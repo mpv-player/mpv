@@ -20,15 +20,15 @@
 #include "options/m_config.h"
 #include "video/out/cocoa_common.h"
 #include "context.h"
+#include "osdep/macosx_application.h"
 
 struct cocoa_opts {
-    int cocoa_force_dedicated_gpu;
 };
 
 #define OPT_BASE_STRUCT struct cocoa_opts
 const struct m_sub_options cocoa_conf = {
     .opts = (const struct m_option[]) {
-        OPT_FLAG("cocoa-force-dedicated-gpu", cocoa_force_dedicated_gpu, 0),
+        OPT_REPLACED("cocoa-force-dedicated-gpu", "macos-force-dedicated-gpu"),
         {0}
     },
     .size = sizeof(struct cocoa_opts),
@@ -41,6 +41,7 @@ struct priv {
     CGLContextObj ctx;
 
     struct cocoa_opts *opts;
+    struct macos_opts *macos_opts;
 };
 
 static int set_swap_interval(int enabled)
@@ -85,7 +86,7 @@ static CGLError test_gl_version(struct ra_ctx *ctx, CGLOpenGLProfile ver)
     CGLError err;
     int supported_attribute = MP_ARRAY_SIZE(attrs)-1;
 
-    if (p->opts->cocoa_force_dedicated_gpu)
+    if (p->macos_opts->macos_force_dedicated_gpu)
         attrs[--supported_attribute] = 0;
 
     err = CGLChoosePixelFormat(attrs, &p->pix, &npix);
@@ -169,6 +170,7 @@ static bool cocoa_init(struct ra_ctx *ctx)
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     GL *gl = &p->gl;
     p->opts = mp_get_config_group(ctx, ctx->global, &cocoa_conf);
+    p->macos_opts = mp_get_config_group(ctx, ctx->global, &macos_conf);
     vo_cocoa_init(ctx->vo);
 
     MP_WARN(ctx->vo, "opengl cocoa backend is deprecated, use vo=libmpv instead\n");

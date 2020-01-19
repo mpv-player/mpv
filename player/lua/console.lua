@@ -34,7 +34,7 @@ function detect_platform()
     -- Kind of a dumb way of detecting the platform but whatever
     if mp.get_property_native('options/vo-mmcss-profile', o) ~= o then
         return 'windows'
-    elseif mp.get_property_native('options/cocoa-force-dedicated-gpu', o) ~= o then
+    elseif mp.get_property_native('options/macos-force-dedicated-gpu', o) ~= o then
         return 'macos'
     end
     return 'x11'
