@@ -538,9 +538,9 @@ static int archive_entry_open(stream_t *stream)
     char *base = talloc_strdup(p, stream->path);
     char *name = strchr(base, '|');
     *name++ = '\0';
-    if (name[0] != '/')
-        return STREAM_ERROR;
-    p->entry_name = name + 1;
+    if (name[0] == '/')
+        name += 1;
+    p->entry_name = name;
     mp_url_unescape_inplace(base);
 
     p->src = stream_create(base, STREAM_READ | stream->stream_origin,
