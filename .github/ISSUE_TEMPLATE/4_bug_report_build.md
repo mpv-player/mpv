@@ -1,6 +1,6 @@
 ---
 name: 'Report a build Problem'
-about: 'Create a report for a build related Bug'
+about: 'Create a report for a build related Issue'
 title: ''
 labels: 'core:waf'
 assignees: ''

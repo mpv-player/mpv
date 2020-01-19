@@ -1,6 +1,6 @@
 ---
-name: 'Report a Windows Bug'
-about: 'Create a report for a runtime related Windows Bug'
+name: 'Report a Windows Issue'
+about: 'Create a report for a runtime related Windows Issue'
 title: ''
 labels: 'os:win'
 assignees: ''
