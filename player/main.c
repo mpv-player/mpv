@@ -433,7 +433,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
 #endif
 
-    mp_load_scripts(mpctx);
+    if (!mp_load_scripts(mpctx))
+        return -1;
 
     if (opts->force_vo == 2 && handle_force_window(mpctx, false) < 0)
         return -1;

@@ -103,6 +103,9 @@ static void *script_thread(void *p)
 static int mp_load_script(struct MPContext *mpctx, const char *fname)
 {
     char *ext = mp_splitext(fname, NULL);
+    if (ext && strcasecmp(ext, "disable") == 0)
+        return 0;
+
     const struct mp_scripting *backend = NULL;
     for (int n = 0; scripting_backends[n]; n++) {
         const struct mp_scripting *b = scripting_backends[n];
@@ -113,7 +116,7 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
     }
 
     if (!backend) {
-        MP_VERBOSE(mpctx, "Can't load unknown script: %s\n", fname);
+        MP_ERR(mpctx, "Can't load unknown script: %s\n", fname);
         return -1;
     }
 
@@ -211,16 +214,18 @@ void mp_load_builtin_scripts(struct MPContext *mpctx)
     load_builtin_script(mpctx, mpctx->opts->lua_load_console, "@console.lua");
 }
 
-void mp_load_scripts(struct MPContext *mpctx)
+bool mp_load_scripts(struct MPContext *mpctx)
 {
+    bool ok = true;
+
     // Load scripts from options
     char **files = mpctx->opts->script_files;
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])
-            mp_load_user_script(mpctx, files[n]);
+            ok &= mp_load_user_script(mpctx, files[n]) >= 0;
     }
     if (!mpctx->opts->auto_load_scripts)
-        return;
+        return ok;
 
     // Load all scripts
     void *tmp = talloc_new(NULL);
@@ -228,9 +233,11 @@ void mp_load_scripts(struct MPContext *mpctx)
     for (int i = 0; scriptsdir && scriptsdir[i]; i++) {
         files = list_script_files(tmp, scriptsdir[i]);
         for (int n = 0; files && files[n]; n++)
-            mp_load_script(mpctx, files[n]);
+            ok &= mp_load_script(mpctx, files[n]) >= 0;
     }
     talloc_free(tmp);
+
+    return ok;
 }
 
 #if HAVE_CPLUGINS
