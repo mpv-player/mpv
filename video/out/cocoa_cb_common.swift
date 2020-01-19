@@ -166,7 +166,9 @@ class CocoaCB: NSObject {
     }
 
     func setAppIcon() {
-        if let app = NSApp as? Application {
+        if let app = NSApp as? Application,
+            ProcessInfo.processInfo.environment["MPVBUNDLE"] != "true"
+        {
             NSApp.applicationIconImage = app.getMPVIcon()
         }
     }
