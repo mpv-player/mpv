@@ -234,6 +234,7 @@ struct file_pattern {
                         struct bstr base, int index);
     int start;
     int stop;
+    bool legacy;
 };
 
 static const struct file_pattern patterns[] = {
@@ -241,12 +242,13 @@ static const struct file_pattern patterns[] = {
     { ".part01.rar",   "%.*s.part%.2d.rar", standard_volume_url, 2,   99 },
     { ".part001.rar",  "%.*s.part%.3d.rar", standard_volume_url, 2,  999 },
     { ".part0001.rar", "%.*s.part%.4d.rar", standard_volume_url, 2, 9999 },
-    { ".rar",          "%.*s.%c%.2d",       old_rar_volume_url,  0, 9999 },
+    { ".rar",          "%.*s.%c%.2d",       old_rar_volume_url,  0,   99, true },
     { ".001",          "%.*s.%.3d",         standard_volume_url, 2, 9999 },
     { NULL, NULL, NULL, 0, 0 },
 };
 
-static bool find_volumes(struct mp_archive *mpa, bool *is_multivolume)
+static bool find_volumes(struct mp_archive *mpa, bool multivol_hint,
+                         bool *is_multivolume)
 {
     struct bstr primary_url = bstr0(mpa->primary_src->url);
 
@@ -258,6 +260,8 @@ static bool find_volumes(struct mp_archive *mpa, bool *is_multivolume)
     }
 
     if (!pattern->match)
+        return true;
+    if (pattern->legacy && !multivol_hint)
         return true;
 
     struct bstr base = bstr_splice(primary_url, 0, -(int)strlen(pattern->match));
@@ -293,18 +297,28 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     if (!add_volume(mpa, src, src->url, 0))
         goto err;
 
+    bool maybe_rar = probe_rar(src);
+    bool maybe_zip = probe_zip(src);
+    bool probe_all = flags & MP_ARCHIVE_FLAG_UNSAFE;
+    bool maybe_rar2_multivol = false;
+
+    uint8_t hdr[14];
+    if (maybe_rar && stream_read_peek(src, hdr, sizeof(hdr)) == sizeof(hdr)) {
+        // Look for rar mark head & main head (assume they're in order).
+        if (hdr[6] == 0x00 && hdr[7 + 2] == 0x73) {
+            int rflags = hdr[7 + 3] | (hdr[7 + 4] << 8);
+            maybe_rar2_multivol = rflags & 0x100;
+        }
+    }
+
     bool is_multivolume = false;
     if (!(flags & MP_ARCHIVE_FLAG_NO_RAR_VOLUMES)) {
         // try to open other volumes
-        if (!find_volumes(mpa, &is_multivolume))
+        if (!find_volumes(mpa, maybe_rar2_multivol, &is_multivolume))
             goto err;
     }
 
     locale_t oldlocale = uselocale(mpa->locale);
-
-    bool maybe_rar = probe_rar(src);
-    bool maybe_zip = probe_zip(src);
-    bool probe_all = flags & MP_ARCHIVE_FLAG_UNSAFE;
 
     archive_read_support_format_rar(mpa->arch);
     archive_read_support_format_rar5(mpa->arch);
@@ -353,6 +367,7 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
             "They are also an excessively inefficient and stupid way to "
             "distribute media files, so tell the people creating these files "
             "to rethink this.\n");
+        MP_WARN(mpa, "There are known cases of libarchive crashing mpv on these.\n");
     }
 
     return mpa;
