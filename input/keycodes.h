@@ -80,6 +80,8 @@
 #define MP_KEY_RECORD           (MP_KEY_MM_BASE+20)
 #define MP_KEY_CHANNEL_UP       (MP_KEY_MM_BASE+21)
 #define MP_KEY_CHANNEL_DOWN     (MP_KEY_MM_BASE+22)
+#define MP_KEY_PLAYONLY         (MP_KEY_MM_BASE+23)
+#define MP_KEY_PAUSEONLY        (MP_KEY_MM_BASE+24)
 
 /*  Function keys  */
 #define MP_KEY_F (MP_KEY_BASE+0x40)
