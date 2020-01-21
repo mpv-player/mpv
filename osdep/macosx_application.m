@@ -174,6 +174,12 @@ static const char macosx_icon[] =
     if ([self respondsToSelector:@selector(touchBar)])
         [(TouchBar *)self.touchBar processEvent:event];
 #endif
+#if HAVE_MACOS_MEDIA_PLAYER
+    // 10.12.2 runtime availability check
+    if ([self respondsToSelector:@selector(touchBar)]) {
+        [_remoteCommandCenter processEvent:event];
+    }
+#endif
     if (_cocoa_cb) {
         [_cocoa_cb processEvent:event];
     }

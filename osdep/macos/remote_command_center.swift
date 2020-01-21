@@ -87,7 +87,10 @@ class RemoteCommandCenter: NSObject {
         MPRemoteCommandCenter.shared().bookmarkCommand,
     ]
 
-    let application: Application;
+    let application: Application
+
+    var mpInfoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
+    var isPaused: Bool = false { didSet { updatePlaybackState() } }
 
     @objc init(app: Application) {
         application = app
@@ -97,11 +100,6 @@ class RemoteCommandCenter: NSObject {
         for cmd in disabledCommands {
             cmd.isEnabled = false
         }
-    }
-
-    @objc func makeCurrent() {
-        MPNowPlayingInfoCenter.default().playbackState = .paused
-        MPNowPlayingInfoCenter.default().playbackState = .playing
     }
 
     @objc func start() {
@@ -119,8 +117,8 @@ class RemoteCommandCenter: NSObject {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = albumArt
         }
 
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-        MPNowPlayingInfoCenter.default().playbackState = .playing
+        mpInfoCenter.nowPlayingInfo = nowPlayingInfo
+        mpInfoCenter.playbackState = .playing
     }
 
     @objc func stop() {
@@ -129,8 +127,18 @@ class RemoteCommandCenter: NSObject {
             cmd.removeTarget(nil)
         }
 
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-        MPNowPlayingInfoCenter.default().playbackState = .unknown
+        mpInfoCenter.nowPlayingInfo = nil
+        mpInfoCenter.playbackState = .unknown
+    }
+
+    @objc func makeCurrent() {
+        mpInfoCenter.playbackState = .paused
+        mpInfoCenter.playbackState = .playing
+        updatePlaybackState()
+    }
+
+    func updatePlaybackState() {
+        mpInfoCenter.playbackState = isPaused ? .paused : .playing
     }
 
     func cmdHandler(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
@@ -155,5 +163,28 @@ class RemoteCommandCenter: NSObject {
         application.handleMPKey(mpKey, withMask: Int32(state));
 
         return .success
+    }
+
+    @objc func processEvent(_ event: UnsafeMutablePointer<mpv_event>) {
+        switch event.pointee.event_id {
+        case MPV_EVENT_PROPERTY_CHANGE:
+            handlePropertyChange(event)
+        default:
+            break
+        }
+    }
+
+    func handlePropertyChange(_ event: UnsafeMutablePointer<mpv_event>) {
+        let pData = OpaquePointer(event.pointee.data)
+        guard let property = UnsafePointer<mpv_event_property>(pData)?.pointee else {
+            return
+        }
+
+        switch String(cString: property.name) {
+        case "pause" where property.format == MPV_FORMAT_FLAG:
+            isPaused = LibmpvHelper.mpvFlagToBool(property.data) ?? false
+        default:
+            break
+        }
     }
 }
