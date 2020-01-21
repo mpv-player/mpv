@@ -151,6 +151,8 @@ static const struct key_name key_names[] = {
   { MP_KEY_RECORD,      "RECORD" },
   { MP_KEY_CHANNEL_UP,  "CHANNEL_UP" },
   { MP_KEY_CHANNEL_DOWN,"CHANNEL_DOWN" },
+  { MP_KEY_PLAYONLY,    "PLAYONLY" },
+  { MP_KEY_PAUSEONLY,   "PAUSEONLY" },
 
   // These are kept for backward compatibility
   { MP_KEY_PAUSE,   "XF86_PAUSE" },
