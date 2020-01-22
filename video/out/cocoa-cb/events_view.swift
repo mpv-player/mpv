@@ -179,6 +179,11 @@ class EventsView: NSView {
         }
     }
 
+    override func magnify(with event: NSEvent) {
+        cocoaCB.layer?.inLiveResize = event.phase == .ended ? false : true
+        cocoaCB.window?.addWindowScale(Double(event.magnification))
+    }
+
     func signalMouseDown(_ event: NSEvent) {
         signalMouseEvent(event, MP_KEY_STATE_DOWN)
         if event.clickCount > 1 {
