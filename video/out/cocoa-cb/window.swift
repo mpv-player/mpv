@@ -461,6 +461,12 @@ class Window: NSWindow, NSWindowDelegate {
         mpv?.command("set window-scale \(scale)")
     }
 
+    func addWindowScale(_ scale: Double) {
+        if !isInFullscreen {
+            mpv?.command("add window-scale \(scale)")
+        }
+    }
+
     func windowDidChangeScreen(_ notification: Notification) {
         if screen == nil {
             return
