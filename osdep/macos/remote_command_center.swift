@@ -27,11 +27,11 @@ class RemoteCommandCenter: NSObject {
 
     var config: [MPRemoteCommand:[String:Any]] = [
         MPRemoteCommandCenter.shared().pauseCommand: [
-            "mpKey": MP_KEY_PAUSE,
+            "mpKey": MP_KEY_PAUSEONLY,
             "keyType": KeyType.normal
         ],
         MPRemoteCommandCenter.shared().playCommand: [
-            "mpKey": MP_KEY_PLAY,
+            "mpKey": MP_KEY_PLAYONLY,
             "keyType": KeyType.normal
         ],
         MPRemoteCommandCenter.shared().stopCommand: [
@@ -47,7 +47,7 @@ class RemoteCommandCenter: NSObject {
             "keyType": KeyType.normal
         ],
         MPRemoteCommandCenter.shared().togglePlayPauseCommand: [
-            "mpKey": MP_KEY_PLAYPAUSE,
+            "mpKey": MP_KEY_PLAY,
             "keyType": KeyType.normal
         ],
         MPRemoteCommandCenter.shared().seekForwardCommand: [
