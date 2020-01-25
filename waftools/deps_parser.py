@@ -1,8 +1,7 @@
-
 class ParseError(Exception):
     pass
 
-class AstOp(object):
+class AstOp:
     def __init__(self, op, sub):
         self.op = op
         self.sub = sub
@@ -12,7 +11,7 @@ class AstOp(object):
             return self.op + str(self.sub[0])
         return "(" + (" " + self.op + " ").join([str(x) for x in self.sub]) + ")"
 
-class AstSym(object):
+class AstSym:
     def __init__(self, name):
         assert type(name) is type("")
         self.name = name

@@ -1,5 +1,4 @@
-#! /usr/bin/env python
-# encoding: utf-8
+#! /usr/bin/env python3
 # Original source: waflib/extras/syms.py from waf git 610d0d59f (New BSD License)
 
 """

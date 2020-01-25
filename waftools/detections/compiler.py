@@ -6,7 +6,7 @@ def __get_cc_env_vars__(cc):
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
                                         stdout=Utils.subprocess.PIPE,
                                         stderr=Utils.subprocess.PIPE)
-        p.stdin.write('\n'.encode())
+        p.stdin.write(b'\n')
         return p.communicate()[0]
     except Exception:
         return ""

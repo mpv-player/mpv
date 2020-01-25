@@ -2,7 +2,6 @@
 
 # This script simply downloads waf to the current directory
 
-from __future__ import print_function
 import os, sys, stat, hashlib, subprocess
 
 WAFRELEASE = "waf-2.0.9"
@@ -20,10 +19,9 @@ if "--no-download" in sys.argv[1:]:
     print("Did not find {} and no download was requested.".format(WAFRELEASE))
     sys.exit(1)
 
-try:
-    from urllib.request import urlopen, URLError
-except:
-    from urllib2 import urlopen, URLError
+# remove urllib2, it is urllib in py3
+from urllib.request import urlopen, URLError
+
 
 waf = None
 

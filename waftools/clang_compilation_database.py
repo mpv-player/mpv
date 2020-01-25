@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# encoding: utf-8
 # Christoph Koke, 2013
 # Original source: waflib/extras/clang_compilation_database.py from
 # waf git 5e4b86b81df3 (New BSD License)
@@ -42,7 +41,7 @@ def write_compilation_database(ctx):
         Logs.info('Build commands will be stored in %s', database_file.path_from(ctx.path))
         try:
                 root = json.load(database_file)
-        except IOError:
+        except OSError:
                 root = []
         clang_db = {x['file']: x for x in root}
         for task in getattr(ctx, 'clang_compilation_database_tasks', []):

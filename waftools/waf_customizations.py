@@ -15,7 +15,7 @@ def get_config_header(self, defines=True, headers=False, define_prefix=''):
     if defines:
         for x in self.env[DEFKEYS]:
             val = self.is_defined(x) and self.get_define(x) or "0"
-            lst.append('#define %s %s' % (define_prefix + x, val))
+            lst.append('#define {} {}'.format(define_prefix + x, val))
 
     return "\n".join(lst)
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Convert the contents of a file into a C string constant.
 # Note that the compiler will implicitly add an extra 0 byte at the end
@@ -22,7 +22,6 @@
 # License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
 import sys
 
 # Indexing a byte string yields int on Python 3.x, and a str on Python 2.x

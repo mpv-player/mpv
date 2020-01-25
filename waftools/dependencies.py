@@ -8,7 +8,7 @@ import inflector
 class DependencyError(Exception):
     pass
 
-class Dependency(object):
+class Dependency:
     def __init__(self, ctx, known_deps, satisfied_deps, dependency):
         self.ctx = ctx
         self.known_deps = known_deps

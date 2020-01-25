@@ -1,7 +1,7 @@
 from waflib.Options import OptionsContext
 import optparse
 
-class Feature(object):
+class Feature:
     def __init__(self, group, feature):
         self.group = group
         self.identifier, self.attributes = feature['name'], feature
