@@ -68,7 +68,7 @@ const struct m_sub_options stream_lavf_conf = {
     },
     .size = sizeof(struct stream_lavf_params),
     .defaults = &(const struct stream_lavf_params){
-        .useragent = (char *)mpv_version,
+        .useragent = "libmpv",
         .timeout = 60,
     },
 };
