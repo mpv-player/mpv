@@ -593,7 +593,7 @@
                         @"action"     : @"url:",
                         @"key"        : @"",
                         @"target"     : self,
-                        @"url"        : @"https://github.com/mpv-player/mpv/issues/new"
+                        @"url"        : @"https://github.com/mpv-player/mpv/issues/new/choose"
                     }]
                 ]
             }
