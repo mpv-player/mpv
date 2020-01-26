@@ -273,28 +273,6 @@ static int load_scripts(lua_State *L)
     return 0;
 }
 
-static void set_path(lua_State *L)
-{
-    void *tmp = talloc_new(NULL);
-
-    lua_getglobal(L, "package"); // package
-    lua_getfield(L, -1, "path"); // package path
-    const char *path = lua_tostring(L, -1);
-
-    char *newpath = talloc_strdup(tmp, path ? path : "");
-    char **luadir = mp_find_all_config_files(tmp, get_mpctx(L)->global, "scripts");
-    for (int i = 0; luadir && luadir[i]; i++) {
-        newpath = talloc_asprintf_append(newpath, ";%s",
-                        mp_path_join(tmp, luadir[i], "?.lua"));
-    }
-
-    lua_pushstring(L, newpath);  // package path newpath
-    lua_setfield(L, -3, "path"); // package path
-    lua_pop(L, 2);  // -
-
-    talloc_free(tmp);
-}
-
 static int run_lua(lua_State *L)
 {
     struct script_ctx *ctx = lua_touserdata(L, -1);
@@ -346,9 +324,6 @@ static int run_lua(lua_State *L)
     }
     lua_pop(L, 2); // -
 
-    assert(lua_gettop(L) == 0);
-
-    set_path(L);
     assert(lua_gettop(L) == 0);
 
     // run this under an error handler that can do backtraces
