@@ -24,7 +24,7 @@ Interface changes
 
 ::
 
- --- mpv 0.31.1 ---
+ --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended
       syntax is required for options starting with ``--``, which means an option

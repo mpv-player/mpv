@@ -1,4 +1,4 @@
-Release 0.31.0
+Release 0.32.0
 ==============
 
 This release requires FFmpeg 4.0 or newer.
@@ -10,32 +10,25 @@ Features
 Added
 ~~~~~
 
-- vo_gpu/d3d11: allow configurable swapchain color space for native HDR output
-- player: add mechanisms for better logging as preperation for console.lua
-- audio: add ao_audiotrack for Android
-- input: introduce a pseudo key name that grabs all text input
-- wayland: add grab zone for resizing window with mouse
-- osc: implement pseudo client side decorations via OSC
-- vf_gpu: add video filter using vo_gpu's renderer
-- added console.lua: interactive REPL for input commands
-- osc: display Santa hat for idle logo in December
-- vd_lavc: add option to autoselect known good hwdec implementations
-- mac: replace old event tap for media key support with MediaPlayer
+- stream_libarchive: enable RAR5 support
+- bash completion: add initial implementation
+- cocoa-cb: add support for forcing the dedicated GPU for rendering
+- cocoa-cb: add pinch to resize window gesture
+- w32_common: support minimizing/maximizing using osc window controls
 
 
 Changed
 ~~~~~~~
 
-- input: disable gamepad code by default
-- vo_gpu: allow vdpau usage under EGL
-- stream, demux: redo origin policy
+- wayland: print warning on GNOME due to serious issues with their compositor
+- player: write watch-later config even for unseekable streams
 
 
 Removed
 ~~~~~~~
 
-- mac: remove Apple Remote support
-- client API: deprecate tick event
+- vo_gpu: hwdec_vdpau: remove direct_mode
+- vo_gpu: hwdec_vaegl: remove support for old-style interop
 
 
 Options and Commands
@@ -44,64 +37,33 @@ Options and Commands
 Added
 ~~~~~
 
-- vo_gpu/d3d11: add --d3d11-output-csp for configuring swap chain color space
-- command: add command-list property
-- command, input: add input-bindings property
-- command: add --window-maximized and make --window-minimized settable
-- command: add property returning hidpi scale
-- command, lua: add a way to share data between scripts
-- client API, lua: add new API for setting OSD overlays
+- command: add a playlist-unshuffle command
+- command: add osd-dimensions property
+- input: new PLAYONLY and PAUSEONLY keycodes
 
 
 Changed
 ~~~~~~~
 
-- add a builtin "sw-fast" profile, which restores performance settings
-  for software video conversion. These were switched to higher quality.
-  This affects video outputs like vo_x11 and vo_drm, and screenshots.
-- options: make --show-profile without parameters list all profiles
-- wayland: support for --hidpi-window-scale option
-- stream_lavf: set --network-timeout to 60 seconds by default
-- x11: scale window-scale by DPI
-
-
-Deprecated
-~~~~~~~~~~
-
-- deprecate --input-file
-- deprecate --video-sync=display-adrop
-- deprecate all input section commands
-- deprecate --display-fps, replaced by --override-display-fps
-
-Removed
-~~~~~~~
-
-- remove deprecated --playlist-pos alias
+- options: change option parsing when using a single dash
+  This adds a warning for `-o file.mkv` and disallows the use of
+  `--o file.mkv` (use `--o=file.mkv` instead).
 
 
 Fixes and Minor Enhancements
 ----------------------------
 
-- vo_drm, vo_x11: allow use of zimg
-- vo_sdl: Support mouse wheel input, Improve mouse button input
-- video: fix track switching work for external images
-- vo_gpu: fix infinite scaler reinit spam
-- f_output_chain: fix possible crash when changing filters
-- vo_gpu: opengl: add hack for ancient Mesa/GLX
-- demux_lavf: export demuxer_id for more formats which have it
-- lua: make later key bindings always have higher priority
-- drm_common: fix display FPS estimation for interlaced modes
-- vo_drm: fix incorrect pixel format possibly being picked for 30-bit
-- zsh completion: fix pcre usage to really be optional
-- options: increase consistency between list options and document them
-- osc: reduce unnecesary CPU usage by using property notifications
+- lua: fix mp.file_info for large files
+- vo_gpu: fix crash if dither texture fails to allocate
+- wayland: unscrew up cursors, fix various issues
+- osc: usability improvements for osc window controls
 
 
 This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log v0.30.0..v0.31.0`
+A complete changelog can be seen by running `git log v0.31.0..v0.32.0`
 in the git repository or by visiting either
-https://github.com/mpv-player/mpv/compare/v0.30.0...v0.31.0 or
-https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.30.0..v0.31.0
+https://github.com/mpv-player/mpv/compare/v0.31.0...v0.32.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.31.0..v0.32.0
