@@ -431,7 +431,8 @@ void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
     char *fname = mp_get_playback_resume_config_filename(mpctx, file);
     if (fname && mp_path_exists(fname)) {
         if (mpctx->opts->position_check_mtime &&
-            !mp_is_url(bstr0(file)) && !check_mtime(file, fname)) {
+            !mp_is_url(bstr0(file)) && !check_mtime(file, fname))
+        {
             talloc_free(fname);
             return;
         }
