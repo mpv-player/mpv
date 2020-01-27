@@ -152,7 +152,7 @@ local function read_options(options, identifier, on_update)
                 end
             end
             last_opts = new_opts
-            if #changelist then
+            if next(changelist) ~= nil then
                 on_update(changelist)
             end
         end)
