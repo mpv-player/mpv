@@ -144,17 +144,15 @@ local function read_options(options, identifier, on_update)
             local new_opts = opt_table_copy(conf_and_default_opts)
             parse_opts(val, new_opts)
             local changelist = {}
-            local changed = false
             for key, val in pairs(new_opts) do
                 if not opt_equal(last_opts[key], val) then
                     -- copy to user
                     options[key] = opt_copy(val)
                     changelist[key] = true
-                    changed = true
                 end
             end
             last_opts = new_opts
-            if changed then
+            if next(changelist) ~= nil then
                 on_update(changelist)
             end
         end)
