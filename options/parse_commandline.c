@@ -106,6 +106,10 @@ static bool split_opt(struct parse_state *p)
 
     MP_FATAL(p->config, "Error parsing commandline option %.*s: %s\n",
              BSTR_P(p->arg), m_option_strerror(r));
+    if (r == M_OPT_MISSING_PARAM) {
+        MP_WARN(p->config, "Make sure you're using e.g. '--%.*s=value' instead "
+                "of '--%.*s value'.\n", BSTR_P(p->arg), BSTR_P(p->arg));
+    }
     return false;
 }
 
