@@ -50,14 +50,13 @@ struct parse_state {
     struct bstr param;
 };
 
-// Returns 0 if a valid option/file is available, <0 on error, 1 on end of args.
-static int split_opt_silent(struct parse_state *p)
+// Returns true if more args, false if all parsed or an error occurred.
+static bool split_opt(struct parse_state *p)
 {
-    struct mp_log *log = p->log ? p->log : mp_null_log;
     assert(!p->error);
 
     if (!p->argv || !p->argv[0])
-        return 1;
+        return false;
 
     p->is_opt = false;
     p->arg = bstr0(p->argv[0]);
@@ -66,11 +65,11 @@ static int split_opt_silent(struct parse_state *p)
     p->argv++;
 
     if (p->no_more_opts || !bstr_startswith0(p->arg, "-") || p->arg.len == 1)
-        return 0;
+        return true;
 
     if (bstrcmp0(p->arg, "--") == 0) {
         p->no_more_opts = true;
-        return split_opt_silent(p);
+        return split_opt(p);
     }
 
     p->is_opt = true;
@@ -84,33 +83,22 @@ static int split_opt_silent(struct parse_state *p)
     bool need_param = m_config_option_requires_param(p->config, p->arg) > 0;
 
     if (ambiguous && need_param) {
-        if (!p->argv[0] || new_opt)
-            return M_OPT_MISSING_PARAM;
+        if (!p->argv[0] || new_opt) {
+            p->error = true;
+            MP_FATAL(p, "Error parsing commandline option %.*s: %s\n",
+                     BSTR_P(p->arg), m_option_strerror(M_OPT_MISSING_PARAM));
+            MP_WARN(p, "Make sure you're using e.g. '--%.*s=value' instead "
+                    "of '--%.*s value'.\n", BSTR_P(p->arg), BSTR_P(p->arg));
+            return false;
+        }
         p->param = bstr0(p->argv[0]);
         p->argv++;
-        mp_warn(log, "The legacy option syntax ('-%.*s value') is deprecated "
-                     "and dangerous.\nPlease use '--%.*s=value'.\n",
+        MP_WARN(p, "The legacy option syntax ('-%.*s value') is deprecated "
+                "and dangerous.\nPlease use '--%.*s=value'.\n",
                 BSTR_P(p->arg), BSTR_P(p->arg));
     }
 
-    return 0;
-}
-
-// Returns true if more args, false if all parsed or an error occurred.
-static bool split_opt(struct parse_state *p)
-{
-    int r = split_opt_silent(p);
-    if (r >= 0)
-        return r == 0;
-    p->error = true;
-
-    MP_FATAL(p->config, "Error parsing commandline option %.*s: %s\n",
-             BSTR_P(p->arg), m_option_strerror(r));
-    if (r == M_OPT_MISSING_PARAM) {
-        MP_WARN(p->config, "Make sure you're using e.g. '--%.*s=value' instead "
-                "of '--%.*s value'.\n", BSTR_P(p->arg), BSTR_P(p->arg));
-    }
-    return false;
+    return true;
 }
 
 #ifdef __MINGW32__
@@ -259,8 +247,8 @@ err_out:
 void m_config_preparse_command_line(m_config_t *config, struct mpv_global *global,
                                     int *verbose, char **argv)
 {
-    struct parse_state p = {config, argv};
-    while (split_opt_silent(&p) == 0) {
+    struct parse_state p = {config, argv, mp_null_log};
+    while (split_opt(&p)) {
         if (p.is_opt) {
             // Ignore non-pre-parse options. They will be set later.
             // Option parsing errors will be handled later as well.
