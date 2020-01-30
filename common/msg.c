@@ -318,6 +318,7 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
     struct mp_log_root *root = log->root;
     for (int n = 0; n < root->num_buffers; n++) {
         struct mp_log_buffer *buffer = root->buffers[n];
+        bool wakeup = false;
         pthread_mutex_lock(&buffer->lock);
         int buffer_level = buffer->level;
         if (buffer_level == MP_LOG_BUFFER_MSGL_TERM)
@@ -358,9 +359,11 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
             buffer->entries[pos] = entry;
             buffer->num_entries += 1;
             if (buffer->wakeup_cb && !buffer->silent)
-                buffer->wakeup_cb(buffer->wakeup_cb_ctx);
+                wakeup = true;
         }
         pthread_mutex_unlock(&buffer->lock);
+        if (wakeup)
+            buffer->wakeup_cb(buffer->wakeup_cb_ctx);
     }
 }
 
@@ -533,8 +536,9 @@ static void wakeup_log_file(void *p)
 {
     struct mp_log_root *root = p;
 
-    // This makes use of the implicit fact that the caller holds mp_msg_lock.
+    pthread_mutex_lock(&root->log_file_lock);
     pthread_cond_broadcast(&root->log_file_wakeup);
+    pthread_mutex_unlock(&root->log_file_lock);
 }
 
 // Only to be called from the main thread.
@@ -658,15 +662,12 @@ void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr)
     pthread_mutex_unlock(&mp_msg_lock);
 }
 
+// Only to be called from the main thread.
 bool mp_msg_has_log_file(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;
 
-    pthread_mutex_lock(&mp_msg_lock);
-    bool res = !!root->log_file;
-    pthread_mutex_unlock(&mp_msg_lock);
-
-    return res;
+    return !!root->log_file;
 }
 
 void mp_msg_uninit(struct mpv_global *global)
