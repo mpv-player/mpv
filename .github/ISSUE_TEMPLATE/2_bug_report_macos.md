@@ -31,9 +31,11 @@ differes from your own.
 
 ### Log file
 
-Make a log file made with -v -v or --log-file=output.txt, paste it to
-https://0x0.st/ or attach it to the github issue, and replace this text with a
-link to it.
+Make a log file made with -v -v or --log-file=output.txt. If you use the Bundle
+from a version later than 0.32 a default log is created for your last run at
+~/Library/Logs/mpv.log. You can jump to that file via the Help > Show log File…
+menu. Paste the log to https://0x0.st/ or attach it to the github issue, and
+replace this text with a link to it.
 
 In the case of a crash please provide the macOS Crash Report (Backtrace).
 
