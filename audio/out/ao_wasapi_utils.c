@@ -525,9 +525,8 @@ static void init_session_display(struct wasapi_state *state) {
                                          (void **)&state->pSessionControl);
     EXIT_ON_ERROR(hr);
 
-    wchar_t path[MAX_PATH+12] = {0};
+    wchar_t path[MAX_PATH] = {0};
     GetModuleFileNameW(NULL, path, MAX_PATH);
-    wcscat(path, L",-IDI_ICON1");
     hr = IAudioSessionControl_SetIconPath(state->pSessionControl, path, NULL);
     if (FAILED(hr)) {
         // don't goto exit_label here since SetDisplayName might still work
