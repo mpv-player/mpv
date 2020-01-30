@@ -45,7 +45,6 @@
 #define OPT_BASE_STRUCT struct wayland_opts
 const struct m_sub_options wayland_conf = {
     .opts = (const struct m_option[]) {
-        OPT_INTRANGE("wayland-frame-wait-offset", frame_offset, 0, -500, 3000),
         OPT_FLAG("wayland-disable-vsync", disable_vsync, 0),
         OPT_INTRANGE("wayland-edge-pixels-pointer", edge_pixels_pointer, 10, 0, INT_MAX),
         OPT_INTRANGE("wayland-edge-pixels-touch", edge_pixels_touch, 64, 0, INT_MAX),
@@ -53,7 +52,6 @@ const struct m_sub_options wayland_conf = {
     },
     .size = sizeof(struct wayland_opts),
     .defaults = &(struct wayland_opts) {
-        .frame_offset = 1000,
         .disable_vsync = false,
         .edge_pixels_pointer = 10,
         .edge_pixels_touch = 64,
@@ -1587,14 +1585,14 @@ void vo_wayland_wakeup(struct vo *vo)
     (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
 }
 
-void vo_wayland_wait_frame(struct vo_wayland_state *wl, int frame_offset)
+void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 {
     struct pollfd fds[1] = {
         {.fd = wl->display_fd,     .events = POLLIN },
     };
 
     double vblank_time = 1e6 / wl->current_output->refresh_rate;
-    int64_t finish_time = mp_time_us() + vblank_time + (int64_t)frame_offset;
+    int64_t finish_time = mp_time_us() + vblank_time;
 
     while (wl->frame_wait && finish_time > mp_time_us()) {
 

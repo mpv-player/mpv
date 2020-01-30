@@ -111,7 +111,7 @@ static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
     }
 
     if (!wl->opts->disable_vsync)
-        vo_wayland_wait_frame(wl, wl->opts->frame_offset);
+        vo_wayland_wait_frame(wl);
 
     if (wl->presentation)
         wayland_sync_swap(wl);
