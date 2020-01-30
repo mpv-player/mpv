@@ -652,6 +652,9 @@ Program Behavior
     can be raised via ``--msg-level`` (the option cannot lower it below the
     forced minimum log level).
 
+    A special case is the macOS bundle, it will create a log file at
+    ``~/Library/Logs/mpv.log`` by default.
+
 ``--config-dir=<path>``
     Force a different configuration directory. If this is set, the given
     directory is used to load configuration files, and all other configuration
