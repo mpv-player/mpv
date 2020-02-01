@@ -2321,6 +2321,11 @@ Subtitles
     This option changed in mpv 0.23.0. Support for the old syntax was fully
     removed in mpv 0.24.0.
 
+    .. note::
+
+        This works for text subtitle files only. Other types of subtitles (in
+        particular subtitles in mkv files) are always assumed to be UTF-8.
+
 
 ``--sub-fix-timing=<yes|no>``
     Adjust subtitle timing is to remove minor gaps or overlaps between
