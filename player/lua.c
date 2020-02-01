@@ -83,6 +83,7 @@ static const char * const builtin_lua_scripts[][2] = {
 struct script_ctx {
     const char *name;
     const char *filename;
+    const char *path; // NULL if single file
     lua_State *state;
     struct mp_log *log;
     struct mpv_handle *client;
@@ -273,6 +274,30 @@ static int load_scripts(lua_State *L)
     return 0;
 }
 
+static void set_path(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+
+    if (!ctx->path)
+        return;
+
+    void *tmp = talloc_new(NULL);
+
+    lua_getglobal(L, "package"); // package
+    lua_getfield(L, -1, "path"); // package path
+    const char *path = lua_tostring(L, -1);
+
+    char *newpath = talloc_asprintf(tmp, "%s;%s",
+                                    mp_path_join(tmp, ctx->path, "?.lua"),
+                                    path ? path : "");
+
+    lua_pushstring(L, newpath);  // package path newpath
+    lua_setfield(L, -3, "path"); // package path
+    lua_pop(L, 2);  // -
+
+    talloc_free(tmp);
+}
+
 static int run_lua(lua_State *L)
 {
     struct script_ctx *ctx = lua_touserdata(L, -1);
@@ -326,6 +351,9 @@ static int run_lua(lua_State *L)
 
     assert(lua_gettop(L) == 0);
 
+    set_path(L);
+    assert(lua_gettop(L) == 0);
+
     // run this under an error handler that can do backtraces
     lua_pushcfunction(L, error_handler); // errf
     lua_pushcfunction(L, load_scripts); // errf fn
@@ -348,6 +376,7 @@ static int load_lua(struct mp_script_args *args)
         .name = mpv_client_name(args->client),
         .log = args->log,
         .filename = args->filename,
+        .path = args->path,
     };
 
     if (LUA_VERSION_NUM != 501 && LUA_VERSION_NUM != 502) {

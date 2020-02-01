@@ -1242,10 +1242,11 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
 
 ``~/.config/mpv/scripts/``
     All files in this directory are loaded as if they were passed to the
-    ``--script`` option. They are loaded in alphabetical order. Directory entries
-    other than files are ignored. Files with unknown extension lead to an
-    initialization error. Files with ``.disable`` extension are ignored. The
-    ``--load-scripts=no`` option disables loading these files.
+    ``--script`` option. They are loaded in alphabetical order.
+
+    The ``--load-scripts=no`` option disables loading these files.
+
+    See `Script location`_ for details.
 
 ``~/.config/mpv/watch_later/``
     Contains temporary config files needed for resuming playback of files with

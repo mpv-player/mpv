@@ -1,12 +1,7 @@
 LUA SCRIPTING
 =============
 
-mpv can load Lua scripts. Scripts passed to the ``--script`` option, or found in
-the ``scripts`` subdirectory of the mpv configuration directory (usually
-``~/.config/mpv/scripts/``) will be loaded on program start. mpv also appends the
-``scripts`` subdirectory to the end of Lua's path so you can import scripts from
-there too. Since it's added to the end, don't name scripts you want to import
-the same as Lua libraries because they will be overshadowed by them.
+mpv can load Lua scripts. (See `Script location`_.)
 
 mpv provides the built-in module ``mp``, which contains functions to send
 commands to the mpv core and to retrieve information about playback state, user
@@ -29,6 +24,43 @@ A script which leaves fullscreen mode when the player is paused:
     end
     mp.observe_property("pause", "bool", on_pause_change)
 
+
+Script location
+---------------
+
+Scripts can be passed to the ``--script`` option, and are automatically loaded
+from the ``scripts`` subdirectory of the mpv configuration directory (usually
+``~/.config/mpv/scripts/``).
+
+A script can be a single file. The file extension is used to select the
+scripting backend to use for it. For Lua, it is ``.lua``. If the extension is
+not recognized, an error is printed. (If an error happens, the extension is
+either mistyped, or the backend was not compiled into your mpv binary.)
+
+Entries with ``.disable`` extension are always ignored.
+
+If a script is a directory (either if a directory is passed to ``--script``,
+or any sub-directories in the script directory, such as for example
+``~/.config/mpv/scripts/something/``), then the directory represents a single
+script. The player will try to load a file named ``main.x``, where ``x`` is
+replaced with the file extension. For example, if ``main.lua`` exists, it is
+loaded with the Lua scripting backend.
+
+You must not put any other files or directories that start with ``main.`` into
+the script's top level directory. If the script directory contains for example
+both ``main.lua`` and ``main.js``, only one of them will be loaded (and which
+one depends on mpv internals that may change any time). Likewise, if there is
+for example ``main.foo``, your script will break as soon as mpv adds a backend
+that uses the ``.foo`` file extension.
+
+mpv also appends the top level directory of the script to the start of Lua's
+package path so you can import scripts from there too. Be aware that this will
+shadow Lua libraries that use the same package path.
+
+On the other hand, if the script is a single file (directly located in
+``~/.config/mpv/scripts/`` and not as sub-directory), the Lua package path
+does not include any mpv specific directories. (This was silently changed in
+mpv 0.32.0.)
 
 Details on the script initialization and lifecycle
 --------------------------------------------------
