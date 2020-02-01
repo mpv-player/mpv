@@ -24,6 +24,10 @@ Interface changes
 
 ::
 
+ --- mpv 0.33.0 ---
+    - directories in ~/.mpv/scripts/ (or equivalent) now have special semantics
+      (see mpv Lua scripting docs)
+    - names starting with "." in ~/.mpv/scripts/ (or equivalent) are now ignored
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

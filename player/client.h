@@ -36,8 +36,6 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
 void mp_client_set_weak(struct mpv_handle *ctx);
 struct mp_log *mp_client_get_log(struct mpv_handle *ctx);
 struct mpv_global *mp_client_get_global(struct mpv_handle *ctx);
-struct MPContext *mp_client_get_core(struct mpv_handle *ctx);
-struct MPContext *mp_client_api_get_core(struct mp_client_api *api);
 
 void mp_client_broadcast_event_external(struct mp_client_api *api, int event,
                                         void *data);

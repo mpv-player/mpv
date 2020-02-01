@@ -316,16 +316,6 @@ struct mpv_global *mp_client_get_global(struct mpv_handle *ctx)
     return ctx->mpctx->global;
 }
 
-struct MPContext *mp_client_get_core(struct mpv_handle *ctx)
-{
-    return ctx->mpctx;
-}
-
-struct MPContext *mp_client_api_get_core(struct mp_client_api *api)
-{
-    return api->mpctx;
-}
-
 static void wakeup_client(struct mpv_handle *ctx)
 {
     pthread_mutex_lock(&ctx->wakeup_lock);

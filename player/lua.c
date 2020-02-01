@@ -337,18 +337,17 @@ static int run_lua(lua_State *L)
     return 0;
 }
 
-static int load_lua(struct mpv_handle *client, const char *fname)
+static int load_lua(struct mp_script_args *args)
 {
-    struct MPContext *mpctx = mp_client_get_core(client);
     int r = -1;
 
     struct script_ctx *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct script_ctx) {
-        .mpctx = mpctx,
-        .client = client,
-        .name = mpv_client_name(client),
-        .log = mp_client_get_log(client),
-        .filename = fname,
+        .mpctx = args->mpctx,
+        .client = args->client,
+        .name = mpv_client_name(args->client),
+        .log = args->log,
+        .filename = args->filename,
     };
 
     if (LUA_VERSION_NUM != 501 && LUA_VERSION_NUM != 502) {

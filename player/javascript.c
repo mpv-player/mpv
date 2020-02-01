@@ -468,15 +468,15 @@ static int s_init_js(js_State *J, struct script_ctx *ctx)
 //
 // Note: init functions don't need autofree. They can use ctx as a talloc
 // context and free normally. If they throw - ctx is freed right afterwards.
-static int s_load_javascript(struct mpv_handle *client, const char *fname)
+static int s_load_javascript(struct mp_script_args *args)
 {
     struct script_ctx *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct script_ctx) {
-        .client = client,
-        .mpctx = mp_client_get_core(client),
-        .log = mp_client_get_log(client),
+        .client = args->client,
+        .mpctx = args->mpctx,
+        .log = args->log,
         .last_error_str = talloc_strdup(ctx, "Cannot initialize JavaScript"),
-        .filename = fname,
+        .filename = args->filename,
     };
 
     int r = -1;

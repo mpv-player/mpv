@@ -619,10 +619,18 @@ void update_screensaver_state(struct MPContext *mpctx);
 void update_ab_loop_clip(struct MPContext *mpctx);
 
 // scripting.c
+struct mp_script_args {
+    const struct mp_scripting *backend;
+    struct MPContext *mpctx;
+    struct mp_log *log;
+    struct mpv_handle *client;
+    const char *filename;
+    const char *path;
+};
 struct mp_scripting {
     const char *name;       // e.g. "lua script"
     const char *file_ext;   // e.g. "lua"
-    int (*load)(struct mpv_handle *client, const char *filename);
+    int (*load)(struct mp_script_args *args);
 };
 bool mp_load_scripts(struct MPContext *mpctx);
 void mp_load_builtin_scripts(struct MPContext *mpctx);
