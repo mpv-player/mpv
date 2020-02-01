@@ -508,8 +508,6 @@ static struct m_config *m_config_from_obj_desc(void *talloc_ctx,
     struct m_config *c = m_config_new(talloc_ctx, log, root);
     talloc_steal(c, root);
     c->global = global;
-    if (desc->set_defaults && c->global)
-        desc->set_defaults(c->global, c->optstruct);
     return c;
 }
 

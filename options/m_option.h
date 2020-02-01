@@ -128,10 +128,6 @@ struct m_obj_desc {
     bool hidden;
     // Callback to print custom help if "vf=entry=help" is passed
     void (*print_help)(struct mp_log *log);
-    // Callback that allows you to override the static default values. The
-    // pointer p points to the struct described by options/priv_size, with
-    // priv_defaults already applied. You can write to it to set any defaults.
-    void (*set_defaults)(struct mpv_global *global, void *p);
     // Set by m_obj_list_find(). If the requested name is an old alias, this
     // is set to the old name (while the name field uses the new name).
     const char *replaced_name;
