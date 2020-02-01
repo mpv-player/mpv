@@ -120,6 +120,7 @@ class EventsView: NSView {
         if mpv?.mouseEnabled() ?? true {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_ENTER, 0)
         }
+        cocoaCB.updateCursorVisibility()
     }
 
     override func mouseExited(with event: NSEvent) {
@@ -127,6 +128,7 @@ class EventsView: NSView {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
         cocoaCB.titleBar?.hide()
+        cocoaCB.setCursorVisiblility(true)
     }
 
     override func mouseMoved(with event: NSEvent) {

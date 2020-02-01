@@ -28,7 +28,6 @@ class CocoaCB: NSObject {
     var layer: VideoLayer?
     var link: CVDisplayLink?
 
-    var cursorHidden: Bool = false
     var cursorVisibilityWanted: Bool = true
     @objc var isShuttingDown: Bool = false
 
@@ -267,19 +266,12 @@ class CocoaCB: NSObject {
             &displaySleepAssertion)
     }
 
-    func updateCusorVisibility() {
+    func updateCursorVisibility() {
         setCursorVisiblility(cursorVisibilityWanted)
     }
 
     func setCursorVisiblility(_ visible: Bool) {
-        let visibility = visible ? true : !(view?.canHideCursor() ?? false)
-        if visibility && cursorHidden {
-            NSCursor.unhide()
-            cursorHidden = false;
-        } else if !visibility && !cursorHidden {
-            NSCursor.hide()
-            cursorHidden = true
-        }
+        NSCursor.setHiddenUntilMouseMoves(!visible && (view?.canHideCursor() ?? false))
     }
 
     func updateICCProfile() {

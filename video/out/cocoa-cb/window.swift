@@ -183,7 +183,7 @@ class Window: NSWindow, NSWindowDelegate {
     func windowDidEnterFullScreen(_ notification: Notification) {
         isInFullscreen = true
         cocoaCB.mpv?.setConfigProperty(fullscreen: isInFullscreen)
-        cocoaCB.updateCusorVisibility()
+        cocoaCB.updateCursorVisibility()
         endAnimation(frame)
         cocoaCB.titleBar?.show()
     }
@@ -517,12 +517,13 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidBecomeKey(_ notification: Notification) {
-        cocoaCB.updateCusorVisibility()
+        cocoaCB.updateCursorVisibility()
     }
 
     func windowDidChangeOcclusionState(_ notification: Notification) {
         if occlusionState.contains(.visible) {
             cocoaCB.layer?.update(force: true)
+            cocoaCB.updateCursorVisibility()
         }
     }
 
