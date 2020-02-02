@@ -28,6 +28,9 @@ Interface changes
     - directories in ~/.mpv/scripts/ (or equivalent) now have special semantics
       (see mpv Lua scripting docs)
     - names starting with "." in ~/.mpv/scripts/ (or equivalent) are now ignored
+    - js modules: ~~/scripts/modules.js/ is no longer used, common global path
+      can be set via script-opts/js-modules_common, directory scripts first
+      search at modules/ inside the directory.
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

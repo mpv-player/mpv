@@ -457,12 +457,17 @@ function process_timers() {
    - A module has "privacy of its top scope", runs in its own function context.
  - No id identity with symlinks - a valid choice which others make too.
  - require("X") always maps to "X.js" -> require("foo.js") is file "foo.js.js".
- - Global modules search paths are 'scripts/modules.js/' in mpv config dirs.
+ - Global modules search paths are at mp.module_paths - see docs.
  - A main script could e.g. require("./abc") to load a non-global module.
  - Module id supports mpv path enhancements, e.g. ~/foo, ~~/bar, ~~desktop/baz
  *********************************************************************/
 
-mp.module_paths = ["~~/scripts/modules.js"];  // global modules search paths
+mp.module_paths = [];  // global module id's search paths
+if (mp.script_path)  // loaded as a directory
+    mp.module_paths.push(mp.utils.join_path(mp.script_path, "modules"));
+var mc = mp.get_property_native("options/script-opts")["js-modules_common"];
+if (mc)
+    mp.module_paths.push(mc);
 
 // Internal meta top-dirs. Users should not rely on these names.
 var MODULES_META = "~~modules",
