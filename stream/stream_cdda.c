@@ -57,6 +57,8 @@ typedef struct cdda_params {
     int sector;
     int start_sector;
     int end_sector;
+    uint8_t *data;
+    size_t data_pos;
 
     // options
     int speed;
@@ -156,22 +158,23 @@ static void cdparanoia_callback(long int inpos, paranoia_cb_mode_t function)
 static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     cdda_priv *p = (cdda_priv *)s->priv;
-    int16_t *buf;
     int i;
 
-    if (max_len < CDIO_CD_FRAMESIZE_RAW)
-        return -1;
+    if (!p->data || p->data_pos >= CDIO_CD_FRAMESIZE_RAW) {
+        if ((p->sector < p->start_sector) || (p->sector > p->end_sector))
+            return 0;
 
-    if ((p->sector < p->start_sector) || (p->sector > p->end_sector)) {
-        return 0;
+        p->data_pos = 0;
+        p->data = (uint8_t *)paranoia_read(p->cdp, cdparanoia_callback);
+        if (!p->data)
+            return 0;
+
+        p->sector++;
     }
 
-    buf = paranoia_read(p->cdp, cdparanoia_callback);
-    if (!buf)
-        return 0;
-
-    p->sector++;
-    memcpy(buffer, buf, CDIO_CD_FRAMESIZE_RAW);
+    size_t copy = MPMIN(CDIO_CD_FRAMESIZE_RAW - p->data_pos, max_len);
+    memcpy(buffer, p->data + p->data_pos, copy);
+    p->data_pos += copy;
 
     for (i = 0; i < p->cd->tracks; i++) {
         if (p->cd->disc_toc[i].dwStartSector == p->sector - 1) {
@@ -180,7 +183,7 @@ static int fill_buffer(stream_t *s, void *buffer, int max_len)
         }
     }
 
-    return CDIO_CD_FRAMESIZE_RAW;
+    return copy;
 }
 
 static int seek(stream_t *s, int64_t newpos)
