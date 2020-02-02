@@ -94,6 +94,11 @@ int drm_object_set_property(drmModeAtomicReq *request, struct drm_object *object
 {
    for (int i = 0; i < object->props->count_props; i++) {
        if (strcasecmp(name, object->props_info[i]->name) == 0) {
+           if (object->props_info[i]->flags & DRM_MODE_PROP_IMMUTABLE) {
+               /* Do not try to set immutable values, as this might cause the
+                * atomic commit operation to fail. */
+               return -EINVAL;
+           }
            return drmModeAtomicAddProperty(request, object->id,
                                            object->props_info[i]->prop_id, value);
        }
@@ -362,7 +367,7 @@ static bool drm_atomic_restore_plane_state(drmModeAtomicReq *request,
         ret = false;
     if (0 > drm_object_set_property(request, plane, "CRTC_H", plane_state->crtc_h))
         ret = false;
-    // ZPOS might not exist, so ignore whether or not this succeeds
+    // ZPOS might not exist, or be immutable, so ignore whether or not this succeeds
     drm_object_set_property(request, plane, "ZPOS", plane_state->zpos);
 
     return ret;
