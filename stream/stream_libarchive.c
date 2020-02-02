@@ -334,11 +334,6 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
         archive_read_support_filter_xz(mpa->arch);
         archive_read_support_format_zip_streamable(mpa->arch);
 
-        if (probe_all) {
-            archive_read_support_format_gnutar(mpa->arch);
-            archive_read_support_format_tar(mpa->arch);
-        }
-
         // This zip reader is normally preferable. However, it seeks to the end
         // of the file, which may be annoying (HTTP reconnect, volume skipping),
         // so use it only as last resort, or if it's relatively likely that it's
