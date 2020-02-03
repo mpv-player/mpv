@@ -462,12 +462,10 @@ function process_timers() {
  - Module id supports mpv path enhancements, e.g. ~/foo, ~~/bar, ~~desktop/baz
  *********************************************************************/
 
-mp.module_paths = [];  // global module id's search paths
-if (mp.script_path)  // loaded as a directory
-    mp.module_paths.push(mp.utils.join_path(mp.script_path, "modules"));
-var mc = mp.get_property_native("options/script-opts")["js-modules_common"];
-if (mc)
-    mp.module_paths.push(mc);
+// global module id's search paths array
+mp.module_paths = mp.get_property_native("js-require-paths") || [];
+if (mp.script_path)  // loaded as a directory, add+prioritize  <dir>/modules/
+    mp.module_paths.unshift(mp.utils.join_path(mp.script_path, "modules"));
 
 // Internal meta top-dirs. Users should not rely on these names.
 var MODULES_META = "~~modules",

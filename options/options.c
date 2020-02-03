@@ -398,6 +398,9 @@ static const m_option_t mp_opts[] = {
     OPT_FLAG("load-stats-overlay", lua_load_stats, UPDATE_BUILTIN_SCRIPTS),
     OPT_FLAG("load-osd-console", lua_load_console, UPDATE_BUILTIN_SCRIPTS),
 #endif
+#if HAVE_JAVASCRIPT
+    OPT_PATHLIST("js-require-paths", js_require_paths, M_OPT_FILE),
+#endif
 
 // ------------------------- stream options --------------------
 

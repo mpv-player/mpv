@@ -309,10 +309,10 @@ to ``mp.module_paths`` in normal array order, e.g. ``require("x")`` tries to
 load ``x.js`` at one of the array paths, and id ``foo/x`` tries to load ``x.js``
 inside dir ``foo`` at one of the paths.
 
-``mp.module_paths`` is empty by default except for scripts which are loaded as
-a directory, where it contains one path - ``modules/`` inside that directory.
-Additionally the option ``--script-opts=js-modules_common=...`` can be used to
-append one common global path to this array which applies to all scripts.
+The ``mp.module_paths`` array is initialized from the ``--js-require-paths``
+option which is empty by default. Scripts which are loaded as directory always
+prepend ``<directory>/modules/`` to the array, i.e. with highest priority.
+(``--js-require-paths`` is a path list option, see `List Options`_ for details).
 Modifying ``mp.module_paths`` from a script will affect future ``require`` calls
 of global module id's which are not already loaded/cached.
 
