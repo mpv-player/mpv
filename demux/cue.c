@@ -62,20 +62,46 @@ static const struct {
     { -1 },
 };
 
+static const uint8_t spaces[] = {' ', '\f', '\n', '\r', '\t', '\v', 0xA0};
+
+static struct bstr lstrip_whitespace(struct bstr data)
+{
+    while (data.len) {
+        bstr rest = data;
+        int code = bstr_decode_utf8(data, &rest);
+        if (code < 0) {
+            // Tolerate Latin1 => probing works (which doesn't convert charsets).
+            code = data.start[0];
+            rest.start += 1;
+            rest.len -= 1;
+        }
+        for (size_t n = 0; n < MP_ARRAY_SIZE(spaces); n++) {
+            if (spaces[n] == code) {
+                data = rest;
+                goto next;
+            }
+        }
+        break;
+    next: ;
+    }
+    return data;
+}
+
 static enum cue_command read_cmd(struct bstr *data, struct bstr *out_params)
 {
     struct bstr line = bstr_strip_linebreaks(bstr_getline(*data, data));
-    line = bstr_lstrip(line);
+    line = lstrip_whitespace(line);
     if (line.len == 0)
         return CUE_EMPTY;
     for (int n = 0; cue_command_strings[n].command != -1; n++) {
         struct bstr name = bstr0(cue_command_strings[n].text);
         if (bstr_case_startswith(line, name)) {
             struct bstr rest = bstr_cut(line, name.len);
-            if (rest.len && !strchr(WHITESPACE, rest.start[0]))
+            struct bstr par = lstrip_whitespace(rest);
+            if (rest.len && par.len == rest.len)
                 continue;
             if (out_params)
-                *out_params = bstr_lstrip(rest);
+                *out_params = par;
             return cue_command_strings[n].command;
         }
     }
@@ -94,7 +120,7 @@ static bool eat_char(struct bstr *data, char ch)
 
 static char *read_quoted(void *talloc_ctx, struct bstr *data)
 {
-    *data = bstr_lstrip(*data);
+    *data = lstrip_whitespace(*data);
     if (!eat_char(data, '"'))
         return NULL;
     int end = bstrchr(*data, '"');
@@ -118,7 +144,7 @@ static struct bstr strip_quotes(struct bstr data)
 // Return -1 on failure.
 static int read_int(struct bstr *data, bool two_digit)
 {
-    *data = bstr_lstrip(*data);
+    *data = lstrip_whitespace(*data);
     if (data->len && data->start[0] == '-')
         return -1;
     struct bstr s = *data;
