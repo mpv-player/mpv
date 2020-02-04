@@ -55,12 +55,18 @@ that uses the ``.foo`` file extension.
 
 mpv also appends the top level directory of the script to the start of Lua's
 package path so you can import scripts from there too. Be aware that this will
-shadow Lua libraries that use the same package path.
+shadow Lua libraries that use the same package path. (Single file scripts do not
+include mpv specific directory the Lua package path. This was silently changed
+in mpv 0.32.0.)
 
-On the other hand, if the script is a single file (directly located in
-``~/.config/mpv/scripts/`` and not as sub-directory), the Lua package path
-does not include any mpv specific directories. (This was silently changed in
-mpv 0.32.0.)
+Using a script directory is the recommended way to package a script that
+consists of multiple source files, or requires other files (you can use
+``mp.get_script_directory()`` to get the location and e.g. load data files).
+
+Making a script a git repository, basically a repository which contains a
+``main.lua``` file in the root directory, makes scripts easily updateable
+(without the dangers of auto-updates). Another suggestion is to use git
+submodules to share common files or libraries.
 
 Details on the script initialization and lifecycle
 --------------------------------------------------
@@ -491,6 +497,11 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     .. admonition:: Example
 
         The script ``/path/to/fooscript.lua`` becomes ``fooscript``.
+
+``mp.get_script_directory()``
+    Return the directory if this is a script packaged as directory (see
+    `Script location`_ for a description). Return nothing if this is a single
+    file script.
 
 ``mp.osd_message(text [,duration])``
     Show an OSD message on the screen. ``duration`` is in seconds, and is

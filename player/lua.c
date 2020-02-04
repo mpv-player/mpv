@@ -455,6 +455,16 @@ static int script_find_config_file(lua_State *L)
     return 1;
 }
 
+static int script_get_script_directory(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    if (ctx->path) {
+        lua_pushstring(L, ctx->path);
+        return 1;
+    }
+    return 0;
+}
+
 static int script_suspend(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -1228,6 +1238,7 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(wait_event),
     FN_ENTRY(request_event),
     FN_ENTRY(find_config_file),
+    FN_ENTRY(get_script_directory),
     FN_ENTRY(command),
     FN_ENTRY(commandv),
     FN_ENTRY(command_native),
