@@ -476,7 +476,6 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
             .name = talloc_strdup(config, it.full_name),
             .opt = it.opt,
             .group_index = it.group_index,
-            .is_hidden = !!it.opt->deprecation_message,
         };
 
         struct m_group_data *gdata = config->cache
@@ -837,7 +836,7 @@ const char *m_config_get_positional_option(const struct m_config *config, int p)
     int pos = 0;
     for (int n = 0; n < config->num_opts; n++) {
         struct m_config_option *co = &config->opts[n];
-        if (!co->is_hidden) {
+        if (!co->opt->deprecation_message) {
             if (pos == p)
                 return co->name;
             pos++;
@@ -1253,8 +1252,6 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
     for (int i = 0; i < config->num_opts; i++) {
         struct m_config_option *co = &sorted[i];
         const struct m_option *opt = co->opt;
-        if (co->is_hidden)
-            continue;
         if (strcmp(name, "*") != 0 && !strstr(co->name, name))
             continue;
         MP_INFO(config, " %s%-30s", prefix, co->name);
@@ -1291,6 +1288,8 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             MP_INFO(config, " [not in config files]");
         if (opt->flags & M_OPT_FILE)
             MP_INFO(config, " [file]");
+        if (opt->deprecation_message)
+            MP_INFO(config, " [deprecated]");
         if (opt->type == &m_option_type_alias)
             MP_INFO(config, " for %s", (char *)opt->priv);
         if (opt->type == &m_option_type_cli_alias)
@@ -1313,8 +1312,6 @@ char **m_config_list_options(void *ta_parent, const struct m_config *config)
     int count = 0;
     for (int i = 0; i < config->num_opts; i++) {
         struct m_config_option *co = &config->opts[i];
-        if (co->is_hidden)
-            continue;
         // For use with CONF_TYPE_STRING_LIST, it's important not to set list
         // as allocation parent.
         char *s = talloc_strdup(ta_parent, co->name);

@@ -39,7 +39,6 @@ struct mp_dispatch_queue;
 
 // Config option
 struct m_config_option {
-    bool is_hidden : 1;             // Does not show up in help
     bool is_set_from_cmdline : 1;   // Set by user from command line
     bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
