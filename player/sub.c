@@ -57,11 +57,8 @@ static void reset_subtitles(struct MPContext *mpctx, struct track *track)
 
 void reset_subtitle_state(struct MPContext *mpctx)
 {
-    for (int n = 0; n < mpctx->num_tracks; n++) {
-        struct dec_sub *d_sub = mpctx->tracks[n]->d_sub;
-        if (d_sub)
-            sub_reset(d_sub);
-    }
+    for (int n = 0; n < mpctx->num_tracks; n++)
+        reset_subtitles(mpctx, mpctx->tracks[n]);
     term_osd_set_subs(mpctx, NULL);
 }
 
