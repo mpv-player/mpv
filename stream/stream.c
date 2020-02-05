@@ -475,8 +475,11 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 
     int res = 0;
     // we will retry even if we already reached EOF previously.
-    if (s->fill_buffer && !mp_cancel_test(s->cancel))
+    if (s->fill_buffer && !mp_cancel_test(s->cancel)) {
+        MP_STATS(s, "value %d read-start", len);
         res = s->fill_buffer(s, buf, len);
+        MP_STATS(s, "value %d read-end", len);
+    }
     if (res <= 0) {
         s->eof = 1;
         return 0;
