@@ -274,25 +274,38 @@ static int load_scripts(lua_State *L)
     return 0;
 }
 
-static void set_path(lua_State *L)
+static void fuck_lua(lua_State *L, const char *search_path, const char *extra)
 {
-    struct script_ctx *ctx = get_ctx(L);
-
-    if (!ctx->path)
-        return;
-
     void *tmp = talloc_new(NULL);
 
     lua_getglobal(L, "package"); // package
-    lua_getfield(L, -1, "path"); // package path
-    const char *path = lua_tostring(L, -1);
+    lua_getfield(L, -1, search_path); // package search_path
+    bstr path = bstr0(lua_tostring(L, -1));
+    char *newpath = talloc_strdup(tmp, "");
 
-    char *newpath = talloc_asprintf(tmp, "%s;%s",
-                                    mp_path_join(tmp, ctx->path, "?.lua"),
-                                    path ? path : "");
+    // Unbelievable but true: Lua loads .lua files AND dynamic libraries from
+    // the working directory. This is highly security relevant.
+    // Lua scripts are still supposed to load globally installed libraries, so
+    // try to get by by filtering out any relative paths.
+    while (path.len) {
+        bstr item;
+        bstr_split_tok(path, ";", &item, &path);
+        if (bstr_startswith0(item, "/")) {
+            newpath = talloc_asprintf_append(newpath, "%s%.*s",
+                                             newpath[0] ? ";" : "",
+                                             BSTR_P(item));
+        }
+    }
 
-    lua_pushstring(L, newpath);  // package path newpath
-    lua_setfield(L, -3, "path"); // package path
+    // Script-directory paths take priority.
+    if (extra) {
+        newpath = talloc_asprintf_append(newpath, "%s%s",
+                                         newpath[0] ? ";" : "",
+                                         mp_path_join(tmp, extra, "?.lua"));
+    }
+
+    lua_pushstring(L, newpath);  // package search_path newpath
+    lua_setfield(L, -3, search_path); // package search_path
     lua_pop(L, 2);  // -
 
     talloc_free(tmp);
@@ -351,7 +364,8 @@ static int run_lua(lua_State *L)
 
     assert(lua_gettop(L) == 0);
 
-    set_path(L);
+    fuck_lua(L, "path", ctx->path);
+    fuck_lua(L, "cpath", NULL);
     assert(lua_gettop(L) == 0);
 
     // run this under an error handler that can do backtraces
