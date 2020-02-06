@@ -128,7 +128,7 @@ static int destroy_crap(lua_State *L)
 // This can be used to free temporary C data structures correctly if Lua errors
 // happen.
 // You can't free the talloc context directly; the Lua __gc handler does this.
-// In my cases, talloc_free_children(returnval) will be used to free attached
+// In many cases, talloc_free_children(returnval) will be used to free attached
 // memory in advance when it's known not to be needed anymore (a minor
 // optimization). Freeing it completely must be left to the Lua GC.
 static void *mp_lua_PITA(lua_State *L)
