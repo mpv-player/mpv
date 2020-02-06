@@ -297,7 +297,7 @@ static void fuck_lua(lua_State *L, const char *search_path, const char *extra)
     while (path.len) {
         bstr item;
         bstr_split_tok(path, ";", &item, &path);
-        if (bstr_startswith0(item, "/")) {
+        if (mp_path_is_absolute(item)) {
             newpath = talloc_asprintf_append(newpath, "%s%.*s",
                                              newpath[0] ? ";" : "",
                                              BSTR_P(item));
