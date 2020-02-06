@@ -2200,7 +2200,7 @@ Subtitles
 
 ``--sub-ass-vsfilter-blur-compat=<yes|no>``
     Scale ``\blur`` tags by video resolution instead of script resolution
-    (enabled by default). This is bug in VSFilter, which according to some,
+    (disabled by default). This is bug in VSFilter, which according to some,
     can't be fixed anymore in the name of compatibility.
 
     Note that this uses the actual video resolution for calculating the
