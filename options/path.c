@@ -256,28 +256,28 @@ char *mp_splitext(const char *path, bstr *root)
 
 char *mp_path_join_bstr(void *talloc_ctx, struct bstr p1, struct bstr p2)
 {
-    bool test;
     if (p1.len == 0)
         return bstrdup0(talloc_ctx, p2);
     if (p2.len == 0)
         return bstrdup0(talloc_ctx, p1);
 
+    bool is_absolute = strchr(mp_path_separators, p2.start[0]);
 #if HAVE_DOS_PATHS
-    test = (p2.len >= 2 && p2.start[1] == ':')
-        || p2.start[0] == '\\' || p2.start[0] == '/';
-#else
-    test = p2.start[0] == '/';
+    // Note: "X:filename" is a path relative to the current working directory
+    //       of drive X, and thus is not an absolute path. It needs to be
+    //       followed by \ or /.
+    if (p2.len >= 3 && p2.start[1] == ':' &&
+        strchr(mp_path_separators, p2.start[2]))
+        is_absolute = true;
 #endif
-    if (test)
-        return bstrdup0(talloc_ctx, p2);   // absolute path
+    if (is_absolute)
+        return bstrdup0(talloc_ctx, p2);
 
-    bool have_separator;
-    int endchar1 = p1.start[p1.len - 1];
+    bool have_separator = strchr(mp_path_separators, p1.start[p1.len - 1]);
 #if HAVE_DOS_PATHS
-    have_separator = endchar1 == '/' || endchar1 == '\\'
-                     || (p1.len == 2 && endchar1 == ':'); // "X:" only
-#else
-    have_separator = endchar1 == '/';
+    // "X:" only => path relative to "X:" current working directory.
+    if (p1.len == 2 && p1.start[1] == ':')
+        have_separator = true;
 #endif
 
     return talloc_asprintf(talloc_ctx, "%.*s%s%.*s", BSTR_P(p1),

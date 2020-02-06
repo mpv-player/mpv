@@ -36,7 +36,7 @@ static void run(struct test_ctx *ctx)
     TEST_JOIN("c:\\a",      "c:\\b",        "c:\\b");
     TEST_JOIN("c:/a",       "c:/b",         "c:/b");
     // Note: drive-relative paths are not always supported "properly"
-    TEST_JOIN("c:/a",       "d:b",          "d:b");
+    TEST_JOIN("c:/a",       "d:b",          "c:/a/d:b");
     TEST_JOIN("c:a",        "b",            "c:a/b");
     TEST_JOIN("c:",         "b",            "c:b");
 #endif
