@@ -83,6 +83,8 @@ struct vo_wayland_state {
     int mouse_unscaled_y;
     int scaling;
     int touch_entries;
+    int toplevel_width;
+    int toplevel_height;
     uint32_t pointer_id;
     int display_fd;
     struct wl_callback       *frame_callback;
