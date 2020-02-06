@@ -77,6 +77,9 @@ void mp_path_strip_trailing_separator(char *path);
 char *mp_path_join(void *talloc_ctx, const char *p1, const char *p2);
 char *mp_path_join_bstr(void *talloc_ctx, struct bstr p1, struct bstr p2);
 
+// Return whether the path is absolute.
+bool mp_path_is_absolute(struct bstr path);
+
 char *mp_getcwd(void *talloc_ctx);
 
 bool mp_path_exists(const char *path);

@@ -254,6 +254,23 @@ char *mp_splitext(const char *path, bstr *root)
     return (char *)split + 1;
 }
 
+bool mp_path_is_absolute(struct bstr path)
+{
+    if (path.len && strchr(mp_path_separators, path.start[0]))
+        return true;
+
+#if HAVE_DOS_PATHS
+    // Note: "X:filename" is a path relative to the current working directory
+    //       of drive X, and thus is not an absolute path. It needs to be
+    //       followed by \ or /.
+    if (path.len >= 3 && path.start[1] == ':' &&
+        strchr(mp_path_separators, path.start[2]))
+        return true;
+#endif
+
+    return false;
+}
+
 char *mp_path_join_bstr(void *talloc_ctx, struct bstr p1, struct bstr p2)
 {
     if (p1.len == 0)
@@ -261,16 +278,7 @@ char *mp_path_join_bstr(void *talloc_ctx, struct bstr p1, struct bstr p2)
     if (p2.len == 0)
         return bstrdup0(talloc_ctx, p1);
 
-    bool is_absolute = strchr(mp_path_separators, p2.start[0]);
-#if HAVE_DOS_PATHS
-    // Note: "X:filename" is a path relative to the current working directory
-    //       of drive X, and thus is not an absolute path. It needs to be
-    //       followed by \ or /.
-    if (p2.len >= 3 && p2.start[1] == ':' &&
-        strchr(mp_path_separators, p2.start[2]))
-        is_absolute = true;
-#endif
-    if (is_absolute)
+    if (mp_path_is_absolute(p2))
         return bstrdup0(talloc_ctx, p2);
 
     bool have_separator = strchr(mp_path_separators, p1.start[p1.len - 1]);

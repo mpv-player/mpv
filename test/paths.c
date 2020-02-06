@@ -14,11 +14,25 @@ static void test_join(char *file, int line, char *a, char *b, char *c)
     talloc_free(res);
 }
 
+static void test_abs(char *file, int line, bool abs, char *a)
+{
+    if (mp_path_is_absolute(bstr0(a)) != abs) {
+        printf("%s:%d: mp_path_is_absolute('%s') => %d, expected %d\n",
+               file, line, a, !abs, abs);
+        abort();
+    }
+}
+
 #define TEST_JOIN(a, b, c) \
     test_join(__FILE__, __LINE__, a, b, c);
 
+#define TEST_ABS(abs, a) \
+    test_abs(__FILE__, __LINE__, abs, a)
+
 static void run(struct test_ctx *ctx)
 {
+    TEST_ABS(true, "/ab");
+    TEST_ABS(false, "ab");
     TEST_JOIN("",           "",             "");
     TEST_JOIN("a",          "",             "a");
     TEST_JOIN("/a",         "",             "/a");
@@ -29,6 +43,12 @@ static void run(struct test_ctx *ctx)
     TEST_JOIN("ab/",        "/cd",          "/cd");
     // Note: we prefer "/" on win32, but tolerate "\".
 #if HAVE_DOS_PATHS
+    TEST_ABS(true, "\\ab");
+    TEST_ABS(true, "c:\\");
+    TEST_ABS(true, "c:/");
+    TEST_ABS(false, "c:");
+    TEST_ABS(false, "c:a");
+    TEST_ABS(false, "c:a\\");
     TEST_JOIN("ab\\",       "cd",           "ab\\cd");
     TEST_JOIN("ab\\",       "\\cd",         "\\cd");
     TEST_JOIN("c:/",        "de",           "c:/de");
