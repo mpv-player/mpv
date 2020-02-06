@@ -43,6 +43,7 @@ extern const struct unittest test_json;
 extern const struct unittest test_linked_list;
 extern const struct unittest test_repack_sws;
 extern const struct unittest test_repack_zimg;
+extern const struct unittest test_paths;
 
 #define assert_true(x) assert(x)
 #define assert_false(x) assert(!(x))
