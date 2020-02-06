@@ -610,6 +610,7 @@ end
 local function cache_stats()
     local stats = {}
 
+    eval_ass_formatting()
     add_header(stats)
     append(stats, "", {prefix=o.nl .. o.nl .. "Cache info:", nl="", indent=""})
 
