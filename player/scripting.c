@@ -104,6 +104,7 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
     void *tmp = talloc_new(NULL);
 
     const char *path = NULL;
+    char *script_name = NULL;
     const struct mp_scripting *backend = NULL;
 
     struct stat s;
@@ -129,6 +130,10 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
             talloc_free(tmp);
             return -1;
         }
+
+        script_name = talloc_strdup(tmp, path);
+        mp_path_strip_trailing_separator(script_name);
+        script_name = mp_basename(script_name);
     } else {
         for (int n = 0; scripting_backends[n]; n++) {
             const struct mp_scripting *b = scripting_backends[n];
@@ -137,6 +142,7 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
                 break;
             }
         }
+        script_name = script_name_from_filename(tmp, fname);
     }
 
     if (!backend) {
@@ -146,7 +152,6 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
     }
 
     struct mp_script_args *arg = talloc_ptrtype(NULL, arg);
-    char *name = script_name_from_filename(arg, fname);
     *arg = (struct mp_script_args){
         .mpctx = mpctx,
         .filename = talloc_strdup(arg, fname),
@@ -155,12 +160,13 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
         // Create the client before creating the thread; otherwise a race
         // condition could happen, where MPContext is destroyed while the
         // thread tries to create the client.
-        .client = mp_new_client(mpctx->clients, name),
+        .client = mp_new_client(mpctx->clients, script_name),
     };
 
     talloc_free(tmp);
 
     if (!arg->client) {
+        MP_ERR(mpctx, "Failed to create client for script: %s\n", fname);
         talloc_free(arg);
         return -1;
     }
