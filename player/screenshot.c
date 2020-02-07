@@ -53,6 +53,7 @@ typedef struct screenshot_ctx {
     struct mp_cmd *each_frame;
 
     int frameno;
+    uint64_t last_frame_count;
 } screenshot_ctx;
 
 void screenshot_init(struct MPContext *mpctx)
@@ -529,12 +530,16 @@ static void screenshot_fin(struct mp_cmd_ctx *cmd)
     mp_wakeup_core(mpctx);
 }
 
-void screenshot_flip(struct MPContext *mpctx)
+void handle_each_frame_screenshot(struct MPContext *mpctx)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
     if (!ctx->each_frame)
         return;
+
+    if (ctx->last_frame_count == mpctx->shown_vframes)
+        return;
+    ctx->last_frame_count = mpctx->shown_vframes;
 
     struct mp_waiter wait = MP_WAITER_INITIALIZER;
     void *a[] = {mpctx, &wait};

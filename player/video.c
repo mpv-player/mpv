@@ -1224,8 +1224,6 @@ void write_video(struct MPContext *mpctx)
 
     vo_c->underrun_signaled = false;
 
-    screenshot_flip(mpctx);
-
     mp_wakeup_core(mpctx);
     return;
 

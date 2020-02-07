@@ -28,8 +28,8 @@ struct mpv_global;
 // One time initialization at program start.
 void screenshot_init(struct MPContext *mpctx);
 
-// Called by the playback core code when a new frame is displayed.
-void screenshot_flip(struct MPContext *mpctx);
+// Called by the playback core on each iteration.
+void handle_each_frame_screenshot(struct MPContext *mpctx);
 
 /* Return the image converted to the given format. If the pixel aspect ratio is
  * not 1:1, the image is scaled as well. Returns NULL on failure.

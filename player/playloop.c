@@ -49,6 +49,7 @@
 #include "core.h"
 #include "client.h"
 #include "command.h"
+#include "screenshot.h"
 
 // Wait until mp_wakeup_core() is called, since the last time
 // mp_wait_events() was called.
@@ -1225,6 +1226,8 @@ void run_playloop(struct MPContext *mpctx)
     update_osd_msg(mpctx);
     if (mpctx->video_status == STATUS_EOF)
         update_subtitles(mpctx, mpctx->playback_pts);
+
+    handle_each_frame_screenshot(mpctx);
 
     handle_eof(mpctx);
 
