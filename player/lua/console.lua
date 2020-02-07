@@ -653,7 +653,7 @@ end
 local bindings = {
     { 'esc',         function() set_active(false) end       },
     { 'enter',       handle_enter                           },
-    { 'kp_enter',    hanmdle_enter                          },
+    { 'kp_enter',    handle_enter                           },
     { 'shift+enter', function() handle_char_input('\n') end },
     { 'bs',          handle_backspace                       },
     { 'shift+bs',    handle_backspace                       },
