@@ -2020,7 +2020,7 @@ function osc_init()
             -- probably not a network stream
             return ""
         end
-        local dmx_cache = mp.get_property_number("demuxer-cache-duration")
+        local dmx_cache = cache_state and cache_state["cache-duration"]
         local thresh = math.min(state.dmx_cache * 0.05, 5)  -- 5% or 5s
         if dmx_cache and math.abs(dmx_cache - state.dmx_cache) >= thresh then
             state.dmx_cache = dmx_cache
