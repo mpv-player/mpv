@@ -87,6 +87,7 @@ struct demux_opts {
     int disk_cache;
     int64_t max_bytes;
     int64_t max_bytes_bw;
+    int donate_fw;
     double min_secs;
     int force_seekable;
     double min_secs_cache;
@@ -117,6 +118,7 @@ const struct m_sub_options demux_conf = {
         // of double type.)
         OPT_BYTE_SIZE("demuxer-max-bytes", max_bytes, 0, 0, MAX_BYTES),
         OPT_BYTE_SIZE("demuxer-max-back-bytes", max_bytes_bw, 0, 0, MAX_BYTES),
+        OPT_FLAG("demuxer-donate-buffer", donate_fw, 0),
         OPT_FLAG("force-seekable", force_seekable, 0),
         OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0),
         OPT_FLAG("access-references", access_references, 0),
@@ -140,6 +142,7 @@ const struct m_sub_options demux_conf = {
         .enable_cache = -1, // auto
         .max_bytes = 150 * 1024 * 1024,
         .max_bytes_bw = 50 * 1024 * 1024,
+        .donate_fw = 1,
         .min_secs = 1.0,
         .min_secs_cache = 10.0 * 60 * 60,
         .seekable_cache = -1,
@@ -2265,7 +2268,7 @@ static void prune_old_packets(struct demux_internal *in)
         uint64_t max_avail = in->max_bytes_bw;
         // Backward cache (if enabled at all) can use unused forward cache.
         // Still leave 1 byte free, so the read_packet logic doesn't get stuck.
-        if (max_avail && in->max_bytes > (fw_bytes + 1))
+        if (max_avail && in->max_bytes > (fw_bytes + 1) && in->opts->donate_fw)
             max_avail += in->max_bytes - (fw_bytes + 1);
         if (in->total_bytes - fw_bytes <= max_avail)
             break;
