@@ -462,7 +462,7 @@ function process_timers() {
  - Module id supports mpv path enhancements, e.g. ~/foo, ~~/bar, ~~desktop/baz
  *********************************************************************/
 
-mp.module_paths = ["~~/scripts/modules.js"];  // global modules search paths
+mp.module_paths = [];  // global modules search paths
 
 // Internal meta top-dirs. Users should not rely on these names.
 var MODULES_META = "~~modules",
@@ -740,3 +740,8 @@ g.mp_event_loop = function mp_event_loop() {
 };
 
 })(this)
+
+try {
+    // let the user extend us, e.g. for updating mp.module_paths
+    require("~~/.init");
+} catch(e) {}

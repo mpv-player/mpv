@@ -300,25 +300,34 @@ do work. In general, this is for mpv modules and not a node.js replacement.
 A ``.js`` file extension is always added to ``id``, e.g. ``require("./foo")``
 will load the file ``./foo.js`` and return its ``exports`` object.
 
-An id is relative (to the script which ``require``'d it) if it starts with
-``./`` or ``../``. Otherwise, it's considered a "top-level id" (CommonJS term).
+An id which starts with ``./`` or ``../`` is relative to the script or module
+which ``require`` it. Otherwise it's considered a top-level id (CommonJS term).
 
-Top level id is evaluated as absolute filesystem path if possible, e.g. ``/x/y``
-or ``~/x``. Otherwise, it's considered a global module id and searched at
-``scripts/modules.js/`` in mpv config dirs - in normal config search order. E.g.
-``require("x")`` is searched as file ``x.js`` at those dirs, and id ``foo/x`` is
-searched as file ``x.js`` inside dir ``foo`` at those dirs.
+Top-level id is evaluated as absolute filesystem path if possible, e.g. ``/x/y``
+or ``~/x``. Otherwise it's considered a global module id and searched according
+``mp.module_paths`` in normal array order, e.g. ``require("x")`` tries to
+load ``x.js`` at one of the array paths, and id ``foo/x`` tries to load ``x.js``
+inside dir ``foo`` at one of the paths.
 
-Search paths for global module id's are at the array ``mp.module_paths``, which
-is searched in order. Initially it contains one item: ``~~/scripts/modules.js``
-such that it behaves as described above. Modifying it will affect future
-``require`` calls with global module id's which are not already loaded/cached.
+The ``mp.module_paths`` array is empty by default.
+``mp.module_paths`` may be updated from a script (preferably via custom init -
+see below) which will affect future calls to ``require`` for global module id's
+which are not already loaded/cached.
 
 No ``global`` variable, but a module's ``this`` at its top lexical scope is the
 global object - also in strict mode. If you have a module which needs ``global``
 as the global object, you could do ``this.global = this;`` before ``require``.
 
 Functions and variables declared at a module don't pollute the global object.
+
+Custom initialization
+---------------------
+
+After mpv initializes the JavaScript environment for a script but before it
+loads the script - it tries to run the file ``.init.js`` at the root of the mpv
+configuration directory. Code at this file can update the environment further
+for all scripts. E.g. if it contains ``mp.module_paths.push("/foo")`` then
+``require`` at all scripts will search global module id's also at ``/foo``.
 
 The event loop
 --------------
