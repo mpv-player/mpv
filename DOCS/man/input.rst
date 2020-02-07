@@ -1800,6 +1800,8 @@ Property list
     includes all overhead, and possibly unused data (like pruned data). This
     member is missing if the file cache is not active.
 
+    ``cache-duration`` is ``demuxer-cache-duration``. Missing if unavailable.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -1815,6 +1817,7 @@ Property list
             "eof-cached"        MPV_FORMAT_FLAG
             "fw-bytes"          MPV_FORMAT_INT64
             "file-cache-bytes"  MPV_FORMAT_INT64
+            "cache-duration"    MPV_FORMAT_DOUBLE
 
     Other fields (might be changed or removed in the future):
 

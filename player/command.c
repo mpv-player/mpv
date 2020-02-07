@@ -1450,6 +1450,9 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     if (s.ts_reader != MP_NOPTS_VALUE)
         node_map_add_double(r, "reader-pts", s.ts_reader);
 
+    if (s.ts_duration >= 0)
+        node_map_add_double(r, "cache-duration", s.ts_duration);
+
     node_map_add_flag(r, "eof", s.eof);
     node_map_add_flag(r, "underrun", s.underrun);
     node_map_add_flag(r, "idle", s.idle);
