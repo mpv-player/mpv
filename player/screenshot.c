@@ -545,7 +545,7 @@ void handle_each_frame_screenshot(struct MPContext *mpctx)
     void *a[] = {mpctx, &wait};
     run_command(mpctx, mp_cmd_clone(ctx->each_frame), NULL, screenshot_fin, a);
 
-    // Block (in a reentrant way) until he screenshot was written. Otherwise,
+    // Block (in a reentrant way) until the screenshot was written. Otherwise,
     // we could pile up screenshot requests forever.
     while (!mp_waiter_poll(&wait))
         mp_idle(mpctx);
