@@ -307,15 +307,15 @@ which ``require`` it. Otherwise it's considered a top-level id (CommonJS term).
 
 Top-level id is evaluated as absolute filesystem path if possible, e.g. ``/x/y``
 or ``~/x``. Otherwise it's considered a global module id and searched according
-``mp.module_paths`` in normal array order, e.g. ``require("x")`` tries to
+to ``mp.module_paths`` in normal array order, e.g. ``require("x")`` tries to
 load ``x.js`` at one of the array paths, and id ``foo/x`` tries to load ``x.js``
 inside dir ``foo`` at one of the paths.
 
 The ``mp.module_paths`` array is empty by default except for scripts which are
-loaded as a directory where it contains one item - ``<directory>/modules/``.
-``mp.module_paths`` may be updated from a script (preferably via custom init -
-see below) which will affect future calls to ``require`` for global module id's
-which are not already loaded/cached.
+loaded as a directory where it contains one item - ``<directory>/modules/`` .
+The array may be updated from a script (or using custom init - see below) which
+will affect future calls to ``require`` for global module id's which are not
+already loaded/cached.
 
 No ``global`` variable, but a module's ``this`` at its top lexical scope is the
 global object - also in strict mode. If you have a module which needs ``global``
