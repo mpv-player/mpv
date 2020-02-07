@@ -653,6 +653,7 @@ end
 local bindings = {
     { 'esc',         function() set_active(false) end       },
     { 'enter',       handle_enter                           },
+    { 'kp_enter',    hanmdle_enter                          },
     { 'shift+enter', function() handle_char_input('\n') end },
     { 'bs',          handle_backspace                       },
     { 'shift+bs',    handle_backspace                       },
@@ -684,7 +685,13 @@ local bindings = {
     { 'ctrl+v',      function() paste(true) end             },
     { 'meta+v',      function() paste(true) end             },
     { 'ctrl+w',      del_word                               },
+    { 'kp_dec',      function() handle_char_input('.') end  },
 }
+
+for i = 0, 9 do
+    bindings[#bindings + 1] =
+        {'kp' .. i, function() handle_char_input('' .. i) end}
+end
 
 local function text_input(info)
     if info.key_text and (info.event == "press" or info.event == "down"
