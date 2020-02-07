@@ -1596,19 +1596,19 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 
     while (wl->frame_wait && finish_time > mp_time_us()) {
 
-        while (wl_display_prepare_read(wl->display) != 0)
-            wl_display_dispatch_pending(wl->display);
-        wl_display_flush(wl->display);
-
-        int poll_time = (finish_time - mp_time_us()) / 1000;
+        int poll_time = ceil((double)(finish_time - mp_time_us()) / 1000);
         if (poll_time < 0) {
             poll_time = 0;
         }
 
+        while (wl_display_prepare_read(wl->display) != 0)
+            wl_display_dispatch_pending(wl->display);
+        wl_display_flush(wl->display);
+
         poll(fds, 1, poll_time);
 
         wl_display_read_events(wl->display);
-        wl_display_dispatch_pending(wl->display);
+        wl_display_roundtrip(wl->display);
     }
 
     if (wl->frame_wait) {
