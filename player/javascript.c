@@ -59,6 +59,7 @@ static const char *const builtin_files[][3] = {
 // Represents a loaded script. Each has its own js state.
 struct script_ctx {
     const char *filename;
+    const char *path; // NULL if single file
     struct mpv_handle *client;
     struct MPContext *mpctx;
     struct mp_log *log;
@@ -477,6 +478,7 @@ static int s_load_javascript(struct mp_script_args *args)
         .log = args->log,
         .last_error_str = talloc_strdup(ctx, "Cannot initialize JavaScript"),
         .filename = args->filename,
+        .path = args->path,
     };
 
     int r = -1;
@@ -1280,6 +1282,11 @@ static void add_functions(js_State *J, struct script_ctx *ctx)
 
     js_pushstring(J, ctx->filename);
     js_setproperty(J, -2, "script_file");
+
+    if (ctx->path) {
+        js_pushstring(J, ctx->path);
+        js_setproperty(J, -2, "script_path");
+    }
 
     js_pop(J, 2);  // leave the stack as we got it
 }

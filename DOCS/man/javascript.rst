@@ -139,6 +139,8 @@ success, ``fn`` is called always a-sync, ``error`` is empty string on success.
 
 ``mp.get_script_name()``
 
+``mp.get_script_directory()``
+
 ``mp.osd_message(text [,duration])``
 
 ``mp.get_wakeup_pipe()``
@@ -309,7 +311,8 @@ or ``~/x``. Otherwise it's considered a global module id and searched according
 load ``x.js`` at one of the array paths, and id ``foo/x`` tries to load ``x.js``
 inside dir ``foo`` at one of the paths.
 
-The ``mp.module_paths`` array is empty by default.
+The ``mp.module_paths`` array is empty by default except for scripts which are
+loaded as a directory where it contains one item - ``<directory>/modules/``.
 ``mp.module_paths`` may be updated from a script (preferably via custom init -
 see below) which will affect future calls to ``require`` for global module id's
 which are not already loaded/cached.

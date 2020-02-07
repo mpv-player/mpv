@@ -463,6 +463,8 @@ function process_timers() {
  *********************************************************************/
 
 mp.module_paths = [];  // global modules search paths
+if (mp.script_path !== undefined)  // loaded as a directory
+    mp.module_paths.push(mp.utils.join_path(mp.script_path, "modules"));
 
 // Internal meta top-dirs. Users should not rely on these names.
 var MODULES_META = "~~modules",
@@ -645,6 +647,7 @@ mp.options = { read_options: read_options };
 g.print = mp.msg.info;  // convenient alias
 mp.get_script_name = function() { return mp.script_name };
 mp.get_script_file = function() { return mp.script_file };
+mp.get_script_directory = function() { return mp.script_path };
 mp.get_time = function() { return mp.get_time_ms() / 1000 };
 mp.utils.getcwd = function() { return mp.get_property("working-directory") };
 mp.dispatch_event = dispatch_event;
