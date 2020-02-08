@@ -885,6 +885,10 @@ static void handle_loop_file(struct MPContext *mpctx)
 
     double ab[2];
     if (get_ab_loop_times(mpctx, ab) && mpctx->ab_loop_clip) {
+        if (opts->ab_loop_count > 0) {
+            opts->ab_loop_count--;
+            m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->ab_loop_count);
+        }
         target = ab[0];
         prec = MPSEEK_EXACT;
     } else if (opts->loop_file) {

@@ -427,6 +427,8 @@ static const m_option_t mp_opts[] = {
 
     OPT_TIME("ab-loop-a", ab_loop[0], 0, .min = MP_NOPTS_VALUE),
     OPT_TIME("ab-loop-b", ab_loop[1], 0, .min = MP_NOPTS_VALUE),
+    OPT_CHOICE_OR_INT("ab-loop-count", ab_loop_count, 0, 0, INT_MAX,
+                      ({"inf", -1})),
 
     OPT_CHOICE_OR_INT("playlist-start", playlist_pos, 0, 0, INT_MAX,
                       ({"auto", -1}, {"no", -1})),
@@ -940,6 +942,7 @@ static const struct MPOpts mp_default_opts = {
     .cache_pause = 1,
     .cache_pause_wait = 1.0,
     .ab_loop = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
+    .ab_loop_count = -1,
     .edition_id = -1,
     .default_max_pts_correction = -1,
     .correct_pts = 1,

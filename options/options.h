@@ -232,6 +232,7 @@ typedef struct MPOpts {
     int rebase_start_time;
     int play_frames;
     double ab_loop[2];
+    int ab_loop_count;
     double step_sec;
     int position_resume;
     int position_check_mtime;
