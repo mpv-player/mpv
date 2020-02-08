@@ -50,7 +50,7 @@ _mpv_get_args()
     Flag)
       candidates=("yes" "no" "help")
       ;;
-    Choices:)
+    Choices:|Object)
       candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
       candidates+=("help")
       ;;
