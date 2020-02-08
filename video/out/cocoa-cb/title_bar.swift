@@ -199,7 +199,11 @@ class TitleBar: NSVisualEffectView {
                 return NSAppearance(named: .accessibilityHighContrastVibrantDark)
             case "0", "auto": fallthrough
             default:
+#if HAVE_MACOS_10_14_FEATURES
                 return nil
+#else
+                break
+#endif
             }
         }
 
