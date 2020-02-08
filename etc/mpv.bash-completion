@@ -17,9 +17,12 @@
 # License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# Cache all the mpv options
+_mpv_options=$(mpv --list-options)
+
 _mpv_get_args()
 {
-  local doc=$(mpv --list-options | grep -E "^\\s*$1\\s")
+  local doc=$(echo "$_mpv_options" | grep -E "^\\s*$1\\s")
   local partial="$2"
   local type=$(echo "$doc" | awk '{print $2;}')
 
@@ -70,6 +73,11 @@ _mpv_get_args()
   fi
 }
 
+# This regex detects special options where we don't want an '=' appended
+_mpv_special_regex='Flag.*\[not in config files\]|Print'
+_mpv_regular_options=($(echo "$_mpv_options" | grep -v -E "$_mpv_special_regex" |awk '{print "\\"$1;}' | grep '\--'))
+_mpv_special_options=($(echo "$_mpv_options" | grep -E "$_mpv_special_regex" |awk '{print "\\"$1;}' | grep '\--'))
+
 _mpv()
 {
   compopt +o nospace mpv
@@ -90,14 +98,9 @@ _mpv()
   else
     case $cur in
       -*)
-        # This regex detects special options where we don't want an '=' appended
-        local special_regex='Flag.*\[not in config files\]|Print'
-        local options=($(mpv --list-options | grep -v -E "$special_regex" |awk '{print "\\"$1;}' | grep '\--'))
-        local specials=($(mpv --list-options | grep -E "$special_regex" |awk '{print "\\"$1;}' | grep '\--'))
-
-        COMPREPLY=($(compgen -W "${options[*]}" -S '=' -- "${cur}"))
+        COMPREPLY=($(compgen -W "${_mpv_regular_options[*]}" -S '=' -- "${cur}"))
         local normal_count=${#COMPREPLY[@]}
-        COMPREPLY+=($(compgen -W "${specials[*]}" -- "${cur}"))
+        COMPREPLY+=($(compgen -W "${_mpv_special_options[*]}" -- "${cur}"))
         if [ $normal_count -gt 0 -o ${#COMPREPLY[@]} -gt 1 ]; then
           compopt -o nospace mpv
         fi
