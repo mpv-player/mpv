@@ -17,7 +17,9 @@ a large part of the user interface and APIs.
 
 Also see compatibility.rst.
 
-This document lists changes to them. New changes are added to the top.
+This document lists changes to them. New changes are added to the top. Usually,
+only incompatible or important changes are mentioned. New options/commands/etc.
+are not always listed.
 
 Interface changes
 =================
