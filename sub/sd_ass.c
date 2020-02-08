@@ -249,7 +249,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         for (int n = 0; r && r[n]; n++) {
             char *ass_line = r[n];
             if (sd->opts->sub_filter_SDH)
-                ass_line = filter_SDH(sd, track->event_format, 0, ass_line, 0);
+                ass_line = filter_SDH(sd, track->event_format, 1, ass_line, 0);
             if (ass_line)
                 ass_process_chunk(track, ass_line, strlen(ass_line),
                                   llrint(sub_pts * 1000),
