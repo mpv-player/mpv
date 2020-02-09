@@ -27,6 +27,8 @@
 
 static_assert(MP_IMAGE_BYTE_ALIGN >= ZIMG_ALIGN, "");
 
+#define HAVE_ZIMG_ALPHA (ZIMG_API_VERSION >= ZIMG_MAKE_API_VERSION(2, 4))
+
 static const struct m_opt_choice_alternatives mp_zimg_scalers[] = {
     {"point",           ZIMG_RESIZE_POINT},
     {"bilinear",        ZIMG_RESIZE_BILINEAR},
@@ -264,6 +266,29 @@ static int repack_align(void *user, unsigned i, unsigned x0, unsigned x1)
 // Unpackers will often use "x" for padding, because they ignore it, while
 // packets will use "z" because they write zero.
 
+#define PA_WORD_4(name, packed_t, plane_t, sh_c0, sh_c1, sh_c2, sh_c3)      \
+    static void name(void *dst, void *src[], int x0, int x1) {              \
+        for (int x = x0; x < x1; x++) {                                     \
+            ((packed_t *)dst)[x] =                                          \
+                ((packed_t)((plane_t *)src[0])[x] << (sh_c0)) |             \
+                ((packed_t)((plane_t *)src[1])[x] << (sh_c1)) |             \
+                ((packed_t)((plane_t *)src[2])[x] << (sh_c2)) |             \
+                ((packed_t)((plane_t *)src[3])[x] << (sh_c3));              \
+        }                                                                   \
+    }
+
+#define UN_WORD_4(name, packed_t, plane_t, sh_c0, sh_c1, sh_c2, sh_c3, mask)\
+    static void name(void *src, void *dst[], int x0, int x1) {              \
+        for (int x = x0; x < x1; x++) {                                     \
+            packed_t c = ((packed_t *)src)[x];                              \
+            ((plane_t *)dst[0])[x] = (c >> (sh_c0)) & (mask);               \
+            ((plane_t *)dst[1])[x] = (c >> (sh_c1)) & (mask);               \
+            ((plane_t *)dst[2])[x] = (c >> (sh_c2)) & (mask);               \
+            ((plane_t *)dst[3])[x] = (c >> (sh_c3)) & (mask);               \
+        }                                                                   \
+    }
+
+
 #define PA_WORD_3(name, packed_t, plane_t, sh_c0, sh_c1, sh_c2, pad)        \
     static void name(void *dst, void *src[], int x0, int x1) {              \
         for (int x = x0; x < x1; x++) {                                     \
@@ -273,6 +298,12 @@ static int repack_align(void *user, unsigned i, unsigned x0, unsigned x1)
                 ((packed_t)((plane_t *)src[2])[x] << (sh_c2));              \
         }                                                                   \
     }
+
+UN_WORD_4(un_cccc8,  uint32_t, uint8_t,  0, 8,  16, 24, 0xFFu)
+PA_WORD_4(pa_cccc8,  uint32_t, uint8_t,  0, 8,  16, 24)
+// Not sure if this is a good idea; there may be no alignment guarantee.
+UN_WORD_4(un_cccc16,  uint64_t, uint16_t,  0, 16,  32, 48, 0xFFFFu)
+PA_WORD_4(pa_cccc16,  uint64_t, uint16_t,  0, 16,  32, 48)
 
 #define UN_WORD_3(name, packed_t, plane_t, sh_c0, sh_c1, sh_c2, mask)       \
     static void name(void *src, void *dst[], int x0, int x1) {              \
@@ -352,6 +383,8 @@ struct regular_repacker {
 static const struct regular_repacker regular_repackers[] = {
     {32, 8,  0, 3, pa_ccc8z8,  un_ccc8x8},
     {32, 8,  8, 3, pa_z8ccc8,  un_x8ccc8},
+    {32, 8,  0, 4, pa_cccc8,   un_cccc8},
+    {64, 16, 0, 4, pa_cccc16,  un_cccc16},
     {24, 8,  0, 3, pa_ccc8,    un_ccc8},
     {48, 16, 0, 3, pa_ccc16,   un_ccc16},
     {16, 8,  0, 2, pa_cc8,     un_cc8},
@@ -366,8 +399,8 @@ static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
     uint32_t *p1 =
         (void *)(r->mpi->planes[0] + r->mpi->stride[0] * (ptrdiff_t)i);
 
-    void *p2[3];
-    for (int p = 0; p < 3; p++) {
+    void *p2[4] = {0};
+    for (int p = 0; p < r->zplanes; p++) {
         int s = r->components[p];
         p2[p] = r->tmp->planes[s] +
                 r->tmp->stride[s] * (ptrdiff_t)(i & r->zmask[s]);
@@ -548,14 +581,16 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         return;
     struct mp_regular_imgfmt_plane *p = &desc.planes[0];
 
+    int num_real_components = 0;
     for (int n = 0; n < p->num_components; n++) {
-        if (p->components[n] >= 4) // no alpha
-            return;
+        if (p->components[n]) {
+            num_real_components += 1;
+        } else {
+            // padding must be in MSB or LSB
+            if (n != 0 && n != p->num_components - 1)
+                return;
+        }
     }
-
-    // padding must be in MSB or LSB
-    if (p->components[0] && p->components[3])
-        return;
 
     int depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
 
@@ -564,7 +599,7 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
     desc2.forced_csp = 0;
     if (desc2.component_pad > 0)
         desc2.component_pad = 0;
-    desc2.num_planes = 3;
+    desc2.num_planes = num_real_components;
     for (int n = 0; n < desc2.num_planes; n++) {
         desc2.planes[n].num_components = 1;
         desc2.planes[n].components[0] = n + 1;
@@ -586,7 +621,7 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
 
         if (pa->packed_width != desc.component_size * p->num_components * 8 ||
             pa->component_width != depth ||
-            pa->num_components != 3 ||
+            pa->num_components != num_real_components ||
             pa->prepadding != prepad ||
             !repack_cb)
             continue;
@@ -594,7 +629,7 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         r->repack = packed_repack;
         r->packed_repack_scanline = repack_cb;
         r->zimgfmt = planar_fmt;
-        for (int n = 0; n < 3; n++)
+        for (int n = 0; n < num_real_components; n++)
             r->components[n] = p->components[first_comp + n] - 1;
         return;
     }
@@ -622,8 +657,8 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     if (!mp_get_regular_imgfmt(&desc, r->zimgfmt))
         return false;
 
-    // no alpha plane, no odd chroma subsampling
-    if (desc.num_planes > 3 || !MP_IS_POWER_OF_2(desc.chroma_w) ||
+    // no weird stuff
+    if (desc.num_planes > 4 || !MP_IS_POWER_OF_2(desc.chroma_w) ||
         !MP_IS_POWER_OF_2(desc.chroma_h))
         return false;
 
@@ -632,11 +667,21 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
         if (desc.planes[n].num_components != 1)
             return false;
         int c = desc.planes[n].components[0];
-        if (c < 1 || c > 3)
+        if (c < 1 || c > 4)
             return false;
-        // Unfortunately, ffmpeg prefers GBR order for planar RGB, while zimg
-        // is sane. This makes it necessary to determine and fix the order.
-        r->z_planes[c - 1] = n;
+        if (c < 4) {
+            // Unfortunately, ffmpeg prefers GBR order for planar RGB, while zimg
+            // is sane. This makes it necessary to determine and fix the order.
+            r->z_planes[c - 1] = n;
+        } else {
+            r->z_planes[3] = n; // alpha, always plane 4 in zimg
+
+#if HAVE_ZIMG_ALPHA
+            zfmt->alpha = ZIMG_ALPHA_STRAIGHT;
+#else
+            return false;
+#endif
+        }
     }
 
     r->zplanes = desc.num_planes;
@@ -844,7 +889,7 @@ bool mp_zimg_convert(struct mp_zimg_context *ctx, struct mp_image *dst,
 
     // An annoyance.
     zimg_image_buffer_const zsrc_c = {ZIMG_API_VERSION};
-    for (int n = 0; n < 3; n++) {
+    for (int n = 0; n < MP_ARRAY_SIZE(zsrc_c.plane); n++) {
         zsrc_c.plane[n].data = zsrc.plane[n].data;
         zsrc_c.plane[n].stride = zsrc.plane[n].stride;
         zsrc_c.plane[n].mask = zsrc.plane[n].mask;
