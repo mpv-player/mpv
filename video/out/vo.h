@@ -67,7 +67,7 @@ enum mp_voctrl {
     VOCTRL_SET_PANSCAN,
     VOCTRL_SET_EQUALIZER,
 
-    // Trigger by any change to mp_vo_opts. This is for convenience. In theory,
+    // Triggered by any change to mp_vo_opts. This is for convenience. In theory,
     // you could install your own listener.
     VOCTRL_VO_OPTS_CHANGED,
 
