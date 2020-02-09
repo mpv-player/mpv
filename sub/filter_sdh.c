@@ -83,6 +83,8 @@ static void copy_ass(struct sd *sd, char **rpp, struct buffer *buf)
     return;
 }
 
+static bool skip_bracketed(struct sd *sd, char **rpp, struct buffer *buf);
+
 // check for speaker label, like MAN:
 // normal subtitles may include mixed case text with : after so
 // only upper case is accepted and lower case l which for some
@@ -121,6 +123,12 @@ static void skip_speaker_label(struct sd *sd, char **rpp, struct buffer *buf)
     while (*rp && rp[0] != ':') {
         if (rp[0] == '{') {
             copy_ass(sd, &rp, buf);
+        } else if (rp[0] == '[') {
+            // not uncommon with [xxxx]: which should also be skipped
+            if (!skip_bracketed(sd, &rp, buf)) {
+                buf->pos = old_pos;
+                return;
+            }
         } else if ((mp_isalpha(rp[0]) &&
                     (filter_harder || mp_isupper(rp[0]) || rp[0] == 'l')) ||
                    mp_isdigit(rp[0]) ||
