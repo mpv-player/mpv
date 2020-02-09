@@ -748,7 +748,7 @@ static const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", cocoa_opts, cocoa_conf, 0),
 #endif
 
-#if HAVE_MACOS_COCOA_CB
+#if HAVE_COCOA
     OPT_SUBSTRUCT("", macos_opts, macos_conf, 0),
 #endif
 
