@@ -50,12 +50,14 @@ struct vf_format_opts {
     int chroma_location;
     int stereo_in;
     int rotate;
+    int w, h;
     int dw, dh;
     double dar;
     int convert;
 };
 
-static void set_params(struct vf_format_opts *p, struct mp_image_params *out)
+static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
+                       bool set_size)
 {
     if (p->colormatrix)
         out->color.space = p->colormatrix;
@@ -85,6 +87,10 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out)
     if (p->rotate >= 0)
         out->rotate = p->rotate;
 
+    if (p->w > 0 && set_size)
+        out->w = p->w;
+    if (p->h > 0 && set_size)
+        out->h = p->h;
     AVRational dsize;
     mp_image_params_get_dsize(out, &dsize.num, &dsize.den);
     if (p->dw > 0)
@@ -115,7 +121,7 @@ static void vf_format_process(struct mp_filter *f)
                 par.color.levels = MP_CSP_LEVELS_TV;
             }
 
-            set_params(priv->opts, &par);
+            set_params(priv->opts, &par, true);
 
             if (par.imgfmt != outfmt) {
                 par.imgfmt = outfmt;
@@ -135,7 +141,7 @@ static void vf_format_process(struct mp_filter *f)
         if (!priv->opts->convert && frame.type == MP_FRAME_VIDEO) {
             struct mp_image *img = frame.data;
 
-            set_params(priv->opts, &img->params);
+            set_params(priv->opts, &img->params, false);
             mp_image_params_guess_csp(&img->params);
         }
 
@@ -187,6 +193,8 @@ static const m_option_t vf_opts_fields[] = {
     OPT_CHOICE_C("chroma-location", chroma_location, 0, mp_chroma_names),
     OPT_CHOICE_C("stereo-in", stereo_in, 0, mp_stereo3d_names),
     OPT_INTRANGE("rotate", rotate, 0, -1, 359),
+    OPT_INT("w", w, 0),
+    OPT_INT("h", h, 0),
     OPT_INT("dw", dw, 0),
     OPT_INT("dh", dh, 0),
     OPT_DOUBLE("dar", dar, 0),

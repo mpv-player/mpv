@@ -321,6 +321,10 @@ Available mpv-only filters are:
         Set the rotation the video is assumed to be encoded with in degrees.
         The special value ``-1`` uses the input format.
 
+    ``<w>``, ``<h>``
+        If not 0, perform conversion to the given size. Ignored if
+        ``convert=yes`` is not set.
+
     ``<dw>``, ``<dh>``
         Set the display size. Note that setting the display size such that
         the video is scaled in both directions instead of just changing the
