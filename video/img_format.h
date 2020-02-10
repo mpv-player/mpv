@@ -151,6 +151,10 @@ enum mp_imgfmt {
     IMGFMT_Y8,
     IMGFMT_Y16,
 
+    // Planar gray/alpha.
+    IMGFMT_YAP8,
+    IMGFMT_YAP16,
+
     // Packed YUV formats (components are byte-accessed)
     IMGFMT_UYVY,                // U  Y0 V  Y1
 
