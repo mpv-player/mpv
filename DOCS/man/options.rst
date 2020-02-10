@@ -4022,7 +4022,7 @@ Software Scaler
     VOs like ``drm`` and ``x11`` will benefit a lot from using ``--sws-fast``.
     You may need to set other options, like ``--sws-scaler``. The builtin
     ``sws-fast`` profile sets this option and some others to gain performance
-    for reduced quality.
+    for reduced quality. Also see ``--sws-allow-zimg``.
 
 ``--sws-allow-zimg=<yes|no>``
     Allow using zimg (if the component using the internal swscale wrapper
@@ -4038,6 +4038,15 @@ Software Scaler
     being used.
 
     Most things which need software conversion can make use of this.
+
+    .. note::
+
+        The builtin ``sws-fast`` profile (which you are supposed to use when you
+        use a VO that uses software conversion on weak hardware) sets this
+        option. But do note that zimg *may* be slower than libswscale. Usually,
+        it's faster on x86 platforms, but slower on ARM (due to lack of ARM
+        specific optimizations). The mpv zimg wrapper uses unoptimized repacking
+        for some formats, for which zimg cannot be blamed.
 
 ``--zimg-scaler=<point|bilinear|bicubic|spline16|spline36|lanczos>``
     Zimg luma scaler to use (default: lanczos).
