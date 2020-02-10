@@ -75,8 +75,8 @@ struct mp_zimg_repack {
     struct mp_image_params fmt; // original mp format (possibly packed format)
     int zimgfmt;                // zimg equivalent unpacked format
     int zplanes;                // number of planes (zimgfmt)
-    unsigned zmask[4];          // zmask[n] = zimg_image_buffer.plane[n].mask
-    int z_planes[4];            // z_planes[zimg_index] = mp_index
+    unsigned zmask[4];          // zmask[mp_index] = zimg mask (using mp index!)
+    int z_planes[4];            // z_planes[zimg_index] = mp_index (or -1)
     bool pass_through_y;        // luma plane optimization for e.g. nv12
 
     // If set, the pack/unpack callback to pass to zimg.
@@ -465,16 +465,21 @@ static void wrap_buffer(struct mp_zimg_repack *r,
     }
 
     for (int n = 0; n < r->zplanes; n++) {
+        // Note: this is really the only place we have to care about plane
+        // permutation (zimg_image_buffer may have a different plane order
+        // than the shadow mpi like r->tmp). We never use the zimg indexes
+        // in other places.
         int mplane = r->z_planes[n];
 
-        r->use_buf[mplane] = !plane_aligned[n];
+        r->use_buf[mplane] = !plane_aligned[mplane];
         if (!(r->pass_through_y && mplane == 0))
             r->use_buf[mplane] |= !!r->repack;
 
         struct mp_image *tmpi = r->use_buf[mplane] ? r->tmp : mpi;
         buf->plane[n].data = tmpi->planes[mplane];
         buf->plane[n].stride = tmpi->stride[mplane];
-        buf->plane[n].mask = r->use_buf[mplane] ? r->zmask[n] : ZIMG_BUFFER_MAX;
+        buf->plane[n].mask = r->use_buf[mplane] ? r->zmask[mplane]
+                                                : ZIMG_BUFFER_MAX;
     }
 
     *cb = r->repack ? r->repack : repack_align;
