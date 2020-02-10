@@ -74,7 +74,7 @@ struct mp_zimg_repack {
     bool pack;                  // if false, this is for unpacking
     struct mp_image_params fmt; // original mp format (possibly packed format)
     int zimgfmt;                // zimg equivalent unpacked format
-    int zplanes;                // number of planes involved
+    int num_planes;             // number of planes involved
     unsigned zmask[4];          // zmask[mp_index] = zimg mask (using mp index!)
     int z_planes[4];            // z_planes[zimg_index] = mp_index (or -1)
     bool pass_through_y;        // luma plane optimization for e.g. nv12
@@ -400,7 +400,7 @@ static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
         (void *)(r->mpi->planes[0] + r->mpi->stride[0] * (ptrdiff_t)i);
 
     void *p2[4] = {0};
-    for (int p = 0; p < r->zplanes; p++) {
+    for (int p = 0; p < r->num_planes; p++) {
         int s = r->components[p];
         p2[p] = r->tmp->planes[s] +
                 r->tmp->stride[s] * (ptrdiff_t)(i & r->zmask[s]);
@@ -459,7 +459,7 @@ static void wrap_buffer(struct mp_zimg_repack *r,
     *buf = (zimg_image_buffer){ZIMG_API_VERSION};
 
     bool plane_aligned[4] = {0};
-    for (int n = 0; n < r->zplanes; n++) {
+    for (int n = 0; n < r->num_planes; n++) {
         plane_aligned[n] = !((uintptr_t)mpi->planes[n] % ZIMG_ALIGN) &&
                            !(mpi->stride[n] % ZIMG_ALIGN);
     }
@@ -702,7 +702,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
         }
     }
 
-    r->zplanes = desc.num_planes;
+    r->num_planes = desc.num_planes;
 
     // Note: formats with subsampled chroma may have odd width or height in mpv
     // and FFmpeg. This is because the width/height is actually a cropping
