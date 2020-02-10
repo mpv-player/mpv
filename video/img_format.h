@@ -192,6 +192,9 @@ enum mp_imgfmt {
     // Accessed with bit-shifts, uint32_t units.
     IMGFMT_RGB30,               // 2pad 10r 10g 10b (MSG to LSB)
 
+    // AV_PIX_FMT_PAL8
+    IMGFMT_PAL8,
+
     // Hardware accelerated formats. Plane data points to special data
     // structures, instead of pixel data.
     IMGFMT_VDPAU,           // VdpVideoSurface
