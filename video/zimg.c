@@ -411,6 +411,30 @@ static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
     return 0;
 }
 
+static int unpack_pal(void *user, unsigned i, unsigned x0, unsigned x1)
+{
+    struct mp_zimg_repack *r = user;
+
+    uint8_t *src = (void *)(r->mpi->planes[0] + r->mpi->stride[0] * (ptrdiff_t)i);
+    uint32_t *pal = (void *)r->mpi->planes[1];
+
+    uint8_t *dst[4] = {0};
+    for (int p = 0; p < r->num_planes; p++) {
+        dst[p] = r->tmp->planes[p] +
+                 r->tmp->stride[p] * (ptrdiff_t)(i & r->zmask[p]);
+    }
+
+    for (int x = x0; x < x1; x++) {
+        uint32_t c = pal[src[x]];
+        dst[0][x] = (c >>  8) & 0xFF; // G
+        dst[1][x] = (c >>  0) & 0xFF; // B
+        dst[2][x] = (c >> 16) & 0xFF; // R
+        dst[3][x] = (c >> 24) & 0xFF; // A
+    }
+
+    return 0;
+}
+
 static int repack_nv(void *user, unsigned i, unsigned x0, unsigned x1)
 {
     struct mp_zimg_repack *r = user;
@@ -574,6 +598,21 @@ static void setup_misc_packer(struct mp_zimg_repack *r)
         static int c_order[] = {3, 2, 1};
         for (int n = 0; n < 3; n++)
             r->components[n] = c_order[n] - 1;
+    } else if (r->zimgfmt == IMGFMT_PAL8 && !r->pack) {
+        struct mp_regular_imgfmt gbrap = {
+            .component_type = MP_COMPONENT_TYPE_UINT,
+            .forced_csp = MP_CSP_RGB,
+            .component_size = 1,
+            .num_planes = 4,
+            .planes = { {1, {2}}, {1, {3}}, {1, {1}}, {1, {4}}, },
+            .chroma_w = 1,
+            .chroma_h = 1,
+        };
+        int grap_fmt = mp_find_regular_imgfmt(&gbrap);
+        if (!grap_fmt)
+            return;
+        r->zimgfmt = grap_fmt;
+        r->repack = unpack_pal;
     }
 }
 
