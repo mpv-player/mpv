@@ -74,7 +74,7 @@ struct mp_zimg_repack {
     bool pack;                  // if false, this is for unpacking
     struct mp_image_params fmt; // original mp format (possibly packed format)
     int zimgfmt;                // zimg equivalent unpacked format
-    int zplanes;                // number of planes (zimgfmt)
+    int zplanes;                // number of planes involved
     unsigned zmask[4];          // zmask[mp_index] = zimg mask (using mp index!)
     int z_planes[4];            // z_planes[zimg_index] = mp_index (or -1)
     bool pass_through_y;        // luma plane optimization for e.g. nv12
@@ -464,12 +464,14 @@ static void wrap_buffer(struct mp_zimg_repack *r,
                            !(mpi->stride[n] % ZIMG_ALIGN);
     }
 
-    for (int n = 0; n < r->zplanes; n++) {
+    for (int n = 0; n < MP_ARRAY_SIZE(buf->plane); n++) {
         // Note: this is really the only place we have to care about plane
         // permutation (zimg_image_buffer may have a different plane order
         // than the shadow mpi like r->tmp). We never use the zimg indexes
         // in other places.
         int mplane = r->z_planes[n];
+        if (mplane < 0)
+            continue;
 
         r->use_buf[mplane] = !plane_aligned[mplane];
         if (!(r->pass_through_y && mplane == 0))
@@ -582,13 +584,15 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
     if (!mp_get_regular_imgfmt(&desc, r->zimgfmt))
         return;
 
-    if (desc.num_planes != 1 || desc.planes[0].num_components < 3)
+    if (desc.num_planes != 1 || desc.planes[0].num_components < 2)
         return;
     struct mp_regular_imgfmt_plane *p = &desc.planes[0];
 
     int num_real_components = 0;
+    bool has_alpha = false;
     for (int n = 0; n < p->num_components; n++) {
         if (p->components[n]) {
+            has_alpha |= p->components[n] == 4;
             num_real_components += 1;
         } else {
             // padding must be in MSB or LSB
@@ -609,6 +613,8 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         desc2.planes[n].num_components = 1;
         desc2.planes[n].components[0] = n + 1;
     }
+    if (has_alpha)
+        desc2.planes[desc2.num_planes - 1].components[0] = 4;
     int planar_fmt = mp_find_regular_imgfmt(&desc2);
     if (!planar_fmt)
         return;
@@ -634,8 +640,12 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         r->repack = packed_repack;
         r->packed_repack_scanline = repack_cb;
         r->zimgfmt = planar_fmt;
-        for (int n = 0; n < num_real_components; n++)
-            r->components[n] = p->components[first_comp + n] - 1;
+        for (int n = 0; n < num_real_components; n++) {
+            // Determine permutation that maps component order between the two
+            // formats, with has_alpha special case (see above).
+            int c = p->components[first_comp + n];
+            r->components[n] = c == 4 ? num_real_components - 1 : c - 1;
+        }
         return;
     }
 }
@@ -666,6 +676,9 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     if (desc.num_planes > 4 || !MP_IS_POWER_OF_2(desc.chroma_w) ||
         !MP_IS_POWER_OF_2(desc.chroma_h))
         return false;
+
+    for (int n = 0; n < 4; n++)
+        r->z_planes[n] = -1;
 
     // Accept only true planar formats.
     for (int n = 0; n < desc.num_planes; n++) {
@@ -705,7 +718,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     zfmt->subsample_h = mp_log2(desc.chroma_h);
 
     zfmt->color_family = ZIMG_COLOR_YUV;
-    if (desc.num_planes == 1) {
+    if (desc.num_planes <= 2) {
         zfmt->color_family = ZIMG_COLOR_GREY;
     } else if (fmt.color.space == MP_CSP_RGB || fmt.color.space == MP_CSP_XYZ) {
         zfmt->color_family = ZIMG_COLOR_RGB;
