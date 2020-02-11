@@ -674,7 +674,7 @@ static int control(struct vo *vo, uint32_t request, void *arg)
 
 const struct vo_driver video_out_drm = {
     .name = "drm",
-    .description = "Direct Rendering Manager",
+    .description = "Direct Rendering Manager (software scaling)",
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

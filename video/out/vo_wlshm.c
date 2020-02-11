@@ -285,7 +285,7 @@ static const m_option_t options[] = {
 };
 
 const struct vo_driver video_out_wlshm = {
-    .description = "Wayland SHM video output",
+    .description = "Wayland SHM video output (software scaling)",
     .name = "wlshm",
     .preinit = preinit,
     .query_format = query_format,
