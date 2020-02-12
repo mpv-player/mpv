@@ -102,6 +102,8 @@ struct mp_zimg_repack {
 
     // Also temporary, per-call. use_buf[n] == plane n uses tmp (and not mpi).
     bool use_buf[4];
+
+    int real_w, real_h;         // aligned size
 };
 
 static void mp_zimg_update_from_cmdline(struct mp_zimg_context *ctx)
@@ -742,15 +744,20 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     r->num_planes = desc.num_planes;
 
-    // Note: formats with subsampled chroma may have odd width or height in mpv
-    // and FFmpeg. This is because the width/height is actually a cropping
+    // Note: formats with subsampled chroma may have odd width or height in
+    // mpv and FFmpeg. This is because the width/height is actually a cropping
     // rectangle. Reconstruct the image allocation size and set the cropping.
-    zfmt->width = MP_ALIGN_UP(fmt.w, desc.chroma_w);
-    zfmt->height = MP_ALIGN_UP(fmt.h, desc.chroma_h);
-    if (zfmt->width != fmt.w)
-        zfmt->active_region.width = fmt.w;
-    if (zfmt->height != fmt.h)
-        zfmt->active_region.height = fmt.h;
+    zfmt->width = r->real_w = MP_ALIGN_UP(fmt.w, desc.chroma_w);
+    zfmt->height = r->real_h = MP_ALIGN_UP(fmt.h, desc.chroma_h);
+    if (!r->pack && ctx) {
+        // Relies on ctx->zimg_dst being initialized first.
+        struct mp_zimg_repack *dst = ctx->zimg_dst;
+        if (r->real_w != fmt.w || dst->real_w != dst->fmt.w)
+            zfmt->active_region.width = dst->real_w * (uint64_t)fmt.w / dst->fmt.w;
+        if (r->real_h != fmt.h || dst->real_h != dst->fmt.h)
+            zfmt->active_region.height = dst->real_h * (uint64_t)fmt.h / dst->fmt.h;
+
+    }
 
     zfmt->subsample_w = mp_log2(desc.chroma_w);
     zfmt->subsample_h = mp_log2(desc.chroma_h);
@@ -861,8 +868,9 @@ bool mp_zimg_config(struct mp_zimg_context *ctx)
 
     zimg_image_format src_fmt, dst_fmt;
 
-    if (!setup_format(&src_fmt, ctx->zimg_src, ctx) ||
-        !setup_format(&dst_fmt, ctx->zimg_dst, ctx))
+    // Note: do zimg_dst first, because zimg_src uses fields from zimg_dst.
+    if (!setup_format(&dst_fmt, ctx->zimg_dst, ctx) ||
+        !setup_format(&src_fmt, ctx->zimg_src, ctx))
         goto fail;
 
     zimg_graph_builder_params params;
