@@ -70,7 +70,9 @@ struct vo_wayland_state {
     /* State */
     struct mp_rect geometry;
     struct mp_rect window_size;
-    float aspect_ratio;
+    int gcd;
+    int reduced_width;
+    int reduced_height;
     bool configured;
     bool frame_wait;
     bool hidden;

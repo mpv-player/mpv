@@ -995,10 +995,13 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     if (width > 0 && height > 0) {
         if (!is_fullscreen && !is_maximized) {
             if (wl->vo_opts->keepaspect && wl->vo_opts->keepaspect_window) {
-                if (width > height)
-                    width  = height * wl->aspect_ratio;
-                else
-                    height =  width / wl->aspect_ratio;
+                if (abs(wl->toplevel_width - old_toplevel_width) > abs(wl->toplevel_height - old_toplevel_height)) {
+                    double scale_factor = (double)width / wl->reduced_width;
+                    width = wl->reduced_width * scale_factor;
+                } else {
+                    double scale_factor = (double)height / wl->reduced_height;
+                    height = wl->reduced_height * scale_factor;
+                }
             }
             wl->window_size.x0 = 0;
             wl->window_size.y0 = 0;
@@ -1270,6 +1273,25 @@ static struct vo_wayland_output *find_output(struct vo_wayland_state *wl, int in
     return NULL;
 }
 
+static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b) {
+    // euclidean algorithm
+    int larger;
+    int smaller;
+    if (a > b) {
+        larger = a;
+        smaller = b;
+    } else {
+        larger = b;
+        smaller = a;
+    }
+    int remainder = larger - smaller * floor(larger/smaller);
+    if (remainder == 0) {
+        wl->gcd = smaller;
+    } else {
+        greatest_common_divisor(wl, smaller, remainder);
+    }
+}
+
 int vo_wayland_reconfig(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
@@ -1309,7 +1331,9 @@ int vo_wayland_reconfig(struct vo *vo)
         wl->window_size = wl->geometry;
     }
 
-    wl->aspect_ratio = vo->dwidth / (float)vo->dheight;
+    greatest_common_divisor(wl, vo->dwidth, vo->dheight);
+    wl->reduced_width = vo->dwidth / wl->gcd;
+    wl->reduced_height = vo->dheight / wl->gcd;
 
     if (wl->vo_opts->fullscreen) {
         /* If already fullscreen, fix resolution for the frame size change */
