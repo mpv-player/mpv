@@ -2227,7 +2227,7 @@ Property list
     present null is returned instead.
 
 ``sub-end``
-    Return the current subtitle start time (in seconds). If there's multiple
+    Return the current subtitle end time (in seconds). If there's multiple
     current subtitles, return the last end time. If no current subtitle is
     present, or if it's present but has unknown or incorrect duration, null
     is returned instead.
