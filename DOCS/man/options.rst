@@ -4026,9 +4026,10 @@ Software Scaler
 
 ``--sws-allow-zimg=<yes|no>``
     Allow using zimg (if the component using the internal swscale wrapper
-    explicitly allows so). In this case, zimg *may* be used, if the internal
-    zimg wrapper supports the input and output formats. It will silently
-    fall back to libswscale if one of these conditions does not apply.
+    explicitly allows so) (default: yes). In this case, zimg *may* be used, if
+    the internal zimg wrapper supports the input and output formats. It will
+    silently or noisily fall back to libswscale if one of these conditions does
+    not apply.
 
     If zimg is used, the other ``--sws-`` options are ignored, and the
     ``--zimg-`` options are used instead.
@@ -4041,9 +4042,7 @@ Software Scaler
 
     .. note::
 
-        The builtin ``sws-fast`` profile (which you are supposed to use when you
-        use a VO that uses software conversion on weak hardware) sets this
-        option. But do note that zimg *may* be slower than libswscale. Usually,
+        Do note that zimg *may* be slower than libswscale. Usually,
         it's faster on x86 platforms, but slower on ARM (due to lack of ARM
         specific optimizations). The mpv zimg wrapper uses unoptimized repacking
         for some formats, for which zimg cannot be blamed.

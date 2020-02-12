@@ -83,6 +83,7 @@ const struct m_sub_options sws_conf = {
     .size = sizeof(struct sws_opts),
     .defaults = &(const struct sws_opts){
         .scaler = SWS_LANCZOS,
+        .zimg = 1,
     },
 };
 
