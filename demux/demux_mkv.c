@@ -2466,12 +2466,15 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
     int64_t dts = dp->dts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : dp->dts * tb;
     bool copy_sidedata = true;
 
+    MP_STATS(demuxer, "start parse");
     while (dp->len) {
         uint8_t *data = NULL;
         int size = 0;
+        MP_STATS(demuxer, "start avparse");
         int len = av_parser_parse2(track->av_parser, track->av_parser_codec,
                                    &data, &size, dp->buffer, dp->len,
                                    pts, dts, 0);
+        MP_STATS(demuxer, "end avparse");
         if (len < 0 || len > dp->len)
             break;
         dp->buffer += len;
@@ -2495,6 +2498,7 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
         }
         pts = dts = AV_NOPTS_VALUE;
     }
+    MP_STATS(demuxer, "end parse");
 
     if (dp->len) {
         add_packet(demuxer, stream, dp);
@@ -2639,6 +2643,8 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     }
 
     if (use_this_block) {
+        MP_STATS(demuxer, "start block");
+
         uint64_t filepos = block_info->filepos;
 
         for (int i = 0; i < block_info->num_laces; i++) {
@@ -2698,6 +2704,8 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         } else if (stream->type == STREAM_AUDIO) {
             mkv_d->a_skip_to_keyframe = 0;
         }
+
+        MP_STATS(demuxer, "end block");
 
         return 1;
     }
@@ -2778,6 +2786,8 @@ static int read_next_block_into_queue(demuxer_t *demuxer)
     stream_t *s = demuxer->stream;
     struct block_info block = {0};
 
+    MP_STATS(s, "start rblock");
+
     while (1) {
         while (stream_tell(s) < mkv_d->cluster_end) {
             int64_t start_filepos = stream_tell(s);
@@ -2834,13 +2844,18 @@ static int read_next_block_into_queue(demuxer_t *demuxer)
             uint32_t id = ebml_read_id(s);
             if (id == MATROSKA_ID_CLUSTER)
                 break;
-            if (s->eof)
+            if (s->eof) {
+                MP_STATS(s, "end rblock");
                 return -1;
-            if (demux_cancel_test(demuxer))
+            }
+            if (demux_cancel_test(demuxer)) {
+                MP_STATS(s, "end rblock");
                 return -1;
+            }
             if (id == EBML_ID_EBML && stream_tell(s) >= mkv_d->segment_end) {
                 // Appended segment - don't use its clusters, consider this EOF.
                 stream_seek(s, stream_tell(s) - 4);
+                MP_STATS(s, "end rblock");
                 return -1;
             }
             // For the sake of robustness, consider even unknown level 1
@@ -2861,6 +2876,7 @@ static int read_next_block_into_queue(demuxer_t *demuxer)
     assert(0); // unreachable
 
 add_block:
+    MP_STATS(s, "end rblock");
     index_block(demuxer, &block);
     MP_TARRAY_APPEND(mkv_d, mkv_d->blocks, mkv_d->num_blocks, block);
     return 1;

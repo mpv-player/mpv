@@ -98,7 +98,9 @@ static int fill_buffer(stream_t *s, void *buffer, int max_len)
 #endif
 
     for (int retries = 0; retries < MAX_RETRIES; retries++) {
+        MP_STATS(s, "start read");
         int r = read(p->fd, buffer, max_len);
+        MP_STATS(s, "end read");
         if (r > 0)
             return r;
 
