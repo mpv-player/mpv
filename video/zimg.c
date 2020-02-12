@@ -752,10 +752,8 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     if (!r->pack && ctx) {
         // Relies on ctx->zimg_dst being initialized first.
         struct mp_zimg_repack *dst = ctx->zimg_dst;
-        if (r->real_w != fmt.w || dst->real_w != dst->fmt.w)
-            zfmt->active_region.width = dst->real_w * (uint64_t)fmt.w / dst->fmt.w;
-        if (r->real_h != fmt.h || dst->real_h != dst->fmt.h)
-            zfmt->active_region.height = dst->real_h * (uint64_t)fmt.h / dst->fmt.h;
+        zfmt->active_region.width = dst->real_w * (double)fmt.w / dst->fmt.w;
+        zfmt->active_region.height = dst->real_h * (double)fmt.h / dst->fmt.h;
 
     }
 
