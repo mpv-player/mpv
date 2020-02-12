@@ -255,16 +255,15 @@ static int repack_align(void *user, unsigned i, unsigned x0, unsigned x1)
 // Naming convention:
 //  pa_/un_ prefix to identify conversion direction.
 //  Left (LSB, lowest byte address) -> Right (MSB, highest byte address).
-//      (This is unusual; MSG to LSB is more commonly used to describe formats,
+//      (This is unusual; MSB to LSB is more commonly used to describe formats,
 //       but our convention makes more sense for byte access in little endian.)
 //  "c" identifies a color component.
 //  "z" identifies known zero padding.
-//  "o" identifies opaque alpha (unused/unsupported yet).
 //  "x" identifies uninitialized padding.
 //  A component is followed by its size in bits.
 //  Size can be omitted for multiple uniform components (c8c8c8 == ccc8).
 // Unpackers will often use "x" for padding, because they ignore it, while
-// packets will use "z" because they write zero.
+// packers will use "z" because they write zero.
 
 #define PA_WORD_4(name, packed_t, plane_t, sh_c0, sh_c1, sh_c2, sh_c3)      \
     static void name(void *dst, void *src[], int x0, int x1) {              \
