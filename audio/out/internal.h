@@ -138,6 +138,8 @@ struct ao_driver {
     // Do not set this to true if underruns may be missed in some way. If the
     // AO can't guarantee to play silence after underruns, it may be better not
     // to set this.
+    // If not set, the generic buffer code will report an underrun if the buffer
+    // becomes empty.
     bool reports_underruns;
     // Init the device using ao->format/ao->channels/ao->samplerate. If the
     // device doesn't accept these parameters, you can attempt to negotiate

@@ -215,6 +215,7 @@ const struct ao_driver audio_out_pcm = {
     .uninit    = uninit,
     .get_space = get_space,
     .play      = play,
+    .reports_underruns = true, // not a thing
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) { .waveheader = 1 },
     .options = (const struct m_option[]) {

@@ -347,6 +347,8 @@ static void ao_play_data(struct ao *ao)
                 !(flags & AOPLAY_FINAL_CHUNK);
     if (more)
         ao->wakeup_cb(ao->wakeup_ctx); // request more data
+    if (!samples && space && !ao->driver->reports_underruns && p->still_playing)
+        ao_underrun_event(ao);
     MP_TRACE(ao, "in=%d flags=%d space=%d r=%d wa/pl=%d/%d needed=%d more=%d\n",
              max, flags, space, r, p->wait_on_ao, p->still_playing, needed, more);
 }

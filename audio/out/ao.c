@@ -535,11 +535,6 @@ const char *ao_get_description(struct ao *ao)
     return ao->driver->description;
 }
 
-bool ao_get_reports_underruns(struct ao *ao)
-{
-    return ao->driver->reports_underruns;
-}
-
 bool ao_untimed(struct ao *ao)
 {
     return ao->untimed;

@@ -205,7 +205,6 @@ const struct ao_driver audio_out_sdl = {
     .uninit    = uninit,
     .reset     = reset,
     .resume    = resume,
-    .reports_underruns = true,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .buflen = 0, // use SDL default

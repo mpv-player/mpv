@@ -691,7 +691,7 @@ static void handle_update_cache(struct MPContext *mpctx)
     bool force_update = false;
     struct MPOpts *opts = mpctx->opts;
 
-    if (!mpctx->demuxer) {
+    if (!mpctx->demuxer || mpctx->encode_lavc_ctx) {
         clear_underruns(mpctx);
         return;
     }
@@ -726,11 +726,8 @@ static void handle_update_cache(struct MPContext *mpctx)
         // underrun detection.)
         bool output_underrun = false;
 
-        if (mpctx->ao_chain) {
-            output_underrun |=
-                !(mpctx->ao && ao_get_reports_underruns(mpctx->ao)) ||
-                mpctx->ao_chain->underrun;
-        }
+        if (mpctx->ao_chain)
+            output_underrun |= mpctx->ao_chain->underrun;
         if (mpctx->vo_chain)
             output_underrun |= mpctx->vo_chain->underrun;
 
