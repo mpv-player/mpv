@@ -1272,8 +1272,6 @@ static struct vo_wayland_output *find_output(struct vo_wayland_state *wl, int in
 
 int vo_wayland_reconfig(struct vo *vo)
 {
-    struct wl_output *wl_out = NULL;
-    struct mp_rect screenrc = { 0 };
     struct vo_wayland_state *wl = vo->wl;
 
     MP_VERBOSE(wl, "Reconfiguring!\n");
@@ -1284,18 +1282,22 @@ int vo_wayland_reconfig(struct vo *vo)
             idx = wl->vo_opts->fsscreen_id;
         struct vo_wayland_output *out = find_output(wl, idx);
         if (!out) {
+            MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", idx);
+            out = find_output(wl, 0);
+        }
+        if (!out) {
             MP_ERR(wl, "Screen index %i not found/unavailable!\n", idx);
+            return false;
         } else {
-            wl_out = out->output;
             wl->current_output = out;
             if (!wl->vo_opts->hidpi_window_scale)
                 out->scale = 1;
             wl->scaling = out->scale;
-            screenrc = wl->current_output->geometry;
         }
     }
 
     struct vo_win_geometry geo;
+    struct mp_rect screenrc = wl->current_output->geometry;
     vo_calc_window_geometry(vo, &screenrc, &geo);
     vo_apply_window_geometry(vo, &geo);
 
@@ -1320,7 +1322,7 @@ int vo_wayland_reconfig(struct vo *vo)
         if (wl->vo_opts->fsscreen_id < 0) {
             xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
         } else {
-            xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl_out);
+            xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl->current_output->output);
         }
     }
 
