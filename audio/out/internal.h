@@ -211,7 +211,7 @@ struct pollfd;
 int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
                  pthread_mutex_t *lock);
 void ao_wakeup_poll(struct ao *ao);
-void ao_underrun_event(struct ao *ao);
+bool ao_underrun_event(struct ao *ao);
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);

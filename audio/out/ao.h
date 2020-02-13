@@ -110,7 +110,7 @@ void ao_resume(struct ao *ao);
 void ao_drain(struct ao *ao);
 bool ao_eof_reached(struct ao *ao);
 int ao_query_and_reset_events(struct ao *ao, int events);
-void ao_add_events(struct ao *ao, int events);
+int ao_add_events(struct ao *ao, int events);
 void ao_unblock(struct ao *ao);
 void ao_request_reload(struct ao *ao);
 void ao_hotplug_event(struct ao *ao);
