@@ -83,22 +83,9 @@ static void set_state(struct ao *ao, int new_state)
     }
 }
 
-static void report_underruns(struct ao *ao)
-{
-    struct ao_pull_state *p = ao->api_priv;
-
-    int underflow = atomic_fetch_and(&p->underflow, 0);
-    if (underflow) {
-        if (ao_underrun_event(ao))
-            MP_VERBOSE(ao, "Audio underrun by %d samples.\n", underflow);
-    }
-}
-
 static int get_space(struct ao *ao)
 {
     struct ao_pull_state *p = ao->api_priv;
-
-    report_underruns(ao);
 
     // Since the reader will read the last plane last, its free space is the
     // minimum free space across all planes.
@@ -133,7 +120,9 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     bool draining = write_samples == samples && (flags & AOPLAY_FINAL_CHUNK);
     atomic_store(&p->draining, draining);
 
-    report_underruns(ao);
+    int underflow = atomic_fetch_and(&p->underflow, 0);
+    if (underflow)
+        MP_DBG(ao, "Audio underrun by %d samples.\n", underflow);
 
     return write_samples;
 }
@@ -165,8 +154,10 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
     int buffered_bytes = mp_ring_buffered(p->buffers[0]);
     bytes = MPMIN(buffered_bytes, full_bytes);
 
-    if (full_bytes > bytes && !atomic_load(&p->draining))
+    if (full_bytes > bytes && !atomic_load(&p->draining)) {
         atomic_fetch_add(&p->underflow, (full_bytes - bytes) / ao->sstride);
+        ao_underrun_event(ao);
+    }
 
     if (bytes > 0)
         atomic_store(&p->end_time_us, out_time_us);

@@ -469,10 +469,7 @@ void ao_hotplug_event(struct ao *ao)
 // Returns whether this call actually set a new underrun flag.
 bool ao_underrun_event(struct ao *ao)
 {
-    bool new_underrun = ao_add_events(ao, AO_EVENT_UNDERRUN);
-    if (new_underrun)
-        MP_WARN(ao, "Device underrun detected.\n");
-    return new_underrun;
+    return ao_add_events(ao, AO_EVENT_UNDERRUN);
 }
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,

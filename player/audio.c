@@ -859,8 +859,11 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
 
     int playsize = ao_get_space(mpctx->ao);
 
-    if (ao_query_and_reset_events(mpctx->ao, AO_EVENT_UNDERRUN))
+    if (ao_query_and_reset_events(mpctx->ao, AO_EVENT_UNDERRUN)) {
+        if (!ao_c->underrun)
+            MP_WARN(mpctx, "Audio device underrun detected.\n");
         ao_c->underrun = true;
+    }
 
     // Stop feeding data if an underrun happened. Something else needs to
     // "unblock" audio after underrun. handle_update_cache() does this and can
