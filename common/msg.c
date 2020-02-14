@@ -282,7 +282,7 @@ static void print_terminal_line(struct mp_log *log, int lev,
         set_msg_color(stream, lev);
 
     if (root->show_time)
-        fprintf(stream, "[%" PRId64 "] ", mp_time_us());
+        fprintf(stream, "[%" PRId64 "] ", mp_time_us() - MP_START_TIME);
 
     const char *prefix = log->prefix;
     if ((lev >= MSGL_V) || root->verbose || root->module)
