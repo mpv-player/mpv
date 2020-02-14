@@ -64,6 +64,7 @@ struct priv {
     bool use_poll;
     bool regular_file;
     bool appending;
+    int64_t cached_size; // -2: invalid, -1: unknown
     int64_t orig_size;
     struct mp_cancel *cancel;
 };
@@ -75,14 +76,19 @@ struct priv {
 static int64_t get_size(stream_t *s)
 {
     struct priv *p = s->priv;
-    off_t size = lseek(p->fd, 0, SEEK_END);
-    lseek(p->fd, s->pos, SEEK_SET);
-    return size == (off_t)-1 ? -1 : size;
+    if (p->cached_size == -2) {
+        off_t size = lseek(p->fd, 0, SEEK_END);
+        lseek(p->fd, s->pos, SEEK_SET);
+        p->cached_size = size < 0 ? -1 : size;
+    }
+    return p->cached_size;
 }
 
 static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     struct priv *p = s->priv;
+
+    p->cached_size = -2; // always invalidate cached size
 
 #ifndef __MINGW32__
     if (p->use_poll) {
@@ -245,7 +251,8 @@ static int open_f(stream_t *stream)
 {
     struct priv *p = talloc_ptrtype(stream, p);
     *p = (struct priv) {
-        .fd = -1
+        .fd = -1,
+        .cached_size = -2,
     };
     stream->priv = p;
     stream->is_local_file = true;
