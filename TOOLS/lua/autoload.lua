@@ -2,20 +2,20 @@
 -- the currently played file. It does so by scanning the directory a file is
 -- located in when starting playback. It sorts the directory entries
 -- alphabetically, and adds entries before and after the current file to
--- the internal playlist. (It stops if the it would add an already existing
+-- the internal playlist. (It stops if it would add an already existing
 -- playlist entry at the same position - this makes it "stable".)
 -- Add at most 5000 * 2 files when starting a file (before + after).
 
 --[[
-To configure this script use file autoload.conf in director script-opts (the "script-opts"
+To configure this script use file autoload.conf in directory script-opts (the "script-opts"
 directory must be in the mpv configuration directory, typically ~/.config/mpv/).
 
 Example configuration would be:
 
-disabled=false
-images=false
-videos=true
-audio=true
+disabled=no
+images=no
+videos=yes
+audio=yes
 
 --]]
 
