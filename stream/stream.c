@@ -720,8 +720,13 @@ bool stream_seek(stream_t *s, int64_t pos)
 // it's a forward-seek.
 bool stream_seek_skip(stream_t *s, int64_t pos)
 {
-    return !s->seekable && pos > stream_tell(s)
-        ? stream_skip_read(s, pos - stream_tell(s))
+    uint64_t cur_pos = stream_tell(s);
+
+    if (cur_pos == pos)
+        return true;
+
+    return !s->seekable && pos > cur_pos
+        ? stream_skip_read(s, pos - cur_pos)
         : stream_seek(s, pos);
 }
 
