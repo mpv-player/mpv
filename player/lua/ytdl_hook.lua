@@ -29,6 +29,11 @@ local safe_protos = Set {
     "data"
 }
 
+-- Codec name as reported by youtube-dl mapped to mpv internal codec names.
+local map_codec_to_mpv = {
+    ["vtt"] = "webvtt",
+}
+
 local function exec(args)
     local ret = mp.command_native({name = "subprocess",
                                    args = args,
@@ -386,8 +391,13 @@ local function add_single_video(json)
             end
 
             if not (sub == nil) then
-                mp.commandv("sub-add", sub,
-                    "auto", sub_info.ext, lang)
+                local edl = "edl://!no_clip;!delay_open,media_type=sub"
+                local codec = map_codec_to_mpv[sub_info.ext]
+                if codec then
+                    edl = edl .. ",codec=" .. codec
+                end
+                edl = edl .. ";" .. edl_escape(sub)
+                mp.commandv("sub-add", edl, "auto", sub_info.ext, lang)
             else
                 msg.verbose("No subtitle data/url for ["..lang.."]")
             end
