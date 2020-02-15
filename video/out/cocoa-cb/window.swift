@@ -337,7 +337,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func aspectFit(rect r: NSRect, in rTarget: NSRect) -> NSRect {
-        var s = rTarget.width / r.width;
+        var s = rTarget.width / r.width
         if r.height*s > rTarget.height {
             s = rTarget.height / r.height
         }

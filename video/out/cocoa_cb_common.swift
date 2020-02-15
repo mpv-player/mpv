@@ -355,7 +355,7 @@ class CocoaCB: NSObject {
             let displayID = ccb.window?.screen?.displayID ?? display
 
             if displayID == display {
-                ccb.libmpv.sendVerbose("Detected display mode change, updating screen refresh rate");
+                ccb.libmpv.sendVerbose("Detected display mode change, updating screen refresh rate")
                 ccb.flagEvents(VO_EVENT_WIN_STATE)
             }
         }
@@ -490,7 +490,7 @@ class CocoaCB: NSObject {
                              ccb.getTargetScreen(forFullscreen: false)?.backingScaleFactor ??
                              NSScreen.main?.backingScaleFactor ?? 1.0
                 scaleFactor.pointee = Double(factor)
-                return VO_TRUE;
+                return VO_TRUE
             }
             return VO_FALSE
         case VOCTRL_RESTORE_SCREENSAVER:
