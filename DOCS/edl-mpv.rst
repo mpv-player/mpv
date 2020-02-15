@@ -189,7 +189,8 @@ Currently, time values are floating point values in seconds.
 
 As an extension, you can set the ``timestamps=chapters`` option. If this option
 is set, timestamps have to be integers, and refer to chapter numbers, starting
-with 0.
+with 0. The default value for this parameter is ``seconds``, which means the
+time is as described in the previous paragraph.
 
 Example::
 
