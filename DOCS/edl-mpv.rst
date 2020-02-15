@@ -146,7 +146,8 @@ The current implementation will
 Another header part of this mechanism is ``no_clip``. This header is similar
 to ``mp4_dash``, but does not include on-demand opening/closing of segments,
 and does not support init segments. It also exists solely to support internal
-ytdl requirements.
+ytdl requirements. Using ``no_clip`` with segments is not recommended and
+probably breaks. ``mp4_dash`` already implicitly does a variant of ``no_clip``.
 
 The ``mp4_dash`` and ``no_clip`` headers are not part of the core EDL format.
 They may be changed or removed at any time, depending on mpv's internal

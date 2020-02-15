@@ -429,6 +429,9 @@ static struct timeline_par *build_timeline(struct timeline *root,
         tl->num_parts++;
     }
 
+    if (tl->no_clip && tl->num_parts > 1)
+        MP_WARN(root, "Multiple parts with no_clip. Undefined behavior ahead.\n");
+
     if (!tl->track_layout) {
         // Use a heuristic to select the "broadest" part as layout.
         for (int n = 0; n < parts->num_parts; n++) {
