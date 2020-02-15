@@ -78,6 +78,7 @@ struct virtual_source {
 
 struct priv {
     struct timeline *tl;
+    bool owns_tl;
 
     double duration;
 
@@ -614,6 +615,7 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
 
     reselect_streams(demuxer);
 
+    p->owns_tl = true;
     return 0;
 }
 
@@ -629,9 +631,11 @@ static void d_close(struct demuxer *demuxer)
         close_lazy_segments(demuxer, src);
     }
 
-    struct demuxer *master = p->tl->demuxer;
-    timeline_destroy(p->tl);
-    demux_free(master);
+    if (p->owns_tl) {
+        struct demuxer *master = p->tl->demuxer;
+        timeline_destroy(p->tl);
+        demux_free(master);
+    }
 }
 
 static void d_switched_tracks(struct demuxer *demuxer)
