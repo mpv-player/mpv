@@ -107,7 +107,6 @@ static void terminate_cocoa_application(void)
 @synthesize menuBar = _menu_bar;
 @synthesize openCount = _open_count;
 @synthesize cocoaCB = _cocoa_cb;
-@synthesize remoteCommandCenter = _remoteCommandCenter;
 
 - (void)sendEvent:(NSEvent *)event
 {
@@ -175,12 +174,6 @@ static const char macosx_icon[] =
     if ([self respondsToSelector:@selector(touchBar)])
         [(TouchBar *)self.touchBar processEvent:event];
 #endif
-#if HAVE_MACOS_MEDIA_PLAYER
-    // 10.12.2 runtime availability check
-    if ([self respondsToSelector:@selector(touchBar)]) {
-        [_remoteCommandCenter processEvent:event];
-    }
-#endif
     if (_cocoa_cb) {
         [_cocoa_cb processEvent:event];
     }
@@ -208,11 +201,6 @@ static const char macosx_icon[] =
     [_eventsResponder queueCommand:cmd];
 }
 
-- (void)handleMPKey:(int)key withMask:(int)mask
-{
-    [_eventsResponder handleMPKey:key withMask:mask];
-}
-
 - (void)stopMPV:(char *)cmd
 {
     if (![_eventsResponder queueCommand:cmd])
@@ -226,11 +214,6 @@ static const char macosx_icon[] =
             andSelector:@selector(handleQuitEvent:withReplyEvent:)
           forEventClass:kCoreEventClass
              andEventID:kAEQuitApplication];
-}
-
-- (void)applicationWillBecomeActive:(NSNotification *)notification
-{
-    [_remoteCommandCenter makeCurrent];
 }
 
 - (void)handleQuitEvent:(NSAppleEventDescriptor *)event
@@ -306,13 +289,6 @@ static void init_cocoa_application(bool regular)
     NSApp = mpv_shared_app();
     [NSApp setDelegate:NSApp];
     [NSApp setMenuBar:[[MenuBar alloc] init]];
-
-#if HAVE_MACOS_MEDIA_PLAYER
-    // 10.12.2 runtime availability check
-    if ([NSApp respondsToSelector:@selector(touchBar)]) {
-        [NSApp setRemoteCommandCenter:[[RemoteCommandCenter alloc] initWithApp:NSApp]];
-    }
-#endif
 
     // Will be set to Regular from cocoa_common during UI creation so that we
     // don't create an icon when playing audio only files.

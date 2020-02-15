@@ -20,6 +20,7 @@
 #import <Cocoa/Cocoa.h>
 #include "osdep/macosx_events.h"
 
+@class RemoteCommandCenter;
 struct input_ctx;
 
 @interface EventsResponder : NSObject
@@ -38,5 +39,7 @@ struct input_ctx;
 - (bool)processKeyEvent:(NSEvent *)event;
 
 - (BOOL)handleMPKey:(int)key withMask:(int)mask;
+
+@property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
 
 @end

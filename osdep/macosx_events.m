@@ -161,6 +161,8 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 
 @implementation EventsResponder
 
+@synthesize remoteCommandCenter = _remoteCommandCenter;
+
 + (EventsResponder *)sharedInstance
 {
     static EventsResponder *responder = nil;
@@ -272,14 +274,18 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         [NSApp processEvent:event];
     }
 
+    if (_remoteCommandCenter) {
+        [_remoteCommandCenter processEvent:event];
+    }
+
     switch (event->event_id) {
     case MPV_EVENT_SHUTDOWN: {
-        #if HAVE_MACOS_COCOA_CB
+#if HAVE_MACOS_COCOA_CB
         if ([(Application *)NSApp cocoaCB].isShuttingDown) {
             _ctx = nil;
             return;
         }
-        #endif
+#endif
         mpv_destroy(_ctx);
         _ctx = nil;
         break;
@@ -289,16 +295,19 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 
 - (void)startMediaKeys
 {
-    if ([(Application *)NSApp remoteCommandCenter]) {
-        [[(Application *)NSApp remoteCommandCenter] start];
+#if HAVE_MACOS_MEDIA_PLAYER
+    // 10.12.2 runtime availability check
+    if (_remoteCommandCenter == nil && [NSApp respondsToSelector:@selector(touchBar)]) {
+        _remoteCommandCenter = [[RemoteCommandCenter alloc] init];
     }
+#endif
+
+    [_remoteCommandCenter start];
 }
 
 - (void)stopMediaKeys
 {
-    if ([(Application *)NSApp remoteCommandCenter]) {
-        [[(Application *)NSApp remoteCommandCenter] stop];
-    }
+    [_remoteCommandCenter stop];
 }
 
 - (int)mapKeyModifiers:(int)cocoaModifiers
