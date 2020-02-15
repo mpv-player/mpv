@@ -953,6 +953,7 @@ static void add_missing_streams(struct demux_internal *in,
 // Allocate a new sh_stream of the given type. It either has to be released
 // with talloc_free(), or added to a demuxer with demux_add_sh_stream(). You
 // cannot add or read packets from the stream before it has been added.
+// type may be changed later, but only before demux_add_sh_stream().
 struct sh_stream *demux_alloc_sh_stream(enum stream_type type)
 {
     struct sh_stream *sh = talloc_ptrtype(NULL, sh);

@@ -195,6 +195,78 @@ example as above::
 Note that ``!new_stream`` must be the first header. Whether the parser accepts
 (i.e. ignores) or rejects other headers before that is implementation specific.
 
+Track metadata
+==============
+
+The special ``track_meta`` header can set some specific metadata fields of the
+current ``!new_stream`` partition. The tags are applied to all tracks within
+the partition. It is not possible to set the metadata for individual tracks (the
+feature was needed only for single-track media).
+
+It provides following parameters change track metadata:
+
+``lang``
+    Set the language tag.
+
+``title``
+    Set the title tag.
+
+``byterate``
+    Number of bytes per second this stream uses. (Purely informational.)
+
+Example::
+
+    # mpv EDL v0
+    !track_meta,lang=bla,title=blabla
+    file.mkv
+    !new_stream
+    !track_meta,title=ducks
+    sub.srt
+
+If ``file.mkv`` has an audio and a video stream, both will use ``blabla`` as
+title. The subtitle stream will use ``ducks`` as title.
+
+The ``track_meta`` header is not part of the core EDL format. It may be changed
+or removed at any time, depending on mpv's internal requirements.
+
+Delayed media opening
+=====================
+
+The special ``delay_open`` header can be used to open the media URL of the
+stream only when the track is selected for the first time. This is supposed to
+be an optimization to speed up opening of a remote stream if there are many
+tracks for whatever reasons.
+
+This has various tricky restrictions, and also will defer failure to open a
+stream to "later". By design, it's supposed to be used for single-track streams.
+
+Using multiple segments requires you to specify all offsets and durations (also
+it was never tested whether it works at all). Interaction with ``mp4_dash`` may
+be strange.
+
+This has the following parameters:
+
+``media_type``
+    Required. Must be set to ``video``, ``audio``, or ``sub``. (Other tracks in
+    the opened URL are ignored.)
+
+``codec``
+    The mpv codec name that is expected. Although mpv tries to initialize a
+    decoder with it currently (and will fail track selection if it does not
+    initialize successfully), it is not used for decoding - decoding still uses
+    the information retrieved from opening the actual media information, and may
+    be a different codec (you should try to avoid this, of course). Defaults to
+    ``null``.
+
+    Above also applies for similar fields such as ``w``.  These fields are
+    mostly to help with user track pre-selection.
+
+``w``, ``h``
+    For video codecs: expected video size. See ``codec`` for details.
+
+The ``delay_open`` header is not part of the core EDL format. It may be changed
+or removed at any time, depending on mpv's internal requirements.
+
 Timestamp format
 ================
 

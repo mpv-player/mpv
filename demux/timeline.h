@@ -1,6 +1,8 @@
 #ifndef MP_TIMELINE_H_
 #define MP_TIMELINE_H_
 
+#include "common/common.h"
+
 // Single segment in a timeline.
 struct timeline_part {
     // (end time must match with start time of the next part)
@@ -20,7 +22,11 @@ struct timeline_part {
 // "par" is short for parallel stream.
 struct timeline_par {
     bstr init_fragment;
-    bool dash, no_clip;
+    bool dash, no_clip, delay_open;
+
+    // If non-NULL, _some_ fields are used. If delay_open==true, this must be
+    // set, and the codec info is used.
+    struct sh_stream *sh_meta;
 
     // Segments to play, ordered by time.
     struct timeline_part *parts;

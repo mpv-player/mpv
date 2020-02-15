@@ -56,7 +56,7 @@ struct virtual_stream {
 struct virtual_source {
     struct timeline_par *tl;
 
-    bool dash, no_clip;
+    bool dash, no_clip, delay_open;
 
     struct segment **segments;
     int num_segments;
@@ -204,11 +204,15 @@ static void reopen_lazy_segments(struct demuxer *demuxer,
     if (src->current->d)
         return;
 
-    close_lazy_segments(demuxer, src);
+    // Note: in delay_open mode, we must _not_ close segments during demuxing,
+    // because demuxed packets have demux_packet.codec set to objects owned
+    // by the segments. Closing them would create dangling pointers.
+    if (!src->delay_open)
+        close_lazy_segments(demuxer, src);
 
     struct demuxer_params params = {
         .init_fragment = src->tl->init_fragment,
-        .skip_lavf_probing = true,
+        .skip_lavf_probing = src->tl->dash,
         .stream_flags = demuxer->stream_origin,
     };
     src->current->d = demux_open_url(src->current->url, &params,
@@ -309,10 +313,12 @@ static bool do_read_next_packet(struct demuxer *demuxer,
     if (pkt->stream < 0 || pkt->stream >= seg->num_stream_map)
         goto drop;
 
-    if (!src->no_clip) {
+    if (!src->no_clip || src->delay_open) {
         pkt->segmented = true;
         if (!pkt->codec)
             pkt->codec = demux_get_stream(seg->d, pkt->stream)->codec;
+    }
+    if (!src->no_clip) {
         if (pkt->start == MP_NOPTS_VALUE || pkt->start < seg->start)
             pkt->start = seg->start;
         if (pkt->end == MP_NOPTS_VALUE || pkt->end > seg->end)
@@ -495,6 +501,27 @@ static void print_timeline(struct demuxer *demuxer)
     MP_VERBOSE(demuxer, "Total duration: %f\n", p->duration);
 }
 
+// Copy various (not all) metadata fields from src to dst, but try not to
+// overwrite fields in dst that are unset in src.
+// May keep data from src by reference.
+// Imperfect and arbitrary, only suited for EDL stuff.
+static void apply_meta(struct sh_stream *dst, struct sh_stream *src)
+{
+    if (src->demuxer_id >= 0)
+        dst->demuxer_id = src->demuxer_id;
+    if (src->title)
+        dst->title = src->title;
+    if (src->lang)
+        dst->lang = src->lang;
+    dst->default_track = src->default_track;
+    dst->forced_track = src->forced_track;
+    if (src->hls_bitrate)
+        dst->hls_bitrate = src->hls_bitrate;
+    dst->missing_timestamps = src->missing_timestamps;
+    if (src->attached_picture)
+        dst->attached_picture = src->attached_picture;
+}
+
 static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
 {
     struct priv *p = demuxer->priv;
@@ -503,11 +530,12 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
     *src = (struct virtual_source){
         .tl = tl,
         .dash = tl->dash,
+        .delay_open = tl->delay_open,
         .no_clip = tl->no_clip || tl->dash,
         .dts = MP_NOPTS_VALUE,
     };
 
-    if (!tl->num_parts || !tl->track_layout)
+    if (!tl->num_parts)
         return false;
 
     MP_TARRAY_APPEND(p, p->sources, p->num_sources, src);
@@ -516,19 +544,32 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
 
     struct demuxer *meta = tl->track_layout;
 
-    int num_streams = demux_get_num_stream(meta);
+    // delay_open streams normally have meta==NULL, and 1 virtual stream
+    int num_streams = 0;
+    if (tl->delay_open) {
+        num_streams = 1;
+    } else if (meta) {
+        num_streams = demux_get_num_stream(meta);
+    }
     for (int n = 0; n < num_streams; n++) {
-        struct sh_stream *sh = demux_get_stream(meta, n);
-        struct sh_stream *new = demux_alloc_sh_stream(sh->type);
-        new->demuxer_id = sh->demuxer_id;
-        new->codec = sh->codec;
-        new->title = sh->title;
-        new->lang = sh->lang;
-        new->default_track = sh->default_track;
-        new->forced_track = sh->forced_track;
-        new->hls_bitrate = sh->hls_bitrate;
-        new->missing_timestamps = sh->missing_timestamps;
-        new->attached_picture = sh->attached_picture;
+        struct sh_stream *new = NULL;
+
+        if (tl->delay_open) {
+            assert(tl->sh_meta);
+            new = demux_alloc_sh_stream(tl->sh_meta->type);
+            new->codec = tl->sh_meta->codec;
+            demuxer->is_network = true;
+            demuxer->is_streaming = true;
+        } else {
+            struct sh_stream *sh = demux_get_stream(meta, n);
+            new = demux_alloc_sh_stream(sh->type);
+            apply_meta(new, sh);
+            new->codec = sh->codec;
+        }
+
+        if (tl->sh_meta)
+            apply_meta(new, tl->sh_meta);
+
         demux_add_sh_stream(demuxer, new);
         struct virtual_stream *vs = talloc_ptrtype(p, vs);
         *vs = (struct virtual_stream){
@@ -550,6 +591,9 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
             demuxer->is_streaming |= part->source->is_streaming;
         }
 
+        if (!part->source)
+            assert(tl->dash || tl->delay_open);
+
         struct segment *seg = talloc_ptrtype(src, seg);
         *seg = (struct segment){
             .d = part->source,
@@ -566,8 +610,10 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
         MP_TARRAY_APPEND(src, src->segments, src->num_segments, seg);
     }
 
-    demuxer->is_network |= tl->track_layout->is_network;
-    demuxer->is_streaming |= tl->track_layout->is_streaming;
+    if (tl->track_layout) {
+        demuxer->is_network |= tl->track_layout->is_network;
+        demuxer->is_streaming |= tl->track_layout->is_streaming;
+    }
     return true;
 }
 
@@ -582,14 +628,14 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->num_chapters = p->tl->num_chapters;
 
     struct demuxer *meta = p->tl->meta;
-    if (!meta)
-        return -1;
-    demuxer->metadata = meta->metadata;
-    demuxer->attachments = meta->attachments;
-    demuxer->num_attachments = meta->num_attachments;
-    demuxer->editions = meta->editions;
-    demuxer->num_editions = meta->num_editions;
-    demuxer->edition = meta->edition;
+    if (meta) {
+        demuxer->metadata = meta->metadata;
+        demuxer->attachments = meta->attachments;
+        demuxer->num_attachments = meta->num_attachments;
+        demuxer->editions = meta->editions;
+        demuxer->num_editions = meta->num_editions;
+        demuxer->edition = meta->edition;
+    }
 
     for (int n = 0; n < p->tl->num_pars; n++) {
         if (!add_tl(demuxer, p->tl->pars[n]))
@@ -609,9 +655,10 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->seekable = true;
     demuxer->partially_seekable = false;
 
-    demuxer->filetype = talloc_asprintf(p, "%s/%s",
-                        p->tl->format,
-                        meta->filetype ? meta->filetype : meta->desc->name);
+    const char *format_name = "unknown";
+    if (meta)
+        format_name = meta->filetype ? meta->filetype : meta->desc->name;
+    demuxer->filetype = talloc_asprintf(p, "%s/%s", p->tl->format, format_name);
 
     reselect_streams(demuxer);
 

@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <math.h>
 
 #include "mpv_talloc.h"
@@ -47,8 +48,9 @@ struct tl_part {
 
 struct tl_parts {
     bool disable_chapters;
-    bool dash, no_clip;
+    bool dash, no_clip, delay_open;
     char *init_fragment_url;
+    struct sh_stream *sh_meta;
     struct tl_part *parts;
     int num_parts;
     struct tl_parts *next;
@@ -102,6 +104,24 @@ static char *get_param0(struct parse_ctx *ctx, void *ta_ctx, const char *name)
     return bstrdup0(ta_ctx, get_param(ctx, name));
 }
 
+// Optional int parameter. Returns the parsed integer, or def if the parameter
+// is missing or on error (sets ctx.error on error).
+static int get_param_int(struct parse_ctx *ctx, const char *name, int def)
+{
+    bstr val = get_param(ctx, name);
+    if (val.start) {
+        bstr rest;
+        long long ival = bstrtoll(val, &rest, 0);
+        if (!val.len || rest.len || ival < INT_MIN || ival > INT_MAX) {
+            MP_ERR(ctx, "Invalid integer: '%.*s'\n", BSTR_P(val));
+            ctx->error = true;
+            return def;
+        }
+        return ival;
+    }
+    return def;
+}
+
 // Optional time parameter. Currently a number.
 // Returns true: parameter was present and valid, *t is set
 // Returns false: parameter was not present (or broken => ctx.error set)
@@ -125,6 +145,8 @@ static bool get_param_time(struct parse_ctx *ctx, const char *name, double *t)
 static struct tl_parts *add_part(struct tl_root *root)
 {
     struct tl_parts *tl = talloc_zero(root, struct tl_parts);
+    tl->sh_meta = demux_alloc_sh_stream(STREAM_TYPE_COUNT);
+    talloc_steal(tl, tl->sh_meta);
     MP_TARRAY_APPEND(root, root->pars, root->num_pars, tl);
     return tl;
 }
@@ -200,6 +222,30 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
                     tl = add_part(root);
             } else if (bstr_equals0(f_type, "no_chapters")) {
                 tl->disable_chapters = true;
+            } else if (bstr_equals0(f_type, "track_meta")) {
+                struct sh_stream *sh = tl->sh_meta;
+                sh->lang = get_param0(&ctx, sh, "lang");
+                sh->title = get_param0(&ctx, sh, "title");
+                sh->hls_bitrate = get_param_int(&ctx, "byterate", 0) * 8;
+            } else if (bstr_equals0(f_type, "delay_open")) {
+                struct sh_stream *sh = tl->sh_meta;
+                bstr mt = get_param(&ctx, "media_type");
+                if (bstr_equals0(mt, "video")) {
+                    sh->type = sh->codec->type = STREAM_VIDEO;
+                } else if (bstr_equals0(mt, "audio")) {
+                    sh->type = sh->codec->type = STREAM_AUDIO;
+                } else if (bstr_equals0(mt, "sub")) {
+                    sh->type = sh->codec->type = STREAM_SUB;
+                } else {
+                    mp_err(log, "Invalid or missing !delay_open media type.\n");
+                    goto error;
+                }
+                sh->codec->codec = get_param0(&ctx, sh, "codec");
+                if (!sh->codec->codec)
+                    sh->codec->codec = "null";
+                sh->codec->disp_w = get_param_int(&ctx, "w", 0);
+                sh->codec->disp_h = get_param_int(&ctx, "h", 0);
+                tl->delay_open = true;
             } else {
                 mp_err(log, "Unknown header: '%.*s'\n", BSTR_P(f_type));
                 goto error;
@@ -322,6 +368,11 @@ static struct timeline_par *build_timeline(struct timeline *root,
     tl->track_layout = NULL;
     tl->dash = parts->dash;
     tl->no_clip = parts->no_clip;
+    tl->delay_open = parts->delay_open;
+
+    // There is no copy function for sh_stream, so just steal it.
+    tl->sh_meta = talloc_steal(tl, parts->sh_meta);
+    parts->sh_meta = NULL;
 
     if (parts->init_fragment_url && parts->init_fragment_url[0]) {
         MP_VERBOSE(root, "Opening init fragment...\n");
@@ -366,6 +417,15 @@ static struct timeline_par *build_timeline(struct timeline *root,
 
             if (!tl->track_layout)
                 tl->track_layout = open_source(root, tl, part->filename);
+        } else if (tl->delay_open) {
+            if (n == 0 && !part->offset_set) {
+                part->offset = starttime;
+                part->offset_set = true;
+            }
+            if (part->chapter_ts || (part->length < 0 && !tl->no_clip)) {
+                MP_ERR(root, "Invalid specification for delay_open stream.\n");
+                goto error;
+            }
         } else {
             MP_VERBOSE(root, "Opening segment %d...\n", n);
 
@@ -444,7 +504,7 @@ static struct timeline_par *build_timeline(struct timeline *root,
         }
     }
 
-    if (!tl->track_layout)
+    if (!tl->track_layout && !tl->delay_open)
         goto error;
     if (!root->meta)
         root->meta = tl->track_layout;
