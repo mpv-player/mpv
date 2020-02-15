@@ -89,10 +89,6 @@ struct priv {
     int num_sources;
 };
 
-static bool add_tl(struct demuxer *demuxer, struct timeline_par *par);
-static bool do_read_next_packet(struct demuxer *demuxer,
-                                struct virtual_source *src);
-
 static void update_slave_stats(struct demuxer *demuxer, struct demuxer *slave)
 {
     demux_report_unbuffered_read_bytes(demuxer, demux_get_bytes_read_hack(slave));
@@ -254,112 +250,6 @@ static void switch_segment(struct demuxer *demuxer, struct virtual_source *src,
     src->eos_packets = 0;
 }
 
-static void seek_source(struct demuxer *demuxer, struct virtual_source *src,
-                        double pts, int flags)
-{
-    struct segment *new = src->segments[src->num_segments - 1];
-    for (int n = 0; n < src->num_segments; n++) {
-        if (pts < src->segments[n]->end) {
-            new = src->segments[n];
-            break;
-        }
-    }
-
-    switch_segment(demuxer, src, new, pts, flags, false);
-
-    src->dts = MP_NOPTS_VALUE;
-    TA_FREEP(&src->next);
-}
-
-static void d_seek(struct demuxer *demuxer, double seek_pts, int flags)
-{
-    struct priv *p = demuxer->priv;
-
-    seek_pts = seek_pts * ((flags & SEEK_FACTOR) ? p->duration : 1);
-    flags &= SEEK_FORWARD | SEEK_HR;
-
-    // The intention is to seek audio streams to the same target as video
-    // streams if they are separate streams. Video streams usually have more
-    // coarse keyframe snapping, which could leave video without audio.
-    struct virtual_source *master = NULL;
-    bool has_slaves = false;
-    for (int x = 0; x < p->num_sources; x++) {
-        struct virtual_source *src = p->sources[x];
-
-        bool any_audio = false, any_video = false;
-        for (int i = 0; i < src->num_streams; i++) {
-            struct virtual_stream *str = src->streams[i];
-            if (str->selected) {
-                if (str->sh->type == STREAM_VIDEO)
-                    any_video = true;
-                if (str->sh->type == STREAM_AUDIO)
-                    any_audio = true;
-            }
-        }
-
-        if (any_video)
-            master = src;
-        // A true slave stream is audio-only; this also prevents that the master
-        // stream is considered a slave stream.
-        if (any_audio && !any_video)
-            has_slaves = true;
-    }
-
-    if (!has_slaves)
-        master = NULL;
-
-    if (master) {
-        seek_source(demuxer, master, seek_pts, flags);
-        do_read_next_packet(demuxer, master);
-        if (master->next && master->next->pts != MP_NOPTS_VALUE) {
-            // Assume we got a seek target. Actually apply the heuristic.
-            MP_VERBOSE(demuxer, "adjust seek target from %f to %f\n", seek_pts,
-                       master->next->pts);
-            seek_pts = master->next->pts;
-            flags &= ~(unsigned)SEEK_FORWARD;
-        }
-    }
-
-    for (int x = 0; x < p->num_sources; x++) {
-        struct virtual_source *src = p->sources[x];
-        if (src != master)
-            seek_source(demuxer, src, seek_pts, flags);
-    }
-}
-
-static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt)
-{
-    struct priv *p = demuxer->priv;
-
-    struct virtual_source *src = NULL;
-
-    for (int x = 0; x < p->num_sources; x++) {
-        struct virtual_source *cur = p->sources[x];
-
-        if (!cur->any_selected || cur->eof_reached)
-            continue;
-
-        if (!cur->current)
-            switch_segment(demuxer, cur, cur->segments[0], 0, 0, true);
-
-        if (!cur->any_selected || !cur->current || !cur->current->d)
-            continue;
-
-        if (!src || cur->dts == MP_NOPTS_VALUE ||
-            (src->dts != MP_NOPTS_VALUE && cur->dts < src->dts))
-            src = cur;
-    }
-
-    if (!src)
-        return false;
-
-    if (!do_read_next_packet(demuxer, src))
-        return false;
-    *out_pkt = src->next;
-    src->next = NULL;
-    return true;
-}
-
 static bool do_read_next_packet(struct demuxer *demuxer,
                                 struct virtual_source *src)
 {
@@ -462,6 +352,112 @@ drop:
     return true;
 }
 
+static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt)
+{
+    struct priv *p = demuxer->priv;
+
+    struct virtual_source *src = NULL;
+
+    for (int x = 0; x < p->num_sources; x++) {
+        struct virtual_source *cur = p->sources[x];
+
+        if (!cur->any_selected || cur->eof_reached)
+            continue;
+
+        if (!cur->current)
+            switch_segment(demuxer, cur, cur->segments[0], 0, 0, true);
+
+        if (!cur->any_selected || !cur->current || !cur->current->d)
+            continue;
+
+        if (!src || cur->dts == MP_NOPTS_VALUE ||
+            (src->dts != MP_NOPTS_VALUE && cur->dts < src->dts))
+            src = cur;
+    }
+
+    if (!src)
+        return false;
+
+    if (!do_read_next_packet(demuxer, src))
+        return false;
+    *out_pkt = src->next;
+    src->next = NULL;
+    return true;
+}
+
+static void seek_source(struct demuxer *demuxer, struct virtual_source *src,
+                        double pts, int flags)
+{
+    struct segment *new = src->segments[src->num_segments - 1];
+    for (int n = 0; n < src->num_segments; n++) {
+        if (pts < src->segments[n]->end) {
+            new = src->segments[n];
+            break;
+        }
+    }
+
+    switch_segment(demuxer, src, new, pts, flags, false);
+
+    src->dts = MP_NOPTS_VALUE;
+    TA_FREEP(&src->next);
+}
+
+static void d_seek(struct demuxer *demuxer, double seek_pts, int flags)
+{
+    struct priv *p = demuxer->priv;
+
+    seek_pts = seek_pts * ((flags & SEEK_FACTOR) ? p->duration : 1);
+    flags &= SEEK_FORWARD | SEEK_HR;
+
+    // The intention is to seek audio streams to the same target as video
+    // streams if they are separate streams. Video streams usually have more
+    // coarse keyframe snapping, which could leave video without audio.
+    struct virtual_source *master = NULL;
+    bool has_slaves = false;
+    for (int x = 0; x < p->num_sources; x++) {
+        struct virtual_source *src = p->sources[x];
+
+        bool any_audio = false, any_video = false;
+        for (int i = 0; i < src->num_streams; i++) {
+            struct virtual_stream *str = src->streams[i];
+            if (str->selected) {
+                if (str->sh->type == STREAM_VIDEO)
+                    any_video = true;
+                if (str->sh->type == STREAM_AUDIO)
+                    any_audio = true;
+            }
+        }
+
+        if (any_video)
+            master = src;
+        // A true slave stream is audio-only; this also prevents that the master
+        // stream is considered a slave stream.
+        if (any_audio && !any_video)
+            has_slaves = true;
+    }
+
+    if (!has_slaves)
+        master = NULL;
+
+    if (master) {
+        seek_source(demuxer, master, seek_pts, flags);
+        do_read_next_packet(demuxer, master);
+        if (master->next && master->next->pts != MP_NOPTS_VALUE) {
+            // Assume we got a seek target. Actually apply the heuristic.
+            MP_VERBOSE(demuxer, "adjust seek target from %f to %f\n", seek_pts,
+                       master->next->pts);
+            seek_pts = master->next->pts;
+            flags &= ~(unsigned)SEEK_FORWARD;
+        }
+    }
+
+    for (int x = 0; x < p->num_sources; x++) {
+        struct virtual_source *src = p->sources[x];
+        if (src != master)
+            seek_source(demuxer, src, seek_pts, flags);
+    }
+}
+
 static void print_timeline(struct demuxer *demuxer)
 {
     struct priv *p = demuxer->priv;
@@ -496,53 +492,6 @@ static void print_timeline(struct demuxer *demuxer)
             MP_VERBOSE(demuxer, " (Using pseudo-DASH mode.)\n");
     }
     MP_VERBOSE(demuxer, "Total duration: %f\n", p->duration);
-}
-
-static int d_open(struct demuxer *demuxer, enum demux_check check)
-{
-    struct priv *p = demuxer->priv = talloc_zero(demuxer, struct priv);
-    p->tl = demuxer->params ? demuxer->params->timeline : NULL;
-    if (!p->tl || p->tl->num_pars < 1)
-        return -1;
-
-    demuxer->chapters = p->tl->chapters;
-    demuxer->num_chapters = p->tl->num_chapters;
-
-    struct demuxer *meta = p->tl->meta;
-    if (!meta)
-        return -1;
-    demuxer->metadata = meta->metadata;
-    demuxer->attachments = meta->attachments;
-    demuxer->num_attachments = meta->num_attachments;
-    demuxer->editions = meta->editions;
-    demuxer->num_editions = meta->num_editions;
-    demuxer->edition = meta->edition;
-
-    for (int n = 0; n < p->tl->num_pars; n++) {
-        if (!add_tl(demuxer, p->tl->pars[n]))
-            return -1;
-    }
-
-    if (!p->num_sources)
-        return -1;
-
-    demuxer->is_network |= p->tl->is_network;
-    demuxer->is_streaming |= p->tl->is_streaming;
-
-    demuxer->duration = p->duration;
-
-    print_timeline(demuxer);
-
-    demuxer->seekable = true;
-    demuxer->partially_seekable = false;
-
-    demuxer->filetype = talloc_asprintf(p, "%s/%s",
-                        p->tl->format,
-                        meta->filetype ? meta->filetype : meta->desc->name);
-
-    reselect_streams(demuxer);
-
-    return 0;
 }
 
 static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
@@ -619,6 +568,53 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
     demuxer->is_network |= tl->track_layout->is_network;
     demuxer->is_streaming |= tl->track_layout->is_streaming;
     return true;
+}
+
+static int d_open(struct demuxer *demuxer, enum demux_check check)
+{
+    struct priv *p = demuxer->priv = talloc_zero(demuxer, struct priv);
+    p->tl = demuxer->params ? demuxer->params->timeline : NULL;
+    if (!p->tl || p->tl->num_pars < 1)
+        return -1;
+
+    demuxer->chapters = p->tl->chapters;
+    demuxer->num_chapters = p->tl->num_chapters;
+
+    struct demuxer *meta = p->tl->meta;
+    if (!meta)
+        return -1;
+    demuxer->metadata = meta->metadata;
+    demuxer->attachments = meta->attachments;
+    demuxer->num_attachments = meta->num_attachments;
+    demuxer->editions = meta->editions;
+    demuxer->num_editions = meta->num_editions;
+    demuxer->edition = meta->edition;
+
+    for (int n = 0; n < p->tl->num_pars; n++) {
+        if (!add_tl(demuxer, p->tl->pars[n]))
+            return -1;
+    }
+
+    if (!p->num_sources)
+        return -1;
+
+    demuxer->is_network |= p->tl->is_network;
+    demuxer->is_streaming |= p->tl->is_streaming;
+
+    demuxer->duration = p->duration;
+
+    print_timeline(demuxer);
+
+    demuxer->seekable = true;
+    demuxer->partially_seekable = false;
+
+    demuxer->filetype = talloc_asprintf(p, "%s/%s",
+                        p->tl->format,
+                        meta->filetype ? meta->filetype : meta->desc->name);
+
+    reselect_streams(demuxer);
+
+    return 0;
 }
 
 static void d_close(struct demuxer *demuxer)
