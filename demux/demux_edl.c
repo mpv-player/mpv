@@ -49,6 +49,9 @@ struct tl_parts {
     bool disable_chapters;
     bool dash, no_clip;
     char *init_fragment_url;
+    char *title, *lang;
+    bool delay_open;
+    enum stream_type delay_open_st;
     struct tl_part *parts;
     int num_parts;
     struct tl_parts *next;
@@ -102,6 +105,9 @@ static struct tl_root *parse_edl(bstr str)
         bool is_header = bstr_eatstart0(&str, "!");
         bstr f_type = {0};
         bstr f_init = {0};
+        bstr f_lang = {0};
+        bstr f_title = {0};
+        bstr f_mt = {0};
         struct tl_part p = { .length = -1 };
         int nparam = 0;
         while (1) {
@@ -135,6 +141,12 @@ static struct tl_root *parse_edl(bstr str)
                     f_type = val;
                 } else if (bstr_equals0(name, "init")) {
                     f_init = val;
+                } else if (bstr_equals0(name, "lang")) {
+                    f_lang = val;
+                } else if (bstr_equals0(name, "title")) {
+                    f_title = val;
+                } else if (bstr_equals0(name, "media_type")) {
+                    f_mt = val;
                 }
             } else {
                 if (bstr_equals0(name, "file")) {
@@ -168,9 +180,28 @@ static struct tl_root *parse_edl(bstr str)
             } else if (bstr_equals0(f_type, "no_clip")) {
                 tl->no_clip = true;
             } else if (bstr_equals0(f_type, "new_stream")) {
-                tl = add_part(root);
+                // (Special case: ignore "redundant" headers at the start for
+                // general symmetry.)
+                if (root->num_pars > 1 || tl->num_parts)
+                    tl = add_part(root);
             } else if (bstr_equals0(f_type, "no_chapters")) {
                 tl->disable_chapters = true;
+            } else if (bstr_equals0(f_type, "track_meta")) {
+                if (f_lang.start)
+                    tl->lang = bstrto0(tl, f_lang);
+                if (f_title.start)
+                    tl->title = bstrto0(tl, f_title);
+            } else if (bstr_equals0(f_type, "delay_open")) {
+                if (bstr_equals0(f_mt, "video")) {
+                    tl->delay_open_st = STREAM_VIDEO;
+                } else if (bstr_equals0(f_mt, "audio")) {
+                    tl->delay_open_st = STREAM_AUDIO;
+                } else if (bstr_equals0(f_mt, "sub")) {
+                    tl->delay_open_st = STREAM_SUB;
+                } else {
+                    goto error;
+                }
+                tl->delay_open = true;
             } else {
                 goto error;
             }
@@ -265,6 +296,10 @@ static struct timeline_par *build_timeline(struct timeline *root,
     tl->track_layout = NULL;
     tl->dash = parts->dash;
     tl->no_clip = parts->no_clip;
+    tl->title = talloc_strdup(tl, parts->title);
+    tl->lang = talloc_strdup(tl, parts->lang);
+    tl->delay_open = parts->delay_open;
+    tl->delay_open_st = parts->delay_open_st;
 
     if (parts->init_fragment_url && parts->init_fragment_url[0]) {
         MP_VERBOSE(root, "Opening init fragment...\n");
@@ -309,6 +344,15 @@ static struct timeline_par *build_timeline(struct timeline *root,
 
             if (!tl->track_layout)
                 tl->track_layout = open_source(root, tl, part->filename);
+        } else if (tl->delay_open) {
+            if (n == 0 && !part->offset_set) {
+                part->offset = starttime;
+                part->offset_set = true;
+            }
+            if (part->chapter_ts || (part->length < 0 && !tl->no_clip)) {
+                MP_ERR(root, "Incomplete specification for delay_open stream.\n");
+                goto error;
+            }
         } else {
             MP_VERBOSE(root, "Opening segment %d...\n", n);
 
@@ -372,6 +416,9 @@ static struct timeline_par *build_timeline(struct timeline *root,
         tl->num_parts++;
     }
 
+    if (tl->no_clip && tl->num_parts > 1)
+        MP_WARN(root, "Multiple parts with no_clip. Undefined behavior ahead.\n");
+
     if (!tl->track_layout) {
         // Use a heuristic to select the "broadest" part as layout.
         for (int n = 0; n < parts->num_parts; n++) {
@@ -384,7 +431,7 @@ static struct timeline_par *build_timeline(struct timeline *root,
         }
     }
 
-    if (!tl->track_layout)
+    if (!tl->track_layout && !tl->delay_open)
         goto error;
     if (!root->meta)
         root->meta = tl->track_layout;

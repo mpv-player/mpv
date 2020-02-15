@@ -1,6 +1,8 @@
 #ifndef MP_TIMELINE_H_
 #define MP_TIMELINE_H_
 
+#include "common/common.h"
+
 // Single segment in a timeline.
 struct timeline_part {
     // (end time must match with start time of the next part)
@@ -21,6 +23,12 @@ struct timeline_part {
 struct timeline_par {
     bstr init_fragment;
     bool dash, no_clip;
+
+    bool delay_open;
+    enum stream_type delay_open_st; // valid if delay_open=true, promised type
+
+    char *lang;
+    char *title;
 
     // Segments to play, ordered by time.
     struct timeline_part *parts;

@@ -155,7 +155,11 @@ static int init(struct sd *sd)
     char *extradata = sd->codec->extradata;
     int extradata_size = sd->codec->extradata_size;
 
-    if (strcmp(sd->codec->codec, "ass") != 0) {
+    // Note: accept "null" as alias for "ass", so EDL delay_open subtitle
+    //       streams work.
+    if (strcmp(sd->codec->codec, "ass") != 0 &&
+        strcmp(sd->codec->codec, "null") != 0)
+    {
         ctx->is_converted = true;
         ctx->converter = lavc_conv_create(sd->log, sd->codec->codec, extradata,
                                           extradata_size);

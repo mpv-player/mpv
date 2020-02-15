@@ -199,13 +199,16 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
     const struct mp_decoder_fns *driver = NULL;
     struct mp_decoder_list *list = NULL;
     char *user_list = NULL;
+    char *fallback = NULL;
 
     if (p->codec->type == STREAM_VIDEO) {
         driver = &vd_lavc;
         user_list = opts->video_decoders;
+        fallback = "h264";
     } else if (p->codec->type == STREAM_AUDIO) {
         driver = &ad_lavc;
         user_list = opts->audio_decoders;
+        fallback = "aac";
 
         if (p->public.try_spdif && p->codec->codec) {
             struct mp_decoder_list *spdif =
@@ -223,7 +226,10 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
         struct mp_decoder_list *full = talloc_zero(NULL, struct mp_decoder_list);
         if (driver)
             driver->add_decoders(full);
-        list = mp_select_decoders(p->log, full, p->codec->codec, user_list);
+        const char *codec = p->codec->codec;
+        if (codec && strcmp(codec, "null") == 0)
+            codec = fallback;
+        list = mp_select_decoders(p->log, full, codec, user_list);
         talloc_free(full);
     }
 
