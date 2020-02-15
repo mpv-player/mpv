@@ -51,8 +51,8 @@ struct virtual_stream {
     struct virtual_source *src; // group this stream is part of
 };
 
-// This represents a single timeline source. (See timeline.next. For each
-// timeline struct there is a virtual_source.)
+// This represents a single timeline source. (See timeline.pars[]. For each
+// timeline_par struct there is a virtual_source.)
 struct virtual_source {
     struct timeline_par *tl;
 
