@@ -458,7 +458,10 @@ static void fix_filenames(struct tl_parts *parts, char *source_path)
     struct bstr dirname = mp_dirname(source_path);
     for (int n = 0; n < parts->num_parts; n++) {
         struct tl_part *part = &parts->parts[n];
-        part->filename = mp_path_join_bstr(parts, dirname, bstr0(part->filename));
+        if (!mp_is_url(bstr0(part->filename))) {
+            part->filename =
+                mp_path_join_bstr(parts, dirname, bstr0(part->filename));
+        }
     }
 }
 
