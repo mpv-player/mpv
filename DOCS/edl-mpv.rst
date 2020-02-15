@@ -182,6 +182,18 @@ this will use a unified cache for all streams.
 The ``new_stream`` header is not part of the core EDL format. It may be changed
 or removed at any time, depending on mpv's internal requirements.
 
+If the first ``!new_stream`` is redundant, it is ignored. This is the same
+example as above::
+
+    # mpv EDL v0
+    !new_stream
+    video.mkv
+    !new_stream
+    audio.mkv
+
+Note that ``!new_stream`` must be the first header. Whether the parser accepts
+(i.e. ignores) or rejects other headers before that is implementation specific.
+
 Timestamp format
 ================
 

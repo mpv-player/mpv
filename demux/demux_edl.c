@@ -194,7 +194,10 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
             } else if (bstr_equals0(f_type, "no_clip")) {
                 tl->no_clip = true;
             } else if (bstr_equals0(f_type, "new_stream")) {
-                tl = add_part(root);
+                // (Special case: ignore "redundant" headers at the start for
+                // general symmetry.)
+                if (root->num_pars > 1 || tl->num_parts)
+                    tl = add_part(root);
             } else if (bstr_equals0(f_type, "no_chapters")) {
                 tl->disable_chapters = true;
             } else {
