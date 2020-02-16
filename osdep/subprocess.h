@@ -48,12 +48,14 @@ struct mp_subprocess_opts {
     struct mp_subprocess_fd fds[MP_SUBPROCESS_MAX_FDS];
     int num_fds;
     struct mp_cancel *cancel; // if !NULL, asynchronous process abort (kills it)
+    bool detach;    // if true, do not wait for process to end
 };
 
 struct mp_subprocess_result {
     int error;              // one of MP_SUBPROCESS_* (>0 on error)
     // NB: if WIFEXITED applies, error==0, and this is WEXITSTATUS
     //     on win32, this can use the full 32 bit
+    //     if started with detach==true, this is always 0
     uint32_t exit_status;   // if error==0==MP_SUBPROCESS_OK, 0 otherwise
 };
 

@@ -17,6 +17,7 @@
 
 #include "osdep/posix-spawn.h"
 #include <poll.h>
+#include <pthread.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -43,7 +44,7 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     int status = -1;
     int comm_pipe[MP_SUBPROCESS_MAX_FDS][2];
     int devnull = -1;
-    pid_t pid = -1;
+    pid_t pid = 0;
     bool spawned = false;
     bool killed_by_us = false;
     int cancel_fd = -1;
@@ -84,11 +85,35 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     }
 
     char **env = opts->env ? opts->env : environ;
-    if (posix_spawnp(&pid, opts->exe, &fa, NULL, opts->args, env)) {
-        pid = -1;
-        goto done;
+
+    if (opts->detach) {
+        // If we run it detached, we fork a child to start the process; then
+        // it exits immediately, letting PID 1 inherit it. So we don't need
+        // anything else to collect these child PIDs.
+        sigset_t sigmask, oldmask;
+        sigfillset(&sigmask);
+        pthread_sigmask(SIG_BLOCK, &sigmask, &oldmask);
+        pid_t fres = fork();
+        if (fres < 0)
+            goto done;
+        if (fres == 0) {
+            // child
+            setsid();
+            if (posix_spawnp(&pid, opts->exe, &fa, NULL, opts->args, env))
+                _exit(1);
+            _exit(0);
+        }
+        pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
+        int child_status = 0;
+        while (waitpid(fres, &child_status, 0) < 0 && errno == EINTR) {}
+        if (!WIFEXITED(child_status) || WEXITSTATUS(child_status) != 0)
+            goto done;
+        spawned = true;
+    } else {
+        if (posix_spawnp(&pid, opts->exe, &fa, NULL, opts->args, env))
+            goto done;
+        spawned = true;
     }
-    spawned = true;
 
     for (int n = 0; n < opts->num_fds; n++)
         SAFE_CLOSE(comm_pipe[n][1]);
@@ -122,7 +147,8 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
                 int n = map_fds[idx];
                 if (n < 0) {
                     // cancel_fd
-                    kill(pid, SIGKILL);
+                    if (pid)
+                        kill(pid, SIGKILL);
                     killed_by_us = true;
                     break;
                 } else {
@@ -144,7 +170,8 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     //       a separate thread and use pthread_cancel(), or use other weird
     //       and laborious tricks in order to react to mp_cancel.
     //       So this isn't handled yet.
-    while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {}
+    if (pid)
+        while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {}
 
 done:
     if (fa_destroy)
@@ -155,10 +182,12 @@ done:
     }
     SAFE_CLOSE(devnull);
 
-    if (!spawned || (WIFEXITED(status) && WEXITSTATUS(status) == 127)) {
+    if (!spawned || (pid && WIFEXITED(status) && WEXITSTATUS(status) == 127)) {
         res->error = MP_SUBPROCESS_EINIT;
-    } else if (WIFEXITED(status)) {
+    } else if (pid && WIFEXITED(status)) {
         res->exit_status = WEXITSTATUS(status);
+    } else if (spawned && opts->detach) {
+        // ok
     } else if (killed_by_us) {
         res->error = MP_SUBPROCESS_EKILLED_BY_US;
     } else {

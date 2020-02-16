@@ -65,7 +65,30 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     return res.exit_status;
 }
 
-#endif
+void mp_subprocess_detached(struct mp_log *log, char **args)
+{
+    mp_msg_flush_status_line(log);
+
+    struct mp_subprocess_opts opts = {
+        .exe = args[0],
+        .args = args,
+        .fds = {
+            {.fd = 0, .src_fd = 0,},
+            {.fd = 1, .src_fd = 1,},
+            {.fd = 2, .src_fd = 2,},
+        },
+        .num_fds = 3,
+        .detach = true,
+    };
+    struct mp_subprocess_result res;
+    mp_subprocess2(&opts, &res);
+    if (res.error < 0) {
+        mp_err(log, "Starting subprocess failed: %s\n",
+               mp_subprocess_err_str(res.error));
+    }
+}
+
+#else
 
 struct subprocess_args {
     struct mp_log *log;
@@ -99,6 +122,8 @@ void mp_subprocess_detached(struct mp_log *log, char **args)
     if (pthread_create(&thread, NULL, run_subprocess, p))
         talloc_free(p);
 }
+
+#endif
 
 const char *mp_subprocess_err_str(int num)
 {
