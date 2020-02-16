@@ -25,6 +25,48 @@
 
 #include "subprocess.h"
 
+void mp_devnull(void *ctx, char *data, size_t size)
+{
+}
+
+#if HAVE_POSIX_SPAWN
+
+int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
+                  subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
+                  char **error)
+{
+    struct mp_subprocess_opts opts = {
+        .exe = args[0],
+        .args = args,
+        .cancel = cancel,
+    };
+    opts.fds[opts.num_fds++] = (struct mp_subprocess_fd){
+        .fd = 0, // stdin
+        .src_fd = 0,
+    };
+    opts.fds[opts.num_fds++] = (struct mp_subprocess_fd){
+        .fd = 1, // stdout
+        .on_read = on_stdout,
+        .on_read_ctx = ctx,
+        .src_fd = on_stdout ? -1 : 1,
+    };
+    opts.fds[opts.num_fds++] = (struct mp_subprocess_fd){
+        .fd = 2, // stderr
+        .on_read = on_stderr,
+        .on_read_ctx = ctx,
+        .src_fd = on_stderr ? -1 : 2,
+    };
+    struct mp_subprocess_result res;
+    mp_subprocess2(&opts, &res);
+    if (res.error < 0) {
+        *error = (char *)mp_subprocess_err_str(res.error);
+        return res.error;
+    }
+    return res.exit_status;
+}
+
+#endif
+
 struct subprocess_args {
     struct mp_log *log;
     char **args;
@@ -45,10 +87,6 @@ static void *run_subprocess(void *ptr)
     return NULL;
 }
 
-void mp_devnull(void *ctx, char *data, size_t size)
-{
-}
-
 void mp_subprocess_detached(struct mp_log *log, char **args)
 {
     struct subprocess_args *p = talloc_zero(NULL, struct subprocess_args);
@@ -60,4 +98,17 @@ void mp_subprocess_detached(struct mp_log *log, char **args)
     pthread_t thread;
     if (pthread_create(&thread, NULL, run_subprocess, p))
         talloc_free(p);
+}
+
+const char *mp_subprocess_err_str(int num)
+{
+    // Note: these are visible to the public client API
+    switch (num) {
+    case MP_SUBPROCESS_OK:              return "success";
+    case MP_SUBPROCESS_EKILLED_BY_US:   return "killed";
+    case MP_SUBPROCESS_EINIT:           return "init";
+    case MP_SUBPROCESS_EUNSUPPORTED:    return "unsupported";
+    case MP_SUBPROCESS_EGENERIC:        // fall through
+    default:                            return "unknown";
+    }
 }
