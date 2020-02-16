@@ -4028,8 +4028,6 @@ static void update_cache(struct demux_internal *in)
     struct demuxer *demuxer = in->d_thread;
     struct stream *stream = demuxer->stream;
 
-    struct mp_tags *stream_metadata = NULL;
-
     int64_t now = mp_time_us();
     int64_t diff = now - in->last_speed_query;
     bool do_update = diff >= MP_SECOND_US;
@@ -4038,6 +4036,7 @@ static void update_cache(struct demux_internal *in)
     pthread_mutex_unlock(&in->lock);
 
     int64_t stream_size = -1;
+    struct mp_tags *stream_metadata = NULL;
     if (stream) {
         if (do_update)
             stream_size = stream_get_size(stream);
