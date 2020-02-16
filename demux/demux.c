@@ -3078,6 +3078,9 @@ void demux_update(demuxer_t *demuxer, double pts)
     if (!in->threading)
         update_cache(in);
 
+    // This implies this function is actually called from "the" user thread.
+    in->d_user->filesize = in->stream_size;
+
     pts = MP_ADD_PTS(pts, -in->ts_offset);
 
     struct timed_metadata *prev = lookup_timed_metadata(in, in->last_playback_pts);
