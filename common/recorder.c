@@ -91,14 +91,12 @@ static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
     if (!avp)
         return -1;
 
-#if LIBAVCODEC_VERSION_MICRO >= 100
     // We don't know the delay, so make something up. If the format requires
     // DTS, the result will probably be broken. FFmpeg provides nothing better
     // yet (unless you demux with libavformat, which contains tons of hacks
     // that try to determine a PTS).
     if (!sh->codec->lav_codecpar)
         avp->video_delay = 16;
-#endif
 
     if (avp->codec_id == AV_CODEC_ID_NONE)
         return -1;

@@ -78,9 +78,7 @@ static int init(struct sd *sd)
     // Supported codecs must be known to decode to paletted bitmaps
     switch (cid) {
     case AV_CODEC_ID_DVB_SUBTITLE:
-#if LIBAVCODEC_VERSION_MICRO >= 100
     case AV_CODEC_ID_DVB_TELETEXT:
-#endif
     case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
     case AV_CODEC_ID_XSUB:
     case AV_CODEC_ID_DVD_SUBTITLE:
@@ -99,9 +97,7 @@ static int init(struct sd *sd)
         goto error;
     mp_lavc_set_extradata(ctx, sd->codec->extradata, sd->codec->extradata_size);
     priv->pkt_timebase = mp_get_codec_timebase(sd->codec);
-#if LIBAVCODEC_VERSION_MICRO >= 100
     ctx->pkt_timebase = priv->pkt_timebase;
-#endif
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
     priv->avctx = ctx;

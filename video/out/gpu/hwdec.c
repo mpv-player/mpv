@@ -73,7 +73,7 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #if HAVE_RPI_MMAL
     &ra_hwdec_rpi_overlay,
 #endif
-#if HAVE_DRMPRIME && HAVE_DRM
+#if HAVE_DRM
     &ra_hwdec_drmprime_drm,
 #endif
 

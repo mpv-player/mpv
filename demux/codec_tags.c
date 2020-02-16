@@ -24,24 +24,18 @@
 #include "stheader.h"
 #include "common/av_common.h"
 
-#define HAVE_QT_TAGS (LIBAVFORMAT_VERSION_MICRO >= 100)
-
 static const char *lookup_tag(int type, uint32_t tag)
 {
     const struct AVCodecTag *av_tags[3] = {0};
     switch (type) {
     case STREAM_VIDEO: {
         av_tags[0] = avformat_get_riff_video_tags();
-#if HAVE_QT_TAGS
         av_tags[1] = avformat_get_mov_video_tags();
-#endif
         break;
     }
     case STREAM_AUDIO: {
         av_tags[0] = avformat_get_riff_audio_tags();
-#if HAVE_QT_TAGS
         av_tags[1] = avformat_get_mov_audio_tags();
-#endif
         break;
     }
     }

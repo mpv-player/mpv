@@ -198,7 +198,6 @@ size_t demux_packet_estimate_total_size(struct demux_packet *dp)
 
 int demux_packet_set_padding(struct demux_packet *dp, int start, int end)
 {
-#if LIBAVCODEC_VERSION_MICRO >= 100
     if (!start && !end)
         return 0;
     if (!dp->avpacket)
@@ -209,14 +208,12 @@ int demux_packet_set_padding(struct demux_packet *dp, int start, int end)
 
     AV_WL32(p + 0, start);
     AV_WL32(p + 4, end);
-#endif
     return 0;
 }
 
 int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
                                      void *data, size_t size)
 {
-#if LIBAVCODEC_VERSION_MICRO >= 100
     if (!dp->avpacket)
         return -1;
     uint8_t *sd =  av_packet_new_side_data(dp->avpacket,
@@ -227,6 +224,5 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
     AV_WB64(sd, id);
     if (size > 0)
         memcpy(sd + 8, data, size);
-#endif
     return 0;
 }

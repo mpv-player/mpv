@@ -434,69 +434,19 @@ iconv support use --disable-iconv.",
     }
 ]
 
-ffmpeg_pkg_config_checks = [
-    'libavutil',     '>= 56.12.100',
-    'libavcodec',    '>= 58.16.100',
-    'libavformat',   '>= 58.9.100',
-    'libswscale',    '>= 5.0.101',
-    'libavfilter',   '>= 7.14.100',
-    'libswresample', '>= 3.0.100',
-]
-libav_pkg_config_checks = [
-    'libavutil',     '>= 56.6.0',
-    'libavcodec',    '>= 58.8.0',
-    'libavformat',   '>= 58.1.0',
-    'libswscale',    '>= 5.0.0',
-    'libavfilter',   '>= 7.0.0',
-    'libavresample', '>= 4.0.0',
-]
-
-def check_ffmpeg_or_libav_versions():
-    def fn(ctx, dependency_identifier, **kw):
-        versions = ffmpeg_pkg_config_checks
-        if ctx.dependency_satisfied('libav'):
-            versions = libav_pkg_config_checks
-        return check_pkg_config(*versions)(ctx, dependency_identifier, **kw)
-    return fn
-
 libav_dependencies = [
     {
-        'name': 'libavcodec',
-        'desc': 'FFmpeg/Libav present',
-        'func': check_pkg_config('libavcodec'),
-        'req': True,
-        'fmsg': "FFmpeg/Libav development files not found.",
-    }, {
-        'name': 'libavutil',
-        'desc': 'FFmpeg/Libav libavutil present',
-        'func': check_pkg_config('libavutil'),
-        'req': True,
-        'fmsg': "FFmpeg/Libav libavutil not found.",
-    }, {
         'name': 'ffmpeg',
-        'desc': 'libav* is FFmpeg',
-        # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
-        'func': check_statement('libavcodec/version.h',
-                                'int x[LIBAVCODEC_VERSION_MICRO >= 100 ? 1 : -1]',
-                                use='libavcodec'),
-    }, {
-        # This check should always result in the opposite of ffmpeg-*.
-        # Run it to make sure is_ffmpeg didn't fail for some other reason than
-        # the actual version check.
-        'name': 'libav',
-        'desc': 'libav* is Libav',
-        # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
-        'func': check_statement('libavcodec/version.h',
-                                'int x[LIBAVCODEC_VERSION_MICRO >= 100 ? -1 : 1]',
-                                use='libavcodec')
-    }, {
-        'name': 'libav-any',
-        'desc': 'Libav/FFmpeg library versions',
-        'deps': 'ffmpeg || libav',
-        'func': check_ffmpeg_or_libav_versions(),
+        'desc': 'FFmpeg library',
+        'func': check_pkg_config('libavutil',     '>= 56.12.100',
+                                 'libavcodec',    '>= 58.16.100',
+                                 'libavformat',   '>= 58.9.100',
+                                 'libswscale',    '>= 5.0.101',
+                                 'libavfilter',   '>= 7.14.100',
+                                 'libswresample', '>= 3.0.100'),
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
-FFmpeg/Libav libraries. Git master is recommended."
+FFmpeg libraries. Git master is recommended."
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
@@ -589,12 +539,6 @@ video_output_features = [
         'desc': 'DRM',
         'deps': 'vt.h',
         'func': check_pkg_config('libdrm', '>= 2.4.74'),
-    }, {
-        'name': '--drmprime',
-        'desc': 'DRM Prime ffmpeg support',
-        'func': check_statement('libavutil/pixfmt.h',
-                                'int i = AV_PIX_FMT_DRM_PRIME',
-                                use='libavutil')
     }, {
         'name': '--gbm',
         'desc': 'GBM',

@@ -1161,10 +1161,8 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     dp->duration = pkt->duration * av_q2d(st->time_base);
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
-#if LIBAVFORMAT_VERSION_MICRO >= 100
     if (pkt->flags & AV_PKT_FLAG_DISCARD)
         MP_ERR(demux, "Edit lists are not correctly supported (FFmpeg issue).\n");
-#endif
     av_packet_unref(pkt);
 
     if (priv->format_hack.clear_filepos)

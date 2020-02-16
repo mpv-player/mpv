@@ -20,6 +20,7 @@
 #include <libavutil/samplefmt.h>
 #include <libavutil/channel_layout.h>
 #include <libavutil/mathematics.h>
+#include <libswresample/swresample.h>
 
 #include "config.h"
 
@@ -35,35 +36,14 @@
 #include "f_swresample.h"
 #include "filter_internal.h"
 
-#define HAVE_LIBSWRESAMPLE (!HAVE_LIBAV)
-#define HAVE_LIBAVRESAMPLE HAVE_LIBAV
-
-#if HAVE_LIBAVRESAMPLE
-#include <libavresample/avresample.h>
-#elif HAVE_LIBSWRESAMPLE
-#include <libswresample/swresample.h>
-#define AVAudioResampleContext SwrContext
-#define avresample_alloc_context swr_alloc
-#define avresample_open swr_init
-#define avresample_close(x) do { } while(0)
-#define avresample_free swr_free
-#define avresample_available(x) 0
-#define avresample_convert(ctx, out, out_planesize, out_samples, in, in_planesize, in_samples) \
-    swr_convert(ctx, out, out_samples, (const uint8_t**)(in), in_samples)
-#define avresample_set_channel_mapping swr_set_channel_mapping
-#define avresample_set_compensation swr_set_compensation
-#else
-#error "config.h broken or no resampler found"
-#endif
-
 struct priv {
     struct mp_log *log;
     bool is_resampling;
-    struct AVAudioResampleContext *avrctx;
+    struct SwrContext *avrctx;
     struct mp_aframe *avrctx_fmt; // output format of avrctx
     struct mp_aframe *pool_fmt; // format used to allocate frames for avrctx output
     struct mp_aframe *pre_out_fmt; // format before final conversion
-    struct AVAudioResampleContext *avrctx_out; // for output channel reordering
+    struct SwrContext *avrctx_out; // for output channel reordering
     struct mp_resample_opts *opts; // opts requested by the user
     // At least libswresample keeps a pointer around for this:
     int reorder_in[MP_NUM_CHANNELS];
@@ -106,17 +86,6 @@ const struct m_sub_options resample_conf = {
     .change_flags = UPDATE_AUDIO,
 };
 
-#if HAVE_LIBAVRESAMPLE
-static double get_delay(struct priv *p)
-{
-    return avresample_get_delay(p->avrctx) / (double)p->in_rate +
-           avresample_available(p->avrctx) / (double)p->out_rate;
-}
-static int get_out_samples(struct priv *p, int in_samples)
-{
-    return avresample_get_out_samples(p->avrctx, in_samples);
-}
-#else
 static double get_delay(struct priv *p)
 {
     int64_t base = p->in_rate * (int64_t)p->out_rate;
@@ -126,16 +95,11 @@ static int get_out_samples(struct priv *p, int in_samples)
 {
     return swr_get_out_samples(p->avrctx, in_samples);
 }
-#endif
 
 static void close_lavrr(struct priv *p)
 {
-    if (p->avrctx)
-        avresample_close(p->avrctx);
-    avresample_free(&p->avrctx);
-    if (p->avrctx_out)
-        avresample_close(p->avrctx_out);
-    avresample_free(&p->avrctx_out);
+    swr_free(&p->avrctx);
+    swr_free(&p->avrctx_out);
 
     TA_FREEP(&p->pre_out_fmt);
     TA_FREEP(&p->avrctx_fmt);
@@ -206,8 +170,8 @@ static bool configure_lavrr(struct priv *p, bool verbose)
                p->out_rate, mp_chmap_to_str(&p->out_channels),
                af_fmt_to_str(p->out_format));
 
-    p->avrctx = avresample_alloc_context();
-    p->avrctx_out = avresample_alloc_context();
+    p->avrctx = swr_alloc();
+    p->avrctx_out = swr_alloc();
     if (!p->avrctx || !p->avrctx_out)
         goto error;
 
@@ -234,11 +198,7 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     av_opt_set_double(p->avrctx, "cutoff",          cutoff, 0);
 
     int normalize = p->opts->normalize;
-#if HAVE_LIBSWRESAMPLE
     av_opt_set_double(p->avrctx, "rematrix_maxval", normalize ? 1 : 1000, 0);
-#else
-    av_opt_set_int(p->avrctx, "normalize_mix_level", !!normalize, 0);
-#endif
 
     if (mp_set_avopts(p->log, p->avrctx, p->opts->avopts) < 0)
         goto error;
@@ -337,11 +297,11 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     // API has weird requirements, quoting avresample.h:
     //  * This function can only be called when the allocated context is not open.
     //  * Also, the input channel layout must have already been set.
-    avresample_set_channel_mapping(p->avrctx, p->reorder_in);
+    swr_set_channel_mapping(p->avrctx, p->reorder_in);
 
     p->is_resampling = false;
 
-    if (avresample_open(p->avrctx) < 0 || avresample_open(p->avrctx_out) < 0) {
+    if (swr_init(p->avrctx) < 0 || swr_init(p->avrctx_out) < 0) {
         MP_ERR(p, "Cannot open Libavresample context.\n");
         goto error;
     }
@@ -363,13 +323,9 @@ static void reset(struct mp_filter *f)
 
     if (!p->avrctx)
         return;
-#if HAVE_LIBSWRESAMPLE
     swr_close(p->avrctx);
     if (swr_init(p->avrctx) < 0)
         close_lavrr(p);
-#else
-    while (avresample_read(p->avrctx, NULL, 1000) > 0) {}
-#endif
 }
 
 static void extra_output_conversion(struct mp_aframe *mpa)
@@ -428,7 +384,7 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
     return true;
 }
 
-static int resample_frame(struct AVAudioResampleContext *r,
+static int resample_frame(struct SwrContext *r,
                           struct mp_aframe *out, struct mp_aframe *in,
                           int consume_in)
 {
@@ -437,12 +393,10 @@ static int resample_frame(struct AVAudioResampleContext *r,
     // or after conversion. The sample rates can also be different.
     AVFrame *av_i = in ? mp_aframe_get_raw_avframe(in) : NULL;
     AVFrame *av_o = out ? mp_aframe_get_raw_avframe(out) : NULL;
-    return avresample_convert(r,
+    return swr_convert(r,
         av_o ? av_o->extended_data : NULL,
-        av_o ? av_o->linesize[0] : 0,
         av_o ? av_o->nb_samples : 0,
-        av_i ? av_i->extended_data : NULL,
-        av_i ? av_i->linesize[0] : 0,
+        (const uint8_t **)(av_i ? av_i->extended_data : NULL),
         av_i ? MPMIN(av_i->nb_samples, consume_in) : 0);
 }
 
@@ -634,7 +588,7 @@ static void process(struct mp_filter *f)
     if (p->avrctx && use_comp) {
         AVRational r =
             av_d2q(p->speed * p->in_rate_user / p->in_rate, INT_MAX / 2);
-        // Essentially, swr/avresample_set_compensation() does 2 things:
+        // Essentially, swr_set_compensation() does 2 things:
         // - adjust output sample rate by sample_delta/compensation_distance
         // - reset the adjustment after compensation_distance output samples
         // Increase the compensation_distance to avoid undesired reset
@@ -644,7 +598,7 @@ static void process(struct mp_filter *f)
         r = (AVRational){ r.num * mult, r.den * mult };
         if (r.den == r.num)
             r = (AVRational){0}; // fully disable
-        if (avresample_set_compensation(p->avrctx, r.den - r.num, r.den) >= 0) {
+        if (swr_set_compensation(p->avrctx, r.den - r.num, r.den) >= 0) {
             exact_rate = true;
             p->is_resampling = true; // libswresample can auto-enable it
         }

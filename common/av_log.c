@@ -35,23 +35,12 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libswresample/swresample.h>
 #include <libswscale/swscale.h>
 #include <libavfilter/avfilter.h>
 
 #if HAVE_LIBAVDEVICE
 #include <libavdevice/avdevice.h>
-#endif
-
-#if HAVE_LIBAV
-#include <libavresample/avresample.h>
-#else
-#include <libswresample/swresample.h>
-#endif
-
-#if LIBAVCODEC_VERSION_MICRO >= 100
-#define LIB_PREFIX "ffmpeg"
-#else
-#define LIB_PREFIX "libav"
 #endif
 
 // Needed because the av_log callback does not provide a library-safe message
@@ -151,7 +140,7 @@ void init_libav(struct mpv_global *global)
     pthread_mutex_lock(&log_lock);
     if (!log_mpv_instance) {
         log_mpv_instance = global;
-        log_root = mp_log_new(NULL, global->log, LIB_PREFIX);
+        log_root = mp_log_new(NULL, global->log, "ffmpeg");
         log_decaudio = mp_log_new(log_root, log_root, "audio");
         log_decvideo = mp_log_new(log_root, log_root, "video");
         log_demuxer = mp_log_new(log_root, log_root, "demuxer");
@@ -195,14 +184,10 @@ bool print_libav_versions(struct mp_log *log, int v)
         {"libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version()},
         {"libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version()},
         {"libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version()},
-#if HAVE_LIBAV
-        {"libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version()},
-#else
         {"libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version()},
-#endif
     };
 
-    mp_msg(log, v, "%s library versions:\n", LIB_PREFIX);
+    mp_msg(log, v, "FFmpeg library versions:\n");
 
     bool mismatch = false;
     for (int n = 0; n < MP_ARRAY_SIZE(libs); n++) {
@@ -216,7 +201,7 @@ bool print_libav_versions(struct mp_log *log, int v)
         mp_msg(log, v, "\n");
     }
 
-    mp_msg(log, v, "%s version: %s\n", LIB_PREFIX, av_version_info());
+    mp_msg(log, v, "FFmpeg version: %s\n", av_version_info());
 
     return !mismatch;
 }

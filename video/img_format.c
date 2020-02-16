@@ -377,10 +377,8 @@ enum mp_component_type mp_imgfmt_get_component_type(int imgfmt)
     if (!pixdesc || (pixdesc->flags & AV_PIX_FMT_FLAG_HWACCEL))
         return MP_COMPONENT_TYPE_UNKNOWN;
 
-#if LIBAVUTIL_VERSION_MICRO >= 100
     if (pixdesc->flags & AV_PIX_FMT_FLAG_FLOAT)
         return MP_COMPONENT_TYPE_FLOAT;
-#endif
 
     return MP_COMPONENT_TYPE_UINT;
 }
@@ -509,10 +507,8 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
     res.chroma_w = 1 << pixdesc->log2_chroma_w;
     res.chroma_h = 1 << pixdesc->log2_chroma_h;
 
-#if LIBAVUTIL_VERSION_MICRO >= 100
     if (pixdesc->flags & AV_PIX_FMT_FLAG_BAYER)
         return false; // it's satan himself
-#endif
 
     res.forced_csp = mp_imgfmt_get_forced_csp(imgfmt);
 
@@ -573,10 +569,6 @@ int mp_imgfmt_find(int xs, int ys, int planes, int component_bits, int flags)
     }
     return 0;
 }
-
-#if LIBAVUTIL_VERSION_MICRO < 100
-#define avcodec_find_best_pix_fmt_of_list avcodec_find_best_pix_fmt2
-#endif
 
 // Compare the dst image formats, and return the one which can carry more data
 // (e.g. higher depth, more color components, lower chroma subsampling, etc.),
