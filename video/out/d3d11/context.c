@@ -92,6 +92,7 @@ const struct m_sub_options d3d11_conf = {
 
 struct priv {
     struct d3d11_opts *opts;
+    struct m_config_cache *opts_cache;
 
     struct mp_vo_opts *vo_opts;
     struct m_config_cache *vo_opts_cache;
@@ -237,6 +238,8 @@ static void d3d11_swap_buffers(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
 
+    m_config_cache_update(p->opts_cache);
+
     LARGE_INTEGER perf_count;
     QueryPerformanceCounter(&perf_count);
     p->last_submit_qpc = perf_count.QuadPart;
@@ -248,6 +251,8 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
 {
     struct priv *p = sw->priv;
     HRESULT hr;
+
+    m_config_cache_update(p->opts_cache);
 
     // The calculations below are only valid if mpv presents on every vsync
     if (p->opts->sync_interval != 1)
@@ -329,6 +334,8 @@ static bool d3d11_set_fullscreen(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     HRESULT hr;
+
+    m_config_cache_update(p->opts_cache);
 
     if (!p->swapchain) {
         MP_ERR(ctx, "Full screen configuration was requested before D3D11 "
@@ -438,7 +445,8 @@ static const struct ra_swapchain_fns d3d11_swapchain = {
 static bool d3d11_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
-    p->opts = mp_get_config_group(ctx, ctx->global, &d3d11_conf);
+    p->opts_cache = m_config_cache_alloc(ctx, ctx->global, &d3d11_conf);
+    p->opts = p->opts_cache->opts;
 
     p->vo_opts_cache = m_config_cache_alloc(ctx, ctx->vo->global, &vo_sub_opts);
     p->vo_opts = p->vo_opts_cache->opts;
