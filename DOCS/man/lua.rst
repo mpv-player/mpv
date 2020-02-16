@@ -165,12 +165,19 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
 ``mp.command_native_async(table [,fn])``
     Like ``mp.command_native()``, but the command is ran asynchronously (as far
-    as possible), and upon completion, fn is called. fn has two arguments:
-    ``fn(success, result, error)``. ``success`` is always a Boolean and is true
-    if the command was successful, otherwise false. The second parameter is
-    the result value (can be nil) in case of success, nil otherwise (as returned
-    by ``mp.command_native()``). The third parameter is the error string in case
-    of an error, nil otherwise.
+    as possible), and upon completion, fn is called. fn has three arguments:
+    ``fn(success, result, error)``:
+
+         ``success``
+            Always a Boolean and is true if the command was successful,
+            otherwise false.
+
+        ``result``
+            The result value (can be nil) in case of success, nil otherwise (as
+            returned by ``mp.command_native()``).
+
+        ``error``
+            The error string in case of an error, nil otherwise.
 
     Returns a table with undefined contents, which can be used as argument for
     ``mp.abort_async_command``.
