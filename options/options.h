@@ -103,6 +103,9 @@ struct mp_subtitle_opts {
 struct mp_sub_filter_opts {
     int sub_filter_SDH;
     int sub_filter_SDH_harder;
+    int rf_enable;
+    char **rf_items;
+    int rf_warn;
 };
 
 struct mp_osd_render_opts {

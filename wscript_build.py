@@ -388,6 +388,7 @@ def build(ctx):
         ( "sub/ass_mp.c",                        "libass"),
         ( "sub/dec_sub.c" ),
         ( "sub/draw_bmp.c" ),
+        ( "sub/filter_regex.c",                  "posix" ),
         ( "sub/filter_sdh.c" ),
         ( "sub/img_convert.c" ),
         ( "sub/lavc_conv.c" ),

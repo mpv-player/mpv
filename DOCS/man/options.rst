@@ -2571,6 +2571,47 @@ Subtitles
 
     Default: ``no``.
 
+``--sub-filter-regex-...=...``
+    Set a list of regular expressions to match on text subtitles, and remove any
+    lines that match (default: empty). This is a string list option. See
+    `List Options`_ for details. Normally, you should use
+    ``--sub-filter-regex-append=<regex>``, where each option use will append a
+    new regular expression, without having to fight escaping problems.
+
+    List items are matched in order. If a regular expression matches, the
+    process is stopped, and the subtitle line is discarded. The text matched
+    against is, currently, always the ``Text`` field of ASS events (if the
+    subtitle format is different, it is always converted). This may include
+    formatting tags. Matching is case-insensitive, but how this is done depends
+    on the libc, and most likely works in ASCII only. It does not work on
+    bitmap/image subtitles. Unavailable on inferior OSes (requires POSIX regex
+    support).
+
+    .. admonition:: Example
+
+        ``--sub-filter-regex-append=opensubtitles\.org`` filters some ads.
+
+    Technically, using a list for matching is redundant, since you could just
+    use a single combined regular expression. But it helps with diagnosis,
+    ease of use, and temporarily disabling or enabling individual filters.
+
+    .. warning::
+
+        This is experimental. The semantics most likely will change, and if you
+        use this, you should be prepared to update the option later. Ideas
+        include replacing the regexes with a very primitive and small subset of
+        sed, or some method to control case-sensitivity.
+
+``--sub-filter-regex-warn=<yes|no>``
+    Log dropped lines with warning log level, instead of verbose (default: no).
+    Helpful for testing.
+
+``--sub-filter-regex-enable=<yes|no>``
+    Whether to enable regex filtering (default: yes). Note that if no regexes
+    are added to the ``--sub-filter-regex`` list, setting this option to ``yes``
+    has no default. It's meant to easily disable or enable filtering
+    temporarily.
+
 ``--sub-create-cc-track=<yes|no>``
     For every video stream, create a closed captions track (default: no). The
     only purpose is to make the track available for selection at the start of

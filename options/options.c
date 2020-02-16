@@ -201,9 +201,15 @@ const struct m_sub_options mp_sub_filter_opts = {
     .opts = (const struct m_option[]){
         OPT_FLAG("sub-filter-sdh", sub_filter_SDH, 0),
         OPT_FLAG("sub-filter-sdh-harder", sub_filter_SDH_harder, 0),
+        OPT_FLAG("sub-filter-regex-enable", rf_enable, 0),
+        OPT_STRINGLIST("sub-filter-regex", rf_items, 0),
+        OPT_FLAG("sub-filter-regex-warn", rf_warn, 0),
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
+    .defaults = &(OPT_BASE_STRUCT){
+        .rf_enable = 1,
+    },
     .change_flags = UPDATE_SUB_FILT,
 };
 

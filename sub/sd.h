@@ -87,5 +87,6 @@ struct sd_filter_functions {
 };
 
 extern const struct sd_filter_functions sd_filter_sdh;
+extern const struct sd_filter_functions sd_filter_regex;
 
 #endif
