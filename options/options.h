@@ -82,8 +82,6 @@ struct mp_subtitle_opts {
     float sub_scale;
     float sub_gauss;
     int sub_gray;
-    int sub_filter_SDH;
-    int sub_filter_SDH_harder;
     int ass_enabled;
     float ass_line_spacing;
     int ass_use_margins;
@@ -100,6 +98,11 @@ struct mp_subtitle_opts {
     int ass_justify;
     int sub_clear_on_seek;
     int teletext_page;
+};
+
+struct mp_sub_filter_opts {
+    int sub_filter_SDH;
+    int sub_filter_SDH_harder;
 };
 
 struct mp_osd_render_opts {
@@ -173,6 +176,7 @@ typedef struct MPOpts {
     char *audio_spdif;
 
     struct mp_subtitle_opts *subs_rend;
+    struct mp_sub_filter_opts *subs_filt;
     struct mp_osd_render_opts *osd_rend;
 
     int osd_level;
@@ -361,6 +365,7 @@ struct filter_opts {
 extern const struct m_sub_options vo_sub_opts;
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
+extern const struct m_sub_options mp_sub_filter_opts;
 extern const struct m_sub_options mp_osd_render_sub_opts;
 extern const struct m_sub_options filter_conf;
 extern const struct m_sub_options resample_conf;

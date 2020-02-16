@@ -6115,12 +6115,14 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);
 
-    if (flags & UPDATE_OSD) {
+    if (flags & (UPDATE_OSD | UPDATE_SUB_FILT)) {
         for (int n = 0; n < NUM_PTRACKS; n++) {
             struct track *track = mpctx->current_track[n][STREAM_SUB];
             struct dec_sub *sub = track ? track->d_sub : NULL;
-            if (sub)
-                sub_update_opts(track->d_sub);
+            if (sub) {
+                sub_control(track->d_sub, SD_CTRL_UPDATE_OPTS,
+                            (void *)(uintptr_t)flags);
+            }
         }
         osd_changed(mpctx->osd);
         mp_wakeup_core(mpctx);

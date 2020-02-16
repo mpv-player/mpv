@@ -15,9 +15,11 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+
 #include "misc/ctype.h"
 #include "common/common.h"
 #include "common/msg.h"
@@ -43,7 +45,7 @@ static void init_buf(struct buffer *buf, int length)
     buf->length = length;
 }
 
-static inline int append(struct sd *sd, struct buffer *buf, char c)
+static inline int append(struct sd_filter *sd, struct buffer *buf, char c)
 {
     if (buf->pos >= 0 && buf->pos < buf->length) {
         buf->string[buf->pos++] = c;
@@ -66,7 +68,7 @@ static inline int append(struct sd *sd, struct buffer *buf, char c)
 //
 // on return the read pointer is updated to the position after
 // the tags.
-static void copy_ass(struct sd *sd, char **rpp, struct buffer *buf)
+static void copy_ass(struct sd_filter *sd, char **rpp, struct buffer *buf)
 {
     char *rp = *rpp;
 
@@ -83,7 +85,7 @@ static void copy_ass(struct sd *sd, char **rpp, struct buffer *buf)
     return;
 }
 
-static bool skip_bracketed(struct sd *sd, char **rpp, struct buffer *buf);
+static bool skip_bracketed(struct sd_filter *sd, char **rpp, struct buffer *buf);
 
 // check for speaker label, like MAN:
 // normal subtitles may include mixed case text with : after so
@@ -101,7 +103,7 @@ static bool skip_bracketed(struct sd *sd, char **rpp, struct buffer *buf);
 // if no label was found read pointer and write position in buffer
 // will be unchanged
 // otherwise they point to next position after label and next write position
-static void skip_speaker_label(struct sd *sd, char **rpp, struct buffer *buf)
+static void skip_speaker_label(struct sd_filter *sd, char **rpp, struct buffer *buf)
 {
     int filter_harder = sd->opts->sub_filter_SDH_harder;
     char *rp = *rpp;
@@ -187,7 +189,7 @@ static void skip_speaker_label(struct sd *sd, char **rpp, struct buffer *buf)
 // return true if bracketed text was removed.
 // if not valid SDH read pointer and write buffer position will be unchanged
 // otherwise they point to next position after text and next write position
-static bool skip_bracketed(struct sd *sd, char **rpp, struct buffer *buf)
+static bool skip_bracketed(struct sd_filter *sd, char **rpp, struct buffer *buf)
 {
     char *rp = *rpp;
     int old_pos = buf->pos;
@@ -235,7 +237,7 @@ static bool skip_bracketed(struct sd *sd, char **rpp, struct buffer *buf)
 // return true if paranthesed text was removed.
 // if not valid SDH read pointer and write buffer position will be unchanged
 // otherwise they point to next position after text and next write position
-static bool skip_parenthesed(struct sd *sd, char **rpp, struct buffer *buf)
+static bool skip_parenthesed(struct sd_filter *sd, char **rpp, struct buffer *buf)
 {
     int filter_harder = sd->opts->sub_filter_SDH_harder;
     char *rp = *rpp;
@@ -289,7 +291,8 @@ static bool skip_parenthesed(struct sd *sd, char **rpp, struct buffer *buf)
 //
 // when removing characters the following are moved back
 //
-static void remove_leading_hyphen_space(struct sd *sd, int start_pos, struct buffer *buf)
+static void remove_leading_hyphen_space(struct sd_filter *sd, int start_pos,
+                                        struct buffer *buf)
 {
     int old_pos = buf->pos;
     if (start_pos < 0 || start_pos >= old_pos)
@@ -340,7 +343,8 @@ static void remove_leading_hyphen_space(struct sd *sd, int start_pos, struct buf
 //
 // Returns NULL if filtering resulted in all of ASS data being removed so no
 // subtitle should be output
-char *filter_SDH(struct sd *sd, char *format, int n_ignored, char *data, int length)
+static char *filter_SDH(struct sd_filter *sd, char *format, int n_ignored,
+                        char *data, int length)
 {
     if (!format) {
         MP_VERBOSE(sd, "SDH filtering not possible - format missing\n");
@@ -462,3 +466,42 @@ char *filter_SDH(struct sd *sd, char *format, int n_ignored, char *data, int len
         return NULL;
     }
 }
+
+static bool sdh_init(struct sd_filter *ft)
+{
+    if (strcmp(ft->codec, "ass") != 0)
+        return false;
+
+    if (!ft->opts->sub_filter_SDH)
+        return false;
+
+    return true;
+}
+
+static struct demux_packet *sdh_filter(struct sd_filter *ft,
+                                       struct demux_packet *pkt)
+{
+    char *line = (char *)pkt->buffer;
+    size_t len = pkt->len;
+    if (len >= INT_MAX)
+        return NULL;
+
+    line = filter_SDH(ft, ft->event_format, 1, line, len);
+    if (!line)
+        return NULL;
+
+    // Stupidly, this copies it again. One could possibly allocate the packet
+    // for writing in the first place (new_demux_packet()) and use
+    // demux_packet_shorten(). Or not allocate anything on no change.
+    struct demux_packet *npkt = new_demux_packet_from(line, strlen(line));
+    if (npkt)
+        demux_packet_copy_attribs(npkt, pkt);
+
+    talloc_free(line);
+    return npkt;
+}
+
+const struct sd_filter_functions sd_filter_sdh = {
+    .init   = sdh_init,
+    .filter = sdh_filter,
+};

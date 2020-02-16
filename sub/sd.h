@@ -3,6 +3,7 @@
 
 #include "dec_sub.h"
 #include "demux/packet.h"
+#include "misc/bstr.h"
 
 // up to 210 ms overlaps or gaps are removed
 #define SUB_GAP_THRESHOLD 0.210
@@ -43,6 +44,7 @@ struct sd_functions {
     struct sd_times (*get_times)(struct sd *sd, double pts);
 };
 
+// lavc_conv.c
 struct lavc_conv;
 struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
                                    char *extradata, int extradata_len);
@@ -52,6 +54,38 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
 void lavc_conv_reset(struct lavc_conv *priv);
 void lavc_conv_uninit(struct lavc_conv *priv);
 
-char *filter_SDH(struct sd *sd, char *format, int n_ignored, char *data, int length);
+struct sd_filter {
+    struct mpv_global *global;
+    struct mp_log *log;
+    struct mp_sub_filter_opts *opts;
+    const struct sd_filter_functions *driver;
+
+    void *priv;
+
+    // Static codec parameters. Set by sd; cannot be changed by filter.
+    char *codec;
+    char *event_format;
+};
+
+struct sd_filter_functions {
+    bool (*init)(struct sd_filter *ft);
+
+    // Filter an ASS event (usually in the Matroska format, but event_format
+    // can be used to determine details).
+    // Returning NULL is interpreted as dropping the event completely.
+    // Returning pkt makes it no-op.
+    // If the returned packet is not pkt or NULL, it must have been properly
+    // allocated.
+    // pkt is owned by the caller (and freed by the caller when needed).
+    // Note: as by normal demux_packet rules, you must not modify any fields in
+    //       it, or the data referenced by it. You must create a new demux_packet
+    //       when modifying data.
+    struct demux_packet *(*filter)(struct sd_filter *ft,
+                                   struct demux_packet *pkt);
+
+    void (*uninit)(struct sd_filter *ft);
+};
+
+extern const struct sd_filter_functions sd_filter_sdh;
 
 #endif

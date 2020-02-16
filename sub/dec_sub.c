@@ -413,6 +413,7 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
 {
     int r = CONTROL_UNKNOWN;
     pthread_mutex_lock(&sub->lock);
+    bool propagate = false;
     switch (cmd) {
     case SD_CTRL_SET_VIDEO_DEF_FPS:
         sub->video_fps = *(double *)arg;
@@ -427,21 +428,19 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
         if (r == CONTROL_OK)
             a[0] = pts_from_subtitle(sub, arg2[0]);
         break;
+    case SD_CTRL_UPDATE_OPTS:
+        if (m_config_cache_update(sub->opts_cache))
+            update_subtitle_speed(sub);
+        propagate = true;
+        break;
     }
     default:
-        if (sub->sd->driver->control)
-            r = sub->sd->driver->control(sub->sd, cmd, arg);
+        propagate = true;
     }
+    if (propagate && sub->sd->driver->control)
+        r = sub->sd->driver->control(sub->sd, cmd, arg);
     pthread_mutex_unlock(&sub->lock);
     return r;
-}
-
-void sub_update_opts(struct dec_sub *sub)
-{
-    pthread_mutex_lock(&sub->lock);
-    if (m_config_cache_update(sub->opts_cache))
-        update_subtitle_speed(sub);
-    pthread_mutex_unlock(&sub->lock);
 }
 
 void sub_set_recorder_sink(struct dec_sub *sub, struct mp_recorder_sink *sink)

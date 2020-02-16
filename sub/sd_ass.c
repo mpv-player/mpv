@@ -26,6 +26,8 @@
 
 #include "mpv_talloc.h"
 
+#include "config.h"
+#include "options/m_config.h"
 #include "options/options.h"
 #include "common/common.h"
 #include "common/msg.h"
@@ -43,6 +45,9 @@ struct sd_ass_priv {
     struct ass_track *shadow_track; // for --sub-ass=no rendering
     bool is_converted;
     struct lavc_conv *converter;
+    struct sd_filter **filters;
+    int num_filters;
+    bool clear_once;
     bool on_top;
     struct mp_ass_packer *packer;
     struct sub_bitmap *bs;
@@ -56,6 +61,12 @@ struct sd_ass_priv {
 
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
 static void fill_plaintext(struct sd *sd, double pts);
+
+static const struct sd_filter_functions *const filters[] = {
+    // Note: list order defines filter order.
+    &sd_filter_sdh,
+    NULL,
+};
 
 // Add default styles, if the track does not have any styles yet.
 // Apply style overrides if the user provides any.
@@ -130,6 +141,43 @@ static void add_subtitle_fonts(struct sd *sd)
     }
 }
 
+static void filters_destroy(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+
+    for (int n = 0; n < ctx->num_filters; n++) {
+        struct sd_filter *ft = ctx->filters[n];
+        if (ft->driver->uninit)
+            ft->driver->uninit(ft);
+        talloc_free(ft);
+    }
+    ctx->num_filters = 0;
+}
+
+static void filters_init(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+
+    filters_destroy(sd);
+
+    for (int n = 0; filters[n]; n++) {
+        struct sd_filter *ft = talloc_ptrtype(ctx, ft);
+        *ft = (struct sd_filter){
+            .global = sd->global,
+            .log = sd->log,
+            .opts = mp_get_config_group(ft, sd->global, &mp_sub_filter_opts),
+            .driver = filters[n],
+            .codec = "ass",
+            .event_format = ctx->ass_track->event_format,
+        };
+        if (ft->driver->init(ft)) {
+            MP_TARRAY_APPEND(ctx, ctx->filters, ctx->num_filters, ft);
+        } else {
+            talloc_free(ft);
+        }
+    }
+}
+
 static void enable_output(struct sd *sd, bool enable)
 {
     struct sd_ass_priv *ctx = sd->priv;
@@ -198,10 +246,35 @@ static int init(struct sd *sd)
 #endif
 
     enable_output(sd, true);
+    filters_init(sd);
 
     ctx->packer = mp_ass_packer_alloc(ctx);
 
     return 0;
+}
+
+// Note: pkt is not necessarily a fully valid refcounted packet.
+static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    struct demux_packet *orig_pkt = pkt;
+
+    for (int n = 0; n < ctx->num_filters; n++) {
+        struct sd_filter *ft = ctx->filters[n];
+        struct demux_packet *npkt = ft->driver->filter(ft, pkt);
+        if (pkt != npkt && pkt != orig_pkt)
+            talloc_free(pkt);
+        pkt = npkt;
+        if (!pkt)
+            return;
+    }
+
+    ass_process_chunk(ctx->ass_track, pkt->buffer, pkt->len,
+                      llrint(pkt->pts * 1000),
+                      llrint(pkt->duration * 1000));
+
+    if (pkt != orig_pkt)
+        talloc_free(pkt);
 }
 
 // Test if the packet with the given file position (used as unique ID) was
@@ -251,15 +324,13 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         }
 
         for (int n = 0; r && r[n]; n++) {
-            char *ass_line = r[n];
-            if (sd->opts->sub_filter_SDH)
-                ass_line = filter_SDH(sd, track->event_format, 1, ass_line, 0);
-            if (ass_line)
-                ass_process_chunk(track, ass_line, strlen(ass_line),
-                                  llrint(sub_pts * 1000),
-                                  llrint(sub_duration * 1000));
-            if (sd->opts->sub_filter_SDH)
-                talloc_free(ass_line);
+            struct demux_packet pkt2 = {
+                .pts = sub_pts,
+                .duration = sub_duration,
+                .buffer = r[n],
+                .len = strlen(r[n]),
+            };
+            filter_and_add(sd, &pkt2);
         }
         if (ctx->duration_unknown) {
             for (int n = 0; n < track->n_events - 1; n++) {
@@ -272,18 +343,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     } else {
         // Note that for this packet format, libass has an internal mechanism
         // for discarding duplicate (already seen) packets.
-        char *ass_line = packet->buffer;
-        int ass_len = packet->len;
-        if (sd->opts->sub_filter_SDH) {
-            ass_line = filter_SDH(sd, track->event_format, 1, ass_line, ass_len);
-            ass_len = ass_line ? strlen(ass_line) : 0;
-        }
-        if (ass_line)
-            ass_process_chunk(track, ass_line, ass_len,
-                              llrint(packet->pts * 1000),
-                              llrint(packet->duration * 1000));
-        if (sd->opts->sub_filter_SDH)
-            talloc_free(ass_line);
+        filter_and_add(sd, packet);
     }
 }
 
@@ -668,10 +728,11 @@ static void fill_plaintext(struct sd *sd, double pts)
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (sd->opts->sub_clear_on_seek || ctx->duration_unknown) {
+    if (sd->opts->sub_clear_on_seek || ctx->duration_unknown || ctx->clear_once) {
         ass_flush_events(ctx->ass_track);
         ctx->num_seen_packets = 0;
         sd->preload_ok = false;
+        ctx->clear_once = false;
     }
     if (ctx->converter)
         lavc_conv_reset(ctx->converter);
@@ -681,6 +742,7 @@ static void uninit(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
 
+    filters_destroy(sd);
     if (ctx->converter)
         lavc_conv_uninit(ctx->converter);
     ass_free_track(ctx->ass_track);
@@ -708,6 +770,15 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     case SD_CTRL_SET_TOP:
         ctx->on_top = *(bool *)arg;
         return CONTROL_OK;
+    case SD_CTRL_UPDATE_OPTS: {
+        int flags = (uintptr_t)arg;
+        if (flags & UPDATE_SUB_FILT) {
+            filters_destroy(sd);
+            filters_init(sd);
+            ctx->clear_once = true; // allow reloading on seeks
+        }
+        return CONTROL_OK;
+    }
     default:
         return CONTROL_UNKNOWN;
     }

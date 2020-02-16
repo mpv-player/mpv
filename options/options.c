@@ -195,6 +195,19 @@ const struct m_sub_options vo_sub_opts = {
 };
 
 #undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct mp_sub_filter_opts
+
+const struct m_sub_options mp_sub_filter_opts = {
+    .opts = (const struct m_option[]){
+        OPT_FLAG("sub-filter-sdh", sub_filter_SDH, 0),
+        OPT_FLAG("sub-filter-sdh-harder", sub_filter_SDH_harder, 0),
+        {0}
+    },
+    .size = sizeof(OPT_BASE_STRUCT),
+    .change_flags = UPDATE_SUB_FILT,
+};
+
+#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct mp_subtitle_opts
 
 const struct m_sub_options mp_subtitle_sub_opts = {
@@ -212,8 +225,6 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         OPT_FLOATRANGE("sub-gauss", sub_gauss, 0, 0.0, 3.0),
         OPT_FLAG("sub-gray", sub_gray, 0),
         OPT_FLAG("sub-ass", ass_enabled, 0),
-        OPT_FLAG("sub-filter-sdh", sub_filter_SDH, 0),
-        OPT_FLAG("sub-filter-sdh-harder", sub_filter_SDH_harder, 0),
         OPT_FLOATRANGE("sub-scale", sub_scale, 0, 0, 100),
         OPT_FLOATRANGE("sub-ass-line-spacing", ass_line_spacing, 0, -1000, 1000),
         OPT_FLAG("sub-use-margins", sub_use_margins, 0),
@@ -555,6 +566,7 @@ static const m_option_t mp_opts[] = {
                ({"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})),
 
     OPT_SUBSTRUCT("", subs_rend, mp_subtitle_sub_opts, 0),
+    OPT_SUBSTRUCT("", subs_filt, mp_sub_filter_opts, 0),
     OPT_SUBSTRUCT("", osd_rend, mp_osd_render_sub_opts, 0),
 
     OPT_FLAG("osd-bar", osd_bar_visible, UPDATE_OSD),
