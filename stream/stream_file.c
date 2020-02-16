@@ -77,9 +77,14 @@ static int64_t get_size(stream_t *s)
 {
     struct priv *p = s->priv;
     if (p->cached_size == -2) {
-        off_t size = lseek(p->fd, 0, SEEK_END);
-        lseek(p->fd, s->pos, SEEK_SET);
-        p->cached_size = size < 0 ? -1 : size;
+        int64_t size = -1;
+        struct stat st;
+        if (fstat(p->fd, &st) == 0) {
+            if (st.st_size <= 0 && !s->seekable)
+                st.st_size = -1;
+            size = st.st_size < 0 ? -1 : st.st_size;
+        }
+        p->cached_size = size;
     }
     return p->cached_size;
 }
