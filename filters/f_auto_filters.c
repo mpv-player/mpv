@@ -68,6 +68,7 @@ static void deint_process(struct mp_filter *f)
         return;
     }
 
+    bool has_filter = true;
     if (img->imgfmt == IMGFMT_VDPAU) {
         char *args[] = {"deint", "yes", NULL};
         p->sub.filter =
@@ -80,6 +81,13 @@ static void deint_process(struct mp_filter *f)
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "yadif_cuda", args);
     } else {
+        has_filter = false;
+    }
+
+    if (!p->sub.filter) {
+        if (has_filter)
+            MP_ERR(f, "creating deinterlacer failed\n");
+
         struct mp_filter *subf = mp_bidir_dummy_filter_create(f);
         struct mp_filter *filters[2] = {0};
 
@@ -105,9 +113,6 @@ static void deint_process(struct mp_filter *f)
         mp_chain_filters(subf->ppins[0], subf->ppins[1], filters, 2);
         p->sub.filter = subf;
     }
-
-    if (!p->sub.filter)
-        MP_ERR(f, "creating deinterlacer failed\n");
 
     mp_subfilter_continue(&p->sub);
 }
