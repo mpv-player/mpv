@@ -4027,12 +4027,17 @@ static void update_cache(struct demux_internal *in)
 
     struct mp_tags *stream_metadata = NULL;
 
+    int64_t now = mp_time_us();
+    int64_t diff = now - in->last_speed_query;
+    bool do_update = diff >= MP_SECOND_US;
+
     // Don't lock while querying the stream.
     pthread_mutex_unlock(&in->lock);
 
     int64_t stream_size = -1;
     if (stream) {
-        stream_size = stream_get_size(stream);
+        if (do_update)
+            stream_size = stream_get_size(stream);
         stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
     }
 
@@ -4040,7 +4045,8 @@ static void update_cache(struct demux_internal *in)
 
     pthread_mutex_lock(&in->lock);
 
-    in->stream_size = stream_size;
+    if (do_update)
+        in->stream_size = stream_size;
     if (stream_metadata) {
         add_timed_metadata(in, stream_metadata, NULL, MP_NOPTS_VALUE);
         talloc_free(stream_metadata);
@@ -4048,9 +4054,7 @@ static void update_cache(struct demux_internal *in)
 
     in->next_cache_update = INT64_MAX;
 
-    int64_t now = mp_time_us();
-    int64_t diff = now - in->last_speed_query;
-    if (diff >= MP_SECOND_US) {
+    if (do_update) {
         uint64_t bytes = in->cache_unbuffered_read_bytes;
         in->cache_unbuffered_read_bytes = 0;
         in->last_speed_query = now;
