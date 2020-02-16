@@ -304,7 +304,6 @@ static void precreate_graph(struct lavfi *c, bool first_init)
 error:
     free_graph(c);
     c->failed = true;
-    mp_filter_internal_mark_failed(c->f);
     return;
 }
 
@@ -518,7 +517,6 @@ static bool init_pads(struct lavfi *c)
 error:
     MP_FATAL(c, "could not initialize filter pads\n");
     c->failed = true;
-    mp_filter_internal_mark_failed(c->f);
     return false;
 }
 
@@ -556,7 +554,6 @@ static void init_graph(struct lavfi *c)
             MP_FATAL(c, "failed to configure the filter graph\n");
             free_graph(c);
             c->failed = true;
-            mp_filter_internal_mark_failed(c->f);
             return;
         }
 
