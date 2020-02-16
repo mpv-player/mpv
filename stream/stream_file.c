@@ -76,11 +76,11 @@ struct priv {
 static int64_t get_size(stream_t *s)
 {
     struct priv *p = s->priv;
-    if (p->cached_size == -2) {
+    //if (p->cached_size == -2) {
         off_t size = lseek(p->fd, 0, SEEK_END);
         lseek(p->fd, s->pos, SEEK_SET);
         p->cached_size = size < 0 ? -1 : size;
-    }
+    //}
     return p->cached_size;
 }
 
