@@ -76,7 +76,7 @@ struct priv {
 static int64_t get_size(stream_t *s)
 {
     struct priv *p = s->priv;
-    if (p->cached_size == -2) {
+    //if (p->cached_size == -2) {
         int64_t size = -1;
         struct stat st;
         if (fstat(p->fd, &st) == 0) {
@@ -85,7 +85,7 @@ static int64_t get_size(stream_t *s)
             size = st.st_size < 0 ? -1 : st.st_size;
         }
         p->cached_size = size;
-    }
+    //}
     return p->cached_size;
 }
 
