@@ -93,9 +93,6 @@ static bool split_opt(struct parse_state *p)
         }
         p->param = bstr0(p->argv[0]);
         p->argv++;
-        MP_WARN(p, "The legacy option syntax ('-%.*s value') is deprecated "
-                "and dangerous.\nPlease use '--%.*s=value'.\n",
-                BSTR_P(p->arg), BSTR_P(p->arg));
     }
 
     return true;
