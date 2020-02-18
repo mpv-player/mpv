@@ -164,9 +164,6 @@ enum mp_imgfmt {
     // Like IMGFMT_NV12, but with 10 bits per component (and 6 bits of padding)
     IMGFMT_P010,
 
-    // Like IMGFMT_NV12, but for 4:4:4
-    IMGFMT_NV24,
-
     // RGB/BGR Formats
 
     // Byte accessed (low address to high address)
