@@ -315,7 +315,7 @@ When executed, a socket (the IPC connection) is passed to them through file
 descriptor inheritance. The file descriptor is indicated as the special command
 line argument ``--mpv-ipc-fd=N``, where ``N`` is the numeric file descriptor.
 Currently, this is hardcoded as ``--mpv-ipc-fd=3``, and the intention is that
-it will always be ``3``. (This was a promise between keeping it as simple as
+it will always be ``3``. (This was a compromise between keeping it as simple as
 possible, and not doing too much implicitly. Also, since there is a chance that
 this will change anyway, you should at least validate that you got the expected
 argument.)

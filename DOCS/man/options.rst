@@ -823,6 +823,16 @@ Program Behavior
     should use ``%`` before any of the characters ``^$()%|,.[]*+-?`` to match
     that character.
 
+    .. admonition:: Examples
+
+        - ``--script-opts=ytdl_hook-exclude='^youtube%.com'``
+          will exclude any URL that starts with ``http://youtube.com`` or
+          ``https://youtube.com``.
+        - ``--script-opts=ytdl_hook-exclude='%.mkv$|%.mp4$'``
+          will exclude any URL that ends with ``.mkv`` or ``.mp4``.
+
+    See more lua patterns here: https://www.lua.org/manual/5.1/manual.html#5.4.1
+
     The ``all_formats`` script option accepts a boolean 'yes' or 'no',
     and if 'yes' will attempt to add all formats found reported by youtube-dl
     (default: no). Each format is added as a separate track. In addition, they
@@ -835,16 +845,6 @@ Program Behavior
     makes it possible to switch streams at runtime, it's not suitable for this
     purpose for various technical reasons. In general, this option is not
     useful, and was only added to show that it's possible.
-
-    .. admonition:: Examples
-
-        - ``--script-opts=ytdl_hook-exclude='^youtube%.com'``
-          will exclude any URL that starts with ``http://youtube.com`` or
-          ``https://youtube.com``.
-        - ``--script-opts=ytdl_hook-exclude='%.mkv$|%.mp4$'``
-          will exclude any URL that ends with ``.mkv`` or ``.mp4``.
-
-    See more lua patterns here: https://www.lua.org/manual/5.1/manual.html#5.4.1
 
     The ``use_manifests`` script option makes mpv use the master manifest URL for
     formats like HLS and DASH, if available, allowing for video/audio selection
