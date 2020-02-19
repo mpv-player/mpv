@@ -46,8 +46,6 @@ enum {
     AD_WAIT = -4,
 };
 
-// Try to reuse the existing filters to change playback speed. If it works,
-// return true; if filter recreation is needed, return false.
 static void update_speed_filters(struct MPContext *mpctx)
 {
     struct ao_chain *ao_c = mpctx->ao_chain;
