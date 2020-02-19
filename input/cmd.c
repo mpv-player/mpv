@@ -544,6 +544,15 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
     return ret;
 }
 
+static int get_arg_count(const struct mp_cmd_def *cmd)
+{
+    for (int i = MP_CMD_DEF_MAX_ARGS - 1; i >= 0; i--) {
+        if (cmd->args[i].type)
+            return i + 1;
+    }
+    return 0;
+}
+
 void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
 {
     if (!mp_msg_test(log, msgl))
@@ -555,7 +564,9 @@ void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
         return;
     }
     mp_msg(log, msgl, "%s, flags=%d, args=[", cmd->name, cmd->flags);
+    int argc = get_arg_count(cmd->def);
     for (int n = 0; n < cmd->nargs; n++) {
+        const char *argname = cmd->def->args[MPMIN(n, argc - 1)].name;
         char *s = m_option_print(cmd->args[n].type, &cmd->args[n].v);
         if (n)
             mp_msg(log, msgl, ", ");
@@ -565,7 +576,7 @@ void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
         };
         char *esc = NULL;
         json_write(&esc, &node);
-        mp_msg(log, msgl, "%s", esc ? esc : "<error>");
+        mp_msg(log, msgl, "%s=%s", argname, esc ? esc : "<error>");
         talloc_free(esc);
         talloc_free(s);
     }
