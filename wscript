@@ -282,10 +282,6 @@ iconv support use --disable-iconv.",
         'deps': 'glob-posix || glob-win32',
         'func': check_true,
     }, {
-        'name': 'fchmod',
-        'desc': 'fchmod()',
-        'func': check_statement('sys/stat.h', 'fchmod(0, 0)'),
-    }, {
         'name': 'vt.h',
         'desc': 'vt.h',
         'func': check_statement(['sys/vt.h', 'sys/ioctl.h'],

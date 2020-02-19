@@ -314,9 +314,7 @@ static void *ipc_thread(void *p)
         goto done;
     }
 
-#if HAVE_FCHMOD
     fchmod(ipc_fd, 0600);
-#endif
 
     size_t path_len = strlen(arg->path);
     if (path_len >= sizeof(ipc_un.sun_path) - 1) {
