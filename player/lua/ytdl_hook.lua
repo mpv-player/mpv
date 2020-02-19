@@ -5,7 +5,8 @@ local options = require 'mp.options'
 local o = {
     exclude = "",
     try_ytdl_first = false,
-    use_manifests = false
+    use_manifests = false,
+    all_formats = false,
 }
 options.read_options(o)
 
@@ -29,10 +30,37 @@ local safe_protos = Set {
     "data"
 }
 
--- Codec name as reported by youtube-dl mapped to mpv internal codec names.
-local map_codec_to_mpv = {
-    ["vtt"] = "webvtt",
+local codec_map = {
+    ["vtt"]         = "webvtt",
+    ["opus"]        = "opus",
+    ["vp9"]         = "vp9",
 }
+
+-- Codec name as reported by youtube-dl mapped to mpv internal codec names.
+-- Fun fact: mpv will not really use the codec, but will still try to initialize
+-- the codec on track selection (just to scrap it), meaning it's only a hint,
+-- but one that may make initialization fail. On the other hand, if the codec
+-- is valid but completely different from the actual media, nothing bad happens.
+local function map_codec_to_mpv(codec)
+    if codec == nil then
+        return nil
+    end
+    local mc = codec_map[codec]
+    if mc then
+        return mc
+    end
+    if codec:sub(1, 5) == "avc1." then
+        return "h264"
+    end
+    if codec:sub(1, 5) == "av01." then
+        return "av1"
+    end
+    if codec:sub(1, 5) == "mp4a." then
+        return "aac"
+    end
+    print("unknoiwn codec " .. codec)
+    return nil
+end
 
 local function exec(args)
     local ret = mp.command_native({name = "subprocess",
@@ -288,10 +316,26 @@ local function valid_manifest(json)
         proto:find("^m3u8")
 end
 
+local function as_integer(v, def)
+    def = def or 0
+    local num = math.floor(tonumber(v) or def)
+    if num > -math.huge and num < math.huge then
+        return num
+    end
+    return def
+end
+
 local function add_single_video(json)
     local streamurl = ""
     local max_bitrate = 0
-    local reqfmts = json["requested_formats"]
+    local formats = json["requested_formats"]
+    local duration = as_integer(json["duration"])
+
+    local use_all_formats = o.all_formats
+    local all_formats = json["formats"]
+    if use_all_formats and all_formats and (#all_formats > 0) then
+        formats = all_formats
+    end
 
     -- prefer manifest_url if present
     if o.use_manifests and valid_manifest(json) then
@@ -316,10 +360,11 @@ local function add_single_video(json)
         end
 
     -- DASH/split tracks
-    elseif reqfmts then
+    elseif formats then
         local streams = {}
+        local single_url = nil
 
-        for _, track in pairs(reqfmts) do
+        for _, track in pairs(formats) do
             local edl_track = nil
             edl_track = edl_track_joined(track.fragments,
                 track.protocol, json.is_live,
@@ -327,24 +372,46 @@ local function add_single_video(json)
             if not edl_track and not url_is_safe(track.url) then
                 return
             end
+            local media_type = nil
+            local codec = nil
             if track.vcodec and track.vcodec ~= "none" then
-                -- video track
-                streams[#streams + 1] = edl_track or track.url
+                media_type = "video"
+                codec = track.vcodec
             elseif track.vcodec == "none" then
-                -- audio track
-                streams[#streams + 1] = edl_track or track.url
+                media_type = "audio"
+                codec = track.acodec
             end
+            if not media_type then
+                return
+            end
+            local url = edl_track or track.url
+            local hdr = {"!new_stream", "!no_clip", "!no_chapters"}
+            if use_all_formats then
+                local codec = map_codec_to_mpv(codec)
+                hdr[#hdr + 1] = "!delay_open,media_type=" .. media_type ..
+                    ",codec=" .. (codec or "null") .. ",w=" ..
+                    as_integer(track.width) .. ",h=" .. as_integer(track.height)
+                local size = as_integer(track["filesize"])
+                local byterate = 0
+                if size > 0 and duration > 0 then
+                    byterate = as_integer(size / duration)
+                end
+                hdr[#hdr + 1] = "!track_meta,title=" ..
+                    edl_escape(track.format_note or "") ..
+                    ",byterate=" .. byterate
+            end
+            hdr[#hdr + 1] = edl_escape(url)
+            streams[#streams + 1] = table.concat(hdr, ";")
+            -- In case there is only 1 of these streams.
+            -- Note: assumes it has no important EDL headers
+            single_url = url
         end
 
         if #streams > 1 then
             -- merge them via EDL
-            for i = 1, #streams do
-                streams[i] = "!no_clip;!no_chapters;" .. edl_escape(streams[i])
-            end
-            streamurl = "edl://" ..
-                        table.concat(streams, ";!new_stream;") .. ";"
+            streamurl = "edl://" .. table.concat(streams, ";")
         else
-            streamurl = streams[1]
+            streamurl = single_url
         end
 
     elseif not (json.url == nil) then
@@ -392,7 +459,7 @@ local function add_single_video(json)
 
             if not (sub == nil) then
                 local edl = "edl://!no_clip;!delay_open,media_type=sub"
-                local codec = map_codec_to_mpv[sub_info.ext]
+                local codec = map_codec_to_mpv(sub_info.ext)
                 if codec then
                     edl = edl .. ",codec=" .. codec
                 end

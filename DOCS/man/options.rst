@@ -823,6 +823,19 @@ Program Behavior
     should use ``%`` before any of the characters ``^$()%|,.[]*+-?`` to match
     that character.
 
+    The ``all_formats`` script option accepts a boolean 'yes' or 'no',
+    and if 'yes' will attempt to add all formats found reported by youtube-dl
+    (default: no). Each format is added as a separate track. In addition, they
+    are delay-loaded, and actually opened only when a track is selected (this
+    should keep load times as low as without this option). It also adds average
+    bitrate metadata, if available, which means ``--hls-bitrate`` will decide
+    which track to select. (HLS used to be the only format whose alternative
+    quality streams were exposed in a similar way, thus the option name.) The
+    ``--ytdl-format`` option is essentially ignored. Although this mechanism
+    makes it possible to switch streams at runtime, it's not suitable for this
+    purpose for various technical reasons. In general, this option is not
+    useful, and was only added to show that it's possible.
+
     .. admonition:: Examples
 
         - ``--script-opts=ytdl_hook-exclude='^youtube%.com'``
@@ -836,6 +849,10 @@ Program Behavior
     The ``use_manifests`` script option makes mpv use the master manifest URL for
     formats like HLS and DASH, if available, allowing for video/audio selection
     in runtime. It's disabled ("no") by default for performance reasons.
+
+    .. admonition:: Why do the option names mix ``_`` and ``-``?
+
+        I have no idea.
 
 ``--ytdl-format=<ytdl|best|worst|mp4|webm|...>``
     Video format/quality that is directly passed to youtube-dl. The possible
