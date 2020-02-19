@@ -144,6 +144,9 @@ extern "C" {
  *   and set it to SIG_IGN.
  * - mpv will reseed the legacy C random number generator by calling srand() at
  *   some random point once.
+ * - mpv may start sub processes, so overriding SIGCHLD, or waiting on all PIDs
+ *   (such as calling wait()) by the parent process or any other library within
+ *   the process must be avoided. libmpv itself only waits for its own PIDs.
  *
  * Encoding of filenames
  * ---------------------
