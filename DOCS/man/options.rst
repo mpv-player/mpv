@@ -837,13 +837,18 @@ Program Behavior
     formats like HLS and DASH, if available, allowing for video/audio selection
     in runtime. It's disabled ("no") by default for performance reasons.
 
-``--ytdl-format=<best|worst|mp4|webm|...>``
+``--ytdl-format=<ytdl|best|worst|mp4|webm|...>``
     Video format/quality that is directly passed to youtube-dl. The possible
     values are specific to the website and the video, for a given url the
     available formats can be found with the command
     ``youtube-dl --list-formats URL``. See youtube-dl's documentation for
     available aliases.
-    (Default: youtube-dl's default, currently ``bestvideo+bestaudio/best``)
+    (Default: ``bestvideo+bestaudio/best``)
+
+    The ``ytdl`` value does not pass a ``--format`` option to youtube-dl at all,
+    and thus does not override its default. Note that sometimes youtube-dl
+    returns a format that mpv cannot use, and in these cases the mpv default
+    may work better.
 
 ``--ytdl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
     Pass arbitrary options to youtube-dl. Parameter and argument should be

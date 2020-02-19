@@ -519,8 +519,11 @@ function run_ytdl_hook(url)
     if (format == "") then
         format = "bestvideo+bestaudio/best"
     end
-    table.insert(command, "--format")
-    table.insert(command, format)
+
+    if format ~= "ytdl" then
+        table.insert(command, "--format")
+        table.insert(command, format)
+    end
 
     for param, arg in pairs(raw_options) do
         table.insert(command, "--" .. param)
