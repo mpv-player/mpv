@@ -335,6 +335,12 @@ static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, HANDLE h)
     ipc_start_client(ctx, client);
 }
 
+bool mp_ipc_start_anon_client(struct mp_ipc_ctx *ctx, struct mpv_handle *h,
+                              int out_fd[2])
+{
+    return false;
+}
+
 static void *ipc_thread(void *p)
 {
     // Use PIPE_TYPE_MESSAGE | PIPE_READMODE_BYTE so message framing is

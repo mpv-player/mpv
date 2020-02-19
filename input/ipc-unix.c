@@ -58,7 +58,7 @@ struct client_arg {
     struct mp_log *log;
     struct mpv_handle *client;
 
-    char *client_name;
+    const char *client_name;
     int client_fd;
     bool close_client_fd;
 
@@ -215,9 +215,11 @@ done:
     return NULL;
 }
 
-static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
+static bool ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client,
+                             bool free_on_init_fail)
 {
-    client->client = mp_new_client(ctx->client_api, client->client_name);
+    if (!client->client)
+        client->client = mp_new_client(ctx->client_api, client->client_name);
     if (!client->client)
         goto err;
 
@@ -227,16 +229,19 @@ static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
     if (pthread_create(&client_thr, NULL, client_thread, client))
         goto err;
 
-    return;
+    return true;
 
 err:
-    if (client->client)
-        mpv_destroy(client->client);
+    if (free_on_init_fail) {
+        if (client->client)
+            mpv_destroy(client->client);
 
-    if (client->close_client_fd)
-        close(client->client_fd);
+        if (client->close_client_fd)
+            close(client->client_fd);
+    }
 
     talloc_free(client);
+    return false;
 }
 
 static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, int fd)
@@ -246,11 +251,37 @@ static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, int fd)
         .client_name = talloc_asprintf(client, "ipc-%d", id),
         .client_fd   = fd,
         .close_client_fd = true,
-
         .writable = true,
     };
 
-    ipc_start_client(ctx, client);
+    ipc_start_client(ctx, client, true);
+}
+
+bool mp_ipc_start_anon_client(struct mp_ipc_ctx *ctx, struct mpv_handle *h,
+                              int out_fd[2])
+{
+    int pair[2];
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, pair))
+        return false;
+
+    struct client_arg *client = talloc_ptrtype(NULL, client);
+    *client = (struct client_arg){
+        .client = h,
+        .client_name = mpv_client_name(h),
+        .client_fd   = pair[1],
+        .close_client_fd = true,
+        .writable = true,
+    };
+
+    if (!ipc_start_client(ctx, client, false)) {
+        close(pair[0]);
+        close(pair[1]);
+        return false;
+    }
+
+    out_fd[0] = pair[0];
+    out_fd[1] = -1;
+    return true;
 }
 
 static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
@@ -292,7 +323,7 @@ static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
         .writable = writable,
     };
 
-    ipc_start_client(ctx, client);
+    ipc_start_client(ctx, client, true);
 }
 
 static void *ipc_thread(void *p)

@@ -123,6 +123,12 @@ void mp_subprocess_detached(struct mp_log *log, char **args)
         talloc_free(p);
 }
 
+void mp_subprocess2(struct mp_subprocess_opts *opts,
+                    struct mp_subprocess_result *res)
+{
+    *res = (struct mp_subprocess_result){.error = MP_SUBPROCESS_EUNSUPPORTED};
+}
+
 #endif
 
 const char *mp_subprocess_err_str(int num)

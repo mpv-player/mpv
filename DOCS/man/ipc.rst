@@ -297,3 +297,30 @@ Is equivalent to:
 ::
 
     { "objkey": "value\n" }
+
+Alternative ways of starting clients
+------------------------------------
+
+You can create an anonymous IPC connection without having to set
+``--input-ipc-server``. This is achieved through a mpv pseudo scripting backend
+that starts processes.
+
+You can put ``.run`` file extension in the mpv scripts directory in its  config
+directory (see the `FILES`_ section for details), or load them through other
+means (see `Script location`_). These scripts are simply executed with the OS
+native mechanism (as if you ran them in the shell). They must have a proper
+shebang and have the executable bit set.
+
+When executed, a socket (the IPC connection) is passed to them through file
+descriptor inheritance. The file descriptor is indicated as the special command
+line argument ``--mpv-ipc-fd=N``, where ``N`` is the numeric file descriptor.
+Currently, this is hardcoded as ``--mpv-ipc-fd=3``, and the intention is that
+it will always be ``3``. (This was a promise between keeping it as simple as
+possible, and not doing too much implicitly. Also, since there is a chance that
+this will change anyway, you should at least validate that you got the expected
+argument.)
+
+The rest is the same as with a normal ``--input-ipc-server`` IPC connection. mpv
+does not attempt to observe or other interact with the started script process.
+
+This does not work in Windows yet.

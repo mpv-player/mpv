@@ -22,14 +22,17 @@
 #include <math.h>
 #include <pthread.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include "config.h"
 
 #include "osdep/io.h"
+#include "osdep/subprocess.h"
 #include "osdep/threads.h"
 
 #include "common/common.h"
 #include "common/msg.h"
+#include "input/input.h"
 #include "options/m_config.h"
 #include "options/parse_configfile.h"
 #include "options/path.h"
@@ -41,6 +44,7 @@
 extern const struct mp_scripting mp_scripting_lua;
 extern const struct mp_scripting mp_scripting_cplugin;
 extern const struct mp_scripting mp_scripting_js;
+extern const struct mp_scripting mp_scripting_run;
 
 static const struct mp_scripting *const scripting_backends[] = {
 #if HAVE_LUA
@@ -52,6 +56,7 @@ static const struct mp_scripting *const scripting_backends[] = {
 #if HAVE_JAVASCRIPT
     &mp_scripting_js,
 #endif
+    &mp_scripting_run,
     NULL
 };
 
@@ -76,12 +81,8 @@ static char *script_name_from_filename(void *talloc_ctx, const char *fname)
     return talloc_asprintf(talloc_ctx, "%s", name);
 }
 
-static void *script_thread(void *p)
+static void run_script(struct mp_script_args *arg)
 {
-    pthread_detach(pthread_self());
-
-    struct mp_script_args *arg = p;
-
     char name[90];
     snprintf(name, sizeof(name), "%s (%s)", arg->backend->name,
              mpv_client_name(arg->client));
@@ -92,6 +93,15 @@ static void *script_thread(void *p)
 
     mpv_destroy(arg->client);
     talloc_free(arg);
+}
+
+static void *script_thread(void *p)
+{
+    pthread_detach(pthread_self());
+
+    struct mp_script_args *arg = p;
+    run_script(arg);
+
     return NULL;
 }
 
@@ -176,11 +186,15 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
 
     MP_DBG(arg, "Loading %s %s...\n", backend->name, fname);
 
-    pthread_t thread;
-    if (pthread_create(&thread, NULL, script_thread, arg)) {
-        mpv_destroy(arg->client);
-        talloc_free(arg);
-        return -1;
+    if (backend->no_thread) {
+        run_script(arg);
+    } else {
+        pthread_t thread;
+        if (pthread_create(&thread, NULL, script_thread, arg)) {
+            mpv_destroy(arg->client);
+            talloc_free(arg);
+            return -1;
+        }
     }
 
     return 0;
@@ -311,3 +325,58 @@ const struct mp_scripting mp_scripting_cplugin = {
 };
 
 #endif
+
+static int load_run(struct mp_script_args *args)
+{
+    int fds[2];
+    if (!mp_ipc_start_anon_client(args->mpctx->ipc_ctx, args->client, fds))
+        return -1;
+    args->client = NULL; // ownership lost
+
+    // Hardcode them (according to opts.fds[]), because we want to allow clients
+    // to hardcode them if they want. Sue me.
+    char *fdopt = fds[1] >= 0 ? "--mpv-ipc-fd=3:4"
+                              : "--mpv-ipc-fd=3";
+
+    struct mp_subprocess_opts opts = {
+        .exe = (char *)args->filename,
+        .args = (char *[]){(char *)args->filename, fdopt, NULL},
+        .fds = {
+            // Keep terminal stuff
+            {.fd = 0, .src_fd = 0,},
+            {.fd = 1, .src_fd = 1,},
+            {.fd = 2, .src_fd = 2,},
+            // Just hope these don't step over each other (e.g. fds[1] is not
+            // below 4, if the std FDs are missing).
+            {.fd = 3, .src_fd = fds[0], },
+            {.fd = 4, .src_fd = fds[1], },
+        },
+        .num_fds = fds[1] >= 0 ? 4 : 5,
+        .detach = true,
+    };
+    struct mp_subprocess_result res;
+    mp_subprocess2(&opts, &res);
+
+    // Closing these will (probably) make the client exit, if it really died.
+    // They _should_ be CLOEXEC, but are not, because
+    // posix_spawn_file_actions_adddup2() may not clear the CLOEXEC flag
+    // properly if by coincidence fd==src_fd.
+    close(fds[0]);
+    if (fds[1] >= 0)
+        close(fds[1]);
+
+    if (res.error < 0) {
+        MP_ERR(args, "Starting '%s' failed: %s\n", args->filename,
+               mp_subprocess_err_str(res.error));
+        return -1;
+    }
+
+    return 0;
+}
+
+const struct mp_scripting mp_scripting_run = {
+    .name = "spawned IPC process",
+    .file_ext = "run",
+    .no_thread = true,
+    .load = load_run,
+};

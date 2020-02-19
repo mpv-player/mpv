@@ -213,10 +213,20 @@ void mp_input_sdl_gamepad_add(struct input_ctx *ictx);
 
 struct mp_ipc_ctx;
 struct mp_client_api;
+struct mpv_handle;
 
 // Platform specific implementation, provided by ipc-*.c.
 struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
                                struct mpv_global *global);
+// Start a thread for the given handle and return a socket in out_fd[0] that
+// is served by this thread. If the FD is not full-duplex, then out_fd[0] is
+// the user's read-end, and out_fd[1] the write-end, otherwise out_fd[1] is set
+// to -1.
+//  returns:
+//      true: out_fd[0] and out_fd[1] are set, ownership of h is transferred
+//      false: out_fd are not touched, caller retains ownership of h
+bool mp_ipc_start_anon_client(struct mp_ipc_ctx *ctx, struct mpv_handle *h,
+                              int out_fd[2]);
 void mp_uninit_ipc(struct mp_ipc_ctx *ctx);
 
 // Serialize the given mpv_event structure to JSON. Returns an allocated string.
