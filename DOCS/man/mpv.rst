@@ -602,7 +602,7 @@ setting them to *no*. Even suboptions can be specified in this way.
         # Use GPU-accelerated video output by default.
         vo=gpu
         # Use quotes for text that can contain spaces:
-        status-msg="Time: ${time-pos}"
+        term-status-msg="Time: ${time-pos}"
 
 Escaping spaces and special characters
 --------------------------------------
@@ -786,7 +786,7 @@ listed.
 
 - ``AV:`` or ``V:`` (video only) or ``A:`` (audio only)
 - The current time position in ``HH:MM:SS`` format (``playback-time`` property)
-- The total file duration (absent if unknown) (``length`` property)
+- The total file duration (absent if unknown) (``duration`` property)
 - Playback speed, e.g. `` x2.0``. Only visible if the speed is not normal. This
   is the user-requested speed, and not the actual speed  (usually they should
   be the same, unless playback is too slow). (``speed`` property.)
@@ -812,11 +812,11 @@ listed.
 - Dropped frames, e.g. ``Dropped: 4``. Shows up only if the count is not 0. Can
   grow if the video framerate is higher than that of the display, or if video
   rendering is too slow. May also be incremented on "hiccups" and when the video
-  frame couldn't be displayed on time. (``vo-drop-frame-count`` property.)
+  frame couldn't be displayed on time. (``frame-drop-count`` property.)
   If the decoder drops frames, the number of decoder-dropped frames is appended
   to the display as well, e.g.: ``Dropped: 4/34``. This happens only if
   decoder frame dropping is enabled with the ``--framedrop`` options.
-  (``drop-frame-count`` property.)
+  (``decoder-frame-drop-count`` property.)
 - Cache state, e.g. ``Cache:  2s/134KB``. Visible if the stream cache is enabled.
   The first value shows the amount of video buffered in the demuxer in seconds,
   the second value shows the estimated size of the buffered amount in kilobytes.
