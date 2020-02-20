@@ -116,6 +116,7 @@ static void associate_streams(struct demuxer *demuxer,
     for (int n = 0; n < num_streams; n++) {
         struct sh_stream *sh = demux_get_stream(seg->d, n);
         struct virtual_stream *other = NULL;
+
         for (int i = 0; i < src->num_streams; i++) {
             struct virtual_stream *vs = src->streams[i];
 
@@ -132,6 +133,11 @@ static void associate_streams(struct demuxer *demuxer,
             // ordered chapters.
             if (sh->demuxer_id >= 0 && sh->demuxer_id == vs->sh->demuxer_id)
                 other = vs;
+        }
+
+        if (!other) {
+            MP_WARN(demuxer, "Source stream %d (%s) unused and hidden.\n",
+                    n, stream_type_name(sh->type));
         }
 
         MP_TARRAY_APPEND(seg, seg->stream_map, seg->num_stream_map, other);
