@@ -1844,7 +1844,8 @@ static struct demux_packet *compute_keyframe_times(struct demux_packet *pkt,
             break;
 
         double ts = MP_PTS_OR_DEF(pkt->pts, pkt->dts);
-        if (pkt->segmented && (ts < pkt->start || ts > pkt->end))
+        if (pkt->segmented && ((pkt->start != MP_NOPTS_VALUE && ts < pkt->start) ||
+                               (pkt->end != MP_NOPTS_VALUE && ts > pkt->end)))
             ts = MP_NOPTS_VALUE;
 
         min = MP_PTS_MIN(min, ts);
