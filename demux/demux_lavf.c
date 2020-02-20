@@ -146,6 +146,7 @@ struct format_hack {
     bool is_network : 1;
     bool no_seek : 1;
     bool no_pcm_seek : 1;
+    bool no_seek_on_no_duration : 1;
 };
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
@@ -174,6 +175,7 @@ static const struct format_hack format_hacks[] = {
     {"matroska", .skipinfo = true, .no_pcm_seek = true, .use_stream_ids = true},
 
     {"v4l2", .no_seek = true},
+    {"rtsp", .no_seek_on_no_duration = true},
 
     // In theory, such streams might contain timestamps, but virtually none do.
     {"h264", .if_flags = AVFMT_NOTIMESTAMPS },
@@ -1089,6 +1091,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         if (duration > 0)
             demuxer->duration = duration;
     }
+
+    if (demuxer->duration < 0 && priv->format_hack.no_seek_on_no_duration)
+        demuxer->seekable = false;
 
     // In some cases, libavformat will export bogus bullshit timestamps anyway,
     // such as with mjpeg.
