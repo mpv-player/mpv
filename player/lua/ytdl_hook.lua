@@ -58,7 +58,6 @@ local function map_codec_to_mpv(codec)
     if codec:sub(1, 5) == "mp4a." then
         return "aac"
     end
-    print("unknoiwn codec " .. codec)
     return nil
 end
 
