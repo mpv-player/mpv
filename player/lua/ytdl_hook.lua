@@ -364,7 +364,7 @@ local function add_single_video(json)
         local streams = {}
         local single_url = nil
 
-        for _, track in pairs(formats) do
+        for index, track in ipairs(formats) do
             local edl_track = nil
             edl_track = edl_track_joined(track.fragments,
                 track.protocol, json.is_live,
