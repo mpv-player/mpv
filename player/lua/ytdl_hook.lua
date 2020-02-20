@@ -355,23 +355,22 @@ local function formats_to_edl(json, formats, use_all_formats)
             return nil
         end
 
-        local media_type = nil
-        local codec = nil
-        local interlaved_streams = false
+        local tracks = {}
         if track.vcodec and track.vcodec ~= "none" then
-            media_type = "video"
-            codec = track.vcodec
+            tracks[#tracks + 1] = {
+                media_type = "video",
+                codec = track.vcodec,
+            }
         end
         -- Tries to follow the strange logic that vcodec unset means it's
         -- an audio stream, even if acodec is (supposedly) sometimes unset.
-        if (not codec) or (track.acodec and track.acodec ~= "none") then
-            if codec then
-                interlaved_streams = true
-            end
-            media_type = "audio"
-            codec = track.acodec
+        if (#tracks == 0) or (track.acodec and track.acodec ~= "none") then
+            tracks[#tracks + 1] = {
+                media_type = "audio",
+                codec = track.acodec,
+            }
         end
-        if not media_type then
+        if #tracks == 0 then
             return nil
         end
 
@@ -381,33 +380,47 @@ local function formats_to_edl(json, formats, use_all_formats)
         local params = ""
 
         if use_all_formats then
-            if interlaved_streams then
-                hdr[#hdr + 1] = "!track_meta,title=muxed-" .. index
-                as_muxed = o.skip_muxed
-            else
+            if #tracks > 1 and o.skip_muxed then
+                as_muxed = true
+                tracks = {} -- skip
+            end
+            for _, sub in ipairs(tracks) do
                 -- A single track that is either audio or video. Delay load it.
-                local codec = map_codec_to_mpv(codec)
-                hdr[#hdr + 1] = "!delay_open,media_type=" .. media_type ..
+                local codec = map_codec_to_mpv(sub.codec)
+                hdr[#hdr + 1] = "!delay_open,media_type=" .. sub.media_type ..
                     ",codec=" .. (codec or "null") .. ",w=" ..
                     as_integer(track.width) .. ",h=" .. as_integer(track.height)
 
                 -- Add bitrate information etc. for better user selection.
                 local size = as_integer(track["filesize"])
                 local byterate = 0
-                for _, f in ipairs({"tbr", "vbr", "abr"}) do
+                local rates = {"tbr", "vbr", "abr"}
+                if #tracks > 1 then
+                    rates = {({video = "vbr", audio = "abr"})[sub.media_type]}
+                end
+                for _, f in ipairs(rates) do
                     local br = as_integer(track[f])
                     if br > 0 then
                         byterate = math.floor(br * 1000 / 8)
                         break
                     end
                 end
-                if byterate == 0 and size > 0 and duration > 0 then
+                if byterate < 1 and size > 0 and duration > 0 and #tracks < 2 then
                     byterate = as_integer(size / duration)
                 end
+                local title = track.format_note or ""
+                if #tracks > 1 then
+                    if #title > 0 then
+                        title = title .. " "
+                    end
+                    title = title .. "muxed-" .. index
+                end
                 hdr[#hdr + 1] = "!track_meta,title=" ..
-                    edl_escape(track.format_note or "") ..
-                    ",byterate=" .. byterate
-                separate_present[media_type] = true
+                    edl_escape(title) .. ",byterate=" .. byterate
+
+                if #tracks == 1 then
+                    separate_present[sub.media_type] = true
+                end
 
                 if duration > 0 then
                     params = params .. ",length=" .. duration
