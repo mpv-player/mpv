@@ -400,7 +400,14 @@ local function add_single_video(json)
                     as_integer(track.width) .. ",h=" .. as_integer(track.height)
                 local size = as_integer(track["filesize"])
                 local byterate = 0
-                if size > 0 and duration > 0 then
+                for _, f in ipairs({"tbr", "vbr", "abr"}) do
+                    local br = as_integer(track[f])
+                    if br > 0 then
+                        byterate = math.floor(br * 1000 / 8)
+                        break
+                    end
+                end
+                if byterate == 0 and size > 0 and duration > 0 then
                     byterate = as_integer(size / duration)
                 end
                 hdr[#hdr + 1] = "!track_meta,title=" ..
