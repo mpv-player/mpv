@@ -846,6 +846,18 @@ Program Behavior
     purpose for various technical reasons. In general, this option is not
     useful, and was only added to show that it's possible.
 
+    The ``skip_muxed`` script option is a boolean (default: yes). It is used
+    only if ``all_formats`` is set. If set to 'yes', it will skip formats that
+    have both audio and video streams. Some sites that provide multiple
+    qualities will do so with separated audio and video streams (which is what
+    ``all_formats`` is supposed to make use of), still provide formats that
+    include both audio and video. We assume that they do so for compatibility
+    reasons, and ``skip_muxed`` filters them out. This will make loading faster,
+    and potentially avoid wasting bandwidth by using only one stream of a muxed
+    stream. On the other hand, if muxed streams are present, but the separate
+    streams lack either video or audio or do not exist at all, then the stream
+    selection as done by youtube-dl (via ``--ytdl-format``) is used.
+
     The ``use_manifests`` script option makes mpv use the master manifest URL for
     formats like HLS and DASH, if available, allowing for video/audio selection
     in runtime. It's disabled ("no") by default for performance reasons.

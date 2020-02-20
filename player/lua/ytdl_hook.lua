@@ -7,6 +7,7 @@ local o = {
     try_ytdl_first = false,
     use_manifests = false,
     all_formats = false,
+    skip_muxed = true,
 }
 options.read_options(o)
 
@@ -324,20 +325,134 @@ local function as_integer(v, def)
     return def
 end
 
-local function add_single_video(json)
-    local streamurl = ""
-    local max_bitrate = 0
-    local formats = json["requested_formats"]
-    local duration = as_integer(json["duration"])
+-- Convert a format list from youtube-dl to an EDL URL, or plain URL.
+--  json: full json blob by youtube-dl
+--  formats: format list by youtube-dl
+--  use_all_formats: if=true, then formats is the full format list, and the
+--                   function will attempt to return them as delay-loaded tracks
+-- See res table initialization in the function for result type.
+local function formats_to_edl(json, formats, use_all_formats)
+    local res = {
+        -- the media URL, which may be EDL
+        url = nil,
+        -- for use_all_formats=true: whether any muxed formats are present, and
+        -- at the same time the separate EDL parts don't have both audio/video
+        muxed_needed = false,
+    }
 
-    local use_all_formats = o.all_formats
-    local all_formats = json["formats"]
-    if use_all_formats and all_formats and (#all_formats > 0) then
-        formats = all_formats
+    local duration = as_integer(json["duration"])
+    local single_url = nil
+    local streams = {}
+    local separate_present = {}
+    local muxed_present = false
+
+    for index, track in ipairs(formats) do
+        local edl_track = nil
+        edl_track = edl_track_joined(track.fragments,
+            track.protocol, json.is_live,
+            track.fragment_base_url)
+        if not edl_track and not url_is_safe(track.url) then
+            return nil
+        end
+
+        local media_type = nil
+        local codec = nil
+        local interlaved_streams = false
+        if track.vcodec and track.vcodec ~= "none" then
+            media_type = "video"
+            codec = track.vcodec
+        end
+        -- Tries to follow the strange logic that vcodec unset means it's
+        -- an audio stream, even if acodec is (supposedly) sometimes unset.
+        if (not codec) or (track.acodec and track.acodec ~= "none") then
+            if codec then
+                interlaved_streams = true
+            end
+            media_type = "audio"
+            codec = track.acodec
+        end
+        if not media_type then
+            return nil
+        end
+
+        local url = edl_track or track.url
+        local hdr = {"!new_stream", "!no_clip", "!no_chapters"}
+        local as_muxed = false
+
+        if use_all_formats then
+            if interlaved_streams then
+                hdr[#hdr + 1] = "!track_meta,title=muxed-" .. index
+                as_muxed = o.skip_muxed
+            else
+                -- A single track that is either audio or video. Delay load it.
+                local codec = map_codec_to_mpv(codec)
+                hdr[#hdr + 1] = "!delay_open,media_type=" .. media_type ..
+                    ",codec=" .. (codec or "null") .. ",w=" ..
+                    as_integer(track.width) .. ",h=" .. as_integer(track.height)
+
+                -- Add bitrate information etc. for better user selection.
+                local size = as_integer(track["filesize"])
+                local byterate = 0
+                for _, f in ipairs({"tbr", "vbr", "abr"}) do
+                    local br = as_integer(track[f])
+                    if br > 0 then
+                        byterate = math.floor(br * 1000 / 8)
+                        break
+                    end
+                end
+                if byterate == 0 and size > 0 and duration > 0 then
+                    byterate = as_integer(size / duration)
+                end
+                hdr[#hdr + 1] = "!track_meta,title=" ..
+                    edl_escape(track.format_note or "") ..
+                    ",byterate=" .. byterate
+                separate_present[media_type] = true
+            end
+        end
+
+        hdr[#hdr + 1] = edl_escape(url)
+
+        if as_muxed then
+            muxed_present = true
+        else
+            streams[#streams + 1] = table.concat(hdr, ";")
+        end
+        -- In case there is only 1 of these streams.
+        -- Note: assumes it has no important EDL headers
+        single_url = url
     end
 
-    -- prefer manifest_url if present
+    -- If "skip_muxed" is enabled, we discard formats that have both audio
+    -- and video aka muxed (because it's a pain). But if the single-media
+    -- type formats do not provide both video and audio, then discard them
+    -- and use the muxed streams instead.
+    res.muxed_needed = muxed_present and (not (separate_present["video"] and
+                                               separate_present["audio"]))
+
+    -- Merge all tracks into a single virtual file, but avoid EDL if it's
+    -- only a single track (i.e. redundant).
+    if #streams == 1 and single_url then
+        res.url = single_url
+    elseif #streams > 0 then
+        res.url = "edl://" .. table.concat(streams, ";")
+    else
+        return nil
+    end
+
+    return res
+end
+
+local function add_single_video(json)
+    local streamurl = ""
+    local format_info = ""
+    local max_bitrate = 0
+    local requested_formats = json["requested_formats"]
+    local all_formats = json["formats"]
+
     if o.use_manifests and valid_manifest(json) then
+        -- prefer manifest_url if present
+        format_info = "manifest"
+
         local mpd_url = reqfmts and reqfmts[1]["manifest_url"] or
             json["manifest_url"]
         if not mpd_url then
@@ -357,79 +472,34 @@ local function add_single_video(json)
         elseif json.tbr then
             max_bitrate = json.tbr > max_bitrate and json.tbr or max_bitrate
         end
+    end
 
-    -- DASH/split tracks
-    elseif formats then
-        local streams = {}
-        local single_url = nil
+    if streamurl == ""  then
+        -- possibly DASH/split tracks
+        local res = nil
 
-        for index, track in ipairs(formats) do
-            local edl_track = nil
-            edl_track = edl_track_joined(track.fragments,
-                track.protocol, json.is_live,
-                track.fragment_base_url)
-            if not edl_track and not url_is_safe(track.url) then
-                return
+        if all_formats and o.all_formats then
+            format_info = "all_formats (separate)"
+            res = formats_to_edl(json, all_formats, true)
+            -- Note: since we don't delay-load muxed streams, use normal stream
+            -- selection if we have to use muxed streams.
+            if res and res.muxed_needed then
+                res = nil
             end
-            local media_type = nil
-            local codec = nil
-            local interlaved_streams = false
-            if track.vcodec and track.vcodec ~= "none" then
-                media_type = "video"
-                codec = track.vcodec
-            end
-            -- Tries to follow the strange logic that vcodec unset means it's
-            -- an audio stream, even if acodec is (supposedly) sometimes unset.
-            if (not codec) or (track.acodec and track.acodec ~= "none") then
-                if codec then
-                    interlaved_streams = true
-                end
-                media_type = "audio"
-                codec = track.acodec
-            end
-            if not media_type then
-                return
-            end
-            local url = edl_track or track.url
-            local hdr = {"!new_stream", "!no_clip", "!no_chapters"}
-            if use_all_formats and not interlaved_streams then
-                local codec = map_codec_to_mpv(codec)
-                hdr[#hdr + 1] = "!delay_open,media_type=" .. media_type ..
-                    ",codec=" .. (codec or "null") .. ",w=" ..
-                    as_integer(track.width) .. ",h=" .. as_integer(track.height)
-                local size = as_integer(track["filesize"])
-                local byterate = 0
-                for _, f in ipairs({"tbr", "vbr", "abr"}) do
-                    local br = as_integer(track[f])
-                    if br > 0 then
-                        byterate = math.floor(br * 1000 / 8)
-                        break
-                    end
-                end
-                if byterate == 0 and size > 0 and duration > 0 then
-                    byterate = as_integer(size / duration)
-                end
-                hdr[#hdr + 1] = "!track_meta,title=" ..
-                    edl_escape(track.format_note or "") ..
-                    ",byterate=" .. byterate
-            elseif interlaved_streams then
-                hdr[#hdr + 1] = "!track_meta,title=muxed-" .. index
-            end
-            hdr[#hdr + 1] = edl_escape(url)
-            streams[#streams + 1] = table.concat(hdr, ";")
-            -- In case there is only 1 of these streams.
-            -- Note: assumes it has no important EDL headers
-            single_url = url
         end
 
-        if #streams > 1 then
-            -- merge them via EDL
-            streamurl = "edl://" .. table.concat(streams, ";")
-        else
-            streamurl = single_url
+        if (not res) and requested_formats and #requested_formats > 0 then
+            format_info = "youtube-dl (separate)"
+            res = formats_to_edl(json, requested_formats, false)
         end
 
-    elseif not (json.url == nil) then
+        if res then
+            streamurl = res.url
+        end
+    end
+
+    if streamurl == "" and json.url then
+        format_info = "youtube-dl (single)"
         local edl_track = nil
         edl_track = edl_track_joined(json.fragments, json.protocol,
             json.is_live, json.fragment_base_url)
@@ -440,11 +510,14 @@ local function add_single_video(json)
         -- normal video or single track
         streamurl = edl_track or json.url
         set_http_headers(json.http_headers)
-    else
+    end
+
+    if streamurl == "" then
         msg.error("No URL found in JSON data.")
         return
     end
 
+    msg.verbose("format selection: " .. format_info)
     msg.debug("streamurl: " .. streamurl)
 
     mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
