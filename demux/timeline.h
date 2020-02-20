@@ -24,9 +24,11 @@ struct timeline_par {
     bstr init_fragment;
     bool dash, no_clip, delay_open;
 
-    // If non-NULL, _some_ fields are used. If delay_open==true, this must be
-    // set, and the codec info is used.
-    struct sh_stream *sh_meta;
+    // Of any of these, _some_ fields are used. If delay_open==true, this
+    // describes each sub-track, and the codec info is used.
+    // In both cases, the metadata is mapped to actual tracks in specific ways.
+    struct sh_stream **sh_meta;
+    int num_sh_meta;
 
     // Segments to play, ordered by time.
     struct timeline_part *parts;

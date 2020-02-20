@@ -214,6 +214,16 @@ It provides following parameters change track metadata:
 ``byterate``
     Number of bytes per second this stream uses. (Purely informational.)
 
+``index``
+    The numeric index of the track this should map to (default: -1). This is
+    the 0-based index of the virtual stream as seen by the player, enumerating
+    all audio/video/subtitle streams. If nothing matches, this is silently
+    discarded. The special index -1 (the default) has two meanings: if there
+    was a previous meta data entry (either ``!track_meta`` or ``!delay_open``
+    element since the last ``!new_stream``), then this element manipulates
+    the previous meta data entry. If there was no previous entry, a new meta
+    data entry that matches all streams is created.
+
 Example::
 
     # mpv EDL v0
@@ -243,6 +253,12 @@ stream to "later". By design, it's supposed to be used for single-track streams.
 Using multiple segments requires you to specify all offsets and durations (also
 it was never tested whether it works at all). Interaction with ``mp4_dash`` may
 be strange.
+
+You can describe multiple sub-tracks by using multiple ``delay_open`` headers
+before the same source URL. (If there are multiple sub-tracks of the same media
+type, then the mapping to the real stream is probably rather arbitrary.) If the
+source contains tracks not described, a warning is logged when the delayed
+opening happens, and the track is hidden.
 
 This has the following parameters:
 

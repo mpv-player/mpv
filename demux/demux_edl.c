@@ -50,7 +50,8 @@ struct tl_parts {
     bool disable_chapters;
     bool dash, no_clip, delay_open;
     char *init_fragment_url;
-    struct sh_stream *sh_meta;
+    struct sh_stream **sh_meta;
+    int num_sh_meta;
     struct tl_part *parts;
     int num_parts;
     struct tl_parts *next;
@@ -145,10 +146,20 @@ static bool get_param_time(struct parse_ctx *ctx, const char *name, double *t)
 static struct tl_parts *add_part(struct tl_root *root)
 {
     struct tl_parts *tl = talloc_zero(root, struct tl_parts);
-    tl->sh_meta = demux_alloc_sh_stream(STREAM_TYPE_COUNT);
-    talloc_steal(tl, tl->sh_meta);
     MP_TARRAY_APPEND(root, root->pars, root->num_pars, tl);
     return tl;
+}
+
+static struct sh_stream *get_meta(struct tl_parts *tl, int index)
+{
+    for (int n = 0; n < tl->num_sh_meta; n++) {
+        if (tl->sh_meta[n]->index == index)
+            return tl->sh_meta[n];
+    }
+    struct sh_stream *sh = demux_alloc_sh_stream(STREAM_TYPE_COUNT);
+    talloc_steal(tl, sh);
+    MP_TARRAY_APPEND(tl, tl->sh_meta, tl->num_sh_meta, sh);
+    return sh;
 }
 
 /* Returns a list of parts, or NULL on parse error.
@@ -223,12 +234,15 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
             } else if (bstr_equals0(f_type, "no_chapters")) {
                 tl->disable_chapters = true;
             } else if (bstr_equals0(f_type, "track_meta")) {
-                struct sh_stream *sh = tl->sh_meta;
+                int index = get_param_int(&ctx, "index", -1);
+                struct sh_stream *sh = index < 0 && tl->num_sh_meta
+                    ? tl->sh_meta[tl->num_sh_meta - 1]
+                    : get_meta(tl, index);
                 sh->lang = get_param0(&ctx, sh, "lang");
                 sh->title = get_param0(&ctx, sh, "title");
                 sh->hls_bitrate = get_param_int(&ctx, "byterate", 0) * 8;
             } else if (bstr_equals0(f_type, "delay_open")) {
-                struct sh_stream *sh = tl->sh_meta;
+                struct sh_stream *sh = get_meta(tl, tl->num_sh_meta);
                 bstr mt = get_param(&ctx, "media_type");
                 if (bstr_equals0(mt, "video")) {
                     sh->type = sh->codec->type = STREAM_VIDEO;
@@ -371,8 +385,12 @@ static struct timeline_par *build_timeline(struct timeline *root,
     tl->delay_open = parts->delay_open;
 
     // There is no copy function for sh_stream, so just steal it.
-    tl->sh_meta = talloc_steal(tl, parts->sh_meta);
-    parts->sh_meta = NULL;
+    for (int n = 0; n < parts->num_sh_meta; n++) {
+        MP_TARRAY_APPEND(tl, tl->sh_meta, tl->num_sh_meta,
+                         talloc_steal(tl, parts->sh_meta[n]));
+        parts->sh_meta[n] = NULL;
+    }
+    parts->num_sh_meta = 0;
 
     if (parts->init_fragment_url && parts->init_fragment_url[0]) {
         MP_VERBOSE(root, "Opening init fragment...\n");

@@ -528,6 +528,17 @@ static void apply_meta(struct sh_stream *dst, struct sh_stream *src)
         dst->attached_picture = src->attached_picture;
 }
 
+// This is mostly for EDL user-defined metadata.
+static struct sh_stream *find_matching_meta(struct timeline_par *tl, int index)
+{
+    for (int n = 0; n < tl->num_sh_meta; n++) {
+        struct sh_stream *sh = tl->sh_meta[n];
+        if (sh->index == index || sh->index < 0)
+            return sh;
+    }
+    return NULL;
+}
+
 static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
 {
     struct priv *p = demuxer->priv;
@@ -553,7 +564,7 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
     // delay_open streams normally have meta==NULL, and 1 virtual stream
     int num_streams = 0;
     if (tl->delay_open) {
-        num_streams = 1;
+        num_streams = tl->num_sh_meta;
     } else if (meta) {
         num_streams = demux_get_num_stream(meta);
     }
@@ -561,9 +572,10 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
         struct sh_stream *new = NULL;
 
         if (tl->delay_open) {
-            assert(tl->sh_meta);
-            new = demux_alloc_sh_stream(tl->sh_meta->type);
-            new->codec = tl->sh_meta->codec;
+            struct sh_stream *tsh = tl->sh_meta[n];
+            new = demux_alloc_sh_stream(tsh->type);
+            new->codec = tsh->codec;
+            apply_meta(new, tsh);
             demuxer->is_network = true;
             demuxer->is_streaming = true;
         } else {
@@ -571,10 +583,10 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
             new = demux_alloc_sh_stream(sh->type);
             apply_meta(new, sh);
             new->codec = sh->codec;
+            struct sh_stream *tsh = find_matching_meta(tl, n);
+            if (tsh)
+                apply_meta(new, tsh);
         }
-
-        if (tl->sh_meta)
-            apply_meta(new, tl->sh_meta);
 
         demux_add_sh_stream(demuxer, new);
         struct virtual_stream *vs = talloc_ptrtype(p, vs);
