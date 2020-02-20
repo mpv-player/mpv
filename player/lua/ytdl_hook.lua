@@ -378,6 +378,7 @@ local function formats_to_edl(json, formats, use_all_formats)
         local url = edl_track or track.url
         local hdr = {"!new_stream", "!no_clip", "!no_chapters"}
         local as_muxed = false
+        local params = ""
 
         if use_all_formats then
             if interlaved_streams then
@@ -407,10 +408,14 @@ local function formats_to_edl(json, formats, use_all_formats)
                     edl_escape(track.format_note or "") ..
                     ",byterate=" .. byterate
                 separate_present[media_type] = true
+
+                if duration > 0 then
+                    params = params .. ",length=" .. duration
+                end
             end
         end
 
-        hdr[#hdr + 1] = edl_escape(url)
+        hdr[#hdr + 1] = edl_escape(url) .. params
 
         if as_muxed then
             muxed_present = true
