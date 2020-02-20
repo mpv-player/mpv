@@ -374,10 +374,17 @@ local function add_single_video(json)
             end
             local media_type = nil
             local codec = nil
+            local interlaved_streams = false
             if track.vcodec and track.vcodec ~= "none" then
                 media_type = "video"
                 codec = track.vcodec
-            elseif track.vcodec == "none" then
+            end
+            -- Tries to follow the strange logic that vcodec unset means it's
+            -- an audio stream, even if acodec is (supposedly) sometimes unset.
+            if (not codec) or (track.acodec and track.acodec ~= "none") then
+                if codec then
+                    interlaved_streams = true
+                end
                 media_type = "audio"
                 codec = track.acodec
             end
@@ -386,7 +393,7 @@ local function add_single_video(json)
             end
             local url = edl_track or track.url
             local hdr = {"!new_stream", "!no_clip", "!no_chapters"}
-            if use_all_formats then
+            if use_all_formats and not interlaved_streams then
                 local codec = map_codec_to_mpv(codec)
                 hdr[#hdr + 1] = "!delay_open,media_type=" .. media_type ..
                     ",codec=" .. (codec or "null") .. ",w=" ..
@@ -399,6 +406,8 @@ local function add_single_video(json)
                 hdr[#hdr + 1] = "!track_meta,title=" ..
                     edl_escape(track.format_note or "") ..
                     ",byterate=" .. byterate
+            elseif interlaved_streams then
+                hdr[#hdr + 1] = "!track_meta,title=muxed-" .. index
             end
             hdr[#hdr + 1] = edl_escape(url)
             streams[#streams + 1] = table.concat(hdr, ";")
