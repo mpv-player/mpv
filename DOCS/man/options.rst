@@ -810,57 +810,72 @@ Program Behavior
 
     If the script can't do anything with an URL, it will do nothing.
 
-    The ``try_ytdl_first`` script option accepts a boolean 'yes' or 'no', and if
-    'yes' will try parsing the URL with youtube-dl first, instead of the default
-    where it's only after mpv failed to open it. This mostly depends on whether
-    most of your URLs need youtube-dl parsing.
+    This accepts a set of options, which can be passed to it with the
+    ``--script-opts`` option (using ``ytdl_hook-`` as prefix):
 
-    The ``exclude`` script option accepts a ``|``-separated list of URL patterns
-    which mpv should not use with youtube-dl. The patterns are matched after
-    the ``http(s)://`` part of the URL.
+    ``try_ytdl_first=<yes|no>``
 
-    ``^`` matches the beginning of the URL, ``$`` matches its end, and you
-    should use ``%`` before any of the characters ``^$()%|,.[]*+-?`` to match
-    that character.
+        If 'yes' will try parsing the URL with youtube-dl first, instead of the
+        default where it's only after mpv failed to open it. This mostly depends
+        on whether most of your URLs need youtube-dl parsing.
 
-    .. admonition:: Examples
+    ``exclude=<URL1|URL2|...``
+        A ``|``-separated list of URL patterns which mpv should not use with
+        youtube-dl. The patterns are matched after the ``http(s)://`` part of
+        the URL.
 
-        - ``--script-opts=ytdl_hook-exclude='^youtube%.com'``
-          will exclude any URL that starts with ``http://youtube.com`` or
-          ``https://youtube.com``.
-        - ``--script-opts=ytdl_hook-exclude='%.mkv$|%.mp4$'``
-          will exclude any URL that ends with ``.mkv`` or ``.mp4``.
+        ``^`` matches the beginning of the URL, ``$`` matches its end, and you
+        should use ``%`` before any of the characters ``^$()%|,.[]*+-?`` to
+        match that character.
 
-    See more lua patterns here: https://www.lua.org/manual/5.1/manual.html#5.4.1
+        .. admonition:: Examples
 
-    The ``all_formats`` script option accepts a boolean 'yes' or 'no',
-    and if 'yes' will attempt to add all formats found reported by youtube-dl
-    (default: no). Each format is added as a separate track. In addition, they
-    are delay-loaded, and actually opened only when a track is selected (this
-    should keep load times as low as without this option). It also adds average
-    bitrate metadata, if available, which means ``--hls-bitrate`` will decide
-    which track to select. (HLS used to be the only format whose alternative
-    quality streams were exposed in a similar way, thus the option name.) The
-    ``--ytdl-format`` option is essentially ignored. Although this mechanism
-    makes it possible to switch streams at runtime, it's not suitable for this
-    purpose for various technical reasons. In general, this option is not
-    useful, and was only added to show that it's possible.
+            - ``--script-opts=ytdl_hook-exclude='^youtube%.com'``
+              will exclude any URL that starts with ``http://youtube.com`` or
+              ``https://youtube.com``.
+            - ``--script-opts=ytdl_hook-exclude='%.mkv$|%.mp4$'``
+              will exclude any URL that ends with ``.mkv`` or ``.mp4``.
 
-    The ``skip_muxed`` script option is a boolean (default: yes). It is used
-    only if ``all_formats`` is set. If set to 'yes', it will skip formats that
-    have both audio and video streams. Some sites that provide multiple
-    qualities will do so with separated audio and video streams (which is what
-    ``all_formats`` is supposed to make use of), still provide formats that
-    include both audio and video. We assume that they do so for compatibility
-    reasons, and ``skip_muxed`` filters them out. This will make loading faster,
-    and potentially avoid wasting bandwidth by using only one stream of a muxed
-    stream. On the other hand, if muxed streams are present, but the separate
-    streams lack either video or audio or do not exist at all, then the stream
-    selection as done by youtube-dl (via ``--ytdl-format``) is used.
+        See more lua patterns here: https://www.lua.org/manual/5.1/manual.html#5.4.1
 
-    The ``use_manifests`` script option makes mpv use the master manifest URL for
-    formats like HLS and DASH, if available, allowing for video/audio selection
-    in runtime. It's disabled ("no") by default for performance reasons.
+    ``all_formats=<yes|no>``
+        If 'yes' will attempt to add all formats found reported by youtube-dl
+        (default: no). Each format is added as a separate track. In addition,
+        they are delay-loaded, and actually opened only when a track is selected
+        (this should keep load times as low as without this option). It also
+        adds average bitrate metadata, if available, which means
+        ``--hls-bitrate`` will decide which track to select. (HLS used to be the
+        only format whose alternative quality streams were exposed in a similar
+        way, thus the option name.)
+
+        The ``--ytdl-format`` option is essentially ignored.
+
+        Although this mechanism makes it possible to switch streams at runtime,
+        it's not suitable for this purpose for various technical reasons. (It's
+        slow, which can't be really fixed.) In general, this option is not
+        useful, and was only added to show that it's possible.
+
+    ``skip_muxed=<yes|no>``
+        If set to 'yes', and ``all_formats`` is also set to 'yes', this will
+        skip formats that have both audio and video streams (default: yes).
+
+        Some sites that provide multiple qualities will do so with separated
+        audio and video streams (which is what ``all_formats`` is supposed to
+        make use of), still provide formats that include both audio and video.
+        We assume that they do so for compatibility reasons, and ``skip_muxed``
+        filters them out. This will make loading faster, and potentially avoid
+        wasting bandwidth by using only one stream of a muxed stream. On the
+        other hand, if muxed streams are present, but the separate streams lack
+        either video or audio or do not exist at all, then the stream selection
+        as done by youtube-dl (via ``--ytdl-format``) is used.
+
+        This appears to terribly break with some sites that provide a HLS master
+        playlist on the lowest level.
+
+    ``use_manifests=<yes|no>``
+        Make mpv use the master manifest URL for formats like HLS and DASH,
+        if available, allowing for video/audio selection in runtime (default:
+        no). It's disabled ("no") by default for performance reasons.
 
     .. admonition:: Why do the option names mix ``_`` and ``-``?
 
