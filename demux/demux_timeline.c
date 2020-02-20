@@ -466,7 +466,7 @@ static void d_seek(struct demuxer *demuxer, double seek_pts, int flags)
 
     for (int x = 0; x < p->num_sources; x++) {
         struct virtual_source *src = p->sources[x];
-        if (src != master)
+        if (src != master && src->any_selected)
             seek_source(demuxer, src, seek_pts, flags);
     }
 }
