@@ -25,6 +25,14 @@ function Set (t)
     return set
 end
 
+-- ?: surrogate (keep in mind that there is no lazy evaluation)
+function iif(cond, if_true, if_false)
+    if cond then
+        return if_true
+    end
+    return if_false
+end
+
 local safe_protos = Set {
     "http", "https", "ftp", "ftps",
     "rtmp", "rtmps", "rtmpe", "rtmpt", "rtmpts", "rtmpte",
@@ -340,6 +348,17 @@ local function formats_to_edl(json, formats, use_all_formats)
         muxed_needed = false,
     }
 
+    local default_formats = {}
+    local requested_formats = json["requested_formats"]
+    if use_all_formats and requested_formats then
+        for _, track in ipairs(requested_formats) do
+            local id = track["format_id"]
+            if id then
+                default_formats[id] = true
+            end
+        end
+    end
+
     local duration = as_integer(json["duration"])
     local single_url = nil
     local streams = {}
@@ -414,8 +433,13 @@ local function formats_to_edl(json, formats, use_all_formats)
                     end
                     title = title .. "muxed-" .. index
                 end
+                local flags = {}
+                if default_formats[track["format_id"]] then
+                    flags[#flags + 1] = "default"
+                end
                 hdr[#hdr + 1] = "!track_meta,title=" ..
-                    edl_escape(title) .. ",byterate=" .. byterate
+                    edl_escape(title) .. ",byterate=" .. byterate ..
+                    iif(#flags > 0, ",flags=" .. table.concat(flags, "+"), "")
             end
 
             if duration > 0 then

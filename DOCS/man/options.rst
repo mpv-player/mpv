@@ -841,13 +841,16 @@ Program Behavior
         If 'yes' will attempt to add all formats found reported by youtube-dl
         (default: no). Each format is added as a separate track. In addition,
         they are delay-loaded, and actually opened only when a track is selected
-        (this should keep load times as low as without this option). It also
-        adds average bitrate metadata, if available, which means
-        ``--hls-bitrate`` will decide which track to select. (HLS used to be the
+        (this should keep load times as low as without this option).
+
+        It adds average bitrate metadata, if available, which means you can use
+        ``--hls-bitrate`` to decide which track to select. (HLS used to be the
         only format whose alternative quality streams were exposed in a similar
         way, thus the option name.)
 
-        The ``--ytdl-format`` option is essentially ignored.
+        Tracks which represent formats that were selected by youtube-dl as
+        default will have the default flag set. This means mpv should generally
+        still select formats chosen with ``--ytdl-format`` by default.
 
         Although this mechanism makes it possible to switch streams at runtime,
         it's not suitable for this purpose for various technical reasons. (It's
