@@ -392,7 +392,6 @@ local function formats_to_edl(json, formats, use_all_formats)
                     as_integer(track.width) .. ",h=" .. as_integer(track.height)
 
                 -- Add bitrate information etc. for better user selection.
-                local size = as_integer(track["filesize"])
                 local byterate = 0
                 local rates = {"tbr", "vbr", "abr"}
                 if #tracks > 1 then
@@ -407,9 +406,6 @@ local function formats_to_edl(json, formats, use_all_formats)
                         byterate = math.floor(br * 1000 / 8)
                         break
                     end
-                end
-                if byterate < 1 and size > 0 and duration > 0 and #tracks < 2 then
-                    byterate = as_integer(size / duration)
                 end
                 local title = track.format_note or ""
                 if #tracks > 1 then
