@@ -292,8 +292,10 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
         }
         if (ctx.error)
             goto error;
-        for (int n = 0; n < ctx.num_params; n++)
-            mp_warn(log, "Unknown parameter: '%.*s'\n", BSTR_P(ctx.param_names[n]));
+        for (int n = 0; n < ctx.num_params; n++) {
+            mp_warn(log, "Unknown or duplicate parameter: '%.*s'\n",
+                    BSTR_P(ctx.param_names[n]));
+        }
     }
     assert(root->num_pars);
     for (int n = 0; n < root->num_pars; n++) {
