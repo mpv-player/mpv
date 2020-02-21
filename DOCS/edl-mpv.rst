@@ -291,6 +291,13 @@ This has the following parameters:
 ``w``, ``h``
     For video codecs: expected video size. See ``codec`` for details.
 
+``fps``
+    For video codecs: expected video framerate, as integer. (The rate is usually
+    only crudely reported, and it makes no sense to expect exact values.)
+
+``samplerate``
+    For audio codecs: expected sample rate, as integer.
+
 The ``delay_open`` header is not part of the core EDL format. It may be changed
 or removed at any time, depending on mpv's internal requirements.
 

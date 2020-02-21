@@ -270,6 +270,8 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
                     sh->codec->codec = "null";
                 sh->codec->disp_w = get_param_int(&ctx, "w", 0);
                 sh->codec->disp_h = get_param_int(&ctx, "h", 0);
+                sh->codec->fps = get_param_int(&ctx, "fps", 0);
+                sh->codec->samplerate = get_param_int(&ctx, "samplerate", 0);
                 tl->delay_open = true;
             } else {
                 mp_err(log, "Unknown header: '%.*s'\n", BSTR_P(f_type));

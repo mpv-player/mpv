@@ -403,9 +403,16 @@ local function formats_to_edl(json, formats, use_all_formats)
             for _, sub in ipairs(tracks) do
                 -- A single track that is either audio or video. Delay load it.
                 local codec = map_codec_to_mpv(sub.codec)
+                local props = ""
+                if sub.media_type == "video" then
+                    props = props .. ",w=" .. as_integer(track.width)
+                                  .. ",h=" .. as_integer(track.height)
+                                  .. ",fps=" .. as_integer(track.fps)
+                elseif sub.media_type == "audio" then
+                    props = props .. ",samplerate=" .. as_integer(track.asr)
+                end
                 hdr[#hdr + 1] = "!delay_open,media_type=" .. sub.media_type ..
-                    ",codec=" .. (codec or "null") .. ",w=" ..
-                    as_integer(track.width) .. ",h=" .. as_integer(track.height)
+                    ",codec=" .. (codec or "null") .. props
 
                 -- Add bitrate information etc. for better user selection.
                 local byterate = 0
