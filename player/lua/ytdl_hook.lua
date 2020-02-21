@@ -39,6 +39,12 @@ local safe_protos = Set {
     "data"
 }
 
+-- For some sites, youtube-dl returns the audio codec (?) only in the "ext" field.
+local ext_map = {
+    ["mp3"]         = "mp3",
+    ["opus"]        = "opus",
+}
+
 local codec_map = {
     -- src pattern  = mpv codec
     ["vtt"]         = "webvtt",
@@ -379,15 +385,16 @@ local function formats_to_edl(json, formats, use_all_formats)
         if track.vcodec and track.vcodec ~= "none" then
             tracks[#tracks + 1] = {
                 media_type = "video",
-                codec = track.vcodec,
+                codec = map_codec_to_mpv(track.vcodec),
             }
         end
         -- Tries to follow the strange logic that vcodec unset means it's
-        -- an audio stream, even if acodec is (supposedly) sometimes unset.
+        -- an audio stream, even if acodec is sometimes unset.
         if (#tracks == 0) or (track.acodec and track.acodec ~= "none") then
             tracks[#tracks + 1] = {
                 media_type = "audio",
-                codec = track.acodec,
+                codec = map_codec_to_mpv(track.acodec) or
+                        ext_map[track.ext],
             }
         end
         if #tracks == 0 then
@@ -402,7 +409,6 @@ local function formats_to_edl(json, formats, use_all_formats)
         if use_all_formats then
             for _, sub in ipairs(tracks) do
                 -- A single track that is either audio or video. Delay load it.
-                local codec = map_codec_to_mpv(sub.codec)
                 local props = ""
                 if sub.media_type == "video" then
                     props = props .. ",w=" .. as_integer(track.width)
@@ -412,7 +418,7 @@ local function formats_to_edl(json, formats, use_all_formats)
                     props = props .. ",samplerate=" .. as_integer(track.asr)
                 end
                 hdr[#hdr + 1] = "!delay_open,media_type=" .. sub.media_type ..
-                    ",codec=" .. (codec or "null") .. props
+                    ",codec=" .. (sub.codec or "null") .. props
 
                 -- Add bitrate information etc. for better user selection.
                 local byterate = 0
