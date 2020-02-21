@@ -40,9 +40,13 @@ local safe_protos = Set {
 }
 
 local codec_map = {
+    -- src pattern  = mpv codec
     ["vtt"]         = "webvtt",
     ["opus"]        = "opus",
     ["vp9"]         = "vp9",
+    ["avc1\..*"]    = "h264",
+    ["av01\..*"]    = "av1",
+    ["mp4a\..*"]    = "aac",
 }
 
 -- Codec name as reported by youtube-dl mapped to mpv internal codec names.
@@ -54,18 +58,11 @@ local function map_codec_to_mpv(codec)
     if codec == nil then
         return nil
     end
-    local mc = codec_map[codec]
-    if mc then
-        return mc
-    end
-    if codec:sub(1, 5) == "avc1." then
-        return "h264"
-    end
-    if codec:sub(1, 5) == "av01." then
-        return "av1"
-    end
-    if codec:sub(1, 5) == "mp4a." then
-        return "aac"
+    for k, v in pairs(codec_map) do
+        local s, e = codec:find(k)
+        if s == 1 and e == #codec then
+            return v
+        end
     end
     return nil
 end
