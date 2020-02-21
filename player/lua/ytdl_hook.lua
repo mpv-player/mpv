@@ -44,9 +44,9 @@ local codec_map = {
     ["vtt"]         = "webvtt",
     ["opus"]        = "opus",
     ["vp9"]         = "vp9",
-    ["avc1\..*"]    = "h264",
-    ["av01\..*"]    = "av1",
-    ["mp4a\..*"]    = "aac",
+    ["avc1%..*"]    = "h264",
+    ["av01%..*"]    = "av1",
+    ["mp4a%..*"]    = "aac",
 }
 
 -- Codec name as reported by youtube-dl mapped to mpv internal codec names.
