@@ -427,15 +427,18 @@ additionally wrapped in the fixed-length syntax, e.g. ``%n%string_of_length_n``
 Some mpv options interpret paths starting with ``~``. Currently, the prefix
 ``~~/`` expands to the mpv configuration directory (usually ``~/.config/mpv/``).
 ``~/`` expands to the user's home directory. (The trailing ``/`` is always
-required.) There are the following paths as well:
+required.) The following paths are currently recognized:
 
 ================ ===============================================================
 Name             Meaning
 ================ ===============================================================
+``~~/``          mpv config dir (for example ``~/.config/mpv/``)
+``~/``           user home directory root (similar to shell, ``$HOME``)
 ``~~home/``      same as ``~~/``
 ``~~global/``    the global config path, if available (not on win32)
 ``~~osxbundle/`` the OSX bundle resource path (OSX only)
 ``~~desktop/``   the path to the desktop (win32, OSX)
+``~~old_home``   do not use
 ================ ===============================================================
 
 
@@ -1095,10 +1098,6 @@ behavior of mpv.
 
     ``$HOME/.mpv`` is always added to the list of config search paths with a
     lower priority.
-
-``XDG_CONFIG_DIRS``
-    If set, XDG-style system configuration directories are used. Otherwise,
-    the UNIX convention (``PREFIX/etc/mpv/``) is used.
 
 ``MPV_HOME``
     Directory where mpv looks for user settings. Overrides ``HOME``, and mpv
