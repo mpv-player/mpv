@@ -277,6 +277,17 @@ This has the following parameters:
     Above also applies for similar fields such as ``w``.  These fields are
     mostly to help with user track pre-selection.
 
+``flags``
+    A ``+`` separated list of boolean flags. Currently defined flags:
+
+        ``default``
+            Set the default track flag.
+
+        ``forced``
+            Set the forced track flag.
+
+    Other values are ignored after triggering a warning.
+
 ``w``, ``h``
     For video codecs: expected video size. See ``codec`` for details.
 

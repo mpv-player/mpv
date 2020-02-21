@@ -241,6 +241,17 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
                 sh->lang = get_param0(&ctx, sh, "lang");
                 sh->title = get_param0(&ctx, sh, "title");
                 sh->hls_bitrate = get_param_int(&ctx, "byterate", 0) * 8;
+                bstr flags = get_param(&ctx, "flags");
+                bstr flag;
+                while (bstr_split_tok(flags, "+", &flag, &flags) || flag.len) {
+                    if (bstr_equals0(flag, "default")) {
+                        sh->default_track = true;
+                    } else if (bstr_equals0(flag, "forced")) {
+                        sh->forced_track = true;
+                    } else {
+                        mp_warn(log, "Unknown flag: '%.*s'\n", BSTR_P(flag));
+                    }
+                }
             } else if (bstr_equals0(f_type, "delay_open")) {
                 struct sh_stream *sh = get_meta(tl, tl->num_sh_meta);
                 bstr mt = get_param(&ctx, "media_type");
