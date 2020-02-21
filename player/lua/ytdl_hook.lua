@@ -436,7 +436,7 @@ local function formats_to_edl(json, formats, use_all_formats)
                         break
                     end
                 end
-                local title = track.format_note or track.format or ""
+                local title = track.format or track.format_note or ""
                 if #tracks > 1 then
                     if #title > 0 then
                         title = title .. " "
