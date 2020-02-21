@@ -344,6 +344,12 @@ local function formats_to_edl(json, formats, use_all_formats)
     local single_url = nil
     local streams = {}
 
+    local tbr_only = true
+    for index, track in ipairs(formats) do
+        tbr_only = tbr_only and track["tbr"] and
+                   (not track["abr"]) and (not track["vbr"])
+    end
+
     for index, track in ipairs(formats) do
         local edl_track = nil
         edl_track = edl_track_joined(track.fragments,
@@ -391,6 +397,9 @@ local function formats_to_edl(json, formats, use_all_formats)
                 local rates = {"tbr", "vbr", "abr"}
                 if #tracks > 1 then
                     rates = {({video = "vbr", audio = "abr"})[sub.media_type]}
+                end
+                if tbr_only then
+                    rates = {"tbr"}
                 end
                 for _, f in ipairs(rates) do
                     local br = as_integer(track[f])
