@@ -416,10 +416,10 @@ local function formats_to_edl(json, formats, use_all_formats)
                 end
                 hdr[#hdr + 1] = "!track_meta,title=" ..
                     edl_escape(title) .. ",byterate=" .. byterate
+            end
 
-                if duration > 0 then
-                    params = params .. ",length=" .. duration
-                end
+            if duration > 0 then
+                params = params .. ",length=" .. duration
             end
         end
 
