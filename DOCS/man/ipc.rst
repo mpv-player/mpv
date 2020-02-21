@@ -71,6 +71,9 @@ To be able to simultaneously read and write from the IPC pipe, like on Linux,
 it's necessary to write an external program that uses overlapped file I/O (or
 some wrapper like .NET's NamedPipeClientStream.)
 
+You can open the pipe in PuTTY as "serial" device. This is not very
+comfortable, but gives a way to test interactively without having to write code.
+
 Protocol
 --------
 
