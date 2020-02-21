@@ -814,7 +814,6 @@ Program Behavior
     ``--script-opts`` option (using ``ytdl_hook-`` as prefix):
 
     ``try_ytdl_first=<yes|no>``
-
         If 'yes' will try parsing the URL with youtube-dl first, instead of the
         default where it's only after mpv failed to open it. This mostly depends
         on whether most of your URLs need youtube-dl parsing.
@@ -855,22 +854,40 @@ Program Behavior
         slow, which can't be really fixed.) In general, this option is not
         useful, and was only added to show that it's possible.
 
-    ``skip_muxed=<yes|no>``
+        There are two cases that must be considered when doing quality/bandwidth
+        selection:
+
+            1. Completely separate audio and video streams (DASH-like). Each of
+               these streams contain either only audio or video, so you can
+               mix and combine audio/video bandwidths without restriction. This
+               intuitively matches best with the concept of selecting quality
+               by track (what ``all_formats`` is supposed to do).
+
+            2. Separate sets of muxed audio and video streams. Each version of
+               the media contains both an audio and video stream, and they are
+               interleaved. In order not to waste bandwidth, you should only
+               select one of these versions (if, for example, you select an
+               audio stream, then video will be downloaded, even if you selected
+               video from a different stream).
+
+               mpv will still represent them as separate tracks, but will set
+               the title of each track to ``muxed-N``, where ``N`` is replaced
+               with the youtube-dl format ID of the originating stream.
+
+        Some sites will mix 1. and 2., but we assume that they do so for
+        compatibility reasons, and there is no reason to use them at all.
+
+    ``force_all_formats=<yes|no>``
         If set to 'yes', and ``all_formats`` is also set to 'yes', this will
-        skip formats that have both audio and video streams (default: yes).
+        try to represent all youtube-dl reported formats as tracks, even if
+        mpv would normally use the direct URL reported by it (default: yes).
 
-        Some sites that provide multiple qualities will do so with separated
-        audio and video streams (which is what ``all_formats`` is supposed to
-        make use of), still provide formats that include both audio and video.
-        We assume that they do so for compatibility reasons, and ``skip_muxed``
-        filters them out. This will make loading faster, and potentially avoid
-        wasting bandwidth by using only one stream of a muxed stream. On the
-        other hand, if muxed streams are present, but the separate streams lack
-        either video or audio or do not exist at all, then the stream selection
-        as done by youtube-dl (via ``--ytdl-format``) is used.
+        It appears this normally makes a difference if youtube-dl works on a
+        master HLS playlist.
 
-        This appears to terribly break with some sites that provide a HLS master
-        playlist on the lowest level.
+        If this is set to 'no', this specific kind of stream is treated like
+        ``all_formats`` is set to 'no', and the stream selection as done by
+        youtube-dl (via ``--ytdl-format``) is used.
 
     ``use_manifests=<yes|no>``
         Make mpv use the master manifest URL for formats like HLS and DASH,

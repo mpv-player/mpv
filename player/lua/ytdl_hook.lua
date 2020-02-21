@@ -7,7 +7,7 @@ local o = {
     try_ytdl_first = false,
     use_manifests = false,
     all_formats = false,
-    skip_muxed = true,
+    force_all_formats = true,
 }
 options.read_options(o)
 
@@ -343,8 +343,6 @@ local function formats_to_edl(json, formats, use_all_formats)
     local duration = as_integer(json["duration"])
     local single_url = nil
     local streams = {}
-    local separate_present = {}
-    local muxed_present = false
 
     for index, track in ipairs(formats) do
         local edl_track = nil
@@ -376,14 +374,10 @@ local function formats_to_edl(json, formats, use_all_formats)
 
         local url = edl_track or track.url
         local hdr = {"!new_stream", "!no_clip", "!no_chapters"}
-        local as_muxed = false
+        local skip = false
         local params = ""
 
         if use_all_formats then
-            if #tracks > 1 and o.skip_muxed then
-                as_muxed = true
-                tracks = {} -- skip
-            end
             for _, sub in ipairs(tracks) do
                 -- A single track that is either audio or video. Delay load it.
                 local codec = map_codec_to_mpv(sub.codec)
@@ -418,10 +412,6 @@ local function formats_to_edl(json, formats, use_all_formats)
                 hdr[#hdr + 1] = "!track_meta,title=" ..
                     edl_escape(title) .. ",byterate=" .. byterate
 
-                if #tracks == 1 then
-                    separate_present[sub.media_type] = true
-                end
-
                 if duration > 0 then
                     params = params .. ",length=" .. duration
                 end
@@ -430,22 +420,11 @@ local function formats_to_edl(json, formats, use_all_formats)
 
         hdr[#hdr + 1] = edl_escape(url) .. params
 
-        if as_muxed then
-            muxed_present = true
-        else
-            streams[#streams + 1] = table.concat(hdr, ";")
-        end
+        streams[#streams + 1] = table.concat(hdr, ";")
         -- In case there is only 1 of these streams.
         -- Note: assumes it has no important EDL headers
         single_url = url
     end
-
-    -- If "skip_muxed" is enabled, we discard formats that have both audio
-    -- and video aka muxed (because it's a pain). But if the single-media
-    -- type formats do not provide both video and audio, then discard them
-    -- and use the muxed streams instead.
-    res.muxed_needed = muxed_present and (not (separate_present["video"] and
-                                               separate_present["audio"]))
 
     -- Merge all tracks into a single virtual file, but avoid EDL if it's
     -- only a single track (i.e. redundant).
@@ -495,8 +474,13 @@ local function add_single_video(json)
     if streamurl == ""  then
         -- possibly DASH/split tracks
         local res = nil
+        local has_requested_formats = requested_formats and #requested_formats > 0
 
-        if all_formats and o.all_formats then
+        -- Not having requested_formats usually hints to HLS master playlist
+        -- usage, which we don't want to split off, at least not yet.
+        if (all_formats and o.all_formats) and
+           (has_requested_formats or o.force_all_formats)
+        then
             format_info = "all_formats (separate)"
             res = formats_to_edl(json, all_formats, true)
             -- Note: since we don't delay-load muxed streams, use normal stream
@@ -506,7 +490,7 @@ local function add_single_video(json)
             end
         end
 
-        if (not res) and requested_formats and #requested_formats > 0 then
+        if (not res) and has_requested_formats then
             format_info = "youtube-dl (separate)"
             res = formats_to_edl(json, requested_formats, false)
         end
