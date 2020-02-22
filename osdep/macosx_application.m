@@ -99,8 +99,10 @@ static Application *mpv_shared_app(void)
 
 static void terminate_cocoa_application(void)
 {
-    [NSApp hide:NSApp];
-    [NSApp terminate:NSApp];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [NSApp hide:NSApp];
+        [NSApp terminate:NSApp];
+    });
 }
 
 @implementation Application
@@ -300,7 +302,9 @@ static void init_cocoa_application(bool regular)
         // Because activation policy has just been set to behave like a real
         // application, that policy must be reset on exit to prevent, among
         // other things, the menubar created here from remaining on screen.
-        [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
+        });
     });
 }
 

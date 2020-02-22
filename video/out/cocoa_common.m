@@ -395,8 +395,10 @@ void vo_cocoa_init(struct vo *vo)
     cocoa_add_event_monitor(vo);
 
     if (!s->embedded) {
-        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-        set_application_icon(NSApp);
+        run_on_main_thread(vo, ^{
+            [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+            set_application_icon(NSApp);
+        });
     }
 }
 
