@@ -539,7 +539,8 @@ class CocoaCB: NSObject {
         case VOCTRL_UPDATE_WINDOW_TITLE:
             if let titleData = data?.assumingMemoryBound(to: Int8.self) {
                 DispatchQueue.main.async {
-                    ccb.title = String(cString: titleData)
+                    let title = NSString(utf8String: titleData) as String?
+                    ccb.title = title ?? "Unknown Title"
                 }
                 return VO_TRUE
             }
