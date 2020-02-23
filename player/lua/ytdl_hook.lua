@@ -489,8 +489,8 @@ local function add_single_video(json)
         -- prefer manifest_url if present
         format_info = "manifest"
 
-        local mpd_url = reqfmts and reqfmts[1]["manifest_url"] or
-            json["manifest_url"]
+        local mpd_url = requested_formats and
+            requested_formats[1]["manifest_url"] or json["manifest_url"]
         if not mpd_url then
             msg.error("No manifest URL found in JSON data.")
             return
@@ -500,8 +500,8 @@ local function add_single_video(json)
 
         streamurl = mpd_url
 
-        if reqfmts then
-            for _, track in pairs(reqfmts) do
+        if requested_formats then
+            for _, track in pairs(requested_formats) do
                 max_bitrate = track.tbr > max_bitrate and
                     track.tbr or max_bitrate
             end
