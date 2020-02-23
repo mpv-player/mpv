@@ -31,9 +31,13 @@
 
 struct ta_header {
     size_t size;                // size of the user allocation
-    struct ta_header *prev;     // ring list containing siblings
+    // Invariant: parent!=NULL => prev==NULL
+    struct ta_header *prev;     // siblings list (by destructor order)
     struct ta_header *next;
-    struct ta_ext_header *ext;
+    // Invariant: parent==NULL || parent->child==this
+    struct ta_header *child;    // points to first child
+    struct ta_header *parent;   // set for _first_ child only, NULL otherwise
+    void (*destructor)(void *);
 #ifdef TA_MEMORY_DEBUGGING
     unsigned int canary;
     struct ta_header *leak_next;
@@ -59,16 +63,6 @@ union aligned_header {
 
 #define MAX_ALLOC (((size_t)-1) - sizeof(union aligned_header))
 
-// Needed for non-leaf allocations, or extended features such as destructors.
-struct ta_ext_header {
-    struct ta_header *header;  // points back to normal header
-    struct ta_header children; // list of children, with this as sentinel
-    void (*destructor)(void *);
-};
-
-// ta_ext_header.children.size is set to this
-#define CHILDREN_SENTINEL ((size_t)-1)
-
 static void ta_dbg_add(struct ta_header *h);
 static void ta_dbg_check_header(struct ta_header *h);
 static void ta_dbg_remove(struct ta_header *h);
@@ -78,29 +72,6 @@ static struct ta_header *get_header(void *ptr)
     struct ta_header *h = ptr ? PTR_TO_HEADER(ptr) : NULL;
     ta_dbg_check_header(h);
     return h;
-}
-
-static struct ta_ext_header *get_or_alloc_ext_header(void *ptr)
-{
-    struct ta_header *h = get_header(ptr);
-    if (!h)
-        return NULL;
-    if (!h->ext) {
-        h->ext = malloc(sizeof(struct ta_ext_header));
-        if (!h->ext)
-            return NULL;
-        *h->ext = (struct ta_ext_header) {
-            .header = h,
-            .children = {
-                .next = &h->ext->children,
-                .prev = &h->ext->children,
-                // Needed by ta_find_parent():
-                .size = CHILDREN_SENTINEL,
-                .ext = h->ext,
-            },
-        };
-    }
-    return h->ext;
 }
 
 /* Set the parent allocation of ptr. If parent==NULL, remove the parent.
@@ -117,22 +88,31 @@ bool ta_set_parent(void *ptr, void *ta_parent)
     struct ta_header *ch = get_header(ptr);
     if (!ch)
         return true;
-    struct ta_ext_header *parent_eh = get_or_alloc_ext_header(ta_parent);
-    if (ta_parent && !parent_eh) // do nothing on OOM
-        return false;
+    struct ta_header *new_parent = get_header(ta_parent);
     // Unlink from previous parent
-    if (ch->next) {
-        ch->next->prev = ch->prev;
+    if (ch->prev)
         ch->prev->next = ch->next;
-        ch->next = ch->prev = NULL;
+    if (ch->next)
+        ch->next->prev = ch->prev;
+    // If ch was the firs child, change child link of old parent
+    if (ch->parent) {
+        assert(ch->parent->child == ch);
+        ch->parent->child = ch->next;
+        if (ch->parent->child) {
+            assert(!ch->parent->child->parent);
+            ch->parent->child->parent = ch->parent;
+        }
     }
-    // Link to new parent - insert at end of list (possibly orders destructors)
-    if (parent_eh) {
-        struct ta_header *children = &parent_eh->children;
-        ch->next = children;
-        ch->prev = children->prev;
-        children->prev->next = ch;
-        children->prev = ch;
+    ch->next = ch->prev = ch->parent = NULL;
+    // Link to new parent - insert at start of list (LIFO destructor order)
+    if (new_parent) {
+        ch->next = new_parent->child;
+        if (ch->next) {
+            ch->next->prev = ch;
+            ch->next->parent = NULL;
+        }
+        new_parent->child = ch;
+        ch->parent = new_parent;
     }
     return true;
 }
@@ -205,6 +185,7 @@ void *ta_realloc_size(void *ta_parent, void *ptr, size_t size)
     struct ta_header *old_h = h;
     if (h->size == size)
         return ptr;
+    bool first_child = h->parent && h->parent->child == h;
     ta_dbg_remove(h);
     h = realloc(h, sizeof(union aligned_header) + size);
     ta_dbg_add(h ? h : old_h);
@@ -212,17 +193,17 @@ void *ta_realloc_size(void *ta_parent, void *ptr, size_t size)
         return NULL;
     h->size = size;
     if (h != old_h) {
-        if (h->next) {
-            // Relink siblings
+        // Relink parent
+        if (first_child)
+            h->parent->child = h;
+        // Relink siblings
+        if (h->next)
             h->next->prev = h;
+        if (h->prev)
             h->prev->next = h;
-        }
-        if (h->ext) {
-            // Relink children
-            h->ext->header = h;
-            h->ext->children.next->prev = &h->ext->children;
-            h->ext->children.prev->next = &h->ext->children;
-        }
+        // Relink children
+        if (h->child)
+            h->child->parent = h;
     }
     return PTR_FROM_HEADER(h);
 }
@@ -243,11 +224,8 @@ size_t ta_get_size(void *ptr)
 void ta_free_children(void *ptr)
 {
     struct ta_header *h = get_header(ptr);
-    struct ta_ext_header *eh = h ? h->ext : NULL;
-    if (!eh)
-        return;
-    while (eh->children.prev != &eh->children)
-        ta_free(PTR_FROM_HEADER(eh->children.prev));
+    while (h && h->child)
+        ta_free(PTR_FROM_HEADER(h->child));
 }
 
 /* Free the given allocation, and all of its direct and indirect children.
@@ -257,16 +235,11 @@ void ta_free(void *ptr)
     struct ta_header *h = get_header(ptr);
     if (!h)
         return;
-    if (h->ext && h->ext->destructor)
-        h->ext->destructor(ptr);
+    if (h->destructor)
+        h->destructor(ptr);
     ta_free_children(ptr);
-    if (h->next) {
-        // Unlink from sibling list
-        h->next->prev = h->prev;
-        h->prev->next = h->next;
-    }
+    ta_set_parent(ptr, NULL);
     ta_dbg_remove(h);
-    free(h->ext);
     free(h);
 }
 
@@ -284,10 +257,10 @@ void ta_free(void *ptr)
  */
 bool ta_set_destructor(void *ptr, void (*destructor)(void *))
 {
-    struct ta_ext_header *eh = get_or_alloc_ext_header(ptr);
-    if (!eh)
+    struct ta_header *h = get_header(ptr);
+    if (!h)
         return false;
-    eh->destructor = destructor;
+    h->destructor = destructor;
     return true;
 }
 
@@ -315,8 +288,13 @@ static void ta_dbg_add(struct ta_header *h)
 
 static void ta_dbg_check_header(struct ta_header *h)
 {
-    if (h)
+    if (h) {
         assert(h->canary == CANARY);
+        if (h->parent) {
+            assert(!h->prev);
+            assert(h->parent->child == h);
+        }
+    }
 }
 
 static void ta_dbg_remove(struct ta_header *h)
@@ -335,11 +313,8 @@ static void ta_dbg_remove(struct ta_header *h)
 static size_t get_children_size(struct ta_header *h)
 {
     size_t size = 0;
-    if (h->ext) {
-        struct ta_header *s;
-        for (s = h->ext->children.next; s != &h->ext->children; s = s->next)
-            size += s->size + get_children_size(s);
-    }
+    for (struct ta_header *s = h; s; s = s->next)
+        size += s->size + get_children_size(s);
     return size;
 }
 
