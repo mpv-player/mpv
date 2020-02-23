@@ -147,6 +147,29 @@ with ``#`` and empty lines are ignored.
 Currently, embedded 0 bytes terminate the current line, but you should not
 rely on this.
 
+Data flow
+---------
+
+Currently, the mpv-side IPC implementation does not service the socket while a
+command is executed and the reply is written. It is for example not possible
+that other events, that happened during the execution of the command, are
+written to the socket before the reply is written.
+
+This might change in the future. The only guarantee is that replies to IPC
+messages are sent in sequence.
+
+Also, since socket I/O is inherently asynchronous, it is possible that you read
+unrelated event messages from the socket, before you read the reply to the
+previous command you sent. In this case, these events were queued by the mpv
+side before it read and started processing your command message.
+
+If the mpv-side IPC implementation switches away from blocking writes and
+blocking command execution, it may attempt to send events at any time.
+
+You can also use asynchronous commands, which can return in any order, and
+which do not block IPC protocol interaction at all while the command is
+executed in the background.
+
 Asynchronous commands
 ---------------------
 
