@@ -75,19 +75,18 @@ static struct ta_header *get_header(void *ptr)
 }
 
 /* Set the parent allocation of ptr. If parent==NULL, remove the parent.
- * Setting parent==NULL (with ptr!=NULL) always succeeds, and unsets the
- * parent of ptr. Operations ptr==NULL always succeed and do nothing.
- * Returns true on success, false on OOM.
+ * Setting parent==NULL (with ptr!=NULL) unsets the parent of ptr.
+ * With ptr==NULL, the function does nothing.
  *
  * Warning: if ta_parent is a direct or indirect child of ptr, things will go
  *          wrong. The function will apparently succeed, but creates circular
  *          parent links, which are not allowed.
  */
-bool ta_set_parent(void *ptr, void *ta_parent)
+void ta_set_parent(void *ptr, void *ta_parent)
 {
     struct ta_header *ch = get_header(ptr);
     if (!ch)
-        return true;
+        return;
     struct ta_header *new_parent = get_header(ta_parent);
     // Unlink from previous parent
     if (ch->prev)
@@ -114,7 +113,6 @@ bool ta_set_parent(void *ptr, void *ta_parent)
         new_parent->child = ch;
         ch->parent = new_parent;
     }
-    return true;
 }
 
 /* Allocate size bytes of memory. If ta_parent is not NULL, this is used as
@@ -132,10 +130,7 @@ void *ta_alloc_size(void *ta_parent, size_t size)
     *h = (struct ta_header) {.size = size};
     ta_dbg_add(h);
     void *ptr = PTR_FROM_HEADER(h);
-    if (!ta_set_parent(ptr, ta_parent)) {
-        ta_free(ptr);
-        return NULL;
-    }
+    ta_set_parent(ptr, ta_parent);
     return ptr;
 }
 
@@ -152,10 +147,7 @@ void *ta_zalloc_size(void *ta_parent, size_t size)
     *h = (struct ta_header) {.size = size};
     ta_dbg_add(h);
     void *ptr = PTR_FROM_HEADER(h);
-    if (!ta_set_parent(ptr, ta_parent)) {
-        ta_free(ptr);
-        return NULL;
-    }
+    ta_set_parent(ptr, ta_parent);
     return ptr;
 }
 
@@ -252,16 +244,12 @@ void ta_free(void *ptr)
  * almost anything, but it must not attempt to free or realloc ptr. The
  * destructor is run before the allocation's children are freed (also, before
  * their destructors are run).
- *
- * Returns false if ptr==NULL, or on OOM.
  */
-bool ta_set_destructor(void *ptr, void (*destructor)(void *))
+void ta_set_destructor(void *ptr, void (*destructor)(void *))
 {
     struct ta_header *h = get_header(ptr);
-    if (!h)
-        return false;
-    h->destructor = destructor;
-    return true;
+    if (h)
+        h->destructor = destructor;
 }
 
 #ifdef TA_MEMORY_DEBUGGING

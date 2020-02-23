@@ -44,21 +44,11 @@ size_t ta_calc_prealloc_elems(size_t nextidx)
     return (nextidx + 1) * 2;
 }
 
-static void dummy_dtor(void *p){}
-
-/* Create an empty (size 0) TA allocation, which is prepared in a way such that
- * using it as parent with ta_set_parent() always succeed. Calling
- * ta_set_destructor() on it will always succeed as well.
+/* Create an empty (size 0) TA allocation.
  */
 void *ta_new_context(void *ta_parent)
 {
-    void *new = ta_alloc_size(ta_parent, 0);
-    // Force it to allocate an extended header.
-    if (!ta_set_destructor(new, dummy_dtor)) {
-        ta_free(new);
-        new = NULL;
-    }
-    return new;
+    return ta_alloc_size(ta_parent, 0);
 }
 
 /* Set parent of ptr to ta_parent, return the ptr.
@@ -68,8 +58,7 @@ void *ta_new_context(void *ta_parent)
  */
 void *ta_steal_(void *ta_parent, void *ptr)
 {
-    if (!ta_set_parent(ptr, ta_parent))
-        return NULL;
+    ta_set_parent(ptr, ta_parent);
     return ptr;
 }
 
@@ -138,10 +127,7 @@ char *ta_strndup(void *ta_parent, const char *str, size_t n)
         return NULL;
     char *new = NULL;
     strndup_append_at(&new, 0, str, n);
-    if (!ta_set_parent(new, ta_parent)) {
-        ta_free(new);
-        new = NULL;
-    }
+    ta_set_parent(new, ta_parent);
     return new;
 }
 
@@ -229,7 +215,8 @@ char *ta_vasprintf(void *ta_parent, const char *fmt, va_list ap)
 {
     char *res = NULL;
     ta_vasprintf_append_at(&res, 0, fmt, ap);
-    if (!res || !ta_set_parent(res, ta_parent)) {
+    ta_set_parent(res, ta_parent);
+    if (!res) {
         ta_free(res);
         return NULL;
     }
@@ -303,7 +290,7 @@ char *ta_oom_s(char *s)
 
 void *ta_xsteal_(void *ta_parent, void *ptr)
 {
-    ta_oom_b(ta_set_parent(ptr, ta_parent));
+    ta_set_parent(ptr, ta_parent);
     return ptr;
 }
 
