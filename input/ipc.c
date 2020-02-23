@@ -109,8 +109,28 @@ static void mpv_node_map_add_string(void *ta_parent, mpv_node *src, const char *
     mpv_node_map_add(ta_parent, src, key, &val_node);
 }
 
+// This is supposed to write a reply that looks like "normal" command execution.
+static void mpv_format_command_reply(void *ta_parent, mpv_event *event,
+                                     mpv_node *dst)
+{
+    assert(event->event_id == MPV_EVENT_COMMAND_REPLY);
+    mpv_event_command *cmd = event->data;
+
+    mpv_node_map_add_int64(ta_parent, dst, "request_id", event->reply_userdata);
+
+    mpv_node_map_add_string(ta_parent, dst, "error",
+                            mpv_error_string(event->error));
+
+    mpv_node_map_add(ta_parent, dst, "data", &cmd->result);
+}
+
 static void mpv_event_to_node(void *ta_parent, mpv_event *event, mpv_node *dst)
 {
+    if (event->event_id == MPV_EVENT_COMMAND_REPLY) {
+        mpv_format_command_reply(ta_parent, event, dst);
+        return;
+    }
+
     mpv_node_map_add_string(ta_parent, dst, "event", mpv_event_name(event->event_id));
 
     if (event->reply_userdata)
@@ -193,6 +213,10 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
     mpv_node msg_node;
     mpv_node reply_node = {.format = MPV_FORMAT_NODE_MAP, .u.list = NULL};
     mpv_node *reqid_node = NULL;
+    int64_t reqid = 0;
+    mpv_node *async_node = NULL;
+    bool async = false;
+    bool send_reply = true;
 
     rc = json_parse(ta_parent, &msg_node, &src, 50);
     if (rc < 0) {
@@ -206,10 +230,27 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
         goto error;
     }
 
+    async_node = node_map_get(&msg_node, "async");
+    if (async_node) {
+        if (async_node->format != MPV_FORMAT_FLAG) {
+            rc = MPV_ERROR_INVALID_PARAMETER;
+            goto error;
+        }
+        async = async_node->u.flag;
+    }
+
     reqid_node = node_map_get(&msg_node, "request_id");
-    if (reqid_node && reqid_node->format != MPV_FORMAT_INT64) {
-        mp_warn(log, "'request_id' must be an integer. Using other types is "
-                "deprecated and will trigger an error in the future!\n");
+    if (reqid_node) {
+        if (reqid_node->format == MPV_FORMAT_INT64) {
+            reqid = reqid_node->u.int64;
+        } else if (async) {
+            mp_err(log, "'request_id' must be an integer for async commands.\n");
+            rc = MPV_ERROR_INVALID_PARAMETER;
+            goto error;
+        } else {
+            mp_warn(log, "'request_id' must be an integer. Using other types is "
+                    "deprecated and will trigger an error in the future!\n");
+        }
     }
 
     mpv_node *cmd_node = node_map_get(&msg_node, "command");
@@ -396,9 +437,15 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
     } else {
         mpv_node result_node;
 
-        rc = mpv_command_node(client, cmd_node, &result_node);
-        if (rc >= 0)
-            mpv_node_map_add(ta_parent, &reply_node, "data", &result_node);
+        if (async) {
+            rc = mpv_command_node_async(client, reqid, cmd_node);
+            if (rc >= 0)
+                send_reply = false;
+        } else {
+            rc = mpv_command_node(client, cmd_node, &result_node);
+            if (rc >= 0)
+                mpv_node_map_add(ta_parent, &reply_node, "data", &result_node);
+        }
     }
 
 error:
@@ -415,8 +462,11 @@ error:
     mpv_node_map_add_string(ta_parent, &reply_node, "error", mpv_error_string(rc));
 
     char *output = talloc_strdup(ta_parent, "");
-    json_write(&output, &reply_node);
-    output = ta_talloc_strdup_append(output, "\n");
+
+    if (send_reply) {
+        json_write(&output, &reply_node);
+        output = ta_talloc_strdup_append(output, "\n");
+    }
 
     return output;
 }

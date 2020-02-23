@@ -136,9 +136,6 @@ Would generate this response:
 
 If you don't specify a ``request_id``, command replies will set it to 0.
 
-Commands may run asynchronously in the future, instead of blocking the  socket
-until a reply is sent.
-
 All commands, replies, and events are separated from each other with a line
 break character (``\n``).
 
@@ -149,6 +146,38 @@ with ``#`` and empty lines are ignored.
 
 Currently, embedded 0 bytes terminate the current line, but you should not
 rely on this.
+
+Asynchronous commands
+---------------------
+
+Command can be run asynchronously. This behaves exactly as with normal command
+execution, except that execution is not blocking. Other commands can be sent
+while it's executing, and command completion can be arbitrarily reordered.
+
+The ``async`` field controls this. If present, it must be a boolean. If missing,
+``false`` is assumed.
+
+For example, this initiates an asynchronous command:
+
+::
+
+    { "command": ["screenshot"], "request_id": 123, "async": true }
+
+And this is the completion:
+
+::
+
+    {"request_id":123,"error":"success","data":null}
+
+By design, you will not get a confirmation that the command was started. If a
+command is long running, sending the message will lead to any reply until much
+later when the command finishes.
+
+Some commands execute synchronously, but these will behave like asynchronous
+commands that finished execution immediately.
+
+Cancellation of asynchronous commands is available in the libmpv API, but has
+not yet been implemented in the IPC protocol.
 
 Commands
 --------
