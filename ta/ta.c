@@ -177,7 +177,6 @@ void *ta_realloc_size(void *ta_parent, void *ptr, size_t size)
     struct ta_header *old_h = h;
     if (h->size == size)
         return ptr;
-    bool first_child = h->parent && h->parent->child == h;
     ta_dbg_remove(h);
     h = realloc(h, sizeof(union aligned_header) + size);
     ta_dbg_add(h ? h : old_h);
@@ -186,7 +185,7 @@ void *ta_realloc_size(void *ta_parent, void *ptr, size_t size)
     h->size = size;
     if (h != old_h) {
         // Relink parent
-        if (first_child)
+        if (h->parent)
             h->parent->child = h;
         // Relink siblings
         if (h->next)
