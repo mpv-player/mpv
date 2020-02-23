@@ -125,10 +125,6 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 #define ta_xnew_array_ptrtype(...)      ta_oom_g(ta_new_array_ptrtype(__VA_ARGS__))
 #define ta_xdup(...)                    ta_oom_g(ta_dup(__VA_ARGS__))
 
-// Cannot fail anymore.
-#define ta_xset_destructor(...)         ta_set_destructor(__VA_ARGS__)
-#define ta_xset_parent(...)             ta_set_parent(__VA_ARGS__)
-
 #define ta_xsteal(ta_parent, ptr) (TA_TYPEOF(ptr))ta_xsteal_(ta_parent, ptr)
 #define ta_xrealloc(ta_parent, ptr, type, count) \
     (type *)ta_xrealloc_size(ta_parent, ptr, ta_calc_array_size(sizeof(type), count))

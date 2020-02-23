@@ -4284,7 +4284,7 @@ static void continue_cmd_list(struct cmd_list_ctx *list)
         struct mp_cmd *sub = list->parent->args[0].v.p;
         list->parent->args[0].v.p = sub->queue_next;
 
-        ta_xset_parent(sub, NULL);
+        ta_set_parent(sub, NULL);
 
         if (sub->flags & MP_ASYNC_CMD) {
             // We run it "detached" (fire & forget)

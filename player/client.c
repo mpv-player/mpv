@@ -1141,7 +1141,7 @@ static void async_cmd_fn(void *data)
     struct async_cmd_request *req = data;
 
     struct mp_cmd *cmd = req->cmd;
-    ta_xset_parent(cmd, NULL);
+    ta_set_parent(cmd, NULL);
     req->cmd = NULL;
 
     struct mp_abort_entry *abort = NULL;
