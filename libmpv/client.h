@@ -1011,6 +1011,11 @@ int mpv_command_string(mpv_handle *ctx, const char *args);
  * error code set if running the command failed. For commands that
  * return data, the data is put into mpv_event_command.result.
  *
+ * The only case when you do not receive an event is when the function call
+ * itself fails. This happens only if parsing the command itself (or otherwise
+ * validating it) fails, i.e. the return code of the API call is not 0 or
+ * positive.
+ *
  * Safe to be called from mpv render API threads.
  *
  * @param reply_userdata the value mpv_event.reply_userdata of the reply will
