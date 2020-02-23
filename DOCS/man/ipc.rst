@@ -202,6 +202,17 @@ commands that finished execution immediately.
 Cancellation of asynchronous commands is available in the libmpv API, but has
 not yet been implemented in the IPC protocol.
 
+Commands with named arguments
+-----------------------------
+
+If the ``command`` field is a JSON object, named arguments are expected. This
+is described in the C API ``mpv_command_node()`` documentation (the
+``MPV_FORMAT_NODE_MAP`` case). In some cases, this may make commands more
+readable, while some obscure commands basically require using named arguments.
+
+Currently, only "proper" commands (as listed by `List of Input Commands`_)
+support named arguments.
+
 Commands
 --------
 
