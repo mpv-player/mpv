@@ -1662,7 +1662,7 @@ void mp_client_send_property_changes(struct MPContext *mpctx)
         struct mpv_handle *ctx = clients->clients[n];
 
         pthread_mutex_lock(&ctx->lock);
-        if (!ctx->has_pending_properties) {
+        if (!ctx->has_pending_properties || ctx->destroying) {
             pthread_mutex_unlock(&ctx->lock);
             continue;
         }
