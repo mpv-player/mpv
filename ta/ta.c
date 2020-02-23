@@ -291,22 +291,6 @@ bool ta_set_destructor(void *ptr, void (*destructor)(void *))
     return true;
 }
 
-/* Return the ptr's parent allocation, or NULL if there isn't any.
- *
- * Warning: this has O(N) runtime complexity with N sibling allocations!
- */
-void *ta_find_parent(void *ptr)
-{
-    struct ta_header *h = get_header(ptr);
-    if (!h || !h->next)
-        return NULL;
-    for (struct ta_header *cur = h->next; cur != h; cur = cur->next) {
-        if (cur->size == CHILDREN_SENTINEL)
-            return PTR_FROM_HEADER(cur->ext->header);
-    }
-    return NULL;
-}
-
 #ifdef TA_MEMORY_DEBUGGING
 
 #include <pthread.h>
