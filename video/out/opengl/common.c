@@ -41,6 +41,7 @@ static bool is_software_gl(GL *gl)
     return !(renderer && vendor) ||
            strcmp(renderer, "Software Rasterizer") == 0 ||
            strstr(renderer, "llvmpipe") ||
+           strstr(renderer, "softpipe") ||
            strcmp(vendor, "Microsoft Corporation") == 0 ||
            strcmp(renderer, "Mesa X11") == 0 ||
            strcmp(renderer, "Apple Software Renderer") == 0;
