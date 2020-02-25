@@ -328,6 +328,9 @@ const struct mp_scripting mp_scripting_cplugin = {
 
 static int load_run(struct mp_script_args *args)
 {
+    // The arg->client object might die and with it args->log, so duplicate it.
+    args->log = mp_log_new(args, args->log, NULL);
+
     int fds[2];
     if (!mp_ipc_start_anon_client(args->mpctx->ipc_ctx, args->client, fds))
         return -1;
