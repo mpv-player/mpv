@@ -2630,6 +2630,9 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
         tone_map.compute_peak = -1;
     }
 
+    // boost to reference white IFF we are doing OSD, input is not HDR and output is HDR
+    tone_map.boost_to_hdr_reference_white = (osd && !mp_trc_is_hdr(src.gamma) && mp_trc_is_hdr(dst.gamma));
+
     // Adapt from src to dst as necessary
     pass_color_map(p->sc, p->use_linear && !osd, src, dst, &tone_map);
 

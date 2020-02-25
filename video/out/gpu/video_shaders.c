@@ -810,6 +810,11 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
     // Tone map to prevent clipping due to excessive brightness
     if (src.sig_peak > dst.sig_peak)
         pass_tone_map(sc, src.sig_peak, dst.sig_peak, opts);
+    else if (opts->boost_to_hdr_reference_white) {
+        // Boost the image from source to 203 nits (HDR reference white)
+        GLSLF("// Boost from src to HDR ref./graphics white\n");
+        GLSLF("color.rgb *= vec3(%f);\n", 2.03 / mp_trc_nom_peak(src.gamma));
+    }
 
     // Adapt to the right colorspace if necessary
     if (src.primaries != dst.primaries) {

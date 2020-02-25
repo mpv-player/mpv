@@ -107,6 +107,7 @@ struct gl_tone_map_opts {
     float desat;
     float desat_exp;
     int gamut_warning; // bool
+    bool boost_to_hdr_reference_white; // aka Graphics White, ref: BT.2408-3
 };
 
 struct gl_video_opts {
