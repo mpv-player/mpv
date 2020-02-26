@@ -26,7 +26,7 @@
 #include "audio/out/ao.h"
 #include "internal.h"
 
-#define CA_CFSTR_ENCODING kCFStringEncodingASCII
+#define CA_CFSTR_ENCODING kCFStringEncodingUTF8
 
 CFStringRef cfstr_from_cstr(char *str);
 char *cfstr_get_cstr(CFStringRef cfstr);
