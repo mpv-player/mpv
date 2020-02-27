@@ -630,7 +630,9 @@ static void update_seek_ranges(struct demux_cached_range *range)
             range->is_bof &= queue->is_bof;
 
             bool empty = queue->is_eof && !queue->head;
-            if (queue->seek_start >= queue->seek_end && !empty)
+            if (queue->seek_start >= queue->seek_end && !empty &&
+                !(queue->seek_start == queue->seek_end &&
+                  queue->seek_start != MP_NOPTS_VALUE))
                 goto broken;
         }
     }
