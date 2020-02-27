@@ -172,7 +172,7 @@ static struct sd *init_decoder(struct dec_sub *sub)
 // Thread-safety of the returned object: all functions are thread-safe,
 // except sub_get_bitmaps() and sub_get_text(). Decoder backends (sd_*)
 // do not need to acquire locks.
-// Ownership of attachments goes to the caller, and is released with
+// Ownership of attachments goes to the callee, and is released with
 // talloc_free() (even on failure).
 struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
                            struct attachment_list *attachments)
