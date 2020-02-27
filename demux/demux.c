@@ -1569,7 +1569,7 @@ static void back_demux_see_packets(struct demux_stream *ds)
 {
     struct demux_internal *in = ds->in;
 
-    if (!ds->selected || !in->back_demuxing)
+    if (!ds->selected || !in->back_demuxing || !ds->eager)
         return;
 
     assert(!(ds->back_resuming && ds->back_restarting));
@@ -1914,7 +1914,8 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
         queue->keyframe_latest = dp;
     }
 
-    if (update_ranges) {
+    // Adding a sparse packet never changes the seek range.
+    if (update_ranges && ds->eager) {
         update_seek_ranges(queue->range);
         attempt_range_joining(ds->in);
     }
