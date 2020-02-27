@@ -3406,6 +3406,12 @@ Demuxer
 ``--demuxer-mkv-subtitle-preroll-secs-index=<value>``
     See ``--demuxer-mkv-subtitle-preroll``.
 
+``--demuxer-mkv-probe-start-time=<yes|no>``
+    Check the start time of Matroska files (default: yes). This simply reads the
+    first cluster timestamps and assumes it is the start time. Technically, this
+    also reads the first timestamp, which may increase latency by one frame
+    (which may be relevant for live streams).
+
 ``--demuxer-mkv-probe-video-duration=<yes|no|full>``
     When opening the file, seek to the end of it, and check what timestamp the
     last video packet has, and report that as file duration. This is strictly

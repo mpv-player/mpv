@@ -244,6 +244,7 @@ const struct m_sub_options demux_mkv_conf = {
         .subtitle_preroll = 2,
         .subtitle_preroll_secs = 1.0,
         .subtitle_preroll_secs_index = 10.0,
+        .probe_start_time = 1,
     },
 };
 
@@ -3211,7 +3212,7 @@ static void probe_first_timestamp(struct demuxer *demuxer)
 
     demuxer->start_time = mkv_d->cluster_tc / 1e9;
 
-    if (demuxer->start_time > 0)
+    if (demuxer->start_time)
         MP_VERBOSE(demuxer, "Start PTS: %f\n", demuxer->start_time);
 }
 
