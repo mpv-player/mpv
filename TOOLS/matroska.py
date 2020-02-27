@@ -276,7 +276,7 @@ class MatroskaElement(object):
 
     def add_subelements(self, subelements):
         self.subelements = subelements
-        self.subids = set(x[0].elid for x in subelements)
+        self.subids = {x[0].elid for x in subelements}
 
 elementd = {}
 elementlist = []

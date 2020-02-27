@@ -135,7 +135,7 @@ def _check_pkg_config(_dyn_libs, _pkgc_args, *args, **kw_ext):
 
 def check_headers(*headers, **kw_ext):
     def undef_others(ctx, headers, found):
-        not_found_hs = set(headers) - set([found])
+        not_found_hs = set(headers) - {found}
         for not_found_h in not_found_hs:
             ctx.undefine(inflector.define_key(not_found_h))
 
