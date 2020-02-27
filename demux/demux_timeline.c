@@ -261,15 +261,17 @@ static void switch_segment(struct demuxer *demuxer, struct virtual_source *src,
     src->eos_packets = 0;
 }
 
-static bool do_read_next_packet(struct demuxer *demuxer,
+static void do_read_next_packet(struct demuxer *demuxer,
                                 struct virtual_source *src)
 {
     if (src->next)
-        return 1;
+        return;
 
     struct segment *seg = src->current;
-    if (!seg || !seg->d)
-        return 0;
+    if (!seg || !seg->d) {
+        src->eof_reached = true;
+        return;
+    }
 
     struct demux_packet *pkt = demux_read_any_packet(seg->d);
     if (!pkt || (!src->no_clip && pkt->pts >= seg->end))
@@ -310,10 +312,10 @@ static bool do_read_next_packet(struct demuxer *demuxer,
         }
         if (!next) {
             src->eof_reached = true;
-            return false;
+            return;
         }
         switch_segment(demuxer, src, next, next->start, 0, true);
-        return true; // reader will retry
+        return; // reader will retry
     }
 
     if (pkt->stream < 0 || pkt->stream >= seg->num_stream_map)
@@ -358,17 +360,15 @@ static bool do_read_next_packet(struct demuxer *demuxer,
 
     pkt->stream = vs->sh->index;
     src->next = pkt;
-    return true;
+    return;
 
 drop:
     talloc_free(pkt);
-    return true;
 }
 
 static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt)
 {
     struct priv *p = demuxer->priv;
-
     struct virtual_source *src = NULL;
 
     for (int x = 0; x < p->num_sources; x++) {
@@ -391,8 +391,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     if (!src)
         return false;
 
-    if (!do_read_next_packet(demuxer, src))
-        return false;
+    do_read_next_packet(demuxer, src);
     *out_pkt = src->next;
     src->next = NULL;
     return true;
