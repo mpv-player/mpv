@@ -4563,7 +4563,7 @@ Network
         option is ignored (or should be ignored) on RTSP URLs. You can still
         set the timeout option directly with ``--demuxer-lavf-o``.
 
-``--rtsp-transport=<lavf|udp|tcp|http>``
+``--rtsp-transport=<lavf|udp|udp_multicast|tcp|http>``
     Select RTSP transport method (default: tcp). This selects the underlying
     network transport when playing ``rtsp://...`` URLs. The value ``lavf``
     leaves the decision to libavformat.
