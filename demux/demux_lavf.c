@@ -102,7 +102,9 @@ const struct m_sub_options demux_lavf_conf = {
                ({"lavf", 0},
                 {"udp", 1},
                 {"tcp", 2},
-                {"http", 3})),
+                {"http", 3},
+                {"udp_multicast", 4}
+                )),
         OPT_CHOICE("demuxer-lavf-linearize-timestamps", linearize_ts, 0,
                    ({"no", 0}, {"auto", -1}, {"yes", 1})),
         OPT_FLAG("demuxer-lavf-propagate-opts", propagate_opts, 0),
@@ -986,6 +988,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         case 1: transport = "udp";  break;
         case 2: transport = "tcp";  break;
         case 3: transport = "http"; break;
+        case 4: transport = "udp_multicast"; break;
         }
         if (transport)
             av_dict_set(&dopts, "rtsp_transport", transport, 0);
