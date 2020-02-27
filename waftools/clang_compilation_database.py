@@ -44,7 +44,7 @@ def write_compilation_database(ctx):
                 root = json.load(database_file)
         except IOError:
                 root = []
-        clang_db = dict((x['file'], x) for x in root)
+        clang_db = {x['file']: x for x in root}
         for task in getattr(ctx, 'clang_compilation_database_tasks', []):
                 try:
                         cmd = task.last_cmd

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import os
 import shutil
 import sys
@@ -37,7 +37,7 @@ def copy_binary(binary_name):
 
 def apply_plist_template(plist_file, version):
     for line in fileinput.input(plist_file, inplace=1):
-        print (line.rstrip().replace('${VERSION}', version))
+        print(line.rstrip().replace('${VERSION}', version))
 
 def create_bundle_symlink(binary_name, symlink_name):
     os.symlink(os.path.basename(binary_name),
