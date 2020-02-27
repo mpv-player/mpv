@@ -5092,7 +5092,7 @@ static void cmd_rescan_external_files(void *p)
         if (s && s->is_external)
             mp_switch_track(mpctx, STREAM_SUB, s, 0);
 
-        print_track_list(mpctx, "Track list:\n");
+        print_track_list(mpctx, "Track list:");
     }
 }
 
