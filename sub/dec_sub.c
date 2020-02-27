@@ -299,13 +299,16 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
         if (sub->new_segment)
             break;
 
+        // (Use this mechanism only if sub_delay matters to avoid corner cases.)
+        double min_pts = sub->opts->sub_delay < 0 ? video_pts : MP_NOPTS_VALUE;
+
         struct demux_packet *pkt;
-        int st = demux_read_packet_async(sub->sh, &pkt);
+        int st = demux_read_packet_async_until(sub->sh, min_pts, &pkt);
         // Note: "wait" (st==0) happens with non-interleaved streams only, and
         // then we should stop the playloop until a new enough packet has been
-        // seen (or the subtitle decoder's queue is full). This does not happen
-        // for interleaved subtitle streams, which never return "wait" when
-        // reading.
+        // seen (or the subtitle decoder's queue is full). This usually does not
+        // happen for interleaved subtitle streams, which never return "wait"
+        // when reading, unless min_pts is set.
         if (st <= 0) {
             r = st < 0 || (sub->last_pkt_pts != MP_NOPTS_VALUE &&
                            sub->last_pkt_pts > video_pts);

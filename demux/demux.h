@@ -251,6 +251,8 @@ bool demux_free_async_finish(struct demux_free_async_state *state);
 void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp);
 
 int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt);
+int demux_read_packet_async_until(struct sh_stream *sh, double min_pts,
+                                  struct demux_packet **out_pkt);
 bool demux_stream_is_selected(struct sh_stream *stream);
 void demux_set_stream_wakeup_cb(struct sh_stream *sh,
                                 void (*cb)(void *ctx), void *ctx);
