@@ -297,12 +297,12 @@ bgra64be: [GENERIC] fcsp=rgb ctype=uint
     1: p=0  st=8  o=2  sh=0  d=16
     2: p=0  st=8  o=0  sh=0  d=16
     3: p=0  st=8  o=6  sh=0  d=16
-cuda: [GENERIC] ctype=unknown
+cuda: ctype=unknown
   Legacy desc: [le][be][hw]
     planes=0, chroma=0:0 align=1:1 bits=0 cbits=0
     {0/0/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
   AVD: name=cuda chroma=0:0 flags=0x8 [hw]
-d3d11: [GENERIC] ctype=unknown
+d3d11: ctype=unknown
   Legacy desc: [le][be][hw]
     planes=0, chroma=0:0 align=1:1 bits=0 cbits=0
     {0/0/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
@@ -652,7 +652,7 @@ grayf32be: [GENERIC] ctype=float
     {4/32/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
   AVD: name=grayf32be chroma=0:0 flags=0x201 [be][float]
     0: p=0  st=4  o=0  sh=0  d=32
-mediacodec: [GENERIC] ctype=unknown
+mediacodec: ctype=unknown
   Legacy desc: [le][be][hw]
     planes=0, chroma=0:0 align=1:1 bits=0 cbits=0
     {0/0/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
@@ -726,7 +726,7 @@ nv21: [GENERIC] ctype=uint
     0: p=0  st=1  o=0  sh=0  d=8
     1: p=1  st=2  o=1  sh=0  d=8
     2: p=1  st=2  o=0  sh=0  d=8
-nv24: ctype=uint
+nv24: [GENERIC] ctype=uint
   Legacy desc: [ba][nv][yuv][le][be]
     planes=2, chroma=0:0 align=1:1 bits=8 cbits=8
     {1/8/[0:0] 2/16/[0:0] 0/0/[0:0] 0/0/[0:0] }
@@ -791,7 +791,7 @@ p016be: [GENERIC] ctype=uint
     0: p=0  st=2  o=0  sh=0  d=16
     1: p=1  st=4  o=0  sh=0  d=16
     2: p=1  st=4  o=2  sh=0  d=16
-pal8: [GENERIC] fcsp=rgb ctype=uint
+pal8: fcsp=rgb ctype=uint
   Legacy desc: [ba][a][rgb][le][be][pal]
     planes=1, chroma=0:0 align=1:1 bits=8 cbits=8
     {1/8/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
@@ -986,11 +986,16 @@ vdpau_output: ctype=unknown
   Legacy desc: [rgb][le][be][hw]
     planes=0, chroma=0:0 align=0:0 bits=0 cbits=0
     {0/0/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
-videotoolbox_vl: [GENERIC] ctype=unknown
+videotoolbox: ctype=unknown
   Legacy desc: [le][be][hw]
     planes=0, chroma=0:0 align=1:1 bits=0 cbits=0
     {0/0/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
   AVD: name=videotoolbox_vld chroma=0:0 flags=0x8 [hw]
+vulkan: [GENERIC] ctype=unknown
+  Legacy desc: [le][be][hw]
+    planes=0, chroma=0:0 align=1:1 bits=0 cbits=0
+    {0/0/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
+  AVD: name=vulkan chroma=0:0 flags=0x8 [hw]
 xvmc: [GENERIC] ctype=unknown
   Legacy desc: [le][be][hw]
     planes=0, chroma=0:0 align=1:1 bits=0 cbits=0
@@ -1014,6 +1019,22 @@ xyz12be: [GENERIC] fcsp=xyz ctype=uint
     0: p=0  st=6  o=0  sh=4  d=12
     1: p=0  st=6  o=2  sh=4  d=12
     2: p=0  st=6  o=4  sh=4  d=12
+y210: [GENERIC] ctype=uint
+  Legacy desc: [ba][yuv][le]
+    planes=1, chroma=1:0 align=2:1 bits=30 cbits=10
+    {4/32/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
+  AVD: name=y210le chroma=1:0 flags=0x0
+    0: p=0  st=4  o=0  sh=6  d=10
+    1: p=0  st=8  o=2  sh=6  d=10
+    2: p=0  st=8  o=6  sh=6  d=10
+y210be: [GENERIC] ctype=uint
+  Legacy desc: [ba][yuv][be]
+    planes=1, chroma=1:0 align=2:1 bits=30 cbits=10
+    {4/32/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
+  AVD: name=y210be chroma=1:0 flags=0x1 [be]
+    0: p=0  st=4  o=0  sh=6  d=10
+    1: p=0  st=8  o=2  sh=6  d=10
+    2: p=0  st=8  o=6  sh=6  d=10
 ya16: [GENERIC] ctype=uint
   Legacy desc: [ba][a][yuv][le]
     planes=1, chroma=0:0 align=1:1 bits=32 cbits=16
