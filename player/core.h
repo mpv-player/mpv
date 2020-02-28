@@ -369,10 +369,8 @@ typedef struct MPContext {
     /* timestamp of video frame currently visible on screen
      * (or at least queued to be flipped by VO) */
     double video_pts;
+    // Last seek target.
     double last_seek_pts;
-    // As video_pts, but is not reset when seeking away. (For the very short
-    // period of time until a new frame is decoded and shown.)
-    double last_vo_pts;
     // Frame duration field from demuxer. Only used for duration of the last
     // video frame.
     double last_frame_duration;

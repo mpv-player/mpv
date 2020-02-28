@@ -1169,7 +1169,6 @@ void write_video(struct MPContext *mpctx)
     }
 
     mpctx->video_pts = mpctx->next_frames[0]->pts;
-    mpctx->last_vo_pts = mpctx->video_pts;
     mpctx->last_frame_duration =
         mpctx->next_frames[0]->pkt_duration / mpctx->video_speed;
 

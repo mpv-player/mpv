@@ -947,7 +947,6 @@ static void handle_keep_open(struct MPContext *mpctx)
         if (mpctx->vo_chain) {
             if (!vo_has_frame(mpctx->video_out)) // EOF not reached normally
                 seek_to_last_frame(mpctx);
-            mpctx->playback_pts = mpctx->last_vo_pts;
         }
         if (opts->keep_open_pause) {
             if (mpctx->ao)
@@ -1075,6 +1074,15 @@ static void handle_playback_time(struct MPContext *mpctx)
                mpctx->audio_status < STATUS_EOF)
     {
         mpctx->playback_pts = playing_audio_pts(mpctx);
+    } else if (mpctx->video_status == STATUS_EOF &&
+               mpctx->audio_status == STATUS_EOF)
+    {
+        double apts =
+            mpctx->ao_chain ? mpctx->ao_chain->last_out_pts : MP_NOPTS_VALUE;
+        double vpts = mpctx->video_pts;
+        double mpts = MP_PTS_MAX(apts, vpts);
+        if (mpts != MP_NOPTS_VALUE)
+            mpctx->playback_pts = mpts;
     }
 }
 
