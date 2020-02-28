@@ -1179,14 +1179,17 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mp_wakeup_core(mpctx);
         update_ab_loop_clip(mpctx);
         MP_VERBOSE(mpctx, "playback restart complete @ %f\n", mpctx->playback_pts);
+
+        // Continuous seeks past EOF => treat as EOF instead of repeating seek.
+        if (mpctx->seek.type == MPSEEK_RELATIVE && mpctx->seek.amount > 0 &&
+            mpctx->video_status == STATUS_EOF &&
+            mpctx->audio_status == STATUS_EOF)
+            mpctx->seek = (struct seek_params){0};
     }
 }
 
 static void handle_eof(struct MPContext *mpctx)
 {
-    if (mpctx->seek.type)
-        return;
-
     /* Don't quit while paused and we're displaying the last video frame. On the
      * other hand, if we don't have a video frame, then the user probably seeked
      * outside of the video, and we do want to quit. */
