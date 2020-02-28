@@ -240,6 +240,8 @@ typedef struct lavf_priv {
     int linearize_ts;
     bool any_ts_fixed;
 
+    int retry_counter;
+
     AVDictionary *av_opts;
 
     // Proxying nested streams.
@@ -1129,13 +1131,17 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     update_read_stats(demux);
     if (r < 0) {
         av_packet_unref(pkt);
-        if (r == AVERROR(EAGAIN))
-            return true;
         if (r == AVERROR_EOF)
             return false;
         MP_WARN(demux, "error reading packet: %s.\n", av_err2str(r));
-        return false;
+        if (priv->retry_counter >= 10) {
+            MP_ERR(demux, "...treating it as fatal error.\n");
+            return false;
+        }
+        priv->retry_counter += 1;
+        return true;
     }
+    priv->retry_counter = 0;
 
     add_new_streams(demux);
     update_metadata(demux);
