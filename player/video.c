@@ -101,7 +101,7 @@ void reset_video_state(struct MPContext *mpctx)
         vo_chain_reset_state(mpctx->vo_chain);
         struct track *t = mpctx->vo_chain->track;
         if (t && t->dec)
-            t->dec->play_dir = mpctx->play_dir;
+            mp_decoder_wrapper_set_play_dir(t->dec, mpctx->play_dir);
     }
 
     for (int n = 0; n < mpctx->num_next_frames; n++)
@@ -259,7 +259,8 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
             goto err_out;
 
         vo_c->dec_src = track->dec->f->pins[0];
-        vo_c->filter->container_fps = track->dec->fps;
+        vo_c->filter->container_fps =
+            mp_decoder_wrapper_get_container_fps(track->dec);
         vo_c->is_coverart = !!track->stream->attached_picture;
         vo_c->is_sparse = track->stream->still_image || vo_c->is_coverart;
 
@@ -323,8 +324,8 @@ static void check_framedrop(struct MPContext *mpctx, struct vo_chain *vo_c)
             return;
         double frame_time =  1.0 / fps;
         // try to drop as many frames as we appear to be behind
-        vo_c->track->dec->attempt_framedrops =
-            MPCLAMP((mpctx->last_av_difference - 0.010) / frame_time, 0, 100);
+        mp_decoder_wrapper_set_frame_drops(vo_c->track->dec,
+            MPCLAMP((mpctx->last_av_difference - 0.010) / frame_time, 0, 100));
     }
 }
 

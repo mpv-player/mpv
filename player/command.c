@@ -674,7 +674,8 @@ static int mp_property_frame_drop_dec(void *ctx, struct m_property *prop,
     if (!dec)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_int_ro(action, arg, dec->dropped_frames);
+    return m_property_int_ro(action, arg,
+                             mp_decoder_wrapper_get_frames_dropped(dec));
 }
 
 static int mp_property_mistimed_frame_count(void *ctx, struct m_property *prop,
@@ -1753,8 +1754,10 @@ static int mp_property_audio_codec(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_AUDIO];
-    const char *c = track && track->dec ? track->dec->decoder_desc : NULL;
-    return m_property_strdup_ro(action, arg, c);
+    char desc[256] = "";
+    if (track && track->dec)
+        mp_decoder_wrapper_get_desc(track->dec, desc, sizeof(desc));
+    return m_property_strdup_ro(action, arg, desc[0] ? desc : NULL);
 }
 
 static int property_audiofmt(struct mp_aframe *fmt, int action, void *arg)
@@ -1904,9 +1907,9 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct mp_codec_params p =
         track->stream ? *track->stream->codec : (struct mp_codec_params){0};
 
-    const char *decoder_desc = NULL;
+    char decoder_desc[256];
     if (track->dec)
-        decoder_desc = track->dec->decoder_desc;
+        mp_decoder_wrapper_get_desc(track->dec, decoder_desc, sizeof(decoder_desc));
 
     bool has_rg = track->stream && track->stream->codec->replaygain_data;
     struct replaygain_data rg = has_rg ? *track->stream->codec->replaygain_data
@@ -1940,7 +1943,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !track->external_filename},
         {"ff-index",    SUB_PROP_INT(track->ff_index)},
         {"decoder-desc", SUB_PROP_STR(decoder_desc),
-                        .unavailable = !decoder_desc},
+                        .unavailable = !decoder_desc[0]},
         {"codec",       SUB_PROP_STR(p.codec),
                         .unavailable = !p.codec},
         {"demux-w",     SUB_PROP_INT(p.disp_w), .unavailable = !p.disp_w},
@@ -2106,8 +2109,10 @@ static int mp_property_video_codec(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    const char *c = track && track->dec ? track->dec->decoder_desc : NULL;
-    return m_property_strdup_ro(action, arg, c);
+    char desc[256] = "";
+    if (track && track->dec)
+        mp_decoder_wrapper_get_desc(track->dec, desc, sizeof(desc));
+    return m_property_strdup_ro(action, arg, desc[0] ? desc : NULL);
 }
 
 static int property_imgparams(struct mp_image_params p, int action, void *arg)

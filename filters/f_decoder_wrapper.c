@@ -57,6 +57,8 @@ struct priv {
     struct mp_codec_params *codec;
 
     struct mp_decoder *decoder;
+    char *decoder_desc;
+    bool try_spdif;
 
     // Demuxer output.
     struct mp_pin *demux;
@@ -86,6 +88,8 @@ struct priv {
 
     struct mp_image_params dec_format, last_format, fixed_format;
 
+    double fps;
+
     double start_pts;
     double start, end;
     struct demux_packet *new_segment;
@@ -99,6 +103,11 @@ struct priv {
 
     struct mp_frame decoded_coverart;
     int coverart_returned; // 0: no, 1: coverart frame itself, 2: EOF returned
+
+    int attempt_framedrops; // try dropping this many frames
+    int dropped_frames; // total frames _probably_ dropped
+    bool pts_reset;
+    int play_dir;
 
     struct mp_decoder_wrapper public;
 };
@@ -134,9 +143,9 @@ static void reset(struct mp_filter *f)
 
     p->pts = MP_NOPTS_VALUE;
     p->last_format = p->fixed_format = (struct mp_image_params){0};
-    p->public.dropped_frames = 0;
-    p->public.attempt_framedrops = 0;
-    p->public.pts_reset = false;
+    p->dropped_frames = 0;
+    p->attempt_framedrops = 0;
+    p->pts_reset = false;
 
     p->coverart_returned = 0;
 
@@ -196,6 +205,9 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
     reset_decoder(p);
     p->has_broken_packet_pts = -10; // needs 10 packets to reach decision
 
+    talloc_free(p->decoder_desc);
+    p->decoder_desc = NULL;
+
     const struct mp_decoder_fns *driver = NULL;
     struct mp_decoder_list *list = NULL;
     char *user_list = NULL;
@@ -210,7 +222,7 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
         user_list = opts->audio_decoders;
         fallback = "aac";
 
-        if (p->public.try_spdif && p->codec->codec) {
+        if (p->try_spdif && p->codec->codec) {
             struct mp_decoder_list *spdif =
                 select_spdif_codec(p->codec->codec, opts->audio_spdif);
             if (spdif->num_entries) {
@@ -241,9 +253,9 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
 
         p->decoder = driver->create(p->f, p->codec, sel->decoder);
         if (p->decoder) {
-            p->public.decoder_desc =
+            p->decoder_desc =
                 talloc_asprintf(p, "%s (%s)", sel->decoder, sel->desc);
-            MP_VERBOSE(p, "Selected codec: %s\n", p->public.decoder_desc);
+            MP_VERBOSE(p, "Selected codec: %s\n", p->decoder_desc);
             break;
         }
 
@@ -257,6 +269,49 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
 
     talloc_free(list);
     return !!p->decoder;
+}
+
+void mp_decoder_wrapper_get_desc(struct mp_decoder_wrapper *d,
+                                 char *buf, size_t buf_size)
+{
+    struct priv *p = d->f->priv;
+    snprintf(buf, buf_size, "%s", p->decoder_desc ? p->decoder_desc : "");
+}
+
+void mp_decoder_wrapper_set_frame_drops(struct mp_decoder_wrapper *d, int num)
+{
+    struct priv *p = d->f->priv;
+    p->attempt_framedrops = num;
+}
+
+int mp_decoder_wrapper_get_frames_dropped(struct mp_decoder_wrapper *d)
+{
+    struct priv *p = d->f->priv;
+    return p->dropped_frames;
+}
+
+double mp_decoder_wrapper_get_container_fps(struct mp_decoder_wrapper *d)
+{
+    struct priv *p = d->f->priv;
+    return p->fps;
+}
+
+void mp_decoder_wrapper_set_spdif_flag(struct mp_decoder_wrapper *d, bool spdif)
+{
+    struct priv *p = d->f->priv;
+    p->try_spdif = spdif;
+}
+
+bool mp_decoder_wrapper_get_pts_reset(struct mp_decoder_wrapper *d)
+{
+    struct priv *p = d->f->priv;
+    return p->pts_reset;
+}
+
+void mp_decoder_wrapper_set_play_dir(struct mp_decoder_wrapper *d, int dir)
+{
+    struct priv *p = d->f->priv;
+    p->play_dir = dir;
 }
 
 static bool is_valid_peak(float sig_peak)
@@ -371,11 +426,11 @@ static void crazy_video_pts_stuff(struct priv *p, struct mp_image *mpi)
 
     // Compensate for incorrectly using mpeg-style DTS for avi timestamps.
     if (p->decoder && p->decoder->control && p->codec->avi_dts &&
-        mpi->pts != MP_NOPTS_VALUE && p->public.fps > 0)
+        mpi->pts != MP_NOPTS_VALUE && p->fps > 0)
     {
         int delay = -1;
         p->decoder->control(p->decoder->f, VDCTRL_GET_BFRAMES, &delay);
-        mpi->pts -= MPMAX(delay, 0) / p->public.fps;
+        mpi->pts -= MPMAX(delay, 0) / p->fps;
     }
 }
 
@@ -441,10 +496,10 @@ static void correct_video_pts(struct priv *p, struct mp_image *mpi)
 {
     struct MPOpts *opts = p->opt_cache->opts;
 
-    mpi->pts *= p->public.play_dir;
+    mpi->pts *= p->play_dir;
 
     if (!opts->correct_pts || mpi->pts == MP_NOPTS_VALUE) {
-        double fps = p->public.fps > 0 ? p->public.fps : 25;
+        double fps = p->fps > 0 ? p->fps : 25;
 
         if (opts->correct_pts) {
             if (p->has_broken_decoded_pts <= 1) {
@@ -471,7 +526,7 @@ static void correct_video_pts(struct priv *p, struct mp_image *mpi)
 
 static void correct_audio_pts(struct priv *p, struct mp_aframe *aframe)
 {
-    double dir = p->public.play_dir;
+    double dir = p->play_dir;
 
     double frame_pts = mp_aframe_get_pts(aframe);
     double frame_len = mp_aframe_duration(aframe);
@@ -491,7 +546,7 @@ static void correct_audio_pts(struct priv *p, struct mp_aframe *aframe)
         if (p->pts != MP_NOPTS_VALUE && diff > 0.1) {
             MP_WARN(p, "Invalid audio PTS: %f -> %f\n", p->pts, frame_pts);
             if (diff >= 5)
-                p->public.pts_reset = true;
+                p->pts_reset = true;
         }
 
         // Keep the interpolated timestamp if it doesn't deviate more
@@ -520,11 +575,11 @@ static void process_output_frame(struct priv *p, struct mp_frame frame)
             fix_image_params(p, &mpi->params);
 
         mpi->params = p->fixed_format;
-        mpi->nominal_fps = p->public.fps;
+        mpi->nominal_fps = p->fps;
     } else if (frame.type == MP_FRAME_AUDIO) {
         struct mp_aframe *aframe = frame.data;
 
-        if (p->public.play_dir < 0 && !mp_aframe_reverse(aframe))
+        if (p->play_dir < 0 && !mp_aframe_reverse(aframe))
             MP_ERR(p, "Couldn't reverse audio frame.\n");
 
         correct_audio_pts(p, aframe);
@@ -544,7 +599,7 @@ static bool is_new_segment(struct priv *p, struct mp_frame frame)
     struct demux_packet *pkt = frame.data;
     return (pkt->segmented && (pkt->start != p->start || pkt->end != p->end ||
                                pkt->codec != p->codec)) ||
-           (p->public.play_dir < 0 && pkt->back_restart && p->packet_fed);
+           (p->play_dir < 0 && pkt->back_restart && p->packet_fed);
 }
 
 static void feed_packet(struct priv *p)
@@ -590,10 +645,10 @@ static void feed_packet(struct priv *p)
 
         int framedrop_type = 0;
 
-        if (p->public.attempt_framedrops)
+        if (p->attempt_framedrops)
             framedrop_type = 1;
 
-        if (start_pts != MP_NOPTS_VALUE && packet && p->public.play_dir > 0 &&
+        if (start_pts != MP_NOPTS_VALUE && packet && p->play_dir > 0 &&
             packet->pts < start_pts - .005 && !p->has_broken_packet_pts)
             framedrop_type = 2;
 
@@ -695,11 +750,10 @@ static void read_frame(struct priv *p)
         return;
     }
 
-    if (p->public.attempt_framedrops) {
+    if (p->attempt_framedrops) {
         int dropped = MPMAX(0, p->packets_without_output - 1);
-        p->public.attempt_framedrops =
-            MPMAX(0, p->public.attempt_framedrops - dropped);
-        p->public.dropped_frames += dropped;
+        p->attempt_framedrops = MPMAX(0, p->attempt_framedrops - dropped);
+        p->dropped_frames += dropped;
     }
     p->packets_without_output = 0;
 
@@ -715,7 +769,7 @@ static void read_frame(struct priv *p)
 
     bool segment_ended = process_decoded_frame(p, &frame);
 
-    if (p->public.play_dir < 0 && frame.type) {
+    if (p->play_dir < 0 && frame.type) {
         enqueue_backward_frame(p, frame);
         frame = MP_NO_FRAME;
     }
@@ -786,9 +840,8 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
     p->f = f;
     p->header = src;
     p->codec = p->header->codec;
+    p->play_dir = 1;
     w->f = f;
-
-    w->play_dir = 1;
 
     struct MPOpts *opts = p->opt_cache->opts;
 
@@ -797,13 +850,13 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
     if (p->header->type == STREAM_VIDEO) {
         p->log = f->log = mp_log_new(f, parent->log, "!vd");
 
-        p->public.fps = src->codec->fps;
+        p->fps = src->codec->fps;
 
-        MP_VERBOSE(p, "Container reported FPS: %f\n", p->public.fps);
+        MP_VERBOSE(p, "Container reported FPS: %f\n", p->fps);
 
         if (opts->force_fps) {
-            p->public.fps = opts->force_fps;
-            MP_INFO(p, "FPS forced to %5.3f.\n", p->public.fps);
+            p->fps = opts->force_fps;
+            MP_INFO(p, "FPS forced to %5.3f.\n", p->fps);
             MP_INFO(p, "Use --no-correct-pts to force FPS based timing.\n");
         }
     } else if (p->header->type == STREAM_AUDIO) {

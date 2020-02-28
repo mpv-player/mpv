@@ -190,7 +190,7 @@ void reset_audio_state(struct MPContext *mpctx)
         ao_chain_reset_state(mpctx->ao_chain);
         struct track *t = mpctx->ao_chain->track;
         if (t && t->dec)
-            t->dec->play_dir = mpctx->play_dir;
+            mp_decoder_wrapper_set_play_dir(t->dec, mpctx->play_dir);
     }
     mpctx->audio_status = mpctx->ao_chain ? STATUS_SYNCING : STATUS_EOF;
     mpctx->delay = 0;
@@ -389,7 +389,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
             MP_VERBOSE(mpctx, "Falling back to PCM output.\n");
             ao_c->spdif_passthrough = false;
             ao_c->spdif_failed = true;
-            ao_c->track->dec->try_spdif = false;
+            mp_decoder_wrapper_set_spdif_flag(ao_c->track->dec, false);
             if (!mp_decoder_wrapper_reinit(ao_c->track->dec))
                 goto init_error;
             reset_audio_state(mpctx);
@@ -441,7 +441,7 @@ int init_audio_decoder(struct MPContext *mpctx, struct track *track)
         goto init_error;
 
     if (track->ao_c)
-        track->dec->try_spdif = true;
+        mp_decoder_wrapper_set_spdif_flag(track->dec, true);
 
     if (!mp_decoder_wrapper_reinit(track->dec))
         goto init_error;
@@ -776,7 +776,7 @@ void reload_audio_output(struct MPContext *mpctx)
         if (dec && ao_c->spdif_failed) {
             ao_c->spdif_passthrough = true;
             ao_c->spdif_failed = false;
-            dec->try_spdif = true;
+            mp_decoder_wrapper_set_spdif_flag(ao_c->track->dec, true);
             if (!mp_decoder_wrapper_reinit(dec)) {
                 MP_ERR(mpctx, "Error reinitializing audio.\n");
                 error_on_track(mpctx, ao_c->track);
@@ -836,7 +836,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     }
 
     if (mpctx->vo_chain && ao_c->track && ao_c->track->dec &&
-        ao_c->track->dec->pts_reset)
+        mp_decoder_wrapper_get_pts_reset(ao_c->track->dec))
     {
         MP_WARN(mpctx, "Reset playback due to audio timestamp reset.\n");
         reset_playback_state(mpctx);

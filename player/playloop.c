@@ -229,7 +229,7 @@ void reset_playback_state(struct MPContext *mpctx)
         struct track *t = mpctx->tracks[n];
         // (Often, but not always, this is redundant and also done elsewhere.)
         if (t->dec)
-            t->dec->play_dir = mpctx->play_dir;
+            mp_decoder_wrapper_set_play_dir(t->dec, mpctx->play_dir);
         if (t->d_sub)
             sub_set_play_dir(t->d_sub, mpctx->play_dir);
     }

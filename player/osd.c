@@ -220,7 +220,8 @@ static char *get_term_status_msg(struct MPContext *mpctx)
             int64_t c = vo_get_drop_count(mpctx->video_out);
             struct mp_decoder_wrapper *dec = mpctx->vo_chain->track
                                         ? mpctx->vo_chain->track->dec : NULL;
-            int dropped_frames = dec ? dec->dropped_frames : 0;
+            int dropped_frames =
+                dec ? mp_decoder_wrapper_get_frames_dropped(dec) : 0;
             if (c > 0 || dropped_frames > 0) {
                 saddf(&line, " Dropped: %"PRId64, c);
                 if (dropped_frames)
