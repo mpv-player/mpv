@@ -196,7 +196,6 @@ static void uninit_demuxer(struct MPContext *mpctx)
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
             mpctx->current_track[r][t] = NULL;
     }
-    mpctx->seek_slave = NULL;
 
     talloc_free(mpctx->chapters);
     mpctx->chapters = NULL;
@@ -373,8 +372,6 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
             pts -= 10.0;
     }
     demuxer_select_track(track->demuxer, track->stream, pts, track->selected);
-    if (track == mpctx->seek_slave)
-        mpctx->seek_slave = NULL;
 }
 
 static void enable_demux_thread(struct MPContext *mpctx, struct demuxer *demux)
@@ -706,9 +703,6 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
         return false;
 
     struct demuxer *d = track->demuxer;
-
-    if (mpctx->seek_slave == track)
-        mpctx->seek_slave = NULL;
 
     int index = 0;
     while (index < mpctx->num_tracks && mpctx->tracks[index] != track)
