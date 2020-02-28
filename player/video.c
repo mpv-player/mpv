@@ -522,6 +522,7 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
                     }
                     mpctx->hrseek_backstep = false;
                 }
+                mp_image_unrefp(&mpctx->saved_frame);
                 add_new_frame(mpctx, img);
                 img = NULL;
             }
@@ -529,11 +530,13 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
         }
     }
 
+    if (!hrseek)
+        mp_image_unrefp(&mpctx->saved_frame);
+
     // If hr-seek went past EOF, use the last frame.
-    if (r <= 0 && hrseek && mpctx->saved_frame && r == VD_EOF) {
+    if (mpctx->saved_frame && r == VD_EOF) {
         add_new_frame(mpctx, mpctx->saved_frame);
         mpctx->saved_frame = NULL;
-        r = VD_EOF;
         *logical_eof = true;
     }
 
