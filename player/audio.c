@@ -625,7 +625,8 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
         !mp_audio_buffer_samples(mpctx->ao_chain->ao_buffer))
         return false; // no audio read yet
 
-    bool sync_to_video = mpctx->vo_chain && mpctx->video_status != STATUS_EOF;
+    bool sync_to_video = mpctx->vo_chain && mpctx->video_status != STATUS_EOF &&
+                         !mpctx->vo_chain->is_sparse;
 
     double sync_pts = MP_NOPTS_VALUE;
     if (sync_to_video) {

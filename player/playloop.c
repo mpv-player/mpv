@@ -290,10 +290,11 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     double demux_pts = seek_pts;
 
-    bool hr_seek = opts->correct_pts && seek.exact != MPSEEK_KEYFRAME &&
-                 ((opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE) ||
-                  opts->hr_seek > 0 || seek.exact >= MPSEEK_EXACT) &&
-                 seek_pts != MP_NOPTS_VALUE;
+    bool hr_seek = (opts->correct_pts && seek.exact != MPSEEK_KEYFRAME &&
+                    seek_pts != MP_NOPTS_VALUE) &&
+        (seek.exact >= MPSEEK_EXACT || opts->hr_seek == 1 ||
+         (opts->hr_seek >= 0 && seek.type == MPSEEK_ABSOLUTE) ||
+         (opts->hr_seek == 2 && (!mpctx->vo_chain || mpctx->vo_chain->is_sparse)));
 
     if (seek.type == MPSEEK_FACTOR || seek.amount < 0 ||
         (seek.type == MPSEEK_ABSOLUTE && seek.amount < mpctx->last_chapter_pts))
@@ -661,7 +662,7 @@ static void handle_osd_redraw(struct MPContext *mpctx)
             return;
     }
     // Don't redraw immediately during a seek (makes it significantly slower).
-    bool use_video = mpctx->vo_chain && !mpctx->vo_chain->is_coverart;
+    bool use_video = mpctx->vo_chain && !mpctx->vo_chain->is_sparse;
     if (use_video && mp_time_sec() - mpctx->start_timestamp < 0.1) {
         mp_set_timeout(mpctx, 0.1);
         return;
@@ -1110,13 +1111,6 @@ static void handle_playback_restart(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    // Do not wait for video stream if it only has sparse frames.
-    if (mpctx->vo_chain && mpctx->vo_chain->is_sparse &&
-        mpctx->video_status < STATUS_READY)
-    {
-        mpctx->video_status = STATUS_READY;
-    }
-
     if (mpctx->audio_status < STATUS_READY ||
         mpctx->video_status < STATUS_READY)
         return;
@@ -1127,6 +1121,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->video_status = STATUS_PLAYING;
         get_relative_time(mpctx);
         mp_wakeup_core(mpctx);
+        MP_DBG(mpctx, "starting video playback\n");
     }
 
     if (mpctx->audio_status == STATUS_READY) {
@@ -1139,14 +1134,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
             return;
         }
 
-        // Video needed, but not started yet -> wait.
-        if (mpctx->vo_chain &&
-            !mpctx->vo_chain->is_coverart &&
-            !mpctx->vo_chain->is_sparse &&
-            mpctx->video_status <= STATUS_READY)
-            return;
-
-        MP_VERBOSE(mpctx, "starting audio playback\n");
+        MP_DBG(mpctx, "starting audio playback\n");
         mpctx->audio_status = STATUS_PLAYING;
         fill_audio_out_buffers(mpctx); // actually play prepared buffer
         mp_wakeup_core(mpctx);
@@ -1178,7 +1166,9 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->playing_msg_shown = true;
         mp_wakeup_core(mpctx);
         update_ab_loop_clip(mpctx);
-        MP_VERBOSE(mpctx, "playback restart complete @ %f\n", mpctx->playback_pts);
+        MP_VERBOSE(mpctx, "playback restart complete @ %f, audio=%s, video=%s\n",
+                   mpctx->playback_pts, mp_status_str(mpctx->video_status),
+                   mp_status_str(mpctx->audio_status));
 
         // Continuous seeks past EOF => treat as EOF instead of repeating seek.
         if (mpctx->seek.type == MPSEEK_RELATIVE && mpctx->seek.amount > 0 &&

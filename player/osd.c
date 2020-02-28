@@ -192,7 +192,7 @@ static char *get_term_status_msg(struct MPContext *mpctx)
         saddf(&line, " x%4.2f", opts->playback_speed);
 
     // A-V sync
-    if (mpctx->ao_chain && mpctx->vo_chain && !mpctx->vo_chain->is_coverart) {
+    if (mpctx->ao_chain && mpctx->vo_chain && !mpctx->vo_chain->is_sparse) {
         saddf(&line, " A-V:%7.3f", mpctx->last_av_difference);
         if (fabs(mpctx->total_avsync_change) > 0.05)
             saddf(&line, " ct:%7.3f", mpctx->total_avsync_change);

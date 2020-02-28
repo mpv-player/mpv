@@ -301,3 +301,16 @@ void merge_playlist_files(struct playlist *pl)
     playlist_add_file(pl, edl);
     talloc_free(edl);
 }
+
+const char *mp_status_str(enum playback_status st)
+{
+    switch (st) {
+    case STATUS_SYNCING:    return "syncing";
+    case STATUS_FILLING:    return "filling";
+    case STATUS_READY:      return "ready";
+    case STATUS_PLAYING:    return "playing";
+    case STATUS_DRAINING:   return "draining";
+    case STATUS_EOF:        return "eof";
+    default:                return "bug";
+    }
+}

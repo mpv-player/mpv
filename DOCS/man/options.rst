@@ -222,7 +222,7 @@ Playback Control
     chapter instead. A negative value means always go back to the previous
     chapter.
 
-``--hr-seek=<no|absolute|yes>``
+``--hr-seek=<no|absolute|yes|default>``
     Select when to use precise seeks that are not limited to keyframes. Such
     seeks require decoding video from the previous keyframe up to the target
     position and so can take some time depending on decoding performance. For
@@ -234,6 +234,9 @@ Playback Control
     :absolute: Use precise seeks if the seek is to an absolute position in the
                file, such as a chapter seek, but not for relative seeks like
                the default behavior of arrow keys (default).
+    :default:  Like ``absolute``, but enable hr-seeks in audio-only cases. The
+               exact behavior is implementation specific and may change with
+               new releases.
     :yes:      Use precise seeks whenever possible.
     :always:   Same as ``yes`` (for compatibility).
 

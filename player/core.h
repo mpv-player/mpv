@@ -230,6 +230,8 @@ enum playback_status {
     STATUS_EOF,         // playback has ended, or is disabled
 };
 
+const char *mp_status_str(enum playback_status st);
+
 #define NUM_PTRACKS 2
 
 typedef struct MPContext {

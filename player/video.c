@@ -261,7 +261,7 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
         vo_c->dec_src = track->dec->f->pins[0];
         vo_c->filter->container_fps = track->dec->fps;
         vo_c->is_coverart = !!track->stream->attached_picture;
-        vo_c->is_sparse = track->stream->still_image;
+        vo_c->is_sparse = track->stream->still_image || vo_c->is_coverart;
 
         track->vo_c = vo_c;
         vo_c->track = track;
@@ -402,23 +402,28 @@ static void shift_frames(struct MPContext *mpctx)
     mpctx->num_next_frames -= 1;
 }
 
+static bool use_video_lookahead(struct MPContext *mpctx)
+{
+    return mpctx->video_out &&
+           !(mpctx->video_out->driver->caps & VO_CAP_NORETAIN) &&
+           !(mpctx->opts->untimed || mpctx->video_out->driver->untimed) &&
+           !mpctx->opts->video_latency_hacks;
+}
+
 static int get_req_frames(struct MPContext *mpctx, bool eof)
 {
     // On EOF, drain all frames.
     if (eof)
         return 1;
 
-    if (mpctx->video_out->driver->caps & VO_CAP_NORETAIN)
+    if (!use_video_lookahead(mpctx))
         return 1;
 
     if (mpctx->vo_chain && mpctx->vo_chain->is_sparse)
         return 1;
 
-    if (mpctx->opts->untimed || mpctx->video_out->driver->untimed)
-        return 1;
-
     // Normally require at least 2 frames, so we can compute a frame duration.
-    int min = mpctx->opts->video_latency_hacks ? 1 : 2;
+    int min = 2;
 
     // On the first frame, output a new frame as quickly as possible.
     if (mpctx->video_pts == MP_NOPTS_VALUE)
@@ -452,6 +457,7 @@ static bool have_new_frame(struct MPContext *mpctx, bool eof)
 }
 
 // Fill mpctx->next_frames[] with a newly filtered or decoded image.
+// logical_eof: is set to true if there is EOF after currently queued frames
 // returns VD_* code
 static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
 {
@@ -471,6 +477,7 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
     }
 
     if (vo_c->is_coverart) {
+        *logical_eof = true;
         if (vo_has_frame(mpctx->video_out))
             return VD_EOF;
         hrseek = false;
@@ -533,9 +540,10 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
     if (!hrseek)
         mp_image_unrefp(&mpctx->saved_frame);
 
-    // If hr-seek went past EOF, use the last frame.
-    if (mpctx->saved_frame && r == VD_EOF) {
-        add_new_frame(mpctx, mpctx->saved_frame);
+    if (r == VD_EOF) {
+        // If hr-seek went past EOF, use the last frame.
+        if (mpctx->saved_frame)
+            add_new_frame(mpctx, mpctx->saved_frame);
         mpctx->saved_frame = NULL;
         *logical_eof = true;
     }
@@ -1010,7 +1018,8 @@ void write_video(struct MPContext *mpctx)
 
     bool logical_eof = false;
     int r = video_output_image(mpctx, &logical_eof);
-    MP_TRACE(mpctx, "video_output_image: %d\n", r);
+    MP_TRACE(mpctx, "video_output_image: r=%d/eof=%d/st=%s\n", r, logical_eof,
+             mp_status_str(mpctx->video_status));
 
     if (r < 0)
         goto error;
@@ -1039,9 +1048,7 @@ void write_video(struct MPContext *mpctx)
         if (mpctx->video_status <= STATUS_PLAYING) {
             mpctx->video_status = STATUS_DRAINING;
             get_relative_time(mpctx);
-            if (mpctx->num_past_frames == 1 && mpctx->past_frames[0].pts == 0 &&
-                !mpctx->ao_chain)
-            {
+            if (vo_c->is_sparse && !mpctx->ao_chain) {
                 MP_VERBOSE(mpctx, "assuming this is an image\n");
                 mpctx->time_frame += opts->image_display_duration;
             } else if (mpctx->last_frame_duration > 0) {
@@ -1080,6 +1087,20 @@ void write_video(struct MPContext *mpctx)
     if (r != VD_NEW_FRAME) {
         mp_wakeup_core(mpctx); // Decode more in next iteration.
         return;
+    }
+
+    if (logical_eof && !mpctx->num_past_frames && mpctx->num_next_frames == 1 &&
+        use_video_lookahead(mpctx) && !vo_c->is_sparse)
+    {
+        // Too much danger to accidentally mark video as sparse when e.g.
+        // seeking exactly to the last frame, so as a heuristic, do this only
+        // if it looks like the "first" video frame (unreliable, but often
+        // works out well). Helps with seeking with single-image video tracks,
+        // as well as detecting whether as video track is really an image.
+        if (mpctx->next_frames[0]->pts == 0) {
+            MP_VERBOSE(mpctx, "assuming single-image video stream\n");
+            vo_c->is_sparse = true;
+        }
     }
 
     // Filter output is different from VO input?
@@ -1199,17 +1220,10 @@ void write_video(struct MPContext *mpctx)
 
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
 
-    if (vo_c->filter->got_output_eof && !mpctx->num_next_frames &&
-        mpctx->ao_chain)
-    {
-        MP_VERBOSE(mpctx, "assuming this was the last video frame\n");
-        // The main point of doing this is to prevent use of this for the
-        // playback_pts if audio is still running (=> seek behavior).
-        mpctx->video_status = STATUS_EOF;
-    }
-
-    // hr-seek past EOF -> returns last frame, but terminates playback.
-    if (logical_eof)
+    // hr-seek past EOF -> returns last frame, but terminates playback. The
+    // early EOF is needed to trigger the exit before the next seek is executed.
+    // Always using early EOF breaks other cases, like images.
+    if (logical_eof && !mpctx->num_next_frames && mpctx->ao_chain)
         mpctx->video_status = STATUS_EOF;
 
     if (mpctx->video_status != STATUS_EOF) {
