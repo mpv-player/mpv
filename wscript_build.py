@@ -300,6 +300,7 @@ def build(ctx):
         ( "demux/packet.c" ),
         ( "demux/timeline.c" ),
 
+        ( "filters/f_async_queue.c" ),
         ( "filters/f_autoconvert.c" ),
         ( "filters/f_auto_filters.c" ),
         ( "filters/f_decoder_wrapper.c" ),

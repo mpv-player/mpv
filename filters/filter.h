@@ -231,7 +231,7 @@ const char *mp_pin_get_name(struct mp_pin *p);
  * graph, and disallowing different root filters ensures these graphs are not
  * accidentally connected using non-thread safe mechanisms. Actual threaded
  * filter graphs would use several independent graphs connected by asynchronous
- * helpers (such as queues instead of mp_pin connections).
+ * helpers (such as mp_async_queue instead of mp_pin connections).
  *
  * --- Rules for manual connections:
  *
