@@ -58,15 +58,15 @@ def check_iconv(ctx, dependency_identifier):
 
 def check_lua(ctx, dependency_identifier):
     lua_versions = [
-        ( '51',     'lua >= 5.1.0 lua < 5.2.0'),
-        ( '51obsd', 'lua51 >= 5.1.0'), # OpenBSD
-        ( '51deb',  'lua5.1 >= 5.1.0'), # debian
-        ( '51fbsd', 'lua-5.1 >= 5.1.0'), # FreeBSD
         ( '52',     'lua >= 5.2.0 lua < 5.3.0' ),
         ( '52arch', 'lua52 >= 5.2.0'), # Arch
         ( '52deb',  'lua5.2 >= 5.2.0'), # debian
         ( '52fbsd', 'lua-5.2 >= 5.2.0'), # FreeBSD
         ( 'luajit', 'luajit >= 2.0.0' ),
+        ( '51',     'lua >= 5.1.0 lua < 5.2.0'),
+        ( '51obsd', 'lua51 >= 5.1.0'), # OpenBSD
+        ( '51deb',  'lua5.1 >= 5.1.0'), # debian
+        ( '51fbsd', 'lua-5.1 >= 5.1.0'), # FreeBSD
     ]
 
     if ctx.options.LUA_VER:
