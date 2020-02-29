@@ -532,6 +532,9 @@ Playback Control
       (basically it's the ``--video-reversal-buffer`` equivalent for the
       demuxer layer).
 
+    - Setting ``--vd-queue-enable=yes`` can help a lot to make playback smooth
+      (once it works).
+
     - ``--demuxer-backward-playback-step`` also factors into how many seeks may
       be performed, and whether backward demuxing could break due to queue
       overflow. If it's set too high, the backstep operation needs to search
