@@ -217,12 +217,6 @@ const char *mp_pin_get_name(struct mp_pin *p);
  * call the first filter's process() function, which will filter and output
  * the frame, and the frame is iteratively filtered until it reaches the output.
  *
- * (The mp_pin_* calls can recursively start filtering, but this is only the
- * case if you access a separate graph with a different filter root. Most
- * importantly, calling them from outside the filter's process() function (e.g.
- * an outside filter user) will enter filtering. Within the filter, mp_pin_*
- * will usually only set or query flags.)
- *
  * --- General rules for thread safety:
  *
  * Filters are by default not thread safe. However, some filters can be
@@ -230,6 +224,14 @@ const char *mp_pin_get_name(struct mp_pin *p);
  * foreign threads. The common filter code itself is not thread safe, except
  * for some utility functions explicitly marked as such, and which are meant
  * to make implementing threaded filters easier.
+ *
+ * (Semi-)automatic filter communication such as pins must always be within the
+ * same root filter. This is meant to help with ensuring thread-safety. Every
+ * thread that wants to run filters "on its own" should use a different filter
+ * graph, and disallowing different root filters ensures these graphs are not
+ * accidentally connected using non-thread safe mechanisms. Actual threaded
+ * filter graphs would use several independent graphs connected by asynchronous
+ * helpers (such as queues instead of mp_pin connections).
  *
  * --- Rules for manual connections:
  *
@@ -271,6 +273,11 @@ const char *mp_pin_get_name(struct mp_pin *p);
  *
  * For running parts of a filter graph on a different thread, f_async_queue.h
  * can be used.
+ *
+ * With different filter graphs working asynchronously, reset handling and start
+ * of filtering becomes more difficult. Since filtering is always triggered by
+ * requesting output from a filter, a simple way to solve this is to trigger
+ * resets from the consumer, and to synchronously reset the producer.
  *
  * --- Format conversions and mid-stream format changes:
  *
@@ -402,8 +409,6 @@ struct AVBufferRef *mp_filter_load_hwdec_device(struct mp_filter *f, int avtype)
 // Perform filtering. This runs until the filter graph is blocked (due to
 // missing external input or unread output). It returns whether any outside
 // pins have changed state.
-// Does not perform recursive filtering to connected filters with different
-// root filter, though it notifies them.
 bool mp_filter_run(struct mp_filter *f);
 
 // Create a root dummy filter with no inputs or outputs. This fulfills the

@@ -183,6 +183,8 @@ bool mp_filter_run(struct mp_filter *filter)
 
     r->filtering = true;
 
+    // Note: some filters may call mp_filter_wakeup() from process on themselves
+    //       to queue a wakeup again later. So do not call this in the loop.
     flush_async_notifications(r);
 
     while (r->num_pending) {
@@ -311,6 +313,8 @@ static struct mp_pin *find_connected_end(struct mp_pin *p)
 // state flags.
 static void init_connection(struct mp_pin *p)
 {
+    struct filter_runner *runner = p->owner->in->runner;
+
     if (p->dir == MP_PIN_IN)
         p = p->other;
 
@@ -320,6 +324,12 @@ static void init_connection(struct mp_pin *p)
     // These are the "outer" pins by definition, they have no user connections.
     assert(!in->user_conn);
     assert(!out->user_conn);
+
+    // This and similar checks enforce the same root filter requirement.
+    if (in->manual_connection)
+        assert(in->manual_connection->in->runner == runner);
+    if (out->manual_connection)
+        assert(out->manual_connection->in->runner == runner);
 
     // Logicaly, the ends are always manual connections. A pin chain without
     // manual connections at the ends is still disconnected (or if this
@@ -339,6 +349,7 @@ static void init_connection(struct mp_pin *p)
         assert(!cur->data.type); // unused for in pins
         assert(!cur->other->data_requested); // unset for unconnected out pins
         assert(!cur->other->data.type); // unset for unconnected out pins
+        assert(cur->owner->in->runner == runner);
         cur->within_conn = cur->other->within_conn = true;
         cur = cur->other->user_conn;
     }
