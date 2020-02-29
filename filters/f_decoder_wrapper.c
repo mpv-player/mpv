@@ -154,6 +154,7 @@ struct priv {
     struct mp_filter *decf; // wrapper filter which drives the decoder
     struct m_config_cache *opt_cache;
     struct dec_wrapper_opts *opts;
+    struct dec_queue_opts *queue_opts;
 
     struct mp_codec_params *codec;
     struct mp_decoder *decoder;
@@ -1036,12 +1037,27 @@ output_frame:
     mp_pin_in_write(pin, frame);
 }
 
+static void update_queue_config(struct priv *p)
+{
+    if (!p->queue)
+        return;
+
+    struct mp_async_queue_config cfg = {
+        .max_bytes = p->queue_opts->max_bytes,
+        .sample_unit = AQUEUE_UNIT_SAMPLES,
+        .max_samples = p->queue_opts->max_samples,
+        .max_duration = p->queue_opts->max_duration,
+    };
+    mp_async_queue_set_config(p->queue, cfg);
+}
+
 static void decf_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
     assert(p->decf == f);
 
-    m_config_cache_update(p->opt_cache);
+    if (m_config_cache_update(p->opt_cache))
+        update_queue_config(p);
 
     feed_packet(p);
     read_frame(p);
@@ -1142,8 +1158,6 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
     p->play_dir = 1;
     mp_filter_add_pin(public_f, MP_PIN_OUT, "out");
 
-    struct dec_queue_opts *queue_opts = NULL;
-
     if (p->header->type == STREAM_VIDEO) {
         p->log = mp_log_new(p, public_f->log, "!vd");
 
@@ -1157,27 +1171,21 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
             MP_INFO(p, "Use --no-correct-pts to force FPS based timing.\n");
         }
 
-        queue_opts = p->opts->vdec_queue_opts;
+        p->queue_opts = p->opts->vdec_queue_opts;
     } else if (p->header->type == STREAM_AUDIO) {
         p->log = mp_log_new(p, public_f->log, "!ad");
-        queue_opts = p->opts->adec_queue_opts;
+        p->queue_opts = p->opts->adec_queue_opts;
     } else {
         goto error;
     }
 
-    if (queue_opts && queue_opts->use_queue) {
+    if (p->queue_opts && p->queue_opts->use_queue) {
         p->queue = mp_async_queue_create();
         p->dec_dispatch = mp_dispatch_create(p);
         p->dec_root_filter = mp_filter_create_root(public_f->global);
         mp_filter_root_set_wakeup_cb(p->dec_root_filter, wakeup_dec_thread, p);
 
-        struct mp_async_queue_config cfg = {
-            .max_bytes = queue_opts->max_bytes,
-            .sample_unit = AQUEUE_UNIT_SAMPLES,
-            .max_samples = queue_opts->max_samples,
-            .max_duration = queue_opts->max_duration,
-        };
-        mp_async_queue_set_config(p->queue, cfg);
+        update_queue_config(p);
     }
 
     p->decf = mp_filter_create(p->dec_root_filter ? p->dec_root_filter : public_f,

@@ -4521,6 +4521,10 @@ Cache
     In specific situations, this still makes the player wait on the decoder,
     such as seeking, switching hardware decoding modes, and more.
 
+    Most queue options can be changed at runtime. ``--vd-queue-enable`` itself
+    (and the audio equivalent) update only if decoding is completely
+    reinitialized.
+
     This should not be used with hardware decoding. It is possible to enable
     this for audio, but it makes even less sense.
 
