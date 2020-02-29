@@ -129,7 +129,6 @@ local function load_config()
                 setfenv(conf_fn, config)
             end
         else
-            msg.warn("Lua 5.2 was not tested, this might go wrong.")
             conf_fn, err = loadfile(conf_file, "t", config)
         end
     else
