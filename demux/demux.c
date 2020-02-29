@@ -2021,7 +2021,8 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     if (!drop) {
         // If libavformat splits packets, some packets will have pos unset, so
         // make up one based on the first packet => makes refresh seeks work.
-        if (dp->pos < 0 && !dp->keyframe && queue->last_pos_fixup >= 0)
+        if ((dp->pos < 0 || dp->pos == queue->last_pos_fixup) &&
+            !dp->keyframe && queue->last_pos_fixup >= 0)
             dp->pos = queue->last_pos_fixup + 1;
         queue->last_pos_fixup = dp->pos;
     }
