@@ -4504,6 +4504,46 @@ Cache
     See ``--list-options`` for defaults and value range. ``<bytesize>`` options
     accept suffixes such as ``KiB`` and ``MiB``.
 
+``--vd-queue-enable=<yes|no>, --ad-queue-enable``
+    Enable running the video/audio decoder on a separate thread (default: no).
+    If enabled, the decoder is run on a separate thread, and a frame queue is
+    put between decoder and higher level playback logic. The size of the frame
+    queue is defined by the other options below.
+
+    This is probably quite pointless. libavcodec already has multithreaded
+    decoding (enabled by default), which makes this largely unnecessary. It
+    might help in some corner cases with high bandwidth video that is slow to
+    decode (in these cases libavcodec would block the playback logic, while
+    using a decoding thread would distribute the decoding time evenly without
+    affecting the playback logic). In other situations, it will simply make
+    seeking slower and use significantly more memory.
+
+    In specific situations, this still makes the player wait on the decoder,
+    such as seeking, switching hardware decoding modes, and more.
+
+    This should not be used with hardware decoding. It is possible to enable
+    this for audio, but it makes even less sense.
+
+``--vd-queue-max-bytes=<bytesize>``, ``--ad-queue-max-bytes``
+    Maximum approximate allowed size of the queue. If exceeded, decoding will
+    be stopped. The maximum size can be exceeded by about 1 frame.
+
+    See ``--list-options`` for defaults and value range. ``<bytesize>`` options
+    accept suffixes such as ``KiB`` and ``MiB``.
+
+``--vd-queue-max-samples=<int>``, ``--ad-queue-max-samples``
+    Maximum number of frames (video) or samples (audio) of the queue. The audio
+    size may be exceeded by about 1 frame.
+
+    See ``--list-options`` for defaults and value range.
+
+``--vd-queue-max-secs=<seconds>``, ``--ad-queue-max-secs``
+    Maximum number of seconds of media in the queue. The special value 0 means
+    no limit is set. The queue size may be exceeded by about 2 frames. Timestamp
+    resets may lead to random queue size usage.
+
+    See ``--list-options`` for defaults and value range.
+
 Network
 -------
 

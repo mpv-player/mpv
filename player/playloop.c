@@ -336,6 +336,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     if (!mpctx->demuxer->seekable)
         demux_flags |= SEEK_CACHED;
 
+    demux_flags |= SEEK_BLOCK;
+
     if (!demux_seek(mpctx->demuxer, demux_pts, demux_flags)) {
         if (!mpctx->demuxer->seekable) {
             MP_ERR(mpctx, "Cannot seek in this stream.\n");
@@ -355,7 +357,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
                 main_new_pos += get_track_seek_offset(mpctx, track);
             if (demux_flags & SEEK_FACTOR)
                 main_new_pos = seek_pts;
-            demux_seek(track->demuxer, main_new_pos, demux_flags & SEEK_SATAN);
+            demux_seek(track->demuxer, main_new_pos,
+                       demux_flags & (SEEK_SATAN | SEEK_BLOCK));
         }
     }
 
@@ -365,6 +368,13 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     reset_playback_state(mpctx);
     if (mpctx->recorder)
         mp_recorder_mark_discontinuity(mpctx->recorder);
+
+    demux_block_reading(mpctx->demuxer, false);
+    for (int t = 0; t < mpctx->num_tracks; t++) {
+        struct track *track = mpctx->tracks[t];
+        if (track->selected && track->demuxer)
+            demux_block_reading(track->demuxer, false);
+    }
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */

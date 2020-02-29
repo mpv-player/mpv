@@ -290,6 +290,8 @@ typedef struct MPOpts {
     struct filter_opts *filter_opts;
     float movie_aspect;
     int aspect_method;
+    struct dec_queue_opts *vdec_queue_opts;
+    struct dec_queue_opts *adec_queue_opts;
     char **sub_name;
     char **sub_paths;
     char **audiofile_paths;
@@ -373,6 +375,8 @@ extern const struct m_sub_options mp_osd_render_sub_opts;
 extern const struct m_sub_options filter_conf;
 extern const struct m_sub_options resample_conf;
 extern const struct m_sub_options stream_conf;
+extern const struct m_sub_options vdec_queue_conf;
+extern const struct m_sub_options adec_queue_conf;
 extern const struct m_sub_options mp_opt_root;
 
 #endif

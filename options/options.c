@@ -551,6 +551,9 @@ static const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", vd_lavc_params, vd_lavc_conf, 0),
     OPT_SUBSTRUCT("ad-lavc", ad_lavc_params, ad_lavc_conf, 0),
 
+    OPT_SUBSTRUCT("vd-queue", vdec_queue_opts, vdec_queue_conf, 0),
+    OPT_SUBSTRUCT("ad-queue", adec_queue_opts, adec_queue_conf, 0),
+
     OPT_SUBSTRUCT("", demux_lavf, demux_lavf_conf, 0),
     OPT_SUBSTRUCT("demuxer-rawaudio", demux_rawaudio, demux_rawaudio_conf, 0),
     OPT_SUBSTRUCT("demuxer-rawvideo", demux_rawvideo, demux_rawvideo_conf, 0),
