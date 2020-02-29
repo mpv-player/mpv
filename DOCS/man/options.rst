@@ -1829,7 +1829,7 @@ Audio
     other players) ignore this for the sake of better audio quality.
 
 ``--ad-lavc-downmix=<yes|no>``
-    Whether to request audio channel downmixing from the decoder (default: yes).
+    Whether to request audio channel downmixing from the decoder (default: no).
     Some decoders, like AC-3, AAC and DTS, can remix audio on decoding. The
     requested number of output channels is set with the ``--audio-channels`` option.
     Useful for playing surround audio on a stereo system.
