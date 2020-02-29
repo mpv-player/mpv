@@ -300,7 +300,7 @@ static void ta_dbg_remove(struct ta_header *h)
 static size_t get_children_size(struct ta_header *h)
 {
     size_t size = 0;
-    for (struct ta_header *s = h; s; s = s->next)
+    for (struct ta_header *s = h->child; s; s = s->next)
         size += s->size + get_children_size(s);
     return size;
 }
