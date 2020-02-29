@@ -3775,6 +3775,9 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
     bool force_seek = flags & SEEK_FORCE;
     flags &= ~(unsigned)SEEK_FORCE;
 
+    bool block = flags & SEEK_BLOCK;
+    flags &= ~(unsigned)SEEK_BLOCK;
+
     struct demux_cached_range *cache_target =
         find_cache_seek_range(in, seek_pts, flags);
 
@@ -3794,6 +3797,8 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
     in->back_demuxing = set_backwards;
 
     clear_reader_state(in, clear_back_state);
+
+    in->blocked = block;
 
     if (cache_target) {
         execute_cache_seek(in, cache_target, seek_pts, flags);

@@ -63,6 +63,8 @@ struct demux_reader_state {
 #define SEEK_SATAN    (1 << 4)      // enable backward demuxing
 #define SEEK_HR       (1 << 5)      // hr-seek (this is a weak hint only)
 #define SEEK_FORCE    (1 << 6)      // ignore unseekable flag
+#define SEEK_BLOCK    (1 << 7)      // upon successfully queued seek, block readers
+                                    // (simplifies syncing multiple reader threads)
 
 // Strictness of the demuxer open format check.
 // demux.c will try by default: NORMAL, UNSAFE (in this order)
