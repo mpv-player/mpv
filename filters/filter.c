@@ -614,11 +614,11 @@ static void filter_wakeup(struct mp_filter *f, bool mark_only)
         f->in->async_pending = true;
         // (not using a talloc parent for thread safety reasons)
         MP_TARRAY_APPEND(NULL, r->async_pending, r->num_async_pending, f);
-        if (!mark_only && !r->async_wakeup_sent) {
-            if (r->wakeup_cb)
-                r->wakeup_cb(r->wakeup_ctx);
-            r->async_wakeup_sent = true;
-        }
+    }
+    if (!mark_only && !r->async_wakeup_sent) {
+        if (r->wakeup_cb)
+            r->wakeup_cb(r->wakeup_ctx);
+        r->async_wakeup_sent = true;
     }
     pthread_mutex_unlock(&r->async_lock);
 }
