@@ -437,8 +437,6 @@ static const m_option_t mp_opts[] = {
 
     OPT_CHOICE("play-dir", play_dir, 0,
                ({"forward", 1}, {"+", 1}, {"backward", -1}, {"-", -1})),
-    OPT_BYTE_SIZE("video-reversal-buffer", video_reverse_size, 0, 0, (size_t)-1),
-    OPT_BYTE_SIZE("audio-reversal-buffer", audio_reverse_size, 0, 0, (size_t)-1),
 
     OPT_FLAG("rebase-start-time", rebase_start_time, 0),
 
@@ -515,8 +513,6 @@ static const m_option_t mp_opts[] = {
     // set A-V sync correction speed (0=disables it):
     OPT_FLOATRANGE("mc", default_max_pts_correction, 0, 0, 100),
 
-    // force video/audio rate:
-    OPT_DOUBLE("fps", force_fps, CONF_MIN, .min = 0),
     OPT_INTRANGE("audio-samplerate", force_srate, UPDATE_AUDIO, 0, 16*48000),
     OPT_CHANNELS("audio-channels", audio_output_channels, UPDATE_AUDIO),
     OPT_AUDIOFORMAT("audio-format", audio_output_format, UPDATE_AUDIO),
@@ -538,21 +534,9 @@ static const m_option_t mp_opts[] = {
 
     OPT_SUBSTRUCT("", filter_opts, filter_conf, 0),
 
-    OPT_STRING("ad", audio_decoders, 0),
-    OPT_STRING("vd", video_decoders, 0),
-
-    OPT_STRING("audio-spdif", audio_spdif, 0),
-
-    OPT_ASPECT("video-aspect-override", movie_aspect, UPDATE_IMGPAR | M_OPT_RANGE,
-               .min = -1, .max = 10),
-    OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
-               ({"bitstream", 1}, {"container", 2})),
-
+    OPT_SUBSTRUCT("", dec_wrapper, dec_wrapper_conf, 0),
     OPT_SUBSTRUCT("", vd_lavc_params, vd_lavc_conf, 0),
     OPT_SUBSTRUCT("ad-lavc", ad_lavc_params, ad_lavc_conf, 0),
-
-    OPT_SUBSTRUCT("vd-queue", vdec_queue_opts, vdec_queue_conf, 0),
-    OPT_SUBSTRUCT("ad-queue", adec_queue_opts, adec_queue_conf, 0),
 
     OPT_SUBSTRUCT("", demux_lavf, demux_lavf_conf, 0),
     OPT_SUBSTRUCT("demuxer-rawaudio", demux_rawaudio, demux_rawaudio_conf, 0),
@@ -610,8 +594,6 @@ static const m_option_t mp_opts[] = {
 
     OPT_STRING("title", wintitle, 0),
     OPT_STRING("force-media-title", media_title, 0),
-    OPT_CHOICE_OR_INT("video-rotate", video_rotate, UPDATE_IMGPAR, 0, 359,
-                      ({"no", -1})),
 
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
@@ -674,7 +656,6 @@ static const m_option_t mp_opts[] = {
     OPT_FLAG("merge-files", merge_files, 0),
 
     // a-v sync stuff:
-    OPT_FLAG("correct-pts", correct_pts, 0),
     OPT_FLAG("initial-audio-sync", initial_audio_sync, 0),
     OPT_CHOICE("video-sync", video_sync, 0,
                ({"audio", VS_DEFAULT},
@@ -925,8 +906,6 @@ static const m_option_t mp_opts[] = {
 static const struct MPOpts mp_default_opts = {
     .use_terminal = 1,
     .msg_color = 1,
-    .audio_decoders = NULL,
-    .video_decoders = NULL,
     .softvol_max = 130,
     .softvol_volume = 100,
     .softvol_mute = 0,
@@ -968,7 +947,6 @@ static const struct MPOpts mp_default_opts = {
     .ab_loop_count = -1,
     .edition_id = -1,
     .default_max_pts_correction = -1,
-    .correct_pts = 1,
     .initial_audio_sync = 1,
     .frame_dropping = 1,
     .term_osd = 2,
@@ -991,15 +969,11 @@ static const struct MPOpts mp_default_opts = {
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,
     .pitch_correction = 1,
-    .movie_aspect = -1.,
-    .aspect_method = 2,
     .sub_auto = 0,
     .audiofile_auto = -1,
     .osd_bar_visible = 1,
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,
-    .video_reverse_size = 1 * 1024 * 1024 * 1024,
-    .audio_reverse_size = 64 * 1024 * 1024,
 
     .audio_output_channels = {
         .set = 1,

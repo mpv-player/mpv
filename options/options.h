@@ -172,12 +172,6 @@ typedef struct MPOpts {
     int cursor_autohide_delay;
     int cursor_autohide_fs;
 
-    int video_rotate;
-
-    char *audio_decoders;
-    char *video_decoders;
-    char *audio_spdif;
-
     struct mp_subtitle_opts *subs_rend;
     struct mp_sub_filter_opts *subs_filt;
     struct mp_osd_render_opts *osd_rend;
@@ -207,7 +201,6 @@ typedef struct MPOpts {
     int use_filedir_conf;
     int hls_bitrate;
     int edition_id;
-    int correct_pts;
     int initial_audio_sync;
     int video_sync;
     double sync_max_video_change;
@@ -266,8 +259,6 @@ typedef struct MPOpts {
     int prefetch_open;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
-    int64_t video_reverse_size;
-    int64_t audio_reverse_size;
 
     int cache_pause;
     int cache_pause_initial;
@@ -277,7 +268,6 @@ typedef struct MPOpts {
     char *screenshot_template;
     char *screenshot_directory;
 
-    double force_fps;
     int index_mode;
 
     struct m_channels audio_output_channels;
@@ -288,10 +278,7 @@ typedef struct MPOpts {
     struct m_obj_settings *vf_settings, *vf_defs;
     struct m_obj_settings *af_settings, *af_defs;
     struct filter_opts *filter_opts;
-    float movie_aspect;
-    int aspect_method;
-    struct dec_queue_opts *vdec_queue_opts;
-    struct dec_queue_opts *adec_queue_opts;
+    struct dec_wrapper_opts *dec_wrapper;
     char **sub_name;
     char **sub_paths;
     char **audiofile_paths;
@@ -375,8 +362,7 @@ extern const struct m_sub_options mp_osd_render_sub_opts;
 extern const struct m_sub_options filter_conf;
 extern const struct m_sub_options resample_conf;
 extern const struct m_sub_options stream_conf;
-extern const struct m_sub_options vdec_queue_conf;
-extern const struct m_sub_options adec_queue_conf;
+extern const struct m_sub_options dec_wrapper_conf;
 extern const struct m_sub_options mp_opt_root;
 
 #endif

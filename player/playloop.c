@@ -289,8 +289,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     double demux_pts = seek_pts;
 
-    bool hr_seek = (opts->correct_pts && seek.exact != MPSEEK_KEYFRAME &&
-                    seek_pts != MP_NOPTS_VALUE) &&
+    bool hr_seek = seek.exact != MPSEEK_KEYFRAME && seek_pts != MP_NOPTS_VALUE &&
         (seek.exact >= MPSEEK_EXACT || opts->hr_seek == 1 ||
          (opts->hr_seek >= 0 && seek.type == MPSEEK_ABSOLUTE) ||
          (opts->hr_seek == 2 && (!mpctx->vo_chain || mpctx->vo_chain->is_sparse)));

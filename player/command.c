@@ -2565,7 +2565,7 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
 
 skip_warn: ;
 
-    float aspect = mpctx->opts->movie_aspect;
+    float aspect = *(float *)opt->data;
     if (mpctx->vo_chain && aspect <= 0) {
         struct mp_image_params *params = &mpctx->vo_chain->filter->input_params;
         if (params && params->p_w > 0 && params->p_h > 0) {
@@ -2586,7 +2586,7 @@ skip_warn: ;
         *(struct m_option *)arg = *(opt->opt);
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
-        if (mpctx->opts->movie_aspect < 0) {
+        if (aspect < 0) {
             *(char **)arg = talloc_asprintf(NULL, "%.3f (original)", aspect);
             return M_PROPERTY_OK;
         }

@@ -69,7 +69,7 @@ static const struct m_option dec_queue_opts_list[] = {
     {0}
 };
 
-const struct m_sub_options vdec_queue_conf = {
+static const struct m_sub_options vdec_queue_conf = {
     .opts = dec_queue_opts_list,
     .size = sizeof(struct dec_queue_opts),
     .defaults = &(const struct dec_queue_opts){
@@ -80,7 +80,7 @@ const struct m_sub_options vdec_queue_conf = {
     },
 };
 
-const struct m_sub_options adec_queue_conf = {
+static const struct m_sub_options adec_queue_conf = {
     .opts = dec_queue_opts_list,
     .size = sizeof(struct dec_queue_opts),
     .defaults = &(const struct dec_queue_opts){
@@ -88,6 +88,56 @@ const struct m_sub_options adec_queue_conf = {
         .max_bytes = 1 * 1024 * 1024,
         .max_samples = 48000,
         .max_duration = 1,
+    },
+};
+
+#undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct dec_wrapper_opts
+
+struct dec_wrapper_opts {
+    float movie_aspect;
+    int aspect_method;
+    double force_fps;
+    int correct_pts;
+    int video_rotate;
+    char *audio_decoders;
+    char *video_decoders;
+    char *audio_spdif;
+    struct dec_queue_opts *vdec_queue_opts;
+    struct dec_queue_opts *adec_queue_opts;
+    int64_t video_reverse_size;
+    int64_t audio_reverse_size;
+};
+
+static int decoder_list_opt(struct mp_log *log, const m_option_t *opt,
+                            struct bstr name, struct bstr param);
+
+const struct m_sub_options dec_wrapper_conf = {
+    .opts = (const struct m_option[]){
+        OPT_FLAG("correct-pts", correct_pts, 0),
+        OPT_DOUBLE("fps", force_fps, CONF_MIN, .min = 0),
+        OPT_STRING_VALIDATE("ad", audio_decoders, 0, decoder_list_opt),
+        OPT_STRING_VALIDATE("vd", video_decoders, 0, decoder_list_opt),
+        OPT_STRING_VALIDATE("audio-spdif", audio_spdif, 0, decoder_list_opt),
+        OPT_CHOICE_OR_INT("video-rotate", video_rotate, UPDATE_IMGPAR, 0, 359,
+                      ({"no", -1})),
+        OPT_ASPECT("video-aspect-override", movie_aspect,
+                   UPDATE_IMGPAR | M_OPT_RANGE, .min = -1, .max = 10),
+        OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
+                ({"bitstream", 1}, {"container", 2})),
+        OPT_SUBSTRUCT("vd-queue", vdec_queue_opts, vdec_queue_conf, 0),
+        OPT_SUBSTRUCT("ad-queue", adec_queue_opts, adec_queue_conf, 0),
+        OPT_BYTE_SIZE("video-reversal-buffer", video_reverse_size, 0, 0, (size_t)-1),
+        OPT_BYTE_SIZE("audio-reversal-buffer", audio_reverse_size, 0, 0, (size_t)-1),
+        {0}
+    },
+    .size = sizeof(struct dec_wrapper_opts),
+    .defaults = &(const struct dec_wrapper_opts){
+        .correct_pts = 1,
+        .movie_aspect = -1.,
+        .aspect_method = 2,
+        .video_reverse_size = 1 * 1024 * 1024 * 1024,
+        .audio_reverse_size = 64 * 1024 * 1024,
     },
 };
 
@@ -103,6 +153,7 @@ struct priv {
     struct mp_filter *dec_root_filter; // thread root filter; no thread => NULL
     struct mp_filter *decf; // wrapper filter which drives the decoder
     struct m_config_cache *opt_cache;
+    struct dec_wrapper_opts *opts;
 
     struct mp_codec_params *codec;
     struct mp_decoder *decoder;
@@ -173,6 +224,30 @@ struct priv {
     int attempt_framedrops; // try dropping this many frames
     int dropped_frames; // total frames _probably_ dropped
 };
+
+static int decoder_list_opt(struct mp_log *log, const m_option_t *opt,
+                            struct bstr name, struct bstr param)
+{
+    if (!bstr_equals0(param, "help"))
+        return 1;
+    if (strcmp(opt->name, "ad") == 0) {
+        struct mp_decoder_list *list = audio_decoder_list();
+        mp_print_decoders(log, MSGL_INFO, "Audio decoders:", list);
+        talloc_free(list);
+        return M_OPT_EXIT;
+    }
+    if (strcmp(opt->name, "vd") == 0) {
+        struct mp_decoder_list *list = video_decoder_list();
+        mp_print_decoders(log, MSGL_INFO, "Video decoders:", list);
+        talloc_free(list);
+        return M_OPT_EXIT;
+    }
+    if (strcmp(opt->name, "audio-spdif") == 0) {
+        mp_info(log, "Choices: ac3,dts-hd,dts (and possibly more)\n");
+        return M_OPT_EXIT;
+    }
+    return 1;
+}
 
 // Update cached values for main thread which require access to the decoder
 // thread state. Must run on/locked with decoder thread.
@@ -310,8 +385,6 @@ struct mp_decoder_list *audio_decoder_list(void)
 
 static bool reinit_decoder(struct priv *p)
 {
-    struct MPOpts *opts = p->opt_cache->opts;
-
     if (p->decoder)
         talloc_free(p->decoder->f);
     p->decoder = NULL;
@@ -329,11 +402,11 @@ static bool reinit_decoder(struct priv *p)
 
     if (p->codec->type == STREAM_VIDEO) {
         driver = &vd_lavc;
-        user_list = opts->video_decoders;
+        user_list = p->opts->video_decoders;
         fallback = "h264";
     } else if (p->codec->type == STREAM_AUDIO) {
         driver = &ad_lavc;
-        user_list = opts->audio_decoders;
+        user_list = p->opts->audio_decoders;
         fallback = "aac";
 
         pthread_mutex_lock(&p->cache_lock);
@@ -342,7 +415,7 @@ static bool reinit_decoder(struct priv *p)
 
         if (try_spdif && p->codec->codec) {
             struct mp_decoder_list *spdif =
-                select_spdif_codec(p->codec->codec, opts->audio_spdif);
+                select_spdif_codec(p->codec->codec, p->opts->audio_spdif);
             if (spdif->num_entries) {
                 driver = &ad_spdif;
                 list = spdif;
@@ -472,7 +545,7 @@ static void fix_image_params(struct priv *p,
 {
     struct mp_image_params m = *params;
     struct mp_codec_params *c = p->codec;
-    struct MPOpts *opts = p->opt_cache->opts;
+    struct dec_wrapper_opts *opts = p->opts;
 
     MP_VERBOSE(p, "Decoder format: %s\n", mp_image_params_to_str(params));
     p->dec_format = *params;
@@ -642,14 +715,12 @@ done:
 
 static void correct_video_pts(struct priv *p, struct mp_image *mpi)
 {
-    struct MPOpts *opts = p->opt_cache->opts;
-
     mpi->pts *= p->play_dir;
 
-    if (!opts->correct_pts || mpi->pts == MP_NOPTS_VALUE) {
+    if (!p->opts->correct_pts || mpi->pts == MP_NOPTS_VALUE) {
         double fps = p->fps > 0 ? p->fps : 25;
 
-        if (opts->correct_pts) {
+        if (p->opts->correct_pts) {
             if (p->has_broken_decoded_pts <= 1) {
                 MP_WARN(p, "No video PTS! Making something up. Using "
                         "%f FPS.\n", fps);
@@ -841,7 +912,7 @@ static void enqueue_backward_frame(struct priv *p, struct mp_frame frame)
     bool eof = frame.type == MP_FRAME_EOF;
 
     if (!eof) {
-        struct MPOpts *opts = p->opt_cache->opts;
+        struct dec_wrapper_opts *opts = p->opts;
 
         uint64_t queue_size = 0;
         switch (p->header->type) {
@@ -1064,8 +1135,8 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
     p->public.f = public_f;
 
     pthread_mutex_init(&p->cache_lock, NULL);
-    p->opt_cache = m_config_cache_alloc(p, public_f->global, &mp_opt_root);
-    struct MPOpts *opts = p->opt_cache->opts;
+    p->opt_cache = m_config_cache_alloc(p, public_f->global, &dec_wrapper_conf);
+    p->opts = p->opt_cache->opts;
     p->header = src;
     p->codec = p->header->codec;
     p->play_dir = 1;
@@ -1080,16 +1151,16 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
 
         MP_VERBOSE(p, "Container reported FPS: %f\n", p->fps);
 
-        if (opts->force_fps) {
-            p->fps = opts->force_fps;
+        if (p->opts->force_fps) {
+            p->fps = p->opts->force_fps;
             MP_INFO(p, "FPS forced to %5.3f.\n", p->fps);
             MP_INFO(p, "Use --no-correct-pts to force FPS based timing.\n");
         }
 
-        queue_opts = opts->vdec_queue_opts;
+        queue_opts = p->opts->vdec_queue_opts;
     } else if (p->header->type == STREAM_AUDIO) {
         p->log = mp_log_new(p, public_f->log, "!ad");
-        queue_opts = opts->adec_queue_opts;
+        queue_opts = p->opts->adec_queue_opts;
     } else {
         goto error;
     }

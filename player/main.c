@@ -201,22 +201,6 @@ static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct mp_log *log = mpctx->log;
-    if (opts->audio_decoders && strcmp(opts->audio_decoders, "help") == 0) {
-        struct mp_decoder_list *list = audio_decoder_list();
-        mp_print_decoders(log, MSGL_INFO, "Audio decoders:", list);
-        talloc_free(list);
-        return true;
-    }
-    if (opts->audio_spdif && strcmp(opts->audio_spdif, "help") == 0) {
-        MP_INFO(mpctx, "Choices: ac3,dts-hd,dts (and possibly more)\n");
-        return true;
-    }
-    if (opts->video_decoders && strcmp(opts->video_decoders, "help") == 0) {
-        struct mp_decoder_list *list = video_decoder_list();
-        mp_print_decoders(log, MSGL_INFO, "Video decoders:", list);
-        talloc_free(list);
-        return true;
-    }
     if ((opts->demuxer_name && strcmp(opts->demuxer_name, "help") == 0) ||
         (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name, "help") == 0) ||
         (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name, "help") == 0)) {
