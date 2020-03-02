@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
+#include <drm_mode.h>
 
 #include "common/msg.h"
 #include "drm_common.h"
@@ -28,6 +29,7 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd, AVDRMFrameDescripto
 {
     AVDRMLayerDescriptor *layer = NULL;
     uint32_t pitches[4], offsets[4], handles[4];
+    uint64_t modifiers[4];
     int ret, layer_fd;
 
     if (descriptor && descriptor->nb_layers) {
@@ -39,6 +41,11 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd, AVDRMFrameDescripto
                 mp_err(log, "Failed to retrieve the Prime Handle from handle %d (%d).\n", object, descriptor->objects[object].fd);
                 goto fail;
             }
+            if(object == 0 && descriptor->objects[object].format_modifier) {
+                modifiers[object] = descriptor->objects[object].format_modifier;
+            } else if (object == 0) {
+                modifiers[object] = 0;
+            }
         }
 
         layer = &descriptor->layers[0];
@@ -49,15 +56,17 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd, AVDRMFrameDescripto
                 pitches[plane] = layer->planes[plane].pitch;
                 offsets[plane] = layer->planes[plane].offset;
                 handles[plane] = layer_fd;
+                modifiers[plane] = modifiers[0];
             } else {
                 pitches[plane] = 0;
                 offsets[plane] = 0;
                 handles[plane] = 0;
+                modifiers[plane] = 0;
             }
         }
 
-        ret = drmModeAddFB2(fd, width, height, layer->format,
-                            handles, pitches, offsets, &framebuffer->fb_id, 0);
+        ret = drmModeAddFB2WithModifiers(fd, width, height, layer->format,
+                            handles, pitches, offsets, modifiers, &framebuffer->fb_id, DRM_MODE_FB_MODIFIERS);
         if (ret < 0) {
             mp_err(log, "Failed to create framebuffer on layer %d.\n", 0);
             goto fail;
