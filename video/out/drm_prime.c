@@ -41,10 +41,8 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd, AVDRMFrameDescripto
                 mp_err(log, "Failed to retrieve the Prime Handle from handle %d (%d).\n", object, descriptor->objects[object].fd);
                 goto fail;
             }
-            if(object == 0 && descriptor->objects[object].format_modifier) {
+            if(object == 0) {
                 modifiers[object] = descriptor->objects[object].format_modifier;
-            } else if (object == 0) {
-                modifiers[object] = 0;
             }
         }
 
