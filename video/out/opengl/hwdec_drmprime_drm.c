@@ -55,6 +55,8 @@ struct priv {
     struct mp_rect src, dst;
 
     int display_w, display_h;
+
+    struct drm_prime_handle_refs handle_refs;
 };
 
 static void set_current_frame(struct ra_hwdec *hw, struct drm_frame *frame)
@@ -68,7 +70,7 @@ static void set_current_frame(struct ra_hwdec *hw, struct drm_frame *frame)
     // is not being displayed when we release it.
 
     if (p->ctx) {
-        drm_prime_destroy_framebuffer(p->log, p->ctx->fd, &p->old_frame.fb);
+        drm_prime_destroy_framebuffer(p->log, p->ctx->fd, &p->old_frame.fb, &p->handle_refs);
     }
 
     mp_image_setrefp(&p->old_frame.image, p->last_frame.image);
@@ -183,7 +185,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
             int dstw = MP_ALIGN_UP(p->dst.x1 - p->dst.x0, 2);
             int dsth = MP_ALIGN_UP(p->dst.y1 - p->dst.y0, 2);
 
-            if (drm_prime_create_framebuffer(p->log, p->ctx->fd, desc, srcw, srch, &next_frame.fb)) {
+            if (drm_prime_create_framebuffer(p->log, p->ctx->fd, desc, srcw, srch, &next_frame.fb, &p->handle_refs)) {
                 ret = -1;
                 goto fail;
             }
@@ -222,7 +224,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
     return 0;
 
  fail:
-    drm_prime_destroy_framebuffer(p->log, p->ctx->fd, &next_frame.fb);
+    drm_prime_destroy_framebuffer(p->log, p->ctx->fd, &next_frame.fb, &p->handle_refs);
     return ret;
 }
 
@@ -286,6 +288,10 @@ static int init(struct ra_hwdec *hw)
     if (drmGetCap(p->ctx->fd, DRM_CAP_PRIME, &has_prime) < 0) {
         MP_ERR(hw, "Card does not support prime handles.\n");
         goto err;
+    }
+
+    if (has_prime) {
+        drm_prime_init_handle_ref_count(p, &p->handle_refs);
     }
 
     disable_video_plane(hw);
