@@ -33,6 +33,8 @@ Interface changes
     - js modules: ~~/scripts/modules.js/ is no longer used, global paths can be
       set with custom init (see docs), dir-scripts first look at <dir>/modules/
     - the OSX bundle now logs to "~/Library/Logs/mpv.log" by default
+    - deprecate the --cache-secs option (once removed, the cache cannot be
+      limited by time anymore)
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended
