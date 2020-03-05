@@ -4521,9 +4521,6 @@ Cache
     affecting the playback logic). In other situations, it will simply make
     seeking slower and use significantly more memory.
 
-    In specific situations, this still makes the player wait on the decoder,
-    such as seeking, switching hardware decoding modes, and more.
-
     The queue size is restricted by the other ``--vd-queue-...`` options. The
     final queue size is the minimum as indicated by the option with the lowest
     limit. Each decoder/track has its own queue that may use the full configured

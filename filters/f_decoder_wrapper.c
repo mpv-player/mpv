@@ -1141,6 +1141,13 @@ static void wakeup_dec_thread(void *ptr)
     mp_dispatch_interrupt(p->dec_dispatch);
 }
 
+static void onlock_dec_thread(void *ptr)
+{
+    struct priv *p = ptr;
+
+    mp_filter_graph_interrupt(p->dec_root_filter);
+}
+
 struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
                                                      struct sh_stream *src)
 {
@@ -1185,6 +1192,7 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
         p->dec_dispatch = mp_dispatch_create(p);
         p->dec_root_filter = mp_filter_create_root(public_f->global);
         mp_filter_root_set_wakeup_cb(p->dec_root_filter, wakeup_dec_thread, p);
+        mp_dispatch_set_onlock_fn(p->dec_dispatch, onlock_dec_thread, p);
 
         struct mp_stream_info *sinfo = mp_filter_find_stream_info(parent);
         if (sinfo) {
