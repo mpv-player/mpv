@@ -4528,7 +4528,9 @@ Cache
 
     Most queue options can be changed at runtime. ``--vd-queue-enable`` itself
     (and the audio equivalent) update only if decoding is completely
-    reinitialized.
+    reinitialized. However, setting ``--vd-queue-max-samples=1`` should almost
+    lead to the same behavior as ``--vd-queue-enable=no``, so that value can
+    be used for effectively runtime enabling/disabling the queue.
 
     This should not be used with hardware decoding. It is possible to enable
     this for audio, but it makes even less sense.
