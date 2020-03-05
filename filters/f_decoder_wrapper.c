@@ -155,6 +155,7 @@ struct priv {
     struct m_config_cache *opt_cache;
     struct dec_wrapper_opts *opts;
     struct dec_queue_opts *queue_opts;
+    struct mp_stream_info stream_info;
 
     struct mp_codec_params *codec;
     struct mp_decoder *decoder;
@@ -1184,6 +1185,15 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
         p->dec_dispatch = mp_dispatch_create(p);
         p->dec_root_filter = mp_filter_create_root(public_f->global);
         mp_filter_root_set_wakeup_cb(p->dec_root_filter, wakeup_dec_thread, p);
+
+        struct mp_stream_info *sinfo = mp_filter_find_stream_info(parent);
+        if (sinfo) {
+            p->dec_root_filter->stream_info = &p->stream_info;
+            p->stream_info = (struct mp_stream_info){
+                .dr_vo = sinfo->dr_vo,
+                .hwdec_devs = sinfo->hwdec_devs,
+            };
+        }
 
         update_queue_config(p);
     }
