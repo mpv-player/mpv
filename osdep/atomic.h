@@ -48,8 +48,7 @@ typedef struct { uint64_t v;           } mp_atomic_uint64;
 
 #define memory_order_relaxed 1
 #define memory_order_seq_cst 2
-
-#define atomic_load_explicit(p, e) atomic_load(p)
+#define memory_order_acq_rel 3
 
 #include <pthread.h>
 
@@ -98,6 +97,12 @@ extern pthread_mutex_t mp_atomic_mutex;
        }                                                \
        pthread_mutex_unlock(&mp_atomic_mutex);          \
        res_; })
+
+#define atomic_load_explicit(a, b)                      \
+    atomic_load(a)
+
+#define atomic_exchange_explicit(a, b, c)               \
+    atomic_exchange(a, b)
 
 #endif /* else HAVE_STDATOMIC */
 
