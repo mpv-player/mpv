@@ -1201,7 +1201,7 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
     p->decf = mp_filter_create(p->dec_root_filter ? p->dec_root_filter : public_f,
                                &decf_filter);
     p->decf->priv = p;
-    p->decf->log = p->log;
+    p->decf->log = public_f->log = p->log;
     mp_filter_add_pin(p->decf, MP_PIN_OUT, "out");
 
     struct mp_filter *demux = mp_demux_in_create(p->decf, p->header);
