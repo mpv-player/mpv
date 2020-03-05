@@ -744,6 +744,7 @@ video_output_features = [
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
         'func': check_pkg_config('brcmegl'),
+        'default': 'disable',
     } , {
         'name': '--ios-gl',
         'desc': 'iOS OpenGL ES hardware decoding interop support',
