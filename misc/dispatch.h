@@ -10,6 +10,9 @@ struct mp_dispatch_queue *mp_dispatch_create(void *talloc_parent);
 void mp_dispatch_set_wakeup_fn(struct mp_dispatch_queue *queue,
                                void (*wakeup_fn)(void *wakeup_ctx),
                                void *wakeup_ctx);
+void mp_dispatch_set_onlock_fn(struct mp_dispatch_queue *queue,
+                               void (*onlock_fn)(void *onlock_ctx),
+                               void *onlock_ctx);
 void mp_dispatch_enqueue(struct mp_dispatch_queue *queue,
                          mp_dispatch_fn fn, void *fn_data);
 void mp_dispatch_enqueue_autofree(struct mp_dispatch_queue *queue,

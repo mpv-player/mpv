@@ -30,6 +30,8 @@ struct mp_dispatch_queue {
     pthread_cond_t cond;
     void (*wakeup_fn)(void *wakeup_ctx);
     void *wakeup_ctx;
+    void (*onlock_fn)(void *onlock_ctx);
+    void *onlock_ctx;
     // Time at which mp_dispatch_queue_process() should return.
     int64_t wait;
     // Make mp_dispatch_queue_process() exit if it's idle.
@@ -94,14 +96,31 @@ struct mp_dispatch_queue *mp_dispatch_create(void *ta_parent)
 // the wakeup_fn could for example write a byte into a "wakeup" pipe in order
 // to unblock the select(). The wakeup_fn is called from the dispatch queue
 // when there are new dispatch items, and the target thread should then enter
-// mp_dispatch_queue_process() as soon as possible. Note that wakeup_fn is
-// called under no lock, so you might have to do synchronization yourself.
+// mp_dispatch_queue_process() as soon as possible.
+// Note that this setter does not do internal synchronization, so you must set
+// it before other threads see it.
 void mp_dispatch_set_wakeup_fn(struct mp_dispatch_queue *queue,
                                void (*wakeup_fn)(void *wakeup_ctx),
                                void *wakeup_ctx)
 {
     queue->wakeup_fn = wakeup_fn;
     queue->wakeup_ctx = wakeup_ctx;
+}
+
+// Set a function that will be called by mp_dispatch_lock() if the target thread
+// is not calling mp_dispatch_queue_process() right now. This is an obscure,
+// optional mechanism to make a worker thread react to external events more
+// quickly. The idea is that the callback will make the worker thread to stop
+// doing whatever (e.g. by setting a flag), and call mp_dispatch_queue_process()
+// in order to let mp_dispatch_lock() calls continue sooner.
+// Like wakeup_fn, this setter does no internal synchronization, and you must
+// not access the dispatch queue itself from the callback.
+void mp_dispatch_set_onlock_fn(struct mp_dispatch_queue *queue,
+                               void (*onlock_fn)(void *onlock_ctx),
+                               void *onlock_ctx)
+{
+    queue->onlock_fn = onlock_fn;
+    queue->onlock_ctx = onlock_ctx;
 }
 
 static void mp_dispatch_append(struct mp_dispatch_queue *queue,
@@ -356,6 +375,8 @@ void mp_dispatch_lock(struct mp_dispatch_queue *queue)
     // And now wait until the target thread gets "trapped" within the
     // mp_dispatch_queue_process() call, which will mean we get exclusive
     // access to the target's thread state.
+    if (queue->onlock_fn)
+        queue->onlock_fn(queue->onlock_ctx);
     while (!queue->in_process) {
         pthread_mutex_unlock(&queue->lock);
         if (queue->wakeup_fn)
