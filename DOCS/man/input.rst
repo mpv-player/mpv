@@ -2233,8 +2233,14 @@ Property list
     is returned instead.
 
 ``playlist-pos`` (RW)
-    Current position on playlist. The first entry is on position 0. Writing
-    to the property will restart playback at the written entry.
+    Current position on playlist. The first entry is on position 0. Writing to
+    this property may start playback at the new position.
+
+    What happens if you write the same value back to the property is
+    implementation dependent. Currently, writing the same value will restart
+    playback from the beginning. It is possible (but not necessarily planned)
+    that in the future, write access if the same value is written will be
+    ignored.
 
 ``playlist-pos-1`` (RW)
     Same as ``playlist-pos``, but 1-based.
