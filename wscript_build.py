@@ -383,7 +383,6 @@ def build(ctx):
         ( "stream/stream_memory.c" ),
         ( "stream/stream_mf.c" ),
         ( "stream/stream_null.c" ),
-        ( "stream/stream_smb.c",                 "libsmbclient" ),
 
         ## Subtitles
         ( "sub/ass_mp.c",                        "libass"),

@@ -327,13 +327,6 @@ iconv support use --disable-iconv.",
         'func': check_statement('sys/mman.h',
                                 'memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING)')
     }, {
-        'name': '--libsmbclient',
-        'desc': 'Samba support (makes mpv GPLv3)',
-        'deps': 'libdl && gpl',
-        'func': check_pkg_config('smbclient'),
-        'default': 'disable',
-        'module': 'input',
-    }, {
         'name' : '--lua',
         'desc' : 'Lua',
         'func': check_lua,
