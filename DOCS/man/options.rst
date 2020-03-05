@@ -4524,6 +4524,11 @@ Cache
     In specific situations, this still makes the player wait on the decoder,
     such as seeking, switching hardware decoding modes, and more.
 
+    The queue size is restricted by the other ``--vd-queue-...`` options. The
+    final queue size is the minimum as indicated by the option with the lowest
+    limit. Each decoder/track has its own queue that may use the full configured
+    queue size.
+
     Most queue options can be changed at runtime. ``--vd-queue-enable`` itself
     (and the audio equivalent) update only if decoding is completely
     reinitialized.
