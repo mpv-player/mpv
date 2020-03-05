@@ -409,7 +409,30 @@ struct AVBufferRef *mp_filter_load_hwdec_device(struct mp_filter *f, int avtype)
 // Perform filtering. This runs until the filter graph is blocked (due to
 // missing external input or unread output). It returns whether any outside
 // pins have changed state.
+// Note: this always operates on the filter graph associated with f, f itself
+// is not treated differently from any other filters in the graph.
 bool mp_filter_run(struct mp_filter *f);
+
+// Set the maximum time mp_filter_run() should block. If the maximum time
+// expires, the effect is the same as calling mp_filter_graph_interrupt() while
+// the function is running. See that function for further details.
+// The default is seconds==INFINITY. Values <=0 make it return after 1 iteration.
+void mp_filter_graph_set_max_run_time(struct mp_filter *f, double seconds);
+
+// Interrupt mp_filter_run() asynchronously. This does not stop filtering in a
+// destructive way, but merely suspends it. In practice, this will make
+// mp_filter_run() return after the current filter's process() function has
+// finished. Filtering can be resumed with subsequent mp_filter_run() calls.
+// When mp_filter_run() is interrupted, it will trigger the filter graph wakeup
+// callback, which in turn ensures that the user will call mp_filter_run() again.
+// If it is called if not in mp_filter_run(), the next mp_filter_run() call is
+// interrupted and no filtering is done for that call.
+// Calling this too often will starve filtering.
+// This does not call the graph wakeup callback directly, which will avoid
+// potential reentrancy issues. (But mp_filter_run() will call it in reaction to
+// it, as described above.)
+// Explicitly thread-safe.
+void mp_filter_graph_interrupt(struct mp_filter *f);
 
 // Create a root dummy filter with no inputs or outputs. This fulfills the
 // following functions:
@@ -428,6 +451,8 @@ struct mp_filter *mp_filter_create_root(struct mpv_global *global);
 // user's thread to call mp_filter_run() again.
 // The wakeup callback must not recursively call into any filter APIs, or do
 // blocking waits on the filter API (deadlocks will happen).
+// A wakeup callback should always set a "wakeup" flag, that is reset only when
+// mp_filter_run() is going to be called again with no wait time.
 void mp_filter_root_set_wakeup_cb(struct mp_filter *root,
                                   void (*wakeup_cb)(void *ctx), void *ctx);
 

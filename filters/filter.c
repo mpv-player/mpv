@@ -1,8 +1,11 @@
+#include <math.h>
 #include <pthread.h>
 
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "osdep/atomic.h"
+#include "osdep/timer.h"
 #include "video/hwdec.h"
 
 #include "filter.h"
@@ -64,6 +67,9 @@ struct filter_runner {
     void *wakeup_ctx;
 
     struct mp_filter *root_filter;
+
+    double max_run_time;
+    atomic_bool interrupt_flag;
 
     // If we're currently running the filter graph (for avoiding recursion).
     bool filtering;
@@ -177,6 +183,10 @@ bool mp_filter_run(struct mp_filter *filter)
 {
     struct filter_runner *r = filter->in->runner;
 
+    int64_t end_time = 0;
+    if (isfinite(r->max_run_time))
+        end_time = mp_add_timeout(mp_time_us(), MPMAX(r->max_run_time, 0));
+
     // (could happen with separate filter graphs calling each other, for now
     // ignore this issue as we don't use such a setup anywhere)
     assert(!r->filtering);
@@ -187,13 +197,30 @@ bool mp_filter_run(struct mp_filter *filter)
     //       to queue a wakeup again later. So do not call this in the loop.
     flush_async_notifications(r);
 
-    while (r->num_pending) {
+    while (1) {
+        if (atomic_exchange_explicit(&r->interrupt_flag, false,
+                                     memory_order_acq_rel))
+        {
+            pthread_mutex_lock(&r->async_lock);
+            if (!r->async_wakeup_sent && r->wakeup_cb)
+                r->wakeup_cb(r->wakeup_ctx);
+            r->async_wakeup_sent = true;
+            pthread_mutex_unlock(&r->async_lock);
+            break;
+        }
+
+        if (!r->num_pending)
+            break;
+
         struct mp_filter *next = r->pending[r->num_pending - 1];
         r->num_pending -= 1;
         next->in->pending = false;
 
         if (next->in->info->process)
             next->in->info->process(next);
+
+        if (end_time && mp_time_us() >= end_time)
+            mp_filter_graph_interrupt(r->root_filter);
     }
 
     r->filtering = false;
@@ -644,6 +671,18 @@ void mp_filter_mark_async_progress(struct mp_filter *f)
     filter_wakeup(f, true);
 }
 
+void mp_filter_graph_set_max_run_time(struct mp_filter *f, double seconds)
+{
+    struct filter_runner *r = f->in->runner;
+    r->max_run_time = seconds;
+}
+
+void mp_filter_graph_interrupt(struct mp_filter *f)
+{
+    struct filter_runner *r = f->in->runner;
+    atomic_store(&r->interrupt_flag, true);
+}
+
 void mp_filter_free_children(struct mp_filter *f)
 {
     while(f->in->num_children)
@@ -717,6 +756,7 @@ struct mp_filter *mp_filter_create_with_params(struct mp_filter_params *params)
         *f->in->runner = (struct filter_runner){
             .global = params->global,
             .root_filter = f,
+            .max_run_time = INFINITY,
         };
         pthread_mutex_init(&f->in->runner->async_lock, NULL);
     }
