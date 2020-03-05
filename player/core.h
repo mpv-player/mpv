@@ -428,6 +428,7 @@ typedef struct MPContext {
     bool demux_underrun;
     double cache_stop_time;
     int cache_buffer;
+    double cache_update_pts;
 
     // Set after showing warning about decoding being too slow for realtime
     // playback rate. Used to avoid showing it multiple times.
