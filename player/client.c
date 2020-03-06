@@ -1638,10 +1638,12 @@ static void send_client_property_changes(struct mpv_handle *ctx)
             changed = true;
         }
 
-        if (changed) {
-            ctx->new_property_events = true;
-        } else if (prop->value_ret_ts == prop->value_ts) {
+        // Avoid retriggering the change event if the property didn't change,
+        // and the previous value was actually returned to the client.
+        if (!changed && prop->value_ret_ts == prop->value_ts) {
             prop->value_ret_ts = prop->change_ts; // no change => no event
+        } else {
+            ctx->new_property_events = true;
         }
 
         prop->value_ts = prop->change_ts;
@@ -1698,7 +1700,9 @@ static bool gen_property_change_event(struct mpv_handle *ctx)
 
         struct observe_property *prop = ctx->properties[ctx->cur_property_index++];
 
-        if (prop->value_ret_ts != prop->value_ts) {
+        if (prop->value_ts == prop->change_ts &&    // not a stale value?
+            prop->value_ret_ts != prop->value_ts)   // other value than last time?
+        {
             prop->value_ret_ts = prop->value_ts;
             prop_unref(ctx->cur_property);
             ctx->cur_property = prop;
