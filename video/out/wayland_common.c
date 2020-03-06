@@ -1262,15 +1262,27 @@ void vo_wayland_uninit(struct vo *vo)
     vo->wl = NULL;
 }
 
-static struct vo_wayland_output *find_output(struct vo_wayland_state *wl, int index)
+static bool find_output(struct vo_wayland_state *wl, int index)
 {
     int screen_id = 0;
-    struct vo_wayland_output *output;
+    struct vo_wayland_output *output = NULL;
+    struct vo_wayland_output *fallback_output = NULL;
     wl_list_for_each(output, &wl->output_list, link) {
+        if (screen_id == 0)
+            fallback_output = output;
         if (index == screen_id++)
-            return output;
+            wl->current_output = output;
     }
-    return NULL;
+    if (!wl->current_output) {
+        if (!fallback_output) {
+            MP_ERR(wl, "Screen index %i not found/unavailable!\n", index);
+            return 1;
+        } else {
+            MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", index);
+            wl->current_output = fallback_output;
+        }
+    }
+    return 0;
 }
 
 static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b) {
@@ -1302,20 +1314,11 @@ int vo_wayland_reconfig(struct vo *vo)
         int idx = 0;
         if (wl->vo_opts->fullscreen && (wl->vo_opts->fsscreen_id >= 0))
             idx = wl->vo_opts->fsscreen_id;
-        struct vo_wayland_output *out = find_output(wl, idx);
-        if (!out) {
-            MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", idx);
-            out = find_output(wl, 0);
-        }
-        if (!out) {
-            MP_ERR(wl, "Screen index %i not found/unavailable!\n", idx);
+        if (find_output(wl, idx))
             return false;
-        } else {
-            wl->current_output = out;
-            if (!wl->vo_opts->hidpi_window_scale)
-                out->scale = 1;
-            wl->scaling = out->scale;
-        }
+        if (!wl->vo_opts->hidpi_window_scale)
+            wl->current_output->scale = 1;
+        wl->scaling = wl->current_output->scale;
     }
 
     struct vo_win_geometry geo;
@@ -1323,7 +1326,7 @@ int vo_wayland_reconfig(struct vo *vo)
     vo_calc_window_geometry(vo, &screenrc, &geo);
     vo_apply_window_geometry(vo, &geo);
 
-    if (!wl->configured || !wl->vo_opts->window_maximized) {
+    if (!wl->configured) {
         wl->geometry.x0 = 0;
         wl->geometry.y0 = 0;
         wl->geometry.x1 = vo->dwidth  / wl->scaling;
@@ -1335,19 +1338,10 @@ int vo_wayland_reconfig(struct vo *vo)
     wl->reduced_width = vo->dwidth / wl->gcd;
     wl->reduced_height = vo->dheight / wl->gcd;
 
-    if (wl->vo_opts->fullscreen) {
-        /* If already fullscreen, fix resolution for the frame size change */
-        if (wl->current_output) {
-            wl->geometry.x0  = 0;
-            wl->geometry.y0  = 0;
-            wl->geometry.x1  = mp_rect_w(wl->current_output->geometry)/wl->scaling;
-            wl->geometry.y1  = mp_rect_h(wl->current_output->geometry)/wl->scaling;
-        }
-        if (wl->vo_opts->fsscreen_id < 0) {
-            xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
-        } else {
-            xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl->current_output->output);
-        }
+    if (wl->vo_opts->fullscreen && wl->vo_opts->fsscreen_id < 0) {
+        xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
+    } else if (wl->vo_opts->fullscreen && wl->vo_opts->fsscreen_id >= 0) {
+        xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl->current_output->output);
     }
 
     if (wl->vo_opts->window_maximized)
@@ -1391,10 +1385,14 @@ static void toggle_fullscreen(struct vo_wayland_state *wl)
 {
     if (!wl->xdg_toplevel)
         return;
-    if (wl->vo_opts->fullscreen)
+    if (wl->vo_opts->fullscreen && wl->vo_opts->fsscreen_id < 0) {
         xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
-    else
+    } else if (wl->vo_opts->fullscreen && wl->vo_opts->fsscreen_id >= 0) {
+        find_output(wl, wl->vo_opts->fsscreen_id);
+        xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl->current_output->output);
+    } else {
         xdg_toplevel_unset_fullscreen(wl->xdg_toplevel);
+    }
 }
 
 static void toggle_maximized(struct vo_wayland_state *wl)
