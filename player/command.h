@@ -107,7 +107,7 @@ bool mp_hook_test_completion(struct MPContext *mpctx, char *type);
 void mp_hook_start(struct MPContext *mpctx, char *type);
 int mp_hook_continue(struct MPContext *mpctx, char *client, uint64_t id);
 void mp_hook_add(struct MPContext *mpctx, const char *client, const char *name,
-                 uint64_t user_id, int pri, bool legacy);
+                 uint64_t user_id, int pri);
 
 void mark_seek(struct MPContext *mpctx);
 

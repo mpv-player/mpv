@@ -1728,7 +1728,7 @@ int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
                  const char *name, int priority)
 {
     lock_core(ctx);
-    mp_hook_add(ctx->mpctx, ctx->name, name, reply_userdata, priority, false);
+    mp_hook_add(ctx->mpctx, ctx->name, name, reply_userdata, priority);
     unlock_core(ctx);
     return 0;
 }

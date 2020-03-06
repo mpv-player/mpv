@@ -35,6 +35,9 @@ Interface changes
     - the OSX bundle now logs to "~/Library/Logs/mpv.log" by default
     - deprecate the --cache-secs option (once removed, the cache cannot be
       limited by time anymore)
+    - remove deprecated legacy hook API ("hook-add", "hook-ack"). Use either the
+      libmpv API (mpv_hook_add(), mpv_hook_continue()), or the Lua scripting
+      wrappers (mp.add_hook()).
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

@@ -123,7 +123,6 @@ struct hook_handler {
     uint64_t user_id; // user-chosen ID
     int priority;   // priority for global hook order
     int64_t seq;    // unique ID, != 0, also for fixed order on equal priorities
-    bool legacy;    // old cmd based hook API
     bool active;    // hook is currently in progress (only 1 at a time for now)
 };
 
@@ -178,29 +177,13 @@ static int invoke_hook_handler(struct MPContext *mpctx, struct hook_handler *h)
     h->active = true;
 
     uint64_t reply_id = 0;
-    void *data;
-    int msg;
-    if (h->legacy) {
-        mpv_event_client_message *m = talloc_ptrtype(NULL, m);
-        *m = (mpv_event_client_message){0};
-        MP_TARRAY_APPEND(m, m->args, m->num_args, "hook_run");
-        MP_TARRAY_APPEND(m, m->args, m->num_args,
-                         talloc_asprintf(m, "%llu", (long long)h->user_id));
-        MP_TARRAY_APPEND(m, m->args, m->num_args,
-                         talloc_asprintf(m, "%llu", (long long)h->seq));
-        data = m;
-        msg = MPV_EVENT_CLIENT_MESSAGE;
-    } else {
-        mpv_event_hook *m = talloc_ptrtype(NULL, m);
-        *m = (mpv_event_hook){
-            .name = talloc_strdup(m, h->type),
-            .id = h->seq,
-        },
-        reply_id = h->user_id;
-        data = m;
-        msg = MPV_EVENT_HOOK;
-    }
-    int r = mp_client_send_event(mpctx, h->client, reply_id, msg, data);
+    mpv_event_hook *m = talloc_ptrtype(NULL, m);
+    *m = (mpv_event_hook){
+        .name = talloc_strdup(m, h->type),
+        .id = h->seq,
+    },
+    reply_id = h->user_id;
+    int r = mp_client_send_event(mpctx, h->client, reply_id, MPV_EVENT_HOOK, m);
     if (r < 0) {
         MP_WARN(mpctx, "Sending hook command failed. Removing hook.\n");
         hook_remove(mpctx, h);
@@ -261,11 +244,8 @@ static int compare_hook(const void *pa, const void *pb)
 }
 
 void mp_hook_add(struct MPContext *mpctx, const char *client, const char *name,
-                 uint64_t user_id, int pri, bool legacy)
+                 uint64_t user_id, int pri)
 {
-    if (legacy)
-        MP_WARN(mpctx, "The old hook API is deprecated! Use the libmpv API.\n");
-
     struct command_ctx *cmd = mpctx->command_ctx;
     struct hook_handler *h = talloc_ptrtype(cmd, h);
     int64_t seq = ++cmd->hook_seq;
@@ -275,7 +255,6 @@ void mp_hook_add(struct MPContext *mpctx, const char *client, const char *name,
         .user_id = user_id,
         .priority = pri,
         .seq = seq,
-        .legacy = legacy,
     };
     MP_TARRAY_APPEND(cmd, cmd->hooks, cmd->num_hooks, h);
     qsort(cmd->hooks, cmd->num_hooks, sizeof(cmd->hooks[0]), compare_hook);
@@ -5411,33 +5390,6 @@ static void cmd_write_watch_later_config(void *p)
     mp_write_watch_later_conf(mpctx);
 }
 
-static void cmd_hook_add(void *p)
-{
-    struct mp_cmd_ctx *cmd = p;
-    struct MPContext *mpctx = cmd->mpctx;
-
-    if (!cmd->cmd->sender) {
-        MP_ERR(mpctx, "Can be used from client API only.\n");
-        cmd->success = false;
-        return;
-    }
-    mp_hook_add(mpctx, cmd->cmd->sender, cmd->args[0].v.s, cmd->args[1].v.i,
-                cmd->args[2].v.i, true);
-}
-
-static void cmd_hook_ack(void *p)
-{
-    struct mp_cmd_ctx *cmd = p;
-    struct MPContext *mpctx = cmd->mpctx;
-
-    if (!cmd->cmd->sender) {
-        MP_ERR(mpctx, "Can be used from client API only.\n");
-        cmd->success = false;
-        return;
-    }
-    mp_hook_continue(mpctx, cmd->cmd->sender, cmd->args[0].v.i);
-}
-
 static void cmd_mouse(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -5949,11 +5901,6 @@ const struct mp_cmd_def mp_cmds[] = {
     },
 
     { "write-watch-later-config", cmd_write_watch_later_config },
-
-    { "hook-add", cmd_hook_add, { OPT_STRING("arg0", v.s, 0),
-                                  OPT_INT("arg1", v.i, 0),
-                                  OPT_INT("arg2", v.i, 0) }},
-    { "hook-ack", cmd_hook_ack, { OPT_INT("arg0", v.i, 0) }},
 
     { "mouse", cmd_mouse, { OPT_INT("x", v.i, 0),
                             OPT_INT("y", v.i, 0),
