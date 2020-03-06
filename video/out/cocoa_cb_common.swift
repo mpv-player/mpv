@@ -128,10 +128,18 @@ class CocoaCB: NSObject {
 
         titleBar = TitleBar(frame: wr, window: window, cocoaCB: self)
 
+        let minimized = Bool(opts.window_minimized)
         window.isRestorable = false
         window.isReleasedWhenClosed = false
+        window.setMaximized(minimized ? false : Bool(opts.window_maximized))
+        window.setMinimized(minimized)
         window.makeMain()
-        window.makeKeyAndOrderFront(nil)
+        window.makeKey()
+
+        if !minimized {
+            window.orderFront(nil)
+        }
+
         NSApp.activate(ignoringOtherApps: true)
 
         if Bool(opts.fullscreen) {
