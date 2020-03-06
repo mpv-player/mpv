@@ -32,6 +32,16 @@ API changes
 
 ::
 
+ --- mpv 0.33.0 ---
+ 1.107  - Remove the deprecated qthelper.hpp. This was obviously not part of the
+          libmpv API, only an "additionally" provided helper, thus this is not
+          considered an API change. If you are maintaining a project that relies
+          on this header, you can simply download this file and adjust the
+          include statement to use it instead:
+
+            https://raw.githubusercontent.com/mpv-player/mpv/v0.32.0/libmpv/qthelper.hpp
+
+          It is a good idea to write better wrappers for your use, though.
  --- mpv 0.31.0 ---
  1.107  - Deprecate MPV_EVENT_TICK
 
