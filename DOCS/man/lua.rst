@@ -599,6 +599,7 @@ are useful only in special situations.
     ``update()``
         Commit the OSD overlay to the screen, or in other words, run the
         ``osd-overlay`` command with the current fields of the overlay table.
+        Returns the result of the ``osd-overlay`` command itself.
 
     ``remove()``
         Remove the overlay from the screen. A ``update()`` call will add it

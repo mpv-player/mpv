@@ -4106,6 +4106,7 @@ static void cmd_osd_overlay(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
+    double rc[4] = {0};
 
     struct osd_external_ass ov = {
         .owner  = cmd->cmd->sender,
@@ -4115,9 +4116,23 @@ static void cmd_osd_overlay(void *p)
         .res_x  = cmd->args[3].v.i,
         .res_y  = cmd->args[4].v.i,
         .z      = cmd->args[5].v.i,
+        .hidden = cmd->args[6].v.i,
+        .out_rc = cmd->args[7].v.i ? rc : NULL,
     };
 
     osd_set_external(mpctx->osd, &ov);
+
+    struct mpv_node *res = &cmd->result;
+    node_init(res, MPV_FORMAT_NODE_MAP, NULL);
+
+    // (An empty rc uses INFINITY, avoid in JSON, just leave it unset.)
+    if (rc[0] < rc[2] && rc[1] < rc[3]) {
+        node_map_add_double(res, "x0", rc[0]);
+        node_map_add_double(res, "y0", rc[1]);
+        node_map_add_double(res, "x1", rc[2]);
+        node_map_add_double(res, "y1", rc[3]);
+    }
+
     mp_wakeup_core(mpctx);
 }
 
@@ -5927,6 +5942,8 @@ const struct mp_cmd_def mp_cmds[] = {
             OPT_INT("res_x", v.i, 0, OPTDEF_INT(0)),
             OPT_INT("res_y", v.i, 0, OPTDEF_INT(720)),
             OPT_INT("z", v.i, 0, OPTDEF_INT(0)),
+            OPT_FLAG("hidden", v.i, 0, OPTDEF_INT(0)),
+            OPT_FLAG("compute_bounds", v.i, 0, OPTDEF_INT(0)),
         },
         .is_noisy = true,
     },

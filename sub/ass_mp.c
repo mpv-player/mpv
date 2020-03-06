@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <math.h>
 
 #include <ass/ass.h>
 #include <ass/ass_types.h>
@@ -384,4 +385,28 @@ void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
     p->cached_subs = res;
     p->cached_subs.change_id = 0;
     p->cached_subs_valid = true;
+}
+
+// Set *out_rc to [x0, y0, x1, y1] of the graphical bounding box in script
+// coordinates.
+// Set it to [inf, inf, -inf, -inf] if empty.
+void mp_ass_get_bb(ASS_Image *image_list, ASS_Track *track,
+                   struct mp_osd_res *res, double *out_rc)
+{
+    double rc[4] = {INFINITY, INFINITY, -INFINITY, -INFINITY};
+
+    for (ASS_Image *img = image_list; img; img = img->next) {
+        if (img->w == 0 || img->h == 0)
+            continue;
+        rc[0] = MPMIN(rc[0], img->dst_x);
+        rc[1] = MPMIN(rc[1], img->dst_y);
+        rc[2] = MPMAX(rc[2], img->dst_x + img->w);
+        rc[3] = MPMAX(rc[3], img->dst_y + img->h);
+    }
+
+    double scale = track->PlayResY / (double)MPMAX(res->h, 1);
+    if (scale > 0) {
+        for (int i = 0; i < 4; i++)
+            out_rc[i] = rc[i] * scale;
+    }
 }

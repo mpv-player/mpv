@@ -209,6 +209,9 @@ struct osd_external_ass {
     char *data;
     int res_x, res_y;
     int z;
+    bool hidden;
+
+    double *out_rc; // hack to pass boundary rect, [x0, y0, x1, y1]
 };
 
 // defined in osd_libass.c and osd_dummy.c

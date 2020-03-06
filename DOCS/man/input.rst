@@ -1019,6 +1019,31 @@ Input Commands that are Possibly Subject to Change
         It's possible that future mpv versions will randomly change how Z order
         between different OSD formats and builtin OSD is handled.
 
+    ``hidden``
+        If set to ``yes``/true, do not display this (default: no).
+
+    ``compute_bounds``
+        If set to ``yes``/true, attempt to determine bounds and write them to
+        the command's result value as ``x0``, ``x1``, ``y0``, ``y1`` rectangle
+        (default: no). If the rectangle is empty, not known, or somehow
+        degenerate, it is not set. ``x1``/``y1`` is the coordinate of the bottom
+        exclusive corner of the rectangle.
+
+        The result value may depend on the VO window size, and is based on the
+        last known window size at the time of the call. This means the results
+        may be different from what is actually rendered.
+
+        For ``ass-events``, the result rectangle is recomputed to ``PlayRes``
+        coordinates (``res_x``/``res_y``). If window size is not known, a
+        fallback is chosen.
+
+        You should be aware that this mechanism is very inefficient, as it
+        renders the full result, and then uses the bounding box of the rendered
+        bitmap list (even if ``hidden`` is set). It will flush various caches.
+        Its results also depend on the used libass version.
+
+        This feature is experimental, and may change in some way again.
+
     Note: always use named arguments (``mpv_command_node()``). Scripts should
     use the ``mp.create_osd_overlay()`` helper instead of invoking this command
     directly.

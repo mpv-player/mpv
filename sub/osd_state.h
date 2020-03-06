@@ -23,6 +23,8 @@ struct ass_state {
     struct ass_renderer *render;
     struct ass_library *library;
     int res_x, res_y;
+    bool changed;
+    struct mp_osd_res vo_res; // last known value
 };
 
 struct osd_object {

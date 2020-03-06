@@ -40,6 +40,9 @@ static const char osd_font_pfb[] =
 
 #define ASS_USE_OSD_FONT "{\\fnmpv-osd-symbols}"
 
+static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
+                       ASS_Image **img_list, bool *changed);
+
 void osd_init_backend(struct osd_state *osd)
 {
 }
@@ -100,6 +103,8 @@ static void update_playres(struct ass_state *ass, struct mp_osd_res *vo_res)
     ASS_Track *track = ass->track;
     int old_res_x = track->PlayResX;
     int old_res_y = track->PlayResY;
+
+    ass->vo_res = *vo_res;
 
     double aspect = 1.0 * vo_res->w / MPMAX(vo_res->h, 1);
     if (vo_res->display_par > 0)
@@ -531,10 +536,12 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     struct osd_external *entry = obj->externals[index];
 
     if (!ov->format) {
+        if (!entry->ov.hidden) {
+            obj->changed = true;
+            osd->want_redraw_notification = true;
+        }
         destroy_external(entry);
         MP_TARRAY_REMOVE_AT(obj->externals, obj->num_externals, index);
-        obj->changed = true;
-        osd->want_redraw_notification = true;
         goto done;
     }
 
@@ -547,15 +554,40 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     entry->ov.res_y = ov->res_y;
     zorder_changed |= entry->ov.z != ov->z;
     entry->ov.z = ov->z;
+    entry->ov.hidden = ov->hidden;
 
     update_external(osd, obj, entry);
 
-    obj->changed = true;
-    osd->want_redraw_notification = true;
+    if (!entry->ov.hidden) {
+        obj->changed = true;
+        osd->want_redraw_notification = true;
+    }
 
     if (zorder_changed) {
         qsort(obj->externals, obj->num_externals, sizeof(obj->externals[0]),
               cmp_zorder);
+    }
+
+    if (ov->out_rc) {
+        struct mp_osd_res vo_res = entry->ass.vo_res;
+        // Defined fallback if VO has not drawn this yet
+        if (vo_res.w < 1 || vo_res.h < 1) {
+            vo_res = (struct mp_osd_res){
+                .w = entry->ov.res_x,
+                .h = entry->ov.res_y,
+                .display_par = 1,
+            };
+            // According to osd-overlay command description.
+            if (vo_res.w < 1)
+                vo_res.w = 1280;
+            if (vo_res.h < 1)
+                vo_res.h = 720;
+        }
+
+        ASS_Image *img_list = NULL;
+        append_ass(&entry->ass, &vo_res, &img_list, NULL);
+
+        mp_ass_get_bb(img_list, entry->ass.track, &vo_res, ov->out_rc);
     }
 
 done:
@@ -593,7 +625,13 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
 
     int ass_changed;
     *img_list = ass_render_frame(ass->render, ass->track, 0, &ass_changed);
-    *changed |= ass_changed;
+
+    ass->changed |= ass_changed;
+
+    if (changed) {
+        *changed |= ass->changed;
+        ass->changed = false;
+    }
 }
 
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
@@ -609,8 +647,13 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
 
     append_ass(&obj->ass, &obj->vo_res, &obj->ass_imgs[0], &obj->changed);
     for (int n = 0; n < obj->num_externals; n++) {
-        append_ass(&obj->externals[n]->ass, &obj->vo_res,
-                   &obj->ass_imgs[n + 1], &obj->changed);
+        if (obj->externals[n]->ov.hidden) {
+            update_playres(&obj->externals[n]->ass, &obj->vo_res);
+            obj->ass_imgs[n + 1] = NULL;
+        } else {
+            append_ass(&obj->externals[n]->ass, &obj->vo_res,
+                       &obj->ass_imgs[n + 1], &obj->changed);
+        }
     }
 
     mp_ass_packer_pack(obj->ass_packer, obj->ass_imgs, obj->num_externals + 1,
