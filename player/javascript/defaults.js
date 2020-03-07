@@ -214,8 +214,7 @@ mp.create_osd_overlay = function create_osd_overlay(format) {
             cmd.res_x = Math.round(this.res_x);
             cmd.res_y = Math.round(this.res_y);
 
-            mp.command_native(cmd);
-            return mp.last_error() ? undefined : true;
+            return mp.command_native(cmd);
         },
 
         remove: function ass_remove() {
