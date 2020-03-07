@@ -428,7 +428,7 @@ const stream_info_t stream_info_ffmpeg_unsafe = {
   .open = open_f,
   .protocols = (const char *const[]){
      "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp", "md5",
-     "concat",
+     "concat", "smb",
      NULL },
   .stream_origin = STREAM_ORIGIN_UNSAFE,
   .can_write = true,

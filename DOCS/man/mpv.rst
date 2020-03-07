@@ -898,7 +898,7 @@ PROTOCOLS
 
 ``smb://PATH``
 
-    Play a path from  Samba share.
+    Play a path from  Samba share. (Requires FFmpeg support.)
 
 ``bd://[title][/device]`` ``--bluray-device=PATH``
 
