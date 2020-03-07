@@ -1619,12 +1619,12 @@ terminate_playback:
 
     update_core_idle_state(mpctx);
 
-    process_hooks(mpctx, "on_unload");
-
     if (mpctx->step_frames) {
         opts->pause = 1;
         m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->pause);
     }
+
+    process_hooks(mpctx, "on_unload");
 
     close_recorder(mpctx);
 
