@@ -930,7 +930,7 @@ List of events
 ``tick``
     Called after a video frame was displayed. This is a hack, and you should
     avoid using it. Use timers instead and maybe watch pausing/unpausing events
-    to avoid wasting CPU when the player is paused.
+    to avoid wasting CPU when the player is paused. This is deprecated.
 
 ``shutdown``
     Sent when the player quits, and the script should terminate. Normally
