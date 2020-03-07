@@ -204,15 +204,17 @@ mp.create_osd_overlay = function create_osd_overlay(format) {
         z: 0,
 
         update: function ass_update() {
-            mp.command_native({
-                name: "osd-overlay",
-                format: this.format,
-                id: this.id,
-                data: this.data,
-                res_x: Math.round(this.res_x),
-                res_y: Math.round(this.res_y),
-                z: this.z,
-            });
+            var cmd = {};  // shallow clone of `this', excluding methods
+            for (var k in this) {
+                if (typeof this[k] != "function")
+                    cmd[k] = this[k];
+            }
+
+            cmd.name = "osd-overlay";
+            cmd.res_x = Math.round(this.res_x);
+            cmd.res_y = Math.round(this.res_y);
+
+            mp.command_native(cmd);
             return mp.last_error() ? undefined : true;
         },
 
