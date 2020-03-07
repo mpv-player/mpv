@@ -7,7 +7,6 @@ python3 ./waf configure \
   --enable-dvdnav        \
   --enable-libarchive    \
   --enable-libmpv-shared \
-  --enable-libsmbclient  \
   --enable-manpage-build \
   --enable-shaderc       \
   --enable-vulkan
