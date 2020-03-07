@@ -1735,7 +1735,8 @@ static bool gen_property_change_event(struct mpv_handle *ctx)
 
     while (1) {
         if (ctx->cur_property_index >= ctx->num_properties) {
-            if (!ctx->new_property_events || !ctx->num_properties)
+            ctx->new_property_events &= ctx->num_properties > 0;
+            if (!ctx->new_property_events)
                 break;
             ctx->new_property_events = false;
             ctx->cur_property_index = 0;
