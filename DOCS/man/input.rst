@@ -1253,6 +1253,12 @@ the player freeze randomly. Basically, nobody should use this API.
 The C API is described in the header files. The Lua API is described in the
 Lua section.
 
+Before a hook is actually invoked on an API clients, it will attempt to return
+new values for all observed properties that were changed before the hook. This
+may make it easier for an application to set defined "barriers" between property
+change notifications by registering hooks. (That means these hooks will have an
+effect, even if you do nothing and make them continue immediately.)
+
 The following hooks are currently defined:
 
 ``on_load``
@@ -1285,6 +1291,16 @@ The following hooks are currently defined:
 ``on_unload``
     Run before closing a file, and before actually uninitializing
     everything. It's not possible to resume playback in this state.
+
+``on_before_start_file``
+    Run before a ``start-file`` event is sent. (If any client changes the
+    current playlist entry, or sends a quit command to the player, the
+    corresponding event will not actually happen after the hook returns.)
+    Useful to drain property changes before a new file is loaded.
+
+``on_after_end_file``
+    Run after an ``end-file`` event. Useful to drain property changes after a
+    file has finished.
 
 Input Command Prefixes
 ----------------------

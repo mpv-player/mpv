@@ -931,7 +931,8 @@ static void process_hooks(struct MPContext *mpctx, char *name)
     while (!mp_hook_test_completion(mpctx, name)) {
         mp_idle(mpctx);
 
-        // We have no idea what blocks a hook, so just do a full abort.
+        // We have no idea what blocks a hook, so just do a full abort. This
+        // does nothing for hooks that happen outside of playback.
         if (mpctx->stop_play)
             mp_abort_playback_async(mpctx);
     }
@@ -1374,13 +1375,17 @@ static void play_current_file(struct MPContext *mpctx)
     double playback_start = -1e100;
 
     assert(mpctx->stop_play);
+    mpctx->stop_play = 0;
+
+    process_hooks(mpctx, "on_before_start_file");
+    if (mpctx->stop_play)
+        return;
 
     mp_notify(mpctx, MPV_EVENT_START_FILE, NULL);
 
     mp_cancel_reset(mpctx->playback_abort);
 
     mpctx->error_playing = MPV_ERROR_LOADING_FAILED;
-    mpctx->stop_play = 0;
     mpctx->filename = NULL;
     mpctx->shown_aframes = 0;
     mpctx->shown_vframes = 0;
@@ -1701,6 +1706,8 @@ terminate_playback:
     }
 
     assert(mpctx->stop_play);
+
+    process_hooks(mpctx, "on_after_end_file");
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,

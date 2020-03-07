@@ -102,6 +102,7 @@ struct observe_property {
     union m_option_value value;
     uint64_t value_ret_ts;  // logical timestamp of value returned to user
     union m_option_value value_ret;
+    bool waiting_for_hook;  // flag for draining old property changes on a hook
 };
 
 struct mpv_handle {
@@ -140,6 +141,7 @@ struct mpv_handle {
     size_t async_counter;   // pending other async events
     bool choked;            // recovering from queue overflow
     bool destroying;        // pending destruction; no API accesses allowed
+    bool hook_pending;      // hook events are returned after draining properties
 
     struct observe_property **properties;
     int num_properties;
@@ -847,6 +849,27 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
     return 0;
 }
 
+// Set waiting_for_hook==true for all possibly pending properties.
+static void set_wait_for_hook_flags(mpv_handle *ctx)
+{
+    for (int n = 0; n < ctx->num_properties; n++) {
+        struct observe_property *prop = ctx->properties[n];
+
+        if (prop->value_ret_ts != prop->change_ts)
+            prop->waiting_for_hook = true;
+    }
+}
+
+// Return whether any property still has waiting_for_hook set.
+static bool check_for_for_hook_flags(mpv_handle *ctx)
+{
+    for (int n = 0; n < ctx->num_properties; n++) {
+        if (ctx->properties[n]->waiting_for_hook)
+            return true;
+    }
+    return false;
+}
+
 mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
 {
     mpv_event *event = ctx->cur_event;
@@ -874,8 +897,24 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
             event->event_id = MPV_EVENT_QUEUE_OVERFLOW;
             break;
         }
-        if (ctx->num_events) {
-            *event = ctx->events[ctx->first_event];
+        struct mpv_event *ev =
+            ctx->num_events ? &ctx->events[ctx->first_event] : NULL;
+        if (ev && ev->event_id == MPV_EVENT_HOOK) {
+            // Give old property notifications priority over hooks. This is a
+            // guarantee given to clients to simplify their logic. New property
+            // changes after this are treated normally, so
+            if (!ctx->hook_pending) {
+                ctx->hook_pending = true;
+                set_wait_for_hook_flags(ctx);
+            }
+            if (check_for_for_hook_flags(ctx)) {
+                ev = NULL; // delay
+            } else {
+                ctx->hook_pending = false;
+            }
+        }
+        if (ev) {
+            *event = *ev;
             ctx->first_event = (ctx->first_event + 1) % ctx->max_events;
             ctx->num_events--;
             talloc_steal(event, event->data);
@@ -1608,7 +1647,7 @@ static void send_client_property_changes(struct mpv_handle *ctx)
             ctx->async_counter -= 1;
             prop_unref(prop);
 
-            // Set of observed properties was changed or something similar
+            // Set if observed properties was changed or something similar
             // => start over, retry next time.
             if (cur_ts != ctx->properties_change_ts || ctx->destroying) {
                 m_option_free(type, &val);
@@ -1638,10 +1677,14 @@ static void send_client_property_changes(struct mpv_handle *ctx)
             changed = true;
         }
 
+        if (prop->waiting_for_hook)
+            ctx->new_property_events = true; // make sure to wakeup
+
         // Avoid retriggering the change event if the property didn't change,
         // and the previous value was actually returned to the client.
         if (!changed && prop->value_ret_ts == prop->value_ts) {
             prop->value_ret_ts = prop->change_ts; // no change => no event
+            prop->waiting_for_hook = false;
         } else {
             ctx->new_property_events = true;
         }
@@ -1704,6 +1747,7 @@ static bool gen_property_change_event(struct mpv_handle *ctx)
             prop->value_ret_ts != prop->value_ts)   // other value than last time?
         {
             prop->value_ret_ts = prop->value_ts;
+            prop->waiting_for_hook = false;
             prop_unref(ctx->cur_property);
             ctx->cur_property = prop;
             prop->refcount += 1;
