@@ -137,7 +137,8 @@ const struct m_sub_options demux_conf = {
         OPT_DOUBLE("demuxer-backward-playback-step", back_seek_size, M_OPT_MIN,
                    .min = 0),
         OPT_STRING("metadata-codepage", meta_cp, 0),
-        OPT_FLAG("demuxer-force-retry-on-eof", force_retry_eof, 0),
+        OPT_FLAG("demuxer-force-retry-on-eof", force_retry_eof, 0,
+                 .deprecation_message = "temporary debug option, no replacement"),
         {0}
     },
     .size = sizeof(struct demux_opts),
