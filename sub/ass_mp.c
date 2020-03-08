@@ -135,6 +135,8 @@ static void message_callback(int level, const char *format, va_list va, void *ct
 ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log)
 {
     char *path = mp_find_config_file(NULL, global, "fonts");
+    mp_dbg(log, "ASS library version: 0x%x (runtime 0x%x)\n",
+           (unsigned)LIBASS_VERSION, ass_library_version());
     ASS_Library *priv = ass_library_init();
     if (!priv)
         abort();
