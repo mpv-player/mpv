@@ -51,6 +51,7 @@ extern const stream_info_t stream_info_ffmpeg;
 extern const stream_info_t stream_info_ffmpeg_unsafe;
 extern const stream_info_t stream_info_avdevice;
 extern const stream_info_t stream_info_file;
+extern const stream_info_t stream_info_fd;
 extern const stream_info_t stream_info_ifo_dvdnav;
 extern const stream_info_t stream_info_dvdnav;
 extern const stream_info_t stream_info_bdmv_dir;
@@ -87,6 +88,7 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_mf,
     &stream_info_edl,
     &stream_info_file,
+    &stream_info_fd,
     &stream_info_cb,
     NULL
 };

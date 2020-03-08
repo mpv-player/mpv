@@ -351,8 +351,15 @@ static int open_f(stream_t *stream)
 const stream_info_t stream_info_file = {
     .name = "file",
     .open = open_f,
-    .protocols = (const char*const[]){ "file", "", "fd", "fdclose",
-                                       "appending", NULL },
+    .protocols = (const char*const[]){ "file", "", "appending", NULL },
     .can_write = true,
     .stream_origin = STREAM_ORIGIN_FS,
+};
+
+const stream_info_t stream_info_fd = {
+    .name = "fd",
+    .open = open_f,
+    .protocols = (const char*const[]){ "fd", "fdclose", NULL },
+    .can_write = true,
+    .stream_origin = STREAM_ORIGIN_UNSAFE,
 };
