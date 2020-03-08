@@ -2749,6 +2749,11 @@ Property list
     still named the same.) This property is unavailable if mpv is linked against
     older FFmpeg and Libav versions.
 
+``libass-version``
+    Return the value of ``ass_library_version()``. This is an integer, encoded
+    in a somewhat weird form (apparently "hex BCD"), indicating the release
+    version of the libass library linked to mpv.
+
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
     changed at runtime by writing to this property. Note that many options

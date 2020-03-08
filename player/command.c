@@ -74,6 +74,10 @@
 #include <windows.h>
 #endif
 
+#if HAVE_LIBASS
+#include <ass/ass.h>
+#endif
+
 struct command_ctx {
     // All properties, terminated with a {0} item.
     struct m_property *properties;
@@ -3008,6 +3012,16 @@ static int mp_property_ffmpeg(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, av_version_info());
 }
 
+static int mp_property_libass_version(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+#if HAVE_LIBASS
+    return m_property_int64_ro(action, arg, ass_library_version());
+#else
+    return M_PROPERTY_UNAVAILABLE;
+#endif
+}
+
 static int mp_property_alias(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -3449,6 +3463,7 @@ static const struct m_property mp_properties_base[] = {
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},
     {"ffmpeg-version", mp_property_ffmpeg},
+    {"libass-version", mp_property_libass_version},
 
     {"options", mp_property_options},
     {"file-local-options", mp_property_local_options},
