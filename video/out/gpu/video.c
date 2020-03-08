@@ -1290,8 +1290,11 @@ static void finish_pass_tex(struct gl_video *p, struct ra_tex **dst_tex,
 
     // If RA_CAP_PARALLEL_COMPUTE is set, try to prefer compute shaders
     // over fragment shaders wherever possible.
-    if (!p->pass_compute.active && (p->ra->caps & RA_CAP_PARALLEL_COMPUTE))
+    if (!p->pass_compute.active && (p->ra->caps & RA_CAP_PARALLEL_COMPUTE) &&
+        (*dst_tex)->params.storage_dst)
+    {
         pass_is_compute(p, 16, 16, true);
+    }
 
     if (p->pass_compute.active) {
         gl_sc_uniform_image2D_wo(p->sc, "out_image", *dst_tex);
@@ -3707,6 +3710,12 @@ static void check_gl_features(struct gl_video *p)
         have_compute = false;
         MP_WARN(p, "Force-disabling compute shaders as an FBO format was not "
                    "available! See your FBO format configuration!\n");
+    }
+
+    if (have_compute && have_fbo && !p->fbo_format->storable) {
+        have_compute = false;
+        MP_WARN(p, "Force-disabling compute shaders as the chosen FBO format "
+                "is not storable! See your FBO format configuration!\n");
     }
 
     if (!have_compute && p->opts.dither_algo == DITHER_ERROR_DIFFUSION) {

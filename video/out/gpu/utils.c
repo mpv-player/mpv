@@ -185,7 +185,7 @@ bool ra_tex_resize(struct ra *ra, struct mp_log *log, struct ra_tex **tex,
 
     mp_dbg(log, "Resizing texture: %dx%d\n", w, h);
 
-    if (!fmt || !fmt->renderable || !fmt->linear_filter || !fmt->storable) {
+    if (!fmt || !fmt->renderable || !fmt->linear_filter) {
         mp_err(log, "Format %s not supported.\n", fmt ? fmt->name : "(unset)");
         return false;
     }
@@ -200,7 +200,7 @@ bool ra_tex_resize(struct ra *ra, struct mp_log *log, struct ra_tex **tex,
         .src_linear = true,
         .render_src = true,
         .render_dst = true,
-        .storage_dst = true,
+        .storage_dst = fmt->storable,
         .blit_src = true,
     };
 
