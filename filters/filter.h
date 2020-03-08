@@ -204,10 +204,10 @@ const char *mp_pin_get_name(struct mp_pin *p);
  * --- Driving filters:
  *
  * The filter root (created by mp_filter_create_root()) will internally create
- * a graph runner, that can be entered with mp_filter_run(). This will check if
- * any filter/pin has unhandled requests, and call filter process() functions
- * accordingly. Outside of the filter, this can be triggered implicitly via the
- * mp_pin_* functions.
+ * a graph runner, that can be entered with mp_filter_graph_run(). This will
+ * check if any filter/pin has unhandled requests, and call filter process()
+ * functions accordingly. Outside of the filter, this can be triggered
+ * implicitly via the mp_pin_* functions.
  *
  * Multiple filters are driven by letting mp_pin flag filters which need
  * process() to be called. The process starts by requesting output from the
@@ -409,52 +409,56 @@ struct AVBufferRef *mp_filter_load_hwdec_device(struct mp_filter *f, int avtype)
 // Perform filtering. This runs until the filter graph is blocked (due to
 // missing external input or unread output). It returns whether any outside
 // pins have changed state.
-// Note: this always operates on the filter graph associated with f, f itself
-// is not treated differently from any other filters in the graph.
-bool mp_filter_run(struct mp_filter *f);
+// Can be called on the root filter only.
+bool mp_filter_graph_run(struct mp_filter *root);
 
-// Set the maximum time mp_filter_run() should block. If the maximum time
+// Set the maximum time mp_filter_graph_run() should block. If the maximum time
 // expires, the effect is the same as calling mp_filter_graph_interrupt() while
 // the function is running. See that function for further details.
 // The default is seconds==INFINITY. Values <=0 make it return after 1 iteration.
-void mp_filter_graph_set_max_run_time(struct mp_filter *f, double seconds);
+// Can be called on the root filter only.
+void mp_filter_graph_set_max_run_time(struct mp_filter *root, double seconds);
 
-// Interrupt mp_filter_run() asynchronously. This does not stop filtering in a
-// destructive way, but merely suspends it. In practice, this will make
-// mp_filter_run() return after the current filter's process() function has
-// finished. Filtering can be resumed with subsequent mp_filter_run() calls.
-// When mp_filter_run() is interrupted, it will trigger the filter graph wakeup
-// callback, which in turn ensures that the user will call mp_filter_run() again.
-// If it is called if not in mp_filter_run(), the next mp_filter_run() call is
-// interrupted and no filtering is done for that call.
+// Interrupt mp_filter_graph_run() asynchronously. This does not stop filtering
+// in a destructive way, but merely suspends it. In practice, this will make
+// mp_filter_graph_run() return after the current filter's process() function has
+// finished. Filtering can be resumed with subsequent mp_filter_graph_run() calls.
+// When mp_filter_graph_run() is interrupted, it will trigger the filter graph
+// wakeup callback, which in turn ensures that the user will call
+// mp_filter_graph_run() again.
+// If it is called if not in mp_filter_graph_run(), the next mp_filter_graph_run()
+// call is interrupted and no filtering is done for that call.
 // Calling this too often will starve filtering.
 // This does not call the graph wakeup callback directly, which will avoid
-// potential reentrancy issues. (But mp_filter_run() will call it in reaction to
-// it, as described above.)
+// potential reentrancy issues. (But mp_filter_graph_run() will call it in
+// reaction to it, as described above.)
 // Explicitly thread-safe.
-void mp_filter_graph_interrupt(struct mp_filter *f);
+// Can be called on the root filter only.
+void mp_filter_graph_interrupt(struct mp_filter *root);
 
 // Create a root dummy filter with no inputs or outputs. This fulfills the
 // following functions:
+// - creating a new filter graph (attached to the root filter)
 // - passing it as parent filter to top-level filters
 // - driving the filter loop between the shared filters
 // - setting the wakeup callback for async filtering
 // - implicitly passing down global data like mpv_global and keeping filter
 //   constructor functions simple
 // Note that you can still connect pins of filters with different parents or
-// root filters, but then you may have to manually invoke mp_filter_run() on
-// the root filters of the connected filters to drive data flow.
+// root filters, but then you may have to manually invoke mp_filter_graph_run()
+// on the root filters of the connected filters to drive data flow.
 struct mp_filter *mp_filter_create_root(struct mpv_global *global);
 
 // Asynchronous filters may need to wakeup the user thread if the status of any
 // mp_pin has changed. If this is called, the callback provider should get the
-// user's thread to call mp_filter_run() again.
+// user's thread to call mp_filter_graph_run() again.
 // The wakeup callback must not recursively call into any filter APIs, or do
 // blocking waits on the filter API (deadlocks will happen).
 // A wakeup callback should always set a "wakeup" flag, that is reset only when
-// mp_filter_run() is going to be called again with no wait time.
-void mp_filter_root_set_wakeup_cb(struct mp_filter *root,
-                                  void (*wakeup_cb)(void *ctx), void *ctx);
+// mp_filter_graph_run() is going to be called again with no wait time.
+// Can be called on the root filter only.
+void mp_filter_graph_set_wakeup_cb(struct mp_filter *root,
+                                   void (*wakeup_cb)(void *ctx), void *ctx);
 
 // Debugging internal stuff.
 void mp_filter_dump_states(struct mp_filter *f);

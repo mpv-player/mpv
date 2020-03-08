@@ -1076,7 +1076,7 @@ static void *dec_thread(void *ptr)
     mpthread_set_name(t_name);
 
     while (!p->request_terminate_dec_thread) {
-        mp_filter_run(p->dec_root_filter);
+        mp_filter_graph_run(p->dec_root_filter);
         update_cached_values(p);
         mp_dispatch_queue_process(p->dec_dispatch, INFINITY);
     }
@@ -1191,7 +1191,7 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
         p->queue = mp_async_queue_create();
         p->dec_dispatch = mp_dispatch_create(p);
         p->dec_root_filter = mp_filter_create_root(public_f->global);
-        mp_filter_root_set_wakeup_cb(p->dec_root_filter, wakeup_dec_thread, p);
+        mp_filter_graph_set_wakeup_cb(p->dec_root_filter, wakeup_dec_thread, p);
         mp_dispatch_set_onlock_fn(p->dec_dispatch, onlock_dec_thread, p);
 
         struct mp_stream_info *sinfo = mp_filter_find_stream_info(parent);

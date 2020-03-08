@@ -139,10 +139,10 @@ static void add_pending(struct mp_filter *f)
 
 // Possibly enter recursive filtering. This is done as convenience for
 // "external" filter users only. (Normal filtering does this iteratively via
-// mp_filter_run() to avoid filter reentrancy issues and deep call stacks.) If
-// the API users uses an external manually connected pin, do recursive filtering
-// as a not strictly necessary feature which makes outside I/O with filters
-// easier.
+// mp_filter_graph_run() to avoid filter reentrancy issues and deep call
+// stacks.) If the API users uses an external manually connected pin, do
+// recursive filtering as a not strictly necessary feature which makes outside
+// I/O with filters easier.
 static void filter_recursive(struct mp_filter *f)
 {
     assert(f);
@@ -154,7 +154,7 @@ static void filter_recursive(struct mp_filter *f)
 
     // Also don't lose the pending state, which the user may or may not
     // care about.
-    r->external_pending |= mp_filter_run(r->root_filter);
+    r->external_pending |= mp_filter_graph_run(r->root_filter);
 }
 
 void mp_filter_internal_mark_progress(struct mp_filter *f)
@@ -179,9 +179,10 @@ static void flush_async_notifications(struct filter_runner *r)
     pthread_mutex_unlock(&r->async_lock);
 }
 
-bool mp_filter_run(struct mp_filter *filter)
+bool mp_filter_graph_run(struct mp_filter *filter)
 {
     struct filter_runner *r = filter->in->runner;
+    assert(filter == r->root_filter); // user is supposed to call this on root only
 
     int64_t end_time = 0;
     if (isfinite(r->max_run_time))
@@ -674,12 +675,14 @@ void mp_filter_mark_async_progress(struct mp_filter *f)
 void mp_filter_graph_set_max_run_time(struct mp_filter *f, double seconds)
 {
     struct filter_runner *r = f->in->runner;
+    assert(f == r->root_filter); // user is supposed to call this on root only
     r->max_run_time = seconds;
 }
 
 void mp_filter_graph_interrupt(struct mp_filter *f)
 {
     struct filter_runner *r = f->in->runner;
+    assert(f == r->root_filter); // user is supposed to call this on root only
     atomic_store(&r->interrupt_flag, true);
 }
 
@@ -809,10 +812,11 @@ struct mp_filter *mp_filter_create_root(struct mpv_global *global)
     return mp_filter_create_with_params(&params);
 }
 
-void mp_filter_root_set_wakeup_cb(struct mp_filter *root,
-                                  void (*wakeup_cb)(void *ctx), void *ctx)
+void mp_filter_graph_set_wakeup_cb(struct mp_filter *root,
+                                   void (*wakeup_cb)(void *ctx), void *ctx)
 {
     struct filter_runner *r = root->in->runner;
+    assert(root == r->root_filter); // user is supposed to call this on root only
     pthread_mutex_lock(&r->async_lock);
     r->wakeup_cb = wakeup_cb;
     r->wakeup_ctx = ctx;

@@ -1221,7 +1221,7 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_osd_redraw(mpctx);
 
-    if (mp_filter_run(mpctx->filter_root))
+    if (mp_filter_graph_run(mpctx->filter_root))
         mp_wakeup_core(mpctx);
 
     mp_wait_events(mpctx);
