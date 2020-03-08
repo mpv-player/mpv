@@ -176,7 +176,7 @@ struct lib {
     unsigned runv;
 };
 
-bool print_libav_versions(struct mp_log *log, int v)
+void check_library_versions(struct mp_log *log, int v)
 {
     const struct lib libs[] = {
         {"libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version()},
@@ -189,21 +189,22 @@ bool print_libav_versions(struct mp_log *log, int v)
 
     mp_msg(log, v, "FFmpeg library versions:\n");
 
-    bool mismatch = false;
     for (int n = 0; n < MP_ARRAY_SIZE(libs); n++) {
         const struct lib *l = &libs[n];
         mp_msg(log, v, "   %-15s %d.%d.%d", l->name, V(l->buildv));
-        if (l->buildv != l->runv) {
+        if (l->buildv != l->runv)
             mp_msg(log, v, " (runtime %d.%d.%d)", V(l->runv));
-            mismatch = l->buildv > l->runv ||
-                AV_VERSION_MAJOR(l->buildv) != AV_VERSION_MAJOR(l->runv);
-        }
         mp_msg(log, v, "\n");
+        if (l->buildv > l->runv ||
+            AV_VERSION_MAJOR(l->buildv) != AV_VERSION_MAJOR(l->runv))
+        {
+            fprintf(stderr, "%s: %d.%d.%d -> %d.%d.%d\n",
+                    l->name, V(l->buildv), V(l->runv));
+            abort();
+        }
     }
 
     mp_msg(log, v, "FFmpeg version: %s\n", av_version_info());
-
-    return !mismatch;
 }
 
 #undef V
