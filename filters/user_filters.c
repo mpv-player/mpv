@@ -4,7 +4,7 @@
 
 #include "common/common.h"
 #include "common/msg.h"
-#include "options/m_config.h"
+#include "options/m_config_frontend.h"
 
 #include "f_lavfi.h"
 #include "user_filters.h"

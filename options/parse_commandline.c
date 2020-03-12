@@ -29,7 +29,7 @@
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "m_option.h"
-#include "m_config.h"
+#include "m_config_frontend.h"
 #include "options.h"
 #include "common/playlist.h"
 #include "parse_commandline.h"

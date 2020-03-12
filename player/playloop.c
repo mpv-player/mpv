@@ -30,7 +30,7 @@
 #include "common/encode.h"
 #include "common/recorder.h"
 #include "filters/f_decoder_wrapper.h"
-#include "options/m_config.h"
+#include "options/m_config_frontend.h"
 #include "options/m_property.h"
 #include "common/playlist.h"
 #include "input/input.h"

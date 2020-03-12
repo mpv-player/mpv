@@ -29,7 +29,7 @@
 #include "audio/format.h"
 
 #include "options/options.h"
-#include "options/m_config.h"
+#include "options/m_config_frontend.h"
 #include "osdep/endian.h"
 #include "common/msg.h"
 #include "common/common.h"

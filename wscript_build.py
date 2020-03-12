@@ -339,7 +339,8 @@ def build(ctx):
         ( "misc/thread_tools.c" ),
 
         ## Options
-        ( "options/m_config.c" ),
+        ( "options/m_config_core.c" ),
+        ( "options/m_config_frontend.c" ),
         ( "options/m_option.c" ),
         ( "options/m_property.c" ),
         ( "options/options.c" ),

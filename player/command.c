@@ -50,7 +50,7 @@
 #include "sub/dec_sub.h"
 #include "options/m_option.h"
 #include "options/m_property.h"
-#include "options/m_config.h"
+#include "options/m_config_frontend.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
 #include "video/hwdec.h"

@@ -42,7 +42,7 @@
 #include "misc/json.h"
 #include "misc/node.h"
 #include "m_option.h"
-#include "m_config.h"
+#include "m_config_frontend.h"
 
 #if HAVE_DOS_PATHS
 #define OPTION_PATH_SEPARATOR ';'
