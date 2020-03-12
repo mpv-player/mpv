@@ -83,8 +83,10 @@ const struct m_sub_options stream_cdda_conf = {
         OPT_INT("toc-bias", toc_bias, 0),
         OPT_INT("toc-offset", toc_offset, 0),
         OPT_FLAG("skip", skip, 0),
-        OPT_INTPAIR("span", span, 0),
+        OPT_INT("span-a", span[0], 0),
+        OPT_INT("span-b", span[1], 0),
         OPT_FLAG("cdtext", cdtext, 0),
+        OPT_REMOVED("span", "use span-a/span-b"),
         {0}
     },
     .size = sizeof(struct cdda_params),

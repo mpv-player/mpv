@@ -502,59 +502,6 @@ const m_option_type_t m_option_type_byte_size = {
     .equal = int64_equal,
 };
 
-static int parse_intpair(struct mp_log *log, const struct m_option *opt,
-                         struct bstr name, struct bstr param, void *dst)
-{
-    if (param.len == 0)
-        return M_OPT_MISSING_PARAM;
-
-    struct bstr s = param;
-    int end = -1;
-    int start = bstrtoll(s, &s, 10);
-    if (s.len == param.len)
-        goto bad;
-    if (s.len > 0) {
-        if (!bstr_startswith0(s, "-"))
-            goto bad;
-        s = bstr_cut(s, 1);
-    }
-    if (s.len > 0)
-        end = bstrtoll(s, &s, 10);
-    if (s.len > 0)
-        goto bad;
-
-    if (dst) {
-        int *p = dst;
-        p[0] = start;
-        p[1] = end;
-    }
-
-    return 1;
-
-bad:
-    mp_err(log, "Invalid integer range "
-           "specification for option %.*s: %.*s\n",
-           BSTR_P(name), BSTR_P(param));
-    return M_OPT_INVALID;
-}
-
-static char *print_intpair(const m_option_t *opt, const void *val)
-{
-    const int *p = val;
-    char *res = talloc_asprintf(NULL, "%d", p[0]);
-    if (p[1] != -1)
-        res = talloc_asprintf_append(res, "-%d", p[1]);
-    return res;
-}
-
-const struct m_option_type m_option_type_intpair = {
-    .name  = "Int[-Int]",
-    .size  = sizeof(int[2]),
-    .parse = parse_intpair,
-    .print = print_intpair,
-    .copy  = copy_opt,
-};
-
 const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
                              int value)
 {

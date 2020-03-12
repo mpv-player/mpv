@@ -42,7 +42,6 @@ extern const m_option_type_t m_option_type_dummy_flag;
 extern const m_option_type_t m_option_type_int;
 extern const m_option_type_t m_option_type_int64;
 extern const m_option_type_t m_option_type_byte_size;
-extern const m_option_type_t m_option_type_intpair;
 extern const m_option_type_t m_option_type_float;
 extern const m_option_type_t m_option_type_double;
 extern const m_option_type_t m_option_type_string;
@@ -220,7 +219,6 @@ struct m_sub_options {
 #define CONF_TYPE_OBJ_SETTINGS_LIST (&m_option_type_obj_settings_list)
 #define CONF_TYPE_TIME          (&m_option_type_time)
 #define CONF_TYPE_CHOICE        (&m_option_type_choice)
-#define CONF_TYPE_INT_PAIR      (&m_option_type_intpair)
 #define CONF_TYPE_NODE          (&m_option_type_node)
 
 // Possible option values. Code is allowed to access option data without going
@@ -230,7 +228,6 @@ union m_option_value {
     int flag; // not the C type "bool"!
     int int_;
     int64_t int64;
-    int intpair[2];
     float float_;
     double double_;
     char *string;
@@ -635,9 +632,6 @@ extern const char m_option_path_separator;
 
 #define OPT_DOUBLERANGE(...) \
     OPT_RANGE_(double, __VA_ARGS__, .type = &m_option_type_double)
-
-#define OPT_INTPAIR(...) \
-    OPT_GENERAL_NOTYPE(__VA_ARGS__, .type = &m_option_type_intpair)
 
 #define OPT_FLOAT(...) \
     OPT_GENERAL(float, __VA_ARGS__, .type = &m_option_type_float)
