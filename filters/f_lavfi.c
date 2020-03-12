@@ -1091,7 +1091,7 @@ const struct mp_user_filter_entry af_lavfi = {
         .name = "lavfi",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
-            OPT_STRING("graph", graph, M_OPT_MIN, .min = 1),
+            OPT_STRING("graph", graph, 0),
             OPT_FLAG("fix-pts", fix_pts, 0),
             OPT_KEYVALUELIST("o", avopts, 0),
             {0}
@@ -1110,7 +1110,7 @@ const struct mp_user_filter_entry af_lavfi_bridge = {
         .name = "lavfi-bridge",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
-            OPT_STRING("name", filter_name, M_OPT_MIN, .min = 1),
+            OPT_STRING("name", filter_name, 0),
             OPT_KEYVALUELIST("opts", filter_opts, 0),
             OPT_KEYVALUELIST("o", avopts, 0),
             {0}
@@ -1130,7 +1130,7 @@ const struct mp_user_filter_entry vf_lavfi = {
         .name = "lavfi",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
-            OPT_STRING("graph", graph, M_OPT_MIN, .min = 1),
+            OPT_STRING("graph", graph, 0),
             OPT_KEYVALUELIST("o", avopts, 0),
             {0}
         },
@@ -1148,7 +1148,7 @@ const struct mp_user_filter_entry vf_lavfi_bridge = {
         .name = "lavfi-bridge",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
-            OPT_STRING("name", filter_name, M_OPT_MIN, .min = 1),
+            OPT_STRING("name", filter_name, 0),
             OPT_KEYVALUELIST("opts", filter_opts, 0),
             OPT_KEYVALUELIST("o", avopts, 0),
             {0}

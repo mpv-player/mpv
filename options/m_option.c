@@ -1155,17 +1155,6 @@ const m_option_type_t m_option_type_aspect = {
 #undef VAL
 #define VAL(x) (*(char **)(x))
 
-static int clamp_str(const m_option_t *opt, void *val)
-{
-    char *v = VAL(val);
-    int len = v ? strlen(v) : 0;
-    if ((opt->flags & M_OPT_MIN) && (len < opt->min))
-        return M_OPT_OUT_OF_RANGE;
-    if ((opt->flags & M_OPT_MAX) && (len > opt->max))
-        return M_OPT_OUT_OF_RANGE;
-    return 0;
-}
-
 static int parse_str(struct mp_log *log, const m_option_t *opt,
                      struct bstr name, struct bstr param, void *dst)
 {
@@ -1174,18 +1163,6 @@ static int parse_str(struct mp_log *log, const m_option_t *opt,
         int r = validate(log, opt, name, param);
         if (r < 0)
             return r;
-    }
-
-    if ((opt->flags & M_OPT_MIN) && (param.len < opt->min)) {
-        mp_err(log, "Parameter must be >= %d chars: %.*s\n",
-               (int) opt->min, BSTR_P(param));
-        return M_OPT_OUT_OF_RANGE;
-    }
-
-    if ((opt->flags & M_OPT_MAX) && (param.len > opt->max)) {
-        mp_err(log, "Parameter must be <= %d chars: %.*s\n",
-               (int) opt->max, BSTR_P(param));
-        return M_OPT_OUT_OF_RANGE;
     }
 
     if (dst) {
@@ -1214,7 +1191,7 @@ static int str_set(const m_option_t *opt, void *dst, struct mpv_node *src)
     if (src->format != MPV_FORMAT_STRING)
         return M_OPT_UNKNOWN;
     char *s = src->u.string;
-    int r = s ? clamp_str(opt, &s) : M_OPT_INVALID;
+    int r = s ? 0 : M_OPT_INVALID;
     if (r >= 0)
         copy_str(opt, dst, &s);
     return r;
@@ -1458,9 +1435,6 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
     }
     if (n == 0 && op != OP_NONE)
         return M_OPT_INVALID;
-    if (((opt->flags & M_OPT_MIN) && (n < opt->min)) ||
-        ((opt->flags & M_OPT_MAX) && (n > opt->max)))
-        return M_OPT_OUT_OF_RANGE;
 
     if (!dst)
         return 1;
