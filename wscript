@@ -206,27 +206,19 @@ main_dependencies = [
         'req': True,
         'fmsg': 'Unable to find pthreads support.'
     }, {
-        'name': 'gnuc',
-        'desc': 'GNU C extensions',
-        'func': check_statement([], "__GNUC__"),
-    }, {
-        'name': 'stdatomic',
-        'desc': 'stdatomic.h',
+        'name': '--stdatomic',
+        'desc': 'C11 stdatomic.h',
         'func': check_libs(['atomic'],
             check_statement('stdatomic.h',
                 'atomic_int_least64_t test = ATOMIC_VAR_INIT(123);'
-                'atomic_fetch_add(&test, 1)'))
+                'atomic_fetch_add(&test, 1)')),
+        'req': True,
+        'fmsg': 'C11 atomics are required; you may need a newer compiler',
     }, {
         # C11; technically we require C11, but aligned_alloc() is not in MinGW
         'name': 'aligned_alloc',
         'desc': 'C11 aligned_alloc()',
         'func': check_statement('stdlib.h', 'aligned_alloc(1, 1)'),
-    }, {
-        'name': 'atomics',
-        'desc': 'stdatomic.h support or slow emulation',
-        'func': check_true,
-        'req': True,
-        'deps': 'stdatomic || gnuc',
     }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
@@ -500,7 +492,6 @@ audio_output_features = [
     }, {
         'name': '--audiounit',
         'desc': 'AudioUnit output for iOS',
-        'deps': 'atomics',
         'func': check_cc(
             fragment=load_fragment('audiounit.c'),
             framework_name=['Foundation', 'AudioToolbox'])
