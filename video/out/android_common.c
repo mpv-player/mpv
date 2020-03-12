@@ -20,6 +20,7 @@
 
 #include "android_common.h"
 #include "common/msg.h"
+#include "misc/jni.h"
 #include "options/m_config.h"
 #include "vo.h"
 
@@ -51,18 +52,18 @@ int vo_android_init(struct vo *vo)
         .log = mp_log_new(ctx, vo->log, "android"),
     };
 
-    jobject surface = (jobject)(intptr_t)vo->opts->WinID;
-    JavaVM *vm = (JavaVM *)av_jni_get_java_vm(NULL);
-    JNIEnv *env;
-    int ret = (*vm)->GetEnv(vm, (void**)&env, JNI_VERSION_1_6);
-    if (ret == JNI_EDETACHED) {
-        if ((*vm)->AttachCurrentThread(vm, &env, NULL) != 0) {
-            MP_FATAL(ctx, "Could not attach Java VM.\n");
-            goto fail;
-        }
+    JNIEnv *env = MP_JNI_GET_ENV(ctx);
+    if (!env) {
+        MP_FATAL(ctx, "Could not attach java VM.\n");
+        goto fail;
     }
+
+    jobject surface = (jobject)(intptr_t)vo->opts->WinID;
     ctx->native_window = ANativeWindow_fromSurface(env, surface);
-    (*vm)->DetachCurrentThread(vm);
+    if (!ctx->native_window) {
+        MP_FATAL(ctx, "Failed to create ANativeWindow\n");
+        goto fail;
+    }
 
     return 1;
 fail:
