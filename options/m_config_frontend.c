@@ -309,8 +309,7 @@ struct m_config_option *m_config_get_co_index(struct m_config *config, int index
 const void *m_config_get_co_default(const struct m_config *config,
                                     struct m_config_option *co)
 {
-    return m_config_shadow_get_opt_default(config->shadow, co->group_index,
-                                           co->opt);
+    return m_config_shadow_get_opt_default(config->shadow, co->opt_id);
 }
 
 const char *m_config_get_positional_option(const struct m_config *config, int p)
@@ -464,6 +463,51 @@ void m_config_set_update_dispatch_queue(struct m_config *config,
                                           async_change_cb, config);
 }
 
+static void config_destroy(void *p)
+{
+    struct m_config *config = p;
+    config->option_change_callback = NULL;
+    m_config_restore_backups(config);
+
+    talloc_free(config->cache);
+    talloc_free(config->shadow);
+}
+
+struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
+                              const struct m_sub_options *root)
+{
+    struct m_config *config = talloc(talloc_ctx, struct m_config);
+    talloc_set_destructor(config, config_destroy);
+    *config = (struct m_config){.log = log,};
+
+    config->shadow = m_config_shadow_new(root);
+
+    if (root->size) {
+        config->cache = m_config_cache_from_shadow(config, config->shadow, root);
+        config->optstruct = config->cache->opts;
+    }
+
+    int32_t optid = -1;
+    while (m_config_shadow_get_next_opt(config->shadow, &optid)) {
+        char buf[M_CONFIG_MAX_OPT_NAME_LEN];
+        const char *opt_name =
+            m_config_shadow_get_opt_name(config->shadow, optid, buf, sizeof(buf));
+
+        struct m_config_option co = {
+            .name = talloc_strdup(config, opt_name),
+            .opt = m_config_shadow_get_opt(config->shadow, optid),
+            .opt_id = optid,
+        };
+
+        if (config->cache)
+            co.data = m_config_cache_get_opt_data(config->cache, optid);
+
+        MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
+    }
+
+    return config;
+}
+
 // Normally m_config_cache will not send notifications when _we_ change our
 // own stuff. For whatever funny reasons, we need that, though.
 static void force_self_notify_change_opt(struct m_config *config,
@@ -471,8 +515,7 @@ static void force_self_notify_change_opt(struct m_config *config,
                                          bool self_notification)
 {
     int changed =
-        m_config_shadow_get_option_change_mask(config->shadow, co->group_index,
-                                               0, co->opt);
+        m_config_cache_get_option_change_mask(config->cache, co->opt_id);
 
     if (config->option_change_callback) {
         config->option_change_callback(config->option_change_callback_ctx, co,

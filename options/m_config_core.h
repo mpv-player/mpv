@@ -25,8 +25,8 @@
 struct mp_dispatch_queue;
 struct m_sub_options;
 struct m_option_type;
+struct m_option;
 struct mpv_global;
-struct m_config_shadow;
 
 // This can be used to create and synchronize per-thread option structs,
 // which then can be read without synchronization. No concurrent access to
@@ -44,9 +44,15 @@ struct m_config_cache {
     // with one of the update functions (like m_config_cache_update()).
     struct mp_log *debug;
 
+    // Global instance of option data. Read only.
+    struct m_config_shadow *shadow;
+
     // Do not access.
     struct config_cache *internal;
 };
+
+// Maximum possibly option name buffer length (as it appears to the user).
+#define M_CONFIG_MAX_OPT_NAME_LEN 80
 
 // Create a mirror copy from the global options.
 // Keep in mind that a m_config_cache object is not thread-safe; it merely
@@ -152,15 +158,44 @@ struct m_config_cache *m_config_cache_from_shadow(void *ta_parent,
                                             struct m_config_shadow *shadow,
                                             const struct m_sub_options *group);
 
-// Bad function.
-struct m_option;
-uint64_t m_config_shadow_get_option_change_mask(struct m_config_shadow *shadow,
-                                       int group_index, int group_root,
-                                       const struct m_option *opt);
+// Iterate over all registered global options. *p_id must be set to -1 when this
+// is called for the first time. Each time this call returns true, *p_id is set
+// to a new valid option ID. p_id must not be changed for the next call. If
+// false is returned, iteration ends.
+bool m_config_shadow_get_next_opt(struct m_config_shadow *shadow, int32_t *p_id);
 
-// Bad function.
+// Similar to m_config_shadow_get_next_opt(), but return only options that are
+// covered by the m_config_cache.
+bool m_config_cache_get_next_opt(struct m_config_cache *cache, int32_t *p_id);
+
+// Return the m_option that was used to declare this option.
+// id must be a valid option ID as returned by m_config_shadow_get_next_opt() or
+// m_config_cache_get_next_opt().
+const struct m_option *m_config_shadow_get_opt(struct m_config_shadow *shadow,
+                                               int32_t id);
+
+// Return the full (global) option name. buf must be supplied, but may not
+// always be used. It should have the size M_CONFIG_MAX_OPT_NAME_LEN.
+// The returned point points either to buf or a static string.
+// id must be a valid option ID as returned by m_config_shadow_get_next_opt() or
+// m_config_cache_get_next_opt().
+const char *m_config_shadow_get_opt_name(struct m_config_shadow *shadow,
+                                         int32_t id, char *buf, size_t buf_size);
+
+// Pointer to default value, using m_option.type. NULL if option without data.
+// id must be a valid option ID as returned by m_config_shadow_get_next_opt() or
+// m_config_cache_get_next_opt().
 const void *m_config_shadow_get_opt_default(struct m_config_shadow *shadow,
-                                            int group_index,
-                                            const struct m_option *opt);
+                                            int32_t id);
+
+// Return the pointer to the allocated option data (the same pointers that are
+// returned by m_config_cache_get_next_changed()). NULL if option without data.
+// id must be a valid option ID as returned by m_config_cache_get_next_opt().
+void *m_config_cache_get_opt_data(struct m_config_cache *cache, int32_t id);
+
+// Return or-ed UPDATE_OPTS_MASK part of the option and containing sub-options.
+// id must be a valid option ID as returned by m_config_cache_get_next_opt().
+uint64_t m_config_cache_get_option_change_mask(struct m_config_cache *cache,
+                                               int32_t id);
 
 #endif /* MPLAYER_M_CONFIG_H */
