@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -51,6 +52,14 @@
 #endif
 
 const char m_option_path_separator = OPTION_PATH_SEPARATOR;
+
+// For integer types: since min/max are floats and may not be able to represent
+// the real min/max, and since opt.min/.max may use +/-INFINITY, some care has
+// to be taken. (Also tricky rounding.)
+#define OPT_INT_MIN(opt, T, Tm) \
+    ((opt)->min < (opt)->max ? ((opt)->min <= (Tm) ? (Tm) : (T)((opt)->min)) : (Tm))
+#define OPT_INT_MAX(opt, T, Tm) \
+    ((opt)->min < (opt)->max ? ((opt)->max >= (Tm) ? (Tm) : (T)((opt)->max)) : (Tm))
 
 char *m_option_strerror(int code)
 {
@@ -193,16 +202,19 @@ const m_option_type_t m_option_type_flag = {
 
 #undef VAL
 
-static int clamp_longlong(const m_option_t *opt, void *val)
+static int clamp_longlong(const m_option_t *opt, long long i_min, long long i_max,
+                          void *val)
 {
     long long v = *(long long *)val;
     int r = 0;
-    if ((opt->flags & M_OPT_MAX) && (v > opt->max)) {
-        v = opt->max;
+    long long min = OPT_INT_MIN(opt, long long, i_min);
+    long long max = OPT_INT_MAX(opt, long long, i_max);
+    if (v > max) {
+        v = max;
         r = M_OPT_OUT_OF_RANGE;
     }
-    if ((opt->flags & M_OPT_MIN) && (v < opt->min)) {
-        v = opt->min;
+    if (v < min) {
+        v = min;
         r = M_OPT_OUT_OF_RANGE;
     }
     *(long long *)val = v;
@@ -210,6 +222,7 @@ static int clamp_longlong(const m_option_t *opt, void *val)
 }
 
 static int parse_longlong(struct mp_log *log, const m_option_t *opt,
+                          long long i_min, long long i_max,
                           struct bstr name, struct bstr param, void *dst)
 {
     if (param.len == 0)
@@ -225,15 +238,17 @@ static int parse_longlong(struct mp_log *log, const m_option_t *opt,
         return M_OPT_INVALID;
     }
 
-    if ((opt->flags & M_OPT_MIN) && (tmp_int < opt->min)) {
-        mp_err(log, "The %.*s option must be >= %d: %.*s\n",
-               BSTR_P(name), (int) opt->min, BSTR_P(param));
+    long long min = OPT_INT_MIN(opt, long long, i_min);
+    if (tmp_int < min) {
+        mp_err(log, "The %.*s option must be >= %lld: %.*s\n",
+               BSTR_P(name), min, BSTR_P(param));
         return M_OPT_OUT_OF_RANGE;
     }
 
-    if ((opt->flags & M_OPT_MAX) && (tmp_int > opt->max)) {
-        mp_err(log, "The %.*s option must be <= %d: %.*s\n",
-               BSTR_P(name), (int) opt->max, BSTR_P(param));
+    long long max = OPT_INT_MAX(opt, long long, i_max);
+    if (tmp_int > max) {
+        mp_err(log, "The %.*s option must be <= %lld: %.*s\n",
+               BSTR_P(name), max, BSTR_P(param));
         return M_OPT_OUT_OF_RANGE;
     }
 
@@ -246,7 +261,7 @@ static int parse_longlong(struct mp_log *log, const m_option_t *opt,
 static int clamp_int64(const m_option_t *opt, void *val)
 {
     long long tmp = *(int64_t *)val;
-    int r = clamp_longlong(opt, &tmp);
+    int r = clamp_longlong(opt, INT64_MIN, INT64_MAX, &tmp);
     *(int64_t *)val = tmp;
     return r;
 }
@@ -255,7 +270,7 @@ static int parse_int(struct mp_log *log, const m_option_t *opt,
                      struct bstr name, struct bstr param, void *dst)
 {
     long long tmp;
-    int r = parse_longlong(log, opt, name, param, &tmp);
+    int r = parse_longlong(log, opt, INT_MIN, INT_MAX, name, param, &tmp);
     if (r >= 0 && dst)
         *(int *)dst = tmp;
     return r;
@@ -265,7 +280,7 @@ static int parse_int64(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
     long long tmp;
-    int r = parse_longlong(log, opt, name, param, &tmp);
+    int r = parse_longlong(log, opt, INT64_MIN, INT64_MAX, name, param, &tmp);
     if (r >= 0 && dst)
         *(int64_t *)dst = tmp;
     return r;
@@ -290,8 +305,8 @@ static void add_int64(const m_option_t *opt, void *val, double add, bool wrap)
     int64_t nmin = is64 ? INT64_MIN : INT_MIN;
     int64_t nmax = is64 ? INT64_MAX : INT_MAX;
 
-    int64_t min = (opt->flags & M_OPT_MIN) ? opt->min : nmin;
-    int64_t max = (opt->flags & M_OPT_MAX) ? opt->max : nmax;
+    int64_t min = OPT_INT_MIN(opt, int64_t, nmin);
+    int64_t max = OPT_INT_MAX(opt, int64_t, nmax);
 
     if (v < min)
         v = wrap ? max : min;
@@ -332,9 +347,9 @@ static int int64_set(const m_option_t *opt, void *dst, struct mpv_node *src)
     if (src->format != MPV_FORMAT_INT64)
         return M_OPT_UNKNOWN;
     int64_t val = src->u.int64;
-    if ((opt->flags & M_OPT_MIN) && val < opt->min)
+    if (val < OPT_INT_MIN(opt, int64_t, INT64_MIN))
         return M_OPT_OUT_OF_RANGE;
-    if ((opt->flags & M_OPT_MAX) && val > opt->max)
+    if (val > OPT_INT_MAX(opt, int64_t, INT64_MAX))
         return M_OPT_OUT_OF_RANGE;
     *(int64_t *)dst = val;
     return 1;
@@ -380,6 +395,7 @@ static bool int64_equal(const m_option_t *opt, void *a, void *b)
 
 const m_option_type_t m_option_type_int = {
     .name  = "Integer",
+    .flags = M_OPT_TYPE_USES_RANGE,
     .size  = sizeof(int),
     .parse = parse_int,
     .print = print_int,
@@ -393,6 +409,7 @@ const m_option_type_t m_option_type_int = {
 
 const m_option_type_t m_option_type_int64 = {
     .name  = "Integer64",
+    .flags = M_OPT_TYPE_USES_RANGE,
     .size  = sizeof(int64_t),
     .parse = parse_int64,
     .print = print_int,
@@ -447,15 +464,20 @@ static int parse_byte_size(struct mp_log *log, const m_option_t *opt,
 
     tmp_int *= unit;
 
-    if ((opt->flags & M_OPT_MIN) && (tmp_int < opt->min)) {
-        mp_err(log, "The %.*s option must be >= %d: %.*s\n",
-               BSTR_P(name), (int) opt->min, BSTR_P(param));
+    int64_t min = OPT_INT_MIN(opt, int64_t, INT64_MIN);
+    if (tmp_int < min) {
+        mp_err(log, "The %.*s option must be >= %"PRId64": %.*s\n",
+               BSTR_P(name), min, BSTR_P(param));
         return M_OPT_OUT_OF_RANGE;
     }
 
-    if ((opt->flags & M_OPT_MAX) && (tmp_int > opt->max)) {
-        mp_err(log, "The %.*s option must be <= %d: %.*s\n",
-               BSTR_P(name), (int) opt->max, BSTR_P(param));
+    int64_t max = OPT_INT_MAX(opt, int64_t, INT64_MAX);
+    if (tmp_int > max) {
+        mp_err(log, "The %.*s option must be <= %"PRId64": %.*s\n",
+               BSTR_P(name), max, BSTR_P(param));
+        double x = INT64_MAX;
+        printf("max: %ld, %f %f %ld %ld %d %d\n", max, x, opt->max, (int64_t)opt->max, (int64_t)x, x > INT64_MAX, x == INT64_MAX);
+        abort();
         return M_OPT_OUT_OF_RANGE;
     }
 
@@ -490,6 +512,7 @@ static char *pretty_print_byte_size(const m_option_t *opt, const void *val)
 
 const m_option_type_t m_option_type_byte_size = {
     .name  = "ByteSize",
+    .flags = M_OPT_TYPE_USES_RANGE,
     .size  = sizeof(int64_t),
     .parse = parse_byte_size,
     .print = print_int,
@@ -517,7 +540,7 @@ static void print_choice_values(struct mp_log *log, const struct m_option *opt)
     struct m_opt_choice_alternatives *alt = opt->priv;
     for ( ; alt->name; alt++)
         mp_info(log, "    %s\n", alt->name[0] ? alt->name : "(passing nothing)");
-    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX))
+    if (opt->min < opt->max)
         mp_info(log, "    %g-%g (integer range)\n", opt->min, opt->max);
 }
 
@@ -544,9 +567,11 @@ static int parse_choice(struct mp_log *log, const struct m_option *opt,
         }
         if (param.len == 0)
             return M_OPT_MISSING_PARAM;
-        if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
+        if (opt->min < opt->max) {
             long long val;
-            if (parse_longlong(mp_null_log, opt, name, param, &val) == 1) {
+            if (parse_longlong(mp_null_log, opt, INT_MIN, INT_MAX, name, param,
+                               &val) == 1)
+            {
                 if (dst)
                     *(int *)dst = val;
                 return 1;
@@ -573,7 +598,7 @@ static void choice_get_min_max(const struct m_option *opt, int *min, int *max)
         *min = MPMIN(*min, alt->value);
         *max = MPMAX(*max, alt->value);
     }
-    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
+    if (opt->min < opt->max) {
         *min = MPMIN(*min, opt->min);
         *max = MPMAX(*max, opt->max);
     }
@@ -600,7 +625,7 @@ static void add_choice(const m_option_t *opt, void *val, double add, bool wrap)
     if (fabs(add) < 0.5)
         return;
 
-    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
+    if (opt->min < opt->max) {
         int newval = ival + add;
         if (ival >= opt->min && ival <= opt->max &&
             newval >= opt->min && newval <= opt->max)
@@ -655,7 +680,7 @@ static struct m_opt_choice_alternatives *get_choice(const m_option_t *opt,
         if (alt->value == v)
             return alt;
     }
-    if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX)) {
+    if (opt->min < opt->max) {
         if (v >= opt->min && v <= opt->max) {
             *out_val = v;
             return NULL;
@@ -708,7 +733,7 @@ static char *print_choice(const m_option_t *opt, const void *val)
 const struct m_option_type m_option_type_choice = {
     .name  = "Choice",
     .size  = sizeof(int),
-    .flags = M_OPT_TYPE_CHOICE,
+    .flags = M_OPT_TYPE_CHOICE | M_OPT_TYPE_USES_RANGE,
     .parse = parse_choice,
     .print = print_choice,
     .copy  = copy_opt,
@@ -850,13 +875,15 @@ static int clamp_double(const m_option_t *opt, void *val)
 {
     double v = VAL(val);
     int r = 0;
-    if ((opt->flags & M_OPT_MAX) && (v > opt->max)) {
-        v = opt->max;
-        r = M_OPT_OUT_OF_RANGE;
-    }
-    if ((opt->flags & M_OPT_MIN) && (v < opt->min)) {
-        v = opt->min;
-        r = M_OPT_OUT_OF_RANGE;
+    if (opt->min < opt->max) {
+        if (v > opt->max) {
+            v = opt->max;
+            r = M_OPT_OUT_OF_RANGE;
+        }
+        if (v < opt->min) {
+            v = opt->min;
+            r = M_OPT_OUT_OF_RANGE;
+        }
     }
     // (setting max/min to INFINITY/-INFINITY is allowed)
     if (!isfinite(v) && v != opt->max && v != opt->min) {
@@ -925,8 +952,8 @@ static void add_double(const m_option_t *opt, void *val, double add, bool wrap)
 
     v = v + add;
 
-    double min = (opt->flags & M_OPT_MIN) ? opt->min : -INFINITY;
-    double max = (opt->flags & M_OPT_MAX) ? opt->max : +INFINITY;
+    double min = opt->min < opt->max ? opt->min : -INFINITY;
+    double max = opt->min < opt->max ? opt->max : +INFINITY;
 
     if (v < min)
         v = wrap ? max : min;
@@ -984,6 +1011,7 @@ static bool double_equal(const m_option_t *opt, void *a, void *b)
 const m_option_type_t m_option_type_double = {
     // double precision float or ratio (numerator[:/]denominator)
     .name  = "Double",
+    .flags = M_OPT_TYPE_USES_RANGE,
     .size  = sizeof(double),
     .parse = parse_double,
     .print = print_double,
@@ -1059,6 +1087,7 @@ static bool float_equal(const m_option_t *opt, void *a, void *b)
 const m_option_type_t m_option_type_float = {
     // floating point number or ratio (numerator[:/]denominator)
     .name  = "Float",
+    .flags = M_OPT_TYPE_USES_RANGE,
     .size  = sizeof(float),
     .parse = parse_float,
     .print = print_float,
@@ -1085,7 +1114,7 @@ static int parse_float_aspect(struct mp_log *log, const m_option_t *opt,
 const m_option_type_t m_option_type_aspect = {
     .name  = "Aspect",
     .size  = sizeof(float),
-    .flags = M_OPT_TYPE_CHOICE,
+    .flags = M_OPT_TYPE_CHOICE | M_OPT_TYPE_USES_RANGE,
     .parse = parse_float_aspect,
     .print = print_float,
     .pretty_print = print_float_f3,

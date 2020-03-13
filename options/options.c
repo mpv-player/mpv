@@ -22,6 +22,7 @@
  * config for cfgparser
  */
 
+#include <float.h>
 #include <stddef.h>
 #include <sys/types.h>
 #include <limits.h>
@@ -118,7 +119,7 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_SIZE_BOX("autofit", autofit, 0),
     OPT_SIZE_BOX("autofit-larger", autofit_larger, 0),
     OPT_SIZE_BOX("autofit-smaller", autofit_smaller, 0),
-    OPT_DOUBLE("window-scale", window_scale, CONF_RANGE, .min = 0.001, .max = 100),
+    OPT_DOUBLE("window-scale", window_scale, 0, .min = 0.001, .max = 100),
     OPT_FLAG("window-minimized", window_minimized, 0),
     OPT_FLAG("window-maximized", window_maximized, 0),
     OPT_FLAG("force-window-position", force_window_position, 0),
@@ -149,7 +150,8 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_FLAG("keepaspect-window", keepaspect_window, 0),
     OPT_FLAG("hidpi-window-scale", hidpi_window_scale, 0),
     OPT_FLAG("native-fs", native_fs, 0),
-    OPT_DOUBLE("override-display-fps", override_display_fps, M_OPT_MIN, .min = 0),
+    OPT_DOUBLE("override-display-fps", override_display_fps, 0,
+               .min = 0, .max = DBL_MAX),
     OPT_DOUBLERANGE("video-timing-offset", timing_offset, 0, 0.0, 1.0),
 #if HAVE_X11
     OPT_CHOICE("x11-netwm", x11_netwm, 0,
@@ -454,7 +456,7 @@ static const m_option_t mp_opts[] = {
                 {"always", 2})),
     OPT_FLAG("keep-open-pause", keep_open_pause, 0),
     OPT_DOUBLE("image-display-duration", image_display_duration,
-               M_OPT_RANGE, 0, INFINITY),
+               0, 0, INFINITY),
 
     OPT_CHOICE("index", index_mode, 0, ({"default", 1}, {"recreate", 0})),
 
@@ -498,7 +500,7 @@ static const m_option_t mp_opts[] = {
     OPT_FLAG("prefetch-playlist", prefetch_open, 0),
     OPT_FLAG("cache-pause", cache_pause, 0),
     OPT_FLAG("cache-pause-initial", cache_pause_initial, 0),
-    OPT_FLOAT("cache-pause-wait", cache_pause_wait, M_OPT_MIN, .min = 0),
+    OPT_FLOAT("cache-pause-wait", cache_pause_wait, 0, .min = 0, .max = DBL_MAX),
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
     OPT_STRING("mf-type", mf_type, 0),
@@ -515,7 +517,7 @@ static const m_option_t mp_opts[] = {
     OPT_INTRANGE("audio-samplerate", force_srate, UPDATE_AUDIO, 0, 16*48000),
     OPT_CHANNELS("audio-channels", audio_output_channels, UPDATE_AUDIO),
     OPT_AUDIOFORMAT("audio-format", audio_output_format, UPDATE_AUDIO),
-    OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE, .min = 0.01, .max = 100.0),
+    OPT_DOUBLE("speed", playback_speed, 0, .min = 0.01, .max = 100.0),
 
     OPT_FLAG("audio-pitch-correction", pitch_correction, 0),
 
@@ -612,7 +614,7 @@ static const m_option_t mp_opts[] = {
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_FLAG("osd-fractions", osd_fractions, 0),
 
-    OPT_DOUBLE("sstep", step_sec, CONF_MIN, 0),
+    OPT_DOUBLE("sstep", step_sec, 0, .min = 0, .max = DBL_MAX),
 
     OPT_CHOICE("framedrop", frame_dropping, 0,
                ({"no", 0},
@@ -665,12 +667,12 @@ static const m_option_t mp_opts[] = {
                 {"display-vdrop", VS_DISP_VDROP},
                 {"display-desync", VS_DISP_NONE},
                 {"desync", VS_NONE})),
-    OPT_DOUBLE("video-sync-max-video-change", sync_max_video_change,
-               M_OPT_MIN, .min = 0),
-    OPT_DOUBLE("video-sync-max-audio-change", sync_max_audio_change,
-               M_OPT_MIN | M_OPT_MAX, .min = 0, .max = 1),
-    OPT_DOUBLE("video-sync-adrop-size", sync_audio_drop_size,
-               M_OPT_MIN | M_OPT_MAX, .min = 0, .max = 1),
+    OPT_DOUBLE("video-sync-max-video-change", sync_max_video_change, 0,
+               .min = 0, .max = DBL_MAX),
+    OPT_DOUBLE("video-sync-max-audio-change", sync_max_audio_change, 0,
+               .min = 0, .max = 1),
+    OPT_DOUBLE("video-sync-adrop-size", sync_audio_drop_size, 0,
+               .min = 0, .max = 1),
     OPT_CHOICE("hr-seek", hr_seek, 0,
                ({"no", -1}, {"absolute", 0}, {"yes", 1}, {"always", 1},
                 {"default", 2})),

@@ -30,6 +30,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <float.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
@@ -608,10 +609,10 @@ const struct mp_user_filter_entry af_scaletempo = {
             .scale_nominal = 1.0,
         },
         .options = (const struct m_option[]) {
-            OPT_FLOAT("scale", scale_nominal, M_OPT_MIN, .min = 0.01),
-            OPT_FLOAT("stride", ms_stride, M_OPT_MIN, .min = 0.01),
-            OPT_FLOAT("overlap", percent_overlap, M_OPT_RANGE, .min = 0, .max = 1),
-            OPT_FLOAT("search", ms_search, M_OPT_MIN, .min = 0),
+            OPT_FLOAT("scale", scale_nominal, 0, .min = 0.01, .max = DBL_MAX),
+            OPT_FLOAT("stride", ms_stride, 0, .min = 0.01, .max = DBL_MAX),
+            OPT_FLOAT("overlap", percent_overlap, 0, .min = 0, .max = 1),
+            OPT_FLOAT("search", ms_search, 0, .min = 0, .max = DBL_MAX),
             OPT_CHOICE("speed", speed_opt, 0,
                        ({"pitch", SCALE_PITCH},
                         {"tempo", SCALE_TEMPO},

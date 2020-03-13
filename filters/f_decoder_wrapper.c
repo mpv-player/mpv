@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -63,9 +64,9 @@ struct dec_queue_opts {
 
 static const struct m_option dec_queue_opts_list[] = {
     OPT_FLAG("enable", use_queue, 0),
-    OPT_DOUBLE("max-secs", max_duration, M_OPT_MIN, .min = 0),
+    OPT_DOUBLE("max-secs", max_duration, 0, .min = 0, .max = DBL_MAX),
     OPT_BYTE_SIZE("max-bytes", max_bytes, 0, 0, (size_t)-1),
-    OPT_INT64("max-samples", max_samples, M_OPT_MIN, 0, 0),
+    OPT_INT64("max-samples", max_samples, 0, .min = 0, .max = DBL_MAX),
     {0}
 };
 
@@ -115,14 +116,14 @@ static int decoder_list_opt(struct mp_log *log, const m_option_t *opt,
 const struct m_sub_options dec_wrapper_conf = {
     .opts = (const struct m_option[]){
         OPT_FLAG("correct-pts", correct_pts, 0),
-        OPT_DOUBLE("fps", force_fps, CONF_MIN, .min = 0),
+        OPT_DOUBLE("fps", force_fps, 0, .min = 0, .max = DBL_MAX),
         OPT_STRING_VALIDATE("ad", audio_decoders, 0, decoder_list_opt),
         OPT_STRING_VALIDATE("vd", video_decoders, 0, decoder_list_opt),
         OPT_STRING_VALIDATE("audio-spdif", audio_spdif, 0, decoder_list_opt),
         OPT_CHOICE_OR_INT("video-rotate", video_rotate, UPDATE_IMGPAR, 0, 359,
                       ({"no", -1})),
         OPT_ASPECT("video-aspect-override", movie_aspect,
-                   UPDATE_IMGPAR | M_OPT_RANGE, .min = -1, .max = 10),
+                   UPDATE_IMGPAR, .min = -1, .max = 10),
         OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
                 ({"bitstream", 1}, {"container", 2})),
         OPT_SUBSTRUCT("vd-queue", vdec_queue_opts, vdec_queue_conf, 0),

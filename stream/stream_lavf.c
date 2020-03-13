@@ -62,7 +62,7 @@ const struct m_sub_options stream_lavf_conf = {
         OPT_STRING("tls-ca-file", tls_ca_file, M_OPT_FILE),
         OPT_STRING("tls-cert-file", tls_cert_file, M_OPT_FILE),
         OPT_STRING("tls-key-file", tls_key_file, M_OPT_FILE),
-        OPT_DOUBLE("network-timeout", timeout, M_OPT_MIN, .min = 0),
+        OPT_DOUBLE("network-timeout", timeout, 0, .min = 0, .max = DBL_MAX),
         OPT_STRING("http-proxy", http_proxy, 0),
         {0}
     },

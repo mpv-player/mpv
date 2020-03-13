@@ -140,7 +140,7 @@ const struct m_sub_options ao_conf = {
         OPT_STRING("audio-device", audio_device, UPDATE_AUDIO),
         OPT_STRING("audio-client-name", audio_client_name, UPDATE_AUDIO),
         OPT_DOUBLE("audio-buffer", audio_buffer,
-                   UPDATE_AUDIO | M_OPT_MIN | M_OPT_MAX, .min = 0, .max = 10),
+                   UPDATE_AUDIO, .min = 0, .max = 10),
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),

@@ -18,6 +18,7 @@
 #ifndef MPLAYER_M_OPTION_H
 #define MPLAYER_M_OPTION_H
 
+#include <float.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -361,13 +362,14 @@ struct m_option {
 
     int offset;
 
-    // \brief Mostly useful for numeric types, the \ref M_OPT_MIN flags must
-    // also be set.
-    double min;
-
-    // \brief Mostly useful for numeric types, the \ref M_OPT_MAX flags must
-    // also be set.
-    double max;
+    // Most numeric types restrict the range to [min, max] if min<max (this
+    // implies that if min/max are not set, the full range is used). In all
+    // cases, the actual range is clamped to the type's native range.
+    // Float types use [DBL_MIN, DBL_MAX], though by setting min or max to
+    // -/+INFINITY, the range can be extended to INFINITY. (This part is buggy
+    // for "float".)
+    // Some types will abuse the min or max field for unrelated things.
+    double min, max;
 
     // Type dependent data (for all kinds of extended settings).
     void *priv;
@@ -381,15 +383,6 @@ struct m_option {
 };
 
 char *format_file_size(int64_t size);
-
-// The option has a minimum set in \ref m_option::min.
-#define M_OPT_MIN               (1 << 0)
-
-// The option has a maximum set in \ref m_option::max.
-#define M_OPT_MAX               (1 << 1)
-
-// The option has a minimum and maximum in m_option::min and m_option::max.
-#define M_OPT_RANGE             (M_OPT_MIN | M_OPT_MAX)
 
 // The option is forbidden in config files.
 #define M_OPT_NOCFG             (1 << 2)
@@ -436,9 +429,6 @@ char *format_file_size(int64_t size);
 #define M_OPT_OPTIONAL_PARAM    (1 << 30)
 
 // These are kept for compatibility with older code.
-#define CONF_MIN                M_OPT_MIN
-#define CONF_MAX                M_OPT_MAX
-#define CONF_RANGE              M_OPT_RANGE
 #define CONF_NOCFG              M_OPT_NOCFG
 #define CONF_PRE_PARSE          M_OPT_PRE_PARSE
 
@@ -454,6 +444,9 @@ char *format_file_size(int64_t size);
 // values are from a fixed set, although other types of values like numbers
 // might be allowed too). E.g. m_option_type_choice and m_option_type_flag.
 #define M_OPT_TYPE_CHOICE               (1 << 1)
+
+// When m_option.min/max are set, they denote a value range.
+#define M_OPT_TYPE_USES_RANGE           (1 << 2)
 
 ///////////////////////////// Parser flags /////////////////////////////////
 
@@ -621,7 +614,7 @@ extern const char m_option_path_separator;
     OPT_GENERAL(int64_t, __VA_ARGS__, .type = &m_option_type_int64)
 
 #define OPT_RANGE_(ctype, optname, varname, flags, minval, maxval, ...) \
-    OPT_GENERAL(ctype, optname, varname, (flags) | CONF_RANGE,          \
+    OPT_GENERAL(ctype, optname, varname, flags,                         \
                 .min = minval, .max = maxval, __VA_ARGS__)
 
 #define OPT_INTRANGE(...) \
@@ -679,7 +672,7 @@ extern const char m_option_path_separator;
 // Union of choices and an int range. The choice values can be included in the
 // int range, or be completely separate - both works.
 #define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) \
-    OPT_GENERAL(int, optname, varname, (flags) | CONF_RANGE,                      \
+    OPT_GENERAL(int, optname, varname, flags,                                     \
                 .min = minval, .max = maxval,                                     \
                 M_CHOICES(choices), __VA_ARGS__)
 #define OPT_CHOICE_OR_INT(...) \

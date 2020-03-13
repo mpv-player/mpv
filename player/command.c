@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <float.h>
 #include <stdlib.h>
 #include <inttypes.h>
 #include <unistd.h>
@@ -737,7 +738,6 @@ static int mp_property_percent_pos(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_DOUBLE,
-            .flags = M_OPT_RANGE,
             .min = 0,
             .max = 100,
         };
@@ -856,7 +856,6 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_INT,
-            .flags = M_OPT_MIN | M_OPT_MAX,
             .min = -1,
             .max = num - 1,
         };
@@ -1048,7 +1047,6 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
     if (action == M_PROPERTY_GET_CONSTRICTED_TYPE && demuxer) {
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_INT,
-            .flags = M_OPT_RANGE,
             .min = 0,
             .max = demuxer->num_editions - 1,
         };
@@ -1554,7 +1552,6 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET_CONSTRICTED_TYPE:
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_FLOAT,
-            .flags = M_OPT_RANGE,
             .min = 0,
             .max = opts->softvol_max,
         };
@@ -1593,7 +1590,6 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_FLOAT,
-            .flags = M_OPT_RANGE,
             .min = 0,
             .max = 100,
         };
@@ -2735,7 +2731,6 @@ static int mp_property_playlist_pos_x(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET_TYPE: {
         struct m_option opt = {
             .type = CONF_TYPE_INT,
-            .flags = CONF_RANGE,
             .min = base,
             .max = playlist_entry_count(pl) - 1 + base,
         };
@@ -3127,15 +3122,11 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
         if (def_ptr && opt->type->size > 0)
             memcpy(&def, def_ptr, opt->type->size);
 
-        bool has_minmax =
-            opt->type == &m_option_type_int ||
-            opt->type == &m_option_type_int64 ||
-            opt->type == &m_option_type_float ||
-            opt->type == &m_option_type_double;
+        bool has_minmax = opt->min < opt->max &&
+            (opt->type->flags & M_OPT_TYPE_USES_RANGE);
         char **choices = NULL;
 
         if (opt->type == &m_option_type_choice) {
-            has_minmax = true;
             struct m_opt_choice_alternatives *alt = opt->priv;
             int num = 0;
             for ( ; alt->name; alt++)
@@ -3161,9 +3152,9 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
             {"set-locally",             SUB_PROP_FLAG(co->is_set_locally)},
             {"default-value",           *opt, def},
             {"min",                     SUB_PROP_DOUBLE(opt->min),
-             .unavailable = !(has_minmax && (opt->flags & M_OPT_MIN))},
+             .unavailable = !(has_minmax && opt->min != DBL_MIN)},
             {"max",                     SUB_PROP_DOUBLE(opt->max),
-             .unavailable = !(has_minmax && (opt->flags & M_OPT_MAX))},
+             .unavailable = !(has_minmax && opt->max != DBL_MAX)},
             {"choices", .type = {.type = CONF_TYPE_STRING_LIST},
              .value = {.string_list = choices}, .unavailable = !choices},
             {0}
@@ -3781,15 +3772,15 @@ static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
 
     struct m_option prop = {0};
     mp_property_do(name, M_PROPERTY_GET_CONSTRICTED_TYPE, &prop, mpctx);
-    if ((osd_mode & MP_ON_OSD_BAR) && (prop.flags & CONF_RANGE) == CONF_RANGE) {
-        if (prop.type == CONF_TYPE_INT) {
+    if ((osd_mode & MP_ON_OSD_BAR)) {
+        if (prop.type == CONF_TYPE_INT && prop.min < prop.max) {
             int n = prop.min;
             if (disp.osd_progbar)
                 n = disp.marker;
             int i;
             if (mp_property_do(name, M_PROPERTY_GET, &i, mpctx) > 0)
                 set_osd_bar(mpctx, disp.osd_progbar, prop.min, prop.max, n, i);
-        } else if (prop.type == CONF_TYPE_FLOAT) {
+        } else if (prop.type == CONF_TYPE_FLOAT && prop.min < prop.max) {
             float n = prop.min;
             if (disp.osd_progbar)
                 n = disp.marker;
