@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -110,7 +111,7 @@ const struct m_sub_options vd_lavc_conf = {
         OPT_DISCARD("vd-lavc-skipidct", skip_idct, 0),
         OPT_DISCARD("vd-lavc-skipframe", skip_frame, 0),
         OPT_DISCARD("vd-lavc-framedrop", framedrop, 0),
-        OPT_INT("vd-lavc-threads", threads, M_OPT_MIN, .min = 0),
+        OPT_INT("vd-lavc-threads", threads, 0, .min = 0, .max = DBL_MAX),
         OPT_FLAG("vd-lavc-bitexact", bitexact, 0),
         OPT_FLAG("vd-lavc-assume-old-x264", old_x264, 0),
         OPT_FLAG("vd-lavc-check-hw-profile", check_hw_profile, 0),

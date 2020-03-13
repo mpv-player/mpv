@@ -17,6 +17,7 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -897,8 +898,8 @@ const struct vo_driver video_out_xv = {
         .cfg_buffers = 2,
     },
     .options = (const struct m_option[]) {
-        OPT_INT("port", xv_port, M_OPT_MIN, .min = 0),
-        OPT_INT("adaptor", cfg_xv_adaptor, M_OPT_MIN, .min = -1),
+        OPT_INT("port", xv_port, 0, .min = 0, .max = DBL_MAX),
+        OPT_INT("adaptor", cfg_xv_adaptor, 0, .min = -1, .max = DBL_MAX),
         OPT_CHOICE("ck", xv_ck_info.source, 0,
                    ({"use", CK_SRC_USE},
                     {"set", CK_SRC_SET},

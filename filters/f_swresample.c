@@ -74,7 +74,7 @@ const struct m_sub_options resample_conf = {
         OPT_INTRANGE("audio-resample-filter-size", filter_size, 0, 0, 32),
         OPT_INTRANGE("audio-resample-phase-shift", phase_shift, 0, 0, 30),
         OPT_FLAG("audio-resample-linear", linear, 0),
-        OPT_DOUBLE("audio-resample-cutoff", cutoff, M_OPT_RANGE,
+        OPT_DOUBLE("audio-resample-cutoff", cutoff, 0,
                    .min = 0, .max = 1),
         OPT_FLAG("audio-normalize-downmix", normalize, 0),
         OPT_DOUBLE("audio-resample-max-output-size", max_output_frame_size, 0),

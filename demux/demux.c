@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -114,14 +115,15 @@ const struct m_sub_options demux_conf = {
         OPT_CHOICE("cache", enable_cache, 0,
                    ({"no", 0}, {"auto", -1}, {"yes", 1})),
         OPT_FLAG("cache-on-disk", disk_cache, 0),
-        OPT_DOUBLE("demuxer-readahead-secs", min_secs, M_OPT_MIN, .min = 0),
+        OPT_DOUBLE("demuxer-readahead-secs", min_secs, 0,
+                   .min = 0, .max = DBL_MAX),
         // (The MAX_BYTES sizes may not be accurate because the max field is
         // of double type.)
         OPT_BYTE_SIZE("demuxer-max-bytes", max_bytes, 0, 0, MAX_BYTES),
         OPT_BYTE_SIZE("demuxer-max-back-bytes", max_bytes_bw, 0, 0, MAX_BYTES),
         OPT_FLAG("demuxer-donate-buffer", donate_fw, 0),
         OPT_FLAG("force-seekable", force_seekable, 0),
-        OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0,
+        OPT_DOUBLE("cache-secs", min_secs_cache, 0, .min = 0, .max = DBL_MAX,
                    .deprecation_message = "will use unlimited time"),
         OPT_FLAG("access-references", access_references, 0),
         OPT_CHOICE("demuxer-seekable-cache", seekable_cache, 0,
@@ -134,8 +136,8 @@ const struct m_sub_options demux_conf = {
                           1024, ({"auto", -1})),
         OPT_INTRANGE("video-backward-batch", back_batch[STREAM_VIDEO], 0, 0, 1024),
         OPT_INTRANGE("audio-backward-batch", back_batch[STREAM_AUDIO], 0, 0, 1024),
-        OPT_DOUBLE("demuxer-backward-playback-step", back_seek_size, M_OPT_MIN,
-                   .min = 0),
+        OPT_DOUBLE("demuxer-backward-playback-step", back_seek_size, 0,
+                   .min = 0, .max = DBL_MAX),
         OPT_STRING("metadata-codepage", meta_cp, 0),
         OPT_FLAG("demuxer-force-retry-on-eof", force_retry_eof, 0,
                  .deprecation_message = "temporary debug option, no replacement"),

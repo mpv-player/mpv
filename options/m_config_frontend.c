@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <float.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -786,17 +787,17 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             struct m_opt_choice_alternatives *alt = opt->priv;
             for (int n = 0; alt[n].name; n++)
                 MP_INFO(config, " %s", alt[n].name);
-            if (opt->flags & (M_OPT_MIN | M_OPT_MAX))
+            if (opt->min < opt->max)
                 MP_INFO(config, " (or an integer)");
         } else {
             MP_INFO(config, " %s", opt->type->name);
         }
-        if (opt->flags & (M_OPT_MIN | M_OPT_MAX)) {
+        if ((opt->type->flags & M_OPT_TYPE_USES_RANGE) && opt->min < opt->max) {
             snprintf(min, sizeof(min), "any");
             snprintf(max, sizeof(max), "any");
-            if (opt->flags & M_OPT_MIN)
+            if (opt->min != DBL_MIN)
                 snprintf(min, sizeof(min), "%.14g", opt->min);
-            if (opt->flags & M_OPT_MAX)
+            if (opt->max != DBL_MAX)
                 snprintf(max, sizeof(max), "%.14g", opt->max);
             MP_INFO(config, " (%s to %s)", min, max);
         }
