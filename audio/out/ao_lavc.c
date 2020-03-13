@@ -350,6 +350,7 @@ const struct ao_driver audio_out_lavc = {
     .description = "audio encoding using libavcodec",
     .name      = "lavc",
     .initially_blocked = true,
+    .reports_underruns = true, // not a thing
     .priv_size = sizeof(struct priv),
     .init      = init,
     .uninit    = uninit,
