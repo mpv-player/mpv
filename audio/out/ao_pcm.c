@@ -111,9 +111,11 @@ static int init(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
-    if (!priv->outputfilename)
-        priv->outputfilename =
-            talloc_strdup(priv, priv->waveheader ? "audiodump.wav" : "audiodump.pcm");
+    char *outputfilename = priv->outputfilename;
+    if (!outputfilename) {
+        outputfilename = talloc_strdup(priv, priv->waveheader ? "audiodump.wav"
+                                                              : "audiodump.pcm");
+    }
 
     ao->format = af_fmt_from_planar(ao->format);
 
@@ -148,13 +150,13 @@ static int init(struct ao *ao)
     ao->bps = ao->channels.num * ao->samplerate * af_fmt_to_bytes(ao->format);
 
     MP_INFO(ao, "File: %s (%s)\nPCM: Samplerate: %d Hz Channels: %d Format: %s\n",
-            priv->outputfilename,
+            outputfilename,
             priv->waveheader ? "WAVE" : "RAW PCM", ao->samplerate,
             ao->channels.num, af_fmt_to_str(ao->format));
 
-    priv->fp = fopen(priv->outputfilename, priv->append ? "ab" : "wb");
+    priv->fp = fopen(outputfilename, priv->append ? "ab" : "wb");
     if (!priv->fp) {
-        MP_ERR(ao, "Failed to open %s for writing!\n", priv->outputfilename);
+        MP_ERR(ao, "Failed to open %s for writing!\n", outputfilename);
         return -1;
     }
     if (priv->waveheader)  // Reserve space for wave header
