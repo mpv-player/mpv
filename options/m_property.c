@@ -159,7 +159,8 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
         return r;
     }
     case M_PROPERTY_GET_CONSTRICTED_TYPE: {
-        if ((r = do_action(prop_list, name, action, arg, ctx)) >= 0)
+        r = do_action(prop_list, name, action, arg, ctx);
+        if (r >= 0 || r == M_PROPERTY_UNAVAILABLE)
             return r;
         if ((r = do_action(prop_list, name, M_PROPERTY_GET_TYPE, arg, ctx)) >= 0)
             return r;

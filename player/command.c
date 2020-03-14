@@ -1045,6 +1045,8 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
     struct demuxer *demuxer = mpctx->demuxer;
 
     if (action == M_PROPERTY_GET_CONSTRICTED_TYPE && demuxer) {
+        if (demuxer->num_editions <= 1)
+            return M_PROPERTY_UNAVAILABLE;
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_INT,
             .min = 0,
