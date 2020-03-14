@@ -81,7 +81,7 @@ class MPVHelper: LogHelper {
     }
 
     func setConfigProperty(fullscreen: Bool) {
-        optsPtr.pointee.fullscreen = Int32(fullscreen)
+        optsPtr.pointee.fullscreen = fullscreen
         m_config_cache_write_opt(optsCachePtr, UnsafeMutableRawPointer(&optsPtr.pointee.fullscreen))
     }
 

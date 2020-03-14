@@ -118,11 +118,11 @@ static void copy_opt(const m_option_t *opt, void *dst, const void *src)
         memcpy(dst, src, opt->type->size);
 }
 
-// Flag
+// Bool
 
-#define VAL(x) (*(int *)(x))
+#define VAL(x) (*(bool *)(x))
 
-static int parse_flag(struct mp_log *log, const m_option_t *opt,
+static int parse_bool(struct mp_log *log, const m_option_t *opt,
                       struct bstr name, struct bstr param, void *dst)
 {
     if (bstr_equals0(param, "yes") || !param.len) {
@@ -149,12 +149,12 @@ static int parse_flag(struct mp_log *log, const m_option_t *opt,
     return is_help ? M_OPT_EXIT : M_OPT_INVALID;
 }
 
-static char *print_flag(const m_option_t *opt, const void *val)
+static char *print_bool(const m_option_t *opt, const void *val)
 {
     return talloc_strdup(NULL, VAL(val) ? "yes" : "no");
 }
 
-static void add_flag(const m_option_t *opt, void *val, double add, bool wrap)
+static void add_bool(const m_option_t *opt, void *val, double add, bool wrap)
 {
     if (fabs(add) < 0.5)
         return;
@@ -163,7 +163,7 @@ static void add_flag(const m_option_t *opt, void *val, double add, bool wrap)
     VAL(val) = state ? 1 : 0;
 }
 
-static int flag_set(const m_option_t *opt, void *dst, struct mpv_node *src)
+static int bool_set(const m_option_t *opt, void *dst, struct mpv_node *src)
 {
     if (src->format != MPV_FORMAT_FLAG)
         return M_OPT_UNKNOWN;
@@ -171,12 +171,73 @@ static int flag_set(const m_option_t *opt, void *dst, struct mpv_node *src)
     return 1;
 }
 
-static int flag_get(const m_option_t *opt, void *ta_parent,
+static int bool_get(const m_option_t *opt, void *ta_parent,
                     struct mpv_node *dst, void *src)
 {
     dst->format = MPV_FORMAT_FLAG;
     dst->u.flag = !!VAL(src);
     return 1;
+}
+
+static bool bool_equal(const m_option_t *opt, void *a, void *b)
+{
+    return VAL(a) == VAL(b);
+}
+
+const m_option_type_t m_option_type_bool = {
+    .name  = "Flag", // same as m_option_type_flag; transparent to user
+    .size  = sizeof(bool),
+    .flags = M_OPT_TYPE_OPTIONAL_PARAM | M_OPT_TYPE_CHOICE,
+    .parse = parse_bool,
+    .print = print_bool,
+    .copy  = copy_opt,
+    .add   = add_bool,
+    .set   = bool_set,
+    .get   = bool_get,
+    .equal = bool_equal,
+};
+
+#undef VAL
+
+// Flag
+
+#define VAL(x) (*(int *)(x))
+
+static int parse_flag(struct mp_log *log, const m_option_t *opt,
+                      struct bstr name, struct bstr param, void *dst)
+{
+    bool bdst = false;
+    int r = parse_bool(log, opt, name, param, &bdst);
+    if (dst)
+        VAL(dst) = bdst;
+    return r;
+}
+
+static char *print_flag(const m_option_t *opt, const void *val)
+{
+    return print_bool(opt, &(bool){VAL(val)});
+}
+
+static void add_flag(const m_option_t *opt, void *val, double add, bool wrap)
+{
+    bool bval = VAL(val);
+    add_bool(opt, &bval, add, wrap);
+    VAL(val) = bval;
+}
+
+static int flag_set(const m_option_t *opt, void *dst, struct mpv_node *src)
+{
+    bool bdst = false;
+    int r = bool_set(opt, &bdst, src);
+    if (r >= 0)
+        VAL(dst) = bdst;
+    return r;
+}
+
+static int flag_get(const m_option_t *opt, void *ta_parent,
+                    struct mpv_node *dst, void *src)
+{
+    return bool_get(opt, ta_parent, dst, &(bool){VAL(src)});
 }
 
 static bool flag_equal(const m_option_t *opt, void *a, void *b)

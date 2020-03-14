@@ -4143,7 +4143,7 @@ static bool check_property_autorepeat(char *property,  struct MPContext *mpctx)
         return true;
 
     // This is a heuristic at best.
-    if (prop.type == &m_option_type_flag || prop.type == &m_option_type_choice)
+    if (prop.type->flags & M_OPT_TYPE_CHOICE)
         return false;
 
     return true;

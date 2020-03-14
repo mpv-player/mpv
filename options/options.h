@@ -13,7 +13,7 @@ typedef struct mp_vo_opts {
     int snap_window;
     int ontop;
     int ontop_level;
-    int fullscreen;
+    bool fullscreen;
     int border;
     int fit_border;
     int all_workspaces;

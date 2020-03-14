@@ -38,6 +38,7 @@ struct mpv_global;
 ///////////////////////////// Options types declarations ////////////////////
 
 // Simple types
+extern const m_option_type_t m_option_type_bool;
 extern const m_option_type_t m_option_type_flag;
 extern const m_option_type_t m_option_type_dummy_flag;
 extern const m_option_type_t m_option_type_int;
@@ -226,6 +227,7 @@ struct m_sub_options {
 // through this union. It serves for self-documentation and to get minimal
 // size/alignment requirements for option values in general.
 union m_option_value {
+    bool bool_;
     int flag; // not the C type "bool"!
     int int_;
     int64_t int64;
@@ -352,6 +354,7 @@ struct m_option_type {
 // Option description
 struct m_option {
     // Option name.
+    // Option declarations can use this as positional field.
     const char *name;
 
     // Option type.
@@ -587,6 +590,10 @@ extern const char m_option_path_separator;
 
 #define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
 
+#define OPTF_BOOL(field) \
+    .type = &m_option_type_bool, \
+    .offset = MP_CHECKED_OFFSETOF(OPT_BASE_STRUCT, field, bool),
+
 /* The OPT_SOMETHING->OPT_SOMETHING_ kind of redirection exists to
  * make the code fully standard-conforming: the C standard requires that
  * __VA_ARGS__ has at least one argument (though GCC for example would accept
@@ -594,6 +601,7 @@ extern const char m_option_path_separator;
  * argument to ensure __VA_ARGS__ is not empty when calling the next macro.
  */
 
+// Note: new code should use OPTF_BOOL instead
 #define OPT_FLAG(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_flag)
 
