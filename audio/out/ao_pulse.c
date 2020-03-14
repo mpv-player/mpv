@@ -837,10 +837,11 @@ const struct ao_driver audio_out_pulse = {
         .cfg_buffer = 100,
     },
     .options = (const struct m_option[]) {
-        OPT_STRING("host", cfg_host, 0),
-        OPT_CHOICE_OR_INT("buffer", cfg_buffer, 0, 1, 2000, ({"native", 0})),
-        OPT_FLAG("latency-hacks", cfg_latency_hacks, 0),
-        OPT_FLAG("allow-suspended", cfg_allow_suspended, 0),
+        {"host", OPT_STRING(cfg_host)},
+        {"buffer", OPT_CHOICE(cfg_buffer, {"native", 0}),
+            M_RANGE(1, 2000)},
+        {"latency-hacks", OPT_FLAG(cfg_latency_hacks)},
+        {"allow-suspended", OPT_FLAG(cfg_allow_suspended)},
         {0}
     },
     .options_prefix = "pulse",

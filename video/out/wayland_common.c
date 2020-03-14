@@ -45,9 +45,11 @@
 #define OPT_BASE_STRUCT struct wayland_opts
 const struct m_sub_options wayland_conf = {
     .opts = (const struct m_option[]) {
-        OPT_FLAG("wayland-disable-vsync", disable_vsync, 0),
-        OPT_INTRANGE("wayland-edge-pixels-pointer", edge_pixels_pointer, 10, 0, INT_MAX),
-        OPT_INTRANGE("wayland-edge-pixels-touch", edge_pixels_touch, 64, 0, INT_MAX),
+        {"wayland-disable-vsync", OPT_FLAG(disable_vsync)},
+        {"wayland-edge-pixels-pointer", OPT_INT(edge_pixels_pointer),
+            M_RANGE(0, INT_MAX)},
+        {"wayland-edge-pixels-touch", OPT_INT(edge_pixels_touch),
+            M_RANGE(0, INT_MAX)},
         {0},
     },
     .size = sizeof(struct wayland_opts),

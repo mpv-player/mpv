@@ -897,12 +897,12 @@ const struct vo_driver video_out_vaapi = {
         .scaling = VA_FILTER_SCALING_DEFAULT,
     },
     .options = (const struct m_option[]) {
-        OPT_CHOICE("scaling", scaling, 0,
-                   ({"default", VA_FILTER_SCALING_DEFAULT},
-                    {"fast", VA_FILTER_SCALING_FAST},
-                    {"hq", VA_FILTER_SCALING_HQ},
-                    {"nla", VA_FILTER_SCALING_NL_ANAMORPHIC})),
-        OPT_FLAG("scaled-osd", force_scaled_osd, 0),
+        {"scaling", OPT_CHOICE(scaling,
+            {"default", VA_FILTER_SCALING_DEFAULT},
+            {"fast", VA_FILTER_SCALING_FAST},
+            {"hq", VA_FILTER_SCALING_HQ},
+            {"nla", VA_FILTER_SCALING_NL_ANAMORPHIC})},
+        {"scaled-osd", OPT_FLAG(force_scaled_osd)},
         {0}
     },
     .options_prefix = "vo-vaapi",

@@ -67,14 +67,14 @@ struct ao_alsa_opts {
 #define OPT_BASE_STRUCT struct ao_alsa_opts
 static const struct m_sub_options ao_alsa_conf = {
     .opts = (const struct m_option[]) {
-        OPT_FLAG("alsa-resample", resample, 0),
-        OPT_STRING("alsa-mixer-device", mixer_device, 0),
-        OPT_STRING("alsa-mixer-name", mixer_name, 0),
-        OPT_INTRANGE("alsa-mixer-index", mixer_index, 0, 0, 99),
-        OPT_FLAG("alsa-non-interleaved", ni, 0),
-        OPT_FLAG("alsa-ignore-chmap", ignore_chmap, 0),
-        OPT_INTRANGE("alsa-buffer-time", buffer_time, 0, 0, INT_MAX),
-        OPT_INTRANGE("alsa-periods", frags, 0, 0, INT_MAX),
+        {"alsa-resample", OPT_FLAG(resample)},
+        {"alsa-mixer-device", OPT_STRING(mixer_device)},
+        {"alsa-mixer-name", OPT_STRING(mixer_name)},
+        {"alsa-mixer-index", OPT_INT(mixer_index), M_RANGE(0, 99)},
+        {"alsa-non-interleaved", OPT_FLAG(ni)},
+        {"alsa-ignore-chmap", OPT_FLAG(ignore_chmap)},
+        {"alsa-buffer-time", OPT_INT(buffer_time), M_RANGE(0, INT_MAX)},
+        {"alsa-periods", OPT_INT(frags), M_RANGE(0, INT_MAX)},
         {0}
     },
     .defaults = &(const struct ao_alsa_opts) {

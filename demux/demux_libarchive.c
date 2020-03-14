@@ -112,7 +112,7 @@ const struct demuxer_desc demuxer_desc_libarchive = {
     .open = open_file,
     .options = &(const struct m_sub_options){
         .opts = (const struct m_option[]) {
-            OPT_FLAG("rar-list-all-volumes", rar_list_all_volumes, 0),
+            {"rar-list-all-volumes", OPT_FLAG(rar_list_all_volumes)},
             {0}
         },
         .size = sizeof(OPT_BASE_STRUCT),

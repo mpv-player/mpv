@@ -113,7 +113,7 @@ options/options.h, options/options.c
     link them to the option parser. For example, an entry like this may be
     typical:
 
-        OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),
+        {"", OPT_SUBSTRUCT(demux_opts, demux_conf)},
 
     This directs the option access code to include all options in demux_conf
     into the global option list, with no prefix (""), and as part of the

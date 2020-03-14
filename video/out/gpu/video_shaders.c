@@ -882,10 +882,10 @@ const struct deband_opts deband_opts_def = {
 #define OPT_BASE_STRUCT struct deband_opts
 const struct m_sub_options deband_conf = {
     .opts = (const m_option_t[]) {
-        OPT_INTRANGE("iterations", iterations, 0, 1, 16),
-        OPT_FLOATRANGE("threshold", threshold, 0, 0.0, 4096.0),
-        OPT_FLOATRANGE("range", range, 0, 1.0, 64.0),
-        OPT_FLOATRANGE("grain", grain, 0, 0.0, 4096.0),
+        {"iterations", OPT_INT(iterations), M_RANGE(1, 16)},
+        {"threshold", OPT_FLOAT(threshold), M_RANGE(0.0, 4096.0)},
+        {"range", OPT_FLOAT(range), M_RANGE(1.0, 64.0)},
+        {"grain", OPT_FLOAT(grain), M_RANGE(0.0, 4096.0)},
         {0}
     },
     .size = sizeof(struct deband_opts),

@@ -311,10 +311,10 @@ err_out:
 
 #define OPT_BASE_STRUCT struct gpu_priv
 static const m_option_t options[] = {
-    OPT_STRING_VALIDATE("gpu-context", context_name, 0, ra_ctx_validate_context),
-    OPT_STRING_VALIDATE("gpu-api", context_type, 0, ra_ctx_validate_api),
-    OPT_FLAG("gpu-debug", opts.debug, 0),
-    OPT_FLAG("gpu-sw", opts.allow_sw, 0),
+    {"gpu-context", OPT_STRING_VALIDATE(context_name, ra_ctx_validate_context)},
+    {"gpu-api", OPT_STRING_VALIDATE(context_type, ra_ctx_validate_api)},
+    {"gpu-debug", OPT_FLAG(opts.debug)},
+    {"gpu-sw", OPT_FLAG(opts.allow_sw)},
     {0}
 };
 

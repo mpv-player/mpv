@@ -465,7 +465,7 @@ const struct ao_driver audio_out_coreaudio_exclusive = {
         .changed_mixing = false,
     },
     .options = (const struct m_option[]){
-        OPT_FLAG("spdif-hack", spdif_hack, 0),
+        {"spdif-hack", OPT_FLAG(spdif_hack)},
         {0}
     },
     .options_prefix = "coreaudio",

@@ -229,15 +229,15 @@ struct demux_mkv_opts {
 
 const struct m_sub_options demux_mkv_conf = {
     .opts = (const m_option_t[]) {
-        OPT_CHOICE("subtitle-preroll", subtitle_preroll, 0,
-                   ({"no", 0}, {"yes", 1}, {"index", 2})),
-        OPT_DOUBLE("subtitle-preroll-secs", subtitle_preroll_secs, 0,
-                   .min = 0, .max = DBL_MAX),
-        OPT_DOUBLE("subtitle-preroll-secs-index", subtitle_preroll_secs_index, 0,
-                   .min = 0, .max = DBL_MAX),
-        OPT_CHOICE("probe-video-duration", probe_duration, 0,
-                   ({"no", 0}, {"yes", 1}, {"full", 2})),
-        OPT_FLAG("probe-start-time", probe_start_time, 0),
+        {"subtitle-preroll", OPT_CHOICE(subtitle_preroll,
+            {"no", 0}, {"yes", 1}, {"index", 2})},
+        {"subtitle-preroll-secs", OPT_DOUBLE(subtitle_preroll_secs),
+            M_RANGE(0, DBL_MAX)},
+        {"subtitle-preroll-secs-index", OPT_DOUBLE(subtitle_preroll_secs_index),
+            M_RANGE(0, DBL_MAX)},
+        {"probe-video-duration", OPT_CHOICE(probe_duration,
+            {"no", 0}, {"yes", 1}, {"full", 2})},
+        {"probe-start-time", OPT_FLAG(probe_start_time)},
         {0}
     },
     .size = sizeof(struct demux_mkv_opts),

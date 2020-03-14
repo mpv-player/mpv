@@ -45,9 +45,9 @@ const struct m_opt_choice_alternatives type_names[] = {
 
 #define OPT_BASE_STRUCT struct f_opts
 static const struct m_option f_opts_list[] = {
-    OPT_CHOICE_C("type", type, 0, type_names),
-    OPT_FLAG("clear-on-query", clear, 0),
-    OPT_FLAG("print", print, 0),
+    {"type", OPT_CHOICE_C(type, type_names)},
+    {"clear-on-query", OPT_FLAG(clear)},
+    {"print", OPT_FLAG(print)},
     {0}
 };
 

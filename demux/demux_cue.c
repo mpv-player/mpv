@@ -49,7 +49,7 @@ struct demux_cue_opts {
 
 const struct m_sub_options demux_cue_conf = {
         .opts = (const m_option_t[]) {
-            OPT_STRING("codepage", cue_cp, 0),
+            {"codepage", OPT_STRING(cue_cp)},
             {0}
         },
         .size = sizeof(struct demux_cue_opts),

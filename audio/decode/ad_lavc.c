@@ -63,10 +63,10 @@ struct ad_lavc_params {
 
 const struct m_sub_options ad_lavc_conf = {
     .opts = (const m_option_t[]) {
-        OPT_FLOATRANGE("ac3drc", ac3drc, 0, 0, 6),
-        OPT_FLAG("downmix", downmix, 0),
-        OPT_INTRANGE("threads", threads, 0, 0, 16),
-        OPT_KEYVALUELIST("o", avopts, 0),
+        {"ac3drc", OPT_FLOAT(ac3drc), M_RANGE(0, 6)},
+        {"downmix", OPT_FLAG(downmix)},
+        {"threads", OPT_INT(threads), M_RANGE(0, 16)},
+        {"o", OPT_KEYVALUELIST(avopts)},
         {0}
     },
     .size = sizeof(struct ad_lavc_params),

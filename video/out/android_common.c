@@ -31,7 +31,8 @@ struct android_opts {
 #define OPT_BASE_STRUCT struct android_opts
 const struct m_sub_options android_conf = {
     .opts = (const struct m_option[]) {
-        OPT_SIZE_BOX("android-surface-size", surface_size, UPDATE_VO_RESIZE),
+        {"android-surface-size", OPT_SIZE_BOX(surface_size),
+            .flags = UPDATE_VO_RESIZE},
         {0}
     },
     .size = sizeof(struct android_opts),

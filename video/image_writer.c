@@ -65,16 +65,16 @@ const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
 #define OPT_BASE_STRUCT struct image_writer_opts
 
 const struct m_option image_writer_opts[] = {
-    OPT_CHOICE_C("format", format, 0, mp_image_writer_formats),
-    OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
-    OPT_FLAG("jpeg-source-chroma", jpeg_source_chroma, 0),
-    OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
-    OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
-    OPT_FLAG("webp-lossless", webp_lossless, 0),
-    OPT_INTRANGE("webp-quality", webp_quality, 0, 0, 100),
-    OPT_INTRANGE("webp-compression", webp_compression, 0, 0, 6),
-    OPT_FLAG("high-bit-depth", high_bit_depth, 0),
-    OPT_FLAG("tag-colorspace", tag_csp, 0),
+    {"format", OPT_CHOICE_C(format, mp_image_writer_formats)},
+    {"jpeg-quality", OPT_INT(jpeg_quality), M_RANGE(0, 100)},
+    {"jpeg-source-chroma", OPT_FLAG(jpeg_source_chroma)},
+    {"png-compression", OPT_INT(png_compression), M_RANGE(0, 9)},
+    {"png-filter", OPT_INT(png_filter), M_RANGE(0, 5)},
+    {"webp-lossless", OPT_FLAG(webp_lossless)},
+    {"webp-quality", OPT_INT(webp_quality), M_RANGE(0, 100)},
+    {"webp-compression", OPT_INT(webp_compression), M_RANGE(0, 6)},
+    {"high-bit-depth", OPT_FLAG(high_bit_depth)},
+    {"tag-colorspace", OPT_FLAG(tag_csp)},
     {0},
 };
 

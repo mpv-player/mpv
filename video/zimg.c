@@ -39,24 +39,23 @@ static const struct m_opt_choice_alternatives mp_zimg_scalers[] = {
     {0}
 };
 
-#define OPT_PARAM(name, var, flags) \
-    OPT_DOUBLE(name, var, (flags) | M_OPT_DEFAULT_NAN)
+#define OPT_PARAM(var) OPT_DOUBLE(var), .flags = M_OPT_DEFAULT_NAN
 
 #define OPT_BASE_STRUCT struct zimg_opts
 const struct m_sub_options zimg_conf = {
     .opts = (struct m_option[]) {
-        OPT_CHOICE_C("scaler", scaler, 0, mp_zimg_scalers),
-        OPT_PARAM("scaler-param-a", scaler_params[0], 0),
-        OPT_PARAM("scaler-param-b", scaler_params[1], 0),
-        OPT_CHOICE_C("scaler-chroma", scaler_chroma, 0, mp_zimg_scalers),
-        OPT_PARAM("scaler-chroma-param-a", scaler_chroma_params[0], 0),
-        OPT_PARAM("scaler-chroma-param-b", scaler_chroma_params[1], 0),
-        OPT_CHOICE("dither", dither, 0,
-                   ({"no",              ZIMG_DITHER_NONE},
-                    {"ordered",         ZIMG_DITHER_ORDERED},
-                    {"random",          ZIMG_DITHER_RANDOM},
-                    {"error-diffusion", ZIMG_DITHER_ERROR_DIFFUSION})),
-        OPT_FLAG("fast", fast, 0),
+        {"scaler", OPT_CHOICE_C(scaler, mp_zimg_scalers)},
+        {"scaler-param-a", OPT_PARAM(scaler_params[0])},
+        {"scaler-param-b", OPT_PARAM(scaler_params[1])},
+        {"scaler-chroma", OPT_CHOICE_C(scaler_chroma, mp_zimg_scalers)},
+        {"scaler-chroma-param-a", OPT_PARAM(scaler_chroma_params[0])},
+        {"scaler-chroma-param-b", OPT_PARAM(scaler_chroma_params[1])},
+        {"dither", OPT_CHOICE(dither,
+            {"no",              ZIMG_DITHER_NONE},
+            {"ordered",         ZIMG_DITHER_ORDERED},
+            {"random",          ZIMG_DITHER_RANDOM},
+            {"error-diffusion", ZIMG_DITHER_ERROR_DIFFUSION})},
+        {"fast", OPT_FLAG(fast)},
         {0}
     },
     .size = sizeof(struct zimg_opts),

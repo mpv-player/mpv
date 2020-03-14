@@ -1091,9 +1091,9 @@ const struct mp_user_filter_entry af_lavfi = {
         .name = "lavfi",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
-            OPT_STRING("graph", graph, 0),
-            OPT_FLAG("fix-pts", fix_pts, 0),
-            OPT_KEYVALUELIST("o", avopts, 0),
+            {"graph", OPT_STRING(graph)},
+            {"fix-pts", OPT_FLAG(fix_pts)},
+            {"o", OPT_KEYVALUELIST(avopts)},
             {0}
         },
         .priv_defaults = &(const OPT_BASE_STRUCT){
@@ -1110,9 +1110,9 @@ const struct mp_user_filter_entry af_lavfi_bridge = {
         .name = "lavfi-bridge",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
-            OPT_STRING("name", filter_name, 0),
-            OPT_KEYVALUELIST("opts", filter_opts, 0),
-            OPT_KEYVALUELIST("o", avopts, 0),
+            {"name", OPT_STRING(filter_name)},
+            {"opts", OPT_KEYVALUELIST(filter_opts)},
+            {"o", OPT_KEYVALUELIST(avopts)},
             {0}
         },
         .priv_defaults = &(const OPT_BASE_STRUCT){
@@ -1130,8 +1130,8 @@ const struct mp_user_filter_entry vf_lavfi = {
         .name = "lavfi",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
-            OPT_STRING("graph", graph, 0),
-            OPT_KEYVALUELIST("o", avopts, 0),
+            {"graph", OPT_STRING(graph)},
+            {"o", OPT_KEYVALUELIST(avopts)},
             {0}
         },
         .priv_defaults = &(const OPT_BASE_STRUCT){
@@ -1148,9 +1148,9 @@ const struct mp_user_filter_entry vf_lavfi_bridge = {
         .name = "lavfi-bridge",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
-            OPT_STRING("name", filter_name, 0),
-            OPT_KEYVALUELIST("opts", filter_opts, 0),
-            OPT_KEYVALUELIST("o", avopts, 0),
+            {"name", OPT_STRING(filter_name)},
+            {"opts", OPT_KEYVALUELIST(filter_opts)},
+            {"o", OPT_KEYVALUELIST(avopts)},
             {0}
         },
         .priv_defaults = &(const OPT_BASE_STRUCT){

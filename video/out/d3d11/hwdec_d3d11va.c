@@ -36,7 +36,7 @@ struct d3d11va_opts {
 #define OPT_BASE_STRUCT struct d3d11va_opts
 const struct m_sub_options d3d11va_conf = {
     .opts = (const struct m_option[]) {
-        OPT_FLAG("d3d11va-zero-copy", zero_copy, 0),
+        {"d3d11va-zero-copy", OPT_FLAG(zero_copy)},
         {0}
     },
     .defaults = &(const struct d3d11va_opts) {

@@ -1684,21 +1684,21 @@ static void draw_osd(struct vo *vo)
 #define OPT_BASE_STRUCT d3d_priv
 
 static const struct m_option opts[] = {
-    OPT_FLAG("prefer-stretchrect", opt_prefer_stretchrect, 0),
-    OPT_FLAG("disable-textures", opt_disable_textures, 0),
-    OPT_FLAG("disable-stretchrect", opt_disable_stretchrect, 0),
-    OPT_FLAG("disable-shaders", opt_disable_shaders, 0),
-    OPT_FLAG("only-8bit", opt_only_8bit, 0),
-    OPT_FLAG("force-power-of-2", opt_force_power_of_2, 0),
-    OPT_FLAG("disable-texture-align", opt_disable_texture_align, 0),
-    OPT_CHOICE("texture-memory", opt_texture_memory, 0,
-               ({"default", 0},
-                {"managed", 1},
-                {"default-pool", 2},
-                {"default-pool-shadow", 3},
-                {"scratch", 4})),
-    OPT_FLAG("swap-discard", opt_swap_discard, 0),
-    OPT_FLAG("exact-backbuffer", opt_exact_backbuffer, 0),
+    {"prefer-stretchrect", OPT_FLAG(opt_prefer_stretchrect)},
+    {"disable-textures", OPT_FLAG(opt_disable_textures)},
+    {"disable-stretchrect", OPT_FLAG(opt_disable_stretchrect)},
+    {"disable-shaders", OPT_FLAG(opt_disable_shaders)},
+    {"only-8bit", OPT_FLAG(opt_only_8bit)},
+    {"force-power-of-2", OPT_FLAG(opt_force_power_of_2)},
+    {"disable-texture-align", OPT_FLAG(opt_disable_texture_align)},
+    {"texture-memory", OPT_CHOICE(opt_texture_memory,
+        {"default", 0},
+        {"managed", 1},
+        {"default-pool", 2},
+        {"default-pool-shadow", 3},
+        {"scratch", 4})},
+    {"swap-discard", OPT_FLAG(opt_swap_discard)},
+    {"exact-backbuffer", OPT_FLAG(opt_exact_backbuffer)},
     {0}
 };
 

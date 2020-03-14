@@ -649,8 +649,8 @@ const struct ao_driver audio_out_oss = {
         .oss_mixer_device = PATH_DEV_MIXER,
     },
     .options = (const struct m_option[]) {
-        OPT_STRING("mixer-device", oss_mixer_device, M_OPT_FILE),
-        OPT_STRING("mixer-channel", cfg_oss_mixer_channel, 0),
+        {"mixer-device", OPT_STRING(oss_mixer_device), .flags = M_OPT_FILE},
+        {"mixer-channel", OPT_STRING(cfg_oss_mixer_channel)},
         {0}
     },
     .options_prefix = "oss",

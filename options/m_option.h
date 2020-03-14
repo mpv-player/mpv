@@ -371,6 +371,7 @@ struct m_option {
     // Float types use [DBL_MIN, DBL_MAX], though by setting min or max to
     // -/+INFINITY, the range can be extended to INFINITY. (This part is buggy
     // for "float".)
+    // Preferably use M_RANGE() to set these fields.
     // Some types will abuse the min or max field for unrelated things.
     double min, max;
 
@@ -569,6 +570,9 @@ extern const char m_option_path_separator;
     (offsetof(type, member) + (0 && MP_EXPECT_TYPE(expected_member_type*,   \
                                                    &((type*)0)->member)))
 
+#define OPT_TYPED_FIELD(type_, c_type, field) \
+    .type = &type_, \
+    .offset = MP_CHECKED_OFFSETOF(OPT_BASE_STRUCT, field, c_type)
 
 #define OPTION_LIST_SEPARATOR ','
 
@@ -578,185 +582,147 @@ extern const char m_option_path_separator;
 #define OPTDEF_FLOAT(f)   .defval = (void *)&(const float){f}
 #define OPTDEF_DOUBLE(d)  .defval = (void *)&(const double){d}
 
-#define OPT_GENERAL(ctype, optname, varname, flagv, ...)                \
-    {.name = optname, .flags = flagv,                                   \
-    .offset = MP_CHECKED_OFFSETOF(OPT_BASE_STRUCT, varname, ctype),     \
-    __VA_ARGS__}
+#define M_RANGE(a, b) .min = (a), .max = (b)
 
-#define OPT_GENERAL_NOTYPE(optname, varname, flagv, ...)                \
-    {.name = optname, .flags = flagv,                                   \
-    .offset = offsetof(OPT_BASE_STRUCT, varname),                       \
-    __VA_ARGS__}
+#define OPT_BOOL(field) \
+    OPT_TYPED_FIELD(m_option_type_bool, bool, field)
 
-#define OPT_HELPER_REMOVEPAREN(...) __VA_ARGS__
+#define OPT_FLAG(field) \
+    OPT_TYPED_FIELD(m_option_type_flag, int, field)
 
-#define OPTF_BOOL(field) \
-    .type = &m_option_type_bool, \
-    .offset = MP_CHECKED_OFFSETOF(OPT_BASE_STRUCT, field, bool),
+#define OPT_INT(field) \
+    OPT_TYPED_FIELD(m_option_type_int, int, field)
 
-/* The OPT_SOMETHING->OPT_SOMETHING_ kind of redirection exists to
- * make the code fully standard-conforming: the C standard requires that
- * __VA_ARGS__ has at least one argument (though GCC for example would accept
- * 0). Thus the first OPT_SOMETHING is a wrapper which just adds one
- * argument to ensure __VA_ARGS__ is not empty when calling the next macro.
- */
+#define OPT_INT64(field) \
+    OPT_TYPED_FIELD(m_option_type_int64, int64_t, field)
 
-// Note: new code should use OPTF_BOOL instead
-#define OPT_FLAG(...) \
-    OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_flag)
+#define OPT_FLOAT(field) \
+    OPT_TYPED_FIELD(m_option_type_float, float, field)
 
-#define OPT_STRINGLIST(...) \
-    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list)
+#define OPT_DOUBLE(field) \
+    OPT_TYPED_FIELD(m_option_type_double, double, field)
 
-#define OPT_KEYVALUELIST(...) \
-    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_keyvalue_list)
+#define OPT_STRING(field) \
+    OPT_TYPED_FIELD(m_option_type_string, char*, field)
 
-#define OPT_PATHLIST(...)                                               \
-    OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list,\
-                .priv = (void *)&m_option_path_separator)
+#define OPT_STRINGLIST(field) \
+    OPT_TYPED_FIELD(m_option_type_string_list, char**, field)
 
-#define OPT_INT(...) \
-    OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_int)
+#define OPT_KEYVALUELIST(field) \
+    OPT_TYPED_FIELD(m_option_type_keyvalue_list, char**, field)
 
-#define OPT_INT64(...) \
-    OPT_GENERAL(int64_t, __VA_ARGS__, .type = &m_option_type_int64)
+#define OPT_PATHLIST(field) \
+    OPT_TYPED_FIELD(m_option_type_string_list, char**, field), \
+    .priv = (void *)&m_option_path_separator
 
-#define OPT_RANGE_(ctype, optname, varname, flags, minval, maxval, ...) \
-    OPT_GENERAL(ctype, optname, varname, flags,                         \
-                .min = minval, .max = maxval, __VA_ARGS__)
+#define OPT_TIME(field) \
+    OPT_TYPED_FIELD(m_option_type_time, double, field)
 
-#define OPT_INTRANGE(...) \
-    OPT_RANGE_(int, __VA_ARGS__, .type = &m_option_type_int)
+#define OPT_REL_TIME(field) \
+    OPT_TYPED_FIELD(m_option_type_rel_time, struct m_rel_time, field)
 
-#define OPT_FLOATRANGE(...) \
-    OPT_RANGE_(float, __VA_ARGS__, .type = &m_option_type_float)
+#define OPT_COLOR(field) \
+    OPT_TYPED_FIELD(m_option_type_color, struct m_color, field)
 
-#define OPT_DOUBLERANGE(...) \
-    OPT_RANGE_(double, __VA_ARGS__, .type = &m_option_type_double)
+#define OPT_BYTE_SIZE(field) \
+    OPT_TYPED_FIELD(m_option_type_byte_size, int64_t, field)
 
-#define OPT_FLOAT(...) \
-    OPT_GENERAL(float, __VA_ARGS__, .type = &m_option_type_float)
+#define OPT_GEOMETRY(field) \
+    OPT_TYPED_FIELD(m_option_type_geometry, struct m_geometry, field)
 
-#define OPT_DOUBLE(...) \
-    OPT_GENERAL(double, __VA_ARGS__, .type = &m_option_type_double)
+#define OPT_SIZE_BOX(field) \
+    OPT_TYPED_FIELD(m_option_type_size_box, struct m_geometry, field)
 
-#define OPT_STRING(...) \
-    OPT_GENERAL(char*, __VA_ARGS__, .type = &m_option_type_string)
+#define OPT_TRACKCHOICE(field) \
+    OPT_CHOICE(field, {"no", -2}, {"auto", -1}), \
+    M_RANGE(0, 8190)
 
-#define OPT_SETTINGSLIST(optname, varname, flags, objlist, ...) \
-    OPT_GENERAL(m_obj_settings_t*, optname, varname, flags,     \
-                .type = &m_option_type_obj_settings_list,       \
-                .priv = (void*)MP_EXPECT_TYPE(const struct m_obj_list*, objlist), \
-                __VA_ARGS__)
+#define OPT_MSGLEVELS(field) \
+    OPT_TYPED_FIELD(m_option_type_msglevels, char **, field)
 
-#define OPT_IMAGEFORMAT(...) \
-    OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_imgfmt)
+#define OPT_ASPECT(field) \
+    OPT_TYPED_FIELD(m_option_type_aspect, float, field)
 
-#define OPT_AUDIOFORMAT(...) \
-    OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_afmt)
+#define OPT_IMAGEFORMAT(field) \
+    OPT_TYPED_FIELD(m_option_type_imgfmt, int, field)
+
+#define OPT_AUDIOFORMAT(field) \
+    OPT_TYPED_FIELD(m_option_type_afmt, int, field)
 
 // If .min==1, then passing auto is disallowed, but "" is still accepted, and
 // limit channel list to 1 item.
-#define OPT_CHANNELS(...) \
-    OPT_GENERAL(struct m_channels, __VA_ARGS__, .type = &m_option_type_channels)
+#define OPT_CHANNELS(field) \
+    OPT_TYPED_FIELD(m_option_type_channels, struct m_channels, field)
 
-#define M_CHOICES(choices)                                              \
-    .priv = (void *)&(const struct m_opt_choice_alternatives[]){        \
-                      OPT_HELPER_REMOVEPAREN choices, {NULL}}
+#define OPT_STRING_VALIDATE(field, validate_fn) \
+    OPT_TYPED_FIELD(m_option_type_string, char*, field), \
+    .priv = MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn)
 
-#define OPT_CHOICE(...) \
-    OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
-#define OPT_CHOICE_(optname, varname, flags, choices, ...) \
-    OPT_GENERAL(int, optname, varname, flags, M_CHOICES(choices), __VA_ARGS__)
+#define M_CHOICES(...) \
+    .priv = (void *)&(const struct m_opt_choice_alternatives[]){ __VA_ARGS__, {0}}
+
 // Variant which takes a pointer to struct m_opt_choice_alternatives directly
-#define OPT_CHOICE_C(optname, varname, flags, choices, ...) \
-    OPT_GENERAL(int, optname, varname, flags, .priv = (void *) \
-                MP_EXPECT_TYPE(const struct m_opt_choice_alternatives*, choices), \
-                .type = &m_option_type_choice, __VA_ARGS__)
+#define OPT_CHOICE_C(field, choices) \
+    OPT_TYPED_FIELD(m_option_type_choice, int, field), \
+    .priv = (void *)MP_EXPECT_TYPE(const struct m_opt_choice_alternatives*, choices)
 
-#define OPT_FLAGS(...) \
-    OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_flags)
+// Variant where you pass a struct m_opt_choice_alternatives initializer
+#define OPT_CHOICE(field, ...) \
+    OPT_TYPED_FIELD(m_option_type_choice, int, field), \
+    M_CHOICES(__VA_ARGS__)
 
-// Union of choices and an int range. The choice values can be included in the
-// int range, or be completely separate - both works.
-#define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) \
-    OPT_GENERAL(int, optname, varname, flags,                                     \
-                .min = minval, .max = maxval,                                     \
-                M_CHOICES(choices), __VA_ARGS__)
-#define OPT_CHOICE_OR_INT(...) \
-    OPT_CHOICE_OR_INT_(__VA_ARGS__, .type = &m_option_type_choice)
+#define OPT_FLAGS(field, ...) \
+    OPT_TYPED_FIELD(m_option_type_flags, int, field), \
+    M_CHOICES(__VA_ARGS__)
 
-#define OPT_TIME(...) \
-    OPT_GENERAL(double, __VA_ARGS__, .type = &m_option_type_time)
+#define OPT_SETTINGSLIST(field, objlist) \
+    OPT_TYPED_FIELD(m_option_type_obj_settings_list, m_obj_settings_t*, field), \
+    .priv = (void*)MP_EXPECT_TYPE(const struct m_obj_list*, objlist)
 
-#define OPT_REL_TIME(...) \
-    OPT_GENERAL(struct m_rel_time, __VA_ARGS__, .type = &m_option_type_rel_time)
+#define OPT_FOURCC(field) \
+    OPT_TYPED_FIELD(m_option_type_fourcc, int, field)
 
-#define OPT_COLOR(...) \
-    OPT_GENERAL(struct m_color, __VA_ARGS__, .type = &m_option_type_color)
-
-#define OPT_BYTE_SIZE(...) \
-    OPT_RANGE_(int64_t, __VA_ARGS__, .type = &m_option_type_byte_size)
-
-#define OPT_GEOMETRY(...) \
-    OPT_GENERAL(struct m_geometry, __VA_ARGS__, .type = &m_option_type_geometry)
-
-#define OPT_SIZE_BOX(...) \
-    OPT_GENERAL(struct m_geometry, __VA_ARGS__, .type = &m_option_type_size_box)
-
-#define OPT_TRACKCHOICE(name, var, ...) \
-    OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}), \
-    ## __VA_ARGS__)
-
-#define OPT_ASPECT(...) \
-    OPT_GENERAL(float, __VA_ARGS__, .type = &m_option_type_aspect)
-
-#define OPT_STRING_VALIDATE_(optname, varname, flags, validate_fn, ...)        \
-    OPT_GENERAL(char*, optname, varname, flags, __VA_ARGS__,                   \
-                .priv = MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn))
-#define OPT_STRING_VALIDATE(...) \
-    OPT_STRING_VALIDATE_(__VA_ARGS__, .type = &m_option_type_string)
-
-#define OPT_PRINT(optname, fn)                                              \
-    {.name = optname,                                                       \
-     .flags = M_OPT_NOCFG | M_OPT_PRE_PARSE | M_OPT_NOPROP,                 \
-     .type = &m_option_type_print_fn,                                       \
-     .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn),                            \
-     .offset = -1}
+#define OPT_CYCLEDIR(field) \
+    OPT_TYPED_FIELD(m_option_type_cycle_dir, double, field)
 
 // subconf must have the type struct m_sub_options.
 // All sub-options are prefixed with "name-" and are added to the current
 // (containing) option list.
 // If name is "", add the sub-options directly instead.
-// varname refers to the field, that must be a pointer to a field described by
+// "field" refers to the field, that must be a pointer to a field described by
 // the subconf struct.
-#define OPT_SUBSTRUCT(name, varname, subconf, flagv)            \
-    OPT_GENERAL_NOTYPE(name, varname, flagv,                    \
-                       .type = &m_option_type_subconfig,        \
-                       .priv = (void*)&subconf)
+#define OPT_SUBSTRUCT(field, subconf) \
+    .offset = offsetof(OPT_BASE_STRUCT, field), \
+    .type = &m_option_type_subconfig, .priv = (void*)&subconf
 
-// Provide a another name for the option.
-#define OPT_ALIAS(optname, newname) \
-    {.name = optname, .type = &m_option_type_alias, .priv = newname, \
-     .offset = -1}
+// Non-fields
+
+#define OPT_ALIAS(newname) \
+    .type = &m_option_type_alias, .priv = newname, .offset = -1
 
 // If "--optname" was removed, but "--newname" has the same semantics.
 // It will be redirected, and a warning will be printed on first use.
-#define OPT_REPLACED_MSG(optname, newname, msg) \
-    {.name = optname, .type = &m_option_type_alias, .priv = newname, \
-     .deprecation_message = (msg), .offset = -1}
+#define OPT_REPLACED_MSG(newname, msg) \
+    .type = &m_option_type_alias, .priv = newname, \
+    .deprecation_message = (msg), .offset = -1
 
 // Same, with a generic deprecation message.
-#define OPT_REPLACED(optname, newname) OPT_REPLACED_MSG(optname, newname, "")
+#define OPT_REPLACED(newname) OPT_REPLACED_MSG(newname, "")
 
 // Alias, resolved on the CLI/config file/profile parser level only.
-#define OPT_CLI_ALIAS(optname, newname) \
-    {.name = optname, .type = &m_option_type_cli_alias, .priv = newname, \
-     .flags = M_OPT_NOPROP, .offset = -1}
+#define OPT_CLI_ALIAS(newname) \
+    .type = &m_option_type_cli_alias, .priv = newname, \
+    .flags = M_OPT_NOPROP, .offset = -1
 
 // "--optname" doesn't exist, but inform the user about a replacement with msg.
-#define OPT_REMOVED(optname, msg) \
-    {.name = optname, .type = &m_option_type_removed, .priv = msg, \
-     .deprecation_message = "", .flags = M_OPT_NOPROP, .offset = -1}
+#define OPT_REMOVED(msg) \
+    .type = &m_option_type_removed, .priv = msg, \
+    .deprecation_message = "", .flags = M_OPT_NOPROP, .offset = -1
+
+#define OPT_PRINT(fn) \
+    .flags = M_OPT_NOCFG | M_OPT_PRE_PARSE | M_OPT_NOPROP, \
+    .type = &m_option_type_print_fn, \
+    .priv = MP_EXPECT_TYPE(m_opt_print_fn, fn), \
+    .offset = -1
 
 #endif /* MPLAYER_M_OPTION_H */

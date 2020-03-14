@@ -210,7 +210,7 @@ const struct ao_driver audio_out_sdl = {
         .buflen = 0, // use SDL default
     },
     .options = (const struct m_option[]) {
-        OPT_FLOAT("buflen", buflen, 0),
+        {"buflen", OPT_FLOAT(buflen)},
         {0}
     },
     .options_prefix = "sdl",

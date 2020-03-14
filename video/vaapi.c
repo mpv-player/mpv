@@ -38,7 +38,7 @@ struct vaapi_opts {
 #define OPT_BASE_STRUCT struct vaapi_opts
 const struct m_sub_options vaapi_conf = {
     .opts = (const struct m_option[]) {
-        OPT_STRING("device", path, 0),
+        {"device", OPT_STRING(path)},
         {0},
     },
     .defaults = &(const struct vaapi_opts) {

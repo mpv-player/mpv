@@ -168,19 +168,19 @@ error:
 
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
-    OPT_CHOICE("deint-mode", opts.deint, 0,
-               ({"first-field", 1},
-                {"bob", 2},
-                {"temporal", 3},
-                {"temporal-spatial", 4}),
-               OPTDEF_INT(3)),
-    OPT_FLAG("deint", deint_enabled, 0),
-    OPT_FLAG("chroma-deint", opts.chroma_deint, 0, OPTDEF_INT(1)),
-    OPT_FLAG("pullup", opts.pullup, 0),
-    OPT_FLOATRANGE("denoise", opts.denoise, 0, 0, 1),
-    OPT_FLOATRANGE("sharpen", opts.sharpen, 0, -1, 1),
-    OPT_INTRANGE("hqscaling", opts.hqscaling, 0, 0, 9),
-    OPT_FLAG("interlaced-only", interlaced_only, 0),
+    {"deint-mode", OPT_CHOICE(opts.deint,
+        {"first-field", 1},
+        {"bob", 2},
+        {"temporal", 3},
+        {"temporal-spatial", 4}),
+        OPTDEF_INT(3)},
+    {"deint", OPT_FLAG(deint_enabled)},
+    {"chroma-deint", OPT_FLAG(opts.chroma_deint), OPTDEF_INT(1)},
+    {"pullup", OPT_FLAG(opts.pullup)},
+    {"denoise", OPT_FLOAT(opts.denoise), M_RANGE(0, 1)},
+    {"sharpen", OPT_FLOAT(opts.sharpen), M_RANGE(-1, 1)},
+    {"hqscaling", OPT_INT(opts.hqscaling), M_RANGE(0, 9)},
+    {"interlaced-only", OPT_FLAG(interlaced_only)},
     {0}
 };
 

@@ -40,9 +40,10 @@ struct demux_cache_opts {
 
 const struct m_sub_options demux_cache_conf = {
     .opts = (const struct m_option[]){
-        OPT_STRING("cache-dir", cache_dir, M_OPT_FILE),
-        OPT_CHOICE("cache-unlink-files", unlink_files, 0,
-                   ({"immediate", 2}, {"whendone", 1}, {"no", 0})),
+        {"cache-dir", OPT_STRING(cache_dir), .flags = M_OPT_FILE},
+        {"cache-unlink-files", OPT_CHOICE(unlink_files,
+            {"immediate", 2}, {"whendone", 1}, {"no", 0}),
+        },
         {0}
     },
     .size = sizeof(struct demux_cache_opts),

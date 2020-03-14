@@ -76,17 +76,17 @@ typedef struct cdda_params {
 #define OPT_BASE_STRUCT struct cdda_params
 const struct m_sub_options stream_cdda_conf = {
     .opts = (const m_option_t[]) {
-        OPT_INTRANGE("speed", speed, 0, 1, 100),
-        OPT_INTRANGE("paranoia", paranoia_mode, 0, 0, 2),
-        OPT_INTRANGE("sector-size", sector_size, 0, 1, 100),
-        OPT_INTRANGE("overlap", search_overlap, 0, 0, 75),
-        OPT_INT("toc-bias", toc_bias, 0),
-        OPT_INT("toc-offset", toc_offset, 0),
-        OPT_FLAG("skip", skip, 0),
-        OPT_INT("span-a", span[0], 0),
-        OPT_INT("span-b", span[1], 0),
-        OPT_FLAG("cdtext", cdtext, 0),
-        OPT_REMOVED("span", "use span-a/span-b"),
+        {"speed", OPT_INT(speed), M_RANGE(1, 100)},
+        {"paranoia", OPT_INT(paranoia_mode), M_RANGE(0, 2)},
+        {"sector-size", OPT_INT(sector_size), M_RANGE(1, 100)},
+        {"overlap", OPT_INT(search_overlap), M_RANGE(0, 75)},
+        {"toc-bias", OPT_INT(toc_bias)},
+        {"toc-offset", OPT_INT(toc_offset)},
+        {"skip", OPT_FLAG(skip)},
+        {"span-a", OPT_INT(span[0])},
+        {"span-b", OPT_INT(span[1])},
+        {"cdtext", OPT_FLAG(cdtext)},
+        {"span", OPT_REMOVED("use span-a/span-b")},
         {0}
     },
     .size = sizeof(struct cdda_params),

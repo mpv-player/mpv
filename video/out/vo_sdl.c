@@ -980,9 +980,9 @@ const struct vo_driver video_out_sdl = {
         .screensaver_enabled = false,
     },
     .options = (const struct m_option []){
-        OPT_FLAG("sw", allow_sw, 0),
-        OPT_FLAG("switch-mode", switch_mode, 0),
-        OPT_FLAG("vsync", vsync, 0),
+        {"sw", OPT_FLAG(allow_sw)},
+        {"switch-mode", OPT_FLAG(switch_mode)},
+        {"vsync", OPT_FLAG(vsync)},
         {NULL}
     },
     .preinit = preinit,

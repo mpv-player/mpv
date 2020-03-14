@@ -106,9 +106,9 @@ struct stream_opts {
 
 const struct m_sub_options stream_conf = {
     .opts = (const struct m_option[]){
-        OPT_BYTE_SIZE("stream-buffer-size", buffer_size, 0,
-                      STREAM_MIN_BUFFER_SIZE, 512 * 1024 * 1024),
-        OPT_FLAG("load-unsafe-playlists", load_unsafe_playlists, 0),
+        {"stream-buffer-size", OPT_BYTE_SIZE(buffer_size),
+            M_RANGE(STREAM_MIN_BUFFER_SIZE, 512 * 1024 * 1024)},
+        {"load-unsafe-playlists", OPT_FLAG(load_unsafe_playlists)},
         {0}
     },
     .size = sizeof(struct stream_opts),

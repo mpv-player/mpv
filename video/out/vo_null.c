@@ -98,7 +98,7 @@ const struct vo_driver video_out_null = {
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
-        OPT_DOUBLE("fps", cfg_fps, 0, .min = 0, .max = 10000),
+        {"fps", OPT_DOUBLE(cfg_fps), M_RANGE(0, 10000)},
         {0},
     },
     .options_prefix = "vo-null",

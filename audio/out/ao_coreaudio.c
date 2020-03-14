@@ -423,7 +423,7 @@ const struct ao_driver audio_out_coreaudio = {
     .list_devs      = ca_get_device_list,
     .priv_size      = sizeof(struct priv),
     .options = (const struct m_option[]){
-        OPT_FLAG("change-physical-format", change_physical_format, 0),
+        {"change-physical-format", OPT_FLAG(change_physical_format)},
         {0}
     },
     .options_prefix = "coreaudio",

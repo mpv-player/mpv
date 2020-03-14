@@ -28,7 +28,7 @@ struct cocoa_opts {
 #define OPT_BASE_STRUCT struct cocoa_opts
 const struct m_sub_options cocoa_conf = {
     .opts = (const struct m_option[]) {
-        OPT_REPLACED("cocoa-force-dedicated-gpu", "macos-force-dedicated-gpu"),
+        {"cocoa-force-dedicated-gpu", OPT_REPLACED("macos-force-dedicated-gpu")},
         {0}
     },
     .size = sizeof(struct cocoa_opts),

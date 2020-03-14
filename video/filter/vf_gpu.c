@@ -363,8 +363,8 @@ const struct mp_user_filter_entry vf_gpu = {
         .name = "gpu",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const struct m_option[]){
-            OPT_INT("w", w, 0),
-            OPT_INT("h", h, 0),
+            {"w", OPT_INT(w)},
+            {"h", OPT_INT(h)},
             {0}
         },
     },

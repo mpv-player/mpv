@@ -152,7 +152,4 @@ struct mp_cmd *mp_cmd_clone(struct mp_cmd *cmd);
 
 extern const struct m_option_type m_option_type_cycle_dir;
 
-#define OPT_CYCLEDIR(...) \
-    OPT_GENERAL(double, __VA_ARGS__, .type = &m_option_type_cycle_dir)
-
 #endif

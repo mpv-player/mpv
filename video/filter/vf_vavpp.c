@@ -471,17 +471,17 @@ error:
 
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
-    OPT_CHOICE("deint", deint_type, 0,
-               // The values >=0 must match with deint_algorithm[].
-               ({"auto", -1},
-                {"no", 0},
-                {"first-field", 1},
-                {"bob", 2},
-                {"weave", 3},
-                {"motion-adaptive", 4},
-                {"motion-compensated", 5})),
-    OPT_FLAG("interlaced-only", interlaced_only, 0),
-    OPT_FLAG("reversal-bug", reversal_bug, 0),
+    {"deint", OPT_CHOICE(deint_type,
+        // The values >=0 must match with deint_algorithm[].
+        {"auto", -1},
+        {"no", 0},
+        {"first-field", 1},
+        {"bob", 2},
+        {"weave", 3},
+        {"motion-adaptive", 4},
+        {"motion-compensated", 5})},
+    {"interlaced-only", OPT_FLAG(interlaced_only)},
+    {"reversal-bug", OPT_FLAG(reversal_bug)},
     {0}
 };
 
