@@ -38,6 +38,13 @@ Interface changes
     - remove deprecated legacy hook API ("hook-add", "hook-ack"). Use either the
       libmpv API (mpv_hook_add(), mpv_hook_continue()), or the Lua scripting
       wrappers (mp.add_hook()).
+    - improve how property change notifications are delivered on events and on
+      hooks. In particular, a hook event is only returned to a client after all
+      changes initiated before the hook point were delivered to the same client.
+      In addition, it should no longer happen that events and property change
+      notifications were interleaved in bad ways (it could happen that a
+      property notification delivered after an event contained a value that was
+      valid only before the event happened).
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended
