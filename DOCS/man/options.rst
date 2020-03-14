@@ -4960,6 +4960,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
     better than without it) since it will extend the size to match only the
     milder of the scale factors between the axes.
 
+    Note: this option is ignored when using bilinear downscaling (the default).
+
 ``--linear-downscaling``
     Scale in linear light when downscaling. It should only be used with a
     ``--fbo-format`` that has at least 16 bit precision. This option

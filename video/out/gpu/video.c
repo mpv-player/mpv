@@ -292,6 +292,7 @@ struct gl_video {
     bool broken_frame; // temporary error state
 
     bool colorspace_override_warned;
+    bool correct_downscaling_warned;
 };
 
 static const struct gl_video_opts gl_video_opts_def = {
@@ -4021,6 +4022,16 @@ static void reinit_from_options(struct gl_video *p)
         MP_WARN(p, "Interpolation now requires enabling display-sync mode.\n"
                    "E.g.: --video-sync=display-resample\n");
         p->dsi_warned = true;
+    }
+
+    if (p->opts.correct_downscaling && !p->correct_downscaling_warned) {
+        const char *name = p->opts.scaler[SCALER_DSCALE].kernel.name;
+        if (!name)
+            name = p->opts.scaler[SCALER_SCALE].kernel.name;
+        if (!name || !strcmp(name, "bilinear")) {
+            MP_WARN(p, "correct-downscaling requires non-bilinear scaler.\n");
+            p->correct_downscaling_warned = true;
+        }
     }
 }
 
