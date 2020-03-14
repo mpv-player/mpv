@@ -536,9 +536,6 @@ static int parse_byte_size(struct mp_log *log, const m_option_t *opt,
     if (tmp_int > max) {
         mp_err(log, "The %.*s option must be <= %"PRId64": %.*s\n",
                BSTR_P(name), max, BSTR_P(param));
-        double x = INT64_MAX;
-        printf("max: %ld, %f %f %ld %ld %d %d\n", max, x, opt->max, (int64_t)opt->max, (int64_t)x, x > INT64_MAX, x == INT64_MAX);
-        abort();
         return M_OPT_OUT_OF_RANGE;
     }
 
