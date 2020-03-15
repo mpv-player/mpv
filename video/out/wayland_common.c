@@ -631,6 +631,8 @@ static void output_handle_done(void* data, struct wl_output *wl_output)
                "\tHz: %f\n", o->make, o->model, o->id, o->geometry.x0,
                o->geometry.y0, mp_rect_w(o->geometry), o->phys_width,
                mp_rect_h(o->geometry), o->phys_height, o->scale, o->refresh_rate);
+    
+    o->wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
 static void output_handle_scale(void* data, struct wl_output *wl_output,
