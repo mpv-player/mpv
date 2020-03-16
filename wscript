@@ -452,6 +452,11 @@ audio_output_features = [
         'func': check_cc(header_name='sys/soundcard.h'),
         'deps': 'posix && gpl',
     }, {
+        'name': '--netbsd-audio',
+        'desc': 'NetBSD audio output',
+        'func': check_statement(['sys/audioio.h', 'sys/ioctl.h'],
+                                'struct audio_device d; ioctl(0, AUDIO_GETDEV, &d)'),
+    }, {
         'name': '--rsound',
         'desc': 'RSound audio output',
         'func': check_statement('rsound.h', 'rsd_init(NULL)', lib='rsound')

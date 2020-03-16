@@ -241,6 +241,9 @@ Available audio output drivers are:
               confused with RoarAudio, which is something completely
               different.
 
+``netbsd``
+    Audio output to the NetBSD sound system
+
 ``sndio``
     Audio output to the OpenBSD sndio sound system
 

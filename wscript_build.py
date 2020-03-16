@@ -252,6 +252,7 @@ def build(ctx):
         ( "audio/out/ao_coreaudio_utils.c",      "coreaudio || audiounit" ),
         ( "audio/out/ao_jack.c",                 "jack" ),
         ( "audio/out/ao_lavc.c" ),
+        ( "audio/out/ao_netbsd.c",               "netbsd-audio" ),
         ( "audio/out/ao_null.c" ),
         ( "audio/out/ao_openal.c",               "openal" ),
         ( "audio/out/ao_opensles.c",             "opensles" ),
