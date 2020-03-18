@@ -39,9 +39,7 @@ extern const struct sd_functions sd_lavc;
 
 static const struct sd_functions *const sd_list[] = {
     &sd_lavc,
-#if HAVE_LIBASS
     &sd_ass,
-#endif
     NULL
 };
 

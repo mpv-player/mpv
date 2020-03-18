@@ -386,7 +386,7 @@ def build(ctx):
         ( "stream/stream_null.c" ),
 
         ## Subtitles
-        ( "sub/ass_mp.c",                        "libass"),
+        ( "sub/ass_mp.c" ),
         ( "sub/dec_sub.c" ),
         ( "sub/draw_bmp.c" ),
         ( "sub/filter_regex.c",                  "posix" ),
@@ -394,9 +394,8 @@ def build(ctx):
         ( "sub/img_convert.c" ),
         ( "sub/lavc_conv.c" ),
         ( "sub/osd.c" ),
-        ( "sub/osd_dummy.c",                     "dummy-osd" ),
-        ( "sub/osd_libass.c",                    "libass-osd" ),
-        ( "sub/sd_ass.c",                        "libass" ),
+        ( "sub/osd_libass.c" ),
+        ( "sub/sd_ass.c" ),
         ( "sub/sd_lavc.c" ),
 
         ## Tests

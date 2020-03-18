@@ -336,24 +336,13 @@ iconv support use --disable-iconv.",
         'desc' : 'Javascript (MuJS backend)',
         'func': check_pkg_config('mujs', '>= 1.0.0'),
     }, {
-        'name': '--libass',
+        'name': 'libass',
         'desc': 'SSA/ASS support',
         'func': check_pkg_config('libass', '>= 0.12.1'),
         'req': True,
         'fmsg': "Unable to find development files for libass, or the version " +
-                "found is too old. Aborting. If you really mean to compile " +
-                "without libass support use --disable-libass."
+                "found is too old. Aborting."
     }, {
-        'name': '--libass-osd',
-        'desc': 'libass OSD support',
-        'deps': 'libass',
-        'func': check_true,
-    }, {
-        'name': 'dummy-osd',
-        'desc': 'dummy OSD support',
-        'deps': '!libass-osd',
-        'func': check_true,
-    } , {
         'name': '--zlib',
         'desc': 'zlib',
         'func': check_libs(['z'],
