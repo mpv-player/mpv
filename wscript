@@ -206,6 +206,15 @@ main_dependencies = [
         'req': True,
         'fmsg': 'Unable to find pthreads support.'
     }, {
+        # NB: this works only if a source file includes osdep/threads.h
+        #     also, technically, triggers undefined behavior (reserved names)
+        'name': '--pthread-debug',
+        'desc': 'pthread runtime debugging wrappers',
+        'default': 'disable',
+        'func': check_cc(cflags='-DMP_PTHREAD_DEBUG'),
+        # The win32 wrapper defines pthreads symbols as macros only.
+        'deps_neg': 'win32-internal-pthreads',
+    }, {
         'name': '--stdatomic',
         'desc': 'C11 stdatomic.h',
         'func': check_libs(['atomic'],

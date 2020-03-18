@@ -19,8 +19,8 @@
 #include <errno.h>
 #include <pthread.h>
 
+#include "common/common.h"
 #include "config.h"
-
 #include "threads.h"
 #include "timer.h"
 
@@ -48,4 +48,30 @@ void mpthread_set_name(const char *name)
 #elif HAVE_OSX_THREAD_NAME
     pthread_setname_np(tname);
 #endif
+}
+
+int mp_ptwrap_check(const char *file, int line, int res)
+{
+    if (res && res != ETIMEDOUT) {
+        fprintf(stderr, "%s:%d: internal error: pthread result %d (%s)\n",
+                file, line, res, mp_strerror(res));
+        abort();
+    }
+    return res;
+}
+
+int mp_ptwrap_mutex_init(const char *file, int line, pthread_mutex_t *m,
+                         const pthread_mutexattr_t *attr)
+{
+    pthread_mutexattr_t m_attr;
+    if (!attr) {
+        attr = &m_attr;
+        pthread_mutexattr_init(&m_attr);
+        // Force normal mutexes to error checking.
+        pthread_mutexattr_settype(&m_attr, PTHREAD_MUTEX_ERRORCHECK);
+    }
+    int res = mp_ptwrap_check(file, line, (pthread_mutex_init)(m, attr));
+    if (attr == &m_attr)
+        pthread_mutexattr_destroy(&m_attr);
+    return res;
 }
