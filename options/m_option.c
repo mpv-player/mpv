@@ -56,10 +56,10 @@ const char m_option_path_separator = OPTION_PATH_SEPARATOR;
 // For integer types: since min/max are floats and may not be able to represent
 // the real min/max, and since opt.min/.max may use +/-INFINITY, some care has
 // to be taken. (Also tricky rounding.)
-#define OPT_INT_MIN(opt, T, Tm) \
-    ((opt)->min < (opt)->max ? ((opt)->min <= (Tm) ? (Tm) : (T)((opt)->min)) : (Tm))
-#define OPT_INT_MAX(opt, T, Tm) \
-    ((opt)->min < (opt)->max ? ((opt)->max >= (Tm) ? (Tm) : (T)((opt)->max)) : (Tm))
+#define OPT_INT_MIN(opt, T, Tm) ((opt)->min < (opt)->max \
+    ? ((opt)->min <= (double)(Tm) ? (Tm) : (T)((opt)->min)) : (Tm))
+#define OPT_INT_MAX(opt, T, Tm) ((opt)->min < (opt)->max \
+    ? ((opt)->max >= (double)(Tm) ? (Tm) : (T)((opt)->max)) : (Tm))
 
 char *m_option_strerror(int code)
 {
@@ -390,7 +390,7 @@ static void multiply_int64(const m_option_t *opt, void *val, double f)
     int64_t iv = v;
     if (v < INT64_MIN)
         iv = INT64_MIN;
-    if (v > INT64_MAX)
+    if (v >= (double)INT64_MAX)
         iv = INT64_MAX;
     *(int64_t *)val = iv;
     clamp_int64(opt, val);
