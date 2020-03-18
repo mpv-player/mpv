@@ -55,6 +55,7 @@ typedef struct {
 #define pthread_mutexattr_init(attr) (*(attr) = 0)
 #define pthread_mutexattr_settype(attr, type) (*(attr) = (type))
 #define PTHREAD_MUTEX_RECURSIVE 1
+#define PTHREAD_MUTEX_ERRORCHECK 2 // unsupported
 
 int pthread_mutex_destroy(pthread_mutex_t *mutex);
 int pthread_mutex_init(pthread_mutex_t *restrict mutex,
