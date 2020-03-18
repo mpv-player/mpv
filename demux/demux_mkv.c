@@ -2995,7 +2995,8 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
             double secs = mkv_d->opts->subtitle_preroll_secs;
             if (mkv_d->index_has_durations)
                 secs = MPMAX(secs, mkv_d->opts->subtitle_preroll_secs_index);
-            int64_t pre = MPMIN(INT64_MAX, secs * 1e9 / mkv_d->tc_scale);
+            double pre_f = secs * 1e9 / mkv_d->tc_scale;
+            int64_t pre = pre_f >= (double)INT64_MAX ? INT64_MAX : (int64_t)pre_f;
             int64_t min_tc = pre < index->timecode ? index->timecode - pre : 0;
             uint64_t prev_target = 0;
             int64_t prev_tc = 0;
