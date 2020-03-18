@@ -65,7 +65,7 @@ struct dec_queue_opts {
 static const struct m_option dec_queue_opts_list[] = {
     {"enable", OPT_FLAG(use_queue)},
     {"max-secs", OPT_DOUBLE(max_duration), M_RANGE(0, DBL_MAX)},
-    {"max-bytes", OPT_BYTE_SIZE(max_bytes), M_RANGE(0, (size_t)-1)},
+    {"max-bytes", OPT_BYTE_SIZE(max_bytes), M_RANGE(0, M_MAX_MEM_BYTES)},
     {"max-samples", OPT_INT64(max_samples), M_RANGE(0, DBL_MAX)},
     {0}
 };
@@ -130,9 +130,9 @@ const struct m_sub_options dec_wrapper_conf = {
         {"vd-queue", OPT_SUBSTRUCT(vdec_queue_opts, vdec_queue_conf)},
         {"ad-queue", OPT_SUBSTRUCT(adec_queue_opts, adec_queue_conf)},
         {"video-reversal-buffer", OPT_BYTE_SIZE(video_reverse_size),
-            M_RANGE(0, (size_t)-1)},
+            M_RANGE(0, M_MAX_MEM_BYTES)},
         {"audio-reversal-buffer", OPT_BYTE_SIZE(audio_reverse_size),
-            M_RANGE(0, (size_t)-1)},
+            M_RANGE(0, M_MAX_MEM_BYTES)} ,
         {0}
     },
     .size = sizeof(struct dec_wrapper_opts),

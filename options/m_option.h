@@ -627,6 +627,9 @@ extern const char m_option_path_separator;
 #define OPT_BYTE_SIZE(field) \
     OPT_TYPED_FIELD(m_option_type_byte_size, int64_t, field)
 
+// (Approximation of x<=SIZE_MAX/2 for m_option.max, which is double.)
+#define M_MAX_MEM_BYTES MPMIN((1ULL << 62), (size_t)-1 / 2)
+
 #define OPT_GEOMETRY(field) \
     OPT_TYPED_FIELD(m_option_type_geometry, struct m_geometry, field)
 

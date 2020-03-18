@@ -106,8 +106,6 @@ struct demux_opts {
 
 #define OPT_BASE_STRUCT struct demux_opts
 
-#define MAX_BYTES MPMIN(INT64_MAX, SIZE_MAX / 2)
-
 static bool get_demux_sub_opts(int index, const struct m_sub_options **sub);
 
 const struct m_sub_options demux_conf = {
@@ -116,12 +114,10 @@ const struct m_sub_options demux_conf = {
             {"no", 0}, {"auto", -1}, {"yes", 1})},
         {"cache-on-disk", OPT_FLAG(disk_cache)},
         {"demuxer-readahead-secs", OPT_DOUBLE(min_secs), M_RANGE(0, DBL_MAX)},
-        // (The MAX_BYTES sizes may not be accurate because the max field is
-        // of double type.)
         {"demuxer-max-bytes", OPT_BYTE_SIZE(max_bytes),
-            M_RANGE(0, MAX_BYTES)},
+            M_RANGE(0, M_MAX_MEM_BYTES)},
         {"demuxer-max-back-bytes", OPT_BYTE_SIZE(max_bytes_bw),
-            M_RANGE(0, MAX_BYTES)},
+            M_RANGE(0, M_MAX_MEM_BYTES)},
         {"demuxer-donate-buffer", OPT_FLAG(donate_fw)},
         {"force-seekable", OPT_FLAG(force_seekable)},
         {"cache-secs", OPT_DOUBLE(min_secs_cache), M_RANGE(0, DBL_MAX),
