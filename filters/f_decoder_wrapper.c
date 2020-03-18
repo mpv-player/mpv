@@ -1119,6 +1119,8 @@ static void public_f_destroy(struct mp_filter *f)
         p->dec_thread_valid = false;
     }
 
+    mp_filter_free_children(f);
+
     talloc_free(p->dec_root_filter);
     talloc_free(p->queue);
     pthread_mutex_destroy(&p->cache_lock);
