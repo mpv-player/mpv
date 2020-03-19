@@ -83,10 +83,10 @@ static int init(struct ao *ao)
                         ao->device + sizeof("netbsd/") - 1);
     }
 
-    MP_ERR(ao, "Opening device %s", ao->device);
+    MP_ERR(ao, "Opening device %s\n", device);
     if ((p->fd = open(device, O_WRONLY)) == -1) {
         MP_ERR(ao, "Can't open audio device %s: %s\n",
-               ao->device, mp_strerror(errno));
+               device, mp_strerror(errno));
         goto fail;
     }
 
