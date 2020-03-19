@@ -299,8 +299,9 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf,
 }
 
 #define mp_format_res_str(hres) \
-    (SUCCEEDED(hres) ? "ok" : ((hres) == AUDCLNT_E_UNSUPPORTED_FORMAT) \
-     ? "unsupported" : mp_HRESULT_to_str(hres))
+    (SUCCEEDED(hres) ? ((hres) == S_OK) ? "ok" : "close" \
+                     : ((hres) == AUDCLNT_E_UNSUPPORTED_FORMAT) \
+                       ? "unsupported" : mp_HRESULT_to_str(hres))
 
 static bool try_format_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 {
