@@ -427,32 +427,57 @@ static bool find_formats_shared(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 {
     struct wasapi_state *state = ao->priv;
 
-    WAVEFORMATEX *closestMatch;
-    HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
-                                                AUDCLNT_SHAREMODE_SHARED,
-                                                &wformat->Format,
-                                                &closestMatch);
+    struct mp_chmap channels;
+    if (!chmap_from_waveformat(&channels, &wformat->Format)) {
+        MP_ERR(ao, "Error converting channel map\n");
+        return false;
+    }
+
+    HRESULT hr;
+    WAVEFORMATEX *mix_format;
+    hr = IAudioClient_GetMixFormat(state->pAudioClient, &mix_format);
+    EXIT_ON_ERROR(hr);
+
+    // WASAPI doesn't do any sample rate conversion on its own and
+    // will typically only accept the mix format samplerate. Although
+    // it will accept any PCM sample format, everything gets converted
+    // to the mix format anyway (pretty much always float32), so just
+    // use that.
+    WAVEFORMATEXTENSIBLE try_format;
+    waveformat_copy(&try_format, mix_format);
+    CoTaskMemFree(mix_format);
+
+    // WASAPI may accept channel maps other than the mix format
+    // if a surround emulator is enabled.
+    change_waveformat_channels(&try_format, &channels);
+
+    hr = IAudioClient_IsFormatSupported(state->pAudioClient,
+                                        AUDCLNT_SHAREMODE_SHARED,
+                                        &try_format.Format,
+                                        &mix_format);
     MP_VERBOSE(ao, "Trying %s (shared) -> %s\n",
-               waveformat_to_str(&wformat->Format), mp_format_res_str(hr));
+               waveformat_to_str(&try_format.Format), mp_format_res_str(hr));
     if (hr != AUDCLNT_E_UNSUPPORTED_FORMAT)
         EXIT_ON_ERROR(hr);
 
     switch (hr) {
     case S_OK:
+        waveformat_copy(wformat, &try_format.Format);
         break;
     case S_FALSE:
-        waveformat_copy(wformat, closestMatch);
-        CoTaskMemFree(closestMatch);
+        waveformat_copy(wformat, mix_format);
+        CoTaskMemFree(mix_format);
         MP_VERBOSE(ao, "Closest match is %s\n",
                    waveformat_to_str(&wformat->Format));
         break;
     default:
-        hr = IAudioClient_GetMixFormat(state->pAudioClient, &closestMatch);
+        hr = IAudioClient_GetMixFormat(state->pAudioClient, &mix_format);
         EXIT_ON_ERROR(hr);
-        waveformat_copy(wformat, closestMatch);
+        waveformat_copy(wformat, mix_format);
+        CoTaskMemFree(mix_format);
         MP_VERBOSE(ao, "Fallback to mix format %s\n",
                    waveformat_to_str(&wformat->Format));
-        CoTaskMemFree(closestMatch);
+
     }
 
     return true;
