@@ -80,8 +80,6 @@ struct command_ctx {
     // All properties, terminated with a {0} item.
     struct m_property *properties;
 
-    bool is_idle;
-
     double last_seek_time;
     double last_seek_pts;
     double marked_pts;
@@ -1310,8 +1308,7 @@ static int mp_property_idle(void *ctx, struct m_property *prop,
                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct command_ctx *cmd = mpctx->command_ctx;
-    return m_property_flag_ro(action, arg, cmd->is_idle);
+    return m_property_flag_ro(action, arg, mpctx->stop_play == PT_STOP);
 }
 
 static int mp_property_eof_reached(void *ctx, struct m_property *prop,
@@ -6036,10 +6033,6 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         ctx->marked_pts = MP_NOPTS_VALUE;
     }
 
-    if (event == MPV_EVENT_IDLE)
-        ctx->is_idle = true;
-    if (event == MPV_EVENT_START_FILE)
-        ctx->is_idle = false;
     if (event == MPV_EVENT_END_FILE || event == MPV_EVENT_FILE_LOADED) {
         // Update chapters - does nothing if something else is visible.
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);

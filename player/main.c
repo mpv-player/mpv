@@ -267,7 +267,7 @@ struct MPContext *mp_create(void)
         .dispatch = mp_dispatch_create(mpctx),
         .playback_abort = mp_cancel_new(mpctx),
         .thread_pool = mp_thread_pool_create(mpctx, 0, 1, 30),
-        .stop_play = PT_STOP,
+        .stop_play = PT_NEXT_ENTRY,
         .play_dir = 1,
     };
 
@@ -406,6 +406,10 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (opts->force_vo == 2 && handle_force_window(mpctx, false) < 0)
         return -1;
+
+    // Needed to properly enter _initial_ idle mode if playlist empty.
+    if (mpctx->opts->player_idle_mode && !mpctx->playlist->num_entries)
+        mpctx->stop_play = PT_STOP;
 
     MP_STATS(mpctx, "end init");
 

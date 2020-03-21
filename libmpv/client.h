@@ -232,7 +232,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 107)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 108)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -1328,15 +1328,19 @@ typedef enum mpv_event_id {
      *             and might be removed in the far future.
      */
     MPV_EVENT_TRACK_SWITCHED    = 10,
-#endif
     /**
      * Idle mode was entered. In this mode, no file is played, and the playback
      * core waits for new commands. (The command line player normally quits
      * instead of entering idle mode, unless --idle was specified. If mpv
      * was started with mpv_create(), idle mode is enabled by default.)
+     *
+     * @deprecated This is equivalent to using mpv_observe_property() on the
+     *             "idle-active" property. The event is redundant, and might be
+     *             removed in the far future. As a further warning, this event
+     *             is not necessarily sent at the right point anymore (at the
+     *             start of the program), while the property behaves correctly.
      */
     MPV_EVENT_IDLE              = 11,
-#if MPV_ENABLE_DEPRECATED
     /**
      * Playback was paused. This indicates the user pause state.
      *

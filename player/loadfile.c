@@ -1378,7 +1378,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->stop_play = 0;
 
     process_hooks(mpctx, "on_before_start_file");
-    if (mpctx->stop_play)
+    if (mpctx->stop_play || !mpctx->playlist->current)
         return;
 
     mp_notify(mpctx, MPV_EVENT_START_FILE, NULL);
@@ -1777,25 +1777,29 @@ void mp_play_files(struct MPContext *mpctx)
     prepare_playlist(mpctx, mpctx->playlist);
 
     for (;;) {
-        assert(mpctx->stop_play);
         idle_loop(mpctx);
+
         if (mpctx->stop_play == PT_QUIT)
             break;
 
-        play_current_file(mpctx);
+        if (mpctx->playlist->current)
+            play_current_file(mpctx);
+
         if (mpctx->stop_play == PT_QUIT)
             break;
 
-        struct playlist_entry *new_entry = mpctx->playlist->current;
+        struct playlist_entry *new_entry = NULL;
         if (mpctx->stop_play == PT_NEXT_ENTRY || mpctx->stop_play == PT_ERROR ||
-            mpctx->stop_play == AT_END_OF_FILE || mpctx->stop_play == PT_STOP)
+            mpctx->stop_play == AT_END_OF_FILE)
         {
             new_entry = mp_next_file(mpctx, +1, false, true);
+        } else if (mpctx->stop_play == PT_CURRENT_ENTRY) {
+            new_entry = mpctx->playlist->current;
         }
 
         mpctx->playlist->current = new_entry;
         mpctx->playlist->current_was_replaced = false;
-        mpctx->stop_play = PT_STOP;
+        mpctx->stop_play = new_entry ? PT_NEXT_ENTRY : PT_STOP;
 
         if (!mpctx->playlist->current && mpctx->opts->player_idle_mode < 2)
             break;

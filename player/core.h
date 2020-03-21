@@ -43,7 +43,7 @@ enum stop_play_reason {
                         // also returned on unrecoverable playback errors
     PT_NEXT_ENTRY,      // prepare to play next entry in playlist
     PT_CURRENT_ENTRY,   // prepare to play mpctx->playlist->current
-    PT_STOP,            // stop playback, or transient state when going to next
+    PT_STOP,            // stop playback / idle mode
     PT_QUIT,            // stop playback, quit player
     PT_ERROR,           // play next playlist entry (due to an error)
 };
