@@ -62,6 +62,7 @@ static void playlist_update_indexes(struct playlist *pl, int start, int end)
 
 void playlist_add(struct playlist *pl, struct playlist_entry *add)
 {
+    assert(add->filename);
     MP_TARRAY_APPEND(pl, pl->entries, pl->num_entries, add);
     add->pl = pl;
     add->pl_index = pl->num_entries - 1;
@@ -283,9 +284,8 @@ void playlist_append_entries(struct playlist *pl, struct playlist *source_pl)
 // Return -1 if e is not on the list, or if e is NULL.
 int playlist_entry_to_index(struct playlist *pl, struct playlist_entry *e)
 {
-    if (!e)
+    if (!e || e->pl != pl)
         return -1;
-    assert(e->pl == pl);
     return e->pl_index;
 }
 

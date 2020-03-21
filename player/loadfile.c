@@ -1409,8 +1409,8 @@ static void play_current_file(struct MPContext *mpctx)
     reset_playback_state(mpctx);
 
     mpctx->playing = mpctx->playlist->current;
-    if (!mpctx->playing || !mpctx->playing->filename)
-        goto terminate_playback;
+    assert(mpctx->playing);
+    assert(mpctx->playing->filename);
     mpctx->playing->reserved += 1;
 
     mpctx->filename = talloc_strdup(NULL, mpctx->playing->filename);

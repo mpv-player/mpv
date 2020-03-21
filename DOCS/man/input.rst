@@ -377,6 +377,29 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     force
         Terminate playback if the first file is being played.
 
+``playlist-play-index <integer|current|none>``
+    Start (or restart) playback of the given playlist index. In addition to the
+    0-based playlist entry index, it supports the following values:
+
+    <current>
+        The current playlist entry (as in ``playlist-current-pos``) will be
+        played again (unload and reload). If none is set, playback is stopped.
+        (In corner cases, ``playlist-current-pos`` can point to a playlist entry
+        even if playback is currently inactive,
+
+    <none>
+        Playback is stopped. If idle mode (``--idle``) is enabled, the player
+        will enter idle mode, otherwise it will exit.
+
+    This comm and is similar to ``loadfile`` in that it only manipulates the
+    state of what to play next, without waiting until the current file is
+    unloaded, and the next one is loaded.
+
+    Setting ``playlist-pos`` or similar properties can have a similar effect to
+    this command. However, it's more explicit, and guarantees that playback is
+    restarted if for example the new playlist entry is the same as the previous
+    one.
+
 ``loadfile <url> [<flags> [<options>]]``
     Load the given file or URL and play it. Technically, this is just a playlist
     manipulation command (which either replaces the playlist or appends an entry
@@ -649,10 +672,16 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     Write the resume config file that the ``quit-watch-later`` command writes,
     but continue playback normally.
 
-``stop``
+``stop [<flags>]``
     Stop playback and clear playlist. With default settings, this is
     essentially like ``quit``. Useful for the client API: playback can be
     stopped without terminating the player.
+
+    The first argument is optional, and supports the following flags:
+
+    keep-playlist
+        Do not clear the playlist.
+
 
 ``mouse <x> <y> [<button> [<mode>]]``
     Send a mouse event with given coordinate (``<x>``, ``<y>``).
@@ -2242,6 +2271,9 @@ Property list
     Current position on playlist. The first entry is on position 0. Writing to
     this property may start playback at the new position.
 
+    In some cases, this is not necessarily the currently playing file. See
+    explanation of ``current`` and ``playing`` flags in ``playlist``.
+
     If there the playlist is empty, or if it's non-empty, but no entry is
     "current", this property returns -1. Likewise, writing -1 will put the
     player into idle mode (or exit playback if idle mode is not enabled). If an
@@ -2249,14 +2281,46 @@ Property list
     (Before mpv 0.33.0, instead of returning -1, this property was unavailable
     if no playlist entry was current.)
 
-    What happens if you write the same value back to the property is
-    implementation dependent. Currently, writing the same value will restart
-    playback from the beginning. It is possible (but not necessarily planned)
-    that in the future, write access if the same value is written will be
-    ignored.
+    Writing the current value back to the property is subject to change.
+    Currently, it will restart playback of the playlist entry. But in the
+    future, writing the current value will be ignored. Use the
+    ``playlist-play-index`` command to get guaranteed behavior.
 
 ``playlist-pos-1`` (RW)
     Same as ``playlist-pos``, but 1-based.
+
+``playlist-current-pos`` (RW)
+    Index of the "current" item on playlist. This usually, but not necessarily,
+    the currently playing item (see ``playlist-playing-pos``). Depending on the
+    exact internal state of the player, it may refer to the playlist item to
+    play next, or the playlist item used to determine what to play next.
+
+    For reading, this is exactly the same as ``playlist-pos``.
+
+    For writing, this *only* sets the position of the "current" item, without
+    stopping playback of the current file (or starting playback, if this is done
+    in idle mode). Use -1 to remove the current flag.
+
+    This property is only vaguely useful. If set during playback, it will
+    typically cause the playlist entry *after* it to be played next. Another
+    possibly odd observable state is that if ``playlist-next`` is run during
+    playback, this property is set to the playlist entry to play next (unlike
+    the previous case). There is an internal flag that decides whether the
+    current playlist entry or the next one should be played, and this flag is
+    currently inaccessible for API users. (Whether this behavior will kept is
+    possibly subject to change.)
+
+``playlist-playing-pos``
+    Index of the "playing" item on playlist. A playlist item is "playing" if
+    it's being loaded, actually playing, or being unloaded. This property is set
+    during the ``MPV_EVENT_START_FILE`` (``start-file``) and the
+    ``MPV_EVENT_START_END`` (``end-file``) events. Outside of that, it returns
+    -1. If the playlist entry was somehow removed during playback, but playback
+    hasn't stopped yet, or is in progress of being stopped, it also returns -1.
+    (This can happen at least during state transitions.)
+
+    In the "playing" state, this is usually the same as ``playlist-pos``, except
+    during state changes, or if ``playlist-current-pos`` was written explicitly.
 
 ``playlist-count``
     Number of total playlist entries.
@@ -2274,12 +2338,13 @@ Property list
     ``playlist/N/filename``
         Filename of the Nth entry.
 
-    ``playlist/N/current``, ``playlist/N/playing``
-        ``yes`` if this entry is currently playing (or being loaded).
-        Unavailable or ``no`` otherwise. When changing files, ``current`` and
-        ``playing`` can be different, because the currently playing file hasn't
-        been unloaded yet; in this case, ``current`` refers to the new
-        selection. (Since mpv 0.7.0.)
+    ``playlist/N/playing``
+        ``yes`` if the ``playlist-playing-pos`` property points to this entry,
+        unavailable or ``no`` otherwise.
+
+    ``playlist/N/current``
+        ``yes`` if the ``playlist-current-pos`` property points to this entry,
+        unavailable or ``no`` otherwise.
 
     ``playlist/N/title``
         Name of the Nth entry. Only available if the playlist file contains

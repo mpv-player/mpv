@@ -2700,6 +2700,39 @@ static int mp_property_sub_end(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, end);
 }
 
+static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
+                                            int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct playlist *pl = mpctx->playlist;
+
+    switch (action) {
+    case M_PROPERTY_GET: {
+        *(int *)arg = playlist_entry_to_index(pl, pl->current);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET: {
+        pl->current = playlist_entry_from_index(pl, *(int *)arg);
+        mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_INT};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+
+static int mp_property_playlist_playing_pos(void *ctx, struct m_property *prop,
+                                            int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct playlist *pl = mpctx->playlist;
+    return m_property_int_ro(action, arg,
+                             playlist_entry_to_index(pl, mpctx->playing));
+}
+
 static int mp_property_playlist_pos_x(void *ctx, struct m_property *prop,
                                       int action, void *arg, int base)
 {
@@ -2714,6 +2747,11 @@ static int mp_property_playlist_pos_x(void *ctx, struct m_property *prop,
     }
     case M_PROPERTY_SET: {
         int pos = *(int *)arg - base;
+        if (pos >= 0 && playlist_entry_to_index(pl, pl->current) == pos) {
+            MP_WARN(mpctx, "Behavior of %s when writing the same value will "
+                    "change (currently restarts, it will stop doing this).\n",
+                    prop->name);
+        }
         mp_set_playlist_entry(mpctx, playlist_entry_from_index(pl, pos));
         return M_PROPERTY_OK;
     }
@@ -3348,6 +3386,8 @@ static const struct m_property mp_properties_base[] = {
     {"playlist", mp_property_playlist},
     {"playlist-pos", mp_property_playlist_pos},
     {"playlist-pos-1", mp_property_playlist_pos_1},
+    {"playlist-current-pos", mp_property_playlist_current_pos},
+    {"playlist-playing-pos", mp_property_playlist_playing_pos},
     M_PROPERTY_ALIAS("playlist-count", "playlist/count"),
 
     // Audio
@@ -3508,7 +3548,8 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_WIN_STATE, "display-names", "display-fps"),
     E(MP_EVENT_WIN_STATE2, "display-hidpi-scale"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
-      "playlist-count", "playlist/count"),
+      "playlist-count", "playlist/count", "playlist-current-pos",
+      "playlist-playing-pos"),
     E(MP_EVENT_CORE_IDLE, "core-idle", "eof-reached"),
 };
 #undef E
@@ -4722,6 +4763,21 @@ static void cmd_playlist_next_prev(void *p)
         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_CURRENT_FILE;
 }
 
+static void cmd_playlist_play_index(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    struct playlist *pl = mpctx->playlist;
+    int pos = cmd->args[0].v.i;
+
+    if (pos == -2)
+        pos = playlist_entry_to_index(pl, pl->current);
+
+    mp_set_playlist_entry(mpctx, playlist_entry_from_index(pl, pos));
+    if (cmd->on_osd & MP_ON_OSD_MSG)
+        mpctx->add_osd_seek_info |= OSD_SEEK_INFO_CURRENT_FILE;
+}
+
 static void cmd_sub_step_seek(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -4940,8 +4996,10 @@ static void cmd_stop(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
+    int flags = cmd->args[0].v.i;
 
-    playlist_clear(mpctx->playlist);
+    if (!(flags & 1))
+        playlist_clear(mpctx->playlist);
     if (mpctx->stop_play != PT_QUIT)
         mpctx->stop_play = PT_STOP;
     mp_wakeup_core(mpctx);
@@ -5605,7 +5663,9 @@ const struct mp_cmd_def mp_cmds[] = {
     { "quit-watch-later", cmd_quit, { {"code", OPT_INT(v.i),
                                        .flags = MP_CMD_OPT_ARG} },
         .priv = &(const bool){1} },
-    { "stop", cmd_stop, },
+    { "stop", cmd_stop,
+        { {"flags", OPT_FLAGS(v.i, {"keep-playlist", 1}), .flags = MP_CMD_OPT_ARG} }
+    },
     { "frame-step", cmd_frame_step, .allow_auto_repeat = true,
         .on_updown = true },
     { "frame-back-step", cmd_frame_back_step, .allow_auto_repeat = true },
@@ -5626,6 +5686,12 @@ const struct mp_cmd_def mp_cmds[] = {
                 .flags = MP_CMD_OPT_ARG},
         },
         .priv = &(const int){-1},
+    },
+    { "playlist-play-index", cmd_playlist_play_index,
+        {
+            {"index", OPT_CHOICE(v.i, {"current", -2}, {"none", -1}),
+                M_RANGE(-1, INT_MAX)},
+        }
     },
     { "playlist-shuffle", cmd_playlist_shuffle, },
     { "playlist-unshuffle", cmd_playlist_unshuffle, },
