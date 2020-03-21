@@ -452,7 +452,7 @@ int mpv_main(int argc, char *argv[])
     }
 
     if (reason)
-        MP_INFO(mpctx, "\nExiting... (%s)\n", reason);
+        MP_INFO(mpctx, "Exiting... (%s)\n", reason);
     if (mpctx->has_quit_custom_rc)
         rc = mpctx->quit_custom_rc;
 
