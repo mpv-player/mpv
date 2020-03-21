@@ -505,62 +505,18 @@ static int script_wait_event(lua_State *L)
     mpv_event *event = mpv_wait_event(ctx->client, luaL_optnumber(L, 1, 1e20));
 
     lua_newtable(L); // event
-    lua_pushstring(L, mpv_event_name(event->event_id)); // event name
-    lua_setfield(L, -2, "event"); // event
 
-    if (event->reply_userdata) {
-        lua_pushnumber(L, event->reply_userdata);
-        lua_setfield(L, -2, "id");
+    struct mpv_node rn;
+    mpv_event_to_node(&rn, event);
+
+    assert(rn.format == MPV_FORMAT_NODE_MAP);
+    mpv_node_list *list = rn.u.list;
+    for (int n = 0; n < list->num; n++) {
+        pushnode(L, &list->values[n]);
+        lua_setfield(L, -2, list->keys[n]);
     }
 
-    if (event->error < 0) {
-        lua_pushstring(L, mpv_error_string(event->error)); // event err
-        lua_setfield(L, -2, "error"); // event
-    }
-
-    switch (event->event_id) {
-    case MPV_EVENT_PROPERTY_CHANGE: {
-        mpv_event_property *prop = event->data;
-        lua_pushstring(L, prop->name);
-        lua_setfield(L, -2, "name");
-        switch (prop->format) {
-        case MPV_FORMAT_NODE:
-            pushnode(L, prop->data);
-            break;
-        case MPV_FORMAT_DOUBLE:
-            lua_pushnumber(L, *(double *)prop->data);
-            break;
-        case MPV_FORMAT_FLAG:
-            lua_pushboolean(L, *(int *)prop->data);
-            break;
-        case MPV_FORMAT_STRING:
-            lua_pushstring(L, *(char **)prop->data);
-            break;
-        default:
-            lua_pushnil(L);
-        }
-        lua_setfield(L, -2, "data");
-        break;
-    }
-    case MPV_EVENT_COMMAND_REPLY: {
-        mpv_event_command *cmd = event->data;
-        pushnode(L, &cmd->result);
-        lua_setfield(L, -2, "result");
-        break;
-    }
-    default: ;
-        struct mpv_node rn;
-        mpv_event_to_node(&rn, event);
-
-        assert(rn.format == MPV_FORMAT_NODE_MAP);
-        mpv_node_list *list = rn.u.list;
-        for (int n = 0; n < list->num; n++) {
-            pushnode(L, &list->values[n]);
-            lua_setfield(L, -2, list->keys[n]);
-        }
-
-        mpv_free_node_contents(&rn);
-    }
+    mpv_free_node_contents(&rn);
 
     // return event
     return 1;

@@ -1288,6 +1288,10 @@ All events can have the following fields:
 ``event``
     Name as the event (as returned by ``mpv_event_name()``).
 
+``id``
+    The ``reply_userdata`` field (opaque user value). If ``reply_userdata`` is 0,
+    the field is not added.
+
 ``error``
     Set to an error string (as returned by ``mpv_error_string()``). This field
     is missing if no error happened, or the event type does not report error.
@@ -1403,10 +1407,24 @@ This list uses the event name field value, and the C API symbol in brackets:
     Undocumented.
 
 ``command-reply`` (``MPV_EVENT_COMMAND_REPLY``)
-    Undocumented.
+    This is one of the commands for which the ```error`` field is meaningful.
+
+    JSON IPC and Lua and possibly other backends treat this specially and may
+    not pass the actual event to the user.
+
+    The event has the following fields:
+
+    ``result``
+        The result (on success) of any ``mpv_node`` type, if any.
 
 ``client-message`` (``MPV_EVENT_CLIENT_MESSAGE``)
-    Undocumented.
+    Lua and possibly other backends treat this specially and may not pass the
+    actual event to the user.
+
+    The event has the following fields:
+
+    ``args``
+        Array of strings with the message data.
 
 ``video-reconfig`` (``MPV_EVENT_VIDEO_RECONFIG``)
     Happens on video output or filter reconfig.

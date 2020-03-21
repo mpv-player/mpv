@@ -1923,6 +1923,9 @@ int mpv_event_to_node(mpv_node *dst, mpv_event *event)
     if (event->error < 0)
         node_map_add_string(dst, "error", mpv_error_string(event->error));
 
+    if (event->reply_userdata)
+        node_map_add_int64(dst, "id", event->reply_userdata);
+
     switch (event->event_id) {
 
     case MPV_EVENT_START_FILE: {
@@ -1996,6 +1999,13 @@ int mpv_event_to_node(mpv_node *dst, mpv_event *event)
             break;
         default: ;
         }
+        break;
+    }
+
+    case MPV_EVENT_COMMAND_REPLY: {
+        mpv_event_command *cmd = event->data;
+
+        *node_map_add(dst, "result", MPV_FORMAT_NONE) = cmd->result;
         break;
     }
 
