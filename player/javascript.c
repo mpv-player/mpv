@@ -1086,107 +1086,13 @@ static void makenode(void *ta_ctx, mpv_node *dst, js_State *J, int idx)
 // args: wait in secs (infinite if negative) if mpv doesn't send events earlier.
 static void script_wait_event(js_State *J)
 {
-    int top = js_gettop(J);
     double timeout = js_isnumber(J, 1) ? js_tonumber(J, 1) : -1;
     mpv_event *event = mpv_wait_event(jclient(J), timeout);
 
-    js_newobject(J); // the reply
-    js_pushstring(J, mpv_event_name(event->event_id));
-    js_setproperty(J, -2, "event");  // reply.event (is an event name)
-
-    if (event->reply_userdata) {
-        js_pushnumber(J, event->reply_userdata);
-        js_setproperty(J, -2, "id");   // reply.id
-    }
-
-    if (event->error < 0) {
-        // TODO: untested
-        js_pushstring(J, mpv_error_string(event->error));
-        js_setproperty(J, -2, "error");  // reply.error
-    }
-
-    switch (event->event_id) {
-    case MPV_EVENT_LOG_MESSAGE: {
-        mpv_event_log_message *msg = event->data;
-
-        js_pushstring(J, msg->prefix);
-        js_setproperty(J, -2, "prefix");  // reply.prefix (e.g. "cplayer")
-        js_pushstring(J, msg->level);
-        js_setproperty(J, -2, "level");  // reply.level (e.g. "v" or "info")
-        js_pushstring(J, msg->text);
-        js_setproperty(J, -2, "text");  // reply.text
-        break;
-    }
-
-    case MPV_EVENT_CLIENT_MESSAGE: {
-        mpv_event_client_message *msg = event->data;
-
-        js_newarray(J);  // reply.args
-        for (int n = 0; n < msg->num_args; n++) {
-            js_pushstring(J, msg->args[n]);
-            js_setindex(J, -2, n);
-        }
-        js_setproperty(J, -2, "args");  // reply.args (is a strings array)
-        break;
-    }
-
-    case MPV_EVENT_END_FILE: {
-        mpv_event_end_file *eef = event->data;
-        const char *reason;
-
-        switch (eef->reason) {
-        case MPV_END_FILE_REASON_EOF: reason = "eof"; break;
-        case MPV_END_FILE_REASON_STOP: reason = "stop"; break;
-        case MPV_END_FILE_REASON_QUIT: reason = "quit"; break;
-        case MPV_END_FILE_REASON_ERROR: reason = "error"; break;
-        case MPV_END_FILE_REASON_REDIRECT: reason = "redirect"; break;
-        default:
-            reason = "unknown";
-        }
-        js_pushstring(J, reason);
-        js_setproperty(J, -2, "reason");  // reply.reason
-
-        if (eef->reason == MPV_END_FILE_REASON_ERROR) {
-            js_pushstring(J, mpv_error_string(eef->error));
-            js_setproperty(J, -2, "error");  // reply.error
-        }
-        break;
-    }
-
-    case MPV_EVENT_PROPERTY_CHANGE: {
-        mpv_event_property *prop = event->data;
-        js_pushstring(J, prop->name);
-        js_setproperty(J, -2, "name");  // reply.name (is a property name)
-
-        switch (prop->format) {
-        case MPV_FORMAT_NODE:   pushnode(J, prop->data); break;
-        case MPV_FORMAT_DOUBLE: js_pushnumber(J, *(double *)prop->data); break;
-        case MPV_FORMAT_INT64:  js_pushnumber(J, *(int64_t *)prop->data); break;
-        case MPV_FORMAT_FLAG:   js_pushboolean(J, *(int *)prop->data); break;
-        case MPV_FORMAT_STRING: js_pushstring(J, *(char **)prop->data); break;
-        default:
-            js_pushnull(J);  // also for FORMAT_NONE, e.g. observe type "none"
-        }
-        js_setproperty(J, -2, "data");  // reply.data (value as observed type)
-        break;
-    }
-
-    case MPV_EVENT_HOOK: {
-        mpv_event_hook *hook = event->data;
-        js_pushnumber(J, hook->id);
-        js_setproperty(J, -2, "hook_id");  // reply.hook_id (is a number)
-        break;
-    }
-
-    case MPV_EVENT_COMMAND_REPLY: {
-        mpv_event_command *cmd = event->data;
-        pushnode(J, &cmd->result);
-        js_setproperty(J, -2, "result");  // reply.result (mpv node)
-        break;
-    }
-    }  // switch (event->event_id)
-
-    assert(top == js_gettop(J) - 1);
+    struct mpv_node rn;
+    mpv_event_to_node(&rn, event);
+    pushnode(J, &rn);
+    mpv_free_node_contents(&rn);
 }
 
 /**********************************************************************
