@@ -1809,7 +1809,7 @@ void mp_play_files(struct MPContext *mpctx)
         uninit_video_out(mpctx);
 
         if (!encode_lavc_free(mpctx->encode_lavc_ctx))
-            mpctx->stop_play = PT_ERROR;
+            mpctx->files_errored += 1;
 
         mpctx->encode_lavc_ctx = NULL;
     }
