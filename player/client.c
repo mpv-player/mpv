@@ -833,6 +833,18 @@ int mp_client_send_event_dup(struct MPContext *mpctx, const char *client_name,
     return mp_client_send_event(mpctx, client_name, 0, event, event_data.data);
 }
 
+static bool deprecated_events[] = {
+    [MPV_EVENT_TRACKS_CHANGED] = true,
+    [MPV_EVENT_TRACK_SWITCHED] = true,
+    [MPV_EVENT_IDLE] = true,
+    [MPV_EVENT_PAUSE] = true,
+    [MPV_EVENT_UNPAUSE] = true,
+    [MPV_EVENT_TICK] = true,
+    [MPV_EVENT_SCRIPT_INPUT_DISPATCH] = true,
+    [MPV_EVENT_METADATA_UPDATE] = true,
+    [MPV_EVENT_CHAPTER_CHANGE] = true,
+};
+
 int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
 {
     if (!mpv_event_name(event) || enable < 0 || enable > 1)
@@ -843,8 +855,12 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
     pthread_mutex_lock(&ctx->lock);
     uint64_t bit = 1ULL << event;
     ctx->event_mask = enable ? ctx->event_mask | bit : ctx->event_mask & ~bit;
-    if (enable && event == MPV_EVENT_TICK)
-        MP_WARN(ctx, "The 'tick' event is deprecated and will be removed.\n");
+    if (enable && event < MP_ARRAY_SIZE(deprecated_events) &&
+        deprecated_events[event])
+    {
+        MP_WARN(ctx, "The '%s' event is deprecated and will be removed.\n",
+                mpv_event_name(event));
+    }
     pthread_mutex_unlock(&ctx->lock);
     return 0;
 }
