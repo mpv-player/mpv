@@ -2242,6 +2242,13 @@ Property list
     Current position on playlist. The first entry is on position 0. Writing to
     this property may start playback at the new position.
 
+    If there the playlist is empty, or if it's non-empty, but no entry is
+    "current", this property returns -1. Likewise, writing -1 will put the
+    player into idle mode (or exit playback if idle mode is not enabled). If an
+    out of range index is written to the property, this behaves as if writing -1.
+    (Before mpv 0.33.0, instead of returning -1, this property was unavailable
+    if no playlist entry was current.)
+
     What happens if you write the same value back to the property is
     implementation dependent. Currently, writing the same value will restart
     playback from the beginning. It is possible (but not necessarily planned)

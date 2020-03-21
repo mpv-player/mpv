@@ -1828,7 +1828,7 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
     mpctx->playlist->current_was_replaced = false;
     // Make it pick up the new entry.
     if (mpctx->stop_play != PT_QUIT)
-        mpctx->stop_play = PT_CURRENT_ENTRY;
+        mpctx->stop_play = e ? PT_CURRENT_ENTRY : PT_STOP;
     mp_wakeup_core(mpctx);
 }
 

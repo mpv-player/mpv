@@ -45,6 +45,9 @@ Interface changes
       notifications were interleaved in bad ways (it could happen that a
       property notification delivered after an event contained a value that was
       valid only before the event happened).
+    - the playlist-pos and playlist-pos-1 properties now can return and accept
+      -1, and are never unavailable. Out of range indexes are now accepted, but
+      behave like writing -1.
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended
