@@ -504,17 +504,10 @@ static int script_wait_event(lua_State *L)
 
     mpv_event *event = mpv_wait_event(ctx->client, luaL_optnumber(L, 1, 1e20));
 
-    lua_newtable(L); // event
-
     struct mpv_node rn;
     mpv_event_to_node(&rn, event);
 
-    assert(rn.format == MPV_FORMAT_NODE_MAP);
-    mpv_node_list *list = rn.u.list;
-    for (int n = 0; n < list->num; n++) {
-        pushnode(L, &list->values[n]);
-        lua_setfield(L, -2, list->keys[n]);
-    }
+    pushnode(L, &rn); // event
 
     mpv_free_node_contents(&rn);
 
