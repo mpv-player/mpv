@@ -1084,15 +1084,14 @@ static void makenode(void *ta_ctx, mpv_node *dst, js_State *J, int idx)
 }
 
 // args: wait in secs (infinite if negative) if mpv doesn't send events earlier.
-static void script_wait_event(js_State *J)
+static void script_wait_event(js_State *J, void *af)
 {
     double timeout = js_isnumber(J, 1) ? js_tonumber(J, 1) : -1;
     mpv_event *event = mpv_wait_event(jclient(J), timeout);
 
-    struct mpv_node rn;
-    mpv_event_to_node(&rn, event);
-    pushnode(J, &rn);
-    mpv_free_node_contents(&rn);
+    mpv_node *rn = new_af_mpv_node(af);
+    mpv_event_to_node(rn, event);
+    pushnode(J, rn);
 }
 
 /**********************************************************************
@@ -1111,7 +1110,7 @@ struct fn_entry {
 // FN_ENTRY is a normal js C function, AF_ENTRY is an autofree js C function.
 static const struct fn_entry main_fns[] = {
     FN_ENTRY(log, 1),
-    FN_ENTRY(wait_event, 1),
+    AF_ENTRY(wait_event, 1),
     FN_ENTRY(_request_event, 2),
     AF_ENTRY(find_config_file, 1),
     FN_ENTRY(command, 1),
