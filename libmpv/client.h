@@ -1718,6 +1718,31 @@ typedef struct mpv_event {
 } mpv_event;
 
 /**
+ * Convert the given src event to a mpv_node, and set *dst to the result. *dst
+ * is set to a MPV_FORMAT_NODE_MAP, with fields for corresponding mpv_event and
+ * mpv_event.data/mpv_event_* fields.
+ *
+ * The exact details are not completely documented out of laziness. A start
+ * is located in the "Events" section of the manpage.
+ *
+ * *dst may point to newly allocated memory, or pointers in mpv_event. You must
+ * copy the entire mpv_node if you want to reference it after mpv_event becomes
+ * invalid (such as making a new mpv_wait_event() call, or destroying the
+ * mpv_handle from which it was returned). Call mpv_free_node_contents() to free
+ * any memory allocations made by this API function.
+ *
+ * Safe to be called from mpv render API threads.
+ *
+ * @param dst Target. This is not read and fully overwritten. Must be released
+ *            with mpv_free_node_contents(). Do not write to pointers returned
+ *            by it. (On error, this may be left as an empty node.)
+ * @param src The source event. Not modified (it's not const due to the author's
+ *            prejudice of the C version of const).
+ * @return error code (MPV_ERROR_NOMEM only, if at all)
+ */
+int mpv_event_to_node(mpv_node *dst, mpv_event *src);
+
+/**
  * Enable or disable the given event.
  *
  * Some events are enabled by default. Some events can't be disabled.

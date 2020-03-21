@@ -13,6 +13,7 @@ mpv_create_weak_client
 mpv_destroy
 mpv_detach_destroy
 mpv_error_string
+mpv_event_to_node
 mpv_event_name
 mpv_free
 mpv_free_node_contents

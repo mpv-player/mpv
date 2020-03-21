@@ -37,28 +37,6 @@ static mpv_node *mpv_node_array_get(mpv_node *src, int index)
     return &src->u.list->values[index];
 }
 
-static void mpv_node_array_add(void *ta_parent, mpv_node *src,  mpv_node *val)
-{
-    if (src->format != MPV_FORMAT_NODE_ARRAY)
-        return;
-
-    if (!src->u.list)
-        src->u.list = talloc_zero(ta_parent, mpv_node_list);
-
-    MP_TARRAY_GROW(src->u.list, src->u.list->values, src->u.list->num);
-
-    static const struct m_option type = { .type = CONF_TYPE_NODE };
-    m_option_get_node(&type, ta_parent, &src->u.list->values[src->u.list->num], val);
-
-    src->u.list->num++;
-}
-
-static void mpv_node_array_add_string(void *ta_parent, mpv_node *src, const char *val)
-{
-    mpv_node val_node = {.format = MPV_FORMAT_STRING, .u.string = (char *)val};
-    mpv_node_array_add(ta_parent, src, &val_node);
-}
-
 static void mpv_node_map_add(void *ta_parent, mpv_node *src, const char *key, mpv_node *val)
 {
     if (src->format != MPV_FORMAT_NODE_MAP)
@@ -84,22 +62,9 @@ static void mpv_node_map_add_null(void *ta_parent, mpv_node *src, const char *ke
     mpv_node_map_add(ta_parent, src, key, &val_node);
 }
 
-static void mpv_node_map_add_flag(void *ta_parent, mpv_node *src, const char *key, bool val)
-{
-    mpv_node val_node = {.format = MPV_FORMAT_FLAG, .u.flag = val};
-
-    mpv_node_map_add(ta_parent, src, key, &val_node);
-}
-
 static void mpv_node_map_add_int64(void *ta_parent, mpv_node *src, const char *key, int64_t val)
 {
     mpv_node val_node = {.format = MPV_FORMAT_INT64, .u.int64 = val};
-    mpv_node_map_add(ta_parent, src, key, &val_node);
-}
-
-static void mpv_node_map_add_double(void *ta_parent, mpv_node *src, const char *key, double val)
-{
-    mpv_node val_node = {.format = MPV_FORMAT_DOUBLE, .u.double_ = val};
     mpv_node_map_add(ta_parent, src, key, &val_node);
 }
 
@@ -124,74 +89,19 @@ static void mpv_format_command_reply(void *ta_parent, mpv_event *event,
     mpv_node_map_add(ta_parent, dst, "data", &cmd->result);
 }
 
-static void mpv_event_to_node(void *ta_parent, mpv_event *event, mpv_node *dst)
-{
-    if (event->event_id == MPV_EVENT_COMMAND_REPLY) {
-        mpv_format_command_reply(ta_parent, event, dst);
-        return;
-    }
-
-    mpv_node_map_add_string(ta_parent, dst, "event", mpv_event_name(event->event_id));
-
-    if (event->reply_userdata)
-        mpv_node_map_add_int64(ta_parent, dst, "id", event->reply_userdata);
-
-    if (event->error < 0)
-        mpv_node_map_add_string(ta_parent, dst, "error", mpv_error_string(event->error));
-
-    switch (event->event_id) {
-    case MPV_EVENT_LOG_MESSAGE: {
-        mpv_event_log_message *msg = event->data;
-
-        mpv_node_map_add_string(ta_parent, dst, "prefix", msg->prefix);
-        mpv_node_map_add_string(ta_parent, dst, "level",  msg->level);
-        mpv_node_map_add_string(ta_parent, dst, "text",   msg->text);
-
-        break;
-    }
-
-    case MPV_EVENT_CLIENT_MESSAGE: {
-        mpv_event_client_message *msg = event->data;
-
-        mpv_node args_node = {.format = MPV_FORMAT_NODE_ARRAY, .u.list = NULL};
-        for (int n = 0; n < msg->num_args; n++)
-            mpv_node_array_add_string(ta_parent, &args_node, msg->args[n]);
-        mpv_node_map_add(ta_parent, dst, "args", &args_node);
-        break;
-    }
-
-    case MPV_EVENT_PROPERTY_CHANGE: {
-        mpv_event_property *prop = event->data;
-
-        mpv_node_map_add_string(ta_parent, dst, "name", prop->name);
-
-        switch (prop->format) {
-        case MPV_FORMAT_NODE:
-            mpv_node_map_add(ta_parent, dst, "data", prop->data);
-            break;
-        case MPV_FORMAT_DOUBLE:
-            mpv_node_map_add_double(ta_parent, dst, "data", *(double *)prop->data);
-            break;
-        case MPV_FORMAT_FLAG:
-            mpv_node_map_add_flag(ta_parent, dst, "data", *(int *)prop->data);
-            break;
-        case MPV_FORMAT_STRING:
-            mpv_node_map_add_string(ta_parent, dst, "data", *(char **)prop->data);
-            break;
-        default:
-            mpv_node_map_add_null(ta_parent, dst, "data");
-        }
-        break;
-    }
-    }
-}
-
 char *mp_json_encode_event(mpv_event *event)
 {
     void *ta_parent = talloc_new(NULL);
-    mpv_node event_node = {.format = MPV_FORMAT_NODE_MAP, .u.list = NULL};
 
-    mpv_event_to_node(ta_parent, event, &event_node);
+    struct mpv_node event_node;
+    if (event->event_id == MPV_EVENT_COMMAND_REPLY) {
+        event_node = (mpv_node){.format = MPV_FORMAT_NODE_MAP, .u.list = NULL};
+        mpv_format_command_reply(ta_parent, event, &event_node);
+    } else {
+        mpv_event_to_node(&event_node, event);
+        // Abuse mpv_event_to_node() internals.
+        talloc_steal(ta_parent, node_get_alloc(&event_node));
+    }
 
     char *output = talloc_strdup(NULL, "");
     json_write(&output, &event_node);

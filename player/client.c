@@ -676,6 +676,9 @@ static void dup_event_data(struct mpv_event *ev)
         ev->data = msg;
         break;
     }
+    case MPV_EVENT_START_FILE:
+        ev->data = talloc_memdup(NULL, ev->data, sizeof(mpv_event_start_file));
+        break;
     case MPV_EVENT_END_FILE:
         ev->data = talloc_memdup(NULL, ev->data, sizeof(mpv_event_end_file));
         break;
@@ -1908,6 +1911,103 @@ int mpv_get_wakeup_pipe(mpv_handle *ctx)
 unsigned long mpv_client_api_version(void)
 {
     return MPV_CLIENT_API_VERSION;
+}
+
+int mpv_event_to_node(mpv_node *dst, mpv_event *event)
+{
+    *dst = (mpv_node){0};
+
+    node_init(dst, MPV_FORMAT_NODE_MAP, NULL);
+    node_map_add_string(dst, "event", mpv_event_name(event->event_id));
+
+    if (event->error < 0)
+        node_map_add_string(dst, "error", mpv_error_string(event->error));
+
+    switch (event->event_id) {
+
+    case MPV_EVENT_START_FILE: {
+        mpv_event_start_file *esf = event->data;
+
+        node_map_add_int64(dst, "playlist_entry_id", esf->playlist_entry_id);
+        break;
+    }
+
+    case MPV_EVENT_END_FILE: {
+        mpv_event_end_file *eef = event->data;
+
+        const char *reason;
+        switch (eef->reason) {
+        case MPV_END_FILE_REASON_EOF: reason = "eof"; break;
+        case MPV_END_FILE_REASON_STOP: reason = "stop"; break;
+        case MPV_END_FILE_REASON_QUIT: reason = "quit"; break;
+        case MPV_END_FILE_REASON_ERROR: reason = "error"; break;
+        case MPV_END_FILE_REASON_REDIRECT: reason = "redirect"; break;
+        default:
+            reason = "unknown";
+        }
+        node_map_add_string(dst, "reason", reason);
+
+        node_map_add_int64(dst, "playlist_entry_id", eef->playlist_entry_id);
+
+        if (eef->reason == MPV_END_FILE_REASON_ERROR)
+            node_map_add_string(dst, "file_error", mpv_error_string(eef->error));
+        break;
+    }
+
+    case MPV_EVENT_LOG_MESSAGE: {
+        mpv_event_log_message *msg = event->data;
+
+        node_map_add_string(dst, "prefix", msg->prefix);
+        node_map_add_string(dst, "level",  msg->level);
+        node_map_add_string(dst, "text",   msg->text);
+        break;
+    }
+
+    case MPV_EVENT_CLIENT_MESSAGE: {
+        mpv_event_client_message *msg = event->data;
+
+        struct mpv_node *args = node_map_add(dst, "args", MPV_FORMAT_NODE_ARRAY);
+        for (int n = 0; n < msg->num_args; n++) {
+            struct mpv_node *sn = node_array_add(args, MPV_FORMAT_NONE);
+            sn->format = MPV_FORMAT_STRING;
+            sn->u.string = (char *)msg->args[n];
+        }
+        break;
+    }
+
+    case MPV_EVENT_PROPERTY_CHANGE: {
+        mpv_event_property *prop = event->data;
+
+        node_map_add_string(dst, "name", prop->name);
+
+        switch (prop->format) {
+        case MPV_FORMAT_NODE:
+            *node_map_add(dst, "data", MPV_FORMAT_NONE) =
+                *(struct mpv_node *)prop->data;
+            break;
+        case MPV_FORMAT_DOUBLE:
+            node_map_add_double(dst, "data", *(double *)prop->data);
+            break;
+        case MPV_FORMAT_FLAG:
+            node_map_add_flag(dst, "data", *(int *)prop->data);
+            break;
+        case MPV_FORMAT_STRING:
+            node_map_add_string(dst, "data", *(char **)prop->data);
+            break;
+        default: ;
+        }
+        break;
+    }
+
+    case MPV_EVENT_HOOK: {
+        mpv_event_hook *hook = event->data;
+
+        node_map_add_int64(dst, "hook_id", hook->id);
+        break;
+    }
+
+    }
+    return 0;
 }
 
 static const char *const err_table[] = {

@@ -519,50 +519,6 @@ static int script_wait_event(lua_State *L)
     }
 
     switch (event->event_id) {
-    case MPV_EVENT_LOG_MESSAGE: {
-        mpv_event_log_message *msg = event->data;
-
-        lua_pushstring(L, msg->prefix); // event s
-        lua_setfield(L, -2, "prefix"); // event
-        lua_pushstring(L, msg->level); // event s
-        lua_setfield(L, -2, "level"); // event
-        lua_pushstring(L, msg->text); // event s
-        lua_setfield(L, -2, "text"); // event
-        break;
-    }
-    case MPV_EVENT_CLIENT_MESSAGE: {
-        mpv_event_client_message *msg = event->data;
-
-        lua_newtable(L); // event args
-        for (int n = 0; n < msg->num_args; n++) {
-            lua_pushinteger(L, n + 1); // event args N
-            lua_pushstring(L, msg->args[n]); // event args N val
-            lua_settable(L, -3); // event args
-        }
-        lua_setfield(L, -2, "args"); // event
-        break;
-    }
-    case MPV_EVENT_END_FILE: {
-        mpv_event_end_file *eef = event->data;
-        const char *reason;
-        switch (eef->reason) {
-        case MPV_END_FILE_REASON_EOF: reason = "eof"; break;
-        case MPV_END_FILE_REASON_STOP: reason = "stop"; break;
-        case MPV_END_FILE_REASON_QUIT: reason = "quit"; break;
-        case MPV_END_FILE_REASON_ERROR: reason = "error"; break;
-        case MPV_END_FILE_REASON_REDIRECT: reason = "redirect"; break;
-        default:
-            reason = "unknown";
-        }
-        lua_pushstring(L, reason); // event reason
-        lua_setfield(L, -2, "reason"); // event
-
-        if (eef->reason == MPV_END_FILE_REASON_ERROR) {
-            lua_pushstring(L, mpv_error_string(eef->error)); // event error
-            lua_setfield(L, -2, "error"); // event
-        }
-        break;
-    }
     case MPV_EVENT_PROPERTY_CHANGE: {
         mpv_event_property *prop = event->data;
         lua_pushstring(L, prop->name);
@@ -586,12 +542,6 @@ static int script_wait_event(lua_State *L)
         lua_setfield(L, -2, "data");
         break;
     }
-    case MPV_EVENT_HOOK: {
-        mpv_event_hook *hook = event->data;
-        lua_pushinteger(L, hook->id);
-        lua_setfield(L, -2, "hook_id");
-        break;
-    }
     case MPV_EVENT_COMMAND_REPLY: {
         mpv_event_command *cmd = event->data;
         pushnode(L, &cmd->result);
@@ -599,6 +549,17 @@ static int script_wait_event(lua_State *L)
         break;
     }
     default: ;
+        struct mpv_node rn;
+        mpv_event_to_node(&rn, event);
+
+        assert(rn.format == MPV_FORMAT_NODE_MAP);
+        mpv_node_list *list = rn.u.list;
+        for (int n = 0; n < list->num; n++) {
+            pushnode(L, &list->values[n]);
+            lua_setfield(L, -2, list->keys[n]);
+        }
+
+        mpv_free_node_contents(&rn);
     }
 
     // return event
