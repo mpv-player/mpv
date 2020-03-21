@@ -272,6 +272,7 @@ struct demux_internal {
     // Cached state.
     int64_t stream_size;
     int64_t last_speed_query;
+    double speed_query_prev_sample;
     uint64_t bytes_per_second;
     int64_t next_cache_update;
 
@@ -4108,7 +4109,10 @@ static void update_cache(struct demux_internal *in)
         uint64_t bytes = in->cache_unbuffered_read_bytes;
         in->cache_unbuffered_read_bytes = 0;
         in->last_speed_query = now;
-        in->bytes_per_second = bytes / (diff / (double)MP_SECOND_US);
+        double speed = bytes / (diff / (double)MP_SECOND_US);
+        in->bytes_per_second = 0.5 * in->speed_query_prev_sample +
+                               0.5 * speed;
+        in->speed_query_prev_sample = speed;
     }
     // The idea is to update as long as there is "activity".
     if (in->bytes_per_second)
