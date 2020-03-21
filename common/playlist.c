@@ -66,6 +66,7 @@ void playlist_add(struct playlist *pl, struct playlist_entry *add)
     MP_TARRAY_APPEND(pl, pl->entries, pl->num_entries, add);
     add->pl = pl;
     add->pl_index = pl->num_entries - 1;
+    add->id = ++pl->id_alloc;
     talloc_steal(pl, add);
 }
 
@@ -250,6 +251,7 @@ static void playlist_transfer_entries_to(struct playlist *pl, int dst_index,
         struct playlist_entry *e = source_pl->entries[n];
         e->pl = pl;
         e->pl_index = dst_index + n;
+        e->id = ++pl->id_alloc;
         pl->entries[e->pl_index] = e;
         talloc_steal(pl, e);
     }

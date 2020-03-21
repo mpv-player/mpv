@@ -2351,6 +2351,12 @@ Property list
         such fields, and only if mpv's parser supports it for the given
         playlist format.
 
+    ``playlist/N/id``
+        Unique ID for this entry. This is an automatically assigned integer ID
+        that is unique for the entire life time of the current mpv core
+        instance. Other commands, events, etc. use this as ``playlist_entry_id``
+        fields.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -2363,6 +2369,7 @@ Property list
                 "current"   MPV_FORMAT_FLAG (might be missing; since mpv 0.7.0)
                 "playing"   MPV_FORMAT_FLAG (same)
                 "title"     MPV_FORMAT_STRING (optional)
+                "id"        MPV_FORMAT_INT64
 
 ``track-list``
     List of audio/video/sub tracks, current entry marked. Currently, the raw

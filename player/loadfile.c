@@ -1381,7 +1381,11 @@ static void play_current_file(struct MPContext *mpctx)
     if (mpctx->stop_play || !mpctx->playlist->current)
         return;
 
-    mp_notify(mpctx, MPV_EVENT_START_FILE, NULL);
+    mpv_event_start_file start_event = {
+        .playlist_entry_id = mpctx->playlist->current->id,
+    };
+
+    mp_notify(mpctx, MPV_EVENT_START_FILE, &start_event);
 
     mp_cancel_reset(mpctx->playback_abort);
 
@@ -1653,7 +1657,9 @@ terminate_playback:
 
     bool nothing_played = !mpctx->shown_aframes && !mpctx->shown_vframes &&
                           mpctx->error_playing <= 0;
-    struct mpv_event_end_file end_event = {0};
+    struct mpv_event_end_file end_event = {
+        .playlist_entry_id = start_event.playlist_entry_id,
+    };
     switch (mpctx->stop_play) {
     case PT_ERROR:
     case AT_END_OF_FILE:

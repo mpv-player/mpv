@@ -2798,6 +2798,7 @@ static int get_playlist_entry(int item, int action, void *arg, void *ctx)
         {"current",     SUB_PROP_FLAG(1), .unavailable = !current},
         {"playing",     SUB_PROP_FLAG(1), .unavailable = !playing},
         {"title",       SUB_PROP_STR(e->title), .unavailable = !e->title},
+        {"id",          SUB_PROP_INT64(e->id)},
         {0}
     };
 
@@ -4881,6 +4882,10 @@ static void cmd_loadfile(void *p)
     }
     playlist_add(mpctx->playlist, entry);
 
+    struct mpv_node *res = &cmd->result;
+    node_init(res, MPV_FORMAT_NODE_MAP, NULL);
+    node_map_add_int64(res, "playlist_entry_id", entry->id);
+
     if (!append || (append == 2 && !mpctx->playlist->current)) {
         if (mpctx->opts->position_save_on_quit) // requested in issue #1148
             mp_write_watch_later_conf(mpctx);
@@ -4904,6 +4909,8 @@ static void cmd_loadlist(void *p)
         struct playlist_entry *new = pl->current;
         if (!append)
             playlist_clear(mpctx->playlist);
+        struct playlist_entry *first = playlist_entry_from_index(pl, 0);
+        int num_entries = pl->num_entries;
         playlist_append_entries(mpctx->playlist, pl);
         talloc_free(pl);
 
@@ -4912,6 +4919,13 @@ static void cmd_loadlist(void *p)
 
         if (!append && new)
             mp_set_playlist_entry(mpctx, new);
+
+        struct mpv_node *res = &cmd->result;
+        node_init(res, MPV_FORMAT_NODE_MAP, NULL);
+        if (num_entries) {
+            node_map_add_int64(res, "playlist_entry_id", first->id);
+            node_map_add_int64(res, "num_entries", num_entries);
+        }
 
         mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         mp_wakeup_core(mpctx);

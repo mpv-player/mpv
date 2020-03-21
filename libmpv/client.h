@@ -1297,6 +1297,7 @@ typedef enum mpv_event_id {
     MPV_EVENT_COMMAND_REPLY     = 5,
     /**
      * Notification before playback start of a file (before the file is loaded).
+     * See also mpv_event and mpv_event_start_file.
      */
     MPV_EVENT_START_FILE        = 6,
     /**
@@ -1595,6 +1596,14 @@ typedef enum mpv_end_file_reason {
     MPV_END_FILE_REASON_REDIRECT = 5,
 } mpv_end_file_reason;
 
+/// Since API version 1.108.
+typedef struct mpv_event_start_file {
+    /**
+     * Playlist entry ID of the file being loaded now.
+     */
+    int64_t playlist_entry_id;
+} mpv_event_start_file;
+
 typedef struct mpv_event_end_file {
     /**
      * Corresponds to the values in enum mpv_end_file_reason (the "int" type
@@ -1610,6 +1619,13 @@ typedef struct mpv_event_end_file {
      * Since API version 1.9.
      */
     int error;
+    /**
+     * Playlist entry ID of the file that was being played or attempted to be
+     * played. This has the same value as the playlist_entry_id field in the
+     * corresponding mpv_event_start_file event.
+     * Since API version 1.108.
+     */
+    int64_t playlist_entry_id;
 } mpv_event_end_file;
 
 #if MPV_ENABLE_DEPRECATED
@@ -1689,6 +1705,7 @@ typedef struct mpv_event {
      *  MPV_EVENT_PROPERTY_CHANGE:        mpv_event_property*
      *  MPV_EVENT_LOG_MESSAGE:            mpv_event_log_message*
      *  MPV_EVENT_CLIENT_MESSAGE:         mpv_event_client_message*
+     *  MPV_EVENT_START_FILE:             mpv_event_start_file* (since v1.108)
      *  MPV_EVENT_END_FILE:               mpv_event_end_file*
      *  MPV_EVENT_HOOK:                   mpv_event_hook*
      *  MPV_EVENT_COMMAND_REPLY*          mpv_event_command*

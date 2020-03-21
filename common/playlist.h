@@ -30,6 +30,8 @@ struct playlist_entry {
     struct playlist *pl;
     int pl_index;
 
+    uint64_t id;
+
     char *filename;
 
     struct playlist_param *params;
@@ -71,6 +73,8 @@ struct playlist {
     // current_was_replaced is set to true.
     struct playlist_entry *current;
     bool current_was_replaced;
+
+    uint64_t id_alloc;
 };
 
 void playlist_entry_add_param(struct playlist_entry *e, bstr name, bstr value);
