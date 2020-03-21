@@ -1882,7 +1882,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct mp_codec_params p =
         track->stream ? *track->stream->codec : (struct mp_codec_params){0};
 
-    char decoder_desc[256];
+    char decoder_desc[256] = {0};
     if (track->dec)
         mp_decoder_wrapper_get_desc(track->dec, decoder_desc, sizeof(decoder_desc));
 
