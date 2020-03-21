@@ -378,7 +378,11 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Terminate playback if the first file is being played.
 
 ``loadfile <url> [<flags> [<options>]]``
-    Load the given file or URL and play it.
+    Load the given file or URL and play it. Technically, this is just a playlist
+    manipulation command (which either replaces the playlist or appends an entry
+    to it). Actual file loading happens independently. For example, a
+    ``loadfile`` command that replaces the current file with a new one returns
+    before the current file is stopped, and the new file even begins loading.
 
     Second argument:
 
@@ -393,8 +397,10 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     The third argument is a list of options and values which should be set
     while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
-    Not all options can be changed this way. Some options require a restart
-    of the player.
+    When using the client API, this can be a ``MPV_FORMAT_NODE_MAP`` (or a Lua
+    table), however the values themselves must be strings currently. These
+    options are set during playback, and restored to the previous value at end
+    of playback (see `Per-File Options`_).
 
 ``loadlist <url> [<flags>]``
     Load the given playlist file or URL (like ``--playlist``).
