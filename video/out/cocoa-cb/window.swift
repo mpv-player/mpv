@@ -497,6 +497,10 @@ class Window: NSWindow, NSWindowDelegate {
     func windowDidEndLiveResize(_ notification: Notification) {
         cocoaCB.layer?.inLiveResize = false
         cocoaCB.mpv?.setConfigProperty(maximized: isZoomed)
+
+        if let contentViewFrame = contentView?.frame, !isAnimating {
+            unfsContentFrame = convertToScreen(contentViewFrame)
+        }
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {

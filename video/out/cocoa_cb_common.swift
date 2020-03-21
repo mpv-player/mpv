@@ -516,6 +516,17 @@ class CocoaCB: NSObject {
                 return VO_TRUE
             }
             return VO_FALSE
+        case VOCTRL_GET_UNFS_WINDOW_SIZE:
+            let sizeData = data?.assumingMemoryBound(to: Int32.self)
+            let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
+            var rect = ccb.window?.unfsContentFrame ?? NSRect(x: 0, y: 0, width: 1280, height: 720)
+            if let screen = ccb.window?.currentScreen, !Bool(ccb.mpv?.opts.hidpi_window_scale ?? 0) {
+                rect = screen.convertRectToBacking(rect)
+            }
+
+            size[0] = Int32(rect.size.width)
+            size[1] = Int32(rect.size.height)
+            return VO_TRUE
         case VOCTRL_SET_UNFS_WINDOW_SIZE:
             if let sizeData = data?.assumingMemoryBound(to: Int32.self) {
                 let size = UnsafeBufferPointer(start: sizeData, count: 2)
