@@ -1019,7 +1019,7 @@ static int script_readdir(lua_State *L, void *tmp)
     }
     add_af_dir(tmp, dir);
     lua_newtable(L); // list
-    char *fullpath = NULL;
+    char *fullpath = talloc_strdup(tmp, "");
     struct dirent *e;
     int n = 0;
     while ((e = readdir(dir))) {
@@ -1041,8 +1041,6 @@ static int script_readdir(lua_State *L, void *tmp)
         lua_pushstring(L, name); // list index name
         lua_settable(L, -3); // list
     }
-    closedir(dir);
-    talloc_free(fullpath);
     return 1;
 }
 
