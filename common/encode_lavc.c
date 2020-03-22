@@ -395,10 +395,11 @@ void encode_lavc_stream_eof(struct encode_lavc_context *ctx,
 // Signal that you are ready to encode (you provide the codec params etc. too).
 // This returns a muxing handle which you can use to add encodec packets.
 // Can be called only once per stream. info is copied by callee as needed.
-static struct mux_stream *encode_lavc_add_stream(struct encode_lavc_context *ctx,
-                                                 struct encoder_stream_info *info,
-                                                 void (*on_ready)(void *ctx),
-                                                 void *on_ready_ctx)
+static void encode_lavc_add_stream(struct encoder_context *enc,
+                                   struct encode_lavc_context *ctx,
+                                   struct encoder_stream_info *info,
+                                   void (*on_ready)(void *ctx),
+                                   void *on_ready_ctx)
 {
     struct encode_priv *p = ctx->priv;
 
@@ -433,13 +434,12 @@ static struct mux_stream *encode_lavc_add_stream(struct encode_lavc_context *ctx
 
     dst->on_ready = on_ready;
     dst->on_ready_ctx = on_ready_ctx;
+    enc->mux_stream = dst;
 
     maybe_init_muxer(ctx);
 
 done:
     pthread_mutex_unlock(&ctx->lock);
-
-    return dst;
 }
 
 // Write a packet. This will take over ownership of `pkt`
@@ -922,8 +922,7 @@ bool encoder_init_codec_and_muxer(struct encoder_context *p,
     if (avcodec_parameters_from_context(p->info.codecpar, p->encoder) < 0)
         goto fail;
 
-    p->mux_stream = encode_lavc_add_stream(p->encode_lavc_ctx, &p->info,
-                                           on_ready, ctx);
+    encode_lavc_add_stream(p, p->encode_lavc_ctx, &p->info, on_ready, ctx);
     if (!p->mux_stream)
         goto fail;
 

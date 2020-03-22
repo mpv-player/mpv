@@ -232,7 +232,6 @@ static void encode(struct ao *ao, double apts, void **data)
             // whatever the fuck this code does?
             MP_WARN(ao, "audio frame pts went backwards (%d <- %d), autofixed\n",
                     (int)frame->pts, (int)ac->lastpts);
-            int64_t prets = frame->pts;
             frame_pts = ac->lastpts + 1;
             ac->lastpts = frame_pts;
             frame->pts = av_rescale_q(frame_pts, ac->worst_time_base,
