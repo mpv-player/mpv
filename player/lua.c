@@ -114,36 +114,7 @@ static void mp_lua_optarg(lua_State *L, int arg)
         lua_pushnil(L);
 }
 
-static int destroy_crap(lua_State *L)
-{
-    void **data = luaL_checkudata(L, 1, "ohthispain");
-    talloc_free(data[0]);
-    data[0] = NULL;
-    return 0;
-}
-
-// Creates a small userdata object and pushes it to the Lua stack. The function
-// will (on the C level) return a talloc object that will be released by the
-// userdata gc routine.
-// This can be used to free temporary C data structures correctly if Lua errors
-// happen.
-// You can't free the talloc context directly; the Lua __gc handler does this.
-// In many cases, talloc_free_children(returnval) will be used to free attached
-// memory in advance when it's known not to be needed anymore (a minor
-// optimization). Freeing it completely must be left to the Lua GC.
-static void *mp_lua_PITA(lua_State *L)
-{
-    void **data = lua_newuserdata(L, sizeof(void *)); // u
-    if (luaL_newmetatable(L, "ohthispain")) { // u metatable
-        lua_pushvalue(L, -1);  // u metatable metatable
-        lua_setfield(L, -2, "__index");  // u metatable
-        lua_pushcfunction(L, destroy_crap); // u metatable gc
-        lua_setfield(L, -2, "__gc"); // u metatable
-    }
-    lua_setmetatable(L, -2); // u
-    *data = talloc_new(NULL);
-    return *data;
-}
+static void *mp_lua_PITA(lua_State *L);
 
 // Perform the equivalent of mpv_free_node_contents(node) when tmp is freed.
 static void auto_free_node(void *tmp, mpv_node *node)
@@ -1148,10 +1119,12 @@ static int script_format_json(lua_State *L)
     return 2;
 }
 
-#define FN_ENTRY(name) {#name, script_ ## name}
+#define FN_ENTRY(name) {#name, script_ ## name, 0}
+#define AF_ENTRY(name) {#name, script_ ## name, 1}
 struct fn_entry {
     const char *name;
     int (*fn)(lua_State *L);
+    int autofree;
 };
 
 static const struct fn_entry main_fns[] = {
@@ -1165,16 +1138,16 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(get_script_directory),
     FN_ENTRY(command),
     FN_ENTRY(commandv),
-    FN_ENTRY(command_native),
-    FN_ENTRY(raw_command_native_async),
+    AF_ENTRY(command_native),
+    AF_ENTRY(raw_command_native_async),
     FN_ENTRY(raw_abort_async_command),
     FN_ENTRY(get_property_bool),
     FN_ENTRY(get_property_number),
-    FN_ENTRY(get_property_native),
+    AF_ENTRY(get_property_native),
     FN_ENTRY(set_property),
     FN_ENTRY(set_property_bool),
     FN_ENTRY(set_property_number),
-    FN_ENTRY(set_property_native),
+    AF_ENTRY(set_property_native),
     FN_ENTRY(raw_observe_property),
     FN_ENTRY(raw_unobserve_property),
     FN_ENTRY(get_mouse_pos),
@@ -1194,17 +1167,57 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
     FN_ENTRY(getpid),
-    FN_ENTRY(parse_json),
-    FN_ENTRY(format_json),
+    AF_ENTRY(parse_json),
+    AF_ENTRY(format_json),
     {0}
 };
+
+/* returns the talloc ctx which script_autofree_trampoline sets */
+static void *mp_lua_PITA(lua_State *L)
+{
+    void **ctx = lua_touserdata(L, lua_upvalueindex(1));
+    assert(ctx && *ctx);
+    return *ctx;
+}
+
+static int script_autofree_trampoline(lua_State *L)
+{
+    lua_CFunction target = lua_touserdata(L, lua_upvalueindex(1));
+    assert(target);
+
+    int nargs = lua_gettop(L);
+    void *ctx = NULL;
+
+    lua_pushlightuserdata(L, &ctx);
+    lua_pushcclosure(L, target, 1);
+    lua_insert(L, 1);
+
+    ctx = talloc_new(NULL);
+    int r = lua_pcall(L, nargs, LUA_MULTRET, 0);
+    talloc_free(ctx);
+
+    if (r)
+        lua_error(L);
+
+    return lua_gettop(L);
+}
+
+static void mp_push_autofree_fn(lua_State *L, lua_CFunction fn)
+{
+    lua_pushlightuserdata(L, fn);
+    lua_pushcclosure(L, script_autofree_trampoline, 1);
+}
 
 static void register_package_fns(lua_State *L, char *module,
                                  const struct fn_entry *e)
 {
     push_module_table(L, module); // modtable
     for (int n = 0; e[n].name; n++) {
-        lua_pushcclosure(L, e[n].fn, 0); // modtable fn
+        if (e[n].autofree) {
+            mp_push_autofree_fn(L, e[n].fn); // modtable fn
+        } else {
+            lua_pushcclosure(L, e[n].fn, 0); // modtable fn
+        }
         lua_setfield(L, -2, e[n].name); // modtable
     }
     lua_pop(L, 1); // -
