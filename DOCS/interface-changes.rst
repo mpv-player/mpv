@@ -56,6 +56,7 @@ Interface changes
     - add playlist-current-pos, playlist-playing-pos properties
     - Lua end-file events do not set the "error" field anymore, use "file_error"
       instead.
+    - deprecate encoding mode (lack of maintainer)
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

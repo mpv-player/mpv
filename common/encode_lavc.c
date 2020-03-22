@@ -77,7 +77,8 @@ struct mux_stream {
 #define OPT_BASE_STRUCT struct encode_opts
 const struct m_sub_options encode_config = {
     .opts = (const m_option_t[]) {
-        {"o", OPT_STRING(file), .flags = CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE},
+        {"o", OPT_STRING(file), .flags = CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE,
+            .deprecation_message = "lack of maintainer"},
         {"of", OPT_STRING(format)},
         {"ofopts", OPT_KEYVALUELIST(fopts), .flags = M_OPT_HAVE_HELP},
         {"ovc", OPT_STRING(vcodec)},
