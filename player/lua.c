@@ -114,10 +114,16 @@ static void mp_lua_optarg(lua_State *L, int arg)
         lua_pushnil(L);
 }
 
-static void *mp_lua_PITA(lua_State *L);
+// autofree lua C function: same as lua_CFunction but with these differences:
+// - It accepts an additional void* argument which is a pre-initialized talloc
+//   context which it can use, and which is freed with its children once the
+//   function completes - regardless if a lua error occured or not. If a lua
+//   error did occur then it's re-thrown after the ctx is freed.
+// - At struct fn_entry it's declared with AF_ENTRY instead of FN_ENTRY.
+typedef int (*af_CFunction)(lua_State *L, void *ctx);
 
 // Perform the equivalent of mpv_free_node_contents(node) when tmp is freed.
-static void auto_free_node(void *tmp, mpv_node *node)
+static void steal_node_alloctions(void *tmp, mpv_node *node)
 {
     talloc_steal(tmp, node_get_alloc(node));
 }
@@ -689,15 +695,13 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
     }
 }
 
-static int script_set_property_native(lua_State *L)
+static int script_set_property_native(lua_State *L, void *tmp)
 {
     struct script_ctx *ctx = get_ctx(L);
     const char *p = luaL_checkstring(L, 1);
     struct mpv_node node;
-    void *tmp = mp_lua_PITA(L);
     makenode(tmp, &node, L, 2);
     int res = mpv_set_property(ctx->client, p, MPV_FORMAT_NODE, &node);
-    talloc_free_children(tmp);
     return check_error(L, res);
 
 }
@@ -813,19 +817,17 @@ static void pushnode(lua_State *L, mpv_node *node)
     }
 }
 
-static int script_get_property_native(lua_State *L)
+static int script_get_property_native(lua_State *L, void *tmp)
 {
     struct script_ctx *ctx = get_ctx(L);
     const char *name = luaL_checkstring(L, 1);
     mp_lua_optarg(L, 2);
-    void *tmp = mp_lua_PITA(L);
 
     mpv_node node;
     int err = mpv_get_property(ctx->client, name, MPV_FORMAT_NODE, &node);
     if (err >= 0) {
-        auto_free_node(tmp, &node);
+        steal_node_alloctions(tmp, &node);
         pushnode(L, &node);
-        talloc_free_children(tmp);
         return 1;
     }
     lua_pushvalue(L, 2);
@@ -866,19 +868,17 @@ static int script_raw_unobserve_property(lua_State *L)
     return 1;
 }
 
-static int script_command_native(lua_State *L)
+static int script_command_native(lua_State *L, void *tmp)
 {
     struct script_ctx *ctx = get_ctx(L);
     mp_lua_optarg(L, 2);
     struct mpv_node node;
     struct mpv_node result;
-    void *tmp = mp_lua_PITA(L);
     makenode(tmp, &node, L, 1);
     int err = mpv_command_node(ctx->client, &node, &result);
     if (err >= 0) {
-        auto_free_node(tmp, &result);
+        steal_node_alloctions(tmp, &result);
         pushnode(L, &result);
-        talloc_free_children(tmp);
         return 1;
     }
     lua_pushvalue(L, 2);
@@ -886,15 +886,13 @@ static int script_command_native(lua_State *L)
     return 2;
 }
 
-static int script_raw_command_native_async(lua_State *L)
+static int script_raw_command_native_async(lua_State *L, void *tmp)
 {
     struct script_ctx *ctx = get_ctx(L);
     uint64_t id = luaL_checknumber(L, 1);
     struct mpv_node node;
-    void *tmp = mp_lua_PITA(L);
     makenode(tmp, &node, L, 2);
     int res = mpv_command_node_async(ctx->client, id, &node);
-    talloc_free_children(tmp);
     return check_error(L, res);
 }
 
@@ -1078,10 +1076,9 @@ static int script_getpid(lua_State *L)
     return 1;
 }
 
-static int script_parse_json(lua_State *L)
+static int script_parse_json(lua_State *L, void *tmp)
 {
     mp_lua_optarg(L, 2);
-    void *tmp = mp_lua_PITA(L);
     char *text = talloc_strdup(tmp, luaL_checkstring(L, 1));
     bool trail = lua_toboolean(L, 2);
     bool ok = false;
@@ -1098,13 +1095,11 @@ static int script_parse_json(lua_State *L)
         lua_pushstring(L, "error");
     }
     lua_pushstring(L, text);
-    talloc_free_children(tmp);
     return 3;
 }
 
-static int script_format_json(lua_State *L)
+static int script_format_json(lua_State *L, void *tmp)
 {
-    void *tmp = mp_lua_PITA(L);
     struct mpv_node node;
     makenode(tmp, &node, L, 1);
     char *dst = talloc_strdup(tmp, "");
@@ -1115,16 +1110,15 @@ static int script_format_json(lua_State *L)
         lua_pushnil(L);
         lua_pushstring(L, "error");
     }
-    talloc_free_children(tmp);
     return 2;
 }
 
 #define FN_ENTRY(name) {#name, script_ ## name, 0}
-#define AF_ENTRY(name) {#name, script_ ## name, 1}
+#define AF_ENTRY(name) {#name, 0, script_ ## name}
 struct fn_entry {
     const char *name;
-    int (*fn)(lua_State *L);
-    int autofree;
+    int (*fn)(lua_State *L);  // lua_CFunction
+    int (*af)(lua_State *L, void *);  // af_CFunction
 };
 
 static const struct fn_entry main_fns[] = {
@@ -1172,29 +1166,36 @@ static const struct fn_entry utils_fns[] = {
     {0}
 };
 
-/* returns the talloc ctx which script_autofree_trampoline sets */
-static void *mp_lua_PITA(lua_State *L)
+typedef struct autofree_data {
+    af_CFunction target;
+    void *ctx;
+} autofree_data;
+
+/* runs the target autofree script_* function with the ctx argument */
+static int script_autofree_call(lua_State *L)
 {
-    void **ctx = lua_touserdata(L, lua_upvalueindex(1));
-    assert(ctx && *ctx);
-    return *ctx;
+    autofree_data *data = lua_touserdata(L, lua_upvalueindex(1));
+    assert(data && data->target && data->ctx);
+    return data->target(L, data->ctx);
 }
 
 static int script_autofree_trampoline(lua_State *L)
 {
-    lua_CFunction target = lua_touserdata(L, lua_upvalueindex(1));
-    assert(target);
+    autofree_data data = {
+        .target = lua_touserdata(L, lua_upvalueindex(1)),
+        .ctx = NULL,
+    };
+    assert(data.target);
 
     int nargs = lua_gettop(L);
-    void *ctx = NULL;
 
-    lua_pushlightuserdata(L, &ctx);
-    lua_pushcclosure(L, target, 1);
+    lua_pushlightuserdata(L, &data);
+    lua_pushcclosure(L, script_autofree_call, 1);
     lua_insert(L, 1);
 
-    ctx = talloc_new(NULL);
+    data.ctx = talloc_new(NULL);
     int r = lua_pcall(L, nargs, LUA_MULTRET, 0);
-    talloc_free(ctx);
+    talloc_free(data.ctx);
 
     if (r)
         lua_error(L);
@@ -1202,7 +1203,7 @@ static int script_autofree_trampoline(lua_State *L)
     return lua_gettop(L);
 }
 
-static void mp_push_autofree_fn(lua_State *L, lua_CFunction fn)
+static void mp_push_autofree_fn(lua_State *L, af_CFunction fn)
 {
     lua_pushlightuserdata(L, fn);
     lua_pushcclosure(L, script_autofree_trampoline, 1);
@@ -1213,8 +1214,8 @@ static void register_package_fns(lua_State *L, char *module,
 {
     push_module_table(L, module); // modtable
     for (int n = 0; e[n].name; n++) {
-        if (e[n].autofree) {
-            mp_push_autofree_fn(L, e[n].fn); // modtable fn
+        if (e[n].af) {
+            mp_push_autofree_fn(L, e[n].af); // modtable fn
         } else {
             lua_pushcclosure(L, e[n].fn, 0); // modtable fn
         }
