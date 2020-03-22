@@ -426,7 +426,7 @@ static struct mux_stream *encode_lavc_add_stream(struct encode_lavc_context *ctx
     // set on the AVStream.
     if (info->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
         dst->st->sample_aspect_ratio = info->codecpar->sample_aspect_ratio;
-    
+
     if (avcodec_parameters_copy(dst->st->codecpar, info->codecpar) < 0)
         MP_HANDLE_OOM(0);
 
