@@ -498,7 +498,7 @@ static int script_resume_all(lua_State *L)
 
 static void pushnode(lua_State *L, mpv_node *node);
 
-static int script_wait_event(lua_State *L)
+static int script_raw_wait_event(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
 
@@ -1159,7 +1159,7 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(suspend),
     FN_ENTRY(resume),
     FN_ENTRY(resume_all),
-    FN_ENTRY(wait_event),
+    FN_ENTRY(raw_wait_event),
     FN_ENTRY(request_event),
     FN_ENTRY(find_config_file),
     FN_ENTRY(get_script_directory),

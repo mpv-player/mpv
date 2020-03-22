@@ -475,6 +475,15 @@ _G.print = mp.msg.info
 package.loaded["mp"] = mp
 package.loaded["mp.msg"] = mp.msg
 
+function mp.wait_event(t)
+    local r = mp.raw_wait_event(t)
+    if r and r.file_error and not r.error then
+        -- compat; deprecated
+        r.error = r.file_error
+    end
+    return r
+end
+
 _G.mp_event_loop = function()
     mp.dispatch_events(true)
 end

@@ -1350,8 +1350,9 @@ This list uses the event name field value, and the C API symbol in brackets:
     ``file_error``
         Set to mpv error string describing the approximate reason why playback
         failed. Unset if no error known. (In Lua scripting, this value was set
-        on the ``error`` field directly before mpv 0.33.0. Now the ``error``
-        field always indicates success, i.e. is not set.)
+        on the ``error`` field directly. This is deprecated since mpv 0.33.0.
+        In the future, this ``error`` field will be unset for this specific
+        event.)
 
 ``file-loaded``  (``MPV_EVENT_FILE_LOADED``)
     Happens after a file was loaded and begins playback.

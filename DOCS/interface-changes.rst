@@ -54,8 +54,10 @@ Interface changes
       Using the "playlist-play-index" command is recommended instead.
     - add "playlist-play-index" command
     - add playlist-current-pos, playlist-playing-pos properties
-    - Lua end-file events do not set the "error" field anymore, use "file_error"
-      instead.
+    - Lua end-file events set the "error" field; this is deprecated; use the
+      "file_error" instead for this specific event. Scripts relying on the
+      "error" field for end-file will silently break at some point in the
+      future.
     - deprecate encoding mode (lack of maintainer)
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
