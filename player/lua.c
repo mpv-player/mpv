@@ -1170,6 +1170,8 @@ static const struct fn_entry main_fns[] = {
     AF_ENTRY(command_native),
     AF_ENTRY(raw_command_native_async),
     FN_ENTRY(raw_abort_async_command),
+    AF_ENTRY(get_property),
+    AF_ENTRY(get_property_osd),
     FN_ENTRY(get_property_bool),
     FN_ENTRY(get_property_number),
     AF_ENTRY(get_property_native),
@@ -1264,17 +1266,6 @@ static void add_functions(struct script_ctx *ctx)
     lua_State *L = ctx->state;
 
     register_package_fns(L, "mp", main_fns);
-
-    push_module_table(L, "mp"); // mp
-
-    mp_push_autofree_fn(L, script_get_property);
-    lua_setfield(L, -2, "get_property");
-
-    mp_push_autofree_fn(L, script_get_property_osd);
-    lua_setfield(L, -2, "get_property_osd");
-
-    lua_pop(L, 1); // -
-
     register_package_fns(L, "mp.utils", utils_fns);
 }
 
