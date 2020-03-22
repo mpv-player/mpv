@@ -62,7 +62,7 @@ branches:
 before_install:
   - if [ "$TRAVIS_COMPILER" = "clang" ]; then export CXX="clang++"; fi
   - if [ "$TRAVIS_COMPILER" = "gcc" ]; then export CXX="g++"; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1; sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1; ip route get "136.243.89.164"; curl -v "https://registry.cirno.systems/v2/"; docker pull $CONTAINER; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1; sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1; ip route get "136.243.89.164";  curl -v "https://registry.cirno.systems/v2/"; docker pull $CONTAINER; fi
   - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
             if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
