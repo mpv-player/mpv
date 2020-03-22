@@ -122,6 +122,34 @@ static void mp_lua_optarg(lua_State *L, int arg)
 // - At struct fn_entry it's declared with AF_ENTRY instead of FN_ENTRY.
 typedef int (*af_CFunction)(lua_State *L, void *ctx);
 
+// add_af_dir, add_af_mpv_alloc take a valid DIR*/char* value respectively,
+// and closedir/mpv_free it when the parent is freed.
+
+static void destruct_af_dir(void *p)
+{
+    closedir(*(DIR**)p);
+}
+
+static void add_af_dir(void *parent, DIR *d)
+{
+    DIR **pd = talloc(parent, DIR*);
+    *pd = d;
+    talloc_set_destructor(pd, destruct_af_dir);
+}
+
+static void destruct_af_mpv_alloc(void *p)
+{
+    mpv_free(*(char**)p);
+}
+
+static void add_af_mpv_alloc(void *parent, char *ma)
+{
+    char **p = talloc(parent, char*);
+    *p = ma;
+    talloc_set_destructor(p, destruct_af_mpv_alloc);
+}
+
+
 // Perform the equivalent of mpv_free_node_contents(node) when tmp is freed.
 static void steal_node_alloctions(void *tmp, mpv_node *node)
 {
@@ -475,7 +503,7 @@ static int script_resume_all(lua_State *L)
 
 static void pushnode(lua_State *L, mpv_node *node);
 
-static int script_raw_wait_event(lua_State *L)
+static int script_raw_wait_event(lua_State *L, void *tmp)
 {
     struct script_ctx *ctx = get_ctx(L);
 
@@ -483,10 +511,9 @@ static int script_raw_wait_event(lua_State *L)
 
     struct mpv_node rn;
     mpv_event_to_node(&rn, event);
+    steal_node_alloctions(tmp, &rn);
 
     pushnode(L, &rn); // event
-
-    mpv_free_node_contents(&rn);
 
     // return event
     return 1;
@@ -706,18 +733,17 @@ static int script_set_property_native(lua_State *L, void *tmp)
 
 }
 
-static int script_get_property(lua_State *L)
+static int script_get_property_base(lua_State *L, void *tmp, int is_osd)
 {
     struct script_ctx *ctx = get_ctx(L);
     const char *name = luaL_checkstring(L, 1);
-    int type = lua_tointeger(L, lua_upvalueindex(1))
-               ? MPV_FORMAT_OSD_STRING : MPV_FORMAT_STRING;
+    int type = is_osd ? MPV_FORMAT_OSD_STRING : MPV_FORMAT_STRING;
 
     char *result = NULL;
     int err = mpv_get_property(ctx->client, name, type, &result);
     if (err >= 0) {
+        add_af_mpv_alloc(tmp, result);
         lua_pushstring(L, result);
-        talloc_free(result);
         return 1;
     } else {
         if (lua_isnoneornil(L, 2) && type == MPV_FORMAT_OSD_STRING) {
@@ -728,6 +754,16 @@ static int script_get_property(lua_State *L)
         lua_pushstring(L, mpv_error_string(err));
         return 2;
     }
+}
+
+static int script_get_property(lua_State *L, void *tmp)
+{
+    return script_get_property_base(L, tmp, 0);
+}
+
+static int script_get_property_osd(lua_State *L, void *tmp)
+{
+    return script_get_property_base(L, tmp, 1);
 }
 
 static int script_get_property_bool(lua_State *L)
@@ -969,7 +1005,7 @@ static int script_raw_hook_continue(lua_State *L)
     return check_error(L, mpv_hook_continue(ctx->client, id));
 }
 
-static int script_readdir(lua_State *L)
+static int script_readdir(lua_State *L, void *tmp)
 {
     //                    0      1        2       3
     const char *fmts[] = {"all", "files", "dirs", "normal", NULL};
@@ -981,6 +1017,7 @@ static int script_readdir(lua_State *L)
         lua_pushstring(L, "error");
         return 2;
     }
+    add_af_dir(tmp, dir);
     lua_newtable(L); // list
     char *fullpath = NULL;
     struct dirent *e;
@@ -1126,7 +1163,7 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(suspend),
     FN_ENTRY(resume),
     FN_ENTRY(resume_all),
-    FN_ENTRY(raw_wait_event),
+    AF_ENTRY(raw_wait_event),
     FN_ENTRY(request_event),
     FN_ENTRY(find_config_file),
     FN_ENTRY(get_script_directory),
@@ -1156,7 +1193,7 @@ static const struct fn_entry main_fns[] = {
 };
 
 static const struct fn_entry utils_fns[] = {
-    FN_ENTRY(readdir),
+    AF_ENTRY(readdir),
     FN_ENTRY(file_info),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
@@ -1232,12 +1269,10 @@ static void add_functions(struct script_ctx *ctx)
 
     push_module_table(L, "mp"); // mp
 
-    lua_pushinteger(L, 0);
-    lua_pushcclosure(L, script_get_property, 1);
+    mp_push_autofree_fn(L, script_get_property);
     lua_setfield(L, -2, "get_property");
 
-    lua_pushinteger(L, 1);
-    lua_pushcclosure(L, script_get_property, 1);
+    mp_push_autofree_fn(L, script_get_property_osd);
     lua_setfield(L, -2, "get_property_osd");
 
     lua_pop(L, 1); // -
