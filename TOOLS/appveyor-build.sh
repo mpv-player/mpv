@@ -16,7 +16,6 @@ export PYTHON=/usr/bin/python3
     --enable-jpeg \
     --enable-lcms2 \
     --enable-libarchive \
-    --enable-libass \
     --enable-lua \
     --enable-rubberband \
     --enable-shaderc \

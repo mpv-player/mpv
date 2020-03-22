@@ -22,7 +22,6 @@ python3 ./waf configure \
     --enable-lua \
     --enable-javascript \
     --enable-libarchive \
-    --enable-libass \
     --enable-libbluray \
     --enable-dvdnav \
     --enable-uchardet \
