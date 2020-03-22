@@ -491,6 +491,11 @@ done:
         av_packet_unref(pkt);
 }
 
+AVRational encoder_get_mux_timebase_unlocked(struct encoder_context *p)
+{
+    return p->mux_stream->st->time_base;
+}
+
 void encode_lavc_discontinuity(struct encode_lavc_context *ctx)
 {
     if (!ctx)

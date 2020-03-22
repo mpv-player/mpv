@@ -87,6 +87,9 @@ static void select_format(struct ao *ao, const AVCodec *codec)
 static void on_ready(void *ptr)
 {
     struct ao *ao = ptr;
+    struct priv *ac = ao->priv;
+
+    ac->worst_time_base = encoder_get_mux_timebase_unlocked(ac->enc);
 
     ao_add_events(ao, AO_EVENT_INITIAL_UNBLOCK);
 }

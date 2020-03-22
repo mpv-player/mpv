@@ -111,6 +111,10 @@ bool encoder_init_codec_and_muxer(struct encoder_context *p,
 // Encode the frame and write the packet. frame is ref'ed as need.
 bool encoder_encode(struct encoder_context *p, AVFrame *frame);
 
+// Return muxer timebase (only available after on_ready() has been called).
+// Caller needs to acquire encode_lavc_context.lock (or call it from on_ready).
+AVRational encoder_get_mux_timebase_unlocked(struct encoder_context *p);
+
 double encoder_get_offset(struct encoder_context *p);
 
 #endif
