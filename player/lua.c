@@ -121,13 +121,29 @@ static void mp_lua_optarg(lua_State *L, int arg)
         lua_pushnil(L);
 }
 
+// autofree: avoid leaks if a lua-error occurs between talloc new/free.
+// If a lua c-function does a new allocation (not tied to an existing context),
+// and an uncaught lua-error occures before "free" - the allocation is leaked.
+
 // autofree lua C function: same as lua_CFunction but with these differences:
-// - It accepts an additional void* argument which is a pre-initialized talloc
-//   context which it can use, and which is freed with its children once the
-//   function completes - regardless if a lua error occured or not. If a lua
-//   error did occur then it's re-thrown after the ctx is freed.
-// - At struct fn_entry it's declared with AF_ENTRY instead of FN_ENTRY.
+// - It accepts an additional void* argument - a pre-initialized talloc context
+//   which it can use, and which is freed with its children once the function
+//   completes - regardless if a lua error occured or not. If a lua error did
+//   occur then it's re-thrown after the ctx is freed.
+//   The stack/arguments/upvalues/return are the same as with lua_CFunction.
+// - It's inserted into the lua VM using af_pushc{function,closure} instead of
+//   lua_pushc{function,closure}, which takes care of wrapping it with the
+//   automatic talloc alocation + lua-error-handling + talloc release.
+//   This requires using AF_ENTRY instead of FN_ENTRY at struct fn_entry.
+// - The autofree overhead per call is roughly two additional plain lua calls.
+//   Typically that's up to 20% slower than plain new+free without "auto",
+//   and at most about twice slower - compared to bare new+free lua_CFunction.
+// - The overhead of af_push* is one aditional lua-c-closure with two upvalues.
 typedef int (*af_CFunction)(lua_State *L, void *ctx);
+
+static void af_pushcclosure(lua_State *L, af_CFunction fn, int n);
+#define     af_pushcfunction(L, fn) af_pushcclosure((L), (fn), 0)
+
 
 // add_af_dir, add_af_mpv_alloc take a valid DIR*/char* value respectively,
 // and closedir/mpv_free it when the parent is freed.
@@ -1254,39 +1270,53 @@ typedef struct autofree_data {
 /* runs the target autofree script_* function with the ctx argument */
 static int script_autofree_call(lua_State *L)
 {
-    autofree_data *data = lua_touserdata(L, lua_upvalueindex(1));
+    // n*args &data
+    autofree_data *data = lua_touserdata(L, -1);
+    lua_pop(L, 1);  // n*args
     assert(data && data->target && data->ctx);
     return data->target(L, data->ctx);
 }
 
 static int script_autofree_trampoline(lua_State *L)
 {
+    // n*args
     autofree_data data = {
-        .target = lua_touserdata(L, lua_upvalueindex(1)),
+        .target = lua_touserdata(L, lua_upvalueindex(2)),  // fn
         .ctx = NULL,
     };
     assert(data.target);
 
-    int nargs = lua_gettop(L);
-
-    lua_pushlightuserdata(L, &data);
-    lua_pushcclosure(L, script_autofree_call, 1);
-    lua_insert(L, 1);
+    lua_pushvalue(L, lua_upvalueindex(1));  // n*args autofree_call (closure)
+    lua_insert(L, 1);  // autofree_call n*args
+    lua_pushlightuserdata(L, &data);  // autofree_call n*args &data
 
     data.ctx = talloc_new(NULL);
-    int r = lua_pcall(L, nargs, LUA_MULTRET, 0);
+    int r = lua_pcall(L, lua_gettop(L) - 1, LUA_MULTRET, 0);  // m*retvals
     talloc_free(data.ctx);
 
     if (r)
         lua_error(L);
 
-    return lua_gettop(L);
+    return lua_gettop(L);  // m (retvals)
 }
 
-static void mp_push_autofree_fn(lua_State *L, af_CFunction fn)
+static void af_pushcclosure(lua_State *L, af_CFunction fn, int n)
 {
+    // Instead of pushing a direct closure of fn with n upvalues, we push an
+    // autofree_trampoline closure with two upvalues:
+    //   1: autofree_call closure with the n upvalues given here.
+    //   2: fn
+    //
+    // when called the autofree_trampoline closure will pcall the autofree_call
+    // closure with the current lua call arguments and an additional argument
+    // which holds ctx and fn. the autofree_call closure (with the n upvalues
+    // given here) calls fn directly and provides it with the ctx C argument,
+    // so that fn sees the exact n upvalues and lua call arguments as intended,
+    // wrapped with ctx init/cleanup.
+
+    lua_pushcclosure(L, script_autofree_call, n);
     lua_pushlightuserdata(L, fn);
-    lua_pushcclosure(L, script_autofree_trampoline, 1);
+    lua_pushcclosure(L, script_autofree_trampoline, 2);
 }
 
 static void register_package_fns(lua_State *L, char *module,
@@ -1295,7 +1325,7 @@ static void register_package_fns(lua_State *L, char *module,
     push_module_table(L, module); // modtable
     for (int n = 0; e[n].name; n++) {
         if (e[n].af) {
-            mp_push_autofree_fn(L, e[n].af); // modtable fn
+            af_pushcclosure(L, e[n].af, 0); // modtable fn
         } else {
             lua_pushcclosure(L, e[n].fn, 0); // modtable fn
         }
