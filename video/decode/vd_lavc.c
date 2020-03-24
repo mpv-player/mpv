@@ -174,7 +174,6 @@ typedef struct lavc_ctx {
     bool flushing;
     struct lavc_state state;
     const char *decoder;
-    bool hwdec_requested;
     bool hwdec_failed;
     bool hwdec_notified;
 
@@ -467,8 +466,6 @@ static void select_and_set_hwdec(struct mp_filter *vd)
         struct hwdec_info *hwdecs = NULL;
         int num_hwdecs = 0;
         add_all_hwdec_methods(&hwdecs, &num_hwdecs);
-
-        ctx->hwdec_requested = true;
 
         for (int n = 0; n < num_hwdecs; n++) {
             struct hwdec_info *hwdec = &hwdecs[n];
@@ -1158,7 +1155,7 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
         }
     }
 
-    if (!ctx->hwdec_notified && ctx->hwdec_requested) {
+    if (!ctx->hwdec_notified) {
         if (ctx->use_hwdec) {
             MP_INFO(vd, "Using hardware decoding (%s).\n",
                     ctx->hwdec.method_name);
