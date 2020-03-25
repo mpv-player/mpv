@@ -1,6 +1,6 @@
 language: c
 
-macbase:
+_macbase:
   - &macOld
     os: osx
     compiler: clang
@@ -42,8 +42,6 @@ matrix:
 dist: bionic
 services:
   - docker
-
-sudo: required
 
 env:
   global:
