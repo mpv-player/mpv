@@ -105,7 +105,7 @@ notifications:
     channels:
       - "irc.freenode.org#mpv-devel"
     on_success: change
-    on_failure: change
+    on_failure: always
 
 addons:
   coverity_scan:
