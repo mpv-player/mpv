@@ -1646,6 +1646,27 @@ typedef struct mpv_event_end_file {
      * Since API version 1.108.
      */
     int64_t playlist_entry_id;
+    /**
+     * If loading ended, because the playlist entry to be played was for example
+     * a playlist, and the current playlist entry is replaced with a number of
+     * other entries. This may happen at least with MPV_END_FILE_REASON_REDIRECT
+     * (other event types may use this for similar but different purposes in the
+     * future). In this case, playlist_insert_id will be set to the playlist
+     * entry ID of the first inserted entry, and playlist_insert_num_entries to
+     * the total number of inserted playlist entries. Note this in this specific
+     * case, the ID of the last inserted entry is playlist_insert_id+num-1.
+     * Beware that depending on circumstances, you may observe the new playlist
+     * entries before seeing the event (e.g. reading the "playlist" property or
+     * getting a property change notification before receiving the event).
+     * Since API version 1.108.
+     */
+    int64_t playlist_insert_id;
+    /**
+     * See playlist_insert_id. Only non-0 if playlist_insert_id is valid. Never
+     * negative.
+     * Since API version 1.108.
+     */
+    int playlist_insert_num_entries;
 } mpv_event_end_file;
 
 #if MPV_ENABLE_DEPRECATED

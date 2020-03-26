@@ -1979,6 +1979,12 @@ int mpv_event_to_node(mpv_node *dst, mpv_event *event)
 
         node_map_add_int64(dst, "playlist_entry_id", eef->playlist_entry_id);
 
+        if (eef->playlist_insert_id) {
+            node_map_add_int64(dst, "playlist_insert_id", eef->playlist_insert_id);
+            node_map_add_int64(dst, "playlist_insert_num_entries",
+                               eef->playlist_insert_num_entries);
+        }
+
         if (eef->reason == MPV_END_FILE_REASON_ERROR)
             node_map_add_string(dst, "file_error", mpv_error_string(eef->error));
         break;

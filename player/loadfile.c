@@ -906,14 +906,16 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
 
 // Replace the current playlist entry with playlist contents. Moves the entries
 // from the given playlist pl, so the entries don't actually need to be copied.
-static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
+static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl,
+                              int64_t *start_id, int *num_new_entries)
 {
     if (pl->num_entries) {
         prepare_playlist(mpctx, pl);
         struct playlist_entry *new = pl->current;
         if (mpctx->playlist->current)
             playlist_add_redirect(pl, mpctx->playlist->current->filename);
-        playlist_transfer_entries(mpctx->playlist, pl);
+        *num_new_entries = pl->num_entries;
+        *start_id = playlist_transfer_entries(mpctx->playlist, pl);
         // current entry is replaced
         if (mpctx->playlist->current)
             playlist_remove(mpctx->playlist, mpctx->playlist->current);
@@ -1384,6 +1386,9 @@ static void play_current_file(struct MPContext *mpctx)
     mpv_event_start_file start_event = {
         .playlist_entry_id = mpctx->playlist->current->id,
     };
+    mpv_event_end_file end_event = {
+        .playlist_entry_id = start_event.playlist_entry_id,
+    };
 
     mp_notify(mpctx, MPV_EVENT_START_FILE, &start_event);
 
@@ -1477,7 +1482,8 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (mpctx->demuxer->playlist) {
         struct playlist *pl = mpctx->demuxer->playlist;
-        transfer_playlist(mpctx, pl);
+        transfer_playlist(mpctx, pl, &end_event.playlist_insert_id,
+                          &end_event.playlist_insert_num_entries);
         mp_notify_property(mpctx, "playlist");
         mpctx->error_playing = 2;
         goto terminate_playback;
@@ -1657,9 +1663,6 @@ terminate_playback:
 
     bool nothing_played = !mpctx->shown_aframes && !mpctx->shown_vframes &&
                           mpctx->error_playing <= 0;
-    struct mpv_event_end_file end_event = {
-        .playlist_entry_id = start_event.playlist_entry_id,
-    };
     switch (mpctx->stop_play) {
     case PT_ERROR:
     case AT_END_OF_FILE:

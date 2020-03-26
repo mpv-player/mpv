@@ -239,10 +239,11 @@ void playlist_set_stream_flags(struct playlist *pl, int flags)
         pl->entries[n]->stream_flags = flags;
 }
 
-static void playlist_transfer_entries_to(struct playlist *pl, int dst_index,
-                                         struct playlist *source_pl)
+static int64_t playlist_transfer_entries_to(struct playlist *pl, int dst_index,
+                                            struct playlist *source_pl)
 {
     assert(pl != source_pl);
+    struct playlist_entry *first = playlist_get_first(source_pl);
 
     int count = source_pl->num_entries;
     MP_TARRAY_INSERT_N_AT(pl, pl->entries, pl->num_entries, dst_index, count);
@@ -258,11 +259,16 @@ static void playlist_transfer_entries_to(struct playlist *pl, int dst_index,
 
     playlist_update_indexes(pl, dst_index + count, -1);
     source_pl->num_entries = 0;
+
+    return first ? first->id : 0;
 }
 
 // Move all entries from source_pl to pl, appending them after the current entry
 // of pl. source_pl will be empty, and all entries have changed ownership to pl.
-void playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl)
+// Return the new ID of the first added entry within pl (0 if source_pl was
+// empty). The IDs of all added entries increase by 1 each entry (you can
+// predict the ID of the last entry).
+int64_t playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl)
 {
 
     int add_at = pl->num_entries;
@@ -274,12 +280,12 @@ void playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl)
     assert(add_at >= 0);
     assert(add_at <= pl->num_entries);
 
-    playlist_transfer_entries_to(pl, add_at, source_pl);
+    return playlist_transfer_entries_to(pl, add_at, source_pl);
 }
 
-void playlist_append_entries(struct playlist *pl, struct playlist *source_pl)
+int64_t playlist_append_entries(struct playlist *pl, struct playlist *source_pl)
 {
-    playlist_transfer_entries_to(pl, pl->num_entries, source_pl);
+    return playlist_transfer_entries_to(pl, pl->num_entries, source_pl);
 }
 
 // Return number of entries between list start and e.
