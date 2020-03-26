@@ -254,14 +254,6 @@ static struct mpv_handle *find_client(struct mp_client_api *clients,
     return NULL;
 }
 
-bool mp_client_exists(struct MPContext *mpctx, const char *client_name)
-{
-    pthread_mutex_lock(&mpctx->clients->lock);
-    bool r = find_client(mpctx->clients, client_name);
-    pthread_mutex_unlock(&mpctx->clients->lock);
-    return r;
-}
-
 bool mp_client_id_exists(struct MPContext *mpctx, int64_t id)
 {
     pthread_mutex_lock(&mpctx->clients->lock);

@@ -105,7 +105,7 @@ static void *script_thread(void *p)
     return NULL;
 }
 
-static int mp_load_script(struct MPContext *mpctx, const char *fname)
+static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
 {
     char *ext = mp_splitext(fname, NULL);
     if (ext && strcasecmp(ext, "disable") == 0)
@@ -183,6 +183,7 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
 
     mp_client_set_weak(arg->client);
     arg->log = mp_client_get_log(arg->client);
+    int64_t id = mpv_client_id(arg->client);
 
     MP_DBG(arg, "Loading %s %s...\n", backend->name, fname);
 
@@ -197,13 +198,13 @@ static int mp_load_script(struct MPContext *mpctx, const char *fname)
         }
     }
 
-    return 0;
+    return id;
 }
 
-int mp_load_user_script(struct MPContext *mpctx, const char *fname)
+int64_t mp_load_user_script(struct MPContext *mpctx, const char *fname)
 {
     char *path = mp_get_user_path(NULL, mpctx->global, fname);
-    int ret = mp_load_script(mpctx, path);
+    int64_t ret = mp_load_script(mpctx, path);
     talloc_free(path);
     return ret;
 }
@@ -238,33 +239,29 @@ static char **list_script_files(void *talloc_ctx, char *path)
     return files;
 }
 
-static void load_builtin_script(struct MPContext *mpctx, bool enable,
+static void load_builtin_script(struct MPContext *mpctx, int slot, bool enable,
                                 const char *fname)
 {
-    void *tmp = talloc_new(NULL);
-    // (The name doesn't have to match if there were conflicts with other
-    // scripts, so this is on best-effort basis.)
-    char *name = script_name_from_filename(tmp, fname);
-    if (enable != mp_client_exists(mpctx, name)) {
+    assert(slot < MP_ARRAY_SIZE(mpctx->builtin_script_ids));
+    int64_t *pid = &mpctx->builtin_script_ids[slot];
+    if (*pid > 0 && !mp_client_id_exists(mpctx, *pid))
+        *pid = 0; // died
+    if ((*pid > 0) != enable) {
         if (enable) {
-            mp_load_script(mpctx, fname);
+            *pid = mp_load_script(mpctx, fname);
         } else {
-            // Try to unload it by sending a shutdown event. This can be
-            // unreliable, because user scripts could have clashing names, or
-            // disabling and then quickly re-enabling a builtin script might
-            // detect the still-terminating script as loaded.
+            char *name = mp_tprintf(22, "@%"PRIi64, *pid);
             mp_client_send_event(mpctx, name, 0, MPV_EVENT_SHUTDOWN, NULL);
         }
     }
-    talloc_free(tmp);
 }
 
 void mp_load_builtin_scripts(struct MPContext *mpctx)
 {
-    load_builtin_script(mpctx, mpctx->opts->lua_load_osc, "@osc.lua");
-    load_builtin_script(mpctx, mpctx->opts->lua_load_ytdl, "@ytdl_hook.lua");
-    load_builtin_script(mpctx, mpctx->opts->lua_load_stats, "@stats.lua");
-    load_builtin_script(mpctx, mpctx->opts->lua_load_console, "@console.lua");
+    load_builtin_script(mpctx, 0, mpctx->opts->lua_load_osc, "@osc.lua");
+    load_builtin_script(mpctx, 1, mpctx->opts->lua_load_ytdl, "@ytdl_hook.lua");
+    load_builtin_script(mpctx, 2, mpctx->opts->lua_load_stats, "@stats.lua");
+    load_builtin_script(mpctx, 3, mpctx->opts->lua_load_console, "@console.lua");
 }
 
 bool mp_load_scripts(struct MPContext *mpctx)

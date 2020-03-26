@@ -5538,8 +5538,14 @@ static void cmd_load_script(void *p)
     struct MPContext *mpctx = cmd->mpctx;
 
     char *script = cmd->args[0].v.s;
-    if (mp_load_user_script(mpctx, script) < 0)
+    int64_t id = mp_load_user_script(mpctx, script);
+    if (id > 0) {
+        struct mpv_node *res = &cmd->result;
+        node_init(res, MPV_FORMAT_NODE_MAP, NULL);
+        node_map_add_int64(res, "client_id", id);
+    } else {
         cmd->success = false;
+    }
 }
 
 static void cache_dump_poll(struct MPContext *mpctx)

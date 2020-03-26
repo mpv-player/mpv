@@ -1189,6 +1189,10 @@ Input Commands that are Possibly Subject to Change
     the script to finish initialization or not changed multiple times, and the
     future behavior is left undefined.
 
+    On success, returns a ``mpv_node`` with a ``client_id`` field set to the
+    return value of the ``mpv_client_id()`` API call of the newly created script
+    handle.
+
 ``change-list <name> <operation> <value>``
     This command changes list options as described in `List Options`_. The
     ``<name>`` parameter is the normal option name, while ``<operation>`` is
