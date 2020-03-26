@@ -6109,6 +6109,9 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         ctx->marked_pts = MP_NOPTS_VALUE;
     }
 
+    if (event == MPV_EVENT_PLAYBACK_RESTART)
+        ctx->last_seek_time = mp_time_sec();
+
     if (event == MPV_EVENT_END_FILE || event == MPV_EVENT_FILE_LOADED) {
         // Update chapters - does nothing if something else is visible.
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
