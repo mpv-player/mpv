@@ -118,7 +118,8 @@ struct overlay {
 };
 
 struct hook_handler {
-    char *client;   // client API user name
+    char *client;   // client mpv_handle name (for logging)
+    int64_t client_id; // client mpv_handle ID
     char *type;     // kind of hook, e.g. "on_load"
     uint64_t user_id; // user-chosen ID
     int priority;   // priority for global hook order
@@ -160,7 +161,7 @@ bool mp_hook_test_completion(struct MPContext *mpctx, char *type)
     for (int n = 0; n < cmd->num_hooks; n++) {
         struct hook_handler *h = cmd->hooks[n];
         if (h->active && strcmp(h->type, type) == 0) {
-            if (!mp_client_exists(mpctx, h->client)) {
+            if (!mp_client_id_exists(mpctx, h->client_id)) {
                 MP_WARN(mpctx, "client removed during hook handling\n");
                 hook_remove(mpctx, h);
                 break;
@@ -183,7 +184,8 @@ static int invoke_hook_handler(struct MPContext *mpctx, struct hook_handler *h)
         .id = h->seq,
     },
     reply_id = h->user_id;
-    int r = mp_client_send_event(mpctx, h->client, reply_id, MPV_EVENT_HOOK, m);
+    char *name = mp_tprintf(22, "@%"PRIi64, h->client_id);
+    int r = mp_client_send_event(mpctx, name, reply_id, MPV_EVENT_HOOK, m);
     if (r < 0) {
         MP_WARN(mpctx, "Sending hook command failed. Removing hook.\n");
         hook_remove(mpctx, h);
@@ -216,13 +218,13 @@ void mp_hook_start(struct MPContext *mpctx, char *type)
     }
 }
 
-int mp_hook_continue(struct MPContext *mpctx, char *client, uint64_t id)
+int mp_hook_continue(struct MPContext *mpctx, int64_t client_id, uint64_t id)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
 
     for (int n = 0; n < cmd->num_hooks; n++) {
         struct hook_handler *h = cmd->hooks[n];
-        if (strcmp(h->client, client) == 0 && h->seq == id) {
+        if (h->client_id == client_id && h->seq == id) {
             if (!h->active)
                 break;
             h->active = false;
@@ -243,14 +245,15 @@ static int compare_hook(const void *pa, const void *pb)
     return (*h1)->seq - (*h2)->seq;
 }
 
-void mp_hook_add(struct MPContext *mpctx, const char *client, const char *name,
-                 uint64_t user_id, int pri)
+void mp_hook_add(struct MPContext *mpctx, char *client, int64_t client_id,
+                 const char *name, uint64_t user_id, int pri)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
     struct hook_handler *h = talloc_ptrtype(cmd, h);
     int64_t seq = ++cmd->hook_seq;
     *h = (struct hook_handler){
         .client = talloc_strdup(h, client),
+        .client_id = client_id,
         .type = talloc_strdup(h, name),
         .user_id = user_id,
         .priority = pri,

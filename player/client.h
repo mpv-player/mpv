@@ -24,6 +24,7 @@ bool mp_is_shutting_down(struct MPContext *mpctx);
 bool mp_clients_all_initialized(struct MPContext *mpctx);
 
 bool mp_client_exists(struct MPContext *mpctx, const char *client_name);
+bool mp_client_id_exists(struct MPContext *mpctx, int64_t id);
 void mp_client_broadcast_event(struct MPContext *mpctx, int event, void *data);
 int mp_client_send_event(struct MPContext *mpctx, const char *client_name,
                          uint64_t reply_userdata, int event, void *data);

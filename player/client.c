@@ -262,6 +262,14 @@ bool mp_client_exists(struct MPContext *mpctx, const char *client_name)
     return r;
 }
 
+bool mp_client_id_exists(struct MPContext *mpctx, int64_t id)
+{
+    pthread_mutex_lock(&mpctx->clients->lock);
+    bool r = find_client_id(mpctx->clients, id);
+    pthread_mutex_unlock(&mpctx->clients->lock);
+    return r;
+}
+
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name)
 {
     pthread_mutex_lock(&clients->lock);
@@ -1825,7 +1833,7 @@ int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
                  const char *name, int priority)
 {
     lock_core(ctx);
-    mp_hook_add(ctx->mpctx, ctx->name, name, reply_userdata, priority);
+    mp_hook_add(ctx->mpctx, ctx->name, ctx->id, name, reply_userdata, priority);
     unlock_core(ctx);
     return 0;
 }
@@ -1833,7 +1841,7 @@ int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
 int mpv_hook_continue(mpv_handle *ctx, uint64_t id)
 {
     lock_core(ctx);
-    int r = mp_hook_continue(ctx->mpctx, ctx->name, id);
+    int r = mp_hook_continue(ctx->mpctx, ctx->id, id);
     unlock_core(ctx);
     return r;
 }
