@@ -77,6 +77,7 @@ struct mp_client_api {
     // used to safely unlock mp_client_api.lock while iterating the list of
     // clients.
     uint64_t clients_list_change_ts;
+    int64_t id_alloc;
 
     struct mp_custom_protocol *custom_protocols;
     int num_custom_protocols;
@@ -111,6 +112,7 @@ struct mpv_handle {
     struct mp_log *log;
     struct MPContext *mpctx;
     struct mp_client_api *clients;
+    int64_t id;
 
     // -- not thread-safe
     struct mpv_event *cur_event;
@@ -223,13 +225,32 @@ bool mp_clients_all_initialized(struct MPContext *mpctx)
     return all_ok;
 }
 
+static struct mpv_handle *find_client_id(struct mp_client_api *clients, int64_t id)
+{
+    for (int n = 0; n < clients->num_clients; n++) {
+        if (clients->clients[n]->id == id)
+            return clients->clients[n];
+    }
+    return NULL;
+}
+
 static struct mpv_handle *find_client(struct mp_client_api *clients,
                                       const char *name)
 {
+    if (name[0] == '@') {
+        char *end;
+        errno = 0;
+        long long int id = strtoll(name + 1, &end, 10);
+        if (errno || end[0])
+            return NULL;
+        return find_client_id(clients, id);
+    }
+
     for (int n = 0; n < clients->num_clients; n++) {
         if (strcmp(clients->clients[n]->name, name) == 0)
             return clients->clients[n];
     }
+
     return NULL;
 }
 
@@ -271,6 +292,7 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
         .log = mp_log_new(client, clients->mpctx->log, nname),
         .mpctx = clients->mpctx,
         .clients = clients,
+        .id = ++(clients->id_alloc),
         .cur_event = talloc_zero(client, struct mpv_event),
         .events = talloc_array(client, mpv_event, num_events),
         .max_events = num_events,
@@ -306,6 +328,11 @@ void mp_client_set_weak(struct mpv_handle *ctx)
 const char *mpv_client_name(mpv_handle *ctx)
 {
     return ctx->name;
+}
+
+int64_t mpv_client_id(mpv_handle *ctx)
+{
+    return ctx->id;
 }
 
 struct mp_log *mp_client_get_log(struct mpv_handle *ctx)

@@ -36,6 +36,7 @@ API changes
  1.108  - Deprecate MPV_EVENT_IDLE
         - add mpv_event_start_file, mpv_event_end_file.playlist_entry_id
         - add mpv_event_to_node()
+        - add mpv_client_id()
  1.107  - Remove the deprecated qthelper.hpp. This was obviously not part of the
           libmpv API, only an "additionally" provided helper, thus this is not
           considered an API change. If you are maintaining a project that relies

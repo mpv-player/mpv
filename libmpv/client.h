@@ -392,6 +392,24 @@ void mpv_free(void *data);
 const char *mpv_client_name(mpv_handle *ctx);
 
 /**
+ * Return the ID of this client handle. Every client has its own unique ID. This
+ * ID is never reused by the core, even if the mpv_handle at hand gets destroyed
+ * and new handles get allocated.
+ *
+ * IDs are never 0 or negative.
+ *
+ * Some mpv APIs (not necessarily all) accept a name in the form "@<id>" in
+ * addition of the proper mpv_client_name(), where "<id>" is the ID in decimal
+ * form (e.g. "@123"). For example, the "script-message-to" command takes the
+ * client name as first argument, but also accepts the client ID formatted in
+ * this manner.
+ *
+ * @return The client name. The string is read-only and is valid until the
+ *         mpv_handle is destroyed.
+ */
+int64_t mpv_client_id(mpv_handle *ctx);
+
+/**
  * Create a new mpv instance and an associated client API handle to control
  * the mpv instance. This instance is in a pre-initialized state,
  * and needs to be initialized to be actually used with most other API

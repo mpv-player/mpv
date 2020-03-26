@@ -1,5 +1,6 @@
 mpv_abort_async_command
 mpv_client_api_version
+mpv_client_id
 mpv_client_name
 mpv_command
 mpv_command_async
