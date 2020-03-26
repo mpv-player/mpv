@@ -38,6 +38,9 @@
 #include "ass_mp.h"
 #include "sd.h"
 
+// Presence of ASS_OVERRIDE_BIT_SANE_MARGINS.
+#define HAVE_LIBASS_SANE_MARGINS 1
+
 struct sd_ass_priv {
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
@@ -368,6 +371,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     bool set_scale_with_window = false;
     bool set_scale_by_window = true;
     bool total_override = false;
+    int set_force_flags = 0;
     // With forced overrides, apply the --sub-* specific options
     if (converted || opts->ass_style_override == 3) { // 'force'
         set_scale_with_window = opts->sub_scale_with_window;
@@ -384,10 +388,14 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_hinting = opts->ass_hinting;
         set_font_scale = opts->sub_scale;
     }
+#if HAVE_LIBASS_SANE_MARGINS
+    set_force_flags |= ASS_OVERRIDE_BIT_SANE_MARGINS;
+#else
     if (set_scale_with_window) {
         int vidh = dim->h - (dim->mt + dim->mb);
         set_font_scale *= dim->h / (float)MPMAX(vidh, 1);
     }
+#endif
     if (!set_scale_by_window) {
         double factor = dim->h / 720.0;
         if (factor != 0.0)
@@ -396,7 +404,6 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     ass_set_use_margins(priv, set_use_margins);
     ass_set_line_position(priv, set_sub_pos);
     ass_set_shaper(priv, opts->ass_shaper);
-    int set_force_flags = 0;
     if (total_override)
         set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_FONT_SIZE;
     if (opts->ass_style_override == 4) // 'scale'
