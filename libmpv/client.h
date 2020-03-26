@@ -666,7 +666,9 @@ int64_t mpv_get_time_us(mpv_handle *ctx);
  */
 typedef enum mpv_format {
     /**
-     * Invalid. Sometimes used for empty values.
+     * Invalid. Sometimes used for empty values. This is always defined to 0,
+     * so a normal 0-init of mpv_format (or e.g. mpv_node) is guaranteed to set
+     * this it to MPV_FORMAT_NONE (which makes some things saner as consequence).
      */
     MPV_FORMAT_NONE             = 0,
     /**
