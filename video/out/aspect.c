@@ -90,6 +90,10 @@ static void src_dst_split_scaling(int src_size, int dst_size,
     *dst_start = (dst_size - scaled_src_size) * align + pan * scaled_src_size;
     *dst_end = *dst_start + scaled_src_size;
 
+    // Distance of screen frame to video
+    *osd_margin_a = *dst_start;
+    *osd_margin_b = dst_size - *dst_end;
+
     // Clip to screen
     int s_src = *src_end - *src_start;
     int s_dst = *dst_end - *dst_start;
@@ -107,10 +111,6 @@ static void src_dst_split_scaling(int src_size, int dst_size,
     // For sanity: avoid bothering VOs with corner cases
     clamp_size(src_size, src_start, src_end);
     clamp_size(dst_size, dst_start, dst_end);
-
-    // Distance of screen frame to video
-    *osd_margin_a = *dst_start;
-    *osd_margin_b = dst_size - *dst_end;
 }
 
 static void calc_margin(float opts[2], int out[2], int size)
