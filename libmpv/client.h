@@ -1434,9 +1434,9 @@ typedef enum mpv_event_id {
     MPV_EVENT_SEEK              = 20,
     /**
      * There was a discontinuity of some sort (like a seek), and playback
-     * was reinitialized. Usually happens after seeking, or ordered chapter
-     * segment switches. The main purpose is allowing the client to detect
-     * when a seek request is finished.
+     * was reinitialized. Usually happens on start of playback and after
+     * seeking. The main purpose is allowing the client to detect when a seek
+     * request is finished.
      */
     MPV_EVENT_PLAYBACK_RESTART  = 21,
     /**
