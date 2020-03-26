@@ -344,7 +344,7 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
             rc = mpv_request_event(client, event, enable);
         }
     } else {
-        mpv_node result_node;
+        mpv_node result_node = {0};
 
         if (async) {
             rc = mpv_command_node_async(client, reqid, cmd_node);
@@ -355,6 +355,8 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
             if (rc >= 0)
                 mpv_node_map_add(ta_parent, &reply_node, "data", &result_node);
         }
+
+        mpv_free_node_contents(&result_node);
     }
 
 error:
