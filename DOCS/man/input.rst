@@ -1287,6 +1287,10 @@ This is a partial list of events. This section describes what
 IPC sees. Note that the C API has separate C-level declarations with
 ``mpv_event``, which may be slightly different.
 
+Note that events are asynchronous: the player core continues running while
+events are delivered to scripts and other clients. In some cases, you can hooks
+to enforce synchronous execution.
+
 All events can have the following fields:
 
 ``event``
@@ -1423,16 +1427,16 @@ This list uses the event name field value, and the C API symbol in brackets:
         provides a better API around this with ``mp.add_hook()``.
 
 ``get-property-reply`` (``MPV_EVENT_GET_PROPERTY_REPLY``)
-    Undocumented.
+    See C API.
 
 ``set-property-reply`` (``MPV_EVENT_SET_PROPERTY_REPLY``)
-    Undocumented.
+    See C API.
 
 ``command-reply`` (``MPV_EVENT_COMMAND_REPLY``)
     This is one of the commands for which the ```error`` field is meaningful.
 
     JSON IPC and Lua and possibly other backends treat this specially and may
-    not pass the actual event to the user.
+    not pass the actual event to the user. See C API.
 
     The event has the following fields:
 
@@ -1489,12 +1493,17 @@ The following hooks are currently defined:
     ``file-local-options/<option name>``. The player will wait until all
     hooks are run.
 
+    Ordered after ``start-file`` and before ``playback-restart``.
+
 ``on_load_fail``
     Called after after a file has been opened, but failed to. This can be
     used to provide a fallback in case native demuxers failed to recognize
     the file, instead of always running before the native demuxers like
     ``on_load``. Demux will only be retried if ``stream-open-filename``
-    was changed.
+    was changed. If it fails again, this hook is _not_ called again, and
+    loading definitely fails.
+
+    Ordered after ``on_load``, and before ``playback-restart`` and ``end-file``.
 
 ``on_preloaded``
     Called after a file has been opened, and before tracks are selected and
@@ -1507,9 +1516,14 @@ The following hooks are currently defined:
     exactly can be done and not be done, and what information is available and
     what is not yet available yet, is all subject to change.
 
+    Ordered after ``on_load_fail`` etc. and before ``playback-restart``.
+
 ``on_unload``
     Run before closing a file, and before actually uninitializing
     everything. It's not possible to resume playback in this state.
+
+    Ordered before ``end-file``. Will also happen in the error case (then after
+    ``on_load_fail``).
 
 ``on_before_start_file``
     Run before a ``start-file`` event is sent. (If any client changes the
