@@ -62,8 +62,14 @@ Ctrl+W
 Commands
 --------
 
-``script-message-to console type <text>``
-    Show the console and pre-fill it with the provided text.
+``script-message-to console type <text> [<cursor_pos>]``
+    Show the console and pre-fill it with the provided text, optionally
+    specifying the initial cursor position as a positive integer starting from
+    1.
+
+    .. admonition:: Example for input.conf
+
+        ``% script-message-to console type "seek  absolute-percent" 6``
 
 Known issues
 ------------
