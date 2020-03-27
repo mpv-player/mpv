@@ -322,7 +322,6 @@ def build(ctx):
         ( "input/ipc.c" ),
         ( ipc_c ),
         ( "input/keycodes.c" ),
-        ( "input/pipe-win32.c",                  "win32-pipes" ),
         ( "input/sdl_gamepad.c",                 "sdl2-gamepad" ),
 
         ## Misc

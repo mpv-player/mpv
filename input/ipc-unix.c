@@ -284,48 +284,6 @@ bool mp_ipc_start_anon_client(struct mp_ipc_ctx *ctx, struct mpv_handle *h,
     return true;
 }
 
-static void ipc_start_client_text(struct mp_ipc_ctx *ctx, const char *path)
-{
-    int mode = O_RDONLY;
-    int client_fd = -1;
-    bool close_client_fd = true;
-    bool writable = false;
-
-    if (strcmp(path, "/dev/stdin") == 0) { // for symmetry with Linux
-        client_fd = STDIN_FILENO;
-        close_client_fd = false;
-    } else if (strncmp(path, "fd://", 5) == 0) {
-        char *end = NULL;
-        client_fd = strtol(path + 5, &end, 0);
-        if (!end || end == path + 5 || end[0]) {
-            MP_ERR(ctx, "Invalid FD: %s\n", path);
-            return;
-        }
-        close_client_fd = false;
-        writable = true; // maybe
-    } else {
-        // Use RDWR for FIFOs to ensure they stay open over multiple accesses.
-        struct stat st;
-        if (stat(path, &st) == 0 && S_ISFIFO(st.st_mode))
-            mode = O_RDWR;
-        client_fd = open(path, mode);
-    }
-    if (client_fd < 0) {
-        MP_ERR(ctx, "Could not open '%s'\n", path);
-        return;
-    }
-
-    struct client_arg *client = talloc_ptrtype(NULL, client);
-    *client = (struct client_arg){
-        .client_name = "input-file",
-        .client_fd   = client_fd,
-        .close_client_fd = close_client_fd,
-        .writable = writable,
-    };
-
-    ipc_start_client(ctx, client, true);
-}
-
 static void *ipc_thread(void *p)
 {
     int rc;
@@ -425,12 +383,8 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
         .path       = mp_get_user_path(arg, global, opts->ipc_path),
         .death_pipe = {-1, -1},
     };
-    char *input_file = mp_get_user_path(arg, global, opts->input_file);
 
     talloc_free(opts);
-
-    if (input_file && *input_file)
-        ipc_start_client_text(arg, input_file);
 
     if (!arg->path || !arg->path[0])
         goto out;

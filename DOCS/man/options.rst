@@ -3682,22 +3682,6 @@ Input
     work (key bindings that normally quit will be shown on OSD only, just
     like any other binding). See `INPUT.CONF`_.
 
-``--input-file=<filename>``
-    Deprecated. Use ``--input-ipc-server``.
-
-    Read commands from the given file. Mostly useful with a FIFO. Since
-    mpv 0.7.0 also understands JSON commands (see `JSON IPC`_), but you can't
-    get replies or events. Use ``--input-ipc-server`` for something
-    bi-directional. On MS Windows, JSON commands are not available.
-
-    This can also specify a direct file descriptor with ``fd://N`` (UNIX only).
-    In this case, JSON replies will be written if the FD is writable.
-
-    .. note::
-
-        When the given file is a FIFO mpv opens both ends, so you can do several
-        `echo "seek 10" > mp_pipe` and the pipe will stay valid.
-
 ``--input-terminal``, ``--no-input-terminal``
     ``--no-input-terminal`` prevents the player from reading key events from
     standard input. Useful when reading data from standard input. This is

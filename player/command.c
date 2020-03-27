@@ -6208,7 +6208,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (flags & UPDATE_INPUT)
         mp_input_update_opts(mpctx->input);
 
-    if (init || opt_ptr == &opts->ipc_path || opt_ptr == &opts->input_file) {
+    if (init || opt_ptr == &opts->ipc_path) {
         mp_uninit_ipc(mpctx->ipc_ctx);
         mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
     }

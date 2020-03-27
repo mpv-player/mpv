@@ -1379,14 +1379,6 @@ void mp_input_load_config(struct input_ctx *ictx)
         talloc_free(tmp);
     }
 
-#if HAVE_WIN32_PIPES
-    char *ifile;
-    mp_read_option_raw(ictx->global, "input-file", &m_option_type_string, &ifile);
-    if (ifile && ifile[0])
-        mp_input_pipe_add(ictx, ifile);
-    talloc_free(ifile);
-#endif
-
 #if HAVE_SDL2_GAMEPAD
     if (ictx->opts->use_gamepad) {
         mp_input_sdl_gamepad_add(ictx);

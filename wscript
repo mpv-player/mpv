@@ -263,11 +263,6 @@ iconv support use --disable-iconv.",
         'deps': 'posix-spawn-native || posix-spawn-android',
         'func': check_true,
     }, {
-        'name': 'win32-pipes',
-        'desc': 'Windows pipe support',
-        'func': check_true,
-        'deps': 'win32-desktop && !posix',
-    }, {
         'name': 'glob-posix',
         'desc': 'glob() POSIX support',
         'deps': '!(os-win32 || os-cygwin)',

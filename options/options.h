@@ -319,7 +319,6 @@ typedef struct MPOpts {
     struct encode_opts *encode_opts;
 
     char *ipc_path;
-    char *input_file;
 
     int wingl_dwm_flush;
 

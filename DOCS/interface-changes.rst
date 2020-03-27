@@ -59,6 +59,7 @@ Interface changes
       "error" field for end-file will silently break at some point in the
       future.
     - deprecate encoding mode (lack of maintainer)
+    - remove deprecated --input-file option
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

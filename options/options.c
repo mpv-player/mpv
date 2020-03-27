@@ -718,8 +718,6 @@ static const m_option_t mp_opts[] = {
 
     {"input-terminal", OPT_FLAG(consolecontrols), .flags = UPDATE_TERM},
 
-    {"input-file", OPT_STRING(input_file),
-        .flags = M_OPT_FILE, .deprecation_message = "use --input-ipc-server"},
     {"input-ipc-server", OPT_STRING(ipc_path), .flags = M_OPT_FILE},
 
     {"screenshot", OPT_SUBSTRUCT(screenshot_image_opts, screenshot_conf)},
