@@ -214,8 +214,9 @@ end
 
 -- Show the repl if hidden and replace its contents with 'text'
 -- (script-message-to repl type)
-function show_and_type(text)
+function show_and_type(text, cursor_pos)
     text = text or ''
+    cursor_pos = tonumber(cursor_pos)
 
     -- Save the line currently being edited, just in case
     if line ~= text and line ~= '' and history[#history] ~= line then
@@ -223,7 +224,12 @@ function show_and_type(text)
     end
 
     line = text
-    cursor = line:len() + 1
+    if cursor_pos ~= nil and cursor_pos >= 1
+       and cursor_pos <= line:len() + 1 then
+        cursor = math.floor(cursor_pos)
+    else
+        cursor = line:len() + 1
+    end
     history_pos = #history + 1
     insert_mode = false
     if repl_active then
@@ -737,8 +743,8 @@ mp.add_key_binding(nil, 'enable', function()
 end)
 
 -- Add a script-message to show the REPL and fill it with the provided text
-mp.register_script_message('type', function(text)
-    show_and_type(text)
+mp.register_script_message('type', function(text, cursor_pos)
+    show_and_type(text, cursor_pos)
 end)
 
 -- Redraw the REPL when the OSD size changes. This is needed because the
