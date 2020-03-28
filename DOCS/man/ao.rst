@@ -14,8 +14,7 @@ in the list.
 
     See ``--ao=help`` for a list of compiled-in audio output drivers. The
     driver ``--ao=alsa`` is preferred. ``--ao=pulse`` is preferred on systems
-    where PulseAudio is used. On BSD systems, ``--ao=oss`` or ``--ao=sndio``
-    may work (the latter being experimental).
+    where PulseAudio is used.
 
 Available audio output drivers are:
 
@@ -35,18 +34,6 @@ Available audio output drivers are:
         This setup enables multichannel audio on the ``default`` device
         with automatic upmixing with shared access, so playing stereo
         and multichannel audio at the same time will work as expected.
-
-``oss``
-    OSS audio output driver
-
-    The following global options are supported by this audio output:
-
-    ``--oss-mixer-device``
-        Sets the audio mixer device (default: ``/dev/mixer``).
-    ``--oss-mixer-channel``
-        Sets the audio mixer channel (default: ``pcm``). Other valid values
-        include **vol, pcm, line**. For a complete list of options look for
-        ``SOUND_DEVICE_NAMES`` in ``/usr/include/linux/soundcard.h``.
 
 ``jack``
     JACK (Jack Audio Connection Kit) audio output driver.
