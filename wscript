@@ -445,10 +445,6 @@ audio_output_features = [
         'func': check_cc(header_name='sys/soundcard.h'),
         'deps': 'posix && gpl',
     }, {
-        'name': '--rsound',
-        'desc': 'RSound audio output',
-        'func': check_statement('rsound.h', 'rsd_init(NULL)', lib='rsound')
-    }, {
         'name': '--pulse',
         'desc': 'PulseAudio audio output',
         'func': check_pkg_config('libpulse', '>= 1.0')

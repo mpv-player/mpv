@@ -233,13 +233,5 @@ Available audio output drivers are:
         ``no-waveheader`` option - with ``waveheader`` it's broken, because
         it will write a WAVE header every time the file is opened.
 
-``rsound``
-    Audio output to an RSound daemon. Use ``--audio-device=rsound/<hostname>``
-    to set the host name (with ``<hostname>`` replaced, without the ``< >``).
-
-    .. note:: Completely useless, unless you intend to run RSound. Not to be
-              confused with RoarAudio, which is something completely
-              different.
-
 ``wasapi``
     Audio output to the Windows Audio Session API.
