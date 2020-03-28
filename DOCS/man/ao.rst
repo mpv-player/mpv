@@ -241,13 +241,5 @@ Available audio output drivers are:
               confused with RoarAudio, which is something completely
               different.
 
-``sndio``
-    Audio output to the OpenBSD sndio sound system
-
-    .. note:: Experimental. There are known bugs and issues.
-
-    (Note: only supports mono, stereo, 4.0, 5.1 and 7.1 channel
-    layouts.)
-
 ``wasapi``
     Audio output to the Windows Audio Session API.

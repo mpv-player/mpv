@@ -260,7 +260,6 @@ def build(ctx):
         ( "audio/out/ao_pulse.c",                "pulse" ),
         ( "audio/out/ao_rsound.c",               "rsound" ),
         ( "audio/out/ao_sdl.c",                  "sdl2-audio" ),
-        ( "audio/out/ao_sndio.c",                "sndio" ),
         ( "audio/out/ao_wasapi.c",               "wasapi" ),
         ( "audio/out/ao_wasapi_changenotify.c",  "wasapi" ),
         ( "audio/out/ao_wasapi_utils.c",         "wasapi" ),
