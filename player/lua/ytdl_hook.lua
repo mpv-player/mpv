@@ -9,13 +9,16 @@ local o = {
     all_formats = false,
     force_all_formats = true,
 }
-options.read_options(o)
 
 local ytdl = {
     path = "youtube-dl",
     searched = false,
     blacklisted = {}
 }
+
+options.read_options(o, nil, function()
+    ytdl.blacklisted = {} -- reparse o.exclude next time
+end)
 
 local chapter_list = {}
 
