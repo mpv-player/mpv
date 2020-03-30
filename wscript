@@ -652,7 +652,7 @@ video_output_features = [
     }, {
         'name': 'vaapi-egl',
         'desc': 'VAAPI EGL',
-        'deps': 'vaapi-x-egl || vaapi-wayland || vaapi-drm',
+        'deps': 'egl && (vaapi-x-egl || vaapi-wayland || vaapi-drm)',
         'func': check_true,
     }, {
         'name': '--caca',
