@@ -565,16 +565,15 @@ video_output_features = [
     } , {
         'name': '--egl-drm',
         'desc': 'OpenGL DRM EGL Backend',
-        'deps': 'drm && gbm',
+        'deps': 'drm && gbm && egl',
         'groups': [ 'gl' ],
-        'func': check_pkg_config('egl'),
+        'func': check_true,
     } , {
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
-        'deps': 'wayland',
+        'deps': 'wayland && egl',
         'groups': [ 'gl' ],
-        'func': check_pkg_config('wayland-egl', '>= 9.0.0',
-                                 'egl',         '>= 1.5')
+        'func': check_pkg_config('wayland-egl', '>= 9.0.0')
     } , {
         'name': '--gl-win32',
         'desc': 'OpenGL Win32 Backend',
@@ -751,8 +750,7 @@ video_output_features = [
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
-        'deps': 'egl-x11 || rpi || gl-wayland || egl-drm || ' +
-                'egl-angle-win32 || egl-android',
+        'deps': 'egl || rpi || egl-angle-win32 || egl-android',
         'func': check_true
     }
 ]
