@@ -1,6 +1,7 @@
 from waftools import inflector
 from waftools.checks.generic import *
 from waflib import Utils
+from collections import OrderedDict
 from distutils.version import StrictVersion
 import os
 
@@ -57,7 +58,7 @@ def check_iconv(ctx, dependency_identifier):
     return check_libs(libs, checkfn)(ctx, dependency_identifier)
 
 def check_lua(ctx, dependency_identifier):
-    lua_versions = [
+    lua_versions = OrderedDict([
         ( '52',     'lua >= 5.2.0 lua < 5.3.0' ),
         ( '52arch', 'lua52 >= 5.2.0'), # Arch
         ( '52deb',  'lua5.2 >= 5.2.0'), # debian
@@ -67,13 +68,20 @@ def check_lua(ctx, dependency_identifier):
         ( '51obsd', 'lua51 >= 5.1.0'), # OpenBSD
         ( '51deb',  'lua5.1 >= 5.1.0'), # debian
         ( '51fbsd', 'lua-5.1 >= 5.1.0'), # FreeBSD
-    ]
+    ])
 
     if ctx.options.LUA_VER:
-        lua_versions = \
-            [lv for lv in lua_versions if lv[0] == ctx.options.LUA_VER]
+        lua_versions = OrderedDict(
+            [(k, v) for k, v in lua_versions.items() if k == ctx.options.LUA_VER]
+        )
 
-    for lua_version, pkgconfig_query in lua_versions:
+    # luajit < 2.1.0 is broken on macOS Catalina, issues #7512
+    if ctx.env.DEST_OS == "darwin" and tuple(
+        [int(x) for x in ctx.env.MACOS_SDK_VERSION.split(".")]
+    ) >= (10, 15, 0):
+        lua_versions['luajit'] = 'luajit >= 2.1.0'
+
+    for lua_version, pkgconfig_query in lua_versions.items():
         if check_pkg_config(pkgconfig_query, uselib_store=lua_version) \
             (ctx, dependency_identifier):
             # XXX: this is a bit of a hack, ask waf developers if I can copy
