@@ -80,6 +80,10 @@ before_install:
                 brew install libass
                 brew install ffmpeg
             else
+                if [[ "$TRAVIS_OSX_IMAGE" == "xcode11.3" ]]; then
+                    brew uninstall --ignore-dependencies luajit
+                    brew install luajit --HEAD
+                fi
                 brew link --overwrite python
             fi
         fi
