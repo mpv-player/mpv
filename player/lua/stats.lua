@@ -657,8 +657,8 @@ local function cache_stats()
                                      nil, 0.8, 1)
         speed_graph = o.prefix_sep .. speed_graph
     end
-    append(stats, utils.format_bytes_humanized(speed) .. "/s", {prefix="Speed:", nl="",
-           indent=o.prefix_sep, no_prefix_markup=true, suffix=speed_graph})
+    append(stats, utils.format_bytes_humanized(speed) .. "/s", {prefix="Speed:",
+        suffix=speed_graph})
 
     append(stats, utils.format_bytes_humanized(info["total-bytes"]),
            {prefix = "Total RAM:"})
