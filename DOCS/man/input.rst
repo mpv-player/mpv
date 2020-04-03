@@ -1988,6 +1988,8 @@ Property list
     This gives the number bytes per seconds over a 1 second window (using
     the type ``MPV_FORMAT_INT64`` for the client API).
 
+    This is the same as ``demuxer-cache-state/raw-input-rate``.
+
 ``demuxer-cache-duration``
     Approximate duration of video buffered in the demuxer, in seconds. The
     guess is very unreliable, and often the property will not be available
@@ -2035,6 +2037,10 @@ Property list
 
     ``cache-duration`` is ``demuxer-cache-duration``. Missing if unavailable.
 
+    ``raw-input-rate`` is the estimated input rate of the network layer (or any
+    other byte-oriented input layer) in bytes per second. May be inaccurate or
+    missing.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -2051,6 +2057,7 @@ Property list
             "fw-bytes"          MPV_FORMAT_INT64
             "file-cache-bytes"  MPV_FORMAT_INT64
             "cache-duration"    MPV_FORMAT_DOUBLE
+            "raw-input-rate"    MPV_FORMAT_INT64
 
     Other fields (might be changed or removed in the future):
 

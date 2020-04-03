@@ -1441,6 +1441,8 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     node_map_add_int64(r, "fw-bytes", s.fw_bytes);
     if (s.file_cache_bytes >= 0)
         node_map_add_int64(r, "file-cache-bytes", s.file_cache_bytes);
+    if (s.bytes_per_second > 0)
+        node_map_add_int64(r, "raw-input-rate", s.bytes_per_second);
     if (s.seeking != MP_NOPTS_VALUE)
         node_map_add_double(r, "debug-seeking", s.seeking);
     node_map_add_int64(r, "debug-low-level-seeks", s.low_level_seeks);
