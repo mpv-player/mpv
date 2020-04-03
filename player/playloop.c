@@ -107,7 +107,7 @@ void mp_core_unlock(struct MPContext *mpctx)
 }
 
 // Process any queued user input.
-void mp_process_input(struct MPContext *mpctx)
+static void mp_process_input(struct MPContext *mpctx)
 {
     for (;;) {
         mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
