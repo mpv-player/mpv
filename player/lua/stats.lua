@@ -94,12 +94,12 @@ local ass_stop = mp.get_property_osd("osd-ass-cc/1")
 -- Ring buffers for the values used to construct a graph.
 -- .pos denotes the current position, .len the buffer length
 -- .max is the max value in the corresponding buffer
-local vsratio_buf, vsjitter_buf, cache_ahead_buf, cache_total_buf
+local vsratio_buf, vsjitter_buf, cache_ahead_buf, cache_speed_buf
 local function init_buffers()
     vsratio_buf = {0, pos = 1, len = 50, max = 0}
     vsjitter_buf = {0, pos = 1, len = 50, max = 0}
     cache_ahead_buf = {0, pos = 1, len = 50, max = 0}
-    cache_total_buf = {0, pos = 1, len = 50, max = 0}
+    cache_speed_buf = {0, pos = 1, len = 50, max = 0}
 end
 -- Save all properties known to this version of mpv
 local property_list = {}
@@ -456,11 +456,6 @@ local function add_file(s)
         append(s, utils.format_bytes_humanized(demuxer_cache), {prefix="Total Cache:"})
         append(s, format("%.1f", demuxer_secs), {prefix="(", suffix=" sec)", nl="",
                no_prefix_markup=true, prefix_sep="", indent=o.prefix_sep})
-        local speed = mp.get_property_number("cache-speed", 0)
-        if speed > 0 then
-            append(s, utils.format_bytes_humanized(speed) .. "/s", {prefix="Speed:", nl="",
-                   indent=o.prefix_sep, no_prefix_markup=true})
-        end
     end
 end
 
@@ -654,15 +649,19 @@ local function cache_stats()
     end
     append(stats, state, {prefix = "State:"})
 
-    local total_graph = nil
+    local speed = info["raw-input-rate"] or 0
+    local speed_graph = nil
     if not display_timer.oneshot and o.use_ass then
-        total_graph = generate_graph(cache_total_buf, cache_total_buf.pos,
-                                     cache_total_buf.len, cache_total_buf.max,
+        speed_graph = generate_graph(cache_speed_buf, cache_speed_buf.pos,
+                                     cache_speed_buf.len, cache_speed_buf.max,
                                      nil, 0.8, 1)
-        total_graph = o.prefix_sep .. total_graph
+        speed_graph = o.prefix_sep .. speed_graph
     end
+    append(stats, utils.format_bytes_humanized(speed) .. "/s", {prefix="Speed:", nl="",
+           indent=o.prefix_sep, no_prefix_markup=true, suffix=speed_graph})
+
     append(stats, utils.format_bytes_humanized(info["total-bytes"]),
-           {prefix = "Total RAM:", suffix = total_graph})
+           {prefix = "Total RAM:"})
     append(stats, utils.format_bytes_humanized(info["fw-bytes"]),
            {prefix = "Forward RAM:"})
 
@@ -714,7 +713,7 @@ local function record_cache_stats()
         graph_add_value(cache_ahead_buf, b - a)
     end
 
-    graph_add_value(cache_total_buf, info["total-bytes"])
+    graph_add_value(cache_speed_buf, info["raw-input-rate"] or 0)
 end
 
 cache_recorder_timer = mp.add_periodic_timer(0.25, record_cache_stats)
