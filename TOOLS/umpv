@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 This script emulates "unique application" functionality on Linux. When starting
@@ -76,7 +76,7 @@ if sock:
         # escape: \ \n "
         f = f.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
         f = "\"" + f + "\""
-        sock.send("raw loadfile " + f + " append\n")
+        sock.send(("raw loadfile " + f + " append\n").encode("utf-8"))
 else:
     # Let mpv recreate socket if it doesn't already exist.
 
