@@ -44,21 +44,7 @@
 #endif
 
 #ifndef NETBSD_BUF_SIZE
-#define NETBSD_BUF_SIZE (256)
-#endif
-
-/* Values from the audio(4) specification */
-
-#ifndef NETBSD_MAX_CHANNELS
-#define NETBSD_MAX_CHANNELS (12)
-#endif
-
-#ifndef NETBSD_MIN_RATE
-#define NETBSD_MIN_RATE (1000)
-#endif
-
-#ifndef NETBSD_MAX_RATE
-#define NETBSD_MAX_RATE (192000)
+#define NETBSD_BUF_SIZE (1024)
 #endif
 
 struct priv {
@@ -72,10 +58,12 @@ static int init(struct ao *ao)
     char device[16] = "/dev/audio";
     struct priv *p = ao->priv;
     struct audio_info info;
+    struct audio_info hw_info;
     struct audio_prinfo *pinfo;
     struct mp_chmap_sel sel = {0};
 
     AUDIO_INITINFO(&info);
+    AUDIO_INITINFO(&hw_info);
     pinfo = &info.play;
 
     if (ao->device != NULL) {
@@ -90,9 +78,14 @@ static int init(struct ao *ao)
         goto fail;
     }
 
+    if (ioctl(p->fd, AUDIO_GETFORMAT, &hw_info) == -1) {
+        MP_ERR(ao, "AUDIO_GETFORMAT failed: %s\n", mp_strerror(errno));
+        goto fail;
+    }
+
     info.mode = AUMODE_PLAY;
 
-    for (int n = 1; n <= NETBSD_MAX_CHANNELS; n++) {
+    for (int n = 1; n <= hw_info.play.channels; n++) {
         struct mp_chmap map;
 
         mp_chmap_from_channels(&map, n);
@@ -105,14 +98,7 @@ static int init(struct ao *ao)
     }
 
     pinfo->channels = ao->channels.num;
-
-    if (ao->samplerate < NETBSD_MIN_RATE)
-        ao->samplerate = NETBSD_MIN_RATE;
-
-    if (ao->samplerate > NETBSD_MAX_RATE)
-        ao->samplerate = NETBSD_MAX_RATE;
-
-    pinfo->sample_rate = ao->samplerate;
+    pinfo->sample_rate = ao->samplerate = hw_info.play.sample_rate;
 
     switch (ao->format) {
     case AF_FORMAT_U8:
@@ -134,14 +120,6 @@ static int init(struct ao *ao)
         MP_ERR(ao, "AUDIO_SETINFO failed: %s\n", mp_strerror(errno));
         goto fail;
     }
-
-    if (ioctl(p->fd, AUDIO_GETINFO, &info) == -1) {
-        MP_ERR(ao, "AUDIO_GETINFO failed: %s\n", mp_strerror(errno));
-        goto fail;
-    }
-
-    ao->samplerate = pinfo->sample_rate;
-
     return 0;
 
 fail:
@@ -171,7 +149,24 @@ static void reset(struct ao *ao)
         return;
     }
 
+    (void)ioctl(p->fd, AUDIO_FLUSH, NULL);
+    (void)ioctl(p->fd, AUDIO_GETOOFFS, &offset); /* reset deltablks */
+    p->total_blocks = p->total_bytes / info.blocksize;
+}
+
+static void drain(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    struct audio_info info;
+    struct audio_offset offset;
+
+    if (ioctl(p->fd, AUDIO_GETINFO, &info) == -1) {
+        MP_ERR(ao, "AUDIO_GETINFO failed: %s\n", mp_strerror(errno));
+        return;
+    }
+
     (void)ioctl(p->fd, AUDIO_DRAIN, NULL);
+    (void)ioctl(p->fd, AUDIO_FLUSH, NULL);
     (void)ioctl(p->fd, AUDIO_GETOOFFS, &offset); /* reset deltablks */
     p->total_blocks = p->total_bytes / info.blocksize;
 }
@@ -270,6 +265,7 @@ const struct ao_driver audio_out_netbsd = {
     .init      = init,
     .uninit    = uninit,
     .reset     = reset,
+    .drain     = drain,
     .pause     = audio_pause,
     .resume    = audio_resume,
     .get_space = get_space,
