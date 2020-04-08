@@ -176,7 +176,8 @@ is useful for you. Don't attempt to use it. Forget its existence.
 Selecting this for the first time will start collecting some internal
 performance data. That means performance will be slightly lower than normal for
 the rest of the time the player is running (even if the stats page is closed).
-Note that the stats page itself
+Note that the stats page itself uses a lot of CPU and even GPU resources, and
+may have a heavy impact on performance.
 
 The displayed information is accumulated over the redraw delay (shown as
 ``poll-time`` field).
