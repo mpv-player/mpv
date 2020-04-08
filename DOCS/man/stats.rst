@@ -24,6 +24,7 @@ stats:
 1      Show usual stats
 2      Show frame timings
 3      Input cache stats
+4      Internal stuff
 ====   ==================
 
 Font
@@ -56,6 +57,8 @@ Configurable Options
     Default: 2
 ``key_page_3``
     Default: 3
+``key_page_4``
+    Default: 4
 
     Key bindings for page switching while stats are displayed.
 
@@ -163,3 +166,35 @@ Using ``input.conf``, it is also possible to directly display a certain page::
 
     i script-binding stats/display-page-1
     e script-binding stats/display-page-2
+
+Internal stuff page
+~~~~~~~~~~~~~~~~~~~
+
+Most entries shown on this page have rather vague meaning. Likely none of this
+is useful for you. Don't attempt to use it. Forget its existence.
+
+Selecting this for the first time will start collecting some internal
+performance data. That means performance will be slightly lower than normal for
+the rest of the time the player is running (even if the stats page is closed).
+Note that the stats page itself
+
+The displayed information is accumulated over the redraw delay (shown as
+``poll-time`` field).
+
+This adds entries for each Lua script. If there are too many scripts running,
+parts of the list will simply be out of the screen.
+
+If the underlying platform does not support pthread per thread times, the
+displayed times will be 0 or something random (I suspect that at time of this
+writing, only Linux provides the correct via pthread APIs for per thread times).
+
+Most entries are added lazily and only during data collection, which is why
+entries may pop up randomly after some time. It's also why the memory usage
+entries for scripts that have been inactive since the start of data collection
+are missing.
+
+Memory usage is approximate and does not reflect internal fragmentation.
+
+If entries have ``/time`` and ``/cpu`` variants, the former gives the real time
+(monotonic clock), while the latter the thread CPU time (only if the
+corresponding pthread API works and is supported).

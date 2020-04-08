@@ -32,6 +32,7 @@
 #include "options/options.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "common/stats.h"
 #include "player/client.h"
 #include "player/command.h"
 #include "osd.h"
@@ -124,6 +125,7 @@ struct osd_state *osd_create(struct mpv_global *global)
         .global = global,
         .log = mp_log_new(osd, global->log, "osd"),
         .force_video_pts = MP_NOPTS_VALUE,
+        .stats = stats_ctx_create(osd, global, "osd"),
     };
     pthread_mutex_init(&osd->lock, NULL);
     osd->opts = osd->opts_cache->opts;
@@ -326,11 +328,20 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
         if (obj->sub)
             sub_lock(obj->sub);
 
+        char *stat_type_render = obj->is_sub ? "sub-render" : "osd-render";
+        char *stat_type_draw = obj->is_sub ? "sub-draw" : "osd-draw";
+        stats_time_start(osd->stats, stat_type_render);
+
         struct sub_bitmaps imgs;
         render_object(osd, obj, res, video_pts, formats, &imgs);
+
+        stats_time_end(osd->stats, stat_type_render);
+
         if (imgs.num_parts > 0) {
             if (formats[imgs.format]) {
+                stats_time_start(osd->stats, stat_type_draw);
                 cb(cb_ctx, &imgs);
+                stats_time_end(osd->stats, stat_type_draw);
             } else {
                 MP_ERR(osd, "Can't render OSD part %d (format %d).\n",
                        obj->type, imgs.format);

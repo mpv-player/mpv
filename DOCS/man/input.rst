@@ -2875,6 +2875,15 @@ Property list
     Note that directly accessing this structure via subkeys is not supported,
     the only access is through aforementioned ``MPV_FORMAT_NODE``.
 
+``perf-info``
+    Further performance data. Querying this property triggers internal
+    collection of some data, and may slow down the player. Each query will reset
+    some internal state. Property change notification doesn't and won't work.
+    All of this may change in the future, so don't use this. The builtin
+    ``stats`` script is supposed to be the only user; since it's bundled and
+    built with the source code, it can use knowledge of mpv internal to render
+    the information properly. See ``stats`` script description for some details.
+
 ``video-bitrate``, ``audio-bitrate``, ``sub-bitrate``
     Bitrate values calculated on the packet level. This works by dividing the
     bit size of all packets between two keyframes by their presentation

@@ -18,6 +18,7 @@ local o = {
     key_page_1 = "1",
     key_page_2 = "2",
     key_page_3 = "3",
+    key_page_4 = "4",
 
     duration = 4,
     redraw_delay = 1,                -- acts as duration in the toggling case
@@ -101,6 +102,7 @@ local function init_buffers()
     cache_ahead_buf = {0, pos = 1, len = 50, max = 0}
     cache_speed_buf = {0, pos = 1, len = 50, max = 0}
 end
+local perf_buffers = {}
 -- Save all properties known to this version of mpv
 local property_list = {}
 for p in string.gmatch(mp.get_property("property-list"), "([^,]+)") do property_list[p] = true end
@@ -111,6 +113,11 @@ local property_aliases = {
     ["container-fps"] = "fps",
 }
 
+local function graph_add_value(graph, value)
+    graph.pos = (graph.pos % graph.len) + 1
+    graph[graph.pos] = value
+    graph.max = max(graph.max, value)
+end
 
 -- Return deprecated name for the given property
 local function compat(p)
@@ -347,6 +354,21 @@ local function append_perfdata(s, dedicated_page)
     end
 end
 
+local function append_general_perfdata(s)
+    for _, data in ipairs(mp.get_property_native("perf-info") or {}) do
+        append(s, data.text or data.value, {prefix=data.name..":"})
+
+        if o.plot_perfdata and o.use_ass and data.value then
+            buf = perf_buffers[data.name]
+            if not buf then
+                buf = {0, pos = 1, len = 50, max = 0}
+                perf_buffers[data.name] = buf
+            end
+            graph_add_value(buf, data.value)
+            s[#s+1] = generate_graph(buf, buf.pos, buf.len, buf.max, nil, 0.8, 1)
+        end
+    end
+end
 
 local function append_display_sync(s)
     if not mp.get_property_bool("display-sync-active", false) then
@@ -594,6 +616,16 @@ local function vo_stats()
     return table.concat(stats)
 end
 
+local function perf_stats()
+    local stats = {}
+    eval_ass_formatting()
+    add_header(stats)
+    local page = pages[o.key_page_4]
+    append(stats, "", {prefix=o.nl .. o.nl .. page.desc .. ":", nl="", indent=""})
+    append_general_perfdata(stats, true)
+    return table.concat(stats)
+end
+
 local function opt_time(t)
     if type(t) == type(1.1) then
         return mp.format_time(t)
@@ -693,12 +725,6 @@ local function cache_stats()
     return table.concat(stats)
 end
 
-local function graph_add_value(graph, value)
-    graph.pos = (graph.pos % graph.len) + 1
-    graph[graph.pos] = value
-    graph.max = max(graph.max, value)
-end
-
 -- Record 1 sample of cache statistics.
 -- (Unlike record_data(), this does not return a function, but runs directly.)
 local function record_cache_stats()
@@ -725,6 +751,7 @@ pages = {
     [o.key_page_1] = { f = default_stats, desc = "Default" },
     [o.key_page_2] = { f = vo_stats, desc = "Extended Frame Timings" },
     [o.key_page_3] = { f = cache_stats, desc = "Cache Statistics" },
+    [o.key_page_4] = { f = perf_stats, desc = "Internal performance info" },
 }
 
 

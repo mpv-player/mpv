@@ -43,6 +43,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "common/stats.h"
 #include "common/global.h"
 #include "filters/f_decoder_wrapper.h"
 #include "options/parse_configfile.h"
@@ -274,6 +275,8 @@ struct MPContext *mp_create(void)
     pthread_mutex_init(&mpctx->abort_lock, NULL);
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
+
+    stats_global_init(mpctx->global);
 
     // Nothing must call mp_msg*() and related before this
     mp_msg_init(mpctx->global);

@@ -39,6 +39,7 @@
 #include "common/msg.h"
 #include "common/global.h"
 #include "common/recorder.h"
+#include "common/stats.h"
 #include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "osdep/atomic.h"
@@ -167,6 +168,7 @@ const struct m_sub_options demux_conf = {
 struct demux_internal {
     struct mp_log *log;
     struct mpv_global *global;
+    struct stats_ctx *stats;
 
     bool can_cache;             // not a slave demuxer; caching makes sense
     bool can_record;            // stream recording is allowed
@@ -2551,6 +2553,8 @@ static void *demux_thread(void *pctx)
     mpthread_set_name("demux");
     pthread_mutex_lock(&in->lock);
 
+    stats_register_thread_cputime(in->stats, "thread");
+
     while (!in->thread_terminate) {
         if (thread_work(in))
             continue;
@@ -2567,6 +2571,8 @@ static void *demux_thread(void *pctx)
         if (in->wakeup_cb)
             in->wakeup_cb(in->wakeup_cb_ctx);
     }
+
+    stats_unregister_thread(in->stats, "thread");
 
     pthread_mutex_unlock(&in->lock);
     return NULL;
@@ -3262,6 +3268,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     *in = (struct demux_internal){
         .global = global,
         .log = demuxer->log,
+        .stats = stats_ctx_create(in, global, "demuxer"),
         .can_cache = params && params->is_top_level,
         .can_record = params && params->stream_record,
         .opts = opts,

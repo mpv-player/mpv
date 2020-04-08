@@ -40,6 +40,7 @@
 #include "options/m_config.h"
 #include "common/msg.h"
 #include "common/global.h"
+#include "common/stats.h"
 #include "video/hwdec.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
@@ -162,6 +163,8 @@ struct vo_internal {
 
     double display_fps;
     double reported_display_fps;
+
+    struct stats_ctx *stats;
 };
 
 extern const struct m_sub_options gl_video_conf;
@@ -294,6 +297,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
         .dispatch = mp_dispatch_create(vo),
         .req_frames = 1,
         .estimated_vsync_jitter = -1,
+        .stats = stats_ctx_create(vo, global, "vo"),
     };
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
     pthread_mutex_init(&vo->in->lock, NULL);
@@ -900,7 +904,7 @@ static bool render_frame(struct vo *vo)
         pthread_mutex_unlock(&in->lock);
         wakeup_core(vo); // core can queue new video now
 
-        MP_STATS(vo, "start video-draw");
+        stats_time_start(in->stats, "video-draw");
 
         if (vo->driver->draw_frame) {
             vo->driver->draw_frame(vo, frame);
@@ -908,11 +912,11 @@ static bool render_frame(struct vo *vo)
             vo->driver->draw_image(vo, mp_image_new_ref(frame->current));
         }
 
-        MP_STATS(vo, "end video-draw");
+        stats_time_end(in->stats, "video-draw");
 
         wait_until(vo, target);
 
-        MP_STATS(vo, "start video-flip");
+        stats_time_start(in->stats, "video-flip");
 
         vo->driver->flip_page(vo);
 
@@ -927,7 +931,7 @@ static bool render_frame(struct vo *vo)
         if (vsync.last_queue_display_time < 0)
             vsync.last_queue_display_time = mp_time_us();
 
-        MP_STATS(vo, "end video-flip");
+        stats_time_end(in->stats, "video-flip");
 
         pthread_mutex_lock(&in->lock);
         in->dropped_frame = prev_drop_count < vo->in->drop_count;

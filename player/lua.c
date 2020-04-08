@@ -36,6 +36,7 @@
 #include "options/m_property.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "common/stats.h"
 #include "options/m_option.h"
 #include "input/input.h"
 #include "options/path.h"
@@ -88,6 +89,8 @@ struct script_ctx {
     struct mp_log *log;
     struct mpv_handle *client;
     struct MPContext *mpctx;
+    size_t lua_malloc_size;
+    struct stats_ctx *stats;
 };
 
 #if LUA_VERSION_NUM <= 501
@@ -154,6 +157,30 @@ static void add_af_mpv_alloc(void *parent, char *ma)
 static void steal_node_alloctions(void *tmp, mpv_node *node)
 {
     talloc_steal(tmp, node_get_alloc(node));
+}
+
+// lua_Alloc compatible. Serves only to retrieve memory usage.
+static void *mp_lua_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+    struct script_ctx *ctx = ud;
+
+    // Ah, what the fuck, screw whoever introduced this to Lua 5.2.
+    if (!ptr)
+        osize = 0;
+
+    if (nsize) {
+        ptr = realloc(ptr, nsize);
+        if (!ptr)
+            return NULL;
+    } else {
+        free(ptr);
+        ptr = NULL;
+    }
+
+    ctx->lua_malloc_size = ctx->lua_malloc_size - osize + nsize;
+    stats_size_value(ctx->stats, "mem", ctx->lua_malloc_size);
+
+    return ptr;
 }
 
 static struct script_ctx *get_ctx(lua_State *L)
@@ -396,14 +423,18 @@ static int load_lua(struct mp_script_args *args)
         .log = args->log,
         .filename = args->filename,
         .path = args->path,
+        .stats = stats_ctx_create(ctx, args->mpctx->global,
+                    mp_tprintf(80, "script/%s", mpv_client_name(args->client))),
     };
+
+    stats_register_thread_cputime(ctx->stats, "cpu");
 
     if (LUA_VERSION_NUM != 501 && LUA_VERSION_NUM != 502) {
         MP_FATAL(ctx, "Only Lua 5.1 and 5.2 are supported.\n");
         goto error_out;
     }
 
-    lua_State *L = ctx->state = luaL_newstate();
+    lua_State *L = ctx->state = lua_newstate(mp_lua_alloc, ctx);
     if (!L) {
         MP_FATAL(ctx, "Could not initialize Lua.\n");
         goto error_out;

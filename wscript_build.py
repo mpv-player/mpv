@@ -273,6 +273,7 @@ def build(ctx):
         ( "common/msg.c" ),
         ( "common/playlist.c" ),
         ( "common/recorder.c" ),
+        ( "common/stats.c" ),
         ( "common/tags.c" ),
         ( "common/version.c" ),
 

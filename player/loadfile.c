@@ -46,6 +46,7 @@
 #include "common/common.h"
 #include "common/encode.h"
 #include "common/recorder.h"
+#include "common/stats.h"
 #include "input/input.h"
 
 #include "audio/out/ao.h"
@@ -1772,6 +1773,9 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 // Return if all done.
 void mp_play_files(struct MPContext *mpctx)
 {
+    struct stats_ctx *stats = stats_ctx_create(mpctx, mpctx->global, "main");
+    stats_register_thread_cputime(stats, "thread");
+
     // Wait for all scripts to load before possibly starting playback.
     if (!mp_clients_all_initialized(mpctx)) {
         MP_VERBOSE(mpctx, "Waiting for scripts...\n");

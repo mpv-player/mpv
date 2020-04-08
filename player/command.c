@@ -38,6 +38,7 @@
 #include "common/codecs.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "common/stats.h"
 #include "filters/f_decoder_wrapper.h"
 #include "command.h"
 #include "osdep/timer.h"
@@ -2446,6 +2447,23 @@ out:
     return ret;
 }
 
+static int mp_property_perf_info(void *ctx, struct m_property *p, int action,
+                                 void *arg)
+{
+    MPContext *mpctx = ctx;
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET: {
+        stats_global_query(mpctx->global, (struct mpv_node *)arg);
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_vo(void *ctx, struct m_property *p, int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -3425,6 +3443,7 @@ static const struct m_property mp_properties_base[] = {
     {"current-window-scale", mp_property_current_window_scale},
     {"vo-configured", mp_property_vo_configured},
     {"vo-passes", mp_property_vo_passes},
+    {"perf-info", mp_property_perf_info},
     {"current-vo", mp_property_vo},
     {"container-fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},

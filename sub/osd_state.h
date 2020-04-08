@@ -77,6 +77,7 @@ struct osd_state {
     struct mp_osd_render_opts *opts;
     struct mpv_global *global;
     struct mp_log *log;
+    struct stats_ctx *stats;
 
     struct mp_draw_sub_cache *draw_cache;
 };

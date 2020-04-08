@@ -9,6 +9,7 @@ struct mpv_global {
     struct m_config_shadow *config;
     struct mp_client_api *client_api;
     char *configdir;
+    struct stats_base *stats;
 };
 
 #endif
