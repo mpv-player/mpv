@@ -159,6 +159,7 @@ static void steal_node_alloctions(void *tmp, mpv_node *node)
     talloc_steal(tmp, node_get_alloc(node));
 }
 
+#ifndef HAVE_LUAJIT
 // lua_Alloc compatible. Serves only to retrieve memory usage.
 static void *mp_lua_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
 {
@@ -182,6 +183,7 @@ static void *mp_lua_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
 
     return ptr;
 }
+#endif
 
 static struct script_ctx *get_ctx(lua_State *L)
 {
@@ -434,7 +436,12 @@ static int load_lua(struct mp_script_args *args)
         goto error_out;
     }
 
+#if HAVE_LUAJIT
+    // luajit forces the use of its internal allocator, at least on 64-bit
+    lua_State *L = ctx->state = luaL_newstate();
+#else
     lua_State *L = ctx->state = lua_newstate(mp_lua_alloc, ctx);
+#endif
     if (!L) {
         MP_FATAL(ctx, "Could not initialize Lua.\n");
         goto error_out;
