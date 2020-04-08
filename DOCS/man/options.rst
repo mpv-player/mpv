@@ -3704,6 +3704,35 @@ Input
 
     See `JSON IPC`_ for details.
 
+``--input-ipc-client=fd://<N>``
+    Connect a single IPC client to the given FD. This is somewhat similar to
+    ``--input-ipc-server``, except no socket is created, and instead the passed
+    FD is treated like a socket connection received from ``accept()``. In
+    practice, you could pass either a FD created by ``socketpair()``, or a pipe.
+    In both cases, you must sure the FD is actually inherited by mpv (do not
+    set the POSIX ``CLOEXEC`` flag).
+
+    This is somewhat similar to the removed ``--input-file`` option, except it
+    supports only integer FDs, and cannot open actual paths.
+
+    .. admonition:: Example
+
+        ``--input-ipc-client=fd://123``
+
+    .. note::
+
+        Does not and will not work on Windows.
+
+    .. warning::
+
+        Writing to the ``input-ipc-server`` option at runtime will start another
+        instance of an IPC client handler for the ``input-ipc-client`` option,
+        because initialization is bundled, and this thing is stupid. This is a
+        bug. Writing to ``input-ipc-client`` at runtime will start another IPC
+        client handler for the new value, without stopping the old one, even if
+        the FD value is the same (but the string is different e.g. due to
+        whitespace). This is not a bug.
+
 ``--input-gamepad=<yes|no>``
     Enable/disable SDL2 Gamepad support. Disabled by default.
 

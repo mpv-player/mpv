@@ -18,7 +18,7 @@
 #include <pthread.h>
 #include <errno.h>
 #include <unistd.h>
-
+#include <limits.h>
 #include <poll.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -248,9 +248,10 @@ static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, int fd)
 {
     struct client_arg *client = talloc_ptrtype(NULL, client);
     *client = (struct client_arg){
-        .client_name = talloc_asprintf(client, "ipc-%d", id),
-        .client_fd   = fd,
-        .close_client_fd = true,
+        .client_name =
+            id >= 0 ? talloc_asprintf(client, "ipc-%d", id) : "ipc",
+        .client_fd = fd,
+        .close_client_fd = id >= 0,
         .writable = true,
     };
 
@@ -383,6 +384,21 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
         .path       = mp_get_user_path(arg, global, opts->ipc_path),
         .death_pipe = {-1, -1},
     };
+
+    if (opts->ipc_client && opts->ipc_client[0]) {
+        int fd = -1;
+        if (strncmp(opts->ipc_client, "fd://", 5) == 0) {
+            char *end;
+            unsigned long l = strtoul(opts->ipc_client + 5, &end, 0);
+            if (!end[0] && l <= INT_MAX)
+                fd = l;
+        }
+        if (fd < 0) {
+            MP_ERR(arg, "Invalid IPC client argument: '%s'\n", opts->ipc_client);
+        } else {
+            ipc_start_client_json(arg, -1, fd);
+        }
+    }
 
     talloc_free(opts);
 
