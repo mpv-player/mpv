@@ -95,13 +95,12 @@ local ass_stop = mp.get_property_osd("osd-ass-cc/1")
 -- Ring buffers for the values used to construct a graph.
 -- .pos denotes the current position, .len the buffer length
 -- .max is the max value in the corresponding buffer
-local vsratio_buf, vsjitter_buf, cache_ahead_buf, cache_speed_buf
+local vsratio_buf, vsjitter_buf
 local function init_buffers()
     vsratio_buf = {0, pos = 1, len = 50, max = 0}
     vsjitter_buf = {0, pos = 1, len = 50, max = 0}
-    cache_ahead_buf = {0, pos = 1, len = 50, max = 0}
-    cache_speed_buf = {0, pos = 1, len = 50, max = 0}
 end
+local cache_ahead_buf, cache_speed_buf
 local perf_buffers = {}
 -- Save all properties known to this version of mpv
 local property_list = {}
@@ -854,6 +853,10 @@ local function process_key_binding(oneshot)
             -- Will stop working if "vsync-jitter" property change notification
             -- changes, but it's fine for an internal script.
             mp.observe_property("vsync-jitter", "none", recorder)
+        end
+        if not oneshot then
+            cache_ahead_buf = {0, pos = 1, len = 50, max = 0}
+            cache_speed_buf = {0, pos = 1, len = 50, max = 0}
             cache_recorder_timer:resume()
         end
         display_timer:kill()
