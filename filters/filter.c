@@ -74,6 +74,9 @@ struct filter_runner {
     // If we're currently running the filter graph (for avoiding recursion).
     bool filtering;
 
+    // If set, recursive filtering was initiated through this pin.
+    struct mp_pin *recursive;
+
     // Set of filters which need process() to be called. A filter is in this
     // array iff mp_filter_internal.pending==true.
     struct mp_filter **pending;
@@ -131,10 +134,21 @@ static void add_pending(struct mp_filter *f)
     // something naive and dumb does the job too.
     f->in->pending = true;
     MP_TARRAY_APPEND(r, r->pending, r->num_pending, f);
+}
+
+static void add_pending_pin(struct mp_pin *p)
+{
+    struct mp_filter *f = p->manual_connection;
+    assert(f);
+
+    if (f->in->pending)
+        return;
+
+    add_pending(f);
 
     // Need to tell user that something changed.
-    if (f == r->root_filter)
-        r->external_pending = true;
+    if (f == f->in->runner->root_filter && p != f->in->runner->recursive)
+        f->in->runner->external_pending = true;
 }
 
 // Possibly enter recursive filtering. This is done as convenience for
@@ -143,8 +157,9 @@ static void add_pending(struct mp_filter *f)
 // stacks.) If the API users uses an external manually connected pin, do
 // recursive filtering as a not strictly necessary feature which makes outside
 // I/O with filters easier.
-static void filter_recursive(struct mp_filter *f)
+static void filter_recursive(struct mp_pin *p)
 {
+    struct mp_filter *f = p->conn->manual_connection;
     assert(f);
     struct filter_runner *r = f->in->runner;
 
@@ -152,9 +167,15 @@ static void filter_recursive(struct mp_filter *f)
     if (r->filtering)
         return;
 
+    assert(!r->recursive);
+    r->recursive = p;
+
     // Also don't lose the pending state, which the user may or may not
     // care about.
     r->external_pending |= mp_filter_graph_run(r->root_filter);
+
+    assert(r->recursive == p);
+    r->recursive = NULL;
 }
 
 void mp_filter_internal_mark_progress(struct mp_filter *f)
@@ -263,8 +284,8 @@ bool mp_pin_in_write(struct mp_pin *p, struct mp_frame frame)
     assert(p->conn->data.type == MP_FRAME_NONE);
     p->conn->data = frame;
     p->conn->data_requested = false;
-    add_pending(p->conn->manual_connection);
-    filter_recursive(p->conn->manual_connection);
+    add_pending_pin(p->conn);
+    filter_recursive(p);
     return true;
 }
 
@@ -282,9 +303,9 @@ bool mp_pin_out_request_data(struct mp_pin *p)
     if (p->conn && p->conn->manual_connection) {
         if (!p->data_requested) {
             p->data_requested = true;
-            add_pending(p->conn->manual_connection);
+            add_pending_pin(p->conn);
         }
-        filter_recursive(p->conn->manual_connection);
+        filter_recursive(p);
     }
     return mp_pin_out_has_data(p);
 }
@@ -292,7 +313,7 @@ bool mp_pin_out_request_data(struct mp_pin *p)
 void mp_pin_out_request_data_next(struct mp_pin *p)
 {
     if (mp_pin_out_request_data(p))
-        add_pending(p->conn->manual_connection);
+        add_pending_pin(p->conn);
 }
 
 struct mp_frame mp_pin_out_read(struct mp_pin *p)
