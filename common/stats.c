@@ -45,6 +45,7 @@ enum val_type {
     VAL_UNSET = 0,
     VAL_STATIC,
     VAL_STATIC_SIZE,
+    VAL_INC,
     VAL_TIME,
     VAL_THREAD_CPU_TIME,
 };
@@ -181,6 +182,10 @@ void stats_global_query(struct mpv_global *global, struct mpv_node *out)
             talloc_free(s);
             break;
         }
+        case VAL_INC:
+            add_stat(out, e, NULL, e->val_d, NULL);
+            e->val_d = 0;
+            break;
         case VAL_TIME: {
             double t_cpu = e->val_th / 1e6;
             add_stat(out, e, "cpu", t_cpu, mp_tprintf(80, "%.2f ms", t_cpu));
@@ -300,6 +305,17 @@ void stats_time_end(struct stats_ctx *ctx, const char *name)
         e->val_th += get_thread_cpu_time_ns(pthread_self()) - e->cpu_start_ns;
         e->time_start_us = 0;
     }
+    pthread_mutex_unlock(&ctx->base->lock);
+}
+
+void stats_event(struct stats_ctx *ctx, const char *name)
+{
+    if (!IS_ACTIVE(ctx))
+        return;
+    pthread_mutex_lock(&ctx->base->lock);
+    struct stat_entry *e = find_entry(ctx, name);
+    e->val_d += 1;
+    e->type = VAL_INC;
     pthread_mutex_unlock(&ctx->base->lock);
 }
 

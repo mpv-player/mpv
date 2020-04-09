@@ -29,6 +29,7 @@
 #include "common/common.h"
 #include "common/encode.h"
 #include "common/recorder.h"
+#include "common/stats.h"
 #include "filters/f_decoder_wrapper.h"
 #include "options/m_config_frontend.h"
 #include "options/m_property.h"
@@ -56,6 +57,8 @@
 void mp_wait_events(struct MPContext *mpctx)
 {
     mp_client_send_property_changes(mpctx);
+
+    stats_event(mpctx->stats, "iterations");
 
     bool sleeping = mpctx->sleeptime > 0;
     if (sleeping)

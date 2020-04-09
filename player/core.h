@@ -240,6 +240,7 @@ typedef struct MPContext {
     struct mpv_global *global;
     struct MPOpts *opts;
     struct mp_log *log;
+    struct stats_ctx *stats;
     struct m_config *mconfig;
     struct input_ctx *input;
     struct mp_client_api *clients;

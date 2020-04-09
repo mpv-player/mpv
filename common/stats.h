@@ -22,6 +22,9 @@ void stats_size_value(struct stats_ctx *ctx, const char *name, double val);
 void stats_time_start(struct stats_ctx *ctx, const char *name);
 void stats_time_end(struct stats_ctx *ctx, const char *name);
 
+// Display number of events per poll period.
+void stats_event(struct stats_ctx *ctx, const char *name);
+
 // Report the thread's CPU time. This needs to be called only once per thread.
 // The current thread is assumed to stay valid until the stats_ctx is destroyed
 // or stats_unregister_thread() is called, otherwise UB will occur.

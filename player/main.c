@@ -283,6 +283,8 @@ struct MPContext *mp_create(void)
     mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
     mpctx->statusline = mp_log_new(mpctx, mpctx->log, "!statusline");
 
+    mpctx->stats = stats_ctx_create(mpctx, mpctx->global, "main");
+
     // Create the config context and register the options
     mpctx->mconfig = m_config_new(mpctx, mpctx->log, &mp_opt_root);
     mpctx->opts = mpctx->mconfig->optstruct;

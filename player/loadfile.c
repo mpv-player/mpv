@@ -1774,8 +1774,7 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 // Return if all done.
 void mp_play_files(struct MPContext *mpctx)
 {
-    struct stats_ctx *stats = stats_ctx_create(mpctx, mpctx->global, "main");
-    stats_register_thread_cputime(stats, "thread");
+    stats_register_thread_cputime(mpctx->stats, "thread");
 
     // Wait for all scripts to load before possibly starting playback.
     if (!mp_clients_all_initialized(mpctx)) {
