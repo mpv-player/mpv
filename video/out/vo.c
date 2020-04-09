@@ -938,8 +938,14 @@ static bool render_frame(struct vo *vo)
         in->rendering = true;
         in->hasframe_rendered = true;
         int64_t prev_drop_count = vo->in->drop_count;
+        // Can the core queue new video now? Non-display-sync uses a separate
+        // timer instead.
+        bool can_queue =
+            !in->frame_queued && in->current_frame->num_vsyncs < 1 && use_vsync;
         pthread_mutex_unlock(&in->lock);
-        wakeup_core(vo); // core can queue new video now
+
+        if (can_queue)
+            wakeup_core(vo);
 
         stats_time_start(in->stats, "video-draw");
 
