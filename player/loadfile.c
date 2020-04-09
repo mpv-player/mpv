@@ -632,7 +632,8 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         } else if (type == STREAM_AUDIO) {
             clear_audio_output_buffers(mpctx);
             uninit_audio_chain(mpctx);
-            uninit_audio_out(mpctx);
+            if (!track)
+                uninit_audio_out(mpctx);
         }
     }
     if (type == STREAM_SUB)
