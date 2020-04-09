@@ -49,8 +49,6 @@
 
 struct priv {
     int fd;
-    uint64_t total_blocks; /* audio blocks output */
-    uint64_t total_bytes; /* bytes sent to the queue */
 };
 
 static int init(struct ao *ao)
@@ -120,6 +118,15 @@ static int init(struct ao *ao)
         MP_ERR(ao, "AUDIO_SETINFO failed: %s\n", mp_strerror(errno));
         goto fail;
     }
+
+    if (ioctl(p->fd, AUDIO_GETINFO, &info) == -1) {
+        MP_ERR(ao, "AUDIO_GETINFO failed: %s\n", mp_strerror(errno));
+        goto fail;
+    }
+
+    ao->period_size = info.blocksize / (pinfo->precision / 8) / pinfo->channels;
+    ao->device_buffer = info.play.buffer_size / (pinfo->precision / 8) / pinfo->channels;
+
     return 0;
 
 fail:
@@ -142,7 +149,6 @@ static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
     struct audio_info info;
-    struct audio_offset offset;
 
     if (ioctl(p->fd, AUDIO_GETBUFINFO, &info) == -1) {
         MP_ERR(ao, "AUDIO_GETBUFINFO failed: %s\n", mp_strerror(errno));
@@ -150,15 +156,12 @@ static void reset(struct ao *ao)
     }
 
     (void)ioctl(p->fd, AUDIO_FLUSH, NULL);
-    (void)ioctl(p->fd, AUDIO_GETOOFFS, &offset); /* reset deltablks */
-    p->total_blocks = p->total_bytes / info.blocksize;
 }
 
 static void drain(struct ao *ao)
 {
     struct priv *p = ao->priv;
     struct audio_info info;
-    struct audio_offset offset;
 
     if (ioctl(p->fd, AUDIO_GETBUFINFO, &info) == -1) {
         MP_ERR(ao, "AUDIO_GETBUFINFO failed: %s\n", mp_strerror(errno));
@@ -166,20 +169,20 @@ static void drain(struct ao *ao)
     }
 
     (void)ioctl(p->fd, AUDIO_DRAIN, NULL);
-    (void)ioctl(p->fd, AUDIO_GETOOFFS, &offset); /* reset deltablks */
-    p->total_blocks = p->total_bytes / info.blocksize;
 }
 
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
     struct audio_info info;
+    unsigned int nblk;
 
     if (ioctl(p->fd, AUDIO_GETBUFINFO, &info) == -1) {
         MP_ERR(ao, "AUDIO_GETBUFINFO failed: %s\n", mp_strerror(errno));
         return 0;
     }
-    return ((info.hiwat * info.blocksize) - info.play.seek) / ao->sstride;
+    nblk = info.hiwat - (info.play.seek / info.blocksize);
+    return nblk * ao->period_size;
 }
 
 static void audio_pause(struct ao *ao)
@@ -213,20 +216,12 @@ static double get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
     struct audio_info info;
-    struct audio_offset offset;
-    uint64_t transfer_len;
 
     if (ioctl(p->fd, AUDIO_GETBUFINFO, &info) == -1) {
         MP_ERR(ao, "AUDIO_GETBUFINFO failed: %s\n", mp_strerror(errno));
         return 0;
     }
-    if (ioctl(p->fd, AUDIO_GETOOFFS, &offset) == -1) {
-        MP_ERR(ao, "AUDIO_GETOOFFS failed: %s\n", mp_strerror(errno));
-        return 0;
-    }
-    p->total_blocks += offset.deltablks;
-    transfer_len = p->total_bytes - (p->total_blocks * info.blocksize);
-    return transfer_len / (double)ao->bps;
+    return (info.blocksize + info.play.seek) / (double)ao->bps;
 }
 
 static int play(struct ao *ao, void **data, int samples, int flags)
@@ -243,7 +238,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         MP_ERR(ao, "audio write failed: %s\n", mp_strerror(errno));
         return 0;
     }
-    p->total_bytes += ret;
     return ret / ao->sstride;
 }
 
