@@ -194,8 +194,6 @@ bool mp_filter_graph_run(struct mp_filter *filter)
 
     r->filtering = true;
 
-    // Note: some filters may call mp_filter_wakeup() from process on themselves
-    //       to queue a wakeup again later. So do not call this in the loop.
     flush_async_notifications(r);
 
     while (1) {
@@ -210,8 +208,11 @@ bool mp_filter_graph_run(struct mp_filter *filter)
             break;
         }
 
-        if (!r->num_pending)
-            break;
+        if (!r->num_pending) {
+            flush_async_notifications(r);
+            if (!r->num_pending)
+                break;
+        }
 
         struct mp_filter *next = r->pending[r->num_pending - 1];
         r->num_pending -= 1;
