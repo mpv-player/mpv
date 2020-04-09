@@ -1241,7 +1241,8 @@ void write_video(struct MPContext *mpctx)
 
     vo_c->underrun_signaled = false;
 
-    mp_wakeup_core(mpctx);
+    if (mpctx->video_status == STATUS_EOF || mpctx->stop_play)
+        mp_wakeup_core(mpctx);
     return;
 
 error:
