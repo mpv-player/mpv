@@ -372,7 +372,6 @@ struct m_option {
     // -/+INFINITY, the range can be extended to INFINITY. (This part is buggy
     // for "float".)
     // Preferably use M_RANGE() to set these fields.
-    // Some types will abuse the min or max field for unrelated things.
     double min, max;
 
     // Type dependent data (for all kinds of extended settings).
@@ -431,6 +430,9 @@ char *format_file_size(int64_t size);
 
 // type time: string "no" maps to MP_NOPTS_VALUE (if unset, NOPTS is rejected)
 #define M_OPT_ALLOW_NO          (1 << 26)
+
+// type channels: disallow "auto" (still accept ""), limit list to at most 1 item.
+#define M_OPT_CHANNELS_LIMITED  (1 << 27)
 
 // Like M_OPT_TYPE_OPTIONAL_PARAM.
 #define M_OPT_OPTIONAL_PARAM    (1 << 30)
@@ -655,8 +657,6 @@ extern const char m_option_path_separator;
 #define OPT_AUDIOFORMAT(field) \
     OPT_TYPED_FIELD(m_option_type_afmt, int, field)
 
-// If .min==1, then passing auto is disallowed, but "" is still accepted, and
-// limit channel list to 1 item.
 #define OPT_CHANNELS(field) \
     OPT_TYPED_FIELD(m_option_type_channels, struct m_channels, field)
 

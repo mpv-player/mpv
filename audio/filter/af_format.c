@@ -130,9 +130,11 @@ const struct mp_user_filter_entry af_format = {
         .options = (const struct m_option[]) {
             {"format", OPT_AUDIOFORMAT(in_format)},
             {"srate", OPT_INT(in_srate), M_RANGE(1000, 8*48000)},
-            {"channels", OPT_CHANNELS(in_channels), .min = 1},
+            {"channels", OPT_CHANNELS(in_channels),
+                .flags = M_OPT_CHANNELS_LIMITED},
             {"out-srate", OPT_INT(out_srate), M_RANGE(1000, 8*48000)},
-            {"out-channels", OPT_CHANNELS(out_channels), .min = 1},
+            {"out-channels", OPT_CHANNELS(out_channels),
+                .flags = M_OPT_CHANNELS_LIMITED},
             {"fail", OPT_FLAG(fail)},
             {0}
         },

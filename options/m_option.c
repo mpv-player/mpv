@@ -2493,8 +2493,7 @@ const m_option_type_t m_option_type_afmt = {
 static int parse_channels(struct mp_log *log, const m_option_t *opt,
                           struct bstr name, struct bstr param, void *dst)
 {
-    // see OPT_CHANNELS for semantics.
-    bool limited = opt->min;
+    bool limited = opt->flags & M_OPT_CHANNELS_LIMITED;
 
     struct m_channels res = {0};
 

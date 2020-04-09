@@ -54,7 +54,7 @@ struct demux_rawaudio_opts {
 #define OPT_BASE_STRUCT struct demux_rawaudio_opts
 const struct m_sub_options demux_rawaudio_conf = {
     .opts = (const m_option_t[]) {
-        {"channels", OPT_CHANNELS(channels), .min = 1},
+        {"channels", OPT_CHANNELS(channels), .flags = M_OPT_CHANNELS_LIMITED},
         {"rate", OPT_INT(samplerate), M_RANGE(1000, 8 * 48000)},
         {"format", OPT_CHOICE(aformat,
             {"u8",      PCM(0, 0,  8, 0)},
