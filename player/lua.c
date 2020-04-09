@@ -90,6 +90,8 @@ struct script_ctx {
     struct mpv_handle *client;
     struct MPContext *mpctx;
     size_t lua_malloc_size;
+    lua_Alloc lua_allocf;
+    void *lua_alloc_ud;
     struct stats_ctx *stats;
 };
 
@@ -159,8 +161,9 @@ static void steal_node_alloctions(void *tmp, mpv_node *node)
     talloc_steal(tmp, node_get_alloc(node));
 }
 
-#ifndef HAVE_LUAJIT
-// lua_Alloc compatible. Serves only to retrieve memory usage.
+// lua_Alloc compatible. Serves only to track memory usage. This wraps the
+// existing allocator, partly because luajit requires the use of its internal
+// allocator on 64-bit platforms.
 static void *mp_lua_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
 {
     struct script_ctx *ctx = ud;
@@ -169,21 +172,15 @@ static void *mp_lua_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
     if (!ptr)
         osize = 0;
 
-    if (nsize) {
-        ptr = realloc(ptr, nsize);
-        if (!ptr)
-            return NULL;
-    } else {
-        free(ptr);
-        ptr = NULL;
-    }
+    ptr = ctx->lua_allocf(ctx->lua_alloc_ud, ptr, osize, nsize);
+    if (nsize && !ptr)
+        return NULL; // allocation failed, so original memory left untouched
 
     ctx->lua_malloc_size = ctx->lua_malloc_size - osize + nsize;
     stats_size_value(ctx->stats, "mem", ctx->lua_malloc_size);
 
     return ptr;
 }
-#endif
 
 static struct script_ctx *get_ctx(lua_State *L)
 {
@@ -436,16 +433,15 @@ static int load_lua(struct mp_script_args *args)
         goto error_out;
     }
 
-#if HAVE_LUAJIT
-    // luajit forces the use of its internal allocator, at least on 64-bit
     lua_State *L = ctx->state = luaL_newstate();
-#else
-    lua_State *L = ctx->state = lua_newstate(mp_lua_alloc, ctx);
-#endif
     if (!L) {
         MP_FATAL(ctx, "Could not initialize Lua.\n");
         goto error_out;
     }
+
+    // Wrap the internal allocator with our version that does accounting
+    ctx->lua_allocf = lua_getallocf(L, &ctx->lua_alloc_ud);
+    lua_setallocf(L, mp_lua_alloc, ctx);
 
     if (mp_cpcall(L, run_lua, ctx)) {
         const char *err = "unknown error";
