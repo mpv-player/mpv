@@ -427,7 +427,10 @@ char *format_file_size(int64_t size);
     (((UPDATE_OPT_LAST << 1) - 1) & ~(unsigned)(UPDATE_OPT_FIRST - 1))
 
 // type_float/type_double: string "default" is parsed as NaN (and reverse)
-#define M_OPT_DEFAULT_NAN       (1 << 29)
+#define M_OPT_DEFAULT_NAN       (1 << 25)
+
+// type time: string "no" maps to MP_NOPTS_VALUE (if unset, NOPTS is rejected)
+#define M_OPT_ALLOW_NO          (1 << 26)
 
 // Like M_OPT_TYPE_OPTIONAL_PARAM.
 #define M_OPT_OPTIONAL_PARAM    (1 << 30)

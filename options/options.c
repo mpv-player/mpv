@@ -447,8 +447,8 @@ static const m_option_t mp_opts[] = {
 
     {"rebase-start-time", OPT_FLAG(rebase_start_time)},
 
-    {"ab-loop-a", OPT_TIME(ab_loop[0]), .min = MP_NOPTS_VALUE},
-    {"ab-loop-b", OPT_TIME(ab_loop[1]), .min = MP_NOPTS_VALUE},
+    {"ab-loop-a", OPT_TIME(ab_loop[0]), .flags = M_OPT_ALLOW_NO},
+    {"ab-loop-b", OPT_TIME(ab_loop[1]), .flags = M_OPT_ALLOW_NO},
     {"ab-loop-count", OPT_CHOICE(ab_loop_count, {"inf", -1}),
         M_RANGE(0, INT_MAX)},
 

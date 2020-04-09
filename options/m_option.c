@@ -2639,7 +2639,7 @@ static int parse_timestring(struct bstr str, double *time, char endchar)
     return len;
 }
 
-#define HAS_NOPTS(opt) ((opt)->min == MP_NOPTS_VALUE)
+#define HAS_NOPTS(opt) ((opt)->flags & M_OPT_ALLOW_NO)
 
 static int parse_time(struct mp_log *log, const m_option_t *opt,
                       struct bstr name, struct bstr param, void *dst)
