@@ -120,7 +120,7 @@ const struct m_sub_options vd_lavc_conf = {
         {"hwdec", OPT_STRING_VALIDATE(hwdec_api, hwdec_validate_opt),
             .flags = M_OPT_OPTIONAL_PARAM | UPDATE_HWDEC},
         {"hwdec-codecs", OPT_STRING(hwdec_codecs)},
-        {"hwdec-image-format", OPT_IMAGEFORMAT(hwdec_image_format), .min = -1},
+        {"hwdec-image-format", OPT_IMAGEFORMAT(hwdec_image_format)},
         {"hwdec-extra-frames", OPT_INT(hwdec_extra_frames), M_RANGE(0, 256)},
         {0}
     },

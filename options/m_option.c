@@ -2356,8 +2356,6 @@ const m_option_type_t m_option_type_size_box = {
 static int parse_imgfmt(struct mp_log *log, const m_option_t *opt,
                         struct bstr name, struct bstr param, void *dst)
 {
-    bool accept_no = opt->min < 0;
-
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
@@ -2366,15 +2364,14 @@ static int parse_imgfmt(struct mp_log *log, const m_option_t *opt,
         char **list = mp_imgfmt_name_list();
         for (int i = 0; list[i]; i++)
             mp_info(log, " %s", list[i]);
-        if (accept_no)
-            mp_info(log, " no");
+        mp_info(log, " no");
         mp_info(log, "\n");
         talloc_free(list);
         return M_OPT_EXIT;
     }
 
     unsigned int fmt = mp_imgfmt_from_name(param);
-    if (!fmt && !(accept_no && bstr_equals0(param, "no"))) {
+    if (!fmt && !bstr_equals0(param, "no")) {
         mp_err(log, "Option %.*s: unknown format name: '%.*s'\n",
                BSTR_P(name), BSTR_P(param));
         return M_OPT_INVALID;
