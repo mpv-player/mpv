@@ -836,8 +836,6 @@ int dvb_set_channel(stream_t *stream, unsigned int adapter, unsigned int n)
     MP_VERBOSE(stream, "DVB_SET_CHANNEL: new channel name=%s, adapter: %d, "
                "channel %d\n", channel->name, devno, n);
 
-    stream_drop_buffers(stream);
-
     if (channel->freq != state->last_freq) {
         if (!dvb_tune(priv, channel->delsys, channel->freq,
                       channel->pol, channel->srate, channel->diseqc,
