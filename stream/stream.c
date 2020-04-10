@@ -264,24 +264,28 @@ static int ring_copy(struct stream *s, void *dst, int len, int pos)
 // Does nothing if the size is adequate. Calling this with 0 ensures it uses the
 // default buffer size if possible.
 // The caller must check whether enough data was really allocated.
-// Returns false if buffer allocation failed.
-static bool stream_resize_buffer(struct stream *s, uint32_t new)
+//  keep: keep at least [buf_end-keep, buf_end] (used for assert()s only)
+//  new: new total size of buffer
+//  returns: false if buffer allocation failed, true if reallocated or size ok
+static bool stream_resize_buffer(struct stream *s, int keep, int new)
 {
-    // Keep all valid buffer.
-    int old_used_len = s->buf_end - s->buf_start;
-    int old_pos = s->buf_cur - s->buf_start;
-    new = MPMAX(new, old_used_len);
+    assert(keep >= s->buf_end - s->buf_cur);
+    assert(keep <= new);
 
-    // This much is always required.
     new = MPMAX(new, s->requested_buffer_size);
-
     new = MPMIN(new, STREAM_MAX_BUFFER_SIZE);
     new = mp_round_next_power_of_2(new);
+
+    assert(keep <= new); // can't fail (if old buffer size was valid)
 
     if (new == s->buffer_mask + 1)
         return true;
 
-    MP_DBG(s, "resize stream to %d bytes\n", new);
+    int old_pos = s->buf_cur - s->buf_start;
+    int old_used_len = s->buf_end - s->buf_start;
+    int skip = old_used_len > new ? old_used_len - new : 0;
+
+    MP_DBG(s, "resize stream to %d bytes, drop %d bytes\n", new, skip);
 
     void *nbuf = ta_alloc_size(s, new);
     if (!nbuf)
@@ -289,11 +293,12 @@ static bool stream_resize_buffer(struct stream *s, uint32_t new)
 
     int new_len = 0;
     if (s->buffer)
-        new_len = ring_copy(s, nbuf, new, s->buf_start);
-    assert(new_len == old_used_len);
-    assert(old_pos <= old_used_len);
+        new_len = ring_copy(s, nbuf, new, s->buf_start + skip);
+    assert(new_len == old_used_len - skip);
+    assert(old_pos >= skip); // "keep" too low
+    assert(old_pos - skip <= new_len);
     s->buf_start = 0;
-    s->buf_cur = old_pos;
+    s->buf_cur = old_pos - skip;
     s->buf_end = new_len;
 
     ta_free(s->buffer);
@@ -379,7 +384,7 @@ static int stream_create_instance(const stream_info_t *sinfo,
         return r;
     }
 
-    if (!stream_resize_buffer(s, 0)) {
+    if (!stream_resize_buffer(s, 0, 0)) {
         free_stream(s);
         return STREAM_ERROR;
     }
@@ -506,7 +511,7 @@ static bool stream_read_more(struct stream *s, int forward)
     // Keep guaranteed seek-back.
     int buf_old = MPMIN(s->buf_cur - s->buf_start, s->requested_buffer_size / 2);
 
-    if (!stream_resize_buffer(s, buf_old + forward))
+    if (!stream_resize_buffer(s, buf_old + forward_avail, buf_old + forward))
         return false;
 
     int buf_alloc = s->buffer_mask + 1;
@@ -648,7 +653,7 @@ void stream_drop_buffers(stream_t *s)
     s->pos = stream_tell(s);
     s->buf_start = s->buf_cur = s->buf_end = 0;
     s->eof = 0;
-    stream_resize_buffer(s, 0);
+    stream_resize_buffer(s, 0, 0);
 }
 
 // Seek function bypassing the local stream buffer.
