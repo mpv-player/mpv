@@ -344,9 +344,10 @@ unsigned int mp_log2(uint32_t v)
 //  mp_round_next_power_of_2(UINT32_MAX)    == 0
 uint32_t mp_round_next_power_of_2(uint32_t v)
 {
-    for (int n = 0; n < 30; n++) {
-        if ((1 << n) >= v)
-            return 1 << n;
-    }
-    return 0;
+    if (!v)
+        return 1;
+    if (!(v & (v - 1)))
+        return v;
+    int l = mp_log2(v) + 1;
+    return l == 32 ? 0 : (uint32_t)1 << l;
 }
