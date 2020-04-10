@@ -264,7 +264,7 @@ struct MPContext *mp_create(void)
         .last_chapter = -2,
         .term_osd_contents = talloc_strdup(mpctx, ""),
         .osd_progbar = { .type = -1 },
-        .playlist = talloc_struct(mpctx, struct playlist, {0}),
+        .playlist = talloc_zero(mpctx, struct playlist),
         .dispatch = mp_dispatch_create(mpctx),
         .playback_abort = mp_cancel_new(mpctx),
         .thread_pool = mp_thread_pool_create(mpctx, 0, 1, 30),

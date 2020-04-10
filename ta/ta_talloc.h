@@ -156,7 +156,4 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
         : false                                     \
     )
 
-#define talloc_struct(ctx, type, ...) \
-    talloc_memdup(ctx, &(type) TA_EXPAND_ARGS(__VA_ARGS__), sizeof(type))
-
 #endif
