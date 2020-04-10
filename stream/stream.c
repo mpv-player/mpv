@@ -479,6 +479,7 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
         s->eof = 1;
         return 0;
     }
+    assert(res <= len);
     // When reading succeeded we are obviously not at eof.
     s->eof = 0;
     s->pos += res;
@@ -500,6 +501,7 @@ static bool stream_read_more(struct stream *s, int forward)
 
     // Avoid that many small reads will lead to many low-level read calls.
     forward = MPMAX(forward, s->requested_buffer_size / 2);
+    assert(forward_avail < forward);
 
     // Keep guaranteed seek-back.
     int buf_old = MPMIN(s->buf_cur - s->buf_start, s->requested_buffer_size / 2);
@@ -518,7 +520,7 @@ static bool stream_read_more(struct stream *s, int forward)
     // Note: read as much as possible, even if forward is much smaller. Do
     // this because the stream buffer is supposed to set an approx. minimum
     // read size on it.
-    int read = buf_alloc - buf_old - forward_avail; // free buffer past end
+    int read = buf_alloc - (buf_old + forward_avail); // free buffer past end
 
     int pos = s->buf_end & s->buffer_mask;
     read = MPMIN(read, buf_alloc - pos);
