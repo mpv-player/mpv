@@ -79,8 +79,6 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
 
 #define TA_FREEP(pctx) do {talloc_free(*(pctx)); *(pctx) = NULL;} while(0)
 
-#define TA_EXPAND_ARGS(...) __VA_ARGS__
-
 // Return number of allocated entries in typed array p[].
 #define MP_TALLOC_AVAIL(p) (talloc_get_size(p) / sizeof((p)[0]))
 
@@ -105,7 +103,7 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
 #define MP_TARRAY_APPEND(ctx, p, idxvar, ...)       \
     do {                                            \
         MP_TARRAY_GROW(ctx, p, idxvar);             \
-        (p)[(idxvar)] = (TA_EXPAND_ARGS(__VA_ARGS__));\
+        (p)[(idxvar)] = (__VA_ARGS__);              \
         (idxvar)++;                                 \
     } while (0)
 
@@ -120,7 +118,7 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
         memmove((p) + at_ + 1, (p) + at_,           \
                 ((idxvar) - at_) * sizeof((p)[0])); \
         (idxvar)++;                                 \
-        (p)[at_] = (TA_EXPAND_ARGS(__VA_ARGS__));   \
+        (p)[at_] = (__VA_ARGS__);                   \
     } while (0)
 
 // Given an array p with count idxvar, insert c elements at p[at], so that
