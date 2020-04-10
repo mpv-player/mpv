@@ -96,6 +96,9 @@ static const stream_info_t *const stream_list[] = {
 // Because of guarantees documented on STREAM_BUFFER_SIZE.
 // Half the buffer is used as forward buffer, the other for seek-back.
 #define STREAM_MIN_BUFFER_SIZE (STREAM_BUFFER_SIZE * 2)
+// Sort of arbitrary; keep *2 of it comfortably within integer limits.
+// Must be power of 2.
+#define STREAM_MAX_BUFFER_SIZE (512 * 1024 * 1024)
 
 struct stream_opts {
     int64_t buffer_size;
@@ -107,7 +110,7 @@ struct stream_opts {
 const struct m_sub_options stream_conf = {
     .opts = (const struct m_option[]){
         {"stream-buffer-size", OPT_BYTE_SIZE(buffer_size),
-            M_RANGE(STREAM_MIN_BUFFER_SIZE, 512 * 1024 * 1024)},
+            M_RANGE(STREAM_MIN_BUFFER_SIZE, STREAM_MAX_BUFFER_SIZE)},
         {"load-unsafe-playlists", OPT_FLAG(load_unsafe_playlists)},
         {0}
     },
@@ -269,14 +272,11 @@ static bool stream_resize_buffer(struct stream *s, uint32_t new)
     int old_pos = s->buf_cur - s->buf_start;
     new = MPMAX(new, old_used_len);
 
+    // This much is always required.
     new = MPMAX(new, s->requested_buffer_size);
 
-    // This much is always required.
-    new = MPMAX(new, STREAM_MIN_BUFFER_SIZE);
-
+    new = MPMIN(new, STREAM_MAX_BUFFER_SIZE);
     new = mp_round_next_power_of_2(new);
-    if (!new || new > INT_MAX / 8)
-        return false;
 
     if (new == s->buffer_mask + 1)
         return true;
