@@ -53,25 +53,6 @@ end
 -- Apply user-set options
 options.read_options(opts)
 
--- Build a list of commands, properties and options for tab-completion
-local option_info = {
-    'name', 'type', 'set-from-commandline', 'set-locally', 'default-value',
-    'min', 'max', 'choices',
-}
-local cmd_list = {}
-for i, cmd in ipairs(mp.get_property_native('command-list')) do
-    cmd_list[i] = cmd.name
-end
-local prop_list = mp.get_property_native('property-list')
-for _, opt in ipairs(mp.get_property_native('options')) do
-    prop_list[#prop_list + 1] = 'options/' .. opt
-    prop_list[#prop_list + 1] = 'file-local-options/' .. opt
-    prop_list[#prop_list + 1] = 'option-info/' .. opt
-    for _, p in ipairs(option_info) do
-        prop_list[#prop_list + 1] = 'option-info/' .. opt .. '/' .. p
-    end
-end
-
 local repl_active = false
 local insert_mode = false
 local pending_update = false
@@ -226,6 +207,7 @@ function set_active(active)
         repl_active = false
         undefine_key_bindings()
         mp.enable_messages('silent:terminal-default')
+        collectgarbage()
     end
     update()
 end
@@ -467,18 +449,39 @@ end
 --   append: An extra string to be appended to the end of a successful
 --           completion. It is only appended if 'list' contains exactly one
 --           match.
-local completers = {
-    { pattern = '^%s*()[%w_-]+()$', list = cmd_list, append = ' ' },
-    { pattern = '^%s*set%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-    { pattern = '^%s*set%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-    { pattern = '^%s*add%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-    { pattern = '^%s*add%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-    { pattern = '^%s*cycle%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-    { pattern = '^%s*cycle%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-    { pattern = '^%s*multiply%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-    { pattern = '^%s*multiply%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-    { pattern = '${()[%w_/-]+()$', list = prop_list, append = '}' },
-}
+function build_completers()
+    -- Build a list of commands, properties and options for tab-completion
+    local option_info = {
+        'name', 'type', 'set-from-commandline', 'set-locally', 'default-value',
+        'min', 'max', 'choices',
+    }
+    local cmd_list = {}
+    for i, cmd in ipairs(mp.get_property_native('command-list')) do
+        cmd_list[i] = cmd.name
+    end
+    local prop_list = mp.get_property_native('property-list')
+    for _, opt in ipairs(mp.get_property_native('options')) do
+        prop_list[#prop_list + 1] = 'options/' .. opt
+        prop_list[#prop_list + 1] = 'file-local-options/' .. opt
+        prop_list[#prop_list + 1] = 'option-info/' .. opt
+        for _, p in ipairs(option_info) do
+            prop_list[#prop_list + 1] = 'option-info/' .. opt .. '/' .. p
+        end
+    end
+
+    return {
+        { pattern = '^%s*()[%w_-]+()$', list = cmd_list, append = ' ' },
+        { pattern = '^%s*set%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
+        { pattern = '^%s*set%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
+        { pattern = '^%s*add%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
+        { pattern = '^%s*add%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
+        { pattern = '^%s*cycle%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
+        { pattern = '^%s*cycle%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
+        { pattern = '^%s*multiply%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
+        { pattern = '^%s*multiply%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
+        { pattern = '${()[%w_/-]+()$', list = prop_list, append = '}' },
+    }
+end
 
 -- Use 'list' to find possible tab-completions for 'part.' Returns the longest
 -- common prefix of all the matching list items and a flag that indicates
@@ -513,7 +516,7 @@ function complete()
     local after_cur = line:sub(cursor)
 
     -- Try the first completer that works
-    for _, completer in ipairs(completers) do
+    for _, completer in ipairs(build_completers()) do
         -- Completer patterns should return the start and end of the word to be
         -- completed as the first and second capture groups
         local _, _, s, e = before_cur:find(completer.pattern)
@@ -650,47 +653,51 @@ end
 
 -- List of input bindings. This is a weird mashup between common GUI text-input
 -- bindings and readline bindings.
-local bindings = {
-    { 'esc',         function() set_active(false) end       },
-    { 'enter',       handle_enter                           },
-    { 'kp_enter',    handle_enter                           },
-    { 'shift+enter', function() handle_char_input('\n') end },
-    { 'bs',          handle_backspace                       },
-    { 'shift+bs',    handle_backspace                       },
-    { 'del',         handle_del                             },
-    { 'shift+del',   handle_del                             },
-    { 'ins',         handle_ins                             },
-    { 'shift+ins',   function() paste(false) end            },
-    { 'mbtn_mid',    function() paste(false) end            },
-    { 'left',        function() prev_char() end             },
-    { 'right',       function() next_char() end             },
-    { 'up',          function() move_history(-1) end        },
-    { 'wheel_up',    function() move_history(-1) end        },
-    { 'down',        function() move_history(1) end         },
-    { 'wheel_down',  function() move_history(1) end         },
-    { 'wheel_left',  function() end                         },
-    { 'wheel_right', function() end                         },
-    { 'ctrl+left',   prev_word                              },
-    { 'ctrl+right',  next_word                              },
-    { 'tab',         complete                               },
-    { 'home',        go_home                                },
-    { 'end',         go_end                                 },
-    { 'pgup',        handle_pgup                            },
-    { 'pgdwn',       handle_pgdown                          },
-    { 'ctrl+c',      clear                                  },
-    { 'ctrl+d',      maybe_exit                             },
-    { 'ctrl+k',      del_to_eol                             },
-    { 'ctrl+l',      clear_log_buffer                       },
-    { 'ctrl+u',      del_to_start                           },
-    { 'ctrl+v',      function() paste(true) end             },
-    { 'meta+v',      function() paste(true) end             },
-    { 'ctrl+w',      del_word                               },
-    { 'kp_dec',      function() handle_char_input('.') end  },
-}
+function get_bindings()
+    local bindings = {
+        { 'esc',         function() set_active(false) end       },
+        { 'enter',       handle_enter                           },
+        { 'kp_enter',    handle_enter                           },
+        { 'shift+enter', function() handle_char_input('\n') end },
+        { 'bs',          handle_backspace                       },
+        { 'shift+bs',    handle_backspace                       },
+        { 'del',         handle_del                             },
+        { 'shift+del',   handle_del                             },
+        { 'ins',         handle_ins                             },
+        { 'shift+ins',   function() paste(false) end            },
+        { 'mbtn_mid',    function() paste(false) end            },
+        { 'left',        function() prev_char() end             },
+        { 'right',       function() next_char() end             },
+        { 'up',          function() move_history(-1) end        },
+        { 'wheel_up',    function() move_history(-1) end        },
+        { 'down',        function() move_history(1) end         },
+        { 'wheel_down',  function() move_history(1) end         },
+        { 'wheel_left',  function() end                         },
+        { 'wheel_right', function() end                         },
+        { 'ctrl+left',   prev_word                              },
+        { 'ctrl+right',  next_word                              },
+        { 'tab',         complete                               },
+        { 'home',        go_home                                },
+        { 'end',         go_end                                 },
+        { 'pgup',        handle_pgup                            },
+        { 'pgdwn',       handle_pgdown                          },
+        { 'ctrl+c',      clear                                  },
+        { 'ctrl+d',      maybe_exit                             },
+        { 'ctrl+k',      del_to_eol                             },
+        { 'ctrl+l',      clear_log_buffer                       },
+        { 'ctrl+u',      del_to_start                           },
+        { 'ctrl+v',      function() paste(true) end             },
+        { 'meta+v',      function() paste(true) end             },
+        { 'ctrl+w',      del_word                               },
+        { 'kp_dec',      function() handle_char_input('.') end  },
+    }
 
-for i = 0, 9 do
-    bindings[#bindings + 1] =
-        {'kp' .. i, function() handle_char_input('' .. i) end}
+    for i = 0, 9 do
+        bindings[#bindings + 1] =
+            {'kp' .. i, function() handle_char_input('' .. i) end}
+    end
+
+    return bindings
 end
 
 local function text_input(info)
@@ -705,7 +712,7 @@ function define_key_bindings()
     if #key_bindings > 0 then
         return
     end
-    for _, bind in ipairs(bindings) do
+    for _, bind in ipairs(get_bindings()) do
         -- Generate arbitrary name for removing the bindings later.
         local name = "_console_" .. (#key_bindings + 1)
         key_bindings[#key_bindings + 1] = name
@@ -779,3 +786,5 @@ mp.register_event('log-message', function(e)
 
     log_add(style, '[' .. e.prefix .. '] ' .. e.text)
 end)
+
+collectgarbage()
