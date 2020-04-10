@@ -19,6 +19,10 @@ local o = {
     key_page_2 = "2",
     key_page_3 = "3",
     key_page_4 = "4",
+    -- For pages which support scrolling
+    key_scroll_up = "UP",
+    key_scroll_down = "DOWN",
+    scroll_lines = 1,
 
     duration = 4,
     redraw_delay = 1,                -- acts as duration in the toggling case
@@ -89,6 +93,7 @@ local cache_recorder_timer = nil
 -- Current page and <page key>:<page function> mappings
 local curr_page = o.key_page_1
 local pages = {}
+local scroll_bound = false
 -- Save these sequences locally as we'll need them a lot
 local ass_start = mp.get_property_osd("osd-ass-cc/0")
 local ass_stop = mp.get_property_osd("osd-ass-cc/1")
@@ -353,20 +358,32 @@ local function append_perfdata(s, dedicated_page)
     end
 end
 
-local function append_general_perfdata(s)
-    for _, data in ipairs(mp.get_property_native("perf-info") or {}) do
-        append(s, data.text or data.value, {prefix=data.name..":"})
+local function append_general_perfdata(s, offset)
+    local perf_info = mp.get_property_native("perf-info") or {}
+    local count = 0
+    for _, data in ipairs(perf_info) do
+        count = count + 1
+    end
+    offset = max(1, min((offset or 1), count))
 
-        if o.plot_perfdata and o.use_ass and data.value then
-            buf = perf_buffers[data.name]
-            if not buf then
-                buf = {0, pos = 1, len = 50, max = 0}
-                perf_buffers[data.name] = buf
+    local i = 0
+    for _, data in ipairs(perf_info) do
+        i = i + 1
+        if i >= offset then
+            append(s, data.text or data.value, {prefix="["..tostring(i).."] "..data.name..":"})
+
+            if o.plot_perfdata and o.use_ass and data.value then
+                buf = perf_buffers[data.name]
+                if not buf then
+                    buf = {0, pos = 1, len = 50, max = 0}
+                    perf_buffers[data.name] = buf
+                end
+                graph_add_value(buf, data.value)
+                s[#s+1] = generate_graph(buf, buf.pos, buf.len, buf.max, nil, 0.8, 1)
             end
-            graph_add_value(buf, data.value)
-            s[#s+1] = generate_graph(buf, buf.pos, buf.len, buf.max, nil, 0.8, 1)
         end
     end
+    return offset
 end
 
 local function append_display_sync(s)
@@ -621,7 +638,7 @@ local function perf_stats()
     add_header(stats)
     local page = pages[o.key_page_4]
     append(stats, "", {prefix=o.nl .. o.nl .. page.desc .. ":", nl="", indent=""})
-    append_general_perfdata(stats, true)
+    page.offset = append_general_perfdata(stats, page.offset)
     return table.concat(stats)
 end
 
@@ -750,7 +767,7 @@ pages = {
     [o.key_page_1] = { f = default_stats, desc = "Default" },
     [o.key_page_2] = { f = vo_stats, desc = "Extended Frame Timings" },
     [o.key_page_3] = { f = cache_stats, desc = "Cache Statistics" },
-    [o.key_page_4] = { f = perf_stats, desc = "Internal performance info" },
+    [o.key_page_4] = { f = perf_stats, desc = "Internal performance info", scroll = true },
 }
 
 
@@ -801,11 +818,47 @@ local function clear_screen()
     if o.persistent_overlay then mp.set_osd_ass(0, 0, "") else mp.osd_message("", 0) end
 end
 
+local function scroll_delta(d)
+    if display_timer.oneshot then display_timer:kill() ; display_timer:resume() end
+    pages[curr_page].offset = (pages[curr_page].offset or 1) + d
+    print_page(curr_page)
+end
+local function scroll_up() scroll_delta(-o.scroll_lines) end
+local function scroll_down() scroll_delta(o.scroll_lines) end
+
+local function reset_scroll_offsets()
+    for _, page in pairs(pages) do
+        page.offset = nil
+    end
+end
+local function bind_scroll()
+    if not scroll_bound then
+        mp.add_forced_key_binding(o.key_scroll_up, o.key_scroll_up, scroll_up, {repeatable=true})
+        mp.add_forced_key_binding(o.key_scroll_down, o.key_scroll_down, scroll_down, {repeatable=true})
+        scroll_bound = true
+    end
+end
+local function unbind_scroll()
+    if scroll_bound then
+        mp.remove_key_binding(o.key_scroll_up)
+        mp.remove_key_binding(o.key_scroll_down)
+        scroll_bound = false
+    end
+end
+local function update_scroll_bindings(k)
+    if (pages[k].scroll) then
+        bind_scroll()
+    else
+        unbind_scroll()
+    end
+end
 
 -- Add keybindings for every page
 local function add_page_bindings()
     local function a(k)
         return function()
+            reset_scroll_offsets()
+            update_scroll_bindings(k)
             curr_page = k
             print_page(k)
             if display_timer.oneshot then display_timer:kill() ; display_timer:resume() end
@@ -814,6 +867,7 @@ local function add_page_bindings()
     for k, _ in pairs(pages) do
         mp.add_forced_key_binding(k, k, a(k), {repeatable=true})
     end
+    update_scroll_bindings(curr_page)
 end
 
 
@@ -822,10 +876,12 @@ local function remove_page_bindings()
     for k, _ in pairs(pages) do
         mp.remove_key_binding(k)
     end
+    unbind_scroll()
 end
 
 
 local function process_key_binding(oneshot)
+    reset_scroll_offsets()
     -- Stats are already being displayed
     if display_timer:is_enabled() then
         -- Previous and current keys were oneshot -> restart timer

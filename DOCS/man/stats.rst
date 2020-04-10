@@ -24,7 +24,14 @@ stats:
 1      Show usual stats
 2      Show frame timings
 3      Input cache stats
-4      Internal stuff
+4      Internal stuff (scroll)
+====   ==================
+
+On pages which support scroll, these key bindings are also active:
+
+====   ==================
+UP      Scroll one line up
+DOWN    Scroll one line down
 ====   ==================
 
 Font
@@ -61,6 +68,15 @@ Configurable Options
     Default: 4
 
     Key bindings for page switching while stats are displayed.
+
+``key_scroll_up``
+    Default: UP
+``key_scroll_down``
+    Default: DOWN
+``scroll_lines``
+    Default: 1
+
+    Scroll key bindings and number of lines to scroll on pages which support it.
 
 ``duration``
     Default: 4
@@ -183,7 +199,7 @@ The displayed information is accumulated over the redraw delay (shown as
 ``poll-time`` field).
 
 This adds entries for each Lua script. If there are too many scripts running,
-parts of the list will simply be out of the screen.
+parts of the list will simply be out of the screen, but it can be scrolled.
 
 If the underlying platform does not support pthread per thread times, the
 displayed times will be 0 or something random (I suspect that at time of this
