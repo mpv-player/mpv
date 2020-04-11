@@ -33,6 +33,7 @@
 #include "options/m_property.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "common/stats.h"
 #include "options/m_option.h"
 #include "input/input.h"
 #include "options/path.h"
@@ -64,6 +65,8 @@ struct script_ctx {
     struct MPContext *mpctx;
     struct mp_log *log;
     char *last_error_str;
+    size_t js_malloc_size;
+    struct stats_ctx *stats;
 };
 
 static struct script_ctx *jctx(js_State *J)
@@ -458,6 +461,25 @@ static int s_init_js(js_State *J, struct script_ctx *ctx)
     return 0;
 }
 
+static void *mp_js_alloc(void *actx, void *ptr, int size_)
+{
+    if (size_ < 0)
+        return NULL;
+
+    struct script_ctx* ctx = actx;
+    size_t size = size_, osize = 0;
+    if (ptr)  // free/realloc
+        osize = ta_get_size(ptr);
+
+    void *ret = talloc_realloc_size(actx, ptr, size);
+
+    if (!size || ret) {  // free / successful realloc/malloc
+        ctx->js_malloc_size = ctx->js_malloc_size - osize + size;
+        stats_size_value(ctx->stats, "mem", ctx->js_malloc_size);
+    }
+    return ret;
+}
+
 /**********************************************************************
  *  Initialization - booting the script
  *********************************************************************/
@@ -479,10 +501,24 @@ static int s_load_javascript(struct mp_script_args *args)
         .last_error_str = talloc_strdup(ctx, "Cannot initialize JavaScript"),
         .filename = args->filename,
         .path = args->path,
+        .js_malloc_size = 0,
+        .stats = stats_ctx_create(ctx, args->mpctx->global,
+                    mp_tprintf(80, "script/%s", mpv_client_name(args->client))),
     };
 
+    stats_register_thread_cputime(ctx->stats, "cpu");
+
+    js_Alloc alloc_fn = NULL;
+    void *actx = NULL;
+
+    char *mem_report = getenv("MPV_LEAK_REPORT");
+    if (mem_report && strcmp(mem_report, "1") == 0) {
+        alloc_fn = mp_js_alloc;
+        actx = ctx;
+    }
+
     int r = -1;
-    js_State *J = js_newstate(NULL, NULL, 0);
+    js_State *J = js_newstate(alloc_fn, actx, 0);
     if (!J || s_init_js(J, ctx))
         goto error_out;
 
