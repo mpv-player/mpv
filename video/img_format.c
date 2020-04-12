@@ -383,6 +383,11 @@ enum mp_component_type mp_imgfmt_get_component_type(int imgfmt)
     return MP_COMPONENT_TYPE_UINT;
 }
 
+int mp_find_other_endian(int imgfmt)
+{
+    return pixfmt2imgfmt(av_pix_fmt_swap_endianness(imgfmt2pixfmt(imgfmt)));
+}
+
 static bool is_native_endian(const AVPixFmtDescriptor *pixdesc)
 {
     enum AVPixelFormat pixfmt = av_pix_fmt_desc_get_id(pixdesc);

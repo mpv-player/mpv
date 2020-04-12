@@ -137,6 +137,10 @@ struct mp_regular_imgfmt {
 bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt);
 int mp_find_regular_imgfmt(struct mp_regular_imgfmt *src);
 
+// If imgfmt is valid, and there exists a format that is exactly the same, but
+// has inverse endianness, return this other format. Otherwise return 0.
+int mp_find_other_endian(int imgfmt);
+
 enum mp_imgfmt {
     IMGFMT_NONE = 0,
 

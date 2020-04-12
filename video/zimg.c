@@ -17,6 +17,8 @@
 
 #include <math.h>
 
+#include <libavutil/bswap.h>
+
 #include "common/common.h"
 #include "common/msg.h"
 #include "csputils.h"
@@ -71,7 +73,8 @@ const struct m_sub_options zimg_conf = {
 
 struct mp_zimg_repack {
     bool pack;                  // if false, this is for unpacking
-    struct mp_image_params fmt; // original mp format (possibly packed format)
+    struct mp_image_params fmt; // original mp format (possibly packed format,
+                                // swapped endian)
     int zimgfmt;                // zimg equivalent unpacked format
     int num_planes;             // number of planes involved
     unsigned zmask[4];          // zmask[mp_index] = zimg mask (using mp index!)
@@ -81,6 +84,10 @@ struct mp_zimg_repack {
     // If set, the pack/unpack callback to pass to zimg.
     // Called with user==mp_zimg_repack.
     zimg_filter_graph_callback repack;
+
+    // Endian-swap (done before/after actual repacker).
+    int endian_size;            // 0=no swapping, 2/4=word byte size to swap
+    int endian_items[4];        // number of words per pixel/plane
 
     // For packed_repack.
     int components[4];          // p2[n] = mp_image.planes[components[n]]
@@ -93,11 +100,19 @@ struct mp_zimg_repack {
     // about one slice worth of data.
     struct mp_image *tmp;
 
-    // Temporary, per-call source/target frame. (Regrettably a mutable field,
-    // but it's not the only one, and makes the callbacks much less of a mess
-    // by avoiding another "closure" indirection.)
-    // To be used by the repack callback.
+    // Temporary memory for endian swapping. This has about one slice worth
+    // of data; set and used only if endian swapping is used (endian_size>0).
+    // It's also used only for pack==false; packers do this in-place.
+    struct mp_image *tmp_endian;
+
+    // Temporary, per-call source/target frame.
     struct mp_image *mpi;
+    // Y coordinate of first line in mpi; usually 0 if mpi==user_mpi, or the
+    // start of the current slice (in the current repack cb).
+    // repackers should use: mpi->data[p] + mpi->stride[p] * (i - mpi_y0)
+    int mpi_y0;
+
+    struct mp_image *user_mpi;
 
     // Also temporary, per-call. use_buf[n] == plane n uses tmp (and not mpi).
     bool use_buf[4];
@@ -234,7 +249,7 @@ static int repack_align(void *user, unsigned i, unsigned x0, unsigned x1)
 
         for (int y = i; y < i + h; y++) {
             void *a = r->mpi->planes[p] +
-                      r->mpi->stride[p] * (ptrdiff_t)(y >> ys) +
+                      r->mpi->stride[p] * (ptrdiff_t)((y - r->mpi_y0) >> ys) +
                       bpp * (x0 >> xs);
             void *b = r->tmp->planes[p] +
                       r->tmp->stride[p] * (ptrdiff_t)((y >> ys) & r->zmask[p]) +
@@ -249,6 +264,42 @@ static int repack_align(void *user, unsigned i, unsigned x0, unsigned x1)
     }
 
     return 0;
+}
+
+// Swap endian for one line.
+static void swap_endian(struct mp_zimg_repack *r, struct mp_image *dst, int dst_y,
+                        struct mp_image *src, int src_y, int x0, int x1)
+{
+    for (int p = 0; p < dst->fmt.num_planes; p++) {
+        int xs = dst->fmt.xs[p];
+        int ys = dst->fmt.ys[p];
+        int words_per_pixel = r->endian_items[p];
+        int bpp = words_per_pixel * r->endian_size;
+        // Number of lines on this plane.
+        int h = (1 << dst->fmt.chroma_ys) - (1 << ys) + 1;
+        int num_words = ((x1 - x0) >> xs) * words_per_pixel;
+
+        for (int y = 0; y < h; y++) {
+            void *s = src->planes[p] +
+                      src->stride[p] * (ptrdiff_t)((y + src_y) >> ys) +
+                      bpp * (x0 >> xs);
+            void *d = dst->planes[p] +
+                      dst->stride[p] * (ptrdiff_t)((y + dst_y) >> ys) +
+                      bpp * (x0 >> xs);
+            switch (r->endian_size) {
+            case 2:
+                for (int w = 0; w < num_words; w++)
+                    ((uint16_t *)d)[w] = av_bswap16(((uint16_t *)s)[w]);
+                break;
+            case 4:
+                for (int w = 0; w < num_words; w++)
+                    ((uint32_t *)d)[w] = av_bswap32(((uint32_t *)s)[w]);
+                break;
+            default:
+                assert(0);
+            }
+        }
+    }
 }
 
 // PA = PAck, copy planar input to single packed array
@@ -396,8 +447,8 @@ static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
 {
     struct mp_zimg_repack *r = user;
 
-    uint32_t *p1 =
-        (void *)(r->mpi->planes[0] + r->mpi->stride[0] * (ptrdiff_t)i);
+    uint32_t *p1 = (void *)(r->mpi->planes[0] +
+                            r->mpi->stride[0] * (ptrdiff_t)(i - r->mpi_y0));
 
     void *p2[4] = {0};
     for (int p = 0; p < r->num_planes; p++) {
@@ -415,7 +466,8 @@ static int unpack_pal(void *user, unsigned i, unsigned x0, unsigned x1)
 {
     struct mp_zimg_repack *r = user;
 
-    uint8_t *src = (void *)(r->mpi->planes[0] + r->mpi->stride[0] * (ptrdiff_t)i);
+    uint8_t *src = (void *)(r->mpi->planes[0] +
+                            r->mpi->stride[0] * (ptrdiff_t)(i - r->mpi_y0));
     uint32_t *pal = (void *)r->mpi->planes[1];
 
     uint8_t *dst[4] = {0};
@@ -448,7 +500,7 @@ static int repack_nv(void *user, unsigned i, unsigned x0, unsigned x1)
         for (int y = i; y < i + l_h; y++) {
             ptrdiff_t bpp = r->mpi->fmt.bytes[0];
             void *a = r->mpi->planes[0] +
-                    r->mpi->stride[0] * (ptrdiff_t)y + bpp * x0;
+                    r->mpi->stride[0] * (ptrdiff_t)(y - r->mpi_y0) + bpp * x0;
             void *b = r->tmp->planes[0] +
                     r->tmp->stride[0] * (ptrdiff_t)(y & r->zmask[0]) + bpp * x0;
             size_t size = (x1 - x0) * bpp;
@@ -460,8 +512,8 @@ static int repack_nv(void *user, unsigned i, unsigned x0, unsigned x1)
         }
     }
 
-    uint32_t *p1 =
-        (void *)(r->mpi->planes[1] + r->mpi->stride[1] * (ptrdiff_t)(i >> ys));
+    uint32_t *p1 = (void *)(r->mpi->planes[1] +
+                            r->mpi->stride[1] * (ptrdiff_t)((i - r->mpi_y0) >> ys));
 
     void *p2[2];
     for (int p = 0; p < 2; p++) {
@@ -475,9 +527,34 @@ static int repack_nv(void *user, unsigned i, unsigned x0, unsigned x1)
     return 0;
 }
 
+static int repack_entrypoint(void *user, unsigned i, unsigned x0, unsigned x1)
+{
+    struct mp_zimg_repack *r = user;
+
+    if (r->endian_size && !r->pack) {
+        r->mpi = r->tmp_endian;
+        r->mpi_y0 = i;
+        swap_endian(r, r->mpi, 0, r->user_mpi, i, x0, x1);
+    } else {
+        r->mpi = r->user_mpi;
+        r->mpi_y0 = 0;
+    }
+
+    if (r->repack) {
+        r->repack(r, i, x0, x1);
+    } else {
+        repack_align(r, i, x0, x1);
+    }
+
+    if (r->endian_size && r->pack)
+        swap_endian(r, r->user_mpi, i, r->mpi, i - r->mpi_y0, x0, x1);
+
+    r->mpi = NULL;
+    return 0;
+}
+
 static void wrap_buffer(struct mp_zimg_repack *r,
                         zimg_image_buffer *buf,
-                        zimg_filter_graph_callback *cb,
                         struct mp_image *mpi)
 {
     *buf = (zimg_image_buffer){ZIMG_API_VERSION};
@@ -497,7 +574,7 @@ static void wrap_buffer(struct mp_zimg_repack *r,
         if (mplane < 0)
             continue;
 
-        r->use_buf[mplane] = !plane_aligned[mplane];
+        r->use_buf[mplane] = !plane_aligned[mplane] || r->endian_size;
         if (!(r->pass_through_y && mplane == 0))
             r->use_buf[mplane] |= !!r->repack;
 
@@ -508,9 +585,7 @@ static void wrap_buffer(struct mp_zimg_repack *r,
                                                 : ZIMG_BUFFER_MAX;
     }
 
-    *cb = r->repack ? r->repack : repack_align;
-
-    r->mpi = mpi;
+    r->user_mpi = mpi;
 }
 
 static void setup_nv_packer(struct mp_zimg_repack *r)
@@ -689,16 +764,17 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
     }
 }
 
+// (If native_fmt!=r->fmt.imgfmt, this is the swap-endian case; native_fmt is NE.)
 // (ctx can be NULL for the sake of probing.)
-static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
-                         struct mp_zimg_context *ctx)
+static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
+                            int native_fmt, struct mp_zimg_context *ctx)
 {
     zimg_image_format_default(zfmt, ZIMG_API_VERSION);
 
     struct mp_image_params fmt = r->fmt;
     mp_image_params_guess_csp(&fmt);
 
-    r->zimgfmt = fmt.imgfmt;
+    r->zimgfmt = native_fmt;
 
     if (!r->repack)
         setup_nv_packer(r);
@@ -715,6 +791,18 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     if (desc.num_planes > 4 || !MP_IS_POWER_OF_2(desc.chroma_w) ||
         !MP_IS_POWER_OF_2(desc.chroma_h))
         return false;
+
+    // Endian swapping.
+    if (native_fmt != fmt.imgfmt) {
+        struct mp_regular_imgfmt ndesc;
+        if (!mp_get_regular_imgfmt(&ndesc, native_fmt) || ndesc.num_planes > 4)
+            return false;
+        r->endian_size = ndesc.component_size;
+        if (r->endian_size != 2 && r->endian_size != 4)
+            return false;
+        for (int n = 0; n < ndesc.num_planes; n++)
+            r->endian_items[n] = ndesc.planes[n].num_components;
+    }
 
     for (int n = 0; n < 4; n++)
         r->z_planes[n] = -1;
@@ -807,6 +895,25 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     return true;
 }
 
+static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
+                         bool pack, struct mp_image_params *fmt,
+                         struct mp_zimg_context *ctx)
+{
+    struct mp_zimg_repack repack_init = {
+        .pack = pack,
+        .fmt = *fmt,
+    };
+    *r = repack_init;
+    if (setup_format_ne(zfmt, r, fmt->imgfmt, ctx))
+        return true;
+    // Try reverse endian.
+    int nimgfmt = mp_find_other_endian(fmt->imgfmt);
+    if (!nimgfmt)
+        return false;
+    *r = repack_init;
+    return setup_format_ne(zfmt, r, nimgfmt, ctx);
+}
+
 static bool allocate_buffer(struct mp_zimg_context *ctx,
                             struct mp_zimg_repack *r)
 {
@@ -835,15 +942,24 @@ static bool allocate_buffer(struct mp_zimg_context *ctx,
     r->tmp = mp_image_alloc(r->zimgfmt, r->fmt.w, h);
     talloc_steal(r, r->tmp);
 
-    if (r->tmp) {
-        for (int n = 1; n < r->tmp->fmt.num_planes; n++) {
-            r->zmask[n] = r->zmask[0];
-            if (r->zmask[0] != ZIMG_BUFFER_MAX)
-                r->zmask[n] = r->zmask[n] >> r->tmp->fmt.ys[n];
-        }
+    if (!r->tmp)
+        return false;
+
+    for (int n = 1; n < r->tmp->fmt.num_planes; n++) {
+        r->zmask[n] = r->zmask[0];
+        if (r->zmask[0] != ZIMG_BUFFER_MAX)
+            r->zmask[n] = r->zmask[n] >> r->tmp->fmt.ys[n];
     }
 
-    return !!r->tmp;
+    if (r->endian_size && !r->pack) {
+        r->tmp_endian = mp_image_alloc(r->fmt.imgfmt, r->fmt.w, h);
+        talloc_steal(r, r->tmp_endian);
+
+        if (!r->tmp_endian)
+            return false;
+    }
+
+    return true;
 }
 
 bool mp_zimg_config(struct mp_zimg_context *ctx)
@@ -856,18 +972,13 @@ bool mp_zimg_config(struct mp_zimg_context *ctx)
         mp_zimg_update_from_cmdline(ctx);
 
     ctx->zimg_src = talloc_zero(NULL, struct mp_zimg_repack);
-    ctx->zimg_src->pack = false;
-    ctx->zimg_src->fmt = ctx->src;
-
     ctx->zimg_dst = talloc_zero(NULL, struct mp_zimg_repack);
-    ctx->zimg_dst->pack = true;
-    ctx->zimg_dst->fmt = ctx->dst;
 
     zimg_image_format src_fmt, dst_fmt;
 
     // Note: do zimg_dst first, because zimg_src uses fields from zimg_dst.
-    if (!setup_format(&dst_fmt, ctx->zimg_dst, ctx) ||
-        !setup_format(&src_fmt, ctx->zimg_src, ctx))
+    if (!setup_format(&dst_fmt, ctx->zimg_dst, true, &ctx->dst, ctx) ||
+        !setup_format(&src_fmt, ctx->zimg_src, false, &ctx->src, ctx))
         goto fail;
 
     zimg_graph_builder_params params;
@@ -943,10 +1054,8 @@ bool mp_zimg_convert(struct mp_zimg_context *ctx, struct mp_image *dst,
     assert(ctx->zimg_graph);
 
     zimg_image_buffer zsrc, zdst;
-    zimg_filter_graph_callback cbsrc, cbdst;
-
-    wrap_buffer(ctx->zimg_src, &zsrc, &cbsrc, src);
-    wrap_buffer(ctx->zimg_dst, &zdst, &cbdst, dst);
+    wrap_buffer(ctx->zimg_src, &zsrc, src);
+    wrap_buffer(ctx->zimg_dst, &zdst, dst);
 
     // An annoyance.
     zimg_image_buffer_const zsrc_c = {ZIMG_API_VERSION};
@@ -960,25 +1069,21 @@ bool mp_zimg_convert(struct mp_zimg_context *ctx, struct mp_image *dst,
     // to check the return value.)
     zimg_filter_graph_process(ctx->zimg_graph, &zsrc_c, &zdst,
                               ctx->zimg_tmp,
-                              cbsrc, ctx->zimg_src,
-                              cbdst, ctx->zimg_dst);
+                              repack_entrypoint, ctx->zimg_src,
+                              repack_entrypoint, ctx->zimg_dst);
 
-    ctx->zimg_src->mpi = NULL;
-    ctx->zimg_dst->mpi = NULL;
+    ctx->zimg_src->user_mpi = NULL;
+    ctx->zimg_dst->user_mpi = NULL;
 
     return true;
 }
 
 static bool supports_format(int imgfmt, bool out)
 {
-    struct mp_zimg_repack t = {
-        .pack = out,
-        .fmt = {
-            .imgfmt = imgfmt,
-        },
-    };
-    zimg_image_format fmt;
-    return setup_format(&fmt, &t, NULL);
+    struct mp_image_params fmt = {.imgfmt = imgfmt};
+    struct mp_zimg_repack t;
+    zimg_image_format zfmt;
+    return setup_format(&zfmt, &t, out, &fmt, NULL);
 }
 
 bool mp_zimg_supports_in_format(int imgfmt)

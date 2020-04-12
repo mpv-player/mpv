@@ -5,10 +5,14 @@ argb using gbrap
 bgr0 using gbrp
 bgr24 using gbrp
 bgr48 using gbrp16
+bgr48be using gbrp16
 bgra using gbrap
 bgra64 using gbrap16
+bgra64be using gbrap16
 rgb0 using gbrp
 rgb24 using gbrp
 rgb48 using gbrp16
+rgb48be using gbrp16
 rgba using gbrap
 rgba64 using gbrap16
+rgba64be using gbrap16
