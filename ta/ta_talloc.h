@@ -34,7 +34,7 @@
 #define talloc_ptrtype                  ta_xnew_ptrtype
 #define talloc_array_ptrtype            ta_xnew_array_ptrtype
 
-#define talloc_steal                    ta_xsteal
+#define talloc_steal                    ta_steal
 #define talloc_realloc_size             ta_xrealloc_size
 #define talloc_new                      ta_xnew_context
 #define talloc_set_destructor           ta_set_destructor

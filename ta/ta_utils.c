@@ -53,8 +53,6 @@ void *ta_new_context(void *ta_parent)
 
 /* Set parent of ptr to ta_parent, return the ptr.
  * Note that ta_parent==NULL will simply unset the current parent of ptr.
- * If the operation fails (on OOM), return NULL. (That's pretty bad behavior,
- * but the only way to signal failure.)
  */
 void *ta_steal_(void *ta_parent, void *ptr)
 {
@@ -286,12 +284,6 @@ char *ta_oom_s(char *s)
     if (!s)
         abort();
     return s;
-}
-
-void *ta_xsteal_(void *ta_parent, void *ptr)
-{
-    ta_set_parent(ptr, ta_parent);
-    return ptr;
 }
 
 void *ta_xmemdup(void *ta_parent, void *ptr, size_t size)
