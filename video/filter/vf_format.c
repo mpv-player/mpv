@@ -54,6 +54,7 @@ struct vf_format_opts {
     int dw, dh;
     double dar;
     int convert;
+    int force_scaler;
 };
 
 static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
@@ -175,6 +176,8 @@ static struct mp_filter *vf_format_create(struct mp_filter *parent, void *option
         return NULL;
     }
 
+    priv->conv->force_scaler = priv->opts->force_scaler;
+
     if (priv->opts->fmt)
         mp_autoconvert_add_imgfmt(priv->conv, priv->opts->fmt, 0);
 
@@ -199,6 +202,10 @@ static const m_option_t vf_opts_fields[] = {
     {"dh", OPT_INT(dh)},
     {"dar", OPT_DOUBLE(dar)},
     {"convert", OPT_FLAG(convert)},
+    {"force-scaler", OPT_CHOICE(force_scaler,
+                                {"auto", MP_SWS_AUTO},
+                                {"sws", MP_SWS_SWS},
+                                {"zimg", MP_SWS_ZIMG})},
     {"outputlevels", OPT_REMOVED("use the --video-output-levels global option")},
     {"peak", OPT_REMOVED("use sig-peak instead (changed value scale!)")},
     {0}

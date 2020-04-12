@@ -1,6 +1,7 @@
 #pragma once
 
 #include "filter.h"
+#include "video/sws_utils.h"
 
 struct mp_image;
 struct mp_image_params;
@@ -11,6 +12,8 @@ struct mp_image_params;
 struct mp_autoconvert {
     // f->pins[0] is input, f->pins[1] is output
     struct mp_filter *f;
+
+    enum mp_sws_scaler force_scaler;
 
     // If this is set, the callback is invoked (from the process function), and
     // further data flow is blocked until mp_autoconvert_format_change_continue()

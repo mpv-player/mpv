@@ -124,18 +124,30 @@ bool mp_sws_supported_format(int imgfmt)
         && sws_isSupportedOutput(av_format);
 }
 
+static bool allow_zimg(struct mp_sws_context *ctx)
+{
+    return ctx->force_scaler == MP_SWS_ZIMG ||
+           (ctx->force_scaler == MP_SWS_AUTO && ctx->allow_zimg);
+}
+
+static bool allow_sws(struct mp_sws_context *ctx)
+{
+    return ctx->force_scaler == MP_SWS_SWS || ctx->force_scaler == MP_SWS_AUTO;
+}
+
 bool mp_sws_supports_formats(struct mp_sws_context *ctx,
                              int imgfmt_out, int imgfmt_in)
 {
 #if HAVE_ZIMG
-    if (ctx->allow_zimg) {
+    if (allow_zimg(ctx)) {
         if (mp_zimg_supports_in_format(imgfmt_in) &&
             mp_zimg_supports_out_format(imgfmt_out))
             return true;
     }
 #endif
 
-    return sws_isSupportedInput(imgfmt2pixfmt(imgfmt_in)) &&
+    return allow_sws(ctx) &&
+           sws_isSupportedInput(imgfmt2pixfmt(imgfmt_in)) &&
            sws_isSupportedOutput(imgfmt2pixfmt(imgfmt_out));
 }
 
@@ -158,6 +170,7 @@ static bool cache_valid(struct mp_sws_context *ctx)
            ctx->contrast == old->contrast &&
            ctx->saturation == old->saturation &&
            ctx->allow_zimg == old->allow_zimg &&
+           ctx->force_scaler == old->force_scaler &&
            (!ctx->opts_cache || !m_config_cache_update(ctx->opts_cache));
 }
 
@@ -232,7 +245,7 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     ctx->zimg_ok = false;
 
 #if HAVE_ZIMG
-    if (ctx->allow_zimg) {
+    if (allow_zimg(ctx)) {
         ctx->zimg->log = ctx->log;
         ctx->zimg->src = *src;
         ctx->zimg->dst = *dst;
@@ -244,6 +257,11 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         MP_WARN(ctx, "Not using zimg, falling back to swscale.\n");
     }
 #endif
+
+    if (!allow_sws(ctx)) {
+        MP_ERR(ctx, "No scaler.\n");
+        return -1;
+    }
 
     ctx->sws = sws_alloc_context();
     if (!ctx->sws)

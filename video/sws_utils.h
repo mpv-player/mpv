@@ -23,6 +23,12 @@ int mp_image_swscale(struct mp_image *dst, struct mp_image *src,
 int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
                            float gblur);
 
+enum mp_sws_scaler {
+    MP_SWS_AUTO = 0, // use command line
+    MP_SWS_SWS,
+    MP_SWS_ZIMG,
+};
+
 struct mp_sws_context {
     // Can be set for verbose error printing.
     struct mp_log *log;
@@ -35,6 +41,9 @@ struct mp_sws_context {
     // These are also implicitly set by mp_sws_scale(), and thus optional.
     // Setting them before that call makes sense when using mp_sws_reinit().
     struct mp_image_params src, dst;
+
+    // This is unfortunately a hack: bypass command line choice
+    enum mp_sws_scaler force_scaler;
 
     // Changing these requires setting force_reload=true.
     // By default, they are NULL.

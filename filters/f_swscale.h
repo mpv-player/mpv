@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "video/mp_image.h"
+#include "video/sws_utils.h"
 
 struct mp_sws_filter {
     struct mp_filter *f;
@@ -11,6 +12,8 @@ struct mp_sws_filter {
     // If set, force all image params; ignores out_format.
     bool use_out_params;
     struct mp_image_params out_params;
+    // Other options.
+    enum mp_sws_scaler force_scaler;
     // private state
     struct mp_sws_context *sws;
     struct mp_image_pool *pool;

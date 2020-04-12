@@ -43,6 +43,8 @@
 int mp_sws_find_best_out_format(struct mp_sws_filter *sws, int in_format,
                                 int *out_formats, int num_out_formats)
 {
+    sws->sws->force_scaler = sws->force_scaler;
+
     int best = 0;
     for (int n = 0; n < num_out_formats; n++) {
         int out_format = out_formats[n];
@@ -72,6 +74,8 @@ static void process(struct mp_filter *f)
 
     if (!mp_pin_can_transfer_data(f->ppins[1], f->ppins[0]))
         return;
+
+    s->sws->force_scaler = s->force_scaler;
 
     struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
     if (mp_frame_is_signaling(frame)) {
