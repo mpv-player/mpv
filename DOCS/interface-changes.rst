@@ -27,6 +27,8 @@ Interface changes
 ::
 
  --- mpv 0.33.0 ---
+    - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
+      when the player enters fullscreen.
     - directories in ~/.mpv/scripts/ (or equivalent) now have special semantics
       (see mpv Lua scripting docs)
     - names starting with "." in ~/.mpv/scripts/ (or equivalent) are now ignored
