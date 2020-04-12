@@ -1042,10 +1042,18 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct demuxer *demuxer = mpctx->demuxer;
+    char *name = NULL;
 
-    if (action == M_PROPERTY_GET_CONSTRICTED_TYPE && demuxer) {
-        if (demuxer->num_editions <= 1)
-            return M_PROPERTY_UNAVAILABLE;
+    if (!demuxer)
+        return mp_property_generic_option(mpctx, prop, action, arg);
+
+    int ed = demuxer->edition;
+
+    if (demuxer->num_editions <= 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET_CONSTRICTED_TYPE: {
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_INT,
             .min = 0,
@@ -1053,8 +1061,20 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
         };
         return M_PROPERTY_OK;
     }
-
-    return mp_property_generic_option(mpctx, prop, action, arg);
+    case M_PROPERTY_PRINT: {
+        if (ed < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        name = mp_tags_get_str(demuxer->editions[ed].metadata, "title");
+        if (name) {
+            *(char **) arg = talloc_strdup(NULL, name);
+        } else {
+            *(char **) arg = talloc_asprintf(NULL, "%d", ed + 1);
+        }
+        return M_PROPERTY_OK;
+    }
+    default:
+        return mp_property_generic_option(mpctx, prop, action, arg);
+    }
 }
 
 static int get_edition_entry(int item, int action, void *arg, void *ctx)
@@ -3734,6 +3754,7 @@ static const struct property_osd_display {
     {"hr-seek", "hr-seek"},
     {"speed", "Speed"},
     {"clock", "Clock"},
+    {"edition", "Edition"},
     // audio
     {"volume", "Volume",
      .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
