@@ -1103,8 +1103,14 @@ static void process_tags(demuxer_t *demuxer)
         if (dst) {
             for (int j = 0; j < tag.n_simple_tag; j++) {
                 if (tag.simple_tag[j].tag_name && tag.simple_tag[j].tag_string) {
-                    mp_tags_set_str(dst, tag.simple_tag[j].tag_name,
-                                         tag.simple_tag[j].tag_string);
+                    char *name = tag.simple_tag[j].tag_name;
+                    char *val = tag.simple_tag[j].tag_string;
+                    char *old = mp_tags_get_str(dst, name);
+                    if (old)
+                        val = talloc_asprintf(NULL, "%s / %s", old, val);
+                    mp_tags_set_str(dst, name, val);
+                    if (old)
+                        talloc_free(val);
                 }
             }
         }
