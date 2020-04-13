@@ -35,6 +35,34 @@
 #include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
 
+// https://docs.microsoft.com/en-us/windows/console/setconsolemode
+// These values are effective on Windows 10 build 16257 (August 2017) or later
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+#ifndef DISABLE_NEWLINE_AUTO_RETURN
+    #define DISABLE_NEWLINE_AUTO_RETURN 0x0008
+#endif
+
+// Note: the DISABLE_NEWLINE_AUTO_RETURN docs say it enables delayed-wrap, but
+// it's wrong. It does only what its names suggests - and we want it unset:
+// https://github.com/microsoft/terminal/issues/4126#issuecomment-571418661
+static void attempt_native_out_vt(HANDLE hOut, DWORD basemode)
+{
+    DWORD vtmode = basemode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    vtmode &= ~DISABLE_NEWLINE_AUTO_RETURN;
+    if (!SetConsoleMode(hOut, vtmode))
+        SetConsoleMode(hOut, basemode);
+}
+
+static int is_native_out_vt(HANDLE hOut)
+{
+    DWORD cmode;
+    return GetConsoleMode(hOut, &cmode) &&
+           (cmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) &&
+           !(cmode & DISABLE_NEWLINE_AUTO_RETURN);
+}
+
 #define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
 #define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
 
@@ -187,6 +215,10 @@ static void write_console_text(HANDLE wstream, char *buf)
 void mp_write_console_ansi(HANDLE wstream, char *buf)
 {
     while (*buf) {
+        if (is_native_out_vt(wstream)) {
+            write_console_text(wstream, buf);
+            break;
+        }
         char *next = strchr(buf, '\033');
         if (!next) {
             write_console_text(wstream, buf);
@@ -330,8 +362,8 @@ void terminal_init(void)
     DWORD cmode = 0;
     GetConsoleMode(hSTDOUT, &cmode);
     cmode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
-    SetConsoleMode(hSTDOUT, cmode);
-    SetConsoleMode(hSTDERR, cmode);
+    attempt_native_out_vt(hSTDOUT, cmode);
+    attempt_native_out_vt(hSTDERR, cmode);
     GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
     stdoutAttrs = cinfo.wAttributes;
 }
