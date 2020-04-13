@@ -18,12 +18,14 @@
 #include <math.h>
 
 #include <libavutil/bswap.h>
+#include <libavutil/pixfmt.h>
 
 #include "common/common.h"
 #include "common/msg.h"
 #include "csputils.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
+#include "video/fmt-conversion.h"
 #include "video/img_format.h"
 #include "zimg.h"
 
@@ -85,6 +87,10 @@ struct mp_zimg_repack {
     // Called with user==mp_zimg_repack.
     zimg_filter_graph_callback repack;
 
+    // Output bit depth. If 0, use format defaults. (Used by some packets. This
+    // is simpler than defining fringe planar RGB formats for each depth.)
+    int override_depth;
+
     // Endian-swap (done before/after actual repacker).
     int endian_size;            // 0=no swapping, 2/4=word byte size to swap
     int endian_items[4];        // number of words per pixel/plane
@@ -94,6 +100,11 @@ struct mp_zimg_repack {
     //  pack:   p1 is dst, p2 is src
     //  unpack: p1 is src, p2 is dst
     void (*packed_repack_scanline)(void *p1, void *p2[], int x0, int x1);
+
+    // Fringe RGB.
+    uint8_t comp_size;
+    uint8_t comp_shifts[3];
+    uint8_t *comp_lut; // 256 * 3
 
     // Temporary memory for slice-wise repacking. This may be set even if repack
     // is not set (then it may be used to avoid alignment issues). This has
@@ -462,6 +473,93 @@ static int packed_repack(void *user, unsigned i, unsigned x0, unsigned x1)
     return 0;
 }
 
+struct fringe_rgb_repacker {
+    // To avoid making a mess of IMGFMT_*, we use av formats directly.
+    enum AVPixelFormat avfmt;
+    // If true, use BGR instead of RGB.
+    //  False:  LSB - R - G - B - pad - MSB
+    //  True:   LSB - B - G - R - pad - MSB
+    bool rev_order;
+    // Size in bit for each component, strictly from LSB to MSB.
+    int bits[3];
+    bool be;
+};
+
+static const struct fringe_rgb_repacker fringe_rgb_repackers[] = {
+    {AV_PIX_FMT_BGR4_BYTE,  false,  {1, 2, 1}},
+    {AV_PIX_FMT_RGB4_BYTE,  true,   {1, 2, 1}},
+    {AV_PIX_FMT_BGR8,       false,  {3, 3, 2}},
+    {AV_PIX_FMT_RGB8,       true,   {2, 3, 3}}, // pixdesc desc. and doc. bug?
+    {AV_PIX_FMT_RGB444LE,   true,   {4, 4, 4}},
+    {AV_PIX_FMT_RGB444BE,   true,   {4, 4, 4}, .be = true},
+    {AV_PIX_FMT_BGR444LE,   false,  {4, 4, 4}},
+    {AV_PIX_FMT_BGR444BE,   false,  {4, 4, 4}, .be = true},
+    {AV_PIX_FMT_BGR565LE,   false,  {5, 6, 5}},
+    {AV_PIX_FMT_BGR565BE,   false,  {5, 6, 5}, .be = true},
+    {AV_PIX_FMT_RGB565LE,   true,   {5, 6, 5}},
+    {AV_PIX_FMT_RGB565BE,   true,   {5, 6, 5}, .be = true},
+    {AV_PIX_FMT_BGR555LE,   false,  {5, 5, 5}},
+    {AV_PIX_FMT_BGR555BE,   false,  {5, 5, 5}, .be = true},
+    {AV_PIX_FMT_RGB555LE,   true,   {5, 5, 5}},
+    {AV_PIX_FMT_RGB555BE,   true,   {5, 5, 5}, .be = true},
+};
+
+#define PA_SHIFT_LUT8(name, packed_t)                                       \
+    static void name(void *dst, void *src[], int x0, int x1, uint8_t *lut,  \
+                     uint8_t s0, uint8_t s1, uint8_t s2) {                  \
+        for (int x = x0; x < x1; x++) {                                     \
+            ((packed_t *)dst)[x] =                                          \
+                (lut[((uint8_t *)src[0])[x] + 256 * 0] << s0) |             \
+                (lut[((uint8_t *)src[1])[x] + 256 * 1] << s1) |             \
+                (lut[((uint8_t *)src[2])[x] + 256 * 2] << s2);              \
+        }                                                                   \
+    }
+
+
+#define UN_SHIFT_LUT8(name, packed_t)                                       \
+    static void name(void *src, void *dst[], int x0, int x1, uint8_t *lut,  \
+                     uint8_t s0, uint8_t s1, uint8_t s2) {                  \
+        for (int x = x0; x < x1; x++) {                                     \
+            packed_t c = ((packed_t *)src)[x];                              \
+            ((uint8_t *)dst[0])[x] = lut[((c >> s0) & 0xFF) + 256 * 0];     \
+            ((uint8_t *)dst[1])[x] = lut[((c >> s1) & 0xFF) + 256 * 1];     \
+            ((uint8_t *)dst[2])[x] = lut[((c >> s2) & 0xFF) + 256 * 2];     \
+        }                                                                   \
+    }
+
+PA_SHIFT_LUT8(pa_shift_lut8_8,  uint8_t)
+PA_SHIFT_LUT8(pa_shift_lut8_16, uint16_t)
+UN_SHIFT_LUT8(un_shift_lut8_8,  uint8_t)
+UN_SHIFT_LUT8(un_shift_lut8_16, uint16_t)
+
+static int fringe_rgb_repack(void *user, unsigned i, unsigned x0, unsigned x1)
+{
+    struct mp_zimg_repack *r = user;
+
+    void *p1 = r->mpi->planes[0] + r->mpi->stride[0] * (ptrdiff_t)(i - r->mpi_y0);
+
+    void *p2[4] = {0};
+    for (int p = 0; p < r->num_planes; p++) {
+        int s = r->components[p];
+        p2[p] = r->tmp->planes[s] +
+                r->tmp->stride[s] * (ptrdiff_t)(i & r->zmask[s]);
+    }
+
+    assert(r->comp_size == 1 || r->comp_size == 2);
+
+    void (*repack)(void *p1, void *p2[], int x0, int x1, uint8_t *lut,
+                   uint8_t s0, uint8_t s1, uint8_t s2) = NULL;
+    if (r->pack) {
+        repack = r->comp_size == 1 ? pa_shift_lut8_8 : pa_shift_lut8_16;
+    } else {
+        repack = r->comp_size == 1 ? un_shift_lut8_8 : un_shift_lut8_16;
+    }
+    repack(p1, p2, x0, x1, r->comp_lut,
+           r->comp_shifts[0], r->comp_shifts[1], r->comp_shifts[2]);
+
+    return 0;
+}
+
 static int unpack_pal(void *user, unsigned i, unsigned x0, unsigned x1)
 {
     struct mp_zimg_repack *r = user;
@@ -586,6 +684,78 @@ static void wrap_buffer(struct mp_zimg_repack *r,
     }
 
     r->user_mpi = mpi;
+}
+
+static void setup_fringe_rgb_packer(struct mp_zimg_repack *r,
+                                    struct mp_zimg_context *ctx)
+{
+    enum AVPixelFormat avfmt = imgfmt2pixfmt(r->zimgfmt);
+
+    const struct fringe_rgb_repacker *fmt = NULL;
+    for (int n = 0; n < MP_ARRAY_SIZE(fringe_rgb_repackers); n++) {
+        if (fringe_rgb_repackers[n].avfmt == avfmt) {
+            fmt = &fringe_rgb_repackers[n];
+            break;
+        }
+    }
+
+    if (!fmt)
+        return;
+
+    struct mp_regular_imgfmt gbrp = {
+        .component_type = MP_COMPONENT_TYPE_UINT,
+        .forced_csp = MP_CSP_RGB,
+        .component_size = 1,
+        .num_planes = 3,
+        .planes = { {1, {2}}, {1, {3}}, {1, {1}} },
+        .chroma_w = 1,
+        .chroma_h = 1,
+    };
+    r->zimgfmt = mp_find_regular_imgfmt(&gbrp);
+    if (!r->zimgfmt)
+        return;
+    if (ctx)
+        r->comp_lut = talloc_array(ctx, uint8_t, 256 * 3);
+    r->repack = fringe_rgb_repack;
+    static const int c_order_rgb[] = {3, 1, 2};
+    static const int c_order_bgr[] = {2, 1, 3};
+    for (int n = 0; n < 3; n++)
+        r->components[n] = (fmt->rev_order ? c_order_bgr : c_order_rgb)[n] - 1;
+
+    if (r->pack) {
+        // Dither to lowest depth - loses some precision, but result is saner.
+        r->override_depth = fmt->bits[0];
+        for (int n = 0; n < 3; n++)
+            r->override_depth = MPMIN(r->override_depth, fmt->bits[n]);
+    }
+
+    int bitpos = 0;
+    for (int n = 0; n < 3; n++) {
+        int bits = fmt->bits[n];
+        r->comp_shifts[n] = bitpos;
+        if (r->comp_lut) {
+            uint8_t *lut = r->comp_lut + 256 * n;
+            uint8_t zmax = r->pack ? (1 << r->override_depth) - 1 : 255;
+            uint8_t cmax = (1 << bits) - 1;
+            for (int v = 0; v < 256; v++) {
+                if (r->pack) {
+                    lut[v] = (v * cmax + zmax / 2) / zmax;
+                } else {
+                    lut[v] = (v & cmax) * zmax / cmax;
+                }
+            }
+        }
+        bitpos += bits;
+    }
+
+    r->comp_size = (bitpos + 7) / 8;
+    assert(r->comp_size == 1 || r->comp_size == 2);
+
+    if (fmt->be) {
+        assert(r->comp_size == 2);
+        r->endian_size = 2;
+        r->endian_items[0] = 1;
+    }
 }
 
 static void setup_nv_packer(struct mp_zimg_repack *r)
@@ -782,6 +952,8 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
         setup_misc_packer(r);
     if (!r->repack)
         setup_regular_rgb_packer(r);
+    if (!r->repack)
+        setup_fringe_rgb_packer(r, ctx);
 
     struct mp_regular_imgfmt desc;
     if (!mp_get_regular_imgfmt(&desc, r->zimgfmt))
@@ -876,6 +1048,8 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     // (Formats like P010 are basically reported as P016.)
     zfmt->depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
+    if (r->override_depth)
+        zfmt->depth = r->override_depth;
 
     zfmt->pixel_range = fmt.color.levels == MP_CSP_LEVELS_PC ?
                         ZIMG_RANGE_FULL : ZIMG_RANGE_LIMITED;
