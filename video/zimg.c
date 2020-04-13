@@ -627,15 +627,15 @@ struct fringe_yuv422_repacker {
     enum AVPixelFormat avfmt;
     // In bits (depth/8 rounded up gives byte size)
     int8_t depth;
-    // Word index of each sample: {y0, y1, cr, cb}
+    // Word index of each sample: {y0, y1, cb, cr}
     uint8_t comp[4];
     bool be;
 };
 
 static const struct fringe_yuv422_repacker fringe_yuv422_repackers[] = {
-    {AV_PIX_FMT_YUYV422,  8, {0, 2, 3, 1}},
-    {AV_PIX_FMT_UYVY422,  8, {1, 3, 2, 0}},
-    {AV_PIX_FMT_YVYU422,  8, {0, 2, 1, 3}},
+    {AV_PIX_FMT_YUYV422,  8, {0, 2, 1, 3}},
+    {AV_PIX_FMT_UYVY422,  8, {1, 3, 0, 2}},
+    {AV_PIX_FMT_YVYU422,  8, {0, 2, 3, 1}},
 #ifdef AV_PIX_FMT_Y210
     {AV_PIX_FMT_Y210LE,  10, {0, 2, 1, 3}},
     {AV_PIX_FMT_Y210BE,  10, {0, 2, 1, 3}, .be = true},
