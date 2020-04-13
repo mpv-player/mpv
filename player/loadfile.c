@@ -522,6 +522,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (track->user_tid == tid)
             return track;
+        if (tid >= 0)
+            continue;
         if (track->no_auto_select)
             continue;
         if (duplicate_track(mpctx, order, type, track))

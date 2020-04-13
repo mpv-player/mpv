@@ -76,6 +76,24 @@ Track Selection
         before mpv 0.33.0, the user's track selection parameters are clobbered
         in certain situations.
 
+        Also since mpv 0.33.0, trying to select a track by number will strictly
+        select this track. Before this change, trying to select a track which
+        did not exist would fall back to track default selection at playback
+        initialization. The new behavior is more consistent.
+
+        Setting a track selection property at runtime, and then playing a new
+        file might reset the track selection to defaults, if the fingerprint
+        of the track list of the new file is different.
+
+        Be aware of tricky combinations of all of all of the above: for example,
+        ``mpv --aid=2 file_with_2_audio_tracks.mkv file_with_1_audio_track.mkv``
+        would first play the correct track, and the second file without audio.
+        If you then go back the first file, its first audio track will be played,
+        and the second file is played with audio. If you do the same thing again
+        but instead of using ``--aid=2`` you run ``set aid 2`` while the file is
+        playing, then changing to the second file will play its audio track.
+        This is because runtime selection enables the fingerprint heuristic.
+
         Most likely this is not the end.
 
 ``--sid=<ID|auto|no>``
