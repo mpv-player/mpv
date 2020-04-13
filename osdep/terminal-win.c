@@ -39,8 +39,9 @@
 #define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
 
 #define FOREGROUND_ALL (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
+#define BACKGROUND_ALL (BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE)
 
-static short stdoutAttrs = 0;
+static short stdoutAttrs = 0;  // copied from the screen buffer on init
 static const unsigned char ansi2win32[8] = {
     0,
     FOREGROUND_RED,
@@ -50,6 +51,16 @@ static const unsigned char ansi2win32[8] = {
     FOREGROUND_BLUE  | FOREGROUND_RED,
     FOREGROUND_BLUE  | FOREGROUND_GREEN,
     FOREGROUND_BLUE  | FOREGROUND_GREEN | FOREGROUND_RED,
+};
+static const unsigned char ansi2win32bg[8] = {
+    0,
+    BACKGROUND_RED,
+    BACKGROUND_GREEN,
+    BACKGROUND_GREEN | BACKGROUND_RED,
+    BACKGROUND_BLUE,
+    BACKGROUND_BLUE  | BACKGROUND_RED,
+    BACKGROUND_BLUE  | BACKGROUND_GREEN,
+    BACKGROUND_BLUE  | BACKGROUND_GREEN | BACKGROUND_RED,
 };
 
 static bool running;
@@ -193,9 +204,9 @@ void mp_write_console_ansi(HANDLE wstream, char *buf)
         //    "\033[" [ <i> (';' <i> )* ] <c>
         // where <i> are integers, and <c> a single char command code.
         // Also see: http://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
-        int params[2] = {-1, -1}; // 'm' might be unlimited; ignore that
+        int params[16]; // 'm' might be unlimited; ignore that
         int num_params = 0;
-        while (num_params < 2) {
+        while (num_params < MP_ARRAY_SIZE(params)) {
             char *end = next;
             long p = strtol(next, &end, 10);
             if (end == next)
@@ -225,20 +236,48 @@ void mp_write_console_ansi(HANDLE wstream, char *buf)
             break;
         }
         case 'm': {     // "SGR"
+            short attr = info.wAttributes;
+            if (num_params == 0)  // reset
+                params[num_params++] = 0;
+
+            // we don't emulate italic, reverse/underline don't always work
             for (int n = 0; n < num_params; n++) {
                 int p = params[n];
                 if (p == 0) {
-                    info.wAttributes = stdoutAttrs;
-                    SetConsoleTextAttribute(wstream, info.wAttributes);
+                    attr = stdoutAttrs;
                 } else if (p == 1) {
-                    info.wAttributes |= FOREGROUND_INTENSITY;
-                    SetConsoleTextAttribute(wstream, info.wAttributes);
-                } else if (p >= 30 && p < 38) {
-                    info.wAttributes &= ~FOREGROUND_ALL;
-                    info.wAttributes |= ansi2win32[p - 30];
-                    SetConsoleTextAttribute(wstream, info.wAttributes);
+                    attr |= FOREGROUND_INTENSITY;
+                } else if (p == 22) {
+                    attr &= ~FOREGROUND_INTENSITY;
+                } else if (p == 4) {
+                    attr |= COMMON_LVB_UNDERSCORE;
+                } else if (p == 24) {
+                    attr &= ~COMMON_LVB_UNDERSCORE;
+                } else if (p == 7) {
+                    attr |= COMMON_LVB_REVERSE_VIDEO;
+                } else if (p == 27) {
+                    attr &= ~COMMON_LVB_REVERSE_VIDEO;
+                } else if (p >= 30 && p <= 37) {
+                    attr &= ~FOREGROUND_ALL;
+                    attr |= ansi2win32[p - 30];
+                } else if (p == 39) {
+                    attr &= ~FOREGROUND_ALL;
+                    attr |= stdoutAttrs & FOREGROUND_ALL;
+                } else if (p >= 40 && p <= 47) {
+                    attr &= ~BACKGROUND_ALL;
+                    attr |= ansi2win32bg[p - 40];
+                } else if (p == 49) {
+                    attr &= ~BACKGROUND_ALL;
+                    attr |= stdoutAttrs & BACKGROUND_ALL;
+                } else if (p == 38 || p == 48) {  // ignore and skip sub-values
+                    // 256 colors: <38/48>;5;N  true colors: <38/48>;2;R;G;B
+                    if (n+1 < num_params)
+                        n += params[n+1] == 5 ? 2 : 2 ? 4 : 0;
                 }
             }
+
+            if (attr != info.wAttributes)
+                SetConsoleTextAttribute(wstream, attr);
             break;
         }
         }
