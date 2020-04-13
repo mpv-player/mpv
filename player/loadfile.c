@@ -448,9 +448,8 @@ static int match_lang(char **langs, char *lang)
  * tid is the track ID requested by the user (-2: deselect, -1: default)
  * lang is a string list, NULL is same as empty list
  * Sort tracks based on the following criteria, and pick the first:
- * 0a) track matches ff-index (always wins)
- * 0b) track matches tid (almost always wins)
- * 0c) track is not from --external-file
+  *0a) track matches tid (always wins)
+ * 0b) track is not from --external-file
  * 1) track is external (no_default cancels this)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
@@ -585,6 +584,15 @@ static void check_previous_track_selection(struct MPContext *mpctx)
     talloc_free(h);
 }
 
+static void mark_track_selection(struct MPContext *mpctx, int order,
+                                 enum stream_type type, int value)
+{
+    assert(order >= 0 && order < NUM_PTRACKS);
+    mpctx->opts->stream_id[order][type] = value;
+    m_config_notify_change_opt_ptr(mpctx->mconfig,
+                                   &mpctx->opts->stream_id[order][type]);
+}
+
 void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type,
                        struct track *track, int flags)
 {
@@ -593,11 +601,8 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
 
     // Mark the current track selection as explicitly user-requested. (This is
     // different from auto-selection or disabling a track due to errors.)
-    if (flags & FLAG_MARK_SELECTION) {
-        mpctx->opts->stream_id[order][type] = track ? track->user_tid : -2;
-        m_config_notify_change_opt_ptr(mpctx->mconfig,
-                                       &mpctx->opts->stream_id[order][type]);
-    }
+    if (flags & FLAG_MARK_SELECTION)
+        mark_track_selection(mpctx, order, type, track ? track->user_tid : -2);
 
     // No decoder should be initialized yet.
     if (!mpctx->demuxer)
@@ -609,19 +614,19 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
 
     if (current && current->sink) {
         MP_ERR(mpctx, "Can't disable input to complex filter.\n");
-        return;
+        goto error;
     }
     if ((type == STREAM_VIDEO && mpctx->vo_chain && !mpctx->vo_chain->track) ||
         (type == STREAM_AUDIO && mpctx->ao_chain && !mpctx->ao_chain->track))
     {
         MP_ERR(mpctx, "Can't switch away from complex filter output.\n");
-        return;
+        goto error;
     }
 
     if (track && track->selected) {
         // Track has been selected in a different order parameter.
         MP_ERR(mpctx, "Track %d is already selected.\n", track->user_tid);
-        return;
+        goto error;
     }
 
     if (order == 0) {
@@ -666,6 +671,10 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
 
     talloc_free(mpctx->track_layout_hash);
     mpctx->track_layout_hash = talloc_steal(mpctx, track_layout_hash(mpctx));
+
+    return;
+error:
+    mark_track_selection(mpctx, order, type, -1);
 }
 
 void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
@@ -677,8 +686,10 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
 void mp_deselect_track(struct MPContext *mpctx, struct track *track)
 {
     if (track && track->selected) {
-        for (int t = 0; t < NUM_PTRACKS; t++)
+        for (int t = 0; t < NUM_PTRACKS; t++) {
             mp_switch_track_n(mpctx, t, track->type, NULL, 0);
+            mark_track_selection(mpctx, t, track->type, -1); // default
+        }
     }
 }
 
@@ -1523,16 +1534,23 @@ static void play_current_file(struct MPContext *mpctx)
     }
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int i = 0; i < NUM_PTRACKS; i++) {
+            // One track can strictly feed at most 1 decoder
             struct track *track = mpctx->current_track[i][t];
             if (track) {
                 if (track->selected) {
                     MP_ERR(mpctx, "Track %d can't be selected twice.\n",
                            track->user_tid);
                     mpctx->current_track[i][t] = NULL;
+                    mark_track_selection(mpctx, i, t, -2); // disable
                 } else {
                     track->selected = true;
                 }
             }
+
+            // Revert selection of unselected tracks to default. This is needed
+            // because track properties have inconsistent behavior.
+            if (!track && opts->stream_id[i][t] >= 0)
+                mark_track_selection(mpctx, i, t, -1); // default
         }
     }
 

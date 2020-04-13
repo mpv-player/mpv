@@ -49,6 +49,35 @@ Track Selection
     ``--aid=no`` or ``--audio=no`` or ``--no-audio`` disables audio playback.
     (The latter variant does not work with the client API.)
 
+    .. note::
+
+        The track selection options (``--aid`` but also ``--sid`` and the
+        others) sometimes expose behavior that may appear strange. Also, the
+        behavior tends to change around with each mpv release.
+
+        The track selection properties will return the option value outside of
+        playback (as expected), but during playbac, the affective track
+        selection is returned. For example, with ``--aid=auto``, the ``aid``
+        property will suddenly return ``2`` after playback initialization
+        (assuming the file has at least 2 audio tracks, and the second is the
+        default).
+
+        At mpv 0.32.0 (and some releases before), if you passed a track value
+        for which a corresponding track didn't exist (e.g. ``--aid=2`` and there
+        was only 1 audio track), the ``aid`` property returned ``no``. However if
+        another audio track was added during playback, and you tried to set the
+        ``aid`` property to ``2``, nothing happened, because the ``aid`` option
+        still had the value ``2``, and writing the same value has no effect.
+
+        With mpv 0.33.0, the behavior was changed. Now track selection options
+        are reset to ``auto`` at playback initialization, if the option had
+        tries to select a track that does not exist. The same is done if the
+        track exists, but fails to initialize. The consequence is that unlike
+        before mpv 0.33.0, the user's track selection parameters are clobbered
+        in certain situations.
+
+        Most likely this is not the end.
+
 ``--sid=<ID|auto|no>``
     Display the subtitle stream specified by ``<ID>``. ``auto`` selects
     the default, ``no`` disables subtitles.
