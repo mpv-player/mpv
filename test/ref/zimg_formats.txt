@@ -107,7 +107,7 @@
            rgba    Zin   Zout  SWSin  SWSout |
          rgba64    Zin   Zout  SWSin  SWSout |
        rgba64be    Zin   Zout  SWSin  SWSout |
-        uyvy422                SWSin  SWSout |
+        uyvy422    Zin   Zout  SWSin  SWSout |
       uyyvyy411                              |
           vaapi                              |
      vaapi_idct                              |
@@ -119,8 +119,8 @@
            xvmc                              |
           xyz12    Zin   Zout  SWSin  SWSout |
         xyz12be    Zin   Zout  SWSin  SWSout |
-           y210                SWSin         |
-         y210be                              |
+           y210    Zin   Zout  SWSin         |
+         y210be    Zin   Zout                |
            ya16    Zin   Zout  SWSin  SWSout |
          ya16be    Zin   Zout  SWSin  SWSout |
             ya8    Zin   Zout  SWSin  SWSout |
@@ -194,5 +194,5 @@
        yuvj411p    Zin   Zout  SWSin  SWSout |
        yuvj422p    Zin   Zout  SWSin  SWSout |
        yuvj440p    Zin   Zout  SWSin  SWSout |
-        yuyv422                SWSin  SWSout |
-        yvyu422                SWSin  SWSout |
+        yuyv422    Zin   Zout  SWSin  SWSout |
+        yvyu422    Zin   Zout  SWSin  SWSout |

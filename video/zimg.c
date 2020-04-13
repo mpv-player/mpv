@@ -101,8 +101,9 @@ struct mp_zimg_repack {
     //  unpack: p1 is src, p2 is dst
     void (*packed_repack_scanline)(void *p1, void *p2[], int x0, int x1);
 
-    // Fringe RGB.
+    // Fringe RGB/YUV.
     uint8_t comp_size;
+    uint8_t *comp_map;
     uint8_t comp_shifts[3];
     uint8_t *comp_lut; // 256 * 3
 
@@ -585,6 +586,75 @@ static int unpack_pal(void *user, unsigned i, unsigned x0, unsigned x1)
     return 0;
 }
 
+struct fringe_yuv422_repacker {
+    // To avoid making a mess of IMGFMT_*, we use av formats directly.
+    enum AVPixelFormat avfmt;
+    // In bits (depth/8 rounded up gives byte size)
+    int8_t depth;
+    // Word index of each sample: {y0, y1, cr, cb}
+    uint8_t comp[4];
+    bool be;
+};
+
+static const struct fringe_yuv422_repacker fringe_yuv422_repackers[] = {
+    {AV_PIX_FMT_YUYV422,  8, {0, 2, 3, 1}},
+    {AV_PIX_FMT_UYVY422,  8, {1, 3, 2, 0}},
+    {AV_PIX_FMT_YVYU422,  8, {0, 2, 1, 3}},
+    {AV_PIX_FMT_Y210LE,  10, {0, 2, 1, 3}},
+    {AV_PIX_FMT_Y210BE,  10, {0, 2, 1, 3}, .be = true},
+};
+
+#define PA_P422(name, comp_t)                                               \
+    static void name(void *dst, void *src[], int x0, int x1, uint8_t *c) {  \
+        for (int x = x0; x < x1; x += 2) {                                  \
+            ((comp_t *)dst)[x * 2 + c[0]] = ((comp_t *)src[0])[x + 0];      \
+            ((comp_t *)dst)[x * 2 + c[1]] = ((comp_t *)src[0])[x + 1];      \
+            ((comp_t *)dst)[x * 2 + c[2]] = ((comp_t *)src[1])[x >> 1];     \
+            ((comp_t *)dst)[x * 2 + c[3]] = ((comp_t *)src[2])[x >> 1];     \
+        }                                                                   \
+    }
+
+
+#define UN_P422(name, comp_t)                                               \
+    static void name(void *src, void *dst[], int x0, int x1, uint8_t *c) {  \
+        for (int x = x0; x < x1; x += 2) {                                  \
+            ((comp_t *)dst[0])[x + 0]  = ((comp_t *)src)[x * 2 + c[0]];     \
+            ((comp_t *)dst[0])[x + 1]  = ((comp_t *)src)[x * 2 + c[1]];     \
+            ((comp_t *)dst[1])[x >> 1] = ((comp_t *)src)[x * 2 + c[2]];     \
+            ((comp_t *)dst[2])[x >> 1] = ((comp_t *)src)[x * 2 + c[3]];     \
+        }                                                                   \
+    }
+
+PA_P422(pa_p422_8,  uint8_t)
+PA_P422(pa_p422_16, uint16_t)
+UN_P422(un_p422_8,  uint8_t)
+UN_P422(un_p422_16, uint16_t)
+
+static int fringe_yuv422_repack(void *user, unsigned i, unsigned x0, unsigned x1)
+{
+    struct mp_zimg_repack *r = user;
+
+    void *p1 = r->mpi->planes[0] + r->mpi->stride[0] * (ptrdiff_t)(i - r->mpi_y0);
+
+    void *p2[4] = {0};
+    for (int p = 0; p < r->num_planes; p++) {
+        p2[p] = r->tmp->planes[p] +
+                r->tmp->stride[p] * (ptrdiff_t)(i & r->zmask[p]);
+    }
+
+    assert(r->comp_size == 1 || r->comp_size == 2);
+
+    void (*repack)(void *p1, void *p2[], int x0, int x1, uint8_t *c) = NULL;
+    if (r->pack) {
+        repack = r->comp_size == 1 ? pa_p422_8 : pa_p422_16;
+    } else {
+        repack = r->comp_size == 1 ? un_p422_8 : un_p422_16;
+    }
+    repack(p1, p2, x0, x1, r->comp_map);
+
+    return 0;
+}
+
 static int repack_nv(void *user, unsigned i, unsigned x0, unsigned x1)
 {
     struct mp_zimg_repack *r = user;
@@ -755,6 +825,44 @@ static void setup_fringe_rgb_packer(struct mp_zimg_repack *r,
         assert(r->comp_size == 2);
         r->endian_size = 2;
         r->endian_items[0] = 1;
+    }
+}
+
+static void setup_fringe_yuv422_packer(struct mp_zimg_repack *r)
+{
+    enum AVPixelFormat avfmt = imgfmt2pixfmt(r->zimgfmt);
+
+    const struct fringe_yuv422_repacker *fmt = NULL;
+    for (int n = 0; n < MP_ARRAY_SIZE(fringe_yuv422_repackers); n++) {
+        if (fringe_yuv422_repackers[n].avfmt == avfmt) {
+            fmt = &fringe_yuv422_repackers[n];
+            break;
+        }
+    }
+
+    if (!fmt)
+        return;
+
+    r->comp_size = (fmt->depth + 7) / 8;
+    assert(r->comp_size == 1 || r->comp_size == 2);
+
+    struct mp_regular_imgfmt yuvfmt = {
+        .component_type = MP_COMPONENT_TYPE_UINT,
+        // NB: same problem with P010 and not clearing padding.
+        .component_size = r->comp_size,
+        .num_planes = 3,
+        .planes = { {1, {1}}, {1, {2}}, {1, {3}} },
+        .chroma_w = 2,
+        .chroma_h = 1,
+    };
+    r->zimgfmt = mp_find_regular_imgfmt(&yuvfmt);
+    r->repack = fringe_yuv422_repack;
+    r->comp_map = (uint8_t *)fmt->comp;
+
+    if (fmt->be) {
+        assert(r->comp_size == 2);
+        r->endian_size = 2;
+        r->endian_items[0] = 4;
     }
 }
 
@@ -954,6 +1062,8 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
         setup_regular_rgb_packer(r);
     if (!r->repack)
         setup_fringe_rgb_packer(r, ctx);
+    if (!r->repack)
+        setup_fringe_yuv422_packer(r);
 
     struct mp_regular_imgfmt desc;
     if (!mp_get_regular_imgfmt(&desc, r->zimgfmt))
