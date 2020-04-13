@@ -3203,7 +3203,7 @@ static void demux_init_ccs(struct demuxer *demuxer, struct demux_opts *opts)
     pthread_mutex_lock(&in->lock);
     for (int n = 0; n < in->num_streams; n++) {
         struct sh_stream *sh = in->streams[n];
-        if (sh->type == STREAM_VIDEO)
+        if (sh->type == STREAM_VIDEO && !sh->attached_picture)
             demuxer_get_cc_track_locked(sh);
     }
     pthread_mutex_unlock(&in->lock);
