@@ -90,6 +90,8 @@ struct mp_zimg_repack {
     // Output bit depth. If 0, use format defaults. (Used by some packets. This
     // is simpler than defining fringe planar RGB formats for each depth.)
     int override_depth;
+    // Hammer it into using ZIMG_COLOR_GREY.
+    bool override_gray;
 
     // Endian-swap (done before/after actual repacker).
     int endian_size;            // 0=no swapping, 2/4=word byte size to swap
@@ -561,6 +563,40 @@ static int fringe_rgb_repack(void *user, unsigned i, unsigned x0, unsigned x1)
     return 0;
 }
 
+static int bitmap_repack(void *user, unsigned i, unsigned x0, unsigned x1)
+{
+    struct mp_zimg_repack *r = user;
+
+    // Supposedly zimg aligns this at least on 64 byte boundaries. Simplifies a
+    // lot for us.
+    assert(!(x0 & 7));
+
+    uint8_t *p1 =
+        r->mpi->planes[0] + r->mpi->stride[0] * (ptrdiff_t)(i - r->mpi_y0);
+    uint8_t *p2 =
+        r->tmp->planes[0] + r->tmp->stride[0] * (ptrdiff_t)(i & r->zmask[0]);
+
+    uint8_t swap = r->comp_size ? 0xFF : 0;
+    if (r->pack) {
+        for (int x = x0; x < x1; x += 8) {
+            uint8_t d = 0;
+            int max_b = MPMIN(8, x1 - x);
+            for (int b = 0; b < max_b; b++)
+                d |= (!!p2[x + b]) << (7 - b);
+            p1[x / 8] = d ^ swap;
+        }
+    } else {
+        for (int x = x0; x < x1; x += 8) {
+            uint8_t d = p1[x / 8] ^ swap;
+            int max_b = MPMIN(8, x1 - x);
+            for (int b = 0; b < max_b; b++)
+                p2[x + b] = !!(d & (1 << (7 - b)));
+        }
+    }
+
+    return 0;
+}
+
 static int unpack_pal(void *user, unsigned i, unsigned x0, unsigned x1)
 {
     struct mp_zimg_repack *r = user;
@@ -966,6 +1002,16 @@ static void setup_misc_packer(struct mp_zimg_repack *r)
             return;
         r->zimgfmt = grap_fmt;
         r->repack = unpack_pal;
+    } else {
+        enum AVPixelFormat avfmt = imgfmt2pixfmt(r->zimgfmt);
+        if (avfmt == AV_PIX_FMT_MONOWHITE || avfmt == AV_PIX_FMT_MONOBLACK) {
+            r->zimgfmt = IMGFMT_Y8;
+            r->repack = bitmap_repack;
+            r->override_depth = 1;
+            r->override_gray = true;
+            r->comp_size = avfmt == AV_PIX_FMT_MONOWHITE; // abuse to pass a flag
+            return;
+        }
     }
 }
 
@@ -1168,6 +1214,12 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     zfmt->transfer_characteristics = mp_to_z_trc(fmt.color.gamma);
     zfmt->color_primaries = mp_to_z_prim(fmt.color.primaries);
     zfmt->chroma_location = mp_to_z_chroma(fmt.chroma_location);
+
+    if (r->override_gray) {
+        zfmt->color_family = ZIMG_COLOR_GREY;
+        zfmt->pixel_range = ZIMG_RANGE_FULL;
+        zfmt->matrix_coefficients = ZIMG_MATRIX_BT470_BG;
+    }
 
     if (ctx && ctx->opts.fast) {
         // mpv's default for RGB output slows down zimg significantly.

@@ -74,8 +74,8 @@
       grayf32be    Zin   Zout  SWSin  SWSout |
      mediacodec                              |
            mmal                              |
-          monob                SWSin  SWSout |
-          monow                SWSin  SWSout |
+          monob    Zin   Zout  SWSin  SWSout |
+          monow    Zin   Zout  SWSin  SWSout |
            nv12    Zin   Zout  SWSin  SWSout |
            nv16    Zin   Zout                |
            nv20    Zin   Zout                |
