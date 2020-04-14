@@ -298,7 +298,7 @@ Available video output drivers are:
     the hardware decoder APIs.
 
     ``gpu`` makes use of FBOs by default. Sometimes you can achieve better
-    quality or performance by changing the ``--gpu-fbo-format`` option to
+    quality or performance by changing the ``--fbo-format`` option to
     ``rgb16f``, ``rgb32f`` or ``rgb``. Known problems include Mesa/Intel not
     accepting ``rgb16``, Mesa sometimes not being compiled with float texture
     support, and some OS X setups being very slow with ``rgb16`` but fast
