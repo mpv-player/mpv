@@ -306,8 +306,6 @@ typedef struct MPContext {
     struct track **tracks;
     int num_tracks;
 
-    int64_t death_hack; // don't fucking ask, just don't
-
     char *track_layout_hash;
 
     // Selected tracks. NULL if no track selected.
