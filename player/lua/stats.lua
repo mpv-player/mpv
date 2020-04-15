@@ -472,9 +472,6 @@ local function add_file(s)
         append_property(s, "media-title", {prefix="Title:"})
     end
 
-    local fs = append_property(s, "file-size", {prefix="Size:"})
-    append_property(s, "file-format", {prefix="Format/Protocol:", nl=fs and "" or o.nl})
-
     local editions = mp.get_property_number("editions")
     local edition = mp.get_property_number("current-edition")
     local ed_cond = (edition and editions > 1)
@@ -494,6 +491,9 @@ local function add_file(s)
                         {prefix="(" .. tostring(ch_index + 1) .. "/", suffix=")", nl="",
                          indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
+
+    local fs = append_property(s, "file-size", {prefix="Size:"})
+    append_property(s, "file-format", {prefix="Format/Protocol:", nl=fs and "" or o.nl})
 
     local demuxer_cache = mp.get_property_native("demuxer-cache-state", {})
     if demuxer_cache["fw-bytes"] then
