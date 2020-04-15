@@ -591,6 +591,8 @@ static void mark_track_selection(struct MPContext *mpctx, int order,
 {
     assert(order >= 0 && order < NUM_PTRACKS);
     mpctx->opts->stream_id[order][type] = value;
+    if (type != STREAM_SUB && order != 0)
+        return; // mconfig only contains one track for vid/aid
     m_config_notify_change_opt_ptr(mpctx->mconfig,
                                    &mpctx->opts->stream_id[order][type]);
 }
