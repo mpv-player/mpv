@@ -573,11 +573,8 @@ static void check_previous_track_selection(struct MPContext *mpctx)
         // defaults are -1 (default selection), or -2 (off) for secondary tracks.
         for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
             for (int i = 0; i < num_ptracks[t]; i++) {
-                if (opts->stream_id[i][t] >= 0) {
-                    opts->stream_id[i][t] = i == 0 ? -1 : -2;
-                    m_config_notify_change_opt_ptr(mpctx->mconfig,
-                                                   &opts->stream_id[i][t]);
-                }
+                if (opts->stream_id[i][t] >= 0)
+                    mark_track_selection(mpctx, i, t, i == 0 ? -1 : -2);
             }
         }
         talloc_free(mpctx->track_layout_hash);
@@ -586,8 +583,9 @@ static void check_previous_track_selection(struct MPContext *mpctx)
     talloc_free(h);
 }
 
-static void mark_track_selection(struct MPContext *mpctx, int order,
-                                 enum stream_type type, int value)
+// Update the matching track selection user option to the given value.
+void mark_track_selection(struct MPContext *mpctx, int order,
+                          enum stream_type type, int value)
 {
     assert(order >= 0 && order < num_ptracks[type]);
     mpctx->opts->stream_id[order][type] = value;

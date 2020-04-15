@@ -1884,10 +1884,8 @@ static int property_switch_track(void *ctx, struct m_property *prop,
         } else {
             // Simply cycle between "no" and "auto". It's possible that this does
             // not always do what the user means, but keep the complexity low.
-            mpctx->opts->stream_id[order][type] =
-                mpctx->opts->stream_id[order][type] == -1 ? -2 : -1;
-            m_config_notify_change_opt_ptr(mpctx->mconfig,
-                                        &mpctx->opts->stream_id[order][type]);
+            mark_track_selection(mpctx, order, type,
+                mpctx->opts->stream_id[order][type] == -1 ? -2 : -1);
         }
         return M_PROPERTY_OK;
     }
@@ -5094,9 +5092,7 @@ static void cmd_track_add(void *p)
                 mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
                 print_track_list(mpctx, "Track switched:");
             } else {
-                mpctx->opts->stream_id[0][t->type] = t->user_tid;
-                m_config_notify_change_opt_ptr(mpctx->mconfig,
-                                        &mpctx->opts->stream_id[0][t->type]);
+                mark_track_selection(mpctx, 0, t->type, t->user_tid);
             }
             return;
         }
@@ -5116,9 +5112,7 @@ static void cmd_track_add(void *p)
             if (mpctx->playback_initialized) {
                 mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
             } else {
-                mpctx->opts->stream_id[0][t->type] = t->user_tid;
-                m_config_notify_change_opt_ptr(mpctx->mconfig,
-                                        &mpctx->opts->stream_id[0][t->type]);
+                mark_track_selection(mpctx, 0, t->type, t->user_tid);
             }
         }
         char *title = cmd->args[2].v.s;

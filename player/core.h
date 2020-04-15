@@ -525,6 +525,8 @@ void mp_abort_trigger_locked(struct MPContext *mpctx,
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
                          enum stream_type filter, struct mp_cancel *cancel);
+void mark_track_selection(struct MPContext *mpctx, int order,
+                          enum stream_type type, int value);
 #define FLAG_MARK_SELECTION 1
 void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
                      struct track *track, int flags);
