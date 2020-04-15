@@ -39,7 +39,7 @@
 // 0: primary sub, 1: secondary sub, -1: not selected
 static int get_order(struct MPContext *mpctx, struct track *track)
 {
-    for (int n = 0; n < NUM_PTRACKS; n++) {
+    for (int n = 0; n < num_ptracks[STREAM_SUB]; n++) {
         if (mpctx->current_track[n][STREAM_SUB] == track)
             return n;
     }
@@ -129,7 +129,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
 bool update_subtitles(struct MPContext *mpctx, double video_pts)
 {
     bool ok = true;
-    for (int n = 0; n < NUM_PTRACKS; n++)
+    for (int n = 0; n < num_ptracks[STREAM_SUB]; n++)
         ok &= update_subtitle(mpctx, video_pts, mpctx->current_track[n][STREAM_SUB]);
     return ok;
 }
@@ -201,6 +201,6 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
 
 void reinit_sub_all(struct MPContext *mpctx)
 {
-    for (int n = 0; n < NUM_PTRACKS; n++)
+    for (int n = 0; n < num_ptracks[STREAM_SUB]; n++)
         reinit_sub(mpctx, mpctx->current_track[n][STREAM_SUB]);
 }

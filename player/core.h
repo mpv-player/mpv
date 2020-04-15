@@ -232,7 +232,10 @@ enum playback_status {
 
 const char *mp_status_str(enum playback_status st);
 
-#define NUM_PTRACKS 2
+extern const int num_ptracks[STREAM_TYPE_COUNT];
+
+// Maximum of all num_ptracks[] values.
+#define MAX_PTRACKS 2
 
 typedef struct MPContext {
     bool initialized;
@@ -309,9 +312,9 @@ typedef struct MPContext {
     char *track_layout_hash;
 
     // Selected tracks. NULL if no track selected.
-    // There can be NUM_PTRACKS of the same STREAM_TYPE selected at once.
+    // There can be num_ptracks[type] of the same STREAM_TYPE selected at once.
     // Currently, this is used for the secondary subtitle track only.
-    struct track *current_track[NUM_PTRACKS][STREAM_TYPE_COUNT];
+    struct track *current_track[MAX_PTRACKS][STREAM_TYPE_COUNT];
 
     struct mp_filter *filter_root;
 

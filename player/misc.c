@@ -45,6 +45,12 @@
 #include "core.h"
 #include "command.h"
 
+const int num_ptracks[STREAM_TYPE_COUNT] = {
+    [STREAM_VIDEO] = 1,
+    [STREAM_AUDIO] = 1,
+    [STREAM_SUB] = 2,
+};
+
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
 {
     double length = get_time_length(mpctx);

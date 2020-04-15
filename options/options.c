@@ -467,6 +467,7 @@ static const m_option_t mp_opts[] = {
      {"index", OPT_CHOICE(index_mode, {"default", 1}, {"recreate", 0})},
 
     // select audio/video/subtitle stream
+    // keep in sync with num_ptracks[] and MAX_PTRACKS
     {"aid", OPT_TRACKCHOICE(stream_id[0][STREAM_AUDIO])},
     {"vid", OPT_TRACKCHOICE(stream_id[0][STREAM_VIDEO])},
     {"sid", OPT_TRACKCHOICE(stream_id[0][STREAM_SUB])},

@@ -6224,7 +6224,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         mp_update_logging(mpctx, false);
 
     if (flags & (UPDATE_OSD | UPDATE_SUB_FILT)) {
-        for (int n = 0; n < NUM_PTRACKS; n++) {
+        for (int n = 0; n < num_ptracks[STREAM_SUB]; n++) {
             struct track *track = mpctx->current_track[n][STREAM_SUB];
             struct dec_sub *sub = track ? track->d_sub : NULL;
             if (sub) {
@@ -6352,8 +6352,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (opt_ptr == &opts->af_settings)
         set_filters(mpctx, STREAM_AUDIO, opts->af_settings);
 
-    for (int order = 0; order < NUM_PTRACKS; order++) {
-        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+        for (int order = 0; order < num_ptracks[type]; order++) {
             if (opt_ptr == &opts->stream_id[order][type] &&
                 mpctx->playback_initialized)
             {

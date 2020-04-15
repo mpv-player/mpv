@@ -193,8 +193,8 @@ static void kill_demuxers_reentrant(struct MPContext *mpctx,
 
 static void uninit_demuxer(struct MPContext *mpctx)
 {
-    for (int r = 0; r < NUM_PTRACKS; r++) {
-        for (int t = 0; t < STREAM_TYPE_COUNT; t++)
+    for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
+        for (int r = 0; r < num_ptracks[t]; r++)
             mpctx->current_track[r][t] = NULL;
     }
 
@@ -572,7 +572,7 @@ static void check_previous_track_selection(struct MPContext *mpctx)
         // Reset selection, but only if they're not "auto" or "off". The
         // defaults are -1 (default selection), or -2 (off) for secondary tracks.
         for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
-            for (int i = 0; i < NUM_PTRACKS; i++) {
+            for (int i = 0; i < num_ptracks[t]; i++) {
                 if (opts->stream_id[i][t] >= 0) {
                     opts->stream_id[i][t] = i == 0 ? -1 : -2;
                     m_config_notify_change_opt_ptr(mpctx->mconfig,
@@ -589,10 +589,8 @@ static void check_previous_track_selection(struct MPContext *mpctx)
 static void mark_track_selection(struct MPContext *mpctx, int order,
                                  enum stream_type type, int value)
 {
-    assert(order >= 0 && order < NUM_PTRACKS);
+    assert(order >= 0 && order < num_ptracks[type]);
     mpctx->opts->stream_id[order][type] = value;
-    if (type != STREAM_SUB && order != 0)
-        return; // mconfig only contains one track for vid/aid
     m_config_notify_change_opt_ptr(mpctx->mconfig,
                                    &mpctx->opts->stream_id[order][type]);
 }
@@ -601,7 +599,8 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
                        struct track *track, int flags)
 {
     assert(!track || track->type == type);
-    assert(order >= 0 && order < NUM_PTRACKS);
+    assert(type >= 0 && type < STREAM_TYPE_COUNT);
+    assert(order >= 0 && order < num_ptracks[type]);
 
     // Mark the current track selection as explicitly user-requested. (This is
     // different from auto-selection or disabling a track due to errors.)
@@ -690,7 +689,7 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
 void mp_deselect_track(struct MPContext *mpctx, struct track *track)
 {
     if (track && track->selected) {
-        for (int t = 0; t < NUM_PTRACKS; t++) {
+        for (int t = 0; t < num_ptracks[track->type]; t++) {
             mp_switch_track_n(mpctx, t, track->type, NULL, 0);
             mark_track_selection(mpctx, t, track->type, -1); // default
         }
@@ -1525,9 +1524,8 @@ static void play_current_file(struct MPContext *mpctx)
     if (reinit_complex_filters(mpctx, false) < 0)
         goto terminate_playback;
 
-    assert(NUM_PTRACKS == 2); // opts->stream_id is hardcoded to 2
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
-        for (int i = 0; i < NUM_PTRACKS; i++) {
+        for (int i = 0; i < num_ptracks[t]; i++) {
             struct track *sel = NULL;
             bool taken = (t == STREAM_VIDEO && mpctx->vo_chain) ||
                          (t == STREAM_AUDIO && mpctx->ao_chain);
@@ -1537,7 +1535,7 @@ static void play_current_file(struct MPContext *mpctx)
         }
     }
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
-        for (int i = 0; i < NUM_PTRACKS; i++) {
+        for (int i = 0; i < num_ptracks[t]; i++) {
             // One track can strictly feed at most 1 decoder
             struct track *track = mpctx->current_track[i][t];
             if (track) {
