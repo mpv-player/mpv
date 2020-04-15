@@ -135,6 +135,10 @@ void ra_gl_ctx_uninit(struct ra_ctx *ctx)
         ctx->swapchain = NULL;
     }
 
+    // Clean up any potentially left-over debug callback
+    if (ctx->ra)
+        ra_gl_set_debug(ctx->ra, false);
+
     ra_free(&ctx->ra);
 }
 
