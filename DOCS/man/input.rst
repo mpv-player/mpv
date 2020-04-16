@@ -2720,6 +2720,12 @@ Property list
     ``track-list/N/selected``
         ``yes`` if the track is currently decoded, ``no`` otherwise.
 
+    ``track-list/N/main-selection``
+        It indicates the selection order of tracks for the same type.
+        If a track is not selected, or is selected by the ``--lavfi-complex``,
+        it is not available. For subtitle tracks, ``0`` represents the ``sid``,
+        and ``1`` represents the ``secondary-sid``.
+
     ``track-list/N/ff-index``
         The stream index as usually used by the FFmpeg utilities. Note that
         this can be potentially wrong if a demuxer other than libavformat
@@ -2786,6 +2792,7 @@ Property list
                 "default"           MPV_FORMAT_FLAG
                 "forced"            MPV_FORMAT_FLAG
                 "selected"          MPV_FORMAT_FLAG
+                "main-selection"    MPV_FORMAT_INT64
                 "external"          MPV_FORMAT_FLAG
                 "external-filename" MPV_FORMAT_STRING
                 "codec"             MPV_FORMAT_STRING

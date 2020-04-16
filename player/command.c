@@ -1919,6 +1919,16 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     if (p.par_h)
         par = p.par_w / (double) p.par_h;
 
+    int order = -1;
+    if (track->selected) {
+        for (int i = 0; i < num_ptracks[track->type]; i++) {
+            if (mpctx->current_track[i][track->type] == track) {
+                order = i;
+                break;
+            }
+        }
+    }
+
     struct m_sub_property props[] = {
         {"id",          SUB_PROP_INT(track->user_tid)},
         {"type",        SUB_PROP_STR(stream_type_name(track->type)),
@@ -1939,6 +1949,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"hearing-impaired", SUB_PROP_FLAG(track->hearing_impaired_track)},
         {"external",    SUB_PROP_FLAG(track->is_external)},
         {"selected",    SUB_PROP_FLAG(track->selected)},
+        {"main-selection", SUB_PROP_INT(order), .unavailable = order < 0},
         {"external-filename", SUB_PROP_STR(track->external_filename),
                         .unavailable = !track->external_filename},
         {"ff-index",    SUB_PROP_INT(track->ff_index)},
