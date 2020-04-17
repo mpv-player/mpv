@@ -387,7 +387,7 @@ static struct sub *get_current(struct sd_lavc_priv *priv, double pts)
         if (!sub->valid)
             continue;
         if (pts == MP_NOPTS_VALUE ||
-            ((sub->pts == MP_NOPTS_VALUE || pts >= sub->pts) &&
+            ((sub->pts == MP_NOPTS_VALUE || pts + 1e-6 >= sub->pts) &&
              (sub->endpts == MP_NOPTS_VALUE || pts < sub->endpts)))
         {
             // Ignore "trailing" subtitles with unknown length after 1 minute.
