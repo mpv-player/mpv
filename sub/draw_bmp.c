@@ -148,10 +148,10 @@ static void unpremultiply_and_split_BGR32(struct mp_image *img,
         uint8_t *arow = &alpha->planes[0][alpha->stride[0] * y];
         for (int x = 0; x < img->w; ++x) {
             uint32_t pval = irow[x];
-            uint8_t aval = (pval >> 24);
-            uint8_t rval = (pval >> 16) & 0xFF;
-            uint8_t gval = (pval >> 8) & 0xFF;
-            uint8_t bval = pval & 0xFF;
+            uint32_t aval = (pval >> 24);
+            uint32_t rval = (pval >> 16) & 0xFF;
+            uint32_t gval = (pval >> 8) & 0xFF;
+            uint32_t bval = pval & 0xFF;
             // multiplied = separate * alpha / 255
             // separate = rint(multiplied * 255 / alpha)
             //          = floor(multiplied * 255 / alpha + 0.5)
