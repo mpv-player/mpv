@@ -5,7 +5,8 @@ from distutils.version import StrictVersion
 import os
 
 __all__ = ["check_pthreads", "check_iconv", "check_lua",
-           "check_cocoa", "check_wl_protocols", "check_swift"]
+           "check_cocoa", "check_wl_protocols", "check_swift",
+           "check_egl_provider"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -124,3 +125,29 @@ def check_swift(ctx, dependency_identifier):
                              "'swift >= " + str(minVer) + "' not found, found " +
                              str(ctx.env.SWIFT_VERSION or None))
     return False
+
+def check_egl_provider(minVersion=None, name='egl', check=None):
+    def fn(ctx, dependency_identifier, **kw):
+        if not hasattr(ctx, 'egl_provider'):
+            egl_provider_check = check or check_pkg_config(name)
+            if egl_provider_check(ctx, dependency_identifier):
+                ctx.egl_provider = name
+                for ver in ['1.5', '1.4', '1.3', '1.2', '1.1', '1.0']:
+                    stmt = 'int x[EGL_VERSION_{0}]'.format(ver.replace('.','_'))
+                    check_stmt = check_statement(['EGL/egl.h'], stmt)
+                    if check_stmt(ctx, dependency_identifier):
+                        ctx.egl_provider_version = StrictVersion(ver)
+                        break
+                return True
+            else:
+                return False
+        else:
+            minVersionSV = minVersion and StrictVersion(minVersion)
+            if not minVersionSV or ctx.egl_provider_version and \
+                    ctx.egl_provider_version >= minVersionSV:
+                defkey = inflector.define_key(dependency_identifier)
+                ctx.define(defkey, 1)
+                return True
+            else:
+                return False
+    return fn

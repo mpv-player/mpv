@@ -548,14 +548,19 @@ video_output_features = [
         'func': check_libs(['GL', 'GL Xdamage'],
                    check_cc(fragment=load_fragment('gl_x11.c'),
                             use=['x11', 'libdl', 'pthreads']))
+    }, {
+        'name': '--rpi',
+        'desc': 'Raspberry Pi support',
+        'func': check_egl_provider(name='brcmegl', check=any_check(
+            check_pkg_config('brcmegl'),
+            check_pkg_config('/opt/vc/lib/pkgconfig/brcmegl.pc')
+            )),
+        'default': 'disable',
     } , {
         'name': '--egl',
         'desc': 'EGL 1.4',
         'groups': [ 'gl' ],
-        'func': compose_checks(
-            check_pkg_config('egl'),
-            check_statement(['EGL/egl.h'], 'int x[EGL_VERSION_1_4]')
-            ),
+        'func': check_egl_provider('1.4')
     } , {
         'name': '--egl-x11',
         'desc': 'OpenGL X11 EGL Backend',
@@ -708,12 +713,6 @@ video_output_features = [
         'desc': 'Direct3D 11 video output',
         'deps': 'win32-desktop && shaderc && spirv-cross',
         'func': check_cc(header_name=['d3d11_1.h', 'dxgi1_6.h']),
-    }, {
-        'name': '--rpi',
-        'desc': 'Raspberry Pi support',
-        'func': any_check(check_pkg_config('brcmegl'),
-                          check_pkg_config('/opt/vc/lib/pkgconfig/brcmegl.pc')),
-        'default': 'disable',
     } , {
         'name': '--ios-gl',
         'desc': 'iOS OpenGL ES hardware decoding interop support',
