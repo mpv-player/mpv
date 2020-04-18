@@ -42,6 +42,7 @@
 #define EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT     0x00000001
 #define EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE   0x31B1
 #define EGL_OPENGL_ES3_BIT                      0x00000040
+typedef intptr_t EGLAttrib;
 #endif
 
 struct mp_egl_config_attr {
