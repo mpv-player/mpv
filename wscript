@@ -711,7 +711,8 @@ video_output_features = [
     }, {
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
-        'func': check_pkg_config('brcmegl'),
+        'func': any_check(check_pkg_config('brcmegl'),
+                          check_pkg_config('/opt/vc/lib/pkgconfig/brcmegl.pc')),
         'default': 'disable',
     } , {
         'name': '--ios-gl',
@@ -800,7 +801,8 @@ hwaccel_features = [
         'name': '--rpi-mmal',
         'desc': 'Raspberry Pi MMAL hwaccel',
         'deps': 'rpi',
-        'func': check_pkg_config('mmal'),
+        'func': any_check(check_pkg_config('mmal'),
+                          check_pkg_config('/opt/vc/lib/pkgconfig/mmal.pc')),
     }
 ]
 
