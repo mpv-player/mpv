@@ -110,7 +110,7 @@ static void *get_proc_address(const GLubyte *name)
     // EGL 1.4 (supported by the RPI firmware) does not necessarily return
     // function pointers for core functions.
     if (!p) {
-        void *h = dlopen("/opt/vc/lib/libGLESv2.so", RTLD_LAZY);
+        void *h = dlopen("/opt/vc/lib/libbrcmGLESv2.so", RTLD_LAZY);
         if (h) {
             p = dlsym(h, name);
             dlclose(h);
