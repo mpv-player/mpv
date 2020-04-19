@@ -440,10 +440,6 @@ audio_output_features = [
         'deps': 'sdl2',
         'func': check_true,
     }, {
-        'name': '--pulse',
-        'desc': 'PulseAudio audio output',
-        'func': check_pkg_config('libpulse', '>= 1.0')
-    }, {
         'name': '--jack',
         'desc': 'JACK audio output',
         'deps': 'gpl',
@@ -457,10 +453,6 @@ audio_output_features = [
         'name': '--opensles',
         'desc': 'OpenSL ES audio output',
         'func': check_statement('SLES/OpenSLES.h', 'slCreateEngine', lib="OpenSLES"),
-    }, {
-        'name': '--alsa',
-        'desc': 'ALSA audio output',
-        'func': check_pkg_config('alsa', '>= 1.0.18'),
     }, {
         'name': '--coreaudio',
         'desc': 'CoreAudio audio output',

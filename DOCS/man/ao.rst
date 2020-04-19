@@ -18,23 +18,6 @@ in the list.
 
 Available audio output drivers are:
 
-``alsa`` (Linux only)
-    ALSA audio output driver
-
-    See `ALSA audio output options`_ for options specific to this AO.
-
-    .. warning::
-
-        To get multichannel/surround audio, use ``--audio-channels=auto``. The
-        default for this option is ``auto-safe``, which makes this audio output
-        explicitly reject multichannel output, as there is no way to detect
-        whether a certain channel layout is actually supported.
-
-        You can also try `using the upmix plugin <http://git.io/vfuAy>`_.
-        This setup enables multichannel audio on the ``default`` device
-        with automatic upmixing with shared access, so playing stereo
-        and multichannel audio at the same time will work as expected.
-
 ``jack``
     JACK (Jack Audio Connection Kit) audio output driver.
 
@@ -112,36 +95,6 @@ Available audio output drivers are:
         tinting the sound with ambisonics or HRTF.
         Channels are dropped when when they are not available as downmixing
         will be disabled. Default: no.
-
-``pulse``
-    PulseAudio audio output driver
-
-    The following global options are supported by this audio output:
-
-    ``--pulse-host=<host>``
-        Specify the host to use. An empty <host> string uses a local connection,
-        "localhost" uses network transfer (most likely not what you want).
-
-    ``--pulse-buffer=<1-2000|native>``
-        Set the audio buffer size in milliseconds. A higher value buffers
-        more data, and has a lower probability of buffer underruns. A smaller
-        value makes the audio stream react faster, e.g. to playback speed
-        changes.
-
-    ``--pulse-latency-hacks=<yes|no>``
-        Enable hacks to workaround PulseAudio timing bugs (default: no). If
-        enabled, mpv will do elaborate latency calculations on its own. If
-        disabled, it will use PulseAudio automatically updated timing
-        information. Disabling this might help with e.g. networked audio or
-        some plugins, while enabling it might help in some unknown situations
-        (it used to be required to get good behavior on old PulseAudio versions).
-
-        If you have stuttering video when using pulse, try to enable this
-        option. (Or try to update PulseAudio.)
-
-    ``--pulse-allow-suspended=<yes|no>``
-        Allow mpv to use PulseAudio even if the sink is suspended (default: no).
-        Can be useful if PulseAudio is running as a bridge to jack and mpv has its sink-input set to the one jack is using.
 
 ``sdl``
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL
