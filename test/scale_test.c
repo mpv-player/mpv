@@ -18,8 +18,6 @@ static struct mp_image *gen_repack_test_img(int w, int h, int bytes, bool rgb,
             {1, {rgb ? 1 : 3}},
             {1, {4}},
         },
-        .chroma_w = 1,
-        .chroma_h = 1,
     };
     int mpfmt = mp_find_regular_imgfmt(&planar_desc);
     assert(mpfmt);

@@ -816,8 +816,6 @@ static void setup_fringe_rgb_packer(struct mp_zimg_repack *r,
         .component_size = 1,
         .num_planes = 3,
         .planes = { {1, {2}}, {1, {3}}, {1, {1}} },
-        .chroma_w = 1,
-        .chroma_h = 1,
     };
     r->zimgfmt = mp_find_regular_imgfmt(&gbrp);
     if (!r->zimgfmt)
@@ -890,8 +888,8 @@ static void setup_fringe_yuv422_packer(struct mp_zimg_repack *r)
         .component_size = r->comp_size,
         .num_planes = 3,
         .planes = { {1, {1}}, {1, {2}}, {1, {3}} },
-        .chroma_w = 2,
-        .chroma_h = 1,
+        .chroma_xs = 1,
+        .chroma_ys = 0,
     };
     r->zimgfmt = mp_find_regular_imgfmt(&yuvfmt);
     r->repack = fringe_yuv422_repack;
@@ -977,8 +975,6 @@ static void setup_misc_packer(struct mp_zimg_repack *r)
                 {1, {2}},
                 {1, {3}},
             },
-            .chroma_w = 1,
-            .chroma_h = 1,
         };
         int planar_fmt = mp_find_regular_imgfmt(&planar10);
         if (!planar_fmt)
@@ -996,8 +992,6 @@ static void setup_misc_packer(struct mp_zimg_repack *r)
             .component_size = 1,
             .num_planes = 4,
             .planes = { {1, {2}}, {1, {3}}, {1, {1}}, {1, {4}}, },
-            .chroma_w = 1,
-            .chroma_h = 1,
         };
         int grap_fmt = mp_find_regular_imgfmt(&gbrap);
         if (!grap_fmt)
@@ -1118,8 +1112,7 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
         return false;
 
     // no weird stuff
-    if (desc.num_planes > 4 || !MP_IS_POWER_OF_2(desc.chroma_w) ||
-        !MP_IS_POWER_OF_2(desc.chroma_h))
+    if (desc.num_planes > 4)
         return false;
 
     // Endian swapping.
@@ -1164,8 +1157,8 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     // Note: formats with subsampled chroma may have odd width or height in
     // mpv and FFmpeg. This is because the width/height is actually a cropping
     // rectangle. Reconstruct the image allocation size and set the cropping.
-    zfmt->width = r->real_w = MP_ALIGN_UP(fmt.w, desc.chroma_w);
-    zfmt->height = r->real_h = MP_ALIGN_UP(fmt.h, desc.chroma_h);
+    zfmt->width = r->real_w = MP_ALIGN_UP(fmt.w, 1 << desc.chroma_xs);
+    zfmt->height = r->real_h = MP_ALIGN_UP(fmt.h, 1 << desc.chroma_ys);
     if (!r->pack && ctx) {
         // Relies on ctx->zimg_dst being initialized first.
         struct mp_zimg_repack *dst = ctx->zimg_dst;
@@ -1174,8 +1167,8 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     }
 
-    zfmt->subsample_w = mp_log2(desc.chroma_w);
-    zfmt->subsample_h = mp_log2(desc.chroma_h);
+    zfmt->subsample_w = desc.chroma_xs;
+    zfmt->subsample_h = desc.chroma_ys;
 
     zfmt->color_family = ZIMG_COLOR_YUV;
     if (desc.num_planes <= 2) {

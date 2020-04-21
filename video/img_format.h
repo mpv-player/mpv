@@ -130,8 +130,10 @@ struct mp_regular_imgfmt {
     uint8_t num_planes;
     struct mp_regular_imgfmt_plane planes[MP_MAX_PLANES];
 
-    // Chroma pixel size (1x1 is 4:4:4)
-    uint8_t chroma_w, chroma_h;
+    // Chroma shifts for chroma planes. 0/0 is 4:4:4 YUV or RGB. If not 0/0,
+    // then this is always a yuv format, with components 2/3 on separate planes
+    // (reduced by the shift), and planes for components 1/4 are full sized.
+    uint8_t chroma_xs, chroma_ys;
 };
 
 bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt);

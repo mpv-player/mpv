@@ -144,7 +144,8 @@ static void run(struct test_ctx *ctx)
             fprintf(f, "  Regular: planes=%d compbytes=%d bitpad=%d "
                     "chroma=%dx%d ctype=%s\n",
                     reg.num_planes, reg.component_size, reg.component_pad,
-                    reg.chroma_w, reg.chroma_h, comp_type(reg.component_type));
+                    1 << reg.chroma_xs, 1 << reg.chroma_ys,
+                    comp_type(reg.component_type));
             for (int n = 0; n < reg.num_planes; n++) {
                 struct mp_regular_imgfmt_plane *plane = &reg.planes[n];
                 fprintf(f, "    %d: {", n);

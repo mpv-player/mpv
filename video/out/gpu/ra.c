@@ -309,8 +309,8 @@ bool ra_get_imgfmt_desc(struct ra *ra, int imgfmt, struct ra_imgfmt_desc *out)
                 return false;
             ctype = res.planes[n]->ctype;
         }
-        res.chroma_w = regfmt.chroma_w;
-        res.chroma_h = regfmt.chroma_h;
+        res.chroma_w = 1 << regfmt.chroma_xs;
+        res.chroma_h = 1 << regfmt.chroma_ys;
         goto supported;
     }
 

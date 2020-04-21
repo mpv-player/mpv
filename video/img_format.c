@@ -74,8 +74,6 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
             .component_size = 1,
             .num_planes = 2,
             .planes = { {1, {1}}, {1, {4}} },
-            .chroma_w = 1,
-            .chroma_h = 1,
         },
     },
     [IMGFMT_YAP16 - IMGFMT_CUST_BASE] = {
@@ -85,8 +83,6 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
             .component_size = 2,
             .num_planes = 2,
             .planes = { {1, {1}}, {1, {4}} },
-            .chroma_w = 1,
-            .chroma_h = 1,
         },
     },
     // in FFmpeg, but FFmpeg names have an annoying "_vld" suffix
@@ -161,12 +157,12 @@ static struct mp_imgfmt_desc to_legacy_desc(int fmt, struct mp_regular_imgfmt re
             (reg.forced_csp ? MP_IMGFLAG_RGB | MP_IMGFLAG_RGB_P
                             : MP_IMGFLAG_YUV | MP_IMGFLAG_YUV_P),
         .num_planes = reg.num_planes,
-        .chroma_xs = mp_log2(reg.chroma_w),
-        .chroma_ys = mp_log2(reg.chroma_h),
+        .chroma_xs = reg.chroma_xs,
+        .chroma_ys = reg.chroma_ys,
         .component_bits = reg.component_size * 8 - abs(reg.component_pad),
     };
-    desc.align_x = reg.chroma_w;
-    desc.align_y = reg.chroma_h;
+    desc.align_x = 1 << reg.chroma_xs;
+    desc.align_y = 1 << reg.chroma_ys;
     desc.plane_bits = desc.component_bits;
     for (int p = 0; p < reg.num_planes; p++) {
         desc.bytes[p] = reg.component_size;
@@ -363,7 +359,7 @@ static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
         }
         if (pad_only)
             return false; // no planes with only padding allowed
-        if ((fmt->chroma_w > 1 || fmt->chroma_h > 1) && chroma_luma == 3)
+        if ((fmt->chroma_xs > 0 || fmt->chroma_ys > 0) && chroma_luma == 3)
             return false; // separate chroma/luma planes required
     }
 
@@ -518,8 +514,8 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
         res.component_pad = -res.component_pad;
     }
 
-    res.chroma_w = 1 << pixdesc->log2_chroma_w;
-    res.chroma_h = 1 << pixdesc->log2_chroma_h;
+    res.chroma_xs = pixdesc->log2_chroma_w;
+    res.chroma_ys = pixdesc->log2_chroma_h;
 
     if (pixdesc->flags & AV_PIX_FMT_FLAG_BAYER)
         return false; // it's satan himself
@@ -541,8 +537,8 @@ static bool regular_imgfmt_equals(struct mp_regular_imgfmt *a,
         a->num_planes     != b->num_planes ||
         a->component_pad  != b->component_pad ||
         a->forced_csp     != b->forced_csp ||
-        a->chroma_w       != b->chroma_w ||
-        a->chroma_h       != b->chroma_h)
+        a->chroma_xs      != b->chroma_xs ||
+        a->chroma_ys      != b->chroma_ys)
         return false;
 
     for (int n = 0; n < a->num_planes; n++) {

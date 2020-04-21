@@ -111,25 +111,25 @@ struct script_driver {
 
 struct mpvs_fmt {
     VSPresetFormat vs;
-    int bits, cw, ch;
+    int bits, xs, ys;
 };
 
 static const struct mpvs_fmt mpvs_fmt_table[] = {
-    {pfYUV420P8,  8,  2, 2},
-    {pfYUV420P9,  9,  2, 2},
-    {pfYUV420P10, 10, 2, 2},
-    {pfYUV420P16, 16, 2, 2},
-    {pfYUV422P8,  8,  2, 1},
-    {pfYUV422P9,  9,  2, 1},
-    {pfYUV422P10, 10, 2, 1},
-    {pfYUV422P16, 16, 2, 1},
-    {pfYUV410P8,  8,  4, 4},
-    {pfYUV411P8,  8,  4, 1},
-    {pfYUV440P8,  8,  1, 2},
-    {pfYUV444P8,  8,  1, 1},
-    {pfYUV444P9,  9,  1, 1},
-    {pfYUV444P10, 10, 1, 1},
-    {pfYUV444P16, 16, 1, 1},
+    {pfYUV420P8,  8,  1, 1},
+    {pfYUV420P9,  9,  1, 1},
+    {pfYUV420P10, 10, 1, 1},
+    {pfYUV420P16, 16, 1, 1},
+    {pfYUV422P8,  8,  1, 0},
+    {pfYUV422P9,  9,  1, 0},
+    {pfYUV422P10, 10, 1, 0},
+    {pfYUV422P16, 16, 1, 0},
+    {pfYUV410P8,  8,  2, 2},
+    {pfYUV411P8,  8,  2, 0},
+    {pfYUV440P8,  8,  0, 1},
+    {pfYUV444P8,  8,  0, 0},
+    {pfYUV444P9,  9,  0, 0},
+    {pfYUV444P10, 10, 0, 0},
+    {pfYUV444P16, 16, 0, 0},
     {pfNone}
 };
 
@@ -140,7 +140,7 @@ static bool compare_fmt(int imgfmt, const struct mpvs_fmt *vs)
         return false;
     if (rfmt.component_pad > 0)
         return false;
-    if (rfmt.chroma_w != vs->cw || rfmt.chroma_h != vs->ch)
+    if (rfmt.chroma_xs != vs->xs || rfmt.chroma_ys != vs->ys)
         return false;
     if (rfmt.component_size * 8 + rfmt.component_pad != vs->bits)
         return false;
