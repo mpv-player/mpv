@@ -155,10 +155,6 @@ enum mp_imgfmt {
     IMGFMT_Y8,
     IMGFMT_Y16,
 
-    // Planar gray/alpha.
-    IMGFMT_YAP8,
-    IMGFMT_YAP16,
-
     // Packed YUV formats (components are byte-accessed)
     IMGFMT_UYVY,                // U  Y0 V  Y1
 
@@ -190,26 +186,36 @@ enum mp_imgfmt {
     // Accessed with bit-shifts after endian-swapping the uint16_t pixel
     IMGFMT_RGB565,              // 5r 6g 5b (MSB to LSB)
 
-    // Accessed with bit-shifts, uint32_t units.
-    IMGFMT_RGB30,               // 2pad 10r 10g 10b (MSG to LSB)
-
     // AV_PIX_FMT_PAL8
     IMGFMT_PAL8,
 
     // Hardware accelerated formats. Plane data points to special data
     // structures, instead of pixel data.
     IMGFMT_VDPAU,           // VdpVideoSurface
-    IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
-    IMGFMT_VAAPI,
     // plane 0: ID3D11Texture2D
     // plane 1: slice index casted to pointer
     IMGFMT_D3D11,
     IMGFMT_DXVA2,           // IDirect3DSurface9 (NV12/P010/P016)
     IMGFMT_MMAL,            // MMAL_BUFFER_HEADER_T
-    IMGFMT_VIDEOTOOLBOX,    // CVPixelBufferRef
     IMGFMT_MEDIACODEC,      // AVMediaCodecBuffer
     IMGFMT_DRMPRIME,        // AVDRMFrameDescriptor
     IMGFMT_CUDA,            // CUDA Buffer
+
+    // Not an actual format; base for mpv-specific descriptor table.
+    // Some may still map to AV_PIX_FMT_*.
+    IMGFMT_CUST_BASE,
+
+    // Planar gray/alpha.
+    IMGFMT_YAP8,
+    IMGFMT_YAP16,
+
+    // Accessed with bit-shifts, uint32_t units.
+    IMGFMT_RGB30,               // 2pad 10r 10g 10b (MSG to LSB)
+
+    // Hardware accelerated formats (again).
+    IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
+    IMGFMT_VAAPI,
+    IMGFMT_VIDEOTOOLBOX,    // CVPixelBufferRef
 
     // Generic pass-through of AV_PIX_FMT_*. Used for formats which don't have
     // a corresponding IMGFMT_ value.

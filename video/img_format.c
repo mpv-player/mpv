@@ -30,21 +30,84 @@
 
 struct mp_imgfmt_entry {
     const char *name;
-    int fmt;
+    // valid if desc.id is set
+    struct mp_imgfmt_desc desc;
+    // valid if reg_desc.component_size is set
+    struct mp_regular_imgfmt reg_desc;
+    // valid if non-0 and no reg_desc
+    enum mp_csp forced_csp;
+    enum mp_component_type ctype;
 };
 
 static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // not in ffmpeg
-    {"vdpau_output",    IMGFMT_VDPAU_OUTPUT},
-    {"rgb30",           IMGFMT_RGB30},
-    {"yap8",            IMGFMT_YAP8},
-    {"yap16",           IMGFMT_YAP16},
-    // FFmpeg names have an annoying "_vld" suffix
-    {"videotoolbox",    IMGFMT_VIDEOTOOLBOX},
-    {"vaapi",           IMGFMT_VAAPI},
-    {"none",            0},
-    {0}
+    [IMGFMT_VDPAU_OUTPUT - IMGFMT_CUST_BASE] = {
+        .name = "vdpau_output",
+        .desc = {
+            .id = IMGFMT_VDPAU_OUTPUT,
+            .avformat = AV_PIX_FMT_NONE,
+            .flags = MP_IMGFLAG_BE | MP_IMGFLAG_LE | MP_IMGFLAG_RGB |
+                     MP_IMGFLAG_HWACCEL,
+        },
+    },
+    [IMGFMT_RGB30 - IMGFMT_CUST_BASE] = {
+        .name = "rgb30",
+        .desc = {
+            .id = IMGFMT_RGB30,
+            .avformat = AV_PIX_FMT_NONE,
+            .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE | MP_IMGFLAG_RGB,
+            .num_planes = 1,
+            .align_x = 1,
+            .align_y = 1,
+            .bytes = {4},
+            .bpp = {32},
+            .plane_bits = 30,
+            .component_bits = 10,
+        },
+        .forced_csp = MP_CSP_RGB,
+        .ctype = MP_COMPONENT_TYPE_UINT,
+    },
+    [IMGFMT_YAP8 - IMGFMT_CUST_BASE] = {
+        .name = "yap8",
+        .reg_desc = {
+            .component_type = MP_COMPONENT_TYPE_UINT,
+            .component_size = 1,
+            .num_planes = 2,
+            .planes = { {1, {1}}, {1, {4}} },
+            .chroma_w = 1,
+            .chroma_h = 1,
+        },
+    },
+    [IMGFMT_YAP16 - IMGFMT_CUST_BASE] = {
+        .name = "yap16",
+        .reg_desc = {
+            .component_type = MP_COMPONENT_TYPE_UINT,
+            .component_size = 2,
+            .num_planes = 2,
+            .planes = { {1, {1}}, {1, {4}} },
+            .chroma_w = 1,
+            .chroma_h = 1,
+        },
+    },
+    // in FFmpeg, but FFmpeg names have an annoying "_vld" suffix
+    [IMGFMT_VIDEOTOOLBOX - IMGFMT_CUST_BASE] = {
+        .name = "videotoolbox",
+    },
+    [IMGFMT_VAAPI - IMGFMT_CUST_BASE] = {
+        .name = "vaapi",
+    },
 };
+
+static const struct mp_imgfmt_entry *get_mp_desc(int imgfmt)
+{
+    if (imgfmt < IMGFMT_CUST_BASE)
+        return NULL;
+    int index = imgfmt - IMGFMT_CUST_BASE;
+    if (index >= MP_ARRAY_SIZE(mp_imgfmt_list))
+        return NULL;
+    const struct mp_imgfmt_entry *e = &mp_imgfmt_list[index];
+    return e->name ? e : NULL;
+}
 
 char **mp_imgfmt_name_list(void)
 {
@@ -61,31 +124,20 @@ char **mp_imgfmt_name_list(void)
 
 int mp_imgfmt_from_name(bstr name)
 {
-    int img_fmt = 0;
-    for (const struct mp_imgfmt_entry *p = mp_imgfmt_list; p->name; ++p) {
-        if (bstr_equals0(name, p->name)) {
-            img_fmt = p->fmt;
-            break;
-        }
+    if (bstr_equals0(name, "none"))
+        return 0;
+    for (int n = 0; n < MP_ARRAY_SIZE(mp_imgfmt_list); n++) {
+        const struct mp_imgfmt_entry *p = &mp_imgfmt_list[n];
+        if (p->name && bstr_equals0(name, p->name))
+            return IMGFMT_CUST_BASE + n;
     }
-    if (!img_fmt) {
-        char *t = bstrdup0(NULL, name);
-        img_fmt = pixfmt2imgfmt(av_get_pix_fmt(t));
-        talloc_free(t);
-    }
-    return img_fmt;
+    return pixfmt2imgfmt(av_get_pix_fmt(mp_tprintf(80, "%.*s", BSTR_P(name))));
 }
 
 char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt)
 {
-    const char *name = NULL;
-    const struct mp_imgfmt_entry *p = mp_imgfmt_list;
-    for (; p->fmt; p++) {
-        if (p->name && p->fmt == fmt) {
-            name = p->name;
-            break;
-        }
-    }
+    const struct mp_imgfmt_entry *p = get_mp_desc(fmt);
+    const char *name = p ? p->name : NULL;
     if (!name) {
         const AVPixFmtDescriptor *pixdesc = av_pix_fmt_desc_get(imgfmt2pixfmt(fmt));
         if (pixdesc)
@@ -100,68 +152,48 @@ char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt)
     return buf;
 }
 
-static struct mp_imgfmt_desc mp_only_imgfmt_desc(int mpfmt)
+static struct mp_imgfmt_desc to_legacy_desc(int fmt, struct mp_regular_imgfmt reg)
 {
-    switch (mpfmt) {
-    case IMGFMT_VDPAU_OUTPUT:
-        return (struct mp_imgfmt_desc) {
-            .id = mpfmt,
-            .avformat = AV_PIX_FMT_NONE,
-            .flags = MP_IMGFLAG_BE | MP_IMGFLAG_LE | MP_IMGFLAG_RGB |
-                     MP_IMGFLAG_HWACCEL,
-        };
-    case IMGFMT_RGB30:
-        return (struct mp_imgfmt_desc) {
-            .id = mpfmt,
-            .avformat = AV_PIX_FMT_NONE,
-            .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE | MP_IMGFLAG_RGB,
-            .num_planes = 1,
-            .align_x = 1,
-            .align_y = 1,
-            .bytes = {4},
-            .bpp = {32},
-            .plane_bits = 30,
-            .component_bits = 10,
-        };
-    case IMGFMT_YAP8:
-        return (struct mp_imgfmt_desc) {
-            .id = mpfmt,
-            .avformat = AV_PIX_FMT_NONE,
-            .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE | MP_IMGFLAG_YUV |
-                     MP_IMGFLAG_YUV_P,
-            .num_planes = 2,
-            .align_x = 1,
-            .align_y = 1,
-            .bytes = {1, 1},
-            .bpp = {8, 8},
-            .plane_bits = 8,
-            .component_bits = 8,
-        };
-    case IMGFMT_YAP16:
-        return (struct mp_imgfmt_desc) {
-            .id = mpfmt,
-            .avformat = AV_PIX_FMT_NONE,
-            .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE | MP_IMGFLAG_YUV |
-                     MP_IMGFLAG_YUV_P,
-            .num_planes = 2,
-            .align_x = 1,
-            .align_y = 1,
-            .bytes = {2, 2},
-            .bpp = {16, 16},
-            .plane_bits = 16,
-            .component_bits = 16,
-        };
+    struct mp_imgfmt_desc desc = {
+        .id = fmt,
+        .avformat = AV_PIX_FMT_NONE,
+        .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE |
+            (reg.forced_csp ? MP_IMGFLAG_RGB | MP_IMGFLAG_RGB_P
+                            : MP_IMGFLAG_YUV | MP_IMGFLAG_YUV_P),
+        .num_planes = reg.num_planes,
+        .chroma_xs = mp_log2(reg.chroma_w),
+        .chroma_ys = mp_log2(reg.chroma_h),
+        .component_bits = reg.component_size * 8 - abs(reg.component_pad),
+    };
+    desc.align_x = reg.chroma_w;
+    desc.align_y = reg.chroma_h;
+    desc.plane_bits = desc.component_bits;
+    for (int p = 0; p < reg.num_planes; p++) {
+        desc.bytes[p] = reg.component_size;
+        desc.bpp[p] = desc.bytes[p] * 8;
+        desc.xs[p] = p == 1 || p == 2 ? desc.chroma_xs : 0;
+        desc.ys[p] = p == 1 || p == 2 ? desc.chroma_ys : 0;
+        for (int c = 0; c < reg.planes[p].num_components; c++) {
+            if (reg.planes[p].components[c] == 4)
+                desc.flags |= MP_IMGFLAG_ALPHA;
+        }
     }
-    return (struct mp_imgfmt_desc) {0};
+    return desc;
 }
 
 struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 {
+    const struct mp_imgfmt_entry *mpdesc = get_mp_desc(mpfmt);
+    if (mpdesc && mpdesc->desc.id)
+        return mpdesc->desc;
+    if (mpdesc && mpdesc->reg_desc.component_size)
+        return to_legacy_desc(mpfmt, mpdesc->reg_desc);
+
     enum AVPixelFormat fmt = imgfmt2pixfmt(mpfmt);
     const AVPixFmtDescriptor *pd = av_pix_fmt_desc_get(fmt);
     if (!pd || pd->nb_components > 4 || fmt == AV_PIX_FMT_NONE ||
         fmt == AV_PIX_FMT_UYYVYY411)
-        return mp_only_imgfmt_desc(mpfmt);
+        return (struct mp_imgfmt_desc) {0};
     enum mp_component_type is_uint =
         mp_imgfmt_get_component_type(mpfmt) == MP_COMPONENT_TYPE_UINT;
 
@@ -345,8 +377,11 @@ static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
 
 enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
 {
-    if (imgfmt == IMGFMT_RGB30)
-        return MP_CSP_RGB;
+    const struct mp_imgfmt_entry *p = get_mp_desc(imgfmt);
+    if (p && p->reg_desc.component_size)
+        return p->reg_desc.forced_csp;
+    if (p && p->forced_csp)
+        return p->forced_csp;
 
     enum AVPixelFormat pixfmt = imgfmt2pixfmt(imgfmt);
     const AVPixFmtDescriptor *pixdesc = av_pix_fmt_desc_get(pixfmt);
@@ -366,10 +401,11 @@ enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
 
 enum mp_component_type mp_imgfmt_get_component_type(int imgfmt)
 {
-    if (imgfmt == IMGFMT_RGB30 ||
-        imgfmt == IMGFMT_YAP8 ||
-        imgfmt == IMGFMT_YAP16)
-        return MP_COMPONENT_TYPE_UINT;
+    const struct mp_imgfmt_entry *p = get_mp_desc(imgfmt);
+    if (p && p->reg_desc.component_size)
+        return p->reg_desc.component_type;
+    if (p && p->ctype)
+        return p->ctype;
 
     const AVPixFmtDescriptor *pixdesc =
         av_pix_fmt_desc_get(imgfmt2pixfmt(imgfmt));
@@ -398,39 +434,6 @@ static bool is_native_endian(const AVPixFmtDescriptor *pixdesc)
     return pixdesc && (is_le != !!(pixdesc->flags & AV_PIX_FMT_FLAG_BE));
 }
 
-static bool mp_only_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
-{
-    switch (imgfmt) {
-    case IMGFMT_YAP8:
-        *dst = (struct mp_regular_imgfmt) {
-            .component_type = MP_COMPONENT_TYPE_UINT,
-            .component_size = 1,
-            .num_planes = 2,
-            .planes = {
-                {.num_components = 1, .components = {1}},
-                {.num_components = 1, .components = {4}},
-            },
-            .chroma_w = 1,
-            .chroma_h = 1,
-        };
-        return true;
-    case IMGFMT_YAP16:
-        *dst = (struct mp_regular_imgfmt) {
-            .component_type = MP_COMPONENT_TYPE_UINT,
-            .component_size = 2,
-            .num_planes = 2,
-            .planes = {
-                {.num_components = 1, .components = {1}},
-                {.num_components = 1, .components = {4}},
-            },
-            .chroma_w = 1,
-            .chroma_h = 1,
-        };
-        return true;
-    }
-    return false;
-}
-
 bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
 {
     struct mp_regular_imgfmt res = {0};
@@ -438,8 +441,14 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
     const AVPixFmtDescriptor *pixdesc =
         av_pix_fmt_desc_get(imgfmt2pixfmt(imgfmt));
 
-    if (!pixdesc)
-        return mp_only_regular_imgfmt(dst, imgfmt);
+    if (!pixdesc) {
+        const struct mp_imgfmt_entry *p = get_mp_desc(imgfmt);
+        if (p && p->reg_desc.component_size) {
+            *dst = p->reg_desc;
+            return true;
+        }
+        return false;
+    }
 
     if ((pixdesc->flags & AV_PIX_FMT_FLAG_BITSTREAM) ||
         (pixdesc->flags & AV_PIX_FMT_FLAG_HWACCEL) ||

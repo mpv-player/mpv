@@ -1061,14 +1061,14 @@ ya8: [GENERIC] ctype=uint
     0: p=0  st=2  o=0  sh=0  d=8
     1: p=0  st=2  o=1  sh=0  d=8
 yap16: ctype=uint
-  Legacy desc: [ba][yuvp][yuv][le]
+  Legacy desc: [ba][a][yuvp][yuv][le]
     planes=2, chroma=0:0 align=1:1 bits=16 cbits=16
     {2/16/[0:0] 2/16/[0:0] 0/0/[0:0] 0/0/[0:0] }
   Regular: planes=2 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
     1: {4}
 yap8: ctype=uint
-  Legacy desc: [ba][yuvp][yuv][le]
+  Legacy desc: [ba][a][yuvp][yuv][le]
     planes=2, chroma=0:0 align=1:1 bits=8 cbits=8
     {1/8/[0:0] 1/8/[0:0] 0/0/[0:0] 0/0/[0:0] }
   Regular: planes=2 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
