@@ -33,7 +33,7 @@ struct chain {
     struct mp_user_filter **user_filters;
     int num_user_filters;
 
-    // Concatentated list of pre+user+post filters.
+    // Concatenated list of pre+user+post filters.
     struct mp_user_filter **all_filters;
     int num_all_filters;
     // First input/last output of all_filters[].
