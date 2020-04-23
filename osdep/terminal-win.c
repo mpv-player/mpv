@@ -99,8 +99,9 @@ static struct input_ctx *input_ctx;
 void terminal_get_size(int *w, int *h)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
-    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cinfo)) {
-        *w = cinfo.dwMaximumWindowSize.X - 1;
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (GetConsoleScreenBufferInfo(hOut, &cinfo)) {
+        *w = cinfo.dwMaximumWindowSize.X - (is_native_out_vt(hOut) ? 0 : 1);
         *h = cinfo.dwMaximumWindowSize.Y;
     }
 }
