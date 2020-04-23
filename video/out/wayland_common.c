@@ -244,6 +244,8 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
             xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edges);
         else
             window_move(wl, serial);
+        // Explictly send an UP event after the client finishes a move/resize
+        mp_input_put_key(wl->vo->input_ctx, button | MP_KEY_STATE_UP);
     }
 }
 
