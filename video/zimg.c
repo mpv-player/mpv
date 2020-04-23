@@ -87,12 +87,6 @@ struct mp_zimg_repack {
     // Called with user==mp_zimg_repack.
     zimg_filter_graph_callback repack;
 
-    // Output bit depth. If 0, use format defaults. (Used by some packets. This
-    // is simpler than defining fringe planar RGB formats for each depth.)
-    int override_depth;
-    // Hammer it into using ZIMG_COLOR_GREY.
-    bool override_gray;
-
     // Endian-swap (done before/after actual repacker).
     int endian_size;            // 0=no swapping, 2/4=word byte size to swap
     int endian_items[4];        // number of words per pixel/plane
@@ -841,14 +835,15 @@ static void setup_fringe_rgb_packer(struct mp_zimg_repack *r,
     if (!fmt)
         return;
 
-    struct mp_regular_imgfmt gbrp = {
-        .component_type = MP_COMPONENT_TYPE_UINT,
-        .forced_csp = MP_CSP_RGB,
-        .component_size = 1,
-        .num_planes = 3,
-        .planes = { {1, {2}}, {1, {3}}, {1, {1}} },
-    };
-    r->zimgfmt = mp_find_regular_imgfmt(&gbrp);
+    int depth = 8;
+    if (r->pack) {
+        // Dither to lowest depth - loses some precision, but result is saner.
+        depth = fmt->bits[0];
+        for (int n = 0; n < 3; n++)
+            depth = MPMIN(depth, fmt->bits[n]);
+    }
+
+    r->zimgfmt = find_gbrp_format(depth, 3);
     if (!r->zimgfmt)
         return;
     if (ctx)
@@ -859,20 +854,13 @@ static void setup_fringe_rgb_packer(struct mp_zimg_repack *r,
     for (int n = 0; n < 3; n++)
         r->components[n] = (fmt->rev_order ? c_order_bgr : c_order_rgb)[n] - 1;
 
-    if (r->pack) {
-        // Dither to lowest depth - loses some precision, but result is saner.
-        r->override_depth = fmt->bits[0];
-        for (int n = 0; n < 3; n++)
-            r->override_depth = MPMIN(r->override_depth, fmt->bits[n]);
-    }
-
     int bitpos = 0;
     for (int n = 0; n < 3; n++) {
         int bits = fmt->bits[n];
         r->comp_shifts[n] = bitpos;
         if (r->comp_lut) {
             uint8_t *lut = r->comp_lut + 256 * n;
-            uint8_t zmax = r->pack ? (1 << r->override_depth) - 1 : 255;
+            uint8_t zmax = (1 << depth) - 1;
             uint8_t cmax = (1 << bits) - 1;
             for (int v = 0; v < 256; v++) {
                 if (r->pack) {
@@ -1014,10 +1002,8 @@ static void setup_misc_packer(struct mp_zimg_repack *r)
     } else {
         enum AVPixelFormat avfmt = imgfmt2pixfmt(r->zimgfmt);
         if (avfmt == AV_PIX_FMT_MONOWHITE || avfmt == AV_PIX_FMT_MONOBLACK) {
-            r->zimgfmt = IMGFMT_Y8;
+            r->zimgfmt = IMGFMT_Y1;
             r->repack = bitmap_repack;
-            r->override_depth = 1;
-            r->override_gray = true;
             r->comp_size = avfmt == AV_PIX_FMT_MONOWHITE; // abuse to pass a flag
             return;
         }
@@ -1170,7 +1156,6 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
         struct mp_zimg_repack *dst = ctx->zimg_dst;
         zfmt->active_region.width = dst->real_w * (double)fmt.w / dst->fmt.w;
         zfmt->active_region.height = dst->real_h * (double)fmt.h / dst->fmt.h;
-
     }
 
     zfmt->subsample_w = desc.chroma_xs;
@@ -1205,8 +1190,6 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     // (Formats like P010 are basically reported as P016.)
     zfmt->depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
-    if (r->override_depth)
-        zfmt->depth = r->override_depth;
 
     zfmt->pixel_range = fmt.color.levels == MP_CSP_LEVELS_PC ?
                         ZIMG_RANGE_FULL : ZIMG_RANGE_LIMITED;
@@ -1216,18 +1199,17 @@ static bool setup_format_ne(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     zfmt->color_primaries = mp_to_z_prim(fmt.color.primaries);
     zfmt->chroma_location = mp_to_z_chroma(fmt.chroma_location);
 
-    if (r->override_gray) {
-        zfmt->color_family = ZIMG_COLOR_GREY;
-        zfmt->pixel_range = ZIMG_RANGE_FULL;
-        zfmt->matrix_coefficients = ZIMG_MATRIX_BT470_BG;
-    }
-
     if (ctx && ctx->opts.fast) {
         // mpv's default for RGB output slows down zimg significantly.
         if (zfmt->transfer_characteristics == ZIMG_TRANSFER_IEC_61966_2_1 &&
             zfmt->color_family == ZIMG_COLOR_RGB)
             zfmt->transfer_characteristics = ZIMG_TRANSFER_BT709;
     }
+
+    // mpv treats _some_ gray formats as RGB; zimg doesn't like this.
+    if (zfmt->color_family == ZIMG_COLOR_GREY &&
+        zfmt->matrix_coefficients == ZIMG_MATRIX_RGB)
+        zfmt->matrix_coefficients = ZIMG_MATRIX_BT470_BG;
 
     return true;
 }
