@@ -279,17 +279,16 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
                       ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
     }
 
+    enum mp_csp csp = mp_imgfmt_get_forced_csp(mpfmt);
+
     if ((pd->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
         desc.flags |= MP_IMGFLAG_HWACCEL;
-    } else if (fmt == AV_PIX_FMT_XYZ12LE || fmt == AV_PIX_FMT_XYZ12BE) {
+    } else if (csp == MP_CSP_XYZ) {
         /* nothing */
-    } else if (!(pd->flags & AV_PIX_FMT_FLAG_RGB) &&
-               fmt != AV_PIX_FMT_MONOBLACK &&
-               fmt != AV_PIX_FMT_PAL8)
-    {
-        desc.flags |= MP_IMGFLAG_YUV;
-    } else {
+    } else if (csp == MP_CSP_RGB) {
         desc.flags |= MP_IMGFLAG_RGB;
+    } else {
+        desc.flags |= MP_IMGFLAG_YUV;
     }
 
     if (pd->flags & AV_PIX_FMT_FLAG_ALPHA)
@@ -406,6 +405,9 @@ enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
 
     enum AVPixelFormat pixfmt = imgfmt2pixfmt(imgfmt);
     const AVPixFmtDescriptor *pixdesc = av_pix_fmt_desc_get(pixfmt);
+
+    if (pixdesc && (pixdesc->flags & AV_PIX_FMT_FLAG_HWACCEL))
+        return MP_CSP_AUTO;
 
     // FFmpeg does not provide a flag for XYZ, so this is the best we can do.
     if (pixdesc && strncmp(pixdesc->name, "xyz", 3) == 0)
