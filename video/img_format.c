@@ -416,7 +416,9 @@ enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
     if (pixdesc && (pixdesc->flags & AV_PIX_FMT_FLAG_RGB))
         return MP_CSP_RGB;
 
-    if (pixfmt == AV_PIX_FMT_PAL8 || pixfmt == AV_PIX_FMT_MONOBLACK)
+    if (pixfmt == AV_PIX_FMT_PAL8 ||
+        pixfmt == AV_PIX_FMT_MONOBLACK ||
+        pixfmt == AV_PIX_FMT_MONOWHITE)
         return MP_CSP_RGB;
 
     return MP_CSP_AUTO;

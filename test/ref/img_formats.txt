@@ -716,8 +716,8 @@ monob: [GENERIC] fcsp=rgb ctype=uint
     {0/1/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
   AVD: name=monob chroma=0:0 flags=0x4 [bs]
     0: p=0  st=1  o=0  sh=7  d=1
-monow: [GENERIC] ctype=uint
-  Legacy desc: [yuv][le][be]
+monow: [GENERIC] fcsp=rgb ctype=uint
+  Legacy desc: [rgb][le][be]
     planes=1, chroma=0:0 align=8:1 bits=1 cbits=1
     {0/1/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
   AVD: name=monow chroma=0:0 flags=0x4 [bs]
