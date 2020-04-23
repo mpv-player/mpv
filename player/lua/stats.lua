@@ -176,17 +176,6 @@ local function has_vo_window()
 end
 
 
-local function has_ansi()
-    local is_windows = type(package) == 'table'
-        and type(package.config) == 'string'
-        and package.config:sub(1, 1) == '\\'
-    if is_windows then
-        return os.getenv("ANSICON")
-    end
-    return true
-end
-
-
 -- Generate a graph from the given values.
 -- Returns an ASS formatted vector drawing as string.
 --
@@ -608,17 +597,10 @@ local function eval_ass_formatting()
         o.nl = o.no_ass_nl
         o.indent = o.no_ass_indent
         o.prefix_sep = o.no_ass_prefix_sep
-        if not has_ansi() then
-            o.b1 = ""
-            o.b0 = ""
-            o.it1 = ""
-            o.it0 = ""
-        else
-            o.b1 = o.no_ass_b1
-            o.b0 = o.no_ass_b0
-            o.it1 = o.no_ass_it1
-            o.it0 = o.no_ass_it0
-        end
+        o.b1 = o.no_ass_b1
+        o.b0 = o.no_ass_b0
+        o.it1 = o.no_ass_it1
+        o.it0 = o.no_ass_it0
     end
 end
 
