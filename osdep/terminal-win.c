@@ -49,13 +49,13 @@
 // https://github.com/microsoft/terminal/issues/4126#issuecomment-571418661
 static void attempt_native_out_vt(HANDLE hOut, DWORD basemode)
 {
-    DWORD vtmode = basemode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    DWORD vtmode = basemode | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     vtmode &= ~DISABLE_NEWLINE_AUTO_RETURN;
     if (!SetConsoleMode(hOut, vtmode))
         SetConsoleMode(hOut, basemode);
 }
 
-static int is_native_out_vt(HANDLE hOut)
+static bool is_native_out_vt(HANDLE hOut)
 {
     DWORD cmode;
     return GetConsoleMode(hOut, &cmode) &&
