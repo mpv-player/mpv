@@ -106,11 +106,11 @@ static void process(struct mp_filter *f)
 
     mp_image_copy_attributes(dst, src);
 
-    // If we convert from RGB to YUV, default to limited range.
+    // If we convert from RGB to YUV, guess a default.
     if (mp_imgfmt_get_forced_csp(src->imgfmt) == MP_CSP_RGB &&
         mp_imgfmt_get_forced_csp(dst->imgfmt) == MP_CSP_AUTO)
     {
-        dst->params.color.levels = MP_CSP_LEVELS_TV;
+        dst->params.color.levels = MP_CSP_LEVELS_AUTO;
     }
     if (s->use_out_params)
         dst->params = s->out_params;
