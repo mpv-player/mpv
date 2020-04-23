@@ -27,6 +27,7 @@
 
 #include "options/m_config.h"
 #include "config.h"
+#include "osdep/terminal.h"
 #include "vo.h"
 #include "sub/osd.h"
 #include "video/sws_utils.h"
@@ -179,13 +180,8 @@ static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
     struct priv *p = vo->priv;
     *out_width = DEFAULT_WIDTH;
     *out_height = DEFAULT_HEIGHT;
-#if HAVE_POSIX
-    struct winsize winsize;
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &winsize) >= 0) {
-        *out_width = winsize.ws_col;
-        *out_height = winsize.ws_row;
-    }
-#endif
+
+    terminal_get_size(out_width, out_height);
 
     if (p->opts->width > 0)
         *out_width = p->opts->width;
