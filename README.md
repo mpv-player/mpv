@@ -142,7 +142,9 @@ Most of the above libraries are available in suitable versions on normal
 Linux distributions. For ease of compiling the latest git master of everything,
 you may wish to use the separately available build wrapper ([mpv-build][mpv-build])
 which first compiles FFmpeg libraries and libass, and then compiles the player
-statically linked against those.
+statically linked against those. And one neat trick is to use `mpv-build` and
+replace the `mpv` directory in it with a symbolic-link to the directory you use
+to work on `mpv`.
 
 If you want to build a Windows binary, you either have to use MSYS2 and MinGW,
 or cross-compile from Linux with MinGW. See
