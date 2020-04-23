@@ -794,6 +794,37 @@ static void wrap_buffer(struct mp_zimg_repack *r,
     r->user_mpi = mpi;
 }
 
+// depth = number of LSB in use
+static int find_gbrp_format(int depth, int num_planes)
+{
+    if (num_planes != 3 && num_planes != 4)
+        return 0;
+    struct mp_regular_imgfmt desc = {
+        .component_type = MP_COMPONENT_TYPE_UINT,
+        .forced_csp = MP_CSP_RGB,
+        .component_size = depth > 8 ? 2 : 1,
+        .component_pad = depth - (depth > 8 ? 16 : 8),
+        .num_planes = num_planes,
+        .planes = { {1, {2}}, {1, {3}}, {1, {1}}, {1, {4}} },
+    };
+    return mp_find_regular_imgfmt(&desc);
+}
+
+// depth = number of LSB in use
+static int find_gray_format(int depth, int num_planes)
+{
+    if (num_planes != 1 && num_planes != 2)
+        return 0;
+    struct mp_regular_imgfmt desc = {
+        .component_type = MP_COMPONENT_TYPE_UINT,
+        .component_size = depth > 8 ? 2 : 1,
+        .component_pad = depth - (depth > 8 ? 16 : 8),
+        .num_planes = num_planes,
+        .planes = { {1, {1}}, {1, {4}} },
+    };
+    return mp_find_regular_imgfmt(&desc);
+}
+
 static void setup_fringe_rgb_packer(struct mp_zimg_repack *r,
                                     struct mp_zimg_context *ctx)
 {
@@ -965,18 +996,7 @@ static void setup_misc_packer(struct mp_zimg_repack *r)
     // Although it's in regular_repackers[], the generic mpv imgfmt metadata
     // can't handle it yet.
     if (r->zimgfmt == IMGFMT_RGB30) {
-        struct mp_regular_imgfmt planar10 = {
-            .component_type = MP_COMPONENT_TYPE_UINT,
-            .component_size = 2,
-            .component_pad = -6,
-            .num_planes = 3,
-            .planes = {
-                {1, {1}},
-                {1, {2}},
-                {1, {3}},
-            },
-        };
-        int planar_fmt = mp_find_regular_imgfmt(&planar10);
+        int planar_fmt = find_gbrp_format(10, 3);
         if (!planar_fmt)
             return;
         r->zimgfmt = planar_fmt;
@@ -986,14 +1006,7 @@ static void setup_misc_packer(struct mp_zimg_repack *r)
         for (int n = 0; n < 3; n++)
             r->components[n] = c_order[n] - 1;
     } else if (r->zimgfmt == IMGFMT_PAL8 && !r->pack) {
-        struct mp_regular_imgfmt gbrap = {
-            .component_type = MP_COMPONENT_TYPE_UINT,
-            .forced_csp = MP_CSP_RGB,
-            .component_size = 1,
-            .num_planes = 4,
-            .planes = { {1, {2}}, {1, {3}}, {1, {1}}, {1, {4}}, },
-        };
-        int grap_fmt = mp_find_regular_imgfmt(&gbrap);
+        int grap_fmt = find_gbrp_format(8, 4);
         if (!grap_fmt)
             return;
         r->zimgfmt = grap_fmt;
@@ -1037,21 +1050,14 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
 
     int depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
 
-    // Find a physically compatible planar format (typically IMGFMT_420P).
-    struct mp_regular_imgfmt desc2 = desc;
-    desc2.forced_csp = 0;
-    if (desc2.component_pad > 0)
-        desc2.component_pad = 0;
-    desc2.num_planes = num_real_components;
-    for (int n = 0; n < desc2.num_planes; n++) {
-        desc2.planes[n].num_components = 1;
-        desc2.planes[n].components[0] = n + 1;
-    }
-    if (has_alpha)
-        desc2.planes[desc2.num_planes - 1].components[0] = 4;
-    int planar_fmt = mp_find_regular_imgfmt(&desc2);
+    int planar_fmt = num_real_components > 2
+        ? find_gbrp_format(depth, num_real_components)
+        : find_gray_format(depth, num_real_components);
     if (!planar_fmt)
         return;
+    static const int reorder_gbrp[] = {0, 3, 1, 2, 4};
+    static const int reorder_gray[] = {0, 1, 0, 0, 4};
+    const int *reorder = num_real_components > 2 ? reorder_gbrp : reorder_gray;
 
     for (int i = 0; i < MP_ARRAY_SIZE(regular_repackers); i++) {
         const struct regular_repacker *pa = &regular_repackers[i];
@@ -1077,7 +1083,7 @@ static void setup_regular_rgb_packer(struct mp_zimg_repack *r)
         for (int n = 0; n < num_real_components; n++) {
             // Determine permutation that maps component order between the two
             // formats, with has_alpha special case (see above).
-            int c = p->components[first_comp + n];
+            int c = reorder[p->components[first_comp + n]];
             r->components[n] = c == 4 ? num_real_components - 1 : c - 1;
         }
         return;
