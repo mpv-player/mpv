@@ -39,6 +39,14 @@ struct mp_imgfmt_entry {
     enum mp_component_type ctype;
 };
 
+#define FRINGE_GBRP(def, dname, bits)                                       \
+    [def - IMGFMT_CUST_BASE] = {                                            \
+        .name = dname,                                                      \
+        .reg_desc = { .component_type = MP_COMPONENT_TYPE_UINT,             \
+                      .component_size = 1, .component_pad = bits - 8,       \
+                      .num_planes = 3, .forced_csp = MP_CSP_RGB,            \
+                      .planes = { {1, {2}}, {1, {3}}, {1, {1}} }, }, }
+
 static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // not in ffmpeg
     [IMGFMT_VDPAU_OUTPUT - IMGFMT_CUST_BASE] = {
@@ -85,6 +93,23 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
             .planes = { {1, {1}}, {1, {4}} },
         },
     },
+    [IMGFMT_Y1 - IMGFMT_CUST_BASE] = {
+        .name = "y1",
+        .reg_desc = {
+            .component_type = MP_COMPONENT_TYPE_UINT,
+            .component_size = 1,
+            .component_pad = -7,
+            .num_planes = 1,
+            .forced_csp = MP_CSP_RGB,
+            .planes = { {1, {1}} },
+        },
+    },
+    FRINGE_GBRP(IMGFMT_GBRP1, "gbrp1", 1),
+    FRINGE_GBRP(IMGFMT_GBRP2, "gbrp2", 2),
+    FRINGE_GBRP(IMGFMT_GBRP3, "gbrp3", 3),
+    FRINGE_GBRP(IMGFMT_GBRP4, "gbrp4", 4),
+    FRINGE_GBRP(IMGFMT_GBRP5, "gbrp5", 5),
+    FRINGE_GBRP(IMGFMT_GBRP6, "gbrp6", 6),
     // in FFmpeg, but FFmpeg names have an annoying "_vld" suffix
     [IMGFMT_VIDEOTOOLBOX - IMGFMT_CUST_BASE] = {
         .name = "videotoolbox",

@@ -47,6 +47,7 @@
        gbrapf32    Zin   Zout                |
      gbrapf32be    Zin   Zout                |
            gbrp    Zin   Zout  SWSin  SWSout |
+          gbrp1    Zin   Zout                |
          gbrp10    Zin   Zout  SWSin  SWSout |
        gbrp10be    Zin   Zout  SWSin  SWSout |
          gbrp12    Zin   Zout  SWSin  SWSout |
@@ -55,6 +56,11 @@
        gbrp14be    Zin   Zout  SWSin  SWSout |
          gbrp16    Zin   Zout  SWSin  SWSout |
        gbrp16be    Zin   Zout  SWSin  SWSout |
+          gbrp2    Zin   Zout                |
+          gbrp3    Zin   Zout                |
+          gbrp4    Zin   Zout                |
+          gbrp5    Zin   Zout                |
+          gbrp6    Zin   Zout                |
           gbrp9    Zin   Zout  SWSin  SWSout |
         gbrp9be    Zin   Zout  SWSin  SWSout |
         gbrpf32    Zin   Zout                |
@@ -119,6 +125,7 @@
            xvmc                              |
           xyz12    Zin   Zout  SWSin  SWSout |
         xyz12be    Zin   Zout  SWSin  SWSout |
+             y1    Zin   Zout                |
            y210    Zin   Zout  SWSin         |
          y210be    Zin   Zout                |
            ya16    Zin   Zout  SWSin  SWSout |

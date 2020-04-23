@@ -214,6 +214,15 @@ enum mp_imgfmt {
     // Accessed with bit-shifts, uint32_t units.
     IMGFMT_RGB30,               // 2pad 10r 10g 10b (MSG to LSB)
 
+    // Fringe formats for fringe RGB format repacking.
+    IMGFMT_Y1,      // gray with 1 bit per pixel
+    IMGFMT_GBRP1,   // planar RGB with N bits per color component
+    IMGFMT_GBRP2,
+    IMGFMT_GBRP3,
+    IMGFMT_GBRP4,
+    IMGFMT_GBRP5,
+    IMGFMT_GBRP6,
+
     // Hardware accelerated formats (again).
     IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
     IMGFMT_VAAPI,
