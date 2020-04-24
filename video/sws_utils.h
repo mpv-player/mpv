@@ -35,7 +35,6 @@ struct mp_sws_context {
     // User configuration. These can be changed freely, at any time.
     // mp_sws_scale() will handle the changes transparently.
     int flags;
-    int brightness, contrast, saturation;
     bool allow_zimg; // use zimg if available (ignores filters and all)
     bool force_reload;
     // These are also implicitly set by mp_sws_scale(), and thus optional.

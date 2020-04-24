@@ -166,9 +166,6 @@ static bool cache_valid(struct mp_sws_context *ctx)
     return mp_image_params_equal(&ctx->src, &old->src) &&
            mp_image_params_equal(&ctx->dst, &old->dst) &&
            ctx->flags == old->flags &&
-           ctx->brightness == old->brightness &&
-           ctx->contrast == old->contrast &&
-           ctx->saturation == old->saturation &&
            ctx->allow_zimg == old->allow_zimg &&
            ctx->force_scaler == old->force_scaler &&
            (!ctx->opts_cache || !m_config_cache_update(ctx->opts_cache));
@@ -190,8 +187,6 @@ struct mp_sws_context *mp_sws_alloc(void *talloc_ctx)
     *ctx = (struct mp_sws_context) {
         .log = mp_null_log,
         .flags = SWS_BILINEAR,
-        .contrast = 1 << 16,    // 1.0 in 16.16 fixed point
-        .saturation = 1 << 16,
         .force_reload = true,
         .params = {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
         .cached = talloc_zero(ctx, struct mp_sws_context),
@@ -320,7 +315,7 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     int r =
         sws_setColorspaceDetails(ctx->sws, sws_getCoefficients(s_csp), s_range,
                                  sws_getCoefficients(d_csp), d_range,
-                                 ctx->brightness, ctx->contrast, ctx->saturation);
+                                 0, 1 << 16, 1 << 16);
     ctx->supports_csp = r >= 0;
 
     if (sws_init_context(ctx->sws, ctx->src_filter, ctx->dst_filter) < 0)
