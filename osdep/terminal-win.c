@@ -304,8 +304,11 @@ void mp_write_console_ansi(HANDLE wstream, char *buf)
                     attr |= stdoutAttrs & BACKGROUND_ALL;
                 } else if (p == 38 || p == 48) {  // ignore and skip sub-values
                     // 256 colors: <38/48>;5;N  true colors: <38/48>;2;R;G;B
-                    if (n+1 < num_params)
-                        n += params[n+1] == 5 ? 2 : 2 ? 4 : 0;
+                    if (n+1 < num_params) {
+                        n += params[n+1] == 5 ? 2
+                           : params[n+1] == 2 ? 4
+                           : num_params;  /* unrecognized -> the rest */
+                    }
                 }
             }
 
