@@ -108,6 +108,13 @@ const struct m_opt_choice_alternatives mp_chroma_names[] = {
     {0}
 };
 
+const struct m_opt_choice_alternatives mp_alpha_names[] = {
+    {"auto",        MP_ALPHA_AUTO},
+    {"straight",    MP_ALPHA_STRAIGHT},
+    {"premul",      MP_ALPHA_PREMUL},
+    {0}
+};
+
 void mp_colorspace_merge(struct mp_colorspace *orig, struct mp_colorspace *new)
 {
     if (!orig->space)

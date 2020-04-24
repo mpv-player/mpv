@@ -512,6 +512,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.p_h = src->params.p_h;
     dst->params.color = src->params.color;
     dst->params.chroma_location = src->params.chroma_location;
+    dst->params.alpha = src->params.alpha;
     dst->nominal_fps = src->nominal_fps;
     // ensure colorspace consistency
     if (mp_image_params_get_forced_csp(&dst->params) !=
@@ -643,6 +644,10 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
             mp_snprintf_cat(b, bs, " stereo=%s",
                             MP_STEREO3D_NAME_DEF(p->stereo3d, "?"));
         }
+        if (p->alpha) {
+            mp_snprintf_cat(b, bs, " A=%s",
+                            m_opt_choice_str(mp_alpha_names, p->alpha));
+        }
     } else {
         snprintf(b, bs, "???");
     }
@@ -687,7 +692,8 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            mp_colorspace_equal(p1->color, p2->color) &&
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate &&
-           p1->stereo3d == p2->stereo3d;
+           p1->stereo3d == p2->stereo3d &&
+           p1->alpha == p2->alpha;
 }
 
 // Set most image parameters, but not image format or size.
@@ -862,6 +868,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         dst->params.stereo3d = p->stereo3d;
         // Might be incorrect if colorspace changes.
         dst->params.color.light = p->color.light;
+        dst->params.alpha = p->alpha;
     }
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_ICC_PROFILE);

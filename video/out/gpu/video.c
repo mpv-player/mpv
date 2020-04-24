@@ -2357,9 +2357,11 @@ static void pass_convert_yuv(struct gl_video *p)
     p->components = 3;
     if (!p->has_alpha || p->opts.alpha_mode == ALPHA_NO) {
         GLSL(color.a = 1.0;)
-    } else { // alpha present in image
+    } else if (p->image_params.alpha == MP_ALPHA_PREMUL) {
         p->components = 4;
-        GLSL(color = vec4(color.rgb * color.a, color.a);)
+    } else {
+        p->components = 4;
+        GLSL(color = vec4(color.rgb * color.a, color.a);) // straight -> premul
     }
 }
 
