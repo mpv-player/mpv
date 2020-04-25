@@ -561,10 +561,6 @@ static int bitmap_repack(void *user, unsigned i, unsigned x0, unsigned x1)
 {
     struct mp_zimg_repack *r = user;
 
-    // Supposedly zimg aligns this at least on 64 byte boundaries. Simplifies a
-    // lot for us.
-    assert(!(x0 & 7));
-
     uint8_t *p1 =
         r->mpi->planes[0] + r->mpi->stride[0] * (ptrdiff_t)(i - r->mpi_y0);
     uint8_t *p2 =
@@ -572,6 +568,10 @@ static int bitmap_repack(void *user, unsigned i, unsigned x0, unsigned x1)
 
     uint8_t swap = r->comp_size ? 0xFF : 0;
     if (r->pack) {
+        // Supposedly zimg aligns this at least on 64 byte boundaries. Simplifies a
+        // lot for us.
+        assert(!(x0 & 7));
+
         for (int x = x0; x < x1; x += 8) {
             uint8_t d = 0;
             int max_b = MPMIN(8, x1 - x);
@@ -580,6 +580,8 @@ static int bitmap_repack(void *user, unsigned i, unsigned x0, unsigned x1)
             p1[x / 8] = d ^ swap;
         }
     } else {
+        x0 &= ~0x7;
+
         for (int x = x0; x < x1; x += 8) {
             uint8_t d = p1[x / 8] ^ swap;
             int max_b = MPMIN(8, x1 - x);
