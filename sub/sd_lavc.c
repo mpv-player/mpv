@@ -226,6 +226,11 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         talloc_steal(priv, sub->data);
     }
 
+    if (!mp_image_make_writeable(sub->data)) {
+        sub->count = 0;
+        return;
+    }
+
     for (int i = 0; i < sub->count; i++) {
         struct sub_bitmap *b = &sub->inbitmaps[i];
         struct pos pos = priv->packer->result[i];
@@ -400,8 +405,8 @@ static struct sub *get_current(struct sd_lavc_priv *priv, double pts)
     return current;
 }
 
-static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
-                        double pts, struct sub_bitmaps *res)
+static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
+                                       int format, double pts)
 {
     struct sd_lavc_priv *priv = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
@@ -411,12 +416,13 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
     struct sub *current = get_current(priv, pts);
 
     if (!current)
-        return;
+        return NULL;
 
     MP_TARRAY_GROW(priv, priv->outbitmaps, current->count);
     for (int n = 0; n < current->count; n++)
         priv->outbitmaps[n] = current->inbitmaps[n];
 
+    struct sub_bitmaps *res = &(struct sub_bitmaps){0};
     res->parts = priv->outbitmaps;
     res->num_parts = current->count;
     if (priv->displayed_id != current->id)
@@ -484,6 +490,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
         }
     }
 
+    return sub_bitmaps_copy(NULL, res);
 }
 
 static struct sd_times get_times(struct sd *sd, double pts)

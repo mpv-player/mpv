@@ -494,11 +494,8 @@ static void chroma_down(struct mp_image *old_src, struct mp_image *temp)
     }
 }
 
-// cache: if not NULL, the function will set *cache to a talloc-allocated cache
-//        containing scaled versions of sbs contents - free the cache with
-//        talloc_free()
-void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
-                         struct sub_bitmaps *sbs)
+static void draw_sbs(struct mp_draw_sub_cache **cache, struct mp_image *dst,
+                     struct sub_bitmaps *sbs)
 {
     assert(mp_draw_sub_formats[sbs->format]);
     if (!mp_sws_supported_format(dst->imgfmt))
@@ -540,6 +537,16 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
     } else {
         talloc_free(cache_);
     }
+}
+
+// cache: if not NULL, the function will set *cache to a talloc-allocated cache
+//        containing scaled versions of sbs contents - free the cache with
+//        talloc_free()
+void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
+                         struct sub_bitmap_list *sbs_list)
+{
+    for (int n = 0; n < sbs_list->num_items; n++)
+        draw_sbs(cache, dst, sbs_list->items[n]);
 }
 
 // vim: ts=4 sw=4 et tw=80

@@ -54,6 +54,7 @@ struct osd_object {
     bool changed;
     struct ass_state ass;
     struct mp_ass_packer *ass_packer;
+    struct sub_bitmap_copy_cache *copy_cache;
     struct ass_image **ass_imgs;
 };
 
@@ -82,9 +83,9 @@ struct osd_state {
     struct mp_draw_sub_cache *draw_cache;
 };
 
-// defined in osd_libass.c and osd_dummy.c
-void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
-                            int format, struct sub_bitmaps *out_imgs);
+// defined in osd_libass.c
+struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
+                                           struct osd_object *obj, int format);
 void osd_init_backend(struct osd_state *osd);
 void osd_destroy_backend(struct osd_state *osd);
 

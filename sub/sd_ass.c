@@ -50,7 +50,7 @@ struct sd_ass_priv {
     bool clear_once;
     bool on_top;
     struct mp_ass_packer *packer;
-    struct sub_bitmap *bs;
+    struct sub_bitmap_copy_cache *copy_cache;
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
@@ -498,8 +498,8 @@ static long long find_timestamp(struct sd *sd, double pts)
 
 #undef END
 
-static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, int format,
-                        double pts, struct sub_bitmaps *res)
+static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
+                                       int format, double pts)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
@@ -508,9 +508,10 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, int format,
     bool converted = ctx->is_converted || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
     ASS_Renderer *renderer = ctx->ass_renderer;
+    struct sub_bitmaps *res = &(struct sub_bitmaps){0};
 
     if (pts == MP_NOPTS_VALUE || !renderer)
-        return;
+        goto done;
 
     double scale = dim.display_par;
     if (!converted && (!opts->ass_style_override ||
@@ -544,14 +545,14 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, int format,
     ASS_Image *imgs = ass_render_frame(renderer, track, ts, &changed);
     mp_ass_packer_pack(ctx->packer, &imgs, 1, changed, format, res);
 
-    if (!converted && res->num_parts > 0) {
-        // mangle_colors() modifies the color field, so copy the thing.
-        MP_TARRAY_GROW(ctx, ctx->bs, res->num_parts);
-        memcpy(ctx->bs, res->parts, sizeof(ctx->bs[0]) * res->num_parts);
-        res->parts = ctx->bs;
+done:
+    // mangle_colors() modifies the color field, so copy the thing _before_.
+    res = sub_bitmaps_copy(&ctx->copy_cache, res);
 
+    if (!converted && res)
         mangle_colors(sd, res);
-    }
+
+    return res;
 }
 
 struct buf {
@@ -752,6 +753,7 @@ static void uninit(struct sd *sd)
     ass_free_track(ctx->shadow_track);
     enable_output(sd, false);
     ass_library_done(ctx->ass_library);
+    talloc_free(ctx->copy_cache);
 }
 
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)

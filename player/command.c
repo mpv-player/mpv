@@ -4017,6 +4017,9 @@ static void recreate_overlays(struct MPContext *mpctx)
             goto done;
     }
 
+    if (!mp_image_make_writeable(new->packed))
+        goto done;
+
     // clear padding
     mp_image_clear(new->packed, 0, 0, new->packed->w, new->packed->h);
 

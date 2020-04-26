@@ -35,14 +35,12 @@ struct attachment_list {
 struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
                            struct attachment_list *attachments);
 void sub_destroy(struct dec_sub *sub);
-void sub_lock(struct dec_sub *sub);
-void sub_unlock(struct dec_sub *sub);
 
 bool sub_can_preload(struct dec_sub *sub);
 void sub_preload(struct dec_sub *sub);
 bool sub_read_packets(struct dec_sub *sub, double video_pts);
-void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
-                     double pts, struct sub_bitmaps *res);
+struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
+                                    int format, double pts);
 char *sub_get_text(struct dec_sub *sub, double pts);
 struct sd_times sub_get_times(struct dec_sub *sub, double pts);
 void sub_reset(struct dec_sub *sub);

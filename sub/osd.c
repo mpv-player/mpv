@@ -152,6 +152,7 @@ void osd_free(struct osd_state *osd)
     if (!osd)
         return;
     osd_destroy_backend(osd);
+    talloc_free(osd->objs[OSDTYPE_EXTERNAL2]->external2);
     pthread_mutex_destroy(&osd->lock);
     talloc_free(osd);
 }
@@ -233,8 +234,10 @@ void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
 void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs)
 {
     pthread_mutex_lock(&osd->lock);
-    osd->objs[OSDTYPE_EXTERNAL2]->external2 = imgs;
-    osd->objs[OSDTYPE_EXTERNAL2]->vo_change_id += 1;
+    struct osd_object *obj = osd->objs[OSDTYPE_EXTERNAL2];
+    talloc_free(obj->external2);
+    obj->external2 = sub_bitmaps_copy(NULL, imgs);
+    obj->vo_change_id += 1;
     osd->want_redraw_notification = true;
     pthread_mutex_unlock(&osd->lock);
 }
@@ -265,47 +268,52 @@ void osd_resize(struct osd_state *osd, struct mp_osd_res res)
     pthread_mutex_unlock(&osd->lock);
 }
 
-static void render_object(struct osd_state *osd, struct osd_object *obj,
-                          struct mp_osd_res res, double video_pts,
-                          const bool sub_formats[SUBBITMAP_COUNT],
-                          struct sub_bitmaps *out_imgs)
+static struct sub_bitmaps *render_object(struct osd_state *osd,
+                                         struct osd_object *obj,
+                                         struct mp_osd_res osdres, double video_pts,
+                                         const bool sub_formats[SUBBITMAP_COUNT])
 {
     int format = SUBBITMAP_LIBASS;
     if (!sub_formats[format] || osd->opts->force_rgba_osd)
         format = SUBBITMAP_RGBA;
 
-    *out_imgs = (struct sub_bitmaps) {0};
+    struct sub_bitmaps *res = NULL;
 
-    check_obj_resize(osd, res, obj);
+    check_obj_resize(osd, osdres, obj);
 
     if (obj->type == OSDTYPE_SUB || obj->type == OSDTYPE_SUB2) {
         if (obj->sub)
-            sub_get_bitmaps(obj->sub, obj->vo_res, format, video_pts, out_imgs);
+            res = sub_get_bitmaps(obj->sub, obj->vo_res, format, video_pts);
     } else if (obj->type == OSDTYPE_EXTERNAL2) {
         if (obj->external2 && obj->external2->format) {
-            *out_imgs = *obj->external2;
+            res = sub_bitmaps_copy(NULL, obj->external2); // need to be owner
             obj->external2->change_id = 0;
         }
     } else {
-        osd_object_get_bitmaps(osd, obj, format, out_imgs);
+        res = osd_object_get_bitmaps(osd, obj, format);
     }
 
-    obj->vo_change_id += out_imgs->change_id;
+    if (res) {
+        obj->vo_change_id += res->change_id;
 
-    if (out_imgs->num_parts == 0)
-        return;
+        res->render_index = obj->type;
+        res->change_id = obj->vo_change_id;
+    }
 
-    out_imgs->render_index = obj->type;
-    out_imgs->change_id = obj->vo_change_id;
+    return res;
 }
 
+// Render OSD to a list of bitmap and return it. The returned object is
+// refcounted. Typically you should hold it only for a short time, and then
+// release it.
 // draw_flags is a bit field of OSD_DRAW_* constants
-void osd_draw(struct osd_state *osd, struct mp_osd_res res,
-              double video_pts, int draw_flags,
-              const bool formats[SUBBITMAP_COUNT],
-              void (*cb)(void *ctx, struct sub_bitmaps *imgs), void *cb_ctx)
+struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
+                                   double video_pts, int draw_flags,
+                                   const bool formats[SUBBITMAP_COUNT])
 {
     pthread_mutex_lock(&osd->lock);
+
+    struct sub_bitmap_list *list = talloc_zero(NULL, struct sub_bitmap_list);
 
     if (osd->force_video_pts != MP_NOPTS_VALUE)
         video_pts = osd->force_video_pts;
@@ -325,31 +333,26 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
         if ((draw_flags & OSD_DRAW_OSD_ONLY) && obj->is_sub)
             continue;
 
-        if (obj->sub)
-            sub_lock(obj->sub);
-
         char *stat_type_render = obj->is_sub ? "sub-render" : "osd-render";
-        char *stat_type_draw = obj->is_sub ? "sub-draw" : "osd-draw";
         stats_time_start(osd->stats, stat_type_render);
 
-        struct sub_bitmaps imgs;
-        render_object(osd, obj, res, video_pts, formats, &imgs);
+        struct sub_bitmaps *imgs =
+            render_object(osd, obj, res, video_pts, formats);
 
         stats_time_end(osd->stats, stat_type_render);
 
-        if (imgs.num_parts > 0) {
-            if (formats[imgs.format]) {
-                stats_time_start(osd->stats, stat_type_draw);
-                cb(cb_ctx, &imgs);
-                stats_time_end(osd->stats, stat_type_draw);
+        if (imgs && imgs->num_parts > 0) {
+            if (formats[imgs->format]) {
+                talloc_steal(list, imgs);
+                MP_TARRAY_APPEND(list, list->items, list->num_items, imgs);
+                imgs = NULL;
             } else {
                 MP_ERR(osd, "Can't render OSD part %d (format %d).\n",
-                       obj->type, imgs.format);
+                       obj->type, imgs->format);
             }
         }
 
-        if (obj->sub)
-            sub_unlock(obj->sub);
+        talloc_free(imgs);
     }
 
     // If this is called with OSD_DRAW_SUB_ONLY or OSD_DRAW_OSD_ONLY set, assume
@@ -360,35 +363,34 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
         osd->want_redraw_notification = false;
 
     pthread_mutex_unlock(&osd->lock);
+    return list;
 }
 
-struct draw_on_image_closure {
-    struct osd_state *osd;
-    struct mp_image *dest;
-    struct mp_image_pool *pool;
-    bool changed;
-};
-
-static void draw_on_image(void *ctx, struct sub_bitmaps *imgs)
+// Warning: this function should be considered legacy. Use osd_render() instead.
+void osd_draw(struct osd_state *osd, struct mp_osd_res res,
+              double video_pts, int draw_flags,
+              const bool formats[SUBBITMAP_COUNT],
+              void (*cb)(void *ctx, struct sub_bitmaps *imgs), void *cb_ctx)
 {
-    struct draw_on_image_closure *closure = ctx;
-    struct osd_state *osd = closure->osd;
-    if (!mp_image_pool_make_writeable(closure->pool, closure->dest))
-        return; // on OOM, skip
-    mp_draw_sub_bitmaps(&osd->draw_cache, closure->dest, imgs);
-    talloc_steal(osd, osd->draw_cache);
-    closure->changed = true;
+    struct sub_bitmap_list *list =
+        osd_render(osd, res, video_pts, draw_flags, formats);
+
+    stats_time_start(osd->stats, "draw");
+
+    for (int n = 0; n < list->num_items; n++)
+        cb(cb_ctx, list->items[n]);
+
+    stats_time_end(osd->stats, "draw");
+
+    talloc_free(list);
 }
 
 // Calls mp_image_make_writeable() on the dest image if something is drawn.
-// Returns whether anything was drawn.
-bool osd_draw_on_image(struct osd_state *osd, struct mp_osd_res res,
+// draw_flags as in osd_render().
+void osd_draw_on_image(struct osd_state *osd, struct mp_osd_res res,
                        double video_pts, int draw_flags, struct mp_image *dest)
 {
-    struct draw_on_image_closure closure = {osd, dest};
-    osd_draw(osd, res, video_pts, draw_flags, mp_draw_sub_formats,
-             &draw_on_image, &closure);
-    return closure.changed;
+    osd_draw_on_image_p(osd, res, video_pts, draw_flags, NULL, dest);
 }
 
 // Like osd_draw_on_image(), but if dest needs to be copied to make it
@@ -398,9 +400,26 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
                          double video_pts, int draw_flags,
                          struct mp_image_pool *pool, struct mp_image *dest)
 {
-    struct draw_on_image_closure closure = {osd, dest, pool};
-    osd_draw(osd, res, video_pts, draw_flags, mp_draw_sub_formats,
-             &draw_on_image, &closure);
+    struct sub_bitmap_list *list =
+        osd_render(osd, res, video_pts, draw_flags, mp_draw_sub_formats);
+
+    if (!list->num_items) {
+        talloc_free(list);
+        return;
+    }
+
+    if (!mp_image_pool_make_writeable(pool, dest))
+        return; // on OOM, skip
+
+    // Need to lock for the dumb osd->draw_cache thing.
+    pthread_mutex_lock(&osd->lock);
+
+    mp_draw_sub_bitmaps(&osd->draw_cache, dest, list);
+    talloc_steal(osd, osd->draw_cache);
+
+    pthread_mutex_unlock(&osd->lock);
+
+    talloc_free(list);
 }
 
 // Setup the OSD resolution to render into an image with the given parameters.
@@ -470,4 +489,41 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
         bi->dw = (int)(bi->w * xscale + 0.5);
         bi->dh = (int)(bi->h * yscale + 0.5);
     }
+}
+
+// Copy *in and return a new allocation of it. Free with talloc_free(). This
+// will contain a refcounted copy of the image data.
+//
+// in->packed must be set and must be a refcounted image, unless there is no
+// data (num_parts==0).
+//
+//  p_cache: if not NULL, then this points to a struct sub_bitmap_copy_cache*
+//           variable. The function may set this to an allocation and may later
+//           read it. You have to free it with talloc_free() when done.
+//  in: valid struct, or NULL (in this case it also returns NULL)
+//  returns: new copy, or NULL if there was no data in the input
+struct sub_bitmaps *sub_bitmaps_copy(struct sub_bitmap_copy_cache **p_cache,
+                                     struct sub_bitmaps *in)
+{
+    if (!in || !in->num_parts)
+        return NULL;
+
+    struct sub_bitmaps *res = talloc(NULL, struct sub_bitmaps);
+    *res = *in;
+
+    // Note: the p_cache thing is a lie and unused.
+
+    // The bitmaps being refcounted is essential for performance, and for
+    // not invalidating in->parts[*].bitmap pointers.
+    assert(in->packed && in->packed->bufs[0]);
+
+    res->packed = mp_image_new_ref(res->packed);
+    MP_HANDLE_OOM(res->packed);
+    talloc_steal(res, res->packed);
+
+    res->parts = NULL;
+    MP_RESIZE_ARRAY(res, res->parts, res->num_parts);
+    memcpy(res->parts, in->parts, sizeof(res->parts[0]) * res->num_parts);
+
+    return res;
 }

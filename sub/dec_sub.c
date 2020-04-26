@@ -109,16 +109,6 @@ static double pts_from_subtitle(struct dec_sub *sub, double pts)
     return pts;
 }
 
-void sub_lock(struct dec_sub *sub)
-{
-    pthread_mutex_lock(&sub->lock);
-}
-
-void sub_unlock(struct dec_sub *sub)
-{
-    pthread_mutex_unlock(&sub->lock);
-}
-
 static void wakeup_demux(void *ctx)
 {
     struct mp_dispatch_queue *q = ctx;
@@ -335,12 +325,12 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
     return r;
 }
 
-// You must call sub_lock/sub_unlock if more than 1 thread access sub.
-// The issue is that *res will contain decoder allocated data, which might
-// be deallocated on the next decoder access.
-void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
-                     double pts, struct sub_bitmaps *res)
+// Unref sub_bitmaps.rc to free the result. May return NULL.
+struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
+                                    int format, double pts)
 {
+    pthread_mutex_lock(&sub->lock);
+
     struct mp_subtitle_opts *opts = sub->opts;
 
     pts = pts_to_subtitle(sub, pts);
@@ -348,11 +338,14 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
     sub->last_vo_pts = pts;
     update_segment(sub);
 
-    if (sub->end != MP_NOPTS_VALUE && pts >= sub->end)
-        return;
+    struct sub_bitmaps *res = NULL;
 
-    if (opts->sub_visibility && sub->sd->driver->get_bitmaps)
-        sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts, res);
+    if (!(sub->end != MP_NOPTS_VALUE && pts >= sub->end) &&
+        opts->sub_visibility && sub->sd->driver->get_bitmaps)
+        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts);
+
+    pthread_mutex_unlock(&sub->lock);
+    return res;
 }
 
 // See sub_get_bitmaps() for locking requirements.

@@ -76,6 +76,15 @@ struct sub_bitmaps {
     int change_id;  // Incremented on each change
 };
 
+struct sub_bitmap_list {
+    struct sub_bitmaps **items;
+    int num_items;
+};
+
+struct sub_bitmap_copy_cache;
+struct sub_bitmaps *sub_bitmaps_copy(struct sub_bitmap_copy_cache **cache,
+                                     struct sub_bitmaps *in);
+
 struct mp_osd_res {
     int w, h; // screen dimensions, including black borders
     int mt, mb, ml, mr; // borders (top, bottom, left, right)
@@ -183,8 +192,12 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
               const bool formats[SUBBITMAP_COUNT],
               void (*cb)(void *ctx, struct sub_bitmaps *imgs), void *cb_ctx);
 
+struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
+                                   double video_pts, int draw_flags,
+                                   const bool formats[SUBBITMAP_COUNT]);
+
 struct mp_image;
-bool osd_draw_on_image(struct osd_state *osd, struct mp_osd_res res,
+void osd_draw_on_image(struct osd_state *osd, struct mp_osd_res res,
                        double video_pts, int draw_flags, struct mp_image *dest);
 
 struct mp_image_pool;

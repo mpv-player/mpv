@@ -240,6 +240,11 @@ static bool pack(struct mp_ass_packer *p, struct sub_bitmaps *res, int imgfmt)
         talloc_steal(p, p->cached_img);
     }
 
+    if (!mp_image_make_writeable(p->cached_img)) {
+        packer_reset(p->packer);
+        return false;
+    }
+
     res->packed = p->cached_img;
 
     for (int n = 0; n < res->num_parts; n++) {

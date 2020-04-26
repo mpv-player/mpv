@@ -4,10 +4,9 @@
 #include "osd.h"
 
 struct mp_image;
-struct sub_bitmaps;
 struct mp_draw_sub_cache;
 void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
-                         struct sub_bitmaps *sbs);
+                         struct sub_bitmap_list *sbs_list);
 
 extern const bool mp_draw_sub_formats[SUBBITMAP_COUNT];
 
