@@ -25,8 +25,12 @@
 //       make sense to set this value higher than malloc's alignment.
 #define MIN_ALIGN 16
 
-#ifndef NDEBUG
-#define TA_MEMORY_DEBUGGING
+#if !defined(TA_MEMORY_DEBUGGING)
+    #if !defined(NDEBUG)
+        #define TA_MEMORY_DEBUGGING 1
+    #else
+        #define TA_MEMORY_DEBUGGING 0
+    #endif
 #endif
 
 struct ta_header {
@@ -38,7 +42,7 @@ struct ta_header {
     struct ta_header *child;    // points to first child
     struct ta_header *parent;   // set for _first_ child only, NULL otherwise
     void (*destructor)(void *);
-#ifdef TA_MEMORY_DEBUGGING
+#if TA_MEMORY_DEBUGGING
     unsigned int canary;
     struct ta_header *leak_next;
     struct ta_header *leak_prev;
@@ -251,7 +255,7 @@ void ta_set_destructor(void *ptr, void (*destructor)(void *))
         h->destructor = destructor;
 }
 
-#ifdef TA_MEMORY_DEBUGGING
+#if TA_MEMORY_DEBUGGING
 
 #include <pthread.h>
 
