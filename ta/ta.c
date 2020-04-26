@@ -97,7 +97,7 @@ void ta_set_parent(void *ptr, void *ta_parent)
         ch->prev->next = ch->next;
     if (ch->next)
         ch->next->prev = ch->prev;
-    // If ch was the firs child, change child link of old parent
+    // If ch was the first child, change child link of old parent
     if (ch->parent) {
         assert(ch->parent->child == ch);
         ch->parent->child = ch->next;
@@ -117,6 +117,16 @@ void ta_set_parent(void *ptr, void *ta_parent)
         new_parent->child = ch;
         ch->parent = new_parent;
     }
+}
+
+/* Return the parent allocation, or NULL if none or if ptr==NULL.
+ *
+ * Warning: do not use this for program logic, or I'll be sad.
+ */
+void *ta_get_parent(void *ptr)
+{
+    struct ta_header *ch = get_header(ptr);
+    return ch ? ch->parent : NULL;
 }
 
 /* Allocate size bytes of memory. If ta_parent is not NULL, this is used as

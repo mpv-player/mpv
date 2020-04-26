@@ -52,6 +52,7 @@ void ta_free(void *ptr);
 void ta_free_children(void *ptr);
 void ta_set_destructor(void *ptr, void (*destructor)(void *));
 void ta_set_parent(void *ptr, void *ta_parent);
+void *ta_get_parent(void *ptr);
 
 // Utility functions
 size_t ta_calc_array_size(size_t element_size, size_t count);
