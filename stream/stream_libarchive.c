@@ -260,8 +260,7 @@ static const struct file_pattern patterns[] = {
     { NULL, NULL, NULL, 0, 0 },
 };
 
-static bool find_volumes(struct mp_archive *mpa, bool multivol_hint,
-                         bool *is_multivolume)
+static bool find_volumes(struct mp_archive *mpa, bool multivol_hint)
 {
     struct bstr primary_url = bstr0(mpa->primary_src->url);
 
@@ -284,7 +283,12 @@ static bool find_volumes(struct mp_archive *mpa, bool multivol_hint,
         if (!add_volume(mpa, NULL, url, i + 1))
             return false;
     }
-    *is_multivolume = true;
+
+    MP_WARN(mpa, "This appears to be a multi-volume archive.\n"
+            "Support is not very good due to libarchive limitations.\n"
+            "There are known cases of libarchive crashing mpv on these.\n"
+            "This is also an excessively inefficient and stupid way to distribute\n"
+            "media files. People creating them should rethink this.\n");
 
     return true;
 }
@@ -315,10 +319,9 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     bool probe_all = flags & MP_ARCHIVE_FLAG_UNSAFE;
     bool maybe_rar2_multivol = maybe_rar && probe_multi_rar(src);
 
-    bool is_multivolume = false;
     if (!(flags & MP_ARCHIVE_FLAG_NO_RAR_VOLUMES)) {
         // try to open other volumes
-        if (!find_volumes(mpa, maybe_rar2_multivol, &is_multivolume))
+        if (!find_volumes(mpa, maybe_rar2_multivol))
             goto err;
     }
 
@@ -359,15 +362,6 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
 
     if (fail)
         goto err;
-
-    if (is_multivolume) {
-        MP_WARN(mpa, "This appears to be a multi-volume rar file. Support is "
-            "not very good due to lack of good libarchive support for them. "
-            "They are also an excessively inefficient and stupid way to "
-            "distribute media files, so tell the people creating these files "
-            "to rethink this.\n");
-        MP_WARN(mpa, "There are known cases of libarchive crashing mpv on these.\n");
-    }
 
     return mpa;
 
