@@ -42,6 +42,19 @@ static bool probe_rar(struct stream *s)
     return memcmp(buf, rar_sig, 6) == 0;
 }
 
+static bool probe_multi_rar(struct stream *s)
+{
+    uint8_t hdr[14];
+    if (stream_read_peek(s, hdr, sizeof(hdr)) == sizeof(hdr)) {
+        // Look for rar mark head & main head (assume they're in order).
+        if (hdr[6] == 0x00 && hdr[7 + 2] == 0x73) {
+            int rflags = hdr[7 + 3] | (hdr[7 + 4] << 8);
+            return rflags & 0x100;
+        }
+    }
+    return false;
+}
+
 static bool probe_zip(struct stream *s)
 {
     uint8_t p[4];
@@ -300,16 +313,7 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     bool maybe_rar = probe_rar(src);
     bool maybe_zip = probe_zip(src);
     bool probe_all = flags & MP_ARCHIVE_FLAG_UNSAFE;
-    bool maybe_rar2_multivol = false;
-
-    uint8_t hdr[14];
-    if (maybe_rar && stream_read_peek(src, hdr, sizeof(hdr)) == sizeof(hdr)) {
-        // Look for rar mark head & main head (assume they're in order).
-        if (hdr[6] == 0x00 && hdr[7 + 2] == 0x73) {
-            int rflags = hdr[7 + 3] | (hdr[7 + 4] << 8);
-            maybe_rar2_multivol = rflags & 0x100;
-        }
-    }
+    bool maybe_rar2_multivol = maybe_rar && probe_multi_rar(src);
 
     bool is_multivolume = false;
     if (!(flags & MP_ARCHIVE_FLAG_NO_RAR_VOLUMES)) {
