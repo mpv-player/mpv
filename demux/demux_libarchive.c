@@ -66,7 +66,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
         mp_get_config_group(demuxer, demuxer->global, demuxer->desc->options);
 
     if (!opts->rar_list_all_volumes)
-        flags |= MP_ARCHIVE_FLAG_NO_RAR_VOLUMES;
+        flags |= MP_ARCHIVE_FLAG_NO_VOLUMES;
 
     mpa = mp_archive_new(demuxer->log, demuxer->stream, flags, 0);
     if (!mpa)
