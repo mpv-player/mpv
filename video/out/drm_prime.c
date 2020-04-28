@@ -15,11 +15,13 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <unistd.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 #include <drm_mode.h>
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "drm_common.h"
 #include "drm_prime.h"
@@ -72,7 +74,8 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd,
                                          modifiers, &framebuffer->fb_id,
                                          DRM_MODE_FB_MODIFIERS);
         if (ret < 0) {
-            mp_err(log, "Failed to create framebuffer on layer %d.\n", 0);
+            mp_err(log, "Failed to create framebuffer on layer %d: %s\n",
+                   0, mp_strerror(errno));
             goto fail;
         }
         for (int plane = 0; plane < AV_DRM_MAX_PLANES; plane++) {
