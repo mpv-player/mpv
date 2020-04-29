@@ -3286,9 +3286,9 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                 // For the non-interpolation case, we draw to a single "cache"
                 // texture to speed up subsequent re-draws (if any exist)
                 struct ra_fbo dest_fbo = fbo;
-                if (frame->num_vsyncs > 1 && frame->display_synced &&
-                    !p->dumb_mode && (p->ra->caps & RA_CAP_BLIT) &&
-                    fbo.tex->params.blit_dst)
+                bool repeats = frame->num_vsyncs > 1 && frame->display_synced;
+                if ((repeats || frame->still) && !p->dumb_mode &&
+                    (p->ra->caps & RA_CAP_BLIT) && fbo.tex->params.blit_dst)
                 {
                     // Attempt to use the same format as the destination FBO
                     // if possible. Some RAs use a wrapped dummy format here,
