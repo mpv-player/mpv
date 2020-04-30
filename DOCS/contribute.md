@@ -100,6 +100,22 @@ Split changes into multiple commits
   as possible. Commits should form logical steps in development. The way you
   split changes is important for code review and analyzing bugs.
 
+Always squash fixup commits when making changes to pull requests
+----------------------------------------------------------------
+
+- If you make fixup commits to your pull request, you should generally squash
+  them with "git rebase -i". We prefer to have pull requests in a merge
+  ready state.
+- We don't squash-merge (nor do we use github's feature that does this) because
+  pull requests with multiple commits are perfectly legitimate, and the only
+  thing that makes sense in non-trivial cases.
+- With complex pull requests, it *may* make sense to keep them separate, but
+  they should be clearly marked as such. Reviewing commits is generally easier
+  with fixups squashed.
+- Reviewers are encouraged to look at individual commits instead of github's
+  "changes from all commits" view (which just encourages bad git and review
+  practices).
+
 Touching user-visible parts may require updating the mpv docs
 -------------------------------------------------------------
 
