@@ -640,10 +640,15 @@ function mp.set_osd_ass(res_x, res_y, data)
     if not mp._legacy_overlay then
         mp._legacy_overlay = mp.create_osd_overlay("ass-events")
     end
-    mp._legacy_overlay.res_x = res_x
-    mp._legacy_overlay.res_y = res_y
-    mp._legacy_overlay.data = data
-    mp._legacy_overlay:update()
+    if mp._legacy_overlay.res_x ~= res_x or
+       mp._legacy_overlay.res_y ~= res_y or
+       mp._legacy_overlay.data ~= data
+    then
+        mp._legacy_overlay.res_x = res_x
+        mp._legacy_overlay.res_y = res_y
+        mp._legacy_overlay.data = data
+        mp._legacy_overlay:update()
+    end
 end
 
 function mp.get_osd_size()
