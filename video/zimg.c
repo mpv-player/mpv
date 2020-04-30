@@ -204,8 +204,8 @@ static zimg_color_primaries_e mp_to_z_prim(enum mp_csp_prim prim)
 
 static void destroy_zimg(struct mp_zimg_context *ctx)
 {
-    free(ctx->zimg_tmp);
-    ctx->zimg_tmp = NULL;
+    talloc_free(ctx->zimg_tmp_alloc);
+    ctx->zimg_tmp = ctx->zimg_tmp_alloc = NULL;
     zimg_filter_graph_free(ctx->zimg_graph);
     ctx->zimg_graph = NULL;
     TA_FREEP(&ctx->zimg_src);
@@ -1334,11 +1334,15 @@ bool mp_zimg_config(struct mp_zimg_context *ctx)
 
     size_t tmp_size;
     if (!zimg_filter_graph_get_tmp_size(ctx->zimg_graph, &tmp_size)) {
-        tmp_size = MP_ALIGN_UP(tmp_size, ZIMG_ALIGN);
-        ctx->zimg_tmp = aligned_alloc(ZIMG_ALIGN, tmp_size);
+        tmp_size = MP_ALIGN_UP(tmp_size, ZIMG_ALIGN) + ZIMG_ALIGN;
+        ctx->zimg_tmp_alloc = ta_alloc_size(NULL, tmp_size);
+        if (ctx->zimg_tmp_alloc) {
+            ctx->zimg_tmp =
+                (void *)MP_ALIGN_UP((uintptr_t)ctx->zimg_tmp_alloc, ZIMG_ALIGN);
+        }
     }
 
-    if (!ctx->zimg_tmp)
+    if (!ctx->zimg_tmp_alloc)
         goto fail;
 
     if (!allocate_buffer(ctx, ctx->zimg_src) ||

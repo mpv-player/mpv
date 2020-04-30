@@ -224,11 +224,6 @@ main_dependencies = [
         'req': True,
         'fmsg': 'C11 atomics are required; you may need a newer compiler',
     }, {
-        # C11; technically we require C11, but aligned_alloc() is not in MinGW
-        'name': 'aligned_alloc',
-        'desc': 'C11 aligned_alloc()',
-        'func': check_statement('stdlib.h', 'aligned_alloc(1, 1)'),
-    }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
         'deps': 'pthreads',
@@ -379,7 +374,6 @@ iconv support use --disable-iconv.",
         'func': check_pkg_config('rubberband', '>= 1.8.0'),
     }, {
         'name': '--zimg',
-        'deps': 'aligned_alloc',
         'desc': 'libzimg support (high quality software scaler)',
         'func': check_pkg_config('zimg', '>= 2.9'),
     }, {

@@ -40,6 +40,7 @@ struct mp_zimg_context {
     struct m_config_cache *opts_cache;
     zimg_filter_graph *zimg_graph;
     void *zimg_tmp;
+    void *zimg_tmp_alloc;
     struct mp_zimg_repack *zimg_src;
     struct mp_zimg_repack *zimg_dst;
 };
