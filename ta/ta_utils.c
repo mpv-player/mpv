@@ -17,6 +17,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+
+#include "osdep/atomic.h"
 #include "osdep/strnlen.h"
 
 #define TA_NO_WRAPPERS
@@ -312,4 +314,116 @@ char *ta_xstrndup(void *ta_parent, const char *str, size_t n)
     char *res = ta_strndup(ta_parent, str, n);
     ta_oom_b(res || !str);
     return res;
+}
+
+struct ta_refcount {
+    atomic_ulong count;
+    void *child;
+    void (*on_free)(void *ctx, void *ta_child);
+    void *on_free_ctx;
+};
+
+// Allocate a refcount helper. The ta_child parameter is automatically freed
+// with ta_free(). The returned object has a refcount of 1. Once the refcount
+// reaches 0, ta_free(ta_child) is called.
+//
+// If on_free() is not NULL, then instead of ta_free(), on_free() is called with
+// the parameters of the same named as passed to this function.
+//
+// The ta_child pointer must not be NULL, and must not have a parent allocation.
+// Neither make any sense for this use-case, and could be hint for serious bugs
+// in the caller, so assert()s check for this.
+//
+// The return value is not a ta allocation. You use the refcount functions to
+// manage it. It is recommended to use ta_alloc_auto_unref().
+//
+// Note: normally you use the ta_refcount_alloc() macro, which lacks the loc
+//       parameter.
+struct ta_refcount *ta_refcount_alloc_(const char *loc, void *ta_child,
+                                       void (*on_free)(void *ctx, void *ta_child),
+                                       void *free_ctx)
+{
+    assert(ta_child && !ta_get_parent(ta_child));
+
+    struct ta_refcount *rc = ta_new_ptrtype(NULL, rc);
+    if (!rc)
+        return NULL;
+
+    ta_dbg_set_loc(rc, loc);
+    *rc = (struct ta_refcount){
+        .count = ATOMIC_VAR_INIT(1),
+        .child = ta_child,
+        .on_free = on_free,
+        .on_free_ctx = free_ctx,
+    };
+
+    return rc + 1; // "obfuscate" the pointer
+}
+
+void ta_refcount_add(struct ta_refcount *rc)
+{
+    assert(rc);
+    rc -= 1;
+
+    unsigned long c = atomic_fetch_add(&rc->count, 1);
+    assert(c > 0); // not allowed: refcount was 0, you can't "revive" it
+}
+
+void ta_refcount_dec(struct ta_refcount *rc)
+{
+    assert(rc);
+    rc -= 1;
+
+    unsigned long c = atomic_fetch_add(&rc->count, -1);
+    assert(c != 0); // not allowed: refcount was 0
+    if (!c) {
+        if (rc->on_free) {
+            rc->on_free(rc->on_free_ctx, rc->child);
+        } else {
+            ta_free(rc->child);
+        }
+        ta_free(rc);
+    }
+}
+
+// Return whether the refcount is 1. Note that if the result is false, it could
+// become true any time in the general case, since other threads may be changing
+// the refcount. But if true is returned, it means you are the only owner of the
+// refcounted object. (If you are not an owner, it's UB to call this function.)
+bool ta_refcount_is_1(struct ta_refcount *rc)
+{
+    assert(rc);
+    rc -= 1;
+
+    return atomic_load(&rc->count) == 1;
+}
+
+struct ta_refuser {
+    struct ta_refcount *rc;
+};
+
+static void autofree_dtor(void *p)
+{
+    struct ta_refuser *ru = p;
+
+    ta_refcount_dec(ru->rc);
+}
+
+// Refcount user helper. This is a ta allocation which on creation increments
+// the refcount, and decrements it when it is free'd.
+//
+// The user must not access the contents of the allocation or resize it. Calling
+// ta_set_destructor() is not allowed. But you can freely reparent it or add
+// child allocation. ta_free_children() is also allowed and does not affect the
+// refcount.
+struct ta_refuser *ta_alloc_auto_ref(void *ta_parent, struct ta_refcount *rc)
+{
+    struct ta_refuser *ru = ta_new(ta_parent, struct ta_refuser);
+    if (!ru)
+        return NULL;
+
+    ta_set_destructor(ru, autofree_dtor);
+    ru->rc = rc;
+    ta_refcount_add(ru->rc);
+    return ru;
 }
