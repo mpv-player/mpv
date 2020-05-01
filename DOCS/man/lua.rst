@@ -784,7 +784,7 @@ strictly part of the guaranteed API.
 
 ``utils.join_path(p1, p2)``
     Return the concatenation of the 2 paths. Tries to be clever. For example,
-    if ```p2`` is an absolute path, p2 is returned without change.
+    if ``p2`` is an absolute path, ``p2`` is returned without change.
 
 ``utils.subprocess(t)``
     Runs an external process and waits until it exits. Returns process status
