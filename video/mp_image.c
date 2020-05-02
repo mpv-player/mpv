@@ -1041,3 +1041,23 @@ void memset16_pic(void *dst, int fill, int unitsPerLine, int height, int stride)
         }
     }
 }
+
+// Pixel at the given luma position on the given plane, possibly rounded down.
+void *mp_image_pixel_ptr(struct mp_image *img, int plane, int x, int y)
+{
+    return img->planes[plane] +
+           img->stride[plane] * (ptrdiff_t)(y >> img->fmt.ys[plane]) +
+           (size_t)(x >> img->fmt.xs[plane]) * img->fmt.bpp[plane] / 8;
+}
+
+// Number of bytes for w pixels, using luma pixels, possibly rounded up.
+// x0 is the start pixel; matters if the start pixel is rounded down.
+// (E.g. 8 bpp, x0=7, w=7 => pixels 0..15 => 2 bytes)
+size_t mp_image_plane_bytes(struct mp_image *img, int plane, int x0, int w)
+{
+    int bpp = img->fmt.bpp[plane];
+    int xs = img->fmt.xs[plane];
+    size_t b_x0 = (x0 >> xs) * bpp / 8;
+    size_t b_x1 = (((x0 + w + (1 << xs) - 1) >> xs) * bpp + 7) / 8;
+    return b_x1 - b_x0;
+}
