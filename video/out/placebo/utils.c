@@ -27,8 +27,6 @@ static const enum pl_log_level probing_map(enum pl_log_level level)
 {
     switch (level) {
     case PL_LOG_FATAL:
-        return PL_LOG_ERR;
-
     case PL_LOG_ERR:
     case PL_LOG_WARN:
         return PL_LOG_INFO;
