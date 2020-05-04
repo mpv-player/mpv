@@ -32,8 +32,10 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd,
                                  struct drm_prime_handle_refs *handle_refs)
 {
     AVDRMLayerDescriptor *layer = NULL;
-    uint32_t pitches[4], offsets[4], handles[4];
-    uint64_t modifiers[4];
+    uint32_t pitches[4] = { 0 };
+    uint32_t offsets[4] = { 0 };
+    uint32_t handles[4] = { 0 };
+    uint64_t modifiers[4] = { 0 };
     int ret, layer_fd;
 
     if (descriptor && descriptor->nb_layers) {
@@ -47,9 +49,7 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd,
                        object, descriptor->objects[object].fd);
                 goto fail;
             }
-            if (object == 0) {
-                modifiers[object] = descriptor->objects[object].format_modifier;
-            }
+            modifiers[object] = descriptor->objects[object].format_modifier;
         }
 
         layer = &descriptor->layers[0];
@@ -60,7 +60,6 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd,
                 pitches[plane] = layer->planes[plane].pitch;
                 offsets[plane] = layer->planes[plane].offset;
                 handles[plane] = layer_fd;
-                modifiers[plane] = modifiers[0];
             } else {
                 pitches[plane] = 0;
                 offsets[plane] = 0;
