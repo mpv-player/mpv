@@ -73,10 +73,16 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd,
                                          modifiers, &framebuffer->fb_id,
                                          DRM_MODE_FB_MODIFIERS);
         if (ret < 0) {
-            mp_err(log, "Failed to create framebuffer on layer %d: %s\n",
-                   0, mp_strerror(errno));
-            goto fail;
+            ret = drmModeAddFB2(fd, width, height, layer->format,
+                                handles, pitches, offsets,
+                                &framebuffer->fb_id, 0);
+            if (ret < 0) {
+                mp_err(log, "Failed to create framebuffer with drmModeAddFB2 on layer %d: %s\n",
+                        0, mp_strerror(errno));
+                goto fail;
+            }
         }
+
         for (int plane = 0; plane < AV_DRM_MAX_PLANES; plane++) {
             drm_prime_add_handle_ref(handle_refs, framebuffer->gem_handles[plane]);
         }
