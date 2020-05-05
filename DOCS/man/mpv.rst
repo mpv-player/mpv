@@ -159,6 +159,9 @@ L
 Ctrl + and Ctrl -
     Adjust audio delay (A/V sync) by +/- 0.1 seconds.
 
+Shift+g and Shift+f
+    Adjust subtitle font size by +/- 10%.
+
 u
     Switch between applying no style overrides to SSA/ASS subtitles, and
     overriding them almost completely with the normal subtitle style. See
