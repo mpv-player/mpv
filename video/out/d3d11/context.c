@@ -258,6 +258,15 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
     if (p->opts->sync_interval != 1)
         return;
 
+    // They're also only valid for flip model swapchains
+    DXGI_SWAP_CHAIN_DESC desc;
+    hr = IDXGISwapChain_GetDesc(p->swapchain, &desc);
+    if (FAILED(hr) || (desc.SwapEffect != DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL &&
+                       desc.SwapEffect != DXGI_SWAP_EFFECT_FLIP_DISCARD))
+    {
+        return;
+    }
+
     // GetLastPresentCount returns a sequential ID for the frame submitted by
     // the last call to IDXGISwapChain::Present()
     UINT submit_count;
@@ -308,10 +317,9 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
         stats.PresentRefreshCount && stats.SyncRefreshCount &&
         stats.SyncQPCTime.QuadPart)
     {
-        // PresentRefreshCount and SyncRefreshCount might refer to different
-        // frames (this can definitely occur in bitblt-mode.) Assuming mpv
-        // presents on every frame, guess the present count that relates to
-        // SyncRefreshCount.
+        // It's not clear if PresentRefreshCount and SyncRefreshCount can refer
+        // to different frames, but in case they can, assuming mpv presents on
+        // every frame, guess the present count that relates to SyncRefreshCount.
         unsigned expected_sync_pc = stats.PresentCount +
             (stats.SyncRefreshCount - stats.PresentRefreshCount);
 
