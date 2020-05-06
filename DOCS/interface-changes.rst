@@ -65,6 +65,8 @@ Interface changes
       vaguely a replacement of the removed option, but not the same
     - change another detail for track selection options (see --aid manpage
       entry)
+    - reading loop-file property as native property or mpv_node will now return
+      "inf" instead of boolean true (also affects loop option)
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

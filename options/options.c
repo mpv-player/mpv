@@ -648,8 +648,8 @@ static const m_option_t mp_opts[] = {
         M_RANGE(1, 10000)},
     {"loop-file", OPT_CHOICE(loop_file,
         {"no", 0},
-        {"yes", -1},
-        {"inf", -1}),
+        {"inf", -1},
+        {"yes", -1}),
         M_RANGE(0, 10000)},
     {"loop", OPT_ALIAS("loop-file")},
 
