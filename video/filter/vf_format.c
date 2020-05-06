@@ -127,7 +127,7 @@ static void vf_format_process(struct mp_filter *f)
 
             set_params(priv->opts, &par, true);
 
-            if (par.imgfmt != outfmt) {
+            if (outfmt && par.imgfmt != outfmt) {
                 par.imgfmt = outfmt;
                 par.hw_subfmt = 0;
             }
