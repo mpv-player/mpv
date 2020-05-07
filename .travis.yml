@@ -114,5 +114,5 @@ addons:
       description: "Build submitted via Travis CI"
     notification_email: mpv-team@googlegroups.com
     build_command_prepend: "./bootstrap.py && ./waf configure"
-    build_command:   "./waf build"
+    build_command: "./waf build"
     branch_pattern: coverity_scan
