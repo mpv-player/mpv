@@ -1119,6 +1119,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_DPICHANGED:
         update_display_info(w32);
+
+        RECT *rc = (RECT*)lParam;
+        w32->windowrc = *rc;
+        subtract_window_borders(w32, w32->window, &w32->windowrc);
+        update_window_state(w32);
         break;
     case WM_CLOSE:
         // Don't destroy the window yet to not lose wakeup events.
