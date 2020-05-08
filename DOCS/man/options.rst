@@ -5344,6 +5344,15 @@ The following video options are currently all specific to ``--vo=gpu`` and
     ``--no-audio``, and ``--untimed=yes``. Only works with ``--gpu-context=wayland``
     and ``--gpu-context=waylandvk``.
 
+``--wayland-edge-pixels-pointer=<value>``
+    Defines the size of an edge border (default: 10) to initiate client side
+    resize events in the wayland contexts with the mouse. This is only active if
+    there are no server side decorations from the compositor.
+
+``--wayland-edge-pixels-touch=<value>``
+    Defines the size of an edge border (default: 64) to initiate client side
+    resizes events in the wayland contexts with touch events.
+
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
     (currently) only relevant for ``--gpu-api=vulkan`` and `--gpu-api=d3d11`.
