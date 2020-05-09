@@ -1,6 +1,8 @@
 #include <libavutil/pixfmt.h>
 
 #include "common/common.h"
+#include "sub/draw_bmp.h"
+#include "sub/osd.h"
 #include "tests.h"
 #include "video/fmt-conversion.h"
 #include "video/img_format.h"
@@ -331,6 +333,55 @@ static void check_float_repack(int imgfmt, enum mp_csp csp,
     talloc_free(from_f);
 }
 
+static bool try_draw_bmp(FILE *f, int imgfmt)
+{
+    bool ok = false;
+
+    struct mp_image *dst = mp_image_alloc(imgfmt, 64, 64);
+    if (!dst)
+    goto done;
+
+    struct sub_bitmap sb = {
+        .bitmap = &(uint8_t[]){123},
+        .stride = 1,
+        .x = 1,
+        .y = 1,
+        .w = 1, .dw = 1,
+        .h = 1, .dh = 1,
+
+        .libass = { .color = 0xDEDEDEDE },
+    };
+    struct sub_bitmaps sbs = {
+        .format = SUBBITMAP_LIBASS,
+        .parts = &sb,
+        .num_parts = 1,
+        .change_id = 1,
+    };
+    struct sub_bitmap_list sbs_list = {
+        .change_id = 1,
+        .w = dst->w,
+        .h = dst->h,
+        .items = (struct sub_bitmaps *[]){&sbs},
+        .num_items = 1,
+    };
+
+    struct mp_draw_sub_cache *c = NULL;
+    if (mp_draw_sub_bitmaps(&c, dst, &sbs_list)) {
+        char *info = mp_draw_sub_get_dbg_info(c);
+        fprintf(f, "%s\n", info);
+        talloc_free(info);
+        ok = true;
+    }
+
+    talloc_free(c);
+    talloc_free(dst);
+
+done:
+    if (!ok)
+        fprintf(f, "no\n");
+    return ok;
+}
+
 static void run(struct test_ctx *ctx)
 {
     FILE *f = test_open_out(ctx, "repack.txt");
@@ -359,6 +410,22 @@ static void run(struct test_ctx *ctx)
     check_float_repack(-AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
     check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
     check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+
+    // Determine the list of possible draw_bmp input formats. Do this here
+    // because it mostly depends on repack and imgformat stuff.
+    f = test_open_out(ctx, "draw_bmp.txt");
+
+    for (int n = 0; n < num_imgfmts; n++) {
+        int imgfmt = imgfmts[n];
+
+        fprintf(f, "%-12s= ", mp_imgfmt_to_name(imgfmt));
+        try_draw_bmp(f, imgfmt);
+    }
+
+    fclose(f);
+
+    assert_text_files_equal(ctx, "draw_bmp.txt", "draw_bmp.txt",
+                "This can fail if FFmpeg/libswscale adds or removes pixfmts.");
 }
 
 const struct unittest test_repack = {

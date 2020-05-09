@@ -5,8 +5,9 @@
 
 struct mp_image;
 struct mp_draw_sub_cache;
-void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
+bool mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
                          struct sub_bitmap_list *sbs_list);
+char *mp_draw_sub_get_dbg_info(struct mp_draw_sub_cache *c);
 
 extern const bool mp_draw_sub_formats[SUBBITMAP_COUNT];
 

@@ -427,7 +427,8 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
 
     stats_time_start(osd->stats, "draw-bmp");
 
-    mp_draw_sub_bitmaps(&osd->draw_cache, dest, list);
+    if (!mp_draw_sub_bitmaps(&osd->draw_cache, dest, list))
+        MP_WARN(osd, "Failed rendering OSD.\n");
     talloc_steal(osd, osd->draw_cache);
 
     stats_time_end(osd->stats, "draw-bmp");
