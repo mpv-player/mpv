@@ -76,6 +76,7 @@
        gray16be    Zin   Zout  SWSin  SWSout |
           gray9    Zin   Zout  SWSin  SWSout |
         gray9be    Zin   Zout  SWSin  SWSout |
+       grayaf32    Zin   Zout                |
         grayf32    Zin   Zout  SWSin  SWSout |
       grayf32be    Zin   Zout  SWSin  SWSout |
      mediacodec                              |
@@ -134,7 +135,9 @@
           yap16    Zin   Zout                |
            yap8    Zin   Zout                |
         yuv410p    Zin   Zout  SWSin  SWSout |
+       yuv410pf    Zin   Zout                |
         yuv411p    Zin   Zout  SWSin  SWSout |
+       yuv411pf    Zin   Zout                |
         yuv420p    Zin   Zout  SWSin  SWSout |
       yuv420p10    Zin   Zout  SWSin  SWSout |
     yuv420p10be    Zin   Zout  SWSin  SWSout |
@@ -146,6 +149,7 @@
     yuv420p16be    Zin   Zout  SWSin  SWSout |
        yuv420p9    Zin   Zout  SWSin  SWSout |
      yuv420p9be    Zin   Zout  SWSin  SWSout |
+       yuv420pf    Zin   Zout                |
         yuv422p    Zin   Zout  SWSin  SWSout |
       yuv422p10    Zin   Zout  SWSin  SWSout |
     yuv422p10be    Zin   Zout  SWSin  SWSout |
@@ -157,11 +161,13 @@
     yuv422p16be    Zin   Zout  SWSin  SWSout |
        yuv422p9    Zin   Zout  SWSin  SWSout |
      yuv422p9be    Zin   Zout  SWSin  SWSout |
+       yuv422pf    Zin   Zout                |
         yuv440p    Zin   Zout  SWSin  SWSout |
       yuv440p10    Zin   Zout  SWSin  SWSout |
     yuv440p10be    Zin   Zout  SWSin  SWSout |
       yuv440p12    Zin   Zout  SWSin  SWSout |
     yuv440p12be    Zin   Zout  SWSin  SWSout |
+       yuv440pf    Zin   Zout                |
         yuv444p    Zin   Zout  SWSin  SWSout |
       yuv444p10    Zin   Zout  SWSin  SWSout |
     yuv444p10be    Zin   Zout  SWSin  SWSout |
@@ -173,6 +179,9 @@
     yuv444p16be    Zin   Zout  SWSin  SWSout |
        yuv444p9    Zin   Zout  SWSin  SWSout |
      yuv444p9be    Zin   Zout  SWSin  SWSout |
+       yuv444pf    Zin   Zout                |
+      yuva410pf    Zin   Zout                |
+      yuva411pf    Zin   Zout                |
        yuva420p    Zin   Zout  SWSin  SWSout |
      yuva420p10    Zin   Zout  SWSin  SWSout |
    yuva420p10be    Zin   Zout  SWSin  SWSout |
@@ -180,6 +189,7 @@
    yuva420p16be    Zin   Zout  SWSin  SWSout |
       yuva420p9    Zin   Zout  SWSin  SWSout |
     yuva420p9be    Zin   Zout  SWSin  SWSout |
+      yuva420pf    Zin   Zout                |
        yuva422p    Zin   Zout  SWSin  SWSout |
      yuva422p10    Zin   Zout  SWSin  SWSout |
    yuva422p10be    Zin   Zout  SWSin  SWSout |
@@ -189,6 +199,8 @@
    yuva422p16be    Zin   Zout  SWSin  SWSout |
       yuva422p9    Zin   Zout  SWSin  SWSout |
     yuva422p9be    Zin   Zout  SWSin  SWSout |
+      yuva422pf    Zin   Zout                |
+      yuva440pf    Zin   Zout                |
        yuva444p    Zin   Zout  SWSin  SWSout |
      yuva444p10    Zin   Zout  SWSin  SWSout |
    yuva444p10be    Zin   Zout  SWSin  SWSout |
@@ -198,6 +210,7 @@
    yuva444p16be    Zin   Zout  SWSin  SWSout |
       yuva444p9    Zin   Zout  SWSin  SWSout |
     yuva444p9be    Zin   Zout  SWSin  SWSout |
+      yuva444pf    Zin   Zout                |
        yuvj411p    Zin   Zout  SWSin  SWSout |
        yuvj422p    Zin   Zout  SWSin  SWSout |
        yuvj440p    Zin   Zout  SWSin  SWSout |

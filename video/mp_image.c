@@ -563,24 +563,27 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
     struct mp_image area = *img;
     mp_image_crop(&area, x0, y0, x1, y1);
 
+    enum mp_component_type ctype = mp_imgfmt_get_component_type(img->imgfmt);
     uint32_t plane_clear[MP_MAX_PLANES] = {0};
 
-    if (area.imgfmt == IMGFMT_UYVY) {
-        plane_clear[0] = av_le2ne16(0x0080);
-    } else if (area.fmt.flags & MP_IMGFLAG_YUV_NV) {
-        plane_clear[1] = 0x8080;
-    } else if (area.fmt.flags & MP_IMGFLAG_YUV_P) {
-        uint16_t chroma_clear = (1 << area.fmt.plane_bits) / 2;
-        if (!(area.fmt.flags & MP_IMGFLAG_NE))
-            chroma_clear = av_bswap16(chroma_clear);
-        if (area.num_planes > 2)
-            plane_clear[1] = plane_clear[2] = chroma_clear;
+    if (ctype != MP_COMPONENT_TYPE_FLOAT) {
+        if (area.imgfmt == IMGFMT_UYVY) {
+            plane_clear[0] = av_le2ne16(0x0080);
+        } else if (area.fmt.flags & MP_IMGFLAG_YUV_NV) {
+            plane_clear[1] = 0x8080;
+        } else if (area.fmt.flags & MP_IMGFLAG_YUV_P) {
+            uint16_t chroma_clear = (1 << area.fmt.plane_bits) / 2;
+            if (!(area.fmt.flags & MP_IMGFLAG_NE))
+                chroma_clear = av_bswap16(chroma_clear);
+            if (area.num_planes > 2)
+                plane_clear[1] = plane_clear[2] = chroma_clear;
+        }
     }
 
     for (int p = 0; p < area.num_planes; p++) {
         int bpp = area.fmt.bpp[p];
         int bytes = (mp_image_plane_w(&area, p) * bpp + 7) / 8;
-        if (bpp <= 8) {
+        if (bpp <= 8 || bpp > 16) {
             memset_pic(area.planes[p], plane_clear[p], bytes,
                        mp_image_plane_h(&area, p), area.stride[p]);
         } else {

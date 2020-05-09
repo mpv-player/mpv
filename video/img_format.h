@@ -212,6 +212,22 @@ enum mp_imgfmt {
     IMGFMT_YAP8,
     IMGFMT_YAP16,
 
+    // Planar YUV/alpha formats. Sometimes useful for internal processing. There
+    // should be one for each subsampling factor, with and without alpha, gray.
+    IMGFMT_YAPF, // Note: non-alpha version exists in ffmpeg
+    IMGFMT_444PF,
+    IMGFMT_444APF,
+    IMGFMT_420PF,
+    IMGFMT_420APF,
+    IMGFMT_422PF,
+    IMGFMT_422APF,
+    IMGFMT_440PF,
+    IMGFMT_440APF,
+    IMGFMT_410PF,
+    IMGFMT_410APF,
+    IMGFMT_411PF,
+    IMGFMT_411APF,
+
     // Accessed with bit-shifts, uint32_t units.
     IMGFMT_RGB30,               // 2pad 10r 10g 10b (MSB to LSB)
 

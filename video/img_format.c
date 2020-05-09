@@ -47,6 +47,14 @@ struct mp_imgfmt_entry {
                       .num_planes = 3, .forced_csp = MP_CSP_RGB,            \
                       .planes = { {1, {2}}, {1, {3}}, {1, {1}} }, }, }
 
+#define FLOAT_YUV(def, dname, xs, ys, a_planes)                             \
+    [def - IMGFMT_CUST_BASE] = {                                            \
+        .name = dname,                                                      \
+        .reg_desc = { .component_type = MP_COMPONENT_TYPE_FLOAT,            \
+                      .component_size = 4, .num_planes = a_planes,          \
+                      .planes = { {1, {1}}, {1, {2}}, {1, {3}}, {1, {4}} }, \
+                      .chroma_xs = xs, .chroma_ys = ys, }}
+
 static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // not in ffmpeg
     [IMGFMT_VDPAU_OUTPUT - IMGFMT_CUST_BASE] = {
@@ -104,6 +112,27 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
             .planes = { {1, {1}} },
         },
     },
+    [IMGFMT_YAPF - IMGFMT_CUST_BASE] = {
+        .name = "grayaf32", // try to mimic ffmpeg naming convention
+        .reg_desc = {
+            .component_type = MP_COMPONENT_TYPE_FLOAT,
+            .component_size = 4,
+            .num_planes = 2,
+            .planes = { {1, {1}}, {1, {4}} },
+        },
+    },
+    FLOAT_YUV(IMGFMT_444PF,  "yuv444pf",  0, 0, 3),
+    FLOAT_YUV(IMGFMT_444APF, "yuva444pf", 0, 0, 4),
+    FLOAT_YUV(IMGFMT_420PF,  "yuv420pf",  1, 1, 3),
+    FLOAT_YUV(IMGFMT_420APF, "yuva420pf", 1, 1, 4),
+    FLOAT_YUV(IMGFMT_422PF,  "yuv422pf",  1, 0, 3),
+    FLOAT_YUV(IMGFMT_422APF, "yuva422pf", 1, 0, 4),
+    FLOAT_YUV(IMGFMT_440PF,  "yuv440pf",  0, 1, 3),
+    FLOAT_YUV(IMGFMT_440APF, "yuva440pf", 0, 1, 4),
+    FLOAT_YUV(IMGFMT_410PF,  "yuv410pf",  2, 2, 3),
+    FLOAT_YUV(IMGFMT_410APF, "yuva410pf", 2, 2, 4),
+    FLOAT_YUV(IMGFMT_411PF,  "yuv411pf",  2, 0, 3),
+    FLOAT_YUV(IMGFMT_411APF, "yuva411pf", 2, 0, 4),
     FRINGE_GBRP(IMGFMT_GBRP1, "gbrp1", 1),
     FRINGE_GBRP(IMGFMT_GBRP2, "gbrp2", 2),
     FRINGE_GBRP(IMGFMT_GBRP3, "gbrp3", 3),

@@ -686,6 +686,13 @@ gray9be: [GENERIC] ctype=uint
     {2/16/[0:0] 0/0/[0:0] 0/0/[0:0] 0/0/[0:0] }
   AVD: name=gray9be chroma=0:0 flags=0x1 [be]
     0: p=0  st=2  o=0  sh=0  d=9
+grayaf32: ctype=float
+  Legacy desc: [ba][a][yuvp][yuv][le]
+    planes=2, chroma=0:0 align=1:1 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[0:0] 0/0/[0:0] 0/0/[0:0] }
+  Regular: planes=2 compbytes=4 bitpad=0 chroma=1x1 ctype=float
+    0: {1}
+    1: {4}
 grayf32: [GENERIC] ctype=float
   Legacy desc: [ba][yuv][le]
     planes=1, chroma=0:0 align=1:1 bits=32 cbits=32
@@ -1140,6 +1147,14 @@ yuv410p: [GENERIC] ctype=uint
     0: p=0  st=1  o=0  sh=0  d=8
     1: p=1  st=1  o=0  sh=0  d=8
     2: p=2  st=1  o=0  sh=0  d=8
+yuv410pf: ctype=float
+  Legacy desc: [ba][yuvp][yuv][le]
+    planes=3, chroma=2:2 align=4:4 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[2:2] 4/32/[2:2] 0/0/[0:0] }
+  Regular: planes=3 compbytes=4 bitpad=0 chroma=4x4 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
 yuv411p: [GENERIC] ctype=uint
   Legacy desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=2:0 align=4:1 bits=8 cbits=8
@@ -1152,6 +1167,14 @@ yuv411p: [GENERIC] ctype=uint
     0: p=0  st=1  o=0  sh=0  d=8
     1: p=1  st=1  o=0  sh=0  d=8
     2: p=2  st=1  o=0  sh=0  d=8
+yuv411pf: ctype=float
+  Legacy desc: [ba][yuvp][yuv][le]
+    planes=3, chroma=2:0 align=4:1 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[2:0] 4/32/[2:0] 0/0/[0:0] }
+  Regular: planes=3 compbytes=4 bitpad=0 chroma=4x1 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
 yuv420p: ctype=uint
   Legacy desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=1:1 align=2:2 bits=8 cbits=8
@@ -1265,6 +1288,14 @@ yuv420p9be: [GENERIC] ctype=uint
     0: p=0  st=2  o=0  sh=0  d=9
     1: p=1  st=2  o=0  sh=0  d=9
     2: p=2  st=2  o=0  sh=0  d=9
+yuv420pf: ctype=float
+  Legacy desc: [ba][yuvp][yuv][le]
+    planes=3, chroma=1:1 align=2:2 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[1:1] 4/32/[1:1] 0/0/[0:0] }
+  Regular: planes=3 compbytes=4 bitpad=0 chroma=2x2 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
 yuv422p: [GENERIC] ctype=uint
   Legacy desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=1:0 align=2:1 bits=8 cbits=8
@@ -1377,6 +1408,14 @@ yuv422p9be: [GENERIC] ctype=uint
     0: p=0  st=2  o=0  sh=0  d=9
     1: p=1  st=2  o=0  sh=0  d=9
     2: p=2  st=2  o=0  sh=0  d=9
+yuv422pf: ctype=float
+  Legacy desc: [ba][yuvp][yuv][le]
+    planes=3, chroma=1:0 align=2:1 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[1:0] 4/32/[1:0] 0/0/[0:0] }
+  Regular: planes=3 compbytes=4 bitpad=0 chroma=2x1 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
 yuv440p: [GENERIC] ctype=uint
   Legacy desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=0:1 align=1:2 bits=8 cbits=8
@@ -1429,6 +1468,14 @@ yuv440p12be: [GENERIC] ctype=uint
     0: p=0  st=2  o=0  sh=0  d=12
     1: p=1  st=2  o=0  sh=0  d=12
     2: p=2  st=2  o=0  sh=0  d=12
+yuv440pf: ctype=float
+  Legacy desc: [ba][yuvp][yuv][le]
+    planes=3, chroma=0:1 align=1:2 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[0:1] 4/32/[0:1] 0/0/[0:0] }
+  Regular: planes=3 compbytes=4 bitpad=0 chroma=1x2 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
 yuv444p: ctype=uint
   Legacy desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=0:0 align=1:1 bits=8 cbits=8
@@ -1542,6 +1589,32 @@ yuv444p9be: [GENERIC] ctype=uint
     0: p=0  st=2  o=0  sh=0  d=9
     1: p=1  st=2  o=0  sh=0  d=9
     2: p=2  st=2  o=0  sh=0  d=9
+yuv444pf: ctype=float
+  Legacy desc: [ba][yuvp][yuv][le]
+    planes=3, chroma=0:0 align=1:1 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[0:0] 4/32/[0:0] 0/0/[0:0] }
+  Regular: planes=3 compbytes=4 bitpad=0 chroma=1x1 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
+yuva410pf: ctype=float
+  Legacy desc: [ba][a][yuvp][yuv][le]
+    planes=4, chroma=2:2 align=4:4 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[2:2] 4/32/[2:2] 4/32/[0:0] }
+  Regular: planes=4 compbytes=4 bitpad=0 chroma=4x4 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
+    3: {4}
+yuva411pf: ctype=float
+  Legacy desc: [ba][a][yuvp][yuv][le]
+    planes=4, chroma=2:0 align=4:1 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[2:0] 4/32/[2:0] 4/32/[0:0] }
+  Regular: planes=4 compbytes=4 bitpad=0 chroma=4x1 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
+    3: {4}
 yuva420p: [GENERIC] ctype=uint
   Legacy desc: [ba][a][yuvp][yuv][le][be]
     planes=4, chroma=1:1 align=2:2 bits=8 cbits=8
@@ -1625,6 +1698,15 @@ yuva420p9be: [GENERIC] ctype=uint
     1: p=1  st=2  o=0  sh=0  d=9
     2: p=2  st=2  o=0  sh=0  d=9
     3: p=3  st=2  o=0  sh=0  d=9
+yuva420pf: ctype=float
+  Legacy desc: [ba][a][yuvp][yuv][le]
+    planes=4, chroma=1:1 align=2:2 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[1:1] 4/32/[1:1] 4/32/[0:0] }
+  Regular: planes=4 compbytes=4 bitpad=0 chroma=2x2 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
+    3: {4}
 yuva422p: [GENERIC] ctype=uint
   Legacy desc: [ba][a][yuvp][yuv][le][be]
     planes=4, chroma=1:0 align=2:1 bits=8 cbits=8
@@ -1731,6 +1813,24 @@ yuva422p9be: [GENERIC] ctype=uint
     1: p=1  st=2  o=0  sh=0  d=9
     2: p=2  st=2  o=0  sh=0  d=9
     3: p=3  st=2  o=0  sh=0  d=9
+yuva422pf: ctype=float
+  Legacy desc: [ba][a][yuvp][yuv][le]
+    planes=4, chroma=1:0 align=2:1 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[1:0] 4/32/[1:0] 4/32/[0:0] }
+  Regular: planes=4 compbytes=4 bitpad=0 chroma=2x1 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
+    3: {4}
+yuva440pf: ctype=float
+  Legacy desc: [ba][a][yuvp][yuv][le]
+    planes=4, chroma=0:1 align=1:2 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[0:1] 4/32/[0:1] 4/32/[0:0] }
+  Regular: planes=4 compbytes=4 bitpad=0 chroma=1x2 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
+    3: {4}
 yuva444p: [GENERIC] ctype=uint
   Legacy desc: [ba][a][yuvp][yuv][le][be]
     planes=4, chroma=0:0 align=1:1 bits=8 cbits=8
@@ -1837,6 +1937,15 @@ yuva444p9be: [GENERIC] ctype=uint
     1: p=1  st=2  o=0  sh=0  d=9
     2: p=2  st=2  o=0  sh=0  d=9
     3: p=3  st=2  o=0  sh=0  d=9
+yuva444pf: ctype=float
+  Legacy desc: [ba][a][yuvp][yuv][le]
+    planes=4, chroma=0:0 align=1:1 bits=32 cbits=32
+    {4/32/[0:0] 4/32/[0:0] 4/32/[0:0] 4/32/[0:0] }
+  Regular: planes=4 compbytes=4 bitpad=0 chroma=1x1 ctype=float
+    0: {1}
+    1: {2}
+    2: {3}
+    3: {4}
 yuvj411p: [GENERIC] ctype=uint
   Legacy desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=2:0 align=4:1 bits=8 cbits=8
