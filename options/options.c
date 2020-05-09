@@ -699,20 +699,20 @@ static const m_option_t mp_opts[] = {
     {"autosync", OPT_CHOICE(autosync, {"no", -1}), M_RANGE(0, 10000)},
 
     {"term-osd", OPT_CHOICE(term_osd,
-        {"force", 1}, {"auto", 2}, {"no", 0})},
+        {"force", 1}, {"auto", 2}, {"no", 0}), .flags = UPDATE_OSD},
 
-    {"term-osd-bar", OPT_FLAG(term_osd_bar)},
-    {"term-osd-bar-chars", OPT_STRING(term_osd_bar_chars)},
+    {"term-osd-bar", OPT_FLAG(term_osd_bar), .flags = UPDATE_OSD},
+    {"term-osd-bar-chars", OPT_STRING(term_osd_bar_chars), .flags = UPDATE_OSD},
 
     {"term-playing-msg", OPT_STRING(playing_msg)},
     {"osd-playing-msg", OPT_STRING(osd_playing_msg)},
-    {"term-status-msg", OPT_STRING(status_msg)},
-    {"osd-status-msg", OPT_STRING(osd_status_msg)},
-    {"osd-msg1", OPT_STRING(osd_msg[0])},
-    {"osd-msg2", OPT_STRING(osd_msg[1])},
-    {"osd-msg3", OPT_STRING(osd_msg[2])},
+    {"term-status-msg", OPT_STRING(status_msg), .flags = UPDATE_OSD},
+    {"osd-status-msg", OPT_STRING(osd_status_msg), .flags = UPDATE_OSD},
+    {"osd-msg1", OPT_STRING(osd_msg[0]), .flags = UPDATE_OSD},
+    {"osd-msg2", OPT_STRING(osd_msg[1]), .flags = UPDATE_OSD},
+    {"osd-msg3", OPT_STRING(osd_msg[2]), .flags = UPDATE_OSD},
 
-    {"video-osd", OPT_FLAG(video_osd)},
+    {"video-osd", OPT_FLAG(video_osd), .flags = UPDATE_OSD},
 
     {"idle", OPT_CHOICE(player_idle_mode,
         {"no",   0}, {"once", 1}, {"yes",  2})},
