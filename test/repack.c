@@ -5,6 +5,7 @@
 #include "video/fmt-conversion.h"
 #include "video/img_format.h"
 #include "video/repack.h"
+#include "video/sws_utils.h"
 #include "video/zimg.h"
 
 // Excuse the utter stupidity.
@@ -118,14 +119,14 @@ static int try_repack(struct test_ctx *ctx, FILE *f, int imgfmt, int flags,
 
     // Skip the identity ones because they're uninteresting, and add too much
     // noise. But still make sure they behave as expected.
-    if (is_true_planar(imgfmt)) {
+    if (a == imgfmt && b == imgfmt) {
+        assert(is_true_planar(imgfmt));
         // (note that we require alpha-enabled zimg)
         assert(mp_zimg_supports_in_format(imgfmt));
         assert(un && pa);
-        assert(a == imgfmt && b == imgfmt);
         talloc_free(pa);
         talloc_free(un);
-        return 0;
+        return b;
     }
 
     struct mp_repack *rp = pa ? pa : un;
@@ -147,6 +148,8 @@ static int try_repack(struct test_ctx *ctx, FILE *f, int imgfmt, int flags,
 
     fprintf(f, " a=%d:%d", mp_repack_get_align_x(rp), mp_repack_get_align_y(rp));
 
+    if (flags & REPACK_CREATE_PLANAR_F32)
+        fprintf(f, " [planar-f32]");
     if (flags & REPACK_CREATE_ROUND_DOWN)
         fprintf(f, " [round-down]");
     if (flags & REPACK_CREATE_EXPAND_8BIT)
@@ -174,6 +177,9 @@ static int try_repack(struct test_ctx *ctx, FILE *f, int imgfmt, int flags,
         int sx = 4 * ax, sy = 3 * ay, dx = 3 * ax, dy = 2 * ay;
 
         assert(ia && ib);
+
+        mp_image_params_guess_csp(&ia->params);
+        mp_image_params_guess_csp(&ib->params);
 
         for (int pack = 0; pack < 2; pack++) {
             struct mp_repack *repacker = pack ? pa : un;
@@ -227,6 +233,104 @@ static int try_repack(struct test_ctx *ctx, FILE *f, int imgfmt, int flags,
     return b;
 }
 
+static void check_float_repack(int imgfmt, enum mp_csp csp,
+                               enum mp_csp_levels levels)
+{
+    imgfmt = UNFUCK(imgfmt);
+
+    struct mp_regular_imgfmt desc = {0};
+    mp_get_regular_imgfmt(&desc, imgfmt);
+    int bpp = desc.component_size;
+    int comp_bits = desc.component_size * 8 + MPMIN(desc.component_pad, 0);
+
+    assert(bpp == 1 || bpp == 2);
+
+    int w = 1 << (bpp * 8);
+    struct mp_image *src = mp_image_alloc(imgfmt, w, 1);
+    assert(src);
+
+    src->params.color.space = csp;
+    src->params.color.levels = levels;
+    mp_image_params_guess_csp(&src->params);
+    // mpv may not allow all combinations
+    assert(src->params.color.space == csp);
+    assert(src->params.color.levels == levels);
+
+    for (int p = 0; p < src->num_planes; p++) {
+        int val = 0;
+        for (int x = 0; x < w >> src->fmt.xs[p]; x++) {
+            val = MPMIN(val, (1 << comp_bits) - 1);
+            void *pixel = mp_image_pixel_ptr(src, p, x, 0);
+            if (bpp == 1) {
+                *(uint8_t *)pixel = val;
+            } else {
+                *(uint16_t *)pixel = val;
+            }
+            val++;
+        }
+    }
+
+    struct mp_repack *to_f =
+        mp_repack_create_planar(src->imgfmt, false, REPACK_CREATE_PLANAR_F32);
+    struct mp_repack *from_f =
+        mp_repack_create_planar(src->imgfmt, true, REPACK_CREATE_PLANAR_F32);
+    assert(to_f && from_f);
+
+    struct mp_image *z_f = mp_image_alloc(mp_repack_get_format_dst(to_f), w, 1);
+    struct mp_image *r_f = mp_image_alloc(z_f->imgfmt, w, 1);
+    struct mp_image *z_i = mp_image_alloc(src->imgfmt, w, 1);
+    struct mp_image *r_i = mp_image_alloc(src->imgfmt, w, 1);
+    assert(z_f && r_f && z_i && r_i);
+
+    z_f->params.color = r_f->params.color = z_i->params.color =
+        r_i->params.color = src->params.color;
+
+    // The idea is to use zimg to cross-check conversion.
+    struct mp_sws_context *s = mp_sws_alloc(NULL);
+    s->force_scaler = MP_SWS_ZIMG;
+    struct zimg_opts opts = zimg_opts_defaults;
+    opts.dither = ZIMG_DITHER_NONE;
+    s->zimg_opts = &opts;
+    mp_sws_scale(s, z_f, src);
+    mp_sws_scale(s, z_i, z_f);
+    talloc_free(s);
+
+    repack_config_buffers(to_f, 0, r_f, 0, src, NULL);
+    repack_line(to_f, 0, 0, 0, 0, w);
+    repack_config_buffers(from_f, 0, r_i, 0, r_f, NULL);
+    repack_line(from_f, 0, 0, 0, 0, w);
+
+    for (int p = 0; p < src->num_planes; p++) {
+        for (int x = 0; x < w >> src->fmt.xs[p]; x++) {
+            uint32_t src_val, z_i_val, r_i_val;
+            if (bpp == 1) {
+                src_val = *(uint8_t *)mp_image_pixel_ptr(src, p, x, 0);
+                z_i_val = *(uint8_t *)mp_image_pixel_ptr(z_i, p, x, 0);
+                r_i_val = *(uint8_t *)mp_image_pixel_ptr(r_i, p, x, 0);
+            } else {
+                src_val = *(uint16_t *)mp_image_pixel_ptr(src, p, x, 0);
+                z_i_val = *(uint16_t *)mp_image_pixel_ptr(z_i, p, x, 0);
+                r_i_val = *(uint16_t *)mp_image_pixel_ptr(r_i, p, x, 0);
+            }
+            float z_f_val = *(float *)mp_image_pixel_ptr(z_f, p, x, 0);
+            float r_f_val = *(float *)mp_image_pixel_ptr(r_f, p, x, 0);
+
+            assert_int_equal(src_val, z_i_val);
+            assert_int_equal(src_val, r_i_val);
+            double tolerance = 1.0 / (1 << (bpp * 8)) / 4;
+            assert_float_equal(r_f_val, z_f_val, tolerance);
+        }
+    }
+
+    talloc_free(src);
+    talloc_free(z_i);
+    talloc_free(z_f);
+    talloc_free(r_i);
+    talloc_free(r_f);
+    talloc_free(to_f);
+    talloc_free(from_f);
+}
+
 static void run(struct test_ctx *ctx)
 {
     FILE *f = test_open_out(ctx, "repack.txt");
@@ -238,12 +342,23 @@ static void run(struct test_ctx *ctx)
         int other = try_repack(ctx, f, imgfmt, 0, 0);
         try_repack(ctx, f, imgfmt, REPACK_CREATE_ROUND_DOWN, other);
         try_repack(ctx, f, imgfmt, REPACK_CREATE_EXPAND_8BIT, other);
+        try_repack(ctx, f, imgfmt, REPACK_CREATE_PLANAR_F32, other);
     }
 
     fclose(f);
 
     assert_text_files_equal(ctx, "repack.txt", "repack.txt",
                 "This can fail if FFmpeg/libswscale adds or removes pixfmts.");
+
+    check_float_repack(-AV_PIX_FMT_GBRAP, MP_CSP_RGB, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_GBRAP10, MP_CSP_RGB, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_GBRAP16, MP_CSP_RGB, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+    check_float_repack(-AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+    check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
 }
 
 const struct unittest test_repack = {

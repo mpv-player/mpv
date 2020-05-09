@@ -22,11 +22,13 @@
 
 #include "common/common.h"
 #include "repack.h"
+#include "video/csputils.h"
 #include "video/fmt-conversion.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 
 enum repack_step_type {
+    REPACK_STEP_FLOAT,
     REPACK_STEP_REPACK,
     REPACK_STEP_ENDIAN,
 };
@@ -68,6 +70,13 @@ struct mp_repack {
     uint8_t *comp_map;
     uint8_t comp_shifts[3];
     uint8_t *comp_lut;
+
+    // F32 repacking.
+    int f32_comp_size;
+    float f32_m[4], f32_o[4];
+    uint32_t f32_pmax[4];
+    enum mp_csp f32_csp_space;
+    enum mp_csp_levels f32_csp_levels;
 
     // REPACK_STEP_REPACK: if true, need to copy this plane
     bool copy_buf[4];
@@ -807,6 +816,82 @@ static void setup_nv_packer(struct mp_repack *rp)
     }
 }
 
+#define PA_F32(name, packed_t)                                              \
+    static void name(void *dst, float *src, int w, float m, float o,        \
+                     uint32_t p_max) {                                      \
+        for (int x = 0; x < w; x++) {                                       \
+            ((packed_t *)dst)[x] =                                          \
+                MPCLAMP(lrint((src[x] + o) * m), 0, (packed_t)p_max);       \
+        }                                                                   \
+    }
+
+#define UN_F32(name, packed_t)                                              \
+    static void name(void *src, float *dst, int w, float m, float o,        \
+                     uint32_t unused) {                                     \
+        for (int x = 0; x < w; x++)                                         \
+            dst[x] = ((packed_t *)src)[x] * m + o;                          \
+    }
+
+PA_F32(pa_f32_8, uint8_t)
+UN_F32(un_f32_8, uint8_t)
+PA_F32(pa_f32_16, uint16_t)
+UN_F32(un_f32_16, uint16_t)
+
+// In all this, float counts as "unpacked".
+static void repack_float(struct mp_repack *rp,
+                         struct mp_image *a, int a_x, int a_y,
+                         struct mp_image *b, int b_x, int b_y, int w)
+{
+    assert(rp->f32_comp_size == 1 || rp->f32_comp_size == 2);
+
+    void (*packer)(void *a, float *b, int w, float fm, float fb, uint32_t max)
+        = rp->pack ? (rp->f32_comp_size == 1 ? pa_f32_8 : pa_f32_16)
+                   : (rp->f32_comp_size == 1 ? un_f32_8 : un_f32_16);
+
+    for (int p = 0; p < b->num_planes; p++) {
+        int h = (1 << b->fmt.chroma_ys) - (1 << b->fmt.ys[p]) + 1;
+        for (int y = 0; y < h; y++) {
+            void *pa = mp_image_pixel_ptr(a, p, a_x, a_y + y);
+            void *pb = mp_image_pixel_ptr(b, p, b_x, b_y + y);
+
+            packer(pa, pb, w >> b->fmt.xs[p], rp->f32_m[p], rp->f32_o[p],
+                   rp->f32_pmax[p]);
+        }
+    }
+}
+
+static void update_repack_float(struct mp_repack *rp)
+{
+    if (!rp->f32_comp_size)
+        return;
+
+    // Image in input format.
+    struct mp_image *ui =  rp->pack ? rp->steps[rp->num_steps - 1].buf[1]
+                                    : rp->steps[0].buf[0];
+    enum mp_csp csp = ui->params.color.space;
+    enum mp_csp_levels levels = ui->params.color.levels;
+    if (rp->f32_csp_space == csp && rp->f32_csp_levels == levels)
+        return;
+
+    // The fixed point format.
+    struct mp_regular_imgfmt desc = {0};
+    mp_get_regular_imgfmt(&desc, rp->imgfmt_b);
+    assert(desc.component_size);
+
+    int comp_bits = desc.component_size * 8 + MPMIN(desc.component_pad, 0);
+    for (int p = 0; p < desc.num_planes; p++) {
+        double m, o;
+        mp_get_csp_uint_mul(csp, levels, comp_bits, desc.planes[p].components[0],
+                            &m, &o);
+        rp->f32_m[p] = rp->pack ? 1.0 / m : m;
+        rp->f32_o[p] = rp->pack ? -o      : o;
+        rp->f32_pmax[p] = (1u << comp_bits) - 1;
+    }
+
+    rp->f32_csp_space = csp;
+    rp->f32_csp_levels = levels;
+}
+
 void repack_line(struct mp_repack *rp, int dst_x, int dst_y,
                  int src_x, int src_y, int w)
 {
@@ -858,6 +943,9 @@ void repack_line(struct mp_repack *rp, int dst_x, int dst_y,
             swap_endian(rs->buf[1], dx, dy, rs->buf[0], sx, sy, w,
                         rp->endian_size);
             break;
+        case REPACK_STEP_FLOAT:
+            repack_float(rp, buf_a, a_x, a_y, buf_b, b_x, b_y, w);
+            break;
         }
     }
 }
@@ -908,6 +996,32 @@ static bool setup_format_ne(struct mp_repack *rp)
     rp->fmt_b = mp_imgfmt_get_desc(rp->imgfmt_b);
 
     // This is if we did a pack step.
+
+    if (rp->flags & REPACK_CREATE_PLANAR_F32) {
+        // imgfmt_b with float32 component type.
+        struct mp_regular_imgfmt fdesc = desc;
+        fdesc.component_type = MP_COMPONENT_TYPE_FLOAT;
+        fdesc.component_size = 4;
+        fdesc.component_pad = 0;
+        int ffmt = mp_find_regular_imgfmt(&fdesc);
+        if (!ffmt)
+            return false;
+        if (ffmt != rp->imgfmt_b) {
+            if (desc.component_type != MP_COMPONENT_TYPE_UINT ||
+                (desc.component_size != 1 && desc.component_size != 2))
+                return false;
+            rp->f32_comp_size = desc.component_size;
+            rp->f32_csp_space = MP_CSP_COUNT;
+            rp->f32_csp_levels = MP_CSP_LEVELS_COUNT;
+            rp->steps[rp->num_steps++] = (struct repack_step) {
+                .type = REPACK_STEP_FLOAT,
+                .fmt = {
+                    mp_imgfmt_get_desc(ffmt),
+                    rp->fmt_b,
+                },
+            };
+        }
+    }
 
     rp->steps[rp->num_steps++] = (struct repack_step) {
         .type = REPACK_STEP_REPACK,
@@ -1103,6 +1217,8 @@ bool repack_config_buffers(struct mp_repack *rp,
         for (int n = rp->fmt_b.num_planes; n < MP_MAX_PLANES; n++)
             enable_passthrough[n] = false;
     }
+
+    update_repack_float(rp);
 
     rp->configured = true;
 

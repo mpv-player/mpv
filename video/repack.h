@@ -10,6 +10,10 @@ enum {
 
     // Expand some (not all) low bit depth fringe formats to 8 bit on unpack.
     REPACK_CREATE_EXPAND_8BIT   = (1 << 1),
+
+    // For mp_repack_create_planar(). If specified, the planar format uses a
+    // float 32 bit sample format. No range expansion is done.
+    REPACK_CREATE_PLANAR_F32    = (1 << 2),
 };
 
 struct mp_repack;
