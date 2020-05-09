@@ -637,7 +637,8 @@ static void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params,
 }
 
 // Get multiplication factor required if image data is fit within the LSBs of a
-// higher smaller bit depth isfixed-point texture data.
+// higher smaller bit depth fixed-point texture data.
+// This is broken. Use mp_get_csp_uint_mul().
 double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits)
 {
     assert(texture_bits >= input_bits);
@@ -655,6 +656,46 @@ double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits)
 
     // High bit depth YUV uses a range shifted from 8 bit.
     return (1LL << input_bits) / ((1LL << texture_bits) - 1.) * 255 / 256;
+}
+
+// Return information about color fixed point representation.his is needed for
+// converting color from integer formats to or from float. Use as follows:
+//      float_val = uint_val * m + o
+//      uint_val = clamp(round((float_val - o) / m))
+// See H.264/5 Annex E.
+//  csp: colorspace
+//  levels: full range flag
+//  component: ID of the channel, as in mp_regular_imgfmt:
+//             1 is red/luminance/gray, 2 is green/Cb, 3 is blue/Cr, 4 is alpha.
+//  bits: number of significant bits, e.g. 10 for yuv420p10, 16 for p010
+//  out_m: returns factor to multiply the uint number with
+//  out_o: returns offset to add after multiplication
+void mp_get_csp_uint_mul(enum mp_csp csp, enum mp_csp_levels levels,
+                         int bits, int component, double *out_m, double *out_o)
+{
+    uint16_t i_min = 0;
+    uint16_t i_max = (1u << bits) - 1;
+    double f_min = 0; // min. float value
+
+    if (csp != MP_CSP_RGB && component != 4) {
+        if (component == 2 || component == 3) {
+            f_min = (1u << (bits - 1)) / -(double)i_max; // force center => 0
+
+            if (levels != MP_CSP_LEVELS_PC && bits >= 8) {
+                i_min = 16  << (bits - 8); // => -0.5
+                i_max = 240 << (bits - 8); // =>  0.5
+                f_min = -0.5;
+            }
+        } else {
+            if (levels != MP_CSP_LEVELS_PC && bits >= 8) {
+                i_min = 16  << (bits - 8); // => 0
+                i_max = 235 << (bits - 8); // => 1
+            }
+        }
+    }
+
+    *out_m = 1.0 / (i_max - i_min);
+    *out_o = (1 + f_min) - i_max * *out_m;
 }
 
 /* Fill in the Y, U, V vectors of a yuv-to-rgb conversion matrix
