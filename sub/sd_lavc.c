@@ -62,6 +62,8 @@ struct sd_lavc_priv {
     AVRational pkt_timebase;
     struct sub subs[MAX_QUEUE]; // most recent event first
     struct sub_bitmap *outbitmaps;
+    struct sub_bitmap *prevret;
+    int prevret_num;
     int64_t displayed_id;
     int64_t new_id;
     struct mp_image_params video_params;
@@ -489,6 +491,28 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
             sub->dh += sub->dh * shit * 2;
         }
     }
+
+    if (priv->prevret_num != res->num_parts)
+        res->change_id++;
+
+    if (!res->change_id) {
+        assert(priv->prevret_num == res->num_parts);
+        for (int n = 0; n < priv->prevret_num; n++) {
+            struct sub_bitmap *a = &res->parts[n];
+            struct sub_bitmap *b = &priv->prevret[n];
+
+            if (a->x != b->x || a->y != b->y ||
+                a->dw != b->dw || a->dh != b->dh)
+            {
+                res->change_id++;
+                break;
+            }
+        }
+    }
+
+    priv->prevret_num = res->num_parts;
+    MP_TARRAY_GROW(priv, priv->prevret, priv->prevret_num);
+    memcpy(priv->prevret, res->parts, res->num_parts * sizeof(priv->prevret[0]));
 
     return sub_bitmaps_copy(NULL, res);
 }
