@@ -1081,6 +1081,7 @@ static void *vo_thread(void *ptr)
         mp_dispatch_queue_process(vo->in->dispatch, 0);
         if (in->terminate)
             break;
+        stats_event(in->stats, "iterations");
         vo->driver->control(vo, VOCTRL_CHECK_EVENTS, NULL);
         bool working = render_frame(vo);
         int64_t now = mp_time_us();
@@ -1096,10 +1097,10 @@ static void *vo_thread(void *ptr)
             }
         }
         if (vo->want_redraw && !in->want_redraw) {
-            vo->want_redraw = false;
             in->want_redraw = true;
             wakeup_core(vo);
         }
+        vo->want_redraw = false;
         bool redraw = in->request_redraw;
         bool send_reset = in->send_reset;
         in->send_reset = false;
