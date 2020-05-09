@@ -869,7 +869,7 @@ static bool render_frame(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     struct vo_frame *frame = NULL;
-    bool got_frame = false;
+    bool more_frames = false;
 
     update_display_fps(vo);
 
@@ -994,9 +994,14 @@ static bool render_frame(struct vo *vo)
         in->request_redraw = false;
     }
 
-    pthread_cond_broadcast(&in->wakeup); // for vo_wait_frame()
+    if (in->current_frame && in->current_frame->num_vsyncs &&
+        in->current_frame->display_synced)
+        more_frames = true;
 
-    got_frame = true;
+    if (in->frame_queued && in->frame_queued->display_synced)
+        more_frames = true;
+
+    pthread_cond_broadcast(&in->wakeup); // for vo_wait_frame()
 
 done:
     talloc_free(frame);
@@ -1006,7 +1011,7 @@ done:
     }
     pthread_mutex_unlock(&in->lock);
 
-    return got_frame || (in->frame_queued && in->frame_queued->display_synced);
+    return more_frames;
 }
 
 static void do_redraw(struct vo *vo)
@@ -1083,7 +1088,7 @@ static void *vo_thread(void *ptr)
             break;
         stats_event(in->stats, "iterations");
         vo->driver->control(vo, VOCTRL_CHECK_EVENTS, NULL);
-        bool working = render_frame(vo);
+        bool working = render_frame(vo)&&0;
         int64_t now = mp_time_us();
         int64_t wait_until = now + (working ? 0 : (int64_t)1e9);
 
