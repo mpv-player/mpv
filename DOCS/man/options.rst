@@ -2423,7 +2423,8 @@ Subtitles
     default.
 
     :no:    Don't automatically load external subtitle files.
-    :exact: Load the media filename with subtitle file extension (default).
+    :exact: Load the media filename with subtitle file extension and possibly
+            language suffixes (default).
     :fuzzy: Load all subs containing media filename.
     :all:   Load all subs in the current and ``--sub-file-paths`` directories.
 
