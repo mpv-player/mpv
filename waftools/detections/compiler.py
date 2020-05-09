@@ -44,6 +44,7 @@ def __add_generic_flags__(ctx):
                                  "-Wno-format-truncation",
                                  "-Wimplicit-fallthrough",
                                  ])
+    __test_and_add_flags__(ctx, ["-fno-math-errno"])
 
 def __add_gcc_flags__(ctx):
     ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
