@@ -244,6 +244,8 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         ctx->zimg->log = ctx->log;
         ctx->zimg->src = *src;
         ctx->zimg->dst = *dst;
+        if (ctx->zimg_opts)
+            ctx->zimg->opts = *ctx->zimg_opts;
         if (mp_zimg_config(ctx->zimg)) {
             ctx->zimg_ok = true;
             MP_VERBOSE(ctx, "Using zimg.\n");

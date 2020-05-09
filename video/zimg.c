@@ -43,6 +43,15 @@ static const struct m_opt_choice_alternatives mp_zimg_scalers[] = {
     {0}
 };
 
+const struct zimg_opts zimg_opts_defaults = {
+    .scaler = ZIMG_RESIZE_LANCZOS,
+    .scaler_params = {NAN, NAN},
+    .scaler_chroma_params = {NAN, NAN},
+    .scaler_chroma = ZIMG_RESIZE_BILINEAR,
+    .dither = ZIMG_DITHER_RANDOM,
+    .fast = 1,
+};
+
 #define OPT_PARAM(var) OPT_DOUBLE(var), .flags = M_OPT_DEFAULT_NAN
 
 #define OPT_BASE_STRUCT struct zimg_opts
@@ -63,14 +72,7 @@ const struct m_sub_options zimg_conf = {
         {0}
     },
     .size = sizeof(struct zimg_opts),
-    .defaults = &(const struct zimg_opts){
-        .scaler = ZIMG_RESIZE_LANCZOS,
-        .scaler_params = {NAN, NAN},
-        .scaler_chroma_params = {NAN, NAN},
-        .scaler_chroma = ZIMG_RESIZE_BILINEAR,
-        .dither = ZIMG_DITHER_RANDOM,
-        .fast = 1,
-    },
+    .defaults = &zimg_opts_defaults,
 };
 
 struct mp_zimg_repack {

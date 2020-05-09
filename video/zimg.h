@@ -22,6 +22,8 @@ struct zimg_opts {
     int fast;
 };
 
+extern const struct zimg_opts zimg_opts_defaults;
+
 struct mp_zimg_context {
     // Can be set for verbose error printing.
     struct mp_log *log;

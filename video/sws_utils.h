@@ -44,6 +44,10 @@ struct mp_sws_context {
     // This is unfortunately a hack: bypass command line choice
     enum mp_sws_scaler force_scaler;
 
+    // If zimg is used. Need to manually invalidate cache (set force_reload).
+    // Conflicts with enabling command line opts.
+    struct zimg_opts *zimg_opts;
+
     // Changing these requires setting force_reload=true.
     // By default, they are NULL.
     // Freeing the mp_sws_context will deallocate these if set.
