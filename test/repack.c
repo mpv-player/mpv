@@ -24,6 +24,7 @@ struct entry {
 
 #define P8(...) (const uint8_t[]){__VA_ARGS__}
 #define P16(...) (const uint16_t[]){__VA_ARGS__}
+#define P32(...) (const uint32_t[]){__VA_ARGS__}
 
 // Warning: only entries that match existing conversions are tested.
 static const struct entry repack_tests[] = {
@@ -52,6 +53,8 @@ static const struct entry repack_tests[] = {
     {1, 1, -AV_PIX_FMT_RGB48BE,     {P16(0x1a1b, 0x2a2b, 0x3a3b)},
            -AV_PIX_FMT_GBRP16,      {P16(0x2b2a), P16(0x3b3a),
                                      P16(0x1b1a)}},
+    {1, 1, IMGFMT_RGB30,            {P32((3 << 20) | (2 << 10) | 1)},
+           -AV_PIX_FMT_GBRP10,      {P16(2), P16(1), P16(3)}},
     {8, 1, -AV_PIX_FMT_MONOWHITE,   {P8(0xAA)},
            IMGFMT_Y1,               {P8(0, 1, 0, 1, 0, 1, 0, 1)}},
     {8, 1, -AV_PIX_FMT_MONOBLACK,   {P8(0xAA)},

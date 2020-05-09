@@ -190,7 +190,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
             desc->num_planes = 1;
             desc->planes[0] = fmt;
             for (int i = 0; i < 3; i++)
-                desc->components[0][i] = i + 1;
+                desc->components[0][i] = 3 - i;
             desc->chroma_w = desc->chroma_h = 1;
         }
         if (strcmp(fmt->name, "appleyp") == 0) {

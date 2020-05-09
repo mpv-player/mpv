@@ -87,7 +87,7 @@ pal8            =>      [un] gbrap           | a=1:1
 qsv             => no
 rgb0            => [pa] [un] gbrp            | a=1:1 [tu] [tp]
 rgb24           => [pa] [un] gbrp            | a=1:1
-rgb30           => [pa] [un] gbrp10          | a=1:1
+rgb30           => [pa] [un] gbrp10          | a=1:1 [tu] [tp]
 rgb4            => no
 rgb444          => [pa] [un] gbrp4           | a=1:1
 rgb444          => [pa] [un] gbrp            | a=1:1 [expand-8bit]

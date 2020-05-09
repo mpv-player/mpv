@@ -234,7 +234,7 @@ PA_WORD_3(pa_ccc8z8,  uint32_t, uint8_t,  0, 8,  16, 0)
 UN_WORD_3(un_x8ccc8,  uint32_t, uint8_t,  8, 16, 24, 0xFFu)
 PA_WORD_3(pa_z8ccc8,  uint32_t, uint8_t,  8, 16, 24, 0)
 UN_WORD_3(un_ccc10x2, uint32_t, uint16_t, 0, 10, 20, 0x3FFu)
-PA_WORD_3(pa_ccc10z2, uint32_t, uint16_t, 20, 10, 0, 0)
+PA_WORD_3(pa_ccc10z2, uint32_t, uint16_t, 0, 10, 20, 0)
 
 #define PA_WORD_2(name, packed_t, plane_t, sh_c0, sh_c1, pad)               \
     static void name(void *dst, void *src[], int w) {                       \
@@ -598,7 +598,7 @@ static void setup_misc_packer(struct mp_repack *rp)
         rp->imgfmt_b = planar_fmt;
         rp->repack = packed_repack;
         rp->packed_repack_scanline = rp->pack ? pa_ccc10z2 : un_ccc10x2;
-        static int c_order[] = {3, 2, 1};
+        static int c_order[] = {2, 1, 3};
         for (int n = 0; n < 3; n++)
             rp->components[n] = c_order[n] - 1;
     } else if (rp->imgfmt_a == IMGFMT_PAL8 && !rp->pack) {
