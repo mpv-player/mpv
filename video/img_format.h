@@ -98,7 +98,7 @@ enum mp_component_type mp_imgfmt_get_component_type(int imgfmt);
 
 struct mp_regular_imgfmt_plane {
     uint8_t num_components;
-    // 1 is luminance/red/gray, 2 is green/Cb, 3 is blue/Cr, 4 is alpha.
+    // 1 is red/luminance/gray, 2 is green/Cb, 3 is blue/Cr, 4 is alpha.
     // 0 is used for padding (undefined contents).
     // It is guaranteed that non-0 values occur only once in the whole format.
     uint8_t components[MP_NUM_COMPONENTS];
