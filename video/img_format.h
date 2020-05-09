@@ -69,8 +69,9 @@ struct mp_imgfmt_desc {
     int flags;              // MP_IMGFLAG_* bitfield
     int8_t num_planes;
     int8_t chroma_xs, chroma_ys; // chroma shift (i.e. log2 of chroma pixel size)
-    int8_t align_x, align_y;     // pixel size to get byte alignment and to get
+    int8_t align_x, align_y;     // pixel count to get byte alignment and to get
                                  // to a pixel pos where luma & chroma aligns
+                                 // always power of 2
     int8_t bytes[MP_MAX_PLANES]; // bytes per pixel (MP_IMGFLAG_BYTE_ALIGNED)
     int8_t bpp[MP_MAX_PLANES];   // bits per pixel
     int8_t plane_bits;           // number of bits in use for plane 0

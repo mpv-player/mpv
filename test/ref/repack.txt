@@ -1,0 +1,163 @@
+0bgr            => [pa] [un] gbrp            | a=1:1 [tu] [tp]
+0rgb            => [pa] [un] gbrp            | a=1:1 [tu] [tp]
+abgr            => [pa] [un] gbrap           | a=1:1 [tu] [tp]
+argb            => [pa] [un] gbrap           | a=1:1 [tu] [tp]
+ayuv64          => [pa] [un] yuva444p16      | a=1:1 [tu] [tp]
+ayuv64be        => [pa] [un] yuva444p16      | a=1:1 [tu] [tp]
+bayer_bggr16    => no
+bayer_bggr16be  => no
+bayer_bggr8     => no
+bayer_gbrg16    => no
+bayer_gbrg16be  => no
+bayer_gbrg8     => no
+bayer_grbg16    => no
+bayer_grbg16be  => no
+bayer_grbg8     => no
+bayer_rggb16    => no
+bayer_rggb16be  => no
+bayer_rggb8     => no
+bgr0            => [pa] [un] gbrp            | a=1:1 [tu] [tp]
+bgr24           => [pa] [un] gbrp            | a=1:1
+bgr4            => no
+bgr444          => [pa] [un] gbrp4           | a=1:1
+bgr444          => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+bgr444be        => [pa] [un] gbrp4           | a=1:1
+bgr444be        => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+bgr48           => [pa] [un] gbrp16          | a=1:1
+bgr48be         => [pa] [un] gbrp16          | a=1:1
+bgr4_byte       => [pa] [un] gbrp2           | a=1:1
+bgr4_byte       => [pa] [un] gbrp1           | a=1:1 [round-down]
+bgr4_byte       => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+bgr555          => [pa] [un] gbrp5           | a=1:1
+bgr555          => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+bgr555be        => [pa] [un] gbrp5           | a=1:1
+bgr555be        => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+bgr565          => [pa] [un] gbrp6           | a=1:1
+bgr565          => [pa] [un] gbrp5           | a=1:1 [round-down]
+bgr565          => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+bgr565be        => [pa] [un] gbrp6           | a=1:1
+bgr565be        => [pa] [un] gbrp5           | a=1:1 [round-down]
+bgr565be        => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+bgr8            => [pa] [un] gbrp3           | a=1:1
+bgr8            => [pa] [un] gbrp2           | a=1:1 [round-down]
+bgr8            => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+bgra            => [pa] [un] gbrap           | a=1:1 [tu] [tp]
+bgra64          => [pa] [un] gbrap16         | a=1:1
+bgra64be        => [pa] [un] gbrap16         | a=1:1
+cuda            => no
+d3d11           => no
+d3d11va_vld     => no
+drm_prime       => no
+dxva2_vld       => no
+gbrap10be       => [pa] [un] gbrap10         | a=1:1
+gbrap12be       => [pa] [un] gbrap12         | a=1:1
+gbrap16be       => [pa] [un] gbrap16         | a=1:1
+gbrapf32be      => [pa] [un] gbrapf32        | a=1:1
+gbrp10be        => [pa] [un] gbrp10          | a=1:1
+gbrp12be        => [pa] [un] gbrp12          | a=1:1
+gbrp14be        => [pa] [un] gbrp14          | a=1:1
+gbrp16be        => [pa] [un] gbrp16          | a=1:1
+gbrp9be         => [pa] [un] gbrp9           | a=1:1
+gbrpf32be       => [pa] [un] gbrpf32         | a=1:1
+gray10be        => [pa] [un] gray10          | a=1:1
+gray12be        => [pa] [un] gray12          | a=1:1
+gray14be        => [pa] [un] gray14          | a=1:1
+gray16be        => [pa] [un] gray16          | a=1:1
+gray9be         => [pa] [un] gray9           | a=1:1
+grayf32be       => [pa] [un] grayf32         | a=1:1
+mediacodec      => no
+mmal            => no
+monob           => [pa] [un] y1              | a=8:1 [tu] [tp]
+monob           => [pa] [un] gray            | a=8:1 [expand-8bit]
+monow           => [pa] [un] y1              | a=8:1 [tu] [tp]
+monow           => [pa] [un] gray            | a=8:1 [expand-8bit]
+nv12            => [pa] [un] yuv420p         | a=2:2 [tu] [tp]
+nv16            => [pa] [un] yuv422p         | a=2:1
+nv20            => [pa] [un] yuv422p10       | a=2:1
+nv20be          => [pa] [un] yuv422p10       | a=2:1
+nv21            => [pa] [un] yuv420p         | a=2:2 [tu] [tp]
+nv24            => [pa] [un] yuv444p         | a=1:1
+nv42            => [pa] [un] yuv444p         | a=1:1
+opencl          => no
+p010            => [pa] [un] yuv420p16       | a=2:2
+p010be          => [pa] [un] yuv420p16       | a=2:2
+p016            => [pa] [un] yuv420p16       | a=2:2
+p016be          => [pa] [un] yuv420p16       | a=2:2
+pal8            =>      [un] gbrap           | a=1:1
+qsv             => no
+rgb0            => [pa] [un] gbrp            | a=1:1 [tu] [tp]
+rgb24           => [pa] [un] gbrp            | a=1:1
+rgb30           => [pa] [un] gbrp10          | a=1:1
+rgb4            => no
+rgb444          => [pa] [un] gbrp4           | a=1:1
+rgb444          => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+rgb444be        => [pa] [un] gbrp4           | a=1:1
+rgb444be        => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+rgb48           => [pa] [un] gbrp16          | a=1:1
+rgb48be         => [pa] [un] gbrp16          | a=1:1 [tu] [tp]
+rgb4_byte       => [pa] [un] gbrp2           | a=1:1
+rgb4_byte       => [pa] [un] gbrp1           | a=1:1 [round-down]
+rgb4_byte       => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+rgb555          => [pa] [un] gbrp5           | a=1:1
+rgb555          => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+rgb555be        => [pa] [un] gbrp5           | a=1:1
+rgb555be        => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+rgb565          => [pa] [un] gbrp6           | a=1:1
+rgb565          => [pa] [un] gbrp5           | a=1:1 [round-down]
+rgb565          => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+rgb565be        => [pa] [un] gbrp6           | a=1:1
+rgb565be        => [pa] [un] gbrp5           | a=1:1 [round-down]
+rgb565be        => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+rgb8            => [pa] [un] gbrp3           | a=1:1
+rgb8            => [pa] [un] gbrp2           | a=1:1 [round-down]
+rgb8            => [pa] [un] gbrp            | a=1:1 [expand-8bit]
+rgba            => [pa] [un] gbrap           | a=1:1 [tu] [tp]
+rgba64          => [pa] [un] gbrap16         | a=1:1 [tu] [tp]
+rgba64be        => [pa] [un] gbrap16         | a=1:1
+uyvy422         => [pa] [un] yuv422p         | a=2:1
+uyyvyy411       => no
+vaapi           => no
+vaapi_idct      => no
+vaapi_moco      => no
+vdpau           => no
+vdpau_output    => no
+videotoolbox    => no
+vulkan          => no
+xvmc            => no
+xyz12           => [pa] [un] gbrp16          | a=1:1
+xyz12be         => [pa] [un] gbrp16          | a=1:1
+y210            => [pa] [un] yuv422p16       | a=2:1
+y210be          => [pa] [un] yuv422p16       | a=2:1
+ya16            => [pa] [un] yap16           | a=1:1 [tu] [tp]
+ya16be          => [pa] [un] yap16           | a=1:1
+ya8             => [pa] [un] yap8            | a=1:1
+yuv420p10be     => [pa] [un] yuv420p10       | a=2:2
+yuv420p12be     => [pa] [un] yuv420p12       | a=2:2
+yuv420p14be     => [pa] [un] yuv420p14       | a=2:2
+yuv420p16be     => [pa] [un] yuv420p16       | a=2:2
+yuv420p9be      => [pa] [un] yuv420p9        | a=2:2
+yuv422p10be     => [pa] [un] yuv422p10       | a=2:1
+yuv422p12be     => [pa] [un] yuv422p12       | a=2:1
+yuv422p14be     => [pa] [un] yuv422p14       | a=2:1
+yuv422p16be     => [pa] [un] yuv422p16       | a=2:1 [tu] [tp]
+yuv422p9be      => [pa] [un] yuv422p9        | a=2:1
+yuv440p10be     => [pa] [un] yuv440p10       | a=1:2
+yuv440p12be     => [pa] [un] yuv440p12       | a=1:2
+yuv444p10be     => [pa] [un] yuv444p10       | a=1:1
+yuv444p12be     => [pa] [un] yuv444p12       | a=1:1
+yuv444p14be     => [pa] [un] yuv444p14       | a=1:1
+yuv444p16be     => [pa] [un] yuv444p16       | a=1:1
+yuv444p9be      => [pa] [un] yuv444p9        | a=1:1
+yuva420p10be    => [pa] [un] yuva420p10      | a=2:2
+yuva420p16be    => [pa] [un] yuva420p16      | a=2:2
+yuva420p9be     => [pa] [un] yuva420p9       | a=2:2
+yuva422p10be    => [pa] [un] yuva422p10      | a=2:1
+yuva422p12be    => [pa] [un] yuva422p12      | a=2:1
+yuva422p16be    => [pa] [un] yuva422p16      | a=2:1
+yuva422p9be     => [pa] [un] yuva422p9       | a=2:1
+yuva444p10be    => [pa] [un] yuva444p10      | a=1:1
+yuva444p12be    => [pa] [un] yuva444p12      | a=1:1
+yuva444p16be    => [pa] [un] yuva444p16      | a=1:1
+yuva444p9be     => [pa] [un] yuva444p9       | a=1:1
+yuyv422         => [pa] [un] yuv422p         | a=2:1
+yvyu422         => [pa] [un] yuv422p         | a=2:1 [tu] [tp]

@@ -12,6 +12,7 @@ static const struct unittest *unittests[] = {
     &test_paths,
     &test_repack_sws,
 #if HAVE_ZIMG
+    &test_repack, // zimg only due to cross-checking with zimg.c
     &test_repack_zimg,
 #endif
     NULL
@@ -127,4 +128,26 @@ void assert_text_files_equal_impl(const char *file, int line,
         MP_FATAL(ctx, "Giving up.\n");
         abort();
     }
+}
+
+static void hexdump(const uint8_t *d, size_t size)
+{
+    printf("|");
+    while (size--) {
+        printf(" %02x", d[0]);
+        d++;
+    }
+    printf(" |\n");
+}
+
+void assert_memcmp_impl(const char *file, int line,
+                        const void *a, const void *b, size_t size)
+{
+    if (memcmp(a, b, size) == 0)
+        return;
+
+    printf("%s:%d: mismatching data:\n", file, line);
+    hexdump(a, size);
+    hexdump(b, size);
+    abort();
 }
