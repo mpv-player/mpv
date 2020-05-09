@@ -136,6 +136,7 @@ struct osd_state *osd_create(struct mpv_global *global)
             .type = n,
             .text = talloc_strdup(obj, ""),
             .progbar_state = {.type = -1},
+            .vo_change_id = 1,
         };
         osd->objs[n] = obj;
     }
@@ -293,6 +294,11 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
         res = osd_object_get_bitmaps(osd, obj, format);
     }
 
+    if (obj->vo_had_output != !!res) {
+        obj->vo_had_output = !!res;
+        obj->vo_change_id += 1;
+    }
+
     if (res) {
         obj->vo_change_id += res->change_id;
 
@@ -314,6 +320,9 @@ struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
     pthread_mutex_lock(&osd->lock);
 
     struct sub_bitmap_list *list = talloc_zero(NULL, struct sub_bitmap_list);
+    list->change_id = 1;
+    list->w = res.w;
+    list->h = res.h;
 
     if (osd->force_video_pts != MP_NOPTS_VALUE)
         video_pts = osd->force_video_pts;
@@ -351,6 +360,8 @@ struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
                        obj->type, imgs->format);
             }
         }
+
+        list->change_id += obj->vo_change_id;
 
         talloc_free(imgs);
     }
