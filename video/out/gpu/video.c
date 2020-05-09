@@ -790,6 +790,8 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
         int csp = type == PLANE_ALPHA ? MP_CSP_RGB : p->image_params.color.space;
         float tex_mul =
             1.0 / mp_get_csp_mul(csp, msb_valid_bits, p->ra_format.component_bits);
+        if (p->ra_format.component_type == RA_CTYPE_FLOAT)
+            tex_mul = 1.0;
 
         img[n] = (struct image){
             .type = type,
@@ -2296,6 +2298,7 @@ static void pass_convert_yuv(struct gl_video *p)
 
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
     cparams.gray = p->is_gray;
+    cparams.is_float = p->ra_format.component_type == RA_CTYPE_FLOAT;
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_equalizer_state_get(p->video_eq, &cparams);
     p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);

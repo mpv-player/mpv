@@ -162,6 +162,8 @@ struct mp_csp_params {
     float gamma;
     // discard U/V components
     bool gray;
+    // input is already centered and range-expanded
+    bool is_float;
     // texture_bits/input_bits is for rescaling fixed point input to range [0,1]
     int texture_bits;
     int input_bits;

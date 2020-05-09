@@ -531,6 +531,8 @@ struct ra_imgfmt_desc {
     int component_bits;
     // Like mp_regular_imgfmt.component_pad.
     int component_pad;
+    // == planes[n].ctype (RA_CTYPE_UNKNOWN if not applicable)
+    enum ra_ctype component_type;
     // For each texture and each texture output (rgba order) describe what
     // component it returns.
     // The values are like the values in mp_regular_imgfmt_plane.components[].

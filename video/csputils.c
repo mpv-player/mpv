@@ -738,6 +738,9 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
         abort();
     };
 
+    if (params->is_float)
+        levels_in = -1;
+
     if ((colorspace == MP_CSP_BT_601 || colorspace == MP_CSP_BT_709 ||
          colorspace == MP_CSP_SMPTE_240M || colorspace == MP_CSP_BT_2020_NC))
     {
