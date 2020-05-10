@@ -233,6 +233,11 @@ mp.create_osd_overlay = function create_osd_overlay(format) {
 mp.set_osd_ass = function set_osd_ass(res_x, res_y, data) {
     if (!mp._legacy_overlay)
         mp._legacy_overlay = mp.create_osd_overlay("ass-events");
+
+    var lo = mp._legacy_overlay;
+    if (lo.res_x == res_x && lo.res_y == res_y && lo.data == data)
+        return true;
+
     mp._legacy_overlay.res_x = res_x;
     mp._legacy_overlay.res_y = res_y;
     mp._legacy_overlay.data = data;
