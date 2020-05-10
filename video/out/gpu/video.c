@@ -29,6 +29,7 @@
 
 #include "misc/bstr.h"
 #include "options/m_config.h"
+#include "options/path.h"
 #include "common/global.h"
 #include "options/options.h"
 #include "utils.h"
@@ -493,7 +494,9 @@ static struct bstr load_cached_file(struct gl_video *p, const char *path)
             return p->files[n].body;
     }
     // not found -> load it
-    struct bstr s = stream_read_file(path, p, p->global, 1000000000); // 1GB
+    char *fname = mp_get_user_path(NULL, p->global, path);
+    struct bstr s = stream_read_file(fname, p, p->global, 1000000000); // 1GB
+    talloc_free(fname);
     if (s.len) {
         struct cached_file new = {
             .path = talloc_strdup(p, path),
