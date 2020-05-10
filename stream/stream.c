@@ -319,14 +319,20 @@ static int stream_create_instance(const stream_info_t *sinfo,
     *ret = NULL;
 
     const char *path = url;
-    for (int n = 0; sinfo->protocols && sinfo->protocols[n]; n++) {
-        path = match_proto(url, sinfo->protocols[n]);
-        if (path)
-            break;
-    }
 
-    if (!path)
-        return STREAM_NO_MATCH;
+    if (flags & STREAM_LOCAL_FS_ONLY) {
+        if (!sinfo->local_fs)
+            return STREAM_NO_MATCH;
+    } else {
+        for (int n = 0; sinfo->protocols && sinfo->protocols[n]; n++) {
+            path = match_proto(url, sinfo->protocols[n]);
+            if (path)
+                break;
+        }
+
+        if (!path)
+            return STREAM_NO_MATCH;
+    }
 
     stream_t *s = talloc_zero(NULL, stream_t);
     s->global = args->global;
@@ -342,6 +348,9 @@ static int stream_create_instance(const stream_info_t *sinfo,
     s->path = talloc_strdup(s, path);
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
     s->requested_buffer_size = opts->buffer_size;
+
+    if (flags & STREAM_LESS_NOISE)
+        mp_msg_set_max_level(s->log, MSGL_WARN);
 
     int opt;
     mp_read_option_raw(s->global, "access-references", &m_option_type_flag, &opt);
@@ -820,14 +829,13 @@ struct bstr stream_read_file(const char *filename, void *talloc_ctx,
                              struct mpv_global *global, int max_size)
 {
     struct bstr res = {0};
-    char *fname = mp_get_user_path(NULL, global, filename);
-    stream_t *s =
-        stream_create(fname, STREAM_ORIGIN_DIRECT | STREAM_READ, NULL, global);
+    int flags = STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY |
+                STREAM_LESS_NOISE;
+    stream_t *s = stream_create(filename, flags, NULL, global);
     if (s) {
         res = stream_read_complete(s, talloc_ctx, max_size);
         free_stream(s);
     }
-    talloc_free(fname);
     return res;
 }
 
