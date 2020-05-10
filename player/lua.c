@@ -230,10 +230,13 @@ static void load_file(lua_State *L, const char *fname)
 {
     struct script_ctx *ctx = get_ctx(L);
     MP_DBG(ctx, "loading file %s\n", fname);
-    int r = luaL_loadfile(L, fname);
-    if (r)
+    struct bstr s = stream_read_file(fname, ctx, ctx->mpctx->global, 100000000);
+    if (!s.start)
+        luaL_error(L, "Could not read file.\n");
+    if (luaL_loadbuffer(L, s.start, s.len, fname))
         lua_error(L);
-    lua_call(L, 0, 0);
+    lua_call(L, 0, 1);
+    talloc_free(s.start);
 }
 
 static int load_builtin(lua_State *L)
