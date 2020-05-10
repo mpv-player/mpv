@@ -1088,7 +1088,7 @@ static void *vo_thread(void *ptr)
             break;
         stats_event(in->stats, "iterations");
         vo->driver->control(vo, VOCTRL_CHECK_EVENTS, NULL);
-        bool working = render_frame(vo)&&0;
+        bool working = render_frame(vo);
         int64_t now = mp_time_us();
         int64_t wait_until = now + (working ? 0 : (int64_t)1e9);
 
