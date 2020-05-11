@@ -365,8 +365,8 @@ static bool try_draw_bmp(FILE *f, int imgfmt)
         .num_items = 1,
     };
 
-    struct mp_draw_sub_cache *c = NULL;
-    if (mp_draw_sub_bitmaps(&c, dst, &sbs_list)) {
+    struct mp_draw_sub_cache *c = mp_draw_sub_alloc(NULL);
+    if (mp_draw_sub_bitmaps(c, dst, &sbs_list)) {
         char *info = mp_draw_sub_get_dbg_info(c);
         fprintf(f, "%s\n", info);
         talloc_free(info);

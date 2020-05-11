@@ -100,6 +100,8 @@ struct mp_draw_sub_cache
 
     // Function that works on the _f32 data.
     void (*blend_line)(void *dst, void *src, void *src_a, int w);
+
+    struct mp_image res_overlay;    // returned by mp_draw_sub_overlay()
 };
 
 static void blend_line_f32(void *dst, void *src, void *src_a, int w)
@@ -112,7 +114,7 @@ static void blend_line_f32(void *dst, void *src, void *src_a, int w)
         dst_f[x] = src_f[x] + dst_f[x] * (1.0f - src_a_f[x]);
 }
 
-static void blend_slice(struct mp_draw_sub_cache *p, int rgb_y)
+static void blend_slice(struct mp_draw_sub_cache *p)
 {
     struct mp_image *ov = p->overlay_tmp;
     struct mp_image *ca = p->calpha_tmp;
@@ -164,7 +166,7 @@ static bool blend_overlay_with_video(struct mp_draw_sub_cache *p,
             if (p->calpha_to_f32)
                 repack_line(p->calpha_to_f32, 0, 0, x >> xs, y >> ys, w >> xs);
 
-            blend_slice(p, y);
+            blend_slice(p);
 
             repack_line(p->video_from_f32, x, y, 0, 0, w);
         }
@@ -478,10 +480,21 @@ static void clear_rgba_overlay(struct mp_draw_sub_cache *p)
     p->any_osd = false;
 }
 
-static bool reinit(struct mp_draw_sub_cache *p, struct mp_image_params *params)
+static void init_general(struct mp_draw_sub_cache *p)
 {
-    talloc_free_children(p);
-    *p = (struct mp_draw_sub_cache){.params = *params};
+    p->sub_scale = mp_sws_alloc(p);
+
+    p->s_w = MP_ALIGN_UP(p->rgba_overlay->w, SLICE_W) / SLICE_W;
+
+    p->slices = talloc_zero_array(p, struct slice, p->s_w * p->rgba_overlay->h);
+
+    mp_image_clear(p->rgba_overlay, 0, 0, p->w, p->h);
+    clear_rgba_overlay(p);
+}
+
+static bool reinit_to_video(struct mp_draw_sub_cache *p)
+{
+    struct mp_image_params *params = &p->params;
 
     bool need_premul = params->alpha != MP_ALPHA_PREMUL &&
         (mp_imgfmt_get_desc(params->imgfmt).flags & MP_IMGFLAG_ALPHA);
@@ -683,15 +696,6 @@ static bool reinit(struct mp_draw_sub_cache *p, struct mp_image_params *params)
         }
     }
 
-    p->sub_scale = mp_sws_alloc(p);
-
-    p->s_w = MP_ALIGN_UP(p->rgba_overlay->w, SLICE_W) / SLICE_W;
-
-    p->slices = talloc_zero_array(p, struct slice, p->s_w * p->rgba_overlay->h);
-
-    mp_image_clear(p->rgba_overlay, 0, 0, w, h);
-    clear_rgba_overlay(p);
-
     if (need_premul) {
         p->premul = mp_sws_alloc(p);
         p->unpremul = mp_sws_alloc(p);
@@ -707,6 +711,56 @@ static bool reinit(struct mp_draw_sub_cache *p, struct mp_image_params *params)
         p->unpremul->force_scaler = MP_SWS_ZIMG;
     }
 
+    init_general(p);
+
+    return true;
+}
+
+static bool reinit_to_overlay(struct mp_draw_sub_cache *p)
+{
+    p->align_x = 1;
+    p->align_y = 1;
+
+    p->w = p->params.w;
+    p->h = p->params.h;
+
+    p->rgba_overlay = talloc_steal(p, mp_image_alloc(IMGFMT_BGRA, p->w, p->h));
+    if (!p->rgba_overlay)
+        return false;
+
+    mp_image_params_guess_csp(&p->rgba_overlay->params);
+    p->rgba_overlay->params.alpha = MP_ALPHA_PREMUL;
+
+    // Some non-sense with the intention to somewhat isolate the returned image.
+    mp_image_setfmt(&p->res_overlay, p->rgba_overlay->imgfmt);
+    mp_image_set_size(&p->res_overlay, p->rgba_overlay->w, p->rgba_overlay->h);
+    mp_image_copy_attributes(&p->res_overlay, p->rgba_overlay);
+    p->res_overlay.planes[0] = p->rgba_overlay->planes[0];
+    p->res_overlay.stride[0] = p->rgba_overlay->stride[0];
+
+    init_general(p);
+
+    // Mark all dirty (for full reinit of user state).
+    for (int y = 0; y < p->rgba_overlay->h; y++) {
+        for (int sx = 0; sx < p->s_w; sx++)
+            p->slices[y * p->s_w + sx] = (struct slice){0, SLICE_W};
+    }
+
+    return true;
+}
+
+static bool check_reinit(struct mp_draw_sub_cache *p,
+                         struct mp_image_params *params, bool to_video)
+{
+    if (!mp_image_params_equal(&p->params, params) || !p->rgba_overlay) {
+        talloc_free_children(p);
+        *p = (struct mp_draw_sub_cache){.params = *params};
+        if (!(to_video ? reinit_to_video(p) : reinit_to_overlay(p))) {
+            talloc_free_children(p);
+            *p = (struct mp_draw_sub_cache){0};
+            return false;
+        }
+    }
     return true;
 }
 
@@ -725,10 +779,12 @@ char *mp_draw_sub_get_dbg_info(struct mp_draw_sub_cache *p)
         mp_imgfmt_to_name(p->calpha_tmp ? p->calpha_tmp->imgfmt : 0));
 }
 
-// p_cache: if not NULL, the function will set *p to a talloc-allocated p
-//          containing scaled versions of sbs contents - free the p with
-//          talloc_free()
-bool mp_draw_sub_bitmaps(struct mp_draw_sub_cache **p_cache, struct mp_image *dst,
+struct mp_draw_sub_cache *mp_draw_sub_alloc(void *ta_parent)
+{
+    return talloc_zero(ta_parent, struct mp_draw_sub_cache);
+}
+
+bool mp_draw_sub_bitmaps(struct mp_draw_sub_cache *p, struct mp_image *dst,
                          struct sub_bitmap_list *sbs_list)
 {
     bool ok = false;
@@ -738,18 +794,8 @@ bool mp_draw_sub_bitmaps(struct mp_draw_sub_cache **p_cache, struct mp_image *ds
     assert(dst->w >= sbs_list->w);
     assert(dst->h >= sbs_list->h);
 
-    struct mp_draw_sub_cache *p = p_cache ? *p_cache : NULL;
-    if (!p)
-        p = talloc_zero(NULL, struct mp_draw_sub_cache);
-
-    if (!mp_image_params_equal(&p->params, &dst->params) || !p->video_tmp)
-    {
-        if (!reinit(p, &dst->params)) {
-            talloc_free_children(p);
-            *p = (struct mp_draw_sub_cache){0};
-            goto done;
-        }
-    }
+    if (!check_reinit(p, &dst->params, true))
+        return false;
 
     if (p->change_id != sbs_list->change_id) {
         p->change_id = sbs_list->change_id;
@@ -765,31 +811,156 @@ bool mp_draw_sub_bitmaps(struct mp_draw_sub_cache **p_cache, struct mp_image *ds
             goto done;
     }
 
-    struct mp_image *target = dst;
-    if (p->any_osd && p->premul_tmp) {
-        if (mp_sws_scale(p->premul, p->premul_tmp, dst) < 0)
-            goto done;
-        target = p->premul_tmp;
-    }
+    if (p->any_osd) {
+        struct mp_image *target = dst;
+        if (p->premul_tmp) {
+            if (mp_sws_scale(p->premul, p->premul_tmp, dst) < 0)
+                goto done;
+            target = p->premul_tmp;
+        }
 
-    if (!blend_overlay_with_video(p, target))
-        goto done;
-
-    if (p->any_osd && p->premul_tmp) {
-        if (mp_sws_scale(p->unpremul, dst, p->premul_tmp) < 0)
+        if (!blend_overlay_with_video(p, target))
             goto done;
+
+        if (target != dst) {
+            if (mp_sws_scale(p->unpremul, dst, p->premul_tmp) < 0)
+                goto done;
+        }
     }
 
     ok = true;
 
 done:
-    if (p_cache) {
-        *p_cache = p;
-    } else {
-        talloc_free(p);
+    return ok;
+}
+
+// Bounding boxes for mp_draw_sub_overlay() API. For simplicity, each rectangle
+// covers a fixed tile on the screen, starts out empty, but is not extended
+// beyond the tile. In the simplest case, there's only 1 rect/tile for everything.
+struct rc_grid {
+    unsigned w, h;                  // size in grid tiles
+    unsigned r_w, r_h;              // size of a grid tile in pixels
+    struct mp_rect *rcs;            // rcs[x * w + y]
+};
+
+static void init_rc_grid(struct rc_grid *gr, struct mp_draw_sub_cache *p,
+                         struct mp_rect *rcs, int max_rcs)
+{
+    *gr = (struct rc_grid){ .w = max_rcs ? 1 : 0, .h = max_rcs ? 1 : 0,
+                            .rcs = rcs, .r_w = p->s_w * SLICE_W, .r_h = p->h, };
+
+    // Dumb iteration to figure out max. size because I'm stupid.
+    bool more = true;
+    while (more) {
+        more = false;
+        if (gr->r_h >= 128) {
+            if (gr->w * gr->h * 2 > max_rcs)
+                break;
+            gr->h *= 2;
+            gr->r_h = (p->h + gr->h - 1) / gr->h;
+            more = true;
+        }
+        if (gr->r_w >= SLICE_W * 2) {
+            if (gr->w * gr->h * 2 > max_rcs)
+                break;
+            gr->w *= 2;
+            gr->r_w = (p->s_w + gr->w - 1) / gr->w * SLICE_W;
+            more = true;
+        }
     }
 
-    return ok;
+    assert(gr->r_h * gr->h >= p->h);
+    assert(!(gr->r_w & (SLICE_W - 1)));
+    assert(gr->r_w * gr->w >= p->w);
+
+    // Init with empty (degenerate) rectangles.
+    for (int y = 0; y < gr->h; y++) {
+        for (int x = 0; x < gr->w; x++) {
+            struct mp_rect *rc = &gr->rcs[y * gr->w + x];
+            rc->x1 = x * gr->r_w;
+            rc->y1 = y * gr->r_h;
+            rc->x0 = rc->x1 + gr->r_w;
+            rc->y0 = rc->y1 + gr->r_h;
+        }
+    }
+}
+
+// Extend given grid with contents of p->slices.
+static void mark_rcs(struct mp_draw_sub_cache *p, struct rc_grid *gr)
+{
+    for (int y = 0; y < p->h; y++) {
+        struct slice *line = &p->slices[y * p->s_w];
+        struct mp_rect *rcs = &gr->rcs[y / gr->r_h * gr->w];
+
+        for (int sx = 0; sx < p->s_w; sx++) {
+            struct slice *s = &line[sx];
+            if (s->x0 < s->x1) {
+                unsigned xpos = sx * SLICE_W;
+                struct mp_rect *rc = &rcs[xpos / gr->r_w];
+                rc->y0 = MPMIN(rc->y0, y);
+                rc->y1 = MPMAX(rc->y1, y + 1);
+                rc->x0 = MPMIN(rc->x0, xpos + s->x0);
+                rc->x1 = MPMAX(rc->x1, xpos + s->x1);
+            }
+        }
+    }
+}
+
+// Remove empty RCs, and return rc count.
+static int return_rcs(struct rc_grid *gr)
+{
+    int num = 0, cnt = gr->w * gr->h;
+    for (int n = 0; n < cnt; n++) {
+        struct mp_rect *rc = &gr->rcs[n];
+        if (rc->x0 < rc->x1 && rc->y0 < rc->y1)
+            gr->rcs[num++] = *rc;
+    }
+    return num;
+}
+
+struct mp_image *mp_draw_sub_overlay(struct mp_draw_sub_cache *p,
+                                     struct sub_bitmap_list *sbs_list,
+                                     struct mp_rect *act_rcs,
+                                     int max_act_rcs,
+                                     int *num_act_rcs,
+                                     struct mp_rect *mod_rcs,
+                                     int max_mod_rcs,
+                                     int *num_mod_rcs)
+{
+    *num_act_rcs = 0;
+    *num_mod_rcs = 0;
+
+    struct mp_image_params params = {.w = sbs_list->w, .h = sbs_list->h};
+    if (!check_reinit(p, &params, false))
+        return NULL;
+
+    struct rc_grid gr_act, gr_mod;
+    init_rc_grid(&gr_act, p, act_rcs, max_act_rcs);
+    init_rc_grid(&gr_mod, p, mod_rcs, max_mod_rcs);
+
+    if (p->change_id != sbs_list->change_id) {
+        p->change_id = sbs_list->change_id;
+
+        mark_rcs(p, &gr_mod);
+
+        clear_rgba_overlay(p);
+
+        for (int n = 0; n < sbs_list->num_items; n++) {
+            if (!render_sb(p, sbs_list->items[n])) {
+                p->change_id = 0;
+                return NULL;
+            }
+        }
+
+        mark_rcs(p, &gr_mod);
+    }
+
+    mark_rcs(p, &gr_act);
+
+    *num_act_rcs = return_rcs(&gr_act);
+    *num_mod_rcs = return_rcs(&gr_mod);
+
+    return &p->res_overlay;
 }
 
 // vim: ts=4 sw=4 et tw=80

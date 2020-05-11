@@ -425,9 +425,12 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
     // Need to lock for the dumb osd->draw_cache thing.
     pthread_mutex_lock(&osd->lock);
 
+    if (!osd->draw_cache)
+        osd->draw_cache = mp_draw_sub_alloc(osd);
+
     stats_time_start(osd->stats, "draw-bmp");
 
-    if (!mp_draw_sub_bitmaps(&osd->draw_cache, dest, list))
+    if (!mp_draw_sub_bitmaps(osd->draw_cache, dest, list))
         MP_WARN(osd, "Failed rendering OSD.\n");
     talloc_steal(osd, osd->draw_cache);
 
