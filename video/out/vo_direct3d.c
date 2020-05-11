@@ -211,8 +211,8 @@ static const struct fmt_entry fmt_table[] = {
     // packed YUV
     {IMGFMT_UYVY,  D3DFMT_UYVY},
     // packed RGB
-    {IMGFMT_BGR32, D3DFMT_X8R8G8B8},
-    {IMGFMT_RGB32, D3DFMT_X8B8G8R8},
+    {IMGFMT_BGR0, D3DFMT_X8R8G8B8},
+    {IMGFMT_RGB0, D3DFMT_X8B8G8R8},
     {IMGFMT_BGR24, D3DFMT_R8G8B8}, //untested
     {IMGFMT_RGB565, D3DFMT_R5G6B5},
     // grayscale (can be considered both packed and planar)

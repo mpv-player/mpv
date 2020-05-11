@@ -251,15 +251,6 @@ enum mp_imgfmt {
     IMGFMT_AVPIXFMT_END = IMGFMT_AVPIXFMT_START + 500,
 
     IMGFMT_END,
-
-    // Redundant format aliases for native endian access
-
-    // The IMGFMT_RGB32 and IMGFMT_BGR32 formats provide bit-shift access to
-    // normally byte-accessed formats:
-    // IMGFMT_RGB32 = r | (g << 8) | (b << 16) | (a << 24)
-    // IMGFMT_BGR32 = b | (g << 8) | (r << 16) | (a << 24)
-    IMGFMT_RGB32   = MP_SELECT_LE_BE(IMGFMT_RGBA, IMGFMT_ABGR),
-    IMGFMT_BGR32   = MP_SELECT_LE_BE(IMGFMT_BGRA, IMGFMT_ARGB),
 };
 
 static inline bool IMGFMT_IS_RGB(int fmt)

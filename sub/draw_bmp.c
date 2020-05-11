@@ -408,13 +408,13 @@ static bool render_rgba(struct mp_draw_sub_cache *p, struct part *part,
 
             if (!scaled) {
                 struct mp_image src_img = {0};
-                mp_image_setfmt(&src_img, IMGFMT_BGR32);
+                mp_image_setfmt(&src_img, IMGFMT_BGRA);
                 mp_image_set_size(&src_img, sw, sh);
                 src_img.planes[0] = s_ptr;
                 src_img.stride[0] = s_stride;
                 src_img.params.alpha = MP_ALPHA_PREMUL;
 
-                scaled = mp_image_alloc(IMGFMT_BGR32, dw, dh);
+                scaled = mp_image_alloc(IMGFMT_BGRA, dw, dh);
                 if (!scaled)
                     return false;
                 part->imgs[i] = talloc_steal(p, scaled);
@@ -457,7 +457,7 @@ static bool render_sb(struct mp_draw_sub_cache *p, struct sub_bitmaps *sb)
 
 static void clear_rgba_overlay(struct mp_draw_sub_cache *p)
 {
-    assert(p->rgba_overlay->imgfmt == IMGFMT_BGR32);
+    assert(p->rgba_overlay->imgfmt == IMGFMT_BGRA);
 
     for (int y = 0; y < p->rgba_overlay->h; y++) {
         uint32_t *px = mp_image_pixel_ptr(p->rgba_overlay, 0, 0, y);
@@ -519,7 +519,7 @@ static bool reinit(struct mp_draw_sub_cache *p, struct mp_image_params *params)
     int overlay_fmt = 0;
     if (params->color.space == MP_CSP_RGB && vfdesc.num_planes >= 3) {
         // No point in doing anything fancy.
-        overlay_fmt = IMGFMT_BGR32;
+        overlay_fmt = IMGFMT_BGRA;
         p->scale_in_tiles = false;
     } else {
         struct mp_regular_imgfmt odesc = vfdesc;
@@ -586,7 +586,7 @@ static bool reinit(struct mp_draw_sub_cache *p, struct mp_image_params *params)
         h = MP_ALIGN_UP(h, TILE_H);
     }
 
-    p->rgba_overlay = talloc_steal(p, mp_image_alloc(IMGFMT_BGR32, w, h));
+    p->rgba_overlay = talloc_steal(p, mp_image_alloc(IMGFMT_BGRA, w, h));
     p->overlay_tmp = talloc_steal(p, mp_image_alloc(render_fmt, SLICE_W, slice_h));
     p->video_tmp = talloc_steal(p, mp_image_alloc(vid_f32_fmt, SLICE_W, slice_h));
     if (!p->rgba_overlay || !p->overlay_tmp || !p->video_tmp)

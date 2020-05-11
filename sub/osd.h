@@ -28,7 +28,7 @@
 enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
-    SUBBITMAP_RGBA,     // B8G8R8A8 (MSB=A, LSB=B), scaled, premultiplied alpha
+    SUBBITMAP_RGBA,     // IMGFMT_BGRA (MSB=A, LSB=B), scaled, premultiplied alpha
 
     SUBBITMAP_COUNT
 };

@@ -456,7 +456,7 @@ bool mp_vdpau_get_rgb_format(int imgfmt, VdpRGBAFormat *out_rgba_format)
     VdpRGBAFormat format = (VdpRGBAFormat)-1;
 
     switch (imgfmt) {
-    case IMGFMT_BGR32:
+    case IMGFMT_BGRA:
         format = VDP_RGBA_FORMAT_B8G8R8A8; break;
     default:
         return false;
