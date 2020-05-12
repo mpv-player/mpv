@@ -495,6 +495,7 @@ static void init_general(struct mp_draw_sub_cache *p)
 static bool reinit_to_video(struct mp_draw_sub_cache *p)
 {
     struct mp_image_params *params = &p->params;
+    mp_image_params_guess_csp(params);
 
     bool need_premul = params->alpha != MP_ALPHA_PREMUL &&
         (mp_imgfmt_get_desc(params->imgfmt).flags & MP_IMGFLAG_ALPHA);
@@ -616,6 +617,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
                                    0, p->rgba_overlay, NULL))
             return false;
     } else {
+        // Generally non-RGB.
         p->video_overlay = talloc_steal(p, mp_image_alloc(overlay_fmt, w, h));
         if (!p->video_overlay)
             return false;

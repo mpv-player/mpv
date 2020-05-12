@@ -339,7 +339,7 @@ static bool try_draw_bmp(FILE *f, int imgfmt)
 
     struct mp_image *dst = mp_image_alloc(imgfmt, 64, 64);
     if (!dst)
-    goto done;
+        goto done;
 
     struct sub_bitmap sb = {
         .bitmap = &(uint8_t[]){123},
