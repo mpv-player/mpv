@@ -114,6 +114,16 @@ static void blend_line_f32(void *dst, void *src, void *src_a, int w)
         dst_f[x] = src_f[x] + dst_f[x] * (1.0f - src_a_f[x]);
 }
 
+static void blend_line_u8(void *dst, void *src, void *src_a, int w)
+{
+    uint8_t *dst_i = dst;
+    uint8_t *src_i = src;
+    uint8_t *src_a_i = src_a;
+
+    for (int x = 0; x < w; x++)
+        dst_i[x] = src_i[x] + dst_i[x] * (255u - src_a_i[x]) / 255u;
+}
+
 static void blend_slice(struct mp_draw_sub_cache *p)
 {
     struct mp_image *ov = p->overlay_tmp;
@@ -500,13 +510,48 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
     bool need_premul = params->alpha != MP_ALPHA_PREMUL &&
         (mp_imgfmt_get_desc(params->imgfmt).flags & MP_IMGFLAG_ALPHA);
 
-    int rflags = REPACK_CREATE_EXPAND_8BIT | REPACK_CREATE_PLANAR_F32;
-    p->blend_line = blend_line_f32;
+    // Intermediate format for video_overlay. Requirements:
+    //  - same subsampling as video
+    //  - uses video colorspace
+    //  - has alpha
+    //  - repacker support (to the format used in p->blend_line)
+    //  - probably 8 bit per component rather than something wasteful or strange
+    struct mp_regular_imgfmt vfdesc = {0};
+
+    int rflags = REPACK_CREATE_EXPAND_8BIT;
+    bool use_shortcut = false;
 
     p->video_to_f32 = mp_repack_create_planar(params->imgfmt, false, rflags);
     talloc_steal(p, p->video_to_f32);
     if (!p->video_to_f32)
         return false;
+    mp_get_regular_imgfmt(&vfdesc, mp_repack_get_format_dst(p->video_to_f32));
+    assert(vfdesc.num_planes); // must have succeeded
+
+    if (params->color.space == MP_CSP_RGB && vfdesc.num_planes >= 3) {
+        use_shortcut = true;
+
+        if (vfdesc.component_type == MP_COMPONENT_TYPE_UINT &&
+            vfdesc.component_size == 1 && vfdesc.component_pad == 0)
+            p->blend_line = blend_line_u8;
+    }
+
+    // If no special blender is available, blend in float.
+    if (!p->blend_line) {
+        TA_FREEP(&p->video_to_f32);
+
+        rflags |= REPACK_CREATE_PLANAR_F32;
+
+        p->video_to_f32 = mp_repack_create_planar(params->imgfmt, false, rflags);
+        talloc_steal(p, p->video_to_f32);
+        if (!p->video_to_f32)
+            return false;
+
+        mp_get_regular_imgfmt(&vfdesc, mp_repack_get_format_dst(p->video_to_f32));
+        assert(vfdesc.component_type == MP_COMPONENT_TYPE_FLOAT);
+
+        p->blend_line = blend_line_f32;
+    }
 
     p->scale_in_tiles = SCALE_IN_TILES;
 
@@ -520,18 +565,8 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
     assert(mp_repack_get_format_dst(p->video_to_f32) ==
            mp_repack_get_format_src(p->video_from_f32));
 
-    // Find a reasonable intermediate format for video_overlay. Requirements:
-    //  - same subsampling
-    //  - has alpha
-    //  - uses video colorspace
-    //  - REPACK_CREATE_PLANAR_F32 support
-    //  - probably not using float (vaguely wastes memory)
-    struct mp_regular_imgfmt vfdesc = {0};
-    mp_get_regular_imgfmt(&vfdesc, mp_repack_get_format_dst(p->video_to_f32));
-    assert(vfdesc.component_type == MP_COMPONENT_TYPE_FLOAT);
-
     int overlay_fmt = 0;
-    if (params->color.space == MP_CSP_RGB && vfdesc.num_planes >= 3) {
+    if (use_shortcut) {
         // No point in doing anything fancy.
         overlay_fmt = IMGFMT_BGRA;
         p->scale_in_tiles = false;
@@ -643,6 +678,9 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
         int xs = p->video_overlay->fmt.chroma_xs;
         int ys = p->video_overlay->fmt.chroma_ys;
         if (xs || ys) {
+            // Require float so format selection becomes simpler (maybe).
+            assert(rflags & REPACK_CREATE_PLANAR_F32);
+
             // For extracting the alpha plane, construct a gray format that is
             // compatible with the alpha one.
             struct mp_regular_imgfmt odesc = {0};
