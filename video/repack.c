@@ -902,7 +902,7 @@ void repack_line(struct mp_repack *rp, int dst_x, int dst_y,
 
     assert(dst_x >= 0 && dst_y >= 0 && src_x >= 0 && src_y >= 0 && w >= 0);
     assert(dst_x + w <= MP_ALIGN_UP(last->buf[1]->w, last->fmt[1].align_x));
-    assert(src_x + w <= MP_ALIGN_UP(first->buf[1]->w, first->fmt[0].align_x));
+    assert(src_x + w <= MP_ALIGN_UP(first->buf[0]->w, first->fmt[0].align_x));
     assert(dst_y < last->buf[1]->h);
     assert(src_y < first->buf[0]->h);
     assert(!(dst_x & (last->fmt[1].align_x - 1)));
