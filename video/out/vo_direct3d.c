@@ -30,6 +30,7 @@
 #include "config.h"
 #include "options/options.h"
 #include "options/m_option.h"
+#include "sub/draw_bmp.h"
 #include "mpv_talloc.h"
 #include "vo.h"
 #include "video/csputils.h"
@@ -48,11 +49,10 @@
 #define DEVTYPE D3DDEVTYPE_HAL
 //#define DEVTYPE D3DDEVTYPE_REF
 
-#define D3DFVF_OSD_VERTEX (D3DFVF_XYZ | D3DFVF_TEX1 | D3DFVF_DIFFUSE)
+#define D3DFVF_OSD_VERTEX (D3DFVF_XYZ | D3DFVF_TEX1)
 
 typedef struct {
     float x, y, z;
-    D3DCOLOR color;
     float tu, tv;
 } vertex_osd;
 
@@ -73,13 +73,7 @@ struct d3dtex {
     IDirect3DTexture9 *device;
 };
 
-struct osdpart {
-    enum sub_bitmap_format format;
-    int change_id;
-    struct d3dtex texture;
-    int num_vertices;
-    vertex_osd *vertices;
-};
+#define MAX_OSD_RECTS 64
 
 /* Global variables "priv" structure. I try to keep their count low.
  */
@@ -136,11 +130,12 @@ typedef struct d3d_priv {
     int max_texture_width;          /**< from the device capabilities */
     int max_texture_height;         /**< from the device capabilities */
 
-    D3DFORMAT osd_fmt_table[SUBBITMAP_COUNT];
-
     D3DMATRIX d3d_colormatrix;
 
-    struct osdpart *osd[MAX_OSD_PARTS];
+    struct mp_draw_sub_cache *osd_cache;
+    struct d3dtex osd_texture;
+    int osd_num_vertices;
+    vertex_osd osd_vertices[MAX_OSD_RECTS * 6];
 } d3d_priv;
 
 struct fmt_entry {
@@ -366,12 +361,7 @@ static void destroy_d3d_surfaces(d3d_priv *priv)
     MP_VERBOSE(priv, "destroy_d3d_surfaces called.\n");
 
     d3d_destroy_video_objects(priv);
-
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        struct osdpart *osd = priv->osd[n];
-        d3dtex_release(priv, &osd->texture);
-        osd->change_id = -1;
-    }
+    d3dtex_release(priv, &priv->osd_texture);
 
     if (priv->d3d_backbuf)
         IDirect3DSurface9_Release(priv->d3d_backbuf);
@@ -495,26 +485,17 @@ static bool init_d3d(d3d_priv *priv)
     if (priv->opt_force_power_of_2)
         priv->device_caps_power2_only = 1;
 
-    priv->osd_fmt_table[SUBBITMAP_LIBASS] = D3DFMT_A8;
-    priv->osd_fmt_table[SUBBITMAP_RGBA]   = D3DFMT_A8R8G8B8;
-
-    for (int n = 0; n < MP_ARRAY_SIZE(priv->osd_fmt_table); n++) {
-        int fmt = priv->osd_fmt_table[n];
-        if (fmt && FAILED(IDirect3D9_CheckDeviceFormat(priv->d3d_handle,
-                            D3DADAPTER_DEFAULT,
-                            DEVTYPE,
-                            priv->desktop_fmt,
-                            D3DUSAGE_DYNAMIC | D3DUSAGE_QUERY_FILTER,
-                            D3DRTYPE_TEXTURE,
-                            fmt)))
-        {
-            MP_VERBOSE(priv, "OSD format %#x not supported.\n", fmt);
-            priv->osd_fmt_table[n] = 0;
-        }
+    if (FAILED(IDirect3D9_CheckDeviceFormat(priv->d3d_handle,
+                        D3DADAPTER_DEFAULT,
+                        DEVTYPE,
+                        priv->desktop_fmt,
+                        D3DUSAGE_DYNAMIC | D3DUSAGE_QUERY_FILTER,
+                        D3DRTYPE_TEXTURE,
+                        D3DFMT_A8R8G8B8)))
+    {
+        MP_ERR(priv, "OSD texture format not supported.\n");
+        return false;
     }
-
-    if (!priv->osd_fmt_table[SUBBITMAP_RGBA])
-        MP_WARN(priv, "GPU too old - no OSD support.\n");
 
     if (!change_d3d_backbuffer(priv))
         return false;
@@ -830,9 +811,6 @@ static int preinit(struct vo *vo)
     priv->vo = vo;
     priv->log = vo->log;
 
-    for (int n = 0; n < MAX_OSD_PARTS; n++)
-        priv->osd[n] = talloc_zero(priv, struct osdpart);
-
     priv->d3d9_dll = LoadLibraryA("d3d9.dll");
     if (!priv->d3d9_dll) {
         MP_ERR(priv, "Unable to dynamically load d3d9.dll\n");
@@ -1110,130 +1088,110 @@ error_exit:
     return NULL;
 }
 
-static D3DCOLOR ass_to_d3d_color(uint32_t color)
+static void update_osd(d3d_priv *priv)
 {
-    uint32_t r = (color >> 24) & 0xff;
-    uint32_t g = (color >> 16) & 0xff;
-    uint32_t b = (color >> 8) & 0xff;
-    uint32_t a = 0xff - (color & 0xff);
-    return D3DCOLOR_ARGB(a, r, g, b);
-}
+    if (!priv->osd_cache)
+        priv->osd_cache = mp_draw_sub_alloc(priv, priv->vo->global);
 
-static int next_pow2(int v)
-{
-    for (int x = 0; x < 30; x++) {
-        if ((1 << x) >= v)
-            return 1 << x;
+    struct sub_bitmap_list *sbs = osd_render(priv->vo->osd, priv->osd_res,
+                                             priv->osd_pts, 0, mp_draw_sub_formats);
+
+    struct mp_rect act_rc[MAX_OSD_RECTS], mod_rc[64];
+    int num_act_rc = 0, num_mod_rc = 0;
+
+    struct mp_image *osd = mp_draw_sub_overlay(priv->osd_cache, sbs,
+                    act_rc, MP_ARRAY_SIZE(act_rc), &num_act_rc,
+                    mod_rc, MP_ARRAY_SIZE(mod_rc), &num_mod_rc);
+
+    talloc_free(sbs);
+
+    if (!osd) {
+        MP_ERR(priv, "Failed to render OSD.\n");
+        return;
     }
-    return INT_MAX;
-}
 
-static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
-                       struct sub_bitmaps *imgs)
-{
-    D3DFORMAT fmt = priv->osd_fmt_table[imgs->format];
+    if (!num_mod_rc && priv->osd_texture.system)
+        return; // nothing changed
 
-    assert(imgs->packed);
+    priv->osd_num_vertices = 0;
 
-    osd->change_id = imgs->change_id;
-    osd->num_vertices = 0;
-
-    if (imgs->packed_w > osd->texture.tex_w
-        || imgs->packed_h > osd->texture.tex_h
-        || osd->format != imgs->format)
-    {
-        osd->format = imgs->format;
-
-        int new_w = next_pow2(imgs->packed_w);
-        int new_h = next_pow2(imgs->packed_h);
+    if (osd->w > priv->osd_texture.tex_w || osd->h > priv->osd_texture.tex_h) {
+        int new_w = osd->w;
+        int new_h = osd->h;
         d3d_fix_texture_size(priv, &new_w, &new_h);
 
         MP_DBG(priv, "reallocate OSD surface to %dx%d.\n", new_w, new_h);
 
-        d3dtex_release(priv, &osd->texture);
-        d3dtex_allocate(priv, &osd->texture, fmt, new_w, new_h);
-
-        if (!osd->texture.system)
-            return false; // failed to allocate
+        d3dtex_release(priv, &priv->osd_texture);
+        if (!d3dtex_allocate(priv, &priv->osd_texture, D3DFMT_A8R8G8B8,
+                             new_w, new_h))
+            return;
     }
 
-    RECT dirty_rc = { 0, 0, imgs->packed_w, imgs->packed_h };
+    // Lazy; could/should use the bounding rect, or perform multiple lock calls.
+    // The previous approach (fully packed texture) was more efficient.
+    RECT dirty_rc = { 0, 0, priv->osd_texture.w, priv->osd_texture.h };
 
     D3DLOCKED_RECT locked_rect;
 
-    if (FAILED(IDirect3DTexture9_LockRect(osd->texture.system, 0, &locked_rect,
+    if (FAILED(IDirect3DTexture9_LockRect(priv->osd_texture.system, 0, &locked_rect,
                                           &dirty_rc, 0)))
     {
         MP_ERR(priv, "OSD texture lock failed.\n");
-        return false;
+        return;
     }
 
-    int ps = fmt == D3DFMT_A8 ? 1 : 4;
-    memcpy_pic(locked_rect.pBits, imgs->packed->planes[0], ps * imgs->packed_w,
-               imgs->packed_h, locked_rect.Pitch, imgs->packed->stride[0]);
+    for (int n = 0; n < num_mod_rc; n++) {
+        struct mp_rect rc = mod_rc[n];
+        int w = mp_rect_w(rc);
+        int h = mp_rect_h(rc);
+        void *src = mp_image_pixel_ptr(osd, 0, rc.x0, rc.y0);
+        void *dst = (char *)locked_rect.pBits + locked_rect.Pitch * rc.y0 +
+                    rc.x0 * 4;
+        memcpy_pic(dst, src, w * 4, h, locked_rect.Pitch, osd->stride[0]);
+    }
 
-    if (FAILED(IDirect3DTexture9_UnlockRect(osd->texture.system, 0))) {
+    if (FAILED(IDirect3DTexture9_UnlockRect(priv->osd_texture.system, 0))) {
         MP_ERR(priv, "OSD texture unlock failed.\n");
-        return false;
+        return;
     }
 
-    if (!d3dtex_update(priv, &osd->texture))
-        return false;
+    if (!d3dtex_update(priv, &priv->osd_texture))
+        return;
 
     // We need 2 primitives per quad which makes 6 vertices.
-    osd->num_vertices = imgs->num_parts * 6;
-    MP_TARRAY_GROW(osd, osd->vertices, osd->num_vertices);
+    priv->osd_num_vertices = num_act_rc * 6;
 
-    float tex_w = osd->texture.tex_w;
-    float tex_h = osd->texture.tex_h;
+    float tex_w = priv->osd_texture.tex_w;
+    float tex_h = priv->osd_texture.tex_h;
 
-    for (int n = 0; n < imgs->num_parts; n++) {
-        struct sub_bitmap *b = &imgs->parts[n];
+    for (int n = 0; n < num_act_rc; n++) {
+        struct mp_rect rc = act_rc[n];
 
-        D3DCOLOR color = imgs->format == SUBBITMAP_LIBASS
-                        ? ass_to_d3d_color(b->libass.color)
-                        : D3DCOLOR_ARGB(255, 255, 255, 255);
+        float tx0 = rc.x0 / tex_w;
+        float ty0 = rc.y0 / tex_h;
+        float tx1 = rc.x1 / tex_w;
+        float ty1 = rc.y1 / tex_h;
 
-        float x0 = b->x;
-        float y0 = b->y;
-        float x1 = b->x + b->dw;
-        float y1 = b->y + b->dh;
-        float tx0 = b->src_x / tex_w;
-        float ty0 = b->src_y / tex_h;
-        float tx1 = (b->src_x + b->w) / tex_w;
-        float ty1 = (b->src_y + b->h) / tex_h;
-
-        vertex_osd *v = &osd->vertices[n * 6];
-        v[0] = (vertex_osd) { x0, y0, 0, color, tx0, ty0 };
-        v[1] = (vertex_osd) { x1, y0, 0, color, tx1, ty0 };
-        v[2] = (vertex_osd) { x0, y1, 0, color, tx0, ty1 };
-        v[3] = (vertex_osd) { x1, y1, 0, color, tx1, ty1 };
+        vertex_osd *v = &priv->osd_vertices[n * 6];
+        v[0] = (vertex_osd) { rc.x0, rc.y0, 0, tx0, ty0 };
+        v[1] = (vertex_osd) { rc.x1, rc.y0, 0, tx1, ty0 };
+        v[2] = (vertex_osd) { rc.x0, rc.y1, 0, tx0, ty1 };
+        v[3] = (vertex_osd) { rc.x1, rc.y1, 0, tx1, ty1 };
         v[4] = v[2];
         v[5] = v[1];
     }
-
-    return true;
 }
 
-static struct osdpart *generate_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
+static void draw_osd(struct vo *vo)
 {
-    if (imgs->num_parts == 0 || !priv->osd_fmt_table[imgs->format])
-        return NULL;
+    d3d_priv *priv = vo->priv;
+    if (!priv->d3d_device)
+        return;
 
-    struct osdpart *osd = priv->osd[imgs->render_index];
+    update_osd(priv);
 
-    if (imgs->change_id != osd->change_id)
-        upload_osd(priv, osd, imgs);
-
-    return osd->num_vertices ? osd : NULL;
-}
-
-static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
-{
-    d3d_priv *priv = ctx;
-
-    struct osdpart *osd = generate_osd(priv, imgs);
-    if (!osd)
+    if (!priv->osd_num_vertices)
         return;
 
     d3d_begin_scene(priv);
@@ -1242,31 +1200,16 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
                                     D3DRS_ALPHABLENDENABLE, TRUE);
 
     IDirect3DDevice9_SetTexture(priv->d3d_device, 0,
-                                d3dtex_get_render_texture(priv, &osd->texture));
+                        d3dtex_get_render_texture(priv, &priv->osd_texture));
 
-    if (imgs->format == SUBBITMAP_LIBASS) {
-        // do not use the color value from the A8 texture, because that is black
-        IDirect3DDevice9_SetRenderState(priv->d3d_device,D3DRS_TEXTUREFACTOR,
-                                        0xFFFFFFFF);
-        IDirect3DDevice9_SetTextureStageState(priv->d3d_device,0,
-                                            D3DTSS_COLORARG1, D3DTA_TFACTOR);
-
-        IDirect3DDevice9_SetTextureStageState(priv->d3d_device, 0,
-                                            D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-    } else {
-        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_SRCBLEND,
-                                        D3DBLEND_ONE);
-    }
+    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_SRCBLEND,
+                                    D3DBLEND_ONE);
 
     IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_OSD_VERTEX);
     IDirect3DDevice9_DrawPrimitiveUP(priv->d3d_device, D3DPT_TRIANGLELIST,
-                                     osd->num_vertices / 3,
-                                     osd->vertices, sizeof(vertex_osd));
+                                     priv->osd_num_vertices / 3,
+                                     priv->osd_vertices, sizeof(vertex_osd));
 
-    IDirect3DDevice9_SetTextureStageState(priv->d3d_device,0,
-                                          D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    IDirect3DDevice9_SetTextureStageState(priv->d3d_device, 0,
-                                          D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
     IDirect3DDevice9_SetRenderState(priv->d3d_device,
                                     D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 
@@ -1274,21 +1217,6 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 
     IDirect3DDevice9_SetRenderState(priv->d3d_device,
                                     D3DRS_ALPHABLENDENABLE, FALSE);
-}
-
-
-static void draw_osd(struct vo *vo)
-{
-    d3d_priv *priv = vo->priv;
-    if (!priv->d3d_device)
-        return;
-
-    bool osd_fmt_supported[SUBBITMAP_COUNT];
-    for (int n = 0; n < SUBBITMAP_COUNT; n++)
-        osd_fmt_supported[n] = !!priv->osd_fmt_table[n];
-
-    osd_draw(vo->osd, priv->osd_res, priv->osd_pts, 0, osd_fmt_supported,
-             draw_osd_cb, priv);
 }
 
 #define OPT_BASE_STRUCT d3d_priv
