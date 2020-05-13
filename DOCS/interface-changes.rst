@@ -67,6 +67,7 @@ Interface changes
       entry)
     - reading loop-file property as native property or mpv_node will now return
       "inf" instead of boolean true (also affects loop option)
+    - remove some --vo-direct3d-... options (it got dumbed down; use --vo=gpu)
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

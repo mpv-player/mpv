@@ -204,32 +204,7 @@ Available video output drivers are:
     .. note:: This driver is for compatibility with systems that don't provide
               proper OpenGL drivers, and where ANGLE does not perform well.
 
-    .. note:: Before to 0.21.0, ``direct3d_shaders`` and ``direct3d`` were
-              different, with ``direct3d`` not using shader by default. Now
-              both use shaders by default, and ``direct3d_shaders`` is a
-              deprecated alias. Use the ``--vo-direct3d-prefer-stretchrect``
-              or the ``--vo-direct3d-disable-shaders`` options to get the old
-              behavior of ``direct3d``.
-
     The following global options are supported by this video output:
-
-    ``--vo-direct3d-prefer-stretchrect``
-        Use ``IDirect3DDevice9::StretchRect`` over other methods if possible.
-
-    ``--vo-direct3d-disable-stretchrect``
-        Never render the video using ``IDirect3DDevice9::StretchRect``.
-
-    ``--vo-direct3d-disable-textures``
-        Never render the video using D3D texture rendering. Rendering with
-        textures + shader will still be allowed. Add ``disable-shaders`` to
-        completely disable video rendering with textures.
-
-    ``--vo-direct3d-disable-shaders``
-        Never use shaders when rendering video.
-
-    ``--vo-direct3d-only-8bit``
-        Never render YUV video with more than 8 bits per component.
-        Using this flag will force software conversion to 8-bit.
 
     ``--vo-direct3d-disable-texture-align``
         Normally texture sizes are always aligned to 16. With this option
