@@ -31,6 +31,8 @@ char *mp_draw_sub_get_dbg_info(struct mp_draw_sub_cache *c);
 // rectangles are regions that were changed since the last call. This function
 // always makes the act region a subset of the mod region. Rectangles within a
 // list never overlap with rectangles within the same list.
+// If num_mod_rcs==0 is returned, this function guarantees that the act region
+// did not change since the last call.
 // If the user-provided lists are too small (max_*_rcs too small), multiple
 // rectangles are merged until they fit in the list.
 // You can pass max_act_rcs=0, which implies you render the whole overlay.
