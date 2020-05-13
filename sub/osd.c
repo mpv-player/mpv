@@ -196,7 +196,15 @@ bool osd_get_render_subs_in_filter(struct osd_state *osd)
 void osd_set_render_subs_in_filter(struct osd_state *osd, bool s)
 {
     pthread_mutex_lock(&osd->lock);
-    osd->render_subs_in_filter = s;
+    if (osd->render_subs_in_filter != s) {
+        osd->render_subs_in_filter = s;
+
+        int change_id = 0;
+        for (int n = 0; n < MAX_OSD_PARTS; n++)
+            change_id = MPMAX(change_id, osd->objs[n]->vo_change_id);
+        for (int n = 0; n < MAX_OSD_PARTS; n++)
+            osd->objs[n]->vo_change_id = change_id + 1;
+    }
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -426,7 +434,7 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
     pthread_mutex_lock(&osd->lock);
 
     if (!osd->draw_cache)
-        osd->draw_cache = mp_draw_sub_alloc(osd);
+        osd->draw_cache = mp_draw_sub_alloc(osd, osd->global);
 
     stats_time_start(osd->stats, "draw-bmp");
 

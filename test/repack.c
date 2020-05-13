@@ -333,7 +333,7 @@ static void check_float_repack(int imgfmt, enum mp_csp csp,
     talloc_free(from_f);
 }
 
-static bool try_draw_bmp(FILE *f, int imgfmt)
+static bool try_draw_bmp(struct mpv_global *g, FILE *f, int imgfmt)
 {
     bool ok = false;
 
@@ -365,7 +365,7 @@ static bool try_draw_bmp(FILE *f, int imgfmt)
         .num_items = 1,
     };
 
-    struct mp_draw_sub_cache *c = mp_draw_sub_alloc(NULL);
+    struct mp_draw_sub_cache *c = mp_draw_sub_alloc(NULL, g);
     if (mp_draw_sub_bitmaps(c, dst, &sbs_list)) {
         char *info = mp_draw_sub_get_dbg_info(c);
         fprintf(f, "%s\n", info);
@@ -419,7 +419,7 @@ static void run(struct test_ctx *ctx)
         int imgfmt = imgfmts[n];
 
         fprintf(f, "%-12s= ", mp_imgfmt_to_name(imgfmt));
-        try_draw_bmp(f, imgfmt);
+        try_draw_bmp(ctx->global, f, imgfmt);
     }
 
     fclose(f);

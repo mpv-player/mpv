@@ -5,9 +5,10 @@
 
 struct mp_rect;
 struct mp_image;
+struct mpv_global;
 struct mp_draw_sub_cache;
 
-struct mp_draw_sub_cache *mp_draw_sub_alloc(void *ta_parent);
+struct mp_draw_sub_cache *mp_draw_sub_alloc(void *ta_parent, struct mpv_global *g);
 
 // Render the sub-bitmaps in sbs_list to dst. sbs_list must have been rendered
 // for an OSD resolution equivalent to dst's size (UB if not).

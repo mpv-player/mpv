@@ -639,7 +639,7 @@ static void draw_osd(struct vo *vo)
     p->osd_part.active = false;
 
     if (!p->osd_cache)
-        p->osd_cache = mp_draw_sub_alloc(p);
+        p->osd_cache = mp_draw_sub_alloc(p, vo->global);
 
     struct sub_bitmap_list *sbs = osd_render(vo->osd, *res, pts, 0,
                                              mp_draw_sub_formats);

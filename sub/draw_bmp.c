@@ -60,6 +60,8 @@ struct slice {
 
 struct mp_draw_sub_cache
 {
+    struct mpv_global *global;
+
     // Possibly cached parts. Also implies what's in the video_overlay.
     struct part parts[MAX_OSD_PARTS];
     int64_t change_id;
@@ -490,9 +492,16 @@ static void clear_rgba_overlay(struct mp_draw_sub_cache *p)
     p->any_osd = false;
 }
 
+static struct mp_sws_context *alloc_scaler(struct mp_draw_sub_cache *p)
+{
+    struct mp_sws_context *s = mp_sws_alloc(p);
+    mp_sws_enable_cmdline_opts(s, p->global);
+    return s;
+}
+
 static void init_general(struct mp_draw_sub_cache *p)
 {
-    p->sub_scale = mp_sws_alloc(p);
+    p->sub_scale = alloc_scaler(p);
 
     p->s_w = MP_ALIGN_UP(p->rgba_overlay->w, SLICE_W) / SLICE_W;
 
@@ -664,7 +673,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
         if (p->scale_in_tiles)
             p->video_overlay->params.chroma_location = MP_CHROMA_CENTER;
 
-        p->rgba_to_overlay = mp_sws_alloc(p);
+        p->rgba_to_overlay = alloc_scaler(p);
         p->rgba_to_overlay->allow_zimg = true;
         if (!mp_sws_supports_formats(p->rgba_to_overlay,
                             p->video_overlay->imgfmt, p->rgba_overlay->imgfmt))
@@ -729,7 +738,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
                                        0, p->calpha_overlay, NULL))
                 return false;
 
-            p->alpha_to_calpha = mp_sws_alloc(p);
+            p->alpha_to_calpha = alloc_scaler(p);
             if (!mp_sws_supports_formats(p->alpha_to_calpha,
                                          calpha_fmt, calpha_fmt))
                 return false;
@@ -737,8 +746,8 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
     }
 
     if (need_premul) {
-        p->premul = mp_sws_alloc(p);
-        p->unpremul = mp_sws_alloc(p);
+        p->premul = alloc_scaler(p);
+        p->unpremul = alloc_scaler(p);
         p->premul_tmp = mp_image_alloc(params->imgfmt, params->w, params->h);
         talloc_steal(p, p->premul_tmp);
         if (!p->premul_tmp)
@@ -794,10 +803,10 @@ static bool check_reinit(struct mp_draw_sub_cache *p,
 {
     if (!mp_image_params_equal(&p->params, params) || !p->rgba_overlay) {
         talloc_free_children(p);
-        *p = (struct mp_draw_sub_cache){.params = *params};
+        *p = (struct mp_draw_sub_cache){.global = p->global, .params = *params};
         if (!(to_video ? reinit_to_video(p) : reinit_to_overlay(p))) {
             talloc_free_children(p);
-            *p = (struct mp_draw_sub_cache){0};
+            *p = (struct mp_draw_sub_cache){.global = p->global};
             return false;
         }
     }
@@ -819,9 +828,11 @@ char *mp_draw_sub_get_dbg_info(struct mp_draw_sub_cache *p)
         mp_imgfmt_to_name(p->calpha_tmp ? p->calpha_tmp->imgfmt : 0));
 }
 
-struct mp_draw_sub_cache *mp_draw_sub_alloc(void *ta_parent)
+struct mp_draw_sub_cache *mp_draw_sub_alloc(void *ta_parent, struct mpv_global *g)
 {
-    return talloc_zero(ta_parent, struct mp_draw_sub_cache);
+    struct mp_draw_sub_cache *c = talloc_zero(ta_parent, struct mp_draw_sub_cache);
+    c->global = g;
+    return c;
 }
 
 bool mp_draw_sub_bitmaps(struct mp_draw_sub_cache *p, struct mp_image *dst,
