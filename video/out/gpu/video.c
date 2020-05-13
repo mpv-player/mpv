@@ -3302,8 +3302,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                     const struct ra_format *fmt = fbo.tex->params.format;
                     if (fmt->dummy_format)
                         fmt = p->fbo_format;
-                    if (!fmt->storable && p->fbo_format->storable)
-                        fmt = p->fbo_format; // to be on the safe side
+
                     bool r = ra_tex_resize(p->ra, p->log, &p->output_tex,
                                            fbo.tex->params.w, fbo.tex->params.h,
                                            fmt);
