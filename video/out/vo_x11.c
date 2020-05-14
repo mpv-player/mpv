@@ -159,6 +159,8 @@ static void freeMyXImage(struct priv *p, int foo)
     p->myximage[foo] = NULL;
 }
 
+#define BM(first, count) (((1 << (count)) - 1) << (first))
+
 const struct fmt_entry {
     uint32_t mpfmt;
     int depth;
@@ -176,6 +178,7 @@ const struct fmt_entry {
     {IMGFMT_BGR0,   32, MSBFirst,     0x0000FF00, 0x00FF0000, 0xFF000000},
     {IMGFMT_BGR0,   32, LSBFirst,     0x00FF0000, 0x0000FF00, 0x000000FF},
     {IMGFMT_RGB565, 16, LSBFirst,     0x0000F800, 0x000007E0, 0x0000001F},
+    {IMGFMT_RGB30,  32, LSBFirst,     BM(20, 10), BM(10, 10), BM(0, 10)},
     {0}
 };
 
