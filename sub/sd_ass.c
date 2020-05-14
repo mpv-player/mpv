@@ -627,7 +627,7 @@ static bool is_whitespace_only(char *s, int len)
     return true;
 }
 
-static char *get_text(struct sd *sd, double pts)
+static char *get_text_buf(struct sd *sd, double pts, enum sd_text_type type)
 {
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
@@ -643,7 +643,13 @@ static char *get_text(struct sd *sd, double pts)
         if (ipts >= event->Start && ipts < event->Start + event->Duration) {
             if (event->Text) {
                 int start = b.len;
-                ass_to_plaintext(&b, event->Text);
+                if (type == SD_TEXT_TYPE_PLAIN) {
+                    ass_to_plaintext(&b, event->Text);
+                } else {
+                    char *t = event->Text;
+                    while (*t)
+                        append(&b, *t++);
+                }
                 if (is_whitespace_only(&b.start[start], b.len - start)) {
                     b.len = start;
                 } else {
@@ -659,6 +665,11 @@ static char *get_text(struct sd *sd, double pts)
         b.start[b.len - 1] = '\0';
 
     return ctx->last_text;
+}
+
+static char *get_text(struct sd *sd, double pts, enum sd_text_type type)
+{
+    return talloc_strdup(NULL, get_text_buf(sd, pts, type));
 }
 
 static struct sd_times get_times(struct sd *sd, double pts)
@@ -697,7 +708,7 @@ static void fill_plaintext(struct sd *sd, double pts)
 
     ass_flush_events(track);
 
-    char *text = get_text(sd, pts);
+    char *text = get_text_buf(sd, pts, SD_TEXT_TYPE_PLAIN);
     if (!text)
         return;
 

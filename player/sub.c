@@ -105,8 +105,11 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
         return false;
 
     // Handle displaying subtitles on terminal; never done for secondary subs
-    if (mpctx->current_track[0][STREAM_SUB] == track && !mpctx->video_out)
-        term_osd_set_subs(mpctx, sub_get_text(dec_sub, video_pts));
+    if (mpctx->current_track[0][STREAM_SUB] == track && !mpctx->video_out) {
+        char *text = sub_get_text(dec_sub, video_pts, SD_TEXT_TYPE_PLAIN);
+        term_osd_set_subs(mpctx, text);
+        talloc_free(text);
+    }
 
     // Handle displaying subtitles on VO with no video being played. This is
     // quite different, because normally subtitles are redrawn on new video

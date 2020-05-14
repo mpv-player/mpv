@@ -348,10 +348,10 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
     return res;
 }
 
-// See sub_get_bitmaps() for locking requirements.
-// It can be called unlocked too, but then only 1 thread must call this function
-// at a time (unless exclusive access is guaranteed).
-char *sub_get_text(struct dec_sub *sub, double pts)
+// This can only be called by the main thread, due to the returned text pointing
+// to a buffer bound to the sub object. The main thread is the designated
+// "outside" owner of the buffer.
+char *sub_get_text(struct dec_sub *sub, double pts, enum sd_text_type type)
 {
     pthread_mutex_lock(&sub->lock);
     char *text = NULL;
@@ -362,7 +362,7 @@ char *sub_get_text(struct dec_sub *sub, double pts)
     update_segment(sub);
 
     if (sub->sd->driver->get_text)
-        text = sub->sd->driver->get_text(sub->sd, pts);
+        text = sub->sd->driver->get_text(sub->sd, pts, type);
     pthread_mutex_unlock(&sub->lock);
     return text;
 }

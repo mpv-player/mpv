@@ -2695,6 +2695,7 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
 static int mp_property_sub_text(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
+    int type = *(int *)prop->priv;
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_SUB];
     struct dec_sub *sub = track ? track->d_sub : NULL;
@@ -2702,11 +2703,19 @@ static int mp_property_sub_text(void *ctx, struct m_property *prop,
     if (!sub || pts == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
 
-    char *text = sub_get_text(sub, pts);
-    if (!text)
-        text = "";
-
-    return m_property_strdup_ro(action, arg, text);
+    switch (action) {
+    case M_PROPERTY_GET: {
+        char *text = sub_get_text(sub, pts, type);
+        if (!text)
+            text = talloc_strdup(NULL, "");
+        *(char **)arg = text;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static struct sd_times get_times(void *ctx, struct m_property *prop,
@@ -3489,7 +3498,10 @@ static const struct m_property mp_properties_base[] = {
     {"sub-delay", mp_property_sub_delay},
     {"sub-speed", mp_property_sub_speed},
     {"sub-pos", mp_property_sub_pos},
-    {"sub-text", mp_property_sub_text},
+    {"sub-text", mp_property_sub_text,
+        .priv = (void *)&(const int){SD_TEXT_TYPE_PLAIN}},
+    {"sub-text-ass", mp_property_sub_text,
+        .priv = (void *)&(const int){SD_TEXT_TYPE_ASS}},
     {"sub-start", mp_property_sub_start},
     {"sub-end", mp_property_sub_end},
 
