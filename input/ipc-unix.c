@@ -61,6 +61,7 @@ struct client_arg {
     const char *client_name;
     int client_fd;
     bool close_client_fd;
+    bool quit_on_close;
 
     bool writable;
 };
@@ -210,8 +211,14 @@ done:
     talloc_free(client_msg.start);
     if (arg->close_client_fd)
         close(arg->client_fd);
-    mpv_destroy(arg->client);
+    struct mpv_handle *h = arg->client;
+    bool quit = arg->quit_on_close;
     talloc_free(arg);
+    if (quit) {
+        mpv_terminate_destroy(h);
+    } else {
+        mpv_destroy(h);
+    }
     return NULL;
 }
 
@@ -252,6 +259,7 @@ static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, int fd)
             id >= 0 ? talloc_asprintf(client, "ipc-%d", id) : "ipc",
         .client_fd = fd,
         .close_client_fd = id >= 0,
+        .quit_on_close = id < 0,
         .writable = true,
     };
 

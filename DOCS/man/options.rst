@@ -3760,6 +3760,8 @@ Input
     In both cases, you must sure the FD is actually inherited by mpv (do not
     set the POSIX ``CLOEXEC`` flag).
 
+    The player quits when the connection is closed.
+
     This is somewhat similar to the removed ``--input-file`` option, except it
     supports only integer FDs, and cannot open actual paths.
 
