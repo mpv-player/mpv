@@ -322,6 +322,16 @@ void mp_print_key_list(struct mp_log *out)
         mp_info(out, "%s\n", key_names[i].name);
 }
 
+char **mp_get_key_list(void)
+{
+    char **list = NULL;
+    int num = 0;
+    for (int i = 0; key_names[i].name != NULL; i++)
+        MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(NULL, key_names[i].name));
+    MP_TARRAY_APPEND(NULL, list, num, NULL);
+    return list;
+}
+
 int mp_normalize_keycode(int keycode)
 {
     if (keycode <= 0)

@@ -3016,6 +3016,20 @@ static int mp_property_protocols(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_keylist(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(char ***)arg = mp_get_key_list();
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int get_decoder_entry(int item, int action, void *arg, void *ctx)
 {
     struct mp_decoder_list *codecs = ctx;
@@ -3533,6 +3547,7 @@ static const struct m_property mp_properties_base[] = {
     {"decoder-list", mp_property_decoders},
     {"encoder-list", mp_property_encoders},
     {"demuxer-lavf-list", mp_property_lavf_demuxers},
+    {"input-key-list", mp_property_keylist},
 
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},

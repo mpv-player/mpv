@@ -253,5 +253,6 @@ int mp_input_get_keys_from_string(char *str, int max_num_keys,
 
 struct mp_log;
 void mp_print_key_list(struct mp_log *out);
+char **mp_get_key_list(void);
 
 #endif /* MPLAYER_KEYCODES_H */

@@ -3046,6 +3046,9 @@ Property list
     List of available libavformat demuxers' names. This can be used to check
     for support for a specific format or use with ``--demuxer-lavf-format``.
 
+``input-key-list``
+    List of `Key names`_, same as output by ``--input-keylist``.
+
 ``mpv-version``
     Return the mpv version/copyright string. Depending on how the binary was
     built, it might contain either a release version, or just a git hash.
