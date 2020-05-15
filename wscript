@@ -242,22 +242,6 @@ iconv support use --disable-iconv.",
         'deps': 'os-win32 || os-cygwin',
         'func': check_true
     }, {
-        'name': 'posix-spawn-native',
-        'desc': 'spawnp()/kill() POSIX support',
-        'func': check_statement(['spawn.h', 'signal.h'],
-            'posix_spawnp(0,0,0,0,0,0); kill(0,0)'),
-        'deps': '!mingw && !tvos',
-    }, {
-        'name': 'posix-spawn-android',
-        'desc': 'spawnp()/kill() Android replacement',
-        'func': check_true,
-        'deps': 'android && !posix-spawn-native',
-    },{
-        'name': 'posix-spawn',
-        'desc': 'any spawnp()/kill() support',
-        'deps': 'posix-spawn-native || posix-spawn-android',
-        'func': check_true,
-    }, {
         'name': 'glob-posix',
         'desc': 'glob() POSIX support',
         'deps': '!(os-win32 || os-cygwin)',
