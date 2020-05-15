@@ -272,6 +272,8 @@ bool mp_ipc_start_anon_client(struct mp_ipc_ctx *ctx, struct mpv_handle *h,
     int pair[2];
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, pair))
         return false;
+    mp_set_cloexec(pair[0]);
+    mp_set_cloexec(pair[1]);
 
     struct client_arg *client = talloc_ptrtype(NULL, client);
     *client = (struct client_arg){
