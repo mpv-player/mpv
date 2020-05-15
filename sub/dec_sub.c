@@ -348,9 +348,7 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
     return res;
 }
 
-// This can only be called by the main thread, due to the returned text pointing
-// to a buffer bound to the sub object. The main thread is the designated
-// "outside" owner of the buffer.
+// The returned string is talloc'ed.
 char *sub_get_text(struct dec_sub *sub, double pts, enum sd_text_type type)
 {
     pthread_mutex_lock(&sub->lock);
