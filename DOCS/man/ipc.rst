@@ -380,11 +380,6 @@ shebang and have the executable bit set.
 When executed, a socket (the IPC connection) is passed to them through file
 descriptor inheritance. The file descriptor is indicated as the special command
 line argument ``--mpv-ipc-fd=N``, where ``N`` is the numeric file descriptor.
-Currently, this is hardcoded as ``--mpv-ipc-fd=3``, and the intention is that
-it will always be ``3``. (This was a compromise between keeping it as simple as
-possible, and not doing too much implicitly. Also, since there is a chance that
-this will change anyway, you should at least validate that you got the expected
-argument.)
 
 The rest is the same as with a normal ``--input-ipc-server`` IPC connection. mpv
 does not attempt to observe or other interact with the started script process.

@@ -335,8 +335,8 @@ static int load_run(struct mp_script_args *args)
 
     // Hardcode them (according to opts.fds[]), because we want to allow clients
     // to hardcode them if they want. Sue me.
-    char *fdopt = fds[1] >= 0 ? "--mpv-ipc-fd=3:4"
-                              : "--mpv-ipc-fd=3";
+    char *fdopt = fds[1] >= 0 ? mp_tprintf(80, "--mpv-ipc-fd=%d:%d", fds[0], fds[1])
+                              : mp_tprintf(80, "--mpv-ipc-fd=%d", fds[0]);
 
     struct mp_subprocess_opts opts = {
         .exe = (char *)args->filename,
@@ -348,8 +348,8 @@ static int load_run(struct mp_script_args *args)
             {.fd = 2, .src_fd = 2,},
             // Just hope these don't step over each other (e.g. fds[1] is not
             // below 4, if the std FDs are missing).
-            {.fd = 3, .src_fd = fds[0], },
-            {.fd = 4, .src_fd = fds[1], },
+            {.fd = fds[0], .src_fd = fds[0], },
+            {.fd = fds[1], .src_fd = fds[1], },
         },
         .num_fds = fds[1] >= 0 ? 5 : 4,
         .detach = true,
