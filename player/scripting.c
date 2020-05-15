@@ -351,7 +351,7 @@ static int load_run(struct mp_script_args *args)
             {.fd = 3, .src_fd = fds[0], },
             {.fd = 4, .src_fd = fds[1], },
         },
-        .num_fds = fds[1] >= 0 ? 4 : 5,
+        .num_fds = fds[1] >= 0 ? 5 : 4,
         .detach = true,
     };
     struct mp_subprocess_result res;
