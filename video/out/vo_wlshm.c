@@ -112,8 +112,7 @@ static struct buffer *buffer_create(struct vo *vo, int width, int height)
     buf->vo = vo;
     buf->size = size;
     mp_image_set_params(&buf->mpi, &p->sws->dst);
-    buf->mpi.w = width;
-    buf->mpi.h = height;
+    mp_image_set_size(&buf->mpi, width, height);
     buf->mpi.planes[0] = data;
     buf->mpi.stride[0] = stride;
     buf->pool = wl_shm_create_pool(wl->shm, fd, size);
