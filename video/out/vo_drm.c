@@ -322,8 +322,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     p->cur_frame = mp_image_alloc(p->imgfmt, p->screen_w, p->screen_h);
     mp_image_params_guess_csp(&p->sws->dst);
     mp_image_set_params(p->cur_frame, &p->sws->dst);
-    p->cur_frame[0].w = p->screen_w;
-    p->cur_frame[0].h = p->screen_h;
+    mp_image_set_size(p->cur_frame, p->screen_w, p->screen_h);
 
     talloc_free(p->cur_frame_cropped);
     p->cur_frame_cropped = mp_image_new_dummy_ref(p->cur_frame);
