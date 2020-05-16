@@ -102,6 +102,7 @@ local state = {
     mp_screen_sizeX, mp_screen_sizeY,       -- last screen-resolution, to detect resolution changes to issue reINITs
     initREQ = false,                        -- is a re-init request pending?
     last_mouseX, last_mouseY,               -- last mouse position, to detect significant mouse movement
+    mouse_in_window = false,
     message_text,
     message_hide_timer,
     fullscreen = false,
@@ -160,9 +161,13 @@ end
 
 -- return mouse position in virtual ASS coordinates (playresx/y)
 function get_virt_mouse_pos()
-    local sx, sy = get_virt_scale_factor()
-    local x, y = mp.get_mouse_pos()
-    return x * sx, y * sy
+    if state.mouse_in_window then
+        local sx, sy = get_virt_scale_factor()
+        local x, y = mp.get_mouse_pos()
+        return x * sx, y * sy
+    else
+        return -1, -1
+    end
 end
 
 function set_virt_mouse_area(x0, y0, x1, y1, name)
@@ -2212,6 +2217,7 @@ function mouse_leave()
     end
     -- reset mouse position
     state.last_mouseX, state.last_mouseY = nil, nil
+    state.mouse_in_window = false
 end
 
 function request_init()
@@ -2448,6 +2454,8 @@ function process_event(source, what)
         state.mouse_down_counter = 0
 
     elseif source == "mouse_move" then
+
+        state.mouse_in_window = true
 
         local mouseX, mouseY = get_virt_mouse_pos()
         if (user_opts.minmousemove == 0) or
