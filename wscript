@@ -302,12 +302,6 @@ iconv support use --disable-iconv.",
         'func': check_statement('sys/vfs.h',
                                 'struct statfs fs; fstatfs(0, &fs); fs.f_namelen')
     }, {
-        'name': 'memfd_create',
-        'desc': "Linux's memfd_create()",
-        'deps': 'os-linux',
-        'func': check_statement('sys/mman.h',
-                                'memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING)')
-    }, {
         'name' : '--lua',
         'desc' : 'Lua',
         'func': check_lua,
@@ -501,6 +495,12 @@ video_output_features = [
         'func': check_pkg_config('wayland-client', '>= 1.15.0',
                                  'wayland-cursor', '>= 1.15.0',
                                  'xkbcommon',      '>= 0.3.0'),
+    } , {
+        'name': 'memfd_create',
+        'desc': "Linux's memfd_create()",
+        'deps': 'wayland',
+        'func': check_statement('sys/mman.h',
+                                'memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING)')
     } , {
         'name': '--x11',
         'desc': 'X11',
