@@ -6,6 +6,7 @@
 
 struct ra_pl {
     const struct pl_gpu *gpu;
+    struct ra_timer_pl *active_timer;
 };
 
 static inline const struct pl_gpu *get_gpu(const struct ra *ra)
@@ -20,6 +21,10 @@ const struct pl_gpu *ra_pl_get(const struct ra *ra)
 {
     return ra->fns == &ra_fns_pl ? get_gpu(ra) : NULL;
 }
+
+#if PL_API_VER >= 60
+static struct pl_timer *get_active_timer(const struct ra *ra);
+#endif
 
 struct ra *ra_create_pl(const struct pl_gpu *gpu, struct mp_log *log)
 {
@@ -232,6 +237,9 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
         .buf = params->buf ? params->buf->priv : NULL,
         .buf_offset = params->buf_offset,
         .ptr = (void *) params->src,
+#if PL_API_VER >= 60
+        .timer = get_active_timer(ra),
+#endif
     };
 
     if (params->tex->params.dimensions == 2) {
@@ -254,6 +262,9 @@ static bool tex_download_pl(struct ra *ra, struct ra_tex_download_params *params
         .tex = tex,
         .ptr = params->dst,
         .stride_w = texel_stride_w(params->stride, tex),
+#if PL_API_VER >= 60
+        .timer = get_active_timer(ra),
+#endif
     };
 
     return pl_tex_download(get_gpu(ra), &pl_params);
@@ -596,6 +607,9 @@ static void renderpass_run_pl(struct ra *ra,
         .num_var_updates = p->num_varups,
         .desc_bindings = p->binds,
         .push_constants = params->push_constants,
+#if PL_API_VER >= 60
+        .timer = get_active_timer(ra),
+#endif
     };
 
     if (p->pl_pass->params.type == PL_PASS_RASTER) {
@@ -611,6 +625,81 @@ static void renderpass_run_pl(struct ra *ra,
 
     pl_pass_run(get_gpu(ra), &pl_params);
 }
+
+#if PL_API_VER >= 60
+
+struct ra_timer_pl {
+    // Because libpplacebo only supports one operation per timer, we need
+    // to use multiple pl_timers to sum up multiple passes/transfers
+    struct pl_timer **timers;
+    int num_timers;
+    int idx_timers;
+};
+
+static ra_timer *timer_create_pl(struct ra *ra)
+{
+    struct ra_timer_pl *t = talloc_zero(ra, struct ra_timer_pl);
+    return t;
+}
+
+static void timer_destroy_pl(struct ra *ra, ra_timer *timer)
+{
+    const struct pl_gpu *gpu = get_gpu(ra);
+    struct ra_timer_pl *t = timer;
+
+    for (int i = 0; i < t->num_timers; i++)
+        pl_timer_destroy(gpu, &t->timers[i]);
+
+    talloc_free(t);
+}
+
+static void timer_start_pl(struct ra *ra, ra_timer *timer)
+{
+    struct ra_pl *p = ra->priv;
+    struct ra_timer_pl *t = timer;
+
+    // There's nothing easy we can do in this case, since libplacebo only
+    // supports one timer object per operation; so just ignore "inner" timers
+    // when the user is nesting different timer queries
+    if (p->active_timer)
+        return;
+
+    p->active_timer = t;
+    t->idx_timers = 0;
+}
+
+static uint64_t timer_stop_pl(struct ra *ra, ra_timer *timer)
+{
+    struct ra_pl *p = ra->priv;
+    struct ra_timer_pl *t = timer;
+
+    if (p->active_timer != t)
+        return 0;
+
+    p->active_timer = NULL;
+
+    // Sum up all of the active results
+    uint64_t res = 0;
+    for (int i = 0; i < t->idx_timers; i++)
+        res += pl_timer_query(p->gpu, t->timers[i]);
+
+    return res;
+}
+
+static struct pl_timer *get_active_timer(const struct ra *ra)
+{
+    struct ra_pl *p = ra->priv;
+    if (!p->active_timer)
+        return NULL;
+
+    struct ra_timer_pl *t = p->active_timer;
+    if (t->idx_timers == t->num_timers)
+        MP_TARRAY_APPEND(t, t->timers, t->num_timers, pl_timer_create(p->gpu));
+
+    return t->timers[t->idx_timers++];
+}
+
+#endif // PL_API_VER >= 60
 
 static struct ra_fns ra_fns_pl = {
     .destroy                = destroy_ra_pl,
@@ -630,5 +719,11 @@ static struct ra_fns ra_fns_pl = {
     .renderpass_create      = renderpass_create_pl,
     .renderpass_destroy     = renderpass_destroy_pl,
     .renderpass_run         = renderpass_run_pl,
+#if PL_API_VER >= 60
+    .timer_create           = timer_create_pl,
+    .timer_destroy          = timer_destroy_pl,
+    .timer_start            = timer_start_pl,
+    .timer_stop             = timer_stop_pl,
+#endif
 };
 
