@@ -77,13 +77,13 @@ static void assert_imgs_equal(struct scale_test *stest, FILE *f,
     assert(ref->h == new->h);
 
     assert(ref->fmt.flags & MP_IMGFLAG_BYTE_ALIGNED);
-    assert(ref->fmt.bytes[0]);
+    assert(ref->fmt.bpp[0]);
 
     for (int p = 0; p < ref->num_planes; p++) {
         for (int y = 0; y < ref->h; y++) {
             void *line_r = ref->planes[p] + ref->stride[p] * (ptrdiff_t)y;
             void *line_o = new->planes[p] + new->stride[p] * (ptrdiff_t)y;
-            size_t size = ref->fmt.bytes[p] * (size_t)new->w;
+            size_t size = mp_image_plane_bytes(ref, p, 0, new->w);
 
             bool ok = memcmp(line_r, line_o, size) == 0;
             if (!ok) {
@@ -123,14 +123,18 @@ void repack_test_run(struct scale_test *stest)
     for (int a = 0; a < num_imgfmts; a++) {
         int mpfmt = imgfmts[a];
         struct mp_imgfmt_desc fmtdesc = mp_imgfmt_get_desc(mpfmt);
-        if (!fmtdesc.id || !(fmtdesc.flags & MP_IMGFLAG_RGB) ||
-            !fmtdesc.component_bits || (fmtdesc.component_bits % 8) ||
-            fmtdesc.num_planes > 1)
+        struct mp_regular_imgfmt rdesc;
+        if (!mp_get_regular_imgfmt(&rdesc, mpfmt)) {
+            int ofmt = mp_find_other_endian(mpfmt);
+            if (!mp_get_regular_imgfmt(&rdesc, ofmt))
+                continue;
+        }
+        if (rdesc.num_planes > 1 || rdesc.forced_csp != MP_CSP_RGB)
             continue;
 
         struct mp_image *test_img = NULL;
         bool alpha = fmtdesc.flags & MP_IMGFLAG_ALPHA;
-        bool hidepth = fmtdesc.component_bits > 8;
+        bool hidepth = rdesc.component_size > 1;
         if (alpha) {
             test_img = hidepth ? stest->img_repack_rgba16 : stest->img_repack_rgba8;
         } else {

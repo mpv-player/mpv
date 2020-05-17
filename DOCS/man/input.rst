@@ -2236,11 +2236,6 @@ Property list
         different resolution, which is the reason this value can sometimes be
         odd or confusing. Can be unavailable with some formats.
 
-    ``video-params/plane-depth``
-        Bit depth for each color component as integer. This is only exposed
-        for planar or single-component formats, and is unavailable for other
-        formats.
-
     ``video-params/w``, ``video-params/h``
         Video size as integers, with no aspect correction applied.
 

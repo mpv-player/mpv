@@ -186,6 +186,7 @@ void memset_pic(void *dst, int fill, int bytesPerLine, int height, int stride);
 void memset16_pic(void *dst, int fill, int unitsPerLine, int height, int stride);
 
 void *mp_image_pixel_ptr(struct mp_image *img, int plane, int x, int y);
+void *mp_image_pixel_ptr_ny(struct mp_image *img, int plane, int x, int y);
 size_t mp_image_plane_bytes(struct mp_image *img, int plane, int x0, int w);
 
 #endif /* MPLAYER_MP_IMAGE_H */

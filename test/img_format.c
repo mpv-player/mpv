@@ -82,7 +82,7 @@ static void run(struct test_ctx *ctx)
 
         struct mp_imgfmt_desc d = mp_imgfmt_get_desc(mpfmt);
         if (d.id) {
-            fprintf(f, "  Legacy desc: ");
+            fprintf(f, "  Basic desc: ");
             #define FLAG(t, c) if (d.flags & (t)) fprintf(f, "[%s]", c);
             FLAG(MP_IMGFLAG_BYTE_ALIGNED, "ba")
             FLAG(MP_IMGFLAG_ALPHA, "a")
@@ -95,13 +95,15 @@ static void run(struct test_ctx *ctx)
             FLAG(MP_IMGFLAG_PAL, "pal")
             FLAG(MP_IMGFLAG_HWACCEL, "hw")
             fprintf(f, "\n");
-            fprintf(f, "    planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
-                    d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
-                    d.plane_bits, d.component_bits);
+            fprintf(f, "    planes=%d, chroma=%d:%d align=%d:%d\n",
+                    d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y);
             fprintf(f, "    {");
             for (int n = 0; n < MP_MAX_PLANES; n++) {
-                fprintf(f, "%d/%d/[%d:%d] ", d.bytes[n], d.bpp[n],
-                                             d.xs[n], d.ys[n]);
+                if (n >= d.num_planes) {
+                    assert(d.bpp[n] == 0 && d.xs[n] == 0 && d.ys[n] == 0);
+                    continue;
+                }
+                fprintf(f, "%d/[%d:%d] ", d.bpp[n], d.xs[n], d.ys[n]);
             }
             fprintf(f, "}\n");
         } else {

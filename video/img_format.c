@@ -75,10 +75,7 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
             .num_planes = 1,
             .align_x = 1,
             .align_y = 1,
-            .bytes = {4},
             .bpp = {32},
-            .plane_bits = 30,
-            .component_bits = 10,
         },
         .forced_csp = MP_CSP_RGB,
         .ctype = MP_COMPONENT_TYPE_UINT,
@@ -213,14 +210,11 @@ static struct mp_imgfmt_desc to_legacy_desc(int fmt, struct mp_regular_imgfmt re
         .num_planes = reg.num_planes,
         .chroma_xs = reg.chroma_xs,
         .chroma_ys = reg.chroma_ys,
-        .component_bits = reg.component_size * 8 - abs(reg.component_pad),
     };
     desc.align_x = 1 << reg.chroma_xs;
     desc.align_y = 1 << reg.chroma_ys;
-    desc.plane_bits = desc.component_bits;
     for (int p = 0; p < reg.num_planes; p++) {
-        desc.bytes[p] = reg.component_size;
-        desc.bpp[p] = desc.bytes[p] * 8;
+        desc.bpp[p] = reg.component_size * 8;
         desc.xs[p] = p == 1 || p == 2 ? desc.chroma_xs : 0;
         desc.ys[p] = p == 1 || p == 2 ? desc.chroma_ys : 0;
         for (int c = 0; c < reg.planes[p].num_components; c++) {
@@ -258,6 +252,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     int el_size = (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM) ? 1 : 8;
     bool need_endian = false; // single component is spread over >1 bytes
     int shift = -1; // shift for all components, or -1 if not uniform
+    int comp_bits = 0;
     for (int c = 0; c < pd->nb_components; c++) {
         AVComponentDescriptor d = pd->comp[c];
         // multiple components per plane -> Y is definitive, ignore chroma
@@ -266,9 +261,9 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         planedepth[d.plane] += d.depth;
         need_endian |= (d.depth + d.shift) > 8;
         if (c == 0)
-            desc.component_bits = d.depth;
-        if (d.depth != desc.component_bits)
-            desc.component_bits = 0;
+            comp_bits = d.depth;
+        if (d.depth != comp_bits)
+            comp_bits = 0;
         if (c == 0)
             shift = d.shift;
         if (shift != d.shift)
@@ -280,8 +275,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             desc.num_planes++;
     }
 
-    desc.plane_bits = planedepth[0];
-
     // Check whether any components overlap other components (per plane).
     // We're cheating/simplifying here: we assume that this happens if a shift
     // is set - which is wrong in general (could be needed for padding, instead
@@ -292,7 +285,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     for (int c = 0; c < pd->nb_components; c++) {
         AVComponentDescriptor d = pd->comp[c];
         component_byte_overlap |= d.shift > 0 && planedepth[d.plane] > 8 &&
-                                  desc.component_bits < 8;
+                                  comp_bits < 8;
     }
 
     // If every component sits in its own byte, or all components are within
@@ -327,8 +320,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         !(pd->flags & AV_PIX_FMT_FLAG_BITSTREAM))
     {
         desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
-        for (int p = 0; p < desc.num_planes; p++)
-            desc.bytes[p] = desc.bpp[p] / 8;
     }
 
     if (pd->flags & AV_PIX_FMT_FLAG_PAL)
@@ -360,8 +351,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
             desc.flags |= MP_IMGFLAG_YUV_NV;
         }
-        if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P | MP_IMGFLAG_YUV_NV))
-            desc.component_bits += shift;
     }
 
     for (int p = 0; p < desc.num_planes; p++) {
@@ -374,11 +363,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     if ((desc.bpp[0] % 8) != 0)
         desc.align_x = 8 / desc.bpp[0]; // expect power of 2
-
-    if (desc.flags & MP_IMGFLAG_HWACCEL) {
-        desc.component_bits = 0;
-        desc.plane_bits = 0;
-    }
 
     return desc;
 }
@@ -619,21 +603,6 @@ int mp_find_regular_imgfmt(struct mp_regular_imgfmt *src)
         struct mp_regular_imgfmt f;
         if (mp_get_regular_imgfmt(&f, n) && regular_imgfmt_equals(src, &f))
             return n;
-    }
-    return 0;
-}
-
-// Find a format that has the given flags set with the following configuration.
-int mp_imgfmt_find(int xs, int ys, int planes, int component_bits, int flags)
-{
-    for (int n = IMGFMT_START + 1; n < IMGFMT_END; n++) {
-        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(n);
-        if (desc.id && ((desc.flags & flags) == flags)) {
-            if (desc.num_planes == planes && desc.chroma_xs == xs &&
-                desc.chroma_ys == ys && desc.plane_bits == component_bits &&
-                (desc.flags & MP_IMGFLAG_NE))
-                return desc.id;
-        }
     }
     return 0;
 }

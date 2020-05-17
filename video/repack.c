@@ -132,8 +132,8 @@ static void copy_plane(struct mp_image *dst, int dst_x, int dst_y,
     assert(dst->fmt.bpp[p] == src->fmt.bpp[p]);
 
     for (int y = 0; y < h; y++) {
-        void *pd = mp_image_pixel_ptr(dst, p, dst_x, dst_y + y);
-        void *ps = mp_image_pixel_ptr(src, p, src_x, src_y + y);
+        void *pd = mp_image_pixel_ptr_ny(dst, p, dst_x, dst_y + y);
+        void *ps = mp_image_pixel_ptr_ny(src, p, src_x, src_y + y);
         memcpy(pd, ps, size);
     }
 }
@@ -147,17 +147,17 @@ static void swap_endian(struct mp_image *dst, int dst_x, int dst_y,
 
     for (int p = 0; p < dst->fmt.num_planes; p++) {
         int xs = dst->fmt.xs[p];
-        int bpp = dst->fmt.bytes[p];
+        int bpp = dst->fmt.bpp[p] / 8;
         int words_per_pixel = bpp / endian_size;
         int num_words = ((w + (1 << xs) - 1) >> xs) * words_per_pixel;
         // Number of lines on this plane.
         int h = (1 << dst->fmt.chroma_ys) - (1 << dst->fmt.ys[p]) + 1;
 
-        assert(src->fmt.bytes[p] == bpp);
+        assert(src->fmt.bpp[p] == bpp * 8);
 
         for (int y = 0; y < h; y++) {
-            void *s = mp_image_pixel_ptr(src, p, src_x, src_y + y);
-            void *d = mp_image_pixel_ptr(dst, p, dst_x, dst_y + y);
+            void *s = mp_image_pixel_ptr_ny(src, p, src_x, src_y + y);
+            void *d = mp_image_pixel_ptr_ny(dst, p, dst_x, dst_y + y);
             switch (endian_size) {
             case 2:
                 for (int x = 0; x < num_words; x++)
@@ -851,8 +851,8 @@ static void repack_float(struct mp_repack *rp,
     for (int p = 0; p < b->num_planes; p++) {
         int h = (1 << b->fmt.chroma_ys) - (1 << b->fmt.ys[p]) + 1;
         for (int y = 0; y < h; y++) {
-            void *pa = mp_image_pixel_ptr(a, p, a_x, a_y + y);
-            void *pb = mp_image_pixel_ptr(b, p, b_x, b_y + y);
+            void *pa = mp_image_pixel_ptr_ny(a, p, a_x, a_y + y);
+            void *pb = mp_image_pixel_ptr_ny(b, p, b_x, b_y + y);
 
             packer(pa, pb, w >> b->fmt.xs[p], rp->f32_m[p], rp->f32_o[p],
                    rp->f32_pmax[p]);

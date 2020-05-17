@@ -72,11 +72,12 @@ struct mp_imgfmt_desc {
     int8_t align_x, align_y;     // pixel count to get byte alignment and to get
                                  // to a pixel pos where luma & chroma aligns
                                  // always power of 2
-    int8_t bytes[MP_MAX_PLANES]; // bytes per pixel (MP_IMGFLAG_BYTE_ALIGNED)
-    int8_t bpp[MP_MAX_PLANES];   // bits per pixel
-    int8_t plane_bits;           // number of bits in use for plane 0
-    int8_t component_bits;       // number of bits per component (0 if uneven)
+    int8_t bpp[MP_MAX_PLANES];   // bits per pixel (may be "average"; the real
+                                 // byte value is determined by align_x*bpp/8
+                                 // for align_x pixels)
     // chroma shifts per plane (provided for convenience with planar formats)
+    // Packed YUV always uses xs[0]=ys[0]=0, because plane 0 contains luma in
+    // addition to chroma, and thus is not sub-sampled (uses align_x=2 instead).
     int8_t xs[MP_MAX_PLANES];
     int8_t ys[MP_MAX_PLANES];
 };
@@ -253,13 +254,6 @@ enum mp_imgfmt {
     IMGFMT_END,
 };
 
-static inline bool IMGFMT_IS_RGB(int fmt)
-{
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
-    return (desc.flags & MP_IMGFLAG_RGB) && desc.num_planes == 1;
-}
-
-#define IMGFMT_RGB_DEPTH(fmt) (mp_imgfmt_get_desc(fmt).plane_bits)
 #define IMGFMT_IS_HWACCEL(fmt) (!!(mp_imgfmt_get_desc(fmt).flags & MP_IMGFLAG_HWACCEL))
 
 int mp_imgfmt_from_name(bstr name);
@@ -269,8 +263,6 @@ char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt);
 char **mp_imgfmt_name_list(void);
 
 #define vo_format_name mp_imgfmt_to_name
-
-int mp_imgfmt_find(int xs, int ys, int planes, int component_bits, int flags);
 
 int mp_imgfmt_select_best(int dst1, int dst2, int src);
 int mp_imgfmt_select_best_list(int *dst, int num_dst, int src);

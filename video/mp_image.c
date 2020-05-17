@@ -47,6 +47,10 @@ static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
                            int out_plane_size[MP_MAX_PLANES])
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
+
+    w = MP_ALIGN_UP(w, desc.align_x);
+    h = MP_ALIGN_UP(h, desc.align_y);
+
     struct mp_image_params params = {.imgfmt = imgfmt, .w = w, .h = h};
 
     if (!mp_image_params_valid(&params) || desc.flags & MP_IMGFLAG_HWACCEL)
@@ -61,9 +65,6 @@ static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
         int alloc_h = MP_ALIGN_UP(h, 32) >> desc.ys[n];
         int line_bytes = (alloc_w * desc.bpp[n] + 7) / 8;
         out_stride[n] = MP_ALIGN_UP(line_bytes, stride_align);
-        // also align to a multiple of desc.bytes[n]
-        while (desc.bytes[n] && out_stride[n] % desc.bytes[n])
-            out_stride[n] += stride_align;
         out_plane_size[n] = out_stride[n] * alloc_h;
     }
     if (desc.flags & MP_IMGFLAG_PAL)
@@ -214,13 +215,15 @@ int mp_chroma_div_up(int size, int shift)
 // Return the storage width in pixels of the given plane.
 int mp_image_plane_w(struct mp_image *mpi, int plane)
 {
-    return mp_chroma_div_up(mpi->w, mpi->fmt.xs[plane]);
+    return mp_chroma_div_up(MP_ALIGN_UP(mpi->w, mpi->fmt.align_x),
+                            mpi->fmt.xs[plane]);
 }
 
 // Return the storage height in pixels of the given plane.
 int mp_image_plane_h(struct mp_image *mpi, int plane)
 {
-    return mp_chroma_div_up(mpi->h, mpi->fmt.ys[plane]);
+    return mp_chroma_div_up(MP_ALIGN_UP(mpi->h, mpi->fmt.align_y),
+                            mpi->fmt.ys[plane]);
 }
 
 // Caller has to make sure this doesn't exceed the allocated plane data/strides.
@@ -572,7 +575,10 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
         } else if (area.fmt.flags & MP_IMGFLAG_YUV_NV) {
             plane_clear[1] = 0x8080;
         } else if (area.fmt.flags & MP_IMGFLAG_YUV_P) {
-            uint16_t chroma_clear = (1 << area.fmt.plane_bits) / 2;
+            struct mp_regular_imgfmt desc = {0};
+            mp_get_regular_imgfmt(&desc, img->imgfmt);
+            int depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
+            uint16_t chroma_clear = (1 << depth) / 2;
             if (!(area.fmt.flags & MP_IMGFLAG_NE))
                 chroma_clear = av_bswap16(chroma_clear);
             if (area.num_planes > 2)
@@ -582,7 +588,7 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
 
     for (int p = 0; p < area.num_planes; p++) {
         int bpp = area.fmt.bpp[p];
-        int bytes = (mp_image_plane_w(&area, p) * bpp + 7) / 8;
+        int bytes = mp_image_plane_bytes(&area, p, 0, area.w);
         if (bpp <= 8 || bpp > 16) {
             memset_pic(area.planes[p], plane_clear[p], bytes,
                        mp_image_plane_h(&area, p), area.stride[p]);
@@ -1045,22 +1051,39 @@ void memset16_pic(void *dst, int fill, int unitsPerLine, int height, int stride)
     }
 }
 
-// Pixel at the given luma position on the given plane, possibly rounded down.
+// Pixel at the given luma position on the given plane. x/y always refer to
+// non-subsampled coordinates (even if plane is chroma).
+// The coordinates must be aligned to mp_imgfmt_desc.align_x/y (these are byte
+// and chroma boundaries).
+// You cannot access e.g. individual luma pixels on the luma plane with yuv420p.
 void *mp_image_pixel_ptr(struct mp_image *img, int plane, int x, int y)
 {
-    return img->planes[plane] +
-           img->stride[plane] * (ptrdiff_t)(y >> img->fmt.ys[plane]) +
-           (size_t)(x >> img->fmt.xs[plane]) * img->fmt.bpp[plane] / 8;
+    assert(MP_IS_ALIGNED(x, img->fmt.align_x));
+    assert(MP_IS_ALIGNED(y, img->fmt.align_y));
+    return mp_image_pixel_ptr_ny(img, plane, x, y);
 }
 
-// Number of bytes for w pixels, using luma pixels, possibly rounded up.
-// x0 is the start pixel; matters if the start pixel is rounded down.
-// (E.g. 8 bpp, x0=7, w=7 => pixels 0..15 => 2 bytes)
+// Like mp_image_pixel_ptr(), but do not require alignment on Y coordinates if
+// the plane does not require it. Use with care.
+// Useful for addressing luma rows.
+void *mp_image_pixel_ptr_ny(struct mp_image *img, int plane, int x, int y)
+{
+    assert(MP_IS_ALIGNED(x, img->fmt.align_x));
+    assert(MP_IS_ALIGNED(y, 1 << img->fmt.ys[plane]));
+    return img->planes[plane] +
+           img->stride[plane] * (ptrdiff_t)(y >> img->fmt.ys[plane]) +
+           (x >> img->fmt.xs[plane]) * (size_t)img->fmt.bpp[plane] / 8;
+}
+
+// Return size of pixels [x0, x0+w-1] in bytes. The coordinates refer to non-
+// subsampled pixels (basically plane 0), and the size is rounded to chroma
+// and byte alignment boundaries for the entire image, even if plane!=0.
+// x0!=0 is useful for rounding (e.g. 8 bpp, x0=7, w=7 => 0..15 => 2 bytes).
 size_t mp_image_plane_bytes(struct mp_image *img, int plane, int x0, int w)
 {
-    int bpp = img->fmt.bpp[plane];
+    int x1 = MP_ALIGN_UP(x0 + w, img->fmt.align_x);
+    x0 = MP_ALIGN_DOWN(x0, img->fmt.align_x);
+    size_t bpp = img->fmt.bpp[plane];
     int xs = img->fmt.xs[plane];
-    size_t b_x0 = (x0 >> xs) * bpp / 8;
-    size_t b_x1 = (((x0 + w + (1 << xs) - 1) >> xs) * bpp + 7) / 8;
-    return b_x1 - b_x0;
+    return (x1 >> xs) * bpp / 8 - (x0 >> xs) * bpp / 8;
 }

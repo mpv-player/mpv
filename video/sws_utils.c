@@ -400,7 +400,7 @@ struct mp_image *mp_img_swap_to_native(struct mp_image *img)
     }
     if (to == AV_PIX_FMT_NONE || !mp_image_make_writeable(img))
         return img;
-    int elems = img->fmt.bytes[0] / 2 * img->w;
+    int elems = img->fmt.bpp[0] / 8 / 2 * img->w;
     for (int y = 0; y < img->h; y++) {
         uint16_t *p = (uint16_t *)(img->planes[0] + y * img->stride[0]);
         for (int i = 0; i < elems; i++)

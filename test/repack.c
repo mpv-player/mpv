@@ -283,8 +283,7 @@ static int try_repack(struct test_ctx *ctx, FILE *f, int imgfmt, int flags,
             for (int p = 0; p < srci->num_planes; p++) {
                 uint8_t *ptr = mp_image_pixel_ptr(srci, p, sx, sy);
                 for (int y = 0; y < e->h >> srci->fmt.ys[p]; y++) {
-                    int w = e->w >> srci->fmt.xs[p];
-                    int wb = (w * srci->fmt.bpp[p] + 7) / 8;
+                    int wb = mp_image_plane_bytes(srci, p, 0, e->w);
                     const void *cptr = (uint8_t *)srcd[p] + wb * y;
                     memcpy(ptr + srci->stride[p] * y, cptr, wb);
                 }
@@ -295,8 +294,7 @@ static int try_repack(struct test_ctx *ctx, FILE *f, int imgfmt, int flags,
             for (int p = 0; p < dsti->num_planes; p++) {
                 uint8_t *ptr = mp_image_pixel_ptr(dsti, p, dx, dy);
                 for (int y = 0; y < e->h >> dsti->fmt.ys[p]; y++) {
-                    int w = e->w >> dsti->fmt.xs[p];
-                    int wb = (w * dsti->fmt.bpp[p] + 7) / 8;
+                    int wb = mp_image_plane_bytes(dsti, p, 0, e->w);
                     const void *cptr = (uint8_t *)dstd[p] + wb * y;
                     assert_memcmp(ptr + dsti->stride[p] * y, cptr, wb);
                 }

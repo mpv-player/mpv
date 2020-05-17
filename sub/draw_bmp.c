@@ -138,10 +138,10 @@ static void blend_slice(struct mp_draw_sub_cache *p)
         int h = (1 << vid->fmt.chroma_ys) - (1 << ys) + 1;
         int cw = mp_chroma_div_up(vid->w, xs);
         for (int y = 0; y < h; y++) {
-            p->blend_line(mp_image_pixel_ptr(vid, plane, 0, y),
-                          mp_image_pixel_ptr(ov, plane, 0, y),
-                          xs || ys ? mp_image_pixel_ptr(ca, 0, 0, y)
-                            : mp_image_pixel_ptr(ov, ov->num_planes - 1, 0, y),
+            p->blend_line(mp_image_pixel_ptr_ny(vid, plane, 0, y),
+                          mp_image_pixel_ptr_ny(ov, plane, 0, y),
+                          xs || ys ? mp_image_pixel_ptr_ny(ca, 0, 0, y)
+                            : mp_image_pixel_ptr_ny(ov, ov->num_planes - 1, 0, y),
                           cw);
         }
     }

@@ -259,9 +259,17 @@ static int get_encoder_format(struct AVCodec *codec, int srcfmt, bool highdepth)
         int fmt = pixfmt2imgfmt(pix_fmts[n]);
         if (!fmt)
             continue;
-        // Ignore formats larger than 8 bit per pixel.
-        if (!highdepth && IMGFMT_RGB_DEPTH(fmt) > 32)
-            continue;
+        if (!highdepth) {
+            // Ignore formats larger than 8 bit per pixel. (Or which are unknown.)
+            struct mp_regular_imgfmt rdesc;
+            if (!mp_get_regular_imgfmt(&rdesc, fmt)) {
+                int ofmt = mp_find_other_endian(fmt);
+                if (!mp_get_regular_imgfmt(&rdesc, ofmt))
+                    continue;
+            }
+            if (rdesc.component_size > 1)
+                continue;
+        }
         current = current ? mp_imgfmt_select_best(current, fmt, srcfmt) : fmt;
     }
     return current;
