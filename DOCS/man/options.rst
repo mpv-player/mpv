@@ -6005,12 +6005,12 @@ The following video options are currently all specific to ``--vo=gpu`` and
     additional effect of parametrizing the inverse OOTF, in order to get
     colorimetrically consistent results with the mastering display. For SDR, or
     when using an ICC (profile (``--icc-profile``), setting this to a value
-    above 100 essentially causes the display to be treated as if it were an HDR
+    above 203 essentially causes the display to be treated as if it were an HDR
     display in disguise. (See the note below)
 
     In ``auto`` mode (the default), the chosen peak is an appropriate value
-    based on the TRC in use. For SDR curves, it uses 100. For HDR curves, it
-    uses 100 * the transfer function's nominal peak.
+    based on the TRC in use. For SDR curves, it uses 203. For HDR curves, it
+    uses 203 * the transfer function's nominal peak.
 
     .. note::
 

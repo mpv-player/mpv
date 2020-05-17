@@ -399,6 +399,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "                exp((color.rgb - vec3(%f)) * vec3(1.0/%f)) + vec3(%f),\n"
               "                lessThan(vec3(0.5), color.rgb));\n",
               HLG_C, HLG_A, HLG_B);
+        GLSLF("color.rgb *= vec3(1.0/%f);\n", MP_REF_WHITE_HLG);
         break;
     case MP_CSP_TRC_V_LOG:
         GLSLF("color.rgb = mix((color.rgb - vec3(0.125)) * vec3(1.0/5.6), \n"
@@ -483,6 +484,7 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
         GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", PQ_M2);
         break;
     case MP_CSP_TRC_HLG:
+        GLSLF("color.rgb *= vec3(%f);\n", MP_REF_WHITE_HLG);
         GLSLF("color.rgb = mix(vec3(0.5) * sqrt(color.rgb),\n"
               "                vec3(%f) * log(color.rgb - vec3(%f)) + vec3(%f),\n"
               "                lessThan(vec3(1.0), color.rgb));\n",
@@ -528,7 +530,7 @@ static void pass_ootf(struct gl_shader_cache *sc, enum mp_csp_light light,
         // HLG OOTF from BT.2100, scaled to the chosen display peak
         float gamma = MPMAX(1.0, 1.2 + 0.42 * log10(peak * MP_REF_WHITE / 1000.0));
         GLSLF("color.rgb *= vec3(%f * pow(dot(src_luma, color.rgb), %f));\n",
-              peak / pow(12, gamma), gamma - 1.0);
+              peak / pow(12.0 / MP_REF_WHITE_HLG, gamma), gamma - 1.0);
         break;
     }
     case MP_CSP_LIGHT_SCENE_709_1886:
@@ -561,7 +563,7 @@ static void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light ligh
     {
     case MP_CSP_LIGHT_SCENE_HLG: {
         float gamma = MPMAX(1.0, 1.2 + 0.42 * log10(peak * MP_REF_WHITE / 1000.0));
-        GLSLF("color.rgb *= vec3(1.0/%f);\n", peak / pow(12, gamma));
+        GLSLF("color.rgb *= vec3(1.0/%f);\n", peak / pow(12.0 / MP_REF_WHITE_HLG, gamma));
         GLSLF("color.rgb /= vec3(max(1e-6, pow(dot(src_luma, color.rgb), %f)));\n",
               (gamma - 1.0) / gamma);
         break;
