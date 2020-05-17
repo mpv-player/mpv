@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavutil/imgutils.h>
 #include <libavutil/pixfmt.h>
 #include <libavutil/pixdesc.h>
 
@@ -34,6 +35,8 @@ struct mp_imgfmt_entry {
     struct mp_imgfmt_desc desc;
     // valid if reg_desc.component_size is set
     struct mp_regular_imgfmt reg_desc;
+    // valid if bits!=0
+    struct mp_imgfmt_layout layout;
     // valid if non-0 and no reg_desc
     enum mp_csp forced_csp;
     enum mp_component_type ctype;
@@ -77,6 +80,7 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
             .align_y = 1,
             .bpp = {32},
         },
+        .layout = { {32}, { {0, 20, 10}, {0, 10, 10}, {0, 0, 10} } },
         .forced_csp = MP_CSP_RGB,
         .ctype = MP_COMPONENT_TYPE_UINT,
     },
@@ -225,6 +229,251 @@ static struct mp_imgfmt_desc to_legacy_desc(int fmt, struct mp_regular_imgfmt re
     return desc;
 }
 
+void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
+{
+    const struct mp_imgfmt_entry *mpdesc = get_mp_desc(mpfmt);
+    if (mpdesc && mpdesc->reg_desc.component_size) {
+        *p_desc = (struct mp_imgfmt_layout){{0}};
+        return;
+    }
+    if (mpdesc && mpdesc->layout.bits) {
+        *p_desc = mpdesc->layout;
+        return;
+    }
+
+    enum AVPixelFormat fmt = imgfmt2pixfmt(mpfmt);
+    const AVPixFmtDescriptor *pd = av_pix_fmt_desc_get(fmt);
+    if (!pd ||
+        (pd->flags & AV_PIX_FMT_FLAG_PAL) ||
+        (pd->flags & AV_PIX_FMT_FLAG_HWACCEL))
+        goto fail;
+
+    bool has_alpha = pd->flags & AV_PIX_FMT_FLAG_ALPHA;
+    if (pd->nb_components != 1 + has_alpha &&
+        pd->nb_components != 3 + has_alpha)
+        goto fail;
+
+    struct mp_imgfmt_layout desc = {0};
+
+    // Very convenient: we assume we're always on little endian, and FFmpeg
+    // explicitly marks big endian formats => don't need to guess whether a
+    // format is little endian, or not affected by byte order.
+    bool is_be = pd->flags & AV_PIX_FMT_FLAG_BE;
+
+    // Packed sub-sampled YUV is very... special.
+    bool is_packed_ss_yuv = pd->log2_chroma_w && !pd->log2_chroma_h &&
+        (1 << pd->log2_chroma_w) <= MP_ARRAY_SIZE(desc.extra_luma_offsets) + 1 &&
+        pd->comp[1].plane == 0 && pd->comp[2].plane == 0 &&
+        pd->nb_components == 3;
+
+    if (is_packed_ss_yuv) {
+        desc.extra_w = (1 << pd->log2_chroma_w) - 1;
+        desc.bits[0] = pd->comp[1].step * 8;
+    }
+
+    int num_planes = 0;
+    int el_bits = (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM) ? 1 : 8;
+    for (int c = 0; c < pd->nb_components; c++) {
+        const AVComponentDescriptor *d = &pd->comp[c];
+        if (d->plane >= MP_MAX_PLANES)
+            goto fail;
+
+        num_planes = MPMAX(num_planes, d->plane + 1);
+
+        int plane_bits = desc.bits[d->plane];
+        int c_bits = d->step * el_bits;
+
+        // The first component wins, because either all components result in
+        // the same value, or luma wins (luma always comes before chroma).
+        if (plane_bits) {
+            if (c_bits > plane_bits)
+                goto fail; // inconsistent
+        } else {
+            desc.bits[d->plane] = plane_bits = c_bits;
+        }
+
+        int shift = d->shift;
+        // What the fuck: for some inexplicable reason, MONOB uses shift=7
+        // in pixdesc, which is basically out of bounds. Pixdesc bug?
+        // Make it behave like MONOW. (No, the bit-order is not different.)
+        if (fmt == AV_PIX_FMT_MONOBLACK)
+            shift = 0;
+
+        int offset = d->offset * el_bits;
+        // The pixdesc logic for reading and endian swapping is as follows
+        // (reverse engineered from av_read_image_line2()):
+        // - determine a word size that will include the component fully;
+        //   this includes the "active" bits and the amount "shifted" away
+        //   (for example shift=7/depth=18 => 32 bit word reading [31:0])
+        // - the same format can use different word sizes (e.g. bgr565: the R
+        //   component at offset 0 is read as 8 bit; BG is read as 16 bits)
+        // - if BE flag is set, swap the word before proceeding
+        // - extract via shift and mask derived by depth
+        int word = mp_round_next_power_of_2(MPMAX(d->depth + shift, 8)) / 8;
+        // The purpose of this is unknown. It's an absurdity fished out of
+        // av_read_image_line2()'s implementation. It seems technically
+        // unnecessary, and provides no information. On the other hand, it
+        // compensates for seemingly bogus packed integer pixdescs; this
+        // is "why" some formats use d->offset = -1.
+        if (is_be && el_bits == 8 && word == 1)
+            offset += 8;
+        // Pixdesc's model requires accesses with varying word-sizes. This
+        // is complete bullshit, so we transform it into word swaps before
+        // further processing.
+        if (is_be && word == 1) {
+            // Probably packed RGB formats with varying word sizes. Assume
+            // the word access size is the entire pixel.
+            if (plane_bits % 8 || plane_bits >= 64)
+                goto fail;
+            if (!desc.endian_bytes)
+                desc.endian_bytes = plane_bits / 8;
+            if (desc.endian_bytes != plane_bits / 8)
+                goto fail;
+            offset = desc.endian_bytes * 8 - 8 - offset;
+        }
+        if (is_be && word > 1) {
+            if (desc.endian_bytes && desc.endian_bytes != word)
+                goto fail; // fortunately not needed/never happens
+            if (word >= 64)
+                goto fail;
+            desc.endian_bytes = word;
+        }
+        // We always use bit offsets; this doesn't lose any information,
+        // and pixdesc is merely more redundant.
+        offset += shift;
+        if (offset < 0 || offset >= (1 << 6))
+            goto fail;
+        if (offset + d->depth > plane_bits)
+            goto fail;
+        if (d->depth < 0 || d->depth >= (1 << 6))
+            goto fail;
+        desc.comps[c] = (struct mp_imgfmt_comp_desc){
+            .plane = d->plane,
+            .offset = offset,
+            .size = d->depth,
+        };
+    }
+
+    for (int p = 0; p < num_planes; p++) {
+        if (!desc.bits[p])
+            goto fail; // plane doesn't exist
+    }
+
+    // What the fuck: this is probably a pixdesc bug, so fix it.
+    if (fmt == AV_PIX_FMT_RGB8) {
+        desc.comps[2] = (struct mp_imgfmt_comp_desc){0, 0, 2};
+        desc.comps[1] = (struct mp_imgfmt_comp_desc){0, 2, 3};
+        desc.comps[0] = (struct mp_imgfmt_comp_desc){0, 5, 3};
+    }
+
+    // Overlap test. If any shared bits are happening, this is not a format we
+    // can represent (or it's something like Bayer: components in the same bits,
+    // but different alternating lines).
+    bool any_shared_bits = false;
+    bool any_shared_bytes = false;
+    for (int c = 0; c < pd->nb_components; c++) {
+        for (int i = 0; i < c; i++) {
+            struct mp_imgfmt_comp_desc *c1 = &desc.comps[c];
+            struct mp_imgfmt_comp_desc *c2 = &desc.comps[i];
+            if (c1->plane == c2->plane) {
+                if (c1->offset + c1->size > c2->offset &&
+                    c2->offset + c2->size > c1->offset)
+                    any_shared_bits = true;
+                if ((c1->offset + c1->size + 7) / 8u > c2->offset / 8u &&
+                    (c2->offset + c2->size + 7) / 8u > c1->offset / 8u)
+                    any_shared_bytes = true;
+            }
+        }
+    }
+
+    if (any_shared_bits) {
+        for (int c = 0; c < pd->nb_components; c++)
+            desc.comps[c] = (struct mp_imgfmt_comp_desc){0};
+    }
+
+    // Many important formats have padding within an access word. For example
+    // yuv420p10 has the upper 6 bit cleared to 0; P010 has the lower 6 bits
+    // cleared to 0. Pixdesc cannot represent that these bits are 0. There are
+    // other formats where padding is not guaranteed to be 0, but they are
+    // described in the same way.
+    // Apply a heuristic that is supposed to identify formats which use
+    // guaranteed 0 padding. This could fail, but nobody said this pixdesc crap
+    // is robust.
+    for (int c = 0; c < pd->nb_components; c++) {
+        struct mp_imgfmt_comp_desc *cd = &desc.comps[c];
+        // Note: rgb444 would defeat our heuristic if we checked only per comp.
+        //       also, exclude "bitstream" formats due to monow/monob
+        int fsize = MP_ALIGN_UP(cd->size, 8);
+        if (!any_shared_bytes && el_bits == 8 && fsize != cd->size &&
+            fsize - cd->size <= (1 << 3))
+        {
+            if (!(cd->offset % 8u)) {
+                cd->pad = -(fsize - cd->size);
+                cd->size = fsize;
+            } else if (!((cd->offset + cd->size) % 8u)) {
+                cd->pad = fsize - cd->size;
+                cd->size = fsize;
+                cd->offset = MP_ALIGN_DOWN(cd->offset, 8);
+            }
+        }
+    }
+
+    if (is_packed_ss_yuv) {
+        if (num_planes > 1)
+            goto fail;
+        // Guess at which positions the additional luma samples are. We iterate
+        // starting with the first byte, and then put a luma sample at places
+        // not covered by other luma/chroma.
+        // Pixdesc does not and can not provide this information. This heuristic
+        // may fail in certain cases. What a load of bullshit, right?
+        int lsize = desc.comps[0].size;
+        int cur_offset = 0;
+        for (int lsample = 1; lsample < (1 << pd->log2_chroma_w); lsample++) {
+            while (1) {
+                if (cur_offset + lsize > desc.bits[0])
+                    goto fail;
+                bool free = true;
+                for (int c = 0; c < pd->nb_components; c++) {
+                    struct mp_imgfmt_comp_desc *cd = &desc.comps[c];
+                    if (!cd->size)
+                        continue;
+                    if (cd->offset + cd->size > cur_offset &&
+                        cur_offset + lsize > cd->offset)
+                    {
+                        free = false;
+                        break;
+                    }
+                }
+                if (free)
+                    break;
+                cur_offset += lsize;
+            }
+            desc.extra_luma_offsets[lsample - 1] = cur_offset;
+            cur_offset += lsize;
+        }
+    }
+
+    // The alpha component always has ID 4 (index 3) in our representation, so
+    // move the alpha component to there.
+    if (has_alpha && pd->nb_components < 4) {
+        desc.comps[3] = desc.comps[pd->nb_components - 1];
+        desc.comps[pd->nb_components - 1] = (struct mp_imgfmt_comp_desc){0};
+    }
+
+    *p_desc = desc;
+    return;
+
+fail:
+    *p_desc = (struct mp_imgfmt_layout){{0}};
+    // Average bit size fallback.
+    int num_av_planes = av_pix_fmt_count_planes(fmt);
+    for (int p = 0; p < num_av_planes; p++) {
+        int ls = av_image_get_linesize(fmt, 256, p);
+        if (ls > 0)
+            p_desc->bits[p] = ls * 8 / 256;
+    }
+}
+
 struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 {
     const struct mp_imgfmt_entry *mpdesc = get_mp_desc(mpfmt);
@@ -235,11 +484,9 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     enum AVPixelFormat fmt = imgfmt2pixfmt(mpfmt);
     const AVPixFmtDescriptor *pd = av_pix_fmt_desc_get(fmt);
-    if (!pd || pd->nb_components > 4 || fmt == AV_PIX_FMT_NONE ||
-        fmt == AV_PIX_FMT_UYYVYY411)
+    if (!pd || pd->nb_components > 4)
         return (struct mp_imgfmt_desc) {0};
-    enum mp_component_type is_uint =
-        mp_imgfmt_get_component_type(mpfmt) == MP_COMPONENT_TYPE_UINT;
+    bool is_uint = mp_imgfmt_get_component_type(mpfmt) == MP_COMPONENT_TYPE_UINT;
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
@@ -248,57 +495,30 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         .chroma_ys = pd->log2_chroma_h,
     };
 
-    int planedepth[4] = {0};
-    int el_size = (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM) ? 1 : 8;
-    bool need_endian = false; // single component is spread over >1 bytes
-    int shift = -1; // shift for all components, or -1 if not uniform
-    int comp_bits = 0;
-    for (int c = 0; c < pd->nb_components; c++) {
-        AVComponentDescriptor d = pd->comp[c];
-        // multiple components per plane -> Y is definitive, ignore chroma
-        if (!desc.bpp[d.plane])
-            desc.bpp[d.plane] = d.step * el_size;
-        planedepth[d.plane] += d.depth;
-        need_endian |= (d.depth + d.shift) > 8;
-        if (c == 0)
-            comp_bits = d.depth;
-        if (d.depth != comp_bits)
-            comp_bits = 0;
-        if (c == 0)
-            shift = d.shift;
-        if (shift != d.shift)
-            shift = -1;
+    for (int c = 0; c < pd->nb_components; c++)
+        desc.num_planes = MPMAX(desc.num_planes, pd->comp[c].plane + 1);
+
+    struct mp_imgfmt_layout layout;
+    mp_imgfmt_get_layout(mpfmt, &layout);
+
+    bool is_ba = desc.num_planes > 0;
+    for (int p = 0; p < desc.num_planes; p++) {
+        desc.bpp[p] = layout.bits[p] / (layout.extra_w + 1);
+        is_ba = !(desc.bpp[p] % 8u);
     }
 
-    for (int p = 0; p < 4; p++) {
-        if (desc.bpp[p])
-            desc.num_planes++;
-    }
+    if (is_ba)
+        desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
 
-    // Check whether any components overlap other components (per plane).
-    // We're cheating/simplifying here: we assume that this happens if a shift
-    // is set - which is wrong in general (could be needed for padding, instead
-    // of overlapping bits of another component - use the "< 8" test to exclude
-    // "normal" formats which use this for padding, like p010).
-    // Needed for rgb444le/be.
-    bool component_byte_overlap = false;
-    for (int c = 0; c < pd->nb_components; c++) {
-        AVComponentDescriptor d = pd->comp[c];
-        component_byte_overlap |= d.shift > 0 && planedepth[d.plane] > 8 &&
-                                  comp_bits < 8;
-    }
+    // Very heuristical.
+    bool is_be = layout.endian_bytes > 0;
+    bool need_endian = (layout.comps[0].size % 8u && layout.bits[0] > 8) ||
+                       layout.comps[0].size > 8;
 
-    // If every component sits in its own byte, or all components are within
-    // a single byte, no endian-dependent access is needed. If components
-    // stride bytes (like with packed 2 byte RGB formats), endian-dependent
-    // access is needed.
-    need_endian |= component_byte_overlap;
-
-    if (!need_endian) {
-        desc.flags |= MP_IMGFLAG_LE | MP_IMGFLAG_BE;
+    if (need_endian) {
+        desc.flags |= is_be ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
     } else {
-        desc.flags |= (pd->flags & AV_PIX_FMT_FLAG_BE)
-                      ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
+        desc.flags |= MP_IMGFLAG_LE | MP_IMGFLAG_BE;
     }
 
     enum mp_csp csp = mp_imgfmt_get_forced_csp(mpfmt);
@@ -316,24 +536,17 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if (pd->flags & AV_PIX_FMT_FLAG_ALPHA)
         desc.flags |= MP_IMGFLAG_ALPHA;
 
-    if (!(pd->flags & AV_PIX_FMT_FLAG_HWACCEL) &&
-        !(pd->flags & AV_PIX_FMT_FLAG_BITSTREAM))
-    {
-        desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
-    }
-
     if (pd->flags & AV_PIX_FMT_FLAG_PAL)
         desc.flags |= MP_IMGFLAG_PAL;
 
     if ((desc.flags & (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB))
         && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED)
         && !(pd->flags & AV_PIX_FMT_FLAG_PAL)
-        && !component_byte_overlap
-        && shift >= 0 && is_uint)
+        && is_uint)
     {
         bool same_depth = true;
         for (int p = 0; p < desc.num_planes; p++) {
-            same_depth &= planedepth[p] == planedepth[0] &&
+            same_depth &= layout.bits[p] == layout.bits[0] &&
                           desc.bpp[p] == desc.bpp[0];
         }
         if (same_depth && pd->nb_components == desc.num_planes) {
@@ -344,7 +557,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             }
         }
         if (pd->nb_components == 3 && desc.num_planes == 2 &&
-            planedepth[1] == planedepth[0] * 2 &&
             desc.bpp[1] == desc.bpp[0] * 2 &&
             (desc.flags & MP_IMGFLAG_YUV))
         {
@@ -462,105 +674,69 @@ int mp_find_other_endian(int imgfmt)
     return pixfmt2imgfmt(av_pix_fmt_swap_endianness(imgfmt2pixfmt(imgfmt)));
 }
 
-static bool is_native_endian(const AVPixFmtDescriptor *pixdesc)
-{
-    enum AVPixelFormat pixfmt = av_pix_fmt_desc_get_id(pixdesc);
-    enum AVPixelFormat other = av_pix_fmt_swap_endianness(pixfmt);
-    if (other == AV_PIX_FMT_NONE || other == pixfmt)
-        return true; // no endian nonsense
-    bool is_le = *(char *)&(uint32_t){1};
-    return pixdesc && (is_le != !!(pixdesc->flags & AV_PIX_FMT_FLAG_BE));
-}
-
 bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
 {
-    struct mp_regular_imgfmt res = {0};
-
-    const AVPixFmtDescriptor *pixdesc =
-        av_pix_fmt_desc_get(imgfmt2pixfmt(imgfmt));
-
-    if (!pixdesc) {
-        const struct mp_imgfmt_entry *p = get_mp_desc(imgfmt);
-        if (p && p->reg_desc.component_size) {
-            *dst = p->reg_desc;
-            return true;
-        }
-        return false;
+    const struct mp_imgfmt_entry *p = get_mp_desc(imgfmt);
+    if (p && p->reg_desc.component_size) {
+        *dst = p->reg_desc;
+        return true;
     }
 
-    if ((pixdesc->flags & AV_PIX_FMT_FLAG_BITSTREAM) ||
-        (pixdesc->flags & AV_PIX_FMT_FLAG_HWACCEL) ||
-        (pixdesc->flags & AV_PIX_FMT_FLAG_PAL) ||
-        pixdesc->nb_components < 1 ||
-        pixdesc->nb_components > MP_NUM_COMPONENTS ||
-        !is_native_endian(pixdesc))
+    struct mp_regular_imgfmt res = {0};
+
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
+    if (!desc.num_planes)
+        return false;
+    res.num_planes = desc.num_planes;
+
+    struct mp_imgfmt_layout layout;
+    mp_imgfmt_get_layout(imgfmt, &layout);
+
+    if (layout.endian_bytes || layout.extra_w)
         return false;
 
     res.component_type = mp_imgfmt_get_component_type(imgfmt);
     if (!res.component_type)
         return false;
 
-    const AVComponentDescriptor *comp0 = &pixdesc->comp[0];
-
-    int depth = comp0->depth + comp0->shift;
-    if (depth < 1 || depth > 64)
+    struct mp_imgfmt_comp_desc *comp0 = &layout.comps[0];
+    if (comp0->size < 1 || comp0->size > 64 || (comp0->size % 8u))
         return false;
-    res.component_size = (depth + 7) / 8;
 
-    for (int n = 0; n < pixdesc->nb_components; n++) {
-        const AVComponentDescriptor *comp = &pixdesc->comp[n];
+    res.component_size = comp0->size / 8u;
+    res.component_pad = comp0->pad;
 
-        if (comp->plane < 0 || comp->plane >= MP_MAX_PLANES)
+    for (int n = 0; n < res.num_planes; n++) {
+        if (layout.bits[n] % comp0->size)
             return false;
+        res.planes[n].num_components = layout.bits[n] / comp0->size;
+    }
+
+    for (int n = 0; n < MP_NUM_COMPONENTS; n++) {
+        struct mp_imgfmt_comp_desc *comp = &layout.comps[n];
+        if (!comp->size)
+            continue;
+
+        struct mp_regular_imgfmt_plane *plane = &res.planes[comp->plane];
 
         res.num_planes = MPMAX(res.num_planes, comp->plane + 1);
 
         // We support uniform depth only.
-        if (comp->depth != comp0->depth || comp->shift != comp0->shift)
+        if (comp->size != comp0->size || comp->pad != comp0->pad)
             return false;
 
-        // Uniform component size; even the padding must have same size.
-        int ncomp = comp->step / res.component_size;
-        if (!ncomp || ncomp * res.component_size != comp->step)
+        // Size-aligned only.
+        int pos = comp->offset / comp->size;
+        if (comp->offset != pos * comp->size || pos >= MP_NUM_COMPONENTS)
             return false;
 
-        struct mp_regular_imgfmt_plane *plane = &res.planes[comp->plane];
-
-        if (plane->num_components && plane->num_components != ncomp)
-            return false;
-        plane->num_components = ncomp;
-
-        int pos = comp->offset / res.component_size;
-        if (pos < 0 || pos >= ncomp || ncomp > MP_NUM_COMPONENTS)
-            return false;
         if (plane->components[pos])
             return false;
         plane->components[pos] = n + 1;
     }
 
-    // Make sure alpha is always component 4.
-    if (pixdesc->nb_components == 2 && (pixdesc->flags & AV_PIX_FMT_FLAG_ALPHA)) {
-        for (int n = 0; n < res.num_planes; n++) {
-            for (int i = 0; i < res.planes[n].num_components; i++) {
-                if (res.planes[n].components[i] == 2)
-                    res.planes[n].components[i] = 4;
-            }
-        }
-    }
-
-    res.component_pad = comp0->depth - res.component_size * 8;
-    if (comp0->shift) {
-        // We support padding only on 1 side.
-        if (comp0->shift + comp0->depth != res.component_size * 8)
-            return false;
-        res.component_pad = -res.component_pad;
-    }
-
-    res.chroma_xs = pixdesc->log2_chroma_w;
-    res.chroma_ys = pixdesc->log2_chroma_h;
-
-    if (pixdesc->flags & AV_PIX_FMT_FLAG_BAYER)
-        return false; // it's satan himself
+    res.chroma_xs = desc.chroma_xs;
+    res.chroma_ys = desc.chroma_ys;
 
     res.forced_csp = mp_imgfmt_get_forced_csp(imgfmt);
 

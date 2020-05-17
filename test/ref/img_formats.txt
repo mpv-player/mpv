@@ -2,6 +2,7 @@
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {24:8} {16:8} {8:8} {}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {0, 3, 2, 1}
   AVD: name=0bgr chroma=0:0 flags=0x20 [rgb]
@@ -12,6 +13,7 @@
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {8:8} {16:8} {24:8} {}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {0, 1, 2, 3}
   AVD: name=0rgb chroma=0:0 flags=0x20 [rgb]
@@ -22,6 +24,7 @@ abgr: fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {24:8} {16:8} {8:8} {0:8}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {4, 3, 2, 1}
   AVD: name=abgr chroma=0:0 flags=0xa0 [rgb][alpha]
@@ -33,6 +36,7 @@ argb: fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {8:8} {16:8} {24:8} {0:8}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {4, 1, 2, 3}
   AVD: name=argb chroma=0:0 flags=0xa0 [rgb][alpha]
@@ -44,6 +48,7 @@ ayuv64: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuv][le]
     planes=1, chroma=0:0 align=1:1
     {64/[0:0] }
+    0: 64bits {16:16} {32:16} {48:16} {0:16}
   Regular: planes=1 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {4, 1, 2, 3}
   AVD: name=ayuv64le chroma=0:0 flags=0x80 [alpha]
@@ -55,6 +60,7 @@ ayuv64be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuv][be]
     planes=1, chroma=0:0 align=1:1
     {64/[0:0] }
+    0: 64bits endian_bytes=2 {16:16} {32:16} {48:16} {0:16}
   AVD: name=ayuv64be chroma=0:0 flags=0x81 [be][alpha]
     0: p=0  st=8  o=2  sh=0  d=16
     1: p=0  st=8  o=4  sh=0  d=16
@@ -64,6 +70,7 @@ bayer_bggr16: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {} {} {} {}
   AVD: name=bayer_bggr16le chroma=0:0 flags=0x120 [rgb][bayer]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=0  d=8
@@ -72,6 +79,7 @@ bayer_bggr16be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {} {} {} {}
   AVD: name=bayer_bggr16be chroma=0:0 flags=0x121 [be][rgb][bayer]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=0  d=8
@@ -80,6 +88,7 @@ bayer_bggr8: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {} {} {} {}
   AVD: name=bayer_bggr8 chroma=0:0 flags=0x120 [rgb][bayer]
     0: p=0  st=1  o=0  sh=0  d=2
     1: p=0  st=1  o=0  sh=0  d=4
@@ -88,6 +97,7 @@ bayer_gbrg16: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {} {} {} {}
   AVD: name=bayer_gbrg16le chroma=0:0 flags=0x120 [rgb][bayer]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=0  d=8
@@ -96,6 +106,7 @@ bayer_gbrg16be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {} {} {} {}
   AVD: name=bayer_gbrg16be chroma=0:0 flags=0x121 [be][rgb][bayer]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=0  d=8
@@ -104,6 +115,7 @@ bayer_gbrg8: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {} {} {} {}
   AVD: name=bayer_gbrg8 chroma=0:0 flags=0x120 [rgb][bayer]
     0: p=0  st=1  o=0  sh=0  d=2
     1: p=0  st=1  o=0  sh=0  d=4
@@ -112,6 +124,7 @@ bayer_grbg16: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {} {} {} {}
   AVD: name=bayer_grbg16le chroma=0:0 flags=0x120 [rgb][bayer]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=0  d=8
@@ -120,6 +133,7 @@ bayer_grbg16be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {} {} {} {}
   AVD: name=bayer_grbg16be chroma=0:0 flags=0x121 [be][rgb][bayer]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=0  d=8
@@ -128,6 +142,7 @@ bayer_grbg8: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {} {} {} {}
   AVD: name=bayer_grbg8 chroma=0:0 flags=0x120 [rgb][bayer]
     0: p=0  st=1  o=0  sh=0  d=2
     1: p=0  st=1  o=0  sh=0  d=4
@@ -136,6 +151,7 @@ bayer_rggb16: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {} {} {} {}
   AVD: name=bayer_rggb16le chroma=0:0 flags=0x120 [rgb][bayer]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=0  d=8
@@ -144,6 +160,7 @@ bayer_rggb16be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {} {} {} {}
   AVD: name=bayer_rggb16be chroma=0:0 flags=0x121 [be][rgb][bayer]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=0  d=8
@@ -152,6 +169,7 @@ bayer_rggb8: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {} {} {} {}
   AVD: name=bayer_rggb8 chroma=0:0 flags=0x120 [rgb][bayer]
     0: p=0  st=1  o=0  sh=0  d=2
     1: p=0  st=1  o=0  sh=0  d=4
@@ -160,6 +178,7 @@ bgr0: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {16:8} {8:8} {0:8} {}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {3, 2, 1, 0}
   AVD: name=bgr0 chroma=0:0 flags=0x20 [rgb]
@@ -170,6 +189,7 @@ bgr24: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {24/[0:0] }
+    0: 24bits {16:8} {8:8} {0:8} {}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {3, 2, 1}
   AVD: name=bgr24 chroma=0:0 flags=0x20 [rgb]
@@ -180,6 +200,7 @@ bgr4: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [rgb][le][be]
     planes=1, chroma=0:0 align=2:1
     {4/[0:0] }
+    0: 4bits {3:1} {1:2} {0:1} {}
   AVD: name=bgr4 chroma=0:0 flags=0x24 [bs][rgb]
     0: p=0  st=4  o=3  sh=0  d=1
     1: p=0  st=4  o=1  sh=0  d=2
@@ -188,6 +209,7 @@ bgr444: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {0:4} {4:4} {8:4} {}
   AVD: name=bgr444le chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=4  d=4
@@ -196,6 +218,7 @@ bgr444be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {0:4} {4:4} {8:4} {}
   AVD: name=bgr444be chroma=0:0 flags=0x21 [be][rgb]
     0: p=0  st=2  o=0  sh=0  d=4
     1: p=0  st=2  o=0  sh=4  d=4
@@ -204,6 +227,7 @@ bgr48: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {48/[0:0] }
+    0: 48bits {32:16} {16:16} {0:16} {}
   Regular: planes=1 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {3, 2, 1}
   AVD: name=bgr48le chroma=0:0 flags=0x20 [rgb]
@@ -214,6 +238,7 @@ bgr48be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {48/[0:0] }
+    0: 48bits endian_bytes=2 {32:16} {16:16} {0:16} {}
   AVD: name=bgr48be chroma=0:0 flags=0x21 [be][rgb]
     0: p=0  st=6  o=4  sh=0  d=16
     1: p=0  st=6  o=2  sh=0  d=16
@@ -222,6 +247,7 @@ bgr4_byte: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {0:1} {1:2} {3:1} {}
   AVD: name=bgr4_byte chroma=0:0 flags=0x60 [rgb]
     0: p=0  st=1  o=0  sh=0  d=1
     1: p=0  st=1  o=0  sh=1  d=2
@@ -230,6 +256,7 @@ bgr555: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {0:5} {5:5} {10:5} {}
   AVD: name=bgr555le chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=2  o=0  sh=0  d=5
     1: p=0  st=2  o=0  sh=5  d=5
@@ -238,6 +265,7 @@ bgr555be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {0:5} {5:5} {10:5} {}
   AVD: name=bgr555be chroma=0:0 flags=0x21 [be][rgb]
     0: p=0  st=2  o=0  sh=0  d=5
     1: p=0  st=2  o=0  sh=5  d=5
@@ -246,6 +274,7 @@ bgr565: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {0:5} {5:6} {11:5} {}
   AVD: name=bgr565le chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=2  o=0  sh=0  d=5
     1: p=0  st=2  o=0  sh=5  d=6
@@ -254,6 +283,7 @@ bgr565be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {0:5} {5:6} {11:5} {}
   AVD: name=bgr565be chroma=0:0 flags=0x21 [be][rgb]
     0: p=0  st=2  o=0  sh=0  d=5
     1: p=0  st=2  o=0  sh=5  d=6
@@ -262,6 +292,7 @@ bgr8: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {0:3} {3:3} {6:2} {}
   AVD: name=bgr8 chroma=0:0 flags=0x60 [rgb]
     0: p=0  st=1  o=0  sh=0  d=3
     1: p=0  st=1  o=0  sh=3  d=3
@@ -270,6 +301,7 @@ bgra: fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {16:8} {8:8} {0:8} {24:8}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {3, 2, 1, 4}
   AVD: name=bgra chroma=0:0 flags=0xa0 [rgb][alpha]
@@ -281,6 +313,7 @@ bgra64: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {64/[0:0] }
+    0: 64bits {32:16} {16:16} {0:16} {48:16}
   Regular: planes=1 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {3, 2, 1, 4}
   AVD: name=bgra64le chroma=0:0 flags=0xa0 [rgb][alpha]
@@ -292,6 +325,7 @@ bgra64be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {64/[0:0] }
+    0: 64bits endian_bytes=2 {32:16} {16:16} {0:16} {48:16}
   AVD: name=bgra64be chroma=0:0 flags=0xa1 [be][rgb][alpha]
     0: p=0  st=8  o=4  sh=0  d=16
     1: p=0  st=8  o=2  sh=0  d=16
@@ -326,6 +360,10 @@ gbrap: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le][be]
     planes=4, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 8bits {} {0:8} {} {}
+    1: 8bits {} {} {0:8} {}
+    2: 8bits {0:8} {} {} {}
+    3: 8bits {} {} {} {0:8}
   Regular: planes=4 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -340,6 +378,10 @@ gbrap10: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {} {0:16/-6} {} {}
+    1: 16bits {} {} {0:16/-6} {}
+    2: 16bits {0:16/-6} {} {} {}
+    3: 16bits {} {} {} {0:16/-6}
   Regular: planes=4 compbytes=2 bitpad=-6 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -354,6 +396,10 @@ gbrap10be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][be]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {} {0:16/-6} {} {}
+    1: 16bits endian_bytes=2 {} {} {0:16/-6} {}
+    2: 16bits endian_bytes=2 {0:16/-6} {} {} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-6}
   AVD: name=gbrap10be chroma=0:0 flags=0xb1 [be][planar][rgb][alpha]
     0: p=2  st=2  o=0  sh=0  d=10
     1: p=0  st=2  o=0  sh=0  d=10
@@ -363,6 +409,10 @@ gbrap12: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {} {0:16/-4} {} {}
+    1: 16bits {} {} {0:16/-4} {}
+    2: 16bits {0:16/-4} {} {} {}
+    3: 16bits {} {} {} {0:16/-4}
   Regular: planes=4 compbytes=2 bitpad=-4 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -377,6 +427,10 @@ gbrap12be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][be]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {} {0:16/-4} {} {}
+    1: 16bits endian_bytes=2 {} {} {0:16/-4} {}
+    2: 16bits endian_bytes=2 {0:16/-4} {} {} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-4}
   AVD: name=gbrap12be chroma=0:0 flags=0xb1 [be][planar][rgb][alpha]
     0: p=2  st=2  o=0  sh=0  d=12
     1: p=0  st=2  o=0  sh=0  d=12
@@ -386,6 +440,10 @@ gbrap16: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {} {0:16} {} {}
+    1: 16bits {} {} {0:16} {}
+    2: 16bits {0:16} {} {} {}
+    3: 16bits {} {} {} {0:16}
   Regular: planes=4 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -400,6 +458,10 @@ gbrap16be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][be]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {} {0:16} {} {}
+    1: 16bits endian_bytes=2 {} {} {0:16} {}
+    2: 16bits endian_bytes=2 {0:16} {} {} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16}
   AVD: name=gbrap16be chroma=0:0 flags=0xb1 [be][planar][rgb][alpha]
     0: p=2  st=2  o=0  sh=0  d=16
     1: p=0  st=2  o=0  sh=0  d=16
@@ -409,6 +471,10 @@ gbrapf32: [GENERIC] fcsp=rgb ctype=float
   Basic desc: [ba][a][rgb][le]
     planes=4, chroma=0:0 align=1:1
     {32/[0:0] 32/[0:0] 32/[0:0] 32/[0:0] }
+    0: 32bits {} {0:32} {} {}
+    1: 32bits {} {} {0:32} {}
+    2: 32bits {0:32} {} {} {}
+    3: 32bits {} {} {} {0:32}
   Regular: planes=4 compbytes=4 bitpad=0 chroma=1x1 ctype=float
     0: {2}
     1: {3}
@@ -423,6 +489,10 @@ gbrapf32be: [GENERIC] fcsp=rgb ctype=float
   Basic desc: [ba][a][rgb][be]
     planes=4, chroma=0:0 align=1:1
     {32/[0:0] 32/[0:0] 32/[0:0] 32/[0:0] }
+    0: 32bits endian_bytes=4 {} {0:32} {} {}
+    1: 32bits endian_bytes=4 {} {} {0:32} {}
+    2: 32bits endian_bytes=4 {0:32} {} {} {}
+    3: 32bits endian_bytes=4 {} {} {} {0:32}
   AVD: name=gbrapf32be chroma=0:0 flags=0x2b1 [be][planar][rgb][alpha][float]
     0: p=2  st=4  o=0  sh=0  d=32
     1: p=0  st=4  o=0  sh=0  d=32
@@ -432,6 +502,9 @@ gbrp: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=3, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 8bits {} {0:8} {} {}
+    1: 8bits {} {} {0:8} {}
+    2: 8bits {0:8} {} {} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -444,6 +517,9 @@ gbrp1: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=1 bitpad=-7 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -452,6 +528,9 @@ gbrp10: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {} {0:16/-6} {} {}
+    1: 16bits {} {} {0:16/-6} {}
+    2: 16bits {0:16/-6} {} {} {}
   Regular: planes=3 compbytes=2 bitpad=-6 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -464,6 +543,9 @@ gbrp10be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {} {0:16/-6} {} {}
+    1: 16bits endian_bytes=2 {} {} {0:16/-6} {}
+    2: 16bits endian_bytes=2 {0:16/-6} {} {} {}
   AVD: name=gbrp10be chroma=0:0 flags=0x31 [be][planar][rgb]
     0: p=2  st=2  o=0  sh=0  d=10
     1: p=0  st=2  o=0  sh=0  d=10
@@ -472,6 +554,9 @@ gbrp12: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {} {0:16/-4} {} {}
+    1: 16bits {} {} {0:16/-4} {}
+    2: 16bits {0:16/-4} {} {} {}
   Regular: planes=3 compbytes=2 bitpad=-4 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -484,6 +569,9 @@ gbrp12be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {} {0:16/-4} {} {}
+    1: 16bits endian_bytes=2 {} {} {0:16/-4} {}
+    2: 16bits endian_bytes=2 {0:16/-4} {} {} {}
   AVD: name=gbrp12be chroma=0:0 flags=0x31 [be][planar][rgb]
     0: p=2  st=2  o=0  sh=0  d=12
     1: p=0  st=2  o=0  sh=0  d=12
@@ -492,6 +580,9 @@ gbrp14: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {} {0:16/-2} {} {}
+    1: 16bits {} {} {0:16/-2} {}
+    2: 16bits {0:16/-2} {} {} {}
   Regular: planes=3 compbytes=2 bitpad=-2 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -504,6 +595,9 @@ gbrp14be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {} {0:16/-2} {} {}
+    1: 16bits endian_bytes=2 {} {} {0:16/-2} {}
+    2: 16bits endian_bytes=2 {0:16/-2} {} {} {}
   AVD: name=gbrp14be chroma=0:0 flags=0x31 [be][planar][rgb]
     0: p=2  st=2  o=0  sh=0  d=14
     1: p=0  st=2  o=0  sh=0  d=14
@@ -512,6 +606,9 @@ gbrp16: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {} {0:16} {} {}
+    1: 16bits {} {} {0:16} {}
+    2: 16bits {0:16} {} {} {}
   Regular: planes=3 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -524,6 +621,9 @@ gbrp16be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {} {0:16} {} {}
+    1: 16bits endian_bytes=2 {} {} {0:16} {}
+    2: 16bits endian_bytes=2 {0:16} {} {} {}
   AVD: name=gbrp16be chroma=0:0 flags=0x31 [be][planar][rgb]
     0: p=2  st=2  o=0  sh=0  d=16
     1: p=0  st=2  o=0  sh=0  d=16
@@ -532,6 +632,9 @@ gbrp2: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=1 bitpad=-6 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -540,6 +643,9 @@ gbrp3: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=1 bitpad=-5 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -548,6 +654,9 @@ gbrp4: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=1 bitpad=-4 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -556,6 +665,9 @@ gbrp5: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=1 bitpad=-3 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -564,6 +676,9 @@ gbrp6: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=1 bitpad=-2 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -572,6 +687,9 @@ gbrp9: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {} {0:16/-7} {} {}
+    1: 16bits {} {} {0:16/-7} {}
+    2: 16bits {0:16/-7} {} {} {}
   Regular: planes=3 compbytes=2 bitpad=-7 chroma=1x1 ctype=uint
     0: {2}
     1: {3}
@@ -584,6 +702,9 @@ gbrp9be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {} {0:16/-7} {} {}
+    1: 16bits endian_bytes=2 {} {} {0:16/-7} {}
+    2: 16bits endian_bytes=2 {0:16/-7} {} {} {}
   AVD: name=gbrp9be chroma=0:0 flags=0x31 [be][planar][rgb]
     0: p=2  st=2  o=0  sh=0  d=9
     1: p=0  st=2  o=0  sh=0  d=9
@@ -592,6 +713,9 @@ gbrpf32: [GENERIC] fcsp=rgb ctype=float
   Basic desc: [ba][rgb][le]
     planes=3, chroma=0:0 align=1:1
     {32/[0:0] 32/[0:0] 32/[0:0] }
+    0: 32bits {} {0:32} {} {}
+    1: 32bits {} {} {0:32} {}
+    2: 32bits {0:32} {} {} {}
   Regular: planes=3 compbytes=4 bitpad=0 chroma=1x1 ctype=float
     0: {2}
     1: {3}
@@ -604,6 +728,9 @@ gbrpf32be: [GENERIC] fcsp=rgb ctype=float
   Basic desc: [ba][rgb][be]
     planes=3, chroma=0:0 align=1:1
     {32/[0:0] 32/[0:0] 32/[0:0] }
+    0: 32bits endian_bytes=4 {} {0:32} {} {}
+    1: 32bits endian_bytes=4 {} {} {0:32} {}
+    2: 32bits endian_bytes=4 {0:32} {} {} {}
   AVD: name=gbrpf32be chroma=0:0 flags=0x231 [be][planar][rgb][float]
     0: p=2  st=4  o=0  sh=0  d=32
     1: p=0  st=4  o=0  sh=0  d=32
@@ -612,6 +739,7 @@ gray: ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {0:8} {} {} {}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
   AVD: name=gray chroma=0:0 flags=0x40
@@ -620,6 +748,7 @@ gray10: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {0:16/-6} {} {} {}
   Regular: planes=1 compbytes=2 bitpad=-6 chroma=1x1 ctype=uint
     0: {1}
   AVD: name=gray10le chroma=0:0 flags=0x0
@@ -628,12 +757,14 @@ gray10be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-6} {} {} {}
   AVD: name=gray10be chroma=0:0 flags=0x1 [be]
     0: p=0  st=2  o=0  sh=0  d=10
 gray12: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {0:16/-4} {} {} {}
   Regular: planes=1 compbytes=2 bitpad=-4 chroma=1x1 ctype=uint
     0: {1}
   AVD: name=gray12le chroma=0:0 flags=0x0
@@ -642,12 +773,14 @@ gray12be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-4} {} {} {}
   AVD: name=gray12be chroma=0:0 flags=0x1 [be]
     0: p=0  st=2  o=0  sh=0  d=12
 gray14: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {0:16/-2} {} {} {}
   Regular: planes=1 compbytes=2 bitpad=-2 chroma=1x1 ctype=uint
     0: {1}
   AVD: name=gray14le chroma=0:0 flags=0x0
@@ -656,12 +789,14 @@ gray14be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-2} {} {} {}
   AVD: name=gray14be chroma=0:0 flags=0x1 [be]
     0: p=0  st=2  o=0  sh=0  d=14
 gray16: ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {0:16} {} {} {}
   Regular: planes=1 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
   AVD: name=gray16le chroma=0:0 flags=0x0
@@ -670,12 +805,14 @@ gray16be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
   AVD: name=gray16be chroma=0:0 flags=0x1 [be]
     0: p=0  st=2  o=0  sh=0  d=16
 gray9: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {0:16/-7} {} {} {}
   Regular: planes=1 compbytes=2 bitpad=-7 chroma=1x1 ctype=uint
     0: {1}
   AVD: name=gray9le chroma=0:0 flags=0x0
@@ -684,12 +821,15 @@ gray9be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-7} {} {} {}
   AVD: name=gray9be chroma=0:0 flags=0x1 [be]
     0: p=0  st=2  o=0  sh=0  d=9
 grayaf32: ctype=float
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=2, chroma=0:0 align=1:1
     {32/[0:0] 32/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
   Regular: planes=2 compbytes=4 bitpad=0 chroma=1x1 ctype=float
     0: {1}
     1: {4}
@@ -697,6 +837,7 @@ grayf32: [GENERIC] ctype=float
   Basic desc: [ba][yuv][le]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {0:32} {} {} {}
   Regular: planes=1 compbytes=4 bitpad=0 chroma=1x1 ctype=float
     0: {1}
   AVD: name=grayf32le chroma=0:0 flags=0x200 [float]
@@ -705,6 +846,7 @@ grayf32be: [GENERIC] ctype=float
   Basic desc: [ba][yuv][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits endian_bytes=4 {0:32} {} {} {}
   AVD: name=grayf32be chroma=0:0 flags=0x201 [be][float]
     0: p=0  st=4  o=0  sh=0  d=32
 mediacodec: ctype=unknown
@@ -721,18 +863,22 @@ monob: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [rgb][le][be]
     planes=1, chroma=0:0 align=8:1
     {1/[0:0] }
+    0: 1bits {0:1} {} {} {}
   AVD: name=monob chroma=0:0 flags=0x4 [bs]
     0: p=0  st=1  o=0  sh=7  d=1
 monow: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [rgb][le][be]
     planes=1, chroma=0:0 align=8:1
     {1/[0:0] }
+    0: 1bits {0:1} {} {} {}
   AVD: name=monow chroma=0:0 flags=0x4 [bs]
     0: p=0  st=1  o=0  sh=0  d=1
 nv12: ctype=uint
   Basic desc: [ba][nv][yuv][le][be]
     planes=2, chroma=1:1 align=2:2
     {8/[0:0] 16/[1:1] }
+    0: 8bits {0:8} {} {} {}
+    1: 16bits {} {0:8} {8:8} {}
   Regular: planes=2 compbytes=1 bitpad=0 chroma=2x2 ctype=uint
     0: {1}
     1: {2, 3}
@@ -744,6 +890,8 @@ nv16: [GENERIC] ctype=uint
   Basic desc: [ba][nv][yuv][le][be]
     planes=2, chroma=1:0 align=2:1
     {8/[0:0] 16/[1:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 16bits {} {0:8} {8:8} {}
   Regular: planes=2 compbytes=1 bitpad=0 chroma=2x1 ctype=uint
     0: {1}
     1: {2, 3}
@@ -755,6 +903,8 @@ nv20: [GENERIC] ctype=uint
   Basic desc: [ba][nv][yuv][le]
     planes=2, chroma=1:0 align=2:1
     {16/[0:0] 32/[1:0] }
+    0: 16bits {0:16/-6} {} {} {}
+    1: 32bits {} {0:16/-6} {16:16/-6} {}
   Regular: planes=2 compbytes=2 bitpad=-6 chroma=2x1 ctype=uint
     0: {1}
     1: {2, 3}
@@ -766,6 +916,8 @@ nv20be: [GENERIC] ctype=uint
   Basic desc: [ba][nv][yuv][be]
     planes=2, chroma=1:0 align=2:1
     {16/[0:0] 32/[1:0] }
+    0: 16bits endian_bytes=2 {0:16/-6} {} {} {}
+    1: 32bits endian_bytes=2 {} {0:16/-6} {16:16/-6} {}
   AVD: name=nv20be chroma=1:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=10
     1: p=1  st=4  o=0  sh=0  d=10
@@ -774,6 +926,8 @@ nv21: [GENERIC] ctype=uint
   Basic desc: [ba][nv][yuv][le][be]
     planes=2, chroma=1:1 align=2:2
     {8/[0:0] 16/[1:1] }
+    0: 8bits {0:8} {} {} {}
+    1: 16bits {} {8:8} {0:8} {}
   Regular: planes=2 compbytes=1 bitpad=0 chroma=2x2 ctype=uint
     0: {1}
     1: {3, 2}
@@ -785,6 +939,8 @@ nv24: [GENERIC] ctype=uint
   Basic desc: [ba][nv][yuv][le][be]
     planes=2, chroma=0:0 align=1:1
     {8/[0:0] 16/[0:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 16bits {} {0:8} {8:8} {}
   Regular: planes=2 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
     1: {2, 3}
@@ -796,6 +952,8 @@ nv42: [GENERIC] ctype=uint
   Basic desc: [ba][nv][yuv][le][be]
     planes=2, chroma=0:0 align=1:1
     {8/[0:0] 16/[0:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 16bits {} {8:8} {0:8} {}
   Regular: planes=2 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
     1: {3, 2}
@@ -812,6 +970,8 @@ p010: ctype=uint
   Basic desc: [ba][nv][yuv][le]
     planes=2, chroma=1:1 align=2:2
     {16/[0:0] 32/[1:1] }
+    0: 16bits {0:16/6} {} {} {}
+    1: 32bits {} {0:16/6} {16:16/6} {}
   Regular: planes=2 compbytes=2 bitpad=6 chroma=2x2 ctype=uint
     0: {1}
     1: {2, 3}
@@ -823,6 +983,8 @@ p010be: [GENERIC] ctype=uint
   Basic desc: [ba][nv][yuv][be]
     planes=2, chroma=1:1 align=2:2
     {16/[0:0] 32/[1:1] }
+    0: 16bits endian_bytes=2 {0:16/6} {} {} {}
+    1: 32bits endian_bytes=2 {} {0:16/6} {16:16/6} {}
   AVD: name=p010be chroma=1:1 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=6  d=10
     1: p=1  st=4  o=0  sh=6  d=10
@@ -831,6 +993,8 @@ p016: [GENERIC] ctype=uint
   Basic desc: [ba][nv][yuv][le]
     planes=2, chroma=1:1 align=2:2
     {16/[0:0] 32/[1:1] }
+    0: 16bits {0:16} {} {} {}
+    1: 32bits {} {0:16} {16:16} {}
   Regular: planes=2 compbytes=2 bitpad=0 chroma=2x2 ctype=uint
     0: {1}
     1: {2, 3}
@@ -842,6 +1006,8 @@ p016be: [GENERIC] ctype=uint
   Basic desc: [ba][nv][yuv][be]
     planes=2, chroma=1:1 align=2:2
     {16/[0:0] 32/[1:1] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
+    1: 32bits endian_bytes=2 {} {0:16} {16:16} {}
   AVD: name=p016be chroma=1:1 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=16
     1: p=1  st=4  o=0  sh=0  d=16
@@ -850,6 +1016,7 @@ pal8: fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le][be][pal]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {} {} {} {}
   AVD: name=pal8 chroma=0:0 flags=0x82 [pal][alpha]
     0: p=0  st=1  o=0  sh=0  d=8
 qsv: [GENERIC] ctype=unknown
@@ -861,6 +1028,7 @@ rgb0: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {0:8} {8:8} {16:8} {}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1, 2, 3, 0}
   AVD: name=rgb0 chroma=0:0 flags=0x20 [rgb]
@@ -871,6 +1039,7 @@ rgb24: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {24/[0:0] }
+    0: 24bits {0:8} {8:8} {16:8} {}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1, 2, 3}
   AVD: name=rgb24 chroma=0:0 flags=0x20 [rgb]
@@ -881,10 +1050,12 @@ rgb30: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {20:10} {10:10} {0:10} {}
 rgb4: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [rgb][le][be]
     planes=1, chroma=0:0 align=2:1
     {4/[0:0] }
+    0: 4bits {0:1} {1:2} {3:1} {}
   AVD: name=rgb4 chroma=0:0 flags=0x24 [bs][rgb]
     0: p=0  st=4  o=0  sh=0  d=1
     1: p=0  st=4  o=1  sh=0  d=2
@@ -893,6 +1064,7 @@ rgb444: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {8:4} {4:4} {0:4} {}
   AVD: name=rgb444le chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=2  o=1  sh=0  d=4
     1: p=0  st=2  o=0  sh=4  d=4
@@ -901,6 +1073,7 @@ rgb444be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {8:4} {4:4} {0:4} {}
   AVD: name=rgb444be chroma=0:0 flags=0x21 [be][rgb]
     0: p=0  st=2  o=-1 sh=0  d=4
     1: p=0  st=2  o=0  sh=4  d=4
@@ -909,6 +1082,7 @@ rgb48: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {48/[0:0] }
+    0: 48bits {0:16} {16:16} {32:16} {}
   Regular: planes=1 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {1, 2, 3}
   AVD: name=rgb48le chroma=0:0 flags=0x20 [rgb]
@@ -919,6 +1093,7 @@ rgb48be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {48/[0:0] }
+    0: 48bits endian_bytes=2 {0:16} {16:16} {32:16} {}
   AVD: name=rgb48be chroma=0:0 flags=0x21 [be][rgb]
     0: p=0  st=6  o=0  sh=0  d=16
     1: p=0  st=6  o=2  sh=0  d=16
@@ -927,6 +1102,7 @@ rgb4_byte: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {3:1} {1:2} {0:1} {}
   AVD: name=rgb4_byte chroma=0:0 flags=0x60 [rgb]
     0: p=0  st=1  o=0  sh=3  d=1
     1: p=0  st=1  o=0  sh=1  d=2
@@ -935,6 +1111,7 @@ rgb555: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {10:5} {5:5} {0:5} {}
   AVD: name=rgb555le chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=2  o=1  sh=2  d=5
     1: p=0  st=2  o=0  sh=5  d=5
@@ -943,6 +1120,7 @@ rgb555be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {10:5} {5:5} {0:5} {}
   AVD: name=rgb555be chroma=0:0 flags=0x21 [be][rgb]
     0: p=0  st=2  o=-1 sh=2  d=5
     1: p=0  st=2  o=0  sh=5  d=5
@@ -951,6 +1129,7 @@ rgb565: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {11:5} {5:6} {0:5} {}
   AVD: name=rgb565le chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=2  o=1  sh=3  d=5
     1: p=0  st=2  o=0  sh=5  d=6
@@ -959,6 +1138,7 @@ rgb565be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits endian_bytes=2 {11:5} {5:6} {0:5} {}
   AVD: name=rgb565be chroma=0:0 flags=0x21 [be][rgb]
     0: p=0  st=2  o=-1 sh=3  d=5
     1: p=0  st=2  o=0  sh=5  d=6
@@ -967,6 +1147,7 @@ rgb8: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 8bits {5:3} {2:3} {0:2} {}
   AVD: name=rgb8 chroma=0:0 flags=0x60 [rgb]
     0: p=0  st=1  o=0  sh=6  d=2
     1: p=0  st=1  o=0  sh=3  d=3
@@ -975,6 +1156,7 @@ rgba: fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {0:8} {8:8} {16:8} {24:8}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1, 2, 3, 4}
   AVD: name=rgba chroma=0:0 flags=0xa0 [rgb][alpha]
@@ -986,6 +1168,7 @@ rgba64: fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {64/[0:0] }
+    0: 64bits {0:16} {16:16} {32:16} {48:16}
   Regular: planes=1 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {1, 2, 3, 4}
   AVD: name=rgba64le chroma=0:0 flags=0xa0 [rgb][alpha]
@@ -997,6 +1180,7 @@ rgba64be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][a][rgb][be]
     planes=1, chroma=0:0 align=1:1
     {64/[0:0] }
+    0: 64bits endian_bytes=2 {0:16} {16:16} {32:16} {48:16}
   AVD: name=rgba64be chroma=0:0 flags=0xa1 [be][rgb][alpha]
     0: p=0  st=8  o=0  sh=0  d=16
     1: p=0  st=8  o=2  sh=0  d=16
@@ -1006,12 +1190,18 @@ uyvy422: ctype=uint
   Basic desc: [ba][yuv][le][be]
     planes=1, chroma=1:0 align=2:1
     {16/[0:0] }
+    0: 32bits w=2 {8:8} {0:8} {16:8} {}
+       extra_luma_offsets=[ 24]
   AVD: name=uyvy422 chroma=1:0 flags=0x0
     0: p=0  st=2  o=1  sh=0  d=8
     1: p=0  st=4  o=0  sh=0  d=8
     2: p=0  st=4  o=2  sh=0  d=8
 uyyvyy411: [GENERIC] ctype=uint
-  [NODESC]
+  Basic desc: [yuv][le][be]
+    planes=1, chroma=2:0 align=0:1
+    {12/[0:0] }
+    0: 48bits w=4 {8:8} {0:8} {24:8} {}
+       extra_luma_offsets=[ 16 32 40]
   [NOALLOC]
   AVD: name=uyyvyy411 chroma=2:0 flags=0x0
     0: p=0  st=4  o=1  sh=0  d=8
@@ -1060,6 +1250,7 @@ xyz12: [GENERIC] fcsp=xyz ctype=uint
   Basic desc: [ba][le]
     planes=1, chroma=0:0 align=1:1
     {48/[0:0] }
+    0: 48bits {0:16/4} {16:16/4} {32:16/4} {}
   Regular: planes=1 compbytes=2 bitpad=4 chroma=1x1 ctype=uint
     0: {1, 2, 3}
   AVD: name=xyz12le chroma=0:0 flags=0x0
@@ -1070,6 +1261,7 @@ xyz12be: [GENERIC] fcsp=xyz ctype=uint
   Basic desc: [ba][be]
     planes=1, chroma=0:0 align=1:1
     {48/[0:0] }
+    0: 48bits endian_bytes=2 {0:16/4} {16:16/4} {32:16/4} {}
   AVD: name=xyz12be chroma=0:0 flags=0x1 [be]
     0: p=0  st=6  o=0  sh=4  d=12
     1: p=0  st=6  o=2  sh=4  d=12
@@ -1078,12 +1270,15 @@ y1: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le]
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
+    0: 0bits {} {} {} {}
   Regular: planes=1 compbytes=1 bitpad=-7 chroma=1x1 ctype=uint
     0: {1}
 y210: [GENERIC] ctype=uint
   Basic desc: [ba][yuv][le]
     planes=1, chroma=1:0 align=2:1
     {32/[0:0] }
+    0: 64bits w=2 {0:16/6} {16:16/6} {48:16/6} {}
+       extra_luma_offsets=[ 32]
   AVD: name=y210le chroma=1:0 flags=0x0
     0: p=0  st=4  o=0  sh=6  d=10
     1: p=0  st=8  o=2  sh=6  d=10
@@ -1092,6 +1287,8 @@ y210be: [GENERIC] ctype=uint
   Basic desc: [ba][yuv][be]
     planes=1, chroma=1:0 align=2:1
     {32/[0:0] }
+    0: 64bits w=2 endian_bytes=2 {0:16/6} {16:16/6} {48:16/6} {}
+       extra_luma_offsets=[ 32]
   AVD: name=y210be chroma=1:0 flags=0x1 [be]
     0: p=0  st=4  o=0  sh=6  d=10
     1: p=0  st=8  o=2  sh=6  d=10
@@ -1100,6 +1297,7 @@ ya16: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuv][le]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits {0:16} {} {} {16:16}
   Regular: planes=1 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {1, 4}
   AVD: name=ya16le chroma=0:0 flags=0x80 [alpha]
@@ -1109,6 +1307,7 @@ ya16be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuv][be]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
+    0: 32bits endian_bytes=2 {0:16} {} {} {16:16}
   AVD: name=ya16be chroma=0:0 flags=0x81 [be][alpha]
     0: p=0  st=4  o=0  sh=0  d=16
     1: p=0  st=4  o=2  sh=0  d=16
@@ -1116,6 +1315,7 @@ ya8: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuv][le][be]
     planes=1, chroma=0:0 align=1:1
     {16/[0:0] }
+    0: 16bits {0:8} {} {} {8:8}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1, 4}
   AVD: name=ya8 chroma=0:0 flags=0x80 [alpha]
@@ -1125,6 +1325,8 @@ yap16: ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=2, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
   Regular: planes=2 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
     1: {4}
@@ -1132,6 +1334,8 @@ yap8: ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=2, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
   Regular: planes=2 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
     1: {4}
@@ -1139,6 +1343,9 @@ yuv410p: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=2:2 align=4:4
     {8/[0:0] 8/[2:2] 8/[2:2] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=4x4 ctype=uint
     0: {1}
     1: {2}
@@ -1151,6 +1358,9 @@ yuv410pf: ctype=float
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=2:2 align=4:4
     {32/[0:0] 32/[2:2] 32/[2:2] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=4 bitpad=0 chroma=4x4 ctype=float
     0: {1}
     1: {2}
@@ -1159,6 +1369,9 @@ yuv411p: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=2:0 align=4:1
     {8/[0:0] 8/[2:0] 8/[2:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=4x1 ctype=uint
     0: {1}
     1: {2}
@@ -1171,6 +1384,9 @@ yuv411pf: ctype=float
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=2:0 align=4:1
     {32/[0:0] 32/[2:0] 32/[2:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=4 bitpad=0 chroma=4x1 ctype=float
     0: {1}
     1: {2}
@@ -1179,6 +1395,9 @@ yuv420p: ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=1:1 align=2:2
     {8/[0:0] 8/[1:1] 8/[1:1] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1192,6 +1411,9 @@ yuv420p10: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits {0:16/-6} {} {} {}
+    1: 16bits {} {0:16/-6} {} {}
+    2: 16bits {} {} {0:16/-6} {}
   Regular: planes=3 compbytes=2 bitpad=-6 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1204,6 +1426,9 @@ yuv420p10be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits endian_bytes=2 {0:16/-6} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-6} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-6} {}
   AVD: name=yuv420p10be chroma=1:1 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=10
     1: p=1  st=2  o=0  sh=0  d=10
@@ -1212,6 +1437,9 @@ yuv420p12: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits {0:16/-4} {} {} {}
+    1: 16bits {} {0:16/-4} {} {}
+    2: 16bits {} {} {0:16/-4} {}
   Regular: planes=3 compbytes=2 bitpad=-4 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1224,6 +1452,9 @@ yuv420p12be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits endian_bytes=2 {0:16/-4} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-4} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-4} {}
   AVD: name=yuv420p12be chroma=1:1 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=12
     1: p=1  st=2  o=0  sh=0  d=12
@@ -1232,6 +1463,9 @@ yuv420p14: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits {0:16/-2} {} {} {}
+    1: 16bits {} {0:16/-2} {} {}
+    2: 16bits {} {} {0:16/-2} {}
   Regular: planes=3 compbytes=2 bitpad=-2 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1244,6 +1478,9 @@ yuv420p14be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits endian_bytes=2 {0:16/-2} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-2} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-2} {}
   AVD: name=yuv420p14be chroma=1:1 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=14
     1: p=1  st=2  o=0  sh=0  d=14
@@ -1252,6 +1489,9 @@ yuv420p16: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits {0:16} {} {} {}
+    1: 16bits {} {0:16} {} {}
+    2: 16bits {} {} {0:16} {}
   Regular: planes=3 compbytes=2 bitpad=0 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1264,6 +1504,9 @@ yuv420p16be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16} {}
   AVD: name=yuv420p16be chroma=1:1 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=16
     1: p=1  st=2  o=0  sh=0  d=16
@@ -1272,6 +1515,9 @@ yuv420p9: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits {0:16/-7} {} {} {}
+    1: 16bits {} {0:16/-7} {} {}
+    2: 16bits {} {} {0:16/-7} {}
   Regular: planes=3 compbytes=2 bitpad=-7 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1284,6 +1530,9 @@ yuv420p9be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] }
+    0: 16bits endian_bytes=2 {0:16/-7} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-7} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-7} {}
   AVD: name=yuv420p9be chroma=1:1 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=9
     1: p=1  st=2  o=0  sh=0  d=9
@@ -1292,6 +1541,9 @@ yuv420pf: ctype=float
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:1 align=2:2
     {32/[0:0] 32/[1:1] 32/[1:1] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=4 bitpad=0 chroma=2x2 ctype=float
     0: {1}
     1: {2}
@@ -1300,6 +1552,9 @@ yuv422p: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=1:0 align=2:1
     {8/[0:0] 8/[1:0] 8/[1:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1312,6 +1567,9 @@ yuv422p10: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits {0:16/-6} {} {} {}
+    1: 16bits {} {0:16/-6} {} {}
+    2: 16bits {} {} {0:16/-6} {}
   Regular: planes=3 compbytes=2 bitpad=-6 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1324,6 +1582,9 @@ yuv422p10be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits endian_bytes=2 {0:16/-6} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-6} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-6} {}
   AVD: name=yuv422p10be chroma=1:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=10
     1: p=1  st=2  o=0  sh=0  d=10
@@ -1332,6 +1593,9 @@ yuv422p12: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits {0:16/-4} {} {} {}
+    1: 16bits {} {0:16/-4} {} {}
+    2: 16bits {} {} {0:16/-4} {}
   Regular: planes=3 compbytes=2 bitpad=-4 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1344,6 +1608,9 @@ yuv422p12be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits endian_bytes=2 {0:16/-4} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-4} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-4} {}
   AVD: name=yuv422p12be chroma=1:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=12
     1: p=1  st=2  o=0  sh=0  d=12
@@ -1352,6 +1619,9 @@ yuv422p14: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits {0:16/-2} {} {} {}
+    1: 16bits {} {0:16/-2} {} {}
+    2: 16bits {} {} {0:16/-2} {}
   Regular: planes=3 compbytes=2 bitpad=-2 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1364,6 +1634,9 @@ yuv422p14be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits endian_bytes=2 {0:16/-2} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-2} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-2} {}
   AVD: name=yuv422p14be chroma=1:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=14
     1: p=1  st=2  o=0  sh=0  d=14
@@ -1372,6 +1645,9 @@ yuv422p16: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits {0:16} {} {} {}
+    1: 16bits {} {0:16} {} {}
+    2: 16bits {} {} {0:16} {}
   Regular: planes=3 compbytes=2 bitpad=0 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1384,6 +1660,9 @@ yuv422p16be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16} {}
   AVD: name=yuv422p16be chroma=1:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=16
     1: p=1  st=2  o=0  sh=0  d=16
@@ -1392,6 +1671,9 @@ yuv422p9: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits {0:16/-7} {} {} {}
+    1: 16bits {} {0:16/-7} {} {}
+    2: 16bits {} {} {0:16/-7} {}
   Regular: planes=3 compbytes=2 bitpad=-7 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1404,6 +1686,9 @@ yuv422p9be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] }
+    0: 16bits endian_bytes=2 {0:16/-7} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-7} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-7} {}
   AVD: name=yuv422p9be chroma=1:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=9
     1: p=1  st=2  o=0  sh=0  d=9
@@ -1412,6 +1697,9 @@ yuv422pf: ctype=float
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=1:0 align=2:1
     {32/[0:0] 32/[1:0] 32/[1:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=4 bitpad=0 chroma=2x1 ctype=float
     0: {1}
     1: {2}
@@ -1420,6 +1708,9 @@ yuv440p: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=0:1 align=1:2
     {8/[0:0] 8/[0:1] 8/[0:1] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=1x2 ctype=uint
     0: {1}
     1: {2}
@@ -1432,6 +1723,9 @@ yuv440p10: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=0:1 align=1:2
     {16/[0:0] 16/[0:1] 16/[0:1] }
+    0: 16bits {0:16/-6} {} {} {}
+    1: 16bits {} {0:16/-6} {} {}
+    2: 16bits {} {} {0:16/-6} {}
   Regular: planes=3 compbytes=2 bitpad=-6 chroma=1x2 ctype=uint
     0: {1}
     1: {2}
@@ -1444,6 +1738,9 @@ yuv440p10be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=0:1 align=1:2
     {16/[0:0] 16/[0:1] 16/[0:1] }
+    0: 16bits endian_bytes=2 {0:16/-6} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-6} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-6} {}
   AVD: name=yuv440p10be chroma=0:1 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=10
     1: p=1  st=2  o=0  sh=0  d=10
@@ -1452,6 +1749,9 @@ yuv440p12: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=0:1 align=1:2
     {16/[0:0] 16/[0:1] 16/[0:1] }
+    0: 16bits {0:16/-4} {} {} {}
+    1: 16bits {} {0:16/-4} {} {}
+    2: 16bits {} {} {0:16/-4} {}
   Regular: planes=3 compbytes=2 bitpad=-4 chroma=1x2 ctype=uint
     0: {1}
     1: {2}
@@ -1464,6 +1764,9 @@ yuv440p12be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=0:1 align=1:2
     {16/[0:0] 16/[0:1] 16/[0:1] }
+    0: 16bits endian_bytes=2 {0:16/-4} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-4} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-4} {}
   AVD: name=yuv440p12be chroma=0:1 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=12
     1: p=1  st=2  o=0  sh=0  d=12
@@ -1472,6 +1775,9 @@ yuv440pf: ctype=float
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=0:1 align=1:2
     {32/[0:0] 32/[0:1] 32/[0:1] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=4 bitpad=0 chroma=1x2 ctype=float
     0: {1}
     1: {2}
@@ -1480,6 +1786,9 @@ yuv444p: ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1493,6 +1802,9 @@ yuv444p10: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {0:16/-6} {} {} {}
+    1: 16bits {} {0:16/-6} {} {}
+    2: 16bits {} {} {0:16/-6} {}
   Regular: planes=3 compbytes=2 bitpad=-6 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1505,6 +1817,9 @@ yuv444p10be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-6} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-6} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-6} {}
   AVD: name=yuv444p10be chroma=0:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=10
     1: p=1  st=2  o=0  sh=0  d=10
@@ -1513,6 +1828,9 @@ yuv444p12: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {0:16/-4} {} {} {}
+    1: 16bits {} {0:16/-4} {} {}
+    2: 16bits {} {} {0:16/-4} {}
   Regular: planes=3 compbytes=2 bitpad=-4 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1525,6 +1843,9 @@ yuv444p12be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-4} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-4} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-4} {}
   AVD: name=yuv444p12be chroma=0:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=12
     1: p=1  st=2  o=0  sh=0  d=12
@@ -1533,6 +1854,9 @@ yuv444p14: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {0:16/-2} {} {} {}
+    1: 16bits {} {0:16/-2} {} {}
+    2: 16bits {} {} {0:16/-2} {}
   Regular: planes=3 compbytes=2 bitpad=-2 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1545,6 +1869,9 @@ yuv444p14be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-2} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-2} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-2} {}
   AVD: name=yuv444p14be chroma=0:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=14
     1: p=1  st=2  o=0  sh=0  d=14
@@ -1553,6 +1880,9 @@ yuv444p16: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {0:16} {} {} {}
+    1: 16bits {} {0:16} {} {}
+    2: 16bits {} {} {0:16} {}
   Regular: planes=3 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1565,6 +1895,9 @@ yuv444p16be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16} {}
   AVD: name=yuv444p16be chroma=0:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=16
     1: p=1  st=2  o=0  sh=0  d=16
@@ -1573,6 +1906,9 @@ yuv444p9: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {0:16/-7} {} {} {}
+    1: 16bits {} {0:16/-7} {} {}
+    2: 16bits {} {} {0:16/-7} {}
   Regular: planes=3 compbytes=2 bitpad=-7 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1585,6 +1921,9 @@ yuv444p9be: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][be]
     planes=3, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-7} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-7} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-7} {}
   AVD: name=yuv444p9be chroma=0:0 flags=0x11 [be][planar]
     0: p=0  st=2  o=0  sh=0  d=9
     1: p=1  st=2  o=0  sh=0  d=9
@@ -1593,6 +1932,9 @@ yuv444pf: ctype=float
   Basic desc: [ba][yuvp][yuv][le]
     planes=3, chroma=0:0 align=1:1
     {32/[0:0] 32/[0:0] 32/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
   Regular: planes=3 compbytes=4 bitpad=0 chroma=1x1 ctype=float
     0: {1}
     1: {2}
@@ -1601,6 +1943,10 @@ yuva410pf: ctype=float
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=2:2 align=4:4
     {32/[0:0] 32/[2:2] 32/[2:2] 32/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
+    3: 0bits {} {} {} {}
   Regular: planes=4 compbytes=4 bitpad=0 chroma=4x4 ctype=float
     0: {1}
     1: {2}
@@ -1610,6 +1956,10 @@ yuva411pf: ctype=float
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=2:0 align=4:1
     {32/[0:0] 32/[2:0] 32/[2:0] 32/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
+    3: 0bits {} {} {} {}
   Regular: planes=4 compbytes=4 bitpad=0 chroma=4x1 ctype=float
     0: {1}
     1: {2}
@@ -1619,6 +1969,10 @@ yuva420p: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le][be]
     planes=4, chroma=1:1 align=2:2
     {8/[0:0] 8/[1:1] 8/[1:1] 8/[0:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
+    3: 8bits {} {} {} {0:8}
   Regular: planes=4 compbytes=1 bitpad=0 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1633,6 +1987,10 @@ yuva420p10: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] 16/[0:0] }
+    0: 16bits {0:16/-6} {} {} {}
+    1: 16bits {} {0:16/-6} {} {}
+    2: 16bits {} {} {0:16/-6} {}
+    3: 16bits {} {} {} {0:16/-6}
   Regular: planes=4 compbytes=2 bitpad=-6 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1647,6 +2005,10 @@ yuva420p10be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-6} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-6} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-6} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-6}
   AVD: name=yuva420p10be chroma=1:1 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=10
     1: p=1  st=2  o=0  sh=0  d=10
@@ -1656,6 +2018,10 @@ yuva420p16: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] 16/[0:0] }
+    0: 16bits {0:16} {} {} {}
+    1: 16bits {} {0:16} {} {}
+    2: 16bits {} {} {0:16} {}
+    3: 16bits {} {} {} {0:16}
   Regular: planes=4 compbytes=2 bitpad=0 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1670,6 +2036,10 @@ yuva420p16be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16}
   AVD: name=yuva420p16be chroma=1:1 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=16
     1: p=1  st=2  o=0  sh=0  d=16
@@ -1679,6 +2049,10 @@ yuva420p9: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] 16/[0:0] }
+    0: 16bits {0:16/-7} {} {} {}
+    1: 16bits {} {0:16/-7} {} {}
+    2: 16bits {} {} {0:16/-7} {}
+    3: 16bits {} {} {} {0:16/-7}
   Regular: planes=4 compbytes=2 bitpad=-7 chroma=2x2 ctype=uint
     0: {1}
     1: {2}
@@ -1693,6 +2067,10 @@ yuva420p9be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=1:1 align=2:2
     {16/[0:0] 16/[1:1] 16/[1:1] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-7} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-7} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-7} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-7}
   AVD: name=yuva420p9be chroma=1:1 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=9
     1: p=1  st=2  o=0  sh=0  d=9
@@ -1702,6 +2080,10 @@ yuva420pf: ctype=float
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=1:1 align=2:2
     {32/[0:0] 32/[1:1] 32/[1:1] 32/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
+    3: 0bits {} {} {} {}
   Regular: planes=4 compbytes=4 bitpad=0 chroma=2x2 ctype=float
     0: {1}
     1: {2}
@@ -1711,6 +2093,10 @@ yuva422p: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le][be]
     planes=4, chroma=1:0 align=2:1
     {8/[0:0] 8/[1:0] 8/[1:0] 8/[0:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
+    3: 8bits {} {} {} {0:8}
   Regular: planes=4 compbytes=1 bitpad=0 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1725,6 +2111,10 @@ yuva422p10: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] 16/[0:0] }
+    0: 16bits {0:16/-6} {} {} {}
+    1: 16bits {} {0:16/-6} {} {}
+    2: 16bits {} {} {0:16/-6} {}
+    3: 16bits {} {} {} {0:16/-6}
   Regular: planes=4 compbytes=2 bitpad=-6 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1739,6 +2129,10 @@ yuva422p10be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-6} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-6} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-6} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-6}
   AVD: name=yuva422p10be chroma=1:0 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=10
     1: p=1  st=2  o=0  sh=0  d=10
@@ -1748,6 +2142,10 @@ yuva422p12: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] 16/[0:0] }
+    0: 16bits {0:16/-4} {} {} {}
+    1: 16bits {} {0:16/-4} {} {}
+    2: 16bits {} {} {0:16/-4} {}
+    3: 16bits {} {} {} {0:16/-4}
   Regular: planes=4 compbytes=2 bitpad=-4 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1762,6 +2160,10 @@ yuva422p12be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-4} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-4} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-4} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-4}
   AVD: name=yuva422p12be chroma=1:0 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=12
     1: p=1  st=2  o=0  sh=0  d=12
@@ -1771,6 +2173,10 @@ yuva422p16: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] 16/[0:0] }
+    0: 16bits {0:16} {} {} {}
+    1: 16bits {} {0:16} {} {}
+    2: 16bits {} {} {0:16} {}
+    3: 16bits {} {} {} {0:16}
   Regular: planes=4 compbytes=2 bitpad=0 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1785,6 +2191,10 @@ yuva422p16be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16}
   AVD: name=yuva422p16be chroma=1:0 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=16
     1: p=1  st=2  o=0  sh=0  d=16
@@ -1794,6 +2204,10 @@ yuva422p9: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] 16/[0:0] }
+    0: 16bits {0:16/-7} {} {} {}
+    1: 16bits {} {0:16/-7} {} {}
+    2: 16bits {} {} {0:16/-7} {}
+    3: 16bits {} {} {} {0:16/-7}
   Regular: planes=4 compbytes=2 bitpad=-7 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1808,6 +2222,10 @@ yuva422p9be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=1:0 align=2:1
     {16/[0:0] 16/[1:0] 16/[1:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-7} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-7} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-7} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-7}
   AVD: name=yuva422p9be chroma=1:0 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=9
     1: p=1  st=2  o=0  sh=0  d=9
@@ -1817,6 +2235,10 @@ yuva422pf: ctype=float
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=1:0 align=2:1
     {32/[0:0] 32/[1:0] 32/[1:0] 32/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
+    3: 0bits {} {} {} {}
   Regular: planes=4 compbytes=4 bitpad=0 chroma=2x1 ctype=float
     0: {1}
     1: {2}
@@ -1826,6 +2248,10 @@ yuva440pf: ctype=float
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=0:1 align=1:2
     {32/[0:0] 32/[0:1] 32/[0:1] 32/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
+    3: 0bits {} {} {} {}
   Regular: planes=4 compbytes=4 bitpad=0 chroma=1x2 ctype=float
     0: {1}
     1: {2}
@@ -1835,6 +2261,10 @@ yuva444p: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le][be]
     planes=4, chroma=0:0 align=1:1
     {8/[0:0] 8/[0:0] 8/[0:0] 8/[0:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
+    3: 8bits {} {} {} {0:8}
   Regular: planes=4 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1849,6 +2279,10 @@ yuva444p10: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {0:16/-6} {} {} {}
+    1: 16bits {} {0:16/-6} {} {}
+    2: 16bits {} {} {0:16/-6} {}
+    3: 16bits {} {} {} {0:16/-6}
   Regular: planes=4 compbytes=2 bitpad=-6 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1863,6 +2297,10 @@ yuva444p10be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-6} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-6} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-6} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-6}
   AVD: name=yuva444p10be chroma=0:0 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=10
     1: p=1  st=2  o=0  sh=0  d=10
@@ -1872,6 +2310,10 @@ yuva444p12: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {0:16/-4} {} {} {}
+    1: 16bits {} {0:16/-4} {} {}
+    2: 16bits {} {} {0:16/-4} {}
+    3: 16bits {} {} {} {0:16/-4}
   Regular: planes=4 compbytes=2 bitpad=-4 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1886,6 +2328,10 @@ yuva444p12be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-4} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-4} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-4} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-4}
   AVD: name=yuva444p12be chroma=0:0 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=12
     1: p=1  st=2  o=0  sh=0  d=12
@@ -1895,6 +2341,10 @@ yuva444p16: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {0:16} {} {} {}
+    1: 16bits {} {0:16} {} {}
+    2: 16bits {} {} {0:16} {}
+    3: 16bits {} {} {} {0:16}
   Regular: planes=4 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1909,6 +2359,10 @@ yuva444p16be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16}
   AVD: name=yuva444p16be chroma=0:0 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=16
     1: p=1  st=2  o=0  sh=0  d=16
@@ -1918,6 +2372,10 @@ yuva444p9: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits {0:16/-7} {} {} {}
+    1: 16bits {} {0:16/-7} {} {}
+    2: 16bits {} {} {0:16/-7} {}
+    3: 16bits {} {} {} {0:16/-7}
   Regular: planes=4 compbytes=2 bitpad=-7 chroma=1x1 ctype=uint
     0: {1}
     1: {2}
@@ -1932,6 +2390,10 @@ yuva444p9be: [GENERIC] ctype=uint
   Basic desc: [ba][a][yuvp][yuv][be]
     planes=4, chroma=0:0 align=1:1
     {16/[0:0] 16/[0:0] 16/[0:0] 16/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/-7} {} {} {}
+    1: 16bits endian_bytes=2 {} {0:16/-7} {} {}
+    2: 16bits endian_bytes=2 {} {} {0:16/-7} {}
+    3: 16bits endian_bytes=2 {} {} {} {0:16/-7}
   AVD: name=yuva444p9be chroma=0:0 flags=0x91 [be][planar][alpha]
     0: p=0  st=2  o=0  sh=0  d=9
     1: p=1  st=2  o=0  sh=0  d=9
@@ -1941,6 +2403,10 @@ yuva444pf: ctype=float
   Basic desc: [ba][a][yuvp][yuv][le]
     planes=4, chroma=0:0 align=1:1
     {32/[0:0] 32/[0:0] 32/[0:0] 32/[0:0] }
+    0: 0bits {} {} {} {}
+    1: 0bits {} {} {} {}
+    2: 0bits {} {} {} {}
+    3: 0bits {} {} {} {}
   Regular: planes=4 compbytes=4 bitpad=0 chroma=1x1 ctype=float
     0: {1}
     1: {2}
@@ -1950,6 +2416,9 @@ yuvj411p: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=2:0 align=4:1
     {8/[0:0] 8/[2:0] 8/[2:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=4x1 ctype=uint
     0: {1}
     1: {2}
@@ -1962,6 +2431,9 @@ yuvj422p: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=1:0 align=2:1
     {8/[0:0] 8/[1:0] 8/[1:0] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=2x1 ctype=uint
     0: {1}
     1: {2}
@@ -1974,6 +2446,9 @@ yuvj440p: [GENERIC] ctype=uint
   Basic desc: [ba][yuvp][yuv][le][be]
     planes=3, chroma=0:1 align=1:2
     {8/[0:0] 8/[0:1] 8/[0:1] }
+    0: 8bits {0:8} {} {} {}
+    1: 8bits {} {0:8} {} {}
+    2: 8bits {} {} {0:8} {}
   Regular: planes=3 compbytes=1 bitpad=0 chroma=1x2 ctype=uint
     0: {1}
     1: {2}
@@ -1986,6 +2461,8 @@ yuyv422: [GENERIC] ctype=uint
   Basic desc: [ba][yuv][le][be]
     planes=1, chroma=1:0 align=2:1
     {16/[0:0] }
+    0: 32bits w=2 {0:8} {8:8} {24:8} {}
+       extra_luma_offsets=[ 16]
   AVD: name=yuyv422 chroma=1:0 flags=0x0
     0: p=0  st=2  o=0  sh=0  d=8
     1: p=0  st=4  o=1  sh=0  d=8
@@ -1994,6 +2471,8 @@ yvyu422: [GENERIC] ctype=uint
   Basic desc: [ba][yuv][le][be]
     planes=1, chroma=1:0 align=2:1
     {16/[0:0] }
+    0: 32bits w=2 {0:8} {24:8} {8:8} {}
+       extra_luma_offsets=[ 16]
   AVD: name=yvyu422 chroma=1:0 flags=0x0
     0: p=0  st=2  o=0  sh=0  d=8
     1: p=0  st=4  o=3  sh=0  d=8

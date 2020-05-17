@@ -141,6 +141,63 @@ struct mp_regular_imgfmt {
 bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt);
 int mp_find_regular_imgfmt(struct mp_regular_imgfmt *src);
 
+struct mp_imgfmt_comp_desc {
+    // Plane on which this component is.
+    uint8_t plane;
+    // Bit offset of first sample, from start of the pixel group (little endian).
+    uint8_t offset : 6;
+    // Number of bits used by each sample.
+    uint8_t size : 6;
+    // Internal padding. See mp_regular_imgfmt.component_pad.
+    int8_t pad : 4;
+};
+
+// Describes component layout of a specific image format.
+// Complements struct mp_imgfmt_desc, mp_imgfmt_get_component_type(), and
+// mp_imgfmt_get_forced_csp().
+// struct mp_regular_imgfmt provides a simpler description in some cases.
+struct mp_imgfmt_layout {
+    // Size of a pixel on each plane. If bits is not a multiple of 8, this is
+    // what FFmpeg calls a bitstream format.
+    // For planar sub-sampled formats, this describes a sub-sample. For
+    // example, with yuv420p, both luma and chroma planes use bits=8, extra_w=0.
+    // mp_imgfmt_desc.align_x gives the number of pixels needed to reach byte
+    // align.
+    // If extra_w>0, this is the size of extra_w+1 pixels (bundled together).
+    uint8_t bits[MP_MAX_PLANES];
+
+    // Description for each component. This is indexed by component_type-1,
+    // where component_type is as in mp_regular_imgfmt_plane.components[x] (so
+    // 1=R, 2=G, etc.). Components not present, or which have an unknown layout,
+    // use size=0.
+    struct mp_imgfmt_comp_desc comps[MP_NUM_COMPONENTS];
+
+    // If !=0, this gives the word size in bytes for endian swapping that needs
+    // to be performed for converting to native endian. This is performed before
+    // any other unpacking steps, and for all data covered by bits.
+    uint8_t endian_bytes : 4;
+
+    // Number of extra pixels in a pixel group. Packed, sub-sampled YUV formats
+    // use extra_w>0. There are no other types of formats that use this. Packed
+    // sub-sampled is defined as mixed non-sub-sampled (luma, alpha) and sub-
+    // sampled (chroma) components on the same plane. There are extra_w+1 luma
+    // samples in the pixel group, but only 1 chroma sample of each type.
+    // NB: mp_imgfmt_desc.align_x gives the number of pixels needed to get a
+    // "super pixel" with full chroma information, even for w=1 formats.
+    uint8_t extra_w : 4;
+
+    // For packed sub-sampled YUV: positions of further luma samples. Generally,
+    // you can access extra_luma_offsets[x] for (x >= 0 && x < extra_w). Luma
+    // sample 0 is described in comps[0]; luma sample N (N>1) uses all fields in
+    // comps[0], except offset=extra_luma_offsets[N-1].
+    // In theory, alpha also requires extra offsets, but we do not support any
+    // packed YUV formats with alpha and sub-sampled chroma.
+    uint8_t extra_luma_offsets[3];
+};
+
+// Return description for the given format, or desc={0} if unavailable.
+void mp_imgfmt_get_layout(int imgfmt, struct mp_imgfmt_layout *desc);
+
 // If imgfmt is valid, and there exists a format that is exactly the same, but
 // has inverse endianness, return this other format. Otherwise return 0.
 int mp_find_other_endian(int imgfmt);

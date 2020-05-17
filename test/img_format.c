@@ -110,6 +110,39 @@ static void run(struct test_ctx *ctx)
             fprintf(f, "  [NODESC]\n");
         }
 
+        struct mp_imgfmt_layout pd;
+        mp_imgfmt_get_layout(mpfmt, &pd);
+
+        for (int n = 0; n < d.num_planes; n++) {
+            fprintf(f, "    %d: %dbits", n, pd.bits[n]);
+            if (pd.extra_w)
+                fprintf(f, " w=%d", pd.extra_w + 1);
+            if (pd.endian_bytes)
+                fprintf(f, " endian_bytes=%d", pd.endian_bytes);
+            for (int x = 0; x < MP_NUM_COMPONENTS; x++) {
+                struct mp_imgfmt_comp_desc cm = pd.comps[x];
+                fprintf(f, " {");
+                if (cm.plane == n) {
+                    if (cm.size) {
+                        fprintf(f, "%d:%d", cm.offset, cm.size);
+                        if (cm.pad)
+                            fprintf(f, "/%d", cm.pad);
+                    } else {
+                        assert(cm.offset == 0);
+                        assert(cm.pad == 0);
+                    }
+                }
+                fprintf(f, "}");
+            }
+            fprintf(f, "\n");
+            if (pd.extra_w) {
+                fprintf(f, "       extra_luma_offsets=[");
+                for (int x = 0; x < pd.extra_w; x++)
+                    fprintf(f, " %d", pd.extra_luma_offsets[x]);
+                fprintf(f, "]\n");
+            }
+        }
+
         if (!(d.flags & MP_IMGFLAG_HWACCEL) && pixfmt != AV_PIX_FMT_NONE) {
             AVFrame *fr = av_frame_alloc();
             fr->format = pixfmt;
