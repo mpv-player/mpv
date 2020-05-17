@@ -306,6 +306,8 @@ local function append_perfdata(s, dedicated_page)
         return format("{\\b%d}%02d%%{\\b0}", w, i * 100)
     end
 
+    -- ensure that the fixed title is one element and every scrollable line is
+    -- also one single element.
     s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}",
                      dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
@@ -326,7 +328,9 @@ local function append_perfdata(s, dedicated_page)
                                  o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
 
                 if o.plot_perfdata and o.use_ass then
-                    s[#s+1] = generate_graph(pass["samples"], pass["count"],
+                    -- use the same line that was already started for this iteration
+                    s[#s] = s[#s] ..
+                              generate_graph(pass["samples"], pass["count"],
                                              pass["count"], pass["peak"],
                                              pass["avg"], 0.9, 0.25)
                 end
@@ -616,13 +620,31 @@ local function default_stats()
     return table.concat(stats)
 end
 
+local function scroll_vo_stats(stats, fixed_items, offset)
+    local ret = {}
+    local count = #stats - fixed_items
+    offset = max(1, min((offset or 1), count))
+
+    for i, line in pairs(stats) do
+        if i <= fixed_items or i >= fixed_items + offset then
+            ret[#ret+1] = stats[i]
+        end
+    end
+    return ret, offset
+end
 
 -- Returns an ASS string with extended VO stats
 local function vo_stats()
     local stats = {}
     eval_ass_formatting()
     add_header(stats)
+
+    -- first line (title) added next is considered fixed
+    local fixed_items = #stats + 1
     append_perfdata(stats, true)
+
+    local page = pages[o.key_page_2]
+    stats, page.offset = scroll_vo_stats(stats, fixed_items, page.offset)
     return table.concat(stats)
 end
 
@@ -759,7 +781,7 @@ cache_recorder_timer:kill()
 curr_page = o.key_page_1
 pages = {
     [o.key_page_1] = { f = default_stats, desc = "Default" },
-    [o.key_page_2] = { f = vo_stats, desc = "Extended Frame Timings" },
+    [o.key_page_2] = { f = vo_stats, desc = "Extended Frame Timings", scroll = true },
     [o.key_page_3] = { f = cache_stats, desc = "Cache Statistics" },
     [o.key_page_4] = { f = perf_stats, desc = "Internal performance info", scroll = true },
 }

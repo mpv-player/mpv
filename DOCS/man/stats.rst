@@ -22,7 +22,7 @@ stats:
 
 ====   ==================
 1      Show usual stats
-2      Show frame timings
+2      Show frame timings (scroll)
 3      Input cache stats
 4      Internal stuff (scroll)
 ====   ==================
