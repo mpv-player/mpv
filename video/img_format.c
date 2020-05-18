@@ -573,7 +573,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     desc.align_x = 1 << desc.chroma_xs;
     desc.align_y = 1 << desc.chroma_ys;
 
-    if ((desc.bpp[0] % 8) != 0)
+    if ((desc.bpp[0] * (layout.extra_w + 1) % 8) != 0)
         desc.align_x = 8 / desc.bpp[0]; // expect power of 2
 
     return desc;

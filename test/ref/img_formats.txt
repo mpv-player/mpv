@@ -1198,11 +1198,10 @@ uyvy422: ctype=uint
     2: p=0  st=4  o=2  sh=0  d=8
 uyyvyy411: [GENERIC] ctype=uint
   Basic desc: [yuv][le][be]
-    planes=1, chroma=2:0 align=0:1
+    planes=1, chroma=2:0 align=4:1
     {12/[0:0] }
     0: 48bits w=4 {8:8} {0:8} {24:8} {}
        extra_luma_offsets=[ 16 32 40]
-  [NOALLOC]
   AVD: name=uyyvyy411 chroma=2:0 flags=0x0
     0: p=0  st=4  o=1  sh=0  d=8
     1: p=0  st=6  o=0  sh=0  d=8
