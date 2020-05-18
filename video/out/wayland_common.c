@@ -829,8 +829,8 @@ static void pres_set_clockid(void *data, struct wp_presentation *pres,
 {
     struct vo_wayland_state *wl = data;
     
-    wl->presentation = pres;
-    clockid = CLOCK_MONOTONIC;
+    if (clockid == CLOCK_MONOTONIC)
+        wl->presentation = pres;
 }
 
 static const struct wp_presentation_listener pres_listener = {
