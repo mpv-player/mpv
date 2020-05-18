@@ -403,37 +403,6 @@ static void setup_packed_packer(struct mp_repack *rp)
     }
 }
 
-struct fringe_rgb_repacker {
-    // To avoid making a mess of IMGFMT_*, we use av formats directly.
-    enum AVPixelFormat avfmt;
-    // If true, use BGR instead of RGB.
-    //  False:  LSB - R - G - B - pad - MSB
-    //  True:   LSB - B - G - R - pad - MSB
-    bool rev_order;
-    // Size in bit for each component, strictly from LSB to MSB.
-    int bits[3];
-    bool be;
-};
-
-static const struct fringe_rgb_repacker fringe_rgb_repackers[] = {
-    {AV_PIX_FMT_BGR4_BYTE,  false,  {1, 2, 1}},
-    {AV_PIX_FMT_RGB4_BYTE,  true,   {1, 2, 1}},
-    {AV_PIX_FMT_BGR8,       false,  {3, 3, 2}},
-    {AV_PIX_FMT_RGB8,       true,   {2, 3, 3}}, // pixdesc desc. and doc. bug?
-    {AV_PIX_FMT_RGB444LE,   true,   {4, 4, 4}},
-    {AV_PIX_FMT_RGB444BE,   true,   {4, 4, 4}, .be = true},
-    {AV_PIX_FMT_BGR444LE,   false,  {4, 4, 4}},
-    {AV_PIX_FMT_BGR444BE,   false,  {4, 4, 4}, .be = true},
-    {AV_PIX_FMT_BGR565LE,   false,  {5, 6, 5}},
-    {AV_PIX_FMT_BGR565BE,   false,  {5, 6, 5}, .be = true},
-    {AV_PIX_FMT_RGB565LE,   true,   {5, 6, 5}},
-    {AV_PIX_FMT_RGB565BE,   true,   {5, 6, 5}, .be = true},
-    {AV_PIX_FMT_BGR555LE,   false,  {5, 5, 5}},
-    {AV_PIX_FMT_BGR555BE,   false,  {5, 5, 5}, .be = true},
-    {AV_PIX_FMT_RGB555LE,   true,   {5, 5, 5}},
-    {AV_PIX_FMT_RGB555BE,   true,   {5, 5, 5}, .be = true},
-};
-
 #define PA_SHIFT_LUT8(name, packed_t)                                       \
     static void name(void *dst, void *src[], int w, uint8_t *lut,           \
                      uint8_t s0, uint8_t s1, uint8_t s2) {                  \
@@ -489,25 +458,26 @@ static void fringe_rgb_repack(struct mp_repack *rp,
 
 static void setup_fringe_rgb_packer(struct mp_repack *rp)
 {
-    enum AVPixelFormat avfmt = imgfmt2pixfmt(rp->imgfmt_a);
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(rp->imgfmt_a);
+    struct mp_imgfmt_layout layout;
+    mp_imgfmt_get_layout(rp->imgfmt_a, &layout);
 
-    const struct fringe_rgb_repacker *fmt = NULL;
-    for (int n = 0; n < MP_ARRAY_SIZE(fringe_rgb_repackers); n++) {
-        if (fringe_rgb_repackers[n].avfmt == avfmt) {
-            fmt = &fringe_rgb_repackers[n];
-            break;
-        }
-    }
-
-    if (!fmt)
+    if (layout.bits[0] > 16 || (layout.bits[0] % 8u) || layout.extra_w ||
+        mp_imgfmt_get_forced_csp(rp->imgfmt_a) != MP_CSP_RGB ||
+        desc.num_planes != 1 || layout.comps[3].size)
         return;
 
-    int depth = fmt->bits[0];
+    int depth = layout.comps[0].size;
     for (int n = 0; n < 3; n++) {
+        struct mp_imgfmt_comp_desc *c = &layout.comps[n];
+
+        if (c->size < 1 || c->size > 8 || c->pad)
+            return;
+
         if (rp->flags & REPACK_CREATE_ROUND_DOWN) {
-            depth = MPMIN(depth, fmt->bits[n]);
+            depth = MPMIN(depth, c->size);
         } else {
-            depth = MPMAX(depth, fmt->bits[n]);
+            depth = MPMAX(depth, c->size);
         }
     }
     if (rp->flags & REPACK_CREATE_EXPAND_8BIT)
@@ -518,15 +488,12 @@ static void setup_fringe_rgb_packer(struct mp_repack *rp)
         return;
     rp->comp_lut = talloc_array(rp, uint8_t, 256 * 3);
     rp->repack = fringe_rgb_repack;
-    static const int c_order_rgb[] = {3, 1, 2};
-    static const int c_order_bgr[] = {2, 1, 3};
     for (int n = 0; n < 3; n++)
-        rp->components[n] = (fmt->rev_order ? c_order_bgr : c_order_rgb)[n] - 1;
+        rp->components[n] = ((int[]){3, 1, 2})[n] - 1;
 
-    int bitpos = 0;
     for (int n = 0; n < 3; n++) {
-        int bits = fmt->bits[n];
-        rp->comp_shifts[n] = bitpos;
+        int bits = layout.comps[n].size;
+        rp->comp_shifts[n] = layout.comps[n].offset;
         if (rp->comp_lut) {
             uint8_t *lut = rp->comp_lut + 256 * n;
             uint8_t zmax = (1 << depth) - 1;
@@ -539,14 +506,13 @@ static void setup_fringe_rgb_packer(struct mp_repack *rp)
                 }
             }
         }
-        bitpos += bits;
     }
 
-    rp->comp_size = (bitpos + 7) / 8;
+    rp->comp_size = (layout.bits[0] + 7) / 8;
     assert(rp->comp_size == 1 || rp->comp_size == 2);
 
-    if (fmt->be) {
-        assert(rp->comp_size == 2);
+    if (layout.endian_bytes) {
+        assert(rp->comp_size == 2 && layout.endian_bytes == 2);
         rp->endian_size = 2;
     }
 }
