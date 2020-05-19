@@ -110,17 +110,12 @@ static void run(struct test_ctx *ctx)
             fprintf(f, "  [NODESC]\n");
         }
 
-        struct mp_imgfmt_layout pd;
-        mp_imgfmt_get_layout(mpfmt, &pd);
-
         for (int n = 0; n < d.num_planes; n++) {
-            fprintf(f, "    %d: %dbits", n, pd.bits[n]);
-            if (pd.extra_w)
-                fprintf(f, " w=%d", pd.extra_w + 1);
-            if (pd.endian_bytes)
-                fprintf(f, " endian_bytes=%d", pd.endian_bytes);
+            fprintf(f, "    %d: %dbits", n, d.bpp[n]);
+            if (d.endian_shift)
+                fprintf(f, " endian_bytes=%d", 1 << d.endian_shift);
             for (int x = 0; x < MP_NUM_COMPONENTS; x++) {
-                struct mp_imgfmt_comp_desc cm = pd.comps[x];
+                struct mp_imgfmt_comp_desc cm = d.comps[x];
                 fprintf(f, " {");
                 if (cm.plane == n) {
                     if (cm.size) {
@@ -133,12 +128,22 @@ static void run(struct test_ctx *ctx)
                     }
                 }
                 fprintf(f, "}");
+                if (!(d.flags & (MP_IMGFLAG_PACKED_SS_YUV | MP_IMGFLAG_HAS_COMPS)))
+                {
+                    assert(cm.size == 0);
+                    assert(cm.offset == 0);
+                    assert(cm.pad == 0);
+                }
             }
             fprintf(f, "\n");
-            if (pd.extra_w) {
-                fprintf(f, "       extra_luma_offsets=[");
-                for (int x = 0; x < pd.extra_w; x++)
-                    fprintf(f, " %d", pd.extra_luma_offsets[x]);
+            if (d.flags & MP_IMGFLAG_PACKED_SS_YUV) {
+                assert(!(d.flags & MP_IMGFLAG_HAS_COMPS));
+                uint8_t offsets[10];
+                bool r = mp_imgfmt_get_packed_yuv_locations(mpfmt, offsets);
+                assert(r);
+                fprintf(f, "       luma_offsets=[");
+                for (int x = 0; x < d.align_x; x++)
+                    fprintf(f, " %d", offsets[x]);
                 fprintf(f, "]\n");
             }
         }

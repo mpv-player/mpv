@@ -35,8 +35,6 @@ struct mp_imgfmt_entry {
     struct mp_imgfmt_desc desc;
     // valid if reg_desc.component_size is set
     struct mp_regular_imgfmt reg_desc;
-    // valid if bits!=0
-    struct mp_imgfmt_layout layout;
     // valid if non-0 and no reg_desc
     enum mp_csp forced_csp;
     enum mp_component_type ctype;
@@ -74,13 +72,14 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
         .desc = {
             .id = IMGFMT_RGB30,
             .avformat = AV_PIX_FMT_NONE,
-            .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE | MP_IMGFLAG_RGB,
+            .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE | MP_IMGFLAG_RGB |
+                     MP_IMGFLAG_HAS_COMPS,
             .num_planes = 1,
             .align_x = 1,
             .align_y = 1,
             .bpp = {32},
+            .comps = { {0, 20, 10}, {0, 10, 10}, {0, 0, 10} },
         },
-        .layout = { {32}, { {0, 20, 10}, {0, 10, 10}, {0, 0, 10} } },
         .forced_csp = MP_CSP_RGB,
         .ctype = MP_COMPONENT_TYPE_UINT,
     },
@@ -229,31 +228,18 @@ static struct mp_imgfmt_desc to_legacy_desc(int fmt, struct mp_regular_imgfmt re
     return desc;
 }
 
-void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
+static void fill_pixdesc_layout(struct mp_imgfmt_desc *desc,
+                                enum AVPixelFormat fmt,
+                                const AVPixFmtDescriptor *pd)
 {
-    const struct mp_imgfmt_entry *mpdesc = get_mp_desc(mpfmt);
-    if (mpdesc && mpdesc->reg_desc.component_size) {
-        *p_desc = (struct mp_imgfmt_layout){{0}};
-        return;
-    }
-    if (mpdesc && mpdesc->layout.bits) {
-        *p_desc = mpdesc->layout;
-        return;
-    }
-
-    enum AVPixelFormat fmt = imgfmt2pixfmt(mpfmt);
-    const AVPixFmtDescriptor *pd = av_pix_fmt_desc_get(fmt);
-    if (!pd ||
-        (pd->flags & AV_PIX_FMT_FLAG_PAL) ||
-        (pd->flags & AV_PIX_FMT_FLAG_HWACCEL))
+    if (pd->flags & AV_PIX_FMT_FLAG_PAL ||
+        pd->flags & AV_PIX_FMT_FLAG_HWACCEL)
         goto fail;
 
     bool has_alpha = pd->flags & AV_PIX_FMT_FLAG_ALPHA;
     if (pd->nb_components != 1 + has_alpha &&
         pd->nb_components != 3 + has_alpha)
         goto fail;
-
-    struct mp_imgfmt_layout desc = {0};
 
     // Very convenient: we assume we're always on little endian, and FFmpeg
     // explicitly marks big endian formats => don't need to guess whether a
@@ -262,14 +248,11 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
 
     // Packed sub-sampled YUV is very... special.
     bool is_packed_ss_yuv = pd->log2_chroma_w && !pd->log2_chroma_h &&
-        (1 << pd->log2_chroma_w) <= MP_ARRAY_SIZE(desc.extra_luma_offsets) + 1 &&
         pd->comp[1].plane == 0 && pd->comp[2].plane == 0 &&
         pd->nb_components == 3;
 
-    if (is_packed_ss_yuv) {
-        desc.extra_w = (1 << pd->log2_chroma_w) - 1;
-        desc.bits[0] = pd->comp[1].step * 8;
-    }
+    if (is_packed_ss_yuv)
+        desc->bpp[0] = pd->comp[1].step * 8;
 
     int num_planes = 0;
     int el_bits = (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM) ? 1 : 8;
@@ -280,7 +263,7 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
 
         num_planes = MPMAX(num_planes, d->plane + 1);
 
-        int plane_bits = desc.bits[d->plane];
+        int plane_bits = desc->bpp[d->plane];
         int c_bits = d->step * el_bits;
 
         // The first component wins, because either all components result in
@@ -289,7 +272,7 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
             if (c_bits > plane_bits)
                 goto fail; // inconsistent
         } else {
-            desc.bits[d->plane] = plane_bits = c_bits;
+            desc->bpp[d->plane] = plane_bits = c_bits;
         }
 
         int shift = d->shift;
@@ -323,21 +306,24 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
         if (is_be && word == 1) {
             // Probably packed RGB formats with varying word sizes. Assume
             // the word access size is the entire pixel.
-            if (plane_bits % 8 || plane_bits >= 64)
+            int logend = mp_log2(plane_bits) - 3;
+            if (!MP_IS_POWER_OF_2(plane_bits) || logend < 0 || logend > 3)
                 goto fail;
-            if (!desc.endian_bytes)
-                desc.endian_bytes = plane_bits / 8;
-            if (desc.endian_bytes != plane_bits / 8)
+            if (!desc->endian_shift)
+                desc->endian_shift = logend;
+            if (desc->endian_shift != logend)
                 goto fail;
-            offset = desc.endian_bytes * 8 - 8 - offset;
+            offset = (1 << desc->endian_shift) * 8 - 8 - offset;
         }
         if (is_be && word > 1) {
-            if (desc.endian_bytes && desc.endian_bytes != word)
+            int logend = mp_log2(word);
+            if (desc->endian_shift && desc->endian_shift != logend)
                 goto fail; // fortunately not needed/never happens
-            if (word >= 64)
+            if (logend > 3)
                 goto fail;
-            desc.endian_bytes = word;
+            desc->endian_shift = logend;
         }
+
         // We always use bit offsets; this doesn't lose any information,
         // and pixdesc is merely more redundant.
         offset += shift;
@@ -347,7 +333,7 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
             goto fail;
         if (d->depth < 0 || d->depth >= (1 << 6))
             goto fail;
-        desc.comps[c] = (struct mp_imgfmt_comp_desc){
+        desc->comps[c] = (struct mp_imgfmt_comp_desc){
             .plane = d->plane,
             .offset = offset,
             .size = d->depth,
@@ -355,15 +341,15 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
     }
 
     for (int p = 0; p < num_planes; p++) {
-        if (!desc.bits[p])
+        if (!desc->bpp[p])
             goto fail; // plane doesn't exist
     }
 
     // What the fuck: this is probably a pixdesc bug, so fix it.
     if (fmt == AV_PIX_FMT_RGB8) {
-        desc.comps[2] = (struct mp_imgfmt_comp_desc){0, 0, 2};
-        desc.comps[1] = (struct mp_imgfmt_comp_desc){0, 2, 3};
-        desc.comps[0] = (struct mp_imgfmt_comp_desc){0, 5, 3};
+        desc->comps[2] = (struct mp_imgfmt_comp_desc){0, 0, 2};
+        desc->comps[1] = (struct mp_imgfmt_comp_desc){0, 2, 3};
+        desc->comps[0] = (struct mp_imgfmt_comp_desc){0, 5, 3};
     }
 
     // Overlap test. If any shared bits are happening, this is not a format we
@@ -373,8 +359,8 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
     bool any_shared_bytes = false;
     for (int c = 0; c < pd->nb_components; c++) {
         for (int i = 0; i < c; i++) {
-            struct mp_imgfmt_comp_desc *c1 = &desc.comps[c];
-            struct mp_imgfmt_comp_desc *c2 = &desc.comps[i];
+            struct mp_imgfmt_comp_desc *c1 = &desc->comps[c];
+            struct mp_imgfmt_comp_desc *c2 = &desc->comps[i];
             if (c1->plane == c2->plane) {
                 if (c1->offset + c1->size > c2->offset &&
                     c2->offset + c2->size > c1->offset)
@@ -388,7 +374,7 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
 
     if (any_shared_bits) {
         for (int c = 0; c < pd->nb_components; c++)
-            desc.comps[c] = (struct mp_imgfmt_comp_desc){0};
+            desc->comps[c] = (struct mp_imgfmt_comp_desc){0};
     }
 
     // Many important formats have padding within an access word. For example
@@ -400,7 +386,7 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
     // guaranteed 0 padding. This could fail, but nobody said this pixdesc crap
     // is robust.
     for (int c = 0; c < pd->nb_components; c++) {
-        struct mp_imgfmt_comp_desc *cd = &desc.comps[c];
+        struct mp_imgfmt_comp_desc *cd = &desc->comps[c];
         // Note: rgb444 would defeat our heuristic if we checked only per comp.
         //       also, exclude "bitstream" formats due to monow/monob
         int fsize = MP_ALIGN_UP(cd->size, 8);
@@ -418,59 +404,30 @@ void mp_imgfmt_get_layout(int mpfmt, struct mp_imgfmt_layout *p_desc)
         }
     }
 
-    if (is_packed_ss_yuv) {
-        if (num_planes > 1)
-            goto fail;
-        // Guess at which positions the additional luma samples are. We iterate
-        // starting with the first byte, and then put a luma sample at places
-        // not covered by other luma/chroma.
-        // Pixdesc does not and can not provide this information. This heuristic
-        // may fail in certain cases. What a load of bullshit, right?
-        int lsize = desc.comps[0].size;
-        int cur_offset = 0;
-        for (int lsample = 1; lsample < (1 << pd->log2_chroma_w); lsample++) {
-            while (1) {
-                if (cur_offset + lsize > desc.bits[0])
-                    goto fail;
-                bool free = true;
-                for (int c = 0; c < pd->nb_components; c++) {
-                    struct mp_imgfmt_comp_desc *cd = &desc.comps[c];
-                    if (!cd->size)
-                        continue;
-                    if (cd->offset + cd->size > cur_offset &&
-                        cur_offset + lsize > cd->offset)
-                    {
-                        free = false;
-                        break;
-                    }
-                }
-                if (free)
-                    break;
-                cur_offset += lsize;
-            }
-            desc.extra_luma_offsets[lsample - 1] = cur_offset;
-            cur_offset += lsize;
-        }
-    }
-
     // The alpha component always has ID 4 (index 3) in our representation, so
     // move the alpha component to there.
     if (has_alpha && pd->nb_components < 4) {
-        desc.comps[3] = desc.comps[pd->nb_components - 1];
-        desc.comps[pd->nb_components - 1] = (struct mp_imgfmt_comp_desc){0};
+        desc->comps[3] = desc->comps[pd->nb_components - 1];
+        desc->comps[pd->nb_components - 1] = (struct mp_imgfmt_comp_desc){0};
     }
 
-    *p_desc = desc;
+    if (is_packed_ss_yuv) {
+        desc->flags |= MP_IMGFLAG_PACKED_SS_YUV;
+        desc->bpp[0] /= 1 << pd->log2_chroma_w;
+    } else {
+        desc->flags |= MP_IMGFLAG_HAS_COMPS;
+    }
+
     return;
 
 fail:
-    *p_desc = (struct mp_imgfmt_layout){{0}};
+    for (int n = 0; n < 4; n++)
+        desc->comps[n] = (struct mp_imgfmt_comp_desc){0};
     // Average bit size fallback.
     int num_av_planes = av_pix_fmt_count_planes(fmt);
     for (int p = 0; p < num_av_planes; p++) {
         int ls = av_image_get_linesize(fmt, 256, p);
-        if (ls > 0)
-            p_desc->bits[p] = ls * 8 / 256;
+        desc->bpp[p] = ls > 0 ? ls * 8 / 256 : 0;
     }
 }
 
@@ -498,22 +455,30 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     for (int c = 0; c < pd->nb_components; c++)
         desc.num_planes = MPMAX(desc.num_planes, pd->comp[c].plane + 1);
 
-    struct mp_imgfmt_layout layout;
-    mp_imgfmt_get_layout(mpfmt, &layout);
+    for (int p = 0; p < desc.num_planes; p++) {
+        desc.xs[p] = (p == 1 || p == 2) ? desc.chroma_xs : 0;
+        desc.ys[p] = (p == 1 || p == 2) ? desc.chroma_ys : 0;
+    }
+
+    desc.align_x = 1 << desc.chroma_xs;
+    desc.align_y = 1 << desc.chroma_ys;
+
+    fill_pixdesc_layout(&desc, fmt, pd);
+
+    if (desc.bpp[0] % 8u && (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM))
+        desc.align_x = 8 / desc.bpp[0]; // expect power of 2
 
     bool is_ba = desc.num_planes > 0;
-    for (int p = 0; p < desc.num_planes; p++) {
-        desc.bpp[p] = layout.bits[p] / (layout.extra_w + 1);
+    for (int p = 0; p < desc.num_planes; p++)
         is_ba = !(desc.bpp[p] % 8u);
-    }
 
     if (is_ba)
         desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
 
     // Very heuristical.
-    bool is_be = layout.endian_bytes > 0;
-    bool need_endian = (layout.comps[0].size % 8u && layout.bits[0] > 8) ||
-                       layout.comps[0].size > 8;
+    bool is_be = desc.endian_shift > 0;
+    bool need_endian = (desc.comps[0].size % 8u && desc.bpp[0] > 8) ||
+                       desc.comps[0].size > 8;
 
     if (need_endian) {
         desc.flags |= is_be ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
@@ -545,10 +510,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         && is_uint)
     {
         bool same_depth = true;
-        for (int p = 0; p < desc.num_planes; p++) {
-            same_depth &= layout.bits[p] == layout.bits[0] &&
-                          desc.bpp[p] == desc.bpp[0];
-        }
+        for (int p = 0; p < desc.num_planes; p++)
+            same_depth &= desc.bpp[p] == desc.bpp[0];
         if (same_depth && pd->nb_components == desc.num_planes) {
             if (desc.flags & MP_IMGFLAG_YUV) {
                 desc.flags |= MP_IMGFLAG_YUV_P;
@@ -565,18 +528,50 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         }
     }
 
-    for (int p = 0; p < desc.num_planes; p++) {
-        desc.xs[p] = (p == 1 || p == 2) ? desc.chroma_xs : 0;
-        desc.ys[p] = (p == 1 || p == 2) ? desc.chroma_ys : 0;
+    return desc;
+}
+
+bool mp_imgfmt_get_packed_yuv_locations(int imgfmt, uint8_t *luma_offsets)
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
+    if (!(desc.flags & MP_IMGFLAG_PACKED_SS_YUV))
+        return false;
+
+    assert(desc.num_planes == 1);
+
+    // Guess at which positions the additional luma samples are. We iterate
+    // starting with the first byte, and then put a luma sample at places
+    // not covered by other luma/chroma.
+    // Pixdesc does not and can not provide this information. This heuristic
+    // may fail in certain cases. What a load of bullshit, right?
+    int lsize = desc.comps[0].size;
+    int cur_offset = 0;
+    for (int lsample = 1; lsample < (1 << desc.chroma_xs); lsample++) {
+        while (1) {
+            if (cur_offset + lsize > desc.bpp[0] * desc.align_x)
+                return false;
+            bool free = true;
+            for (int c = 0; c < 3; c++) {
+                struct mp_imgfmt_comp_desc *cd = &desc.comps[c];
+                if (!cd->size)
+                    continue;
+                if (cd->offset + cd->size > cur_offset &&
+                    cur_offset + lsize > cd->offset)
+                {
+                    free = false;
+                    break;
+                }
+            }
+            if (free)
+                break;
+            cur_offset += lsize;
+        }
+        luma_offsets[lsample] = cur_offset;
+        cur_offset += lsize;
     }
 
-    desc.align_x = 1 << desc.chroma_xs;
-    desc.align_y = 1 << desc.chroma_ys;
-
-    if ((desc.bpp[0] * (layout.extra_w + 1) % 8) != 0)
-        desc.align_x = 8 / desc.bpp[0]; // expect power of 2
-
-    return desc;
+    luma_offsets[0] = desc.comps[0].offset;
+    return true;
 }
 
 static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
@@ -689,17 +684,14 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
         return false;
     res.num_planes = desc.num_planes;
 
-    struct mp_imgfmt_layout layout;
-    mp_imgfmt_get_layout(imgfmt, &layout);
-
-    if (layout.endian_bytes || layout.extra_w)
+    if (desc.endian_shift || !(desc.flags & MP_IMGFLAG_HAS_COMPS))
         return false;
 
     res.component_type = mp_imgfmt_get_component_type(imgfmt);
     if (!res.component_type)
         return false;
 
-    struct mp_imgfmt_comp_desc *comp0 = &layout.comps[0];
+    struct mp_imgfmt_comp_desc *comp0 = &desc.comps[0];
     if (comp0->size < 1 || comp0->size > 64 || (comp0->size % 8u))
         return false;
 
@@ -707,13 +699,13 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
     res.component_pad = comp0->pad;
 
     for (int n = 0; n < res.num_planes; n++) {
-        if (layout.bits[n] % comp0->size)
+        if (desc.bpp[n] % comp0->size)
             return false;
-        res.planes[n].num_components = layout.bits[n] / comp0->size;
+        res.planes[n].num_components = desc.bpp[n] / comp0->size;
     }
 
     for (int n = 0; n < MP_NUM_COMPONENTS; n++) {
-        struct mp_imgfmt_comp_desc *comp = &layout.comps[n];
+        struct mp_imgfmt_comp_desc *comp = &desc.comps[n];
         if (!comp->size)
             continue;
 

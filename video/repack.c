@@ -459,17 +459,17 @@ static void fringe_rgb_repack(struct mp_repack *rp,
 static void setup_fringe_rgb_packer(struct mp_repack *rp)
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(rp->imgfmt_a);
-    struct mp_imgfmt_layout layout;
-    mp_imgfmt_get_layout(rp->imgfmt_a, &layout);
-
-    if (layout.bits[0] > 16 || (layout.bits[0] % 8u) || layout.extra_w ||
-        mp_imgfmt_get_forced_csp(rp->imgfmt_a) != MP_CSP_RGB ||
-        desc.num_planes != 1 || layout.comps[3].size)
+    if (!(desc.flags & MP_IMGFLAG_HAS_COMPS))
         return;
 
-    int depth = layout.comps[0].size;
+    if (desc.bpp[0] > 16 || (desc.bpp[0] % 8u) ||
+        mp_imgfmt_get_forced_csp(rp->imgfmt_a) != MP_CSP_RGB ||
+        desc.num_planes != 1 || desc.comps[3].size)
+        return;
+
+    int depth = desc.comps[0].size;
     for (int n = 0; n < 3; n++) {
-        struct mp_imgfmt_comp_desc *c = &layout.comps[n];
+        struct mp_imgfmt_comp_desc *c = &desc.comps[n];
 
         if (c->size < 1 || c->size > 8 || c->pad)
             return;
@@ -492,8 +492,8 @@ static void setup_fringe_rgb_packer(struct mp_repack *rp)
         rp->components[n] = ((int[]){3, 1, 2})[n] - 1;
 
     for (int n = 0; n < 3; n++) {
-        int bits = layout.comps[n].size;
-        rp->comp_shifts[n] = layout.comps[n].offset;
+        int bits = desc.comps[n].size;
+        rp->comp_shifts[n] = desc.comps[n].offset;
         if (rp->comp_lut) {
             uint8_t *lut = rp->comp_lut + 256 * n;
             uint8_t zmax = (1 << depth) - 1;
@@ -508,11 +508,11 @@ static void setup_fringe_rgb_packer(struct mp_repack *rp)
         }
     }
 
-    rp->comp_size = (layout.bits[0] + 7) / 8;
+    rp->comp_size = (desc.bpp[0] + 7) / 8;
     assert(rp->comp_size == 1 || rp->comp_size == 2);
 
-    if (layout.endian_bytes) {
-        assert(rp->comp_size == 2 && layout.endian_bytes == 2);
+    if (desc.endian_shift) {
+        assert(rp->comp_size == 2 && (1 << desc.endian_shift) == 2);
         rp->endian_size = 2;
     }
 }
