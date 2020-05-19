@@ -5085,6 +5085,13 @@ static void cmd_stop(void *p)
 
     if (!(flags & 1))
         playlist_clear(mpctx->playlist);
+
+    if (mpctx->opts->player_idle_mode < 2 &&
+        mpctx->opts->position_save_on_quit)
+    {
+        mp_write_watch_later_conf(mpctx);
+    }
+
     if (mpctx->stop_play != PT_QUIT)
         mpctx->stop_play = PT_STOP;
     mp_wakeup_core(mpctx);
