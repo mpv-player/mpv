@@ -159,28 +159,7 @@ static void freeMyXImage(struct priv *p, int foo)
     p->myximage[foo] = NULL;
 }
 
-#define BM(first, count) (((1 << (count)) - 1) << (first))
-
-const struct fmt_entry {
-    uint32_t mpfmt;
-    int depth;
-    int byte_order;
-    unsigned red_mask;
-    unsigned green_mask;
-    unsigned blue_mask;
-} mp_to_x_fmt[] = {
-    {IMGFMT_0RGB,   32, MSBFirst,     0x00FF0000, 0x0000FF00, 0x000000FF},
-    {IMGFMT_0RGB,   32, LSBFirst,     0x0000FF00, 0x00FF0000, 0xFF000000},
-    {IMGFMT_0BGR,   32, MSBFirst,     0x000000FF, 0x0000FF00, 0x00FF0000},
-    {IMGFMT_0BGR,   32, LSBFirst,     0xFF000000, 0x00FF0000, 0x0000FF00},
-    {IMGFMT_RGB0,   32, MSBFirst,     0xFF000000, 0x00FF0000, 0x0000FF00},
-    {IMGFMT_RGB0,   32, LSBFirst,     0x000000FF, 0x0000FF00, 0x00FF0000},
-    {IMGFMT_BGR0,   32, MSBFirst,     0x0000FF00, 0x00FF0000, 0xFF000000},
-    {IMGFMT_BGR0,   32, LSBFirst,     0x00FF0000, 0x0000FF00, 0x000000FF},
-    {IMGFMT_RGB565, 16, LSBFirst,     0x0000F800, 0x000007E0, 0x0000001F},
-    {IMGFMT_RGB30,  32, LSBFirst,     BM(20, 10), BM(10, 10), BM(0, 10)},
-    {0}
-};
+#define MAKE_MASK(comp) (((1u << (comp).size) - 1) << (comp).offset)
 
 static int reconfig(struct vo *vo, struct mp_image_params *fmt)
 {
@@ -232,23 +211,33 @@ static bool resize(struct vo *vo)
             return false;
     }
 
-    const struct fmt_entry *fmte = mp_to_x_fmt;
-    while (fmte->mpfmt) {
-        if (fmte->depth == p->myximage[0]->bits_per_pixel &&
-            fmte->byte_order == p->myximage[0]->byte_order &&
-            fmte->red_mask == p->myximage[0]->red_mask &&
-            fmte->green_mask == p->myximage[0]->green_mask &&
-            fmte->blue_mask == p->myximage[0]->blue_mask)
+    int mpfmt = 0;
+    for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
+        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+        if ((desc.flags & MP_IMGFLAG_HAS_COMPS) && desc.num_planes == 1 &&
+            mp_imgfmt_get_component_type(fmt) == MP_COMPONENT_TYPE_UINT &&
+            mp_imgfmt_get_forced_csp(fmt) == MP_CSP_RGB &&
+            !(desc.flags & MP_IMGFLAG_ALPHA) &&
+            desc.bpp[0] <= 32 &&
+            p->myximage[0]->bits_per_pixel == desc.bpp[0] &&
+            p->myximage[0]->byte_order == LSBFirst &&
+            p->myximage[0]->red_mask == MAKE_MASK(desc.comps[0]) &&
+            p->myximage[0]->green_mask == MAKE_MASK(desc.comps[1]) &&
+            p->myximage[0]->blue_mask == MAKE_MASK(desc.comps[2]))
+        {
+            mpfmt = fmt;
             break;
-        fmte++;
+        }
     }
-    if (!fmte->mpfmt) {
+
+    if (!mpfmt) {
         MP_ERR(vo, "X server image format not supported, use another VO.\n");
         return false;
     }
+    MP_VERBOSE(vo, "Using mp format: %s\n", mp_imgfmt_to_name(mpfmt));
 
     p->sws->dst = (struct mp_image_params) {
-        .imgfmt = fmte->mpfmt,
+        .imgfmt = mpfmt,
         .w = p->dst_w,
         .h = p->dst_h,
         .p_w = 1,
