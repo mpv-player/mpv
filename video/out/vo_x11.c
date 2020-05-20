@@ -159,7 +159,7 @@ static void freeMyXImage(struct priv *p, int foo)
     p->myximage[foo] = NULL;
 }
 
-#define MAKE_MASK(comp) (((1u << (comp).size) - 1) << (comp).offset)
+#define MAKE_MASK(comp) (((1ul << (comp).size) - 1) << (comp).offset)
 
 static int reconfig(struct vo *vo, struct mp_image_params *fmt)
 {
@@ -215,10 +215,10 @@ static bool resize(struct vo *vo)
     for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
         struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
         if ((desc.flags & MP_IMGFLAG_HAS_COMPS) && desc.num_planes == 1 &&
-            mp_imgfmt_get_component_type(fmt) == MP_COMPONENT_TYPE_UINT &&
-            mp_imgfmt_get_forced_csp(fmt) == MP_CSP_RGB &&
-            !(desc.flags & MP_IMGFLAG_ALPHA) &&
-            desc.bpp[0] <= 32 &&
+            (desc.flags & MP_IMGFLAG_COLOR_MASK) == MP_IMGFLAG_COLOR_RGB &&
+            (desc.flags & MP_IMGFLAG_TYPE_MASK) == MP_IMGFLAG_TYPE_UINT &&
+            (desc.flags & MP_IMGFLAG_NE) && !(desc.flags & MP_IMGFLAG_ALPHA) &&
+            desc.bpp[0] <= 8 * sizeof(unsigned long) &&
             p->myximage[0]->bits_per_pixel == desc.bpp[0] &&
             p->myximage[0]->byte_order == LSBFirst &&
             p->myximage[0]->red_mask == MAKE_MASK(desc.comps[0]) &&
