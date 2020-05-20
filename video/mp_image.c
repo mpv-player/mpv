@@ -23,6 +23,7 @@
 #include <libavutil/common.h>
 #include <libavutil/bswap.h>
 #include <libavutil/hwcontext.h>
+#include <libavutil/intreadwrite.h>
 #include <libavutil/rational.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/mastering_display_metadata.h>
@@ -553,8 +554,54 @@ void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc)
     mp_image_crop(img, rc.x0, rc.y0, rc.x1, rc.y1);
 }
 
+// Repeatedly write count patterns of src[0..src_size] to p.
+static void memset_pattern(void *p, size_t count, uint8_t *src, size_t src_size)
+{
+    assert(src_size >= 1);
+
+    if (src_size == 1) {
+        memset(p, src[0], count);
+    } else if (src_size == 2) { // >8 bit YUV => common, be slightly less naive
+        uint16_t val;
+        memcpy(&val, src, 2);
+        uint16_t *p16 = p;
+        while (count--)
+            *p16++ = val;
+    } else {
+        while (count--) {
+            memcpy(p, src, src_size);
+            p = (char *)p + src_size;
+        }
+    }
+}
+
+static bool endian_swap_bytes(void *d, size_t bytes, size_t word_size)
+{
+    if (word_size != 2 && word_size != 4)
+        return false;
+
+    size_t num_words = bytes / word_size;
+    uint8_t *ud = d;
+
+    switch (word_size) {
+    case 2:
+        for (size_t x = 0; x < num_words; x++)
+            AV_WL16(ud + x * 2, AV_RB16(ud + x * 2));
+        break;
+    case 4:
+        for (size_t x = 0; x < num_words; x++)
+            AV_WL32(ud + x * 2, AV_RB32(ud + x * 2));
+        break;
+    default:
+        assert(0);
+    }
+
+    return true;
+}
+
 // Bottom/right border is allowed not to be aligned, but it might implicitly
 // overwrite pixel data until the alignment (align_x/align_y) is reached.
+// Alpha is cleared to 0 (fully transparent).
 void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
 {
     assert(x0 >= 0 && y0 >= 0);
@@ -564,37 +611,69 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
     assert(!(y0 & (img->fmt.align_y - 1)));
 
     struct mp_image area = *img;
+    struct mp_imgfmt_desc *fmt = &area.fmt;
     mp_image_crop(&area, x0, y0, x1, y1);
 
-    enum mp_component_type ctype = mp_imgfmt_get_component_type(img->imgfmt);
-    uint32_t plane_clear[MP_MAX_PLANES] = {0};
+    // "Black" color for each plane.
+    uint8_t plane_clear[MP_MAX_PLANES][8] = {0};
+    int plane_size[MP_MAX_PLANES] = {0};
+    int misery = 1; // pixel group width
 
-    if (ctype != MP_COMPONENT_TYPE_FLOAT) {
-        if (area.imgfmt == IMGFMT_UYVY) {
-            plane_clear[0] = av_le2ne16(0x0080);
-        } else if (area.fmt.flags & MP_IMGFLAG_YUV_NV) {
-            plane_clear[1] = 0x8080;
-        } else if (area.fmt.flags & MP_IMGFLAG_YUV_P) {
-            struct mp_regular_imgfmt desc = {0};
-            mp_get_regular_imgfmt(&desc, img->imgfmt);
-            int depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
-            uint16_t chroma_clear = (1 << depth) / 2;
-            if (!(area.fmt.flags & MP_IMGFLAG_NE))
-                chroma_clear = av_bswap16(chroma_clear);
-            if (area.num_planes > 2)
-                plane_clear[1] = plane_clear[2] = chroma_clear;
+    // YUV integer chroma needs special consideration, and technically luma is
+    // usually not 0 either.
+    if ((fmt->flags & (MP_IMGFLAG_HAS_COMPS | MP_IMGFLAG_PACKED_SS_YUV)) &&
+        (fmt->flags & MP_IMGFLAG_TYPE_MASK) == MP_IMGFLAG_TYPE_UINT &&
+        (fmt->flags & MP_IMGFLAG_COLOR_MASK) == MP_IMGFLAG_COLOR_YUV)
+    {
+        uint64_t plane_clear_i[MP_MAX_PLANES] = {0};
+
+        // Need to handle "multiple" pixels with packed YUV.
+        uint8_t luma_offsets[4] = {0};
+        if (fmt->flags & MP_IMGFLAG_PACKED_SS_YUV) {
+            misery = fmt->align_x;
+            if (misery <= MP_ARRAY_SIZE(luma_offsets)) // ignore if out of bounds
+                mp_imgfmt_get_packed_yuv_locations(fmt->id, luma_offsets);
+        }
+
+        for (int c = 0; c < 4; c++) {
+            struct mp_imgfmt_comp_desc *cd = &fmt->comps[c];
+            int plane_bits = fmt->bpp[cd->plane] * misery;
+            if (plane_bits <= 64 && plane_bits % 8u == 0 && cd->size) {
+                plane_size[cd->plane] = plane_bits / 8u;
+                int depth = cd->size + MPMIN(cd->pad, 0);
+                double m, o;
+                mp_get_csp_uint_mul(area.params.color.space,
+                                    area.params.color.levels,
+                                    depth, c + 1, &m, &o);
+                uint64_t val = MPCLAMP(lrint((0 - o) / m), 0, 1ull << depth);
+                plane_clear_i[cd->plane] |= val << cd->offset;
+                for (int x = 1; x < (c ? 0 : misery); x++)
+                    plane_clear_i[cd->plane] |= val << luma_offsets[x];
+            }
+        }
+
+        for (int p = 0; p < MP_MAX_PLANES; p++) {
+            if (!plane_clear_i[p])
+                plane_size[p] = 0;
+            memcpy(&plane_clear[p][0], &plane_clear_i[p], 8); // endian dependent
+
+            if (fmt->endian_shift) {
+                endian_swap_bytes(&plane_clear[p][0], plane_size[p],
+                                  1 << fmt->endian_shift);
+            }
         }
     }
 
     for (int p = 0; p < area.num_planes; p++) {
-        int bpp = area.fmt.bpp[p];
-        int bytes = mp_image_plane_bytes(&area, p, 0, area.w);
-        if (bpp <= 8 || bpp > 16) {
-            memset_pic(area.planes[p], plane_clear[p], bytes,
-                       mp_image_plane_h(&area, p), area.stride[p]);
-        } else {
-            memset16_pic(area.planes[p], plane_clear[p], (bytes + 1) / 2,
-                         mp_image_plane_h(&area, p), area.stride[p]);
+        int p_h = mp_image_plane_h(&area, p);
+        int p_w = mp_image_plane_w(&area, p);
+        for (int y = 0; y < p_h; y++) {
+            void *ptr = area.planes[p] + (ptrdiff_t)area.stride[p] * y;
+            if (plane_size[p] && plane_clear[p]) {
+                memset_pattern(ptr, p_w / misery, plane_clear[p], plane_size[p]);
+            } else {
+                memset(ptr, 0, mp_image_plane_bytes(&area, p, 0, area.w));
+            }
         }
     }
 }
