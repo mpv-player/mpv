@@ -18,25 +18,46 @@ _macbase:
 
 matrix:
   include:
-    - <<: *macNew
-      osx_image: xcode11.3
-    - <<: *macNew
-      osx_image: xcode10.1
-    - <<: *macOld
-      osx_image: xcode9.2
-    - os: linux
-      compiler: gcc
-      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh
     - os: linux
       compiler: clang
-      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh
-    - os: linux
-      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:i686 CI_SCRIPT=ci/build-mingw64.sh TARGET=i686-w64-mingw32
-    - os: linux
-      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:x86_64 CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
-  allow_failures:
-    - os: osx
-      osx_image: xcode9.2
+      addons:
+        apt:
+          # basics
+          - build-essential
+          - curl
+          - git
+          - pkg-config
+
+          # libass deps
+          - libfreetype6-dev
+          - libfribidi-dev
+          - libharfbuzz-dev
+          - libfontconfig1-dev
+          - libpng-dev
+
+          # FFmpeg deps
+          - libgnutls28-dev
+          - libva-dev
+          - libvdpau-dev
+
+          # mpv deps
+          - libarchive-dev
+          - libasound2-dev
+          - libbluray-dev
+          - libdrm-dev
+          - libegl1-mesa-dev
+          - libgl1-mesa-dev
+          - libgbm-dev
+          - liblcms2-dev
+          - libpulse-dev
+          - libwayland-dev
+          - libx11-dev
+          - x11proto-dev
+          - libxinerama-dev
+          - libxkbcommon-dev
+          - libxrandr-dev
+          - libxss-dev
+          - libluajit-5.1-dev
   fast_finish: true
 
 dist: bionic
@@ -60,7 +81,32 @@ branches:
 before_install:
   - if [ "$TRAVIS_COMPILER" = "clang" ]; then export CXX="clang++"; fi
   - if [ "$TRAVIS_COMPILER" = "gcc" ]; then export CXX="g++"; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker pull $CONTAINER; fi
+  - |
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+         WL_PROTOCOLS_DEB_NAME="wayland-protocols_1.20-1_all.deb";
+         curl -LO "http://archive.ubuntu.com/ubuntu/pool/main/w/wayland-protocols/${WL_PROTOCOLS_DEB_NAME}";
+         SHASUM=$(sha256sum "${WL_PROTOCOLS_DEB_NAME}" |awk '{print $1}');
+         EXPECTED_SHASUM="4b8b41972cdf5269cdcd964d636d3ee15824ebf58cea79a952fe7a773af71af6";
+         if [ "$SHASUM" != "$EXPECTED_SHASUM" ]; then exit 1; fi
+         sudo apt install -y "./${WL_PROTOCOLS_DEB_NAME}";
+
+         MPV_SYSROOT_TARBALL="2020-05-21-mpv_sysroot.tar.xz";
+         curl -LO "https://megumin.fushizen.eu/builds/2020-05-21-mpv_sysroot.tar.xz";
+         SHASUM=$(sha256sum "${MPV_SYSROOT_TARBALL}" |awk '{print $1}');
+         EXPECTED_SHASUM="297461ef689402dd1c63cbcf255aeed59b90d06f742a8784156284fa73d4610a";
+         if [ "$SHASUM" != "$EXPECTED_SHASUM" ]; then exit 1; fi
+         tar xf "${MPV_SYSROOT_TARBALL}";
+
+         BASE_DIR="$(pwd)";
+         SYSROOT_PATH="${BASE_DIR}/mpv_sysroot";
+         export PKG_CONFIG_PATH="${SYSROOT_PATH}/lib/pkgconfig";
+
+         for pc_file in $(find mpv_sysroot -iname '*.pc'); do
+           sed -i "s+^prefix\s*=.*+prefix=${SYSROOT_PATH}+g" "${pc_file}";
+           sed -i 's+^libdir\s*=.*+libdir=${prefix}/lib+g' "${pc_file}";
+           sed -i 's+^includedir\s*=.*+includedir=${prefix}/include+g' "${pc_file}";
+         done
+      fi
   - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
             if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
@@ -93,7 +139,11 @@ cache:
 
 script:
   - ./bootstrap.py
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"; fi
+  - |
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+        python3 waf configure;
+        python3 waf build;
+      fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./ci/build-macos.sh; fi
 after_failure: cat ./build/config.log
 after_script: TOOLS/travis-rebuild-website
