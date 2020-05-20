@@ -31,108 +31,90 @@
 
 struct mp_imgfmt_entry {
     const char *name;
-    // valid if desc.id is set
+    // Valid if flags!=0.
+    // This can be incomplete, and missing fields are filled in:
+    //  - sets num_planes and bpp[], derived from comps[] (rounds to bytes)
+    //  - sets MP_IMGFLAG_GRAY, derived from comps[]
+    //  - sets MP_IMGFLAG_ALPHA, derived from comps[]
+    //  - sets align_x/y if 0, derived from chroma shift
+    //  - sets xs[]/ys[] always, derived from num_planes/chroma_shift
+    //  - sets MP_IMGFLAG_HAS_COMPS|MP_IMGFLAG_NE if num_planes>0
+    //  - sets MP_IMGFLAG_TYPE_UINT if no other type set
+    //  - sets id to mp_imgfmt_list[] implied format
+    //  - sets avformat to AV_PIX_FMT_NONE
     struct mp_imgfmt_desc desc;
-    // valid if reg_desc.component_size is set
-    struct mp_regular_imgfmt reg_desc;
-    // valid if non-0 and no reg_desc
-    enum mp_csp forced_csp;
-    enum mp_component_type ctype;
 };
 
-#define FRINGE_GBRP(def, dname, bits)                                       \
+#define FRINGE_GBRP(def, dname, b)                                          \
     [def - IMGFMT_CUST_BASE] = {                                            \
         .name = dname,                                                      \
-        .reg_desc = { .component_type = MP_COMPONENT_TYPE_UINT,             \
-                      .component_size = 1, .component_pad = bits - 8,       \
-                      .num_planes = 3, .forced_csp = MP_CSP_RGB,            \
-                      .planes = { {1, {2}}, {1, {3}}, {1, {1}} }, }, }
+        .desc = { .flags = MP_IMGFLAG_COLOR_RGB,                            \
+                  .comps = { {2, 0, 8, (b) - 8}, {0, 0, 8, (b) - 8},        \
+                             {1, 0, 8, (b) - 8}, }, }}
 
-#define FLOAT_YUV(def, dname, xs, ys, a_planes)                             \
+#define FLOAT_YUV(def, dname, xs, ys, a)                                    \
     [def - IMGFMT_CUST_BASE] = {                                            \
         .name = dname,                                                      \
-        .reg_desc = { .component_type = MP_COMPONENT_TYPE_FLOAT,            \
-                      .component_size = 4, .num_planes = a_planes,          \
-                      .planes = { {1, {1}}, {1, {2}}, {1, {3}}, {1, {4}} }, \
-                      .chroma_xs = xs, .chroma_ys = ys, }}
+        .desc = { .flags = MP_IMGFLAG_COLOR_YUV | MP_IMGFLAG_TYPE_FLOAT,    \
+                   .chroma_xs = xs, .chroma_ys = ys,                        \
+                   .comps = { {0, 0, 32}, {1, 0, 32}, {2, 0, 32},           \
+                              {3 * (a), 0, 32 * (a)} }, }}
 
 static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // not in ffmpeg
     [IMGFMT_VDPAU_OUTPUT - IMGFMT_CUST_BASE] = {
         .name = "vdpau_output",
         .desc = {
-            .id = IMGFMT_VDPAU_OUTPUT,
-            .avformat = AV_PIX_FMT_NONE,
-            .flags = MP_IMGFLAG_BE | MP_IMGFLAG_LE | MP_IMGFLAG_RGB |
-                     MP_IMGFLAG_HWACCEL,
+            .flags = MP_IMGFLAG_NE | MP_IMGFLAG_RGB | MP_IMGFLAG_HWACCEL,
         },
     },
     [IMGFMT_RGB30 - IMGFMT_CUST_BASE] = {
         .name = "rgb30",
         .desc = {
-            .id = IMGFMT_RGB30,
-            .avformat = AV_PIX_FMT_NONE,
-            .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE | MP_IMGFLAG_RGB |
-                     MP_IMGFLAG_HAS_COMPS,
-            .num_planes = 1,
-            .align_x = 1,
-            .align_y = 1,
-            .bpp = {32},
+            .flags = MP_IMGFLAG_RGB,
             .comps = { {0, 20, 10}, {0, 10, 10}, {0, 0, 10} },
         },
-        .forced_csp = MP_CSP_RGB,
-        .ctype = MP_COMPONENT_TYPE_UINT,
     },
     [IMGFMT_YAP8 - IMGFMT_CUST_BASE] = {
         .name = "yap8",
-        .reg_desc = {
-            .component_type = MP_COMPONENT_TYPE_UINT,
-            .component_size = 1,
-            .num_planes = 2,
-            .planes = { {1, {1}}, {1, {4}} },
+        .desc = {
+            .flags = MP_IMGFLAG_COLOR_YUV,
+            .comps = { {0, 0, 8}, {0}, {0}, {1, 0, 8} },
         },
     },
     [IMGFMT_YAP16 - IMGFMT_CUST_BASE] = {
         .name = "yap16",
-        .reg_desc = {
-            .component_type = MP_COMPONENT_TYPE_UINT,
-            .component_size = 2,
-            .num_planes = 2,
-            .planes = { {1, {1}}, {1, {4}} },
+        .desc = {
+            .flags = MP_IMGFLAG_COLOR_YUV,
+            .comps = { {0, 0, 16}, {0}, {0}, {1, 0, 16} },
         },
     },
     [IMGFMT_Y1 - IMGFMT_CUST_BASE] = {
         .name = "y1",
-        .reg_desc = {
-            .component_type = MP_COMPONENT_TYPE_UINT,
-            .component_size = 1,
-            .component_pad = -7,
-            .num_planes = 1,
-            .forced_csp = MP_CSP_RGB,
-            .planes = { {1, {1}} },
+        .desc = {
+            .flags = MP_IMGFLAG_COLOR_RGB,
+            .comps = { {0, 0, 8, -7} },
         },
     },
     [IMGFMT_YAPF - IMGFMT_CUST_BASE] = {
         .name = "grayaf32", // try to mimic ffmpeg naming convention
-        .reg_desc = {
-            .component_type = MP_COMPONENT_TYPE_FLOAT,
-            .component_size = 4,
-            .num_planes = 2,
-            .planes = { {1, {1}}, {1, {4}} },
+        .desc = {
+            .flags = MP_IMGFLAG_COLOR_YUV | MP_IMGFLAG_TYPE_FLOAT,
+            .comps = { {0, 0, 32}, {0}, {0}, {1, 0, 32} },
         },
     },
-    FLOAT_YUV(IMGFMT_444PF,  "yuv444pf",  0, 0, 3),
-    FLOAT_YUV(IMGFMT_444APF, "yuva444pf", 0, 0, 4),
-    FLOAT_YUV(IMGFMT_420PF,  "yuv420pf",  1, 1, 3),
-    FLOAT_YUV(IMGFMT_420APF, "yuva420pf", 1, 1, 4),
-    FLOAT_YUV(IMGFMT_422PF,  "yuv422pf",  1, 0, 3),
-    FLOAT_YUV(IMGFMT_422APF, "yuva422pf", 1, 0, 4),
-    FLOAT_YUV(IMGFMT_440PF,  "yuv440pf",  0, 1, 3),
-    FLOAT_YUV(IMGFMT_440APF, "yuva440pf", 0, 1, 4),
-    FLOAT_YUV(IMGFMT_410PF,  "yuv410pf",  2, 2, 3),
-    FLOAT_YUV(IMGFMT_410APF, "yuva410pf", 2, 2, 4),
-    FLOAT_YUV(IMGFMT_411PF,  "yuv411pf",  2, 0, 3),
-    FLOAT_YUV(IMGFMT_411APF, "yuva411pf", 2, 0, 4),
+    FLOAT_YUV(IMGFMT_444PF,  "yuv444pf",  0, 0, 0),
+    FLOAT_YUV(IMGFMT_444APF, "yuva444pf", 0, 0, 1),
+    FLOAT_YUV(IMGFMT_420PF,  "yuv420pf",  1, 1, 0),
+    FLOAT_YUV(IMGFMT_420APF, "yuva420pf", 1, 1, 1),
+    FLOAT_YUV(IMGFMT_422PF,  "yuv422pf",  1, 0, 0),
+    FLOAT_YUV(IMGFMT_422APF, "yuva422pf", 1, 0, 1),
+    FLOAT_YUV(IMGFMT_440PF,  "yuv440pf",  0, 1, 0),
+    FLOAT_YUV(IMGFMT_440APF, "yuva440pf", 0, 1, 1),
+    FLOAT_YUV(IMGFMT_410PF,  "yuv410pf",  2, 2, 0),
+    FLOAT_YUV(IMGFMT_410APF, "yuva410pf", 2, 2, 1),
+    FLOAT_YUV(IMGFMT_411PF,  "yuv411pf",  2, 0, 0),
+    FLOAT_YUV(IMGFMT_411APF, "yuva411pf", 2, 0, 1),
     FRINGE_GBRP(IMGFMT_GBRP1, "gbrp1", 1),
     FRINGE_GBRP(IMGFMT_GBRP2, "gbrp2", 2),
     FRINGE_GBRP(IMGFMT_GBRP3, "gbrp3", 3),
@@ -202,32 +184,6 @@ char *mp_imgfmt_to_name_buf(char *buf, size_t buf_size, int fmt)
     return buf;
 }
 
-static struct mp_imgfmt_desc to_legacy_desc(int fmt, struct mp_regular_imgfmt reg)
-{
-    struct mp_imgfmt_desc desc = {
-        .id = fmt,
-        .avformat = AV_PIX_FMT_NONE,
-        .flags = MP_IMGFLAG_BYTE_ALIGNED | MP_IMGFLAG_NE |
-            (reg.forced_csp ? MP_IMGFLAG_RGB | MP_IMGFLAG_RGB_P
-                            : MP_IMGFLAG_YUV | MP_IMGFLAG_YUV_P),
-        .num_planes = reg.num_planes,
-        .chroma_xs = reg.chroma_xs,
-        .chroma_ys = reg.chroma_ys,
-    };
-    desc.align_x = 1 << reg.chroma_xs;
-    desc.align_y = 1 << reg.chroma_ys;
-    for (int p = 0; p < reg.num_planes; p++) {
-        desc.bpp[p] = reg.component_size * 8;
-        desc.xs[p] = p == 1 || p == 2 ? desc.chroma_xs : 0;
-        desc.ys[p] = p == 1 || p == 2 ? desc.chroma_ys : 0;
-        for (int c = 0; c < reg.planes[p].num_components; c++) {
-            if (reg.planes[p].components[c] == 4)
-                desc.flags |= MP_IMGFLAG_ALPHA;
-        }
-    }
-    return desc;
-}
-
 static void fill_pixdesc_layout(struct mp_imgfmt_desc *desc,
                                 enum AVPixelFormat fmt,
                                 const AVPixFmtDescriptor *pd)
@@ -254,14 +210,13 @@ static void fill_pixdesc_layout(struct mp_imgfmt_desc *desc,
     if (is_packed_ss_yuv)
         desc->bpp[0] = pd->comp[1].step * 8;
 
-    int num_planes = 0;
     int el_bits = (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM) ? 1 : 8;
     for (int c = 0; c < pd->nb_components; c++) {
         const AVComponentDescriptor *d = &pd->comp[c];
         if (d->plane >= MP_MAX_PLANES)
             goto fail;
 
-        num_planes = MPMAX(num_planes, d->plane + 1);
+        desc->num_planes = MPMAX(desc->num_planes, d->plane + 1);
 
         int plane_bits = desc->bpp[d->plane];
         int c_bits = d->step * el_bits;
@@ -340,7 +295,7 @@ static void fill_pixdesc_layout(struct mp_imgfmt_desc *desc,
         };
     }
 
-    for (int p = 0; p < num_planes; p++) {
+    for (int p = 0; p < desc->num_planes; p++) {
         if (!desc->bpp[p])
             goto fail; // plane doesn't exist
     }
@@ -414,7 +369,7 @@ static void fill_pixdesc_layout(struct mp_imgfmt_desc *desc,
     if (is_packed_ss_yuv) {
         desc->flags |= MP_IMGFLAG_PACKED_SS_YUV;
         desc->bpp[0] /= 1 << pd->log2_chroma_w;
-    } else {
+    } else if (!any_shared_bits) {
         desc->flags |= MP_IMGFLAG_HAS_COMPS;
     }
 
@@ -424,26 +379,19 @@ fail:
     for (int n = 0; n < 4; n++)
         desc->comps[n] = (struct mp_imgfmt_comp_desc){0};
     // Average bit size fallback.
-    int num_av_planes = av_pix_fmt_count_planes(fmt);
-    for (int p = 0; p < num_av_planes; p++) {
+    desc->num_planes = av_pix_fmt_count_planes(fmt);
+    for (int p = 0; p < desc->num_planes; p++) {
         int ls = av_image_get_linesize(fmt, 256, p);
         desc->bpp[p] = ls > 0 ? ls * 8 / 256 : 0;
     }
 }
 
-struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
+static bool mp_imgfmt_get_desc_from_pixdesc(int mpfmt, struct mp_imgfmt_desc *out)
 {
-    const struct mp_imgfmt_entry *mpdesc = get_mp_desc(mpfmt);
-    if (mpdesc && mpdesc->desc.id)
-        return mpdesc->desc;
-    if (mpdesc && mpdesc->reg_desc.component_size)
-        return to_legacy_desc(mpfmt, mpdesc->reg_desc);
-
     enum AVPixelFormat fmt = imgfmt2pixfmt(mpfmt);
     const AVPixFmtDescriptor *pd = av_pix_fmt_desc_get(fmt);
     if (!pd || pd->nb_components > 4)
-        return (struct mp_imgfmt_desc) {0};
-    bool is_uint = mp_imgfmt_get_component_type(mpfmt) == MP_COMPONENT_TYPE_UINT;
+        return false;
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
@@ -452,28 +400,43 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         .chroma_ys = pd->log2_chroma_h,
     };
 
-    for (int c = 0; c < pd->nb_components; c++)
-        desc.num_planes = MPMAX(desc.num_planes, pd->comp[c].plane + 1);
+    if (pd->flags & AV_PIX_FMT_FLAG_ALPHA)
+        desc.flags |= MP_IMGFLAG_ALPHA;
 
-    for (int p = 0; p < desc.num_planes; p++) {
-        desc.xs[p] = (p == 1 || p == 2) ? desc.chroma_xs : 0;
-        desc.ys[p] = (p == 1 || p == 2) ? desc.chroma_ys : 0;
+    if (pd->flags & AV_PIX_FMT_FLAG_HWACCEL)
+        desc.flags |= MP_IMGFLAG_TYPE_HW;
+
+    // Pixdesc does not provide a flag for XYZ, so this is the best we can do.
+    if (strncmp(pd->name, "xyz", 3) == 0) {
+        desc.flags |= MP_IMGFLAG_COLOR_XYZ;
+    } else if (pd->flags & AV_PIX_FMT_FLAG_RGB) {
+        desc.flags |= MP_IMGFLAG_COLOR_RGB;
+    } else if (fmt == AV_PIX_FMT_MONOBLACK || fmt == AV_PIX_FMT_MONOWHITE) {
+        desc.flags |= MP_IMGFLAG_COLOR_RGB;
+    } else if (fmt == AV_PIX_FMT_PAL8) {
+        desc.flags |= MP_IMGFLAG_COLOR_RGB | MP_IMGFLAG_TYPE_PAL8;
     }
+
+    if (pd->flags & AV_PIX_FMT_FLAG_FLOAT)
+        desc.flags |= MP_IMGFLAG_TYPE_FLOAT;
+
+    // Educated guess.
+    if (!(desc.flags & MP_IMGFLAG_COLOR_MASK) &&
+        !(desc.flags & MP_IMGFLAG_TYPE_HW))
+        desc.flags |= MP_IMGFLAG_COLOR_YUV;
 
     desc.align_x = 1 << desc.chroma_xs;
     desc.align_y = 1 << desc.chroma_ys;
 
     fill_pixdesc_layout(&desc, fmt, pd);
 
+    if (desc.flags & (MP_IMGFLAG_HAS_COMPS | MP_IMGFLAG_PACKED_SS_YUV)) {
+        if (!(desc.flags & MP_IMGFLAG_TYPE_MASK))
+            desc.flags |= MP_IMGFLAG_TYPE_UINT;
+    }
+
     if (desc.bpp[0] % 8u && (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM))
         desc.align_x = 8 / desc.bpp[0]; // expect power of 2
-
-    bool is_ba = desc.num_planes > 0;
-    for (int p = 0; p < desc.num_planes; p++)
-        is_ba = !(desc.bpp[p] % 8u);
-
-    if (is_ba)
-        desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
 
     // Very heuristical.
     bool is_be = desc.endian_shift > 0;
@@ -486,49 +449,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         desc.flags |= MP_IMGFLAG_LE | MP_IMGFLAG_BE;
     }
 
-    enum mp_csp csp = mp_imgfmt_get_forced_csp(mpfmt);
-
-    if ((pd->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
-        desc.flags |= MP_IMGFLAG_HWACCEL;
-    } else if (csp == MP_CSP_XYZ) {
-        /* nothing */
-    } else if (csp == MP_CSP_RGB) {
-        desc.flags |= MP_IMGFLAG_RGB;
-    } else {
-        desc.flags |= MP_IMGFLAG_YUV;
-    }
-
-    if (pd->flags & AV_PIX_FMT_FLAG_ALPHA)
-        desc.flags |= MP_IMGFLAG_ALPHA;
-
-    if (pd->flags & AV_PIX_FMT_FLAG_PAL)
-        desc.flags |= MP_IMGFLAG_PAL;
-
-    if ((desc.flags & (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB))
-        && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED)
-        && !(pd->flags & AV_PIX_FMT_FLAG_PAL)
-        && is_uint)
-    {
-        bool same_depth = true;
-        for (int p = 0; p < desc.num_planes; p++)
-            same_depth &= desc.bpp[p] == desc.bpp[0];
-        if (same_depth && pd->nb_components == desc.num_planes) {
-            if (desc.flags & MP_IMGFLAG_YUV) {
-                desc.flags |= MP_IMGFLAG_YUV_P;
-            } else {
-                desc.flags |= MP_IMGFLAG_RGB_P;
-            }
-        }
-        if (pd->nb_components == 3 && desc.num_planes == 2 &&
-            desc.bpp[1] == desc.bpp[0] * 2 &&
-            (desc.flags & MP_IMGFLAG_YUV))
-        {
-
-            desc.flags |= MP_IMGFLAG_YUV_NV;
-        }
-    }
-
-    return desc;
+    *out = desc;
+    return true;
 }
 
 bool mp_imgfmt_get_packed_yuv_locations(int imgfmt, uint8_t *luma_offsets)
@@ -574,6 +496,113 @@ bool mp_imgfmt_get_packed_yuv_locations(int imgfmt, uint8_t *luma_offsets)
     return true;
 }
 
+static bool get_native_desc(int mpfmt, struct mp_imgfmt_desc *desc)
+{
+    const struct mp_imgfmt_entry *p = get_mp_desc(mpfmt);
+    if (!p || !p->desc.flags)
+        return false;
+
+    *desc = p->desc;
+
+    // Fill in some fields mp_imgfmt_entry.desc is not required to set.
+
+    desc->id = mpfmt;
+    desc->avformat = AV_PIX_FMT_NONE;
+
+    for (int n = 0; n < MP_NUM_COMPONENTS; n++) {
+        struct mp_imgfmt_comp_desc *cd = &desc->comps[n];
+        if (cd->size)
+            desc->num_planes = MPMAX(desc->num_planes, cd->plane + 1);
+        desc->bpp[cd->plane] =
+            MPMAX(desc->bpp[cd->plane], MP_ALIGN_UP(cd->offset + cd->size, 8));
+    }
+
+    if (!desc->align_x && !desc->align_y) {
+        desc->align_x = 1 << desc->chroma_xs;
+        desc->align_y = 1 << desc->chroma_ys;
+    }
+
+    if (desc->num_planes)
+        desc->flags |= MP_IMGFLAG_HAS_COMPS | MP_IMGFLAG_NE;
+
+    if (!(desc->flags & MP_IMGFLAG_TYPE_MASK))
+        desc->flags |= MP_IMGFLAG_TYPE_UINT;
+
+    return true;
+}
+
+static int num_comps(int flags)
+{
+    if (!(flags & MP_IMGFLAG_COLOR_MASK))
+        return 0;
+    return 3 + (flags & MP_IMGFLAG_GRAY ? -2 : 0) + !!(flags & MP_IMGFLAG_ALPHA);
+}
+
+struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
+{
+    struct mp_imgfmt_desc desc;
+
+    if (!get_native_desc(mpfmt, &desc) &&
+        !mp_imgfmt_get_desc_from_pixdesc(mpfmt, &desc))
+        return (struct mp_imgfmt_desc){0};
+
+    for (int p = 0; p < desc.num_planes; p++) {
+        desc.xs[p] = (p == 1 || p == 2) ? desc.chroma_xs : 0;
+        desc.ys[p] = (p == 1 || p == 2) ? desc.chroma_ys : 0;
+    }
+
+    bool is_ba = desc.num_planes > 0;
+    for (int p = 0; p < desc.num_planes; p++)
+        is_ba = !(desc.bpp[p] % 8u);
+
+    if (is_ba)
+        desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
+
+    if (desc.flags & MP_IMGFLAG_HAS_COMPS) {
+        if (desc.comps[3].size)
+            desc.flags |= MP_IMGFLAG_ALPHA;
+
+        // Assuming all colors are (CCC+[A]) or (C+[A]), the latter being gray.
+        if (!desc.comps[1].size)
+            desc.flags |= MP_IMGFLAG_GRAY;
+
+        bool bb = true;
+        for (int n = 0; n < MP_NUM_COMPONENTS; n++) {
+            if (desc.comps[n].offset % 8u || desc.comps[n].size % 8u)
+                bb = false;
+        }
+        if (bb)
+            desc.flags |= MP_IMGFLAG_BYTES;
+    }
+
+    if ((desc.flags & (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB))
+        && (desc.flags & MP_IMGFLAG_HAS_COMPS)
+        && (desc.flags & MP_IMGFLAG_BYTES)
+        && ((desc.flags & MP_IMGFLAG_TYPE_MASK) == MP_IMGFLAG_TYPE_UINT))
+    {
+        int cnt = num_comps(desc.flags);
+        bool same_depth = true;
+        for (int p = 0; p < desc.num_planes; p++)
+            same_depth &= desc.bpp[p] == desc.bpp[0];
+        if (same_depth && cnt == desc.num_planes) {
+            if (desc.flags & MP_IMGFLAG_YUV) {
+                desc.flags |= MP_IMGFLAG_YUV_P;
+            } else {
+                desc.flags |= MP_IMGFLAG_RGB_P;
+            }
+        }
+        if (cnt == 3 && desc.num_planes == 2 &&
+            desc.bpp[1] == desc.bpp[0] * 2 &&
+            (desc.flags & MP_IMGFLAG_YUV))
+        {
+
+            desc.flags |= MP_IMGFLAG_YUV_NV;
+        }
+    }
+
+    return desc;
+}
+
 static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
 {
     bool present[MP_NUM_COMPONENTS] = {0};
@@ -615,53 +644,36 @@ static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
     return true;
 }
 
-enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
+static enum mp_csp get_forced_csp_from_flags(int flags)
 {
-    const struct mp_imgfmt_entry *p = get_mp_desc(imgfmt);
-    if (p && p->reg_desc.component_size)
-        return p->reg_desc.forced_csp;
-    if (p && p->forced_csp)
-        return p->forced_csp;
-
-    enum AVPixelFormat pixfmt = imgfmt2pixfmt(imgfmt);
-    const AVPixFmtDescriptor *pixdesc = av_pix_fmt_desc_get(pixfmt);
-
-    if (pixdesc && (pixdesc->flags & AV_PIX_FMT_FLAG_HWACCEL))
-        return MP_CSP_AUTO;
-
-    // FFmpeg does not provide a flag for XYZ, so this is the best we can do.
-    if (pixdesc && strncmp(pixdesc->name, "xyz", 3) == 0)
+    if (flags & MP_IMGFLAG_COLOR_XYZ)
         return MP_CSP_XYZ;
 
-    if (pixdesc && (pixdesc->flags & AV_PIX_FMT_FLAG_RGB))
-        return MP_CSP_RGB;
-
-    if (pixfmt == AV_PIX_FMT_PAL8 ||
-        pixfmt == AV_PIX_FMT_MONOBLACK ||
-        pixfmt == AV_PIX_FMT_MONOWHITE)
+    if (flags & MP_IMGFLAG_COLOR_RGB)
         return MP_CSP_RGB;
 
     return MP_CSP_AUTO;
 }
 
-enum mp_component_type mp_imgfmt_get_component_type(int imgfmt)
+enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
 {
-    const struct mp_imgfmt_entry *p = get_mp_desc(imgfmt);
-    if (p && p->reg_desc.component_size)
-        return p->reg_desc.component_type;
-    if (p && p->ctype)
-        return p->ctype;
+    return get_forced_csp_from_flags(mp_imgfmt_get_desc(imgfmt).flags);
+}
 
-    const AVPixFmtDescriptor *pixdesc =
-        av_pix_fmt_desc_get(imgfmt2pixfmt(imgfmt));
+static enum mp_component_type get_component_type_from_flags(int flags)
+{
+    if (flags & MP_IMGFLAG_TYPE_UINT)
+        return MP_COMPONENT_TYPE_UINT;
 
-    if (!pixdesc || (pixdesc->flags & AV_PIX_FMT_FLAG_HWACCEL))
-        return MP_COMPONENT_TYPE_UNKNOWN;
-
-    if (pixdesc->flags & AV_PIX_FMT_FLAG_FLOAT)
+    if (flags & MP_IMGFLAG_TYPE_FLOAT)
         return MP_COMPONENT_TYPE_FLOAT;
 
-    return MP_COMPONENT_TYPE_UINT;
+    return MP_COMPONENT_TYPE_UNKNOWN;
+}
+
+enum mp_component_type mp_imgfmt_get_component_type(int imgfmt)
+{
+    return get_component_type_from_flags(mp_imgfmt_get_desc(imgfmt).flags);
 }
 
 int mp_find_other_endian(int imgfmt)
@@ -671,12 +683,6 @@ int mp_find_other_endian(int imgfmt)
 
 bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
 {
-    const struct mp_imgfmt_entry *p = get_mp_desc(imgfmt);
-    if (p && p->reg_desc.component_size) {
-        *dst = p->reg_desc;
-        return true;
-    }
-
     struct mp_regular_imgfmt res = {0};
 
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
@@ -687,7 +693,7 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
     if (desc.endian_shift || !(desc.flags & MP_IMGFLAG_HAS_COMPS))
         return false;
 
-    res.component_type = mp_imgfmt_get_component_type(imgfmt);
+    res.component_type = get_component_type_from_flags(desc.flags);
     if (!res.component_type)
         return false;
 
@@ -730,7 +736,7 @@ bool mp_get_regular_imgfmt(struct mp_regular_imgfmt *dst, int imgfmt)
     res.chroma_xs = desc.chroma_xs;
     res.chroma_ys = desc.chroma_ys;
 
-    res.forced_csp = mp_imgfmt_get_forced_csp(imgfmt);
+    res.forced_csp = get_forced_csp_from_flags(desc.flags);
 
     if (!validate_regular_imgfmt(&res))
         return false;

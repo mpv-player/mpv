@@ -31,41 +31,53 @@
 #endif
 
 #define MP_MAX_PLANES 4
+#define MP_NUM_COMPONENTS 4
 
-// All pixels start in byte boundaries
-#define MP_IMGFLAG_BYTE_ALIGNED 0x1
 // mp_imgfmt_desc.comps[] is set to useful values. Some types of formats will
 // use comps[], but not set this flag, because it doesn't cover all requirements
 // (for example MP_IMGFLAG_PACKED_SS_YUV).
-#define MP_IMGFLAG_HAS_COMPS (1 << 1)
-// set if (possibly) alpha is included (might be not definitive for packed RGB)
-#define MP_IMGFLAG_ALPHA 0x80
-// set if it's YUV colorspace
-#define MP_IMGFLAG_YUV 0x200
-// set if it's RGB colorspace
-#define MP_IMGFLAG_RGB 0x400
-// set if the format is in a standard YUV format:
-// - planar and yuv colorspace
-// - chroma shift 0-2
-// - 1-4 planes (1: gray, 2: gray/alpha, 3: yuv, 4: yuv/alpha)
-// - 8-16 bit per pixel/plane, all planes have same depth,
-//   each plane has exactly one component
-#define MP_IMGFLAG_YUV_P 0x1000
+#define MP_IMGFLAG_HAS_COMPS    (1 << 0)
+
+// all components start on byte boundaries
+#define MP_IMGFLAG_BYTES        (1 << 1)
+
+// all pixels start in byte boundaries
+#define MP_IMGFLAG_BYTE_ALIGNED (1 << 2)
+
 // set if in little endian, or endian independent
-#define MP_IMGFLAG_LE 0x2000
+#define MP_IMGFLAG_LE           (1 << 3)
+
 // set if in big endian, or endian independent
-#define MP_IMGFLAG_BE 0x4000
+#define MP_IMGFLAG_BE           (1 << 4)
+
 // set if in native (host) endian, or endian independent
-#define MP_IMGFLAG_NE MP_SELECT_LE_BE(MP_IMGFLAG_LE, MP_IMGFLAG_BE)
-// Carries a palette in plane[1] (see AV_PIX_FMT_PAL8 for format of the palette).
-#define MP_IMGFLAG_PAL 0x8000
-// planes don't contain real data
-#define MP_IMGFLAG_HWACCEL 0x10000
-// Like MP_IMGFLAG_YUV_P, but RGB. This can be e.g. AV_PIX_FMT_GBRP. The planes
-// are always shuffled (G - B - R [- A]).
-#define MP_IMGFLAG_RGB_P 0x40000
-// Semi-planar YUV formats, like AV_PIX_FMT_NV12.
-#define MP_IMGFLAG_YUV_NV 0x80000
+#define MP_IMGFLAG_NE           MP_SELECT_LE_BE(MP_IMGFLAG_LE, MP_IMGFLAG_BE)
+
+// set if an alpha component is included
+#define MP_IMGFLAG_ALPHA        (1 << 5)
+
+// color class flags - can use via bit tests, or use the mask and compare
+#define MP_IMGFLAG_COLOR_MASK   (15 << 6)
+#define MP_IMGFLAG_COLOR_YUV    (1 << 6)
+#define MP_IMGFLAG_COLOR_RGB    (2 << 6)
+#define MP_IMGFLAG_COLOR_XYZ    (4 << 6)
+
+// component type flags (same access conventions as MP_IMGFLAG_COLOR_*)
+#define MP_IMGFLAG_TYPE_MASK    (15 << 10)
+#define MP_IMGFLAG_TYPE_UINT    (1 << 10)
+#define MP_IMGFLAG_TYPE_FLOAT   (2 << 10)
+#define MP_IMGFLAG_TYPE_PAL8    (4 << 10)
+#define MP_IMGFLAG_TYPE_HW      (8 << 10)
+
+#define MP_IMGFLAG_YUV          MP_IMGFLAG_COLOR_YUV
+#define MP_IMGFLAG_RGB          MP_IMGFLAG_COLOR_RGB
+#define MP_IMGFLAG_PAL          MP_IMGFLAG_TYPE_PAL8
+#define MP_IMGFLAG_HWACCEL      MP_IMGFLAG_TYPE_HW
+
+// 1 component format (or 2 components if MP_IMGFLAG_ALPHA is set).
+// This should probably be a separate MP_IMGFLAG_COLOR_GRAY, but for now it
+// is too much of a mess.
+#define MP_IMGFLAG_GRAY         (1 << 14)
 
 // Packed, sub-sampled YUV format. Does not apply to packed non-subsampled YUV.
 // These formats pack multiple pixels into one sample with strange organization.
@@ -76,9 +88,22 @@
 // get their offsets with mp_imgfmt_get_packed_yuv_locations(). Note that the
 // component offsets can be >= bpp[0]; the actual range is bpp[0]*align_x.
 // These formats have no alpha.
-#define MP_IMGFLAG_PACKED_SS_YUV (1 << 20)
+#define MP_IMGFLAG_PACKED_SS_YUV (1 << 15)
 
-#define MP_NUM_COMPONENTS 4
+// set if the format is in a standard YUV format:
+// - planar and yuv colorspace
+// - chroma shift 0-2
+// - 1-4 planes (1: gray, 2: gray/alpha, 3: yuv, 4: yuv/alpha)
+// - 8-16 bit per pixel/plane, all planes have same depth,
+//   each plane has exactly one component
+#define MP_IMGFLAG_YUV_P        (1 << 16)
+
+// Like MP_IMGFLAG_YUV_P, but RGB. This can be e.g. AV_PIX_FMT_GBRP. The planes
+// are always shuffled (G - B - R [- A]).
+#define MP_IMGFLAG_RGB_P        (1 << 17)
+
+// Semi-planar YUV formats, like AV_PIX_FMT_NV12.
+#define MP_IMGFLAG_YUV_NV       (1 << 18)
 
 struct mp_imgfmt_comp_desc {
     // Plane on which this component is.
@@ -113,8 +138,8 @@ struct mp_imgfmt_desc {
     // MP_IMGFLAG_HAS_COMPS set.
     // This is indexed by component_type-1 (so 0=R, 1=G, etc.), see
     // mp_regular_imgfmt_plane.components[x] for component_type. Components not
-    // present, or which have an unknown layout, use size=0. Bits not covered by
-    // any component are random and not interpreted by any software.
+    // present use size=0. Bits not covered by any component are random and not
+    // interpreted by any software.
     // In particular, don't make the mistake to index this by plane.
     struct mp_imgfmt_comp_desc comps[MP_NUM_COMPONENTS];
 

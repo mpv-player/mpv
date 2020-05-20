@@ -85,15 +85,20 @@ static void run(struct test_ctx *ctx)
             fprintf(f, "  Basic desc: ");
             #define FLAG(t, c) if (d.flags & (t)) fprintf(f, "[%s]", c);
             FLAG(MP_IMGFLAG_BYTE_ALIGNED, "ba")
+            FLAG(MP_IMGFLAG_BYTES, "bb")
             FLAG(MP_IMGFLAG_ALPHA, "a")
             FLAG(MP_IMGFLAG_YUV_P, "yuvp")
             FLAG(MP_IMGFLAG_YUV_NV, "nv")
-            FLAG(MP_IMGFLAG_YUV, "yuv")
-            FLAG(MP_IMGFLAG_RGB, "rgb")
+            FLAG(MP_IMGFLAG_COLOR_YUV, "yuv")
+            FLAG(MP_IMGFLAG_COLOR_RGB, "rgb")
+            FLAG(MP_IMGFLAG_COLOR_XYZ, "xyz")
+            FLAG(MP_IMGFLAG_GRAY, "gray")
             FLAG(MP_IMGFLAG_LE, "le")
             FLAG(MP_IMGFLAG_BE, "be")
-            FLAG(MP_IMGFLAG_PAL, "pal")
-            FLAG(MP_IMGFLAG_HWACCEL, "hw")
+            FLAG(MP_IMGFLAG_TYPE_PAL8, "pal")
+            FLAG(MP_IMGFLAG_TYPE_HW, "hw")
+            FLAG(MP_IMGFLAG_TYPE_FLOAT, "float")
+            FLAG(MP_IMGFLAG_TYPE_UINT, "uint")
             fprintf(f, "\n");
             fprintf(f, "    planes=%d, chroma=%d:%d align=%d:%d\n",
                     d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y);
