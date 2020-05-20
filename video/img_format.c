@@ -41,7 +41,6 @@ struct mp_imgfmt_entry {
     //  - sets MP_IMGFLAG_HAS_COMPS|MP_IMGFLAG_NE if num_planes>0
     //  - sets MP_IMGFLAG_TYPE_UINT if no other type set
     //  - sets id to mp_imgfmt_list[] implied format
-    //  - sets avformat to AV_PIX_FMT_NONE
     struct mp_imgfmt_desc desc;
 };
 
@@ -395,7 +394,6 @@ static bool mp_imgfmt_get_desc_from_pixdesc(int mpfmt, struct mp_imgfmt_desc *ou
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
-        .avformat = fmt,
         .chroma_xs = pd->log2_chroma_w,
         .chroma_ys = pd->log2_chroma_h,
     };
@@ -507,7 +505,6 @@ static bool get_native_desc(int mpfmt, struct mp_imgfmt_desc *desc)
     // Fill in some fields mp_imgfmt_entry.desc is not required to set.
 
     desc->id = mpfmt;
-    desc->avformat = AV_PIX_FMT_NONE;
 
     for (int n = 0; n < MP_NUM_COMPONENTS; n++) {
         struct mp_imgfmt_comp_desc *cd = &desc->comps[n];

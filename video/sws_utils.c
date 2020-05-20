@@ -393,9 +393,10 @@ static const int endian_swaps[][2] = {
 // might reduce the effective bit depth in some cases.
 struct mp_image *mp_img_swap_to_native(struct mp_image *img)
 {
+    int avfmt = imgfmt2pixfmt(img->imgfmt);
     int to = AV_PIX_FMT_NONE;
     for (int n = 0; endian_swaps[n][0] != AV_PIX_FMT_NONE; n++) {
-        if (endian_swaps[n][0] == img->fmt.avformat)
+        if (endian_swaps[n][0] == avfmt)
             to = endian_swaps[n][1];
     }
     if (to == AV_PIX_FMT_NONE || !mp_image_make_writeable(img))

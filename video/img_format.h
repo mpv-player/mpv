@@ -118,7 +118,6 @@ struct mp_imgfmt_comp_desc {
 
 struct mp_imgfmt_desc {
     int id;                 // IMGFMT_*
-    int avformat;           // AV_PIX_FMT_* (or AV_PIX_FMT_NONE)
     int flags;              // MP_IMGFLAG_* bitfield
     int8_t num_planes;
     int8_t chroma_xs, chroma_ys; // chroma shift (i.e. log2 of chroma pixel size)
