@@ -67,7 +67,7 @@ struct mp_repack {
 
     // Fringe RGB/YUV.
     uint8_t comp_size;
-    uint8_t *comp_map;
+    uint8_t comp_map[4];
     uint8_t comp_shifts[3];
     uint8_t *comp_lut;
 
@@ -333,41 +333,41 @@ static void packed_repack(struct mp_repack *rp,
 // Tries to set a packer/unpacker for component-wise byte aligned formats.
 static void setup_packed_packer(struct mp_repack *rp)
 {
-    struct mp_regular_imgfmt desc;
-    if (!mp_get_regular_imgfmt(&desc, rp->imgfmt_a))
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(rp->imgfmt_a);
+    if (!(desc.flags & MP_IMGFLAG_HAS_COMPS) ||
+        !(desc.flags & MP_IMGFLAG_TYPE_UINT) ||
+        !(desc.flags & MP_IMGFLAG_NE) ||
+        desc.num_planes != 1)
         return;
-
-    if (desc.num_planes != 1 || desc.planes[0].num_components < 2)
-        return;
-    struct mp_regular_imgfmt_plane *p = &desc.planes[0];
 
     int num_real_components = 0;
-    bool has_alpha = false;
-    for (int n = 0; n < p->num_components; n++) {
-        if (p->components[n]) {
-            has_alpha |= p->components[n] == 4;
-            num_real_components += 1;
-        } else {
-            // padding must be in MSB or LSB
-            if (n != 0 && n != p->num_components - 1)
-                return;
-        }
+    int components[4] = {0};
+    for (int n = 0; n < MP_NUM_COMPONENTS; n++) {
+        if (!desc.comps[n].size)
+            continue;
+        if (desc.comps[n].size != desc.comps[0].size ||
+            desc.comps[n].pad != desc.comps[0].pad ||
+            desc.comps[n].offset % desc.comps[0].size)
+            return;
+        int item = desc.comps[n].offset / desc.comps[0].size;
+        if (item >= 4)
+            return;
+        components[item] = n + 1;
+        num_real_components++;
     }
 
-    int depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
+    int depth = desc.comps[0].size + MPMIN(0, desc.comps[0].pad);
 
     static const int reorder_gbrp[] = {0, 3, 1, 2, 4};
     static const int reorder_yuv[] = {0, 1, 2, 3, 4};
     int planar_fmt = 0;
     const int *reorder = NULL;
-    if (desc.forced_csp) {
-        if (desc.forced_csp != MP_CSP_RGB && desc.forced_csp != MP_CSP_XYZ)
-            return;
-        planar_fmt = find_gbrp_format(depth, num_real_components);
-        reorder = reorder_gbrp;
-    } else {
+    if (desc.flags & MP_IMGFLAG_COLOR_YUV) {
         planar_fmt = find_yuv_format(depth, num_real_components);
         reorder = reorder_yuv;
+    } else {
+        planar_fmt = find_gbrp_format(depth, num_real_components);
+        reorder = reorder_gbrp;
     }
     if (!planar_fmt)
         return;
@@ -378,12 +378,12 @@ static void setup_packed_packer(struct mp_repack *rp)
         // The following may assume little endian (because some repack backends
         // use word access, while the metadata here uses byte access).
 
-        int prepad = p->components[0] ? 0 : 8;
-        int first_comp = p->components[0] ? 0 : 1;
+        int prepad = components[0] ? 0 : 8;
+        int first_comp = components[0] ? 0 : 1;
         void (*repack_cb)(void *pa, void *pb[], int w) =
             rp->pack ? pa->pa_scanline : pa->un_scanline;
 
-        if (pa->packed_width != desc.component_size * p->num_components * 8 ||
+        if (pa->packed_width != desc.bpp[0] ||
             pa->component_width != depth ||
             pa->num_components != num_real_components ||
             pa->prepadding != prepad ||
@@ -396,7 +396,7 @@ static void setup_packed_packer(struct mp_repack *rp)
         for (int n = 0; n < num_real_components; n++) {
             // Determine permutation that maps component order between the two
             // formats, with has_alpha special case (see above).
-            int c = reorder[p->components[first_comp + n]];
+            int c = reorder[components[first_comp + n]];
             rp->components[n] = c == 4 ? num_real_components - 1 : c - 1;
         }
         return;
@@ -564,19 +564,7 @@ static void bitmap_repack(struct mp_repack *rp,
 
 static void setup_misc_packer(struct mp_repack *rp)
 {
-    // Although it's in regular_repackers[], the generic mpv imgfmt metadata
-    // can't handle it yet.
-    if (rp->imgfmt_a == IMGFMT_RGB30) {
-        int planar_fmt = find_gbrp_format(10, 3);
-        if (!planar_fmt)
-            return;
-        rp->imgfmt_b = planar_fmt;
-        rp->repack = packed_repack;
-        rp->packed_repack_scanline = rp->pack ? pa_ccc10z2 : un_ccc10x2;
-        static int c_order[] = {2, 1, 3};
-        for (int n = 0; n < 3; n++)
-            rp->components[n] = c_order[n] - 1;
-    } else if (rp->imgfmt_a == IMGFMT_PAL8 && !rp->pack) {
+    if (rp->imgfmt_a == IMGFMT_PAL8 && !rp->pack) {
         int grap_fmt = find_gbrp_format(8, 4);
         if (!grap_fmt)
             return;
@@ -602,26 +590,6 @@ static void setup_misc_packer(struct mp_repack *rp)
         }
     }
 }
-
-struct fringe_yuv422_repacker {
-    // To avoid making a mess of IMGFMT_*, we use av formats directly.
-    enum AVPixelFormat avfmt;
-    // In bits (depth/8 rounded up gives byte size)
-    int8_t depth;
-    // Word index of each sample: {y0, y1, cb, cr}
-    uint8_t comp[4];
-    bool be;
-};
-
-static const struct fringe_yuv422_repacker fringe_yuv422_repackers[] = {
-    {AV_PIX_FMT_YUYV422,  8, {0, 2, 1, 3}},
-    {AV_PIX_FMT_UYVY422,  8, {1, 3, 0, 2}},
-    {AV_PIX_FMT_YVYU422,  8, {0, 2, 3, 1}},
-#ifdef AV_PIX_FMT_Y210
-    {AV_PIX_FMT_Y210LE,  10, {0, 2, 1, 3}},
-    {AV_PIX_FMT_Y210BE,  10, {0, 2, 1, 3}, .be = true},
-#endif
-};
 
 #define PA_P422(name, comp_t)                                               \
     static void name(void *dst, void *src[], int w, uint8_t *c) {           \
@@ -672,20 +640,39 @@ static void fringe_yuv422_repack(struct mp_repack *rp,
 
 static void setup_fringe_yuv422_packer(struct mp_repack *rp)
 {
-    enum AVPixelFormat avfmt = imgfmt2pixfmt(rp->imgfmt_a);
-
-    const struct fringe_yuv422_repacker *fmt = NULL;
-    for (int n = 0; n < MP_ARRAY_SIZE(fringe_yuv422_repackers); n++) {
-        if (fringe_yuv422_repackers[n].avfmt == avfmt) {
-            fmt = &fringe_yuv422_repackers[n];
-            break;
-        }
-    }
-
-    if (!fmt)
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(rp->imgfmt_a);
+    if (!(desc.flags & MP_IMGFLAG_PACKED_SS_YUV) ||
+        mp_imgfmt_desc_get_num_comps(&desc) != 3 ||
+        desc.align_x != 2)
         return;
 
-    rp->comp_size = (fmt->depth + 7) / 8;
+    uint8_t y_loc[2];
+    if (!mp_imgfmt_get_packed_yuv_locations(desc.id, y_loc))
+        return;
+
+    for (int n = 0; n < MP_NUM_COMPONENTS; n++) {
+        if (!desc.comps[n].size)
+            continue;
+        if (desc.comps[n].size != desc.comps[0].size ||
+            desc.comps[n].pad < 0 ||
+            desc.comps[n].offset % desc.comps[0].size)
+            return;
+        if (n == 1 || n == 2) {
+            rp->comp_map[n - 1 + desc.align_x] =
+                desc.comps[n].offset / desc.comps[0].size;
+        }
+    }
+    for (int n = 0; n < desc.align_x; n++) {
+        if (y_loc[n] % desc.comps[0].size)
+            return;
+        rp->comp_map[n] = y_loc[n] / desc.comps[0].size;
+    }
+
+    int depth = desc.comps[0].size;
+    if (depth != 8 && depth != 16)
+        return;
+
+    rp->comp_size = depth / 8u;
     assert(rp->comp_size == 1 || rp->comp_size == 2);
 
     struct mp_regular_imgfmt yuvfmt = {
@@ -699,11 +686,10 @@ static void setup_fringe_yuv422_packer(struct mp_repack *rp)
     };
     rp->imgfmt_b = mp_find_regular_imgfmt(&yuvfmt);
     rp->repack = fringe_yuv422_repack;
-    rp->comp_map = (uint8_t *)fmt->comp;
 
-    if (fmt->be) {
-        assert(rp->comp_size == 2);
-        rp->endian_size = 2;
+    if (desc.endian_shift) {
+        rp->endian_size = 1 << desc.endian_shift;
+        assert(rp->endian_size == 2);
     }
 }
 
@@ -1031,7 +1017,6 @@ static void reset_params(struct mp_repack *rp)
     rp->endian_size = 0;
     rp->packed_repack_scanline = NULL;
     rp->comp_size = 0;
-    rp->comp_map = NULL;
     talloc_free(rp->comp_lut);
     rp->comp_lut = NULL;
 }
