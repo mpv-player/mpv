@@ -151,6 +151,9 @@ struct mp_imgfmt_desc {
 
 struct mp_imgfmt_desc mp_imgfmt_get_desc(int imgfmt);
 
+// Return the number of component types, or 0 if unknown.
+int mp_imgfmt_desc_get_num_comps(struct mp_imgfmt_desc *desc);
+
 // For MP_IMGFLAG_PACKED_SS_YUV formats (packed sub-sampled YUV): positions of
 // further luma samples. luma_offsets must be an array of align_x size, and the
 // function will return the offset (like in mp_imgfmt_comp_desc.offset) of each

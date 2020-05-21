@@ -528,8 +528,9 @@ static bool get_native_desc(int mpfmt, struct mp_imgfmt_desc *desc)
     return true;
 }
 
-static int num_comps(int flags)
+int mp_imgfmt_desc_get_num_comps(struct mp_imgfmt_desc *desc)
 {
+    int flags = desc->flags;
     if (!(flags & MP_IMGFLAG_COLOR_MASK))
         return 0;
     return 3 + (flags & MP_IMGFLAG_GRAY ? -2 : 0) + !!(flags & MP_IMGFLAG_ALPHA);
@@ -577,7 +578,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         && (desc.flags & MP_IMGFLAG_BYTES)
         && ((desc.flags & MP_IMGFLAG_TYPE_MASK) == MP_IMGFLAG_TYPE_UINT))
     {
-        int cnt = num_comps(desc.flags);
+        int cnt = mp_imgfmt_desc_get_num_comps(&desc);
         bool same_depth = true;
         for (int p = 0; p < desc.num_planes; p++)
             same_depth &= desc.bpp[p] == desc.bpp[0];
