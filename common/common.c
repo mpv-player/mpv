@@ -126,6 +126,28 @@ bool mp_rect_equals(struct mp_rect *rc1, struct mp_rect *rc2)
            rc1->x1 == rc2->x1 && rc1->y1 == rc2->y1;
 }
 
+// Compute rc1-rc2, put result in res_array, return number of rectangles in
+// res_array. In the worst case, there are 4 rectangles, so res_array must
+// provide that much storage space.
+int mp_rect_subtract(const struct mp_rect *rc1, const struct mp_rect *rc2,
+                     struct mp_rect res[4])
+{
+    struct mp_rect rc = *rc1;
+    if (!mp_rect_intersection(&rc, rc2))
+        return 0;
+
+    int cnt = 0;
+    if (rc1->y0 < rc.y0)
+        res[cnt++] = (struct mp_rect){rc1->x0, rc1->y0, rc1->x1, rc.y0};
+    if (rc1->x0 < rc.x0)
+        res[cnt++] = (struct mp_rect){rc1->x0, rc.y0,   rc.x0,   rc.y1};
+    if (rc1->x1 > rc.x1)
+        res[cnt++] = (struct mp_rect){rc.x1,   rc.y0,   rc1->x1, rc.y1};
+    if (rc1->y1 > rc.y1)
+        res[cnt++] = (struct mp_rect){rc1->x0, rc.y1,   rc1->x1, rc1->y1};
+    return cnt;
+}
+
 // This works like snprintf(), except that it starts writing the first output
 // character to str[strlen(str)]. This returns the number of characters the
 // string would have *appended* assuming a large enough buffer, will make sure
