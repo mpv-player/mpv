@@ -141,8 +141,8 @@ static const struct entry repack_tests[] = {
            -AV_PIX_FMT_YUVA444P16,  {P16(2), P16(3), P16(4), P16(1)}},
     {1, 1, -AV_PIX_FMT_AYUV64BE,    {P16(0x0100, 0x0200, 0x0300, 0x0400)},
            -AV_PIX_FMT_YUVA444P16,  {P16(2), P16(3), P16(4), P16(1)}},
-    {2, 1, -AV_PIX_FMT_YUYV422,     {P8(1, 2, 3, 4)},
-           -AV_PIX_FMT_YUV422P,     {P8(1, 3), P8(2), P8(4)}},
+    {4, 1, -AV_PIX_FMT_YUYV422,     {P8(1, 2, 3, 4, 5, 6, 7, 8)},
+           -AV_PIX_FMT_YUV422P,     {P8(1, 3, 5, 7), P8(2, 6), P8(4, 8)}},
     {2, 1, -AV_PIX_FMT_YVYU422,     {P8(1, 2, 3, 4)},
            -AV_PIX_FMT_YUV422P,     {P8(1, 3), P8(4), P8(2)}},
     {2, 1, -AV_PIX_FMT_UYVY422,     {P8(1, 2, 3, 4)},
@@ -159,6 +159,9 @@ static const struct entry repack_tests[] = {
                                      P16(0x4a4b)},
            -AV_PIX_FMT_YUV422P16,   {P16(0x1b1a, 0x2b2a), P16(0x3b3a),
                                      P16(0x4b4a)}},
+    {8, 1, -AV_PIX_FMT_UYYVYY411,   {P8(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)},
+           -AV_PIX_FMT_YUV411P,     {P8(2, 3, 5, 6, 8, 9, 11, 12),
+                                     P8(1, 7), P8(4, 10)}},
 };
 
 static bool is_true_planar(int imgfmt)

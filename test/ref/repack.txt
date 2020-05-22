@@ -200,7 +200,8 @@ rgba64be        => [pa] [un] gbrap16         | a=1:1 [tu] [tp]
 rgba64be        => [pa] [un] gbrapf32        | a=1:1 [planar-f32]
 uyvy422         => [pa] [un] yuv422p         | a=2:1 [tu] [tp]
 uyvy422         => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
-uyyvyy411       => no
+uyyvyy411       => [pa] [un] yuv411p         | a=4:1 [tu] [tp]
+uyyvyy411       => [pa] [un] yuv411pf        | a=4:1 [planar-f32]
 vaapi           => no
 vaapi_idct      => no
 vaapi_moco      => no

@@ -115,7 +115,7 @@
          rgba64    Zin   Zout  SWSin  SWSout |
        rgba64be    Zin   Zout  SWSin  SWSout |
         uyvy422    Zin   Zout  SWSin  SWSout |
-      uyyvyy411                              |
+      uyyvyy411    Zin   Zout                |
           vaapi                              |
      vaapi_idct                              |
      vaapi_moco                              |

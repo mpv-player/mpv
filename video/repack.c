@@ -67,9 +67,10 @@ struct mp_repack {
 
     // Fringe RGB/YUV.
     uint8_t comp_size;
-    uint8_t comp_map[4];
+    uint8_t comp_map[6];
     uint8_t comp_shifts[3];
     uint8_t *comp_lut;
+    void (*repack_fringe_yuv)(void *dst, void *src[], int w, uint8_t *c);
 
     // F32 repacking.
     int f32_comp_size;
@@ -596,8 +597,8 @@ static void setup_misc_packer(struct mp_repack *rp)
         for (int x = 0; x < w; x += 2) {                                    \
             ((comp_t *)dst)[x * 2 + c[0]] = ((comp_t *)src[0])[x + 0];      \
             ((comp_t *)dst)[x * 2 + c[1]] = ((comp_t *)src[0])[x + 1];      \
-            ((comp_t *)dst)[x * 2 + c[2]] = ((comp_t *)src[1])[x >> 1];     \
-            ((comp_t *)dst)[x * 2 + c[3]] = ((comp_t *)src[2])[x >> 1];     \
+            ((comp_t *)dst)[x * 2 + c[4]] = ((comp_t *)src[1])[x >> 1];     \
+            ((comp_t *)dst)[x * 2 + c[5]] = ((comp_t *)src[2])[x >> 1];     \
         }                                                                   \
     }
 
@@ -607,8 +608,8 @@ static void setup_misc_packer(struct mp_repack *rp)
         for (int x = 0; x < w; x += 2) {                                    \
             ((comp_t *)dst[0])[x + 0]  = ((comp_t *)src)[x * 2 + c[0]];     \
             ((comp_t *)dst[0])[x + 1]  = ((comp_t *)src)[x * 2 + c[1]];     \
-            ((comp_t *)dst[1])[x >> 1] = ((comp_t *)src)[x * 2 + c[2]];     \
-            ((comp_t *)dst[2])[x >> 1] = ((comp_t *)src)[x * 2 + c[3]];     \
+            ((comp_t *)dst[1])[x >> 1] = ((comp_t *)src)[x * 2 + c[4]];     \
+            ((comp_t *)dst[2])[x >> 1] = ((comp_t *)src)[x * 2 + c[5]];     \
         }                                                                   \
     }
 
@@ -617,9 +618,34 @@ PA_P422(pa_p422_16, uint16_t)
 UN_P422(un_p422_8,  uint8_t)
 UN_P422(un_p422_16, uint16_t)
 
-static void fringe_yuv422_repack(struct mp_repack *rp,
-                                 struct mp_image *a, int a_x, int a_y,
-                                 struct mp_image *b, int b_x, int b_y, int w)
+static void pa_p411_8(void *dst, void *src[], int w, uint8_t *c)
+{
+    for (int x = 0; x < w; x += 4) {
+        ((uint8_t *)dst)[x / 4 * 6 + c[0]] = ((uint8_t *)src[0])[x + 0];
+        ((uint8_t *)dst)[x / 4 * 6 + c[1]] = ((uint8_t *)src[0])[x + 1];
+        ((uint8_t *)dst)[x / 4 * 6 + c[2]] = ((uint8_t *)src[0])[x + 2];
+        ((uint8_t *)dst)[x / 4 * 6 + c[3]] = ((uint8_t *)src[0])[x + 3];
+        ((uint8_t *)dst)[x / 4 * 6 + c[4]] = ((uint8_t *)src[1])[x >> 2];
+        ((uint8_t *)dst)[x / 4 * 6 + c[5]] = ((uint8_t *)src[2])[x >> 2];
+    }
+}
+
+
+static void un_p411_8(void *src, void *dst[], int w, uint8_t *c)
+{
+    for (int x = 0; x < w; x += 4) {
+        ((uint8_t *)dst[0])[x + 0]  = ((uint8_t *)src)[x / 4 * 6 + c[0]];
+        ((uint8_t *)dst[0])[x + 1]  = ((uint8_t *)src)[x / 4 * 6 + c[1]];
+        ((uint8_t *)dst[0])[x + 2]  = ((uint8_t *)src)[x / 4 * 6 + c[2]];
+        ((uint8_t *)dst[0])[x + 3]  = ((uint8_t *)src)[x / 4 * 6 + c[3]];
+        ((uint8_t *)dst[1])[x >> 2] = ((uint8_t *)src)[x / 4 * 6 + c[4]];
+        ((uint8_t *)dst[2])[x >> 2] = ((uint8_t *)src)[x / 4 * 6 + c[5]];
+    }
+}
+
+static void fringe_yuv_repack(struct mp_repack *rp,
+                              struct mp_image *a, int a_x, int a_y,
+                              struct mp_image *b, int b_x, int b_y, int w)
 {
     void *pa = mp_image_pixel_ptr(a, 0, a_x, a_y);
 
@@ -627,26 +653,18 @@ static void fringe_yuv422_repack(struct mp_repack *rp,
     for (int p = 0; p < b->num_planes; p++)
         pb[p] = mp_image_pixel_ptr(b, p, b_x, b_y);
 
-    assert(rp->comp_size == 1 || rp->comp_size == 2);
-
-    void (*repack)(void *a, void *b[], int w, uint8_t *c) = NULL;
-    if (rp->pack) {
-        repack = rp->comp_size == 1 ? pa_p422_8 : pa_p422_16;
-    } else {
-        repack = rp->comp_size == 1 ? un_p422_8 : un_p422_16;
-    }
-    repack(pa, pb, w, rp->comp_map);
+    rp->repack_fringe_yuv(pa, pb, w, rp->comp_map);
 }
 
-static void setup_fringe_yuv422_packer(struct mp_repack *rp)
+static void setup_fringe_yuv_packer(struct mp_repack *rp)
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(rp->imgfmt_a);
     if (!(desc.flags & MP_IMGFLAG_PACKED_SS_YUV) ||
         mp_imgfmt_desc_get_num_comps(&desc) != 3 ||
-        desc.align_x != 2)
+        desc.align_x > 4)
         return;
 
-    uint8_t y_loc[2];
+    uint8_t y_loc[4];
     if (!mp_imgfmt_get_packed_yuv_locations(desc.id, y_loc))
         return;
 
@@ -658,7 +676,7 @@ static void setup_fringe_yuv422_packer(struct mp_repack *rp)
             desc.comps[n].offset % desc.comps[0].size)
             return;
         if (n == 1 || n == 2) {
-            rp->comp_map[n - 1 + desc.align_x] =
+            rp->comp_map[4 + (n - 1)] =
                 desc.comps[n].offset / desc.comps[0].size;
         }
     }
@@ -668,24 +686,28 @@ static void setup_fringe_yuv422_packer(struct mp_repack *rp)
         rp->comp_map[n] = y_loc[n] / desc.comps[0].size;
     }
 
-    int depth = desc.comps[0].size;
-    if (depth != 8 && depth != 16)
-        return;
+    if (desc.comps[0].size == 8 && desc.align_x == 2) {
+        rp->repack_fringe_yuv = rp->pack ? pa_p422_8 : un_p422_8;
+    } else if (desc.comps[0].size == 16 && desc.align_x == 2) {
+        rp->repack_fringe_yuv = rp->pack ? pa_p422_16 : un_p422_16;
+    } else if (desc.comps[0].size == 8 && desc.align_x == 4) {
+        rp->repack_fringe_yuv = rp->pack ? pa_p411_8 : un_p411_8;
+    }
 
-    rp->comp_size = depth / 8u;
-    assert(rp->comp_size == 1 || rp->comp_size == 2);
+    if (!rp->repack_fringe_yuv)
+        return;
 
     struct mp_regular_imgfmt yuvfmt = {
         .component_type = MP_COMPONENT_TYPE_UINT,
         // NB: same problem with P010 and not clearing padding.
-        .component_size = rp->comp_size,
+        .component_size = desc.comps[0].size / 8u,
         .num_planes = 3,
         .planes = { {1, {1}}, {1, {2}}, {1, {3}} },
-        .chroma_xs = 1,
+        .chroma_xs = desc.chroma_xs,
         .chroma_ys = 0,
     };
     rp->imgfmt_b = mp_find_regular_imgfmt(&yuvfmt);
-    rp->repack = fringe_yuv422_repack;
+    rp->repack = fringe_yuv_repack;
 
     if (desc.endian_shift) {
         rp->endian_size = 1 << desc.endian_shift;
@@ -913,7 +935,7 @@ static bool setup_format_ne(struct mp_repack *rp)
     if (!rp->imgfmt_b)
         setup_fringe_rgb_packer(rp);
     if (!rp->imgfmt_b)
-        setup_fringe_yuv422_packer(rp);
+        setup_fringe_yuv_packer(rp);
     if (!rp->imgfmt_b)
         rp->imgfmt_b = rp->imgfmt_a; // maybe it was planar after all
 
