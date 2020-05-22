@@ -678,6 +678,20 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
     }
 }
 
+void mp_image_clear_rc(struct mp_image *mpi, struct mp_rect rc)
+{
+    mp_image_clear(mpi, rc.x0, rc.y0, rc.x1, rc.y1);
+}
+
+// Clear the are of the image _not_ covered by rc.
+void mp_image_clear_rc_inv(struct mp_image *mpi, struct mp_rect rc)
+{
+    struct mp_rect clr[4];
+    int cnt = mp_rect_subtract(&(struct mp_rect){0, 0, mpi->w, mpi->h}, &rc, clr);
+    for (int n = 0; n < cnt; n++)
+        mp_image_clear_rc(mpi, clr[n]);
+}
+
 void mp_image_vflip(struct mp_image *img)
 {
     for (int p = 0; p < img->num_planes; p++) {

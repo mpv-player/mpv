@@ -137,6 +137,8 @@ void mp_image_setrefp(struct mp_image **p_img, struct mp_image *new_value);
 void mp_image_unrefp(struct mp_image **p_img);
 
 void mp_image_clear(struct mp_image *mpi, int x0, int y0, int x1, int y1);
+void mp_image_clear_rc(struct mp_image *mpi, struct mp_rect rc);
+void mp_image_clear_rc_inv(struct mp_image *mpi, struct mp_rect rc);
 void mp_image_crop(struct mp_image *img, int x0, int y0, int x1, int y1);
 void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc);
 void mp_image_vflip(struct mp_image *img);
