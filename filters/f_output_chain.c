@@ -454,13 +454,12 @@ bool mp_output_chain_command(struct mp_output_chain *c, const char *target,
 // supports it, reset *speed, then keep setting the speed on the other filters.
 // The purpose of this is to make sure only 1 filter changes speed.
 static void set_speed_any(struct mp_user_filter **filters, int num_filters,
-                          bool resample, double *speed)
+                          int command, double *speed)
 {
     for (int n = num_filters - 1; n >= 0; n--) {
         assert(*speed);
         struct mp_filter_command cmd = {
-            .type = resample ? MP_FILTER_COMMAND_SET_SPEED_RESAMPLE
-                             : MP_FILTER_COMMAND_SET_SPEED,
+            .type = command,
             .speed = *speed,
         };
         if (mp_filter_command(filters[n]->f, &cmd))
@@ -469,17 +468,24 @@ static void set_speed_any(struct mp_user_filter **filters, int num_filters,
 }
 
 void mp_output_chain_set_audio_speed(struct mp_output_chain *c,
-                                     double speed, double resample)
+                                     double speed, double resample, double drop)
 {
     struct chain *p = c->f->priv;
 
     // We always resample with the final libavresample instance.
-    set_speed_any(p->post_filters, p->num_post_filters, true, &resample);
+    set_speed_any(p->post_filters, p->num_post_filters,
+                  MP_FILTER_COMMAND_SET_SPEED_RESAMPLE, &resample);
 
     // If users have filters like "scaletempo" insert anywhere, use that,
     // otherwise use the builtin ones.
-    set_speed_any(p->user_filters, p->num_user_filters, false, &speed);
-    set_speed_any(p->post_filters, p->num_post_filters, false, &speed);
+    set_speed_any(p->user_filters, p->num_user_filters,
+                  MP_FILTER_COMMAND_SET_SPEED, &speed);
+    set_speed_any(p->post_filters, p->num_post_filters,
+                  MP_FILTER_COMMAND_SET_SPEED, &speed);
+    set_speed_any(p->user_filters, p->num_user_filters,
+                  MP_FILTER_COMMAND_SET_SPEED_DROP, &drop);
+    set_speed_any(p->post_filters, p->num_post_filters,
+                  MP_FILTER_COMMAND_SET_SPEED_DROP, &drop);
 }
 
 double mp_output_get_measured_total_delay(struct mp_output_chain *c)

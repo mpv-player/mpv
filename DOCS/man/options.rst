@@ -6403,7 +6403,8 @@ Miscellaneous
                         video. See ``--video-sync-adrop-size``. This mode will
                         cause severe audio artifacts if the real monitor
                         refresh rate is too different from the reported or
-                        forced rate.
+                        forced rate. Sicne mpv 0.33.0, this acts on entire audio
+                        frames, instead of single samples.
     :display-desync:    Sync video to display, and let audio play on its own.
     :desync:            Sync video according to system clock, and let audio play
                         on its own.

@@ -54,13 +54,19 @@ static void update_speed_filters(struct MPContext *mpctx)
 
     double speed = mpctx->opts->playback_speed;
     double resample = mpctx->speed_factor_a;
+    double drop = 1.0;
 
     if (!mpctx->opts->pitch_correction) {
         resample *= speed;
         speed = 1.0;
     }
 
-    mp_output_chain_set_audio_speed(ao_c->filter, speed, resample);
+    if (mpctx->display_sync_active && mpctx->opts->video_sync == VS_DISP_ADROP) {
+        drop *= speed * resample;
+        resample = speed = 1.0;
+    }
+
+    mp_output_chain_set_audio_speed(ao_c->filter, speed, resample, drop);
 }
 
 static int recreate_audio_filters(struct MPContext *mpctx)
@@ -878,24 +884,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         playsize = MPMAX(1, playsize + skip); // silence will be prepended
     }
 
-    int skip_duplicate = 0; // >0: skip, <0: duplicate
-    double drop_limit =
-        (opts->sync_max_audio_change + opts->sync_max_video_change) / 100;
-    if (mpctx->display_sync_active && opts->video_sync == VS_DISP_ADROP &&
-        fabs(mpctx->last_av_difference) >= opts->sync_audio_drop_size &&
-        mpctx->audio_drop_throttle < drop_limit &&
-        mpctx->audio_status == STATUS_PLAYING)
-    {
-        int samples = ceil(opts->sync_audio_drop_size * play_samplerate);
-        samples = (samples + align / 2) / align * align;
-
-        skip_duplicate = mpctx->last_av_difference >= 0 ? -samples : samples;
-
-        playsize = MPMAX(playsize, samples);
-
-        mpctx->audio_drop_throttle += 1 - drop_limit - samples / play_samplerate;
-    }
-
     playsize = playsize / align * align;
 
     int status = mpctx->audio_status >= STATUS_DRAINING ? AD_EOF : AD_OK;
@@ -938,21 +926,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         }
         mp_audio_buffer_prepend_silence(ao_c->ao_buffer, -skip);
         end_sync = true;
-    }
-
-    if (skip_duplicate) {
-        int max = mp_audio_buffer_samples(ao_c->ao_buffer);
-        if (abs(skip_duplicate) > max)
-            skip_duplicate = skip_duplicate >= 0 ? max : -max;
-        mpctx->last_av_difference += skip_duplicate / play_samplerate;
-        if (skip_duplicate >= 0) {
-            mp_audio_buffer_skip(ao_c->ao_buffer, skip_duplicate);
-            MP_STATS(mpctx, "drop-audio");
-        } else {
-            mp_audio_buffer_duplicate(ao_c->ao_buffer, -skip_duplicate);
-            MP_STATS(mpctx, "duplicate-audio");
-        }
-        MP_VERBOSE(mpctx, "audio skip_duplicate=%d\n", skip_duplicate);
     }
 
     if (mpctx->audio_status == STATUS_SYNCING) {

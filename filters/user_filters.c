@@ -39,6 +39,7 @@ const struct mp_user_filter_entry *af_list[] = {
     &af_rubberband,
 #endif
     &af_lavcac3enc,
+    &af_drop,
 };
 
 static bool get_af_desc(struct m_obj_desc *dst, int index)

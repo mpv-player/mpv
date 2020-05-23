@@ -220,3 +220,10 @@ Available filters are:
         broken filters. In practice, these broken filters will either cause slow
         A/V desync over time (with some files), or break playback completely if
         you seek or start playback from the middle of a file.
+
+``drop``
+    This filter drops or repeats audio frames to adapt to playback speed. It
+    always operates on full audio frames, because it was made to handle SPDIF
+    (compressed audio passthrough). This is used automatically if the
+    ``--video-sync=display-adrop`` option is used. Do not use this filter (or
+    the given option); they are extremely low quality.

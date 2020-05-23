@@ -898,7 +898,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     mpctx->past_frames[0].num_vsyncs = num_vsyncs;
     mpctx->past_frames[0].av_diff = mpctx->last_av_difference;
 
-    if (resample) {
+    if (resample || mode == VS_DISP_ADROP) {
         adjust_audio_resample_speed(mpctx, vsync);
     } else {
         mpctx->speed_factor_a = 1.0;

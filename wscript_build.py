@@ -235,6 +235,7 @@ def build(ctx):
         ( "audio/chmap_sel.c" ),
         ( "audio/decode/ad_lavc.c" ),
         ( "audio/decode/ad_spdif.c" ),
+        ( "audio/filter/af_drop.c" ),
         ( "audio/filter/af_format.c" ),
         ( "audio/filter/af_lavcac3enc.c" ),
         ( "audio/filter/af_rubberband.c",        "rubberband" ),
