@@ -659,12 +659,12 @@ double calc_average_frame_duration(struct MPContext *mpctx)
 // effective video FPS. If this is not possible, try to do it for multiples,
 // which still leads to an improved end result.
 // Both parameters are durations in seconds.
-static double calc_best_speed(double vsync, double frame)
+static double calc_best_speed(double vsync, double frame, int max_factor)
 {
     double ratio = frame / vsync;
     double best_scale = -1;
     double best_dev = INFINITY;
-    for (int factor = 1; factor <= 5; factor++) {
+    for (int factor = 1; factor <= max_factor; factor++) {
         double scale = ratio * factor / rint(ratio * factor);
         double dev = fabs(scale - 1);
         if (dev < best_dev) {
@@ -683,7 +683,8 @@ static double find_best_speed(struct MPContext *mpctx, double vsync)
         double dur = mpctx->past_frames[n].approx_duration;
         if (dur <= 0)
             continue;
-        total += calc_best_speed(vsync, dur / mpctx->opts->playback_speed);
+        total += calc_best_speed(vsync, dur / mpctx->opts->playback_speed,
+                                 mpctx->opts->sync_max_factor);
         num++;
     }
     return num > 0 ? total / num : 1;
