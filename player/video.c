@@ -800,12 +800,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     mpctx->display_sync_active = false;
 
-    if (mode == VS_DISP_ADROP && !mpctx->audio_drop_deprecated_msg) {
-        MP_WARN(mpctx, "video-sync=display-adrop mode is deprecated and will "
-                       "be removed in the future.\n");
-        mpctx->audio_drop_deprecated_msg = true;
-    }
-
     if (!VS_IS_DISP(mode))
         return;
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||

@@ -205,7 +205,6 @@ typedef struct MPOpts {
     int video_sync;
     double sync_max_video_change;
     double sync_max_audio_change;
-    double sync_audio_drop_size;
     int sync_max_factor;
     int hr_seek;
     float hr_seek_demuxer_offset;

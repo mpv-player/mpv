@@ -69,6 +69,9 @@ Interface changes
       "inf" instead of boolean true (also affects loop option)
     - remove some --vo-direct3d-... options (it got dumbed down; use --vo=gpu)
     - remove video-params/plane-depth property (was too vaguely defined)
+    - remove --video-sync-adrop-size option (implementation was changed, no
+      replacement for what this option did)
+    - undeprecate --video-sync=display-adrop
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

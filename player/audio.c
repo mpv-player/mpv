@@ -200,7 +200,6 @@ void reset_audio_state(struct MPContext *mpctx)
     }
     mpctx->audio_status = mpctx->ao_chain ? STATUS_SYNCING : STATUS_EOF;
     mpctx->delay = 0;
-    mpctx->audio_drop_throttle = 0;
     mpctx->audio_stat_start = 0;
 }
 
@@ -854,7 +853,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     int ao_format;
     struct mp_chmap ao_channels;
     ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels);
-    double play_samplerate = ao_rate / mpctx->audio_speed;
     int align = af_format_sample_alignment(ao_format);
 
     // If audio is infinitely fast, somehow try keeping approximate A/V sync.
@@ -984,9 +982,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     int played = write_to_ao(mpctx, planes, samples, playflags);
     assert(played >= 0 && played <= samples);
     mp_audio_buffer_skip(ao_c->ao_buffer, played);
-
-    mpctx->audio_drop_throttle =
-        MPMAX(0, mpctx->audio_drop_throttle - played / play_samplerate);
 
     dump_audio_stats(mpctx);
 
