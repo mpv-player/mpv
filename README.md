@@ -49,10 +49,6 @@ Releases can be found on the [release list][releases].
   output methods can help (such as `--vo=xv` on Linux), but this use is not
   recommended or supported.
 
-Note: "Direct" Windows support is deprecated, pending complete GL/Vulkan support
-      by Microsoft's WSL 2. This will enable running Linux binaries under win32,
-      and, owing to Microsoft's competence, it will be *faster* than native.
-
 ## Downloads
 
 
