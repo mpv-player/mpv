@@ -24,6 +24,8 @@ matrix:
       osx_image: xcode10.1
     - <<: *macOld
       osx_image: xcode9.2
+    - os: freebsd
+      compiler: clang
     - os: linux
       compiler: gcc
       env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh
@@ -62,6 +64,40 @@ before_install:
   - if [ "$TRAVIS_COMPILER" = "gcc" ]; then export CXX="g++"; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker pull $CONTAINER; fi
   - |
+        if [ "$TRAVIS_OS_NAME" = "freebsd" ]; then
+            # Requested in ci/build-freebsd.sh
+            sudo pkg install -y \
+                evdev-proto \
+                ffmpeg \
+                libplacebo \
+                libxkbcommon \
+                luajit \
+                openal-soft \
+                pkgconf \
+                python3 \
+                sdl2 \
+                vulkan-headers \
+                wayland-protocols \
+                $NULL
+            # Optionally auto-enabled
+            sudo pkg install -y \
+                alsa-lib \
+                jackit \
+                libXv \
+                libarchive \
+                libbluray \
+                libcaca \
+                libcdio-paranoia \
+                libdvdnav \
+                mujs \
+                pulseaudio \
+                rubberband \
+                sekrit-twc-zimg \
+                uchardet \
+                v4l_compat \
+                $NULL
+        fi
+  - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
             if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
                 brew update
@@ -95,6 +131,7 @@ script:
   - ./bootstrap.py
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./ci/build-macos.sh; fi
+  - if [ "$TRAVIS_OS_NAME" = "freebsd" ]; then ./ci/build-freebsd.sh; fi
 after_failure: cat ./build/config.log
 after_script: TOOLS/travis-rebuild-website
 
