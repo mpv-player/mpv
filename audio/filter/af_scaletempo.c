@@ -538,7 +538,8 @@ static void reset(struct mp_filter *f)
     s->bytes_queued = 0;
     s->bytes_to_slide = 0;
     s->frames_stride_error = 0;
-    memset(s->buf_overlap, 0, s->bytes_overlap);
+    if (s->buf_overlap && s->bytes_overlap)
+        memset(s->buf_overlap, 0, s->bytes_overlap);
     TA_FREEP(&s->in);
 }
 
