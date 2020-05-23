@@ -6091,8 +6091,10 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "load-script", cmd_load_script, {{"filename", OPT_STRING(v.s)}} },
 
-    { "dump-cache", cmd_dump_cache, { {"start", OPT_TIME(v.d), .min = MP_NOPTS_VALUE},
-                                      {"end", OPT_TIME(v.d), .min = MP_NOPTS_VALUE},
+    { "dump-cache", cmd_dump_cache, { {"start", OPT_TIME(v.d),
+                                        .flags = M_OPT_ALLOW_NO},
+                                      {"end", OPT_TIME(v.d),
+                                        .flags = M_OPT_ALLOW_NO},
                                       {"filename", OPT_STRING(v.s)} },
         .exec_async = true,
         .can_abort = true,
