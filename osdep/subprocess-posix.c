@@ -150,13 +150,8 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     bool killed_by_us = false;
     int cancel_fd = -1;
     char *path = getenv("PATH");
-    char path_storage[PATH_MAX];
-    if (!path) {
-        path = path_storage;
-        size_t r = confstr(_CS_PATH, path, sizeof(path_storage));
-        if (r == 0 || r >= sizeof(path_storage))
-            path[0] = '\0'; // failure, who cares
-    }
+    if (!path)
+        path = ""; // failure, who cares
 
     *res = (struct mp_subprocess_result){0};
 
