@@ -37,8 +37,8 @@ struct ao {
     bool untimed;               // don't assume realtime playback
     int device_buffer;          // device buffer in samples (guessed by
                                 // common init code if not set by driver)
-    const struct ao_driver *api; // entrypoints to the wrapper (push.c/pull.c)
     const struct ao_driver *driver;
+    bool driver_initialized;
     void *priv;
     struct mpv_global *global;
     struct encode_lavc_context *encode_lavc_ctx;
@@ -75,12 +75,12 @@ struct ao {
 
     int buffer;
     double def_buffer;
+    struct buffer_state *buffer_state;
     void *api_priv;
 };
 
-extern const struct ao_driver ao_api_push;
-extern const struct ao_driver ao_api_pull;
-
+void init_buffer_pre(struct ao *ao);
+bool init_buffer_post(struct ao *ao);
 
 /* Note:
  *

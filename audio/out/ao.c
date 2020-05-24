@@ -200,12 +200,9 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
                af_fmt_to_str(ao->format));
 
     ao->device = talloc_strdup(ao, dev);
-
-    ao->api = ao->driver->play ? &ao_api_push : &ao_api_pull;
-    ao->api_priv = talloc_zero_size(ao, ao->api->priv_size);
-    assert(!ao->api->priv_defaults && !ao->api->options);
-
     ao->stream_silence = flags & AO_INIT_STREAM_SILENCE;
+
+    init_buffer_pre(ao);
 
     ao->period_size = 1;
 
@@ -216,13 +213,14 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
             char redirect[80], rdevice[80];
             snprintf(redirect, sizeof(redirect), "%s", ao->redirect);
             snprintf(rdevice, sizeof(rdevice), "%s", ao->device ? ao->device : "");
-            talloc_free(ao);
+            ao_uninit(ao);
             return ao_init(probing, global, wakeup_cb, wakeup_ctx,
                            encode_lavc_ctx, flags, samplerate, format, channels,
                            rdevice, redirect);
         }
         goto fail;
     }
+    ao->driver_initialized = true;
 
     if (ao->period_size < 1) {
         MP_ERR(ao, "Invalid period size set.\n");
@@ -249,12 +247,12 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
     ao->buffer = (ao->buffer + align - 1) / align * align;
     MP_VERBOSE(ao, "using soft-buffer of %d samples.\n", ao->buffer);
 
-    if (ao->api->init(ao) < 0)
+    if (!init_buffer_post(ao))
         goto fail;
     return ao;
 
 fail:
-    talloc_free(ao);
+    ao_uninit(ao);
     return NULL;
 }
 
@@ -346,86 +344,6 @@ struct ao *ao_init_best(struct mpv_global *global,
 
     talloc_free(tmp);
     return ao;
-}
-
-// Uninitialize and destroy the AO. Remaining audio must be dropped.
-void ao_uninit(struct ao *ao)
-{
-    if (ao)
-        ao->api->uninit(ao);
-    talloc_free(ao);
-}
-
-// Queue the given audio data. Start playback if it hasn't started yet. Return
-// the number of samples that was accepted (the core will try to queue the rest
-// again later). Should never block.
-//  data: start pointer for each plane. If the audio data is packed, only
-//        data[0] is valid, otherwise there is a plane for each channel.
-//  samples: size of the audio data (see ao->sstride)
-//  flags: currently AOPLAY_FINAL_CHUNK can be set
-int ao_play(struct ao *ao, void **data, int samples, int flags)
-{
-    return ao->api->play(ao, data, samples, flags);
-}
-
-int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
-{
-    return ao->api->control ? ao->api->control(ao, cmd, arg) : CONTROL_UNKNOWN;
-}
-
-// Return size of the buffered data in seconds. Can include the device latency.
-// Basically, this returns how much data there is still to play, and how long
-// it takes until the last sample in the buffer reaches the speakers. This is
-// used for audio/video synchronization, so it's very important to implement
-// this correctly.
-double ao_get_delay(struct ao *ao)
-{
-    return ao->api->get_delay(ao);
-}
-
-// Return free size of the internal audio buffer. This controls how much audio
-// the core should decode and try to queue with ao_play().
-int ao_get_space(struct ao *ao)
-{
-    return ao->api->get_space(ao);
-}
-
-// Stop playback and empty buffers. Essentially go back to the state after
-// ao->init().
-void ao_reset(struct ao *ao)
-{
-    if (ao->api->reset)
-        ao->api->reset(ao);
-    atomic_fetch_and(&ao->events_, ~(unsigned int)AO_EVENT_UNDERRUN);
-}
-
-// Pause playback. Keep the current buffer. ao_get_delay() must return the
-// same value as before pausing.
-void ao_pause(struct ao *ao)
-{
-    if (ao->api->pause)
-        ao->api->pause(ao);
-}
-
-// Resume playback. Play the remaining buffer. If the driver doesn't support
-// pausing, it has to work around this and e.g. use ao_play_silence() to fill
-// the lost audio.
-void ao_resume(struct ao *ao)
-{
-    if (ao->api->resume)
-        ao->api->resume(ao);
-}
-
-// Block until the current audio buffer has played completely.
-void ao_drain(struct ao *ao)
-{
-    if (ao->api->drain)
-        ao->api->drain(ao);
-}
-
-bool ao_eof_reached(struct ao *ao)
-{
-    return ao->api->get_eof ? ao->api->get_eof(ao) : true;
 }
 
 // Query the AO_EVENT_*s as requested by the events parameter, and return them.
