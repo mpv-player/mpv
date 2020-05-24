@@ -100,6 +100,19 @@ void mp_aframe_unref_data(struct mp_aframe *frame)
     talloc_free(tmp);
 }
 
+// Allocate this much data. Returns false for failure (data already allocated,
+// invalid sample count or format, allocation failures).
+// Normally you're supposed to use a frame pool and mp_aframe_pool_allocate().
+bool mp_aframe_alloc_data(struct mp_aframe *frame, int samples)
+{
+    if (mp_aframe_is_allocated(frame))
+        return false;
+    struct mp_aframe_pool *p = mp_aframe_pool_create(NULL);
+    int r = mp_aframe_pool_allocate(p, frame, samples);
+    talloc_free(p);
+    return r >= 0;
+}
+
 // Return a new reference to the data in av_frame. av_frame itself is not
 // touched. Returns NULL if not representable, or if input is NULL.
 // Does not copy the timestamps.

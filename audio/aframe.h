@@ -20,6 +20,7 @@ struct AVFrame *mp_aframe_to_avframe_and_unref(struct mp_aframe *frame);
 struct AVFrame *mp_aframe_get_raw_avframe(struct mp_aframe *frame);
 
 bool mp_aframe_is_allocated(struct mp_aframe *frame);
+bool mp_aframe_alloc_data(struct mp_aframe *frame, int samples);
 
 void mp_aframe_config_copy(struct mp_aframe *dst, struct mp_aframe *src);
 bool mp_aframe_config_equals(struct mp_aframe *a, struct mp_aframe *b);
