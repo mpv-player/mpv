@@ -268,10 +268,6 @@ iconv support use --disable-iconv.",
         'func': check_statement(['sys/consio.h', 'sys/ioctl.h'],
                                 'int m; ioctl(0, VT_GETMODE, &m)'),
     }, {
-        'name': 'gbm.h',
-        'desc': 'gbm.h',
-        'func': check_cc(header_name=['stdio.h', 'gbm.h']),
-    }, {
         'name': 'glibc-thread-name',
         'desc': 'GLIBC API for setting thread name',
         'func': check_statement('pthread.h',
@@ -482,7 +478,6 @@ video_output_features = [
     }, {
         'name': '--gbm',
         'desc': 'GBM',
-        'deps': 'gbm.h',
         'func': check_pkg_config('gbm'),
     } , {
         'name': '--wayland-scanner',
@@ -655,8 +650,7 @@ video_output_features = [
     }, {
         'name': '--jpeg',
         'desc': 'JPEG support',
-        'func': check_cc(header_name=['stdio.h', 'jpeglib.h'],
-                         lib='jpeg', use='libm'),
+        'func': check_pkg_config('libjpeg'),
     }, {
         'name': '--direct3d',
         'desc': 'Direct3D support',
@@ -667,14 +661,13 @@ video_output_features = [
         'desc': 'libshaderc SPIR-V compiler (shared library)',
         'deps': '!static-build',
         'groups': ['shaderc'],
-        'func': check_cc(header_name='shaderc/shaderc.h', lib='shaderc_shared'),
+        'func': check_pkg_config('shaderc'),
     }, {
         'name': 'shaderc-static',
         'desc': 'libshaderc SPIR-V compiler (static library)',
         'deps': '!shaderc-shared',
         'groups': ['shaderc'],
-        'func': check_cc(header_name='shaderc/shaderc.h',
-                         lib=['shaderc_combined', 'stdc++']),
+        'func': check_pkg_config('shaderc_combined'),
     }, {
         'name': '--shaderc',
         'desc': 'libshaderc SPIR-V compiler',
