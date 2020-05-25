@@ -1,10 +1,6 @@
 #!/bin/sh
 set -e
 
-export CFLAGS="$CFLAGS -isystem/usr/local/include"
-export CXXFLAGS="$CXXFLAGS -isystem/usr/local/include"
-export LDFLAGS="$LDFLAGS -L/usr/local/lib"
-
 if [ ! -e "./waf" ] ; then
     python3 ./bootstrap.py
 fi
