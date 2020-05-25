@@ -264,6 +264,7 @@ typedef struct MPContext {
     char *term_osd_status;
     char *term_osd_subs;
     char *term_osd_contents;
+    char *term_osd_title;
     char *last_window_title;
     struct voctrl_playback_state vo_playback_state;
 

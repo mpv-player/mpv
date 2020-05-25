@@ -96,6 +96,21 @@ static void term_osd_update(struct MPContext *mpctx)
     }
 }
 
+static void term_osd_update_title(struct MPContext *mpctx)
+{
+    if (!mpctx->opts->use_terminal)
+        return;
+
+    char *s = mp_property_expand_escaped_string(mpctx, mpctx->opts->term_title);
+    if (bstr_equals(bstr0(s), bstr0(mpctx->term_osd_title))) {
+        talloc_free(s);
+        return;
+    }
+
+    mp_msg_set_term_title(mpctx->statusline, s);
+    mpctx->term_osd_title = talloc_steal(mpctx, s);
+}
+
 void term_osd_set_subs(struct MPContext *mpctx, const char *text)
 {
     if (mpctx->video_out || !text || !mpctx->opts->subs_rend->sub_visibility)
@@ -260,6 +275,7 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
+    term_osd_update_title(mpctx);
     update_window_title(mpctx, false);
     update_vo_playback_state(mpctx);
 

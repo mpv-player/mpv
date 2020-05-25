@@ -14,6 +14,7 @@ bool mp_msg_has_log_file(struct mpv_global *global);
 void mp_msg_set_early_logging(struct mpv_global *global, bool enable);
 
 void mp_msg_flush_status_line(struct mp_log *log);
+void mp_msg_set_term_title(struct mp_log *log, const char *title);
 
 struct mp_log_buffer_entry {
     char *prefix;

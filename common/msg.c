@@ -230,6 +230,16 @@ void mp_msg_flush_status_line(struct mp_log *log)
     }
 }
 
+void mp_msg_set_term_title(struct mp_log *log, const char *title)
+{
+    if (log->root && title) {
+        // Lock because printf to terminal is not necessarily atomic.
+        pthread_mutex_lock(&log->root->lock);
+        fprintf(stderr, "\e]0;%s\007", title);
+        pthread_mutex_unlock(&log->root->lock);
+    }
+}
+
 bool mp_msg_has_status_line(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;

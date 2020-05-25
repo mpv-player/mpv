@@ -702,6 +702,7 @@ static const m_option_t mp_opts[] = {
 
     {"term-osd-bar", OPT_FLAG(term_osd_bar), .flags = UPDATE_OSD},
     {"term-osd-bar-chars", OPT_STRING(term_osd_bar_chars), .flags = UPDATE_OSD},
+    {"term-title", OPT_STRING(term_title), .flags = UPDATE_OSD},
 
     {"term-playing-msg", OPT_STRING(playing_msg)},
     {"osd-playing-msg", OPT_STRING(osd_playing_msg)},

@@ -4429,6 +4429,15 @@ Terminal
     Print out a custom string during playback instead of the standard status
     line. Expands properties. See `Property Expansion`_.
 
+``--term-title=<string>``
+    Set the terminal title. Currently, this simply concatenates the escape
+    sequence setting the window title with the provided (property expanded)
+    string. This will mess up if the expanded string contain bytes that end the
+    escape sequence, or if the terminal does not understand the sequence. The
+    latter probably includes the regrettable win32.
+
+    Expands properties. See `Property Expansion`_.
+
 ``--msg-module``
     Prepend module name to each console message.
 
