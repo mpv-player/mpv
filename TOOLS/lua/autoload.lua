@@ -13,6 +13,7 @@ directory must be in the mpv configuration directory, typically ~/.config/mpv/).
 Example configuration would be:
 
 disabled=no
+silent=yes
 images=no
 videos=yes
 audio=yes
@@ -27,6 +28,7 @@ local utils = require 'mp.utils'
 
 o = {
     disabled = false,
+    silent = false,
     images = true,
     videos = true,
     audio = true
@@ -203,11 +205,15 @@ function find_and_add_entries()
 
             if direction == -1 then
                 if pl_current == 1 then -- never add additional entries in the middle
-                    msg.info("Prepending " .. file)
+                    if not o.silent then
+                        msg.info("Prepending " .. file)
+                    end
                     table.insert(append[-1], 1, filepath)
                 end
             else
-                msg.info("Adding " .. file)
+                if not o.silent then
+                    msg.info("Adding " .. file)
+                end
                 table.insert(append[1], filepath)
             end
         end
