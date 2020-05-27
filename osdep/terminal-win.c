@@ -204,121 +204,153 @@ bool terminal_in_background(void)
     return false;
 }
 
-static void write_console_text(HANDLE wstream, char *buf)
-{
-    wchar_t *out = mp_from_utf8(NULL, buf);
-    size_t out_len = wcslen(out);
-    WriteConsoleW(wstream, out, out_len, NULL, NULL);
-    talloc_free(out);
-}
-
-// Mutates the input argument (buf), because we're evil.
 void mp_write_console_ansi(HANDLE wstream, char *buf)
 {
-    while (*buf) {
-        if (is_native_out_vt(wstream)) {
-            write_console_text(wstream, buf);
-            break;
-        }
-        char *next = strchr(buf, '\033');
-        if (!next) {
-            write_console_text(wstream, buf);
-            break;
-        }
-        next[0] = '\0'; // mutate input for fun and profit
-        write_console_text(wstream, buf);
-        if (next[1] != '[') {
-            write_console_text(wstream, "\033");
-            buf = next;
-            continue;
-        }
-        next += 2;
-        // ANSI codes generally follow this syntax:
-        //    "\033[" [ <i> (';' <i> )* ] <c>
-        // where <i> are integers, and <c> a single char command code.
-        // Also see: http://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
-        int params[16]; // 'm' might be unlimited; ignore that
-        int num_params = 0;
-        while (num_params < MP_ARRAY_SIZE(params)) {
-            char *end = next;
-            long p = strtol(next, &end, 10);
-            if (end == next)
-                break;
-            next = end;
-            params[num_params++] = p;
-            if (next[0] != ';' || !next[0])
-                break;
-            next += 1;
-        }
-        char code = next[0];
-        if (code)
-            next += 1;
-        CONSOLE_SCREEN_BUFFER_INFO info;
-        GetConsoleScreenBufferInfo(wstream, &info);
-        switch (code) {
-        case 'K': {     // erase to end of line
-            COORD at = info.dwCursorPosition;
-            int len = info.dwSize.X - at.X;
-            FillConsoleOutputCharacterW(wstream, ' ', len, at, &(DWORD){0});
-            SetConsoleCursorPosition(wstream, at);
-            break;
-        }
-        case 'A': {     // cursor up
-            info.dwCursorPosition.Y -= 1;
-            SetConsoleCursorPosition(wstream, info.dwCursorPosition);
-            break;
-        }
-        case 'm': {     // "SGR"
-            short attr = info.wAttributes;
-            if (num_params == 0)  // reset
-                params[num_params++] = 0;
+    wchar_t *wbuf = mp_from_utf8(NULL, buf);
+    wchar_t *pos = wbuf;
 
-            // we don't emulate italic, reverse/underline don't always work
-            for (int n = 0; n < num_params; n++) {
-                int p = params[n];
-                if (p == 0) {
-                    attr = stdoutAttrs;
-                } else if (p == 1) {
-                    attr |= FOREGROUND_INTENSITY;
-                } else if (p == 22) {
-                    attr &= ~FOREGROUND_INTENSITY;
-                } else if (p == 4) {
-                    attr |= COMMON_LVB_UNDERSCORE;
-                } else if (p == 24) {
-                    attr &= ~COMMON_LVB_UNDERSCORE;
-                } else if (p == 7) {
-                    attr |= COMMON_LVB_REVERSE_VIDEO;
-                } else if (p == 27) {
-                    attr &= ~COMMON_LVB_REVERSE_VIDEO;
-                } else if (p >= 30 && p <= 37) {
-                    attr &= ~FOREGROUND_ALL;
-                    attr |= ansi2win32[p - 30];
-                } else if (p == 39) {
-                    attr &= ~FOREGROUND_ALL;
-                    attr |= stdoutAttrs & FOREGROUND_ALL;
-                } else if (p >= 40 && p <= 47) {
-                    attr &= ~BACKGROUND_ALL;
-                    attr |= ansi2win32bg[p - 40];
-                } else if (p == 49) {
-                    attr &= ~BACKGROUND_ALL;
-                    attr |= stdoutAttrs & BACKGROUND_ALL;
-                } else if (p == 38 || p == 48) {  // ignore and skip sub-values
-                    // 256 colors: <38/48>;5;N  true colors: <38/48>;2;R;G;B
-                    if (n+1 < num_params) {
-                        n += params[n+1] == 5 ? 2
-                           : params[n+1] == 2 ? 4
-                           : num_params;  /* unrecognized -> the rest */
+    while (*pos) {
+        if (is_native_out_vt(wstream)) {
+            WriteConsoleW(wstream, pos, wcslen(pos), NULL, NULL);
+            break;
+        }
+        wchar_t *next = wcschr(pos, '\033');
+        if (!next) {
+            WriteConsoleW(wstream, pos, wcslen(pos), NULL, NULL);
+            break;
+        }
+        next[0] = '\0';
+        WriteConsoleW(wstream, pos, wcslen(pos), NULL, NULL);
+        if (next[1] == '[') {
+            // CSI - Control Sequence Introducer
+            next += 2;
+
+            // CSI codes generally follow this syntax:
+            //    "\033[" [ <i> (';' <i> )* ] <c>
+            // where <i> are integers, and <c> a single char command code.
+            // Also see: http://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
+            int params[16]; // 'm' might be unlimited; ignore that
+            int num_params = 0;
+            while (num_params < MP_ARRAY_SIZE(params)) {
+                wchar_t *end = next;
+                long p = wcstol(next, &end, 10);
+                if (end == next)
+                    break;
+                next = end;
+                params[num_params++] = p;
+                if (next[0] != ';' || !next[0])
+                    break;
+                next += 1;
+            }
+            wchar_t code = next[0];
+            if (code)
+                next += 1;
+            CONSOLE_SCREEN_BUFFER_INFO info;
+            GetConsoleScreenBufferInfo(wstream, &info);
+            switch (code) {
+            case 'K': {     // erase to end of line
+                COORD at = info.dwCursorPosition;
+                int len = info.dwSize.X - at.X;
+                FillConsoleOutputCharacterW(wstream, ' ', len, at, &(DWORD){0});
+                SetConsoleCursorPosition(wstream, at);
+                break;
+            }
+            case 'A': {     // cursor up
+                info.dwCursorPosition.Y -= 1;
+                SetConsoleCursorPosition(wstream, info.dwCursorPosition);
+                break;
+            }
+            case 'm': {     // "SGR"
+                short attr = info.wAttributes;
+                if (num_params == 0)  // reset
+                    params[num_params++] = 0;
+
+                // we don't emulate italic, reverse/underline don't always work
+                for (int n = 0; n < num_params; n++) {
+                    int p = params[n];
+                    if (p == 0) {
+                        attr = stdoutAttrs;
+                    } else if (p == 1) {
+                        attr |= FOREGROUND_INTENSITY;
+                    } else if (p == 22) {
+                        attr &= ~FOREGROUND_INTENSITY;
+                    } else if (p == 4) {
+                        attr |= COMMON_LVB_UNDERSCORE;
+                    } else if (p == 24) {
+                        attr &= ~COMMON_LVB_UNDERSCORE;
+                    } else if (p == 7) {
+                        attr |= COMMON_LVB_REVERSE_VIDEO;
+                    } else if (p == 27) {
+                        attr &= ~COMMON_LVB_REVERSE_VIDEO;
+                    } else if (p >= 30 && p <= 37) {
+                        attr &= ~FOREGROUND_ALL;
+                        attr |= ansi2win32[p - 30];
+                    } else if (p == 39) {
+                        attr &= ~FOREGROUND_ALL;
+                        attr |= stdoutAttrs & FOREGROUND_ALL;
+                    } else if (p >= 40 && p <= 47) {
+                        attr &= ~BACKGROUND_ALL;
+                        attr |= ansi2win32bg[p - 40];
+                    } else if (p == 49) {
+                        attr &= ~BACKGROUND_ALL;
+                        attr |= stdoutAttrs & BACKGROUND_ALL;
+                    } else if (p == 38 || p == 48) {  // ignore and skip sub-values
+                        // 256 colors: <38/48>;5;N  true colors: <38/48>;2;R;G;B
+                        if (n+1 < num_params) {
+                            n += params[n+1] == 5 ? 2
+                               : params[n+1] == 2 ? 4
+                               : num_params;  /* unrecognized -> the rest */
+                        }
                     }
                 }
+
+                if (attr != info.wAttributes)
+                    SetConsoleTextAttribute(wstream, attr);
+                break;
+            }
+            }
+        } else if (next[1] == ']') {
+            // OSC - Operating System Commands
+            next += 2;
+
+            // OSC sequences generally follow this syntax:
+            //    "\033]" <command> ST
+            // Where <command> is a string command
+            wchar_t *cmd = next;
+            while (next[0]) {
+                // BEL can be used instead of ST in xterm
+                if (next[0] == '\007' || next[0] == 0x9c) {
+                    next[0] = '\0';
+                    next += 1;
+                    break;
+                }
+                if (next[0] == '\033' && next[1] == '\\') {
+                    next[0] = '\0';
+                    next += 2;
+                    break;
+                }
+                next += 1;
             }
 
-            if (attr != info.wAttributes)
-                SetConsoleTextAttribute(wstream, attr);
-            break;
+            // Handle xterm-style OSC commands
+            if (cmd[0] && cmd[1] == ';') {
+                wchar_t code = cmd[0];
+                wchar_t *param = cmd + 2;
+
+                switch (code) {
+                case '0': // Change Icon Name and Window Title
+                case '2': // Change Window Title
+                    SetConsoleTitleW(param);
+                    break;
+                }
+            }
+        } else {
+            WriteConsoleW(wstream, L"\033", 1, NULL, NULL);
         }
-        }
-        buf = next;
+        pos = next;
     }
+
+    talloc_free(wbuf);
 }
 
 static bool is_a_console(HANDLE h)
