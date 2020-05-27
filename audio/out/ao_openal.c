@@ -274,16 +274,6 @@ err_out:
     return -1;
 }
 
-static void drain(struct ao *ao)
-{
-    ALint state;
-    alGetSourcei(source, AL_SOURCE_STATE, &state);
-    while (state == AL_PLAYING) {
-        mp_sleep_us(10000);
-        alGetSourcei(source, AL_SOURCE_STATE, &state);
-    }
-}
-
 static void unqueue_buffers(struct ao *ao)
 {
     struct priv *q = ao->priv;
@@ -420,7 +410,6 @@ const struct ao_driver audio_out_openal = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
-    .drain     = drain,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .num_buffers = 4,

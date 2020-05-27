@@ -107,7 +107,6 @@ bool init_buffer_post(struct ao *ao);
  *          resume
  *     Optional:
  *          control
- *          drain
  *          wait
  *          wakeup
  *  b) ->play must be NULL. ->resume must be provided, and should make the
@@ -162,8 +161,6 @@ struct ao_driver {
     int (*play)(struct ao *ao, void **data, int samples, int flags);
     // push based: see ao_get_delay()
     double (*get_delay)(struct ao *ao);
-    // push based: block until all queued audio is played (optional)
-    void (*drain)(struct ao *ao);
     // Optional. Return true if audio has stopped in any way.
     bool (*get_eof)(struct ao *ao);
     // Wait until the audio buffer needs to be refilled. The lock is the

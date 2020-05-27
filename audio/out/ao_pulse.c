@@ -278,15 +278,6 @@ static bool select_chmap(struct ao *ao, pa_channel_map *dst)
            chmap_pa_from_mp(dst, &ao->channels);
 }
 
-static void drain(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-    if (priv->stream) {
-        pa_threaded_mainloop_lock(priv->mainloop);
-        waitop(priv, pa_stream_drain(priv->stream, success_cb, ao));
-    }
-}
-
 static void uninit(struct ao *ao)
 {
     struct priv *priv = ao->priv;
@@ -826,7 +817,6 @@ const struct ao_driver audio_out_pulse = {
     .get_delay = get_delay,
     .pause     = pause,
     .resume    = resume,
-    .drain     = drain,
     .wait      = wait_audio,
     .wakeup    = wakeup,
     .hotplug_init = hotplug_init,

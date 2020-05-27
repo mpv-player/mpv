@@ -229,7 +229,6 @@ const struct ao_driver audio_out_null = {
     .get_delay = get_delay,
     .pause     = pause,
     .resume    = resume,
-    .drain     = wait_drain,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .bufferlen = 0.2,

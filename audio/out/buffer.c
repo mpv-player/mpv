@@ -403,19 +403,21 @@ void ao_drain(struct ao *ao)
     p->final_chunk = true;
     wakeup_playthread(ao);
     double left = 0;
-    if (p->playing && !p->paused)
+    if (p->playing && !p->paused && !ao->driver->encode)
         left = mp_ring_buffered(p->buffers[0]) / (double)ao->bps * 1e6;
     pthread_mutex_unlock(&p->lock);
 
-    // Wait for lower bound.
-    mp_sleep_us(left);
-    // And then poll for actual end. (Unfortunately, this code considers
-    // audio APIs which do not want you to use mutexes in the audio
-    // callback, and an extra semaphore would require slightly more effort.)
-    // Limit to arbitrary ~250ms max. waiting for robustness.
-    int64_t max = mp_time_us() + 250000;
-    while (mp_time_us() < max && !ao_eof_reached(ao))
-        mp_sleep_us(1);
+    if (left > 0) {
+        // Wait for lower bound.
+        mp_sleep_us(left);
+        // And then poll for actual end. (Unfortunately, this code considers
+        // audio APIs which do not want you to use mutexes in the audio
+        // callback, and an extra semaphore would require slightly more effort.)
+        // Limit to arbitrary ~250ms max. waiting for robustness.
+        int64_t max = mp_time_us() + 250000;
+        while (mp_time_us() < max && !ao_eof_reached(ao))
+            mp_sleep_us(1);
+    }
 
     ao_reset(ao);
 }

@@ -944,12 +944,6 @@ static int init(struct ao *ao)
     return r;
 }
 
-static void drain(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-    snd_pcm_drain(p->alsa);
-}
-
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -1260,7 +1254,6 @@ const struct ao_driver audio_out_alsa = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
-    .drain     = drain,
     .wait      = audio_wait,
     .wakeup    = ao_wakeup_poll,
     .list_devs = list_devs,
