@@ -550,7 +550,6 @@ static void ao_play_data(struct ao *ao)
         samples = samples / ao->period_size * ao->period_size;
     }
     MP_STATS(ao, "start ao fill");
-    ao_post_process_data(ao, planes, samples);
     int r = 0;
     if (samples)
         r = ao->driver->play(ao, planes, samples, flags);
