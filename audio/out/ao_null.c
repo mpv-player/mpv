@@ -122,14 +122,6 @@ static void uninit(struct ao *ao)
 {
 }
 
-static void wait_drain(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-    drain(ao);
-    if (!priv->paused)
-        mp_sleep_us(1000000.0 * priv->buffered / ao->samplerate / priv->speed);
-}
-
 // stop playing and empty buffers (for seeking/pause)
 static void reset(struct ao *ao)
 {
