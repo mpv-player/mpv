@@ -76,6 +76,9 @@ local function read_options(options, identifier, on_update)
         msg.verbose("Opened config file " .. conffilename .. ".")
         local linecounter = 1
         for line in f:lines() do
+            if line:sub(#line) == "\r" then
+                line = line:sub(1, #line - 1)
+            end
             if string.find(line, "#") == 1 then
 
             else
