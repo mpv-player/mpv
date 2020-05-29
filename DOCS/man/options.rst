@@ -6058,6 +6058,9 @@ The following video options are currently all specific to ``--vo=gpu`` and
         color/brightness accuracy. This is roughly equivalent to
         ``--tone-mapping=reinhard --tone-mapping-param=0.24``. If possible,
         you should also enable ``--hdr-compute-peak`` for the best results.
+    bt.2390
+        Perceptual tone mapping curve (EETF) specified in ITU-R Report BT.2390.
+        This is the recommended curve to use for typical HDR-mastered content.
         (Default)
     gamma
         Fits a logarithmic transfer between the tone curves.

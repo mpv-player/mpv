@@ -649,6 +649,15 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     GLSL(})
 }
 
+static inline float pq_delinearize(float x)
+{
+    x *= MP_REF_WHITE / 10000.0;
+    x = powf(x, PQ_M1);
+    x = (PQ_C1 + PQ_C2 * x) / (1.0 + PQ_C3 * x);
+    x = pow(x, PQ_M2);
+    return x;
+}
+
 // Tone map from a known peak brightness to the range [0,1]. If ref_peak
 // is 0, we will use peak detection instead
 static void pass_tone_map(struct gl_shader_cache *sc,
@@ -672,12 +681,18 @@ static void pass_tone_map(struct gl_shader_cache *sc,
 
     GLSLF("vec3 sig = color.rgb;\n");
 
+    // This function always operates on an absolute scale, so ignore the
+    // dst_peak normalization for it
+    float dst_scale = dst_peak;
+    if (opts->curve == TONE_MAPPING_BT_2390)
+        dst_scale = 1.0;
+
     // Rescale the variables in order to bring it into a representation where
     // 1.0 represents the dst_peak. This is because all of the tone mapping
     // algorithms are defined in such a way that they map to the range [0.0, 1.0].
-    if (dst_peak > 1.0) {
-        GLSLF("sig *= 1.0/%f;\n", dst_peak);
-        GLSLF("sig_peak *= 1.0/%f;\n", dst_peak);
+    if (dst_scale > 1.0) {
+        GLSLF("sig *= 1.0/%f;\n", dst_scale);
+        GLSLF("sig_peak *= 1.0/%f;\n", dst_scale);
     }
 
     GLSL(float sig_orig = sig[sig_idx];)
@@ -744,6 +759,40 @@ static void pass_tone_map(struct gl_shader_cache *sc,
         break;
     }
 
+    case TONE_MAPPING_BT_2390:
+        // We first need to encode both sig and sig_peak into PQ space
+        GLSLF("vec4 sig_pq = vec4(sig.rgb, sig_peak);                           \n"
+              "sig_pq *= vec4(1.0/%f);                                          \n"
+              "sig_pq = pow(sig_pq, vec4(%f));                                  \n"
+              "sig_pq = (vec4(%f) + vec4(%f) * sig_pq)                          \n"
+              "          / (vec4(1.0) + vec4(%f) * sig_pq);                     \n"
+              "sig_pq = pow(sig_pq, vec4(%f));                                  \n",
+              10000.0 / MP_REF_WHITE, PQ_M1, PQ_C1, PQ_C2, PQ_C3, PQ_M2);
+        // Encode both the signal and the target brightness to be relative to
+        // the source peak brightness, and figure out the target peak in this space
+        GLSLF("float scale = 1.0 / sig_pq.a;                                    \n"
+              "sig_pq.rgb *= vec3(scale);                                       \n"
+              "float maxLum = %f * scale;                                       \n",
+              pq_delinearize(dst_peak));
+        // Apply piece-wise hermite spline
+        GLSLF("float ks = 1.5 * maxLum - 0.5;                                   \n"
+              "vec3 tb = (sig_pq.rgb - vec3(ks)) / vec3(1.0 - ks);              \n"
+              "vec3 tb2 = tb * tb;                                              \n"
+              "vec3 tb3 = tb2 * tb;                                             \n"
+              "vec3 pb = (2.0 * tb3 - 3.0 * tb2 + vec3(1.0)) * vec3(ks) +       \n"
+              "          (tb3 - 2.0 * tb2 + tb) * vec3(1.0 - ks) +              \n"
+              "          (-2.0 * tb3 + 3.0 * tb2) * vec3(maxLum);               \n"
+              "sig = mix(pb, sig_pq.rgb, lessThan(sig_pq.rgb, vec3(ks)));       \n");
+        // Convert back from PQ space to linear light
+        GLSLF("sig *= vec3(sig_pq.a);                                           \n"
+              "sig = pow(sig, vec3(1.0/%f));                                    \n"
+              "sig = max(sig - vec3(%f), 0.0) /                                 \n"
+              "          (vec3(%f) - vec3(%f) * sig);                           \n"
+              "sig = pow(sig, vec3(1.0/%f));                                    \n"
+              "sig *= vec3(%f);                                                 \n",
+              PQ_M2, PQ_C1, PQ_C2, PQ_C3, PQ_M1, 10000.0 / MP_REF_WHITE);
+        break;
+
     default:
         abort();
     }
@@ -754,11 +803,11 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     // Mix between the per-channel tone mapped and the linear tone mapped
     // signal based on the desaturation strength
     if (opts->desat > 0) {
-        float base = 0.18 * dst_peak;
+        float base = 0.18 * dst_scale;
         GLSLF("float coeff = max(sig[sig_idx] - %f, 1e-6) / "
               "              max(sig[sig_idx], 1.0);\n", base);
         GLSLF("coeff = %f * pow(coeff, %f);\n", opts->desat, opts->desat_exp);
-        GLSLF("color.rgb = mix(sig_lin, %f * sig, coeff);\n", dst_peak);
+        GLSLF("color.rgb = mix(sig_lin, %f * sig, coeff);\n", dst_scale);
     } else {
         GLSL(color.rgb = sig_lin;)
     }
