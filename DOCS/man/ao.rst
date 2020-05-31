@@ -97,7 +97,7 @@ Available audio output drivers are:
     exclusive mode (bypasses the sound server).
 
 ``openal``
-    OpenAL audio output driver
+    OpenAL audio output driver. This is broken and does not work.
 
     ``--openal-num-buffers=<2-128>``
         Specify the number of audio buffers to use. Lower values are better for

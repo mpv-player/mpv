@@ -194,7 +194,7 @@ err_port_register:
     return -1;
 }
 
-static void resume(struct ao *ao)
+static void start(struct ao *ao)
 {
     struct priv *p = ao->priv;
     if (!p->activated) {
@@ -276,7 +276,7 @@ const struct ao_driver audio_out_jack = {
     .name        = "jack",
     .init      = init,
     .uninit    = uninit,
-    .resume    = resume,
+    .start     = start,
     .priv_size = sizeof(struct priv),
     .global_opts = &ao_jack_conf,
 };

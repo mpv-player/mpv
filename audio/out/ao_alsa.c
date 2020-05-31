@@ -91,12 +91,9 @@ static const struct m_sub_options ao_alsa_conf = {
 struct priv {
     snd_pcm_t *alsa;
     bool device_lost;
+    bool underrun;
     snd_pcm_format_t alsa_fmt;
     bool can_pause;
-    bool paused;
-    bool final_chunk_written;
-    snd_pcm_sframes_t prepause_frames;
-    double delay_before_pause;
     snd_pcm_uframes_t buffersize;
     snd_pcm_uframes_t outburst;
 
@@ -120,34 +117,6 @@ struct priv {
         if (err < 0) \
             MP_WARN(ao, "%s: %s\n", (message), snd_strerror(err)); \
     } while (0)
-
-// Common code for handling ENODEV, which happens if a device gets "lost", and
-// can't be used anymore. Returns true if alsa_err is not ENODEV.
-static bool check_device_present(struct ao *ao, int alsa_err)
-{
-    struct priv *p = ao->priv;
-    if (alsa_err != -ENODEV)
-        return true;
-    if (!p->device_lost) {
-        MP_WARN(ao, "Device lost, trying to recover...\n");
-        ao_request_reload(ao);
-        p->device_lost = true;
-    }
-    return false;
-}
-
-static void handle_underrun(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-
-    if (!p->final_chunk_written) {
-        ao_underrun_event(ao);
-
-        int err = snd_pcm_prepare(p->alsa);
-        CHECK_ALSA_ERROR("pcm prepare error");
-    alsa_error: ;
-    }
-}
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
@@ -865,9 +834,8 @@ static int init_device(struct ao *ao, int mode)
     err = snd_pcm_sw_params_get_boundary(alsa_swparams, &boundary);
     CHECK_ALSA_ERROR("Unable to get boundary");
 
-    /* start playing when one period has been written */
-    err = snd_pcm_sw_params_set_start_threshold
-            (p->alsa, alsa_swparams, p->outburst);
+    // Manual trigger; INT_MAX as suggested by ALSA doxygen (they call it MAXINT).
+    err = snd_pcm_sw_params_set_start_threshold(p->alsa, alsa_swparams, INT_MAX);
     CHECK_ALSA_ERROR("Unable to set start threshold");
 
     /* play silence when there is an underrun */
@@ -886,6 +854,9 @@ static int init_device(struct ao *ao, int mode)
     ao->period_size = p->outburst;
 
     p->convert.channels = ao->channels.num;
+
+    err = snd_pcm_prepare(p->alsa);
+    CHECK_ALSA_ERROR("pcm prepare error");
 
     return 0;
 
@@ -944,258 +915,184 @@ static int init(struct ao *ao)
     return r;
 }
 
-static int get_space(struct ao *ao)
+// Function for dealing with playback state. This attempts to recover the ALSA
+// state (bring it into SND_PCM_STATE_{PREPARED,RUNNING,PAUSED}). If state!=NULL,
+// fill it after recovery.
+// Returns true if PCM is in one the expected states.
+static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
 {
     struct priv *p = ao->priv;
+    int err;
 
-    // in case of pausing or the device still being configured,
-    // just return our buffer size.
-    if (p->paused || snd_pcm_state(p->alsa) == SND_PCM_STATE_SETUP)
-        return p->buffersize;
+    snd_pcm_status_t *st;
+    snd_pcm_status_alloca(&st);
 
-    snd_pcm_sframes_t space = snd_pcm_avail(p->alsa);
-    if (space < 0 && space != -EPIPE) {
-        MP_ERR(ao, "Error received from snd_pcm_avail "
-                   "(%ld, %s with ALSA state %s)!\n",
-               space, snd_strerror(space),
-               snd_pcm_state_name(snd_pcm_state(p->alsa)));
+    bool state_ok = false;
 
-        // request a reload of the AO if device is not present,
-        // then error out.
-        check_device_present(ao, space);
-        goto alsa_error;
+    // Give it a number of chances to recover. This tries to deal with the fact
+    // that the API is asynchronous, and to account for some past cargo-cult
+    // (where things were retried in a loop).
+    for (int n = 0; n < 10; n++) {
+        err = snd_pcm_status(p->alsa, st);
+        CHECK_ALSA_ERROR("snd_pcm_status");
+
+        snd_pcm_state_t pcmst = snd_pcm_status_get_state(st);
+        if (pcmst == SND_PCM_STATE_PREPARED ||
+            pcmst == SND_PCM_STATE_RUNNING ||
+            pcmst == SND_PCM_STATE_PAUSED)
+        {
+            state_ok = true;
+            break;
+        }
+
+        MP_VERBOSE(ao, "attempt %d to recover from state '%s'...\n",
+                   n + 1, snd_pcm_state_name(pcmst));
+
+        switch (pcmst) {
+        // Underrun; note and recover. We never use draining,
+        case SND_PCM_STATE_XRUN:
+        case SND_PCM_STATE_DRAINING:
+            p->underrun = true;
+            err = snd_pcm_prepare(p->alsa);
+            CHECK_ALSA_ERROR("pcm prepare error");
+            continue;
+        // Hardware suspend.
+        case SND_PCM_STATE_SUSPENDED:
+            MP_INFO(ao, "PCM in suspend mode, trying to resume.\n");
+            err = snd_pcm_resume(p->alsa);
+            if (err == -EAGAIN) {
+                // Cargo-cult from decades ago, with a cargo cult timeout.
+                MP_INFO(ao, "PCM resume EAGAIN - retrying.\n");
+                sleep(1);
+                continue;
+            }
+            if (err == -ENOSYS) {
+                // As suggested by ALSA doxygen.
+                MP_VERBOSE(ao, "ENOSYS, retrying with snd_pcm_prepare().\n");
+                err = snd_pcm_prepare(p->alsa);
+            }
+            if (err < 0)
+                MP_ERR(ao, "resuming from SUSPENDED: %s\n", snd_strerror(err));
+            continue;
+        // Device lost. OPEN/SETUP are states we never enter after init, so
+        // treat them like DISCONNECTED.
+        case SND_PCM_STATE_DISCONNECTED:
+        case SND_PCM_STATE_OPEN:
+        case SND_PCM_STATE_SETUP:
+        default:
+            if (!p->device_lost) {
+                MP_WARN(ao, "Device lost, trying to recover...\n");
+                ao_request_reload(ao);
+                p->device_lost = true;
+            }
+            return false;
+        }
     }
-    if (space == -EPIPE)
-        handle_underrun(ao);
 
-    if (space > p->buffersize || space < 0) // Buffer underrun?
-        space = p->buffersize;
-    return space / p->outburst * p->outburst;
+    if (!state_ok) {
+        MP_ERR(ao, "could not recover\n");
+        return false;
+    }
+
+    if (state) {
+        snd_pcm_sframes_t del = snd_pcm_status_get_delay(st);
+        state->delay = MPMAX(del, 0) / (double)ao->samplerate;
+        state->free_samples = snd_pcm_status_get_avail(st);
+        state->free_samples = MPCLAMP(state->free_samples, 0, ao->device_buffer);
+        state->queued_samples = ao->device_buffer - state->free_samples;
+        state->underrun = p->underrun;
+    }
+
+    return true;
 
 alsa_error:
-    return 0;
+    return false;
 }
 
-/* delay in seconds between first and last sample in buffer */
-static double get_delay(struct ao *ao)
+static void audio_get_state(struct ao *ao, struct mp_pcm_state *state)
 {
     struct priv *p = ao->priv;
-    snd_pcm_sframes_t delay;
-
-    if (p->paused)
-        return p->delay_before_pause;
-
-    int err = snd_pcm_delay(p->alsa, &delay);
-    if (err < 0) {
-        if (err == -EPIPE)
-            handle_underrun(ao);
-        return 0;
-    }
-
-    if (delay < 0) {
-        /* underrun - move the application pointer forward to catch up */
-        snd_pcm_forward(p->alsa, -delay);
-        delay = 0;
-    }
-    return delay / (double)ao->samplerate;
+    recover_and_get_state(ao, state);
+    p->underrun = false;
 }
 
-// For stream-silence mode: replace remaining buffer with silence.
-// Tries to cause an instant buffer underrun.
-static void soft_reset(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-    snd_pcm_sframes_t frames = snd_pcm_rewindable(p->alsa);
-    if (frames > 0 && snd_pcm_state(p->alsa) == SND_PCM_STATE_RUNNING) {
-        frames = snd_pcm_rewind(p->alsa, frames);
-        if (frames < 0) {
-            int err = frames;
-            CHECK_ALSA_WARN("pcm rewind error");
-        }
-    }
-}
-
-static void audio_pause(struct ao *ao)
+static void audio_start(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int err;
 
-    if (p->paused)
-        return;
+    recover_and_get_state(ao, NULL);
 
-    p->delay_before_pause = get_delay(ao);
-    p->prepause_frames = p->delay_before_pause * ao->samplerate;
-
-    if (ao->stream_silence) {
-        soft_reset(ao);
-    } else if (p->can_pause) {
-        if (snd_pcm_state(p->alsa) == SND_PCM_STATE_RUNNING) {
-            err = snd_pcm_pause(p->alsa, 1);
-            CHECK_ALSA_ERROR("pcm pause error");
-            p->prepause_frames = 0;
-        }
-    } else {
-        err = snd_pcm_drop(p->alsa);
-        CHECK_ALSA_ERROR("pcm drop error");
-    }
-
-    p->paused = true;
+    err = snd_pcm_start(p->alsa);
+    CHECK_ALSA_ERROR("pcm start error");
 
 alsa_error: ;
 }
 
-static void resume_device(struct ao *ao)
+static void audio_reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int err;
 
-    if (snd_pcm_state(p->alsa) == SND_PCM_STATE_SUSPENDED) {
-        MP_INFO(ao, "PCM in suspend mode, trying to resume.\n");
+    err = snd_pcm_drop(p->alsa);
+    CHECK_ALSA_ERROR("pcm drop error");
+    err = snd_pcm_prepare(p->alsa);
+    CHECK_ALSA_ERROR("pcm prepare error");
 
-        while ((err = snd_pcm_resume(p->alsa)) == -EAGAIN)
-            sleep(1);
-    }
-}
-
-static void audio_resume(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-    int err;
-
-    if (!p->paused)
-        return;
-
-    resume_device(ao);
-
-    if (ao->stream_silence) {
-        p->paused = false;
-        get_delay(ao); // recovers from underrun (as a side-effect)
-    } else if (p->can_pause) {
-        if (snd_pcm_state(p->alsa) == SND_PCM_STATE_PAUSED) {
-            err = snd_pcm_pause(p->alsa, 0);
-            CHECK_ALSA_ERROR("pcm resume error");
-        }
-    } else {
-        MP_VERBOSE(ao, "resume not supported by hardware\n");
-        err = snd_pcm_prepare(p->alsa);
-        CHECK_ALSA_ERROR("pcm prepare error");
-    }
-
-    if (p->prepause_frames)
-        ao_play_silence(ao, p->prepause_frames);
-
-alsa_error: ;
-    p->paused = false;
-}
-
-static void reset(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-    int err;
-
-    p->paused = false;
-    p->prepause_frames = 0;
-    p->delay_before_pause = 0;
-    p->final_chunk_written = false;
-
-    if (ao->stream_silence) {
-        soft_reset(ao);
-    } else {
-        err = snd_pcm_drop(p->alsa);
-        CHECK_ALSA_ERROR("pcm prepare error");
-        err = snd_pcm_prepare(p->alsa);
-        CHECK_ALSA_ERROR("pcm prepare error");
-    }
+    recover_and_get_state(ao, NULL);
 
 alsa_error: ;
 }
 
-static int play(struct ao *ao, void **data, int samples, int flags)
+static bool audio_set_paused(struct ao *ao, bool paused)
 {
     struct priv *p = ao->priv;
-    snd_pcm_sframes_t res = 0;
-    bool final_chunk = flags & AOPLAY_FINAL_CHUNK;
+    int err;
 
-    if (!final_chunk)
-        samples = samples / p->outburst * p->outburst;
+    recover_and_get_state(ao, NULL);
 
-    if (samples == 0)
-        goto done;
+    if (!p->can_pause)
+        return false;
+
+    snd_pcm_state_t pcmst = snd_pcm_state(p->alsa);
+    if (pcmst == SND_PCM_STATE_RUNNING && paused) {
+        err = snd_pcm_pause(p->alsa, 1);
+        CHECK_ALSA_ERROR("pcm pause error");
+    } else if (pcmst == SND_PCM_STATE_PAUSED && !paused) {
+        err = snd_pcm_pause(p->alsa, 0);
+        CHECK_ALSA_ERROR("pcm resume error");
+    }
+
+    return true;
+
+alsa_error:
+    return false;
+}
+
+static bool audio_write(struct ao *ao, void **data, int samples)
+{
+    struct priv *p = ao->priv;
+
     ao_convert_inplace(&p->convert, data, samples);
 
-    do {
-        if (af_fmt_is_planar(ao->format)) {
-            res = snd_pcm_writen(p->alsa, data, samples);
-        } else {
-            res = snd_pcm_writei(p->alsa, data[0], samples);
-        }
+    if (!recover_and_get_state(ao, NULL))
+        return false;
 
-        if (res == -EINTR || res == -EAGAIN) { /* retry */
-            res = 0;
-        } else if (!check_device_present(ao, res)) {
-            goto alsa_error;
-        } else if (res < 0) {
-            if (res == -ESTRPIPE) {  /* suspend */
-                resume_device(ao);
-            } else if (res == -EPIPE) {
-                handle_underrun(ao);
-            } else {
-                MP_ERR(ao, "Write error: %s\n", snd_strerror(res));
-            }
-            int err = snd_pcm_prepare(p->alsa);
-            CHECK_ALSA_ERROR("pcm prepare error");
-            res = 0;
-        }
-    } while (res == 0);
-
-    p->paused = false;
-
-done:
-    p->final_chunk_written = res == samples && final_chunk;
-    return res < 0 ? -1 : res;
-
-alsa_error:
-    return -1;
-}
-
-#define MAX_POLL_FDS 20
-static int audio_wait(struct ao *ao, pthread_mutex_t *lock)
-{
-    struct priv *p = ao->priv;
-    int err;
-
-    int num_fds = snd_pcm_poll_descriptors_count(p->alsa);
-    if (num_fds <= 0 || num_fds >= MAX_POLL_FDS)
-        goto alsa_error;
-
-    struct pollfd fds[MAX_POLL_FDS];
-    err = snd_pcm_poll_descriptors(p->alsa, fds, num_fds);
-    CHECK_ALSA_ERROR("cannot get pollfds");
-
-    while (1) {
-        int r = ao_wait_poll(ao, fds, num_fds, lock);
-        if (r)
-            return r;
-
-        unsigned short revents;
-        err = snd_pcm_poll_descriptors_revents(p->alsa, fds, num_fds, &revents);
-        CHECK_ALSA_ERROR("cannot read poll events");
-
-        if (revents & POLLERR)  {
-            snd_pcm_status_t *status;
-            snd_pcm_status_alloca(&status);
-
-            err = snd_pcm_status(p->alsa, status);
-            check_device_present(ao, err);
-            return -1;
-        }
-        if (revents & POLLOUT)
-            return 0;
+    snd_pcm_sframes_t err = 0;
+    if (af_fmt_is_planar(ao->format)) {
+        err = snd_pcm_writen(p->alsa, data, samples);
+    } else {
+        err = snd_pcm_writei(p->alsa, data[0], samples);
     }
-    return 0;
+
+    CHECK_ALSA_ERROR("pcm write error");
+    if (err != samples)
+        MP_WARN(ao, "unexpected short write\n");
+
+    return true;
 
 alsa_error:
-    return -1;
+    return false;
 }
 
 static bool is_useless_device(char *name)
@@ -1248,16 +1145,12 @@ const struct ao_driver audio_out_alsa = {
     .init      = init,
     .uninit    = uninit,
     .control   = control,
-    .get_space = get_space,
-    .play      = play,
-    .get_delay = get_delay,
-    .pause     = audio_pause,
-    .resume    = audio_resume,
-    .reset     = reset,
-    .wait      = audio_wait,
-    .wakeup    = ao_wakeup_poll,
+    .get_state = audio_get_state,
+    .write     = audio_write,
+    .start     = audio_start,
+    .set_pause = audio_set_paused,
+    .reset     = audio_reset,
     .list_devs = list_devs,
-    .reports_underruns = true,
     .priv_size = sizeof(struct priv),
     .global_opts = &ao_alsa_conf,
 };

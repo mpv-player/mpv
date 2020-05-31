@@ -247,7 +247,7 @@ const struct ao_driver audio_out_opensles = {
     .init      = init,
     .uninit    = uninit,
     .reset     = reset,
-    .resume    = resume,
+    .start     = resume,
 
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {

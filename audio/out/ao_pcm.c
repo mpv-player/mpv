@@ -162,6 +162,7 @@ static int init(struct ao *ao)
     if (priv->waveheader)  // Reserve space for wave header
         write_wave_header(ao, priv->fp, 0x7ffff000);
     ao->untimed = true;
+    ao->device_buffer = 1 << 16;
 
     return 0;
 }
@@ -193,19 +194,36 @@ static void uninit(struct ao *ao)
     fclose(priv->fp);
 }
 
-static int get_space(struct ao *ao)
-{
-    return 65536;
-}
-
-static int play(struct ao *ao, void **data, int samples, int flags)
+static bool audio_write(struct ao *ao, void **data, int samples)
 {
     struct priv *priv = ao->priv;
     int len = samples * ao->sstride;
 
     fwrite(data[0], len, 1, priv->fp);
     priv->data_length += len;
-    return samples;
+
+    return true;
+}
+
+static void get_state(struct ao *ao, struct mp_pcm_state *state)
+{
+    state->free_samples = ao->device_buffer;
+    state->queued_samples = 0;
+    state->delay = 0;
+}
+
+static bool set_pause(struct ao *ao, bool paused)
+{
+    return true; // signal support so common code doesn't write silence
+}
+
+static void start(struct ao *ao)
+{
+    // we use data immediately
+}
+
+static void reset(struct ao *ao)
+{
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -215,9 +233,11 @@ const struct ao_driver audio_out_pcm = {
     .name      = "pcm",
     .init      = init,
     .uninit    = uninit,
-    .get_space = get_space,
-    .play      = play,
-    .reports_underruns = true, // not a thing
+    .get_state = get_state,
+    .set_pause = set_pause,
+    .write     = audio_write,
+    .start     = start,
+    .reset     = reset,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) { .waveheader = 1 },
     .options = (const struct m_option[]) {

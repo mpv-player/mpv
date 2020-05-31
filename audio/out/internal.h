@@ -48,9 +48,7 @@ struct ao {
     int init_flags; // AO_INIT_* flags
     bool stream_silence;        // if audio inactive, just play silence
 
-    // Set by the driver on init. This is typically the period size, and the
-    // smallest unit the driver will accept in one piece (although if
-    // AOPLAY_FINAL_CHUNK is set, the driver must accept everything).
+    // Set by the driver on init.
     // This value is in complete samples (i.e. 1 for stereo means 1 sample
     // for both channels each).
     // Used for push based API only.
@@ -82,6 +80,18 @@ struct ao {
 void init_buffer_pre(struct ao *ao);
 bool init_buffer_post(struct ao *ao);
 
+struct mp_pcm_state {
+    // Note: free_samples+queued_samples <= ao->device_buffer; the sum may be
+    //       less if the audio API can report partial periods played, while
+    //       free_samples should be period-size aligned.
+    int free_samples;       // number of free space in ring buffer
+    int queued_samples;     // number of samples to play in ring buffer
+    double delay;           // total latency in seconds (includes queued_samples)
+    bool underrun;          // if in underrun state (signals both accidental
+                            // underruns and normal playback end); cleared by AO
+                            // driver on reset() calls
+};
+
 /* Note:
  *
  * In general, there are two types of audio drivers:
@@ -89,38 +99,32 @@ bool init_buffer_post(struct ao *ao);
  *  b) pull callback based (the audio API calls a callback to get audio)
  *
  * The ao.c code can handle both. It basically implements two audio paths
- * and provides a uniform API for them. If ao_driver->play is NULL, it assumes
+ * and provides a uniform API for them. If ao_driver->write is NULL, it assumes
  * that the driver uses a callback based audio API, otherwise push based.
  *
  * Requirements:
- *  a) ->play is called to queue audio. push.c creates a thread to regularly
- *     refill audio device buffers with ->play, but all driver functions are
- *     always called under an exclusive lock.
- *     Mandatory:
+ *  a+b) Mandatory for both types:
  *          init
  *          uninit
- *          reset
- *          get_space
- *          play
- *          get_delay
- *          pause
- *          resume
- *     Optional:
+ *          start
+ *     Optional for both types:
  *          control
- *          wait
- *          wakeup
- *  b) ->play must be NULL. ->resume must be provided, and should make the
+ *  a) ->write is called to queue audio. push.c creates a thread to regularly
+ *     refill audio device buffers with ->write, but all driver functions are
+ *     always called under an exclusive lock.
+ *     Mandatory:
+ *          reset
+ *          write
+ *          get_state
+ *     Optional:
+ *          set_pause
+ *  b) ->write must be NULL. ->start must be provided, and should make the
  *     audio API start calling the audio callback. Your audio callback should
  *     in turn call ao_read_data() to get audio data. Most functions are
  *     optional and will be emulated if missing (e.g. pausing is emulated as
- *     silence). ->get_delay and ->get_space are never called.
- *     Mandatory:
- *          init
- *          uninit
- *          resume      (starts the audio callback)
+ *     silence).
  *     Also, the following optional callbacks can be provided:
- *          reset       (stops the audio callback, resume() restarts it)
- *          control
+ *          reset       (stops the audio callback, start() restarts it)
  */
 struct ao_driver {
     // If true, use with encoding only.
@@ -130,16 +134,9 @@ struct ao_driver {
     // Description shown with --ao=help.
     const char *description;
     // This requires waiting for a AO_EVENT_INITIAL_UNBLOCK event before the
-    // first play() call is done. Encode mode uses this, and push mode
+    // first write() call is done. Encode mode uses this, and push mode
     // respects it automatically (don't use with pull mode).
     bool initially_blocked;
-    // Whether underruns are strictly _always_ reported via ao_underrun_event().
-    // Do not set this to true if underruns may be missed in some way. If the
-    // AO can't guarantee to play silence after underruns, it may be better not
-    // to set this.
-    // If not set, the generic buffer code will report an underrun if the buffer
-    // becomes empty.
-    bool reports_underruns;
     // Init the device using ao->format/ao->channels/ao->samplerate. If the
     // device doesn't accept these parameters, you can attempt to negotiate
     // fallback parameters, and set the ao format fields accordingly.
@@ -147,36 +144,29 @@ struct ao_driver {
     // Optional. See ao_control() etc. in ao.c
     int (*control)(struct ao *ao, enum aocontrol cmd, void *arg);
     void (*uninit)(struct ao *ao);
-    // push based: see ao_reset()
-    // pull based: stop the audio callback
+    // Stop all audio playback, clear buffers, back to state after init().
+    // Optional for pull AOs.
     void (*reset)(struct ao *ao);
-    // push based: see ao_pause()
-    void (*pause)(struct ao *ao);
-    // push based: see ao_resume()
+    // push based: set pause state. Only called after start() and before reset().
+    //             returns success (this is intended for paused=true; if it
+    //             returns false, playback continues; unpausing always works)
+    bool (*set_pause)(struct ao *ao, bool paused);
     // pull based: start the audio callback
-    void (*resume)(struct ao *ao);
-    // push based: see ao_play()
-    int (*get_space)(struct ao *ao);
-    // push based: see ao_play()
-    int (*play)(struct ao *ao, void **data, int samples, int flags);
-    // push based: see ao_get_delay()
-    double (*get_delay)(struct ao *ao);
-    // Optional. Return true if audio has stopped in any way.
-    bool (*get_eof)(struct ao *ao);
-    // Wait until the audio buffer needs to be refilled. The lock is the
-    // internal mutex usually protecting the internal AO state (and used to
-    // protect driver calls), and must be temporarily unlocked while waiting.
-    // ->wakeup will be called (with lock held) if the wait should be canceled.
-    // Returns 0 on success, -1 on error.
-    // Optional; if this is not provided, generic code using audio timing is
-    // used to estimate when the AO needs to be refilled.
-    // Warning: it's only called if the feed thread truly needs to know when
-    //          the audio thread takes data again. Often, it will just copy
-    //          the complete soft-buffer to the AO, and then wait for the
-    //          decoder instead. Don't do necessary work in this callback.
-    int (*wait)(struct ao *ao, pthread_mutex_t *lock);
-    // In combination with wait(). Lock may or may not be held.
-    void (*wakeup)(struct ao *ao);
+    // push based: start playing queued data
+    //             AO should call ao_wakeup_playthread() if a period boundary
+    //             is crossed, or playback stops due to external reasons
+    //             (including underruns or device removal)
+    void (*start)(struct ao *ao);
+    // push based: queue new data. This won't try to write more data than the
+    // reported free space (samples <= mp_pcm_state.free_samples).
+    // This must NOT start playback. start() does that, and write() may be
+    // called multiple times before start() is called. It may also happen that
+    // reset() is called to discard the buffer. start() without write() will
+    // immediately reported an underrun.
+    // Return false on failure.
+    bool (*write)(struct ao *ao, void **data, int samples);
+    // push based: return mandatory stream information
+    void (*get_state)(struct ao *ao, struct mp_pcm_state *state);
 
     // Return the list of devices currently available in the system. Use
     // ao_device_list_add() to add entries. The selected device will be set as
@@ -204,13 +194,7 @@ struct ao_driver {
 
 // These functions can be called by AOs.
 
-int ao_play_silence(struct ao *ao, int samples);
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us);
-struct pollfd;
-int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
-                 pthread_mutex_t *lock);
-void ao_wakeup_poll(struct ao *ao);
-bool ao_underrun_event(struct ao *ao);
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
@@ -237,6 +221,8 @@ struct ao_convert_fmt {
 bool ao_can_convert_inplace(struct ao_convert_fmt *fmt);
 bool ao_need_conversion(struct ao_convert_fmt *fmt);
 void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples);
+
+void ao_wakeup_playthread(struct ao *ao);
 
 int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
                            void **data, int samples, int64_t out_time_us);

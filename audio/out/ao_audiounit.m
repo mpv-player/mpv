@@ -193,6 +193,6 @@ const struct ao_driver audio_out_audiounit = {
     .uninit         = uninit,
     .init           = init,
     .reset          = stop,
-    .resume         = start,
+    .start          = start,
     .priv_size      = sizeof(struct priv),
 };

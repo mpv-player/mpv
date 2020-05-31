@@ -52,11 +52,7 @@ struct priv {
     struct pa_sink_input_info pi;
 
     int retval;
-
-    // for wakeup handling
-    pthread_mutex_t wakeup_lock;
-    pthread_cond_t wakeup;
-    int wakeup_status;
+    bool underrun;
 
     char *cfg_host;
     int cfg_buffer;
@@ -119,42 +115,27 @@ static void stream_state_cb(pa_stream *s, void *userdata)
     }
 }
 
-static void wakeup(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-    pthread_mutex_lock(&priv->wakeup_lock);
-    priv->wakeup_status = 1;
-    pthread_cond_signal(&priv->wakeup);
-    pthread_mutex_unlock(&priv->wakeup_lock);
-}
-
 static void stream_request_cb(pa_stream *s, size_t length, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
-    wakeup(ao);
+    ao_wakeup_playthread(ao);
     pa_threaded_mainloop_signal(priv->mainloop, 0);
-}
-
-static int wait_audio(struct ao *ao, pthread_mutex_t *lock)
-{
-    struct priv *priv = ao->priv;
-    // We don't use this mutex, because pulse like to call stream_request_cb
-    // while we have the central mutex held.
-    pthread_mutex_unlock(lock);
-    pthread_mutex_lock(&priv->wakeup_lock);
-    while (!priv->wakeup_status)
-        pthread_cond_wait(&priv->wakeup, &priv->wakeup_lock);
-    priv->wakeup_status = 0;
-    pthread_mutex_unlock(&priv->wakeup_lock);
-    pthread_mutex_lock(lock);
-    return 0;
 }
 
 static void stream_latency_update_cb(pa_stream *s, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
+    pa_threaded_mainloop_signal(priv->mainloop, 0);
+}
+
+static void underflow_cb(pa_stream *s, void *userdata)
+{
+    struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
+    priv->underrun = true;
+    ao_wakeup_playthread(ao);
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
@@ -166,26 +147,31 @@ static void success_cb(pa_stream *s, int success, void *userdata)
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-/**
- * \brief waits for a pulseaudio operation to finish, frees it and
- *        unlocks the mainloop
- * \param op operation to wait for
- * \return 1 if operation has finished normally (DONE state), 0 otherwise
- */
-static int waitop(struct priv *priv, pa_operation *op)
+// Like waitop(), but keep the lock (even if it may unlock temporarily).
+static bool waitop_no_unlock(struct priv *priv, pa_operation *op)
 {
-    if (!op) {
-        pa_threaded_mainloop_unlock(priv->mainloop);
-        return 0;
-    }
+    if (!op)
+        return false;
     pa_operation_state_t state = pa_operation_get_state(op);
     while (state == PA_OPERATION_RUNNING) {
         pa_threaded_mainloop_wait(priv->mainloop);
         state = pa_operation_get_state(op);
     }
     pa_operation_unref(op);
-    pa_threaded_mainloop_unlock(priv->mainloop);
     return state == PA_OPERATION_DONE;
+}
+
+/**
+ * \brief waits for a pulseaudio operation to finish, frees it and
+ *        unlocks the mainloop
+ * \param op operation to wait for
+ * \return 1 if operation has finished normally (DONE state), 0 otherwise
+ */
+static bool waitop(struct priv *priv, pa_operation *op)
+{
+    bool r = waitop_no_unlock(priv, op);
+    pa_threaded_mainloop_unlock(priv->mainloop);
+    return r;
 }
 
 static const struct format_map {
@@ -301,9 +287,6 @@ static void uninit(struct ao *ao)
         pa_threaded_mainloop_free(priv->mainloop);
         priv->mainloop = NULL;
     }
-
-    pthread_cond_destroy(&priv->wakeup);
-    pthread_mutex_destroy(&priv->wakeup_lock);
 }
 
 static int pa_init_boilerplate(struct ao *ao)
@@ -311,9 +294,6 @@ static int pa_init_boilerplate(struct ao *ao)
     struct priv *priv = ao->priv;
     char *host = priv->cfg_host && priv->cfg_host[0] ? priv->cfg_host : NULL;
     bool locked = false;
-
-    pthread_mutex_init(&priv->wakeup_lock, NULL);
-    pthread_cond_init(&priv->wakeup, NULL);
 
     if (!(priv->mainloop = pa_threaded_mainloop_new())) {
         MP_ERR(ao, "Failed to allocate main loop\n");
@@ -451,12 +431,13 @@ static int init(struct ao *ao)
     pa_stream_set_write_callback(priv->stream, stream_request_cb, ao);
     pa_stream_set_latency_update_callback(priv->stream,
                                           stream_latency_update_cb, ao);
+    pa_stream_set_underflow_callback(priv->stream, underflow_cb, ao);
     uint32_t buf_size = ao->samplerate * (priv->cfg_buffer / 1000.0) *
         af_fmt_to_bytes(ao->format) * ao->channels.num;
     pa_buffer_attr bufattr = {
         .maxlength = -1,
         .tlength = buf_size > 0 ? buf_size : -1,
-        .prebuf = -1,
+        .prebuf = 0,
         .minreq = -1,
         .fragsize = -1,
     };
@@ -511,22 +492,23 @@ static void cork(struct ao *ao, bool pause)
 }
 
 // Play the specified data to the pulseaudio server
-static int play(struct ao *ao, void **data, int samples, int flags)
+static bool audio_write(struct ao *ao, void **data, int samples)
 {
     struct priv *priv = ao->priv;
+    bool res = true;
     pa_threaded_mainloop_lock(priv->mainloop);
     if (pa_stream_write(priv->stream, data[0], samples * ao->sstride, NULL, 0,
                         PA_SEEK_RELATIVE) < 0) {
         GENERIC_ERR_MSG("pa_stream_write() failed");
-        samples = -1;
-    }
-    if (flags & AOPLAY_FINAL_CHUNK) {
-        // Force start in case the stream was too short for prebuf
-        pa_operation *op = pa_stream_trigger(priv->stream, NULL, NULL);
-        pa_operation_unref(op);
+        res = false;
     }
     pa_threaded_mainloop_unlock(priv->mainloop);
-    return samples;
+    return res;
+}
+
+static void start(struct ao *ao)
+{
+    cork(ao, false);
 }
 
 // Reset the audio stream, i.e. flush the playback buffer on the server side
@@ -540,29 +522,12 @@ static void reset(struct ao *ao)
     if (!waitop(priv, pa_stream_flush(priv->stream, success_cb, ao)) ||
         !priv->retval)
         GENERIC_ERR_MSG("pa_stream_flush() failed");
-    cork(ao, false);
 }
 
-// Pause the audio stream by corking it on the server
-static void pause(struct ao *ao)
+static bool set_pause(struct ao *ao, bool paused)
 {
-    cork(ao, true);
-}
-
-// Resume the audio stream by uncorking it on the server
-static void resume(struct ao *ao)
-{
-    cork(ao, false);
-}
-
-// Return number of samples that may be written to the server without blocking
-static int get_space(struct ao *ao)
-{
-    struct priv *priv = ao->priv;
-    pa_threaded_mainloop_lock(priv->mainloop);
-    size_t space = pa_stream_writable_size(priv->stream);
-    pa_threaded_mainloop_unlock(priv->mainloop);
-    return space / ao->sstride;
+    cork(ao, paused);
+    return true;
 }
 
 static double get_delay_hackfixed(struct ao *ao)
@@ -581,21 +546,19 @@ static double get_delay_hackfixed(struct ao *ao)
      * this should be enough to fix the normal local playback case.
      */
     struct priv *priv = ao->priv;
-    pa_threaded_mainloop_lock(priv->mainloop);
-    if (!waitop(priv, pa_stream_update_timing_info(priv->stream, NULL, NULL))) {
+    if (!waitop_no_unlock(priv, pa_stream_update_timing_info(priv->stream,
+                                                             NULL, NULL)))
+    {
         GENERIC_ERR_MSG("pa_stream_update_timing_info() failed");
         return 0;
     }
-    pa_threaded_mainloop_lock(priv->mainloop);
     const pa_timing_info *ti = pa_stream_get_timing_info(priv->stream);
     if (!ti) {
-        pa_threaded_mainloop_unlock(priv->mainloop);
         GENERIC_ERR_MSG("pa_stream_get_timing_info() failed");
         return 0;
     }
     const struct pa_sample_spec *ss = pa_stream_get_sample_spec(priv->stream);
     if (!ss) {
-        pa_threaded_mainloop_unlock(priv->mainloop);
         GENERIC_ERR_MSG("pa_stream_get_sample_spec() failed");
         return 0;
     }
@@ -616,7 +579,6 @@ static double get_delay_hackfixed(struct ao *ao)
         latency += sink_latency;
     if (latency < 0)
         latency = 0;
-    pa_threaded_mainloop_unlock(priv->mainloop);
     return latency / 1e6;
 }
 
@@ -624,7 +586,6 @@ static double get_delay_pulse(struct ao *ao)
 {
     struct priv *priv = ao->priv;
     pa_usec_t latency = (pa_usec_t) -1;
-    pa_threaded_mainloop_lock(priv->mainloop);
     while (pa_stream_get_latency(priv->stream, &latency, NULL) < 0) {
         if (pa_context_errno(priv->context) != PA_ERR_NODATA) {
             GENERIC_ERR_MSG("pa_stream_get_latency() failed");
@@ -633,19 +594,35 @@ static double get_delay_pulse(struct ao *ao)
         /* Wait until latency data is available again */
         pa_threaded_mainloop_wait(priv->mainloop);
     }
-    pa_threaded_mainloop_unlock(priv->mainloop);
     return latency == (pa_usec_t) -1 ? 0 : latency / 1000000.0;
 }
 
-// Return the current latency in seconds
-static double get_delay(struct ao *ao)
+static void audio_get_state(struct ao *ao, struct mp_pcm_state *state)
 {
     struct priv *priv = ao->priv;
+
+    pa_threaded_mainloop_lock(priv->mainloop);
+
+    size_t space = pa_stream_writable_size(priv->stream);
+    state->free_samples = space == (size_t)-1 ? 0 : space / ao->sstride;
+
+    state->queued_samples = ao->device_buffer - state->free_samples; // dunno
+
     if (priv->cfg_latency_hacks) {
-        return get_delay_hackfixed(ao);
+        state->delay = get_delay_hackfixed(ao);
     } else {
-        return get_delay_pulse(ao);
+        state->delay = get_delay_pulse(ao);
     }
+
+    state->underrun = priv->underrun;
+    priv->underrun = false;
+
+    pa_threaded_mainloop_unlock(priv->mainloop);
+
+    // Otherwise, PA will keep hammering us for underruns (which it does instead
+    // of stopping the stream automatically).
+    if (state->underrun)
+        cork(ao, true);
 }
 
 /* A callback function that is called when the
@@ -812,13 +789,10 @@ const struct ao_driver audio_out_pulse = {
     .init      = init,
     .uninit    = uninit,
     .reset     = reset,
-    .get_space = get_space,
-    .play      = play,
-    .get_delay = get_delay,
-    .pause     = pause,
-    .resume    = resume,
-    .wait      = wait_audio,
-    .wakeup    = wakeup,
+    .get_state = audio_get_state,
+    .write     = audio_write,
+    .start     = start,
+    .set_pause = set_pause,
     .hotplug_init = hotplug_init,
     .hotplug_uninit = hotplug_uninit,
     .list_devs = list_devs,

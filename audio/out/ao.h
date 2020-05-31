@@ -39,7 +39,7 @@ enum aocontrol {
 
 // If set, then the queued audio data is the last. Note that after a while, new
 // data might be written again, instead of closing the AO.
-#define AOPLAY_FINAL_CHUNK 1
+#define PLAYER_FINAL_CHUNK 1
 
 enum {
     AO_EVENT_RELOAD = 1,

@@ -236,8 +236,10 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
     }
     ao->bps = ao->samplerate * ao->sstride;
 
-    if (!ao->device_buffer && ao->driver->get_space)
-        ao->device_buffer = ao->driver->get_space(ao);
+    if (ao->device_buffer < 0 && ao->driver->write) {
+        MP_ERR(ao, "Device buffer size not set.\n");
+        goto fail;
+    }
     if (ao->device_buffer)
         MP_VERBOSE(ao, "device buffer: %d samples.\n", ao->device_buffer);
     ao->buffer = MPMAX(ao->device_buffer, ao->def_buffer * ao->samplerate);
@@ -372,12 +374,6 @@ void ao_request_reload(struct ao *ao)
 void ao_hotplug_event(struct ao *ao)
 {
     ao_add_events(ao, AO_EVENT_HOTPLUG);
-}
-
-// Returns whether this call actually set a new underrun flag.
-bool ao_underrun_event(struct ao *ao)
-{
-    return ao_add_events(ao, AO_EVENT_UNDERRUN);
 }
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,

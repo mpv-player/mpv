@@ -61,8 +61,6 @@ struct priv {
     int direct_channels;
 };
 
-static void reset(struct ao *ao);
-
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     switch (cmd) {
@@ -177,6 +175,9 @@ static void uninit(struct ao *ao)
 
 static int init(struct ao *ao)
 {
+    MP_FATAL(ao, "broken.\n");
+    return -1;
+
     float position[3] = {0, 0, 0};
     float direction[6] = {0, 0, -1, 0, 1, 0};
     ALCdevice *dev = NULL;
@@ -291,67 +292,32 @@ static void unqueue_buffers(struct ao *ao)
     }
 }
 
-/**
- * \brief stop playing and empty buffers (for seeking/pause)
- */
 static void reset(struct ao *ao)
 {
     alSourceStop(source);
     unqueue_buffers(ao);
 }
 
-/**
- * \brief stop playing, keep buffers (for pause)
- */
-static void audio_pause(struct ao *ao)
+static bool audio_set_pause(struct ao *ao, bool pause)
 {
-    alSourcePause(source);
-}
-
-/**
- * \brief resume playing, after audio_pause()
- */
-static void audio_resume(struct ao *ao)
-{
-    alSourcePlay(source);
-}
-
-static int get_space(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-    ALint queued;
-    unqueue_buffers(ao);
-    alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
-    queued = p->num_buffers - queued;
-    if (queued < 0)
-        return 0;
-    return p->num_samples * queued;
-}
-
-/**
- * \brief write data into buffer and reset underrun flag
- */
-static int play(struct ao *ao, void **data, int samples, int flags)
-{
-    struct priv *p = ao->priv;
-
-    int buffered_samples = 0;
-    int num = 0;
-    if (flags & AOPLAY_FINAL_CHUNK) {
-        num = 1;
-        buffered_samples = samples;
+    if (pause) {
+        alSourcePause(source);
     } else {
-        num = samples / p->num_samples;
-        buffered_samples = num * p->num_samples;
+        alSourcePlay(source);
     }
+    return true;
+}
+
+static bool audio_write(struct ao *ao, void **data, int samples)
+{
+    struct priv *p = ao->priv;
+
+    int num = (samples + p->num_samples - 1) / p->num_samples;
 
     for (int i = 0; i < num; i++) {
         char *d = *data;
-        if (flags & AOPLAY_FINAL_CHUNK) {
-            buffer_size[cur_buf] = samples;
-        } else {
-            buffer_size[cur_buf] = p->num_samples;
-        }
+        buffer_size[cur_buf] =
+            MPMIN(samples - num * p->num_samples, p->num_samples);
         d += i * buffer_size[cur_buf] * ao->sstride;
         alBufferData(buffers[cur_buf], p->al_format, d,
             buffer_size[cur_buf] * ao->sstride, ao->samplerate);
@@ -359,17 +325,18 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         cur_buf = (cur_buf + 1) % p->num_buffers;
     }
 
-    ALint state;
-    alGetSourcei(source, AL_SOURCE_STATE, &state);
-    if (state != AL_PLAYING) // checked here in case of an underrun
-        alSourcePlay(source);
-
-    return buffered_samples;
+    return true;
 }
 
-static double get_delay(struct ao *ao)
+static void audio_start(struct ao *ao)
+{
+    alSourcePlay(source);
+}
+
+static void get_state(struct ao *ao, struct mp_pcm_state *state)
 {
     struct priv *p = ao->priv;
+
     ALint queued;
     unqueue_buffers(ao);
     alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
@@ -393,7 +360,11 @@ static double get_delay(struct ao *ao)
         queued_samples += buffer_size[index];
         index = (index + 1) % p->num_buffers;
     }
-    return (queued_samples / (double)ao->samplerate) + soft_source_latency;
+
+    state->delay = queued_samples / (double)ao->samplerate + soft_source_latency;
+
+    state->queued_samples = queued_samples;
+    state->free_samples = MPMAX(p->num_buffers - queued, 0) * p->num_samples;
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -404,11 +375,10 @@ const struct ao_driver audio_out_openal = {
     .init      = init,
     .uninit    = uninit,
     .control   = control,
-    .get_space = get_space,
-    .play      = play,
-    .get_delay = get_delay,
-    .pause     = audio_pause,
-    .resume    = audio_resume,
+    .get_state = get_state,
+    .write     = audio_write,
+    .start     = audio_start,
+    .set_pause = audio_set_pause,
     .reset     = reset,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {

@@ -706,7 +706,7 @@ const struct ao_driver audio_out_audiotrack = {
     .init      = init,
     .uninit    = uninit,
     .reset     = stop,
-    .resume    = start,
+    .start     = start,
     .priv_size = sizeof(struct priv),
     .options   = (const struct m_option[]) {
         {"pcm-float", OPT_FLAG(cfg_pcm_float)},

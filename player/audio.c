@@ -971,7 +971,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     // do it if gapless is forced, mostly for testing).
     if (audio_eof && (!opts->gapless_audio ||
         (opts->gapless_audio <= 0 && mpctx->video_status != STATUS_EOF)))
-        playflags |= AOPLAY_FINAL_CHUNK;
+        playflags |= PLAYER_FINAL_CHUNK;
 
     uint8_t **planes;
     int samples;
