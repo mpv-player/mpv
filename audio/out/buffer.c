@@ -366,7 +366,7 @@ void ao_resume(struct ao *ao)
     pthread_mutex_lock(&p->lock);
 
     if (p->playing && p->paused) {
-        if (p->streaming && ao->driver->resume)
+        if (ao->driver->resume && (!p->streaming || ao->driver->play))
             ao->driver->resume(ao);
         p->paused = false;
         p->expected_end_time = 0;
