@@ -939,9 +939,9 @@ static bool render_frame(struct vo *vo)
         in->hasframe_rendered = true;
         int64_t prev_drop_count = vo->in->drop_count;
         // Can the core queue new video now? Non-display-sync uses a separate
-        // timer instead.
-        bool can_queue =
-            !in->frame_queued && in->current_frame->num_vsyncs < 1 && use_vsync;
+        // timer instead, but possibly benefits from preparing a frame early.
+        bool can_queue = !in->frame_queued &&
+            (in->current_frame->num_vsyncs < 1 || !use_vsync);
         pthread_mutex_unlock(&in->lock);
 
         if (can_queue)
