@@ -239,7 +239,8 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
         mp_ring_read(p->buffers[n], data[n], bytes);
 
     // Half of the buffer played -> request more.
-    need_wakeup = buffered_bytes - bytes <= mp_ring_size(p->buffers[0]) / 2;
+    if (!ao->driver->write)
+        need_wakeup = buffered_bytes - bytes <= mp_ring_size(p->buffers[0]) / 2;
 
 end:
 
@@ -652,11 +653,9 @@ static void ao_play_data(struct ao *ao)
     p->ao_wait_low_buffer = space == 0 || written > 0 || p->draining;
     p->still_playing |= samples > 0 && !play_silence;
 
-    // If we just filled the AO completely (r == space), don't refill for a
-    // while. Prevents wakeup feedback with byte-granular AOs.
+    // Request more data if we're below some random buffer level.
     int needed = unlocked_get_space(ao);
-    bool more = needed >= (written == space ? ao->device_buffer / 4 : 1) &&
-                !p->final_chunk;
+    bool more = needed >= ao->device_buffer / 4 && !p->final_chunk;
     if (more)
         ao->wakeup_cb(ao->wakeup_ctx); // request more data
     MP_TRACE(ao, "in=%d eof=%d space=%d r=%d wa/pl/dr=%d/%d/%d needed=%d more=%d\n",
