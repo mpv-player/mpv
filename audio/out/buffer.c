@@ -327,6 +327,7 @@ void ao_reset(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
     bool wakeup = false;
+    bool do_reset = false;
 
     pthread_mutex_lock(&p->lock);
 
@@ -334,7 +335,13 @@ void ao_reset(struct ao *ao)
         mp_ring_reset(p->buffers[n]);
 
     if (!ao->stream_silence && ao->driver->reset) {
-        ao->driver->reset(ao); // assumes the audio callback thread is stopped
+        if (ao->driver->write) {
+            ao->driver->reset(ao);
+        } else {
+            // Pull AOs may wait for ao_read_data() to return.
+            // That would deadlock if called from within the lock.
+            do_reset = true;
+        }
         p->streaming = false;
     }
     p->paused = false;
@@ -350,6 +357,9 @@ void ao_reset(struct ao *ao)
 
     pthread_mutex_unlock(&p->lock);
 
+    if (do_reset)
+        ao->driver->reset(ao);
+
     if (wakeup)
         ao_wakeup_playthread(ao);
 }
@@ -358,6 +368,7 @@ void ao_pause(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
     bool wakeup = false;
+    bool do_reset = false;
 
     pthread_mutex_lock(&p->lock);
 
@@ -373,7 +384,8 @@ void ao_pause(struct ao *ao)
                     p->streaming = false;
                 }
             } else if (ao->driver->reset) {
-                ao->driver->reset(ao);
+                // See ao_reset() why this is done outside of the lock.
+                do_reset = true;
                 p->streaming = false;
             }
         }
@@ -382,6 +394,9 @@ void ao_pause(struct ao *ao)
     }
 
     pthread_mutex_unlock(&p->lock);
+
+    if (do_reset)
+        ao->driver->reset(ao);
 
     if (wakeup)
         ao_wakeup_playthread(ao);
