@@ -641,6 +641,7 @@ static void ao_play_data(struct ao *ao)
             ao->driver->start(ao);
             p->streaming = true;
         }
+        p->still_playing = !play_silence;
     }
 
     if (p->draining && p->still_playing && ao->untimed) {
@@ -651,7 +652,6 @@ static void ao_play_data(struct ao *ao)
     // Wait until space becomes available. Also wait if we actually wrote data,
     // so the AO wakes us up properly if it needs more data.
     p->ao_wait_low_buffer = space == 0 || written > 0 || p->draining;
-    p->still_playing |= samples > 0 && !play_silence;
 
     // Request more data if we're below some random buffer level.
     int needed = unlocked_get_space(ao);
