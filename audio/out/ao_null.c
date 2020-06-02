@@ -43,7 +43,6 @@ struct priv {
     float buffered;     // samples
     int buffersize;     // samples
     bool playing;
-    bool underrun;
 
     int untimed;
     float bufferlen;    // seconds
@@ -77,10 +76,8 @@ static void drain(struct ao *ao)
     double now = mp_time_sec();
     if (priv->buffered > 0) {
         priv->buffered -= (now - priv->last_time) * ao->samplerate * priv->speed;
-        if (priv->buffered < 0) {
-            priv->underrun = true;
+        if (priv->buffered < 0)
             priv->buffered = 0;
-        }
     }
     priv->last_time = now;
 }
@@ -127,7 +124,6 @@ static void reset(struct ao *ao)
 {
     struct priv *priv = ao->priv;
     priv->buffered = 0;
-    priv->underrun = false;
     priv->playing = false;
 }
 
@@ -200,8 +196,7 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
             state->delay = (int)(state->delay / q) * q;
     }
 
-    state->underrun = priv->underrun;
-    priv->underrun = false;
+    state->playing = priv->playing && priv->buffered > 0;
 }
 
 #define OPT_BASE_STRUCT struct priv

@@ -91,7 +91,6 @@ static const struct m_sub_options ao_alsa_conf = {
 struct priv {
     snd_pcm_t *alsa;
     bool device_lost;
-    bool underrun;
     snd_pcm_format_t alsa_fmt;
     bool can_pause;
     snd_pcm_uframes_t buffersize;
@@ -916,8 +915,8 @@ static int init(struct ao *ao)
 }
 
 // Function for dealing with playback state. This attempts to recover the ALSA
-// state (bring it into SND_PCM_STATE_{PREPARED,RUNNING,PAUSED}). If state!=NULL,
-// fill it after recovery.
+// state (bring it into SND_PCM_STATE_{PREPARED,RUNNING,PAUSED,UNDERRUN}). If
+// state!=NULL, fill it after recovery.
 // Returns true if PCM is in one the expected states.
 static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
 {
@@ -928,6 +927,7 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
     snd_pcm_status_alloca(&st);
 
     bool state_ok = false;
+    snd_pcm_state_t pcmst = SND_PCM_STATE_DISCONNECTED;
 
     // Give it a number of chances to recover. This tries to deal with the fact
     // that the API is asynchronous, and to account for some past cargo-cult
@@ -936,7 +936,7 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
         err = snd_pcm_status(p->alsa, st);
         CHECK_ALSA_ERROR("snd_pcm_status");
 
-        snd_pcm_state_t pcmst = snd_pcm_status_get_state(st);
+        pcmst = snd_pcm_status_get_state(st);
         if (pcmst == SND_PCM_STATE_PREPARED ||
             pcmst == SND_PCM_STATE_RUNNING ||
             pcmst == SND_PCM_STATE_PAUSED)
@@ -949,10 +949,9 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
                    n + 1, snd_pcm_state_name(pcmst));
 
         switch (pcmst) {
-        // Underrun; note and recover. We never use draining,
+        // Underrun; recover. (We never use draining.)
         case SND_PCM_STATE_XRUN:
         case SND_PCM_STATE_DRAINING:
-            p->underrun = true;
             err = snd_pcm_prepare(p->alsa);
             CHECK_ALSA_ERROR("pcm prepare error");
             continue;
@@ -1000,7 +999,8 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
         state->free_samples = snd_pcm_status_get_avail(st);
         state->free_samples = MPCLAMP(state->free_samples, 0, ao->device_buffer);
         state->queued_samples = ao->device_buffer - state->free_samples;
-        state->underrun = p->underrun;
+        state->playing = pcmst == SND_PCM_STATE_RUNNING ||
+                         pcmst == SND_PCM_STATE_PAUSED;
     }
 
     return true;
@@ -1011,9 +1011,7 @@ alsa_error:
 
 static void audio_get_state(struct ao *ao, struct mp_pcm_state *state)
 {
-    struct priv *p = ao->priv;
     recover_and_get_state(ao, state);
-    p->underrun = false;
 }
 
 static void audio_start(struct ao *ao)

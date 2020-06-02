@@ -87,9 +87,11 @@ struct mp_pcm_state {
     int free_samples;       // number of free space in ring buffer
     int queued_samples;     // number of samples to play in ring buffer
     double delay;           // total latency in seconds (includes queued_samples)
-    bool underrun;          // if in underrun state (signals both accidental
-                            // underruns and normal playback end); cleared by AO
-                            // driver on reset() calls
+    bool playing;           // set if underlying API is actually playing audio;
+                            // the AO must unset it on underrun (accidental
+                            // underrun and EOF are indistinguishable; the upper
+                            // layers decide what it was)
+                            // real pausing may assume playing=true
 };
 
 /* Note:
@@ -149,13 +151,15 @@ struct ao_driver {
     void (*reset)(struct ao *ao);
     // push based: set pause state. Only called after start() and before reset().
     //             returns success (this is intended for paused=true; if it
-    //             returns false, playback continues; unpausing always works)
+    //             returns false, playback continues, and the core emulates via
+    //             reset(); unpausing always works)
     bool (*set_pause)(struct ao *ao, bool paused);
     // pull based: start the audio callback
     // push based: start playing queued data
     //             AO should call ao_wakeup_playthread() if a period boundary
     //             is crossed, or playback stops due to external reasons
     //             (including underruns or device removal)
+    //             must set mp_pcm_state.playing; unset on error/underrun/end
     void (*start)(struct ao *ao);
     // push based: queue new data. This won't try to write more data than the
     // reported free space (samples <= mp_pcm_state.free_samples).

@@ -71,7 +71,6 @@ struct buffer_state {
     bool hw_paused;             // driver->set_pause() was used successfully
     bool recover_pause;         // non-hw_paused: needs to recover delay
     bool draining;
-    bool had_underrun;
     bool ao_wait_low_buffer;
     struct mp_pcm_state prepause_state;
     pthread_t thread;           // thread shoveling data to AO
@@ -108,20 +107,8 @@ static void get_dev_state(struct ao *ao, struct mp_pcm_state *state)
         .free_samples = -1,
         .queued_samples = -1,
         .delay = -1,
-        .underrun = false,
     };
     ao->driver->get_state(ao, state);
-
-    if (state->underrun) {
-        p->had_underrun = true;
-        if (p->draining) {
-            MP_VERBOSE(ao, "underrun signaled for audio end\n");
-            p->still_playing = false;
-            pthread_cond_broadcast(&p->wakeup);
-        } else {
-            ao_add_events(ao, AO_EVENT_UNDERRUN);
-        }
-    }
 }
 
 static int unlocked_get_space(struct ao *ao)
@@ -455,7 +442,7 @@ void ao_drain(struct ao *ao)
 
     pthread_mutex_lock(&p->lock);
     p->final_chunk = true;
-    while (!p->paused && p->still_playing && !p->had_underrun) {
+    while (!p->paused && p->still_playing && p->streaming) {
         if (ao->driver->write) {
             if (p->draining) {
                 // Wait for EOF signal from AO.
@@ -586,16 +573,21 @@ static bool realloc_buf(struct ao *ao, int samples)
 static void ao_play_data(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
-
-    if (p->had_underrun) {
-        MP_VERBOSE(ao, "recover underrun\n");
-        ao->driver->reset(ao);
-        p->streaming = false;
-        p->had_underrun = false;
-    }
-
     struct mp_pcm_state state;
     get_dev_state(ao, &state);
+
+    if (p->streaming && !state.playing && !ao->untimed) {
+        if (p->draining) {
+            MP_VERBOSE(ao, "underrun signaled for audio end\n");
+            p->still_playing = false;
+            pthread_cond_broadcast(&p->wakeup);
+        } else {
+            ao_add_events(ao, AO_EVENT_UNDERRUN);
+        }
+
+        p->streaming = false;
+    }
+
     // Round free space to period sizes to reduce number of write() calls.
     int space = state.free_samples / ao->period_size * ao->period_size;
     bool play_silence = p->paused || (ao->stream_silence && !p->still_playing);

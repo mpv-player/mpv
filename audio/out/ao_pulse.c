@@ -52,7 +52,7 @@ struct priv {
     struct pa_sink_input_info pi;
 
     int retval;
-    bool underrun;
+    bool playing;
 
     char *cfg_host;
     int cfg_buffer;
@@ -134,7 +134,7 @@ static void underflow_cb(pa_stream *s, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
-    priv->underrun = true;
+    priv->playing = false;
     ao_wakeup_playthread(ao);
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
@@ -486,9 +486,15 @@ static void cork(struct ao *ao, bool pause)
     struct priv *priv = ao->priv;
     pa_threaded_mainloop_lock(priv->mainloop);
     priv->retval = 0;
-    if (!waitop(priv, pa_stream_cork(priv->stream, pause, success_cb, ao)) ||
-        !priv->retval)
+    if (waitop_no_unlock(priv, pa_stream_cork(priv->stream, pause, success_cb, ao))
+        && priv->retval)
+    {
+        priv->playing = true;
+    } else {
         GENERIC_ERR_MSG("pa_stream_cork() failed");
+        priv->playing = false;
+    }
+    pa_threaded_mainloop_unlock(priv->mainloop);
 }
 
 // Play the specified data to the pulseaudio server
@@ -614,14 +620,13 @@ static void audio_get_state(struct ao *ao, struct mp_pcm_state *state)
         state->delay = get_delay_pulse(ao);
     }
 
-    state->underrun = priv->underrun;
-    priv->underrun = false;
+    state->playing = priv->playing;
 
     pa_threaded_mainloop_unlock(priv->mainloop);
 
     // Otherwise, PA will keep hammering us for underruns (which it does instead
     // of stopping the stream automatically).
-    if (state->underrun)
+    if (!state->playing)
         cork(ao, true);
 }
 
