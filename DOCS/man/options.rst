@@ -1091,8 +1091,8 @@ Video
 
     This does:
 
-    - Use the demuxer reported FPS for frame dropping. This avoids that the
-      player needs to decode 1 frame in advance, lowering total latency in
+    - Use the demuxer reported FPS for frame dropping. This avoids the
+      player needing to decode 1 frame in advance, lowering total latency in
       effect. This also means that if the demuxer reported FPS is wrong, or
       the video filter chain changes FPS (e.g. deinterlacing), then it could
       drop too many or not enough frames.
