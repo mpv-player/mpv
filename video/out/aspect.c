@@ -77,12 +77,12 @@ static void clamp_size(int size, int *start, int *end)
 
 static void src_dst_split_scaling(int src_size, int dst_size,
                                   int scaled_src_size,
-                                  float zoom, float align, float pan,
+                                  float zoom, float align, float pan, float scale,
                                   int *src_start, int *src_end,
                                   int *dst_start, int *dst_end,
                                   int *osd_margin_a, int *osd_margin_b)
 {
-    scaled_src_size *= powf(2, zoom);
+    scaled_src_size *= powf(2, zoom) * scale;
     align = (align + 1) / 2;
 
     *src_start = 0;
@@ -168,11 +168,11 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
                             vid_window_w, vid_window_h, monitor_par,
                             &scaled_width, &scaled_height);
         src_dst_split_scaling(src_w, vid_window_w, scaled_width,
-                              opts->zoom, opts->align_x, opts->pan_x,
+                              opts->zoom, opts->align_x, opts->pan_x, opts->scale_x,
                               &src.x0, &src.x1, &dst.x0, &dst.x1,
                               &osd.ml, &osd.mr);
         src_dst_split_scaling(src_h, vid_window_h, scaled_height,
-                              opts->zoom, opts->align_y, opts->pan_y,
+                              opts->zoom, opts->align_y, opts->pan_y, opts->scale_y,
                               &src.y0, &src.y1, &dst.y0, &dst.y1,
                               &osd.mt, &osd.mb);
     }

@@ -1467,6 +1467,15 @@ Video
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
+``--video-scale-x=<value>``, ``--video-scale-y=<value>``
+    Multiply the video display size with the given value (default: 1.0). If a
+    non-default value is used, this will be different from the window size, so
+    video will be either cut off, or black bars are added.
+
+    This value is multiplied with the value derived from ``--video-zoom`` and
+    the normal video aspect aspect ratio. This option is disabled if the
+    ``--no-keepaspect`` option is used.
+
 ``--video-align-x=<-1-1>``, ``--video-align-y=<-1-1>``
     Moves the video rectangle within the black borders, which are usually added
     to pad the video to screen if video and screen aspect ratios are different.
