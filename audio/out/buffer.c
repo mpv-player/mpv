@@ -687,13 +687,11 @@ static void *playthread(void *arg)
         // Fallback to guessing.
         double timeout = INFINITY;
         if (p->ao_wait_low_buffer) {
-            struct mp_pcm_state state;
-            get_dev_state(ao, &state);
-            timeout = state.delay * 0.25; // wake up if 25% played
+            // Wake up again if half of the audio buffer has been played.
+            // Since audio could play at a faster or slower pace, wake up twice
+            // as often as ideally needed.
+            timeout = ao->device_buffer / (double)ao->samplerate * 0.25;
             p->ao_wait_low_buffer = false;
-            // If the AO doesn't tell us, we need to guess.
-            if (p->draining)
-                timeout = MPMAX(timeout, 0.1);
         }
 
         pthread_mutex_unlock(&p->lock);
