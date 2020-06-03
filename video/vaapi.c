@@ -226,7 +226,7 @@ static void drm_create(VADisplay **out_display, void **out_native_ctx,
     struct va_native_display_drm *ctx = talloc_ptrtype(NULL, ctx);
     ctx->drm_fd = drm_fd;
     *out_display = vaGetDisplayDRM(drm_fd);
-    if (out_display) {
+    if (*out_display) {
         *out_native_ctx = ctx;
         return;
     }
