@@ -632,7 +632,7 @@ static void ao_play_data(struct ao *ao)
     bool ok = true;
     int written = 0;
     if (samples) {
-        p->draining = is_eof;
+        p->draining |= is_eof;
         MP_STATS(ao, "start ao fill");
         ok = ao->driver->write(ao, planes, samples);
         MP_STATS(ao, "end ao fill");
