@@ -26,7 +26,7 @@
 #include "utils.h"
 
 // Generated from presentation-time.xml
-#include "video/out/wayland/presentation-time.h"
+#include "generated/wayland/presentation-time.h"
 
 #define EGL_PLATFORM_WAYLAND_EXT 0x31D8
 

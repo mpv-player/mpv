@@ -34,10 +34,10 @@
 #include "generated/wayland/xdg-shell.h"
 
 // Generated from idle-inhibit-unstable-v1.xml
-#include "generated/wayland/idle-inhibit-v1.h"
+#include "generated/wayland/idle-inhibit-unstable-v1.h"
 
 // Generated from xdg-decoration-unstable-v1.xml
-#include "generated/wayland/xdg-decoration-v1.h"
+#include "generated/wayland/xdg-decoration-unstable-v1.h"
 
 // Generated from presentation-time.xml
 #include "generated/wayland/presentation-time.h"
