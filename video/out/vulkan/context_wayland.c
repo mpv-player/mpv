@@ -23,7 +23,7 @@
 #include "utils.h"
 
 // Generated from presentation-time.xml
-#include "video/out/wayland/presentation-time.h"
+#include "generated/wayland/presentation-time.h"
 
 struct priv {
     struct mpvk_ctx vk;
