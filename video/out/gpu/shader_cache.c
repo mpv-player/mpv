@@ -695,7 +695,7 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
                 u->input.binding, u->input.name, u->buffer_format);
             break;
         case RA_VARTYPE_BUF_RW:
-            ADD(dst, "layout(std430, binding=%d) buffer %s { %s };\n",
+            ADD(dst, "layout(std430, binding=%d) restrict buffer %s { %s };\n",
                 u->input.binding, u->input.name, u->buffer_format);
             break;
         case RA_VARTYPE_IMG_W: {
@@ -712,7 +712,7 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
             } else if (fmt) {
                 ADD(dst, "layout(%s) ", fmt);
             }
-            ADD(dst, "uniform %s %s;\n", u->glsl_type, u->input.name);
+            ADD(dst, "uniform restrict %s %s;\n", u->glsl_type, u->input.name);
         }
         }
     }
