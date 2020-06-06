@@ -3458,6 +3458,7 @@ done:
     talloc_free(nframe);
     ra_tex_free(p->ra, &target);
     gl_video_resize(p, &old_src, &old_dst, &old_osd);
+    gl_video_reset_surfaces(p);
     if (!ok)
         TA_FREEP(&res);
     args->res = res;
