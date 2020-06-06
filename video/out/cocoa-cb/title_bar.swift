@@ -96,6 +96,8 @@ class TitleBar: NSVisualEffectView {
                 window?.zoom(self)
             }
         }
+
+        cocoaCB.window?.isMoving = false
     }
 
     func set(appearance: Any) {
