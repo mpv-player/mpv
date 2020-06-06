@@ -2636,7 +2636,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     if (detect_peak) {
         pass_describe(p, "detect HDR peak");
         pass_is_compute(p, 8, 8, true); // 8x8 is good for performance
-        gl_sc_ssbo(p->sc, "PeakDetect", p->hdr_peak_ssbo,
+        gl_sc_ssbo(p->sc, "coherent PeakDetect", p->hdr_peak_ssbo,
             "vec2 average;"
             "int frame_sum;"
             "uint frame_max;"
