@@ -16,6 +16,17 @@ _macbase:
                    'pkg-config', 'python']
         update: true
 
+_mingwbase:
+  - &mingw
+    os: linux
+    addons:
+      apt:
+        packages: ['autoconf', 'automake', 'pkg-config', 'gcc-mingw-w64',
+                   'nasm', 'yasm']
+    cache:
+      directories:
+        - mingw_prefix/
+
 matrix:
   include:
     - <<: *macNew
@@ -32,10 +43,10 @@ matrix:
     - os: linux
       compiler: clang
       env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh
-    - os: linux
-      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:i686 CI_SCRIPT=ci/build-mingw64.sh TARGET=i686-w64-mingw32
-    - os: linux
-      env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci-mingw64:x86_64 CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
+    - <<: *mingw
+      env: CI_SCRIPT=ci/build-mingw64.sh TARGET=i686-w64-mingw32
+    - <<: *mingw
+      env: CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
   allow_failures:
     - os: osx
       osx_image: xcode9.2
@@ -62,7 +73,7 @@ branches:
 before_install:
   - if [ "$TRAVIS_COMPILER" = "clang" ]; then export CXX="clang++"; fi
   - if [ "$TRAVIS_COMPILER" = "gcc" ]; then export CXX="g++"; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker pull $CONTAINER; fi
+  - if [ -n "$CONTAINER" ]; then docker pull $CONTAINER; fi
   - |
         if [ "$TRAVIS_OS_NAME" = "freebsd" ]; then
             # Requested in ci/build-freebsd.sh
@@ -129,7 +140,14 @@ cache:
 
 script:
   - ./bootstrap.py
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"; fi
+  - |
+        if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+            if [ -n "$CONTAINER" ]; then
+                docker run --env CC --env TARGET -v $TRAVIS_BUILD_DIR:/build $CONTAINER /bin/sh -c "cd /build && $CI_SCRIPT"
+            else
+                $CI_SCRIPT
+            fi
+        fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./ci/build-macos.sh; fi
   - if [ "$TRAVIS_OS_NAME" = "freebsd" ]; then ./ci/build-freebsd.sh; fi
 after_failure: cat ./build/config.log
