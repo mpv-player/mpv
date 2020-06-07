@@ -465,6 +465,14 @@ static int init(struct ao *ao)
         goto unlock_and_fail;
     }
 
+    const pa_buffer_attr* final_bufattr = pa_stream_get_buffer_attr(priv->stream);
+    if(!final_bufattr) {
+        MP_ERR(ao, "PulseAudio didn't tell us what buffer sizes it set. Bailing out.\n");
+        goto unlock_and_fail;
+    }
+    ao->device_buffer = final_bufattr->tlength /
+                        af_fmt_to_bytes(ao->format) / ao->channels.num;
+
     pa_threaded_mainloop_unlock(priv->mainloop);
     return 0;
 
