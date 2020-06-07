@@ -472,6 +472,7 @@ static int init(struct ao *ao)
     }
     ao->device_buffer = final_bufattr->tlength /
                         af_fmt_to_bytes(ao->format) / ao->channels.num;
+    ao->period_size = final_bufattr->minreq / af_fmt_to_bytes(ao->format) / ao->channels.num;
 
     pa_threaded_mainloop_unlock(priv->mainloop);
     return 0;
