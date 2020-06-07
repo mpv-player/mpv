@@ -147,6 +147,23 @@ static void success_cb(pa_stream *s, int success, void *userdata)
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
+/* Note: for some reason this callback gets called twice. I don't know why, I don't
+ * care to find out why, and the second time around it's called with a nullpointer
+ * as the info struct, so I do not have to care as to why. */
+static void fragment_size_cb(pa_context *c, const pa_sink_info *i, int eol,
+                             void *userdata)
+{
+    struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
+    const pa_sample_spec* sspec = pa_stream_get_sample_spec(priv->stream);
+    if(!i)
+        return;
+    const char* frag_size = pa_proplist_gets(i->proplist, PA_PROP_DEVICE_BUFFERING_FRAGMENT_SIZE);
+    if(!frag_size)
+        return;
+    ao->period_size = strtoul(frag_size, NULL, 10) / pa_frame_size(sspec);
+}
+
 // Like waitop(), but keep the lock (even if it may unlock temporarily).
 static bool waitop_no_unlock(struct priv *priv, pa_operation *op)
 {
@@ -392,6 +409,7 @@ static int init(struct ao *ao)
     pa_format_info *format = NULL;
     struct priv *priv = ao->priv;
     char *sink = ao->device;
+    pa_operation* paop = NULL;
 
     if (pa_init_boilerplate(ao) < 0)
         return -1;
@@ -472,6 +490,14 @@ static int init(struct ao *ao)
     }
     ao->device_buffer = final_bufattr->tlength /
                         af_fmt_to_bytes(ao->format) / ao->channels.num;
+
+    /* Having a fantastic API means that getting something resembling the period_size we
+     * need to wait for an asynchronous callback that parses a string. */
+    ao->period_size = -1;
+    paop = pa_context_get_sink_info_by_name(priv->context,
+                                            pa_stream_get_device_name(priv->stream),
+                                            fragment_size_cb, ao);
+    waitop_no_unlock(priv, paop);
 
     pa_threaded_mainloop_unlock(priv->mainloop);
     return 0;
