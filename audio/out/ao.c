@@ -236,7 +236,7 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
     }
     ao->bps = ao->samplerate * ao->sstride;
 
-    if (ao->device_buffer < 0 && ao->driver->write) {
+    if (ao->device_buffer <= 0 && ao->driver->write) {
         MP_ERR(ao, "Device buffer size not set.\n");
         goto fail;
     }

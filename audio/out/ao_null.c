@@ -105,7 +105,7 @@ static int init(struct ao *ao)
 
     // A "buffer" for this many seconds of audio
     int bursts = (int)(ao->samplerate * priv->bufferlen + 1) / priv->outburst;
-    priv->buffersize = priv->outburst * bursts + priv->latency;
+    ao->device_buffer = priv->outburst * bursts + priv->latency;
 
     priv->last_time = mp_time_sec();
 
@@ -175,7 +175,7 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
 
     drain(ao);
 
-    state->free_samples = priv->buffersize - priv->latency - priv->buffered;
+    state->free_samples = ao->device_buffer - priv->latency - priv->buffered;
     state->free_samples = state->free_samples / priv->outburst * priv->outburst;
     state->queued_samples = priv->buffered;
 
