@@ -562,9 +562,14 @@ static int open_s_internal(stream_t *stream)
 {
     struct priv *priv, *p;
     priv = p = stream->priv;
-    char *filename;
 
     p->opts = mp_get_config_group(stream, stream->global, &dvd_conf);
+
+    char *filename = "/dev/dvd";
+
+#if defined(_WIN32)
+    filename = "D:";
+#endif
 
     if (p->device && p->device[0])
         filename = p->device;

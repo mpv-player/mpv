@@ -292,12 +292,16 @@ static int open_cdda(stream_t *st)
                        &global_device);
     talloc_steal(st, global_device);
 
+#if defined(_WIN32)
+    p->device = "D:";
+#else
+    p->device = "/dev/cdrom";
+#endif
+
     if (st->path[0]) {
         p->device = st->path;
     } else if (global_device && global_device[0]) {
         p->device = global_device;
-    } else {
-        p->device = DEFAULT_CDROM_DEVICE;
     }
 
 #if defined(__NetBSD__)
