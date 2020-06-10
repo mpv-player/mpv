@@ -1158,6 +1158,9 @@ static void handle_playback_restart(struct MPContext *mpctx)
 
 static void handle_eof(struct MPContext *mpctx)
 {
+    if (mpctx->seek.type)
+        return; // for proper keep-open operation
+
     /* Don't quit while paused and we're displaying the last video frame. On the
      * other hand, if we don't have a video frame, then the user probably seeked
      * outside of the video, and we do want to quit. */
