@@ -292,7 +292,9 @@ bool mp_load_scripts(struct MPContext *mpctx)
 
 #if HAVE_CPLUGINS
 
+#if !_WIN32
 #include <dlfcn.h>
+#endif
 
 #define MPV_DLOPEN_FN "mpv_open_cplugin"
 typedef int (*mpv_open_cplugin)(mpv_handle *handle);
@@ -300,11 +302,13 @@ typedef int (*mpv_open_cplugin)(mpv_handle *handle);
 static int load_cplugin(struct mp_script_args *args)
 {
     void *lib = dlopen(args->filename, RTLD_NOW | RTLD_LOCAL);
+
     if (!lib)
         goto error;
     // Note: once loaded, we never unload, as unloading the libraries linked to
     //       the plugin can cause random serious problems.
     mpv_open_cplugin sym = (mpv_open_cplugin)dlsym(lib, MPV_DLOPEN_FN);
+
     if (!sym)
         goto error;
     return sym(args->client) ? -1 : 0;
@@ -316,8 +320,13 @@ error: ;
 }
 
 const struct mp_scripting mp_scripting_cplugin = {
+    #if _WIN32
+    .name = "DLL plugin",
+    .file_ext = "dll",
+    #else
     .name = "SO plugin",
     .file_ext = "so",
+    #endif
     .load = load_cplugin,
 };
 
