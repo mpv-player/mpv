@@ -221,16 +221,9 @@ static void tex_destroy_pl(struct ra *ra, struct ra_tex *tex)
     talloc_free(tex);
 }
 
-static int texel_stride_w(size_t stride, const struct pl_tex *tex)
-{
-    size_t texel_size = tex->params.format->texel_size;
-    int texels = stride / texel_size;
-    assert(texels * texel_size == stride);
-    return texels;
-}
-
 static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *params)
 {
+    const struct pl_gpu *gpu = get_gpu(ra);
     const struct pl_tex *tex = params->tex->priv;
     struct pl_tex_transfer_params pl_params = {
         .tex = tex,
@@ -242,32 +235,79 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
 #endif
     };
 
+    const struct pl_buf *staging = NULL;
+
     if (params->tex->params.dimensions == 2) {
-        pl_params.stride_w = texel_stride_w(params->stride, tex);
+        size_t texel_size = tex->params.format->texel_size;
+        pl_params.stride_w = params->stride / texel_size;
+        size_t stride = pl_params.stride_w * texel_size;
+        int lines = tex->params.h;
         if (params->rc) {
             pl_params.rc = (struct pl_rect3d) {
                 .x0 = params->rc->x0, .x1 = params->rc->x1,
                 .y0 = params->rc->y0, .y1 = params->rc->y1,
             };
+            lines = pl_rect_h(pl_params.rc);
+        }
+
+        if (stride != params->stride) {
+            // Fall back to uploading via a staging buffer prepared in CPU
+            staging = pl_buf_create(gpu, &(struct pl_buf_params) {
+                .type = PL_BUF_TEX_TRANSFER,
+                .size = lines * stride,
+                .memory_type = PL_BUF_MEM_HOST,
+                .host_mapped = true,
+            });
+            if (!staging)
+                return false;
+
+            const uint8_t *src = params->buf ? params->buf->data : params->src;
+            assert(src);
+            for (int y = 0; y < lines; y++)
+                memcpy(staging->data + y * stride, src + y * params->stride, stride);
+
+            pl_params.ptr = NULL;
+            pl_params.buf = staging;
+            pl_params.buf_offset = 0;
         }
     }
 
-    return pl_tex_upload(get_gpu(ra), &pl_params);
+    bool ok = pl_tex_upload(gpu, &pl_params);
+    pl_buf_destroy(gpu, &staging);
+    return ok;
 }
 
 static bool tex_download_pl(struct ra *ra, struct ra_tex_download_params *params)
 {
     const struct pl_tex *tex = params->tex->priv;
+    size_t texel_size = tex->params.format->texel_size;
     struct pl_tex_transfer_params pl_params = {
         .tex = tex,
         .ptr = params->dst,
-        .stride_w = texel_stride_w(params->stride, tex),
+        .stride_w = params->stride / texel_size,
 #if PL_API_VER >= 60
         .timer = get_active_timer(ra),
 #endif
     };
 
-    return pl_tex_download(get_gpu(ra), &pl_params);
+    uint8_t *staging = NULL;
+    size_t stride = pl_params.stride_w * texel_size;
+    if (stride != params->stride) {
+        staging = talloc_size(NULL, tex->params.h * stride);
+        pl_params.ptr = staging;
+    }
+
+    bool ok = pl_tex_download(get_gpu(ra), &pl_params);
+    if (ok && staging) {
+        for (int y = 0; y < tex->params.h; y++) {
+            memcpy((uint8_t *) params->dst + y * params->stride,
+                   staging + y * stride,
+                   stride);
+        }
+    }
+
+    talloc_free(staging);
+    return ok;
 }
 
 static struct ra_buf *buf_create_pl(struct ra *ra,
