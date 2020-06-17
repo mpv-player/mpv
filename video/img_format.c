@@ -200,6 +200,7 @@ static void fill_pixdesc_layout(struct mp_imgfmt_desc *desc,
     // explicitly marks big endian formats => don't need to guess whether a
     // format is little endian, or not affected by byte order.
     bool is_be = pd->flags & AV_PIX_FMT_FLAG_BE;
+    bool is_ne = MP_SELECT_LE_BE(false, true) == is_be;
 
     // Packed sub-sampled YUV is very... special.
     bool is_packed_ss_yuv = pd->log2_chroma_w && !pd->log2_chroma_h &&
@@ -283,19 +284,20 @@ static void fill_pixdesc_layout(struct mp_imgfmt_desc *desc,
         // representable, because endian_shift is for all planes).
         // As a heuristic, assume that if any components share a byte, the whole
         // pixel is read as a single memory access and endian swapped at once.
-        int endian_size = 8;
-        if (is_be && plane_bits > 8) {
+        int access_size = 8;
+        if (plane_bits > 8) {
             if (any_shared_bytes) {
-                endian_size = plane_bits;
-                if (word != endian_size) {
+                access_size = plane_bits;
+                if (is_be && word != access_size) {
                     // Before: offset = 8*byte_offset (with word bits of data)
                     // After: offset = bit_offset into swapped endian_size word
-                    offset = endian_size - word - offset;
+                    offset = access_size - word - offset;
                 }
             } else {
-                endian_size = word;
+                access_size = word;
             }
         }
+        int endian_size = (access_size && !is_ne) ? access_size : 8;
         int endian_shift = mp_log2(endian_size) - 3;
         if (!MP_IS_POWER_OF_2(endian_size) || endian_shift < 0 || endian_shift > 3)
             goto fail;
@@ -458,12 +460,13 @@ static bool mp_imgfmt_get_desc_from_pixdesc(int mpfmt, struct mp_imgfmt_desc *ou
         desc.align_x = 8 / desc.bpp[0]; // expect power of 2
 
     // Very heuristical.
-    bool is_be = desc.endian_shift > 0;
+    bool is_ne = !desc.endian_shift;
     bool need_endian = (desc.comps[0].size % 8u && desc.bpp[0] > 8) ||
                        desc.comps[0].size > 8;
 
     if (need_endian) {
-        desc.flags |= is_be ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
+        bool is_le = MP_SELECT_LE_BE(is_ne, !is_ne);
+        desc.flags |= is_le ? MP_IMGFLAG_LE : MP_IMGFLAG_BE;
     } else {
         desc.flags |= MP_IMGFLAG_LE | MP_IMGFLAG_BE;
     }
