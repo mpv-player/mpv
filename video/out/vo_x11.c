@@ -207,13 +207,29 @@ static bool resize(struct vo *vo)
             (desc.flags & MP_IMGFLAG_NE) && !(desc.flags & MP_IMGFLAG_ALPHA) &&
             desc.bpp[0] <= 8 * sizeof(unsigned long) &&
             p->myximage[0]->bits_per_pixel == desc.bpp[0] &&
-            p->myximage[0]->byte_order == LSBFirst &&
-            p->myximage[0]->red_mask == MAKE_MASK(desc.comps[0]) &&
-            p->myximage[0]->green_mask == MAKE_MASK(desc.comps[1]) &&
-            p->myximage[0]->blue_mask == MAKE_MASK(desc.comps[2]))
+            p->myximage[0]->byte_order == MP_SELECT_LE_BE(LSBFirst, MSBFirst))
         {
-            mpfmt = fmt;
-            break;
+            // desc.comps[] uses little endian bit offsets, so "swap" the
+            // offsets here.
+            if (MP_SELECT_LE_BE(0, 1)) {
+                // Except for formats that use byte swapping; for these, the
+                // offsets are in native endian. There is no way to distinguish
+                // which one a given format is (could even be both), and using
+                // mp_find_other_endian() is just a guess.
+                if (!mp_find_other_endian(fmt)) {
+                    for (int c = 0; c < 3; c++) {
+                        desc.comps[c].offset =
+                            desc.bpp[0] - desc.comps[c].size -desc.comps[c].offset;
+                    }
+                }
+            }
+            if (p->myximage[0]->red_mask == MAKE_MASK(desc.comps[0]) &&
+                p->myximage[0]->green_mask == MAKE_MASK(desc.comps[1]) &&
+                p->myximage[0]->blue_mask == MAKE_MASK(desc.comps[2]))
+            {
+                mpfmt = fmt;
+                break;
+            }
         }
     }
 
