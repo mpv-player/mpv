@@ -948,12 +948,13 @@ static bool setup_format_ne(struct mp_repack *rp)
         return false;
 
     // Endian swapping.
-    if (rp->imgfmt_a != rp->imgfmt_user) {
-        struct mp_regular_imgfmt ndesc;
-        if (!mp_get_regular_imgfmt(&ndesc, rp->imgfmt_a) || ndesc.num_planes > 4)
-            return false;
-        rp->endian_size = ndesc.component_size;
-        if (rp->endian_size != 2 && rp->endian_size != 4)
+    if (rp->imgfmt_a != rp->imgfmt_user &&
+        rp->imgfmt_a == mp_find_other_endian(rp->imgfmt_user))
+    {
+        struct mp_imgfmt_desc desc_a = mp_imgfmt_get_desc(rp->imgfmt_a);
+        struct mp_imgfmt_desc desc_u = mp_imgfmt_get_desc(rp->imgfmt_user);
+        rp->endian_size = 1 << desc_u.endian_shift;
+        if (!desc_a.endian_shift && rp->endian_size != 2 && rp->endian_size != 4)
             return false;
     }
 
