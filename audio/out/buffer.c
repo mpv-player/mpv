@@ -288,9 +288,14 @@ int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
     struct buffer_state *p = ao->buffer_state;
     int r = CONTROL_UNKNOWN;
     if (ao->driver->control) {
-        pthread_mutex_lock(&p->lock);
+        // Only need to lock in push mode.
+        if (ao->driver->write)
+            pthread_mutex_lock(&p->lock);
+
         r = ao->driver->control(ao, cmd, arg);
-        pthread_mutex_unlock(&p->lock);
+
+        if (ao->driver->write)
+            pthread_mutex_unlock(&p->lock);
     }
     return r;
 }
