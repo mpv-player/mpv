@@ -29,6 +29,7 @@ struct entry {
 #define P16(...) (const uint16_t[]){__VA_ARGS__}
 #define P32(...) (const uint32_t[]){__VA_ARGS__}
 #define SW16(v) ((((v) & 0xFF) << 8) | ((v) >> 8))
+#define SW32(v) ((SW16((v) & 0xFFFFu) << 16) | (SW16(((v) | 0u) >> 16)))
 
 // Warning: only entries that match existing conversions are tested.
 static const struct entry repack_tests[] = {
@@ -128,6 +129,8 @@ static const struct entry repack_tests[] = {
            IMGFMT_GBRP,             {P8(0,0xFF,0), P8(0,0,0xFF), P8(0xFF,0,0)},
         .flags = REPACK_CREATE_EXPAND_8BIT},
     {1, 1, IMGFMT_RGB30,            {P32((3 << 20) | (2 << 10) | 1)},
+           -AV_PIX_FMT_GBRP10,      {P16(2), P16(1), P16(3)}},
+    {1, 1, -AV_PIX_FMT_X2RGB10BE,   {P32(SW32((3 << 20) | (2 << 10) | 1))},
            -AV_PIX_FMT_GBRP10,      {P16(2), P16(1), P16(3)}},
     {8, 1, -AV_PIX_FMT_MONOWHITE,   {P8(0xAA)},
            IMGFMT_Y1,               {P8(0, 1, 0, 1, 0, 1, 0, 1)}},

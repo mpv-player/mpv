@@ -1051,6 +1051,10 @@ rgb30: fcsp=rgb ctype=uint
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
     0: 32bits {20:10} {10:10} {0:10} {}
+  AVD: name=x2rgb10le chroma=0:0 flags=0x20 [rgb]
+    0: p=0  st=4  o=2  sh=4  d=10
+    1: p=0  st=4  o=1  sh=2  d=10
+    2: p=0  st=4  o=0  sh=0  d=10
 rgb4: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [rgb][le][be][uint]
     planes=1, chroma=0:0 align=2:1
@@ -1240,6 +1244,15 @@ vulkan: [GENERIC] ctype=unknown
     planes=0, chroma=0:0 align=1:1
     {}
   AVD: name=vulkan chroma=0:0 flags=0x8 [hw]
+x2rgb10be: [GENERIC] fcsp=rgb ctype=uint
+  Basic desc: [ba][rgb][be][uint]
+    planes=1, chroma=0:0 align=1:1
+    {32/[0:0] }
+    0: 32bits endian_bytes=4 {20:10} {10:10} {0:10} {}
+  AVD: name=x2rgb10be chroma=0:0 flags=0x21 [be][rgb]
+    0: p=0  st=4  o=0  sh=4  d=10
+    1: p=0  st=4  o=1  sh=2  d=10
+    2: p=0  st=4  o=2  sh=0  d=10
 xvmc: [GENERIC] ctype=unknown
   Basic desc: [le][be][hw]
     planes=0, chroma=0:0 align=1:1

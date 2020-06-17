@@ -123,6 +123,7 @@ vdpau       = no
 vdpau_output= no
 videotoolbox= no
 vulkan      = no
+x2rgb10be   = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown
 xvmc        = no
 xyz12       = align=1:1 ov=gbrap  , ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown
 xyz12be     = align=1:1 ov=gbrap  , ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown

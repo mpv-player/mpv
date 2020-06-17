@@ -209,6 +209,8 @@ vdpau           => no
 vdpau_output    => no
 videotoolbox    => no
 vulkan          => no
+x2rgb10be       => [pa] [un] gbrp10          | a=1:1 [tu] [tp]
+x2rgb10be       => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 xvmc            => no
 xyz12           => [pa] [un] gbrp16          | a=1:1 [tu] [tp]
 xyz12           => [pa] [un] gbrpf32         | a=1:1 [planar-f32]

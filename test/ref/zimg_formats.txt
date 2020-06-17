@@ -44,8 +44,8 @@
       gbrap12be    Zin   Zout  SWSin  SWSout |
         gbrap16    Zin   Zout  SWSin  SWSout |
       gbrap16be    Zin   Zout  SWSin  SWSout |
-       gbrapf32    Zin   Zout                |
-     gbrapf32be    Zin   Zout                |
+       gbrapf32    Zin   Zout  SWSin  SWSout |
+     gbrapf32be    Zin   Zout  SWSin  SWSout |
            gbrp    Zin   Zout  SWSin  SWSout |
           gbrp1    Zin   Zout                |
          gbrp10    Zin   Zout  SWSin  SWSout |
@@ -63,8 +63,8 @@
           gbrp6    Zin   Zout                |
           gbrp9    Zin   Zout  SWSin  SWSout |
         gbrp9be    Zin   Zout  SWSin  SWSout |
-        gbrpf32    Zin   Zout                |
-      gbrpf32be    Zin   Zout                |
+        gbrpf32    Zin   Zout  SWSin  SWSout |
+      gbrpf32be    Zin   Zout  SWSin  SWSout |
            gray    Zin   Zout  SWSin  SWSout |
          gray10    Zin   Zout  SWSin  SWSout |
        gray10be    Zin   Zout  SWSin  SWSout |
@@ -99,7 +99,7 @@
             qsv                              |
            rgb0    Zin   Zout  SWSin  SWSout |
           rgb24    Zin   Zout  SWSin  SWSout |
-          rgb30    Zin   Zout                |
+          rgb30    Zin   Zout  SWSin  SWSout |
            rgb4                       SWSout |
          rgb444    Zin   Zout  SWSin  SWSout |
        rgb444be    Zin   Zout  SWSin  SWSout |
@@ -123,6 +123,7 @@
    vdpau_output                              |
    videotoolbox                              |
          vulkan                              |
+      x2rgb10be    Zin   Zout                |
            xvmc                              |
           xyz12    Zin   Zout  SWSin  SWSout |
         xyz12be    Zin   Zout  SWSin  SWSout |
