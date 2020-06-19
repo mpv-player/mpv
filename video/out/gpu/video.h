@@ -108,6 +108,7 @@ struct gl_tone_map_opts {
     float desat;
     float desat_exp;
     int gamut_warning; // bool
+    int gamut_clipping; // bool
 };
 
 struct gl_video_opts {

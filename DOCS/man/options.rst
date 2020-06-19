@@ -6167,6 +6167,13 @@ The following video options are currently all specific to ``--vo=gpu`` and
     well with ICC profiles, since the 3DLUTs are always generated against the
     source color space and have chromatically-accurate clipping built in.
 
+``--gamut-clipping``
+    If enabled (default: yes), mpv will colorimetrically clip out-of-gamut
+    colors by desaturating them (preserving luma), rather than hard-clipping
+    each component individually. This should make playback of wide gamut
+    content on typical (standard gamut) monitors look much more aesthetically
+    pleasing and less blown-out.
+
 ``--use-embedded-icc-profile``
     Load the embedded ICC profile contained in media files such as PNG images.
     (Default: yes). Note that this option only works when also using a display

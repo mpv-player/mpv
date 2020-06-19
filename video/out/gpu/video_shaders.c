@@ -870,6 +870,17 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
         mp_get_cms_matrix(csp_src, csp_dst, MP_INTENT_RELATIVE_COLORIMETRIC, m);
         gl_sc_uniform_mat3(sc, "cms_matrix", true, &m[0][0]);
         GLSL(color.rgb = cms_matrix * color.rgb;)
+
+        if (opts->gamut_clipping) {
+            GLSL(float cmin = min(min(color.r, color.g), color.b);)
+            GLSL(if (cmin < 0.0) {
+                     float luma = dot(dst_luma, color.rgb);
+                     float coeff = cmin / (cmin - luma);
+                     color.rgb = mix(color.rgb, vec3(luma), coeff);
+                 })
+            GLSL(float cmax = max(max(color.r, color.g), color.b);)
+            GLSL(if (cmax > 1.0) color.rgb /= cmax;)
+        }
     }
 
     if (need_ootf)
