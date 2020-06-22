@@ -228,7 +228,8 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-fps", OPT_FLOAT(sub_fps)},
         {"sub-speed", OPT_FLOAT(sub_speed)},
         {"sub-visibility", OPT_FLAG(sub_visibility)},
-        {"sub-forced-only", OPT_FLAG(forced_subs_only)},
+        {"sub-forced-only", OPT_CHOICE(forced_subs_only,
+            {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"stretch-dvd-subs", OPT_FLAG(stretch_dvd_subs)},
         {"stretch-image-subs-to-screen", OPT_FLAG(stretch_image_subs)},
         {"image-subs-video-resolution", OPT_FLAG(image_subs_video_res)},
@@ -269,6 +270,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
     .size = sizeof(OPT_BASE_STRUCT),
     .defaults = &(OPT_BASE_STRUCT){
         .sub_visibility = 1,
+        .forced_subs_only = -1,
         .sub_pos = 100,
         .sub_speed = 1.0,
         .ass_enabled = 1,
@@ -489,6 +491,7 @@ static const m_option_t mp_opts[] = {
     {"slang", OPT_STRINGLIST(stream_lang[STREAM_SUB])},
     {"vlang", OPT_STRINGLIST(stream_lang[STREAM_VIDEO])},
     {"track-auto-selection", OPT_FLAG(stream_auto_sel)},
+    {"subs-with-matching-audio", OPT_FLAG(subs_with_matching_audio)},
 
     {"lavfi-complex", OPT_STRING(lavfi_complex), .flags = UPDATE_LAVFI_COMPLEX},
 
@@ -992,6 +995,7 @@ static const struct MPOpts mp_default_opts = {
                      [STREAM_VIDEO] = -2,
                      [STREAM_SUB] = -2, }, },
     .stream_auto_sel = 1,
+    .subs_with_matching_audio = 1,
     .audio_display = 1,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,

@@ -533,6 +533,12 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     if (pts == MP_NOPTS_VALUE || !renderer)
         goto done;
 
+    // Currently no supported text sub formats support a distinction between forced
+    // and unforced lines, so we just assume everything's unforced and discard everything.
+    // If we ever see a format that makes this distinction, we can add support here.
+    if (opts->forced_subs_only_current)
+        goto done;
+
     double scale = dim.display_par;
     if (!converted && (!opts->ass_style_override ||
                        opts->ass_vsfilter_aspect_compat))

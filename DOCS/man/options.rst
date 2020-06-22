@@ -135,6 +135,11 @@ Track Selection
     Note that if ``--lavfi-complex`` is set before playback is started, the
     referenced tracks are always selected.
 
+``--subs-with-matching-audio=<yes|no>``
+    When autoselecting a subtitle track, select a non-forced one even if the selected
+    audio stream matches your preferred subtitle language (default: yes). Disable this
+    if you'd like to only show subtitles for foreign audio or onscreen text.
+
 
 Playback Control
 ----------------
@@ -2487,9 +2492,12 @@ Subtitles
     subtitles (if the difference is smaller than 210 ms, the gap or overlap
     is removed).
 
-``--sub-forced-only``
+``--sub-forced-only=<auto|yes|no>``
     Display only forced subtitles for the DVD subtitle stream selected by e.g.
-    ``--slang``.
+    ``--slang`` (default: ``auto``). When set to ``auto``, enabled when the
+    ``--subs-with-matching-audio`` option is on and a non-forced stream is selected.
+    Enabling this will hide all subtitles in streams that don't make a distinction
+    between forced and unforced events within a stream.
 
 ``--sub-fps=<rate>``
     Specify the framerate of the subtitle file (default: video fps). Affects

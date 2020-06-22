@@ -453,17 +453,19 @@ static int match_lang(char **langs, char *lang)
  * 1) track is external (no_default cancels this)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
- * 3a) track is marked forced
- * 3b) track is marked default
+ * 3a) track is marked forced and we're preferring forced tracks
+ * 3b) track is marked non-forced and we're preferring non-forced tracks
+ * 3c) track is marked default
  * 4) attached picture, HLS bitrate
  * 5) lower track number
  * If select_fallback is not set, 5) is only used to determine whether a
  * matching track is preferred over another track. Otherwise, always pick a
  * track (if nothing else matches, return the track with lowest ID).
+ * Forced tracks are preferred when the user prefers not to display subtitles
  */
 // Return whether t1 is preferred over t2
 static bool compare_track(struct track *t1, struct track *t2, char **langs,
-                          struct MPOpts *opts)
+                          int prefer_forced, struct MPOpts *opts)
 {
     if (!opts->autoload_files && t1->is_external != t2->is_external)
         return !t1->is_external;
@@ -477,7 +479,7 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
     if (l1 != l2)
         return l1 > l2;
     if (t1->forced_track != t2->forced_track)
-        return t1->forced_track;
+        return prefer_forced ? t1->forced_track : !t1->forced_track;
     if (t1->default_track != t2->default_track)
         return t1->default_track;
     if (t1->attached_picture != t2->attached_picture)
@@ -512,6 +514,10 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     struct MPOpts *opts = mpctx->opts;
     int tid = opts->stream_id[order][type];
     char **langs = opts->stream_lang[type];
+    int prefer_forced = type != STREAM_SUB ||
+                        (!opts->subs_with_matching_audio &&
+                         mpctx->current_track[0][STREAM_AUDIO] &&
+                         match_lang(langs, mpctx->current_track[0][STREAM_AUDIO]->lang));
     if (tid == -2)
         return NULL;
     bool select_fallback = type == STREAM_VIDEO || type == STREAM_AUDIO;
@@ -528,7 +534,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (duplicate_track(mpctx, order, type, track))
             continue;
-        if (!pick || compare_track(track, pick, langs, mpctx->opts))
+        if (!pick || compare_track(track, pick, langs, prefer_forced, mpctx->opts))
             pick = track;
     }
     if (pick && !select_fallback && !(pick->is_external && !pick->no_default)
@@ -539,6 +545,9 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         pick = NULL;
     if (pick && !opts->autoload_files && pick->is_external)
         pick = NULL;
+    if (pick && type == STREAM_SUB && prefer_forced && !pick->forced_track &&
+        opts->subs_rend->forced_subs_only == -1)
+        opts->subs_rend->forced_subs_only_current = 1;
     return pick;
 }
 
@@ -1521,6 +1530,8 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (reinit_complex_filters(mpctx, false) < 0)
         goto terminate_playback;
+
+    opts->subs_rend->forced_subs_only_current = (opts->subs_rend->forced_subs_only == 1) ? 1 : 0;
 
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int i = 0; i < num_ptracks[t]; i++) {
