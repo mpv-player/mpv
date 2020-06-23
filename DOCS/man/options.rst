@@ -570,14 +570,13 @@ Playback Control
       logged errors).
 
     - The demuxer cache is essential for backward demuxing. Make sure to set
-      ``--demuxer-seekable-cache`` (or just use ``--cache``). The cache size
-      might matter. If it's too small, a queue overflow will be logged, and
-      backward playback cannot continue, or it performs too many low level
-      seeks. If it's too large, implementation tradeoffs may cause general
-      performance issues. Use ``--demuxer-max-bytes`` to potentially increase
-      the amount of packets the demuxer layer can queue for reverse demuxing
-      (basically it's the ``--video-reversal-buffer`` equivalent for the
-      demuxer layer).
+      ``--cache=yes``. The cache size might matter. If it's too small, a queue
+      overflow will be logged, and backward playback cannot continue, or it
+      performs too many low level seeks. If it's too large, implementation
+      tradeoffs may cause general performance issues. Use
+      ``--demuxer-max-bytes`` to potentially increase the amount of packets the
+      demuxer layer can queue for reverse demuxing (basically it's the
+      ``--video-reversal-buffer`` equivalent for the demuxer layer).
 
     - Setting ``--vd-queue-enable=yes`` can help a lot to make playback smooth
       (once it works).
@@ -3547,7 +3546,8 @@ Demuxer
 
 ``--demuxer-max-back-bytes=<bytesize>``
     This controls how much past data the demuxer is allowed to preserve. This
-    is useful only if the ``--demuxer-seekable-cache`` option is enabled.
+    is useful only if the cache is enabled.
+
     Unlike the forward cache, there is no control how many seconds are actually
     cached - it will simply use as much memory this option allows. Setting this
     option to 0 will strictly disable any back buffer, but this will lead to
@@ -3581,17 +3581,17 @@ Demuxer
     buffer is only reduced when new data is read.
 
 ``--demuxer-seekable-cache=<yes|no|auto>``
-    This controls whether seeking can use the demuxer cache (default: auto). If
-    enabled, short seek offsets will not trigger a low level demuxer seek
+    Debugging option to control whether seeking can use the demuxer cache
+    (default: auto). Normally you don't ever need to set this; the default
+    ``auto`` does the right thing and enables cache seeking it if ``--cache``
+    is set to ``yes`` (or is implied ``yes`` if ``--cache=auto``).
+
+    If enabled, short seek offsets will not trigger a low level demuxer seek
     (which means for example that slow network round trips or FFmpeg seek bugs
     can be avoided). If a seek cannot happen within the cached range, a low
     level seek will be triggered. Seeking outside of the cache will start a new
     cached range, but can discard the old cache range if the demuxer exhibits
     certain unsupported behavior.
-
-    Keep in mind that some events can flush the cache or force a low level
-    seek anyway, such as switching tracks, or attempting to seek before the
-    start or after the end of the file.
 
     The special value ``auto`` means ``yes`` in the same situation as
     ``--cache-secs`` is used (i.e. when the stream appears to be a network
@@ -4463,9 +4463,8 @@ Cache
     Decide whether to use network cache settings (default: auto).
 
     If enabled, use up to ``--cache-secs`` for the cache size (but still limited
-    to ``--demuxer-max-bytes``). ``--demuxer-seekable-cache=auto`` behaves as if
-    it was set to ``yes``. If disabled, ``--cache-pause`` and related are
-    implicitly disabled.
+    to ``--demuxer-max-bytes``), and make the cached data seekable (if possible).
+    If disabled, ``--cache-pause`` and related are implicitly disabled.
 
     The ``auto`` choice enables this depending on whether the stream is thought
     to involve network accesses or other slow media (this is an imperfect
@@ -6431,7 +6430,7 @@ Miscellaneous
                         video. See ``--video-sync-adrop-size``. This mode will
                         cause severe audio artifacts if the real monitor
                         refresh rate is too different from the reported or
-                        forced rate. Sicne mpv 0.33.0, this acts on entire audio
+                        forced rate. Since mpv 0.33.0, this acts on entire audio
                         frames, instead of single samples.
     :display-desync:    Sync video to display, and let audio play on its own.
     :desync:            Sync video according to system clock, and let audio play
