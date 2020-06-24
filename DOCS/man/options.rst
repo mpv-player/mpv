@@ -3175,6 +3175,10 @@ Window
     ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with
     ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec-copy``).
 
+    If compiled with MoltenVK on iOS/tvOS/macOS, the ID is interpreted as
+    ``CAMetalLayer *``. Pass it as a value cast to ``intptr_t``. Use with
+    ``--vo=gpu --gpu-api=vulkan --gpu-context=moltenvk``
+
 ``--no-window-dragging``
     Don't move the window when clicking on it and moving the mouse pointer.
 

@@ -158,6 +158,13 @@ main_dependencies = [
         'desc': 'Android environment',
         'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
     }, {
+        'name': '--ios',
+        'desc': 'iOS environment',
+        'func': check_statement(
+            ['TargetConditionals.h', 'assert.h'],
+            'static_assert(TARGET_OS_IPHONE, "TARGET_OS_IPHONE defined to zero!")'
+        ),
+    }, {
         'name': '--tvos',
         'desc': 'tvOS environment',
         'func': check_statement(
@@ -726,6 +733,11 @@ video_output_features = [
         'desc':  'Vulkan context support',
         'deps': 'libplacebo',
         'func': check_pkg_config('vulkan'),
+    }, {
+        'name': '--moltenvk',
+        'desc':  'MoltenVK support',
+        'deps': 'ios || tvos || cocoa',
+        'func': check_cc(header_name=['MoltenVK/mvk_vulkan.h']),
     }, {
         'name': 'vaapi-vulkan',
         'desc': 'VAAPI Vulkan',
