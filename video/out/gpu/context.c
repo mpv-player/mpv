@@ -49,7 +49,7 @@ extern const struct ra_ctx_fns ra_ctx_android;
 extern const struct ra_ctx_fns ra_ctx_vulkan_wayland;
 extern const struct ra_ctx_fns ra_ctx_vulkan_win;
 extern const struct ra_ctx_fns ra_ctx_vulkan_xlib;
-extern const struct ra_ctx_fnd ra_ctx_vulkan_android;
+extern const struct ra_ctx_fns ra_ctx_vulkan_android;
 
 /* Direct3D 11 */
 extern const struct ra_ctx_fns ra_ctx_d3d11;
