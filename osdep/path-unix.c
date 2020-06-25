@@ -33,17 +33,17 @@ static void path_init(void)
     char *home = getenv("HOME");
     char *xdg_dir = getenv("XDG_CONFIG_HOME");
 
+    if (home && home[0])
+        snprintf(mpv_home, sizeof(mpv_home), "%s/.mpv", home);
+
+    // Maintain compatibility with old XDG config dirs
     if (xdg_dir && xdg_dir[0]) {
-        snprintf(mpv_home, sizeof(mpv_home), "%s/mpv", xdg_dir);
+        snprintf(old_home, sizeof(old_home), "%s/mpv", xdg_dir);
     } else if (home && home[0]) {
-        snprintf(mpv_home, sizeof(mpv_home), "%s/.config/mpv", home);
+        snprintf(old_home, sizeof(old_home), "%s/.config/mpv", home);
     }
 
-    // Maintain compatibility with old ~/.mpv
-    if (home && home[0])
-        snprintf(old_home, sizeof(old_home), "%s/.mpv", home);
-
-    // If the old ~/.mpv exists, and the XDG config dir doesn't, use the old
+    // If the compat. dir exists, and the proper dir doesn't, use the compat.
     // config dir only.
     if (mp_path_exists(old_home) && !mp_path_exists(mpv_home)) {
         snprintf(mpv_home, sizeof(mpv_home), "%s", old_home);

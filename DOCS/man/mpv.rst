@@ -425,14 +425,14 @@ additionally wrapped in the fixed-length syntax, e.g. ``%n%string_of_length_n``
 (see above).
 
 Some mpv options interpret paths starting with ``~``. Currently, the prefix
-``~~/`` expands to the mpv configuration directory (usually ``~/.config/mpv/``).
+``~~/`` expands to the mpv configuration directory (usually ``~/.mpv/``).
 ``~/`` expands to the user's home directory. (The trailing ``/`` is always
 required.) The following paths are currently recognized:
 
 ================ ===============================================================
 Name             Meaning
 ================ ===============================================================
-``~~/``          mpv config dir (for example ``~/.config/mpv/``)
+``~~/``          mpv config dir (for example ``~/.mpv/``)
 ``~/``           user home directory root (similar to shell, ``$HOME``)
 ``~~home/``      same as ``~~/``
 ``~~global/``    the global config path, if available (not on win32)
@@ -589,7 +589,7 @@ Location and Syntax
 You can put all of the options in configuration files which will be read every
 time mpv is run. The system-wide configuration file 'mpv.conf' is in your
 configuration directory (e.g. ``/etc/mpv`` or ``/usr/local/etc/mpv``), the
-user-specific one is ``~/.config/mpv/mpv.conf``. For details and platform
+user-specific one is ``~/.mpv/mpv.conf``. For details and platform
 specifics (in particular Windows paths) see the `FILES`_ section.
 
 User-specific options override system-wide options and options given on the
@@ -639,11 +639,11 @@ File-specific Configuration Files
 You can also write file-specific configuration files. If you wish to have a
 configuration file for a file called 'video.avi', create a file named
 'video.avi.conf' with the file-specific options in it and put it in
-``~/.config/mpv/``. You can also put the configuration file in the same directory
+``~/.mpv/``. You can also put the configuration file in the same directory
 as the file to be played. Both require you to set the ``--use-filedir-conf``
 option (either on the command line or in your global config file). If a
 file-specific configuration file is found in the same directory, no
-file-specific configuration is loaded from ``~/.config/mpv``. In addition, the
+file-specific configuration is loaded from ``~/.mpv``. In addition, the
 ``--use-filedir-conf`` option enables directory-specific configuration files.
 For this, mpv first tries to load a mpv.conf from the same directory
 as the file played and then tries to load any file-specific configuration.
@@ -1094,10 +1094,9 @@ behavior of mpv.
 
 ``HOME``, ``XDG_CONFIG_HOME``
     Used to determine mpv config directory. If ``XDG_CONFIG_HOME`` is not set,
-    ``$HOME/.config/mpv`` is used.
-
-    ``$HOME/.mpv`` is always added to the list of config search paths with a
-    lower priority.
+    ``$HOME/.config/mpv`` is used. But note that if the directory as according
+    to XDG does not exist, ``$HOME/.config/mpv`` is created and used. See
+    `FILES`_.
 
 ``MPV_HOME``
     Directory where mpv looks for user settings. Overrides ``HOME``, and mpv
@@ -1223,30 +1222,55 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
     in default configuration will use ``/usr/local/etc/mpv/`` as config
     directory, while most Linux distributions will set it to ``/etc/mpv/``).
 
-``~/.config/mpv/mpv.conf``
+    Ignored if ``$MPV_HOME`` is set.
+
+``~/.mpv/``
+    Standard configuration files directory. The path is derived from the
+    ``$HOME`` environment variable (if unset, something stupid happens).
+
+    If the ``$MPV_HOME`` environment variable is set, it is used as sole config
+    dir, and the other paths are not used.
+
+    If the directory does not exist (and no alternative config dirs exist), mpv
+    tries to create it and use it.
+
+``~/.config/mpv/``
+    Alternative configuration directory following the KDE/GNOME desktop
+    environment specific convention. If the standard directory ``~/.mpv/`` does
+    not exist, but this path does, it is used instead.
+    .
+
+    If ``$XDG_CONFIG_HOME`` is set, it is used as prefix instead of
+    ``~/.config``.
+
+    Note that if both this path and ``~/.mpv/`` exists, ``~/.mpv/`` will be
+    preferred, but it will still add the XDG path as secondary search path
+    (why the hell it does that is unknown).
+
+``~/.mpv/mpv.conf``
     mpv user settings (see `CONFIGURATION FILES`_ section)
 
-``~/.config/mpv/input.conf``
+``~/.mpv/input.conf``
     key bindings (see `INPUT.CONF`_ section)
 
-``~/.config/mpv/fonts.conf``
+``~/.mpv/fonts.conf``
     Fontconfig fonts.conf that is customized for mpv. You should include system
     fonts.conf in this file or mpv would not know about fonts that you already
     have in the system.
 
     Only available when libass is built with fontconfig.
 
-``~/.config/mpv/subfont.ttf``
+``~/.mpv/subfont.ttf``
     fallback subtitle font
 
-``~/.config/mpv/fonts/``
+``~/.mpv/fonts/``
     Font files in this directory are used by mpv/libass for subtitles. Useful
     if you do not want to install fonts to your system. Note that files in this
     directory are loaded into memory before being used by mpv. If you have a
     lot of fonts, consider using fonts.conf (see above) to include additional
     fonts, which is more memory-efficient.
 
-``~/.config/mpv/scripts/``
+``~/.mpv/scripts/``
     All files in this directory are loaded as if they were passed to the
     ``--script`` option. They are loaded in alphabetical order.
 
@@ -1254,7 +1278,7 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
 
     See `Script location`_ for details.
 
-``~/.config/mpv/watch_later/``
+``~/.mpv/watch_later/``
     Contains temporary config files needed for resuming playback of files with
     the watch later feature. See for example the ``Q`` key binding, or the
     ``quit-watch-later`` input command.
@@ -1267,18 +1291,12 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
     ``--write-filename-in-watch-later-config`` option, and the player will
     add the media filename to the contents of the resume config file.
 
-``~/.config/mpv/script-opts/osc.conf``
+``~/.mpv/script-opts/osc.conf``
     This is loaded by the OSC script. See the `ON SCREEN CONTROLLER`_ docs
     for details.
 
     Other files in this directory are specific to the corresponding scripts
     as well, and the mpv core doesn't touch them.
-
-Note that the environment variables ``$XDG_CONFIG_HOME`` and ``$MPV_HOME`` can
-override the standard directory ``~/.config/mpv/``.
-
-Also, the old config location at ``~/.mpv/`` is still read, and if the XDG
-variant does not exist, will still be preferred.
 
 FILES ON WINDOWS
 ================
