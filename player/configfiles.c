@@ -65,7 +65,16 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
 
     mp_mk_config_dir(mpctx->global, "");
 
-    m_config_t *conf = mpctx->mconfig;
+    char *p1 = mp_get_user_path(NULL, mpctx->global, "~~home/");
+    char *p2 = mp_get_user_path(NULL, mpctx->global, "~~old_home/");
+    if (strcmp(p1, p2) != 0 && mp_path_exists(p2)) {
+        MP_WARN(mpctx, "Warning, two config dirs found:\n   %s (main)\n"
+                "   %s (bogus)\nYou should merge or delete the second one.\n",
+                p1, p2);
+    }
+    talloc_free(p1);
+    talloc_free(p2);
+
     char *section = NULL;
     bool encoding = opts->encode_opts &&
         opts->encode_opts->file && opts->encode_opts->file[0];
@@ -81,7 +90,7 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     load_all_cfgfiles(mpctx, section, "mpv.conf|config");
 
     if (encoding)
-        m_config_set_profile(conf, SECT_ENCODE, 0);
+        m_config_set_profile(mpctx->mconfig, SECT_ENCODE, 0);
 }
 
 static int try_load_config(struct MPContext *mpctx, const char *file, int flags,
