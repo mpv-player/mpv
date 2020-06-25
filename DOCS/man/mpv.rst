@@ -441,6 +441,8 @@ Name             Meaning
 ``~~global/``    the global config path, if available (not on win32)
 ``~~osxbundle/`` the OSX bundle resource path (OSX only)
 ``~~desktop/``   the path to the desktop (win32, OSX)
+``~~exe_dir``    win32 only: the path to the directory containing the exe (for
+                 config file purposes; ``$MPV_HOME`` overrides it)
 ``~~old_home``   do not use
 ================ ===============================================================
 
