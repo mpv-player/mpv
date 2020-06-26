@@ -160,10 +160,6 @@ Available audio output drivers are:
         obtained exact buffer size. A value of 0 selects the sound system
         default.
 
-    ``--sdl-bufcnt=<count>``
-        Sets the number of extra audio buffers in mpv. Usually needs not be
-        changed.
-
 ``null``
     Produces no audio output but maintains video playback speed. You can use
     ``--ao=null --ao-null-untimed`` for benchmarking.
