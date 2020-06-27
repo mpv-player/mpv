@@ -19,7 +19,6 @@ import MediaPlayer
 
 @available(macOS 10.12.2, *)
 class RemoteCommandCenter: NSObject {
-
     enum KeyType {
         case normal
         case repeatable

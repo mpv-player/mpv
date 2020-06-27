@@ -152,7 +152,7 @@ def build(ctx):
 
         return task.exec_command(cmd)
 
-    if ctx.dependency_satisfied('macos-cocoa-cb'):
+    if ctx.dependency_satisfied('cocoa') and ctx.dependency_satisfied('swift'):
         swift_source = [
             ( "osdep/macos/log_helper.swift" ),
             ( "osdep/macos/libmpv_helper.swift" ),
@@ -160,11 +160,12 @@ def build(ctx):
             ( "osdep/macos/swift_extensions.swift" ),
             ( "osdep/macos/swift_compat.swift" ),
             ( "osdep/macos/remote_command_center.swift", "macos-media-player" ),
-            ( "video/out/cocoa-cb/events_view.swift" ),
-            ( "video/out/cocoa-cb/video_layer.swift" ),
-            ( "video/out/cocoa-cb/window.swift" ),
-            ( "video/out/cocoa-cb/title_bar.swift" ),
-            ( "video/out/cocoa_cb_common.swift" ),
+            ( "video/out/mac/common.swift" ),
+            ( "video/out/mac/view.swift" ),
+            ( "video/out/mac/window.swift" ),
+            ( "video/out/mac/title_bar.swift" ),
+            ( "video/out/cocoa_cb_common.swift", "macos-cocoa-cb" ),
+            ( "video/out/mac/gl_layer.swift", "macos-cocoa-cb" ),
         ]
 
         ctx(

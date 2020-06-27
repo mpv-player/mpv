@@ -21,8 +21,8 @@ import OpenGL.GL3
 
 let glDummy: @convention(c) () -> Void = {}
 
-class LibmpvHelper: LogHelper {
-
+class LibmpvHelper {
+    var log: LogHelper
     var mpvHandle: OpaquePointer?
     var mpvRenderContext: OpaquePointer?
     var macOptsPtr: UnsafeMutableRawPointer?
@@ -30,17 +30,16 @@ class LibmpvHelper: LogHelper {
     var fbo: GLint = 1
     let deinitLock = NSLock()
 
-    init(_ mpv: OpaquePointer, _ name: String) {
-        let newlog = mp_log_new(UnsafeMutablePointer<MPContext>(mpv), mp_client_get_log(mpv), name)
-        super.init(newlog)
+    init(_ mpv: OpaquePointer, _ mpLog: OpaquePointer?) {
         mpvHandle = mpv
+        log = LogHelper(mpLog)
 
         guard let app = NSApp as? Application,
               let ptr = mp_get_config_group(nil,
                                             mp_client_get_global(mpvHandle),
                                             app.getMacOSConf()) else
         {
-            sendError("macOS config group couldn't be retrieved'")
+            log.sendError("macOS config group couldn't be retrieved'")
             exit(1)
         }
         macOptsPtr = ptr
@@ -62,7 +61,7 @@ class LibmpvHelper: LogHelper {
 
         if (mpv_render_context_create(&mpvRenderContext, mpvHandle, &params) < 0)
         {
-            sendError("Render context init has failed.")
+            log.sendError("Render context init has failed.")
             exit(1)
         }
     }
@@ -86,7 +85,7 @@ class LibmpvHelper: LogHelper {
 
     func setRenderUpdateCallback(_ callback: @escaping mpv_render_update_fn, context object: AnyObject) {
         if mpvRenderContext == nil {
-            sendWarning("Init mpv render context first.")
+            log.sendWarning("Init mpv render context first.")
         } else {
             mpv_render_context_set_update_callback(mpvRenderContext, callback, MPVHelper.bridge(obj: object))
         }
@@ -94,7 +93,7 @@ class LibmpvHelper: LogHelper {
 
     func setRenderControlCallback(_ callback: @escaping mp_render_cb_control_fn, context object: AnyObject) {
         if mpvRenderContext == nil {
-            sendWarning("Init mpv render context first.")
+            log.sendWarning("Init mpv render context first.")
         } else {
             mp_render_context_set_control_callback(mpvRenderContext, callback, MPVHelper.bridge(obj: object))
         }
@@ -153,7 +152,7 @@ class LibmpvHelper: LogHelper {
     func setRenderICCProfile(_ profile: NSColorSpace) {
         if mpvRenderContext == nil { return }
         guard var iccData = profile.iccProfileData else {
-            sendWarning("Invalid ICC profile data.")
+            log.sendWarning("Invalid ICC profile data.")
             return
         }
         iccData.withUnsafeMutableBytes { (ptr: UnsafeMutableRawBufferPointer) in
@@ -235,7 +234,6 @@ class LibmpvHelper: LogHelper {
         ta_free(macOptsPtr)
         macOptsPtr = nil
         mpvHandle = nil
-        log = nil
     }
 
     // *(char **) MPV_FORMAT_STRING on mpv_event_property

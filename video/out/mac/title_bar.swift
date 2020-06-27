@@ -18,18 +18,17 @@
 import Cocoa
 
 class TitleBar: NSVisualEffectView {
-
-    unowned var cocoaCB: CocoaCB
-    var libmpv: LibmpvHelper { get { return cocoaCB.libmpv } }
+    unowned var common: Common
+    var mpv: MPVHelper? { get { return common.mpv } }
 
     var systemBar: NSView? {
-        get { return cocoaCB.window?.standardWindowButton(.closeButton)?.superview }
+        get { return common.window?.standardWindowButton(.closeButton)?.superview }
     }
     static var height: CGFloat {
         get { return NSWindow.frameRect(forContentRect: CGRect.zero, styleMask: .titled).size.height }
     }
     var buttons: [NSButton] {
-        get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindow.ButtonType]).compactMap { cocoaCB.window?.standardWindowButton($0) } }
+        get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindow.ButtonType]).compactMap { common.window?.standardWindowButton($0) } }
     }
 
     override var material: NSVisualEffectView.Material {
@@ -50,10 +49,10 @@ class TitleBar: NSVisualEffectView {
         }
     }
 
-    init(frame: NSRect, window: NSWindow, cocoaCB ccb: CocoaCB) {
+    init(frame: NSRect, window: NSWindow, common com: Common) {
         let f = NSMakeRect(0, frame.size.height - TitleBar.height,
                            frame.size.width, TitleBar.height)
-        cocoaCB = ccb
+        common = com
         super.init(frame: f)
         buttons.forEach { $0.isHidden = true }
         isHidden = true
@@ -67,9 +66,9 @@ class TitleBar: NSVisualEffectView {
         window.contentView?.addSubview(self, positioned: .above, relativeTo: nil)
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
-        set(appearance: Int(libmpv.macOpts.macos_title_bar_appearance))
-        set(material: Int(libmpv.macOpts.macos_title_bar_material))
-        set(color: libmpv.macOpts.macos_title_bar_color)
+        set(appearance: Int(mpv?.macOpts.macos_title_bar_appearance ?? 0))
+        set(material: Int(mpv?.macOpts.macos_title_bar_material ?? 0))
+        set(color: mpv?.macOpts.macos_title_bar_color ?? "#00000000")
     }
 
     required init?(coder: NSCoder) {
@@ -97,7 +96,7 @@ class TitleBar: NSVisualEffectView {
             }
         }
 
-        cocoaCB.window?.isMoving = false
+        common.window?.isMoving = false
     }
 
     func set(appearance: Any) {
@@ -131,9 +130,9 @@ class TitleBar: NSVisualEffectView {
     }
 
     func show() {
-        guard let window = cocoaCB.window else { return }
+        guard let window = common.window else { return }
         if !window.border && !window.isInFullscreen { return }
-        let loc = cocoaCB.view?.convert(window.mouseLocationOutsideOfEventStream, from: nil)
+        let loc = common.view?.convert(window.mouseLocationOutsideOfEventStream, from: nil)
 
         buttons.forEach { $0.isHidden = false }
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
@@ -153,7 +152,7 @@ class TitleBar: NSVisualEffectView {
     }
 
     @objc func hide() {
-        guard let window = cocoaCB.window else { return }
+        guard let window = common.window else { return }
         if window.isInFullscreen && !window.isAnimating {
             alphaValue = 0
             isHidden = true

@@ -17,8 +17,8 @@
 
 import Cocoa
 
-class MPVHelper: LogHelper {
-
+class MPVHelper {
+    var log: LogHelper
     var vo: UnsafeMutablePointer<vo>
     var optsCachePtr: UnsafeMutablePointer<m_config_cache>
     var optsPtr: UnsafeMutablePointer<mp_vo_opts>
@@ -33,21 +33,19 @@ class MPVHelper: LogHelper {
     var input: OpaquePointer { get { return vout.input_ctx } }
     var macOpts: macos_opts = macos_opts()
 
-    init(_ vo: UnsafeMutablePointer<vo>, _ name: String) {
+    init(_ vo: UnsafeMutablePointer<vo>, _ log: LogHelper) {
         self.vo = vo
+        self.log = log
 
         guard let app = NSApp as? Application,
               let cache = m_config_cache_alloc(vo, vo.pointee.global, app.getVoSubConf()) else
         {
-            print("NSApp couldn't be retrieved")
+            log.sendError("NSApp couldn't be retrieved")
             exit(1)
         }
 
-        let newlog = mp_log_new(vo, vo.pointee.log, name)
         optsCachePtr = cache
         optsPtr = UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(cache.pointee.opts))
-
-        super.init(newlog)
 
         guard let ptr = mp_get_config_group(vo,
                                             vo.pointee.global,
