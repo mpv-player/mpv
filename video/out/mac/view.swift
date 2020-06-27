@@ -17,10 +17,9 @@
 
 import Cocoa
 
-class EventsView: NSView {
-
-    unowned var cocoaCB: CocoaCB
-    var mpv: MPVHelper? { get { return cocoaCB.mpv } }
+class View: NSView {
+    unowned var common: Common
+    var mpv: MPVHelper? { get { return common.mpv } }
 
     var tracker: NSTrackingArea?
     var hasMouseDown: Bool = false
@@ -29,9 +28,9 @@ class EventsView: NSView {
     override var acceptsFirstResponder: Bool { return true }
 
 
-    init(cocoaCB ccb: CocoaCB) {
-        cocoaCB = ccb
-        super.init(frame: NSMakeRect(0, 0, 960, 480))
+    init(frame: NSRect, common com: Common) {
+        common = com
+        super.init(frame: frame)
         autoresizingMask = [.width, .height]
         wantsBestResolutionOpenGLSurface = true
         registerForDraggedTypes([ .fileURLCompat, .URLCompat, .string ])
@@ -120,22 +119,22 @@ class EventsView: NSView {
         if mpv?.mouseEnabled() ?? true {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_ENTER, 0)
         }
-        cocoaCB.updateCursorVisibility()
+        common.updateCursorVisibility()
     }
 
     override func mouseExited(with event: NSEvent) {
         if mpv?.mouseEnabled() ?? true {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
-        cocoaCB.titleBar?.hide()
-        cocoaCB.setCursorVisiblility(true)
+        common.titleBar?.hide()
+        common.setCursorVisiblility(true)
     }
 
     override func mouseMoved(with event: NSEvent) {
         if mpv?.mouseEnabled() ?? true {
             signalMouseMovement(event)
         }
-        cocoaCB.titleBar?.show()
+        common.titleBar?.show()
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -154,7 +153,7 @@ class EventsView: NSView {
         if mpv?.mouseEnabled() ?? true {
             signalMouseUp(event)
         }
-        cocoaCB.window?.isMoving = false
+        common.window?.isMoving = false
     }
 
     override func rightMouseDown(with event: NSEvent) {
@@ -182,8 +181,10 @@ class EventsView: NSView {
     }
 
     override func magnify(with event: NSEvent) {
-        cocoaCB.layer?.inLiveResize = event.phase == .ended ? false : true
-        cocoaCB.window?.addWindowScale(Double(event.magnification))
+        event.phase == .ended ?
+            common.windowDidEndLiveResize() : common.windowWillStartLiveResize()
+
+        common.window?.addWindowScale(Double(event.magnification))
     }
 
     func signalMouseDown(_ event: NSEvent) {
@@ -208,8 +209,8 @@ class EventsView: NSView {
         point = convertToBacking(point)
         point.y = -point.y
 
-        cocoaCB.window?.updateMovableBackground(point)
-        if !(cocoaCB.window?.isMoving ?? false) {
+        common.window?.updateMovableBackground(point)
+        if !(common.window?.isMoving ?? false) {
             mpv?.setMousePosition(point)
         }
     }
@@ -256,7 +257,7 @@ class EventsView: NSView {
         var topMargin: CGFloat = 0.0
         let menuBarHeight = NSApp.mainMenu?.menuBarHeight ?? 23.0
 
-        guard let window = cocoaCB.window else { return false }
+        guard let window = common.window else { return false }
         guard var vF = window.screen?.frame else { return false }
 
         if window.isInFullscreen && (menuBarHeight > 0) {
@@ -278,7 +279,7 @@ class EventsView: NSView {
     }
 
     func canHideCursor() -> Bool {
-        guard let window = cocoaCB.window else { return false }
+        guard let window = common.window else { return false }
         return !hasMouseDown && containsMouseLocation() && window.isKeyWindow
     }
 

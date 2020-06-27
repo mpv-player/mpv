@@ -18,7 +18,6 @@
 import Cocoa
 
 class LogHelper: NSObject {
-
     var log: OpaquePointer?
 
     init(_ log: OpaquePointer?) {
