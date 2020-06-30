@@ -12,8 +12,9 @@ commonflags="--disable-static --enable-shared"
 export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
 export PKG_CONFIG_LIBDIR="$PKG_CONFIG_SYSROOT_DIR/lib/pkgconfig"
 
-export CC=$TARGET-gcc
-export CXX=$TARGET-g++
+# -posix is Ubuntu's variant with pthreads support
+export CC=$TARGET-gcc-posix
+export CXX=$TARGET-g++-posix
 export AR=$TARGET-ar
 export NM=$TARGET-nm
 export RANLIB=$TARGET-ranlib
@@ -72,6 +73,25 @@ if [ ! -e "$prefix_dir/lib/libavcodec.dll.a" ]; then
     popd
 fi
 
+## shaderc + spirv-cross
+if [ ! -e "$prefix_dir/lib/libspirv-cross-c-shared.dll.a" ]; then
+    if [ ! -d shaderc ]; then
+        $gitclone https://github.com/google/shaderc.git
+        (cd shaderc && ./utils/git-sync-deps)
+    fi
+    builddir shaderc
+    cmake .. -DCMAKE_SYSTEM_NAME=Windows \
+        -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
+        -DSHADERC_SKIP_TESTS=ON -DCMAKE_INSTALL_PREFIX=/
+    makeplusinstall
+    popd
+    builddir shaderc/third_party/spirv-cross
+    cmake .. -DCMAKE_SYSTEM_NAME=Windows \
+        -DSPIRV_CROSS_SHARED=ON -DSPIRV_CROSS_{CLI,STATIC}=OFF
+    makeplusinstall
+    popd
+fi
+
 ## freetype2
 if [ ! -e "$prefix_dir/lib/libfreetype.dll.a" ]; then
     ver=2.10.2
@@ -104,22 +124,23 @@ if [ ! -e "$prefix_dir/lib/libass.dll.a" ]; then
     popd
 fi
 
-## lua
-if [ ! -e "$prefix_dir/lib/liblua.a" ]; then
-    ver=5.2.4
-    gettar "https://www.lua.org/ftp/lua-${ver}.tar.gz"
-    pushd lua-${ver}
-    make PLAT=mingw INSTALL_TOP="$prefix_dir" TO_BIN=/dev/null \
-        CC="$CC" AR="$AR r" all install
-    make INSTALL_TOP="$prefix_dir" pc >"$prefix_dir/lib/pkgconfig/lua.pc"
-    printf 'Name: Lua\nDescription:\nVersion: ${version}\nLibs: -L${libdir} -llua\nCflags: -I${includedir}\n' \
-        >>"$prefix_dir/lib/pkgconfig/lua.pc"
+## luajit
+if [ ! -e "$prefix_dir/lib/libluajit-5.1.a" ]; then
+    ver=2.0.5
+    gettar "http://luajit.org/download/LuaJIT-${ver}.tar.gz"
+    pushd LuaJIT-${ver}
+    hostcc=gcc
+    [[ "$TARGET" == "i686-"* ]] && hostcc="$hostcc -m32"
+    make HOST_CC="$hostcc" CROSS=$TARGET- TARGET_SYS=Windows \
+        BUILDMODE=static amalg
+    make DESTDIR="$prefix_dir" INSTALL_DEP= FILE_T=luajit.exe install
     popd
 fi
 
 ## mpv
 PKG_CONFIG=pkg-config CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
 python3 ./waf configure \
-    --enable-libmpv-shared --lua=52
+    --enable-libmpv-shared --lua=luajit \
+    --enable-{shaderc,spirv-cross,d3d11}
 
 python3 ./waf build --verbose
