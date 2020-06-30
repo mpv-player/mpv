@@ -5225,6 +5225,11 @@ The following video options are currently all specific to ``--vo=gpu`` and
     use of compute shaders over fragment shaders wherever possible. Enabled by
     default, although Nvidia users may want to disable it.
 
+``--vulkan-disable-events``
+    Disable the use of VkEvents, for debugging purposes or for compatibility
+    with some older drivers / vulkan portability layers that don't provide
+    working VkEvent support.
+
 ``--d3d11-exclusive-fs=<yes|no>``
     Switches the D3D11 swap chain fullscreen state to 'fullscreen' when
     fullscreen video is requested. Also known as "exclusive fullscreen" or
