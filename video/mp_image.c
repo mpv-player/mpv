@@ -989,7 +989,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     if (!dst->params.color.sig_peak && sd) {
         AVMasteringDisplayMetadata *mdm = (AVMasteringDisplayMetadata *)sd->data;
         if (mdm->has_luminance)
-            dst->params.color.sig_peak = av_q2d(mdm->max_luminance) / MP_REF_WHITE;
+            dst->params.color.sig_peak = av_q2d(mdm->max_luminance) / ( 10000.0 * MP_REF_WHITE );
     }
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_A53_CC);
