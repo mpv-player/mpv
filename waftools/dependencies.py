@@ -215,7 +215,7 @@ def env_fetch(tx):
     return fn
 
 def dependencies_use(ctx):
-    return [inflector.storage_key(dep) for dep in ctx.env.satisfied_deps]
+    return [inflector.storage_key(dep) for dep in sorted(ctx.env.satisfied_deps)]
 
 BuildContext.filtered_sources = filtered_sources
 BuildContext.pick_first_matching_dep = pick_first_matching_dep
