@@ -65,7 +65,7 @@ static int init(struct render_backend *ctx, mpv_render_param *params)
     }
 
     if (!p->context)
-        return MPV_ERROR_INVALID_PARAMETER;
+        return MPV_ERROR_NOT_IMPLEMENTED;
 
     int err = p->context->fns->init(p->context, params);
     if (err < 0)

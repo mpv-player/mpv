@@ -452,6 +452,7 @@ def build(ctx):
         ( "video/out/hwdec/hwdec_vaapi.c",       "vaapi-egl || vaapi-vulkan" ),
         ( "video/out/hwdec/hwdec_vaapi_gl.c",    "vaapi-egl" ),
         ( "video/out/hwdec/hwdec_vaapi_vk.c",    "vaapi-vulkan" ),
+        ( "video/out/libmpv_sw.c" ),
         ( "video/out/placebo/ra_pl.c",           "libplacebo" ),
         ( "video/out/placebo/utils.c",           "libplacebo" ),
         ( "video/out/opengl/angle_dynamic.c",    "egl-angle" ),
