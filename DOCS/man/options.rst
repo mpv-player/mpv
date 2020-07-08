@@ -3147,7 +3147,8 @@ Window
     always re-enabled when the player is paused.
 
     This is not supported on all video outputs or platforms. Sometimes it is
-    implemented, but does not work (especially with Linux "desktops").
+    implemented, but does not work (especially with Linux "desktops"). Read the
+    `Disabling Screensaver`_ section very carefully.
 
 ``--wid=<ID>``
     This tells mpv to attach to an existing window. If a VO is selected that
