@@ -333,8 +333,6 @@ static int load_run(struct mp_script_args *args)
         return -1;
     args->client = NULL; // ownership lost
 
-    // Hardcode them (according to opts.fds[]), because we want to allow clients
-    // to hardcode them if they want. Sue me.
     char *fdopt = fds[1] >= 0 ? mp_tprintf(80, "--mpv-ipc-fd=%d:%d", fds[0], fds[1])
                               : mp_tprintf(80, "--mpv-ipc-fd=%d", fds[0]);
 
@@ -346,7 +344,7 @@ static int load_run(struct mp_script_args *args)
             {.fd = 0, .src_fd = 0,},
             {.fd = 1, .src_fd = 1,},
             {.fd = 2, .src_fd = 2,},
-            // Just hope these don't step over each other (e.g. fds[1] is not
+            // Just hope these don't step over each other (e.g. fds[1] could be
             // below 4, if the std FDs are missing).
             {.fd = fds[0], .src_fd = fds[0], },
             {.fd = fds[1], .src_fd = fds[1], },
