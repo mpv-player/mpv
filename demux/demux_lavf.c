@@ -148,6 +148,7 @@ struct format_hack {
     bool no_seek : 1;
     bool no_pcm_seek : 1;
     bool no_seek_on_no_duration : 1;
+    bool readall_on_no_streamseek : 1;
 };
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
@@ -185,6 +186,10 @@ static const struct format_hack format_hacks[] = {
     // Some Ogg shoutcast streams are essentially concatenated OGG files. They
     // reset timestamps, which causes all sorts of problems.
     {"ogg", .linearize_audio_ts = true, .use_stream_ids = true},
+
+    // At some point, FFmpeg lost the ability to read gif from unseekable
+    // streams.
+    {"gif", .readall_on_no_streamseek = true},
 
     TEXTSUB("aqtitle"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
     TEXTSUB("mpl2"), TEXTSUB("mpsub"), TEXTSUB("pjs"), TEXTSUB("realtext"),
@@ -1018,6 +1023,20 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (av_dict_copy(&priv->av_opts, dopts, 0) < 0) {
         av_dict_free(&dopts);
         return -1;
+    }
+
+    if (priv->format_hack.readall_on_no_streamseek && priv->pb &&
+        !priv->pb->seekable)
+    {
+        MP_VERBOSE(demuxer, "Non-seekable demuxer pre-read hack...\n");
+        // Read incremental to avoid unnecessary large buffer sizes.
+        int r = 0;
+        for (int n = 16; n < 29; n++) {
+            r = stream_peek(priv->stream, 1 << n);
+            if (r < (1 << n))
+                break;
+        }
+        MP_VERBOSE(demuxer, "...did read %d bytes.\n", r);
     }
 
     if (avformat_open_input(&avfc, priv->filename, priv->avif, &dopts) < 0) {

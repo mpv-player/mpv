@@ -212,6 +212,7 @@ bool stream_seek_skip(stream_t *s, int64_t pos);
 bool stream_seek(stream_t *s, int64_t pos);
 int stream_read(stream_t *s, void *mem, int total);
 int stream_read_partial(stream_t *s, void *buf, int buf_size);
+int stream_peek(stream_t *s, int forward_size);
 int stream_read_peek(stream_t *s, void *buf, int buf_size);
 void stream_drop_buffers(stream_t *s);
 int64_t stream_get_size(stream_t *s);
