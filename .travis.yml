@@ -119,6 +119,9 @@ before_install:
         fi
   - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+            if [[ "$(brew list |grep -c 'python@2')" -ne 0 ]]; then
+                brew unlink "python@2";
+            fi
             if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
                 brew update
                 pushd "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core"
@@ -135,8 +138,6 @@ before_install:
                 brew install luajit
                 brew install libass
                 brew install ffmpeg
-            else
-                brew link --overwrite python
             fi
         fi
 
