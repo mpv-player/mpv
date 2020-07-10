@@ -635,7 +635,7 @@ static void audio_get_state(struct ao *ao, struct mp_pcm_state *state)
     // Otherwise, PA will keep hammering us for underruns (which it does instead
     // of stopping the stream automatically).
     if (!state->playing)
-        cork(ao, true);
+        reset(ao);
 }
 
 /* A callback function that is called when the
