@@ -2936,7 +2936,7 @@ Window
     (X11 only)
     Show the video window on all virtual desktops.
 
-``--geometry=<[W[xH]][+-x+-y]>``, ``--geometry=<x:y>``
+``--geometry=<[W[xH]][+-x+-y][/WS]>``, ``--geometry=<x:y>``
     Adjust the initial window position or size. ``W`` and ``H`` set the window
     size in pixels. ``x`` and ``y`` set the window position, measured in pixels
     from the top-left corner of the screen to the top-left corner of the image
@@ -2945,7 +2945,9 @@ Window
     Positions are specified similar to the standard X11 ``--geometry`` option
     format, in which e.g. +10-50 means "place 10 pixels from the left border and
     50 pixels from the lower border" and "--20+-10" means "place 20 pixels
-    beyond the right and 10 pixels beyond the top border".
+    beyond the right and 10 pixels beyond the top border". A trailing ``/``
+    followed by an integer denotes on which workspace (virtual desktop) the
+    window should appear (X11 only).
 
     If an external window is specified using the ``--wid`` option, this
     option is ignored.
@@ -2982,9 +2984,10 @@ Window
             Forces the window width and height to half the screen width and
             height. Will show black borders to compensate for the video aspect
             ratio (with most VOs and without ``--no-keepaspect``).
-        ``50%+10+10``
+        ``50%+10+10/2``
             Sets the window to half the screen widths, and positions it 10
-            pixels below/left of the top left corner of the screen.
+            pixels below/left of the top left corner of the screen, on the
+            second workspace.
 
     See also ``--autofit`` and ``--autofit-larger`` for fitting the window into
     a given size without changing aspect ratio.

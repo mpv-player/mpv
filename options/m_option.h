@@ -98,6 +98,7 @@ struct m_geometry {
     bool xy_valid : 1, wh_valid : 1;
     bool w_per : 1, h_per : 1;
     bool x_sign : 1, y_sign : 1, x_per : 1, y_per : 1;
+    int ws; // workspace; valid if !=0
 };
 
 void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
