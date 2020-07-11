@@ -132,6 +132,7 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     track->Timer = 100.;
     track->WrapStyle = 1; // end-of-line wrapping instead of smart wrapping
     track->Kerning = true;
+    track->ScaledBorderAndShadow = true;
 
     update_playres(ass, &obj->vo_res);
 }
