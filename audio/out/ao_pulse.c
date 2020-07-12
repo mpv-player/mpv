@@ -53,6 +53,7 @@ struct priv {
 
     int retval;
     bool playing;
+    bool underrun_signalled;
 
     char *cfg_host;
     int cfg_buffer;
@@ -135,6 +136,7 @@ static void underflow_cb(pa_stream *s, void *userdata)
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
     priv->playing = false;
+    priv->underrun_signalled = true;
     ao_wakeup_playthread(ao);
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
@@ -497,7 +499,8 @@ static void cork(struct ao *ao, bool pause)
     if (waitop_no_unlock(priv, pa_stream_cork(priv->stream, pause, success_cb, ao))
         && priv->retval)
     {
-        priv->playing = true;
+        if (!pause)
+            priv->playing = true;
     } else {
         GENERIC_ERR_MSG("pa_stream_cork() failed");
         priv->playing = false;
@@ -634,8 +637,10 @@ static void audio_get_state(struct ao *ao, struct mp_pcm_state *state)
 
     // Otherwise, PA will keep hammering us for underruns (which it does instead
     // of stopping the stream automatically).
-    if (!state->playing)
+    if (!state->playing && priv->underrun_signalled) {
         reset(ao);
+        priv->underrun_signalled = false;
+    }
 }
 
 /* A callback function that is called when the
