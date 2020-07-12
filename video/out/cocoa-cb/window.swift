@@ -498,7 +498,9 @@ class Window: NSWindow, NSWindowDelegate {
         cocoaCB.layer?.inLiveResize = false
         cocoaCB.mpv?.setConfigProperty(maximized: isZoomed)
 
-        if let contentViewFrame = contentView?.frame, !isAnimating {
+        if let contentViewFrame = contentView?.frame,
+               !isAnimating && !isInFullscreen
+        {
             unfsContentFrame = convertToScreen(contentViewFrame)
         }
     }
