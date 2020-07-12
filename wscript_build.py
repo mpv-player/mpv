@@ -242,6 +242,7 @@ def build(ctx):
         ( "audio/out/ao_openal.c",               "openal" ),
         ( "audio/out/ao_opensles.c",             "opensles" ),
         ( "audio/out/ao_pcm.c" ),
+        ( "audio/out/ao_pipewire.c",             "pipewire" ),
         ( "audio/out/ao_pulse.c",                "pulse" ),
         ( "audio/out/ao_sdl.c",                  "sdl2-audio" ),
         ( "audio/out/ao_wasapi.c",               "wasapi" ),
