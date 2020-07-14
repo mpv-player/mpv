@@ -24,6 +24,7 @@ static const struct scale_test_fns fns = {
 static void run(struct test_ctx *ctx)
 {
     struct mp_zimg_context *zimg = mp_zimg_alloc();
+    zimg->opts.threads = 1;
 
     struct scale_test *stest = talloc_zero(NULL, struct scale_test);
     stest->fns = &fns;

@@ -20,6 +20,7 @@ struct zimg_opts {
     double scaler_chroma_params[2];
     int dither;
     int fast;
+    int threads;
 };
 
 extern const struct zimg_opts zimg_opts_defaults;
@@ -42,6 +43,8 @@ struct mp_zimg_context {
     struct m_config_cache *opts_cache;
     struct mp_zimg_state **states;
     int num_states;
+    struct mp_thread_pool *tp;
+    int current_thread_count;
 };
 
 // Allocate a zimg context. Always succeeds. Returns a talloc pointer (use

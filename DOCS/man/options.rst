@@ -4283,6 +4283,17 @@ Software Scaler
 ``--zimg-dither=<no|ordered|random|error-diffusion>``
     Dithering (default: random).
 
+``--zimg-threads=<auto|integer>``
+    Set the maximum number of threads to use for scaling (default: auto).
+    ``auto`` uses the number of logical cores on the current machine. Note that
+    the scaler may use less threads (or even just 1 thread) depending on stuff.
+    Passing a value of 1 disables threading and always scales the image in a
+    single operation. Higher thread counts waste resources, but make it
+    typically faster.
+
+    Note that some zimg git versions had bugs that will corrupt the output if
+    threads are used.
+
 ``--zimg-fast=<yes|no>``
     Allow optimizations that help with performance, but reduce quality (default:
     yes). Currently, this may simplify gamma conversion operations.

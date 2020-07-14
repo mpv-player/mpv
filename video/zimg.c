@@ -17,12 +17,13 @@
 
 #include <math.h>
 
-#include <libavutil/bswap.h>
-#include <libavutil/pixfmt.h>
+#include <libavutil/cpu.h>
 
 #include "common/common.h"
 #include "common/msg.h"
 #include "csputils.h"
+#include "misc/thread_pool.h"
+#include "misc/thread_tools.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "repack.h"
@@ -70,6 +71,7 @@ const struct m_sub_options zimg_conf = {
             {"random",          ZIMG_DITHER_RANDOM},
             {"error-diffusion", ZIMG_DITHER_ERROR_DIFFUSION})},
         {"fast", OPT_FLAG(fast)},
+        {"threads", OPT_CHOICE(threads, {"auto", 0}), M_RANGE(1, 64)},
         {0}
     },
     .size = sizeof(struct zimg_opts),
@@ -82,6 +84,9 @@ struct mp_zimg_state {
     void *tmp_alloc;
     struct mp_zimg_repack *src;
     struct mp_zimg_repack *dst;
+    int slice_y, slice_h; // y start position, height of target slice
+    double scale_y;
+    struct mp_waiter thread_waiter;
 };
 
 struct mp_zimg_repack {
@@ -102,6 +107,7 @@ struct mp_zimg_repack {
 
     // Temporary memory for zimg buffer.
     zimg_image_buffer zbuf;
+    struct mp_image cropped_tmp;
 
     int real_w, real_h;         // aligned size
 };
@@ -198,6 +204,7 @@ static void free_mp_zimg(void *p)
     struct mp_zimg_context *ctx = p;
 
     destroy_zimg(ctx);
+    TA_FREEP(&ctx->tp);
 }
 
 struct mp_zimg_context *mp_zimg_alloc(void)
@@ -242,10 +249,18 @@ static int repack_entrypoint(void *user, unsigned i, unsigned x0, unsigned x1)
     return 0;
 }
 
-static bool wrap_buffer(struct mp_zimg_repack *r, struct mp_image *mpi)
+static bool wrap_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r,
+                        struct mp_image *a_mpi)
 {
     zimg_image_buffer *buf = &r->zbuf;
     *buf = (zimg_image_buffer){ZIMG_API_VERSION};
+
+    struct mp_image *mpi = a_mpi;
+    if (r->pack) {
+        mpi = &r->cropped_tmp;
+        *mpi = *a_mpi;
+        mp_image_crop(mpi, 0, st->slice_y, mpi->w, st->slice_y + st->slice_h);
+    }
 
     bool direct[MP_MAX_PLANES] = {0};
 
@@ -354,16 +369,27 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     r->num_planes = desc.num_planes;
 
+    // Take care of input/output size, including slicing.
     // Note: formats with subsampled chroma may have odd width or height in
     // mpv and FFmpeg. This is because the width/height is actually a cropping
     // rectangle. Reconstruct the image allocation size and set the cropping.
     zfmt->width = r->real_w = MP_ALIGN_UP(fmt.w, 1 << desc.chroma_xs);
     zfmt->height = r->real_h = MP_ALIGN_UP(fmt.h, 1 << desc.chroma_ys);
-    if (!r->pack && st) {
-        // Relies on st->dst being initialized first.
-        struct mp_zimg_repack *dst = st->dst;
-        zfmt->active_region.width = dst->real_w * (double)fmt.w / dst->fmt.w;
-        zfmt->active_region.height = dst->real_h * (double)fmt.h / dst->fmt.h;
+    if (st) {
+        if (r->pack) {
+            zfmt->height = r->real_h = st->slice_h =
+                MPMIN(st->slice_y + st->slice_h, r->real_h) - st->slice_y;
+
+            assert(MP_IS_ALIGNED(r->real_h, 1 << desc.chroma_ys));
+        } else {
+            // Relies on st->dst being initialized first.
+            struct mp_zimg_repack *dst = st->dst;
+
+            zfmt->active_region.width = dst->real_w * (double)fmt.w / dst->fmt.w;
+            zfmt->active_region.height = dst->real_h * st->scale_y;
+
+            zfmt->active_region.top = st->slice_y * st->scale_y;
+        }
     }
 
     zfmt->subsample_w = desc.chroma_xs;
@@ -440,13 +466,13 @@ static bool allocate_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r)
     // Either ZIMG_BUFFER_MAX, or a power-of-2 slice buffer.
     assert(r->zmask[0] == ZIMG_BUFFER_MAX || MP_IS_POWER_OF_2(r->zmask[0] + 1));
 
-    int h = r->zmask[0] == ZIMG_BUFFER_MAX ? r->fmt.h : r->zmask[0] + 1;
-    if (h >= r->fmt.h) {
-        h = r->fmt.h;
+    int h = r->zmask[0] == ZIMG_BUFFER_MAX ? r->real_h : r->zmask[0] + 1;
+    if (h >= r->real_h) {
+        h = r->real_h;
         r->zmask[0] = ZIMG_BUFFER_MAX;
     }
 
-    r->tmp = mp_image_alloc(r->zimgfmt, r->fmt.w, h);
+    r->tmp = mp_image_alloc(r->zimgfmt, r->real_w, h);
     talloc_steal(r, r->tmp);
 
     if (!r->tmp)
@@ -465,12 +491,17 @@ static bool allocate_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r)
 }
 
 static bool mp_zimg_state_init(struct mp_zimg_context *ctx,
-                               struct mp_zimg_state *st)
+                               struct mp_zimg_state *st,
+                               int slice_y, int slice_h)
 {
     struct zimg_opts *opts = &ctx->opts;
 
     st->src = talloc_zero(NULL, struct mp_zimg_repack);
     st->dst = talloc_zero(NULL, struct mp_zimg_repack);
+
+    st->scale_y = ctx->src.h / (double)ctx->dst.h;
+    st->slice_y = slice_y;
+    st->slice_h = slice_h;
 
     zimg_image_format src_fmt, dst_fmt;
 
@@ -532,15 +563,49 @@ bool mp_zimg_config(struct mp_zimg_context *ctx)
     if (ctx->opts_cache)
         mp_zimg_update_from_cmdline(ctx);
 
-    struct mp_zimg_state *st = talloc_zero(NULL, struct mp_zimg_state);
-    MP_TARRAY_APPEND(ctx, ctx->states, ctx->num_states, st);
+    int slices = ctx->opts.threads;
+    if (slices < 1)
+        slices = av_cpu_count();
+    slices = MPCLAMP(slices, 1, 64);
 
-    if (!mp_zimg_state_init(ctx, st)) {
-        destroy_zimg(ctx);
-        return false;
+    struct mp_imgfmt_desc dstfmt = mp_imgfmt_get_desc(ctx->dst.imgfmt);
+    if (!dstfmt.align_y)
+        goto fail;
+    int full_h = MP_ALIGN_UP(ctx->dst.h, dstfmt.align_y);
+    int slice_h = (full_h + slices - 1) / slices;
+    slice_h = MP_ALIGN_UP(slice_h, dstfmt.align_y);
+    slice_h = MP_ALIGN_UP(slice_h, 64); // for dithering and minimum slice size
+    slices = (full_h + slice_h - 1) / slice_h;
+
+    int threads = slices - 1;
+    if (threads != ctx->current_thread_count) {
+        // Just destroy and recreate all - dumb and costly, but rarely happens.
+        TA_FREEP(&ctx->tp);
+        ctx->current_thread_count = 0;
+        if (threads) {
+            MP_VERBOSE(ctx, "using %d threads for scaling\n", threads);
+            ctx->tp = mp_thread_pool_create(NULL, threads, threads, threads);
+            if (!ctx->tp)
+                goto fail;
+            ctx->current_thread_count = threads;
+        }
     }
 
+    for (int n = 0; n < slices; n++) {
+        struct mp_zimg_state *st = talloc_zero(NULL, struct mp_zimg_state);
+        MP_TARRAY_APPEND(ctx, ctx->states, ctx->num_states, st);
+
+        if (!mp_zimg_state_init(ctx, st, n * slice_h, slice_h))
+            goto fail;
+    }
+
+    assert(ctx->num_states == slices);
+
     return true;
+
+fail:
+    destroy_zimg(ctx);
+    return false;
 }
 
 bool mp_zimg_config_image_params(struct mp_zimg_context *ctx)
@@ -577,6 +642,14 @@ static void do_convert(struct mp_zimg_state *st)
                               repack_entrypoint, st->dst);
 }
 
+static void do_convert_thread(void *ptr)
+{
+    struct mp_zimg_state *st = ptr;
+
+    do_convert(st);
+    mp_waiter_wakeup(&st->thread_waiter, 0);
+}
+
 bool mp_zimg_convert(struct mp_zimg_context *ctx, struct mp_image *dst,
                      struct mp_image *src)
 {
@@ -591,14 +664,29 @@ bool mp_zimg_convert(struct mp_zimg_context *ctx, struct mp_image *dst,
     for (int n = 0; n < ctx->num_states; n++) {
         struct mp_zimg_state *st = ctx->states[n];
 
-        if (!wrap_buffer(st->src, src) || !wrap_buffer(st->dst, dst)) {
+        if (!wrap_buffer(st, st->src, src) || !wrap_buffer(st, st->dst, dst)) {
             MP_ERR(ctx, "zimg repacker initialization failed.\n");
             return false;
         }
     }
 
-    assert(ctx->num_states == 1);
+    for (int n = 1; n < ctx->num_states; n++) {
+        struct mp_zimg_state *st = ctx->states[n];
+
+        st->thread_waiter = (struct mp_waiter)MP_WAITER_INITIALIZER;
+
+        bool r = mp_thread_pool_run(ctx->tp, do_convert_thread, st);
+        // This is guaranteed by the API; and unrolling would be inconvenient.
+        assert(r);
+    }
+
     do_convert(ctx->states[0]);
+
+    for (int n = 1; n < ctx->num_states; n++) {
+        struct mp_zimg_state *st = ctx->states[n];
+
+        mp_waiter_wait(&st->thread_waiter);
+    }
 
     return true;
 }
