@@ -48,7 +48,7 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper)
             .format = format->priv,
             .sampleable = true,
             .sample_mode = format->linear_filter ? PL_TEX_SAMPLE_LINEAR
-                                                    : PL_TEX_SAMPLE_NEAREST,
+                                                 : PL_TEX_SAMPLE_NEAREST,
             .import_handle = PL_HANDLE_DMA_BUF,
             .shared_mem = (struct pl_shared_mem) {
                 .handle = {
@@ -56,6 +56,9 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper)
                 },
                 .size = size,
                 .offset = offset,
+#if PL_API_VER >= 88
+                .drm_format_mod = p->desc.objects[id].drm_format_modifier,
+#endif
             },
         };
 
