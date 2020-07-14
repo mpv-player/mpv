@@ -1756,7 +1756,7 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
         if (!next && mpctx->opts->loop_times == 1) {
             next = playlist_get_first(mpctx->playlist);
             while (next && next->playback_short)
-                next = playlist_entry_get_rel(next, -1);
+                next = playlist_entry_get_rel(next, 1);
         }
     }
     if (!next && mpctx->opts->loop_times != 1) {
