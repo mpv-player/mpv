@@ -76,6 +76,14 @@ const struct m_sub_options zimg_conf = {
     .defaults = &zimg_opts_defaults,
 };
 
+struct mp_zimg_state {
+    zimg_filter_graph *graph;
+    void *tmp;
+    void *tmp_alloc;
+    struct mp_zimg_repack *src;
+    struct mp_zimg_repack *dst;
+};
+
 struct mp_zimg_repack {
     bool pack;                  // if false, this is for unpacking
     struct mp_image_params fmt; // original mp format (possibly packed format,
@@ -91,6 +99,9 @@ struct mp_zimg_repack {
     // is not set (then it may be used to avoid alignment issues). This has
     // about one slice worth of data.
     struct mp_image *tmp;
+
+    // Temporary memory for zimg buffer.
+    zimg_image_buffer zbuf;
 
     int real_w, real_h;         // aligned size
 };
@@ -171,12 +182,15 @@ static zimg_color_primaries_e mp_to_z_prim(enum mp_csp_prim prim)
 
 static void destroy_zimg(struct mp_zimg_context *ctx)
 {
-    talloc_free(ctx->zimg_tmp_alloc);
-    ctx->zimg_tmp = ctx->zimg_tmp_alloc = NULL;
-    zimg_filter_graph_free(ctx->zimg_graph);
-    ctx->zimg_graph = NULL;
-    TA_FREEP(&ctx->zimg_src);
-    TA_FREEP(&ctx->zimg_dst);
+    for (int n = 0; n < ctx->num_states; n++) {
+        struct mp_zimg_state *st = ctx->states[n];
+        talloc_free(st->tmp_alloc);
+        zimg_filter_graph_free(st->graph);
+        TA_FREEP(&st->src);
+        TA_FREEP(&st->dst);
+        talloc_free(st);
+    }
+    ctx->num_states = 0;
 }
 
 static void free_mp_zimg(void *p)
@@ -228,10 +242,9 @@ static int repack_entrypoint(void *user, unsigned i, unsigned x0, unsigned x1)
     return 0;
 }
 
-static bool wrap_buffer(struct mp_zimg_repack *r,
-                        zimg_image_buffer *buf,
-                        struct mp_image *mpi)
+static bool wrap_buffer(struct mp_zimg_repack *r, struct mp_image *mpi)
 {
+    zimg_image_buffer *buf = &r->zbuf;
     *buf = (zimg_image_buffer){ZIMG_API_VERSION};
 
     bool direct[MP_MAX_PLANES] = {0};
@@ -264,10 +277,11 @@ static bool wrap_buffer(struct mp_zimg_repack *r,
     return true;
 }
 
-// (ctx can be NULL for probing.)
+// (ctx and st can be NULL for probing.)
 static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
                          bool pack, struct mp_image_params *user_fmt,
-                         struct mp_zimg_context *ctx)
+                         struct mp_zimg_context *ctx,
+                         struct mp_zimg_state *st)
 {
     r->fmt = *user_fmt;
     r->pack = pack;
@@ -345,9 +359,9 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     // rectangle. Reconstruct the image allocation size and set the cropping.
     zfmt->width = r->real_w = MP_ALIGN_UP(fmt.w, 1 << desc.chroma_xs);
     zfmt->height = r->real_h = MP_ALIGN_UP(fmt.h, 1 << desc.chroma_ys);
-    if (!r->pack && ctx) {
-        // Relies on ctx->zimg_dst being initialized first.
-        struct mp_zimg_repack *dst = ctx->zimg_dst;
+    if (!r->pack && st) {
+        // Relies on st->dst being initialized first.
+        struct mp_zimg_repack *dst = st->dst;
         zfmt->active_region.width = dst->real_w * (double)fmt.w / dst->fmt.w;
         zfmt->active_region.height = dst->real_h * (double)fmt.h / dst->fmt.h;
     }
@@ -408,15 +422,14 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     return true;
 }
 
-static bool allocate_buffer(struct mp_zimg_context *ctx,
-                            struct mp_zimg_repack *r)
+static bool allocate_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r)
 {
     unsigned lines = 0;
     int err;
     if (r->pack) {
-        err = zimg_filter_graph_get_output_buffering(ctx->zimg_graph, &lines);
+        err = zimg_filter_graph_get_output_buffering(st->graph, &lines);
     } else {
-        err = zimg_filter_graph_get_input_buffering(ctx->zimg_graph, &lines);
+        err = zimg_filter_graph_get_input_buffering(st->graph, &lines);
     }
 
     if (err)
@@ -451,24 +464,20 @@ static bool allocate_buffer(struct mp_zimg_context *ctx,
     return true;
 }
 
-bool mp_zimg_config(struct mp_zimg_context *ctx)
+static bool mp_zimg_state_init(struct mp_zimg_context *ctx,
+                               struct mp_zimg_state *st)
 {
     struct zimg_opts *opts = &ctx->opts;
 
-    destroy_zimg(ctx);
-
-    if (ctx->opts_cache)
-        mp_zimg_update_from_cmdline(ctx);
-
-    ctx->zimg_src = talloc_zero(NULL, struct mp_zimg_repack);
-    ctx->zimg_dst = talloc_zero(NULL, struct mp_zimg_repack);
+    st->src = talloc_zero(NULL, struct mp_zimg_repack);
+    st->dst = talloc_zero(NULL, struct mp_zimg_repack);
 
     zimg_image_format src_fmt, dst_fmt;
 
-    // Note: do zimg_dst first, because zimg_src uses fields from zimg_dst.
-    if (!setup_format(&dst_fmt, ctx->zimg_dst, true, &ctx->dst, ctx) ||
-        !setup_format(&src_fmt, ctx->zimg_src, false, &ctx->src, ctx))
-        goto fail;
+    // Note: do dst first, because src uses fields from dst.
+    if (!setup_format(&dst_fmt, st->dst, true, &ctx->dst, ctx, st) ||
+        !setup_format(&src_fmt, st->src, false, &ctx->src, ctx, st))
+        return false;
 
     zimg_graph_builder_params params;
     zimg_graph_builder_params_default(&params, ZIMG_API_VERSION);
@@ -491,46 +500,81 @@ bool mp_zimg_config(struct mp_zimg_context *ctx)
     if (ctx->src.color.sig_peak > 0)
         params.nominal_peak_luminance = ctx->src.color.sig_peak;
 
-    ctx->zimg_graph = zimg_filter_graph_build(&src_fmt, &dst_fmt, &params);
-    if (!ctx->zimg_graph) {
+    st->graph = zimg_filter_graph_build(&src_fmt, &dst_fmt, &params);
+    if (!st->graph) {
         char err[128] = {0};
         zimg_get_last_error(err, sizeof(err) - 1);
         MP_ERR(ctx, "zimg_filter_graph_build: %s \n", err);
-        goto fail;
+        return false;
     }
 
     size_t tmp_size;
-    if (!zimg_filter_graph_get_tmp_size(ctx->zimg_graph, &tmp_size)) {
+    if (!zimg_filter_graph_get_tmp_size(st->graph, &tmp_size)) {
         tmp_size = MP_ALIGN_UP(tmp_size, ZIMG_ALIGN) + ZIMG_ALIGN;
-        ctx->zimg_tmp_alloc = ta_alloc_size(NULL, tmp_size);
-        if (ctx->zimg_tmp_alloc) {
-            ctx->zimg_tmp =
-                (void *)MP_ALIGN_UP((uintptr_t)ctx->zimg_tmp_alloc, ZIMG_ALIGN);
-        }
+        st->tmp_alloc = ta_alloc_size(NULL, tmp_size);
+        if (st->tmp_alloc)
+            st->tmp = (void *)MP_ALIGN_UP((uintptr_t)st->tmp_alloc, ZIMG_ALIGN);
     }
 
-    if (!ctx->zimg_tmp_alloc)
-        goto fail;
+    if (!st->tmp_alloc)
+        return false;
 
-    if (!allocate_buffer(ctx, ctx->zimg_src) ||
-        !allocate_buffer(ctx, ctx->zimg_dst))
-        goto fail;
+    if (!allocate_buffer(st, st->src) || !allocate_buffer(st, st->dst))
+        return false;
 
     return true;
+}
 
-fail:
+bool mp_zimg_config(struct mp_zimg_context *ctx)
+{
     destroy_zimg(ctx);
-    return false;
+
+    if (ctx->opts_cache)
+        mp_zimg_update_from_cmdline(ctx);
+
+    struct mp_zimg_state *st = talloc_zero(NULL, struct mp_zimg_state);
+    MP_TARRAY_APPEND(ctx, ctx->states, ctx->num_states, st);
+
+    if (!mp_zimg_state_init(ctx, st)) {
+        destroy_zimg(ctx);
+        return false;
+    }
+
+    return true;
 }
 
 bool mp_zimg_config_image_params(struct mp_zimg_context *ctx)
 {
-    if (ctx->zimg_src && mp_image_params_equal(&ctx->src, &ctx->zimg_src->fmt) &&
-        ctx->zimg_dst && mp_image_params_equal(&ctx->dst, &ctx->zimg_dst->fmt) &&
-        (!ctx->opts_cache || !m_config_cache_update(ctx->opts_cache)) &&
-        ctx->zimg_graph)
-        return true;
+    if (ctx->num_states) {
+        // All states are the same, so checking only one of them is sufficient.
+        struct mp_zimg_state *st = ctx->states[0];
+        if (st->src && mp_image_params_equal(&ctx->src, &st->src->fmt) &&
+            st->dst && mp_image_params_equal(&ctx->dst, &st->dst->fmt) &&
+            (!ctx->opts_cache || !m_config_cache_update(ctx->opts_cache)) &&
+            st->graph)
+            return true;
+    }
     return mp_zimg_config(ctx);
+}
+
+static void do_convert(struct mp_zimg_state *st)
+{
+    assert(st->graph);
+
+    // An annoyance.
+    zimg_image_buffer *zsrc = &st->src->zbuf;
+    zimg_image_buffer_const zsrc_c = {ZIMG_API_VERSION};
+    for (int n = 0; n < MP_ARRAY_SIZE(zsrc_c.plane); n++) {
+        zsrc_c.plane[n].data = zsrc->plane[n].data;
+        zsrc_c.plane[n].stride = zsrc->plane[n].stride;
+        zsrc_c.plane[n].mask = zsrc->plane[n].mask;
+    }
+
+    // (The API promises to succeed if no user callbacks fail, so no need
+    // to check the return value.)
+    zimg_filter_graph_process(st->graph, &zsrc_c, &st->dst->zbuf, st->tmp,
+                              repack_entrypoint, st->src,
+                              repack_entrypoint, st->dst);
 }
 
 bool mp_zimg_convert(struct mp_zimg_context *ctx, struct mp_image *dst,
@@ -544,30 +588,17 @@ bool mp_zimg_convert(struct mp_zimg_context *ctx, struct mp_image *dst,
         return false;
     }
 
-    assert(ctx->zimg_graph);
+    for (int n = 0; n < ctx->num_states; n++) {
+        struct mp_zimg_state *st = ctx->states[n];
 
-    zimg_image_buffer zsrc, zdst;
-    if (!wrap_buffer(ctx->zimg_src, &zsrc, src) ||
-        !wrap_buffer(ctx->zimg_dst, &zdst, dst))
-    {
-        MP_ERR(ctx, "zimg repacker initialization failed.\n");
-        return false;
+        if (!wrap_buffer(st->src, src) || !wrap_buffer(st->dst, dst)) {
+            MP_ERR(ctx, "zimg repacker initialization failed.\n");
+            return false;
+        }
     }
 
-    // An annoyance.
-    zimg_image_buffer_const zsrc_c = {ZIMG_API_VERSION};
-    for (int n = 0; n < MP_ARRAY_SIZE(zsrc_c.plane); n++) {
-        zsrc_c.plane[n].data = zsrc.plane[n].data;
-        zsrc_c.plane[n].stride = zsrc.plane[n].stride;
-        zsrc_c.plane[n].mask = zsrc.plane[n].mask;
-    }
-
-    // (The API promises to succeed if no user callbacks fail, so no need
-    // to check the return value.)
-    zimg_filter_graph_process(ctx->zimg_graph, &zsrc_c, &zdst,
-                              ctx->zimg_tmp,
-                              repack_entrypoint, ctx->zimg_src,
-                              repack_entrypoint, ctx->zimg_dst);
+    assert(ctx->num_states == 1);
+    do_convert(ctx->states[0]);
 
     return true;
 }
@@ -577,7 +608,7 @@ static bool supports_format(int imgfmt, bool out)
     struct mp_image_params fmt = {.imgfmt = imgfmt};
     struct mp_zimg_repack t;
     zimg_image_format zfmt;
-    return setup_format(&zfmt, &t, out, &fmt, NULL);
+    return setup_format(&zfmt, &t, out, &fmt, NULL, NULL);
 }
 
 bool mp_zimg_supports_in_format(int imgfmt)

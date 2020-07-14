@@ -40,11 +40,8 @@ struct mp_zimg_context {
 
     // Cached zimg state (if any). Private, do not touch.
     struct m_config_cache *opts_cache;
-    zimg_filter_graph *zimg_graph;
-    void *zimg_tmp;
-    void *zimg_tmp_alloc;
-    struct mp_zimg_repack *zimg_src;
-    struct mp_zimg_repack *zimg_dst;
+    struct mp_zimg_state **states;
+    int num_states;
 };
 
 // Allocate a zimg context. Always succeeds. Returns a talloc pointer (use
