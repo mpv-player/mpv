@@ -539,6 +539,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         useless.) The format of the list is as in the ``execle()`` syscall. Each
         string item defines an environment variable as in ``NANME=VALUE``.
 
+        On Lua, you may use ``utils.get_env_list()`` to retrieve the current
+        environment if you e.g. simply want to add a new variable.
+
     The command returns the following result (as ``MPV_FORMAT_NODE_MAP``):
 
     ``status`` (``MPV_FORMAT_INT64``)

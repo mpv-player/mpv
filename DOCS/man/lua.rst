@@ -826,6 +826,10 @@ strictly part of the guaranteed API.
     Returns the process ID of the running mpv process. This can be used to identify
     the calling mpv when launching (detached) subprocesses.
 
+``utils.get_env_list()``
+    Returns the C environment as a list of strings. (Do not confuse this with
+    the Lua "environment", which is an unrelated concept.)
+
 ``utils.parse_json(str [, trail])``
     Parses the given string argument as JSON, and returns it as a Lua table. On
     error, returns ``nil, error``. (Currently, ``error`` is just a string
