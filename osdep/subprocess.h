@@ -73,13 +73,4 @@ const char *mp_subprocess_err_str(int num);
 void mp_subprocess2(struct mp_subprocess_opts *opts,
                     struct mp_subprocess_result *res);
 
-// Start a subprocess. Uses callbacks to read from stdout and stderr.
-// Returns any of MP_SUBPROCESS_*, or a value >=0 for the process exir
-int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
-                  subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
-                  char **error);
-
-struct mp_log;
-void mp_subprocess_detached(struct mp_log *log, char **args);
-
 #endif

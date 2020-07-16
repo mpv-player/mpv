@@ -118,13 +118,19 @@ void assert_text_files_equal_impl(const char *file, int line,
     char *path_ref = mp_tprintf(4096, "%s/%s", ctx->ref_path, ref);
     char *path_new = mp_tprintf(4096, "%s/%s", ctx->out_path, new);
 
-    char *errstr = NULL;
-    int res = mp_subprocess((char*[]){"diff", "-u", "--", path_ref, path_new, 0},
-                            NULL, NULL, NULL, NULL, &errstr);
+    struct mp_subprocess_opts opts = {
+        .exe = "diff",
+        .args = (char*[]){"diff", "-u", "--", path_ref, path_new, 0},
+        .fds = { {0, .src_fd = 0}, {1, .src_fd = 1}, {2, .src_fd = 2} },
+        .num_fds = 3,
+    };
 
-    if (res) {
-        if (res == 1)
-            MP_WARN(ctx, "Note: %s\n", err);
+    struct mp_subprocess_result res;
+    mp_subprocess2(&opts, &res);
+
+    if (res.error || res.exit_status) {
+        if (res.error)
+            MP_WARN(ctx, "Note: %s\n", mp_subprocess_err_str(res.error));
         MP_FATAL(ctx, "Giving up.\n");
         abort();
     }

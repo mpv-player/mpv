@@ -1,9 +1,7 @@
 #include "subprocess.h"
 
-int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
-                  subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
-                  char **error)
+void mp_subprocess2(struct mp_subprocess_opts *opts,
+                    struct mp_subprocess_result *res)
 {
-    *error = "unsupported";
-    return -1;
+    *res = (struct mp_subprocess_result){.error = MP_SUBPROCESS_EUNSUPPORTED};
 }

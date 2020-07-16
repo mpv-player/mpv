@@ -523,12 +523,28 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     ``capture_stderr`` (``MPV_FORMAT_FLAG``)
         Same as ``capture_stdout``, but for stderr.
 
+    ``detach`` (``MPV_FORMAT_FLAG``)
+        Whether to run the process in detached mode (optional, default: no). In
+        this mode, the process is run in a new process session, and the command
+        does not wait for the process to terminate. If neither
+        ``capture_stdout`` nor ``capture_stderr`` have been set to ``yes``,
+        the command returns immediately after the new process has been started,
+        otherwise the command will read as long as the pipes are open.
+
+    ``env`` (``MPV_FORMAT_NODE_ARRAY[MPV_FORMAT_STRING]``)
+        Set a list of environment variables for the new process (default: empty).
+        If an empty list is passed, the environment of the mpv process is used
+        instead. (Unlike the underlying OS mechanisms, the mpv command cannot
+        start a process with empty environment. Fortunately, that is completely
+        useless.) The format of the list is as in the ``execle()`` syscall. Each
+        string item defines an environment variable as in ``NANME=VALUE``.
+
     The command returns the following result (as ``MPV_FORMAT_NODE_MAP``):
 
     ``status`` (``MPV_FORMAT_INT64``)
         The raw exit status of the process. It will be negative on error. The
         meaning of negative values is undefined, other than meaning error (and
-        does not necessarily correspond to OS low level exit status values).
+        does not correspond to OS low level exit status values).
 
         On Windows, it can happen that a negative return value is returned
         even if the process exits gracefully, because the win32 ``UINT`` exit
