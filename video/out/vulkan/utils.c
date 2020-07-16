@@ -9,6 +9,7 @@ bool mpvk_init(struct mpvk_ctx *vk, struct ra_ctx *ctx, const char *surface_ext)
 
     vk->pl_log = mp_log_new(ctx, ctx->log, "libplacebo");
     mppl_ctx_set_log(vk->ctx, vk->pl_log, true);
+    mp_verbose(vk->pl_log, "Initialized libplacebo v%d\n", PL_API_VER);
 
     const char *exts[] = {
         VK_KHR_SURFACE_EXTENSION_NAME,
