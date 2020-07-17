@@ -277,6 +277,12 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Mark the current time position. The next normal ``revert-seek`` command
         will seek back to this point, no matter how many seeks happened since
         last time.
+    mark-permanent
+        If set, mark the current position, and do not change the mark position
+        before the next ``revert-seek`` command that has ``mark`` or
+        ``mark-permanent`` set (or playback of the current file ends). Until
+        this happens, ``revert-seek`` will always seek to the marked point. This
+        flag cannot be combined with ``mark``.
 
     Using it without any arguments gives you the default behavior.
 

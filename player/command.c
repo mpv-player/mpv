@@ -84,6 +84,7 @@ struct command_ctx {
     double last_seek_time;
     double last_seek_pts;
     double marked_pts;
+    bool marked_permanent;
 
     char **warned_deprecated;
     int num_warned_deprecated;
@@ -4649,11 +4650,14 @@ static void cmd_revert_seek(void *p)
     double oldpts = cmdctx->last_seek_pts;
     if (cmdctx->marked_pts != MP_NOPTS_VALUE)
         oldpts = cmdctx->marked_pts;
-    if (cmd->args[0].v.i == 1) {
+    if (cmd->args[0].v.i & 3) {
         cmdctx->marked_pts = get_current_time(mpctx);
+        cmdctx->marked_permanent = cmd->args[0].v.i & 1;
     } else if (oldpts != MP_NOPTS_VALUE) {
-        cmdctx->last_seek_pts = get_current_time(mpctx);
-        cmdctx->marked_pts = MP_NOPTS_VALUE;
+        if (!cmdctx->marked_permanent) {
+            cmdctx->marked_pts = MP_NOPTS_VALUE;
+            cmdctx->last_seek_pts = get_current_time(mpctx);
+        }
         queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, MPSEEK_EXACT,
                    MPSEEK_FLAG_DELAY);
         set_osd_function(mpctx, OSD_REW);
@@ -5794,7 +5798,8 @@ const struct mp_cmd_def mp_cmds[] = {
         .scalable = true,
     },
     { "revert-seek", cmd_revert_seek,
-        { {"flags", OPT_FLAGS(v.i, {"mark", 1}), .flags = MP_CMD_OPT_ARG} },
+        { {"flags", OPT_FLAGS(v.i, {"mark", 2|0}, {"mark-permanent", 2|1}),
+           .flags = MP_CMD_OPT_ARG} },
     },
     { "quit", cmd_quit, { {"code", OPT_INT(v.i), .flags = MP_CMD_OPT_ARG} },
         .priv = &(const bool){0} },
@@ -6235,6 +6240,7 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
     if (event == MPV_EVENT_START_FILE) {
         ctx->last_seek_pts = MP_NOPTS_VALUE;
         ctx->marked_pts = MP_NOPTS_VALUE;
+        ctx->marked_permanent = false;
     }
 
     if (event == MPV_EVENT_PLAYBACK_RESTART)
