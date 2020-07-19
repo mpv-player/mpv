@@ -679,7 +679,9 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     if (opts->compute_peak >= 0)
         hdr_update_peak(sc, opts);
 
-    GLSLF("vec3 sig = color.rgb;\n");
+    // Always hard-clip the upper bound of the signal range to avoid functions
+    // exploding on inputs greater than 1.0
+    GLSLF("vec3 sig = min(color.rgb, sig_peak);\n");
 
     // This function always operates on an absolute scale, so ignore the
     // dst_peak normalization for it
@@ -703,7 +705,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     float param = opts->curve_param;
     switch (opts->curve) {
     case TONE_MAPPING_CLIP:
-        GLSLF("sig = %f * sig;\n", isnan(param) ? 1.0 : param);
+        GLSLF("sig = min(%f * sig, 1.0);\n", isnan(param) ? 1.0 : param);
         break;
 
     case TONE_MAPPING_MOBIUS:
@@ -755,7 +757,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
 
     case TONE_MAPPING_LINEAR: {
         float coeff = isnan(param) ? 1.0 : param;
-        GLSLF("sig = %f / sig_peak * sig;\n", coeff);
+        GLSLF("sig = min(%f / sig_peak, 1.0) * sig;\n", coeff);
         break;
     }
 
@@ -797,7 +799,6 @@ static void pass_tone_map(struct gl_shader_cache *sc,
         abort();
     }
 
-    GLSL(sig = min(sig, vec3(1.0));)
     GLSL(vec3 sig_lin = color.rgb * (sig[sig_idx] / sig_orig);)
 
     // Mix between the per-channel tone mapped and the linear tone mapped
