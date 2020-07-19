@@ -210,11 +210,10 @@ This applies to certain APIs, such as ``mp.command_native()`` (with tables that
 have string keys) in Lua scripting, or ``mpv_command_node()`` (with
 MPV_FORMAT_NODE_MAP) in the C libmpv client API.
 
-Like with array commands, quoting and escaping is inherently not needed in the
-normal case.
-
-The name of each command is defined in each command description in the
-`List of Input Commands`_. ``--input-cmdlist`` also lists them.
+The name of the command is provided with a ``name`` string field. The name of
+each command is defined in each command description in the
+`List of Input Commands`_. ``--input-cmdlist`` also lists them. See the
+``subprocess`` command for an example.
 
 Some commands do not support named arguments (e.g. ``run`` command). You need
 to use APIs that pass arguments as arrays.
@@ -596,6 +595,23 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Don't forget to set the ``playback_only`` field if you want the command
         run while the player is in idle mode, or if you don't want that end of
         playback kills the command.
+
+    .. admonition:: Example
+
+        ::
+
+            local r = mp.command_native({
+                name = "subprocess",
+                playback_only = false,
+                capture_stdout = true,
+                args = {"cat", "/proc/cpuinfo"},
+            })
+            if r.status == 0 then
+                print("result: " .. r.stdout)
+            end
+
+        This is a fairly useless Lua example, which demonstrates how to run
+        a process in a blocking manner, and retrieving its stdout output.
 
 ``quit [<code>]``
     Exit the player. If an argument is given, it's used as process exit code.
