@@ -360,10 +360,27 @@ static bool is_a_console(HANDLE h)
 
 static void reopen_console_handle(DWORD std, int fd, FILE *stream)
 {
-    if (is_a_console(GetStdHandle(std))) {
-        freopen("CONOUT$", "wt", stream);
-        dup2(fileno(stream), fd);
+    HANDLE handle = GetStdHandle(std);
+    if (is_a_console(handle)) {
+        if (fd == 0) {
+            freopen("CONIN$", "rt", stream);
+        } else {
+            freopen("CONOUT$", "wt", stream);
+        }
         setvbuf(stream, NULL, _IONBF, 0);
+
+        // Set the low-level FD to the new handle value, since mp_subprocess2
+        // callers might rely on low-level FDs being set. Note, with this
+        // method, fileno(stdin) != STDIN_FILENO, but that shouldn't matter.
+        int unbound_fd = -1;
+        if (fd == 0) {
+             unbound_fd = _open_osfhandle((intptr_t)handle, _O_RDONLY);
+        } else {
+             unbound_fd = _open_osfhandle((intptr_t)handle, _O_WRONLY);
+        }
+        // dup2 will duplicate the underlying handle. Don't close unbound_fd,
+        // since that will close the original handle.
+        dup2(unbound_fd, fd);
     }
 }
 
@@ -384,8 +401,9 @@ bool terminal_try_attach(void)
     if (!AttachConsole(ATTACH_PARENT_PROCESS))
         return false;
 
-    // We have a console window. Redirect output streams to that console's
-    // low-level handles, so things that use printf directly work later on.
+    // We have a console window. Redirect input/output streams to that console's
+    // low-level handles, so things that use stdio work later on.
+    reopen_console_handle(STD_INPUT_HANDLE, STDIN_FILENO, stdin);
     reopen_console_handle(STD_OUTPUT_HANDLE, STDOUT_FILENO, stdout);
     reopen_console_handle(STD_ERROR_HANDLE, STDERR_FILENO, stderr);
 

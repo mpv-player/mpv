@@ -208,7 +208,7 @@ def build(ctx):
 
     subprocess_c = ctx.pick_first_matching_dep([
         ( "osdep/subprocess-posix.c",            "posix" ),
-        # broken ( "osdep/subprocess-win.c",              "win32-desktop" ),
+        ( "osdep/subprocess-win.c",              "win32-desktop" ),
         ( "osdep/subprocess-dummy.c" ),
     ])
 

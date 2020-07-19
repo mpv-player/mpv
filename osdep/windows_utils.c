@@ -24,6 +24,8 @@
 #include <d3d9.h>
 #include <dxgi1_2.h>
 
+#include "common/common.h"
+#include "osdep/atomic.h"
 #include "windows_utils.h"
 
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
@@ -157,4 +159,71 @@ char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
     msg = msg[0] ? msg : hresult_to_str(hr);
     snprintf(buf, buf_size, "%s (0x%"PRIx32")", msg, (uint32_t)hr);
     return buf;
+}
+
+bool mp_w32_create_anon_pipe(HANDLE *server, HANDLE *client,
+                             struct w32_create_anon_pipe_opts *opts)
+{
+    static atomic_ulong counter = ATOMIC_VAR_INIT(0);
+
+    // Generate pipe name
+    unsigned long id = atomic_fetch_add(&counter, 1);
+    unsigned pid = GetCurrentProcessId();
+    wchar_t buf[36];
+    swprintf(buf, MP_ARRAY_SIZE(buf), L"\\\\.\\pipe\\mpv-anon-%08x-%08lx",
+             pid, id);
+
+    DWORD client_access = 0;
+    DWORD out_buffer = opts->out_buf_size;
+    DWORD in_buffer = opts->in_buf_size;
+
+    if (opts->server_flags & PIPE_ACCESS_INBOUND) {
+        client_access |= FILE_GENERIC_WRITE | FILE_READ_ATTRIBUTES;
+        if (!in_buffer)
+            in_buffer = 4096;
+    }
+    if (opts->server_flags & PIPE_ACCESS_OUTBOUND) {
+        client_access |= FILE_GENERIC_READ | FILE_WRITE_ATTRIBUTES;
+        if (!out_buffer)
+            out_buffer = 4096;
+    }
+
+    SECURITY_ATTRIBUTES inherit_sa = {
+        .nLength = sizeof inherit_sa,
+        .bInheritHandle = TRUE,
+    };
+
+    // The function for creating anonymous pipes (CreatePipe) can't create
+    // overlapped pipes, so instead, use a named pipe with a unique name
+    *server = CreateNamedPipeW(buf,
+                               opts->server_flags | FILE_FLAG_FIRST_PIPE_INSTANCE,
+                               opts->server_mode | PIPE_REJECT_REMOTE_CLIENTS,
+                               1, out_buffer, in_buffer, 0,
+                               opts->server_inheritable ? &inherit_sa : NULL);
+    if (*server == INVALID_HANDLE_VALUE)
+        goto error;
+
+    // Open the write end of the pipe as a synchronous handle
+    *client = CreateFileW(buf, client_access, 0,
+                          opts->client_inheritable ? &inherit_sa : NULL,
+                          OPEN_EXISTING,
+                          opts->client_flags | SECURITY_SQOS_PRESENT |
+                          SECURITY_ANONYMOUS, NULL);
+    if (*client == INVALID_HANDLE_VALUE) {
+        CloseHandle(*server);
+        goto error;
+    }
+
+    if (opts->client_mode) {
+        if (!SetNamedPipeHandleState(*client, &opts->client_mode, NULL, NULL)) {
+            CloseHandle(*server);
+            CloseHandle(*client);
+            goto error;
+        }
+    }
+
+    return true;
+error:
+    *server = *client = INVALID_HANDLE_VALUE;
+    return false;
 }
