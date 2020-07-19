@@ -360,6 +360,12 @@ class Common: NSObject {
         return getScreenBy(id: Int(screenID))
     }
 
+    func getCurrentScreen() -> NSScreen? {
+         return window != nil ? window?.screen :
+                                    getTargetScreen(forFullscreen: false) ??
+                                    NSScreen.main
+    }
+
     func getWindowGeometry(forScreen targetScreen: NSScreen,
                            videoOut vo: UnsafeMutablePointer<vo>) -> NSRect {
         let r = targetScreen.convertRectToBacking(targetScreen.frame)
@@ -488,9 +494,9 @@ class Common: NSObject {
             return VO_TRUE
         case VOCTRL_GET_HIDPI_SCALE:
             let scaleFactor = data.assumingMemoryBound(to: CDouble.self)
+            let screen = getCurrentScreen()
             let factor = window?.backingScaleFactor ??
-                         getTargetScreen(forFullscreen: false)?.backingScaleFactor ??
-                         NSScreen.main?.backingScaleFactor ?? 1.0
+                         screen?.backingScaleFactor ?? 1.0
             scaleFactor.pointee = Double(factor)
             return VO_TRUE
         case VOCTRL_RESTORE_SCREENSAVER:
@@ -506,6 +512,27 @@ class Common: NSObject {
                 self.setCursorVisiblility(self.cursorVisibilityWanted)
             }
             return VO_TRUE
+        case VOCTRL_GET_ICC_PROFILE:
+            let screen = getCurrentScreen()
+            guard var iccData = screen?.colorSpace?.iccProfileData else {
+                log.sendWarning("No Screen available to retrieve ICC profile")
+                return VO_TRUE
+            }
+
+            let icc = data.assumingMemoryBound(to: bstr.self)
+            iccData.withUnsafeMutableBytes { (ptr: UnsafeMutableRawBufferPointer) in
+                guard let baseAddress = ptr.baseAddress, ptr.count > 0 else { return }
+                let u8Ptr = baseAddress.assumingMemoryBound(to: UInt8.self)
+                icc.pointee = bstrdup(nil, bstr(start: u8Ptr, len: ptr.count))
+            }
+            return VO_TRUE
+        case VOCTRL_GET_AMBIENT_LUX:
+            if lightSensor != 0 {
+                let lux = data.assumingMemoryBound(to: Int32.self)
+                lux.pointee = Int32(lmuToLux(lastLmu))
+                return VO_TRUE;
+            }
+            return VO_NOTIMPL
         case VOCTRL_GET_UNFS_WINDOW_SIZE:
             let sizeData = data.assumingMemoryBound(to: Int32.self)
             let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
@@ -532,10 +559,7 @@ class Common: NSObject {
             let dnames = data.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self)
             var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>? = nil
             var count: Int32 = 0
-            let screen = window != nil ? window?.screen :
-                                            getTargetScreen(forFullscreen: false) ??
-                                            NSScreen.main
-            let displayName = screen?.displayName ?? "Unknown"
+            let displayName = getCurrentScreen()?.displayName ?? "Unknown"
 
             SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, ta_xstrdup(nil, displayName))
             SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, nil)
