@@ -732,7 +732,7 @@ def build(ctx):
 
         ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
 
-        for size in '16x16 32x32 64x64'.split():
+        for size in '16x16 32x32 64x64 128x128'.split():
             ctx.install_as(
                 ctx.env.DATADIR + '/icons/hicolor/' + size + '/apps/mpv.png',
                 'etc/mpv-icon-8bit-' + size + '.png')
