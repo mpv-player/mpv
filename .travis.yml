@@ -1,7 +1,7 @@
 language: c
 
 _macbase:
-  - &macOld
+  - &mac
     os: osx
     compiler: clang
     env:
@@ -12,14 +12,7 @@ _macbase:
     cache:
       directories:
         - $HOME/Library/Caches/Homebrew
-  - &macNew
-    <<: *macOld
-    addons:
-      homebrew:
-        packages: ['autoconf', 'automake', 'ffmpeg', 'freetype', 'fribidi',
-                   'libass', 'libtool', 'little-cms2', 'luajit', 'nasm',
-                   'pkg-config', 'python']
-        update: true
+        - /usr/local/Homebrew
 
 _mingwbase:
   - &mingw
@@ -38,11 +31,11 @@ _mingwbase:
 
 matrix:
   include:
-    - <<: *macNew
+    - <<: *mac
       osx_image: xcode11.3
-    - <<: *macNew
+    - <<: *mac
       osx_image: xcode10.1
-    - <<: *macOld
+    - <<: *mac
       osx_image: xcode9.2
     - os: freebsd
       compiler: clang
@@ -119,25 +112,22 @@ before_install:
         fi
   - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+            remove=$(brew list)
+            keep="gettext pcre2 git"
+            install="autoconf automake pkg-config libtool python freetype fribidi little-cms2 luajit libass ffmpeg"
+            for formula in ${keep[@]}; do remove=("${remove[@]/$formula}"); done
+            for formula in ${install[@]}; do remove=("${remove[@]/$formula}"); done
+            brew remove --force $remove --ignore-dependencies
+            brew update
             if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
-                brew remove --force $(brew list) --ignore-dependencies
-                brew update
                 pushd "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core"
-                git checkout 55e02323812604add9a69bab8730319b9255a697
+                git checkout --force 55e02323812604add9a69bab8730319b9255a697
+            fi
+            brew install $install
+            brew link --overwrite python
+            if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
+                git checkout master
                 popd
-                brew install autoconf
-                brew install automake
-                brew install pkg-config
-                brew install libtool
-                brew install python
-                brew install freetype
-                brew install fribidi
-                brew install little-cms2
-                brew install luajit
-                brew install libass
-                brew install ffmpeg
-            else
-                brew link --overwrite python
             fi
         fi
 
