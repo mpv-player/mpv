@@ -964,8 +964,11 @@ mp.add_key_binding(o.key_toggle, "display-stats-toggle", function() process_key_
 -- Single invocation bindings without key, can be used in input.conf to create
 -- bindings for a specific page: "e script-binding stats/display-page-2"
 for k, _ in pairs(pages) do
-    mp.add_key_binding(nil, "display-page-" .. k, function() process_key_binding(true) end,
-        {repeatable=true})
+    mp.add_key_binding(nil, "display-page-" .. k,
+        function()
+            curr_page = k
+            process_key_binding(true)
+        end, {repeatable=true})
 end
 
 -- Reprint stats immediately when VO was reconfigured, only when toggled
