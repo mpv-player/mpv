@@ -120,6 +120,7 @@ before_install:
   - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
             if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
+                brew remove --force $(brew list) --ignore-dependencies
                 brew update
                 pushd "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core"
                 git checkout 55e02323812604add9a69bab8730319b9255a697
