@@ -110,13 +110,17 @@ void mp_core_unlock(struct MPContext *mpctx)
 // Process any queued user input.
 static void mp_process_input(struct MPContext *mpctx)
 {
+    int processed = 0;
     for (;;) {
         mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
         if (!cmd)
             break;
         run_command(mpctx, cmd, NULL, NULL, NULL);
+        processed = 1;
     }
     mp_set_timeout(mpctx, mp_input_get_delay(mpctx->input));
+    if (processed)
+        mp_notify(mpctx, MP_EVENT_INPUT_PROCESSED, NULL);
 }
 
 double get_relative_time(struct MPContext *mpctx)
