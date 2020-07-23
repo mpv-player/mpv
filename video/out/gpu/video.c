@@ -151,6 +151,7 @@ struct pass_info {
 
 struct dr_buffer {
     struct ra_buf *buf;
+    bool dedicated; // this buffer was purpose-allocated to map one mpi
     // The mpi reference will keep the data from being recycled (or from other
     // references gaining write access) while the GPU is accessing the buffer.
     struct mp_image *mpi;
@@ -967,14 +968,32 @@ static void init_video(struct gl_video *p)
     gl_video_setup_hooks(p);
 }
 
-static struct dr_buffer *gl_find_dr_buffer(struct gl_video *p, uint8_t *ptr)
+static struct dr_buffer *gl_find_dr_buffer(struct gl_video *p,
+                                           struct mp_image *mpi, int n)
 {
-   for (int i = 0; i < p->num_dr_buffers; i++) {
-       struct dr_buffer *buffer = &p->dr_buffers[i];
+    uint8_t *ptr = mpi->planes[n];
+
+    for (int i = 0; i < p->num_dr_buffers; i++) {
+        struct dr_buffer *buffer = &p->dr_buffers[i];
         uint8_t *bufptr = buffer->buf->data;
         size_t size = buffer->buf->params.size;
         if (ptr >= bufptr && ptr < bufptr + size)
             return buffer;
+    }
+
+    if (p->ra->fns->buf_map_ptr) {
+        size_t size = mpi->stride[n] * (mpi->h >> mpi->fmt.ys[n]);
+        struct ra_buf *buf = p->ra->fns->buf_map_ptr(p->ra, ptr, size);
+        if (!buf)
+            return NULL;
+
+        MP_TARRAY_GROW(p, p->dr_buffers, p->num_dr_buffers);
+        p->dr_buffers[p->num_dr_buffers] = (struct dr_buffer){
+            .buf = buf,
+            .dedicated = true,
+        };
+
+        return &p->dr_buffers[p->num_dr_buffers++];
     }
 
     return NULL;
@@ -1000,6 +1019,10 @@ again:;
             struct mp_image *ref = buffer->mpi;
             buffer->mpi = NULL;
             talloc_free(ref);
+            if (buffer->dedicated) {
+                ra_buf_free(p->ra, &buffer->buf);
+                MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, n);
+            }
             goto again;
         }
     }
@@ -3593,7 +3616,7 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
             params.stride = -params.stride;
         }
 
-        struct dr_buffer *mapped = gl_find_dr_buffer(p, mpi->planes[n]);
+        struct dr_buffer *mapped = gl_find_dr_buffer(p, mpi, n);
         if (mapped) {
             params.buf = mapped->buf;
             params.buf_offset = (uintptr_t)params.src -

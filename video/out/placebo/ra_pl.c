@@ -374,6 +374,47 @@ static bool buf_poll_pl(struct ra *ra, struct ra_buf *buf)
     return !pl_buf_poll(get_gpu(ra), buf->priv, 0);
 }
 
+static struct ra_buf *buf_map_ptr_pl(struct ra *ra, const void *ptr,
+                                     size_t size)
+{
+#if PL_API_VER >= 89
+
+    const struct pl_gpu *gpu = get_gpu(ra);
+    if (!(gpu->import_caps.buf & PL_HANDLE_HOST_PTR))
+        return NULL;
+
+    const struct pl_buf *plbuf;
+    plbuf = pl_buf_create(gpu, &(struct pl_buf_params) {
+        .size = size,
+        .host_mapped = true,
+        .import_handle = PL_HANDLE_HOST_PTR,
+        .shared_mem = {
+            .handle.ptr = (void *) ptr,
+            .size = size,
+        },
+    });
+
+    if (!plbuf)
+        return NULL;
+
+    struct ra_buf *rabuf = talloc_ptrtype(NULL, rabuf);
+    *rabuf = (struct ra_buf) {
+        .params = {
+            .type = RA_BUF_TYPE_TEX_UPLOAD,
+            .size = plbuf->params.size,
+            .host_mapped = true,
+        },
+        .data = plbuf->data,
+        .priv = (void *) plbuf,
+    };
+
+    return rabuf;
+
+#else // PL_API_VER < 89
+    return NULL;
+#endif
+}
+
 static void clear_pl(struct ra *ra, struct ra_tex *dst, float color[4],
                      struct mp_rect *scissor)
 {
@@ -751,6 +792,7 @@ static struct ra_fns ra_fns_pl = {
     .buf_destroy            = buf_destroy_pl,
     .buf_update             = buf_update_pl,
     .buf_poll               = buf_poll_pl,
+    .buf_map_ptr            = buf_map_ptr_pl,
     .clear                  = clear_pl,
     .blit                   = blit_pl,
     .uniform_layout         = uniform_layout_pl,
