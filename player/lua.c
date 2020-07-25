@@ -1238,7 +1238,6 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(get_wakeup_pipe),
     FN_ENTRY(raw_hook_add),
     FN_ENTRY(raw_hook_continue),
-    FN_ENTRY(get_env_list),
     {0}
 };
 
@@ -1250,6 +1249,7 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(getpid),
     AF_ENTRY(parse_json),
     AF_ENTRY(format_json),
+    FN_ENTRY(get_env_list),
     {0}
 };
 
