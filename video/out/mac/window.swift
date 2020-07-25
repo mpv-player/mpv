@@ -28,9 +28,11 @@ class Window: NSWindow, NSWindowDelegate {
 
     var unfsContentFrame: NSRect?
     var isInFullscreen: Bool = false
-    var isAnimating: Bool = false
     var isMoving: Bool = false
     var previousStyleMask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable]
+
+    var isAnimating: Bool = false
+    let animationLock: NSCondition = NSCondition()
 
     var unfsContentFramePixel: NSRect { get { return convertToBacking(unfsContentFrame ?? NSRect(x: 0, y: 0, width: 160, height: 90)) } }
     var framePixel: NSRect { get { return convertToBacking(frame) } }
@@ -115,7 +117,9 @@ class Window: NSWindow, NSWindowDelegate {
             return
         }
 
+        animationLock.lock()
         isAnimating = true
+        animationLock.unlock()
 
         targetScreen = common.getTargetScreen(forFullscreen: !isInFullscreen)
         if targetScreen == nil && previousScreen == nil {
@@ -224,7 +228,10 @@ class Window: NSWindow, NSWindowDelegate {
             }, completionHandler: nil )
         }
 
+        animationLock.lock()
         isAnimating = false
+        animationLock.signal()
+        animationLock.unlock()
         common.windowDidEndAnimation()
     }
 
@@ -263,6 +270,14 @@ class Window: NSWindow, NSWindowDelegate {
         isInFullscreen = false
         mpv?.setOption(fullscreen: isInFullscreen)
         common.windowSetToWindow()
+    }
+
+    func waitForAnimation() {
+        animationLock.lock()
+        while(isAnimating){
+            animationLock.wait()
+        }
+        animationLock.unlock()
     }
 
     func getFsAnimationDuration(_ def: Double) -> Double {
