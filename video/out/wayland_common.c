@@ -45,6 +45,7 @@
 #define OPT_BASE_STRUCT struct wayland_opts
 const struct m_sub_options wayland_conf = {
     .opts = (const struct m_option[]) {
+        {"wayland-app-id", OPT_STRING(app_id)},
         {"wayland-disable-vsync", OPT_FLAG(disable_vsync)},
         {"wayland-edge-pixels-pointer", OPT_INT(edge_pixels_pointer),
             M_RANGE(0, INT_MAX)},
@@ -54,6 +55,7 @@ const struct m_sub_options wayland_conf = {
     },
     .size = sizeof(struct wayland_opts),
     .defaults = &(struct wayland_opts) {
+        .app_id = "mpv",
         .disable_vsync = false,
         .edge_pixels_pointer = 10,
         .edge_pixels_touch = 64,
@@ -1051,7 +1053,7 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
     xdg_toplevel_add_listener(wl->xdg_toplevel, &xdg_toplevel_listener, wl);
 
     xdg_toplevel_set_title (wl->xdg_toplevel, "mpv");
-    xdg_toplevel_set_app_id(wl->xdg_toplevel, "mpv");
+    xdg_toplevel_set_app_id(wl->xdg_toplevel, wl->opts->app_id);
 
     return 0;
 }
@@ -1119,6 +1121,8 @@ int vo_wayland_init(struct vo *vo)
         return false;
     }
 
+    wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
+
     /* Can't be initialized during registry due to multi-protocol dependence */
     if (create_xdg_surface(wl))
         return false;
@@ -1160,7 +1164,6 @@ int vo_wayland_init(struct vo *vo)
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    zwp_idle_inhibit_manager_v1_interface.name);
 
-    wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
     wl->display_fd = wl_display_get_fd(wl->display);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
 

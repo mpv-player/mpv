@@ -26,6 +26,7 @@
 #include "input/event.h"
 
 struct wayland_opts {
+    char *app_id;
     int disable_vsync;
     int edge_pixels_pointer;
     int edge_pixels_touch;
