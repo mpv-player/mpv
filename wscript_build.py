@@ -225,6 +225,8 @@ def build(ctx):
         ( "audio/filter/af_lavcac3enc.c" ),
         ( "audio/filter/af_rubberband.c",        "rubberband" ),
         ( "audio/filter/af_scaletempo.c" ),
+        ( "audio/filter/af_scaletempo2.c" ),
+        ( "audio/filter/af_scaletempo2_internals.c" ),
         ( "audio/fmt-conversion.c" ),
         ( "audio/format.c" ),
         ( "audio/out/ao.c" ),
