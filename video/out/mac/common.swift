@@ -453,7 +453,8 @@ class Common: NSObject {
                         self.window?.toggleFullScreen(nil)
                     }
                 }
-                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.ontop) {
+                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.ontop) ||
+                   opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.ontop_level) {
                     DispatchQueue.main.async {
                         self.window?.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
                     }
