@@ -5737,10 +5737,26 @@ static void cmd_mouse(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
+    int pre_key = 0;
 
     const int x = cmd->args[0].v.i, y = cmd->args[1].v.i;
     int button = cmd->args[2].v.i;
+
+    if (mpctx->video_out && mpctx->video_out->config_ok) {
+        int oldx, oldy, oldhover;
+        mp_input_get_mouse_pos(mpctx->input, &oldx, &oldy, &oldhover);
+        struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
+
+        // TODO: VOs don't send outside positions. should we abort if outside?
+        int hover = x >= 0 && y >= 0 && x < vo_res.w && y < vo_res.h;
+
+        if (vo_res.w && vo_res.h && hover != oldhover)
+            pre_key = hover ? MP_KEY_MOUSE_ENTER : MP_KEY_MOUSE_LEAVE;
+    }
+
     if (button == -1) {// no button
+        if (pre_key)
+            mp_input_put_key_artificial(mpctx->input, pre_key);
         mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
         return;
     }
@@ -5757,6 +5773,8 @@ static void cmd_mouse(void *p)
         return;
     }
     button += dbc ? MP_MBTN_DBL_BASE : MP_MBTN_BASE;
+    if (pre_key)
+        mp_input_put_key_artificial(mpctx->input, pre_key);
     mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
     mp_input_put_key_artificial(mpctx->input, button);
 }
