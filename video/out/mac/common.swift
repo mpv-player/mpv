@@ -437,34 +437,38 @@ class Common: NSObject {
             events.pointee |= Int32(checkEvents())
             return VO_TRUE
         case VOCTRL_VO_OPTS_CHANGED:
-            var opt: UnsafeMutableRawPointer?
-            while mpv.nextChangedConfig(property: &opt) {
-                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.border) {
+            var o: UnsafeMutableRawPointer?
+            while mpv.nextChangedConfig(property: &o) {
+                guard let opt = o else {
+                    log.sendError("No changed options was retrieved")
+                    return VO_TRUE
+                }
+                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.border) {
                     DispatchQueue.main.async {
                         self.window?.border = Bool(mpv.opts.border)
                     }
                 }
-                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.fullscreen) {
+                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.fullscreen) {
                     DispatchQueue.main.async {
                         self.window?.toggleFullScreen(nil)
                     }
                 }
-                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.ontop) {
+                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.ontop) {
                     DispatchQueue.main.async {
                         self.window?.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
                     }
                 }
-                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.keepaspect_window) {
+                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.keepaspect_window) {
                     DispatchQueue.main.async {
                         self.window?.keepAspect = Bool(mpv.opts.keepaspect_window)
                     }
                 }
-                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.window_minimized) {
+                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.window_minimized) {
                     DispatchQueue.main.async {
                         self.window?.setMinimized(Bool(mpv.opts.window_minimized))
                     }
                 }
-                if opt! == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.window_maximized) {
+                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.window_maximized) {
                     DispatchQueue.main.async {
                         self.window?.setMaximized(Bool(mpv.opts.window_maximized))
                     }
