@@ -190,6 +190,11 @@ static bool getch2(struct input_ctx *input_ctx)
         return errno != EBADF && errno != EINVAL;
     buf.len += retval;
 
+    if (buf.len == 1 && buf.b[0] == '\033') {
+        mp_input_put_key(input_ctx, MP_KEY_ESC);
+        skip_buf(&buf, 1);
+    }
+
     while (buf.len) {
         int utf8_len = bstr_parse_utf8_code_length(buf.b[0]);
         if (utf8_len > 1) {
@@ -216,9 +221,6 @@ static bool getch2(struct input_ctx *input_ctx)
                 skip_buf(&buf, 1);
                 if (buf.len > 0 && mp_isalnum(buf.b[0])) { // meta+normal key
                     mp_input_put_key(input_ctx, buf.b[0] | MP_KEY_MODIFIER_ALT);
-                    skip_buf(&buf, 1);
-                } else if (buf.len == 1 && buf.b[0] == '\033') {
-                    mp_input_put_key(input_ctx, MP_KEY_ESC);
                     skip_buf(&buf, 1);
                 } else {
                     // Throw it away. Typically, this will be a complete,
