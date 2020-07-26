@@ -4,10 +4,6 @@
 #include "audio/chmap.h"
 #include "audio/filter/af_scaletempo2_internals.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 // Algorithm overview (from chromium):
 // Waveform Similarity Overlap-and-add (WSOLA).
 //
