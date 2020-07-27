@@ -138,7 +138,6 @@ static bool init_scaletempo2(struct mp_filter *f)
     p->initialized = true;
     p->sent_final = false;
     p->frame_delay = 0;
-    p->speed = 1;
     mp_aframe_config_copy(p->cur_format, p->pending);
 
     mp_scaletempo2_init(&p->data, mp_aframe_get_channels(p->pending),
