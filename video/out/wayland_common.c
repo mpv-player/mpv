@@ -1660,7 +1660,6 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
 {
     struct vo_wayland_state *wl = vo->wl;
-    struct wl_display *display = wl->display;
 
     if (wl->display_fd == -1)
         return;
@@ -1673,20 +1672,24 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
     int64_t wait_us = until_time_us - mp_time_us();
     int timeout_ms = MPCLAMP((wait_us + 999) / 1000, 0, 10000);
 
-    wl_display_dispatch_pending(display);
-    wl_display_flush(display);
+    while (wl_display_prepare_read(wl->display) != 0)
+        wl_display_dispatch_pending(wl->display);
+    wl_display_flush(wl->display);
 
     poll(fds, 2, timeout_ms);
 
     if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
         MP_FATAL(wl, "Error occurred on the display fd, closing\n");
+        wl_display_cancel_read(wl->display);
         close(wl->display_fd);
         wl->display_fd = -1;
         mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
+    } else {
+        wl_display_read_events(wl->display);
     }
 
     if (fds[0].revents & POLLIN)
-        wl_display_dispatch(display);
+        wl_display_dispatch(wl->display);
 
     if (fds[1].revents & POLLIN)
         mp_flush_wakeup_pipe(wl->wakeup_pipe[0]);
