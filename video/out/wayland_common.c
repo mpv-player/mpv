@@ -763,6 +763,7 @@ static void data_device_handle_drop(void *data, struct wl_data_device *wl_ddev)
     close(pipefd[1]);
 
     wl->dnd_fd = pipefd[0];
+    wl_data_offer_finish(wl->dnd_offer);
 }
 
 static void data_device_handle_selection(void *data, struct wl_data_device *wl_ddev,
@@ -1458,7 +1459,6 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
                                 file_list, wl->dnd_action);
         talloc_free(buffer);
 end:
-        wl_data_offer_finish(wl->dnd_offer);
         talloc_free(wl->dnd_mime_type);
         wl->dnd_mime_type = NULL;
         wl->dnd_mime_score = 0;
