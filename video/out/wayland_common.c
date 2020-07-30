@@ -1652,9 +1652,17 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 
         poll(fds, 1, poll_time);
 
-        wl_display_read_events(wl->display);
-        wl_display_roundtrip(wl->display);
+        if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+            wl_display_cancel_read(wl->display);
+        } else {
+            wl_display_read_events(wl->display);
+        }
+
+        wl_display_dispatch_pending(wl->display);
     }
+
+    if (wl_display_get_error(wl->display) == 0)
+        wl_display_roundtrip(wl->display);
 }
 
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
@@ -1689,7 +1697,7 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
     }
 
     if (fds[0].revents & POLLIN)
-        wl_display_dispatch(wl->display);
+        wl_display_dispatch_pending(wl->display);
 
     if (fds[1].revents & POLLIN)
         mp_flush_wakeup_pipe(wl->wakeup_pipe[0]);
