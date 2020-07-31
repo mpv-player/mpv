@@ -36,11 +36,6 @@ class CocoaCB: Common {
         libmpv = LibmpvHelper(mpvHandle, newlog)
         super.init(newlog)
         layer = GLLayer(cocoaCB: self)
-
-        libmpv.observeString("macos-title-bar-style")
-        libmpv.observeString("macos-title-bar-appearance")
-        libmpv.observeString("macos-title-bar-material")
-        libmpv.observeString("macos-title-bar-color")
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
@@ -238,34 +233,6 @@ class CocoaCB: Common {
         switch event.pointee.event_id {
         case MPV_EVENT_SHUTDOWN:
             shutdown()
-        case MPV_EVENT_PROPERTY_CHANGE:
-            if backendState == .initialized {
-                handlePropertyChange(event)
-            }
-        default:
-            break
-        }
-    }
-
-    func handlePropertyChange(_ event: UnsafePointer<mpv_event>) {
-        let pData = OpaquePointer(event.pointee.data)
-        guard let property = UnsafePointer<mpv_event_property>(pData)?.pointee else {
-            return
-        }
-
-        switch String(cString: property.name) {
-        case "macos-title-bar-appearance":
-            if let data = LibmpvHelper.mpvStringArrayToString(property.data) {
-                titleBar?.set(appearance: data)
-            }
-        case "macos-title-bar-material":
-            if let data = LibmpvHelper.mpvStringArrayToString(property.data) {
-                titleBar?.set(material: data)
-            }
-        case "macos-title-bar-color":
-            if let data = LibmpvHelper.mpvStringArrayToString(property.data) {
-                titleBar?.set(color: data)
-            }
         default:
             break
         }

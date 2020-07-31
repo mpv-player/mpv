@@ -182,14 +182,6 @@ class LibmpvHelper {
         for ptr in cargs { free(UnsafeMutablePointer(mutating: ptr)) }
     }
 
-    func observeString(_ property: String) {
-        mpv_observe_property(mpvHandle, 0, property, MPV_FORMAT_STRING)
-    }
-
-    func observeFlag(_ property: String) {
-        mpv_observe_property(mpvHandle, 0, property, MPV_FORMAT_FLAG)
-    }
-
     // Unsafe function when called while using the render API
     func command(_ cmd: String) {
         if mpvHandle == nil { return }

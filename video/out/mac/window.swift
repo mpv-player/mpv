@@ -183,7 +183,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowDidEnterFullScreen(_ notification: Notification) {
         isInFullscreen = true
-        mpv?.setConfigProperty(fullscreen: isInFullscreen)
+        mpv?.setOption(fullscreen: isInFullscreen)
         common.updateCursorVisibility()
         endAnimation(frame)
         common.titleBar?.show()
@@ -192,7 +192,7 @@ class Window: NSWindow, NSWindowDelegate {
     func windowDidExitFullScreen(_ notification: Notification) {
         guard let tScreen = targetScreen else { return }
         isInFullscreen = false
-        mpv?.setConfigProperty(fullscreen: isInFullscreen)
+        mpv?.setOption(fullscreen: isInFullscreen)
         endAnimation(calculateWindowPosition(for: tScreen, withoutBounds: targetScreen == screen))
         common.view?.layerContentsPlacement = .scaleProportionallyToFit
     }
@@ -230,7 +230,7 @@ class Window: NSWindow, NSWindowDelegate {
         setFrame(targetFrame, display: true)
         endAnimation()
         isInFullscreen = true
-        mpv?.setConfigProperty(fullscreen: isInFullscreen)
+        mpv?.setOption(fullscreen: isInFullscreen)
         common.windowSetToFullScreen()
     }
 
@@ -242,7 +242,7 @@ class Window: NSWindow, NSWindowDelegate {
         styleMask.remove(.fullScreen)
         endAnimation()
         isInFullscreen = false
-        mpv?.setConfigProperty(fullscreen: isInFullscreen)
+        mpv?.setOption(fullscreen: isInFullscreen)
         common.windowSetToWindow()
     }
 
@@ -496,7 +496,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowDidEndLiveResize(_ notification: Notification) {
         common.windowDidEndLiveResize()
-        mpv?.setConfigProperty(maximized: isZoomed)
+        mpv?.setOption(maximized: isZoomed)
 
         if let contentViewFrame = contentView?.frame,
                !isAnimating && !isInFullscreen
@@ -515,11 +515,11 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidMiniaturize(_ notification: Notification) {
-        mpv?.setConfigProperty(minimized: true)
+        mpv?.setOption(minimized: true)
     }
 
     func windowDidDeminiaturize(_ notification: Notification) {
-        mpv?.setConfigProperty(minimized: false)
+        mpv?.setOption(minimized: false)
     }
 
     func windowDidResignKey(_ notification: Notification) {
@@ -542,6 +542,6 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidMove(_ notification: Notification) {
-        mpv?.setConfigProperty(maximized: isZoomed)
+        mpv?.setOption(maximized: isZoomed)
     }
 }

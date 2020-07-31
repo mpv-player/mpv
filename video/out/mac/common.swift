@@ -49,9 +49,15 @@ class Common: NSObject {
     }
 
     func initMisc(_ vo: UnsafeMutablePointer<vo>) {
+        guard let mpv = mpv else {
+            log.sendError("Something went wrong, no MPVHelper was initialized")
+            exit(1)
+        }
+
         startDisplayLink(vo)
         initLightSensor()
         addDisplayReconfigureObserver()
+        mpv.setMacOptionCallback(macOptsWakeupCallback, context: self)
     }
 
     func initApp() {
@@ -438,7 +444,7 @@ class Common: NSObject {
             return VO_TRUE
         case VOCTRL_VO_OPTS_CHANGED:
             var o: UnsafeMutableRawPointer?
-            while mpv.nextChangedConfig(property: &o) {
+            while mpv.nextChangedOption(property: &o) {
                 guard let opt = o else {
                     log.sendError("No changed options was retrieved")
                     return VO_TRUE
@@ -544,6 +550,39 @@ class Common: NSObject {
             return VO_TRUE
         default:
             return VO_NOTIMPL
+        }
+    }
+
+    let macOptsWakeupCallback: swift_wakeup_cb_fn = { ( ctx ) in
+        let com = unsafeBitCast(ctx, to: Common.self)
+        DispatchQueue.main.async {
+            com.macOptsUpdate()
+        }
+    }
+
+    func macOptsUpdate() {
+        guard let mpv = mpv else {
+            log.sendWarning("Unexpected nil value in mac opts update")
+            return
+        }
+
+        var o: UnsafeMutableRawPointer?
+        while mpv.nextChangedMacOption(property: &o) {
+            guard let opt = o else {
+                log.sendWarning("Could not retrieve changed mac option")
+                return
+            }
+
+            switch opt {
+            case UnsafeMutableRawPointer(&mpv.macOptsPtr.pointee.macos_title_bar_appearance):
+                titleBar?.set(appearance: Int(mpv.macOpts.macos_title_bar_appearance))
+            case UnsafeMutableRawPointer(&mpv.macOptsPtr.pointee.macos_title_bar_material):
+                titleBar?.set(material: Int(mpv.macOpts.macos_title_bar_material))
+            case UnsafeMutableRawPointer(&mpv.macOptsPtr.pointee.macos_title_bar_color):
+                titleBar?.set(color: mpv.macOpts.macos_title_bar_color)
+            default:
+                break
+            }
         }
     }
 }
