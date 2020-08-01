@@ -761,7 +761,7 @@ function run_ytdl_hook(url)
         if result.error_string and result.error_string == "init" then
             err = err .. "not found or not enough permissions"
         elseif not result.killed_by_us then
-            err = err .. "unexpected error ocurred"
+            err = err .. "unexpected error occurred"
         else
             err = string.format("%s returned '%d'", err, es)
         end
