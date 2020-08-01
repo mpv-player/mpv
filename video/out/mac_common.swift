@@ -20,12 +20,17 @@ import Cocoa
 class MacCommon: Common {
     @objc var layer: MetalLayer?
 
+    var timer: PreciseTimer?
+    var swapTime: UInt64 = 0
+    let swapLock: NSCondition = NSCondition()
+
     var needsICCUpdate: Bool = false
 
     @objc init(_ vo: UnsafeMutablePointer<vo>) {
         let newlog = mp_log_new(vo, vo.pointee.log, "mac")
         super.init(newlog)
         mpv = MPVHelper(vo, log)
+        timer =  PreciseTimer(common: self)
 
         DispatchQueue.main.sync {
             layer = MetalLayer(common: self)
@@ -78,6 +83,13 @@ class MacCommon: Common {
     }
 
     @objc func swapBuffer() {
+        swapLock.lock()
+        let oldSwapTime = swapTime
+        while(oldSwapTime == swapTime){
+            swapLock.wait()
+        }
+        swapLock.unlock()
+
         if needsICCUpdate {
             needsICCUpdate = false
             updateICCProfile()
@@ -91,6 +103,31 @@ class MacCommon: Common {
     }
 
     // TODO draw in background
+    override func displayLinkCallback(_ displayLink: CVDisplayLink,
+                                            _ inNow: UnsafePointer<CVTimeStamp>,
+                                     _ inOutputTime: UnsafePointer<CVTimeStamp>,
+                                          _ flagsIn: CVOptionFlags,
+                                         _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn
+    {
+        timer?.scheduleAt(time: inOutputTime.pointee.hostTime) {
+            self.swapLock.lock()
+            self.swapTime += 1
+            self.swapLock.signal()
+            self.swapLock.unlock()
+        }
+
+        return kCVReturnSuccess
+    }
+
+    override func startDisplayLink(_ vo: UnsafeMutablePointer<vo>) {
+        super.startDisplayLink(vo)
+        timer?.updatePolicy(refreshRate: currentFps())
+    }
+
+    override func updateDisplaylink() {
+        super.updateDisplaylink()
+        timer?.updatePolicy(refreshRate: currentFps())
+    }
 
     override func lightSensorUpdate() {
         flagEvents(VO_EVENT_AMBIENT_LIGHTING_CHANGED)

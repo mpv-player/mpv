@@ -24,14 +24,8 @@ class MetalLayer: CAMetalLayer {
         common = com
         super.init()
 
-        //layer.framebufferOnly = false
-        //layer.drawableSize = NSSize(width: 1024, height: 576)
         pixelFormat = .rgba16Float
         backgroundColor = NSColor.black.cgColor
-
-        if #available(macOS 10.13, *) {
-            displaySyncEnabled = true
-        }
     }
 
     // necessary for when the layer containing window changes the screen
