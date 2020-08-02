@@ -545,7 +545,9 @@ local function add_video(s)
         append(s, r["h"], {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
     append_property(s, "current-window-scale", {prefix="Window Scale:"})
-    append(s, format("%.2f", r["aspect"]), {prefix="Aspect Ratio:"})
+    if r["aspect"] ~= nil then
+        append(s, format("%.2f", r["aspect"]), {prefix="Aspect Ratio:"})
+    end
     append(s, r["pixelformat"], {prefix="Pixel Format:"})
 
     -- Group these together to save vertical space
