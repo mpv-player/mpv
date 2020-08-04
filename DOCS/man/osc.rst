@@ -329,7 +329,8 @@ Configurable Options
     within the areas not covered by the osc (``yes``). If this option is set,
     the osc may overwrite the ``--video-margin-ratio-*`` options, even if the
     user has set them. (It will not overwrite them if all of them are set to
-    default values.)
+    default values.) Additionally, ``visibility`` must be set to ``always``.
+    Otherwise, this option does nothing.
 
     Currently, this is supported for the ``bottombar`` and ``topbar`` layout
     only. The other layouts do not change if this option is set. Separately,
