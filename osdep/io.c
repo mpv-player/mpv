@@ -682,6 +682,12 @@ char *mp_getenv(const char *name)
     return NULL;
 }
 
+char ***mp_penviron()
+{
+    mp_getenv("");  // ensure init
+    return &utf8_environ;  // `environ' should be an l-value
+}
+
 off_t mp_lseek(int fd, off_t offset, int whence)
 {
     HANDLE h = (HANDLE)_get_osfhandle(fd);

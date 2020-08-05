@@ -53,8 +53,6 @@
 #include "client.h"
 #include "libmpv/client.h"
 
-extern char **environ;
-
 // List of builtin modules and their contents as strings.
 // All these are generated from player/lua/*.lua
 static const char * const builtin_lua_scripts[][2] = {
