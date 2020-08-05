@@ -8,6 +8,7 @@ local watched_properties = {}       -- indexed by property name (used as a set)
 local cached_properties = {}        -- property name -> last known raw value
 local properties_to_profiles = {}   -- property name -> set of profiles using it
 local have_dirty_profiles = false   -- at least one profile is marked dirty
+local pending_hooks = {}            -- as set (keys only, meaningless values)
 
 -- Used during evaluation of the profile condition, and should contain the
 -- profile the condition is evaluated for.
@@ -61,6 +62,20 @@ local function on_idle()
         end
     end
     have_dirty_profiles = false
+    -- Release all hooks (the point was to wait until an idle event)
+    while true do
+        local h = next(pending_hooks)
+        if not h then
+            break
+        end
+        pending_hooks[h] = nil
+        h:cont()
+    end
+end
+
+local function on_hook(h)
+    h:defer()
+    pending_hooks[h] = true
 end
 
 function get(name, default)
@@ -155,4 +170,8 @@ if #profiles < 1 and mp.get_property("load-auto-profiles") == "auto" then
 end
 
 mp.register_idle(on_idle)
+for _, name in ipairs({"on_load", "on_preloaded", "on_before_start_file"}) do
+    mp.add_hook(name, 50, on_hook)
+end
+
 on_idle() -- re-evaluate all profiles immediately
