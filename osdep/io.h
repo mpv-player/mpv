@@ -105,6 +105,13 @@ int mp_closedir(DIR *dir);
 int mp_mkdir(const char *path, int mode);
 char *mp_win32_getcwd(char *buf, size_t size);
 char *mp_getenv(const char *name);
+
+#ifdef environ  /* mingw defines it as _environ */
+#undef environ
+#endif
+#define environ (*mp_penviron())  /* ensure initialization and l-value */
+char ***mp_penviron(void);
+
 off_t mp_lseek(int fd, off_t offset, int whence);
 
 // mp_stat types. MSVCRT's dev_t and ino_t are way too short to be unique.
@@ -204,6 +211,8 @@ void freelocale(locale_t);
 #else /* __MINGW32__ */
 
 #include <sys/mman.h>
+
+extern char **environ;
 
 #endif /* __MINGW32__ */
 

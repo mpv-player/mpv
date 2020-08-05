@@ -47,8 +47,6 @@
 #include "client.h"
 #include "libmpv/client.h"
 
-extern char **environ;
-
 // List of builtin modules and their contents as strings.
 // All these are generated from player/javascript/*.js
 static const char *const builtin_files[][3] = {
