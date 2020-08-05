@@ -445,7 +445,7 @@ typedef struct MPContext {
 
     struct mp_ipc_ctx *ipc_ctx;
 
-    int64_t builtin_script_ids[4];
+    int64_t builtin_script_ids[5];
 
     pthread_mutex_t abort_lock;
 

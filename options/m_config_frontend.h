@@ -232,6 +232,9 @@ struct m_profile *m_config_add_profile(struct m_config *config, char *name);
  */
 void m_profile_set_desc(struct m_profile *p, bstr desc);
 
+// Set auto profile condition of a profile.
+void m_profile_set_cond(struct m_profile *p, bstr cond);
+
 /*  Add an option to a profile.
  *  Used by the config file parser when defining a profile.
  *

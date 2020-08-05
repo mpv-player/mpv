@@ -72,6 +72,8 @@ Interface changes
     - remove --video-sync-adrop-size option (implementation was changed, no
       replacement for what this option did)
     - undeprecate --video-sync=display-adrop
+    - deprecate legacy auto profiles (profiles starting with "extension." and
+      "protocol."). Use conditional auto profiles instead.
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

@@ -50,8 +50,10 @@ struct m_profile {
     struct m_profile *next;
     char *name;
     char *desc;
+    char *cond;
     int num_opts;
     // Option/value pair array.
+    // name,value = opts[n*2+0],opts[n*2+1]
     char **opts;
 };
 
@@ -85,6 +87,10 @@ static int show_profile(struct m_config *config, bstr param)
         MP_INFO(config, "Profile %s: %s\n", p->name,
                 p->desc ? p->desc : "");
     config->profile_depth++;
+    if (p->cond) {
+        MP_INFO(config, "%*sprofile-cond=%s\n", config->profile_depth, "",
+                p->cond);
+    }
     for (int i = 0; i < p->num_opts; i++) {
         MP_INFO(config, "%*s%s=%s\n", config->profile_depth, "",
                 p->opts[2 * i], p->opts[2 * i + 1]);
@@ -884,6 +890,14 @@ void m_profile_set_desc(struct m_profile *p, bstr desc)
     p->desc = bstrto0(p, desc);
 }
 
+void m_profile_set_cond(struct m_profile *p, bstr cond)
+{
+    TA_FREEP(&p->cond);
+    cond = bstr_strip(cond);
+    if (cond.len)
+        p->cond = bstrto0(p, cond);
+}
+
 int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
                                 bstr name, bstr val)
 {
@@ -944,6 +958,8 @@ struct mpv_node m_config_get_profiles(struct m_config *config)
         node_map_add_string(entry, "name", profile->name);
         if (profile->desc)
             node_map_add_string(entry, "profile-desc", profile->desc);
+        if (profile->cond)
+            node_map_add_string(entry, "profile-cond", profile->cond);
 
         struct mpv_node *opts =
             node_map_add(entry, "options", MPV_FORMAT_NODE_ARRAY);

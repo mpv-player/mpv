@@ -999,6 +999,11 @@ Program Behavior
     show the console, and ``ESC`` to hide it again. (This is based on  a user
     script called ``repl.lua``.)
 
+``--load-auto-profiles=<yes|no|auto>``
+    Enable the builtin script that does auto profiles (default: auto). See
+    `Conditional auto profiles`_ for details. ``auto`` will load the script,
+    but immediately unload it if there are no conditional profiles.
+
 ``--player-operation-mode=<cplayer|pseudo-gui>``
     For enabling "pseudo GUI mode", which means that the defaults for some
     options are changed. This option should not normally be used directly, but

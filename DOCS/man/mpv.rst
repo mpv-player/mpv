@@ -694,10 +694,130 @@ or at runtime with the ``apply-profile <name>`` command.
         profile=big-cache
 
 
-Auto profiles
--------------
+Conditional auto profiles
+-------------------------
 
-Some profiles are loaded automatically. The following example demonstrates this:
+Profiles which have the ``profile-cond`` option set are applied automatically
+if the associated condition matches (unless auto profiles are disabled). The
+option takes a string, which is interpreted as Lua condition. If evaluating the
+expression returns true, the profile is applied, if it returns false, it is
+ignored. This Lua code execution is not sandboxed.
+
+Any variables in condition expressions can reference properties. If an
+identifier is not already by defined by Lua or mpv, it is interpreted as
+property. For example, ``pause`` would return the current pause status. If the
+variable name contains any ``_`` characters, they are turned into ``-``. For
+example, ``playback_time`` would return the property ``playback-time``.
+
+A more robust way to access properties is using ``p.property_name`` or
+``get("property-name", default_value)``. The automatic variable to property
+magic will break if a new identifier with the same name is introduced (for
+example, if a function named ``pause()`` were added, ``pause`` would return a
+function value instead of the value of the ``pause`` property).
+
+Note that if a property is not available, it will return ``nil``, which can
+cause errors if used in expressions. These are logged in verbose mode, and the
+expression is considered to be false.
+
+Whenever a property referenced by a profile condition changes, the condition
+is re-evaluated. If the return value of the condition changes from false or
+error to true, the profile is applied.
+
+Note that profiles cannot be "unapplied", so you may have to define inverse
+profiles with inverse conditions do undo a profile.
+
+.. admonition:: Example
+
+    Make only HD video look funny:
+
+    ::
+
+        [something]
+        profile-desc=HD video sucks
+        profile-cond=width >= 1280
+        hue=-50
+
+    If you want the profile to be reverted if the condition goes to false again,
+    you need to do this by manually creating an inverse profile:
+
+    ::
+
+        [something]
+        profile-desc=Flip video when entering fullscreen
+        profile-cond=fullscreen
+        vf=vflip
+
+        [something2]
+        profile-desc=Inverse of [something]
+        profile-cond=not fullscreen
+        vf=
+
+    This sets the video filter chain to ``vflip`` when entering fullscreen. The
+    first profile does not cause the filter to be removed when leaving
+    fullscreen. A second profile has to be defined, which is explicitly applied
+    on leaving fullscreen, and which explicitly clears the filter list. (This
+    would also clear the filter list at program start when starting the player
+    in windowed mode.)
+
+.. warning::
+
+    Every time an involved property changes, the condition is evaluated again.
+    If your condition uses ``p.playback_time`` for example, the condition is
+    re-evaluated approximately on every video frame. This is probably slow.
+
+This feature is managed by an internal Lua script. Conditions are executed as
+Lua code within this script. Its environment contains at least the following
+things:
+
+``(function environment table)``
+    Every Lua function has an environment table. This is used for identifier
+    access. There is no named Lua symbol for it; it is implicit.
+
+    The environment does "magic" accesses to mpv properties. If an identifier
+    is not already defined in ``_G``, it retrieves the mpv property of the same
+    name. Any occurrences of ``_`` in the name are replaced with ``-`` before
+    reading the property. The returned value is as retrieved by
+    ``mp.get_property_native(name)``. Internally, a cache of property values,
+    updated by observing the property is used instead, so properties that are
+    not observable will be stuck at the initial value forever.
+
+    If you want to access properties, that actually contain ``_`` in the name,
+    use ``get()`` (which does not perform transliteration).
+
+    Internally, the environment table has a ``__index`` meta method set, which
+    performs the access logic.
+
+``p``
+    A "magic" table similar to the environment table. Unlike the latter, this
+    does not prefer accessing variables defined in ``_G`` - it always accesses
+    properties.
+
+``get(name [, def])``
+    Read a property and return its value. If the property value is ``nil`` (e.g.
+    if the property does not exist), ``def`` is returned.
+
+    This is superficially similar to ``mp.get_property_native(name)``. An
+    important difference is that this accesses the property cache, and enables
+    the change detection logic (which is essential to the dynamic runtime
+    behavior of auto profiles). Also, it does not return an error value as
+    second return value.
+
+    The "magic" tables mentioned above use this function as backend. It does not
+    perform the ``_`` transliteration.
+
+In addition, the same environment as in a blank mpv Lua script is present. For
+example, ``math`` is defined and gives access to the Lua standard math library.
+
+.. warning::
+
+    This feature is subject to change indefinitely. You might be forced to
+    adjust your profiles on mpv updates.
+
+Legacy auto profiles
+--------------------
+
+Some profiles are loaded automatically using a legacy mechanism. The following
+example demonstrates this:
 
 .. admonition:: Auto profile loading
 
@@ -705,14 +825,15 @@ Some profiles are loaded automatically. The following example demonstrates this:
 
         [extension.mkv]
         profile-desc="profile for .mkv files"
-        vf=flip
+        vf=vflip
 
 The profile name follows the schema ``type.name``, where type can be
 ``protocol`` for the input/output protocol in use (see ``--list-protocols``),
 and ``extension`` for the extension of the path of the currently played file
 (*not* the file format).
 
-This feature is very limited, and there are no other auto profiles.
+This feature is very limited, and is considered soft-deprecated. Use conditional
+auto profiles.
 
 Using mpv from other programs or scripts
 ========================================

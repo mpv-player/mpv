@@ -426,6 +426,9 @@ static const m_option_t mp_opts[] = {
         .flags = UPDATE_BUILTIN_SCRIPTS},
     {"load-osd-console", OPT_FLAG(lua_load_console),
         .flags = UPDATE_BUILTIN_SCRIPTS},
+    {"load-auto-profiles",
+        OPT_CHOICE(lua_load_auto_profiles, {"no", 0}, {"yes", 1}, {"auto", -1}),
+        .flags = UPDATE_BUILTIN_SCRIPTS},
 #endif
 
 // ------------------------- stream options --------------------
@@ -944,6 +947,7 @@ static const struct MPOpts mp_default_opts = {
     .lua_ytdl_raw_options = NULL,
     .lua_load_stats = 1,
     .lua_load_console = 1,
+    .lua_load_auto_profiles = -1,
 #endif
     .auto_load_scripts = 1,
     .loop_times = 1,
