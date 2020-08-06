@@ -11,6 +11,7 @@
         <windowsSettings>
             <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">True/PM</dpiAware>
             <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2,PerMonitor</dpiAwareness>
+            <activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">UTF-8</activeCodePage>
         </windowsSettings>
     </application>
     <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
