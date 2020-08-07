@@ -126,10 +126,17 @@ function dispatch_message(ev) {
 var hooks = [];  // array of callbacks, id is index+1
 
 function run_hook(ev) {
+    var state = 0;  // 0:initial, 1:deferred, 2:continued
+    function do_cont() { return state = 2, mp._hook_continue(ev.hook_id) }
+
+    function err() { return mp.msg.error("hook already continued"), undefined }
+    function usr_defer() { return state == 2 ? err() : (state = 1, true) }
+    function usr_cont()  { return state == 2 ? err() : do_cont() }
+
     var cb = ev.id > 0 && hooks[ev.id - 1];
     if (cb)
-        cb();
-    mp._hook_continue(ev.hook_id);
+        cb({ defer: usr_defer, cont: usr_cont });
+    return state == 0 ? do_cont() : true;
 }
 
 mp.add_hook = function add_hook(name, pri, fn) {
