@@ -693,6 +693,72 @@ or at runtime with the ``apply-profile <name>`` command.
         # you can also include other profiles
         profile=big-cache
 
+Runtime profiles
+----------------
+
+Profiles can be set at runtime with ``apply-profile`` command. Since this
+operation is "destructive" (every item in a profile is simply set as an
+option, overwriting the previous value), you can't just enable and disable
+profiles again.
+
+As a partial remedy, there is a way to make profiles save old option values
+before overwriting them with the profile values, and then restoring the old
+values at a later point using ``apply-profile <profile-name> restore``.
+
+This can be enabled with the ``profile-restore`` option, which takes one of
+the following options:
+
+    ``default``
+        Does nothing, and nothing can be restored (default).
+
+    ``copy``
+        When applying a profile, copy the old values of all profile options to a
+        backup before setting them from the profile. These options are reset to
+        their old values using the backup when restoring.
+
+        Every profile has its own list of backed up values. If the backup
+        already exists (e.g. if ``apply-profile name`` was called more than
+        once in a row), the existing backup is no changed. The restore operation
+        will remove the backup.
+
+        It's important to know that restoring does not "undo" setting an option,
+        but simply copies the old option value. Consider for example ``vf-add``,
+        appends an entry to ``vf``. This mechanism will simply copy the entire
+        ``vf`` list, and does _not_ execute the inverse of ``vf-add`` (that
+        would be ``vf-remove``) on restoring.
+
+        Note that if a profile contains recursive profiles (via the ``profile``
+        option), the options in these recursive profiles are treated as if they
+        were part of this profile. The referenced profile's backup list is not
+        used when creating or using the backup. Restoring a profile does not
+        restore referenced profiles, only the options of referenced profiles (as
+        if they were part of the main profile).
+
+    ``copy-equal``
+        Similar to ``copy``, but restore an option only if it has the same value
+        as the value effectively set by the profile. This tries to deal with
+        the situation when the user does not want the option to be reset after
+        interactively changing it.
+
+.. admonition:: Example
+
+    ::
+
+        [something]
+        profile-restore=copy-equal
+        vf-add=rotate=90
+
+    Then running these commands will result in behavior as commented:
+
+    ::
+
+        set vf vflip
+        apply-profile something
+        vf-add=hflip
+        apply-profile something
+        # vf == vflip,rotate=90,hflip,rotate=90
+        apply-profile something restore
+        # vf == vflip
 
 Conditional auto profiles
 -------------------------

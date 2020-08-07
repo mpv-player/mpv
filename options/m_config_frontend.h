@@ -70,6 +70,9 @@ typedef struct m_config {
     struct m_profile *profiles;
     // Depth when recursively including profiles.
     int profile_depth;
+    // Temporary during profile application.
+    struct m_opt_backup **profile_backup_tmp;
+    int profile_backup_flags;
 
     struct m_opt_backup *backup_opts;
 
@@ -224,17 +227,6 @@ void m_config_finish_default_profile(struct m_config *config, int flags);
  */
 struct m_profile *m_config_add_profile(struct m_config *config, char *name);
 
-/*  Set the description of a profile.
- *  Used by the config file parser when defining a profile.
- *
- *  \param p The profile object.
- *  \param arg The profile's name.
- */
-void m_profile_set_desc(struct m_profile *p, bstr desc);
-
-// Set auto profile condition of a profile.
-void m_profile_set_cond(struct m_profile *p, bstr cond);
-
 /*  Add an option to a profile.
  *  Used by the config file parser when defining a profile.
  *
@@ -255,6 +247,9 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
  * Returns error code (<0) or 0 on success
  */
 int m_config_set_profile(struct m_config *config, char *name, int flags);
+
+// Attempt to "unset" a profile if possible.
+int m_config_restore_profile(struct m_config *config, char *name);
 
 struct mpv_node m_config_get_profiles(struct m_config *config);
 

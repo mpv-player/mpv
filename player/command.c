@@ -5647,8 +5647,12 @@ static void cmd_apply_profile(void *p)
     struct MPContext *mpctx = cmd->mpctx;
 
     char *profile = cmd->args[0].v.s;
-    if (m_config_set_profile(mpctx->mconfig, profile, 0) < 0)
-        cmd->success = false;
+    int mode = cmd->args[1].v.i;
+    if (mode == 0) {
+        cmd->success = m_config_set_profile(mpctx->mconfig, profile, 0) >= 0;
+    } else {
+        cmd->success = m_config_restore_profile(mpctx->mconfig, profile) >= 0;
+    }
 }
 
 static void cmd_load_script(void *p)
@@ -6138,7 +6142,11 @@ const struct mp_cmd_def mp_cmds[] = {
     { "keyup", cmd_key, { {"name", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG} },
         .priv = &(const int){MP_KEY_STATE_UP}},
 
-    { "apply-profile", cmd_apply_profile, {{"name", OPT_STRING(v.s)}} },
+    { "apply-profile", cmd_apply_profile, {
+        {"name", OPT_STRING(v.s)},
+        {"mode", OPT_CHOICE(v.i, {"apply", 0}, {"restore", 1}),
+            .flags = MP_CMD_OPT_ARG}, }
+    },
 
     { "load-script", cmd_load_script, {{"filename", OPT_STRING(v.s)}} },
 

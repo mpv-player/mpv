@@ -127,16 +127,7 @@ int m_config_parse(m_config_t *config, const char *location, bstr data,
             goto error;
         }
 
-        int res;
-        if (bstr_equals0(option, "profile-desc")) {
-            m_profile_set_desc(profile, value);
-            res = 0;
-        } else if (bstr_equals0(option, "profile-cond")) {
-            m_profile_set_cond(profile, value);
-            res = 0;
-        } else {
-            res = m_config_set_profile_option(config, profile, option, value);
-        }
+        int res = m_config_set_profile_option(config, profile, option, value);
         if (res < 0) {
             MP_ERR(config, "%s setting option %.*s='%.*s' failed.\n",
                    loc, BSTR_P(option), BSTR_P(value));

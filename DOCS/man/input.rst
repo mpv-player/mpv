@@ -1220,13 +1220,21 @@ Input Commands that are Possibly Subject to Change
 ``af-command <label> <command> <argument>``
     Same as ``vf-command``, but for audio filters.
 
-``apply-profile <name>``
+``apply-profile <name> [<mode>]``
     Apply the contents of a named profile. This is like using ``profile=name``
     in a config file, except you can map it to a key binding to change it at
     runtime.
 
-    There is no such thing as "unapplying" a profile - applying a profile
-    merely sets all option values listed within the profile.
+    The mode argument:
+
+    ``default``
+        Apply the profile. Default if the argument is omitted.
+
+    ``restore``
+        Restore options set by a previous ``apply-profile`` command for this
+        profile. Only works if the profile has ``profile-restore`` set to a
+        relevant mode. Prints a warning if nothing could be done. See
+        `Runtime profiles`_ for details.
 
 ``load-script <filename>``
     Load a script, similar to the ``--script`` option. Whether this waits for
