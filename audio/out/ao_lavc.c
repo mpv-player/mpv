@@ -209,6 +209,8 @@ static void encode(struct ao *ao, double apts, void **data)
         AVFrame *frame = av_frame_alloc();
         frame->format = af_to_avformat(ao->format);
         frame->nb_samples = ac->aframesize;
+        frame->channels = encoder->channels;
+        frame->channel_layout = encoder->channel_layout;
 
         size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
         assert(num_planes <= AV_NUM_DATA_POINTERS);
