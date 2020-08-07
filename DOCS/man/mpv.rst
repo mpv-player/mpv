@@ -789,8 +789,14 @@ Whenever a property referenced by a profile condition changes, the condition
 is re-evaluated. If the return value of the condition changes from false or
 error to true, the profile is applied.
 
-Note that profiles cannot be "unapplied", so you may have to define inverse
-profiles with inverse conditions do undo a profile.
+This mechanism tries to "unapply" profiles once the condition changes from true
+to false. If you want to use this, you need to set ``profile-restore`` for the
+profile. Another possibility it to create another profile with an inverse
+condition to undo the other profile.
+
+Recursive profiles can be used. But it is discouraged to reference other
+conditional profiles in a conditional profile, since this can lead to tricky
+and unintuitive behavior.
 
 .. admonition:: Example
 
@@ -804,26 +810,32 @@ profiles with inverse conditions do undo a profile.
         hue=-50
 
     If you want the profile to be reverted if the condition goes to false again,
-    you need to do this by manually creating an inverse profile:
+    you can set ``profile-restore``:
 
     ::
 
         [something]
-        profile-desc=Flip video when entering fullscreen
+        profile-desc=Mess up video when entering fullscreen
         profile-cond=fullscreen
-        vf=vflip
+        profile-restore=copy
+        vf-add=rotate=90
 
-        [something2]
-        profile-desc=Inverse of [something]
+    This appends the ``rotate`` filter to the video filter chain when entering
+    fullscreen. When leaving fullscreen, the ``vf`` option is set to the value
+    it had before entering fullscreen. Note that this would also remove any
+    other filters that were added during fullscreen mode by the user. Avoiding
+    this is trickier, and could for example be solved by adding a second profile
+    with an inverse condition and operation:
+
+    ::
+
+        [something]
+        profile-cond=fullscreen
+        vf-add=@rot:rotate=90
+
+        [something-inv]
         profile-cond=not fullscreen
-        vf=
-
-    This sets the video filter chain to ``vflip`` when entering fullscreen. The
-    first profile does not cause the filter to be removed when leaving
-    fullscreen. A second profile has to be defined, which is explicitly applied
-    on leaving fullscreen, and which explicitly clears the filter list. (This
-    would also clear the filter list at program start when starting the player
-    in windowed mode.)
+        vf-remove=@rot
 
 .. warning::
 

@@ -30,9 +30,14 @@ local function evaluate(profile)
                     .. type(res) .. ".")
         res = false
     end
-    if res ~= profile.status and res == true then
-        msg.info("Applying auto profile: " .. profile.name)
-        mp.commandv("apply-profile", profile.name)
+    if res ~= profile.status then
+        if res == true then
+            msg.info("Applying auto profile: " .. profile.name)
+            mp.commandv("apply-profile", profile.name)
+        elseif profile.status == true and profile.has_restore_opt then
+            msg.info("Restoring profile: " .. profile.name)
+            mp.commandv("apply-profile", profile.name, "restore")
+        end
     end
     profile.status = res
     profile.dirty = false
@@ -154,6 +159,7 @@ local function load_profiles()
                 properties = {},
                 status = nil,
                 dirty = true, -- need re-evaluate
+                has_restore_opt = v["profile-restore"] ~= "default"
             }
             profiles[#profiles + 1] = profile
             have_dirty_profiles = true
@@ -164,7 +170,7 @@ end
 load_profiles()
 
 if #profiles < 1 and mp.get_property("load-auto-profiles") == "auto" then
-    -- make it exist immediately
+    -- make it exit immediately
     _G.mp_event_loop = function() end
     return
 end
