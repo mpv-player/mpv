@@ -1060,6 +1060,17 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
     return 0;
 }
 
+static void update_app_id(struct vo_wayland_state *wl)
+{
+    if (!wl->xdg_toplevel)
+        return;
+    if (!wl->vo_opts->appid) {
+        wl->vo_opts->appid = talloc_strdup(wl->vo_opts, "mpv");
+        m_config_cache_write_opt(wl->vo_opts_cache, &wl->vo_opts->appid);
+    }
+    xdg_toplevel_set_app_id(wl->xdg_toplevel, wl->vo_opts->appid);
+}
+
 static void set_border_decorations(struct vo_wayland_state *wl, int state)
 {
     if (!wl->xdg_toplevel_decoration) {
@@ -1126,6 +1137,7 @@ int vo_wayland_init(struct vo *vo)
     /* Can't be initialized during registry due to multi-protocol dependence */
     if (create_xdg_surface(wl))
         return false;
+    update_app_id(wl);
 
     const char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
     if (xdg_current_desktop != NULL && strstr(xdg_current_desktop, "GNOME"))
@@ -1511,6 +1523,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                 toggle_maximized(wl);
             if (opt == &opts->border)
                 set_border_decorations(wl, opts->border);
+            if (opt == &opts->appid)
+                update_app_id(wl);
         }
         return VO_TRUE;
     }

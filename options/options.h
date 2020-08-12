@@ -23,6 +23,7 @@ typedef struct mp_vo_opts {
     int screen_id;
     int fsscreen_id;
     char *winname;
+    char *appid;
     int x11_netwm;
     int x11_bypass_compositor;
     int native_keyrepeat;
