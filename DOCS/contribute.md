@@ -238,7 +238,10 @@ General coding
 Code of Conduct
 ---------------
 
-We have one, but the document describing it got lost accidentally.
+Please note that this project is released with a Contributor Code of Conduct.
+By participating in this project you agree to abide by its terms.
+The Contributor Code of Conduct can be found here:
+https://www.contributor-covenant.org/version/2/0/code_of_conduct/
 
 Rules for git push access
 -------------------------
