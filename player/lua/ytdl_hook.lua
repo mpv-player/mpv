@@ -577,7 +577,13 @@ local function add_single_video(json)
 
     -- add subtitles
     if not (json.requested_subtitles == nil) then
-        for lang, sub_info in pairs(json.requested_subtitles) do
+        local subs = {}
+        for lang, info in pairs(json.requested_subtitles) do
+            subs[#subs + 1] = {lang = lang or "-", info = info}
+        end
+        table.sort(subs, function(a, b) return a.lang < b.lang end)
+        for _, e in ipairs(subs) do
+            local lang, sub_info = e.lang, e.info
             msg.verbose("adding subtitle ["..lang.."]")
 
             local sub = nil
