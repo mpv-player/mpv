@@ -472,6 +472,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
 
             // Allow moving up the subtitle, but only until it clips.
             sub->y = MPMAX(sub->y - offset, 0);
+            sub->y = MPMIN(sub->y + sub->h, h) - sub->h;
         }
     }
 
