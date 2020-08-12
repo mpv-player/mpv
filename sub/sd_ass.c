@@ -197,31 +197,10 @@ static void enable_output(struct sd *sd, bool enable)
     }
 }
 
-static int init(struct sd *sd)
+static void assobjects_init(struct sd *sd)
 {
+    struct sd_ass_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
-    struct sd_ass_priv *ctx = talloc_zero(sd, struct sd_ass_priv);
-    sd->priv = ctx;
-
-    char *extradata = sd->codec->extradata;
-    int extradata_size = sd->codec->extradata_size;
-
-    // Note: accept "null" as alias for "ass", so EDL delay_open subtitle
-    //       streams work.
-    if (strcmp(sd->codec->codec, "ass") != 0 &&
-        strcmp(sd->codec->codec, "null") != 0)
-    {
-        ctx->is_converted = true;
-        ctx->converter = lavc_conv_create(sd->log, sd->codec->codec, extradata,
-                                          extradata_size);
-        if (!ctx->converter)
-            return -1;
-        extradata = lavc_conv_get_extradata(ctx->converter);
-        extradata_size = extradata ? strlen(extradata) : 0;
-
-        if (strcmp(sd->codec->codec, "eia_608") == 0)
-            ctx->duration_unknown = 1;
-    }
 
     ctx->ass_library = mp_ass_init(sd->global, sd->log);
     ass_set_extract_fonts(ctx->ass_library, opts->use_embedded_fonts);
@@ -239,6 +218,8 @@ static int init(struct sd *sd)
     ctx->shadow_track->PlayResY = 288;
     mp_ass_add_default_styles(ctx->shadow_track, opts);
 
+    char *extradata = sd->codec->extradata;
+    int extradata_size = sd->codec->extradata_size;
     if (extradata)
         ass_process_codec_private(ctx->ass_track, extradata, extradata_size);
 
@@ -249,6 +230,44 @@ static int init(struct sd *sd)
 #endif
 
     enable_output(sd, true);
+}
+
+static void assobjects_destroy(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+
+    ass_free_track(ctx->ass_track);
+    ass_free_track(ctx->shadow_track);
+    enable_output(sd, false);
+    ass_library_done(ctx->ass_library);
+}
+
+static int init(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = talloc_zero(sd, struct sd_ass_priv);
+    sd->priv = ctx;
+
+    // Note: accept "null" as alias for "ass", so EDL delay_open subtitle
+    //       streams work.
+    if (strcmp(sd->codec->codec, "ass") != 0 &&
+        strcmp(sd->codec->codec, "null") != 0)
+    {
+        char *extradata = sd->codec->extradata;
+        int extradata_size = sd->codec->extradata_size;
+
+        ctx->is_converted = true;
+        ctx->converter = lavc_conv_create(sd->log, sd->codec->codec, extradata,
+                                          extradata_size);
+        if (!ctx->converter)
+            return -1;
+        extradata = lavc_conv_get_extradata(ctx->converter);
+        extradata_size = extradata ? strlen(extradata) : 0;
+
+        if (strcmp(sd->codec->codec, "eia_608") == 0)
+            ctx->duration_unknown = 1;
+    }
+
+    assobjects_init(sd);
     filters_init(sd);
 
     ctx->packer = mp_ass_packer_alloc(ctx);
@@ -760,10 +779,7 @@ static void uninit(struct sd *sd)
     filters_destroy(sd);
     if (ctx->converter)
         lavc_conv_uninit(ctx->converter);
-    ass_free_track(ctx->ass_track);
-    ass_free_track(ctx->shadow_track);
-    enable_output(sd, false);
-    ass_library_done(ctx->ass_library);
+    assobjects_destroy(sd);
     talloc_free(ctx->copy_cache);
 }
 
@@ -792,6 +808,11 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
             filters_destroy(sd);
             filters_init(sd);
             ctx->clear_once = true; // allow reloading on seeks
+        }
+        if (flags & UPDATE_SUB_HARD) {
+            assobjects_destroy(sd);
+            assobjects_init(sd);
+            MP_WARN(sd, "reoinit\n");
         }
         return CONTROL_OK;
     }

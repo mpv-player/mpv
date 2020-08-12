@@ -6362,7 +6362,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);
 
-    if (flags & (UPDATE_OSD | UPDATE_SUB_FILT)) {
+    if (flags & (UPDATE_OSD | UPDATE_SUB_FILT | UPDATE_SUB_HARD)) {
         for (int n = 0; n < num_ptracks[STREAM_SUB]; n++) {
             struct track *track = mpctx->current_track[n][STREAM_SUB];
             struct dec_sub *sub = track ? track->d_sub : NULL;
@@ -6372,6 +6372,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             }
         }
         osd_changed(mpctx->osd);
+        if (flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD))
+            mp_force_video_refresh(mpctx);
         mp_wakeup_core(mpctx);
     }
 

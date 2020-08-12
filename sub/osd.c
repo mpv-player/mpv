@@ -66,7 +66,7 @@ static const m_option_t style_opts[] = {
     {"justify", OPT_CHOICE(justify,
         {"auto", 0}, {"left", 1}, {"center", 2}, {"right", 3})},
     {"font-provider", OPT_CHOICE(font_provider,
-        {"auto", 0}, {"none", 1}, {"fontconfig", 2})},
+        {"auto", 0}, {"none", 1}, {"fontconfig", 2}), .flags = UPDATE_SUB_HARD},
     {0}
 };
 

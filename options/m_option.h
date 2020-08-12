@@ -420,7 +420,8 @@ char *format_file_size(int64_t size);
 #define UPDATE_VO_RESIZE        (1 << 19) // --android-surface-size
 #define UPDATE_HWDEC            (1 << 20) // --hwdec
 #define UPDATE_DVB_PROG         (1 << 21) // some --dvbin-...
-#define UPDATE_OPT_LAST         (1 << 21)
+#define UPDATE_SUB_HARD         (1 << 22) // subtitle opts. that need full reinit
+#define UPDATE_OPT_LAST         (1 << 22)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \
