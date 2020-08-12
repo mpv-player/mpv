@@ -1055,9 +1055,8 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
     wl->xdg_toplevel = xdg_surface_get_toplevel(wl->xdg_surface);
     xdg_toplevel_add_listener(wl->xdg_toplevel, &xdg_toplevel_listener, wl);
 
-    xdg_toplevel_set_title (wl->xdg_toplevel, "mpv");
-    xdg_toplevel_set_app_id(wl->xdg_toplevel, "mpv");
-
+    if (!wl->xdg_surface || !wl->xdg_toplevel)
+        return 1;
     return 0;
 }
 
@@ -1423,7 +1422,7 @@ static void do_minimize(struct vo_wayland_state *wl)
         xdg_toplevel_set_minimized(wl->xdg_toplevel);
 }
 
-static int update_window_title(struct vo_wayland_state *wl, char *title)
+static int update_window_title(struct vo_wayland_state *wl, const char *title)
 {
     if (!wl->xdg_toplevel)
         return VO_NOTAVAIL;
@@ -1544,7 +1543,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_UPDATE_WINDOW_TITLE:
-        return update_window_title(wl, (char *)arg);
+        return update_window_title(wl, (const char *)arg);
     case VOCTRL_SET_CURSOR_VISIBILITY:
         if (!wl->pointer)
             return VO_NOTAVAIL;
