@@ -2780,6 +2780,26 @@ Property list
                 "replaygain-album-peak" MPV_FORMAT_DOUBLE
                 "replaygain-album-gain" MPV_FORMAT_DOUBLE
 
+``current-tracks/...``
+    This gives access to currently selected tracks. It redirects to the correct
+    entry in ``track-list``.
+
+    The following sub-entries are defined: ``video``, ``audio``, ``sub``,
+    ``sub2``
+
+    For example, ``current-tracks/audio/lang`` returns the current audio track's
+    language field (the same value as ``track-list/N/lang``).
+
+    A sub-entry is accessible only if a track of that type is actually selected.
+    Tracks selected via ``--lavfi-complex`` never appear under this property.
+    ``current-tracks`` and ``current-tracks/`` are currently not accessible, and
+    will not return anything.
+
+    Scripts etc. should not use this. They should use ``track-list``, loop over
+    all tracks, and inspect the ``selected`` field to test whether a track is
+    selected (or compare the ``id`` field to the ``video`` / ``audio`` etc.
+    options).
+
 ``chapter-list``
     List of chapters, current entry marked. Currently, the raw property value
     is useless.

@@ -2025,6 +2025,53 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
                                 get_track_entry, mpctx);
 }
 
+static int property_current_tracks(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+
+    if (action != M_PROPERTY_KEY_ACTION)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int type = -1;
+    int order = 0;
+
+    struct m_property_action_arg *ka = arg;
+    bstr key;
+    char *rem;
+    m_property_split_path(ka->key, &key, &rem);
+
+    if (bstr_equals0(key, "video")) {
+        type = STREAM_VIDEO;
+    } else if (bstr_equals0(key, "audio")) {
+        type = STREAM_AUDIO;
+    } else if (bstr_equals0(key, "sub")) {
+        type = STREAM_SUB;
+    } else if (bstr_equals0(key, "sub2")) {
+        type = STREAM_SUB;
+        order = 1;
+    }
+
+    if (type < 0)
+        return M_PROPERTY_UNKNOWN;
+
+    struct track *t = mpctx->current_track[order][type];
+    if (!t)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int index = -1;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        if (mpctx->tracks[n] == t) {
+            index = n;
+            break;
+        }
+    }
+    assert(index >= 0);
+
+    char *name = mp_tprintf(80, "track-list/%d/%s", index, rem);
+    return mp_property_do(name, ka->action, ka->arg, ctx);
+}
+
 static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3445,6 +3492,7 @@ static const struct m_property mp_properties_base[] = {
 
     {"chapter-list", mp_property_list_chapters},
     {"track-list", property_list_tracks},
+    {"current-tracks", property_current_tracks},
     {"edition-list", property_list_editions},
 
     {"playlist", mp_property_playlist},
@@ -3584,7 +3632,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_END_FILE, "*"),
     E(MPV_EVENT_FILE_LOADED, "*"),
     E(MP_EVENT_CHANGE_ALL, "*"),
-    E(MPV_EVENT_TRACKS_CHANGED, "track-list"),
+    E(MPV_EVENT_TRACKS_CHANGED, "track-list", "current-tracks"),
     E(MPV_EVENT_IDLE, "*"),
     E(MPV_EVENT_TICK, "time-pos", "audio-pts", "stream-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
