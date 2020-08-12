@@ -220,6 +220,10 @@ static void assobjects_init(struct sd *sd)
 
     char *extradata = sd->codec->extradata;
     int extradata_size = sd->codec->extradata_size;
+    if (ctx->converter) {
+        extradata = lavc_conv_get_extradata(ctx->converter);
+        extradata_size = extradata ? strlen(extradata) : 0;
+    }
     if (extradata)
         ass_process_codec_private(ctx->ass_track, extradata, extradata_size);
 
@@ -252,16 +256,12 @@ static int init(struct sd *sd)
     if (strcmp(sd->codec->codec, "ass") != 0 &&
         strcmp(sd->codec->codec, "null") != 0)
     {
-        char *extradata = sd->codec->extradata;
-        int extradata_size = sd->codec->extradata_size;
-
         ctx->is_converted = true;
-        ctx->converter = lavc_conv_create(sd->log, sd->codec->codec, extradata,
-                                          extradata_size);
+        ctx->converter = lavc_conv_create(sd->log, sd->codec->codec,
+                                          sd->codec->extradata,
+                                          sd->codec->extradata_size);
         if (!ctx->converter)
             return -1;
-        extradata = lavc_conv_get_extradata(ctx->converter);
-        extradata_size = extradata ? strlen(extradata) : 0;
 
         if (strcmp(sd->codec->codec, "eia_608") == 0)
             ctx->duration_unknown = 1;
