@@ -349,7 +349,7 @@ typedef enum mpv_render_param_type {
     MPV_RENDER_PARAM_DRM_DISPLAY_V2 = 16,
     /**
      * MPV_RENDER_API_TYPE_SW only: rendering target surface size, mandatory.
-     * Valid for MPV_RENDER_API_TYPE_SW & mpv_render_context_create().
+     * Valid for MPV_RENDER_API_TYPE_SW & mpv_render_context_render().
      * Type: int[2] (e.g.: int s[2] = {w, h}; param.data = &s[0];)
      *
      * The video frame is transformed as with other VOs. Typically, this means
@@ -360,7 +360,7 @@ typedef enum mpv_render_param_type {
     /**
      * MPV_RENDER_API_TYPE_SW only: rendering target surface pixel format,
      * mandatory.
-     * Valid for MPV_RENDER_API_TYPE_SW & mpv_render_context_create().
+     * Valid for MPV_RENDER_API_TYPE_SW & mpv_render_context_render().
      * Type: char* (e.g.: char *f = "rgb0"; param.data = f;)
      *
      * Valid values are:
@@ -383,7 +383,7 @@ typedef enum mpv_render_param_type {
     /**
      * MPV_RENDER_API_TYPE_SW only: rendering target surface bytes per line,
      * mandatory.
-     * Valid for MPV_RENDER_API_TYPE_SW & mpv_render_context_create().
+     * Valid for MPV_RENDER_API_TYPE_SW & mpv_render_context_render().
      * Type: size_t*
      *
      * This is the number of bytes between a pixel (x, y) and (x, y + 1) on the
@@ -396,7 +396,7 @@ typedef enum mpv_render_param_type {
     /*
      * MPV_RENDER_API_TYPE_SW only: rendering target surface pixel data pointer,
      * mandatory.
-     * Valid for MPV_RENDER_API_TYPE_SW & mpv_render_context_create().
+     * Valid for MPV_RENDER_API_TYPE_SW & mpv_render_context_render().
      * Type: void*
      *
      * This points to the first pixel at the left/top corner (0, 0). In
