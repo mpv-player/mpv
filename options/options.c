@@ -124,6 +124,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"window-maximized", OPT_FLAG(window_maximized)},
     {"force-window-position", OPT_FLAG(force_window_position)},
     {"x11-name", OPT_STRING(winname)},
+    {"wayland-app-id", OPT_STRING(appid)},
     {"monitoraspect", OPT_FLOAT(force_monitor_aspect), M_RANGE(0.0, 9.0)},
     {"monitorpixelaspect", OPT_FLOAT(monitor_pixel_aspect),
         M_RANGE(1.0/32.0, 32.0)},
