@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Convert the contents of a file into a C string constant.
 # Note that the compiler will implicitly add an extra 0 byte at the end
