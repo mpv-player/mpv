@@ -79,6 +79,7 @@ struct mp_subtitle_opts {
     int sub_scale_by_window;
     int sub_scale_with_window;
     int ass_scale_with_window;
+    int ass_scale_dialog_only;
     struct osd_style_opts *sub_style;
     float sub_scale;
     float sub_gauss;

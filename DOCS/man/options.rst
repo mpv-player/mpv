@@ -2219,6 +2219,12 @@ Subtitles
 
     Default: no.
 
+``--sub-ass-scale-dialog-only=<yes|no>``
+    When scaling ASS subtitles, scale only the parts that look like dialog.
+    Other elements (like signs) will be left intact.
+
+    Default: no.
+
 ``--embeddedfonts=<yes|no>``
     Use fonts embedded in Matroska container files and ASS scripts (default:
     yes). These fonts can be used for SSA/ASS subtitle rendering.

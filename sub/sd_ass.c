@@ -421,6 +421,8 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_FONT_SIZE;
     if (opts->ass_style_override == 4) // 'scale'
         set_force_flags |= ASS_OVERRIDE_BIT_FONT_SIZE;
+    if (opts->ass_scale_dialog_only)
+        set_force_flags |= ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
 #if LIBASS_VERSION >= 0x01201001
     if (converted)
         set_force_flags |= ASS_OVERRIDE_BIT_ALIGNMENT;

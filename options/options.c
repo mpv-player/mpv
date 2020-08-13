@@ -260,6 +260,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-scale-by-window", OPT_FLAG(sub_scale_by_window)},
         {"sub-scale-with-window", OPT_FLAG(sub_scale_with_window)},
         {"sub-ass-scale-with-window", OPT_FLAG(ass_scale_with_window)},
+        {"sub-ass-scale-dialog-only", OPT_FLAG(ass_scale_dialog_only)},
         {"sub", OPT_SUBSTRUCT(sub_style, sub_style_conf)},
         {"sub-clear-on-seek", OPT_FLAG(sub_clear_on_seek)},
         {"teletext-page", OPT_INT(teletext_page), M_RANGE(1, 999)},
