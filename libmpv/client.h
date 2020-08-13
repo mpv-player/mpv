@@ -406,8 +406,7 @@ const char *mpv_client_name(mpv_handle *ctx);
  * client name as first argument, but also accepts the client ID formatted in
  * this manner.
  *
- * @return The client name. The string is read-only and is valid until the
- *         mpv_handle is destroyed.
+ * @return The client ID.
  */
 int64_t mpv_client_id(mpv_handle *ctx);
 
