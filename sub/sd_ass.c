@@ -100,6 +100,7 @@ static const char *const font_mimetypes[] = {
     "application/vnd.ms-opentype",
     "application/x-font-ttf",
     "application/x-font", // probably incorrect
+    "application/font-sfnt",
     "font/collection",
     "font/otf",
     "font/sfnt",
