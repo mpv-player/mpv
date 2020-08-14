@@ -1347,7 +1347,7 @@ int vo_wayland_reconfig(struct vo *vo)
     vo_calc_window_geometry(vo, &screenrc, &geo);
     vo_apply_window_geometry(vo, &geo);
 
-    if (!wl->configured) {
+    if (!wl->configured || !wl->vo_opts->window_maximized) {
         wl->geometry.x0 = 0;
         wl->geometry.y0 = 0;
         wl->geometry.x1 = vo->dwidth  / wl->scaling;
