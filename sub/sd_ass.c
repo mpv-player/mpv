@@ -813,7 +813,6 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         if (flags & UPDATE_SUB_HARD) {
             assobjects_destroy(sd);
             assobjects_init(sd);
-            MP_WARN(sd, "reoinit\n");
         }
         return CONTROL_OK;
     }
