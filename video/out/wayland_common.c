@@ -1254,6 +1254,9 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->presentation)
         wp_presentation_destroy(wl->presentation);
 
+    if (wl->feedback)
+        wp_presentation_feedback_destroy(wl->feedback);
+
     if (wl->pointer)
         wl_pointer_destroy(wl->pointer);
 
