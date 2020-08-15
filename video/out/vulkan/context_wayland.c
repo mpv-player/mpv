@@ -29,24 +29,6 @@ struct priv {
     struct mpvk_ctx vk;
 };
 
-static const struct wl_callback_listener frame_listener;
-
-static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
-{
-    struct vo_wayland_state *wl = data;
-
-    if (callback)
-        wl_callback_destroy(callback);
-
-    wl->frame_callback = wl_surface_frame(wl->surface);
-    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
-    wl->frame_wait = false;
-}
-
-static const struct wl_callback_listener frame_listener = {
-    frame_callback,
-};
-
 static const struct wp_presentation_feedback_listener feedback_listener;
 
 static void feedback_sync_output(void *data, struct wp_presentation_feedback *fback,
@@ -61,8 +43,10 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
                               uint32_t flags)
 {
     struct vo_wayland_state *wl = data;
-    wp_presentation_feedback_destroy(fback);
     vo_wayland_sync_shift(wl);
+
+    if (fback)
+        wp_presentation_feedback_destroy(fback);
 
     // Very similar to oml_sync_control, in this case we assume that every
     // time the compositor receives feedback, a buffer swap has been already
@@ -83,11 +67,13 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     wl->sync[index].ust = sec * 1000000LL + (uint64_t) tv_nsec / 1000;
     wl->sync[index].msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
     wl->sync[index].filled = true;
+    wl->presentation_discarded = false;
 }
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
 {
-    wp_presentation_feedback_destroy(fback);
+    struct vo_wayland_state *wl = data;
+    wl->presentation_discarded = true;
 }
 
 static const struct wp_presentation_feedback_listener feedback_listener = {
@@ -96,24 +82,41 @@ static const struct wp_presentation_feedback_listener feedback_listener = {
     feedback_discarded,
 };
 
-static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
+static const struct wl_callback_listener frame_listener;
+
+static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
 {
-    struct vo_wayland_state *wl = ctx->vo->wl;
+    struct vo_wayland_state *wl = data;
+
+    if (callback)
+        wl_callback_destroy(callback);
+
+    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
     if (wl->presentation) {
         wl->feedback = wp_presentation_feedback(wl->presentation, wl->surface);
         wp_presentation_feedback_add_listener(wl->feedback, &feedback_listener, wl);
-        wl->user_sbc += 1;
-        int index = last_available_sync(wl);
-        if (index < 0)
-            queue_new_sync(wl);
     }
+
+    wl->frame_wait = false;
+}
+
+static const struct wl_callback_listener frame_listener = {
+    frame_callback,
+};
+
+static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
+{
+    struct vo_wayland_state *wl = ctx->vo->wl;
 
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
 
-    if (wl->presentation)
+    if (wl->presentation) {
+        wl->user_sbc += 1;
         wayland_sync_swap(wl);
+    }
 
     wl->frame_wait = true;
 }
