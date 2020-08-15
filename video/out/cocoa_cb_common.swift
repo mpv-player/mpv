@@ -67,7 +67,7 @@ class CocoaCB: Common {
         } else {
             DispatchQueue.main.async {
                 self.updateWindowSize(vo)
-                self.layer?.update()
+                self.layer?.update(force: true)
             }
         }
     }
