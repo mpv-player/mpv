@@ -66,6 +66,9 @@ struct priv {
     bool appending;
     int64_t orig_size;
     struct mp_cancel *cancel;
+    // part_file://
+    int64_t part_start;
+    int64_t part_max_end; // 0 for no limit
 };
 
 // Total timeout = RETRY_TIMEOUT * MAX_RETRIES
@@ -79,8 +82,13 @@ static int64_t get_size(stream_t *s)
     if (fstat(p->fd, &st) == 0) {
         if (st.st_size <= 0 && !s->seekable)
             st.st_size = -1;
-        if (st.st_size >= 0)
-            return st.st_size;
+        if (st.st_size >= 0) {
+            if (st.st_size <= p->part_start)
+                return 0;
+            if (p->part_max_end)
+                st.st_size = MPMIN(st.st_size, p->part_max_end);
+            return st.st_size - p->part_start;
+        }
     }
     return -1;
 }
@@ -88,6 +96,11 @@ static int64_t get_size(stream_t *s)
 static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     struct priv *p = s->priv;
+
+    // We don't simply use (s->pos >= size) to avoid early return if
+    // the file is still being appended to.
+    if (p->part_max_end && s->pos + p->part_start >= p->part_max_end)
+        return -1;
 
 #ifndef __MINGW32__
     if (p->use_poll) {
@@ -134,6 +147,7 @@ static int write_buffer(stream_t *s, void *buffer, int len)
 static int seek(stream_t *s, int64_t newpos)
 {
     struct priv *p = s->priv;
+    newpos += p->part_start;
     return lseek(p->fd, newpos, SEEK_SET) != (off_t)-1;
 }
 
@@ -246,6 +260,55 @@ static bool check_stream_network(int fd)
 }
 #endif
 
+static int parse_part_file_range(stream_t *stream) {
+    struct priv *p = stream->priv;
+    int path_range_pos = bstrrchr(bstr0(stream->path), '@') + 1;
+    if (!path_range_pos || !strlen(stream->path+path_range_pos)) {
+        MP_ERR(stream, "URL %s does not end with a byte range\n", stream->url);
+        return STREAM_ERROR;
+    }
+
+    const struct m_option opt = {
+        .min = 0,
+        .max = INT64_MAX,
+    };
+
+    struct bstr range = bstr0(stream->path + path_range_pos);
+    struct bstr start, end;
+
+    bool has_end = bstr_split_tok(range, "-", &start, &end);
+
+    if(!start.len) {
+        MP_ERR(stream, "The byte range must have a start, and it can't be negative: '%s'\n", stream->url);
+        return STREAM_ERROR;
+    }
+
+    if (has_end && !end.len) {
+        MP_ERR(stream, "The byte range end can be omitted, but it can't be empty: '%s'\n", stream->url);
+        return STREAM_ERROR;
+    }
+
+    if (parse_byte_size(stream->log, &opt, bstr0("part_start"), start, &p->part_start) < 0)
+        return STREAM_ERROR;
+
+    if (has_end) {
+        if (parse_byte_size(stream->log, &opt, bstr0("part_max_end"), end, &p->part_max_end) < 0)
+            return STREAM_ERROR;
+    }
+
+    if (p->part_max_end && p->part_max_end < p->part_start) {
+        MP_ERR(stream, "The byte range end (%"PRId64") can't be smaller than the start (%"PRId64"): '%s'\n",
+                p->part_max_end,
+                p->part_start,
+                stream->url);
+        return STREAM_ERROR;
+    }
+
+    stream->path[path_range_pos-1] = '\0';
+    stream->path += 12;
+    return STREAM_OK;
+}
+
 static int open_f(stream_t *stream, struct stream_open_args *args)
 {
     struct priv *p = talloc_ptrtype(stream, p);
@@ -261,7 +324,16 @@ static int open_f(stream_t *stream, struct stream_open_args *args)
 
     char *filename = stream->path;
     char *url = "";
-    if (!strict_fs) {
+
+    bool is_part_file = bstr_startswith0(bstr0(stream->url), "part_file://");
+    if (is_part_file) {
+        mp_url_unescape_inplace(stream->url);
+        if (parse_part_file_range(stream) == STREAM_ERROR) return STREAM_ERROR;
+        url = stream->url;
+        filename = stream->path;
+    }
+
+    if (!strict_fs && !is_part_file) {
         char *fn = mp_file_url_to_filename(stream, bstr0(stream->url));
         if (fn)
             filename = stream->path = fn;
@@ -349,6 +421,9 @@ static int open_f(stream_t *stream, struct stream_open_args *args)
     if (stream->cancel)
         mp_cancel_set_parent(p->cancel, stream->cancel);
 
+    if (p->part_start && stream->seekable) {
+        seek(stream, 0);
+    }
     return STREAM_OK;
 }
 
@@ -358,6 +433,15 @@ const stream_info_t stream_info_file = {
     .protocols = (const char*const[]){ "file", "", "appending", NULL },
     .can_write = true,
     .local_fs = true,
+    .stream_origin = STREAM_ORIGIN_FS,
+};
+
+const stream_info_t stream_info_part_file = {
+    .name = "part_file",
+    .open2 = open_f,
+    .protocols = (const char*const[]){ "part_file", NULL },
+    .local_fs = true,
+    .can_write = false,
     .stream_origin = STREAM_ORIGIN_FS,
 };
 

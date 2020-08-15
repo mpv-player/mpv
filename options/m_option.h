@@ -566,6 +566,10 @@ int m_option_required_params(const m_option_t *opt);
 
 extern const char m_option_path_separator;
 
+
+int parse_byte_size(struct mp_log *log, const m_option_t *opt,
+                           struct bstr name, struct bstr param, void *dst);
+
 // Cause a compilation warning if typeof(expr) != type.
 // Should be used with pointer types only.
 #define MP_EXPECT_TYPE(type, expr) (0 ? (type)0 : (expr))

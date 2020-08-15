@@ -1165,6 +1165,15 @@ PROTOCOLS
     ``PATH`` itself should start with a third ``/`` to make the path an
     absolute path.
 
+``part_file://PATH@start[-end]``
+
+    Like ``file://``, but takes a byte range. ``end`` is optional.
+    ``start`` and ``end`` accept suffixes such as ``KiB`` and ``MiB``.
+
+    Example::
+
+      mpv part_file://captured_stream.ts@1g-2g
+
 ``appending://PATH``
 
     Play a local file, but assume it's being appended to. This is useful for

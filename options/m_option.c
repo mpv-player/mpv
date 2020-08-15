@@ -482,7 +482,7 @@ const m_option_type_t m_option_type_int64 = {
     .equal = int64_equal,
 };
 
-static int parse_byte_size(struct mp_log *log, const m_option_t *opt,
+int parse_byte_size(struct mp_log *log, const m_option_t *opt,
                            struct bstr name, struct bstr param, void *dst)
 {
     if (param.len == 0)
