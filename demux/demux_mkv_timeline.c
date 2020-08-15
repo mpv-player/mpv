@@ -494,6 +494,11 @@ static void check_track_compatibility(struct tl_ctx *tl, struct demuxer *mainsrc
                 // match (though mpv's implementation doesn't care).
                 if (strcmp(s->codec->codec, m->codec->codec) != 0)
                     MP_WARN(tl, "Timeline segments have mismatching codec.\n");
+                if (s->codec->extradata_size != m->codec->extradata_size ||
+                    (s->codec->extradata_size &&
+                        memcmp(s->codec->extradata, m->codec->extradata,
+                               s->codec->extradata_size) != 0))
+                    MP_WARN(tl, "Timeline segments have mismatching codec info.\n");
             } else {
                 MP_WARN(tl, "Source %s lacks %s stream with TID=%d, which "
                             "is present in the ordered chapters main "
