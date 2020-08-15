@@ -44,7 +44,7 @@ class MacCommon: Common {
         DispatchQueue.main.sync {
             initApp()
 
-            let (mpv, _, wr) = getInitProperties(vo)
+            let (_, _, wr) = getInitProperties(vo)
 
             guard let layer = self.layer else {
                 log.sendError("Something went wrong, no MetalLayer was initialized")
@@ -57,10 +57,7 @@ class MacCommon: Common {
                 initWindowState()
             }
 
-            if !NSEqualSizes(
-                window?.unfsContentFramePixel.size ?? NSZeroSize,
-                NSSize(width: Int(mpv.vout.dwidth), height: Int(mpv.vout.dheight))
-            ) {
+            if !NSEqualSizes(window?.unfsContentFramePixel.size ?? NSZeroSize, wr.size) {
                 window?.updateSize(wr.size)
             }
 

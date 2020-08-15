@@ -18,7 +18,6 @@
 import Cocoa
 
 class PreciseTimer {
-
     unowned var common: Common
     var mpv: MPVHelper? { get { return common.mpv } }
 
@@ -35,7 +34,7 @@ class PreciseTimer {
     let policyCount = MemoryLayout<thread_time_constraint_policy>.size /
                           MemoryLayout<integer_t>.size
 
-    init(common com: MacCommon) {
+    init(common com: Common) {
         common = com
         var timebase: mach_timebase_info = mach_timebase_info()
         var attr: pthread_attr_t = pthread_attr_t()
@@ -78,6 +77,7 @@ class PreciseTimer {
         isRunning = false
         condition.signal()
         condition.unlock()
+        // TODO ! shit
         pthread_kill(thread!, SIGALRM)
         pthread_join(thread!, nil)
     }
