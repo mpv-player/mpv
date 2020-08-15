@@ -1777,9 +1777,9 @@ Property list
     property.
 
 ``stream-open-filename``
-    The full path to the currently played media. This is different only from
-    ``path`` in special cases. In particular, if ``--ytdl=yes`` is used, and
-    the URL is detected by ``youtube-dl``, then the script will set this
+    The full path to the currently played media. This is different from
+    ``path`` only in special cases. In particular, if ``--ytdl=yes`` is used,
+    and the URL is detected by ``youtube-dl``, then the script will set this
     property to the actual media URL. This property should be set only during
     the ``on_load`` or ``on_load_fail`` hooks, otherwise it will have no effect
     (or may do something implementation defined in the future). The property is
