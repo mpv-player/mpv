@@ -2175,6 +2175,13 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
     for (int i = 0; i < desc.num_planes; i++)
         bpp += desc.bpp[i] >> (desc.xs[i] + desc.ys[i]);
 
+    // Alpha type is not supported by FFmpeg, so MP_ALPHA_AUTO may mean alpha
+    // is of an unknown type, or simply not present. Normalize to AUTO=no alpha.
+    if (!!(desc.flags & MP_IMGFLAG_ALPHA) != (p.alpha != MP_ALPHA_AUTO)) {
+        p.alpha =
+            (desc.flags & MP_IMGFLAG_ALPHA) ? MP_ALPHA_STRAIGHT : MP_ALPHA_AUTO;
+    }
+
     struct m_sub_property props[] = {
         {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p.imgfmt))},
         {"average-bpp",     SUB_PROP_INT(bpp),
@@ -2201,6 +2208,10 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"stereo-in",
             SUB_PROP_STR(m_opt_choice_str(mp_stereo3d_names, p.stereo3d))},
         {"rotate",          SUB_PROP_INT(p.rotate)},
+        {"alpha",
+            SUB_PROP_STR(m_opt_choice_str(mp_alpha_names, p.alpha)),
+            // avoid using "auto" for "no", so just make it unavailable
+            .unavailable = p.alpha == MP_ALPHA_AUTO},
         {0}
     };
 

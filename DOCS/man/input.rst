@@ -2328,6 +2328,11 @@ Property list
         Source file stereo 3D mode. (See the ``format`` video filter's
         ``stereo-in`` option.)
 
+    ``video-params/alpha``
+        Alpha type. If the format has no alpha channel, this will be unavailable
+        (but in future releases, it could change to ``no``). If alpha is
+        present, this is set to ``straight`` or ``premul``.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -2351,6 +2356,8 @@ Property list
             "chroma-location"   MPV_FORMAT_STRING
             "rotate"            MPV_FORMAT_INT64
             "stereo-in"         MPV_FORMAT_STRING
+            "average-bpp"       MPV_FORMAT_INT64
+            "alpha"             MPV_FORMAT_STRING
 
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling
