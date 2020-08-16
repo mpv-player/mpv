@@ -678,10 +678,21 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
         dst->format = MPV_FORMAT_FLAG;
         dst->u.flag = !!lua_toboolean(L, t);
         break;
-    case LUA_TSTRING:
-        dst->format = MPV_FORMAT_STRING;
-        dst->u.string = talloc_strdup(tmp, lua_tostring(L, t));
+    case LUA_TSTRING: {
+        size_t len = 0;
+        char *s = (char *)lua_tolstring(L, t, &len);
+        bool has_zeros = !!memchr(s, 0, len);
+        if (has_zeros) {
+            mpv_byte_array *ba = talloc_zero(tmp, mpv_byte_array);
+            *ba = (mpv_byte_array){talloc_memdup(tmp, s, len), len};
+            dst->format = MPV_FORMAT_BYTE_ARRAY;
+            dst->u.ba = ba;
+        } else {
+            dst->format = MPV_FORMAT_STRING;
+            dst->u.string = talloc_strdup(tmp, s);
+        }
         break;
+    }
     case LUA_TTABLE: {
         // Lua uses the same type for arrays and maps, so guess the correct one.
         int format = MPV_FORMAT_NONE;
