@@ -74,6 +74,9 @@ Interface changes
     - undeprecate --video-sync=display-adrop
     - deprecate legacy auto profiles (profiles starting with "extension." and
       "protocol."). Use conditional auto profiles instead.
+    - the "subprocess" command does not connect spawned processes' stdin to
+      mpv's stdin anymore. Instead, stdin is connected to /dev/null by default.
+      To get the old behavior, set the "passthrough_stdin" argument to true.
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

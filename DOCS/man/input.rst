@@ -547,6 +547,17 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         On Lua, you may use ``utils.get_env_list()`` to retrieve the current
         environment if you e.g. simply want to add a new variable.
 
+    ``stdin_data`` (``MPV_FORMAT_STRING``)
+        Feed the given string to the new process' stdin. Since this is a string,
+        you cannot pass arbitrary binary data. If the process terminates or
+        closes the pipe before all data is written, the remaining data is
+        silently discarded. Probably does not work on win32.
+
+    ``passthrough_stdin`` (``MPV_FORMAT_FLAG``)
+        If enabled, wire the new process' stdin to mpv's stdin (default: no).
+        Before mpv 0.33.0, this argument did not exist, but the default was if
+        it was set to ``yes``.
+
     The command returns the following result (as ``MPV_FORMAT_NODE_MAP``):
 
     ``status`` (``MPV_FORMAT_INT64``)

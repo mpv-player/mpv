@@ -76,6 +76,25 @@ mp.observe_property("vo-configured", "bool", function(_, v)
     end)
 
 
+    mp.command_native_async({name = "subprocess", args = {"wc", "-c"},
+                             stdin_data = "hello", capture_stdout = true},
+        function(res, val, err)
+            print("Should be '5': " .. val.stdout)
+        end)
+    -- blocking stdin by default
+    mp.command_native_async({name = "subprocess", args = {"cat"},
+                             capture_stdout = true},
+        function(res, val, err)
+            print("Should be 0: " .. #val.stdout)
+        end)
+    -- stdin + detached
+    mp.command_native_async({name = "subprocess",
+                             args = {"bash", "-c", "(sleep 5s ; cat)"},
+                             stdin_data = "this should appear after 5s.\n",
+                             detach = true},
+        function(res, val, err)
+            print("5s test: " .. val.status)
+        end)
 
     -- This should get killed on script exit.
     mp.command_native_async({name = "subprocess", playback_only = false,

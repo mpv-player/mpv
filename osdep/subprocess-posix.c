@@ -165,8 +165,21 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     }
 
     for (int n = 0; n < opts->num_fds; n++) {
+        assert(!(opts->fds[n].on_read && opts->fds[n].on_write));
+
         if (opts->fds[n].on_read && mp_make_cloexec_pipe(comm_pipe[n]) < 0)
             goto done;
+
+        if (opts->fds[n].on_write || opts->fds[n].write_buf) {
+            assert(opts->fds[n].on_write && opts->fds[n].write_buf);
+            if (mp_make_cloexec_pipe(comm_pipe[n]) < 0)
+                goto done;
+            MPSWAP(int, comm_pipe[n][0], comm_pipe[n][1]);
+
+            struct sigaction sa = {.sa_handler = SIG_IGN, .sa_flags = SA_RESTART};
+            sigfillset(&sa.sa_mask);
+            sigaction(SIGPIPE, &sa, NULL);
+        }
     }
 
     devnull = open("/dev/null", O_RDONLY | O_CLOEXEC);
@@ -225,7 +238,7 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
             if (comm_pipe[n][0] >= 0) {
                 map_fds[num_fds] = n;
                 fds[num_fds++] = (struct pollfd){
-                    .events = POLLIN,
+                    .events = opts->fds[n].on_read ? POLLIN : POLLOUT,
                     .fd = comm_pipe[n][0],
                 };
             }
@@ -249,15 +262,35 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
                         kill(pid, SIGKILL);
                     killed_by_us = true;
                     break;
-                } else {
+                }
+                struct mp_subprocess_fd *fd = &opts->fds[n];
+                if (fd->on_read) {
                     char buf[4096];
                     ssize_t r = read(comm_pipe[n][0], buf, sizeof(buf));
                     if (r < 0 && errno == EINTR)
                         continue;
-                    if (r > 0 && opts->fds[n].on_read)
-                        opts->fds[n].on_read(opts->fds[n].on_read_ctx, buf, r);
+                    fd->on_read(fd->on_read_ctx, buf, MPMAX(r, 0));
                     if (r <= 0)
                         SAFE_CLOSE(comm_pipe[n][0]);
+                } else if (fd->on_write) {
+                    if (!fd->write_buf->len) {
+                        fd->on_write(fd->on_write_ctx);
+                        if (!fd->write_buf->len) {
+                            SAFE_CLOSE(comm_pipe[n][0]);
+                            continue;
+                        }
+                    }
+                    ssize_t r = write(comm_pipe[n][0], fd->write_buf->start,
+                                      fd->write_buf->len);
+                    if (r < 0 && errno == EINTR)
+                        continue;
+                    if (r < 0) {
+                        // Let's not signal an error for now - caller can check
+                        // whether all buffer was written.
+                        SAFE_CLOSE(comm_pipe[n][0]);
+                        continue;
+                    }
+                    *fd->write_buf = bstr_cut(*fd->write_buf, r);
                 }
             }
         }

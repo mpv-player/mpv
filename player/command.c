@@ -5343,6 +5343,11 @@ static void subprocess_read(void *p, char *data, size_t size)
     }
 }
 
+static void subprocess_write(void *p)
+{
+    // Unused; we write a full buffer.
+}
+
 static void cmd_subprocess(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -5351,12 +5356,20 @@ static void cmd_subprocess(void *p)
     bool playback_only = cmd->args[1].v.i;
     bool detach = cmd->args[5].v.i;
     char **env = cmd->args[6].v.str_list;
+    bstr stdin_data = bstr0(cmd->args[7].v.s);
+    bool passthrough_stdin = cmd->args[8].v.i;
 
     if (env && !env[0])
         env = NULL; // do not actually set an empty environment
 
     if (!args || !args[0]) {
         MP_ERR(mpctx, "program name missing\n");
+        cmd->success = false;
+        return;
+    }
+
+    if (stdin_data.len && passthrough_stdin) {
+        MP_ERR(mpctx, "both stdin_data and passthrough_stdin set\n");
         cmd->success = false;
         return;
     }
@@ -5392,7 +5405,7 @@ static void cmd_subprocess(void *p)
         .fds = {
             {
                 .fd = 0, // stdin
-                .src_fd = 0,
+                .src_fd = passthrough_stdin ? 0 : -1,
             },
         },
         .num_fds = 1,
@@ -5406,6 +5419,16 @@ static void cmd_subprocess(void *p)
             .src_fd = capture ? -1 : fd,
             .on_read = capture ? subprocess_read : NULL,
             .on_read_ctx = &fdctx[fd],
+        };
+    }
+    // stdin
+    if (stdin_data.len) {
+        opts.fds[0] = (struct mp_subprocess_fd){
+            .fd = 0,
+            .src_fd = -1,
+            .on_write = subprocess_write,
+            .on_write_ctx = &fdctx[0],
+            .write_buf = &stdin_data,
         };
     }
 
@@ -6078,6 +6101,8 @@ const struct mp_cmd_def mp_cmds[] = {
             {"capture_stderr", OPT_FLAG(v.i), .flags = MP_CMD_OPT_ARG},
             {"detach", OPT_FLAG(v.i), .flags = MP_CMD_OPT_ARG},
             {"env", OPT_STRINGLIST(v.str_list), .flags = MP_CMD_OPT_ARG},
+            {"stdin_data", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"passthrough_stdin", OPT_FLAG(v.i), .flags = MP_CMD_OPT_ARG},
         },
         .spawn_thread = true,
         .can_abort = true,
