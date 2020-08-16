@@ -360,6 +360,7 @@ def build(ctx):
         ( "stream/stream_cb.c" ),
         ( "stream/stream_cdda.c",                "cdda" ),
         ( "stream/stream_concat.c" ),
+        ( "stream/stream_slice.c" ),
         ( "stream/stream_dvb.c",                 "dvbin" ),
         ( "stream/stream_dvdnav.c",              "dvdnav" ),
         ( "stream/stream_edl.c" ),
