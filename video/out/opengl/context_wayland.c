@@ -77,13 +77,10 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     wl->sync[index].ust = sec * 1000000LL + (uint64_t) tv_nsec / 1000;
     wl->sync[index].msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
     wl->sync[index].filled = true;
-    wl->presentation_discarded = false;
 }
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
 {
-    struct vo_wayland_state *wl = data;
-    wl->presentation_discarded = true;
 }
 
 static const struct wp_presentation_feedback_listener feedback_listener = {

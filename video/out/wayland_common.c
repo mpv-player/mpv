@@ -1607,9 +1607,10 @@ void wayland_sync_swap(struct vo_wayland_state *wl)
 
     wl->last_skipped_vsyncs = 0;
 
-    // If the presentation event was discarded, update the values based on
-    // the difference in mp_time.
-    if (wl->presentation_discarded) {
+    // If these are the same, presentation feedback has not been received.
+    // This will happen if the window is obscured/hidden in some way. Update
+    // the values based on the difference in mp_time.
+    if (wl->sync[index].ust == wl->last_ust && wl->last_ust) {
         wl->sync[index].ust += mp_time - wl->sync[index].last_mp_time;
         wl->sync[index].msc += 1;
         wl->sync[index].sbc += 1;

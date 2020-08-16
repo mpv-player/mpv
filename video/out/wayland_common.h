@@ -107,7 +107,6 @@ struct vo_wayland_state {
     /* Presentation Feedback */
     struct vo_wayland_sync *sync;
     int sync_size;
-    bool presentation_discarded;
     int64_t user_sbc;
     int64_t last_ust;
     int64_t last_msc;
