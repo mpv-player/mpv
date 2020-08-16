@@ -1194,6 +1194,27 @@ PROTOCOLS
 
     Stitch together parts of multiple files and play them.
 
+``slice://start[-end]@URL``
+
+    Read a slice of a stream.
+
+    ``start`` and ``end`` represent a byte range and accept
+    suffixes such as ``KiB`` and ``MiB``. ``end`` is optional.
+
+    Only works with seekable streams.
+
+    Examples::
+
+      mpv slice://1g-2g@cap.ts
+
+      This starts reading from cap.ts after seeking 1 GiB, then
+      reads until reaching 2 GiB or end of file.
+
+      mpv slice://100m@appending://cap.ts
+
+      This starts reading from cap.ts after seeking 100MiB, then
+      reads until end of file.
+
 ``null://``
 
     Simulate an empty file. If opened for writing, it will discard all data.
