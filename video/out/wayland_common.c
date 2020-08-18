@@ -1362,10 +1362,16 @@ int vo_wayland_reconfig(struct vo *vo)
     wl->reduced_width = vo->dwidth / wl->gcd;
     wl->reduced_height = vo->dheight / wl->gcd;
 
-    if (wl->vo_opts->fullscreen && wl->vo_opts->fsscreen_id < 0) {
-        xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
-    } else if (wl->vo_opts->fullscreen && wl->vo_opts->fsscreen_id >= 0) {
-        xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl->current_output->output);
+    if (wl->vo_opts->fullscreen) {
+        wl->geometry.x0 = 0;
+        wl->geometry.y0 = 0;
+        wl->geometry.x1 = mp_rect_w(wl->current_output->geometry) / wl->scaling;
+        wl->geometry.y1 = mp_rect_h(wl->current_output->geometry) / wl->scaling;
+        if (wl->vo_opts->fsscreen_id < 0) {
+            xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
+        } else if (wl->vo_opts->fsscreen_id >= 0) {
+            xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl->current_output->output);
+        }
     }
 
     if (wl->vo_opts->window_maximized)
