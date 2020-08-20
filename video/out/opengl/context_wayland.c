@@ -128,6 +128,8 @@ static void resize(struct ra_ctx *ctx)
     if (p->egl_window)
         wl_egl_window_resize(p->egl_window, width, height, 0, 0);
 
+    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+        wl_surface_commit(wl->surface);
     wl->vo->dwidth  = width;
     wl->vo->dheight = height;
 }

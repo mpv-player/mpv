@@ -198,7 +198,10 @@ static bool resize(struct ra_ctx *ctx)
     const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
 
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
-    return ra_vk_ctx_resize(ctx, width, height);
+    bool ok = ra_vk_ctx_resize(ctx, width, height);
+    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+        wl_surface_commit(wl->surface);
+    return ok;
 }
 
 static bool wayland_vk_reconfig(struct ra_ctx *ctx)
