@@ -390,7 +390,13 @@ typedef enum mpv_render_param_type {
      * target surface. It must be a multiple of the pixel size, and have space
      * for the surface width as specified by MPV_RENDER_PARAM_SW_SIZE.
      *
-     * It should be a multiple of 64 to facilitate fast SIMD operation.
+     * It should be a multiple of 64 to facilitate fast SIMD operation. Lower
+     * alignment might trigger slower code paths. In addition, it appears that
+     * if libswscale is used, stride must be at least a multiple of 16, or
+     * libswscale may randomly corrupt memory. The API still accepts unaligned
+     * values, because libswscale is not supposed to corrupt memory, and whether
+     * it does depends on its implementation details and bugs. If mpv is built
+     * with zimg (and zimg is not disabled), no problems should occur.
      */
     MPV_RENDER_PARAM_SW_STRIDE = 19,
     /*
@@ -407,6 +413,9 @@ typedef enum mpv_render_param_type {
      * will do it anyway). It is assumed that even the padding after the last
      * line (starting at bytepos(w, h) until (pointer + stride * h)) is
      * writable.
+     *
+     * It should be a aligned to 64 to facilitate fast SIMD operation. Lower
+     * alignment might trigger slower code paths.
      */
     MPV_RENDER_PARAM_SW_POINTER = 20,
 } mpv_render_param_type;
