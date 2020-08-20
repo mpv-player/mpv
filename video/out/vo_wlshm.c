@@ -194,7 +194,10 @@ static int resize(struct vo *vo)
         p->free_buffers = buf->next;
         talloc_free(buf);
     }
-    return mp_sws_reinit(p->sws);
+    int ret = mp_sws_reinit(p->sws);
+    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+        wl_surface_commit(wl->surface);
+    return ret;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
