@@ -194,6 +194,7 @@ static bool demux_mf_read_packet(struct demuxer *demuxer,
     mf_t *mf = demuxer->priv;
     if (mf->curr_frame >= mf->nr_of_files)
         return false;
+    bool ok = false;
 
     struct stream *entry_stream = NULL;
     if (mf->streams)
@@ -218,6 +219,7 @@ static bool demux_mf_read_packet(struct demuxer *demuxer,
                 dp->keyframe = true;
                 dp->stream = mf->sh->index;
                 *pkt = dp;
+                ok = true;
             }
         }
         talloc_free(data.start);
@@ -227,6 +229,10 @@ static bool demux_mf_read_packet(struct demuxer *demuxer,
         free_stream(stream);
 
     mf->curr_frame++;
+
+    if (!ok)
+        MP_ERR(demuxer, "error reading image file\n");
+
     return true;
 }
 
