@@ -894,6 +894,11 @@ static void handle_loop_file(struct MPContext *mpctx)
     }
 
     if (target != MP_NOPTS_VALUE) {
+        if (!mpctx->shown_aframes && !mpctx->shown_vframes) {
+            MP_WARN(mpctx, "No media data to loop.\n");
+            return;
+        }
+
         mpctx->stop_play = KEEP_PLAYING;
         set_osd_function(mpctx, OSD_FFW);
         mark_seek(mpctx);
