@@ -1616,19 +1616,18 @@ void queue_new_sync(struct vo_wayland_state *wl)
 void wayland_sync_swap(struct vo_wayland_state *wl)
 {
     int index = wl->sync_size - 1;
-    int64_t mp_time = mp_time_us();
-
-    wl->last_skipped_vsyncs = 0;
 
     // If these are the same, presentation feedback has not been received.
-    // This will happen if the window is obscured/hidden in some way. Update
-    // the values based on the difference in mp_time.
-    if (wl->sync[index].ust == wl->last_ust && wl->last_ust) {
-        wl->sync[index].ust += mp_time - wl->sync[index].last_mp_time;
-        wl->sync[index].msc += 1;
-        wl->sync[index].sbc += 1;
+    // This will happen if the window is obscured/hidden in some way. Set
+    // these values to -1 to disable presentation feedback in mpv's core.
+    if (wl->sync[index].ust == wl->last_ust) {
+        wl->last_skipped_vsyncs = -1;
+        wl->vsync_duration = -1;
+        wl->last_queue_display_time = -1;
+        return;
     }
-    wl->sync[index].last_mp_time = mp_time;
+
+    wl->last_skipped_vsyncs = 0;
 
     int64_t ust_passed = wl->sync[index].ust ? wl->sync[index].ust - wl->last_ust: 0;
     wl->last_ust = wl->sync[index].ust;
@@ -1647,7 +1646,7 @@ void wayland_sync_swap(struct vo_wayland_state *wl)
         }
 
         uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
-        uint64_t ust_mp_time = mp_time - (now_monotonic - wl->sync[index].ust);
+        uint64_t ust_mp_time = mp_time_us() - (now_monotonic - wl->sync[index].ust);
         wl->last_sbc_mp_time = ust_mp_time;
     }
 
