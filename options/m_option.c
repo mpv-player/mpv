@@ -1710,7 +1710,7 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
             val = param;
             param.len = 0;
         } else {
-            r = read_subparam(log, name, ",:", &param, &val);
+            r = read_subparam(log, name, ",", &param, &val);
             if (r < 0)
                 break;
         }

@@ -77,6 +77,8 @@ Interface changes
     - the "subprocess" command does not connect spawned processes' stdin to
       mpv's stdin anymore. Instead, stdin is connected to /dev/null by default.
       To get the old behavior, set the "passthrough_stdin" argument to true.
+    - key/value list options do not accept ":" as item separator anymore,
+      only ",". This means ":" is always considered part of the value.
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

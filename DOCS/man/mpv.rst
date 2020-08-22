@@ -542,6 +542,13 @@ Suffix        Meaning
 Keys are unique within the list. If an already present key is set, the existing
 key is removed before the new value is appended.
 
+If you want to pass a value without interpreting it for escapes or ``,``, it is
+recommended to use the ``-add`` variant. When using libmpv, prefer using
+``MPV_FORMAT_NODE_MAP``; when using a scripting backend or the JSON IPC, use an
+appropriate structured data type.
+
+Prior to mpv 0.33, ``:`` was also recognized as separator by ``-set``.
+
 Filter options
 ~~~~~~~~~~~~~~
 
