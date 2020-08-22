@@ -35,7 +35,6 @@ struct vo_wayland_sync {
     int64_t ust;
     int64_t msc;
     int64_t sbc;
-    int64_t last_mp_time;
     bool filled;
 };
 
