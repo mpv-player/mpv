@@ -28,26 +28,39 @@ static pthread_once_t path_init_once = PTHREAD_ONCE_INIT;
 static char mpv_home[512];
 static char old_home[512];
 
+static void copy_paths(char *default_path, const int size, char *compat_path)
+{
+    // If the compat. dir exists, and the proper dir doesn't, use the compat.
+    // config dir only.
+    if (mp_path_exists(compat_path) && !mp_path_exists(default_path)) {
+        snprintf(default_path, size, "%s", compat_path);
+        compat_path[0] = '\0';
+    }
+
+    snprintf(mpv_home, sizeof(mpv_home), "%s", default_path);
+    snprintf(old_home, sizeof(old_home), "%s", compat_path);
+}
+
 static void path_init(void)
 {
+    char xdg_home[512];
+    char dot_home[512];
     char *home = getenv("HOME");
     char *xdg_dir = getenv("XDG_CONFIG_HOME");
 
     if (home && home[0])
-        snprintf(mpv_home, sizeof(mpv_home), "%s/.mpv", home);
+        snprintf(dot_home, sizeof(dot_home), "%s/.mpv", home);
 
-    // Maintain compatibility with old XDG config dirs
     if (xdg_dir && xdg_dir[0]) {
-        snprintf(old_home, sizeof(old_home), "%s/mpv", xdg_dir);
+        snprintf(xdg_home, sizeof(xdg_home), "%s/mpv", xdg_dir);
     } else if (home && home[0]) {
-        snprintf(old_home, sizeof(old_home), "%s/.config/mpv", home);
+        snprintf(xdg_home, sizeof(xdg_home), "%s/.config/mpv", home);
     }
 
-    // If the compat. dir exists, and the proper dir doesn't, use the compat.
-    // config dir only.
-    if (mp_path_exists(old_home) && !mp_path_exists(mpv_home)) {
-        snprintf(mpv_home, sizeof(mpv_home), "%s", old_home);
-        old_home[0] = '\0';
+    if (HAVE_XDG) {
+        copy_paths(xdg_home, sizeof(xdg_home), dot_home);
+    } else {
+        copy_paths(dot_home, sizeof(dot_home), xdg_home);
     }
 }
 

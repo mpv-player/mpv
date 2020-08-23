@@ -829,6 +829,11 @@ standalone_features = [
         'desc': 'macOS libmpv backend',
         'deps': 'cocoa && swift',
         'func': check_true
+    }, {
+        'name': '--xdg',
+        'desc': 'xdg basedir specification config support as default',
+        'default': 'disable',
+        'func': check_true,
     }
 ]
 
