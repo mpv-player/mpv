@@ -200,7 +200,6 @@ void reset_audio_state(struct MPContext *mpctx)
     }
     mpctx->audio_status = mpctx->ao_chain ? STATUS_SYNCING : STATUS_EOF;
     mpctx->delay = 0;
-    mpctx->audio_stat_start = 0;
 }
 
 void uninit_audio_out(struct MPContext *mpctx)
@@ -573,29 +572,9 @@ static int write_to_ao(struct MPContext *mpctx, uint8_t **planes, int samples,
     if (played > 0) {
         mpctx->shown_aframes += played;
         mpctx->delay += played / real_samplerate;
-        mpctx->written_audio += played / (double)samplerate;
         return played;
     }
     return 0;
-}
-
-static void dump_audio_stats(struct MPContext *mpctx)
-{
-    if (!mp_msg_test(mpctx->log, MSGL_STATS))
-        return;
-    if (mpctx->audio_status != STATUS_PLAYING || !mpctx->ao || mpctx->paused) {
-        mpctx->audio_stat_start = 0;
-        return;
-    }
-
-    double delay = ao_get_delay(mpctx->ao);
-    if (!mpctx->audio_stat_start) {
-        mpctx->audio_stat_start = mp_time_us();
-        mpctx->written_audio = delay;
-    }
-    double current_audio = mpctx->written_audio - delay;
-    double current_time = (mp_time_us() - mpctx->audio_stat_start) / 1e6;
-    MP_STATS(mpctx, "value %f ao-dev", current_audio - current_time);
 }
 
 // Return the number of samples that must be skipped or prepended to reach the
@@ -797,8 +776,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     bool was_eof = mpctx->audio_status == STATUS_EOF;
 
-    dump_audio_stats(mpctx);
-
     if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_RELOAD))
         reload_audio_output(mpctx);
 
@@ -982,8 +959,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     int played = write_to_ao(mpctx, planes, samples, playflags);
     assert(played >= 0 && played <= samples);
     mp_audio_buffer_skip(ao_c->ao_buffer, played);
-
-    dump_audio_stats(mpctx);
 
     mpctx->audio_status = STATUS_PLAYING;
     if (audio_eof && !playsize) {
