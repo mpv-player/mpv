@@ -1621,6 +1621,7 @@ void wayland_sync_swap(struct vo_wayland_state *wl)
     // This will happen if the window is obscured/hidden in some way. Set
     // these values to -1 to disable presentation feedback in mpv's core.
     if (wl->sync[index].ust == wl->last_ust) {
+        wl->last_sbc += 1;
         wl->last_skipped_vsyncs = -1;
         wl->vsync_duration = -1;
         wl->last_queue_display_time = -1;
