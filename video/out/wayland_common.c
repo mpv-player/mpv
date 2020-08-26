@@ -1526,6 +1526,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         check_dnd_fd(wl);
         *events |= wl->pending_vo_events;
         wl->pending_vo_events = 0;
+        wl->vo->force_drop = wl->may_drop;
         return VO_TRUE;
     }
     case VOCTRL_VO_OPTS_CHANGED: {

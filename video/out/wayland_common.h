@@ -74,6 +74,7 @@ struct vo_wayland_state {
     int reduced_width;
     int reduced_height;
     bool frame_wait;
+    bool may_drop;
     bool state_change;
     bool toplevel_configured;
     int wakeup_pipe[2];

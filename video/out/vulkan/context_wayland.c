@@ -97,6 +97,7 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     }
 
     wl->frame_wait = false;
+    wl->may_drop = false;
 }
 
 static const struct wl_callback_listener frame_listener = {
@@ -109,6 +110,8 @@ static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
 
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
+
+    wl->may_drop = wl->frame_wait;
 
     if (wl->presentation) {
         wl->user_sbc += 1;
