@@ -468,6 +468,10 @@ struct vo {
 
     bool want_redraw;   // redraw as soon as possible
 
+    // Some backends may forcibly drop frames
+    bool force_drops_allowed;
+    bool force_drop;
+
     // current window state
     int dwidth;
     int dheight;

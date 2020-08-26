@@ -237,6 +237,7 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
             mpctx->error_playing = MPV_ERROR_VO_INIT_FAILED;
             goto err_out;
         }
+        mpctx->video_out->force_drops_allowed = !VS_IS_DISP(mpctx->opts->video_sync);
         mpctx->mouse_cursor_visible = true;
     }
 

@@ -1009,6 +1009,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
         mpctx->video_out = init_best_video_out(mpctx->global, &ex);
         if (!mpctx->video_out)
             goto err;
+        mpctx->video_out->force_drops_allowed = !VS_IS_DISP(mpctx->opts->video_sync);
         mpctx->mouse_cursor_visible = true;
     }
 

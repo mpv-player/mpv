@@ -1060,6 +1060,30 @@ static struct mp_image *get_image_vo(void *ctx, int imgfmt, int w, int h,
     return vo->driver->get_image(vo, imgfmt, w, h, stride_align);
 }
 
+static void drop_unrendered_frame(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    pthread_mutex_lock(&in->lock);
+
+    if (!in->frame_queued)
+        goto end;
+
+    if ((in->frame_queued->pts + in->frame_queued->duration) > mp_time_us())
+        goto end;
+
+    MP_VERBOSE(vo, "Dropping unrendered frame (pts %li)\n", in->frame_queued->pts);
+
+    talloc_free(in->frame_queued);
+    in->frame_queued = NULL;
+    in->hasframe = false;
+    pthread_cond_broadcast(&in->wakeup);
+    wakeup_core(vo);
+
+end:
+    pthread_mutex_unlock(&in->lock);
+}
+
 static void *vo_thread(void *ptr)
 {
     struct vo *vo = ptr;
@@ -1088,7 +1112,12 @@ static void *vo_thread(void *ptr)
             break;
         stats_event(in->stats, "iterations");
         vo->driver->control(vo, VOCTRL_CHECK_EVENTS, NULL);
-        bool working = render_frame(vo);
+        bool working = false;
+        if (vo->force_drop && vo->force_drops_allowed) {
+            drop_unrendered_frame(vo);
+        } else {
+            working = render_frame(vo);
+        }
         int64_t now = mp_time_us();
         int64_t wait_until = now + (working ? 0 : (int64_t)1e9);
 
