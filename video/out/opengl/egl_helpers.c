@@ -61,6 +61,7 @@ static const struct mp_egl_config_attr mp_egl_attribs[] = {
     MP_EGL_ATTRIB(EGL_COLOR_BUFFER_TYPE),
     MP_EGL_ATTRIB(EGL_CONFIG_CAVEAT),
     MP_EGL_ATTRIB(EGL_CONFORMANT),
+    MP_EGL_ATTRIB(EGL_NATIVE_VISUAL_ID),
 };
 
 static void dump_egl_config(struct mp_log *log, int msgl, EGLDisplay display,
@@ -70,7 +71,7 @@ static void dump_egl_config(struct mp_log *log, int msgl, EGLDisplay display,
         const char *name = mp_egl_attribs[n].name;
         EGLint v = -1;
         if (eglGetConfigAttrib(display, config, mp_egl_attribs[n].attrib, &v)) {
-            mp_msg(log, msgl, "  %s=%d\n", name, v);
+            mp_msg(log, msgl, "  %s=0x%x\n", name, v);
         } else {
             mp_msg(log, msgl, "  %s=<error>\n", name);
         }
