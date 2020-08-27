@@ -30,6 +30,8 @@ static void process(struct mp_filter *f)
 
     struct mp_frame frame = {MP_FRAME_PACKET, pkt};
     if (pkt) {
+        if (p->eof_returned)
+            MP_VERBOSE(f, "unset EOF on stream %d\n", p->src->index);
         p->eof_returned = false;
     } else {
         frame.type = MP_FRAME_EOF;
