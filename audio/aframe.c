@@ -461,13 +461,13 @@ void mp_aframe_clip_timestamps(struct mp_aframe *f, double start, double end)
     double rate = mp_aframe_get_effective_rate(f);
     if (f_end == MP_NOPTS_VALUE)
         return;
-    if (af_fmt_is_spdif(mp_aframe_get_format(f)))
-        return;
     if (end != MP_NOPTS_VALUE) {
         if (f_end >= end) {
             if (f->pts >= end) {
                 f->av_frame->nb_samples = 0;
             } else {
+                if (af_fmt_is_spdif(mp_aframe_get_format(f)))
+                    return;
                 int new = (end - f->pts) * rate;
                 f->av_frame->nb_samples = MPCLAMP(new, 0, f->av_frame->nb_samples);
             }
@@ -479,6 +479,8 @@ void mp_aframe_clip_timestamps(struct mp_aframe *f, double start, double end)
                 f->av_frame->nb_samples = 0;
                 f->pts = f_end;
             } else {
+                if (af_fmt_is_spdif(mp_aframe_get_format(f)))
+                    return;
                 int skip = (start - f->pts) * rate;
                 skip = MPCLAMP(skip, 0, f->av_frame->nb_samples);
                 mp_aframe_skip_samples(f, skip);
