@@ -1150,8 +1150,8 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mp_wakeup_core(mpctx);
         update_ab_loop_clip(mpctx);
         MP_VERBOSE(mpctx, "playback restart complete @ %f, audio=%s, video=%s\n",
-                   mpctx->playback_pts, mp_status_str(mpctx->video_status),
-                   mp_status_str(mpctx->audio_status));
+                   mpctx->playback_pts, mp_status_str(mpctx->audio_status),
+                   mp_status_str(mpctx->video_status));
 
         // Continuous seeks past EOF => treat as EOF instead of repeating seek.
         if (mpctx->seek.type == MPSEEK_RELATIVE && mpctx->seek.amount > 0 &&
