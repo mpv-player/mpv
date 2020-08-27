@@ -275,7 +275,7 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
 
     update_screensaver_state(mpctx);
 
-    vo_set_paused(vo_c->vo, mpctx->paused);
+    vo_set_paused(vo_c->vo, get_internal_paused(mpctx));
 
     // If we switch on video again, ensure audio position matches up.
     if (mpctx->ao_chain)

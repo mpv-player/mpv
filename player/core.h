@@ -615,6 +615,7 @@ int handle_force_window(struct MPContext *mpctx, bool force);
 void seek_to_last_frame(struct MPContext *mpctx);
 void update_screensaver_state(struct MPContext *mpctx);
 void update_ab_loop_clip(struct MPContext *mpctx);
+bool get_internal_paused(struct MPContext *mpctx);
 
 // scripting.c
 struct mp_script_args {

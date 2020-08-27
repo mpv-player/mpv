@@ -145,6 +145,11 @@ void update_core_idle_state(struct MPContext *mpctx)
     }
 }
 
+bool get_internal_paused(struct MPContext *mpctx)
+{
+    return mpctx->opts->pause || mpctx->paused_for_cache;
+}
+
 // The value passed here is the new value for mpctx->opts->pause
 void set_pause_state(struct MPContext *mpctx, bool user_pause)
 {
@@ -152,7 +157,7 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
 
     opts->pause = user_pause;
 
-    bool internal_paused = opts->pause || mpctx->paused_for_cache;
+    bool internal_paused = get_internal_paused(mpctx);
     if (internal_paused != mpctx->paused) {
         mpctx->paused = internal_paused;
 
