@@ -120,7 +120,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
         EGL_RED_SIZE, 8,
         EGL_GREEN_SIZE, 8,
         EGL_BLUE_SIZE, 8,
-        EGL_ALPHA_SIZE, ctx->opts.want_alpha ? 1 : 0,
+        EGL_ALPHA_SIZE, 0,
         EGL_RENDERABLE_TYPE, rend,
         EGL_NONE
     };
