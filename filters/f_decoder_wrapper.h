@@ -110,6 +110,7 @@ extern const struct mp_decoder_fns ad_spdif;
 // init to all-0 on init and resets.
 struct lavc_state {
     bool eof_returned;
+    bool packets_sent;
 };
 void lavc_process(struct mp_filter *f, struct lavc_state *state,
                   int (*send)(struct mp_filter *f, struct demux_packet *pkt),

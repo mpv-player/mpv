@@ -1266,6 +1266,7 @@ void lavc_process(struct mp_filter *f, struct lavc_state *state,
         if (!state->eof_returned)
             mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
         state->eof_returned = true;
+        state->packets_sent = false;
     } else if (ret_recv == AVERROR(EAGAIN)) {
         // Need to feed a packet.
         frame = mp_pin_out_read(f->ppins[0]);
@@ -1279,6 +1280,11 @@ void lavc_process(struct mp_filter *f, struct lavc_state *state,
                 mp_filter_internal_mark_failed(f);
             }
             return;
+        } else if (!state->packets_sent) {
+            // EOF only; just return it, without requiring send/receive to
+            // pass it through properly.
+            mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
+            return;
         }
         int ret_send = send(f, pkt);
         if (ret_send == AVERROR(EAGAIN)) {
@@ -1288,6 +1294,7 @@ void lavc_process(struct mp_filter *f, struct lavc_state *state,
             mp_filter_wakeup(f);
             return;
         }
+        state->packets_sent = true;
         talloc_free(pkt);
         mp_filter_internal_mark_progress(f);
     } else {
