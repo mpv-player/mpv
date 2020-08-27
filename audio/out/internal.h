@@ -153,6 +153,7 @@ struct ao_driver {
     //             returns success (this is intended for paused=true; if it
     //             returns false, playback continues, and the core emulates via
     //             reset(); unpausing always works)
+    //             The pausing state is also cleared by reset().
     bool (*set_pause)(struct ao *ao, bool paused);
     // pull based: start the audio callback
     // push based: start playing queued data
