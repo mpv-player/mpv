@@ -512,6 +512,11 @@ const char *mp_filter_get_name(struct mp_filter *f)
     return f->in->name;
 }
 
+const struct mp_filter_info *mp_filter_get_info(struct mp_filter *f)
+{
+    return f->in->info;
+}
+
 void mp_filter_set_name(struct mp_filter *f, const char *name)
 {
     talloc_free(f->in->name);
