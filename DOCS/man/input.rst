@@ -1737,9 +1737,10 @@ Property list
 .. note::
 
     Most options can be set as runtime via properties as well. Just remove the
-    leading ``--`` from the option name. These are not documented. Only
-    properties which do not exist as option with the same name, or which have
-    very different behavior from the options are documented below.
+    leading ``--`` from the option name. These are not documented below, see
+    `OPTIONS`_ instead. Only properties which do not exist as option with the
+    same name, or which have very different behavior from the options are
+    documented below.
 
 ``audio-speed-correction``, ``video-speed-correction``
     Factor multiplied with ``speed`` at which the player attempts to play the
