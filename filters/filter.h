@@ -346,6 +346,10 @@ const char *mp_filter_get_name(struct mp_filter *f);
 // Change mp_filter_get_name() return value.
 void mp_filter_set_name(struct mp_filter *f, const char *name);
 
+// Set filter priority. A higher priority gets processed first. Also, high
+// priority filters disable "interrupting" the filter graph.
+void mp_filter_set_high_priority(struct mp_filter *filter, bool pri);
+
 // Get a pin from f->pins[] for which mp_pin_get_name() returns the same name.
 // If name is NULL, always return NULL.
 struct mp_pin *mp_filter_get_named_pin(struct mp_filter *f, const char *name);
