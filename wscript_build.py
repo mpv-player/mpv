@@ -217,7 +217,6 @@ def build(ctx):
     sources = [
         ## Audio
         ( "audio/aframe.c" ),
-        ( "audio/audio_buffer.c" ),
         ( "audio/chmap.c" ),
         ( "audio/chmap_sel.c" ),
         ( "audio/decode/ad_lavc.c" ),
