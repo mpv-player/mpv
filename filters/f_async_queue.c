@@ -248,7 +248,12 @@ static void reset(struct mp_filter *f)
     struct priv *p = f->priv;
     struct async_queue *q = p->q;
 
-    reset_queue(q);
+    pthread_mutex_lock(&q->lock);
+    // If the queue is in reading state, it is logical that it should request
+    // input immediately.
+    if (mp_pin_get_dir(f->pins[0]) == MP_PIN_IN && q->reading)
+        mp_filter_wakeup(f);
+    pthread_mutex_unlock(&q->lock);
 }
 
 // producer
@@ -266,7 +271,6 @@ static const struct mp_filter_info info_out = {
     .priv_size = sizeof(struct priv),
     .destroy = destroy,
     .process = process_out,
-    .reset = reset,
 };
 
 struct mp_filter *mp_async_queue_create_filter(struct mp_filter *parent,
