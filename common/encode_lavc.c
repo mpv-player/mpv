@@ -243,16 +243,6 @@ bool encode_lavc_free(struct encode_lavc_context *ctx)
     return res;
 }
 
-void encode_lavc_set_audio_pts(struct encode_lavc_context *ctx, double pts)
-{
-    if (ctx) {
-        pthread_mutex_lock(&ctx->lock);
-        ctx->last_audio_in_pts = pts;
-        ctx->samples_since_last_pts = 0;
-        pthread_mutex_unlock(&ctx->lock);
-    }
-}
-
 // called locked
 static void maybe_init_muxer(struct encode_lavc_context *ctx)
 {
@@ -503,10 +493,7 @@ void encode_lavc_discontinuity(struct encode_lavc_context *ctx)
         return;
 
     pthread_mutex_lock(&ctx->lock);
-
-    ctx->audio_pts_offset = MP_NOPTS_VALUE;
     ctx->discontinuity_pts_offset = MP_NOPTS_VALUE;
-
     pthread_mutex_unlock(&ctx->lock);
 }
 

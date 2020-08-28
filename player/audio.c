@@ -31,11 +31,12 @@
 #include "common/common.h"
 #include "osdep/timer.h"
 
-#include "audio/audio_buffer.h"
 #include "audio/format.h"
 #include "audio/out/ao.h"
 #include "demux/demux.h"
+#include "filters/f_async_queue.h"
 #include "filters/f_decoder_wrapper.h"
+#include "filters/filter_internal.h"
 
 #include "core.h"
 #include "command.h"
@@ -45,6 +46,8 @@ enum {
     AD_EOF = -2,
     AD_WAIT = -4,
 };
+
+static void ao_process(struct mp_filter *f);
 
 static void update_speed_filters(struct MPContext *mpctx)
 {
@@ -183,11 +186,12 @@ void update_playback_speed(struct MPContext *mpctx)
 static void ao_chain_reset_state(struct ao_chain *ao_c)
 {
     ao_c->last_out_pts = MP_NOPTS_VALUE;
-    TA_FREEP(&ao_c->output_frame);
     ao_c->out_eof = false;
     ao_c->underrun = false;
-
-    mp_audio_buffer_clear(ao_c->ao_buffer);
+    ao_c->start_pts_known = false;
+    ao_c->start_pts = MP_NOPTS_VALUE;
+    ao_c->untimed_throttle = false;
+    ao_c->underrun = false;
 }
 
 void reset_audio_state(struct MPContext *mpctx)
@@ -204,10 +208,18 @@ void reset_audio_state(struct MPContext *mpctx)
 
 void uninit_audio_out(struct MPContext *mpctx)
 {
+    struct ao_chain *ao_c = mpctx->ao_chain;
+    if (ao_c) {
+        ao_c->ao_queue = NULL;
+        TA_FREEP(&ao_c->queue_filter);
+        ao_c->ao = NULL;
+    }
     if (mpctx->ao) {
         // Note: with gapless_audio, stop_play is not correctly set
-        if (mpctx->opts->gapless_audio || mpctx->stop_play == AT_END_OF_FILE)
+        if (mpctx->opts->gapless_audio || mpctx->stop_play == AT_END_OF_FILE) {
+            MP_VERBOSE(mpctx, "draining left over audio\n");
             ao_drain(mpctx->ao);
+        }
         ao_uninit(mpctx->ao);
 
         mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
@@ -232,8 +244,7 @@ static void ao_chain_uninit(struct ao_chain *ao_c)
         mp_pin_disconnect(ao_c->filter_src);
 
     talloc_free(ao_c->filter->f);
-    talloc_free(ao_c->output_frame);
-    talloc_free(ao_c->ao_buffer);
+    talloc_free(ao_c->ao_filter);
     talloc_free(ao_c);
 }
 
@@ -289,6 +300,25 @@ done:
     return res;
 }
 
+static void ao_chain_set_ao(struct ao_chain *ao_c, struct ao *ao)
+{
+    if (ao_c->ao != ao) {
+        assert(!ao_c->ao);
+        ao_c->ao = ao;
+        ao_c->ao_queue = ao_get_queue(ao_c->ao);
+        ao_c->queue_filter = mp_async_queue_create_filter(ao_c->ao_filter,
+                                                          MP_PIN_IN, ao_c->ao_queue);
+        mp_async_queue_set_notifier(ao_c->queue_filter, ao_c->ao_filter);
+        // Make sure filtering never stops with frames stuck in access filter.
+        mp_filter_set_high_priority(ao_c->queue_filter, true);
+    }
+
+    if (ao_c->filter->ao_needs_update)
+        mp_output_chain_set_ao(ao_c->filter, ao_c->ao);
+
+    mp_filter_wakeup(ao_c->ao_filter);
+}
+
 static void reinit_audio_filters_and_output(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -296,10 +326,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     assert(ao_c);
     struct track *track = ao_c->track;
 
-    if (!ao_c->filter->ao_needs_update)
-        return;
-
-    TA_FREEP(&ao_c->output_frame); // stale?
+    assert(ao_c->filter->ao_needs_update);
 
     // The "ideal" filter output format
     struct mp_aframe *out_fmt = mp_aframe_new_ref(ao_c->filter->output_aformat);
@@ -327,7 +354,26 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
          keep_weak_gapless_format(mpctx->ao_filter_fmt, out_fmt)) ||
         (mpctx->ao && opts->gapless_audio > 0))
     {
-        mp_output_chain_set_ao(ao_c->filter, mpctx->ao);
+        ao_chain_set_ao(ao_c, mpctx->ao);
+        talloc_free(out_fmt);
+        return;
+    }
+
+    // Wait until all played.
+    if (mpctx->ao && ao_is_playing(mpctx->ao)) {
+        talloc_free(out_fmt);
+        return;
+    }
+    // Format change during syncing. Force playback start early, then wait.
+    if (ao_c->ao_queue && mp_async_queue_get_frames(ao_c->ao_queue) &&
+        mpctx->audio_status == STATUS_SYNCING)
+    {
+        mpctx->audio_status = STATUS_READY;
+        mp_wakeup_core(mpctx);
+        talloc_free(out_fmt);
+        return;
+    }
+    if (mpctx->audio_status == STATUS_READY) {
         talloc_free(out_fmt);
         return;
     }
@@ -367,7 +413,6 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     mpctx->ao = ao_init_best(mpctx->global, ao_flags, mp_wakeup_core_cb,
                              mpctx, mpctx->encode_lavc_ctx, out_rate,
                              out_format, out_channels);
-    ao_c->ao = mpctx->ao;
 
     int ao_rate = 0;
     int ao_format = 0;
@@ -383,7 +428,6 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
             MP_ERR(mpctx, "Passthrough format unsupported.\n");
             ao_uninit(mpctx->ao);
             mpctx->ao = NULL;
-            ao_c->ao = NULL;
         }
     }
 
@@ -407,9 +451,6 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
         goto init_error;
     }
 
-    mp_audio_buffer_reinit_fmt(ao_c->ao_buffer, ao_format, &ao_channels,
-                                ao_rate);
-
     char tmp[192];
     MP_INFO(mpctx, "AO: [%s] %s\n", ao_get_name(mpctx->ao),
             audio_config_to_str_buf(tmp, sizeof(tmp), ao_rate, ao_format,
@@ -420,10 +461,17 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     ao_c->ao_resume_time =
         opts->audio_wait_open > 0 ? mp_time_sec() + opts->audio_wait_open : 0;
 
-    mp_output_chain_set_ao(ao_c->filter, mpctx->ao);
+    ao_set_paused(mpctx->ao, get_internal_paused(mpctx));
+
+    ao_chain_set_ao(ao_c, mpctx->ao);
 
     audio_update_volume(mpctx);
 
+    // Almost nonsensical hack to deal with certain format change scenarios.
+    if (mpctx->audio_status == STATUS_PLAYING)
+        ao_start(mpctx->ao);
+
+    mp_wakeup_core(mpctx);
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
     return;
@@ -472,6 +520,11 @@ void reinit_audio_chain(struct MPContext *mpctx)
     reinit_audio_chain_src(mpctx, track);
 }
 
+static const struct mp_filter_info ao_filter = {
+    .name = "ao",
+    .process = ao_process,
+};
+
 // (track=NULL creates a blank chain, used for lavfi-complex)
 void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
 {
@@ -481,14 +534,21 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
 
     struct ao_chain *ao_c = talloc_zero(NULL, struct ao_chain);
     mpctx->ao_chain = ao_c;
+    ao_c->mpctx = mpctx;
     ao_c->log = mpctx->log;
     ao_c->filter =
         mp_output_chain_create(mpctx->filter_root, MP_OUTPUT_CHAIN_AUDIO);
     ao_c->spdif_passthrough = true;
     ao_c->last_out_pts = MP_NOPTS_VALUE;
-    ao_c->ao_buffer = mp_audio_buffer_create(NULL);
-    ao_c->ao = mpctx->ao;
     ao_c->delay = mpctx->opts->audio_delay;
+
+    ao_c->ao_filter = mp_filter_create(mpctx->filter_root, &ao_filter);
+    if (!ao_c->filter || !ao_c->ao_filter)
+        goto init_error;
+    ao_c->ao_filter->priv = ao_c;
+
+    mp_filter_add_pin(ao_c->ao_filter, MP_PIN_IN, "in");
+    mp_pin_connect(ao_c->ao_filter->pins[0], ao_c->filter->f->pins[1]);
 
     if (track) {
         ao_c->track = track;
@@ -504,15 +564,8 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
     if (recreate_audio_filters(mpctx) < 0)
         goto init_error;
 
-    if (mpctx->ao) {
-        int rate;
-        int format;
-        struct mp_chmap channels;
-        ao_get_format(mpctx->ao, &rate, &format, &channels);
-        mp_audio_buffer_reinit_fmt(ao_c->ao_buffer, format, &channels, rate);
-
+    if (mpctx->ao)
         audio_update_volume(mpctx);
-    }
 
     mp_wakeup_core(mpctx);
     return;
@@ -523,25 +576,11 @@ init_error:
     error_on_track(mpctx, track);
 }
 
-// Return pts value corresponding to the end point of audio written to the
-// ao so far.
+// Return pts value corresponding to the start point of audio written to the
+// ao queue so far.
 double written_audio_pts(struct MPContext *mpctx)
 {
-    struct ao_chain *ao_c = mpctx->ao_chain;
-    if (!ao_c)
-        return MP_NOPTS_VALUE;
-
-    // end pts of audio that has been output by filters
-    double a_pts = ao_c->last_out_pts;
-    if (a_pts == MP_NOPTS_VALUE)
-        return MP_NOPTS_VALUE;
-
-    // Data that was ready for ao but was buffered because ao didn't fully
-    // accept everything to internal buffers yet. This also does not correctly
-    // track playback speed, so we use the current speed.
-    a_pts -= mp_audio_buffer_seconds(ao_c->ao_buffer) * mpctx->audio_speed;
-
-    return a_pts;
+    return mpctx->ao_chain ? mpctx->ao_chain->last_out_pts : MP_NOPTS_VALUE;
 }
 
 // Return pts value corresponding to currently playing audio.
@@ -553,187 +592,125 @@ double playing_audio_pts(struct MPContext *mpctx)
     return pts - mpctx->audio_speed * ao_get_delay(mpctx->ao);
 }
 
-static int write_to_ao(struct MPContext *mpctx, uint8_t **planes, int samples,
-                       int flags)
-{
-    if (mpctx->paused)
-        return 0;
-    struct ao *ao = mpctx->ao;
-    int samplerate;
-    int format;
-    struct mp_chmap channels;
-    ao_get_format(ao, &samplerate, &format, &channels);
-    encode_lavc_set_audio_pts(mpctx->encode_lavc_ctx, playing_audio_pts(mpctx));
-    if (samples == 0)
-        return 0;
-    double real_samplerate = samplerate / mpctx->audio_speed;
-    int played = ao_play(mpctx->ao, (void **)planes, samples, flags);
-    assert(played <= samples);
-    if (played > 0) {
-        mpctx->shown_aframes += played;
-        mpctx->delay += played / real_samplerate;
-        return played;
-    }
-    return 0;
-}
-
-// Return the number of samples that must be skipped or prepended to reach the
-// target audio pts after a seek (for A/V sync or hr-seek).
-// Return value (*skip):
-//   >0: skip this many samples
-//   =0: don't do anything
-//   <0: prepend this many samples of silence
-// Returns false if PTS is not known yet.
-static bool get_sync_samples(struct MPContext *mpctx, int *skip)
-{
-    struct MPOpts *opts = mpctx->opts;
-    *skip = 0;
-
-    if (mpctx->audio_status != STATUS_SYNCING)
-        return true;
-
-    int ao_rate;
-    int ao_format;
-    struct mp_chmap ao_channels;
-    ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels);
-
-    double play_samplerate = ao_rate / mpctx->audio_speed;
-
-    if (!opts->initial_audio_sync) {
-        mpctx->audio_status = STATUS_FILLING;
-        return true;
-    }
-
-    double written_pts = written_audio_pts(mpctx);
-    if (written_pts == MP_NOPTS_VALUE &&
-        !mp_audio_buffer_samples(mpctx->ao_chain->ao_buffer))
-        return false; // no audio read yet
-
-    bool sync_to_video = mpctx->vo_chain && mpctx->video_status != STATUS_EOF &&
-                         !mpctx->vo_chain->is_sparse;
-
-    double sync_pts = MP_NOPTS_VALUE;
-    if (sync_to_video) {
-        if (mpctx->video_status < STATUS_READY)
-            return false; // wait until we know a video PTS
-        if (mpctx->video_pts != MP_NOPTS_VALUE)
-            sync_pts = mpctx->video_pts - opts->audio_delay;
-    } else if (mpctx->hrseek_active) {
-        sync_pts = mpctx->hrseek_pts;
-    } else {
-        // If audio-only is enabled mid-stream during playback, sync accordingly.
-        sync_pts = mpctx->playback_pts;
-    }
-    if (sync_pts == MP_NOPTS_VALUE) {
-        mpctx->audio_status = STATUS_FILLING;
-        return true; // syncing disabled
-    }
-
-    double ptsdiff = written_pts - sync_pts;
-
-    // Missing timestamp, or PTS reset, or just broken.
-    if (written_pts == MP_NOPTS_VALUE) {
-        MP_WARN(mpctx, "Failed audio resync.\n");
-        mpctx->audio_status = STATUS_FILLING;
-        return true;
-    }
-    ptsdiff = MPCLAMP(ptsdiff, -3600, 3600);
-
-    MP_VERBOSE(mpctx, "audio sync: sync_to_video=%d, offset=%f\n",
-               sync_to_video, ptsdiff);
-
-    int align = af_format_sample_alignment(ao_format);
-    *skip = (int)(-ptsdiff * play_samplerate) / align * align;
-    return true;
-}
-
-
-static bool copy_output(struct MPContext *mpctx, struct ao_chain *ao_c,
-                        int minsamples, double endpts, bool *seteof)
-{
-    struct mp_audio_buffer *outbuf = ao_c->ao_buffer;
-
-    int ao_rate;
-    int ao_format;
-    struct mp_chmap ao_channels;
-    ao_get_format(ao_c->ao, &ao_rate, &ao_format, &ao_channels);
-
-    while (mp_audio_buffer_samples(outbuf) < minsamples) {
-        int cursamples = mp_audio_buffer_samples(outbuf);
-        int maxsamples = INT_MAX;
-        if (endpts != MP_NOPTS_VALUE) {
-            double rate = ao_rate / mpctx->audio_speed;
-            double curpts = written_audio_pts(mpctx);
-            if (curpts != MP_NOPTS_VALUE) {
-                double remaining =
-                    (endpts - curpts - mpctx->opts->audio_delay) * rate;
-                maxsamples = MPCLAMP(remaining, 0, INT_MAX);
-            }
-        }
-
-        if (!ao_c->output_frame || !mp_aframe_get_size(ao_c->output_frame)) {
-            TA_FREEP(&ao_c->output_frame);
-
-            struct mp_frame frame = mp_pin_out_read(ao_c->filter->f->pins[1]);
-            if (frame.type == MP_FRAME_AUDIO) {
-                ao_c->output_frame = frame.data;
-                ao_c->out_eof = false;
-                ao_c->last_out_pts = mp_aframe_end_pts(ao_c->output_frame);
-            } else if (frame.type == MP_FRAME_EOF) {
-                ao_c->out_eof = true;
-            } else if (frame.type) {
-                MP_ERR(mpctx, "unknown frame type\n");
-                mp_frame_unref(&frame);
-            }
-        }
-
-        // out of data
-        if (!ao_c->output_frame) {
-            if (ao_c->out_eof) {
-                *seteof = true;
-                return true;
-            }
-            return false;
-        }
-
-        if (cursamples + mp_aframe_get_size(ao_c->output_frame) > maxsamples) {
-            if (cursamples < maxsamples) {
-                uint8_t **data = mp_aframe_get_data_ro(ao_c->output_frame);
-                mp_audio_buffer_append(outbuf, (void **)data,
-                                       maxsamples - cursamples);
-                mp_aframe_skip_samples(ao_c->output_frame,
-                                       maxsamples - cursamples);
-            }
-            *seteof = true;
-            return true;
-        }
-
-        uint8_t **data = mp_aframe_get_data_ro(ao_c->output_frame);
-        mp_audio_buffer_append(outbuf, (void **)data,
-                               mp_aframe_get_size(ao_c->output_frame));
-        TA_FREEP(&ao_c->output_frame);
-    }
-    return true;
-}
-
-/* Try to get at least minsamples decoded+filtered samples in outbuf
- * (total length including possible existing data).
- * Return 0 on success, or negative AD_* error code.
- * In the former case outbuf has at least minsamples buffered on return.
- * In case of EOF/error it might or might not be. */
-static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
-                        int minsamples)
+// This garbage is needed for untimed AOs. These consume audio infinitely fast,
+// so try keeping approximate A/V sync by blocking audio transfer as needed.
+static void update_throttle(struct MPContext *mpctx)
 {
     struct ao_chain *ao_c = mpctx->ao_chain;
+    bool new_throttle = mpctx->audio_status == STATUS_PLAYING &&
+                        mpctx->delay > 0 && ao_c && ao_c->ao &&
+                        ao_untimed(ao_c->ao) &&
+                        mpctx->video_status != STATUS_EOF;
+    if (ao_c && new_throttle != ao_c->untimed_throttle) {
+        ao_c->untimed_throttle = new_throttle;
+        mp_wakeup_core(mpctx);
+        mp_filter_wakeup(ao_c->ao_filter);
+    }
+}
 
-    double endpts = get_play_end_pts(mpctx);
-    if (endpts != MP_NOPTS_VALUE)
-        endpts *= mpctx->play_dir;
+static void ao_process(struct mp_filter *f)
+{
+    struct ao_chain *ao_c = f->priv;
+    struct MPContext *mpctx = ao_c->mpctx;
 
-    bool eof = false;
-    if (!copy_output(mpctx, ao_c, minsamples, endpts, &eof))
-        return AD_WAIT;
-    return eof ? AD_EOF : AD_OK;
+    if (!ao_c->queue_filter) {
+        // This will eventually lead to the creation of the AO + queue, due
+        // to how f_output_chain and AO management works.
+        mp_pin_out_request_data(f->ppins[0]);
+        return;
+    }
+
+    // Due to mp_async_queue_set_notifier() thhis function is called when the
+    // queue becomes full. This affects state changes in the normal playloop,
+    // so wake it up. But avoid redundant wakeups during normal playback.
+    if (mpctx->audio_status != STATUS_PLAYING &&
+        mp_async_queue_is_full(ao_c->ao_queue))
+        mp_wakeup_core(mpctx);
+
+    if (mpctx->audio_status == STATUS_SYNCING && !ao_c->start_pts_known)
+        return;
+
+    if (ao_c->untimed_throttle)
+        return;
+
+    if (!mp_pin_can_transfer_data(ao_c->queue_filter->pins[0], f->ppins[0]))
+        return;
+
+    struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
+    if (frame.type == MP_FRAME_AUDIO) {
+        struct mp_aframe *af = frame.data;
+
+        double endpts = get_play_end_pts(mpctx);
+        if (endpts != MP_NOPTS_VALUE) {
+            endpts *= mpctx->play_dir;
+            // Avoid decoding and discarding the entire rest of the file.
+            if (mp_aframe_get_pts(af) >= endpts) {
+                mp_pin_out_unread(f->ppins[0], frame);
+                if (!ao_c->out_eof) {
+                    ao_c->out_eof = true;
+                    mp_pin_in_write(ao_c->queue_filter->pins[0], MP_EOF_FRAME);
+                }
+                return;
+            }
+        }
+        double startpts = mpctx->audio_status == STATUS_SYNCING ?
+                                            ao_c->start_pts : MP_NOPTS_VALUE;
+        mp_aframe_clip_timestamps(af, startpts, endpts);
+
+        int samples = mp_aframe_get_size(af);
+        if (!samples) {
+            mp_filter_internal_mark_progress(f);
+            mp_frame_unref(&frame);
+            return;
+        }
+
+        ao_c->out_eof = false;
+
+        if (mpctx->audio_status == STATUS_DRAINING ||
+            mpctx->audio_status == STATUS_EOF)
+        {
+            // If a new frame comes decoder/filter EOF, we should preferably
+            // call get_sync_pts() again, which (at least in obscure situations)
+            // may require us to wait a while until the sync PTS is known. Our
+            // code sucks and can't deal with that, so jump through a hoop to
+            // get things done in the correct order.
+            mp_pin_out_unread(f->ppins[0], frame);
+            ao_c->start_pts_known = false;
+            mpctx->audio_status = STATUS_SYNCING;
+            mp_wakeup_core(mpctx);
+            MP_VERBOSE(mpctx, "new audio frame after EOF\n");
+            return;
+        }
+
+        mpctx->shown_aframes += samples;
+        double real_samplerate = mp_aframe_get_rate(af) / mpctx->audio_speed;
+        mpctx->delay += samples / real_samplerate;
+        ao_c->last_out_pts = mp_aframe_end_pts(af);
+        update_throttle(mpctx);
+
+        // Gapless case: the AO is still playing from previous file. It makes
+        // no sense to wait, and in fact the "full queue" event we're waiting
+        // for may never happen, so start immediately.
+        // If the new audio starts "later" (big video sync offset), transfer
+        // of data is stopped somewhere else.
+        if (mpctx->audio_status == STATUS_SYNCING && ao_is_playing(ao_c->ao)) {
+            mpctx->audio_status = STATUS_READY;
+            mp_wakeup_core(mpctx);
+            MP_VERBOSE(mpctx, "previous audio still playing; continuing\n");
+        }
+
+        mp_pin_in_write(ao_c->queue_filter->pins[0], frame);
+    } else if (frame.type == MP_FRAME_EOF) {
+        MP_VERBOSE(mpctx, "audio filter EOF\n");
+
+        ao_c->out_eof = true;
+        mp_wakeup_core(mpctx);
+
+        mp_pin_in_write(ao_c->queue_filter->pins[0], frame);
+        mp_filter_internal_mark_progress(f);
+    } else {
+        mp_frame_unref(&frame);
+    }
 }
 
 void reload_audio_output(struct MPContext *mpctx)
@@ -771,10 +748,70 @@ void reload_audio_output(struct MPContext *mpctx)
     mp_wakeup_core(mpctx);
 }
 
+// Returns audio start pts for seeking or video sync.
+// Returns false if PTS is not known yet.
+static bool get_sync_pts(struct MPContext *mpctx, double *pts)
+{
+    struct MPOpts *opts = mpctx->opts;
+
+    *pts = MP_NOPTS_VALUE;
+
+    if (!opts->initial_audio_sync)
+        return true;
+
+    bool sync_to_video = mpctx->vo_chain && mpctx->video_status != STATUS_EOF &&
+                         !mpctx->vo_chain->is_sparse;
+
+    if (sync_to_video) {
+        if (mpctx->video_status < STATUS_READY)
+            return false; // wait until we know a video PTS
+        if (mpctx->video_pts != MP_NOPTS_VALUE)
+            *pts = mpctx->video_pts - opts->audio_delay;
+    } else if (mpctx->hrseek_active) {
+        *pts = mpctx->hrseek_pts;
+    } else {
+        // If audio-only is enabled mid-stream during playback, sync accordingly.
+        *pts = mpctx->playback_pts;
+    }
+
+    return true;
+}
+
+// Look whether audio can be started yet - if audio has to start some time
+// after video.
+static void check_audio_start(struct MPContext *mpctx, bool force)
+{
+    struct ao_chain *ao_c = mpctx->ao_chain;
+    if (!ao_c || !ao_c->ao || mpctx->audio_status != STATUS_READY)
+        return;
+    if (!mpctx->restart_complete && !force)
+        return;
+    double pts = MP_NOPTS_VALUE;
+    if (!get_sync_pts(mpctx, &pts))
+        return;
+    double apts = playing_audio_pts(mpctx); // (basically including mpctx->delay)
+    if (pts != MP_NOPTS_VALUE && apts != MP_NOPTS_VALUE && pts < apts &&
+        mpctx->video_status != STATUS_EOF)
+    {
+        double diff = (apts - pts) / mpctx->opts->playback_speed;
+        mp_set_timeout(mpctx, diff);
+        MP_VERBOSE(mpctx, "delaying audio start %f vs. %f, diff=%f\n",
+                   apts, pts, diff);
+        return;
+    }
+
+    MP_VERBOSE(mpctx, "starting audio playback\n");
+    ao_start(ao_c->ao);
+    mpctx->audio_status = STATUS_PLAYING;
+    if (ao_c->out_eof)
+        mpctx->audio_status = STATUS_DRAINING;
+    ao_c->underrun = false;
+    mp_wakeup_core(mpctx);
+}
+
 void fill_audio_out_buffers(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    bool was_eof = mpctx->audio_status == STATUS_EOF;
 
     if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_RELOAD))
         reload_audio_output(mpctx);
@@ -782,6 +819,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     if (mpctx->ao && ao_query_and_reset_events(mpctx->ao,
                                                AO_EVENT_INITIAL_UNBLOCK))
         ao_unblock(mpctx->ao);
+
+    update_throttle(mpctx);
 
     struct ao_chain *ao_c = mpctx->ao_chain;
     if (!ao_c)
@@ -792,30 +831,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         return;
     }
 
-    // (if AO is set due to gapless from previous file, then we can try to
-    // filter normally until the filter tells us to change the AO)
-    if (!mpctx->ao) {
-        // Probe the initial audio format.
-        mp_pin_out_request_data(ao_c->filter->f->pins[1]);
+    if (ao_c->filter->ao_needs_update)
         reinit_audio_filters_and_output(mpctx);
-        if (!mpctx->ao_chain)
-            return;
-        if (ao_c->filter->got_output_eof &&
-            mpctx->audio_status != STATUS_EOF)
-        {
-            mpctx->audio_status = STATUS_EOF;
-            MP_VERBOSE(mpctx, "audio EOF without any data\n");
-            mp_filter_reset(ao_c->filter->f);
-            encode_lavc_stream_eof(mpctx->encode_lavc_ctx, STREAM_AUDIO);
-        }
-        return; // try again next iteration
-    }
-
-    if (ao_c->ao_resume_time > mp_time_sec()) {
-        double remaining = ao_c->ao_resume_time - mp_time_sec();
-        mp_set_timeout(mpctx, remaining);
-        return;
-    }
 
     if (mpctx->vo_chain && ao_c->track && ao_c->track->dec &&
         mp_decoder_wrapper_get_pts_reset(ao_c->track->dec))
@@ -823,157 +840,97 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         MP_WARN(mpctx, "Reset playback due to audio timestamp reset.\n");
         reset_playback_state(mpctx);
         mp_wakeup_core(mpctx);
-        return;
-    }
-
-    int ao_rate;
-    int ao_format;
-    struct mp_chmap ao_channels;
-    ao_get_format(mpctx->ao, &ao_rate, &ao_format, &ao_channels);
-    int align = af_format_sample_alignment(ao_format);
-
-    // If audio is infinitely fast, somehow try keeping approximate A/V sync.
-    if (mpctx->audio_status == STATUS_PLAYING && ao_untimed(mpctx->ao) &&
-        mpctx->video_status != STATUS_EOF && mpctx->delay > 0)
-        return;
-
-    int playsize = ao_get_space(mpctx->ao);
-
-    if (ao_query_and_reset_events(mpctx->ao, AO_EVENT_UNDERRUN)) {
-        if (!ao_c->underrun)
-            MP_WARN(mpctx, "Audio device underrun detected.\n");
-        ao_c->underrun = true;
-    }
-
-    // Stop feeding data if an underrun happened. Something else needs to
-    // "unblock" audio after underrun. handle_update_cache() does this and can
-    // take the network state into account.
-    if (ao_c->underrun)
-        return;
-
-    int skip = 0;
-    bool sync_known = get_sync_samples(mpctx, &skip);
-    if (skip > 0) {
-        playsize = MPMIN(skip + 1, MPMAX(playsize, 2500)); // buffer extra data
-    } else if (skip < 0) {
-        playsize = MPMAX(1, playsize + skip); // silence will be prepended
-    }
-
-    playsize = playsize / align * align;
-
-    int status = mpctx->audio_status >= STATUS_DRAINING ? AD_EOF : AD_OK;
-    bool working = false;
-    if (playsize > mp_audio_buffer_samples(ao_c->ao_buffer)) {
-        status = filter_audio(mpctx, ao_c->ao_buffer, playsize);
-        if (ao_c->filter->ao_needs_update) {
-            reinit_audio_filters_and_output(mpctx);
-            mp_wakeup_core(mpctx);
-            return; // retry on next iteration
-        }
-        if (status == AD_WAIT)
-            return;
-        working = true;
-    }
-
-    // If EOF was reached before, but now something can be decoded, try to
-    // restart audio properly. This helps with video files where audio starts
-    // later. Retrying is needed to get the correct sync PTS.
-    if (mpctx->audio_status >= STATUS_DRAINING &&
-        mp_audio_buffer_samples(ao_c->ao_buffer) > 0)
-    {
-        mpctx->audio_status = STATUS_SYNCING;
-        return; // retry on next iteration
-    }
-
-    bool end_sync = false;
-    if (skip >= 0) {
-        int max = mp_audio_buffer_samples(ao_c->ao_buffer);
-        mp_audio_buffer_skip(ao_c->ao_buffer, MPMIN(skip, max));
-        // If something is left, we definitely reached the target time.
-        end_sync |= sync_known && skip < max;
-        working |= skip > 0;
-    } else if (skip < 0) {
-        if (-skip > playsize) { // heuristic against making the buffer too large
-            ao_reset(mpctx->ao); // some AOs repeat data on underflow
-            mpctx->audio_status = STATUS_DRAINING;
-            mpctx->delay = 0;
-            return;
-        }
-        mp_audio_buffer_prepend_silence(ao_c->ao_buffer, -skip);
-        end_sync = true;
     }
 
     if (mpctx->audio_status == STATUS_SYNCING) {
-        if (end_sync)
-            mpctx->audio_status = STATUS_FILLING;
-        if (status != AD_OK && !mp_audio_buffer_samples(ao_c->ao_buffer))
-            mpctx->audio_status = STATUS_EOF;
-        if (working || end_sync)
+        double pts;
+        bool ok = get_sync_pts(mpctx, &pts);
+
+        // If the AO is still playing from the previous file (due to gapless),
+        // but if video is active, this may not work if audio starts later than
+        // video, and gapless has no advantages anyway. So block doing anything
+        // until the old audio is fully played.
+        // (Buggy if AO underruns.)
+        if (mpctx->ao && ao_is_playing(mpctx->ao) &&
+            mpctx->video_status != STATUS_EOF)
+            ok = false;
+
+        if (ao_c->start_pts_known != ok || ao_c->start_pts != pts) {
+            ao_c->start_pts_known = ok;
+            ao_c->start_pts = pts;
+            mp_filter_wakeup(ao_c->ao_filter);
+        }
+
+        if (ao_c->ao && mp_async_queue_is_full(ao_c->ao_queue)) {
+            mpctx->audio_status = STATUS_READY;
             mp_wakeup_core(mpctx);
-        return; // continue on next iteration
+            MP_VERBOSE(mpctx, "audio ready\n");
+        } else if (ao_c->out_eof) {
+            // Force playback start early.
+            mpctx->audio_status = STATUS_READY;
+            mp_wakeup_core(mpctx);
+            MP_VERBOSE(mpctx, "audio ready (and EOF)\n");
+        }
     }
 
-    assert(mpctx->audio_status >= STATUS_FILLING);
+    if (ao_c->ao && !ao_is_playing(ao_c->ao) && !ao_c->underrun &&
+        (mpctx->audio_status == STATUS_PLAYING ||
+         mpctx->audio_status == STATUS_DRAINING))
+    {
+        // Should be playing, but somehow isn't.
 
-    // We already have as much data as the audio device wants, and can start
-    // writing it any time.
-    if (mpctx->audio_status == STATUS_FILLING)
-        mpctx->audio_status = STATUS_READY;
-
-    // Even if we're done decoding and syncing, let video start first - this is
-    // required, because sending audio to the AO already starts playback.
-    if (mpctx->audio_status == STATUS_READY) {
-        // Warning: relies on handle_playback_restart() being called afterwards.
-        return;
-    }
-
-    bool audio_eof = status == AD_EOF;
-    bool partial_fill = false;
-    int playflags = 0;
-
-    if (playsize > mp_audio_buffer_samples(ao_c->ao_buffer)) {
-        playsize = mp_audio_buffer_samples(ao_c->ao_buffer);
-        partial_fill = true;
-    }
-
-    audio_eof &= partial_fill;
-
-    if (audio_eof && playsize < align)
-        playsize = 0;
-
-    // With gapless audio, delay this to ao_uninit. There must be only
-    // 1 final chunk, and that is handled when calling ao_uninit().
-    // If video is still on-going, trying to do gapless is pointless, as video
-    // will have to continue for a while with audio stopped (but still try to
-    // do it if gapless is forced, mostly for testing).
-    if (audio_eof && (!opts->gapless_audio ||
-        (opts->gapless_audio <= 0 && mpctx->video_status != STATUS_EOF)))
-        playflags |= PLAYER_FINAL_CHUNK;
-
-    uint8_t **planes;
-    int samples;
-    mp_audio_buffer_peek(ao_c->ao_buffer, &planes, &samples);
-    if (audio_eof || samples >= align)
-        samples = samples / align * align;
-    samples = MPMIN(samples, mpctx->paused ? 0 : playsize);
-    int played = write_to_ao(mpctx, planes, samples, playflags);
-    assert(played >= 0 && played <= samples);
-    mp_audio_buffer_skip(ao_c->ao_buffer, played);
-
-    mpctx->audio_status = STATUS_PLAYING;
-    if (audio_eof && !playsize) {
-        mpctx->audio_status = STATUS_DRAINING;
-        // Wait until the AO has played all queued data. In the gapless case,
-        // we trigger EOF immediately, and let it play asynchronously.
-        if (ao_eof_reached(mpctx->ao) || opts->gapless_audio) {
+        if (ao_c->out_eof && !mp_async_queue_get_frames(ao_c->ao_queue)) {
+            MP_VERBOSE(mpctx, "AO signaled EOF (while in state %s)\n",
+                       mp_status_str(mpctx->audio_status));
             mpctx->audio_status = STATUS_EOF;
-            if (!was_eof) {
-                MP_VERBOSE(mpctx, "audio EOF reached\n");
+            mp_wakeup_core(mpctx);
+            // stops untimed AOs, stops pull AOs from streaming silence
+            ao_reset(ao_c->ao);
+        } else {
+            if (!ao_c->ao_underrun) {
+                MP_WARN(mpctx, "Audio device underrun detected.\n");
+                ao_c->ao_underrun = true;
                 mp_wakeup_core(mpctx);
-                encode_lavc_stream_eof(mpctx->encode_lavc_ctx, STREAM_AUDIO);
+                ao_c->underrun = true;
+            }
+
+            // Wait until buffers are filled before recovering underrun.
+            if (ao_c->out_eof || mp_async_queue_is_full(ao_c->ao_queue)) {
+                MP_VERBOSE(mpctx, "restarting audio after underrun\n");
+                ao_start(mpctx->ao_chain->ao);
+                ao_c->ao_underrun = false;
+                ao_c->underrun = false;
+                mp_wakeup_core(mpctx);
             }
         }
     }
+
+    if (mpctx->audio_status == STATUS_PLAYING && ao_c->out_eof) {
+        mpctx->audio_status = STATUS_DRAINING;
+        MP_VERBOSE(mpctx, "audio draining\n");
+        mp_wakeup_core(mpctx);
+    }
+
+    if (ao_c->ao && mpctx->audio_status == STATUS_DRAINING) {
+        // Wait until the AO has played all queued data. In the gapless case,
+        // we trigger EOF immediately, and let it play asynchronously.
+        if (!ao_is_playing(ao_c->ao) ||
+            (opts->gapless_audio && !ao_untimed(ao_c->ao)))
+        {
+            MP_VERBOSE(mpctx, "audio EOF reached\n");
+            mpctx->audio_status = STATUS_EOF;
+            mp_wakeup_core(mpctx);
+            encode_lavc_stream_eof(mpctx->encode_lavc_ctx, STREAM_AUDIO);
+        }
+    }
+
+    check_audio_start(mpctx, false);
+}
+
+void audio_start_ao(struct MPContext *mpctx)
+{
+    assert(mpctx->audio_status == STATUS_READY);
+    check_audio_start(mpctx, true);
 }
 
 // Drop data queued for output, or which the AO is currently outputting.

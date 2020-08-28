@@ -45,7 +45,6 @@ enum {
     AO_EVENT_RELOAD = 1,
     AO_EVENT_HOTPLUG = 2,
     AO_EVENT_INITIAL_UNBLOCK = 4,
-    AO_EVENT_UNDERRUN = 8,
 };
 
 enum {
@@ -98,16 +97,16 @@ void ao_get_format(struct ao *ao,
 const char *ao_get_name(struct ao *ao);
 const char *ao_get_description(struct ao *ao);
 bool ao_untimed(struct ao *ao);
-int ao_play(struct ao *ao, void **data, int samples, int flags);
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg);
 void ao_set_gain(struct ao *ao, float gain);
 double ao_get_delay(struct ao *ao);
-int ao_get_space(struct ao *ao);
 void ao_reset(struct ao *ao);
-void ao_pause(struct ao *ao);
-void ao_resume(struct ao *ao);
+void ao_start(struct ao *ao);
+void ao_set_paused(struct ao *ao, bool paused);
 void ao_drain(struct ao *ao);
-bool ao_eof_reached(struct ao *ao);
+bool ao_is_playing(struct ao *ao);
+struct mp_async_queue;
+struct mp_async_queue *ao_get_queue(struct ao *ao);
 int ao_query_and_reset_events(struct ao *ao, int events);
 int ao_add_events(struct ao *ao, int events);
 void ao_unblock(struct ao *ao);

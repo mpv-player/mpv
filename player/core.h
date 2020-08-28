@@ -190,28 +190,33 @@ struct vo_chain {
 // Like vo_chain, for audio.
 struct ao_chain {
     struct mp_log *log;
+    struct MPContext *mpctx;
 
     bool spdif_passthrough, spdif_failed;
 
     struct mp_output_chain *filter;
 
     struct ao *ao;
-    struct mp_audio_buffer *ao_buffer;
+    struct mp_async_queue *ao_queue;
+    struct mp_filter *queue_filter;
+    struct mp_filter *ao_filter;
     double ao_resume_time;
 
-    // 1-element output frame queue.
-    struct mp_aframe *output_frame;
     bool out_eof;
-
     double last_out_pts;
+
+    double start_pts;
+    bool start_pts_known;
 
     struct track *track;
     struct mp_pin *filter_src;
     struct mp_pin *dec_src;
 
     double delay;
+    bool untimed_throttle;
 
-    bool underrun;
+    bool ao_underrun;   // last known AO state
+    bool underrun;      // for cache pause logic
 };
 
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
@@ -223,7 +228,6 @@ struct ao_chain {
 enum playback_status {
     // code may compare status values numerically
     STATUS_SYNCING,     // seeking for a position to resume
-    STATUS_FILLING,     // decoding more data (so you start with full buffers)
     STATUS_READY,       // buffers full, playback can be started any time
     STATUS_PLAYING,     // normal playback
     STATUS_DRAINING,    // decoding has ended; still playing out queued buffers
@@ -500,6 +504,7 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track);
 void audio_update_volume(struct MPContext *mpctx);
 void audio_update_balance(struct MPContext *mpctx);
 void reload_audio_output(struct MPContext *mpctx);
+void audio_start_ao(struct MPContext *mpctx);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);

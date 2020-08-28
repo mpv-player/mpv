@@ -31,13 +31,11 @@
 #include "common/msg.h"
 #include "common/common.h"
 
-#include "input/input.h"
+#include "filters/f_async_queue.h"
+#include "filters/filter_internal.h"
 
-#include "osdep/io.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
-#include "osdep/atomic.h"
-#include "misc/ring.h"
 
 struct buffer_state {
     // Buffer and AO
@@ -51,27 +49,26 @@ struct buffer_state {
     // Access from AO driver's thread only.
     char *convert_buffer;
 
+    // Immutable.
+    struct mp_async_queue *queue;
+
     // --- protected by lock
 
-    struct mp_ring *buffers[MP_NUM_CHANNELS];
-
+    struct mp_filter *filter_root;
+    struct mp_filter *input;    // connected to queue
+    struct mp_aframe *pending;  // last, not fully consumed output
 
     bool streaming;             // AO streaming active
     bool playing;               // logically playing audio from buffer
-    bool paused;                // logically paused; implies playing=true
-    bool final_chunk;           // if buffer contains EOF
+    bool paused;                // logically paused
 
     int64_t end_time_us;        // absolute output time of last played sample
-    int64_t underflow;          // number of samples missing since last check
 
     bool initial_unblocked;
 
     // "Push" AOs only (AOs with driver->write).
-    bool still_playing;
     bool hw_paused;             // driver->set_pause() was used successfully
     bool recover_pause;         // non-hw_paused: needs to recover delay
-    bool draining;
-    bool ao_wait_low_buffer;
     struct mp_pcm_state prepause_state;
     pthread_t thread;           // thread shoveling data to AO
     bool thread_valid;          // thread is running
@@ -98,7 +95,7 @@ static void get_dev_state(struct ao *ao, struct mp_pcm_state *state)
 {
     struct buffer_state *p = ao->buffer_state;
 
-    if (p->paused) {
+    if (p->paused && p->playing) {
         *state = p->prepause_state;
         return;
     }
@@ -111,84 +108,66 @@ static void get_dev_state(struct ao *ao, struct mp_pcm_state *state)
     ao->driver->get_state(ao, state);
 }
 
-static int unlocked_get_space(struct ao *ao)
+struct mp_async_queue *ao_get_queue(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
-
-    int space = mp_ring_available(p->buffers[0]) / ao->sstride;
-
-    // The following code attempts to keep the total buffered audio at
-    // ao->buffer in order to improve latency.
-    if (ao->driver->write) {
-        struct mp_pcm_state state;
-        get_dev_state(ao, &state);
-        int align = af_format_sample_alignment(ao->format);
-        int device_space = MPMAX(state.free_samples, 0);
-        int device_buffered = ao->device_buffer - device_space;
-        int soft_buffered = mp_ring_size(p->buffers[0]) / ao->sstride - space;
-        // The extra margin helps avoiding too many wakeups if the AO is fully
-        // byte based and doesn't do proper chunked processing.
-        int min_buffer = ao->buffer + 64;
-        int missing = min_buffer - device_buffered - soft_buffered;
-        missing = (missing + align - 1) / align * align;
-        // But always keep the device's buffer filled as much as we can.
-        int device_missing = device_space - soft_buffered;
-        missing = MPMAX(missing, device_missing);
-        space = MPMIN(space, missing);
-        space = MPMAX(0, space);
-    }
-
-    return space;
+    return p->queue;
 }
 
-int ao_get_space(struct ao *ao)
+// Special behavior with data==NULL: caller uses p->pending.
+static int read_buffer(struct ao *ao, void **data, int samples, bool *eof)
 {
     struct buffer_state *p = ao->buffer_state;
-    pthread_mutex_lock(&p->lock);
-    int space = unlocked_get_space(ao);
-    pthread_mutex_unlock(&p->lock);
-    return space;
-}
+    int pos = 0;
+    *eof = false;
 
-int ao_play(struct ao *ao, void **data, int samples, int flags)
-{
-    struct buffer_state *p = ao->buffer_state;
-
-    pthread_mutex_lock(&p->lock);
-
-    int write_samples = mp_ring_available(p->buffers[0]) / ao->sstride;
-    write_samples = MPMIN(write_samples, samples);
-
-    int write_bytes = write_samples * ao->sstride;
-    for (int n = 0; n < ao->num_planes; n++) {
-        int r = mp_ring_write(p->buffers[n], data[n], write_bytes);
-        assert(r == write_bytes);
-    }
-
-    p->paused = false;
-    p->final_chunk = write_samples == samples && (flags & PLAYER_FINAL_CHUNK);
-
-    if (p->underflow)
-        MP_DBG(ao, "Audio underrun by %lld samples.\n", (long long)p->underflow);
-    p->underflow = 0;
-
-    if (write_samples) {
-        p->playing = true;
-        p->still_playing = true;
-        p->draining = false;
-
-        if (!ao->driver->write && !p->streaming) {
-            p->streaming = true;
-            ao->driver->start(ao);
+    while (p->playing && !p->paused && pos < samples) {
+        if (!p->pending || !mp_aframe_get_size(p->pending)) {
+            TA_FREEP(&p->pending);
+            struct mp_frame frame = mp_pin_out_read(p->input->pins[0]);
+            if (!frame.type)
+                break; // we can't/don't want to block
+            if (frame.type != MP_FRAME_AUDIO) {
+                if (frame.type == MP_FRAME_EOF)
+                    *eof = true;
+                mp_frame_unref(&frame);
+                continue;
+            }
+            p->pending = frame.data;
         }
 
+        if (!data)
+            break;
+
+        int copy = mp_aframe_get_size(p->pending);
+        uint8_t **fdata = mp_aframe_get_data_ro(p->pending);
+        copy = MPMIN(copy, samples - pos);
+        for (int n = 0; n < ao->num_planes; n++) {
+            memcpy((char *)data[n] + pos * ao->sstride,
+                   fdata[n], copy * ao->sstride);
+        }
+        mp_aframe_skip_samples(p->pending, copy);
+        pos += copy;
+        *eof = false;
     }
-    pthread_mutex_unlock(&p->lock);
 
-    if (write_samples)
-        ao_wakeup_playthread(ao);
+    if (!data) {
+        if (!p->pending)
+            return 0;
+        void **pd = (void *)mp_aframe_get_data_rw(p->pending);
+        if (pd)
+            ao_post_process_data(ao, pd, mp_aframe_get_size(p->pending));
+        return 1;
+    }
 
-    return write_samples;
+    // pad with silence (underflow/paused/eof)
+    for (int n = 0; n < ao->num_planes; n++) {
+        af_fill_silence((char *)data[n] + pos, (samples - pos) * ao->sstride,
+                        ao->format);
+    }
+
+    ao_post_process_data(ao, data, pos);
+    return pos;
 }
 
 // Read the given amount of samples in the user-provided data buffer. Returns
@@ -202,47 +181,24 @@ int ao_play(struct ao *ao, void **data, int samples, int flags)
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
 {
     struct buffer_state *p = ao->buffer_state;
-    int full_bytes = samples * ao->sstride;
-    bool need_wakeup = false;
-    int bytes = 0;
+    assert(!ao->driver->write);
 
     pthread_mutex_lock(&p->lock);
 
-    if (!p->playing || p->paused)
-        goto end;
+    int pos = read_buffer(ao, data, samples, &(bool){0});
 
-    int buffered_bytes = mp_ring_buffered(p->buffers[0]);
-    bytes = MPMIN(buffered_bytes, full_bytes);
-
-    if (full_bytes > bytes && !p->final_chunk) {
-        p->underflow += (full_bytes - bytes) / ao->sstride;
-        ao_add_events(ao, AO_EVENT_UNDERRUN);
-    }
-
-    if (bytes > 0)
+    if (pos > 0)
         p->end_time_us = out_time_us;
 
-    for (int n = 0; n < ao->num_planes; n++)
-        mp_ring_read(p->buffers[n], data[n], bytes);
-
-    // Half of the buffer played -> request more.
-    if (!ao->driver->write)
-        need_wakeup = buffered_bytes - bytes <= mp_ring_size(p->buffers[0]) / 2;
-
-end:
+    if (pos < samples && p->playing && !p->paused) {
+        p->playing = false;
+        // For ao_drain().
+        pthread_cond_broadcast(&p->wakeup);
+    }
 
     pthread_mutex_unlock(&p->lock);
 
-    if (need_wakeup)
-        ao->wakeup_cb(ao->wakeup_ctx);
-
-    // pad with silence (underflow/paused/eof)
-    for (int n = 0; n < ao->num_planes; n++)
-        af_fill_silence((char *)data[n] + bytes, full_bytes - bytes, ao->format);
-
-    ao_post_process_data(ao, data, samples);
-
-    return bytes / ao->sstride;
+    return pos;
 }
 
 // Same as ao_read_data(), but convert data according to *fmt.
@@ -300,11 +256,13 @@ int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
     return r;
 }
 
-static double unlocked_get_delay(struct ao *ao)
+double ao_get_delay(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
-    double driver_delay = 0;
 
+    pthread_mutex_lock(&p->lock);
+
+    double driver_delay;
     if (ao->driver->write) {
         struct mp_pcm_state state;
         get_dev_state(ao, &state);
@@ -312,22 +270,18 @@ static double unlocked_get_delay(struct ao *ao)
     } else {
         int64_t end = p->end_time_us;
         int64_t now = mp_time_us();
-        driver_delay += MPMAX(0, (end - now) / (1000.0 * 1000.0));
+        driver_delay = MPMAX(0, (end - now) / (1000.0 * 1000.0));
     }
 
-    return mp_ring_buffered(p->buffers[0]) / (double)ao->bps + driver_delay;
-}
+    int pending = mp_async_queue_get_samples(p->queue);
+    if (p->pending)
+        pending += mp_aframe_get_size(p->pending);
 
-double ao_get_delay(struct ao *ao)
-{
-    struct buffer_state *p = ao->buffer_state;
-
-    pthread_mutex_lock(&p->lock);
-    double delay = unlocked_get_delay(ao);
     pthread_mutex_unlock(&p->lock);
-    return delay;
+    return driver_delay + pending / (double)ao->samplerate;
 }
 
+// Fully stop playback; clear buffers, including queue.
 void ao_reset(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
@@ -336,8 +290,10 @@ void ao_reset(struct ao *ao)
 
     pthread_mutex_lock(&p->lock);
 
-    for (int n = 0; n < ao->num_planes; n++)
-        mp_ring_reset(p->buffers[n]);
+    TA_FREEP(&p->pending);
+    mp_async_queue_reset(p->queue);
+    mp_filter_reset(p->filter_root);
+    mp_async_queue_resume_reading(p->queue);
 
     if (!ao->stream_silence && ao->driver->reset) {
         if (ao->driver->write) {
@@ -349,16 +305,11 @@ void ao_reset(struct ao *ao)
         }
         p->streaming = false;
     }
-    p->paused = false;
+    wakeup = p->playing;
     p->playing = false;
     p->recover_pause = false;
     p->hw_paused = false;
-    wakeup = p->still_playing || p->draining;
-    p->draining = false;
-    p->still_playing = false;
     p->end_time_us = 0;
-
-    atomic_fetch_and(&ao->events_, ~(unsigned int)AO_EVENT_UNDERRUN);
 
     pthread_mutex_unlock(&p->lock);
 
@@ -369,7 +320,29 @@ void ao_reset(struct ao *ao)
         ao_wakeup_playthread(ao);
 }
 
-void ao_pause(struct ao *ao)
+// Initiate playback. This moves from the stop/underrun state to actually
+// playing (orthogonally taking the paused state into account). Plays all
+// data in the queue, and goes into underrun state if no more data available.
+// No-op if already running.
+void ao_start(struct ao *ao)
+{
+    struct buffer_state *p = ao->buffer_state;
+
+    pthread_mutex_lock(&p->lock);
+
+    p->playing = true;
+
+    if (!ao->driver->write && !p->streaming) {
+        p->streaming = true;
+        ao->driver->start(ao);
+    }
+
+    pthread_mutex_unlock(&p->lock);
+
+    ao_wakeup_playthread(ao);
+}
+
+void ao_set_paused(struct ao *ao, bool paused)
 {
     struct buffer_state *p = ao->buffer_state;
     bool wakeup = false;
@@ -377,7 +350,7 @@ void ao_pause(struct ao *ao)
 
     pthread_mutex_lock(&p->lock);
 
-    if (p->playing && !p->paused) {
+    if (p->playing && !p->paused && paused) {
         if (p->streaming && !ao->stream_silence) {
             if (ao->driver->write) {
                 if (!p->recover_pause)
@@ -387,6 +360,7 @@ void ao_pause(struct ao *ao)
                 } else {
                     ao->driver->reset(ao);
                     p->streaming = false;
+                    p->recover_pause = !ao->untimed;
                 }
             } else if (ao->driver->reset) {
                 // See ao_reset() why this is done outside of the lock.
@@ -394,9 +368,20 @@ void ao_pause(struct ao *ao)
                 p->streaming = false;
             }
         }
-        p->paused = true;
+        wakeup = true;
+    } else if (p->playing && p->paused && !paused) {
+        if (ao->driver->write) {
+            if (p->hw_paused)
+                ao->driver->set_pause(ao, false);
+            p->hw_paused = false;
+        } else {
+            if (!p->streaming)
+                ao->driver->start(ao);
+            p->streaming = true;
+        }
         wakeup = true;
     }
+    p->paused = paused;
 
     pthread_mutex_unlock(&p->lock);
 
@@ -407,52 +392,19 @@ void ao_pause(struct ao *ao)
         ao_wakeup_playthread(ao);
 }
 
-void ao_resume(struct ao *ao)
-{
-    struct buffer_state *p = ao->buffer_state;
-    bool wakeup = false;
-
-    pthread_mutex_lock(&p->lock);
-
-    if (p->playing && p->paused) {
-        if (ao->driver->write) {
-            if (p->streaming && p->hw_paused) {
-                ao->driver->set_pause(ao, false);
-            } else {
-                p->recover_pause = true;
-            }
-            p->hw_paused = false;
-        } else {
-            if (!p->streaming)
-                ao->driver->start(ao);
-            p->streaming = true;
-        }
-        p->paused = false;
-        wakeup = true;
-    }
-
-    pthread_mutex_unlock(&p->lock);
-
-    if (wakeup)
-        ao_wakeup_playthread(ao);
-}
-
-bool ao_eof_reached(struct ao *ao)
+// Whether audio is playing. This means that there is still data in the buffers,
+// and ao_start() was called. This returns true even if playback was logically
+// paused. On false, EOF was reached, or an underrun happened, or ao_reset()
+// was called.
+bool ao_is_playing(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
 
     pthread_mutex_lock(&p->lock);
-    bool eof = !p->playing;
-    if (ao->driver->write) {
-        eof |= !p->still_playing;
-    } else {
-        // For simplicity, ignore the latency. Otherwise, we would have to run
-        // an extra thread to time it.
-        eof |= mp_ring_buffered(p->buffers[0]) == 0;
-    }
+    bool playing = p->playing;
     pthread_mutex_unlock(&p->lock);
 
-    return eof;
+    return playing;
 }
 
 // Block until the current audio buffer has played completely.
@@ -461,41 +413,37 @@ void ao_drain(struct ao *ao)
     struct buffer_state *p = ao->buffer_state;
 
     pthread_mutex_lock(&p->lock);
-    p->final_chunk = true;
-    while (!p->paused && p->still_playing && p->streaming) {
-        if (ao->driver->write) {
-            if (p->draining) {
-                // Wait for EOF signal from AO.
-                pthread_cond_wait(&p->wakeup, &p->lock);
-            } else {
-                p->draining = true;
-                MP_VERBOSE(ao, "waiting for draining...\n");
-                pthread_mutex_unlock(&p->lock);
-                ao_wakeup_playthread(ao);
-                pthread_mutex_lock(&p->lock);
-            }
-        } else {
-            double left = mp_ring_buffered(p->buffers[0]) / (double)ao->bps * 1e6;
+    while (!p->paused && p->playing) {
+        pthread_mutex_unlock(&p->lock);
+        double delay = ao_get_delay(ao);
+        pthread_mutex_lock(&p->lock);
+
+        // Limit to buffer + arbitrary ~250ms max. waiting for robustness.
+        delay += mp_async_queue_get_samples(p->queue) / (double)ao->samplerate;
+        struct timespec ts = mp_rel_time_to_timespec(MPMAX(delay, 0) + 0.25);
+
+        // Wait for EOF signal from AO.
+        if (pthread_cond_timedwait(&p->wakeup, &p->lock, &ts)) {
+            MP_VERBOSE(ao, "drain timeout\n");
+            break;
+        }
+
+        if (!p->playing && mp_async_queue_get_samples(p->queue)) {
+            MP_WARN(ao, "underrun during draining\n");
             pthread_mutex_unlock(&p->lock);
-
-            if (left > 0) {
-                // Wait for lower bound.
-                mp_sleep_us(left);
-                // And then poll for actual end. No other way.
-                // Limit to arbitrary ~250ms max. waiting for robustness.
-                int64_t max = mp_time_us() + 250000;
-                while (mp_time_us() < max && !ao_eof_reached(ao))
-                    mp_sleep_us(1);
-            } else {
-                p->still_playing = false;
-            }
-
+            ao_start(ao);
             pthread_mutex_lock(&p->lock);
         }
     }
     pthread_mutex_unlock(&p->lock);
 
     ao_reset(ao);
+}
+
+static void wakeup_filters(void *ctx)
+{
+    struct ao *ao = ctx;
+    ao_wakeup_playthread(ao);
 }
 
 void ao_uninit(struct ao *ao)
@@ -515,6 +463,9 @@ void ao_uninit(struct ao *ao)
     if (ao->driver_initialized)
         ao->driver->uninit(ao);
 
+    talloc_free(p->filter_root);
+    talloc_free(p->queue);
+    talloc_free(p->pending);
     talloc_free(p->convert_buffer);
     talloc_free(p->temp_buf);
 
@@ -542,16 +493,28 @@ bool init_buffer_post(struct ao *ao)
         assert(ao->driver->get_state);
     }
 
-    for (int n = 0; n < ao->num_planes; n++)
-        p->buffers[n] = mp_ring_new(ao, ao->buffer * ao->sstride);
-
-    mpthread_mutex_init_recursive(&p->lock);
+    pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
 
     pthread_mutex_init(&p->pt_lock, NULL);
     pthread_cond_init(&p->pt_wakeup, NULL);
 
+    p->queue = mp_async_queue_create();
+    p->filter_root = mp_filter_create_root(ao->global);
+    p->input = mp_async_queue_create_filter(p->filter_root, MP_PIN_OUT, p->queue);
+
+    mp_async_queue_resume_reading(p->queue);
+
+    struct mp_async_queue_config cfg = {
+        .sample_unit = AQUEUE_UNIT_SAMPLES,
+        .max_samples = ao->buffer,
+        .max_bytes = INT64_MAX,
+    };
+    mp_async_queue_set_config(p->queue, cfg);
+
     if (ao->driver->write) {
+        mp_filter_graph_set_wakeup_cb(p->filter_root, wakeup_filters, ao);
+
         p->thread_valid = true;
         if (pthread_create(&p->thread, NULL, playthread, ao)) {
             p->thread_valid = false;
@@ -590,89 +553,85 @@ static bool realloc_buf(struct ao *ao, int samples)
 }
 
 // called locked
-static void ao_play_data(struct ao *ao)
+static bool ao_play_data(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
+
+    if (!(p->playing && (!p->paused || ao->stream_silence)))
+        return false;
+
     struct mp_pcm_state state;
     get_dev_state(ao, &state);
 
-    if (p->streaming && !state.playing && !ao->untimed) {
-        if (p->draining) {
-            MP_VERBOSE(ao, "underrun signaled for audio end\n");
-            p->still_playing = false;
-            pthread_cond_broadcast(&p->wakeup);
-        } else {
-            ao_add_events(ao, AO_EVENT_UNDERRUN);
+    if (p->streaming && !state.playing && !ao->untimed)
+        goto eof;
+
+    void **planes = NULL;
+    int space = state.free_samples;
+    if (!space)
+        return false;
+    assert(space >= 0);
+
+    int samples = 0;
+    bool got_eof = false;
+    if (ao->driver->write_frames) {
+        TA_FREEP(&p->pending);
+        samples = read_buffer(ao, NULL, 1, &got_eof);
+        planes = (void **)&p->pending;
+    } else {
+        if (!realloc_buf(ao, space)) {
+            MP_ERR(ao, "Failed to allocate buffer.\n");
+            return false;
+        }
+        planes = (void **)mp_aframe_get_data_rw(p->temp_buf);
+        assert(planes);
+
+        if (p->recover_pause) {
+            samples = MPCLAMP(p->prepause_state.delay * ao->samplerate, 0, space);
+            p->recover_pause = false;
+            mp_aframe_set_silence(p->temp_buf, 0, space);
         }
 
-        p->streaming = false;
+        if (!samples) {
+            samples = read_buffer(ao, planes, space, &got_eof);
+            if (p->paused || (ao->stream_silence && !p->playing))
+                samples = space; // read_buffer() sets remainder to silent
+        }
     }
 
-    // Round free space to period sizes to reduce number of write() calls.
-    int space = state.free_samples / ao->period_size * ao->period_size;
-    bool play_silence = p->paused || (ao->stream_silence && !p->still_playing);
-    space = MPMAX(space, 0);
-    if (!realloc_buf(ao, space)) {
-        MP_ERR(ao, "Failed to allocate buffer.\n");
-        return;
-    }
-    void **planes = (void **)mp_aframe_get_data_rw(p->temp_buf);
-    assert(planes);
-    int samples = mp_ring_buffered(p->buffers[0]) / ao->sstride;
-    if (samples > space)
-        samples = space;
-    if (play_silence)
-        samples = space;
-    if (p->recover_pause) {
-        samples = MPCLAMP(p->prepause_state.delay * ao->samplerate, 0, space);
-        p->recover_pause = false;
-        mp_aframe_set_silence(p->temp_buf, 0, space);
-    } else {
-        samples = ao_read_data(ao, planes, samples, 0);
-    }
-    if (play_silence)
-        samples = space; // ao_read_data() sets remainder to silent
-
-    bool is_eof = p->final_chunk && samples < space;
-    bool ok = true;
-    int written = 0;
     if (samples) {
-        p->draining |= is_eof;
         MP_STATS(ao, "start ao fill");
-        ok = ao->driver->write(ao, planes, samples);
+        if (!ao->driver->write(ao, planes, samples))
+            MP_ERR(ao, "Error writing audio to device.\n");
         MP_STATS(ao, "end ao fill");
-    }
 
-    if (!ok)
-        MP_ERR(ao, "Error writing audio to device.\n");
-
-    if (samples > 0 && ok) {
-        written = samples;
         if (!p->streaming) {
             MP_VERBOSE(ao, "starting AO\n");
             ao->driver->start(ao);
             p->streaming = true;
+            state.playing = true;
         }
-        p->still_playing = !play_silence;
     }
 
-    if (p->draining && p->still_playing && ao->untimed) {
-        p->still_playing = false;
-        pthread_cond_broadcast(&p->wakeup);
+    MP_TRACE(ao, "in=%d space=%d(%d) pl=%d, eof=%d\n",
+             samples, space, state.free_samples, p->playing, got_eof);
+
+    if (got_eof)
+        goto eof;
+
+    return samples > 0;
+
+eof:
+    MP_VERBOSE(ao, "audio end or underrun\n");
+    // Normal AOs signal EOF on underrun, untimed AOs never signal underruns.
+    if (ao->untimed || !state.playing) {
+        p->streaming = false;
+        p->playing = false;
     }
-
-    // Wait until space becomes available. Also wait if we actually wrote data,
-    // so the AO wakes us up properly if it needs more data.
-    p->ao_wait_low_buffer = space == 0 || written > 0 || p->draining;
-
-    // Request more data if we're below some random buffer level.
-    int needed = unlocked_get_space(ao);
-    bool more = needed >= ao->device_buffer / 4 && !p->final_chunk;
-    if (more)
-        ao->wakeup_cb(ao->wakeup_ctx); // request more data
-    MP_TRACE(ao, "in=%d eof=%d space=%d r=%d wa/pl/dr=%d/%d/%d needed=%d more=%d\n",
-             samples, is_eof, space, written, p->ao_wait_low_buffer,
-             p->still_playing, p->draining, needed, more);
+    ao->wakeup_cb(ao->wakeup_ctx);
+    // For ao_drain().
+    pthread_cond_broadcast(&p->wakeup);
+    return true;
 }
 
 static void *playthread(void *arg)
@@ -683,20 +642,18 @@ static void *playthread(void *arg)
     while (1) {
         pthread_mutex_lock(&p->lock);
 
-        bool blocked = ao->driver->initially_blocked && !p->initial_unblocked;
-        bool playing = !p->paused && (p->playing || ao->stream_silence);
-        if (playing && !blocked)
-            ao_play_data(ao);
+        bool progress = false;
+        if (!ao->driver->initially_blocked || p->initial_unblocked)
+            progress = ao_play_data(ao);
 
         // Wait until the device wants us to write more data to it.
         // Fallback to guessing.
         double timeout = INFINITY;
-        if (p->ao_wait_low_buffer) {
+        if (p->streaming && !p->paused && !progress) {
             // Wake up again if half of the audio buffer has been played.
             // Since audio could play at a faster or slower pace, wake up twice
             // as often as ideally needed.
             timeout = ao->device_buffer / (double)ao->samplerate * 0.25;
-            p->ao_wait_low_buffer = false;
         }
 
         pthread_mutex_unlock(&p->lock);
@@ -706,7 +663,7 @@ static void *playthread(void *arg)
             pthread_mutex_unlock(&p->pt_lock);
             break;
         }
-        if (!p->need_wakeup) {
+        if (!p->need_wakeup && !progress) {
             MP_STATS(ao, "start audio wait");
             struct timespec ts = mp_rel_time_to_timespec(timeout);
             pthread_cond_timedwait(&p->pt_wakeup, &p->pt_lock, &ts);

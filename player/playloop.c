@@ -31,6 +31,7 @@
 #include "common/recorder.h"
 #include "common/stats.h"
 #include "filters/f_decoder_wrapper.h"
+#include "filters/filter_internal.h"
 #include "options/m_config_frontend.h"
 #include "options/m_property.h"
 #include "common/playlist.h"
@@ -161,13 +162,8 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
     if (internal_paused != mpctx->paused) {
         mpctx->paused = internal_paused;
 
-        if (mpctx->ao && mpctx->ao_chain) {
-            if (internal_paused) {
-                ao_pause(mpctx->ao);
-            } else {
-                ao_resume(mpctx->ao);
-            }
-        }
+        if (mpctx->ao && mpctx->ao_chain)
+            ao_set_paused(mpctx->ao, internal_paused);
 
         if (mpctx->video_out)
             vo_set_paused(mpctx->video_out, internal_paused);
@@ -956,8 +952,8 @@ static void handle_keep_open(struct MPContext *mpctx)
                 seek_to_last_frame(mpctx);
         }
         if (opts->keep_open_pause) {
-            if (mpctx->ao)
-                ao_drain(mpctx->ao);
+            if (mpctx->ao && ao_is_playing(mpctx->ao))
+                return;
             set_pause_state(mpctx, true);
         }
     }
@@ -1122,10 +1118,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
             return;
         }
 
-        MP_DBG(mpctx, "starting audio playback\n");
-        mpctx->audio_status = STATUS_PLAYING;
-        fill_audio_out_buffers(mpctx); // actually play prepared buffer
-        mp_wakeup_core(mpctx);
+        audio_start_ao(mpctx);
     }
 
     if (!mpctx->restart_complete) {

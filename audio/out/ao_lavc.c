@@ -30,8 +30,11 @@
 #include "config.h"
 #include "options/options.h"
 #include "common/common.h"
+#include "audio/aframe.h"
 #include "audio/format.h"
 #include "audio/fmt-conversion.h"
+#include "filters/filter_internal.h"
+#include "filters/f_utils.h"
 #include "mpv_talloc.h"
 #include "ao.h"
 #include "internal.h"
@@ -44,20 +47,19 @@ struct priv {
 
     int pcmhack;
     int aframesize;
-    int aframecount;
-    int64_t savepts;
     int framecount;
     int64_t lastpts;
     int sample_size;
-    const void *sample_padding;
     double expected_next_pts;
+    struct mp_filter *filter_root;
+    struct mp_filter *fix_frame_size;
 
     AVRational worst_time_base;
 
     bool shutdown;
 };
 
-static void encode(struct ao *ao, double apts, void **data);
+static void read_frames(struct ao *ao);
 
 static bool supports_format(const AVCodec *codec, int format)
 {
@@ -151,7 +153,6 @@ static int init(struct ao *ao)
     // but at least one!
     ac->framecount = MPMAX(ac->framecount, 1);
 
-    ac->savepts = AV_NOPTS_VALUE;
     ac->lastpts = AV_NOPTS_VALUE;
 
     ao->untimed = true;
@@ -159,8 +160,10 @@ static int init(struct ao *ao)
     ao->device_buffer = ac->aframesize * ac->framecount;
     ao->period_size = ao->device_buffer;
 
-    if (ao->channels.num > AV_NUM_DATA_POINTERS)
-        goto fail;
+    ac->filter_root = mp_filter_create_root(ao->global);
+    ac->fix_frame_size = mp_fixed_aframe_size_create(ac->filter_root,
+                                                     ac->aframesize, true);
+    MP_HANDLE_OOM(ac->fix_frame_size);
 
     return 0;
 
@@ -185,103 +188,81 @@ static void uninit(struct ao *ao)
         pthread_mutex_unlock(&ectx->lock);
 
         outpts += encoder_get_offset(ac->enc);
-        encode(ao, outpts, NULL);
+
+        if (!mp_pin_in_write(ac->fix_frame_size->pins[0], MP_EOF_FRAME))
+            MP_WARN(ao, "could not flush last frame\n");
+        read_frames(ao);
+        encoder_encode(ac->enc, NULL);
     }
+
+    talloc_free(ac->filter_root);
 }
 
 // must get exactly ac->aframesize amount of data
-static void encode(struct ao *ao, double apts, void **data)
+static void encode(struct ao *ao, struct mp_aframe *af)
 {
     struct priv *ac = ao->priv;
-    struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
     AVCodecContext *encoder = ac->enc->encoder;
-    double realapts = ac->aframecount * (double) ac->aframesize /
-                      ao->samplerate;
+    double outpts = mp_aframe_get_pts(af);
 
-    ac->aframecount++;
+    AVFrame *frame = mp_aframe_to_avframe(af);
+    if (!frame)
+        abort();
 
-    pthread_mutex_lock(&ectx->lock);
-    if (data)
-        ectx->audio_pts_offset = realapts - apts;
-    pthread_mutex_unlock(&ectx->lock);
+    frame->pts = rint(outpts * av_q2d(av_inv_q(encoder->time_base)));
 
-    if(data) {
-        AVFrame *frame = av_frame_alloc();
-        frame->format = af_to_avformat(ao->format);
-        frame->nb_samples = ac->aframesize;
-        frame->channels = encoder->channels;
-        frame->channel_layout = encoder->channel_layout;
-
-        size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
-        assert(num_planes <= AV_NUM_DATA_POINTERS);
-        for (int n = 0; n < num_planes; n++)
-            frame->extended_data[n] = data[n];
-
-        frame->linesize[0] = frame->nb_samples * ao->sstride;
-
-        frame->pts = rint(apts * av_q2d(av_inv_q(encoder->time_base)));
-
-        int64_t frame_pts = av_rescale_q(frame->pts, encoder->time_base,
-                                         ac->worst_time_base);
-        while (ac->lastpts != AV_NOPTS_VALUE && frame_pts <= ac->lastpts) {
-            // whatever the fuck this code does?
-            MP_WARN(ao, "audio frame pts went backwards (%d <- %d), autofixed\n",
-                    (int)frame->pts, (int)ac->lastpts);
-            frame_pts = ac->lastpts + 1;
-            ac->lastpts = frame_pts;
-            frame->pts = av_rescale_q(frame_pts, ac->worst_time_base,
-                                      encoder->time_base);
-            frame_pts = av_rescale_q(frame->pts, encoder->time_base,
+    int64_t frame_pts = av_rescale_q(frame->pts, encoder->time_base,
                                      ac->worst_time_base);
-        }
+    if (ac->lastpts != AV_NOPTS_VALUE && frame_pts <= ac->lastpts) {
+        // whatever the fuck this code does?
+        MP_WARN(ao, "audio frame pts went backwards (%d <- %d), autofixed\n",
+                (int)frame->pts, (int)ac->lastpts);
+        frame_pts = ac->lastpts + 1;
         ac->lastpts = frame_pts;
+        frame->pts = av_rescale_q(frame_pts, ac->worst_time_base,
+                                  encoder->time_base);
+        frame_pts = av_rescale_q(frame->pts, encoder->time_base,
+                                 ac->worst_time_base);
+    }
+    ac->lastpts = frame_pts;
 
-        frame->quality = encoder->global_quality;
-        encoder_encode(ac->enc, frame);
-        av_frame_free(&frame);
-    } else {
-        encoder_encode(ac->enc, NULL);
+    frame->quality = encoder->global_quality;
+    encoder_encode(ac->enc, frame);
+    av_frame_free(&frame);
+}
+
+static void read_frames(struct ao *ao)
+{
+    struct priv *ac = ao->priv;
+
+    while (1) {
+        struct mp_frame fr = mp_pin_out_read(ac->fix_frame_size->pins[1]);
+        if (!fr.type)
+            break;
+        if (fr.type != MP_FRAME_AUDIO)
+            continue;
+        struct mp_aframe *af = fr.data;
+        encode(ao, af);
+        mp_frame_unref(&fr);
     }
 }
 
-// Note: currently relies on samples aligned to period sizes - will not work
-//       in the future.
 static bool audio_write(struct ao *ao, void **data, int samples)
 {
     struct priv *ac = ao->priv;
-    struct encoder_context *enc = ac->enc;
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
-    int bufpos = 0;
+
+    // See ao_driver.write_frames.
+    struct mp_aframe *af = mp_aframe_new_ref(*(struct mp_aframe **)data);
+
     double nextpts;
-    int orig_samples = samples;
+    double pts = mp_aframe_get_pts(af);
+    double outpts = pts;
 
     // for ectx PTS fields
     pthread_mutex_lock(&ectx->lock);
 
-    double pts = ectx->last_audio_in_pts;
-    pts += ectx->samples_since_last_pts / (double)ao->samplerate;
-
-    size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
-
-    void *tempdata = NULL;
-    void *padded[MP_NUM_CHANNELS];
-
-    if (samples % ac->aframesize) {
-       tempdata = talloc_new(NULL);
-       size_t bytelen = samples * ao->sstride;
-       size_t extralen = (ac->aframesize - 1) * ao->sstride;
-       for (int n = 0; n < num_planes; n++) {
-           padded[n] = talloc_size(tempdata, bytelen + extralen);
-           memcpy(padded[n], data[n], bytelen);
-           af_fill_silence((char *)padded[n] + bytelen, extralen, ao->format);
-       }
-       data = padded;
-       samples = (bytelen + extralen) / ao->sstride;
-       MP_VERBOSE(ao, "padding final frame with silence\n");
-    }
-
-    double outpts = pts;
-    if (!enc->options->rawts) {
+    if (!ectx->options->rawts) {
         // Fix and apply the discontinuity pts offset.
         nextpts = pts;
         if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
@@ -298,44 +279,36 @@ static bool audio_write(struct ao *ao, void **data, int samples)
         outpts = pts + ectx->discontinuity_pts_offset;
     }
 
-    pthread_mutex_unlock(&ectx->lock);
-
     // Shift pts by the pts offset first.
-    outpts += encoder_get_offset(enc);
-
-    while (samples - bufpos >= ac->aframesize) {
-        void *start[MP_NUM_CHANNELS] = {0};
-        for (int n = 0; n < num_planes; n++)
-            start[n] = (char *)data[n] + bufpos * ao->sstride;
-        encode(ao, outpts + bufpos / (double) ao->samplerate, start);
-        bufpos += ac->aframesize;
-    }
+    outpts += encoder_get_offset(ac->enc);
 
     // Calculate expected pts of next audio frame (input side).
-    ac->expected_next_pts = pts + bufpos / (double) ao->samplerate;
-
-    pthread_mutex_lock(&ectx->lock);
+    ac->expected_next_pts = pts + mp_aframe_get_size(af) / (double) ao->samplerate;
 
     // Set next allowed input pts value (input side).
-    if (!enc->options->rawts) {
+    if (!ectx->options->rawts) {
         nextpts = ac->expected_next_pts + ectx->discontinuity_pts_offset;
         if (nextpts > ectx->next_in_pts)
             ectx->next_in_pts = nextpts;
     }
 
-    talloc_free(tempdata);
-
-    int taken = MPMIN(bufpos, orig_samples);
-    ectx->samples_since_last_pts += taken;
-
     pthread_mutex_unlock(&ectx->lock);
 
+    mp_aframe_set_pts(af, outpts);
+
+    // Can't push in frame if it doesn't want it output one.
+    mp_pin_out_request_data(ac->fix_frame_size->pins[1]);
+
+    if (!mp_pin_in_write(ac->fix_frame_size->pins[0],
+                         MAKE_FRAME(MP_FRAME_AUDIO, af)))
+        return false; // shouldn't happen™
+    read_frames(ao);
     return true;
 }
 
 static void get_state(struct ao *ao, struct mp_pcm_state *state)
 {
-    state->free_samples = ao->device_buffer;
+    state->free_samples = 1;
     state->queued_samples = 0;
     state->delay = 0;
 }
@@ -359,6 +332,7 @@ const struct ao_driver audio_out_lavc = {
     .description = "audio encoding using libavcodec",
     .name      = "lavc",
     .initially_blocked = true,
+    .write_frames = true,
     .priv_size = sizeof(struct priv),
     .init      = init,
     .uninit    = uninit,

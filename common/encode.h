@@ -60,7 +60,6 @@ void encode_lavc_stream_eof(struct encode_lavc_context *ctx,
                             enum stream_type type);
 void encode_lavc_set_metadata(struct encode_lavc_context *ctx,
                               struct mp_tags *metadata);
-void encode_lavc_set_audio_pts(struct encode_lavc_context *ctx, double pts);
 bool encode_lavc_didfail(struct encode_lavc_context *ctx); // check if encoding failed
 
 #endif

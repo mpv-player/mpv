@@ -139,6 +139,9 @@ struct ao_driver {
     // first write() call is done. Encode mode uses this, and push mode
     // respects it automatically (don't use with pull mode).
     bool initially_blocked;
+    // If true, write units of entire frames. The write() call is modified to
+    // use data==mp_aframe. Useful for encoding AO only.
+    bool write_frames;
     // Init the device using ao->format/ao->channels/ao->samplerate. If the
     // device doesn't accept these parameters, you can attempt to negotiate
     // fallback parameters, and set the ao format fields accordingly.

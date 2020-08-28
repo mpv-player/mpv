@@ -278,8 +278,11 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
     vo_set_paused(vo_c->vo, get_internal_paused(mpctx));
 
     // If we switch on video again, ensure audio position matches up.
-    if (mpctx->ao_chain)
+    if (mpctx->ao_chain && mpctx->ao_chain->ao) {
+        ao_reset(mpctx->ao_chain->ao);
+        mpctx->ao_chain->start_pts_known = false;
         mpctx->audio_status = STATUS_SYNCING;
+    }
 
     reset_video_state(mpctx);
     reset_subtitle_state(mpctx);
