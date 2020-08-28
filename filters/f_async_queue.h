@@ -28,6 +28,28 @@ void mp_async_queue_reset(struct mp_async_queue *queue);
 // fill up.
 void mp_async_queue_resume(struct mp_async_queue *queue);
 
+// Like mp_async_queue_resume(), but also allows the producer writing to the
+// queue, even if the consumer will request any data yet.
+void mp_async_queue_resume_reading(struct mp_async_queue *queue);
+
+// Returns true if out of mp_async_queue_reset()/mp_async_queue_resume(), the
+// latter was most recently called.
+bool mp_async_queue_is_active(struct mp_async_queue *queue);
+
+// Returns true if the queue reached its configured size, the input filter
+// accepts no further frames. Always returns false if not active (then it does
+// not accept any input at all).
+bool mp_async_queue_is_full(struct mp_async_queue *queue);
+
+// Get the total of samples buffered within the queue itself. This doesn't count
+// samples buffered in the access filters. mp_async_queue_config.sample_unit is
+// used to define what "1 sample" means.
+int64_t mp_async_queue_get_samples(struct mp_async_queue *queue);
+
+// Get the total number of frames buffered within the queue itself. Frames
+// buffered in the access filters are not included.
+int mp_async_queue_get_frames(struct mp_async_queue *queue);
+
 // Create a filter to access the queue, and connect it. It's not allowed to
 // connect an already connected end of the queue. The filter can be freed at
 // any time.
@@ -44,7 +66,7 @@ void mp_async_queue_resume(struct mp_async_queue *queue);
 // queue state is the API user's responsibility. Note that resetting an input
 // filter (dir==MP_PIN_IN) while the queue is active and in "reading" state
 // (the output filter requested data at any point before the last
-// mp_async_queue_reset() was called), the
+// mp_async_queue_reset(), or mp_async_queue_resume_reading() was called), the
 // filter will immediately request data after the reset.
 //
 // For proper global reset, this order should be preferred:
@@ -62,6 +84,17 @@ void mp_async_queue_resume(struct mp_async_queue *queue);
 struct mp_filter *mp_async_queue_create_filter(struct mp_filter *parent,
                                                enum mp_pin_dir dir,
                                                struct mp_async_queue *queue);
+
+// Set a filter that should be woken up with mp_filter_wakeup() in the following
+// situations:
+//  - mp_async_queue_is_full() changes to true (at least for a short moment)
+//  - mp_async_queue_get_frames() changes to 0 (at least until new data is fed)
+// This is a workaround for the filter design, which does not allow you to write
+// to the queue in a "sequential" way (write, then check condition).
+// Calling this again on the same filter removes the previous notify filter.
+//  f: must be a filter returned by mp_async_queue_create_filter(, MP_PIN_IN,)
+//  notify: filter to be woken up
+void mp_async_queue_set_notifier(struct mp_filter *f, struct mp_filter *notify);
 
 enum mp_async_queue_sample_unit {
     AQUEUE_UNIT_FRAME = 0,  // a frame counts as 1 sample
