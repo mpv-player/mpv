@@ -312,7 +312,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': 'libass',
         'desc': 'SSA/ASS support',
-        'func': check_pkg_config('libass', '>= 0.12.1'),
+        'func': check_pkg_config('libass', '>= 0.12.2'),
         'req': True,
         'fmsg': "Unable to find development files for libass, or the version " +
                 "found is too old. Aborting."

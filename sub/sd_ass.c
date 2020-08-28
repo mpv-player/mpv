@@ -418,13 +418,11 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     ass_set_shaper(priv, opts->ass_shaper);
     int set_force_flags = 0;
     if (total_override)
-        set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_FONT_SIZE;
+        set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
     if (opts->ass_style_override == 4) // 'scale'
-        set_force_flags |= ASS_OVERRIDE_BIT_FONT_SIZE;
-#if LIBASS_VERSION >= 0x01201001
+        set_force_flags |= ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
     if (converted)
         set_force_flags |= ASS_OVERRIDE_BIT_ALIGNMENT;
-#endif
 #ifdef ASS_JUSTIFY_AUTO
     if ((converted || opts->ass_style_override) && opts->ass_justify)
         set_force_flags |= ASS_OVERRIDE_BIT_JUSTIFY;
