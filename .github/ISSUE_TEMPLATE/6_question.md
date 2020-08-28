@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+### Your Question
+
 Don't ask questions about issues, errors or problems you have and instead open
 a proper issue with the right template from the previous selection.
 

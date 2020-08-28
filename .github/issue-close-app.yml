@@ -1,0 +1,20 @@
+comment: "You either ignored the Issue Template, deleted important parts of it
+or opened an Issue without any Template. Please open a new Issue and deligently
+fill out the Template with all informations asked for. Don't delete the headers
+or it might be automatically closed again."
+issueConfigs:
+- content:
+  - "Important Information"
+  - "Reproduction steps"
+  - "Log file"
+- content:
+  - "mpv version and platform versions"
+  - "Reproduction steps"
+  - "Log file"
+- content:
+  - "Expected behavior of the wanted feature"
+  - "Log file"
+- content:
+  - "Your Question"
+caseInsensitive: false
+label: "priority:ignored-issue-template"
