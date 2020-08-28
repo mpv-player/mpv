@@ -88,6 +88,8 @@ static int64_t frame_get_samples(struct async_queue *q, struct mp_frame frame)
         struct mp_aframe *aframe = frame.data;
         res = mp_aframe_get_size(aframe);
     }
+    if (mp_frame_is_signaling(frame))
+        return 0;
     return res;
 }
 

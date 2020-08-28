@@ -65,7 +65,8 @@ struct mp_filter *mp_async_queue_create_filter(struct mp_filter *parent,
 
 enum mp_async_queue_sample_unit {
     AQUEUE_UNIT_FRAME = 0,  // a frame counts as 1 sample
-    AQUEUE_UNIT_SAMPLES,    // number of audio samples (1 for other media types)
+    AQUEUE_UNIT_SAMPLES,    // number of audio samples (1 for other media types,
+                            // 0 for signaling)
 };
 
 // Setting this struct to all-0 is equivalent to defaults.
