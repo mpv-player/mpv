@@ -158,7 +158,6 @@ static int init(struct ao *ao)
     ao->untimed = true;
 
     ao->device_buffer = ac->aframesize * ac->framecount;
-    ao->period_size = ao->device_buffer;
 
     ac->filter_root = mp_filter_create_root(ao->global);
     ac->fix_frame_size = mp_fixed_aframe_size_create(ac->filter_root,

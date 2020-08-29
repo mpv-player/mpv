@@ -267,7 +267,6 @@ static int init(struct ao *ao)
         goto err_out;
     }
 
-    ao->period_size = p->num_samples;
     return 0;
 
 err_out:

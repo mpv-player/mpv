@@ -619,7 +619,7 @@ static bool ao_play_data(struct ao *ao)
     if (got_eof)
         goto eof;
 
-    return samples > 0;
+    return samples > 0 && (samples < space || ao->untimed);
 
 eof:
     MP_VERBOSE(ao, "audio end or underrun\n");
@@ -642,14 +642,14 @@ static void *playthread(void *arg)
     while (1) {
         pthread_mutex_lock(&p->lock);
 
-        bool progress = false;
+        bool retry = false;
         if (!ao->driver->initially_blocked || p->initial_unblocked)
-            progress = ao_play_data(ao);
+            retry = ao_play_data(ao);
 
         // Wait until the device wants us to write more data to it.
         // Fallback to guessing.
         double timeout = INFINITY;
-        if (p->streaming && !p->paused && !progress) {
+        if (p->streaming && !p->paused && !retry) {
             // Wake up again if half of the audio buffer has been played.
             // Since audio could play at a faster or slower pace, wake up twice
             // as often as ideally needed.
@@ -663,7 +663,7 @@ static void *playthread(void *arg)
             pthread_mutex_unlock(&p->pt_lock);
             break;
         }
-        if (!p->need_wakeup && !progress) {
+        if (!p->need_wakeup && !retry) {
             MP_STATS(ao, "start audio wait");
             struct timespec ts = mp_rel_time_to_timespec(timeout);
             pthread_cond_timedwait(&p->pt_wakeup, &p->pt_lock, &ts);

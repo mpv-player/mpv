@@ -204,8 +204,6 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
 
     init_buffer_pre(ao);
 
-    ao->period_size = 1;
-
     int r = ao->driver->init(ao);
     if (r < 0) {
         // Silly exception for coreaudio spdif redirection
@@ -221,11 +219,6 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
         goto fail;
     }
     ao->driver_initialized = true;
-
-    if (ao->period_size < 1) {
-        MP_ERR(ao, "Invalid period size set.\n");
-        goto fail;
-    }
 
     ao->sstride = af_fmt_to_bytes(ao->format);
     ao->num_planes = 1;

@@ -850,7 +850,6 @@ static int init_device(struct ao *ao, int mode)
     MP_VERBOSE(ao, "period size: %d samples\n", (int)p->outburst);
 
     ao->device_buffer = p->buffersize;
-    ao->period_size = p->outburst;
 
     p->convert.channels = ao->channels.num;
 
@@ -998,6 +997,8 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
         state->delay = MPMAX(del, 0) / (double)ao->samplerate;
         state->free_samples = snd_pcm_status_get_avail(st);
         state->free_samples = MPCLAMP(state->free_samples, 0, ao->device_buffer);
+        // Align to period size.
+        state->free_samples = state->free_samples / p->outburst * p->outburst;
         state->queued_samples = ao->device_buffer - state->free_samples;
         state->playing = pcmst == SND_PCM_STATE_RUNNING ||
                          pcmst == SND_PCM_STATE_PAUSED;
