@@ -687,8 +687,11 @@ end
 function run_ytdl_hook(url)
     local start_time = os.clock()
 
+    local pathoption = mp.get_property("options/ytdl-path")
+    if (pathoption ~= "") then
+        ytdl.path = pathoption
     -- check for youtube-dl in mpv's config dir
-    if not (ytdl.searched) then
+    elseif not (ytdl.searched) then
         local exesuf = (package.config:sub(1,1) == '\\') and '.exe' or ''
         local ytdl_mcd = mp.find_config_file("youtube-dl" .. exesuf)
         if not (ytdl_mcd == nil) then

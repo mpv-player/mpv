@@ -971,6 +971,23 @@ Program Behavior
     returns a format that mpv cannot use, and in these cases the mpv default
     may work better.
 
+``--ytdl-path=<file>``
+    Provide a path to the youtube-dl binary that mpv should use for its
+    youtube-dl hook. (Default: unset)
+    mpv calls youtube-dl and parses its output to make use of the youtube-dl
+    hook, and this option lets the user point mpv to a particular binary of
+    youtube-dl rather than the default one.
+
+    If this option is unset, mpv will look in the mpv configuration directory
+    first to find youtube-dl. If it doesn't find youtube-dl there, then mpv
+    will look in PATH to find it.
+
+    Most users will not need to set this option, although it can be helpful
+    to test differences or regressions between various youtube-dl versions.
+
+    Do note that if you provide a path that doesn't point to a working
+    youtube-dl, mpv will not fall back to its default scan.
+
 ``--ytdl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
     Pass arbitrary options to youtube-dl. Parameter and argument should be
     passed as a key-value pair. Options without argument must include ``=``.
