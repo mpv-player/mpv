@@ -15,43 +15,40 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
-#include <stdbool.h>
+#include <assert.h>
 #include <inttypes.h>
 #include <math.h>
-#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
 
+#include "client.h"
+#include "command.h"
 #include "config.h"
+#include "core.h"
 #include "mpv_talloc.h"
-
-#include "common/msg.h"
-#include "options/options.h"
-#include "common/common.h"
-#include "common/encode.h"
-#include "common/recorder.h"
-#include "common/stats.h"
-#include "filters/f_decoder_wrapper.h"
-#include "filters/filter_internal.h"
-#include "options/m_config_frontend.h"
-#include "options/m_property.h"
-#include "common/playlist.h"
-#include "input/input.h"
-
-#include "misc/dispatch.h"
-#include "osdep/terminal.h"
-#include "osdep/timer.h"
+#include "screenshot.h"
 
 #include "audio/out/ao.h"
+#include "common/common.h"
+#include "common/encode.h"
+#include "common/msg.h"
+#include "common/playlist.h"
+#include "common/recorder.h"
+#include "common/stats.h"
 #include "demux/demux.h"
+#include "filters/f_decoder_wrapper.h"
+#include "filters/filter_internal.h"
+#include "input/input.h"
+#include "misc/dispatch.h"
+#include "options/m_config_frontend.h"
+#include "options/m_property.h"
+#include "options/options.h"
+#include "osdep/terminal.h"
+#include "osdep/timer.h"
 #include "stream/stream.h"
 #include "sub/dec_sub.h"
 #include "sub/osd.h"
 #include "video/out/vo.h"
-
-#include "core.h"
-#include "client.h"
-#include "command.h"
-#include "screenshot.h"
 
 // Wait until mp_wakeup_core() is called, since the last time
 // mp_wait_events() was called.
