@@ -60,7 +60,6 @@ Interface changes
       "file_error" instead for this specific event. Scripts relying on the
       "error" field for end-file will silently break at some point in the
       future.
-    - deprecate encoding mode (lack of maintainer)
     - remove deprecated --input-file option, add --input-ipc-client, which is
       vaguely a replacement of the removed option, but not the same
     - change another detail for track selection options (see --aid manpage
