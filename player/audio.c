@@ -216,7 +216,9 @@ void uninit_audio_out(struct MPContext *mpctx)
     }
     if (mpctx->ao) {
         // Note: with gapless_audio, stop_play is not correctly set
-        if (mpctx->opts->gapless_audio || mpctx->stop_play == AT_END_OF_FILE) {
+        if ((mpctx->opts->gapless_audio || mpctx->stop_play == AT_END_OF_FILE) &&
+            ao_is_playing(mpctx->ao) && !get_internal_paused(mpctx))
+        {
             MP_VERBOSE(mpctx, "draining left over audio\n");
             ao_drain(mpctx->ao);
         }
