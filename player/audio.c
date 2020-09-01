@@ -794,7 +794,8 @@ static void check_audio_start(struct MPContext *mpctx, bool force)
         mpctx->video_status != STATUS_EOF)
     {
         double diff = (apts - pts) / mpctx->opts->playback_speed;
-        mp_set_timeout(mpctx, diff);
+        if (!get_internal_paused(mpctx))
+            mp_set_timeout(mpctx, diff);
         MP_VERBOSE(mpctx, "delaying audio start %f vs. %f, diff=%f\n",
                    apts, pts, diff);
         return;
