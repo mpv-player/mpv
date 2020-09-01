@@ -645,6 +645,8 @@ int mp_aframe_pool_allocate(struct mp_aframe_pool *pool, struct mp_aframe *frame
     av_frame->linesize[0] = samples * sstride;
     for (int n = 0; n < planes; n++)
         av_frame->extended_data[n] = av_frame->buf[0]->data + n * plane_size;
+    for (int n = 0; n < MPMIN(planes, AV_NUM_DATA_POINTERS); n++)
+        av_frame->data[n] = av_frame->extended_data[n];
     av_frame->nb_samples = samples;
 
     return 0;
