@@ -356,31 +356,6 @@ done:
     pthread_mutex_unlock(&ctx->lock);
 }
 
-void encode_lavc_stream_eof(struct encode_lavc_context *ctx,
-                            enum stream_type type)
-{
-    if (!ctx)
-        return;
-
-    struct encode_priv *p = ctx->priv;
-
-    pthread_mutex_lock(&ctx->lock);
-
-    enum AVMediaType codec_type = mp_to_av_stream_type(type);
-    struct mux_stream *dst = find_mux_stream(ctx, codec_type);
-
-    // If we've reached EOF, even though the stream was selected, and we didn't
-    // ever initialize it, we have a problem. We could mux some sort of dummy
-    // stream (and could fail if actual data arrives later), or we bail out
-    // early.
-    if (dst && !dst->st) {
-        MP_ERR(p, "No data on stream %s.\n", dst->name);
-        p->failed = true;
-    }
-
-    pthread_mutex_unlock(&ctx->lock);
-}
-
 // Signal that you are ready to encode (you provide the codec params etc. too).
 // This returns a muxing handle which you can use to add encodec packets.
 // Can be called only once per stream. info is copied by callee as needed.
