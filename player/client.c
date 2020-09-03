@@ -83,7 +83,6 @@ struct mp_client_api {
     int num_custom_protocols;
 
     struct mpv_render_context *render_context;
-    struct mpv_opengl_cb_context *gl_cb_ctx;
 };
 
 struct observe_property {
@@ -194,8 +193,6 @@ void mp_clients_destroy(struct MPContext *mpctx)
     if (!mpctx->clients)
         return;
     assert(mpctx->clients->num_clients == 0);
-
-    TA_FREEP(&mpctx->clients->gl_cb_ctx);
 
     // The API user is supposed to call mpv_render_context_free(). It's simply
     // not allowed not to do this.
@@ -2189,123 +2186,48 @@ mp_client_api_acquire_render_context(struct mp_client_api *ca)
 #include "libmpv/opengl_cb.h"
 #include "libmpv/render_gl.h"
 
-struct mpv_opengl_cb_context {
-    struct mp_client_api *client_api;
-    mpv_opengl_cb_update_fn callback;
-    void *callback_ctx;
-};
-
-static mpv_opengl_cb_context *opengl_cb_get_context(mpv_handle *ctx)
-{
-    pthread_mutex_lock(&ctx->clients->lock);
-    mpv_opengl_cb_context *cb = ctx->clients->gl_cb_ctx;
-    if (!cb) {
-        cb = talloc_zero(NULL, struct mpv_opengl_cb_context);
-        cb->client_api = ctx->clients;
-        cb->client_api->gl_cb_ctx = cb;
-    }
-    pthread_mutex_unlock(&ctx->clients->lock);
-    return cb;
-}
-
 void mpv_opengl_cb_set_update_callback(mpv_opengl_cb_context *ctx,
                                        mpv_opengl_cb_update_fn callback,
                                        void *callback_ctx)
 {
-    // This was probably supposed to be thread-safe, but we don't care. It's
-    // compatibility code, and if you have problems, use the new API.
-    if (ctx->client_api->render_context) {
-        mpv_render_context_set_update_callback(ctx->client_api->render_context,
-                                               callback, callback_ctx);
-    }
-    // Nasty thing: could set this even while not initialized, so we need to
-    // preserve it.
-    ctx->callback = callback;
-    ctx->callback_ctx = callback_ctx;
 }
 
 int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
                           mpv_opengl_cb_get_proc_address_fn get_proc_address,
                           void *get_proc_address_ctx)
 {
-    if (ctx->client_api->render_context)
-        return MPV_ERROR_INVALID_PARAMETER;
-
-    // mpv_render_context_create() only calls mp_client_get_global() on it.
-    mpv_handle dummy = {.mpctx = ctx->client_api->mpctx};
-
-    mpv_render_param params[] = {
-        {MPV_RENDER_PARAM_API_TYPE, MPV_RENDER_API_TYPE_OPENGL},
-        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &(mpv_opengl_init_params){
-            .get_proc_address = get_proc_address,
-            .get_proc_address_ctx = get_proc_address_ctx,
-            .extra_exts = exts,
-        }},
-        // Hack for explicit legacy hwdec loading. We really want to make it
-        // impossible for proper render API users to trigger this.
-        {(mpv_render_param_type)-1, ctx->client_api->mpctx->global},
-        {0}
-    };
-    int err = mpv_render_context_create(&ctx->client_api->render_context,
-                                        &dummy, params);
-    if (err >= 0) {
-        mpv_render_context_set_update_callback(ctx->client_api->render_context,
-                                               ctx->callback, ctx->callback_ctx);
-    }
-    return err;
+    return MPV_ERROR_NOT_IMPLEMENTED;
 }
 
 int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int w, int h)
 {
-    if (!ctx->client_api->render_context)
-        return MPV_ERROR_INVALID_PARAMETER;
-
-    mpv_render_param params[] = {
-        {MPV_RENDER_PARAM_OPENGL_FBO, &(mpv_opengl_fbo){
-            .fbo = fbo,
-            .w = w,
-            .h = abs(h),
-        }},
-        {MPV_RENDER_PARAM_FLIP_Y, &(int){h < 0}},
-        {0}
-    };
-    return mpv_render_context_render(ctx->client_api->render_context, params);
+    return MPV_ERROR_NOT_IMPLEMENTED;
 }
 
 int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time)
 {
-    if (!ctx->client_api->render_context)
-        return MPV_ERROR_INVALID_PARAMETER;
-
-    mpv_render_context_report_swap(ctx->client_api->render_context);
-    return 0;
+    return MPV_ERROR_NOT_IMPLEMENTED;
 }
 
 int mpv_opengl_cb_uninit_gl(mpv_opengl_cb_context *ctx)
 {
-    if (ctx->client_api->render_context)
-        mpv_render_context_free(ctx->client_api->render_context);
-    ctx->client_api->render_context = NULL;
     return 0;
 }
 
 int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
 {
-    return mpv_opengl_cb_draw(ctx, fbo, vp[2], vp[3]);
+    return MPV_ERROR_NOT_IMPLEMENTED;
 }
 
 void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
 {
-    if (!ctx->mpctx->initialized)
+    if (!ctx->mpctx->initialized || sub_api != MPV_SUB_API_OPENGL_CB)
         return NULL;
-    void *res = NULL;
-    switch (sub_api) {
-    case MPV_SUB_API_OPENGL_CB:
-        res = opengl_cb_get_context(ctx);
-        break;
-    default:;
-    }
-    return res;
+    // Return something non-NULL, as I think most API users will not check
+    // this properly. The other opengl_cb stubs do not use this value.
+    MP_WARN(ctx, "The opengl_cb API is not supported anymore.\n"
+                 "Use the similar API in render.h instead.\n");
+    return "no";
 }
 
 // stream_cb
