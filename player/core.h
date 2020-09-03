@@ -383,6 +383,8 @@ typedef struct MPContext {
     double last_frame_duration;
     // Video PTS, or audio PTS if video has ended.
     double playback_pts;
+    // For logging only.
+    double logged_async_diff;
 
     int last_chapter;
 

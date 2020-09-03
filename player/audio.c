@@ -204,6 +204,7 @@ void reset_audio_state(struct MPContext *mpctx)
     }
     mpctx->audio_status = mpctx->ao_chain ? STATUS_SYNCING : STATUS_EOF;
     mpctx->delay = 0;
+    mpctx->logged_async_diff = -1;
 }
 
 void uninit_audio_out(struct MPContext *mpctx)
@@ -798,8 +799,11 @@ static void check_audio_start(struct MPContext *mpctx, bool force)
         double diff = (apts - pts) / mpctx->opts->playback_speed;
         if (!get_internal_paused(mpctx))
             mp_set_timeout(mpctx, diff);
-        MP_VERBOSE(mpctx, "delaying audio start %f vs. %f, diff=%f\n",
-                   apts, pts, diff);
+        if (mpctx->logged_async_diff != diff) {
+            MP_VERBOSE(mpctx, "delaying audio start %f vs. %f, diff=%f\n",
+                       apts, pts, diff);
+            mpctx->logged_async_diff = diff;
+        }
         return;
     }
 
@@ -809,6 +813,7 @@ static void check_audio_start(struct MPContext *mpctx, bool force)
     if (ao_c->out_eof)
         mpctx->audio_status = STATUS_DRAINING;
     ao_c->underrun = false;
+    mpctx->logged_async_diff = -1;
     mp_wakeup_core(mpctx);
 }
 
