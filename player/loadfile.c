@@ -1701,6 +1701,12 @@ terminate_playback:
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
+    if (encode_lavc_didfail(mpctx->encode_lavc_ctx))
+        mpctx->stop_play = PT_ERROR;
+
+    if (mpctx->stop_play == PT_ERROR && !mpctx->error_playing)
+        mpctx->error_playing = MPV_ERROR_GENERIC;
+
     bool nothing_played = !mpctx->shown_aframes && !mpctx->shown_vframes &&
                           mpctx->error_playing <= 0;
     switch (mpctx->stop_play) {

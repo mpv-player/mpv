@@ -1182,7 +1182,7 @@ static void handle_eof(struct MPContext *mpctx)
 void run_playloop(struct MPContext *mpctx)
 {
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
-        mpctx->stop_play = PT_QUIT;
+        mpctx->stop_play = PT_ERROR;
         return;
     }
 
