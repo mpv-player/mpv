@@ -1548,7 +1548,16 @@ static void play_current_file(struct MPContext *mpctx)
             // One track can strictly feed at most 1 decoder
             struct track *track = mpctx->current_track[i][t];
             if (track) {
-                if (track->selected) {
+                if (track->type != STREAM_SUB &&
+                    mpctx->encode_lavc_ctx &&
+                    !encode_lavc_stream_type_ok(mpctx->encode_lavc_ctx,
+                                                track->type))
+                {
+                    MP_WARN(mpctx, "Disabling %s (not supported by target "
+                            "format).\n", stream_type_name(track->type));
+                    mpctx->current_track[i][t] = NULL;
+                    mark_track_selection(mpctx, i, t, -2); // disable
+                } else if (track->selected) {
                     MP_ERR(mpctx, "Track %d can't be selected twice.\n",
                            track->user_tid);
                     mpctx->current_track[i][t] = NULL;

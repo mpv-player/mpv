@@ -735,6 +735,47 @@ static void encoder_destroy(void *ptr)
     free_stream(p->twopass_bytebuffer);
 }
 
+static AVCodec *find_codec_for(struct encode_lavc_context *ctx,
+                               enum stream_type type, bool *used_auto)
+{
+    char *codec_name = type == STREAM_VIDEO
+        ? ctx->options->vcodec
+        : ctx->options->acodec;
+    enum AVMediaType codec_type = mp_to_av_stream_type(type);
+    const char *tname = stream_type_name(type);
+
+    *used_auto = !(codec_name && codec_name[0]);
+
+    AVCodec *codec;
+    if (*used_auto) {
+        codec = avcodec_find_encoder(av_guess_codec(ctx->oformat, NULL,
+                                     ctx->options->file, NULL,
+                                     codec_type));
+    } else {
+        codec = avcodec_find_encoder_by_name(codec_name);
+        if (!codec)
+            MP_FATAL(ctx, "codec '%s' not found.\n", codec_name);
+    }
+
+    if (codec && codec->type != codec_type) {
+        MP_FATAL(ctx, "codec for %s has wrong media type\n", tname);
+        codec = NULL;
+    }
+
+    return codec;
+}
+
+// Return whether the stream type is "supposed" to work.
+bool encode_lavc_stream_type_ok(struct encode_lavc_context *ctx,
+                                enum stream_type type)
+{
+    // If a codec was forced, let it proceed to actual encoding, and then error
+    // if it doesn't work. (Worried that av_guess_codec() may return NULL for
+    // some formats where a specific codec works anyway.)
+    bool auto_codec;
+    return !!find_codec_for(ctx, type, &auto_codec) || !auto_codec;
+}
+
 struct encoder_context *encoder_context_alloc(struct encode_lavc_context *ctx,
                                               enum stream_type type,
                                               struct mp_log *log)
@@ -755,27 +796,13 @@ struct encoder_context *encoder_context_alloc(struct encode_lavc_context *ctx,
         .encode_lavc_ctx = ctx,
     };
 
-    char *codec_name = type == STREAM_VIDEO
-        ? p->options->vcodec
-        : p->options->acodec;
-    enum AVMediaType codec_type = mp_to_av_stream_type(type);
+    bool auto_codec;
+    AVCodec *codec = find_codec_for(ctx, type, &auto_codec);
     const char *tname = stream_type_name(type);
 
-    AVCodec *codec;
-    if (codec_name&& codec_name[0]) {
-        codec = avcodec_find_encoder_by_name(codec_name);
-    } else {
-        codec = avcodec_find_encoder(av_guess_codec(p->oformat, NULL,
-                                                    p->options->file, NULL,
-                                                    codec_type));
-    }
-
     if (!codec) {
-        MP_FATAL(p, "codec for %s not found\n", tname);
-        goto fail;
-    }
-    if (codec->type != codec_type) {
-        MP_FATAL(p, "codec for %s has wrong media type\n", tname);
+        if (auto_codec)
+            MP_FATAL(p, "codec for %s not found\n", tname);
         goto fail;
     }
 
