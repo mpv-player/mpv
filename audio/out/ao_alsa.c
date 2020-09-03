@@ -1086,8 +1086,8 @@ static bool audio_write(struct ao *ao, void **data, int samples)
 
     CHECK_ALSA_ERROR("pcm write error");
     if (err >= 0 && err != samples) {
-        MP_WARN(ao, "unexpected short write (%d of %d frames), dropping audio\n",
-                (int)err, samples);
+        MP_ERR(ao, "unexpected partial write (%d of %d frames), dropping audio\n",
+               (int)err, samples);
     }
 
     return true;
