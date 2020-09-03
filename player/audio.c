@@ -782,12 +782,11 @@ static bool get_sync_pts(struct MPContext *mpctx, double *pts)
 
 // Look whether audio can be started yet - if audio has to start some time
 // after video.
-static void check_audio_start(struct MPContext *mpctx, bool force)
+// Caller needs to ensure mpctx->restart_complete is OK
+void audio_start_ao(struct MPContext *mpctx)
 {
     struct ao_chain *ao_c = mpctx->ao_chain;
     if (!ao_c || !ao_c->ao || mpctx->audio_status != STATUS_READY)
-        return;
-    if (!mpctx->restart_complete && !force)
         return;
     double pts = MP_NOPTS_VALUE;
     if (!get_sync_pts(mpctx, &pts))
@@ -932,13 +931,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         }
     }
 
-    check_audio_start(mpctx, false);
-}
-
-void audio_start_ao(struct MPContext *mpctx)
-{
-    assert(mpctx->audio_status == STATUS_READY);
-    check_audio_start(mpctx, true);
+    if (mpctx->restart_complete)
+        audio_start_ao(mpctx); // in case it got delayed
 }
 
 // Drop data queued for output, or which the AO is currently outputting.
