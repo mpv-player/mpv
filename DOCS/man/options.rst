@@ -2116,6 +2116,11 @@ Audio
 
     Not all AOs support this.
 
+    .. admonition:: Warning
+
+        This modifies certain subtle player behavior, like A/V-sync and underrun
+        handling. Enabling this option is strongly discouraged.
+
 ``--audio-wait-open=<secs>``
     This makes sense for use with ``--audio-stream-silence=yes``. If this option
     is given, the player will wait for the given amount of seconds after opening

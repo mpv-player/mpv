@@ -95,7 +95,7 @@ static void get_dev_state(struct ao *ao, struct mp_pcm_state *state)
 {
     struct buffer_state *p = ao->buffer_state;
 
-    if (p->paused && p->playing) {
+    if (p->paused && p->playing && !ao->stream_silence) {
         *state = p->prepause_state;
         return;
     }
@@ -527,6 +527,11 @@ bool init_buffer_post(struct ao *ao)
         }
     }
 
+    if (ao->stream_silence) {
+        MP_WARN(ao, "The --audio-stream-silence option is set. This will break "
+                "certain player behavior.\n");
+    }
+
     return true;
 }
 
@@ -557,7 +562,7 @@ static bool ao_play_data(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
 
-    if (!(p->playing && (!p->paused || ao->stream_silence)))
+    if ((!p->playing || p->paused) && !ao->stream_silence)
         return false;
 
     struct mp_pcm_state state;
@@ -624,8 +629,8 @@ static bool ao_play_data(struct ao *ao)
 eof:
     MP_VERBOSE(ao, "audio end or underrun\n");
     // Normal AOs signal EOF on underrun, untimed AOs never signal underruns.
-    if (ao->untimed || !state.playing) {
-        p->streaming = false;
+    if (ao->untimed || !state.playing || ao->stream_silence) {
+        p->streaming = state.playing && !ao->untimed;
         p->playing = false;
     }
     ao->wakeup_cb(ao->wakeup_ctx);
@@ -649,7 +654,7 @@ static void *playthread(void *arg)
         // Wait until the device wants us to write more data to it.
         // Fallback to guessing.
         double timeout = INFINITY;
-        if (p->streaming && !p->paused && !retry) {
+        if (p->streaming && !retry && (!p->paused || ao->stream_silence)) {
             // Wake up again if half of the audio buffer has been played.
             // Since audio could play at a faster or slower pace, wake up twice
             // as often as ideally needed.
