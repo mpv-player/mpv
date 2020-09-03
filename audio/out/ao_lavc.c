@@ -59,7 +59,7 @@ struct priv {
     bool shutdown;
 };
 
-static void read_frames(struct ao *ao);
+static bool write_frame(struct ao *ao, struct mp_frame frame);
 
 static bool supports_format(const AVCodec *codec, int format)
 {
@@ -188,9 +188,8 @@ static void uninit(struct ao *ao)
 
         outpts += encoder_get_offset(ac->enc);
 
-        if (!mp_pin_in_write(ac->fix_frame_size->pins[0], MP_EOF_FRAME))
+        if (!write_frame(ao, MP_EOF_FRAME))
             MP_WARN(ao, "could not flush last frame\n");
-        read_frames(ao);
         encoder_encode(ac->enc, NULL);
     }
 
@@ -230,9 +229,15 @@ static void encode(struct ao *ao, struct mp_aframe *af)
     av_frame_free(&frame);
 }
 
-static void read_frames(struct ao *ao)
+static bool write_frame(struct ao *ao, struct mp_frame frame)
 {
     struct priv *ac = ao->priv;
+
+    // Can't push in frame if it doesn't want it output one.
+    mp_pin_out_request_data(ac->fix_frame_size->pins[1]);
+
+    if (!mp_pin_in_write(ac->fix_frame_size->pins[0], frame))
+        return false; // shouldn't happen™
 
     while (1) {
         struct mp_frame fr = mp_pin_out_read(ac->fix_frame_size->pins[1]);
@@ -244,6 +249,8 @@ static void read_frames(struct ao *ao)
         encode(ao, af);
         mp_frame_unref(&fr);
     }
+
+    return true;
 }
 
 static bool audio_write(struct ao *ao, void **data, int samples)
@@ -295,14 +302,7 @@ static bool audio_write(struct ao *ao, void **data, int samples)
 
     mp_aframe_set_pts(af, outpts);
 
-    // Can't push in frame if it doesn't want it output one.
-    mp_pin_out_request_data(ac->fix_frame_size->pins[1]);
-
-    if (!mp_pin_in_write(ac->fix_frame_size->pins[0],
-                         MAKE_FRAME(MP_FRAME_AUDIO, af)))
-        return false; // shouldn't happen™
-    read_frames(ao);
-    return true;
+    return write_frame(ao, MAKE_FRAME(MP_FRAME_AUDIO, af));
 }
 
 static void get_state(struct ao *ao, struct mp_pcm_state *state)
