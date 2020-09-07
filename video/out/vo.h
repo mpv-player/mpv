@@ -48,10 +48,11 @@ enum {
     // Special thing for encode mode (vo_driver.initially_blocked).
     // Part of VO_EVENTS_USER to make vo_is_ready_for_frame() work properly.
     VO_EVENT_INITIAL_UNBLOCK            = 1 << 7,
+    VO_EVENT_FOCUS                      = 1 << 8,
 
     // Set of events the player core may be interested in.
     VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE | VO_EVENT_DPI |
-                     VO_EVENT_INITIAL_UNBLOCK,
+                     VO_EVENT_INITIAL_UNBLOCK | VO_EVENT_FOCUS,
 };
 
 enum mp_voctrl {
@@ -98,6 +99,8 @@ enum mp_voctrl {
     // these must access the not-fullscreened window size only).
     VOCTRL_GET_UNFS_WINDOW_SIZE,        // int[2] (w/h)
     VOCTRL_SET_UNFS_WINDOW_SIZE,        // int[2] (w/h)
+
+    VOCTRL_GET_FOCUSED,                 // bool*
 
     // char *** (NULL terminated array compatible with CONF_TYPE_STRING_LIST)
     // names for displays the window is on

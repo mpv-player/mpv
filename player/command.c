@@ -2410,6 +2410,21 @@ static int mp_property_hidpi_scale(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, cmd->cached_window_scale);
 }
 
+static int mp_property_focused(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+
+    bool focused;
+    if (vo_control(vo, VOCTRL_GET_FOCUSED, &focused) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_flag_ro(action, arg, focused);
+}
+
 static int mp_property_display_names(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3593,6 +3608,7 @@ static const struct m_property mp_properties_base[] = {
     PROPERTY_BITRATE("audio-bitrate", false, STREAM_AUDIO),
     PROPERTY_BITRATE("sub-bitrate", false, STREAM_SUB),
 
+    {"focused", mp_property_focused},
     {"display-names", mp_property_display_names},
     {"display-fps", mp_property_display_fps},
     {"estimated-display-fps", mp_property_estimated_display_fps},
@@ -3676,6 +3692,7 @@ static const char *const *const mp_event_property_change[] = {
       "osd-par", "osd-dimensions"),
     E(MP_EVENT_WIN_STATE, "display-names", "display-fps"),
     E(MP_EVENT_WIN_STATE2, "display-hidpi-scale"),
+    E(MP_EVENT_FOCUS, "focused"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
       "playlist-count", "playlist/count", "playlist-current-pos",
       "playlist-playing-pos"),

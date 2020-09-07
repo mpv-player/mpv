@@ -1128,11 +1128,13 @@ void vo_x11_check_events(struct vo *vo)
         case FocusIn:
             x11->has_focus = true;
             vo_update_cursor(vo);
+            x11->pending_vo_events |= VO_EVENT_FOCUS;
             break;
         case FocusOut:
             release_all_keys(vo);
             x11->has_focus = false;
             vo_update_cursor(vo);
+            x11->pending_vo_events |= VO_EVENT_FOCUS;
             break;
         case KeyRelease:
             release_all_keys(vo);
@@ -1876,6 +1878,10 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
             x11->winrc.x1 = x11->winrc.x0 + w;
             x11->winrc.y1 = x11->winrc.y0 + h;
         }
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_FOCUSED: {
+        *(bool *)arg = x11->has_focus;
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_NAMES: {

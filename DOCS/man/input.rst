@@ -2439,6 +2439,9 @@ Property list
     since setting the option, and the window size was not restricted in other
     ways. The property is unavailable if no video is active.
 
+``focused``
+    Whether the window has focus. Currently works only on X11 and Wayland.
+
 ``display-names``
     Names of the displays that the mpv window covers. On X11, these
     are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.). On Windows, these
