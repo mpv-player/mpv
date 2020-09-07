@@ -447,11 +447,15 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
                                   uint32_t serial, struct wl_surface *surface,
                                   struct wl_array *keys)
 {
+    struct vo_wayland_state *wl = data;
+    wl->has_keyboard_input = true;
 }
 
 static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
                                   uint32_t serial, struct wl_surface *surface)
 {
+    struct vo_wayland_state *wl = data;
+    wl->has_keyboard_input = false;
 }
 
 static bool create_input(struct vo_wayland_state *wl)
@@ -951,6 +955,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
 
     bool is_maximized = false;
     bool is_fullscreen = false;
+    bool is_activated = false;
     enum xdg_toplevel_state *state;
     wl_array_for_each(state, states) {
         switch (*state) {
@@ -961,6 +966,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
             wl->pending_vo_events |= VO_EVENT_LIVE_RESIZING;
             break;
         case XDG_TOPLEVEL_STATE_ACTIVATED:
+            is_activated = true;
             /*
              * If we get an ACTIVATED state, we know it cannot be
              * minimized, but it may not have been minimized
@@ -990,6 +996,16 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         wl->state_change = true;
         vo_opts->window_maximized = is_maximized;
         m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->window_maximized);
+    }
+
+    if (wl->activated != is_activated) {
+        wl->activated = is_activated;
+        if ((!wl->focused && wl->activated && wl->has_keyboard_input) ||
+            (wl->focused && !wl->activated))
+        {
+            wl->focused = !wl->focused;
+            wl->pending_vo_events |= VO_EVENT_FOCUS;
+        }
     }
 
     if (!(wl->pending_vo_events & VO_EVENT_LIVE_RESIZING))
@@ -1542,6 +1558,10 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             if (opt == &opts->appid)
                 update_app_id(wl);
         }
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_FOCUSED: {
+        *(bool *)arg = wl->focused;
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_NAMES: {

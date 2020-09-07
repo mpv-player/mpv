@@ -844,6 +844,8 @@ static void handle_vo_events(struct MPContext *mpctx)
         mp_notify(mpctx, MP_EVENT_WIN_STATE, NULL);
     if (events & VO_EVENT_DPI)
         mp_notify(mpctx, MP_EVENT_WIN_STATE2, NULL);
+    if (events & VO_EVENT_FOCUS)
+        mp_notify(mpctx, MP_EVENT_FOCUS, NULL);
 }
 
 static void handle_sstep(struct MPContext *mpctx)
