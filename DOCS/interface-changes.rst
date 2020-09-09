@@ -78,6 +78,7 @@ Interface changes
       To get the old behavior, set the "passthrough_stdin" argument to true.
     - key/value list options do not accept ":" as item separator anymore,
       only ",". This means ":" is always considered part of the value.
+    - remove deprecated --vo-vdpau-deint option
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

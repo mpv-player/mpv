@@ -88,7 +88,6 @@ struct vdpctx {
 
     int                                force_yuv;
     struct mp_vdpau_mixer             *video_mixer;
-    int                                deint;
     int                                pullup;
     float                              denoise;
     float                              sharpen;
@@ -1080,9 +1079,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
             return false;
         *(struct mp_image **)data = get_window_screenshot(vo);
         return true;
-    case VOCTRL_GET_PREF_DEINT:
-        *(int *)data = vc->deint;
-        return true;
     }
 
     int events = 0;
@@ -1115,7 +1111,6 @@ const struct vo_driver video_out_vdpau = {
     .uninit = uninit,
     .priv_size = sizeof(struct vdpctx),
     .options = (const struct m_option []){
-        {"deint", OPT_INT(deint), M_RANGE(-4, 4)},
         {"chroma-deint", OPT_FLAG(chroma_deint), OPTDEF_INT(1)},
         {"pullup", OPT_FLAG(pullup)},
         {"denoise", OPT_FLOAT(denoise), M_RANGE(0, 1)},

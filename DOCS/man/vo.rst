@@ -99,29 +99,6 @@ Available video output drivers are:
 
         Apply a noise reduction algorithm to the video (default: 0; no noise
         reduction).
-    ``--vo-vdpau-deint=<-4-4>``
-        (Deprecated. See note about ``vdpaupp``.)
-
-        Select deinterlacing mode (default: 0). In older versions (as well as
-        MPlayer/mplayer2) you could use this option to enable deinterlacing.
-        This doesn't work anymore, and deinterlacing is enabled with either
-        the ``d`` key (by default mapped to the command ``cycle deinterlace``),
-        or the ``--deinterlace`` option. Also, to select the default deint mode,
-        you should use something like ``--vf-defaults=vdpaupp:deint-mode=temporal``
-        instead of this sub-option.
-
-        0
-            Pick the ``vdpaupp`` video filter default, which corresponds to 3.
-        1
-            Show only first field.
-        2
-            Bob deinterlacing.
-        3
-            Motion-adaptive temporal deinterlacing. May lead to A/V desync
-            with slow video hardware and/or high resolution.
-        4
-            Motion-adaptive temporal deinterlacing with edge-guided spatial
-            interpolation. Needs fast video hardware.
     ``--vo-vdpau-chroma-deint``
         (Deprecated. See note about ``vdpaupp``.)
 
