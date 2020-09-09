@@ -116,10 +116,14 @@ static int parse_slice_range(stream_t *stream)
     if (m_option_parse(stream->log, &opt, bstr0("slice_start"), start, &p->slice_start) < 0)
         return STREAM_ERROR;
 
+    bool max_end_is_offset = bstr_startswith0(end, "+");
     if (has_end) {
         if (m_option_parse(stream->log, &opt, bstr0("slice_max_end"), end, &p->slice_max_end) < 0)
             return STREAM_ERROR;
     }
+
+    if (max_end_is_offset)
+      p->slice_max_end += p->slice_start;
 
     if (p->slice_max_end && p->slice_max_end < p->slice_start) {
         MP_ERR(stream, "The byte range end (%"PRId64") can't be smaller than the start (%"PRId64"): '%s'\n",

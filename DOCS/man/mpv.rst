@@ -1208,6 +1208,8 @@ PROTOCOLS
     ``start`` and ``end`` represent a byte range and accept
     suffixes such as ``KiB`` and ``MiB``. ``end`` is optional.
 
+    if ``end`` starts with ``+``, it is considered as offset from ``start``.
+
     Only works with seekable streams.
 
     Examples::
@@ -1216,6 +1218,11 @@ PROTOCOLS
 
       This starts reading from cap.ts after seeking 1 GiB, then
       reads until reaching 2 GiB or end of file.
+
+      mpv slice://1g-+2g@cap.ts
+
+      This starts reading from cap.ts after seeking 1 GiB, then
+      reads until reaching 3 GiB or end of file.
 
       mpv slice://100m@appending://cap.ts
 
