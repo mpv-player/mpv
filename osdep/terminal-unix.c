@@ -212,23 +212,31 @@ static bool getch2(struct input_ctx *input_ctx)
         }
 
         if (!match) { // normal or unknown key
+            int mods = 0;
             if (buf.b[0] == '\033') {
                 skip_buf(&buf, 1);
-                if (buf.len > 0 && mp_isalnum(buf.b[0])) { // meta+normal key
-                    mp_input_put_key(input_ctx, buf.b[0] | MP_KEY_MODIFIER_ALT);
-                    skip_buf(&buf, 1);
+                if (buf.len > 0 && buf.b[0] > 0 && buf.b[0] < 127) {
+                    // meta+normal key
+                    mods |= MP_KEY_MODIFIER_ALT;
                 } else if (buf.len == 1 && buf.b[0] == '\033') {
+                    // Make 2x ESC -> ESC (lone ESC is ambiguous).
                     mp_input_put_key(input_ctx, MP_KEY_ESC);
                     skip_buf(&buf, 1);
+                    continue;
                 } else {
                     // Throw it away. Typically, this will be a complete,
                     // unsupported sequence, and dropping this will skip it.
                     skip_buf(&buf, buf.len);
+                    continue;
                 }
-            } else {
-                mp_input_put_key(input_ctx, buf.b[0]);
-                skip_buf(&buf, 1);
             }
+            unsigned char c = buf.b[0];
+            skip_buf(&buf, 1);
+            if (c < 32) {
+                c = c <= 25 ? (c + 'a' - 1) : (c - 25 + '2' - 1);
+                mods |= MP_KEY_MODIFIER_CTRL;
+            }
+            mp_input_put_key(input_ctx, c | mods);
             continue;
         }
 
