@@ -261,7 +261,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         return;
 
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
-    double current_time = get_current_time(mpctx);
+    double current_time = get_playback_time(mpctx);
     if (current_time == MP_NOPTS_VALUE && seek.type == MPSEEK_RELATIVE)
         return;
     if (current_time == MP_NOPTS_VALUE)
@@ -1149,6 +1149,12 @@ static void handle_playback_restart(struct MPContext *mpctx)
         MP_VERBOSE(mpctx, "playback restart complete @ %f, audio=%s, video=%s\n",
                    mpctx->playback_pts, mp_status_str(mpctx->audio_status),
                    mp_status_str(mpctx->video_status));
+
+        // To avoid strange effects when using relative seeks, especially if
+        // there are no proper audio & video timestamps (seeks after EOF).
+        double length = get_time_length(mpctx);
+        if (mpctx->last_seek_pts != MP_NOPTS_VALUE && length >= 0)
+            mpctx->last_seek_pts = MPCLAMP(mpctx->last_seek_pts, 0, length);
 
         // Continuous seeks past EOF => treat as EOF instead of repeating seek.
         if (mpctx->seek.type == MPSEEK_RELATIVE && mpctx->seek.amount > 0 &&
