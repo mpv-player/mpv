@@ -1061,7 +1061,9 @@ Input Commands that are Possibly Subject to Change
         again.
 
     ``format``
-        String that gives the type of the overlay. Accepts the following values:
+        String that gives the type of the overlay. Accepts the following values
+        (HTML rendering of this is broken, view the generated manpage instead,
+        or the raw RST source):
 
         ``ass-events``
             The ``data`` parameter is a string. The string is split on the
@@ -1134,9 +1136,11 @@ Input Commands that are Possibly Subject to Change
 
         This feature is experimental, and may change in some way again.
 
-    Note: always use named arguments (``mpv_command_node()``). Scripts should
-    use the ``mp.create_osd_overlay()`` helper instead of invoking this command
-    directly.
+    .. note::
+
+        Always use named arguments (``mpv_command_node()``). Lua scripts should
+        use the ``mp.create_osd_overlay()`` helper instead of invoking this
+        command directly.
 
 ``script-message [<arg1> [<arg2> [...]]]``
     Send a message to all clients, and pass it the following list of arguments.
