@@ -507,24 +507,19 @@ double get_start_time(struct MPContext *mpctx, int dir)
 
 double get_current_time(struct MPContext *mpctx)
 {
-    struct demuxer *demuxer = mpctx->demuxer;
-    if (demuxer) {
-        if (mpctx->playback_pts != MP_NOPTS_VALUE)
-            return mpctx->playback_pts * mpctx->play_dir;
-        if (mpctx->last_seek_pts != MP_NOPTS_VALUE)
-            return mpctx->last_seek_pts;
-    }
-    return MP_NOPTS_VALUE;
+    if (!mpctx->demuxer)
+        return MP_NOPTS_VALUE;
+    if (mpctx->playback_pts != MP_NOPTS_VALUE)
+        return mpctx->playback_pts * mpctx->play_dir;
+    return mpctx->last_seek_pts;
 }
 
 double get_playback_time(struct MPContext *mpctx)
 {
     double cur = get_current_time(mpctx);
-    if (cur == MP_NOPTS_VALUE)
-        return cur;
     // During seeking, the time corresponds to the last seek time - apply some
     // cosmetics to it.
-    if (mpctx->playback_pts == MP_NOPTS_VALUE) {
+    if (cur != MP_NOPTS_VALUE && mpctx->playback_pts == MP_NOPTS_VALUE) {
         double length = get_time_length(mpctx);
         if (length >= 0)
             cur = MPCLAMP(cur, 0, length);
