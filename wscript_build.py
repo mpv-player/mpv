@@ -628,7 +628,7 @@ def build(ctx):
             )
 
             wrapctx.env.cprogram_PATTERN = "%s.com"
-            wrapflags = ['-municode', '-mconsole']
+            wrapflags = ['-municode', '-Wl,--subsystem,console']
             wrapctx.env.CFLAGS = ctx.env.CFLAGS + wrapflags
             wrapctx.env.LAST_LINKFLAGS = ctx.env.LAST_LINKFLAGS + wrapflags
 
