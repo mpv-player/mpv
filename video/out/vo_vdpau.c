@@ -1060,8 +1060,6 @@ static void checked_resize(struct vo *vo)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    struct vdpctx *vc = vo->priv;
-
     check_preemption(vo);
 
     switch (request) {
