@@ -2931,6 +2931,22 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
         return talloc_dup(NULL, &rg);
     }
 
+    /* Opus uses R128_TRACK_GAIN and R128_ALBUM_GAIN tags instead of
+     * the usual REPLAYGAIN_*. */
+    /* XXX: peak values? */
+    if(decode_gain(log, tags, "R128_TRACK_GAIN", &rg.track_gain) >= 0) {
+        if(decode_gain(log, tags, "R128_ALBUM_GAIN", &rg.album_gain) < 0) {
+            rg.album_gain = rg.track_gain;
+        }
+
+        /* https://tools.ietf.org/html/rfc7845: The gain is [...] a Q7.8
+         * fixed-point number in dB */
+        rg.album_gain /= 256.f;
+        rg.track_gain /= 256.f;
+
+        return talloc_dup(NULL, &rg);
+    }
+
     return NULL;
 }
 
