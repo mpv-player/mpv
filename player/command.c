@@ -6493,13 +6493,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         }
     }
 
-    if (opt_ptr == &opts->pause) {
-        if (mpctx->playback_initialized) {
-            int val = opts->pause;
-            opts->pause = !val; // temporary hack to force update
-            set_pause_state(mpctx, val);
-        }
-    }
+    if (opt_ptr == &opts->pause)
+        set_pause_state(mpctx, opts->pause);
 
     if (opt_ptr == &opts->audio_delay) {
         if (mpctx->ao_chain) {
