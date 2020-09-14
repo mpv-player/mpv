@@ -592,6 +592,10 @@ class Common: NSObject {
             SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, nil)
             dnames.pointee = array
             return VO_TRUE
+        case VOCTRL_GET_FOCUSED:
+            let focus = data.assumingMemoryBound(to: CBool.self)
+            focus.pointee = NSApp.isActive
+            return VO_TRUE
         case VOCTRL_UPDATE_WINDOW_TITLE:
             let titleData = data.assumingMemoryBound(to: Int8.self)
             DispatchQueue.main.async {
