@@ -2949,6 +2949,11 @@ Window
     :desktop: On top of the Dekstop behind windows and Desktop icons.
     :level:   A level as integer.
 
+``--focus-on-open``, ``--no-focus-on-open``
+    (macOS only)
+    Focus the video window on creation and makes it the front most window. This
+    is on by default.
+
 ``--border``, ``--no-border``
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.

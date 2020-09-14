@@ -121,6 +121,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"window-scale", OPT_DOUBLE(window_scale), M_RANGE(0.001, 100)},
     {"window-minimized", OPT_FLAG(window_minimized)},
     {"window-maximized", OPT_FLAG(window_maximized)},
+    {"focus-on-open", OPT_BOOL(focus_on_open)},
     {"force-window-position", OPT_FLAG(force_window_position)},
     {"x11-name", OPT_STRING(winname)},
     {"wayland-app-id", OPT_STRING(appid)},
@@ -199,6 +200,7 @@ const struct m_sub_options vo_sub_opts = {
         .ontop_level = -1,
         .timing_offset = 0.050,
         .swapchain_depth = 3,
+        .focus_on_open = true,
     },
 };
 
