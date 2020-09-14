@@ -73,8 +73,9 @@ class CocoaCB: Common {
     }
 
     func initBackend(_ vo: UnsafeMutablePointer<vo>) {
+        let previousActiveApp = getActiveApp()
         initApp()
-        initWindow(vo)
+        initWindow(vo, previousActiveApp)
         updateICCProfile()
         initWindowState()
 

@@ -82,7 +82,7 @@ class Common: NSObject {
         setAppIcon()
     }
 
-    func initWindow(_ vo: UnsafeMutablePointer<vo>) {
+    func initWindow(_ vo: UnsafeMutablePointer<vo>, _ previousActiveApp: NSRunningApplication?) {
         let (mpv, targetScreen, wr) = getInitProperties(vo)
 
         guard let view = self.view else {
@@ -115,7 +115,12 @@ class Common: NSObject {
             window.orderFront(nil)
         }
 
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate(ignoringOtherApps: mpv.opts.focus_on_open)
+
+        // workaround for macOS 10.15 to refocus the previous App
+        if (!mpv.opts.focus_on_open) {
+            previousActiveApp?.activate(options: .activateAllWindows)
+        }
     }
 
     func initView(_ vo: UnsafeMutablePointer<vo>, _ layer: CALayer) {
@@ -417,6 +422,11 @@ class Common: NSObject {
         let wr = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
 
         return (mpv, targetScreen, wr)
+    }
+
+    // call before initApp, because on macOS +10.15 it changes the active App
+    func getActiveApp() -> NSRunningApplication? {
+        return NSWorkspace.shared.runningApplications.first(where: {$0.isActive})
     }
 
     func flagEvents(_ ev: Int) {
