@@ -61,7 +61,24 @@ class Common: NSObject {
     }
 
     func initApp() {
-        NSApp.setActivationPolicy(.regular)
+        guard let mpv = mpv else {
+            log.sendError("Something went wrong, no MPVHelper was initialized")
+            exit(1)
+        }
+
+        var policy: NSApplication.ActivationPolicy = .regular
+        switch mpv.macOpts.macos_app_activation_policy {
+        case 0:
+            policy = .regular
+        case 1:
+            policy = .accessory
+        case 2:
+            policy = .prohibited
+        default:
+            break
+        }
+
+        NSApp.setActivationPolicy(policy)
         setAppIcon()
     }
 

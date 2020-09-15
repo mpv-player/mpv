@@ -63,6 +63,8 @@ const struct m_sub_options macos_conf = {
             OPT_CHOICE(macos_fs_animation_duration, {"default", -1}),
             M_RANGE(0, 1000)},
         {"macos-force-dedicated-gpu", OPT_FLAG(macos_force_dedicated_gpu)},
+        {"macos-app-activation-policy", OPT_CHOICE(macos_app_activation_policy,
+            {"regular", 0}, {"accessory", 1}, {"prohibited", 2})},
         {"cocoa-cb-sw-renderer", OPT_CHOICE(cocoa_cb_sw_renderer,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"cocoa-cb-10bit-context", OPT_FLAG(cocoa_cb_10bit_context)},
