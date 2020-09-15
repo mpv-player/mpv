@@ -2940,12 +2940,13 @@ Window
     treated as exclusive fullscreen window that bypasses the Desktop Window
     Manager.
 
-``--ontop-level=<window|system|level>``
+``--ontop-level=<window|system|desktop|level>``
     (OS X only)
     Sets the level of an ontop window (default: window).
 
     :window:  On top of all other windows.
     :system:  On top of system elements like Taskbar, Menubar and Dock.
+    :desktop: On top of the Dekstop behind windows and Desktop icons.
     :level:   A level as integer.
 
 ``--border``, ``--no-border``
