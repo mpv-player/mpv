@@ -262,6 +262,8 @@ class Window: NSWindow, NSWindowDelegate {
                 level = .floating
             case -2:
                 level = .statusBar + 1
+            case -3:
+                level = NSWindow.Level(Int(CGWindowLevelForKey(.desktopWindow)))
             default:
                 level = NSWindow.Level(ontopLevel)
             }
@@ -416,7 +418,9 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     override func constrainFrameRect(_ frameRect: NSRect, to tScreen: NSScreen?) -> NSRect {
-        if (isAnimating && !isInFullscreen) || (!isAnimating && isInFullscreen) {
+        if (isAnimating && !isInFullscreen) || (!isAnimating && isInFullscreen ||
+            level == NSWindow.Level(Int(CGWindowLevelForKey(.desktopWindow))))
+        {
             return frameRect
         }
 
