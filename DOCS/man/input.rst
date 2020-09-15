@@ -3179,7 +3179,7 @@ Property list
     ``<name>``, except in situations in which the properties have different
     behavior or conflicting semantics.
 
-``file-local-options/<name>``
+``file-local-options/<name>`` (RW)
     Similar to ``options/<name>``, but when setting an option through this
     property, the option is reset to its old value once the current file has
     stopped playing. Trying to write an option while no file is playing (or
