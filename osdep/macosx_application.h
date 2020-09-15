@@ -28,6 +28,7 @@ struct macos_opts {
     struct m_color macos_title_bar_color;
     int macos_fs_animation_duration;
     int macos_force_dedicated_gpu;
+    int macos_app_activation_policy;
     int cocoa_cb_sw_renderer;
     int cocoa_cb_10bit_context;
 };

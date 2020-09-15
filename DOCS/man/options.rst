@@ -5858,6 +5858,13 @@ The following video options are currently all specific to ``--vo=gpu`` and
     set anyway.
     OS X and cocoa-cb only
 
+
+``--macos-app-activation-policy=<regular|accessory|prohibited>``
+    Changes the App activation policy. With accessory the mpv icon in the Dock
+    can be hidden. (default: regular)
+
+    macOS only.
+
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during
