@@ -3954,7 +3954,7 @@ OSD
     Height of the OSD bar, in percentage of the screen height (default: 3.125).
 
 ``--osd-back-color=<color>``
-    See ``--osd-color``. Color used for OSD text background.
+    See ``--sub-color``. Color used for OSD text background.
 
 ``--osd-blur=<0..20.0>``
     Gaussian blur factor. 0 means no blur applied (default).
@@ -3966,7 +3966,7 @@ OSD
     Format text on italic.
 
 ``--osd-border-color=<color>``
-    See ``--osd-color``. Color used for the OSD font border.
+    See ``--sub-color``. Color used for the OSD font border.
 
     .. note::
 
@@ -6335,8 +6335,8 @@ The following video options are currently all specific to ``--vo=gpu`` and
     this flag. Could be removed any time.
 
 ``--background=<color>``
-    Color used to draw parts of the mpv window not covered by video. See
-    ``--osd-color`` option how colors are defined.
+    Color used to draw parts of the mpv window not covered by video. See the
+    ``--sub-color`` option for how colors are defined.
 
 ``--gpu-tex-pad-x``, ``--gpu-tex-pad-y``
     Enlarge the video source textures by this many pixels. For debugging only
