@@ -42,6 +42,9 @@
 #include "misc/ctype.h"
 #include "terminal.h"
 
+// Timeout in ms after which the (normally ambiguous) ESC key is detected.
+#define ESC_TIMEOUT 100
+
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
 
@@ -175,22 +178,18 @@ static void skip_buf(struct termbuf *b, unsigned int count)
 
 static struct termbuf buf;
 
-static bool getch2(struct input_ctx *input_ctx)
+static void process_input(struct input_ctx *input_ctx, bool timeout)
 {
-    int retval = read(tty_in, &buf.b[buf.len], BUF_LEN - buf.len);
-    /* Return false on EOF to stop running select() on the FD, as it'd
-     * trigger all the time. Note that it's possible to get temporary
-     * EOF on terminal if the user presses ctrl-d, but that shouldn't
-     * happen if the terminal state change done in terminal_init()
-     * works.
-     */
-    if (retval == 0)
-        return false;
-    if (retval == -1)
-        return errno != EBADF && errno != EINVAL;
-    buf.len += retval;
-
     while (buf.len) {
+        // Lone ESC is ambiguous, so accept it only after a timeout.
+        if (timeout &&
+            ((buf.len == 1 && buf.b[0] == '\033') ||
+             (buf.len > 1 && buf.b[0] == '\033' && buf.b[1] == '\033')))
+        {
+            mp_input_put_key(input_ctx, MP_KEY_ESC);
+            skip_buf(&buf, 1);
+        }
+
         int utf8_len = bstr_parse_utf8_code_length(buf.b[0]);
         if (utf8_len > 1) {
             if (buf.len < utf8_len)
@@ -218,11 +217,6 @@ static bool getch2(struct input_ctx *input_ctx)
                 if (buf.len > 0 && buf.b[0] > 0 && buf.b[0] < 127) {
                     // meta+normal key
                     mods |= MP_KEY_MODIFIER_ALT;
-                } else if (buf.len == 1 && buf.b[0] == '\033') {
-                    // Make 2x ESC -> ESC (lone ESC is ambiguous).
-                    mp_input_put_key(input_ctx, MP_KEY_ESC);
-                    skip_buf(&buf, 1);
-                    continue;
                 } else {
                     // Throw it away. Typically, this will be a complete,
                     // unsupported sequence, and dropping this will skip it.
@@ -258,8 +252,7 @@ static bool getch2(struct input_ctx *input_ctx)
         skip_buf(&buf, seq_len);
     }
 
-read_more:  /* need more bytes */
-    return true;
+read_more: ;  /* need more bytes */
 }
 
 static volatile int getch2_active  = 0;
@@ -404,13 +397,18 @@ static void *terminal_thread(void *ptr)
             { .events = POLLIN, .fd = death_pipe[0] },
             { .events = POLLIN, .fd = tty_in }
         };
-        polldev(fds, stdin_ok ? 2 : 1, -1);
+        int r = polldev(fds, stdin_ok ? 2 : 1, buf.len ? ESC_TIMEOUT : -1);
         if (fds[0].revents)
             break;
         if (fds[1].revents) {
-            if (!getch2(input_ctx))
-                break;
+            int retval = read(tty_in, &buf.b[buf.len], BUF_LEN - buf.len);
+            if (!retval || (retval == -1 && (errno == EBADF || errno == EINVAL)))
+                break; // EOF/closed
+            buf.len += retval;
+            process_input(input_ctx, false);
         }
+        if (r == 0)
+            process_input(input_ctx, true);
     }
     char c;
     bool quit = read(death_pipe[0], &c, 1) == 1 && c == 1;
