@@ -370,9 +370,11 @@ typedef enum mpv_render_param_type {
      *      address 0), the "0" component contains uninitialized garbage (often
      *      the value 0, but not necessarily; the bad naming is inherited from
      *      FFmpeg)
+     *      Pixel alignment size: 4 bytes
      *  "rgb24"
      *      3 bytes per pixel RGB. This is strongly discouraged because it is
      *      very slow.
+     *      Pixel alignment size: 1 bytes
      *  other
      *      The API may accept other pixel formats, using mpv internal format
      *      names, as long as it's internally marked as RGB, has exactly 1
@@ -390,13 +392,15 @@ typedef enum mpv_render_param_type {
      * target surface. It must be a multiple of the pixel size, and have space
      * for the surface width as specified by MPV_RENDER_PARAM_SW_SIZE.
      *
-     * It should be a multiple of 64 to facilitate fast SIMD operation. Lower
-     * alignment might trigger slower code paths. In addition, it appears that
-     * if libswscale is used, stride must be at least a multiple of 16, or
-     * libswscale may randomly corrupt memory. The API still accepts unaligned
-     * values, because libswscale is not supposed to corrupt memory, and whether
-     * it does depends on its implementation details and bugs. If mpv is built
-     * with zimg (and zimg is not disabled), no problems should occur.
+     * Both stride and pointer value should be a multiple of 64 to facilitate
+     * fast SIMD operation. Lower alignment might trigger slower code paths,
+     * and in the worst case, will copy the entire target frame. If mpv is built
+     * with zimg (and zimg is not disabled), the performance impact might be
+     * less.
+     * In either cases, the pointer and stride must be aligned at least to the
+     * pixel alignment size. Otherwise, crashes and undefined behavior is
+     * possible on platforms which do not support unaligned accesses (either
+     * through normal memory access or aligned SIMD memory access instructions).
      */
     MPV_RENDER_PARAM_SW_STRIDE = 19,
     /*
@@ -414,8 +418,7 @@ typedef enum mpv_render_param_type {
      * line (starting at bytepos(w, h) until (pointer + stride * h)) is
      * writable.
      *
-     * It should be a aligned to 64 to facilitate fast SIMD operation. Lower
-     * alignment might trigger slower code paths.
+     * See MPV_RENDER_PARAM_SW_STRIDE for alignment requirements.
      */
     MPV_RENDER_PARAM_SW_POINTER = 20,
 } mpv_render_param_type;
