@@ -177,6 +177,8 @@ static void free_mp_sws(void *p)
     sws_freeContext(ctx->sws);
     sws_freeFilter(ctx->src_filter);
     sws_freeFilter(ctx->dst_filter);
+    TA_FREEP(&ctx->aligned_src);
+    TA_FREEP(&ctx->aligned_dst);
 }
 
 // You're supposed to set your scaling parameters on the returned context.
@@ -234,6 +236,8 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     sws_freeContext(ctx->sws);
     ctx->sws = NULL;
     ctx->zimg_ok = false;
+    TA_FREEP(&ctx->aligned_src);
+    TA_FREEP(&ctx->aligned_dst);
 
 #if HAVE_ZIMG
     if (allow_zimg(ctx)) {
@@ -325,6 +329,42 @@ success:
     return 1;
 }
 
+static struct mp_image *check_alignment(struct mp_log *log,
+                                        struct mp_image **alloc,
+                                        struct mp_image *img)
+{
+    // It's completely unclear which alignment libswscale wants (for performance)
+    // or requires (for avoiding crashes and memory corruption).
+    // Is it av_cpu_max_align()? Is it the hardcoded AVFrame "default" of 32
+    // in get_video_buffer()? Is it whatever avcodec_align_dimensions2()
+    // determines? It's like you can't win if you try to prevent libswscale from
+    // corrupting memory...
+    // So use 32, a value that has been experimentally determined to be safe,
+    // and which in most cases is not larger than decoder output. It is smaller
+    // or equal to what most image allocators in mpv/ffmpeg use.
+    size_t align = 32;
+    assert(align <= MP_IMAGE_BYTE_ALIGN); // or mp_image_alloc will not cut it
+
+    bool is_aligned = true;
+    for (int p = 0; p < img->num_planes; p++) {
+        is_aligned &= MP_IS_ALIGNED((uintptr_t)img->planes[p], align);
+        is_aligned &= MP_IS_ALIGNED(labs(img->stride[p]), align);
+    }
+
+    if (is_aligned)
+        return img;
+
+    if (!*alloc) {
+        mp_verbose(log, "unaligned libswscale parameter; using slow copy.\n");
+        *alloc = mp_image_alloc(img->imgfmt, img->w, img->h);
+        if (!*alloc)
+            return NULL;
+    }
+
+    mp_image_copy_attributes(*alloc, img);
+    return *alloc;
+}
+
 // Scale from src to dst - if src/dst have different parameters from previous
 // calls, the context is reinitialized. Return error code. (It can fail if
 // reinitialization was necessary, and swscale returned an error.)
@@ -345,8 +385,22 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
         return mp_zimg_convert(ctx->zimg, dst, src) ? 0 : -1;
 #endif
 
-    sws_scale(ctx->sws, (const uint8_t *const *) src->planes, src->stride,
-              0, src->h, dst->planes, dst->stride);
+    struct mp_image *a_src = check_alignment(ctx->log, &ctx->aligned_src, src);
+    struct mp_image *a_dst = check_alignment(ctx->log, &ctx->aligned_dst, dst);
+    if (!a_src || !a_dst) {
+        MP_ERR(ctx, "image allocation failed.\n");
+        return -1;
+    }
+
+    if (a_src != src)
+        mp_image_copy(a_src, src);
+
+    sws_scale(ctx->sws, (const uint8_t *const *) a_src->planes, a_src->stride,
+              0, a_src->h, a_dst->planes, a_dst->stride);
+
+    if (a_dst != dst)
+        mp_image_copy(dst, a_dst);
+
     return 0;
 }
 
