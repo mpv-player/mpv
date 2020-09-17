@@ -3487,12 +3487,19 @@ void demux_flush(demuxer_t *demuxer)
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
 
-    pthread_mutex_lock(&demuxer->in->lock);
+    pthread_mutex_lock(&in->lock);
     clear_reader_state(in, true);
     for (int n = 0; n < in->num_ranges; n++)
         clear_cached_range(in, in->ranges[n]);
     free_empty_cached_ranges(in);
-    pthread_mutex_unlock(&demuxer->in->lock);
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds = in->streams[n]->ds;
+        ds->refreshing = false;
+        ds->eof = false;
+    }
+    in->eof = false;
+    in->seeking = false;
+    pthread_mutex_unlock(&in->lock);
 }
 
 // Does some (but not all) things for switching to another range.

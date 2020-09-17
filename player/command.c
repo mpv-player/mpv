@@ -5561,8 +5561,7 @@ static void cmd_drop_buffers(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    reset_audio_state(mpctx);
-    reset_video_state(mpctx);
+    reset_playback_state(mpctx);
 
     if (mpctx->demuxer)
         demux_flush(mpctx->demuxer);
