@@ -36,7 +36,7 @@ INSERT
     Toggle insert mode.
 
 Shift+INSERT
-    Paste text (uses the primary selection on X11.)
+    Paste text (uses the primary selection on X11).
 
 TAB
     Complete the command or property name at the cursor.
@@ -44,7 +44,7 @@ TAB
 Ctrl+C
     Clear current line.
 
-Ctrl+K.
+Ctrl+K
     Delete text from the cursor to the end of the line.
 
 Ctrl+L
@@ -54,7 +54,7 @@ Ctrl+U
     Delete text from the cursor to the beginning of the line.
 
 Ctrl+V
-    Paste text (uses the clipboard on X11.)
+    Paste text (uses the clipboard on X11).
 
 Ctrl+W
     Delete text from the cursor to the beginning of the current word.
