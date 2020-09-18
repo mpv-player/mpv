@@ -526,12 +526,13 @@ video_output_features = [
                                 cflags=['-DGL_SILENCE_DEPRECATION'])
     } , {
         'name': '--gl-x11',
-        'desc': 'OpenGL X11 Backend',
+        'desc': 'OpenGL X11/GLX (deprecated/legacy)',
         'deps': 'x11',
         'groups': [ 'gl' ],
         'func': check_libs(['GL', 'GL Xdamage'],
                    check_cc(fragment=load_fragment('gl_x11.c'),
-                            use=['x11', 'libdl', 'pthreads']))
+                            use=['x11', 'libdl', 'pthreads'])),
+        'default': 'disable',
     }, {
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
