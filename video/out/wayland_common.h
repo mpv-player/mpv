@@ -110,14 +110,11 @@ struct vo_wayland_state {
     /* Presentation Feedback */
     struct vo_wayland_sync *sync;
     int sync_size;
-    int64_t user_sbc;
     int64_t last_ust;
     int64_t last_msc;
-    int64_t last_sbc;
-    int64_t last_sbc_mp_time;
-    int64_t vsync_duration;
     int64_t last_skipped_vsyncs;
     int64_t last_queue_display_time;
+    int64_t vsync_duration;
 
     /* Input */
     struct wl_seat     *seat;
@@ -154,6 +151,7 @@ void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wakeup(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
 void vo_wayland_wait_frame(struct vo_wayland_state *wl);
+void vo_wayland_sync_clear(struct vo_wayland_state *wl);
 void wayland_sync_swap(struct vo_wayland_state *wl);
 void vo_wayland_sync_shift(struct vo_wayland_state *wl);
 void queue_new_sync(struct vo_wayland_state *wl);

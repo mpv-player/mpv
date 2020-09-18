@@ -229,6 +229,11 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
     struct pl_swapchain_frame frame;
+    bool start = true;
+    if (p->params.start_frame)
+        start = p->params.start_frame(sw->ctx);
+    if (!start)
+        return false;
     if (!pl_swapchain_start_frame(p->swapchain, &frame))
         return false;
     if (!mppl_wrap_tex(sw->ctx->ra, frame.fbo, &p->proxy_tex))
