@@ -73,7 +73,6 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
         index = 0;
     }
     int64_t sec = (uint64_t) tv_sec_lo + ((uint64_t) tv_sec_hi << 32);
-    wl->sync[index].sbc = wl->user_sbc;
     wl->sync[index].ust = sec * 1000000LL + (uint64_t) tv_nsec / 1000;
     wl->sync[index].msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
     wl->sync[index].filled = true;
@@ -134,8 +133,25 @@ static void resize(struct ra_ctx *ctx)
     wl->vo->dheight = height;
 }
 
-static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
+static bool wayland_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
+    struct ra_ctx *ctx = sw->ctx;
+    struct vo_wayland_state *wl = ctx->vo->wl;
+
+    bool render = !wl->frame_wait || wl->opts->disable_vsync;
+
+    if (wl->frame_wait && wl->presentation)
+        vo_wayland_sync_clear(wl);
+
+    if (render)
+        wl->frame_wait = true;
+
+    return render ? ra_gl_ctx_start_frame(sw, out_fbo) : false;
+}
+
+static void wayland_egl_swap_buffers(struct ra_swapchain *sw)
+{
+    struct ra_ctx *ctx = sw->ctx;
     struct priv *p = ctx->priv;
     struct vo_wayland_state *wl = ctx->vo->wl;
 
@@ -144,13 +160,14 @@ static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
 
-    if (wl->presentation) {
-        wl->user_sbc += 1;
+    if (wl->presentation)
         wayland_sync_swap(wl);
-    }
-
-    wl->frame_wait = true;
 }
+
+static const struct ra_swapchain_fns wayland_egl_swapchain = {
+    .start_frame   = wayland_egl_start_frame,
+    .swap_buffers  = wayland_egl_swap_buffers,
+};
 
 static void wayland_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
@@ -184,8 +201,8 @@ static bool egl_create_context(struct ra_ctx *ctx)
     mpegl_load_functions(&p->gl, wl->log);
 
     struct ra_gl_ctx_params params = {
-        .swap_buffers = wayland_egl_swap_buffers,
-        .get_vsync = wayland_egl_get_vsync,
+        .external_swapchain = &wayland_egl_swapchain,
+        .get_vsync          = &wayland_egl_get_vsync,
     };
 
     if (!ra_gl_ctx_init(ctx, &p->gl, params))

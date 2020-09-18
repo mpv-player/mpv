@@ -73,6 +73,25 @@ static void buffer_destroy(void *p)
     munmap(buf->mpi.planes[0], buf->size);
 }
 
+static const struct wl_callback_listener frame_listener;
+
+static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
+{
+    struct vo_wayland_state *wl = data;
+
+    if (callback)
+        wl_callback_destroy(callback);
+
+    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
+
+    wl->frame_wait = false;
+}
+
+static const struct wl_callback_listener frame_listener = {
+    frame_callback,
+};
+
 static int allocate_memfd(size_t size)
 {
     int fd = memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING);
@@ -123,6 +142,11 @@ static struct buffer *buffer_create(struct vo *vo, int width, int height)
     if (!buf->buffer)
         goto error4;
     wl_buffer_add_listener(buf->buffer, &buffer_listener, buf);
+    if (!wl->frame_callback) {
+        wl->frame_callback = wl_surface_frame(wl->surface);
+        wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
+    }
+
     close(fd);
     talloc_set_destructor(buf, buffer_destroy);
 
@@ -207,6 +231,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     if (events & VO_EVENT_RESIZE)
         ret = resize(vo);
+    if (events & VO_EVENT_EXPOSE)
+        vo->want_redraw = true;
     vo_event(vo, events);
     return ret;
 }
@@ -216,6 +242,11 @@ static void draw_image(struct vo *vo, struct mp_image *src)
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
     struct buffer *buf;
+
+    if (wl->frame_wait)
+        return;
+
+    wl->frame_wait = true;
 
     buf = p->free_buffers;
     if (buf) {
@@ -266,6 +297,9 @@ static void flip_page(struct vo *vo)
     wl_surface_damage(wl->surface, 0, 0, mp_rect_w(wl->geometry),
                       mp_rect_h(wl->geometry));
     wl_surface_commit(wl->surface);
+
+    if (!wl->opts->disable_vsync)
+        vo_wayland_wait_frame(wl);
 }
 
 static void uninit(struct vo *vo)

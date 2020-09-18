@@ -1005,6 +1005,11 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         {
             wl->focused = !wl->focused;
             wl->pending_vo_events |= VO_EVENT_FOCUS;
+
+            if (wl->activated) {
+                /* If the surface comes back into view, force a redraw. */
+                wl->pending_vo_events |= VO_EVENT_EXPOSE;
+            }
         }
     }
 
@@ -1607,6 +1612,13 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
+void vo_wayland_sync_clear(struct vo_wayland_state *wl)
+{
+    struct vo_wayland_sync sync = {0, 0, 0, 0};
+    for (int i = 0; i < wl->sync_size; ++i)
+        wl->sync[i] = sync;
+}
+
 void vo_wayland_sync_shift(struct vo_wayland_state *wl)
 {
     for (int i = wl->sync_size - 1; i > 0; --i) {
@@ -1630,7 +1642,6 @@ void queue_new_sync(struct vo_wayland_state *wl)
     wl->sync_size += 1;
     wl->sync = talloc_realloc(wl, wl->sync, struct vo_wayland_sync, wl->sync_size);
     vo_wayland_sync_shift(wl);
-    wl->sync[0].sbc = wl->user_sbc;
 }
 
 void wayland_sync_swap(struct vo_wayland_state *wl)
@@ -1638,10 +1649,10 @@ void wayland_sync_swap(struct vo_wayland_state *wl)
     int index = wl->sync_size - 1;
 
     // If these are the same, presentation feedback has not been received.
-    // This will happen if the window is obscured/hidden in some way. Set
-    // these values to -1 to disable presentation feedback in mpv's core.
+    // This can happen if a frame takes too long and misses vblank. Don't
+    // attempt to use these statistics and wait until the next presentation
+    // event arrives.
     if (wl->sync[index].ust == wl->last_ust) {
-        wl->last_sbc += 1;
         wl->last_skipped_vsyncs = -1;
         wl->vsync_duration = -1;
         wl->last_queue_display_time = -1;
@@ -1654,27 +1665,19 @@ void wayland_sync_swap(struct vo_wayland_state *wl)
     wl->last_ust = wl->sync[index].ust;
     int64_t msc_passed = wl->sync[index].msc ? wl->sync[index].msc - wl->last_msc: 0;
     wl->last_msc = wl->sync[index].msc;
-    int64_t sbc_passed = wl->sync[index].sbc ? wl->sync[index].sbc - wl->last_sbc: 0;
-    wl->last_sbc = wl->sync[index].sbc;
 
     if (msc_passed && ust_passed)
         wl->vsync_duration = ust_passed / msc_passed;
 
-    if (sbc_passed) {
-        struct timespec ts;
-        if (clock_gettime(CLOCK_MONOTONIC, &ts)) {
-            return;
-        }
-
-        uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
-        uint64_t ust_mp_time = mp_time_us() - (now_monotonic - wl->sync[index].ust);
-        wl->last_sbc_mp_time = ust_mp_time;
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts)) {
+        return;
     }
 
-    if (!wl->sync[index].sbc)
-        return;
+    uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
+    uint64_t ust_mp_time = mp_time_us() - (now_monotonic - wl->sync[index].ust);
 
-    wl->last_queue_display_time = wl->last_sbc_mp_time + sbc_passed*wl->vsync_duration;
+    wl->last_queue_display_time = ust_mp_time + wl->vsync_duration;
 }
 
 void vo_wayland_wakeup(struct vo *vo)
