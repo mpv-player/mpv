@@ -6475,7 +6475,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (flags & UPDATE_LAVFI_COMPLEX)
         update_lavfi_complex(mpctx);
 
-    if (flags & UPDATE_VO_RESIZE) {
+    if (opt_ptr == &opts->vo->android_surface_size) {
         if (mpctx->video_out)
             vo_control(mpctx->video_out, VOCTRL_EXTERNAL_RESIZE, NULL);
     }

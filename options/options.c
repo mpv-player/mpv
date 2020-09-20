@@ -92,7 +92,6 @@ extern const struct m_sub_options d3d11va_conf;
 extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 extern const struct m_sub_options macos_conf;
-extern const struct m_sub_options android_conf;
 extern const struct m_sub_options wayland_conf;
 extern const struct m_sub_options vaapi_conf;
 
@@ -166,6 +165,9 @@ static const m_option_t mp_vo_opt_list[] = {
 #endif
 #if HAVE_DRM
     {"", OPT_SUBSTRUCT(drm_opts, drm_conf)},
+#endif
+#if HAVE_EGL_ANDROID
+    {"android-surface-size", OPT_SIZE_BOX(android_surface_size)},
 #endif
     {"swapchain-depth", OPT_INT(swapchain_depth), M_RANGE(1, 8)},
     {0}
@@ -782,10 +784,6 @@ static const m_option_t mp_opts[] = {
 
 #if HAVE_COCOA
     {"", OPT_SUBSTRUCT(macos_opts, macos_conf)},
-#endif
-
-#if HAVE_EGL_ANDROID
-    {"", OPT_SUBSTRUCT(android_opts, android_conf)},
 #endif
 
 #if HAVE_WAYLAND

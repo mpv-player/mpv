@@ -62,6 +62,8 @@ typedef struct mp_vo_opts {
     // vo_drm
     struct drm_opts *drm_opts;
 
+    struct m_geometry android_surface_size;
+
     int swapchain_depth;  // max number of images to render ahead
 } mp_vo_opts;
 
@@ -340,7 +342,6 @@ typedef struct MPOpts {
     struct d3d11va_opts *d3d11va_opts;
     struct cocoa_opts *cocoa_opts;
     struct macos_opts *macos_opts;
-    struct android_opts *android_opts;
     struct wayland_opts *wayland_opts;
     struct dvd_opts *dvd_opts;
     struct vaapi_opts *vaapi_opts;
