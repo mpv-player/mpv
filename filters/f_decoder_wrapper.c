@@ -1173,7 +1173,7 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
     mp_filter_add_pin(public_f, MP_PIN_OUT, "out");
 
     if (p->header->type == STREAM_VIDEO) {
-        p->log = mp_log_new(p, public_f->log, "!vd");
+        p->log = mp_log_new(p, parent->global->log, "!vd");
 
         p->fps = src->codec->fps;
 
@@ -1187,7 +1187,7 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
 
         p->queue_opts = p->opts->vdec_queue_opts;
     } else if (p->header->type == STREAM_AUDIO) {
-        p->log = mp_log_new(p, public_f->log, "!ad");
+        p->log = mp_log_new(p, parent->global->log, "!ad");
         p->queue_opts = p->opts->adec_queue_opts;
     } else {
         goto error;
