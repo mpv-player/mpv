@@ -327,6 +327,7 @@ void ao_reset(struct ao *ao)
 void ao_start(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
+    bool do_start = false;
 
     pthread_mutex_lock(&p->lock);
 
@@ -334,10 +335,14 @@ void ao_start(struct ao *ao)
 
     if (!ao->driver->write && !p->streaming) {
         p->streaming = true;
-        ao->driver->start(ao);
+        do_start = true;
     }
 
     pthread_mutex_unlock(&p->lock);
+
+    // Pull AOs might call ao_read_data() so do this outside the lock.
+    if (do_start)
+        ao->driver->start(ao);
 
     ao_wakeup_playthread(ao);
 }
@@ -346,7 +351,7 @@ void ao_set_paused(struct ao *ao, bool paused)
 {
     struct buffer_state *p = ao->buffer_state;
     bool wakeup = false;
-    bool do_reset = false;
+    bool do_reset = false, do_start = false;
 
     pthread_mutex_lock(&p->lock);
 
@@ -376,7 +381,7 @@ void ao_set_paused(struct ao *ao, bool paused)
             p->hw_paused = false;
         } else {
             if (!p->streaming)
-                ao->driver->start(ao);
+                do_start = true;
             p->streaming = true;
         }
         wakeup = true;
@@ -387,6 +392,8 @@ void ao_set_paused(struct ao *ao, bool paused)
 
     if (do_reset)
         ao->driver->reset(ao);
+    if (do_start)
+        ao->driver->start(ao);
 
     if (wakeup)
         ao_wakeup_playthread(ao);
