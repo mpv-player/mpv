@@ -81,10 +81,12 @@ class MacCommon: Common {
 
     @objc func swapBuffer() {
         swapLock.lock()
-        let oldSwapTime = swapTime
-        while(oldSwapTime == swapTime){
+        //let oldSwapTime = swapTime
+        //while(oldSwapTime == swapTime) {
+        while(swapTime < 1) {
             swapLock.wait()
         }
+        swapTime = 0
         swapLock.unlock()
 
         if needsICCUpdate {
@@ -100,6 +102,8 @@ class MacCommon: Common {
     }
 
     // TODO draw in background
+    // TODO proper timing
+    // TODO make time configurable
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
                                             _ inNow: UnsafePointer<CVTimeStamp>,
                                      _ inOutputTime: UnsafePointer<CVTimeStamp>,
@@ -109,6 +113,9 @@ class MacCommon: Common {
         timer?.scheduleAt(time: inOutputTime.pointee.hostTime) {
             self.swapLock.lock()
             self.swapTime += 1
+            /*if (self.swapTime > 1) {
+                print("no swap for vysnc, behind: \(self.swapTime)")
+            }*/
             self.swapLock.signal()
             self.swapLock.unlock()
         }
