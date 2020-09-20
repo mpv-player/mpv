@@ -333,7 +333,7 @@ void ao_start(struct ao *ao)
 
     p->playing = true;
 
-    if (!ao->driver->write && !p->streaming) {
+    if (!ao->driver->write && !p->paused && !p->streaming) {
         p->streaming = true;
         do_start = true;
     }
