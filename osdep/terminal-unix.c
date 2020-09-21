@@ -404,8 +404,10 @@ static void *terminal_thread(void *ptr)
             int retval = read(tty_in, &buf.b[buf.len], BUF_LEN - buf.len);
             if (!retval || (retval == -1 && (errno == EBADF || errno == EINVAL)))
                 break; // EOF/closed
-            buf.len += retval;
-            process_input(input_ctx, false);
+            if (retval > 0) {
+                buf.len += retval;
+                process_input(input_ctx, false);
+            }
         }
         if (r == 0)
             process_input(input_ctx, true);
