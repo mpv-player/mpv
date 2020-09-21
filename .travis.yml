@@ -118,6 +118,9 @@ before_install:
             for formula in ${keep[@]}; do remove=("${remove[@]/$formula}"); done
             for formula in ${install[@]}; do remove=("${remove[@]/$formula}"); done
             brew remove --force $remove --ignore-dependencies
+            if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
+                brew untap caskroom/cask
+            fi
             brew update
             if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
                 pushd "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core"
