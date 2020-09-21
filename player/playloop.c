@@ -1141,9 +1141,10 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->playing_msg_shown = true;
         mp_wakeup_core(mpctx);
         update_ab_loop_clip(mpctx);
-        MP_VERBOSE(mpctx, "playback restart complete @ %f, audio=%s, video=%s\n",
+        MP_VERBOSE(mpctx, "playback restart complete @ %f, audio=%s, video=%s%s\n",
                    mpctx->playback_pts, mp_status_str(mpctx->audio_status),
-                   mp_status_str(mpctx->video_status));
+                   mp_status_str(mpctx->video_status),
+                   get_internal_paused(mpctx) ? " (paused)" : "");
 
         // To avoid strange effects when using relative seeks, especially if
         // there are no proper audio & video timestamps (seeks after EOF).
