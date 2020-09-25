@@ -73,8 +73,8 @@ if [ ! -e "$prefix_dir/lib/libavcodec.dll.a" ]; then
     popd
 fi
 
-## shaderc + spirv-cross
-if [ ! -e "$prefix_dir/lib/libspirv-cross-c-shared.dll.a" ]; then
+## shaderc
+if [ ! -e "$prefix_dir/lib/libshaderc_shared.dll.a" ]; then
     if [ ! -d shaderc ]; then
         $gitclone https://github.com/google/shaderc.git
         (cd shaderc && ./utils/git-sync-deps)
@@ -85,7 +85,12 @@ if [ ! -e "$prefix_dir/lib/libspirv-cross-c-shared.dll.a" ]; then
         -DSHADERC_SKIP_TESTS=ON -DCMAKE_INSTALL_PREFIX=/
     makeplusinstall
     popd
-    builddir shaderc/third_party/spirv-cross
+fi
+
+## spirv-cross
+if [ ! -e "$prefix_dir/lib/libspirv-cross-c-shared.dll.a" ]; then
+    [ -d SPIRV-Cross ] || $gitclone https://github.com/KhronosGroup/SPIRV-Cross
+    builddir SPIRV-Cross
     cmake .. -DCMAKE_SYSTEM_NAME=Windows \
         -DSPIRV_CROSS_SHARED=ON -DSPIRV_CROSS_{CLI,STATIC}=OFF
     makeplusinstall
