@@ -126,6 +126,7 @@ enum mp_osd_font_codepoints {
     OSD_BRIGHTNESS = 0x0A,
     OSD_HUE = 0x0B,
     OSD_BALANCE = 0x0C,
+    OSD_REV = 0x0D,
     OSD_PANSCAN = 0x50,
 
     OSD_PB_START = 0x10,
