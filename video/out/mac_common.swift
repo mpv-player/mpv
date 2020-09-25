@@ -42,6 +42,7 @@ class MacCommon: Common {
         mpv?.vo = vo
 
         DispatchQueue.main.sync {
+            let previousActiveApp = getActiveApp()
             initApp()
 
             let (_, _, wr) = getInitProperties(vo)
@@ -53,7 +54,7 @@ class MacCommon: Common {
 
             if window == nil {
                 initView(vo, layer)
-                initWindow(vo)
+                initWindow(vo, previousActiveApp)
                 initWindowState()
             }
 
