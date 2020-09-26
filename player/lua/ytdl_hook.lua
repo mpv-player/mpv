@@ -134,7 +134,7 @@ local function edl_escape(url)
 end
 
 local function url_is_safe(url)
-    local proto = type(url) == "string" and url:match("^(.+)://") or nil
+    local proto = type(url) == "string" and url:match("^(.-)://") or nil
     local safe = proto and safe_protos[proto]
     if not safe then
         msg.error(("Ignoring potentially unsafe url: '%s'"):format(url))
