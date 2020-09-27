@@ -226,6 +226,7 @@ struct priv {
     char *cur_hwdec;
     char *decoder_desc;
     bool try_spdif;
+    bool attached_picture;
     bool pts_reset;
     int attempt_framedrops; // try dropping this many frames
     int dropped_frames; // total frames _probably_ dropped
@@ -521,6 +522,14 @@ void mp_decoder_wrapper_set_spdif_flag(struct mp_decoder_wrapper *d, bool spdif)
     struct priv *p = d->f->priv;
     pthread_mutex_lock(&p->cache_lock);
     p->try_spdif = spdif;
+    pthread_mutex_unlock(&p->cache_lock);
+}
+
+void mp_decoder_wrapper_set_coverart_flag(struct mp_decoder_wrapper *d, bool c)
+{
+    struct priv *p = d->f->priv;
+    pthread_mutex_lock(&p->cache_lock);
+    p->attached_picture = c;
     pthread_mutex_unlock(&p->cache_lock);
 }
 
@@ -974,19 +983,20 @@ static void read_frame(struct priv *p)
     if (!frame.type)
         return;
 
-    if (p->header->attached_picture && frame.type == MP_FRAME_VIDEO) {
-        p->decoded_coverart = frame;
-        mp_filter_internal_mark_progress(p->decf);
-        return;
-    }
-
     pthread_mutex_lock(&p->cache_lock);
+    if (p->attached_picture && frame.type == MP_FRAME_VIDEO)
+        p->decoded_coverart = frame;
     if (p->attempt_framedrops) {
         int dropped = MPMAX(0, p->packets_without_output - 1);
         p->attempt_framedrops = MPMAX(0, p->attempt_framedrops - dropped);
         p->dropped_frames += dropped;
     }
     pthread_mutex_unlock(&p->cache_lock);
+
+    if (p->decoded_coverart.type) {
+        mp_filter_internal_mark_progress(p->decf);
+        return;
+    }
 
     p->packets_without_output = 0;
 

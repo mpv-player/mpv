@@ -55,6 +55,9 @@ double mp_decoder_wrapper_get_container_fps(struct mp_decoder_wrapper *d);
 // Whether to prefer spdif wrapper over real decoders on next reinit.
 void mp_decoder_wrapper_set_spdif_flag(struct mp_decoder_wrapper *d, bool spdif);
 
+// Whether to decode only 1 frame and then stop, and cache the frame across resets.
+void mp_decoder_wrapper_set_coverart_flag(struct mp_decoder_wrapper *d, bool c);
+
 // True if a pts reset was observed (audio only, heuristic).
 bool mp_decoder_wrapper_get_pts_reset(struct mp_decoder_wrapper *d);
 
