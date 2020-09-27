@@ -42,6 +42,25 @@ static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
                                          "wv",
                                          NULL};
 
+// Stolen from: vlc/-/blob/master/modules/meta_engine/folder.c#L40
+static const char *const cover_files[] = {
+    "Folder.jpg",
+    "Folder.png",
+    "AlbumArtSmall.jpg",
+    "AlbumArt.jpg",
+    "Album.jpg",
+    ".folder.png",
+    "cover.jpg",
+    "cover.png",
+    "cover.gif",
+    "front.jpg",
+    "front.png",
+    "front.gif",
+    "front.bmp",
+    "thumb.jpg",
+    NULL
+};
+
 static bool test_ext_list(bstr ext, const char *const *list)
 {
     for (int n = 0; list[n]; n++) {
@@ -57,6 +76,15 @@ static int test_ext(bstr ext)
         return STREAM_SUB;
     if (test_ext_list(ext, audio_exts))
         return STREAM_AUDIO;
+    return -1;
+}
+
+static int test_filename(bstr fname)
+{
+    for (int n = 0; cover_files[n]; n++) {
+        if (bstrcasecmp(bstr0(cover_files[n]), fname) == 0)
+            return STREAM_VIDEO;
+    }
     return -1;
 }
 
@@ -159,6 +187,8 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
 
         // check what it is (most likely)
         int type = test_ext(tmp_fname_ext);
+        if (type < 0)
+            type = test_filename(dename);
         char **langs = NULL;
         int fuzz = -1;
         switch (type) {
@@ -169,6 +199,9 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         case STREAM_AUDIO:
             langs = opts->stream_lang[type];
             fuzz = opts->audiofile_auto;
+            break;
+        case STREAM_VIDEO:
+            fuzz = opts->coverart_auto;
             break;
         }
 
@@ -208,6 +241,10 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         // doesn't contain the movie name
         // don't try in the mplayer subtitle directory
         if (!limit_fuzziness && fuzz >= 2)
+            prio |= 1;
+
+        // cover art: just accept it
+        if (type == STREAM_VIDEO && fuzz >= 1)
             prio |= 1;
 
         mp_dbg(log, "Potential external file: \"%s\"  Priority: %d\n",

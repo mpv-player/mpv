@@ -827,6 +827,8 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         t->external_filename = talloc_strdup(t, filename);
         t->no_default = sh->type != filter;
         t->no_auto_select = t->no_default;
+        // filter==STREAM_VIDEO always means cover art.
+        t->attached_picture = t->type == STREAM_VIDEO && filter == STREAM_VIDEO;
         if (first_num < 0 && (filter == STREAM_TYPE_COUNT || sh->type == filter))
             first_num = mpctx->num_tracks - 1;
     }
@@ -859,14 +861,15 @@ static void open_external_files(struct MPContext *mpctx, char **files,
 // See mp_add_external_file() for meaning of cancel parameter.
 void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
 {
-    if (mpctx->opts->sub_auto < 0 && mpctx->opts->audiofile_auto < 0)
+    struct MPOpts *opts = mpctx->opts;
+
+    if (opts->sub_auto < 0 && opts->audiofile_auto < 0 && opts->coverart_auto < 0)
         return;
-    if (!mpctx->opts->autoload_files || strcmp(mpctx->filename, "-") == 0)
+    if (!opts->autoload_files || strcmp(mpctx->filename, "-") == 0)
         return;
 
     void *tmp = talloc_new(NULL);
-    struct subfn *list = find_external_files(mpctx->global, mpctx->filename,
-                                             mpctx->opts);
+    struct subfn *list = find_external_files(mpctx->global, mpctx->filename, opts);
     talloc_steal(tmp, list);
 
     int sc[STREAM_TYPE_COUNT] = {0};
@@ -887,6 +890,8 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
             goto skip;
         if (list[i].type == STREAM_AUDIO && !sc[STREAM_VIDEO])
             goto skip;
+        if (list[i].type == STREAM_VIDEO && (sc[STREAM_VIDEO] || !sc[STREAM_AUDIO]))
+            goto skip;
         int first = mp_add_external_file(mpctx, filename, list[i].type, cancel);
         if (first < 0)
             goto skip;
@@ -894,6 +899,8 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
         for (int n = first; n < mpctx->num_tracks; n++) {
             struct track *t = mpctx->tracks[n];
             t->auto_loaded = true;
+            t->attached_picture =
+                t->type == STREAM_VIDEO && list[i].type == STREAM_VIDEO;
             if (!t->lang)
                 t->lang = talloc_strdup(t, lang);
         }
@@ -1364,6 +1371,7 @@ static void load_external_opts_thread(void *p)
     load_chapters(mpctx);
     open_external_files(mpctx, mpctx->opts->audio_files, STREAM_AUDIO);
     open_external_files(mpctx, mpctx->opts->sub_name, STREAM_SUB);
+    open_external_files(mpctx, mpctx->opts->coverart_files, STREAM_VIDEO);
     open_external_files(mpctx, mpctx->opts->external_files, STREAM_TYPE_COUNT);
     autoload_external_files(mpctx, mpctx->playback_abort);
 

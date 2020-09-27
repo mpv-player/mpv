@@ -21,7 +21,7 @@
 #include <stdbool.h>
 
 struct subfn {
-    int type; // STREAM_SUB/STREAM_AUDIO
+    int type; // STREAM_SUB/STREAM_AUDIO/STREAM_VIDEO(coverart)
     int priority;
     char *fname;
     char *lang;

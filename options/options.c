@@ -512,8 +512,6 @@ static const m_option_t mp_opts[] = {
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
-    {"audio-files", OPT_PATHLIST(audio_files), .flags = M_OPT_FILE},
-    {"audio-file", OPT_CLI_ALIAS("audio-files-append")},
     {"demuxer", OPT_STRING(demuxer_name)},
     {"audio-demuxer", OPT_STRING(audio_demuxer_name)},
     {"sub-demuxer", OPT_STRING(sub_demuxer_name)},
@@ -573,15 +571,24 @@ static const m_option_t mp_opts[] = {
 
     {"sub-files", OPT_PATHLIST(sub_name), .flags = M_OPT_FILE},
     {"sub-file", OPT_CLI_ALIAS("sub-files-append")},
+    {"audio-files", OPT_PATHLIST(audio_files), .flags = M_OPT_FILE},
+    {"audio-file", OPT_CLI_ALIAS("audio-files-append")},
+    {"cover-art-files", OPT_PATHLIST(coverart_files), .flags = M_OPT_FILE},
+    {"cover-art-file", OPT_CLI_ALIAS("covert-art-files-append")},
+
     {"sub-file-paths", OPT_PATHLIST(sub_paths), .flags = M_OPT_FILE},
     {"audio-file-paths", OPT_PATHLIST(audiofile_paths), .flags = M_OPT_FILE},
+
     {"external-files", OPT_PATHLIST(external_files), .flags = M_OPT_FILE},
     {"external-file", OPT_CLI_ALIAS("external-files-append")},
     {"autoload-files", OPT_FLAG(autoload_files)},
+
     {"sub-auto", OPT_CHOICE(sub_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
     {"audio-file-auto", OPT_CHOICE(audiofile_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
+    {"cover-art-auto", OPT_CHOICE(coverart_auto,
+        {"no", -1}, {"fuzzy", 1})},
 
     {"", OPT_SUBSTRUCT(subs_rend, mp_subtitle_sub_opts)},
     {"", OPT_SUBSTRUCT(subs_filt, mp_sub_filter_opts)},
@@ -1002,6 +1009,7 @@ static const struct MPOpts mp_default_opts = {
     .pitch_correction = 1,
     .sub_auto = 0,
     .audiofile_auto = -1,
+    .coverart_auto = 1,
     .osd_bar_visible = 1,
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,

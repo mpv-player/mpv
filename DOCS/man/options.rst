@@ -6603,7 +6603,39 @@ Miscellaneous
 
 ``--external-file=<file>``
     CLI/config file only alias for ``--external-files-append``. Each use of this
-    option will add a new external files.
+    option will add a new external file.
+
+``--cover-art-files=<file-list>``
+    Use an external file as cover art while playing audio. This makes it appear
+    on the track list and subject to automatic track selection. Options like
+    ``--audio-display`` control whether such tracks are supposed to be selected.
+
+    (The difference to loading a file with ``--external-files`` is that video
+    tracks will be marked as being pictures, which affects the auto-selection
+    method. If the passed file is a video, only the first frame will be decoded
+    and displayed. Enabling the cover art track during playback may show a
+    random frame if the source file is a video. Normally you're not supposed to
+    pass videos to this option, so this paragraph describes the behavior
+    coincidentally resulting from implementation details.)
+
+    This is a path list option. See `List Options`_ for details.
+
+``--cover-art-file=<file>``
+    CLI/config file only alias for ``--cover-art-files-append``. Each use of this
+    option will add a new external file.
+
+``--cover-art-auto=<no|fuzzy>``
+    Whether to load _external_ cover art automatically (default: fuzzy). Similar
+    to ``--sub-auto`` and ``--audio-file-auto``. However, it's currently limited
+    to picking up a whitelist of "album art" filenames (such as ``cover.jpg``),
+    so currently only the ``fuzzy`` choice is available. In addition, if a video
+    already has tracks (which are not marked as cover art), external cover art
+    will not be loaded.
+
+    See ``--cover-art-files`` for details about what constitutes cover art.
+
+    See ``--audio-display`` how to control display of cover art (this can be
+    used to disable cover art that is part of the file).
 
 ``--autoload-files=<yes|no>``
     Automatically load/select external files (default: yes).
