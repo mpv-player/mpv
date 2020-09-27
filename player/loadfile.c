@@ -879,20 +879,20 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
     }
 
     for (int i = 0; list && list[i].fname; i++) {
-        char *filename = list[i].fname;
-        char *lang = list[i].lang;
+        struct subfn *e = &list[i];
+
         for (int n = 0; n < mpctx->num_tracks; n++) {
             struct track *t = mpctx->tracks[n];
-            if (t->demuxer && strcmp(t->demuxer->filename, filename) == 0)
+            if (t->demuxer && strcmp(t->demuxer->filename, e->fname) == 0)
                 goto skip;
         }
-        if (list[i].type == STREAM_SUB && !sc[STREAM_VIDEO] && !sc[STREAM_AUDIO])
+        if (e->type == STREAM_SUB && !sc[STREAM_VIDEO] && !sc[STREAM_AUDIO])
             goto skip;
-        if (list[i].type == STREAM_AUDIO && !sc[STREAM_VIDEO])
+        if (e->type == STREAM_AUDIO && !sc[STREAM_VIDEO])
             goto skip;
-        if (list[i].type == STREAM_VIDEO && (sc[STREAM_VIDEO] || !sc[STREAM_AUDIO]))
+        if (e->type == STREAM_VIDEO && (sc[STREAM_VIDEO] || !sc[STREAM_AUDIO]))
             goto skip;
-        int first = mp_add_external_file(mpctx, filename, list[i].type, cancel);
+        int first = mp_add_external_file(mpctx, e->fname, e->type, cancel);
         if (first < 0)
             goto skip;
 
@@ -900,9 +900,9 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
             struct track *t = mpctx->tracks[n];
             t->auto_loaded = true;
             t->attached_picture =
-                t->type == STREAM_VIDEO && list[i].type == STREAM_VIDEO;
+                t->type == STREAM_VIDEO && e->type == STREAM_VIDEO;
             if (!t->lang)
-                t->lang = talloc_strdup(t, lang);
+                t->lang = talloc_strdup(t, e->lang);
         }
     skip:;
     }
