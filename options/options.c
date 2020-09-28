@@ -574,7 +574,7 @@ static const m_option_t mp_opts[] = {
     {"audio-files", OPT_PATHLIST(audio_files), .flags = M_OPT_FILE},
     {"audio-file", OPT_CLI_ALIAS("audio-files-append")},
     {"cover-art-files", OPT_PATHLIST(coverart_files), .flags = M_OPT_FILE},
-    {"cover-art-file", OPT_CLI_ALIAS("covert-art-files-append")},
+    {"cover-art-file", OPT_CLI_ALIAS("cover-art-files-append")},
 
     {"sub-file-paths", OPT_PATHLIST(sub_paths), .flags = M_OPT_FILE},
     {"audio-file-paths", OPT_PATHLIST(audiofile_paths), .flags = M_OPT_FILE},
