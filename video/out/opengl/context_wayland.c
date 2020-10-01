@@ -122,6 +122,13 @@ static void resize(struct ra_ctx *ctx)
     const int32_t width = wl->scaling*mp_rect_w(wl->geometry);
     const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
 
+    if (!ctx->opts.want_alpha) {
+        struct wl_region *region = wl_compositor_create_region(wl->compositor);
+        wl_region_add(region, 0, 0, width, height);
+        wl_surface_set_opaque_region(wl->surface, region);
+        wl_region_destroy(region);
+    }
+
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
 
     if (p->egl_window)
