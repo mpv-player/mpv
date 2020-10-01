@@ -1714,6 +1714,15 @@ static void vo_x11_update_geometry(struct vo *vo)
         XTranslateCoordinates(x11->display, win, x11->rootwin, 0, 0,
                               &x, &y, &dummy_win);
         x11->winrc = (struct mp_rect){x, y, x + w, y + h};
+        // Update the opaque region, a list of 4-tuples
+        int alpha_mode;
+        mp_read_option_raw(vo->global, "alpha", &m_option_type_choice, &alpha_mode);
+        if(alpha_mode != 1) {
+            long params[1][4] = {{0, 0, w, h}};
+            XChangeProperty(x11->display, x11->window, XA(x11, _NET_WM_OPAQUE_REGION),
+                            XA_CARDINAL, 32, PropModeReplace,
+                            (unsigned char *) &params, 4);
+        }
     }
     double fps = 1000.0;
     for (int n = 0; n < x11->num_displays; n++) {
