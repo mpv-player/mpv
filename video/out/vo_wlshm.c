@@ -293,9 +293,15 @@ static void draw_image(struct vo *vo, struct mp_image *src)
 static void flip_page(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
+    struct wl_region* region;
 
     wl_surface_damage(wl->surface, 0, 0, mp_rect_w(wl->geometry),
                       mp_rect_h(wl->geometry));
+    region = wl_compositor_create_region(wl->compositor);
+    wl_region_add(region, 0, 0, mp_rect_w(wl->geometry),
+                  mp_rect_h(wl->geometry));
+    wl_surface_set_opaque_region(wl->surface, region);
+    wl_region_destroy(region);
     wl_surface_commit(wl->surface);
 
     if (!wl->opts->disable_vsync)
