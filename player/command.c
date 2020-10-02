@@ -42,6 +42,7 @@
 #include "filters/f_decoder_wrapper.h"
 #include "command.h"
 #include "osdep/timer.h"
+#include "osdep/utils.h"
 #include "common/common.h"
 #include "input/input.h"
 #include "input/keycodes.h"
@@ -3191,6 +3192,14 @@ static int mp_property_libass_version(void *ctx, struct m_property *prop,
     return m_property_int64_ro(action, arg, ass_library_version());
 }
 
+static int mp_property_platform(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    const char* platform = platform_enum_to_str[get_target_platform()];
+    return m_property_strdup_ro(action, arg, platform);
+}
+
+
 static int mp_property_alias(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -3648,6 +3657,7 @@ static const struct m_property mp_properties_base[] = {
     {"input-bindings", mp_property_bindings},
 
     {"shared-script-properties", mp_property_script_props},
+    {"platform", mp_property_platform},
 
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),

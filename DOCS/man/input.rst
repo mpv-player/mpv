@@ -3169,6 +3169,12 @@ Property list
     in a somewhat weird form (apparently "hex BCD"), indicating the release
     version of the libass library linked to mpv.
 
+``platform``
+    Return a string describing what target platform mpv was built for. This is
+    one of the following values: ``win32`` (desktop Windows), ``uwp``,
+    ``macos``, ``tvos``, ``bsd/linux`` (any non-Apple non-Android POSIX),
+    ``android``, ``unknown`` (fallback value)
+
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
     changed at runtime by writing to this property. Note that many options
