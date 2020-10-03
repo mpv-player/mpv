@@ -456,6 +456,14 @@ void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
     talloc_free(fname);
 }
 
+void mp_clear_playback_resume(struct MPContext *mpctx, const char *file)
+{
+    char *fname = mp_get_playback_resume_config_filename(mpctx, file);
+    if (fname)
+        unlink(fname);
+    talloc_free(fname);
+}
+
 // Returns the first file that has a resume config.
 // Compared to hashing the playlist file or contents and managing separate
 // resume file for them, this is simpler, and also has the nice property

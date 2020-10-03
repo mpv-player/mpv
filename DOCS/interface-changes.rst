@@ -79,6 +79,10 @@ Interface changes
     - key/value list options do not accept ":" as item separator anymore,
       only ",". This means ":" is always considered part of the value.
     - remove deprecated --vo-vdpau-deint option
+    - delete the "watch later" config when ending the playback for a file; this
+      is in addition to deleting it when it is read on start-up, so this only
+      has an effect if the config has been re-written using
+      ``write-watch-later-config``.
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended

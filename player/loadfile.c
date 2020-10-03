@@ -1703,6 +1703,11 @@ terminate_playback:
 
     m_config_restore_backups(mpctx->mconfig);
 
+    if (mpctx->stop_play == AT_END_OF_FILE ||
+        mpctx->stop_play == PT_NEXT_ENTRY ||
+        mpctx->stop_play == PT_CURRENT_ENTRY)
+        mp_clear_playback_resume(mpctx, mpctx->filename);
+
     TA_FREEP(&mpctx->filter_root);
     talloc_free(mpctx->filtered_tags);
     mpctx->filtered_tags = NULL;
