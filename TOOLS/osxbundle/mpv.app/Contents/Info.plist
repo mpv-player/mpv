@@ -217,6 +217,7 @@
           <string>ftp</string>
           <string>udp</string>
           <string>smb</string>
+          <string>srt</string>
         </array>
       </dict>
       <dict>
