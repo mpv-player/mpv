@@ -346,7 +346,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
             .high_bit_depth = high_depth &&
                               mpctx->opts->screenshot_image_opts->high_bit_depth,
         };
-        vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &ctrl);
+        if (!mpctx->opts->screenshot_sw)
+            vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &ctrl);
         image = ctrl.res;
         if (image)
             need_add_subs = false;

@@ -276,6 +276,7 @@ typedef struct MPOpts {
     struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;
     char *screenshot_directory;
+    bool screenshot_sw;
 
     int index_mode;
 

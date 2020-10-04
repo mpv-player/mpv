@@ -4224,6 +4224,21 @@ Screenshot
     more CPU time. Note that this also affects the screenshot quality when used
     with lossy WebP files. The default is 4.
 
+``--screenshot-sw=<yes|no>``
+    Whether to use software rendering for screenshots (default: no).
+
+    If set to no, the screenshot will be rendered by the current VO if possible
+    (only vo_gpu currently). The advantage is that this will (probably) always
+    show up as in the video window, because the same code is used for rendering.
+    But since the renderer needs to be reinitialized, this can be slow and
+    interrupt playback. (Unless the ``window`` mode is used with the
+    ``screenshot`` command.)
+
+    If set to yes, the software scaler is used to convert the video to RGB (or
+    whatever the target screenshot requires). In this case, conversion will
+    run in a separate thread and will probably not interrupt playback. The
+    software renderer may lack some capabilities, such as HDR rendering.
+
 Software Scaler
 ---------------
 
