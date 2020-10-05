@@ -173,6 +173,15 @@ static void get_and_update_ambient_lighting(struct gpu_priv *p)
     }
 }
 
+static void update_ra_ctx_options(struct vo *vo)
+{
+    struct gpu_priv *p = vo->priv;
+
+    /* Only the alpha option has any runtime toggle ability. */
+    struct gl_video_opts *gl_opts = mp_get_config_group(p->ctx, vo->global, &gl_video_conf);
+    p->ctx->opts.want_alpha = gl_opts->alpha_mode == 1;
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct gpu_priv *p = vo->priv;
@@ -195,8 +204,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         request_hwdec_api(vo);
         return true;
     case VOCTRL_UPDATE_RENDER_OPTS: {
+        update_ra_ctx_options(vo);
         gl_video_configure_queue(p->renderer, vo);
         get_and_update_icc_profile(p);
+        p->ctx->fns->update_render_opts(p->ctx);
         vo->want_redraw = true;
         return true;
     }
@@ -279,11 +290,9 @@ static int preinit(struct vo *vo)
     struct gpu_priv *p = vo->priv;
     p->log = vo->log;
 
-    int alpha_mode;
-    mp_read_option_raw(vo->global, "alpha", &m_option_type_choice, &alpha_mode);
-
     struct ra_ctx_opts opts = p->opts;
-    opts.want_alpha = alpha_mode == 1;
+    struct gl_video_opts *gl_opts = mp_get_config_group(p->ctx, vo->global, &gl_video_conf);
+    opts.want_alpha = gl_opts->alpha_mode == 1;
 
     p->ctx = ra_ctx_create(vo, p->context_type, p->context_name, opts);
     if (!p->ctx)
