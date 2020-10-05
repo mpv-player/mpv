@@ -44,6 +44,7 @@ struct ra_ctx_fns {
     // optional.
     void (*wakeup)(struct ra_ctx *ctx);
     void (*wait_events)(struct ra_ctx *ctx, int64_t until_time_us);
+    void (*update_render_opts)(struct ra_ctx *ctx);
 
     // Initialize/destroy the 'struct ra' and possibly the underlying VO backend.
     // Not normally called by the user of the ra_ctx.
