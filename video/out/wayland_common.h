@@ -151,6 +151,7 @@ void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wakeup(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
 void vo_wayland_wait_frame(struct vo_wayland_state *wl);
+void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha);
 void vo_wayland_sync_clear(struct vo_wayland_state *wl);
 void wayland_sync_swap(struct vo_wayland_state *wl);
 void vo_wayland_sync_shift(struct vo_wayland_state *wl);
