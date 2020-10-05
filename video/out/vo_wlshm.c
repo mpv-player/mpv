@@ -201,11 +201,7 @@ static int resize(struct vo *vo)
     const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
     struct buffer *buf;
 
-    struct wl_region *region = wl_compositor_create_region(wl->compositor);
-    wl_region_add(region, 0, 0, width, height);
-    wl_surface_set_opaque_region(wl->surface, region);
-    wl_region_destroy(region);
-
+    vo_wayland_set_opaque_region(wl, 0);
     vo->want_redraw = true;
     vo->dwidth = width;
     vo->dheight = height;

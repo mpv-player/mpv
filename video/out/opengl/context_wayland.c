@@ -119,16 +119,10 @@ static void resize(struct ra_ctx *ctx)
 
     MP_VERBOSE(wl, "Handling resize on the egl side\n");
 
-    const int32_t width = wl->scaling*mp_rect_w(wl->geometry);
-    const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
+    const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
+    const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
 
-    if (!ctx->opts.want_alpha) {
-        struct wl_region *region = wl_compositor_create_region(wl->compositor);
-        wl_region_add(region, 0, 0, width, height);
-        wl_surface_set_opaque_region(wl->surface, region);
-        wl_region_destroy(region);
-    }
-
+    vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
 
     if (p->egl_window)
@@ -296,6 +290,13 @@ static void wayland_egl_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
     vo_wayland_wait_events(ctx->vo, until_time_us);
 }
 
+static void wayland_egl_update_render_opts(struct ra_ctx *ctx)
+{
+    struct vo_wayland_state *wl = ctx->vo->wl;
+    vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
+    wl_surface_commit(wl->surface);
+}
+
 static bool wayland_egl_init(struct ra_ctx *ctx)
 {
     if (!vo_wayland_init(ctx->vo)) {
@@ -307,12 +308,13 @@ static bool wayland_egl_init(struct ra_ctx *ctx)
 }
 
 const struct ra_ctx_fns ra_ctx_wayland_egl = {
-    .type           = "opengl",
-    .name           = "wayland",
-    .reconfig       = wayland_egl_reconfig,
-    .control        = wayland_egl_control,
-    .wakeup         = wayland_egl_wakeup,
-    .wait_events    = wayland_egl_wait_events,
-    .init           = wayland_egl_init,
-    .uninit         = wayland_egl_uninit,
+    .type               = "opengl",
+    .name               = "wayland",
+    .reconfig           = wayland_egl_reconfig,
+    .control            = wayland_egl_control,
+    .wakeup             = wayland_egl_wakeup,
+    .wait_events        = wayland_egl_wait_events,
+    .update_render_opts = wayland_egl_update_render_opts,
+    .init               = wayland_egl_init,
+    .uninit             = wayland_egl_uninit,
 };

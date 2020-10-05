@@ -205,16 +205,10 @@ static bool resize(struct ra_ctx *ctx)
 
     MP_VERBOSE(wl, "Handling resize on the vk side\n");
 
-    const int32_t width = wl->scaling*mp_rect_w(wl->geometry);
-    const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
+    const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
+    const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
 
-    if (!ctx->opts.want_alpha) {
-        struct wl_region *region = wl_compositor_create_region(wl->compositor);
-        wl_region_add(region, 0, 0, width, height);
-        wl_surface_set_opaque_region(wl->surface, region);
-        wl_region_destroy(region);
-    }
-
+    vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
     bool ok = ra_vk_ctx_resize(ctx, width, height);
     if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
@@ -250,13 +244,21 @@ static void wayland_vk_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
     vo_wayland_wait_events(ctx->vo, until_time_us);
 }
 
+static void wayland_vk_update_render_opts(struct ra_ctx *ctx)
+{
+    struct vo_wayland_state *wl = ctx->vo->wl;
+    vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
+    wl_surface_commit(wl->surface);
+}
+
 const struct ra_ctx_fns ra_ctx_vulkan_wayland = {
-    .type           = "vulkan",
-    .name           = "waylandvk",
-    .reconfig       = wayland_vk_reconfig,
-    .control        = wayland_vk_control,
-    .wakeup         = wayland_vk_wakeup,
-    .wait_events    = wayland_vk_wait_events,
-    .init           = wayland_vk_init,
-    .uninit         = wayland_vk_uninit,
+    .type               = "vulkan",
+    .name               = "waylandvk",
+    .reconfig           = wayland_vk_reconfig,
+    .control            = wayland_vk_control,
+    .wakeup             = wayland_vk_wakeup,
+    .wait_events        = wayland_vk_wait_events,
+    .update_render_opts = wayland_vk_update_render_opts,
+    .init               = wayland_vk_init,
+    .uninit             = wayland_vk_uninit,
 };
