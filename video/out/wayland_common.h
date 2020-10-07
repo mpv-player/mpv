@@ -27,7 +27,6 @@
 
 struct wayland_opts {
     int disable_vsync;
-    char *display_socket;
     int edge_pixels_pointer;
     int edge_pixels_touch;
 };

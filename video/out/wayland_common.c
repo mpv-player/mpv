@@ -46,7 +46,6 @@
 const struct m_sub_options wayland_conf = {
     .opts = (const struct m_option[]) {
         {"wayland-disable-vsync", OPT_FLAG(disable_vsync)},
-        {"wayland-display-socket", OPT_STRING(display_socket)},
         {"wayland-edge-pixels-pointer", OPT_INT(edge_pixels_pointer),
             M_RANGE(0, INT_MAX)},
         {"wayland-edge-pixels-touch", OPT_INT(edge_pixels_touch),
@@ -56,7 +55,6 @@ const struct m_sub_options wayland_conf = {
     .size = sizeof(struct wayland_opts),
     .defaults = &(struct wayland_opts) {
         .disable_vsync = false,
-        .display_socket = NULL,
         .edge_pixels_pointer = 10,
         .edge_pixels_touch = 64,
     },
@@ -1127,6 +1125,7 @@ int vo_wayland_init(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
 
     *wl = (struct vo_wayland_state) {
+        .display = wl_display_connect(NULL),
         .vo = vo,
         .log = mp_log_new(wl, vo->log, "wayland"),
         .scaling = 1,
@@ -1135,15 +1134,7 @@ int vo_wayland_init(struct vo *vo)
         .cursor_visible = true,
         .vo_opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
-    wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
     wl->vo_opts = wl->vo_opts_cache->opts;
-
-    wl->display = wl_display_connect(wl->opts->display_socket);
-    if (!wl->display) {
-        MP_WARN(wl, "Display socket %s not found/unavailable! Falling back to NULL!\n", wl->opts->display_socket);
-        wl->display = wl_display_connect(NULL);
-    }
-    wl->display_fd = wl_display_get_fd(wl->display);
 
     wl_list_init(&wl->output_list);
 
@@ -1213,6 +1204,8 @@ int vo_wayland_init(struct vo *vo)
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    zwp_idle_inhibit_manager_v1_interface.name);
 
+    wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
+    wl->display_fd = wl_display_get_fd(wl->display);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
 
     return true;

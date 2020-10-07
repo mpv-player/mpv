@@ -5382,12 +5382,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     ``--no-audio``, and ``--untimed=yes``. Only works with ``--gpu-context=wayland``
     and ``--gpu-context=waylandvk``.
 
-``--wayland-display-socket=<string>``
-    Specify the name of the wayland socket mpv attempts to connect to. By default,
-    mpv will simply pass "NULL" which will then try to connect to the compositor
-    currently in use. Note that this will only have an effect during startup since
-    closing the connection to the wl_display will terminate the client.
-
 ``--wayland-edge-pixels-pointer=<value>``
     Defines the size of an edge border (default: 10) to initiate client side
     resize events in the wayland contexts with the mouse. This is only active if
