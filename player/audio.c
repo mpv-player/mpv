@@ -620,6 +620,17 @@ static void ao_process(struct mp_filter *f)
         // This will eventually lead to the creation of the AO + queue, due
         // to how f_output_chain and AO management works.
         mp_pin_out_request_data(f->ppins[0]);
+        // Check for EOF with no data case, which is a mess because everything
+        // hates us.
+        struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
+        if (frame.type == MP_FRAME_EOF) {
+            MP_VERBOSE(mpctx, "got EOF with no data before it\n");
+            ao_c->out_eof = true;
+            mpctx->audio_status = STATUS_DRAINING;
+            mp_wakeup_core(mpctx);
+        } else if (frame.type) {
+            mp_pin_out_unread(f->ppins[0], frame);
+        }
         return;
     }
 
@@ -918,11 +929,11 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         mp_wakeup_core(mpctx);
     }
 
-    if (ao_c->ao && mpctx->audio_status == STATUS_DRAINING) {
+    if (mpctx->audio_status == STATUS_DRAINING) {
         // Wait until the AO has played all queued data. In the gapless case,
         // we trigger EOF immediately, and let it play asynchronously.
-        if (!ao_is_playing(ao_c->ao) ||
-            (opts->gapless_audio && !ao_untimed(ao_c->ao)))
+        if (!ao_c->ao || (!ao_is_playing(ao_c->ao) ||
+                          (opts->gapless_audio && !ao_untimed(ao_c->ao))))
         {
             MP_VERBOSE(mpctx, "audio EOF reached\n");
             mpctx->audio_status = STATUS_EOF;
