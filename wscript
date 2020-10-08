@@ -383,11 +383,6 @@ iconv support use --disable-iconv.",
         'desc': 'SDL2 gamepad input',
         'deps': 'sdl2',
         'func': check_true,
-    }, {
-        'name': '--fluidsynth',
-        'desc': 'MIDI file playback support via fluidsynth',
-        'func': check_pkg_config('fluidsynth', '>= 2.1.5'),
-        'default': 'disable',
     }
 ]
 

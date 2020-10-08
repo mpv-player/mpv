@@ -66,7 +66,6 @@ extern const demuxer_desc_t demuxer_desc_rar;
 extern const demuxer_desc_t demuxer_desc_libarchive;
 extern const demuxer_desc_t demuxer_desc_null;
 extern const demuxer_desc_t demuxer_desc_timeline;
-extern const demuxer_desc_t demuxer_desc_midi;
 
 static const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_disc,
@@ -79,9 +78,6 @@ static const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_libarchive,
 #endif
     &demuxer_desc_lavf,
-#if HAVE_FLUIDSYNTH
-    &demuxer_desc_midi,
-#endif
     &demuxer_desc_mf,
     &demuxer_desc_playlist,
     &demuxer_desc_null,

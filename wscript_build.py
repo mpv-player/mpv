@@ -276,7 +276,6 @@ def build(ctx):
         ( "demux/demux_lavf.c" ),
         ( "demux/demux_libarchive.c",            "libarchive" ),
         ( "demux/demux_mf.c" ),
-        ( "demux/demux_midi.c",                  "fluidsynth" ),
         ( "demux/demux_mkv.c" ),
         ( "demux/demux_mkv_timeline.c" ),
         ( "demux/demux_null.c" ),
