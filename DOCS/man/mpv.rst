@@ -1497,6 +1497,11 @@ FILES
 
 For Windows-specifics, see `FILES ON WINDOWS`_ section.
 
+mpv follows the
+[Unix Directory Standard](https://github.com/unix-directory-standard/unix-directory-standard)
+. There is some deprecated fallback support for XDG, for the sake of
+compatibility.
+
 ``/usr/local/etc/mpv/mpv.conf``
     mpv system-wide settings (depends on ``--prefix`` passed to configure - mpv
     in default configuration will use ``/usr/local/etc/mpv/`` as config
