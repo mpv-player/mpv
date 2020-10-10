@@ -2766,7 +2766,7 @@ Subtitles
 ``--sub-filter-regex-enable=<yes|no>``
     Whether to enable regex filtering (default: yes). Note that if no regexes
     are added to the ``--sub-filter-regex`` list, setting this option to ``yes``
-    has no default. It's meant to easily disable or enable filtering
+    has no effect. It's meant to easily disable or enable filtering
     temporarily.
 
 ``--sub-create-cc-track=<yes|no>``
