@@ -3094,7 +3094,7 @@ Window
 
 ``--window-minimized=<yes|no>``
     Whether the video window is minimized or not. Setting this will minimize,
-    or unminimze, the video window if the current VO supports it. Note that
+    or unminimize, the video window if the current VO supports it. Note that
     some VOs may support minimization while not supporting unminimization
     (eg: Wayland).
 
