@@ -1717,6 +1717,17 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
         wl_display_dispatch_pending(wl->display);
     }
 
+    if (!wl->hidden && wl->frame_wait) {
+        wl->timeout_count += 1;
+        if (wl->timeout_count > wl->current_output->refresh_rate)
+            wl->hidden = true;
+    }
+
+    if (!wl->frame_wait) {
+        wl->timeout_count = 0;
+        wl->hidden = false;
+    }
+
     if (wl_display_get_error(wl->display) == 0)
         wl_display_roundtrip(wl->display);
 }
