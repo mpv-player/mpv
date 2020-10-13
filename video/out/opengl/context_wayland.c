@@ -145,7 +145,7 @@ static bool wayland_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_
     struct ra_ctx *ctx = sw->ctx;
     struct vo_wayland_state *wl = ctx->vo->wl;
 
-    bool render = !wl->frame_wait || wl->opts->disable_vsync;
+    bool render = !wl->hidden || wl->opts->disable_vsync;
 
     if (wl->frame_wait && wl->presentation)
         vo_wayland_sync_clear(wl);

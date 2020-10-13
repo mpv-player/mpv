@@ -248,7 +248,7 @@ static void draw_image(struct vo *vo, struct mp_image *src)
     struct vo_wayland_state *wl = vo->wl;
     struct buffer *buf;
 
-    if (wl->frame_wait)
+    if (wl->hidden)
         return;
 
     wl->frame_wait = true;

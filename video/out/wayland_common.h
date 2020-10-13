@@ -79,6 +79,8 @@ struct vo_wayland_state {
     bool activated;
     bool has_keyboard_input;
     bool focused;
+    bool hidden;
+    int timeout_count;
     int wakeup_pipe[2];
     int pending_vo_events;
     int mouse_x;
