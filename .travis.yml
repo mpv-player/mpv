@@ -27,10 +27,6 @@ _mingwbase:
           - 'gcc-multilib'
           - 'nasm'
           - 'yasm'
-    before_install: |
-        # upgrade MinGW CRT to the one from Ubuntu 20.04 (required for D3D11):
-        wget "http://archive.ubuntu.com/ubuntu/pool/universe/m/mingw-w64/"mingw-w64-{common,i686-dev,x86-64-dev}_7.0.0-2_all.deb
-        sudo apt-get install -y ./mingw-w64-*.deb
     cache:
       directories:
         - mingw_prefix/
