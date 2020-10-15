@@ -1501,6 +1501,28 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
     in default configuration will use ``/usr/local/etc/mpv/`` as config
     directory, while most Linux distributions will set it to ``/etc/mpv/``).
 
+``~/.config/mpv``
+    The standard configuration directory. This can be overridden by environment
+    variables, in ascending order:
+
+    :1: If ``$XDG_CONFIG_HOME`` is set, then the derived configuration directory
+        will be ``$XDG_CONFIG_HOME/mpv``.
+    :2: If ``$MPV_HOME`` is set, then the derived configuration directory will be
+       ``$MPV_HOME``.
+
+    If this directory, nor the original configuration directory (see below) do
+    not exist, mpv tries to create this directory automatically.
+
+``~/.mpv/``
+    The original (pre 0.5.0) configuration directory. It will continue to be
+    read if present.
+
+    If both this directory and the standard configuration directory are
+    present, configuration will be read from both with the standard
+    configuration directory content taking precedence. However, you should
+    fully migrate to the standard directory and a warning will be shown in
+    this situation.
+
 ``~/.config/mpv/mpv.conf``
     mpv user settings (see `CONFIGURATION FILES`_ section)
 
@@ -1551,12 +1573,6 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
 
     Other files in this directory are specific to the corresponding scripts
     as well, and the mpv core doesn't touch them.
-
-Note that the environment variables ``$XDG_CONFIG_HOME`` and ``$MPV_HOME`` can
-override the standard directory ``~/.config/mpv/``.
-
-Also, the old config location at ``~/.mpv/`` is still read, and if the XDG
-variant does not exist, will still be preferred.
 
 FILES ON WINDOWS
 ================
