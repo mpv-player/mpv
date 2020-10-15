@@ -54,7 +54,7 @@ matrix:
       osx_image: xcode9.2
   fast_finish: true
 
-dist: bionic
+dist: focal
 services:
   - docker
 
