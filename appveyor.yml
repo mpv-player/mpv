@@ -15,6 +15,12 @@ shallow_clone: true
 test: off
 
 install:
+  # Work around age/brokenness of Appveyor's msys2 by adding the new
+  # maintainer's keyring.
+  - bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
+  - bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
+  - bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
+  - bash -lc "pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
   # Support for Ada and Objective-C was removed from MSYS2. GCC won't update if
   # these packages are installed.
   - >-
@@ -23,6 +29,8 @@ install:
     mingw-w64-x86_64-gcc-objc
   # Update core packages
   - C:\msys64\usr\bin\pacman -Syyuu --noconfirm --noprogressbar --ask=20
+  # Explicitly kill any remaining msys2 processes after core update
+  - taskkill /f /fi "MODULES eq msys-2.0.dll"
   # Update non-core packages
   - C:\msys64\usr\bin\pacman -Suu --noconfirm --noprogressbar --ask=20
   # Install required MSYS2 packages
