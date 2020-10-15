@@ -207,7 +207,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         update_ra_ctx_options(vo);
         gl_video_configure_queue(p->renderer, vo);
         get_and_update_icc_profile(p);
-        p->ctx->fns->update_render_opts(p->ctx);
+        if (p->ctx->fns->update_render_opts)
+            p->ctx->fns->update_render_opts(p->ctx);
         vo->want_redraw = true;
         return true;
     }
