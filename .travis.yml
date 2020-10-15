@@ -19,8 +19,14 @@ _mingwbase:
     os: linux
     addons:
       apt:
-        packages: ['autoconf', 'automake', 'pkg-config', 'gcc-mingw-w64',
-                   'gcc-multilib', 'nasm', 'yasm']
+        packages:
+          - 'autoconf'
+          - 'automake'
+          - 'pkg-config'
+          - 'gcc-mingw-w64'
+          - 'gcc-multilib'
+          - 'nasm'
+          - 'yasm'
     before_install: |
         # upgrade MinGW CRT to the one from Ubuntu 20.04 (required for D3D11):
         wget "http://archive.ubuntu.com/ubuntu/pool/universe/m/mingw-w64/"mingw-w64-{common,i686-dev,x86-64-dev}_7.0.0-2_all.deb
