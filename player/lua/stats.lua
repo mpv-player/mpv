@@ -549,6 +549,10 @@ local function add_video(s)
         append(s, format("%.2f", r["aspect"]), {prefix="Aspect Ratio:"})
     end
     append(s, r["pixelformat"], {prefix="Pixel Format:"})
+    if r["hw-pixelformat"] ~= nil then
+        append(s, r["hw-pixelformat"], {prefix_sep="[", nl="", indent=" ",
+                suffix="]"})
+    end
 
     -- Group these together to save vertical space
     local prim = append(s, r["primaries"], {prefix="Primaries:"})
