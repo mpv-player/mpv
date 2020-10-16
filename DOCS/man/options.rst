@@ -754,7 +754,7 @@ Program Behavior
     The directory in which to store the "watch later" temporary files.
 
     The default is a subdirectory named "watch_later" underneath the
-    config directory (usually ``~/.config/mpv/``).
+    local data directory (usually ``~/.local/share/mpv/``).
 
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
@@ -4585,8 +4585,6 @@ Cache
     This makes sense only with ``--cache``. If the normal cache is disabled,
     this option is ignored.
 
-    You need to set ``--cache-dir`` to use this.
-
     The cache file is append-only. Even if the player appears to prune data, the
     file space freed by it is not reused. The cache file is deleted when
     playback is closed.
@@ -4609,7 +4607,7 @@ Cache
     continue to use the cache file that was opened first.
 
 ``--cache-dir=<path>``
-    Directory where to create temporary files (default: none).
+    Directory where to create temporary files (usually ``~/.cache/mpv``).
 
     Currently, this is used for ``--cache-on-disk`` only.
 

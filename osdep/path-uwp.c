@@ -26,7 +26,9 @@ WINBASEAPI DWORD WINAPI GetCurrentDirectoryW(DWORD nBufferLength, LPWSTR lpBuffe
 
 const char *mp_get_platform_path_uwp(void *talloc_ctx, const char *type)
 {
-    if (strcmp(type, "home") == 0) {
+    if (strcmp(type, "home") == 0 || strcmp(type, "cache") == 0 ||
+        strcmp(type, "data") == 0)
+    {
         wchar_t homeDir[_MAX_PATH];
         if (GetCurrentDirectoryW(_MAX_PATH, homeDir) != 0)
             return mp_to_utf8(talloc_ctx, homeDir);
