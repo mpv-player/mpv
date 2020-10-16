@@ -2299,6 +2299,10 @@ Property list
         The pixel format as string. This uses the same names as used in other
         places of mpv.
 
+    ``video-params/hw-pixelformat``
+        The underlying pixel format as string. This is relevant for some cases
+        of hardware decoding and unavailable otherwise.
+
     ``video-params/average-bpp``
         Average bits-per-pixel as integer. Subsampled planar formats use a
         different resolution, which is the reason this value can sometimes be
@@ -2357,6 +2361,7 @@ Property list
 
         MPV_FORMAT_NODE_MAP
             "pixelformat"       MPV_FORMAT_STRING
+            "hw-pixelformat"    MPV_FORMAT_STRING
             "w"                 MPV_FORMAT_INT64
             "h"                 MPV_FORMAT_INT64
             "dw"                MPV_FORMAT_INT64

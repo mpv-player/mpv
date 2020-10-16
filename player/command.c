@@ -2195,6 +2195,8 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
 
     struct m_sub_property props[] = {
         {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p.imgfmt))},
+        {"hw-pixelformat",  SUB_PROP_STR(mp_imgfmt_to_name(p.hw_subfmt)),
+                            .unavailable = !p.hw_subfmt},
         {"average-bpp",     SUB_PROP_INT(bpp),
                             .unavailable = !bpp},
         {"w",               SUB_PROP_INT(p.w)},
