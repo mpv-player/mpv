@@ -1663,10 +1663,11 @@ void wayland_sync_swap(struct vo_wayland_state *wl)
     int index = wl->sync_size - 1;
 
     // If these are the same, presentation feedback has not been received.
-    // This can happen if a frame takes too long and misses vblank. Don't
-    // attempt to use these statistics and wait until the next presentation
+    // This can happen if a frame takes too long and misses vblank.
+    // Additionally, a compositor may return an ust value of 0. In either case,
+    // Don't attempt to use these statistics and wait until the next presentation
     // event arrives.
-    if (wl->sync[index].ust == wl->last_ust) {
+    if (!wl->sync[index].ust || wl->sync[index].ust == wl->last_ust) {
         wl->last_skipped_vsyncs = -1;
         wl->vsync_duration = -1;
         wl->last_queue_display_time = -1;
