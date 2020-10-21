@@ -898,8 +898,8 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
 
     // Warn for remaining out-of-gamut colors is enabled
     if (opts->gamut_warning) {
-        GLSL(if (any(greaterThan(color.rgb, vec3(1.01))) ||
-                 any(lessThan(color.rgb, vec3(0.0)))))
+        GLSL(if (any(greaterThan(color.rgb, vec3(1.005))) ||
+                 any(lessThan(color.rgb, vec3(-0.005)))))
             GLSL(color.rgb = vec3(1.0) - color.rgb;) // invert
     }
 
