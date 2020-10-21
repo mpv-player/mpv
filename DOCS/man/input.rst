@@ -160,8 +160,9 @@ Flat command syntax
 This is the syntax used in input.conf, and referred to "input.conf syntax" in
 a number of other places.
 
-``<command> ::= [<prefixes>] <command_name> (<argument>)*``
-``<argument> ::= (<string> | " <quoted_string> " )``
+|
+| ``<command>  ::= [<prefixes>] <command_name> (<argument>)*``
+| ``<argument> ::= (<string> | " <quoted_string> ")``
 
 ``command_name`` is an unquoted string with the command name itself. See
 `List of Input Commands`_ for a list.
