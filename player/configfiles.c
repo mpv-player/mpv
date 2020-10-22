@@ -433,6 +433,23 @@ exit:
     talloc_free(conffile);
 }
 
+void mp_delete_watch_later_conf(struct MPContext *mpctx, const char *file)
+{
+    if (!file) {
+        struct playlist_entry *cur = mpctx->playing;
+        if (!cur)
+            return;
+        file = cur->filename;
+        if (!file)
+            return;
+    }
+
+    char *fname = mp_get_playback_resume_config_filename(mpctx, file);
+    if (fname)
+        unlink(fname);
+    talloc_free(fname);
+}
+
 void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
 {
     if (!mpctx->opts->position_resume)

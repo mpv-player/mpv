@@ -724,6 +724,13 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     Write the resume config file that the ``quit-watch-later`` command writes,
     but continue playback normally.
 
+``delete-watch-later-config [<filename>]``
+    Delete any existing resume config file that was written by
+    ``quit-watch-later`` or ``write-watch-later-config``. If a filename is
+    specified, then the deleted config is for that file; otherwise, it is the
+    same one as would be written by ``quit-watch-later`` or
+    ``write-watch-later-config`` in the current circumstance.
+
 ``stop [<flags>]``
     Stop playback and clear playlist. With default settings, this is
     essentially like ``quit``. Useful for the client API: playback can be
