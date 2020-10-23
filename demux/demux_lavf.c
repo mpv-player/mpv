@@ -610,6 +610,8 @@ static void export_replaygain(demuxer_t *demuxer, struct sh_stream *sh,
 
         av_rgain = (AVReplayGain*)src_sd->data;
         rgain    = talloc_ptrtype(demuxer, rgain);
+        rgain->track_gain = rgain->album_gain = 0;
+        rgain->track_peak = rgain->album_peak = 1;
 
         // Set values in *rgain, using track gain as a fallback for album gain
         // if the latter is not present. This behavior matches that in
