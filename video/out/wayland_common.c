@@ -19,7 +19,7 @@
 #include <limits.h>
 #include <poll.h>
 #include <unistd.h>
-#include <linux/input.h>
+#include <linux/input-event-codes.h>
 #include <time.h>
 #include "common/msg.h"
 #include "options/m_config.h"
