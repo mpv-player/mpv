@@ -954,6 +954,11 @@ Program Behavior
         if available, allowing for video/audio selection in runtime (default:
         no). It's disabled ("no") by default for performance reasons.
 
+    ``ytdl_path=youtube-dl``
+        Configure path to youtube-dl executable or a compatible fork's.
+        The default "youtube-dl" looks for the executable in PATH. In a Windows
+        environment the suffix extension ".exe" is always appended.
+
     .. admonition:: Why do the option names mix ``_`` and ``-``?
 
         I have no idea.

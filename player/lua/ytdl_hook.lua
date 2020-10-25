@@ -8,16 +8,18 @@ local o = {
     use_manifests = false,
     all_formats = false,
     force_all_formats = true,
+    ytdl_path = "youtube-dl",
 }
 
 local ytdl = {
-    path = "youtube-dl",
+    path = nil,
     searched = false,
     blacklisted = {}
 }
 
 options.read_options(o, nil, function()
     ytdl.blacklisted = {} -- reparse o.exclude next time
+    ytdl.searched = false
 end)
 
 local chapter_list = {}
@@ -690,7 +692,7 @@ function run_ytdl_hook(url)
     -- check for youtube-dl in mpv's config dir
     if not (ytdl.searched) then
         local exesuf = (package.config:sub(1,1) == '\\') and '.exe' or ''
-        local ytdl_mcd = mp.find_config_file("youtube-dl" .. exesuf)
+        local ytdl_mcd = mp.find_config_file(o.ytdl_path .. exesuf)
         if not (ytdl_mcd == nil) then
             msg.verbose("found youtube-dl at: " .. ytdl_mcd)
             ytdl.path = ytdl_mcd
