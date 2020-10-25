@@ -693,7 +693,10 @@ function run_ytdl_hook(url)
     if not (ytdl.searched) then
         local exesuf = (package.config:sub(1,1) == '\\') and '.exe' or ''
         local ytdl_mcd = mp.find_config_file(o.ytdl_path .. exesuf)
-        if not (ytdl_mcd == nil) then
+        if ytdl_mcd == nil then
+            msg.verbose("No youtube-dl found with path "..o.ytdl_path..exesuf.." in config directories")
+            ytdl.path = o.ytdl_path
+        else
             msg.verbose("found youtube-dl at: " .. ytdl_mcd)
             ytdl.path = ytdl_mcd
         end
