@@ -302,6 +302,10 @@ iconv support use --disable-iconv.",
         'func': check_statement('sys/vfs.h',
                                 'struct statfs fs; fstatfs(0, &fs); fs.f_namelen')
     }, {
+        'name': 'linux-input-event-codes',
+        'desc': "Linux's input-event-codes.h",
+        'func': check_cc(header_name=['linux/input-event-codes.h']),
+    }, {
         'name' : '--lua',
         'desc' : 'Lua',
         'func': check_lua,
@@ -491,7 +495,7 @@ video_output_features = [
     } , {
         'name': '--wayland',
         'desc': 'Wayland',
-        'deps': 'wayland-protocols && wayland-scanner',
+        'deps': 'wayland-protocols && wayland-scanner && linux-input-event-codes',
         'func': check_pkg_config('wayland-client', '>= 1.15.0',
                                  'wayland-cursor', '>= 1.15.0',
                                  'xkbcommon',      '>= 0.3.0'),
