@@ -44,20 +44,22 @@ static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
 
 // Stolen from: vlc/-/blob/master/modules/meta_engine/folder.c#L40
 static const char *const cover_files[] = {
-    "Folder.jpg",
-    "Folder.png",
-    "AlbumArtSmall.jpg",
     "AlbumArt.jpg",
     "Album.jpg",
-    ".folder.png",
     "cover.jpg",
     "cover.png",
-    "cover.gif",
     "front.jpg",
     "front.png",
-    "front.gif",
-    "front.bmp",
+
+    "AlbumArtSmall.jpg",
+    "Folder.jpg",
+    "Folder.png",
+    ".folder.png",
     "thumb.jpg",
+
+    "front.bmp",
+    "front.gif",
+    "cover.gif",
     NULL
 };
 
