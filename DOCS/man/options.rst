@@ -746,6 +746,23 @@ Program Behavior
     The default is a subdirectory named "watch_later" underneath the
     config directory (usually ``~/.config/mpv/``).
 
+``--watch-later-blacklist-properties=<all|property1,property2,...>``
+    Prevents the listed properties from being saved in the "watch later" files.
+    Existing watch later data won't be modified and will still be applied
+    fully, but new watch later data won't contain these properties.
+
+    The special name "all" blacklists as many properties as possible. The
+    starting position is always saved and restored.
+
+    .. admonition:: Examples
+
+        - ``--watch-later-blacklist-properties=fullscreen``
+          Resuming a file won't restore the fullscreen state.
+        - ``--watch-later-blacklist-properties=volume,mute``
+          Resuming a file won't restore the volume or mute state.
+        - ``--watch-later-blacklist-properties=all``
+          Resuming a file won't restore any property except the starting position.
+
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To

@@ -357,6 +357,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     if (!file)
         goto exit;
 
+    struct MPOpts *opts = mpctx->opts;
+
     write_filename(mpctx, file, cur->filename);
 
     double pos = get_current_time(mpctx);
@@ -370,6 +372,29 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     }
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];
+
+        if (opts->watch_later_blacklist_properties) {
+            bool blacklist_all = false;
+            bool blacklist_one = false;
+            for (int n = 0; opts->watch_later_blacklist_properties[n]; n++) {
+                const char *opt = opts->watch_later_blacklist_properties[n];
+                if (opt[0]) {
+                    if (strcmp(opt, "all") == 0) {
+                        blacklist_all = true;
+                        break;
+                    } else if (strcmp(opt, pname) == 0) {
+                        blacklist_one = true;
+                        break;
+                    }
+                }
+            }
+            if (blacklist_all) {
+                break;
+            } else if (blacklist_one) {
+                continue;
+            }
+        }
+
         char *val = NULL;
         int r = mp_property_do(pname, M_PROPERTY_GET_STRING, &val, mpctx);
         if (r == M_PROPERTY_OK) {
@@ -390,7 +415,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     }
     fclose(file);
 
-    if (mpctx->opts->position_check_mtime &&
+    if (opts->position_check_mtime &&
         !mp_is_url(bstr0(cur->filename)) &&
         !copy_mtime(cur->filename, conffile))
     {
