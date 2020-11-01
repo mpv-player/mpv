@@ -2079,10 +2079,9 @@ Property list
     to the requested amount, and is currently not reading more data.
 
 ``demuxer-cache-state``
-    Various undocumented or half-documented things.
-
     Each entry in ``seekable-ranges`` represents a region in the demuxer cache
-    that can be seeked to. If there are multiple demuxers active, this only
+    that can be seeked to, with a ``start`` and ``end`` fields containing the
+    respective timestamps. If there are multiple demuxers active, this only
     returns information about the "main" demuxer, but might be changed in
     future to return unified information about all demuxers. The ranges are in
     arbitrary order. Often, ranges will overlap for a bit, before being joined.
@@ -2107,7 +2106,13 @@ Property list
 
     ``file-cache-bytes`` is the number of bytes stored in the file cache. This
     includes all overhead, and possibly unused data (like pruned data). This
-    member is missing if the file cache is not active.
+    member is missing if the file cache wasn't enabled with
+    ``--cache-on-disk=yes``.
+
+    ``cache-end`` is ``demuxer-cache-time``. Missing if unavailable.
+
+    ``reader-pts`` is the approximate timestamp of the start of the buffered
+    range. Missing if unavailable.
 
     ``cache-duration`` is ``demuxer-cache-duration``. Missing if unavailable.
 
@@ -2130,6 +2135,8 @@ Property list
             "eof-cached"        MPV_FORMAT_FLAG
             "fw-bytes"          MPV_FORMAT_INT64
             "file-cache-bytes"  MPV_FORMAT_INT64
+            "cache-end"         MPV_FORMAT_DOUBLE
+            "reader-pts"        MPV_FORMAT_DOUBLE
             "cache-duration"    MPV_FORMAT_DOUBLE
             "raw-input-rate"    MPV_FORMAT_INT64
 
