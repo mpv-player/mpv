@@ -1531,6 +1531,17 @@ This list uses the event name field value, and the C API symbol in brackets:
 ``audio-reconfig`` (``MPV_EVENT_AUDIO_RECONFIG``)
     Happens on audio output or filter reconfig.
 
+``property-change`` (``MPV_EVENT_PROPERTY_CHANGE``)
+    Happens when a property that is being observed changes value.
+
+    The event has the following fields:
+
+    ``name``
+        The name of the property.
+
+    ``data``
+        The new value of the property.
+
 The following events also happen, but are deprecated: ``tracks-changed``,
 ``track-switched``, ``pause``, ``unpause``, ``metadata-update``, ``idle``,
 ``tick``, ``chapter-change``. Use ``mpv_observe_property()``
