@@ -512,7 +512,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     ``playback_only`` (``MPV_FORMAT_FLAG``)
         Boolean indicating whether the process should be killed when playback
-        terminates (optional, default: yes). If enabled, stopping playback
+        terminates (optional, default: true). If enabled, stopping playback
         will automatically kill the process, and you can't start it outside of
         playback.
 
@@ -532,7 +532,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Whether to run the process in detached mode (optional, default: no). In
         this mode, the process is run in a new process session, and the command
         does not wait for the process to terminate. If neither
-        ``capture_stdout`` nor ``capture_stderr`` have been set to ``yes``,
+        ``capture_stdout`` nor ``capture_stderr`` have been set to true,
         the command returns immediately after the new process has been started,
         otherwise the command will read as long as the pipes are open.
 
@@ -555,8 +555,8 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     ``passthrough_stdin`` (``MPV_FORMAT_FLAG``)
         If enabled, wire the new process' stdin to mpv's stdin (default: no).
-        Before mpv 0.33.0, this argument did not exist, but the default was if
-        it was set to ``yes``.
+        Before mpv 0.33.0, this argument did not exist, but the behavior was as
+        if this was set to true.
 
     The command returns the following result (as ``MPV_FORMAT_NODE_MAP``):
 
@@ -582,13 +582,12 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         process could not be started.
 
         On Windows, ``killed`` is only returned when the process has been
-        killed by mpv as a result of ``playback_only`` being set to ``yes``.
+        killed by mpv as a result of ``playback_only`` being set to true.
 
     ``killed_by_us`` (``MPV_FORMAT_FLAG``)
-        Set to ``yes`` if the process has been killed by mpv, for example as a
-        result of ``playback_only`` being set to ``yes``, aborting the command
-        (e.g. by ``mp.abort_async_command()``), or if the player is about to
-        exit.
+        Whether the process has been killed by mpv, for example as a result of
+        ``playback_only`` being set to true, aborting the command (e.g. by
+        ``mp.abort_async_command()``), or if the player is about to exit.
 
     Note that the command itself will always return success as long as the
     parameters are correct. Whether the process could be spawned or whether
@@ -838,8 +837,8 @@ Input Commands that are Possibly Subject to Change
         Append the new filter chain to the previous one.
 
     <toggle>
-        Check if the given filter (with the exact parameters) is already
-        in the video chain. If yes, remove the filter. If no, add the filter.
+        Check if the given filter (with the exact parameters) is already in the
+        video chain. If it is, remove the filter. If it isn't, add the filter.
         (If several filters are passed to the command, this is done for
         each filter.)
 
@@ -1119,14 +1118,14 @@ Input Commands that are Possibly Subject to Change
         between different OSD formats and builtin OSD is handled.
 
     ``hidden``
-        If set to ``yes``/true, do not display this (default: no).
+        If set to true, do not display this (default: false).
 
     ``compute_bounds``
-        If set to ``yes``/true, attempt to determine bounds and write them to
-        the command's result value as ``x0``, ``x1``, ``y0``, ``y1`` rectangle
-        (default: no). If the rectangle is empty, not known, or somehow
-        degenerate, it is not set. ``x1``/``y1`` is the coordinate of the bottom
-        exclusive corner of the rectangle.
+        If set to true, attempt to determine bounds and write them to the
+        command's result value as ``x0``, ``x1``, ``y0``, ``y1`` rectangle
+        (default: false). If the rectangle is empty, not known, or somehow
+        degenerate, it is not set. ``x1``/``y1`` is the coordinate of the
+        bottom exclusive corner of the rectangle.
 
         The result value may depend on the VO window size, and is based on the
         last known window size at the time of the call. This means the results
@@ -1957,7 +1956,7 @@ Property list
         Currently, this is the same as the edition index.
 
     ``edition-list/N/default``
-        ``yes`` if this is the default edition, ``no`` otherwise.
+        Whether this is the default edition.
 
     ``edition-list/N/title``
         Edition title as stored in the file. Not always available.
@@ -2044,18 +2043,18 @@ Property list
     Equivalent to ``vf-metadata/<filter-label>``, but for audio filters.
 
 ``idle-active``
-    Return ``yes`` if no file is loaded, but the player is staying around
+    Return ``yes``/true if no file is loaded, but the player is staying around
     because of the ``--idle`` option.
 
     (Renamed from ``idle``.)
 
 ``core-idle``
-    Return ``yes`` if the playback core is paused, otherwise ``no``. This can
-    be different ``pause`` in special situations, such as when the player
-    pauses itself due to low network cache.
+    Whether the playback core is paused. This can differ from ``pause`` in
+    special situations, such as when the player pauses itself due to low
+    network cache.
 
-    This also returns ``yes`` if playback is restarting or if nothing is
-    playing at all. In other words, it's only ``no`` if there's actually
+    This also returns ``yes``/true if playback is restarting or if nothing is
+    playing at all. In other words, it's only ``no``/false if there's actually
     video playing. (Behavior since mpv 0.7.0.)
 
 ``cache-speed`` (R)
@@ -2076,8 +2075,8 @@ Property list
     data in demuxer.
 
 ``demuxer-cache-idle``
-    Returns ``yes`` if the demuxer is idle, which means the demuxer cache is
-    filled to the requested amount, and is currently not reading more data.
+    Whether the demuxer is idle, which means that the demuxer cache is filled
+    to the requested amount, and is currently not reading more data.
 
 ``demuxer-cache-state``
     Various undocumented or half-documented things.
@@ -2098,8 +2097,8 @@ Property list
     points to the beginning of the stream (BOF). This implies you cannot seek
     before this position at all. ``eof-cached`` indicates whether the seek range
     with the highest timestamp points to the end of the stream (EOF). If both
-    ``bof-cached`` and ``eof-cached`` are set to ``yes``, and there's only 1
-    cache range, the entire stream is cached.
+    ``bof-cached`` and ``eof-cached`` are true, and there's only 1 cache range,
+    the entire stream is cached.
 
     ``fw-bytes`` is the number of bytes of packets buffered in the range
     starting from the current decoding position. This is a rough estimate
@@ -2137,52 +2136,51 @@ Property list
     Other fields (might be changed or removed in the future):
 
     ``eof``
-        True if the reader thread has hit the end of the file.
+        Whether the reader thread has hit the end of the file.
 
     ``underrun``
-        True if the reader thread could not satisfy a decoder's request for a
+        Whether the reader thread could not satisfy a decoder's request for a
         new packet.
 
     ``idle``
-        True if the thread is currently not reading.
+        Whether the thread is currently not reading.
 
     ``total-bytes``
         Sum of packet bytes (plus some overhead estimation) of the entire packet
         queue, including cached seekable ranges.
 
 ``demuxer-via-network``
-    Returns ``yes`` if the stream demuxed via the main demuxer is most likely
-    played via network. What constitutes "network" is not always clear, might
-    be used for other types of untrusted streams, could be wrong in certain
-    cases, and its definition might be changing. Also, external files (like
-    separate audio files or streams) do not influence the value of this
-    property (currently).
+    Whether the stream demuxed via the main demuxer is most likely played via
+    network. What constitutes "network" is not always clear, might be used for
+    other types of untrusted streams, could be wrong in certain cases, and its
+    definition might be changing. Also, external files (like separate audio
+    files or streams) do not influence the value of this property (currently).
 
 ``demuxer-start-time`` (R)
     Returns the start time reported by the demuxer in fractional seconds.
 
 ``paused-for-cache``
-    Returns ``yes`` when playback is paused because of waiting for the cache.
+    Whether playback is paused because of waiting for the cache.
 
 ``cache-buffering-state``
     Return the percentage (0-100) of the cache fill status until the player
     will unpause (related to ``paused-for-cache``).
 
 ``eof-reached``
-    Returns ``yes`` if end of playback was reached, ``no`` otherwise. Note
-    that this is usually interesting only if ``--keep-open`` is enabled,
-    since otherwise the player will immediately play the next file (or exit
-    or enter idle mode), and in these cases the ``eof-reached`` property will
-    logically be cleared immediately after it's set.
+    Whether the end of playback was reached. Note that this is usually
+    interesting only if ``--keep-open`` is enabled, since otherwise the player
+    will immediately play the next file (or exit or enter idle mode), and in
+    these cases the ``eof-reached`` property will logically be cleared
+    immediately after it's set.
 
 ``seeking``
-    Returns ``yes`` if the player is currently seeking, or otherwise trying
-    to restart playback. (It's possible that it returns ``yes`` while a file
-    is loaded. This is because the same underlying code is used for seeking and
+    Whether the player is currently seeking, or otherwise trying to restart
+    playback. (It's possible that it returns ``yes``/true while a file is
+    loaded. This is because the same underlying code is used for seeking and
     resyncing.)
 
 ``mixer-active``
-    Return ``yes`` if the audio mixer is active, ``no`` otherwise.
+    Whether the audio mixer is active.
 
     This option is relatively useless. Before mpv 0.18.1, it could be used to
     infer behavior of the ``volume`` property.
@@ -2269,8 +2267,9 @@ Property list
 
 ``hwdec-current``
     Return the current hardware decoding in use. If decoding is active, return
-    one of the values used by the ``hwdec`` option/property. ``no`` indicates
-    software decoding. If no decoder is loaded, the property is unavailable.
+    one of the values used by the ``hwdec`` option/property. ``no``/false
+    indicates software decoding. If no decoder is loaded, the property is
+    unavailable.
 
 ``hwdec-interop``
     This returns the currently loaded hardware decoding/output interop driver.
@@ -2642,12 +2641,12 @@ Property list
         Filename of the Nth entry.
 
     ``playlist/N/playing``
-        ``yes`` if the ``playlist-playing-pos`` property points to this entry,
-        unavailable or ``no`` otherwise.
+        ``yes``/true if the ``playlist-playing-pos`` property points to this
+        entry, ``no``/false or unavailable otherwise.
 
     ``playlist/N/current``
-        ``yes`` if the ``playlist-current-pos`` property points to this entry,
-        unavailable or ``no`` otherwise.
+        ``yes``/true if the ``playlist-current-pos`` property points to this
+        entry, ``no``/false or unavailable otherwise.
 
     ``playlist/N/title``
         Name of the Nth entry. Only available if the playlist file contains
@@ -2705,32 +2704,33 @@ Property list
         Track language as identified by the file. Not always available.
 
     ``track-list/N/albumart``
-        ``yes`` if this is a video track that consists of a single picture,
-        ``no`` or unavailable otherwise. This is used for video tracks that are
-        really attached pictures in audio files.
+        ``yes``/true if this is a video track that consists of a single
+        picture, ``no``/false or unavailable otherwise. This is used for video
+        tracks that are really attached pictures in audio files.
 
     ``track-list/N/default``
-        ``yes`` if the track has the default flag set in the file, ``no``
-        otherwise.
+        ``yes``/true if the track has the default flag set in the file,
+        ``no``/false or unavailable otherwise.
 
     ``track-list/N/forced``
-        ``yes`` if the track has the forced flag set in the file, ``no``
-        otherwise.
+        ``yes``/true if the track has the forced flag set in the file,
+        ``no``/false or unavailable otherwise.
 
     ``track-list/N/codec``
         The codec name used by this track, for example ``h264``. Unavailable
         in some rare cases.
 
     ``track-list/N/external``
-        ``yes`` if the track is an external file, ``no`` otherwise. This is
-        set for separate subtitle files.
+        ``yes``/true if the track is an external file, ``no``/false or
+        unavailable otherwise. This is set for separate subtitle files.
 
     ``track-list/N/external-filename``
         The filename if the track is from an external file, unavailable
         otherwise.
 
     ``track-list/N/selected``
-        ``yes`` if the track is currently decoded, ``no`` otherwise.
+        ``yes``/true if the track is currently decoded, ``no``/false or
+        unavailable otherwise.
 
     ``track-list/N/main-selection``
         It indicates the selection order of tracks for the same type.
@@ -2896,12 +2896,12 @@ Property list
     Return whether it's generally possible to seek in the current file.
 
 ``partially-seekable``
-    Return ``yes`` if the current file is considered seekable, but only because
-    the cache is active. This means small relative seeks may be fine, but larger
-    seeks may fail anyway. Whether a seek will succeed or not is generally not
-    known in advance.
+    Whether the current file is considered seekable, but only because the cache
+    is active. This means small relative seeks may be fine, but larger seeks
+    may fail anyway. Whether a seek will succeed or not is generally not known
+    in advance.
 
-    If this property returns true, ``seekable`` will also return true.
+    If this property returns ``yes``/true, so will ``seekable``.
 
 ``playback-abort``
     Return whether playback is stopped or is to be stopped. (Useful in obscure
@@ -2940,7 +2940,7 @@ Property list
 ``vo-configured``
     Return whether the VO is configured right now. Usually this corresponds to
     whether the video window is visible. If the ``--force-window`` option is
-    used, this is usually always returns ``yes``.
+    used, this usually always returns ``yes``/true.
 
 ``vo-passes``
     Contains introspection about the VO's active render passes and their
@@ -3216,12 +3216,12 @@ Property list
         For many complex types, this isn't very accurate.
 
     ``option-info/<name>/set-from-commandline``
-        Return ``yes`` if the option was set from the mpv command line,
-        ``no`` otherwise. What this is set to if the option is e.g. changed
-        at runtime is left undefined (meaning it could change in the future).
+        Whether the option was set from the mpv command line. What this is set
+        to if the option is e.g. changed at runtime is left undefined (meaning
+        it could change in the future).
 
     ``option-info/<name>/set-locally``
-        Return ``yes`` if the option was set per-file. This is the case with
+        Whether the option was set per-file. This is the case with
         automatically loaded profiles, file-dir configs, and other cases. It
         means the option value will be restored to the value before playback
         start when playback ends.
