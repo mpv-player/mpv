@@ -1760,7 +1760,7 @@ Property list
     being ``(raw - 1) * 100`` for the given raw property value.
 
 ``display-sync-active``
-    Return whether ``--video-sync=display`` is actually active.
+    Whether ``--video-sync=display`` is actually active.
 
 ``filename``
     Currently played file, with path stripped. If this is an URL, try to undo
@@ -2043,7 +2043,7 @@ Property list
     Equivalent to ``vf-metadata/<filter-label>``, but for audio filters.
 
 ``idle-active``
-    Return ``yes``/true if no file is loaded, but the player is staying around
+    Returns ``yes``/true if no file is loaded, but the player is staying around
     because of the ``--idle`` option.
 
     (Renamed from ``idle``.)
@@ -2164,14 +2164,14 @@ Property list
     files or streams) do not influence the value of this property (currently).
 
 ``demuxer-start-time`` (R)
-    Returns the start time reported by the demuxer in fractional seconds.
+    The start time reported by the demuxer in fractional seconds.
 
 ``paused-for-cache``
     Whether playback is paused because of waiting for the cache.
 
 ``cache-buffering-state``
-    Return the percentage (0-100) of the cache fill status until the player
-    will unpause (related to ``paused-for-cache``).
+    The percentage (0-100) of the cache fill status until the player will
+    unpause (related to ``paused-for-cache``).
 
 ``eof-reached``
     Whether the end of playback was reached. Note that this is usually
@@ -2273,10 +2273,9 @@ Property list
     this purpose.
 
 ``hwdec-current``
-    Return the current hardware decoding in use. If decoding is active, return
-    one of the values used by the ``hwdec`` option/property. ``no``/false
-    indicates software decoding. If no decoder is loaded, the property is
-    unavailable.
+    The current hardware decoding in use. If decoding is active, return one of
+    the values used by the ``hwdec`` option/property. ``no``/false indicates
+    software decoding. If no decoder is loaded, the property is unavailable.
 
 ``hwdec-interop``
     This returns the currently loaded hardware decoding/output interop driver.
@@ -2486,9 +2485,9 @@ Property list
     versions, it returned the ``--display-fps`` option value.
 
 ``estimated-display-fps``
-    Only available if display-sync mode (as selected by ``--video-sync``) is
-    active. Returns the actual rate at which display refreshes seem to occur,
-    measured by system time.
+    The actual rate at which display refreshes seem to occur, measured by
+    system time. Only available if display-sync mode (as selected by
+    ``--video-sync``) is active.
 
 ``vsync-jitter``
     Estimated deviation factor of the vsync duration.
@@ -2546,9 +2545,9 @@ Property list
     VO window is not created or visible.
 
 ``sub-text``
-    Return the current subtitle text regardless of sub visibility.
-    Formatting is stripped. If the subtitle is not text-based
-    (i.e. DVD/BD subtitles), an empty string is returned.
+    The current subtitle text regardless of sub visibility. Formatting is
+    stripped. If the subtitle is not text-based (i.e. DVD/BD subtitles), an
+    empty string is returned.
 
     This property is experimental and might be removed in the future.
 
@@ -2566,15 +2565,15 @@ Property list
     This property is experimental and might be removed in the future.
 
 ``sub-start``
-    Return the current subtitle start time (in seconds). If there's multiple
-    current subtitles, returns the first start time. If no current subtitle is
-    present null is returned instead.
+    The current subtitle start time (in seconds). If there's multiple current
+    subtitles, returns the first start time. If no current subtitle is present
+    null is returned instead.
 
 ``sub-end``
-    Return the current subtitle end time (in seconds). If there's multiple
-    current subtitles, return the last end time. If no current subtitle is
-    present, or if it's present but has unknown or incorrect duration, null
-    is returned instead.
+    The current subtitle end time (in seconds). If there's multiple current
+    subtitles, return the last end time. If no current subtitle is present, or
+    if it's present but has unknown or incorrect duration, null is returned
+    instead.
 
 ``playlist-pos`` (RW)
     Current position on playlist. The first entry is on position 0. Writing to
@@ -2900,7 +2899,7 @@ Property list
     It's also possible to write the property using this format.
 
 ``seekable``
-    Return whether it's generally possible to seek in the current file.
+    Whether it's generally possible to seek in the current file.
 
 ``partially-seekable``
     Whether the current file is considered seekable, but only because the cache
@@ -2911,9 +2910,9 @@ Property list
     If this property returns ``yes``/true, so will ``seekable``.
 
 ``playback-abort``
-    Return whether playback is stopped or is to be stopped. (Useful in obscure
-    situations like during ``on_load`` hook processing, when the user can
-    stop playback, but the script has to explicitly end processing.)
+    Whether playback is stopped or is to be stopped. (Useful in obscure
+    situations like during ``on_load`` hook processing, when the user can stop
+    playback, but the script has to explicitly end processing.)
 
 ``cursor-autohide`` (RW)
     See ``--cursor-autohide``. Setting this to a new value will always update
@@ -2945,9 +2944,9 @@ Property list
     A list of tags can be found here: http://docs.aegisub.org/latest/ASS_Tags/
 
 ``vo-configured``
-    Return whether the VO is configured right now. Usually this corresponds to
-    whether the video window is visible. If the ``--force-window`` option is
-    used, this usually always returns ``yes``/true.
+    Whether the VO is configured right now. Usually this corresponds to whether
+    the video window is visible. If the ``--force-window`` option is used, this
+    usually always returns ``yes``/true.
 
 ``vo-passes``
     Contains introspection about the VO's active render passes and their
@@ -3049,9 +3048,9 @@ Property list
     These properties shouldn't be used anymore.
 
 ``audio-device-list``
-    Return the list of discovered audio devices. This is mostly for use with
-    the client API, and reflects what ``--audio-device=help`` with the command
-    line player returns.
+    The list of discovered audio devices. This is mostly for use with the
+    client API, and reflects what ``--audio-device=help`` with the command line
+    player returns.
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
@@ -3119,8 +3118,8 @@ Property list
     same key at the same time.)
 
 ``working-directory``
-    Return the working directory of the mpv process. Can be useful for JSON IPC
-    users, because the command line player usually works with relative paths.
+    The working directory of the mpv process. Can be useful for JSON IPC users,
+    because the command line player usually works with relative paths.
 
 ``protocol-list``
     List of protocol prefixes potentially recognized by the player. They are
@@ -3169,24 +3168,24 @@ Property list
     List of `Key names`_, same as output by ``--input-keylist``.
 
 ``mpv-version``
-    Return the mpv version/copyright string. Depending on how the binary was
-    built, it might contain either a release version, or just a git hash.
+    The mpv version/copyright string. Depending on how the binary was built, it
+    might contain either a release version, or just a git hash.
 
 ``mpv-configuration``
-    Return the configuration arguments which were passed to the build system
+    The configuration arguments which were passed to the build system
     (typically the way ``./waf configure ...`` was invoked).
 
 ``ffmpeg-version``
-    Return the contents of the ``av_version_info()`` API call. This is a string
-    which identifies the build in some way, either through a release version
-    number, or a git hash. This applies to Libav as well (the property is
-    still named the same.) This property is unavailable if mpv is linked against
-    older FFmpeg and Libav versions.
+    The contents of the ``av_version_info()`` API call. This is a string which
+    identifies the build in some way, either through a release version number,
+    or a git hash. This applies to Libav as well (the property is still named
+    the same.) This property is unavailable if mpv is linked against older
+    FFmpeg and Libav versions.
 
 ``libass-version``
-    Return the value of ``ass_library_version()``. This is an integer, encoded
-    in a somewhat weird form (apparently "hex BCD"), indicating the release
-    version of the libass library linked to mpv.
+    The value of ``ass_library_version()``. This is an integer, encoded in a
+    somewhat weird form (apparently "hex BCD"), indicating the release version
+    of the libass library linked to mpv.
 
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
@@ -3216,11 +3215,11 @@ Property list
     sub-properties - they may change radically in the feature.
 
     ``option-info/<name>/name``
-        Returns the name of the option.
+        The name of the option.
 
     ``option-info/<name>/type``
-        Return the name of the option type, like ``String`` or ``Integer``.
-        For many complex types, this isn't very accurate.
+        The name of the option type, like ``String`` or ``Integer``. For many
+        complex types, this isn't very accurate.
 
     ``option-info/<name>/set-from-commandline``
         Whether the option was set from the mpv command line. What this is set
@@ -3249,26 +3248,26 @@ Property list
         available.
 
 ``property-list``
-    Return the list of top-level properties.
+    The list of top-level properties.
 
 ``profile-list``
-    Return the list of profiles and their contents. This is highly
-    implementation-specific, and may change any time. Currently, it returns
-    an array of options for each profile. Each option has a name and a value,
-    with the value currently always being a string. Note that the options array
-    is not a map, as order matters and duplicate entries are possible. Recursive
+    The list of profiles and their contents. This is highly
+    implementation-specific, and may change any time. Currently, it returns an
+    array of options for each profile. Each option has a name and a value, with
+    the value currently always being a string. Note that the options array is
+    not a map, as order matters and duplicate entries are possible. Recursive
     profiles are not expanded, and show up as special ``profile`` options.
 
 ``command-list``
-    Return the list of input commands. This returns an array of maps, where
-    each map node represents a command. This map currently only has a single
-    entry: ``name`` for the name of the command. (This property is supposed to
-    be a replacement for ``--input-cmdlist``. The option dumps some more
+    The list of input commands. This returns an array of maps, where each map
+    node represents a command. This map currently only has a single entry:
+    ``name`` for the name of the command. (This property is supposed to be a
+    replacement for ``--input-cmdlist``. The option dumps some more
     information, but it's a valid feature request to extend this property if
     needed.)
 
 ``input-bindings``
-    Return list of current input key bindings. This returns an array of maps,
+    The list of current input key bindings. This returns an array of maps,
     where each map node represents a binding for a single key/command. This map
     has the following entries:
 
