@@ -741,6 +741,10 @@ video_output_features = [
         'desc': 'EGL helper functions',
         'deps': 'egl || rpi || egl-angle-win32 || egl-android',
         'func': check_true
+    }, {
+        'name': '--sixel',
+        'desc': 'Sixel',
+        'func': check_pkg_config('libsixel', '>= 1.5'),
     }
 ]
 

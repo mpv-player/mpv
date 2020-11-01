@@ -363,6 +363,74 @@ Available video output drivers are:
     ``--vo-tct-256=<yes|no>`` (default: no)
         Use 256 colors - for terminals which don't support true color.
 
+``sixel``
+    Sixel graphics video output driver based on libsixel that works on a
+    console that has sixel graphics enabled such as ``xterm`` or ``mlterm``.
+    Additionally some terminals have limitation on the dimensions, so may
+    not display images bigger than 1000x1000 for example. Make sure that
+    ``img2sixel`` can display images of the corresponding resolution.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
+
+    Note: the Sixel image output is not synchronized with other terminal output
+    from mpv, which can lead to broken images. The option ``--really-quiet``
+    can help with that, and is recommended.
+
+    ``--vo-sixel-diffusion=<algo>``
+        Selects the diffusion algorithm for dithering used by libsixel.
+        Can be one of the below list as per libsixel's documentation.
+
+        auto
+            Choose diffuse type automatically
+        none
+            Don't diffuse
+        atkinson
+            Diffuse with Bill Atkinson's method. (Default)
+        fs
+            Diffuse with Floyd-Steinberg method
+        jajuni
+            Diffuse with Jarvis, Judice & Ninke method
+        stucki
+            Diffuse with Stucki's method
+        burkes
+            Diffuse with Burkes' method
+        arithmetic
+            Positionally stable arithmetic dither
+        xor
+            Positionally stable arithmetic xor based dither
+
+    ``--vo-sixel-width=<width>``  ``--vo-sixel-height=<height>``
+        The output video resolution will be set to width and height
+        These default to 320x240 if not set. The terminal window must
+        be bigger than this resolution to have smooth playback.
+        Additionally the last row will be a blank line and can't be
+        used to display pixel data.
+
+    ``--vo-sixel-fixedpalette=<0|1>`` (default: 0)
+        Use libsixel's built-in static palette using the XTERM256 profile
+        for dither.  Fixed palette uses 256 colors for dithering.
+
+    ``--vo-sixel-reqcolors=<colors>`` (default: 256)
+        Setup libsixel to use required number of colors for dynamic palette.
+        This value depends on the console as well. Xterm supports 256.
+        Can set this to a lower value for faster performance.
+        This option has no effect if fixed palette is used.
+
+    ``--vo-sixel-color-threshold=<threshold>`` (default: 0)
+        This threshold value is used in dynamic palette mode to
+        recompute the palette based on the scene changes.
+
+    ``--vo-sixel-offset-top=<top>`` (default: 1)
+        The output video playback will start from the specified row number.
+        If this is greater than 1, then those many rows will be skipped.
+        This option can be used to shift video below in the terminal.
+        If it is greater than number of rows in terminal, then it is ignored.
+
+    ``--vo-sixel-offset-left=<left>`` (default: 1)
+        The output video playback will start from the specified column number.
+        If this is greater than 1, then those many columns will be skipped.
+        This option can be used to shift video to the right in the terminal.
+        If it is greater than number of columns in terminal, then it is ignored.
+
 ``image``
     Output each frame into an image file in the current directory. Each file
     takes the frame number padded with leading zeros as name.
