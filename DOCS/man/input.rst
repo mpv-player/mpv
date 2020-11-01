@@ -2418,12 +2418,20 @@ Property list
     redrawing and frame display being somewhat disconnected, and you might
     have to pause and force a redraw.
 
-    Sub-properties::
+    This has a number of sub-properties:
 
-        video-frame-info/picture-type
-        video-frame-info/interlaced
-        video-frame-info/tff
-        video-frame-info/repeat
+    ``video-frame-info/picture-type``
+        The type of the picture. It can be "I" (intra), "P" (predicted), "B"
+        (bi-dir predicted) or unavailable.
+
+    ``video-frame-info/interlaced``
+        Whether the content of the frame is interlaced.
+
+    ``video-frame-info/tff``
+        If the content is interlaced, whether the top field is displayed first.
+
+    ``video-frame-info/repeat``
+        Whether the frame must be delayed when decoding.
 
 ``container-fps``
     Container FPS. This can easily contain bogus values. For videos that use
