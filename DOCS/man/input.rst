@@ -1763,6 +1763,9 @@ Property list
     same name, or which have very different behavior from the options are
     documented below.
 
+    Properties marked as (RW) are writeable, while those that aren't are
+    read-only.
+
 ``audio-speed-correction``, ``video-speed-correction``
     Factor multiplied with ``speed`` at which the player attempts to play the
     file. Usually it's exactly 1. (Display sync mode will make this useful.)
@@ -1911,7 +1914,7 @@ Property list
     Remaining length of the file in seconds. Note that the file duration is not
     always exactly known, so this is an estimate.
 
-``audio-pts`` (R)
+``audio-pts``
     Current audio playback position in current file in seconds. Unlike time-pos,
     this updates more often than once per frame. For audio-only files, it is
     mostly equivalent to time-pos, while for video-only files this property is
@@ -1962,7 +1965,7 @@ Property list
         Number of editions. If there are no editions, this can be 0 or 1 (1
         if there's a useless dummy edition).
 
-    ``edition-list/N/id``
+    ``edition-list/N/id`` (RW)
         Edition ID as integer. Use this to set the ``edition`` property.
         Currently, this is the same as the edition index.
 
@@ -2068,7 +2071,7 @@ Property list
     playing at all. In other words, it's only ``no``/false if there's actually
     video playing. (Behavior since mpv 0.7.0.)
 
-``cache-speed`` (R)
+``cache-speed``
     Current I/O read speed between the cache and the lower layer (like network).
     This gives the number bytes per seconds over a 1 second window (using
     the type ``MPV_FORMAT_INT64`` for the client API).
@@ -2174,7 +2177,7 @@ Property list
     definition might be changing. Also, external files (like separate audio
     files or streams) do not influence the value of this property (currently).
 
-``demuxer-start-time`` (R)
+``demuxer-start-time``
     The start time reported by the demuxer in fractional seconds.
 
 ``paused-for-cache``
@@ -2261,14 +2264,14 @@ Property list
     Same as ``audio-params``, but the format of the data written to the audio
     API.
 
-``colormatrix`` (R)
+``colormatrix``
     Redirects to ``video-params/colormatrix``. This parameter (as well as
     similar ones) can be overridden with the ``format`` video filter.
 
-``colormatrix-input-range`` (R)
+``colormatrix-input-range``
     See ``colormatrix``.
 
-``colormatrix-primaries`` (R)
+``colormatrix-primaries``
     See ``colormatrix``.
 
 ``hwdec`` (RW)
@@ -2480,7 +2483,8 @@ Property list
     ways. The property is unavailable if no video is active.
 
 ``focused``
-    Whether the window has focus. Currently works only on X11 and Wayland.
+    Whether the window has focus. Currently works only on X11, Wayland and
+    macOS.
 
 ``display-names``
     Names of the displays that the mpv window covers. On X11, these
@@ -2542,21 +2546,21 @@ Property list
     Has the following sub-properties (which can be read as ``MPV_FORMAT_NODE``
     or Lua table with ``mp.get_property_native``):
 
-    ``w``
+    ``osd-dimensions/w``
         Size of the VO window in OSD render units (usually pixels, but may be
         scaled pixels with VOs like ``xv``).
 
-    ``h``
+    ``osd-dimensions/h``
         Size of the VO window in OSD render units,
 
-    ``par``
+    ``osd-dimensions/par``
         Pixel aspect ratio of the OSD (usually 1).
 
-    ``aspect``
+    ``osd-dimensions/aspect``
         Display aspect ratio of the VO window. (Computing from the properties
         above.)
 
-    ``mt``, ``mb``, ``ml``, ``mr``
+    ``osd-dimensions/mt``, ``osd-dimensions/mb``, ``osd-dimensions/ml``, ``osd-dimensions/mr``
         OSD to video margins (top, bottom, left, right). This describes the
         area into which the video is rendered.
 
@@ -3207,10 +3211,10 @@ Property list
     of the libass library linked to mpv.
 
 ``options/<name>`` (RW)
-    Read-only access to value of option ``--<name>``. Most options can be
-    changed at runtime by writing to this property. Note that many options
-    require reloading the file for changes to take effect. If there is an
-    equivalent property, prefer setting the property instead.
+    The value of option ``--<name>``. Most options can be changed at runtime by
+    writing to this property. Note that many options require reloading the file
+    for changes to take effect. If there is an equivalent property, prefer
+    setting the property instead.
 
     There shouldn't be any reason to access ``options/<name>`` instead of
     ``<name>``, except in situations in which the properties have different
