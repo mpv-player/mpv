@@ -915,7 +915,7 @@ static int init(struct ao *ao)
 
 // Function for dealing with playback state. This attempts to recover the ALSA
 // state (bring it into SND_PCM_STATE_{PREPARED,RUNNING,PAUSED,UNDERRUN}). If
-// state!=NULL, fill it after recovery.
+// state!=NULL, fill it after recovery is attempted.
 // Returns true if PCM is in one the expected states.
 static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
 {
@@ -983,19 +983,20 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
                 ao_request_reload(ao);
                 p->device_lost = true;
             }
-            return false;
+            goto alsa_error;
         }
     }
 
     if (!state_ok) {
         MP_ERR(ao, "could not recover\n");
-        return false;
     }
 
+alsa_error:
+
     if (state) {
-        snd_pcm_sframes_t del = snd_pcm_status_get_delay(st);
+        snd_pcm_sframes_t del = state_ok ? snd_pcm_status_get_delay(st) : 0;
         state->delay = MPMAX(del, 0) / (double)ao->samplerate;
-        state->free_samples = snd_pcm_status_get_avail(st);
+        state->free_samples = state_ok ? snd_pcm_status_get_avail(st) : 0;
         state->free_samples = MPCLAMP(state->free_samples, 0, ao->device_buffer);
         // Align to period size.
         state->free_samples = state->free_samples / p->outburst * p->outburst;
@@ -1004,10 +1005,7 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
                          pcmst == SND_PCM_STATE_PAUSED;
     }
 
-    return true;
-
-alsa_error:
-    return false;
+    return state_ok;
 }
 
 static void audio_get_state(struct ao *ao, struct mp_pcm_state *state)
