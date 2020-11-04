@@ -933,9 +933,18 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
     // (where things were retried in a loop).
     for (int n = 0; n < 10; n++) {
         err = snd_pcm_status(p->alsa, st);
-        CHECK_ALSA_ERROR("snd_pcm_status");
+        if (err == -EPIPE) {
+            // ALSA APIs can return -EPIPE when an XRUN happens,
+            // we skip right to handling it by setting pcmst
+            // manually.
+            pcmst = SND_PCM_STATE_XRUN;
+        } else {
+            // Otherwise do error checking and query the PCM state properly.
+            CHECK_ALSA_ERROR("snd_pcm_status");
 
-        pcmst = snd_pcm_status_get_state(st);
+            pcmst = snd_pcm_status_get_state(st);
+        }
+
         if (pcmst == SND_PCM_STATE_PREPARED ||
             pcmst == SND_PCM_STATE_RUNNING ||
             pcmst == SND_PCM_STATE_PAUSED)
