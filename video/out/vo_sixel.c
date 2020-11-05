@@ -44,8 +44,9 @@
 #define ESC_GOTOXY "\033[%d;%df"
 #define ESC_USE_GLOBAL_COLOR_REG "\033[?1070l"
 
+struct priv {
 
-struct vo_sixel_opts {
+    // User specified options
     int diffuse;
     int width;
     int height;
@@ -54,46 +55,8 @@ struct vo_sixel_opts {
     int threshold;
     int top;
     int left;
-};
 
-#define OPT_BASE_STRUCT struct vo_sixel_opts
-static const struct m_sub_options vo_sixel_conf = {
-    .opts = (const m_option_t[]) {
-        {"vo-sixel-diffusion", OPT_CHOICE(diffuse,
-            {"auto", DIFFUSE_AUTO},
-            {"none", DIFFUSE_NONE},
-            {"atkinson", DIFFUSE_ATKINSON},
-            {"fs", DIFFUSE_FS},
-            {"jajuni", DIFFUSE_JAJUNI},
-            {"stucki", DIFFUSE_STUCKI},
-            {"burkes", DIFFUSE_BURKES},
-            {"arithmetic", DIFFUSE_A_DITHER},
-            {"xor", DIFFUSE_X_DITHER})},
-        {"vo-sixel-width", OPT_INT(width)},
-        {"vo-sixel-height", OPT_INT(height)},
-        {"vo-sixel-reqcolors", OPT_INT(reqcolors)},
-        {"vo-sixel-fixedpalette", OPT_INT(fixedpal)},
-        {"vo-sixel-color-threshold", OPT_INT(threshold)},
-        {"vo-sixel-offset-top", OPT_INT(top)},
-        {"vo-sixel-offset-left", OPT_INT(left)},
-        {0}
-    },
-    .defaults = &(const struct vo_sixel_opts) {
-        .diffuse = DIFFUSE_ATKINSON,
-        .width = 320,
-        .height = 240,
-        .reqcolors = 256,
-        .fixedpal = 0,
-        .threshold = 0,
-        .top = 1,
-        .left = 1,
-    },
-    .size = sizeof(struct vo_sixel_opts),
-};
-
-struct priv {
-    struct vo_sixel_opts *opts;
-
+    // Internal data
     sixel_output_t *output;
     sixel_dither_t *dither;
     sixel_dither_t *testdither;
@@ -117,8 +80,8 @@ static const unsigned int depth = 3;
 static void validate_offset_values(struct vo* vo)
 {
     struct priv* priv = vo->priv;
-    int top = priv->opts->top;
-    int left = priv->opts->left;
+    int top = priv->top;
+    int left = priv->left;
     int terminal_width = 0;
     int terminal_height = 0;
 
@@ -128,13 +91,13 @@ static void validate_offset_values(struct vo* vo)
     // lies in the range 1 to TERMINAL_HEIGHT
     // Otherwise default to the topmost row
     if (top <= 0 || top > terminal_height)
-        priv->opts->top = 1;
+        priv->top = 1;
 
     // Make sure that the user specified left offset
     // lies in the range 1 to TERMINAL_WIDTH
     // Otherwise default to the leftmost column
-    if (left <= 0 || top > terminal_width)
-        priv->opts->left = 1;
+    if (left <= 0 || left > terminal_width)
+        priv->left = 1;
 }
 
 static int detect_scene_change(struct vo* vo)
@@ -181,7 +144,7 @@ static int detect_scene_change(struct vo* vo)
     score = (r - average_r) * (r - average_r)
           + (g - average_g) * (g - average_g)
           + (b - average_b) * (b - average_b);
-    if (score > priv->opts->threshold * palette_colors
+    if (score > priv->threshold * palette_colors
                              * palette_colors)
         goto detected;
 
@@ -222,7 +185,7 @@ static SIXELSTATUS prepare_static_palette(struct vo* vo)
         priv->dither = sixel_dither_get(BUILTIN_XTERM256);
         if (priv->dither == NULL)
             return SIXEL_FALSE;
-        sixel_dither_set_diffusion_type(priv->dither, priv->opts->diffuse);
+        sixel_dither_set_diffusion_type(priv->dither, priv->diffuse);
     }
     return SIXEL_OK;
 }
@@ -235,7 +198,7 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
     /* create histgram and construct color palette
      * with median cut algorithm. */
     status = sixel_dither_initialize(priv->testdither, priv->buffer,
-                                     priv->opts->width, priv->opts->height, 3,
+                                     priv->width, priv->height, 3,
                                      LARGE_NORM, REP_CENTER_BOX,
                                      QUALITY_LOW);
     if (SIXEL_FAILED(status))
@@ -246,12 +209,12 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
             sixel_dither_unref(priv->dither);
 
         priv->dither = priv->testdither;
-        status = sixel_dither_new(&priv->testdither, priv->opts->reqcolors, NULL);
+        status = sixel_dither_new(&priv->testdither, priv->reqcolors, NULL);
 
         if (SIXEL_FAILED(status))
             return status;
 
-        sixel_dither_set_diffusion_type(priv->dither, priv->opts->diffuse);
+        sixel_dither_set_diffusion_type(priv->dither, priv->diffuse);
     } else
         sixel_dither_set_body_only(priv->dither, 1);
 
@@ -264,12 +227,12 @@ static int resize(struct vo *vo)
 
     dealloc_dithers_and_buffer(vo);
 
-    SIXELSTATUS status = sixel_dither_new(&priv->testdither, priv->opts->reqcolors, NULL);
+    SIXELSTATUS status = sixel_dither_new(&priv->testdither, priv->reqcolors, NULL);
     if (SIXEL_FAILED(status))
         return status;
 
     priv->buffer =
-        talloc_array(NULL, uint8_t, depth * priv->opts->width * priv->opts->height);
+        talloc_array(NULL, uint8_t, depth * priv->width * priv->height);
 
     return 0;
 }
@@ -284,13 +247,13 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     priv->sws->src = *params;
     priv->sws->dst = (struct mp_image_params) {
         .imgfmt = IMGFMT,
-        .w = priv->opts->width,
-        .h = priv->opts->height,
+        .w = priv->width,
+        .h = priv->height,
         .p_w = 1,
         .p_h = 1,
     };
 
-    priv->frame = mp_image_alloc(IMGFMT, priv->opts->width, priv->opts->height);
+    priv->frame = mp_image_alloc(IMGFMT, priv->width, priv->height);
     if (!priv->frame)
         return -1;
 
@@ -313,10 +276,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     mp_sws_scale(priv->sws, priv->frame, &src);
 
     // Copy from mpv to RGB format as required by libsixel
-    memcpy_pic(priv->buffer, priv->frame->planes[0], priv->opts->width * depth, priv->opts->height,
-               priv->opts->width * depth, priv->frame->stride[0]);
+    memcpy_pic(priv->buffer, priv->frame->planes[0], priv->width * depth, priv->height,
+               priv->width * depth, priv->frame->stride[0]);
 
-    if (priv->opts->fixedpal)
+    if (priv->fixedpal)
         prepare_static_palette(vo);
     else
         prepare_dynamic_palette(vo);
@@ -334,8 +297,8 @@ static void flip_page(struct vo *vo)
     struct priv* priv = vo->priv;
 
     // Go to the offset row and column, then display the image
-    printf(ESC_GOTOXY, priv->opts->top, priv->opts->left);
-    sixel_encode(priv->buffer, priv->opts->width, priv->opts->height,
+    printf(ESC_GOTOXY, priv->top, priv->left);
+    sixel_encode(priv->buffer, priv->width, priv->height,
                  PIXELFORMAT_RGB888,
                  priv->dither, priv->output);
     fflush(stdout);
@@ -348,7 +311,6 @@ static int preinit(struct vo *vo)
     FILE* sixel_output_file = stdout;
 
     // Parse opts set by CLI or conf
-    priv->opts = mp_get_config_group(vo, vo->global, &vo_sixel_conf);
     priv->sws = mp_sws_alloc(vo);
     priv->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(priv->sws, vo->global);
@@ -365,13 +327,13 @@ static int preinit(struct vo *vo)
     printf(ESC_USE_GLOBAL_COLOR_REG);
 
     priv->dither = NULL;
-    status = sixel_dither_new(&priv->testdither, priv->opts->reqcolors, NULL);
+    status = sixel_dither_new(&priv->testdither, priv->reqcolors, NULL);
 
     if (SIXEL_FAILED(status))
         return status;
 
     priv->buffer =
-        talloc_array(NULL, uint8_t, depth * priv->opts->width * priv->opts->height);
+        talloc_array(NULL, uint8_t, depth * priv->width * priv->height);
 
     priv->average_r = 0;
     priv->average_g = 0;
@@ -412,6 +374,8 @@ static void uninit(struct vo *vo)
     dealloc_dithers_and_buffer(vo);
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct vo_driver video_out_sixel = {
     .name = "sixel",
     .description = "libsixel",
@@ -423,5 +387,35 @@ const struct vo_driver video_out_sixel = {
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
-    .global_opts = &vo_sixel_conf,
+    .priv_defaults = &(const struct priv) {
+        .diffuse = DIFFUSE_ATKINSON,
+        .width = 320,
+        .height = 240,
+        .reqcolors = 256,
+        .fixedpal = 0,
+        .threshold = 0,
+        .top = 1,
+        .left = 1,
+    },
+    .options = (const m_option_t[]) {
+        {"diffusion", OPT_CHOICE(diffuse,
+            {"auto", DIFFUSE_AUTO},
+            {"none", DIFFUSE_NONE},
+            {"atkinson", DIFFUSE_ATKINSON},
+            {"fs", DIFFUSE_FS},
+            {"jajuni", DIFFUSE_JAJUNI},
+            {"stucki", DIFFUSE_STUCKI},
+            {"burkes", DIFFUSE_BURKES},
+            {"arithmetic", DIFFUSE_A_DITHER},
+            {"xor", DIFFUSE_X_DITHER})},
+        {"width", OPT_INT(width)},
+        {"height", OPT_INT(height)},
+        {"reqcolors", OPT_INT(reqcolors)},
+        {"fixedpalette", OPT_INT(fixedpal)},
+        {"color-threshold", OPT_INT(threshold)},
+        {"offset-top", OPT_INT(top)},
+        {"offset-left", OPT_INT(left)},
+        {0}
+    },
+    .options_prefix = "vo-sixel",
 };
