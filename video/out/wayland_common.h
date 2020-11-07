@@ -119,6 +119,7 @@ struct vo_wayland_state {
     int64_t vsync_duration;
 
     /* Input */
+    uint32_t keyboard_code;
     struct wl_seat     *seat;
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
