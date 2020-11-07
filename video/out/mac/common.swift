@@ -38,6 +38,8 @@ class Common: NSObject {
 
     var displaySleepAssertion: IOPMAssertionID = IOPMAssertionID(0)
 
+    var appNotificationObservers: [NSObjectProtocol] = []
+
     var cursorVisibilityWanted: Bool = true
 
     var title: String = "mpv" {
@@ -57,6 +59,7 @@ class Common: NSObject {
         startDisplayLink(vo)
         initLightSensor()
         addDisplayReconfigureObserver()
+        addAppNotifications()
         mpv.setMacOptionCallback(macOptsWakeupCallback, context: self)
     }
 
@@ -152,6 +155,7 @@ class Common: NSObject {
         stopDisplaylink()
         uninitLightSensor()
         removeDisplayReconfigureObserver()
+        removeAppNotifications()
         enableDisplaySleep()
         window?.orderOut(nil)
 
@@ -345,6 +349,34 @@ class Common: NSObject {
 
     func removeDisplayReconfigureObserver() {
         CGDisplayRemoveReconfigurationCallback(reconfigureCallback, MPVHelper.bridge(obj: self))
+    }
+
+    func addAppNotifications() {
+        appNotificationObservers.append(NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main,
+            using: { [weak self] (_) in self?.appDidBecomeActive() }
+        ))
+        appNotificationObservers.append(NotificationCenter.default.addObserver(
+            forName: NSApplication.didResignActiveNotification,
+            object: nil,
+            queue: .main,
+            using: { [weak self] (_) in self?.appDidResignActive() }
+        ))
+    }
+
+    func removeAppNotifications() {
+        appNotificationObservers.forEach { NotificationCenter.default.removeObserver($0) }
+        appNotificationObservers.removeAll()
+    }
+
+    func appDidBecomeActive() {
+        flagEvents(VO_EVENT_FOCUS)
+    }
+
+    func appDidResignActive() {
+        flagEvents(VO_EVENT_FOCUS)
     }
 
     func setAppIcon() {
