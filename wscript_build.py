@@ -553,6 +553,7 @@ def build(ctx):
         ( "osdep/win32/pthread.c",               "win32-internal-pthreads"),
         ( "osdep/windows_utils.c",               "os-cygwin" ),
         ( "osdep/windows_utils.c",               "os-win32" ),
+        ( "osdep/utils.c" ),
 
         ## tree_allocator
         "ta/ta.c", "ta/ta_talloc.c", "ta/ta_utils.c"
