@@ -125,6 +125,32 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
     return VO_TRUE;
 }
 
+static int get_mods(struct vo_wayland_state *wl)
+{
+    static const char *mod_names[] = {
+        XKB_MOD_NAME_SHIFT,
+        XKB_MOD_NAME_CTRL,
+        XKB_MOD_NAME_ALT,
+        XKB_MOD_NAME_LOGO,
+    };
+
+    static int mods[] = {
+        MP_KEY_MODIFIER_SHIFT,
+        MP_KEY_MODIFIER_CTRL,
+        MP_KEY_MODIFIER_ALT,
+        MP_KEY_MODIFIER_META,
+    };
+
+    for (int n = 0; mods[n]; n++) {
+        xkb_mod_index_t index = xkb_keymap_mod_get_index(wl->xkb_keymap, mod_names[n]);
+        if (!xkb_state_mod_index_is_consumed(wl->xkb_state, wl->keyboard_code, index)
+            && xkb_state_mod_index_is_active(wl->xkb_state, index,
+                                             XKB_STATE_MODS_DEPRESSED))
+            return mods[n];
+    }
+    return 0;
+}
+
 static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
                                  uint32_t serial, struct wl_surface *surface,
                                  wl_fixed_t sx, wl_fixed_t sy)
@@ -207,6 +233,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
                                   uint32_t state)
 {
     struct vo_wayland_state *wl = data;
+    int mpmod = 0;
 
     state = state == WL_POINTER_BUTTON_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                      : MP_KEY_STATE_UP;
@@ -232,9 +259,11 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         break;
     }
 
-    if (button) {
-        mp_input_put_key(wl->vo->input_ctx, button | state);
-    }
+    if (wl->keyboard)
+        mpmod = get_mods(wl);
+
+    if (button)
+        mp_input_put_key(wl->vo->input_ctx, button | state | mpmod);
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN)) {
@@ -492,43 +521,20 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_state *wl = data;
 
-    uint32_t code = code = key + 8;
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(wl->xkb_state, code);
+    wl->keyboard_code = key + 8;
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(wl->xkb_state, wl->keyboard_code);
 
-    int mpmod = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
-                                                       : MP_KEY_STATE_UP;
+    state = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
+                                                   : MP_KEY_STATE_UP;
 
-    static const char *mod_names[] = {
-        XKB_MOD_NAME_SHIFT,
-        XKB_MOD_NAME_CTRL,
-        XKB_MOD_NAME_ALT,
-        XKB_MOD_NAME_LOGO,
-        0,
-    };
-
-    static int mods[] = {
-        MP_KEY_MODIFIER_SHIFT,
-        MP_KEY_MODIFIER_CTRL,
-        MP_KEY_MODIFIER_ALT,
-        MP_KEY_MODIFIER_META,
-        0,
-    };
-
-    for (int n = 0; mods[n]; n++) {
-        xkb_mod_index_t index = xkb_keymap_mod_get_index(wl->xkb_keymap, mod_names[n]);
-        if (!xkb_state_mod_index_is_consumed(wl->xkb_state, code, index)
-            && xkb_state_mod_index_is_active(wl->xkb_state, index,
-                                             XKB_STATE_MODS_DEPRESSED))
-            mpmod |= mods[n];
-    }
-
+    int mpmod = get_mods(wl);
     int mpkey = lookupkey(sym);
     if (mpkey) {
-        mp_input_put_key(wl->vo->input_ctx, mpkey | mpmod);
+        mp_input_put_key(wl->vo->input_ctx, mpkey | state | mpmod);
     } else {
         char s[128];
         if (xkb_keysym_to_utf8(sym, s, sizeof(s)) > 0)
-            mp_input_put_key_utf8(wl->vo->input_ctx, mpmod, bstr0(s));
+            mp_input_put_key_utf8(wl->vo->input_ctx, state | mpmod, bstr0(s));
     }
 }
 
