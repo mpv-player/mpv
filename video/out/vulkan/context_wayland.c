@@ -210,10 +210,7 @@ static bool resize(struct ra_ctx *ctx)
 
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
-    bool ok = ra_vk_ctx_resize(ctx, width, height);
-    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
-        wl_surface_commit(wl->surface);
-    return ok;
+    return ra_vk_ctx_resize(ctx, width, height);
 }
 
 static bool wayland_vk_reconfig(struct ra_ctx *ctx)
