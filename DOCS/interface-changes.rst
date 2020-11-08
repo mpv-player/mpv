@@ -79,6 +79,8 @@ Interface changes
     - key/value list options do not accept ":" as item separator anymore,
       only ",". This means ":" is always considered part of the value.
     - remove deprecated --vo-vdpau-deint option
+    - add `delete-watch-later-config` command to complement
+      `write-watch-later-config`
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended
@@ -145,8 +147,6 @@ Interface changes
     - change the default of --hwdec to "no" on RPI. The default used to be "mmal"
       specifically if 'Raspberry Pi support' was enabled at configure time
       (equivalent to --enable-rpi). Use --hwdec=mmal to get the old behavior.
-    - add `delete-watch-later-config` command to complement
-      `write-watch-later-config`
  --- mpv 0.30.0 ---
     - add `--d3d11-output-format` to enable explicit selection of a D3D11
       swap chain format.
