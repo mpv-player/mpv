@@ -2330,6 +2330,15 @@ static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
     if (vid_w < 1 || vid_h < 1)
         return M_PROPERTY_UNAVAILABLE;
 
+    if (action == M_PROPERTY_SET) {
+        double scale = *(double *)arg;
+        int s[2] = {vid_w * scale, vid_h * scale};
+        if (s[0] <= 0 || s[1] <= 0)
+            return M_PROPERTY_INVALID_FORMAT;
+        vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
+        return M_PROPERTY_OK;
+    }
+
     int s[2];
     if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 ||
         s[0] < 1 || s[1] < 1)
