@@ -2518,26 +2518,20 @@ Property list
     enabled, or after precise seeking). Files with imprecise timestamps (such
     as Matroska) might lead to unstable results.
 
-``window-scale`` (RW)
+``current-window-scale`` (RW)
     Window size multiplier. Setting this will resize the video window to the
     values contained in ``dwidth`` and ``dheight`` multiplied with the value
     set with this property. Setting ``1`` will resize to original video size
     (or to be exact, the size the video filters output). ``2`` will set the
-    double size, ``0.5`` halves the size.
+    double size, ``0.5`` halves the size. When reading this property, this
+    returns the scale value calculated from the current window size.
 
-    See ``current-window-scale`` for the value derived from the actual window
-    size.
+    The similarly named ``window-scale`` option behaves like a typical mpv
+    option. It does not pay attention to realtime window changes and only
+    updates if the user changes its value. In most cases, you probably want
+    to set ``current-window-scale`` directly.
 
-    Since mpv 0.31.0, this always returns the previously set value (or the
-    default value), instead of the value implied by the actual window size.
-    Before mpv 0.31.0, this returned what ``current-window-scale`` returns now,
-    after the window was created.
-
-``current-window-scale``
-    The ``window-scale`` value calculated from the current window size. This
-    has the same value as ``window-scale`` if the window size was not changed
-    since setting the option, and the window size was not restricted in other
-    ways. The property is unavailable if no video is active.
+    ``current-window-scale`` is unavailable if no video is active.
 
 ``focused``
     Whether the window has focus. Might not be supported by all VOs.
