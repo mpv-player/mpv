@@ -127,21 +127,21 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
 
 static int get_mods(struct vo_wayland_state *wl)
 {
-    static const char *mod_names[] = {
+    static char* const mod_names[] = {
         XKB_MOD_NAME_SHIFT,
         XKB_MOD_NAME_CTRL,
         XKB_MOD_NAME_ALT,
         XKB_MOD_NAME_LOGO,
     };
 
-    static int mods[] = {
+    static const int mods[] = {
         MP_KEY_MODIFIER_SHIFT,
         MP_KEY_MODIFIER_CTRL,
         MP_KEY_MODIFIER_ALT,
         MP_KEY_MODIFIER_META,
     };
 
-    for (int n = 0; mods[n]; n++) {
+    for (int n = 0; n < MP_ARRAY_SIZE(mods); n++) {
         xkb_mod_index_t index = xkb_keymap_mod_get_index(wl->xkb_keymap, mod_names[n]);
         if (!xkb_state_mod_index_is_consumed(wl->xkb_state, wl->keyboard_code, index)
             && xkb_state_mod_index_is_active(wl->xkb_state, index,
