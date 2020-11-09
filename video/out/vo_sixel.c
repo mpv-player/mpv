@@ -38,6 +38,9 @@
 
 #define IMGFMT IMGFMT_RGB24
 
+#define TERMINAL_FALLBACK_DEFAULT_WIDTH 80
+#define TERMINAL_FALLBACK_DEFAULT_HEIGHT 25
+
 #define ESC_HIDE_CURSOR "\033[?25l"
 #define ESC_RESTORE_CURSOR "\033[?25h"
 #define ESC_CLEAR_SCREEN "\033[2J"
@@ -82,8 +85,8 @@ static void validate_offset_values(struct vo* vo)
     struct priv* priv = vo->priv;
     int top = priv->top;
     int left = priv->left;
-    int terminal_width = 0;
-    int terminal_height = 0;
+    int terminal_width = TERMINAL_FALLBACK_DEFAULT_WIDTH;
+    int terminal_height = TERMINAL_FALLBACK_DEFAULT_HEIGHT;
 
     terminal_get_size(&terminal_width, &terminal_height);
 
