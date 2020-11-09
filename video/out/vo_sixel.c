@@ -162,7 +162,10 @@ static void dealloc_dithers_and_buffer(struct vo* vo)
 {
     struct priv* priv = vo->priv;
 
-    talloc_free(priv->buffer);
+    if (priv->buffer) {
+        talloc_free(priv->buffer);
+        priv->buffer = NULL;
+    }
 
     if (priv->dither) {
         sixel_dither_unref(priv->dither);
@@ -295,6 +298,10 @@ static int sixel_write(char *data, int size, void *priv)
 static void flip_page(struct vo *vo)
 {
     struct priv* priv = vo->priv;
+
+    // Make sure that image and dither are valid before drawing
+    if (priv->buffer == NULL || priv->dither == NULL)
+        return;
 
     // Go to the offset row and column, then display the image
     printf(ESC_GOTOXY, priv->top, priv->left);
