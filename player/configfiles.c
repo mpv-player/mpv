@@ -373,26 +373,22 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];
 
-        if (opts->watch_later_blacklist_properties) {
-            bool blacklist_all = false;
-            bool blacklist_one = false;
-            for (int n = 0; opts->watch_later_blacklist_properties[n]; n++) {
-                const char *opt = opts->watch_later_blacklist_properties[n];
-                if (opt[0]) {
-                    if (strcmp(opt, "all") == 0) {
-                        blacklist_all = true;
-                        break;
-                    } else if (strcmp(opt, pname) == 0) {
-                        blacklist_one = true;
-                        break;
-                    }
-                }
-            }
-            if (blacklist_all) {
+        bool blacklist_all = false;
+        bool blacklist_one = false;
+        for (int n = 0; opts->watch_later_blacklist_properties && opts->watch_later_blacklist_properties[n]; n++) {
+            const char *opt = opts->watch_later_blacklist_properties[n];
+            if (strcmp(opt, "all") == 0) {
+                blacklist_all = true;
                 break;
-            } else if (blacklist_one) {
-                continue;
+            } else if (strcmp(opt, pname) == 0) {
+                blacklist_one = true;
+                break;
             }
+        }
+        if (blacklist_all) {
+            break;
+        } else if (blacklist_one) {
+            continue;
         }
 
         char *val = NULL;
