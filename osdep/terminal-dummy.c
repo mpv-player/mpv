@@ -21,6 +21,10 @@ void terminal_get_size(int *w, int *h)
 {
 }
 
+void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
+{
+}
+
 void mp_write_console_ansi(void *wstream, char *buf)
 {
 }

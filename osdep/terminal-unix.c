@@ -493,6 +493,19 @@ void terminal_get_size(int *w, int *h)
     *h = ws.ws_row;
 }
 
+void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
+{
+    struct winsize ws;
+    if (ioctl(tty_in, TIOCGWINSZ, &ws) < 0 || !ws.ws_row || !ws.ws_col
+                                           || !ws.ws_xpixel || !ws.ws_ypixel)
+        return;
+
+    *rows = ws.ws_row;
+    *cols = ws.ws_col;
+    *px_width = ws.ws_xpixel;
+    *px_height = ws.ws_ypixel;
+}
+
 void terminal_init(void)
 {
     assert(!getch2_enabled);

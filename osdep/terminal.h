@@ -40,6 +40,9 @@ bool terminal_in_background(void);
 /* Get terminal-size in columns/rows. */
 void terminal_get_size(int *w, int *h);
 
+/* Get terminal-size in columns/rows and width/height in pixels. */
+void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height);
+
 // Windows only.
 void mp_write_console_ansi(void *wstream, char *buf);
 
