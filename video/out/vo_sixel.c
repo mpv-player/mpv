@@ -40,6 +40,8 @@
 
 #define TERMINAL_FALLBACK_DEFAULT_WIDTH 80
 #define TERMINAL_FALLBACK_DEFAULT_HEIGHT 25
+#define IMG_FALLBACK_DEFAULT_WIDTH 320
+#define IMG_FALLBACK_DEFAULT_HEIGHT 240
 
 #define ESC_HIDE_CURSOR "\033[?25l"
 #define ESC_RESTORE_CURSOR "\033[?25h"
@@ -101,6 +103,37 @@ static void validate_offset_values(struct vo* vo)
     // Otherwise default to the leftmost column
     if (left <= 0 || left > terminal_width)
         priv->left = 1;
+}
+
+static void set_output_resolution(struct vo* vo)
+{
+    struct priv *priv = vo->priv;
+
+    // If both dimensions are set, then no need to calculate
+    if (priv->height && priv->width)
+        return;
+
+    int num_rows = TERMINAL_FALLBACK_DEFAULT_WIDTH;
+    int num_cols = TERMINAL_FALLBACK_DEFAULT_HEIGHT;
+    int total_px_width = IMG_FALLBACK_DEFAULT_WIDTH;
+    int total_px_height = IMG_FALLBACK_DEFAULT_HEIGHT;
+
+    terminal_get_size2(&num_rows, &num_cols, &total_px_width, &total_px_height);
+
+    // The maximum width is the full terminal width
+    int available_px_width = total_px_width;
+
+    // The maximum height is the amount of pixels
+    // comprising n-1 rows worth pixels.
+    // This is because sixel dump after sixel_encode adds a newline
+    // which can't be used for image display.
+    int available_px_height = (total_px_height * (num_rows - 1)) / num_rows;
+
+    if (priv->width == 0)
+        priv->width = available_px_width;
+
+    if (priv->height == 0)
+        priv->height = available_px_height;
 }
 
 static int detect_scene_change(struct vo* vo)
@@ -249,6 +282,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     priv->image_height = params->h;
     priv->image_width  = params->w;
     priv->image_format = params->imgfmt;
+
+    set_output_resolution(vo);
 
     priv->sws->src = *params;
     priv->sws->dst = (struct mp_image_params) {
@@ -399,8 +434,8 @@ const struct vo_driver video_out_sixel = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .diffuse = DIFFUSE_ATKINSON,
-        .width = 320,
-        .height = 240,
+        .width = 0,
+        .height = 0,
         .reqcolors = 256,
         .fixedpal = 0,
         .threshold = 0,
