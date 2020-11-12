@@ -23,7 +23,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <libswscale/swscale.h>
 #include <sixel.h>
@@ -38,16 +37,16 @@
 
 #define IMGFMT IMGFMT_RGB24
 
-#define TERMINAL_FALLBACK_DEFAULT_WIDTH 80
-#define TERMINAL_FALLBACK_DEFAULT_HEIGHT 25
-#define IMG_FALLBACK_DEFAULT_WIDTH 320
-#define IMG_FALLBACK_DEFAULT_HEIGHT 240
+#define TERMINAL_FALLBACK_COLS      80
+#define TERMINAL_FALLBACK_ROWS      25
+#define TERMINAL_FALLBACK_PX_WIDTH  320
+#define TERMINAL_FALLBACK_PX_HEIGHT 240
 
-#define ESC_HIDE_CURSOR "\033[?25l"
-#define ESC_RESTORE_CURSOR "\033[?25h"
-#define ESC_CLEAR_SCREEN "\033[2J"
-#define ESC_GOTOXY "\033[%d;%df"
-#define ESC_USE_GLOBAL_COLOR_REG "\033[?1070l"
+#define ESC_HIDE_CURSOR             "\033[?25l"
+#define ESC_RESTORE_CURSOR          "\033[?25h"
+#define ESC_CLEAR_SCREEN            "\033[2J"
+#define ESC_GOTOXY                  "\033[%d;%df"
+#define ESC_USE_GLOBAL_COLOR_REG    "\033[?1070l"
 
 struct priv {
 
@@ -60,16 +59,16 @@ struct priv {
     int opt_threshold;
     int opt_top;
     int opt_left;
+    int opt_pad_y;
+    int opt_pad_x;
+    int opt_rows;
+    int opt_cols;
 
     // Internal data
     sixel_output_t *output;
     sixel_dither_t *dither;
     sixel_dither_t *testdither;
     uint8_t        *buffer;
-
-    int image_height;
-    int image_width;
-    int image_format;
 
     // The dimensions that will be actually
     // be used after processing user inputs
@@ -78,134 +77,42 @@ struct priv {
     int width;
     int height;
 
-    unsigned int average_r;
-    unsigned int average_g;
-    unsigned int average_b;
     int previous_histgram_colors;
 
+    struct mp_rect src_rect;
+    struct mp_rect dst_rect;
+    struct mp_osd_res osd;
     struct mp_image *frame;
     struct mp_sws_context *sws;
 };
 
 static const unsigned int depth = 3;
 
-static void validate_offset_values(struct vo* vo)
-{
-    struct priv* priv = vo->priv;
-    int top = priv->opt_top;
-    int left = priv->opt_left;
-    int terminal_width = TERMINAL_FALLBACK_DEFAULT_WIDTH;
-    int terminal_height = TERMINAL_FALLBACK_DEFAULT_HEIGHT;
-
-    terminal_get_size(&terminal_width, &terminal_height);
-
-    // Make sure that the user specified top offset
-    // lies in the range 1 to TERMINAL_HEIGHT
-    // Otherwise default to the topmost row
-    if (top <= 0 || top > terminal_height)
-        priv->top = 1;
-    else
-        priv->top = top;
-
-    // Make sure that the user specified left offset
-    // lies in the range 1 to TERMINAL_WIDTH
-    // Otherwise default to the leftmost column
-    if (left <= 0 || left > terminal_width)
-        priv->left = 1;
-    else
-        priv->left = left;
-}
-
-static void set_output_resolution(struct vo* vo)
-{
-    struct priv *priv = vo->priv;
-
-    // If both dimensions are set, then no need to calculate
-    if (priv->opt_height && priv->opt_width) {
-        priv->width = priv->opt_width;
-        priv->height = priv->opt_height;
-        return;
-    }
-
-    int num_rows = TERMINAL_FALLBACK_DEFAULT_WIDTH;
-    int num_cols = TERMINAL_FALLBACK_DEFAULT_HEIGHT;
-    int total_px_width = IMG_FALLBACK_DEFAULT_WIDTH;
-    int total_px_height = IMG_FALLBACK_DEFAULT_HEIGHT;
-
-    terminal_get_size2(&num_rows, &num_cols, &total_px_width, &total_px_height);
-
-    // The maximum width is the full terminal width
-    int available_px_width = total_px_width;
-
-    // The maximum height is the amount of pixels
-    // comprising n-1 rows worth pixels.
-    // This is because sixel dump after sixel_encode adds a newline
-    // which can't be used for image display.
-    int available_px_height = (total_px_height * (num_rows - 1)) / num_rows;
-
-    if (priv->opt_width == 0)
-        priv->width = available_px_width;
-
-    if (priv->opt_height == 0)
-        priv->height = available_px_height;
-}
-
 static int detect_scene_change(struct vo* vo)
 {
     struct priv* priv = vo->priv;
-    int score;
-    int i;
-    unsigned int r = 0;
-    unsigned int g = 0;
-    unsigned int b = 0;
-
-    unsigned int average_r = priv->average_r;
-    unsigned int average_g = priv->average_g;
-    unsigned int average_b = priv->average_b;
     int previous_histgram_colors = priv->previous_histgram_colors;
-
     int histgram_colors = 0;
-    int palette_colors = 0;
-    unsigned char const* palette;
+
+    // If threshold is set negative, then every frame must be a scene change
+    if (priv->dither == NULL || priv->opt_threshold < 0)
+        return 1;
 
     histgram_colors = sixel_dither_get_num_of_histogram_colors(priv->testdither);
 
-    if (priv->dither == NULL)
-        goto detected;
+    int color_difference_count = previous_histgram_colors - histgram_colors;
+    color_difference_count = (color_difference_count > 0) ?  // abs value
+                              color_difference_count : -color_difference_count;
 
-    /* detect scene change if number of colors increses 20% */
-    if (previous_histgram_colors * 6 < histgram_colors * 5)
-        goto detected;
-
-    /* detect scene change if number of colors decreses 20% */
-    if (previous_histgram_colors * 4 > histgram_colors * 5)
-        goto detected;
-
-    palette_colors = sixel_dither_get_num_of_palette_colors(priv->testdither);
-    palette = sixel_dither_get_palette(priv->testdither);
-
-    /* compare color difference between current
-     * palette and previous one */
-    for (i = 0; i < palette_colors; i++) {
-        r += palette[i * 3 + 0];
-        g += palette[i * 3 + 1];
-        b += palette[i * 3 + 2];
+    if (100 * color_difference_count >
+        priv->opt_threshold * previous_histgram_colors)
+    {
+        priv->previous_histgram_colors = histgram_colors; // update history
+        return 1;
+    } else {
+        return 0;
     }
-    score = (r - average_r) * (r - average_r)
-          + (g - average_g) * (g - average_g)
-          + (b - average_b) * (b - average_b);
-    if (score > priv->opt_threshold * palette_colors
-                             * palette_colors)
-        goto detected;
 
-    return 0;
-
-detected:
-    priv->previous_histgram_colors = histgram_colors;
-    priv->average_r = r;
-    priv->average_g = g;
-    priv->average_b = b;
-    return 1;
 }
 
 static void dealloc_dithers_and_buffer(struct vo* vo)
@@ -232,9 +139,9 @@ static SIXELSTATUS prepare_static_palette(struct vo* vo)
 {
     struct priv* priv = vo->priv;
 
-    if (priv->dither)
+    if (priv->dither) {
         sixel_dither_set_body_only(priv->dither, 1);
-    else {
+    } else {
         priv->dither = sixel_dither_get(BUILTIN_XTERM256);
         if (priv->dither == NULL)
             return SIXEL_FALSE;
@@ -268,38 +175,103 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
             return status;
 
         sixel_dither_set_diffusion_type(priv->dither, priv->opt_diffuse);
-    } else
+    } else {
         sixel_dither_set_body_only(priv->dither, 1);
+    }
 
     return status;
 }
 
-static int resize(struct vo *vo)
+static void resize(struct vo *vo)
 {
-    struct priv *priv = vo->priv;
+    // this function sets the vo canvas size in pixels vo->dwidth, vo->dheight,
+    // and the output scaled size in priv->width, priv->height
+    // and the scaling rectangles in pixels priv->src_rect, priv->dst_rect
+    // as well as image positioning in cells priv->top, priv->left.
+    // no other scaling/rendering size values are required past this point.
+    struct priv *priv   = vo->priv;
+    int num_rows        = TERMINAL_FALLBACK_ROWS;
+    int num_cols        = TERMINAL_FALLBACK_COLS;
+    int total_px_width  = 0;
+    int total_px_height = 0;
 
-    dealloc_dithers_and_buffer(vo);
+    terminal_get_size2(&num_rows, &num_cols, &total_px_width, &total_px_height);
 
-    SIXELSTATUS status = sixel_dither_new(&priv->testdither, priv->opt_reqcolors, NULL);
-    if (SIXEL_FAILED(status))
-        return status;
+    // If the user has specified rows/cols use them for further calculations
+    num_rows = (priv->opt_rows > 0) ? priv->opt_rows : num_rows;
+    num_cols = (priv->opt_cols > 0) ? priv->opt_cols : num_cols;
 
-    priv->buffer =
-        talloc_array(NULL, uint8_t, depth * priv->width * priv->height);
+    // If the pad value is set in between 0 and width/2 - 1, then we
+    // subtract from the detected width. Otherwise, we assume that the width
+    // output must be a integer multiple of num_cols and accordingly set
+    // total_width to be an integer multiple of num_cols. So in case the padding
+    // added by terminal is less than the number of cells in that axis, then rounding
+    // down will take care of correcting the detected width and remove padding.
+    if (priv->opt_width > 0) {
+        // option - set by the user, hard truth
+        total_px_width = priv->opt_width;
+    } else {
+        if (total_px_width <= 0) {
+                // ioctl failed to read terminal width
+                total_px_width = TERMINAL_FALLBACK_PX_WIDTH;
+        } else {
+            if (priv->opt_pad_x >= 0 && priv->opt_pad_x < total_px_width / 2) {
+                // explicit padding set by the user
+                total_px_width -= (2 * priv->opt_pad_x);
+            } else {
+                // rounded "auto padding"
+                total_px_width = total_px_width / num_cols * num_cols;
+            }
+        }
+    }
 
-    return 0;
+    if (priv->opt_height > 0) {
+        total_px_height = priv->opt_height;
+    } else {
+        if (total_px_height <= 0) {
+            total_px_height = TERMINAL_FALLBACK_PX_HEIGHT;
+        } else {
+            if (priv->opt_pad_y >= 0 && priv->opt_pad_y < total_px_height / 2) {
+                total_px_height -= (2 * priv->opt_pad_y);
+            } else {
+                total_px_height = total_px_height / num_rows * num_rows;
+            }
+        }
+    }
+
+    // use n-1 rows for height
+    // The last row can't be used for encoding image, because after sixel encode
+    // the terminal moves the cursor to next line below the image, causing the
+    // last line to be empty instead of displaying image data.
+    // TODO: Confirm if the output height must be a multiple of 6, if not, remove
+    // the / 6 * 6 part which is setting the height to be a multiple of 6.
+    vo->dheight = total_px_height * (num_rows - 1) / num_rows / 6 * 6;
+    vo->dwidth  = total_px_width;
+
+    vo_get_src_dst_rects(vo, &priv->src_rect, &priv->dst_rect, &priv->osd);
+
+    // priv->width and priv->height are the width and height of dst_rect
+    // and they are not changed anywhere else outside this function.
+    // It is the sixel image output dimension which is output by libsixel.
+    priv->width  = priv->dst_rect.x1 - priv->dst_rect.x0;
+    priv->height = priv->dst_rect.y1 - priv->dst_rect.y0;
+
+    // top/left values must be greater than 1. If it is set, then
+    // the image will be rendered from there and no further centering is done.
+    priv->top  = (priv->opt_top  > 0) ?  priv->opt_top :
+                  num_rows * priv->dst_rect.y0 / vo->dheight + 1;
+    priv->left = (priv->opt_left > 0) ?  priv->opt_left :
+                  num_cols * priv->dst_rect.x0 / vo->dwidth  + 1;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *priv = vo->priv;
-    priv->image_height = params->h;
-    priv->image_width  = params->w;
-    priv->image_format = params->imgfmt;
-
-    set_output_resolution(vo);
+    resize(vo);
 
     priv->sws->src = *params;
+    priv->sws->src.w = mp_rect_w(priv->src_rect);
+    priv->sws->src.h = mp_rect_h(priv->src_rect);
     priv->sws->dst = (struct mp_image_params) {
         .imgfmt = IMGFMT,
         .w = priv->width,
@@ -319,13 +291,26 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     printf(ESC_CLEAR_SCREEN);
     vo->want_redraw = true;
 
-    return resize(vo);
+    dealloc_dithers_and_buffer(vo);
+    SIXELSTATUS status = sixel_dither_new(&priv->testdither, priv->opt_reqcolors, NULL);
+    if (SIXEL_FAILED(status))
+        return status;
+
+    priv->buffer =
+        talloc_array(NULL, uint8_t, depth * priv->width * priv->height);
+
+    return 0;
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *priv = vo->priv;
     struct mp_image src = *mpi;
+
+    struct mp_rect src_rc = priv->src_rect;
+    src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
+    src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
+    mp_image_crop_rc(&src, src_rc);
 
     // Downscale the image
     mp_sws_scale(priv->sws, priv->frame, &src);
@@ -334,10 +319,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     memcpy_pic(priv->buffer, priv->frame->planes[0], priv->width * depth, priv->height,
                priv->width * depth, priv->frame->stride[0]);
 
-    if (priv->opt_fixedpal)
+    if (priv->opt_fixedpal) {
         prepare_static_palette(vo);
-    else
+    } else {
         prepare_dynamic_palette(vo);
+    }
 
     talloc_free(mpi);
 }
@@ -391,15 +377,11 @@ static int preinit(struct vo *vo)
     if (SIXEL_FAILED(status))
         return status;
 
+    resize(vo);
     priv->buffer =
         talloc_array(NULL, uint8_t, depth * priv->width * priv->height);
 
-    priv->average_r = 0;
-    priv->average_g = 0;
-    priv->average_b = 0;
     priv->previous_histgram_colors = 0;
-
-    validate_offset_values(vo);
 
     return 0;
 }
@@ -411,7 +393,15 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    return VO_NOTIMPL;
+    if (request == VOCTRL_SET_PANSCAN) {
+        if (!reconfig(vo, vo->params)) {
+            return VO_TRUE;
+        } else {
+            return VO_FALSE;
+        }
+    } else {
+        return VO_NOTIMPL;
+    }
 }
 
 
@@ -452,12 +442,16 @@ const struct vo_driver video_out_sixel = {
         .opt_height = 0,
         .opt_reqcolors = 256,
         .opt_fixedpal = 0,
-        .opt_threshold = 0,
-        .opt_top = 1,
-        .opt_left = 1,
+        .opt_threshold = -1,
+        .opt_top = 0,
+        .opt_left = 0,
+        .opt_pad_y = -1,
+        .opt_pad_x = -1,
+        .opt_rows = 0,
+        .opt_cols = 0,
     },
     .options = (const m_option_t[]) {
-        {"diffusion", OPT_CHOICE(opt_diffuse,
+        {"dither", OPT_CHOICE(opt_diffuse,
             {"auto", DIFFUSE_AUTO},
             {"none", DIFFUSE_NONE},
             {"atkinson", DIFFUSE_ATKINSON},
@@ -470,10 +464,14 @@ const struct vo_driver video_out_sixel = {
         {"width", OPT_INT(opt_width)},
         {"height", OPT_INT(opt_height)},
         {"reqcolors", OPT_INT(opt_reqcolors)},
-        {"fixedpalette", OPT_INT(opt_fixedpal)},
-        {"color-threshold", OPT_INT(opt_threshold)},
-        {"offset-top", OPT_INT(opt_top)},
-        {"offset-left", OPT_INT(opt_left)},
+        {"fixedpalette", OPT_FLAG(opt_fixedpal)},
+        {"threshold", OPT_INT(opt_threshold)},
+        {"top", OPT_INT(opt_top)},
+        {"left", OPT_INT(opt_left)},
+        {"pad-y", OPT_INT(opt_pad_y)},
+        {"pad-x", OPT_INT(opt_pad_x)},
+        {"rows", OPT_INT(opt_rows)},
+        {"cols", OPT_INT(opt_cols)},
         {0}
     },
     .options_prefix = "vo-sixel",

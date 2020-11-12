@@ -364,19 +364,59 @@ Available video output drivers are:
         Use 256 colors - for terminals which don't support true color.
 
 ``sixel``
-    Sixel graphics video output driver based on libsixel that works on a
-    console that has sixel graphics enabled such as ``xterm`` or ``mlterm``.
-    Additionally some terminals have limitation on the dimensions, so may
-    not display images bigger than 1000x1000 for example. Make sure that
-    ``img2sixel`` can display images of the corresponding resolution.
-    You may need to use ``--profile=sw-fast`` to get decent performance.
+    Graphical output for the terminal, using sixels. Tested with ``mlterm`` and
+    ``xterm``.
 
     Note: the Sixel image output is not synchronized with other terminal output
     from mpv, which can lead to broken images. The option ``--really-quiet``
     can help with that, and is recommended.
 
-    ``--vo-sixel-diffusion=<algo>``
-        Selects the diffusion algorithm for dithering used by libsixel.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
+
+    Note: at the time of writing, ``xterm`` does not enable sixel by default -
+    launching it as ``xterm -ti 340`` is one way to enable it. Also, ``xterm``
+    does not display images bigger than 1000x1000 pixels by default.
+
+    To render and align sixel images correctly, mpv needs to know the terminal
+    size both in cells and in pixels. By default it tries to use values which
+    the terminal reports, however, due to differences between terminals this is
+    an error-prone process which cannot be automated with certainty - some
+    terminals report the size in pixels including the padding - e.g. ``xterm``,
+    while others report the actual usable number of pixels - like ``mlterm``.
+    Additionally, they may behave differently when maximized or in fullscreen,
+    and mpv cannot detect this state using standard methods.
+
+    Sixel size and alignment options:
+
+    ``--vo-sixel-cols=<columns>``, ``--vo-sixel-rows=<rows>`` (default: 0)
+        Specify the terminal size in character cells, otherwise (0) read it
+        from the terminal, or fall back to 80x25. Note that mpv doesn't use the
+        the last row with sixel because this seems to result in scrolling.
+
+    ``--vo-sixel-width=<width>``, ``--vo-sixel-height=<height>`` (default: 0)
+        Specify the available size in pixels, otherwise (0) read it from the
+        terminal, or fall back to 320x240. Other than excluding the last line,
+        the height is also further rounded down to a multiple of 6 (sixel unit
+        height) to avoid overflowing below the designated size.
+
+    ``--vo-sixel-left=<col>``, ``--vo-sixel-top=<row>`` (default: 0)
+        Specify the position in character cells where the image starts (1 is
+        the first column or row). If 0 (default) then try to automatically
+        determine it according to the other values and the image aspect ratio
+        and zoom.
+
+    ``--vo-sixel-pad-x=<pad_x>``, ``--vo-sixel-pad-y=<pad_y>`` (default: -1)
+        Used only when mpv reads the size in pixels from the terminal.
+        Specify the number of padding pixels (on one side) which are included
+        at the size which the terminal reports. If -1 (default) then the number
+        of pixels is rounded down to a multiple of number of cells (per axis),
+        to take into account padding at the report - this only works correctly
+        when the overall padding per axis is smaller than the number of cells.
+
+    Sixel image quality options:
+
+    ``--vo-sixel-dither=<algo>``
+        Selects the dither algorithm which libsixel should apply.
         Can be one of the below list as per libsixel's documentation.
 
         auto
@@ -398,38 +438,26 @@ Available video output drivers are:
         xor
             Positionally stable arithmetic xor based dither
 
-    ``--vo-sixel-width=<width>``  ``--vo-sixel-height=<height>``
-        The output video resolution will be set to width and height
-        These default to 320x240 if not set. The terminal window must
-        be bigger than this resolution to have smooth playback.
-        Additionally the last row will be a blank line and can't be
-        used to display pixel data.
-
-    ``--vo-sixel-fixedpalette=<0|1>`` (default: 0)
+    ``--vo-sixel-fixedpalette=<yes|no>`` (default: yes)
         Use libsixel's built-in static palette using the XTERM256 profile
-        for dither.  Fixed palette uses 256 colors for dithering.
+        for dither. Fixed palette uses 256 colors for dithering. Note that
+        using ``no`` (at the time of writing) will slow down ``xterm``.
 
     ``--vo-sixel-reqcolors=<colors>`` (default: 256)
-        Setup libsixel to use required number of colors for dynamic palette.
-        This value depends on the console as well. Xterm supports 256.
-        Can set this to a lower value for faster performance.
+        Set up libsixel to use required number of colors for dynamic palette.
+        This value depends on the terminal emulator as well. Xterm supports
+        256 colors.  Can set this to a lower value for faster performance.
         This option has no effect if fixed palette is used.
 
-    ``--vo-sixel-color-threshold=<threshold>`` (default: 0)
-        This threshold value is used in dynamic palette mode to
-        recompute the palette based on the scene changes.
-
-    ``--vo-sixel-offset-top=<top>`` (default: 1)
-        The output video playback will start from the specified row number.
-        If this is greater than 1, then those many rows will be skipped.
-        This option can be used to shift video below in the terminal.
-        If it is greater than number of rows in terminal, then it is ignored.
-
-    ``--vo-sixel-offset-left=<left>`` (default: 1)
-        The output video playback will start from the specified column number.
-        If this is greater than 1, then those many columns will be skipped.
-        This option can be used to shift video to the right in the terminal.
-        If it is greater than number of columns in terminal, then it is ignored.
+    ``--vo-sixel-threshold=<threshold>`` (default: -1)
+        When using a dynamic palette, defines the threshold to change the
+        palette - as percentage of the number of colors, e.g. 20 will change
+        the palette when the number of colors changed by 20%. It's a simple
+        measure to reduce the number of palette changes, because it can be slow
+        in some terminals (``xterm``), however, it seems that in ``mlterm`` it
+        causes image corruption. The default (-1) will change the palette
+        on every frame and will have better quality, and no corruption in
+        ``mlterm``.
 
 ``image``
     Output each frame into an image file in the current directory. Each file
