@@ -2567,6 +2567,20 @@ Property list
     Any of these properties may be unavailable or set to dummy values if the
     VO window is not created or visible.
 
+``mouse-pos``
+    Read-only - last known mouse position, normalizd to OSD dimensions.
+
+    Has the following sub-properties (which can be read as ``MPV_FORMAT_NODE``
+    or Lua table with ``mp.get_property_native``):
+
+    ``mouse-pos/x``, ``mouse-pos/y``
+        Last known coordinates of the mouse pointer.
+
+    ``mouse-pos/hover``
+        Boolean - whether the mouse pointer hovers the video window. The
+        coordinates should be ignored when this value is false, because the
+        video backends update them only when the pointer hovers the window.
+
 ``sub-text``
     The current subtitle text regardless of sub visibility. Formatting is
     stripped. If the subtitle is not text-based (i.e. DVD/BD subtitles), an
