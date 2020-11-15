@@ -119,6 +119,17 @@ if [ ! -e "$prefix_dir/lib/libfribidi.dll.a" ]; then
     popd
 fi
 
+## harfbuzz
+if [ ! -e "$prefix_dir/lib/libharfbuzz.dll.a" ]; then
+    ver=2.7.2
+    gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
+    builddir harfbuzz-${ver}
+    ../configure --host=$TARGET $commonflags --with-icu=no
+    makeplusinstall
+    popd
+    rm "$prefix_dir"/lib/*.la # fuck off
+fi
+
 ## libass
 if [ ! -e "$prefix_dir/lib/libass.dll.a" ]; then
     [ -d libass ] || $gitclone https://github.com/libass/libass.git
