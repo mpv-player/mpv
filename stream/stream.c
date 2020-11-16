@@ -441,8 +441,7 @@ int stream_create_with_args(struct stream_open_args *args, struct stream **ret)
 
         if (r == STREAM_UNSAFE) {
             mp_err(log, "\nRefusing to load potentially unsafe URL from a playlist.\n"
-                   "Use --playlist=file or the --load-unsafe-playlists option to "
-                   "load it anyway.\n\n");
+                   "Use the --load-unsafe-playlists option to load it anyway.\n\n");
         } else if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED) {
             mp_err(log, "No protocol handler found to open URL %s\n", args->url);
             mp_err(log, "The protocol is either unsupported, or was disabled "

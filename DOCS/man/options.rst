@@ -236,27 +236,40 @@ Playback Control
     The value ``no`` is a deprecated alias for ``auto``.
 
 ``--playlist=<filename>``
-    Play files according to a playlist file (Supports some common formats. If
+    Play files according to a playlist file. Supports some common formats. If
     no format is detected, it will be treated as list of files, separated by
-    newline characters. Note that XML playlist formats are not supported.)
+    newline characters. You may need this option to load plaintext files as
+    a playlist. Note that XML playlist formats are not supported.
 
-    You can play playlists directly and without this option, however, this
-    option disables any security mechanisms that might be in place. You may
-    also need this option to load plaintext files as playlist.
+    This option forces ``--demuxer=playlist`` to interpret the playlist file.
+    Some playlist formats, notably CUE and optical disc formats, need to use
+    different demuxers and will not work with this option. They still can be
+    played directly, without using this option.
+
+    You can play playlists directly, without this option. Before mpv version
+    0.31.0, this option disabled any security mechanisms that might be in
+    place, but since 0.31.0 it uses the same security mechanisms as playing a
+    playlist file directly. If you trust the playlist file, you can disable
+    any security checks with ``--load-unsafe-playlists``. Because playlists
+    can load other playlist entries, consider applying this option only to the
+    playlist itself and not its entries, using something along these lines:
+
+        ``mpv --{ --playlist=filename --load-unsafe-playlists --}``
 
     .. warning::
 
-        The way mpv uses playlist files via ``--playlist`` is not safe against
-        maliciously constructed files. Such files may trigger harmful actions.
-        This has been the case for all mpv and MPlayer versions, but
-        unfortunately this fact was not well documented earlier, and some people
-        have even misguidedly recommended use of ``--playlist`` with untrusted
-        sources. Do NOT use ``--playlist`` with random internet sources or files
-        you do not trust!
+        The way older versions of mpv played playlist files via ``--playlist``
+        was not safe against maliciously constructed files. Such files may
+        trigger harmful actions. This has been the case for all verions of
+        mpv prior to 0.31.0, and all MPlayer versions, but unfortunately this
+        fact was not well documented earlier, and some people have even
+        misguidedly recommended the use of ``--playlist`` with untrusted
+        sources. Do NOT use ``--playlist`` with random internet sources or
+        files you do not trust if you are not sure your mpv is at least 0.31.0.
 
-        Playlist can contain entries using other protocols, such as local files,
-        or (most severely), special protocols like ``avdevice://``, which are
-        inherently unsafe.
+        In particular, playlists can contain entries using protocols other than
+        local files, such as special protocols like ``avdevice://`` (which are
+        inherently unsafe).
 
 ``--chapter-merge-threshold=<number>``
     Threshold for merging almost consecutive ordered chapter parts in
@@ -336,9 +349,6 @@ Playback Control
     entries are not marked as originating from network or potentially unsafe
     location. (Instead, the behavior is as if the playlist entries were provided
     directly to mpv command line or ``loadfile`` command.)
-
-    Note that ``--playlist`` always loads all entries, so you use that instead
-    if you really have the need for this functionality.
 
 ``--access-references=<yes|no>``
     Follow any references in the file being opened (default: yes). Disabling
