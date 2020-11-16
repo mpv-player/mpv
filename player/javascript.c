@@ -781,16 +781,6 @@ static void push_nums_obj(js_State *J, const char * const names[],
     }
 }
 
-// args: none, return: object with properties x, y
-static void script_get_mouse_pos(js_State *J)
-{
-    int x, y;
-    mp_input_get_mouse_pos(jctx(J)->mpctx->input, &x, &y);
-    const char * const names[] = {"x", "y", NULL};
-    const double vals[] = {x, y};
-    push_nums_obj(J, names, vals);
-}
-
 // args: input-section-name, x0, y0, x1, y1
 static void script_input_set_section_mouse_area(js_State *J)
 {
@@ -1181,7 +1171,6 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(get_wakeup_pipe, 0),
     FN_ENTRY(_hook_add, 3),
     FN_ENTRY(_hook_continue, 1),
-    FN_ENTRY(get_mouse_pos, 0),
     FN_ENTRY(input_set_section_mouse_area, 5),
     FN_ENTRY(last_error, 0),
     FN_ENTRY(_set_last_error, 1),

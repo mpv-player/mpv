@@ -42,6 +42,11 @@ function mp.input_disable_section(section)
     mp.commandv("disable-section", section)
 end
 
+function mp.get_mouse_pos()
+    local m = mp.get_property_native("mouse-pos")
+    return m.x, m.y
+end
+
 -- For dispatching script-binding. This is sent as:
 --      script-message-to $script_name $binding_name $keystate
 -- The array is indexed by $binding_name, and has functions like this as value:
