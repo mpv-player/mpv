@@ -145,6 +145,7 @@ static SIXELSTATUS prepare_static_palette(struct vo* vo)
         priv->dither = sixel_dither_get(BUILTIN_XTERM256);
         if (priv->dither == NULL)
             return SIXEL_FALSE;
+
         sixel_dither_set_diffusion_type(priv->dither, priv->opt_diffuse);
     }
     return SIXEL_OK;
@@ -165,8 +166,10 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
         return status;
 
     if (detect_scene_change(vo)) {
-        if (priv->dither)
+        if (priv->dither) {
             sixel_dither_unref(priv->dither);
+            priv->dither = NULL;
+        }
 
         priv->dither = priv->testdither;
         status = sixel_dither_new(&priv->testdither, priv->opt_reqcolors, NULL);
@@ -176,6 +179,9 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
 
         sixel_dither_set_diffusion_type(priv->dither, priv->opt_diffuse);
     } else {
+        if (priv->dither == NULL) {
+            return SIXEL_FALSE;
+        }
         sixel_dither_set_body_only(priv->dither, 1);
     }
 
@@ -292,9 +298,13 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     vo->want_redraw = true;
 
     dealloc_dithers_and_buffer(vo);
-    SIXELSTATUS status = sixel_dither_new(&priv->testdither, priv->opt_reqcolors, NULL);
-    if (SIXEL_FAILED(status))
-        return status;
+    SIXELSTATUS status = sixel_dither_new(&priv->testdither,
+                                          priv->opt_reqcolors, NULL);
+    if (SIXEL_FAILED(status)) {
+        MP_ERR(vo, "reconfig: Failed to create new dither: %s\n",
+               sixel_helper_format_error(status));
+        return -1;
+    }
 
     priv->buffer =
         talloc_array(NULL, uint8_t, depth * priv->width * priv->height);
@@ -306,6 +316,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *priv = vo->priv;
     struct mp_image src = *mpi;
+    SIXELSTATUS status;
 
     struct mp_rect src_rc = priv->src_rect;
     src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
@@ -319,10 +330,19 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     memcpy_pic(priv->buffer, priv->frame->planes[0], priv->width * depth, priv->height,
                priv->width * depth, priv->frame->stride[0]);
 
+    // Even if either of these prepare palette functions fail, on re-running them
+    // they should try to re-initialize the dithers, so it shouldn't dereference
+    // any NULL pointers. flip_page also has a check to make sure dither is not
+    // NULL before drawing, so failure in these functions should still be okay.
     if (priv->opt_fixedpal) {
-        prepare_static_palette(vo);
+        status = prepare_static_palette(vo);
     } else {
-        prepare_dynamic_palette(vo);
+        status = prepare_dynamic_palette(vo);
+    }
+
+    if (SIXEL_FAILED(status)) {
+        MP_WARN(vo, "draw_image: prepare_palette returned error: %s\n",
+                sixel_helper_format_error(status));
     }
 
     talloc_free(mpi);
@@ -361,8 +381,11 @@ static int preinit(struct vo *vo)
     mp_sws_enable_cmdline_opts(priv->sws, vo->global);
 
     status = sixel_output_new(&priv->output, sixel_write, sixel_output_file, NULL);
-    if (SIXEL_FAILED(status))
-        return status;
+    if (SIXEL_FAILED(status)) {
+        MP_ERR(vo, "preinit: Failed to create output file: %s\n",
+               sixel_helper_format_error(status));
+        return -1;
+    }
 
     sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
 
@@ -374,8 +397,11 @@ static int preinit(struct vo *vo)
     priv->dither = NULL;
     status = sixel_dither_new(&priv->testdither, priv->opt_reqcolors, NULL);
 
-    if (SIXEL_FAILED(status))
-        return status;
+    if (SIXEL_FAILED(status)) {
+        MP_ERR(vo, "preinit: Failed to create new dither: %s\n",
+               sixel_helper_format_error(status));
+        return -1;
+    }
 
     resize(vo);
     priv->buffer =
