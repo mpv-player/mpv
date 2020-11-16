@@ -326,6 +326,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     // Downscale the image
     mp_sws_scale(priv->sws, priv->frame, &src);
 
+    struct mp_osd_res dim = {
+        .w = priv->width,
+        .h = priv->height
+    };
+    osd_draw_on_image(vo->osd, dim, mpi ? mpi->pts : 0, 0, priv->frame);
     // Copy from mpv to RGB format as required by libsixel
     memcpy_pic(priv->buffer, priv->frame->planes[0], priv->width * depth, priv->height,
                priv->width * depth, priv->frame->stride[0]);
