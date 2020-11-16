@@ -991,16 +991,6 @@ static int script_raw_abort_async_command(lua_State *L)
     return 0;
 }
 
-static int script_get_mouse_pos(lua_State *L)
-{
-    struct MPContext *mpctx = get_mpctx(L);
-    int px, py;
-    mp_input_get_mouse_pos(mpctx->input, &px, &py);
-    lua_pushnumber(L, px);
-    lua_pushnumber(L, py);
-    return 2;
-}
-
 static int script_get_time(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -1242,7 +1232,6 @@ static const struct fn_entry main_fns[] = {
     AF_ENTRY(set_property_native),
     FN_ENTRY(raw_observe_property),
     FN_ENTRY(raw_unobserve_property),
-    FN_ENTRY(get_mouse_pos),
     FN_ENTRY(get_time),
     FN_ENTRY(input_set_section_mouse_area),
     FN_ENTRY(format_time),
