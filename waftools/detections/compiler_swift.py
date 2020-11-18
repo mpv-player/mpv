@@ -17,7 +17,6 @@ def __add_swift_flags(ctx):
     ctx.env.SWIFT_FLAGS = [
         "-frontend", "-c", "-sdk", ctx.env.MACOS_SDK,
         "-enable-objc-interop", "-emit-objc-header", "-parse-as-library",
-        "-target", "x86_64-apple-macosx10.10"
     ]
 
     verRe = re.compile("(?i)version\s?([\d.]+)")
@@ -150,7 +149,7 @@ def __find_macos_sdk(ctx):
             # convert build version to a version string
             # first 2 two digits are the major version, starting with 15 which is 10.11 (offset of 4)
             # 1 char is the minor version, A => 0, B => 1 and ongoing
-            # las digits are bugfix version, which are nor relevant for us
+            # last digits are bugfix version, which are not relevant for us
             # eg 16E185 => 10.12.4, 17A360 => 10.13, 18B71 => 10.14.1
             if sdk_build_version and isinstance(sdk_build_version, str):
                 verRe = re.compile("(\d+)(\D+)(\d+)")
@@ -158,6 +157,9 @@ def __find_macos_sdk(ctx):
                 major = int(version_parts.group(1)) - 4
                 minor = string.ascii_lowercase.index(version_parts.group(2).lower())
                 build_version = '10.' + str(major) + '.' + str(minor)
+                # from 20 onwards macOS 11.0 starts
+                if int(version_parts.group(1)) >= 20:
+                    build_version = '11.' + str(minor)
 
             if not isinstance(sdk_version, str):
                 sdk_version = '10.10.0'
