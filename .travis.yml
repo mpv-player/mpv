@@ -39,6 +39,10 @@ matrix:
       osx_image: xcode10.1
     - <<: *mac
       osx_image: xcode9.2
+      env:
+        - HOMEBREW_NO_AUTO_UPDATE=1
+        - HOMEBREW_NO_INSTALL_CLEANUP=1
+        - CI_SWIFT_FLAGS="\-target x86_64-apple-macosx10.12"
     - os: freebsd
       compiler: clang
     - os: linux
