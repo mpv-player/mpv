@@ -547,7 +547,8 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 void update_demuxer_properties(struct MPContext *mpctx);
 void print_track_list(struct MPContext *mpctx, const char *msg);
-void reselect_demux_stream(struct MPContext *mpctx, struct track *track);
+void reselect_demux_stream(struct MPContext *mpctx, struct track *track,
+                           bool refresh_only);
 void prepare_playlist(struct MPContext *mpctx, struct playlist *pl);
 void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel);
 struct track *select_default_track(struct MPContext *mpctx, int order,
