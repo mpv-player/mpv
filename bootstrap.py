@@ -41,6 +41,12 @@ if not waf:
     sys.exit(1)
 
 if SHA256HASH == hashlib.sha256(waf).hexdigest():
+    # Upstream waf is not changing the default interpreter during
+    # 2.0.x line due to compatibility reasons apparently. So manually
+    # convert it to use python3 (the script works with both).
+    expected = b"#!/usr/bin/env python\n"
+    assert waf.startswith(expected)
+    waf = b"#!/usr/bin/env python3\n" + waf[len(expected):]
     with open("waf", "wb") as wf:
         wf.write(waf)
 
