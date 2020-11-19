@@ -362,7 +362,9 @@ void update_demuxer_properties(struct MPContext *mpctx)
 
 // Enables or disables the stream for the given track, according to
 // track->selected.
-void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
+// With refresh_only=true, refreshes the stream if it's enabled.
+void reselect_demux_stream(struct MPContext *mpctx, struct track *track,
+                           bool refresh_only)
 {
     if (!track->stream)
         return;
@@ -372,7 +374,10 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
         if (track->type == STREAM_SUB)
             pts -= 10.0;
     }
-    demuxer_select_track(track->demuxer, track->stream, pts, track->selected);
+    if (refresh_only)
+        demuxer_refresh_track(track->demuxer, track->stream, pts);
+    else
+        demuxer_select_track(track->demuxer, track->stream, pts, track->selected);
 }
 
 static void enable_demux_thread(struct MPContext *mpctx, struct demuxer *demux)
@@ -658,14 +663,14 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         if (current->remux_sink)
             close_recorder_and_error(mpctx);
         current->selected = false;
-        reselect_demux_stream(mpctx, current);
+        reselect_demux_stream(mpctx, current, false);
     }
 
     mpctx->current_track[order][type] = track;
 
     if (track) {
         track->selected = true;
-        reselect_demux_stream(mpctx, track);
+        reselect_demux_stream(mpctx, track, false);
     }
 
     if (type == STREAM_VIDEO && order == 0) {
@@ -1341,7 +1346,7 @@ done:
 
     if (mpctx->playback_initialized) {
         for (int n = 0; n < mpctx->num_tracks; n++)
-            reselect_demux_stream(mpctx, mpctx->tracks[n]);
+            reselect_demux_stream(mpctx, mpctx->tracks[n], false);
     }
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
@@ -1583,7 +1588,7 @@ static void play_current_file(struct MPContext *mpctx)
     }
 
     for (int n = 0; n < mpctx->num_tracks; n++)
-        reselect_demux_stream(mpctx, mpctx->tracks[n]);
+        reselect_demux_stream(mpctx, mpctx->tracks[n], false);
 
     update_demuxer_properties(mpctx);
 
