@@ -3970,6 +3970,26 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
     pthread_mutex_unlock(&in->lock);
 }
 
+// Execute a refresh seek on the given stream.
+// ref_pts has the same meaning as with demuxer_select_track()
+void demuxer_refresh_track(struct demuxer *demuxer, struct sh_stream *stream,
+                           double ref_pts)
+{
+    struct demux_internal *in = demuxer->in;
+    struct demux_stream *ds = stream->ds;
+    pthread_mutex_lock(&in->lock);
+    ref_pts = MP_ADD_PTS(ref_pts, -in->ts_offset);
+    if (ds->selected) {
+        MP_VERBOSE(in, "refresh track %d\n", stream->index);
+        update_stream_selection_state(in, ds);
+        if (in->back_demuxing)
+            ds->back_seek_pos = ref_pts;
+        if (!in->after_seek)
+            initiate_refresh_seek(in, ds, ref_pts);
+    }
+    pthread_mutex_unlock(&in->lock);
+}
+
 // This is for demuxer implementations only. demuxer_select_track() sets the
 // logical state, while this function returns the actual state (in case the
 // demuxer attempts to cache even unselected packets for track switching - this
