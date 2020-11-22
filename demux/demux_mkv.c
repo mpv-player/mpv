@@ -1449,6 +1449,19 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     if (!strcmp(codec, "mjpeg")) {
         sh_v->codec_tag = MKTAG('m', 'j', 'p', 'g');
         track->require_keyframes = true;
+    } else if (!strncmp(codec, "av1", 3) && extradata_size) {
+        bool codec_config_fits = (extradata_size >= 4);
+        if (!codec_config_fits)
+            MP_WARN(demuxer,
+                   "Partial AV1 Codec Configuration in CodecPrivate, "
+                   "not passing it on!\n");
+
+        // If we have the minimum required size available for an MP4 style
+        // AV1 extradata (also utilized in Matroska), offset it by four bytes
+        // as nothing seems to want the non-OBU bits of it. Otherwise,
+        // set extradata to default values (nullptr, zero size).
+        extradata      = codec_config_fits ? extradata      + 4 : NULL;
+        extradata_size = codec_config_fits ? extradata_size - 4 : 0;
     }
 
     if (extradata_size > 0x1000000) {
