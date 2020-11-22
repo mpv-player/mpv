@@ -1,7 +1,11 @@
-Release 0.32.0
+Release 0.33.0
 ==============
 
 This release requires FFmpeg 4.0 or newer.
+
+For packagers: Note that mpv's build system is only supported on Python 3.
+If you use the `bootstrap.py` script it will take care of this, otherwise you
+need to explicitly invoke the build system using `python3 waf`.
 
 
 Features
@@ -10,25 +14,53 @@ Features
 Added
 ~~~~~
 
-- stream_libarchive: enable RAR5 support
-- bash completion: add initial implementation
-- cocoa-cb: add support for forcing the dedicated GPU for rendering
-- cocoa-cb: add pinch to resize window gesture
-- w32_common: support minimizing/maximizing using osc window controls
+- scripting: load scripts from directories
+- mac: activate logging when started from the bundle
+- ytdl_hook.lua: delay load subtitles
+- sub: add an option to filter subtitles by regex
+- scripting: add a way to run subprocesses as "scripts"
+- command: implement asynchronous commands and support for named arguments
+- player: add optional separate video decoding thread
+- vo_gpu: d3d11: add support for exclusive fullscreen
+- w32_common: Support HiDPI on Windows
+- vo_x11: add 10 bit support
+- vo_gpu: add BT.2390 tone-mapping
+- client API: add software rendering API
+- audio: add scaletempo2 filter based on chromium
+- auto_profiles: add this script
+- stream: Implement slice:// for reading slices of streams
+- player: add automatic loading of external cover art files
+- vo_sixel: implement terminal video output using sixel
 
 
 Changed
 ~~~~~~~
 
-- wayland: print warning on GNOME due to serious issues with their compositor
-- player: write watch-later config even for unseekable streams
+- sws_utils: use zimg by default if available
+- build: pick up Lua 5.2 by default (preferred over 5.1)
+- build: disable RPI vendor blob auto-detection in favor of open-source stack
+- build: make C11 atomics mandatory
+- build: make libass non-optional
+- player: stricter filename matching for external subtitle auto-loading
+- lua: support Unicode paths in script loading and IO library
+- vo_direct3d: rip out texture video rendering path and dumb down OSD rendering
+- audio: rewrite internal audio handling and AO API
+- build: disable GLX by default
 
 
 Removed
 ~~~~~~~
 
-- vo_gpu: hwdec_vdpau: remove direct_mode
-- vo_gpu: hwdec_vaegl: remove support for old-style interop
+- stream_libarchive: disable tar support due to bugs
+- Remove remains of Libav compatibility
+- stream_smb: remove due to lack of thread safety and the abundance
+  of alternatives, FFmpeg still includes SMB support
+- command: remove legacy hook API (has been deprecated for a long time)
+- client API: remove deprecated qthelper.hpp header
+- removed audio outputs: sndio, rsound, oss
+- x11: remove xdg-screensaver invocations that supported dbus based idle inhibit
+- client API: deactivate the opengl_cb API
+- build system: drop Python 2 compatbility
 
 
 Options and Commands
@@ -37,33 +69,90 @@ Options and Commands
 Added
 ~~~~~
 
-- command: add a playlist-unshuffle command
-- command: add osd-dimensions property
-- input: new PLAYONLY and PAUSEONLY keycodes
+- demux: add option to disable cache "sharing" between back and forward buffers
+- player: add ab-loop-count option/property
+- ytdl_hook: add a way to use ytdl's default formats
+- ytdl_hook: add all_formats option that loads all formats that were found
+- demux_mkv: document probe-start-time option and enable it by default
+- command: extend osd-overlay command with bounds reporting
+- player: a number of new playlist contol commands/properties
+- ipc: add --input-ipc-client option
+- options: add option to control display-sync factor
+- vo_gpu: add better gamut clipping option
+- vo_gpu: vulkan: add ability to disable events
+- x11: add option to make window appear on a specific workspace
+- wayland: expose wayland-app-id as a user option
+- player: add --subs-with-matching-audio option
+- command: add read-only focused property
+- screenshot: option to use software rendering for screenshots
+- command: add delete-watch-later-config
+- command: new property mouse-pos with current position and hover state
 
 
 Changed
 ~~~~~~~
 
-- options: change option parsing when using a single dash
-  This adds a warning for `-o file.mkv` and disallows the use of
-  `--o file.mkv` (use `--o=file.mkv` instead).
+- options: remove deprecation warning for "-foo bar" syntax
+- player: make audio hr-seek default
+- ad_lavc: disable decoder downmix by default
+- command: support save-position-on-quit for "stop" command too
+- command: extend subprocess command
+- options: do not accept ":" as separator anymore in key/value lists
+
+
+Deprecated
+~~~~~~~~~~
+
+- demux: deprecate --cache-secs
+
+
+Removed
+~~~~~~~
+
+- wayland: remove wayland-frame-wait-offset option
+- input: remove deprecated --input-file option
+- vo_vdpau: remove deprecated/inactive --vo-vdpau-deint option
 
 
 Fixes and Minor Enhancements
 ----------------------------
 
-- lua: fix mp.file_info for large files
-- vo_gpu: fix crash if dither texture fails to allocate
-- wayland: unscrew up cursors, fix various issues
-- osc: usability improvements for osc window controls
+- options: stop hiding deprecated options from --help output
+- lua, js: add mp.get_script_directory() function
+- lua: fix security relevant loading order issue with scripts
+- player: make screenshot each-frame mode more accurate
+- bash completion: complete ao/af/vo/vf options
+- zimg: add alpha support
+- wayland: make resizing better
+- edl: add mechanism for delay loading streams
+- stream_file: fix caching-related performance regression on CIFS
+- cocoa-cb: fix crashes and issues with UI updates
+- sub, demux: improve behavior with negative subtitle delay/muxed subs
+- demux: make seek ranges work for static images + audio
+- cocoa-cb: support maximize/minimize on startup
+- umpv: change from legacy FIFO to socket
+- stats: move input speed to cache page, make it a graph
+- stats: add fourth page with performance graphs
+- command: print edition title to OSD when cycling
+- zimg: add support for big endian input and output
+- demux_mkv: add png intra support
+- build: detect VT_GETMODE on FreeBSD and DragonFly
+- win32: use windows 10 native virtual-terminal if available
+- vo_gpu: enable frame caching for still frames
+- command: add property to return text subtitles in ASS
+- vo_gpu: ra_pl: add timers support
+- build: allow vo_wlshm on more Wayland platforms (e.g. FreeBSD)
+- zimg: add slice threading and use it by default
+- command: add a way to access properties of a current track
+- vo_gpu: EGL: fix transparency on X11/EGL/Mesa
+- vd_lavc: add AV1 to the default allowed hwdec codec list
 
 
 This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log v0.31.0..v0.32.0`
+A complete changelog can be seen by running `git log v0.32.0..v0.33.0`
 in the git repository or by visiting either
-https://github.com/mpv-player/mpv/compare/v0.31.0...v0.32.0 or
-https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.31.0..v0.32.0
+https://github.com/mpv-player/mpv/compare/v0.32.0...v0.33.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.32.0..v0.33.0
