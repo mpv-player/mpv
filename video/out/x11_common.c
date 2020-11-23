@@ -467,7 +467,8 @@ static void vo_x11_update_screeninfo(struct vo *vo)
     struct mp_vo_opts *opts = x11->opts;
     bool all_screens = opts->fullscreen && opts->fsscreen_id == -2;
     x11->screenrc = (struct mp_rect){.x1 = x11->ws_width, .y1 = x11->ws_height};
-    if (opts->screen_id >= -1 && XineramaIsActive(x11->display) && !all_screens)
+    if ((opts->screen_id >= -1 || opts->screen_name) && XineramaIsActive(x11->display) &&
+         !all_screens)
     {
         int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
         XineramaScreenInfo *screens;
@@ -475,6 +476,23 @@ static void vo_x11_update_screeninfo(struct vo *vo)
 
         if (opts->fullscreen && opts->fsscreen_id == -1)
             screen = opts->screen_id;
+
+        if (screen == -1 && (opts->fsscreen_name || opts->screen_name)) {
+            char *screen_name = opts->fullscreen ? opts->fsscreen_name : opts->screen_name;
+            if (screen_name) {
+                bool screen_found = false;
+                for (int n = 0; n < x11->num_displays; n++) {
+                    char *display_name = x11->displays[n].name;
+                    if (!strcmp(display_name, screen_name)) {
+                        screen = n;
+                        screen_found = true;
+                        break;
+                    }
+                }
+                if (!screen_found)
+                    MP_WARN(x11, "Screen name %s not found!\n", screen_name);
+            }
+        }
 
         screens = XineramaQueryScreens(x11->display, &num_screens);
         if (screen >= num_screens)
