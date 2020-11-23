@@ -1320,27 +1320,37 @@ void vo_wayland_uninit(struct vo *vo)
     vo->wl = NULL;
 }
 
-static bool find_output(struct vo_wayland_state *wl, int index)
+static bool find_output(struct vo_wayland_state *wl)
 {
-    int screen_id = 0;
+    int index = 0;
+    int screen_id = wl->vo_opts->fsscreen_id;
+    char *screen_name = wl->vo_opts->fsscreen_name;
     struct vo_wayland_output *output = NULL;
     struct vo_wayland_output *fallback_output = NULL;
     wl_list_for_each(output, &wl->output_list, link) {
-        if (screen_id == 0)
+        if (index == 0)
             fallback_output = output;
-        if (index == screen_id++)
+        if (screen_id == -1 && screen_name && !strcmp(screen_name, output->model)) {
             wl->current_output = output;
+            break;
+        }
+        if (screen_id == index++) {
+            wl->current_output = output;
+            break;
+        }
     }
     if (!wl->current_output) {
         if (!fallback_output) {
-            MP_ERR(wl, "Screen index %i not found/unavailable!\n", index);
-            return 1;
-        } else {
-            MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", index);
-            wl->current_output = fallback_output;
+            MP_ERR(wl, "No screens could be found!\n");
+            return false;
+        } else if (wl->vo_opts->fsscreen_id >= 0) {
+            MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", screen_id);
+        } else if (wl->vo_opts->fsscreen_name) {
+            MP_WARN(wl, "Screen name %s not found/unavailable! Falling back to screen 0!\n", screen_name);
         }
+        wl->current_output = fallback_output;
     }
-    return 0;
+    return true;
 }
 
 static void toggle_fullscreen(struct vo_wayland_state *wl)
@@ -1348,10 +1358,11 @@ static void toggle_fullscreen(struct vo_wayland_state *wl)
     if (!wl->xdg_toplevel)
         return;
     wl->state_change = true;
-    if (wl->vo_opts->fullscreen && wl->vo_opts->fsscreen_id < 0) {
+    bool specific_screen = wl->vo_opts->fsscreen_id >= 0 || wl->vo_opts->fsscreen_name;
+    if (wl->vo_opts->fullscreen && !specific_screen) {
         xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
-    } else if (wl->vo_opts->fullscreen && wl->vo_opts->fsscreen_id >= 0) {
-        find_output(wl, wl->vo_opts->fsscreen_id);
+    } else if (wl->vo_opts->fullscreen && specific_screen) {
+        find_output(wl);
         xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl->current_output->output);
     } else {
         xdg_toplevel_unset_fullscreen(wl->xdg_toplevel);
@@ -1405,10 +1416,7 @@ int vo_wayland_reconfig(struct vo *vo)
     MP_VERBOSE(wl, "Reconfiguring!\n");
 
     if (!wl->current_output) {
-        int idx = 0;
-        if (wl->vo_opts->fullscreen && (wl->vo_opts->fsscreen_id >= 0))
-            idx = wl->vo_opts->fsscreen_id;
-        if (find_output(wl, idx))
+        if (!find_output(wl))
             return false;
         if (!wl->vo_opts->hidpi_window_scale)
             wl->current_output->scale = 1;
