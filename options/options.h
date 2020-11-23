@@ -22,7 +22,9 @@ typedef struct mp_vo_opts {
     bool focus_on_open;
 
     int screen_id;
+    char *screen_name;
     int fsscreen_id;
+    char *fsscreen_name;
     char *winname;
     char *appid;
     int x11_netwm;
