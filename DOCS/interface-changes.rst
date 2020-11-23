@@ -26,6 +26,9 @@ Interface changes
 
 ::
 
+ --- mpv 0.34.0 ---
+    - add `--screen-name` and `--fs-screen-name` flags to allow selecting the 
+      screen by its name instead of the index
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
       when the player enters fullscreen.

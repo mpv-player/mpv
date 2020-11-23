@@ -2839,6 +2839,12 @@ Window
 
     See also ``--fs-screen``.
 
+``--screen-name=<string>``
+    In multi-monitor configurations, this option tells mpv which screen to
+    display the video on based on the screen name from the video backend. The
+    same caveats in the ``--screen`` option also apply here. This option is
+    ignored and does nothing if ``--screen`` is explicitly set.
+
 ``--fullscreen``, ``--fs``
     Fullscreen playback.
 
@@ -2858,6 +2864,12 @@ Window
         ``all`` does not work on OS X and will behave like ``current``.
 
     See also ``--screen``.
+
+``--fs-screen-name=<string>``
+    In multi-monitor configurations, this option tells mpv which screen to go
+    fullscreen to based on the screen name from the video backend. The same
+    caveats in the ``--fs-screen`` option also apply here. This option is
+    ignored and does nothing if ``--fs-screen`` is explicitly set.
 
 ``--keep-open=<yes|no|always>``
     Do not terminate when playing or seeking beyond the end of the file, and
