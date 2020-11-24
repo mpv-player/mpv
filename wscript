@@ -422,6 +422,11 @@ audio_output_features = [
         'deps': 'sdl2',
         'func': check_true,
     }, {
+        'name': '--oss-audio',
+        'desc': 'OSSv4 audio output',
+        'func': check_statement(['sys/soundcard.h'], 'int x = SNDCTL_DSP_SETPLAYVOL'),
+        'deps': 'posix && gpl',
+    }, {
         'name': '--pulse',
         'desc': 'PulseAudio audio output',
         'func': check_pkg_config('libpulse', '>= 1.0')

@@ -35,6 +35,7 @@
 #include "common/common.h"
 #include "common/global.h"
 
+extern const struct ao_driver audio_out_oss;
 extern const struct ao_driver audio_out_audiotrack;
 extern const struct ao_driver audio_out_audiounit;
 extern const struct ao_driver audio_out_coreaudio;
@@ -70,6 +71,9 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #endif
 #if HAVE_WASAPI
     &audio_out_wasapi,
+#endif
+#if HAVE_OSS_AUDIO
+    &audio_out_oss,
 #endif
     // wrappers:
 #if HAVE_JACK
