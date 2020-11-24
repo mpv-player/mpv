@@ -14,7 +14,7 @@ in the list.
 
     See ``--ao=help`` for a list of compiled-in audio output drivers. The
     driver ``--ao=alsa`` is preferred. ``--ao=pulse`` is preferred on systems
-    where PulseAudio is used.
+    where PulseAudio is used. On BSD systems, ``--ao=oss`` is preferred.
 
 Available audio output drivers are:
 
@@ -34,6 +34,9 @@ Available audio output drivers are:
         This setup enables multichannel audio on the ``default`` device
         with automatic upmixing with shared access, so playing stereo
         and multichannel audio at the same time will work as expected.
+
+``oss``
+    OSS audio output driver
 
 ``jack``
     JACK (Jack Audio Connection Kit) audio output driver.
