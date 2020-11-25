@@ -427,6 +427,12 @@ audio_output_features = [
         'func': check_statement(['sys/soundcard.h'], 'int x = SNDCTL_DSP_SETPLAYVOL'),
         'deps': 'posix && gpl',
     }, {
+        'name': '--sndio',
+        'desc': 'sndio audio input/output',
+        'func': check_statement('sndio.h',
+            'struct sio_par par; sio_initpar(&par); const char *s = SIO_DEVANY', lib='sndio'),
+        'default': 'disable'
+    }, {
         'name': '--pulse',
         'desc': 'PulseAudio audio output',
         'func': check_pkg_config('libpulse', '>= 1.0')
