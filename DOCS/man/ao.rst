@@ -228,5 +228,11 @@ Available audio output drivers are:
         ``no-waveheader`` option - with ``waveheader`` it's broken, because
         it will write a WAVE header every time the file is opened.
 
+``sndio``
+    Audio output to the OpenBSD sndio sound system
+
+    (Note: only supports mono, stereo, 4.0, 5.1 and 7.1 channel
+    layouts.)
+
 ``wasapi``
     Audio output to the Windows Audio Session API.
