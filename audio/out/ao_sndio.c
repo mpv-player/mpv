@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2008 Alexandre Ratchov <alex@caoua.org>
  * Copyright (c) 2013 Christian Neukirchen <chneukirchen@gmail.com>
+ * Copyright (c) 2020 Érico Nogueira Rolim <ericonr@disroot.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,16 +31,20 @@
 #include "internal.h"
 
 struct priv {
+    /* sndio control and interaction */
     struct sio_hdl *hdl;
     struct sio_par par;
-    int delay;
-    bool playing;
-    int vol;
-    int havevol;
-#define SILENCE_NMAX 0x1000
-    char silence[SILENCE_NMAX];
     struct pollfd *pfd;
-    char *dev;
+    /* temporary buffer for audio written before audio_start() */
+    unsigned char *buffer;
+    int buffer_pos;
+    /* variable to keep track of hardware position */
+    int delay;
+    /* volume control */
+    int vol;
+    bool havevol;
+    /* current state */
+    bool playing;
 };
 
 /*
@@ -54,7 +59,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     case AOCONTROL_GET_VOLUME:
         if (!p->havevol)
             return CONTROL_FALSE;
-        vol->left = vol->right = p->vol * 100 / SIO_MAXVOL;
+        vol->left = vol->right = p->vol * 100 / (float)SIO_MAXVOL;
         break;
     case AOCONTROL_SET_VOLUME:
         if (!p->havevol)
@@ -87,8 +92,8 @@ static void volcb(void *addr, unsigned newvol)
 
 static const struct mp_chmap sndio_layouts[MP_NUM_CHANNELS + 1] = {
     {0},                                        // empty
-    {1, {MP_SPEAKER_ID_FL}},                    // mono
-    MP_CHMAP2(FL, FR),                          // stereo
+    MP_CHMAP_INIT_MONO,                         // mono
+    MP_CHMAP_INIT_STEREO,                       // stereo
     {0},                                        // 2.1
     MP_CHMAP4(FL, FR, BL, BR),                  // 4.0
     {0},                                        // 5.0
@@ -119,9 +124,11 @@ static int init(struct ao *ao)
     const struct af_to_par *ap;
     int i;
 
-    p->hdl = sio_open(SIO_DEVANY, SIO_PLAY, 0);
+    /* support audio device defined in the command line */
+    const char *dev_name = ao->device ? ao->device : SIO_DEVANY;
+    p->hdl = sio_open(dev_name, SIO_PLAY, 0);
     if (p->hdl == NULL) {
-        MP_ERR(ao, "can't open sndio %s\n", SIO_DEVANY);
+        MP_ERR(ao, "can't open sndio device '%s'\n", dev_name);
         goto error;
     }
 
@@ -156,8 +163,9 @@ static int init(struct ao *ao)
         goto error;
 
     p->par.pchan = ao->channels.num;
-    p->par.appbufsz = p->par.rate * 250 / 1000;    /* 250ms buffer */
-    p->par.round = p->par.rate * 10 / 1000;    /*  10ms block size */
+    p->par.round = p->par.rate * 10 / 1000; /*  10ms block size */
+    /* other parameters are left for libsndio to decide */
+
     if (!sio_setpar(p->hdl, &p->par)) {
         MP_ERR(ao, "couldn't set params\n");
         goto error;
@@ -183,14 +191,15 @@ static int init(struct ao *ao)
 
     p->havevol = sio_onvol(p->hdl, volcb, p);
     sio_onmove(p->hdl, movecb, p);
-    if (!sio_start(p->hdl))
-        MP_ERR(ao, "init: couldn't start\n");
 
     p->pfd = calloc (sio_nfds(p->hdl), sizeof (struct pollfd));
     if (!p->pfd)
         goto error;
 
-    ao->period_size = p->par.round;
+    ao->device_buffer = p->par.bufsz;
+
+    p->buffer = NULL;
+    p->playing = false;
 
     return 0;
 
@@ -212,6 +221,7 @@ static void uninit(struct ao *ao)
         sio_close(p->hdl);
 
     free(p->pfd);
+    free(p->buffer);
 }
 
 /*
@@ -224,29 +234,95 @@ static void reset(struct ao *ao)
     if (p->playing) {
         MP_WARN(ao, "Blocking until remaining audio is played... (sndio design bug).\n");
 
-        p->playing = false;
-
+        /* reset needs to bring the driver back to the state right after init,
+         * so we shouldn't call sio_start() in it */
         if (!sio_stop(p->hdl))
             MP_ERR(ao, "reset: couldn't stop\n");
+
+        p->playing = false;
         p->delay = 0;
-        if (!sio_start(p->hdl))
-            MP_ERR(ao, "reset: couldn't start\n");
     }
+
+    /* discard temporary buffer directly */
+    p->buffer_pos = 0;
 }
 
-/*
- * play given number of samples until sio_write() blocks
- */
-static int play(struct ao *ao, void **data, int samples, int flags)
+static void audio_start(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int n;
 
-    n = sio_write(p->hdl, data[0], samples * ao->sstride) / ao->sstride;
-    p->delay += n;
+    /* don't need to do anything if already playing */
+    if (p->playing)
+        return;
+
+    if (!sio_start(p->hdl)) {
+        MP_ERR(ao, "start: couldn't start\n");
+        return;
+    }
+
     p->playing = true;
+
+    /* if temporary buffer was used, flush it */
+    if (p->buffer) {
+        int buffer_old = p->buffer_pos;
+        while (p->buffer_pos > 0) {
+            n = sio_write(
+                    p->hdl,
+                    p->buffer + ao->sstride * (buffer_old - p->buffer_pos),
+                    p->buffer_pos * ao->sstride
+                ) / ao->sstride;
+
+            if (sio_eof(p->hdl)) {
+                MP_WARN(ao, "start: couldn't flush temporary buffer\n");
+                p->buffer_pos = 0;
+                return;
+            }
+
+            p->buffer_pos -= n;
+        }
+    }
+
+}
+
+static bool audio_write(struct ao *ao, void **data, int samples)
+{
+    struct priv *p = ao->priv;
+    int n;
+
+    /* if audio_start has been called, write directly to sndio,
+     * otherwise store in temporary buffer */
+    if (p->playing) {
+        n = sio_write(p->hdl, data[0], samples * ao->sstride) / ao->sstride;
+        p->delay += n;
+    } else {
+        /* allocate the temporary buffer on demand */
+        if (!p->buffer) {
+            p->buffer_pos = 0;
+            p->buffer = malloc(ao->device_buffer * ao->sstride);
+
+            if (!p->buffer) {
+                MP_ERR(ao, "write: couldn't allocate temporary buffer\n");
+                return false;
+            }
+        }
+
+        if ((p->buffer_pos + samples) > ao->device_buffer) {
+            MP_ERR(ao, "write: temporary buffer full\n");
+            return false;
+        }
+
+        memcpy(p->buffer + (p->buffer_pos * ao->sstride), data[0], samples * ao->sstride);
+        p->buffer_pos += samples;
+        /* it's as if the buffer is getting occupied */
+        p->delay += samples;
+
+        /* at this point, always succeeds */
+        return true;
+    }
+
     /* on AOPLAY_FINAL_CHUNK, just let it underrun */
-    return n;
+    return !sio_eof(p->hdl);
 }
 
 /*
@@ -260,48 +336,22 @@ static void update(struct ao *ao)
     sio_revents(p->hdl, p->pfd);
 }
 
-/*
- * how many samples can be played without blocking
- */
-static int get_space(struct ao *ao)
+
+static void get_state(struct ao *ao, struct mp_pcm_state *state)
 {
     struct priv *p = ao->priv;
 
     update(ao);
 
-    int samples = p->par.bufsz - p->delay;
-    return samples / p->par.round * p->par.round;
+    /* delay in seconds between first and last sample in buffer */
+    state->delay = p->delay / (double)p->par.rate;
+    /* how many samples we can play without blocking, rounded to best size */
+    state->free_samples = (p->par.bufsz - p->delay) / p->par.round * p->par.round;
+    /* how many samples are already in the buffer to be played */
+    state->queued_samples = p->delay;
+
+    state->playing = p->playing;
 }
-
-/*
- * return: delay in seconds between first and last sample in buffer
- */
-static double get_delay(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-
-    update(ao);
-
-    return p->delay / (double)p->par.rate;
-}
-
-/*
- * stop playing, keep buffers (for pause)
- */
-static void audio_pause(struct ao *ao)
-{
-    reset(ao);
-}
-
-/*
- * resume playing, after audio_pause()
- */
-static void audio_resume(struct ao *ao)
-{
-    return;
-}
-
-#define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_sndio = {
     .description = "sndio audio output",
@@ -309,11 +359,10 @@ const struct ao_driver audio_out_sndio = {
     .init      = init,
     .uninit    = uninit,
     .control   = control,
-    .get_space = get_space,
-    .play      = play,
-    .get_delay = get_delay,
-    .pause     = audio_pause,
-    .resume    = audio_resume,
+    .get_state = get_state,
+    .start     = audio_start,
+    .write     = audio_write,
     .reset     = reset,
+    /* no need for .set_pause, since core emulates that with .reset */
     .priv_size = sizeof(struct priv),
 };
