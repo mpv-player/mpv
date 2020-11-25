@@ -219,8 +219,6 @@ Available audio output drivers are:
 ``sndio``
     Audio output to the OpenBSD sndio sound system
 
-    .. note:: Experimental. There are known bugs and issues.
-
     (Note: only supports mono, stereo, 4.0, 5.1 and 7.1 channel
     layouts.)
 
