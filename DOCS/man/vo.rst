@@ -423,12 +423,12 @@ Available video output drivers are:
         Selects the dither algorithm which libsixel should apply.
         Can be one of the below list as per libsixel's documentation.
 
-        auto
-            Choose diffuse type automatically
+        auto (Default)
+            Let libsixel choose the dithering method.
         none
             Don't diffuse
         atkinson
-            Diffuse with Bill Atkinson's method. (Default)
+            Diffuse with Bill Atkinson's method.
         fs
             Diffuse with Floyd-Steinberg method
         jajuni
