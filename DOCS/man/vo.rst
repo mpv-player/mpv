@@ -448,20 +448,18 @@ Available video output drivers are:
         using ``no`` (at the time of writing) will slow down ``xterm``.
 
     ``--vo-sixel-reqcolors=<colors>`` (default: 256)
-        Set up libsixel to use required number of colors for dynamic palette.
-        This value depends on the terminal emulator as well. Xterm supports
-        256 colors.  Can set this to a lower value for faster performance.
-        This option has no effect if fixed palette is used.
+        Has no effect with fixed palette. Set up libsixel to use required
+        number of colors for dynamic palette. This value depends on the
+        terminal emulator as well. Xterm supports 256 colors. Can set this to
+        a lower value for faster performance.
 
     ``--vo-sixel-threshold=<threshold>`` (default: -1)
-        When using a dynamic palette, defines the threshold to change the
+        Has no effect with fixed palette. Defines the threshold to change the
         palette - as percentage of the number of colors, e.g. 20 will change
         the palette when the number of colors changed by 20%. It's a simple
         measure to reduce the number of palette changes, because it can be slow
-        in some terminals (``xterm``), however, it seems that in ``mlterm`` it
-        causes image corruption. The default (-1) will change the palette
-        on every frame and will have better quality, and no corruption in
-        ``mlterm``.
+        in some terminals (``xterm``). The default (-1) will choose a palette
+        on every frame and will have better quality.
 
 ``image``
     Output each frame into an image file in the current directory. Each file

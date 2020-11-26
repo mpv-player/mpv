@@ -140,15 +140,15 @@ static SIXELSTATUS prepare_static_palette(struct vo* vo)
 {
     struct priv* priv = vo->priv;
 
-    if (priv->dither) {
-        sixel_dither_set_body_only(priv->dither, 1);
-    } else {
+    if (!priv->dither) {
         priv->dither = sixel_dither_get(BUILTIN_XTERM256);
         if (priv->dither == NULL)
             return SIXEL_FALSE;
 
         sixel_dither_set_diffusion_type(priv->dither, priv->opt_diffuse);
     }
+
+    sixel_dither_set_body_only(priv->dither, 0);
     return SIXEL_OK;
 }
 
@@ -180,12 +180,11 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
 
         sixel_dither_set_diffusion_type(priv->dither, priv->opt_diffuse);
     } else {
-        if (priv->dither == NULL) {
+        if (priv->dither == NULL)
             return SIXEL_FALSE;
-        }
-        sixel_dither_set_body_only(priv->dither, 1);
     }
 
+    sixel_dither_set_body_only(priv->dither, 0);
     return status;
 }
 
