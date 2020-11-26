@@ -45,6 +45,14 @@
 // Timeout in ms after which the (normally ambiguous) ESC key is detected.
 #define ESC_TIMEOUT 100
 
+// Timeout in ms after which the poll for input is aborted. The FG/BG state is
+// tested before every wait, and a positive value allows reactivating input
+// processing when mpv is brought to the foreground while it was running in the
+// background. In such a situation, an infinite timeout (-1) will keep mpv
+// waiting for input without realizing the terminal state changed - and thus
+// buffer all keypresses until ENTER is pressed.
+#define INPUT_TIMEOUT 1000
+
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
 
@@ -397,7 +405,7 @@ static void *terminal_thread(void *ptr)
             { .events = POLLIN, .fd = death_pipe[0] },
             { .events = POLLIN, .fd = tty_in }
         };
-        int r = polldev(fds, stdin_ok ? 2 : 1, buf.len ? ESC_TIMEOUT : -1);
+        int r = polldev(fds, stdin_ok ? 2 : 1, buf.len ? ESC_TIMEOUT : INPUT_TIMEOUT);
         if (fds[0].revents)
             break;
         if (fds[1].revents) {
