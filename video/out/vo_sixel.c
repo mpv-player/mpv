@@ -70,6 +70,7 @@ struct priv {
     sixel_dither_t *dither;
     sixel_dither_t *testdither;
     uint8_t        *buffer;
+    bool            skip_frame_draw;
 
     // The dimensions that will be actually
     // be used after processing user inputs
@@ -317,28 +318,45 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *priv = vo->priv;
-    struct mp_image src = *mpi;
     SIXELSTATUS status;
+    struct mp_image *mpi = NULL;
 
-    struct mp_rect src_rc = priv->src_rect;
-    src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
-    src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
-    mp_image_crop_rc(&src, src_rc);
+    if (frame->repeat && !frame->redraw) {
+        // Frame is repeated, and no need to update OSD either
+        priv->skip_frame_draw = true;
+        return;
+    } else {
+        // Either frame is new, or OSD has to be redrawn
+        priv->skip_frame_draw = false;
+    }
 
-    // Downscale the image
-    mp_sws_scale(priv->sws, priv->frame, &src);
+    // Normal case where we have to draw the frame and the image is not NULL
+    if (frame->current) {
+        mpi = mp_image_new_ref(frame->current);
+        struct mp_rect src_rc = priv->src_rect;
+        src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
+        src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
+        mp_image_crop_rc(mpi, src_rc);
+
+        // scale/pan to our dest rect
+        mp_sws_scale(priv->sws, priv->frame, mpi);
+    } else {
+        // Image is NULL, so need to clear image and draw OSD
+        mp_image_clear(priv->frame, 0, 0, priv->width, priv->height);
+    }
 
     struct mp_osd_res dim = {
         .w = priv->width,
         .h = priv->height
     };
     osd_draw_on_image(vo->osd, dim, mpi ? mpi->pts : 0, 0, priv->frame);
+
     // Copy from mpv to RGB format as required by libsixel
-    memcpy_pic(priv->buffer, priv->frame->planes[0], priv->width * depth, priv->height,
-               priv->width * depth, priv->frame->stride[0]);
+    memcpy_pic(priv->buffer, priv->frame->planes[0], priv->width * depth,
+               priv->height, priv->width * depth, priv->frame->stride[0]);
 
     // Even if either of these prepare palette functions fail, on re-running them
     // they should try to re-initialize the dithers, so it shouldn't dereference
@@ -351,11 +369,12 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 
     if (SIXEL_FAILED(status)) {
-        MP_WARN(vo, "draw_image: prepare_palette returned error: %s\n",
+        MP_WARN(vo, "draw_frame: prepare_palette returned error: %s\n",
                 sixel_helper_format_error(status));
     }
 
-    talloc_free(mpi);
+    if (mpi)
+        talloc_free(mpi);
 }
 
 static int sixel_write(char *data, int size, void *priv)
@@ -366,6 +385,10 @@ static int sixel_write(char *data, int size, void *priv)
 static void flip_page(struct vo *vo)
 {
     struct priv* priv = vo->priv;
+
+    // If frame is repeated and no update required, then we skip encoding
+    if (priv->skip_frame_draw)
+        return;
 
     // Make sure that image and dither are valid before drawing
     if (priv->buffer == NULL || priv->dither == NULL)
@@ -472,7 +495,7 @@ const struct vo_driver video_out_sixel = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
