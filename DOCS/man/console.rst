@@ -88,6 +88,17 @@ option. The configuration syntax is described in `ON SCREEN CONTROLLER`_.
 Key bindings can be changed in a standard way, see for example stats.lua
 documentation.
 
+Command-line Syntax
+~~~~~~~~~~~~~~~~~~~
+
+To avoid collisions with other scripts, all options need to be prefixed with `console-`.
+
+Example:
+
+```
+--script-opts=console-optionA=value1,console-optionB=value2
+```
+
 Configurable Options
 ~~~~~~~~~~~~~~~~~~~~
 
