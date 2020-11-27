@@ -37,12 +37,17 @@ matrix:
       osx_image: xcode11.6
     - <<: *mac
       osx_image: xcode10.1
+      env:
+        - HOMEBREW_NO_AUTO_UPDATE=1
+        - HOMEBREW_NO_INSTALL_CLEANUP=1
+        - CI_HOMEBREW_HASH=7242872d7878f1a4c2706e5837faafcf0782b58d
     - <<: *mac
       osx_image: xcode9.2
       env:
         - HOMEBREW_NO_AUTO_UPDATE=1
         - HOMEBREW_NO_INSTALL_CLEANUP=1
         - CI_SWIFT_FLAGS="\-target x86_64-apple-macosx10.12"
+        - CI_HOMEBREW_HASH=55e02323812604add9a69bab8730319b9255a697
     - os: freebsd
       compiler: clang
     - os: linux
@@ -128,13 +133,13 @@ before_install:
                 brew untap caskroom/cask
             fi
             brew update
-            if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
+            if [[ -n "$CI_HOMEBREW_HASH" ]]; then
                 pushd "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core"
-                git checkout --force 55e02323812604add9a69bab8730319b9255a697
+                git checkout --force $CI_HOMEBREW_HASH
             fi
             brew install $install
             brew link --overwrite python
-            if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
+            if [[ -n "$CI_HOMEBREW_HASH" ]]; then
                 git checkout master
                 popd
             fi
