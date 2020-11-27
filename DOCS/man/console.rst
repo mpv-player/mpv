@@ -91,7 +91,7 @@ documentation.
 Configurable Options
 ~~~~~~~~~~~~~~~~~~~~
 
-``scale``
+``console-scale``
     Default: 1
 
     All drawing is scaled by this value, including the text borders and the
@@ -100,13 +100,13 @@ Configurable Options
     If the VO backend in use has HiDPI scale reporting implemented, the option
     value is scaled with the reported HiDPI scale.
 
-``font``
+``console-font``
     Default: unset (picks a hardcoded font depending on detected platform)
 
     Set the font used for the REPL and the console. This probably doesn't
     have to be a monospaced font.
 
-``font_size``
+``console-font_size``
     Default: 16
 
     Set the font size used for the REPL and the console. This will be
