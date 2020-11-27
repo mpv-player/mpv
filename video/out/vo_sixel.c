@@ -299,12 +299,16 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     vo->want_redraw = true;
 
     dealloc_dithers_and_buffer(vo);
-    SIXELSTATUS status = sixel_dither_new(&priv->testdither,
-                                          priv->opt_reqcolors, NULL);
-    if (SIXEL_FAILED(status)) {
-        MP_ERR(vo, "reconfig: Failed to create new dither: %s\n",
-               sixel_helper_format_error(status));
-        return -1;
+
+    // create testdither only if dynamic palette mode is set
+    if (!priv->opt_fixedpal) {
+        SIXELSTATUS status = sixel_dither_new(&priv->testdither,
+                                              priv->opt_reqcolors, NULL);
+        if (SIXEL_FAILED(status)) {
+            MP_ERR(vo, "reconfig: Failed to create new dither: %s\n",
+                   sixel_helper_format_error(status));
+            return -1;
+        }
     }
 
     priv->buffer =
@@ -400,12 +404,15 @@ static int preinit(struct vo *vo)
     printf(ESC_USE_GLOBAL_COLOR_REG);
 
     priv->dither = NULL;
-    status = sixel_dither_new(&priv->testdither, priv->opt_reqcolors, NULL);
 
-    if (SIXEL_FAILED(status)) {
-        MP_ERR(vo, "preinit: Failed to create new dither: %s\n",
-               sixel_helper_format_error(status));
-        return -1;
+    // create testdither only if dynamic palette mode is set
+    if (!priv->opt_fixedpal) {
+        status = sixel_dither_new(&priv->testdither, priv->opt_reqcolors, NULL);
+        if (SIXEL_FAILED(status)) {
+            MP_ERR(vo, "preinit: Failed to create new dither: %s\n",
+                   sixel_helper_format_error(status));
+            return -1;
+        }
     }
 
     resize(vo);
