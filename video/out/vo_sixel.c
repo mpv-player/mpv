@@ -160,7 +160,8 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
     /* create histgram and construct color palette
      * with median cut algorithm. */
     status = sixel_dither_initialize(priv->testdither, priv->buffer,
-                                     priv->width, priv->height, 3,
+                                     priv->width, priv->height,
+                                     SIXEL_PIXELFORMAT_RGB888,
                                      LARGE_NORM, REP_CENTER_BOX,
                                      QUALITY_LOW);
     if (SIXEL_FAILED(status))
@@ -369,8 +370,7 @@ static void flip_page(struct vo *vo)
     // Go to the offset row and column, then display the image
     printf(ESC_GOTOXY, priv->top, priv->left);
     sixel_encode(priv->buffer, priv->width, priv->height,
-                 PIXELFORMAT_RGB888,
-                 priv->dither, priv->output);
+                 depth, priv->dither, priv->output);
     fflush(stdout);
 }
 
