@@ -781,9 +781,11 @@ ignored. This Lua code execution is not sandboxed.
 
 Any variables in condition expressions can reference properties. If an
 identifier is not already defined by Lua or mpv, it is interpreted as property.
-For example, ``pause`` would return the current pause status. If the variable
-name contains any ``_`` characters, they are turned into ``-``. For example,
-``playback_time`` would return the property ``playback-time``.
+For example, ``pause`` would return the current pause status. You cannot
+reference properties with ``-`` this way since that would denote a subtraction,
+but if the variable name contains any ``_`` characters, they are turned into
+``-``. For example, ``playback_time`` would return the property
+``playback-time``.
 
 A more robust way to access properties is using ``p.property_name`` or
 ``get("property-name", default_value)``. The automatic variable to property
