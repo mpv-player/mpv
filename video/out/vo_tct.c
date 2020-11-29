@@ -209,6 +209,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     };
 
     const int mul = (p->opts->algo == ALGO_PLAIN ? 1 : 2);
+    if (p->frame)
+        talloc_free(p->frame);
     p->frame = mp_image_alloc(IMGFMT, p->swidth, p->sheight * mul);
     if (!p->frame)
         return -1;
@@ -253,6 +255,9 @@ static void uninit(struct vo *vo)
     printf(ESC_RESTORE_CURSOR);
     printf(ESC_CLEAR_SCREEN);
     printf(ESC_GOTOXY, 0, 0);
+    struct priv *p = vo->priv;
+    if (p->frame)
+        talloc_free(p->frame);
 }
 
 static int preinit(struct vo *vo)
