@@ -117,13 +117,18 @@ static int detect_scene_change(struct vo* vo)
 
 }
 
-static void dealloc_dithers_and_buffer(struct vo* vo)
+static void dealloc_dithers_and_buffers(struct vo* vo)
 {
     struct priv* priv = vo->priv;
 
     if (priv->buffer) {
         talloc_free(priv->buffer);
         priv->buffer = NULL;
+    }
+
+    if (priv->frame) {
+        talloc_free(priv->frame);
+        priv->frame = NULL;
     }
 
     if (priv->dither) {
@@ -288,6 +293,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         .p_h = 1,
     };
 
+    dealloc_dithers_and_buffers(vo);
+
     priv->frame = mp_image_alloc(IMGFMT, priv->width, priv->height);
     if (!priv->frame)
         return -1;
@@ -298,8 +305,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     printf(ESC_HIDE_CURSOR);
     printf(ESC_CLEAR_SCREEN);
     vo->want_redraw = true;
-
-    dealloc_dithers_and_buffer(vo);
 
     // create testdither only if dynamic palette mode is set
     if (!priv->opt_fixedpal) {
@@ -483,7 +488,7 @@ static void uninit(struct vo *vo)
         priv->output = NULL;
     }
 
-    dealloc_dithers_and_buffer(vo);
+    dealloc_dithers_and_buffers(vo);
 }
 
 #define OPT_BASE_STRUCT struct priv
