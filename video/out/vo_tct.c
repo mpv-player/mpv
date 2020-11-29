@@ -76,7 +76,6 @@ static const struct m_sub_options vo_tct_conf = {
 struct priv {
     struct vo_tct_opts *opts;
     size_t buffer_size;
-    char *buffer;
     int swidth;
     int sheight;
     struct mp_image *frame;
@@ -200,9 +199,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     p->swidth = p->dst.x1 - p->dst.x0;
     p->sheight = p->dst.y1 - p->dst.y0;
 
-    if (p->buffer)
-        free(p->buffer);
-
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = IMGFMT,
@@ -257,9 +253,6 @@ static void uninit(struct vo *vo)
     printf(ESC_RESTORE_CURSOR);
     printf(ESC_CLEAR_SCREEN);
     printf(ESC_GOTOXY, 0, 0);
-    struct priv *p = vo->priv;
-    if (p->buffer)
-        talloc_free(p->buffer);
 }
 
 static int preinit(struct vo *vo)
