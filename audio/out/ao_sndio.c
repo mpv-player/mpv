@@ -18,16 +18,14 @@
 
 #include "config.h"
 
-#include <sys/types.h>
 #include <poll.h>
-#include <errno.h>
+#include <pthread.h>
 #include <sndio.h>
 
-#include "options/m_option.h"
 #include "common/msg.h"
+#include "osdep/timer.h"
 
 #include "audio/format.h"
-#include "ao.h"
 #include "internal.h"
 
 struct priv {
@@ -35,15 +33,17 @@ struct priv {
     struct sio_hdl *hdl;
     struct sio_par par;
     struct pollfd *pfd;
-    /* temporary buffer for audio written before audio_start() */
-    unsigned char *buffer;
-    int buffer_pos;
-    /* variable to keep track of hardware position */
+    /* audio_write thread control */
+    pthread_t thread;
+    /* mutex for priv.hdl */
+    pthread_mutex_t lock;
+    /* data control */
+    void *buffer;
     int delay;
     /* volume control */
     int vol;
     bool havevol;
-    /* current state */
+    /* callback thread status */
     bool playing;
 };
 
@@ -64,7 +64,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     case AOCONTROL_SET_VOLUME:
         if (!p->havevol)
             return CONTROL_FALSE;
+        /* hold the lock while touching p->hdl */
+        pthread_mutex_lock(&p->lock);
         sio_setvol(p->hdl, vol->left * SIO_MAXVOL / 100);
+        pthread_mutex_unlock(&p->lock);
         break;
     default:
         return CONTROL_UNKNOWN;
@@ -90,7 +93,7 @@ static void volcb(void *addr, unsigned newvol)
     p->vol = newvol;
 }
 
-static const struct mp_chmap sndio_layouts[MP_NUM_CHANNELS + 1] = {
+static const struct mp_chmap sndio_layouts[] = {
     {0},                                        // empty
     MP_CHMAP_INIT_MONO,                         // mono
     MP_CHMAP_INIT_STEREO,                       // stereo
@@ -126,6 +129,7 @@ static int init(struct ao *ao)
 
     /* support audio device defined in the command line */
     const char *dev_name = ao->device ? ao->device : SIO_DEVANY;
+    /* use blocking mode */
     p->hdl = sio_open(dev_name, SIO_PLAY, 0);
     if (p->hdl == NULL) {
         MP_ERR(ao, "can't open sndio device '%s'\n", dev_name);
@@ -135,36 +139,31 @@ static int init(struct ao *ao)
     ao->format = af_fmt_from_planar(ao->format);
 
     sio_initpar(&p->par);
-    for (i = 0, ap = af_to_par;; i++, ap++) {
-        if (i == sizeof(af_to_par) / sizeof(struct af_to_par)) {
-            MP_VERBOSE(ao, "unsupported format\n");
-            p->par.bits = 16;
-            p->par.sig = 1;
-            p->par.le = SIO_LE_NATIVE;
-            break;
-        }
+
+    /* fallback values */
+    p->par.bits = 16;
+    p->par.sig = 1;
+    p->par.le = SIO_LE_NATIVE;
+    for (i = 0; i < MP_ARRAY_SIZE(af_to_par); i++) {
+        ap = &af_to_par[i];
+        /* check if one of the available formats fits what the ao wants */
         if (ap->format == ao->format) {
             p->par.bits = ap->bits;
             p->par.sig = ap->sig;
-            if (ap->bits > 8)
-                p->par.le = SIO_LE_NATIVE;
-            if (ap->bits != SIO_BPS(ap->bits))
-                p->par.bps = ap->bits / 8;
             break;
         }
     }
     p->par.rate = ao->samplerate;
 
     struct mp_chmap_sel sel = {0};
-    for (int n = 0; n < MP_NUM_CHANNELS+1; n++)
-        mp_chmap_sel_add_map(&sel, &sndio_layouts[n]);
+    for (i = 0; i < MP_ARRAY_SIZE(sndio_layouts); i++)
+        mp_chmap_sel_add_map(&sel, &sndio_layouts[i]);
 
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         goto error;
 
     p->par.pchan = ao->channels.num;
-    p->par.round = p->par.rate * 10 / 1000; /*  10ms block size */
-    /* other parameters are left for libsndio to decide */
+    /* other parameters (par.round, par.appbufsiz) are left for libsndio to decide */
 
     if (!sio_setpar(p->hdl, &p->par)) {
         MP_ERR(ao, "couldn't set params\n");
@@ -178,28 +177,40 @@ static int init(struct ao *ao)
         MP_ERR(ao, "swapped endian output not supported\n");
         goto error;
     }
-    if (p->par.bits == 8 && p->par.bps == 1 && !p->par.sig) {
-        ao->format = AF_FORMAT_U8;
-    } else if (p->par.bits == 16 && p->par.bps == 2 && p->par.sig) {
-        ao->format = AF_FORMAT_S16;
-    } else if ((p->par.bits == 32 || p->par.msb) && p->par.bps == 4 && p->par.sig) {
-        ao->format = AF_FORMAT_S32;
-    } else {
-        MP_ERR(ao, "couldn't set format\n");
-        goto error;
+
+    /* check if it was possible to use a supported format */
+    for (i = 0; i < MP_ARRAY_SIZE(af_to_par); i++) {
+        ap = &af_to_par[i];
+        if (p->par.bits == ap->bits && p->par.bps == SIO_BPS(ap->bits) && p->par.sig == ap->sig) {
+            ao->format = ap->format;
+            break;
+        }
     }
+    if (i == MP_ARRAY_SIZE(af_to_par)) {
+        /* if the data is aligned to MSB, we can treat
+         * it as if the format is 32-bit signed */
+        if (p->par.msb && p->par.bps == 4 && p->par.sig) {
+            ao->format = AF_FORMAT_S32;
+        } else {
+            MP_ERR(ao, "couldn't set format\n");
+            goto error;
+        }
+    }
+
+    /* use negotiated parameters */
+    ao->samplerate = p->par.rate;
+    ao->channels = sndio_layouts[p->par.pchan];
+    ao->device_buffer = p->par.bufsz;
 
     p->havevol = sio_onvol(p->hdl, volcb, p);
     sio_onmove(p->hdl, movecb, p);
 
-    p->pfd = calloc (sio_nfds(p->hdl), sizeof (struct pollfd));
-    if (!p->pfd)
-        goto error;
+    /* allocate pollfd and data buffer */
+    p->pfd = talloc_array_ptrtype(p, p->pfd, sio_nfds(p->hdl));
+    /* this allocation assumes that (par.bps * par.pchan) == ao->sstride */
+    p->buffer = talloc_array_size(p, p->par.bps * p->par.pchan, p->par.bufsz);
 
-    ao->device_buffer = p->par.bufsz;
-
-    p->buffer = NULL;
-    p->playing = false;
+    pthread_mutex_init(&p->lock, NULL);
 
     return 0;
 
@@ -217,140 +228,99 @@ static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    if (p->hdl)
-        sio_close(p->hdl);
-
-    free(p->pfd);
-    free(p->buffer);
-}
-
-/*
- * stop playing and empty buffers (for seeking/pause)
- */
-static void reset(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-
     if (p->playing) {
-        MP_WARN(ao, "Blocking until remaining audio is played... (sndio design bug).\n");
-
-        /* reset needs to bring the driver back to the state right after init,
-         * so we shouldn't call sio_start() in it */
-        if (!sio_stop(p->hdl))
-            MP_ERR(ao, "reset: couldn't stop\n");
-
-        p->playing = false;
-        p->delay = 0;
+        /* kill audio_write thread before stopping playback;
+         * this is necessary only if audio_start() was called */
+        pthread_cancel(p->thread);
+        pthread_join(p->thread, NULL);
     }
 
-    /* discard temporary buffer directly */
-    p->buffer_pos = 0;
+    pthread_mutex_lock(&p->lock);
+    sio_close(p->hdl);
+    /* unlock mutex so it can be destroyed */
+    pthread_mutex_unlock(&p->lock);
+
+    pthread_mutex_destroy(&p->lock);
+}
+
+static void *audio_write(void *arg)
+{
+    struct ao *ao = arg;
+    struct priv *p = ao->priv;
+    void *data[1] = {p->buffer};
+
+    /* allow the thread to be canceled inside the poll() call */
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    /* thread shouldn't be cancelled while holding the mutex */
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+    pthread_mutex_lock(&p->lock);
+
+    for (;;) {
+        int n;
+        bool should_continue = false, should_return = false;
+
+        n = sio_pollfd(p->hdl, p->pfd, POLLOUT);
+        if (n == 0) {
+            MP_ERR(ao, "device error\n");
+            should_return = true;
+        }
+        /* don't hold mutex while thread can sleep or when exiting */
+        pthread_mutex_unlock(&p->lock);
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+
+        /* exit with mutex unlocked - pollfd error */
+        if (should_return)
+            return NULL;
+
+        /* if poll errors out, loop back, with the correct mutex status */
+        if (poll(p->pfd, n, -1) < 0)
+            should_continue = true;
+
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+        pthread_mutex_lock(&p->lock);
+
+        if (should_continue)
+            continue;
+
+        if (sio_revents(p->hdl, p->pfd) & POLLOUT) {
+            /* write the most possible while guaranteeing little to no blocking,
+             * using a multiple of block size */
+            int to_write = ((p->par.bufsz - p->delay) / p->par.round) * p->par.round;
+            /* time until buffer is heard is: (<current sample delay> + <new samples>) / <sample rate> */
+            /* ao_read_data inserts silence when necessary; checking its return value isn't required */
+            ao_read_data(ao, data, to_write, mp_time_us() + ((p->delay + to_write) * 1000000LL) / p->par.rate);
+
+            if (sio_write(p->hdl, p->buffer, to_write * ao->sstride) != (to_write * ao->sstride)) {
+                /* fatal error, unlock mutex before exiting */
+                pthread_mutex_unlock(&p->lock);
+                MP_FATAL(ao, "unexpected error while writing\n");
+                return NULL;
+            }
+
+            p->delay += to_write;
+        }
+    }
+
+    return NULL;
 }
 
 static void audio_start(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    int n;
 
-    /* don't need to do anything if already playing */
-    if (p->playing)
-        return;
+    assert(ao->sstride == (p->par.bps * p->par.pchan));
 
     if (!sio_start(p->hdl)) {
-        MP_ERR(ao, "start: couldn't start\n");
+        MP_FATAL(ao, "start: couldn't start sndio\n");
+        return;
+    }
+
+    if (pthread_create(&p->thread, NULL, audio_write, ao)) {
+        MP_FATAL(ao, "start: couldn't start audio thread\n");
         return;
     }
 
     p->playing = true;
-
-    /* if temporary buffer was used, flush it */
-    if (p->buffer) {
-        int buffer_old = p->buffer_pos;
-        while (p->buffer_pos > 0) {
-            n = sio_write(
-                    p->hdl,
-                    p->buffer + ao->sstride * (buffer_old - p->buffer_pos),
-                    p->buffer_pos * ao->sstride
-                ) / ao->sstride;
-
-            if (sio_eof(p->hdl)) {
-                MP_WARN(ao, "start: couldn't flush temporary buffer\n");
-                p->buffer_pos = 0;
-                return;
-            }
-
-            p->buffer_pos -= n;
-        }
-    }
-
-}
-
-static bool audio_write(struct ao *ao, void **data, int samples)
-{
-    struct priv *p = ao->priv;
-    int n;
-
-    /* if audio_start has been called, write directly to sndio,
-     * otherwise store in temporary buffer */
-    if (p->playing) {
-        n = sio_write(p->hdl, data[0], samples * ao->sstride) / ao->sstride;
-        p->delay += n;
-    } else {
-        /* allocate the temporary buffer on demand */
-        if (!p->buffer) {
-            p->buffer_pos = 0;
-            p->buffer = malloc(ao->device_buffer * ao->sstride);
-
-            if (!p->buffer) {
-                MP_ERR(ao, "write: couldn't allocate temporary buffer\n");
-                return false;
-            }
-        }
-
-        if ((p->buffer_pos + samples) > ao->device_buffer) {
-            MP_ERR(ao, "write: temporary buffer full\n");
-            return false;
-        }
-
-        memcpy(p->buffer + (p->buffer_pos * ao->sstride), data[0], samples * ao->sstride);
-        p->buffer_pos += samples;
-        /* it's as if the buffer is getting occupied */
-        p->delay += samples;
-
-        /* at this point, always succeeds */
-        return true;
-    }
-
-    /* on AOPLAY_FINAL_CHUNK, just let it underrun */
-    return !sio_eof(p->hdl);
-}
-
-/*
- * make libsndio call movecb()
- */
-static void update(struct ao *ao)
-{
-    struct priv *p = ao->priv;
-    int n = sio_pollfd(p->hdl, p->pfd, POLLOUT);
-    while (poll(p->pfd, n, 0) < 0 && errno == EINTR) {}
-    sio_revents(p->hdl, p->pfd);
-}
-
-
-static void get_state(struct ao *ao, struct mp_pcm_state *state)
-{
-    struct priv *p = ao->priv;
-
-    update(ao);
-
-    /* delay in seconds between first and last sample in buffer */
-    state->delay = p->delay / (double)p->par.rate;
-    /* how many samples we can play without blocking, rounded to best size */
-    state->free_samples = (p->par.bufsz - p->delay) / p->par.round * p->par.round;
-    /* how many samples are already in the buffer to be played */
-    state->queued_samples = p->delay;
-
-    state->playing = p->playing;
 }
 
 const struct ao_driver audio_out_sndio = {
@@ -359,10 +329,6 @@ const struct ao_driver audio_out_sndio = {
     .init      = init,
     .uninit    = uninit,
     .control   = control,
-    .get_state = get_state,
     .start     = audio_start,
-    .write     = audio_write,
-    .reset     = reset,
-    /* no need for .set_pause, since core emulates that with .reset */
     .priv_size = sizeof(struct priv),
 };
