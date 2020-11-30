@@ -78,6 +78,8 @@ struct priv {
     int left;
     int width;
     int height;
+    int num_rows;
+    int num_cols;
 
     int previous_histgram_colors;
 
@@ -195,13 +197,10 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
     return status;
 }
 
-static void resize(struct vo *vo)
+static void update_canvas_dimensions(struct vo *vo)
 {
     // this function sets the vo canvas size in pixels vo->dwidth, vo->dheight,
-    // and the output scaled size in priv->width, priv->height
-    // and the scaling rectangles in pixels priv->src_rect, priv->dst_rect
-    // as well as image positioning in cells priv->top, priv->left.
-    // no other scaling/rendering size values are required past this point.
+    // and the number of rows and columns available in priv->num_rows/cols
     struct priv *priv   = vo->priv;
     int num_rows        = TERMINAL_FALLBACK_ROWS;
     int num_cols        = TERMINAL_FALLBACK_COLS;
@@ -261,6 +260,17 @@ static void resize(struct vo *vo)
     vo->dheight = total_px_height * (num_rows - 1) / num_rows / 6 * 6;
     vo->dwidth  = total_px_width;
 
+    priv->num_rows = num_rows;
+    priv->num_cols = num_cols;
+}
+
+static void set_sixel_output_parameters(struct vo *vo)
+{
+    // This function sets output scaled size in priv->width, priv->height
+    // and the scaling rectangles in pixels priv->src_rect, priv->dst_rect
+    // as well as image positioning in cells priv->top, priv->left.
+    struct priv *priv = vo->priv;
+
     vo_get_src_dst_rects(vo, &priv->src_rect, &priv->dst_rect, &priv->osd);
 
     // priv->width and priv->height are the width and height of dst_rect
@@ -272,15 +282,14 @@ static void resize(struct vo *vo)
     // top/left values must be greater than 1. If it is set, then
     // the image will be rendered from there and no further centering is done.
     priv->top  = (priv->opt_top  > 0) ?  priv->opt_top :
-                  num_rows * priv->dst_rect.y0 / vo->dheight + 1;
+                  priv->num_rows * priv->dst_rect.y0 / vo->dheight + 1;
     priv->left = (priv->opt_left > 0) ?  priv->opt_left :
-                  num_cols * priv->dst_rect.x0 / vo->dwidth  + 1;
+                  priv->num_cols * priv->dst_rect.x0 / vo->dwidth  + 1;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params)
+static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *priv = vo->priv;
-    resize(vo);
 
     priv->sws->src = *params;
     priv->sws->src.w = mp_rect_w(priv->src_rect);
@@ -302,16 +311,12 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(priv->sws) < 0)
         return -1;
 
-    printf(ESC_HIDE_CURSOR);
-    printf(ESC_CLEAR_SCREEN);
-    vo->want_redraw = true;
-
     // create testdither only if dynamic palette mode is set
     if (!priv->opt_fixedpal) {
         SIXELSTATUS status = sixel_dither_new(&priv->testdither,
                                               priv->opt_reqcolors, NULL);
         if (SIXEL_FAILED(status)) {
-            MP_ERR(vo, "reconfig: Failed to create new dither: %s\n",
+            MP_ERR(vo, "update_sixel_swscaler: Failed to create new dither: %s\n",
                    sixel_helper_format_error(status));
             return -1;
         }
@@ -321,6 +326,18 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         talloc_array(NULL, uint8_t, depth * priv->width * priv->height);
 
     return 0;
+}
+
+static int reconfig(struct vo *vo, struct mp_image_params *params)
+{
+    update_canvas_dimensions(vo);
+    set_sixel_output_parameters(vo);
+    int ret =  update_sixel_swscaler(vo, params);
+
+    printf(ESC_CLEAR_SCREEN);
+    vo->want_redraw = true;
+
+    return ret;
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -443,10 +460,6 @@ static int preinit(struct vo *vo)
         }
     }
 
-    resize(vo);
-    priv->buffer =
-        talloc_array(NULL, uint8_t, depth * priv->width * priv->height);
-
     priv->previous_histgram_colors = 0;
 
     return 0;
@@ -459,15 +472,9 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    if (request == VOCTRL_SET_PANSCAN) {
-        if (!reconfig(vo, vo->params)) {
-            return VO_TRUE;
-        } else {
-            return VO_FALSE;
-        }
-    } else {
-        return VO_NOTIMPL;
-    }
+    if (request == VOCTRL_SET_PANSCAN)
+        return (vo->config_ok && !reconfig(vo, vo->params)) ? VO_TRUE : VO_FALSE;
+    return VO_NOTIMPL;
 }
 
 
