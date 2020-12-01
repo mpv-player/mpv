@@ -495,7 +495,7 @@ static void uninit(struct vo *vo)
 
 const struct vo_driver video_out_sixel = {
     .name = "sixel",
-    .description = "libsixel",
+    .description = "terminal graphics using sixels",
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
