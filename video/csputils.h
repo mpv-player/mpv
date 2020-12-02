@@ -186,6 +186,7 @@ bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2);
 
 enum mp_chroma_location {
     MP_CHROMA_AUTO,
+    MP_CHROMA_TOPLEFT,  // uhd
     MP_CHROMA_LEFT,     // mpeg2/4, h264
     MP_CHROMA_CENTER,   // mpeg1, jpeg
     MP_CHROMA_COUNT,

@@ -123,6 +123,7 @@ static void mp_zimg_update_from_cmdline(struct mp_zimg_context *ctx)
 static zimg_chroma_location_e mp_to_z_chroma(enum mp_chroma_location cl)
 {
     switch (cl) {
+    case MP_CHROMA_TOPLEFT:     return ZIMG_CHROMA_TOP_LEFT;
     case MP_CHROMA_LEFT:        return ZIMG_CHROMA_LEFT;
     case MP_CHROMA_CENTER:      return ZIMG_CHROMA_CENTER;
     default:                    return ZIMG_CHROMA_LEFT;
