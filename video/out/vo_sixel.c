@@ -72,14 +72,10 @@ struct priv {
     uint8_t        *buffer;
     bool            skip_frame_draw;
 
-    // The dimensions that will be actually
-    // be used after processing user inputs
-    int top;
-    int left;
-    int width;
-    int height;
-    int num_rows;
-    int num_cols;
+    int left, top;  // image origin cell (1 based)
+    int width, height;  // actual image px size - always reflects dst_rect.
+    int num_cols, num_rows;  // terminal size in cells
+    int canvas_ok;  // whether canvas vo->dwidth and vo->dheight are positive
 
     int previous_histgram_colors;
 
@@ -262,6 +258,8 @@ static void update_canvas_dimensions(struct vo *vo)
 
     priv->num_rows = num_rows;
     priv->num_cols = num_cols;
+
+    priv->canvas_ok = vo->dwidth > 0 && vo->dheight > 0;
 }
 
 static void set_sixel_output_parameters(struct vo *vo)
@@ -330,9 +328,13 @@ static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
+    struct priv *priv = vo->priv;
+    int ret = 0;
     update_canvas_dimensions(vo);
-    set_sixel_output_parameters(vo);
-    int ret =  update_sixel_swscaler(vo, params);
+    if (priv->canvas_ok) {  // if too small - succeed but skip the rendering
+        set_sixel_output_parameters(vo);
+        ret = update_sixel_swscaler(vo, params);
+    }
 
     printf(ESC_CLEAR_SCREEN);
     vo->want_redraw = true;
@@ -352,6 +354,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     int  prev_width  = vo->dwidth;
     bool resized     = false;
     update_canvas_dimensions(vo);
+    if (!priv->canvas_ok)
+        return;
 
     if (prev_rows != priv->num_rows || prev_cols != priv->num_cols ||
         prev_width != vo->dwidth || prev_height != vo->dheight)
@@ -426,6 +430,8 @@ static int sixel_write(char *data, int size, void *priv)
 static void flip_page(struct vo *vo)
 {
     struct priv* priv = vo->priv;
+    if (!priv->canvas_ok)
+        return;
 
     // If frame is repeated and no update required, then we skip encoding
     if (priv->skip_frame_draw)
