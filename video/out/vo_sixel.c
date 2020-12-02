@@ -346,7 +346,26 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     SIXELSTATUS status;
     struct mp_image *mpi = NULL;
 
-    if (frame->repeat && !frame->redraw) {
+    int  prev_rows   = priv->num_rows;
+    int  prev_cols   = priv->num_cols;
+    int  prev_height = vo->dheight;
+    int  prev_width  = vo->dwidth;
+    bool resized     = false;
+    update_canvas_dimensions(vo);
+
+    if (prev_rows != priv->num_rows || prev_cols != priv->num_cols ||
+        prev_width != vo->dwidth || prev_height != vo->dheight)
+    {
+        set_sixel_output_parameters(vo);
+        // Not checking for vo->config_ok because draw_frame is never called
+        // with a failed reconfig.
+        update_sixel_swscaler(vo, vo->params);
+
+        printf(ESC_CLEAR_SCREEN);
+        resized = true;
+    }
+
+    if (frame->repeat && !frame->redraw && !resized) {
         // Frame is repeated, and no need to update OSD either
         priv->skip_frame_draw = true;
         return;
