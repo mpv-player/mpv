@@ -136,15 +136,19 @@ setmetatable(p, {
 })
 
 local function compile_cond(name, s)
-    -- (pre 5.2 ignores the extra arguments)
-    local chunk, err = load("return " .. s, "profile " .. name .. " condition",
-                            "t", evil_magic)
+    local code, chunkname = "return " .. s, "profile " .. name .. " condition"
+    local chunk, err
+    if setfenv then -- lua 5.1
+        chunk, err = loadstring(code, chunkname)
+        if chunk then
+            setfenv(chunk, evil_magic)
+        end
+    else -- lua 5.2
+        chunk, err = load(code, chunkname, "t", evil_magic)
+    end
     if not chunk then
         msg.error("Profile '" .. name .. "' condition: " .. err)
         chunk = function() return false end
-    end
-    if setfenv then
-        setfenv(chunk, evil_magic)
     end
     return chunk
 end
