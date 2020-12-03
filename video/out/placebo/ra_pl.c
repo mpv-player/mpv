@@ -144,8 +144,14 @@ bool mppl_wrap_tex(struct ra *ra, const struct pl_tex *pltex,
             .blit_dst = pltex->params.blit_dst,
             .host_mutable = pltex->params.host_writable,
             .downloadable = pltex->params.host_readable,
+#if PL_API_VER >= 103
+            // These don't exist upstream, so just pick something reasonable
+            .src_linear = pltex->params.format->caps & PL_FMT_CAP_LINEAR,
+            .src_repeat = false,
+#else
             .src_linear = pltex->params.sample_mode == PL_TEX_SAMPLE_LINEAR,
             .src_repeat = pltex->params.address_mode == PL_TEX_ADDRESS_REPEAT,
+#endif
         },
         .priv = (void *) pltex,
     };
@@ -195,10 +201,12 @@ static struct ra_tex *tex_create_pl(struct ra *ra,
         .blit_dst = params->blit_dst || params->render_dst,
         .host_writable = params->host_mutable,
         .host_readable = params->downloadable,
+#if PL_API_VER < 103
         .sample_mode = params->src_linear ? PL_TEX_SAMPLE_LINEAR
                                           : PL_TEX_SAMPLE_NEAREST,
         .address_mode = params->src_repeat ? PL_TEX_ADDRESS_REPEAT
                                            : PL_TEX_ADDRESS_CLAMP,
+#endif
         .initial_data = params->initial_data,
     });
 
@@ -399,7 +407,18 @@ static void blit_pl(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
         pldst.y1 = MPMIN(MPMAX(dst_rc->y1, 0), dst->params.h);
     }
 
+#if PL_API_VER >= 103
+    pl_tex_blit(get_gpu(ra), &(struct pl_tex_blit_params) {
+        .src = src->priv,
+        .dst = dst->priv,
+        .src_rc = plsrc,
+        .dst_rc = pldst,
+        .sample_mode = src->params.src_linear ? PL_TEX_SAMPLE_LINEAR
+                                              : PL_TEX_SAMPLE_NEAREST,
+    });
+#else
     pl_tex_blit(get_gpu(ra), dst->priv, src->priv, pldst, plsrc);
+#endif
 }
 
 static const enum pl_var_type var_type[RA_VARTYPE_COUNT] = {
@@ -627,9 +646,17 @@ static void renderpass_run_pl(struct ra *ra,
             struct pl_desc_binding bind;
             switch (inp->type) {
             case RA_VARTYPE_TEX:
-            case RA_VARTYPE_IMG_W:
-                bind.object = (* (struct ra_tex **) val->data)->priv;
+            case RA_VARTYPE_IMG_W: {
+                struct ra_tex *tex = *((struct ra_tex **) val->data);
+                bind.object = tex->priv;
+#if PL_API_VER >= 103
+                bind.sample_mode = tex->params.src_linear ? PL_TEX_SAMPLE_LINEAR
+                                                          : PL_TEX_SAMPLE_NEAREST;
+                bind.address_mode = tex->params.src_repeat ? PL_TEX_ADDRESS_REPEAT
+                                                           : PL_TEX_ADDRESS_CLAMP;
+#endif
                 break;
+            }
             case RA_VARTYPE_BUF_RO:
             case RA_VARTYPE_BUF_RW:
                 bind.object = (* (struct ra_buf **) val->data)->priv;
