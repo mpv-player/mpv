@@ -186,8 +186,7 @@ class Common: NSObject {
     func startDisplayLink(_ vo: UnsafeMutablePointer<vo>) {
         CVDisplayLinkCreateWithActiveCGDisplays(&link)
 
-        guard let opts: mp_vo_opts = mpv?.opts,
-              let screen = getScreenBy(id: Int(opts.screen_id)) ?? NSScreen.main,
+        guard let screen = getTargetScreen(forFullscreen: false) ?? NSScreen.main,
               let link = self.link else
         {
             log.sendWarning("Couldn't start DisplayLink, no MPVHelper, Screen or DisplayLink available")
@@ -409,9 +408,27 @@ class Common: NSObject {
         return NSScreen.screens[screenID]
     }
 
+    func getScreenBy(name screenName: String?) -> NSScreen? {
+        for screen in NSScreen.screens {
+            if screen.displayName == screenName {
+                return screen
+            }
+        }
+        return nil
+    }
+
     func getTargetScreen(forFullscreen fs: Bool) -> NSScreen? {
-        let screenID = fs ? (mpv?.opts.fsscreen_id ?? 0) : (mpv?.opts.screen_id ?? 0)
-        return getScreenBy(id: Int(screenID))
+        guard let mpv = mpv else {
+            log.sendWarning("Unexpected nil value in getTargetScreen")
+            return nil
+        }
+
+        let screenID = fs ? mpv.opts.fsscreen_id : mpv.opts.screen_id
+        var name: String?
+        if let screenName = fs ? mpv.opts.fsscreen_name : mpv.opts.screen_name {
+            name = String(cString: screenName)
+        }
+        return getScreenBy(id: Int(screenID)) ?? getScreenBy(name: name)
     }
 
     func getCurrentScreen() -> NSScreen? {
@@ -446,7 +463,7 @@ class Common: NSObject {
             log.sendError("Something went wrong, no MPVHelper was initialized")
             exit(1)
         }
-        guard let targetScreen = getScreenBy(id: Int(mpv.opts.screen_id)) ?? NSScreen.main else {
+        guard let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main else {
             log.sendError("Something went wrong, no Screen was found")
             exit(1)
         }
