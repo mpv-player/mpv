@@ -323,10 +323,8 @@ iconv support use --disable-iconv.",
     }, {
         'name': '--zlib',
         'desc': 'zlib',
-        'func': check_libs(['z'],
-                    check_statement('zlib.h', 'inflate(0, Z_NO_FLUSH)')),
+        'func': check_pkg_config('zlib'),
         'req': True,
-        'fmsg': 'Unable to find development files for zlib.'
     }, {
         'name': '--libbluray',
         'desc': 'Bluray support',
