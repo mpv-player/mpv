@@ -6376,13 +6376,13 @@ The following video options are currently all specific to ``--vo=gpu`` and
         black).
     yes
         Try to create a framebuffer with alpha component. This only makes sense
-        if the video contains alpha information (which is extremely rare). May
-        not be supported on all platforms. If alpha framebuffers are
-        unavailable, it silently falls back on a normal framebuffer. Note that
-        if you set the ``--fbo-format`` option to a non-default value, a
-        format with alpha must be specified, or this won't work.
-        Whether this really works depends on the windowing system and desktop
-        environment.
+        if the video contains alpha information (which is extremely rare) or if
+        you make the background color transparent. May not be supported on all
+        platforms. If alpha framebuffers are unavailable, it silently falls
+        back on a normal framebuffer. Note that if you set the ``--fbo-format``
+        option to a non-default value, a format with alpha must be specified,
+        or this won't work. Whether this really works depends on the windowing
+        system and desktop environment.
     no
         Ignore alpha component.
 
