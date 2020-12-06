@@ -6423,6 +6423,13 @@ The following video options are currently all specific to ``--vo=gpu`` and
     we may have to deal with additional padding, which can be tested with these
     options). Could be removed any time.
 
+``--always-clear-framebuffer=<yes|no>``
+    Always clears the framebuffer before rendering a new frame (default: yes).
+    When disabled automatically decide whether clearing the framebuffer is
+    necessary or not. For example, clearing is needed in fullscreen when the
+    aspect ratio of the video differes from the aspect ratio of the display
+    and mpv has to draw black bars.
+
 ``--opengl-early-flush=<yes|no|auto>``
     Call ``glFlush()`` after rendering a frame and before attempting to display
     it (default: auto). Can fix stuttering in some cases, in other cases
