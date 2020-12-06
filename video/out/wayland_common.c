@@ -792,6 +792,56 @@ static const struct wl_data_device_listener data_device_listener = {
     data_device_handle_selection,
 };
 
+static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b) {
+    // euclidean algorithm
+    int larger;
+    int smaller;
+    if (a > b) {
+        larger = a;
+        smaller = b;
+    } else {
+        larger = b;
+        smaller = a;
+    }
+    int remainder = larger - smaller * floor(larger/smaller);
+    if (remainder == 0) {
+        wl->gcd = smaller;
+    } else {
+        greatest_common_divisor(wl, smaller, remainder);
+    }
+}
+
+static void set_geometry(struct vo_wayland_state *wl)
+{
+    struct vo *vo = wl->vo;
+
+    struct vo_win_geometry geo;
+    struct mp_rect screenrc = wl->current_output->geometry;
+    vo_calc_window_geometry(vo, &screenrc, &geo);
+    vo_apply_window_geometry(vo, &geo);
+
+    greatest_common_divisor(wl, vo->dwidth, vo->dheight);
+    wl->reduced_width = vo->dwidth / wl->gcd;
+    wl->reduced_height = vo->dheight / wl->gcd;
+
+    wl->vdparams.x0 = 0;
+    wl->vdparams.y0 = 0;
+    wl->vdparams.x1 = vo->dwidth / wl->scaling;
+    wl->vdparams.y1 = vo->dheight / wl->scaling;
+}
+
+static void rescale_geometry_dimensions(struct vo_wayland_state *wl, double factor)
+{
+    wl->vdparams.x1 *= factor;
+    wl->vdparams.y1 *= factor;
+    wl->window_size.x1 *= factor;
+    wl->window_size.y1 *= factor;
+    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) {
+        wl->geometry.x1 *= factor;
+        wl->geometry.y1 *= factor;
+    }
+}
+
 static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
@@ -807,9 +857,19 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     }
 
     wl->current_output->has_surface = true;
-    if (wl->scaling != wl->current_output->scale)
+    set_geometry(wl);
+    wl->window_size = wl->vdparams;
+
+    if (wl->scaling != wl->current_output->scale && wl->vo_opts->hidpi_window_scale) {
+        double factor = (double)wl->scaling / wl->current_output->scale;
+        wl->scaling = wl->current_output->scale;
+        rescale_geometry_dimensions(wl, factor);
+    }
+
+    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) {
+        wl->geometry = wl->window_size;
         wl->pending_vo_events |= VO_EVENT_RESIZE;
-    wl->scaling = wl->current_output->scale;
+    }
 
     MP_VERBOSE(wl, "Surface entered output %s %s (0x%x), scale = %i\n", o->make,
                o->model, o->id, wl->scaling);
@@ -1320,7 +1380,7 @@ void vo_wayland_uninit(struct vo *vo)
     vo->wl = NULL;
 }
 
-static bool find_output(struct vo_wayland_state *wl)
+static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
 {
     int index = 0;
     int screen_id = wl->vo_opts->fsscreen_id;
@@ -1330,27 +1390,22 @@ static bool find_output(struct vo_wayland_state *wl)
     wl_list_for_each(output, &wl->output_list, link) {
         if (index == 0)
             fallback_output = output;
-        if (screen_id == -1 && screen_name && !strcmp(screen_name, output->model)) {
-            wl->current_output = output;
-            break;
-        }
-        if (screen_id == index++) {
-            wl->current_output = output;
-            break;
-        }
+        if (screen_id == -1 && !screen_name)
+            return output;
+        if (screen_id == -1 && screen_name && !strcmp(screen_name, output->model))
+            return output;
+        if (screen_id == index++)
+            return output;
     }
-    if (!wl->current_output) {
-        if (!fallback_output) {
-            MP_ERR(wl, "No screens could be found!\n");
-            return false;
-        } else if (wl->vo_opts->fsscreen_id >= 0) {
-            MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", screen_id);
-        } else if (wl->vo_opts->fsscreen_name) {
-            MP_WARN(wl, "Screen name %s not found/unavailable! Falling back to screen 0!\n", screen_name);
-        }
-        wl->current_output = fallback_output;
+    if (!fallback_output) {
+        MP_ERR(wl, "No screens could be found!\n");
+        return NULL;
+    } else if (wl->vo_opts->fsscreen_id >= 0) {
+        MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", screen_id);
+    } else if (wl->vo_opts->fsscreen_name) {
+        MP_WARN(wl, "Screen name %s not found/unavailable! Falling back to screen 0!\n", screen_name);
     }
-    return true;
+    return fallback_output;
 }
 
 static void toggle_fullscreen(struct vo_wayland_state *wl)
@@ -1362,8 +1417,8 @@ static void toggle_fullscreen(struct vo_wayland_state *wl)
     if (wl->vo_opts->fullscreen && !specific_screen) {
         xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
     } else if (wl->vo_opts->fullscreen && specific_screen) {
-        find_output(wl);
-        xdg_toplevel_set_fullscreen(wl->xdg_toplevel, wl->current_output->output);
+        struct vo_wayland_output *output = find_output(wl);
+        xdg_toplevel_set_fullscreen(wl->xdg_toplevel, output->output);
     } else {
         xdg_toplevel_unset_fullscreen(wl->xdg_toplevel);
     }
@@ -1389,25 +1444,6 @@ static void do_minimize(struct vo_wayland_state *wl)
         xdg_toplevel_set_minimized(wl->xdg_toplevel);
 }
 
-static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b) {
-    // euclidean algorithm
-    int larger;
-    int smaller;
-    if (a > b) {
-        larger = a;
-        smaller = b;
-    } else {
-        larger = b;
-        smaller = a;
-    }
-    int remainder = larger - smaller * floor(larger/smaller);
-    if (remainder == 0) {
-        wl->gcd = smaller;
-    } else {
-        greatest_common_divisor(wl, smaller, remainder);
-    }
-}
-
 int vo_wayland_reconfig(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
@@ -1416,30 +1452,24 @@ int vo_wayland_reconfig(struct vo *vo)
     MP_VERBOSE(wl, "Reconfiguring!\n");
 
     if (!wl->current_output) {
-        if (!find_output(wl))
+        wl->current_output = find_output(wl);
+        if (!wl->current_output)
             return false;
         if (!wl->vo_opts->hidpi_window_scale)
             wl->current_output->scale = 1;
         wl->scaling = wl->current_output->scale;
+        wl_surface_set_buffer_scale(wl->surface, wl->scaling);
+        wl_surface_commit(wl->surface);
         configure = true;
     }
 
-    struct vo_win_geometry geo;
-    struct mp_rect screenrc = wl->current_output->geometry;
-    vo_calc_window_geometry(vo, &screenrc, &geo);
-    vo_apply_window_geometry(vo, &geo);
+    set_geometry(wl);
 
-    greatest_common_divisor(wl, vo->dwidth, vo->dheight);
-    wl->reduced_width = vo->dwidth / wl->gcd;
-    wl->reduced_height = vo->dheight / wl->gcd;
-
-    wl->vdparams.x0 = 0;
-    wl->vdparams.y0 = 0;
-    wl->vdparams.x1 = vo->dwidth / wl->scaling;
-    wl->vdparams.y1 = vo->dheight / wl->scaling;
-    if (wl->vo_opts->keepaspect && wl->vo_opts->keepaspect_window) {
+    if (wl->vo_opts->keepaspect && wl->vo_opts->keepaspect_window)
         wl->window_size = wl->vdparams;
-    }
+
+    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+        wl->geometry = wl->window_size;
 
     if (wl->vo_opts->fullscreen)
         toggle_fullscreen(wl);
@@ -1450,17 +1480,11 @@ int vo_wayland_reconfig(struct vo *vo)
     if (wl->vo_opts->window_minimized)
         do_minimize(wl);
 
-    wl_surface_set_buffer_scale(wl->surface, wl->scaling);
-    wl_surface_commit(wl->surface);
-
     if (configure) {
         wl->window_size = wl->vdparams;
-        wl->geometry = wl->vdparams;
+        wl->geometry = wl->window_size;
         wl_display_roundtrip(wl->display);
     }
-
-    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
-        wl->geometry = wl->window_size;
 
     wl->pending_vo_events |= VO_EVENT_RESIZE;
 
