@@ -3689,14 +3689,16 @@ Demuxer
 
 ``--prefetch-playlist=<yes|no>``
     Prefetch next playlist entry while playback of the current entry is ending
-    (default: no). This merely opens the URL of the next playlist entry as soon
-    as the current URL is fully read.
+    (default: no).
+
+    This does not prefill the cache with the video data of the next URL.
+    Prefetching video data is supported only for the current playlist entry,
+    and depends on the demuxer cache settings (on by default). This merely
+    opens the URL of the next playlist entry as soon the current URL is fully
+    read.
 
     This does **not** work with URLs resolved by the ``youtube-dl`` wrapper,
     and it won't.
-
-    This does not affect HLS (``.m3u8`` URLs) - HLS prefetching depends on the
-    demuxer cache settings and is on by default.
 
     This can give subtly wrong results if per-file options are used, or if
     options are changed in the time window between prefetching start and next
