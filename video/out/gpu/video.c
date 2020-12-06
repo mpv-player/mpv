@@ -3246,9 +3246,11 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
 
     bool has_frame = !!frame->current;
 
-    struct m_color c = p->clear_color;
-    float clear_color[4] = {c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0};
-    p->ra->fns->clear(p->ra, fbo.tex, clear_color, &target_rc);
+    if (!has_frame || !mp_rect_equals(&p->dst_rect, &target_rc)) {
+        struct m_color c = p->clear_color;
+        float clear_color[4] = {c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0};
+        p->ra->fns->clear(p->ra, fbo.tex, clear_color, &target_rc);
+    }
 
     if (p->hwdec_overlay) {
         if (has_frame) {
