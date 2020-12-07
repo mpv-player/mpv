@@ -389,10 +389,8 @@ static int write_completed_frames_to(struct mp_scaletempo2 *p,
 
 static bool can_perform_wsola(struct mp_scaletempo2 *p)
 {
-    const int search_block_size = p->num_candidate_blocks
-        + (p->ola_window_size - 1);
     return p->target_block_index + p->ola_window_size <= p->input_buffer_frames
-        && p->search_block_index + search_block_size <= p->input_buffer_frames;
+        && p->search_block_index + p->search_block_size <= p->input_buffer_frames;
 }
 
 // number of frames needed until a wsola iteration can be performed
@@ -403,6 +401,14 @@ static int frames_needed(struct mp_scaletempo2 *p)
         p->search_block_index + p->search_block_size - p->input_buffer_frames));
 }
 
+static void resize_input_buffer(struct mp_scaletempo2 *p, int size)
+{
+    if (size > p->input_buffer_size) {
+        p->input_buffer_size = size;
+        p->input_buffer = realloc_2d(p->input_buffer, p->channels, size);
+    }
+}
+
 int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
     uint8_t **planes, int frame_size, bool final)
 {
@@ -411,7 +417,8 @@ int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
     int total_fill = final ? needed : read;
     if (total_fill == 0) return 0;
 
-    assert(total_fill + p->input_buffer_frames <= p->input_buffer_size);
+    int required_size = total_fill + p->input_buffer_frames;
+    resize_input_buffer(p, required_size);
 
     for (int i = 0; i < p->channels; ++i) {
         memcpy(p->input_buffer[i] + p->input_buffer_frames,
@@ -427,11 +434,9 @@ int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
 
 static bool target_is_within_search_region(struct mp_scaletempo2 *p)
 {
-    const int search_block_size = p->num_candidate_blocks + (p->ola_window_size - 1);
-
     return p->target_block_index >= p->search_block_index
         && p->target_block_index + p->ola_window_size
-            <= p->search_block_index + search_block_size;
+            <= p->search_block_index + p->search_block_size;
 }
 
 
@@ -715,8 +720,7 @@ void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
     p->search_block = realloc_2d(p->search_block, p->channels, p->search_block_size);
     p->target_block = realloc_2d(p->target_block, p->channels, p->ola_window_size);
 
-    p->input_buffer_size = 4 * MPMAX(p->ola_window_size, p->search_block_size);
-    p->input_buffer = realloc_2d(p->input_buffer, p->channels, p->input_buffer_size);
+    resize_input_buffer(p, 4 * MPMAX(p->ola_window_size, p->search_block_size));
     p->input_buffer_frames = 0;
 
     p->energy_candidate_blocks = realloc(p->energy_candidate_blocks,
