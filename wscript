@@ -958,15 +958,15 @@ def configure(ctx):
         while re.match('\$\{([^}]+)\}', ctx.env[varname]):
             ctx.env[varname] = Utils.subst_vars(ctx.env[varname], ctx.env)
 
+    if ctx.options.LUA_VER:
+        ctx.options.enable_lua = True
+
     ctx.parse_dependencies(build_options)
     ctx.parse_dependencies(main_dependencies)
     ctx.parse_dependencies(libav_dependencies)
     ctx.parse_dependencies(audio_output_features)
     ctx.parse_dependencies(video_output_features)
     ctx.parse_dependencies(hwaccel_features)
-
-    if ctx.options.LUA_VER:
-        ctx.options.enable_lua = True
 
     if ctx.options.SWIFT_FLAGS:
         ctx.env.SWIFT_FLAGS.extend(split(ctx.options.SWIFT_FLAGS))
