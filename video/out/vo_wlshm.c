@@ -275,6 +275,19 @@ static void flip_page(struct vo *vo)
 
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
+
+    if (wl->presentation)
+        wayland_sync_swap(wl);
+}
+
+static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
+{
+    struct vo_wayland_state *wl = vo->wl;
+    if (wl->presentation) {
+        info->vsync_duration = wl->vsync_duration;
+        info->skipped_vsyncs = wl->last_skipped_vsyncs;
+        info->last_queue_display_time = wl->last_queue_display_time;
+    }
 }
 
 static void uninit(struct vo *vo)
@@ -304,6 +317,7 @@ const struct vo_driver video_out_wlshm = {
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,
+    .get_vsync = get_vsync,
     .wakeup = vo_wayland_wakeup,
     .wait_events = vo_wayland_wait_events,
     .uninit = uninit,
