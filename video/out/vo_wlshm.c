@@ -73,25 +73,6 @@ static void buffer_destroy(void *p)
     munmap(buf->mpi.planes[0], buf->size);
 }
 
-static const struct wl_callback_listener frame_listener;
-
-static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
-{
-    struct vo_wayland_state *wl = data;
-
-    if (callback)
-        wl_callback_destroy(callback);
-
-    wl->frame_callback = wl_surface_frame(wl->surface);
-    wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
-
-    wl->frame_wait = false;
-}
-
-static const struct wl_callback_listener frame_listener = {
-    frame_callback,
-};
-
 static int allocate_memfd(size_t size)
 {
     int fd = memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING);
@@ -142,10 +123,6 @@ static struct buffer *buffer_create(struct vo *vo, int width, int height)
     if (!buf->buffer)
         goto error4;
     wl_buffer_add_listener(buf->buffer, &buffer_listener, buf);
-    if (!wl->frame_callback) {
-        wl->frame_callback = wl_surface_frame(wl->surface);
-        wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
-    }
 
     close(fd);
     talloc_set_destructor(buf, buffer_destroy);
