@@ -151,7 +151,7 @@ class TitleBar: NSVisualEffectView {
         }
     }
 
-    @objc func hide() {
+    @objc func hide(_ duration: TimeInterval = 0.20) {
         guard let window = common.window else { return }
         if window.isInFullscreen && !window.isAnimating {
             alphaValue = 0
@@ -159,7 +159,7 @@ class TitleBar: NSVisualEffectView {
             return
         }
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
-            context.duration = 0.20
+            context.duration = duration
             systemBar?.animator().alphaValue = 0
             animator().alphaValue = 0
         }, completionHandler: {
