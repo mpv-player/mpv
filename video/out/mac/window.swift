@@ -163,22 +163,26 @@ class Window: NSWindow, NSWindowDelegate {
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
             context.duration = getFsAnimationDuration(duration - 0.05)
             window.animator().setFrame(tScreen.frame, display: true)
-        }, completionHandler: { })
+        }, completionHandler: nil)
     }
 
     func window(_ window: NSWindow, startCustomAnimationToExitFullScreenWithDuration duration: TimeInterval) {
         guard let tScreen = targetScreen, let currentScreen = screen else { return }
         let newFrame = calculateWindowPosition(for: tScreen, withoutBounds: tScreen == screen)
         let intermediateFrame = aspectFit(rect: newFrame, in: currentScreen.frame)
-        common.view?.layerContentsPlacement = .scaleProportionallyToFill
-        common.titleBar?.hide()
-        styleMask.remove(.fullScreen)
-        setFrame(intermediateFrame, display: true)
+        common.titleBar?.hide(0.0)
 
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
-            context.duration = getFsAnimationDuration(duration - 0.05)
-            window.animator().setFrame(newFrame, display: true)
-        }, completionHandler: { })
+            context.duration = 0.0
+            common.view?.layerContentsPlacement = .scaleProportionallyToFill
+            window.animator().setFrame(intermediateFrame, display: true)
+        }, completionHandler: {
+            NSAnimationContext.runAnimationGroup({ (context) -> Void in
+                context.duration = self.getFsAnimationDuration(duration - 0.05)
+                self.styleMask.remove(.fullScreen)
+                window.animator().setFrame(newFrame, display: true)
+            }, completionHandler: nil)
+        })
     }
 
     func windowDidEnterFullScreen(_ notification: Notification) {
