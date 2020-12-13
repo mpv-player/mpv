@@ -111,6 +111,10 @@ struct vo_x11_state {
     bool size_changed_during_fs;
     bool pos_changed_during_fs;
 
+    /* The geometry/autofit option was changed while the window was maximized.
+     * Wait until the state changes to resize. */
+    bool pending_geometry_change;
+
     XComposeStatus compose_status;
 
     /* XShm stuff */
