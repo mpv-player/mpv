@@ -440,21 +440,27 @@ class Common: NSObject {
     func getWindowGeometry(forScreen targetScreen: NSScreen,
                            videoOut vo: UnsafeMutablePointer<vo>) -> NSRect {
         let r = targetScreen.convertRectToBacking(targetScreen.frame)
-        var screenRC: mp_rect = mp_rect(x0: Int32(0),
-                                        y0: Int32(0),
-                                        x1: Int32(r.size.width),
-                                        y1: Int32(r.size.height))
+        let targetFrame =
+            (mpv?.macOpts.macos_geometry_calculation ?? FRAME_VISIBLE) == FRAME_VISIBLE ?
+                targetScreen.visibleFrame : targetScreen.frame
+        let rv = targetScreen.convertRectToBacking(targetFrame)
 
+        // flip the y origin, mp_rect expects the origin at the top-left
+        // macOS' windowing system operates from the bottom-left
+        var originY = r.size.height - rv.origin.y - rv.size.height
+        var screenRC: mp_rect = mp_rect(x0: Int32(rv.origin.x),
+                                        y0: Int32(originY),
+                                        x1: Int32(rv.origin.x + rv.size.width),
+                                        y1: Int32(originY + rv.size.height))
         var geo: vo_win_geometry = vo_win_geometry()
         vo_calc_window_geometry2(vo, &screenRC, Double(targetScreen.backingScaleFactor), &geo)
+        vo_apply_window_geometry(vo, &geo)
 
-        // flip y coordinates
-        geo.win.y1 = Int32(r.size.height) - geo.win.y1
-        geo.win.y0 = Int32(r.size.height) - geo.win.y0
-
-        let wr = NSMakeRect(CGFloat(geo.win.x0), CGFloat(geo.win.y1),
-                            CGFloat(geo.win.x1 - geo.win.x0),
-                            CGFloat(geo.win.y0 - geo.win.y1))
+        // flip the y origin again
+        let height = CGFloat(geo.win.y1 - geo.win.y0)
+        originY = r.size.height - CGFloat(geo.win.y0) - height
+        let wr = NSMakeRect(CGFloat(geo.win.x0), originY,
+                            CGFloat(geo.win.x1 - geo.win.x0), height)
         return targetScreen.convertRectFromBacking(wr)
     }
 

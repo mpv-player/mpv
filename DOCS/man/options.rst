@@ -5914,6 +5914,16 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     macOS only.
 
+``--macos-geometry-calculation=<visible|whole>``
+    This changes the rectangle which is used to calculate the screen position
+    and size of the window (default: visible). ``visible`` takes the the menu
+    bar and Dock into account and the window is only positioned/sized within the
+    visible screen frame rectangle, ``whole`` takes the whole screen frame
+    rectangle and ignores the menu bar and Dock. Other previous restrictions
+    still apply, like the window can't be placed on top of the menu bar etc.
+
+    macOS only.
+
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during

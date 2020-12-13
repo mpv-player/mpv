@@ -27,8 +27,13 @@ Interface changes
 ::
 
  --- mpv 0.34.0 ---
-    - add `--screen-name` and `--fs-screen-name` flags to allow selecting the 
+    - add `--screen-name` and `--fs-screen-name` flags to allow selecting the
       screen by its name instead of the index
+    - add `--macos-geometry-calculation` to change the rectangle used for screen
+      position and size calculation. the old behavior used the whole screen,
+      which didn't take the menu bar and Dock into account. The new default
+      behaviour includes both. To revert to the old behavior set this to
+      `whole`.
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
       when the player enters fullscreen.
