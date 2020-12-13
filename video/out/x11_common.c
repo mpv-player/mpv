@@ -1037,6 +1037,11 @@ static void vo_x11_check_net_wm_state_change(struct vo *vo)
             XFree(elems);
         }
 
+        if (opts->window_maximized && !is_maximized && x11->pending_geometry_change) {
+            vo_x11_config_vo_window(vo);
+            x11->pending_geometry_change = false;
+        }
+
         opts->window_minimized = is_minimized;
         m_config_cache_write_opt(x11->opts_cache, &opts->window_minimized);
         opts->window_maximized = is_maximized;
@@ -1838,6 +1843,17 @@ static void vo_x11_minimize(struct vo *vo)
     }
 }
 
+static void vo_x11_set_geometry(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    if (x11->opts->window_maximized) {
+        x11->pending_geometry_change = true;
+    } else {
+        vo_x11_config_vo_window(vo);
+    }
+}
+
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1871,6 +1887,11 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 vo_x11_minimize(vo);
             if (opt == &opts->window_maximized)
                 vo_x11_maximize(vo);
+            if (opt == &opts->geometry || opt == &opts->autofit ||
+                opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
+            {
+                vo_x11_set_geometry(vo);
+            }
         }
         return VO_TRUE;
     }
