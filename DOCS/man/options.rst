@@ -4890,6 +4890,67 @@ DVB
     An example ``input.conf`` could contain:
     ``H cycle dvbin-channel-switch-offset up``, ``K cycle dvbin-channel-switch-offset down``
 
+DVBV5
+-----
+
+``--dvbv5-adapter=<0-100>``
+    Use the given adapter. Default value: 0.
+
+``--dvbv5-audio-pid=<0-9999>``
+    Select a different audio Packet ID (PID). The default is to use
+    the first audio PID found at the channel-name-file.
+
+``--dvbv5-cc=<country code>``
+    Set the default country to be used by the MPEG-TS parsers, in
+    ISO 3166-1 two letter code. If not specified, the default
+    charset is guessed from the locale environment variables.
+
+``--dvbv5-lna=<auto|disable|enable>``
+    Enable, disable or put LNA power in auto mode. Not all frontends
+    support it.
+
+``--dvbv5-demux=<0-100>``
+    Use the given demux. Default value: 0.
+
+``--dvbv5-diseqc-wait=<0-9999>``
+    Adds additional wait time for DISEqC command completion.
+
+``--dvbv5-freq-bpf=<0-9999>``
+    SCR/Unicable band-pass filter frequency to use, in kHz. Used
+    only on satellite delivery systems.
+
+``--dvbv5-frontend=<0-100>``
+    Use the given frontend. Default value: 0.
+
+``--dvbv5-keep-tune``
+    Keep the DVB device tuned. Speeds up switching channels when the frequency
+    doesn't change.
+
+``--dvbv5-lnb-name=<LNB name>``
+    Type of LNBf to use dvbv5-zap to list the available ones.
+
+``--dvbv5-pat``
+    Add PAT and PMT MPEG-TS tables to stream.
+
+``--dvbv5-port=<0-65536>``
+    Dvbv5-daemon host tcp port
+
+``--dvbv5-sat-number=<0-9999>``
+    Satellite number. Used only on satellite delivery systems. If not specified, disable
+    DISEqC satellite switch.
+
+``--dvbv5-server=<server address>``
+    Dvbv5-daemon host IP address.
+
+``--dvbv5-timeout=<0-3600>``
+    Maximum amount of seconds to wait for a signal
+
+``--dvbv5-verbose=<0-9999>``
+    Be verbose. Useful to check if the MPEG-TS is happenning fine.
+
+``--dvbv5-video-pid=<0-9999>``
+    Video pid program to use (default 0)
+
 ALSA audio output options
 -------------------------
 
