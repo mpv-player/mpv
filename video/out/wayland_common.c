@@ -846,6 +846,8 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
     struct vo_wayland_state *wl = data;
+    struct mp_rect old_output_geometry = wl->current_output->geometry;
+    struct mp_rect old_geometry = wl->geometry;
     wl->current_output = NULL;
 
     struct vo_wayland_output *o;
@@ -857,8 +859,13 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     }
 
     wl->current_output->has_surface = true;
-    set_geometry(wl);
-    wl->window_size = wl->vdparams;
+    bool force_resize = false;
+
+    if (!mp_rect_equals(&old_output_geometry, &wl->current_output->geometry)) {
+        set_geometry(wl);
+        wl->window_size = wl->vdparams;
+        force_resize = true;
+    }
 
     if (wl->scaling != wl->current_output->scale && wl->vo_opts->hidpi_window_scale) {
         double factor = (double)wl->scaling / wl->current_output->scale;
@@ -866,10 +873,11 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
         rescale_geometry_dimensions(wl, factor);
     }
 
-    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) {
+    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
         wl->geometry = wl->window_size;
+
+    if (!mp_rect_equals(&old_geometry, &wl->geometry) || force_resize)
         wl->pending_vo_events |= VO_EVENT_RESIZE;
-    }
 
     MP_VERBOSE(wl, "Surface entered output %s %s (0x%x), scale = %i\n", o->make,
                o->model, o->id, wl->scaling);
@@ -1600,6 +1608,15 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                 set_border_decorations(wl, opts->border);
             if (opt == &opts->appid)
                 update_app_id(wl);
+            if (opt == &opts->geometry || opt == &opts->autofit ||
+                opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
+            {
+                set_geometry(wl);
+                wl->window_size = wl->vdparams;
+                if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+                    wl->geometry = wl->window_size;
+                wl->pending_vo_events |= VO_EVENT_RESIZE;
+            }
         }
         return VO_TRUE;
     }
