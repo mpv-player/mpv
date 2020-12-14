@@ -36,6 +36,8 @@ function detect_platform()
         return 'windows'
     elseif mp.get_property_native('options/macos-force-dedicated-gpu', o) ~= o then
         return 'macos'
+    elseif os.getenv('WAYLAND_DISPLAY') then
+        return 'wayland'
     end
     return 'x11'
 end
@@ -609,6 +611,14 @@ function get_clipboard(clip)
         if not res.error then
             return res.stdout
         end
+    elseif platform == 'wayland' then
+        local res = utils.subprocess({
+            args = { 'wl-paste', clip and '-n' or  '-np' },
+            playback_only = false,
+        })
+        if not res.error then
+            return res.stdout
+        end
     elseif platform == 'windows' then
         local res = utils.subprocess({
             args = { 'powershell', '-NoProfile', '-Command', [[& {
@@ -647,7 +657,7 @@ function get_clipboard(clip)
 end
 
 -- Paste text from the window-system's clipboard. 'clip' determines whether the
--- clipboard or the primary selection buffer is used (on X11 only.)
+-- clipboard or the primary selection buffer is used (on X11 and Wayland only.)
 function paste(clip)
     local text = get_clipboard(clip)
     local before_cur = line:sub(1, cursor - 1)
