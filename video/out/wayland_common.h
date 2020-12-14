@@ -149,7 +149,6 @@ int vo_wayland_init(struct vo *vo);
 int vo_wayland_reconfig(struct vo *vo);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 int last_available_sync(struct vo_wayland_state *wl);
-void vo_wayland_check_events(struct vo *vo);
 void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wakeup(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
