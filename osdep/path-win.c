@@ -85,10 +85,15 @@ const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
 {
     pthread_once(&path_init_once, path_init);
     if (portable_path) {
-        if (strcmp(type, "home") == 0)
+        if (strcmp(type, "home") == 0 || strcmp(type, "cache") == 0 ||
+            strcmp(type, "data") == 0)
+        {
             return portable_path;
+        }
     } else {
-        if (strcmp(type, "home") == 0)
+        if (strcmp(type, "home") == 0 || strmcp(type, "cache") == 0 ||
+            strcmp(type, "data") == 0)
+        {
             return mp_get_win_app_dir(talloc_ctx);
         if (strcmp(type, "exe_dir") == 0)
             return mp_get_win_exe_dir(talloc_ctx);

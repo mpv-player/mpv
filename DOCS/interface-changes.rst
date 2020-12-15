@@ -29,6 +29,9 @@ Interface changes
  --- mpv 0.34.0 ---
     - add `--screen-name` and `--fs-screen-name` flags to allow selecting the 
       screen by its name instead of the index
+    - the watch_later directory is now stored in "~/.local/share/mpv" by default (unix)
+    - the cache-dir option defaults to "~/.cache/mpv" instead of none (unix). For
+      other platforms/configurations, the cache is stored in mpv's config directory.
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
       when the player enters fullscreen.

@@ -11,6 +11,13 @@
 //  "global"        the least priority, global config file location
 //  "desktop"       path to desktop contents
 //
+//  These additional type values are also defined. It is only used if
+//  the native mpv-specific user config dir is defined and only has any
+//  special meaning on unix platforms (elsewhere, the user config dir is
+//  returned).
+//  "cache"         path to local user cache files
+//  "data"          path to local user data files
+//
 // It is allowed to return a static string, so the caller must set talloc_ctx
 // to something other than NULL to avoid memory leaks.
 typedef const char *(*mp_get_platform_path_cb)(void *talloc_ctx, const char *type);

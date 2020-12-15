@@ -1561,7 +1561,7 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
 
     See `Script location`_ for details.
 
-``~/.config/mpv/watch_later/``
+``~/.local/share/mpv/watch_later/``
     Contains temporary config files needed for resuming playback of files with
     the watch later feature. See for example the ``Q`` key binding, or the
     ``quit-watch-later`` input command.
