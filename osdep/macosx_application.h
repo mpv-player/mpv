@@ -31,8 +31,8 @@ struct macos_opts {
     int macos_app_activation_policy;
     int cocoa_cb_sw_renderer;
     int cocoa_cb_10bit_context;
-    // Experimental #HDR on #macOS        
-    int macos_hdr_csp;
+    // #HDR on #macOS        
+    int macos_output_csp;
 };
 
 // multithreaded wrapper for mpv_main

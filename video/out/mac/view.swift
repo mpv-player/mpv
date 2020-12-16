@@ -33,9 +33,6 @@ class View: NSView {
         super.init(frame: frame)
         autoresizingMask = [.width, .height]
         wantsBestResolutionOpenGLSurface = true
-        // Experimental #HDR on #macOS        
-        // This must be enabled to reproduce HDR content 
-        wantsExtendedDynamicRangeOpenGLSurface = true
         registerForDraggedTypes([ .fileURLCompat, .URLCompat, .string ])
     }
 

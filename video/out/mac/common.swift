@@ -42,6 +42,8 @@ class Common: NSObject {
 
     var cursorVisibilityWanted: Bool = true
 
+    var colorSpace: NSColorSpace?
+
     var title: String = "mpv" {
         didSet { if let window = window { window.title = title } }
     }
@@ -138,6 +140,12 @@ class Common: NSObject {
         view.layer = layer
         view.wantsLayer = true
         view.layerContentsPlacement = .scaleProportionallyToFit
+
+        if (mpv?.macOpts.macos_output_csp != -1) {
+            (view.layer as! CAOpenGLLayer).wantsExtendedDynamicRangeContent = true
+            view.wantsExtendedDynamicRangeOpenGLSurface = true;
+        }
+
     }
 
     func initWindowState() {
@@ -395,7 +403,61 @@ class Common: NSObject {
     }
 
     func updateICCProfile() {
-        log.sendWarning("updateICCProfile not implemented")
+        guard let screenColorSpace = window?.screen?.colorSpace else {
+            log.sendWarning("Couldn't update ICC Profile, no color space available")
+            return 
+        }
+
+        colorSpace = screenColorSpace
+
+        if #available(macOS 10.11, *) {
+
+            // #HDR on #macOS        
+            var name = "" as CFString
+
+            switch (mpv?.macOpts.macos_output_csp)
+            {
+                case 3: name = CGColorSpace.itur_2020
+                        break;
+                default: break;
+            }
+
+#if HAVE_MACOS_10_12_FEATURES
+            if #available(macOS 10.12, *) {
+                switch (mpv?.macOpts.macos_output_csp)
+                {
+                    case 6: name = CGColorSpace.extendedSRGB; break
+                    case 7: name = CGColorSpace.extendedLinearSRGB; break
+                    default: break
+                }
+            }
+#endif
+
+#if HAVE_MACOS_10_15_FEATURES
+            if #available(macOS 10.15.1, *) {
+                switch (mpv?.macOpts.macos_output_csp)
+                {
+                    // Even though those features are declared as supported by 10.14 SDK 
+                    // they seem to be available only on 10.15+
+                    
+                    case 0: name = CGColorSpace.displayP3_HLG; break
+                    case 1: name = CGColorSpace.displayP3_PQ_EOTF; break
+                    case 2: name = CGColorSpace.extendedLinearDisplayP3; break
+                    case 4: if #available(macOS 10.15.6, *) {
+                                name = CGColorSpace.itur_2020_HLG; break
+                            }
+                    case 5: name = CGColorSpace.itur_2020_PQ_EOTF; break
+                    default: break;
+                }
+            }
+#endif            
+
+            (view?.layer as! CAOpenGLLayer).colorspace = screenColorSpace.cgColorSpace
+            if (name as String != "")
+            {
+                (view?.layer as! CAOpenGLLayer).colorspace = CGColorSpace(name: name)
+            } 
+        }
     }
 
     func getScreenBy(id screenID: Int) -> NSScreen? {

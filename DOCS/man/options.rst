@@ -5826,6 +5826,36 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     OS X only.
 
+``--macos-output-csp=<type>``
+    Activate HDR output color space to utilize macOS HDR display support. 
+    "auto" is the default, which will select the color space of the desktop 
+    but will not activate HDR mode. To activate HDR mode this value must be 
+    set specifically matching video's color space. It is recommended to use 
+    this switch together with ``--target-trc``. Both values must correspond 
+    to video's color primaries/transfer characteristics in order to get the 
+    correct color reproduction.
+
+    auto    
+        Select the color space of the desktop without activating HDR mode
+    displayP3_PQ_EOTF 
+        DCI P3 primaries, PQ transfer function - that's the most common color 
+        profile for most HDR videos. ``--target-trc`` must be set to ``pq`` to get 
+        the correct video color reproduction
+    displayP3_HLG 
+        DCI P3 primaries, and the HLG gamma
+    extendedLinearDisplayP3 
+        P3 primaries and linear transfer function
+    itur_2020 
+        ITU-R BT.2020
+    itur_2020_PQ_EOTF 
+        ITU-R BT.2020 with PQ transfer function
+    extendedSRGB
+        The extended sRGB color space
+    extendedLinearSRGB
+        The sRGB color space with a linear transfer function and extended-range values
+
+    macOS only.
+
 ``--macos-title-bar-appearance=<appearance>``
     Sets the appearance of the title bar (default: auto). Not all combinations
     of appearances and ``--macos-title-bar-material`` materials make sense or

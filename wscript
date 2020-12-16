@@ -829,6 +829,11 @@ standalone_features = [
         'deps': 'cocoa',
         'func': check_macos_sdk('10.14')
     },{
+        'name': '--macos-10-15-features',
+        'desc': 'macOS 10.15 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.15')
+    },{
         'name': '--macos-media-player',
         'desc': 'macOS Media Player support',
         'deps': 'macos-10-12-2-features && swift',

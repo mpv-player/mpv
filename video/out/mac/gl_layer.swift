@@ -109,10 +109,6 @@ class GLLayer: CAOpenGLLayer {
         autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         backgroundColor = NSColor.black.cgColor
 
-        // Experimental #HDR on #macOS        
-        // This must be enabled to reproduce HDR content 
-        wantsExtendedDynamicRangeContent = true
-
         if #available(macOS 10.12, *), bufferDepth > 8 {
             contentsFormat = .RGBA16Float
         }
