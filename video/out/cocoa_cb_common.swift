@@ -122,7 +122,36 @@ class CocoaCB: Common {
 
         libmpv.setRenderICCProfile(colorSpace)
         if #available(macOS 10.11, *) {
-            layer?.colorspace = colorSpace.cgColorSpace
+
+            print("## VALUE:",libmpv.macOpts.macos_hdr_csp)
+            
+            // Experimental #HDR on #macOS        
+            var name = "" as CFString
+            switch (libmpv.macOpts.macos_hdr_csp)
+            {
+                case 0: name = CGColorSpace.displayP3_HLG
+                        break;
+                case 1: name = CGColorSpace.displayP3_HLG
+                        break;
+                case 2: name = CGColorSpace.displayP3_HLG
+                        break;
+                case 3: name = CGColorSpace.displayP3_HLG
+                        break;
+                case 4: name = CGColorSpace.displayP3_HLG
+                        break;
+                case 5: name = CGColorSpace.displayP3_HLG
+                        break;
+                default: 
+                        break;
+            }
+            
+            if (name as String != "")
+            {
+                layer?.colorspace = CGColorSpace(name: name)
+            } else
+            {
+                layer?.colorspace = colorSpace.cgColorSpace
+            }
         }
     }
 

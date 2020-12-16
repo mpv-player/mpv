@@ -68,6 +68,11 @@ const struct m_sub_options macos_conf = {
         {"cocoa-cb-sw-renderer", OPT_CHOICE(cocoa_cb_sw_renderer,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"cocoa-cb-10bit-context", OPT_FLAG(cocoa_cb_10bit_context)},
+        // Experimental #HDR on #macOS        
+        {"macos-hdr-csp", OPT_CHOICE(macos_hdr_csp,
+            {"displayP3_HLG", 0}, {"displayP3_PQ_EOTF", 1}, {"extendedLinearDisplayP3", 2},
+            {"itur_2020", 3}, {"itur_2020_HLG", 4}, {"itur_2020_PQ_EOTF", 5}
+            )},
         {"macos-title-bar-style", OPT_REMOVED("Split into --macos-title-bar-appearance "
                      "and --macos-title-bar-material")},
         {0}
@@ -77,7 +82,9 @@ const struct m_sub_options macos_conf = {
         .macos_title_bar_color = {0, 0, 0, 0},
         .macos_fs_animation_duration = -1,
         .cocoa_cb_sw_renderer = -1,
-        .cocoa_cb_10bit_context = 1
+        .cocoa_cb_10bit_context = 1,
+        // Experimental #HDR on #macOS        
+        .macos_hdr_csp = -1
     },
 };
 
