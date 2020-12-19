@@ -600,51 +600,55 @@ static void select_tracks(struct demuxer *demuxer, int start)
     }
 }
 
+static inline const uint8_t *mp_av_stream_get_side_data(const AVStream *st,
+                                                        enum AVPacketSideDataType type)
+{
+    const AVPacketSideData *sd;
+    sd = av_packet_side_data_get(st->codecpar->coded_side_data,
+                                 st->codecpar->nb_coded_side_data,
+                                 type);
+    return sd ? sd->data : NULL;
+}
+
 static void export_replaygain(demuxer_t *demuxer, struct sh_stream *sh,
                               AVStream *st)
 {
-    AVPacketSideData *side_data = st->codecpar->coded_side_data;
-    int nb_side_data = st->codecpar->nb_coded_side_data;
-    for (int i = 0; i < nb_side_data; i++) {
-        AVReplayGain *av_rgain;
-        struct replaygain_data *rgain;
-        AVPacketSideData *src_sd = &side_data[i];
+    const AVReplayGain *av_rgain =
+        (const AVReplayGain *)mp_av_stream_get_side_data(st, AV_PKT_DATA_REPLAYGAIN);
+    if (!av_rgain)
+        return;
 
-        if (src_sd->type != AV_PKT_DATA_REPLAYGAIN)
-            continue;
+    struct replaygain_data *rgain = talloc_ptrtype(demuxer, rgain);
 
-        av_rgain = (AVReplayGain*)src_sd->data;
-        rgain    = talloc_ptrtype(demuxer, rgain);
-        rgain->track_gain = rgain->album_gain = 0;
-        rgain->track_peak = rgain->album_peak = 1;
+    rgain->track_gain = rgain->album_gain = 0;
+    rgain->track_peak = rgain->album_peak = 1;
 
-        // Set values in *rgain, using track gain as a fallback for album gain
-        // if the latter is not present. This behavior matches that in
-        // demux/demux.c's decode_rgain; if you change this, please make
-        // equivalent changes there too.
-        if (av_rgain->track_gain != INT32_MIN && av_rgain->track_peak != 0.0) {
-            // Track gain is defined.
-            rgain->track_gain = av_rgain->track_gain / 100000.0f;
-            rgain->track_peak = av_rgain->track_peak / 100000.0f;
+    // Set values in *rgain, using track gain as a fallback for album gain
+    // if the latter is not present. This behavior matches that in
+    // demux/demux.c's decode_rgain; if you change this, please make
+    // equivalent changes there too.
+    if (av_rgain->track_gain != INT32_MIN && av_rgain->track_peak != 0.0) {
+        // Track gain is defined.
+        rgain->track_gain = av_rgain->track_gain / 100000.0f;
+        rgain->track_peak = av_rgain->track_peak / 100000.0f;
 
-            if (av_rgain->album_gain != INT32_MIN &&
-                av_rgain->album_peak != 0.0)
-            {
-                // Album gain is also defined.
-                rgain->album_gain = av_rgain->album_gain / 100000.0f;
-                rgain->album_peak = av_rgain->album_peak / 100000.0f;
-            } else {
-                // Album gain is undefined; fall back to track gain.
-                rgain->album_gain = rgain->track_gain;
-                rgain->album_peak = rgain->track_peak;
-            }
+        if (av_rgain->album_gain != INT32_MIN &&
+            av_rgain->album_peak != 0.0)
+        {
+            // Album gain is also defined.
+            rgain->album_gain = av_rgain->album_gain / 100000.0f;
+            rgain->album_peak = av_rgain->album_peak / 100000.0f;
+        } else {
+            // Album gain is undefined; fall back to track gain.
+            rgain->album_gain = rgain->track_gain;
+            rgain->album_peak = rgain->track_peak;
         }
-
-        // This must be run only before the stream was added, otherwise there
-        // will be race conditions with accesses from the user thread.
-        assert(!sh->ds);
-        sh->codec->replaygain_data = rgain;
     }
+
+    // This must be run only before the stream was added, otherwise there
+    // will be race conditions with accesses from the user thread.
+    assert(!sh->ds);
+    sh->codec->replaygain_data = rgain;
 }
 
 // Return a dictionary entry as (decimal) integer.
@@ -671,16 +675,6 @@ static bool is_image(AVStream *st, bool attached_picture, const AVInputFormat *a
         strcmp(avif->name, "image2pipe") == 0 ||
         (st->codecpar->codec_id == AV_CODEC_ID_AV1 && st->nb_frames == 1)
     );
-}
-
-static inline const uint8_t *mp_av_stream_get_side_data(const AVStream *st,
-                                                        enum AVPacketSideDataType type)
-{
-    const AVPacketSideData *sd;
-    sd = av_packet_side_data_get(st->codecpar->coded_side_data,
-                                 st->codecpar->nb_coded_side_data,
-                                 type);
-    return sd ? sd->data : NULL;
 }
 
 static void handle_new_stream(demuxer_t *demuxer, int i)
