@@ -441,7 +441,7 @@ class Common: NSObject {
                            videoOut vo: UnsafeMutablePointer<vo>) -> NSRect {
         let r = targetScreen.convertRectToBacking(targetScreen.frame)
         let targetFrame =
-            (mpv?.macOpts.macos_geometry_calculation ?? FRAME_VISIBLE) == FRAME_VISIBLE ?
+            (mpv?.macOpts.macos_geometry_calculation ?? Int32(FRAME_VISIBLE)) == FRAME_VISIBLE ?
                 targetScreen.visibleFrame : targetScreen.frame
         let rv = targetScreen.convertRectToBacking(targetFrame)
 
