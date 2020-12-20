@@ -123,4 +123,22 @@ class MPVHelper {
     class func bridge<T: AnyObject>(ptr: UnsafeRawPointer) -> T {
         return Unmanaged<T>.fromOpaque(ptr).takeUnretainedValue()
     }
+
+    class func withUnsafeMutableRawPointers(_ arguments: [Any],
+                                               pointers: [UnsafeMutableRawPointer?] = [],
+                                                closure: (_ pointers: [UnsafeMutableRawPointer?]) -> Void) {
+        if arguments.count > 0 {
+            let args = Array(arguments.dropFirst(1))
+            var newPtrs = pointers
+            var firstArg = arguments.first
+            withUnsafeMutableBytes(of: &firstArg) { (ptr: UnsafeMutableRawBufferPointer) in
+                newPtrs.append(ptr.baseAddress)
+                withUnsafeMutableRawPointers(args, pointers: newPtrs, closure: closure)
+            }
+
+            return
+        }
+
+        closure(pointers)
+    }
 }
