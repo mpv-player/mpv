@@ -86,17 +86,23 @@ class MPVHelper {
 
     func setOption(fullscreen: Bool) {
         optsPtr.pointee.fullscreen = fullscreen
-        m_config_cache_write_opt(optsCachePtr, UnsafeMutableRawPointer(&optsPtr.pointee.fullscreen))
+        _ = withUnsafeMutableBytes(of: &optsPtr.pointee.fullscreen) { (ptr: UnsafeMutableRawBufferPointer) in
+            m_config_cache_write_opt(optsCachePtr, ptr.baseAddress)
+        }
     }
 
     func setOption(minimized: Bool) {
         optsPtr.pointee.window_minimized = Int32(minimized)
-        m_config_cache_write_opt(optsCachePtr, UnsafeMutableRawPointer(&optsPtr.pointee.window_minimized))
+        _ = withUnsafeMutableBytes(of: &optsPtr.pointee.window_minimized) { (ptr: UnsafeMutableRawBufferPointer) in
+            m_config_cache_write_opt(optsCachePtr, ptr.baseAddress)
+        }
     }
 
     func setOption(maximized: Bool) {
         optsPtr.pointee.window_maximized = Int32(maximized)
-        m_config_cache_write_opt(optsCachePtr, UnsafeMutableRawPointer(&optsPtr.pointee.window_maximized))
+        _ = withUnsafeMutableBytes(of: &optsPtr.pointee.window_maximized) { (ptr: UnsafeMutableRawBufferPointer) in
+            m_config_cache_write_opt(optsCachePtr, ptr.baseAddress)
+        }
     }
 
     func setMacOptionCallback(_ callback: swift_wakeup_cb_fn, context object: AnyObject) {
@@ -140,5 +146,11 @@ class MPVHelper {
         }
 
         closure(pointers)
+    }
+
+    class func getPointer<T>(_ value: inout T) -> UnsafeMutableRawPointer? {
+        return withUnsafeMutableBytes(of: &value) { (ptr: UnsafeMutableRawBufferPointer) in
+            ptr.baseAddress
+        }
     }
 }
