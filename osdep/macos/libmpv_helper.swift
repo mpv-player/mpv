@@ -47,23 +47,26 @@ class LibmpvHelper {
     }
 
     func initRender() {
-        var advanced: CInt = 1
+        let advanced: CInt = 1
         let api = UnsafeMutableRawPointer(mutating: (MPV_RENDER_API_TYPE_OPENGL as NSString).utf8String)
-        var pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
+        let pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
                                               get_proc_address_ctx: nil,
                                               extra_exts: nil)
-        var params: [mpv_render_param] = [
-            mpv_render_param(type: MPV_RENDER_PARAM_API_TYPE, data: api),
-            mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, data: &pAddress),
-            mpv_render_param(type: MPV_RENDER_PARAM_ADVANCED_CONTROL, data: &advanced),
-            mpv_render_param()
-        ]
 
-        if (mpv_render_context_create(&mpvRenderContext, mpvHandle, &params) < 0)
-        {
-            log.sendError("Render context init has failed.")
-            exit(1)
+        MPVHelper.withUnsafeMutableRawPointers([pAddress, advanced]) { (pointers: [UnsafeMutableRawPointer?]) in
+            var params: [mpv_render_param] = [
+                mpv_render_param(type: MPV_RENDER_PARAM_API_TYPE, data: api),
+                mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, data: pointers[0]),
+                mpv_render_param(type: MPV_RENDER_PARAM_ADVANCED_CONTROL, data: pointers[1]),
+                mpv_render_param()
+            ]
+
+            if (mpv_render_context_create(&mpvRenderContext, mpvHandle, &params) < 0) {
+                log.sendError("Render context init has failed.")
+                exit(1)
+            }
         }
+
     }
 
     let getProcAddress: (@convention(c) (UnsafeMutableRawPointer?, UnsafePointer<Int8>?)
@@ -119,26 +122,29 @@ class LibmpvHelper {
         deinitLock.lock()
         if mpvRenderContext != nil {
             var i: GLint = 0
-            var flip: CInt = 1
-            var skip: CInt = skip ? 1 : 0
-            var ditherDepth = depth
+            let flip: CInt = 1
+            let skip: CInt = skip ? 1 : 0
+            let ditherDepth = depth
             glGetIntegerv(GLenum(GL_DRAW_FRAMEBUFFER_BINDING), &i)
             // CAOpenGLLayer has ownership of FBO zero yet can return it to us,
             // so only utilize a newly received FBO ID if it is nonzero.
             fbo = i != 0 ? i : fbo
 
-            var data = mpv_opengl_fbo(fbo: Int32(fbo),
+            let data = mpv_opengl_fbo(fbo: Int32(fbo),
                                         w: Int32(surface.width),
                                         h: Int32(surface.height),
                           internal_format: 0)
-            var params: [mpv_render_param] = [
-                mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: &data),
-                mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: &flip),
-                mpv_render_param(type: MPV_RENDER_PARAM_DEPTH, data: &ditherDepth),
-                mpv_render_param(type: MPV_RENDER_PARAM_SKIP_RENDERING, data: &skip),
-                mpv_render_param()
-            ]
-            mpv_render_context_render(mpvRenderContext, &params);
+
+            MPVHelper.withUnsafeMutableRawPointers([data, flip, ditherDepth, skip]) { (pointers: [UnsafeMutableRawPointer?]) in
+                var params: [mpv_render_param] = [
+                    mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: pointers[0]),
+                    mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: pointers[1]),
+                    mpv_render_param(type: MPV_RENDER_PARAM_DEPTH, data: pointers[2]),
+                    mpv_render_param(type: MPV_RENDER_PARAM_SKIP_RENDERING, data: pointers[3]),
+                    mpv_render_param()
+                ]
+                mpv_render_context_render(mpvRenderContext, &params);
+            }
         } else {
             glClearColor(0, 0, 0, 1)
             glClear(GLbitfield(GL_COLOR_BUFFER_BIT))
@@ -161,16 +167,20 @@ class LibmpvHelper {
             let u8Ptr = baseAddress.assumingMemoryBound(to: UInt8.self)
             let iccBstr = bstrdup(nil, bstr(start: u8Ptr, len: ptr.count))
             var icc = mpv_byte_array(data: iccBstr.start, size: iccBstr.len)
-            let params = mpv_render_param(type: MPV_RENDER_PARAM_ICC_PROFILE, data: &icc)
-            mpv_render_context_set_parameter(mpvRenderContext, params)
+            withUnsafeMutableBytes(of: &icc) { (ptr: UnsafeMutableRawBufferPointer) in
+                let params = mpv_render_param(type: MPV_RENDER_PARAM_ICC_PROFILE, data: ptr.baseAddress)
+                mpv_render_context_set_parameter(mpvRenderContext, params)
+            }
         }
     }
 
     func setRenderLux(_ lux: Int) {
         if mpvRenderContext == nil { return }
         var light = lux
-        let params = mpv_render_param(type: MPV_RENDER_PARAM_AMBIENT_LIGHT, data: &light)
-        mpv_render_context_set_parameter(mpvRenderContext, params)
+        withUnsafeMutableBytes(of: &light) { (ptr: UnsafeMutableRawBufferPointer) in
+            let params = mpv_render_param(type: MPV_RENDER_PARAM_AMBIENT_LIGHT, data: ptr.baseAddress)
+            mpv_render_context_set_parameter(mpvRenderContext, params)
+        }
     }
 
     func commandAsync(_ cmd: [String?], id: UInt64 = 1) {
