@@ -531,42 +531,36 @@ class Common: NSObject {
             events.pointee |= Int32(checkEvents())
             return VO_TRUE
         case VOCTRL_VO_OPTS_CHANGED:
-            var o: UnsafeMutableRawPointer?
-            while mpv.nextChangedOption(property: &o) {
-                guard let opt = o else {
-                    log.sendError("No changed options was retrieved")
-                    return VO_TRUE
-                }
-                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.border) {
+            var opt: UnsafeMutableRawPointer?
+            while mpv.nextChangedOption(property: &opt) {
+                switch opt {
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.border):
                     DispatchQueue.main.async {
                         self.window?.border = Bool(mpv.opts.border)
                     }
-                }
-                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.fullscreen) {
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.fullscreen):
                     DispatchQueue.main.async {
                         self.window?.toggleFullScreen(nil)
                     }
-                }
-                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.ontop) ||
-                   opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.ontop_level) {
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.ontop): fallthrough
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.ontop_level):
                     DispatchQueue.main.async {
                         self.window?.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
                     }
-                }
-                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.keepaspect_window) {
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.keepaspect_window):
                     DispatchQueue.main.async {
                         self.window?.keepAspect = Bool(mpv.opts.keepaspect_window)
                     }
-                }
-                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.window_minimized) {
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.window_minimized):
                     DispatchQueue.main.async {
                         self.window?.setMinimized(Bool(mpv.opts.window_minimized))
                     }
-                }
-                if opt == UnsafeMutableRawPointer(&mpv.optsPtr.pointee.window_maximized) {
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.window_maximized):
                     DispatchQueue.main.async {
                         self.window?.setMaximized(Bool(mpv.opts.window_maximized))
                     }
+                default:
+                    break
                 }
             }
             return VO_TRUE
@@ -676,19 +670,14 @@ class Common: NSObject {
             return
         }
 
-        var o: UnsafeMutableRawPointer?
-        while mpv.nextChangedMacOption(property: &o) {
-            guard let opt = o else {
-                log.sendWarning("Could not retrieve changed mac option")
-                return
-            }
-
+        var opt: UnsafeMutableRawPointer?
+        while mpv.nextChangedMacOption(property: &opt) {
             switch opt {
-            case UnsafeMutableRawPointer(&mpv.macOptsPtr.pointee.macos_title_bar_appearance):
+            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_appearance):
                 titleBar?.set(appearance: Int(mpv.macOpts.macos_title_bar_appearance))
-            case UnsafeMutableRawPointer(&mpv.macOptsPtr.pointee.macos_title_bar_material):
+            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_material):
                 titleBar?.set(material: Int(mpv.macOpts.macos_title_bar_material))
-            case UnsafeMutableRawPointer(&mpv.macOptsPtr.pointee.macos_title_bar_color):
+            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_color):
                 titleBar?.set(color: mpv.macOpts.macos_title_bar_color)
             default:
                 break
