@@ -63,7 +63,7 @@ command.
 
 ``<command>`` is the command itself. It consists of the command name and
 multiple (or none) arguments, all separated by whitespace. String arguments
-need to be quoted with ``"``. Details see ``Flat command syntax``.
+should be quoted, typically with ``"``. See `Flat command syntax`_.
 
 You can bind multiple commands to one key. For example:
 
@@ -162,18 +162,31 @@ a number of other places.
 
 |
 | ``<command>  ::= [<prefixes>] <command_name> (<argument>)*``
-| ``<argument> ::= (<string> | " <quoted_string> ")``
+| ``<string>   ::= (<unquoted> | " <double_quoted> " | ' <single_quoted> ')``
+| ``<argument> ::= <string>[<string>...]``
 
 ``command_name`` is an unquoted string with the command name itself. See
 `List of Input Commands`_ for a list.
 
-Arguments are separated by whitespace. This applies even to string arguments.
-For this reason, string arguments should be quoted with ``"``. If a string
-argument contains spaces or certain special characters, quoting and possibly
-escaping is mandatory, or the command cannot be parsed correctly.
+An argument is one string or any sequence of immediately-adjacent strings, e.g.
+``'Foo'Bar"Baz"`` is the same as ``FooBarBaz``.
 
-Inside quotes, C-style escaping can be used. JSON escapes according to RFC 8259,
-minus surrogate pair escapes, should be a safe subset that can be used.
+Arguments are separated by whitespaces even if the command expects only one
+argument. To include whitespaces, quotes, backslash, or command terminators
+semicolon/hash in an argument - they must be quoted or escaped with ``\``.
+
+Single quote takes everything literally until the next single quote, double
+quotes are the same but interpret backslash like in a JSON/C string (``\n`` is
+newline, ``\uHHHH`` is Unicode codepoint etc), and outside of quotes backslash
+takes the next character literally - only useful for special characters.
+
+Note that argument parsing and property expansion happen at different stages.
+First, arguments are determined as described above, and then, where applicable,
+properties are expanded - regardless of argument quoting. However, expansion
+can still be prevented with ``$>``. See `Property Expansion`_.
+
+JSON escapes according to RFC 8259, minus surrogate pair escapes, should be
+a safe subset that can be used.
 
 Commands specified as arrays
 ----------------------------

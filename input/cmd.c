@@ -330,18 +330,59 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
     *out = (bstr){0};
     ctx->str = bstr_lstrip(ctx->str);
     bstr start = ctx->str;
-    if (bstr_eatstart0(&ctx->str, "\"")) {
-        if (!mp_append_escaped_string_noalloc(ctx->tmp, out, &ctx->str)) {
-            MP_ERR(ctx, "Broken string escapes: ...>%.*s<.\n", BSTR_P(start));
-            return -1;
+
+    int next;
+    const char *errdesc;
+    #define arg_err(s) do { errdesc = s; goto error_out; } while (0)
+
+    while (ctx->str.len && !strchr(WHITESPACE "#;", ctx->str.start[0])) {
+        // if out is sliced, then it's already longest slice, so by definition
+        // if we're sliced now then we won't be continuous anymore -> alloc.
+        // wasteful alloc if slice is empty, but it's useless, so not optimized
+        if (out->start >= start.start && out->start < start.start + start.len)
+            *out = bstrdup(ctx->tmp, *out);  // sliced -> alloced
+
+        if (bstr_eatstart0(&ctx->str, "\"")) {
+            if (!mp_append_escaped_string_noalloc(ctx->tmp, out, &ctx->str))
+                arg_err("Broken string escapes");
+            if (!bstr_eatstart0(&ctx->str, "\""))
+                arg_err("Unterminated quotes");
+            continue;  // out is now either a longest slice or alloced
         }
-        if (!bstr_eatstart0(&ctx->str, "\"")) {
-            MP_ERR(ctx, "Unterminated quotes: ...>%.*s<.\n", BSTR_P(start));
-            return -1;
+
+        bstr slice;  // single-quote/unquoted take a longest input slice
+        if (bstr_eatstart0(&ctx->str, "'")) {
+            next = bstrchr(ctx->str, '\'');
+            if (next < 0)
+                arg_err("Unterminated quote");
+            slice = bstr_splice(ctx->str, 0, next);
+            ctx->str = bstr_cut(ctx->str, next+1);  // with trailing quote
+
+        } else if (bstr_eatstart0(&ctx->str, "\\")) {  // unquoted esc
+            if (!ctx->str.len)
+                arg_err("Empty escape");
+            slice = bstr_splice(ctx->str, 0, 1);  // take 1 unconditionally
+            ctx->str = bstr_cut(ctx->str, 1);
+            goto unquoted;  // continue with plain unquoted
+
+        } else {  // unquoted
+            slice = bstr_splice(ctx->str, 0, 0);
+unquoted:   // extend slice up to a delimiter/(start)quote/backslash
+            next = bstrcspn(ctx->str, WHITESPACE "'\"\\#;");
+            slice.len += next;
+            ctx->str = bstr_cut(ctx->str, next);
         }
-        return 1;
+
+        if (!out->start)  // unset -> set as the current slice
+            *out = slice;
+        else  // already set and allocated
+            bstr_xappend(ctx->tmp, out, slice);
     }
-    return read_token(ctx->str, &ctx->str, out) ? 1 : 0;
+    return out->start ? 1 : 0;
+
+error_out:
+    MP_ERR(ctx, "%s: ...>%.*s<.\n", errdesc, BSTR_P(start));
+    return -1;
 }
 
 static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
