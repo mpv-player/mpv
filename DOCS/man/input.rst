@@ -62,7 +62,7 @@ character), or a symbolic name (as printed by ``--input-keylist``).
 command.
 
 ``<command>`` is the command itself. It consists of the command name and
-multiple (or none) commands, all separated by whitespace. String arguments
+multiple (or none) arguments, all separated by whitespace. String arguments
 need to be quoted with ``"``. Details see ``Flat command syntax``.
 
 You can bind multiple commands to one key. For example:
