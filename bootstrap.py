@@ -27,8 +27,8 @@ for WAFURL in WAFURLS:
         print("Downloading {}...".format(WAFURL))
         waf = urlopen(WAFURL).read()
         break
-    except URLError:
-        print("Download failed.")
+    except URLError as err:
+        print("Download failed! ({})".format(err))
 
 if not waf:
     print("Could not download {}.".format(WAFRELEASE))
