@@ -2597,6 +2597,13 @@ Subtitles
     This works for ``dvb_teletext`` subtitle streams, and if FFmpeg has been
     compiled with support for it.
 
+``--sub-past-video-end``
+    After the last frame of video, if this option is enabled, subtitles will
+    continue to update based on audio timestamps. Otherwise, the subtitles
+    for the last video frame will stay onscreen.
+
+    Default: disabled
+
 ``--sub-font=<name>``
     Specify font to use for subtitles that do not themselves
     specify a particular font. The default is ``sans-serif``.
