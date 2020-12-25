@@ -115,17 +115,19 @@ def check_cocoa(ctx, dependency_identifier):
 
     return res
 
-def check_swift(ctx, dependency_identifier):
-    minVer = StrictVersion("3.0.2")
-    if ctx.env.SWIFT_VERSION:
-        if StrictVersion(ctx.env.SWIFT_VERSION) >= minVer:
-            ctx.add_optional_message(dependency_identifier,
-                                     'version found: ' + str(ctx.env.SWIFT_VERSION))
-            return True
-    ctx.add_optional_message(dependency_identifier,
-                             "'swift >= " + str(minVer) + "' not found, found " +
-                             str(ctx.env.SWIFT_VERSION or None))
-    return False
+def check_swift(version):
+    def fn(ctx, dependency_identifier):
+        minVer = StrictVersion(version)
+        if ctx.env.SWIFT_VERSION:
+            if StrictVersion(ctx.env.SWIFT_VERSION) >= minVer:
+                ctx.add_optional_message(dependency_identifier,
+                                         'version found: ' + str(ctx.env.SWIFT_VERSION))
+                return True
+        ctx.add_optional_message(dependency_identifier,
+                                 "'swift >= " + str(minVer) + "' not found, found " +
+                                 str(ctx.env.SWIFT_VERSION or None))
+        return False
+    return fn
 
 def check_egl_provider(minVersion=None, name='egl', check=None):
     def fn(ctx, dependency_identifier, **kw):

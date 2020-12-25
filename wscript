@@ -182,7 +182,7 @@ main_dependencies = [
         'name': '--swift',
         'desc': 'macOS Swift build tools',
         'deps': 'os-darwin',
-        'func': compose_checks(check_swift, check_macos_sdk('10.10')),
+        'func': compose_checks(check_swift('4.1'), check_macos_sdk('10.10')),
     }, {
         'name': '--uwp',
         'desc': 'Universal Windows Platform',

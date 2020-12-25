@@ -36,18 +36,13 @@ matrix:
     - <<: *mac
       osx_image: xcode12.2
     - <<: *mac
-      osx_image: xcode10.1
+      osx_image: xcode11.3
+    - <<: *mac
+      osx_image: xcode9.4
       env:
         - HOMEBREW_NO_AUTO_UPDATE=1
         - HOMEBREW_NO_INSTALL_CLEANUP=1
         - CI_HOMEBREW_HASH=7242872d7878f1a4c2706e5837faafcf0782b58d
-    - <<: *mac
-      osx_image: xcode9.2
-      env:
-        - HOMEBREW_NO_AUTO_UPDATE=1
-        - HOMEBREW_NO_INSTALL_CLEANUP=1
-        - CI_SWIFT_FLAGS="\-target x86_64-apple-macosx10.12"
-        - CI_HOMEBREW_HASH=55e02323812604add9a69bab8730319b9255a697
     - os: freebsd
       compiler: clang
     - os: linux
@@ -62,7 +57,7 @@ matrix:
       env: CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
   allow_failures:
     - os: osx
-      osx_image: xcode9.2
+      osx_image: xcode9.4
   fast_finish: true
 
 dist: focal
@@ -123,15 +118,14 @@ before_install:
         fi
   - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-            remove=$(brew list)
+            remove=$(brew list --formula)
             keep="gettext pcre2 git"
             install="autoconf automake pkg-config libtool python freetype fribidi little-cms2 luajit libass ffmpeg"
             for formula in ${keep[@]}; do remove=("${remove[@]/$formula}"); done
             for formula in ${install[@]}; do remove=("${remove[@]/$formula}"); done
             brew remove --force $remove --ignore-dependencies
-            if [[ "$TRAVIS_OSX_IMAGE" == "xcode9.2" ]]; then
-                brew untap caskroom/cask
-            fi
+            brew remove --cask $(brew list --cask)
+            brew untap homebrew/cask
             brew update
             if [[ -n "$CI_HOMEBREW_HASH" ]]; then
                 pushd "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core"
