@@ -33,7 +33,6 @@ extension String {
 #endif
 
 extension NSPasteboard.PasteboardType {
-
     static let fileURLCompat: NSPasteboard.PasteboardType = {
         if #available(OSX 10.13, *) {
             return .fileURL
@@ -53,7 +52,6 @@ extension NSPasteboard.PasteboardType {
 
 #if !swift(>=5.0)
 extension Data {
-
     mutating func withUnsafeMutableBytes<Type>(_ body: (UnsafeMutableRawBufferPointer) throws -> Type) rethrows -> Type {
         let dataCount = count
         return try withUnsafeMutableBytes { (ptr: UnsafeMutablePointer<UInt8>) throws -> Type in
@@ -65,33 +63,8 @@ extension Data {
 
 #if !swift(>=4.2)
 extension NSDraggingInfo {
-
     var draggingPasteboard: NSPasteboard {
         get { return draggingPasteboard() }
     }
 }
 #endif
-
-#if !swift(>=4.1)
-extension Array {
-
-    func compactMap<ElementOfResult>(_ transform: (Element) throws -> ElementOfResult?) rethrows -> [ElementOfResult] {
-        return try self.flatMap(transform)
-    }
-}
-
-extension Array where Element == [CGLPixelFormatAttribute] {
-
-    func contains(_ obj: [CGLPixelFormatAttribute]) -> Bool {
-        return self.contains(where:{ $0 == obj })
-    }
-}
-
-extension NSWindow.Level {
-
-    static func +(left: NSWindow.Level, right: Int) -> NSWindow.Level {
-        return NSWindow.Level(left.rawValue + right)
-    }
-}
-#endif
-
