@@ -458,6 +458,26 @@ void gl_sc_blend(struct gl_shader_cache *sc,
     sc->params.blend_dst_alpha = blend_dst_alpha;
 }
 
+const char *gl_sc_bvec(struct gl_shader_cache *sc, int dims)
+{
+    static const char *bvecs[] = {
+        [1] = "bool",
+        [2] = "bvec2",
+        [3] = "bvec3",
+        [4] = "bvec4",
+    };
+
+    static const char *vecs[] = {
+        [1] = "float",
+        [2] = "vec2",
+        [3] = "vec3",
+        [4] = "vec4",
+    };
+
+    assert(dims > 0 && dims < MP_ARRAY_SIZE(bvecs));
+    return sc->ra->glsl_version >= 130 ? bvecs[dims] : vecs[dims];
+}
+
 static const char *vao_glsl_type(const struct ra_renderpass_input *e)
 {
     // pretty dumb... too dumb, but works for us

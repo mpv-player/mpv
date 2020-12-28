@@ -43,6 +43,10 @@ void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
                         bool transpose, float *v);
 void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
                         bool transpose, float *v);
+
+// Return the correct bvecN() variant for using mix() in this GLSL version
+const char *gl_sc_bvec(struct gl_shader_cache *sc, int dims);
+
 void gl_sc_blend(struct gl_shader_cache *sc,
                  enum ra_blend blend_src_rgb,
                  enum ra_blend blend_dst_rgb,

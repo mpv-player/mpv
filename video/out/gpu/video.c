@@ -2341,26 +2341,29 @@ static void pass_convert_yuv(struct gl_video *p)
         // as per the BT.2020 specification, table 4. This is a non-linear
         // transformation because (constant) luminance receives non-equal
         // contributions from the three different channels.
-        GLSLF("// constant luminance conversion\n");
-        GLSL(color.br = color.br * mix(vec2(1.5816, 0.9936),
-                                       vec2(1.9404, 1.7184),
-                                       lessThanEqual(color.br, vec2(0)))
-                        + color.gg;)
+        GLSLF("// constant luminance conversion \n"
+              "color.br = color.br * mix(vec2(1.5816, 0.9936),              \n"
+              "                         vec2(1.9404, 1.7184),               \n"
+              "                         %s(lessThanEqual(color.br, vec2(0))))\n"
+              "          + color.gg;                                        \n",
+              gl_sc_bvec(p->sc, 2));
         // Expand channels to camera-linear light. This shader currently just
         // assumes everything uses the BT.2020 12-bit gamma function, since the
         // difference between 10 and 12-bit is negligible for anything other
         // than 12-bit content.
-        GLSL(color.rgb = mix(color.rgb * vec3(1.0/4.5),
-                             pow((color.rgb + vec3(0.0993))*vec3(1.0/1.0993),
-                                 vec3(1.0/0.45)),
-                             lessThanEqual(vec3(0.08145), color.rgb));)
+        GLSLF("color.rgb = mix(color.rgb * vec3(1.0/4.5),                       \n"
+              "                pow((color.rgb + vec3(0.0993))*vec3(1.0/1.0993), \n"
+              "                    vec3(1.0/0.45)),                             \n"
+              "                %s(lessThanEqual(vec3(0.08145), color.rgb)));    \n",
+              gl_sc_bvec(p->sc, 3));
         // Calculate the green channel from the expanded RYcB
         // The BT.2020 specification says Yc = 0.2627*R + 0.6780*G + 0.0593*B
         GLSL(color.g = (color.g - 0.2627*color.r - 0.0593*color.b)*1.0/0.6780;)
         // Recompress to receive the R'G'B' result, same as other systems
-        GLSL(color.rgb = mix(color.rgb * vec3(4.5),
-                             vec3(1.0993) * pow(color.rgb, vec3(0.45)) - vec3(0.0993),
-                             lessThanEqual(vec3(0.0181), color.rgb));)
+        GLSLF("color.rgb = mix(color.rgb * vec3(4.5),                       \n"
+              "                vec3(1.0993) * pow(color.rgb, vec3(0.45)) - vec3(0.0993), \n"
+              "                %s(lessThanEqual(vec3(0.0181), color.rgb))); \n",
+              gl_sc_bvec(p->sc, 3));
     }
 
     p->components = 3;
