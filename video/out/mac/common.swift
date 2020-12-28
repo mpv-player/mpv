@@ -434,7 +434,7 @@ class Common: NSObject {
 #endif
 
 #if HAVE_MACOS_10_15_FEATURES
-            if #available(macOS 10.15.1, *) {
+            if #available(macOS 10.15, *) {
                 switch (mpv?.macOpts.macos_output_csp)
                 {
                     // Even though those features are declared as supported by 10.14 SDK 
