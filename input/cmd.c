@@ -341,6 +341,19 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
         }
         return 1;
     }
+    if (ctx->start.len > 1 && bstr_eatstart0(&ctx->str, "!")) {
+        char endquote[2] = {ctx->str.start[0], '!'};
+        ctx->str = bstr_cut(ctx->str, 1);
+        int next = bstr_find(ctx->str, (bstr){endquote, 2});
+        if (next < 0) {
+            MP_ERR(ctx, "Unterminated custom quote: ...>%.*s<.\n", BSTR_P(start));
+            return -1;
+        }
+        *out = bstr_splice(ctx->str, 0, next);
+        ctx->str = bstr_cut(ctx->str, next+2);
+        return 1;
+    }
+
     return read_token(ctx->str, &ctx->str, out) ? 1 : 0;
 }
 
