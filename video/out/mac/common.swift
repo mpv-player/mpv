@@ -433,35 +433,20 @@ class Common: NSObject {
             }
 #endif
 
-#if HAVE_MACOS_10_14_FEATURES
-            if #available(macOS 10.14, *) {
-                switch (mpv?.macOpts.macos_output_csp)
-                {
-                    case 0: if #available(macOS 10.14.6, *) {
-                                name = CGColorSpace.displayP3_HLG
-                            }   
-                            break;
-                    case 1: if #available(macOS 10.14.6, *) {
-                                name = CGColorSpace.displayP3_PQ_EOTF
-                            }   
-                            break;
-                    case 2: if #available(macOS 10.14.3, *) {
-                                name = CGColorSpace.extendedLinearDisplayP3
-                            }
-                            break;
-                    case 5: if #available(macOS 10.14.6, *) {
-                                name = CGColorSpace.itur_2020_PQ_EOTF
-                            }
-                    default: break;
-                }
-            }
-#endif
-
 #if HAVE_MACOS_10_15_FEATURES
-            if #available(macOS 10.15.6, *) {
+            if #available(macOS 10.15, *) {
                 switch (mpv?.macOpts.macos_output_csp)
                 {
-                    case 4: name = CGColorSpace.itur_2020_HLG; break
+                    // Even though those features are declared as supported by 10.14 SDK 
+                    // they seem to be available only on 10.15+
+                    
+                    case 0: name = CGColorSpace.displayP3_HLG; break
+                    case 1: name = CGColorSpace.displayP3_PQ_EOTF; break
+                    case 2: name = CGColorSpace.extendedLinearDisplayP3; break
+                    case 4: if #available(macOS 10.15.6, *) {
+                                name = CGColorSpace.itur_2020_HLG; break
+                            }
+                    case 5: name = CGColorSpace.itur_2020_PQ_EOTF; break
                     default: break;
                 }
             }
