@@ -189,6 +189,8 @@ enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri)
     case AVCOL_PRI_BT709:       return MP_CSP_PRIM_BT_709;
     case AVCOL_PRI_BT2020:      return MP_CSP_PRIM_BT_2020;
     case AVCOL_PRI_BT470M:      return MP_CSP_PRIM_BT_470M;
+    case AVCOL_PRI_SMPTE431:    return MP_CSP_PRIM_DCI_P3;
+    case AVCOL_PRI_SMPTE432:    return MP_CSP_PRIM_DISPLAY_P3;
     default:                    return MP_CSP_PRIM_AUTO;
     }
 }
@@ -243,6 +245,8 @@ int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim)
     case MP_CSP_PRIM_BT_709:     return AVCOL_PRI_BT709;
     case MP_CSP_PRIM_BT_2020:    return AVCOL_PRI_BT2020;
     case MP_CSP_PRIM_BT_470M:    return AVCOL_PRI_BT470M;
+    case MP_CSP_PRIM_DCI_P3:     return AVCOL_PRI_SMPTE431;
+    case MP_CSP_PRIM_DISPLAY_P3: return AVCOL_PRI_SMPTE432;
     default:                     return AVCOL_PRI_UNSPECIFIED;
     }
 }
