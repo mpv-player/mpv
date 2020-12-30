@@ -1606,7 +1606,7 @@ Video
     You can get the list of allowed codecs with ``mpv --vd=help``. Remove the
     prefix, e.g. instead of ``lavc:h264`` use ``h264``.
 
-    By default, this is set to ``h264,vc1,hevc,vp9,av1``. Note that
+    By default, this is set to ``h264,vc1,hevc,vp8,vp9,av1``. Note that
     the hardware acceleration special codecs like ``h264_vdpau`` are not
     relevant anymore, and in fact have been removed from Libav in this form.
 
