@@ -253,7 +253,7 @@ Available video output drivers are:
     quality or performance by changing the ``--fbo-format`` option to
     ``rgb16f``, ``rgb32f`` or ``rgb``. Known problems include Mesa/Intel not
     accepting ``rgb16``, Mesa sometimes not being compiled with float texture
-    support, and some OS X setups being very slow with ``rgb16`` but fast
+    support, and some macOS setups being very slow with ``rgb16`` but fast
     with ``rgb32f``. If you have problems, you can also try enabling the
     ``--gpu-dumb-mode=yes`` option.
 
@@ -498,7 +498,7 @@ Available video output drivers are:
         Specify the directory to save the image files to (default: ``./``).
 
 ``libmpv``
-    For use with libmpv direct embedding. As a special case, on OS X it
+    For use with libmpv direct embedding. As a special case, on macOS it
     is used like a normal VO within mpv (cocoa-cb). Otherwise useless in any
     other contexts.
     (See ``<mpv/render.h>``.)

@@ -65,8 +65,8 @@ Available audio output drivers are:
         mode is probably not very useful, other than for debugging or when used
         with fixed setups.
 
-``coreaudio`` (Mac OS X only)
-    Native Mac OS X audio output driver using AudioUnits and the CoreAudio
+``coreaudio`` (macOS only)
+    Native macOS audio output driver using AudioUnits and the CoreAudio
     sound server.
 
     Automatically redirects to ``coreaudio_exclusive`` when playing compressed
@@ -92,8 +92,8 @@ Available audio output drivers are:
         extreme care.
 
 
-``coreaudio_exclusive`` (Mac OS X only)
-    Native Mac OS X audio output driver using direct device access and
+``coreaudio_exclusive`` (macOS only)
+    Native macOS audio output driver using direct device access and
     exclusive mode (bypasses the sound server).
 
 ``openal``
