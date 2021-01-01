@@ -664,6 +664,11 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
 
     talloc_free(lut3d);
 
+    if (!p->lut_3d_texture) {
+        p->use_lut_3d = false;
+        return false;
+    }
+
     return true;
 }
 
