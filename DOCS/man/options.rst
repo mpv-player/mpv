@@ -392,6 +392,11 @@ Playback Control
     difference between the two option is that this option performs a seek on
     loop, instead of reloading the file.
 
+    Note that ``--loop-file`` counts the number of times it causes the player to
+    seek to the beginning of the file, not the number of full playthroughs. This
+    means ``--loop-file=1`` will end up playing the file twice. Contrast with
+    ``--loop-playlist``, which counts the number of full playthroughs.
+
     ``--loop`` is an alias for this option.
 
 ``--ab-loop-a=<time>``, ``--ab-loop-b=<time>``
