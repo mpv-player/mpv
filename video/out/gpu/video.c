@@ -2518,7 +2518,7 @@ static void pass_scale_main(struct gl_video *p)
 // If OSD is true, ignore any changes that may have been made to the video
 // by previous passes (i.e. linear scaling)
 static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
-                             struct mp_colorspace fbo_csp, bool osd)
+                             struct mp_colorspace fbo_csp, struct mp_colorspace *out_color, bool osd)
 {
     struct ra *ra = p->ra;
 
@@ -2656,6 +2656,9 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
 
     // Adapt from src to dst as necessary
     pass_color_map(p->sc, p->use_linear && !osd, src, dst, &tone_map);
+
+    if(out_color)
+        *out_color = dst;
 
     if (p->use_lut_3d) {
         gl_sc_uniform_texture(p->sc, "lut_3d", p->lut_3d_texture);
@@ -2852,7 +2855,7 @@ static void pass_draw_osd(struct gl_video *p, int osd_flags, int frame_flags,
                 .light = MP_CSP_LIGHT_DISPLAY,
             };
 
-            pass_colormanage(p, csp_srgb, fbo.color_space, true);
+            pass_colormanage(p, csp_srgb, fbo.color_space, NULL, true);
         }
         mpgl_osd_draw_finish(p->osd, n, p->sc, fbo);
     }
@@ -2991,7 +2994,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
     return true;
 }
 
-static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
+static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo, struct vo_frame *frame)
 {
     if (p->dumb_mode)
         pass_render_frame_dumb(p);
@@ -3003,7 +3006,7 @@ static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
-    pass_colormanage(p, p->image_params.color, fbo.color_space, false);
+    pass_colormanage(p, p->image_params.color, fbo.color_space, &frame->out_color, false);
 
     // Since finish_pass_fbo doesn't work with compute shaders, and neither
     // does the checkerboard/dither code, we may need an indirection via
@@ -3235,7 +3238,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
                  t->ideal_frame_duration, t->vsync_interval, mix);
         p->is_interpolated = true;
     }
-    pass_draw_to_screen(p, fbo);
+    pass_draw_to_screen(p, fbo, t);
 
     p->frames_drawn += 1;
 }
@@ -3321,7 +3324,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                         p->output_tex_valid = true;
                     }
                 }
-                pass_draw_to_screen(p, dest_fbo);
+                pass_draw_to_screen(p, dest_fbo, frame);
             }
 
             // "output tex valid" and "output tex needed" are equivalent
