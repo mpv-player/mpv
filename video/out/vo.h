@@ -242,6 +242,8 @@ struct vo_frame {
     // drops or reconfigs will keep the guarantee.
     // The ID is never 0 (unless num_frames==0). IDs are strictly monotonous.
     uint64_t frame_id;
+    // To hold colorspace data for HDR packets
+    struct mp_colorspace out_color;
 };
 
 // Presentation feedback. See get_vsync() for how backends should fill this
