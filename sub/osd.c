@@ -290,8 +290,11 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
 
     check_obj_resize(osd, osdres, obj);
 
-    if (obj->type == OSDTYPE_SUB || obj->type == OSDTYPE_SUB2) {
+    if (obj->type == OSDTYPE_SUB) {
         if (obj->sub)
+            res = sub_get_bitmaps(obj->sub, obj->vo_res, format, video_pts);
+    } else if (obj->type == OSDTYPE_SUB2) {
+        if (obj->sub && sub_is_secondary_visible(obj->sub))
             res = sub_get_bitmaps(obj->sub, obj->vo_res, format, video_pts);
     } else if (obj->type == OSDTYPE_EXTERNAL2) {
         if (obj->external2 && obj->external2->format) {

@@ -236,6 +236,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-fps", OPT_FLOAT(sub_fps)},
         {"sub-speed", OPT_FLOAT(sub_speed)},
         {"sub-visibility", OPT_FLAG(sub_visibility)},
+        {"secondary-sub-visibility", OPT_FLAG(sec_sub_visibility)},
         {"sub-forced-only", OPT_CHOICE(forced_subs_only,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"stretch-dvd-subs", OPT_FLAG(stretch_dvd_subs)},
@@ -278,6 +279,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
     .size = sizeof(OPT_BASE_STRUCT),
     .defaults = &(OPT_BASE_STRUCT){
         .sub_visibility = 1,
+        .sec_sub_visibility = 1,
         .forced_subs_only = -1,
         .sub_pos = 100,
         .sub_speed = 1.0,
