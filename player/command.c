@@ -6471,6 +6471,25 @@ static void update_priority(struct MPContext *mpctx)
 #endif
 }
 
+static void update_track_switch(struct MPContext *mpctx, int order, int type)
+{
+    if (!mpctx->playback_initialized)
+        return;
+
+    int tid = mpctx->opts->stream_id[order][type];
+    struct track *track;
+    if (tid == -1) {
+        // If "auto" reset to default track selection
+        track = select_default_track(mpctx, order, type);
+        mark_track_selection(mpctx, order, type, -1);
+    } else {
+        track = mp_track_by_tid(mpctx, type, tid);
+    }
+    mp_switch_track_n(mpctx, order, type, track, (tid == -1) ? 0 : FLAG_MARK_SELECTION);
+    print_track_list(mpctx, "Track switched:");
+    mp_wakeup_core(mpctx);
+}
+
 void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
                                bool self_update)
 {
@@ -6629,15 +6648,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
         for (int order = 0; order < num_ptracks[type]; order++) {
-            if (opt_ptr == &opts->stream_id[order][type] &&
-                mpctx->playback_initialized)
-            {
-                struct track *track =
-                    mp_track_by_tid(mpctx, type, opts->stream_id[order][type]);
-                mp_switch_track_n(mpctx, order, type, track, FLAG_MARK_SELECTION);
-                print_track_list(mpctx, "Track switched:");
-                mp_wakeup_core(mpctx);
-            }
+            if (opt_ptr == &opts->stream_id[order][type])
+                update_track_switch(mpctx, order, type);
         }
     }
 
