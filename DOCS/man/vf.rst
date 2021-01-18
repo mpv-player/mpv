@@ -310,7 +310,7 @@ Available mpv-only filters are:
 
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Use
-        ``--vf format:stereo-in=help`` to list all available modes. Check with
+        ``--vf=format:stereo-in=help`` to list all available modes. Check with
         the ``stereo3d`` filter documentation to see what the names mean.
 
     ``<stereo-out>``
