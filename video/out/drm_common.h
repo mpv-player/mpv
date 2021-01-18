@@ -29,6 +29,7 @@
 
 struct kms {
     struct mp_log *log;
+    char *primary_node_path;
     int fd;
     drmModeConnector *connector;
     drmModeEncoder *encoder;
