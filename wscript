@@ -487,7 +487,7 @@ video_output_features = [
         'name': '--drm',
         'desc': 'DRM',
         'deps': 'vt.h || consio.h',
-        'func': check_pkg_config('libdrm', '>= 2.4.74'),
+        'func': check_pkg_config('libdrm', '>= 2.4.75'),
     }, {
         'name': '--gbm',
         'desc': 'GBM',
