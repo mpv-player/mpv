@@ -819,6 +819,16 @@ standalone_features = [
         'deps': 'cocoa',
         'func': check_macos_sdk('10.11')
     }, {
+        'name': '--macos-10-11-2-features',
+        'desc': 'macOS 10.11.2 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.11.2')
+    }, {
+        'name': '--macos-10-12-features',
+        'desc': 'macOS 10.12 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.12')
+    }, {
         'name': '--macos-10-12-2-features',
         'desc': 'macOS 10.12.2 SDK Features',
         'deps': 'cocoa',
@@ -828,7 +838,17 @@ standalone_features = [
         'desc': 'macOS 10.14 SDK Features',
         'deps': 'cocoa',
         'func': check_macos_sdk('10.14')
-    },{
+    }, {
+        'name': '--macos-10-14-6-features',
+        'desc': 'macOS 10.14.6 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.14.6')
+    }, {
+        'name': '--macos-10-15-4-features',
+        'desc': 'macOS 10.15.4 SDK Features',
+        'deps': 'cocoa',
+        'func': check_macos_sdk('10.15.4')
+    }, {
         'name': '--macos-media-player',
         'desc': 'macOS Media Player support',
         'deps': 'macos-10-12-2-features && swift',

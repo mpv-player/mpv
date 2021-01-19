@@ -26,6 +26,7 @@ class Common: NSObject {
     var window: Window?
     var view: View?
     var titleBar: TitleBar?
+    private(set) var videoLayer: VideoLayer?
 
     var link: CVDisplayLink?
 
@@ -395,7 +396,95 @@ class Common: NSObject {
     }
 
     func updateICCProfile() {
-        log.sendWarning("updateICCProfile not implemented")
+        layerGuard: if #available(macOS 10.11, *) {
+            guard let layer = videoLayer else {
+                log.sendWarning("No layer found, macOS color transformation deactivated")
+                break layerGuard
+            }
+
+            layer.colorspace = getColorSpace()
+        }
+
+        flagEvents(VO_EVENT_ICC_PROFILE_CHANGED)
+    }
+
+    @available(macOS 10.11, *)
+    func getColorSpace() -> CGColorSpace? {
+        guard let colorSpace = window?.screen?.colorSpace?.cgColorSpace else {
+            log.sendWarning("Couldn't retrieve ICC Profile, no color space available")
+            return nil
+        }
+
+        let outputCsp = Int(mpv?.macOpts.macos_output_csp ?? Int32(MAC_CSP_AUTO))
+
+        switch outputCsp {
+        case MAC_CSP_AUTO:
+            return colorSpace
+        case MAC_CSP_SRGB:
+            return CGColorSpace(name: CGColorSpace.sRGB)
+        case MAC_CSP_GENERIC_RGB_LINEAR:
+            return CGColorSpace(name: CGColorSpace.genericRGBLinear)
+        case MAC_CSP_ADOBE_RGB1998:
+            return CGColorSpace(name: CGColorSpace.adobeRGB1998)
+#if HAVE_MACOS_10_11_FEATURES
+        case MAC_CSP_DCIP3:
+            return CGColorSpace(name: CGColorSpace.dcip3)
+        case MAC_CSP_ITUR_2020:
+            return CGColorSpace(name: CGColorSpace.itur_2020)
+        case MAC_CSP_ITUR_709:
+            return CGColorSpace(name: CGColorSpace.itur_709)
+#endif
+        default: break
+        }
+
+#if HAVE_MACOS_10_11_2_FEATURES
+        if #available(macOS 10.11.2, *) {
+            switch outputCsp {
+            case MAC_CSP_DISPLAY_P3:
+                return CGColorSpace(name: CGColorSpace.displayP3)
+            default: break
+            }
+        }
+#endif
+
+#if HAVE_MACOS_10_12_FEATURES
+        if #available(macOS 10.12, *) {
+            switch outputCsp {
+            case MAC_CSP_LINEAR_SRGB:
+                return CGColorSpace(name: CGColorSpace.linearSRGB)
+            default: break
+            }
+        }
+#endif
+
+#if HAVE_MACOS_10_14_6_FEATURES
+        // these color spaces are defined from SDK 10.14.6 onwards but throws a
+        // null pointer exception when accessing on 10.14.6, but not on 10.15.x
+        // most likely an OS bug
+        if #available(macOS 10.15, *) {
+            switch outputCsp {
+            case MAC_CSP_DISPLAY_P3_HLG:
+                return CGColorSpace(name: CGColorSpace.displayP3_HLG)
+            case MAC_CSP_DISPLAY_P3_PQ_EOTF:
+                return CGColorSpace(name: CGColorSpace.displayP3_PQ_EOTF) // deprecated
+            default: break
+            }
+        }
+#endif
+
+#if HAVE_MACOS_10_15_4_FEATURES
+        if #available(macOS 10.15.4, *) {
+            switch outputCsp {
+            case MAC_CSP_DISPLAY_P3_PQ:
+                return CGColorSpace(name: CGColorSpace.displayP3_PQ)
+            default: break
+            }
+        }
+#endif
+
+        log.sendWarning("Couldn't retrieve configured color space, falling back to auto")
+
+        return colorSpace
     }
 
     func getScreenBy(id screenID: Int) -> NSScreen? {
@@ -679,6 +768,8 @@ class Common: NSObject {
                 titleBar?.set(material: Int(mpv.macOpts.macos_title_bar_material))
             case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_color):
                 titleBar?.set(color: mpv.macOpts.macos_title_bar_color)
+            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_output_csp):
+                updateICCProfile()
             default:
                 break
             }

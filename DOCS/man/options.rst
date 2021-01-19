@@ -5929,6 +5929,35 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     macOS only.
 
+``--macos-output-csp=<csp>``
+    This sets the color space of the layer to activate the macOS color
+    transformation. Depending on the color space used the system's EDR (HDT)
+    support will be activated. To get correct results, this needs to be set to
+    the color primaries/transfer characteristics of the video. It is recommended
+    to use this switch together with ``--target-trc``.
+
+    ``<csp>`` can be one of the following:
+
+    :auto:               Sets the color space to the icc profile of the
+                         screen (default).
+    :display_p3:         DCI P3 primaries, a D65 white point, and the sRGB
+                         transfer function.
+    :display_p3_hlg:     DCI P3 primaries, a D65 white point, and the Hybrid
+                         Log-Gamma (HLG) transfer function.
+    :display_p3_pq:      DCI P3 primaries, a D65 white point, and the Perceptual
+                         Quantizer (PQ) transfer function.
+    :display_p3_pq_eotf: DCI P3 primaries, a D65 white point, and the Perceptual
+                         Quantizer (PQ) transfer function.
+    :dcip3:              DCI P3 color space.
+    :itur_2020:          ITU BT.2020 color space.
+    :itur_709:           ITU BT.709 color space.
+    :srgb:               sRGB colorimetry and non-linear transfer function.
+    :linear_srgb:        Same as sRGB but linear transfer function.
+    :generic_rgb_linear: RGB and linear transfer function.
+    :adobe_rgb1998:      Adobe RGB (1998) color space.
+
+    macOS only.
+
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during
