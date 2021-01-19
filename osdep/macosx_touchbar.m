@@ -131,13 +131,13 @@
                 makeItemForIdentifier:(NSTouchBarItemIdentifier)identifier
 {
     if ([self.touchbarItems[identifier][@"type"] isEqualToString:@"slider"]) {
-        NSSliderTouchBarItem *tbItem = [[NSSliderTouchBarItem alloc] initWithIdentifier:identifier];
-        tbItem.slider.minValue = 0.0f;
-        tbItem.slider.maxValue = 100.0f;
-        tbItem.target = self;
-        tbItem.action = @selector(seekbarChanged:);
+        NSCustomTouchBarItem *tbItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
+        NSSlider *slider = [NSSlider sliderWithTarget:self action:@selector(seekbarChanged:)];
+        slider.minValue = 0.0f;
+        slider.maxValue = 100.0f;
+        tbItem.view = slider;
         tbItem.customizationLabel = self.touchbarItems[identifier][@"name"];
-        [self.touchbarItems[identifier] setObject:tbItem.slider forKey:@"view"];
+        [self.touchbarItems[identifier] setObject:slider forKey:@"view"];
         return tbItem;
     } else if ([self.touchbarItems[identifier][@"type"] isEqualToString:@"button"]) {
         NSCustomTouchBarItem *tbItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
@@ -261,11 +261,11 @@
     [self.app queueCommand:(char *)[self.touchbarItems[identifier][@"cmd"] UTF8String]];
 }
 
-- (void)seekbarChanged:(NSSliderTouchBarItem *)sender
+- (void)seekbarChanged:(NSSlider *)slider
 {
-    NSString *identifier = [self getIdentifierFromView:sender.slider];
+    NSString *identifier = [self getIdentifierFromView:slider];
     NSString *seek = [NSString stringWithFormat:
-        self.touchbarItems[identifier][@"cmd"], sender.slider.doubleValue];
+        self.touchbarItems[identifier][@"cmd"], slider.doubleValue];
     [self.app queueCommand:(char *)[seek UTF8String]];
 }
 
