@@ -24,6 +24,7 @@
 @synthesize touchbarItems = _touchbar_items;
 @synthesize duration = _duration;
 @synthesize position = _position;
+@synthesize pause = _pause;
 
 - (id)init
 {
@@ -86,45 +87,10 @@
                 @"name": @"Time Left"
             }]
         };
+
+        [self addObserver:self forKeyPath:@"visible" options:0 context:nil];
     }
     return self;
-}
-
--(void)processEvent:(struct mpv_event *)event
-{
-    switch (event->event_id) {
-    case MPV_EVENT_END_FILE: {
-        self.position = 0;
-        self.duration = 0;
-        break;
-    }
-    case MPV_EVENT_PROPERTY_CHANGE: {
-        [self handlePropertyChange:(mpv_event_property *)event->data];
-        break;
-    }
-    }
-}
-
--(void)handlePropertyChange:(struct mpv_event_property *)property
-{
-    NSString *name = [NSString stringWithUTF8String:property->name];
-    mpv_format format = property->format;
-
-    if ([name isEqualToString:@"time-pos"] && format == MPV_FORMAT_DOUBLE) {
-        self.position = *(double *)property->data;
-        self.position = self.position < 0 ? 0 : self.position;
-        [self updateTouchBarTimeItems];
-    } else if ([name isEqualToString:@"duration"] && format == MPV_FORMAT_DOUBLE) {
-        self.duration = *(double *)property->data;
-        [self updateTouchBarTimeItems];
-    } else if ([name isEqualToString:@"pause"] && format == MPV_FORMAT_FLAG) {
-        NSButton *playButton = self.touchbarItems[play][@"view"];
-        if (*(int *)property->data) {
-            playButton.image = self.touchbarItems[play][@"imageAlt"];
-        } else {
-            playButton.image = self.touchbarItems[play][@"image"];
-        }
-    }
 }
 
 - (nullable NSTouchBarItem *)touchBar:(NSTouchBar *)touchBar
@@ -138,6 +104,8 @@
         tbItem.view = slider;
         tbItem.customizationLabel = self.touchbarItems[identifier][@"name"];
         [self.touchbarItems[identifier] setObject:slider forKey:@"view"];
+        [self.touchbarItems[identifier] setObject:tbItem forKey:@"tbItem"];
+        [tbItem addObserver:self forKeyPath:@"visible" options:0 context:nil];
         return tbItem;
     } else if ([self.touchbarItems[identifier][@"type"] isEqualToString:@"button"]) {
         NSCustomTouchBarItem *tbItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
@@ -146,6 +114,8 @@
         tbItem.view = tbButton;
         tbItem.customizationLabel = self.touchbarItems[identifier][@"name"];
         [self.touchbarItems[identifier] setObject:tbButton forKey:@"view"];
+        [self.touchbarItems[identifier] setObject:tbItem forKey:@"tbItem"];
+        [tbItem addObserver:self forKeyPath:@"visible" options:0 context:nil];
         return tbItem;
     } else if ([self.touchbarItems[identifier][@"type"] isEqualToString:@"text"]) {
         NSCustomTouchBarItem *tbItem = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
@@ -154,10 +124,122 @@
         tbItem.view = tbText;
         tbItem.customizationLabel = self.touchbarItems[identifier][@"name"];
         [self.touchbarItems[identifier] setObject:tbText forKey:@"view"];
+        [self.touchbarItems[identifier] setObject:tbItem forKey:@"tbItem"];
+        [tbItem addObserver:self forKeyPath:@"visible" options:0 context:nil];
         return tbItem;
     }
 
     return nil;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey,id> *)change
+                       context:(void *)context {
+    if ([keyPath isEqualToString:@"visible"]) {
+        NSNumber *visible = [object valueForKey:@"visible"];
+        if (visible.boolValue) {
+            [self updateTouchBarTimeItems];
+            [self updatePlayButton];
+        }
+    }
+}
+
+- (void)updateTouchBarTimeItems
+{
+    if (!self.isVisible)
+        return;
+
+    [self updateSlider];
+    [self updateTimeLeft];
+    [self updateCurrentPosition];
+}
+
+- (void)updateSlider
+{
+    NSCustomTouchBarItem *tbItem = self.touchbarItems[seekBar][@"tbItem"];
+    if (!tbItem.visible)
+        return;
+
+    NSSlider *seekSlider = self.touchbarItems[seekBar][@"view"];
+
+    if (self.duration <= 0) {
+        seekSlider.enabled = NO;
+        seekSlider.doubleValue = 0;
+    } else {
+        seekSlider.enabled = YES;
+        if (!seekSlider.highlighted)
+            seekSlider.doubleValue = (self.position/self.duration)*100;
+    }
+}
+
+- (void)updateTimeLeft
+{
+    NSCustomTouchBarItem *tbItem = self.touchbarItems[timeLeft][@"tbItem"];
+    if (!tbItem.visible)
+        return;
+
+    NSTextField *timeLeftItem = self.touchbarItems[timeLeft][@"view"];
+
+    [self removeConstraintForIdentifier:timeLeft];
+    if (self.duration <= 0) {
+        timeLeftItem.stringValue = @"";
+    } else {
+        int left = (int)(floor(self.duration)-floor(self.position));
+        NSString *leftFormat = [self formatTime:left];
+        NSString *durFormat = [self formatTime:self.duration];
+        timeLeftItem.stringValue = [NSString stringWithFormat:@"-%@", leftFormat];
+        [self applyConstraintFromString:[NSString stringWithFormat:@"-%@", durFormat]
+                          forIdentifier:timeLeft];
+    }
+}
+
+- (void)updateCurrentPosition
+{
+    NSCustomTouchBarItem *tbItem = self.touchbarItems[currentPosition][@"tbItem"];
+    if (!tbItem.visible)
+        return;
+
+    NSTextField *curPosItem = self.touchbarItems[currentPosition][@"view"];
+    NSString *posFormat = [self formatTime:(int)floor(self.position)];
+    curPosItem.stringValue = posFormat;
+
+    [self removeConstraintForIdentifier:currentPosition];
+    if (self.duration <= 0) {
+        [self applyConstraintFromString:[self formatTime:self.position]
+                          forIdentifier:currentPosition];
+    } else {
+        NSString *durFormat = [self formatTime:self.duration];
+        [self applyConstraintFromString:durFormat forIdentifier:currentPosition];
+    }
+}
+
+- (void)updatePlayButton
+{
+    NSCustomTouchBarItem *tbItem = self.touchbarItems[play][@"tbItem"];
+    if (!self.isVisible || !tbItem.visible)
+        return;
+
+    NSButton *playButton = self.touchbarItems[play][@"view"];
+    if (self.pause) {
+        playButton.image = self.touchbarItems[play][@"imageAlt"];
+    } else {
+        playButton.image = self.touchbarItems[play][@"image"];
+    }
+}
+
+- (void)buttonAction:(NSButton *)sender
+{
+    NSString *identifier = [self getIdentifierFromView:sender];
+    [self.app queueCommand:(char *)[self.touchbarItems[identifier][@"cmd"] UTF8String]];
+}
+
+- (void)seekbarChanged:(NSSlider *)slider
+{
+    NSString *identifier = [self getIdentifierFromView:slider];
+    NSString *seek = [NSString stringWithFormat:
+        self.touchbarItems[identifier][@"cmd"], slider.doubleValue];
+    [self.app queueCommand:(char *)[seek UTF8String]];
 }
 
 - (NSString *)formatTime:(int)time
@@ -204,48 +286,6 @@
     }
 }
 
-- (void)updateTouchBarTimeItemConstrains
-{
-    [self removeConstraintForIdentifier:currentPosition];
-    [self removeConstraintForIdentifier:timeLeft];
-
-    if (self.duration <= 0) {
-        [self applyConstraintFromString:[self formatTime:self.position]
-                          forIdentifier:currentPosition];
-    } else {
-        NSString *durFormat = [self formatTime:self.duration];
-
-        [self applyConstraintFromString:durFormat forIdentifier:currentPosition];
-        [self applyConstraintFromString:[NSString stringWithFormat:@"-%@", durFormat]
-                          forIdentifier:timeLeft];
-    }
-}
-
-- (void)updateTouchBarTimeItems
-{
-    NSSlider *seekSlider = self.touchbarItems[seekBar][@"view"];
-    NSTextField *curPosItem = self.touchbarItems[currentPosition][@"view"];
-    NSTextField *timeLeftItem = self.touchbarItems[timeLeft][@"view"];
-
-    if (self.duration <= 0) {
-        seekSlider.enabled = NO;
-        seekSlider.doubleValue = 0;
-        timeLeftItem.stringValue = @"";
-    }
-    else {
-        seekSlider.enabled = YES;
-        if (!seekSlider.highlighted)
-            seekSlider.doubleValue = (self.position/self.duration)*100;
-        int left = (int)(floor(self.duration)-floor(self.position));
-        NSString *leftFormat = [self formatTime:left];
-        timeLeftItem.stringValue = [NSString stringWithFormat:@"-%@", leftFormat];
-    }
-    NSString *posFormat = [self formatTime:(int)floor(self.position)];
-    curPosItem.stringValue = posFormat;
-
-    [self updateTouchBarTimeItemConstrains];
-}
-
 - (NSString *)getIdentifierFromView:(id)view
 {
     NSString *identifier;
@@ -255,18 +295,40 @@
     return identifier;
 }
 
-- (void)buttonAction:(NSButton *)sender
+- (void)processEvent:(struct mpv_event *)event
 {
-    NSString *identifier = [self getIdentifierFromView:sender];
-    [self.app queueCommand:(char *)[self.touchbarItems[identifier][@"cmd"] UTF8String]];
+    switch (event->event_id) {
+    case MPV_EVENT_END_FILE: {
+        self.position = 0;
+        self.duration = 0;
+        break;
+    }
+    case MPV_EVENT_PROPERTY_CHANGE: {
+        [self handlePropertyChange:(mpv_event_property *)event->data];
+        break;
+    }
+    }
 }
 
-- (void)seekbarChanged:(NSSlider *)slider
+- (void)handlePropertyChange:(struct mpv_event_property *)property
 {
-    NSString *identifier = [self getIdentifierFromView:slider];
-    NSString *seek = [NSString stringWithFormat:
-        self.touchbarItems[identifier][@"cmd"], slider.doubleValue];
-    [self.app queueCommand:(char *)[seek UTF8String]];
+    NSString *name = [NSString stringWithUTF8String:property->name];
+    mpv_format format = property->format;
+
+    if ([name isEqualToString:@"time-pos"] && format == MPV_FORMAT_DOUBLE) {
+        double newPosition = *(double *)property->data;
+        newPosition = newPosition < 0 ? 0 : newPosition;
+        if ((int)(floor(newPosition) - floor(self.position)) != 0) {
+            self.position = newPosition;
+            [self updateTouchBarTimeItems];
+        }
+    } else if ([name isEqualToString:@"duration"] && format == MPV_FORMAT_DOUBLE) {
+        self.duration = *(double *)property->data;
+        [self updateTouchBarTimeItems];
+    } else if ([name isEqualToString:@"pause"] && format == MPV_FORMAT_FLAG) {
+        self.pause = *(int *)property->data;
+        [self updatePlayButton];
+    }
 }
 
 @end

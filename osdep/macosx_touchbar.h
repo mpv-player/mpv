@@ -41,5 +41,6 @@ struct mpv_event;
 @property(nonatomic, retain) NSDictionary *touchbarItems;
 @property(nonatomic, assign) double duration;
 @property(nonatomic, assign) double position;
+@property(nonatomic, assign) int pause;
 
 @end
