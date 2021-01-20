@@ -213,7 +213,7 @@ Playback Control
     Slow down or speed up playback by the factor given as parameter.
 
     If ``--audio-pitch-correction`` (on by default) is used, playing with a
-    speed higher than normal automatically inserts the ``scaletempo`` audio
+    speed higher than normal automatically inserts the ``scaletempo2`` audio
     filter.
 
 ``--pause``
@@ -1746,7 +1746,7 @@ Audio
 
 ``--audio-pitch-correction=<yes|no>``
     If this is enabled (default), playing with a speed different from normal
-    automatically inserts the ``scaletempo`` audio filter. For details, see
+    automatically inserts the ``scaletempo2`` audio filter. For details, see
     audio filter section.
 
 ``--audio-device=<name>``
