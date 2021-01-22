@@ -47,6 +47,7 @@ struct vt_switcher {
 };
 
 struct drm_opts {
+    char *drm_device_path;
     char *drm_connector_spec;
     char *drm_mode_spec;
     int drm_atomic;
@@ -80,7 +81,9 @@ void vt_switcher_acquire(struct vt_switcher *s, void (*handler)(void*),
 void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*),
                          void *user_data);
 
-struct kms *kms_create(struct mp_log *log, const char *connector_spec,
+struct kms *kms_create(struct mp_log *log,
+                       const char *drm_device_path,
+                       const char *connector_spec,
                        const char *mode_spec,
                        int draw_plane, int drmprime_video_plane,
                        bool use_atomic);

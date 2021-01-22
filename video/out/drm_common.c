@@ -74,6 +74,7 @@ static double mode_get_Hz(const drmModeModeInfo *mode);
 #define OPT_BASE_STRUCT struct drm_opts
 const struct m_sub_options drm_conf = {
     .opts = (const struct m_option[]) {
+        {"drm-device", OPT_STRING(drm_device_path), .flags = M_OPT_FILE},
         {"drm-connector", OPT_STRING(drm_connector_spec),
             .help = drm_connector_opt_help},
         {"drm-mode", OPT_STRING_VALIDATE(drm_mode_spec, drm_validate_mode_opt),
@@ -570,6 +571,8 @@ static void parse_connector_spec(struct mp_log *log,
     }
     char *dot_ptr = strchr(connector_spec, '.');
     if (dot_ptr) {
+        mp_warn(log, "Warning: Selecting a connector by index with drm-connector "
+                     "is deprecated. Use the drm-device option instead.\n");
         *card_no = atoi(connector_spec);
         *connector_name = talloc_strdup(log, dot_ptr + 1);
     } else {
@@ -578,15 +581,26 @@ static void parse_connector_spec(struct mp_log *log,
     }
 }
 
-struct kms *kms_create(struct mp_log *log, const char *connector_spec,
+struct kms *kms_create(struct mp_log *log,
+                       const char *drm_device_path,
+                       const char *connector_spec,
                        const char* mode_spec,
                        int draw_plane, int drmprime_video_plane,
                        bool use_atomic)
 {
     int card_no = -1;
     char *connector_name = NULL;
+
     parse_connector_spec(log, connector_spec, &card_no, &connector_name);
-    char *primary_node_path = get_primary_device_path(log, &card_no);
+    if (drm_device_path && card_no != -1)
+        mp_warn(log, "Both DRM device and card number (as part of "
+                     "drm-connector) are set! Will prefer given device path "
+                     "'%s'!\n",
+                drm_device_path);
+
+    char *primary_node_path = drm_device_path ?
+                              talloc_strdup(log, drm_device_path) :
+                              get_primary_device_path(log, &card_no);
 
     if (!primary_node_path) {
         mp_err(log,

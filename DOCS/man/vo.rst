@@ -552,8 +552,13 @@ Available video output drivers are:
         Select the connector to use (usually this is a monitor.) If ``<name>``
         is empty or ``auto``, mpv renders the output on the first available
         connector. Use ``--drm-connector=help`` to get a list of available
-        connectors. When using multiple graphic cards, use the ``<gpu_number>``
-        argument to disambiguate.
+        connectors. The ``<gpu_number>`` argument can be used to disambiguate
+        multiple graphic cards, but is deprecated in favor of ``--drm-device``.
+        (default: empty)
+
+    ``--drm-device=<path>``
+        Select the DRM device file to use. If specified this overrides automatic
+        card selection and any card number specified ``--drm-connector``.
         (default: empty)
 
     ``--drm-mode=<preferred|highest|N|WxH[@R]>``
