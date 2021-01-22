@@ -27,6 +27,8 @@ Interface changes
 ::
 
  --- mpv 0.34.0 ---
+    - deprecate selecting by card number with `--drm-connector`, add
+      `--drm-device` which can be used instead
     - add `--screen-name` and `--fs-screen-name` flags to allow selecting the
       screen by its name instead of the index
     - add `--macos-geometry-calculation` to change the rectangle used for screen
