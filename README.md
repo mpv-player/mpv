@@ -121,9 +121,9 @@ Libass dependencies (when building libass):
 
 - gcc or clang, yasm on x86 and x86_64
 - fribidi, freetype, fontconfig development headers (for libass)
-- harfbuzz (optional, required for correct rendering of combining characters,
-  particularly for correct rendering of non-English text on OSX, and
-  Arabic/Indic scripts on any platform)
+- harfbuzz (required for correct rendering of combining characters, particularly
+  for correct rendering of non-English text on OSX, and Arabic/Indic scripts on
+  any platform)
 
 FFmpeg dependencies (when building FFmpeg):
 
