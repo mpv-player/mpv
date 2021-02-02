@@ -254,6 +254,8 @@ static const struct {
     { "jls",            "ljpeg" },
     { "thm",            "mjpeg" },
     { "db",             "mjpeg" },
+    { "pcd",            "photocd" },
+    { "pfm",            "pfm" },
     { "pcx",            "pcx" },
     { "png",            "png" },
     { "pns",            "png" },
