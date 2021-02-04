@@ -23,6 +23,7 @@
 
 #include <libswscale/swscale.h>
 
+#include "osdep/endian.h"
 #include "sub/osd.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
@@ -184,7 +185,7 @@ static int resize(struct vo *vo)
     vo->dheight = height;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
     p->sws->dst = (struct mp_image_params) {
-        .imgfmt = IMGFMT_BGR0,
+        .imgfmt = MP_SELECT_LE_BE(IMGFMT_BGR0, IMGFMT_0RGB),
         .w = width,
         .h = height,
         .p_w = 1,
