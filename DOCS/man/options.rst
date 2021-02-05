@@ -5705,7 +5705,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
 ``--deband-threshold=<0..4096>``
     The debanding filter's cut-off threshold. Higher numbers increase the
     debanding strength dramatically but progressively diminish image details.
-    (Default 64)
+    (Default 32)
 
 ``--deband-range=<1..64>``
     The debanding filter's initial radius. The radius increases linearly for
