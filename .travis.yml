@@ -118,13 +118,21 @@ before_install:
         fi
   - |
         if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-            remove=$(brew list --formula)
+            if [[ "$TRAVIS_OSX_IMAGE" == "xcode12.2" ]]; then
+                remove=$(brew list --formula)
+            else
+                remove=$(brew list)
+            fi
             keep="gettext pcre2 git"
             install="autoconf automake pkg-config libtool python freetype fribidi little-cms2 luajit libass ffmpeg"
             for formula in ${keep[@]}; do remove=("${remove[@]/$formula}"); done
             for formula in ${install[@]}; do remove=("${remove[@]/$formula}"); done
             brew remove --force $remove --ignore-dependencies
-            brew remove --cask $(brew list --cask)
+            if [[ "$TRAVIS_OSX_IMAGE" == "xcode12.2" ]]; then
+                brew remove $(brew list --cask)
+            else
+                brew cask remove $(brew cask list)
+            fi
             brew untap homebrew/cask
             brew update
             if [[ -n "$CI_HOMEBREW_HASH" ]]; then
