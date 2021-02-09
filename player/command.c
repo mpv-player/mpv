@@ -2954,13 +2954,20 @@ static int get_playlist_entry(int item, int action, void *arg, void *ctx)
     if (!e)
         return M_PROPERTY_ERROR;
 
+    const char *entry_title = e->title;
+    for (int i = 0; i < e->num_params; i++) {
+        struct playlist_param p = e->params[i];
+        if (!bstrcmp0(p.name, "media-title"))
+            entry_title = bstrto0(NULL, p.value);
+    }
+
     bool current = mpctx->playlist->current == e;
     bool playing = mpctx->playing == e;
     struct m_sub_property props[] = {
         {"filename",    SUB_PROP_STR(e->filename)},
         {"current",     SUB_PROP_FLAG(1), .unavailable = !current},
         {"playing",     SUB_PROP_FLAG(1), .unavailable = !playing},
-        {"title",       SUB_PROP_STR(e->title), .unavailable = !e->title},
+        {"title",       SUB_PROP_STR(entry_title), .unavailable = !entry_title},
         {"id",          SUB_PROP_INT64(e->id)},
         {0}
     };
