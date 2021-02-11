@@ -21,8 +21,8 @@ C PLUGINS
 You can write C plugins for mpv. These use the libmpv API, although they do not
 use the libmpv library itself.
 
-Currently, they must be explicitly enabled at build time with
-``--enable-cplugins``. They are available on Linux/BSD platforms only.
+They are available on Linux/BSD platforms only and enabled by default if the
+compiler supports linking with the ``-rdynamic`` flag.
 
 C plugins location
 ------------------
