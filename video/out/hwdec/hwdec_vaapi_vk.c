@@ -43,6 +43,7 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper)
         int fd = p->desc.objects[id].fd;
         uint32_t size = p->desc.objects[id].size;
         uint32_t offset = p->desc.layers[n].offset[0];
+        uint32_t pitch = p->desc.layers[n].pitch[0];
 
 #if PL_API_VER >= 88
         // AMD drivers do not return the size in the surface description, so we
@@ -84,6 +85,9 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper)
                 .offset = offset,
 #if PL_API_VER >= 88
                 .drm_format_mod = p->desc.objects[id].drm_format_modifier,
+#endif
+#if PL_API_VER >= 106
+                .stride_w = pitch,
 #endif
             },
         };
