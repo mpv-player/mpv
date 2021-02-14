@@ -29,7 +29,8 @@ o = {
     disabled = false,
     images = true,
     videos = true,
-    audio = true
+    audio = true,
+    sameseries = true
 }
 options.read_options(o)
 
@@ -162,6 +163,15 @@ function find_and_add_entries()
         if ext == nil then
             return false
         end
+    if o.sameseries then
+        if mp.get_property("current-tracks/video/albumart") ~= true then
+            local name = string.sub(mp.get_property("filename/no-ext"), 1, 6)
+            local name0 = string.gsub(name, "%p", "%%%1")
+            if string.match(v, "^"..name0) == nil then
+            return false
+            end
+        end
+    end
         return EXTENSIONS[string.lower(ext)]
     end)
     table.sort(files, alnumcomp)
