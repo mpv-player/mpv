@@ -164,7 +164,7 @@ function find_and_add_entries()
             return false
         end
     if o.sameseries then
-        if mp.get_property("current-tracks/video/albumart") ~= true then
+        if mp.get_property("current-tracks/video/albumart") == false then
             local name = string.sub(mp.get_property("filename/no-ext"), 1, 6)
             local name0 = string.gsub(name, "%p", "%%%1")
             if string.match(v, "^"..name0) == nil then
