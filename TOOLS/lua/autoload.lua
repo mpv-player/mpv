@@ -231,4 +231,4 @@ function find_and_add_entries()
     add_files_at(pl_current, append[-1])
 end
 
-mp.register_event("file-loaded", find_and_add_entries)
+mp.register_event("start-file", find_and_add_entries)
