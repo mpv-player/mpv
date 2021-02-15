@@ -16,6 +16,7 @@ disabled=no
 images=no
 videos=yes
 audio=yes
+sameseries=yes
 
 --]]
 
@@ -164,7 +165,7 @@ function find_and_add_entries()
             return false
         end
     if o.sameseries then
-        if mp.get_property("current-tracks/video/albumart") == false then
+        if mp.get_property("track-list/0/type") == "video" then
             local name = string.sub(mp.get_property("filename/no-ext"), 1, 6)
             local name0 = string.gsub(name, "%p", "%%%1")
             if string.match(v, "^"..name0) == nil then
@@ -227,4 +228,4 @@ function find_and_add_entries()
     add_files_at(pl_current, append[-1])
 end
 
-mp.register_event("start-file", find_and_add_entries)
+mp.register_event("file-loaded", find_and_add_entries)
