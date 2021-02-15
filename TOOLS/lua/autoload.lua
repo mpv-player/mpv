@@ -165,11 +165,14 @@ function find_and_add_entries()
             return false
         end
     if o.sameseries then
-        if mp.get_property("track-list/0/type") == "video" then
-            local name = string.sub(mp.get_property("filename/no-ext"), 1, 6)
-            local name0 = string.gsub(name, "%p", "%%%1")
-            if string.match(v, "^"..name0) == nil then
-            return false
+        local name = mp.get_property("filename")
+        local namepre = string.sub(name, 1, 6)
+        local namepre0 = string.gsub(namepre, "%p", "%%%1")
+        for vidext, _ in pairs(EXTENSIONS_VIDEO) do
+            if string.match(name, vidext.."$") ~= nil then
+                if string.match(v, "^"..namepre0) == nil then
+                return false
+                end
             end
         end
     end
