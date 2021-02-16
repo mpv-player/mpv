@@ -957,9 +957,6 @@ static void init_video(struct gl_video *p)
                        params.w, params.h);
 
             plane->tex = ra_tex_create(p->ra, &params);
-            if (!plane->tex)
-                abort(); // shit happens
-
             p->use_integer_conversion |= format->ctype == RA_CTYPE_UINT;
         }
     }
@@ -3588,6 +3585,10 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
     timer_pool_start(p->upload_timer);
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
+        if (!plane->tex) {
+            timer_pool_stop(p->upload_timer);
+            goto error;
+        }
 
         struct ra_tex_upload_params params = {
             .tex = plane->tex,
