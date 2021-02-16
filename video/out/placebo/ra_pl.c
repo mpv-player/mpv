@@ -22,9 +22,7 @@ const struct pl_gpu *ra_pl_get(const struct ra *ra)
     return ra->fns == &ra_fns_pl ? get_gpu(ra) : NULL;
 }
 
-#if PL_API_VER >= 60
 static struct pl_timer *get_active_timer(const struct ra *ra);
-#endif
 
 struct ra *ra_create_pl(const struct pl_gpu *gpu, struct mp_log *log)
 {
@@ -163,32 +161,6 @@ static struct ra_tex *tex_create_pl(struct ra *ra,
                                     const struct ra_tex_params *params)
 {
     const struct pl_gpu *gpu = get_gpu(ra);
-
-    // Check size limits
-    bool ok = false;
-    switch (params->dimensions) {
-    case 1:
-        ok = params->w <= gpu->limits.max_tex_1d_dim;
-        break;
-
-    case 2:
-        ok = params->w <= gpu->limits.max_tex_2d_dim &&
-             params->h <= gpu->limits.max_tex_2d_dim;
-        break;
-
-    case 3:
-        ok = params->w <= gpu->limits.max_tex_2d_dim &&
-             params->h <= gpu->limits.max_tex_2d_dim &&
-             params->d <= gpu->limits.max_tex_2d_dim;
-        break;
-    };
-
-    if (!ok) {
-        MP_ERR(ra, "Texture size %dx%dx%d exceeds dimension limits!\n",
-               params->w, params->h, params->d);
-        return NULL;
-    }
-
     const struct pl_tex *pltex = pl_tex_create(gpu, &(struct pl_tex_params) {
         .w = params->w,
         .h = params->dimensions >= 2 ? params->h : 0,
@@ -238,9 +210,7 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
         .buf = params->buf ? params->buf->priv : NULL,
         .buf_offset = params->buf_offset,
         .ptr = (void *) params->src,
-#if PL_API_VER >= 60
         .timer = get_active_timer(ra),
-#endif
     };
 
     const struct pl_buf *staging = NULL;
@@ -293,9 +263,7 @@ static bool tex_download_pl(struct ra *ra, struct ra_tex_download_params *params
         .tex = tex,
         .ptr = params->dst,
         .stride_w = params->stride / texel_size,
-#if PL_API_VER >= 60
         .timer = get_active_timer(ra),
-#endif
     };
 
     uint8_t *staging = NULL;
@@ -328,19 +296,7 @@ static struct ra_buf *buf_create_pl(struct ra *ra,
         [RA_BUF_TYPE_SHARED_MEMORY]  = 0,
     };
 
-    const struct pl_gpu *gpu = get_gpu(ra);
-    size_t max_size[] = {
-        [PL_BUF_TEX_TRANSFER] = gpu->limits.max_xfer_size,
-        [PL_BUF_UNIFORM]      = gpu->limits.max_ubo_size,
-        [PL_BUF_STORAGE]      = gpu->limits.max_ssbo_size,
-    };
-
-    if (params->size > max_size[buf_type[params->type]]) {
-        MP_ERR(ra, "Buffer size %zu exceeds size limits!\n", params->size);
-        return NULL;
-    }
-
-    const struct pl_buf *plbuf = pl_buf_create(gpu, &(struct pl_buf_params) {
+    const struct pl_buf *plbuf = pl_buf_create(get_gpu(ra), &(struct pl_buf_params) {
         .type = buf_type[params->type],
         .size = params->size,
         .host_mapped = params->host_mapped,
@@ -693,8 +649,6 @@ static void renderpass_run_pl(struct ra *ra,
     pl_pass_run(get_gpu(ra), &pl_params);
 }
 
-#if PL_API_VER >= 60
-
 struct ra_timer_pl {
     // Because libpplacebo only supports one operation per timer, we need
     // to use multiple pl_timers to sum up multiple passes/transfers
@@ -766,8 +720,6 @@ static struct pl_timer *get_active_timer(const struct ra *ra)
     return t->timers[t->idx_timers++];
 }
 
-#endif // PL_API_VER >= 60
-
 static struct ra_fns ra_fns_pl = {
     .destroy                = destroy_ra_pl,
     .tex_create             = tex_create_pl,
@@ -786,11 +738,9 @@ static struct ra_fns ra_fns_pl = {
     .renderpass_create      = renderpass_create_pl,
     .renderpass_destroy     = renderpass_destroy_pl,
     .renderpass_run         = renderpass_run_pl,
-#if PL_API_VER >= 60
     .timer_create           = timer_create_pl,
     .timer_destroy          = timer_destroy_pl,
     .timer_start            = timer_start_pl,
     .timer_stop             = timer_stop_pl,
-#endif
 };
 
