@@ -516,7 +516,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
     struct track *track = NULL;
     track = mpctx->current_track[0][STREAM_AUDIO];
     if (!track || !track->stream) {
-        uninit_audio_out(mpctx);
+        if (!mpctx->encode_lavc_ctx)
+            uninit_audio_out(mpctx);
         error_on_track(mpctx, track);
         return;
     }
