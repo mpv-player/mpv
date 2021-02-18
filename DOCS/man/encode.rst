@@ -93,6 +93,16 @@ You can encode files from one format/codec to another using this facility.
     and all pts are passed through as-is. Never seek backwards or use multiple
     input files in this mode!
 
+``--oforce-key-frames=<value>``
+    Replicates FFmpeg argument -force_key_frames for output.
+    Useful for maintaining a regular keyframe interval ragrdless of frame rate.
+    Only allows value with the prefix 'expr:'
+
+    .. admonition:: Example
+
+        "``--oforce-key-frames=expr:gte(t,n_forced*2)``"
+            Forces a keyframe once every 2 seconds.
+
 ``--no-ocopy-metadata``
     Turns off copying of metadata from input files to output files when
     encoding (which is enabled by default).

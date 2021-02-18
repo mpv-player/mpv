@@ -27,6 +27,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avstring.h>
+#include <libavutil/eval.h>
 #include <libavutil/pixfmt.h>
 #include <libavutil/opt.h>
 #include <libavutil/mathematics.h>
@@ -52,6 +53,18 @@ struct encode_lavc_context {
     // anti discontinuity mode
     double next_in_pts;
     double discontinuity_pts_offset;
+    
+    AVExpr *forced_keyframes_pexpr;
+    double forced_keyframes_expr_const_values[5];
+};
+
+enum forced_keyframes_const {
+    FKF_N,
+    FKF_N_FORCED,
+    FKF_PREV_FORCED_N,
+    FKF_PREV_FORCED_T,
+    FKF_T,
+    FKF_NB
 };
 
 // --- interface for vo/ao drivers
@@ -104,6 +117,9 @@ bool encoder_init_codec_and_muxer(struct encoder_context *p,
 
 // Encode the frame and write the packet. frame is ref'ed as need.
 bool encoder_encode(struct encoder_context *p, AVFrame *frame);
+
+// Determine if frame is keyframe if --oforce-key-frames is used.
+enum AVPictureType encoder_get_pict_type(struct encode_lavc_context *enc, double outpts);
 
 // Return muxer timebase (only available after on_ready() has been called).
 // Caller needs to acquire encode_lavc_context.lock (or call it from on_ready).
