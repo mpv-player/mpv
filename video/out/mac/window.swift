@@ -278,6 +278,14 @@ class Window: NSWindow, NSWindowDelegate {
         }
     }
 
+    func setOnAllWorkspaces(_ state: Bool) {
+        if state {
+            collectionBehavior.insert(.canJoinAllSpaces)
+        } else {
+            collectionBehavior.remove(.canJoinAllSpaces)
+        }
+    }
+
     func setMinimized(_ stateWanted: Bool) {
         if isMiniaturized == stateWanted { return }
 
