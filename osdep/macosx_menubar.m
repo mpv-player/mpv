@@ -218,6 +218,13 @@
                         @"target"     : self,
                         @"cmd"        : @"cycle ontop"
                     }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Toggle Visibility on All Workspaces",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"cycle on-all-workspaces"
+                    }],
 #if HAVE_MACOS_TOUCHBAR
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
