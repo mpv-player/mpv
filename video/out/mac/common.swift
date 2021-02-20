@@ -100,6 +100,7 @@ class Common: NSObject {
         }
 
         window.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
+        window.setOnAllWorkspaces(Bool(mpv.opts.all_workspaces))
         window.keepAspect = Bool(mpv.opts.keepaspect_window)
         window.title = title
         window.border = Bool(mpv.opts.border)
@@ -546,6 +547,10 @@ class Common: NSObject {
                 case MPVHelper.getPointer(&mpv.optsPtr.pointee.ontop_level):
                     DispatchQueue.main.async {
                         self.window?.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
+                    }
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.all_workspaces):
+                    DispatchQueue.main.async {
+                        self.window?.setOnAllWorkspaces(Bool(mpv.opts.all_workspaces))
                     }
                 case MPVHelper.getPointer(&mpv.optsPtr.pointee.keepaspect_window):
                     DispatchQueue.main.async {

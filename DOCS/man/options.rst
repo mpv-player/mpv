@@ -2999,7 +2999,7 @@ Window
     applied to window/video with size exceeding size of the screen.
 
 ``--on-all-workspaces``
-    (X11 only)
+    (X11 and macOS only)
     Show the video window on all virtual desktops.
 
 ``--geometry=<[W[xH]][+-x+-y][/WS]>``, ``--geometry=<x:y>``
