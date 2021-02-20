@@ -3917,6 +3917,7 @@ static const struct property_osd_display {
     {"taskbar-progress", "Progress in taskbar"},
     {"snap-window", "Snap to screen edges"},
     {"ontop", "Stay on top"},
+    {"on-all-workspaces", "Visibility on all workspaces"},
     {"border", "Border"},
     {"framedrop", "Framedrop"},
     {"deinterlace", "Deinterlace"},
