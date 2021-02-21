@@ -61,6 +61,31 @@ const char m_option_path_separator = OPTION_PATH_SEPARATOR;
 #define OPT_INT_MAX(opt, T, Tm) ((opt)->min < (opt)->max \
     ? ((opt)->max >= (double)(Tm) ? (Tm) : (T)((opt)->max)) : (Tm))
 
+int m_option_parse(struct mp_log *log, const m_option_t *opt,
+                   struct bstr name, struct bstr param, void *dst)
+{
+    int r = M_OPT_INVALID;
+    if (bstr_equals0(param, "help") && opt->help) {
+        r = opt->help(log, opt, name);
+        if (r < 0)
+            return r;
+    }
+
+    r = opt->type->parse(log, opt, name, param, dst);
+    if (r < 0)
+        return r;
+
+    if (opt->validate) {
+        r = opt->validate(log, opt, name, dst);
+        if (r < 0) {
+            if (opt->type->free)
+                opt->type->free(dst);
+            return r;
+        }
+    }
+    return 1;
+}
+
 char *m_option_strerror(int code)
 {
     switch (code) {
@@ -1192,13 +1217,6 @@ const m_option_type_t m_option_type_aspect = {
 static int parse_str(struct mp_log *log, const m_option_t *opt,
                      struct bstr name, struct bstr param, void *dst)
 {
-    m_opt_string_validate_fn validate = opt->priv;
-    if (validate) {
-        int r = validate(log, opt, name, param);
-        if (r < 0)
-            return r;
-    }
-
     if (dst) {
         talloc_free(VAL(dst));
         VAL(dst) = bstrdup0(NULL, param);

@@ -28,7 +28,7 @@
 
 static int d3d11_validate_adapter(struct mp_log *log,
                                   const struct m_option *opt,
-                                  struct bstr name, struct bstr param);
+                                  struct bstr name, const char **value);
 
 struct d3d11_opts {
     int feature_level;
@@ -61,7 +61,7 @@ const struct m_sub_options d3d11_conf = {
         {"d3d11-flip", OPT_FLAG(flip)},
         {"d3d11-sync-interval", OPT_INT(sync_interval), M_RANGE(0, 4)},
         {"d3d11-adapter", OPT_STRING_VALIDATE(adapter_name,
-                                               d3d11_validate_adapter)},
+                                              d3d11_validate_adapter)},
         {"d3d11-output-format", OPT_CHOICE(output_format,
             {"auto",     DXGI_FORMAT_UNKNOWN},
             {"rgba8",    DXGI_FORMAT_R8G8B8A8_UNORM},
@@ -111,8 +111,9 @@ struct priv {
 
 static int d3d11_validate_adapter(struct mp_log *log,
                                   const struct m_option *opt,
-                                  struct bstr name, struct bstr param)
+                                  struct bstr name, const char **value)
 {
+    struct bstr param = bstr0(*value);
     bool help = bstr_equals0(param, "help");
     bool adapter_matched = false;
     struct bstr listing = { 0 };

@@ -63,8 +63,8 @@ static void uninit_avctx(struct mp_filter *vd);
 static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags);
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                                            const enum AVPixelFormat *pix_fmt);
-static int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                              struct bstr name, struct bstr param);
+static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
+                          struct bstr name);
 
 #define HWDEC_DELAY_QUEUE_COUNT 2
 
@@ -117,7 +117,8 @@ const struct m_sub_options vd_lavc_conf = {
             {"no", INT_MAX}, {"yes", 1}), M_RANGE(1, INT_MAX)},
         {"vd-lavc-o", OPT_KEYVALUELIST(avopts)},
         {"vd-lavc-dr", OPT_FLAG(dr)},
-        {"hwdec", OPT_STRING_VALIDATE(hwdec_api, hwdec_validate_opt),
+        {"hwdec", OPT_STRING(hwdec_api),
+            .help = hwdec_opt_help,
             .flags = M_OPT_OPTIONAL_PARAM | UPDATE_HWDEC},
         {"hwdec-codecs", OPT_STRING(hwdec_codecs)},
         {"hwdec-image-format", OPT_IMAGEFORMAT(hwdec_image_format)},
@@ -533,33 +534,30 @@ static void select_and_set_hwdec(struct mp_filter *vd)
     }
 }
 
-static int hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                              struct bstr name, struct bstr param)
+static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
+                          struct bstr name)
 {
-    if (bstr_equals0(param, "help")) {
-        struct hwdec_info *hwdecs = NULL;
-        int num_hwdecs = 0;
-        add_all_hwdec_methods(&hwdecs, &num_hwdecs);
+    struct hwdec_info *hwdecs = NULL;
+    int num_hwdecs = 0;
+    add_all_hwdec_methods(&hwdecs, &num_hwdecs);
 
-        mp_info(log, "Valid values (with alternative full names):\n");
+    mp_info(log, "Valid values (with alternative full names):\n");
 
-        for (int n = 0; n < num_hwdecs; n++) {
-            struct hwdec_info *hwdec = &hwdecs[n];
+    for (int n = 0; n < num_hwdecs; n++) {
+        struct hwdec_info *hwdec = &hwdecs[n];
 
-            mp_info(log, "  %s (%s)\n", hwdec->method_name, hwdec->name);
-        }
-
-        talloc_free(hwdecs);
-
-        mp_info(log, "  auto (yes '')\n");
-        mp_info(log, "  no\n");
-        mp_info(log, "  auto-safe\n");
-        mp_info(log, "  auto-copy\n");
-        mp_info(log, "  auto-copy-safe\n");
-
-        return M_OPT_EXIT;
+        mp_info(log, "  %s (%s)\n", hwdec->method_name, hwdec->name);
     }
-    return 0;
+
+    talloc_free(hwdecs);
+
+    mp_info(log, "  auto (yes '')\n");
+    mp_info(log, "  no\n");
+    mp_info(log, "  auto-safe\n");
+    mp_info(log, "  auto-copy\n");
+    mp_info(log, "  auto-copy-safe\n");
+
+    return M_OPT_EXIT;
 }
 
 static void force_fallback(struct mp_filter *vd)

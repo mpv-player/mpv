@@ -110,16 +110,19 @@ struct dec_wrapper_opts {
     int64_t audio_reverse_size;
 };
 
-static int decoder_list_opt(struct mp_log *log, const m_option_t *opt,
-                            struct bstr name, struct bstr param);
+static int decoder_list_help(struct mp_log *log, const m_option_t *opt,
+                             struct bstr name);
 
 const struct m_sub_options dec_wrapper_conf = {
     .opts = (const struct m_option[]){
         {"correct-pts", OPT_FLAG(correct_pts)},
         {"fps", OPT_DOUBLE(force_fps), M_RANGE(0, DBL_MAX)},
-        {"ad", OPT_STRING_VALIDATE(audio_decoders, decoder_list_opt)},
-        {"vd", OPT_STRING_VALIDATE(video_decoders, decoder_list_opt)},
-        {"audio-spdif", OPT_STRING_VALIDATE(audio_spdif, decoder_list_opt)},
+        {"ad", OPT_STRING(audio_decoders),
+            .help = decoder_list_help},
+        {"vd", OPT_STRING(video_decoders),
+            .help = decoder_list_help},
+        {"audio-spdif", OPT_STRING(audio_spdif),
+            .help = decoder_list_help},
         {"video-rotate", OPT_CHOICE(video_rotate, {"no", -1}),
             .flags = UPDATE_IMGPAR, M_RANGE(0, 359)},
         {"video-aspect-override", OPT_ASPECT(movie_aspect),
@@ -232,11 +235,9 @@ struct priv {
     int dropped_frames; // total frames _probably_ dropped
 };
 
-static int decoder_list_opt(struct mp_log *log, const m_option_t *opt,
-                            struct bstr name, struct bstr param)
+static int decoder_list_help(struct mp_log *log, const m_option_t *opt,
+                             struct bstr name)
 {
-    if (!bstr_equals0(param, "help"))
-        return 1;
     if (strcmp(opt->name, "ad") == 0) {
         struct mp_decoder_list *list = audio_decoder_list();
         mp_print_decoders(log, MSGL_INFO, "Audio decoders:", list);

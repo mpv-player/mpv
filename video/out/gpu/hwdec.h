@@ -109,7 +109,7 @@ struct ra_hwdec *ra_hwdec_load_driver(struct ra *ra, struct mp_log *log,
                                       bool is_auto);
 
 int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                          struct bstr name, struct bstr param);
+                          struct bstr name, const char **value);
 
 void ra_hwdec_uninit(struct ra_hwdec *hwdec);
 
