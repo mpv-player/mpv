@@ -126,6 +126,8 @@ static void update_loglevel(struct mp_log *log)
     struct mp_log_root *root = log->root;
     pthread_mutex_lock(&root->lock);
     log->level = MSGL_STATUS + root->verbose; // default log level
+    if (root->really_quiet)
+        log->level = -1;
     for (int n = 0; root->msg_levels && root->msg_levels[n * 2 + 0]; n++) {
         if (match_mod(log->verbose_prefix, root->msg_levels[n * 2 + 0]))
             log->level = mp_msg_find_level(root->msg_levels[n * 2 + 1]);
@@ -143,8 +145,6 @@ static void update_loglevel(struct mp_log *log)
     if (log->root->stats_file)
         log->level = MPMAX(log->level, MSGL_STATS);
     log->level = MPMIN(log->level, log->max_level);
-    if (root->really_quiet)
-        log->level = -1;
     atomic_store(&log->reload_counter, atomic_load(&log->root->reload_counter));
     pthread_mutex_unlock(&root->lock);
 }
