@@ -54,13 +54,15 @@
 
 static int vt_switcher_pipe[2];
 
-static int drm_validate_connector_opt(
-    struct mp_log *log, const struct m_option *opt, struct bstr name,
-    struct bstr param);
+static int drm_connector_opt_help(
+    struct mp_log *log, const struct m_option *opt, struct bstr name);
+
+static int drm_mode_opt_help(
+    struct mp_log *log, const struct m_option *opt, struct bstr name);
 
 static int drm_validate_mode_opt(
     struct mp_log *log, const struct m_option *opt, struct bstr name,
-    struct bstr param);
+    const char **value);
 
 static void kms_show_available_modes(
     struct mp_log *log, const drmModeConnector *connector);
@@ -71,10 +73,10 @@ static double mode_get_Hz(const drmModeModeInfo *mode);
 #define OPT_BASE_STRUCT struct drm_opts
 const struct m_sub_options drm_conf = {
     .opts = (const struct m_option[]) {
-        {"drm-connector", OPT_STRING_VALIDATE(drm_connector_spec,
-                                               drm_validate_connector_opt)},
-        {"drm-mode", OPT_STRING_VALIDATE(drm_mode_spec,
-                                          drm_validate_mode_opt)},
+        {"drm-connector", OPT_STRING(drm_connector_spec),
+            .help = drm_connector_opt_help},
+        {"drm-mode", OPT_STRING_VALIDATE(drm_mode_spec, drm_validate_mode_opt),
+            .help = drm_mode_opt_help},
         {"drm-atomic", OPT_CHOICE(drm_atomic, {"no", 0}, {"auto", 1})},
         {"drm-draw-plane", OPT_CHOICE(drm_draw_plane,
             {"primary", DRM_OPTS_PRIMARY_PLANE},
@@ -747,31 +749,28 @@ double kms_get_display_fps(const struct kms *kms)
     return mode_get_Hz(&kms->mode.mode);
 }
 
-static int drm_validate_connector_opt(struct mp_log *log, const struct m_option *opt,
-                                      struct bstr name, struct bstr param)
+static int drm_connector_opt_help(struct mp_log *log, const struct m_option *opt,
+                                  struct bstr name)
 {
-    if (bstr_equals0(param, "help")) {
-        kms_show_available_cards_and_connectors(log);
-        return M_OPT_EXIT;
-    }
-    return 1;
+    kms_show_available_cards_and_connectors(log);
+    return M_OPT_EXIT;
+}
+
+static int drm_mode_opt_help(struct mp_log *log, const struct m_option *opt,
+                                  struct bstr name)
+{
+    kms_show_available_cards_connectors_and_modes(log);
+    return M_OPT_EXIT;
 }
 
 static int drm_validate_mode_opt(struct mp_log *log, const struct m_option *opt,
-                                 struct bstr name, struct bstr param)
+                                 struct bstr name, const char **value)
 {
-    if (bstr_equals0(param, "help")) {
-        kms_show_available_cards_connectors_and_modes(log);
-        return M_OPT_EXIT;
-    }
-
-    char *spec = bstrto0(NULL, param);
-    if (!parse_mode_spec(spec, NULL)) {
+    const char *param = *value;
+    if (!parse_mode_spec(param, NULL)) {
         mp_fatal(log, "Invalid value for option drm-mode. Must be a positive number, a string of the format WxH[@R] or 'help'\n");
-        talloc_free(spec);
         return M_OPT_INVALID;
     }
-    talloc_free(spec);
 
     return 1;
 }

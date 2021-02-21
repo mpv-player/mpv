@@ -31,8 +31,9 @@ struct vulkan_opts {
 };
 
 static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
-                           struct bstr name, struct bstr param)
+                           struct bstr name, const char **value)
 {
+    struct bstr param = bstr0(*value);
     int ret = M_OPT_INVALID;
     VkResult res;
 

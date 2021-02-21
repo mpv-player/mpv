@@ -337,13 +337,13 @@ static const struct gl_video_opts gl_video_opts_def = {
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, struct bstr param);
+                               struct bstr name, const char **value);
 
 static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, struct bstr param);
+                               struct bstr name, const char **value);
 
 static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *opt,
-                                        struct bstr name, struct bstr param);
+                                        struct bstr name, const char **value);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 
@@ -4089,8 +4089,9 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
 }
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, struct bstr param)
+                               struct bstr name, const char **value)
 {
+    struct bstr param = bstr0(*value);
     char s[20] = {0};
     int r = 1;
     bool tscale = bstr_equals0(name, "tscale");
@@ -4121,8 +4122,9 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
 }
 
 static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, struct bstr param)
+                               struct bstr name, const char **value)
 {
+    struct bstr param = bstr0(*value);
     char s[20] = {0};
     int r = 1;
     if (bstr_equals0(param, "help")) {
@@ -4146,8 +4148,9 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
 }
 
 static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *opt,
-                                        struct bstr name, struct bstr param)
+                                        struct bstr name, const char **value)
 {
+    struct bstr param = bstr0(*value);
     char s[20] = {0};
     int r = 1;
     if (bstr_equals0(param, "help")) {

@@ -189,9 +189,12 @@ struct m_opt_choice_alternatives {
 const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
                              int value);
 
-// For OPT_STRING_VALIDATE(). Behaves like m_option_type.parse().
+// Validator function signatures. Required to properly type the param value.
+typedef int (*m_opt_generic_validate_fn)(struct mp_log *log, const m_option_t *opt,
+                                         struct bstr name, void *value);
+
 typedef int (*m_opt_string_validate_fn)(struct mp_log *log, const m_option_t *opt,
-                                        struct bstr name, struct bstr param);
+                                        struct bstr name, const char **value);
 
 // m_option.priv points to this if OPT_SUBSTRUCT is used
 struct m_sub_options {
@@ -384,6 +387,12 @@ struct m_option {
     // Print a warning when this option is used (for options with no direct
     // replacement.)
     const char *deprecation_message;
+
+    // Optional function that validates a param value for this option.
+    m_opt_generic_validate_fn validate;
+
+    // Optional function that displays help. Will replace type-specific help.
+    int (*help)(struct mp_log *log, const m_option_t *opt, struct bstr name);
 };
 
 char *format_file_size(int64_t size);
@@ -491,11 +500,8 @@ char *format_file_size(int64_t size);
 char *m_option_strerror(int code);
 
 // Helper to parse options, see \ref m_option_type::parse.
-static inline int m_option_parse(struct mp_log *log, const m_option_t *opt,
-                                 struct bstr name, struct bstr param, void *dst)
-{
-    return opt->type->parse(log, opt, name, param, dst);
-}
+int m_option_parse(struct mp_log *log, const m_option_t *opt,
+                   struct bstr name, struct bstr param, void *dst);
 
 // Helper to print options, see \ref m_option_type::print.
 static inline char *m_option_print(const m_option_t *opt, const void *val_ptr)
@@ -663,7 +669,8 @@ extern const char m_option_path_separator;
 
 #define OPT_STRING_VALIDATE(field, validate_fn) \
     OPT_TYPED_FIELD(m_option_type_string, char*, field), \
-    .priv = MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn)
+    .validate = (m_opt_generic_validate_fn) \
+        MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn)
 
 #define M_CHOICES(...) \
     .priv = (void *)&(const struct m_opt_choice_alternatives[]){ __VA_ARGS__, {0}}

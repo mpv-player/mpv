@@ -28,7 +28,7 @@
 
 static int d3d11_validate_adapter(struct mp_log *log,
                                   const struct m_option *opt,
-                                  struct bstr name, struct bstr param);
+                                  struct bstr name, const char **value);
 
 struct d3d11_opts {
     int feature_level;
@@ -111,8 +111,9 @@ struct priv {
 
 static int d3d11_validate_adapter(struct mp_log *log,
                                   const struct m_option *opt,
-                                  struct bstr name, struct bstr param)
+                                  struct bstr name, const char **value)
 {
+    struct bstr param = bstr0(*value);
     bool help = bstr_equals0(param, "help");
     bool adapter_matched = false;
     struct bstr listing = { 0 };
