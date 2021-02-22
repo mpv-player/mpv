@@ -1,3 +1,5 @@
+image: Visual Studio 2019
+
 branches:
   only:
     - master
@@ -15,18 +17,8 @@ shallow_clone: true
 test: off
 
 install:
-  # Work around age/brokenness of Appveyor's msys2 by adding the new
-  # maintainer's keyring.
-  - bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-  - bash -lc "curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
-  - bash -lc "pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig"
-  - bash -lc "pacman -U --noconfirm msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz"
-  # Support for Ada and Objective-C was removed from MSYS2. GCC won't update if
-  # these packages are installed.
-  - >-
-    C:\msys64\usr\bin\pacman -R --noconfirm --noprogressbar
-    mingw-w64-i686-gcc-ada mingw-w64-i686-gcc-objc mingw-w64-x86_64-gcc-ada
-    mingw-w64-x86_64-gcc-objc
+  # Disable checking disk space to speed up install time
+  - C:\msys64\usr\bin\sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
   # Update core packages
   - C:\msys64\usr\bin\pacman -Syyuu --noconfirm --noprogressbar --ask=20
   # Explicitly kill any remaining msys2 processes after core update
