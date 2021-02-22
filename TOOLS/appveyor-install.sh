@@ -24,6 +24,7 @@ pacman -S --noconfirm --needed \
     $MINGW_PACKAGE_PREFIX-ninja \
     $MINGW_PACKAGE_PREFIX-rubberband \
     $MINGW_PACKAGE_PREFIX-shaderc \
+    $MINGW_PACKAGE_PREFIX-spirv-cross \
     $MINGW_PACKAGE_PREFIX-uchardet \
     $MINGW_PACKAGE_PREFIX-vulkan
 
@@ -50,13 +51,4 @@ pacman -Sc --noconfirm
         --enable-dxva2 \
         --enable-schannel
     make -j4 install
-)
-
-# Compile SPIRV-Cross
-(
-    git clone --depth=1 https://github.com/KhronosGroup/SPIRV-Cross && cd SPIRV-Cross
-
-    mkdir build && cd build
-    cmake -GNinja -DSPIRV_CROSS_SHARED=ON -DCMAKE_INSTALL_PREFIX=$MINGW_PREFIX ..
-    ninja install
 )
