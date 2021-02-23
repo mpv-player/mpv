@@ -132,11 +132,11 @@ class CocoaCB: Common {
     }
 
     override func windowSetToFullScreen() {
-        layer?.update()
+        layer?.update(force: true)
     }
 
     override func windowSetToWindow() {
-        layer?.update()
+        layer?.update(force: true)
     }
 
     override func windowDidUpdateFrame() {
