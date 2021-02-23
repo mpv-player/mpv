@@ -30,6 +30,7 @@ class Window: NSWindow, NSWindowDelegate {
     var isInFullscreen: Bool = false
     var isAnimating: Bool = false
     var isMoving: Bool = false
+    var previousStyleMask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable]
 
     var unfsContentFramePixel: NSRect { get { return convertToBacking(unfsContentFrame ?? NSRect(x: 0, y: 0, width: 160, height: 90)) } }
     var framePixel: NSRect { get { return convertToBacking(frame) } }
@@ -60,6 +61,7 @@ class Window: NSWindow, NSWindowDelegate {
         set {
             let responder = firstResponder
             let windowTitle = title
+            previousStyleMask = super.styleMask
             super.styleMask = newValue
             makeFirstResponder(responder)
             title = windowTitle
@@ -228,7 +230,14 @@ class Window: NSWindow, NSWindowDelegate {
 
     func setToFullScreen() {
         guard let targetFrame = targetScreen?.frame else { return }
-        styleMask.insert(.fullScreen)
+
+        if #available(macOS 11.0, *) {
+            styleMask = .borderless
+            common.titleBar?.hide(0.0)
+        } else {
+            styleMask.insert(.fullScreen)
+        }
+
         NSApp.presentationOptions = [.autoHideMenuBar, .autoHideDock]
         setFrame(targetFrame, display: true)
         endAnimation()
@@ -239,10 +248,17 @@ class Window: NSWindow, NSWindowDelegate {
 
     func setToWindow() {
         guard let tScreen = targetScreen else { return }
+
+        if #available(macOS 11.0, *) {
+            styleMask = previousStyleMask
+            common.titleBar?.hide(0.0)
+        } else {
+            styleMask.remove(.fullScreen)
+        }
+
         let newFrame = calculateWindowPosition(for: tScreen, withoutBounds: targetScreen == screen)
         NSApp.presentationOptions = []
         setFrame(newFrame, display: true)
-        styleMask.remove(.fullScreen)
         endAnimation()
         isInFullscreen = false
         mpv?.setOption(fullscreen: isInFullscreen)
