@@ -34,6 +34,8 @@ Interface changes
       which didn't take the menu bar and Dock into account. The new default
       behaviour includes both. To revert to the old behavior set this to
       `whole`.
+    - add an additional optional `albumart` argument to the `video-add` command,
+      which tells mpv to load the given video as album art.
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
       when the player enters fullscreen.

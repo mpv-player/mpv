@@ -5241,6 +5241,8 @@ static void cmd_track_add(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     int type = *(int *)cmd->priv;
+    bool is_albumart = type == STREAM_VIDEO &&
+                       cmd->args[4].v.i;
 
     if (mpctx->stop_play) {
         cmd->success = false;
@@ -5260,7 +5262,7 @@ static void cmd_track_add(void *p)
         }
     }
     int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type,
-                                     cmd->abort->cancel, false);
+                                     cmd->abort->cancel, is_albumart);
     if (first < 0) {
         cmd->success = false;
         return;
@@ -5323,9 +5325,10 @@ static void cmd_track_reload(void *p)
 
     if (t && t->is_external && t->external_filename) {
         char *filename = talloc_strdup(NULL, t->external_filename);
+        bool is_albumart = t->attached_picture;
         mp_remove_track(mpctx, t);
         nt_num = mp_add_external_file(mpctx, filename, type, cmd->abort->cancel,
-                                      false);
+                                      is_albumart);
         talloc_free(filename);
     }
 
@@ -6072,6 +6075,7 @@ const struct mp_cmd_def mp_cmds[] = {
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"lang", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"albumart", OPT_FLAG(v.i), .flags = MP_CMD_OPT_ARG},
         },
         .priv = &(const int){STREAM_VIDEO},
         .spawn_thread = true,

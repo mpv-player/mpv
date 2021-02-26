@@ -801,8 +801,11 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``audio-reload [<id>]``
     Reload the given audio tracks. See ``sub-reload`` command.
 
-``video-add <url> [<flags> [<title> [<lang>]]]``
-    Load the given video file. See ``sub-add`` command.
+``video-add <url> [<flags> [<title> [<lang> [<albumart>]]]]``
+    Load the given video file. See ``sub-add`` command for common options.
+
+    ``albumart`` (``MPV_FORMAT_FLAG``)
+        If enabled, mpv will load the given video as album art.
 
 ``video-remove [<id>]``
     Remove the given video track. See ``sub-remove`` command.
