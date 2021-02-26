@@ -5282,6 +5282,9 @@ static void cmd_track_add(void *p)
         char *lang = cmd->args[3].v.s;
         if (lang && lang[0])
             t->lang = talloc_strdup(t, lang);
+        int extra = cmd->args[4].v.i;
+        int is_albumart = extra & 1;
+        t->attached_picture = t->type == STREAM_VIDEO && is_albumart;
     }
 
     if (mpctx->playback_initialized)
@@ -5322,8 +5325,10 @@ static void cmd_track_reload(void *p)
 
     if (t && t->is_external && t->external_filename) {
         char *filename = talloc_strdup(NULL, t->external_filename);
+        bool is_coverart = t->attached_picture;
         mp_remove_track(mpctx, t);
         nt_num = mp_add_external_file(mpctx, filename, type, cmd->abort->cancel);
+        t->attached_picture = is_coverart;
         talloc_free(filename);
     }
 
@@ -6070,6 +6075,8 @@ const struct mp_cmd_def mp_cmds[] = {
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"lang", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"extra", OPT_CHOICE(v.i,
+                {"albumart", 1}), .flags = MP_CMD_OPT_ARG},
         },
         .priv = &(const int){STREAM_VIDEO},
         .spawn_thread = true,

@@ -832,8 +832,6 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         t->external_filename = talloc_strdup(t, filename);
         t->no_default = sh->type != filter;
         t->no_auto_select = t->no_default;
-        // filter==STREAM_VIDEO always means cover art.
-        t->attached_picture = t->type == STREAM_VIDEO && filter == STREAM_VIDEO;
         if (first_num < 0 && (filter == STREAM_TYPE_COUNT || sh->type == filter))
             first_num = mpctx->num_tracks - 1;
     }
@@ -1376,7 +1374,10 @@ static void load_external_opts_thread(void *p)
     load_chapters(mpctx);
     open_external_files(mpctx, mpctx->opts->audio_files, STREAM_AUDIO);
     open_external_files(mpctx, mpctx->opts->sub_name, STREAM_SUB);
+    int n = mpctx->num_tracks;
     open_external_files(mpctx, mpctx->opts->coverart_files, STREAM_VIDEO);
+    for (; n < mpctx->num_tracks; n++)
+        mpctx->tracks[n]->attached_picture = true;
     open_external_files(mpctx, mpctx->opts->external_files, STREAM_TYPE_COUNT);
     autoload_external_files(mpctx, mpctx->playback_abort);
 

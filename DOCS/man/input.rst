@@ -801,8 +801,13 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``audio-reload [<id>]``
     Reload the given audio tracks. See ``sub-reload`` command.
 
-``video-add <url> [<flags> [<title> [<lang>]]]``
+``video-add <url> [<flags> [<title> [<lang> [<extra>]]]]``
     Load the given video file. See ``sub-add`` command.
+    
+    ``extra`` flags:
+
+    <albumart>
+        Sets the video track's ``albumart`` value to true.
 
 ``video-remove [<id>]``
     Remove the given video track. See ``sub-remove`` command.
