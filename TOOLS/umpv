@@ -8,7 +8,8 @@ by umpv) are ignored, and the script doesn't know about them.
 
 This only takes filenames as arguments. Custom options can't be used; the script
 interprets them as filenames. If mpv is already running, the files passed to
-umpv are appended to mpv's internal playlist. If a file does not exist or is
+umpv are appended to mpv's internal playlist and the first file added starts
+playing. Old playlist entries are retained. If a file does not exist or is
 otherwise not playable, mpv will skip the playlist entry when attempting to
 play it (from the GUI perspective, it's silently ignored).
 
@@ -70,11 +71,12 @@ except socket.error as e:
 
 if sock:
     # Unhandled race condition: what if mpv is terminating right now?
+    sock.send(b"playlist-play-index none\n")
     for f in files:
         # escape: \ \n "
         f = f.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
         f = "\"" + f + "\""
-        sock.send(("raw loadfile " + f + " append\n").encode("utf-8"))
+        sock.send(("raw loadfile " + f + " append-play\n").encode("utf-8"))
 else:
     # Let mpv recreate socket if it doesn't already exist.
 
