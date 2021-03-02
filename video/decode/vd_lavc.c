@@ -661,7 +661,9 @@ static void init_avctx(struct mp_filter *vd)
     if (!ctx->use_hwdec && ctx->vo && lavc_param->dr) {
         avctx->opaque = vd;
         avctx->get_buffer2 = get_buffer2_direct;
+#if LIBAVCODEC_VERSION_MAJOR < 60
         avctx->thread_safe_callbacks = 1;
+#endif
     }
 
     avctx->flags |= lavc_param->bitexact ? AV_CODEC_FLAG_BITEXACT : 0;
