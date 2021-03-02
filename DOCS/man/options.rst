@@ -1489,6 +1489,10 @@ Video
     is added to the rotation metadata, which means the value ``0`` would rotate
     the video according to the rotation metadata.)
 
+    When using hardware decoding without copy-back, only 90° steps work, while
+    software decoding and hardware decoding methods that copy the video back to
+    system memory support all values between 0 and 359.
+
 ``--video-zoom=<value>``
     Adjust the video display scale factor by the given value. The parameter is
     given log 2. For example, ``--video-zoom=0`` is unscaled,
