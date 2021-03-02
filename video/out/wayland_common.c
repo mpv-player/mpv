@@ -268,6 +268,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         mp_input_put_key(wl->vo->input_ctx, button | state | mpmod);
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
+        (!wl->vo_opts->fullscreen) && (!wl->vo_opts->window_maximized) &&
         (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN)) {
         uint32_t edges;
         // Implement an edge resize zone if there are no decorations
