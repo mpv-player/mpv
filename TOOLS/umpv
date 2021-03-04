@@ -59,7 +59,7 @@ def make_abs(filename):
     if not is_url(filename):
         return os.path.abspath(filename)
     return filename
-args.files = [make_abs(f) for f in args.files]
+args.files = (make_abs(f) for f in args.files)
 
 SOCK = os.path.join(os.getenv("HOME"), ".umpv_socket")
 
