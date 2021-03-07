@@ -54,7 +54,6 @@
 #include "input/input.h"
 
 #include "audio/out/ao.h"
-#include "demux/demux.h"
 #include "misc/thread_tools.h"
 #include "sub/osd.h"
 #include "test/tests.h"
@@ -202,13 +201,6 @@ static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct mp_log *log = mpctx->log;
-    if ((opts->demuxer_name && strcmp(opts->demuxer_name, "help") == 0) ||
-        (opts->audio_demuxer_name && strcmp(opts->audio_demuxer_name, "help") == 0) ||
-        (opts->sub_demuxer_name && strcmp(opts->sub_demuxer_name, "help") == 0)) {
-        demuxer_help(log);
-        MP_INFO(mpctx, "\n");
-        return true;
-    }
     if (opts->ao_opts->audio_device &&
         strcmp(opts->ao_opts->audio_device, "help") == 0)
     {

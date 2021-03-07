@@ -2827,7 +2827,7 @@ done:
     return out_pkt;
 }
 
-void demuxer_help(struct mp_log *log)
+int demuxer_help(struct mp_log *log, const m_option_t *opt, struct bstr name)
 {
     int i;
 
@@ -2837,6 +2837,9 @@ void demuxer_help(struct mp_log *log)
         mp_info(log, "%10s  %s\n",
                 demuxer_list[i]->name, demuxer_list[i]->desc);
     }
+    mp_info(log, "\n");
+
+    return M_OPT_EXIT;
 }
 
 static const char *d_level(enum demux_check level)

@@ -46,6 +46,7 @@
 #include "player/core.h"
 #include "player/command.h"
 #include "stream/stream.h"
+#include "demux/demux.h"
 
 #if HAVE_DRM
 #include "video/out/drm_common.h"
@@ -514,9 +515,9 @@ static const m_option_t mp_opts[] = {
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
-    {"demuxer", OPT_STRING(demuxer_name)},
-    {"audio-demuxer", OPT_STRING(audio_demuxer_name)},
-    {"sub-demuxer", OPT_STRING(sub_demuxer_name)},
+    {"demuxer", OPT_STRING(demuxer_name), .help = demuxer_help},
+    {"audio-demuxer", OPT_STRING(audio_demuxer_name), .help = demuxer_help},
+    {"sub-demuxer", OPT_STRING(sub_demuxer_name), .help = demuxer_help},
     {"demuxer-thread", OPT_FLAG(demuxer_thread)},
     {"demuxer-termination-timeout", OPT_DOUBLE(demux_termination_timeout)},
     {"demuxer-cache-wait", OPT_FLAG(demuxer_cache_wait)},

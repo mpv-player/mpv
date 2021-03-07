@@ -293,7 +293,7 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
 void demuxer_refresh_track(struct demuxer *demuxer, struct sh_stream *stream,
                            double ref_pts);
 
-void demuxer_help(struct mp_log *log);
+int demuxer_help(struct mp_log *log, const m_option_t *opt, struct bstr name);
 
 int demuxer_add_attachment(struct demuxer *demuxer, char *name,
                            char *type, void *data, size_t data_size);
