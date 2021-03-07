@@ -758,7 +758,8 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
 // cancel will generally be used to abort the loading process, but on success
 // the demuxer is changed to be slaved to mpctx->playback_abort instead.
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
-                         enum stream_type filter, struct mp_cancel *cancel)
+                         enum stream_type filter, struct mp_cancel *cancel,
+                         bool cover_art)
 {
     struct MPOpts *opts = mpctx->opts;
     if (!filename || mp_cancel_test(cancel))
@@ -832,8 +833,8 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         t->external_filename = talloc_strdup(t, filename);
         t->no_default = sh->type != filter;
         t->no_auto_select = t->no_default;
-        // filter==STREAM_VIDEO always means cover art.
-        t->attached_picture = t->type == STREAM_VIDEO && filter == STREAM_VIDEO;
+        // if we found video, and we are loading cover art, flag as such.
+        t->attached_picture = t->type == STREAM_VIDEO && cover_art;
         if (first_num < 0 && (filter == STREAM_TYPE_COUNT || sh->type == filter))
             first_num = mpctx->num_tracks - 1;
     }
@@ -858,7 +859,9 @@ static void open_external_files(struct MPContext *mpctx, char **files,
     files = mp_dup_str_array(tmp, files);
 
     for (int n = 0; files && files[n]; n++)
-        mp_add_external_file(mpctx, files[n], filter, mpctx->playback_abort);
+        // when given filter is set to video, we are loading up cover art
+        mp_add_external_file(mpctx, files[n], filter, mpctx->playback_abort,
+                             filter == STREAM_VIDEO);
 
     talloc_free(tmp);
 }
@@ -897,15 +900,16 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
             goto skip;
         if (e->type == STREAM_VIDEO && (sc[STREAM_VIDEO] || !sc[STREAM_AUDIO]))
             goto skip;
-        int first = mp_add_external_file(mpctx, e->fname, e->type, cancel);
+
+        // when given filter is set to video, we are loading up cover art
+        int first = mp_add_external_file(mpctx, e->fname, e->type, cancel,
+                                         e->type == STREAM_VIDEO);
         if (first < 0)
             goto skip;
 
         for (int n = first; n < mpctx->num_tracks; n++) {
             struct track *t = mpctx->tracks[n];
             t->auto_loaded = true;
-            t->attached_picture =
-                t->type == STREAM_VIDEO && e->type == STREAM_VIDEO;
             if (!t->lang)
                 t->lang = talloc_strdup(t, e->lang);
         }

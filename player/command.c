@@ -5260,7 +5260,7 @@ static void cmd_track_add(void *p)
         }
     }
     int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type,
-                                     cmd->abort->cancel);
+                                     cmd->abort->cancel, false);
     if (first < 0) {
         cmd->success = false;
         return;
@@ -5324,7 +5324,8 @@ static void cmd_track_reload(void *p)
     if (t && t->is_external && t->external_filename) {
         char *filename = talloc_strdup(NULL, t->external_filename);
         mp_remove_track(mpctx, t);
-        nt_num = mp_add_external_file(mpctx, filename, type, cmd->abort->cancel);
+        nt_num = mp_add_external_file(mpctx, filename, type, cmd->abort->cancel,
+                                      false);
         talloc_free(filename);
     }
 
