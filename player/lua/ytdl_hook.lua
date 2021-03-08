@@ -507,7 +507,7 @@ local function add_single_video(json)
 
         if requested_formats then
             for _, track in pairs(requested_formats) do
-                max_bitrate = track.tbr > max_bitrate and
+                max_bitrate = (track.tbr and track.tbr > max_bitrate) and
                     track.tbr or max_bitrate
             end
         elseif json.tbr then
