@@ -696,8 +696,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
     case AOCONTROL_SET_MUTE:
     case AOCONTROL_SET_VOLUME: {
-        pa_operation *o;
-
         pa_threaded_mainloop_lock(priv->mainloop);
         uint32_t stream_index = pa_stream_get_index(priv->stream);
         if (cmd == AOCONTROL_SET_VOLUME) {
@@ -711,27 +709,24 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
                 volume.values[0] = VOL_MP2PA(vol->left);
                 volume.values[1] = VOL_MP2PA(vol->right);
             }
-            o = pa_context_set_sink_input_volume(priv->context, stream_index,
-                                                 &volume, NULL, NULL);
-            if (!o) {
-                pa_threaded_mainloop_unlock(priv->mainloop);
+            if (!waitop(priv, pa_context_set_sink_input_volume(priv->context,
+                                                               stream_index,
+                                                               &volume,
+                                                               NULL, NULL))) {
                 GENERIC_ERR_MSG("pa_context_set_sink_input_volume() failed");
                 return CONTROL_ERROR;
             }
         } else if (cmd == AOCONTROL_SET_MUTE) {
             const bool *mute = arg;
-            o = pa_context_set_sink_input_mute(priv->context, stream_index,
-                                               *mute, NULL, NULL);
-            if (!o) {
-                pa_threaded_mainloop_unlock(priv->mainloop);
+            if (!waitop(priv, pa_context_set_sink_input_mute(priv->context,
+                                                             stream_index,
+                                                             *mute,
+                                                             NULL, NULL))) {
                 GENERIC_ERR_MSG("pa_context_set_sink_input_mute() failed");
                 return CONTROL_ERROR;
             }
         } else
             abort();
-        /* We don't wait for completion here */
-        pa_operation_unref(o);
-        pa_threaded_mainloop_unlock(priv->mainloop);
         return CONTROL_OK;
     }
 
