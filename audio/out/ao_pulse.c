@@ -712,7 +712,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             if (!waitop(priv, pa_context_set_sink_input_volume(priv->context,
                                                                stream_index,
                                                                &volume,
-                                                               NULL, NULL))) {
+                                                               &context_success_cb, ao))) {
                 GENERIC_ERR_MSG("pa_context_set_sink_input_volume() failed");
                 return CONTROL_ERROR;
             }
@@ -721,7 +721,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             if (!waitop(priv, pa_context_set_sink_input_mute(priv->context,
                                                              stream_index,
                                                              *mute,
-                                                             NULL, NULL))) {
+                                                             &context_success_cb, ao))) {
                 GENERIC_ERR_MSG("pa_context_set_sink_input_mute() failed");
                 return CONTROL_ERROR;
             }
