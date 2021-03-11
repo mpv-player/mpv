@@ -697,6 +697,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     case AOCONTROL_SET_MUTE:
     case AOCONTROL_SET_VOLUME: {
         pa_threaded_mainloop_lock(priv->mainloop);
+        priv->retval = 0;
         uint32_t stream_index = pa_stream_get_index(priv->stream);
         if (cmd == AOCONTROL_SET_VOLUME) {
             const ao_control_vol_t *vol = arg;
@@ -712,7 +713,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             if (!waitop(priv, pa_context_set_sink_input_volume(priv->context,
                                                                stream_index,
                                                                &volume,
-                                                               NULL, NULL))) {
+                                                               context_success_cb, ao)) ||
+                !priv->retval) {
                 GENERIC_ERR_MSG("pa_context_set_sink_input_volume() failed");
                 return CONTROL_ERROR;
             }
@@ -721,7 +723,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             if (!waitop(priv, pa_context_set_sink_input_mute(priv->context,
                                                              stream_index,
                                                              *mute,
-                                                             NULL, NULL))) {
+                                                             context_success_cb, ao)) ||
+                !priv->retval) {
                 GENERIC_ERR_MSG("pa_context_set_sink_input_mute() failed");
                 return CONTROL_ERROR;
             }
