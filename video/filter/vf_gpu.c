@@ -88,7 +88,8 @@ static struct offscreen_ctx *gl_offscreen_ctx_create(struct mpv_global *global,
         .global = global,
     };
     EGLConfig config;
-    if (!mpegl_create_context(&ractx, gl->egl_display, &gl->egl_context, &config))
+    if (!mpegl_create_context(&ractx, gl->egl_display, &gl->egl_context, &config,
+                              false))
     {
         MP_ERR(ctx, "Could not create EGL context.\n");
         goto error;

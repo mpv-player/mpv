@@ -120,7 +120,8 @@ static bool mpegl_init(struct ra_ctx *ctx)
         ctx->opts.want_alpha = 0;
 
     EGLConfig config;
-    if (!mpegl_create_context_cb(ctx, p->egl_display, cb, &p->egl_context, &config))
+    if (!mpegl_create_context_cb(ctx, p->egl_display, cb, &p->egl_context, &config,
+                                 false))
         goto uninit;
 
     int cid, vID, n;

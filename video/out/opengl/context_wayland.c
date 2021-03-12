@@ -118,8 +118,9 @@ static bool egl_create_context(struct ra_ctx *ctx)
     if (eglInitialize(p->egl_display, NULL, NULL) != EGL_TRUE)
         return false;
 
+    // Prefer ES context over Core.
     if (!mpegl_create_context(ctx, p->egl_display, &p->egl_context,
-                              &p->egl_config))
+                              &p->egl_config, true))
         return false;
 
     eglMakeCurrent(p->egl_display, NULL, NULL, p->egl_context);

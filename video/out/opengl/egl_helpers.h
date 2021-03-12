@@ -11,7 +11,8 @@
 struct mp_log;
 
 bool mpegl_create_context(struct ra_ctx *ctx, EGLDisplay display,
-                          EGLContext *out_context, EGLConfig *out_config);
+                          EGLContext *out_context, EGLConfig *out_config,
+                          bool prefer_es);
 
 struct mpegl_cb {
     // if set, pick the desired config from the given list and return its index
@@ -24,7 +25,7 @@ struct mpegl_cb {
 
 bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
                              struct mpegl_cb cb, EGLContext *out_context,
-                             EGLConfig *out_config);
+                             EGLConfig *out_config, bool prefer_es);
 
 struct GL;
 void mpegl_load_functions(struct GL *gl, struct mp_log *log);

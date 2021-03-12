@@ -211,18 +211,20 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
 // Create a context and return it and the config it was created with. If it
 // returns false, the out_* pointers are set to NULL.
 // vo_flags is a combination of VOFLAG_* values.
+// if prefer_es is true, GLES context is tried before Core.
 bool mpegl_create_context(struct ra_ctx *ctx, EGLDisplay display,
-                          EGLContext *out_context, EGLConfig *out_config)
+                          EGLContext *out_context, EGLConfig *out_config,
+                          bool prefer_es)
 {
     return mpegl_create_context_cb(ctx, display, (struct mpegl_cb){0},
-                                   out_context, out_config);
+                                   out_context, out_config, prefer_es);
 }
 
 // Create a context and return it and the config it was created with. If it
 // returns false, the out_* pointers are set to NULL.
 bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
                              struct mpegl_cb cb, EGLContext *out_context,
-                             EGLConfig *out_config)
+                             EGLConfig *out_config, bool prefer_es)
 {
     *out_context = NULL;
     *out_config = NULL;
@@ -233,9 +235,19 @@ bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
     MP_VERBOSE(ctx, "EGL_VERSION=%s\nEGL_VENDOR=%s\nEGL_CLIENT_APIS=%s\n",
                STR_OR_ERR(version), STR_OR_ERR(vendor), STR_OR_ERR(apis));
 
-    int es[] = {0, 3, 2}; // preference order
-    for (int i = 0; i < MP_ARRAY_SIZE(es); i++) {
-        if (create_context(ctx, display, es[i], cb, out_context, out_config))
+    const int *gl_versions = NULL; // preference order
+    int num_versions = 0;
+    const int gl_prefer_core[] = {0, 3, 2};
+    const int gl_prefer_es[] = {3, 2, 0};
+    if (prefer_es) {
+        gl_versions = gl_prefer_es;
+        num_versions = MP_ARRAY_SIZE(gl_prefer_es);
+    } else {
+        gl_versions = gl_prefer_core;
+        num_versions = MP_ARRAY_SIZE(gl_prefer_core);
+    }
+    for (int i = 0; i < num_versions; i++) {
+        if (create_context(ctx, display, gl_versions[i], cb, out_context, out_config))
             return true;
     }
 

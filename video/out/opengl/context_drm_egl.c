@@ -216,8 +216,7 @@ static bool init_egl(struct ra_ctx *ctx)
     if (!mpegl_create_context_cb(ctx,
                                  p->egl.display,
                                  (struct mpegl_cb){match_config_to_visual, ctx},
-                                 &p->egl.context,
-                                 &config))
+                                 &p->egl.context, &config, false))
         return false;
     MP_VERBOSE(ctx, "Initializing EGL surface\n");
     p->egl.surface
