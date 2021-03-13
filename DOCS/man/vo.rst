@@ -631,6 +631,13 @@ Available video output drivers are:
         Note: this option is only available with DRM atomic support.
         (default: display resolution)
 
+    ``--drm-send-hdr-meta=<no|auto>``
+        Send HDR metadata over the connector to indicate to the display that
+        a HDR EOTF curve should be used. Use together with ``--target-trc=hlg``
+        or ``--target-trc=pq`` to select the curve and use ``--target-peak=203``
+        to set the base white level.
+        (default: no)
+
 ``mediacodec_embed`` (Android)
     Renders ``IMGFMT_MEDIACODEC`` frames directly to an ``android.view.Surface``.
     Requires ``--hwdec=mediacodec`` for hardware decoding, along with
