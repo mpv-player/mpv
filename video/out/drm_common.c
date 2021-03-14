@@ -124,6 +124,9 @@ static const char *connector_names[] = {
     "Virtual",   // DRM_MODE_CONNECTOR_VIRTUAL
     "DSI",       // DRM_MODE_CONNECTOR_DSI
     "DPI",       // DRM_MODE_CONNECTOR_DPI
+    "Writeback", // DRM_MODE_CONNECTOR_WRITEBACK
+    "SPI",       // DRM_MODE_CONNECTOR_SPI
+    "USB",       // DRM_MODE_CONNECTOR_USB
 };
 
 struct drm_mode_spec {
