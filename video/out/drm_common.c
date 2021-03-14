@@ -144,8 +144,15 @@ struct drm_mode_spec {
 static void get_connector_name(const drmModeConnector *connector,
                                char ret[MAX_CONNECTOR_NAME_LEN])
 {
-    snprintf(ret, MAX_CONNECTOR_NAME_LEN, "%s-%d",
-             connector_names[connector->connector_type],
+    const char *type_name;
+
+    if (connector->connector_type < MP_ARRAY_SIZE(connector_names)) {
+        type_name = connector_names[connector->connector_type];
+    } else {
+        type_name = "UNKNOWN";
+    }
+
+    snprintf(ret, MAX_CONNECTOR_NAME_LEN, "%s-%d", type_name,
              connector->connector_type_id);
 }
 
