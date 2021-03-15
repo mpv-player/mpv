@@ -426,6 +426,10 @@ local function append_filters(s, prop, prefix)
             n = n .. " (disabled)"
         end
 
+        if f.label ~= nil then
+            n = "@" .. f.label .. ": " .. n
+        end
+
         local p = {}
         for key,value in pairs(f.params) do
             p[#p+1] = key .. "=" .. value
