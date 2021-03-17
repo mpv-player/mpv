@@ -5183,18 +5183,29 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
 ``--interpolation-threshold=<0..1,-1>``
     Threshold below which frame ratio interpolation gets disabled (default:
-    ``0.0001``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
+    ``0.01``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
     where ``vfps`` is the speed-adjusted video FPS, and ``disphz`` the
     display refresh rate. (The speed-adjusted video FPS is roughly equal to
     the normal video FPS, but with slowdown and speedup applied. This matters
     if you use ``--video-sync=display-resample`` to make video run synchronously
     to the display FPS, or if you change the ``speed`` property.)
 
-    The default is intended to almost always enable interpolation if the
-    playback rate is even slightly different from the display refresh rate. But
-    note that if you use e.g. ``--video-sync=display-vdrop``, small deviations
-    in the rate can disable interpolation and introduce a discontinuity every
-    other minute.
+    The default is intended to enable interpolation in scenarios where
+    retiming with the ``--video-sync=display-*`` cannot adjust the speed of
+    the video sufficiently for smooth playback. For example if a video is
+    60.00 FPS and your display refresh rate is 59.94 Hz, interpolation will
+    never be activated, since the mismatch is within 1% of the refresh
+    rate. The default also handles the scenario when mpv cannot determine the
+    container FPS, such as during certain live streams, and may dynamically
+    toggle interpolation on and off. In this scenario, the default would be to
+    not use interpolation but rather to allow ``--video-sync=display-*`` to
+    retime the video to match display refresh rate. See
+    ``--video-sync-max-video-change`` for more information about how mpv
+    will retime video.
+
+    Also note that if you use e.g. ``--video-sync=display-vdrop``, small
+    deviations in the rate can disable interpolation and introduce a
+    discontinuity every other minute.
 
     Set this to ``-1`` to disable this logic.
 
@@ -6580,6 +6591,9 @@ Miscellaneous
     For example, if this is set to 1, the video FPS is forced to an integer
     multiple of the display FPS, as long as the speed change does not exceed
     the value set by ``--video-sync-max-video-change``.
+
+    See ``--interpolation-threshold`` for how this option affects
+    interpolation.
 
     This is mostly for testing, and the option may be randomly changed in the
     future without notice.

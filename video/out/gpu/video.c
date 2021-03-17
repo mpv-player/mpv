@@ -317,7 +317,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     },
     .scaler_resizes_only = 1,
     .scaler_lut_size = 6,
-    .interpolation_threshold = 0.0001,
+    .interpolation_threshold = 0.01,
     .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
