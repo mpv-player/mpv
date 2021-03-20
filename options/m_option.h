@@ -195,6 +195,9 @@ typedef int (*m_opt_generic_validate_fn)(struct mp_log *log, const m_option_t *o
 
 typedef int (*m_opt_string_validate_fn)(struct mp_log *log, const m_option_t *opt,
                                         struct bstr name, const char **value);
+typedef int (*m_opt_int_validate_fn)(struct mp_log *log, const m_option_t *opt,
+                                     struct bstr name, const int *value);
+
 
 // m_option.priv points to this if OPT_SUBSTRUCT is used
 struct m_sub_options {
@@ -666,6 +669,11 @@ extern const char m_option_path_separator;
 
 #define OPT_CHANNELS(field) \
     OPT_TYPED_FIELD(m_option_type_channels, struct m_channels, field)
+
+#define OPT_INT_VALIDATE(field, validate_fn) \
+    OPT_TYPED_FIELD(m_option_type_int, int, field), \
+    .validate = (m_opt_generic_validate_fn) \
+        MP_EXPECT_TYPE(m_opt_int_validate_fn, validate_fn)
 
 #define OPT_STRING_VALIDATE(field, validate_fn) \
     OPT_TYPED_FIELD(m_option_type_string, char*, field), \
