@@ -189,6 +189,10 @@ static struct ra_tex *tex_create_pl(struct ra *ra,
         return NULL;
     }
 
+    // Keep track of these, so we can correctly bind them later
+    ratex->params.src_repeat = params->src_repeat;
+    ratex->params.src_linear = params->src_linear;
+
     return ratex;
 }
 
