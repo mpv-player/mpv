@@ -42,6 +42,10 @@ static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
                                          "wv",
                                          NULL};
 
+static const char *const image_exts[] = {"jpg", "jpeg", "png", "gif", "bmp",
+                                         "webp",
+                                         NULL};
+
 // Stolen from: vlc/-/blob/master/modules/meta_engine/folder.c#L40
 // sorted by priority (descending)
 static const char *const cover_files[] = {
@@ -79,18 +83,19 @@ static int test_ext(bstr ext)
         return STREAM_SUB;
     if (test_ext_list(ext, audio_exts))
         return STREAM_AUDIO;
+    if (test_ext_list(ext, image_exts))
+        return STREAM_VIDEO;
     return -1;
 }
 
-static int test_cover_filename(bstr fname, int *priority)
+static int test_cover_filename(bstr fname)
 {
     for (int n = 0; cover_files[n]; n++) {
         if (bstrcasecmp(bstr0(cover_files[n]), fname) == 0) {
-            *priority = MP_ARRAY_SIZE(cover_files) - n;
-            return STREAM_VIDEO;
+            return MP_ARRAY_SIZE(cover_files) - n;
         }
     }
-    return -1;
+    return 0;
 }
 
 bool mp_might_be_subtitle_file(const char *filename)
@@ -191,10 +196,7 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
             talloc_steal(tmpmem2, dename.start);
 
         // check what it is (most likely)
-        int cover_prio = 0;
         int type = test_ext(tmp_fname_ext);
-        if (type < 0)
-            type = test_cover_filename(dename, &cover_prio);
         char **langs = NULL;
         int fuzz = -1;
         switch (type) {
@@ -218,8 +220,12 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         // higher prio -> auto-selection may prefer it (0 = not loaded)
         int prio = 0;
 
-        if (bstrcmp(tmp_fname_trim, f_fname_trim) == 0)
+        if (bstrcmp(tmp_fname_trim, f_fname_trim) == 0 &&
+            (type != STREAM_VIDEO || (fuzz != 1 && bstrcmp(dename, f_fname) != 0)))
             prio |= 32; // exact movie name match
+
+        if (type == STREAM_VIDEO)
+            goto cover_art;
 
         bstr lang = {0};
         if (bstr_startswith(tmp_fname_trim, f_fname_trim)) {
@@ -249,9 +255,9 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         if (!limit_fuzziness && fuzz >= 2)
             prio |= 1;
 
-        // cover art: just accept it
-        if (type == STREAM_VIDEO && fuzz >= 1)
-            prio = cover_prio;
+        cover_art:
+        if (type == STREAM_VIDEO && fuzz >= 1 && prio == 0)
+            prio = test_cover_filename(dename);
 
         mp_dbg(log, "Potential external file: \"%s\"  Priority: %d\n",
                de->d_name, prio);

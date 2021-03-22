@@ -6695,12 +6695,15 @@ Miscellaneous
     option will add a new external file.
 
 ``--cover-art-auto=<no|fuzzy>``
-    Whether to load _external_ cover art automatically (default: fuzzy). Similar
-    to ``--sub-auto`` and ``--audio-file-auto``. However, it's currently limited
-    to picking up a whitelist of "album art" filenames (such as ``cover.jpg``),
-    so currently only the ``fuzzy`` choice is available. In addition, if a video
-    already has tracks (which are not marked as cover art), external cover art
-    will not be loaded.
+    Whether to load _external_ cover art automatically. Similar to
+    ``--sub-auto`` and ``--audio-file-auto``. If a video already has tracks
+    (which are not marked as cover art), external cover art will not be loaded.
+
+    :no:    Don't automatically load cover art.
+    :exact: Load the media filename with an image file extension.
+    :fuzzy: Load cover art with a filename included in an internal whitelist,
+            such as ``cover.jpg``.
+    :all:   Union of exact and fuzzy (default).
 
     See ``--cover-art-files`` for details about what constitutes cover art.
 
