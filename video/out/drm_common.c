@@ -65,14 +65,19 @@ static int drm_validate_mode_opt(
 static void kms_show_available_modes(
     struct mp_log *log, const drmModeConnector *connector);
 
-static void kms_show_available_connectors(struct mp_log *log, int card_no);
+static void kms_show_available_connectors(struct mp_log *log, int card_no,
+                                          const char *card_path);
 static double mode_get_Hz(const drmModeModeInfo *mode);
 
 #define OPT_BASE_STRUCT struct drm_opts
 const struct m_sub_options drm_conf = {
     .opts = (const struct m_option[]) {
+        {"drm-device", OPT_STRING(drm_device_path), .flags = M_OPT_FILE},
         {"drm-connector", OPT_STRING_VALIDATE(drm_connector_spec,
-                                               drm_validate_connector_opt)},
+                                              drm_validate_connector_opt),
+         .deprecation_message = "the drm card number support will be removed "
+                                "in favour of specifying a specific device "
+                                "via drm-device"},
         {"drm-mode", OPT_STRING_VALIDATE(drm_mode_spec,
                                           drm_validate_mode_opt)},
         {"drm-atomic", OPT_CHOICE(drm_atomic, {"no", 0}, {"auto", 1})},
@@ -198,7 +203,8 @@ static bool setup_connector(struct kms *kms, const drmModeRes *res,
         connector = get_connector_by_name(kms, res, connector_name);
         if (!connector) {
             MP_ERR(kms, "No connector with name %s found\n", connector_name);
-            kms_show_available_connectors(kms->log, kms->card_no);
+            kms_show_available_connectors(kms->log, kms->card_no,
+                                          kms->primary_node_path);
             return false;
         }
     } else {
@@ -497,11 +503,71 @@ err:
     return false;
 }
 
-static int open_card(int card_no)
+static int open_card_path(const char *path)
 {
-    char card_path[128];
-    snprintf(card_path, sizeof(card_path), DRM_DEV_NAME, DRM_DIR_NAME, card_no);
-    return open(card_path, O_RDWR | O_CLOEXEC);
+    return open(path, O_RDWR | O_CLOEXEC);
+}
+
+static char *get_primary_device_path(struct mp_log *log, int *card_no)
+{
+    drmDevice *devices[DRM_MAX_MINOR] = { 0 };
+    int card_count = drmGetDevices(devices,
+                                   MP_ARRAY_SIZE(devices));
+    char *device_path = NULL;
+    bool card_no_given = (*card_no >= 0);
+
+    if (card_count < 0) {
+        mp_err(log, "Listing DRM devices with drmGetDevices failed! (%s)\n",
+               mp_strerror(errno));
+    }
+
+    if (card_no_given && *card_no > (card_count - 1)) {
+        mp_err(log, "Card number %d given too high! %d devices located.\n",
+               *card_no, card_count);
+        goto err;
+    }
+
+    for (int i = card_no_given ? *card_no : 0; i < card_count; i++) {
+        drmDevice *dev = devices[i];
+
+        if (!dev || !(dev->available_nodes & (1 << DRM_NODE_PRIMARY))) {
+            if (card_no_given) {
+                mp_err(log,
+                       "DRM card number %d given, yet it does not have "
+                       "a primary node!\n", i);
+                break;
+            }
+
+            continue;
+        }
+
+        char *primary_node_path = dev->nodes[DRM_NODE_PRIMARY];
+        if (!primary_node_path || !primary_node_path[0]) {
+            mp_err(log,
+                   "Card %d advertises primary node, but primary DRM node path "
+                   "not available or empty!\n", i);
+            if (card_no_given)
+                break;
+
+            continue;
+        }
+
+        mp_verbose(log, "Picked DRM card %d, primary node %s%s.\n",
+                   i, primary_node_path,
+                   card_no_given ? "" : " as the default");
+
+        device_path = talloc_strdup(log, primary_node_path);
+        *card_no = i;
+        break;
+    }
+
+err:
+    drmFreeDevices(devices, card_count);
+
+    if (!device_path)
+        mp_err(log, "No primary DRM device could be picked!\n");
+
+    return device_path;
 }
 
 static void parse_connector_spec(struct mp_log *log,
@@ -509,7 +575,7 @@ static void parse_connector_spec(struct mp_log *log,
                                  int *card_no, char **connector_name)
 {
     if (!connector_spec) {
-        *card_no = 0;
+        *card_no = -1;
         *connector_name = NULL;
         return;
     }
@@ -518,24 +584,43 @@ static void parse_connector_spec(struct mp_log *log,
         *card_no = atoi(connector_spec);
         *connector_name = talloc_strdup(log, dot_ptr + 1);
     } else {
-        *card_no = 0;
+        *card_no = -1;
         *connector_name = talloc_strdup(log, connector_spec);
     }
 }
 
-struct kms *kms_create(struct mp_log *log, const char *connector_spec,
+struct kms *kms_create(struct mp_log *log,
+                       const char *drm_device_path,
+                       const char *connector_spec,
                        const char* mode_spec,
                        int draw_plane, int drmprime_video_plane,
                        bool use_atomic)
 {
     int card_no = -1;
     char *connector_name = NULL;
+
     parse_connector_spec(log, connector_spec, &card_no, &connector_name);
+    if (drm_device_path && card_no != -1)
+        mp_warn(log, "Both DRM device and card number (as part of "
+                     "drm-connector) are set! Will prefer given device path "
+                     "'%s'!\n",
+                drm_device_path);
+
+    char *primary_node_path = drm_device_path ?
+                              talloc_strdup(log, drm_device_path) :
+                              get_primary_device_path(log, &card_no);
+
+    if (!primary_node_path) {
+        mp_err(log,
+               "Failed to find a usable DRM primary node!\n");
+        return NULL;
+    }
 
     struct kms *kms = talloc(NULL, struct kms);
     *kms = (struct kms) {
         .log = mp_log_new(kms, log, "kms"),
-        .fd = open_card(card_no),
+        .primary_node_path = primary_node_path,
+        .fd = open_card_path(primary_node_path),
         .connector = NULL,
         .encoder = NULL,
         .mode = {{0}},
@@ -606,6 +691,7 @@ err:
         drmModeFreeResources(res);
     if (connector_name)
         talloc_free(connector_name);
+
     kms_destroy(kms);
     return NULL;
 }
@@ -625,6 +711,10 @@ void kms_destroy(struct kms *kms)
     }
     if (kms->atomic_context) {
        drm_atomic_destroy_context(kms->atomic_context);
+    }
+
+    if (kms->primary_node_path) {
+        TA_FREEP(&(kms->primary_node_path));
     }
 
     close(kms->fd);
@@ -652,12 +742,13 @@ static void kms_show_available_modes(
 }
 
 static void kms_show_foreach_connector(struct mp_log *log, int card_no,
+                                       const char *card_path,
                                        void (*show_fn)(struct mp_log*, int,
                                                        const drmModeConnector*))
 {
-    int fd = open_card(card_no);
+    int fd = open_card_path(card_path);
     if (fd < 0) {
-        mp_err(log, "Failed to open card %d\n", card_no);
+        mp_err(log, "Failed to open card %d (%s)\n", card_no, card_path);
         return;
     }
 
@@ -693,11 +784,13 @@ static void kms_show_connector_name_and_state_callback(
     mp_info(log, "  %s (%s)\n", other_connector_name, connection_str);
 }
 
-static void kms_show_available_connectors(struct mp_log *log, int card_no)
+static void kms_show_available_connectors(struct mp_log *log, int card_no,
+                                          const char *card_path)
 {
-    mp_info(log, "Available connectors for card %d:\n", card_no);
+    mp_info(log, "Available connectors for card %d (%s):\n", card_no,
+            card_path);
     kms_show_foreach_connector(
-        log, card_no, kms_show_connector_name_and_state_callback);
+        log, card_no, card_path, kms_show_connector_name_and_state_callback);
     mp_info(log, "\n");
 }
 
@@ -715,21 +808,52 @@ static void kms_show_connector_modes_callback(struct mp_log *log, int card_no,
     mp_info(log, "\n");
 }
 
-static void kms_show_available_connectors_and_modes(struct mp_log *log, int card_no)
+static void kms_show_available_connectors_and_modes(struct mp_log *log,
+                                                    int card_no,
+                                                    const char *card_path)
 {
-    kms_show_foreach_connector(log, card_no, kms_show_connector_modes_callback);
+    kms_show_foreach_connector(log, card_no, card_path,
+                               kms_show_connector_modes_callback);
 }
 
 static void kms_show_foreach_card(
-    struct mp_log *log, void (*show_fn)(struct mp_log*,int))
+    struct mp_log *log, void (*show_fn)(struct mp_log*,int,const char *))
 {
-    for (int card_no = 0; card_no < DRM_MAX_MINOR; card_no++) {
-        int fd = open_card(card_no);
-        if (fd < 0)
-            break;
-        close(fd);
-        show_fn(log, card_no);
+    drmDevice *devices[DRM_MAX_MINOR] = { 0 };
+    int card_count = drmGetDevices(devices,
+                                   MP_ARRAY_SIZE(devices));
+    if (card_count < 0) {
+        mp_err(log, "Listing DRM devices with drmGetDevices failed! (%s)\n",
+               mp_strerror(errno));
     }
+
+    for (int card_no = 0; card_no < card_count; card_no++) {
+        drmDevice *dev = devices[card_no];
+
+        if (!dev || !(dev->available_nodes & (1 << DRM_NODE_PRIMARY)))
+            continue;
+
+        char *primary_node_path = dev->nodes[DRM_NODE_PRIMARY];
+        if (!primary_node_path || !primary_node_path[0]) {
+            mp_err(log,
+                   "Card %d advertises primary node, but primary DRM node path "
+                   "not available or empty!\n",
+                   card_no);
+            continue;
+        }
+
+        int fd = open_card_path(primary_node_path);
+        if (fd < 0) {
+            mp_err(log, "Failed to open primary DRM node path %s!\n",
+                   primary_node_path);
+            continue;
+        }
+
+        close(fd);
+        show_fn(log, card_no, primary_node_path);
+    }
+
+    drmFreeDevices(devices, card_count);
 }
 
 static void kms_show_available_cards_and_connectors(struct mp_log *log)
