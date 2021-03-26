@@ -167,16 +167,8 @@ class CocoaCB: Common {
         layer?.update(force: true)
     }
 
-    var controlCallback: mp_render_cb_control_fn = { ( v, ctx, e, request, d ) -> Int32 in
+    var controlCallback: mp_render_cb_control_fn = { ( v, ctx, e, request, data ) -> Int32 in
         let ccb = unsafeBitCast(ctx, to: CocoaCB.self)
-
-        // the data pointer can be a null pointer, the libmpv control callback
-        // provides nil instead of the 0 address like the usual control call of
-        // an internal vo, workaround to create a null pointer instead of nil
-        var data = UnsafeMutableRawPointer.init(bitPattern: 0).unsafelyUnwrapped
-        if let dunwrapped = d {
-            data = dunwrapped
-        }
 
         guard let vo = v, let events = e else {
             ccb.log.sendWarning("Unexpected nil value in Control Callback")
@@ -189,7 +181,7 @@ class CocoaCB: Common {
     override func control(_ vo: UnsafeMutablePointer<vo>,
                     events: UnsafeMutablePointer<Int32>,
                     request: UInt32,
-                    data: UnsafeMutableRawPointer) -> Int32
+                    data: UnsafeMutableRawPointer?) -> Int32
     {
         switch mp_voctrl(request) {
         case VOCTRL_PREINIT:
