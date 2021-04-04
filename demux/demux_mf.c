@@ -121,7 +121,8 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
         goto exit_mf;
     }
 
-    char *fname = talloc_size(mf, strlen(filename) + 32);
+    size_t fname_avail = strlen(filename) + 32;
+    char *fname = talloc_size(mf, fname_avail);
 
 #if HAVE_GLOB
     if (!strchr(filename, '%')) {
@@ -148,10 +149,44 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
     }
 #endif
 
+    // We're using arbitrary user input as printf format with 1 int argument.
+    // Any format which uses exactly 1 int argument would be valid, but for
+    // simplicity we reject all conversion specifiers except %% and simple
+    // integer specifier: %[.][NUM]d where NUM is 1-3 digits (%.d is valid)
+    const char *f = filename;
+    int MAXDIGS = 3, nspec = 0, bad_spec = 0, c;
+
+    while (nspec < 2 && (c = *f++)) {
+        if (c != '%')
+            continue;
+        if (*f != '%') {
+            nspec++;  // conversion specifier which isn't %%
+            if (*f == '.')
+                f++;
+            for (int ndig = 0; mp_isdigit(*f) && ndig < MAXDIGS; ndig++, f++)
+                /* no-op */;
+            if (*f != 'd') {
+                bad_spec++;  // not int, or beyond our validation capacity
+                break;
+            }
+        }
+        // *f is '%' or 'd'
+        f++;
+    }
+
+    // nspec==0 (zero specifiers) is rejected because fname wouldn't advance.
+    if (bad_spec || nspec != 1) {
+        mp_err(log, "unsupported expr format: '%s'\n", filename);
+        goto exit_mf;
+    }
+
     mp_info(log, "search expr: %s\n", filename);
 
     while (error_count < 5) {
-        sprintf(fname, filename, count++);
+        if (snprintf(fname, fname_avail, filename, count++) >= fname_avail) {
+            mp_err(log, "format result too long: '%s'\n", filename);
+            goto exit_mf;
+        }
         if (!mp_path_exists(fname)) {
             error_count++;
             mp_verbose(log, "file not found: '%s'\n", fname);
