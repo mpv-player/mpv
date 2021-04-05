@@ -930,11 +930,9 @@ bool encoder_encode(struct encoder_context *p, AVFrame *frame)
         goto fail;
     }
 
+    AVPacket *packet = av_packet_alloc();
     for (;;) {
-        AVPacket packet = {0};
-        av_init_packet(&packet);
-
-        status = avcodec_receive_packet(p->encoder, &packet);
+        status = avcodec_receive_packet(p->encoder, packet);
         if (status == AVERROR(EAGAIN))
             break;
         if (status < 0 && status != AVERROR_EOF)
@@ -948,8 +946,9 @@ bool encoder_encode(struct encoder_context *p, AVFrame *frame)
         if (status == AVERROR_EOF)
             break;
 
-        encode_lavc_add_packet(p->mux_stream, &packet);
+        encode_lavc_add_packet(p->mux_stream, packet);
     }
+    av_packet_free(&packet);
 
     return true;
 

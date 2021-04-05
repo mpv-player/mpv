@@ -98,10 +98,10 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 {
     bool success = 0;
     AVFrame *pic = NULL;
-    AVPacket pkt = {0};
+    AVPacket *pkt;
     int got_output = 0;
 
-    av_init_packet(&pkt);
+    pkt = av_packet_alloc();
 
     struct AVCodec *codec;
     if (ctx->opts->format == AV_CODEC_ID_WEBP) {
@@ -172,18 +172,18 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     ret = avcodec_send_frame(avctx, NULL); // send EOF
     if (ret < 0)
         goto error_exit;
-    ret = avcodec_receive_packet(avctx, &pkt);
+    ret = avcodec_receive_packet(avctx, pkt);
     if (ret < 0)
         goto error_exit;
     got_output = 1;
 
-    fwrite(pkt.data, pkt.size, 1, fp);
+    fwrite(pkt->data, pkt->size, 1, fp);
 
     success = !!got_output;
 error_exit:
     avcodec_free_context(&avctx);
     av_frame_free(&pic);
-    av_packet_unref(&pkt);
+    av_packet_free(&pkt);
     return success;
 }
 

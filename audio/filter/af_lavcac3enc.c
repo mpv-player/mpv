@@ -152,13 +152,12 @@ static void process(struct mp_filter *f)
 
     bool err = true;
     struct mp_aframe *out = NULL;
-    AVPacket pkt = {0};
-    av_init_packet(&pkt);
+    AVPacket *pkt = av_packet_alloc();
 
     // Send input as long as it wants.
     while (1) {
         if (avcodec_is_open(s->lavc_actx)) {
-            int lavc_ret = avcodec_receive_packet(s->lavc_actx, &pkt);
+            int lavc_ret = avcodec_receive_packet(s->lavc_actx, pkt);
             if (lavc_ret >= 0)
                 break;
             if (lavc_ret < 0 && lavc_ret != AVERROR(EAGAIN)) {
@@ -216,12 +215,12 @@ static void process(struct mp_filter *f)
 
     mp_aframe_copy_attributes(out, s->in_frame);
 
-    int frame_size = pkt.size;
+    int frame_size = pkt->size;
     int header_len = 0;
     char hdr[8];
 
-    if (s->opts->add_iec61937_header && pkt.size > 5) {
-        int bsmod = pkt.data[5] & 0x7;
+    if (s->opts->add_iec61937_header && pkt->size > 5) {
+        int bsmod = pkt->data[5] & 0x7;
         int len = frame_size;
 
         frame_size = AC3_FRAME_SIZE * 2 * 2;
@@ -242,17 +241,17 @@ static void process(struct mp_filter *f)
         goto done;
     char *buf = planes[0];
     memcpy(buf, hdr, header_len);
-    memcpy(buf + header_len, pkt.data, pkt.size);
-    memset(buf + header_len + pkt.size, 0,
-           frame_size - (header_len + pkt.size));
-    swap_16((uint16_t *)(buf + header_len), pkt.size / 2);
+    memcpy(buf + header_len, pkt->data, pkt->size);
+    memset(buf + header_len + pkt->size, 0,
+           frame_size - (header_len + pkt->size));
+    swap_16((uint16_t *)(buf + header_len), pkt->size / 2);
     mp_aframe_set_size(out, frame_size / sstride);
     mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_AUDIO, out));
     out = NULL;
 
     err = 0;
 done:
-    av_packet_unref(&pkt);
+    av_packet_free(&pkt);
     talloc_free(out);
     if (err)
         mp_filter_internal_mark_failed(f);
