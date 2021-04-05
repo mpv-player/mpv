@@ -696,9 +696,9 @@ static void init_avctx(struct mp_filter *vd)
     // x264 build number (encoded in a SEI element), needed to enable a
     // workaround for broken 4:4:4 streams produced by older x264 versions.
     if (lavc_codec->id == AV_CODEC_ID_H264 && c->first_packet) {
-        AVPacket avpkt;
-        mp_set_av_packet(&avpkt, c->first_packet, &ctx->codec_timebase);
-        avcodec_send_packet(avctx, &avpkt);
+        AVPacket *avpkt = mp_alloc_av_packet(c->first_packet, &ctx->codec_timebase);
+        avcodec_send_packet(avctx, avpkt);
+        mp_free_av_packet(avpkt);
         avcodec_receive_frame(avctx, ctx->pic);
         av_frame_unref(ctx->pic);
         avcodec_flush_buffers(ctx->avctx);
@@ -1011,10 +1011,14 @@ static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
     if (avctx->skip_frame == AVDISCARD_ALL)
         return 0;
 
-    AVPacket avpkt;
-    mp_set_av_packet(&avpkt, pkt, &ctx->codec_timebase);
-
-    int ret = avcodec_send_packet(avctx, pkt ? &avpkt : NULL);
+    int ret;
+    if (pkt) {
+        AVPacket *avpkt = mp_alloc_av_packet(pkt, &ctx->codec_timebase);
+        ret = avcodec_send_packet(avctx, avpkt);
+        mp_free_av_packet(avpkt);
+    } else {
+        ret = avcodec_send_packet(avctx, NULL);
+    }
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         return ret;
 

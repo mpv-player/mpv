@@ -298,7 +298,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     double endpts = MP_NOPTS_VALUE;
     double duration = packet->duration;
     AVSubtitle sub;
-    AVPacket pkt;
+    AVPacket *pkt;
 
     // libavformat sets duration==0, even if the duration is unknown. Some files
     // also have actually subtitle packets with duration explicitly set to 0
@@ -311,7 +311,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     if (pts == MP_NOPTS_VALUE)
         MP_WARN(sd, "Subtitle with unknown start time.\n");
 
-    mp_set_av_packet(&pkt, packet, &priv->pkt_timebase);
+    pkt = mp_alloc_av_packet(packet, &priv->pkt_timebase);
 
     if (ctx->codec_id == AV_CODEC_ID_DVB_TELETEXT) {
         char page[4];
@@ -320,7 +320,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     }
 
     int got_sub;
-    int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, &pkt);
+    int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, pkt);
+    mp_free_av_packet(pkt);
     if (res < 0 || !got_sub)
         return;
 

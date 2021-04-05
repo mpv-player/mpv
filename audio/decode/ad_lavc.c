@@ -168,10 +168,15 @@ static int send_packet(struct mp_filter *da, struct demux_packet *mpkt)
     if (mpkt && priv->next_pts == MP_NOPTS_VALUE)
         priv->next_pts = mpkt->pts;
 
-    AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt, &priv->codec_timebase);
+    int ret;
+    if (mpkt) {
+        AVPacket *pkt = mp_alloc_av_packet(mpkt, &priv->codec_timebase);
+        ret = avcodec_send_packet(avctx, pkt);
+        mp_free_av_packet(pkt);
+    } else {
+        ret = avcodec_send_packet(avctx, NULL);
+    }
 
-    int ret = avcodec_send_packet(avctx, mpkt ? &pkt : NULL);
     if (ret < 0)
         MP_ERR(da, "Error decoding audio.\n");
     return ret;

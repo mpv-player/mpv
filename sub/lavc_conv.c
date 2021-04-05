@@ -221,26 +221,27 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
                         double *sub_pts, double *sub_duration)
 {
     AVCodecContext *avctx = priv->avctx;
-    AVPacket pkt;
-    AVPacket parsed_pkt = {0};
+    AVPacket *pkt, *parsed_pkt = NULL;
     int ret, got_sub;
     int num_cur = 0;
 
     avsubtitle_free(&priv->cur);
 
-    mp_set_av_packet(&pkt, packet, &avctx->time_base);
-    if (pkt.pts < 0)
-        pkt.pts = 0;
+    pkt = mp_alloc_av_packet(packet, &avctx->time_base);
+    if (pkt->pts < 0)
+        pkt->pts = 0;
 
     if (strcmp(priv->codec, "webvtt-webm") == 0) {
-        if (parse_webvtt(&pkt, &parsed_pkt) < 0) {
+        parsed_pkt = av_packet_alloc();
+        if (parse_webvtt(pkt, parsed_pkt) < 0) {
             MP_ERR(priv, "Error parsing subtitle\n");
             goto done;
         }
+        mp_free_av_packet(pkt);
         pkt = parsed_pkt;
     }
 
-    ret = avcodec_decode_subtitle2(avctx, &priv->cur, &got_sub, &pkt);
+    ret = avcodec_decode_subtitle2(avctx, &priv->cur, &got_sub, pkt);
     if (ret < 0) {
         MP_ERR(priv, "Error decoding subtitle\n");
     } else if (got_sub) {
@@ -263,7 +264,10 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
     }
 
 done:
-    av_packet_unref(&parsed_pkt);
+    if (parsed_pkt)
+        av_packet_free(&parsed_pkt);
+    else
+        mp_free_av_packet(pkt);
     MP_TARRAY_APPEND(priv, priv->cur_list, num_cur, NULL);
     return priv->cur_list;
 }

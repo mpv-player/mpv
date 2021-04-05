@@ -295,15 +295,14 @@ static void process(struct mp_filter *da)
     struct mp_aframe *out = NULL;
     double pts = mpkt->pts;
 
-    AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt, NULL);
-    pkt.pts = pkt.dts = 0;
+    AVPacket *pkt = mp_alloc_av_packet(mpkt, NULL);
+    pkt->pts = pkt->dts = 0;
     if (!spdif_ctx->lavf_ctx) {
-        if (init_filter(da, &pkt) < 0)
+        if (init_filter(da, pkt) < 0)
             goto done;
     }
     spdif_ctx->out_buffer_len  = 0;
-    int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
+    int ret = av_write_frame(spdif_ctx->lavf_ctx, pkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
     if (ret < 0) {
         MP_ERR(da, "spdif mux error: '%s'\n", mp_strerror(AVUNERROR(ret)));
@@ -327,6 +326,7 @@ static void process(struct mp_filter *da)
     mp_aframe_set_pts(out, pts);
 
 done:
+    mp_free_av_packet(pkt);
     talloc_free(mpkt);
     if (out) {
         mp_pin_in_write(da->ppins[1], MAKE_FRAME(MP_FRAME_AUDIO, out));

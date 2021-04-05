@@ -173,13 +173,14 @@ double mp_pts_from_av(int64_t av_pts, AVRational *tb)
     return av_pts == AV_NOPTS_VALUE ? MP_NOPTS_VALUE : av_pts * av_q2d(b);
 }
 
-// Set dst from mpkt. Note that dst is not refcountable.
+// Allocate AVPacket from mpkt. Note that it is not refcountable.
+// Must be freed using mp_free_av_packet().
 // mpkt can be NULL to generate empty packets (used to flush delayed data).
 // Sets pts/dts using mp_pts_to_av(ts, tb). (Be aware of the implications.)
 // Set duration field only if tb is set.
-void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
+AVPacket *mp_alloc_av_packet(struct demux_packet *mpkt, AVRational *tb)
 {
-    av_init_packet(dst);
+    AVPacket *dst = av_packet_alloc();
     dst->data = mpkt ? mpkt->buffer : NULL;
     dst->size = mpkt ? mpkt->len : 0;
     /* Some codecs (ZeroCodec, some cases of PNG) may want keyframe info
@@ -197,6 +198,17 @@ void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
         dst->duration = mpkt->duration / av_q2d(*tb);
     dst->pts = mp_pts_to_av(mpkt ? mpkt->pts : MP_NOPTS_VALUE, tb);
     dst->dts = mp_pts_to_av(mpkt ? mpkt->dts : MP_NOPTS_VALUE, tb);
+    return dst;
+}
+
+void mp_free_av_packet(AVPacket *pkt)
+{
+    // Don't free any of the buffers we merely "borrowed" from another AVPacket
+    pkt->buf = NULL;
+    pkt->side_data = NULL;
+    pkt->side_data_elems = 0;
+
+    av_packet_free(&pkt);
 }
 
 void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads)

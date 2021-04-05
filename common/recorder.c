@@ -199,15 +199,15 @@ static void mux_packet(struct mp_recorder_sink *rst,
 
     rst->max_out_pts = MP_PTS_MAX(rst->max_out_pts, pkt->pts);
 
-    AVPacket avpkt;
-    mp_set_av_packet(&avpkt, &mpkt, &rst->av_stream->time_base);
+    AVPacket *avpkt = mp_alloc_av_packet(&mpkt, &rst->av_stream->time_base);
 
-    avpkt.stream_index = rst->av_stream->index;
+    avpkt->stream_index = rst->av_stream->index;
 
-    if (avpkt.duration < 0 && rst->sh->type != STREAM_SUB)
-        avpkt.duration = 0;
+    if (avpkt->duration < 0 && rst->sh->type != STREAM_SUB)
+        avpkt->duration = 0;
 
-    AVPacket *new_packet = av_packet_clone(&avpkt);
+    AVPacket *new_packet = av_packet_clone(avpkt);
+    mp_free_av_packet(avpkt);
     if (!new_packet) {
         MP_ERR(priv, "Failed to allocate packet.\n");
         return;
