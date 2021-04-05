@@ -1,3 +1,15 @@
+Release 0.33.1
+==============
+
+Security fix release for the 0.30 branch. Users are advised to upgrade immediately.
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- demux_mf: improve format string processing
+
+
 Release 0.33.0
 ==============
 
@@ -152,7 +164,7 @@ This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log v0.32.0..v0.33.0`
+A complete changelog can be seen by running `git log v0.32.0..v0.33.1`
 in the git repository or by visiting either
-https://github.com/mpv-player/mpv/compare/v0.32.0...v0.33.0 or
-https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.32.0..v0.33.0
+https://github.com/mpv-player/mpv/compare/v0.32.0...v0.33.1 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.32.0..v0.33.1
