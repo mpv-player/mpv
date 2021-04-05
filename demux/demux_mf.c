@@ -16,6 +16,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -153,7 +154,8 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
     // simplicity we reject all conversion specifiers except %% and simple
     // integer specifier: %[.][NUM]d where NUM is 1-3 digits (%.d is valid)
     const char *f = filename;
-    int MAXDIGS = 3, nspec = 0, bad_spec = 0, c;
+    int MAXDIGS = 3, nspec = 0, c;
+    bool bad_spec = false;
 
     while (nspec < 2 && (c = *f++)) {
         if (c != '%')
@@ -177,7 +179,7 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
             /* no-op */;
 
         if (*f != 'd') {
-            bad_spec++; // not int, or beyond our validation capacity
+            bad_spec = true; // not int, or beyond our validation capacity
             break;
         }
 
