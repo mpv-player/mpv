@@ -56,7 +56,7 @@ Track Selection
         behavior tends to change around with each mpv release.
 
         The track selection properties will return the option value outside of
-        playback (as expected), but during playbac, the affective track
+        playback (as expected), but during playback, the affective track
         selection is returned. For example, with ``--aid=auto``, the ``aid``
         property will suddenly return ``2`` after playback initialization
         (assuming the file has at least 2 audio tracks, and the second is the
