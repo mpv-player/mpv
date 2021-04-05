@@ -1012,7 +1012,7 @@ Program Behavior
 
         - ``--ytdl-raw-options=username=user,password=pass``
         - ``--ytdl-raw-options=force-ipv6=``
-        - ``--ytdl-raw-options=proxy=[http://127.0.0.1:3128]``
+        - ``--ytdl-raw-options=proxy=http://127.0.0.1:3128``
         - ``--ytdl-raw-options-append=proxy=http://127.0.0.1:3128``
 
 ``--load-stats-overlay=<yes|no>``
