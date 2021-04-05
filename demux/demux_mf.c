@@ -158,18 +158,30 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
     while (nspec < 2 && (c = *f++)) {
         if (c != '%')
             continue;
-        if (*f != '%') {
-            nspec++;  // conversion specifier which isn't %%
-            if (*f == '.')
-                f++;
-            for (int ndig = 0; mp_isdigit(*f) && ndig < MAXDIGS; ndig++, f++)
-                /* no-op */;
-            if (*f != 'd') {
-                bad_spec++;  // not int, or beyond our validation capacity
-                break;
-            }
+
+        if (*f == '%') {
+            // '%%', which ends up as an explicit % in the output.
+            // Skipping forwards as it doesn't require further attention.
+            f++;
+            continue;
         }
-        // *f is '%' or 'd'
+
+        // Now c == '%' and *f != '%', thus we have entered territory of format
+        // specifiers which we are interested in.
+        nspec++;
+
+        if (*f == '.')
+            f++;
+
+        for (int ndig = 0; mp_isdigit(*f) && ndig < MAXDIGS; ndig++, f++)
+            /* no-op */;
+
+        if (*f != 'd') {
+            bad_spec++; // not int, or beyond our validation capacity
+            break;
+        }
+
+        // *f is 'd'
         f++;
     }
 
