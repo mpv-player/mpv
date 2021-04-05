@@ -174,9 +174,10 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
     };
 
     talloc_free(tmp);
+    fname = NULL; // might have been freed so don't touch anymore
 
     if (!arg->client) {
-        MP_ERR(mpctx, "Failed to create client for script: %s\n", fname);
+        MP_ERR(mpctx, "Failed to create client for script: %s\n", arg->filename);
         talloc_free(arg);
         return -1;
     }
@@ -185,7 +186,7 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
     arg->log = mp_client_get_log(arg->client);
     int64_t id = mpv_client_id(arg->client);
 
-    MP_DBG(arg, "Loading %s %s...\n", backend->name, fname);
+    MP_DBG(arg, "Loading %s %s...\n", backend->name, arg->filename);
 
     if (backend->no_thread) {
         run_script(arg);
