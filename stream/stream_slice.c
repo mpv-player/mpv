@@ -136,7 +136,7 @@ static int parse_slice_range(stream_t *stream)
     return STREAM_OK;
 }
 
-static int open2(struct stream *stream, struct stream_open_args *args)
+static int open2(struct stream *stream, const struct stream_open_args *args)
 {
     struct priv *p = talloc_zero(stream, struct priv);
     stream->priv = p;

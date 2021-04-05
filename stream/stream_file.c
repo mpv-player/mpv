@@ -246,7 +246,7 @@ static bool check_stream_network(int fd)
 }
 #endif
 
-static int open_f(stream_t *stream, struct stream_open_args *args)
+static int open_f(stream_t *stream, const struct stream_open_args *args)
 {
     struct priv *p = talloc_ptrtype(stream, p);
     *p = (struct priv) {

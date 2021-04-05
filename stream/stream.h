@@ -109,7 +109,7 @@ typedef struct stream_info_st {
     // opts is set from ->opts
     int (*open)(struct stream *st);
     // Alternative to open(). Only either open() or open2() can be set.
-    int (*open2)(struct stream *st, struct stream_open_args *args);
+    int (*open2)(struct stream *st, const struct stream_open_args *args);
     const char *const *protocols;
     bool can_write;     // correctly checks for READ/WRITE modes
     bool local_fs;      // supports STREAM_LOCAL_FS_ONLY

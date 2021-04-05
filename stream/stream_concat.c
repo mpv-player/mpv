@@ -99,7 +99,7 @@ static int combine_origin(int cur, int new)
     return new; // including cur==0
 }
 
-static int open2(struct stream *stream, struct stream_open_args *args)
+static int open2(struct stream *stream, const struct stream_open_args *args)
 {
     struct priv *p = talloc_zero(stream, struct priv);
     stream->priv = p;
