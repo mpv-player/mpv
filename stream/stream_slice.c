@@ -151,8 +151,9 @@ static int open2(struct stream *stream, struct stream_open_args *args)
         return parse_ret;
     }
 
-    args->url = stream->path;
-    int inner_ret = stream_create_with_args(args, &p->inner);
+    struct stream_open_args args2 = *args;
+    args2.url = stream->path;
+    int inner_ret = stream_create_with_args(&args2, &p->inner);
     if (inner_ret != STREAM_OK) {
         return inner_ret;
     }
