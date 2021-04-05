@@ -44,7 +44,7 @@ static int64_t get_size(stream_t *s)
     return p->data.len;
 }
 
-static int open2(stream_t *stream, struct stream_open_args *args)
+static int open2(stream_t *stream, const struct stream_open_args *args)
 {
     stream->fill_buffer = fill_buffer;
     stream->seek = seek;
