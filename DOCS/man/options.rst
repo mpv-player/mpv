@@ -4579,12 +4579,6 @@ Cache
     Turn off input stream caching. See ``--cache``.
 
 ``--cache-secs=<seconds>``
-    Deprecated. Once this option is removed, there will be no way to limit the
-    cache size by time (only by size with ``--demuxer-max-bytes``). This option
-    is considered useless, since there is no good reason to limit the cache by
-    time, and the default value of this option is already something very high.
-    The interaction with the other cache options is also confusing.
-
     How many seconds of audio/video to prefetch if the cache is active. This
     overrides the ``--demuxer-readahead-secs`` option if and only if the cache
     is enabled and the value is larger. The default value is set to something
