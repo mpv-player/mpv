@@ -635,18 +635,24 @@ int mp_aframe_pool_allocate(struct mp_aframe_pool *pool, struct mp_aframe *frame
     AVFrame *av_frame = frame->av_frame;
     if (av_frame->extended_data != av_frame->data)
         av_freep(&av_frame->extended_data); // sigh
-    av_frame->extended_data =
-        av_mallocz_array(planes, sizeof(av_frame->extended_data[0]));
-    if (!av_frame->extended_data)
-        abort();
+    if (planes > AV_NUM_DATA_POINTERS) {
+        av_frame->extended_data =
+            av_mallocz_array(planes, sizeof(av_frame->extended_data[0]));
+        if (!av_frame->extended_data)
+            abort();
+    } else {
+        av_frame->extended_data = av_frame->data;
+    }
     av_frame->buf[0] = av_buffer_pool_get(pool->avpool);
     if (!av_frame->buf[0])
         return -1;
     av_frame->linesize[0] = samples * sstride;
     for (int n = 0; n < planes; n++)
         av_frame->extended_data[n] = av_frame->buf[0]->data + n * plane_size;
-    for (int n = 0; n < MPMIN(planes, AV_NUM_DATA_POINTERS); n++)
-        av_frame->data[n] = av_frame->extended_data[n];
+    if (planes > AV_NUM_DATA_POINTERS) {
+        for (int n = 0; n < AV_NUM_DATA_POINTERS; n++)
+            av_frame->data[n] = av_frame->extended_data[n];
+    }
     av_frame->nb_samples = samples;
 
     return 0;
