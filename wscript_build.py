@@ -492,6 +492,7 @@ def build(ctx):
         ( "video/out/vo_direct3d.c",             "direct3d" ),
         ( "video/out/vo_drm.c",                  "drm" ),
         ( "video/out/vo_gpu.c" ),
+        ( "video/out/vo_gpu_next.c",             "libplacebo-v4" ),
         ( "video/out/vo_image.c" ),
         ( "video/out/vo_lavc.c" ),
         ( "video/out/vo_libmpv.c" ),
