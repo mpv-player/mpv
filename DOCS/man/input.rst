@@ -2534,6 +2534,11 @@ Property list
 ``vsync-jitter``
     Estimated deviation factor of the vsync duration.
 
+``display-width``, ``display-height``
+    The current display's horizontal and vertical resolution in pixels. Whether
+    or not these values update as the mpv window changes displays depends on
+    the windowing backend. It may not be available on all platforms.
+
 ``display-hidpi-scale``
     The HiDPI scale factor as reported by the windowing backend. If no VO is
     active, or if the VO does not report a value, this property is unavailable.

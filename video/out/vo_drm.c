@@ -654,6 +654,11 @@ static int control(struct vo *vo, uint32_t request, void *arg)
         *(double*)arg = fps;
         return VO_TRUE;
     }
+    case VOCTRL_GET_DISPLAY_RES: {
+        ((int *)arg)[0] = p->kms->mode.mode.hdisplay;
+        ((int *)arg)[1] = p->kms->mode.mode.vdisplay;
+        return VO_TRUE;
+    }
     case VOCTRL_PAUSE:
         vo->want_redraw = true;
         p->paused = true;

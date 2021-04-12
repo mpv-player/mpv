@@ -120,6 +120,7 @@ enum mp_voctrl {
     VOCTRL_GET_AMBIENT_LUX,             // int*
     VOCTRL_GET_DISPLAY_FPS,             // double*
     VOCTRL_GET_HIDPI_SCALE,             // double*
+    VOCTRL_GET_DISPLAY_RES,             // int[2]
 
     /* private to vo_gpu */
     VOCTRL_EXTERNAL_RESIZE,

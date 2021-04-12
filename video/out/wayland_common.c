@@ -1754,6 +1754,13 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         *(double *)arg = wl->current_output->refresh_rate;
         return VO_TRUE;
     }
+    case VOCTRL_GET_DISPLAY_RES: {
+        if (!wl->current_output)
+            return VO_NOTAVAIL;
+        ((int *)arg)[0] = wl->current_output->geometry.x1;
+        ((int *)arg)[1] = wl->current_output->geometry.y1;
+        return VO_TRUE;
+    }
     case VOCTRL_GET_HIDPI_SCALE: {
         if (!wl->scaling)
             return VO_NOTAVAIL;
