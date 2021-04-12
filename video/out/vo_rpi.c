@@ -748,6 +748,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_DISPLAY_FPS:
         *(double *)data = p->display_fps;
         return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_RES:
+        ((int *)arg)[0] = p->w;
+        ((int *)arg)[1] = p->h;
+        return VO_TRUE;
     }
 
     return VO_NOTIMPL;

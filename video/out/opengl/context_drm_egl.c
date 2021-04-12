@@ -880,6 +880,11 @@ static int drm_egl_control(struct ra_ctx *ctx, int *events, int request,
         *(double*)arg = fps;
         return VO_TRUE;
     }
+    case VOCTRL_GET_DISPLAY_RES: {
+        ((int *)arg)[0] = p->kms->mode.mode.hdisplay;
+        ((int *)arg)[1] = p->kms->mode.mode.vdisplay;
+        return VO_TRUE;
+    }
     case VOCTRL_PAUSE:
         ctx->vo->want_redraw = true;
         p->paused = true;

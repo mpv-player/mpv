@@ -2404,6 +2404,23 @@ static int mp_property_vsync_jitter(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, stddev);
 }
 
+static int mp_property_display_resolution(void *ctx, struct m_property *prop,
+                                          int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+    int res[2];
+    if (vo_control(vo, VOCTRL_GET_DISPLAY_RES, &res) <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+    if (strcmp(prop->name, "display-width") == 0) {
+        return m_property_int_ro(action, arg, res[0]);
+    } else {
+        return m_property_int_ro(action, arg, res[1]);
+    }
+}
+
 static int mp_property_hidpi_scale(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
@@ -3519,6 +3536,8 @@ static const struct m_property mp_properties_base[] = {
     {"total-avsync-change", mp_property_total_avsync_change},
     {"mistimed-frame-count", mp_property_mistimed_frame_count},
     {"vsync-ratio", mp_property_vsync_ratio},
+    {"display-width", mp_property_display_resolution},
+    {"display-height", mp_property_display_resolution},
     {"decoder-frame-drop-count", mp_property_frame_drop_dec},
     {"frame-drop-count", mp_property_frame_drop_vo},
     {"vo-delayed-frame-count", mp_property_vo_delayed_frame_count},
@@ -3734,7 +3753,8 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-state"),
     E(MP_EVENT_WIN_RESIZE, "current-window-scale", "osd-width", "osd-height",
       "osd-par", "osd-dimensions"),
-    E(MP_EVENT_WIN_STATE, "display-names", "display-fps"),
+    E(MP_EVENT_WIN_STATE, "display-names", "display-fps" "display-width",
+      "display-height"),
     E(MP_EVENT_WIN_STATE2, "display-hidpi-scale"),
     E(MP_EVENT_FOCUS, "focused"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
