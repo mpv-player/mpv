@@ -873,6 +873,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
         double factor = (double)wl->scaling / wl->current_output->scale;
         wl->scaling = wl->current_output->scale;
         rescale_geometry_dimensions(wl, factor);
+        wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
     if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
@@ -1570,6 +1571,7 @@ int vo_wayland_reconfig(struct vo *vo)
         wl->window_size = wl->vdparams;
         wl->geometry = wl->window_size;
         wl_display_roundtrip(wl->display);
+        wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
     wl->pending_vo_events |= VO_EVENT_RESIZE;
@@ -1728,6 +1730,12 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         if (!wl->current_output)
             return VO_NOTAVAIL;
         *(double *)arg = wl->current_output->refresh_rate;
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_HIDPI_SCALE: {
+        if (!wl->scaling)
+            return VO_NOTAVAIL;
+        *(double *)arg = wl->scaling;
         return VO_TRUE;
     }
     case VOCTRL_UPDATE_WINDOW_TITLE:
