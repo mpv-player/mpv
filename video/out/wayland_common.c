@@ -71,7 +71,8 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
 
 static int spawn_cursor(struct vo_wayland_state *wl)
 {
-    if (wl->allocated_cursor_scale == wl->scaling) /* Reuse if size is identical */
+    /* Reuse if size is identical */
+    if (!wl->pointer || wl->allocated_cursor_scale == wl->scaling)
         return 0;
     else if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
@@ -604,6 +605,44 @@ static const struct wl_seat_listener seat_listener = {
     seat_handle_caps,
 };
 
+static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b) {
+    // euclidean algorithm
+    int larger;
+    int smaller;
+    if (a > b) {
+        larger = a;
+        smaller = b;
+    } else {
+        larger = b;
+        smaller = a;
+    }
+    int remainder = larger - smaller * floor(larger/smaller);
+    if (remainder == 0) {
+        wl->gcd = smaller;
+    } else {
+        greatest_common_divisor(wl, smaller, remainder);
+    }
+}
+
+static void set_geometry(struct vo_wayland_state *wl)
+{
+    struct vo *vo = wl->vo;
+
+    struct vo_win_geometry geo;
+    struct mp_rect screenrc = wl->current_output->geometry;
+    vo_calc_window_geometry(vo, &screenrc, &geo);
+    vo_apply_window_geometry(vo, &geo);
+
+    greatest_common_divisor(wl, vo->dwidth, vo->dheight);
+    wl->reduced_width = vo->dwidth / wl->gcd;
+    wl->reduced_height = vo->dheight / wl->gcd;
+
+    wl->vdparams.x0 = 0;
+    wl->vdparams.y0 = 0;
+    wl->vdparams.x1 = vo->dwidth / wl->scaling;
+    wl->vdparams.y1 = vo->dheight / wl->scaling;
+}
+
 static void output_handle_geometry(void *data, struct wl_output *wl_output,
                                    int32_t x, int32_t y, int32_t phys_width,
                                    int32_t phys_height, int32_t subpixel,
@@ -638,6 +677,7 @@ static void output_handle_mode(void *data, struct wl_output *wl_output,
 static void output_handle_done(void* data, struct wl_output *wl_output)
 {
     struct vo_wayland_output *o = data;
+    struct vo_wayland_state *wl = o->wl;
 
     o->geometry.x1 += o->geometry.x0;
     o->geometry.y1 += o->geometry.y0;
@@ -649,8 +689,21 @@ static void output_handle_done(void* data, struct wl_output *wl_output)
                "\tHz: %f\n", o->make, o->model, o->id, o->geometry.x0,
                o->geometry.y0, mp_rect_w(o->geometry), o->phys_width,
                mp_rect_h(o->geometry), o->phys_height, o->scale, o->refresh_rate);
+
+    /* If we satisfy this conditional, something about the current
+     * output must have changed (resolution, scale, etc). All window
+     * geometry and scaling should be recalculated. */
+    if (wl->current_output && wl->current_output->output == wl_output) {
+        wl->scaling = wl->current_output->scale;
+        spawn_cursor(wl);
+        set_geometry(wl);
+        wl->window_size = wl->vdparams;
+        if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+            wl->geometry = wl->window_size;
+        wl->pending_vo_events |= VO_EVENT_RESIZE;
+    }
     
-    o->wl->pending_vo_events |= VO_EVENT_WIN_STATE;
+    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
 static void output_handle_scale(void* data, struct wl_output *wl_output,
@@ -794,44 +847,6 @@ static const struct wl_data_device_listener data_device_listener = {
     data_device_handle_selection,
 };
 
-static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b) {
-    // euclidean algorithm
-    int larger;
-    int smaller;
-    if (a > b) {
-        larger = a;
-        smaller = b;
-    } else {
-        larger = b;
-        smaller = a;
-    }
-    int remainder = larger - smaller * floor(larger/smaller);
-    if (remainder == 0) {
-        wl->gcd = smaller;
-    } else {
-        greatest_common_divisor(wl, smaller, remainder);
-    }
-}
-
-static void set_geometry(struct vo_wayland_state *wl)
-{
-    struct vo *vo = wl->vo;
-
-    struct vo_win_geometry geo;
-    struct mp_rect screenrc = wl->current_output->geometry;
-    vo_calc_window_geometry(vo, &screenrc, &geo);
-    vo_apply_window_geometry(vo, &geo);
-
-    greatest_common_divisor(wl, vo->dwidth, vo->dheight);
-    wl->reduced_width = vo->dwidth / wl->gcd;
-    wl->reduced_height = vo->dheight / wl->gcd;
-
-    wl->vdparams.x0 = 0;
-    wl->vdparams.y0 = 0;
-    wl->vdparams.x1 = vo->dwidth / wl->scaling;
-    wl->vdparams.y1 = vo->dheight / wl->scaling;
-}
-
 static void rescale_geometry_dimensions(struct vo_wayland_state *wl, double factor)
 {
     wl->vdparams.x1 *= factor;
@@ -872,6 +887,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     if (wl->scaling != wl->current_output->scale && wl->vo_opts->hidpi_window_scale) {
         double factor = (double)wl->scaling / wl->current_output->scale;
         wl->scaling = wl->current_output->scale;
+        spawn_cursor(wl);
         rescale_geometry_dimensions(wl, factor);
         wl->pending_vo_events |= VO_EVENT_DPI;
     }
