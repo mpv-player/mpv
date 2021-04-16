@@ -116,6 +116,7 @@ struct vo_wayland_state {
     int64_t last_msc;
     int64_t last_skipped_vsyncs;
     int64_t last_queue_display_time;
+    int64_t refresh_interval;
     int64_t vsync_duration;
 
     /* Input */

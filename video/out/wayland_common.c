@@ -956,6 +956,8 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     if (fback)
         wp_presentation_feedback_destroy(fback);
 
+    wl->refresh_interval = (int64_t)refresh_nsec / 1000;
+
     // Very similar to oml_sync_control, in this case we assume that every
     // time the compositor receives feedback, a buffer swap has been already
     // been performed.
@@ -1860,11 +1862,31 @@ void vo_wayland_wakeup(struct vo *vo)
 
 void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 {
+    int64_t vblank_time = 0;
     struct pollfd fds[1] = {
         {.fd = wl->display_fd,     .events = POLLIN },
     };
 
-    double vblank_time = 1e6 / wl->current_output->refresh_rate;
+    /* We need some vblank interval to use for the timeout in
+     * this function. The order of preference of values to use is:
+     * 1. vsync duration from presentation time
+     * 2. refresh inteval reported by presentation time
+     * 3. refresh rate of the output reported by the compositor
+     * 4. make up crap if vblank_time is still <= 0 (better than nothing) */
+
+    if (wl->presentation)
+        vblank_time = wl->vsync_duration;
+
+    if (vblank_time <= 0 && wl->refresh_interval > 0)
+        vblank_time = wl->refresh_interval;
+
+    if (vblank_time <= 0 && wl->current_output->refresh_rate > 0)
+        vblank_time = 1e6 / wl->current_output->refresh_rate;
+
+    // Ideally you should never reach this point.
+    if (vblank_time <= 0)
+        vblank_time = 1e6 / 60;
+
     int64_t finish_time = mp_time_us() + vblank_time;
 
     while (wl->frame_wait && finish_time > mp_time_us()) {
@@ -1891,7 +1913,7 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 
     if (!wl->hidden && wl->frame_wait) {
         wl->timeout_count += 1;
-        if (wl->timeout_count > wl->current_output->refresh_rate)
+        if (wl->timeout_count > ((1 / (double)vblank_time) * 1e6))
             wl->hidden = true;
     }
 
