@@ -828,7 +828,7 @@ static void fit_window_on_screen(struct vo_w32_state *w32)
         return;
 
     RECT screen = get_working_area(w32);
-    if (w32->opts->border && w32->opts->fit_border)
+    if (w32->opts->border)
         subtract_window_borders(w32, w32->window, &screen);
 
     if (fit_rect(&w32->windowrc, &screen)) {
