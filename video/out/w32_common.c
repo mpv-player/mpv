@@ -824,9 +824,6 @@ static bool fit_rect_size(RECT *rc, long n_w, long n_h)
 // Also, if the top edge is above the working area, move down to align.
 static void fit_window_on_screen(struct vo_w32_state *w32)
 {
-    if (w32->parent || w32->current_fs || IsMaximized(w32->window))
-        return;
-
     RECT screen = get_working_area(w32);
     if (w32->opts->border)
         subtract_window_borders(w32, w32->window, &screen);
@@ -986,7 +983,9 @@ static void reinit_window_state(struct vo_w32_state *w32)
 
     // Assume that the window has already been fit on screen before switching fs
     if (!toggle_fs || w32->fit_on_screen) {
-        fit_window_on_screen(w32);
+        if (!w32->current_fs && !IsMaximized(w32->window))
+            fit_window_on_screen(w32);
+
         // The fullscreen state might still be active, so set the flag
         // to fit on screen next time the window leaves the fullscreen.
         w32->fit_on_screen = w32->current_fs;
