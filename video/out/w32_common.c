@@ -795,13 +795,12 @@ static void update_window_style(struct vo_w32_state *w32)
     w32->windowrc = wr;
 }
 
-// Adjust rc size and position if its size is larger than rc2.
+// If rc is wider/taller than n_w/n_h, shrink rc size while keeping the center.
 // returns true if the rectangle was modified.
-static bool fit_rect(RECT *rc, RECT *rc2)
+static bool fit_rect_size(RECT *rc, long n_w, long n_h)
 {
-    // Calculate old size and maximum new size
+    // nothing to do if we already fit.
     int o_w = rect_w(*rc), o_h = rect_h(*rc);
-    int n_w = rect_w(*rc2), n_h = rect_h(*rc2);
     if (o_w <= n_w && o_h <= n_h)
         return false;
 
@@ -821,7 +820,8 @@ static bool fit_rect(RECT *rc, RECT *rc2)
     return true;
 }
 
-// Adjust window size and position if its size is larger than the screen size.
+// If the window is bigger than the desktop, shrink to fit with same center.
+// Also, if the top edge is above the working area, move down to align.
 static void fit_window_on_screen(struct vo_w32_state *w32)
 {
     if (w32->parent || w32->current_fs || IsMaximized(w32->window))
@@ -831,7 +831,19 @@ static void fit_window_on_screen(struct vo_w32_state *w32)
     if (w32->opts->border)
         subtract_window_borders(w32, w32->window, &screen);
 
-    if (fit_rect(&w32->windowrc, &screen)) {
+    bool adjusted = fit_rect_size(&w32->windowrc, rect_w(screen), rect_h(screen));
+
+    if (w32->windowrc.top < screen.top) {
+        // if the top-edge of client area is above the target area (mainly
+        // because the client-area is centered but the title bar is taller
+        // than the bottom border), then move it down to align the edges.
+        // Windows itself applies the same constraint during manual move.
+        w32->windowrc.bottom += screen.top - w32->windowrc.top;
+        w32->windowrc.top = screen.top;
+        adjusted = true;
+    }
+
+    if (adjusted) {
         MP_VERBOSE(w32, "adjusted window bounds: %d:%d:%d:%d\n",
                    (int)w32->windowrc.left, (int)w32->windowrc.top,
                    (int)rect_w(w32->windowrc), (int)rect_h(w32->windowrc));
