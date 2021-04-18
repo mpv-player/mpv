@@ -937,14 +937,6 @@ static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
     gl_sc_uniform_f(sc, "random", (double)av_lfg_get(lfg) / UINT32_MAX);
 }
 
-struct deband_opts {
-    int enabled;
-    int iterations;
-    float threshold;
-    float range;
-    float grain;
-};
-
 const struct deband_opts deband_opts_def = {
     .iterations = 1,
     .threshold = 32.0,

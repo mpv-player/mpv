@@ -344,6 +344,7 @@ typedef struct MPOpts {
 
     struct mp_resample_opts *resample_opts;
 
+    struct ra_ctx_opts *ra_ctx_opts;
     struct gl_video_opts *gl_video_opts;
     struct angle_opts *angle_opts;
     struct opengl_opts *opengl_opts;

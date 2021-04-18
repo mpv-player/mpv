@@ -54,18 +54,6 @@ struct gl_lcms {
     struct mp_icc_opts *opts;
 };
 
-static bool parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
-{
-    if (sscanf(arg, "%dx%dx%d", p1, p2, p3) != 3)
-        return false;
-    for (int n = 0; n < 3; n++) {
-        int s = ((int[]) { *p1, *p2, *p3 })[n];
-        if (s < 2 || s > 512)
-            return false;
-    }
-    return true;
-}
-
 static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
                                    struct bstr name, const char **value)
 {
@@ -73,7 +61,7 @@ static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
     int p1, p2, p3;
     char s[20];
     snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
-    return parse_3dlut_size(s, &p1, &p2, &p3);
+    return gl_parse_3dlut_size(s, &p1, &p2, &p3);
 }
 
 #define OPT_BASE_STRUCT struct mp_icc_opts
@@ -367,7 +355,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
             abort();
     }
 
-    if (!parse_3dlut_size(p->opts->size_str, &s_r, &s_g, &s_b))
+    if (!gl_parse_3dlut_size(p->opts->size_str, &s_r, &s_g, &s_b))
         return false;
 
     if (!gl_lcms_has_profile(p))
