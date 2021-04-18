@@ -48,7 +48,6 @@ struct gpu_priv {
 
     char *context_name;
     char *context_type;
-    struct ra_ctx_opts opts;
     struct gl_video *renderer;
 
     int events;
@@ -291,13 +290,13 @@ static int preinit(struct vo *vo)
     struct gpu_priv *p = vo->priv;
     p->log = vo->log;
 
-    struct ra_ctx_opts opts = p->opts;
-    struct gl_video_opts *gl_opts =
-        mp_get_config_group(p->ctx, vo->global, &gl_video_conf);
+    struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
+    struct gl_video_opts *gl_opts = mp_get_config_group(vo, vo->global, &gl_video_conf);
+    struct ra_ctx_opts opts = *ctx_opts;
     opts.want_alpha = gl_opts->alpha_mode == 1;
+    p->ctx = ra_ctx_create(vo, opts);
+    talloc_free(ctx_opts);
     talloc_free(gl_opts);
-
-    p->ctx = ra_ctx_create(vo, p->context_type, p->context_name, opts);
     if (!p->ctx)
         goto err_out;
     assert(p->ctx->ra);
@@ -321,19 +320,6 @@ err_out:
     return -1;
 }
 
-#define OPT_BASE_STRUCT struct gpu_priv
-static const m_option_t options[] = {
-    {"gpu-context",
-        OPT_STRING_VALIDATE(context_name, ra_ctx_validate_context),
-        .help = ra_ctx_context_help},
-    {"gpu-api",
-        OPT_STRING_VALIDATE(context_type, ra_ctx_validate_api),
-        .help = ra_ctx_api_help},
-    {"gpu-debug", OPT_FLAG(opts.debug)},
-    {"gpu-sw", OPT_FLAG(opts.allow_sw)},
-    {0}
-};
-
 const struct vo_driver video_out_gpu = {
     .description = "Shader-based GPU Renderer",
     .name = "gpu",
@@ -350,5 +336,4 @@ const struct vo_driver video_out_gpu = {
     .wakeup = wakeup,
     .uninit = uninit,
     .priv_size = sizeof(struct gpu_priv),
-    .options = options,
 };

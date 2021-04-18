@@ -11,7 +11,11 @@ struct ra_ctx_opts {
     int want_alpha;      // create an alpha framebuffer if possible
     int debug;           // enable debugging layers/callbacks etc.
     bool probing;        // the backend was auto-probed
+    char *context_name;  // filter by `ra_ctx_fns.name`
+    char *context_type;  // filter by `ra_ctx_fns.type`
 };
+
+extern const struct m_sub_options ra_ctx_conf;
 
 struct ra_ctx {
     struct vo *vo;
@@ -95,16 +99,5 @@ struct ra_swapchain_fns {
 
 // Create and destroy a ra_ctx. This also takes care of creating and destroying
 // the underlying `struct ra`, and perhaps the underlying VO backend.
-struct ra_ctx *ra_ctx_create(struct vo *vo, const char *context_type,
-                             const char *context_name, struct ra_ctx_opts opts);
+struct ra_ctx *ra_ctx_create(struct vo *vo, struct ra_ctx_opts opts);
 void ra_ctx_destroy(struct ra_ctx **ctx);
-
-struct m_option;
-int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
-                    struct bstr name);
-int ra_ctx_validate_api(struct mp_log *log, const struct m_option *opt,
-                        struct bstr name, const char **value);
-int ra_ctx_context_help(struct mp_log *log, const struct m_option *opt,
-                        struct bstr name);
-int ra_ctx_validate_context(struct mp_log *log, const struct m_option *opt,
-                            struct bstr name, const char **value);
