@@ -17,7 +17,7 @@
 #include "utils.h"
 
 // Force cache flush if more than this number of shaders is created.
-#define SC_MAX_ENTRIES 48
+#define SC_MAX_ENTRIES 256
 
 union uniform_val {
     float f[9];         // RA_VARTYPE_FLOAT
