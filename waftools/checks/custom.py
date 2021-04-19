@@ -1,8 +1,6 @@
 from waftools import inflector
 from waftools.checks.generic import *
-from waflib import Utils
 from distutils.version import StrictVersion
-import os
 
 __all__ = ["check_pthreads", "check_iconv", "check_lua",
            "check_cocoa", "check_wl_protocols", "check_swift",
