@@ -12,7 +12,6 @@ def build(ctx):
 only the symbols listed in the file syms.def will be exported.
 """
 
-from waflib.Context import STDOUT
 from waflib.Task import Task
 from waflib.Errors import WafError
 from waflib.TaskGen import feature, after_method
