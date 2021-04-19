@@ -44,7 +44,7 @@ Releases can be found on the [release list][releases].
   embedded or integrated GPUs (for example, hardware decoding is not even
   enabled by default). Low power GPUs may cause issues like tearing, stutter,
   etc. The main video output uses shaders for video rendering and scaling,
-  rather than GPU fixed function hardware. On Windows, you might want to make
+  rather than GPU fixed-function hardware. On Windows, you might want to make
   sure the graphics drivers are current. In some cases, ancient fallback video
   output methods can help (such as `--vo=xv` on Linux), but this use is not
   recommended or supported.
@@ -168,7 +168,7 @@ Please use the [issue tracker][issue-tracker] provided by GitHub to send us bug
 reports or feature requests. Follow the template's instructions or the issue
 will likely be ignored or closed as invalid.
 
-Using the bug tracker as place for simple questions is fine but IRC is
+Using the bug tracker as a place for simple questions is fine but IRC is
 recommended (see [Contact](#Contact) below).
 
 ## Contributing
@@ -192,7 +192,7 @@ See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
 ## History
 
 This software is based on the MPlayer project. Before mpv existed as a project,
-the code base was briefly developed under the mplayer2 project. For details,
+the codebase was briefly developed under the mplayer2 project. For details,
 see the [FAQ][FAQ].
 
 ## Contact
