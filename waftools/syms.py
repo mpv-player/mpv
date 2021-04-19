@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # encoding: utf-8
 # Original source: waflib/extras/syms.py from waf git 610d0d59f (New BSD License)
 
@@ -12,7 +12,6 @@ def build(ctx):
 only the symbols listed in the file syms.def will be exported.
 """
 
-from waflib.Context import STDOUT
 from waflib.Task import Task
 from waflib.Errors import WafError
 from waflib.TaskGen import feature, after_method
