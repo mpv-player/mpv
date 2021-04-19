@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 # Christoph Koke, 2013
 # Original source: waflib/extras/clang_compilation_database.py from
@@ -16,7 +16,7 @@ Usage:
         conf.load('clang_compilation_database')
 """
 
-import sys, os, json, shlex, pipes
+import os, json
 from waflib import Logs, TaskGen, Task
 
 Task.Task.keep_last_cmd = True
