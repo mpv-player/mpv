@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 # Christoph Koke, 2013
 # Original source: waflib/extras/clang_compilation_database.py from
