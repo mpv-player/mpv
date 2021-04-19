@@ -6,7 +6,7 @@ General
 
 The main contact for mpv development is IRC, specifically #mpv
 and #mpv-devel on Freenode. Github is used for code review and
-long term discussions.
+long-term discussions.
 
 Sending patches
 ---------------
@@ -15,8 +15,8 @@ Sending patches
   ``git format-patch``.
 - Plain diffs posted as pastebins are not acceptable! (Especially if the http
   link returns HTML.) They only cause extra work for everyone, because they lack
-  commit message and authorship information.
-- Never send patches to any of the developers email addresses.
+  commit messages and authorship information.
+- Never send patches to any of the developers' email addresses.
 - If your changes are not supposed to be merged immediately, mark them as
   "[RFC]" in the commit message or the pull request title.
 - Be sure to test your changes. If you didn't, please say so in the commit
@@ -56,7 +56,7 @@ Write good commit messages
   situation with the patch applied, and past tense for the situation before
   the change.
 - The subject line (the first line in a commit message) must contain a
-  prefix identifying the sub system, followed by a short description what
+  prefix identifying the subsystem, followed by a short description what
   impact this commit has. This subject line and the commit message body
   must not be longer than 72 characters per line, because it messes up the
   output of many git tools otherwise.
@@ -71,7 +71,7 @@ Write good commit messages
 - The first word after the ``:`` is lower case.
 - Don't end the subject line with a ``.``.
 - Put an empty line between the subject line and the commit message.
-  If this is missing, it will break display in common git tools.
+  If this is missing, it will break the display in common git tools.
 - The body of the commit message (everything else after the subject line) must
   be as informative as possible and contain everything that isn't obvious. Don't
   hesitate to dump as much information as you can - it doesn't cost you
@@ -81,7 +81,7 @@ Write good commit messages
   information to test the original bug. The old bug might be reintroduced while
   fixing the new bug.
 
-  The commit message must be wrapped on 72 characters per line, because git
+  The commit message must be wrapped in 72 characters per line, because git
   tools usually do not break text automatically. On the other hand, you do not
   need to break text that would be unnatural to break (like data for test cases,
   or long URLs).
@@ -120,10 +120,10 @@ Touching user-visible parts may require updating the mpv docs
 -------------------------------------------------------------
 
 - Most user-visible things are normally documented in DOCS/man/. If your commit
-  touches documented behavior, list of sub-options, etc., you need to adjust the
+  touches documented behavior, a list of sub-options, etc., you need to adjust the
   documentation.
 - These changes usually go into the same commit that changes the code.
-- Changes to command line options (addition/modification/removal) must be
+- Changes to command-line options (addition/modification/removal) must be
   documented in options.rst.
 - Changes to input properties or input commands must be documented in input.rst.
 - All incompatible changes to the user interface (options, properties, commands)
@@ -152,7 +152,7 @@ mpv uses C99 with K&R formatting, with some exceptions.
   this limit if there's a strong case that not breaking the line will increase
   readability. Going over 85 columns might provoke endless discussions about
   whether such a limit is needed or not, so avoid it.
-- If the body of an if/for/while statement has more than 1 physical lines, then
+- If the body of an if/for/while statement has more than 1 physical line, then
   always add braces, even if they're technically redundant.
 
   Bad:
@@ -261,7 +261,7 @@ you got access, the following rules must be followed:
   major bug fixes, or you're the original author of the code). If there is more
   than one maintainer, you may need to come to an agreement with the others how
   to handle this to avoid conflict.
-- If you make a pull requests (especially if it's to code you maintain), and you
+- If you make a pull request (especially if it's to code you maintain), and you
   want reviews, explicitly ping the people from which you expect reviews.
 - As a maintainer, you can approve pull requests by others to "your" code.
 - If you approve or merge 3rd party changes, make sure they follow the general
@@ -270,6 +270,6 @@ you got access, the following rules must be followed:
   project leader.
 - Seasoned project members are allowed to revert commits that broke the build,
   or broke basic functionality in a catastrophic way, and the developer who
-  broke it is unavailable. (Depending on severity.)
+  broke it is unavailable. (Depending on the severity.)
 - Adhere to the CoC.
 - The project leader is not bound by these rules.
