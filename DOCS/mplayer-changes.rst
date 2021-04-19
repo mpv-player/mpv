@@ -30,7 +30,7 @@ Player
 * Precise seeking support.
 * Improvements in audio/video sync handling.
 * Do not lose settings when playing a new file in the same player instance.
-* Slave mode compatibility broken (see below).
+* Slave mode compatibility is broken (see below).
 * Re-enable screensaver while the player is paused.
 * Allow resuming playback at a later point with ``Shift+q``, also see the
   ``quit-watch-later`` input command.
@@ -54,7 +54,7 @@ Input
   using the normal ``input.conf``.
   Also see: http://github.com/mpv-player/mpv/wiki/IR-remotes
 * Joystick support was removed. It was considered useless and was the cause
-  of some problems (e.g. a laptop's accelerator being recognized as joystick).
+  of some problems (e.g. a laptop's accelerator being recognized as a joystick).
 * Support for relative seeking by percentage.
 
 Audio
@@ -84,11 +84,11 @@ Video
 * More correct color reproduction (color matrix generation), including support
   for BT.2020 (Ultra HD). linear XYZ (Digital Cinema) and SMPTE ST2084 (HDR)
   inputs.
-* Support for color managed displays, via ICC profiles.
+* Support for color-managed displays, via ICC profiles.
 * High-quality image resamplers (see the ``--scale`` suboption).
 * Support for scaling in (sigmoidized) linear light.
 * Better subtitle rendering using libass by default.
-* Improvements when playing multiple files (``-fixed-vo`` is default, do not
+* Improvements when playing multiple files (``-fixed-vo`` is the default, do not
   reset settings by default when playing a new file).
 * Replace image video outputs (``--vo=jpeg`` etc.) with ``--vo=image``.
 * Removal of ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding
@@ -370,7 +370,7 @@ input.conf and Slave Commands
 
     .. note::
 
-        Due to lack of hardware and users using the TV/DVB/PVR features, and
+        Due to the lack of hardware and users using the TV/DVB/PVR features, and
         due to the need to cleanup the related command code, it's possible
         that the new commands are buggy or behave worse. This can be improved
         if testers are available. Otherwise, some of the TV code will be
