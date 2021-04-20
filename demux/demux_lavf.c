@@ -1354,6 +1354,8 @@ static void demux_close_lavf(demuxer_t *demuxer)
         }
         if (priv->own_stream)
             free_stream(priv->stream);
+        if (priv->av_opts)
+            av_dict_free(&priv->av_opts);
         talloc_free(priv);
         demuxer->priv = NULL;
     }
