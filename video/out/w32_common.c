@@ -103,8 +103,8 @@ struct vo_w32_state {
     bool current_fs;
     bool toggle_fs; // whether the current fullscreen state needs to be switched
 
-    RECT windowrc; // currently known window rect
-    RECT prev_windowrc; // last non-fullscreen window rect
+    RECT windowrc; // currently known window client rect
+    RECT prev_windowrc; // saved windowed client rect while fullscreen/maximized
 
     // video size
     uint32_t o_dwidth;
@@ -129,7 +129,13 @@ struct vo_w32_state {
     // UTF-16 decoding state for WM_CHAR and VK_PACKET
     int high_surrogate;
 
-    // Whether to fit the window on screen on next window state updating
+    // Fit the window to one monitor working area next time it's not fullscreen
+    // and not naximized. Only used when a new "untrusted" size comes from mpv,
+    // else we use the last known client rect size (w32->prev_windowrc).
+    // FIXME: on a multi-monitor setup one bit is not enough, because the first
+    // fit (autofit etc) should be to one monitor, but later size changes like
+    // window-scale (VOCTRL_SET_UNFS_WINDOW_SIZE) should allow the entire
+    // virtual desktop area - but now we still limit to one monitor size.
     bool fit_on_screen;
 
     ITaskbarList2 *taskbar_list;
@@ -848,11 +854,10 @@ static void fit_window_on_screen(struct vo_w32_state *w32)
 }
 
 // Calculate new fullscreen state and change window size and position.
-// returns true if fullscreen state was changed.
-static bool update_fullscreen_state(struct vo_w32_state *w32)
+static void update_fullscreen_state(struct vo_w32_state *w32)
 {
     if (w32->parent)
-        return false;
+        return;
 
     bool new_fs = w32->opts->fullscreen;
     if (w32->toggle_fs) {
@@ -884,7 +889,6 @@ static bool update_fullscreen_state(struct vo_w32_state *w32)
     MP_VERBOSE(w32, "reset window bounds: %d:%d:%d:%d\n",
                (int)w32->windowrc.left, (int)w32->windowrc.top,
                (int)rect_w(w32->windowrc), (int)rect_h(w32->windowrc));
-    return toggle_fs;
 }
 
 static void update_minimized_state(struct vo_w32_state *w32)
@@ -978,17 +982,15 @@ static void reinit_window_state(struct vo_w32_state *w32)
         return;
 
     // The order matters: fs state should be updated prior to changing styles
-    bool toggle_fs = update_fullscreen_state(w32);
+    update_fullscreen_state(w32);
     update_window_style(w32);
 
-    // Assume that the window has already been fit on screen before switching fs
-    if (!toggle_fs || w32->fit_on_screen) {
-        if (!w32->current_fs && !IsMaximized(w32->window))
-            fit_window_on_screen(w32);
-
-        // The fullscreen state might still be active, so set the flag
-        // to fit on screen next time the window leaves the fullscreen.
-        w32->fit_on_screen = w32->current_fs;
+    // Fit is used once for normal window after new "untrusted" size from mpv.
+    // Else, if we were fullscreen then last known size was restored. If we
+    // were normal or maximized then w32->windowrc is still the normal rect.
+    if (w32->fit_on_screen && !w32->current_fs && !IsMaximized(w32->window)) {
+        fit_window_on_screen(w32);
+        w32->fit_on_screen = false;
     }
 
     // Show and activate the window after all window state parameters were set
