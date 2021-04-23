@@ -390,6 +390,9 @@ It is started with ``%`` and has the following format::
 
     ``mpv --vf=foo:option1=%`expr length "$NAME"`%"$NAME" test.avi``
 
+Note: where applicable with JSON-IPC, ``%n%`` is the length in UTF-8 bytes,
+after decoding the JSON data.
+
 Suboptions passed to the client API are also subject to escaping. Using
 ``mpv_set_option_string()`` is exactly like passing ``--name=data`` to the
 command line (but without shell processing of the string). Some options
@@ -511,7 +514,7 @@ They support the following operations:
 ============= ===============================================
 Suffix        Meaning
 ============= ===============================================
--set          Set a list of items (using the list separator, interprets escapes)
+-set          Set a list of items (using the list separator, escaped with backslash)
 -append       Append single item (does not interpret escapes)
 -add          Append 1 or more items (same syntax as -set)
 -pre          Prepend 1 or more items (same syntax as -set)
