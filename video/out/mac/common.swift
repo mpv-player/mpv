@@ -438,27 +438,23 @@ class Common: NSObject {
                                     NSScreen.main
     }
 
-    func calculateRect(forScreen screen: NSScreen, visible: Bool) -> mp_rect {
+    func getWindowGeometry(forScreen screen: NSScreen,
+                           videoOut vo: UnsafeMutablePointer<vo>) -> NSRect {
         let r = screen.convertRectToBacking(screen.frame)
-        let targetFrame = visible ? screen.visibleFrame : screen.frame
+        let targetFrame = (mpv?.macOpts.macos_geometry_calculation ?? Int32(FRAME_VISIBLE)) == FRAME_VISIBLE
+            ? screen.visibleFrame : screen.frame
         let rv = screen.convertRectToBacking(targetFrame)
 
         // convert origin to be relative to target screen
         var originY = rv.origin.y - r.origin.y
-        var originX = rv.origin.x - r.origin.x
+        let originX = rv.origin.x - r.origin.x
         // flip the y origin, mp_rect expects the origin at the top-left
         // macOS' windowing system operates from the bottom-left
         originY = -(originY + rv.size.height)
-        return mp_rect(x0: Int32(originX),
-                       y0: Int32(originY),
-                       x1: Int32(originX + rv.size.width),
-                       y1: Int32(originY + rv.size.height))
-    }
-
-    func getWindowGeometry(forScreen screen: NSScreen,
-                           videoOut vo: UnsafeMutablePointer<vo>) -> NSRect {
-        let visible: Bool = (mpv?.macOpts.macos_geometry_calculation ?? Int32(FRAME_VISIBLE)) == FRAME_VISIBLE
-        var screenRC: mp_rect = calculateRect(forScreen: screen, visible: visible)
+        var screenRC: mp_rect = mp_rect(x0: Int32(originX),
+                                        y0: Int32(originY),
+                                        x1: Int32(originX + rv.size.width),
+                                        y1: Int32(originY + rv.size.height))
 
         var geo: vo_win_geometry = vo_win_geometry()
         vo_calc_window_geometry2(vo, &screenRC, Double(screen.backingScaleFactor), &geo)
@@ -652,6 +648,17 @@ class Common: NSObject {
             SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, ta_xstrdup(nil, displayName))
             SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, nil)
             dnames.pointee = array
+            return VO_TRUE
+        case VOCTRL_GET_DISPLAY_RES:
+            guard let screen = getCurrentScreen() else {
+                log.sendWarning("No Screen available to retrieve frame")
+                return VO_NOTAVAIL
+            }
+            let sizeData = data.assumingMemoryBound(to: Int32.self)
+            let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
+            let frame = screen.convertRectToBacking(screen.frame)
+            size[0] = Int32(frame.size.width)
+            size[1] = Int32(frame.size.height)
             return VO_TRUE
         case VOCTRL_GET_FOCUSED:
             let focus = data.assumingMemoryBound(to: CBool.self)
