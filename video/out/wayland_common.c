@@ -1121,6 +1121,10 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     struct mp_vo_opts *vo_opts = wl->vo_opts;
     struct mp_rect old_geometry = wl->geometry;
 
+    /* Don't do anything here if we haven't finished setting geometry. */
+    if (mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0)
+        return;
+
     bool is_maximized = false;
     bool is_fullscreen = false;
     bool is_activated = false;
