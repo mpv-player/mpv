@@ -2236,6 +2236,7 @@ end
 
 function render_wipe()
     msg.trace("render_wipe()")
+    state.osd.data = "" -- allows set_osd to immediately update on enable
     state.osd:remove()
 end
 
@@ -2548,7 +2549,7 @@ function tick()
         render()
     else
         -- Flush OSD
-        set_osd(osc_param.playresy, osc_param.playresy, "")
+        render_wipe()
     end
 
     state.tick_last_time = mp.get_time()
