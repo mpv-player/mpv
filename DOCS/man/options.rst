@@ -6355,14 +6355,15 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Size of the 3D LUT generated from the ICC profile in each dimension.
     Default is 64x64x64. Sizes may range from 2 to 512.
 
-``--icc-contrast=<0-1000000|inf>``
-    Specifies an upper limit on the target device's contrast ratio. This is
-    detected automatically from the profile if possible, but for some profiles
-    it might be missing, causing the contrast to be assumed as infinite. As a
-    result, video may appear darker than intended. This only affects BT.1886
-    content. The default of 0 means no limit if the detected contrast is less
-    than 100000, and limits to 1000 otherwise. Use ``--icc-contrast=inf`` to
-    preserve the infinite contrast (most likely when using OLED displays).
+``--icc-force-contrast=<no|0-1000000|inf>``
+    Override the target device's detected contrast ratio by a specific value.
+    This is detected automatically from the profile if possible, but for some
+    profiles it might be missing, causing the contrast to be assumed as
+    infinite. As a result, video may appear darker than intended. If this is
+    the case, setting this option might help. This only affects BT.1886
+    content. The default of ``no`` means to use the profile values. The special
+    value ``inf`` causes the BT.1886 curve to be treated as a pure power gamma
+    2.4 function.
 
 ``--blend-subtitles=<yes|video|no>``
     Blend subtitles directly onto upscaled video frames, before interpolation
