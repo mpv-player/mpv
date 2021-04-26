@@ -84,11 +84,12 @@ const struct m_sub_options mp_icc_conf = {
         {"icc-profile-auto", OPT_FLAG(profile_auto)},
         {"icc-cache-dir", OPT_STRING(cache_dir), .flags = M_OPT_FILE},
         {"icc-intent", OPT_INT(intent)},
-        {"icc-contrast", OPT_CHOICE(contrast, {"inf", -1}),
+        {"icc-force-contrast", OPT_CHOICE(contrast, {"no", 0}, {"inf", -1}),
             M_RANGE(0, 1000000)},
         {"icc-3dlut-size", OPT_STRING_VALIDATE(size_str, validate_3dlut_size_opt)},
         {"3dlut-size", OPT_REPLACED("icc-3dlut-size")},
         {"icc-cache", OPT_REMOVED("see icc-cache-dir")},
+        {"icc-contrast", OPT_REMOVED("see icc-force-contrast")},
         {0}
     },
     .size = sizeof(struct mp_icc_opts),
@@ -272,48 +273,46 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
         break;
 
     case MP_CSP_TRC_BT_1886: {
-        // To build an appropriate BT.1886 transformation we need access to
-        // the display's black point, so we LittleCMS' detection function.
-        // Relative colorimetric is used since we want to approximate the
-        // BT.1886 to the target device's actual black point even in e.g.
-        // perceptual mode
-        const int intent = MP_INTENT_RELATIVE_COLORIMETRIC;
-        cmsCIEXYZ bp_XYZ;
-        if (!cmsDetectBlackPoint(&bp_XYZ, disp_profile, intent, 0))
-            return false;
-
-        // Map this XYZ value back into the (linear) source space
-        cmsToneCurve *linear = cmsBuildGamma(cms, 1.0);
-        cmsHPROFILE rev_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
-                (cmsToneCurve*[3]){linear, linear, linear});
-        cmsHPROFILE xyz_profile = cmsCreateXYZProfile();
-        cmsHTRANSFORM xyz2src = cmsCreateTransformTHR(cms,
-                xyz_profile, TYPE_XYZ_DBL, rev_profile, TYPE_RGB_DBL,
-                intent, 0);
-        cmsFreeToneCurve(linear);
-        cmsCloseProfile(rev_profile);
-        cmsCloseProfile(xyz_profile);
-        if (!xyz2src)
-            return false;
-
         double src_black[3];
-        cmsDoTransform(xyz2src, &bp_XYZ, src_black, 1);
-        cmsDeleteTransform(xyz2src);
-
-        // Contrast limiting
-        if (p->opts->contrast > 0) {
+        if (p->opts->contrast < 0) {
+            // User requested infinite contrast, return 2.4 profile
+            tonecurve[0] = cmsBuildGamma(cms, 2.4);
+            break;
+        } else if (p->opts->contrast > 0) {
+            MP_VERBOSE(p, "Using specified contrast: %d\n", p->opts->contrast);
             for (int i = 0; i < 3; i++)
-                src_black[i] = MPMAX(src_black[i], 1.0 / p->opts->contrast);
-        }
+                src_black[i] = 1.0 / p->opts->contrast;
+        } else {
+            // To build an appropriate BT.1886 transformation we need access to
+            // the display's black point, so we use LittleCMS' detection
+            // function. Relative colorimetric is used since we want to
+            // approximate the BT.1886 to the target device's actual black
+            // point even in e.g. perceptual mode
+            const int intent = MP_INTENT_RELATIVE_COLORIMETRIC;
+            cmsCIEXYZ bp_XYZ;
+            if (!cmsDetectBlackPoint(&bp_XYZ, disp_profile, intent, 0))
+                return false;
 
-        // Built-in contrast failsafe
-        double contrast = 3.0 / (src_black[0] + src_black[1] + src_black[2]);
-        MP_VERBOSE(p, "Detected ICC profile contrast: %f\n", contrast);
-        if (contrast > 100000 && !p->opts->contrast) {
-            MP_WARN(p, "ICC profile detected contrast very high (>100000),"
-                    " falling back to contrast 1000 for sanity. Set the"
-                    " icc-contrast option to silence this warning.\n");
-            src_black[0] = src_black[1] = src_black[2] = 1.0 / 1000;
+            // Map this XYZ value back into the (linear) source space
+            cmsHPROFILE rev_profile;
+            cmsToneCurve *linear = cmsBuildGamma(cms, 1.0);
+            rev_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
+                    (cmsToneCurve*[3]){linear, linear, linear});
+            cmsHPROFILE xyz_profile = cmsCreateXYZProfile();
+            cmsHTRANSFORM xyz2src = cmsCreateTransformTHR(cms,
+                    xyz_profile, TYPE_XYZ_DBL, rev_profile, TYPE_RGB_DBL,
+                    intent, 0);
+            cmsFreeToneCurve(linear);
+            cmsCloseProfile(rev_profile);
+            cmsCloseProfile(xyz_profile);
+            if (!xyz2src)
+                return false;
+
+            cmsDoTransform(xyz2src, &bp_XYZ, src_black, 1);
+            cmsDeleteTransform(xyz2src);
+
+            double contrast = 3.0 / (src_black[0] + src_black[1] + src_black[2]);
+            MP_VERBOSE(p, "Detected ICC profile contrast: %f\n", contrast);
         }
 
         // Build the parametric BT.1886 transfer curve, one per channel

@@ -37,6 +37,9 @@ Interface changes
     - add an additional optional `albumart` argument to the `video-add` command,
       which tells mpv to load the given video as album art.
     - undeprecate `--cache-secs` option
+    - remove `--icc-contrast` and introduce `--icc-force-contrast`. The latter
+      defaults to the equivalent of the old `--icc-contrast=inf`, and can
+      instead be used to specifically set the contrast to any value.
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
       when the player enters fullscreen.
