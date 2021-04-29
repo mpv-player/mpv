@@ -2544,8 +2544,8 @@ Property list
 
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the
-    ``overlay-add`` command. It gives you the actual OSD size, which can be
-    different from the window size in some cases.
+    ``overlay-add`` command. It gives you the actual OSD/window size (not
+    including decorations drawn by the OS window manager).
 
     Alias to ``osd-dimensions/w`` and ``osd-dimensions/h``.
 

@@ -2587,14 +2587,14 @@ static int mp_property_osd_dim(void *ctx, struct m_property *prop,
                     (vo_res.display_par ? vo_res.display_par : 1);
 
     struct m_sub_property props[] = {
-        {"w",       SUB_PROP_DOUBLE(vo_res.w)},
-        {"h",       SUB_PROP_DOUBLE(vo_res.h)},
+        {"w",       SUB_PROP_INT(vo_res.w)},
+        {"h",       SUB_PROP_INT(vo_res.h)},
         {"par",     SUB_PROP_DOUBLE(vo_res.display_par)},
         {"aspect",  SUB_PROP_DOUBLE(aspect)},
-        {"mt",      SUB_PROP_DOUBLE(vo_res.mt)},
-        {"mb",      SUB_PROP_DOUBLE(vo_res.mb)},
-        {"ml",      SUB_PROP_DOUBLE(vo_res.ml)},
-        {"mr",      SUB_PROP_DOUBLE(vo_res.mr)},
+        {"mt",      SUB_PROP_INT(vo_res.mt)},
+        {"mb",      SUB_PROP_INT(vo_res.mb)},
+        {"ml",      SUB_PROP_INT(vo_res.ml)},
+        {"mr",      SUB_PROP_INT(vo_res.mr)},
         {0}
     };
 
