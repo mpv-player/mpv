@@ -1201,7 +1201,7 @@ Video
     :auto-copy: enable best hw decoder with copy-back (see below)
     :vdpau:     requires ``--vo=gpu`` with X11, or ``--vo=vdpau`` (Linux only)
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
-    :vaapi:     requires ``--vo=gpu`` or ``--vo=vaapi`` (Linux only)
+    :vaapi:     requires ``--vo=gpu``, ``--vo=vaapi`` or ``--vo=libmpv`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with some GPUs only)
     :videotoolbox: requires ``--vo=gpu`` (macOS 10.8 and up),
                    or ``--vo=libmpv`` (iOS 9.0 and up)
