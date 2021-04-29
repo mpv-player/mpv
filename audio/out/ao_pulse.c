@@ -535,6 +535,7 @@ static void reset(struct ao *ao)
     cork(ao, true);
     struct priv *priv = ao->priv;
     pa_threaded_mainloop_lock(priv->mainloop);
+    priv->playing = false;
     priv->retval = 0;
     if (!waitop(priv, pa_stream_flush(priv->stream, success_cb, ao)) ||
         !priv->retval)
