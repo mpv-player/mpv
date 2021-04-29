@@ -823,8 +823,10 @@ void audio_start_ao(struct MPContext *mpctx)
     MP_VERBOSE(mpctx, "starting audio playback\n");
     ao_start(ao_c->ao);
     mpctx->audio_status = STATUS_PLAYING;
-    if (ao_c->out_eof)
+    if (ao_c->out_eof) {
         mpctx->audio_status = STATUS_DRAINING;
+        MP_VERBOSE(mpctx, "audio draining\n");
+    }
     ao_c->underrun = false;
     mpctx->logged_async_diff = -1;
     mp_wakeup_core(mpctx);
@@ -873,8 +875,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         // until the old audio is fully played.
         // (Buggy if AO underruns.)
         if (mpctx->ao && ao_is_playing(mpctx->ao) &&
-            mpctx->video_status != STATUS_EOF)
+            mpctx->video_status != STATUS_EOF) {
+            MP_VERBOSE(mpctx, "blocked, waiting for old audio to play\n");
             ok = false;
+        }
 
         if (ao_c->start_pts_known != ok || ao_c->start_pts != pts) {
             ao_c->start_pts_known = ok;
