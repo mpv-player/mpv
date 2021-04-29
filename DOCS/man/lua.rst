@@ -37,6 +37,12 @@ scripting backend to use for it. For Lua, it is ``.lua``. If the extension is
 not recognized, an error is printed. (If an error happens, the extension is
 either mistyped, or the backend was not compiled into your mpv binary.)
 
+mpv internally loads the script's name by stripping the ``.lua`` extension and
+replacing all nonalphanumeric characters with ``_``. E.g., ``my-tools.lua``
+becomes ``my_tools``. If there are several scripts with the same name, it is
+made unique by appending a number. This is the name returned by
+``mp.get_script_name()``.
+
 Entries with ``.disable`` extension are always ignored.
 
 If a script is a directory (either if a directory is passed to ``--script``,
@@ -500,11 +506,11 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Return the name of the current script. The name is usually made of the
     filename of the script, with directory and file extension removed. If
     there are several scripts which would have the same name, it's made unique
-    by appending a number.
+    by appending a number. Any nonalphanumeric characters are replaced with ``_``.
 
     .. admonition:: Example
 
-        The script ``/path/to/fooscript.lua`` becomes ``fooscript``.
+        The script ``/path/to/foo-script.lua`` becomes ``foo_script``.
 
 ``mp.get_script_directory()``
     Return the directory if this is a script packaged as directory (see

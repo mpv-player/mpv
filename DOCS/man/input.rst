@@ -1174,7 +1174,8 @@ Input Commands that are Possibly Subject to Change
 ``script-message-to <target> [<arg1> [<arg2> [...]]]``
     Same as ``script-message``, but send it only to the client named
     ``<target>``. Each client (scripts etc.) has a unique name. For example,
-    Lua scripts can get their name via ``mp.get_script_name()``.
+    Lua scripts can get their name via ``mp.get_script_name()``. Note that
+    client names only consist of alphanumeric characters and ``_``.
 
     This command has a variable number of arguments, and cannot be used with
     named arguments.
@@ -1186,7 +1187,8 @@ Input Commands that are Possibly Subject to Change
     The argument is the name of the binding.
 
     It can optionally be prefixed with the name of the script, using ``/`` as
-    separator, e.g. ``script-binding scriptname/bindingname``.
+    separator, e.g. ``script-binding scriptname/bindingname``. Note that script
+    names only consist of alphanumeric characters and ``_``.
 
     For completeness, here is how this command works internally. The details
     could change any time. On any matching key event, ``script-message-to``
