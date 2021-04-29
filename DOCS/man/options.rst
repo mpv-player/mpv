@@ -3286,7 +3286,7 @@ Disc Devices
 ------------
 
 ``--cdrom-device=<path>``
-    Specify the CD-ROM device (default: ``/dev/cdrom``).
+    Deprecated, use ``--cdda-device`` instead.
 
 ``--dvd-device=<path>``
     Specify the DVD device or .iso filename (default: ``/dev/dvd``). You can
@@ -3308,6 +3308,9 @@ Disc Devices
 
 ``--cdda-...``
     These options can be used to tune the CD Audio reading feature of mpv.
+
+``--cdda-device=<path>``
+    Specify the CD-ROM device.
 
 ``--cdda-speed=<value>``
     Set CD spin speed.

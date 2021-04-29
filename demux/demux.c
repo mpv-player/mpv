@@ -32,6 +32,7 @@
 
 #include "cache.h"
 #include "config.h"
+#include "options/options.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "mpv_talloc.h"
@@ -93,7 +94,6 @@ struct demux_opts {
     double min_secs;
     int force_seekable;
     double min_secs_cache;
-    int access_references;
     int seekable_cache;
     int create_ccs;
     char *record_file;
@@ -122,7 +122,6 @@ const struct m_sub_options demux_conf = {
         {"demuxer-donate-buffer", OPT_FLAG(donate_fw)},
         {"force-seekable", OPT_FLAG(force_seekable)},
         {"cache-secs", OPT_DOUBLE(min_secs_cache), M_RANGE(0, DBL_MAX)},
-        {"access-references", OPT_FLAG(access_references)},
         {"demuxer-seekable-cache", OPT_CHOICE(seekable_cache,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"sub-create-cc-track", OPT_FLAG(create_ccs)},
@@ -151,7 +150,6 @@ const struct m_sub_options demux_conf = {
         .min_secs = 1.0,
         .min_secs_cache = 1000.0 * 60 * 60,
         .seekable_cache = -1,
-        .access_references = 1,
         .video_back_preroll = -1,
         .audio_back_preroll = -1,
         .back_seek_size = 60,
@@ -3248,6 +3246,10 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     struct m_config_cache *opts_cache =
         m_config_cache_alloc(demuxer, global, &demux_conf);
     struct demux_opts *opts = opts_cache->opts;
+
+    struct demux_shared_opts *shared_opts =
+        mp_get_config_group(demuxer, global, &demux_shared_conf);
+
     *demuxer = (struct demuxer) {
         .desc = desc,
         .stream = stream,
@@ -3261,9 +3263,10 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .is_network = sinfo->is_network,
         .is_streaming = sinfo->is_streaming,
         .stream_origin = sinfo->stream_origin,
-        .access_references = opts->access_references,
+        .access_references = shared_opts->access_references,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
+        .shared_opts = shared_opts,
     };
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);

@@ -40,6 +40,8 @@ Interface changes
     - remove `--icc-contrast` and introduce `--icc-force-contrast`. The latter
       defaults to the equivalent of the old `--icc-contrast=inf`, and can
       instead be used to specifically set the contrast to any value.
+    - deprecate --cdrom-device, instead use --cdda-device which behaves exactly
+      the same
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
       when the player enters fullscreen.

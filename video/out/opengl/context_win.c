@@ -37,6 +37,20 @@
 #define WGL_CONTEXT_CORE_PROFILE_BIT_ARB   0x00000001
 #endif
 
+struct wingl_opts {
+    int wingl_dwm_flush;
+};
+
+#define OPT_BASE_STRUCT struct wingl_opts
+const struct m_sub_options wingl_conf = {
+    .opts = (const struct m_option[]) {
+        {"opengl-dwmflush", OPT_CHOICE(wingl_dwm_flush,
+            {"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})},
+        {0}
+    },
+    .size = sizeof(struct wingl_opts),
+};
+
 struct priv {
     GL gl;
 
@@ -247,9 +261,10 @@ static void wgl_swap_buffers(struct ra_ctx *ctx)
     // default if we don't DwmFLush
     int new_swapinterval = p->opt_swapinterval;
 
-    int dwm_flush_opt;
-    mp_read_option_raw(ctx->global, "opengl-dwmflush", &m_option_type_choice,
-                       &dwm_flush_opt);
+    struct wingl_opts *opts =
+        mp_get_config_group(ctx, ctx->global, &wingl_conf);
+    int dwm_flush_opt = opts->wingl_dwm_flush;
+    talloc_free(opts);
 
     if (dwm_flush_opt >= 0) {
         if ((dwm_flush_opt == 1 && !ctx->vo->opts->fullscreen) ||

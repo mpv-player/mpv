@@ -281,8 +281,6 @@ typedef struct MPOpts {
     char *screenshot_directory;
     bool screenshot_sw;
 
-    int index_mode;
-
     struct m_channels audio_output_channels;
     int audio_output_format;
     int force_srate;
@@ -305,15 +303,10 @@ typedef struct MPOpts {
 
     int w32_priority;
 
+    struct bluray_params *stream_bluray_opts;
     struct cdda_params *stream_cdda_opts;
     struct dvb_params *stream_dvb_opts;
     struct stream_lavf_params *stream_lavf_opts;
-
-    char *cdrom_device;
-    char *bluray_device;
-
-    double mf_fps;
-    char *mf_type;
 
     struct demux_rawaudio_opts *demux_rawaudio;
     struct demux_rawvideo_opts *demux_rawvideo;
@@ -336,8 +329,6 @@ typedef struct MPOpts {
     char *ipc_path;
     char *ipc_client;
 
-    int wingl_dwm_flush;
-
     struct mp_resample_opts *resample_opts;
 
     struct gl_video_opts *gl_video_opts;
@@ -350,13 +341,27 @@ typedef struct MPOpts {
     struct cocoa_opts *cocoa_opts;
     struct macos_opts *macos_opts;
     struct wayland_opts *wayland_opts;
+    struct wingl_opts *wingl_opts;
+    struct cuda_opts *cuda_opts;
+    struct demux_shared_opts *demux_shared_opts;
     struct dvd_opts *dvd_opts;
     struct vaapi_opts *vaapi_opts;
     struct sws_opts *sws_opts;
     struct zimg_opts *zimg_opts;
 
-    int cuda_device;
 } MPOpts;
+
+struct cuda_opts {
+    int cuda_device;
+};
+
+struct demux_shared_opts {
+    int access_references;
+    int edition_id;
+    int index_mode;
+    double mf_fps;
+    char *mf_type;
+};
 
 struct dvd_opts {
     int angle;
@@ -369,6 +374,8 @@ struct filter_opts {
 };
 
 extern const struct m_sub_options vo_sub_opts;
+extern const struct m_sub_options cuda_conf;
+extern const struct m_sub_options demux_shared_conf;
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_sub_filter_opts;

@@ -1145,7 +1145,7 @@ PROTOCOLS
 
     Play a series of images as video.
 
-``cdda://[device]`` ``--cdrom-device=PATH`` ``--cdda-...``
+``cdda://[device]`` ``--cdda-device=PATH`` ``--cdda-...``
 
     Play CD.
 

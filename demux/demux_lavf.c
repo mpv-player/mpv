@@ -48,6 +48,7 @@
 #include "stheader.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
+#include "options/options.h"
 #include "options/path.h"
 
 #ifndef AV_DISPOSITION_TIMED_THUMBNAILS
@@ -237,7 +238,6 @@ typedef struct lavf_priv {
     double seek_delay;
 
     struct demux_lavf_opts *opts;
-    double mf_fps;
 
     bool pcm_seek_hack_disabled;
     AVStream *pcm_seek_hack;
@@ -715,7 +715,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
         if (priv->format_hack.image_format)
-            sh->codec->fps = priv->mf_fps;
+            sh->codec->fps = demuxer->shared_opts->mf_fps;
         sh->codec->par_w = st->sample_aspect_ratio.num;
         sh->codec->par_h = st->sample_aspect_ratio.den;
 
@@ -930,12 +930,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     priv->opts = mp_get_config_group(priv, demuxer->global, &demux_lavf_conf);
     struct demux_lavf_opts *lavfdopts = priv->opts;
 
-    int index_mode;
-    mp_read_option_raw(demuxer->global, "index", &m_option_type_choice,
-                       &index_mode);
-    mp_read_option_raw(demuxer->global, "mf-fps", &m_option_type_double,
-                       &priv->mf_fps);
-
     if (lavf_check_file(demuxer, check) < 0)
         return -1;
 
@@ -943,7 +937,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (!avfc)
         return -1;
 
-    if (index_mode != 1)
+    if (demuxer->shared_opts->index_mode != 1)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
     if (lavfdopts->probesize) {

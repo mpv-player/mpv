@@ -58,6 +58,7 @@ static void print_version(struct mp_log *log)
 }
 
 extern const struct m_sub_options tv_params_conf;
+extern const struct m_sub_options stream_bluray_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
@@ -94,6 +95,7 @@ extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options cocoa_conf;
 extern const struct m_sub_options macos_conf;
 extern const struct m_sub_options wayland_conf;
+extern const struct m_sub_options wingl_conf;
 extern const struct m_sub_options vaapi_conf;
 
 static const struct m_sub_options screenshot_conf = {
@@ -328,6 +330,39 @@ const struct m_sub_options mp_osd_render_sub_opts = {
 };
 
 #undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct cuda_opts
+
+const struct m_sub_options cuda_conf = {
+    .opts = (const struct m_option[]){
+        {"cuda-decode-device", OPT_CHOICE(cuda_device, {"auto", -1}),
+            M_RANGE(0, INT_MAX)},
+        {0}
+    },
+    .size = sizeof(struct cuda_opts),
+    .defaults = &(const struct cuda_opts){
+        .cuda_device = -1,
+    },
+};
+
+#undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct demux_shared_opts
+
+const struct m_sub_options demux_shared_conf = {
+    .opts = (const struct m_option[]){
+        {"access-references", OPT_FLAG(access_references)},
+        {"index", OPT_CHOICE(index_mode, {"default", 1}, {"recreate", 0})},
+        {"mf-fps", OPT_DOUBLE(mf_fps)},
+        {"mf-type", OPT_STRING(mf_type)},
+        {0}
+    },
+    .size = sizeof(struct demux_shared_opts),
+    .defaults = &(const struct demux_shared_opts){
+        .access_references = 1,
+        .mf_fps = 1.0,
+    },
+};
+
+#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct dvd_opts
 
 const struct m_sub_options dvd_conf = {
@@ -453,7 +488,7 @@ static const m_option_t mp_opts[] = {
 #endif
     {"edition", OPT_CHOICE(edition_id, {"auto", -1}), M_RANGE(0, 8190)},
 #if HAVE_LIBBLURAY
-    {"bluray-device", OPT_STRING(bluray_device), .flags = M_OPT_FILE},
+    {"bluray", OPT_SUBSTRUCT(stream_bluray_opts, stream_bluray_conf)},
 #endif /* HAVE_LIBBLURAY */
 
 // ------------------------- demuxer options --------------------
@@ -486,8 +521,6 @@ static const m_option_t mp_opts[] = {
     {"image-display-duration", OPT_DOUBLE(image_display_duration),
         M_RANGE(0, INFINITY)},
 
-     {"index", OPT_CHOICE(index_mode, {"default", 1}, {"recreate", 0})},
-
     // select audio/video/subtitle stream
     // keep in sync with num_ptracks[] and MAX_PTRACKS
     {"aid", OPT_TRACKCHOICE(stream_id[0][STREAM_AUDIO])},
@@ -514,7 +547,7 @@ static const m_option_t mp_opts[] = {
 
 #if HAVE_CDDA
     {"cdda", OPT_SUBSTRUCT(stream_cdda_opts, stream_cdda_conf)},
-    {"cdrom-device", OPT_STRING(cdrom_device), .flags = M_OPT_FILE},
+    {"cdrom-device", OPT_REPLACED("cdda-device")},
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
@@ -529,8 +562,6 @@ static const m_option_t mp_opts[] = {
     {"cache-pause-initial", OPT_FLAG(cache_pause_initial)},
     {"cache-pause-wait", OPT_FLOAT(cache_pause_wait), M_RANGE(0, DBL_MAX)},
 
-    {"mf-fps", OPT_DOUBLE(mf_fps)},
-    {"mf-type", OPT_STRING(mf_type)},
 #if HAVE_DVBIN
     {"dvbin", OPT_SUBSTRUCT(stream_dvb_opts, stream_dvb_conf)},
 #endif
@@ -768,6 +799,7 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(input_opts, input_config)},
 
     {"", OPT_SUBSTRUCT(vo, vo_sub_opts)},
+    {"", OPT_SUBSTRUCT(demux_shared_opts, demux_shared_conf)},
     {"", OPT_SUBSTRUCT(demux_opts, demux_conf)},
     {"", OPT_SUBSTRUCT(demux_cache_opts, demux_cache_conf)},
     {"", OPT_SUBSTRUCT(stream_opts, stream_conf)},
@@ -807,13 +839,11 @@ static const m_option_t mp_opts[] = {
 #endif
 
 #if HAVE_GL_WIN32
-    {"opengl-dwmflush", OPT_CHOICE(wingl_dwm_flush,
-        {"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})},
+    {"", OPT_SUBSTRUCT(wingl_opts, wingl_conf)},
 #endif
 
 #if HAVE_CUDA_HWACCEL
-    {"cuda-decode-device", OPT_CHOICE(cuda_device, {"auto", -1}),
-        M_RANGE(0, INT_MAX)},
+    {"", OPT_SUBSTRUCT(cuda_opts, cuda_conf)},
 #endif
 
 #if HAVE_VAAPI
@@ -1026,10 +1056,6 @@ static const struct MPOpts mp_default_opts = {
         .auto_safe = 1,
     },
 
-    .index_mode = 1,
-
-    .mf_fps = 1.0,
-
     .display_tags = (char **)(const char*[]){
         "Artist", "Album", "Album_Artist", "Comment", "Composer",
         "Date", "Description", "Genre", "Performer", "Rating",
@@ -1037,8 +1063,6 @@ static const struct MPOpts mp_default_opts = {
         "Uploader", "Channel_URL",
         NULL
     },
-
-    .cuda_device = -1,
 };
 
 const struct m_sub_options mp_opt_root = {
