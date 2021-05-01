@@ -1821,6 +1821,9 @@ Property list
     .. note:: This is only an estimate. (It's computed from two unreliable
               quantities: fps and possibly rounded timestamps.)
 
+``pid``
+    Process-id of mpv.
+
 ``path``
     Full path of the currently played file. Usually this is exactly the same
     string you pass on the mpv command line or the ``loadfile`` command, even
