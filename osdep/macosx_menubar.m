@@ -21,7 +21,7 @@
 #import "macosx_menubar_objc.h"
 #import "osdep/macosx_application_objc.h"
 #include "osdep/macosx_compat.h"
-#import <CoreServices/CoreServices.h>
+#include <ApplicationServices/ApplicationServices.h>
 
 @implementation MenuBar
 {
