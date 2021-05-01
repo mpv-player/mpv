@@ -21,6 +21,7 @@
 #import "macosx_menubar_objc.h"
 #import "osdep/macosx_application_objc.h"
 #include "osdep/macosx_compat.h"
+#import <CoreServices/CoreServices.h>
 
 @implementation MenuBar
 {
@@ -48,7 +49,12 @@
                         @"key"        : @"",
                         @"target"     : self
                     }],
-                    @{ @"name": @"separator" },
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Set as default handler",
+                        @"action"     : @"defaultHandler:",
+                        @"key"        : @"",
+                        @"target"     : self
+                    }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Preferences…",
                         @"action"     : @"preferences:",
@@ -766,6 +772,23 @@
         [(Application *)NSApp openFiles:url];
     }
 }
+
+- (void)defaultHandler:(NSMenuItem *)menuItem
+{
+    NSArray *extensions = @[@"webm",@"mkv",@"mov",@"mp4",@"avi"];
+    for (NSString *extension in extensions) {
+        for (UTType *type in [UTType typesWithTag: extension
+                                        tagClass: kUTTagClassFilenameExtension
+                                conformingToType: nil])
+        {
+            if ([type identifier]) {
+                NSLog(@"%@ -> %@", extension, type);
+                LSSetDefaultRoleHandlerForContentType([type identifier], kLSRolesAll, @"io.mpv");
+            }
+        }
+    }
+}
+
 
 - (void)cmd:(NSMenuItem *)menuItem
 {
