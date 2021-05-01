@@ -45,7 +45,6 @@
 #include "osdep/subprocess.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
-#include "osdep/getpid.h"
 #include "stream/stream.h"
 #include "sub/osd.h"
 #include "core.h"
@@ -1146,12 +1145,6 @@ static int script_join_path(lua_State *L)
     return 1;
 }
 
-static int script_getpid(lua_State *L)
-{
-    lua_pushnumber(L, mp_getpid());
-    return 1;
-}
-
 static int script_parse_json(lua_State *L, void *tmp)
 {
     mp_lua_optarg(L, 2);
@@ -1247,7 +1240,6 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(file_info),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
-    FN_ENTRY(getpid),
     AF_ENTRY(parse_json),
     AF_ENTRY(format_json),
     FN_ENTRY(get_env_list),

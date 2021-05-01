@@ -747,6 +747,10 @@ function mp_utils.getcwd()
     return mp.get_property("working-directory")
 end
 
+function mp_utils.getpid()
+    return mp.get_property_number("pid")
+end
+
 function mp_utils.format_bytes_humanized(b)
     local d = {"Bytes", "KiB", "MiB", "GiB", "TiB", "PiB"}
     local i = 1

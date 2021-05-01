@@ -663,6 +663,7 @@ mp.get_script_file = function() { return mp.script_file };
 mp.get_script_directory = function() { return mp.script_path };
 mp.get_time = function() { return mp.get_time_ms() / 1000 };
 mp.utils.getcwd = function() { return mp.get_property("working-directory") };
+mp.utils.getpid = function() { return mp.get_property_number("pid") }
 mp.get_mouse_pos = function() { return mp.get_property_native("mouse-pos") };
 mp.dispatch_event = dispatch_event;
 mp.process_timers = process_timers;

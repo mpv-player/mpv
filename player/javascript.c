@@ -40,7 +40,6 @@
 #include "misc/bstr.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
-#include "osdep/getpid.h"
 #include "stream/stream.h"
 #include "sub/osd.h"
 #include "core.h"
@@ -925,12 +924,6 @@ static void script_get_user_path(js_State *J, void *af)
     js_pushstring(J, mp_get_user_path(af, jctx(J)->mpctx->global, path));
 }
 
-// args: none
-static void script_getpid(js_State *J)
-{
-    js_pushnumber(J, mp_getpid());
-}
-
 // args: prefixed file name, data (c-str)
 static void script_write_file(js_State *J, void *af)
 {
@@ -1183,7 +1176,6 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(split_path, 1),
     AF_ENTRY(join_path, 2),
     AF_ENTRY(get_user_path, 1),
-    FN_ENTRY(getpid, 0),
     FN_ENTRY(get_env_list, 0),
 
     FN_ENTRY(read_file, 2),
