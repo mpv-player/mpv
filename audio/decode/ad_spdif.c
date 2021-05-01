@@ -116,7 +116,7 @@ static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
     if (profile != FF_PROFILE_UNKNOWN || spdif_ctx->codec_id != AV_CODEC_ID_DTS)
         return;
 
-    AVCodec *codec = avcodec_find_decoder(spdif_ctx->codec_id);
+    const AVCodec *codec = avcodec_find_decoder(spdif_ctx->codec_id);
     if (!codec)
         goto done;
 

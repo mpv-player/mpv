@@ -227,7 +227,7 @@ typedef struct lavf_priv {
     bool own_stream;
     char *filename;
     struct format_hack format_hack;
-    AVInputFormat *avif;
+    const AVInputFormat *avif;
     int avif_flags;
     AVFormatContext *avfc;
     AVIOContext *pb;
@@ -443,7 +443,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     if (!lavfdopts->allow_mimetype || !mime_type)
         mime_type = "";
 
-    AVInputFormat *forced_format = NULL;
+    const AVInputFormat *forced_format = NULL;
     const char *format = lavfdopts->format;
     if (!format)
         format = s->lavf_type;

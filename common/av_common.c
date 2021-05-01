@@ -270,7 +270,7 @@ int mp_codec_to_av_codec_id(const char *codec)
         if (desc)
             id = desc->id;
         if (id == AV_CODEC_ID_NONE) {
-            AVCodec *avcodec = avcodec_find_decoder_by_name(codec);
+            const AVCodec *avcodec = avcodec_find_decoder_by_name(codec);
             if (avcodec)
                 id = avcodec->id;
         }
@@ -285,7 +285,7 @@ const char *mp_codec_from_av_codec_id(int codec_id)
     if (desc)
         name = desc->name;
     if (!name) {
-        AVCodec *avcodec = avcodec_find_decoder(codec_id);
+        const AVCodec *avcodec = avcodec_find_decoder(codec_id);
         if (avcodec)
             name = avcodec->name;
     }

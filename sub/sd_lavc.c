@@ -91,7 +91,7 @@ static int init(struct sd *sd)
 
     struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
     AVCodecContext *ctx = NULL;
-    AVCodec *sub_codec = avcodec_find_decoder(cid);
+    const AVCodec *sub_codec = avcodec_find_decoder(cid);
     if (!sub_codec)
         goto error;
     ctx = avcodec_alloc_context3(sub_codec);

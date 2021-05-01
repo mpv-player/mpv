@@ -103,7 +103,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 
     av_init_packet(&pkt);
 
-    struct AVCodec *codec;
+    const AVCodec *codec;
     if (ctx->opts->format == AV_CODEC_ID_WEBP) {
         codec = avcodec_find_encoder_by_name("libwebp"); // non-animated encoder
     } else {
@@ -251,7 +251,7 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 
 #endif
 
-static int get_encoder_format(struct AVCodec *codec, int srcfmt, bool highdepth)
+static int get_encoder_format(const AVCodec *codec, int srcfmt, bool highdepth)
 {
     const enum AVPixelFormat *pix_fmts = codec->pix_fmts;
     int current = 0;
@@ -277,7 +277,7 @@ static int get_encoder_format(struct AVCodec *codec, int srcfmt, bool highdepth)
 
 static int get_target_format(struct image_writer_ctx *ctx)
 {
-    struct AVCodec *codec = avcodec_find_encoder(ctx->opts->format);
+    const AVCodec *codec = avcodec_find_encoder(ctx->opts->format);
     if (!codec)
         goto unknown;
 

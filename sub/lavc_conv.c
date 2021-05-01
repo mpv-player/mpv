@@ -75,7 +75,7 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     AVCodecContext *avctx = NULL;
     AVDictionary *opts = NULL;
     const char *fmt = get_lavc_format(priv->codec);
-    AVCodec *codec = avcodec_find_decoder(mp_codec_to_av_codec_id(fmt));
+    const AVCodec *codec = avcodec_find_decoder(mp_codec_to_av_codec_id(fmt));
     if (!codec)
         goto error;
     avctx = avcodec_alloc_context3(codec);

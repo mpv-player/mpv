@@ -68,7 +68,7 @@ struct priv {
     struct mp_aframe *in_frame;
     struct mp_aframe_pool *out_pool;
 
-    struct AVCodec        *lavc_acodec;
+    const struct AVCodec  *lavc_acodec;
     struct AVCodecContext *lavc_actx;
     int bit_rate;
     int out_samples;    // upper bound on encoded output per AC3 frame

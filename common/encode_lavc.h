@@ -41,7 +41,7 @@ struct encode_lavc_context {
     struct encode_opts *options;
     struct mp_log *log;
     struct encode_priv *priv;
-    AVOutputFormat *oformat;
+    const AVOutputFormat *oformat;
     const char *filename;
 
     // All entry points must be guarded with the lock. Functions called by
@@ -71,7 +71,7 @@ struct encoder_context {
     struct mpv_global *global;
     struct encode_opts *options;
     struct mp_log *log;
-    AVOutputFormat *oformat;
+    const AVOutputFormat *oformat;
 
     // (avoid using this)
     struct encode_lavc_context *encode_lavc_ctx;

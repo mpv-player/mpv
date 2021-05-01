@@ -85,7 +85,7 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
     struct ad_lavc_params *opts =
         mp_get_config_group(ctx, da->global, &ad_lavc_conf);
     AVCodecContext *lavc_context;
-    AVCodec *lavc_codec;
+    const AVCodec *lavc_codec;
 
     ctx->codec_timebase = mp_get_codec_timebase(codec);
 

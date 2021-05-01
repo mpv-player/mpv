@@ -735,7 +735,7 @@ static void encoder_destroy(void *ptr)
     free_stream(p->twopass_bytebuffer);
 }
 
-static AVCodec *find_codec_for(struct encode_lavc_context *ctx,
+static const AVCodec *find_codec_for(struct encode_lavc_context *ctx,
                                enum stream_type type, bool *used_auto)
 {
     char *codec_name = type == STREAM_VIDEO
@@ -746,7 +746,7 @@ static AVCodec *find_codec_for(struct encode_lavc_context *ctx,
 
     *used_auto = !(codec_name && codec_name[0]);
 
-    AVCodec *codec;
+    const AVCodec *codec;
     if (*used_auto) {
         codec = avcodec_find_encoder(av_guess_codec(ctx->oformat, NULL,
                                      ctx->options->file, NULL,
@@ -797,7 +797,7 @@ struct encoder_context *encoder_context_alloc(struct encode_lavc_context *ctx,
     };
 
     bool auto_codec;
-    AVCodec *codec = find_codec_for(ctx, type, &auto_codec);
+    const AVCodec *codec = find_codec_for(ctx, type, &auto_codec);
     const char *tname = stream_type_name(type);
 
     if (!codec) {
