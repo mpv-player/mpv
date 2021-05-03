@@ -769,7 +769,7 @@ strictly part of the guaranteed API.
         ``mtime``
             time of last modification
         ``ctime``
-            time of last metadata change (Linux) / time of creation (Windows)
+            time of last metadata change
         ``is_file``
             Whether ``path`` is a regular file (boolean)
         ``is_dir``
