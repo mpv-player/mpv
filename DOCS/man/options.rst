@@ -3782,7 +3782,10 @@ Input
     configuration directory (usually ``~/.config/mpv/input.conf``).
 
 ``--no-input-default-bindings``
-    Disable mpv default (built-in) key bindings.
+    Disable mpv default (built-in) key bindings. Currently this includes all
+    key bindings which ``input.conf`` can override, like those added by scripts
+    using ``mp.add_key_binding`` (but not ``mp.add_forced_key_binding``).
+    This might change in the future to exclude ``mp.add_key_binding``.
 
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
