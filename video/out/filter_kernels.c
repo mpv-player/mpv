@@ -199,7 +199,7 @@ static double hamming(params *p, double x)
 
 static double quadric(params *p, double x)
 {
-    if (x <  0.75) {
+    if (x <  0.5) {
         return 0.75 - x * x;
     } else if (x <  1.5) {
         double t = x - 1.5;
