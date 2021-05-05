@@ -48,6 +48,7 @@ local user_opts = {
     windowcontrols = "auto",    -- whether to show window controls
     windowcontrols_alignment = "right", -- which side to show window controls on
     greenandgrumpy = false,     -- disable santa hat
+    controlkbd = true,          -- take control of some keyboard keys(eg. seek keys)
 }
 
 -- read options from config and command-line
@@ -2481,6 +2482,25 @@ function process_event(source, what)
     end
 end
 
+--process events from the keyboard
+--generally this is supposed to immitate mpv's own behaviour on the osc
+function process_event_key(key)
+    show_osc()
+    if key == "right" then
+        mp.command("seek 5")
+    end
+    if key == "left" then
+        mp.command("seek -5")
+    end
+    if key == "up" then
+        mp.command("seek 60")
+    end
+    if key == "down" then
+        mp.command("seek -60")
+    end
+    request_tick()
+end
+
 
 local logo_lines = {
     -- White border
@@ -2664,6 +2684,20 @@ mp.set_key_bindings({
 }, "showhide_wc", "force")
 do_enable_keybindings()
 
+--keyboard bindings
+if user_opts.controlkbd then
+    mp.set_key_bindings({
+        {"right",               function(e) process_event_key("right") end,
+                                function(e) process_event_key("right") end},
+        {"left",                function(e) process_event_key("left") end,
+                                function(e) process_event_key("left") end},
+        {"up",                  function(e) process_event_key("up") end,
+                                function(e) process_event_key("up") end},
+        {"down",                function(e) process_event_key("down") end,
+                                function(e) process_event_key("down") end},
+    }, "osc-kbd", "force")
+    mp.enable_key_bindings("osc-kbd")
+end
 --mouse input bindings
 mp.set_key_bindings({
     {"mbtn_left",           function(e) process_event("mbtn_left", "up") end,

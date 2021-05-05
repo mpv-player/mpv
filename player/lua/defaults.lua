@@ -79,7 +79,7 @@ local default_section = "input_dispatch_" .. mp.script_name
 -- Note: the bindings are not active by default. Use enable_key_bindings().
 --
 -- list is an array of key bindings, where each entry is an array as follow:
---      {key, callback_press, callback_down, callback_up}
+--      {key, callback_press/callback_repeat, callback_down, callback_up}
 -- key is the key string as used in input.conf, like "ctrl+a"
 --
 -- callback can be a string too, in which case the following will be added like
@@ -99,10 +99,10 @@ function mp.set_key_bindings(list, section, flags)
                 local event = state:sub(1, 1)
                 local is_mouse = state:sub(2, 2) == "m"
                 local def = (is_mouse and "u") or "d"
-                if event == "r" then
-                    return
-                end
-                if event == "p" and cb then
+                --if event == "r" then
+                --    return
+                --end
+                if event == "p" or event == "r" and cb then
                     cb()
                 elseif event == "d" and cb_down then
                     cb_down()

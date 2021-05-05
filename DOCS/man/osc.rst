@@ -375,6 +375,12 @@ Configurable Options
 
     Set to ``yes`` to reduce festivity (i.e. disable santa hat in December.)
 
+``controlkbd``
+    Default: yes
+
+    Deliver control of some keys for the osc to handle, making possible to
+    eg. disable osd-on-seek and use the osc bar for it.
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
