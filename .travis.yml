@@ -24,7 +24,7 @@ _mingwbase:
           - 'automake'
           - 'pkg-config'
           - 'gcc-mingw-w64'
-          - 'gcc-multilib'
+          - 'aptitude'
           - 'nasm'
           - 'yasm'
     cache:
@@ -82,6 +82,7 @@ before_install:
   - if [ "$TRAVIS_COMPILER" = "clang" ]; then export CXX="clang++"; fi
   - if [ "$TRAVIS_COMPILER" = "gcc" ]; then export CXX="g++"; fi
   - if [ -n "$CONTAINER" ]; then docker pull $CONTAINER; fi
+  - if [ -n "$TARGET" ]; then sudo aptitude update && sudo aptitude -y install libc-dev-bin=2.31-0ubuntu9.2 libc6=2.31-0ubuntu9.2 libc6-dev=2.31-0ubuntu9.2 libc6-i386=2.31-0ubuntu9.2 gcc-multilib; fi
   - |
         if [ "$TRAVIS_OS_NAME" = "freebsd" ]; then
             # Requested in ci/build-freebsd.sh
