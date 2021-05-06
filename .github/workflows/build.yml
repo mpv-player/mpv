@@ -1,0 +1,41 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+      - ci
+      - 'release/**'
+  pull_request:
+    branches: [master]
+
+jobs:
+  mingw:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        target: [i686-w64-mingw32, x86_64-w64-mingw32]
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: mingw_prefix/
+          key: ${{ matrix.target }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib nasm yasm
+          ./bootstrap.py
+
+      - name: Build
+        run: |
+          ./ci/build-mingw64.sh
+        env:
+          TARGET: ${{ matrix.target }}
+
+      - name: Print configure log
+        if: ${{ failure() }}
+        run: |
+          cat ./build/config.log

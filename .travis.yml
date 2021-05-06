@@ -14,23 +14,6 @@ _macbase:
         - $HOME/Library/Caches/Homebrew
         - /usr/local/Homebrew
 
-_mingwbase:
-  - &mingw
-    os: linux
-    addons:
-      apt:
-        packages:
-          - 'autoconf'
-          - 'automake'
-          - 'pkg-config'
-          - 'gcc-mingw-w64'
-          - 'gcc-multilib'
-          - 'nasm'
-          - 'yasm'
-    cache:
-      directories:
-        - mingw_prefix/
-
 matrix:
   include:
     - <<: *mac
@@ -51,10 +34,6 @@ matrix:
     - os: linux
       compiler: clang
       env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh
-    - <<: *mingw
-      env: CI_SCRIPT=ci/build-mingw64.sh TARGET=i686-w64-mingw32
-    - <<: *mingw
-      env: CI_SCRIPT=ci/build-mingw64.sh TARGET=x86_64-w64-mingw32
   allow_failures:
     - os: osx
       osx_image: xcode9.4
