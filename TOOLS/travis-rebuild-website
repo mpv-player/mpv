@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ "x$TARGET" != "xx86_64-w64-mingw32" ]; then
+if [ "$TRAVIS_OS_NAME" != "linux" ] || [ "$CC" != "clang" ]; then
   # trigger build only on one of the matrix nodes
   exit;
 fi
