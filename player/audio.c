@@ -314,6 +314,7 @@ static void ao_chain_set_ao(struct ao_chain *ao_c, struct ao *ao)
         mp_async_queue_set_notifier(ao_c->queue_filter, ao_c->ao_filter);
         // Make sure filtering never stops with frames stuck in access filter.
         mp_filter_set_high_priority(ao_c->queue_filter, true);
+        audio_update_volume(ao_c->mpctx);
     }
 
     if (ao_c->filter->ao_needs_update)
