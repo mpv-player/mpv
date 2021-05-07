@@ -116,9 +116,18 @@ error:
     mp_filter_internal_mark_failed(f);
 }
 
+static void vf_sub_destroy(struct mp_filter *f)
+{
+    struct mp_stream_info *info = mp_filter_find_stream_info(f);
+    struct osd_state *osd = info ? info->osd : NULL;
+    if (osd)
+        osd_set_render_subs_in_filter(osd, false);
+}
+
 static const struct mp_filter_info vf_sub_filter = {
     .name = "sub",
     .process = vf_sub_process,
+    .destroy = vf_sub_destroy,
     .priv_size = sizeof(struct priv),
 };
 
