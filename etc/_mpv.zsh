@@ -42,7 +42,7 @@ function _mpv_generate_arguments {
   local -a option_aliases=()
 
   local list_options_line
-  for list_options_line in "${(@f)$($words[1] --list-options)}"; do
+  for list_options_line in "${(@f)$($~words[1] --list-options)}"; do
 
     [[ $list_options_line =~ $'^[ \t]+--([^ \t]+)[ \t]*(.*)' ]] || continue
 
@@ -146,7 +146,7 @@ function _mpv_generate_arguments {
 function _mpv_generate_protocols {
   _mpv_completion_protocols=()
   local list_protos_line
-  for list_protos_line in "${(@f)$($words[1] --list-protocols)}"; do
+  for list_protos_line in "${(@f)$($~words[1] --list-protocols)}"; do
     if [[ $list_protos_line =~ $'^[ \t]+(.*)' ]]; then
       _mpv_completion_protocols+="$match[1]"
     fi
@@ -158,7 +158,7 @@ function _mpv_generate_if_changed {
   # on the first run and re-generates it if the executable being completed for
   # is different than the one we used to generate the cached list.
   typeset -gA _mpv_completion_binary
-  local current_binary=${words[1]:c}
+  local current_binary=${~words[1]:c}
   zmodload -F zsh/stat b:zstat
   current_binary+=T$(zstat +mtime $current_binary)
   if [[ $_mpv_completion_binary[$1] != $current_binary ]]; then
@@ -207,7 +207,7 @@ case $state in
     esac
     local -a values
     local current
-    for current in "${(@f)$($words[1] --${option_name}=help)}"; do
+    for current in "${(@f)$($~words[1] --${option_name}=help)}"; do
       [[ $current =~ $pattern ]] || continue;
       local name=${match[name_group]//:/\\:} desc=${match[desc_group]}
       if [[ -n $desc ]]; then
