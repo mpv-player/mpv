@@ -624,7 +624,7 @@ static const m_option_t mp_opts[] = {
         {"album", 2}),
         .flags = UPDATE_VOL},
     {"replaygain-preamp", OPT_FLOAT(rgain_preamp), .flags = UPDATE_VOL,
-        M_RANGE(-15, 15)},
+        M_RANGE(-150, 150)},
     {"replaygain-clip", OPT_FLAG(rgain_clip), .flags = UPDATE_VOL},
     {"replaygain-fallback", OPT_FLOAT(rgain_fallback), .flags = UPDATE_VOL,
         M_RANGE(-200, 60)},
