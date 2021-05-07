@@ -568,10 +568,8 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
     if (recreate_audio_filters(mpctx) < 0)
         goto init_error;
 
-    if (mpctx->ao) {
-        ao_chain_set_ao(ao_c, mpctx->ao);
+    if (mpctx->ao)
         audio_update_volume(mpctx);
-    }
 
     mp_wakeup_core(mpctx);
     return;
