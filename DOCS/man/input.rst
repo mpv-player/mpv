@@ -2625,6 +2625,9 @@ Property list
 
     This property is experimental and might be removed in the future.
 
+``secondary-sub-text``
+    Same as ``sub-text``, but for the secondary subtitles.
+
 ``sub-start``
     The current subtitle start time (in seconds). If there's multiple current
     subtitles, returns the first start time. If no current subtitle is present
