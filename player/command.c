@@ -2830,12 +2830,12 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-static int mp_property_sub_text(void *ctx, struct m_property *prop,
-                                int action, void *arg)
+static int get_sub_text(void *ctx, struct m_property *prop,
+                        int action, void *arg, int sub_index)
 {
     int type = *(int *)prop->priv;
     MPContext *mpctx = ctx;
-    struct track *track = mpctx->current_track[0][STREAM_SUB];
+    struct track *track = mpctx->current_track[sub_index][STREAM_SUB];
     struct dec_sub *sub = track ? track->d_sub : NULL;
     double pts = mpctx->playback_pts;
     if (!sub || pts == MP_NOPTS_VALUE)
@@ -2854,6 +2854,18 @@ static int mp_property_sub_text(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_sub_text(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    return get_sub_text(ctx, prop, action, arg, 0);
+}
+
+static int mp_property_secondary_sub_text(void *ctx, struct m_property *prop,
+                                          int action, void *arg)
+{
+    return get_sub_text(ctx, prop, action, arg, 1);
 }
 
 static struct sd_times get_times(void *ctx, struct m_property *prop,
@@ -3658,6 +3670,8 @@ static const struct m_property mp_properties_base[] = {
     {"sub-pos", mp_property_sub_pos},
     {"sub-text", mp_property_sub_text,
         .priv = (void *)&(const int){SD_TEXT_TYPE_PLAIN}},
+    {"secondary-sub-text", mp_property_secondary_sub_text,
+        .priv = (void *)&(const int){SD_TEXT_TYPE_PLAIN}},
     {"sub-text-ass", mp_property_sub_text,
         .priv = (void *)&(const int){SD_TEXT_TYPE_ASS}},
     {"sub-start", mp_property_sub_start},
@@ -3738,8 +3752,8 @@ static const char *const *const mp_event_property_change[] = {
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
       "vo-delayed-frame-count", "mistimed-frame-count", "vsync-ratio",
-      "estimated-display-fps", "vsync-jitter", "sub-text", "audio-bitrate",
-      "video-bitrate", "sub-bitrate", "decoder-frame-drop-count",
+      "estimated-display-fps", "vsync-jitter", "sub-text", "secondary-sub-text",
+      "audio-bitrate", "video-bitrate", "sub-bitrate", "decoder-frame-drop-count",
       "frame-drop-count", "video-frame-info", "vf-metadata", "af-metadata",
       "sub-start", "sub-end"),
     E(MP_EVENT_DURATION_UPDATE, "duration"),
