@@ -239,6 +239,26 @@ title. The subtitle stream will use ``ducks`` as title.
 The ``track_meta`` header is not part of the core EDL format. It may be changed
 or removed at any time, depending on mpv's internal requirements.
 
+Global metadata
+===============
+
+The special ``global_tags`` header can set metadata fields (aka tags) of the EDL
+file. This metadata is supposed to be informational, much like for example ID3
+tags in audio files. Due to lack of separation of different kinds of metadata it
+is unspecified what names are allowed, how they are interpreted, and whether
+some of them affect playback functionally. (Much of this is unfortunately
+inherited from FFmpeg. Another consequence of this is that FFmpeg "normalized"
+tags are recognized, or stuff like replaygain tags.)
+
+Example::
+
+    !global_tags,title=bla,something_arbitrary=even_more_arbitrary
+
+Any parameter names are allowed. Repeated use of this adds to the tag list. If
+``!new_stream`` is used, the location doesn't matter.
+
+May possibly be ignored in some cases, such as delayed media opening.
+
 Delayed media opening
 =====================
 

@@ -32,6 +32,7 @@
 #include "options/path.h"
 #include "misc/bstr.h"
 #include "common/common.h"
+#include "common/tags.h"
 #include "stream/stream.h"
 
 #define HEADER "# mpv EDL v0\n"
@@ -60,6 +61,7 @@ struct tl_parts {
 struct tl_root {
     struct tl_parts **pars;
     int num_pars;
+    struct mp_tags *tags;
 };
 
 struct priv {
@@ -171,6 +173,7 @@ static struct sh_stream *get_meta(struct tl_parts *tl, int index)
 static struct tl_root *parse_edl(bstr str, struct mp_log *log)
 {
     struct tl_root *root = talloc_zero(NULL, struct tl_root);
+    root->tags = talloc_zero(root, struct mp_tags);
     struct tl_parts *tl = add_part(root);
     while (str.len) {
         if (bstr_eatstart0(&str, "#")) {
@@ -273,6 +276,12 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
                 sh->codec->fps = get_param_int(&ctx, "fps", 0);
                 sh->codec->samplerate = get_param_int(&ctx, "samplerate", 0);
                 tl->delay_open = true;
+            } else if (bstr_equals0(f_type, "global_tags")) {
+                for (int n = 0; n < ctx.num_params; n++) {
+                    mp_tags_set_bstr(root->tags, ctx.param_names[n],
+                                     ctx.param_vals[n]);
+                }
+                ctx.num_params = 0;
             } else {
                 mp_err(log, "Unknown header: '%.*s'\n", BSTR_P(f_type));
                 goto error;
@@ -389,6 +398,7 @@ static void resolve_timestamps(struct tl_part *part, struct demuxer *demuxer)
 }
 
 static struct timeline_par *build_timeline(struct timeline *root,
+                                           struct tl_root *edl_root,
                                            struct tl_parts *parts)
 {
     struct timeline_par *tl = talloc_zero(root, struct timeline_par);
@@ -542,6 +552,11 @@ static struct timeline_par *build_timeline(struct timeline *root,
     if (!root->meta)
         root->meta = tl->track_layout;
 
+    // Not very sane, since demuxer fields are supposed to be treated read-only
+    // from outside, but happens to work in this case, so who cares.
+    if (root->meta)
+        mp_tags_merge(root->meta->metadata, edl_root->tags);
+
     assert(tl->num_parts == parts->num_parts);
     return tl;
 
@@ -581,7 +596,7 @@ static void build_mpv_edl_timeline(struct timeline *tl)
     for (int n = 0; n < root->num_pars; n++) {
         struct tl_parts *parts = root->pars[n];
         fix_filenames(parts, tl->demuxer->filename);
-        struct timeline_par *par = build_timeline(tl, parts);
+        struct timeline_par *par = build_timeline(tl, root, parts);
         if (!par)
             break;
         all_dash &= par->dash;
