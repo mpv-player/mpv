@@ -188,6 +188,11 @@
     <string>${VERSION}</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>LSEnvironment</key>
+    <dict>
+      <key>MallocNanoZone</key>
+      <string>0</string>
+    </dict>
     <key>CFBundleURLTypes</key>
     <array>
       <dict>
