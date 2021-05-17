@@ -1796,13 +1796,6 @@ void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha)
     }
 }
 
-void vo_wayland_sync_clear(struct vo_wayland_state *wl)
-{
-    struct vo_wayland_sync sync = {0, 0, 0, 0};
-    for (int i = 0; i < wl->sync_size; ++i)
-        wl->sync[i] = sync;
-}
-
 void vo_wayland_sync_shift(struct vo_wayland_state *wl)
 {
     for (int i = wl->sync_size - 1; i > 0; --i) {
@@ -1871,7 +1864,7 @@ void vo_wayland_wakeup(struct vo *vo)
     (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
 }
 
-void vo_wayland_wait_frame(struct vo_wayland_state *wl)
+bool vo_wayland_wait_frame(struct vo_wayland_state *wl)
 {
     int64_t vblank_time = 0;
     struct pollfd fds[1] = {
@@ -1922,19 +1915,28 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
         wl_display_dispatch_pending(wl->display);
     }
 
-    if (!wl->hidden && wl->frame_wait) {
-        wl->timeout_count += 1;
-        if (wl->timeout_count > ((1 / (double)vblank_time) * 1e6))
-            wl->hidden = true;
+    /* If the compositor does not have presentatiom time, we cannot be sure
+     * that this wait is accurate. Do some crap with wl_display_roundtrip
+     * and randomly assume that if timeouts > refresh rate, the window is
+     * hidden. This is neccesary otherwise we may mistakeningly skip rendering.*/
+    if (!wl->presentation) {
+        if (wl_display_get_error(wl->display) == 0)
+            wl_display_roundtrip(wl->display);
+        if (wl->frame_wait) {
+            if (wl->timeout_count > ((1 / (double)vblank_time) * 1e6)) {
+                return false;
+            } else {
+                wl->timeout_count += 1;
+                return true;
+            }
+        } else {
+            wl->timeout_count = 0;
+            return true;
+        }
+
     }
 
-    if (!wl->frame_wait) {
-        wl->timeout_count = 0;
-        wl->hidden = false;
-    }
-
-    if (wl_display_get_error(wl->display) == 0)
-        wl_display_roundtrip(wl->display);
+    return !wl->frame_wait;
 }
 
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
