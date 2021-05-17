@@ -218,11 +218,14 @@ static void draw_image(struct vo *vo, struct mp_image *src)
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
     struct buffer *buf;
+    bool callback = true;
 
-    if (wl->hidden)
-        return;
+    if (!wl->opts->disable_vsync)
+        callback = vo_wayland_wait_frame(wl);
 
     wl->frame_wait = true;
+    if (!callback)
+        return;
 
     buf = p->free_buffers;
     if (buf) {
@@ -273,9 +276,6 @@ static void flip_page(struct vo *vo)
     wl_surface_damage(wl->surface, 0, 0, mp_rect_w(wl->geometry),
                       mp_rect_h(wl->geometry));
     wl_surface_commit(wl->surface);
-
-    if (!wl->opts->disable_vsync)
-        vo_wayland_wait_frame(wl);
 
     if (wl->presentation)
         wayland_sync_swap(wl);
