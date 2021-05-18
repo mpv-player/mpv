@@ -73,7 +73,8 @@ const struct m_sub_options stream_lavf_conf = {
     },
 };
 
-static const char *const http_like[];
+static const char *const http_like[] =
+    {"http", "https", "mmsh", "mmshttp", "httproxy", NULL};
 
 static int open_f(stream_t *stream);
 static struct mp_tags *read_icy(stream_t *stream);
@@ -403,9 +404,6 @@ done:
     av_free(icy_packet);
     return res;
 }
-
-static const char *const http_like[] =
-    {"http", "https", "mmsh", "mmshttp", "httproxy", NULL};
 
 const stream_info_t stream_info_ffmpeg = {
   .name = "ffmpeg",
