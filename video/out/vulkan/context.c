@@ -18,6 +18,7 @@
 #include "options/m_config.h"
 #include "video/out/placebo/ra_pl.h"
 
+#include "config.h"
 #include "context.h"
 #include "utils.h"
 

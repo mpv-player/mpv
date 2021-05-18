@@ -15,6 +15,10 @@ for ac_option do
     version_h="$(pwd)/$ac_arg"
     print=no
     ;;
+  --versionh_abs=*)
+    version_h="$ac_arg"
+    print=no
+    ;;
   --cwd=*)
     cwd="$ac_arg"
     ;;

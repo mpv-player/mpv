@@ -1,4 +1,5 @@
 #pragma once
+#define PL_DEPRECATED __attribute__((deprecated))
 
 #include <stdlib.h>
 #include <stdio.h>
