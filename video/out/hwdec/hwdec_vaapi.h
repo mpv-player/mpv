@@ -33,7 +33,7 @@ struct priv_owner {
                          const struct ra_imgfmt_desc *desc);
     void (*interop_uninit)(const struct ra_hwdec_mapper *mapper);
 
-    bool (*interop_map)(struct ra_hwdec_mapper *mapper);
+    bool (*interop_map)(struct ra_hwdec_mapper *mapper, bool probing);
     void (*interop_unmap)(struct ra_hwdec_mapper *mapper);
 };
 

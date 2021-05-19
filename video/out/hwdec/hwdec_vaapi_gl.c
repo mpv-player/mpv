@@ -137,7 +137,7 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
                         p_mapper->desc.layers[n].pitch[plane]); \
         } while (0)
 
-static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper)
+static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
 {
     struct priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;

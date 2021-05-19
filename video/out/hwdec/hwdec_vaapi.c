@@ -249,7 +249,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     CHECK_VA_STATUS(mapper, "vaSyncSurface()");
     p->surface_acquired = true;
 
-    if (!p_owner->interop_map(mapper))
+    if (!p_owner->interop_map(mapper, p_owner->probing_formats))
         goto err;
 
     if (p->desc.fourcc == VA_FOURCC_YV12)

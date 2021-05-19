@@ -21,8 +21,9 @@
 #include "config.h"
 #include "hwdec_vaapi.h"
 #include "video/out/placebo/ra_pl.h"
+#include "video/out/placebo/utils.h"
 
-static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper)
+static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper, bool probing)
 {
     struct priv *p = mapper->priv;
     const struct pl_gpu *gpu = ra_pl_get(mapper->ra);
@@ -92,7 +93,9 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper)
             },
         };
 
+        mppl_ctx_set_log(gpu->ctx, mapper->ra->log, probing);
         const struct pl_tex *pltex = pl_tex_create(gpu, &tex_params);
+        mppl_ctx_set_log(gpu->ctx, mapper->ra->log, false);
         if (!pltex) {
             return false;
         }
