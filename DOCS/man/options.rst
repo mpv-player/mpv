@@ -4780,6 +4780,30 @@ Network
     are not used for https URLs. Setting this option does not try to make the
     ytdl script use the proxy.
 
+``--icy-codepage=<codepage>``
+    Codepage to use for decoding icy-title metadata. uchardet will be
+    used to guess the charset. (If mpv was not compiled with uchardet, then
+    ``utf-8`` is the effective default.)
+
+    The default value for this option is ``auto``, which enables autodetection.
+
+    The following steps are taken to determine the final codepage, in order:
+
+    - if the specific codepage has a ``+``, use that codepage
+    - if the data looks like UTF-8, assume it is UTF-8
+    - if ``--icy-codepage`` is set to a specific codepage, use that
+    - run uchardet, and if successful, use that
+    - otherwise, use ``UTF-8-BROKEN``
+
+    .. admonition:: Examples
+
+        - ``--icy-codepage=latin2`` Use Latin 2 if input is not UTF-8.
+        - ``--icy-codepage=+cp1250`` Always force recoding to cp1250.
+
+    The pseudo codepage ``UTF-8-BROKEN`` is used internally. If it's set,
+    the icy-title is interpreted as UTF-8 with "Latin 1" as fallback for bytes
+    which are not valid UTF-8 sequences. iconv is never involved in this mode.
+
 ``--tls-ca-file=<filename>``
     Certificate authority database file for use with TLS. (Silently fails with
     older FFmpeg or Libav versions.)

@@ -24,6 +24,7 @@
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
+#include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "stream.h"
 #include "options/m_config.h"
@@ -48,6 +49,7 @@ struct stream_lavf_params {
     char *tls_key_file;
     double timeout;
     char *http_proxy;
+    char *icy_codepage;
 };
 
 const struct m_sub_options stream_lavf_conf = {
@@ -64,11 +66,13 @@ const struct m_sub_options stream_lavf_conf = {
         {"tls-key-file", OPT_STRING(tls_key_file), .flags = M_OPT_FILE},
         {"network-timeout", OPT_DOUBLE(timeout), M_RANGE(0, DBL_MAX)},
         {"http-proxy", OPT_STRING(http_proxy)},
+        {"icy-codepage", OPT_STRING(icy_codepage)},
         {0}
     },
     .size = sizeof(struct stream_lavf_params),
     .defaults = &(const struct stream_lavf_params){
         .useragent = "libmpv",
+        .icy_codepage = "auto",
         .timeout = 60,
     },
 };
@@ -394,6 +398,16 @@ static struct mp_tags *read_icy(stream_t *s)
         packet = bstr_cut(packet, i + head.len);
         int end = bstr_find(packet, bstr0("\';"));
         packet = bstr_splice(packet, 0, end);
+
+        void *temp = talloc_new(NULL);
+        struct stream_lavf_params *opts =
+            mp_get_config_group(temp, s->global, &stream_lavf_conf);
+        const char* packet_charset = mp_charset_guess(NULL, s->log, packet, opts->icy_codepage, 0);
+        talloc_free(temp);
+        if(packet_charset != NULL) {
+            packet = mp_iconv_to_utf8(s->log, packet, packet_charset, 0);
+        }
+
         mp_tags_set_bstr(res, bstr0("icy-title"), packet);
     }
 
