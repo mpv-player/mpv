@@ -888,7 +888,8 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
                      float coeff = cmin / (cmin - luma);
                      color.rgb = mix(color.rgb, vec3(luma), coeff);
                  })
-            GLSL(float cmax = max(max(color.r, color.g), color.b);)
+            GLSLF("float cmax = 1.0/%f * max(max(color.r, color.g), color.b);\n",
+                  dst.sig_peak);
             GLSL(if (cmax > 1.0) color.rgb /= cmax;)
         }
     }
