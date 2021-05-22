@@ -4,6 +4,8 @@
 #include "audio/chmap.h"
 #include "audio/filter/af_scaletempo2_internals.h"
 
+#include "config.h"
+
 // Algorithm overview (from chromium):
 // Waveform Similarity Overlap-and-add (WSOLA).
 //
@@ -104,6 +106,10 @@ static float multi_channel_similarity_measure(
     return similarity_measure;
 }
 
+#if HAVE_VECTOR
+
+typedef float v8sf __attribute__ ((vector_size (32), aligned (1)));
+
 // Dot-product of channels of two AudioBus. For each AudioBus an offset is
 // given. |dot_product[k]| is the dot-product of channel |k|. The caller should
 // allocate sufficient space for |dot_product|.
@@ -116,15 +122,78 @@ static void multi_channel_dot_product(
     assert(frame_offset_a >= 0);
     assert(frame_offset_b >= 0);
 
-    memset(dot_product, 0, sizeof(*dot_product) * channels);
     for (int k = 0; k < channels; ++k) {
         const float* ch_a = a[k] + frame_offset_a;
         const float* ch_b = b[k] + frame_offset_b;
-        for (int n = 0; n < num_frames; ++n) {
-            dot_product[k] += *ch_a++ * *ch_b++;
+        float sum = 0.0;
+        if (num_frames < 32)
+            goto rest;
+
+        const v8sf *va = (const v8sf *) ch_a;
+        const v8sf *vb = (const v8sf *) ch_b;
+        v8sf vsum[4] = {
+            // Initialize to product of first 32 floats
+            va[0] * vb[0],
+            va[1] * vb[1],
+            va[2] * vb[2],
+            va[3] * vb[3],
+        };
+        va += 4;
+        vb += 4;
+
+        // Process `va` and `vb` across four vertical stripes
+        for (int n = 1; n < num_frames / 32; n++) {
+            vsum[0] += va[0] * vb[0];
+            vsum[1] += va[1] * vb[1];
+            vsum[2] += va[2] * vb[2];
+            vsum[3] += va[3] * vb[3];
+            va += 4;
+            vb += 4;
         }
+
+        // Vertical sum across `vsum` entries
+        vsum[0] += vsum[1];
+        vsum[2] += vsum[3];
+        vsum[0] += vsum[2];
+
+        // Horizontal sum across `vsum[0]`, could probably be done better but
+        // this section is not super performance critical
+        float *vf = (float *) &vsum[0];
+        sum = vf[0] + vf[1] + vf[2] + vf[3] + vf[4] + vf[5] + vf[6] + vf[7];
+        ch_a = (const float *) va;
+        ch_b = (const float *) vb;
+
+rest:
+        // Process the remainder
+        for (int n = 0; n < num_frames % 32; n++)
+            sum += *ch_a++ * *ch_b++;
+
+        dot_product[k] = sum;
     }
 }
+
+#else // !HAVE_VECTOR
+
+static void multi_channel_dot_product(
+    float **a, int frame_offset_a,
+    float **b, int frame_offset_b,
+    int channels,
+    int num_frames, float *dot_product)
+{
+    assert(frame_offset_a >= 0);
+    assert(frame_offset_b >= 0);
+
+    for (int k = 0; k < channels; ++k) {
+        const float* ch_a = a[k] + frame_offset_a;
+        const float* ch_b = b[k] + frame_offset_b;
+        float sum = 0.0;
+        for (int n = 0; n < num_frames; n++)
+            sum += *ch_a++ * *ch_b++;
+        dot_product[k] = sum;
+    }
+}
+
+#endif // HAVE_VECTOR
 
 // Fit the curve f(x) = a * x^2 + b * x + c such that
 //   f(-1) = y[0]
