@@ -1,6 +1,10 @@
 #include <float.h>
 #include <math.h>
 
+#ifdef __aarch64__
+#include <arm_neon.h>
+#endif
+
 #include "audio/chmap.h"
 #include "audio/filter/af_scaletempo2_internals.h"
 
@@ -116,7 +120,31 @@ static void multi_channel_dot_product(
     assert(frame_offset_a >= 0);
     assert(frame_offset_b >= 0);
 
+#ifdef __aarch64__
+    for (int k = 0; k < channels; ++k) {
+        float32x4_t dp = vmovq_n_f32(0.0);
+        const float* ch_a = a[k] + frame_offset_a;
+        const float* ch_b = b[k] + frame_offset_b;
+        int n = 0;
+        for (; n < num_frames - 7; n += 8) {
+            float32x4_t a_ld = vld1q_f32(ch_a);
+            float32x4_t b_ld = vld1q_f32(ch_b);
+            dp = vfmaq_f32(dp, a_ld, b_ld);
+            a_ld = vld1q_f32(ch_a + 4);
+            b_ld = vld1q_f32(ch_b + 4);
+            dp = vfmaq_f32(dp, a_ld, b_ld);
+            ch_a += 8;
+            ch_b += 8;
+        }
+        float after_simd = vaddvq_f32(dp);
+        for(; n < num_frames; n++) {
+            after_simd += *ch_a++ * *ch_b++;
+        }
+        dot_product[k] = after_simd;
+    }
+#else
     memset(dot_product, 0, sizeof(*dot_product) * channels);
+
     for (int k = 0; k < channels; ++k) {
         const float* ch_a = a[k] + frame_offset_a;
         const float* ch_b = b[k] + frame_offset_b;
@@ -124,6 +152,7 @@ static void multi_channel_dot_product(
             dot_product[k] += *ch_a++ * *ch_b++;
         }
     }
+#endif
 }
 
 // Fit the curve f(x) = a * x^2 + b * x + c such that
