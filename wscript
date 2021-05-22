@@ -117,6 +117,10 @@ build_options = [
         'default': 'enable',
         'func': check_true,
     }, {
+        'name': '--vector',
+        'desc': 'GCC vector instructions',
+        'func': check_statement([], 'float v __attribute__((vector_size(32)))'),
+    }, {
         'name': '--clang-database',
         'desc': 'generate a clang compilation database',
         'func': check_true,
