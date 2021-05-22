@@ -116,13 +116,14 @@ static void multi_channel_dot_product(
     assert(frame_offset_a >= 0);
     assert(frame_offset_b >= 0);
 
-    memset(dot_product, 0, sizeof(*dot_product) * channels);
     for (int k = 0; k < channels; ++k) {
         const float* ch_a = a[k] + frame_offset_a;
         const float* ch_b = b[k] + frame_offset_b;
+        float dp = 0;
         for (int n = 0; n < num_frames; ++n) {
-            dot_product[k] += *ch_a++ * *ch_b++;
+            dp += *ch_a++ * *ch_b++;
         }
+        dot_product[k] = dp;
     }
 }
 
