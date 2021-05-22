@@ -36,3 +36,6 @@
 
 /old_build
 /Makefile
+
+/mpv.xcodeproj/project.xcworkspace/xcuserdata
+/mpv.xcodeproj/xcuserdata
