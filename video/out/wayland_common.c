@@ -700,6 +700,7 @@ static void output_handle_done(void* data, struct wl_output *wl_output)
         wl->window_size = wl->vdparams;
         if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
             wl->geometry = wl->window_size;
+        wl->pending_vo_events |= VO_EVENT_DPI;
         wl->pending_vo_events |= VO_EVENT_RESIZE;
     }
     
