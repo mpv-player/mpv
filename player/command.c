@@ -3776,7 +3776,7 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-state"),
     E(MP_EVENT_WIN_RESIZE, "current-window-scale", "osd-width", "osd-height",
       "osd-par", "osd-dimensions"),
-    E(MP_EVENT_WIN_STATE, "display-names", "display-fps" "display-width",
+    E(MP_EVENT_WIN_STATE, "display-names", "display-fps", "display-width",
       "display-height"),
     E(MP_EVENT_WIN_STATE2, "display-hidpi-scale"),
     E(MP_EVENT_FOCUS, "focused"),
