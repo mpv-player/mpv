@@ -32,18 +32,19 @@ struct priv {
 static bool wayland_vk_start_frame(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
-    bool render = true;
-
-    if (!wl->opts->disable_vsync)
-        render = vo_wayland_wait_frame(wl);
-
+    bool render = wl->render || wl->opts->disable_vsync;
     wl->frame_wait = true;
+
     return render;
 }
 
 static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
+
+    if (!wl->opts->disable_vsync)
+        vo_wayland_wait_frame(wl);
+
     if (wl->presentation)
         wayland_sync_swap(wl);
 }

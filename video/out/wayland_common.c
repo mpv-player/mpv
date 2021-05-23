@@ -1864,7 +1864,7 @@ void vo_wayland_wakeup(struct vo *vo)
     (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
 }
 
-bool vo_wayland_wait_frame(struct vo_wayland_state *wl)
+void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 {
     int64_t vblank_time = 0;
     struct pollfd fds[1] = {
@@ -1916,27 +1916,25 @@ bool vo_wayland_wait_frame(struct vo_wayland_state *wl)
     }
 
     /* If the compositor does not have presentatiom time, we cannot be sure
-     * that this wait is accurate. Do some crap with wl_display_roundtrip
-     * and randomly assume that if timeouts > refresh rate, the window is
-     * hidden. This is neccesary otherwise we may mistakeningly skip rendering.*/
-    if (!wl->presentation) {
-        if (wl_display_get_error(wl->display) == 0)
-            wl_display_roundtrip(wl->display);
-        if (wl->frame_wait) {
-            if (wl->timeout_count > ((1 / (double)vblank_time) * 1e6)) {
-                return false;
-            } else {
-                wl->timeout_count += 1;
-                return true;
-            }
-        } else {
-            wl->timeout_count = 0;
-            return true;
-        }
+     * that this wait is accurate. Do a hacky block with wl_display_roundtrip. */
+    if (!wl->presentation && !wl_display_get_error(wl->display))
+        wl_display_roundtrip(wl->display);
 
+    if (wl->frame_wait) {
+        // Only consider consecutive missed callbacks.
+        if (wl->timeout_count > 1) {
+            wl->render = false;
+            return;
+        } else {
+            wl->timeout_count += 1;
+            wl->render = true;
+            return;
+        }
     }
 
-    return !wl->frame_wait;
+    wl->timeout_count = 0;
+    wl->render = true;
+    return;
 }
 
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
