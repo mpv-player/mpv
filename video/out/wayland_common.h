@@ -74,6 +74,7 @@ struct vo_wayland_state {
     int reduced_width;
     int reduced_height;
     bool frame_wait;
+    bool render;
     bool state_change;
     bool toplevel_configured;
     bool activated;
@@ -152,7 +153,7 @@ int last_available_sync(struct vo_wayland_state *wl);
 void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wakeup(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
-bool vo_wayland_wait_frame(struct vo_wayland_state *wl);
+void vo_wayland_wait_frame(struct vo_wayland_state *wl);
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha);
 void wayland_sync_swap(struct vo_wayland_state *wl);
 void vo_wayland_sync_shift(struct vo_wayland_state *wl);
