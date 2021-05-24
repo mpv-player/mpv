@@ -9,7 +9,7 @@ __all__ = [
     "check_pkg_config_cflags", "check_cc", "check_statement", "check_libs",
     "check_headers", "compose_checks", "any_check", "check_true", "any_version",
     "load_fragment", "check_stub", "check_ctx_vars", "check_program",
-    "check_pkg_config_datadir", "check_macos_sdk"]
+    "check_pkg_config_datadir", "check_macos_sdk", "check_preprocessor"]
 
 any_version = None
 
@@ -45,6 +45,23 @@ def check_libs(libs, function):
             if function(ctx, dependency_identifier, **kwargs):
                 return True
         return False
+    return fn
+
+def check_preprocessor(header, expression, **kw_ext):
+    def fn(ctx, dependency_identifier, **kw):
+        headers = header
+        if not isinstance(headers, list):
+            headers = [header]
+        hs = "\n".join(["#include <{0}>".format(h) for h in headers])
+        fragment = ("{0}\n"
+                    "#if !({1})\n#error\n#endif\n"
+                    "int main(int argc, char **argv)\n"
+                    "{{ return 0; }}").format(hs, expression)
+        opts = __merge_options__(dependency_identifier,
+                                 {'fragment':fragment},
+                                 __define_options__(dependency_identifier),
+                                 kw_ext, kw)
+        return ctx.check_cc(**_filter_cc_arguments(ctx, opts))
     return fn
 
 def check_statement(header, statement, **kw_ext):

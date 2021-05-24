@@ -65,6 +65,7 @@ extern const struct vo_driver video_out_wlshm;
 extern const struct vo_driver video_out_rpi;
 extern const struct vo_driver video_out_tct;
 extern const struct vo_driver video_out_sixel;
+extern const struct vo_driver video_out_placebo;
 
 const struct vo_driver *const video_out_drivers[] =
 {
@@ -73,6 +74,9 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_mediacodec_embed,
 #endif
     &video_out_gpu,
+#if HAVE_VO_PLACEBO
+    &video_out_placebo,
+#endif
 #if HAVE_VDPAU
     &video_out_vdpau,
 #endif

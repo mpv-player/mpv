@@ -37,6 +37,7 @@ Interface changes
     - add an additional optional `albumart` argument to the `video-add` command,
       which tells mpv to load the given video as album art.
     - undeprecate `--cache-secs` option
+    - add the `--vo=placebo` video output driver
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
       when the player enters fullscreen.

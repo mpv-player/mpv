@@ -257,6 +257,14 @@ Available video output drivers are:
     with ``rgb32f``. If you have problems, you can also try enabling the
     ``--gpu-dumb-mode=yes`` option.
 
+``placebo``
+    Video renderer based on ``libplacebo``. This supports almost the same
+    set of features as ``--vo=gpu``. See `GPU renderer options`_ for a list.
+
+    Currently, this only supports ``--gpu-api=vulkan``, and no hardware
+    decoding. Unlike ``--vo=gpu``, the FBO formats are not tunable, but you can
+    still set ``--gpu-dumb-mode=yes`` to forcibly disable their use.
+
 ``sdl``
     SDL 2.0+ Render video output driver, depending on system with or without
     hardware acceleration. Should work on all platforms supported by SDL 2.0.

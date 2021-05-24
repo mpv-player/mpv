@@ -129,13 +129,14 @@ static bool mp_image_fill_alloc(struct mp_image *mpi, int stride_align,
 // align the plane start pointers and strides. Once the last reference to the
 // returned image is destroyed, free(free_opaque, buffer) is called. (Be aware
 // that this can happen from any thread.)
-// The allocated size of buffer must be given by buffer_size. buffer_size should
-// be at least the value returned by mp_image_get_alloc_size(). If buffer is not
-// already aligned to stride_align, the function will attempt to align the
-// pointer itself by incrementing the buffer pointer until ther alignment is
-// achieved (if buffer_size is not large enough to allow aligning the buffer
-// safely, the function fails). To be safe, you may want to overallocate the
-// buffer by stride_align bytes, and include the overallocation in buffer_size.
+// The allocated size of buffer must be given by buffer_size. buffer_size
+// should be at least the value returned by mp_image_get_alloc_size() plus
+// buffer_offset. If buffer is not already aligned to stride_align, the
+// function will attempt to align the pointer itself by incrementing the buffer
+// pointer until the alignment is achieved (if buffer_size is not large enough
+// to allow aligning the buffer safely, the function fails). To be safe, you
+// may want to overallocate the buffer by stride_align bytes, and include the
+// overallocation in buffer_size.
 // Returns NULL on failure. On failure, the free() callback is not called.
 struct mp_image *mp_image_from_buffer(int imgfmt, int w, int h, int stride_align,
                                       uint8_t *buffer, int buffer_size,

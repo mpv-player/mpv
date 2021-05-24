@@ -23,6 +23,13 @@
 #include "utils.h"
 #include "video.h"
 
+struct deband_opts {
+    int iterations;
+    float threshold;
+    float range;
+    float grain;
+};
+
 extern const struct deband_opts deband_opts_def;
 extern const struct m_sub_options deband_conf;
 

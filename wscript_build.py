@@ -496,6 +496,7 @@ def build(ctx):
         ( "video/out/vo_libmpv.c" ),
         ( "video/out/vo_mediacodec_embed.c",     "android" ),
         ( "video/out/vo_null.c" ),
+        ( "video/out/vo_placebo.c",              "vo-placebo" ),
         ( "video/out/vo_rpi.c",                  "rpi-mmal" ),
         ( "video/out/vo_sdl.c",                  "sdl2-video" ),
         ( "video/out/vo_sixel.c",                "sixel" ),
