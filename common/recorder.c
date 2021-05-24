@@ -31,7 +31,7 @@
 // Maximum number of packets we buffer at most to attempt to resync streams.
 // Essentially, this should be higher than the highest supported keyframe
 // interval.
-#define QUEUE_MAX_PACKETS 256
+#define QUEUE_MAX_PACKETS 128
 // Number of packets we should buffer at least to determine timestamps (due to
 // codec delay and frame reordering, and potentially lack of DTS).
 // Keyframe flags can trigger this earlier.
@@ -229,7 +229,10 @@ static void mux_packets(struct mp_recorder_sink *rst, bool force)
         if (rst->packets[n]->keyframe)
             safe_count = n;
     }
-    if (force)
+    // Long keyframeless sections can fill our queue, so just dump the
+    // packets if that happens (it's safe to do so anyway, with
+    // av_interleaved_write_frame handling interleaving for us)
+    if (force || rst->num_packets >= QUEUE_MAX_PACKETS)
         safe_count = rst->num_packets;
 
     for (int n = 0; n < safe_count; n++) {
