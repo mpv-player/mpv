@@ -91,6 +91,12 @@ static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
     if (!avp)
         return -1;
 
+    // Check if we get the same codec_tag for the output format;
+    // otherwise clear it to have a chance at muxing
+    if (av_codec_get_id(priv->mux->oformat->codec_tag,
+                        avp->codec_tag) != avp->codec_tag)
+        avp->codec_tag = 0;
+
     // We don't know the delay, so make something up. If the format requires
     // DTS, the result will probably be broken. FFmpeg provides nothing better
     // yet (unless you demux with libavformat, which contains tons of hacks
