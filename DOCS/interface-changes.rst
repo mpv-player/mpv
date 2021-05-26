@@ -79,6 +79,7 @@ Interface changes
     - add `--gamut-mapping-mode=perceptual|relative|saturation|absolute|linear`
     - add `--corner-rounding` option
     - change `--subs-with-matching-audio` default from `yes` to `no`
+    - change `--slang` default from blank to `auto`
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,
