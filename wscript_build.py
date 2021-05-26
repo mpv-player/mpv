@@ -582,6 +582,7 @@ def build(ctx):
         ( "osdep/polldev.c",                     "posix" ),
 
         ( "osdep/android/strnlen.c",             "android"),
+        ( "osdep/apple_utils.c",                 "cocoa" ),
         ( "osdep/glob-win.c",                    "glob-win32" ),
         ( "osdep/macosx_application.m",          "cocoa" ),
         ( "osdep/macosx_events.m",               "cocoa" ),

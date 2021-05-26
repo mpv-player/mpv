@@ -384,7 +384,8 @@ cocoa = dependency('appleframeworks', modules: ['Cocoa', 'IOKit', 'QuartzCore'],
 features += {'cocoa': cocoa.found()}
 if features['cocoa']
     dependencies += cocoa
-    sources += files('osdep/macosx_application.m',
+    sources += files('osdep/apple_utils.c',
+                     'osdep/macosx_application.m',
                      'osdep/macosx_events.m',
                      'osdep/macosx_menubar.m',
                      'osdep/main-fn-cocoa.c',
