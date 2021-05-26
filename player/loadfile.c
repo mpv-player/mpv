@@ -47,6 +47,7 @@
 #include "common/recorder.h"
 #include "common/stats.h"
 #include "input/input.h"
+#include "misc/language.h"
 
 #include "audio/out/ao.h"
 #include "filters/f_decoder_wrapper.h"
@@ -447,8 +448,9 @@ static int match_lang(char **langs, const char *lang)
     if (!lang)
         return 0;
     for (int idx = 0; langs && langs[idx]; idx++) {
-        if (lang && strcasecmp(langs[idx], lang) == 0)
-            return INT_MAX - idx;
+        int score = mp_match_lang_single(langs[idx], lang);
+        if (score > 0)
+            return INT_MAX - (idx + 1) * LANGUAGE_SCORE_MAX + score - 1;
     }
     return 0;
 }
