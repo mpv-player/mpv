@@ -249,6 +249,12 @@ def build(ctx):
         ( "osdep/subprocess-dummy.c" ),
     ])
 
+    language_c = ctx.pick_first_matching_dep([
+        ( "osdep/language-apple.c",              "cocoa" ),
+        ( "osdep/language-win.c",                "win32-desktop" ),
+        ( "osdep/language-posix.c" ),
+    ])
+
     sources = [
         ## Audio
         ( "audio/aframe.c" ),
@@ -580,6 +586,8 @@ def build(ctx):
         ( "osdep/timer.c" ),
         ( timer_c ),
         ( "osdep/polldev.c",                     "posix" ),
+
+        ( language_c ),
 
         ( "osdep/android/strnlen.c",             "android"),
         ( "osdep/apple_utils.c",                 "cocoa" ),
