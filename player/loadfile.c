@@ -529,12 +529,53 @@ static bool duplicate_track(struct MPContext *mpctx, int order,
     return false;
 }
 
+static bool append_lang(size_t *nb, char ***out, char *in)
+{
+    if (!in)
+        return false;
+    MP_TARRAY_GROW(NULL, *out, *nb + 1);
+    (*out)[(*nb)++] = in;
+    (*out)[*nb] = NULL;
+    return true;
+}
+
+static bool add_auto_langs(size_t *nb, char ***out)
+{
+    bool ret = false;
+    char **autos = mp_get_user_langs();
+    for (int i = 0; autos && autos[i]; i++) {
+        if (!append_lang(nb, out, talloc_steal(*out, autos[i])))
+            goto cleanup;
+    }
+    ret = true;
+
+cleanup:
+    talloc_free(autos);
+    return ret;
+}
+
+static char **process_langs(char **in)
+{
+    size_t nb = 0;
+    char **out = NULL;
+    for (int i = 0; in && in[i]; i++) {
+        if (!strcmp(in[i], "auto")) {
+            if (!add_auto_langs(&nb, &out))
+                break;
+        } else {
+            if (!append_lang(&nb, &out, talloc_strdup(out, in[i])))
+                break;
+        }
+    }
+    return out;
+}
+
 struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type)
 {
     struct MPOpts *opts = mpctx->opts;
     int tid = opts->stream_id[order][type];
-    char **langs = opts->stream_lang[type];
+    char **langs = process_langs(opts->stream_lang[type]);
     int prefer_forced = type != STREAM_SUB ||
                         (!opts->subs_with_matching_audio &&
                          mpctx->current_track[0][STREAM_AUDIO] &&
@@ -549,8 +590,10 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         struct track *track = mpctx->tracks[n];
         if (track->type != type)
             continue;
-        if (track->user_tid == tid)
-            return track;
+        if (track->user_tid == tid) {
+            pick = track;
+            goto cleanup;
+        }
         if (tid >= 0)
             continue;
         if (track->no_auto_select)
@@ -571,6 +614,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     if (pick && type == STREAM_SUB && prefer_forced && !pick->forced_track &&
         opts->subs_rend->forced_subs_only == -1)
         opts->subs_rend->forced_subs_only_current = 1;
+cleanup:
+    talloc_free(langs);
     return pick;
 }
 
