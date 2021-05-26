@@ -131,6 +131,7 @@ sources = files(
     'misc/charset_conv.c',
     'misc/dispatch.c',
     'misc/json.c',
+    'misc/language.c',
     'misc/natural_sort.c',
     'misc/node.c',
     'misc/random.c',
