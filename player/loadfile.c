@@ -444,6 +444,8 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
 // Result numerically higher => better match. 0 == no match.
 static int match_lang(char **langs, char *lang)
 {
+    if (!lang)
+        return 0;
     for (int idx = 0; langs && langs[idx]; idx++) {
         if (lang && strcasecmp(langs[idx], lang) == 0)
             return INT_MAX - idx;
