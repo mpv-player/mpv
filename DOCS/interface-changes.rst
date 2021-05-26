@@ -78,6 +78,7 @@ Interface changes
     - remove the `--tone-mapping-crosstalk` option
     - add `--gamut-mapping-mode=perceptual|relative|saturation|absolute|linear`
     - add `--corner-rounding` option
+    - change `--subs-with-matching-audio` default from `yes` to `no`
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,

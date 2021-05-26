@@ -136,9 +136,8 @@ Track Selection
     referenced tracks are always selected.
 
 ``--subs-with-matching-audio=<yes|no>``
-    When autoselecting a subtitle track, select a non-forced one even if the selected
-    audio stream matches your preferred subtitle language (default: yes). Disable this
-    if you'd like to only show subtitles for foreign audio or onscreen text.
+    When autoselecting a subtitle track, select a full/non-forced one even if the selected
+    audio stream matches your preferred subtitle language (default: no).
 
 
 Playback Control
