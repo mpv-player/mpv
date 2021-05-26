@@ -24,7 +24,7 @@ Track Selection
           audio.
 
 ``--slang=<languagecode[,languagecode,...]>``
-    Equivalent to ``--alang``, for subtitle tracks.
+    Equivalent to ``--alang``, for subtitle tracks (default: auto).
 
     This is a string list option. See `List Options`_ for details.
 
