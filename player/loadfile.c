@@ -442,7 +442,7 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
 }
 
 // Result numerically higher => better match. 0 == no match.
-static int match_lang(char **langs, char *lang)
+static int match_lang(char **langs, const char *lang)
 {
     if (!lang)
         return 0;
