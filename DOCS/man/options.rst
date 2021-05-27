@@ -6714,8 +6714,9 @@ Miscellaneous
     Automatically load/select external files (default: yes).
 
     If set to ``no``, then do not automatically load external files as specified
-    by ``--sub-auto`` and ``--audio-file-auto``. If external files are forcibly
-    added (like with ``--sub-files``), they will not be auto-selected.
+    by ``--sub-auto``, ``--audio-file-auto`` and ``--cover-art-auto``. If
+    external files are forcibly added (like with ``--sub-files``), they will
+    not be auto-selected.
 
     This does not affect playlist expansion, redirection, or other loading of
     referenced files like with ordered chapters.
