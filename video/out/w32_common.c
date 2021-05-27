@@ -97,6 +97,8 @@ struct vo_w32_state {
     // Has the window seen a WM_DESTROY? If so, don't call DestroyWindow again.
     bool destroyed;
 
+    bool focused;
+
     // whether the window position and size were intialized
     bool window_bounds_initialized;
 
@@ -1210,7 +1212,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_KILLFOCUS:
         mp_input_put_key(w32->input_ctx, MP_INPUT_RELEASE_ALL);
-        break;
+        w32->focused = false;
+        signal_events(w32, VO_EVENT_FOCUS);
+        return 0;
+    case WM_SETFOCUS:
+        w32->focused = true;
+        signal_events(w32, VO_EVENT_FOCUS);
+        return 0;
     case WM_SETCURSOR:
         // The cursor should only be hidden if the mouse is in the client area
         // and if the window isn't in menu mode (HIWORD(lParam) is non-zero)
@@ -1785,6 +1793,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             return p->len ? VO_TRUE : VO_FALSE;
         }
         return VO_FALSE;
+    case VOCTRL_GET_FOCUSED:
+        *(bool *)arg = w32->focused;
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
