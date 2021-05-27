@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "player/core.h"
 #include "osd.h"
 
 struct sh_stream;
@@ -36,7 +37,7 @@ struct attachment_list {
     int num_entries;
 };
 
-struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
+struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
                            struct attachment_list *attachments, int order);
 void sub_destroy(struct dec_sub *sub);
 

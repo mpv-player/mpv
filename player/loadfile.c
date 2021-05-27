@@ -591,6 +591,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     struct track *forced_pick = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
+        track->forced_only_def = false;
         if (track->type != type)
             continue;
         if (track->user_tid == tid) {
@@ -639,9 +640,16 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         pick = NULL;
     if (pick && !opts->autoload_files && pick->is_external)
         pick = NULL;
-    if (pick && type == STREAM_SUB && prefer_forced && !pick->forced_track &&
-        opts->subs_rend->forced_subs_only == -1)
-        opts->subs_rend->forced_subs_only_current = 1;
+    if (pick && type == STREAM_SUB && prefer_forced && !pick->forced_track) {
+        // If the codec is DVD or PGS, we can display it in forced-only mode.
+        // This isn't really meaningful for other codecs, so we'll just pick nothing.
+        if (pick->stream &&
+            !strcmp(pick->stream->codec->codec, "dvd_subtitle") ||
+            !strcmp(pick->stream->codec->codec, "hdmv_pgs_subtitle"))
+            pick->forced_only_def = 1;
+        else
+            pick = NULL;
+    }
 cleanup:
     talloc_free(langs);
     return pick;
@@ -1638,8 +1646,6 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (reinit_complex_filters(mpctx, false) < 0)
         goto terminate_playback;
-
-    opts->subs_rend->forced_subs_only_current = (opts->subs_rend->forced_subs_only == 1) ? 1 : 0;
 
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int i = 0; i < num_ptracks[t]; i++) {
