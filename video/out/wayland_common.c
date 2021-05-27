@@ -1181,6 +1181,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
 
             if (wl->activated) {
                 /* If the surface comes back into view, force a redraw. */
+                vo_wayland_wait_frame(wl);
                 wl->pending_vo_events |= VO_EVENT_EXPOSE;
             }
         }
@@ -1783,6 +1784,36 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
+static void vo_wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int timeout)
+{
+    struct pollfd fds[2] = {
+        {.fd = wl->display_fd,     .events = POLLIN },
+        {.fd = wl->wakeup_pipe[0], .events = POLLIN },
+    };
+
+    while (wl_display_prepare_read(wl->display) != 0)
+        wl_display_dispatch_pending(wl->display);
+    wl_display_flush(wl->display);
+
+    poll(fds, nfds, timeout);
+
+    if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+        MP_FATAL(wl, "Error occurred on the display fd, closing\n");
+        wl_display_cancel_read(wl->display);
+        close(wl->display_fd);
+        wl->display_fd = -1;
+        mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
+    } else {
+        wl_display_read_events(wl->display);
+    }
+
+    if (fds[0].revents & POLLIN)
+        wl_display_dispatch_pending(wl->display);
+
+    if (fds[1].revents & POLLIN)
+        mp_flush_wakeup_pipe(wl->wakeup_pipe[0]);
+}
+
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha)
 {
     const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
@@ -1868,10 +1899,6 @@ void vo_wayland_wakeup(struct vo *vo)
 void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 {
     int64_t vblank_time = 0;
-    struct pollfd fds[1] = {
-        {.fd = wl->display_fd,     .events = POLLIN },
-    };
-
     /* We need some vblank interval to use for the timeout in
      * this function. The order of preference of values to use is:
      * 1. vsync duration from presentation time
@@ -1895,28 +1922,14 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
     int64_t finish_time = mp_time_us() + vblank_time;
 
     while (wl->frame_wait && finish_time > mp_time_us()) {
-
         int poll_time = ceil((double)(finish_time - mp_time_us()) / 1000);
         if (poll_time < 0) {
             poll_time = 0;
         }
-
-        while (wl_display_prepare_read(wl->display) != 0)
-            wl_display_dispatch_pending(wl->display);
-        wl_display_flush(wl->display);
-
-        poll(fds, 1, poll_time);
-
-        if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-            wl_display_cancel_read(wl->display);
-        } else {
-            wl_display_read_events(wl->display);
-        }
-
-        wl_display_dispatch_pending(wl->display);
+        vo_wayland_dispatch_events(wl, 1, poll_time);
     }
 
-    /* If the compositor does not have presentatiom time, we cannot be sure
+    /* If the compositor does not have presentation time, we cannot be sure
      * that this wait is accurate. Do a hacky block with wl_display_roundtrip. */
     if (!wl->presentation && !wl_display_get_error(wl->display))
         wl_display_roundtrip(wl->display);
@@ -1945,33 +1958,8 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
     if (wl->display_fd == -1)
         return;
 
-    struct pollfd fds[2] = {
-        {.fd = wl->display_fd,     .events = POLLIN },
-        {.fd = wl->wakeup_pipe[0], .events = POLLIN },
-    };
-
     int64_t wait_us = until_time_us - mp_time_us();
     int timeout_ms = MPCLAMP((wait_us + 999) / 1000, 0, 10000);
 
-    while (wl_display_prepare_read(wl->display) != 0)
-        wl_display_dispatch_pending(wl->display);
-    wl_display_flush(wl->display);
-
-    poll(fds, 2, timeout_ms);
-
-    if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-        MP_FATAL(wl, "Error occurred on the display fd, closing\n");
-        wl_display_cancel_read(wl->display);
-        close(wl->display_fd);
-        wl->display_fd = -1;
-        mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
-    } else {
-        wl_display_read_events(wl->display);
-    }
-
-    if (fds[0].revents & POLLIN)
-        wl_display_dispatch_pending(wl->display);
-
-    if (fds[1].revents & POLLIN)
-        mp_flush_wakeup_pipe(wl->wakeup_pipe[0]);
+    vo_wayland_dispatch_events(wl, 2, timeout_ms);
 }
