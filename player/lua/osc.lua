@@ -2598,6 +2598,7 @@ mp.register_event("shutdown", shutdown)
 mp.register_event("start-file", request_init)
 mp.observe_property("track-list", nil, request_init)
 mp.observe_property("playlist", nil, request_init)
+mp.observe_property("chapter-list", nil, request_init)
 
 mp.register_script_message("osc-message", show_message)
 mp.register_script_message("osc-chapterlist", function(dur)
