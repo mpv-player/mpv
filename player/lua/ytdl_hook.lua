@@ -793,30 +793,32 @@ function run_ytdl_hook(url)
         return
     end
 
-    if (es < 0) or (json == nil) or (json == "") then
+    local parse_err = nil
+
+    if (es < 0) or (json == "") then
+        json = nil
+    elseif json then
+        json, parse_err = utils.parse_json(json)
+    end
+
+    if (json == nil) then
         -- trim our stderr to avoid spurious newlines
         ytdl_err = result.stderr:gsub("^%s*(.-)%s*$", "%1")
         msg.error(ytdl_err)
         local err = "youtube-dl failed: "
         if result.error_string and result.error_string == "init" then
             err = err .. "not found or not enough permissions"
+        elseif parse_err then
+            err = err .. "failed to parse JSON data: " .. parse_err
         elseif not result.killed_by_us then
             err = err .. "unexpected error occurred"
         else
             err = string.format("%s returned '%d'", err, es)
         end
         msg.error(err)
-        if string.find(ytdl_err, "yt%-dl%.org/bug") then
+        if parse_err or string.find(ytdl_err, "yt%-dl%.org/bug") then
             check_version(ytdl.path)
         end
-        return
-    end
-
-    local json, err = utils.parse_json(json)
-
-    if (json == nil) then
-        msg.error("failed to parse JSON data: " .. err)
-        check_version(ytdl.path)
         return
     end
 
