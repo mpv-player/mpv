@@ -258,7 +258,13 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
         break;
     }
     char b[2048] = {0};
-    APPEND(b, " %3s %-5s", t->selected ? "(+)" : "", tname);
+    bool forced_only = false;
+    if (t->type == STREAM_SUB) {
+        int forced_opt = mpctx->opts->subs_rend->forced_subs_only;
+        if (forced_opt == 1 || (forced_opt && t->forced_only_def))
+            forced_only = t->selected;
+    }
+    APPEND(b, " %3s %-5s", t->selected ? (forced_only ? "(*)" : "(+)") : "", tname);
     APPEND(b, " --%s=%d", selopt, t->user_tid);
     if (t->lang && langopt)
         APPEND(b, " --%s=%s", langopt, t->lang);
@@ -268,6 +274,8 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
         APPEND(b, " (f)");
     if (t->attached_picture)
         APPEND(b, " [P]");
+    if (forced_only)
+        APPEND(b, " [F]");
     if (t->title)
         APPEND(b, " '%s'", t->title);
     const char *codec = s ? s->codec->codec : NULL;
