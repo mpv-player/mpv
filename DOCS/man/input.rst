@@ -814,9 +814,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     Reload the given video tracks. See ``sub-reload`` command.
 
 ``rescan-external-files [<mode>]``
-    Rescan external files according to the current ``--sub-auto`` and
-    ``--audio-file-auto`` settings. This can be used to auto-load external
-    files *after* the file was loaded.
+    Rescan external files according to the current ``--sub-auto``,
+    ``--audio-file-auto`` and ``--cover-art-auto`` settings. This can be used
+    to auto-load external files *after* the file was loaded.
 
     The ``mode`` argument is one of the following:
 
