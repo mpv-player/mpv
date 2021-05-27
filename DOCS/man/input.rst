@@ -2502,8 +2502,7 @@ Property list
     ways. The property is unavailable if no video is active.
 
 ``focused``
-    Whether the window has focus. Currently works only on X11, Wayland and
-    macOS.
+    Whether the window has focus. Might not be supported by all VOs.
 
 ``display-names``
     Names of the displays that the mpv window covers. On X11, these
