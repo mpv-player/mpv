@@ -2865,6 +2865,10 @@ Property list
         ``yes``/true if the track has the forced flag set in the file,
         ``no``/false or unavailable otherwise.
 
+    ``track-list/N/auto-forced-only``
+        ``yes``/true if the track was autoselected in forced-only mode,
+        ``no``/false or unavailable otherwise.
+
     ``track-list/N/codec``
         The codec name used by this track, for example ``h264``. Unavailable
         in some rare cases.
