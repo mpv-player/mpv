@@ -1944,9 +1944,18 @@ static struct mp_recorder *recorder_create(struct demux_internal *in,
         if (stream->ds->selected)
             MP_TARRAY_APPEND(NULL, streams, num_streams, stream);
     }
+
+    struct demuxer *demuxer = in->d_thread;
+    struct demux_attachment **attachments = talloc_array(NULL, struct demux_attachment*, demuxer->num_attachments);
+    for (int n = 0; n < demuxer->num_attachments; n++) {
+        attachments[n] = &demuxer->attachments[n];
+    }
+
     struct mp_recorder *res = mp_recorder_create(in->d_thread->global, dst,
-                                                 streams, num_streams);
+                                                 streams, num_streams,
+                                                 attachments, demuxer->num_attachments);
     talloc_free(streams);
+    talloc_free(attachments);
     return res;
 }
 

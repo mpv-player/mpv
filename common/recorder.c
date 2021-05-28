@@ -23,6 +23,7 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "demux/demux.h"
 #include "demux/packet.h"
 #include "demux/stheader.h"
 
@@ -119,7 +120,9 @@ static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
 struct mp_recorder *mp_recorder_create(struct mpv_global *global,
                                        const char *target_file,
                                        struct sh_stream **streams,
-                                       int num_streams)
+                                       int num_streams,
+                                       struct demux_attachment **attachments,
+                                       int num_attachments)
 {
     struct mp_recorder *priv = talloc_zero(NULL, struct mp_recorder);
 
@@ -150,6 +153,35 @@ struct mp_recorder *mp_recorder_create(struct mpv_global *global,
         if (add_stream(priv, streams[n]) < 0) {
             MP_ERR(priv, "Can't mux one of the input streams.\n");
             goto error;
+        }
+    }
+
+    if (!strcmp(priv->mux->oformat->name, "matroska")) {
+        // Only attach attachments (fonts) to matroska - mp4, nut, mpegts don't
+        // like them, and we find that out too late in the muxing process.
+        AVStream *a_stream = NULL;
+        for (int i = 0; i < num_attachments; ++i) {
+            a_stream = avformat_new_stream(priv->mux, NULL);
+            if (!a_stream) {
+                MP_ERR(priv, "Can't mux one of the attachments.\n");
+                goto error;
+            }
+            struct demux_attachment *attachment = attachments[i];
+
+            a_stream->codecpar->codec_type = AVMEDIA_TYPE_ATTACHMENT;
+
+            a_stream->codecpar->extradata  = av_mallocz(
+                attachment->data_size + AV_INPUT_BUFFER_PADDING_SIZE
+            );
+            if (!a_stream->codecpar->extradata) {
+                goto error;
+            }
+            memcpy(a_stream->codecpar->extradata,
+                attachment->data, attachment->data_size);
+            a_stream->codecpar->extradata_size = attachment->data_size;
+
+            av_dict_set(&a_stream->metadata, "filename", attachment->name, 0);
+            av_dict_set(&a_stream->metadata, "mimetype", attachment->type, 0);
         }
     }
 

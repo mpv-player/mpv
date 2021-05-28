@@ -1959,11 +1959,18 @@ void open_recorder(struct MPContext *mpctx, bool on_init)
             MP_TARRAY_APPEND(NULL, streams, num_streams, track->stream);
     }
 
+    struct demux_attachment **attachments = talloc_array(NULL, struct demux_attachment*, mpctx->demuxer->num_attachments);
+    for (int n = 0; n < mpctx->demuxer->num_attachments; n++) {
+        attachments[n] = &mpctx->demuxer->attachments[n];
+    }
+
     mpctx->recorder = mp_recorder_create(mpctx->global, mpctx->opts->record_file,
-                                         streams, num_streams);
+                                         streams, num_streams,
+                                         attachments, mpctx->demuxer->num_attachments);
 
     if (!mpctx->recorder) {
         talloc_free(streams);
+        talloc_free(attachments);
         close_recorder_and_error(mpctx);
         return;
     }
@@ -1987,5 +1994,6 @@ void open_recorder(struct MPContext *mpctx, bool on_init)
     }
 
     talloc_free(streams);
+    talloc_free(attachments);
 }
 
