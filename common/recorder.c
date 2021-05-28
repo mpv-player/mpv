@@ -318,7 +318,6 @@ void mp_recorder_destroy(struct mp_recorder *priv)
 // This is called on a seek, or when recording was started mid-stream.
 void mp_recorder_mark_discontinuity(struct mp_recorder *priv)
 {
-    flush_packets(priv);
 
     for (int n = 0; n < priv->num_streams; n++) {
         struct mp_recorder_sink *rst = priv->streams[n];
@@ -327,6 +326,7 @@ void mp_recorder_mark_discontinuity(struct mp_recorder *priv)
         rst->proper_eof = false;
     }
 
+    flush_packets(priv);
     priv->muxing = false;
     priv->muxing_from_start = false;
 }
