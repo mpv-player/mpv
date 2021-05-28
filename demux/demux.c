@@ -4166,8 +4166,8 @@ static void dumper_close(struct demux_internal *in)
 
 static int range_time_compare(const void *p1, const void *p2)
 {
-    struct demux_cached_range *r1 = (void *)p1;
-    struct demux_cached_range *r2 = (void *)p2;
+    struct demux_cached_range *r1 = *((struct demux_cached_range **)p1);
+    struct demux_cached_range *r2 = *((struct demux_cached_range **)p2);
 
     if (r1->seek_start == r2->seek_start)
         return 0;
