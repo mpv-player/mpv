@@ -223,30 +223,19 @@ static void mux_packet(struct mp_recorder_sink *rst,
         MP_ERR(priv, "Failed writing packet.\n");
 }
 
-// Write all packets that currently can be written.
-static void mux_packets(struct mp_recorder_sink *rst, bool force)
+// Write all packets available in the stream queue
+static void mux_packets(struct mp_recorder_sink *rst)
 {
     struct mp_recorder *priv = rst->owner;
     if (!priv->muxing || !rst->num_packets)
         return;
 
-    int safe_count = 0;
     for (int n = 0; n < rst->num_packets; n++) {
-        if (rst->packets[n]->keyframe)
-            safe_count = n;
-    }
-    if (force)
-        safe_count = rst->num_packets;
-
-    for (int n = 0; n < safe_count; n++) {
         mux_packet(rst, rst->packets[n]);
         talloc_free(rst->packets[n]);
     }
 
-    // Remove packets[0..safe_count]
-    memmove(&rst->packets[0], &rst->packets[safe_count],
-            (rst->num_packets - safe_count) * sizeof(rst->packets[0]));
-    rst->num_packets -= safe_count;
+    rst->num_packets = 0;
 }
 
 // If there was a discontinuity, check whether we can resume muxing (and from
@@ -297,7 +286,7 @@ void mp_recorder_destroy(struct mp_recorder *priv)
     if (priv->opened) {
         for (int n = 0; n < priv->num_streams; n++) {
             struct mp_recorder_sink *rst = priv->streams[n];
-            mux_packets(rst, true);
+            mux_packets(rst);
         }
 
         if (av_write_trailer(priv->mux) < 0)
@@ -321,7 +310,7 @@ void mp_recorder_mark_discontinuity(struct mp_recorder *priv)
 
     for (int n = 0; n < priv->num_streams; n++) {
         struct mp_recorder_sink *rst = priv->streams[n];
-        mux_packets(rst, true);
+        mux_packets(rst);
         rst->discont = true;
         rst->proper_eof = false;
     }
@@ -356,7 +345,7 @@ void mp_recorder_feed_packet(struct mp_recorder_sink *rst,
     if (!pkt) {
         rst->proper_eof = true;
         check_restart(priv);
-        mux_packets(rst, false);
+        mux_packets(rst);
         return;
     }
 
@@ -365,7 +354,7 @@ void mp_recorder_feed_packet(struct mp_recorder_sink *rst,
         // No, FFmpeg doesn't tell us which formats need DTS at all.
         // No, we can not shut up the FFmpeg warning, which will follow.
         MP_WARN(priv, "Source stream misses DTS on at least some packets!\n"
-                      "If the target file format requires DTS, the written\n"
+                      "If the target file format requires DTS, the written "
                       "file will be invalid.\n");
         priv->dts_warning = true;
     }
@@ -386,5 +375,5 @@ void mp_recorder_feed_packet(struct mp_recorder_sink *rst,
     MP_TARRAY_APPEND(rst, rst->packets, rst->num_packets, pkt);
 
     check_restart(priv);
-    mux_packets(rst, false);
+    mux_packets(rst);
 }
