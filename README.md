@@ -181,7 +181,7 @@ changes come and talk to us on IRC before you start working on them. It will
 make code review easier for both parties later on.
 
 You can check [the wiki](https://github.com/mpv-player/mpv/wiki/Stuff-to-do)
-or the [issue tracker](https://github.com/mpv-player/mpv/issues?q=is%3Aopen+is%3Aissue+label%3A%22feature+request%22)
+or the [issue tracker](https://github.com/mpv-player/mpv/issues?q=is%3Aopen+is%3Aissue+label%3Ameta%3Afeature-request)
 for ideas on what you could contribute with.
 
 ## License
