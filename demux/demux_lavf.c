@@ -802,7 +802,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             sh->title = talloc_strdup(sh, title->value);
         else {
             AVDictionaryEntry *handler_name = av_dict_get(st->metadata, "handler_name", NULL, 0);
-            if (handler_name && handler_name->value)
+            if (handler_name && handler_name->value && !strstr(handler_name->value, "Handler"))
                 sh->title = talloc_strdup(sh, handler_name->value);
         }
         if (!sh->title && st->disposition & AV_DISPOSITION_VISUAL_IMPAIRED)
