@@ -6567,11 +6567,10 @@ Miscellaneous
                         video. (Although it should have the same effects as
                         ``audio``, the implementation is very different.)
     :display-adrop:     Drop or repeat audio data to compensate desyncing
-                        video. See ``--video-sync-adrop-size``. This mode will
-                        cause severe audio artifacts if the real monitor
-                        refresh rate is too different from the reported or
-                        forced rate. Since mpv 0.33.0, this acts on entire audio
-                        frames, instead of single samples.
+                        video. This mode will cause severe audio artifacts if
+                        the real monitor refresh rate is too different from
+                        the reported or forced rate. Since mpv 0.33.0, this
+                        acts on entire audio frames, instead of single samples.
     :display-desync:    Sync video to display, and let audio play on its own.
     :desync:            Sync video according to system clock, and let audio play
                         on its own.
