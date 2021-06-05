@@ -2,7 +2,7 @@ waf build system overview
 =========================
 
 mpv's new build system is based on waf and it should completely replace the
-custom ./configure + Makefile based system inherited from MPlayer.
+custom ./configure + Makefile-based system inherited from MPlayer.
 
 Goals and the choice of waf
 ===========================
@@ -17,20 +17,20 @@ shortcomings:
    When adding a new feature using the old configure, one had to add a fair
    amount of code to the shell script to do option parsing, detection of the
    feature and declaration of variables for the Makefile to pickup. The worst
-   part is this pieces are spread apart in the configure and copy pasted for
-   any single case. That brings us to..
+   part is these pieces are spread apart in the configure and copy-pasted for
+   any single case. That brings us to...
 
 2) --enable-feature has to be overridden by the user and helps them understand that
    they have libraries missing and should install them for the feature to be
    enabled.
 
-3) Must be customizable, hackable, pleasant to the developer eyes and to work
-   with in general.
+3) Must be customizable, hackable, pleasant to the developers' eyes and to work
+   with, in general.
 
 4) Must have separate configuration and build steps.
 
 Goal 2 comes as a given on pretty much any build system, since autotools made
-this behaviour very popular among users (and rightly so).
+this behavior very popular among users (and rightly so).
 
 Goal 1+3 were somewhat harder to accomplish as it looks like all of the build
 systems we evaluated (waf included!) had problems with them. For reference we
@@ -44,11 +44,11 @@ tailored to the project's specific needs.
 mpv's custom configure step on top of waf
 =========================================
 
-To some extents mpv has a custom build system written on top of waf. This
-document will not go over the standard waf behaviour as that is documented in
+To some extent mpv has a custom build system written on top of waf. This
+document will not go over the standard waf behavior as that is documented in
 the `Waf book <http://docs.waf.googlecode.com/git/book_17/single.html>`_.
 
-All of the configuration process is handled with a declarative approach. Lists
+All of the configuration processes are handled with a declarative approach. Lists
 of dictionaries define the checks, and some custom Python code traverses these
 lists and depending on the check definition it calls into the actual waf API.
 
@@ -68,7 +68,7 @@ consists of running ``pkg-config`` and looking for ``vdpau`` with version
 ``>= 0.2``. If the check succeeds a ``#define HAVE_VDPAU 1`` will be added to
 ``config.h``, if not ``#define HAVE_VDPAU 0`` will be added.
 
-The defines names are automatically prepended with ``HAVE_``, capitalized and
+The defined names are automatically prepended with ``HAVE_``, capitalized and
 special characters are replaced with underscores. This happens in
 ``waftools/inflectors.py``.
 
@@ -83,7 +83,7 @@ the feature can be enabled and disabled.
 ``desc``: this is the textual representation of the feature used in the
 interactions with the users.
 
-``func``: function that will perform the check. These functions are defined in
+``func``: The function that will perform the check. These functions are defined in
 ``waftools/checks``. The reusable checks are all functions that return
 functions. The return functions will then be applied using waf's configuration
 context.

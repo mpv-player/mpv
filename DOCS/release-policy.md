@@ -27,11 +27,11 @@ While on master:
 - Update `DOCS/client-api-changes.rst` and `DOCS/interface-changes.rst`
   (in particular, update the last version numbers if necessary)
 
-- Create signed commit with changes.
+- Create a signed commit with changes.
 
 - Create signed tag v0.X.Y.
 
-- Add -UNKNOWN suffix to version in `VERSION` file.
+- Add -UNKNOWN suffix to the version in the `VERSION` file.
 
 - Commit changes, push release branch (`release/0.X`) and tag to GitHub.
 
@@ -108,7 +108,7 @@ Fixes and Minor Enhancements
 - List of fixes and minor enhancements
 
 This listing is not complete. There are many more bug fixes and changes. The
-complete change log can be viewed by running `git log <start>..<end>` in
+complete changelog can be viewed by running `git log <start>..<end>` in
 the git repository.
 ```
 
@@ -118,4 +118,4 @@ release.
 When creating a new point release its changes should be added on top of the
 `RELEASE_NOTES` file (with the appropriate title) so that all the changes in
 the current 0.X branch will be included. This way the `RELEASE_NOTES` file
-can be used by distributors as changelog for point releases too.
+can be used by distributors as a changelog for point releases too.
