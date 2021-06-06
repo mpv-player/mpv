@@ -79,10 +79,13 @@ static const int format_table[][2] = {
 #ifdef AFMT_S32_NE
     {AFMT_S32_NE,       AF_FORMAT_S32},
 #endif
-#ifdef AFMT_FLOAT
+/* Not supported on Solaris 11 (see /usr/include/sys/audio/audio_oss.h) or
+ * (https://github.com/illumos/illumos-gate/blob/master/usr/src/uts/common/sys/audio/audio_oss.h#L763)
+ */
+#if defined(AFMT_FLOAT) && !defined(__sun)
     {AFMT_FLOAT,        AF_FORMAT_FLOAT},
 #endif
-#ifdef AFMT_MPEG
+#if defined(AFMT_MPEG) && !defined(__sun)
     {AFMT_MPEG,         AF_FORMAT_S_MP3},
 #endif
     {-1, -1}
@@ -111,7 +114,9 @@ static void device_descr_get(size_t dev_idx, char *buf, size_t buf_size)
     size_t tmp = 0;
     char dev_path[32];
     mixer_info mi;
-
+#ifndef PATH_DEV_MIXER
+#define PATH_DEV_MIXER "/dev/mixer"
+#endif
     snprintf(dev_path, sizeof(dev_path), PATH_DEV_MIXER"%zu", dev_idx);
     int fd = open(dev_path, O_RDONLY);
     if (ioctl(fd, SOUND_MIXER_INFO, &mi) == 0) {
