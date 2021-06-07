@@ -49,6 +49,9 @@
 #endif
 
 #define PATH_DEV_DSP "/dev/dsp"
+#ifndef PATH_DEV_MIXER
+#define PATH_DEV_MIXER "/dev/mixer"
+#endif
 
 struct priv {
     int dsp_fd;
@@ -114,9 +117,7 @@ static void device_descr_get(size_t dev_idx, char *buf, size_t buf_size)
     size_t tmp = 0;
     char dev_path[32];
     mixer_info mi;
-#ifndef PATH_DEV_MIXER
-#define PATH_DEV_MIXER "/dev/mixer"
-#endif
+
     snprintf(dev_path, sizeof(dev_path), PATH_DEV_MIXER"%zu", dev_idx);
     int fd = open(dev_path, O_RDONLY);
     if (ioctl(fd, SOUND_MIXER_INFO, &mi) == 0) {
