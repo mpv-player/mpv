@@ -201,8 +201,8 @@ see the [FAQ][FAQ].
 Most activity happens on the IRC channel and the github issue tracker.
 
 - **GitHub issue tracker**: [issue tracker][issue-tracker] (report bugs here)
-- **User IRC Channel**: `#mpv` on `irc.freenode.net`
-- **Developer IRC Channel**: `#mpv-devel` on `irc.freenode.net`
+- **User IRC Channel**: `#mpv` on `irc.libera.chat`
+- **Developer IRC Channel**: `#mpv-devel` on `irc.libera.chat`
 
 [FAQ]: https://github.com/mpv-player/mpv/wiki/FAQ
 [releases]: https://github.com/mpv-player/mpv/releases

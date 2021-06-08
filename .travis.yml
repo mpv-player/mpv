@@ -148,7 +148,7 @@ notifications:
   irc:
     if: fork = false
     channels:
-      - "irc.freenode.org#mpv-devel"
+      - "irc.libera.chat#mpv-devel"
     on_success: change
     on_failure: always
 

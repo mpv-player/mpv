@@ -5,7 +5,7 @@ General
 -------
 
 The main contact for mpv development is IRC, specifically #mpv
-and #mpv-devel on Freenode. Github is used for code review and
+and #mpv-devel on Libera.chat. Github is used for code review and
 long term discussions.
 
 Sending patches
