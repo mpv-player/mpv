@@ -1141,6 +1141,10 @@ PROTOCOLS
 
     Digital TV via DVB. (Linux only.)
 
+``dvbv5://channel`` ``--dvbv5-...``
+
+    Digital TV via DVB using libdvbv5. (Linux only.)
+
 ``mf://[filemask|@listfile]`` ``--mf-...``
 
     Play a series of images as video.
