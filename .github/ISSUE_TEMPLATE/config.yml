@@ -1,9 +1,9 @@
 blank_issues_enabled: false
 contact_links:
-  - name: mpv irc channel
+  - name: mpv IRC channel
     url: https://mpv.io/community/
     about: Feel free to ask questions here irc://irc.libera.chat/mpv
-  - name: mpv irc developer channel
+  - name: mpv IRC developer channel
     url: https://mpv.io/community/
     about: Ask questions related to the development of mpv here
            irc://irc.libera.chat/mpv-devel
