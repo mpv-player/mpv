@@ -15,9 +15,10 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// including IOKit here again doesn't make sense, but otherwise the swift
+// including frameworks here again doesn't make sense, but otherwise the swift
 // compiler doesn't include the needed header in our generated header file
 #import <IOKit/pwr_mgt/IOPMLib.h>
+#import <QuartzCore/QuartzCore.h>
 
 #include "player/client.h"
 #include "video/out/libmpv.h"

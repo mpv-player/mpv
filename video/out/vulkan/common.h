@@ -22,6 +22,11 @@
 #if HAVE_WIN32_DESKTOP
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
+// check for molten instead?
+#if HAVE_COCOA
+#define VK_USE_PLATFORM_MACOS_MVK
+#define VK_USE_PLATFORM_METAL_EXT
+#endif
 
 #include <libplacebo/vulkan.h>
 
