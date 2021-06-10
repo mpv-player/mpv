@@ -924,27 +924,31 @@ static void script_get_user_path(js_State *J, void *af)
     js_pushstring(J, mp_get_user_path(af, jctx(J)->mpctx->global, path));
 }
 
-// args: prefixed file name, data (c-str)
-static void script_write_file(js_State *J, void *af)
+// args: is_append, prefixed file name, data (c-str)
+static void script__write_file(js_State *J, void *af)
 {
     static const char *prefix = "file://";
-    const char *fname = js_tostring(J, 1);
-    const char *data = js_tostring(J, 2);
+    bool append = js_toboolean(J, 1);
+    const char *fname = js_tostring(J, 2);
+    const char *data = js_tostring(J, 3);
+    const char *opstr = append ? "append" : "write";
+
     if (strstr(fname, prefix) != fname)  // simple protection for incorrect use
         js_error(J, "File name must be prefixed with '%s'", prefix);
     fname += strlen(prefix);
     fname = mp_get_user_path(af, jctx(J)->mpctx->global, fname);
-    MP_VERBOSE(jctx(J), "Writing file '%s'\n", fname);
+    MP_VERBOSE(jctx(J), "%s file '%s'\n", opstr, fname);
 
-    FILE *f = fopen(fname, "wb");
+    FILE *f = fopen(fname, append ? "ab" : "wb");
     if (!f)
-        js_error(J, "Cannot open file for writing: '%s'", fname);
+        js_error(J, "Cannot open (%s) file: '%s'", opstr, fname);
     add_af_file(af, f);
 
     int len = strlen(data);  // limited by terminating null
     int wrote = fwrite(data, 1, len, f);
     if (len != wrote)
-        js_error(J, "Cannot write to file: '%s'", fname);
+        js_error(J, "Cannot %s to file: '%s'", opstr, fname);
+    js_pushboolean(J, 1);  // success. doesn't touch last_error
 }
 
 // args: env var name
@@ -1179,7 +1183,7 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(get_env_list, 0),
 
     FN_ENTRY(read_file, 2),
-    AF_ENTRY(write_file, 2),
+    AF_ENTRY(_write_file, 3),
     FN_ENTRY(getenv, 1),
     FN_ENTRY(compile_js, 2),
     FN_ENTRY(_gc, 1),

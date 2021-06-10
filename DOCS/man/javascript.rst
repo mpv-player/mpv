@@ -221,7 +221,8 @@ Additional utilities
 
 ``mp.utils.get_user_path(path)``
     Expands (mpv) meta paths like ``~/x``, ``~~/y``, ``~~desktop/z`` etc.
-    ``read_file``, ``write_file`` and ``require`` already use this internaly.
+    ``read_file``, ``write_file``, ``append_file`` and ``require`` already use
+    this internaly.
 
 ``mp.utils.read_file(fname [,max])``
     Returns the content of file ``fname`` as string. If ``max`` is provided and
@@ -232,7 +233,12 @@ Additional utilities
     prefixed with ``file://`` as simple protection against accidental arguments
     switch, e.g. ``mp.utils.write_file("file://~/abc.txt", "hello world")``.
 
-Note: ``read_file`` and ``write_file`` throw on errors, allow text content only.
+``mp.utils.append_file(fname, str)``
+    Same as ``mp.utils.write_file`` if the file ``fname`` does not exist. If it
+    does exist then append instead of overwrite.
+
+Note: ``read_file``, ``write_file`` and ``append_file`` throw on errors, allow
+text content only.
 
 ``mp.get_time_ms()``
     Same as ``mp.get_time()`` but in ms instead of seconds.
