@@ -22,6 +22,9 @@
 #if HAVE_WIN32_DESKTOP
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
+#if HAVE_MOLTENVK
+#include <MoltenVK/mvk_vulkan.h>
+#endif
 
 #include <libplacebo/vulkan.h>
 
