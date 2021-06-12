@@ -93,8 +93,9 @@ static bool walk_display_properties(struct mp_log *log,
         goto done;
     }
 
+    // Allocate zeroed arrays so that planes with no displays have a null entry.
     VkDisplayKHR **planes_to_displays =
-        talloc_array(tmp, VkDisplayKHR *, num_planes);
+        talloc_zero_array(tmp, VkDisplayKHR *, num_planes);
     for (int j = 0; j < num_planes; j++) {
         int num_displays_for_plane = 0;
         vkGetDisplayPlaneSupportedDisplaysKHR(device, j,
@@ -177,6 +178,10 @@ static bool walk_display_properties(struct mp_log *log,
         mp_msg(log, msgl_info, "    Planes:\n");
         for (int k = 0; k < num_planes; k++) {
             VkDisplayKHR *displays = planes_to_displays[k];
+            if (!displays) {
+                // This plane is not connected to any displays.
+                continue;
+            }
             for (int d = 0; displays[d]; d++) {
                 if (displays[d] == display) {
                     if (selector && selector->plane_idx != k)
