@@ -375,6 +375,15 @@ Configurable Options
 
     Set to ``yes`` to reduce festivity (i.e. disable santa hat in December.)
 
+``live_markers``
+    Default: yes
+
+    Updates the chapter indicator/marker positions on the seek bar when the
+    duration changes. This ensures the markers are accurate if chapters are
+    present on live streams. You may want to disable this on low-end systems
+    as this option reinitializes the OSC every time the duration changes when
+    there are chapters.
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
