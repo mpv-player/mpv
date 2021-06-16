@@ -46,6 +46,12 @@ define additional key bindings.
 Keyboard Control
 ----------------
 
+h
+    Show input bindings
+
+H
+    Show raw input bindings
+
 LEFT and RIGHT
     Seek backward/forward 5 seconds. Shift+arrow does a 1 second exact seek
     (see ``--hr-seek``).
@@ -1363,6 +1369,8 @@ intervals when not paused. This hack was removed in 0.33.0.
 .. include:: stats.rst
 
 .. include:: console.rst
+
+.. include:: help.rst
 
 .. include:: lua.rst
 

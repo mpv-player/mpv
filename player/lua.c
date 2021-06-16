@@ -76,6 +76,9 @@ static const char * const builtin_lua_scripts[][2] = {
     {"@console.lua",
 #   include "generated/player/lua/console.lua.inc"
     },
+    {"@help.lua",
+#   include "generated/player/lua/help.lua.inc"
+    },
     {"@auto_profiles.lua",
 #   include "generated/player/lua/auto_profiles.lua.inc"
     },
