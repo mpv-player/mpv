@@ -179,9 +179,9 @@ Configurable Options
 ``seekbarkeyframes``
     Default: yes
 
-    Controls the mode used to seek when dragging the seekbar (default: true). If
-    set to true, default seeking mode is used (usually keyframes, but player
-    defaults and heuristics can change it to exact). If set to false, exact
+    Controls the mode used to seek when dragging the seekbar (default: yes). If
+    set to yes, default seeking mode is used (usually keyframes, but player
+    defaults and heuristics can change it to exact). If set to no, exact
     seeking on mouse drags will be used instead. Keyframes are preferred, but
     exact seeks may be useful in cases where keyframes cannot be found. Note
     that using exact seeks can potentially make mouse dragging much slower.
