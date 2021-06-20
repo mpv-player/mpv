@@ -2263,7 +2263,14 @@ function render()
     end
 
     -- init management
-    if state.initREQ then
+    if state.active_element then
+        -- mouse is held down on some element - keep ticking and igore initReq
+        -- till it's released, or else the mouse-up (click) will misbehave or
+        -- get ignored. that's because osc_init() recreates the osc elements,
+        -- but mouse handling depends on the elements staying unmodified
+        -- between mouse-down and mouse-up (using the index active_element).
+        request_tick()
+    elseif state.initREQ then
         osc_init()
         state.initREQ = false
 
