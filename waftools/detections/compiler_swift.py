@@ -152,7 +152,7 @@ def __find_macos_sdk(ctx):
             # last digits are bugfix version, which are not relevant for us
             # eg 16E185 => 10.12.4, 17A360 => 10.13, 18B71 => 10.14.1
             if sdk_build_version and isinstance(sdk_build_version, str):
-                verRe = re.compile("(\d+)(\D+)(\d+)")
+                verRe = re.compile("^(\d+)(\D+)(\d+)$", re.MULTILINE)
                 version_parts = verRe.search(sdk_build_version)
                 major = int(version_parts.group(1)) - 4
                 minor = string.ascii_lowercase.index(version_parts.group(2).lower())
@@ -161,7 +161,10 @@ def __find_macos_sdk(ctx):
                 if int(version_parts.group(1)) >= 20:
                     build_version = '11.' + str(minor)
 
-            if not isinstance(sdk_version, str):
+            if sdk_version and isinstance(sdk_version, str):
+                sdkVerRE = re.compile("^(\d+)((\.)(\d+))+$", re.MULTILINE)
+                sdk_version = sdkVerRE.search(sdk_version).group(0)
+            elif not isinstance(sdk_version, str):
                 sdk_version = '10.10.0'
 
             # pick the higher version, always pick sdk over build if newer
