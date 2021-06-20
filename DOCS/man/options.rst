@@ -5200,6 +5200,12 @@ The following video options are currently all specific to ``--vo=gpu`` and
 
     Set this to ``-1`` to disable this logic.
 
+``--interpolation-allow-multiple=<yes|no>``
+    Whether or not to count multiples (or factors) of the video frame rate as equivalent
+    to it for the `--interpolation-threshold` calculation. Default: yes.
+    This disables interpolation when playing e.g. 24fps content on a 48Hz display,
+    or vice versa.
+
 ``--opengl-pbo``
     Enable use of PBOs. On some drivers this can be faster, especially if the
     source video size is huge (e.g. so called "4K" video). On other drivers it
