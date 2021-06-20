@@ -43,7 +43,8 @@ pl next
     =============   ================================================
 
 title
-    | Displays current media-title, filename, or custom title
+    | Displays current media-title, filename, custom title, or target chapter
+      name while hovering the seekbar.
 
     =============   ================================================
     left-click      show playlist position and length and full title
