@@ -221,7 +221,7 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         int prio = 0;
 
         if (bstrcmp(tmp_fname_trim, f_fname_trim) == 0 &&
-            (type != STREAM_VIDEO || (fuzz != 1 && bstrcmp(dename, f_fname) != 0)))
+            (type != STREAM_VIDEO || fuzz != 1))
             prio |= 32; // exact movie name match
 
         bstr lang = {0};
