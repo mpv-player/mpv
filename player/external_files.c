@@ -220,13 +220,10 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         // higher prio -> auto-selection may prefer it (0 = not loaded)
         int prio = 0;
 
-        if (bstrcmp(tmp_fname_trim, f_fname_trim) == 0 &&
-            (type != STREAM_VIDEO || fuzz != 1))
+        if (bstrcmp(tmp_fname_trim, f_fname_trim) == 0)
             prio |= 32; // exact movie name match
 
         bstr lang = {0};
-        if (type == STREAM_VIDEO)
-            goto cover_art;
         if (bstr_startswith(tmp_fname_trim, f_fname_trim)) {
             int start = 0;
             lang = guess_lang_from_filename(tmp_fname_trim, &start);
@@ -249,14 +246,13 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         if (bstr_find(tmp_fname_trim, f_fname_trim) >= 0 && fuzz >= 1)
             prio |= 2; // contains the movie name
 
+        if (type == STREAM_VIDEO && fuzz >= 1 && prio == 0)
+            prio = test_cover_filename(dename);
+
         // doesn't contain the movie name
         // don't try in the mplayer subtitle directory
         if (!limit_fuzziness && fuzz >= 2)
             prio |= 1;
-
-        cover_art:
-        if (type == STREAM_VIDEO && fuzz >= 1 && prio == 0)
-            prio = test_cover_filename(dename);
 
         mp_dbg(log, "Potential external file: \"%s\"  Priority: %d\n",
                de->d_name, prio);
