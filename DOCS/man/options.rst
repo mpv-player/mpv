@@ -2101,7 +2101,7 @@ Audio
 
     :no:    Don't automatically load external audio files (default).
     :exact: Load the media filename with audio file extension.
-    :fuzzy: Load all audio files containing media filename.
+    :fuzzy: Load all audio files containing the media filename.
     :all:   Load all audio files in the current and ``--audio-file-paths``
             directories.
 
@@ -2481,7 +2481,7 @@ Subtitles
     :no:    Don't automatically load external subtitle files.
     :exact: Load the media filename with subtitle file extension and possibly
             language suffixes (default).
-    :fuzzy: Load all subs containing media filename.
+    :fuzzy: Load all subs containing the media filename.
     :all:   Load all subs in the current and ``--sub-file-paths`` directories.
 
 ``--sub-codepage=<codepage>``
