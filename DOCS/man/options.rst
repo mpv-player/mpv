@@ -6729,9 +6729,9 @@ Miscellaneous
 
     :no:    Don't automatically load cover art.
     :exact: Load the media filename with an image file extension.
-    :fuzzy: Load cover art with a filename included in an internal whitelist,
-            such as ``cover.jpg``.
-    :all:   Union of exact and fuzzy (default).
+    :fuzzy: Load all cover art containing the media filename and filenames
+            in an internal whitelist, such as ``cover.jpg`` (default).
+    :all:   Load all images in the current directory.
 
     See ``--cover-art-files`` for details about what constitutes cover art.
 
