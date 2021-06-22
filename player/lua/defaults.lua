@@ -528,8 +528,17 @@ function mp.dispatch_events(allow_wait)
         if not more_events then
             wait = process_timers() or 1e20 -- infinity for all practical purposes
             if wait ~= 0 then
+                local idle_called = nil
                 for _, handler in ipairs(idle_handlers) do
+                    idle_called = true
                     handler()
+                end
+                if idle_called then
+                    -- handlers don't complete in 0 time, and may modify timers
+                    wait = mp.get_next_timeout() or 1e20
+                    if wait < 0 then
+                        wait = 0
+                    end
                 end
             end
             -- Resume playloop - important especially if an error happened while
