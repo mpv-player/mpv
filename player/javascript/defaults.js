@@ -751,7 +751,7 @@ g.mp_event_loop = function mp_event_loop() {
             wait = 0;  // poll the next one
         } else {
             wait = process_timers() / 1000;
-            if (wait != 0) {
+            if (wait != 0 && iobservers.length) {
                 notify_idle_observers();  // can add timers -> recalculate wait
                 wait = peek_timers_wait() / 1000;
             }
