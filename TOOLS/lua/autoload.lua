@@ -16,6 +16,7 @@ disabled=no
 images=no
 videos=yes
 audio=yes
+ignore_hidden=yes
 
 --]]
 
@@ -29,7 +30,8 @@ o = {
     disabled = false,
     images = true,
     videos = true,
-    audio = true
+    audio = true,
+    ignore_hidden = true
 }
 options.read_options(o)
 
@@ -155,7 +157,7 @@ function find_and_add_entries()
         return
     end
     table.filter(files, function (v, k)
-        if string.match(v, "^%.") then
+        if (o.ignore_hidden and string.match(v, "^%.")) then
             return false
         end
         local ext = get_extension(v)
