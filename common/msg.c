@@ -415,6 +415,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     bstr_xappend_vasprintf(root, &root->buffer, format, va);
 
     char *text = root->buffer.start;
+    size_t len = root->buffer.len;
 
     if (lev == MSGL_STATS) {
         dump_stats(log, lev, text);
@@ -428,7 +429,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         // lines if they happen.
         while (1) {
             char *end = strchr(text, '\n');
-            if (!end)
+            if (!end || len > 200)
                 break;
             char *next = &end[1];
             char saved = next[0];
