@@ -16,6 +16,7 @@ disabled=no
 images=no
 videos=yes
 audio=yes
+sameseries=yes
 
 --]]
 
@@ -29,7 +30,8 @@ o = {
     disabled = false,
     images = true,
     videos = true,
-    audio = true
+    audio = true,
+    sameseries = true
 }
 options.read_options(o)
 
@@ -162,6 +164,18 @@ function find_and_add_entries()
         if ext == nil then
             return false
         end
+    if o.sameseries then
+        local name = mp.get_property("filename")
+        local namepre = string.sub(name, 1, 6)
+        local namepre0 = string.gsub(namepre, "%p", "%%%1")
+        for vidext, _ in pairs(EXTENSIONS_VIDEO) do
+            if string.match(name, vidext.."$") ~= nil then
+                if string.match(v, "^"..namepre0) == nil then
+                return false
+                end
+            end
+        end
+    end
         return EXTENSIONS[string.lower(ext)]
     end)
     table.sort(files, alnumcomp)
