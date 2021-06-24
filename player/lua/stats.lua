@@ -517,6 +517,10 @@ local function add_video(s)
         return
     end
 
+    local osd_dims = mp.get_property_native("osd-dimensions")
+    local scaled_width = osd_dims["w"] - osd_dims["ml"] - osd_dims["mr"]
+    local scaled_height = osd_dims["h"] - osd_dims["mt"] - osd_dims["mb"]
+
     append(s, "", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""})
     if append_property(s, "video-codec", {prefix_sep="", nl="", indent=""}) then
         append_property(s, "hwdec-current", {prefix="(hwdec:", nl="", indent=" ",
@@ -547,6 +551,9 @@ local function add_video(s)
 
     if append(s, r["w"], {prefix="Native Resolution:"}) then
         append(s, r["h"], {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    end
+    if append(s, scaled_width, {prefix="Scaled Resolution:"}) then
+        append(s, scaled_height, {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
     append_property(s, "current-window-scale", {prefix="Window Scale:"})
     if r["aspect"] ~= nil then
