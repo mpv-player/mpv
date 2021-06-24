@@ -113,6 +113,9 @@ char *mp_getenv(const char *name);
 char ***mp_penviron(void);
 
 off_t mp_lseek(int fd, off_t offset, int whence);
+void *mp_dlopen(const char *filename, int flag);
+void *mp_dlsym(void *handle, const char *symbol);
+char *mp_dlerror(void);
 
 // mp_stat types. MSVCRT's dev_t and ino_t are way too short to be unique.
 typedef uint64_t mp_dev_t_;
@@ -171,6 +174,12 @@ void mp_globfree(mp_glob_t *pglob);
 
 #undef lseek
 #define lseek(...) mp_lseek(__VA_ARGS__)
+
+#define RTLD_NOW 0
+#define RTLD_LOCAL 0
+#define dlopen(fn,fg) mp_dlopen((fn), (fg))
+#define dlsym(h,s) mp_dlsym((h), (s))
+#define dlerror mp_dlerror
 
 // Affects both "stat()" and "struct stat".
 #undef stat
