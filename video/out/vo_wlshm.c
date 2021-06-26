@@ -278,7 +278,7 @@ static void flip_page(struct vo *vo)
         vo_wayland_wait_frame(wl);
 
     if (wl->presentation)
-        wayland_sync_swap(wl);
+        vo_wayland_sync_swap(wl);
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)

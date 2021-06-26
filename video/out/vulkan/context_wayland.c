@@ -46,7 +46,7 @@ static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
         vo_wayland_wait_frame(wl);
 
     if (wl->presentation)
-        wayland_sync_swap(wl);
+        vo_wayland_sync_swap(wl);
 }
 
 static void wayland_vk_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)

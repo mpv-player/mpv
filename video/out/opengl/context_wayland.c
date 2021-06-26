@@ -81,7 +81,7 @@ static void wayland_egl_swap_buffers(struct ra_swapchain *sw)
         vo_wayland_wait_frame(wl);
 
     if (wl->presentation)
-        wayland_sync_swap(wl);
+        vo_wayland_sync_swap(wl);
 }
 
 static const struct ra_swapchain_fns wayland_egl_swapchain = {
