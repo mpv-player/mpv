@@ -198,7 +198,7 @@ static void window_move(struct vo_wayland_state *wl, uint32_t serial)
 static int check_for_resize(struct vo_wayland_state *wl, wl_fixed_t x_w, wl_fixed_t y_w,
                             int edge_pixels, enum xdg_toplevel_resize_edge *edge)
 {
-    if (wl->touch_entries || wl->vo_opts->fullscreen || wl->vo_opts->window_maximized)
+    if (wl->vo_opts->fullscreen || wl->vo_opts->window_maximized)
         return 0;
 
     int pos[2] = { wl_fixed_to_double(x_w), wl_fixed_to_double(y_w) };
@@ -320,18 +320,18 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
 {
     struct vo_wayland_state *wl = data;
 
+    wl->touch_entries++;
+    if (wl->touch_entries > 2)
+        return;
+
     enum xdg_toplevel_resize_edge edge;
     if (check_for_resize(wl, x_w, y_w, wl->opts->edge_pixels_touch, &edge)) {
-        wl->touch_entries = 0;
         xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
-        return;
-    } else if (wl->touch_entries) {
-        wl->touch_entries = 0;
+    } else if (wl->touch_entries == 1) {
         xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
-        return;
+    } else if (wl->touch_entries == 2) {
+        xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
     }
-
-    wl->touch_entries = 1;
 
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
@@ -345,9 +345,10 @@ static void touch_handle_up(void *data, struct wl_touch *wl_touch,
 {
     struct vo_wayland_state *wl = data;
 
-    wl->touch_entries = 0;
+    wl->touch_entries--;
 
-    mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
+    if (wl->touch_entries < 2)
+        mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
 }
 
 static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
