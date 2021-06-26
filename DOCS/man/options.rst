@@ -5446,8 +5446,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     Currently only relevant for ``--gpu-api=d3d11``.
 
 ``--wayland-app-id=<string>``
-    Set the client app id for Wayland-based video output methods. By default, "mpv"
-    is used.
+    Set the client app id for Wayland-based video output methods (default: ``mpv``).
 
 ``--wayland-disable-vsync=<yes|no>``
     Disable vsync for the wayland contexts (default: no). Useful for benchmarking

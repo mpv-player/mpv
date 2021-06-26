@@ -1480,10 +1480,6 @@ static void update_app_id(struct vo_wayland_state *wl)
 {
     if (!wl->xdg_toplevel)
         return;
-    if (!wl->vo_opts->appid) {
-        wl->vo_opts->appid = talloc_strdup(wl->vo_opts, "mpv");
-        m_config_cache_write_opt(wl->vo_opts_cache, &wl->vo_opts->appid);
-    }
     xdg_toplevel_set_app_id(wl->xdg_toplevel, wl->vo_opts->appid);
 }
 

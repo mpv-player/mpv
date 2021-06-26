@@ -198,6 +198,7 @@ const struct m_sub_options vo_sub_opts = {
         .snap_window = 0,
         .border = 1,
         .fit_border = 1,
+        .appid = "mpv",
         .WinID = -1,
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,
