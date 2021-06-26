@@ -5144,7 +5144,7 @@ static void cmd_loadlist(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
-    bool append = cmd->args[1].v.i;
+    int append = cmd->args[1].v.i;
 
     struct playlist *pl = playlist_parse_file(filename, cmd->abort->cancel,
                                               mpctx->global);
@@ -5161,7 +5161,7 @@ static void cmd_loadlist(void *p)
         if (!new)
             new = playlist_get_first(mpctx->playlist);
 
-        if (!append && new)
+        if ((!append || (append == 2 && !mpctx->playlist->current)) && new)
             mp_set_playlist_entry(mpctx, new);
 
         struct mpv_node *res = &cmd->result;
@@ -6217,7 +6217,10 @@ const struct mp_cmd_def mp_cmds[] = {
     { "loadlist", cmd_loadlist,
         {
             {"url", OPT_STRING(v.s)},
-            {"flags", OPT_CHOICE(v.i, {"replace", 0}, {"append", 1}),
+            {"flags", OPT_CHOICE(v.i,
+                {"replace", 0},
+                {"append", 1},
+                {"append-play", 2}),
                 .flags = MP_CMD_OPT_ARG},
         },
         .spawn_thread = true,

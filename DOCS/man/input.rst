@@ -450,6 +450,10 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Stop playback and replace the internal playlist with the new one.
     <append>
         Append the new playlist at the end of the current internal playlist.
+    <append-play>
+        Append the new playlist, and if nothing is currently playing, start
+        playback. (Always starts with the new playlist, even if the internal
+        playlist was not empty before running this command.)
 
 ``playlist-clear``
     Clear the playlist, except the currently played file.
