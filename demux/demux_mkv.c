@@ -1741,7 +1741,11 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     if (!strcmp(codec, "mp2") || !strcmp(codec, "mp3") ||
         !strcmp(codec, "truehd") || !strcmp(codec, "eac3"))
     {
+        mkv_demuxer_t *mkv_d = demuxer->priv;
+        int64_t segment_timebase = (1e9 / mkv_d->tc_scale);
+
         track->parse = true;
+        track->parse_timebase = MPMAX(sh_a->samplerate, segment_timebase);
     } else if (!strcmp(codec, "flac")) {
         unsigned char *ptr = extradata;
         unsigned int size = extradata_len;
