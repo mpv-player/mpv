@@ -22,9 +22,6 @@
 #include "context.h"
 #include "utils.h"
 
-// Generated from presentation-time.xml
-#include "generated/wayland/presentation-time.h"
-
 struct priv {
     struct mpvk_ctx vk;
 };

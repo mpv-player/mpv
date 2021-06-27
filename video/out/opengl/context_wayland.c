@@ -25,9 +25,6 @@
 #include "egl_helpers.h"
 #include "utils.h"
 
-// Generated from presentation-time.xml
-#include "generated/wayland/presentation-time.h"
-
 #define EGL_PLATFORM_WAYLAND_EXT 0x31D8
 
 struct priv {
