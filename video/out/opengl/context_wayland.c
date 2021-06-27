@@ -47,8 +47,6 @@ static void resize(struct ra_ctx *ctx)
     const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
 
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
-    wl_surface_set_buffer_scale(wl->surface, wl->scaling);
-
     if (p->egl_window)
         wl_egl_window_resize(p->egl_window, width, height, 0, 0);
 

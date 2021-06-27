@@ -653,6 +653,7 @@ static void output_handle_done(void* data, struct wl_output *wl_output)
      * geometry and scaling should be recalculated. */
     if (wl->current_output && wl->current_output->output == wl_output) {
         wl->scaling = wl->current_output->scale;
+        wl_surface_set_buffer_scale(wl->surface, wl->scaling);
         spawn_cursor(wl);
         set_geometry(wl);
         wl->window_size = wl->vdparams;
@@ -711,6 +712,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     if (wl->scaling != wl->current_output->scale && wl->vo_opts->hidpi_window_scale) {
         double factor = (double)wl->scaling / wl->current_output->scale;
         wl->scaling = wl->current_output->scale;
+        wl_surface_set_buffer_scale(wl->surface, wl->scaling);
         spawn_cursor(wl);
         rescale_geometry_dimensions(wl, factor);
         wl->pending_vo_events |= VO_EVENT_DPI;
