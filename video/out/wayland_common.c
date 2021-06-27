@@ -1964,18 +1964,17 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
     if (wl->frame_wait) {
         // Only consider consecutive missed callbacks.
         if (wl->timeout_count > 1) {
-            wl->render = false;
+            wl->hidden = true;
             return;
         } else {
             wl->timeout_count += 1;
-            wl->render = true;
+            wl->hidden = false;
             return;
         }
     }
 
     wl->timeout_count = 0;
-    wl->render = true;
-    return;
+    wl->hidden = false;
 }
 
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)

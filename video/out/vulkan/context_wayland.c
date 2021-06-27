@@ -29,7 +29,7 @@ struct priv {
 static bool wayland_vk_start_frame(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
-    bool render = wl->render || wl->opts->disable_vsync;
+    bool render = !wl->hidden || wl->opts->disable_vsync;
     wl->frame_wait = true;
 
     return render;

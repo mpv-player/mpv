@@ -58,7 +58,7 @@ struct vo_wayland_state {
     bool has_keyboard_input;
     bool focused;
     bool frame_wait;
-    bool render;
+    bool hidden;
     bool state_change;
     bool toplevel_configured;
     int display_fd;

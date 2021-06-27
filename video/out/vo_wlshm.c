@@ -218,7 +218,7 @@ static void draw_image(struct vo *vo, struct mp_image *src)
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
     struct buffer *buf;
-    bool render = wl->render || wl->opts->disable_vsync;
+    bool render = !wl->hidden || wl->opts->disable_vsync;
     wl->frame_wait = true;
 
     if (!render)
