@@ -153,8 +153,8 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b);
 static void queue_new_sync(struct vo_wayland_state *wl);
 static void remove_output(struct vo_wayland_output *out);
-static void rescale_geometry_dimensions(struct vo_wayland_state *wl, double factor);
 static void set_geometry(struct vo_wayland_state *wl);
+static void set_surface_scaling(struct vo_wayland_state *wl);
 static void sync_shift(struct vo_wayland_state *wl);
 static void window_move(struct vo_wayland_state *wl, uint32_t serial);
 
@@ -652,8 +652,12 @@ static void output_handle_done(void* data, struct wl_output *wl_output)
      * output must have changed (resolution, scale, etc). All window
      * geometry and scaling should be recalculated. */
     if (wl->current_output && wl->current_output->output == wl_output) {
-        wl->scaling = wl->current_output->scale;
-        wl_surface_set_buffer_scale(wl->surface, wl->scaling);
+        set_surface_scaling(wl);
+        if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) {
+            wl_surface_set_buffer_scale(wl->surface, wl->scaling);
+        } else {
+            wl->scale_change = true;
+        }
         spawn_cursor(wl);
         set_geometry(wl);
         wl->window_size = wl->vdparams;
@@ -703,19 +707,21 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     wl->current_output->has_surface = true;
     bool force_resize = false;
 
+    if (wl->scaling != wl->current_output->scale) {
+        set_surface_scaling(wl);
+        if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) {
+            wl->scale_change = true;
+        } else {
+            wl_surface_set_buffer_scale(wl->surface, wl->scaling);
+        }
+        spawn_cursor(wl);
+        wl->pending_vo_events |= VO_EVENT_DPI;
+    }
+
     if (!mp_rect_equals(&old_output_geometry, &wl->current_output->geometry)) {
         set_geometry(wl);
         wl->window_size = wl->vdparams;
         force_resize = true;
-    }
-
-    if (wl->scaling != wl->current_output->scale && wl->vo_opts->hidpi_window_scale) {
-        double factor = (double)wl->scaling / wl->current_output->scale;
-        wl->scaling = wl->current_output->scale;
-        wl_surface_set_buffer_scale(wl->surface, wl->scaling);
-        spawn_cursor(wl);
-        rescale_geometry_dimensions(wl, factor);
-        wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
     if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
@@ -848,6 +854,11 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     int old_toplevel_height = wl->toplevel_height;
     wl->toplevel_width = width;
     wl->toplevel_height = height;
+
+    if (wl->scale_change) {
+        wl_surface_set_buffer_scale(wl->surface, wl->scaling);
+        wl->scale_change = false;
+    }
 
     if (wl->state_change) {
         if (!is_fullscreen && !is_maximized) {
@@ -1315,18 +1326,6 @@ static void remove_output(struct vo_wayland_output *out)
     return;
 }
 
-static void rescale_geometry_dimensions(struct vo_wayland_state *wl, double factor)
-{
-    wl->vdparams.x1 *= factor;
-    wl->vdparams.y1 *= factor;
-    wl->window_size.x1 *= factor;
-    wl->window_size.y1 *= factor;
-    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) {
-        wl->geometry.x1 *= factor;
-        wl->geometry.y1 *= factor;
-    }
-}
-
 static void set_border_decorations(struct vo_wayland_state *wl, int state)
 {
     if (!wl->xdg_toplevel_decoration) {
@@ -1404,6 +1403,22 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
         wl->idle_inhibitor = NULL;
     }
     return VO_TRUE;
+}
+
+static void set_surface_scaling(struct vo_wayland_state *wl)
+{
+    int old_scale = wl->scaling;
+    if (wl->vo_opts->hidpi_window_scale) {
+        wl->scaling = wl->current_output->scale;
+    } else {
+        wl->scaling = 1;
+    }
+
+    double factor = (double)old_scale / wl->scaling;
+    wl->vdparams.x1 *= factor;
+    wl->vdparams.y1 *= factor;
+    wl->window_size.x1 *= factor;
+    wl->window_size.y1 *= factor;
 }
 
 static int spawn_cursor(struct vo_wayland_state *wl)
@@ -1546,16 +1561,25 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_VO_OPTS_CHANGED: {
         void *opt;
         while (m_config_cache_get_next_changed(wl->vo_opts_cache, &opt)) {
-            if (opt == &opts->fullscreen)
-                toggle_fullscreen(wl);
-            if (opt == &opts->window_minimized)
-                do_minimize(wl);
-            if (opt == &opts->window_maximized)
-                toggle_maximized(wl);
-            if (opt == &opts->border)
-                set_border_decorations(wl, opts->border);
             if (opt == &opts->appid)
                 update_app_id(wl);
+            if (opt == &opts->border)
+                set_border_decorations(wl, opts->border);
+            if (opt == &opts->fullscreen)
+                toggle_fullscreen(wl);
+            if (opt == &opts->hidpi_window_scale)
+            {
+                set_surface_scaling(wl);
+                if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) {
+                    wl_surface_set_buffer_scale(wl->surface, wl->scaling);
+                } else {
+                    wl->scale_change = true;
+                }
+            }
+            if (opt == &opts->window_maximized)
+                toggle_maximized(wl);
+            if (opt == &opts->window_minimized)
+                do_minimize(wl);
             if (opt == &opts->geometry || opt == &opts->autofit ||
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
@@ -1734,9 +1758,7 @@ int vo_wayland_reconfig(struct vo *vo)
         wl->current_output = find_output(wl);
         if (!wl->current_output)
             return false;
-        if (!wl->vo_opts->hidpi_window_scale)
-            wl->current_output->scale = 1;
-        wl->scaling = wl->current_output->scale;
+        set_surface_scaling(wl);
         wl_surface_set_buffer_scale(wl->surface, wl->scaling);
         wl_surface_commit(wl->surface);
         configure = true;
