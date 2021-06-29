@@ -31,6 +31,7 @@ local o = {
     print_perfdata_passes = false,   -- when true, print the full information about all passes
     filter_params_max_length = 100,  -- a filter list longer than this many characters will be shown one filter per line instead
     debug = false,
+    hook_esc = false,                -- prevent insta "quit" if mapped to "Escape"
 
     -- Graph options and style
     plot_perfdata = true,
@@ -928,6 +929,7 @@ local function process_key_binding(oneshot)
             cache_recorder_timer:stop()
             clear_screen()
             remove_page_bindings()
+            if o.hook_esc then mp.remove_key_binding("ESC-close") end
             if recorder then
                 mp.unobserve_property(recorder)
                 recorder = nil
@@ -952,6 +954,10 @@ local function process_key_binding(oneshot)
         display_timer.oneshot = oneshot
         display_timer.timeout = oneshot and o.duration or o.redraw_delay
         add_page_bindings()
+        if o.hook_esc then
+            mp.add_forced_key_binding("ESC", "ESC-close", function() process_key_binding(false) end, 
+                {repeatable=false})
+        end
         print_page(curr_page)
         display_timer:resume()
     end
@@ -964,6 +970,7 @@ display_timer = mp.add_periodic_timer(o.duration,
     function()
         if display_timer.oneshot then
             display_timer:kill() ; clear_screen() ; remove_page_bindings()
+            if o.hook_esc then mp.remove_key_binding("ESC-close") end
         else
             print_page(curr_page)
         end
