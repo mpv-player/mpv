@@ -36,6 +36,7 @@
 // Generated from wayland-protocols
 #include "generated/wayland/idle-inhibit-unstable-v1.h"
 #include "generated/wayland/presentation-time.h"
+#include "generated/wayland/surface-suspension.h"
 #include "generated/wayland/xdg-decoration-unstable-v1.h"
 #include "generated/wayland/xdg-shell.h"
 
@@ -756,6 +757,26 @@ static const struct wl_surface_listener surface_listener = {
     surface_handle_leave,
 };
 
+static void surface_suspended(void *data, struct wp_surface_suspension_v1 *surface_suspension)
+{
+    struct vo_wayland_state *wl = data;
+    wl->suspended = true;
+}
+
+static void surface_resumed(void *data, struct wp_surface_suspension_v1 *surface_suspension)
+{
+    struct vo_wayland_state *wl = data;
+    wl->suspended = false;
+
+    /* If the surface becomes unoccluded, force a redraw. */
+    wl->pending_vo_events |= VO_EVENT_EXPOSE;
+}
+
+static const struct wp_surface_suspension_v1_listener surface_suspension_listener = {
+    surface_suspended,
+    surface_resumed,
+};
+
 static void xdg_wm_base_ping(void *data, struct xdg_wm_base *wm_base, uint32_t serial)
 {
     xdg_wm_base_pong(wm_base, serial);
@@ -838,12 +859,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         {
             wl->focused = !wl->focused;
             wl->pending_vo_events |= VO_EVENT_FOCUS;
-
-            if (wl->activated) {
-                /* If the surface comes back into view, force a redraw. */
-                vo_wayland_wait_frame(wl);
-                wl->pending_vo_events |= VO_EVENT_EXPOSE;
-            }
         }
     }
 
@@ -1041,6 +1056,10 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
         wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, 1);
         wp_presentation_add_listener(wl->presentation, &pres_listener, wl);
+    }
+
+    if (!strcmp(interface, wp_surface_suspension_manager_v1_interface.name) && found++) {
+        wl->surface_suspension_manager = wl_registry_bind(reg, id, &wp_surface_suspension_manager_v1_interface, 1);
     }
 
     if (!strcmp(interface, xdg_wm_base_interface.name) && found++) {
@@ -1721,6 +1740,14 @@ int vo_wayland_init(struct vo *vo)
                    wp_presentation_interface.name);
     }
 
+    if (wl->surface_suspension_manager) {
+        wl->surface_suspension = wp_surface_suspension_manager_v1_get_surface_suspension(wl->surface_suspension_manager, wl->surface);
+        wp_surface_suspension_v1_add_listener(wl->surface_suspension, &surface_suspension_listener, wl);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   wp_surface_suspension_manager_v1_interface.name);
+    }
+
     if (wl->xdg_decoration_manager) {
         wl->xdg_toplevel_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(wl->xdg_decoration_manager, wl->xdg_toplevel);
         set_border_decorations(wl, wl->vo_opts->border);
@@ -1906,6 +1933,12 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->surface)
         wl_surface_destroy(wl->surface);
 
+    if (wl->surface_suspension)
+        wp_surface_suspension_v1_destroy(wl->surface_suspension);
+
+    if (wl->surface_suspension_manager)
+        wp_surface_suspension_manager_v1_destroy(wl->surface_suspension_manager);
+
     if (wl->wm_base)
         xdg_wm_base_destroy(wl->wm_base);
 
@@ -1984,21 +2017,6 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
      * that this wait is accurate. Do a hacky block with wl_display_roundtrip. */
     if (!wl->presentation && !wl_display_get_error(wl->display))
         wl_display_roundtrip(wl->display);
-
-    if (wl->frame_wait) {
-        // Only consider consecutive missed callbacks.
-        if (wl->timeout_count > 1) {
-            wl->hidden = true;
-            return;
-        } else {
-            wl->timeout_count += 1;
-            wl->hidden = false;
-            return;
-        }
-    }
-
-    wl->timeout_count = 0;
-    wl->hidden = false;
 }
 
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)

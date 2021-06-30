@@ -498,6 +498,7 @@ video_output_features = [
         'desc': 'wayland-scanner',
         'func': check_program('wayland-scanner', 'WAYSCAN')
     } , {
+        #TODO: add a version check here for whenever the protocol gets merged
         'name': '--wayland-protocols',
         'desc': 'wayland-protocols',
         'func': check_wl_protocols

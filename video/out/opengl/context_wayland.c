@@ -58,10 +58,9 @@ static bool wayland_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_
 {
     struct ra_ctx *ctx = sw->ctx;
     struct vo_wayland_state *wl = ctx->vo->wl;
-    bool render = !wl->hidden || wl->opts->disable_vsync;
     wl->frame_wait = true;
 
-    return render ? ra_gl_ctx_start_frame(sw, out_fbo) : false;
+    return !wl->suspended ? ra_gl_ctx_start_frame(sw, out_fbo) : false;
 }
 
 static void wayland_egl_swap_buffers(struct ra_swapchain *sw)
