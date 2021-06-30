@@ -58,9 +58,9 @@ struct vo_wayland_state {
     bool has_keyboard_input;
     bool focused;
     bool frame_wait;
-    bool hidden;
     bool scale_change;
     bool state_change;
+    bool suspended;
     bool toplevel_configured;
     int display_fd;
     int mouse_unscaled_x;
@@ -69,13 +69,16 @@ struct vo_wayland_state {
     int mouse_y;
     int pending_vo_events;
     int scaling;
-    int timeout_count;
     int touch_entries;
     int wakeup_pipe[2];
 
     /* idle-inhibit */
     struct zwp_idle_inhibit_manager_v1 *idle_inhibit_manager;
     struct zwp_idle_inhibitor_v1 *idle_inhibitor;
+
+    /* surface-suspension */
+    struct wp_surface_suspension_manager_v1 *surface_suspension_manager;
+    struct wp_surface_suspension_v1 *surface_suspension;
 
     /* xdg-decoration */
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
