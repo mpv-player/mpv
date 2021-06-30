@@ -1544,6 +1544,18 @@ static void vo_wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, in
         mp_flush_wakeup_pipe(wl->wakeup_pipe[0]);
 }
 
+static void vo_wayland_set_input_region(struct vo_wayland_state *wl, bool passthrough)
+{
+    if (passthrough) {
+        struct wl_region *region = wl_compositor_create_region(wl->compositor);
+        wl_region_add(region, 0, 0, 0, 0);
+        wl_surface_set_input_region(wl->surface, region);
+        wl_region_destroy(region);
+    } else {
+        wl_surface_set_input_region(wl->surface, NULL);
+    }
+}
+
 /* Non-static */
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 {
@@ -1565,6 +1577,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                 update_app_id(wl);
             if (opt == &opts->border)
                 set_border_decorations(wl, opts->border);
+            if (opt == &opts->cursor_passthrough)
+                vo_wayland_set_input_region(wl, opts->cursor_passthrough);
             if (opt == &opts->fullscreen)
                 toggle_fullscreen(wl);
             if (opt == &opts->hidpi_window_scale)
@@ -1765,6 +1779,9 @@ int vo_wayland_reconfig(struct vo *vo)
     }
 
     set_geometry(wl);
+
+    if (wl->vo_opts->cursor_passthrough)
+        vo_wayland_set_input_region(wl, true);
 
     if (wl->vo_opts->keepaspect && wl->vo_opts->keepaspect_window)
         wl->window_size = wl->vdparams;

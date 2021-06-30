@@ -3879,6 +3879,12 @@ Input
     driver. Necessary to use the OSC, or to select the buttons in DVD menus.
     Support depends on the VO in use.
 
+``--input-cursor-passthrough``, ``--no-input-cursor-passthrough``
+    Tell the backend windowing system to allow pointer events to passthrough
+    the mpv window. This allows windows under mpv to instead receive pointer
+    events as if the mpv window was never there. Support depends on the OS
+    and/or the actual windowing system in use.
+
 ``--input-media-keys=<yes|no>``
     (macOS and Windows only)
     Enable/disable media keys support. Enabled by default (except for libmpv).

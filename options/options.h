@@ -29,6 +29,7 @@ typedef struct mp_vo_opts {
     char *appid;
     int x11_netwm;
     int x11_bypass_compositor;
+    int cursor_passthrough;
     int native_keyrepeat;
 
     float panscan;
