@@ -80,12 +80,23 @@ AVCodecParameters *mp_codec_params_to_av(struct mp_codec_params *c)
     avp->codec_id = mp_codec_to_av_codec_id(c->codec);
     avp->codec_tag = c->codec_tag;
     if (c->extradata_size) {
-        avp->extradata =
-            av_mallocz(c->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
+        uint8_t *extradata = c->extradata;
+        int size = c->extradata_size;
+
+        if (avp->codec_id == AV_CODEC_ID_FLAC) {
+            // ffmpeg expects FLAC extradata to be just the STREAMINFO,
+            // so grab only that (and assume it'll be the first block)
+            if (size >= 8 && !memcmp(c->extradata, "fLaC", 4)) {
+                extradata += 8;
+                size = MPMIN(34, size - 8); // FLAC_STREAMINFO_SIZE
+            }
+        }
+
+        avp->extradata = av_mallocz(size + AV_INPUT_BUFFER_PADDING_SIZE);
         if (!avp->extradata)
             goto error;
-        avp->extradata_size = c->extradata_size;
-        memcpy(avp->extradata, c->extradata, avp->extradata_size);
+        avp->extradata_size = size;
+        memcpy(avp->extradata, extradata, size);
     }
     avp->bits_per_coded_sample = c->bits_per_coded_sample;
 
