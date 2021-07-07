@@ -84,6 +84,7 @@ struct mp_subtitle_opts {
     int stretch_image_subs;
     int image_subs_video_res;
     int sub_fix_timing;
+    int sub_stretch_durations;
     int sub_scale_by_window;
     int sub_scale_with_window;
     int ass_scale_with_window;
