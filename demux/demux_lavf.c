@@ -600,46 +600,48 @@ static void select_tracks(struct demuxer *demuxer, int start)
 static void export_replaygain(demuxer_t *demuxer, struct sh_stream *sh,
                               AVStream *st)
 {
-    for (int i = 0; i < st->nb_side_data; i++) {
-        AVReplayGain *av_rgain;
-        struct replaygain_data *rgain;
-        AVPacketSideData *src_sd = &st->side_data[i];
+    const AVReplayGain *av_rgain =
+        (const AVReplayGain*)av_stream_get_side_data(st,
+                                                     AV_PKT_DATA_REPLAYGAIN,
+                                                     NULL);
+    struct replaygain_data *rgain = NULL;
 
-        if (src_sd->type != AV_PKT_DATA_REPLAYGAIN)
-            continue;
+    if (!av_rgain)
+        return;
 
-        av_rgain = (AVReplayGain*)src_sd->data;
-        rgain    = talloc_ptrtype(demuxer, rgain);
-        rgain->track_gain = rgain->album_gain = 0;
-        rgain->track_peak = rgain->album_peak = 1;
+    bool track_data_available =
+        (av_rgain->track_gain != INT32_MIN && av_rgain->track_peak != 0);
+    bool album_data_available =
+        (av_rgain->album_gain != INT32_MIN && av_rgain->album_peak != 0);
 
-        // Set values in *rgain, using track gain as a fallback for album gain
-        // if the latter is not present. This behavior matches that in
-        // demux/demux.c's decode_rgain; if you change this, please make
-        // equivalent changes there too.
-        if (av_rgain->track_gain != INT32_MIN && av_rgain->track_peak != 0.0) {
-            // Track gain is defined.
-            rgain->track_gain = av_rgain->track_gain / 100000.0f;
-            rgain->track_peak = av_rgain->track_peak / 100000.0f;
+    if (!track_data_available && !album_data_available)
+        return;
 
-            if (av_rgain->album_gain != INT32_MIN &&
-                av_rgain->album_peak != 0.0)
-            {
-                // Album gain is also defined.
-                rgain->album_gain = av_rgain->album_gain / 100000.0f;
-                rgain->album_peak = av_rgain->album_peak / 100000.0f;
-            } else {
-                // Album gain is undefined; fall back to track gain.
-                rgain->album_gain = rgain->track_gain;
-                rgain->album_peak = rgain->track_peak;
-            }
-        }
+    rgain    = talloc_ptrtype(demuxer, rgain);
+    rgain->track_gain = rgain->album_gain = 0;
+    rgain->track_peak = rgain->album_peak = 1;
 
-        // This must be run only before the stream was added, otherwise there
-        // will be race conditions with accesses from the user thread.
-        assert(!sh->ds);
-        sh->codec->replaygain_data = rgain;
+    // Set values in *rgain, using track gain as a fallback for album gain
+    // if the latter is not present. This behavior matches that in
+    // demux/demux.c's decode_rgain; if you change this, please make
+    // equivalent changes there too.
+    if (track_data_available) {
+        rgain->track_gain = rgain->album_gain =
+            av_rgain->track_gain / 100000.0f;
+        rgain->track_peak = rgain->album_peak =
+            av_rgain->track_peak / 100000.0f;
     }
+
+    // If album data is actually available, fill it in with proper values.
+    if (album_data_available) {
+        rgain->album_gain = av_rgain->album_gain / 100000.0f;
+        rgain->album_peak = av_rgain->album_peak / 100000.0f;
+    }
+
+    // This must be run only before the stream was added, otherwise there
+    // will be race conditions with accesses from the user thread.
+    assert(!sh->ds);
+    sh->codec->replaygain_data = rgain;
 }
 
 // Return a dictionary entry as (decimal) integer.
