@@ -103,12 +103,22 @@ const struct m_sub_options encode_config = {
         {"ofps", OPT_REMOVED("no replacement (use --vf-add=fps=VALUE for CFR)")},
         {"oautofps", OPT_REMOVED("no replacement")},
         {"omaxfps", OPT_REMOVED("no replacement")},
+        {"oforce-key-frames", OPT_STRING(forced_keyframes)},
         {0}
     },
     .size = sizeof(struct encode_opts),
     .defaults = &(const struct encode_opts){
         .copy_metadata = 1,
     },
+};
+
+const char *const forced_keyframes_const_names[] = {
+    "n",
+    "n_forced",
+    "prev_forced_n",
+    "prev_forced_t",
+    "t",
+    NULL
 };
 
 struct encode_lavc_context *encode_lavc_init(struct mpv_global *global)
@@ -159,6 +169,21 @@ struct encode_lavc_context *encode_lavc_init(struct mpv_global *global)
 
     p->muxer->url = av_strdup(filename);
     MP_HANDLE_OOM(p->muxer->url);
+    
+    if (ctx->options->forced_keyframes) {
+        if (!strncmp(ctx->options->forced_keyframes, "expr:", 5)) {
+            int ret = av_expr_parse(&ctx->forced_keyframes_pexpr, ctx->options->forced_keyframes+5,
+                                forced_keyframes_const_names, NULL, NULL, NULL, NULL, 0, NULL);
+            if (ret < 0) {
+                MP_ERR(p, "Invalid force_key_frames expression '%s'\n",
+                       ctx->options->forced_keyframes+5);
+            }
+            ctx->forced_keyframes_expr_const_values[FKF_N] = 0;
+            ctx->forced_keyframes_expr_const_values[FKF_N_FORCED] = 0;
+            ctx->forced_keyframes_expr_const_values[FKF_PREV_FORCED_N] = NAN;
+            ctx->forced_keyframes_expr_const_values[FKF_PREV_FORCED_T] = NAN;
+        }
+    }
 
     return ctx;
 
@@ -919,6 +944,25 @@ bool encoder_init_codec_and_muxer(struct encoder_context *p,
 fail:
     avcodec_close(p->encoder);
     return false;
+}
+
+enum AVPictureType encoder_get_pict_type(struct encode_lavc_context *enc, double outpts)
+{
+    enum AVPictureType pict_type = 0; // keep this at unknown/undefined
+    if (enc->forced_keyframes_pexpr) {
+        enc->forced_keyframes_expr_const_values[FKF_T] = outpts;
+        double res = av_expr_eval(enc->forced_keyframes_pexpr,
+                            enc->forced_keyframes_expr_const_values, NULL);
+        if (res) {
+            pict_type = AV_PICTURE_TYPE_I;
+            enc->forced_keyframes_expr_const_values[FKF_PREV_FORCED_N] =
+                enc->forced_keyframes_expr_const_values[FKF_N];
+            enc->forced_keyframes_expr_const_values[FKF_PREV_FORCED_T] =
+                enc->forced_keyframes_expr_const_values[FKF_T];
+            enc->forced_keyframes_expr_const_values[FKF_N_FORCED] += 1;
+        }
+    }
+    return pict_type;
 }
 
 bool encoder_encode(struct encoder_context *p, AVFrame *frame)

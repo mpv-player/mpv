@@ -44,6 +44,7 @@ struct encode_opts {
     int video_first;
     int audio_first;
     int copy_metadata;
+    char *forced_keyframes;
     char **set_metadata;
     char **remove_metadata;
 };
