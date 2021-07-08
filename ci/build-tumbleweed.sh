@@ -9,5 +9,11 @@ python3 ./waf configure \
   --enable-libmpv-shared \
   --enable-manpage-build \
   --enable-shaderc       \
-  --enable-vulkan
+  --enable-vulkan        \
+  --enable-tests
+
 python3 ./waf build --verbose
+
+zypper install gdb
+
+gdb -ex=r --args ./build/mpv --unittest=all-simple

@@ -130,8 +130,10 @@ static const struct entry repack_tests[] = {
         .flags = REPACK_CREATE_EXPAND_8BIT},
     {1, 1, IMGFMT_RGB30,            {P32((3 << 20) | (2 << 10) | 1)},
            -AV_PIX_FMT_GBRP10,      {P16(2), P16(1), P16(3)}},
+#ifdef AV_PIX_FMT_X2RGB10BE
     {1, 1, -AV_PIX_FMT_X2RGB10BE,   {P32(SW32((3 << 20) | (2 << 10) | 1))},
            -AV_PIX_FMT_GBRP10,      {P16(2), P16(1), P16(3)}},
+#endif
     {8, 1, -AV_PIX_FMT_MONOWHITE,   {P8(0xAA)},
            IMGFMT_Y1,               {P8(0, 1, 0, 1, 0, 1, 0, 1)}},
     {8, 1, -AV_PIX_FMT_MONOBLACK,   {P8(0xAA)},
