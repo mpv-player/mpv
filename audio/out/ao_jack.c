@@ -246,6 +246,8 @@ static int init(struct ao *ao)
     jack_set_process_callback(p->client, process, ao);
 
     ao->samplerate = jack_get_sample_rate(p->client);
+    // The actual device buffer can change, but this is enough for pre-buffer
+    ao->device_buffer = jack_get_buffer_size(p->client);
 
     jack_set_buffer_size_callback(p->client, buffer_size_cb, ao);
     jack_set_graph_order_callback(p->client, graph_order_cb, ao);
