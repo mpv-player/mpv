@@ -110,6 +110,12 @@ def build(ctx):
             protocol  = "stable/xdg-shell/xdg-shell",
             target    = "generated/wayland/xdg-shell.h")
         ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "staging/surface-suspension/surface-suspension-v1",
+            target    = "generated/wayland/surface-suspension.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "staging/surface-suspension/surface-suspension-v1",
+            target    = "generated/wayland/surface-suspension.h")
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "unstable/idle-inhibit/idle-inhibit-unstable-v1",
             target    = "generated/wayland/idle-inhibit-unstable-v1.c")
         ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
@@ -515,6 +521,7 @@ def build(ctx):
         ( "video/out/w32_common.c",              "win32-desktop" ),
         ( "generated/wayland/idle-inhibit-unstable-v1.c", "wayland" ),
         ( "generated/wayland/presentation-time.c", "wayland" ),
+        ( "generated/wayland/surface-suspension.c", "wayland" ),
         ( "generated/wayland/xdg-decoration-unstable-v1.c", "wayland" ),
         ( "generated/wayland/xdg-shell.c",       "wayland" ),
         ( "video/out/wayland_common.c",          "wayland" ),
