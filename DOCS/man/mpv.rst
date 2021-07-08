@@ -1330,8 +1330,7 @@ generally unacceptable things.
 
 However, since mpv does not officially support GNOME, this is not much of a
 problem. If you are one of those miserable users who want to use mpv on GNOME,
-report a bug on the GNOME issue tracker:
-https://gitlab.gnome.org/groups/GNOME/-/issues
+follow https://gitlab.gnome.org/GNOME/mutter/-/issues/20.
 
 Alternatively, you may be able to write a Lua script that calls the
 ``xdg-screensaver`` command line program. (By the way, this a command line
