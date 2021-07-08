@@ -95,6 +95,7 @@ Interface changes
     - remove deprecated --vo-vdpau-deint option
     - add `delete-watch-later-config` command to complement
       `write-watch-later-config`
+    - make `current-window-scale` writeable and use it in the default input.conf
  --- mpv 0.32.0 ---
     - change behavior when using legacy option syntax with options that start
       with two dashes (``--`` instead of a ``-``). Now, using the recommended
