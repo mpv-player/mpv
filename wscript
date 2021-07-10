@@ -391,6 +391,10 @@ iconv support use --disable-iconv.",
         'desc': 'SDL2 gamepad input',
         'deps': 'sdl2',
         'func': check_true,
+    }, {
+        'name': '--libxml2',
+        'desc': 'libxml2 for XSPF support',
+        'func': check_pkg_config('libxml-2.0'),
     }
 ]
 

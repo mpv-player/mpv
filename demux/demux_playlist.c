@@ -23,6 +23,12 @@
 #include <libavutil/common.h>
 
 #include "config.h"
+
+#if HAVE_LIBXML2
+#include <libxml/parser.h>
+#include <libxml/xmlmemory.h>
+#endif
+
 #include "common/common.h"
 #include "options/options.h"
 #include "common/msg.h"
@@ -220,6 +226,90 @@ ok:
     return 0;
 }
 
+#if HAVE_LIBXML2
+static void suppress_xml_errors(void *ctx, const char *msg, ...) {}
+#endif
+
+static int parse_xspf(struct pl_parser *p)
+{
+#if HAVE_LIBXML2
+    // Override error output of the xml parser with an empty function
+    // Otherwise errors are written to stderr when probing for other file types
+    xmlGenericErrorFunc errorfunc = &suppress_xml_errors;
+    initGenericErrorDefaultFunc(&errorfunc);
+
+    xmlDocPtr doc = xmlParseFile(p->real_stream->path);
+    if (doc == NULL)
+        return -1;
+    xmlNodePtr cur = xmlDocGetRootElement(doc);
+    if (cur == NULL) {
+        xmlFreeDoc(doc);
+        return -1;
+    }
+    // Ensure the root element is named "playlist"
+    if (xmlStrcmp(cur->name, (const xmlChar *) "playlist")) {
+        xmlFreeDoc(doc);
+        return -1;
+    }
+
+    cur = cur->xmlChildrenNode;
+    while (1) {
+        if (cur == NULL) {
+            // No "trackList" node found
+            xmlFreeDoc(doc);
+            return -1;
+        } else if (!xmlStrcmp(cur->name, (const xmlChar *) "trackList")) {
+            break;
+        }
+        cur = cur->next;
+    }
+
+    if (p->probing) {
+        xmlFreeDoc(doc);
+        return 0;
+    }
+
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        if (!xmlStrcmp(cur->name, (const xmlChar *) "track")) {
+            xmlChar *location = NULL;
+            xmlChar *title = NULL;
+            xmlNodePtr dp = cur->xmlChildrenNode;
+            // Stop searching once both location and title have been found
+            while (dp != NULL && (location == NULL || title == NULL)) {
+                // Only use the first occurance of each data point
+                if (location == NULL &&
+                    !xmlStrcmp(dp->name, (const xmlChar *) "location"))
+                {
+                    location = xmlNodeListGetString(doc, dp->xmlChildrenNode, 1);
+                } else if (title == NULL &&
+                           !xmlStrcmp(dp->name, (const xmlChar *) "title"))
+                {
+                    title = xmlNodeListGetString(doc, dp->xmlChildrenNode, 1);
+                }
+                dp = dp->next;
+            }
+
+            // Skip if location is empty or missing
+            if (location != NULL) {
+                struct playlist_entry *e = playlist_entry_new((char *) location);
+                xmlFree(location);
+                if (title != NULL) {
+                    e->title = talloc_strdup(e, (char *) title);
+                    xmlFree(title);
+                }
+                playlist_add(p->pl, e);
+            }
+        }
+        cur = cur->next;
+    }
+    xmlFreeDoc(doc);
+    return 0;
+#else
+    return -1;
+#endif
+}
+
 static int parse_ref_init(struct pl_parser *p)
 {
     bstr line = bstr_strip(pl_get_line(p));
@@ -405,6 +495,8 @@ static const struct pl_format formats[] = {
     {"ini", parse_ref_init},
     {"pls", parse_pls,
      MIME_TYPES("audio/x-scpls")},
+    {"xspf", parse_xspf,
+     MIME_TYPES("application/xspf+xml")},
     {"url", parse_url},
     {"txt", parse_txt},
 };
