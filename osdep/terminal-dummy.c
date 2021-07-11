@@ -33,3 +33,7 @@ bool terminal_try_attach(void)
 {
     return false;
 }
+
+void terminal_show_cursor(bool)
+{
+}

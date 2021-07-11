@@ -49,4 +49,7 @@ void mp_write_console_ansi(void *wstream, char *buf);
 /* Windows-only function to attach to the parent process's console */
 bool terminal_try_attach(void);
 
+/* Show and hide cursor. */
+void terminal_show_cursor(bool);
+
 #endif /* MPLAYER_GETCH2_H */

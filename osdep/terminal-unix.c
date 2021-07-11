@@ -352,6 +352,7 @@ static void getch2_poll(void)
 
 static void stop_sighandler(int signum)
 {
+    terminal_show_cursor(true);
     do_deactivate_getch2();
 
     // note: for this signal, we use SA_RESETHAND but do NOT mask signals
@@ -361,6 +362,8 @@ static void stop_sighandler(int signum)
 
 static void continue_sighandler(int signum)
 {
+    terminal_show_cursor(false);
+
     // SA_RESETHAND has reset SIGTSTP, so we need to restore it here
     setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
 
@@ -390,6 +393,7 @@ static void close_tty(void)
 
 static void quit_request_sighandler(int signum)
 {
+    terminal_show_cursor(true);
     do_deactivate_getch2();
 
     (void)write(death_pipe[1], &(char){1}, 1);
@@ -512,6 +516,15 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
     *cols = ws.ws_col;
     *px_width = ws.ws_xpixel;
     *px_height = ws.ws_ypixel;
+}
+
+void terminal_show_cursor(bool visible)
+{
+    if (visible)
+        printf("\e[?25h");
+    else
+        printf("\e[?25l");
+    fflush(stdout);
 }
 
 void terminal_init(void)

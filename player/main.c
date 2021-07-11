@@ -420,6 +420,7 @@ int mpv_main(int argc, char *argv[])
         return 1;
 
     mpctx->is_cli = true;
+    terminal_show_cursor(false);
 
     char **options = argv && argv[0] ? argv + 1 : NULL; // skips program name
     int r = mp_initialize(mpctx, options);
@@ -458,5 +459,6 @@ int mpv_main(int argc, char *argv[])
         rc = mpctx->quit_custom_rc;
 
     mp_destroy(mpctx);
+    terminal_show_cursor(true);
     return rc;
 }
