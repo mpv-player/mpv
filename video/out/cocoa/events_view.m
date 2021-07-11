@@ -22,6 +22,8 @@
 #include "video/out/cocoa_common.h"
 #include "events_view.h"
 
+#include "config.h"
+
 @interface MpvEventsView()
 @property(nonatomic, assign) BOOL hasMouseDown;
 @property(nonatomic, retain) NSTrackingArea *tracker;
@@ -35,12 +37,40 @@
 @synthesize tracker = _tracker;
 @synthesize hasMouseDown = _mouse_down;
 
+#if !HAVE_MACOS_10_13_FEATURES
+typedef NSString* NSPasteboardType;
+#endif
+
+static NSPasteboardType filenameType(void)
+{
+#if HAVE_MACOS_10_13_FEATURES
+    if (@available(macOS 10.13, *)) {
+        return NSPasteboardTypeFileURL;
+    } else
+#endif
+    {
+        return (NSPasteboardType)kUTTypeFileURL;
+    }
+}
+
+static NSPasteboardType urlType(void)
+{
+#if HAVE_MACOS_10_13_FEATURES
+    if (@available(macOS 10.13, *)) {
+        return NSPasteboardTypeURL;
+    } else
+#endif
+    {
+        return (NSPasteboardType)kUTTypeURL;
+    }
+}
+
 - (id)initWithFrame:(NSRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-        [self registerForDraggedTypes:@[NSFilenamesPboardType,
-                                        NSURLPboardType]];
+        [self registerForDraggedTypes:@[filenameType(),
+                                        urlType()]];
         [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
     }
     return self;
@@ -305,8 +335,8 @@
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
     NSArray *types = [pboard types];
-    if ([types containsObject:NSFilenamesPboardType] ||
-        [types containsObject:NSURLPboardType]) {
+    if ([types containsObject:filenameType()] ||
+        [types containsObject:urlType()]) {
         return NSDragOperationCopy;
     } else {
         return NSDragOperationNone;
@@ -316,13 +346,13 @@
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
-    if ([[pboard types] containsObject:NSFilenamesPboardType]) {
-        NSArray *pbitems = [pboard propertyListForType:NSFilenamesPboardType];
-        [self.adapter handleFilesArray:pbitems];
-        return YES;
-    } else if ([[pboard types] containsObject:NSURLPboardType]) {
-        NSURL *url = [NSURL URLFromPasteboard:pboard];
-        [self.adapter handleFilesArray:@[[url absoluteString]]];
+    if ([[pboard types] containsObject:filenameType()] ||
+        [[pboard types] containsObject:urlType()]) {
+        NSArray *pbitems = [pboard readObjectsForClasses:@[[NSURL class]] options:nil];
+        NSMutableArray *stringArray = [NSMutableArray new];
+        for (NSURL *url in pbitems)
+            [stringArray addObject:[url absoluteString]];
+        [self.adapter handleFilesArray:stringArray];
         return YES;
     }
     return NO;
