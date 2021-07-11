@@ -4137,9 +4137,9 @@ static void update_cache(struct demux_internal *in)
         stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
     }
 
-    update_bytes_read(in);
-
     pthread_mutex_lock(&in->lock);
+
+    update_bytes_read(in);
 
     if (do_update)
         in->stream_size = stream_size;
