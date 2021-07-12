@@ -679,15 +679,29 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     This works by unloading and re-adding the subtitle track.
 
-``sub-step <skip>``
+``sub-step <skip> <flags>``
     Change subtitle timing such, that the subtitle event after the next
     ``<skip>`` subtitle events is displayed. ``<skip>`` can be negative to step
     backwards.
 
-``sub-seek <skip>``
+    Secondary argument:
+
+    primary (default)
+        Steps through the primary subtitles.
+    secondary
+        Steps through the secondary subtitles.
+
+``sub-seek <skip> <flags>``
     Seek to the next (skip set to 1) or the previous (skip set to -1) subtitle.
     This is similar to ``sub-step``, except that it seeks video and audio
     instead of adjusting the subtitle delay.
+
+    Secondary argument:
+
+    primary (default)
+        Seeks through the primary subtitles.
+    secondary
+        Seeks through the secondary subtitles.
 
     For embedded subtitles (like with Matroska), this works only with subtitle
     events that have already been displayed, or are within a short prefetch

@@ -3677,11 +3677,11 @@ static const struct m_property mp_properties_base[] = {
         .priv = (void *)&(const int){SD_TEXT_TYPE_ASS}},
     {"sub-start", mp_property_sub_start,
         .priv = (void *)&(const int){0}},
-    {"secondary-sub-start", mp_property_sub_start, 
+    {"secondary-sub-start", mp_property_sub_start,
         .priv = (void *)&(const int){1}},
     {"sub-end", mp_property_sub_end,
         .priv = (void *)&(const int){0}},
-    {"secondary-sub-end", mp_property_sub_end, 
+    {"secondary-sub-end", mp_property_sub_end,
         .priv = (void *)&(const int){1}},
 
     {"vf", mp_property_vf},
@@ -5035,13 +5035,14 @@ static void cmd_sub_step_seek(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     bool step = *(bool *)cmd->priv;
+    int track_ind = cmd->args[1].v.i;
 
     if (!mpctx->playback_initialized) {
         cmd->success = false;
         return;
     }
 
-    struct track *track = mpctx->current_track[0][STREAM_SUB];
+    struct track *track = mpctx->current_track[track_ind][STREAM_SUB];
     struct dec_sub *sub = track ? track->d_sub : NULL;
     double refpts = get_current_time(mpctx);
     if (sub && refpts != MP_NOPTS_VALUE) {
@@ -6073,10 +6074,28 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "playlist-shuffle", cmd_playlist_shuffle, },
     { "playlist-unshuffle", cmd_playlist_unshuffle, },
-    { "sub-step", cmd_sub_step_seek, { {"skip", OPT_INT(v.i)} },
-        .allow_auto_repeat = true, .priv = &(const bool){true} },
-    { "sub-seek", cmd_sub_step_seek, { {"skip", OPT_INT(v.i)} },
-        .allow_auto_repeat = true, .priv = &(const bool){false} },
+    { "sub-step", cmd_sub_step_seek,
+        {
+            {"skip", OPT_INT(v.i)},
+            {"flags", OPT_CHOICE(v.i,
+                {"primary", 0},
+                {"secondary", 1}),
+                OPTDEF_INT(0)},
+        },
+        .allow_auto_repeat = true,
+        .priv = &(const bool){true}
+    },
+    { "sub-seek", cmd_sub_step_seek,
+        {
+            {"skip", OPT_INT(v.i)},
+            {"flags", OPT_CHOICE(v.i,
+                {"primary", 0},
+                {"secondary", 1}),
+                OPTDEF_INT(0)},
+        },
+        .allow_auto_repeat = true,
+        .priv = &(const bool){false}
+    },
     { "print-text", cmd_print_text, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true, .allow_auto_repeat = true },
     { "show-text", cmd_show_text,
