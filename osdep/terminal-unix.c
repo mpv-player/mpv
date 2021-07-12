@@ -520,11 +520,7 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
 
 void terminal_show_cursor(bool visible)
 {
-    if (visible)
-        printf("\e[?25h");
-    else
-        printf("\e[?25l");
-    fflush(stdout);
+    write(STDOUT_FILENO, (visible ? "\e[?25h" : "\e[?25l"), 6);
 }
 
 void terminal_init(void)
