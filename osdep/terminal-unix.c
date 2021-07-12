@@ -55,7 +55,9 @@
 
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
+
 static int send_cursor_esc = 0;
+void terminal_show_cursor(bool);
 
 static int tty_in = -1, tty_out = -1;
 

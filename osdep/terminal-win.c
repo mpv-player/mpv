@@ -414,11 +414,6 @@ bool terminal_try_attach(void)
     return true;
 }
 
-void terminal_show_cursor(bool)
-{
-	// Don't do anything on Windows.
-}
-
 void terminal_init(void)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
