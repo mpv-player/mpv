@@ -227,7 +227,7 @@ i and I
     `STATS`_ for more information.
 
 del
-    Cycles visibility between never / auto (mouse-move) / always
+    Cycle OSC visibility between never / auto (mouse-move) / always
 
 \`
     Show the console. (ESC closes it again. See `CONSOLE`_.)
