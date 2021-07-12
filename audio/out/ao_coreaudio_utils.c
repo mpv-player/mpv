@@ -35,21 +35,6 @@
 #include <mach/mach_time.h>
 #endif
 
-CFStringRef cfstr_from_cstr(char *str)
-{
-    return CFStringCreateWithCString(NULL, str, CA_CFSTR_ENCODING);
-}
-
-char *cfstr_get_cstr(CFStringRef cfstr)
-{
-    CFIndex size =
-        CFStringGetMaximumSizeForEncoding(
-            CFStringGetLength(cfstr), CA_CFSTR_ENCODING) + 1;
-    char *buffer = talloc_zero_size(NULL, size);
-    CFStringGetCString(cfstr, buffer, size, CA_CFSTR_ENCODING);
-    return buffer;
-}
-
 #if HAVE_COREAUDIO
 static bool ca_is_output_device(struct ao *ao, AudioDeviceID dev)
 {

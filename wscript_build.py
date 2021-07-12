@@ -214,6 +214,12 @@ def build(ctx):
         ( "osdep/subprocess-dummy.c" ),
     ])
 
+    language_c = ctx.pick_first_matching_dep([
+        ( "osdep/language-apple.c",              "cocoa" ),
+        ( "osdep/language-win.c",                "win32-desktop" ),
+        ( "osdep/language-posix.c" ),
+    ])
+
     sources = [
         ## Audio
         ( "audio/aframe.c" ),
@@ -317,6 +323,7 @@ def build(ctx):
         ( "misc/dispatch.c" ),
         ( "misc/jni.c",                          "android" ),
         ( "misc/json.c" ),
+        ( "misc/language.c" ),
         ( "misc/natural_sort.c" ),
         ( "misc/node.c" ),
         ( "misc/rendezvous.c" ),
@@ -537,7 +544,10 @@ def build(ctx):
         ( timer_c ),
         ( "osdep/polldev.c",                     "posix" ),
 
+        ( language_c ),
+
         ( "osdep/android/strnlen.c",             "android"),
+        ( "osdep/apple_utils.c",                 "cocoa" ),
         ( "osdep/glob-win.c",                    "glob-win32" ),
         ( "osdep/macosx_application.m",          "cocoa" ),
         ( "osdep/macosx_events.m",               "cocoa" ),

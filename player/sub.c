@@ -170,7 +170,7 @@ static bool init_subdec(struct MPContext *mpctx, struct track *track)
     if (!track->demuxer || !track->stream)
         return false;
 
-    track->d_sub = sub_create(mpctx->global, track->stream,
+    track->d_sub = sub_create(mpctx->global, track,
                               get_all_attachments(mpctx));
     if (!track->d_sub)
         return false;
