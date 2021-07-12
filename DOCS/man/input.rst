@@ -2632,11 +2632,17 @@ Property list
     subtitles, returns the first start time. If no current subtitle is present
     null is returned instead.
 
+``secondary-sub-start``
+    Same as ``sub-start``, but for the secondary subtitles.
+
 ``sub-end``
     The current subtitle end time (in seconds). If there's multiple current
     subtitles, return the last end time. If no current subtitle is present, or
     if it's present but has unknown or incorrect duration, null is returned
     instead.
+
+``secondary-sub-end``
+    Same as ``sub-end``, but for the secondary subtitles.
 
 ``playlist-pos`` (RW)
     Current position on playlist. The first entry is on position 0. Writing to

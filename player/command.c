@@ -2873,7 +2873,8 @@ static struct sd_times get_times(void *ctx, struct m_property *prop,
 {
     struct sd_times res = { .start = MP_NOPTS_VALUE, .end = MP_NOPTS_VALUE };
     MPContext *mpctx = ctx;
-    struct track *track = mpctx->current_track[0][STREAM_SUB];
+    int track_ind = *(int *)prop->priv;
+    struct track *track = mpctx->current_track[track_ind][STREAM_SUB];
     struct dec_sub *sub = track ? track->d_sub : NULL;
     double pts = mpctx->playback_pts;
     if (!sub || pts == MP_NOPTS_VALUE)
@@ -3674,8 +3675,14 @@ static const struct m_property mp_properties_base[] = {
         .priv = (void *)&(const int){SD_TEXT_TYPE_PLAIN}},
     {"sub-text-ass", mp_property_sub_text,
         .priv = (void *)&(const int){SD_TEXT_TYPE_ASS}},
-    {"sub-start", mp_property_sub_start},
-    {"sub-end", mp_property_sub_end},
+    {"sub-start", mp_property_sub_start,
+        .priv = (void *)&(const int){0}},
+    {"secondary-sub-start", mp_property_sub_start, 
+        .priv = (void *)&(const int){1}},
+    {"sub-end", mp_property_sub_end,
+        .priv = (void *)&(const int){0}},
+    {"secondary-sub-end", mp_property_sub_end, 
+        .priv = (void *)&(const int){1}},
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
@@ -3755,7 +3762,7 @@ static const char *const *const mp_event_property_change[] = {
       "estimated-display-fps", "vsync-jitter", "sub-text", "secondary-sub-text",
       "audio-bitrate", "video-bitrate", "sub-bitrate", "decoder-frame-drop-count",
       "frame-drop-count", "video-frame-info", "vf-metadata", "af-metadata",
-      "sub-start", "sub-end"),
+      "sub-start", "sub-end", "secondary-sub-start", "secondary-sub-end"),
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
