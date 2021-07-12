@@ -174,7 +174,7 @@ static void *input_thread_fn(void *ptr)
     return NULL;
 }
 
-void terminal_setup_getch(struct input_ctx *ictx)
+void terminal_setup(struct input_ctx *ictx, bool hide_cursor)
 {
     if (running)
         return;

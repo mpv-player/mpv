@@ -55,6 +55,7 @@
 
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
+static int send_cursor_esc = 0;
 
 static int tty_in = -1, tty_out = -1;
 
@@ -435,8 +436,11 @@ static void *terminal_thread(void *ptr)
     return NULL;
 }
 
-void terminal_setup_getch(struct input_ctx *ictx)
+void terminal_setup(struct input_ctx *ictx, bool hide_cursor)
 {
+    send_cursor_esc = hide_cursor;
+    terminal_show_cursor(false);
+
     if (!getch2_enabled || input_ctx)
         return;
 
@@ -464,6 +468,8 @@ void terminal_setup_getch(struct input_ctx *ictx)
 
 void terminal_uninit(void)
 {
+    terminal_show_cursor(true);
+
     if (!getch2_enabled)
         return;
 
@@ -520,7 +526,8 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
 
 void terminal_show_cursor(bool visible)
 {
-    write(STDOUT_FILENO, (visible ? "\e[?25h" : "\e[?25l"), 6);
+    if (send_cursor_esc)
+        write(STDOUT_FILENO, (visible ? "\e[?25h" : "\e[?25l"), 6);
 }
 
 void terminal_init(void)

@@ -225,6 +225,7 @@ typedef struct MPOpts {
     int autosync;
     int frame_dropping;
     int video_latency_hacks;
+    bool term_cursor_hide;
     int term_osd;
     int term_osd_bar;
     char *term_osd_bar_chars;

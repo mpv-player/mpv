@@ -136,7 +136,7 @@ void mp_update_logging(struct MPContext *mpctx, bool preinit)
         mp_print_version(mpctx->log, false); // for log-file=... in config files
 
     if (enabled && !preinit && mpctx->opts->consolecontrols)
-        terminal_setup_getch(mpctx->input);
+        terminal_setup(mpctx->input, mpctx->opts->term_cursor_hide);
 }
 
 void mp_print_version(struct mp_log *log, int always)
@@ -420,7 +420,6 @@ int mpv_main(int argc, char *argv[])
         return 1;
 
     mpctx->is_cli = true;
-    terminal_show_cursor(false);
 
     char **options = argv && argv[0] ? argv + 1 : NULL; // skips program name
     int r = mp_initialize(mpctx, options);
@@ -459,6 +458,5 @@ int mpv_main(int argc, char *argv[])
         rc = mpctx->quit_custom_rc;
 
     mp_destroy(mpctx);
-    terminal_show_cursor(true);
     return rc;
 }

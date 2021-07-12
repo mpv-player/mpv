@@ -4510,6 +4510,10 @@ Terminal
         Only show warnings or worse, and let the ao_alsa output show errors
         only.
 
+``--term-cursor-hide``, ``--no-term-cursor-hide``
+    Hide the terminal cursor with VT220 escape sequences.
+    (Disabled by default.)
+
 ``--term-osd=<auto|no|force>``
     Control whether OSD messages are shown on the console when no video output
     is available (default: auto).

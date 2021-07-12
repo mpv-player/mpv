@@ -730,6 +730,7 @@ static const m_option_t mp_opts[] = {
     {"hr-seek-framedrop", OPT_FLAG(hr_seek_framedrop)},
     {"autosync", OPT_CHOICE(autosync, {"no", -1}), M_RANGE(0, 10000)},
 
+    {"term-cursor-hide", OPT_BOOL(term_cursor_hide), .flags = UPDATE_OSD},
     {"term-osd", OPT_CHOICE(term_osd,
         {"force", 1}, {"auto", 2}, {"no", 0}), .flags = UPDATE_OSD},
 

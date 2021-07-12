@@ -4,7 +4,7 @@ void terminal_init(void)
 {
 }
 
-void terminal_setup_getch(struct input_ctx *ictx)
+void terminal_setup(struct input_ctx *ictx, bool hide_cursor)
 {
 }
 

@@ -29,9 +29,9 @@ struct input_ctx;
 void terminal_init(void);
 
 /* Setup ictx to read keys from the terminal */
-void terminal_setup_getch(struct input_ctx *ictx);
+void terminal_setup(struct input_ctx *ictx, bool hide_cursor);
 
-/* Undo terminal_init(), and also terminal_setup_getch() */
+/* Undo terminal_init(), and also terminal_setup() */
 void terminal_uninit(void);
 
 /* Return whether the process has been backgrounded. */
@@ -49,7 +49,7 @@ void mp_write_console_ansi(void *wstream, char *buf);
 /* Windows-only function to attach to the parent process's console */
 bool terminal_try_attach(void);
 
-/* Show and hide cursor. */
+/* Unix only: show and hide cursor. */
 void terminal_show_cursor(bool);
 
 #endif /* MPLAYER_GETCH2_H */
