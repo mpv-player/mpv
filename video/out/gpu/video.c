@@ -334,6 +334,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     },
     .early_flush = -1,
     .hwdec_interop = "auto",
+    .always_clear_framebuffer = true,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -448,6 +449,7 @@ const struct m_sub_options gl_video_conf = {
         {"deband", OPT_FLAG(deband)},
         {"deband", OPT_SUBSTRUCT(deband_opts, deband_conf)},
         {"sharpen", OPT_FLOAT(unsharp)},
+        {"always-clear-framebuffer", OPT_BOOL(always_clear_framebuffer)},
         {"gpu-tex-pad-x", OPT_INT(tex_pad_x), M_RANGE(0, 4096)},
         {"gpu-tex-pad-y", OPT_INT(tex_pad_y), M_RANGE(0, 4096)},
         {"", OPT_SUBSTRUCT(icc_opts, mp_icc_conf)},
@@ -3251,9 +3253,13 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
 
     bool has_frame = !!frame->current;
 
-    struct m_color c = p->clear_color;
-    float clear_color[4] = {c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0};
-    p->ra->fns->clear(p->ra, fbo.tex, clear_color, &target_rc);
+    if (p->opts.always_clear_framebuffer || (!has_frame ||
+        !mp_rect_equals(&p->dst_rect, &target_rc)))
+    {
+        struct m_color c = p->clear_color;
+        float clear_color[4] = {c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0};
+        p->ra->fns->clear(p->ra, fbo.tex, clear_color, &target_rc);
+    }
 
     if (p->hwdec_overlay) {
         if (has_frame) {
@@ -3787,6 +3793,7 @@ static void check_gl_features(struct gl_video *p)
             .tex_pad_y = p->opts.tex_pad_y,
             .tone_map = p->opts.tone_map,
             .early_flush = p->opts.early_flush,
+            .always_clear_framebuffer = p->opts.always_clear_framebuffer,
             .icc_opts = p->opts.icc_opts,
             .hwdec_interop = p->opts.hwdec_interop,
             .target_trc = p->opts.target_trc,
