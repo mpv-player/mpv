@@ -2585,6 +2585,15 @@ Subtitles
     Can be used to disable display of subtitles, but still select and decode
     them.
 
+``--secondary-sub-visibility``, ``--no-secondary-sub-visibility``
+    Can be used to disable display of secondary subtitles, but still select and
+    decode them.
+
+    .. note::
+
+        If ``--sub-visibility=no``, secondary subtitles are hidden regardless of
+        ``--secondary-sub-visibility``.
+
 ``--sub-clear-on-seek``
     (Obscure, rarely useful.) Can be used to play broken mkv files with
     duplicate ReadOrder fields. ReadOrder is the first field in a
