@@ -235,7 +235,8 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
             unsigned char c = buf.b[0];
             skip_buf(&buf, 1);
             if (c < 32) {
-                c = c <= 25 ? (c + 'a' - 1) : (c - 25 + '2' - 1);
+                // 1..26 is ^A..^Z, and 27..31 is ^3..^7
+                c = c <= 26 ? (c + 'a' - 1) : (c + '3' - 27);
                 mods |= MP_KEY_MODIFIER_CTRL;
             }
             mp_input_put_key(input_ctx, c | mods);
