@@ -49,6 +49,9 @@
 #endif
 
 #define PATH_DEV_DSP "/dev/dsp"
+#ifndef PATH_DEV_MIXER
+#define PATH_DEV_MIXER "/dev/mixer"
+#endif
 
 struct priv {
     int dsp_fd;
@@ -79,10 +82,13 @@ static const int format_table[][2] = {
 #ifdef AFMT_S32_NE
     {AFMT_S32_NE,       AF_FORMAT_S32},
 #endif
-#ifdef AFMT_FLOAT
+/* Not supported on Solaris 11 (see /usr/include/sys/audio/audio_oss.h) or
+ * (https://github.com/illumos/illumos-gate/blob/master/usr/src/uts/common/sys/audio/audio_oss.h#L763)
+ */
+#if defined(AFMT_FLOAT) && !defined(__sun)
     {AFMT_FLOAT,        AF_FORMAT_FLOAT},
 #endif
-#ifdef AFMT_MPEG
+#if defined(AFMT_MPEG) && !defined(__sun)
     {AFMT_MPEG,         AF_FORMAT_S_MP3},
 #endif
     {-1, -1}
