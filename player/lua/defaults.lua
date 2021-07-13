@@ -330,8 +330,9 @@ function mp.get_next_timeout()
     return timer.next_deadline - now
 end
 
--- Run timers that have met their deadline.
--- Return: next absolute time a timer expires as number, or nil if no timers
+-- Run timers that have met their deadline at the time of invocation.
+-- Return: time>0 in seconds till the next due timer, 0 if there are due timers
+--         (aborted to avoid infinite loop), or nil if no timers
 local function process_timers()
     local t0 = nil
     while true do
