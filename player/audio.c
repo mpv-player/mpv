@@ -323,7 +323,7 @@ static void ao_chain_set_ao(struct ao_chain *ao_c, struct ao *ao)
     mp_filter_wakeup(ao_c->ao_filter);
 }
 
-static void reinit_audio_filters_and_output(struct MPContext *mpctx)
+static int reinit_audio_filters_and_output(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct ao_chain *ao_c = mpctx->ao_chain;
@@ -360,13 +360,13 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     {
         ao_chain_set_ao(ao_c, mpctx->ao);
         talloc_free(out_fmt);
-        return;
+        return 0;
     }
 
     // Wait until all played.
     if (mpctx->ao && ao_is_playing(mpctx->ao)) {
         talloc_free(out_fmt);
-        return;
+        return 0;
     }
     // Format change during syncing. Force playback start early, then wait.
     if (ao_c->ao_queue && mp_async_queue_get_frames(ao_c->ao_queue) &&
@@ -375,11 +375,11 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
         mpctx->audio_status = STATUS_READY;
         mp_wakeup_core(mpctx);
         talloc_free(out_fmt);
-        return;
+        return 0;
     }
     if (mpctx->audio_status == STATUS_READY) {
         talloc_free(out_fmt);
-        return;
+        return 0;
     }
 
     uninit_audio_out(mpctx);
@@ -447,7 +447,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
             reset_audio_state(mpctx);
             mp_output_chain_reset_harder(ao_c->filter);
             mp_wakeup_core(mpctx); // reinit with new format next time
-            return;
+            return 0;
         }
 
         MP_ERR(mpctx, "Could not open/initialize audio device -> no sound.\n");
@@ -478,12 +478,13 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     mp_wakeup_core(mpctx);
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
-    return;
+    return 0;
 
 init_error:
     uninit_audio_chain(mpctx);
     uninit_audio_out(mpctx);
     error_on_track(mpctx, track);
+    return -1;
 }
 
 int init_audio_decoder(struct MPContext *mpctx, struct track *track)
@@ -853,8 +854,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         return;
     }
 
-    if (ao_c->filter->ao_needs_update)
-        reinit_audio_filters_and_output(mpctx);
+    if (ao_c->filter->ao_needs_update) {
+        if (reinit_audio_filters_and_output(mpctx) < 0)
+            return;
+    }
 
     if (mpctx->vo_chain && ao_c->track && ao_c->track->dec &&
         mp_decoder_wrapper_get_pts_reset(ao_c->track->dec))
