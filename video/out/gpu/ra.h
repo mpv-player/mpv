@@ -435,6 +435,9 @@ struct ra_fns {
     // NULL then all buffers are always usable.
     bool (*buf_poll)(struct ra *ra, struct ra_buf *buf);
 
+    // Create a `ra_buf` mapping an existing host pointer. May fail. Optional.
+    struct ra_buf *(*buf_map_ptr)(struct ra *ra, const void *ptr, size_t size);
+
     // Returns the layout requirements of a uniform buffer element. Optional,
     // but must be implemented if RA_CAP_BUF_RO is supported.
     struct ra_layout (*uniform_layout)(struct ra_renderpass_input *inp);
