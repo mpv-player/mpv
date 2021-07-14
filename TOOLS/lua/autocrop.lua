@@ -102,12 +102,13 @@ function is_enough_time(seconds)
 end
 
 function is_cropable()
-    local vid = mp.get_property_native("vid")
-    local is_album = vid and mp.get_property_native(
-        string.format("track-list/%d/albumart", vid)
-    ) or false
+    for _, track in pairs(mp.get_property_native('track-list')) do
+        if track.type == 'video' and track.selected then
+            return not track.albumart
+        end
+    end
 
-    return vid and not is_album
+    return false
 end
 
 function remove_filter(label)
