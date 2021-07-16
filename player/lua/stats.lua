@@ -18,7 +18,7 @@ local o = {
     key_page_1 = "1",
     key_page_2 = "2",
     key_page_3 = "3",
-    key_page_4 = "4",
+    key_page_0 = "0",
     -- For pages which support scrolling
     key_scroll_up = "UP",
     key_scroll_down = "DOWN",
@@ -669,7 +669,7 @@ local function perf_stats()
     local stats = {}
     eval_ass_formatting()
     add_header(stats)
-    local page = pages[o.key_page_4]
+    local page = pages[o.key_page_0]
     append(stats, "", {prefix=o.nl .. o.nl .. page.desc .. ":", nl="", indent=""})
     page.offset = append_general_perfdata(stats, page.offset)
     return table.concat(stats)
@@ -800,7 +800,7 @@ pages = {
     [o.key_page_1] = { f = default_stats, desc = "Default" },
     [o.key_page_2] = { f = vo_stats, desc = "Extended Frame Timings", scroll = true },
     [o.key_page_3] = { f = cache_stats, desc = "Cache Statistics" },
-    [o.key_page_4] = { f = perf_stats, desc = "Internal performance info", scroll = true },
+    [o.key_page_0] = { f = perf_stats, desc = "Internal performance info", scroll = true },
 }
 
 
