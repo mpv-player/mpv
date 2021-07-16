@@ -24,7 +24,7 @@ stats:
 1      Show usual stats
 2      Show frame timings (scroll)
 3      Input cache stats
-4      Internal stuff (scroll)
+0      Internal stuff (scroll)
 ====   ==================
 
 On pages which support scroll, these key bindings are also active:
@@ -64,8 +64,8 @@ Configurable Options
     Default: 2
 ``key_page_3``
     Default: 3
-``key_page_4``
-    Default: 4
+``key_page_0``
+    Default: 0
 
     Key bindings for page switching while stats are displayed.
 
