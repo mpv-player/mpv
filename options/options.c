@@ -133,6 +133,7 @@ static const m_option_t mp_vo_opt_list[] = {
         M_RANGE(1.0/32.0, 32.0)},
     {"fullscreen", OPT_BOOL(fullscreen)},
     {"fs", OPT_ALIAS("fullscreen")},
+    {"input-cursor-passthrough", OPT_FLAG(cursor_passthrough)},
     {"native-keyrepeat", OPT_FLAG(native_keyrepeat)},
     {"panscan", OPT_FLOAT(panscan), M_RANGE(0.0, 1.0)},
     {"video-zoom", OPT_FLOAT(zoom), M_RANGE(-20.0, 20.0)},
