@@ -43,6 +43,9 @@ The following listings are not necessarily complete. See ``etc/input.conf`` for
 a list of default bindings. User ``input.conf`` files and Lua scripts can
 define additional key bindings.
 
+See also `--input-test`_ for interactive binding details by key, and the
+`stats`_ built-in script for key bindings list (including print to terminal).
+
 Keyboard Control
 ----------------
 
