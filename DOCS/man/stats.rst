@@ -24,6 +24,7 @@ stats:
 1      Show usual stats
 2      Show frame timings (scroll)
 3      Input cache stats
+4      Active key bindings (scroll)
 0      Internal stuff (scroll)
 ====   ==================
 
@@ -64,6 +65,8 @@ Configurable Options
     Default: 2
 ``key_page_3``
     Default: 3
+``key_page_4``
+    Default: 4
 ``key_page_0``
     Default: 0
 
@@ -182,6 +185,20 @@ Using ``input.conf``, it is also possible to directly display a certain page::
 
     i script-binding stats/display-page-1
     e script-binding stats/display-page-2
+
+Active key bindings page
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Lists the active key bindings and the commands they're bound to, excluding the
+interactive keys of the stats script itself. See also `--input-test`_ for more
+detailed view of each binding.
+
+The keys are grouped automatically using a simple analysis of the command
+string, and one should not expect documentation-level grouping accuracy,
+however, it should still be reasonably useful.
+
+Like with ``--input-test``, the list includes bindings from ``input.conf`` and
+from user scripts. Use `--no-config`` to list only built-in bindings.
 
 Internal stuff page
 ~~~~~~~~~~~~~~~~~~~
