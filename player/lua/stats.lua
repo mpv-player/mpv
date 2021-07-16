@@ -838,11 +838,12 @@ local function record_data(skip)
 end
 
 -- Call the function for `page` and print it to OSD
-local function print_page(page)
+local function print_page(page, after_scroll)
     if o.persistent_overlay then
-        mp.set_osd_ass(0, 0, pages[page].f())
+        mp.set_osd_ass(0, 0, pages[page].f(after_scroll))
     else
-        mp.osd_message(pages[page].f(), display_timer.oneshot and o.duration or o.redraw_delay + 1)
+        mp.osd_message(pages[page].f(after_scroll),
+                       display_timer.oneshot and o.duration or o.redraw_delay + 1)
     end
 end
 
@@ -854,7 +855,7 @@ end
 local function scroll_delta(d)
     if display_timer.oneshot then display_timer:kill() ; display_timer:resume() end
     pages[curr_page].offset = (pages[curr_page].offset or 1) + d
-    print_page(curr_page)
+    print_page(curr_page, true)
 end
 local function scroll_up() scroll_delta(-o.scroll_lines) end
 local function scroll_down() scroll_delta(o.scroll_lines) end
