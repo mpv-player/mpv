@@ -205,6 +205,8 @@ typedef struct demuxer {
     int stream_origin; // any STREAM_ORIGIN_* (set from source stream)
     bool access_references; // allow opening other files/URLs
 
+    struct demux_shared_opts *shared_opts;
+
     // Bitmask of DEMUX_EVENT_*
     int events;
 

@@ -354,9 +354,10 @@ static int stream_create_instance(const stream_info_t *sinfo,
     if (flags & STREAM_LESS_NOISE)
         mp_msg_set_max_level(s->log, MSGL_WARN);
 
-    int opt;
-    mp_read_option_raw(s->global, "access-references", &m_option_type_flag, &opt);
-    s->access_references = opt;
+    struct demux_shared_opts *shared_opts =
+        mp_get_config_group(s, s->global, &demux_shared_conf);
+    s->access_references = shared_opts->access_references;
+    talloc_free(shared_opts);
 
     MP_VERBOSE(s, "Opening %s\n", url);
 

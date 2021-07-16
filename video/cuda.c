@@ -19,15 +19,18 @@
 
 #include "hwdec.h"
 #include "options/m_config.h"
+#include "options/options.h"
 
 #include <libavutil/hwcontext.h>
 
 static struct AVBufferRef *cuda_create_standalone(struct mpv_global *global,
         struct mp_log *log, struct hwcontext_create_dev_params *params)
 {
-    int decode_dev_idx;
-    mp_read_option_raw(global, "cuda-decode-device", &m_option_type_choice,
-                       &decode_dev_idx);
+    void *tmp = talloc_new(NULL);
+    struct cuda_opts *opts =
+        mp_get_config_group(tmp, global, &cuda_conf);
+    int decode_dev_idx = opts->cuda_device;
+    talloc_free(tmp);
 
     char *decode_dev = NULL;
     if (decode_dev_idx != -1) {

@@ -73,6 +73,19 @@
 #define AACS_ERROR_MMC_FAILURE    -7 /* MMC failed */
 #define AACS_ERROR_NO_DK          -8 /* no matching device key */
 
+struct bluray_opts {
+    char *bluray_device;
+};
+
+#define OPT_BASE_STRUCT struct bluray_opts
+const struct m_sub_options stream_bluray_conf = {
+    .opts = (const m_option_t[]) {
+        {"device", OPT_STRING(bluray_device), .flags = M_OPT_FILE},
+        {0}
+    },
+    .size = sizeof(struct bluray_opts),
+};
+
 struct bluray_priv_s {
     BLURAY *bd;
     BLURAY_TITLE_INFO *title_info;
@@ -86,6 +99,7 @@ struct bluray_priv_s {
     char *cfg_device;
 
     bool use_nav;
+    struct bluray_opts *opts;
 };
 
 static void destruct(struct bluray_priv_s *priv)
@@ -377,8 +391,7 @@ static int bluray_stream_open_internal(stream_t *s)
     if (b->cfg_device && b->cfg_device[0]) {
         device = b->cfg_device;
     } else {
-        mp_read_option_raw(s->global, "bluray-device", &m_option_type_string,
-                           &device);
+        device = b->opts->bluray_device;
     }
 
     if (!device || !device[0]) {
@@ -566,6 +579,8 @@ static int bdmv_dir_stream_open(stream_t *stream)
     *priv = (struct bluray_priv_s){
         .cfg_title = BLURAY_DEFAULT_TITLE,
     };
+
+    priv->opts = mp_get_config_group(stream, stream->global, &stream_bluray_conf);
 
     if (!stream->access_references)
         goto unsupported;
