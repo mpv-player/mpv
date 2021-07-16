@@ -78,6 +78,8 @@ local o = {
     no_ass_b0 = "\027[0m",
     no_ass_it1 = "\027[3m",
     no_ass_it0 = "\027[0m",
+
+    bindlist = "no",  -- print page 4 to the terminal on startup and quit mpv
 }
 options.read_options(o)
 
@@ -395,7 +397,7 @@ local function cmd_subject(cmd)
     return subw:len() > 1 and subw or "[unknown]"
 end
 
-local function get_kbinfo_lines()
+local function get_kbinfo_lines(width)
     -- active keys: only highest priotity of each key, and not our (stats) keys
     local bindings = mp.get_property_native("input-bindings", {})
     local active = {}  -- map: key-name -> bind-info
@@ -458,7 +460,7 @@ local function get_kbinfo_lines()
                                  o.font_mono, kspaces, o.font, 1.3*o.font_size)
     local spost = term and "" or format("{\\u0\\fs%d}", o.font_size)
     local _, itabs = o.indent:gsub("\t", "")
-    local cutoff = term and 79 - o.indent:len() - itabs * 7 - spre:len()
+    local cutoff = term and (width or 79) - o.indent:len() - itabs * 7 - spre:len()
 
     -- create the display lines
     local info_lines = {}
@@ -1147,3 +1149,22 @@ mp.register_event("video-reconfig",
             print_page(curr_page)
         end
     end)
+
+--  --script-opts=stats-bindlist=[-]{yes|<TERM-WIDTH>}
+if o.bindlist ~= "no" then
+    mp.command("no-osd set really-quiet yes")
+    if o.bindlist:sub(1, 1) == "-" then
+        o.bindlist = o.bindlist:sub(2)
+        o.no_ass_b0 = ""
+        o.no_ass_b1 = ""
+    end
+    local width = max(40, math.floor(tonumber(o.bindlist) or 79))
+    mp.add_timeout(0, function()  -- wait for all other scripts to finish init
+        o.ass_formatting = false
+        o.no_ass_indent = " "
+        eval_ass_formatting()
+        io.write(pages[o.key_page_4].desc .. ":" ..
+                 table.concat(get_kbinfo_lines(width)) .. "\n")
+        mp.command("quit")
+    end)
+end
