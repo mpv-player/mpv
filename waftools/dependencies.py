@@ -1,4 +1,4 @@
-from waflib.Errors import ConfigurationError, WafError
+from waflib.Errors import ConfigurationError
 from waflib.Configure import conf
 from waflib.Build import BuildContext
 from waflib.Logs import pprint

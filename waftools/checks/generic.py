@@ -89,7 +89,6 @@ def check_pkg_config_datadir(*args, **kw_ext):
 
 def _check_pkg_config(_dyn_libs, _pkgc_args, *args, **kw_ext):
     def fn(ctx, dependency_identifier, **kw):
-        argsl     = list(args)
         packages  = args[::2]
         verchecks = args[1::2]
         sargs     = []

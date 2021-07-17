@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import shutil
-import sys
 import fileinput
 from optparse import OptionParser
 

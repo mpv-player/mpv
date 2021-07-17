@@ -1,5 +1,5 @@
 from waflib.Build import BuildContext
-from waflib import TaskGen, Utils
+from waflib import TaskGen
 from io import StringIO
 from TOOLS.matroska import generate_C_header, generate_C_definitions
 from TOOLS.file2string import file2string

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from pyqtgraph.Qt import QtGui, QtCore
+from pyqtgraph.Qt import QtGui
 import pyqtgraph as pg
 import sys
 import re
