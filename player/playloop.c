@@ -239,6 +239,10 @@ void reset_playback_state(struct MPContext *mpctx)
             sub_set_play_dir(t->d_sub, mpctx->play_dir);
     }
 
+    // May need unpause first
+    if (mpctx->paused_for_cache)
+        update_internal_pause_state(mpctx);
+
     mpctx->hrseek_active = false;
     mpctx->hrseek_lastframe = false;
     mpctx->hrseek_backstep = false;
