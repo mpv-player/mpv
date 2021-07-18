@@ -307,7 +307,6 @@ void ao_reset(struct ao *ao)
     }
     wakeup = p->playing;
     p->playing = false;
-    p->paused = false;
     p->recover_pause = false;
     p->hw_paused = false;
     p->end_time_us = 0;
