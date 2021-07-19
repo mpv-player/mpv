@@ -1020,8 +1020,8 @@ local function reset_scroll_offsets()
 end
 local function bind_scroll()
     if not scroll_bound then
-        mp.add_forced_key_binding(o.key_scroll_up, o.key_scroll_up, scroll_up, {repeatable=true})
-        mp.add_forced_key_binding(o.key_scroll_down, o.key_scroll_down, scroll_down, {repeatable=true})
+        mp.add_forced_key_binding(o.key_scroll_up, nil, scroll_up, {repeatable=true})
+        mp.add_forced_key_binding(o.key_scroll_down, nil, scroll_down, {repeatable=true})
         scroll_bound = true
     end
 end
@@ -1052,7 +1052,7 @@ local function add_page_bindings()
         end
     end
     for k, _ in pairs(pages) do
-        mp.add_forced_key_binding(k, k, a(k), {repeatable=true})
+        mp.add_forced_key_binding(k, nil, a(k), {repeatable=true})
     end
     update_scroll_bindings(curr_page)
 end
