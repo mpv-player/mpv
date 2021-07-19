@@ -407,7 +407,7 @@ local function get_kbinfo_lines(width)
                (active[bind.key].is_weak and not bind.is_weak) or
                (bind.is_weak == active[bind.key].is_weak and
                 bind.priority > active[bind.key].priority)
-           ) and not bind.cmd:find("script-binding stats/__key", 1, true)
+           ) and not bind.cmd:find("script-binding stats/__forced_", 1, true)
         then
             active[bind.key] = bind
         end
@@ -1020,15 +1020,15 @@ local function reset_scroll_offsets()
 end
 local function bind_scroll()
     if not scroll_bound then
-        mp.add_forced_key_binding(o.key_scroll_up, o.key_scroll_up, scroll_up, {repeatable=true})
-        mp.add_forced_key_binding(o.key_scroll_down, o.key_scroll_down, scroll_down, {repeatable=true})
+        mp.add_forced_key_binding(o.key_scroll_up, "__forced_"..o.key_scroll_up, scroll_up, {repeatable=true})
+        mp.add_forced_key_binding(o.key_scroll_down, "__forced_"..o.key_scroll_down, scroll_down, {repeatable=true})
         scroll_bound = true
     end
 end
 local function unbind_scroll()
     if scroll_bound then
-        mp.remove_key_binding(o.key_scroll_up)
-        mp.remove_key_binding(o.key_scroll_down)
+        mp.remove_key_binding("__forced_"..o.key_scroll_up)
+        mp.remove_key_binding("__forced_"..o.key_scroll_down)
         scroll_bound = false
     end
 end
@@ -1052,7 +1052,7 @@ local function add_page_bindings()
         end
     end
     for k, _ in pairs(pages) do
-        mp.add_forced_key_binding(k, k, a(k), {repeatable=true})
+        mp.add_forced_key_binding(k, "__forced_"..k, a(k), {repeatable=true})
     end
     update_scroll_bindings(curr_page)
 end
@@ -1061,7 +1061,7 @@ end
 -- Remove keybindings for every page
 local function remove_page_bindings()
     for k, _ in pairs(pages) do
-        mp.remove_key_binding(k)
+        mp.remove_key_binding("__forced_"..k)
     end
     unbind_scroll()
 end
