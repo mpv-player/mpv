@@ -45,7 +45,6 @@ class TitleBar: NSVisualEffectView {
             } else {
                 state = .followsWindowActiveState
             }
-
         }
     }
 
