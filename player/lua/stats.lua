@@ -134,17 +134,27 @@ local function compat(p)
     return p
 end
 
-
-local function set_ASS(b)
-    if not o.use_ass or o.persistent_overlay then
-        return ""
-    end
-    return b and ass_start or ass_stop
-end
-
+-- "\\<U+2060>" in UTF-8 (U+2060 is WORD-JOINER)
+local ESC_BACKSLASH = "\\" .. string.char(0xE2, 0x81, 0xA0)
 
 local function no_ASS(t)
-    return set_ASS(false) .. t .. set_ASS(true)
+    if not o.use_ass then
+        return t
+    elseif not o.persistent_overlay then
+        -- mp.osd_message supports ass-escape using osd-ass-cc/{0|1}
+        return ass_stop .. t .. ass_start
+    else
+        -- mp.set_osd_ass doesn't support ass-escape. roll our own.
+        -- similar to mpv's sub/osd_libass.c:mangle_ass(...), excluding
+        -- space after newlines because no_ASS is not used with multi-line.
+        -- space at the begining is replaced with "\\h" because it matters
+        -- at the begining of a line, and we can't know where our output
+        -- ends up. no issue if it ends up at the middle of a line.
+        return tostring(t)
+               :gsub("\\", ESC_BACKSLASH)
+               :gsub("{", "\\{")
+               :gsub("^ ", "\\h")
+    end
 end
 
 
@@ -163,11 +173,11 @@ local function text_style()
         return ""
     end
     if o.custom_header and o.custom_header ~= "" then
-        return set_ASS(true) .. o.custom_header
+        return o.custom_header
     else
-        return format("%s{\\r}{\\an7}{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}" ..
+        return format("{\\r}{\\an7}{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}" ..
                       "{\\1c&H%s&}{\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}",
-                      set_ASS(true), o.font_size, o.font, o.border_size,
+                      o.font_size, o.font, o.border_size,
                       o.border_color, o.font_color, o.alpha, o.shadow_x_offset,
                       o.shadow_y_offset, o.shadow_color)
     end
@@ -992,10 +1002,13 @@ end
 
 -- Call the function for `page` and print it to OSD
 local function print_page(page, after_scroll)
+    -- the page functions assume we start in ass-enabled mode.
+    -- that's true for mp.set_osd_ass, but not for mp.osd_message.
+    local ass_content = pages[page].f(after_scroll)
     if o.persistent_overlay then
-        mp.set_osd_ass(0, 0, pages[page].f(after_scroll))
+        mp.set_osd_ass(0, 0, ass_content)
     else
-        mp.osd_message(pages[page].f(after_scroll),
+        mp.osd_message((o.use_ass and ass_start or "") .. ass_content,
                        display_timer.oneshot and o.duration or o.redraw_delay + 1)
     end
 end
