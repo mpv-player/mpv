@@ -838,13 +838,19 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         {
             wl->focused = !wl->focused;
             wl->pending_vo_events |= VO_EVENT_FOCUS;
-
-            if (wl->activated) {
-                /* If the surface comes back into view, force a redraw. */
-                vo_wayland_wait_frame(wl);
-                wl->pending_vo_events |= VO_EVENT_EXPOSE;
-            }
         }
+    }
+
+    /* If we receive this event, the window has come back into view. */
+    if (wl->hidden) {
+        wl->hidden = false;
+        wl->pending_vo_events |= VO_EVENT_EXPOSE;
+    }
+
+    if (wl->force_render) {
+        wl->force_render = false;
+        wl->hidden = false;
+        wl->pending_vo_events |= VO_EVENT_EXPOSE;
     }
 
     if (!(wl->pending_vo_events & VO_EVENT_LIVE_RESIZING))
@@ -1397,6 +1403,7 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
         MP_VERBOSE(wl, "Enabling idle inhibitor\n");
         struct zwp_idle_inhibit_manager_v1 *mgr = wl->idle_inhibit_manager;
         wl->idle_inhibitor = zwp_idle_inhibit_manager_v1_create_inhibitor(mgr, wl->surface);
+        wl->force_render = true;
     } else {
         MP_VERBOSE(wl, "Disabling the idle inhibitor\n");
         zwp_idle_inhibitor_v1_destroy(wl->idle_inhibitor);
