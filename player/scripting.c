@@ -263,7 +263,8 @@ void mp_load_builtin_scripts(struct MPContext *mpctx)
     load_builtin_script(mpctx, 1, mpctx->opts->lua_load_ytdl, "@ytdl_hook.lua");
     load_builtin_script(mpctx, 2, mpctx->opts->lua_load_stats, "@stats.lua");
     load_builtin_script(mpctx, 3, mpctx->opts->lua_load_console, "@console.lua");
-    load_builtin_script(mpctx, 4, mpctx->opts->lua_load_auto_profiles,
+    load_builtin_script(mpctx, 4, mpctx->opts->lua_load_help, "@help.lua");
+    load_builtin_script(mpctx, 5, mpctx->opts->lua_load_auto_profiles,
                         "@auto_profiles.lua");
 }
 

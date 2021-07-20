@@ -1026,6 +1026,11 @@ Program Behavior
     show the console, and ``ESC`` to hide it again. (This is based on  a user
     script called ``repl.lua``.)
 
+``--load-help=<yes|no>``
+    Enable the builtin script that shows the current input bindings if asked
+    to (default: yes). By default, the ``h`` key will show a pretty list and
+    ``H`` will show input bindings in raw form.
+
 ``--load-auto-profiles=<yes|no|auto>``
     Enable the builtin script that does auto profiles (default: auto). See
     `Conditional auto profiles`_ for details. ``auto`` will load the script,
