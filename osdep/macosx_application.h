@@ -37,6 +37,8 @@ struct macos_opts {
     int macos_geometry_calculation;
     int cocoa_cb_sw_renderer;
     int cocoa_cb_10bit_context;
+    // #HDR on #macOS        
+    int macos_output_csp;
 };
 
 // multithreaded wrapper for mpv_main

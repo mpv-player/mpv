@@ -115,15 +115,8 @@ class CocoaCB: Common {
     }
 
     override func updateICCProfile() {
-        guard let colorSpace = window?.screen?.colorSpace else {
-            log.sendWarning("Couldn't update ICC Profile, no color space available")
-            return
-        }
-
-        libmpv.setRenderICCProfile(colorSpace)
-        if #available(macOS 10.11, *) {
-            layer?.colorspace = colorSpace.cgColorSpace
-        }
+        super.updateICCProfile()    
+        libmpv.setRenderICCProfile(colorSpace!)
     }
 
     override func windowDidEndAnimation() {
