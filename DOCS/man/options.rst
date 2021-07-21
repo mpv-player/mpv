@@ -866,12 +866,12 @@ Program Behavior
     .. admonition:: Examples
 
         - ``--watch-later-options-remove=fullscreen``
-          Resuming a file won't restore the fullscreen state.
+          The fullscreen state won't be saved to watch later files.
         - ``--watch-later-options-remove=volume``
           ``--watch-later-options-remove=mute``
-          Resuming a file won't restore the volume or mute state.
+          The volume and mute state won't be saved to watch later files.
         - ``--watch-later-options-clr``
-          Resuming a file won't restore any option except the starting
+          No option will be saved to watch later files except the starting
           position.
 
 ``--write-filename-in-watch-later-config``
