@@ -6737,7 +6737,7 @@ Miscellaneous
     CLI/config file only alias for ``--cover-art-files-append``. Each use of this
     option will add a new external file.
 
-``--cover-art-auto=<no|fuzzy>``
+``--cover-art-auto=<no|exact|fuzzy|all>``
     Whether to load _external_ cover art automatically. Similar to
     ``--sub-auto`` and ``--audio-file-auto``. If a video already has tracks
     (which are not marked as cover art), external cover art will not be loaded.
