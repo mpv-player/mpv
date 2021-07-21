@@ -867,9 +867,10 @@ Program Behavior
 
         - ``--watch-later-options-remove=fullscreen``
           Resuming a file won't restore the fullscreen state.
-        - ``--watch-later-options-remove=volume,mute``
+        - ``--watch-later-options-remove=volume``
+          ``--watch-later-options-remove=mute``
           Resuming a file won't restore the volume or mute state.
-        - ``--watch-later-options=``
+        - ``--watch-later-options-clr``
           Resuming a file won't restore any option except the starting
           position.
 
