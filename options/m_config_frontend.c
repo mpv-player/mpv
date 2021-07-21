@@ -244,6 +244,28 @@ void m_config_restore_backups(struct m_config *config)
     restore_backups(&config->backup_opts, config);
 }
 
+bool m_config_watch_later_backup_opt_changed(struct m_config *config,
+                                             char *opt_name)
+{
+    struct m_config_option *co = m_config_get_co(config, bstr0(opt_name));
+    if (!co) {
+        // --watch-later-options= makes the first list item an empty string.
+        if (strcmp(opt_name, "") != 0)
+            MP_ERR(config, "Option %s not found.\n", opt_name);
+        return false;
+    }
+
+    for (struct m_opt_backup *bc = config->watch_later_backup_opts; bc;
+         bc = bc->next) {
+        if (strcmp(bc->co->name, co->name) == 0) {
+            struct m_config_option *bc_co = (struct m_config_option *)bc->backup;
+            return !m_option_equal(co->opt, co->data, bc_co);
+        }
+    }
+
+    return false;
+}
+
 void m_config_backup_opt(struct m_config *config, const char *opt)
 {
     struct m_config_option *co = m_config_get_co(config, bstr0(opt));
@@ -260,6 +282,12 @@ void m_config_backup_all_opts(struct m_config *config)
         ensure_backup(&config->backup_opts, BACKUP_LOCAL, &config->opts[n]);
 }
 
+void m_config_backup_watch_later_opts(struct m_config *config)
+{
+    for (int n = 0; n < config->num_opts; n++)
+        ensure_backup(&config->watch_later_backup_opts, BACKUP_LOCAL,
+                      &config->opts[n]);
+}
 
 struct m_config_option *m_config_get_co_raw(const struct m_config *config,
                                             struct bstr name)
@@ -508,6 +536,13 @@ static void config_destroy(void *p)
     struct m_config *config = p;
     config->option_change_callback = NULL;
     m_config_restore_backups(config);
+
+    struct m_opt_backup **list = &config->watch_later_backup_opts;
+    while (*list) {
+        struct m_opt_backup *bc = *list;
+        *list = bc->next;
+        talloc_free(bc);
+    }
 
     talloc_free(config->cache);
     talloc_free(config->shadow);

@@ -75,6 +75,7 @@ typedef struct m_config {
     int profile_backup_flags;
 
     struct m_opt_backup *backup_opts;
+    struct m_opt_backup *watch_later_backup_opts;
 
     bool use_profiles;
     bool is_toplevel;
@@ -134,9 +135,17 @@ void m_config_backup_opt(struct m_config *config, const char *opt);
 // Call m_config_backup_opt() on all options.
 void m_config_backup_all_opts(struct m_config *config);
 
+// Backup options on startup so that quit-watch-later can compare the current
+// values to their backups, and save them only if they have been changed.
+void m_config_backup_watch_later_opts(struct m_config *config);
+
 // Restore all options backed up with m_config_backup_opt(), and delete the
 // backups afterwards.
 void m_config_restore_backups(struct m_config *config);
+
+// Whether opt_name is different from its initial value.
+bool m_config_watch_later_backup_opt_changed(struct m_config *config,
+                                             char *opt_name);
 
 enum {
     M_SETOPT_PRE_PARSE_ONLY = 1,    // Silently ignore non-M_OPT_PRE_PARSE opt.
