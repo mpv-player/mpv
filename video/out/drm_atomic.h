@@ -24,6 +24,7 @@
 #include <xf86drmMode.h>
 
 #include "common/msg.h"
+#include "video/csputils.h"
 
 #define DRM_OPTS_PRIMARY_PLANE -1
 #define DRM_OPTS_OVERLAY_PLANE -2
@@ -69,6 +70,23 @@ struct drm_object {
     drmModePropertyRes **props_info;
 };
 
+#define DRM_HAS_HDR_METADATA_INFOFRAME
+// https://lists.freedesktop.org/archives/dri-devel/2021-January/295187.html
+#define DRM_HDMI_STATIC_METADATA_TYPE1 0
+
+#include "config.h"
+#if !HAVE_DRM_HDMI_HDR
+#include "osdep/drm-hdr-metadata.h"
+#endif
+
+struct drm_hdr_metadata {
+#ifdef DRM_HAS_HDR_METADATA_INFOFRAME
+    struct hdr_output_metadata data;
+    uint32_t blob_id;
+#endif
+};
+
+
 struct drm_atomic_context {
     int fd;
 
@@ -80,7 +98,10 @@ struct drm_atomic_context {
     drmModeAtomicReq *request;
 
     struct drm_atomic_state old_state;
+    
+    struct drm_hdr_metadata hdr_metadata;
 };
+
 
 
 int drm_object_create_properties(struct mp_log *log, int fd, struct drm_object *object);
@@ -100,5 +121,10 @@ bool drm_atomic_restore_old_state(drmModeAtomicReq *request, struct drm_atomic_c
 
 bool drm_mode_ensure_blob(int fd, struct drm_mode *mode);
 bool drm_mode_destroy_blob(int fd, struct drm_mode *mode);
+
+// append HDR blob to the connector properties
+void drm_send_hdrmeta(struct drm_atomic_context *ctx, struct mp_colorspace *color);
+void drm_destroy_hdrmeta(struct drm_atomic_context *ctx);
+
 
 #endif // MP_DRMATOMIC_H

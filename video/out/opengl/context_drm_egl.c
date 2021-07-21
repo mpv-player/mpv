@@ -108,6 +108,8 @@ struct priv {
 
     struct mpv_opengl_drm_params_v2 drm_params;
     struct mpv_opengl_drm_draw_surface_size draw_surface_size;
+    
+    struct mp_colorspace out_color;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -466,7 +468,11 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
     data->waiting_for_flip = &p->waiting_for_flip;
     data->log = ctx->log;
 
+
+
     if (atomic_ctx) {
+        if(ctx->vo->opts->drm_opts->drm_send_hdr_meta)
+              drm_send_hdrmeta(atomic_ctx, &p->out_color);
         drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
         drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "CRTC_ID", atomic_ctx->crtc->id);
         drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
@@ -585,6 +591,8 @@ static bool drm_egl_submit_frame(struct ra_swapchain *sw, const struct vo_frame 
 
     p->still = frame->still;
 
+    p->out_color = frame->out_color;
+    
     return ra_gl_ctx_submit_frame(sw, frame);
 }
 

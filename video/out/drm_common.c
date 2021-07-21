@@ -94,6 +94,7 @@ const struct m_sub_options drm_conf = {
         {"drm-osd-plane-id", OPT_REPLACED("drm-draw-plane")},
         {"drm-video-plane-id", OPT_REPLACED("drm-drmprime-video-plane")},
         {"drm-osd-size", OPT_REPLACED("drm-draw-surface-size")},
+        {"drm-send-hdr-meta", OPT_CHOICE(drm_send_hdr_meta, {"no", 0}, {"auto", 1})},
         {0},
     },
     .defaults = &(const struct drm_opts) {
@@ -101,6 +102,7 @@ const struct m_sub_options drm_conf = {
         .drm_atomic = 1,
         .drm_draw_plane = DRM_OPTS_PRIMARY_PLANE,
         .drm_drmprime_video_plane = DRM_OPTS_OVERLAY_PLANE,
+        .drm_send_hdr_meta = 0,
     },
     .size = sizeof(struct drm_opts),
 };
@@ -616,6 +618,7 @@ void kms_destroy(struct kms *kms)
 {
     if (!kms)
         return;
+    drm_destroy_hdrmeta(kms->atomic_context);
     drm_mode_destroy_blob(kms->fd, &kms->mode);
     if (kms->connector) {
         drmModeFreeConnector(kms->connector);
