@@ -249,9 +249,7 @@ bool m_config_watch_later_backup_opt_changed(struct m_config *config,
 {
     struct m_config_option *co = m_config_get_co(config, bstr0(opt_name));
     if (!co) {
-        // --watch-later-options= makes the first list item an empty string.
-        if (strcmp(opt_name, "") != 0)
-            MP_ERR(config, "Option %s not found.\n", opt_name);
+        MP_ERR(config, "Option %s not found.\n", opt_name);
         return false;
     }
 
