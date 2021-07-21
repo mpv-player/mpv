@@ -695,6 +695,7 @@ static const m_option_t mp_opts[] = {
         OPT_FLAG(ignore_path_in_watch_later_config)},
     {"watch-later-directory", OPT_STRING(watch_later_directory),
         .flags = M_OPT_FILE},
+    {"watch-later-options", OPT_STRINGLIST(watch_later_options)},
 
     {"ordered-chapters", OPT_FLAG(ordered_chapters)},
     {"ordered-chapters-files", OPT_STRING(ordered_chapters_files),
@@ -1043,6 +1044,44 @@ static const struct MPOpts mp_default_opts = {
     },
 
     .cuda_device = -1,
+
+    .watch_later_options = (char **)(const char*[]){
+        "osd-level",
+        "speed",
+        "edition",
+        "pause",
+        "volume",
+        "mute",
+        "audio-delay",
+        "fullscreen",
+        "ontop",
+        "border",
+        "gamma",
+        "brightness",
+        "contrast",
+        "saturation",
+        "hue",
+        "deinterlace",
+        "vf",
+        "af",
+        "panscan",
+        "aid",
+        "vid",
+        "sid",
+        "sub-delay",
+        "sub-speed",
+        "sub-pos",
+        "sub-visibility",
+        "sub-scale",
+        "sub-use-margins",
+        "sub-ass-force-margins",
+        "sub-ass-vsfilter-aspect-compat",
+        "sub-ass-override",
+        "ab-loop-a",
+        "ab-loop-b",
+        "video-aspect-override",
+        NULL
+    },
 };
 
 const struct m_sub_options mp_opt_root = {

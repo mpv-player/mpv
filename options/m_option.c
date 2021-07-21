@@ -3668,7 +3668,7 @@ static bool obj_settings_list_equal(const m_option_t *opt, void *pa, void *pb)
     struct m_obj_settings *b = VAL(pb);
 
     if (a == b || !a || !b)
-        return a == b;
+        return a == b || (!a && !b[0].name) || (!b && !a[0].name);
 
     for (int n = 0; a[n].name || b[n].name; n++) {
         if (!a[n].name || !b[n].name)

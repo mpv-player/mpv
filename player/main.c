@@ -353,7 +353,10 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         m_config_set_profile(mpctx->mconfig, "pseudo-gui", 0);
     }
 
-    mp_get_resume_defaults(mpctx);
+    // Backup the default settings, which should not be stored in the resume
+    // config files. This explicitly includes values set by config files and
+    // the command line.
+    m_config_backup_watch_later_opts(mpctx->mconfig);
 
     mp_input_load_config(mpctx->input);
 
