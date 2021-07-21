@@ -1742,6 +1742,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         !strcmp(codec, "truehd") || !strcmp(codec, "eac3"))
     {
         track->parse = true;
+        if (!strcmp(codec, "eac3"))
+            track->parse_timebase = AV_TIME_BASE;
     } else if (!strcmp(codec, "flac")) {
         unsigned char *ptr = extradata;
         unsigned int size = extradata_len;
