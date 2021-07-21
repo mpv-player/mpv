@@ -1,6 +1,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 
+#include "config.h"
 #include "ra_pl.h"
 #include "utils.h"
 

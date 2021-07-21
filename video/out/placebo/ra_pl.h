@@ -1,4 +1,5 @@
 #pragma once
+#define PL_DEPRECATED __attribute__((deprecated))
 
 #include "video/out/gpu/ra.h"
 #include <libplacebo/gpu.h>
