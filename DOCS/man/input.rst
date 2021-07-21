@@ -912,7 +912,7 @@ Input Commands that are Possibly Subject to Change
 
     .. admonition:: Example for input.conf
 
-        - ``a vf set flip`` turn video upside-down on the ``a`` key
+        - ``a vf set vflip`` turn the video upside-down on the ``a`` key
         - ``b vf set ""`` remove all video filters on ``b``
         - ``c vf toggle gradfun`` toggle debanding on ``c``
 
@@ -3420,8 +3420,8 @@ caveats with some properties (due to historical reasons):
     the initial filter chain cannot be created.
 
     This behavior changed in mpv 0.31.0. Before this, the new value was rejected
-    *iff* video (for ``vf``) or audio (for ``af``) was active. If playback was
-    not active, the behavior was the same as the current behavior.
+    *iff* a video (for ``vf``) or an audio (for ``af``) track was active. If
+    playback was not active, the behavior was the same as the current one.
 
 ``playlist``
     The property is read-only and returns the current internal playlist. The
