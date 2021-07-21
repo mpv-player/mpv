@@ -276,9 +276,18 @@ function dispatch_key_binding(name, state, key_name) {
 
 var binds_tid = 0;  // flush timer id. actual id's are always true-thy
 mp.flush_key_bindings = function flush_key_bindings() {
+    function prioritized_inputs(arr) {
+        return arr.sort(function(a, b) { return a.id > b.id })
+                  .map(function(bind) { return bind.input });
+    }
+
     var def = [], forced = [];
-    for (var n in binds)  // Array.join() will later skip undefined .input
-        (binds[n].forced ? forced : def).push(binds[n].input);
+    for (var n in binds)
+        if (binds[n].input)
+            (binds[n].forced ? forced : def).push(binds[n]);
+    // newer bindings for the same key override/hide older ones
+    def = prioritized_inputs(def);
+    forced = prioritized_inputs(forced);
 
     var sect = "input_" + mp.script_name;
     mp.commandv("define-section", sect, def.join("\n"), "default");
@@ -306,13 +315,14 @@ function add_binding(forced, key, name, fn, opts) {
         fn = name;
         name = false;
     }
-    if (!name)
-        name = "__keybinding" + next_bid++;  // new unique binding name
     var key_data = {forced: forced};
     switch (typeof opts) {  // merge opts into key_data
         case "string": key_data[opts] = true; break;
         case "object": for (var o in opts) key_data[o] = opts[o];
     }
+    key_data.id = next_bid++;
+    if (!name)
+        name = "__keybinding" + key_data.id;  // new unique binding name
 
     if (key_data.complex) {
         mp.register_script_message(name, function msg_cb() {
