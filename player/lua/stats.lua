@@ -13,8 +13,6 @@ local utils = require 'mp.utils'
 -- Options
 local o = {
     -- Default key bindings
-    key_oneshot = "i",
-    key_toggle = "I",
     key_page_1 = "1",
     key_page_2 = "2",
     key_page_3 = "3",
@@ -1125,11 +1123,11 @@ display_timer = mp.add_periodic_timer(o.duration,
 display_timer:kill()
 
 -- Single invocation key binding
-mp.add_key_binding(o.key_oneshot, "display-stats", function() process_key_binding(true) end,
+mp.add_key_binding(nil, "display-stats", function() process_key_binding(true) end,
     {repeatable=true})
 
 -- Toggling key binding
-mp.add_key_binding(o.key_toggle, "display-stats-toggle", function() process_key_binding(false) end,
+mp.add_key_binding(nil, "display-stats-toggle", function() process_key_binding(false) end,
     {repeatable=false})
 
 -- Single invocation bindings without key, can be used in input.conf to create

@@ -52,13 +52,6 @@ option. The configuration syntax is described in `ON SCREEN CONTROLLER`_.
 Configurable Options
 ~~~~~~~~~~~~~~~~~~~~
 
-``key_oneshot``
-    Default: i
-``key_toggle``
-    Default: I
-
-    Key bindings to display stats.
-
 ``key_page_1``
     Default: 1
 ``key_page_2``
@@ -174,14 +167,12 @@ Note: colors are given as hexadecimal values and use ASS tag order: BBGGRR
 Different key bindings
 ~~~~~~~~~~~~~~~~~~~~~~
 
-A different key binding can be defined with the aforementioned options
-``key_oneshot`` and ``key_toggle`` but also with commands in ``input.conf``,
-for example::
+Additional keys can be configured in ``input.conf`` to display the stats::
 
     e script-binding stats/display-stats
     E script-binding stats/display-stats-toggle
 
-Using ``input.conf``, it is also possible to directly display a certain page::
+And to display a certain page directly::
 
     i script-binding stats/display-page-1
     e script-binding stats/display-page-2
