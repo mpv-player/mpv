@@ -726,11 +726,6 @@ static void drm_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 
 static bool drm_egl_init(struct ra_ctx *ctx)
 {
-    if (ctx->opts.probing) {
-        MP_VERBOSE(ctx, "DRM EGL backend can be activated only manually.\n");
-        return false;
-    }
-
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
     p->ev.page_flip_handler = &drm_pflip_cb;
