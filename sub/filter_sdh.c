@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <stddef.h>
 
 #include "misc/ctype.h"
 #include "common/common.h"
@@ -332,10 +333,9 @@ static void remove_leading_hyphen_space(struct sd_filter *sd, int start_pos,
 // Filter ASS formatted string for SDH
 //
 // Parameters:
-//     format       format line from ASS configuration
-//     n_ignored    number of comma to skip as preprocessing have removed them
-//     data         ASS line. null terminated string if length == 0
-//     length       length of ASS input if not null terminated, 0 otherwise
+//     data         ASS line
+//     length       length of ASS line
+//     toff         Text offset from data. required: 0 <= toff <= length
 //
 // Returns  a talloc allocated string with filtered ASS data (may be the same
 // content as original if no SDH was found) which must be released
@@ -343,45 +343,16 @@ static void remove_leading_hyphen_space(struct sd_filter *sd, int start_pos,
 //
 // Returns NULL if filtering resulted in all of ASS data being removed so no
 // subtitle should be output
-static char *filter_SDH(struct sd_filter *sd, char *format, int n_ignored,
-                        char *data, int length)
+static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t toff)
 {
-    // need null terminated string
-    char *ass = length ? talloc_strndup(NULL, data, length) : data;
-
-    int comma = 0;
-    // scan format line to find the number of the field where the text is
-    for (char *c = format; *c; c++) {
-        if (*c == ',') {
-            comma++;
-            if (strncasecmp(c + 1, "Text", 4) == 0)
-                break;
-        }
-    }
-    // if preprocessed line some fields are skipped
-    comma -= n_ignored;
-
     struct buffer writebuf;
     struct buffer *buf = &writebuf;
+    init_buf(buf, length + 1); // with room for terminating '\0'
 
-    init_buf(buf, strlen(ass) + 1); // with room for terminating '\0'
-
-    char *rp = ass;
-
-    // locate text field in ASS line
-    for (int k = 0; k < comma; k++) {
-        while (*rp) {
-            char tmp = append(sd, buf, rp[0]);
-            rp++;
-            if (tmp == ',')
-                break;
-        }
-    }
-    if (!*rp) {
-        talloc_free(buf->string);
-        MP_VERBOSE(sd, "SDH filtering not possible - cannot find text field\n");
-        return length ? ass : talloc_strdup(NULL, ass);
-    }
+    // pre-text headers into buf, rp is the (null-terminated) remaining text
+    char *ass = talloc_strndup(NULL, data, length), *rp = ass;
+    while (rp - ass < toff)
+        append(sd, buf, *rp++);
 
     bool contains_text = false;  // true if non SDH text was found
     bool line_with_text = false; // if last line contained text
@@ -449,8 +420,8 @@ static char *filter_SDH(struct sd_filter *sd, char *format, int n_ignored,
     } else {
         contains_text = true;
     }
-    if (length)
-        talloc_free(ass);
+    talloc_free(ass);
+
     if (contains_text) {
         // the ASS data contained normal text after filtering
         append(sd, buf, '\0'); // '\0' terminate
@@ -481,12 +452,12 @@ static bool sdh_init(struct sd_filter *ft)
 static struct demux_packet *sdh_filter(struct sd_filter *ft,
                                        struct demux_packet *pkt)
 {
-    char *line = (char *)pkt->buffer;
-    size_t len = pkt->len;
-    if (len >= INT_MAX)
-        return NULL;
+    bstr text = sd_ass_pkt_text(ft, pkt, sd_ass_fmt_offset(ft->event_format));
+    if (!text.start || !text.len || pkt->len >= INT_MAX)
+        return pkt;  // we don't touch it
 
-    line = filter_SDH(ft, ft->event_format, 1, line, len);
+    ptrdiff_t toff = text.start - pkt->buffer;
+    char *line = filter_SDH(ft, (char *)pkt->buffer, (int)pkt->len, toff);
     if (!line)
         return NULL;
     if (0 == bstrcmp0((bstr){(char *)pkt->buffer, pkt->len}, line)) {
