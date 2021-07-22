@@ -181,7 +181,7 @@ Active key bindings page
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Lists the active key bindings and the commands they're bound to, excluding the
-interactive keys of the stats script itself. See also `--input-test`_ for more
+interactive keys of the stats script itself. See also ``--input-test`` for more
 detailed view of each binding.
 
 The keys are grouped automatically using a simple analysis of the command
