@@ -89,4 +89,15 @@ struct sd_filter_functions {
 extern const struct sd_filter_functions sd_filter_sdh;
 extern const struct sd_filter_functions sd_filter_regex;
 
+
+// convenience utils for filters with ass codec
+
+// num commas to skip at an ass-event before the "Text" field (always last)
+// (doesn't change, can be retrieved once on filter init)
+int sd_ass_fmt_offset(const char *event_format);
+
+// the event (pkt->buffer) "Text" content according to the calculated offset.
+// on malformed event: warns and returns (bstr){NULL,0}
+bstr sd_ass_pkt_text(struct sd_filter *ft, struct demux_packet *pkt, int offset);
+
 #endif
