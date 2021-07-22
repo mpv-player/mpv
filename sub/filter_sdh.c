@@ -346,11 +346,6 @@ static void remove_leading_hyphen_space(struct sd_filter *sd, int start_pos,
 static char *filter_SDH(struct sd_filter *sd, char *format, int n_ignored,
                         char *data, int length)
 {
-    if (!format) {
-        MP_VERBOSE(sd, "SDH filtering not possible - format missing\n");
-        return length ? talloc_strndup(NULL, data, length) : talloc_strdup(NULL, data);
-    }
-
     // need null terminated string
     char *ass = length ? talloc_strndup(NULL, data, length) : data;
 
@@ -475,6 +470,11 @@ static bool sdh_init(struct sd_filter *ft)
     if (!ft->opts->sub_filter_SDH)
         return false;
 
+    if (!ft->event_format) {
+        MP_VERBOSE(ft, "SDH filtering not possible - format missing\n");
+        return false;
+    }
+
     return true;
 }
 
@@ -489,10 +489,14 @@ static struct demux_packet *sdh_filter(struct sd_filter *ft,
     line = filter_SDH(ft, ft->event_format, 1, line, len);
     if (!line)
         return NULL;
+    if (0 == bstrcmp0((bstr){(char *)pkt->buffer, pkt->len}, line)) {
+        talloc_free(line);
+        return pkt;  // unmodified, no need to allocate new packet
+    }
 
     // Stupidly, this copies it again. One could possibly allocate the packet
     // for writing in the first place (new_demux_packet()) and use
-    // demux_packet_shorten(). Or not allocate anything on no change.
+    // demux_packet_shorten().
     struct demux_packet *npkt = new_demux_packet_from(line, strlen(line));
     if (npkt)
         demux_packet_copy_attribs(npkt, pkt);
