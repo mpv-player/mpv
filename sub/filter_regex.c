@@ -44,15 +44,7 @@ static bool rf_init(struct sd_filter *ft)
     if (!p->num_regexes)
         return false;
 
-    char *headers = ft->event_format;
-    while (headers && headers[0]) {
-        p->offset += 1;
-        headers = strchr(headers, ',');
-        if (headers)
-            headers += 1;
-    }
-    p->offset -= 1; // removes Start/End, adds ReadOrder
-
+    p->offset = sd_ass_fmt_offset(ft->event_format);
     return true;
 }
 
@@ -68,19 +60,8 @@ static struct demux_packet *rf_filter(struct sd_filter *ft,
                                       struct demux_packet *pkt)
 {
     struct priv *p = ft->priv;
-    char *line = bstrto0(NULL, (bstr){(char *)pkt->buffer, pkt->len});
+    char *text = bstrto0(NULL, sd_ass_pkt_text(ft, pkt, p->offset));
     bool drop = false;
-
-    char *text = line;
-    for (int n = 0; n < p->offset - 1; n++) {
-        text = strchr(text, ',');
-        if (!text) {
-            MP_WARN(ft, "Malformed event: '%s'\n", line);
-            text = line; // shouldn't happen; random fallback
-            break;
-        }
-        text = text + 1;
-    }
 
     for (int n = 0; n < p->num_regexes; n++) {
         int err = regexec(&p->regexes[n], text, 0, NULL, 0);
@@ -94,7 +75,7 @@ static struct demux_packet *rf_filter(struct sd_filter *ft,
         }
     }
 
-    talloc_free(line);
+    talloc_free(text);
     return drop ? NULL : pkt;
 }
 

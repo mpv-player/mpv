@@ -945,3 +945,28 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
         sb->libass.color = MP_ASS_RGBA(rgb[0], rgb[1], rgb[2], a);
     }
 }
+
+int sd_ass_fmt_offset(const char *evt_fmt)
+{
+    // "Text" is always last (as it's arbitrary content in buf), e.g. format:
+    // "Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
+    int n = 0;
+    while (evt_fmt && (evt_fmt = strchr(evt_fmt, ',')))
+         evt_fmt++, n++;
+    return n-1;  // buffer is without the format's Start/End, with ReadOrder
+}
+
+bstr sd_ass_pkt_text(struct sd_filter *ft, struct demux_packet *pkt, int offset)
+{
+    // e.g. pkt->buffer ("4" is ReadOrder): "4,0,Default,,0,0,0,,fifth line"
+    bstr txt = {(char *)pkt->buffer, pkt->len}, t0 = txt;
+    while (offset-- > 0) {
+        int n = bstrchr(txt, ',');
+        if (n < 0) {  // shouldn't happen
+            MP_WARN(ft, "Malformed event '%.*s'\n", BSTR_P(t0));
+            return (bstr){NULL, 0};
+        }
+        txt = bstr_cut(txt, n+1);
+    }
+    return txt;
+}
