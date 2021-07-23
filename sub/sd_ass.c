@@ -973,3 +973,12 @@ bstr sd_ass_pkt_text(struct sd_filter *ft, struct demux_packet *pkt, int offset)
     }
     return txt;
 }
+
+bstr sd_ass_to_plaintext(char *out, size_t out_siz, const char *in)
+{
+    struct buf b = {out, out_siz, 0};
+    ass_to_plaintext(&b, in);
+    if (b.len < out_siz)
+        out[b.len] = 0;
+    return (bstr){out, b.len};
+}

@@ -87,7 +87,7 @@ static bool jsre_init(struct sd_filter *ft)
     for (int n = 0; ft->opts->jsre_items && ft->opts->jsre_items[n]; n++) {
         char *item = ft->opts->jsre_items[n];
 
-        int err = p_regcomp(p->J, p->num_regexes, item, JS_REGEXP_I);
+        int err = p_regcomp(p->J, p->num_regexes, item, JS_REGEXP_I | JS_REGEXP_M);
         if (err) {
             MP_ERR(ft, "jsre: %s -- '%s'\n", get_err(p->J), item);
             js_pop(p->J, 1);
@@ -110,6 +110,9 @@ static struct demux_packet *jsre_filter(struct sd_filter *ft,
     struct priv *p = ft->priv;
     char *text = bstrto0(NULL, sd_ass_pkt_text(ft, pkt, p->offset));
     bool drop = false;
+
+    if (ft->opts->rf_plain)
+        sd_ass_to_plaintext(text, strlen(text), text);
 
     for (int n = 0; n < p->num_regexes; n++) {
         int found, err = p_regexec(p->J, n, text, &found);

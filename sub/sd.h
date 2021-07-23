@@ -101,4 +101,9 @@ int sd_ass_fmt_offset(const char *event_format);
 // on malformed event: warns and returns (bstr){NULL,0}
 bstr sd_ass_pkt_text(struct sd_filter *ft, struct demux_packet *pkt, int offset);
 
+// convert \0-terminated "Text" (ass) content to plaintext, possibly in-place.
+// result.start is out, result.len is MIN(out_siz, strlen(in)) or smaller.
+// if there's room: out[result.len] is set to \0. out == in is allowed.
+bstr sd_ass_to_plaintext(char *out, size_t out_siz, const char *in);
+
 #endif

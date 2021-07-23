@@ -2804,7 +2804,7 @@ Subtitles
 
     List items are matched in order. If a regular expression matches, the
     process is stopped, and the subtitle line is discarded. The text matched
-    against is, currently, always the ``Text`` field of ASS events (if the
+    against is, by default, the ``Text`` field of ASS events (if the
     subtitle format is different, it is always converted). This may include
     formatting tags. Matching is case-insensitive, but how this is done depends
     on the libc, and most likely works in ASCII only. It does not work on
@@ -2830,6 +2830,12 @@ Subtitles
     Same as ``--sub-filter-regex`` but with JavaScript regular expressions.
     Shares/affected-by all ``--sub-filter-regex-*`` control options (see below),
     and also experimental. Requires only JavaScript support.
+
+``--sub-filter-regex-plain=<yes|no>``
+    Whether to first convert the ASS "Text" field to plain-text (default: no).
+    This strips ASS tags and applies ASS directives, like ``\N`` to new-line.
+    If the result is multi-line then the regexp anchors ``^`` and ``$`` match
+    each line, but still any match discards all lines.
 
 ``--sub-filter-regex-warn=<yes|no>``
     Log dropped lines with warning log level, instead of verbose (default: no).
