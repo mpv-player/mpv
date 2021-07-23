@@ -115,6 +115,7 @@ struct mp_sub_filter_opts {
     int sub_filter_SDH_harder;
     int rf_enable;
     char **rf_items;
+    char **jsre_items;
     int rf_warn;
 };
 

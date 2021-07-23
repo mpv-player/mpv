@@ -2826,6 +2826,11 @@ Subtitles
         include replacing the regexes with a very primitive and small subset of
         sed, or some method to control case-sensitivity.
 
+``--sub-filter-jsre-...=...``
+    Same as ``--sub-filter-regex`` but with JavaScript regular expressions.
+    Shares/affected-by all ``--sub-filter-regex-*`` control options (see below),
+    and also experimental. Requires only JavaScript support.
+
 ``--sub-filter-regex-warn=<yes|no>``
     Log dropped lines with warning log level, instead of verbose (default: no).
     Helpful for testing.

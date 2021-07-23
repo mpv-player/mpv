@@ -68,6 +68,9 @@ static const struct sd_filter_functions *const filters[] = {
 #if HAVE_POSIX
     &sd_filter_regex,
 #endif
+#if HAVE_JAVASCRIPT
+    &sd_filter_jsre,
+#endif
     NULL,
 };
 
