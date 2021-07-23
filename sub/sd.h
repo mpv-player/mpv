@@ -88,6 +88,7 @@ struct sd_filter_functions {
 
 extern const struct sd_filter_functions sd_filter_sdh;
 extern const struct sd_filter_functions sd_filter_regex;
+extern const struct sd_filter_functions sd_filter_jsre;
 
 
 // convenience utils for filters with ass codec

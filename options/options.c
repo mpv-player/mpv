@@ -219,6 +219,7 @@ const struct m_sub_options mp_sub_filter_opts = {
         {"sub-filter-sdh-harder", OPT_FLAG(sub_filter_SDH_harder)},
         {"sub-filter-regex-enable", OPT_FLAG(rf_enable)},
         {"sub-filter-regex", OPT_STRINGLIST(rf_items)},
+        {"sub-filter-jsre", OPT_STRINGLIST(jsre_items)},
         {"sub-filter-regex-warn", OPT_FLAG(rf_warn)},
         {0}
     },
