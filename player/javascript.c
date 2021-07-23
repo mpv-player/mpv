@@ -101,16 +101,25 @@ static uint64_t jsL_checkuint64(js_State *J, int idx);
 //   padded with undefined if called with less, or bigger if called with more.
 //
 // - Almost all vm APIs (js_*) may throw an error - a longjmp to the last
-//   recovery/catch point, which could skip releasing resources. Use protected
-//   code (e.g. js_pcall) between aquisition and release. Alternatively, use
-//   the autofree mechanism to manage it more easily. See more details below.
+//   recovery/catch point, which could skip releasing resources. This includes
+//   js_try itself(!), except at the outer-most [1] js_try which is always
+//   entering the try part (and the catch part if the try part throws).
+//   The assumption should be that anything can throw and needs careful setup.
+//   One such automated setup is the autofree mechanism. Details later.
 //
 // - Unless named s_foo, all the functions at this file (inc. init) which
 //   touch the vm may throw, but either cleanup resources regardless (mostly
 //   autofree) or leave allocated resources on caller-provided talloc context
 //   which the caller should release, typically with autofree (e.g. makenode).
 //
-// - Functions named s_foo (safe foo) never throw, return 0 on success, else 1.
+// - Functions named s_foo (safe foo) never throw if called at the outer-most
+//   try-levels, or, inside JS C functions - never throw after allocating.
+//   If they didn't throw then they return 0 on success, 1 on js-errors.
+//
+// [1] In practice the N outer-most (nested) tries are guaranteed to enter the
+//     try/carch code, where N is the mujs try-stack size (64 with mujs 1.1.3).
+//     But because we can't track try-level at (called-back) JS C functions,
+//     it's only guaranteed when we know we're near the outer-most try level.
 
 /**********************************************************************
  *  mpv scripting API error handling
@@ -201,13 +210,27 @@ static bool pushed_error(js_State *J, int err, int def)
 //   inserted into the vm using af_newcfunction, but otherwise used normally.
 //
 //  To wrap an autofree function af_TARGET in C:
-//  1. Create a wrapper s_TARGET which runs af_TARGET safely inside js_try.
-//  2. Use s_TARGET like so (always autofree, and throws if af_TARGET threw):
-//       void *af = talloc_new(NULL);
-//       int r = s_TARGET(J, ..., af);  // use J, af where the callee expects.
+//  1. Create a wrapper s_TARGET which does this:
+//      if (js_try(J))
+//          return 1;
+//      *af = talloc_new(NULL);
+//      af_TARGET(J, ..., *af);
+//      js_endtry(J);
+//      return 0;
+//  2. Use s_TARGET like so (frees if allocated, throws if {s,af}_TARGET threw):
+//       void *af = NULL;
+//       int r = s_TARGET(J, ..., &af);  // use J, af where the callee expects.
 //       talloc_free(af);
 //       if (r)
 //           js_throw(J);
+//
+//  The reason that the allocation happens inside try/catch is that js_try
+//  itself can throw (if it runs out of try-stack) and therefore the code
+//  inside the try part is not reached - but neither is the catch part(!),
+//  and instead it throws to the next outer catch - but before we've allocated
+//  anything, hence no leaks on such case. If js_try did get entered, then the
+//  allocation happened, and then if af_TARGET threw then s_TARGET will catch
+//  it (and return 1) and we'll free if afterwards.
 
 // add_af_file, add_af_dir, add_af_mpv_alloc take a valid FILE*/DIR*/char* value
 // respectively, and fclose/closedir/mpv_free it when the parent is freed.
@@ -266,11 +289,12 @@ static mpv_node *new_af_mpv_node(void *parent)
 typedef void (*af_CFunction)(js_State*, void*);
 
 // safely run autofree js c function directly
-static int s_run_af_jsc(js_State *J, af_CFunction fn, void *af)
+static int s_run_af_jsc(js_State *J, af_CFunction fn, void **af)
 {
     if (js_try(J))
         return 1;
-    fn(J, af);
+    *af = talloc_new(NULL);
+    fn(J, *af);
     js_endtry(J);
     return 0;
 }
@@ -285,8 +309,8 @@ static void script__autofree(js_State *J)
     af_CFunction fn = (af_CFunction)js_touserdata(J, -1, "af_fn");
     js_pop(J, 2);
 
-    void *af = talloc_new(NULL);
-    int r = s_run_af_jsc(J, fn, af);
+    void *af = NULL;
+    int r = s_run_af_jsc(J, fn, &af);
     talloc_free(af);
     if (r)
         js_throw(J);
@@ -357,11 +381,12 @@ static void af_push_file(js_State *J, const char *fname, int limit, void *af)
 }
 
 // Safely run af_push_file.
-static int s_push_file(js_State *J, const char *fname, int limit, void *af)
+static int s_push_file(js_State *J, const char *fname, int limit, void **af)
 {
     if (js_try(J))
         return 1;
-    af_push_file(J, fname, limit, af);
+    *af = talloc_new(NULL);
+    af_push_file(J, fname, limit, *af);
     js_endtry(J);
     return 0;
 }
@@ -369,8 +394,8 @@ static int s_push_file(js_State *J, const char *fname, int limit, void *af)
 // Called directly, push up to limit bytes of file fname (from builtin/os).
 static void push_file_content(js_State *J, const char *fname, int limit)
 {
-    void *af = talloc_new(NULL);
-    int r = s_push_file(J, fname, limit, af);
+    void *af = NULL;
+    int r = s_push_file(J, fname, limit, &af);
     talloc_free(af);
     if (r)
         js_throw(J);
