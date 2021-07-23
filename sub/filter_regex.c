@@ -30,7 +30,7 @@ static bool rf_init(struct sd_filter *ft)
         MP_TARRAY_GROW(p, p->regexes, p->num_regexes);
         regex_t *preg = &p->regexes[p->num_regexes];
 
-        int err = regcomp(preg, item, REG_ICASE | REG_EXTENDED | REG_NOSUB);
+        int err = regcomp(preg, item, REG_ICASE | REG_EXTENDED | REG_NOSUB | REG_NEWLINE);
         if (err) {
             char errbuf[512];
             regerror(err, preg, errbuf, sizeof(errbuf));
@@ -62,6 +62,9 @@ static struct demux_packet *rf_filter(struct sd_filter *ft,
     struct priv *p = ft->priv;
     char *text = bstrto0(NULL, sd_ass_pkt_text(ft, pkt, p->offset));
     bool drop = false;
+
+    if (ft->opts->rf_plain)
+        sd_ass_to_plaintext(text, strlen(text), text);
 
     for (int n = 0; n < p->num_regexes; n++) {
         int err = regexec(&p->regexes[n], text, 0, NULL, 0);
