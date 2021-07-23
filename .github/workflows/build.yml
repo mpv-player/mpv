@@ -39,3 +39,30 @@ jobs:
         if: ${{ failure() }}
         run: |
           cat ./build/config.log
+  macos:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        cc:
+          - "clang"
+        os:
+          - "macos-10.15"
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 luajit libass ffmpeg
+
+      - name: Build
+        run: |
+          ./ci/build-macos.sh
+        env:
+          CC: "${{ matrix.cc }}"
+          TRAVIS_OS_NAME: "${{ matrix.os }}"
+
+      - name: Print configure log
+        if: ${{ failure() }}
+        run: |
+          cat ./build/config.log
