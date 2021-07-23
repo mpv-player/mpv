@@ -183,7 +183,8 @@ surrogate pair escapes, should be a safe subset that can be used.
 Note that argument parsing and property expansion happen at different stages.
 First, arguments are determined as described above, and then, where applicable,
 properties are expanded - regardless of argument quoting. However, expansion
-can still be prevented with ``$>``. See `Property Expansion`_.
+can still be prevented with the ``raw`` prefix or ``$>``. See `Input Command
+Prefixes`_ and `Property Expansion`_.
 
 Commands specified as arrays
 ----------------------------
@@ -205,6 +206,9 @@ argument parsers for each argument. The input.conf parser normally handles
 quotes and escaping. The array command APIs mentioned above pass strings
 directly to the argument parsers, or can sidestep them by the ability to pass
 non-string values.
+
+Property expansion is disabled by default for these APIs. This can be changed
+with the ``expand-properties`` prefix. See `Input Command Prefixes`_.
 
 Sometimes commands have string arguments, that in turn are actually parsed by
 other components (e.g. filter strings with ``vf add``) - in these cases, you
@@ -231,6 +235,9 @@ to use APIs that pass arguments as arrays.
 
 Named arguments are not supported in the "flat" input.conf syntax, which means
 you cannot use them for key bindings in input.conf at all.
+
+Property expansion is disabled by default for these APIs. This can be changed
+with the ``expand-properties`` prefix. See `Input Command Prefixes`_.
 
 List of Input Commands
 ----------------------
@@ -3450,8 +3457,11 @@ command is an exception and not a general rule.)
     ``i show-text "Filename: ${filename}"``
         shows the filename of the current file when pressing the ``i`` key
 
-Within ``input.conf``, property expansion can be inhibited by putting the
-``raw`` prefix in front of commands.
+Whether property expansion is enabled by default depends on which API is used
+(see `Flat command syntax`_, `Commands specified as arrays`_ and `Named
+arguments`_), but it can always be enabled with the ``expand-properties``
+prefix or disabled with the ``raw`` prefix, as described in `Input Command
+Prefixes`_.
 
 The following expansions are supported:
 
