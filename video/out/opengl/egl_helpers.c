@@ -78,6 +78,20 @@ static void dump_egl_config(struct mp_log *log, int msgl, EGLDisplay display,
     }
 }
 
+static void *mpegl_get_proc_address(void *ctx, const char *name)
+{
+    void *p = eglGetProcAddress(name);
+#if defined(__GLIBC__) && HAVE_LIBDL
+    // Some crappy ARM/Linux things do not provide EGL 1.5, so above call does
+    // not necessarily return function pointers for core functions. Try to get
+    // them from a loaded GLES lib. As POSIX leaves RTLD_DEFAULT "reserved",
+    // use it only with glibc.
+    if (!p)
+        p = dlsym(RTLD_DEFAULT, name);
+#endif
+    return p;
+}
+
 // es_version: 0 (core), 2 or 3
 static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
                            int es_version, struct mpegl_cb cb,
@@ -188,11 +202,20 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
                 break;
         }
 
-        if (!egl_ctx && ra_gl_ctx_test_version(ctx, 140, false)) {
+        if (!egl_ctx) {
             // Fallback for EGL 1.4 without EGL_KHR_create_context.
             EGLint attrs[] = { EGL_NONE };
-
             egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
+
+            GL *gl = talloc_zero(ctx, struct GL);
+            mpgl_check_version(gl, mpegl_get_proc_address, NULL);
+            if (gl->version < 210 ||
+                !ra_gl_ctx_test_version(ctx, gl->version, false))
+            {
+                eglDestroyContext(display, egl_ctx);
+                egl_ctx = NULL;
+            }
+            talloc_free(gl);
         }
     }
 
@@ -250,20 +273,6 @@ static int GLAPIENTRY swap_interval(int interval)
     if (!display)
         return 1;
     return !eglSwapInterval(display, interval);
-}
-
-static void *mpegl_get_proc_address(void *ctx, const char *name)
-{
-    void *p = eglGetProcAddress(name);
-#if defined(__GLIBC__) && HAVE_LIBDL
-    // Some crappy ARM/Linux things do not provide EGL 1.5, so above call does
-    // not necessarily return function pointers for core functions. Try to get
-    // them from a loaded GLES lib. As POSIX leaves RTLD_DEFAULT "reserved",
-    // use it only with glibc.
-    if (!p)
-        p = dlsym(RTLD_DEFAULT, name);
-#endif
-    return p;
 }
 
 // Load gl version and function pointers into *gl.
