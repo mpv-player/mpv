@@ -486,6 +486,26 @@ static const struct gl_functions gl_functions[] = {
 #undef DEF_FN
 #undef DEF_FN_NAME
 
+void mpgl_check_version(GL *gl, void *(*get_fn)(void *ctx, const char *n),
+                        void *fn_ctx)
+{
+    gl->GetString = get_fn(fn_ctx, "glGetString");
+    if (!gl->GetString) {
+        gl->version = 0;
+        return;
+    }
+    const char *version_string = gl->GetString(GL_VERSION);
+    if (!version_string) {
+        gl->version = 0;
+        return;
+    }
+    int major = 0, minor = 0;
+    if (sscanf(version_string, "%d.%d", &major, &minor) < 2) {
+        gl->version = 0;
+        return;
+    }
+    gl->version = MPGL_VER(major, minor);
+}
 
 // Fill the GL struct with function pointers and extensions from the current
 // GL context. Called by the backend.
