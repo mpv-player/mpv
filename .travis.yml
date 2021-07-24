@@ -1,31 +1,7 @@
 language: c
 
-_macbase:
-  - &mac
-    os: osx
-    compiler: clang
-    env:
-      - HOMEBREW_NO_AUTO_UPDATE=1
-      - HOMEBREW_NO_INSTALL_CLEANUP=1
-    before_cache:
-      - brew cleanup -s
-    cache:
-      directories:
-        - $HOME/Library/Caches/Homebrew
-        - /usr/local/Homebrew
-
 matrix:
   include:
-    - <<: *mac
-      osx_image: xcode12.2
-    - <<: *mac
-      osx_image: xcode11.3
-    - <<: *mac
-      osx_image: xcode9.4
-      env:
-        - HOMEBREW_NO_AUTO_UPDATE=1
-        - HOMEBREW_NO_INSTALL_CLEANUP=1
-        - CI_HOMEBREW_HASH=7242872d7878f1a4c2706e5837faafcf0782b58d
     - os: freebsd
       compiler: clang
     - os: linux
@@ -34,9 +10,6 @@ matrix:
     - os: linux
       compiler: clang
       env: CONTAINER=registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps CI_SCRIPT=ci/build-tumbleweed.sh
-  allow_failures:
-    - os: osx
-      osx_image: xcode9.4
   fast_finish: true
 
 dist: focal
@@ -95,36 +68,6 @@ before_install:
                 v4l_compat \
                 $NULL
         fi
-  - |
-        if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-            if [[ "$TRAVIS_OSX_IMAGE" == "xcode12.2" ]]; then
-                remove=$(brew list --formula)
-            else
-                remove=$(brew list)
-            fi
-            keep="gettext pcre2 git"
-            install="autoconf automake pkg-config libtool python freetype fribidi little-cms2 luajit libass ffmpeg"
-            for formula in ${keep[@]}; do remove=("${remove[@]/$formula}"); done
-            for formula in ${install[@]}; do remove=("${remove[@]/$formula}"); done
-            brew remove --force $remove --ignore-dependencies
-            if [[ "$TRAVIS_OSX_IMAGE" == "xcode12.2" ]]; then
-                brew remove $(brew list --cask)
-            else
-                brew cask remove $(brew cask list)
-            fi
-            brew untap homebrew/cask
-            brew update
-            if [[ -n "$CI_HOMEBREW_HASH" ]]; then
-                pushd "/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core"
-                git checkout --force $CI_HOMEBREW_HASH
-            fi
-            brew install $install
-            brew link --overwrite python
-            if [[ -n "$CI_HOMEBREW_HASH" ]]; then
-                git checkout master
-                popd
-            fi
-        fi
 
 
 
@@ -138,7 +81,6 @@ script:
                 $CI_SCRIPT
             fi
         fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./ci/build-macos.sh; fi
   - if [ "$TRAVIS_OS_NAME" = "freebsd" ]; then ./ci/build-freebsd.sh; fi
 after_failure: cat ./build/config.log
 after_script: TOOLS/travis-rebuild-website
