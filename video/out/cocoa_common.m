@@ -227,14 +227,14 @@ static void cocoa_init_light_sensor(struct vo *vo)
     run_on_main_thread(vo, ^{
         struct vo_cocoa_state *s = vo->cocoa;
         io_service_t srv = IOServiceGetMatchingService(
-                kIOMasterPortDefault, IOServiceMatching("AppleLMUController"));
+                kIOMainPortDefault, IOServiceMatching("AppleLMUController"));
         if (srv == IO_OBJECT_NULL) {
             MP_VERBOSE(vo, "can't find an ambient light sensor\n");
             return;
         }
 
         // subscribe to notifications from the light sensor driver
-        s->light_sensor_io_port = IONotificationPortCreate(kIOMasterPortDefault);
+        s->light_sensor_io_port = IONotificationPortCreate(kIOMainPortDefault);
         IONotificationPortSetDispatchQueue(
             s->light_sensor_io_port, dispatch_get_main_queue());
 

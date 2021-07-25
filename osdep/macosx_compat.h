@@ -24,6 +24,11 @@
 #import <Cocoa/Cocoa.h>
 #include "osdep/macosx_versions.h"
 
+#if (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_12_0)
+#define kIOMainPortDefault kIOMasterPortDefault
+#define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
+#endif
+
 #if (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
 
 @interface NSWindow (macOS10_12_SDK)

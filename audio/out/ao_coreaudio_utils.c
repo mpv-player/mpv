@@ -35,6 +35,10 @@
 #include <mach/mach_time.h>
 #endif
 
+#if !HAVE_MACOS_12_0_FEATURES
+#define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
+#endif
+
 CFStringRef cfstr_from_cstr(char *str)
 {
     return CFStringCreateWithCString(NULL, str, CA_CFSTR_ENCODING);
@@ -113,7 +117,7 @@ OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
         AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
             .mSelector = kAudioHardwarePropertyDeviceForUID,
             .mScope    = kAudioObjectPropertyScopeGlobal,
-            .mElement  = kAudioObjectPropertyElementMaster,
+            .mElement  = kAudioObjectPropertyElementMain,
         };
         err = AudioObjectGetPropertyData(
             kAudioObjectSystemObject, &p_addr, 0, 0, &size, &v);
@@ -392,7 +396,7 @@ static OSStatus ca_change_mixing(struct ao *ao, AudioDeviceID device,
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
         .mSelector = kAudioDevicePropertySupportsMixing,
         .mScope    = kAudioObjectPropertyScopeGlobal,
-        .mElement  = kAudioObjectPropertyElementMaster,
+        .mElement  = kAudioObjectPropertyElementMain,
     };
 
     if (AudioObjectHasProperty(device, &p_addr)) {
@@ -493,7 +497,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
     AudioObjectPropertyAddress p_addr = {
         .mSelector = kAudioStreamPropertyPhysicalFormat,
         .mScope    = kAudioObjectPropertyScopeGlobal,
-        .mElement  = kAudioObjectPropertyElementMaster,
+        .mElement  = kAudioObjectPropertyElementMain,
     };
 
     err = AudioObjectAddPropertyListener(stream, &p_addr,

@@ -51,6 +51,10 @@
 #include "audio/out/ao_coreaudio_properties.h"
 #include "audio/out/ao_coreaudio_utils.h"
 
+#if !HAVE_MACOS_12_0_FEATURES
+#define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
+#endif
+
 struct priv {
     AudioDeviceID device;   // selected device
 
@@ -120,7 +124,7 @@ static OSStatus enable_property_listener(struct ao *ao, bool enabled)
     for (int n = 0; n < MP_ARRAY_SIZE(devs); n++) {
         AudioObjectPropertyAddress addr = {
             .mScope    = kAudioObjectPropertyScopeGlobal,
-            .mElement  = kAudioObjectPropertyElementMaster,
+            .mElement  = kAudioObjectPropertyElementMain,
             .mSelector = selectors[n],
         };
         AudioDeviceID device = devs[n];

@@ -304,13 +304,21 @@ class Common: NSObject {
     }
 
     func initLightSensor() {
+        #if HAVE_MACOS_12_0_FEATURES
+        let srv = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleLMUController"))
+        #else
         let srv = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("AppleLMUController"))
+        #endif
         if srv == IO_OBJECT_NULL {
             log.sendVerbose("Can't find an ambient light sensor")
             return
         }
 
+        #if HAVE_MACOS_12_0_FEATURES
+        lightSensorIOPort = IONotificationPortCreate(kIOMainPortDefault)
+        #else
         lightSensorIOPort = IONotificationPortCreate(kIOMasterPortDefault)
+        #endif
         IONotificationPortSetDispatchQueue(lightSensorIOPort, queue)
         var n = io_object_t()
         IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback, MPVHelper.bridge(obj: self), &n)

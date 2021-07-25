@@ -35,8 +35,11 @@ extension NSScreen {
             var object: io_object_t
             var iter = io_iterator_t()
             let matching = IOServiceMatching("IODisplayConnect")
+            #if HAVE_MACOS_12_0_FEATURES
+            let result = IOServiceGetMatchingServices(kIOMainPortDefault, matching, &iter)
+            #else
             let result = IOServiceGetMatchingServices(kIOMasterPortDefault, matching, &iter)
-
+            #endif
             if result != KERN_SUCCESS || iter == 0 { return nil }
 
             repeat {

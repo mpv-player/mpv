@@ -23,13 +23,17 @@
 #include "audio/out/ao_coreaudio_utils.h"
 #include "mpv_talloc.h"
 
+#if !HAVE_MACOS_12_0_FEATURES
+#define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
+#endif
+
 OSStatus ca_get(AudioObjectID id, ca_scope scope, ca_sel selector,
                 uint32_t size, void *data)
 {
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
         .mSelector = selector,
         .mScope    = scope,
-        .mElement  = kAudioObjectPropertyElementMaster,
+        .mElement  = kAudioObjectPropertyElementMain,
     };
 
     return AudioObjectGetPropertyData(id, &p_addr, 0, NULL, &size, data);
@@ -41,7 +45,7 @@ OSStatus ca_set(AudioObjectID id, ca_scope scope, ca_sel selector,
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
         .mSelector = selector,
         .mScope    = scope,
-        .mElement  = kAudioObjectPropertyElementMaster,
+        .mElement  = kAudioObjectPropertyElementMain,
     };
 
     return AudioObjectSetPropertyData(id, &p_addr, 0, NULL, size, data);
@@ -56,7 +60,7 @@ OSStatus ca_get_ary(AudioObjectID id, ca_scope scope, ca_sel selector,
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
         .mSelector = selector,
         .mScope    = scope,
-        .mElement  = kAudioObjectPropertyElementMaster,
+        .mElement  = kAudioObjectPropertyElementMain,
     };
 
     err = AudioObjectGetPropertyDataSize(id, &p_addr, 0, NULL, &p_size);
@@ -95,7 +99,7 @@ Boolean ca_settable(AudioObjectID id, ca_scope scope, ca_sel selector,
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
         .mSelector = selector,
         .mScope    = kAudioObjectPropertyScopeGlobal,
-        .mElement  = kAudioObjectPropertyElementMaster,
+        .mElement  = kAudioObjectPropertyElementMain,
     };
 
     return AudioObjectIsPropertySettable(id, &p_addr, data);
