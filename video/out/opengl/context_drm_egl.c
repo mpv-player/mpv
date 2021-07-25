@@ -44,8 +44,6 @@
 #define EGL_PLATFORM_GBM_KHR 0x31D7
 #endif
 
-#define USE_MASTER 0
-
 #ifndef EGL_EXT_platform_base
 typedef EGLDisplay (EGLAPIENTRYP PFNEGLGETPLATFORMDISPLAYEXTPROC)
     (EGLenum platform, void *native_display, const EGLint *attrib_list);
@@ -423,15 +421,11 @@ static void release_vt(void *data)
     struct ra_ctx *ctx = data;
     MP_VERBOSE(ctx->vo, "Releasing VT\n");
     crtc_release(ctx);
-    if (USE_MASTER) {
-        //this function enables support for switching to x, weston etc.
-        //however, for whatever reason, it can be called only by root users.
-        //until things change, this is commented.
-        struct priv *p = ctx->priv;
-        if (drmDropMaster(p->kms->fd)) {
-            MP_WARN(ctx->vo, "Failed to drop DRM master: %s\n",
-                    mp_strerror(errno));
-        }
+
+    const struct priv *p = ctx->priv;
+    if (drmDropMaster(p->kms->fd)) {
+        MP_WARN(ctx->vo, "Failed to drop DRM master: %s\n",
+                mp_strerror(errno));
     }
 }
 
@@ -439,12 +433,11 @@ static void acquire_vt(void *data)
 {
     struct ra_ctx *ctx = data;
     MP_VERBOSE(ctx->vo, "Acquiring VT\n");
-    if (USE_MASTER) {
-        struct priv *p = ctx->priv;
-        if (drmSetMaster(p->kms->fd)) {
-            MP_WARN(ctx->vo, "Failed to acquire DRM master: %s\n",
-                    mp_strerror(errno));
-        }
+
+    const struct priv *p = ctx->priv;
+    if (drmSetMaster(p->kms->fd)) {
+        MP_WARN(ctx->vo, "Failed to acquire DRM master: %s\n",
+                mp_strerror(errno));
     }
 
     crtc_setup(ctx);
