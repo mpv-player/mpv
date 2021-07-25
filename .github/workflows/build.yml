@@ -39,6 +39,7 @@ jobs:
         if: ${{ failure() }}
         run: |
           cat ./build/config.log
+
   macos:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -66,6 +67,7 @@ jobs:
         if: ${{ failure() }}
         run: |
           cat ./build/config.log
+
   linux:
     runs-on: "ubuntu-20.04"
     container:
