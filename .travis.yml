@@ -1,9 +1,6 @@
 language: c
 
 matrix:
-  include:
-    - os: freebsd
-      compiler: clang
   fast_finish: true
 
 dist: focal
@@ -27,46 +24,11 @@ branches:
 before_install:
   - if [ "$TRAVIS_COMPILER" = "clang" ]; then export CXX="clang++"; fi
   - if [ "$TRAVIS_COMPILER" = "gcc" ]; then export CXX="g++"; fi
-  - |
-        if [ "$TRAVIS_OS_NAME" = "freebsd" ]; then
-            # Requested in ci/build-freebsd.sh
-            sudo pkg install -y \
-                evdev-proto \
-                ffmpeg \
-                libplacebo \
-                libxkbcommon \
-                luajit \
-                openal-soft \
-                pkgconf \
-                python3 \
-                sdl2 \
-                vulkan-headers \
-                wayland-protocols \
-                $NULL
-            # Optionally auto-enabled
-            sudo pkg install -y \
-                alsa-lib \
-                jackit \
-                libXv \
-                libarchive \
-                libbluray \
-                libcaca \
-                libcdio-paranoia \
-                libdvdnav \
-                mujs \
-                pulseaudio \
-                rubberband \
-                sekrit-twc-zimg \
-                uchardet \
-                v4l_compat \
-                $NULL
-        fi
 
 
 
 script:
   - ./bootstrap.py
-  - if [ "$TRAVIS_OS_NAME" = "freebsd" ]; then ./ci/build-freebsd.sh; fi
 after_failure: cat ./build/config.log
 after_script: TOOLS/travis-rebuild-website
 
