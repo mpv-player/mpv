@@ -66,3 +66,29 @@ jobs:
         if: ${{ failure() }}
         run: |
           cat ./build/config.log
+  linux:
+    runs-on: "ubuntu-20.04"
+    container:
+      image: "registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps"
+      env:
+        CC: "${{ matrix.cc }}"
+    strategy:
+      matrix:
+        cc:
+          - "gcc"
+          - "clang"
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          ./bootstrap.py
+
+      - name: Build
+        run: |
+          ./ci/build-tumbleweed.sh
+
+      - name: Print configure log
+        if: ${{ failure() }}
+        run: |
+          cat ./build/config.log
