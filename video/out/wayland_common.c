@@ -838,12 +838,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         {
             wl->focused = !wl->focused;
             wl->pending_vo_events |= VO_EVENT_FOCUS;
-
-            if (wl->activated) {
-                /* If the surface comes back into view, force a redraw. */
-                vo_wayland_wait_frame(wl);
-                wl->pending_vo_events |= VO_EVENT_EXPOSE;
-            }
         }
     }
 
@@ -994,6 +988,7 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     }
 
     wl->frame_wait = false;
+    wl->hidden = false;
 }
 
 static const struct wl_callback_listener frame_listener = {
@@ -1992,13 +1987,11 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
             return;
         } else {
             wl->timeout_count += 1;
-            wl->hidden = false;
             return;
         }
     }
 
     wl->timeout_count = 0;
-    wl->hidden = false;
 }
 
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
