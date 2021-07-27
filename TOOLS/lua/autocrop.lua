@@ -56,6 +56,9 @@ detect_min_ratio: number[0.0-1.0] - The ratio of the minimum clip
 detect_seconds: seconds - How long to gather cropdetect data.
     Increasing this may be desirable to allow cropdetect more
     time to collect data.
+
+suppress_osd: bool - Whether the OSD shouldn't be used when filters
+    are applied and removed.
 --]]
 
 require "mp.msg"
@@ -67,7 +70,8 @@ local options = {
     detect_limit = "24/255",
     detect_round = 2,
     detect_min_ratio = 0.5,
-    detect_seconds = 1
+    detect_seconds = 1,
+    suppress_osd = false,
 }
 read_options(options)
 
@@ -81,6 +85,8 @@ timers = {
     auto_delay = nil,
     detect_crop = nil
 }
+
+local command_prefix = options.suppress_osd and 'no-osd' or ''
 
 function is_filter_present(label)
     local filters = mp.get_property_native("vf")
@@ -113,7 +119,7 @@ end
 
 function remove_filter(label)
     if is_filter_present(label) then
-        mp.command(string.format('vf remove @%s', label))
+        mp.command(string.format('%s vf remove @%s', command_prefix, label))
         return true
     end
     return false
@@ -157,8 +163,8 @@ function detect_crop()
 
     mp.command(
         string.format(
-            'vf pre @%s:cropdetect=limit=%s:round=%d:reset=0',
-            labels.cropdetect, limit, round
+            '%s vf pre @%s:cropdetect=limit=%s:round=%d:reset=0',
+            command_prefix, labels.cropdetect, limit, round
         )
     )
 
@@ -249,8 +255,8 @@ function apply_crop(meta)
 
     -- Apply crop.
     mp.command(
-        string.format("vf pre @%s:lavfi-crop=w=%s:h=%s:x=%s:y=%s",
-            labels.crop, meta.w, meta.h, meta.x, meta.y
+        string.format("%s vf pre @%s:lavfi-crop=w=%s:h=%s:x=%s:y=%s",
+            command_prefix, labels.crop, meta.w, meta.h, meta.x, meta.y
         )
     )
 end
