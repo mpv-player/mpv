@@ -1009,7 +1009,7 @@ listed.
 - ``AV:`` or ``V:`` (video only) or ``A:`` (audio only)
 - The current time position in ``HH:MM:SS`` format (``playback-time`` property)
 - The total file duration (absent if unknown) (``duration`` property)
-- Playback speed, e.g. `` x2.0``. Only visible if the speed is not normal. This
+- Playback speed, e.g. ``x2.0``. Only visible if the speed is not normal. This
   is the user-requested speed, and not the actual speed  (usually they should
   be the same, unless playback is too slow). (``speed`` property.)
 - Playback percentage, e.g. ``(13%)``. How much of the file has been played.
