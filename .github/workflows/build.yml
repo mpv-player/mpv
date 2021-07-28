@@ -47,6 +47,8 @@ jobs:
         cc:
           - "clang"
         os:
+          - "macos-10.13"
+          - "macos-10.14"
           - "macos-10.15"
     steps:
       - uses: actions/checkout@v2
