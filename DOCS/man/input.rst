@@ -162,7 +162,7 @@ a number of other places.
 
 |
 | ``<command>  ::= [<prefixes>] <command_name> (<argument>)*``
-| ``<argument> ::= (<unquoted> | " <double_quoted> " | !X <custom_quoted> X!)``
+| ``<argument> ::= (<unquoted> | " <double_quoted> " | `X <custom_quoted> X`)``
 
 ``command_name`` is an unquoted string with the command name itself. See
 `List of Input Commands`_ for a list.
@@ -171,10 +171,10 @@ Arguments are separated by whitespaces even if the command expects only one
 argument. Arguments with whitespaces or other special characters must be quoted,
 or the command cannot be parsed correctly.
 
-Double quoted arguments start and end with ``"``. Custom quotes start with ``!``
-(exclamation mark) followed by any ASCII character, and end in the same pair in
-reverse order, e.g. ``!'foo'!`` or ``!-bar-!``. The final pair sequence is not
-allowed inside the string - in these examples ``'!`` and ``-!`` respectively.
+Double quoted arguments start and end with ``"``. Custom quotes start with `````
+(back-quote) followed by any ASCII character, and end in the same pair in
+reverse order, e.g. ```-foo-``` or ````bar````. The final pair sequence is not
+allowed inside the string - in these examples ``-``` and `````` respectively.
 
 Custom quotes take their content literally, while inside double quotes
 JSON/C-style escaping can be used. JSON escapes according to RFC 8259, minus
