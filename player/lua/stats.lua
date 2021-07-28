@@ -386,10 +386,10 @@ local name_prefixes = {
 -- It's decent in practice, and worst case is "incorrect" subject.
 local function cmd_subject(cmd)
     cmd = cmd:gsub(";.*", ""):gsub("%-", "_")  -- only first cmd, s/-/_/
-    local TOKEN = '^%s*"?([%w_!]*)'  -- captures+ends before a (maybe) final "
+    local TOKEN = '^%s*["\']?([%w_!]*)'  -- captures+ends before (maybe) final "
     local tok, sname, subw
 
-    repeat tok, cmd = cmd:match(TOKEN .. '"?(.*)')
+    repeat tok, cmd = cmd:match(TOKEN .. '["\']?(.*)')
     until not cmd_prefixes[tok]
     -- tok is the 1st non-generic command/property name token, cmd is the rest
 
