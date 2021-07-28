@@ -97,6 +97,12 @@ All key names can be combined with the modifiers ``Shift``, ``Ctrl``, ``Alt``,
 ``Meta``. They must be prefixed to the actual key name, where each modifier
 is followed by a ``+`` (for example ``ctrl+q``).
 
+The ``Shift`` modifier requires some attention. For instance ``Shift+2`` should
+usually be specified as key-name ``@`` at ``input.conf``, and similarly the
+combination ``Alt+Shift+2`` is usually ``Alt+@``, etc. Special key names like
+``Shift+LEFT`` work as expected. If in doubt - use ``--input-test`` to check
+how a key/combination is seen by mpv.
+
 Symbolic key names and modifier names are case-insensitive. Unicode key names
 are case-sensitive because input bindings typically respect the shift key.
 
