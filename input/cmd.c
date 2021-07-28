@@ -341,8 +341,8 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
         }
         return 1;
     }
-    if (ctx->start.len > 1 && bstr_eatstart0(&ctx->str, "!")) {
-        char endquote[2] = {ctx->str.start[0], '!'};
+    if (ctx->start.len > 1 && bstr_eatstart0(&ctx->str, "`")) {
+        char endquote[2] = {ctx->str.start[0], '`'};
         ctx->str = bstr_cut(ctx->str, 1);
         int next = bstr_find(ctx->str, (bstr){endquote, 2});
         if (next < 0) {
