@@ -2806,7 +2806,8 @@ Property list
     ``track-list/N/albumart``
         ``yes``/true if this is a video track that consists of a single
         picture, ``no``/false or unavailable otherwise. This is used for video
-        tracks that are really attached pictures in audio files.
+        tracks that are really images embedded in audio files and for external
+        cover art.
 
     ``track-list/N/default``
         ``yes``/true if the track has the default flag set in the file,
