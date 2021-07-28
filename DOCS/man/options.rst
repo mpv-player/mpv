@@ -2036,14 +2036,17 @@ Audio
         want. For example, most A/V receivers connected via HDMI and that can
         do 7.1 would  be served by: ``--audio-channels=7.1,5.1,stereo``
 
-``--audio-display=<no|attachment>``
-    Setting this option to ``attachment`` (default) will display image
-    attachments (e.g. album cover art) when playing audio files. It will
-    display the first image found, and additional images are available as
-    video tracks.
+``--audio-display=<no|embedded-first|external-first>``
+    Determines whether to display cover art when playing audio files and with
+    what priority. It will display the first image found, and additional images
+    are available as video tracks.
 
-    Setting this option to ``no`` disables display of video entirely when
-    playing audio files.
+    :no:             Disable display of video entirely when playing audio
+                     files.
+    :embedded-first: Display embedded images and external cover art, giving
+                     priority to embedded images (default).
+    :external-first: Display embedded images and external cover art, giving
+                     priority to external files.
 
     This option has no influence on files with normal video tracks.
 

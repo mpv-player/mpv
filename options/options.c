@@ -508,7 +508,8 @@ static const m_option_t mp_opts[] = {
 
     {"lavfi-complex", OPT_STRING(lavfi_complex), .flags = UPDATE_LAVFI_COMPLEX},
 
-    {"audio-display", OPT_CHOICE(audio_display, {"no", 0}, {"attachment", 1})},
+    {"audio-display", OPT_CHOICE(audio_display, {"no", 0},
+        {"embedded-first", 1}, {"external-first", 2})},
 
     {"hls-bitrate", OPT_CHOICE(hls_bitrate,
         {"no", -1}, {"min", 0}, {"max", INT_MAX}), M_RANGE(0, INT_MAX)},

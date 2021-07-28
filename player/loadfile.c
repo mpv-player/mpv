@@ -476,8 +476,12 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
         return !t1->is_external;
     bool ext1 = t1->is_external && !t1->no_default;
     bool ext2 = t2->is_external && !t2->no_default;
-    if (ext1 != ext2)
+    if (ext1 != ext2) {
+        if (t1->attached_picture && t2->attached_picture
+            && opts->audio_display == 1)
+            return !ext1;
         return ext1;
+    }
     if (t1->auto_loaded != t2->auto_loaded)
         return !t1->auto_loaded;
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
@@ -1619,7 +1623,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (mpctx->vo_chain && mpctx->vo_chain->is_coverart) {
         MP_INFO(mpctx,
-            "Displaying attached picture. Use --no-audio-display to prevent this.\n");
+            "Displaying cover art. Use --no-audio-display to prevent this.\n");
     }
 
     if (!mpctx->vo_chain)
