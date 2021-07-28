@@ -97,6 +97,12 @@ All key names can be combined with the modifiers ``Shift``, ``Ctrl``, ``Alt``,
 ``Meta``. They must be prefixed to the actual key name, where each modifier
 is followed by a ``+`` (for example ``ctrl+q``).
 
+    .. note::
+
+        When editing your input config file, ``Shift+<number>`` may not work.
+        However, another way can be tried. For instance, for those who use
+        US-layout keyboard, use ``!`` instead of ``Shift+1`` .
+
 Symbolic key names and modifier names are case-insensitive. Unicode key names
 are case-sensitive because input bindings typically respect the shift key.
 
