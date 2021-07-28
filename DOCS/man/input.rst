@@ -162,7 +162,7 @@ a number of other places.
 
 |
 | ``<command>  ::= [<prefixes>] <command_name> (<argument>)*``
-| ``<argument> ::= (<unquoted> | " <double_quoted> " | `X <custom_quoted> X`)``
+| ``<argument> ::= (<unquoted> | " <double_quoted> " | ' <single_quoted> ' | `X <custom_quoted> X`)``
 
 ``command_name`` is an unquoted string with the command name itself. See
 `List of Input Commands`_ for a list.
@@ -171,14 +171,21 @@ Arguments are separated by whitespaces even if the command expects only one
 argument. Arguments with whitespaces or other special characters must be quoted,
 or the command cannot be parsed correctly.
 
-Double quoted arguments start and end with ``"``. Custom quotes start with `````
-(back-quote) followed by any ASCII character, and end in the same pair in
-reverse order, e.g. ```-foo-``` or ````bar````. The final pair sequence is not
-allowed inside the string - in these examples ``-``` and `````` respectively.
+Double quotes interpret JSON/C-style escaping, like ``\t`` or ``\"`` or ``\\``.
+JSON escapes according to RFC 8259, minus surrogate pair escapes. This is the
+only form which allows newlines at the value - as ``\n``.
 
-Custom quotes take their content literally, while inside double quotes
-JSON/C-style escaping can be used. JSON escapes according to RFC 8259, minus
-surrogate pair escapes, should be a safe subset that can be used.
+Single quotes take the content literally, and cannot include the single-quote
+character at the value.
+
+Custom quotes also take the content literally, but are more flexible than single
+quotes. They start with ````` (back-quote) followed by any ASCII character,
+and end at the first occurance of the same pair in reverse order, e.g.
+```-foo-``` or ````bar````. The final pair sequence is not allowed at the
+value - in these examples ``-``` and `````` respectively. In the second
+example the last character of the value also can't be a back-quote.
+
+Mixed quoting at the same argument, like ``'foo'"bar"``, is not supported.
 
 Note that argument parsing and property expansion happen at different stages.
 First, arguments are determined as described above, and then, where applicable,

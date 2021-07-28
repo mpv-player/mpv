@@ -336,9 +336,19 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
             return -1;
         }
         if (!bstr_eatstart0(&ctx->str, "\"")) {
-            MP_ERR(ctx, "Unterminated quotes: ...>%.*s<.\n", BSTR_P(start));
+            MP_ERR(ctx, "Unterminated double quote: ...>%.*s<.\n", BSTR_P(start));
             return -1;
         }
+        return 1;
+    }
+    if (bstr_eatstart0(&ctx->str, "'")) {
+        int next = bstrchr(ctx->str, '\'');
+        if (next < 0) {
+            MP_ERR(ctx, "Unterminated single quote: ...>%.*s<.\n", BSTR_P(start));
+            return -1;
+        }
+        *out = bstr_splice(ctx->str, 0, next);
+        ctx->str = bstr_cut(ctx->str, next+1);
         return 1;
     }
     if (ctx->start.len > 1 && bstr_eatstart0(&ctx->str, "`")) {
