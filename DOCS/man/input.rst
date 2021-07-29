@@ -99,9 +99,14 @@ is followed by a ``+`` (for example ``ctrl+q``).
 
     .. note::
 
-        When editing your input config file, ``Shift+<number>`` may not work.
-        However, another way can be tried. For instance, for those who use
-        US-layout keyboard, use ``!`` instead of ``Shift+1`` .
+        Usually, "Shift+<letter/number>" is registered as the single key. For
+        instance, ``Shift+q`` would be registered as the key name ``Q`` ,
+        ``Ctrl+Shift+q`` as ``Ctrl+Q``. However, without ``Shift``, the base
+        name is used normally, like ``Alt+q`` (or ``meta+q`` on some systems).
+
+        When editing your input config file, ``Shift+<letter>`` still work but
+        ``Shift+<number>`` may not. To fix it, replace ``Shift+<number>`` with
+        ``!`` , ``@`` or ``SHARP`` etc.
 
 Symbolic key names and modifier names are case-insensitive. Unicode key names
 are case-sensitive because input bindings typically respect the shift key.
