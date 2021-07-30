@@ -405,6 +405,19 @@ local function cmd_subject(cmd)
     return subw:len() > 1 and subw or "[unknown]"
 end
 
+-- key names are valid UTF-8, ascii7 except maybe the last/only codepoint.
+-- we count codepoints and ignore wcwidth. no need for grapheme clusters.
+-- our error for alignment is at most one cell (if last CP is double-width).
+-- (if k was valid but arbitrary: we'd count all bytes <0x80 or >=0xc0)
+local function keyname_cells(k)
+    local klen = k:len()
+    if klen > 1 and k:byte(klen) >= 0x80 then  -- last/only CP is not ascii7
+        repeat klen = klen-1
+        until klen == 1 or k:byte(klen) >= 0xc0  -- last CP begins at klen
+    end
+    return klen
+end
+
 local function get_kbinfo_lines(width)
     -- active keys: only highest priotity of each key, and not our (stats) keys
     local bindings = mp.get_property_native("input-bindings", {})
@@ -437,7 +450,7 @@ local function get_kbinfo_lines(width)
     end
 
     local function align_right(key)
-        return kspaces:sub(key:len()) .. key
+        return kspaces:sub(keyname_cells(key)) .. key
     end
 
     -- sort by: subject, mod(ifier)s count, mods, key-len, lowercase-key, key
@@ -460,8 +473,9 @@ local function get_kbinfo_lines(width)
     -- key/subject pre/post formatting for terminal/ass.
     -- key/subject alignment uses spaces (with mono font if ass)
     -- word-wrapping is disabled for ass, or cut at 79 for the terminal
+    local LTR = string.char(0xE2, 0x80, 0x8E)  -- U+200E Left To Right mark 
     local term = not o.use_ass
-    local kpre = term and "" or format("{\\q2\\fn%s}", o.font_mono)
+    local kpre = term and "" or format("{\\q2\\fn%s}%s", o.font_mono, LTR)
     local kpost = term and " " or format(" {\\fn%s}", o.font)
     local spre = term and kspaces .. "   "
                        or format("{\\q2\\fn%s}%s   {\\fn%s}{\\fs%d\\u1}",
