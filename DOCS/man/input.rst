@@ -2512,19 +2512,9 @@ Property list
     (or to be exact, the size the video filters output). ``2`` will set the
     double size, ``0.5`` halves the size.
 
-    See ``current-window-scale`` for the value derived from the actual window
-    size.
-
-    Since mpv 0.31.0, this always returns the previously set value (or the
-    default value), instead of the value implied by the actual window size.
-    Before mpv 0.31.0, this returned what ``current-window-scale`` returns now,
-    after the window was created.
-
-``current-window-scale``
-    The ``window-scale`` value calculated from the current window size. This
-    has the same value as ``window-scale`` if the window size was not changed
-    since setting the option, and the window size was not restricted in other
-    ways. The property is unavailable if no video is active.
+    Since mpv 0.34.0, ``window-scale`` always tracks the value calculated
+    from the current window size. This property is unavailable if no video
+    is active.
 
 ``focused``
     Whether the window has focus. Might not be supported by all VOs.

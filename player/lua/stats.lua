@@ -692,7 +692,7 @@ local function add_video(s)
     if append(s, scaled_width, {prefix="Scaled Resolution:"}) then
         append(s, scaled_height, {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
-    append_property(s, "current-window-scale", {prefix="Window Scale:"})
+    append_property(s, "window-scale", {prefix="Window Scale:"})
     if r["aspect"] ~= nil then
         append(s, format("%.2f", r["aspect"]), {prefix="Aspect Ratio:"})
     end

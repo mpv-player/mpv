@@ -2316,7 +2316,7 @@ static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
-static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
+static int mp_property_window_scale(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2326,36 +2326,30 @@ static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
 
     struct mp_image_params params = get_video_out_params(mpctx);
     int vid_w, vid_h;
-    mp_image_params_get_dsize(&params, &vid_w, &vid_h);
-    if (vid_w < 1 || vid_h < 1)
-        return M_PROPERTY_UNAVAILABLE;
-
     int s[2];
-    if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 ||
-        s[0] < 1 || s[1] < 1)
-        return M_PROPERTY_UNAVAILABLE;
-
-    double xs = (double)s[0] / vid_w;
-    double ys = (double)s[1] / vid_h;
-    return m_property_double_ro(action, arg, (xs + ys) / 2);
-}
-
-static void update_window_scale(struct MPContext *mpctx)
-{
-    struct vo *vo = mpctx->video_out;
-    if (!vo)
-        return;
-
-    struct mp_image_params params = get_video_out_params(mpctx);
-    int vid_w, vid_h;
     mp_image_params_get_dsize(&params, &vid_w, &vid_h);
     if (vid_w < 1 || vid_h < 1)
-        return;
+        return M_PROPERTY_UNAVAILABLE;
 
-    double scale = mpctx->opts->vo->window_scale;
-    int s[2] = {vid_w * scale, vid_h * scale};
-    if (s[0] > 0 && s[1] > 0)
-        vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
+    switch (action) {
+    case M_PROPERTY_SET: ;
+        double scale = *(double *)arg;
+        s[0] = vid_w * scale;
+        s[1] = vid_h * scale;
+        if (s[0] > 0 && s[1] > 0)
+            vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+    case M_PROPERTY_GET:
+        if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 ||
+            s[0] < 1 || s[1] < 1)
+            return M_PROPERTY_UNAVAILABLE;
+
+        double xs = (double)s[0] / vid_w;
+        double ys = (double)s[1] / vid_h;
+        return m_property_double_ro(action, arg, (xs + ys) / 2);
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static int mp_property_display_fps(void *ctx, struct m_property *prop,
@@ -3636,7 +3630,7 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("dheight", "video-out-params/dh"),
     M_PROPERTY_ALIAS("width", "video-params/w"),
     M_PROPERTY_ALIAS("height", "video-params/h"),
-    {"current-window-scale", mp_property_current_window_scale},
+    {"window-scale", mp_property_window_scale},
     {"vo-configured", mp_property_vo_configured},
     {"vo-passes", mp_property_vo_passes},
     {"perf-info", mp_property_perf_info},
@@ -3742,6 +3736,7 @@ static const struct m_property mp_properties_base[] = {
 
     M_PROPERTY_DEPRECATED_ALIAS("drop-frame-count", "decoder-frame-drop-count"),
     M_PROPERTY_DEPRECATED_ALIAS("vo-drop-frame-count", "frame-drop-count"),
+    M_PROPERTY_DEPRECATED_ALIAS("current-window-scale", "window-scale"),
 };
 
 // Each entry describes which properties an event (possibly) changes.
@@ -3781,7 +3776,7 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache",
       "demuxer-cache-time", "cache-buffering-state", "cache-speed",
       "demuxer-cache-state"),
-    E(MP_EVENT_WIN_RESIZE, "current-window-scale", "osd-width", "osd-height",
+    E(MP_EVENT_WIN_RESIZE, "window-scale", "osd-width", "osd-height",
       "osd-par", "osd-dimensions"),
     E(MP_EVENT_WIN_STATE, "display-names", "display-fps", "display-width",
       "display-height"),
@@ -6699,9 +6694,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
                 queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, 0);
         }
     }
-
-    if (opt_ptr == &opts->vo->window_scale)
-        update_window_scale(mpctx);
 
     if (opt_ptr == &opts->cursor_autohide_delay)
         mpctx->mouse_timer = 0;
