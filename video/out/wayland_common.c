@@ -796,7 +796,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
             is_fullscreen = true;
             break;
         case XDG_TOPLEVEL_STATE_RESIZING:
-            wl->pending_vo_events |= VO_EVENT_LIVE_RESIZING;
             break;
         case XDG_TOPLEVEL_STATE_ACTIVATED:
             is_activated = true;
@@ -839,15 +838,12 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
             wl->focused = !wl->focused;
             wl->pending_vo_events |= VO_EVENT_FOCUS;
         }
+        /* Just force a redraw to be on the safe side. */
+        if (wl->activated) {
+            wl->hidden = false;
+            wl->pending_vo_events |= VO_EVENT_EXPOSE;
+        }
     }
-
-    if (!(wl->pending_vo_events & VO_EVENT_LIVE_RESIZING))
-        vo_query_and_reset_events(wl->vo, VO_EVENT_LIVE_RESIZING);
-
-    int old_toplevel_width = wl->toplevel_width;
-    int old_toplevel_height = wl->toplevel_height;
-    wl->toplevel_width = width;
-    wl->toplevel_height = height;
 
     if (wl->scale_change) {
         wl_surface_set_buffer_scale(wl->surface, wl->scaling);
@@ -862,12 +858,12 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
     }
 
-    if (old_toplevel_width == wl->toplevel_width && old_toplevel_height == wl->toplevel_height)
+    if (width == 0 || height == 0)
         return;
 
     if (!is_fullscreen && !is_maximized) {
         if (vo_opts->keepaspect && vo_opts->keepaspect_window) {
-            if (abs(wl->toplevel_width - old_toplevel_width) > abs(wl->toplevel_height - old_toplevel_height)) {
+            if (width > height) {
                 double scale_factor = (double)width / wl->reduced_width;
                 width = wl->reduced_width * scale_factor;
             } else {
