@@ -283,8 +283,7 @@ void m_config_backup_all_opts(struct m_config *config)
 void m_config_backup_watch_later_opts(struct m_config *config)
 {
     for (int n = 0; n < config->num_opts; n++)
-        ensure_backup(&config->watch_later_backup_opts, BACKUP_LOCAL,
-                      &config->opts[n]);
+        ensure_backup(&config->watch_later_backup_opts, 0, &config->opts[n]);
 }
 
 struct m_config_option *m_config_get_co_raw(const struct m_config *config,
