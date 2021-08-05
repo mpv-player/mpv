@@ -43,7 +43,7 @@ local o = {
     plot_color = "FFFFFF",
 
     -- Text style
-    font = "sans",
+    font = "sans-serif",
     font_mono = "monospace",   -- monospaced digits are sufficient
     font_size = 8,
     font_color = "FFFFFF",
