@@ -4015,7 +4015,8 @@ static const struct property_osd_display {
     {0}
 };
 
-static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
+static void show_property_osd(MPContext *mpctx, const char *name,
+                              int osd_mode, const char *arg)
 {
     struct MPOpts *opts = mpctx->opts;
     struct property_osd_display disp = {.name = name, .osd_name = name};
@@ -4075,8 +4076,11 @@ static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
         void *tmp = talloc_new(NULL);
 
         const char *msg = disp.msg;
-        if (!msg)
+        if (!msg && !strcmp(arg, "")) {
             msg = talloc_asprintf(tmp, "%s: ${%s}", disp.osd_name, name);
+        } else if (!msg && strcmp(arg, "")) {
+            msg = talloc_asprintf(tmp, "%s: %s", disp.osd_name, arg);
+        }
 
         char *osd_msg = talloc_steal(tmp, mp_property_expand_string(mpctx, msg));
 
@@ -4161,7 +4165,7 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
     if (on_osd) {
         if (r >= 0) {
             const char *prop = filter_opt[mediatype];
-            show_property_osd(mpctx, prop, MP_ON_OSD_MSG);
+            show_property_osd(mpctx, prop, MP_ON_OSD_MSG, "");
         } else {
             set_osd_msg(mpctx, 1, mpctx->opts->osd_duration,
                          "Changing filters failed!");
@@ -4445,7 +4449,8 @@ static bool check_property_scalable(char *property, struct MPContext *mpctx)
            prop.type == &m_option_type_aspect;
 }
 
-static void show_property_status(struct mp_cmd_ctx *cmd, const char *name, int r)
+static void show_property_status(struct mp_cmd_ctx *cmd, const char *name,
+                                 int r, const char *arg)
 {
     struct MPContext *mpctx = cmd->mpctx;
     struct MPOpts *opts = mpctx->opts;
@@ -4453,7 +4458,7 @@ static void show_property_status(struct mp_cmd_ctx *cmd, const char *name, int r
     int osdl = cmd->msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
 
     if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-        show_property_osd(mpctx, name, cmd->on_osd);
+        show_property_osd(mpctx, name, cmd->on_osd, arg);
         if (r == M_PROPERTY_UNAVAILABLE)
             cmd->success = false;
     } else if (r == M_PROPERTY_UNKNOWN) {
@@ -4470,7 +4475,7 @@ static void change_property_cmd(struct mp_cmd_ctx *cmd,
                                 const char *name, int action, void *arg)
 {
     int r = mp_property_do(name, action, arg, cmd->mpctx);
-    show_property_status(cmd, name, r);
+    show_property_status(cmd, name, r, arg);
 }
 
 static void cmd_cycle_values(void *p)
@@ -4496,14 +4501,14 @@ static void cmd_cycle_values(void *p)
     struct m_option prop = {0};
     int r = mp_property_do(name, M_PROPERTY_GET_TYPE, &prop, mpctx);
     if (r <= 0) {
-        show_property_status(cmd, name, r);
+        show_property_status(cmd, name, r, "");
         return;
     }
 
     union m_option_value curval = {0};
     r = mp_property_do(name, M_PROPERTY_GET, &curval, mpctx);
     if (r <= 0) {
-        show_property_status(cmd, name, r);
+        show_property_status(cmd, name, r, "");
         return;
     }
 
@@ -4909,7 +4914,7 @@ static void cmd_change_list(void *p)
         return;
     }
 
-    show_property_osd(mpctx, name, cmd->on_osd);
+    show_property_osd(mpctx, name, cmd->on_osd, "");
 }
 
 static void cmd_add_cycle(void *p)
@@ -5060,7 +5065,7 @@ static void cmd_sub_step_seek(void *p)
                 mpctx->opts->subs_rend->sub_delay -= a[0] - refpts;
                 m_config_notify_change_opt_ptr_notify(mpctx->mconfig,
                                                &mpctx->opts->subs_rend->sub_delay);
-                show_property_osd(mpctx, "sub-delay", cmd->on_osd);
+                show_property_osd(mpctx, "sub-delay", cmd->on_osd, "");
             } else {
                 // We can easily get stuck by failing to seek to the video
                 // frame which actually shows the sub first (because video
@@ -5623,10 +5628,10 @@ static void cmd_ab_loop(void *p)
     double now = get_current_time(mpctx);
     if (mpctx->opts->ab_loop[0] == MP_NOPTS_VALUE) {
         mp_property_do("ab-loop-a", M_PROPERTY_SET, &now, mpctx);
-        show_property_osd(mpctx, "ab-loop-a", cmd->on_osd);
+        show_property_osd(mpctx, "ab-loop-a", cmd->on_osd, "");
     } else if (mpctx->opts->ab_loop[1] == MP_NOPTS_VALUE) {
         mp_property_do("ab-loop-b", M_PROPERTY_SET, &now, mpctx);
-        show_property_osd(mpctx, "ab-loop-b", cmd->on_osd);
+        show_property_osd(mpctx, "ab-loop-b", cmd->on_osd, "");
     } else {
         now = MP_NOPTS_VALUE;
         mp_property_do("ab-loop-a", M_PROPERTY_SET, &now, mpctx);
@@ -5652,7 +5657,7 @@ static void cmd_align_cache_ab(void *p)
     mp_property_do("ab-loop-b", M_PROPERTY_SET, &b, mpctx);
 
     // Happens to cover both properties.
-    show_property_osd(mpctx, "ab-loop-b", cmd->on_osd);
+    show_property_osd(mpctx, "ab-loop-b", cmd->on_osd, "");
 }
 
 static void cmd_drop_buffers(void *p)
