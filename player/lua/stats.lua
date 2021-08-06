@@ -376,7 +376,7 @@ local cmd_prefixes = {
 -- commands/writable-properties prefix sub-words (followed by -) to strip
 local name_prefixes = {
     define=1, delete=1, enable=1, disable=1, dump=1, write=1, drop=1, revert=1,
-    ab=1, hr=1, secondary=1,
+    ab=1, hr=1, secondary=1, current=1,
 }
 -- extract a command "subject" from a command string, by removing all
 -- generic prefix tokens and then returning the first interesting sub-word
