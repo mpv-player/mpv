@@ -1715,17 +1715,6 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 
         return VO_TRUE;
     }
-    case VOCTRL_GET_UNFS_WINDOW_SIZE: {
-        int *s = arg;
-
-        if (!w32->window_bounds_initialized)
-            return VO_FALSE;
-
-        RECT *rc = w32->current_fs ? &w32->prev_windowrc : &w32->windowrc;
-        s[0] = rect_w(*rc);
-        s[1] = rect_h(*rc);
-        return VO_TRUE;
-    }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
 

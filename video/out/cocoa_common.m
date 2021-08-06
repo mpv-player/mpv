@@ -869,16 +869,6 @@ static int vo_cocoa_control_on_main_thread(struct vo *vo, int request, void *arg
     struct vo_cocoa_state *s = vo->cocoa;
 
     switch (request) {
-    case VOCTRL_GET_UNFS_WINDOW_SIZE: {
-        int *sz = arg;
-        NSRect rect = (s->fullscreen || vo->opts->fullscreen) ?
-                       s->unfs_window : [s->view frame];
-        if(!vo->opts->hidpi_window_scale)
-            rect = [s->current_screen convertRectToBacking:rect];
-        sz[0] = rect.size.width;
-        sz[1] = rect.size.height;
-        return VO_TRUE;
-    }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *sz = arg;
         NSRect r = NSMakeRect(0, 0, sz[0], sz[1]);

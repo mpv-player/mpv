@@ -1597,12 +1597,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         *(char ***)arg = get_displays_spanned(wl);
         return VO_TRUE;
     }
-    case VOCTRL_GET_UNFS_WINDOW_SIZE: {
-        int *s = arg;
-        s[0] = mp_rect_w(wl->geometry) * wl->scaling;
-        s[1] = mp_rect_h(wl->geometry) * wl->scaling;
-        return VO_TRUE;
-    }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         wl->window_size.x0 = 0;

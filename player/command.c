@@ -2349,19 +2349,16 @@ static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE:
     case M_PROPERTY_GET: ;
+        struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
+        if (!mpctx->video_out || !mpctx->video_out->config_ok)
+            return M_PROPERTY_UNAVAILABLE;
         struct mp_image_params params = get_video_out_params(mpctx);
         int vid_w, vid_h;
         mp_image_params_get_dsize(&params, &vid_w, &vid_h);
         if (vid_w < 1 || vid_h < 1)
             return M_PROPERTY_UNAVAILABLE;
-
-        int s[2];
-        if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 ||
-            s[0] < 1 || s[1] < 1)
-            return M_PROPERTY_UNAVAILABLE;
-
-        double xs = (double)s[0] / vid_w;
-        double ys = (double)s[1] / vid_h;
+        double xs = (double)vo_res.w / vid_w;
+        double ys = (double)vo_res.h / vid_h;
         return m_property_double_ro(action, arg, (xs + ys) / 2);
     }
     return M_PROPERTY_NOT_IMPLEMENTED;

@@ -95,9 +95,8 @@ enum mp_voctrl {
     VOCTRL_KILL_SCREENSAVER,
     VOCTRL_RESTORE_SCREENSAVER,
 
-    // Return or set window size (not-fullscreen mode only - if fullscreened,
-    // these must access the not-fullscreened window size only).
-    VOCTRL_GET_UNFS_WINDOW_SIZE,        // int[2] (w/h)
+    // Set window size (not-fullscreen mode only - if fullscreened,
+    // this must access the not-fullscreened window size only).
     VOCTRL_SET_UNFS_WINDOW_SIZE,        // int[2] (w/h)
 
     VOCTRL_GET_FOCUSED,                 // bool*

@@ -1895,14 +1895,6 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         }
         return VO_TRUE;
     }
-    case VOCTRL_GET_UNFS_WINDOW_SIZE: {
-        int *s = arg;
-        if (!x11->window || x11->parent)
-            return VO_FALSE;
-        s[0] = (x11->fs ? RC_W(x11->nofsrc) : RC_W(x11->winrc)) / x11->dpi_scale;
-        s[1] = (x11->fs ? RC_H(x11->nofsrc) : RC_H(x11->winrc)) / x11->dpi_scale;
-        return VO_TRUE;
-    }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (!x11->window || x11->parent)
