@@ -782,6 +782,11 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     struct mp_vo_opts *vo_opts = wl->vo_opts;
     struct mp_rect old_geometry = wl->geometry;
 
+    int old_toplevel_width = wl->toplevel_width;
+    int old_toplevel_height = wl->toplevel_height;
+    wl->toplevel_width = width;
+    wl->toplevel_height = height;
+
     /* Don't do anything here if we haven't finished setting geometry. */
     if (mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0)
         return;
@@ -858,7 +863,8 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
     }
 
-    if (width == 0 || height == 0)
+    if (old_toplevel_width == wl->toplevel_width &&
+        old_toplevel_height == wl->toplevel_height)
         return;
 
     if (!is_fullscreen && !is_maximized) {

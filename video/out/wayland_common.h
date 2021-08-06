@@ -50,6 +50,8 @@ struct vo_wayland_state {
     int gcd;
     int reduced_height;
     int reduced_width;
+    int toplevel_width;
+    int toplevel_height;
 
     /* State */
     bool activated;
