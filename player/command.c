@@ -2316,24 +2316,6 @@ static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
-static int update_window_scale(struct MPContext *mpctx, double scale)
-{
-    struct vo *vo = mpctx->video_out;
-    if (!vo)
-        return -1;
-
-    struct mp_image_params params = get_video_out_params(mpctx);
-    int vid_w, vid_h;
-    mp_image_params_get_dsize(&params, &vid_w, &vid_h);
-    if (vid_w < 1 || vid_h < 1)
-        return -1;
-
-    int s[2] = {vid_w * scale, vid_h * scale};
-    if (s[0] > 0 && s[1] > 0)
-        vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
-    return 0;
-}
-
 static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
@@ -2342,29 +2324,38 @@ static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
     if (!vo)
         return M_PROPERTY_UNAVAILABLE;
 
-    switch (action) {
-    case M_PROPERTY_SET:
-        if (update_window_scale(mpctx, *(double *)arg) < 0)
-            return M_PROPERTY_UNAVAILABLE;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET_TYPE:
-    case M_PROPERTY_GET: ;
-        struct mp_image_params params = get_video_out_params(mpctx);
-        int vid_w, vid_h;
-        mp_image_params_get_dsize(&params, &vid_w, &vid_h);
-        if (vid_w < 1 || vid_h < 1)
-            return M_PROPERTY_UNAVAILABLE;
+    struct mp_image_params params = get_video_out_params(mpctx);
+    int vid_w, vid_h;
+    mp_image_params_get_dsize(&params, &vid_w, &vid_h);
+    if (vid_w < 1 || vid_h < 1)
+        return M_PROPERTY_UNAVAILABLE;
 
-        int s[2];
-        if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 ||
-            s[0] < 1 || s[1] < 1)
-            return M_PROPERTY_UNAVAILABLE;
+    int s[2];
+    if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 ||
+        s[0] < 1 || s[1] < 1)
+        return M_PROPERTY_UNAVAILABLE;
 
-        double xs = (double)s[0] / vid_w;
-        double ys = (double)s[1] / vid_h;
-        return m_property_double_ro(action, arg, (xs + ys) / 2);
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    double xs = (double)s[0] / vid_w;
+    double ys = (double)s[1] / vid_h;
+    return m_property_double_ro(action, arg, (xs + ys) / 2);
+}
+
+static void update_window_scale(struct MPContext *mpctx)
+{
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return;
+
+    struct mp_image_params params = get_video_out_params(mpctx);
+    int vid_w, vid_h;
+    mp_image_params_get_dsize(&params, &vid_w, &vid_h);
+    if (vid_w < 1 || vid_h < 1)
+        return;
+
+    double scale = mpctx->opts->vo->window_scale;
+    int s[2] = {vid_w * scale, vid_h * scale};
+    if (s[0] > 0 && s[1] > 0)
+        vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
 }
 
 static int mp_property_display_fps(void *ctx, struct m_property *prop,
@@ -6710,7 +6701,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     }
 
     if (opt_ptr == &opts->vo->window_scale)
-        update_window_scale(mpctx, opts->vo->window_scale);
+        update_window_scale(mpctx);
 
     if (opt_ptr == &opts->cursor_autohide_delay)
         mpctx->mouse_timer = 0;
