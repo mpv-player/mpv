@@ -1599,8 +1599,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        s[0] = mp_rect_w(wl->geometry) * wl->scaling;
-        s[1] = mp_rect_h(wl->geometry) * wl->scaling;
+        s[0] = mp_rect_w(wl->window_size) * wl->scaling;
+        s[1] = mp_rect_h(wl->window_size) * wl->scaling;
         return VO_TRUE;
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
@@ -1609,7 +1609,14 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         wl->window_size.y0 = 0;
         wl->window_size.x1 = s[0] / wl->scaling;
         wl->window_size.y1 = s[1] / wl->scaling;
-        if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) {
+        if (!wl->vo_opts->fullscreen) {
+            if (wl->vo_opts->window_maximized) {
+                xdg_toplevel_unset_maximized(wl->xdg_toplevel);
+                wl_display_dispatch_pending(wl->display);
+                /* Make sure the compositor let us unmaximize */
+                if (wl->vo_opts->window_maximized)
+                    return VO_TRUE;
+            }
             wl->geometry = wl->window_size;
             wl->pending_vo_events |= VO_EVENT_RESIZE;
         }
