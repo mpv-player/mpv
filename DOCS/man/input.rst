@@ -2527,7 +2527,12 @@ Property list
 
     Note that setting a value identical to its previous value will not resize
     the window. That's because this property mirrors the ``window-scale``
-    option, and setting an option to its previous value is ignored.
+    option, and setting an option to its previous value is ignored. If this
+    value is set while the window is in a fullscreen, the multiplier is not
+    applied until the window is taken out of that state. Writing this property
+    to a maximized window can unmaximize the window depending on the OS and
+    window manager. If the window does not unmaximize, the multiplier will be
+    applied if the user unmaximizes the window later.
 
     See ``current-window-scale`` for the value derived from the actual window
     size.
@@ -2541,10 +2546,14 @@ Property list
     The ``window-scale`` value calculated from the current window size. This
     has the same value as ``window-scale`` if the window size was not changed
     since setting the option, and the window size was not restricted in other
-    ways. The property is unavailable if no video is active.
+    ways. If the window is fullscreened, this will return the scale value
+    calculated from the last non-fullscreen size of the window. The property
+    is unavailable if no video is active.
 
-    Setting the value of this property will always resize the window
-    accordingly if possible, without affecting the value of ``window-scale``.
+    When setting this property in the fullscreen or maximized state, the behavior
+    is the same as window-scale. In all ther cases, setting the value of this
+    property will always resize the window. This does not affect the value of
+    ``window-scale``.
 
 ``focused``
     Whether the window has focus. Might not be supported by all VOs.
