@@ -1912,6 +1912,12 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         struct mp_rect rc = x11->winrc;
         rc.x1 = rc.x0 + w;
         rc.y1 = rc.y0 + h;
+        if (x11->opts->window_maximized) {
+            x11->opts->window_maximized = false;
+            m_config_cache_write_opt(x11->opts_cache,
+                    &x11->opts->window_maximized);
+            vo_x11_maximize(vo);
+        }
         vo_x11_highlevel_resize(vo, rc);
         if (!x11->fs) { // guess new window size, instead of waiting for X
             x11->winrc.x1 = x11->winrc.x0 + w;
