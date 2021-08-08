@@ -5506,7 +5506,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
     there are no server side decorations from the compositor.
 
 ``--wayland-edge-pixels-touch=<value>``
-    Defines the size of an edge border (default: 64) to initiate client side
+    Defines the size of an edge border (default: 32) to initiate client side
     resizes events in the wayland contexts with touch events.
 
 ``--spirv-compiler=<compiler>``

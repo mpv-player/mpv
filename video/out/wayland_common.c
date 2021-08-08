@@ -115,7 +115,7 @@ const struct m_sub_options wayland_conf = {
     .defaults = &(struct wayland_opts) {
         .disable_vsync = false,
         .edge_pixels_pointer = 10,
-        .edge_pixels_touch = 64,
+        .edge_pixels_touch = 32,
     },
 };
 
@@ -283,33 +283,24 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
 {
     struct vo_wayland_state *wl = data;
 
-    enum xdg_toplevel_resize_edge edge;
-    if (check_for_resize(wl, x_w, y_w, wl->opts->edge_pixels_touch, &edge)) {
-        wl->touch_entries = 0;
-        xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
-        return;
-    } else if (wl->touch_entries) {
-        wl->touch_entries = 0;
-        xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
-        return;
-    }
-
-    wl->touch_entries = 1;
-
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
 
     mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
     mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN);
+
+    enum xdg_toplevel_resize_edge edge;
+    if (check_for_resize(wl, x_w, y_w, wl->opts->edge_pixels_touch, &edge)) {
+        xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
+    } else {
+        xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
+    }
 }
 
 static void touch_handle_up(void *data, struct wl_touch *wl_touch,
                             uint32_t serial, uint32_t time, int32_t id)
 {
     struct vo_wayland_state *wl = data;
-
-    wl->touch_entries = 0;
-
     mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
 }
 
@@ -1122,7 +1113,7 @@ end:
 static int check_for_resize(struct vo_wayland_state *wl, wl_fixed_t x_w, wl_fixed_t y_w,
                             int edge_pixels, enum xdg_toplevel_resize_edge *edge)
 {
-    if (wl->touch_entries || wl->vo_opts->fullscreen || wl->vo_opts->window_maximized)
+    if (wl->vo_opts->fullscreen || wl->vo_opts->window_maximized)
         return 0;
 
     int pos[2] = { wl_fixed_to_double(x_w), wl_fixed_to_double(y_w) };
