@@ -70,7 +70,6 @@ struct vo_wayland_state {
     int pending_vo_events;
     int scaling;
     int timeout_count;
-    int touch_entries;
     int wakeup_pipe[2];
 
     /* idle-inhibit */
