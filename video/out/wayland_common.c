@@ -153,6 +153,7 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b);
 static void queue_new_sync(struct vo_wayland_state *wl);
 static void remove_output(struct vo_wayland_output *out);
+static void set_border_decorations(struct vo_wayland_state *wl, uint32_t mode);
 static void set_geometry(struct vo_wayland_state *wl);
 static void set_surface_scaling(struct vo_wayland_state *wl);
 static void sync_shift(struct vo_wayland_state *wl);
@@ -898,6 +899,18 @@ static const struct xdg_toplevel_listener xdg_toplevel_listener = {
     handle_toplevel_close,
 };
 
+static void configure_decorations(void *data,
+                                  struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration,
+                                  uint32_t mode)
+{
+    struct vo_wayland_state *wl = data;
+    set_border_decorations(wl, mode);
+}
+
+static const struct zxdg_toplevel_decoration_v1_listener decoration_listener = {
+    configure_decorations,
+};
+
 static void pres_set_clockid(void *data, struct wp_presentation *pres,
                            uint32_t clockid)
 {
@@ -1311,7 +1324,7 @@ static void remove_output(struct vo_wayland_output *out)
     return;
 }
 
-static void set_border_decorations(struct vo_wayland_state *wl, int state)
+static void set_border_decorations(struct vo_wayland_state *wl, uint32_t mode)
 {
     if (!wl->xdg_toplevel_decoration) {
         wl->vo_opts->border = false;
@@ -1319,16 +1332,15 @@ static void set_border_decorations(struct vo_wayland_state *wl, int state)
                                  &wl->vo_opts->border);
         return;
     }
-
-    enum zxdg_toplevel_decoration_v1_mode mode;
-    if (state) {
+    if (mode == ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE) {
         MP_VERBOSE(wl, "Enabling server decorations\n");
-        mode = ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE;
+        wl->vo_opts->border = true;
     } else {
         MP_VERBOSE(wl, "Disabling server decorations\n");
-        mode = ZXDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE;
+        wl->vo_opts->border = false;
     }
-    zxdg_toplevel_decoration_v1_set_mode(wl->xdg_toplevel_decoration, mode);
+    m_config_cache_write_opt(wl->vo_opts_cache,
+                             &wl->vo_opts->border);
 }
 
 static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
@@ -1549,7 +1561,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             if (opt == &opts->appid)
                 update_app_id(wl);
             if (opt == &opts->border)
-                set_border_decorations(wl, opts->border);
+                // The enum in xdg-decoration starts at 1.
+                zxdg_toplevel_decoration_v1_set_mode(wl->xdg_toplevel_decoration, opts->border + 1);
             if (opt == &opts->fullscreen)
                 toggle_fullscreen(wl);
             if (opt == &opts->hidpi_window_scale)
@@ -1715,7 +1728,7 @@ int vo_wayland_init(struct vo *vo)
 
     if (wl->xdg_decoration_manager) {
         wl->xdg_toplevel_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(wl->xdg_decoration_manager, wl->xdg_toplevel);
-        set_border_decorations(wl, wl->vo_opts->border);
+        zxdg_toplevel_decoration_v1_add_listener(wl->xdg_toplevel_decoration, &decoration_listener, wl);
     } else {
         wl->vo_opts->border = false;
         m_config_cache_write_opt(wl->vo_opts_cache,
