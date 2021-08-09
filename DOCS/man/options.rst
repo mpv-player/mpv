@@ -3926,8 +3926,15 @@ Input
     Support depends on the VO in use.
 
 ``--input-media-keys=<yes|no>``
-    (macOS and Windows only)
-    Enable/disable media keys support. Enabled by default (except for libmpv).
+    On systems where mpv can choose between receiving media keys or letting
+    the system handle them - this option controls whether mpv should receive
+    them.
+
+    Default: yes (except for libmpv). macOS and Windows only, because elsewhere
+    mpv doesn't have a choice - the system decides whether to send media keys
+    to mpv. For instance, on X11 or Wayland, system-wide media keys are not
+    implemented. Whether media keys work when the mpv window is focused is
+    implementation-defined.
 
 ``--input-right-alt-gr``, ``--no-input-right-alt-gr``
     (Cocoa and Windows only)
