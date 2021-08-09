@@ -859,14 +859,11 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         return;
 
     if (!is_fullscreen && !is_maximized) {
-        if (vo_opts->keepaspect && vo_opts->keepaspect_window) {
-            if (width > height) {
-                double scale_factor = (double)width / wl->reduced_width;
-                width = wl->reduced_width * scale_factor;
-            } else {
-                double scale_factor = (double)height / wl->reduced_height;
-                height = wl->reduced_height * scale_factor;
-            }
+        if (vo_opts->keepaspect) {
+            double scale_factor = (double)width / wl->reduced_width;
+            width = ceil(wl->reduced_width * scale_factor);
+            if (vo_opts->keepaspect_window)
+                height = ceil(wl->reduced_height * scale_factor);
         }
         wl->window_size.x0 = 0;
         wl->window_size.y0 = 0;
@@ -1761,7 +1758,7 @@ int vo_wayland_reconfig(struct vo *vo)
 
     set_geometry(wl);
 
-    if (wl->vo_opts->keepaspect && wl->vo_opts->keepaspect_window)
+    if (wl->vo_opts->keepaspect)
         wl->window_size = wl->vdparams;
 
     if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
