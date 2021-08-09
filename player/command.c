@@ -2331,6 +2331,7 @@ static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
+        // Also called by update_window_scale as a NULL property.
         double scale = *(double *)arg;
         int s[2] = {vid_w * scale, vid_h * scale};
         if (s[0] <= 0 || s[1] <= 0)
@@ -2351,20 +2352,9 @@ static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
 
 static void update_window_scale(struct MPContext *mpctx)
 {
-    struct vo *vo = mpctx->video_out;
-    if (!vo)
-        return;
-
-    struct mp_image_params params = get_video_out_params(mpctx);
-    int vid_w, vid_h;
-    mp_image_params_get_dsize(&params, &vid_w, &vid_h);
-    if (vid_w < 1 || vid_h < 1)
-        return;
-
     double scale = mpctx->opts->vo->window_scale;
-    int s[2] = {vid_w * scale, vid_h * scale};
-    if (s[0] > 0 && s[1] > 0)
-        vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
+    mp_property_current_window_scale(mpctx, (struct m_property *)NULL,
+                                     M_PROPERTY_SET, (void*)&scale);
 }
 
 static int mp_property_display_fps(void *ctx, struct m_property *prop,
