@@ -537,24 +537,26 @@ done:
 static void update_dpi(struct vo_w32_state *w32)
 {
     UINT dpiX, dpiY;
+    HDC hdc = NULL;
+    int dpi = 0;
+
     if (w32->api.pGetDpiForMonitor && w32->api.pGetDpiForMonitor(w32->monitor,
                                      MDT_EFFECTIVE_DPI, &dpiX, &dpiY) == S_OK) {
-        w32->dpi = (int)dpiX;
-        w32->dpi_scale = w32->opts->hidpi_window_scale ? w32->dpi / 96.0 : 1.0;
-        MP_VERBOSE(w32, "DPI detected from the new API: %d\n", w32->dpi);
-        return;
-    }
-    HDC hdc = GetDC(NULL);
-    if (hdc) {
-        w32->dpi = GetDeviceCaps(hdc, LOGPIXELSX);
-        w32->dpi_scale = w32->opts->hidpi_window_scale ? w32->dpi / 96.0 : 1.0;
+        dpi = (int)dpiX;
+        MP_VERBOSE(w32, "DPI detected from the new API: %d\n", dpi);
+    } else if ((hdc = GetDC(NULL))) {
+        dpi = GetDeviceCaps(hdc, LOGPIXELSX);
         ReleaseDC(NULL, hdc);
-        MP_VERBOSE(w32, "DPI detected from the old API: %d\n", w32->dpi);
-    } else {
-        w32->dpi = 96;
-        w32->dpi_scale = 1.0;
-        MP_VERBOSE(w32, "Couldn't determine DPI, falling back to %d\n", w32->dpi);
+        MP_VERBOSE(w32, "DPI detected from the old API: %d\n", dpi);
     }
+ 
+    if (dpi <= 0) {
+        dpi = 96;
+        MP_VERBOSE(w32, "Couldn't determine DPI, falling back to %d\n", dpi);
+    }
+
+    w32->dpi = dpi;
+    w32->dpi_scale = w32->opts->hidpi_window_scale ? w32->dpi / 96.0 : 1.0;
 }
 
 static void update_display_info(struct vo_w32_state *w32)
@@ -1419,6 +1421,9 @@ static void gui_thread_reconfig(void *ptr)
     RECT r = get_working_area(w32);
     struct mp_rect screen = { r.left, r.top, r.right, r.bottom };
     struct vo_win_geometry geo;
+
+    if (w32->dpi_scale == 0)
+        force_update_display_info(w32);
 
     vo_calc_window_geometry2(vo, &screen, w32->dpi_scale, &geo);
     vo_apply_window_geometry(vo, &geo);
