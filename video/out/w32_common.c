@@ -1727,8 +1727,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             return VO_FALSE;
 
         RECT *rc = w32->current_fs ? &w32->prev_windowrc : &w32->windowrc;
-        s[0] = rect_w(*rc);
-        s[1] = rect_h(*rc);
+        s[0] = rect_w(*rc) / w32->dpi_scale;
+        s[1] = rect_h(*rc) / w32->dpi_scale;
         return VO_TRUE;
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
@@ -1736,6 +1736,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 
         if (!w32->window_bounds_initialized)
             return VO_FALSE;
+
+        s[0] *= w32->dpi_scale;
+        s[1] *= w32->dpi_scale;
 
         RECT *rc = w32->current_fs ? &w32->prev_windowrc : &w32->windowrc;
         const int x = rc->left + rect_w(*rc) / 2 - s[0] / 2;
