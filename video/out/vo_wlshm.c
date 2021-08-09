@@ -304,11 +304,6 @@ static void uninit(struct vo *vo)
     vo_wayland_uninit(vo);
 }
 
-#define OPT_BASE_STRUCT struct priv
-static const m_option_t options[] = {
-    {0}
-};
-
 const struct vo_driver video_out_wlshm = {
     .description = "Wayland SHM video output (software scaling)",
     .name = "wlshm",
@@ -323,5 +318,4 @@ const struct vo_driver video_out_wlshm = {
     .wait_events = vo_wayland_wait_events,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
-    .options = options,
 };
