@@ -1560,7 +1560,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         while (m_config_cache_get_next_changed(wl->vo_opts_cache, &opt)) {
             if (opt == &opts->appid)
                 update_app_id(wl);
-            if (opt == &opts->border)
+            if (opt == &opts->border && wl->xdg_toplevel_decoration)
                 // The enum in xdg-decoration starts at 1.
                 zxdg_toplevel_decoration_v1_set_mode(wl->xdg_toplevel_decoration, opts->border + 1);
             if (opt == &opts->fullscreen)
