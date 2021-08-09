@@ -1720,6 +1720,10 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 
         return VO_TRUE;
     }
+    case VOCTRL_GET_HIDPI_SCALE: {
+        *(double *)arg = w32->dpi_scale;
+        return VO_TRUE;
+    }
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
 
