@@ -195,7 +195,7 @@ set by changing ``yes`` to a number (at least 40), and escape sequences can be
 disabled by adding ``-`` before the value, e.g. ``...=-yes`` or ``...=-120``.
 
 Like with ``--input-test``, the list includes bindings from ``input.conf`` and
-from user scripts. Use `--no-config`` to list only built-in bindings.
+from user scripts. Use ``--no-config`` to list only built-in bindings.
 
 Internal stuff page
 ~~~~~~~~~~~~~~~~~~~
