@@ -37,7 +37,7 @@ struct attachment_list {
 };
 
 struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
-                           struct attachment_list *attachments);
+                           struct attachment_list *attachments, int order);
 void sub_destroy(struct dec_sub *sub);
 
 bool sub_can_preload(struct dec_sub *sub);

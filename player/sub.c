@@ -171,7 +171,8 @@ static bool init_subdec(struct MPContext *mpctx, struct track *track)
         return false;
 
     track->d_sub = sub_create(mpctx->global, track->stream,
-                              get_all_attachments(mpctx));
+                              get_all_attachments(mpctx),
+                              get_order(mpctx, track));
     if (!track->d_sub)
         return false;
 
@@ -199,7 +200,7 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
     sub_select(track->d_sub, true);
     int order = get_order(mpctx, track);
     osd_set_sub(mpctx->osd, order, track->d_sub);
-    sub_control(track->d_sub, SD_CTRL_SET_TOP, &(bool){!!order});
+    sub_control(track->d_sub, SD_CTRL_SET_TOP, &order);
 
     if (mpctx->playback_initialized)
         update_subtitles(mpctx, mpctx->playback_pts);

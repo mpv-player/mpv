@@ -57,6 +57,7 @@ struct dec_sub {
 
     struct sh_stream *sh;
     int play_dir;
+    int order;
     double last_pkt_pts;
     bool preload_attempted;
     double video_fps;
@@ -161,7 +162,7 @@ static struct sd *init_decoder(struct dec_sub *sub)
 // Ownership of attachments goes to the callee, and is released with
 // talloc_free() (even on failure).
 struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
-                           struct attachment_list *attachments)
+                           struct attachment_list *attachments, int order)
 {
     assert(sh && sh->type == STREAM_SUB);
 
@@ -174,6 +175,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
         .codec = sh->codec,
         .attachments = talloc_steal(sub, attachments),
         .play_dir = 1,
+        .order = order,
         .last_pkt_pts = MP_NOPTS_VALUE,
         .last_vo_pts = MP_NOPTS_VALUE,
         .start = MP_NOPTS_VALUE,
@@ -210,6 +212,7 @@ static void update_segment(struct dec_sub *sub)
             talloc_free(sub->sd);
             sub->sd = new;
             update_subtitle_speed(sub);
+            sub_control(sub, SD_CTRL_SET_TOP, &sub->order);
         } else {
             // We'll just keep the current decoder, and feed it possibly
             // invalid data (not our fault if it crashes or something).
