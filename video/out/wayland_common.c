@@ -1730,7 +1730,7 @@ int vo_wayland_init(struct vo *vo)
         wl->xdg_toplevel_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(wl->xdg_decoration_manager, wl->xdg_toplevel);
         zxdg_toplevel_decoration_v1_add_listener(wl->xdg_toplevel_decoration, &decoration_listener, wl);
         // The enum in xdg-decoration starts at 1.
-        zxdg_toplevel_decoration_v1_set_mode(wl->xdg_toplevel_decoration, opts->border + 1);
+        zxdg_toplevel_decoration_v1_set_mode(wl->xdg_toplevel_decoration, wl->vo_opts->border + 1);
     } else {
         wl->vo_opts->border = false;
         m_config_cache_write_opt(wl->vo_opts_cache,
