@@ -92,7 +92,7 @@ local function read_options(options, identifier, on_update)
                     -- match found values with defaults
                     if option_types[key] == nil then
                         msg.warn(conffilename..":"..linecounter..
-                            " unknown key " .. key .. ", ignoring")
+                            " unknown key '" .. key .. "', ignoring")
                     else
                         local convval = typeconv(option_types[key], val)
                         if convval == nil then
