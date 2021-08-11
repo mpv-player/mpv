@@ -69,6 +69,7 @@ struct priv {
 
     double osd_pts;
     struct mp_osd_res osd_res;
+    struct m_config_cache *opts_cache;
 
     struct mp_egl_rpi egl;
     struct gl_video *gl_video;
@@ -720,11 +721,28 @@ fail:
     return NULL;
 }
 
+static void set_fullscreen(struct vo *vo) {
+    struct priv *p = vo->priv;
+
+    if (p->renderer_enabled)
+	set_geometry(vo);
+    vo->want_redraw = true;
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
 
     switch (request) {
+    case VOCTRL_VO_OPTS_CHANGED: {
+        void *opt;
+        while (m_config_cache_get_next_changed(p->opts_cache, &opt)) {
+            struct mp_vo_opts *opts = p->opts_cache->opts;
+            if (&opts->fullscreen == opt)
+                set_fullscreen(vo);
+        }
+        return VO_TRUE;
+    }
     case VOCTRL_SET_PANSCAN:
         if (p->renderer_enabled)
             resize(vo);
@@ -869,6 +887,8 @@ static int preinit(struct vo *vo)
 
     pthread_mutex_init(&p->display_mutex, NULL);
     pthread_cond_init(&p->display_cond, NULL);
+
+    p->opts_cache = m_config_cache_alloc(p, vo->global, &vo_sub_opts);
 
     if (recreate_dispmanx(vo) < 0)
         goto fail;
