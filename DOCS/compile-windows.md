@@ -22,7 +22,7 @@ When cross-compiling, you have to run mpv's configure with these arguments:
 DEST_OS=win32 TARGET=i686-w64-mingw32 ./waf configure
 ```
 
-[MXE](http://mxe.cc) makes it very easy to bootstrap a complete MingGW-w64
+[MXE](https://mxe.cc) makes it very easy to bootstrap a complete MingGW-w64
 environment from a Linux machine. See a working example below.
 
 Alternatively, you can try [mingw-w64-cmake](https://github.com/lachs0r/mingw-w64-cmake),
@@ -38,7 +38,7 @@ Example with MXE
 #
 # Refer to
 #
-#    http://mxe.cc/#requirements
+#    https://mxe.cc/#requirements
 #
 # Scroll down for disto/OS-specific instructions to install them.
 

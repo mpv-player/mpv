@@ -198,7 +198,7 @@ Available filters are:
     for each option. The options are not documented here, because they are
     merely passed to librubberband. Look at the librubberband documentation
     to learn what each option does:
-    http://breakfastquay.com/rubberband/code-doc/classRubberBand_1_1RubberBandStretcher.html
+    https://breakfastquay.com/rubberband/code-doc/classRubberBand_1_1RubberBandStretcher.html
     (The mapping of the mpv rubberband filter sub-option names and values to
     those of librubberband follows a simple pattern: ``"Option" + Name + Value``.)
 
