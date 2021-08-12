@@ -1419,6 +1419,8 @@ static void gui_thread_reconfig(void *ptr)
     struct vo *vo = w32->vo;
 
     RECT r = get_working_area(w32);
+    if (!w32->current_fs && !IsMaximized(w32->window) && w32->opts->border)
+        subtract_window_borders(w32, w32->window, &r);
     struct mp_rect screen = { r.left, r.top, r.right, r.bottom };
     struct vo_win_geometry geo;
 
