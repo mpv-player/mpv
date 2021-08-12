@@ -288,7 +288,7 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
     }
 
     reset_video_state(mpctx);
-    reset_subtitle_state(mpctx);
+    term_osd_set_subs(mpctx, NULL);
 
     return;
 
