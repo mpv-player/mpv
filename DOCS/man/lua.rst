@@ -480,7 +480,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             the timer callback function fn is run).
 
     Note that these are methods, and you have to call them using ``:`` instead
-    of ``.`` (Refer to http://www.lua.org/manual/5.2/manual.html#3.4.9 .)
+    of ``.`` (Refer to https://www.lua.org/manual/5.2/manual.html#3.4.9 .)
 
     Example:
 

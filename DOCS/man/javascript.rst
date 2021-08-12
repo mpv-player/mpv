@@ -58,7 +58,7 @@ Language features - ECMAScript 5
 The scripting backend which mpv currently uses is MuJS - a compatible minimal
 ES5 interpreter. As such, ``String.substring`` is implemented for instance,
 while the common but non-standard ``String.substr`` is not. Please consult the
-MuJS pages on language features and platform support - http://mujs.com .
+MuJS pages on language features and platform support - https://mujs.com .
 
 Unsupported Lua APIs and their JS alternatives
 ----------------------------------------------
