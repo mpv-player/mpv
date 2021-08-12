@@ -52,7 +52,7 @@ Input
 * Classic LIRC support was removed. Install remotes as input devices instead.
   This way they will send X11 key events to the mpv window, which can be bound
   using the normal ``input.conf``.
-  Also see: http://github.com/mpv-player/mpv/wiki/IR-remotes
+  Also see: https://github.com/mpv-player/mpv/wiki/IR-remotes
 * Joystick support was removed. It was considered useless and was the cause
   of some problems (e.g. a laptop's accelerator being recognized as joystick).
 * Support for relative seeking by percentage.
