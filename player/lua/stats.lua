@@ -660,7 +660,7 @@ end
 
 local function add_video(s)
     local r = mp.get_property_native("video-params")
-    -- in case of e.g. lavi-complex there can be no input video, only output
+    -- in case of e.g. lavfi-complex there can be no input video, only output
     if not r then
         r = mp.get_property_native("video-out-params")
     end
@@ -736,7 +736,7 @@ end
 
 local function add_audio(s)
     local r = mp.get_property_native("audio-params")
-    -- in case of e.g. lavi-complex there can be no input audio, only output
+    -- in case of e.g. lavfi-complex there can be no input audio, only output
     if not r then
         r = mp.get_property_native("audio-out-params")
     end
