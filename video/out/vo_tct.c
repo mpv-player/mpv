@@ -43,10 +43,10 @@
 #define ESC_CLEAR_SCREEN "\033[2J"
 #define ESC_CLEAR_COLORS "\033[0m"
 #define ESC_GOTOXY "\033[%d;%df"
-#define ESC_COLOR_BG "\033[48;2;%d;%d;%dm"
-#define ESC_COLOR_FG "\033[38;2;%d;%d;%dm"
-#define ESC_COLOR256_BG "\033[48;5;%dm"
-#define ESC_COLOR256_FG "\033[38;5;%dm"
+#define ESC_COLOR_BG "\033[48;2"
+#define ESC_COLOR_FG "\033[38;2"
+#define ESC_COLOR256_BG "\033[48"
+#define ESC_COLOR256_FG "\033[38"
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
@@ -74,6 +74,11 @@ static const struct m_sub_options vo_tct_conf = {
     .size = sizeof(struct vo_tct_opts),
 };
 
+struct lut_item {
+    char str[4];
+    int width;
+};
+
 struct priv {
     struct vo_tct_opts *opts;
     size_t buffer_size;
@@ -83,6 +88,7 @@ struct priv {
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_sws_context *sws;
+    struct lut_item lut[256];
 };
 
 // Convert RGB24 to xterm-256 8-bit value
@@ -114,11 +120,41 @@ static int rgb_to_x256(uint8_t r, uint8_t g, uint8_t b)
     return color_err <= gray_err ? 16 + color_index() : 232 + gray_index;
 }
 
+static void print_seq3(struct lut_item *lut, const char* prefix,
+                       uint8_t r, uint8_t g, uint8_t b)
+{
+// The fwrite implementation is about 25% faster than the printf code
+// (even if we use *.s with the lut values), however,
+// on windows we need to use printf in order to translate escape sequences and
+// UTF8 output for the console.
+#ifndef _WIN32
+    fputs(prefix, stdout);
+    fwrite(lut[r].str, lut[r].width, 1, stdout);
+    fwrite(lut[g].str, lut[g].width, 1, stdout);
+    fwrite(lut[b].str, lut[b].width, 1, stdout);
+    fputc('m', stdout);
+#else
+    printf("%s;%d;%d;%dm", prefix, (int)r, (int)g, (int)b);
+#endif
+}
+
+static void print_seq1(struct lut_item *lut, const char* prefix, uint8_t c)
+{
+#ifndef _WIN32
+    fputs(prefix, stdout);
+    fwrite(lut[c].str, lut[c].width, 1, stdout);
+    fputc('m', stdout);
+#else
+    printf("%s%dm", prefix, (int)c);
+#endif
+}
+
+
 static void write_plain(
     const int dwidth, const int dheight,
     const int swidth, const int sheight,
     const unsigned char *source, const int source_stride,
-    bool term256)
+    bool term256, struct lut_item *lut)
 {
     assert(source);
     const int tx = (dwidth - swidth) / 2;
@@ -131,9 +167,9 @@ static void write_plain(
             unsigned char g = *row++;
             unsigned char r = *row++;
             if (term256) {
-                printf(ESC_COLOR256_BG, rgb_to_x256(r, g, b));
+                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r, g, b));
             } else {
-                printf(ESC_COLOR_BG, r, g, b);
+                print_seq3(lut, ESC_COLOR_BG, r, g, b);
             }
             printf(" ");
         }
@@ -146,7 +182,7 @@ static void write_half_blocks(
     const int dwidth, const int dheight,
     const int swidth, const int sheight,
     unsigned char *source, int source_stride,
-    bool term256)
+    bool term256, struct lut_item *lut)
 {
     assert(source);
     const int tx = (dwidth - swidth) / 2;
@@ -163,11 +199,11 @@ static void write_half_blocks(
             unsigned char g_down = *row_down++;
             unsigned char r_down = *row_down++;
             if (term256) {
-                printf(ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
-                printf(ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
+                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
+                print_seq1(lut, ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
             } else {
-                printf(ESC_COLOR_BG, r_up, g_up, b_up);
-                printf(ESC_COLOR_FG, r_down, g_down, b_down);
+                print_seq3(lut, ESC_COLOR_BG, r_up, g_up, b_up);
+                print_seq3(lut, ESC_COLOR_FG, r_down, g_down, b_down);
             }
             printf("\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
         }
@@ -241,12 +277,12 @@ static void flip_page(struct vo *vo)
         write_plain(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256);
+            p->opts->term256, p->lut);
     } else {
         write_half_blocks(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256);
+            p->opts->term256, p->lut);
     }
     fflush(stdout);
 }
@@ -272,6 +308,13 @@ static int preinit(struct vo *vo)
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
+
+    for (int i = 0; i < 256; ++i) {
+        char buff[8];
+        p->lut[i].width = sprintf(buff, ";%d", i);
+        memcpy(p->lut[i].str, buff, 4); // some strings may not end on a null byte, but that's ok.
+    }
+
     return 0;
 }
 
