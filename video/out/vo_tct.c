@@ -28,6 +28,7 @@
 #include "options/m_config.h"
 #include "config.h"
 #include "osdep/terminal.h"
+#include "osdep/io.h"
 #include "vo.h"
 #include "sub/osd.h"
 #include "video/sws_utils.h"
