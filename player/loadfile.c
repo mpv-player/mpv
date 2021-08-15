@@ -1307,7 +1307,12 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
         case STREAM_AUDIO: prefix = 'a'; break;
         default: continue;
         }
-        snprintf(label, sizeof(label), "%cid%d", prefix, track->user_tid);
+
+        if (track->is_external) {
+            snprintf(label, sizeof(label), "ext%cid%d", prefix, track->ff_index + 1);
+        } else {
+            snprintf(label, sizeof(label), "%cid%d", prefix, track->user_tid);
+        }
 
         pad = mp_filter_get_named_pin(mpctx->lavfi, label);
         if (!pad)
