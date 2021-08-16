@@ -608,8 +608,10 @@ void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
 
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
 {
-    return (cmd->def->allow_auto_repeat) || cmd->def == &mp_cmd_list ||
-           (cmd->flags & MP_ALLOW_REPEAT);
+    if (cmd->def == &mp_cmd_list && cmd->args[0].v.p)
+        cmd = cmd->args[0].v.p;  // list - only 1st cmd is considered
+
+    return (cmd->def->allow_auto_repeat) || (cmd->flags & MP_ALLOW_REPEAT);
 }
 
 bool mp_input_is_scalable_cmd(struct mp_cmd *cmd)
