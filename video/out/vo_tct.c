@@ -45,8 +45,8 @@
 #define ESC_GOTOXY "\033[%d;%df"
 #define ESC_COLOR_BG "\033[48;2"
 #define ESC_COLOR_FG "\033[38;2"
-#define ESC_COLOR256_BG "\033[48"
-#define ESC_COLOR256_FG "\033[38"
+#define ESC_COLOR256_BG "\033[48;5"
+#define ESC_COLOR256_FG "\033[38;5"
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
@@ -145,7 +145,7 @@ static void print_seq1(struct lut_item *lut, const char* prefix, uint8_t c)
     fwrite(lut[c].str, lut[c].width, 1, stdout);
     fputc('m', stdout);
 #else
-    printf("%s%dm", prefix, (int)c);
+    printf("%s;%dm", prefix, (int)c);
 #endif
 }
 
