@@ -549,10 +549,11 @@ video_output_features = [
     }, {
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
-        'func': check_egl_provider(name='brcmegl', check=any_check(
-            check_pkg_config('brcmegl'),
-            check_pkg_config('/opt/vc/lib/pkgconfig/brcmegl.pc')
-            )),
+        'func': check_egl_provider(name='brcmegl', check=compose_checks(
+            # RPI libraries need to be added in this order to initialize properly
+            any_check(check_pkg_config('mmal'), check_pkg_config('/opt/vc/lib/pkgconfig/mmal.pc')),
+            any_check(check_pkg_config('brcmegl'), check_pkg_config('/opt/vc/lib/pkgconfig/brcmegl.pc'))
+        )),
         'default': 'disable',
     } , {
         'name': '--egl',
@@ -802,8 +803,7 @@ hwaccel_features = [
         'name': '--rpi-mmal',
         'desc': 'Raspberry Pi MMAL hwaccel',
         'deps': 'rpi',
-        'func': any_check(check_pkg_config('mmal'),
-                          check_pkg_config('/opt/vc/lib/pkgconfig/mmal.pc')),
+        'func': check_true,
     }
 ]
 
