@@ -273,6 +273,13 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
+
+    int width, height;
+    get_win_size(vo, &width, &height);
+
+    if (vo->dwidth != width || vo->dheight != height)
+        reconfig(vo, vo->params);
+
     if (p->opts->algo == ALGO_PLAIN) {
         write_plain(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
