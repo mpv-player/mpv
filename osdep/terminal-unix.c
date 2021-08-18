@@ -221,6 +221,17 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
         if (!match) { // normal or unknown key
             int mods = 0;
             if (buf.b[0] == '\033') {
+                if (buf.len > 1 && buf.b[1] == '[') {
+                    // unknown CSI sequence. wait till it completes
+                    for (int i = 2; i < buf.len; i++) {
+                        if (buf.b[i] >= 0x40 && buf.b[i] <= 0x7E)  {
+                            skip_buf(&buf, i+1);
+                            continue;  // complete - throw it away
+                        }
+                    }
+                    goto read_more;  // not yet complete
+                }
+                // non-CSI esc sequence
                 skip_buf(&buf, 1);
                 if (buf.len > 0 && buf.b[0] > 0 && buf.b[0] < 127) {
                     // meta+normal key
