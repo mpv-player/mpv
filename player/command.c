@@ -4921,7 +4921,9 @@ static void cmd_add_cycle(void *p)
     bool is_cycle = !!cmd->priv;
 
     char *property = cmd->args[0].v.s;
-    if (cmd->cmd->repeated && !check_property_autorepeat(property, mpctx)) {
+    if (cmd->cmd->repeated && !check_property_autorepeat(property, mpctx) &&
+        !(cmd->cmd->flags & MP_ALLOW_REPEAT)  /* "repeatable" prefix */ )
+    {
         MP_VERBOSE(mpctx, "Dropping command '%s' from auto-repeated key.\n",
                    cmd->cmd->original);
         return;

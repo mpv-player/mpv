@@ -344,6 +344,10 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     the minimum, on underflow set it to the maximum. If ``up`` or ``down`` is
     omitted, assume ``up``.
 
+    Whether or not key-repeat is enabled by default depends on the property.
+    Currently properties with continuous values are repeatable by default (like
+    ``volume``), while discrete values are not (like ``osd-level``).
+
 ``multiply <name> <value>``
     Similar to ``add``, but multiplies the property or option with the numeric
     value.
