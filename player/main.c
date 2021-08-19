@@ -394,7 +394,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
         mpctx->encode_lavc_ctx = encode_lavc_init(mpctx->global);
-        if(!mpctx->encode_lavc_ctx) {
+        if (!mpctx->encode_lavc_ctx) {
             MP_INFO(mpctx, "Encoding initialization failed.\n");
             return -1;
         }
