@@ -624,7 +624,7 @@ are useful only in special situations.
 
 ``mp.get_osd_size()``
     Returns a tuple of ``osd_width, osd_height, osd_par``. The first two give
-    the size of the OSD in pixels (for video ouputs like ``--vo=xv``, this may
+    the size of the OSD in pixels (for video outputs like ``--vo=xv``, this may
     be "scaled" pixels). The third is the display pixel aspect ratio.
 
     May return invalid/nonsense values if OSD is not initialized yet.
@@ -781,7 +781,7 @@ strictly part of the guaranteed API.
     The booleans ``is_file`` and ``is_dir`` are provided as a convenience;
     they can be and are derived from ``mode``.
 
-    On error (eg. path does not exist), ``nil, error`` is returned.
+    On error (e.g. path does not exist), ``nil, error`` is returned.
 
 ``utils.split_path(path)``
     Split a path into directory component and filename component, and return

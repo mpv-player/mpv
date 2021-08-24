@@ -336,7 +336,7 @@ Available video output drivers are:
 ``tct``
     Color Unicode art video output driver that works on a text console.
     By default depends on support of true color by modern terminals to display
-    the images at full color range, but 256-colors outout is also supported (see
+    the images at full color range, but 256-colors output is also supported (see
     below). On Windows it requires an ansi terminal such as mintty.
 
     Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
