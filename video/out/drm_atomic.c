@@ -165,7 +165,7 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
 
     plane_res = drmModeGetPlaneResources(fd);
     if (!plane_res) {
-        mp_err(log, "Cannot retrieve plane ressources: %s\n", mp_strerror(errno));
+        mp_err(log, "Cannot retrieve plane resources: %s\n", mp_strerror(errno));
         goto fail;
     }
 
