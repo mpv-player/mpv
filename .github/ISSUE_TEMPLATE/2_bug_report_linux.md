@@ -28,7 +28,7 @@ with --no-config try to first find out which option or script causes your issue.
 
 Describe the reproduction steps as precise as possible. It's very likely that
 the bug you experience wasn't reproduced by the developer because the workflow
-differes from your own.
+differs from your own.
 
 ### Expected behavior
 
