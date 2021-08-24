@@ -222,7 +222,7 @@ Additional utilities
 ``mp.utils.get_user_path(path)``
     Expands (mpv) meta paths like ``~/x``, ``~~/y``, ``~~desktop/z`` etc.
     ``read_file``, ``write_file``, ``append_file`` and ``require`` already use
-    this internaly.
+    this internally.
 
 ``mp.utils.read_file(fname [,max])``
     Returns the content of file ``fname`` as string. If ``max`` is provided and

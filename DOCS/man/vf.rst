@@ -598,7 +598,7 @@ Available mpv-only filters are:
 
     ``reversal-bug=<yes|no>``
         :no:  Use the API as it was interpreted by older Mesa drivers. While
-              this interpretation was more obvious and inuitive, it was
+              this interpretation was more obvious and intuitive, it was
               apparently wrong, and not shared by Intel driver developers.
         :yes: Use Intel interpretation of surface forward and backwards
               references (default). This is what Intel drivers and newer Mesa
@@ -738,7 +738,7 @@ Available mpv-only filters are:
         which leads to lost frames.
 
     ``print=yes|no``
-        Print computed fingerprints the the terminal (default: no). This is
+        Print computed fingerprints to the terminal (default: no). This is
         mostly for testing and such. Scripts should use ``vf-metadata`` to
         read information from this filter instead.
 

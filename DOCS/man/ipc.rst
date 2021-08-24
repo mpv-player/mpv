@@ -116,7 +116,7 @@ can also be present. See `List of events`_ for a list of all supported events.
 Because events can occur at any time, it may be difficult at times to determine
 which response goes with which command. Commands may optionally include a
 ``request_id`` which, if provided in the command request, will be copied
-verbatim into the response. mpv does not intrepret the ``request_id`` in any
+verbatim into the response. mpv does not interpret the ``request_id`` in any
 way; it is solely for the use of the requester. The only requirement is that
 the ``request_id`` field must be an integer (a number without fractional parts
 in the range ``-2^63..2^63-1``). Using other types is deprecated and will
