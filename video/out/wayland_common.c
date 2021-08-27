@@ -1429,7 +1429,7 @@ static int spawn_cursor(struct vo_wayland_state *wl)
 
     const char *xcursor_theme = getenv("XCURSOR_THEME");
     const char *size_str = getenv("XCURSOR_SIZE");
-    int size = 32;
+    int size = 24;
     if (size_str != NULL) {
         errno = 0;
         char *end;
