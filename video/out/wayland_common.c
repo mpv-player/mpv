@@ -1427,6 +1427,7 @@ static int spawn_cursor(struct vo_wayland_state *wl)
     else if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
 
+    const char *xcursor_theme = getenv("XCURSOR_THEME");
     const char *size_str = getenv("XCURSOR_SIZE");
     int size = 32;
     if (size_str != NULL) {
@@ -1437,7 +1438,7 @@ static int spawn_cursor(struct vo_wayland_state *wl)
             size = (int)size_long;
     }
 
-    wl->cursor_theme = wl_cursor_theme_load(NULL, size*wl->scaling, wl->shm);
+    wl->cursor_theme = wl_cursor_theme_load(xcursor_theme, size*wl->scaling, wl->shm);
     if (!wl->cursor_theme) {
         MP_ERR(wl, "Unable to load cursor theme!\n");
         return 1;
