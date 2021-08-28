@@ -120,32 +120,40 @@ static int rgb_to_x256(uint8_t r, uint8_t g, uint8_t b)
     return color_err <= gray_err ? 16 + color_index() : 232 + gray_index;
 }
 
-static void print_seq3(struct lut_item *lut, const char* prefix,
+static int sprint_seq3(char* buff, struct lut_item *lut, const char* prefix,
                        uint8_t r, uint8_t g, uint8_t b)
 {
+    int prefix_len = strlen(prefix);
+    memcpy(buff, prefix,     prefix_len);   buff += prefix_len;
+    memcpy(buff, lut[r].str, lut[r].width); buff += lut[r].width;
+    memcpy(buff, lut[g].str, lut[g].width); buff += lut[g].width;
+    memcpy(buff, lut[b].str, lut[b].width); buff += lut[b].width;
+    *buff = 'm';
+    
+    return prefix_len + lut[r].width + lut[g].width + lut[b].width + 1;
+}
+
+static int sprint_seq1(char* buff, struct lut_item *lut,
+                       const char* prefix, uint8_t c)
+{
+    int prefix_len = strlen(prefix);
+    memcpy(buff, prefix,     prefix_len);   buff += prefix_len;
+    memcpy(buff, lut[c].str, lut[c].width); buff += lut[c].width;
+    *buff = 'm';
+    
+    return prefix_len + lut[c].width + 1;
+}
+
 // The fwrite implementation is about 25% faster than the printf code
 // (even if we use *.s with the lut values), however,
 // on windows we need to use printf in order to translate escape sequences and
 // UTF8 output for the console.
-#ifndef _WIN32
-    fputs(prefix, stdout);
-    fwrite(lut[r].str, lut[r].width, 1, stdout);
-    fwrite(lut[g].str, lut[g].width, 1, stdout);
-    fwrite(lut[b].str, lut[b].width, 1, stdout);
-    fputc('m', stdout);
-#else
-    printf("%s;%d;%d;%dm", prefix, (int)r, (int)g, (int)b);
-#endif
-}
-
-static void print_seq1(struct lut_item *lut, const char* prefix, uint8_t c)
+static void print_buff(char* buff, int size)
 {
 #ifndef _WIN32
-    fputs(prefix, stdout);
-    fwrite(lut[c].str, lut[c].width, 1, stdout);
-    fputc('m', stdout);
+    fwrite(buff, size, 1, stdout);
 #else
-    printf("%s;%dm", prefix, (int)c);
+    printf("%.*s", size, buff);
 #endif
 }
 
@@ -159,23 +167,33 @@ static void write_plain(
     assert(source);
     const int tx = (dwidth - swidth) / 2;
     const int ty = (dheight - sheight) / 2;
+    const int max_seq_size = term256 ? 11 : 19;
+    const int max_buffer_size =
+            (max_seq_size + 1) * (swidth * sheight) // escape codes + blocks
+                    + (10 + 4) * sheight // ESC_GOTOXY + ESC_CLEAR_COLORS
+                    + 2; // '\n' + '\0'
+    char *framebuff = malloc(max_buffer_size);
+    char *buffptr = framebuff;
+    
     for (int y = 0; y < sheight; y++) {
         const unsigned char *row = source + y * source_stride;
-        printf(ESC_GOTOXY, ty + y, tx);
+        buffptr += sprintf(buffptr, ESC_GOTOXY, ty + y, tx);
         for (int x = 0; x < swidth; x++) {
             unsigned char b = *row++;
             unsigned char g = *row++;
             unsigned char r = *row++;
             if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r, g, b));
+                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG, rgb_to_x256(r, g, b));
             } else {
-                print_seq3(lut, ESC_COLOR_BG, r, g, b);
+                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG, r, g, b);
             }
-            printf(" ");
+            *buffptr++ = ' ';
         }
-        printf(ESC_CLEAR_COLORS);
+        buffptr += sprintf(buffptr, ESC_CLEAR_COLORS);
     }
-    printf("\n");
+    *buffptr++ = '\n';
+    print_buff(framebuff, buffptr - framebuff);
+    free(framebuff);
 }
 
 static void write_half_blocks(
@@ -187,10 +205,18 @@ static void write_half_blocks(
     assert(source);
     const int tx = (dwidth - swidth) / 2;
     const int ty = (dheight - sheight) / 2;
+    const int max_seq_size = term256 ? 11 : 19;
+    const int max_buffer_size =
+        (max_seq_size * 2 + 3) * (swidth * sheight) // escape codes + blocks
+            + (10 + 4) * sheight // ESC_GOTOXY + ESC_CLEAR_COLORS
+            + 2; // '\n' + '\0'
+    char *framebuff = malloc(max_buffer_size);
+    char *buffptr = framebuff;
+    
     for (int y = 0; y < sheight * 2; y += 2) {
         const unsigned char *row_up = source + y * source_stride;
         const unsigned char *row_down = source + (y + 1) * source_stride;
-        printf(ESC_GOTOXY, ty + y / 2, tx);
+        buffptr += sprintf(buffptr, ESC_GOTOXY, ty + y / 2, tx);
         for (int x = 0; x < swidth; x++) {
             unsigned char b_up = *row_up++;
             unsigned char g_up = *row_up++;
@@ -199,17 +225,19 @@ static void write_half_blocks(
             unsigned char g_down = *row_down++;
             unsigned char r_down = *row_down++;
             if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
-                print_seq1(lut, ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
+                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
+                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
             } else {
-                print_seq3(lut, ESC_COLOR_BG, r_up, g_up, b_up);
-                print_seq3(lut, ESC_COLOR_FG, r_down, g_down, b_down);
+                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG, r_up, g_up, b_up);
+                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_FG, r_down, g_down, b_down);
             }
-            printf("\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
+            buffptr += sprintf(buffptr, "\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
         }
-        printf(ESC_CLEAR_COLORS);
+        buffptr += sprintf(buffptr, ESC_CLEAR_COLORS);
     }
-    printf("\n");
+    *buffptr++ = '\n';
+    print_buff(framebuff, buffptr - framebuff);
+    free(framebuff);
 }
 
 static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
