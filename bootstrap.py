@@ -42,6 +42,12 @@ if SHA256HASH == hashlib.sha256(waf).hexdigest():
     expected = b"#!/usr/bin/env python\n"
     assert waf.startswith(expected)
     waf = b"#!/usr/bin/env python3\n" + waf[len(expected):]
+    
+    waflines = waf.splitlines()
+    hashstart = [x.startswith(b"#") for x in waflines].index(False)
+    waflines.insert(hashstart, b"__import__(\"warnings\").simplefilter(\"ignore\", ResourceWarning)")
+    waf = b"\n".join(waflines)
+    
     with open("waf", "wb") as wf:
         wf.write(waf)
 
