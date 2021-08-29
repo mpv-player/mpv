@@ -74,6 +74,14 @@ static const struct m_sub_options vo_tct_conf = {
     .size = sizeof(struct vo_tct_opts),
 };
 
+struct BGR_color {
+    int16_t b;
+    int16_t g;
+    int16_t r;
+};
+#define c_cmp(x, y) ((x.b == y.b) && (x.g == y.g) && (x.r == y.r))
+
+
 struct lut_item {
     char str[4];
     int width;
@@ -97,15 +105,15 @@ struct priv {
 // input is the exact middle:
 // - The r/g/b channels and the gray value: the higher value output is chosen.
 // - If the gray and color have same distance from the input - color is chosen.
-static int rgb_to_x256(uint8_t r, uint8_t g, uint8_t b)
+static int rgb_to_x256(struct BGR_color c)
 {
     // Calculate the nearest 0-based color index at 16 .. 231
 #   define v2ci(v) (v < 48 ? 0 : v < 115 ? 1 : (v - 35) / 40)
-    int ir = v2ci(r), ig = v2ci(g), ib = v2ci(b);   // 0..5 each
+    int ir = v2ci(c.r), ig = v2ci(c.g), ib = v2ci(c.b);   // 0..5 each
 #   define color_index() (36 * ir + 6 * ig + ib)  /* 0..215, lazy evaluation */
 
     // Calculate the nearest 0-based gray index at 232 .. 255
-    int average = (r + g + b) / 3;
+    int average = (c.r + c.g + c.b) / 3;
     int gray_index = average > 238 ? 23 : (average - 3) / 10;  // 0..23
 
     // Calculate the represented colors back from the index
@@ -115,21 +123,21 @@ static int rgb_to_x256(uint8_t r, uint8_t g, uint8_t b)
 
     // Return the one which is nearer to the original input rgb value
 #   define dist_square(A,B,C, a,b,c) ((A-a)*(A-a) + (B-b)*(B-b) + (C-c)*(C-c))
-    int color_err = dist_square(cr, cg, cb, r, g, b);
-    int gray_err  = dist_square(gv, gv, gv, r, g, b);
+    int color_err = dist_square(cr, cg, cb, c.r, c.g, c.b);
+    int gray_err  = dist_square(gv, gv, gv, c.r, c.g, c.b);
     return color_err <= gray_err ? 16 + color_index() : 232 + gray_index;
 }
 
 static int sprint_seq3(char* buff, struct lut_item *lut, const char* prefix,
-                       size_t prefix_len, uint8_t r, uint8_t g, uint8_t b)
+                       size_t prefix_len, struct BGR_color c)
 {
     memcpy(buff, prefix,     prefix_len);   buff += prefix_len;
-    memcpy(buff, lut[r].str, lut[r].width); buff += lut[r].width;
-    memcpy(buff, lut[g].str, lut[g].width); buff += lut[g].width;
-    memcpy(buff, lut[b].str, lut[b].width); buff += lut[b].width;
+    memcpy(buff, lut[c.r].str, lut[c.r].width); buff += lut[c.r].width;
+    memcpy(buff, lut[c.g].str, lut[c.g].width); buff += lut[c.g].width;
+    memcpy(buff, lut[c.b].str, lut[c.b].width); buff += lut[c.b].width;
     *buff = 'm';
     
-    return prefix_len + lut[r].width + lut[g].width + lut[b].width + 1;
+    return prefix_len + lut[c.r].width + lut[c.g].width + lut[c.b].width + 1;
 }
 
 static int sprint_seq1(char* buff, struct lut_item *lut, const char* prefix,
@@ -176,17 +184,21 @@ static void write_plain(
     for (int y = 0; y < sheight; y++) {
         const unsigned char *row = source + y * source_stride;
         buffptr += snprintf(buffptr, 11, ESC_GOTOXY, ty + y, tx);
+        
+        struct BGR_color old_c = {-1, -1, -1};
         for (int x = 0; x < swidth; x++) {
-            unsigned char b = *row++;
-            unsigned char g = *row++;
-            unsigned char r = *row++;
+            struct BGR_color c = {*row++, *row++, *row++};
+
             if (term256) {
-                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG,
-                                       6, rgb_to_x256(r, g, b));
+                if (!c_cmp(old_c, c))
+                    buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG,
+                                           6, rgb_to_x256(c));
             } else {
-                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG,
-                                       6, r, g, b);
+                if (!c_cmp(old_c, c))
+                    buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG,
+                                           6, c);
             }
+            old_c = c;
             *buffptr++ = ' ';
         }
         buffptr += snprintf(buffptr, 5, ESC_CLEAR_COLORS);
@@ -217,24 +229,30 @@ static void write_half_blocks(
         const unsigned char *row_up = source + y * source_stride;
         const unsigned char *row_down = source + (y + 1) * source_stride;
         buffptr += snprintf(buffptr, 11, ESC_GOTOXY, ty + y / 2, tx);
+        struct BGR_color old_up = {-1, -1, -1};
+        struct BGR_color old_down = {-1, -1, -1};
+        
         for (int x = 0; x < swidth; x++) {
-            unsigned char b_up = *row_up++;
-            unsigned char g_up = *row_up++;
-            unsigned char r_up = *row_up++;
-            unsigned char b_down = *row_down++;
-            unsigned char g_down = *row_down++;
-            unsigned char r_down = *row_down++;
+            struct BGR_color up = {*row_up++, *row_up++, *row_up++};
+            struct BGR_color down = {*row_down++, *row_down++, *row_down++};
+            
             if (term256) {
-                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG,
-                                       6, rgb_to_x256(r_up, g_up, b_up));
-                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_FG,
-                                       6, rgb_to_x256(r_down, g_down, b_down));
+                if (!c_cmp(old_up, up))
+                    buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG,
+                                           6, rgb_to_x256(up));
+                if (!c_cmp(old_down, down))
+                    buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_FG,
+                                           6, rgb_to_x256(down));
             } else {
-                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG,
-                                       6, r_up, g_up, b_up);
-                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_FG,
-                                       6, r_down, g_down, b_down);
+                if (!c_cmp(old_up, up))
+                    buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG,
+                                           6, up);
+                if (!c_cmp(old_down, down))
+                    buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_FG,
+                                           6, down);
             }
+            old_down = down;
+            old_up = up;
             // UTF8 bytes of U+2584 (lower half block)
             buffptr += snprintf(buffptr, 4, "\xe2\x96\x84");
         }
