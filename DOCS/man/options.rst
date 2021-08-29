@@ -5661,7 +5661,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
         Specifies that this shader should be treated as a compute shader, with
         the block size bw and bh. The compute shader will be dispatched with
         however many blocks are necessary to completely tile over the output.
-        Within each block, there will bw tw*th threads, forming a single work
+        Within each block, there will be tw*th threads, forming a single work
         group. In other words: tw and th specify the work group size, which can
         be different from the block size. So for example, a compute shader with
         bw, bh = 32 and tw, th = 8 running on a 500x500 texture would dispatch
