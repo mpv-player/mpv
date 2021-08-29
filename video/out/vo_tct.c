@@ -121,9 +121,8 @@ static int rgb_to_x256(uint8_t r, uint8_t g, uint8_t b)
 }
 
 static int sprint_seq3(char* buff, struct lut_item *lut, const char* prefix,
-                       uint8_t r, uint8_t g, uint8_t b)
+                       size_t prefix_len, uint8_t r, uint8_t g, uint8_t b)
 {
-    int prefix_len = strlen(prefix);
     memcpy(buff, prefix,     prefix_len);   buff += prefix_len;
     memcpy(buff, lut[r].str, lut[r].width); buff += lut[r].width;
     memcpy(buff, lut[g].str, lut[g].width); buff += lut[g].width;
@@ -133,10 +132,9 @@ static int sprint_seq3(char* buff, struct lut_item *lut, const char* prefix,
     return prefix_len + lut[r].width + lut[g].width + lut[b].width + 1;
 }
 
-static int sprint_seq1(char* buff, struct lut_item *lut,
-                       const char* prefix, uint8_t c)
+static int sprint_seq1(char* buff, struct lut_item *lut, const char* prefix,
+                       size_t prefix_len, uint8_t c)
 {
-    int prefix_len = strlen(prefix);
     memcpy(buff, prefix,     prefix_len);   buff += prefix_len;
     memcpy(buff, lut[c].str, lut[c].width); buff += lut[c].width;
     *buff = 'm';
@@ -177,19 +175,21 @@ static void write_plain(
     
     for (int y = 0; y < sheight; y++) {
         const unsigned char *row = source + y * source_stride;
-        buffptr += sprintf(buffptr, ESC_GOTOXY, ty + y, tx);
+        buffptr += snprintf(buffptr, 11, ESC_GOTOXY, ty + y, tx);
         for (int x = 0; x < swidth; x++) {
             unsigned char b = *row++;
             unsigned char g = *row++;
             unsigned char r = *row++;
             if (term256) {
-                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG, rgb_to_x256(r, g, b));
+                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG,
+                                       6, rgb_to_x256(r, g, b));
             } else {
-                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG, r, g, b);
+                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG,
+                                       6, r, g, b);
             }
             *buffptr++ = ' ';
         }
-        buffptr += sprintf(buffptr, ESC_CLEAR_COLORS);
+        buffptr += snprintf(buffptr, 5, ESC_CLEAR_COLORS);
     }
     *buffptr++ = '\n';
     print_buff(framebuff, buffptr - framebuff);
@@ -216,7 +216,7 @@ static void write_half_blocks(
     for (int y = 0; y < sheight * 2; y += 2) {
         const unsigned char *row_up = source + y * source_stride;
         const unsigned char *row_down = source + (y + 1) * source_stride;
-        buffptr += sprintf(buffptr, ESC_GOTOXY, ty + y / 2, tx);
+        buffptr += snprintf(buffptr, 11, ESC_GOTOXY, ty + y / 2, tx);
         for (int x = 0; x < swidth; x++) {
             unsigned char b_up = *row_up++;
             unsigned char g_up = *row_up++;
@@ -225,15 +225,20 @@ static void write_half_blocks(
             unsigned char g_down = *row_down++;
             unsigned char r_down = *row_down++;
             if (term256) {
-                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
-                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
+                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_BG,
+                                       6, rgb_to_x256(r_up, g_up, b_up));
+                buffptr += sprint_seq1(buffptr, lut, ESC_COLOR256_FG,
+                                       6, rgb_to_x256(r_down, g_down, b_down));
             } else {
-                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG, r_up, g_up, b_up);
-                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_FG, r_down, g_down, b_down);
+                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_BG,
+                                       6, r_up, g_up, b_up);
+                buffptr += sprint_seq3(buffptr, lut, ESC_COLOR_FG,
+                                       6, r_down, g_down, b_down);
             }
-            buffptr += sprintf(buffptr, "\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
+            // UTF8 bytes of U+2584 (lower half block)
+            buffptr += snprintf(buffptr, 4, "\xe2\x96\x84");
         }
-        buffptr += sprintf(buffptr, ESC_CLEAR_COLORS);
+        buffptr += snprintf(buffptr, 5, ESC_CLEAR_COLORS);
     }
     *buffptr++ = '\n';
     print_buff(framebuff, buffptr - framebuff);
