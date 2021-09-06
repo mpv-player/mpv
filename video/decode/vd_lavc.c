@@ -715,7 +715,7 @@ static void reset_avctx(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-    if (ctx->avctx && avcodec_is_open(ctx->avctx))
+    if (ctx->avctx && avcodec_is_open(ctx->avctx) && ctx->state.packets_sent)
         avcodec_flush_buffers(ctx->avctx);
     ctx->flushing = false;
     ctx->hwdec_request_reinit = false;
