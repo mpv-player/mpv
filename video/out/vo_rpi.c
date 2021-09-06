@@ -804,6 +804,10 @@ static void destroy_dispmanx(struct vo *vo)
     disable_renderer(vo);
     destroy_overlays(vo);
 
+    if (p->update)
+        vc_dispmanx_update_submit_sync(p->update);
+    p->update = 0;
+
     if (p->display) {
         vc_dispmanx_vsync_callback(p->display, NULL, NULL);
         vc_dispmanx_display_close(p->display);
@@ -855,9 +859,6 @@ static void uninit(struct vo *vo)
     talloc_free(p->next_image);
 
     destroy_dispmanx(vo);
-
-    if (p->update)
-        vc_dispmanx_update_submit_sync(p->update);
 
     if (p->renderer)
         mmal_component_release(p->renderer);
