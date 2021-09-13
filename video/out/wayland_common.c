@@ -1602,8 +1602,13 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        s[0] = mp_rect_w(wl->window_size) * wl->scaling;
-        s[1] = mp_rect_h(wl->window_size) * wl->scaling;
+        if (wl->vo_opts->window_maximized) {
+            s[0] = mp_rect_w(wl->geometry) * wl->scaling;
+            s[1] = mp_rect_h(wl->geometry) * wl->scaling;
+        } else {
+            s[0] = mp_rect_w(wl->window_size) * wl->scaling;
+            s[1] = mp_rect_h(wl->window_size) * wl->scaling;
+        }
         return VO_TRUE;
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
