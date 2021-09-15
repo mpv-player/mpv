@@ -22,6 +22,8 @@
 #include <sys/time.h>
 #include <assert.h>
 
+#include "osdep/timer.h"  // mp_{start,end}_hires_timers
+
 int pthread_once(pthread_once_t *once_control, void (*init_routine)(void))
 {
     BOOL pending;
@@ -78,11 +80,13 @@ static int cond_wait(pthread_cond_t *restrict cond,
                      DWORD ms)
 {
     BOOL res;
+    int hrt = mp_start_hires_timers(ms);
     if (mutex->use_cs) {
         res = SleepConditionVariableCS(cond, &mutex->lock.cs, ms);
     } else {
         res = SleepConditionVariableSRW(cond, &mutex->lock.srw, ms, 0);
     }
+    mp_end_hires_timers(hrt);
     return res ? 0 : ETIMEDOUT;
 }
 
