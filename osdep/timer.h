@@ -37,6 +37,14 @@ uint64_t mp_raw_time_us(void);
 // Sleep in microseconds.
 void mp_sleep_us(int64_t us);
 
+#ifdef _WIN32
+// returns: timer resolution in ms if needed and started successfully, else 0
+int mp_start_hires_timers(int wait_ms);
+
+// call unconditionally with the return value of mp_start_hires_timers
+void mp_end_hires_timers(int resolution_ms);
+#endif  /* _WIN32 */
+
 #define MP_START_TIME 10000000
 
 // Duration of a second in mpv time.
