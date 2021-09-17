@@ -995,9 +995,11 @@ Program Behavior
         no). It's disabled ("no") by default for performance reasons.
 
     ``ytdl_path=youtube-dl``
-        Configure path to youtube-dl executable or a compatible fork's.
-        The default "youtube-dl" looks for the executable in PATH. In a Windows
-        environment the suffix extension ".exe" is always appended.
+        Configure paths to youtube-dl's executable or a compatible fork's. The
+        paths should be separated by : on Unix and ; on Windows. mpv looks in
+        order for the configured paths in PATH and in mpv's config directory.
+        The defaults are "yt-dlp", "yt-dlp_x86" and "youtube-dl". On Windows
+        the suffix extension ".exe" is always appended.
 
     .. admonition:: Why do the option names mix ``_`` and ``-``?
 
