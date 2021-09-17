@@ -8,11 +8,12 @@ local o = {
     use_manifests = false,
     all_formats = false,
     force_all_formats = true,
-    ytdl_path = "youtube-dl",
+    ytdl_path = "",
 }
 
 local ytdl = {
-    path = nil,
+    path = "",
+    paths_to_search = {"yt-dlp", "yt-dlp_x86", "youtube-dl"},
     searched = false,
     blacklisted = {}
 }
@@ -88,7 +89,13 @@ local function map_codec_to_mpv(codec)
     return nil
 end
 
+local function platform_is_windows()
+    return package.config:sub(1,1) == "\\"
+end
+
 local function exec(args)
+    msg.debug("Running: " .. table.concat(args, " "))
+
     local ret = mp.command_native({name = "subprocess",
                                    args = args,
                                    capture_stdout = true,
@@ -718,20 +725,6 @@ end
 function run_ytdl_hook(url)
     local start_time = os.clock()
 
-    -- check for youtube-dl in mpv's config dir
-    if not (ytdl.searched) then
-        local exesuf = (package.config:sub(1,1) == '\\') and '.exe' or ''
-        local ytdl_mcd = mp.find_config_file(o.ytdl_path .. exesuf)
-        if ytdl_mcd == nil then
-            msg.verbose("No youtube-dl found with path "..o.ytdl_path..exesuf.." in config directories")
-            ytdl.path = o.ytdl_path
-        else
-            msg.verbose("found youtube-dl at: " .. ytdl_mcd)
-            ytdl.path = ytdl_mcd
-        end
-        ytdl.searched = true
-    end
-
     -- strip ytdl://
     if (url:find("ytdl://") == 1) then
         url = url:sub(8)
@@ -786,8 +779,45 @@ function run_ytdl_hook(url)
     end
     table.insert(command, "--")
     table.insert(command, url)
-    msg.debug("Running: " .. table.concat(command,' '))
-    local es, json, result, aborted = exec(command)
+
+    local es, json, result, aborted
+    if ytdl.searched then
+        es, json, result, aborted = exec(command)
+    else
+        local separator = platform_is_windows() and ";" or ":"
+        if o.ytdl_path:match("[^" .. separator .. "]") then
+            ytdl.paths_to_search = {}
+            for path in o.ytdl_path:gmatch("[^" .. separator .. "]+") do
+                table.insert(ytdl.paths_to_search, path)
+            end
+        end
+
+        for _, path in pairs(ytdl.paths_to_search) do
+            -- search for youtube-dl in mpv's config dir
+            local exesuf = platform_is_windows() and ".exe" or ""
+            local ytdl_cmd = mp.find_config_file(path .. exesuf)
+            if ytdl_cmd then
+                msg.verbose("Found youtube-dl at: " .. ytdl_cmd)
+                ytdl.path = ytdl_cmd
+                command[1] = ytdl.path
+                es, json, result, aborted = exec(command)
+                break
+            else
+                msg.verbose("No youtube-dl found with path " .. path .. exesuf .. " in config directories")
+                command[1] = path
+                es, json, result, aborted = exec(command)
+                if result.error_string == "init" then
+                    msg.verbose("youtube-dl with path " .. path .. exesuf .. " not found in PATH or not enough permissions")
+                else
+                    msg.verbose("Found youtube-dl with path " .. path .. exesuf .. " in PATH")
+                    ytdl.path = path
+                    break
+                end
+            end
+        end
+
+        ytdl.searched = true
+    end
 
     if aborted then
         return
