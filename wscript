@@ -912,6 +912,10 @@ def options(opt):
         type    = 'string',
         dest    = 'SWIFT_FLAGS',
         help    = "Optional Swift compiler flags")
+    # for consistency since this option is now enabled by default
+    group.add_option('--enable-ffmpeg-strict-abi',
+        action  = 'store_true',
+        help    = "Disable all known FFmpeg ABI violations (currently without effect)")
 
 @conf
 def is_optimization(ctx):
