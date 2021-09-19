@@ -85,10 +85,10 @@ detect it, the file `build/config.log` may contain information about the
 reasons for the failure.
 
 NOTE: To avoid cluttering the output with unreadable spam, `--help` only shows
-one of the two switches for each option. If the option is autodetected by
-default, the `--disable-***` switch is printed; if the option is disabled by
-default, the `--enable-***` switch is printed. Either way, you can use
-`--enable-***` or `--disable-**` regardless of what is printed by `--help`.
+one of the two switches for each option. If the option is autodetected or
+enabled by default, the `--disable-***` switch is printed; if the option is
+disabled by default, the `--enable-***` switch is printed. Either way, you can
+use `--enable-***` or `--disable-**` regardless of what is printed by `--help`.
 
 To build the software you can use `./waf build`: the result of the compilation
 will be located in `build/mpv`. You can use `./waf install` to install mpv
