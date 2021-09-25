@@ -58,15 +58,28 @@ def check_iconv(ctx, dependency_identifier):
     return check_libs(libs, checkfn)(ctx, dependency_identifier)
 
 def check_lua(ctx, dependency_identifier):
+    # mainline lua 5.1/5.2 doesn't have a .pc file, so each distro chooses
+    # a different name, either non-versioned (lua.pc) or lua5x/lua5.x/lua-5.x
+    # and we need to check them all. luadef* are the non-versioned .pc files,
+    # and the rest represent the .pc file exactly e.g. --lua=lua-5.1
+    # The non lua* names are legacy in mpv configure, and kept for compat.
     lua_versions = [
+        ( 'luadef52','lua >= 5.2.0 lua < 5.3.0' ), # package "lua"
         ( '52',     'lua >= 5.2.0 lua < 5.3.0' ),
+        ( 'lua52',  'lua52 >= 5.2.0'),
         ( '52arch', 'lua52 >= 5.2.0'), # Arch
+        ( 'lua5.2', 'lua5.2 >= 5.2.0'),
         ( '52deb',  'lua5.2 >= 5.2.0'), # debian
+        ( 'lua-5.2','lua-5.2 >= 5.2.0'),
         ( '52fbsd', 'lua-5.2 >= 5.2.0'), # FreeBSD
         ( 'luajit', 'luajit >= 2.0.0' ),
+        ( 'luadef51','lua >= 5.1.0 lua < 5.2.0'), # package "lua"
         ( '51',     'lua >= 5.1.0 lua < 5.2.0'),
+        ( 'lua51',  'lua51 >= 5.1.0'),
         ( '51obsd', 'lua51 >= 5.1.0'), # OpenBSD
+        ( 'lua5.1', 'lua5.1 >= 5.1.0'),
         ( '51deb',  'lua5.1 >= 5.1.0'), # debian
+        ( 'lua-5.1','lua-5.1 >= 5.1.0'),
         ( '51fbsd', 'lua-5.1 >= 5.1.0'), # FreeBSD
     ]
 
