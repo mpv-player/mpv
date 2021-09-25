@@ -907,7 +907,7 @@ def options(opt):
     group.add_option('--lua',
         type    = 'string',
         dest    = 'LUA_VER',
-        help    = "select Lua package which should be autodetected. Choices: 51 51deb 51obsd 51fbsd 52 52deb 52arch 52fbsd luajit")
+        help    = "select Lua package to autodetect. Choices (x is 1 or 2): luadef5x, lua5x, lua5.x, lua-5.x, luajit (luadef5x is for pkg-config name 'lua', the rest are exact pkg-config names)")
     group.add_option('--swift-flags',
         type    = 'string',
         dest    = 'SWIFT_FLAGS',
