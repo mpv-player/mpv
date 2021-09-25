@@ -75,13 +75,15 @@ def check_lua(ctx, dependency_identifier):
             [lv for lv in lua_versions if lv[0] == ctx.options.LUA_VER]
 
     for lua_version, pkgconfig_query in lua_versions:
+        display_version = lua_version
+        lua_version = inflector.sanitize_id(lua_version)
         if check_pkg_config(pkgconfig_query, uselib_store=lua_version) \
             (ctx, dependency_identifier):
             # XXX: this is a bit of a hack, ask waf developers if I can copy
             # the uselib_store to 'lua'
             ctx.mark_satisfied(lua_version)
             ctx.add_optional_message(dependency_identifier,
-                                     'version found: ' + lua_version)
+                                     'version found: ' + display_version)
             return True
     return False
 
