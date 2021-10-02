@@ -21,15 +21,9 @@
 #include "utils.h"
 
 // 0-terminated list of desktop GL versions a backend should try to
-// initialize. The first entry is the most preferred version.
-const int mpgl_preferred_gl_versions[] = {
-    440,
-    430,
-    400,
-    330,
+// initialize. Each entry is the minimum required version.
+const int mpgl_min_required_gl_versions[] = {
     320,
-    310,
-    300,
     210,
     0
 };

@@ -4,7 +4,7 @@
 #include "video/out/gpu/context.h"
 #include "common.h"
 
-extern const int mpgl_preferred_gl_versions[];
+extern const int mpgl_min_required_gl_versions[];
 
 // Returns whether or not a candidate GL version should be accepted or not
 // (based on the --opengl opts). Implementations may call this before
