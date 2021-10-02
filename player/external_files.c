@@ -317,9 +317,12 @@ static void load_paths(struct mpv_global *global, struct MPOpts *opts,
 {
     for (int i = 0; paths && paths[i]; i++) {
         char *expanded_path = mp_get_user_path(NULL, global, paths[i]);
-        char *path = mp_path_join_bstr(
-            *slist, mp_dirname(fname),
-            bstr0(expanded_path ? expanded_path : paths[i]));
+        char *effective_path = expanded_path ? expanded_path : paths[i];
+
+        char *path = !mp_path_is_absolute(bstr0(effective_path)) &&
+                      mp_is_url(mp_dirname(fname)) ? effective_path :
+                      mp_path_join_bstr(*slist, mp_dirname(fname),
+                                        bstr0(effective_path));
         append_dir_subtitles(global, opts, slist, nsubs, bstr0(path),
                              fname, 0, type);
         talloc_free(expanded_path);

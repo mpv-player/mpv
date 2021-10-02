@@ -2593,8 +2593,8 @@ Subtitles
     Multiple directories can be separated by ":" (";" on Windows).
     Paths can be relative or absolute. Relative paths are interpreted relative
     to video file directory.
-    If the file is a URL, only absolute paths and ``sub`` configuration
-    subdirectory will be scanned.
+    If the file is a URL, relative paths are interpreted relative to the current
+    directory.
 
     .. admonition:: Example
 
