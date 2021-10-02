@@ -1419,13 +1419,18 @@ static void gui_thread_reconfig(void *ptr)
     struct vo *vo = w32->vo;
 
     RECT r = get_working_area(w32);
+    if (!w32->current_fs && !IsMaximized(w32->window) && w32->opts->border)
+        subtract_window_borders(w32, w32->window, &r);
     struct mp_rect screen = { r.left, r.top, r.right, r.bottom };
     struct vo_win_geometry geo;
+
+    RECT monrc = get_monitor_info(w32).rcMonitor;
+    struct mp_rect mon = { monrc.left, monrc.top, monrc.right, monrc.bottom };
 
     if (w32->dpi_scale == 0)
         force_update_display_info(w32);
 
-    vo_calc_window_geometry2(vo, &screen, w32->dpi_scale, &geo);
+    vo_calc_window_geometry3(vo, &screen, &mon, w32->dpi_scale, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     bool reset_size = w32->o_dwidth != vo->dwidth ||

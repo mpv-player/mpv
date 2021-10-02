@@ -415,7 +415,7 @@ FFmpeg libraries. Git master is recommended."
         'name': '--ffmpeg-strict-abi',
         'desc': 'Disable all known FFmpeg ABI violations',
         'func': check_true,
-        'default': 'disable',
+        'default': 'enable',
     }
 ]
 

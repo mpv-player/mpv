@@ -179,7 +179,8 @@ success, ``fn`` is called always a-sync, ``error`` is empty string on success.
 
 ``mp.utils.readdir(path [, filter])`` (LE)
 
-``mp.utils.file_info(path)`` (LE)
+``mp.utils.file_info(path)`` (LE) Note: like lua - this does NOT expand
+meta-paths like ``~~/foo`` (other JS file functions do expand meta paths).
 
 ``mp.utils.split_path(path)``
 
@@ -338,7 +339,9 @@ After mpv initializes the JavaScript environment for a script but before it
 loads the script - it tries to run the file ``.init.js`` at the root of the mpv
 configuration directory. Code at this file can update the environment further
 for all scripts. E.g. if it contains ``mp.module_paths.push("/foo")`` then
-``require`` at all scripts will search global module id's also at ``/foo``.
+``require`` at all scripts will search global module id's also at ``/foo``
+(do NOT do ``mp.module_paths = ["/foo"];`` because this will remove existing
+paths - like ``<script-dir>/modules`` for scripts which load from a directory).
 
 The event loop
 --------------

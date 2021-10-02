@@ -771,7 +771,7 @@ g.mp_event_loop = function mp_event_loop() {
 
 })(this)
 
-try {
-    // let the user extend us, e.g. for updating mp.module_paths
+// let the user extend us, e.g. by adding items to mp.module_paths
+// (unlike e.g. read_file, file_info doesn't expand meta-paths)
+if (mp.utils.file_info(mp.utils.get_user_path("~~/.init.js")))
     require("~~/.init");
-} catch(e) {}

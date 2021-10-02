@@ -79,6 +79,7 @@ struct vo_wayland_state {
     /* xdg-decoration */
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
     struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration;
+    int requested_decoration;
 
     /* xdg-shell */
     struct xdg_wm_base      *wm_base;

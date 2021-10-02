@@ -34,13 +34,12 @@ _mpv_get_args()
   declare -a candidates
   case $type in
     String)
-      echo "$doc" | grep -q '\[file\]'
-      if [ $? -eq 0 ]; then
+      if echo "$doc" | grep -q '\[file\]' ; then
         if [ "$cur" = '=' ]; then
           # Without this, _filedir will try and complete files starting with '='
           cur=""
         fi
-        _filedir
+        _filedir 2>/dev/null || COMPREPLY=($(compgen -f))
         return 0
       else
         candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
@@ -106,7 +105,7 @@ _mpv()
         fi
         ;;
       *)
-        _filedir
+        _filedir 2>/dev/null || COMPREPLY=($(compgen -f))
         ;;
     esac
   fi

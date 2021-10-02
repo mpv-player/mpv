@@ -48,6 +48,7 @@ struct sh_stream {
     bool dependent_track;       // container dependent track flag
     bool visual_impaired_track; // container flag
     bool hearing_impaired_track;// container flag
+    bool image;                 // video stream is an image
     bool still_image;           // video stream contains still images
     int hls_bitrate;
 

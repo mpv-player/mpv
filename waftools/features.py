@@ -29,6 +29,7 @@ class Feature(object):
             ],
             'enable': [
                 {'state': 'disable', 'action': 'store_false', 'default': True},
+                {'state': 'enable',  'action': 'store_true',  'default': True},
             ],
         }[self.behaviour()]
 

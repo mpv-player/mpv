@@ -995,9 +995,11 @@ Program Behavior
         no). It's disabled ("no") by default for performance reasons.
 
     ``ytdl_path=youtube-dl``
-        Configure path to youtube-dl executable or a compatible fork's.
-        The default "youtube-dl" looks for the executable in PATH. In a Windows
-        environment the suffix extension ".exe" is always appended.
+        Configure paths to youtube-dl's executable or a compatible fork's. The
+        paths should be separated by : on Unix and ; on Windows. mpv looks in
+        order for the configured paths in PATH and in mpv's config directory.
+        The defaults are "yt-dlp", "yt-dlp_x86" and "youtube-dl". On Windows
+        the suffix extension ".exe" is always appended.
 
     .. admonition:: Why do the option names mix ``_`` and ``-``?
 
@@ -5661,7 +5663,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
         Specifies that this shader should be treated as a compute shader, with
         the block size bw and bh. The compute shader will be dispatched with
         however many blocks are necessary to completely tile over the output.
-        Within each block, there will bw tw*th threads, forming a single work
+        Within each block, there will be tw*th threads, forming a single work
         group. In other words: tw and th specify the work group size, which can
         be different from the block size. So for example, a compute shader with
         bw, bh = 32 and tw, th = 8 running on a 500x500 texture would dispatch

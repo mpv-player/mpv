@@ -22,8 +22,6 @@
 #include <inttypes.h>
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/frontend.h>
-#include <linux/dvb/video.h>
-#include <linux/dvb/audio.h>
 #include <linux/dvb/version.h>
 
 #define MAX_ADAPTERS 16
