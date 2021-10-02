@@ -381,8 +381,12 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
 
     // create a new video stream header
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
-    struct mp_codec_params *c = sh->codec;
+    if (mf->nr_of_files == 1) {
+        MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
+        sh->image = true;
+    }
 
+    struct mp_codec_params *c = sh->codec;
     c->codec = codec;
     c->disp_w = 0;
     c->disp_h = 0;
