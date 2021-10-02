@@ -6,10 +6,14 @@
 
 extern const int mpgl_min_required_gl_versions[];
 
-// Returns whether or not a candidate GL version should be accepted or not
-// (based on the --opengl opts). Implementations may call this before
-// ra_gl_ctx_init if they wish to probe for multiple possible GL versions.
-bool ra_gl_ctx_test_version(struct ra_ctx *ctx, int version, bool es);
+enum gles_mode {
+    GLES_AUTO = 0,
+    GLES_YES,
+    GLES_NO,
+};
+
+// Returns the gles mode based on the --opengl opts.
+enum gles_mode ra_gl_ctx_get_glesmode(struct ra_ctx *ctx);
 
 // These are a set of helpers for ra_ctx providers based on ra_gl.
 // The init function also initializes ctx->ra and ctx->swapchain, so the user

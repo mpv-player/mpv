@@ -116,9 +116,6 @@ static bool create_context_x11_gl3(struct ra_ctx *ctx, GL *gl, int gl_version,
     if (p->context)
         return true;
 
-    if (!ra_gl_ctx_test_version(ctx, gl_version, es))
-        return false;
-
     glXCreateContextAttribsARBProc glXCreateContextAttribsARB =
         (glXCreateContextAttribsARBProc)
             glXGetProcAddressARB((const GLubyte *)"glXCreateContextAttribsARB");
@@ -312,19 +309,23 @@ static bool glx_init(struct ra_ctx *ctx)
         goto uninit;
 
     bool success = false;
-    for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
-        int version = mpgl_min_required_gl_versions[n];
-        MP_VERBOSE(ctx, "Creating OpenGL %d.%d context...\n",
-                   MPGL_VER_P(version));
-        if (version >= 300) {
-            success = create_context_x11_gl3(ctx, gl, version, false);
-        } else {
-            success = create_context_x11_old(ctx, gl);
+    enum gles_mode mode = ra_gl_ctx_get_glesmode(ctx);
+
+    if (mode == GLES_NO || mode == GLES_AUTO) {
+        for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
+            int version = mpgl_min_required_gl_versions[n];
+            MP_VERBOSE(ctx, "Creating OpenGL %d.%d context...\n",
+                       MPGL_VER_P(version));
+            if (version >= 300) {
+                success = create_context_x11_gl3(ctx, gl, version, false);
+            } else {
+                success = create_context_x11_old(ctx, gl);
+            }
+            if (success)
+                break;
         }
-        if (success)
-            break;
     }
-    if (!success) // try again for GLES
+    if (!success && (mode == GLES_YES || mode == GLES_AUTO))
         success = create_context_x11_gl3(ctx, gl, 200, true);
     if (success && !glXIsDirect(vo->x11->display, p->context))
         gl->mpgl_caps |= MPGL_CAP_SW;
