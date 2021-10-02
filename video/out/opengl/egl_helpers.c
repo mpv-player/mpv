@@ -184,8 +184,8 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
 
         egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
     } else {
-        for (int n = 0; mpgl_preferred_gl_versions[n]; n++) {
-            int ver = mpgl_preferred_gl_versions[n];
+        for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
+            int ver = mpgl_min_required_gl_versions[n];
             if (!ra_gl_ctx_test_version(ctx, ver, false))
                 continue;
 

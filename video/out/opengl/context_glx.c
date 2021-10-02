@@ -312,8 +312,8 @@ static bool glx_init(struct ra_ctx *ctx)
         goto uninit;
 
     bool success = false;
-    for (int n = 0; mpgl_preferred_gl_versions[n]; n++) {
-        int version = mpgl_preferred_gl_versions[n];
+    for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
+        int version = mpgl_min_required_gl_versions[n];
         MP_VERBOSE(ctx, "Creating OpenGL %d.%d context...\n",
                    MPGL_VER_P(version));
         if (version >= 300) {
