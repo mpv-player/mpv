@@ -138,7 +138,6 @@ struct format_hack {
     bool use_stream_ids : 1;    // has a meaningful native stream IDs (export it)
     bool fully_read : 1;        // set demuxer.fully_read flag
     bool detect_charset : 1;    // format is a small text file, possibly not UTF8
-    bool image_format : 1;      // expected to contain exactly 1 frame
     // Do not confuse player's position estimation (position is into external
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
@@ -205,8 +204,6 @@ static const struct format_hack format_hacks[] = {
     BLACKLIST("bin"),
     // Useless, does not work with custom streams.
     BLACKLIST("image2"),
-    // Image demuxers ("<name>_pipe" is detected explicitly)
-    {"image2pipe", .image_format = true},
     {0}
 };
 
@@ -528,11 +525,6 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         return -1;
     }
 
-    if (bstr_endswith0(bstr0(priv->avif->name), "_pipe")) {
-        MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
-        priv->format_hack.image_format = true;
-    }
-
     if (lavfdopts->hacks)
         priv->avif_flags = priv->avif->flags | priv->format_hack.if_flags;
 
@@ -714,8 +706,16 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->codec->disp_h = codec->height;
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
-        if (priv->format_hack.image_format)
+        if (st->nb_frames <= 1 && (
+                sh->attached_picture ||
+                bstr_endswith0(bstr0(priv->avif->name), "_pipe") ||
+                strcmp(priv->avif->name, "alias_pix") == 0 ||
+                strcmp(priv->avif->name, "gif") == 0 ||
+                strcmp(priv->avif->name, "image2pipe") == 0
+            )) {
+            MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
             sh->codec->fps = priv->mf_fps;
+        }
         sh->codec->par_w = st->sample_aspect_ratio.num;
         sh->codec->par_h = st->sample_aspect_ratio.den;
 
