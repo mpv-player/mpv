@@ -164,9 +164,6 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     EGLContext *egl_ctx = NULL;
 
     if (es) {
-        if (!ra_gl_ctx_test_version(ctx, MPGL_VER(2, 0), true))
-            return false;
-
         EGLint attrs[] = {
             EGL_CONTEXT_CLIENT_VERSION, 2,
             EGL_NONE
@@ -176,8 +173,6 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     } else {
         for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
             int ver = mpgl_min_required_gl_versions[n];
-            if (!ra_gl_ctx_test_version(ctx, ver, false))
-                continue;
 
             EGLint attrs[] = {
                 EGL_CONTEXT_MAJOR_VERSION, MPGL_VER_GET_MAJOR(ver),
@@ -199,9 +194,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
 
             GL *gl = talloc_zero(ctx, struct GL);
             mpgl_check_version(gl, mpegl_get_proc_address, NULL);
-            if (gl->version < 210 ||
-                !ra_gl_ctx_test_version(ctx, gl->version, false))
-            {
+            if (gl->version < 210) {
                 eglDestroyContext(display, egl_ctx);
                 egl_ctx = NULL;
             }
@@ -246,9 +239,14 @@ bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
     MP_VERBOSE(ctx, "EGL_VERSION=%s\nEGL_VENDOR=%s\nEGL_CLIENT_APIS=%s\n",
                STR_OR_ERR(version), STR_OR_ERR(vendor), STR_OR_ERR(apis));
 
-    if (create_context(ctx, display, false, cb, out_context, out_config))
+    enum gles_mode mode = ra_gl_ctx_get_glesmode(ctx);
+
+    if ((mode == GLES_NO || mode == GLES_AUTO) &&
+        create_context(ctx, display, false, cb, out_context, out_config))
         return true;
-    if (create_context(ctx, display, true, cb, out_context, out_config))
+
+    if ((mode == GLES_YES || mode == GLES_AUTO) &&
+        create_context(ctx, display, true, cb, out_context, out_config))
         return true;
 
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;

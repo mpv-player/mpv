@@ -34,12 +34,6 @@ enum {
     FLUSH_AUTO,
 };
 
-enum {
-    GLES_AUTO = 0,
-    GLES_YES,
-    GLES_NO,
-};
-
 struct opengl_opts {
     int use_glfinish;
     int waitvsync;
@@ -93,23 +87,17 @@ struct priv {
     int num_vsync_fences;
 };
 
-bool ra_gl_ctx_test_version(struct ra_ctx *ctx, int version, bool es)
+enum gles_mode ra_gl_ctx_get_glesmode(struct ra_ctx *ctx)
 {
-    bool ret;
-    struct opengl_opts *opts;
     void *tmp = talloc_new(NULL);
+    struct opengl_opts *opts;
+    enum gles_mode mode;
+
     opts = mp_get_config_group(tmp, ctx->global, &opengl_conf);
+    mode = opts->gles_mode;
 
-    switch (opts->gles_mode) {
-    case GLES_YES:  ret = es;   goto done;
-    case GLES_NO:   ret = !es;  goto done;
-    case GLES_AUTO: ret = true; goto done;
-    default: abort();
-    }
-
-done:
     talloc_free(tmp);
-    return ret;
+    return mode;
 }
 
 void ra_gl_ctx_uninit(struct ra_ctx *ctx)
