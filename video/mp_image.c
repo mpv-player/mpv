@@ -21,6 +21,7 @@
 
 #include <libavutil/mem.h>
 #include <libavutil/common.h>
+#include <libavutil/display.h>
 #include <libavutil/bswap.h>
 #include <libavutil/hwcontext.h>
 #include <libavutil/intreadwrite.h>
@@ -971,6 +972,13 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         // Might be incorrect if colorspace changes.
         dst->params.color.light = p->color.light;
         dst->params.alpha = p->alpha;
+    }
+
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_DISPLAYMATRIX);
+    if (sd) {
+        double r = av_display_rotation_get((int32_t *)(sd->data));
+        if (!isnan(r))
+            dst->params.rotate = (((int)(-r) % 360) + 360) % 360;
     }
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_ICC_PROFILE);
