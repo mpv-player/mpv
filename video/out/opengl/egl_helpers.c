@@ -161,6 +161,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     MP_DBG(ctx, "Chosen EGLConfig:\n");
     dump_egl_config(ctx->log, MSGL_DEBUG, display, config);
 
+    int ctx_flags = ctx->opts.debug ? EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR : 0;
     EGLContext *egl_ctx = NULL;
 
     if (!es) {
@@ -172,6 +173,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
                 EGL_CONTEXT_MINOR_VERSION, MPGL_VER_GET_MINOR(ver),
                 EGL_CONTEXT_OPENGL_PROFILE_MASK,
                     ver >= 320 ? EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT : 0,
+                EGL_CONTEXT_FLAGS_KHR, ctx_flags,
                 EGL_NONE
             };
 
@@ -182,8 +184,10 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     }
     if (!egl_ctx) {
         // Fallback for EGL 1.4 without EGL_KHR_create_context or GLES
+        // Add the context flags only for GLES - GL has been attempted above
         EGLint attrs[] = {
             EGL_CONTEXT_CLIENT_VERSION, 2,
+            es ? EGL_CONTEXT_FLAGS_KHR : EGL_NONE, ctx_flags,
             EGL_NONE
         };
 
