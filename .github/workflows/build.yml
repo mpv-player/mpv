@@ -72,6 +72,10 @@ jobs:
     runs-on: "ubuntu-20.04"
     container:
       image: "registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps"
+      # Disable seccomp until a container manager in GitHub recognizes
+      # clone3() syscall,
+      # <https://github.com/actions/virtual-environments/issues/3812>.
+      options: --security-opt seccomp=unconfined
       env:
         CC: "${{ matrix.cc }}"
     strategy:
