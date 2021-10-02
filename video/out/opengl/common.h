@@ -70,8 +70,6 @@ enum {
 
 #define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
 
-void mpgl_check_version(GL *gl, void *(*get_fn)(void *ctx, const char *n),
-                        void *fn_ctx);
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);
 void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
