@@ -163,14 +163,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
 
     EGLContext *egl_ctx = NULL;
 
-    if (es) {
-        EGLint attrs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,
-            EGL_NONE
-        };
-
-        egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
-    } else {
+    if (!es) {
         for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
             int ver = mpgl_min_required_gl_versions[n];
 
@@ -186,20 +179,15 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
             if (egl_ctx)
                 break;
         }
+    }
+    if (!egl_ctx) {
+        // Fallback for EGL 1.4 without EGL_KHR_create_context or GLES
+        EGLint attrs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 2,
+            EGL_NONE
+        };
 
-        if (!egl_ctx) {
-            // Fallback for EGL 1.4 without EGL_KHR_create_context.
-            EGLint attrs[] = { EGL_NONE };
-            egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
-
-            GL *gl = talloc_zero(ctx, struct GL);
-            mpgl_check_version(gl, mpegl_get_proc_address, NULL);
-            if (gl->version < 210) {
-                eglDestroyContext(display, egl_ctx);
-                egl_ctx = NULL;
-            }
-            talloc_free(gl);
-        }
+        egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
     }
 
     if (!egl_ctx) {
