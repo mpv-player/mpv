@@ -1949,7 +1949,6 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !track->lang},
         {"audio-channels", SUB_PROP_INT(track_channels(track)),
                         .unavailable = track_channels(track) <= 0},
-        {"image",       SUB_PROP_FLAG(track->image)},
         {"albumart",    SUB_PROP_FLAG(track->attached_picture)},
         {"default",     SUB_PROP_FLAG(track->default_track)},
         {"forced",      SUB_PROP_FLAG(track->forced_track)},

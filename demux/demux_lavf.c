@@ -138,6 +138,7 @@ struct format_hack {
     bool use_stream_ids : 1;    // has a meaningful native stream IDs (export it)
     bool fully_read : 1;        // set demuxer.fully_read flag
     bool detect_charset : 1;    // format is a small text file, possibly not UTF8
+    bool image_format : 1;      // expected to contain exactly 1 frame
     // Do not confuse player's position estimation (position is into external
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
@@ -204,6 +205,8 @@ static const struct format_hack format_hacks[] = {
     BLACKLIST("bin"),
     // Useless, does not work with custom streams.
     BLACKLIST("image2"),
+    // Image demuxers ("<name>_pipe" is detected explicitly)
+    {"image2pipe", .image_format = true},
     {0}
 };
 
@@ -525,6 +528,11 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         return -1;
     }
 
+    if (bstr_endswith0(bstr0(priv->avif->name), "_pipe")) {
+        MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
+        priv->format_hack.image_format = true;
+    }
+
     if (lavfdopts->hacks)
         priv->avif_flags = priv->avif->flags | priv->format_hack.if_flags;
 
@@ -647,35 +655,6 @@ static int dict_get_decimal(AVDictionary *dict, const char *entry, int def)
     return def;
 }
 
-// Detect if a stream is an image from the number of frames and duration.
-// Unlike checking only the codec, this doesn't detect videos with codecs
-// commonly used for images (e.g. mjpeg) as images, and can detect images in
-// codecs commonly used for videos. But for some video codecs and containers,
-// libavformat always returns 0/1 numbers of frames and 0 duration, so they
-// have to be hardcoded to never be considered images.
-static const int blacklisted_video_codecs[] =
-    {AV_CODEC_ID_AMV, AV_CODEC_ID_FLIC, AV_CODEC_ID_VMDVIDEO, 0};
-
-static const char *const blacklisted_formats[] = {"lavfi", "m4v", "vc1", NULL};
-
-static bool is_image(AVStream *st, int codec_id, const char *avifname)
-{
-    if (st->nb_frames > 1 || st->codec_info_nb_frames != 1 || st->duration > 10)
-        return false;
-
-    for (int i = 0; blacklisted_video_codecs[i]; i++) {
-        if (codec_id == blacklisted_video_codecs[i])
-            return false;
-    }
-
-    for (int i = 0; blacklisted_formats[i]; i++) {
-        if (strcmp(avifname, blacklisted_formats[i]) == 0)
-            return false;
-    }
-
-    return true;
-}
-
 static void handle_new_stream(demuxer_t *demuxer, int i)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -735,12 +714,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->codec->disp_h = codec->height;
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
-        if (sh->attached_picture ||
-            is_image(st, codec->codec_id, priv->avif->name)) {
-            MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
-            sh->image = true;
+        if (priv->format_hack.image_format)
             sh->codec->fps = priv->mf_fps;
-        }
         sh->codec->par_w = st->sample_aspect_ratio.num;
         sh->codec->par_h = st->sample_aspect_ratio.den;
 
