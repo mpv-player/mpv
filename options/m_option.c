@@ -3217,9 +3217,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt, int op,
     } else {
         char name[80];
         snprintf(name, sizeof(name), "%.*s", BSTR_P(str));
-        if (!list->allow_unknown_entries ||
-            (list->check_unknown_entry && !list->check_unknown_entry(name)))
-        {
+        if (list->check_unknown_entry && !list->check_unknown_entry(name)) {
             mp_err(log, "Option %.*s: %.*s doesn't exist.\n",
                    BSTR_P(opt), BSTR_P(str));
             return M_OPT_INVALID;
