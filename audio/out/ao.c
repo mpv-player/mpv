@@ -120,7 +120,6 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 static const struct m_obj_list ao_obj_list = {
     .get_desc = get_desc,
     .description = "audio outputs",
-    .allow_unknown_entries = true,
     .allow_trailer = true,
     .disallow_positional_parameters = true,
     .use_global_options = true,

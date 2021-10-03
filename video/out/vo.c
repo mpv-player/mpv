@@ -207,7 +207,6 @@ const struct m_obj_list vo_obj_list = {
         {"opengl-cb", "libmpv"},
         {0}
     },
-    .allow_unknown_entries = true,
     .allow_trailer = true,
     .disallow_positional_parameters = true,
     .use_global_options = true,
