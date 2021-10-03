@@ -72,14 +72,10 @@ static void glx_uninit(struct ra_ctx *ctx)
 typedef GLXContext (*glXCreateContextAttribsARBProc)
     (Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
-static bool create_context_x11_gl3(struct ra_ctx *ctx, GL *gl, int gl_version,
-                                   bool es)
+static bool create_context_x11(struct ra_ctx *ctx, GL *gl, bool es)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
-
-    if (p->context)
-        return true;
 
     glXCreateContextAttribsARBProc glXCreateContextAttribsARB =
         (glXCreateContextAttribsARBProc)
@@ -108,17 +104,43 @@ static bool create_context_x11_gl3(struct ra_ctx *ctx, GL *gl, int gl_version,
     }
 
     int context_attribs[] = {
-        GLX_CONTEXT_MAJOR_VERSION_ARB, MPGL_VER_GET_MAJOR(gl_version),
-        GLX_CONTEXT_MINOR_VERSION_ARB, MPGL_VER_GET_MINOR(gl_version),
+        GLX_CONTEXT_MAJOR_VERSION_ARB, 0,
+        GLX_CONTEXT_MINOR_VERSION_ARB, 0,
         GLX_CONTEXT_PROFILE_MASK_ARB, profile_mask,
         GLX_CONTEXT_FLAGS_ARB, ctx_flags,
         None
     };
-    vo_x11_silence_xlib(1);
-    GLXContext context = glXCreateContextAttribsARB(vo->x11->display,
-                                                    p->fbc, 0, True,
-                                                    context_attribs);
-    vo_x11_silence_xlib(-1);
+
+    GLXContext context;
+
+    if (!es) {
+        for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
+            int version = mpgl_min_required_gl_versions[n];
+            MP_VERBOSE(ctx, "Creating OpenGL %d.%d context...\n",
+                       MPGL_VER_P(version));
+
+            context_attribs[1] = MPGL_VER_GET_MAJOR(version);
+            context_attribs[3] = MPGL_VER_GET_MINOR(version);
+
+            vo_x11_silence_xlib(1);
+            context = glXCreateContextAttribsARB(vo->x11->display,
+                                                 p->fbc, 0, True,
+                                                 context_attribs);
+            vo_x11_silence_xlib(-1);
+
+            if (context)
+                break;
+        }
+    } else {
+        context_attribs[1] = 2;
+
+        vo_x11_silence_xlib(1);
+        context = glXCreateContextAttribsARB(vo->x11->display,
+                                             p->fbc, 0, True,
+                                             context_attribs);
+        vo_x11_silence_xlib(-1);
+    }
+
     if (!context)
         return false;
 
@@ -281,18 +303,10 @@ static bool glx_init(struct ra_ctx *ctx)
     bool success = false;
     enum gles_mode mode = ra_gl_ctx_get_glesmode(ctx);
 
-    if (mode == GLES_NO || mode == GLES_AUTO) {
-        for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
-            int version = mpgl_min_required_gl_versions[n];
-            MP_VERBOSE(ctx, "Creating OpenGL %d.%d context...\n",
-                       MPGL_VER_P(version));
-            success = create_context_x11_gl3(ctx, gl, version, false);
-            if (success)
-                break;
-        }
-    }
+    if (mode == GLES_NO || mode == GLES_AUTO)
+        success = create_context_x11(ctx, gl, false);
     if (!success && (mode == GLES_YES || mode == GLES_AUTO))
-        success = create_context_x11_gl3(ctx, gl, 200, true);
+        success = create_context_x11(ctx, gl, true);
     if (success && !glXIsDirect(vo->x11->display, p->context))
         gl->mpgl_caps |= MPGL_CAP_SW;
     if (!success)
