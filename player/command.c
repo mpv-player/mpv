@@ -3388,7 +3388,7 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
         char **choices = NULL;
 
         if (opt->type == &m_option_type_choice) {
-            struct m_opt_choice_alternatives *alt = opt->priv;
+            const struct m_opt_choice_alternatives *alt = opt->priv;
             int num = 0;
             for ( ; alt->name; alt++)
                 MP_TARRAY_APPEND(NULL, choices, num, alt->name);
