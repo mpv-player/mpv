@@ -46,7 +46,6 @@ struct opengl_opts {
     int vsync_pattern[2];
     int swapinterval;
     int early_flush;
-    int restrict_version;
     int gles_mode;
 };
 
@@ -58,7 +57,7 @@ const struct m_sub_options opengl_conf = {
         {"opengl-swapinterval", OPT_INT(swapinterval)},
         {"opengl-check-pattern-a", OPT_INT(vsync_pattern[0])},
         {"opengl-check-pattern-b", OPT_INT(vsync_pattern[1])},
-        {"opengl-restrict", OPT_INT(restrict_version)},
+        {"opengl-restrict", OPT_REMOVED(NULL)},
         {"opengl-es", OPT_CHOICE(gles_mode,
             {"auto", GLES_AUTO}, {"yes", GLES_YES}, {"no", GLES_NO})},
         {"opengl-early-flush", OPT_CHOICE(early_flush,
@@ -100,12 +99,6 @@ bool ra_gl_ctx_test_version(struct ra_ctx *ctx, int version, bool es)
     struct opengl_opts *opts;
     void *tmp = talloc_new(NULL);
     opts = mp_get_config_group(tmp, ctx->global, &opengl_conf);
-
-    // Version too high
-    if (opts->restrict_version && version >= opts->restrict_version) {
-        ret = false;
-        goto done;
-    }
 
     switch (opts->gles_mode) {
     case GLES_YES:  ret = es;   goto done;

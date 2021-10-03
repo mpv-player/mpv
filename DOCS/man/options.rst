@@ -6101,13 +6101,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     no
         Only allow desktop/core GL
 
-``--opengl-restrict=<version>``
-    Restricts all OpenGL versions above a certain version. Versions are encoded
-    in hundreds, i.e. OpenGL 4.5 -> 450. As an example, --opengl-restrict=300
-    would restrict OpenGL 3.0 and higher, effectively only allowing 2.x
-    contexts. Note that this only imposes a limit on context creation APIs, the
-    actual OpenGL context may still have a higher OpenGL version. (Default: 0)
-
 ``--fbo-format=<fmt>``
     Selects the internal format of textures used for FBOs. The format can
     influence performance and quality of the video output. ``fmt`` can be one
