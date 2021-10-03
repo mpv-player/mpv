@@ -92,9 +92,8 @@ static void *mpegl_get_proc_address(void *ctx, const char *name)
     return p;
 }
 
-// es_version: 0 (core), 2 or 3
 static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
-                           int es_version, struct mpegl_cb cb,
+                           bool es, struct mpegl_cb cb,
                            EGLContext *out_context, EGLConfig *out_config)
 {
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_FATAL;
@@ -103,23 +102,14 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     EGLint rend;
     const char *name;
 
-    switch (es_version) {
-    case 0:
+    if (!es) {
         api = EGL_OPENGL_API;
         rend = EGL_OPENGL_BIT;
         name = "Desktop OpenGL";
-        break;
-    case 2:
+    } else {
         api = EGL_OPENGL_ES_API;
-        rend = EGL_OPENGL_ES2_BIT;
-        name = "GLES 2.x";
-        break;
-    case 3:
-        api = EGL_OPENGL_ES_API;
-        rend = EGL_OPENGL_ES3_BIT;
-        name = "GLES 3.x";
-        break;
-    default: abort();
+        rend = EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES3_BIT;
+        name = "GLES 2.x +";
     }
 
     MP_VERBOSE(ctx, "Trying to create %s context.\n", name);
@@ -173,12 +163,12 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
 
     EGLContext *egl_ctx = NULL;
 
-    if (es_version) {
-        if (!ra_gl_ctx_test_version(ctx, MPGL_VER(es_version, 0), true))
+    if (es) {
+        if (!ra_gl_ctx_test_version(ctx, MPGL_VER(2, 0), true))
             return false;
 
         EGLint attrs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, es_version,
+            EGL_CONTEXT_CLIENT_VERSION, 2,
             EGL_NONE
         };
 
@@ -256,11 +246,10 @@ bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
     MP_VERBOSE(ctx, "EGL_VERSION=%s\nEGL_VENDOR=%s\nEGL_CLIENT_APIS=%s\n",
                STR_OR_ERR(version), STR_OR_ERR(vendor), STR_OR_ERR(apis));
 
-    int es[] = {0, 3, 2}; // preference order
-    for (int i = 0; i < MP_ARRAY_SIZE(es); i++) {
-        if (create_context(ctx, display, es[i], cb, out_context, out_config))
-            return true;
-    }
+    if (create_context(ctx, display, false, cb, out_context, out_config))
+        return true;
+    if (create_context(ctx, display, true, cb, out_context, out_config))
+        return true;
 
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
     MP_MSG(ctx, msgl, "Could not create a GL context.\n");
