@@ -3384,7 +3384,7 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
             MP_TARRAY_APPEND(NULL, choices, num, NULL);
         }
         if (opt->type == &m_option_type_obj_settings_list) {
-            struct m_obj_list *objs = opt->priv;
+            const struct m_obj_list *objs = opt->priv;
             int num = 0;
             for (int n = 0; ; n++) {
                 struct m_obj_desc desc = {0};

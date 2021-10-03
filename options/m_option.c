@@ -3311,7 +3311,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
     int op = OP_NONE;
     bool *mark_del = NULL;
     int num_items = obj_settings_list_num_items(dst ? VAL(dst) : 0);
-    struct m_obj_list *ol = opt->priv;
+    const struct m_obj_list *ol = opt->priv;
 
     assert(opt->priv);
 
