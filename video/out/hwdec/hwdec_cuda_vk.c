@@ -63,8 +63,6 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
         .d = 0,
         .format = ra_pl_fmt_get(format),
         .sampleable = true,
-        .sample_mode = format->linear_filter ? PL_TEX_SAMPLE_LINEAR
-                                             : PL_TEX_SAMPLE_NEAREST,
         .export_handle = p_owner->handle_type,
     };
 
