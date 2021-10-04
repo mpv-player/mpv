@@ -235,7 +235,6 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
         if (stride != params->stride) {
             // Fall back to uploading via a staging buffer prepared in CPU
             staging = pl_buf_create(gpu, &(struct pl_buf_params) {
-                .type = PL_BUF_TEX_TRANSFER,
                 .size = lines * stride,
                 .memory_type = PL_BUF_MEM_HOST,
                 .host_mapped = true,
@@ -293,16 +292,10 @@ static bool tex_download_pl(struct ra *ra, struct ra_tex_download_params *params
 static struct ra_buf *buf_create_pl(struct ra *ra,
                                     const struct ra_buf_params *params)
 {
-    static const enum pl_buf_type buf_type[] = {
-        [RA_BUF_TYPE_TEX_UPLOAD]     = PL_BUF_TEX_TRANSFER,
-        [RA_BUF_TYPE_SHADER_STORAGE] = PL_BUF_STORAGE,
-        [RA_BUF_TYPE_UNIFORM]        = PL_BUF_UNIFORM,
-        [RA_BUF_TYPE_SHARED_MEMORY]  = 0,
-    };
-
     const struct pl_buf *plbuf = pl_buf_create(get_gpu(ra), &(struct pl_buf_params) {
-        .type = buf_type[params->type],
         .size = params->size,
+        .uniform = params->type == RA_BUF_TYPE_UNIFORM,
+        .storable = params->type == RA_BUF_TYPE_SHADER_STORAGE,
         .host_mapped = params->host_mapped,
         .host_writable = params->host_mutable,
         .initial_data = params->initial_data,
