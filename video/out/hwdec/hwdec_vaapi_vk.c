@@ -46,13 +46,8 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper, bool probing)
         uint32_t offset = p->desc.layers[n].offset[0];
         uint32_t pitch = p->desc.layers[n].pitch[0];
 
-#if PL_API_VER >= 88
         // AMD drivers do not return the size in the surface description, so we
-        // need to query it manually. The reason we guard this logic behind
-        // PL_API_VER >= 88 is that the same drivers also require DRM format
-        // modifier support in order to not produce corrupted textures, so
-        // having this #ifdef merely exists to protect users from combining
-        // too-new mpv with too-old libplacebo.
+        // need to query it manually.
         if (size == 0) {
             size = lseek(fd, 0, SEEK_END);
             if (size == -1) {
@@ -67,7 +62,6 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper, bool probing)
                 return false;
             }
         }
-#endif
 
         struct pl_tex_params tex_params = {
             .w = mp_image_plane_w(&p->layout, n),
@@ -82,12 +76,8 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper, bool probing)
                 },
                 .size = size,
                 .offset = offset,
-#if PL_API_VER >= 88
                 .drm_format_mod = p->desc.objects[id].drm_format_modifier,
-#endif
-#if PL_API_VER >= 106
                 .stride_w = pitch,
-#endif
             },
         };
 
