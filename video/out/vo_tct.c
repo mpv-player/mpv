@@ -18,9 +18,10 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <config.h>
+#include <stdbool.h>
 
 #if HAVE_POSIX
-#include <sys/ioctl.h>
+#   include <sys/ioctl.h>
 #endif
 
 #include <libswscale/swscale.h>
@@ -38,56 +39,46 @@
 
 #define ALGO_PLAIN 1
 #define ALGO_HALF_BLOCKS 2
+
 #define ESC_HIDE_CURSOR "\033[?25l"
 #define ESC_RESTORE_CURSOR "\033[?25h"
 #define ESC_CLEAR_SCREEN "\033[2J"
 #define ESC_CLEAR_COLORS "\033[0m"
+#define ESC_CLEAR_COLORS_LEN 5
 #define ESC_GOTOXY "\033[%d;%df"
+#define ESC_GOTOXY_LEN 11
 #define ESC_COLOR_BG "\033[48;2"
 #define ESC_COLOR_FG "\033[38;2"
 #define ESC_COLOR256_BG "\033[48;5"
 #define ESC_COLOR256_FG "\033[38;5"
+#define ESC_COLOR_LEN 6
+
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
-struct vo_tct_opts {
-    int algo;
-    int width;   // 0 -> default
-    int height;  // 0 -> default
-    int term256;  // 0 -> true color
-};
-
-#define OPT_BASE_STRUCT struct vo_tct_opts
-static const struct m_sub_options vo_tct_conf = {
-    .opts = (const m_option_t[]) {
-        {"vo-tct-algo", OPT_CHOICE(algo,
-            {"plain", ALGO_PLAIN},
-            {"half-blocks", ALGO_HALF_BLOCKS})},
-        {"vo-tct-width", OPT_INT(width)},
-        {"vo-tct-height", OPT_INT(height)},
-        {"vo-tct-256", OPT_FLAG(term256)},
-        {0}
-    },
-    .defaults = &(const struct vo_tct_opts) {
-        .algo = ALGO_HALF_BLOCKS,
-    },
-    .size = sizeof(struct vo_tct_opts),
-};
-
-struct lut_item {
+typedef struct lut_item {
     char str[4];
     int width;
-};
+} lut_item_t;
 
 struct priv {
-    struct vo_tct_opts *opts;
+    // User specified options
+    int opt_algo;
+    int opt_width;   // 0 -> default
+    int opt_height;  // 0 -> default
+    int opt_term256;  // 0 -> true color
+    
+    // Internal data
     size_t buffer_size;
-    int swidth;
-    int sheight;
-    struct mp_image *frame;
-    struct mp_rect src;
-    struct mp_rect dst;
+    int    swidth;
+    int    sheight;
+    
+    struct mp_rect    src;
+    struct mp_rect    dst;
+    struct mp_image  *frame;
     struct mp_sws_context *sws;
+    
+    // int -> str lookup table for faster conversion
     struct lut_item lut[256];
 };
 
@@ -120,96 +111,148 @@ static int rgb_to_x256(uint8_t r, uint8_t g, uint8_t b)
     return color_err <= gray_err ? 16 + color_index() : 232 + gray_index;
 }
 
-static void print_seq3(struct lut_item *lut, const char* prefix,
-                       uint8_t r, uint8_t g, uint8_t b)
+static inline int snprint_seq3(char* buff, lut_item_t *lut, size_t prefix_len,
+                         const char* prefix, uint8_t r, uint8_t g, uint8_t b)
 {
+    memcpy(buff, prefix,     prefix_len);   buff += prefix_len;
+    memcpy(buff, lut[r].str, lut[r].width); buff += lut[r].width;
+    memcpy(buff, lut[g].str, lut[g].width); buff += lut[g].width;
+    memcpy(buff, lut[b].str, lut[b].width); buff += lut[b].width;
+    *buff = 'm';
+    
+    return prefix_len + lut[r].width + lut[g].width + lut[b].width + 1;
+}
+
+static inline int snprint_seq1(char* buff, lut_item_t *lut, size_t prefix_len,
+                         const char* prefix, uint8_t c)
+{
+    memcpy(buff, prefix,     prefix_len);   buff += prefix_len;
+    memcpy(buff, lut[c].str, lut[c].width); buff += lut[c].width;
+    *buff = 'm';
+    
+    return prefix_len + lut[c].width + 1;
+}
+
+// Used for generalizing the code between true-color and xterm-256 options
+// (removes the need to check for it on every pixel). The dummy function is used
+// with ALGO_PLAIN. No inline keyword, because they are made to be pointed at,
+// and not called directly.
+static int __x256_sprint_bg(char* buff, lut_item_t *lut, uint8_t r, uint8_t g, uint8_t b)
+{ return snprint_seq1(buff, lut, ESC_COLOR_LEN, ESC_COLOR256_BG, rgb_to_x256(r, g, b));}
+
+static int __x256_sprint_fg(char* buff, lut_item_t *lut, uint8_t r, uint8_t g, uint8_t b)
+{ return snprint_seq1(buff, lut, ESC_COLOR_LEN, ESC_COLOR256_FG, rgb_to_x256(r, g, b));}
+
+static int __tc_sprint_bg(char* buff, lut_item_t *lut, uint8_t r, uint8_t g, uint8_t b)
+{ return snprint_seq3(buff, lut, ESC_COLOR_LEN, ESC_COLOR_BG, r, g, b); }
+
+static int __tc_sprint_fg(char* buff, lut_item_t *lut, uint8_t r, uint8_t g, uint8_t b)
+{ return snprint_seq3(buff, lut, ESC_COLOR_LEN, ESC_COLOR_FG, r, g, b); }
+
+static int __dummy_sprintf(char* buff, lut_item_t *lut, uint8_t r, uint8_t g, uint8_t b)
+{ return 0; }
+
 // The fwrite implementation is about 25% faster than the printf code
 // (even if we use *.s with the lut values), however,
 // on windows we need to use printf in order to translate escape sequences and
 // UTF8 output for the console.
-#ifndef _WIN32
-    fputs(prefix, stdout);
-    fwrite(lut[r].str, lut[r].width, 1, stdout);
-    fwrite(lut[g].str, lut[g].width, 1, stdout);
-    fwrite(lut[b].str, lut[b].width, 1, stdout);
-    fputc('m', stdout);
-#else
-    printf("%s;%d;%d;%dm", prefix, (int)r, (int)g, (int)b);
-#endif
+static void print_buff(char* buff, int size)
+{
+#   ifndef _WIN32
+#       ifdef __linux__
+            fwrite_unlocked(buff, size, 1, stdout);
+#       else
+            fwrite(buff, size, 1, stdout);
+#       endif
+#   else
+        printf("%.*s", size, buff);
+#   endif
 }
 
-static void print_seq1(struct lut_item *lut, const char* prefix, uint8_t c)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
-#ifndef _WIN32
-    fputs(prefix, stdout);
-    fwrite(lut[c].str, lut[c].width, 1, stdout);
-    fputc('m', stdout);
-#else
-    printf("%s;%dm", prefix, (int)c);
-#endif
-}
+    assert(IMGFMT == IMGFMT_BGR24); // or else the init macro breaks.
+    assert(frame->current->planes[0]);
+    
+    struct priv *p = vo->priv;
+    mp_sws_scale(p->sws, p->frame, frame->current);
+    
+    uint8_t *src   = p->frame->planes[0];
+    int src_stride = p->frame->stride[0];
+    
+    int term_x = (vo->dwidth - p->swidth) / 2;
+    int term_y = (vo->dheight - p->sheight) / 2;
+    
+    int max_seq_size  = (p->opt_term256 ? 11 : 19);
+    int max_buff_size = (max_seq_size * 2 + 3) * (p->sheight * p->swidth)
+                      + (10 + 4) * p->sheight // ESC_GOTOXY + ESC_CLEAR_COLORS
+                      + 2; // "\n\0"
+    
+    char *framebuff = malloc(max_buff_size);
+    char *buffptr = framebuff;
+    
+    // Requires a semi-hack (color_rgb_args) to make compatible with other
+    // functions, but doesn't pollute the global fucking namespace with
+    // a generic name.
+    // We are using 16 bit signed ints, because it makes it easier to check
+    // for an unset value.
+    typedef struct color {
+        int16_t b;
+        int16_t g;
+        int16_t r;
+    } color_t;
 
-
-static void write_plain(
-    const int dwidth, const int dheight,
-    const int swidth, const int sheight,
-    const unsigned char *source, const int source_stride,
-    bool term256, struct lut_item *lut)
-{
-    assert(source);
-    const int tx = (dwidth - swidth) / 2;
-    const int ty = (dheight - sheight) / 2;
-    for (int y = 0; y < sheight; y++) {
-        const unsigned char *row = source + y * source_stride;
-        printf(ESC_GOTOXY, ty + y, tx);
-        for (int x = 0; x < swidth; x++) {
-            unsigned char b = *row++;
-            unsigned char g = *row++;
-            unsigned char r = *row++;
-            if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r, g, b));
-            } else {
-                print_seq3(lut, ESC_COLOR_BG, r, g, b);
-            }
-            printf(" ");
-        }
-        printf(ESC_CLEAR_COLORS);
+#   define color_rgb_args(x) (uint8_t)(x).r, (uint8_t)(x).g, (uint8_t)(x).b
+#   define color_buff_inc(x) {.b = *(x)++, .g = *(x)++, .r = *(x)++}
+#   define color_eq(x, y) (((x).b == (y).b) && ((x).g == (y).g) \
+                                            && ((x).r == (y).r))
+    
+    // Use function pointers to generalize the printing functions
+    int (*sprint_bg)(char*, lut_item_t*, uint8_t, uint8_t, uint8_t) = NULL;
+    int (*sprint_fg)(char*, lut_item_t*, uint8_t, uint8_t, uint8_t) = NULL;
+    if (p->opt_term256) {
+        sprint_bg = &__x256_sprint_bg;
+        sprint_fg = &__x256_sprint_fg;
+    } else {
+        sprint_bg = &__tc_sprint_bg;
+        sprint_fg = &__tc_sprint_fg;
     }
-    printf("\n");
-}
-
-static void write_half_blocks(
-    const int dwidth, const int dheight,
-    const int swidth, const int sheight,
-    unsigned char *source, int source_stride,
-    bool term256, struct lut_item *lut)
-{
-    assert(source);
-    const int tx = (dwidth - swidth) / 2;
-    const int ty = (dheight - sheight) / 2;
-    for (int y = 0; y < sheight * 2; y += 2) {
-        const unsigned char *row_up = source + y * source_stride;
-        const unsigned char *row_down = source + (y + 1) * source_stride;
-        printf(ESC_GOTOXY, ty + y / 2, tx);
-        for (int x = 0; x < swidth; x++) {
-            unsigned char b_up = *row_up++;
-            unsigned char g_up = *row_up++;
-            unsigned char r_up = *row_up++;
-            unsigned char b_down = *row_down++;
-            unsigned char g_down = *row_down++;
-            unsigned char r_down = *row_down++;
-            if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
-                print_seq1(lut, ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
-            } else {
-                print_seq3(lut, ESC_COLOR_BG, r_up, g_up, b_up);
-                print_seq3(lut, ESC_COLOR_FG, r_down, g_down, b_down);
-            }
-            printf("\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
-        }
-        printf(ESC_CLEAR_COLORS);
+    if (p->opt_algo == ALGO_PLAIN) {
+        sprint_fg = &__dummy_sprintf;
     }
-    printf("\n");
+
+    // "\xe2\x96\x84" are the UTF8 bytes of U+2584 (lower half block)
+    const char* pixel_char = (p->opt_algo == ALGO_PLAIN ?
+                              " " : "\xe2\x96\x84");
+    int pixel_char_len = (p->opt_algo == ALGO_PLAIN ? 2 : 4);
+    
+    for (int y = 0; y < p->sheight * 2; y += 2) {
+        uint8_t *row_up   = src + y * src_stride;
+        uint8_t *row_down = src + (y + 1) * src_stride;
+        
+        buffptr += snprintf(buffptr, ESC_GOTOXY_LEN, ESC_GOTOXY,
+                            term_y + y / 2, term_x);
+        color_t old_up   = {-1, -1, -1};
+        color_t old_down = {-1, -1, -1};
+        
+        for (int x = 0; x < p->swidth; ++x) {
+            color_t up =   color_buff_inc(row_up);
+            color_t down = color_buff_inc(row_down);
+            
+            if (!color_eq(old_up, up))
+                buffptr += sprint_bg(buffptr, p->lut, color_rgb_args(up));
+            if (!color_eq(old_down, down))
+                buffptr += sprint_fg(buffptr, p->lut, color_rgb_args(down));
+            
+            buffptr += snprintf(buffptr, pixel_char_len, "%s", pixel_char);
+            old_down = down;
+            old_up = up;
+        }
+        buffptr += snprintf(buffptr, ESC_CLEAR_COLORS_LEN, ESC_CLEAR_COLORS);
+    }
+    *buffptr++ = '\n';
+    print_buff(framebuff, buffptr - framebuff);
+    free(framebuff);
 }
 
 static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
@@ -219,10 +262,10 @@ static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
 
     terminal_get_size(out_width, out_height);
 
-    if (p->opts->width > 0)
-        *out_width = p->opts->width;
-    if (p->opts->height > 0)
-        *out_height = p->opts->height;
+    if (p->opt_width > 0)
+        *out_width = p->opt_width;
+    if (p->opt_height > 0)
+        *out_height = p->opt_height;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -245,7 +288,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         .p_h = 1,
     };
 
-    const int mul = (p->opts->algo == ALGO_PLAIN ? 1 : 2);
+    // We still have to alloc the same ammount as for ALGO_HALF_BLOCKS,
+    // because we just use the upper of 2 rows (cleaner code)
+    const int mul = (p->opt_algo == ALGO_PLAIN ? 2 : 2);
     if (p->frame)
         talloc_free(p->frame);
     p->frame = mp_image_alloc(IMGFMT, p->swidth, p->sheight * mul);
@@ -261,37 +306,19 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
-{
-    struct priv *p = vo->priv;
-    struct mp_image src = *mpi;
-    // XXX: pan, crop etc.
-    mp_sws_scale(p->sws, p->frame, &src);
-    talloc_free(mpi);
-}
-
 static void flip_page(struct vo *vo)
 {
-    struct priv *p = vo->priv;
-
     int width, height;
     get_win_size(vo, &width, &height);
-
+    
     if (vo->dwidth != width || vo->dheight != height)
         reconfig(vo, vo->params);
-
-    if (p->opts->algo == ALGO_PLAIN) {
-        write_plain(
-            vo->dwidth, vo->dheight, p->swidth, p->sheight,
-            p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256, p->lut);
-    } else {
-        write_half_blocks(
-            vo->dwidth, vo->dheight, p->swidth, p->sheight,
-            p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256, p->lut);
-    }
-    fflush(stdout);
+    
+#   ifdef __linux__
+        fflush_unlocked(stdout);
+#   else
+        fflush(stdout);
+#   endif
 }
 
 static void uninit(struct vo *vo)
@@ -311,7 +338,6 @@ static int preinit(struct vo *vo)
     vo->monitor_par = vo->opts->monitor_pixel_aspect * 2;
 
     struct priv *p = vo->priv;
-    p->opts = mp_get_config_group(vo, vo->global, &vo_tct_conf);
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
@@ -319,7 +345,8 @@ static int preinit(struct vo *vo)
     for (int i = 0; i < 256; ++i) {
         char buff[8];
         p->lut[i].width = sprintf(buff, ";%d", i);
-        memcpy(p->lut[i].str, buff, 4); // some strings may not end on a null byte, but that's ok.
+        // some strings may not end on a null byte, but that's ok.
+        memcpy(p->lut[i].str, buff, 4);
     }
 
     return 0;
@@ -335,6 +362,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
+#define OPT_BASE_STRUCT struct priv
 const struct vo_driver video_out_tct = {
     .name = "tct",
     .description = "true-color terminals",
@@ -342,9 +370,24 @@ const struct vo_driver video_out_tct = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
-    .global_opts = &vo_tct_conf,
+    .priv_defaults = &(const struct priv) {
+        .opt_algo = ALGO_HALF_BLOCKS,
+        .opt_term256 = 0,
+        .opt_height = 0,
+        .opt_width = 0
+    },
+    .options = (const m_option_t[]) {
+        {"algo", OPT_CHOICE(opt_algo,
+            {"plain", ALGO_PLAIN},
+            {"half-blocks", ALGO_HALF_BLOCKS})},
+        {"width", OPT_INT(opt_width)},
+        {"height", OPT_INT(opt_height)},
+        {"256", OPT_FLAG(opt_term256)},
+        {0}
+    },
+    .options_prefix = "vo-tct"
 };
