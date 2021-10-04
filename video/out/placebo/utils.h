@@ -4,6 +4,7 @@
 #include "common/msg.h"
 
 #include <libplacebo/common.h>
+#include <libplacebo/context.h>
 
 void mppl_ctx_set_log(struct pl_context *ctx, struct mp_log *log, bool probing);
 
