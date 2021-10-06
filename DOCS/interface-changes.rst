@@ -43,6 +43,7 @@ Interface changes
     - add a `--watch-later-options` option to allow configuring which
       options quit-watch-later saves
     - make `current-window-scale` writeable and use it in the default input.conf
+    - new startup-only option --no-input-builtin-bindings (useful with libmpv).
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
       when the player enters fullscreen.
