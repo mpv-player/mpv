@@ -18,10 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # Increase -N suffix here to force full rebuild after changes
       - uses: actions/cache@v2
         with:
           path: mingw_prefix/
-          key: ${{ matrix.target }}
+          key: "${{ matrix.target }}-1"
 
       - name: Install dependencies
         run: |

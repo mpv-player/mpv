@@ -99,7 +99,7 @@ fi
 
 ## freetype2
 if [ ! -e "$prefix_dir/lib/libfreetype.dll.a" ]; then
-    ver=2.10.2
+    ver=2.11.0
     gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.gz"
     builddir freetype-${ver}
     ZLIB_LIBS="-L'$prefix_dir/lib' -lz" \
@@ -111,7 +111,7 @@ fi
 
 ## fribidi
 if [ ! -e "$prefix_dir/lib/libfribidi.dll.a" ]; then
-    ver=1.0.9
+    ver=1.0.11
     gettar "https://github.com/fribidi/fribidi/releases/download/v${ver}/fribidi-${ver}.tar.xz"
     builddir fribidi-${ver}
     ../configure --host=$TARGET $commonflags
@@ -121,7 +121,7 @@ fi
 
 ## harfbuzz
 if [ ! -e "$prefix_dir/lib/libharfbuzz.dll.a" ]; then
-    ver=2.7.2
+    ver=3.0.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     ../configure --host=$TARGET $commonflags --with-icu=no
