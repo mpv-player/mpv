@@ -3842,6 +3842,11 @@ Input
     using ``mp.add_key_binding`` (but not ``mp.add_forced_key_binding``).
     This might change in the future to exclude ``mp.add_key_binding``.
 
+``--no-input-builtin-bindings``
+    Disable loading of built-in key bindings during start-up. This option is
+    applied only during (lib)mpv initialization, and if used then it will not
+    be not possible to enable them later. May be useful to libmpv clients.
+
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
 
