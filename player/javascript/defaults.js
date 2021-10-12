@@ -769,12 +769,16 @@ g.mp_event_loop = function mp_event_loop() {
     } while (mp.keep_running);
 };
 
-})(this)
 
 // let the user extend us, e.g. by adding items to mp.module_paths
-// (unlike e.g. read_file, file_info doesn't expand meta-paths)
-if (mp.get_property_bool("config") &&  // --no-config disables custom init
-    mp.utils.file_info(mp.utils.get_user_path("~~/.init.js")))
-{
-    require("~~/.init");
+if (mp.get_property_bool("config")) {  // --no-config disables custom init
+    // file_info doesn't expand meta-paths (other file functions do)
+    var file_info = mp.utils.file_info, user_path = mp.utils.get_user_path;
+
+    if (file_info(user_path("~~/init.js")))
+        require("~~/init");
+    else if (file_info(user_path("~~/.init.js")))
+        mp.msg.warn("Config file ~~/.init.js is ignored. Use ~~/init.js");
 }
+
+})(this)

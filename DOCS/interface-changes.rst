@@ -47,6 +47,8 @@ Interface changes
       bindings during start-up (default: yes).
     - add ``track-list/N/image`` sub-property
     - remove `--opengl-restrict` option
+    - js custom-init: use filename ~~/init.js instead of ~~/.init.js (dot)
+
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
       when the player enters fullscreen.

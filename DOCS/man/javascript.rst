@@ -336,7 +336,7 @@ Custom initialization
 ---------------------
 
 After mpv initializes the JavaScript environment for a script but before it
-loads the script - it tries to run the file ``.init.js`` at the root of the mpv
+loads the script - it tries to run the file ``init.js`` at the root of the mpv
 configuration directory. Code at this file can update the environment further
 for all scripts. E.g. if it contains ``mp.module_paths.push("/foo")`` then
 ``require`` at all scripts will search global module id's also at ``/foo``
@@ -344,6 +344,8 @@ for all scripts. E.g. if it contains ``mp.module_paths.push("/foo")`` then
 paths - like ``<script-dir>/modules`` for scripts which load from a directory).
 
 The custom-init file is ignored if mpv is invoked with ``--no-config``.
+
+Before mpv 0.34, the file name was ``.init.js`` (with dot) at the same dir.
 
 The event loop
 --------------
