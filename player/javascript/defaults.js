@@ -773,5 +773,8 @@ g.mp_event_loop = function mp_event_loop() {
 
 // let the user extend us, e.g. by adding items to mp.module_paths
 // (unlike e.g. read_file, file_info doesn't expand meta-paths)
-if (mp.utils.file_info(mp.utils.get_user_path("~~/.init.js")))
+if (mp.get_property_bool("config") &&  // --no-config disables custom init
+    mp.utils.file_info(mp.utils.get_user_path("~~/.init.js")))
+{
     require("~~/.init");
+}

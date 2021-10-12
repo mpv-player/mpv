@@ -343,6 +343,8 @@ for all scripts. E.g. if it contains ``mp.module_paths.push("/foo")`` then
 (do NOT do ``mp.module_paths = ["/foo"];`` because this will remove existing
 paths - like ``<script-dir>/modules`` for scripts which load from a directory).
 
+The custom-init file is ignored if mpv is invoked with ``--no-config``.
+
 The event loop
 --------------
 
