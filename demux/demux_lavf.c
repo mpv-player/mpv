@@ -714,6 +714,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
                 strcmp(priv->avif->name, "image2pipe") == 0
             )) {
             MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
+            sh->image = true;
             sh->codec->fps = priv->mf_fps;
         }
         sh->codec->par_w = st->sample_aspect_ratio.num;

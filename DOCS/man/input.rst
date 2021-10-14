@@ -2838,11 +2838,15 @@ Property list
     ``track-list/N/lang``
         Track language as identified by the file. Not always available.
 
-    ``track-list/N/albumart``
+    ``track-list/N/image``
         ``yes``/true if this is a video track that consists of a single
-        picture, ``no``/false or unavailable otherwise. This is used for video
-        tracks that are really images embedded in audio files and for external
-        cover art.
+        picture, ``no``/false or unavailable otherwise. The heuristic used to
+        determine if a stream is an image doesn't attempt to detect images in
+        codecs normally used for videos. Otherwise, it is reliable.
+
+    ``track-list/N/albumart``
+        ``yes``/true if this is an image embedded in an audio file or external
+        cover art, ``no``/false or unavailable otherwise.
 
     ``track-list/N/default``
         ``yes``/true if the track has the default flag set in the file,
@@ -2936,6 +2940,7 @@ Property list
                 "src-id"            MPV_FORMAT_INT64
                 "title"             MPV_FORMAT_STRING
                 "lang"              MPV_FORMAT_STRING
+                "image"             MPV_FORMAT_FLAG
                 "albumart"          MPV_FORMAT_FLAG
                 "default"           MPV_FORMAT_FLAG
                 "forced"            MPV_FORMAT_FLAG

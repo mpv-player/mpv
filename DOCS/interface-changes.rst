@@ -45,6 +45,7 @@ Interface changes
     - make `current-window-scale` writeable and use it in the default input.conf
     - add `--input-builtin-bindings` flag to control loading of built-in key
       bindings during start-up (default: yes).
+    - add ``track-list/N/image`` sub-property
 
  --- mpv 0.33.0 ---
     - add `--d3d11-exclusive-fs` flag to enable D3D11 exclusive fullscreen mode
