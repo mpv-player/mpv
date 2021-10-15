@@ -107,14 +107,18 @@ function is_enough_time(seconds)
     return playtime_remaining and time_needed < playtime_remaining
 end
 
-function is_cropable()
-    for _, track in pairs(mp.get_property_native('track-list')) do
-        if track.type == 'video' and track.selected then
-            return not track.albumart
-        end
+function is_cropable(time_needed)
+    if mp.get_property_native('current-tracks/video/image') ~= false then
+        mp.msg.warn("autocrop only works for videos.")
+        return false
     end
 
-    return false
+    if not is_enough_time(time_needed) then
+        mp.msg.warn("Not enough time to detect crop.")
+        return false
+    end
+
+    return true
 end
 
 function remove_filter(label)
@@ -142,18 +146,9 @@ function cleanup()
 end
 
 function detect_crop()
-
-    -- If it's not cropable, exit.
-    if not is_cropable() then
-        mp.msg.warn("autocrop only works for videos.")
-        return
-    end
-
-    -- Verify if there is enough time to detect crop.
     local time_needed = options.detect_seconds
 
-    if not is_enough_time(time_needed) then
-        mp.msg.warn("Not enough time to detect crop.")
+    if not is_cropable(time_needed) then
         return
     end
 
@@ -282,8 +277,7 @@ function on_start()
         -- Verify if there is enough time for autocrop.
         local time_needed = options.auto_delay + options.detect_seconds
 
-        if not is_enough_time(time_needed) then
-            mp.msg.warn("Not enough time for autocrop.")
+        if not is_cropable(time_needed) then
             return
         end
 
