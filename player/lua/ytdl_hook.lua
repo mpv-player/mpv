@@ -96,11 +96,12 @@ end
 local function exec(args)
     msg.debug("Running: " .. table.concat(args, " "))
 
-    local ret = mp.command_native({name = "subprocess",
-                                   args = args,
-                                   capture_stdout = true,
-                                   capture_stderr = true})
-    return ret.status, ret.stdout, ret, ret.killed_by_us
+    return mp.command_native({
+        name = "subprocess",
+        args = args,
+        capture_stdout = true,
+        capture_stderr = true,
+    })
 end
 
 -- return true if it was explicitly set on the command line
@@ -805,9 +806,9 @@ function run_ytdl_hook(url)
     table.insert(command, "--")
     table.insert(command, url)
 
-    local es, json, result, aborted
+    local result
     if ytdl.searched then
-        es, json, result, aborted = exec(command)
+        result = exec(command)
     else
         local separator = platform_is_windows() and ";" or ":"
         if o.ytdl_path:match("[^" .. separator .. "]") then
@@ -825,12 +826,12 @@ function run_ytdl_hook(url)
                 msg.verbose("Found youtube-dl at: " .. ytdl_cmd)
                 ytdl.path = ytdl_cmd
                 command[1] = ytdl.path
-                es, json, result, aborted = exec(command)
+                result = exec(command)
                 break
             else
                 msg.verbose("No youtube-dl found with path " .. path .. exesuf .. " in config directories")
                 command[1] = path
-                es, json, result, aborted = exec(command)
+                result = exec(command)
                 if result.error_string == "init" then
                     msg.verbose("youtube-dl with path " .. path .. exesuf .. " not found in PATH or not enough permissions")
                 else
@@ -844,20 +845,21 @@ function run_ytdl_hook(url)
         ytdl.searched = true
     end
 
-    if aborted then
+    if result.killed_by_us then
         return
     end
 
+    local json = result.stdout
     local parse_err = nil
 
-    if (es ~= 0) or (json == "") then
+    if result.status ~= 0 or json == "" then
         json = nil
     elseif json then
         json, parse_err = utils.parse_json(json)
     end
 
     if (json == nil) then
-        msg.verbose("status:", es)
+        msg.verbose("status:", result.status)
         msg.verbose("reason:", result.error_string)
         msg.verbose("stdout:", result.stdout)
         msg.verbose("stderr:", result.stderr)
@@ -870,10 +872,8 @@ function run_ytdl_hook(url)
             err = err .. "not found or not enough permissions"
         elseif parse_err then
             err = err .. "failed to parse JSON data: " .. parse_err
-        elseif not result.killed_by_us then
-            err = err .. "unexpected error occurred"
         else
-            err = string.format("%s returned '%d'", err, es)
+            err = err .. "unexpected error occurred"
         end
         msg.error(err)
         if parse_err or string.find(ytdl_err, "yt%-dl%.org/bug") then
