@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import shutil
+import subprocess
 import sys
 import fileinput
 from optparse import OptionParser
@@ -48,7 +49,7 @@ def bundle_version():
         version = x.read()
         x.close()
     else:
-        version = sh("./version.sh").strip()
+        version = subprocess.check_output("./version.py", encoding="UTF-8")
     return version
 
 def main():

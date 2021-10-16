@@ -1005,9 +1005,9 @@ def __write_version__(ctx):
     ctx.env.VERSIONSH_CWD = [ctx.srcnode.abspath()]
 
     ctx(
-        source = 'version.sh',
+        source = 'version.py',
         target = 'generated/version.h',
-        rule   = 'sh ${SRC} ${CWD_ST:VERSIONSH_CWD} ${VERSIONH_ST:TGT}',
+        rule   = '${SRC} ${TGT}',
         always = True,
         update_outputs = True)
 
