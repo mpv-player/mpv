@@ -1193,16 +1193,8 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
         if (!s->tex)
             continue;
 
-        // We need to rescale the coordinates to the true texture size
-        char *tex_scale = mp_tprintf(32, "tex_scale%d", n);
-        gl_sc_uniform_vec2(p->sc, tex_scale, (float[2]){
-                (float)s->w / s->tex->params.w,
-                (float)s->h / s->tex->params.h,
-        });
-
-        PRELUDE("#define texmap%d_raw(id) (tex_scale%d * outcoord(id))\n", n, n);
-        PRELUDE("#define texmap%d(id) (texture_rot%d * texmap%d_raw(id) + "
-               "pixel_size%d * texture_off%d)\n", n, n, n, n, n);
+        PRELUDE("#define texmap%d(id) (texture_rot%d * outcoord(id) + "
+               "pixel_size%d * texture_off%d)\n", n, n, n, n);
         PRELUDE("#define texcoord%d texmap%d(gl_GlobalInvocationID)\n", n, n);
     }
 
