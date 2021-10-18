@@ -1264,7 +1264,8 @@ Video
     :dxva2-copy: copies video back to system RAM (Windows only)
     :vdpau:     requires ``--vo=gpu`` with X11, or ``--vo=vdpau`` (Linux only)
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
-    :mediacodec: requires ``--vo=mediacodec_embed`` (Android only)
+    :mediacodec: requires ``--vo=gpu --gpu-context=android``
+                 or ``--vo=mediacodec_embed`` (Android only)
     :mediacodec-copy: copies video back to system RAM (Android only)
     :mmal:      requires ``--vo=gpu`` (Raspberry Pi only - default if available)
     :mmal-copy: copies video back to system RAM (Raspberry Pi only)
@@ -1363,6 +1364,11 @@ Video
 
         ``rpi`` always uses the hardware overlay renderer, even with
         ``--vo=gpu``.
+
+        ``mediacodec`` is not safe. It forces RGB conversion (not with ``-copy``)
+        and how well it handles non-standard colorspaces is not known.
+        In the rare cases where 10-bit is supported the bit depth of the output
+        will be reduced to 8.
 
         ``cuda`` should usually be safe, but depending on how a file/stream
         has been mixed, it has been reported to corrupt the timestamps causing
@@ -3317,7 +3323,7 @@ Window
     On Android, the ID is interpreted as ``android.view.Surface``. Pass it as a
     value cast to ``intptr_t``. Use with ``--vo=mediacodec_embed`` and
     ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with
-    ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec-copy``).
+    ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec``).
 
 ``--no-window-dragging``
     Don't move the window when clicking on it and moving the mouse pointer.

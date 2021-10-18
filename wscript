@@ -162,6 +162,12 @@ main_dependencies = [
         'desc': 'Android environment',
         'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
     }, {
+        'name': '--android-media-ndk',
+        'desc': 'Android Media APIs',
+        'deps': 'android',
+        # header only, library is dynamically loaded
+        'func': check_statement('media/NdkImageReader.h', 'int x = AIMAGE_FORMAT_PRIVATE'),
+    }, {
         'name': '--tvos',
         'desc': 'tvOS environment',
         'func': check_statement(
