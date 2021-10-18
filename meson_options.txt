@@ -94,6 +94,7 @@ option('x11', type: 'feature', value: 'auto', description: 'X11')
 option('xv', type: 'feature', value: 'auto', description: 'Xv video output')
 
 # hwaccel features
+option('android-media-ndk', type: 'feature', value: 'auto', description: 'Android Media APIs')
 option('cuda-hwaccel', type: 'feature', value: 'auto', description: 'CUDA acceleration')
 option('cuda-interop', type: 'feature', value: 'auto', description: 'CUDA with graphics interop')
 option('d3d-hwaccel', type: 'feature', value: 'auto', description: 'D3D11VA hwaccel')

@@ -1264,6 +1264,15 @@ if features['ffnvcodec']
     sources += files('video/cuda.c')
 endif
 
+android_media_ndk = get_option('android-media-ndk').require(
+    features['android'] and cc.has_header_symbol('media/NdkImageReader.h', 'AIMAGE_FORMAT_PRIVATE')
+)
+features += {'android-media-ndk': android_media_ndk.allowed()}
+if features['android-media-ndk']
+    # header only, library is dynamically loaded
+    sources += files('video/out/hwdec/hwdec_aimagereader.c')
+endif
+
 cuda_hwaccel = get_option('cuda-hwaccel').require(
     features['ffnvcodec'],
     error_message: 'ffnvcodec was not found!',

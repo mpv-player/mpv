@@ -469,6 +469,7 @@ def build(ctx):
         ( "video/out/gpu/video.c" ),
         ( "video/out/gpu/video_shaders.c" ),
         ( "video/out/gpu_next/context.c",        "libplacebo-next" ),
+        ( "video/out/hwdec/hwdec_aimagereader.c", "android-media-ndk" ),
         ( "video/out/hwdec/hwdec_cuda.c",        "cuda-interop" ),
         ( "video/out/hwdec/hwdec_cuda_gl.c",     "cuda-interop && gl" ),
         ( "video/out/hwdec/hwdec_cuda_vk.c",     "cuda-interop && vulkan" ),
