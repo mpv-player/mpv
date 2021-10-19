@@ -479,12 +479,12 @@ static double AudioTrack_getLatency(struct ao *ao)
     if (!p->timestamp_set &&
         p->format != AudioFormat.ENCODING_IEC61937)
         delay += (double)MP_JNI_CALL_INT(p->audiotrack, AudioTrack.getLatency)/1000.0;
-    if (delay > 1.0) {
+    if (delay > 2.0) {
         //MP_WARN(ao, "getLatency: written=%u playhead=%u diff=%u delay=%f\n", p->written_frames, playhead, diff, delay);
         p->timestamp_fetched = 0;
         return 0;
     }
-    return MPCLAMP(delay, 0.0, 1.0);
+    return MPCLAMP(delay, 0.0, 2.0);
 }
 
 static int AudioTrack_write(struct ao *ao, int len)
