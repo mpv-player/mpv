@@ -721,8 +721,8 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    int min = 0.200 * p->samplerate * af_fmt_to_bytes(ao->format);
-    int max = min * 3 / 2;
+    int min = 0.075 * p->samplerate * af_fmt_to_bytes(ao->format) * ao->channels.num;
+    int max = min * 2;
     p->size = MPCLAMP(buffer_size * 2, min, max);
     MP_VERBOSE(ao, "Setting bufferSize = %d (driver=%d, min=%d, max=%d)\n", p->size, buffer_size, min, max);
     ao->device_buffer = p->size / af_fmt_to_bytes(ao->format);
