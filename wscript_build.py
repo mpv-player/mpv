@@ -129,7 +129,7 @@ def build(ctx):
             target    = "generated/wayland/xdg-decoration-unstable-v1.h")
 
     ctx(features = "ebml_header", target = "generated/ebml_types.h")
-    ctx(features = "ebml_definitions", target = "generated/ebml_defs.c")
+    ctx(features = "ebml_definitions", target = "generated/ebml_defs.inc")
 
     def swift(task):
         src = [x.abspath() for x in task.inputs]
