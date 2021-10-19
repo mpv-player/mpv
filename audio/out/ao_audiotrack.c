@@ -95,6 +95,7 @@ struct JNIAudioTrack {
     jmethodID writeV23;
     jmethodID writeShortV23;
     jmethodID writeBufferV21;
+    jmethodID getBufferSizeInFramesV23;
     jmethodID getPlaybackHeadPosition;
     jmethodID getTimestamp;
     jmethodID getLatency;
@@ -128,6 +129,7 @@ struct JNIAudioTrack {
     {"android/media/AudioTrack", "write", "([BIII)I", MP_JNI_METHOD, OFFSET(writeV23), 0},
     {"android/media/AudioTrack", "write", "([SIII)I", MP_JNI_METHOD, OFFSET(writeShortV23), 0},
     {"android/media/AudioTrack", "write", "(Ljava/nio/ByteBuffer;II)I", MP_JNI_METHOD, OFFSET(writeBufferV21), 1},
+    {"android/media/AudioTrack", "getBufferSizeInFrames", "()I", MP_JNI_METHOD, OFFSET(getBufferSizeInFramesV23), 0},
     {"android/media/AudioTrack", "getTimestamp", "(Landroid/media/AudioTimestamp;)Z", MP_JNI_METHOD, OFFSET(getTimestamp), 1},
     {"android/media/AudioTrack", "getPlaybackHeadPosition", "()I", MP_JNI_METHOD, OFFSET(getPlaybackHeadPosition), 1},
     {"android/media/AudioTrack", "getLatency", "()I", MP_JNI_METHOD, OFFSET(getLatency), 1},
@@ -343,6 +345,14 @@ static int AudioTrack_New(struct ao *ao)
         (*env)->DeleteLocalRef(env, audiotrack);
         MP_ERR(ao, "AudioTrack.getState failed\n");
         return -1;
+    }
+
+    if (AudioTrack.getBufferSizeInFramesV23) {
+        int bufferSize = MP_JNI_CALL_INT(audiotrack, AudioTrack.getBufferSizeInFramesV23);
+        if (bufferSize > 0) {
+            MP_VERBOSE(ao, "AudioTrack.getBufferSizeInFrames = %d\n", bufferSize);
+            ao->device_buffer = bufferSize;
+        }
     }
 
     p->audiotrack = (*env)->NewGlobalRef(env, audiotrack);
