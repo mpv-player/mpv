@@ -720,14 +720,15 @@ static int init(struct ao *ao)
         MP_FATAL(ao, "AudioTrack.getMinBufferSize returned an invalid size: %d", buffer_size);
         return -1;
     }
-    p->chunksize = buffer_size;
-    p->chunk = malloc(buffer_size);
 
     int min = 0.200 * p->samplerate * af_fmt_to_bytes(ao->format);
     int max = min * 3 / 2;
     p->size = MPCLAMP(buffer_size * 2, min, max);
     MP_VERBOSE(ao, "Setting bufferSize = %d (driver=%d, min=%d, max=%d)\n", p->size, buffer_size, min, max);
     ao->device_buffer = p->size / af_fmt_to_bytes(ao->format);
+
+    p->chunksize = p->size;
+    p->chunk = malloc(p->size);
 
     jobject timestamp = MP_JNI_NEW(AudioTimestamp.clazz, AudioTimestamp.ctor);
     if (!timestamp || MP_JNI_EXCEPTION_LOG(ao) < 0) {
