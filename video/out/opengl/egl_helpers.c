@@ -45,6 +45,15 @@
 typedef intptr_t EGLAttrib;
 #endif
 
+// Not every EGL provider (like RPI) has these.
+#ifndef EGL_CONTEXT_FLAGS_KHR
+#define EGL_CONTEXT_FLAGS_KHR EGL_NONE
+#endif
+
+#ifndef EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR
+#define EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR 0
+#endif
+
 struct mp_egl_config_attr {
     int attrib;
     const char *name;
