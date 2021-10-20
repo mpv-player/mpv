@@ -670,6 +670,8 @@ static int script_set_property_number(lua_State *L)
 
 static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
 {
+    luaL_checkstack(L, 6, "makenode");
+
     if (t < 0)
         t = lua_gettop(L) + (t + 1);
     switch (lua_type(L, t)) {
@@ -869,7 +871,7 @@ static int script_get_property_number(lua_State *L)
 
 static void pushnode(lua_State *L, mpv_node *node)
 {
-    luaL_checkstack(L, 6, "stack overflow");
+    luaL_checkstack(L, 6, "pushnode");
 
     switch (node->format) {
     case MPV_FORMAT_STRING:
