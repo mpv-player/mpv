@@ -1092,9 +1092,9 @@ static void vo_x11_check_net_wm_state_change(struct vo *vo)
             XFree(elems);
         }
 
-        if (opts->window_maximized && !is_maximized && x11->pending_geometry_change) {
+        if (opts->window_maximized && !is_maximized && x11->geometry_change) {
+            x11->geometry_change = false;
             vo_x11_config_vo_window(vo);
-            x11->pending_geometry_change = false;
         }
 
         opts->window_minimized = is_minimized;
@@ -1722,6 +1722,10 @@ void vo_x11_config_vo_window(struct vo *vo)
 
     assert(x11->window);
 
+    // Don't attempt to change autofit/geometry on maximized windows.
+    if (x11->geometry_change && opts->window_maximized)
+        return;
+
     vo_x11_update_screeninfo(vo);
 
     struct vo_win_geometry geo;
@@ -1735,7 +1739,9 @@ void vo_x11_config_vo_window(struct vo *vo)
         rc = (struct mp_rect){0, 0, RC_W(x11->winrc), RC_H(x11->winrc)};
     }
 
-    bool reset_size = x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc);
+    bool reset_size = (x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc)) &&
+                      (opts->auto_window_resize || x11->geometry_change);
+
     x11->old_dw = RC_W(rc);
     x11->old_dh = RC_H(rc);
 
@@ -1745,6 +1751,8 @@ void vo_x11_config_vo_window(struct vo *vo)
     } else if (reset_size) {
         vo_x11_highlevel_resize(vo, rc);
     }
+
+    x11->geometry_change = false;
 
     if (opts->ontop)
         vo_x11_setlayer(vo, opts->ontop);
@@ -1961,11 +1969,8 @@ static void vo_x11_set_geometry(struct vo *vo)
     if (!x11->window)
         return;
 
-    if (x11->opts->window_maximized) {
-        x11->pending_geometry_change = true;
-    } else {
-        vo_x11_config_vo_window(vo);
-    }
+    x11->geometry_change = true;
+    vo_x11_config_vo_window(vo);
 }
 
 bool vo_x11_check_visible(struct vo *vo) {
