@@ -1463,10 +1463,10 @@ static int mp_property_demuxer_cache_duration(void *ctx, struct m_property *prop
     struct demux_reader_state s;
     demux_get_reader_state(mpctx->demuxer, &s);
 
-    if (s.ts_duration < 0)
+    if (s.ts_info.duration < 0)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_double_ro(action, arg, s.ts_duration);
+    return m_property_double_ro(action, arg, s.ts_info.duration);
 }
 
 static int mp_property_demuxer_cache_time(void *ctx, struct m_property *prop,
@@ -1479,10 +1479,10 @@ static int mp_property_demuxer_cache_time(void *ctx, struct m_property *prop,
     struct demux_reader_state s;
     demux_get_reader_state(mpctx->demuxer, &s);
 
-    if (s.ts_end == MP_NOPTS_VALUE)
+    if (s.ts_info.end == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_double_ro(action, arg, s.ts_end);
+    return m_property_double_ro(action, arg, s.ts_info.end);
 }
 
 static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
@@ -1518,14 +1518,14 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     struct mpv_node *r = (struct mpv_node *)arg;
     node_init(r, MPV_FORMAT_NODE_MAP, NULL);
 
-    if (s.ts_end != MP_NOPTS_VALUE)
-        node_map_add_double(r, "cache-end", s.ts_end);
+    if (s.ts_info.end != MP_NOPTS_VALUE)
+        node_map_add_double(r, "cache-end", s.ts_info.end);
 
-    if (s.ts_reader != MP_NOPTS_VALUE)
-        node_map_add_double(r, "reader-pts", s.ts_reader);
+    if (s.ts_info.reader != MP_NOPTS_VALUE)
+        node_map_add_double(r, "reader-pts", s.ts_info.reader);
 
-    if (s.ts_duration >= 0)
-        node_map_add_double(r, "cache-duration", s.ts_duration);
+    if (s.ts_info.duration >= 0)
+        node_map_add_double(r, "cache-duration", s.ts_info.duration);
 
     node_map_add_flag(r, "eof", s.eof);
     node_map_add_flag(r, "underrun", s.underrun);
@@ -1542,6 +1542,25 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     node_map_add_int64(r, "debug-byte-level-seeks", s.byte_level_seeks);
     if (s.ts_last != MP_NOPTS_VALUE)
         node_map_add_double(r, "debug-ts-last", s.ts_last);
+
+    struct mpv_node *stream_types =
+        node_map_add(r, "ts-per-stream", MPV_FORMAT_NODE_ARRAY);
+    for (int n = 0; n < STREAM_TYPE_COUNT; n++) {
+        struct demux_ctrl_ts_info ts = s.ts_per_stream[n];
+        if (ts.duration == -1)
+            continue;
+
+        struct mpv_node *st = node_array_add(stream_types, MPV_FORMAT_NODE_MAP);
+        node_map_add_string(st, "type",
+            n == STREAM_VIDEO ? "video" :
+            n == STREAM_AUDIO ? "audio" :
+            n == STREAM_SUB ? "subtitle" : "unknown");
+        node_map_add_double(st, "cache-duration", ts.duration);
+        if (ts.reader != MP_NOPTS_VALUE)
+            node_map_add_double(st, "reader-pts", ts.reader);
+        if (ts.end != MP_NOPTS_VALUE)
+            node_map_add_double(st, "cache-end", ts.end);
+    }
 
     node_map_add_flag(r, "bof-cached", s.bof_cached);
     node_map_add_flag(r, "eof-cached", s.eof_cached);
