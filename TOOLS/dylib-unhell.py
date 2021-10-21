@@ -10,11 +10,13 @@ from functools import partial
 sys_re = re.compile("^/System")
 usr_re = re.compile("^/usr/lib/")
 exe_re = re.compile("@executable_path")
+loader_re = re.compile("@loader_path")
 
 def is_user_lib(objfile, libname):
     return not sys_re.match(libname) and \
            not usr_re.match(libname) and \
            not exe_re.match(libname) and \
+           not loader_re.match(libname) and \
            not "libobjc." in libname and \
            not "libSystem." in libname and \
            not "libc." in libname and \
