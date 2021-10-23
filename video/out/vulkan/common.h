@@ -32,5 +32,6 @@ struct mpvk_ctx {
     const struct pl_vk_inst *vkinst;
     const struct pl_vulkan *vulkan;
     const struct pl_gpu *gpu; // points to vulkan->gpu for convenience
+    const struct pl_swapchain *swapchain;
     VkSurfaceKHR surface;
 };
