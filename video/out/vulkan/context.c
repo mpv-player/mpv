@@ -115,7 +115,6 @@ struct priv {
     struct mpvk_ctx *vk;
     struct vulkan_opts *opts;
     struct ra_vk_ctx_params params;
-    const struct pl_swapchain *swapchain;
     struct ra_tex proxy_tex;
 };
 
@@ -140,7 +139,7 @@ void ra_vk_ctx_uninit(struct ra_ctx *ctx)
 
     if (ctx->ra) {
         pl_gpu_finish(vk->gpu);
-        pl_swapchain_destroy(&p->swapchain);
+        pl_swapchain_destroy(&vk->swapchain);
         ctx->ra->fns->destroy(ctx->ra);
         ctx->ra = NULL;
     }
@@ -195,8 +194,8 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     if (p->opts->swap_mode >= 0) // user override
         pl_params.present_mode = p->opts->swap_mode;
 
-    p->swapchain = pl_vulkan_create_swapchain(vk->vulkan, &pl_params);
-    if (!p->swapchain)
+    vk->swapchain = pl_vulkan_create_swapchain(vk->vulkan, &pl_params);
+    if (!vk->swapchain)
         goto error;
 
     return true;
@@ -210,7 +209,7 @@ bool ra_vk_ctx_resize(struct ra_ctx *ctx, int width, int height)
 {
     struct priv *p = ctx->swapchain->priv;
 
-    bool ok = pl_swapchain_resize(p->swapchain, &width, &height);
+    bool ok = pl_swapchain_resize(p->vk->swapchain, &width, &height);
     ctx->vo->dwidth = width;
     ctx->vo->dheight = height;
 
@@ -245,7 +244,7 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
         start = p->params.start_frame(sw->ctx);
     if (!start)
         return false;
-    if (!pl_swapchain_start_frame(p->swapchain, &frame))
+    if (!pl_swapchain_start_frame(p->vk->swapchain, &frame))
         return false;
     if (!mppl_wrap_tex(sw->ctx->ra, frame.fbo, &p->proxy_tex))
         return false;
@@ -261,13 +260,13 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
 {
     struct priv *p = sw->priv;
-    return pl_swapchain_submit_frame(p->swapchain);
+    return pl_swapchain_submit_frame(p->vk->swapchain);
 }
 
 static void swap_buffers(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
-    pl_swapchain_swap_buffers(p->swapchain);
+    pl_swapchain_swap_buffers(p->vk->swapchain);
     if (p->params.swap_buffers)
         p->params.swap_buffers(sw->ctx);
 }
