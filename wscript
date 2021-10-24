@@ -412,10 +412,14 @@ FFmpeg libraries. Git master is recommended."
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 57.0.0'),
     }, {
-        'name': '--ffmpeg-strict-abi',
-        'desc': 'Disable all known FFmpeg ABI violations',
-        'func': check_true,
-        'default': 'enable',
+        # The following should be removed in 2022 or if libavformat requirement
+        # is bumped to >= 59.8.100
+        'name': 'ffmpeg-aviocontext-bytes-read',
+        'desc': 'FFmpeg AVIOContext bytes_read statistic field',
+        'deps': 'ffmpeg',
+        'func': check_statement(['libavformat/avio.h'],
+                                '(struct AVIOContext){ 0 }.bytes_read = 7357',
+                                use=['ffmpeg']),
     }
 ]
 
