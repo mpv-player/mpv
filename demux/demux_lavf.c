@@ -257,22 +257,20 @@ typedef struct lavf_priv {
 
 static void update_read_stats(struct demuxer *demuxer)
 {
+#if !HAVE_FFMPEG_AVIOCONTEXT_BYTES_READ
+    return;
+#else
     lavf_priv_t *priv = demuxer->priv;
 
     for (int n = 0; n < priv->num_nested; n++) {
         struct nested_stream *nest = &priv->nested[n];
 
-#if !HAVE_FFMPEG_STRICT_ABI
-        // Note: accessing the bytes_read field is not allowed by FFmpeg's API.
-        // This is fully intentional - there is no other way to get this
-        // information (not even by custom I/O, because the connection reuse
-        // mechanism by the HLS demuxer would get disabled).
         int64_t cur = nest->id->bytes_read;
         int64_t new = cur - nest->last_bytes;
         nest->last_bytes = cur;
         demux_report_unbuffered_read_bytes(demuxer, new);
-#endif
     }
+#endif
 }
 
 // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
