@@ -1506,7 +1506,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
     // Or if preroll is involved, the first preroll packet.
     while (ds->reader_head != target) {
         if (!advance_reader_head(ds))
-            assert(0); // target must be in list
+            MP_UNREACHABLE(); // target must be in list
     }
 
     double seek_pts;

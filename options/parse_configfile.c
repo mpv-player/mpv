@@ -176,7 +176,7 @@ static bstr read_file(struct mp_log *log, const char *filename)
         }
         size += s;
     }
-    assert(0);
+    MP_UNREACHABLE();
 }
 
 // Load options and profiles from from a config file.

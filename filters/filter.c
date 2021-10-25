@@ -372,7 +372,7 @@ static struct mp_pin *find_connected_end(struct mp_pin *p)
             return other;
         p = other->user_conn;
     }
-    assert(0);
+    MP_UNREACHABLE();
 }
 
 // With p being part of a connection, create the pin_connection and set all
