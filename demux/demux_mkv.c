@@ -2872,7 +2872,7 @@ static int read_next_block_into_queue(demuxer_t *demuxer)
         if (mkv_d->cluster_end != EBML_UINT_INVALID)
             mkv_d->cluster_end += stream_tell(s);
     }
-    assert(0); // unreachable
+    MP_UNREACHABLE();
 
 add_block:
     index_block(demuxer, &block);
