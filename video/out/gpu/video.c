@@ -1697,9 +1697,17 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 
     uninit_scaler(p, scaler);
 
+    struct filter_kernel bare_window;
     const struct filter_kernel *t_kernel = mp_find_filter_kernel(conf->kernel.name);
     const struct filter_window *t_window = mp_find_filter_window(conf->window.name);
     bool is_tscale = scaler->index == SCALER_TSCALE;
+    if (!t_kernel) {
+        const struct filter_window *window = mp_find_filter_window(conf->kernel.name);
+        if (window) {
+            bare_window = (struct filter_kernel) { .f = *window };
+            t_kernel = &bare_window;
+        }
+    }
 
     scaler->conf = *conf;
     scaler->conf.kernel.name = (char *)handle_scaler_opt(conf->kernel.name, is_tscale);
@@ -3992,6 +4000,10 @@ static const char *handle_scaler_opt(const char *name, bool tscale)
         if (kernel && (!tscale || !kernel->polar))
                 return kernel->f.name;
 
+        const struct filter_window *window = mp_find_filter_window(name);
+        if (window)
+            return window->name;
+
         for (const char *const *filter = tscale ? fixed_tscale_filters
                                                 : fixed_scale_filters;
              *filter; filter++) {
@@ -4104,6 +4116,14 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
         for (int n = 0; mp_filter_kernels[n].f.name; n++) {
             if (!tscale || !mp_filter_kernels[n].polar)
                 mp_info(log, "    %s\n", mp_filter_kernels[n].f.name);
+        }
+        for (int n = 0; mp_filter_windows[n].name; n++) {
+            for (int m = 0; mp_filter_kernels[m].f.name; m++) {
+                if (!strcmp(mp_filter_windows[n].name, mp_filter_kernels[m].f.name))
+                    goto next_window; // don't log duplicates
+            }
+            mp_info(log, "    %s\n", mp_filter_windows[n].name);
+next_window: ;
         }
         if (s[0])
             mp_fatal(log, "No scaler named '%s' found!\n", s);
