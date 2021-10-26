@@ -763,6 +763,10 @@ Program Behavior
     The default is a subdirectory named "watch_later" underneath the
     config directory (usually ``~/.config/mpv/``).
 
+``--watch-later-effective-path=<string>``
+    Use the specified string instead of the current file name for saving
+    and resuming.
+
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To
