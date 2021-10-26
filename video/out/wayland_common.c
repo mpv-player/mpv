@@ -1793,8 +1793,7 @@ int vo_wayland_reconfig(struct vo *vo)
 
     set_geometry(wl);
 
-    if (wl->vo_opts->keepaspect)
-        wl->window_size = wl->vdparams;
+    wl->window_size = wl->vdparams;
 
     if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
         wl->geometry = wl->window_size;
