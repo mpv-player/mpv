@@ -944,19 +944,19 @@ static struct mp_filter *lavfi_create(struct mp_filter *parent, void *options)
     return l ? l->f : NULL;
 }
 
-static bool is_single_media_only(const AVFilterPad *pads, int media_type)
-{
-    int count = avfilter_pad_count(pads);
-    if (count != 1)
-        return false;
-    return avfilter_pad_get_type(pads, 0) == media_type;
-}
-
 // Does it have exactly one video input and one video output?
 static bool is_usable(const AVFilter *filter, int media_type)
 {
-    return is_single_media_only(filter->inputs, media_type) &&
-           is_single_media_only(filter->outputs, media_type);
+#if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(8, 3, 0)
+    int nb_inputs  = avfilter_filter_pad_count(filter, 0),
+        nb_outputs = avfilter_filter_pad_count(filter, 1);
+#else
+    int nb_inputs  = avfilter_pad_count(filter->inputs),
+        nb_outputs = avfilter_pad_count(filter->outputs);
+#endif
+    return nb_inputs == 1 && nb_outputs == 1 &&
+           avfilter_pad_get_type(filter->inputs, 0) == media_type &&
+           avfilter_pad_get_type(filter->outputs, 0) == media_type;
 }
 
 bool mp_lavfi_is_usable(const char *name, int media_type)
