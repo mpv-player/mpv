@@ -433,23 +433,28 @@ need to escape special characters. To work this around, the path can be
 additionally wrapped in the fixed-length syntax, e.g. ``%n%string_of_length_n``
 (see above).
 
-Some mpv options interpret paths starting with ``~``. Currently, the prefix
-``~~/`` expands to the mpv configuration directory (usually ``~/.config/mpv/``).
+Some mpv options interpret paths starting with ``~``.
+Currently, the prefix ``~~home/`` expands to the mpv configuration directory
+(usually ``~/.config/mpv/``).
 ``~/`` expands to the user's home directory. (The trailing ``/`` is always
 required.) The following paths are currently recognized:
 
 ================ ===============================================================
 Name             Meaning
 ================ ===============================================================
-``~~/``          mpv config dir (for example ``~/.config/mpv/``)
+``~~/``          If the subpath exists in any of the mpv's config directories
+                 the path of the existing file/dir is returned. Otherwise this
+                 is equivalent to ``~~home/``.
+                 Note that if --no-config is used ``~~/foobar`` will resolve to
+                 ``foobar`` which can be unexpected.
 ``~/``           user home directory root (similar to shell, ``$HOME``)
-``~~home/``      same as ``~~/``
+``~~home/``      mpv config dir (for example ``~/.config/mpv/``)
 ``~~global/``    the global config path, if available (not on win32)
 ``~~osxbundle/`` the macOS bundle resource path (macOS only)
 ``~~desktop/``   the path to the desktop (win32, macOS)
-``~~exe_dir``    win32 only: the path to the directory containing the exe (for
+``~~exe_dir/``   win32 only: the path to the directory containing the exe (for
                  config file purposes; ``$MPV_HOME`` overrides it)
-``~~old_home``   do not use
+``~~old_home/``  do not use
 ================ ===============================================================
 
 
