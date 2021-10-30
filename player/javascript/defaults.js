@@ -771,14 +771,10 @@ g.mp_event_loop = function mp_event_loop() {
 
 
 // let the user extend us, e.g. by adding items to mp.module_paths
-if (mp.get_property_bool("config")) {  // --no-config disables custom init
-    // file_info doesn't expand meta-paths (other file functions do)
-    var file_info = mp.utils.file_info, user_path = mp.utils.get_user_path;
-
-    if (file_info(user_path("~~/init.js")))
-        require("~~/init");
-    else if (file_info(user_path("~~/.init.js")))
-        mp.msg.warn("Config file ~~/.init.js is ignored. Use ~~/init.js");
-}
+var initjs = mp.find_config_file("init.js");  // ~~/init.js
+if (initjs)
+    require(initjs.slice(0, -3));  // remove ".js"
+else if ((initjs = mp.find_config_file(".init.js")))
+    mp.msg.warn("Use init.js instead of .init.js (ignoring " + initjs + ")");
 
 })(this)
