@@ -637,7 +637,7 @@ int mp_aframe_pool_allocate(struct mp_aframe_pool *pool, struct mp_aframe *frame
         av_freep(&av_frame->extended_data); // sigh
     if (planes > AV_NUM_DATA_POINTERS) {
         av_frame->extended_data =
-            av_mallocz_array(planes, sizeof(av_frame->extended_data[0]));
+            av_calloc(planes, sizeof(av_frame->extended_data[0]));
         if (!av_frame->extended_data)
             abort();
     } else {
