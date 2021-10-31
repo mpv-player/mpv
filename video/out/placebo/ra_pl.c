@@ -207,22 +207,26 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
     };
 
     const struct pl_buf *staging = NULL;
-
     if (params->tex->params.dimensions == 2) {
-        size_t texel_size = tex->params.format->texel_size;
-        pl_params.stride_w = params->stride / texel_size;
-        size_t stride = pl_params.stride_w * texel_size;
-        int lines = tex->params.h;
         if (params->rc) {
             pl_params.rc = (struct pl_rect3d) {
                 .x0 = params->rc->x0, .x1 = params->rc->x1,
                 .y0 = params->rc->y0, .y1 = params->rc->y1,
             };
-            lines = pl_rect_h(pl_params.rc);
         }
+
+#if PL_API_VER >= 168
+        pl_params.row_pitch = params->stride;
+#else
+        // Older libplacebo uses texel-sized strides, so we have to manually
+        // compensate for possibly misaligned sources (typically rgb24).
+        size_t texel_size = tex->params.format->texel_size;
+        pl_params.stride_w = params->stride / texel_size;
+        size_t stride = pl_params.stride_w * texel_size;
 
         if (stride != params->stride) {
             // Fall back to uploading via a staging buffer prepared in CPU
+            int lines = params->rc ? pl_rect_h(pl_params.rc) : tex->params.h;
             staging = pl_buf_create(gpu, &(struct pl_buf_params) {
                 .size = lines * stride,
                 .memory_type = PL_BUF_MEM_HOST,
@@ -240,6 +244,7 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
             pl_params.buf = staging;
             pl_params.buf_offset = 0;
         }
+#endif
     }
 
     bool ok = pl_tex_upload(gpu, &pl_params);
@@ -250,16 +255,20 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
 static bool tex_download_pl(struct ra *ra, struct ra_tex_download_params *params)
 {
     const struct pl_tex *tex = params->tex->priv;
-    size_t texel_size = tex->params.format->texel_size;
     struct pl_tex_transfer_params pl_params = {
         .tex = tex,
         .ptr = params->dst,
-        .stride_w = params->stride / texel_size,
         .timer = get_active_timer(ra),
     };
 
-    uint8_t *staging = NULL;
+#if PL_API_VER >= 168
+    pl_params.row_pitch = params->stride;
+    return pl_tex_download(get_gpu(ra), &pl_params);
+#else
+    size_t texel_size = tex->params.format->texel_size;
+    pl_params.stride_w = params->stride / texel_size;
     size_t stride = pl_params.stride_w * texel_size;
+    uint8_t *staging = NULL;
     if (stride != params->stride) {
         staging = talloc_size(NULL, tex->params.h * stride);
         pl_params.ptr = staging;
@@ -276,6 +285,7 @@ static bool tex_download_pl(struct ra *ra, struct ra_tex_download_params *params
 
     talloc_free(staging);
     return ok;
+#endif
 }
 
 static struct ra_buf *buf_create_pl(struct ra *ra,
