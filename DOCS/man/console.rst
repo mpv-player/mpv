@@ -14,50 +14,82 @@ Keybindings
 ESC
     Hide the console.
 
-ENTER
+ENTER, Ctrl+J and Ctrl+M
     Run the typed command.
 
 Shift+ENTER
     Type a literal newline character.
 
-Ctrl+LEFT and Ctrl+RIGHT
-    Move cursor to previous/next word.
+LEFT and Ctrl+B
+    Move the cursor to the previous character.
 
-UP and DOWN
-    Navigate command history.
+RIGHT and Ctrl+F
+    Move the cursor to the next character.
+
+Ctrl+LEFT and Alt+B
+    Move the cursor to the beginning of the current word, or if between words,
+    to the beginning of the previous word.
+
+Ctrl+RIGHT and Alt+F
+    Move the cursor to the end of the current word, or if between words, to the
+    end of the next word.
+
+HOME and Ctrl+A
+    Move the cursor to the start of the current line.
+
+END and Ctrl+E
+    Move the cursor to the end of the current line.
+
+BACKSPACE and Ctrl+H
+    Delete the previous character.
+
+Ctrl+D
+    Hide the console if the current line is empty, otherwise delete the next
+    character.
+
+Ctrl+BACKSPACE and Ctrl+W
+    Delete text from the cursor to the beginning of the current word, or if
+    between words, to the beginning of the previous word.
+
+Ctrl+DEL and Alt+D
+    Delete text from the cursor to the end of the current word, or if between
+    words, to the end of the next word.
+
+Ctrl+U
+    Delete text from the cursor to the beginning of the current line.
+
+Ctrl+K
+    Delete text from the cursor to the end of the current line.
+
+Ctrl+C
+    Clear the current line.
+
+UP and Ctrl+P
+    Move back in the command history.
+
+DOWN and Ctrl+N
+    Move forward in the command history.
 
 PGUP
     Go to the first command in the history.
 
 PGDN
-    Stop navigating command history.
+    Stop navigating the command history.
 
 INSERT
     Toggle insert mode.
 
-Shift+INSERT
-    Paste text (uses the primary selection on X11 and Wayland).
-
-TAB
-    Complete the command or property name at the cursor.
-
-Ctrl+C
-    Clear current line.
-
-Ctrl+K
-    Delete text from the cursor to the end of the line.
-
-Ctrl+L
-    Clear all log messages from the console.
-
-Ctrl+U
-    Delete text from the cursor to the beginning of the line.
-
 Ctrl+V
     Paste text (uses the clipboard on X11 and Wayland).
 
-Ctrl+W
-    Delete text from the cursor to the beginning of the current word.
+Shift+INSERT
+    Paste text (uses the primary selection on X11 and Wayland).
+
+TAB and Ctrl+I
+    Complete the command or property name at the cursor.
+
+Ctrl+L
+    Clear all log messages from the console.
 
 Commands
 --------
