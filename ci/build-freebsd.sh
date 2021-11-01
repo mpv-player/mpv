@@ -18,6 +18,7 @@ python3 ./waf configure \
     --enable-vaapi-wayland \
     --enable-vdpau \
     --enable-vulkan \
+    --enable-oss-audio \
     $(pkg info -q v4l_compat && echo --enable-dvbin) \
     $(pkg info -q libdvdnav && echo --enable-dvdnav) \
     $(pkg info -q libcdio-paranoia && echo --enable-cdda) \
