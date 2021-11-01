@@ -672,7 +672,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``quit-watch-later [<code>]``
     Exit player, and store current playback position. Playing that file later
     will seek to the previous position on start. The (optional) argument is
-    exactly as in the ``quit`` command.
+    exactly as in the ``quit`` command. See `RESUMING PLAYBACK`_.
 
 ``sub-add <url> [<flags> [<title> [<lang>]]]``
     Load the given subtitle file or stream. By default, it is selected as

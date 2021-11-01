@@ -746,23 +746,6 @@ Program Behavior
 
     Note that the ``--no-config`` option takes precedence over this option.
 
-``--save-position-on-quit``
-    Always save the current playback position on quit. When this file is
-    played again later, the player will seek to the old playback position on
-    start. This does not happen if playback of a file is stopped in any other
-    way than quitting. For example, going to the next file in the playlist
-    will not save the position, and start playback at beginning the next time
-    the file is played.
-
-    This behavior is disabled by default, but is always available when quitting
-    the player with Shift+Q.
-
-``--watch-later-directory=<path>``
-    The directory in which to store the "watch later" temporary files.
-
-    The default is a subdirectory named "watch_later" underneath the
-    config directory (usually ``~/.config/mpv/``).
-
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To
@@ -804,18 +787,6 @@ Program Behavior
     Pretend that all files passed to mpv are concatenated into a single, big
     file. This uses timeline/EDL support internally.
 
-``--no-resume-playback``
-    Do not restore playback position from the ``watch_later`` configuration
-    subdirectory (usually ``~/.config/mpv/watch_later/``).
-    See ``quit-watch-later`` input command.
-
-``--resume-playback-check-mtime``
-    Only restore the playback position from the ``watch_later`` configuration
-    subdirectory (usually ``~/.config/mpv/watch_later/``) if the file's
-    modification time is the same as at the time of saving. This may prevent
-    skipping forward in files with the same name which have different content.
-    (Default: ``no``)
-
 ``--profile=<profile1,profile2,...>``
     Use the given profile(s), ``--profile=help`` displays a list of the
     defined profiles.
@@ -850,42 +821,6 @@ Program Behavior
           during playback.
         - ``--reset-on-next-file=all``
           Try to reset all settings that were changed during playback.
-
-``--watch-later-options=option1,option2,...``
-    The options that are saved in "watch later" files if they have been changed
-    since when mpv started. These values will be restored the next time the
-    files are played. The playback position is always saved as ``start``, so
-    adding ``start`` to this list has no effect.
-
-    When removing options, existing watch later data won't be modified and will
-    still be applied fully, but new watch later data won't contain these
-    options.
-
-    This is a string list option. See `List Options`_ for details.
-
-    .. admonition:: Examples
-
-        - ``--watch-later-options-remove=fullscreen``
-          The fullscreen state won't be saved to watch later files.
-        - ``--watch-later-options-remove=volume``
-          ``--watch-later-options-remove=mute``
-          The volume and mute state won't be saved to watch later files.
-        - ``--watch-later-options-clr``
-          No option will be saved to watch later files except the starting
-          position.
-
-``--write-filename-in-watch-later-config``
-    Prepend the watch later config files with the name of the file they refer
-    to. This is simply written as comment on the top of the file.
-
-    .. warning::
-
-        This option may expose privacy-sensitive information and is thus
-        disabled by default.
-
-``--ignore-path-in-watch-later-config``
-    Ignore path (i.e. use filename only) when using watch later feature.
-    (Default: disabled)
 
 ``--show-profile=<profile>``
     Show the description and content of a profile. Lists all profiles if no
@@ -1061,6 +996,75 @@ Program Behavior
     options are changed. This option should not normally be used directly, but
     only by mpv internally, or mpv-provided scripts, config files, or .desktop
     files. See `PSEUDO GUI MODE`_ for details.
+
+Watch Later
+-----------
+
+``--save-position-on-quit``
+    Always save the current playback position on quit. When this file is
+    played again later, the player will seek to the old playback position on
+    start. This does not happen if playback of a file is stopped in any other
+    way than quitting. For example, going to the next file in the playlist
+    will not save the position, and start playback at beginning the next time
+    the file is played.
+
+    This behavior is disabled by default, but is always available when quitting
+    the player with Shift+Q.
+
+    See `RESUMING PLAYBACK`_.
+
+``--watch-later-directory=<path>``
+    The directory in which to store the "watch later" temporary files.
+
+    The default is a subdirectory named "watch_later" underneath the
+    config directory (usually ``~/.config/mpv/``).
+
+``--no-resume-playback``
+    Do not restore playback position from the ``watch_later`` configuration
+    subdirectory (usually ``~/.config/mpv/watch_later/``).
+
+``--resume-playback-check-mtime``
+    Only restore the playback position from the ``watch_later`` configuration
+    subdirectory (usually ``~/.config/mpv/watch_later/``) if the file's
+    modification time is the same as at the time of saving. This may prevent
+    skipping forward in files with the same name which have different content.
+    (Default: ``no``)
+
+``--watch-later-options=option1,option2,...``
+    The options that are saved in "watch later" files if they have been changed
+    since when mpv started. These values will be restored the next time the
+    files are played. The playback position is always saved as ``start``, so
+    adding ``start`` to this list has no effect.
+
+    When removing options, existing watch later data won't be modified and will
+    still be applied fully, but new watch later data won't contain these
+    options.
+
+    This is a string list option. See `List Options`_ for details.
+
+    .. admonition:: Examples
+
+        - ``--watch-later-options-remove=fullscreen``
+          The fullscreen state won't be saved to watch later files.
+        - ``--watch-later-options-remove=volume``
+          ``--watch-later-options-remove=mute``
+          The volume and mute state won't be saved to watch later files.
+        - ``--watch-later-options-clr``
+          No option will be saved to watch later files except the starting
+          position.
+
+``--write-filename-in-watch-later-config``
+    Prepend the watch later config files with the name of the file they refer
+    to. This is simply written as comment on the top of the file.
+
+    .. warning::
+
+        This option may expose privacy-sensitive information and is thus
+        disabled by default.
+
+``--ignore-path-in-watch-later-config``
+    Ignore path (i.e. use filename only) when using watch later feature.
+    (Default: disabled)
 
 Video
 -----
