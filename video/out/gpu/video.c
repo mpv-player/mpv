@@ -318,6 +318,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .scaler_resizes_only = 1,
     .scaler_lut_size = 6,
     .interpolation_threshold = 0.01,
+    .interpolation_allow_multiple = 1,
     .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
@@ -439,6 +440,7 @@ const struct m_sub_options gl_video_conf = {
         {"background", OPT_COLOR(background)},
         {"interpolation", OPT_FLAG(interpolation)},
         {"interpolation-threshold", OPT_FLOAT(interpolation_threshold)},
+        {"interpolation-allow-multiple", OPT_FLAG(interpolation_allow_multiple)},
         {"blend-subtitles", OPT_CHOICE(blend_subs,
             {"no", BLEND_SUBS_NO},
             {"yes", BLEND_SUBS_YES},
@@ -3267,9 +3269,11 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
     if (has_frame) {
         bool interpolate = p->opts.interpolation && frame->display_synced &&
                            (p->frames_drawn || !frame->still);
-        if (interpolate) {
+        if (interpolate && p->opts.interpolation_threshold >= 0.) {
             double ratio = frame->ideal_frame_duration / frame->vsync_interval;
-            if (fabs(ratio - 1.0) < p->opts.interpolation_threshold)
+            if (ratio < 1. && ratio > 0.)
+                ratio = 1. / ratio;
+            if (fabs(ratio - (p->opts.interpolation_allow_multiple ? round(ratio) : 1.0)) < p->opts.interpolation_threshold)
                 interpolate = false;
         }
 

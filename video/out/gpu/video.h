@@ -141,6 +141,7 @@ struct gl_video_opts {
     struct m_color background;
     int interpolation;
     float interpolation_threshold;
+    int interpolation_allow_multiple;
     int blend_subs;
     char **user_shaders;
     int deband;
