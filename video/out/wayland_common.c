@@ -1370,6 +1370,7 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
 static void set_geometry(struct vo_wayland_state *wl)
 {
     struct vo *vo = wl->vo;
+    assert(wl->current_output);
 
     struct vo_win_geometry geo;
     struct mp_rect screenrc = wl->current_output->geometry;
@@ -1597,11 +1598,13 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             if (opt == &opts->geometry || opt == &opts->autofit ||
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
-                set_geometry(wl);
-                wl->window_size = wl->vdparams;
-                if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
-                    wl->geometry = wl->window_size;
-                wl->pending_vo_events |= VO_EVENT_RESIZE;
+                if (wl->current_output) {
+                    set_geometry(wl);
+                    wl->window_size = wl->vdparams;
+                    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+                        wl->geometry = wl->window_size;
+                    wl->pending_vo_events |= VO_EVENT_RESIZE;
+                }
             }
         }
         return VO_TRUE;
