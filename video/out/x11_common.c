@@ -1847,6 +1847,9 @@ static void vo_x11_set_geometry(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
 
+    if (!x11->window)
+        return;
+
     if (x11->opts->window_maximized) {
         x11->pending_geometry_change = true;
     } else {
