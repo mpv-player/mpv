@@ -1179,6 +1179,8 @@ static void update_render_options(struct priv *p)
     p->color_map.intent = opts->icc_opts->intent;
     p->color_map.tone_mapping_algo = tone_map_algos[opts->tone_map.curve];
     p->color_map.tone_mapping_param = opts->tone_map.curve_param;
+    if (isnan(p->color_map.tone_mapping_param)) // vo_gpu compatibility
+        p->color_map.tone_mapping_param = 0.0;
     p->color_map.desaturation_strength = opts->tone_map.desat;
     p->color_map.desaturation_exponent = opts->tone_map.desat_exp;
     p->color_map.max_boost = opts->tone_map.max_boost;
