@@ -4237,7 +4237,7 @@ static void gl_video_dr_free_buffer(void *opaque, uint8_t *data)
         }
     }
     // not found - must not happen
-    MP_UNREACHABLE();
+    MP_ASSERT_UNREACHABLE();
 }
 
 struct mp_image *gl_video_get_image(struct gl_video *p, int imgfmt, int w, int h,

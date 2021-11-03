@@ -169,7 +169,7 @@ static void swap_endian(struct mp_image *dst, int dst_x, int dst_y,
                     ((uint32_t *)d)[x] = av_bswap32(((uint32_t *)s)[x]);
                 break;
             default:
-                MP_UNREACHABLE();
+                MP_ASSERT_UNREACHABLE();
             }
         }
     }

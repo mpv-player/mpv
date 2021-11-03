@@ -879,7 +879,7 @@ void mp_read_option_raw(struct mpv_global *global, const char *name,
         }
     }
 
-    MP_UNREACHABLE(); // not found
+    MP_ASSERT_UNREACHABLE(); // not found
 }
 
 static const struct m_config_group *find_group(struct mpv_global *global,

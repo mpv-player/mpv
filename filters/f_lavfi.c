@@ -394,7 +394,7 @@ static bool init_pads(struct lavfi *c)
         } else if (pad->type == MP_FRAME_VIDEO) {
             dst_filter = avfilter_get_by_name("buffersink");
         } else {
-            MP_UNREACHABLE();
+            MP_ASSERT_UNREACHABLE();
         }
 
         if (!dst_filter)
@@ -484,7 +484,7 @@ static bool init_pads(struct lavfi *c)
             params->frame_rate = av_d2q(fmt->nominal_fps, 1000000);
             filter_name = "buffer";
         } else {
-            MP_UNREACHABLE();
+            MP_ASSERT_UNREACHABLE();
         }
 
         params->time_base = pad->timebase;

@@ -24,9 +24,9 @@
 #endif
 
 #ifdef __GNUC__
-#define MP_UNREACHABLE() (assert(!"unreachable"), __builtin_unreachable())
+#define MP_ASSERT_UNREACHABLE() (assert(!"unreachable"), __builtin_unreachable())
 #else
-#define MP_UNREACHABLE() (assert(!"unreachable"), abort())
+#define MP_ASSERT_UNREACHABLE() (assert(!"unreachable"), abort())
 #endif
 
 #endif

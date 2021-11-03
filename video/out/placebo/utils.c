@@ -79,7 +79,7 @@ enum pl_color_primaries mp_prim_to_pl(enum mp_csp_prim prim)
     case MP_CSP_PRIM_COUNT:         return PL_COLOR_PRIM_COUNT;
     }
 
-    MP_UNREACHABLE();
+    MP_ASSERT_UNREACHABLE();
 }
 
 enum pl_color_transfer mp_trc_to_pl(enum mp_csp_trc trc)
@@ -104,7 +104,7 @@ enum pl_color_transfer mp_trc_to_pl(enum mp_csp_trc trc)
     case MP_CSP_TRC_COUNT:          return PL_COLOR_TRC_COUNT;
     }
 
-    MP_UNREACHABLE();
+    MP_ASSERT_UNREACHABLE();
 }
 
 enum pl_color_light mp_light_to_pl(enum mp_csp_light light)
@@ -118,7 +118,7 @@ enum pl_color_light mp_light_to_pl(enum mp_csp_light light)
     case MP_CSP_LIGHT_COUNT:        return PL_COLOR_LIGHT_COUNT;
     }
 
-    MP_UNREACHABLE();
+    MP_ASSERT_UNREACHABLE();
 }
 
 enum pl_color_system mp_csp_to_pl(enum mp_csp csp)
@@ -136,7 +136,7 @@ enum pl_color_system mp_csp_to_pl(enum mp_csp csp)
     case MP_CSP_COUNT:              return PL_COLOR_SYSTEM_COUNT;
     }
 
-    MP_UNREACHABLE();
+    MP_ASSERT_UNREACHABLE();
 }
 
 enum pl_color_levels mp_levels_to_pl(enum mp_csp_levels levels)
@@ -148,7 +148,7 @@ enum pl_color_levels mp_levels_to_pl(enum mp_csp_levels levels)
     case MP_CSP_LEVELS_COUNT:       return PL_COLOR_LEVELS_COUNT;
     }
 
-    MP_UNREACHABLE();
+    MP_ASSERT_UNREACHABLE();
 }
 
 enum pl_alpha_mode mp_alpha_to_pl(enum mp_alpha_type alpha)
@@ -161,7 +161,7 @@ enum pl_alpha_mode mp_alpha_to_pl(enum mp_alpha_type alpha)
     case MP_ALPHA_PREMUL:           return PL_ALPHA_PREMULTIPLIED;
     }
 
-    MP_UNREACHABLE();
+    MP_ASSERT_UNREACHABLE();
 }
 
 enum pl_chroma_location mp_chroma_to_pl(enum mp_chroma_location chroma)
@@ -174,5 +174,5 @@ enum pl_chroma_location mp_chroma_to_pl(enum mp_chroma_location chroma)
     case MP_CHROMA_COUNT:           return PL_CHROMA_COUNT;
     }
 
-    MP_UNREACHABLE();
+    MP_ASSERT_UNREACHABLE();
 }

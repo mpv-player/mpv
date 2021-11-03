@@ -155,7 +155,7 @@ static void hook_remove(struct MPContext *mpctx, struct hook_handler *h)
             return;
         }
     }
-    MP_UNREACHABLE();
+    MP_ASSERT_UNREACHABLE();
 }
 
 bool mp_hook_test_completion(struct MPContext *mpctx, char *type)

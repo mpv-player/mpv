@@ -593,7 +593,7 @@ static bool endian_swap_bytes(void *d, size_t bytes, size_t word_size)
             AV_WL32(ud + x * 2, AV_RB32(ud + x * 2));
         break;
     default:
-        MP_UNREACHABLE();
+        MP_ASSERT_UNREACHABLE();
     }
 
     return true;
