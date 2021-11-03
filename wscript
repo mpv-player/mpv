@@ -496,7 +496,7 @@ video_output_features = [
         'name': '--gbm',
         'desc': 'GBM',
         'deps': 'gbm.h',
-        'func': check_pkg_config('gbm'),
+        'func': check_pkg_config('gbm', '>= 17.1.0'),
     } , {
         'name': '--wayland-scanner',
         'desc': 'wayland-scanner',
