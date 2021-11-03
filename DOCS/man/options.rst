@@ -5837,7 +5837,7 @@ them.
     values will sharpen the image (but add more ringing and aliasing). Negative
     values will blur the image. If your GPU is powerful enough, consider
     alternatives like the ``ewa_lanczossharp`` scale filter, or the
-    ``--scale-blur`` option.
+    ``--scale-blur`` option. (Only for ``--vo=gpu``)
 
 ``--opengl-glfinish``
     Call ``glFinish()`` before swapping buffers (default: disabled). Slower,
