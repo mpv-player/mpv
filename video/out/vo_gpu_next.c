@@ -524,6 +524,16 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     frame->count = index + 1;
 }
 
+static bool wait_for_frame(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct ra_swapchain *sw = p->ra_ctx->swapchain;
+    bool should_draw = true;
+    if (sw->fns->wait_for_frame)
+        should_draw = sw->fns->wait_for_frame(sw);
+    return should_draw;
+}
+
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
@@ -576,6 +586,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
         p->last_id = id;
     }
+
+    bool should_draw = wait_for_frame(vo);
+    if (!should_draw)
+        return;
 
     struct pl_swapchain_frame swframe;
     if (!pl_swapchain_start_frame(p->sw, &swframe))

@@ -235,15 +235,19 @@ static int color_depth(struct ra_swapchain *sw)
     return 0; // TODO: implement this somehow?
 }
 
+static bool wait_for_frame(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    bool should_draw = true;
+    if (p->params.wait_for_frame)
+        should_draw = p->params.wait_for_frame(sw->ctx);
+    return should_draw;
+}
+
 static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
     struct pl_swapchain_frame frame;
-    bool start = true;
-    if (p->params.start_frame)
-        start = p->params.start_frame(sw->ctx);
-    if (!start)
-        return false;
     if (!pl_swapchain_start_frame(p->vk->swapchain, &frame))
         return false;
     if (!mppl_wrap_tex(sw->ctx->ra, frame.fbo, &p->proxy_tex))
@@ -280,9 +284,10 @@ static void get_vsync(struct ra_swapchain *sw,
 }
 
 static const struct ra_swapchain_fns vulkan_swapchain = {
-    .color_depth   = color_depth,
-    .start_frame   = start_frame,
-    .submit_frame  = submit_frame,
-    .swap_buffers  = swap_buffers,
-    .get_vsync     = get_vsync,
+    .color_depth    = color_depth,
+    .wait_for_frame = wait_for_frame,
+    .start_frame    = start_frame,
+    .submit_frame   = submit_frame,
+    .swap_buffers   = swap_buffers,
+    .get_vsync      = get_vsync,
 };

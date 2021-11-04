@@ -78,6 +78,11 @@ struct ra_swapchain_fns {
     // Gets the current framebuffer depth in bits (0 if unknown). Optional.
     int (*color_depth)(struct ra_swapchain *sw);
 
+    // Certain platforms may want to setup/check some things before actually
+    // drawing the next frame. If this exists and returns false, then subsequent
+    // start frame call will be skipped and the next frame will not be drawn.
+    bool (*wait_for_frame)(struct ra_swapchain *sw);
+
     // Called when rendering starts. Returns NULL on failure. This must be
     // followed by submit_frame, to submit the rendered frame. This function
     // can also fail sporadically, and such errors should be ignored unless

@@ -74,10 +74,24 @@ static void resize(struct vo *vo)
     vo->want_redraw = true;
 }
 
+static bool wait_for_frame(struct vo *vo)
+{
+    struct gpu_priv *p = vo->priv;
+    struct ra_swapchain *sw = p->ctx->swapchain;
+    bool should_draw = true;
+    if (sw->fns->wait_for_frame)
+        should_draw = sw->fns->wait_for_frame(sw);
+    return should_draw;
+}
+
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct gpu_priv *p = vo->priv;
     struct ra_swapchain *sw = p->ctx->swapchain;
+
+    bool should_draw = wait_for_frame(vo);
+    if (!should_draw)
+        return;
 
     struct ra_fbo fbo;
     if (!sw->fns->start_frame(sw, &fbo))

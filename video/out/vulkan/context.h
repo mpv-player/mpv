@@ -7,8 +7,8 @@ struct ra_vk_ctx_params {
     // See ra_swapchain_fns.get_vsync.
     void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
 
-    // In case something special needs to be done when starting a frame.
-    bool (*start_frame)(struct ra_ctx *ctx);
+    // See ra_swapchain_fns.wait_for_frame. Called before start_frame.
+    bool (*wait_for_frame)(struct ra_ctx *ctx);
 
     // In case something special needs to be done on the buffer swap.
     void (*swap_buffers)(struct ra_ctx *ctx);

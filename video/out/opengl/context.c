@@ -211,6 +211,15 @@ int ra_gl_ctx_color_depth(struct ra_swapchain *sw)
     return depth_g;
 }
 
+static bool ra_gl_ctx_wait_for_frame(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    bool should_draw = true;
+    if (p->params.wait_for_frame)
+        should_draw = p->params.wait_for_frame(sw->ctx);
+    return should_draw;
+}
+
 bool ra_gl_ctx_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
@@ -303,9 +312,10 @@ static void ra_gl_ctx_get_vsync(struct ra_swapchain *sw,
 }
 
 static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
-    .color_depth   = ra_gl_ctx_color_depth,
-    .start_frame   = ra_gl_ctx_start_frame,
-    .submit_frame  = ra_gl_ctx_submit_frame,
-    .swap_buffers  = ra_gl_ctx_swap_buffers,
-    .get_vsync     = ra_gl_ctx_get_vsync,
+    .color_depth    = ra_gl_ctx_color_depth,
+    .wait_for_frame = ra_gl_ctx_wait_for_frame,
+    .start_frame    = ra_gl_ctx_start_frame,
+    .submit_frame   = ra_gl_ctx_submit_frame,
+    .swap_buffers   = ra_gl_ctx_swap_buffers,
+    .get_vsync      = ra_gl_ctx_get_vsync,
 };

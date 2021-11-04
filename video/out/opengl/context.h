@@ -30,6 +30,9 @@ struct ra_gl_ctx_params {
     // See ra_swapchain_fns.get_vsync.
     void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
 
+    // See ra_swapchain_fns.wait_for_frame. Called before start_frame.
+    bool (*wait_for_frame)(struct ra_ctx *ctx);
+
     // Set to false if the implementation follows normal GL semantics, which is
     // upside down. Set to true if it does *not*, i.e. if rendering is right
     // side up
