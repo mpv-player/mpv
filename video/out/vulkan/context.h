@@ -7,8 +7,9 @@ struct ra_vk_ctx_params {
     // See ra_swapchain_fns.get_vsync.
     void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
 
-    // In case something special needs to be done when starting a frame.
-    bool (*start_frame)(struct ra_ctx *ctx);
+    // For special contexts (i.e. wayland) that want to check visibility
+    // before drawing a frame.
+    bool (*check_visible)(struct ra_ctx *ctx);
 
     // In case something special needs to be done on the buffer swap.
     void (*swap_buffers)(struct ra_ctx *ctx);

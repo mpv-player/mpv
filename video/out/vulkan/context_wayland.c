@@ -26,7 +26,7 @@ struct priv {
     struct mpvk_ctx vk;
 };
 
-static bool wayland_vk_start_frame(struct ra_ctx *ctx)
+static bool wayland_vk_check_visible(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
     bool render = !wl->hidden || wl->opts->disable_vsync;
@@ -84,7 +84,7 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
     };
 
     struct ra_vk_ctx_params params = {
-        .start_frame = wayland_vk_start_frame,
+        .check_visible = wayland_vk_check_visible,
         .swap_buffers = wayland_vk_swap_buffers,
         .get_vsync = wayland_vk_get_vsync,
     };
