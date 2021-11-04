@@ -239,10 +239,10 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
     struct pl_swapchain_frame frame;
-    bool start = true;
-    if (p->params.start_frame)
-        start = p->params.start_frame(sw->ctx);
-    if (!start)
+    bool visible = true;
+    if (p->params.check_visible)
+        visible = p->params.check_visible(sw->ctx);
+    if (!visible)
         return false;
     if (!pl_swapchain_start_frame(p->vk->swapchain, &frame))
         return false;
