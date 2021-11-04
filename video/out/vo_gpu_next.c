@@ -577,6 +577,12 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         p->last_id = id;
     }
 
+    // Doesn't draw anything. Only checks for visibility.
+    struct ra_swapchain *sw = p->ra_ctx->swapchain;
+    bool should_draw = sw->fns->start_frame(sw, NULL);
+    if (!should_draw)
+        return;
+
     struct pl_swapchain_frame swframe;
     if (!pl_swapchain_start_frame(p->sw, &swframe))
         return;

@@ -239,11 +239,15 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
     struct pl_swapchain_frame frame;
+
     bool visible = true;
     if (p->params.check_visible)
         visible = p->params.check_visible(sw->ctx);
-    if (!visible)
-        return false;
+
+    // If out_fbo is NULL, this was called from vo_gpu_next. Bail out.
+    if (out_fbo == NULL || !visible)
+        return visible;
+
     if (!pl_swapchain_start_frame(p->vk->swapchain, &frame))
         return false;
     if (!mppl_wrap_tex(sw->ctx->ra, frame.fbo, &p->proxy_tex))
