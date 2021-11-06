@@ -119,10 +119,18 @@ static const char *gbm_format_to_string(uint32_t format)
         return "GBM_FORMAT_XRGB8888";
     case GBM_FORMAT_ARGB8888:
         return "GBM_FORMAT_ARGB8888";
+    case GBM_FORMAT_XBGR8888:
+        return "GBM_FORMAT_XBGR8888";
+    case GBM_FORMAT_ABGR8888:
+        return "GBM_FORMAT_ABGR8888";
     case GBM_FORMAT_XRGB2101010:
         return "GBM_FORMAT_XRGB2101010";
     case GBM_FORMAT_ARGB2101010:
         return "GBM_FORMAT_ARGB2101010";
+    case GBM_FORMAT_XBGR2101010:
+        return "GBM_FORMAT_XBGR2101010";
+    case GBM_FORMAT_ABGR2101010:
+        return "GBM_FORMAT_ABGR2101010";
     default:
         return "UNKNOWN";
     }
@@ -139,10 +147,18 @@ static uint32_t fallback_format_for(uint32_t format)
         return GBM_FORMAT_ARGB8888;
     case GBM_FORMAT_ARGB8888:
         return GBM_FORMAT_XRGB8888;
+    case GBM_FORMAT_XBGR8888:
+        return GBM_FORMAT_ABGR8888;
+    case GBM_FORMAT_ABGR8888:
+        return GBM_FORMAT_XBGR8888;
     case GBM_FORMAT_XRGB2101010:
         return GBM_FORMAT_ARGB2101010;
     case GBM_FORMAT_ARGB2101010:
         return GBM_FORMAT_XRGB2101010;
+    case GBM_FORMAT_XBGR2101010:
+        return GBM_FORMAT_ABGR2101010;
+    case GBM_FORMAT_ABGR2101010:
+        return GBM_FORMAT_XBGR2101010;
     default:
         return 0;
     }
@@ -840,12 +856,23 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     uint32_t argb_format;
     uint32_t xrgb_format;
-    if (DRM_OPTS_FORMAT_XRGB2101010 == ctx->vo->opts->drm_opts->drm_format) {
+    switch (ctx->vo->opts->drm_opts->drm_format) {
+    case DRM_OPTS_FORMAT_XRGB2101010:
         argb_format = GBM_FORMAT_ARGB2101010;
         xrgb_format = GBM_FORMAT_XRGB2101010;
-    } else {
+        break;
+    case DRM_OPTS_FORMAT_XBGR2101010:
+        argb_format = GBM_FORMAT_ABGR2101010;
+        xrgb_format = GBM_FORMAT_XBGR2101010;
+        break;
+    case DRM_OPTS_FORMAT_XBGR8888:
+        argb_format = GBM_FORMAT_ABGR8888;
+        xrgb_format = GBM_FORMAT_XBGR8888;
+        break;
+    default:
         argb_format = GBM_FORMAT_ARGB8888;
         xrgb_format = GBM_FORMAT_XRGB8888;
+        break;
     }
 
     if (!probe_gbm_format(ctx, argb_format, xrgb_format)) {

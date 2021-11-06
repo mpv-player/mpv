@@ -90,7 +90,9 @@ const struct m_sub_options drm_conf = {
             M_RANGE(0, INT_MAX)},
         {"drm-format", OPT_CHOICE(drm_format,
             {"xrgb8888",    DRM_OPTS_FORMAT_XRGB8888},
-            {"xrgb2101010", DRM_OPTS_FORMAT_XRGB2101010})},
+            {"xrgb2101010", DRM_OPTS_FORMAT_XRGB2101010},
+            {"xbgr8888",    DRM_OPTS_FORMAT_XBGR8888},
+            {"xbgr2101010", DRM_OPTS_FORMAT_XBGR2101010})},
         {"drm-draw-surface-size", OPT_SIZE_BOX(drm_draw_surface_size)},
 
         {"drm-osd-plane-id", OPT_REPLACED("drm-draw-plane")},

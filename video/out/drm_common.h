@@ -26,6 +26,8 @@
 
 #define DRM_OPTS_FORMAT_XRGB8888    0
 #define DRM_OPTS_FORMAT_XRGB2101010 1
+#define DRM_OPTS_FORMAT_XBGR8888    2
+#define DRM_OPTS_FORMAT_XBGR2101010 3
 
 struct kms {
     struct mp_log *log;
