@@ -127,6 +127,7 @@ struct priv {
 
     int delayed_peak;
     int inter_preserve;
+    int target_hint;
 };
 
 static void update_render_options(struct priv *p);
@@ -488,6 +489,57 @@ static void discard_frame(const struct pl_source_frame *src)
     talloc_free(mpi);
 }
 
+static struct pl_swapchain_colors get_csp_hint(struct vo *vo, struct mp_image *mpi)
+{
+    struct priv *p = vo->priv;
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+
+    struct pl_swapchain_colors hint = {
+        .primaries = mp_prim_to_pl(mpi->params.color.primaries),
+        .transfer = mp_trc_to_pl(mpi->params.color.gamma),
+    };
+
+    // Respect target color space overrides
+    if (opts->target_prim)
+        hint.primaries = mp_prim_to_pl(opts->target_prim);
+    if (opts->target_trc)
+        hint.transfer = mp_prim_to_pl(opts->target_trc);
+
+    for (int i = 0; i < mpi->num_ff_side_data; i++) {
+        void *data = mpi->ff_side_data[i].buf->data;
+        switch (mpi->ff_side_data[i].type) {
+        case AV_FRAME_DATA_CONTENT_LIGHT_LEVEL: {
+            const AVContentLightMetadata *clm = data;
+            hint.hdr.max_cll = clm->MaxCLL;
+            hint.hdr.max_fall = clm->MaxFALL;
+            break;
+        }
+        case AV_FRAME_DATA_MASTERING_DISPLAY_METADATA: {
+            const AVMasteringDisplayMetadata *mdm = data;
+            if (mdm->has_luminance) {
+                hint.hdr.min_luma = av_q2d(mdm->min_luminance);
+                hint.hdr.max_luma = av_q2d(mdm->max_luminance);
+            }
+
+            if (mdm->has_primaries) {
+                hint.hdr.prim.red.x   = av_q2d(mdm->display_primaries[0][0]);
+                hint.hdr.prim.red.y   = av_q2d(mdm->display_primaries[0][1]);
+                hint.hdr.prim.green.x = av_q2d(mdm->display_primaries[1][0]);
+                hint.hdr.prim.green.y = av_q2d(mdm->display_primaries[1][1]);
+                hint.hdr.prim.blue.x  = av_q2d(mdm->display_primaries[2][0]);
+                hint.hdr.prim.blue.y  = av_q2d(mdm->display_primaries[2][1]);
+                hint.hdr.prim.white.x = av_q2d(mdm->white_point[0]);
+                hint.hdr.prim.white.y = av_q2d(mdm->white_point[1]);
+            }
+            break;
+        }
+        default: break;
+        }
+    }
+
+    return hint;
+}
+
 static void info_callback(void *priv, const struct pl_render_info *info)
 {
     struct vo *vo = priv;
@@ -581,6 +633,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     bool should_draw = sw->fns->start_frame(sw, NULL);
     if (!should_draw)
         return;
+
+    if (p->target_hint && frame->current) {
+        struct pl_swapchain_colors hint = get_csp_hint(vo, frame->current);
+        pl_swapchain_colorspace_hint(p->sw, &hint);
+    } else if (!p->target_hint) {
+        pl_swapchain_colorspace_hint(p->sw, NULL);
+    }
 
     struct pl_swapchain_frame swframe;
     if (!pl_swapchain_start_frame(p->sw, &swframe))
@@ -1277,6 +1336,7 @@ const struct vo_driver video_out_gpu_next = {
         {"image-lut", OPT_STRING(image_lut.opt), .flags = M_OPT_FILE},
         {"image-lut-type", OPT_CHOICE_C(image_lut.type, lut_types)},
         {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
+        {"target-colorspace-hint", OPT_FLAG(target_hint)},
         // No `target-lut-type` because we don't support non-RGB targets
         {0}
     },

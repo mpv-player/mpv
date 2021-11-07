@@ -31,6 +31,7 @@ Interface changes
       `--allow-delayed-peak-detect`, `--builtin-scalers`,
       `--interpolation-preserve` `--lut`, `--lut-type`, `--image-lut`,
       `--image-lut-type` and `--target-lut` along with it.
+    - add `--target-colorspace-hint`
  --- mpv 0.34.0 ---
     - deprecate selecting by card number with `--drm-connector`, add
       `--drm-device` which can be used instead
