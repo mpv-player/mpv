@@ -413,9 +413,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             .data = mpi->icc_profile ? mpi->icc_profile->data : NULL,
             .len = mpi->icc_profile ? mpi->icc_profile->size : 0,
         },
-#if PL_API_VER >= 162
         .rotation = mpi->params.rotate / 90,
-#endif
     };
 
     enum pl_chroma_location chroma = mp_chroma_to_pl(mpi->params.chroma_location);
@@ -672,13 +670,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                 p->src.x0, p->src.y0, p->src.x1, p->src.y1,
             };
 
-#if PL_API_VER >= 162
             // mpv gives us transposed rects, libplacebo expects untransposed
             if (img->rotation % PL_ROTATION_180) {
                 MPSWAP(float, img->crop.x0, img->crop.y0);
                 MPSWAP(float, img->crop.x1, img->crop.y1);
             }
-#endif
         }
     }
 
@@ -1163,9 +1159,7 @@ static void update_render_options(struct priv *p)
     p->params.skip_anti_aliasing = !opts->correct_downscaling;
     p->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     p->params.disable_fbos = opts->dumb_mode == 1;
-#if PL_API_VER >= 164
     p->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
-#endif
 
     // Map scaler options as best we can
     p->params.upscaler = map_scaler(p, SCALER_SCALE);
@@ -1255,9 +1249,7 @@ const struct m_opt_choice_alternatives lut_types[] = {
 const struct vo_driver video_out_gpu_next = {
     .description = "Video output based on libplacebo",
     .name = "gpu-next",
-#if PL_API_VER >= 162
     .caps = VO_CAP_ROTATE90,
-#endif
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
