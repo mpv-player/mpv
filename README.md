@@ -73,11 +73,27 @@ Changes to the default key bindings are indicated in
 
 
 Compiling with full features requires development files for several
-external libraries. Below is a list of some important requirements.
+external libraries. One of the two build systems supported by mpv is required:
+[meson](https://mesonbuild.com/index.html) or [waf](https://waf.io/). Meson
+can be obtained from your distro or PyPI. Waf can be downloaded by using the
+`./bootstrap.py` script. It will get the lastest version of waf that was tested
+with mpv. Some documentation about the differences between the build systems are
+located in [build-system-differences][build-system-differences].
 
-The mpv build system uses [waf](https://waf.io/), but we don't store it in the
-repository. The `./bootstrap.py` script will download the latest version
-of waf that was tested with the build system.
+### Meson
+
+After creating your build directory (e.g. `meson build`), you can view a list
+of all the build options via `meson configure build`. You could also just simply
+look at the `meson_options.txt` file. Logs are stored in `meson-logs` within
+your build directory.
+
+Example:
+
+    meson build
+    meson compile -C build
+    meson install -C build
+
+### Waf
 
 For a list of the available build options use `./waf configure --help`. If
 you think you have support for some feature installed but configure fails to
@@ -214,3 +230,4 @@ Most activity happens on the IRC channel and the github issue tracker.
 [api-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/client-api-changes.rst
 [restore-old-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-old-bindings.conf
 [contribute.md]: https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md
+[build-system-differences]: https://github.com/mpv-player/mpv/blob/master/DOCS/build-system-differences.md
