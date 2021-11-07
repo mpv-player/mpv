@@ -610,6 +610,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         target.color.transfer = mp_trc_to_pl(opts->target_trc);
     if (opts->target_peak)
         target.color.sig_peak = opts->target_peak;
+    if (opts->dither_depth > 0) {
+        struct pl_bit_encoding *tbits = &target.repr.bits;
+        tbits->color_depth += opts->dither_depth - tbits->sample_depth;
+        tbits->sample_depth = opts->dither_depth;
+    }
 
     struct pl_frame_mix mix = {0};
     if (frame->current) {
@@ -1209,6 +1214,9 @@ static void update_render_options(struct priv *p)
         p->dither.temporal = opts->temporal_dither;
         break;
     }
+
+    if (opts->dither_depth < 0)
+        p->params.dither_params = NULL;
 
     update_icc_opts(p, opts->icc_opts);
 
