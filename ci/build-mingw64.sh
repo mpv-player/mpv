@@ -154,9 +154,39 @@ if [ ! -e "$prefix_dir/lib/libluajit-5.1.a" ]; then
 fi
 
 ## mpv
-PKG_CONFIG=pkg-config CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
-python3 ./waf configure \
-    --enable-libmpv-shared --lua=luajit \
-    --enable-{shaderc,spirv-cross,d3d11}
 
-python3 ./waf build --verbose
+if [ $1 = "meson" ]; then
+    CPU="x86_64"
+    mkdir -p "${TARGET}_mingw_build" && pushd "${TARGET}_mingw_build"
+
+cat > mingw64_crossfile << EOF
+[binaries]
+c = '${CC}'
+cpp = '${CXX}'
+ar = '${AR}'
+strip = '${TARGET}-strip'
+pkgconfig = 'pkg-config'
+exe_wrapper = 'wine64' # A command used to run generated executables.
+windres = '${TARGET}-windres'
+[host_machine]
+system = 'windows'
+cpu_family = '${CPU}'
+cpu = '${CPU}'
+endian = 'little'
+EOF
+
+    CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
+    meson .. --cross-file mingw64_crossfile --libdir lib \
+        -Dlibmpv=true -Dlua=luajit -D{shaderc,spirv-cross,d3d11}=enabled
+
+    meson compile
+fi
+
+if [ $1 = "waf" ]; then
+    PKG_CONFIG=pkg-config CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
+    python3 ./waf configure \
+        --enable-libmpv-shared --lua=luajit \
+        --enable-{shaderc,spirv-cross,d3d11}
+
+    python3 ./waf build --verbose
+fi
