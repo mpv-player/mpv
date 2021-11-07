@@ -126,7 +126,6 @@ struct priv {
     struct voctrl_performance_data perf;
 
     int delayed_peak;
-    int builtin_scalers;
     int inter_preserve;
 };
 
@@ -673,7 +672,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     }
 
     p->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
-    p->params.disable_builtin_scalers = !p->builtin_scalers;
     p->params.allow_delayed_peak_detect = p->delayed_peak;
 
     // Render frame
@@ -1253,13 +1251,11 @@ const struct vo_driver video_out_gpu_next = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .delayed_peak = true,
-        .builtin_scalers = true,
         .inter_preserve = true,
     },
 
     .options = (const struct m_option[]) {
         {"allow-delayed-peak-detect", OPT_FLAG(delayed_peak)},
-        {"builtin-scalers", OPT_FLAG(builtin_scalers)},
         {"interpolation-preserve", OPT_FLAG(inter_preserve)},
         {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
         {"lut-type", OPT_CHOICE_C(lut.type, lut_types)},

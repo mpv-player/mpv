@@ -5192,12 +5192,6 @@ them.
     will reproduce the source image perfectly if no scaling is performed.
     Enabled by default. Note that this option never affects ``--cscale``.
 
-``--builtin-scalers``
-    Allow using faster built-in replacements for common scalers such as
-    ``nearest``, ``bilinear`` or ``bicubic``. These have the disadvantage of
-    not being configurable, unlike normal scaler kernels. Defaults to
-    enabled. (This option only affects ``--vo=gpu-next``)
-
 ``--correct-downscaling``
     When using convolution based filters, extend the filter size when
     downscaling. Increases quality, but reduces performance while downscaling.
