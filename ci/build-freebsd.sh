@@ -5,6 +5,24 @@ export CFLAGS="$CFLAGS -isystem/usr/local/include"
 export CXXFLAGS="$CXXFLAGS -isystem/usr/local/include"
 export LDFLAGS="$LDFLAGS -L/usr/local/lib"
 
+meson build \
+    -Dlibmpv=true \
+    -Dlua=enabled \
+    -Degl-drm=enabled \
+    -Dopenal=enabled \
+    -Dsdl2=enabled \
+    -Dvaapi-wayland=enabled \
+    -Dvdpau=enabled \
+    -Dvulkan=enabled \
+    -Doss-audio=enabled \
+    $(pkg info -q v4l_compat && echo -Ddvbin=enabled) \
+    $(pkg info -q libdvdnav && echo -Ddvdnav=enabled) \
+    $(pkg info -q libcdio-paranoia && echo -Dcdda=enabled) \
+    $NULL
+
+meson compile -C build
+./build/mpv
+
 if [ ! -e "./waf" ] ; then
     python3 ./bootstrap.py
 fi
