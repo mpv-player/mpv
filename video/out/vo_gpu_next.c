@@ -583,8 +583,14 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         return;
 
     struct pl_swapchain_frame swframe;
-    if (!pl_swapchain_start_frame(p->sw, &swframe))
+    if (!pl_swapchain_start_frame(p->sw, &swframe)) {
+        // Advance the queue state to the current PTS to discard unused frames
+        pl_queue_update(p->queue, NULL, &(struct pl_queue_params) {
+            .pts = frame->current->pts + frame->vsync_offset,
+            .radius = pl_frame_mix_radius(&p->params),
+        });
         return;
+    }
 
     bool valid = false;
     p->is_interpolated = false;
@@ -616,7 +622,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         tbits->sample_depth = opts->dither_depth;
     }
 
-    struct pl_frame_mix mix = {0};
+    struct pl_frame_mix mix;
     if (frame->current) {
         // Update queue state
         struct pl_queue_params qparams = {
