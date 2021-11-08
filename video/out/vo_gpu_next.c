@@ -679,7 +679,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         tbits->sample_depth = opts->dither_depth;
     }
 
-    struct pl_frame_mix mix;
+    struct pl_frame_mix mix = {0};
     if (frame->current) {
         // Update queue state
         struct pl_queue_params qparams = {
