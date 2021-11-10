@@ -47,6 +47,8 @@
 #ifndef EGL_EXT_platform_base
 typedef EGLDisplay (EGLAPIENTRYP PFNEGLGETPLATFORMDISPLAYEXTPROC)
     (EGLenum platform, void *native_display, const EGLint *attrib_list);
+typedef EGLSurface (EGLAPIENTRYP PFNEGLCREATEPLATFORMWINDOWSURFACEEXTPROC)
+    (EGLDisplay dpy, EGLConfig config, void *native_window, const EGLint *attrib_list);
 #endif
 
 struct framebuffer
@@ -217,9 +219,17 @@ static bool init_egl(struct ra_ctx *ctx)
                                  &p->egl.context,
                                  &config))
         return false;
+
     MP_VERBOSE(ctx, "Initializing EGL surface\n");
-    p->egl.surface
-        = eglCreateWindowSurface(p->egl.display, config, p->gbm.surface, NULL);
+    PFNEGLCREATEPLATFORMWINDOWSURFACEEXTPROC create_window_surface = NULL;
+    create_window_surface = (void *) eglGetProcAddress("eglCreatePlatformWindowSurfaceEXT");
+    if (create_window_surface) {
+        p->egl.surface = create_window_surface(
+            p->egl.display, config, p->gbm.surface, NULL);
+    } else {
+        p->egl.surface = eglCreateWindowSurface(
+            p->egl.display, config, p->gbm.surface, NULL);
+    }
     if (p->egl.surface == EGL_NO_SURFACE) {
         MP_ERR(ctx, "Failed to create EGL surface.\n");
         return false;
