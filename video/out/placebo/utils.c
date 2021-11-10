@@ -154,9 +154,7 @@ enum pl_color_levels mp_levels_to_pl(enum mp_csp_levels levels)
 enum pl_alpha_mode mp_alpha_to_pl(enum mp_alpha_type alpha)
 {
     switch (alpha) {
-    // Note: Older versions of libplacebo incorreclty handled PL_ALPHA_UNKNOWN
-    // as premultiplied, so explicitly default this to independent instead.
-    case MP_ALPHA_AUTO:             return PL_ALPHA_INDEPENDENT;
+    case MP_ALPHA_AUTO:             return PL_ALPHA_UNKNOWN;
     case MP_ALPHA_STRAIGHT:         return PL_ALPHA_INDEPENDENT;
     case MP_ALPHA_PREMUL:           return PL_ALPHA_PREMULTIPLIED;
     }
