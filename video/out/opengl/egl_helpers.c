@@ -41,7 +41,6 @@
 #define EGL_CONTEXT_OPENGL_PROFILE_MASK         0x30FD
 #define EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT     0x00000001
 #define EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE   0x31B1
-#define EGL_OPENGL_ES3_BIT                      0x00000040
 typedef intptr_t EGLAttrib;
 #endif
 
@@ -117,7 +116,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
         name = "Desktop OpenGL";
     } else {
         api = EGL_OPENGL_ES_API;
-        rend = EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES3_BIT;
+        rend = EGL_OPENGL_ES2_BIT;
         name = "GLES 2.x +";
     }
 
