@@ -6172,7 +6172,7 @@ them.
         Fully replaces the color decoding. A LUT of this type should ingest the
         image's native colorspace and output normalized non-linear RGB.
 
-``--target-colorspace-hint```
+``--target-colorspace-hint``
     Automatically configure the output colorspace of the display to pass
     through the input values of the stream (e.g. for HDR passthrough), if
     possible. Requires a supporting driver and ``--vo=gpu-next``.
