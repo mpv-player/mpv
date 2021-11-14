@@ -762,7 +762,7 @@ function run_ytdl_hook(url)
         if (arg ~= "") then
             table.insert(command, arg)
         end
-        if (param == "sub-lang") and (arg ~= "") then
+        if (param == "sub-lang" or param == "sub-langs" or param == "srt-lang") and (arg ~= "") then
             allsubs = false
         elseif (param == "proxy") and (arg ~= "") then
             proxy = arg
