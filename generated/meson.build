@@ -1,9 +1,9 @@
-ebml_defs = custom_target('ebml_defs',
+ebml_defs = custom_target('ebml_defs.inc',
     output: 'ebml_defs.inc',
     command: [matroska, '--generate-definitions', '@OUTPUT@'],
 )
 
-ebml_types = custom_target('ebml_types',
+ebml_types = custom_target('ebml_types.h',
     output: 'ebml_types.h',
     command: [matroska, '--generate-header', '@OUTPUT@'],
 )
