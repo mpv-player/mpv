@@ -136,8 +136,12 @@ static void egl_create_window(struct ra_ctx *ctx)
     p->egl_window = wl_egl_window_create(wl->surface, mp_rect_w(wl->geometry),
                                          mp_rect_h(wl->geometry));
 
-    p->egl_surface = eglCreateWindowSurface(p->egl_display, p->egl_config,
-                                            p->egl_window, NULL);
+    p->egl_surface = mpegl_create_window_surface(
+        p->egl_display, p->egl_config, p->egl_window);
+    if (p->egl_surface == EGL_NO_SURFACE) {
+        p->egl_surface = eglCreateWindowSurface(
+            p->egl_display, p->egl_config, p->egl_window, NULL);
+    }
 
     eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface, p->egl_context);
 

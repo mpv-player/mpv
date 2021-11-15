@@ -148,9 +148,12 @@ static bool mpegl_init(struct ra_ctx *ctx)
 
     XFree(vi);
 
-    p->egl_surface = eglCreateWindowSurface(p->egl_display, config,
-                                    (EGLNativeWindowType)vo->x11->window, NULL);
-
+    p->egl_surface = mpegl_create_window_surface(
+        p->egl_display, config, &vo->x11->window);
+    if (p->egl_surface == EGL_NO_SURFACE) {
+        p->egl_surface = eglCreateWindowSurface(
+            p->egl_display, config, (EGLNativeWindowType)vo->x11->window, NULL);
+    }
     if (p->egl_surface == EGL_NO_SURFACE) {
         MP_FATAL(ctx, "Could not create EGL surface!\n");
         goto uninit;
