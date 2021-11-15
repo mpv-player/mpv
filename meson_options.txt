@@ -21,7 +21,7 @@ option('libavdevice', type: 'feature', value: 'auto', description: 'libavdevice'
 option('libbluray', type: 'feature', value: 'auto', description: 'Bluray support')
 option('lua',
     type: 'combo',
-    choices: ['lua52', 'lua5.2', 'lua-5.2', 'luajit', 'lua51',
+    choices: ['lua', 'lua52', 'lua5.2', 'lua-5.2', 'luajit', 'lua51',
               'lua5.1', 'lua-5.1', 'auto', 'enabled', 'disabled'],
     value: 'auto',
     description: 'Lua'
