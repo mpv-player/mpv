@@ -278,8 +278,8 @@ if cc.get_id() == 'gcc'
 endif
 
 if cc.get_id() == 'clang'
-    clang_flags = ['-Wno-logical-op-parentheses',
-                   '-Wno-tautological-compare',
+    clang_flags = ['-Wno-logical-op-parentheses', '-Wno-switch',
+                   '-Wno-tautological-compare', '-Wno-pointer-sign',
                    '-Wno-tautological-constant-out-of-range-compare']
     flags += clang_flags
 endif
@@ -460,8 +460,11 @@ endif
 
 android = host_machine.system() == 'android'
 if android
+    dependencies += cc.find_library('android')
     features += 'android'
     sources += files('audio/out/ao_audiotrack.c',
+                     'misc/jni.c',
+                     'osdep/android/strnlen.c',
                      'video/out/android_common.c',
                      'video/out/vo_mediacodec_embed.c')
 endif
@@ -598,6 +601,7 @@ endif
 # The following should be removed in 2022 or if libavformat requirement
 # is bumped to >= 59.8.100
 aviocontext_bytes_read = cc.has_member('AVIOContext', 'bytes_read',
+                                       dependencies: ffmpeg['deps'][2], #libavformat
                                        prefix: '#include <libavformat/avio.h>')
 
 
@@ -1206,11 +1210,13 @@ if egl['use']
     features += egl['name']
 endif
 
-egl_android = get_option('egl-android').require(
-    android and egl['use'] and gl['opt'],
-    error_message: 'either this os is not android or egl was not found!',
+egl_android_opt = get_option('egl-android').require(
+    android and gl['opt'],
+    error_message: 'the OS is not android!',
 )
-if egl_android.allowed()
+egl_android = cc.find_library('EGL', required: egl_android_opt)
+if egl_android.found()
+    dependencies += egl_android
     features += 'egl-android'
     gl += {'use': true}
     sources += files('video/out/opengl/context_android.c')
@@ -1275,7 +1281,7 @@ if rpi['use']
     sources += files('video/out/opengl/context_rpi.c')
 endif
 
-egl_helpers = egl['use'] or egl_angle_win32.allowed() or rpi['use']
+egl_helpers = egl['use'] or egl_android.found() or egl_angle_win32.allowed() or rpi['use']
 if egl_helpers
     features += 'egl-helpers'
     sources += files('video/out/opengl/egl_helpers.c')
@@ -1299,8 +1305,12 @@ endif
 
 
 # vulkan
-vulkan = dependency('vulkan', required: get_option('vulkan'))
-if vulkan.found() and libplacebo.found()
+vulkan_opt = get_option('vulkan').require(
+    libplacebo.found(),
+    error_message: 'libplacebo could not be found!',
+)
+vulkan = dependency('vulkan', required: vulkan_opt)
+if vulkan.found()
     dependencies += vulkan
     features += 'vulkan'
     sources += files('video/out/vulkan/context.c',
@@ -1308,19 +1318,19 @@ if vulkan.found() and libplacebo.found()
                      'video/out/vulkan/utils.c')
 endif
 
-if vulkan.found() and libplacebo.found() and android
+if vulkan.found() and android
     sources += files('video/out/vulkan/context_android.c')
 endif
 
-if vulkan.found() and libplacebo.found() and wayland['use']
+if vulkan.found() and wayland['use']
     sources += files('video/out/vulkan/context_wayland.c')
 endif
 
-if vulkan.found() and libplacebo.found() and win32_desktop
+if vulkan.found() and win32_desktop
     sources += files('video/out/vulkan/context_win.c')
 endif
 
-if vulkan.found() and libplacebo.found() and x11['use']
+if vulkan.found() and x11['use']
      sources += files('video/out/vulkan/context_xlib.c')
 endif
 
@@ -1343,14 +1353,14 @@ if cuda_hwaccel.allowed()
 endif
 
 cuda_interop = get_option('cuda-interop').require(
-    cuda_hwaccel.allowed() and (gl['use'] or libplacebo.found() and vulkan.found()),
+    cuda_hwaccel.allowed() and (gl['use'] or vulkan.found()),
     error_message: 'cuda-hwaccel and either gl or vulkan were not found!',
 )
 if cuda_interop.allowed() and gl['use']
     features += 'cuda-interop'
     sources += files('video/out/hwdec/hwdec_cuda_gl.c')
 endif
-if cuda_interop.allowed() and vulkan.found() and libplacebo.found()
+if cuda_interop.allowed() and vulkan.found()
     sources += files('video/out/hwdec/hwdec_cuda_vk.c')
 endif
 
@@ -1471,7 +1481,7 @@ endif
 
 vaapi_vulkan = {
     'name': 'vaapi-vulkan',
-    'use': vaapi['use'] and libplacebo.found() and vulkan.found(),
+    'use': vaapi['use'] and vulkan.found(),
 }
 if vaapi_vulkan['use']
     features += vaapi_vulkan['name']
@@ -1713,7 +1723,7 @@ conf_data.set10('HAVE_DRM', drm['use'])
 conf_data.set10('HAVE_DVBIN', dvbin.allowed())
 conf_data.set10('HAVE_DVDNAV', dvdnav.found() and dvdread.found())
 conf_data.set10('HAVE_EGL', egl['use'])
-conf_data.set10('HAVE_EGL_ANDROID', egl_android.allowed())
+conf_data.set10('HAVE_EGL_ANDROID', egl_android.found())
 conf_data.set10('HAVE_EGL_ANGLE', egl_angle.allowed())
 conf_data.set10('HAVE_EGL_ANGLE_LIB', egl_angle_lib.allowed())
 conf_data.set10('HAVE_EGL_ANGLE_WIN32', egl_angle_win32.allowed())
@@ -1782,7 +1792,7 @@ conf_data.set10('HAVE_VECTOR', vector)
 conf_data.set10('HAVE_VDPAU', vdpau.found() and x11['use'])
 conf_data.set10('HAVE_VDPAU_GL_X11', vdpau.found() and gl_x11.allowed())
 conf_data.set10('HAVE_VIDEOTOOLBOX_GL', videotoolbox_gl.allowed())
-conf_data.set10('HAVE_VULKAN', libplacebo.found() and vulkan.found())
+conf_data.set10('HAVE_VULKAN', vulkan.found())
 conf_data.set10('HAVE_WASAPI', wasapi)
 conf_data.set10('HAVE_WAYLAND', wayland['use'])
 conf_data.set10('HAVE_WIN32_DESKTOP', win32_desktop)
