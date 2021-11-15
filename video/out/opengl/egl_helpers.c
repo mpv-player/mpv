@@ -276,6 +276,20 @@ void mpegl_load_functions(struct GL *gl, struct mp_log *log)
         gl->SwapInterval = swap_interval;
 }
 
+static bool is_egl15(void)
+{
+    // It appears that EGL 1.4 is specified to _require_ an initialized display
+    // for EGL_VERSION, while EGL 1.5 is _required_ to return the EGL version.
+    const char *ver = eglQueryString(EGL_NO_DISPLAY, EGL_VERSION);
+    // Of course we have to go through the excruciating pain of parsing a
+    // version string, since EGL provides no other way without a display. In
+    // theory version!=NULL is already proof enough that it's 1.5, but be
+    // extra defensive, since this should have been true for EGL_EXTENSIONS as
+    // well, but then they added an extension that modified standard behavior.
+    int ma = 0, mi = 0;
+    return ver && sscanf(ver, "%d.%d", &ma, &mi) == 2 && (ma > 1 || mi >= 5);
+}
+
 // This is similar to eglGetPlatformDisplay(platform, native_display, NULL),
 // except that it 1. may use eglGetPlatformDisplayEXT, 2. checks for the
 // platform client extension platform_ext_name, and 3. does not support passing
@@ -310,16 +324,7 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
         return EGL_NO_DISPLAY;
 
     // Before we go through the EGL 1.4 BS, try if we can use native EGL 1.5
-    // It appears that EGL 1.4 is specified to _require_ an initialized display
-    // for EGL_VERSION, while EGL 1.5 is _required_ to return the EGL version.
-    const char *ver = eglQueryString(EGL_NO_DISPLAY, EGL_VERSION);
-    // Of course we have to go through the excruciating pain of parsing a
-    // version string, since EGL provides no other way without a display. In
-    // theory version!=NULL is already proof enough that it's 1.5, but be
-    // extra defensive, since this should have been true for EGL_EXTENSIONS as
-    // well, but then they added an extension that modified standard behavior.
-    int ma = 0, mi = 0;
-    if (ver && sscanf(ver, "%d.%d", &ma, &mi) == 2 && (ma > 1 || mi >= 5)) {
+    if (is_egl15()) {
         // This is EGL 1.5. It must support querying standard functions through
         // eglGetProcAddress(). Note that on EGL 1.4, even if the function is
         // unknown, it could return non-NULL anyway (because EGL is crazy).
@@ -331,8 +336,7 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
             return GetPlatformDisplay(platform, native_display, NULL);
     }
 
-    // (It should be impossible to be missing, but uh.)
-    if (!gl_check_extension(exts, "EGL_EXT_client_extensions"))
+    if (!gl_check_extension(exts, "EGL_EXT_platform_base"))
         return EGL_NO_DISPLAY;
 
     EGLDisplay (EGLAPIENTRYP GetPlatformDisplayEXT)(EGLenum, void*, const EGLint*)
@@ -343,4 +347,35 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
         return GetPlatformDisplayEXT(platform, native_display, NULL);
 
     return EGL_NO_DISPLAY;
+}
+
+// The same mess but with eglCreatePlatformWindowSurface(EXT)
+// again no support for an attribute list because the type differs
+// Returns EGL_NO_SURFACE on failure.
+EGLSurface mpegl_create_window_surface(EGLDisplay dpy, EGLConfig config,
+                                       void *native_window)
+{
+    // Use the EGL 1.5 function if possible
+    if (is_egl15()) {
+        EGLSurface (EGLAPIENTRYP CreatePlatformWindowSurface)
+            (EGLDisplay, EGLConfig, void *, const EGLAttrib *) =
+            (void *)eglGetProcAddress("eglCreatePlatformWindowSurface");
+        // (It should be impossible to be NULL, but uh.)
+        if (CreatePlatformWindowSurface)
+            return CreatePlatformWindowSurface(dpy, config, native_window, NULL);
+    }
+
+    // Check the extension that provides the *EXT function
+    const char *exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+    if (!gl_check_extension(exts, "EGL_EXT_platform_base"))
+        return EGL_NO_SURFACE;
+
+    EGLSurface (EGLAPIENTRYP CreatePlatformWindowSurfaceEXT)
+        (EGLDisplay, EGLConfig, void *, const EGLint *) =
+        (void *)eglGetProcAddress("eglCreatePlatformWindowSurfaceEXT");
+    // (It should be impossible to be NULL, but uh.)
+    if (CreatePlatformWindowSurfaceEXT)
+        return CreatePlatformWindowSurfaceEXT(dpy, config, native_window, NULL);
+
+    return EGL_NO_SURFACE;
 }
