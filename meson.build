@@ -531,7 +531,7 @@ if vt_h
     features += 'vt.h'
 endif
 
-consio_h = cc.has_header_symbol('sys/consio.h', 'VT_GETMODE')
+consio_h = not vt_h and cc.has_header_symbol('sys/consio.h', 'VT_GETMODE')
 if consio_h
     features += 'consio.h'
 endif
@@ -776,8 +776,12 @@ if stdatomic.found()
     features += 'stdatomic'
 endif
 
-uchardet = dependency('uchardet', required: get_option('uchardet'))
-if iconv.found() and uchardet.found()
+uchardet_opt = get_option('uchardet').require(
+    iconv.found(),
+    error_message: 'iconv was not found!',
+)
+uchardet = dependency('uchardet', required: uchardet_opt)
+if uchardet.found()
     dependencies += uchardet
     features += 'uchardet'
 endif
@@ -970,7 +974,10 @@ if libplacebo.found()
     if pl_api_ver.version_compare('>=170')
         features += 'libplacebo-v4'
         libplacebo_v4 = true
+        message('libplacebo v4.170+ found! Enabling vo_gpu_next.')
         sources += files('video/out/vo_gpu_next.c')
+    else
+        message('libplacebo v4.170+ not found! Disabling vo_gpu_next.')
     endif
 endif
 
@@ -1138,9 +1145,10 @@ if gl_x11.allowed()
     sources += files('video/out/opengl/context_glx.c')
 endif
 
-gl_dxinterop_d3d = cc.has_header_symbol('GL/wglext.h', 'WGL_ACCESS_READ_ONLY_NV',
+gl_dxinterop_d3d = gl_win32.allowed() and \
+                   cc.has_header_symbol('GL/wglext.h', 'WGL_ACCESS_READ_ONLY_NV',
                                         prefix: '#include <GL/gl.h>')
-gl_dxinterop_gl = cc.has_header_symbol('d3d9.h', 'IDirect3D9Ex')
+gl_dxinterop_gl = gl_win32.allowed() and cc.has_header_symbol('d3d9.h', 'IDirect3D9Ex')
 gl_dxinterop = get_option('gl-dxinterop').require(
     gl_dxinterop_d3d and gl_dxinterop_gl and gl_win32.allowed(),
     error_message: 'gl-dxinterop could not be found!',
@@ -1151,8 +1159,9 @@ if gl_dxinterop.allowed()
 endif
 
 egl_angle = get_option('egl-angle').require(
-    cc.has_header_symbol('GL/eglext.h', 'EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE',
-                         prefix: '#include <EGL/egl.h>') and gl_win32.allowed(),
+    gl_win32.allowed() and cc.has_header_symbol('GL/eglext.h',
+                                                'EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE',
+                                                prefix: '#include <EGL/egl.h>'),
     error_message: 'egl-angle could not be found!',
 )
 if egl_angle.allowed()
@@ -1161,8 +1170,8 @@ if egl_angle.allowed()
 endif
 
 egl_angle_lib = get_option('egl-angle-lib').require(
-    cc.has_function('eglCreateWindowSurface', prefix: '#include <EGL/egl.h>') and \
-            egl_angle.allowed(),
+    egl_angle.allowed() and cc.has_function('eglCreateWindowSurface',
+                                            prefix: '#include <EGL/egl.h>'),
     error_message: 'egl-angle-lib could not be found!',
 )
 if egl_angle_lib.allowed()
@@ -1384,8 +1393,12 @@ if ios_gl
     sources += files('video/out/opengl/hwdec_ios.m')
 endif
 
-rpi_mmal = dependency('/opt/vc/lib/pkgconfig/mmal.pc', 'mmal', required: get_option('rpi-mmal'))
-if rpi['use'] and rpi_mmal.found()
+rpi_mmal_opt = get_option('rpi-mmal').require(
+    rpi['use'],
+    error_message: 'rpi was not found!',
+)
+rpi_mmal = dependency('/opt/vc/lib/pkgconfig/mmal.pc', 'mmal', required: rpi_mmal_opt)
+if rpi_mmal.found()
     dependencies += rpi_mmal
     features += 'rpi-mmal'
     sources += files('video/out/opengl/hwdec_rpi.c',
@@ -1492,10 +1505,16 @@ endif
 # macOS features
 macos_sdk_version_py = find_program(join_paths(source_root, 'TOOLS',
                                     'macos-sdk-version.py'))
-macos_sdk_info = run_command(macos_sdk_version_py).stdout().split(',')
+macos_sdk_info = ['', '0.0']
+if darwin
+    macos_sdk_info = run_command(macos_sdk_version_py).stdout().split(',')
+endif
+
 macos_sdk_path = macos_sdk_info[0].strip()
 macos_sdk_version = macos_sdk_info[1]
-message('Detected macOS sdk path: ' + macos_sdk_path)
+if macos_sdk_path != ''
+    message('Detected macOS sdk path: ' + macos_sdk_path)
+endif
 
 if macos_sdk_version != '0.0'
     message('Detected macOS SDK: ' + macos_sdk_version)
@@ -1599,7 +1618,7 @@ rst2man = find_program('rst2man', required: get_option('manpage-build'))
 if rst2man.found()
     features += 'manpage-build'
     mandir = get_option('mandir')
-    custom_target('rst2man',
+    custom_target('manpages',
         input: manpage,
         output: 'mpv.1',
         command: [rst2man, '--strip-elements-with-class=contents', '@INPUT@', '@OUTPUT@'],
@@ -1612,7 +1631,7 @@ rst2html = find_program('rst2html', required: get_option('html-build'))
 if rst2html.found()
     datadir = get_option('datadir')
     features += 'html-build'
-    custom_target('rst2html',
+    custom_target('html-manpages',
         input: manpage,
         output: 'mpv.html',
         command: [rst2html, manpage, '@INPUT@', '@OUTPUT@'],
@@ -1625,7 +1644,7 @@ rst2pdf = find_program('rst2pdf', required: get_option('pdf-build'))
 if rst2pdf.found()
     datadir = get_option('datadir')
     features += 'pdf-build'
-    custom_target('rst2pdf',
+    custom_target('pdf-manpages',
         input: manpage,
         output: 'mpv.pdf',
         command: [rst2pdf, '-c', '-b', '1', '--repeat-table-rows', '@INPUT@', '-o', '@OUTPUT@'],
@@ -1735,7 +1754,7 @@ conf_data.set10('HAVE_OSX_THREAD_NAME', osx_thread_name)
 conf_data.set10('HAVE_POSIX', posix)
 conf_data.set10('HAVE_PULSE', pulse.found())
 conf_data.set10('HAVE_RPI', rpi['use'])
-conf_data.set10('HAVE_RPI_MMAL', rpi['use'] and rpi_mmal.found())
+conf_data.set10('HAVE_RPI_MMAL', rpi_mmal.found())
 conf_data.set10('HAVE_RUBBERBAND', rubberband.found())
 conf_data.set10('HAVE_SDL2', sdl2.found())
 conf_data.set10('HAVE_SDL2_AUDIO', sdl2_audio.allowed())
@@ -1746,7 +1765,7 @@ conf_data.set10('HAVE_SIXEL', sixel.found())
 conf_data.set10('HAVE_STDATOMIC', stdatomic.found())
 conf_data.set10('HAVE_TA_LEAK_REPORT', get_option('ta-leak-report'))
 conf_data.set10('HAVE_TESTS', get_option('tests'))
-conf_data.set10('HAVE_UCHARDET', iconv.found() and uchardet.found())
+conf_data.set10('HAVE_UCHARDET', uchardet.found())
 conf_data.set10('HAVE_UWP', uwp.found())
 conf_data.set10('HAVE_VAAPI', vaapi['use'])
 conf_data.set10('HAVE_VAAPI_DRM', vaapi_drm['use'])
