@@ -45,11 +45,6 @@
 #define EGL_PLATFORM_GBM_KHR 0x31D7
 #endif
 
-#ifndef EGL_EXT_platform_base
-typedef EGLSurface (EGLAPIENTRYP PFNEGLCREATEPLATFORMWINDOWSURFACEEXTPROC)
-    (EGLDisplay dpy, EGLConfig config, void *native_window, const EGLint *attrib_list);
-#endif
-
 struct framebuffer
 {
     int fd;
@@ -235,12 +230,9 @@ static bool init_egl(struct ra_ctx *ctx)
         return false;
 
     MP_VERBOSE(ctx, "Initializing EGL surface\n");
-    PFNEGLCREATEPLATFORMWINDOWSURFACEEXTPROC create_window_surface = NULL;
-    create_window_surface = (void *) eglGetProcAddress("eglCreatePlatformWindowSurfaceEXT");
-    if (create_window_surface) {
-        p->egl.surface = create_window_surface(
-            p->egl.display, config, p->gbm.surface, NULL);
-    } else {
+    p->egl.surface = mpegl_create_window_surface(
+        p->egl.display, config, p->gbm.surface);
+    if (p->egl.surface == EGL_NO_SURFACE) {
         p->egl.surface = eglCreateWindowSurface(
             p->egl.display, config, p->gbm.surface, NULL);
     }
