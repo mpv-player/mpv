@@ -46,8 +46,6 @@
 #endif
 
 #ifndef EGL_EXT_platform_base
-typedef EGLDisplay (EGLAPIENTRYP PFNEGLGETPLATFORMDISPLAYEXTPROC)
-    (EGLenum platform, void *native_display, const EGLint *attrib_list);
 typedef EGLSurface (EGLAPIENTRYP PFNEGLCREATEPLATFORMWINDOWSURFACEEXTPROC)
     (EGLDisplay dpy, EGLConfig config, void *native_window, const EGLint *attrib_list);
 #endif
@@ -201,18 +199,15 @@ static int match_config_to_visual(void *user_data, EGLConfig *configs, int num_c
 
 static EGLDisplay egl_get_display(struct gbm_device *gbm_device)
 {
-    const char *ext = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+    EGLDisplay ret;
 
-    if (ext) {
-        PFNEGLGETPLATFORMDISPLAYEXTPROC get_platform_display = NULL;
-        get_platform_display = (void *) eglGetProcAddress("eglGetPlatformDisplayEXT");
+    ret = mpegl_get_display(EGL_PLATFORM_GBM_MESA, "EGL_MESA_platform_gbm", gbm_device);
+    if (ret != EGL_NO_DISPLAY)
+        return ret;
 
-        if (get_platform_display && strstr(ext, "EGL_MESA_platform_gbm"))
-            return get_platform_display(EGL_PLATFORM_GBM_MESA, gbm_device, NULL);
-
-        if (get_platform_display && strstr(ext, "EGL_KHR_platform_gbm"))
-            return get_platform_display(EGL_PLATFORM_GBM_KHR, gbm_device, NULL);
-    }
+    ret = mpegl_get_display(EGL_PLATFORM_GBM_KHR, "EGL_KHR_platform_gbm", gbm_device);
+    if (ret != EGL_NO_DISPLAY)
+        return ret;
 
     return eglGetDisplay(gbm_device);
 }
