@@ -42,6 +42,15 @@ typedef void *EGLImageKHR;
 #define EGL_DMA_BUF_PLANE3_OFFSET_EXT     0x3441
 #define EGL_DMA_BUF_PLANE3_PITCH_EXT      0x3442
 
+#define EGL_DMA_BUF_PLANE0_MODIFIER_LO_EXT 0x3443
+#define EGL_DMA_BUF_PLANE0_MODIFIER_HI_EXT 0x3444
+#define EGL_DMA_BUF_PLANE1_MODIFIER_LO_EXT 0x3445
+#define EGL_DMA_BUF_PLANE1_MODIFIER_HI_EXT 0x3446
+#define EGL_DMA_BUF_PLANE2_MODIFIER_LO_EXT 0x3447
+#define EGL_DMA_BUF_PLANE2_MODIFIER_HI_EXT 0x3448
+#define EGL_DMA_BUF_PLANE3_MODIFIER_LO_EXT 0x3449
+#define EGL_DMA_BUF_PLANE3_MODIFIER_HI_EXT 0x344A
+
 struct vaapi_gl_mapper_priv {
     GLuint gl_textures[4];
     EGLImageKHR images[4];
@@ -135,6 +144,10 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
                         p_mapper->desc.layers[n].offset[plane]); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
                         p_mapper->desc.layers[n].pitch[plane]); \
+            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_HI_EXT, \
+                        p_mapper->desc.objects[p_mapper->desc.layers[n].object_index[plane]].drm_format_modifier >> 32); \
+            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_LO_EXT, \
+                        p_mapper->desc.objects[p_mapper->desc.layers[n].object_index[plane]].drm_format_modifier & 0xfffffffful); \
         } while (0)
 
 static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
@@ -145,7 +158,7 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
     GL *gl = ra_gl_get(mapper->ra);
 
     for (int n = 0; n < p_mapper->num_planes; n++) {
-        int attribs[20] = {EGL_NONE};
+        int attribs[48] = {EGL_NONE};
         int num_attribs = 0;
 
         ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, p_mapper->desc.layers[n].drm_format);
