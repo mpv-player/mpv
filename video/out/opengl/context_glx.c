@@ -99,7 +99,7 @@ static bool create_context_x11(struct ra_ctx *ctx, GL *gl, bool es)
 
     if (es) {
         profile_mask = GLX_CONTEXT_ES2_PROFILE_BIT_EXT;
-        if (!strstr(glxstr, "GLX_EXT_create_context_es2_profile"))
+        if (!gl_check_extension(glxstr, "GLX_EXT_create_context_es2_profile"))
             return false;
     }
 

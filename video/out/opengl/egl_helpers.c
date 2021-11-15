@@ -306,7 +306,7 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
     // If this is either EGL 1.5, or 1.4 with EGL_EXT_client_extensions, then
     // this must return a valid extension string.
     const char *exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
-    if (!exts || !gl_check_extension(exts, platform_ext_name))
+    if (!gl_check_extension(exts, platform_ext_name))
         return EGL_NO_DISPLAY;
 
     // Before we go through the EGL 1.4 BS, try if we can use native EGL 1.5
