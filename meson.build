@@ -256,7 +256,6 @@ test_flags = ['-Werror=implicit-function-declaration',
               '-Wdisabled-optimization',
               '-Wstrict-prototypes',
               '-Wno-format-zero-length',
-              '-Werror=format-security',
               '-Wno-redundant-decls',
               '-Wvla',
               '-Wno-format-truncation',
@@ -264,6 +263,10 @@ test_flags = ['-Werror=implicit-function-declaration',
               '-fno-math-errno']
 
 flags += cc.get_supported_arguments(test_flags)
+
+if cc.has_multi_arguments('-Wformat', '-Werror=format-security')
+    flags += '-Werror=format-security'
+endif
 
 if cc.get_id() == 'gcc'
     gcc_flags = ['-Wundef', '-Wmissing-prototypes', '-Wshadow',
