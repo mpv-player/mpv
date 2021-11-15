@@ -1088,7 +1088,11 @@ if x11['use']
                      'video/out/x11_common.c')
 endif
 
-xv = dependency('xv', required: get_option('xv'))
+xv_opt = get_option('xv').require(
+    x11['use'],
+    error_message: 'x11 could not be found!',
+)
+xv = dependency('xv', required: xv_opt)
 if xv.found()
     dependencies += xv
     features += 'xv'
