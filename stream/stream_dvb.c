@@ -1045,6 +1045,7 @@ static int dvb_open(stream_t *stream)
     }
 
     if (!dvb_parse_path(stream)) {
+        pthread_mutex_unlock(&global_dvb_state_lock);
         goto err_out;
     }
 
