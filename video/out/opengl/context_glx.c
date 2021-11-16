@@ -88,9 +88,9 @@ static bool create_context_x11(struct ra_ctx *ctx, GL *gl, bool es)
         return false;
     }
 
-    if (!strstr(glxstr, "GLX_ARB_create_context") ||
+    if (!gl_check_extension(glxstr, "GLX_ARB_create_context_profile") ||
         !glXCreateContextAttribsARB) {
-        MP_ERR(ctx, "GLX does not support GLX_ARB_create_context\n");
+        MP_ERR(ctx, "GLX does not support GLX_ARB_create_context_profile\n");
         return false;
     }
 
