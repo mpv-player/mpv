@@ -1835,7 +1835,8 @@ if get_option('libmpv')
     client_api_version = major + '.' + minor + '.0'
 
     libmpv = library('mpv', sources, dependencies: [dependencies, luajit_partial],
-                     version: client_api_version, include_directories: includedir, install: true)
+                     gnu_symbol_visibility: 'hidden', version: client_api_version,
+                     include_directories: includedir, install: true)
     pkg = import('pkgconfig')
     pkg.generate(libmpv, version: client_api_version,
                  description: 'mpv media player client library')
