@@ -26,6 +26,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/* New symbols must still be added to libmpv/mpv.def. */
+#if defined(__GNUC__) || defined(__clang__)
+#define MPV_EXPORT __attribute__((visibility("default")))
+#elif defined(_MSC_VER)
+#define MPV_EXPORT __declspec(dllexport)
+#else
+#define MPV_EXPORT
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -374,7 +383,7 @@ typedef enum mpv_error {
  * @return A static string describing the error. The string is completely
  *         static, i.e. doesn't need to be deallocated, and is valid forever.
  */
-const char *mpv_error_string(int error);
+MPV_EXPORT const char *mpv_error_string(int error);
 
 /**
  * General function to deallocate memory returned by some of the API functions.
@@ -383,7 +392,7 @@ const char *mpv_error_string(int error);
  *
  * @param data A valid pointer returned by the API, or NULL.
  */
-void mpv_free(void *data);
+MPV_EXPORT void mpv_free(void *data);
 
 /**
  * Return the name of this client handle. Every client has its own unique
@@ -392,7 +401,7 @@ void mpv_free(void *data);
  * @return The client name. The string is read-only and is valid until the
  *         mpv_handle is destroyed.
  */
-const char *mpv_client_name(mpv_handle *ctx);
+MPV_EXPORT const char *mpv_client_name(mpv_handle *ctx);
 
 /**
  * Return the ID of this client handle. Every client has its own unique ID. This
@@ -409,7 +418,7 @@ const char *mpv_client_name(mpv_handle *ctx);
  *
  * @return The client ID.
  */
-int64_t mpv_client_id(mpv_handle *ctx);
+MPV_EXPORT int64_t mpv_client_id(mpv_handle *ctx);
 
 /**
  * Create a new mpv instance and an associated client API handle to control
@@ -465,7 +474,7 @@ int64_t mpv_client_id(mpv_handle *ctx);
  *         - out of memory
  *         - LC_NUMERIC is not set to "C" (see general remarks)
  */
-mpv_handle *mpv_create(void);
+MPV_EXPORT mpv_handle *mpv_create(void);
 
 /**
  * Initialize an uninitialized mpv instance. If the mpv instance is already
@@ -487,7 +496,7 @@ mpv_handle *mpv_create(void);
  *
  * @return error code
  */
-int mpv_initialize(mpv_handle *ctx);
+MPV_EXPORT int mpv_initialize(mpv_handle *ctx);
 
 /**
  * Disconnect and destroy the mpv_handle. ctx will be deallocated with this
@@ -499,7 +508,7 @@ int mpv_initialize(mpv_handle *ctx);
  * be sent MPV_EVENT_SHUTDOWN. This function may block until these clients
  * have responded to the shutdown event, and the core is finally destroyed.
  */
-void mpv_destroy(mpv_handle *ctx);
+MPV_EXPORT void mpv_destroy(mpv_handle *ctx);
 
 #if MPV_ENABLE_DEPRECATED
 /**
@@ -518,7 +527,7 @@ void mpv_destroy(mpv_handle *ctx);
  *  player is terminated, send a "quit" command, and wait until the
  *  MPV_EVENT_SHUTDOWN event is received, or use mpv_terminate_destroy().
  */
-void mpv_detach_destroy(mpv_handle *ctx);
+MPV_EXPORT void mpv_detach_destroy(mpv_handle *ctx);
 #endif
 
 /**
@@ -546,7 +555,7 @@ void mpv_detach_destroy(mpv_handle *ctx);
  *  this function will merely send a quit command and then call
  *  mpv_destroy(), without waiting for the actual shutdown.
  */
-void mpv_terminate_destroy(mpv_handle *ctx);
+MPV_EXPORT void mpv_terminate_destroy(mpv_handle *ctx);
 
 /**
  * Create a new client handle connected to the same player core as ctx. This
@@ -572,7 +581,7 @@ void mpv_terminate_destroy(mpv_handle *ctx);
  *             If NULL, an arbitrary name is automatically chosen.
  * @return a new handle, or NULL on error
  */
-mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name);
+MPV_EXPORT mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name);
 
 /**
  * This is the same as mpv_create_client(), but the created mpv_handle is
@@ -586,7 +595,7 @@ mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name);
  * mpv_terminate_destroy() _and_ mpv_destroy() for the last non-weak
  * mpv_handle will block until all weak mpv_handles are destroyed.
  */
-mpv_handle *mpv_create_weak_client(mpv_handle *ctx, const char *name);
+MPV_EXPORT mpv_handle *mpv_create_weak_client(mpv_handle *ctx, const char *name);
 
 /**
  * Load a config file. This loads and parses the file, and sets every entry in
@@ -606,7 +615,7 @@ mpv_handle *mpv_create_weak_client(mpv_handle *ctx, const char *name);
  * @param filename absolute path to the config file on the local filesystem
  * @return error code
  */
-int mpv_load_config_file(mpv_handle *ctx, const char *filename);
+MPV_EXPORT int mpv_load_config_file(mpv_handle *ctx, const char *filename);
 
 #if MPV_ENABLE_DEPRECATED
 
@@ -636,12 +645,12 @@ int mpv_load_config_file(mpv_handle *ctx, const char *filename);
  *             well-defined, and their usefulness is extremely limited. The
  *             calls will remain stubs in order to keep ABI compatibility.
  */
-void mpv_suspend(mpv_handle *ctx);
+MPV_EXPORT void mpv_suspend(mpv_handle *ctx);
 
 /**
  * See mpv_suspend().
  */
-void mpv_resume(mpv_handle *ctx);
+MPV_EXPORT void mpv_resume(mpv_handle *ctx);
 
 #endif
 
@@ -659,7 +668,7 @@ void mpv_resume(mpv_handle *ctx);
  *
  * Safe to be called from mpv render API threads.
  */
-int64_t mpv_get_time_us(mpv_handle *ctx);
+MPV_EXPORT int64_t mpv_get_time_us(mpv_handle *ctx);
 
 /**
  * Data format for options and properties. The API functions to get/set
@@ -893,7 +902,7 @@ typedef struct mpv_byte_array {
  * be called. (This is just a clarification that there's no danger of anything
  * strange happening in these cases.)
  */
-void mpv_free_node_contents(mpv_node *node);
+MPV_EXPORT void mpv_free_node_contents(mpv_node *node);
 
 /**
  * Set an option. Note that you can't normally set options during runtime. It
@@ -936,8 +945,8 @@ void mpv_free_node_contents(mpv_node *node);
  * @param[in] data Option value (according to the format).
  * @return error code
  */
-int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
-                   void *data);
+MPV_EXPORT int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
+                              void *data);
 
 /**
  * Convenience function to set an option to a string value. This is like
@@ -945,7 +954,7 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
  *
  * @return error code
  */
-int mpv_set_option_string(mpv_handle *ctx, const char *name, const char *data);
+MPV_EXPORT int mpv_set_option_string(mpv_handle *ctx, const char *name, const char *data);
 
 /**
  * Send a command to the player. Commands are the same as those used in
@@ -961,7 +970,7 @@ int mpv_set_option_string(mpv_handle *ctx, const char *name, const char *data);
  *                 is the command, and the following items are arguments.
  * @return error code
  */
-int mpv_command(mpv_handle *ctx, const char **args);
+MPV_EXPORT int mpv_command(mpv_handle *ctx, const char **args);
 
 /**
  * Same as mpv_command(), but allows passing structured data in any format.
@@ -997,7 +1006,7 @@ int mpv_command(mpv_handle *ctx, const char **args);
  *                    Not many commands actually use this at all.
  * @return error code (the result parameter is not set on error)
  */
-int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result);
+MPV_EXPORT int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result);
 
 /**
  * This is essentially identical to mpv_command() but it also returns a result.
@@ -1013,7 +1022,7 @@ int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result);
  *                    Not many commands actually use this at all.
  * @return error code (the result parameter is not set on error)
  */
-int mpv_command_ret(mpv_handle *ctx, const char **args, mpv_node *result);
+MPV_EXPORT int mpv_command_ret(mpv_handle *ctx, const char **args, mpv_node *result);
 
 /**
  * Same as mpv_command, but use input.conf parsing for splitting arguments.
@@ -1022,7 +1031,7 @@ int mpv_command_ret(mpv_handle *ctx, const char **args, mpv_node *result);
  *
  * This also has OSD and string expansion enabled by default.
  */
-int mpv_command_string(mpv_handle *ctx, const char *args);
+MPV_EXPORT int mpv_command_string(mpv_handle *ctx, const char *args);
 
 /**
  * Same as mpv_command, but run the command asynchronously.
@@ -1044,8 +1053,8 @@ int mpv_command_string(mpv_handle *ctx, const char *args);
  * @param args NULL-terminated list of strings (see mpv_command())
  * @return error code (if parsing or queuing the command fails)
  */
-int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
-                      const char **args);
+MPV_EXPORT int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
+                                 const char **args);
 
 /**
  * Same as mpv_command_node(), but run it asynchronously. Basically, this
@@ -1061,8 +1070,8 @@ int mpv_command_async(mpv_handle *ctx, uint64_t reply_userdata,
  * @param args as in mpv_command_node()
  * @return error code (if parsing or queuing the command fails)
  */
-int mpv_command_node_async(mpv_handle *ctx, uint64_t reply_userdata,
-                           mpv_node *args);
+MPV_EXPORT int mpv_command_node_async(mpv_handle *ctx, uint64_t reply_userdata,
+                                      mpv_node *args);
 
 /**
  * Signal to all async requests with the matching ID to abort. This affects
@@ -1094,7 +1103,7 @@ int mpv_command_node_async(mpv_handle *ctx, uint64_t reply_userdata,
  *
  * @param reply_userdata ID of the request to be aborted (see above)
  */
-void mpv_abort_async_command(mpv_handle *ctx, uint64_t reply_userdata);
+MPV_EXPORT void mpv_abort_async_command(mpv_handle *ctx, uint64_t reply_userdata);
 
 /**
  * Set a property to a given value. Properties are essentially variables which
@@ -1127,15 +1136,15 @@ void mpv_abort_async_command(mpv_handle *ctx, uint64_t reply_userdata);
  * @param[in] data Option value.
  * @return error code
  */
-int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
-                     void *data);
+MPV_EXPORT int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
+                                void *data);
 
 /**
  * Convenience function to set a property to a string value.
  *
  * This is like calling mpv_set_property() with MPV_FORMAT_STRING.
  */
-int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data);
+MPV_EXPORT int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data);
 
 /**
  * Set a property asynchronously. You will receive the result of the operation
@@ -1152,8 +1161,8 @@ int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
  *                 will never be modified by the client API.
  * @return error code if sending the request failed
  */
-int mpv_set_property_async(mpv_handle *ctx, uint64_t reply_userdata,
-                           const char *name, mpv_format format, void *data);
+MPV_EXPORT int mpv_set_property_async(mpv_handle *ctx, uint64_t reply_userdata,
+                                      const char *name, mpv_format format, void *data);
 
 /**
  * Read the value of the given property.
@@ -1173,8 +1182,8 @@ int mpv_set_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  *                  mpv_free_node_contents() (MPV_FORMAT_NODE).
  * @return error code
  */
-int mpv_get_property(mpv_handle *ctx, const char *name, mpv_format format,
-                     void *data);
+MPV_EXPORT int mpv_get_property(mpv_handle *ctx, const char *name, mpv_format format,
+                                void *data);
 
 /**
  * Return the value of the property with the given name as string. This is
@@ -1189,7 +1198,7 @@ int mpv_get_property(mpv_handle *ctx, const char *name, mpv_format format,
  * @return Property value, or NULL if the property can't be retrieved. Free
  *         the string with mpv_free().
  */
-char *mpv_get_property_string(mpv_handle *ctx, const char *name);
+MPV_EXPORT char *mpv_get_property_string(mpv_handle *ctx, const char *name);
 
 /**
  * Return the property as "OSD" formatted string. This is the same as
@@ -1198,7 +1207,7 @@ char *mpv_get_property_string(mpv_handle *ctx, const char *name);
  * @return Property value, or NULL if the property can't be retrieved. Free
  *         the string with mpv_free().
  */
-char *mpv_get_property_osd_string(mpv_handle *ctx, const char *name);
+MPV_EXPORT char *mpv_get_property_osd_string(mpv_handle *ctx, const char *name);
 
 /**
  * Get a property asynchronously. You will receive the result of the operation
@@ -1212,8 +1221,8 @@ char *mpv_get_property_osd_string(mpv_handle *ctx, const char *name);
  * @param format see enum mpv_format.
  * @return error code if sending the request failed
  */
-int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
-                           const char *name, mpv_format format);
+MPV_EXPORT int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
+                                      const char *name, mpv_format format);
 
 /**
  * Get a notification whenever the given property changes. You will receive
@@ -1270,8 +1279,8 @@ int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
  *               from the change events.
  * @return error code (usually fails only on OOM or unsupported format)
  */
-int mpv_observe_property(mpv_handle *mpv, uint64_t reply_userdata,
-                         const char *name, mpv_format format);
+MPV_EXPORT int mpv_observe_property(mpv_handle *mpv, uint64_t reply_userdata,
+                                    const char *name, mpv_format format);
 
 /**
  * Undo mpv_observe_property(). This will remove all observed properties for
@@ -1283,7 +1292,7 @@ int mpv_observe_property(mpv_handle *mpv, uint64_t reply_userdata,
  * @return negative value is an error code, >=0 is number of removed properties
  *         on success (includes the case when 0 were removed)
  */
-int mpv_unobserve_property(mpv_handle *mpv, uint64_t registered_reply_userdata);
+MPV_EXPORT int mpv_unobserve_property(mpv_handle *mpv, uint64_t registered_reply_userdata);
 
 typedef enum mpv_event_id {
     /**
@@ -1509,7 +1518,7 @@ typedef enum mpv_event_id {
  *         The string is completely static, i.e. doesn't need to be deallocated,
  *         and is valid forever.
  */
-const char *mpv_event_name(mpv_event_id event);
+MPV_EXPORT const char *mpv_event_name(mpv_event_id event);
 
 typedef struct mpv_event_property {
     /**
@@ -1782,7 +1791,7 @@ typedef struct mpv_event {
  *            prejudice of the C version of const).
  * @return error code (MPV_ERROR_NOMEM only, if at all)
  */
-int mpv_event_to_node(mpv_node *dst, mpv_event *src);
+MPV_EXPORT int mpv_event_to_node(mpv_node *dst, mpv_event *src);
 
 /**
  * Enable or disable the given event.
@@ -1798,7 +1807,7 @@ int mpv_event_to_node(mpv_node *dst, mpv_event *src);
  * @param enable 1 to enable receiving this event, 0 to disable it.
  * @return error code
  */
-int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable);
+MPV_EXPORT int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable);
 
 /**
  * Enable or disable receiving of log messages. These are the messages the
@@ -1814,7 +1823,7 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable);
  *                  Also see mpv_log_level.
  * @return error code
  */
-int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
+MPV_EXPORT int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
 
 /**
  * Wait for the next event, or until the timeout expires, or if another thread
@@ -1847,7 +1856,7 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
  *         released by the API on the next mpv_wait_event() call, or when the
  *         context is destroyed. The return value is never NULL.
  */
-mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout);
+MPV_EXPORT mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout);
 
 /**
  * Interrupt the current mpv_wait_event() call. This will wake up the thread
@@ -1862,7 +1871,7 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout);
  *
  * Safe to be called from mpv render API threads.
  */
-void mpv_wakeup(mpv_handle *ctx);
+MPV_EXPORT void mpv_wakeup(mpv_handle *ctx);
 
 /**
  * Set a custom function that should be called when there are new events. Use
@@ -1900,7 +1909,7 @@ void mpv_wakeup(mpv_handle *ctx);
  * @param cb function that should be called if a wakeup is required
  * @param d arbitrary userdata passed to cb
  */
-void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
+MPV_EXPORT void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
 
 /**
  * Block until all asynchronous requests are done. This affects functions like
@@ -1914,7 +1923,7 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
  * In case you called mpv_suspend() before, this will also forcibly reset the
  * suspend counter of the given handle.
  */
-void mpv_wait_async_requests(mpv_handle *ctx);
+MPV_EXPORT void mpv_wait_async_requests(mpv_handle *ctx);
 
 /**
  * A hook is like a synchronous event that blocks the player. You register
@@ -1951,8 +1960,8 @@ void mpv_wait_async_requests(mpv_handle *ctx);
  * @param priority See remarks above. Use 0 as a neutral default.
  * @return error code (usually fails only on OOM)
  */
-int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
-                 const char *name, int priority);
+MPV_EXPORT int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
+                            const char *name, int priority);
 
 /**
  * Respond to a MPV_EVENT_HOOK event. You must call this after you have handled
@@ -1970,7 +1979,7 @@ int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
  *           corresponding MPV_EVENT_HOOK.
  * @return error code
  */
-int mpv_hook_continue(mpv_handle *ctx, uint64_t id);
+MPV_EXPORT int mpv_hook_continue(mpv_handle *ctx, uint64_t id);
 
 #if MPV_ENABLE_DEPRECATED
 
@@ -2032,7 +2041,7 @@ int mpv_hook_continue(mpv_handle *ctx, uint64_t id);
  * @return A UNIX FD of the read end of the wakeup pipe, or -1 on error.
  *         On MS Windows/MinGW, this will always return -1.
  */
-int mpv_get_wakeup_pipe(mpv_handle *ctx);
+MPV_EXPORT int mpv_get_wakeup_pipe(mpv_handle *ctx);
 
 /**
  * @deprecated use render.h
@@ -2056,7 +2065,7 @@ typedef enum mpv_sub_api {
  *
  * @deprecated use render.h
  */
-void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api);
+MPV_EXPORT void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api);
 
 #endif
 
