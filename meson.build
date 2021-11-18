@@ -1167,7 +1167,7 @@ if gl_dxinterop.allowed()
 endif
 
 egl_angle = get_option('egl-angle').require(
-    gl_win32.allowed() and cc.has_header_symbol('GL/eglext.h',
+    gl_win32.allowed() and cc.has_header_symbol('EGL/eglext.h',
                                                 'EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE',
                                                 prefix: '#include <EGL/egl.h>'),
     error_message: 'egl-angle could not be found!',
