@@ -107,6 +107,7 @@ struct priv {
     struct pl_dither_params dither;
     struct scaler_params scalers[SCALER_COUNT];
     const struct pl_hook **hooks; // storage for `params.hooks`
+    const struct pl_filter_config *frame_mixer;
 
 #ifdef PL_HAVE_LCMS
     struct pl_icc_params icc;
@@ -706,19 +707,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             break;
         }
 
-        if (frame->still && mix.num_frames) {
-            double best = fabs(mix.timestamps[0]);
-            // Recreate nearest neighbour semantics on this frame mix
-            while (mix.num_frames > 1 && fabs(mix.timestamps[1]) < best) {
-                best = fabs(mix.timestamps[1]);
-                mix.frames++;
-                mix.signatures++;
-                mix.timestamps++;
-                mix.num_frames--;
-            }
-            mix.num_frames = 1;
-        }
-
         // Update source crop on all existing frames. We technically own the
         // `pl_frame` struct so this is kosher. This could be avoided by
         // instead flushing the queue on resizes, but doing it this way avoids
@@ -743,8 +731,12 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         }
     }
 
+#if PL_API_VER >= 179
+    p->params.skip_caching_single_frame = !frame->display_synced || frame->num_vsyncs == 1;
+#endif
     p->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
     p->params.allow_delayed_peak_detect = p->delayed_peak;
+    p->params.frame_mixer = frame->still ? NULL : p->frame_mixer;
 
     // Render frame
     if (!pl_render_image_mix(p->rr, &mix, &target, &p->params)) {
@@ -1229,7 +1221,7 @@ static void update_render_options(struct priv *p)
     // Map scaler options as best we can
     p->params.upscaler = map_scaler(p, SCALER_SCALE);
     p->params.downscaler = map_scaler(p, SCALER_DSCALE);
-    p->params.frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
+    p->frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
 
     p->deband = pl_deband_default_params;
     p->deband.iterations = opts->deband_opts->iterations;
