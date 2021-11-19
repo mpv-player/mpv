@@ -199,8 +199,14 @@ static int init(struct ao *ao)
     alListenerfv(AL_ORIENTATION, direction);
 
     alGenSources(1, &source);
-    if (p->direct_channels && alGetEnumValue((ALchar*)"AL_DIRECT_CHANNELS_SOFT")) {
-        alSourcei(source, alGetEnumValue((ALchar*)"AL_DIRECT_CHANNELS_SOFT"), AL_TRUE);
+    if (p->direct_channels) {
+        if (alIsExtensionPresent("AL_SOFT_direct_channels_remix")) {
+            alSourcei(source,
+                alGetEnumValue((ALchar*)"AL_DIRECT_CHANNELS_SOFT"),
+                alcGetEnumValue(dev, "AL_REMIX_UNMATCHED_SOFT"));
+        } else {
+            MP_WARN(ao, "Direct channels aren't supported by this version of OpenAL\n");
+        }
     }
 
     cur_buf = 0;
@@ -385,7 +391,7 @@ const struct ao_driver audio_out_openal = {
     .priv_defaults = &(const struct priv) {
         .num_buffers = 4,
         .num_samples = 8192,
-        .direct_channels = 0,
+        .direct_channels = 1,
     },
     .options = (const struct m_option[]) {
         {"num-buffers", OPT_INT(num_buffers), M_RANGE(2, MAX_BUF)},

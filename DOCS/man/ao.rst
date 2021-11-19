@@ -112,9 +112,7 @@ Available audio output drivers are:
 
     ``--openal-direct-channels=<yes|no>``
         Enable OpenAL Soft's direct channel extension when available to avoid
-        tinting the sound with ambisonics or HRTF.
-        Channels are dropped when when they are not available as downmixing
-        will be disabled. Default: no.
+        tinting the sound with ambisonics or HRTF. Default: yes.
 
 ``pulse``
     PulseAudio audio output driver
