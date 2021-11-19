@@ -729,10 +729,16 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                 p->src.x0, p->src.y0, p->src.x1, p->src.y1,
             };
 
-            // mpv gives us transposed rects, libplacebo expects untransposed
-            if (img->rotation % PL_ROTATION_180) {
-                MPSWAP(float, img->crop.x0, img->crop.y0);
-                MPSWAP(float, img->crop.x1, img->crop.y1);
+            // mpv gives us rotated/flipped rects, libplacebo expects unrotated
+            pl_rect2df_rotate(&img->crop, -img->rotation);
+            if (img->crop.x1 < img->crop.x0) {
+                img->crop.x0 = vo->params->w - img->crop.x0;
+                img->crop.x1 = vo->params->w - img->crop.x1;
+            }
+
+            if (img->crop.y1 < img->crop.y0) {
+                img->crop.y0 = vo->params->h - img->crop.y0;
+                img->crop.y1 = vo->params->h - img->crop.y1;
             }
         }
     }
