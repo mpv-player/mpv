@@ -1057,7 +1057,7 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
         par->kernel = *par->config.kernel;
         par->config.blur = 0.9812505644269356;
         MP_WARN(p, "'ewa_lanczossharp' is deprecated and will be removed from "
-                "vo=gpu-next in the future, use --scale=ewa_lancozs "
+                "vo=gpu-next in the future, use --scale=ewa_lanczos "
                 "--scale-blur=%f to replicate it.\n", par->config.blur);
     } else {
         MP_ERR(p, "Failed mapping filter function '%s', no libplacebo analog?\n",
