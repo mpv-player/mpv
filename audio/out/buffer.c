@@ -162,7 +162,8 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof)
 
     // pad with silence (underflow/paused/eof)
     for (int n = 0; n < ao->num_planes; n++) {
-        af_fill_silence((char *)data[n] + pos, (samples - pos) * ao->sstride,
+        af_fill_silence((char *)data[n] + pos * ao->sstride,
+                        (samples - pos) * ao->sstride,
                         ao->format);
     }
 
