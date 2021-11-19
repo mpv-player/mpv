@@ -732,7 +732,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     }
 
 #if PL_API_VER >= 179
-    p->params.skip_caching_single_frame = !frame->display_synced || frame->num_vsyncs == 1;
+    bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
+    bool cache_frame = will_redraw || frame->still;
+    p->params.skip_caching_single_frame = !cache_frame;
 #endif
     p->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
     p->params.allow_delayed_peak_detect = p->delayed_peak;
