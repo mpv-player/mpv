@@ -111,6 +111,8 @@ static int init(struct ao *ao)
 
     // This AO only supports two channels at the moment
     mp_chmap_from_channels(&ao->channels, 2);
+    // Upstream "Wilhelm" supports only 8000 <= rate <= 192000
+    ao->samplerate = MPCLAMP(ao->samplerate, 8000, 192000);
 
     CHK(slCreateEngine(&p->sl, 0, NULL, 0, NULL, NULL));
     CHK((*p->sl)->Realize(p->sl, SL_BOOLEAN_FALSE));
