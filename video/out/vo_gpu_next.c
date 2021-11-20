@@ -209,7 +209,7 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
 
 static void write_overlays(struct vo *vo, struct mp_osd_res res, double pts,
                            int flags, struct osd_state *state,
-                           struct pl_frame *frame)
+                           struct pl_frame *frame, bool flip)
 {
     struct priv *p = vo->priv;
     static const bool subfmt_all[SUBBITMAP_COUNT] = {
@@ -255,7 +255,7 @@ static void write_overlays(struct vo *vo, struct mp_osd_res res, double pts,
         for (int i = 0; i < item->num_parts; i++) {
             const struct sub_bitmap *b = &item->parts[i];
             uint32_t c = b->libass.color;
-            MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, (struct pl_overlay_part) {
+            struct pl_overlay_part part = {
                 .src = { b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h },
                 .dst = { b->x, b->y, b->x + b->dw, b->y + b->dh },
                 .color = {
@@ -264,7 +264,13 @@ static void write_overlays(struct vo *vo, struct mp_osd_res res, double pts,
                     ((c >> 8) & 0xFF) / 255.0,
                     1.0 - (c & 0xFF) / 255.0,
                 }
-            });
+            };
+            if (flip) {
+                assert(frame->crop.y0 > frame->crop.y1);
+                part.dst.y0 = frame->crop.y0 - part.dst.y0;
+                part.dst.y1 = frame->crop.y0 - part.dst.y1;
+            }
+            MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, part);
         }
 
         struct pl_overlay *ol = &state->overlays[frame->num_overlays++];
@@ -457,7 +463,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         // compensate for anamorphic sources (render subtitles as normal)
         .display_par = (float) mpi->params.p_h / mpi->params.p_w,
     };
-    write_overlays(vo, vidres, mpi->pts, OSD_DRAW_SUB_ONLY, &fp->subs, frame);
+    write_overlays(vo, vidres, mpi->pts, OSD_DRAW_SUB_ONLY, &fp->subs, frame, false);
 
     // Update LUT attached to this frame
     update_lut(p, &p->image_lut);
@@ -654,8 +660,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
-    write_overlays(vo, p->osd_res, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target);
+    write_overlays(vo, p->osd_res, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target, swframe.flipped);
     target.crop = (struct pl_rect2df) { p->dst.x0, p->dst.y0, p->dst.x1, p->dst.y1 };
+    if (swframe.flipped)
+        MPSWAP(float, target.crop.y0, target.crop.y1);
 
     update_lut(p, &p->target_lut);
     target.lut = p->target_lut.lut;

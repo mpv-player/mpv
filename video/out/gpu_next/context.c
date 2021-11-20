@@ -17,6 +17,10 @@
 
 #include <libplacebo/config.h>
 
+#ifdef PL_HAVE_OPENGL
+#include <libplacebo/opengl.h>
+#endif
+
 #include "context.h"
 #include "config.h"
 #include "common/common.h"
@@ -24,12 +28,21 @@
 #include "video/out/placebo/utils.h"
 #include "video/out/gpu/video.h"
 
+#if HAVE_GL
+#include "video/out/opengl/context.h"
+#include "video/out/opengl/ra_gl.h"
+#endif
+
 #if HAVE_VULKAN
 #include "video/out/vulkan/context.h"
 #endif
 
 struct priv {
+#ifdef PL_HAVE_OPENGL
+    pl_opengl opengl;
+#else
     char dummy;
+#endif
 };
 
 struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
@@ -37,6 +50,7 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
     struct gpu_ctx *ctx = talloc_zero(NULL, struct gpu_ctx);
     ctx->log = vo->log;
     ctx->priv = talloc_zero(ctx, struct priv);
+    struct priv *p = ctx->priv;
 
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(ctx, vo->global, &ra_ctx_conf);
     ctx_opts->want_alpha = gl_opts->alpha_mode == ALPHA_YES;
@@ -54,7 +68,40 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
     }
 #endif
 
-    // TODO: wrap GL contexts
+#if HAVE_GL && defined(PL_HAVE_OPENGL)
+    if (ra_is_gl(ctx->ra_ctx->ra)) {
+        ctx->pllog = pl_log_create(PL_API_VER, NULL);
+        if (!ctx->pllog)
+            goto err_out;
+
+        mppl_ctx_set_log(ctx->pllog, ctx->log, vo->probing);
+        mp_verbose(ctx->log, "Initialized libplacebo %s (API v%d)\n",
+                   PL_VERSION, PL_API_VER);
+
+        p->opengl = pl_opengl_create(ctx->pllog, pl_opengl_params(
+            .debug = ctx_opts->debug,
+            .allow_software = ctx_opts->allow_sw,
+        ));
+        if (!p->opengl)
+            goto err_out;
+        ctx->gpu = p->opengl->gpu;
+
+        mppl_ctx_set_log(ctx->pllog, ctx->log, false); // disable probing
+
+        ctx->swapchain = pl_opengl_create_swapchain(p->opengl, pl_opengl_swapchain_params(
+            .max_swapchain_depth = vo->opts->swapchain_depth,
+        ));
+        if (!ctx->swapchain)
+            goto err_out;
+
+        return ctx;
+    }
+#elif HAVE_GL
+    if (ra_is_gl(ctx->ra_ctx->ra)) {
+        MP_MSG(ctx, vo->probing ? MSGL_V : MSGL_ERR,
+            "libplacebo was built without OpenGL support.\n");
+    }
+#endif
 
 err_out:
     gpu_ctx_destroy(&ctx);
@@ -63,7 +110,14 @@ err_out:
 
 bool gpu_ctx_resize(struct gpu_ctx *ctx, int w, int h)
 {
-    // Not (yet) used
+    struct priv *p = ctx->priv;
+
+#ifdef PL_HAVE_OPENGL
+    // The vulkan context handles this on its own, so only for OpenGL here
+    if (p->opengl)
+        return pl_swapchain_resize(ctx->swapchain, &w, &h);
+#endif
+
     return true;
 }
 
@@ -72,6 +126,15 @@ void gpu_ctx_destroy(struct gpu_ctx **ctxp)
     struct gpu_ctx *ctx = *ctxp;
     if (!ctx)
         return;
+    struct priv *p = ctx->priv;
+
+#if HAVE_GL && defined(PL_HAVE_OPENGL)
+    if (ra_is_gl(ctx->ra_ctx->ra)) {
+        pl_swapchain_destroy(&ctx->swapchain);
+        pl_opengl_destroy(&p->opengl);
+        pl_log_destroy(&ctx->pllog);
+    }
+#endif
 
     ra_ctx_destroy(&ctx->ra_ctx);
 
