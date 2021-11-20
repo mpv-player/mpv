@@ -644,7 +644,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!pl_swapchain_start_frame(p->sw, &swframe)) {
         // Advance the queue state to the current PTS to discard unused frames
         pl_queue_update(p->queue, NULL, &(struct pl_queue_params) {
-            .pts = frame->current->pts + frame->vsync_offset,
+            .pts = frame->current->pts,
             .radius = pl_frame_mix_radius(&p->params),
         });
         return;
@@ -684,7 +684,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (frame->current) {
         // Update queue state
         struct pl_queue_params qparams = {
-            .pts = frame->current->pts + frame->vsync_offset,
+            .pts = frame->current->pts,
             .radius = pl_frame_mix_radius(&p->params),
             .vsync_duration = frame->vsync_interval,
             .frame_duration = frame->ideal_frame_duration,
