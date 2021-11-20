@@ -627,12 +627,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         p->last_id = id;
     }
 
-    // Doesn't draw anything. Only checks for visibility.
-    struct ra_swapchain *sw = p->ra_ctx->swapchain;
-    bool should_draw = sw->fns->start_frame(sw, NULL);
-    if (!should_draw)
-        return;
-
     if (p->target_hint && frame->current) {
         struct pl_swapchain_colors hint = get_csp_hint(vo, frame->current);
         pl_swapchain_colorspace_hint(p->sw, &hint);
@@ -641,7 +635,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     }
 
     struct pl_swapchain_frame swframe;
-    if (!pl_swapchain_start_frame(p->sw, &swframe)) {
+    struct ra_swapchain *sw = p->ra_ctx->swapchain;
+    bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
+    if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         // Advance the queue state to the current PTS to discard unused frames
         pl_queue_update(p->queue, NULL, &(struct pl_queue_params) {
             .pts = frame->current->pts + frame->vsync_offset,
