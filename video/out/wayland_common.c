@@ -681,6 +681,9 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
     struct vo_wayland_state *wl = data;
+    if (!wl->current_output)
+        return;
+
     struct mp_rect old_output_geometry = wl->current_output->geometry;
     struct mp_rect old_geometry = wl->geometry;
     wl->current_output = NULL;
