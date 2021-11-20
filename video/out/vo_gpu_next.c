@@ -39,10 +39,7 @@
 #include "gpu/video.h"
 #include "gpu/video_shaders.h"
 #include "sub/osd.h"
-
-#if HAVE_VULKAN
-#include "vulkan/context.h"
-#endif
+#include "gpu_next/context.h"
 
 struct osd_entry {
     pl_tex tex;
@@ -77,6 +74,7 @@ struct priv {
     struct mp_log *log;
     struct mpv_global *global;
     struct ra_ctx *ra_ctx;
+    struct gpu_ctx *context;
 
     pl_log pllog;
     pl_gpu gpu;
@@ -794,6 +792,7 @@ static void resize(struct vo *vo)
 {
     struct priv *p = vo->priv;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd_res);
+    gpu_ctx_resize(p->context, vo->dwidth, vo->dheight);
     vo->want_redraw = true;
 }
 
@@ -951,7 +950,12 @@ static void uninit(struct vo *vo)
     }
 
     pl_renderer_destroy(&p->rr);
-    ra_ctx_destroy(&p->ra_ctx);
+
+    p->ra_ctx = NULL;
+    p->pllog = NULL;
+    p->gpu = NULL;
+    p->sw = NULL;
+    gpu_ctx_destroy(&p->context);
 }
 
 static int preinit(struct vo *vo)
@@ -963,30 +967,16 @@ static int preinit(struct vo *vo)
     p->log = vo->log;
 
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
-    struct ra_ctx_opts *ctx_opts = mp_get_config_group(p, vo->global, &ra_ctx_conf);
-    struct ra_ctx_opts opts = *ctx_opts;
-    opts.context_type = "vulkan";
-    opts.context_name = NULL;
-    opts.want_alpha = gl_opts->alpha_mode == ALPHA_YES;
-    p->ra_ctx = ra_ctx_create(vo, opts);
-    if (!p->ra_ctx)
+
+    p->context = gpu_ctx_create(vo, gl_opts);
+    if (!p->context)
         goto err_out;
+    // For the time being
+    p->ra_ctx = p->context->ra_ctx;
+    p->pllog = p->context->pllog;
+    p->gpu = p->context->gpu;
+    p->sw = p->context->swapchain;
 
-#if HAVE_VULKAN
-    struct mpvk_ctx *vkctx = ra_vk_ctx_get(p->ra_ctx);
-    if (vkctx) {
-        p->pllog = vkctx->ctx;
-        p->gpu = vkctx->gpu;
-        p->sw = vkctx->swapchain;
-        goto done;
-    }
-#endif
-
-    // TODO: wrap GL contexts
-
-    goto err_out;
-
-done:
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
     p->osd_fmt[SUBBITMAP_LIBASS] = pl_find_named_fmt(p->gpu, "r8");

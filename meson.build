@@ -979,7 +979,8 @@ if libplacebo.found()
         features += 'libplacebo-v4'
         libplacebo_v4 = true
         message('libplacebo v4.170+ found! Enabling vo_gpu_next.')
-        sources += files('video/out/vo_gpu_next.c')
+        sources += files('video/out/vo_gpu_next.c',
+                         'video/out/gpu_next/context.c')
     else
         message('libplacebo v4.170+ not found! Disabling vo_gpu_next.')
     endif
