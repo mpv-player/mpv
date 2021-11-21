@@ -634,13 +634,16 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         pl_swapchain_colorspace_hint(p->sw, NULL);
     }
 
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    double vsync_offset = opts->interpolation ? frame->vsync_offset : 0;
+
     struct pl_swapchain_frame swframe;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         // Advance the queue state to the current PTS to discard unused frames
         pl_queue_update(p->queue, NULL, &(struct pl_queue_params) {
-            .pts = frame->current->pts + frame->vsync_offset,
+            .pts = frame->current->pts + vsync_offset,
             .radius = pl_frame_mix_radius(&p->params),
         });
         return;
@@ -663,7 +666,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 #endif
 
     // Target colorspace overrides
-    const struct gl_video_opts *opts = p->opts_cache->opts;
     if (opts->target_prim)
         target.color.primaries = mp_prim_to_pl(opts->target_prim);
     if (opts->target_trc)
@@ -680,7 +682,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (frame->current) {
         // Update queue state
         struct pl_queue_params qparams = {
-            .pts = frame->current->pts + frame->vsync_offset,
+            .pts = frame->current->pts + vsync_offset,
             .radius = pl_frame_mix_radius(&p->params),
             .vsync_duration = frame->vsync_interval,
             .frame_duration = frame->ideal_frame_duration,
