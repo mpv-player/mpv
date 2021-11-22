@@ -391,34 +391,50 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
                       struct pl_frame *frame)
 {
     struct mp_image *mpi = src->frame_data;
+    const struct mp_image_params *par = &mpi->params;
     struct frame_priv *fp = mpi->priv;
     struct pl_plane_data data[4] = {0};
     struct vo *vo = fp->vo;
     struct priv *p = vo->priv;
 
     // TODO: implement support for hwdec wrappers
-
     *frame = (struct pl_frame) {
         .num_planes = mpi->num_planes,
         .color = {
-            .primaries = mp_prim_to_pl(mpi->params.color.primaries),
-            .transfer = mp_trc_to_pl(mpi->params.color.gamma),
-            .light = mp_light_to_pl(mpi->params.color.light),
-            .sig_peak = mpi->params.color.sig_peak,
+            .primaries = mp_prim_to_pl(par->color.primaries),
+            .transfer = mp_trc_to_pl(par->color.gamma),
+            .light = mp_light_to_pl(par->color.light),
+            .sig_peak = par->color.sig_peak,
         },
         .repr = {
-            .sys = mp_csp_to_pl(mpi->params.color.space),
-            .levels = mp_levels_to_pl(mpi->params.color.levels),
-            .alpha = mp_alpha_to_pl(mpi->params.alpha),
+            .sys = mp_csp_to_pl(par->color.space),
+            .levels = mp_levels_to_pl(par->color.levels),
+            .alpha = mp_alpha_to_pl(par->alpha),
         },
         .profile = {
             .data = mpi->icc_profile ? mpi->icc_profile->data : NULL,
             .len = mpi->icc_profile ? mpi->icc_profile->size : 0,
         },
-        .rotation = mpi->params.rotate / 90,
+        .rotation = par->rotate / 90,
     };
 
-    enum pl_chroma_location chroma = mp_chroma_to_pl(mpi->params.chroma_location);
+    // mp_image, like AVFrame, likes communicating RGB/XYZ/YCbCr status
+    // implicitly via the image format, rather than the actual tagging.
+    switch (mp_imgfmt_get_forced_csp(par->imgfmt)) {
+    case MP_CSP_RGB:
+        frame->repr.sys = PL_COLOR_SYSTEM_RGB;
+        frame->repr.levels = PL_COLOR_LEVELS_FULL;
+        break;
+    case MP_CSP_XYZ:
+        frame->repr.sys = PL_COLOR_SYSTEM_XYZ;
+        break;
+    case MP_CSP_AUTO:
+        frame->repr.sys = pl_color_system_guess_ycbcr(par->w, par->h);
+        break;
+    default: break;
+    }
+
+    enum pl_chroma_location chroma = mp_chroma_to_pl(par->chroma_location);
     int planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt);
     for (int n = 0; n < planes; n++) {
         data[n].width = mp_image_plane_w(mpi, n);
@@ -457,7 +473,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     struct mp_osd_res vidres = {
         .w = mpi->w, .h = mpi->h,
         // compensate for anamorphic sources (render subtitles as normal)
-        .display_par = (float) mpi->params.p_h / mpi->params.p_w,
+        .display_par = (float) par->p_h / par->p_w,
     };
     write_overlays(vo, vidres, mpi->pts, OSD_DRAW_SUB_ONLY, &fp->subs, frame);
 
