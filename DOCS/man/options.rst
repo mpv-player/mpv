@@ -5242,12 +5242,15 @@ them.
 
 ``--interpolation-threshold=<0..1,-1>``
     Threshold below which frame ratio interpolation gets disabled (default:
-    ``0.01``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
-    where ``vfps`` is the speed-adjusted video FPS, and ``disphz`` the
-    display refresh rate. (The speed-adjusted video FPS is roughly equal to
-    the normal video FPS, but with slowdown and speedup applied. This matters
-    if you use ``--video-sync=display-resample`` to make video run synchronously
-    to the display FPS, or if you change the ``speed`` property.)
+    ``0.01``). This is calculated as ``abs(disphz/vfps - round(disphz/vfps))
+    < threshold``, where ``vfps`` is the speed-adjusted video FPS, and ``disphz``
+    the display refresh rate. ``round`` takes the ``disphz/vfps`` ratio to the
+    nearest integer so the threshold also operates if the display refresh rate
+    is an integer multiple of the video FPS (i.e. a 30 FPS video on a 60 Hz
+    display). The speed-adjusted video FPS is roughly equal to the normal video
+    FPS, but with slowdown and speedup applied. This matters if you use
+    ``--video-sync=display-resample`` to make video run synchronously to the
+    display FPS, or if you change the ``speed`` property.
 
     The default is intended to enable interpolation in scenarios where
     retiming with the ``--video-sync=display-*`` cannot adjust the speed of

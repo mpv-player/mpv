@@ -27,6 +27,10 @@ Interface changes
 ::
 
  --- mpv 0.35.0 ---
+    - `--interpolation-threshold` now applies as long as the display hz is
+      an integer multiple of the video fps instead of only being limited to
+      if the display hz and video fps were almost the same (i.e. an integer
+      multiple of 1).
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,
       `--interpolation-preserve` `--lut`, `--lut-type`, `--image-lut`,
