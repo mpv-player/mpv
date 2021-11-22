@@ -429,7 +429,8 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         frame->repr.sys = PL_COLOR_SYSTEM_XYZ;
         break;
     case MP_CSP_AUTO:
-        frame->repr.sys = pl_color_system_guess_ycbcr(par->w, par->h);
+        if (!frame->repr.sys)
+            frame->repr.sys = pl_color_system_guess_ycbcr(par->w, par->h);
         break;
     default: break;
     }
