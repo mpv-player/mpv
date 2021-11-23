@@ -19,6 +19,7 @@
 #include "hwdec_vaapi.h"
 
 #include <EGL/egl.h>
+#include <drm_fourcc.h>
 #include "video/out/opengl/ra_gl.h"
 
 typedef void* GLeglImageOES;
@@ -37,10 +38,19 @@ typedef void *EGLImageKHR;
 #define EGL_DMA_BUF_PLANE2_OFFSET_EXT     0x3279
 #define EGL_DMA_BUF_PLANE2_PITCH_EXT      0x327A
 
+
 // Any EGL_EXT_image_dma_buf_import definitions used in this source file.
 #define EGL_DMA_BUF_PLANE3_FD_EXT         0x3440
 #define EGL_DMA_BUF_PLANE3_OFFSET_EXT     0x3441
 #define EGL_DMA_BUF_PLANE3_PITCH_EXT      0x3442
+#define EGL_DMA_BUF_PLANE0_MODIFIER_LO_EXT 0x3443
+#define EGL_DMA_BUF_PLANE0_MODIFIER_HI_EXT 0x3444
+#define EGL_DMA_BUF_PLANE1_MODIFIER_LO_EXT 0x3445
+#define EGL_DMA_BUF_PLANE1_MODIFIER_HI_EXT 0x3446
+#define EGL_DMA_BUF_PLANE2_MODIFIER_LO_EXT 0x3447
+#define EGL_DMA_BUF_PLANE2_MODIFIER_HI_EXT 0x3448
+#define EGL_DMA_BUF_PLANE3_MODIFIER_LO_EXT 0x3449
+#define EGL_DMA_BUF_PLANE3_MODIFIER_HI_EXT 0x344A
 
 struct vaapi_gl_mapper_priv {
     GLuint gl_textures[4];
@@ -129,23 +139,29 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
     } while(0)
 
 #define ADD_PLANE_ATTRIBS(plane) do { \
+            uint64_t drm_format_modifier = p_mapper->desc.objects[p_mapper->desc.layers[n].object_index[plane]].drm_format_modifier; \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _FD_EXT, \
                         p_mapper->desc.objects[p_mapper->desc.layers[n].object_index[plane]].fd); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _OFFSET_EXT, \
                         p_mapper->desc.layers[n].offset[plane]); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
                         p_mapper->desc.layers[n].pitch[plane]); \
+            if (p_owner->use_modifiers && drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
+                ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_LO_EXT, drm_format_modifier & 0xfffffffful); \
+                ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_HI_EXT, drm_format_modifier >> 32); \
+            }                               \
         } while (0)
 
 static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
 {
     struct priv *p_mapper = mapper->priv;
+    struct priv_owner *p_owner = mapper->owner->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     GL *gl = ra_gl_get(mapper->ra);
 
     for (int n = 0; n < p_mapper->num_planes; n++) {
-        int attribs[20] = {EGL_NONE};
+        int attribs[48] = {EGL_NONE};
         int num_attribs = 0;
 
         ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, p_mapper->desc.layers[n].drm_format);
@@ -209,6 +225,8 @@ bool vaapi_gl_init(const struct ra_hwdec *hw)
         !gl_check_extension(gl->extensions, "GL_OES_EGL_image") ||
         !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return false;
+
+    p->use_modifiers = gl_check_extension(exts, "EGL_EXT_image_dma_buf_import_modifiers");
 
     MP_VERBOSE(hw, "using VAAPI EGL interop\n");
 

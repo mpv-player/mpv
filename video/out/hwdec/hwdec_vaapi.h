@@ -28,6 +28,7 @@ struct priv_owner {
     VADisplay *display;
     int *formats;
     bool probing_formats; // temporary during init
+    bool use_modifiers;
 
     bool (*interop_init)(struct ra_hwdec_mapper *mapper,
                          const struct ra_imgfmt_desc *desc);
