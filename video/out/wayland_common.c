@@ -965,6 +965,8 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     wl->sync[index].ust = sec * 1000000LL + (uint64_t) tv_nsec / 1000;
     wl->sync[index].msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
     wl->sync[index].filled = true;
+    wl->frame_wait = false;
+    wl->hidden = false;
 }
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
@@ -992,10 +994,10 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     if (wl->presentation) {
         wl->feedback = wp_presentation_feedback(wl->presentation, wl->surface);
         wp_presentation_feedback_add_listener(wl->feedback, &feedback_listener, wl);
+    } else {
+        wl->frame_wait = false;
+        wl->hidden = false;
     }
-
-    wl->frame_wait = false;
-    wl->hidden = false;
 }
 
 static const struct wl_callback_listener frame_listener = {
@@ -1728,6 +1730,8 @@ int vo_wayland_init(struct vo *vo)
         struct vo_wayland_sync sync = {0, 0, 0, 0};
         wl->sync[0] = sync;
         wl->sync_size += 1;
+        wl->last_ust = 0;
+        wl->last_msc = 0;
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_presentation_interface.name);
