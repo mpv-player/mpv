@@ -382,6 +382,20 @@ Configurable Options
     Update chapter markers positions on duration changes, e.g. live streams.
     The updates are unoptimized - consider disabling it on very low-end systems.
 
+``chapters_osd``, ``playlist_osd``
+    Default: yes
+
+    Whether to display the chapters/playlist at the OSD when left-clicking the
+    next/previous OSC buttons, respectively.
+
+``chapter_fmt``
+    Default: ``Chapter: %s``
+
+    Template for the chapter-name display when hovering the seekbar.
+    Use ``no`` to disable chapter display on hover. Otherwise it's a lua
+    ``string.format`` template and ``%s`` is replaced with the actual name.
+
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
