@@ -19,11 +19,14 @@
 #include "hwdec_vaapi.h"
 
 #include <EGL/egl.h>
-#include <drm_fourcc.h>
 #include "video/out/opengl/ra_gl.h"
 
 typedef void* GLeglImageOES;
 typedef void *EGLImageKHR;
+
+#ifndef DRM_FORMAT_MOD_INVALID
+#define DRM_FORMAT_MOD_INVALID  ((UINT64_C(1) << 56) - 1)
+#endif
 
 // Any EGL_EXT_image_dma_buf_import definitions used in this source file.
 #define EGL_LINUX_DMA_BUF_EXT             0x3270
