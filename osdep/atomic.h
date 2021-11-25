@@ -25,6 +25,7 @@
 #if HAVE_STDATOMIC
 #include <stdatomic.h>
 typedef _Atomic float mp_atomic_float;
+typedef _Atomic double mp_atomic_double;
 typedef _Atomic int64_t mp_atomic_int64;
 typedef _Atomic uint64_t mp_atomic_uint64;
 #else
@@ -40,6 +41,7 @@ typedef struct { uint_least32_t v;     } atomic_uint_least32_t;
 typedef struct { unsigned long long v; } atomic_ullong;
 
 typedef struct { float v;              } mp_atomic_float;
+typedef struct { double v;             } mp_atomic_double;
 typedef struct { int64_t v;            } mp_atomic_int64;
 typedef struct { uint64_t v;           } mp_atomic_uint64;
 
