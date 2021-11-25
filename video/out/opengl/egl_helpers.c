@@ -324,6 +324,8 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
         return EGL_NO_DISPLAY;
 
     // Before we go through the EGL 1.4 BS, try if we can use native EGL 1.5
+    // only *_KHR platforms are defined for 1.5, but some drivers like mesa still work.
+    // However on platforms where this is broken they do not return an error either.
     if (is_egl15()) {
         // This is EGL 1.5. It must support querying standard functions through
         // eglGetProcAddress(). Note that on EGL 1.4, even if the function is
