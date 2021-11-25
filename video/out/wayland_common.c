@@ -1726,6 +1726,9 @@ int vo_wayland_init(struct vo *vo)
     }
 
     if (wl->presentation) {
+        wl->last_ust = 0;
+        wl->last_msc = 0;
+        wl->refresh_interval = 0;
         wl->sync = talloc_zero_array(wl, struct vo_wayland_sync, 1);
         struct vo_wayland_sync sync = {0, 0, 0, 0};
         wl->sync[0] = sync;
