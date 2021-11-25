@@ -1986,6 +1986,8 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
     if (vblank_time <= 0)
         vblank_time = 1e6 / 60;
 
+    // Completely arbitrary amount of additional time to wait.
+    vblank_time += 0.05 * vblank_time;
     int64_t finish_time = mp_time_us() + vblank_time;
 
     while (wl->frame_wait && finish_time > mp_time_us()) {
