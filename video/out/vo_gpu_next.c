@@ -595,15 +595,10 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     frame->count = index + 1;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static void update_options(struct priv *p)
 {
-    struct priv *p = vo->priv;
-    pl_gpu gpu = p->gpu;
     if (m_config_cache_update(p->opts_cache))
         update_render_options(p);
-
-    p->params.info_callback = info_callback;
-    p->params.info_priv = vo;
 
     update_lut(p, &p->lut);
     p->params.lut = p->lut.lut;
@@ -618,6 +613,64 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     p->color_adjustment.hue = cparams.hue;
     p->color_adjustment.saturation = cparams.saturation;
     p->color_adjustment.gamma = cparams.gamma;
+}
+
+static void apply_target_options(struct priv *p, struct pl_frame *target)
+{
+
+    update_lut(p, &p->target_lut);
+    target->lut = p->target_lut.lut;
+    target->lut_type = p->target_lut.type;
+
+#ifdef PL_HAVE_LCMS
+    target->profile = p->icc_profile;
+#endif
+
+    // Colorspace overrides
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    if (opts->target_prim)
+        target->color.primaries = mp_prim_to_pl(opts->target_prim);
+    if (opts->target_trc)
+        target->color.transfer = mp_trc_to_pl(opts->target_trc);
+    if (opts->target_peak)
+        target->color.sig_peak = opts->target_peak;
+    if (opts->dither_depth > 0) {
+        struct pl_bit_encoding *tbits = &target->repr.bits;
+        tbits->color_depth += opts->dither_depth - tbits->sample_depth;
+        tbits->sample_depth = opts->dither_depth;
+    }
+}
+
+static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
+                       int width, int height)
+{
+    frame->crop = (struct pl_rect2df) {
+        .x0 = crop.x0,
+        .y0 = crop.y0,
+        .x1 = crop.x1,
+        .y1 = crop.y1,
+    };
+
+    // mpv gives us rotated/flipped rects, libplacebo expects unrotated
+    pl_rect2df_rotate(&frame->crop, -frame->rotation);
+    if (frame->crop.x1 < frame->crop.x0) {
+        frame->crop.x0 = width - frame->crop.x0;
+        frame->crop.x1 = width - frame->crop.x1;
+    }
+
+    if (frame->crop.y1 < frame->crop.y0) {
+        frame->crop.y0 = height - frame->crop.y0;
+        frame->crop.y1 = height - frame->crop.y1;
+    }
+}
+
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
+{
+    struct priv *p = vo->priv;
+    pl_gpu gpu = p->gpu;
+    update_options(p);
+    p->params.info_callback = info_callback;
+    p->params.info_priv = vo;
 
     // Push all incoming frames into the frame queue
     for (int n = 0; n < frame->num_frames; n++) {
@@ -676,30 +729,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
+    apply_target_options(p, &target);
     write_overlays(vo, p->osd_res, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target, swframe.flipped);
-    target.crop = (struct pl_rect2df) { p->dst.x0, p->dst.y0, p->dst.x1, p->dst.y1 };
+    apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
     if (swframe.flipped)
         MPSWAP(float, target.crop.y0, target.crop.y1);
-
-    update_lut(p, &p->target_lut);
-    target.lut = p->target_lut.lut;
-    target.lut_type = p->target_lut.type;
-#ifdef PL_HAVE_LCMS
-    target.profile = p->icc_profile;
-#endif
-
-    // Target colorspace overrides
-    if (opts->target_prim)
-        target.color.primaries = mp_prim_to_pl(opts->target_prim);
-    if (opts->target_trc)
-        target.color.transfer = mp_trc_to_pl(opts->target_trc);
-    if (opts->target_peak)
-        target.color.sig_peak = opts->target_peak;
-    if (opts->dither_depth > 0) {
-        struct pl_bit_encoding *tbits = &target.repr.bits;
-        tbits->color_depth += opts->dither_depth - tbits->sample_depth;
-        tbits->sample_depth = opts->dither_depth;
-    }
 
     struct pl_frame_mix mix = {0};
     if (frame->current) {
@@ -733,22 +767,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         // instead flushing the queue on resizes, but doing it this way avoids
         // unnecessarily re-uploading frames.
         for (int i = 0; i < mix.num_frames; i++) {
-            struct pl_frame *img = (struct pl_frame *) mix.frames[i];
-            img->crop = (struct pl_rect2df) {
-                p->src.x0, p->src.y0, p->src.x1, p->src.y1,
-            };
-
-            // mpv gives us rotated/flipped rects, libplacebo expects unrotated
-            pl_rect2df_rotate(&img->crop, -img->rotation);
-            if (img->crop.x1 < img->crop.x0) {
-                img->crop.x0 = vo->params->w - img->crop.x0;
-                img->crop.x1 = vo->params->w - img->crop.x1;
-            }
-
-            if (img->crop.y1 < img->crop.y0) {
-                img->crop.y0 = vo->params->h - img->crop.y0;
-                img->crop.y1 = vo->params->h - img->crop.y1;
-            }
+            apply_crop((struct pl_frame *) mix.frames[i], p->src,
+                       vo->params->w, vo->params->h);
         }
     }
 
