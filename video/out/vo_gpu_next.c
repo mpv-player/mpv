@@ -420,6 +420,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             .len = mpi->icc_profile ? mpi->icc_profile->size : 0,
         },
         .rotation = par->rotate / 90,
+        .user_data = mpi,
     };
 
     // mp_image, like AVFrame, likes communicating RGB/XYZ/YCbCr status
@@ -716,10 +717,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         // Advance the queue state to the current PTS to discard unused frames
-        pl_queue_update(p->queue, NULL, &(struct pl_queue_params) {
+        pl_queue_update(p->queue, NULL, pl_queue_params(
             .pts = frame->current->pts + vsync_offset,
             .radius = pl_frame_mix_radius(&p->params),
-        });
+        ));
         return;
     }
 
@@ -880,6 +881,119 @@ static bool update_auto_profile(struct priv *p, int *events)
     return false;
 }
 
+static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
+{
+    struct priv *p = vo->priv;
+    pl_gpu gpu = p->gpu;
+    pl_tex fbo = NULL;
+    args->res = NULL;
+
+    update_options(p);
+    p->params.info_callback = NULL;
+    p->params.skip_caching_single_frame = true;
+    p->params.preserve_mixing_cache = false;
+    p->params.allow_delayed_peak_detect = false;
+    p->params.frame_mixer = NULL;
+
+    // Retrieve the current frame from the frame queue
+    struct pl_frame_mix mix;
+    enum pl_queue_status status;
+    status = pl_queue_update(p->queue, &mix, pl_queue_params(.pts = p->last_pts));
+    assert(status != PL_QUEUE_EOF);
+    if (status == PL_QUEUE_ERR) {
+        MP_ERR(vo, "Unknown error occured while trying to take screenshot!\n");
+        return;
+    }
+    if (status == PL_QUEUE_MORE || !mix.num_frames) {
+        MP_ERR(vo, "No frames available to take screenshot of? Open issue\n");
+        return;
+    }
+
+    // Passing an interpolation radius of 0 guarantees that the first frame in
+    // the resulting mix is the correct frame for this PTS
+    struct pl_frame *image = (struct pl_frame *) mix.frames[0];
+    struct mp_image *mpi = image->user_data;
+    int orig_overlays = image->num_overlays;
+    if (!args->subs)
+        image->num_overlays = 0;
+
+    struct mp_rect src = p->src, dst = p->dst;
+    struct mp_osd_res osd = p->osd_res;
+    if (!args->scaled) {
+        src = dst = (struct mp_rect) {0, 0, mpi->params.w, mpi->params.h};
+        osd = (struct mp_osd_res) {
+            .w = mpi->params.w,
+            .h = mpi->params.h,
+            .display_par = 1.0,
+        };
+    }
+
+    // Create target FBO, try high bit depth first
+    int mpfmt;
+    for (int depth = args->high_bit_depth ? 16 : 8; depth; depth -= 8) {
+        mpfmt = depth == 16 ? IMGFMT_RGBA64 : IMGFMT_RGBA;
+        pl_fmt fmt = pl_find_fmt(gpu, PL_FMT_UNORM, 4, depth, depth,
+                                 PL_FMT_CAP_RENDERABLE | PL_FMT_CAP_HOST_READABLE);
+        if (!fmt)
+            continue;
+
+        fbo = pl_tex_create(gpu, pl_tex_params(
+            .w = osd.w,
+            .h = osd.h,
+            .format = fmt,
+            .blit_dst = true,
+            .renderable = true,
+            .host_readable = true,
+            .storable = fmt->caps & PL_FMT_CAP_STORABLE,
+        ));
+        if (fbo)
+            break;
+    }
+
+    if (!fbo) {
+        MP_ERR(vo, "Failed creating target FBO for screenshot!\n");
+        goto done;
+    }
+
+    struct pl_frame target = {
+        .num_planes = 1,
+        .planes[0] = {
+            .texture = fbo,
+            .components = 4,
+            .component_mapping = {0, 1, 2, 3},
+        },
+    };
+
+    apply_target_options(p, &target);
+    apply_crop(image, src, mpi->params.w, mpi->params.h);
+    apply_crop(&target, dst, fbo->params.w, fbo->params.h);
+    if (args->osd)
+        write_overlays(vo, osd, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target, false);
+
+    if (!pl_render_image_mix(p->rr, &mix, &target, &p->params)) {
+        MP_ERR(vo, "Failed rendering frame!\n");
+        goto done;
+    }
+
+    args->res = mp_image_alloc(mpfmt, fbo->params.w, fbo->params.h);
+    if (!args->res)
+        goto done;
+
+    bool ok = pl_tex_download(gpu, pl_tex_transfer_params(
+        .tex = fbo,
+        .ptr = args->res->planes[0],
+        .row_pitch = args->res->stride[0],
+    ));
+
+    if (!ok)
+        TA_FREEP(&args->res);
+
+    // fall through
+done:
+    pl_tex_destroy(gpu, &fbo);
+    image->num_overlays = orig_overlays;
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -920,6 +1034,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     case VOCTRL_PERFORMANCE_DATA:
         *(struct voctrl_performance_data *) data = p->perf;
+        return true;
+
+    case VOCTRL_SCREENSHOT:
+        video_screenshot(vo, data);
         return true;
     }
 
