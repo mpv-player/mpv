@@ -1518,21 +1518,23 @@ static void vo_wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, in
 
     poll(fds, nfds, timeout);
 
+    if (fds[0].revents & POLLIN) {
+        wl_display_read_events(wl->display);
+    } else {
+        wl_display_cancel_read(wl->display);
+    }
+
     if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
         MP_FATAL(wl, "Error occurred on the display fd, closing\n");
-        wl_display_cancel_read(wl->display);
         close(wl->display_fd);
         wl->display_fd = -1;
         mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
-    } else {
-        wl_display_read_events(wl->display);
     }
-
-    if (fds[0].revents & POLLIN)
-        wl_display_dispatch_pending(wl->display);
 
     if (fds[1].revents & POLLIN)
         mp_flush_wakeup_pipe(wl->wakeup_pipe[0]);
+
+    wl_display_dispatch_pending(wl->display);
 }
 
 /* Non-static */
