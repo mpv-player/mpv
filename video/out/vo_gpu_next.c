@@ -165,6 +165,7 @@ static pl_buf get_dr_buf(struct mp_image *mpi)
 static void free_dr_buf(void *opaque, uint8_t *data)
 {
     struct dr_buf *dr = opaque;
+    assert(memcmp(dr->sentinel, dr_magic, sizeof(dr_magic)) == 0);
     // Can't use `&dr->buf` because it gets freed during `pl_buf_destroy`
     pl_buf_destroy(dr->gpu, &(pl_buf) { dr->buf });
 }
