@@ -41,7 +41,7 @@ jobs:
       - name: Print meson log
         if: ${{ failure() }}
         run: |
-          cat ./build/meson-logs/meson-log.txt
+          cat ./${{ matrix.target }}_mingw_build/meson-logs/meson-log.txt
 
       - name: Build with waf
         run: |
