@@ -353,7 +353,7 @@ endif
 
 if get_option('tests')
     features += 'tests'
-    sources += files('test/champ.c',
+    sources += files('test/chmap.c',
                      'test/gl_video.c',
                      'test/img_format.c',
                      'test/json.c',
