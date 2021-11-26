@@ -639,14 +639,16 @@ if dvdnav.found() and dvdread.found()
     sources += files('stream/stream_dvdnav.c')
 endif
 
-iconv = dependency('iconv', required: get_option('iconv'))
+#TODO: remove this crap one day.
+#Freebsd requires 0.60.2 or up to work without specifying the method.
+#Windows breaks on exactly 0.60.2 (will have to wait for 0.60.3).
+if host_machine.system() == 'freebsd' or host_machine.system() == 'windows'
+    iconv_method = 'system'
+else
+    iconv_method = 'auto'
+endif
+iconv = dependency('iconv', method: iconv_method, required: get_option('iconv'))
 if iconv.found()
-    # It is possible for FreeBSD to also have GNU's libiconv installed.
-    # We don't need this since mpv does not use any GNU-specific features.
-    # Get iconv via the system method instead in this case.
-    if host_machine.system() == 'freebsd'
-        iconv = dependency('iconv', method: 'system')
-    endif
     dependencies += iconv
     features += 'iconv'
 endif
