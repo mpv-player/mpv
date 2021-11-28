@@ -259,7 +259,7 @@ extern "C" {
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
  */
-unsigned long mpv_client_api_version(void);
+MPV_EXPORT unsigned long mpv_client_api_version(void);
 
 /**
  * Client context used by the client API. Every client has its own private
