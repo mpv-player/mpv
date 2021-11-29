@@ -542,9 +542,6 @@ function mp.dispatch_events(allow_wait)
                     end
                 end
             end
-            -- Resume playloop - important especially if an error happened while
-            -- suspended, and the error was handled, but no resume was done.
-            mp.resume_all()
             if allow_wait ~= true then
                 return
             end

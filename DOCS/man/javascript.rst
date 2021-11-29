@@ -73,12 +73,6 @@ Unsupported Lua APIs and their JS alternatives
 
 ``utils.to_string(v)``  see ``dump`` below.
 
-``mp.suspend()`` JS: none (deprecated).
-
-``mp.resume()`` JS: none (deprecated).
-
-``mp.resume_all()`` JS: none (deprecated).
-
 ``mp.get_next_timeout()`` see event loop below.
 
 ``mp.dispatch_events([allow_wait])`` see event loop below.
