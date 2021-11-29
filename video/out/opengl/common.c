@@ -454,6 +454,17 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    // ES version uses a different extension.
+    {
+        .ver_es_core = 320,
+        .extension = "GL_KHR_debug",
+        .provides = MPGL_CAP_DEBUG,
+        .functions = (const struct gl_function[]) {
+            // (only functions needed by us)
+            DEF_FN(DebugMessageCallback),
+            {0}
+        },
+    },
     // These don't exist - they are for the sake of mpv internals, and libmpv
     // interaction (see libmpv/opengl_cb.h).
     // This is not used by the render API, only the deprecated opengl-cb API.
