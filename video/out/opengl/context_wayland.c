@@ -94,6 +94,8 @@ static void wayland_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info
     }
 }
 
+static void egl_create_window(struct ra_ctx *ctx);
+
 static bool egl_create_context(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
@@ -111,7 +113,7 @@ static bool egl_create_context(struct ra_ctx *ctx)
                               &p->egl_config))
         return false;
 
-    eglMakeCurrent(p->egl_display, NULL, NULL, p->egl_context);
+    egl_create_window(ctx);
 
     mpegl_load_functions(&p->gl, wl->log);
 
@@ -133,8 +135,9 @@ static void egl_create_window(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     struct vo_wayland_state *wl = ctx->vo->wl;
 
-    p->egl_window = wl_egl_window_create(wl->surface, mp_rect_w(wl->geometry),
-                                         mp_rect_h(wl->geometry));
+    // we may not have been configured yet, so choose a surface size unlikely to fail.
+    p->egl_window = wl_egl_window_create(wl->surface, MPMAX(16, mp_rect_w(wl->geometry)),
+                                         MPMAX(16, mp_rect_h(wl->geometry)));
 
     p->egl_surface = mpegl_create_window_surface(
         p->egl_display, p->egl_config, p->egl_window);
