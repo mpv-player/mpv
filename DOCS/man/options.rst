@@ -1677,9 +1677,7 @@ Video
     slow hardware. This works only with the following VOs:
 
         - ``gpu``: requires at least OpenGL 4.4 or Vulkan.
-
-    (In particular, this can't be made work with ``opengl-cb``, but the libmpv
-    render API has optional support.)
+        - ``libmpv``: The libmpv render API has optional support.
 
     Using video filters of any kind that write to the image data (or output
     newly allocated frames) will silently disable the DR code path.
@@ -6666,9 +6664,9 @@ Miscellaneous
     other hand, setting a too high value can reduce responsiveness with low
     FPS value.
 
-    For client API users using the render API (or the deprecated ``opengl-cb``
-    API), this option is interesting, because you can stop the render API
-    from limiting your FPS (see ``mpv_render_context_render()`` documentation).
+    This option is interesting for client API users using the render API
+    because you can stop it from limiting your FPS
+    (see ``mpv_render_context_render()`` documentation).
 
     This applies only to audio timing modes (e.g. ``--video-sync=audio``). In
     other modes (``--video-sync=display-...``), video timing relies on vsync

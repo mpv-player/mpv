@@ -176,9 +176,9 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
 
     // If possible, set this as parent so the decoder gets the hwdec and DR
     // interfaces.
-    // Note: at least mpv_opengl_cb_uninit_gl() relies on being able to get
-    //       rid of all references to the VO by destroying the VO chain. Thus,
-    //       decoders not linked to vo_chain must not use the hwdec context.
+    // Note: We rely on being able to get rid of all references to the VO by
+    //       destroying the VO chain. Thus, decoders not linked to vo_chain
+    //       must not use the hwdec context.
     if (track->vo_c)
         parent = track->vo_c->filter->f;
 

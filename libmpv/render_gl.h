@@ -121,8 +121,7 @@ typedef struct mpv_opengl_init_params {
      */
     void *get_proc_address_ctx;
     /**
-     * This should not be used. It is deprecated and will be removed or ignored
-     * when the opengl_cb API is removed.
+     * This should not be used. It is deprecated and ignored.
      */
     const char *extra_exts;
 } mpv_opengl_init_params;
