@@ -12,7 +12,6 @@ mpv_create
 mpv_create_client
 mpv_create_weak_client
 mpv_destroy
-mpv_detach_destroy
 mpv_error_string
 mpv_event_to_node
 mpv_event_name
@@ -22,7 +21,6 @@ mpv_get_property
 mpv_get_property_async
 mpv_get_property_osd_string
 mpv_get_property_string
-mpv_get_sub_api
 mpv_get_time_us
 mpv_get_wakeup_pipe
 mpv_hook_add
@@ -30,12 +28,6 @@ mpv_hook_continue
 mpv_initialize
 mpv_load_config_file
 mpv_observe_property
-mpv_opengl_cb_draw
-mpv_opengl_cb_init_gl
-mpv_opengl_cb_report_flip
-mpv_opengl_cb_render
-mpv_opengl_cb_set_update_callback
-mpv_opengl_cb_uninit_gl
 mpv_render_context_create
 mpv_render_context_free
 mpv_render_context_get_info
@@ -46,7 +38,6 @@ mpv_render_context_set_update_callback
 mpv_render_context_update
 mpv_request_event
 mpv_request_log_messages
-mpv_resume
 mpv_set_option
 mpv_set_option_string
 mpv_set_property
@@ -54,7 +45,6 @@ mpv_set_property_async
 mpv_set_property_string
 mpv_set_wakeup_callback
 mpv_stream_cb_add_ro
-mpv_suspend
 mpv_terminate_destroy
 mpv_unobserve_property
 mpv_wait_async_requests
