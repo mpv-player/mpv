@@ -1833,8 +1833,8 @@ endif
 if get_option('libmpv')
     client_h_define = cc.get_define('MPV_CLIENT_API_VERSION', prefix: '#include "libmpv/client.h"',
                                     include_directories: include_directories('.'))
-    major = client_h_define.split('|')[0][3]
-    minor = client_h_define.split('|')[1].substring(2,5)
+    major = client_h_define.split('|')[0].split('<<')[0].strip('() ')
+    minor = client_h_define.split('|')[1].strip('() ')
     client_api_version = major + '.' + minor + '.0'
 
     libmpv = library('mpv', sources, dependencies: [dependencies, luajit_partial],
@@ -1844,7 +1844,7 @@ if get_option('libmpv')
     pkg.generate(libmpv, version: client_api_version,
                  description: 'mpv media player client library')
 
-    headers = ['libmpv/client.h', 'libmpv/opengl_cb.h', 'libmpv/render.h',
+    headers = ['libmpv/client.h', 'libmpv/render.h',
                'libmpv/render_gl.h', 'libmpv/stream_cb.h']
     install_headers(headers, subdir: 'mpv')
 endif

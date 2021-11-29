@@ -6603,9 +6603,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (co)
         mp_notify_property(mpctx, co->name);
 
-    if (opt_ptr == &opts->pause)
-        mp_notify(mpctx, opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
-
     if (self_update)
         return;
 

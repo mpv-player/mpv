@@ -180,10 +180,6 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
         } else {
             (void)get_relative_time(mpctx); // ignore time that passed during pause
         }
-
-        // For some reason, these events are supposed to be sent even if only
-        // the internal pause state changed (and "pause" property didn't)... OK.
-        mp_notify(mpctx, opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
     }
 
     update_core_idle_state(mpctx);

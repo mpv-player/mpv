@@ -1601,7 +1601,7 @@ This list uses the event name field value, and the C API symbol in brackets:
         The new value of the property.
 
 The following events also happen, but are deprecated: ``tracks-changed``,
-``track-switched``, ``pause``, ``unpause``, ``metadata-update``, ``idle``,
+``track-switched``, ``metadata-update``, ``idle``,
 ``tick``, ``chapter-change``. Use ``mpv_observe_property()``
 (Lua: ``mp.observe_property()``) instead.
 

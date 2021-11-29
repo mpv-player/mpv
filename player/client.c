@@ -383,15 +383,6 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d)
     pthread_mutex_unlock(&ctx->wakeup_lock);
 }
 
-void mpv_suspend(mpv_handle *ctx)
-{
-    MP_ERR(ctx, "mpv_suspend() is deprecated and does nothing.\n");
-}
-
-void mpv_resume(mpv_handle *ctx)
-{
-}
-
 static void lock_core(mpv_handle *ctx)
 {
     mp_dispatch_lock(ctx->mpctx->dispatch);
@@ -552,11 +543,6 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
 void mpv_destroy(mpv_handle *ctx)
 {
     mp_destroy_client(ctx, false);
-}
-
-void mpv_detach_destroy(mpv_handle *ctx)
-{
-    mpv_destroy(ctx);
 }
 
 void mpv_terminate_destroy(mpv_handle *ctx)
@@ -860,14 +846,11 @@ int mp_client_send_event_dup(struct MPContext *mpctx, const char *client_name,
     return mp_client_send_event(mpctx, client_name, 0, event, event_data.data);
 }
 
-static bool deprecated_events[] = {
+const static bool deprecated_events[] = {
     [MPV_EVENT_TRACKS_CHANGED] = true,
     [MPV_EVENT_TRACK_SWITCHED] = true,
     [MPV_EVENT_IDLE] = true,
-    [MPV_EVENT_PAUSE] = true,
-    [MPV_EVENT_UNPAUSE] = true,
     [MPV_EVENT_TICK] = true,
-    [MPV_EVENT_SCRIPT_INPUT_DISPATCH] = true,
     [MPV_EVENT_METADATA_UPDATE] = true,
     [MPV_EVENT_CHAPTER_CHANGE] = true,
 };
@@ -2098,10 +2081,7 @@ static const char *const event_table[] = {
     [MPV_EVENT_TRACKS_CHANGED] = "tracks-changed",
     [MPV_EVENT_TRACK_SWITCHED] = "track-switched",
     [MPV_EVENT_IDLE] = "idle",
-    [MPV_EVENT_PAUSE] = "pause",
-    [MPV_EVENT_UNPAUSE] = "unpause",
     [MPV_EVENT_TICK] = "tick",
-    [MPV_EVENT_SCRIPT_INPUT_DISPATCH] = "script-input-dispatch",
     [MPV_EVENT_CLIENT_MESSAGE] = "client-message",
     [MPV_EVENT_VIDEO_RECONFIG] = "video-reconfig",
     [MPV_EVENT_AUDIO_RECONFIG] = "audio-reconfig",
@@ -2179,54 +2159,6 @@ mp_client_api_acquire_render_context(struct mp_client_api *ca)
         res = ca->render_context;
     pthread_mutex_unlock(&ca->lock);
     return res;
-}
-
-// Stubs of the old opengl_cb API.
-
-#include "libmpv/opengl_cb.h"
-
-void mpv_opengl_cb_set_update_callback(mpv_opengl_cb_context *ctx,
-                                       mpv_opengl_cb_update_fn callback,
-                                       void *callback_ctx)
-{
-}
-
-int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
-                          mpv_opengl_cb_get_proc_address_fn get_proc_address,
-                          void *get_proc_address_ctx)
-{
-    return MPV_ERROR_NOT_IMPLEMENTED;
-}
-
-int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int w, int h)
-{
-    return MPV_ERROR_NOT_IMPLEMENTED;
-}
-
-int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time)
-{
-    return MPV_ERROR_NOT_IMPLEMENTED;
-}
-
-int mpv_opengl_cb_uninit_gl(mpv_opengl_cb_context *ctx)
-{
-    return 0;
-}
-
-int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
-{
-    return MPV_ERROR_NOT_IMPLEMENTED;
-}
-
-void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
-{
-    if (!ctx->mpctx->initialized || sub_api != MPV_SUB_API_OPENGL_CB)
-        return NULL;
-    // Return something non-NULL, as I think most API users will not check
-    // this properly. The other opengl_cb stubs do not use this value.
-    MP_WARN(ctx, "The opengl_cb API is not supported anymore.\n"
-                 "Use the similar API in render.h instead.\n");
-    return "no";
 }
 
 // stream_cb
