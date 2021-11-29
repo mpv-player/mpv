@@ -539,23 +539,6 @@ static int script_get_script_directory(lua_State *L)
     return 0;
 }
 
-static int script_suspend(lua_State *L)
-{
-    struct script_ctx *ctx = get_ctx(L);
-    MP_ERR(ctx, "mp.suspend() is deprecated and does nothing.\n");
-    return 0;
-}
-
-static int script_resume(lua_State *L)
-{
-    return 0;
-}
-
-static int script_resume_all(lua_State *L)
-{
-    return 0;
-}
-
 static void pushnode(lua_State *L, mpv_node *node);
 
 static int script_raw_wait_event(lua_State *L, void *tmp)
@@ -1220,9 +1203,6 @@ struct fn_entry {
 
 static const struct fn_entry main_fns[] = {
     FN_ENTRY(log),
-    FN_ENTRY(suspend),
-    FN_ENTRY(resume),
-    FN_ENTRY(resume_all),
     AF_ENTRY(raw_wait_event),
     FN_ENTRY(request_event),
     FN_ENTRY(find_config_file),
