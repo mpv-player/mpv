@@ -47,8 +47,8 @@ struct ra {
 };
 
 // For passing through windowing system specific parameters and such. The
-// names are always internal (except for legacy opengl-cb uses; the libmpv
-// render API uses mpv_render_param_type and maps them to names internally).
+// names are always internal (the libmpv render API uses mpv_render_param_type
+// and maps them to names internally).
 // For example, a name="x11" entry has a X11 display as (Display*)data.
 struct ra_native_resource {
     const char *name;

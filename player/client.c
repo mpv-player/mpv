@@ -2181,10 +2181,9 @@ mp_client_api_acquire_render_context(struct mp_client_api *ca)
     return res;
 }
 
-// Emulation of old opengl_cb API.
+// Stubs of the old opengl_cb API.
 
 #include "libmpv/opengl_cb.h"
-#include "libmpv/render_gl.h"
 
 void mpv_opengl_cb_set_update_callback(mpv_opengl_cb_context *ctx,
                                        mpv_opengl_cb_update_fn callback,

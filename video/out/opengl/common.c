@@ -465,24 +465,6 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
-    // These don't exist - they are for the sake of mpv internals, and libmpv
-    // interaction (see libmpv/opengl_cb.h).
-    // This is not used by the render API, only the deprecated opengl-cb API.
-    {
-        .extension = "GL_MP_MPGetNativeDisplay",
-        .functions = (const struct gl_function[]) {
-            DEF_FN(MPGetNativeDisplay),
-            {0}
-        },
-    },
-    // Same, but using the old name.
-    {
-        .extension = "GL_MP_D3D_interfaces",
-        .functions = (const struct gl_function[]) {
-            DEF_FN_NAME(MPGetNativeDisplay, "glMPGetD3DInterface"),
-            {0}
-        },
-    },
     {
         .extension = "GL_ANGLE_translated_shader_source",
         .functions = (const struct gl_function[]) {
