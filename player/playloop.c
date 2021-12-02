@@ -962,7 +962,7 @@ static void handle_chapter_change(struct MPContext *mpctx)
     int chapter = get_current_chapter(mpctx);
     if (chapter != mpctx->last_chapter) {
         mpctx->last_chapter = chapter;
-        mp_notify(mpctx, MPV_EVENT_CHAPTER_CHANGE, NULL);
+        mp_notify(mpctx, MP_EVENT_CHAPTER_CHANGE, NULL);
     }
 }
 

@@ -1266,24 +1266,6 @@ typedef enum mpv_event_id {
     MPV_EVENT_FILE_LOADED       = 8,
 #if MPV_ENABLE_DEPRECATED
     /**
-     * The list of video/audio/subtitle tracks was changed. (E.g. a new track
-     * was found. This doesn't necessarily indicate a track switch; for this,
-     * MPV_EVENT_TRACK_SWITCHED is used.)
-     *
-     * @deprecated This is equivalent to using mpv_observe_property() on the
-     *             "track-list" property. The event is redundant, and might
-     *             be removed in the far future.
-     */
-    MPV_EVENT_TRACKS_CHANGED    = 9,
-    /**
-     * A video/audio/subtitle track was switched on or off.
-     *
-     * @deprecated This is equivalent to using mpv_observe_property() on the
-     *             "vid", "aid", and "sid" properties. The event is redundant,
-     *             and might be removed in the far future.
-     */
-    MPV_EVENT_TRACK_SWITCHED    = 10,
-    /**
      * Idle mode was entered. In this mode, no file is played, and the playback
      * core waits for new commands. (The command line player normally quits
      * instead of entering idle mode, unless --idle was specified. If mpv
@@ -1331,18 +1313,6 @@ typedef enum mpv_event_id {
      * because there is no such thing as audio output embedding.
      */
     MPV_EVENT_AUDIO_RECONFIG    = 18,
-#if MPV_ENABLE_DEPRECATED
-    /**
-     * Happens when metadata (like file tags) is possibly updated. (It's left
-     * unspecified whether this happens on file start or only when it changes
-     * within a file.)
-     *
-     * @deprecated This is equivalent to using mpv_observe_property() on the
-     *             "metadata" property. The event is redundant, and might
-     *             be removed in the far future.
-     */
-    MPV_EVENT_METADATA_UPDATE   = 19,
-#endif
     /**
      * Happens when a seek was initiated. Playback stops. Usually it will
      * resume with MPV_EVENT_PLAYBACK_RESTART as soon as the seek is finished.
@@ -1360,16 +1330,6 @@ typedef enum mpv_event_id {
      * See also mpv_event and mpv_event_property.
      */
     MPV_EVENT_PROPERTY_CHANGE   = 22,
-#if MPV_ENABLE_DEPRECATED
-    /**
-     * Happens when the current chapter changes.
-     *
-     * @deprecated This is equivalent to using mpv_observe_property() on the
-     *             "chapter" property. The event is redundant, and might
-     *             be removed in the far future.
-     */
-    MPV_EVENT_CHAPTER_CHANGE    = 23,
-#endif
     /**
      * Happens if the internal per-mpv_handle ringbuffer overflows, and at
      * least 1 event had to be dropped. This can happen if the client doesn't

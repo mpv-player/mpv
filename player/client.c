@@ -847,12 +847,8 @@ int mp_client_send_event_dup(struct MPContext *mpctx, const char *client_name,
 }
 
 const static bool deprecated_events[] = {
-    [MPV_EVENT_TRACKS_CHANGED] = true,
-    [MPV_EVENT_TRACK_SWITCHED] = true,
     [MPV_EVENT_IDLE] = true,
     [MPV_EVENT_TICK] = true,
-    [MPV_EVENT_METADATA_UPDATE] = true,
-    [MPV_EVENT_CHAPTER_CHANGE] = true,
 };
 
 int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
@@ -2078,18 +2074,14 @@ static const char *const event_table[] = {
     [MPV_EVENT_START_FILE] = "start-file",
     [MPV_EVENT_END_FILE] = "end-file",
     [MPV_EVENT_FILE_LOADED] = "file-loaded",
-    [MPV_EVENT_TRACKS_CHANGED] = "tracks-changed",
-    [MPV_EVENT_TRACK_SWITCHED] = "track-switched",
     [MPV_EVENT_IDLE] = "idle",
     [MPV_EVENT_TICK] = "tick",
     [MPV_EVENT_CLIENT_MESSAGE] = "client-message",
     [MPV_EVENT_VIDEO_RECONFIG] = "video-reconfig",
     [MPV_EVENT_AUDIO_RECONFIG] = "audio-reconfig",
-    [MPV_EVENT_METADATA_UPDATE] = "metadata-update",
     [MPV_EVENT_SEEK] = "seek",
     [MPV_EVENT_PLAYBACK_RESTART] = "playback-restart",
     [MPV_EVENT_PROPERTY_CHANGE] = "property-change",
-    [MPV_EVENT_CHAPTER_CHANGE] = "chapter-change",
     [MPV_EVENT_QUEUE_OVERFLOW] = "event-queue-overflow",
     [MPV_EVENT_HOOK] = "hook",
 };

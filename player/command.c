@@ -993,7 +993,7 @@ static int parse_node_chapters(struct MPContext *mpctx,
         }
     }
 
-    mp_notify(mpctx, MPV_EVENT_CHAPTER_CHANGE, NULL);
+    mp_notify(mpctx, MP_EVENT_CHAPTER_CHANGE, NULL);
     mp_notify_property(mpctx, "chapter-list");
 
     return M_PROPERTY_OK;
@@ -3770,8 +3770,8 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_END_FILE, "*"),
     E(MPV_EVENT_FILE_LOADED, "*"),
     E(MP_EVENT_CHANGE_ALL, "*"),
-    E(MPV_EVENT_TRACKS_CHANGED, "track-list", "current-tracks"),
-    E(MPV_EVENT_TRACK_SWITCHED, "track-list", "current-tracks"),
+    E(MP_EVENT_TRACKS_CHANGED, "track-list", "current-tracks"),
+    E(MP_EVENT_TRACK_SWITCHED, "track-list", "current-tracks"),
     E(MPV_EVENT_IDLE, "*"),
     E(MPV_EVENT_TICK, "time-pos", "audio-pts", "stream-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
@@ -3794,8 +3794,8 @@ static const char *const *const mp_event_property_change[] = {
       "audio-out-params", "volume-max", "mixer-active"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle", "eof-reached"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle", "eof-reached"),
-    E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),
-    E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
+    E(MP_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),
+    E(MP_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
     E(MP_EVENT_CACHE_UPDATE,
       "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache",
       "demuxer-cache-time", "cache-buffering-state", "cache-speed",

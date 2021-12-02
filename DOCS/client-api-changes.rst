@@ -37,7 +37,8 @@ API changes
         - remove mpv_opengl_init_params.extra_exts field
         - remove deprecated mpv_detach_destroy. Use mpv_destroy instead.
         - remove obsolete mpv_suspend and mpv_resume
-        - remove deprecated SCRIPT_INPUT_DISPATCH, PAUSE and UNPAUSE events
+        - remove deprecated SCRIPT_INPUT_DISPATCH, PAUSE and UNPAUSE, TRACKS_CHANGED
+          TRACK_SWITCHED, METADATA_UPDATE, CHAPTER_CHANGE events
  --- mpv 0.33.0 ---
  1.109  - add MPV_RENDER_API_TYPE_SW and related (software rendering API)
         - inactivate the opengl_cb API (always fails to initialize now)
