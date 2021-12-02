@@ -353,7 +353,7 @@ void update_demuxer_properties(struct MPContext *mpctx)
         }
         talloc_free(mpctx->filtered_tags);
         mpctx->filtered_tags = info;
-        mp_notify(mpctx, MPV_EVENT_METADATA_UPDATE, NULL);
+        mp_notify(mpctx, MP_EVENT_METADATA_UPDATE, NULL);
     }
     if (events & DEMUX_EVENT_DURATION)
         mp_notify(mpctx, MP_EVENT_DURATION_UPDATE, NULL);
@@ -429,7 +429,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
 
-    mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
+    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
 
     return track;
 }
@@ -686,7 +686,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         reinit_sub(mpctx, track);
     }
 
-    mp_notify(mpctx, MPV_EVENT_TRACK_SWITCHED, NULL);
+    mp_notify(mpctx, MP_EVENT_TRACK_SWITCHED, NULL);
     mp_wakeup_core(mpctx);
 
     talloc_free(mpctx->track_layout_hash);
@@ -752,7 +752,7 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     if (!in_use)
         demux_cancel_and_free(d);
 
-    mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
+    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
 
     return true;
 }
@@ -1358,7 +1358,7 @@ done:
             reselect_demux_stream(mpctx, mpctx->tracks[n], false);
     }
 
-    mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
+    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
 
     return success ? 1 : -1;
 }
@@ -1721,7 +1721,7 @@ terminate_playback:
     talloc_free(mpctx->filtered_tags);
     mpctx->filtered_tags = NULL;
 
-    mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
+    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
 
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx))
         mpctx->stop_play = PT_ERROR;
