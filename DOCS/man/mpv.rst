@@ -1307,6 +1307,36 @@ works like in older mpv releases:
     change, and not apply your additional settings, and/or use a different
     profile name.
 
+LINUX DESKTOP ISSUES
+====================
+
+This subsection describes common problems on the Linux desktop. None of these
+problems exist on systems like Windows or macOS.
+
+Disabling Screensaver
+---------------------
+
+By default, mpv tries to disable the OS screensaver during playback (only if
+a video output using the OS GUI API is active). ``--stop-screensaver=no``
+disables this.
+
+A common problem is that some Linux desktop environments ignore the standard
+screensaver APIs on which mpv relies. In particular, mpv uses the Screen Saver
+extension (XSS) on X11, and the idle-inhibit on Wayland.
+
+GNOME is one of the desktop environments that does not have a complete
+implementation for the now widely supported idle-inhibit protocol.
+
+The issue could be fixed through the use of a DBus API, but it would create
+several problems to be tackled by mpv. One of them is that it would require
+adding a quite unwieldy dependency for a DBus library, somehow integrating its
+mainloop into mpv, and other generally unacceptable things.
+
+Alternatively, you may be able to write a Lua script that calls the
+``xdg-screensaver`` command line program.
+
+Before mpv 0.33.0, the X11 backend ran ``xdg-screensaver reset`` in 10 second
+intervals when not paused. This hack was removed in 0.33.0.
 
 .. include:: options.rst
 
