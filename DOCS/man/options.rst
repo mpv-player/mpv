@@ -6864,14 +6864,20 @@ Miscellaneous
 
     :no:    Don't automatically load cover art.
     :exact: Load the media filename with an image file extension.
-    :fuzzy: Load all cover art containing the media filename and filenames
-            in an internal whitelist, such as ``cover.jpg`` (default).
+    :fuzzy: Load all cover art containing the media filename (default).
     :all:   Load all images in the current directory.
 
     See ``--cover-art-files`` for details about what constitutes cover art.
 
     See ``--audio-display`` how to control display of cover art (this can be
     used to disable cover art that is part of the file).
+
+``--cover-art-whitelist=<no|yes>``
+    Whether to load filenames in an internal whitelist, such as ``cover.jpg``,
+    as cover art. If ``cover-art-auto`` is set to ``no``, the whitelisted
+    filenames are never loaded even if this option is set to ``yes``.
+
+    Default: ``yes``.
 
 ``--autoload-files=<yes|no>``
     Automatically load/select external files (default: yes).
