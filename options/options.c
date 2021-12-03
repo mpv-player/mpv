@@ -611,6 +611,7 @@ static const m_option_t mp_opts[] = {
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
     {"cover-art-auto", OPT_CHOICE(coverart_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
+    {"cover-art-whitelist", OPT_BOOL(coverart_whitelist)},
 
     {"", OPT_SUBSTRUCT(subs_rend, mp_subtitle_sub_opts)},
     {"", OPT_SUBSTRUCT(subs_filt, mp_sub_filter_opts)},
@@ -1033,6 +1034,7 @@ static const struct MPOpts mp_default_opts = {
     .sub_auto = 0,
     .audiofile_auto = -1,
     .coverart_auto = 1,
+    .coverart_whitelist = true,
     .osd_bar_visible = 1,
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,
