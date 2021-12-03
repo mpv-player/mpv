@@ -6904,8 +6904,8 @@ Miscellaneous
     (which are not marked as cover art), external cover art will not be loaded.
 
     :no:    Don't automatically load cover art.
-    :exact: Load the media filename with an image file extension.
-    :fuzzy: Load all cover art containing the media filename (default).
+    :exact: Load the media filename with an image file extension (default).
+    :fuzzy: Load all cover art containing the media filename.
     :all:   Load all images in the current directory.
 
     See ``--cover-art-files`` for details about what constitutes cover art.
