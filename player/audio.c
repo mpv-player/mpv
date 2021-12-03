@@ -637,7 +637,7 @@ static void ao_process(struct mp_filter *f)
         return;
     }
 
-    // Due to mp_async_queue_set_notifier() thhis function is called when the
+    // Due to mp_async_queue_set_notifier() this function is called when the
     // queue becomes full. This affects state changes in the normal playloop,
     // so wake it up. But avoid redundant wakeups during normal playback.
     if (mpctx->audio_status != STATUS_PLAYING &&
