@@ -111,6 +111,7 @@ struct GL {
     void (GLAPIENTRY *ReadPixels)(GLint, GLint, GLsizei, GLsizei, GLenum,
                                   GLenum, GLvoid *);
     void (GLAPIENTRY *ReadBuffer)(GLenum);
+    void (GLAPIENTRY *DrawBuffer)(GLenum);
     void (GLAPIENTRY *DrawArrays)(GLenum, GLint, GLsizei);
     GLenum (GLAPIENTRY *GetError)(void);
     void (GLAPIENTRY *GetTexLevelParameteriv)(GLenum, GLint, GLenum, GLint *);
