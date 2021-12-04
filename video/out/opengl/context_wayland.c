@@ -144,6 +144,13 @@ static void egl_create_window(struct ra_ctx *ctx)
     }
 
     eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface, p->egl_context);
+    // eglMakeCurrent may not configure the draw or read buffers if the context
+    // has been made current previously. On nvidia GL_NONE is bound because EGL_NO_SURFACE
+    // is used initially and we must bind the read and draw buffers here.
+    if(!p->gl.es) {
+        p->gl.ReadBuffer(GL_BACK);
+        p->gl.DrawBuffer(GL_BACK);
+    }
 
     eglSwapInterval(p->egl_display, 0);
 }
