@@ -308,6 +308,7 @@ static const struct gl_functions gl_functions[] = {
     },
     {
         .ver_core = 430,
+        .extension = "GL_ARB_invalidate_subdata",
         .functions = (const struct gl_function[]) {
             DEF_FN(InvalidateTexImage),
             {0}
@@ -339,8 +340,17 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    // Equivalent extension for ES
+    {
+        .extension = "GL_EXT_buffer_storage",
+        .functions = (const struct gl_function[]) {
+            DEF_FN_NAME(BufferStorage, "glBufferStorageEXT"),
+            {0}
+        },
+    },
     {
         .ver_core = 420,
+        .ver_es_core = 310,
         .extension = "GL_ARB_shader_image_load_store",
         .functions = (const struct gl_function[]) {
             DEF_FN(BindImageTexture),
@@ -350,16 +360,19 @@ static const struct gl_functions gl_functions[] = {
     },
     {
         .ver_core = 310,
+        .ver_es_core = 300,
         .extension = "GL_ARB_uniform_buffer_object",
         .provides = MPGL_CAP_UBO,
     },
     {
         .ver_core = 430,
+        .ver_es_core = 310,
         .extension = "GL_ARB_shader_storage_buffer_object",
         .provides = MPGL_CAP_SSBO,
     },
     {
         .ver_core = 430,
+        .ver_es_core = 310,
         .extension = "GL_ARB_compute_shader",
         .functions = (const struct gl_function[]) {
             DEF_FN(DispatchCompute),
@@ -638,7 +651,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (gl->es >= 200)
             gl->glsl_version = 100;
         if (gl->es >= 300)
-            gl->glsl_version = 300;
+            gl->glsl_version = gl->es;
     } else {
         gl->glsl_version = 120;
         int glsl_major = 0, glsl_minor = 0;
