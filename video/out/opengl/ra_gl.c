@@ -117,8 +117,8 @@ static int ra_init_gl(struct ra *ra, GL *gl)
             ra->caps |= RA_CAP_BUF_RW;
     }
 
-    // textureGather is only supported in GLSL 400+
-    if (ra->glsl_version >= 400)
+    // textureGather is only supported in GLSL 400+ / ES 310+
+    if (ra->glsl_version >= (ra->glsl_es ? 310 : 400))
         ra->caps |= RA_CAP_GATHER;
 
     if (gl->BlitFramebuffer)
@@ -127,7 +127,14 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     // Disable compute shaders for GLSL < 420. This work-around is needed since
     // some buggy OpenGL drivers expose compute shaders for lower GLSL versions,
     // despite the spec requiring 420+.
-    if (ra->glsl_version < 420)
+    if (ra->glsl_version < (ra->glsl_es ? 310 : 420)) {
+        ra->caps &= ~RA_CAP_COMPUTE;
+    }
+
+    // While we can handle compute shaders on GLES the spec (intentionally)
+    // does not support binding textures for writing, which all uses inside mpv
+    // would require. So disable it unconditionally anyway.
+    if (ra->glsl_es)
         ra->caps &= ~RA_CAP_COMPUTE;
 
     int gl_fmt_features = gl_format_feature_flags(gl);
@@ -581,7 +588,7 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
 {
     GL *gl = ra_gl_get(ra);
 
-    if (params->host_mapped && gl->version < 440)
+    if (params->host_mapped && !gl->BufferStorage)
         return NULL;
 
     struct ra_buf *buf = talloc_zero(NULL, struct ra_buf);
