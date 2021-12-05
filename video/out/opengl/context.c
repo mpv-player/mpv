@@ -23,6 +23,15 @@
 // 0-terminated list of desktop GL versions a backend should try to
 // initialize. Each entry is the minimum required version.
 const int mpgl_min_required_gl_versions[] = {
+    /*
+     * Nvidia drivers will not provide the highest supported version
+     * when 320 core is requested. Instead, it just returns 3.2. This
+     * would be bad, as we actually want compute shaders that require
+     * 4.2, so we have to request a sufficiently high version. We use
+     * 440 to maximise driver compatibility as we don't need anything
+     * from newer versions.
+     */
+    440,
     320,
     210,
     0
