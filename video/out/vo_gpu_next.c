@@ -820,7 +820,7 @@ static int query_format(struct vo *vo, int format)
 {
     struct priv *p = vo->priv;
     struct pl_bit_encoding bits;
-    struct pl_plane_data data[4];
+    struct pl_plane_data data[4] = {0};
     int planes = plane_data_from_imgfmt(data, &bits, format);
     if (!planes)
         return false;
