@@ -989,7 +989,7 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
         gl->BindBufferBase(buf_gl->target, input->binding, buf_gl->buffer);
         // SSBOs are not implicitly coherent in OpengL
         if (input->type == RA_VARTYPE_BUF_RW)
-            gl->MemoryBarrier(buf_gl->target);
+            gl->MemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         break;
     }
     default:
