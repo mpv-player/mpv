@@ -24,6 +24,7 @@
 #include "video/out/gpu/d3d11_helpers.h"
 #include "video/out/gpu/spirv.h"
 #include "video/out/w32_common.h"
+#include "context.h"
 #include "ra_d3d11.h"
 
 static int d3d11_validate_adapter(struct mp_log *log,
@@ -524,6 +525,18 @@ static bool d3d11_init(struct ra_ctx *ctx)
 error:
     d3d11_uninit(ctx);
     return false;
+}
+
+IDXGISwapChain *ra_d3d11_ctx_get_swapchain(struct ra_ctx *ra)
+{
+    if (ra->swapchain->fns != &d3d11_swapchain)
+        return NULL;
+
+    struct priv *p = ra->priv;
+
+    IDXGISwapChain_AddRef(p->swapchain);
+
+    return p->swapchain;
 }
 
 const struct ra_ctx_fns ra_ctx_d3d11 = {
