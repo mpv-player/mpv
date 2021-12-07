@@ -257,8 +257,8 @@ static void mark_rect(struct mp_draw_sub_cache *p, int x0, int y0, int x1, int y
     x1 = MP_ALIGN_UP(x1, p->align_x);
     y1 = MP_ALIGN_UP(y1, p->align_y);
 
-    assert(x0 >= 0 && x0 <= x1 && x1 <= p->w);
-    assert(y0 >= 0 && y0 <= y1 && y1 <= p->h);
+    assert(x0 >= 0 && x0 <= x1 && x1 < p->w);
+    assert(y0 >= 0 && y0 <= y1 && y1 < p->h);
 
     int sx0 = x0 / SLICE_W;
     int sx1 = x1 / SLICE_W;
@@ -328,7 +328,7 @@ static void render_ass(struct mp_draw_sub_cache *p, struct sub_bitmaps *sb)
                       p->rgba_overlay->stride[0], s->bitmap, s->stride,
                       s->w, s->h, s->libass.color);
 
-        mark_rect(p, s->x, s->y, s->x + s->w, s->y + s->h);
+        mark_rect(p, s->x, s->y, s->x + s->w - 1, s->y + s->h - 1);
     }
 }
 
@@ -382,16 +382,18 @@ static bool render_rgba(struct mp_draw_sub_cache *p, struct part *part,
         // Clipping is rare but necessary.
         int sx0 = s->x;
         int sy0 = s->y;
-        int sx1 = s->x + s->dw;
-        int sy1 = s->y + s->dh;
+        int sx1 = s->x + s->dw-1;
+        int sy1 = s->y + s->dh-1;
 
-        int x0 = MPCLAMP(sx0, 0, p->w);
-        int y0 = MPCLAMP(sy0, 0, p->h);
-        int x1 = MPCLAMP(sx1, 0, p->w);
-        int y1 = MPCLAMP(sy1, 0, p->h);
+        int x0 = MPCLAMP(sx0, 0, p->w-1);
+        int y0 = MPCLAMP(sy0, 0, p->h-1);
+        int x1 = MPCLAMP(sx1, 0, p->w-1);
+        int y1 = MPCLAMP(sy1, 0, p->h-1);
 
-        int dw = x1 - x0;
-        int dh = y1 - y0;
+        int dw = x1 - x0 + 1;
+        int dh = y1 - y0 + 1;
+        // Only possible if p0 and p1 are in wrong order. Such as negative
+        // width.
         if (dw <= 0 || dh <= 0)
             continue;
 
@@ -405,14 +407,14 @@ static bool render_rgba(struct mp_draw_sub_cache *p, struct part *part,
         if (x0 != sx0 || y0 != sy0 || x1 != sx1 || y1 != sy1) {
             double fx = s->dw / (double)s->w;
             double fy = s->dh / (double)s->h;
-            sx = MPCLAMP((x0 - sx0) / fx, 0, s->w);
-            sy = MPCLAMP((y0 - sy0) / fy, 0, s->h);
+            sx = MPCLAMP((x0 - sx0) / fx, 0, s->w - 1);
+            sy = MPCLAMP((y0 - sy0) / fy, 0, s->h - 1);
             sw = MPCLAMP(dw / fx, 1, s->w);
             sh = MPCLAMP(dh / fy, 1, s->h);
         }
 
-        assert(sx >= 0 && sw > 0 && sx + sw <= s->w);
-        assert(sy >= 0 && sh > 0 && sy + sh <= s->h);
+        assert(sx >= 0 && sw > 0 && sx + sw <= s->w && sx < sw);
+        assert(sy >= 0 && sh > 0 && sy + sh <= s->h && sy < sh);
 
         ptrdiff_t s_stride = s->stride;
         void *s_ptr = (char *)s->bitmap + s_stride * sy + sx * 4;
