@@ -609,7 +609,7 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     // pixel using shared memory first
     GLSLH(shared int wg_sum;)
     GLSLH(shared uint wg_max;)
-    GLSL(wg_sum = 0; wg_max = 0;)
+    GLSL(wg_sum = 0; wg_max = 0u;)
     GLSL(barrier();)
     GLSLF("float sig_log = log(max(sig_max, %f));\n", log_min);
     GLSLF("atomicAdd(wg_sum, int(sig_log * %f));\n", log_scale);
@@ -618,7 +618,7 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     // Have one thread per work group update the global atomics
     GLSL(memoryBarrierShared();)
     GLSL(barrier();)
-    GLSL(if (gl_LocalInvocationIndex == 0) {)
+    GLSL(if (gl_LocalInvocationIndex == 0u) {)
     GLSL(    int wg_avg = wg_sum / int(gl_WorkGroupSize.x * gl_WorkGroupSize.y);)
     GLSL(    atomicAdd(frame_sum, wg_avg);)
     GLSL(    atomicMax(frame_max, wg_max);)
@@ -628,8 +628,8 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
 
     // Finally, to update the global state, we increment a counter per dispatch
     GLSL(uint num_wg = gl_NumWorkGroups.x * gl_NumWorkGroups.y;)
-    GLSL(if (gl_LocalInvocationIndex == 0 && atomicAdd(counter, 1) == num_wg - 1) {)
-    GLSL(    counter = 0;)
+    GLSL(if (gl_LocalInvocationIndex == 0u && atomicAdd(counter, 1u) == num_wg - 1u) {)
+    GLSL(    counter = 0u;)
     GLSL(    vec2 cur = vec2(float(frame_sum) / float(num_wg), frame_max);)
     GLSLF("  cur *= vec2(1.0/%f, 1.0/%f);\n", log_scale, sig_scale);
     GLSL(    cur.x = exp(cur.x);)
@@ -650,7 +650,7 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     GLSL(    average = mix(average, cur, weight);)
 
     // Reset SSBO state for the next frame
-    GLSL(    frame_sum = 0; frame_max = 0;)
+    GLSL(    frame_sum = 0; frame_max = 0u;)
     GLSL(    memoryBarrierBuffer();)
     GLSL(})
 }
