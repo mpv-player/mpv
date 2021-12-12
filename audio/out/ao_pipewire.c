@@ -21,6 +21,7 @@
  */
 
 #include <pipewire/pipewire.h>
+#include <pipewire/global.h>
 #include <spa/param/audio/format-utils.h>
 #include <spa/param/props.h>
 #include <math.h>
@@ -44,6 +45,8 @@
 struct priv {
     struct pw_thread_loop *loop;
     struct pw_stream *stream;
+    struct pw_core *core;
+    struct spa_hook stream_listener;
 
     int buffer_msec;
     bool muted;
@@ -103,6 +106,7 @@ static enum spa_audio_channel mp_speaker_id_to_spa(struct ao *ao, enum mp_speake
                              return SPA_AUDIO_CHANNEL_UNKNOWN;
     };
 }
+
 
 static void on_process(void *userdata)
 {
@@ -227,11 +231,140 @@ static void uninit(struct ao *ao)
     if (p->stream)
         pw_stream_destroy(p->stream);
     p->stream = NULL;
+    if (p->core)
+        pw_core_disconnect(p->core);
+    p->core = NULL;
     if (p->loop)
         pw_thread_loop_destroy(p->loop);
     p->loop = NULL;
     pw_deinit();
 }
+
+struct registry_event_global_ctx {
+    struct ao *ao;
+    void (*sink_cb) (struct ao *ao, uint32_t id, const struct spa_dict *props, void *sink_cb_ctx);
+    void *sink_cb_ctx;
+};
+
+static void for_each_sink_registry_event_global(void *data, uint32_t id,
+                                                uint32_t permissions, const
+                                                char *type, uint32_t version,
+                                                const struct spa_dict *props)
+{
+    struct registry_event_global_ctx *ctx = data;
+
+    if (strcmp(type, PW_TYPE_INTERFACE_Node) != 0)
+        return;
+
+    if (!props)
+        return;
+
+    const char *class = spa_dict_lookup(props, PW_KEY_MEDIA_CLASS);
+    if (!class || strcmp(class, "Audio/Sink") != 0)
+        return;
+
+    ctx->sink_cb(ctx->ao, id, props, ctx->sink_cb_ctx);
+}
+
+
+static const struct pw_registry_events for_each_sink_registry_events = {
+    .version = PW_VERSION_REGISTRY_EVENTS,
+    .global = for_each_sink_registry_event_global,
+};
+
+static void for_each_sink_done(void *data, uint32_t it, int seq)
+{
+    struct pw_thread_loop *loop = data;
+    pw_thread_loop_signal(loop, false);
+}
+
+static const struct pw_core_events for_each_sink_core_events = {
+    .version = PW_VERSION_CORE_EVENTS,
+    .done = for_each_sink_done,
+};
+
+static void for_each_sink(struct ao *ao, void (cb) (struct ao *ao, uint32_t id,
+                          const struct spa_dict *props, void *ctx), void *cb_ctx)
+{
+    struct priv *priv = ao->priv;
+    struct pw_registry *registry;
+    struct spa_hook core_listener;
+
+    pw_thread_loop_lock(priv->loop);
+
+    pw_core_add_listener(priv->core, &core_listener, &for_each_sink_core_events, priv->loop);
+    registry = pw_core_get_registry(priv->core, PW_VERSION_REGISTRY, 0);
+    pw_core_sync(priv->core, 0, 0);
+
+    struct spa_hook registry_listener;
+    struct registry_event_global_ctx revents_ctx = {
+            .ao = ao,
+            .sink_cb = cb,
+            .sink_cb_ctx = cb_ctx,
+    };
+    pw_registry_add_listener(registry, &registry_listener, &for_each_sink_registry_events, &revents_ctx);
+    pw_thread_loop_wait(priv->loop);
+
+
+    spa_hook_remove(&core_listener);
+    spa_hook_remove(&registry_listener);
+    pw_proxy_destroy((struct pw_proxy *)registry);
+
+    pw_thread_loop_unlock(priv->loop);
+}
+
+
+static void get_target_id_cb(struct ao *ao, uint32_t id, const struct spa_dict *props, void *ctx)
+{
+    int32_t *target_id = ctx;
+
+    const char *name = spa_dict_lookup(props, PW_KEY_NODE_NAME);
+    if (!name)
+        return;
+
+    if (strcmp(name, ao->device) == 0) {
+        *target_id = id;
+    }
+}
+
+static uint32_t get_target_id(struct ao *ao)
+{
+    uint32_t target_id = 0;
+
+    if (ao->device == NULL)
+        return PW_ID_ANY;
+
+    for_each_sink(ao, get_target_id_cb, &target_id);
+
+    return target_id;
+}
+
+static int pipewire_init_boilerplate(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    struct pw_context *context;
+
+    pw_init(NULL, NULL);
+
+
+    p->loop = pw_thread_loop_new("ao-pipewire", NULL);
+    if (p->loop == NULL)
+        return -1;
+
+    if (pw_thread_loop_start(p->loop) < 0)
+            return -1;
+
+    context = pw_context_new(pw_thread_loop_get_loop(p->loop), NULL, 0);
+    if (!context)
+            return -1;
+
+    p->core = pw_context_connect(context, NULL, 0);
+    if (!p->core)
+            return -1;
+
+    return 0;
+}
+
 
 static int init(struct ao *ao)
 {
@@ -251,6 +384,9 @@ static int init(struct ao *ao)
         PW_KEY_NODE_ALWAYS_PROCESS, "true",
         NULL
     );
+
+    if (pipewire_init_boilerplate(ao) < 0)
+        goto error;
 
     ao->device_buffer = p->buffer_msec * ao->samplerate / 1000;
 
@@ -282,33 +418,42 @@ static int init(struct ao *ao)
         ao->sstride = ao->channels.num * af_fmt_to_bytes(ao->format);
     }
 
-    pw_init(NULL, NULL);
+    pw_thread_loop_lock(p->loop);
 
-    p->loop = pw_thread_loop_new("ao-pipewire", NULL);
-    if (p->loop == NULL)
-        goto error;
-
-    p->stream = pw_stream_new_simple(
-                    pw_thread_loop_get_loop(p->loop),
+    p->stream = pw_stream_new(
+                    p->core,
                     "audio-src",
-                    props,
-                    &stream_events,
-                    ao);
-    if (p->stream == NULL)
+                    props);
+    if (p->stream == NULL) {
+        pw_thread_loop_unlock(p->loop);
         goto error;
+    }
+
+    pw_stream_add_listener(p->stream,
+                    &p->stream_listener,
+                    &stream_events, ao);
+
+    pw_thread_loop_unlock(p->loop);
+
+    uint32_t target_id = get_target_id(ao);
+    if (target_id == 0)
+        goto error;
+
+    pw_thread_loop_lock(p->loop);
 
     if (pw_stream_connect(p->stream,
                     PW_DIRECTION_OUTPUT,
-                    PW_ID_ANY,
+                    target_id,
                     PW_STREAM_FLAG_AUTOCONNECT |
                     PW_STREAM_FLAG_INACTIVE |
                     PW_STREAM_FLAG_MAP_BUFFERS |
                     PW_STREAM_FLAG_RT_PROCESS,
-                    params, 1) < 0)
+                    params, 1) < 0) {
+        pw_thread_loop_unlock(p->loop);
         goto error;
+    }
 
-    if (pw_thread_loop_start(p->loop) < 0)
-        goto error;
+    pw_thread_loop_unlock(p->loop);
 
     return 0;
 
@@ -389,6 +534,33 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     }
 }
 
+static void add_device_to_list(struct ao *ao, uint32_t id, const struct spa_dict *props, void *ctx)
+{
+    struct ao_device_list *list = ctx;
+    const char *name = spa_dict_lookup(props, PW_KEY_NODE_NAME);
+
+    if (!name)
+        return;
+
+    const char *description = spa_dict_lookup(props, PW_KEY_NODE_DESCRIPTION);
+
+    ao_device_list_add(list, ao, &(struct ao_device_desc){name, description});
+}
+
+static void list_devs(struct ao *ao, struct ao_device_list *list)
+{
+    // we are not using hotplug_{,un}init() because the AO core will only call
+    // the hotplug functions of a single AO. That will probably be ao_pulse.
+    if (pipewire_init_boilerplate(ao) < 0)
+        return;
+
+    ao_device_list_add(list, ao, &(struct ao_device_desc){});
+
+    for_each_sink(ao, add_device_to_list, list);
+
+    uninit(ao);
+}
+
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_pipewire = {
@@ -401,6 +573,8 @@ const struct ao_driver audio_out_pipewire = {
     .start       = start,
 
     .control     = control,
+
+    .list_devs = list_devs,
 
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv)
