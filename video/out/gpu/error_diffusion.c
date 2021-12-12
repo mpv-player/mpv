@@ -110,7 +110,7 @@ void pass_error_diffusion(struct gl_shader_cache *sc,
     // Initialize the ring buffer.
     GLSL("for (int i = int(gl_LocalInvocationIndex); i < %d; i += %d) ",
          ring_buffer_size, block_size);
-    GLSL("err_rgb8[i] = 0;\n");
+    GLSL("err_rgb8[i] = 0u;\n");
 
     GLSL("for (int block_id = 0; block_id < %d; ++block_id) {\n", blocks);
 
@@ -170,7 +170,7 @@ void pass_error_diffusion(struct gl_shader_cache *sc,
          "int((err_u32 >> %d) & 255u) - 128,"
          "int( err_u32        & 255u) - 128"
          ") / %d.0;\n", dither_quant, bitshift_r, bitshift_g, uint8_mul);
-    GLSL("err_rgb8[idx] = 0;\n");
+    GLSL("err_rgb8[idx] = 0u;\n");
 
     // Write the dithered pixel.
     GLSL("vec3 dithered = round(pix);\n");
