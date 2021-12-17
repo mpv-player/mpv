@@ -1631,7 +1631,7 @@ endif
 
 # manpages
 manpage = 'DOCS/man/mpv.rst'
-rst2man = find_program('rst2man', required: get_option('manpage-build'))
+rst2man = find_program('rst2man', 'rst2man.py', required: get_option('manpage-build'))
 if rst2man.found()
     features += 'manpage-build'
     mandir = get_option('mandir')
