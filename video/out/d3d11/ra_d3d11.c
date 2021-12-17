@@ -2386,6 +2386,8 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
     if (p->fl >= D3D_FEATURE_LEVEL_11_0) {
         ra->caps |= RA_CAP_COMPUTE | RA_CAP_BUF_RW;
         ra->max_shmem = 32 * 1024;
+        ra->max_compute_group_threads =
+            D3D11_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
     }
 
     if (p->fl >= D3D_FEATURE_LEVEL_11_1) {

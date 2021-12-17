@@ -2698,12 +2698,9 @@ static void pass_dither(struct gl_video *p)
 
             struct image img = image_wrap(p->error_diffusion_tex[0], PLANE_RGB, p->components);
 
-            // Ensure the block size doesn't exceed the minimum defined by the
-            // specification (1024 in desktop GL, 128 in GLES).
-            // TODO: Look up the actual maximum block size for the
-            // implementation using:
-            //     glGetIntegerv(MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &value);
-            int block_size = MPMIN(p->ra->glsl_es ? 128 : 1024, o_h);
+            // Ensure the block size doesn't exceed the maximum of the
+            // implementation.
+            int block_size = MPMIN(p->ra->max_compute_group_threads, o_h);
 
             pass_describe(p, "dither=error-diffusion (kernel=%s, depth=%d)",
                              kernel->name, dst_depth);

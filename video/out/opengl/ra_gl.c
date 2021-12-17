@@ -224,6 +224,8 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     if (ra->caps & RA_CAP_COMPUTE) {
         gl->GetIntegerv(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE, &ival);
         ra->max_shmem = ival;
+        gl->GetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &ival);
+        ra->max_compute_group_threads = ival;
     }
 
     gl->Disable(GL_DITHER);

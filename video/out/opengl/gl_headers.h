@@ -138,6 +138,7 @@ typedef uint64_t GLuint64;
 
 #define GL_COMPUTE_SHADER                 0x91B9
 #define GL_MAX_COMPUTE_SHARED_MEMORY_SIZE 0x8262
+#define GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS 0x90EB
 
 // --- GL 4.3 or GL_ARB_shader_storage_buffer_object
 
