@@ -67,6 +67,7 @@ struct ra *ra_create_pl(const struct pl_gpu *gpu, struct mp_log *log)
     ra->max_texture_wh = gpu->limits.max_tex_2d_dim;
     ra->max_shmem = gpu->limits.max_shmem_size;
     ra->max_pushc_size = gpu->limits.max_pushc_size;
+    ra->max_compute_group_threads = gpu->limits.max_group_threads;
 
     // Set up format wrappers
     for (int i = 0; i < gpu->num_formats; i++) {

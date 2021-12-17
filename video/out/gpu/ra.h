@@ -26,6 +26,10 @@ struct ra {
     // time.
     size_t max_shmem;
 
+    // Maximum number of threads in a compute work group. Set by the RA backend
+    // at init time.
+    size_t max_compute_group_threads;
+
     // Maximum push constant size. Set by the RA backend at init time.
     size_t max_pushc_size;
 
