@@ -33,6 +33,12 @@
 
 extern char **environ;
 
+#ifdef SIGRTMAX
+#define SIGNAL_MAX SIGRTMAX
+#else
+#define SIGNAL_MAX 32
+#endif
+
 #define SAFE_CLOSE(fd) do { if ((fd) >= 0) close((fd)); (fd) = -1; } while (0)
 
 // Async-signal-safe execvpe(). POSIX does not list it as async-signal-safe
@@ -63,6 +69,20 @@ static int as_execvpe(const char *path, const char *file, char *const argv[],
         path += plen + (path[plen] == ':' ? 1 : 0);
     }
     return -1;
+}
+
+// In the child process, resets the signal mask to defaults. Also clears any
+// signal handlers first so nothing funny happens.
+static void reset_signals_child(void)
+{
+    struct sigaction sa = { 0 };
+    sigset_t sigmask;
+    sa.sa_handler = SIG_DFL;
+    sigemptyset(&sigmask);
+
+    for (int nr = 1; nr < SIGNAL_MAX; nr++)
+        sigaction(nr, &sa, NULL);
+    sigprocmask(SIG_SETMASK, &sigmask, NULL);
 }
 
 // Returns 0 on any error, valid PID on success.
@@ -96,6 +116,7 @@ static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
     }
     if (fres == 0) {
         // child
+        reset_signals_child();
 
         for (int n = 0; n < opts->num_fds; n++) {
             if (src_fds[n] == opts->fds[n].fd) {
