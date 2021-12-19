@@ -1040,6 +1040,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SCREENSHOT:
         video_screenshot(vo, data);
         return true;
+
+    case VOCTRL_EXTERNAL_RESIZE:
+        reconfig(vo, NULL);
+        return true;
     }
 
     int events = 0;
