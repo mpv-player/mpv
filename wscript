@@ -680,14 +680,14 @@ video_output_features = [
         'desc': 'libshaderc SPIR-V compiler (shared library)',
         'deps': '!static-build',
         'groups': ['shaderc'],
-        'func': check_cc(header_name='shaderc/shaderc.h', lib='shaderc_shared'),
+        'func': check_pkg_config('shaderc'),
     }, {
         'name': 'shaderc-static',
         'desc': 'libshaderc SPIR-V compiler (static library)',
         'deps': '!shaderc-shared',
         'groups': ['shaderc'],
-        'func': check_cc(header_name='shaderc/shaderc.h',
-                         lib=['shaderc_combined', 'stdc++']),
+        'func': any_check(check_pkg_config('shaderc_combined'),
+                          check_pkg_config('shaderc_static')),
     }, {
         'name': '--shaderc',
         'desc': 'libshaderc SPIR-V compiler',
