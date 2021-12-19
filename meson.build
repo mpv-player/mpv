@@ -997,7 +997,7 @@ if sdl2_video.allowed()
     sources += files('video/out/vo_sdl.c')
 endif
 
-shaderc = dependency('shaderc', 'shaderc_static', required: get_option('shaderc'))
+shaderc = dependency('shaderc', required: get_option('shaderc'))
 if shaderc.found()
     dependencies += shaderc
     features += shaderc.name()
