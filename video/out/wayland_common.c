@@ -649,9 +649,6 @@ static void output_handle_done(void* data, struct wl_output *wl_output)
         set_surface_scaling(wl);
         spawn_cursor(wl);
         set_geometry(wl);
-        wl->window_size = wl->vdparams;
-        if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
-            wl->geometry = wl->window_size;
         wl->pending_vo_events |= VO_EVENT_DPI;
         wl->pending_vo_events |= VO_EVENT_RESIZE;
     }
@@ -707,12 +704,8 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
 
     if (!mp_rect_equals(&old_output_geometry, &wl->current_output->geometry)) {
         set_geometry(wl);
-        wl->window_size = wl->vdparams;
         force_resize = true;
     }
-
-    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
-        wl->geometry = wl->window_size;
 
     if (!mp_rect_equals(&old_geometry, &wl->geometry) || force_resize)
         wl->pending_vo_events |= VO_EVENT_RESIZE;
