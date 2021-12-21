@@ -1427,7 +1427,7 @@ vaapi = {
     'deps': dependency('libva', version: '>= 1.1.0', required: get_option('vaapi')),
 }
 vaapi += {'use': vaapi['deps'].found() and libdl.found() and
-          (x11['use'] or wayland['use'] or egl_drm['use'])}
+          (x11['use'] or wayland['use'] or egl_drm.allowed())}
 if vaapi['use']
     dependencies += vaapi['deps']
     features += vaapi['name']
