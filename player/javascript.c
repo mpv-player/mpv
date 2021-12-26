@@ -610,9 +610,9 @@ static void script__request_event(js_State *J)
     const char *event = js_tostring(J, 1);
     bool enable = js_toboolean(J, 2);
 
-    const char *name;
-    for (int n = 0; n < 256 && (name = mpv_event_name(n)); n++) {
-        if (strcmp(name, event) == 0) {
+    for (int n = 0; n < 256; n++) {
+        const char *name = mpv_event_name(n);
+        if (name && strcmp(name, event) == 0) {
             push_status(J, mpv_request_event(jclient(J), n, enable));
             return;
         }
