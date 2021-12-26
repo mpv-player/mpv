@@ -611,6 +611,7 @@ static void script__request_event(js_State *J)
     bool enable = js_toboolean(J, 2);
 
     for (int n = 0; n < 256; n++) {
+        // some n's may be missing ("holes"), returning NULL
         const char *name = mpv_event_name(n);
         if (name && strcmp(name, event) == 0) {
             push_status(J, mpv_request_event(jclient(J), n, enable));
