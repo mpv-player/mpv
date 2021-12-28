@@ -635,7 +635,7 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
     if (opts->target_trc)
         target->color.transfer = mp_trc_to_pl(opts->target_trc);
     if (opts->target_peak)
-        target->color.sig_peak = opts->target_peak;
+        target->color.sig_peak = opts->target_peak / PL_COLOR_SDR_WHITE;
     if (opts->dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
         tbits->color_depth += opts->dither_depth - tbits->sample_depth;
