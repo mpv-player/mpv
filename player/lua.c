@@ -874,8 +874,10 @@ static void pushnode(lua_State *L, mpv_node *node)
         break;
     case MPV_FORMAT_NODE_ARRAY:
         lua_newtable(L); // table
-        lua_getfield(L, LUA_REGISTRYINDEX, "ARRAY"); // table mt
-        lua_setmetatable(L, -2); // table
+        if (node->u.list->num) {
+            lua_getfield(L, LUA_REGISTRYINDEX, "ARRAY"); // table mt
+            lua_setmetatable(L, -2); // table
+        }
         for (int n = 0; n < node->u.list->num; n++) {
             pushnode(L, &node->u.list->values[n]); // table value
             lua_rawseti(L, -2, n + 1); // table
@@ -883,8 +885,10 @@ static void pushnode(lua_State *L, mpv_node *node)
         break;
     case MPV_FORMAT_NODE_MAP:
         lua_newtable(L); // table
-        lua_getfield(L, LUA_REGISTRYINDEX, "MAP"); // table mt
-        lua_setmetatable(L, -2); // table
+        if (node->u.list->num) {
+            lua_getfield(L, LUA_REGISTRYINDEX, "MAP"); // table mt
+            lua_setmetatable(L, -2); // table
+        }
         for (int n = 0; n < node->u.list->num; n++) {
             lua_pushstring(L, node->u.list->keys[n]); // table key
             pushnode(L, &node->u.list->values[n]); // table key value
