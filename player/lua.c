@@ -694,47 +694,36 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
     case LUA_TTABLE: {
         // Lua uses the same type for arrays and maps, so guess the correct one.
         int format = MPV_FORMAT_NONE;
-        if (lua_getmetatable(L, t)) { // mt
-            lua_getfield(L, -1, "type"); // mt val
-            if (lua_type(L, -1) == LUA_TSTRING) {
-                const char *type = lua_tostring(L, -1);
-                if (strcmp(type, "MAP") == 0) {
-                    format = MPV_FORMAT_NODE_MAP;
-                } else if (strcmp(type, "ARRAY") == 0) {
-                    format = MPV_FORMAT_NODE_ARRAY;
-                }
+
+        // If all keys are integers, and they're in sequence, take it
+        // as an array.
+        int count = 0;
+        for (int n = 1; ; n++) {
+            lua_pushinteger(L, n); // n
+            lua_gettable(L, t); // t[n]
+            bool empty = lua_isnil(L, -1); // t[n]
+            lua_pop(L, 1); // -
+            if (empty) {
+                count = n - 1;
+                break;
             }
-            lua_pop(L, 2);
         }
-        if (format == MPV_FORMAT_NONE) {
-            // If all keys are integers, and they're in sequence, take it
-            // as an array.
-            int count = 0;
-            for (int n = 1; ; n++) {
-                lua_pushinteger(L, n); // n
-                lua_gettable(L, t); // t[n]
-                bool empty = lua_isnil(L, -1); // t[n]
+        if (count > 0)
+            format = MPV_FORMAT_NODE_ARRAY;
+        lua_pushnil(L); // nil
+        while (lua_next(L, t) != 0) { // key value
+            count--;
+            lua_pop(L, 1); // key
+            if (count < 0) {
                 lua_pop(L, 1); // -
-                if (empty) {
-                    count = n - 1;
-                    break;
-                }
-            }
-            if (count > 0)
-                format = MPV_FORMAT_NODE_ARRAY;
-            lua_pushnil(L); // nil
-            while (lua_next(L, t) != 0) { // key value
-                count--;
-                lua_pop(L, 1); // key
-                if (count < 0) {
-                    lua_pop(L, 1); // -
-                    format = MPV_FORMAT_NODE_MAP;
-                    break;
-                }
+                format = MPV_FORMAT_NODE_MAP;
+                break;
             }
         }
+
         if (format == MPV_FORMAT_NONE)
             format = MPV_FORMAT_NODE_ARRAY; // probably empty table; assume array
+
         mpv_node_list *list = talloc_zero(tmp, mpv_node_list);
         dst->format = format;
         dst->u.list = list;
@@ -874,8 +863,6 @@ static void pushnode(lua_State *L, mpv_node *node)
         break;
     case MPV_FORMAT_NODE_ARRAY:
         lua_newtable(L); // table
-        lua_getfield(L, LUA_REGISTRYINDEX, "ARRAY"); // table mt
-        lua_setmetatable(L, -2); // table
         for (int n = 0; n < node->u.list->num; n++) {
             pushnode(L, &node->u.list->values[n]); // table value
             lua_rawseti(L, -2, n + 1); // table
@@ -883,8 +870,6 @@ static void pushnode(lua_State *L, mpv_node *node)
         break;
     case MPV_FORMAT_NODE_MAP:
         lua_newtable(L); // table
-        lua_getfield(L, LUA_REGISTRYINDEX, "MAP"); // table mt
-        lua_setmetatable(L, -2); // table
         for (int n = 0; n < node->u.list->num; n++) {
             lua_pushstring(L, node->u.list->keys[n]); // table key
             pushnode(L, &node->u.list->values[n]); // table key value
