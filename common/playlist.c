@@ -65,6 +65,7 @@ void playlist_add(struct playlist *pl, struct playlist_entry *add)
     assert(add->filename);
     MP_TARRAY_APPEND(pl, pl->entries, pl->num_entries, add);
     add->pl = pl;
+    add->real_pl = pl;
     add->pl_index = pl->num_entries - 1;
     add->id = ++pl->id_alloc;
     talloc_steal(pl, add);
@@ -329,6 +330,7 @@ struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
     if (d && d->playlist) {
         ret = talloc_zero(NULL, struct playlist);
         playlist_transfer_entries(ret, d->playlist);
+        talloc_steal(ret, d->playlist);
         if (d->filetype && strcmp(d->filetype, "hls") == 0) {
             mp_warn(log, "This might be a HLS stream. For correct operation, "
                          "pass it to the player\ndirectly. Don't use --playlist.\n");

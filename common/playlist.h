@@ -30,6 +30,8 @@ struct playlist_entry {
     struct playlist *pl;
     int pl_index;
 
+    struct playlist *real_pl;
+
     uint64_t id;
 
     char *filename;
@@ -75,6 +77,8 @@ struct playlist {
     bool current_was_replaced;
 
     uint64_t id_alloc;
+
+    char *url;
 };
 
 void playlist_entry_add_param(struct playlist_entry *e, bstr name, bstr value);

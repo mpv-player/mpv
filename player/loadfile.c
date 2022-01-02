@@ -960,6 +960,7 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl,
             playlist_add_redirect(pl, mpctx->playlist->current->filename);
         *num_new_entries = pl->num_entries;
         *start_id = playlist_transfer_entries(mpctx->playlist, pl);
+        talloc_steal(mpctx, pl);
         // current entry is replaced
         if (mpctx->playlist->current)
             playlist_remove(mpctx->playlist, mpctx->playlist->current);

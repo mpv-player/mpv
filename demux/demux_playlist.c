@@ -459,6 +459,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->error = false;
     p->s = demuxer->stream;
     p->utf16 = stream_skip_bom(p->s);
+    p->pl->url = talloc_strdup(p->pl, demuxer->stream->url);
     bool ok = fmt->parse(p) >= 0 && !p->error;
     if (p->add_base)
         playlist_add_base_path(p->pl, mp_dirname(demuxer->filename));

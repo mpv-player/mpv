@@ -5185,7 +5185,7 @@ static void cmd_loadlist(void *p)
         struct playlist_entry *first = playlist_entry_from_index(pl, 0);
         int num_entries = pl->num_entries;
         playlist_append_entries(mpctx->playlist, pl);
-        talloc_free(pl);
+        talloc_steal(mpctx, pl);
 
         if (!new)
             new = playlist_get_first(mpctx->playlist);

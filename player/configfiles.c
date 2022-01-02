@@ -369,6 +369,23 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         }
     }
 
+    if (cur->real_pl && cur->real_pl->url) {
+        talloc_free(conffile);
+
+        conffile = mp_get_playback_resume_config_filename(mpctx, cur->real_pl->url);
+        if (!conffile)
+            goto exit;
+
+        file = fopen(conffile, "wb");
+        if (!file)
+            goto exit;
+
+        write_filename(mpctx, file, cur->real_pl->url);
+        fprintf(file, "playlist-resume=%s\n", cur->filename);
+
+        fclose(file);
+    }
+
 exit:
     talloc_free(conffile);
 }
@@ -405,10 +422,16 @@ void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
 
         // Never apply the saved start position to following files
         m_config_backup_opt(mpctx->mconfig, "start");
+        if (mpctx->opts->playlist_resume) {
+            talloc_free(mpctx->opts->playlist_resume);
+            mpctx->opts->playlist_resume = NULL;
+        }
         MP_INFO(mpctx, "Resuming playback. This behavior can "
                "be disabled with --no-resume-playback.\n");
         try_load_config(mpctx, fname, M_SETOPT_PRESERVE_CMDLINE, MSGL_V);
-        unlink(fname);
+        if (!mpctx->opts->playlist_resume) {
+            unlink(fname);
+        }
     }
     talloc_free(fname);
 }
@@ -423,13 +446,28 @@ struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
 {
     if (!mpctx->opts->position_resume)
         return NULL;
-    for (int n = 0; n < playlist->num_entries; n++) {
-        struct playlist_entry *e = playlist->entries[n];
-        char *conf = mp_get_playback_resume_config_filename(mpctx, e->filename);
+    if (playlist->url) {
+        struct playlist_entry *found = NULL;
+        char *conf = mp_get_playback_resume_config_filename(mpctx, playlist->url);
         bool exists = conf && mp_path_exists(conf);
+        if (exists) {
+            mp_load_playback_resume(mpctx, playlist->url);
+            if (mpctx->opts->playlist_resume) {
+                unlink(conf);
+                const char *fname = mpctx->opts->playlist_resume;
+                for (int n = 0; n < playlist->num_entries; n++) {
+                    struct playlist_entry *e = playlist->entries[n];
+                    if (!strcmp(e->filename, fname)) {
+                        found = e;
+                        break;
+                    }
+                }
+            }
+        }
         talloc_free(conf);
-        if (exists)
-            return e;
+        if (found) {
+            return found;
+        }
     }
     return NULL;
 }

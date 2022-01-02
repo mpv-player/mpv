@@ -239,6 +239,7 @@ typedef struct MPOpts {
     int player_idle_mode;
     int consolecontrols;
     int playlist_pos;
+    char *playlist_resume;
     struct m_rel_time play_start;
     struct m_rel_time play_end;
     struct m_rel_time play_length;

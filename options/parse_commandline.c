@@ -203,7 +203,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                     goto err_out;
                 }
                 playlist_transfer_entries(files, pl);
-                talloc_free(pl);
+                talloc_steal(files, pl);
                 continue;
             }
 

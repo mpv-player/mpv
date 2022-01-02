@@ -466,6 +466,8 @@ static const m_option_t mp_opts[] = {
 
     {"frames", OPT_CHOICE(play_frames, {"all", -1}), M_RANGE(0, INT_MAX)},
 
+    {"playlist-resume", OPT_STRING(playlist_resume)},
+
     {"start", OPT_REL_TIME(play_start)},
     {"end", OPT_REL_TIME(play_end)},
     {"length", OPT_REL_TIME(play_length)},
