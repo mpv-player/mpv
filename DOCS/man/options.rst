@@ -6385,6 +6385,24 @@ them.
     it too high will make dark scenes appear unnaturally bright. (``-vo=gpu``
     only)
 
+``--gamut-mapping-mode``
+    Specifies the algorithm used for reducing the gamut of images for the
+    target display, after any tone mapping is done.
+
+    auto
+        Choose the best mode automatically. (Default)
+    clip
+        Hard-clip to the gamut (per-channel).
+    warn
+        Simply highlight out-of-gamut pixels.
+    desaturate
+        Chromatically desaturate out-of-gamut colors towards white.
+    darken
+        Linearly darken the entire image, then clip to the color volume. Unlike
+        ``clip``, this does not destroy detail in saturated regions, but comes
+        at the cost of sometimes significantly lowering output brightness.
+        (``--vo=gpu-next`` only)
+
 ``--hdr-compute-peak=<auto|yes|no>``
     Compute the HDR peak and frame average brightness per-frame instead of
     relying on tagged metadata. These values are averaged over local regions as
@@ -6447,25 +6465,6 @@ them.
     controls how bright a color needs to be in order to start being
     desaturated. The default of 1.5 provides a reasonable balance.  Decreasing
     this exponent makes the curve more aggressive.
-
-``--gamut-warning``
-    If enabled, mpv will mark all clipped/out-of-gamut pixels that exceed a
-    given threshold (currently hard-coded to 101%). The affected pixels will be
-    inverted to make them stand out. Note: This option applies after the
-    effects of all of mpv's color space transformation / tone mapping options,
-    so it's a good idea to combine this with ``--tone-mapping=clip`` and use
-    ``--target-prim`` to set the gamut to simulate. For example,
-    ``--target-prim=bt.709`` would make mpv highlight all pixels that exceed the
-    gamut of a standard gamut (sRGB) display. This option also does not work
-    well with ICC profiles, since the 3DLUTs are always generated against the
-    source color space and have chromatically-accurate clipping built in.
-
-``--gamut-clipping``
-    If enabled (default: yes), mpv will colorimetrically clip out-of-gamut
-    colors by desaturating them (preserving luma), rather than hard-clipping
-    each component individually. This should make playback of wide gamut
-    content on typical (standard gamut) monitors look much more aesthetically
-    pleasing and less blown-out.
 
 ``--use-embedded-icc-profile``
     Load the embedded ICC profile contained in media files such as PNG images.

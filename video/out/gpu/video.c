@@ -331,7 +331,6 @@ static const struct gl_video_opts gl_video_opts_def = {
         .scene_threshold_high = 10.0,
         .desat = 0.75,
         .desat_exp = 1.5,
-        .gamut_clipping = 1,
     },
     .early_flush = -1,
     .hwdec_interop = "auto",
@@ -398,8 +397,12 @@ const struct m_sub_options gl_video_conf = {
         {"tone-mapping-desaturate", OPT_FLOAT(tone_map.desat)},
         {"tone-mapping-desaturate-exponent", OPT_FLOAT(tone_map.desat_exp),
             M_RANGE(0.0, 20.0)},
-        {"gamut-warning", OPT_FLAG(tone_map.gamut_warning)},
-        {"gamut-clipping", OPT_FLAG(tone_map.gamut_clipping)},
+        {"gamut-mapping-mode", OPT_CHOICE(tone_map.gamut_mode,
+            {"auto",        GAMUT_AUTO},
+            {"clip",        GAMUT_CLIP},
+            {"warn",        GAMUT_WARN},
+            {"desaturate",  GAMUT_DESATURATE},
+            {"darken",      GAMUT_DARKEN})},
         {"hdr-compute-peak", OPT_CHOICE(tone_map.compute_peak,
             {"auto", 0},
             {"yes", 1},
@@ -474,6 +477,8 @@ const struct m_sub_options gl_video_conf = {
         {"opengl-gamma", OPT_REPLACED("gamma-factor")},
         {"linear-scaling", OPT_REMOVED("Split into --linear-upscaling and "
                                         "--linear-downscaling")},
+        {"gamut-warning", OPT_REMOVED("Replaced by --gamut-mapping-mode=warn")},
+        {"gamut-clipping", OPT_REMOVED("Replaced by --gamut-mapping-mode=desaturate")},
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -2636,6 +2641,18 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     default:
         MP_WARN(p, "Tone mapping curve unsupported by vo_gpu, falling back.\n");
         p->opts.tone_map.curve = TONE_MAPPING_AUTO;
+        break;
+    }
+
+    switch (p->opts.tone_map.gamut_mode) {
+    case GAMUT_AUTO:
+    case GAMUT_WARN:
+    case GAMUT_CLIP:
+    case GAMUT_DESATURATE:
+        break;
+    default:
+        MP_WARN(p, "Gamut mapping mode unsupported by vo_gpu, falling back.\n");
+        p->opts.tone_map.gamut_mode = GAMUT_AUTO;
         break;
     }
 

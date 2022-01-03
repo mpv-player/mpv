@@ -882,7 +882,7 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
         gl_sc_uniform_mat3(sc, "cms_matrix", true, &m[0][0]);
         GLSL(color.rgb = cms_matrix * color.rgb;)
 
-        if (opts->gamut_clipping) {
+        if (!opts->gamut_mode || opts->gamut_mode == GAMUT_DESATURATE) {
             GLSL(float cmin = min(min(color.r, color.g), color.b);)
             GLSL(if (cmin < 0.0) {
                      float luma = dot(dst_luma, color.rgb);
@@ -907,8 +907,8 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
 
     GLSLF("color.rgb *= vec3(%f);\n", 1.0 / dst_range);
 
-    // Warn for remaining out-of-gamut colors is enabled
-    if (opts->gamut_warning) {
+    // Warn for remaining out-of-gamut colors if enabled
+    if (opts->gamut_mode == GAMUT_WARN) {
         GLSL(if (any(greaterThan(color.rgb, vec3(1.005))) ||
                  any(lessThan(color.rgb, vec3(-0.005)))))
             GLSL(color.rgb = vec3(1.0) - color.rgb;) // invert

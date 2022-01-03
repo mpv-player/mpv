@@ -1399,6 +1399,13 @@ static void update_render_options(struct priv *p)
         [TONE_MAPPING_BT_2446A] = &pl_tone_map_bt2446a,
     };
 
+    static const enum pl_gamut_mode gamut_modes[] = {
+        [GAMUT_CLIP]            = PL_GAMUT_CLIP,
+        [GAMUT_WARN]            = PL_GAMUT_WARN,
+        [GAMUT_DESATURATE]      = PL_GAMUT_DESATURATE,
+        [GAMUT_DARKEN]          = PL_GAMUT_DARKEN,
+    };
+
     p->color_map = pl_color_map_default_params;
     p->color_map.intent = opts->icc_opts->intent;
     p->color_map.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
@@ -1407,11 +1414,8 @@ static void update_render_options(struct priv *p)
     p->color_map.tone_mapping_crosstalk = opts->tone_map.crosstalk;
     if (isnan(p->color_map.tone_mapping_param)) // vo_gpu compatibility
         p->color_map.tone_mapping_param = 0.0;
-    if (opts->tone_map.gamut_clipping) {
-        p->color_map.gamut_mode = PL_GAMUT_DESATURATE;
-    } else if (opts->tone_map.gamut_warning) {
-        p->color_map.gamut_mode = PL_GAMUT_WARN;
-    }
+    if (opts->tone_map.gamut_mode != GAMUT_AUTO)
+        p->color_map.gamut_mode = gamut_modes[opts->tone_map.gamut_mode];
 
     switch (opts->dither_algo) {
     case DITHER_ERROR_DIFFUSION:
