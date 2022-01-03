@@ -910,8 +910,10 @@ if sdl2_audio.allowed()
     sources += files('audio/out/ao_sdl.c')
 endif
 
+ksuser = cc.find_library('ksuser', required: get_option('wasapi'))
 wasapi = cc.has_header_symbol('audioclient.h', 'IAudioClient', required: get_option('wasapi'))
-if wasapi
+if ksuser.found() and wasapi
+    dependencies += ksuser
     features += 'wasapi'
     sources += files('audio/out/ao_wasapi.c',
                      'audio/out/ao_wasapi_changenotify.c',
