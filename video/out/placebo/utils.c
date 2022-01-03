@@ -107,20 +107,6 @@ enum pl_color_transfer mp_trc_to_pl(enum mp_csp_trc trc)
     MP_ASSERT_UNREACHABLE();
 }
 
-enum pl_color_light mp_light_to_pl(enum mp_csp_light light)
-{
-    switch (light) {
-    case MP_CSP_LIGHT_AUTO:         return PL_COLOR_LIGHT_UNKNOWN;
-    case MP_CSP_LIGHT_DISPLAY:      return PL_COLOR_LIGHT_DISPLAY;
-    case MP_CSP_LIGHT_SCENE_HLG:    return PL_COLOR_LIGHT_SCENE_HLG;
-    case MP_CSP_LIGHT_SCENE_709_1886: return PL_COLOR_LIGHT_SCENE_709_1886;
-    case MP_CSP_LIGHT_SCENE_1_2:    return PL_COLOR_LIGHT_SCENE_1_2;
-    case MP_CSP_LIGHT_COUNT:        return PL_COLOR_LIGHT_COUNT;
-    }
-
-    MP_ASSERT_UNREACHABLE();
-}
-
 enum pl_color_system mp_csp_to_pl(enum mp_csp csp)
 {
     switch (csp) {
