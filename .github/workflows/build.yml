@@ -195,3 +195,61 @@ jobs:
             pip3 install --no-input meson ninja
         run: |
           ./ci/build-freebsd.sh
+
+  msys2:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - { sys: mingw64, env: x86_64, cc: gcc, cxx: g++ }
+          - { sys: mingw32, env: i686, cc: gcc, cxx: g++ }
+          - { sys: ucrt64,  env: ucrt-x86_64, cc: gcc, cxx: g++}
+          - { sys: clang64, env: clang-x86_64, cc: clang, cxx: clang++}
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      CC: ${{matrix.cc}}.exe
+      CXX: ${{matrix.cxx}}.exe
+      CHECK_C_COMPILER: ${{matrix.cc}}
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys}}
+          update: true
+          install: >-
+            git
+            python
+            python-pip
+            mingw-w64-${{matrix.env}}-toolchain
+            mingw-w64-${{matrix.env}}-meson
+            mingw-w64-${{matrix.env}}-ffmpeg
+            mingw-w64-${{matrix.env}}-zlib
+            mingw-w64-${{matrix.env}}-lcms2
+            mingw-w64-${{matrix.env}}-libass
+            mingw-w64-${{matrix.env}}-libiconv
+            mingw-w64-${{matrix.env}}-luajit
+            mingw-w64-${{matrix.env}}-SDL2
+            mingw-w64-${{matrix.env}}-shaderc
+            mingw-w64-${{matrix.env}}-spirv-cross
+            mingw-w64-${{matrix.env}}-spirv-headers
+            mingw-w64-${{matrix.env}}-spirv-tools
+            mingw-w64-${{matrix.env}}-vulkan-headers
+            mingw-w64-${{matrix.env}}-vulkan
+      - uses: actions/checkout@v2
+      - name: Bootstrap waf
+        run: ./bootstrap.py
+      - name: Build with meson
+        run: |
+          ./ci/build-msys2.sh meson
+      - name: Print meson log
+        if: ${{ failure() }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+      - name: Build with waf
+        run: |
+          ./ci/build-msys2.sh waf
+      - name: Print waf log
+        if: ${{ failure() }}
+        run: |
+          cat ./build/config.log
