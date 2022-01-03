@@ -100,6 +100,14 @@ enum tone_mapping {
     TONE_MAPPING_BT_2446A,
 };
 
+enum gamut_mode {
+    GAMUT_AUTO,
+    GAMUT_CLIP,
+    GAMUT_WARN,
+    GAMUT_DESATURATE,
+    GAMUT_DARKEN,
+};
+
 struct gl_tone_map_opts {
     int curve;
     float curve_param;
@@ -112,8 +120,7 @@ struct gl_tone_map_opts {
     float scene_threshold_high;
     float desat;
     float desat_exp;
-    int gamut_warning; // bool
-    int gamut_clipping; // bool
+    int gamut_mode;
 };
 
 struct gl_video_opts {
