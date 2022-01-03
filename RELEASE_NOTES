@@ -1,3 +1,23 @@
+Release 0.34.1
+==============
+
+Bug fix release for the 0.34 branch.
+
+Fixes and Minor Enhancements
+----------------------------
+
+- player: fix autofit/geometry related segfault
+- ao_oss: add missing PATH_DEV_MIXER define
+- egl_helpers: fix context creation if GLES 3 is not available
+- audio: stop corrupting audio on underreads
+- wayland: fix a potential segfault on surface enter
+- vo_gpu: opengl: fix wrong glMemoryBarrier call
+- vo_gpu: opengl: create context at version 4.4 again
+- af_lavcac3enc: fix memory leak on no-op
+- subprocess: unblock/reset signals before running child process
+- wayland: avoid doing unneccesary window resizes
+
+
 Release 0.34.0
 ==============
 
@@ -140,7 +160,7 @@ This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log v0.33.0..v0.34.0`
+A complete changelog can be seen by running `git log v0.33.0..v0.34.1`
 in the git repository or by visiting either
-https://github.com/mpv-player/mpv/compare/v0.33.0...v0.34.0 or
-https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.33.0..v0.34.0
+https://github.com/mpv-player/mpv/compare/v0.33.0...v0.34.1 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.33.0..v0.34.1
