@@ -322,9 +322,10 @@ static const struct gl_video_opts gl_video_opts_def = {
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
     .tone_map = {
-        .curve = TONE_MAPPING_BT_2390,
+        .curve = TONE_MAPPING_AUTO,
         .curve_param = NAN,
         .max_boost = 1.0,
+        .crosstalk = 0.04,
         .decay_rate = 100.0,
         .scene_threshold_low = 5.5,
         .scene_threshold_high = 10.0,
@@ -378,13 +379,27 @@ const struct m_sub_options gl_video_conf = {
         {"target-peak", OPT_CHOICE(target_peak, {"auto", 0}),
             M_RANGE(10, 10000)},
         {"tone-mapping", OPT_CHOICE(tone_map.curve,
+            {"auto",     TONE_MAPPING_AUTO},
             {"clip",     TONE_MAPPING_CLIP},
             {"mobius",   TONE_MAPPING_MOBIUS},
             {"reinhard", TONE_MAPPING_REINHARD},
             {"hable",    TONE_MAPPING_HABLE},
             {"gamma",    TONE_MAPPING_GAMMA},
             {"linear",   TONE_MAPPING_LINEAR},
-            {"bt.2390",  TONE_MAPPING_BT_2390})},
+            {"spline",   TONE_MAPPING_SPLINE},
+            {"bt.2390",  TONE_MAPPING_BT_2390},
+            {"bt.2446a", TONE_MAPPING_BT_2446A})},
+        {"tone-mapping-param", OPT_FLOATDEF(tone_map.curve_param)},
+        {"inverse-tone-mapping", OPT_FLAG(tone_map.inverse)},
+        {"tone-mapping-crosstalk", OPT_FLOAT(tone_map.crosstalk),
+            M_RANGE(0.0, 0.3)},
+        {"tone-mapping-max-boost", OPT_FLOAT(tone_map.max_boost),
+            M_RANGE(1.0, 10.0)},
+        {"tone-mapping-desaturate", OPT_FLOAT(tone_map.desat)},
+        {"tone-mapping-desaturate-exponent", OPT_FLOAT(tone_map.desat_exp),
+            M_RANGE(0.0, 20.0)},
+        {"gamut-warning", OPT_FLAG(tone_map.gamut_warning)},
+        {"gamut-clipping", OPT_FLAG(tone_map.gamut_clipping)},
         {"hdr-compute-peak", OPT_CHOICE(tone_map.compute_peak,
             {"auto", 0},
             {"yes", 1},
@@ -395,14 +410,6 @@ const struct m_sub_options gl_video_conf = {
             M_RANGE(0, 20.0)},
         {"hdr-scene-threshold-high", OPT_FLOAT(tone_map.scene_threshold_high),
             M_RANGE(0, 20.0)},
-        {"tone-mapping-param", OPT_FLOATDEF(tone_map.curve_param)},
-        {"tone-mapping-max-boost", OPT_FLOAT(tone_map.max_boost),
-            M_RANGE(1.0, 10.0)},
-        {"tone-mapping-desaturate", OPT_FLOAT(tone_map.desat)},
-        {"tone-mapping-desaturate-exponent", OPT_FLOAT(tone_map.desat_exp),
-            M_RANGE(0.0, 20.0)},
-        {"gamut-warning", OPT_FLAG(tone_map.gamut_warning)},
-        {"gamut-clipping", OPT_FLAG(tone_map.gamut_clipping)},
         {"opengl-pbo", OPT_FLAG(pbo)},
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
@@ -2614,6 +2621,23 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
         dst.sig_peak = mp_trc_nom_peak(dst.gamma);
     if (!src.sig_peak)
         src.sig_peak = mp_trc_nom_peak(src.gamma);
+
+    // Whitelist supported modes
+    switch (p->opts.tone_map.curve) {
+    case TONE_MAPPING_AUTO:
+    case TONE_MAPPING_CLIP:
+    case TONE_MAPPING_MOBIUS:
+    case TONE_MAPPING_REINHARD:
+    case TONE_MAPPING_HABLE:
+    case TONE_MAPPING_GAMMA:
+    case TONE_MAPPING_LINEAR:
+    case TONE_MAPPING_BT_2390:
+        break;
+    default:
+        MP_WARN(p, "Tone mapping curve unsupported by vo_gpu, falling back.\n");
+        p->opts.tone_map.curve = TONE_MAPPING_AUTO;
+        break;
+    }
 
     struct gl_tone_map_opts tone_map = p->opts.tone_map;
     bool detect_peak = tone_map.compute_peak >= 0 && mp_trc_is_hdr(src.gamma)

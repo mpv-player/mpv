@@ -88,19 +88,24 @@ enum blend_subs_mode {
 };
 
 enum tone_mapping {
+    TONE_MAPPING_AUTO,
     TONE_MAPPING_CLIP,
     TONE_MAPPING_MOBIUS,
     TONE_MAPPING_REINHARD,
     TONE_MAPPING_HABLE,
     TONE_MAPPING_GAMMA,
     TONE_MAPPING_LINEAR,
+    TONE_MAPPING_SPLINE,
     TONE_MAPPING_BT_2390,
+    TONE_MAPPING_BT_2446A,
 };
 
 struct gl_tone_map_opts {
     int curve;
     float curve_param;
     float max_boost;
+    int inverse;
+    float crosstalk;
     int compute_peak;
     float decay_rate;
     float scene_threshold_low;
