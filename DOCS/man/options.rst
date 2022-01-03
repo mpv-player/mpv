@@ -6302,6 +6302,8 @@ them.
     reduction (e.g. playing back BT.2020 content on a standard gamut display).
     Valid values are:
 
+    auto
+        Choose the best curve according to internal heuristics. (Default)
     clip
         Hard-clip any out-of-range values. Use this when you care about
         perfect color accuracy for in-range values at the cost of completely
@@ -6327,13 +6329,17 @@ them.
         you should also enable ``--hdr-compute-peak`` for the best results.
     bt.2390
         Perceptual tone mapping curve (EETF) specified in ITU-R Report BT.2390.
-        This is the recommended curve to use for typical HDR-mastered content.
-        (Default)
     gamma
         Fits a logarithmic transfer between the tone curves.
     linear
         Linearly stretches the entire reference gamut to (a linear multiple of)
         the display.
+    spline
+        Perceptually linear single-pivot polynomial. (``--vo=gpu-next`` only)
+    bt.2446a
+        HDR<->SDR mapping specified in ITU-R Report BT.2446, method A. This is
+        the recommended curve for well-mastered content. (``--vo=gpu-next``
+        only)
 
 ``--tone-mapping-param=<value>``
     Set tone mapping parameters. By default, this is set to the special string
@@ -6358,6 +6364,17 @@ them.
         Specifies the exponent of the function. Defaults to 1.8.
     linear
         Specifies the scale factor to use while stretching. Defaults to 1.0.
+    spline
+        Specifies the knee point (in PQ space). Defaults to 0.30.
+
+``--inverse-tone-mapping``
+    If set, allows inverse tone mapping (expanding SDR to HDR). Not supported
+    by all tone mapping curves. Use with caution. (``--vo=gpu-next`` only)
+
+``--tone-mapping-crosstalk=<0.0..0.30>``
+    If nonzero, apply an extra crosstalk matrix before tone mapping. Can help
+    improve the appearance of strongly saturated monochromatic highlights.
+    (Default: 0.04, only affects ``--vo=gpu-next``)
 
 ``--tone-mapping-max-boost=<1.0..10.0>``
     Upper limit for how much the tone mapping algorithm is allowed to boost
@@ -6365,7 +6382,8 @@ them.
     allows no additional brightness boost. A value of 2.0 would allow
     over-exposing by a factor of 2, and so on. Raising this setting can help
     reveal details that would otherwise be hidden in dark scenes, but raising
-    it too high will make dark scenes appear unnaturally bright.
+    it too high will make dark scenes appear unnaturally bright. (``-vo=gpu``
+    only)
 
 ``--hdr-compute-peak=<auto|yes|no>``
     Compute the HDR peak and frame average brightness per-frame instead of
@@ -6413,8 +6431,8 @@ them.
     Apply desaturation for highlights (default: 0.75). The parameter controls
     the strength of the desaturation curve. A value of 0.0 completely disables
     it, while a value of 1.0 means that overly bright colors will tend towards
-    white. (This is not always the case, especially not for highlights that are
-    near primary colors)
+    white. This is not always the case, especially not for highlights that are
+    near primary colors. (``--vo=gpu`` only)
 
     Values in between apply progressively more/less aggressive desaturation.
     This setting helps prevent unnaturally oversaturated colors for

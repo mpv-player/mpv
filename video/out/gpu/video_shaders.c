@@ -692,7 +692,8 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     // This function always operates on an absolute scale, so ignore the
     // dst_peak normalization for it
     float dst_scale = dst_peak;
-    if (opts->curve == TONE_MAPPING_BT_2390)
+    enum tone_mapping curve = opts->curve ? opts->curve : TONE_MAPPING_BT_2390;
+    if (curve == TONE_MAPPING_BT_2390)
         dst_scale = 1.0;
 
     // Rescale the variables in order to bring it into a representation where
@@ -709,7 +710,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     GLSL(sig_peak *= slope;)
 
     float param = opts->curve_param;
-    switch (opts->curve) {
+    switch (curve) {
     case TONE_MAPPING_CLIP:
         GLSLF("sig = min(%f * sig, 1.0);\n", isnan(param) ? 1.0 : param);
         break;

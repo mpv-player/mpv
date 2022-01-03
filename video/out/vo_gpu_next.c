@@ -1396,27 +1396,32 @@ static void update_render_options(struct priv *p)
     p->peak_detect.scene_threshold_low = opts->tone_map.scene_threshold_low;
     p->peak_detect.scene_threshold_high = opts->tone_map.scene_threshold_high;
 
-    static const enum pl_tone_mapping_algorithm tone_map_algos[] = {
-        [TONE_MAPPING_CLIP]     = PL_TONE_MAPPING_CLIP,
-        [TONE_MAPPING_MOBIUS]   = PL_TONE_MAPPING_MOBIUS,
-        [TONE_MAPPING_REINHARD] = PL_TONE_MAPPING_REINHARD,
-        [TONE_MAPPING_HABLE]    = PL_TONE_MAPPING_HABLE,
-        [TONE_MAPPING_GAMMA]    = PL_TONE_MAPPING_GAMMA,
-        [TONE_MAPPING_LINEAR]   = PL_TONE_MAPPING_LINEAR,
-        [TONE_MAPPING_BT_2390]  = PL_TONE_MAPPING_BT_2390,
+    static const struct pl_tone_map_function * const tone_map_funs[] = {
+        [TONE_MAPPING_AUTO]     = &pl_tone_map_auto,
+        [TONE_MAPPING_CLIP]     = &pl_tone_map_clip,
+        [TONE_MAPPING_MOBIUS]   = &pl_tone_map_mobius,
+        [TONE_MAPPING_REINHARD] = &pl_tone_map_reinhard,
+        [TONE_MAPPING_HABLE]    = &pl_tone_map_hable,
+        [TONE_MAPPING_GAMMA]    = &pl_tone_map_gamma,
+        [TONE_MAPPING_LINEAR]   = &pl_tone_map_linear,
+        [TONE_MAPPING_SPLINE]   = &pl_tone_map_spline,
+        [TONE_MAPPING_BT_2390]  = &pl_tone_map_bt2390,
+        [TONE_MAPPING_BT_2446A] = &pl_tone_map_bt2446a,
     };
 
     p->color_map = pl_color_map_default_params;
     p->color_map.intent = opts->icc_opts->intent;
-    p->color_map.tone_mapping_algo = tone_map_algos[opts->tone_map.curve];
+    p->color_map.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
     p->color_map.tone_mapping_param = opts->tone_map.curve_param;
+    p->color_map.inverse_tone_mapping = opts->tone_map.inverse;
+    p->color_map.tone_mapping_crosstalk = opts->tone_map.crosstalk;
     if (isnan(p->color_map.tone_mapping_param)) // vo_gpu compatibility
         p->color_map.tone_mapping_param = 0.0;
-    p->color_map.desaturation_strength = opts->tone_map.desat;
-    p->color_map.desaturation_exponent = opts->tone_map.desat_exp;
-    p->color_map.max_boost = opts->tone_map.max_boost;
-    p->color_map.gamut_warning = opts->tone_map.gamut_warning;
-    p->color_map.gamut_clipping = opts->tone_map.gamut_clipping;
+    if (opts->tone_map.gamut_clipping) {
+        p->color_map.gamut_mode = PL_GAMUT_DESATURATE;
+    } else if (opts->tone_map.gamut_warning) {
+        p->color_map.gamut_mode = PL_GAMUT_WARN;
+    }
 
     switch (opts->dither_algo) {
     case DITHER_ERROR_DIFFUSION:
