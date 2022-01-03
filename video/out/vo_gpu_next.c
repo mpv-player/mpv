@@ -392,6 +392,49 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
+static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
+{
+    struct pl_color_space csp = {
+        .primaries = mp_prim_to_pl(mpi->params.color.primaries),
+        .transfer = mp_trc_to_pl(mpi->params.color.gamma),
+        .hdr.max_luma = mpi->params.color.sig_peak * MP_REF_WHITE,
+    };
+
+    for (int i = 0; i < mpi->num_ff_side_data; i++) {
+        void *data = mpi->ff_side_data[i].buf->data;
+        switch (mpi->ff_side_data[i].type) {
+        case AV_FRAME_DATA_CONTENT_LIGHT_LEVEL: {
+            const AVContentLightMetadata *clm = data;
+            csp.hdr.max_cll = clm->MaxCLL;
+            csp.hdr.max_fall = clm->MaxFALL;
+            break;
+        }
+        case AV_FRAME_DATA_MASTERING_DISPLAY_METADATA: {
+            const AVMasteringDisplayMetadata *mdm = data;
+            if (mdm->has_luminance) {
+                csp.hdr.min_luma = av_q2d(mdm->min_luminance);
+                csp.hdr.max_luma = av_q2d(mdm->max_luminance);
+            }
+
+            if (mdm->has_primaries) {
+                csp.hdr.prim.red.x   = av_q2d(mdm->display_primaries[0][0]);
+                csp.hdr.prim.red.y   = av_q2d(mdm->display_primaries[0][1]);
+                csp.hdr.prim.green.x = av_q2d(mdm->display_primaries[1][0]);
+                csp.hdr.prim.green.y = av_q2d(mdm->display_primaries[1][1]);
+                csp.hdr.prim.blue.x  = av_q2d(mdm->display_primaries[2][0]);
+                csp.hdr.prim.blue.y  = av_q2d(mdm->display_primaries[2][1]);
+                csp.hdr.prim.white.x = av_q2d(mdm->white_point[0]);
+                csp.hdr.prim.white.y = av_q2d(mdm->white_point[1]);
+            }
+            break;
+        }
+        default: break;
+        }
+    }
+
+    return csp;
+}
+
 static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src,
                       struct pl_frame *frame)
 {
@@ -405,12 +448,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     // TODO: implement support for hwdec wrappers
     *frame = (struct pl_frame) {
         .num_planes = mpi->num_planes,
-        .color = {
-            .primaries = mp_prim_to_pl(par->color.primaries),
-            .transfer = mp_trc_to_pl(par->color.gamma),
-            .light = mp_light_to_pl(par->color.light),
-            .sig_peak = par->color.sig_peak,
-        },
+        .color = get_mpi_csp(vo, mpi),
         .repr = {
             .sys = mp_csp_to_pl(par->color.space),
             .levels = mp_levels_to_pl(par->color.levels),
@@ -511,57 +549,6 @@ static void discard_frame(const struct pl_source_frame *src)
     talloc_free(mpi);
 }
 
-static struct pl_swapchain_colors get_csp_hint(struct vo *vo, struct mp_image *mpi)
-{
-    struct priv *p = vo->priv;
-    const struct gl_video_opts *opts = p->opts_cache->opts;
-
-    struct pl_swapchain_colors hint = {
-        .primaries = mp_prim_to_pl(mpi->params.color.primaries),
-        .transfer = mp_trc_to_pl(mpi->params.color.gamma),
-    };
-
-    // Respect target color space overrides
-    if (opts->target_prim)
-        hint.primaries = mp_prim_to_pl(opts->target_prim);
-    if (opts->target_trc)
-        hint.transfer = mp_prim_to_pl(opts->target_trc);
-
-    for (int i = 0; i < mpi->num_ff_side_data; i++) {
-        void *data = mpi->ff_side_data[i].buf->data;
-        switch (mpi->ff_side_data[i].type) {
-        case AV_FRAME_DATA_CONTENT_LIGHT_LEVEL: {
-            const AVContentLightMetadata *clm = data;
-            hint.hdr.max_cll = clm->MaxCLL;
-            hint.hdr.max_fall = clm->MaxFALL;
-            break;
-        }
-        case AV_FRAME_DATA_MASTERING_DISPLAY_METADATA: {
-            const AVMasteringDisplayMetadata *mdm = data;
-            if (mdm->has_luminance) {
-                hint.hdr.min_luma = av_q2d(mdm->min_luminance);
-                hint.hdr.max_luma = av_q2d(mdm->max_luminance);
-            }
-
-            if (mdm->has_primaries) {
-                hint.hdr.prim.red.x   = av_q2d(mdm->display_primaries[0][0]);
-                hint.hdr.prim.red.y   = av_q2d(mdm->display_primaries[0][1]);
-                hint.hdr.prim.green.x = av_q2d(mdm->display_primaries[1][0]);
-                hint.hdr.prim.green.y = av_q2d(mdm->display_primaries[1][1]);
-                hint.hdr.prim.blue.x  = av_q2d(mdm->display_primaries[2][0]);
-                hint.hdr.prim.blue.y  = av_q2d(mdm->display_primaries[2][1]);
-                hint.hdr.prim.white.x = av_q2d(mdm->white_point[0]);
-                hint.hdr.prim.white.y = av_q2d(mdm->white_point[1]);
-            }
-            break;
-        }
-        default: break;
-        }
-    }
-
-    return hint;
-}
-
 static void info_callback(void *priv, const struct pl_render_info *info)
 {
     struct vo *vo = priv;
@@ -635,7 +622,7 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
     if (opts->target_trc)
         target->color.transfer = mp_trc_to_pl(opts->target_trc);
     if (opts->target_peak)
-        target->color.sig_peak = opts->target_peak / PL_COLOR_SDR_WHITE;
+        target->color.hdr.max_luma = opts->target_peak;
     if (opts->dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
         tbits->color_depth += opts->dither_depth - tbits->sample_depth;
@@ -703,18 +690,21 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         p->last_id = id;
     }
 
+    const struct gl_video_opts *opts = p->opts_cache->opts;
     if (p->target_hint && frame->current) {
-        struct pl_swapchain_colors hint = get_csp_hint(vo, frame->current);
+        struct pl_color_space hint = get_mpi_csp(vo, frame->current);
+        if (opts->target_prim)
+            hint.primaries = mp_prim_to_pl(opts->target_prim);
+        if (opts->target_trc)
+            hint.transfer = mp_prim_to_pl(opts->target_trc);
         pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!p->target_hint) {
         pl_swapchain_colorspace_hint(p->sw, NULL);
     }
 
-    const struct gl_video_opts *opts = p->opts_cache->opts;
-    double vsync_offset = opts->interpolation ? frame->vsync_offset : 0;
-
     struct pl_swapchain_frame swframe;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
+    double vsync_offset = opts->interpolation ? frame->vsync_offset : 0;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         // Advance the queue state to the current PTS to discard unused frames
