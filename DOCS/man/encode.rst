@@ -119,5 +119,5 @@ You can encode files from one format/codec to another using this facility.
     .. admonition:: Example
 
         "``--oremove-metadata=comment,genre``"
-            excludes copying of the the comment and genre tags to the output
+            excludes copying of the comment and genre tags to the output
             file.

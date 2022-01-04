@@ -1532,7 +1532,7 @@ Video
     video will be either cut off, or black bars are added.
 
     This value is multiplied with the value derived from ``--video-zoom`` and
-    the normal video aspect aspect ratio. This option is disabled if the
+    the normal video aspect ratio. This option is disabled if the
     ``--no-keepaspect`` option is used.
 
 ``--video-align-x=<-1-1>``, ``--video-align-y=<-1-1>``
@@ -4423,7 +4423,7 @@ Software Scaler
         a and b are the bicubic b and c parameters.
 
 ``--zimg-scaler-chroma=...``
-    Same as ``--zimg-scaler``, for for chroma interpolation (default: bilinear).
+    Same as ``--zimg-scaler``, for chroma interpolation (default: bilinear).
 
 ``--zimg-scaler-chroma-param-a``, ``--zimg-scaler-chroma-param-b``
     Same as ``--zimg-scaler-param-a`` / ``--zimg-scaler-param-b``, for chroma.
@@ -4484,7 +4484,7 @@ It also sets the defaults for the ``lavrresample`` audio filter.
 
 ``--audio-resample-max-output-size=<length>``
     Limit maximum size of audio frames filtered at once, in ms (default: 40).
-    The output size size is limited in order to make resample speed changes
+    The output size is limited in order to make resample speed changes
     react faster. This is necessary especially if decoders or filters output
     very large frame sizes (like some lossless codecs or some DRC filters).
     This option does not affect the resampling algorithm in any way.
@@ -6027,7 +6027,7 @@ them.
 
 ``--macos-geometry-calculation=<visible|whole>``
     This changes the rectangle which is used to calculate the screen position
-    and size of the window (default: visible). ``visible`` takes the the menu
+    and size of the window (default: visible). ``visible`` takes the menu
     bar and Dock into account and the window is only positioned/sized within the
     visible screen frame rectangle, ``whole`` takes the whole screen frame
     rectangle and ignores the menu bar and Dock. Other previous restrictions

@@ -326,7 +326,7 @@ Interface changes
       (such as "sub-file"), deprecated in mpv 0.26.0
     - deprecate the old command based hook API, and introduce a proper C API
       (the high level Lua API for this does not change)
-    - rename the the lua-settings/ config directory to script-opts/
+    - rename the lua-settings/ config directory to script-opts/
     - the way the player waits for scripts getting loaded changes slightly. Now
       scripts are loaded in parallel, and block the player from continuing
       playback only in the player initialization phase. It could change again in

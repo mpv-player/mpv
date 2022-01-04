@@ -57,7 +57,7 @@ struct ra_hwdec_mapper_driver {
     void (*uninit)(struct ra_hwdec_mapper *mapper);
 
     // Map mapper->src as texture, and set mapper->frame to textures using it.
-    // It is expected that that the textures remain valid until the next unmap
+    // It is expected that the textures remain valid until the next unmap
     // or uninit call.
     // The function is allowed to unref mapper->src if it's not needed (i.e.
     // this function creates a copy).

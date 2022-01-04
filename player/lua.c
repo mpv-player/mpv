@@ -345,7 +345,7 @@ static void fuck_lua(lua_State *L, const char *search_path, const char *extra)
     // Unbelievable but true: Lua loads .lua files AND dynamic libraries from
     // the working directory. This is highly security relevant.
     // Lua scripts are still supposed to load globally installed libraries, so
-    // try to get by by filtering out any relative paths.
+    // try to get them by filtering out any relative paths.
     while (path.len) {
         bstr item;
         bstr_split_tok(path, ";", &item, &path);

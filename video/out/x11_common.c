@@ -2068,7 +2068,7 @@ static void set_screensaver(struct vo_x11_state *x11, bool enabled)
         CARD16 state;
         DPMSInfo(mDisplay, &state, &onoff);
         if (!x11->dpms_touched && enabled)
-            return; // enable DPMS only we we disabled it before
+            return; // enable DPMS only if we disabled it before
         if (enabled != !!onoff) {
             MP_VERBOSE(x11, "Setting DMPS: %s.\n", enabled ? "on" : "off");
             if (enabled) {

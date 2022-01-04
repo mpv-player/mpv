@@ -1803,7 +1803,7 @@ MPV_EXPORT int mpv_hook_add(mpv_handle *ctx, uint64_t reply_userdata,
  * Respond to a MPV_EVENT_HOOK event. You must call this after you have handled
  * the event. There is no way to "cancel" or "stop" the hook.
  *
- * Calling this will will typically unblock the player for whatever the hook
+ * Calling this will typically unblock the player for whatever the hook
  * is responsible for (e.g. for the "on_load" hook it lets it continue
  * playback).
  *
