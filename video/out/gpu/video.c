@@ -329,8 +329,6 @@ static const struct gl_video_opts gl_video_opts_def = {
         .decay_rate = 100.0,
         .scene_threshold_low = 5.5,
         .scene_threshold_high = 10.0,
-        .desat = 0.75,
-        .desat_exp = 1.5,
     },
     .early_flush = -1,
     .hwdec_interop = "auto",
@@ -394,9 +392,12 @@ const struct m_sub_options gl_video_conf = {
             M_RANGE(0.0, 0.3)},
         {"tone-mapping-max-boost", OPT_FLOAT(tone_map.max_boost),
             M_RANGE(1.0, 10.0)},
-        {"tone-mapping-desaturate", OPT_FLOAT(tone_map.desat)},
-        {"tone-mapping-desaturate-exponent", OPT_FLOAT(tone_map.desat_exp),
-            M_RANGE(0.0, 20.0)},
+        {"tone-mapping-mode", OPT_CHOICE(tone_map.mode,
+            {"auto",        TONE_MAP_MODE_AUTO},
+            {"rgb",         TONE_MAP_MODE_RGB},
+            {"max",         TONE_MAP_MODE_MAX},
+            {"hybrid",      TONE_MAP_MODE_HYBRID},
+            {"luma",        TONE_MAP_MODE_LUMA})},
         {"gamut-mapping-mode", OPT_CHOICE(tone_map.gamut_mode,
             {"auto",        GAMUT_AUTO},
             {"clip",        GAMUT_CLIP},
@@ -479,6 +480,8 @@ const struct m_sub_options gl_video_conf = {
                                         "--linear-downscaling")},
         {"gamut-warning", OPT_REMOVED("Replaced by --gamut-mapping-mode=warn")},
         {"gamut-clipping", OPT_REMOVED("Replaced by --gamut-mapping-mode=desaturate")},
+        {"tone-mapping-desaturate", OPT_REMOVED("Replaced by --tone-mapping-mode")},
+        {"tone-mapping-desaturate-exponent", OPT_REMOVED("Replaced by --tone-mapping-mode")},
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -2641,6 +2644,18 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     default:
         MP_WARN(p, "Tone mapping curve unsupported by vo_gpu, falling back.\n");
         p->opts.tone_map.curve = TONE_MAPPING_AUTO;
+        break;
+    }
+
+    switch (p->opts.tone_map.mode) {
+    case TONE_MAP_MODE_AUTO:
+    case TONE_MAP_MODE_RGB:
+    case TONE_MAP_MODE_MAX:
+    case TONE_MAP_MODE_HYBRID:
+        break;
+    default:
+        MP_WARN(p, "Tone mapping mode unsupported by vo_gpu, falling back.\n");
+        p->opts.tone_map.mode = TONE_MAP_MODE_AUTO;
         break;
     }
 

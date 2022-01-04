@@ -6385,6 +6385,28 @@ them.
     it too high will make dark scenes appear unnaturally bright. (``-vo=gpu``
     only)
 
+``--tone-mapping-mode``
+    Controls how the tone mapping function is applied to colors.
+
+    auto
+        Choose the best mode automatically. (Default)
+    rgb
+        Tone-map per-channel (RGB). Has a tendency to severely distort colors,
+        desaturate highlights, and is generally not very recommended. However,
+        this is the mode used in many displays and TVs (especially early ones),
+        and so sometimes it's needed to reproduce the artistic intent a film
+        was mastered with.
+    max
+        Tone-map on the brightest component in the video. Has a tendency to
+        lead to weirdly oversaturated colors, and loss of dark details.
+    hybrid
+        A hybrid approach that uses linear tone-mapping for midtones and
+        per-channel tone mapping for highlights.
+    luma
+        Luminance-based method from ITU-R BT.2446a, including fixed gamut
+        reductions to account for brightness-related perceptual nonuniformity.
+        (``--vo=gpu-next`` only)
+
 ``--gamut-mapping-mode``
     Specifies the algorithm used for reducing the gamut of images for the
     target display, after any tone mapping is done.
@@ -6444,27 +6466,6 @@ them.
     exceeds the low threshold, mpv will make the averaging filter more
     aggressive, up to the limit of the high threshold (at which point the
     filter becomes instant).
-
-``--tone-mapping-desaturate=<0.0..1.0>``
-    Apply desaturation for highlights (default: 0.75). The parameter controls
-    the strength of the desaturation curve. A value of 0.0 completely disables
-    it, while a value of 1.0 means that overly bright colors will tend towards
-    white. This is not always the case, especially not for highlights that are
-    near primary colors. (``--vo=gpu`` only)
-
-    Values in between apply progressively more/less aggressive desaturation.
-    This setting helps prevent unnaturally oversaturated colors for
-    super-highlights, by (smoothly) turning them into less saturated (per
-    channel tone mapped) colors instead. This makes images feel more natural,
-    at the cost of chromatic distortions for out-of-range colors. The default
-    value of 0.75 provides a good balance. Setting this to 0.0 preserves the
-    chromatic accuracy of the tone mapping process.
-
-``--tone-mapping-desaturate-exponent=<0.0..20.0>``
-    This setting controls the exponent of the desaturation curve, which
-    controls how bright a color needs to be in order to start being
-    desaturated. The default of 1.5 provides a reasonable balance.  Decreasing
-    this exponent makes the curve more aggressive.
 
 ``--use-embedded-icc-profile``
     Load the embedded ICC profile contained in media files such as PNG images.

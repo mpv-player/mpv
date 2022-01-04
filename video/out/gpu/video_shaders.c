@@ -809,18 +809,24 @@ static void pass_tone_map(struct gl_shader_cache *sc,
         abort();
     }
 
-    GLSL(vec3 sig_lin = color.rgb * (sig[sig_idx] / sig_orig);)
-
-    // Mix between the per-channel tone mapped and the linear tone mapped
-    // signal based on the desaturation strength
-    if (opts->desat > 0) {
-        float base = 0.18 * dst_scale;
-        GLSLF("float coeff = max(sig[sig_idx] - %f, 1e-6) / "
-              "              max(sig[sig_idx], 1.0);\n", base);
-        GLSLF("coeff = %f * pow(coeff, %f);\n", opts->desat, opts->desat_exp);
-        GLSLF("color.rgb = mix(sig_lin, %f * sig, coeff);\n", dst_scale);
-    } else {
-        GLSL(color.rgb = sig_lin;)
+    switch (opts->mode) {
+    case TONE_MAP_MODE_RGB:
+        GLSL(color.rgb = sig;)
+        break;
+    case TONE_MAP_MODE_MAX:
+        GLSL(color.rgb *= sig[sig_idx] / sig_orig;)
+        break;
+    case TONE_MAP_MODE_AUTO:
+    case TONE_MAP_MODE_HYBRID:
+        GLSLF("float coeff = max(sig[sig_idx] - %f, 1e-6) / \n"
+              "              max(sig[sig_idx], 1.0);        \n"
+              "coeff = %f * pow(coeff / %f, %f);            \n"
+              "color.rgb *= sig[sig_idx] / sig_orig;        \n"
+              "color.rgb = mix(color.rgb, %f * sig, coeff); \n",
+              0.18 / dst_scale, 0.90, dst_scale, 0.20, dst_scale);
+        break;
+    default:
+        abort();
     }
 }
 
