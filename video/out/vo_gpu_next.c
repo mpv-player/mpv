@@ -1406,12 +1406,21 @@ static void update_render_options(struct priv *p)
         [GAMUT_DARKEN]          = PL_GAMUT_DARKEN,
     };
 
+    static const enum pl_tone_map_mode tone_map_modes[] = {
+        [TONE_MAP_MODE_AUTO]    = PL_TONE_MAP_AUTO,
+        [TONE_MAP_MODE_RGB]     = PL_TONE_MAP_RGB,
+        [TONE_MAP_MODE_MAX]     = PL_TONE_MAP_MAX,
+        [TONE_MAP_MODE_HYBRID]  = PL_TONE_MAP_HYBRID,
+        [TONE_MAP_MODE_LUMA]    = PL_TONE_MAP_LUMA,
+    };
+
     p->color_map = pl_color_map_default_params;
     p->color_map.intent = opts->icc_opts->intent;
     p->color_map.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
     p->color_map.tone_mapping_param = opts->tone_map.curve_param;
     p->color_map.inverse_tone_mapping = opts->tone_map.inverse;
     p->color_map.tone_mapping_crosstalk = opts->tone_map.crosstalk;
+    p->color_map.tone_mapping_mode = tone_map_modes[opts->tone_map.mode];
     if (isnan(p->color_map.tone_mapping_param)) // vo_gpu compatibility
         p->color_map.tone_mapping_param = 0.0;
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
