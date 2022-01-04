@@ -199,6 +199,9 @@ static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
 
+    if (!out_fbo)
+        return true;
+
     if (!p->backbuffer)
         return false;
 
