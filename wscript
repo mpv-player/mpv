@@ -435,6 +435,10 @@ audio_output_features = [
         'func': check_statement(['sys/soundcard.h'], 'int x = SNDCTL_DSP_SETPLAYVOL'),
         'deps': 'posix && gpl',
     }, {
+        'name': '--pipewire',
+        'desc': 'PipeWire audio output',
+        'func': check_pkg_config('libpipewire-0.3', '>= 0.3.0')
+    }, {
         'name': '--pulse',
         'desc': 'PulseAudio audio output',
         'func': check_pkg_config('libpulse', '>= 1.0')

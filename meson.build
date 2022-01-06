@@ -886,6 +886,13 @@ if oss
     sources += files('audio/out/ao_oss.c')
 endif
 
+pipewire = dependency('libpipewire-0.3', version: '>= 0.3', required: get_option('pipewire'))
+if pipewire.found()
+    dependencies += pipewire
+    features += 'pipewire'
+    sources += files('audio/out/ao_pipewire.c')
+endif
+
 pulse = dependency('libpulse', version: '>= 1.0', required: get_option('pulse'))
 if pulse.found()
     dependencies += pulse
@@ -1760,6 +1767,7 @@ conf_data.set10('HAVE_OPENAL', openal.found())
 conf_data.set10('HAVE_OPENSLES', opensles.found())
 conf_data.set10('HAVE_OSS_AUDIO', oss)
 conf_data.set10('HAVE_OSX_THREAD_NAME', osx_thread_name)
+conf_data.set10('HAVE_PIPEWIRE', pipewire.found())
 conf_data.set10('HAVE_POSIX', posix)
 conf_data.set10('HAVE_PULSE', pulse.found())
 conf_data.set10('HAVE_RPI', rpi['use'])

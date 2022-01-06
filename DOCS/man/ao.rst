@@ -144,6 +144,17 @@ Available audio output drivers are:
         Allow mpv to use PulseAudio even if the sink is suspended (default: no).
         Can be useful if PulseAudio is running as a bridge to jack and mpv has its sink-input set to the one jack is using.
 
+``pipewire``
+    PipeWire audio output driver
+
+    The following global options are supported by this audio output:
+
+    ``--pipewire-buffer=<1-2000|native>``
+        Set the audio buffer size in milliseconds. A higher value buffers
+        more data, and has a lower probability of buffer underruns. A smaller
+        value makes the audio stream react faster, e.g. to playback speed
+        changes.
+
 ``sdl``
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL
     1.2, but may require the ``SDL_AUDIODRIVER`` environment variable to be set
