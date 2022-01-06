@@ -108,6 +108,8 @@ typedef struct mp_image {
     struct AVBufferRef *icc_profile;
     // Closed captions packet, if any (only after decoder)
     struct AVBufferRef *a53_cc;
+    // Dolby Vision metadata, if any
+    struct AVBufferRef *dovi;
     // Other side data we don't care about.
     struct mp_ff_side_data *ff_side_data;
     int num_ff_side_data;
