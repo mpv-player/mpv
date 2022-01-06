@@ -508,6 +508,23 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             pl_chroma_location_offset(chroma, &plane->shift_x, &plane->shift_y);
     }
 
+#ifdef PL_HAVE_LAV_DOLBY_VISION
+    if (mpi->dovi) {
+        const AVDOVIMetadata *metadata = (AVDOVIMetadata *) mpi->dovi->data;
+        struct pl_dovi_metadata *dovi = talloc_ptrtype(mpi, dovi);
+        const AVDOVIColorMetadata *color = av_dovi_get_color(metadata);
+        pl_map_dovi_metadata(dovi, metadata);
+        frame->repr.dovi = dovi;
+        frame->repr.sys = PL_COLOR_SYSTEM_DOLBYVISION;
+        frame->color.primaries = PL_COLOR_PRIM_BT_2020;
+        frame->color.transfer = PL_COLOR_TRC_PQ;
+        frame->color.hdr.min_luma =
+            pl_hdr_rescale(PL_HDR_PQ, PL_HDR_NITS, color->source_min_pq / 4095.0f);
+        frame->color.hdr.max_luma =
+            pl_hdr_rescale(PL_HDR_PQ, PL_HDR_NITS, color->source_max_pq / 4095.0f);
+    }
+#endif
+
     // Compute a unique signature for any attached ICC profile. Wasteful in
     // theory if the ICC profile is the same for multiple frames, but in
     // practice ICC profiles are overwhelmingly going to be attached to
