@@ -350,7 +350,8 @@ static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
         return;
     }
 
-    wl->xkb_keymap = xkb_keymap_new_from_string(wl->xkb_context, map_str,
+    wl->xkb_keymap = xkb_keymap_new_from_buffer(wl->xkb_context, map_str,
+                                                strnlen(map_str, size),
                                                 XKB_KEYMAP_FORMAT_TEXT_V1, 0);
 
     munmap(map_str, size);
