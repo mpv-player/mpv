@@ -22,6 +22,7 @@
 #include <math.h>
 
 #include <libavutil/rational.h>
+#include <libavutil/buffer.h>
 
 #include "common/msg.h"
 #include "common/common.h"
@@ -56,6 +57,7 @@ struct vf_format_opts {
     double dar;
     int convert;
     int force_scaler;
+    int dovi;
 };
 
 static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
@@ -141,13 +143,15 @@ static void vf_format_process(struct mp_filter *f)
 
     if (mp_pin_can_transfer_data(f->ppins[1], priv->conv->f->pins[1])) {
         struct mp_frame frame = mp_pin_out_read(priv->conv->f->pins[1]);
+        struct mp_image *img = frame.data;
 
         if (!priv->opts->convert && frame.type == MP_FRAME_VIDEO) {
-            struct mp_image *img = frame.data;
-
             set_params(priv->opts, &img->params, false);
             mp_image_params_guess_csp(&img->params);
         }
+
+        if (!priv->opts->dovi)
+            av_buffer_unref(&img->dovi);
 
         mp_pin_in_write(f->ppins[1], frame);
     }
@@ -206,6 +210,7 @@ static const m_option_t vf_opts_fields[] = {
     {"dh", OPT_INT(dh)},
     {"dar", OPT_DOUBLE(dar)},
     {"convert", OPT_FLAG(convert)},
+    {"dolbyvision", OPT_FLAG(dovi)},
     {"force-scaler", OPT_CHOICE(force_scaler,
                                 {"auto", MP_SWS_AUTO},
                                 {"sws", MP_SWS_SWS},
@@ -222,6 +227,7 @@ const struct mp_user_filter_entry vf_format = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT){
             .rotate = -1,
+            .dovi = 1,
         },
         .options = vf_opts_fields,
     },
