@@ -36,6 +36,10 @@
 #include <libavutil/display.h>
 #include <libavutil/opt.h>
 
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(56, 43, 100)
+#include <libavutil/dovi_meta.h>
+#endif
+
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
@@ -724,6 +728,15 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             if (!isnan(r))
                 sh->codec->rotate = (((int)(-r) % 360) + 360) % 360;
         }
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(56, 43, 100)
+        if ((sd = av_stream_get_side_data(st, AV_PKT_DATA_DOVI_CONF, NULL))) {
+            const AVDOVIDecoderConfigurationRecord *cfg = (void *) sd;
+            MP_VERBOSE(demuxer, "Found Dolby Vision config record: profile "
+                       "%d level %d\n", cfg->dv_profile, cfg->dv_level);
+            av_format_inject_global_side_data(avfc);
+        }
+#endif
 
         // This also applies to vfw-muxed mkv, but we can't detect these easily.
         sh->codec->avi_dts = matches_avinputformat_name(priv, "avi");
