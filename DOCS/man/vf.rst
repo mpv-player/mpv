@@ -308,6 +308,10 @@ Available mpv-only filters are:
        :709-1886:     Scene-referred using the BT709+BT1886 interaction
        :gamma1.2:     Scene-referred using a pure power OOTF (gamma=1.2)
 
+    ``<dolbyvision=yes|no>``
+        Whether or not to include Dolby Vision metadata (default: yes). If
+        disabled, any Dolby Vision metadata will be stripped from frames.
+
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Use
         ``--vf=format:stereo-in=help`` to list all available modes. Check with
