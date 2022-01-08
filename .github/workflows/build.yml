@@ -126,10 +126,7 @@ jobs:
       - name: Install dependencies
         run: |
           ./bootstrap.py
-          # TODO: switch back to zypper when OpenSuse updates Meson
-          # zypper -n install meson
-          zypper -n install python3-pip
-          pip install --no-input meson ninja
+          zypper -n install meson
 
       - name: Build with meson
         run: |
@@ -166,6 +163,7 @@ jobs:
                 libplacebo \
                 libxkbcommon \
                 luajit \
+                meson \
                 openal-soft \
                 pkgconf \
                 python3 \
@@ -190,8 +188,5 @@ jobs:
                 uchardet \
                 v4l_compat \
                 #
-            # Meson from pkg is too old
-            python3 -m ensurepip
-            pip3 install --no-input meson ninja
         run: |
           ./ci/build-freebsd.sh
