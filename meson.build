@@ -2,7 +2,7 @@ project('mpv',
         'c',
         license: ['GPL2+', 'LGPL2.1+'],
         version: files('./VERSION'),
-        meson_version: '>=0.60.0',
+        meson_version: '>=0.60.3',
         default_options: [
             'buildtype=debugoptimized',
             'b_lundef=false',
@@ -639,15 +639,7 @@ if dvdnav.found() and dvdread.found()
     sources += files('stream/stream_dvdnav.c')
 endif
 
-#TODO: remove this crap one day.
-#Freebsd requires 0.60.2 or up to work without specifying the method.
-#Windows breaks on exactly 0.60.2 (will have to wait for 0.60.3).
-if host_machine.system() == 'freebsd' or host_machine.system() == 'windows'
-    iconv_method = 'system'
-else
-    iconv_method = 'auto'
-endif
-iconv = dependency('iconv', method: iconv_method, required: get_option('iconv'))
+iconv = dependency('iconv', required: get_option('iconv'))
 if iconv.found()
     dependencies += iconv
     features += 'iconv'
