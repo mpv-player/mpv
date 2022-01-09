@@ -47,7 +47,7 @@
 #define AC3_MAX_CHANNELS 6
 #define AC3_MAX_CODED_FRAME_SIZE 3840
 #define AC3_FRAME_SIZE (6  * 256)
-const uint16_t ac3_bitrate_tab[19] = {
+const static uint16_t ac3_bitrate_tab[19] = {
     32, 40, 48, 56, 64, 80, 96, 112, 128,
     160, 192, 224, 256, 320, 384, 448, 512, 576, 640
 };
@@ -306,7 +306,7 @@ static struct mp_filter *af_lavcac3enc_create(struct mp_filter *parent,
     if (mp_set_avopts(f->log, s->lavc_actx, s->opts->avopts) < 0)
         goto error;
 
-    // For this one, we require the decoder to expert lists of all supported
+    // For this one, we require the decoder to export lists of all supported
     // parameters. (Not all decoders do that, but the ones we're interested
     // in do.)
     if (!s->lavc_acodec->sample_fmts ||
@@ -366,6 +366,7 @@ static struct mp_filter *af_lavcac3enc_create(struct mp_filter *parent,
 
 error:
     av_packet_free(&s->lavc_pkt);
+    avcodec_free_context(&s->lavc_actx);
     talloc_free(f);
     return NULL;
 }
