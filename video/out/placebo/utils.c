@@ -90,10 +90,7 @@ enum pl_color_transfer mp_trc_to_pl(enum mp_csp_trc trc)
     case MP_CSP_TRC_SRGB:           return PL_COLOR_TRC_SRGB;
     case MP_CSP_TRC_LINEAR:         return PL_COLOR_TRC_LINEAR;
     case MP_CSP_TRC_GAMMA18:        return PL_COLOR_TRC_GAMMA18;
-    case MP_CSP_TRC_GAMMA20:        return PL_COLOR_TRC_UNKNOWN; // missing
     case MP_CSP_TRC_GAMMA22:        return PL_COLOR_TRC_GAMMA22;
-    case MP_CSP_TRC_GAMMA24:        return PL_COLOR_TRC_UNKNOWN; // missing
-    case MP_CSP_TRC_GAMMA26:        return PL_COLOR_TRC_UNKNOWN; // missing
     case MP_CSP_TRC_GAMMA28:        return PL_COLOR_TRC_GAMMA28;
     case MP_CSP_TRC_PRO_PHOTO:      return PL_COLOR_TRC_PRO_PHOTO;
     case MP_CSP_TRC_PQ:             return PL_COLOR_TRC_PQ;
@@ -102,6 +99,16 @@ enum pl_color_transfer mp_trc_to_pl(enum mp_csp_trc trc)
     case MP_CSP_TRC_S_LOG1:         return PL_COLOR_TRC_S_LOG1;
     case MP_CSP_TRC_S_LOG2:         return PL_COLOR_TRC_S_LOG2;
     case MP_CSP_TRC_COUNT:          return PL_COLOR_TRC_COUNT;
+
+#if PL_API_VER >= 146
+    case MP_CSP_TRC_GAMMA20:        return PL_COLOR_TRC_GAMMA20;
+    case MP_CSP_TRC_GAMMA24:        return PL_COLOR_TRC_GAMMA24;
+    case MP_CSP_TRC_GAMMA26:        return PL_COLOR_TRC_GAMMA26;
+#else
+    case MP_CSP_TRC_GAMMA20:        return PL_COLOR_TRC_UNKNOWN;
+    case MP_CSP_TRC_GAMMA24:        return PL_COLOR_TRC_UNKNOWN;
+    case MP_CSP_TRC_GAMMA26:        return PL_COLOR_TRC_UNKNOWN;
+#endif
     }
 
     MP_ASSERT_UNREACHABLE();
