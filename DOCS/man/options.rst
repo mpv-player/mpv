@@ -2681,12 +2681,6 @@ Subtitles
 ``--sub-border-color=<color>``
     See ``--sub-color``. Color used for the sub font border.
 
-    .. note::
-
-        ignored when ``--sub-back-color`` is
-        specified (or more exactly: when that option is not set to completely
-        transparent).
-
 ``--sub-border-size=<size>``
     Size of the sub font border in scaled pixels (see ``--sub-font-size``
     for details). A value of 0 disables borders.
@@ -2764,6 +2758,12 @@ Subtitles
 
 ``--sub-shadow-color=<color>``
     See ``--sub-color``. Color used for sub text shadow.
+
+    .. note::
+
+        ignored when ``--sub-back-color`` is
+        specified (or more exactly: when that option is not set to completely
+        transparent).
 
 ``--sub-shadow-offset=<size>``
     Displacement of the sub text shadow in scaled pixels (see
