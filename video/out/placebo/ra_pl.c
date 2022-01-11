@@ -5,11 +5,11 @@
 #include "utils.h"
 
 struct ra_pl {
-    const struct pl_gpu *gpu;
+    pl_gpu gpu;
     struct ra_timer_pl *active_timer;
 };
 
-static inline const struct pl_gpu *get_gpu(const struct ra *ra)
+static inline pl_gpu get_gpu(const struct ra *ra)
 {
     struct ra_pl *p = ra->priv;
     return p->gpu;
@@ -17,14 +17,14 @@ static inline const struct pl_gpu *get_gpu(const struct ra *ra)
 
 static struct ra_fns ra_fns_pl;
 
-const struct pl_gpu *ra_pl_get(const struct ra *ra)
+pl_gpu ra_pl_get(const struct ra *ra)
 {
     return ra->fns == &ra_fns_pl ? get_gpu(ra) : NULL;
 }
 
-static struct pl_timer *get_active_timer(const struct ra *ra);
+static pl_timer get_active_timer(const struct ra *ra);
 
-struct ra *ra_create_pl(const struct pl_gpu *gpu, struct mp_log *log)
+struct ra *ra_create_pl(pl_gpu gpu, struct mp_log *log)
 {
     assert(gpu);
 
@@ -60,7 +60,7 @@ struct ra *ra_create_pl(const struct pl_gpu *gpu, struct mp_log *log)
         ra->caps |= RA_CAP_GATHER;
 
     // Semi-hack: assume all textures are blittable if r8 is
-    const struct pl_fmt *r8 = pl_find_named_fmt(gpu, "r8");
+    pl_fmt r8 = pl_find_named_fmt(gpu, "r8");
     if (r8->caps & PL_FMT_CAP_BLITTABLE)
         ra->caps |= RA_CAP_BLIT;
 
@@ -71,7 +71,7 @@ struct ra *ra_create_pl(const struct pl_gpu *gpu, struct mp_log *log)
 
     // Set up format wrappers
     for (int i = 0; i < gpu->num_formats; i++) {
-        const struct pl_fmt *plfmt = gpu->formats[i];
+        pl_fmt plfmt = gpu->formats[i];
         static const enum ra_ctype fmt_type_map[PL_FMT_TYPE_COUNT] = {
             [PL_FMT_UNORM]  = RA_CTYPE_UNORM,
             [PL_FMT_UINT]   = RA_CTYPE_UINT,
@@ -112,7 +112,7 @@ static void destroy_ra_pl(struct ra *ra)
     talloc_free(ra);
 }
 
-static struct ra_format *map_fmt(struct ra *ra, const struct pl_fmt *plfmt)
+static struct ra_format *map_fmt(struct ra *ra, pl_fmt plfmt)
 {
     for (int i = 0; i < ra->num_formats; i++) {
         if (ra->formats[i]->priv == plfmt)
@@ -123,8 +123,7 @@ static struct ra_format *map_fmt(struct ra *ra, const struct pl_fmt *plfmt)
     return NULL;
 }
 
-bool mppl_wrap_tex(struct ra *ra, const struct pl_tex *pltex,
-                   struct ra_tex *out_tex)
+bool mppl_wrap_tex(struct ra *ra, pl_tex pltex, struct ra_tex *out_tex)
 {
     if (!pltex)
         return false;
@@ -156,8 +155,8 @@ bool mppl_wrap_tex(struct ra *ra, const struct pl_tex *pltex,
 static struct ra_tex *tex_create_pl(struct ra *ra,
                                     const struct ra_tex_params *params)
 {
-    const struct pl_gpu *gpu = get_gpu(ra);
-    const struct pl_tex *pltex = pl_tex_create(gpu, &(struct pl_tex_params) {
+    pl_gpu gpu = get_gpu(ra);
+    pl_tex pltex = pl_tex_create(gpu, &(struct pl_tex_params) {
         .w = params->w,
         .h = params->dimensions >= 2 ? params->h : 0,
         .d = params->dimensions >= 3 ? params->d : 0,
@@ -191,14 +190,14 @@ static void tex_destroy_pl(struct ra *ra, struct ra_tex *tex)
     if (!tex)
         return;
 
-    pl_tex_destroy(get_gpu(ra), (const struct pl_tex **) &tex->priv);
+    pl_tex_destroy(get_gpu(ra), (pl_tex *) &tex->priv);
     talloc_free(tex);
 }
 
 static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *params)
 {
-    const struct pl_gpu *gpu = get_gpu(ra);
-    const struct pl_tex *tex = params->tex->priv;
+    pl_gpu gpu = get_gpu(ra);
+    pl_tex tex = params->tex->priv;
     struct pl_tex_transfer_params pl_params = {
         .tex = tex,
         .buf = params->buf ? params->buf->priv : NULL,
@@ -207,7 +206,7 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
         .timer = get_active_timer(ra),
     };
 
-    const struct pl_buf *staging = NULL;
+    pl_buf staging = NULL;
     if (params->tex->params.dimensions == 2) {
         if (params->rc) {
             pl_params.rc = (struct pl_rect3d) {
@@ -255,7 +254,7 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
 
 static bool tex_download_pl(struct ra *ra, struct ra_tex_download_params *params)
 {
-    const struct pl_tex *tex = params->tex->priv;
+    pl_tex tex = params->tex->priv;
     struct pl_tex_transfer_params pl_params = {
         .tex = tex,
         .ptr = params->dst,
@@ -292,7 +291,7 @@ static bool tex_download_pl(struct ra *ra, struct ra_tex_download_params *params
 static struct ra_buf *buf_create_pl(struct ra *ra,
                                     const struct ra_buf_params *params)
 {
-    const struct pl_buf *plbuf = pl_buf_create(get_gpu(ra), &(struct pl_buf_params) {
+    pl_buf plbuf = pl_buf_create(get_gpu(ra), &(struct pl_buf_params) {
         .size = params->size,
         .uniform = params->type == RA_BUF_TYPE_UNIFORM,
         .storable = params->type == RA_BUF_TYPE_SHADER_STORAGE,
@@ -320,7 +319,7 @@ static void buf_destroy_pl(struct ra *ra, struct ra_buf *buf)
     if (!buf)
         return;
 
-    pl_buf_destroy(get_gpu(ra), (const struct pl_buf **) &buf->priv);
+    pl_buf_destroy(get_gpu(ra), (pl_buf *) &buf->priv);
     talloc_free(buf);
 }
 
@@ -437,7 +436,7 @@ static int desc_namespace_pl(struct ra *ra, enum ra_vartype type)
 }
 
 struct pass_priv {
-    const struct pl_pass *pl_pass;
+    pl_pass pass;
     uint16_t *inp_index; // index translation map
     // Space to hold the descriptor bindings and variable updates
     struct pl_desc_binding *binds;
@@ -449,7 +448,7 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
                                     const struct ra_renderpass_params *params)
 {
     void *tmp = talloc_new(NULL);
-    const struct pl_gpu *gpu = get_gpu(ra);
+    pl_gpu gpu = get_gpu(ra);
     struct ra_renderpass *pass = NULL;
 
     static const enum pl_pass_type pass_type[] = {
@@ -546,8 +545,8 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
         }
     }
 
-    priv->pl_pass = pl_pass_create(gpu, &pl_params);
-    if (!priv->pl_pass)
+    priv->pass = pl_pass_create(gpu, &pl_params);
+    if (!priv->pass)
         goto error;
 
     pass = talloc_ptrtype(NULL, pass);
@@ -557,8 +556,8 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
     };
 
     pass->params.cached_program = (struct bstr) {
-        .start = (void *) priv->pl_pass->params.cached_program,
-        .len = priv->pl_pass->params.cached_program_len,
+        .start = (void *) priv->pass->params.cached_program,
+        .len = priv->pass->params.cached_program_len,
     };
 
     // fall through
@@ -573,7 +572,7 @@ static void renderpass_destroy_pl(struct ra *ra, struct ra_renderpass *pass)
         return;
 
     struct pass_priv *priv = pass->priv;
-    pl_pass_destroy(get_gpu(ra), (const struct pl_pass **) &priv->pl_pass);
+    pl_pass_destroy(get_gpu(ra), (pl_pass *) &priv->pass);
     talloc_free(pass);
 }
 
@@ -616,7 +615,7 @@ static void renderpass_run_pl(struct ra *ra,
     }
 
     struct pl_pass_run_params pl_params = {
-        .pass = p->pl_pass,
+        .pass = p->pass,
         .var_updates = p->varups,
         .num_var_updates = p->num_varups,
         .desc_bindings = p->binds,
@@ -624,7 +623,7 @@ static void renderpass_run_pl(struct ra *ra,
         .timer = get_active_timer(ra),
     };
 
-    if (p->pl_pass->params.type == PL_PASS_RASTER) {
+    if (p->pass->params.type == PL_PASS_RASTER) {
         pl_params.target = params->target->priv;
         pl_params.viewport = mp_rect2d_to_pl(params->viewport);
         pl_params.scissors = mp_rect2d_to_pl(params->scissors);
@@ -641,7 +640,7 @@ static void renderpass_run_pl(struct ra *ra,
 struct ra_timer_pl {
     // Because libpplacebo only supports one operation per timer, we need
     // to use multiple pl_timers to sum up multiple passes/transfers
-    struct pl_timer **timers;
+    pl_timer *timers;
     int num_timers;
     int idx_timers;
 };
@@ -654,7 +653,7 @@ static ra_timer *timer_create_pl(struct ra *ra)
 
 static void timer_destroy_pl(struct ra *ra, ra_timer *timer)
 {
-    const struct pl_gpu *gpu = get_gpu(ra);
+    pl_gpu gpu = get_gpu(ra);
     struct ra_timer_pl *t = timer;
 
     for (int i = 0; i < t->num_timers; i++)
@@ -696,7 +695,7 @@ static uint64_t timer_stop_pl(struct ra *ra, ra_timer *timer)
     return res;
 }
 
-static struct pl_timer *get_active_timer(const struct ra *ra)
+static pl_timer get_active_timer(const struct ra *ra)
 {
     struct ra_pl *p = ra->priv;
     if (!p->active_timer)

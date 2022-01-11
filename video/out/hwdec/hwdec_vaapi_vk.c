@@ -26,7 +26,7 @@
 static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper, bool probing)
 {
     struct priv *p = mapper->priv;
-    const struct pl_gpu *gpu = ra_pl_get(mapper->ra);
+    pl_gpu gpu = ra_pl_get(mapper->ra);
 
     struct ra_imgfmt_desc desc = {0};
     if (!ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
@@ -82,7 +82,7 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper, bool probing)
         };
 
         mppl_log_set_probing(gpu->log, probing);
-        const struct pl_tex *pltex = pl_tex_create(gpu, &tex_params);
+        pl_tex pltex = pl_tex_create(gpu, &tex_params);
         mppl_log_set_probing(gpu->log, false);
         if (!pltex)
             return false;
@@ -110,9 +110,8 @@ static void vaapi_vk_unmap(struct ra_hwdec_mapper *mapper)
 
 bool vaapi_vk_init(const struct ra_hwdec *hw)
 {
-   struct priv_owner *p = hw->priv;
-
-    const struct pl_gpu *gpu = ra_pl_get(hw->ra);
+    struct priv_owner *p = hw->priv;
+    pl_gpu gpu = ra_pl_get(hw->ra);
     if (!gpu) {
         // This is not a Vulkan RA;
         return false;
