@@ -41,12 +41,17 @@ struct ra *ra_create_pl(pl_gpu gpu, struct mp_log *log)
 
     ra->caps = RA_CAP_DIRECT_UPLOAD | RA_CAP_NESTED_ARRAY | RA_CAP_FRAGCOORD;
 
-    if (gpu->caps & PL_GPU_CAP_COMPUTE)
+    if (gpu->glsl.compute)
         ra->caps |= RA_CAP_COMPUTE | RA_CAP_NUM_GROUPS;
-    if (gpu->caps & PL_GPU_CAP_PARALLEL_COMPUTE)
+    if (gpu->limits.compute_queues > gpu->limits.fragment_queues)
         ra->caps |= RA_CAP_PARALLEL_COMPUTE;
-    if (gpu->caps & PL_GPU_CAP_INPUT_VARIABLES)
+#if PL_API_VER >= 180
+    if (gpu->limits.max_variable_comps)
         ra->caps |= RA_CAP_GLOBAL_UNIFORM;
+#else
+    if (gpu->limits.max_variables)
+        ra->caps |= RA_CAP_GLOBAL_UNIFORM;
+#endif
 
     if (gpu->limits.max_tex_1d_dim)
         ra->caps |= RA_CAP_TEX_1D;
@@ -56,7 +61,7 @@ struct ra *ra_create_pl(pl_gpu gpu, struct mp_log *log)
         ra->caps |= RA_CAP_BUF_RO;
     if (gpu->limits.max_ssbo_size)
         ra->caps |= RA_CAP_BUF_RW;
-    if (gpu->limits.min_gather_offset && gpu->limits.max_gather_offset)
+    if (gpu->glsl.min_gather_offset && gpu->glsl.max_gather_offset)
         ra->caps |= RA_CAP_GATHER;
 
     // Semi-hack: assume all textures are blittable if r8 is
@@ -65,9 +70,9 @@ struct ra *ra_create_pl(pl_gpu gpu, struct mp_log *log)
         ra->caps |= RA_CAP_BLIT;
 
     ra->max_texture_wh = gpu->limits.max_tex_2d_dim;
-    ra->max_shmem = gpu->limits.max_shmem_size;
     ra->max_pushc_size = gpu->limits.max_pushc_size;
-    ra->max_compute_group_threads = gpu->limits.max_group_threads;
+    ra->max_compute_group_threads = gpu->glsl.max_group_threads;
+    ra->max_shmem = gpu->glsl.max_shmem_size;
 
     // Set up format wrappers
     for (int i = 0; i < gpu->num_formats; i++) {
