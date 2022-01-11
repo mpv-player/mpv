@@ -4188,7 +4188,7 @@ static void recreate_overlays(struct MPContext *mpctx)
     struct command_ctx *cmd = mpctx->command_ctx;
     int overlay_next = !cmd->overlay_osd_current;
     struct sub_bitmaps *new = &cmd->overlay_osd[overlay_next];
-    new->format = SUBBITMAP_RGBA;
+    new->format = SUBBITMAP_BGRA;
     new->change_id = 1;
 
     bool valid = false;

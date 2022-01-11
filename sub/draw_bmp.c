@@ -32,7 +32,7 @@
 
 const bool mp_draw_sub_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = true,
-    [SUBBITMAP_RGBA] = true,
+    [SUBBITMAP_BGRA] = true,
 };
 
 struct part {
@@ -84,7 +84,7 @@ struct mp_draw_sub_cache
     struct mp_sws_context *alpha_to_calpha; // scaler for overlay -> calpha
     bool scale_in_tiles;
 
-    struct mp_sws_context *sub_scale; // scaler for SUBBITMAP_RGBA
+    struct mp_sws_context *sub_scale; // scaler for SUBBITMAP_BGRA
 
     struct mp_repack *overlay_to_f32; // convert video_overlay to float
     struct mp_image *overlay_tmp;   // slice in float32
@@ -363,7 +363,7 @@ static void draw_rgba(uint8_t *dst, ptrdiff_t dst_stride,
 static bool render_rgba(struct mp_draw_sub_cache *p, struct part *part,
                         struct sub_bitmaps *sb)
 {
-    assert(sb->format == SUBBITMAP_RGBA);
+    assert(sb->format == SUBBITMAP_BGRA);
 
     if (part->change_id != sb->change_id) {
         for (int n = 0; n < part->num_imgs; n++)
@@ -462,7 +462,7 @@ static bool render_sb(struct mp_draw_sub_cache *p, struct sub_bitmaps *sb)
     case SUBBITMAP_LIBASS:
         render_ass(p, sb);
         return true;
-    case SUBBITMAP_RGBA:
+    case SUBBITMAP_BGRA:
         return render_rgba(p, part, sb);
     }
 

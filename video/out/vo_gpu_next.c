@@ -215,7 +215,7 @@ static void write_overlays(struct vo *vo, struct mp_osd_res res, double pts,
     struct priv *p = vo->priv;
     static const bool subfmt_all[SUBBITMAP_COUNT] = {
         [SUBBITMAP_LIBASS] = true,
-        [SUBBITMAP_RGBA]   = true,
+        [SUBBITMAP_BGRA]   = true,
     };
 
     struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, subfmt_all);
@@ -283,7 +283,7 @@ static void write_overlays(struct vo *vo, struct mp_osd_res res, double pts,
         };
 
         switch (item->format) {
-        case SUBBITMAP_RGBA:
+        case SUBBITMAP_BGRA:
             ol->mode = PL_OVERLAY_NORMAL;
             ol->repr.alpha = PL_ALPHA_PREMULTIPLIED;
             break;
@@ -1153,7 +1153,7 @@ static int preinit(struct vo *vo)
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
     p->osd_fmt[SUBBITMAP_LIBASS] = pl_find_named_fmt(p->gpu, "r8");
-    p->osd_fmt[SUBBITMAP_RGBA] = pl_find_named_fmt(p->gpu, "rgba8");
+    p->osd_fmt[SUBBITMAP_BGRA] = pl_find_named_fmt(p->gpu, "rgba8");
 
     char *cache_file = get_cache_file(p);
     if (cache_file) {
