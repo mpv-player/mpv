@@ -970,7 +970,7 @@ if jpeg.found()
 endif
 
 libplacebo_next = false
-libplacebo = dependency('libplacebo', version: '>=3.104.0', required: get_option('libplacebo'))
+libplacebo = dependency('libplacebo', version: '>=4.157.0', required: get_option('libplacebo'))
 if libplacebo.found()
     dependencies += libplacebo
     features += 'libplacebo'
