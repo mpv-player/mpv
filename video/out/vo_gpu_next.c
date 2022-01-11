@@ -1093,6 +1093,7 @@ static char *get_cache_file(struct priv *p)
 
     char *dir = mp_get_user_path(NULL, p->global, opts->shader_cache_dir);
     char *file = mp_path_join(NULL, dir, "libplacebo.cache");
+    mp_mkdirp(dir);
     talloc_free(dir);
     return file;
 }
