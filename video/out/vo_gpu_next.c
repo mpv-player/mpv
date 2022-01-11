@@ -1153,7 +1153,7 @@ static int preinit(struct vo *vo)
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
     p->osd_fmt[SUBBITMAP_LIBASS] = pl_find_named_fmt(p->gpu, "r8");
-    p->osd_fmt[SUBBITMAP_BGRA] = pl_find_named_fmt(p->gpu, "rgba8");
+    p->osd_fmt[SUBBITMAP_BGRA] = pl_find_named_fmt(p->gpu, "bgra8");
 
     char *cache_file = get_cache_file(p);
     if (cache_file) {
