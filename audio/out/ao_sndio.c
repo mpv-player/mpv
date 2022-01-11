@@ -2,6 +2,7 @@
  * Copyright (c) 2008 Alexandre Ratchov <alex@caoua.org>
  * Copyright (c) 2013 Christian Neukirchen <chneukirchen@gmail.com>
  * Copyright (c) 2020 Rozhuk Ivan <rozhuk.im@gmail.com>
+ * Copyright (c) 2021 Andrew Krasavin <noiseless-ak@yandex.ru>
  * 
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,7 +42,7 @@ struct priv {
 };
 
 
-static const struct mp_chmap sndio_layouts[MP_NUM_CHANNELS + 1] = {
+static const struct mp_chmap sndio_layouts[] = {
     {0},                                        /* empty */
     {1, {MP_SPEAKER_ID_FL}},                    /* mono */
     MP_CHMAP2(FL, FR),                          /* stereo */
@@ -64,11 +65,9 @@ static void uninit(struct ao *ao);
 static void process_events(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    
-    if (!p->playing)
-        return;
+
     int n = sio_pollfd(p->hdl, p->pfd, POLLOUT);
-    while (poll(p->pfd, n, 0) < 0 && errno == EINTR) {}
+    while (poll(p->pfd, n, 0) < 0 && errno == EINTR);
 
     sio_revents(p->hdl, p->pfd);
 }
@@ -119,21 +118,15 @@ static int init(struct ao *ao)
 
     /* Selecting sound format. */
     ao->format = af_fmt_from_planar(ao->format);
-    for (i = 0, ap = af_to_par;; i++, ap++) {
-        if (i == MP_ARRAY_SIZE(af_to_par)) {
-            MP_VERBOSE(ao, "unsupported format\n");
-            p->par.bits = 16;
-            p->par.sig = 1;
-            p->par.le = SIO_LE_NATIVE;
-            break;
-        }
+
+    p->par.bits = 16;
+    p->par.sig = 1;
+    p->par.le = SIO_LE_NATIVE;
+    for (i = 0; i < MP_ARRAY_SIZE(af_to_par); i++) {
+        ap = &af_to_par[i];
         if (ap->format == ao->format) {
             p->par.bits = ap->bits;
             p->par.sig = ap->sig;
-            if (ap->bits > 8)
-                p->par.le = SIO_LE_NATIVE;
-            if (ap->bits != SIO_BPS(ap->bits))
-                p->par.bps = ap->bits / 8;
             break;
         }
     }
@@ -148,10 +141,9 @@ static int init(struct ao *ao)
         goto err_out;
 
     p->par.pchan = ao->channels.num;
-#ifdef __FreeBSD__
-    /* OSS wrapper have bad defaults, overwrite it. */
-    p->par.appbufsz = ((p->par.rate * 25) / 1000); /* 25 ms. */
-#endif
+    p->par.appbufsz = p->par.rate * 250 / 1000;    /* 250ms buffer */
+    p->par.round = p->par.rate * 10 / 1000;    /*  10ms block size */
+
     if (!sio_setpar(p->hdl, &p->par)) {
         MP_ERR(ao, "couldn't set params\n");
         goto err_out;
@@ -182,7 +174,7 @@ static int init(struct ao *ao)
     p->havevol = sio_onvol(p->hdl, volcb, ao);
     sio_onmove(p->hdl, movecb, ao);
 
-    p->pfd = calloc(sio_nfds(p->hdl), sizeof(struct pollfd));
+    p->pfd = talloc_array_ptrtype(p, p->pfd, sio_nfds(p->hdl));
     if (!p->pfd)
         goto err_out;
 
@@ -212,7 +204,6 @@ static void uninit(struct ao *ao)
         sio_close(p->hdl);
         p->hdl = NULL;
     }
-    free(p->pfd);
     p->pfd = NULL;
     p->playing = false;
 }
@@ -243,23 +234,16 @@ static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    process_events(ao);
-    p->delay = 0;
-    p->playing = false;
+    if (p->playing) {
+        p->playing = false;
 
-    /* XXX: some times may block here then sndiod used. */
-    if (!sio_stop(p->hdl)) {
-        MP_ERR(ao, "reset: couldn't sio_stop()\n");
-reinit:
-        /* Without this device will never work again. */
-        MP_WARN(ao, "Force reinitialize audio device.\n");
-        uninit(ao);
-        init(ao);
-        return;
-    }
-    if (!sio_start(p->hdl)) {
-        MP_ERR(ao, "reset: sio_start() fail.\n");
-        goto reinit;
+        if (!sio_stop(p->hdl)) {
+            MP_ERR(ao, "reset: couldn't sio_stop()\n");
+        }
+        p->delay = 0;
+        if (!sio_start(p->hdl)) {
+            MP_ERR(ao, "reset: sio_start() fail.\n");
+        }
     }
 }
 
@@ -286,7 +270,6 @@ static bool audio_write(struct ao *ao, void **data, int samples)
         return false;
     }
     p->delay += samples;
-    process_events(ao);
 
     return true;
 }
@@ -297,10 +280,28 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
 
     process_events(ao);
 
-    state->free_samples = (ao->device_buffer - p->delay);
+    /* how many samples we can play without blocking */
+    state->free_samples = ao->device_buffer - p->delay;
+    state->free_samples = state->free_samples / p->par.round * p->par.round;
+    /* how many samples are already in the buffer to be played */
     state->queued_samples = p->delay;
-    state->delay = (p->delay / (double)p->par.rate);
-    state->playing = p->playing;
+    /* delay in seconds between first and last sample in buffer */
+    state->delay = p->delay / (double)p->par.rate;
+
+    /* report unexpected EOF / underrun */
+    if (state->queued_samples && state->queued_samples &&
+        state->queued_samples < state->free_samples &&
+        p->playing || sio_eof(p->hdl))
+    {
+        MP_VERBOSE(ao, "get_state: EOF/underrun detected.\n");
+        MP_VERBOSE(ao, "get_state: free: %d, queued: %d, delay: %lf\n", \
+                state->free_samples, state->queued_samples, state->delay);
+        p->playing = false;
+        state->playing = p->playing;
+        ao_wakeup_playthread(ao);
+    } else {
+        state->playing = p->playing;
+    }
 }
 
 const struct ao_driver audio_out_sndio = {
