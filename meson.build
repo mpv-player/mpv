@@ -909,6 +909,13 @@ if sdl2_audio.allowed()
     sources += files('audio/out/ao_sdl.c')
 endif
 
+sndio = dependency('sndio', required: get_option('sndio'))
+if sndio.found()
+    dependencies += sndio
+    features += 'sndio'
+    sources += files('audio/out/ao_sndio.c')
+endif
+
 wasapi = cc.has_header_symbol('audioclient.h', 'IAudioClient', required: get_option('wasapi'))
 if wasapi
     features += 'wasapi'
@@ -1779,6 +1786,7 @@ conf_data.set10('HAVE_SDL2_GAMEPAD', sdl2_gamepad.allowed())
 conf_data.set10('HAVE_SDL2_VIDEO', sdl2_video.allowed())
 conf_data.set10('HAVE_SHADERC', shaderc.found())
 conf_data.set10('HAVE_SIXEL', sixel.found())
+conf_data.set10('HAVE_SNDIO', sndio.found())
 conf_data.set10('HAVE_STDATOMIC', stdatomic.found())
 conf_data.set10('HAVE_TA_LEAK_REPORT', get_option('ta-leak-report'))
 conf_data.set10('HAVE_TESTS', get_option('tests'))

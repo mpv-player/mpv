@@ -441,8 +441,7 @@ audio_output_features = [
     }, {
         'name': '--sndio',
         'desc': 'sndio audio input/output',
-        'func': check_statement('sndio.h',
-            'struct sio_par par; sio_initpar(&par); const char *s = SIO_DEVANY', lib='sndio'),
+        'func': check_pkg_config('sndio'),
         'default': 'disable'
     }, {
         'name': '--pulse',
