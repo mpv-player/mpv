@@ -35,9 +35,8 @@ struct ext_vk {
     CUexternalMemory mem;
     CUmipmappedArray mma;
 
-    const struct pl_tex *pltex;
-
-    const struct pl_sync *sync;
+    pl_tex pltex;
+    pl_sync sync;
 
     CUexternalSemaphore ss;
     CUexternalSemaphore ws;
@@ -55,7 +54,7 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
     struct ext_vk *evk = talloc_ptrtype(NULL, evk);
     p->ext[n] = evk;
 
-    const struct pl_gpu *gpu = ra_pl_get(mapper->ra);
+    pl_gpu gpu = ra_pl_get(mapper->ra);
 
     struct pl_tex_params tex_params = {
         .w = mp_image_plane_w(&p->layout, n),
@@ -279,7 +278,7 @@ bool cuda_vk_init(const struct ra_hwdec *hw) {
         PL_HANDLE_FD;
 #endif
 
-    const struct pl_gpu *gpu = ra_pl_get(hw->ra);
+    pl_gpu gpu = ra_pl_get(hw->ra);
     if (gpu != NULL) {
         if (!(gpu->export_caps.tex & p->handle_type)) {
             MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable texture memory of type 0x%X.\n",
