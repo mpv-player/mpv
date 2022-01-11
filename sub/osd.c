@@ -284,7 +284,7 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
 {
     int format = SUBBITMAP_LIBASS;
     if (!sub_formats[format] || osd->opts->force_rgba_osd)
-        format = SUBBITMAP_RGBA;
+        format = SUBBITMAP_BGRA;
 
     struct sub_bitmaps *res = NULL;
 
