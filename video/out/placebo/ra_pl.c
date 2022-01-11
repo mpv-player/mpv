@@ -515,8 +515,13 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
         pl_params.vertex_shader = params->vertex_shader;
         pl_params.vertex_type = PL_PRIM_TRIANGLE_LIST;
         pl_params.vertex_stride = params->vertex_stride;
-        pl_params.target_dummy.params.format = params->target_format->priv;
         pl_params.load_target = !params->invalidate_target;
+
+#if PL_API_VER >= 169
+        pl_params.target_format = params->target_format->priv;
+#else
+        pl_params.target_dummy.params.format = params->target_format->priv;
+#endif
 
         if (params->enable_blend) {
             pl_params.blend_params = &blend_params;
