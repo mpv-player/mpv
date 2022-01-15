@@ -1412,6 +1412,11 @@ static void hook_prelude(struct gl_video *p, const char *name, int id,
     GLSLHF("#define %s_tex(pos) (%s_mul * vec4(texture(%s_raw, pos)).%s)\n",
            name, name, name, crap);
 
+    if (p->ra->caps & RA_CAP_GATHER) {
+        GLSLHF("#define %s_gather(pos, c) (%s_mul * vec4("
+               "textureGather(%s_raw, pos, c)))\n", name, name, name);
+    }
+
     // Since the extra matrix multiplication impacts performance,
     // skip it unless the texture was actually rotated
     if (gl_transform_eq(img.transform, identity_trans)) {
