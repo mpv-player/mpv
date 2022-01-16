@@ -13,7 +13,7 @@ EOF
 
 # Install build dependencies for mpv
 pacman -S --noconfirm --needed \
-    $MINGW_PACKAGE_PREFIX-toolchain \
+    $MINGW_PACKAGE_PREFIX-cc \
     $MINGW_PACKAGE_PREFIX-cmake \
     $MINGW_PACKAGE_PREFIX-lcms2 \
     $MINGW_PACKAGE_PREFIX-libarchive \
@@ -50,5 +50,5 @@ pacman -Sc --noconfirm
         --enable-d3d11va \
         --enable-dxva2 \
         --enable-schannel
-    make -j4 install
+    make -j$(($(nproc)+1)) install
 )

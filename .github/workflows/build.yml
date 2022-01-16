@@ -3,11 +3,7 @@ name: build
 on:
   push:
     branches:
-      - master
-      - ci
-      - 'release/**'
   pull_request:
-    branches: [master]
 
 jobs:
   mingw:
@@ -190,3 +186,26 @@ jobs:
                 #
         run: |
           ./ci/build-freebsd.sh
+
+  msys2:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        msystem: [MINGW64, MINGW32]
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          install: autotools git perl python pkg-config
+      - name: Install
+        run: |
+          ./TOOLS/appveyor-install.sh
+      - name: Build
+        run: |
+          ./TOOLS/appveyor-build.sh
