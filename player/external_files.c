@@ -39,7 +39,7 @@ static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub",
 
 static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
                                          "ogg", "m4a", "ac3", "opus", "wav",
-                                         "wv", "eac3",
+                                         "wv", "eac3", "thd",
                                          NULL};
 
 static const char *const image_exts[] = {"jpg", "jpeg", "png", "gif", "bmp",
