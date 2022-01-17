@@ -1516,7 +1516,7 @@ macos_sdk_version_py = find_program(join_paths(source_root, 'TOOLS',
                                     'macos-sdk-version.py'))
 macos_sdk_info = ['', '0.0']
 if darwin
-    macos_sdk_info = run_command(macos_sdk_version_py).stdout().split(',')
+    macos_sdk_info = run_command(macos_sdk_version_py, check: true).stdout().split(',')
 endif
 
 macos_sdk_path = macos_sdk_info[0].strip()
@@ -1550,8 +1550,8 @@ macos_10_14_features = get_option('macos-10-14-features').require(
 xcrun = find_program('xcrun', required: get_option('swift-build'))
 swift_ver = '0.0'
 if xcrun.found()
-    swift_prog = find_program(run_command(xcrun, '-find', 'swift').stdout().strip())
-    swift_ver_string = run_command(swift_prog, '-version').stdout()
+    swift_prog = find_program(run_command(xcrun, '-find', 'swift', check: true).stdout().strip())
+    swift_ver_string = run_command(swift_prog, '-version', check: true).stdout()
     verRe = '''
 #!/usr/bin/env python3
 import re
@@ -1560,7 +1560,7 @@ verRe = re.compile("(?i)version\s?([\d.]+)")
 swift_ver = verRe.search(sys.argv[1]).group(1)
 sys.stdout.write(swift_ver)
 '''
-    swift_ver = run_command(python, '-c', verRe, swift_ver_string).stdout()
+    swift_ver = run_command(python, '-c', verRe, swift_ver_string, check: true).stdout()
     message('Detected Swift version: ' + swift_ver)
 endif
 
@@ -1688,7 +1688,7 @@ features.sort()
 features_str = " ".join(features)
 sys.stdout.write(features_str)
 '''
-feature_str = run_command(python, '-c', feature_sort, features).stdout()
+feature_str = run_command(python, '-c', feature_sort, features, check: true).stdout()
 
 # Set config.h
 conf_data = configuration_data()
