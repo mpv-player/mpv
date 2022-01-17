@@ -941,8 +941,8 @@ static void handle_keep_open(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE &&
-        (opts->keep_open == 2 || !playlist_get_next(mpctx->playlist, 1) &&
-        opts->loop_times == 1))
+        (opts->keep_open == 2 ||
+        (!playlist_get_next(mpctx->playlist, 1) && opts->loop_times == 1)))
     {
         mpctx->stop_play = KEEP_PLAYING;
         if (mpctx->vo_chain) {
