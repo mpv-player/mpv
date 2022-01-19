@@ -68,16 +68,16 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
     }
 #endif
 
+    ctx->pllog = pl_log_create(PL_API_VER, NULL);
+    if (!ctx->pllog)
+        goto err_out;
+
+    mppl_ctx_set_log(ctx->pllog, ctx->log, vo->probing);
+    mp_verbose(ctx->log, "Initialized libplacebo %s (API v%d)\n",
+               PL_VERSION, PL_API_VER);
+
 #if HAVE_GL && defined(PL_HAVE_OPENGL)
     if (ra_is_gl(ctx->ra_ctx->ra)) {
-        ctx->pllog = pl_log_create(PL_API_VER, NULL);
-        if (!ctx->pllog)
-            goto err_out;
-
-        mppl_ctx_set_log(ctx->pllog, ctx->log, vo->probing);
-        mp_verbose(ctx->log, "Initialized libplacebo %s (API v%d)\n",
-                   PL_VERSION, PL_API_VER);
-
         p->opengl = pl_opengl_create(ctx->pllog, pl_opengl_params(
             .debug = ctx_opts->debug,
             .allow_software = ctx_opts->allow_sw,
@@ -126,16 +126,31 @@ void gpu_ctx_destroy(struct gpu_ctx **ctxp)
     struct gpu_ctx *ctx = *ctxp;
     if (!ctx)
         return;
+    if (!ctx->ra_ctx)
+        goto skip_common_pl_cleanup;
+
     struct priv *p = ctx->priv;
+
+#if HAVE_VULKAN
+    if (ra_vk_ctx_get(ctx->ra_ctx))
+        // vulkan RA context handles pl cleanup by itself,
+        // skip common local clean-up.
+        goto skip_common_pl_cleanup;
+#endif
+
+    if (ctx->swapchain)
+        pl_swapchain_destroy(&ctx->swapchain);
 
 #if HAVE_GL && defined(PL_HAVE_OPENGL)
     if (ra_is_gl(ctx->ra_ctx->ra)) {
-        pl_swapchain_destroy(&ctx->swapchain);
         pl_opengl_destroy(&p->opengl);
-        pl_log_destroy(&ctx->pllog);
     }
 #endif
 
+    if (ctx->pllog)
+        pl_log_destroy(&ctx->pllog);
+
+skip_common_pl_cleanup:
     ra_ctx_destroy(&ctx->ra_ctx);
 
     talloc_free(ctx);
