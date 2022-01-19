@@ -334,8 +334,6 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
 {
     pthread_mutex_lock(&sub->lock);
 
-    struct mp_subtitle_opts *opts = sub->opts;
-
     pts = pts_to_subtitle(sub, pts);
 
     sub->last_vo_pts = pts;
@@ -344,7 +342,7 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
     struct sub_bitmaps *res = NULL;
 
     if (!(sub->end != MP_NOPTS_VALUE && pts >= sub->end) &&
-        opts->sub_visibility && sub->sd->driver->get_bitmaps)
+        sub->sd->driver->get_bitmaps)
         res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts);
 
     pthread_mutex_unlock(&sub->lock);
@@ -451,6 +449,11 @@ void sub_set_play_dir(struct dec_sub *sub, int dir)
     pthread_mutex_lock(&sub->lock);
     sub->play_dir = dir;
     pthread_mutex_unlock(&sub->lock);
+}
+
+bool sub_is_primary_visible(struct dec_sub *sub)
+{
+    return !!sub->opts->sub_visibility;
 }
 
 bool sub_is_secondary_visible(struct dec_sub *sub)
