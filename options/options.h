@@ -73,6 +73,7 @@ typedef struct mp_vo_opts {
 // Subtitle options needed by the subtitle decoders/renderers.
 struct mp_subtitle_opts {
     int sub_visibility;
+    int sec_sub_visibility;
     int sub_pos;
     float sub_delay;
     float sub_fps;

@@ -39,8 +39,6 @@ Interface changes
     - add `--tone-mapping-mode`, replacing `--tone-mapping-desaturate` and
       `--tone-mapping-desaturate-exponent`.
     - add `dolbyvision` sub-parameter to `format` video filter
-    - remove `--secondary-sub-visibility` and introduces
-      `--sub-visibility=primary-only` and `--sub-visibility=secondary-only`
  --- mpv 0.34.0 ---
     - deprecate selecting by card number with `--drm-connector`, add
       `--drm-device` which can be used instead

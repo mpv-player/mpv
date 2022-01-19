@@ -4003,13 +4003,11 @@ static const struct property_osd_display {
     {"sub-delay", "Sub delay"},
     {"sub-speed", "Sub speed"},
     {"sub-visibility",
-        .msg = "Subtitles ${?sub-visibility==no:hidden}"
-            "${?sub-visibility==yes:visible}"
-            "${?sub-visibility==primary-only:visible (primary only"
-                "${?sid==no: but no subtitles selected})}"
-            "${?sub-visibility==secondary-only:visible (secondary only"
-                "${?secondary-sid==no: but no subtitles selected})}"
-    },
+     .msg = "Subtitles ${!sub-visibility==yes:hidden}"
+      "${?sub-visibility==yes:visible${?sub==no: (but no subtitles selected)}}"},
+    {"secondary-sub-visibility",
+     .msg = "Secondary Subtitles ${!secondary-sub-visibility==yes:hidden}"
+      "${?secondary-sub-visibility==yes:visible${?secondary-sid==no: (but no secondary subtitles selected)}}"},
     {"sub-forced-only", "Forced sub only"},
     {"sub-scale", "Sub Scale"},
     {"sub-ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
