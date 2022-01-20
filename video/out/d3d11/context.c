@@ -492,6 +492,13 @@ static bool d3d11_init(struct ra_ctx *ctx)
     if (!vo_w32_init(ctx->vo))
         goto error;
 
+    UINT usage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
+    if (ID3D11Device_GetFeatureLevel(p->device) >= D3D_FEATURE_LEVEL_11_0 &&
+        p->opts->output_format != DXGI_FORMAT_B8G8R8A8_UNORM)
+    {
+        usage |= DXGI_USAGE_UNORDERED_ACCESS;
+    }
+
     struct d3d11_swapchain_opts scopts = {
         .window = vo_w32_hwnd(ctx->vo),
         .width = ctx->vo->dwidth,
@@ -503,7 +510,7 @@ static bool d3d11_init(struct ra_ctx *ctx)
         // Add one frame for the backbuffer and one frame of "slack" to reduce
         // contention with the window manager when acquiring the backbuffer
         .length = ctx->vo->opts->swapchain_depth + 2,
-        .usage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
+        .usage = usage,
     };
     if (!mp_d3d11_create_swapchain(p->device, ctx->log, &scopts, &p->swapchain))
         goto error;
