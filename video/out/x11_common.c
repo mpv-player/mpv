@@ -1363,8 +1363,13 @@ static void vo_x11_update_window_title(struct vo *vo)
 
     vo_x11_set_property_string(vo, XA_WM_NAME, x11->window_title);
     vo_x11_set_property_string(vo, XA_WM_ICON_NAME, x11->window_title);
-    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_NAME), x11->window_title);
-    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_ICON_NAME), x11->window_title);
+
+    /* _NET_WM_NAME and _NET_WM_ICON_NAME must be sanitized to UTF-8. */
+    void *tmp = talloc_new(NULL);
+    struct bstr b_title = bstr_sanitize_utf8_latin1(tmp, bstr0(x11->window_title));
+    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_NAME), b_title.start);
+    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_ICON_NAME), b_title.start);
+    talloc_free(tmp);
 }
 
 static void vo_x11_xembed_update(struct vo_x11_state *x11, int flags)
