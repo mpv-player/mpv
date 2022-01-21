@@ -397,7 +397,7 @@ static void draw_1x2(struct vo *vo)
                 }
                 if (bgr_eq(pix_n, old_pix_s)) {
                     // old fg is the same as new (bg,fg).
-                    buffptr += sprintf(buffptr, "░");
+                    buffptr += sprintf(buffptr, "█");
                     continue;
                 }
                 // change bg, since ' ' is shorter than "█".
