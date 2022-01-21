@@ -938,12 +938,23 @@ static bool render_frame(struct vo *vo)
         in->prev_vsync = now;
     in->expecting_vsync = use_vsync;
 
+    bool prev_request_redraw = in->request_redraw;
+
     if (in->dropped_frame) {
         in->drop_count += 1;
         wakeup_core(vo);
     } else {
         in->rendering = true;
         in->hasframe_rendered = true;
+
+        // We have to clear the request_redraw flag now, even though we don't
+        // know whether we have successfully rendered the requested frame yet.
+        // This is so that we can detect new redraw requests whilst we're
+        // rendering the frame with the lock relinquished. If we later find
+        // that we had to drop this frame, we set redraw_request flag again if
+        // it was previously set (see prev_request_redraw).
+        in->request_redraw = false;
+
         int64_t prev_drop_count = vo->in->drop_count;
         // Can the core queue new video now? Non-display-sync uses a separate
         // timer instead, but possibly benefits from preparing a frame early.
@@ -997,8 +1008,7 @@ static bool render_frame(struct vo *vo)
 
     if (in->dropped_frame) {
         MP_STATS(vo, "drop-vo");
-    } else {
-        in->request_redraw = false;
+        in->request_redraw |= prev_request_redraw;
     }
 
     if (in->current_frame && in->current_frame->num_vsyncs &&
