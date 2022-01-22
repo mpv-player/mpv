@@ -94,10 +94,10 @@ void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t);
 void mp_input_put_wheel(struct input_ctx *ictx, int direction, double value);
 
 // Update mouse position (in window coordinates).
-void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y);
+void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y, int mods);
 
 // Like mp_input_set_mouse_pos(), but ignore mouse disable option.
-void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y);
+void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y, int mods);
 
 void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y, int *hover);
 

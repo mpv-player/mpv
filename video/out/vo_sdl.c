@@ -605,9 +605,11 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
             }
             break;
         }
-        case SDL_MOUSEMOTION:
-            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y);
+        case SDL_MOUSEMOTION: {
+            int mods = sdl_mod_to_mpv_mod(SDL_GetModState());
+            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y, mods);
             break;
+        }
         case SDL_MOUSEBUTTONDOWN: {
             int mods = sdl_mod_to_mpv_mod(SDL_GetModState());
             int i;

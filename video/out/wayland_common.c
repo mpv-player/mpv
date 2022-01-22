@@ -190,8 +190,9 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
     wl->mouse_unscaled_x = sx;
     wl->mouse_unscaled_y = sy;
 
+    int mods = get_mods(wl);
     if (!wl->toplevel_configured)
-        mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
+        mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y, mods);
     wl->toplevel_configured = false;
 }
 
@@ -288,7 +289,8 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
 
-    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
+    int mods = get_mods(wl);
+    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y, mods);
     mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN);
 
     enum xdg_toplevel_resize_edge edge;
@@ -314,7 +316,8 @@ static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
 
-    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
+    int mods = get_mods(wl);
+    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y, mods);
 }
 
 static void touch_handle_frame(void *data, struct wl_touch *wl_touch)

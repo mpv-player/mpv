@@ -1178,8 +1178,10 @@ void vo_x11_check_events(struct vo *vo)
                 };
                 x11_send_ewmh_msg(x11, "_NET_WM_MOVERESIZE", params);
             } else {
+                int mods = get_mods(Event.xmotion.state);
                 mp_input_set_mouse_pos(x11->input_ctx, Event.xmotion.x,
-                                                       Event.xmotion.y);
+                                                       Event.xmotion.y,
+                                                       mods);
             }
             x11->win_drag_button1_down = false;
             break;
