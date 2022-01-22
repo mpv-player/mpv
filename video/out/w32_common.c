@@ -1137,6 +1137,17 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         subtract_window_borders(w32, w32->window, &w32->windowrc);
         update_window_state(w32);
         break;
+    // https://docs.microsoft.com/en-us/windows/win32/rstmgr/guidelines-for-applications
+    case WM_QUERYENDSESSION:
+        return TRUE;
+    case WM_ENDSESSION: {
+            // Send quit-watch-later command
+            const char * cmd[] = { "quit-watch-later", NULL };
+            mp_input_run_cmd(w32->input_ctx, cmd);
+            // windows will immediately terminate the process right after we return 0 https://stackoverflow.com/a/31375503
+            Sleep(1000); // Hack: should be enough time to save watch-later data
+            return 0;
+        }
     case WM_CLOSE:
         // Don't destroy the window yet to not lose wakeup events.
         mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
