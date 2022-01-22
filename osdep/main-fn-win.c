@@ -41,6 +41,43 @@ static void microsoft_nonsense(void)
     SetDllDirectoryW(L"");
     if (pSetSearchPathMode)
         pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
+
+    {
+        const WCHAR * cmdline = GetCommandLineW();
+        // RegisterApplicationRestart requires command line without program name(argv[0])
+        // try to strip the first argument
+
+        // skip until whitespace
+        while (*cmdline && *cmdline != L' ')
+        {
+            if (*cmdline == L'"') // skip quoted text
+            {
+                cmdline++;
+                while (*cmdline)
+                {
+                    if (*cmdline == L'"')
+                        break;
+                    if (*cmdline == L'\\' && *(cmdline + 1)) // skip escaped character
+                        cmdline++;
+                    cmdline++;
+                }
+            }
+            if (*cmdline)
+                cmdline++;
+        }
+        // skip whitespace
+        while (*cmdline == L' ')
+            cmdline++;
+
+        const WCHAR * extra_args = L"--pause "; // always start in paused state after restart
+
+        WCHAR restart_cmdline[RESTART_MAX_CMD_LINE];
+        int err = 0;
+        err |= wcscpy_s(restart_cmdline, RESTART_MAX_CMD_LINE, extra_args);
+        err |= wcscat_s(restart_cmdline, RESTART_MAX_CMD_LINE, cmdline);
+        if (err == 0)
+            (void)RegisterApplicationRestart(restart_cmdline, 0); // ignore error
+    }
 }
 
 int main(int argc_, char **argv_)
