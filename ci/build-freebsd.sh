@@ -11,6 +11,7 @@ meson build \
     -Degl-drm=enabled \
     -Dopenal=enabled \
     -Dsdl2=enabled \
+    -Dsndio=enabled \
     -Dvaapi-wayland=enabled \
     -Dvdpau=enabled \
     -Dvulkan=enabled \
@@ -33,6 +34,7 @@ python3 ./waf configure \
     --enable-egl-drm \
     --enable-openal \
     --enable-sdl2 \
+    --enable-sndio \
     --enable-vaapi-wayland \
     --enable-vdpau \
     --enable-vulkan \
