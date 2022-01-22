@@ -168,6 +168,7 @@ jobs:
                 pkgconf \
                 python3 \
                 sdl2 \
+                sndio \
                 vulkan-headers \
                 wayland-protocols \
                 #
