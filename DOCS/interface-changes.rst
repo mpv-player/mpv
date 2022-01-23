@@ -57,6 +57,7 @@ Interface changes
     - add `--tone-mapping-visualize`
     - change type of `--brightness`, `--saturation`, `--contrast`, `--hue` and
       `--gamma` to float.
+    - add `platform` property
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,
