@@ -32,12 +32,9 @@ local opts = {
 }
 
 function detect_platform()
-    local o = {}
-    -- Kind of a dumb way of detecting the platform but whatever
-    if mp.get_property_native('options/vo-mmcss-profile', o) ~= o then
-        return 'windows'
-    elseif mp.get_property_native('options/macos-force-dedicated-gpu', o) ~= o then
-        return 'macos'
+    local platform = mp.get_property_native('platform')
+    if platform == 'darwin' or platform == 'windows' then
+        return platform
     elseif os.getenv('WAYLAND_DISPLAY') then
         return 'wayland'
     end
@@ -48,7 +45,7 @@ end
 local platform = detect_platform()
 if platform == 'windows' then
     opts.font = 'Consolas'
-elseif platform == 'macos' then
+elseif platform == 'darwin' then
     opts.font = 'Menlo'
 else
     opts.font = 'monospace'
@@ -677,7 +674,7 @@ function get_clipboard(clip)
         if not res.error then
             return res.stdout
         end
-    elseif platform == 'macos' then
+    elseif platform == 'darwin' then
         local res = utils.subprocess({
             args = { 'pbpaste' },
             playback_only = false,
