@@ -794,14 +794,15 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Do not clear the playlist.
 
 
-``mouse <x> <y> [<button> [<mode>]]``
+``mouse <x> <y> [<button> [<mode> [<modifiers>]]]``
     Send a mouse event with given coordinate (``<x>``, ``<y>``).
 
     Second argument:
 
     <button>
         The button number of clicked mouse button. This should be one of 0-19.
-        If ``<button>`` is omitted, only the position will be updated.
+        If ``<button>`` is omitted or the special value -1 is used, only the
+        position will be updated.
 
     Third argument:
 
@@ -810,6 +811,12 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     <double>
         The mouse event represents double-click.
+
+    Fourth argument:
+
+    <modifiers>
+        Optional modifiers sent with the mouse event, using the form described
+        in `Key names`_.
 
 ``keypress <name>``
     Send a key event through mpv's input handler, triggering whatever

@@ -208,6 +208,31 @@ static const struct key_name modifier_names[] = {
     { 0 }
 };
 
+int mp_input_get_modifiers_combo_from_name(const char *name)
+{
+    bstr cur = bstr0(name);
+    if (cur.len == 0)
+        return 0;
+    int modifiers = 0;
+    while (true) {
+        for (const struct key_name *m = modifier_names; m->name; m++) {
+            bstr mod_name = bstr0(m->name);
+            if (!bstrcasecmp(mod_name, bstr_splice(cur, 0, mod_name.len))) {
+                modifiers |= m->key;
+                cur = bstr_cut(cur, mod_name.len);
+                goto found;
+            }
+        }
+        return -1;
+found:
+        if (cur.len == 0)
+            return modifiers;
+        if (cur.start[0] != '+')
+            return -1;
+        cur = bstr_cut(cur, 1);
+    }
+}
+
 int mp_input_get_key_from_name(const char *name)
 {
     int modifiers = 0;
