@@ -91,7 +91,7 @@ local function map_codec_to_mpv(codec)
 end
 
 local function platform_is_windows()
-    return package.config:sub(1,1) == "\\"
+    return mp.get_property_native("platform") == "windows"
 end
 
 local function exec(args)
