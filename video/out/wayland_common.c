@@ -768,8 +768,9 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     wl->toplevel_width = width;
     wl->toplevel_height = height;
 
-    /* Don't do anything here if we haven't finished setting geometry. */
-    if (mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0)
+    /* Bail out if any of these values are 0 for any reason. */
+    if (mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0 ||
+        width == 0 || height == 0)
         return;
 
     bool is_maximized = false;
