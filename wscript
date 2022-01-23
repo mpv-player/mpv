@@ -1054,6 +1054,8 @@ def configure(ctx):
     ctx.parse_dependencies(video_output_features)
     ctx.parse_dependencies(hwaccel_features)
 
+    ctx.define('PLATFORM', check_platform(ctx))
+
     if ctx.options.SWIFT_FLAGS:
         ctx.env.SWIFT_FLAGS.extend(split(ctx.options.SWIFT_FLAGS))
 
