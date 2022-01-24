@@ -598,13 +598,6 @@ if darwin
 endif
 
 
-# The following should be removed in 2022 or if libavformat requirement
-# is bumped to >= 59.8.100
-aviocontext_bytes_read = cc.has_member('AVIOContext', 'bytes_read',
-                                       dependencies: ffmpeg['deps'][2], #libavformat
-                                       prefix: '#include <libavformat/avio.h>')
-
-
 # misc dependencies
 cdda_opt = get_option('cdda').require(
     get_option('gpl'),
@@ -1739,7 +1732,6 @@ conf_data.set10('HAVE_EGL_ANGLE_WIN32', egl_angle_win32.allowed())
 conf_data.set10('HAVE_EGL_DRM', egl_drm.allowed())
 conf_data.set10('HAVE_EGL_HELPERS', egl_helpers)
 conf_data.set10('HAVE_EGL_X11', egl_x11.allowed())
-conf_data.set10('HAVE_FFMPEG_AVIOCONTEXT_BYTES_READ', aviocontext_bytes_read)
 conf_data.set10('HAVE_GLIBC_THREAD_NAME', glibc_thread_name and posix)
 conf_data.set10('HAVE_GL', gl['use'])
 conf_data.set10('HAVE_GL_COCOA', gl_cocoa.allowed())
