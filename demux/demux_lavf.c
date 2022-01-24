@@ -261,9 +261,6 @@ typedef struct lavf_priv {
 
 static void update_read_stats(struct demuxer *demuxer)
 {
-#if !HAVE_FFMPEG_AVIOCONTEXT_BYTES_READ
-    return;
-#else
     lavf_priv_t *priv = demuxer->priv;
 
     for (int n = 0; n < priv->num_nested; n++) {
@@ -274,7 +271,6 @@ static void update_read_stats(struct demuxer *demuxer)
         nest->last_bytes = cur;
         demux_report_unbuffered_read_bytes(demuxer, new);
     }
-#endif
 }
 
 // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
