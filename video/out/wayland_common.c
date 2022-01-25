@@ -842,6 +842,14 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
     }
 
+    /* Reuse old size if either of these are 0. */
+    if (width == 0 || height == 0) {
+        if (!is_fullscreen && !is_maximized) {
+            wl->geometry = wl->window_size;
+        }
+        goto resize;
+    }
+
     if (old_toplevel_width == wl->toplevel_width &&
         old_toplevel_height == wl->toplevel_height)
         return;
