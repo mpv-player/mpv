@@ -862,12 +862,13 @@ void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y, int
         cmd->mouse_move = true;
         cmd->mouse_x = x;
         cmd->mouse_y = y;
+        cmd->mouse_move_mods = mods;
         if (should_drop_cmd(ictx, cmd)) {
             talloc_free(cmd);
         } else {
             // Coalesce with previous mouse move events (i.e. replace it)
             struct mp_cmd *tail = queue_peek_tail(&ictx->cmd_queue);
-            if (tail && tail->mouse_move) {
+            if (tail && tail->mouse_move && tail->mouse_move_mods == mods) {
                 queue_remove(&ictx->cmd_queue, tail);
                 talloc_free(tail);
             }

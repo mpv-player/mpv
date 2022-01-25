@@ -109,6 +109,7 @@ typedef struct mp_cmd {
     bool is_mouse_button : 1;
     bool repeated : 1;
     bool mouse_move : 1;
+    int mouse_move_mods;
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
     double scale;               // for scaling numeric arguments
