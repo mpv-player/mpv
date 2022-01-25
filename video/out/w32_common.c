@@ -962,7 +962,7 @@ static void update_window_state(struct vo_w32_state *w32)
     // Show the window if it's not yet visible
     if (!is_visible(w32->window)) {
         if (w32->opts->window_minimized) {
-            ShowWindow(w32->window, SW_SHOWMINIMIZED);
+            ShowWindow(w32->window, SW_SHOWMINNOACTIVE);
             update_maximized_state(w32); // Set the WPF_RESTORETOMAXIMIZED flag
         } else if (w32->opts->window_maximized) {
             ShowWindow(w32->window, SW_SHOWMAXIMIZED);
