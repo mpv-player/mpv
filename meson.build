@@ -717,20 +717,8 @@ if lua_opt != 'disabled'
     endforeach
 endif
 
-# Dumb hack for macOS if we're using luajit so the shared libary compiles.
-# The partial dependency is only used for libmpv and not mpv itself.
-# https://github.com/Homebrew/homebrew-core/issues/37169
-luajit_full = dependency('', required: false)
-luajit_partial = dependency('', required: false)
 if lua['use']
-    if darwin and lua['deps'].name() == 'luajit'
-        luajit_full = lua['deps']
-        luajit_partial = lua['deps'].partial_dependency(compile_args: true, link_args: false,
-                                                        links: true, includes: true, sources: true)
-    else
-        dependencies += lua['deps']
-    endif
-
+    dependencies += lua['deps']
     features += lua['deps'].name()
     sources += files('player/lua.c')
     subdir(join_paths('generated', 'player', 'lua'))
@@ -1837,9 +1825,8 @@ if get_option('libmpv')
     minor = client_h_define.split('|')[1].strip('() ')
     client_api_version = major + '.' + minor + '.0'
 
-    libmpv = library('mpv', sources, dependencies: [dependencies, luajit_partial],
-                     gnu_symbol_visibility: 'hidden', version: client_api_version,
-                     include_directories: includedir, install: true)
+    libmpv = library('mpv', sources, dependencies: dependencies, gnu_symbol_visibility: 'hidden',
+                     version: client_api_version, include_directories: includedir, install: true)
     pkg = import('pkgconfig')
     pkg.generate(libmpv, version: client_api_version,
                  description: 'mpv media player client library')
@@ -1876,6 +1863,6 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    executable('mpv', sources, dependencies: [dependencies, luajit_full],
+    executable('mpv', sources, dependencies: dependencies,
                include_directories: includedir, install: true)
 endif
