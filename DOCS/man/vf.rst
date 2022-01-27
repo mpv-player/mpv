@@ -244,6 +244,7 @@ Available mpv-only filters are:
         Available primaries are:
 
         :auto:         automatic selection (default)
+        :bt.470m:      ITU-R BT.470 System M
         :bt.601-525:   ITU-R BT.601 (SD) 525-line systems (NTSC, SMPTE-C)
         :bt.601-625:   ITU-R BT.601 (SD) 625-line systems (PAL, SECAM)
         :bt.709:       ITU-R BT.709 (HD) (same primaries as sRGB)
@@ -253,7 +254,9 @@ Available mpv-only filters are:
         :prophoto:     ProPhoto RGB (ROMM)
         :cie1931:      CIE 1931 RGB
         :dci-p3:       DCI-P3 (Digital Cinema)
+        :display-p3:   P3-D65
         :v-gamut:      Panasonic V-Gamut primaries
+        :s-gamut:      Sony S-Gamut (S-Log) primaries
 
     ``<gamma>``
        Gamma function the source file was encoded with. Normally this should be set
