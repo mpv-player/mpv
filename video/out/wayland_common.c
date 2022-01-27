@@ -205,25 +205,29 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     state = state == WL_POINTER_BUTTON_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                      : MP_KEY_STATE_UP;
 
-    switch (button) {
-    case BTN_LEFT:
-        button = MP_MBTN_LEFT;
-        break;
-    case BTN_MIDDLE:
-        button = MP_MBTN_MID;
-        break;
-    case BTN_RIGHT:
-        button = MP_MBTN_RIGHT;
-        break;
-    case BTN_SIDE:
-        button = MP_MBTN_BACK;
-        break;
-    case BTN_EXTRA:
-        button = MP_MBTN_FORWARD;
-        break;
-    default:
+    if (button >= BTN_MOUSE && button < BTN_JOYSTICK) {
+        switch (button) {
+        case BTN_LEFT:
+            button = MP_MBTN_LEFT;
+            break;
+        case BTN_MIDDLE:
+            button = MP_MBTN_MID;
+            break;
+        case BTN_RIGHT:
+            button = MP_MBTN_RIGHT;
+            break;
+        case BTN_SIDE:
+            button = MP_MBTN_BACK;
+            break;
+        case BTN_EXTRA:
+            button = MP_MBTN_FORWARD;
+            break;
+        default:
+            button += MP_MBTN9 - BTN_FORWARD;
+            break;
+        }
+    } else {
         button = 0;
-        break;
     }
 
     if (wl->keyboard)
