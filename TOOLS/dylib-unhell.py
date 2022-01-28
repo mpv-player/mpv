@@ -91,15 +91,20 @@ def process_libraries(libs_dict, binary):
 def process_swift_libraries(binary):
     command = ['xcrun', '--find', 'swift-stdlib-tool']
     swiftStdlibTool = subprocess.check_output(command, universal_newlines=True).strip()
-    # from xcode11 on the dynamic swift libs reside in a separate directory from
+    # from Xcode 11 on the dynamic swift libs reside in a separate directory from
     # the std one, might need versioned paths for future swift versions
-    swiftLibPath = os.path.join(swiftStdlibTool, '../../lib/swift-5.0/macosx')
-    swiftLibPath = os.path.abspath(swiftLibPath)
+    # from Xcode 13.3, the path changes to '../../lib/swift/macosx'
+    swiftLibPathCandidates = [
+        os.path.abspath(os.path.join(swiftStdlibTool, x))
+        for x in ["../../lib/swift/macosx", "../../lib/swift5.0/macosx"]
+    ]
 
     command = [swiftStdlibTool, '--copy', '--platform', 'macosx', '--scan-executable', binary, '--destination', lib_path(binary)]
 
-    if os.path.exists(swiftLibPath):
-        command.extend(['--source-libraries', swiftLibPath])
+    for swiftLibPath in swiftLibPathCandidates:
+        if os.path.exists(swiftLibPath):
+            command.extend(["--source-libraries", swiftLibPath])
+            break
 
     subprocess.check_output(command, universal_newlines=True)
 
