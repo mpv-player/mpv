@@ -704,6 +704,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     if (wl->scaling != wl->current_output->scale) {
         set_surface_scaling(wl);
         spawn_cursor(wl);
+        force_resize = true;
         wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
