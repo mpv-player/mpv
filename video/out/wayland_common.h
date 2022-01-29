@@ -52,6 +52,10 @@ struct vo_wayland_state {
     int reduced_width;
     int toplevel_width;
     int toplevel_height;
+    int bounds_width;
+    int bounds_height;
+    int pending_bounds_width;
+    int pending_bounds_height;
 
     /* State */
     bool activated;

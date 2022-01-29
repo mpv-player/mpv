@@ -773,6 +773,11 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     wl->toplevel_width = width;
     wl->toplevel_height = height;
 
+    wl->bounds_width = wl->pending_bounds_width;
+    wl->bounds_height = wl->pending_bounds_height;
+    wl->pending_bounds_width = 0;
+    wl->pending_bounds_height = 0;
+
     /* Don't do anything here if we haven't finished setting geometry. */
     if (mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0)
         return;
@@ -847,10 +852,20 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
     }
 
-    /* Reuse old size if either of these are 0. */
+    /* If the compositor has asked us to pick our own size, reuse the old size
+     * but avoid going beyond the configure bounds.
+     */
     if (width == 0 || height == 0) {
         if (!is_fullscreen && !is_maximized) {
             wl->geometry = wl->window_size;
+            if (wl->bounds_width && (wl->geometry.x1 - wl->geometry.x0) > wl->bounds_width) {
+                wl->geometry.x0 = 0;
+                wl->geometry.x1 = wl->bounds_width;
+            }
+            if (wl->bounds_height && (wl->geometry.y1 - wl->geometry.y0) > wl->bounds_height) {
+                wl->geometry.y0 = 0;
+                wl->geometry.y1 = wl->bounds_height;
+            }
         }
         goto resize;
     }
@@ -894,9 +909,19 @@ static void handle_toplevel_close(void *data, struct xdg_toplevel *xdg_toplevel)
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
 }
 
+static void handle_toplevel_config_bounds(void *data, struct xdg_toplevel *xdg_toplevel,
+                                          int32_t width, int32_t height)
+{
+    struct vo_wayland_state *wl = data;
+
+    wl->pending_bounds_width = width;
+    wl->pending_bounds_height = height;
+}
+
 static const struct xdg_toplevel_listener xdg_toplevel_listener = {
     handle_toplevel_config,
     handle_toplevel_close,
+    handle_toplevel_config_bounds,
 };
 
 static void configure_decorations(void *data,
@@ -1053,7 +1078,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, xdg_wm_base_interface.name) && found++) {
-        ver = MPMIN(ver, 2); /* We can use either 1 or 2 */
+        ver = MPMIN(ver, 4);
         wl->wm_base = wl_registry_bind(reg, id, &xdg_wm_base_interface, ver);
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
     }
@@ -1369,7 +1394,16 @@ static void set_geometry(struct vo_wayland_state *wl)
     assert(wl->current_output);
 
     struct vo_win_geometry geo;
-    struct mp_rect screenrc = wl->current_output->geometry;
+    struct mp_rect screenrc;
+    if (wl->bounds_width && wl->bounds_height) {
+        screenrc.x0 = 0;
+        screenrc.y0 = 0;
+        screenrc.x1 = wl->bounds_width;
+        screenrc.y1 = wl->bounds_height;
+    } else {
+        screenrc = wl->current_output->geometry;
+    }
+
     vo_calc_window_geometry(vo, &screenrc, &geo);
     vo_apply_window_geometry(vo, &geo);
 
