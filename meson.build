@@ -336,14 +336,15 @@ if get_option('ta-leak-report')
     features += 'ta-leak-report'
 endif
 
-libdl = cc.find_library('libdl', required: false)
-if libdl.found()
-    dependencies += libdl
+libdl_dep = cc.find_library('libdl', required: false)
+libdl = cc.has_function('dlopen', dependencies: libdl_dep, prefix: '#include <dlfcn.h>')
+if libdl
+    dependencies += libdl_dep
     features += 'libdl'
 endif
 
 cplugins = get_option('cplugins').require(
-    libdl.found() and not win32 and cc.has_link_argument('-rdynamic'),
+    libdl and not win32 and cc.has_link_argument('-rdynamic'),
     error_message: 'cplugins not supported by the os or compiler!',
 )
 if cplugins.allowed()
@@ -1425,7 +1426,7 @@ vaapi = {
     'name': 'vaapi',
     'deps': dependency('libva', version: '>= 1.1.0', required: get_option('vaapi')),
 }
-vaapi += {'use': vaapi['deps'].found() and libdl.found() and
+vaapi += {'use': vaapi['deps'].found() and libdl and
           (x11['use'] or wayland['use'] or egl_drm.allowed())}
 if vaapi['use']
     dependencies += vaapi['deps']
@@ -1751,7 +1752,7 @@ conf_data.set10('HAVE_JPEG', jpeg.found())
 conf_data.set10('HAVE_LCMS2', lcms2.found())
 conf_data.set10('HAVE_LIBARCHIVE', libarchive.found())
 conf_data.set10('HAVE_LIBAVDEVICE', libavdevice.found())
-conf_data.set10('HAVE_LIBDL', libdl.found())
+conf_data.set10('HAVE_LIBDL', libdl)
 conf_data.set10('HAVE_LIBBLURAY', libbluray.found())
 conf_data.set10('HAVE_LIBPLACEBO_V4', libplacebo_v4)
 conf_data.set10('HAVE_LINUX_FSTATFS', linux_fstatfs)
