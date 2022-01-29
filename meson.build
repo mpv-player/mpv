@@ -1035,7 +1035,7 @@ wayland = {
     'name': 'wayland',
     'deps': [dependency('wayland-client', version: '>= 1.15.0', required: get_option('wayland')),
              dependency('wayland-cursor', version: '>= 1.15.0', required: get_option('wayland')),
-             dependency('wayland-protocols', required: get_option('wayland')),
+             dependency('wayland-protocols', version: '>= 1.15', required: get_option('wayland')),
              dependency('xkbcommon', version: '>= 0.3.0', required: get_option('wayland'))],
     'header': cc.check_header('linux/input-event-codes.h', required: get_option('wayland')),
     'scanner': find_program('wayland-scanner', required: get_option('wayland')),
