@@ -163,7 +163,7 @@ local function load_profiles()
                 properties = {},
                 status = nil,
                 dirty = true, -- need re-evaluate
-                has_restore_opt = v["profile-restore"] ~= "default"
+                has_restore_opt = v["profile-restore"] and v["profile-restore"] ~= "default"
             }
             profiles[#profiles + 1] = profile
             have_dirty_profiles = true
