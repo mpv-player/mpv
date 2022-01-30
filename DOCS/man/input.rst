@@ -3385,6 +3385,10 @@ Property list
     not a map, as order matters and duplicate entries are possible. Recursive
     profiles are not expanded, and show up as special ``profile`` options.
 
+    The ``profile-restore`` field is currently missing if it holds the default
+    value (either because it was not set, or set explicitly to ``default``),
+    but in the future it might hold the value ``default``.
+
 ``command-list``
     The list of input commands. This returns an array of maps, where each map
     node represents a command. This map currently only has a single entry:
