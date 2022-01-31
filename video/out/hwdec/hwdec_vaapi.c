@@ -362,6 +362,10 @@ static void determine_working_formats(struct ra_hwdec *hw)
 
     for (int n = 0; n < num_profiles; n++) {
         VAProfile profile = profiles[n];
+        if (profile == VAProfileNone) {
+            // We don't use the None profile.
+            continue;
+        }
         int num_ep = 0;
         status = vaQueryConfigEntrypoints(p->display, profile, entrypoints,
                                           &num_ep);
@@ -371,6 +375,10 @@ static void determine_working_formats(struct ra_hwdec *hw)
             continue;
         }
         for (int ep = 0; ep < num_ep; ep++) {
+            if (entrypoints[ep] != VAEntrypointVLD) {
+                // We are only interested in decoding entrypoints.
+                continue;
+            }
             VAConfigID config = VA_INVALID_ID;
             status = vaCreateConfig(p->display, profile, entrypoints[ep],
                                     NULL, 0, &config);
