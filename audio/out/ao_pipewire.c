@@ -166,6 +166,10 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
                     SPA_PARAM_BUFFERS_blocks,     SPA_POD_Int(ao->num_planes),
                     SPA_PARAM_BUFFERS_size,       SPA_POD_Int(buffer_size),
                     SPA_PARAM_BUFFERS_stride,     SPA_POD_Int(ao->sstride));
+    if (!params[0]) {
+        MP_ERR(ao, "Could not build parameter pod\n");
+        return;
+    }
 
     pw_stream_update_params(p->stream, params, 1);
 }
@@ -409,6 +413,8 @@ static int init(struct ao *ao)
         audio_info.position[i] = mp_speaker_id_to_spa(ao, ao->channels.speaker[i]);
 
     params[0] = spa_format_audio_raw_build(&b, SPA_PARAM_EnumFormat, &audio_info);
+    if (!params[0])
+        goto error;
 
     if (af_fmt_is_planar(ao->format)) {
         ao->num_planes = ao->channels.num;
