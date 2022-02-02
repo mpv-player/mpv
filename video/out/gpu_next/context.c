@@ -129,7 +129,7 @@ void gpu_ctx_destroy(struct gpu_ctx **ctxp)
     struct priv *p = ctx->priv;
 
 #if HAVE_GL && defined(PL_HAVE_OPENGL)
-    if (ra_is_gl(ctx->ra_ctx->ra)) {
+    if (ctx->ra_ctx && ra_is_gl(ctx->ra_ctx->ra)) {
         pl_swapchain_destroy(&ctx->swapchain);
         pl_opengl_destroy(&p->opengl);
         pl_log_destroy(&ctx->pllog);
