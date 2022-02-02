@@ -1559,6 +1559,12 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_CHECK_EVENTS: {
         check_dnd_fd(wl);
         *events |= wl->pending_vo_events;
+        if (*events & VO_EVENT_RESIZE) {
+            *events |= VO_EVENT_EXPOSE;
+            wl->frame_wait = false;
+            wl->timeout_count = 0;
+            wl->hidden = false;
+        }
         wl->pending_vo_events = 0;
         return VO_TRUE;
     }
