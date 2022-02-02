@@ -187,6 +187,11 @@ static double triangle(params *p, double x)
     return fmax(0.0, 1.0 - fabs(x / p->radius));
 }
 
+static double cosine(params *p, double x)
+{
+    return cos(x);
+}
+
 static double hanning(params *p, double x)
 {
     return 0.5 + 0.5 * cos(M_PI * x);
@@ -339,6 +344,7 @@ const struct filter_window mp_filter_windows[] = {
     {"box",            1,   box},
     {"triangle",       1,   triangle},
     {"bartlett",       1,   triangle},
+    {"cosine",         M_PI_2, cosine},
     {"hanning",        1,   hanning},
     {"tukey",          1,   hanning, .taper = 0.5},
     {"hamming",        1,   hamming},
