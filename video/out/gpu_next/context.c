@@ -47,19 +47,8 @@
 #include "video/out/vulkan/context.h"
 #endif
 
-struct priv {
-#ifdef PL_HAVE_D3D11
-    pl_d3d11 d3d11;
-#endif
-#ifdef PL_HAVE_OPENGL
-    pl_opengl opengl;
-#else
-    char dummy;
-#endif
-};
-
 #if HAVE_D3D11
-static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx, struct priv *p,
+static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx,
                           struct ra_ctx_opts *ctx_opts)
 {
 #if !defined(PL_HAVE_D3D11)
@@ -80,17 +69,20 @@ static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx, struct priv *p,
         goto err_out;
     }
 
-    p->d3d11 = pl_d3d11_create(ctx->pllog, pl_d3d11_params(
-        .device = device,
-    ));
-    if (!p->d3d11) {
+    pl_d3d11 d3d11 = pl_d3d11_create(ctx->pllog,
+        pl_d3d11_params(
+            .device = device,
+        )
+    );
+    if (!d3d11) {
         mp_err(ctx->log, "Failed to acquire a d3d11 libplacebo context!\n");
         goto err_out;
     }
-    ctx->gpu = p->d3d11->gpu;
+    ctx->gpu = d3d11->gpu;
 
     mppl_log_set_probing(ctx->pllog, false);
-    ctx->swapchain = pl_d3d11_create_swapchain(p->d3d11,
+
+    ctx->swapchain = pl_d3d11_create_swapchain(d3d11,
         pl_d3d11_swapchain_params(
             .swapchain = swapchain,
         )
@@ -115,8 +107,6 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
 {
     struct gpu_ctx *ctx = talloc_zero(NULL, struct gpu_ctx);
     ctx->log = vo->log;
-    ctx->priv = talloc_zero(ctx, struct priv);
-    struct priv *p = ctx->priv;
 
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(ctx, vo->global, &ra_ctx_conf);
     ctx_opts->want_alpha = gl_opts->alpha_mode == ALPHA_YES;
@@ -142,7 +132,7 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
 
 #if HAVE_D3D11
     if (ra_is_d3d11(ctx->ra_ctx->ra)) {
-        if (!d3d11_pl_init(vo, ctx, p, ctx_opts))
+        if (!d3d11_pl_init(vo, ctx, ctx_opts))
             goto err_out;
 
         return ctx;
@@ -151,16 +141,19 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
 
 #if HAVE_GL && defined(PL_HAVE_OPENGL)
     if (ra_is_gl(ctx->ra_ctx->ra)) {
-        p->opengl = pl_opengl_create(ctx->pllog, pl_opengl_params(
-            .debug = ctx_opts->debug,
-            .allow_software = ctx_opts->allow_sw,
-        ));
-        if (!p->opengl)
+        pl_opengl opengl = pl_opengl_create(ctx->pllog,
+            pl_opengl_params(
+                .debug = ctx_opts->debug,
+                .allow_software = ctx_opts->allow_sw,
+            )
+        );
+        if (!opengl)
             goto err_out;
-        ctx->gpu = p->opengl->gpu;
+        ctx->gpu = opengl->gpu;
 
         mppl_log_set_probing(ctx->pllog, false);
-        ctx->swapchain = pl_opengl_create_swapchain(p->opengl, pl_opengl_swapchain_params(
+
+        ctx->swapchain = pl_opengl_create_swapchain(opengl, pl_opengl_swapchain_params(
             .max_swapchain_depth = vo->opts->swapchain_depth,
         ));
         if (!ctx->swapchain)
@@ -199,8 +192,6 @@ void gpu_ctx_destroy(struct gpu_ctx **ctxp)
     if (!ctx->ra_ctx)
         goto skip_common_pl_cleanup;
 
-    struct priv *p = ctx->priv;
-
 #if HAVE_VULKAN
     if (ra_vk_ctx_get(ctx->ra_ctx))
         // vulkan RA context handles pl cleanup by itself,
@@ -211,17 +202,21 @@ void gpu_ctx_destroy(struct gpu_ctx **ctxp)
     if (ctx->swapchain)
         pl_swapchain_destroy(&ctx->swapchain);
 
+    if (ctx->gpu) {
 #if HAVE_GL && defined(PL_HAVE_OPENGL)
-    if (ra_is_gl(ctx->ra_ctx->ra)) {
-        pl_opengl_destroy(&p->opengl);
-    }
+        if (ra_is_gl(ctx->ra_ctx->ra)) {
+            pl_opengl opengl = pl_opengl_get(ctx->gpu);
+            pl_opengl_destroy(&opengl);
+        }
 #endif
 
 #if HAVE_D3D11 && defined(PL_HAVE_D3D11)
-    if (ra_is_d3d11(ctx->ra_ctx->ra)) {
-        pl_d3d11_destroy(&p->d3d11);
-    }
+        if (ra_is_d3d11(ctx->ra_ctx->ra)) {
+            pl_d3d11 d3d11 = pl_d3d11_get(ctx->gpu);
+            pl_d3d11_destroy(&d3d11);
+        }
 #endif
+    }
 
     if (ctx->pllog)
         pl_log_destroy(&ctx->pllog);
