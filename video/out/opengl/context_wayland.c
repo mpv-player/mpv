@@ -64,6 +64,15 @@ static bool wayland_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_
     return render ? ra_gl_ctx_start_frame(sw, out_fbo) : false;
 }
 
+static bool wayland_egl_submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
+{
+    struct ra_ctx *ctx = sw->ctx;
+    struct vo_wayland_state *wl = ctx->vo->wl;
+    bool render = !wl->hidden || wl->opts->disable_vsync;
+
+    return render ? ra_gl_ctx_submit_frame(sw, frame): false;
+}
+
 static void wayland_egl_swap_buffers(struct ra_swapchain *sw)
 {
     struct ra_ctx *ctx = sw->ctx;
@@ -81,6 +90,7 @@ static void wayland_egl_swap_buffers(struct ra_swapchain *sw)
 
 static const struct ra_swapchain_fns wayland_egl_swapchain = {
     .start_frame  = wayland_egl_start_frame,
+    .submit_frame = wayland_egl_submit_frame,
     .swap_buffers = wayland_egl_swap_buffers,
 };
 
