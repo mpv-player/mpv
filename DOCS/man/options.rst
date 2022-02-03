@@ -1532,7 +1532,7 @@ Video
     video will be either cut off, or black bars are added.
 
     This value is multiplied with the value derived from ``--video-zoom`` and
-    the normal video aspect aspect ratio. This option is disabled if the
+    the normal video aspect ratio. This option is disabled if the
     ``--no-keepaspect`` option is used.
 
 ``--video-align-x=<-1-1>``, ``--video-align-y=<-1-1>``
