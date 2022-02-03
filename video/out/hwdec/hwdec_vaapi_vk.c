@@ -81,12 +81,11 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper, bool probing)
             },
         };
 
-        mppl_ctx_set_log(gpu->ctx, mapper->ra->log, probing);
+        mppl_log_set_probing(gpu->log, probing);
         const struct pl_tex *pltex = pl_tex_create(gpu, &tex_params);
-        mppl_ctx_set_log(gpu->ctx, mapper->ra->log, false);
-        if (!pltex) {
+        mppl_log_set_probing(gpu->log, false);
+        if (!pltex)
             return false;
-        }
 
         struct ra_tex *ratex = talloc_ptrtype(NULL, ratex);
         int ret = mppl_wrap_tex(mapper->ra, pltex, ratex);
