@@ -969,7 +969,7 @@ if jpeg.found()
     features += 'jpeg'
 endif
 
-libplacebo_v4 = false
+libplacebo_next = false
 libplacebo = dependency('libplacebo', version: '>=3.104.0', required: get_option('libplacebo'))
 if libplacebo.found()
     dependencies += libplacebo
@@ -978,8 +978,8 @@ if libplacebo.found()
                      'video/out/placebo/utils.c')
     pl_api_ver = libplacebo.version().split('.')[1]
     if pl_api_ver.version_compare('>=190')
-        features += 'libplacebo-v4'
-        libplacebo_v4 = true
+        features += 'libplacebo-next'
+        libplacebo_next = true
         message('libplacebo v4.190+ found! Enabling vo_gpu_next.')
         sources += files('video/out/vo_gpu_next.c',
                          'video/out/gpu_next/context.c')
@@ -1754,7 +1754,7 @@ conf_data.set10('HAVE_LIBARCHIVE', libarchive.found())
 conf_data.set10('HAVE_LIBAVDEVICE', libavdevice.found())
 conf_data.set10('HAVE_LIBDL', libdl)
 conf_data.set10('HAVE_LIBBLURAY', libbluray.found())
-conf_data.set10('HAVE_LIBPLACEBO_V4', libplacebo_v4)
+conf_data.set10('HAVE_LIBPLACEBO_NEXT', libplacebo_next)
 conf_data.set10('HAVE_LINUX_FSTATFS', linux_fstatfs)
 conf_data.set10('HAVE_LUA', lua['use'])
 conf_data.set10('HAVE_MACOS_10_11_FEATURES', macos_10_11_features.allowed())

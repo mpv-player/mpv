@@ -740,7 +740,7 @@ video_output_features = [
         'desc': 'libplacebo support',
         'func': check_pkg_config('libplacebo >= 3.104.0'),
     }, {
-        'name': 'libplacebo-v4',
+        'name': 'libplacebo-next',
         'desc': 'libplacebo v4.190+, needed for vo_gpu_next',
         'deps': 'libplacebo',
         'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 190',
