@@ -162,9 +162,9 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     p->params = params;
     p->opts = mp_get_config_group(p, ctx->global, &vulkan_conf);
 
-    assert(vk->ctx);
+    assert(vk->pllog);
     assert(vk->vkinst);
-    vk->vulkan = pl_vulkan_create(vk->ctx, &(struct pl_vulkan_params) {
+    vk->vulkan = pl_vulkan_create(vk->pllog, &(struct pl_vulkan_params) {
         .instance = vk->vkinst->instance,
         .surface = vk->surface,
         .async_transfer = p->opts->async_transfer,

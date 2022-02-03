@@ -89,8 +89,7 @@ static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx, struct priv *p,
     }
     ctx->gpu = p->d3d11->gpu;
 
-    mppl_ctx_set_log(ctx->pllog, ctx->log, false); // disable probing
-
+    mppl_log_set_probing(ctx->pllog, false);
     ctx->swapchain = pl_d3d11_create_swapchain(p->d3d11,
         pl_d3d11_swapchain_params(
             .swapchain = swapchain,
@@ -128,20 +127,18 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
 #if HAVE_VULKAN
     struct mpvk_ctx *vkctx = ra_vk_ctx_get(ctx->ra_ctx);
     if (vkctx) {
-        ctx->pllog = vkctx->ctx;
+        ctx->pllog = vkctx->pllog;
         ctx->gpu = vkctx->gpu;
         ctx->swapchain = vkctx->swapchain;
         return ctx;
     }
 #endif
 
-    ctx->pllog = pl_log_create(PL_API_VER, NULL);
+    ctx->pllog = mppl_log_create(ctx->log);
     if (!ctx->pllog)
         goto err_out;
 
-    mppl_ctx_set_log(ctx->pllog, ctx->log, vo->probing);
-    mp_verbose(ctx->log, "Initialized libplacebo %s (API v%d)\n",
-               PL_VERSION, PL_API_VER);
+    mppl_log_set_probing(ctx->pllog, vo->probing);
 
 #if HAVE_D3D11
     if (ra_is_d3d11(ctx->ra_ctx->ra)) {
@@ -162,8 +159,7 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
             goto err_out;
         ctx->gpu = p->opengl->gpu;
 
-        mppl_ctx_set_log(ctx->pllog, ctx->log, false); // disable probing
-
+        mppl_log_set_probing(ctx->pllog, false);
         ctx->swapchain = pl_opengl_create_swapchain(p->opengl, pl_opengl_swapchain_params(
             .max_swapchain_depth = vo->opts->swapchain_depth,
         ));

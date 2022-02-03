@@ -48,15 +48,20 @@ static void log_cb_probing(void *priv, enum pl_log_level level, const char *msg)
     mp_msg(log, pl_log_to_msg_lev[probing_map(level)], "%s\n", msg);
 }
 
-void mppl_ctx_set_log(struct pl_context *ctx, struct mp_log *log, bool probing)
+pl_log mppl_log_create(struct mp_log *log)
 {
-    assert(log);
-
-    pl_context_update(ctx, &(struct pl_context_params) {
-        .log_cb      = probing ? log_cb_probing : log_cb,
-        .log_level   = msg_lev_to_pl_log[mp_msg_level(log)],
-        .log_priv    = log,
+    return pl_log_create(PL_API_VER, &(struct pl_log_params) {
+        .log_cb     = log_cb,
+        .log_level  = msg_lev_to_pl_log[mp_msg_level(log)],
+        .log_priv   = log,
     });
+}
+
+void mppl_log_set_probing(pl_log log, bool probing)
+{
+    struct pl_log_params params = log->params;
+    params.log_cb = probing ? log_cb_probing : log_cb;
+    pl_log_update(log, &params);
 }
 
 enum pl_color_primaries mp_prim_to_pl(enum mp_csp_prim prim)

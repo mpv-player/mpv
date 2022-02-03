@@ -388,7 +388,7 @@ static bool display_init(struct ra_ctx *ctx)
         .instance = vk->vkinst->instance,
         .device_name = device_name,
     };
-    VkPhysicalDevice device = pl_vulkan_choose_device(vk->ctx, &vulkan_params);
+    VkPhysicalDevice device = pl_vulkan_choose_device(vk->pllog, &vulkan_params);
     talloc_free(device_name);
     if (!device) {
         MP_MSG(ctx, msgl, "Failed to open physical device.\n");
