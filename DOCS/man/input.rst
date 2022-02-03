@@ -2977,7 +2977,7 @@ Property list
     If tracks of the requested type are selected via ``--lavfi-complex``, the
     first one is returned.
 
-``chapter-list``
+``chapter-list`` (RW)
     List of chapters, current entry marked. Currently, the raw property value
     is useless.
 
