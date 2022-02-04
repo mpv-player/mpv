@@ -361,14 +361,17 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             switch (cmd) {
                 case AOCONTROL_SET_VOLUME: {
                     struct ao_control_vol *vol = arg;
-                    float left = mp_volume_to_spa_volume(vol->left), right = mp_volume_to_spa_volume(vol->right);
-                    ret = CONTROL_RET(pw_stream_set_control(p->stream, SPA_PROP_channelVolumes, 2, &left, &right));
+                    float values[2]  = {
+                        mp_volume_to_spa_volume(vol->left),
+                        mp_volume_to_spa_volume(vol->right),
+                    };
+                    ret = CONTROL_RET(pw_stream_set_control(p->stream, SPA_PROP_channelVolumes, 2, values, 0));
                     break;
                }
                 case AOCONTROL_SET_MUTE: {
                     bool *muted = arg;
                     float value = *muted ? 1.f : 0.f;
-                    ret = CONTROL_RET(pw_stream_set_control(p->stream, SPA_PROP_mute, 1, &value));
+                    ret = CONTROL_RET(pw_stream_set_control(p->stream, SPA_PROP_mute, 1, &value, 0));
                     break;
                 }
                 case AOCONTROL_UPDATE_STREAM_TITLE: {
