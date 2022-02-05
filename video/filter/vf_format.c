@@ -145,7 +145,10 @@ static void vf_format_process(struct mp_filter *f)
         struct mp_frame frame = mp_pin_out_read(priv->conv->f->pins[1]);
         struct mp_image *img = frame.data;
 
-        if (!priv->opts->convert && frame.type == MP_FRAME_VIDEO) {
+        if (frame.type != MP_FRAME_VIDEO)
+            goto write_out;
+
+        if (!priv->opts->convert) {
             set_params(priv->opts, &img->params, false);
             mp_image_params_guess_csp(&img->params);
         }
@@ -153,6 +156,7 @@ static void vf_format_process(struct mp_filter *f)
         if (!priv->opts->dovi)
             av_buffer_unref(&img->dovi);
 
+write_out:
         mp_pin_in_write(f->ppins[1], frame);
     }
 }
