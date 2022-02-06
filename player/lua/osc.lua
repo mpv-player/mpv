@@ -124,6 +124,7 @@ local state = {
     border = true,
     maximized = false,
     osd = mp.create_osd_overlay("ass-events"),
+    chapter_list = {},                      -- sorted by time
 }
 
 local window_control_box_width = 80
@@ -604,16 +605,13 @@ end
 
 -- returns nil or a chapter element from the native property chapter-list
 function get_chapter(possec)
-    local cl = mp.get_property_native("chapter-list", {})
-    local ch = nil
+    local cl = state.chapter_list  -- sorted, get latest before possec, if any
 
-    -- chapters might not be sorted by time. find nearest-before/at possec
-    for n=1, #cl do
-        if possec >= cl[n].time and (not ch or cl[n].time > ch.time) then
-            ch = cl[n]
+    for n=#cl,1,-1 do
+        if possec >= cl[n].time then
+            return cl[n]
         end
     end
-    return ch
 end
 
 function render_elements(master_ass)
@@ -2687,7 +2685,10 @@ mp.register_event("shutdown", shutdown)
 mp.register_event("start-file", request_init)
 mp.observe_property("track-list", nil, request_init)
 mp.observe_property("playlist", nil, request_init)
-mp.observe_property("chapter-list", nil, function()
+mp.observe_property("chapter-list", "native", function(_, list)
+    list = list or {}  -- safety, shouldn't return nil
+    table.sort(list, function(a, b) return a.time < b.time end)
+    state.chapter_list = list
     update_duration_watch()
     request_init()
 end)
