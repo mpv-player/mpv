@@ -4329,15 +4329,49 @@ struct mp_image *gl_video_get_image(struct gl_video *p, int imgfmt, int w, int h
 static void load_add_hwdec(struct gl_video *p, struct mp_hwdec_devices *devs,
                            const struct ra_hwdec_driver *drv, bool is_auto)
 {
+    bool needs_loading = true;
+    for (int j = 0; j < p->num_hwdecs; j++) {
+        const struct ra_hwdec *hwdec = p->hwdecs[j];
+        if (hwdec->driver == drv) {
+            needs_loading = false;
+            break;
+        }
+    }
+    if (!needs_loading) {
+        return;
+    }
+
     struct ra_hwdec *hwdec =
         ra_hwdec_load_driver(p->ra, p->log, p->global, devs, drv, is_auto);
     if (hwdec)
         MP_TARRAY_APPEND(p, p->hwdecs, p->num_hwdecs, hwdec);
 }
 
+static void load_hwdecs_all(struct gl_video *p, struct mp_hwdec_devices *devs)
+{
+    if (!p->hwdec_interop_loading_done) {
+        for (int n = 0; ra_hwdec_drivers[n]; n++)
+            load_add_hwdec(p, devs, ra_hwdec_drivers[n], true);
+        p->hwdec_interop_loading_done = true;
+    }
+}
+
 void gl_video_load_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
                           bool load_all_by_default)
 {
+    /*
+     * By default, or if the option value is "auto", we will not pre-emptively
+     * load any interops, and instead allow them to be loaded on-demand.
+     *
+     * If the option value is "no", then no interops will be loaded now, and
+     * no interops will be loaded, even if requested later.
+     *
+     * If the option value is "all", then all interops will be loaded now, and
+     * obviously no interops will need to be loaded later.
+     *
+     * Finally, if a specific interop is requested, it will be loaded now, and
+     * no other interop will be loaded, even if requested later.
+     */
     char *type = p->opts.hwdec_interop;
     if (!type || !type[0] || strcmp(type, "auto") == 0) {
         if (!load_all_by_default)
@@ -4347,7 +4381,7 @@ void gl_video_load_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
     if (strcmp(type, "no") == 0) {
         // do nothing, just block further loading
     } else if (strcmp(type, "all") == 0) {
-        gl_video_load_hwdecs_all(p, devs);
+        load_hwdecs_all(p, devs);
     } else {
         for (int n = 0; ra_hwdec_drivers[n]; n++) {
             const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
@@ -4360,11 +4394,40 @@ void gl_video_load_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
     p->hwdec_interop_loading_done = true;
 }
 
-void gl_video_load_hwdecs_all(struct gl_video *p, struct mp_hwdec_devices *devs)
+void gl_video_load_hwdecs_for_img_fmt(struct gl_video *p,
+                                      struct mp_hwdec_devices *devs,
+                                      int imgfmt)
 {
-    if (!p->hwdec_interop_loading_done) {
-        for (int n = 0; ra_hwdec_drivers[n]; n++)
-            load_add_hwdec(p, devs, ra_hwdec_drivers[n], true);
-        p->hwdec_interop_loading_done = true;
+    if (p->hwdec_interop_loading_done) {
+        /*
+         * If we previously marked interop loading as done (for reasons
+         * discussed above), then do not load any other interops regardless
+         * of imgfmt.
+         */
+        return;
+    }
+
+    if (imgfmt == IMGFMT_NONE) {
+        MP_VERBOSE(p, "Loading hwdec drivers for all formats\n");
+        load_hwdecs_all(p, devs);
+        return;
+    }
+
+    MP_VERBOSE(p, "Loading hwdec drivers for format: '%s'\n",
+               mp_imgfmt_to_name(imgfmt));
+    for (int i = 0; ra_hwdec_drivers[i]; i++) {
+        bool matched_fmt = false;
+        const struct ra_hwdec_driver *drv = ra_hwdec_drivers[i];
+        for (int j = 0; drv->imgfmts[j]; j++) {
+            if (imgfmt == drv->imgfmts[j]) {
+                matched_fmt = true;
+                break;
+            }
+        }
+        if (!matched_fmt) {
+            continue;
+        }
+
+        load_add_hwdec(p, devs, drv, false);
     }
 }

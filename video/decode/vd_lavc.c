@@ -431,7 +431,8 @@ static AVBufferRef *hwdec_create_dev(struct mp_filter *vd,
             return ref;
         }
     } else if (ctx->hwdec_devs) {
-        hwdec_devices_request_all(ctx->hwdec_devs);
+        hwdec_devices_request_for_img_fmt(ctx->hwdec_devs,
+                                          pixfmt2imgfmt(hwdec->pix_fmt));
         return hwdec_devices_get_lavc(ctx->hwdec_devs, hwdec->lavc_device);
     }
 
@@ -510,7 +511,8 @@ static void select_and_set_hwdec(struct mp_filter *vd)
                 // Most likely METHOD_INTERNAL, which often use delay-loaded
                 // VO support as well.
                 if (ctx->hwdec_devs)
-                    hwdec_devices_request_all(ctx->hwdec_devs);
+                    hwdec_devices_request_for_img_fmt(
+                        ctx->hwdec_devs, pixfmt2imgfmt(hwdec->pix_fmt));
             }
 
             ctx->use_hwdec = true;
