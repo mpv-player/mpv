@@ -55,11 +55,12 @@ void hwdec_devices_remove(struct mp_hwdec_devices *devs, struct mp_hwdec_ctx *ct
 // If used at all, this must be set/unset during initialization/uninitialization,
 // as concurrent use with hwdec_devices_request() is a race condition.
 void hwdec_devices_set_loader(struct mp_hwdec_devices *devs,
-    void (*load_api)(void *ctx), void *load_api_ctx);
+    void (*load_api)(void *ctx, int imgfmt), void *load_api_ctx);
 
-// Cause VO to lazily load all devices, and will block until this is done (even
-// if not available).
-void hwdec_devices_request_all(struct mp_hwdec_devices *devs);
+// Cause VO to lazily load all devices for a specified img format, and will
+// block until this is done (even if not available). Pass IMGFMT_NONE to load
+// all available devices.
+void hwdec_devices_request_for_img_fmt(struct mp_hwdec_devices *devs, int imgfmt);
 
 // Return "," concatenated list (for introspection/debugging). Use talloc_free().
 char *hwdec_devices_get_names(struct mp_hwdec_devices *devs);

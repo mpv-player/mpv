@@ -1,12 +1,15 @@
 #include <math.h>
 #include <pthread.h>
 
+#include <libavutil/hwcontext.h>
+
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
 #include "osdep/atomic.h"
 #include "osdep/timer.h"
 #include "video/hwdec.h"
+#include "video/img_format.h"
 
 #include "filter.h"
 #include "filter_internal.h"
@@ -688,7 +691,20 @@ struct AVBufferRef *mp_filter_load_hwdec_device(struct mp_filter *f, int avtype)
     if (!info || !info->hwdec_devs)
         return NULL;
 
-    hwdec_devices_request_all(info->hwdec_devs);
+    int imgfmt = IMGFMT_NONE;
+    switch (avtype) {
+    case AV_HWDEVICE_TYPE_VAAPI:
+        imgfmt = IMGFMT_VAAPI;
+        break;
+    case AV_HWDEVICE_TYPE_VDPAU:
+        imgfmt = IMGFMT_VDPAU;
+        break;
+    default:
+        MP_WARN(f,
+               "Unrecognised HW Device type requested. Loading all devices\n");
+    }
+
+    hwdec_devices_request_for_img_fmt(info->hwdec_devs, imgfmt);
 
     return hwdec_devices_get_lavc(info->hwdec_devs, avtype);
 }
