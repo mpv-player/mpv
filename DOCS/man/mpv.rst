@@ -767,7 +767,7 @@ the following options:
 
         [something]
         profile-restore=copy-equal
-        vf-add=rotate=90
+        vf-add=rotate=PI/2  # rotate by 90 degrees
 
     Then running these commands will result in behavior as commented:
 
@@ -775,9 +775,9 @@ the following options:
 
         set vf vflip
         apply-profile something
-        vf-add=hflip
+        vf add hflip
         apply-profile something
-        # vf == vflip,rotate=90,hflip,rotate=90
+        # vf == vflip,rotate=PI/2,hflip,rotate=PI/2
         apply-profile something restore
         # vf == vflip
 
@@ -841,7 +841,7 @@ and unintuitive behavior.
         profile-desc=Mess up video when entering fullscreen
         profile-cond=fullscreen
         profile-restore=copy
-        vf-add=rotate=90
+        vf-add=rotate=PI/2  # rotate by 90 degrees
 
     This appends the ``rotate`` filter to the video filter chain when entering
     fullscreen. When leaving fullscreen, the ``vf`` option is set to the value
@@ -854,7 +854,7 @@ and unintuitive behavior.
 
         [something]
         profile-cond=fullscreen
-        vf-add=@rot:rotate=90
+        vf-add=@rot:rotate=PI/2
 
         [something-inv]
         profile-cond=not fullscreen
