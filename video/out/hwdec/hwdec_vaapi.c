@@ -249,6 +249,15 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     CHECK_VA_STATUS(mapper, "vaSyncSurface()");
     p->surface_acquired = true;
 
+    if (p->num_planes != p->desc.num_layers) {
+        mp_msg(mapper->log, p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR,
+               "Mapped surface with format '%s' has unexpected number of planes. "
+               "(%d instead of %d)\n",
+               mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
+               p->desc.num_layers, p->num_planes);
+        goto err;
+    }
+
     if (!p_owner->interop_map(mapper, p_owner->probing_formats))
         goto err;
 
@@ -267,16 +276,20 @@ err:
 
 static bool try_format_map(struct ra_hwdec *hw, struct mp_image *surface)
 {
-    bool ok = false;
     struct ra_hwdec_mapper *mapper = ra_hwdec_mapper_create(hw, &surface->params);
-    if (mapper)
-        ok = ra_hwdec_mapper_map(mapper, surface) >= 0;
+    if (!mapper) {
+        MP_DBG(hw, "Failed to create mapper\n");
+        return false;
+    }
+
+    bool ok = ra_hwdec_mapper_map(mapper, surface) >= 0;
     ra_hwdec_mapper_free(&mapper);
     return ok;
 }
 
 static void try_format_pixfmt(struct ra_hwdec *hw, enum AVPixelFormat pixfmt)
 {
+    bool supported = false;
     struct priv_owner *p = hw->priv;
 
     int mp_fmt = pixfmt2imgfmt(pixfmt);
@@ -312,10 +325,15 @@ static void try_format_pixfmt(struct ra_hwdec *hw, enum AVPixelFormat pixfmt)
     if (!s || !mp_image_params_valid(&s->params))
         goto err;
     if (try_format_map(hw, s)) {
+        supported = true;
         MP_TARRAY_APPEND(p, p->formats, num_formats, mp_fmt);
         MP_TARRAY_APPEND(p, p->formats, num_formats, 0); // terminate it
     }
 err:
+    if (!supported)
+        MP_DBG(hw, "Unsupported format: %s\n",
+               mp_imgfmt_to_name(mp_fmt));
+
     talloc_free(s);
     av_frame_free(&frame);
     av_buffer_unref(&fref);
