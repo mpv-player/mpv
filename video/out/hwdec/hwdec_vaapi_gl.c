@@ -183,8 +183,11 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
 
         p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),
             EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
-        if (!p->images[n])
+        if (!p->images[n]) {
+            mp_msg(mapper->log, p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR,
+                   "Failed to import surface in EGL: %u\n", eglGetError());
             return false;
+        }
 
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
         p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
