@@ -481,17 +481,36 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
 
     enum pl_chroma_location chroma = mp_chroma_to_pl(par->chroma_location);
     int planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt);
+    bool img_vflipped = false;
     for (int n = 0; n < planes; n++) {
         data[n].width = mp_image_plane_w(mpi, n);
         data[n].height = mp_image_plane_h(mpi, n);
-        data[n].row_stride = mpi->stride[n];
-        data[n].pixels = mpi->planes[n];
+        bool vflipped = mpi->stride[n] < 0;
+        if (vflipped) {
+            int h = mp_image_plane_h(mpi, n);
+            data[n].pixels = mpi->planes[n] + (h - 1) * mpi->stride[n];
+            data[n].row_stride = -mpi->stride[n];
+        } else {
+            data[n].pixels = mpi->planes[n];
+            data[n].row_stride = mpi->stride[n];
+        }
+
+        // libplacebo can't deal with images that have partially flipped
+        // textures. We could work around this by blitting them to fresh
+        // (unflipped) textures, but it's an unlikely enough case to warrant
+        // just erroring out instead. (Usually, all planes will be flipped or
+        // unflipped simultaneously, e.g. by the `vflip` filter)
+        if (n > 0 && img_vflipped != vflipped) {
+            MP_ERR(vo, "Inconsistently flipped planes!\n");
+            return false;
+        }
+        img_vflipped = vflipped;
 
         pl_buf buf = get_dr_buf(mpi);
         if (buf) {
-            data[n].pixels = NULL;
             data[n].buf = buf;
-            data[n].buf_offset = mpi->planes[n] - buf->data;
+            data[n].buf_offset = (uint8_t *) data[n].pixels - buf->data;
+            data[n].pixels = NULL;
         } else if (gpu->limits.callbacks) {
             data[n].callback = talloc_free;
             data[n].priv = mp_image_new_ref(mpi);
@@ -504,8 +523,11 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             return false;
         }
 
-        if (mpi->fmt.xs[n] || mpi->fmt.ys[n])
+        if (mpi->fmt.xs[n] || mpi->fmt.ys[n]) {
             pl_chroma_location_offset(chroma, &plane->shift_x, &plane->shift_y);
+            if (vflipped)
+                plane->shift_y = -plane->shift_y;
+        }
     }
 
 #ifdef PL_HAVE_LAV_DOLBY_VISION
@@ -665,6 +687,13 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
     }
 
     if (frame->crop.y1 < frame->crop.y0) {
+        frame->crop.y0 = height - frame->crop.y0;
+        frame->crop.y1 = height - frame->crop.y1;
+    }
+
+    struct mp_image *mpi = frame->user_data;
+    if (mpi && mpi->stride[0] < 0) {
+        // Adjust for vertically flipped planes
         frame->crop.y0 = height - frame->crop.y0;
         frame->crop.y1 = height - frame->crop.y1;
     }
