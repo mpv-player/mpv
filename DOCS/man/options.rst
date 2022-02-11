@@ -2904,6 +2904,15 @@ Subtitles
     name does not match, it may prefer not to render any text that uses the
     missing font.)
 
+``--sub-fonts-dir=<path>``
+    Font files in this directory are used by mpv/libass for subtitles. Useful
+    if you do not want to install fonts to your system. Note that files in this
+    directory are loaded into memory before being used by mpv. If you have a
+    lot of fonts, consider using fonts.conf (see `FILES`_ section) to include
+    additional mpv user settings.
+
+    If this option is not specified, ``~~/fonts`` will be used by default.
+
 Window
 ------
 
@@ -4255,6 +4264,9 @@ OSD
 ``--osd-font-provider=<...>``
     See ``--sub-font-provider`` for details and accepted values. Note that
     unlike subtitles, OSD never uses embedded fonts from media files.
+
+``--osd-fonts-dir=<path>``
+    See ``--sub-fonts-dir`` for details.  Defaults to ``~~/fonts``.
 
 Screenshot
 ----------

@@ -67,6 +67,8 @@ static const m_option_t style_opts[] = {
         {"auto", 0}, {"left", 1}, {"center", 2}, {"right", 3})},
     {"font-provider", OPT_CHOICE(font_provider,
         {"auto", 0}, {"none", 1}, {"fontconfig", 2}), .flags = UPDATE_SUB_HARD},
+    {"fonts-dir", OPT_STRING(fonts_dir),
+        .flags = M_OPT_FILE | UPDATE_SUB_HARD},
     {0}
 };
 
