@@ -132,9 +132,12 @@ static void message_callback(int level, const char *format, va_list va, void *ct
     mp_msg(log, level, "\n");
 }
 
-ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log)
+ASS_Library *mp_ass_init(struct mpv_global *global,
+                         struct osd_style_opts *opts, struct mp_log *log)
 {
-    char *path = mp_find_config_file(NULL, global, "fonts");
+    char *path = opts->fonts_dir && opts->fonts_dir[0] ?
+                 mp_get_user_path(NULL, global, opts->fonts_dir) :
+                 mp_find_config_file(NULL, global, "fonts");
     mp_dbg(log, "ASS library version: 0x%x (runtime 0x%x)\n",
            (unsigned)LIBASS_VERSION, ass_library_version());
     ASS_Library *priv = ass_library_init();

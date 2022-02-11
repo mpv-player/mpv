@@ -51,7 +51,7 @@ static void create_ass_renderer(struct osd_state *osd, struct ass_state *ass)
         return;
 
     ass->log = mp_log_new(NULL, osd->log, "libass");
-    ass->library = mp_ass_init(osd->global, ass->log);
+    ass->library = mp_ass_init(osd->global, osd->opts->osd_style, ass->log);
     ass_add_font(ass->library, "mpv-osd-symbols", (void *)osd_font_pfb,
                  sizeof(osd_font_pfb) - 1);
 

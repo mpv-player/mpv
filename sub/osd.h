@@ -157,6 +157,7 @@ struct osd_style_opts {
     bool italic;
     int justify;
     int font_provider;
+    char *fonts_dir;
 };
 
 extern const struct m_sub_options osd_style_conf;

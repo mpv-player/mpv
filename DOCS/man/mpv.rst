@@ -1572,11 +1572,8 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
     fallback subtitle font
 
 ``~/.config/mpv/fonts/``
-    Font files in this directory are used by mpv/libass for subtitles. Useful
-    if you do not want to install fonts to your system. Note that files in this
-    directory are loaded into memory before being used by mpv. If you have a
-    lot of fonts, consider using fonts.conf (see above) to include additional
-    fonts, which is more memory-efficient.
+    Default location for ``--sub-fonts-dir`` (see `Subtitles`_) and
+    ``--osd-fonts-dir`` (see `OSD`_).
 
 ``~/.config/mpv/scripts/``
     All files in this directory are loaded as if they were passed to the
