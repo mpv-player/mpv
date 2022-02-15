@@ -90,6 +90,7 @@ struct priv {
     struct osd_state osd_state;
 
     uint64_t last_id;
+    uint64_t osd_sync;
     double last_pts;
     bool is_interpolated;
     bool want_reset;
@@ -208,9 +209,9 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     return mpi;
 }
 
-static void write_overlays(struct vo *vo, struct mp_osd_res res, double pts,
-                           int flags, struct osd_state *state,
-                           struct pl_frame *frame, bool flip)
+static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
+                            int flags, struct osd_state *state,
+                            struct pl_frame *frame, bool flip)
 {
     struct priv *p = vo->priv;
     static const bool subfmt_all[SUBBITMAP_COUNT] = {
@@ -219,8 +220,8 @@ static void write_overlays(struct vo *vo, struct mp_osd_res res, double pts,
     };
 
     struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, subfmt_all);
-    frame->num_overlays = 0;
     frame->overlays = state->overlays;
+    frame->num_overlays = 0;
 
     for (int n = 0; n < subs->num_items; n++) {
         const struct sub_bitmaps *item = subs->items[n];
@@ -280,6 +281,7 @@ static void write_overlays(struct vo *vo, struct mp_osd_res res, double pts,
             .parts = entry->parts,
             .num_parts = entry->num_parts,
             .color = frame->color,
+            .coords = PL_OVERLAY_COORDS_DST_FRAME,
         };
 
         switch (item->format) {
@@ -300,6 +302,7 @@ static void write_overlays(struct vo *vo, struct mp_osd_res res, double pts,
 struct frame_priv {
     struct vo *vo;
     struct osd_state subs;
+    uint64_t osd_sync;
 };
 
 static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
@@ -553,14 +556,6 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     // still images so it shouldn't matter.
     pl_icc_profile_compute_signature(&frame->profile);
 
-    // Generate subtitles for this frame
-    struct mp_osd_res vidres = {
-        .w = mpi->w, .h = mpi->h,
-        // compensate for anamorphic sources (render subtitles as normal)
-        .display_par = (float) par->p_h / par->p_w,
-    };
-    write_overlays(vo, vidres, mpi->pts, OSD_DRAW_SUB_ONLY, &fp->subs, frame, false);
-
     // Update LUT attached to this frame
     update_lut(p, &p->image_lut);
     frame->lut = p->image_lut.lut;
@@ -768,7 +763,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
     apply_target_options(p, &target);
-    write_overlays(vo, p->osd_res, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target, swframe.flipped);
+    update_overlays(vo, p->osd_res, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target, swframe.flipped);
     apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
     if (swframe.flipped)
         MPSWAP(float, target.crop.y0, target.crop.y1);
@@ -800,13 +795,22 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             break;
         }
 
-        // Update source crop on all existing frames. We technically own the
-        // `pl_frame` struct so this is kosher. This could be avoided by
-        // instead flushing the queue on resizes, but doing it this way avoids
-        // unnecessarily re-uploading frames.
+        // Update source crop and overlays on all existing frames. We
+        // technically own the `pl_frame` struct so this is kosher. This could
+        // be partially avoided by instead flushing the queue on resizes, but
+        // doing it this way avoids unnecessarily re-uploading frames.
         for (int i = 0; i < mix.num_frames; i++) {
-            apply_crop((struct pl_frame *) mix.frames[i], p->src,
-                       vo->params->w, vo->params->h);
+            struct pl_frame *image = (struct pl_frame *) mix.frames[i];
+            struct mp_image *mpi = image->user_data;
+            struct frame_priv *fp = mpi->priv;
+            apply_crop(image, p->src, vo->params->w, vo->params->h);
+
+            if (fp->osd_sync < p->osd_sync) {
+                // Only update the overlays if the state has changed
+                update_overlays(vo, p->osd_res, mpi->pts, OSD_DRAW_SUB_ONLY,
+                                &fp->subs, image, false);
+                fp->osd_sync = p->osd_sync;
+            }
         }
     }
 
@@ -872,9 +876,22 @@ static int query_format(struct vo *vo, int format)
 static void resize(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd_res);
+    struct mp_rect src, dst;
+    struct mp_osd_res osd;
+    vo_get_src_dst_rects(vo, &src, &dst, &osd);
     gpu_ctx_resize(p->context, vo->dwidth, vo->dheight);
     vo->want_redraw = true;
+
+    if (mp_rect_equals(&p->src, &src) &&
+        mp_rect_equals(&p->dst, &dst) &&
+        osd_res_equals(p->osd_res, osd))
+        return;
+
+    pl_renderer_flush_cache(p->rr);
+    p->osd_sync++;
+    p->osd_res = osd;
+    p->src = src;
+    p->dst = dst;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -950,10 +967,6 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     // the resulting mix is the correct frame for this PTS
     struct pl_frame *image = (struct pl_frame *) mix.frames[0];
     struct mp_image *mpi = image->user_data;
-    int orig_overlays = image->num_overlays;
-    if (!args->subs)
-        image->num_overlays = 0;
-
     struct mp_rect src = p->src, dst = p->dst;
     struct mp_osd_res osd = p->osd_res;
     if (!args->scaled) {
@@ -989,7 +1002,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
 
     if (!fbo) {
         MP_ERR(vo, "Failed creating target FBO for screenshot!\n");
-        goto done;
+        return;
     }
 
     struct pl_frame target = {
@@ -1004,8 +1017,13 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     apply_target_options(p, &target);
     apply_crop(image, src, mpi->params.w, mpi->params.h);
     apply_crop(&target, dst, fbo->params.w, fbo->params.h);
-    if (args->osd)
-        write_overlays(vo, osd, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target, false);
+
+    int osd_flags = 0;
+    if (!args->subs)
+        osd_flags |= OSD_DRAW_OSD_ONLY;
+    if (!args->osd)
+        osd_flags |= OSD_DRAW_SUB_ONLY;
+    update_overlays(vo, osd, 0, osd_flags, &p->osd_state, &target, false);
 
     if (!pl_render_image_mix(p->rr, &mix, &target, &p->params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
@@ -1028,7 +1046,6 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     // fall through
 done:
     pl_tex_destroy(gpu, &fbo);
-    image->num_overlays = orig_overlays;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -1037,13 +1054,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
     case VOCTRL_SET_PANSCAN:
-        pl_renderer_flush_cache(p->rr); // invalidate source crop
         resize(vo);
-        // fall through
+        return VO_TRUE;
     case VOCTRL_SET_EQUALIZER:
     case VOCTRL_PAUSE:
         if (p->is_interpolated)
             vo->want_redraw = true;
+        return VO_TRUE;
+
+    case VOCTRL_OSD_CHANGED:
+        pl_renderer_flush_cache(p->rr);
+        p->osd_sync++;
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
@@ -1184,6 +1205,7 @@ static int preinit(struct vo *vo)
     p->queue = pl_queue_create(p->gpu);
     p->osd_fmt[SUBBITMAP_LIBASS] = pl_find_named_fmt(p->gpu, "r8");
     p->osd_fmt[SUBBITMAP_BGRA] = pl_find_named_fmt(p->gpu, "bgra8");
+    p->osd_sync = 1;
 
     char *cache_file = get_cache_file(p);
     if (cache_file) {
