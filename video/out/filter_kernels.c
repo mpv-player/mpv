@@ -415,6 +415,6 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"nearest",        0.5, box}},
     {{"triangle",       1,   triangle, .resizable = true}},
     {{"gaussian",       2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
-    {{"hpl_2007_197",   2,   hpl_2007_197, .params = {0.414, 0.61}, .resizable = true}},
+    {{"hpl_2007_197",   2,   hpl_2007_179, .params = {0.414, 0.61}, .resizable = true}},
     {{0}}
 };
