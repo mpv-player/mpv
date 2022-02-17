@@ -431,7 +431,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Playback is stopped. If idle mode (``--idle``) is enabled, the player
         will enter idle mode, otherwise it will exit.
 
-    This comm and is similar to ``loadfile`` in that it only manipulates the
+    This command is similar to ``loadfile`` in that it only manipulates the
     state of what to play next, without waiting until the current file is
     unloaded, and the next one is loaded.
 
