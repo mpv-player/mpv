@@ -316,6 +316,18 @@ static double gaussian(params *p, double x)
     return exp(-2.0 * x * x / p->params[0]);
 }
 
+static double hpl_2007_179(params *p, double x)
+{
+    //fix me: if radius is set to 4 by user or defaults,
+    //x here have to stay x and not x/4
+    x *= user_set_or_defualt_scale_radius;
+    double chi = p->params[0],
+           eta = p->params[1];
+    double n = M_PI * chi * x / (2.0 - eta);
+    n *= n;
+    return cosh(sqrt(2.0 * eta) * M_PI * chi * x / (2.0 - eta)) * pow(M_E, -n);
+}
+
 static double sinc(params *p, double x)
 {
     if (fabs(x) < 1e-8)
@@ -353,6 +365,7 @@ const struct filter_window mp_filter_windows[] = {
     {"kaiser",         1,   kaiser,   .params = {6.33, NAN} },
     {"blackman",       1,   blackman, .params = {0.16, NAN} },
     {"gaussian",       2,   gaussian, .params = {1.00, NAN} },
+    {"hpl_2007_179",   1,   hpl_2007_179, .params = {0.414, 0.61} },
     {"sinc",           1,   sinc},
     {"jinc",           1.2196698912665045, jinc},
     {"sphinx",         1.4302966531242027, sphinx},
