@@ -197,7 +197,8 @@ void update_screensaver_state(struct MPContext *mpctx)
     if (!mpctx->video_out)
         return;
 
-    bool saver_state = !mpctx->playback_active || !mpctx->opts->stop_screensaver;
+    bool saver_state = (!mpctx->playback_active || !mpctx->opts->stop_screensaver) &&
+                       mpctx->opts->stop_screensaver != 2;
     vo_control_async(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
                                                    : VOCTRL_KILL_SCREENSAVER, NULL);
 }

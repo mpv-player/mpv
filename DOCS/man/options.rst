@@ -3255,10 +3255,12 @@ Window
     1). A value of 1 means square pixels (correct for (almost?) all LCDs). See
     also ``--monitoraspect`` and ``--video-aspect-override``.
 
-``--stop-screensaver``, ``--no-stop-screensaver``
+``--stop-screensaver=<yes|no|always>``
     Turns off the screensaver (or screen blanker and similar mechanisms) at
-    startup and turns it on again on exit (default: yes). The screensaver is
-    always re-enabled when the player is paused.
+    startup and turns it on again on exit (default: yes). When using ``yes``,
+    the screensaver will re-enable when playback is not active. ``always`` will
+    always disable the screensaver. Note that stopping the screensaver is only
+    possible if a video output is available (i.e. there is an open mpv window).
 
     This is not supported on all video outputs or platforms. Sometimes it is
     implemented, but does not work (especially with Linux "desktops"). Read the

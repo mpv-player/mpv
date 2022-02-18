@@ -648,7 +648,11 @@ static const m_option_t mp_opts[] = {
     {"cursor-autohide", OPT_CHOICE(cursor_autohide_delay,
         {"no", -1}, {"always", -2}), M_RANGE(0, 30000)},
     {"cursor-autohide-fs-only", OPT_FLAG(cursor_autohide_fs)},
-    {"stop-screensaver", OPT_FLAG(stop_screensaver), .flags = UPDATE_SCREENSAVER},
+    {"stop-screensaver", OPT_CHOICE(stop_screensaver,
+        {"no", 0},
+        {"yes", 1},
+        {"always", 2}),
+        .flags = UPDATE_SCREENSAVER},
 
     {"", OPT_SUBSTRUCT(video_equalizer, mp_csp_equalizer_conf)},
 
