@@ -5100,15 +5100,6 @@ them.
         to 0 will always interpolate edges, whereas setting it to 0.5 will
         never interpolate, thus behaving as if the regular nearest neighbour
         algorithm was used. Defaults to 0.0.
-        
-    hpl_2007_179
-        Function parameters (``chi`` and ``eta``). The parameter ``chi`` controls
-        compromise between blurring, aliasing and ringing artifacts.
-        If it it too small (0.0), we have nearly ideal filters, which create
-        ringing artifacts around edges. If it is too large (1.0) we have some
-        blurring and the screen door effect. The amount of aliasing depends also
-        on the parameter ``eta``, which controls the height of the sidelobe.
-        Defaults to 0.414 and 0.61.
 
 ``--scale-blur=<value>``, ``--scale-wblur=<value>``, ``--cscale-blur=<value>``, ``--cscale-wblur=<value>``, ``--dscale-blur=<value>``, ``--dscale-wblur=<value>``, ``--tscale-blur=<value>``, ``--tscale-wblur=<value>``
     Kernel/window scaling factor (also known as a blur factor). Decreasing this
