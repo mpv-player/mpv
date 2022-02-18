@@ -395,6 +395,7 @@ class Common: NSObject {
     }
 
     func getScreenBy(name screenName: String?) -> NSScreen? {
+        if (screenName == nil) { return nil }
         for screen in NSScreen.screens {
             if screen.displayName == screenName {
                 return screen
