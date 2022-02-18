@@ -318,6 +318,8 @@ static double gaussian(params *p, double x)
 
 static double hpl_2007_179(params *p, double x)
 {
+    if (fabs(x) < 1e-8)
+        return 1.0;
     double pix = M_PI * x;
     double chi = p->params[0],
            eta = p->params[1];
