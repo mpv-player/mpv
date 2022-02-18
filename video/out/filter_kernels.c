@@ -318,12 +318,12 @@ static double gaussian(params *p, double x)
 
 static double hpl_2007_179(params *p, double x)
 {
-    double pix = M_PI * x;
+    x *= p->reset_x_coef;
     double chi = p->params[0],
            eta = p->params[1];
     double n = M_PI * chi * x / (2.0 - eta);
     n *= n;
-    return sin(pix) / pix * cosh(sqrt(2.0 * eta) * M_PI * chi * x / (2.0 - eta)) * pow(M_E, -n);
+    return cosh(sqrt(2.0 * eta) * M_PI * chi * x / (2.0 - eta)) * pow(M_E, -n);
 }
 
 static double sinc(params *p, double x)
@@ -363,6 +363,7 @@ const struct filter_window mp_filter_windows[] = {
     {"kaiser",         1,   kaiser,   .params = {6.33, NAN} },
     {"blackman",       1,   blackman, .params = {0.16, NAN} },
     {"gaussian",       2,   gaussian, .params = {1.00, NAN} },
+    {"hpl_2007_179",   1,   hpl_2007_179, .params = {0.414, 0.61} },
     {"sinc",           1,   sinc},
     {"jinc",           1.2196698912665045, jinc},
     {"sphinx",         1.4302966531242027, sphinx},
@@ -415,6 +416,5 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"nearest",        0.5, box}},
     {{"triangle",       1,   triangle, .resizable = true}},
     {{"gaussian",       2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
-    {{"hpl_2007_197",   2,   hpl_2007_179, .params = {0.414, 0.61}, .resizable = true}},
     {{0}}
 };
