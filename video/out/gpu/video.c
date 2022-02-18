@@ -1773,7 +1773,7 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     scaler->kernel->value_cutoff = conf->cutoff;
     // has to be set to kernel radius for hpl_2007_179 window
     // to work properly
-    scaler->kernel->w.reset_x_coef = scaler->kernel->f.radius;
+    scaler->kernel->w.reset_x = scaler->kernel->f.radius;
 
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 

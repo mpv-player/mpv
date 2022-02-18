@@ -318,7 +318,7 @@ static double gaussian(params *p, double x)
 
 static double hpl_2007_179(params *p, double x)
 {
-    x *= p->reset_x_coef;
+    x *= p->reset_x;
     double chi = p->params[0],
            eta = p->params[1];
     double n = M_PI * chi * x / (2.0 - eta);
