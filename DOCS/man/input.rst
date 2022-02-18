@@ -551,9 +551,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     ``playback_only`` (``MPV_FORMAT_FLAG``)
         Boolean indicating whether the process should be killed when playback
-        terminates (optional, default: true). If enabled, stopping playback
-        will automatically kill the process, and you can't start it outside of
-        playback.
+        of the current playlist entry terminates (optional, default: true). If
+        enabled, stopping playback will automatically kill the process, and you
+        can't start it outside of playback.
 
     ``capture_size`` (``MPV_FORMAT_INT64``)
         Integer setting the maximum number of stdout plus stderr bytes that can
@@ -600,12 +600,14 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     The command returns the following result (as ``MPV_FORMAT_NODE_MAP``):
 
     ``status`` (``MPV_FORMAT_INT64``)
-        The raw exit status of the process. It will be negative on error. The
-        meaning of negative values is undefined, other than meaning error (and
-        does not correspond to OS low level exit status values).
+        Typically this is the process exit code (0 or positive) if the process
+        terminates normally, or negative for other errors (failed to start,
+        terminated by mpv, and others).  The meaning of negative values is
+        undefined, other than meaning error (and does not correspond to OS low
+        level exit status values).
 
-        On Windows, it can happen that a negative return value is returned
-        even if the process exits gracefully, because the win32 ``UINT`` exit
+        On Windows, it can happen that a negative return value is returned even
+        if the process terminates normally, because the win32 ``UINT`` exit
         code is assigned to an ``int`` variable before being set as ``int64_t``
         field in the result map. This might be fixed later.
 
@@ -616,9 +618,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Same as ``stdout``, but for stderr.
 
     ``error_string`` (``MPV_FORMAT_STRING``)
-        Empty string if the process exited gracefully. The string ``killed`` if
-        the process was terminated in an unusual way. The string ``init`` if the
-        process could not be started.
+        Empty string if the process terminated normally. The string ``killed``
+        if the process was terminated in an unusual way. The string ``init`` if
+        the process could not be started.
 
         On Windows, ``killed`` is only returned when the process has been
         killed by mpv as a result of ``playback_only`` being set to true.
@@ -633,17 +635,19 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     it was somehow killed or returned an error status has to be queried from
     the result value.
 
-    This command can be asynchronously aborted via API.
+    This command can be asynchronously aborted via API. Also see `Asynchronous
+    command details`_. Only the ``run`` command can start processes in a truly
+    detached way.
 
-    In all cases, the subprocess will be terminated on player exit. Also see
-    `Asynchronous command details`_. Only the ``run`` command can start
-    processes in a truly detached way.
+    .. note:: The subprocess will always be terminated on player exit if it
+              wasn't started in detached mode, even if ``playback_only`` is
+              false.
 
     .. admonition:: Warning
 
-        Don't forget to set the ``playback_only`` field if you want the command
-        run while the player is in idle mode, or if you don't want that end of
-        playback kills the command.
+        Don't forget to set the ``playback_only`` field to false if you want
+        the command to run while the player is in idle mode, or if you don't
+        want the end of playback to kill the command.
 
     .. admonition:: Example
 
