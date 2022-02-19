@@ -31,6 +31,7 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "osdep/atomic.h"
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/polldev.h"
@@ -54,7 +55,7 @@
 #define INPUT_TIMEOUT 1000
 
 static volatile struct termios tio_orig;
-static volatile int tio_orig_set;
+static atomic_int tio_orig_set;
 
 static int tty_in = -1, tty_out = -1;
 
@@ -275,7 +276,7 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
 read_more: ;  /* need more bytes */
 }
 
-static volatile int getch2_active  = 0;
+static atomic_int getch2_active;
 static volatile int getch2_enabled = 0;
 static bool read_terminal;
 
@@ -294,7 +295,7 @@ static void enable_kx(bool enable)
 
 static void do_activate_getch2(void)
 {
-    if (getch2_active || !read_terminal)
+    if (atomic_load(&getch2_active) || !read_terminal)
         return;
 
     enable_kx(true);
@@ -302,9 +303,9 @@ static void do_activate_getch2(void)
     struct termios tio_new;
     tcgetattr(tty_in,&tio_new);
 
-    if (!tio_orig_set) {
+    if (!atomic_load(&tio_orig_set)) {
         tio_orig = tio_new;
-        tio_orig_set = 1;
+        atomic_store(&tio_orig_set, 1);
     }
 
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
@@ -312,23 +313,23 @@ static void do_activate_getch2(void)
     tio_new.c_cc[VTIME] = 0;
     tcsetattr(tty_in,TCSANOW,&tio_new);
 
-    getch2_active = 1;
+    atomic_store(&getch2_active, 1);
 }
 
 static void do_deactivate_getch2(void)
 {
-    if (!getch2_active)
+    if (!atomic_load(&getch2_active))
         return;
 
     enable_kx(false);
 
-    if (tio_orig_set) {
+    if (atomic_load(&tio_orig_set)) {
         // once set, it will never be set again
         // so we can cast away volatile here
         tcsetattr(tty_in, TCSANOW, (const struct termios *) &tio_orig);
     }
 
-    getch2_active = 0;
+    atomic_store(&getch2_active, 0);
 }
 
 // sigaction wrapper
