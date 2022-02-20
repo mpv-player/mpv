@@ -23,7 +23,7 @@ struct filter_window {
                       // all filters
     double blur; // Blur coefficient (sharpens or widens the filter)
     double taper; // Taper coefficient (flattens the filter's center)
-    double reset_x; // Should be set to kernel radius, used to
+    double reset_x_coef; // Should be set to kernel radius, used to
                          // reset value of x inside filter window
 };
 
