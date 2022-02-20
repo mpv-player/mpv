@@ -19,6 +19,9 @@ will typically just fill ~/.xsession-errors with garbage.
 mpv will terminate if there are no more files to play, and running the umpv
 script after that will start a new mpv instance.
 
+If "notify-send" (provided by libnotify) is installed, a temporary notification
+will be shown as feedback for every file appended to the playlist.
+
 Note: you can supply custom mpv path and options with the MPV environment
       variable. The environment variable will be split on whitespace, and the
       first item is used as path to mpv binary and the rest is passed as options
@@ -64,7 +67,7 @@ except socket.error as e:
         pass  # abandoned socket
     elif e.errno == errno.ENOENT:
         sock = None
-        pass # doesn't exist
+        pass  # doesn't exist
     else:
         raise e
 
@@ -75,6 +78,20 @@ if sock:
         f = f.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
         f = "\"" + f + "\""
         sock.send(("raw loadfile " + f + " append\n").encode("utf-8"))
+
+    try:
+        # Try to show a notification
+        subprocess.call([
+            "notify-send",  # A binary, provided by libnotify 
+            "--hint=int:transient:1",  # Don't keep the notification in a history
+            "--urgency=low",
+            "--icon=multimedia-player",  # Alt. icons: video-x-generic, list-add
+            "File appended to playlist",  # Title
+            f  # Body
+        ])
+    except FileNotFoundError:
+        # notify-send not installed; ignore
+        pass
 else:
     # Let mpv recreate socket if it doesn't already exist.
 
