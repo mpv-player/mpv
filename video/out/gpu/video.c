@@ -357,8 +357,7 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
     {n"-blur",   OPT_FLOAT(scaler[i].kernel.blur)},                        \
     {n"-cutoff", OPT_FLOAT(scaler[i].cutoff), M_RANGE(0.0, 1.0)},          \
     {n"-taper",  OPT_FLOAT(scaler[i].kernel.taper), M_RANGE(0.0, 1.0)},    \
-    {n"-wparam1", OPT_FLOATDEF(scaler[i].window.params[0])},               \
-    {n"-wparam2", OPT_FLOATDEF(scaler[i].window.params[1])},               \
+    {n"-wparam", OPT_FLOATDEF(scaler[i].window.params[0])},                \
     {n"-wblur",  OPT_FLOAT(scaler[i].window.blur)},                        \
     {n"-wtaper", OPT_FLOAT(scaler[i].window.taper), M_RANGE(0.0, 1.0)},    \
     {n"-clamp",  OPT_FLOAT(scaler[i].clamp), M_RANGE(0.0, 1.0)},           \
@@ -1771,9 +1770,6 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 
     scaler->kernel->clamp = conf->clamp;
     scaler->kernel->value_cutoff = conf->cutoff;
-    // has to be set to kernel radius for hpl_2007_179 window
-    // to work properly
-    scaler->kernel->w.reset_x_coef = scaler->kernel->f.radius;
 
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 
