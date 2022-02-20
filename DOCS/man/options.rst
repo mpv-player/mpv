@@ -5156,7 +5156,7 @@ them.
     Defaults to the filter's preferred window if unset. Use
     ``--scale-window=help`` to get a list of supported windowing functions.
 
-``--scale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--tscale-wparam=<window>``,
+``--scale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--tscale-wparam=<window>``
     (Advanced users only) Configure the parameter for the window function given
     by ``--scale-window`` etc. By default, these are set to the special string
     ``default``, which maps to a window-specific default value. Ignored if the
