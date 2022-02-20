@@ -49,7 +49,7 @@ def find_macos_sdk():
         build_version = '10.' + str(major) + '.' + str(minor)
         # from 20 onwards macOS 11.0 starts
         if int(version_parts.group(1)) >= 20:
-            build_version = '11.' + str(minor)
+            build_version = str(major - 9) + '.' + str(minor)
 
     if not isinstance(sdk_version, str):
         sdk_version = '10.10.0'
