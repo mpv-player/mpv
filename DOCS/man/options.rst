@@ -5156,7 +5156,7 @@ them.
     Defaults to the filter's preferred window if unset. Use
     ``--scale-window=help`` to get a list of supported windowing functions.
 
-``--scale-wparam1=<window>``, ``--scale-wparam2=<window>``, ``--cscale-wparam1=<window>``, ``--cscale-wparam2=<window>``, ``--dscale-wparam1=<window>``, ``--dscale-wparam2=<window>``, ``--tscale-wparam1=<window>``, ``--tscale-wparam2=<window>``
+``--scale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--tscale-wparam=<window>``,
     (Advanced users only) Configure the parameter for the window function given
     by ``--scale-window`` etc. By default, these are set to the special string
     ``default``, which maps to a window-specific default value. Ignored if the
@@ -5170,8 +5170,6 @@ them.
     gaussian
         Scale parameter (t). Increasing this makes the window wider. Defaults
         to 1.
-    hpl_2007_179
-        Window parameters (chi) and (eta). Defaults to 0.414 and 0.61.
 
 ``--scaler-lut-size=<4..10>``
     Set the size of the lookup texture for scaler kernels (default: 6). The
