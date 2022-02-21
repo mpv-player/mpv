@@ -211,18 +211,21 @@ local function generate_graph(values, i, len, v_max, v_avg, scale, x_tics)
     local y_max = o.font_size * 0.66
     local x = 0
 
-    -- try and center the graph if possible, but avoid going above `scale`
-    if v_avg then
-        scale = min(scale, v_max / (2 * v_avg))
-    end
+    if v_max > 0 then
+        -- try and center the graph if possible, but avoid going above `scale`
+        if v_avg and v_avg > 0 then
+            scale = min(scale, v_max / (2 * v_avg))
+        end
+        scale = scale * y_max / v_max
+    end  -- else if v_max==0 then all values are 0 and scale doesn't matter
 
-    local s = {format("m 0 0 n %f %f l ", x, y_max - (y_max * values[i] / v_max * scale))}
+    local s = {format("m 0 0 n %f %f l ", x, y_max - scale * values[i])}
     i = ((i - 2) % len) + 1
 
     for p = 1, len - 1 do
         if values[i] then
             x = x - x_tics
-            s[#s+1] = format("%f %f ", x, y_max - (y_max * values[i] / v_max * scale))
+            s[#s+1] = format("%f %f ", x, y_max - scale * values[i])
         end
         i = ((i - 2) % len) + 1
     end
