@@ -211,7 +211,7 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
 
 static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
                             int flags, struct osd_state *state,
-                            struct pl_frame *frame, bool flip)
+                            struct pl_frame *frame)
 {
     struct priv *p = vo->priv;
     static const bool subfmt_all[SUBBITMAP_COUNT] = {
@@ -267,11 +267,6 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
                     1.0 - (c & 0xFF) / 255.0,
                 }
             };
-            if (flip) {
-                assert(frame->crop.y0 > frame->crop.y1);
-                part.dst.y0 = frame->crop.y0 - part.dst.y0;
-                part.dst.y1 = frame->crop.y0 - part.dst.y1;
-            }
             MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, part);
         }
 
@@ -492,30 +487,18 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
 
     enum pl_chroma_location chroma = mp_chroma_to_pl(par->chroma_location);
     int planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt);
-    bool img_vflipped = false;
     for (int n = 0; n < planes; n++) {
+        struct pl_plane *plane = &frame->planes[n];
         data[n].width = mp_image_plane_w(mpi, n);
         data[n].height = mp_image_plane_h(mpi, n);
-        bool vflipped = mpi->stride[n] < 0;
-        if (vflipped) {
-            int h = mp_image_plane_h(mpi, n);
-            data[n].pixels = mpi->planes[n] + (h - 1) * mpi->stride[n];
+        if (mpi->stride[n] < 0) {
+            data[n].pixels = mpi->planes[n] + (data[n].height - 1) * mpi->stride[n];
             data[n].row_stride = -mpi->stride[n];
+            plane->flipped = true;
         } else {
             data[n].pixels = mpi->planes[n];
             data[n].row_stride = mpi->stride[n];
         }
-
-        // libplacebo can't deal with images that have partially flipped
-        // textures. We could work around this by blitting them to fresh
-        // (unflipped) textures, but it's an unlikely enough case to warrant
-        // just erroring out instead. (Usually, all planes will be flipped or
-        // unflipped simultaneously, e.g. by the `vflip` filter)
-        if (n > 0 && img_vflipped != vflipped) {
-            MP_ERR(vo, "Inconsistently flipped planes!\n");
-            return false;
-        }
-        img_vflipped = vflipped;
 
         pl_buf buf = get_dr_buf(mpi);
         if (buf) {
@@ -527,7 +510,6 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             data[n].priv = mp_image_new_ref(mpi);
         }
 
-        struct pl_plane *plane = &frame->planes[n];
         if (!pl_upload_plane(gpu, plane, &tex[n], &data[n])) {
             MP_ERR(vo, "Failed uploading frame!\n");
             talloc_free(data[n].priv);
@@ -536,8 +518,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
 
         if (mpi->fmt.xs[n] || mpi->fmt.ys[n]) {
             pl_chroma_location_offset(chroma, &plane->shift_x, &plane->shift_y);
-            if (vflipped)
-                plane->shift_y = -plane->shift_y;
+            plane->shift_y = -plane->shift_y;
         }
     }
 
@@ -693,13 +674,6 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
         frame->crop.y0 = height - frame->crop.y0;
         frame->crop.y1 = height - frame->crop.y1;
     }
-
-    struct mp_image *mpi = frame->user_data;
-    if (mpi && mpi->stride[0] < 0) {
-        // Adjust for vertically flipped planes
-        frame->crop.y0 = height - frame->crop.y0;
-        frame->crop.y1 = height - frame->crop.y1;
-    }
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -771,10 +745,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
     apply_target_options(p, &target);
-    update_overlays(vo, p->osd_res, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target, swframe.flipped);
+    update_overlays(vo, p->osd_res, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target);
     apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
-    if (swframe.flipped)
-        MPSWAP(float, target.crop.y0, target.crop.y1);
 
     struct pl_frame_mix mix = {0};
     if (frame->current) {
@@ -816,7 +788,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             if (fp->osd_sync < p->osd_sync) {
                 // Only update the overlays if the state has changed
                 update_overlays(vo, p->osd_res, mpi->pts, OSD_DRAW_SUB_ONLY,
-                                &fp->subs, image, false);
+                                &fp->subs, image);
                 fp->osd_sync = p->osd_sync;
             }
         }
@@ -1031,7 +1003,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         osd_flags |= OSD_DRAW_OSD_ONLY;
     if (!args->osd)
         osd_flags |= OSD_DRAW_SUB_ONLY;
-    update_overlays(vo, osd, 0, osd_flags, &p->osd_state, &target, false);
+    update_overlays(vo, osd, 0, osd_flags, &p->osd_state, &target);
 
     if (!pl_render_image_mix(p->rr, &mix, &target, &p->params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
