@@ -218,15 +218,13 @@ int mp_chroma_div_up(int size, int shift)
 // Return the storage width in pixels of the given plane.
 int mp_image_plane_w(struct mp_image *mpi, int plane)
 {
-    return mp_chroma_div_up(MP_ALIGN_UP(mpi->w, mpi->fmt.align_x),
-                            mpi->fmt.xs[plane]);
+    return mp_chroma_div_up(mpi->w, mpi->fmt.xs[plane]);
 }
 
 // Return the storage height in pixels of the given plane.
 int mp_image_plane_h(struct mp_image *mpi, int plane)
 {
-    return mp_chroma_div_up(MP_ALIGN_UP(mpi->h, mpi->fmt.align_y),
-                            mpi->fmt.ys[plane]);
+    return mp_chroma_div_up(mpi->h, mpi->fmt.ys[plane]);
 }
 
 // Caller has to make sure this doesn't exceed the allocated plane data/strides.
