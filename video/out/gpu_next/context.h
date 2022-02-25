@@ -26,7 +26,6 @@ struct gl_video_opts;
 
 struct gpu_ctx {
     struct mp_log *log;
-
     struct ra_ctx *ra_ctx;
 
     pl_log pllog;

@@ -262,10 +262,6 @@ Available video output drivers are:
     the same set of features as ``--vo=gpu``. See `GPU renderer options`_ for a
     list.
 
-    Currently, this only supports Vulkan, OpenGL, D3D11 and no hardware
-    decoding. Unlike ``--vo=gpu``, the FBO formats are not tunable, but you can
-    still set ``--gpu-dumb-mode=yes`` to forcibly disable their use.
-
     Should generally be faster and higher quality, but some features may still
     be missing or misbehave. Expect (and report!) bugs. See here for a list of
     known differences and bugs:
