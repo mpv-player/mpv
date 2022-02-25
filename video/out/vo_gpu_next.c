@@ -280,9 +280,17 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
             .tex = entry->tex,
             .parts = entry->parts,
             .num_parts = entry->num_parts,
-            .color = frame->color,
+            .color.primaries = frame->color.primaries,
+            .color.transfer = frame->color.transfer,
             .coords = PL_OVERLAY_COORDS_DST_FRAME,
         };
+
+        // Reject HDR/wide gamut subtitles out of the box, since these are
+        // probably not intended to match the video color space.
+        if (pl_color_primaries_is_wide_gamut(ol->color.primaries))
+            ol->color.primaries = PL_COLOR_PRIM_UNKNOWN;
+        if (pl_color_transfer_is_hdr(ol->color.transfer))
+            ol->color.transfer = PL_COLOR_TRC_UNKNOWN;
 
         switch (item->format) {
         case SUBBITMAP_BGRA:
