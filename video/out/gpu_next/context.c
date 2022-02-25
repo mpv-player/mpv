@@ -41,6 +41,9 @@
 #if HAVE_GL
 #include "video/out/opengl/context.h"
 #include "video/out/opengl/ra_gl.h"
+# if HAVE_EGL
+#include <EGL/egl.h>
+# endif
 #endif
 
 #if HAVE_VULKAN
@@ -145,6 +148,10 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
             pl_opengl_params(
                 .debug = ctx_opts->debug,
                 .allow_software = ctx_opts->allow_sw,
+# if HAVE_EGL
+                .egl_display = eglGetCurrentDisplay(),
+                .egl_context = eglGetCurrentContext(),
+# endif
             )
         );
         if (!opengl)
