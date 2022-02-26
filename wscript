@@ -751,9 +751,9 @@ video_output_features = [
         'deps': 'libplacebo',
         'func': check_pkg_config('vulkan'),
     }, {
-        'name': 'vaapi-vulkan',
-        'desc': 'VAAPI Vulkan',
-        'deps': 'vaapi && vulkan',
+        'name': 'vaapi-libplacebo',
+        'desc': 'VAAPI libplacebo',
+        'deps': 'vaapi && libplacebo',
         'func': check_true,
     }, {
         'name': 'egl-helpers',

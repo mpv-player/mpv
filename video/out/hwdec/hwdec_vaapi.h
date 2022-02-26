@@ -52,5 +52,4 @@ struct priv {
 typedef bool (*vaapi_interop_init)(const struct ra_hwdec *hw);
 
 bool vaapi_gl_init(const struct ra_hwdec *hw);
-
-bool vaapi_vk_init(const struct ra_hwdec *hw);
+bool vaapi_pl_init(const struct ra_hwdec *hw);

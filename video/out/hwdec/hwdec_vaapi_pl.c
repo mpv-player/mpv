@@ -23,7 +23,7 @@
 #include "video/out/placebo/ra_pl.h"
 #include "video/out/placebo/utils.h"
 
-static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper, bool probing)
+static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper, bool probing)
 {
     struct priv *p = mapper->priv;
     pl_gpu gpu = ra_pl_get(mapper->ra);
@@ -102,31 +102,31 @@ static bool vaapi_vk_map(struct ra_hwdec_mapper *mapper, bool probing)
     return true;
 }
 
-static void vaapi_vk_unmap(struct ra_hwdec_mapper *mapper)
+static void vaapi_pl_unmap(struct ra_hwdec_mapper *mapper)
 {
     for (int n = 0; n < 4; n++)
         ra_tex_free(mapper->ra, &mapper->tex[n]);
 }
 
-bool vaapi_vk_init(const struct ra_hwdec *hw)
+bool vaapi_pl_init(const struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
     pl_gpu gpu = ra_pl_get(hw->ra);
     if (!gpu) {
-        // This is not a Vulkan RA;
+        // This is not a libplacebo RA;
         return false;
     }
 
     if (!(gpu->import_caps.tex & PL_HANDLE_DMA_BUF)) {
-        MP_VERBOSE(hw, "VAAPI Vulkan interop requires support for "
-                        "dma_buf import in Vulkan.\n");
+        MP_VERBOSE(hw, "VAAPI libplacebo interop requires support for "
+                        "PL_HANDLE_DMA_BUF import.\n");
         return false;
     }
 
-    MP_VERBOSE(hw, "using VAAPI Vulkan interop\n");
+    MP_VERBOSE(hw, "using VAAPI libplacebo interop\n");
 
-    p->interop_map = vaapi_vk_map;
-    p->interop_unmap = vaapi_vk_unmap;
+    p->interop_map = vaapi_pl_map;
+    p->interop_unmap = vaapi_pl_unmap;
 
     return true;
 }
