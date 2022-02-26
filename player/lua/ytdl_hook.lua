@@ -825,13 +825,18 @@ function run_ytdl_hook(url)
 
     local parse_err = nil
 
-    if (es < 0) or (json == "") then
+    if (es ~= 0) or (json == "") then
         json = nil
     elseif json then
         json, parse_err = utils.parse_json(json)
     end
 
     if (json == nil) then
+        msg.verbose("status:", es)
+        msg.verbose("reason:", result.error_string)
+        msg.verbose("stdout:", result.stdout)
+        msg.verbose("stderr:", result.stderr)
+
         -- trim our stderr to avoid spurious newlines
         ytdl_err = result.stderr:gsub("^%s*(.-)%s*$", "%1")
         msg.error(ytdl_err)
