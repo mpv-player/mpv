@@ -1470,16 +1470,16 @@ if vaapi_egl['use']
     sources += files('video/out/hwdec/hwdec_vaapi_gl.c')
 endif
 
-vaapi_vulkan = {
-    'name': 'vaapi-vulkan',
-    'use': vaapi['use'] and vulkan.found(),
+vaapi_libplacebo = {
+    'name': 'vaapi-libplacebo',
+    'use': vaapi['use'] and libplacebo.found(),
 }
-if vaapi_vulkan['use']
-    features += vaapi_vulkan['name']
-    sources += files('video/out/hwdec/hwdec_vaapi_vk.c')
+if vaapi_libplacebo['use']
+    features += vaapi_libplacebo['name']
+    sources += files('video/out/hwdec/hwdec_vaapi_pl.c')
 endif
 
-if vaapi_egl['use'] or vaapi_vulkan['use']
+if vaapi_egl['use'] or vaapi_libplacebo['use']
     sources += files('video/out/hwdec/hwdec_vaapi.c')
 endif
 
@@ -1776,7 +1776,7 @@ conf_data.set10('HAVE_UWP', uwp.found())
 conf_data.set10('HAVE_VAAPI', vaapi['use'])
 conf_data.set10('HAVE_VAAPI_DRM', vaapi_drm['use'])
 conf_data.set10('HAVE_VAAPI_EGL', vaapi_egl['use'])
-conf_data.set10('HAVE_VAAPI_VULKAN', vaapi_vulkan['use'])
+conf_data.set10('HAVE_VAAPI_LIBPLACEBO', vaapi_libplacebo['use'])
 conf_data.set10('HAVE_VAAPI_WAYLAND', vaapi_wayland['use'])
 conf_data.set10('HAVE_VAAPI_X11', vaapi_x11['use'])
 conf_data.set10('HAVE_VAPOURSYNTH', vapoursynth.found() and vapoursynth_script.found())

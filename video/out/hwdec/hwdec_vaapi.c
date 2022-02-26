@@ -111,8 +111,8 @@ const static vaapi_interop_init interop_inits[] = {
 #if HAVE_VAAPI_EGL
     vaapi_gl_init,
 #endif
-#if HAVE_VAAPI_VULKAN
-    vaapi_vk_init,
+#if HAVE_VAAPI_LIBPLACEBO
+    vaapi_pl_init,
 #endif
     NULL
 };
