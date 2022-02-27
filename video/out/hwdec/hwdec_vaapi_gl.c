@@ -73,12 +73,14 @@ static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
     struct vaapi_gl_mapper_priv *p = talloc_ptrtype(NULL, p);
     p_mapper->interop_mapper_priv = p;
 
-    // EGL_KHR_image_base
-    p->CreateImageKHR = (void *)eglGetProcAddress("eglCreateImageKHR");
-    p->DestroyImageKHR = (void *)eglGetProcAddress("eglDestroyImageKHR");
-    // GL_OES_EGL_image
-    p->EGLImageTargetTexture2DOES =
-        (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES");
+    *p = (struct vaapi_gl_mapper_priv) {
+        // EGL_KHR_image_base
+        .CreateImageKHR = (void *)eglGetProcAddress("eglCreateImageKHR"),
+        .DestroyImageKHR = (void *)eglGetProcAddress("eglDestroyImageKHR"),
+        // GL_OES_EGL_image
+        .EGLImageTargetTexture2DOES =
+            (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES"),
+    };
 
     if (!p->CreateImageKHR || !p->DestroyImageKHR ||
         !p->EGLImageTargetTexture2DOES)
