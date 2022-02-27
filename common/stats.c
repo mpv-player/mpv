@@ -295,8 +295,8 @@ void stats_time_end(struct stats_ctx *ctx, const char *name)
     mp_mutex_lock(&ctx->base->lock);
     struct stat_entry *e = find_entry(ctx, name);
     if (e->type == VAL_TIME && e->time_start_ns) {
-        e->val_rt += mp_time_ns() - e->time_start_ns;
         e->val_th += mp_thread_cpu_time_ns(e->thread_id) - e->cpu_start_ns;
+        e->val_rt += mp_time_ns() - e->time_start_ns;
         e->time_start_ns = 0;
     }
     mp_mutex_unlock(&ctx->base->lock);
