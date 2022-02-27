@@ -130,7 +130,7 @@ struct priv {
     int target_hint;
 };
 
-static void update_render_options(struct priv *p);
+static void update_render_options(struct vo *vo);
 static void update_lut(struct priv *p, struct user_lut *lut);
 
 // This struct is stored at the end of DR-allocated buffers, and serves to both
@@ -607,10 +607,11 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     frame->count = index + 1;
 }
 
-static void update_options(struct priv *p)
+static void update_options(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     if (m_config_cache_update(p->opts_cache))
-        update_render_options(p);
+        update_render_options(vo);
 
     update_lut(p, &p->lut);
     p->params.lut = p->lut.lut;
@@ -680,7 +681,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     pl_gpu gpu = p->gpu;
-    update_options(p);
+    update_options(vo);
     p->params.info_callback = info_callback;
     p->params.info_priv = vo;
 
@@ -771,6 +772,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         case PL_QUEUE_EOF:
             abort(); // we never signal EOF
         case PL_QUEUE_MORE:
+            // This is expected to happen semi-frequently near the start and
+            // end of a file, so only log it at high verbosity and move on.
+            MP_DBG(vo, "Render queue underrun.\n");
+            break;
         case PL_QUEUE_OK:
             break;
         }
@@ -922,7 +927,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     pl_tex fbo = NULL;
     args->res = NULL;
 
-    update_options(p);
+    update_options(vo);
     p->params.info_callback = NULL;
     p->params.skip_caching_single_frame = true;
     p->params.preserve_mixing_cache = false;
@@ -1053,7 +1058,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         p->ra_ctx->opts.want_alpha = opts->alpha_mode == ALPHA_YES;
         if (p->ra_ctx->fns->update_render_opts)
             p->ra_ctx->fns->update_render_opts(p->ra_ctx);
-        update_render_options(p);
+        update_render_options(vo);
         vo->want_redraw = true;
 
         // Also re-query the auto profile, in case `update_render_options`
@@ -1197,11 +1202,7 @@ static int preinit(struct vo *vo)
         talloc_free(cache_file);
     }
 
-    // Request as many frames as possible from the decoder. This is not really
-    // wasteful since we pass these through libplacebo's frame queueing
-    // mechanism, which only uploads frames on an as-needed basis.
-    vo_set_queue_params(vo, 0, VO_MAX_REQ_FRAMES);
-    update_render_options(p);
+    update_render_options(vo);
     return 0;
 
 err_out:
@@ -1395,8 +1396,9 @@ static void update_lut(struct priv *p, struct user_lut *lut)
     talloc_free(lutdata.start);
 }
 
-static void update_render_options(struct priv *p)
+static void update_render_options(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     const struct gl_video_opts *opts = p->opts_cache->opts;
     p->params = pl_render_default_params;
     p->params.lut_entries = 1 << opts->scaler_lut_size;
@@ -1419,6 +1421,13 @@ static void update_render_options(struct priv *p)
     p->params.upscaler = map_scaler(p, SCALER_SCALE);
     p->params.downscaler = map_scaler(p, SCALER_DSCALE);
     p->frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
+
+    // Request as many frames as required from the decoder
+    if (p->frame_mixer) {
+        vo_set_queue_params(vo, 0, 2 + ceilf(p->frame_mixer->kernel->radius));
+    } else {
+        vo_set_queue_params(vo, 0, 1);
+    }
 
     p->deband = pl_deband_default_params;
     p->deband.iterations = opts->deband_opts->iterations;
