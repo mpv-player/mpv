@@ -253,12 +253,18 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     if (p_owner->do_full_sync)
         CHECK_CU(cu->cuStreamSynchronize(0));
 
+    // fall through
  error:
-   eret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
-   if (eret < 0)
-       return eret;
 
-   return ret;
+    // Regardless of success or failure, we no longer need the source image,
+    // because this hwdec makes an explicit memcpy into the mapper textures
+    mp_image_unrefp(&mapper->src);
+
+    eret = CHECK_CU(cu->cuCtxPopCurrent(&dummy));
+    if (eret < 0)
+        return eret;
+
+    return ret;
 }
 
 const struct ra_hwdec_driver ra_hwdec_cuda = {

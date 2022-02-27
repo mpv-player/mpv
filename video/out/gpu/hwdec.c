@@ -186,6 +186,8 @@ void ra_hwdec_mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
     if (mapper->driver->unmap)
         mapper->driver->unmap(mapper);
+
+    // Clean up after the image if the mapper didn't already
     mp_image_unrefp(&mapper->src);
 }
 
