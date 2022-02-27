@@ -144,7 +144,7 @@ void stats_global_query(struct mpv_global *global, struct mpv_node *out)
             for (int n = 0; n < stats->num_entries; n++) {
                 struct stat_entry *e = stats->entries[n];
 
-                e->cpu_start_ns = 0;
+                e->cpu_start_ns = e->time_start_ns = 0;
                 e->val_rt = e->val_th = 0;
                 if (e->type != VAL_THREAD_CPU_TIME)
                     e->type = 0;
