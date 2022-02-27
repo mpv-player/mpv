@@ -172,7 +172,8 @@ void stats_global_query(struct mpv_global *global, struct mpv_node *out)
             break;
         case VAL_TIME: {
             double t_cpu = MP_TIME_NS_TO_MS(e->val_th);
-            add_stat(out, e, "cpu", t_cpu, mp_tprintf(80, "%.2f ms", t_cpu));
+            if (e->cpu_start_ns >= 0)
+                add_stat(out, e, "cpu", t_cpu, mp_tprintf(80, "%.2f ms", t_cpu));
             double t_rt = MP_TIME_NS_TO_MS(e->val_rt);
             add_stat(out, e, "time", t_rt, mp_tprintf(80, "%.2f ms", t_rt));
             e->val_rt = e->val_th = 0;
@@ -183,7 +184,8 @@ void stats_global_query(struct mpv_global *global, struct mpv_node *out)
             if (!e->cpu_start_ns)
                 e->cpu_start_ns = t;
             double t_msec = MP_TIME_NS_TO_MS(t - e->cpu_start_ns);
-            add_stat(out, e, NULL, t_msec, mp_tprintf(80, "%.2f ms", t_msec));
+            if (e->cpu_start_ns >= 0)
+                add_stat(out, e, NULL, t_msec, mp_tprintf(80, "%.2f ms", t_msec));
             e->cpu_start_ns = t;
             break;
         }
