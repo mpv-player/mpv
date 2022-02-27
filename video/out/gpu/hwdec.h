@@ -5,6 +5,31 @@
 #include "ra.h"
 #include "video/hwdec.h"
 
+// Helper to organize/load hwdecs dynamically
+struct ra_hwdec_ctx {
+    // Set these before calling `ra_hwdec_ctx_init`
+    struct mp_log *log;
+    struct mpv_global *global;
+    struct ra *ra;
+
+    bool loading_done;
+    struct ra_hwdec **hwdecs;
+    int num_hwdecs;
+};
+
+int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
+                          struct bstr name, const char **value);
+
+void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
+                       const char *opt, bool load_all_by_default);
+void ra_hwdec_ctx_uninit(struct ra_hwdec_ctx *ctx);
+
+void ra_hwdec_ctx_load_fmt(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
+                           int imgfmt);
+
+// Gets the right `ra_hwdec` for a format, if any
+struct ra_hwdec *ra_hwdec_get(struct ra_hwdec_ctx *ctx, int imgfmt);
+
 struct ra_hwdec {
     const struct ra_hwdec_driver *driver;
     struct mp_log *log;
@@ -107,9 +132,6 @@ struct ra_hwdec *ra_hwdec_load_driver(struct ra *ra, struct mp_log *log,
                                       struct mp_hwdec_devices *devs,
                                       const struct ra_hwdec_driver *drv,
                                       bool is_auto);
-
-int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                          struct bstr name, const char **value);
 
 void ra_hwdec_uninit(struct ra_hwdec *hwdec);
 

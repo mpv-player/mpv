@@ -88,7 +88,7 @@ static int init(struct render_backend *ctx, mpv_render_param *params)
     p->renderer = gl_video_init(p->context->ra, ctx->log, ctx->global);
 
     ctx->hwdec_devs = hwdec_devices_create();
-    gl_video_load_hwdecs(p->renderer, ctx->hwdec_devs, true);
+    gl_video_init_hwdecs(p->renderer, ctx->hwdec_devs, true);
     ctx->driver_caps = VO_CAP_ROTATE90;
     return 0;
 }
