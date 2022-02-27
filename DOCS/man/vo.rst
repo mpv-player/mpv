@@ -267,7 +267,10 @@ Available video output drivers are:
     still set ``--gpu-dumb-mode=yes`` to forcibly disable their use.
 
     Should generally be faster and higher quality, but some features may still
-    be missing or misbehave. Expect (and report!) bugs.
+    be missing or misbehave. Expect (and report!) bugs. See here for a list of
+    known differences and bugs:
+
+    https://github.com/mpv-player/mpv/wiki/GPU-Next-vs-GPU
 
 ``sdl``
     SDL 2.0+ Render video output driver, depending on system with or without
