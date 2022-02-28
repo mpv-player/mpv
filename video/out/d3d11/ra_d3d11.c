@@ -196,7 +196,7 @@ static bool dll_version_equal(struct dll_version a, struct dll_version b)
            a.revision == b.revision;
 }
 
-static DXGI_FORMAT fmt_to_dxgi(const struct ra_format *fmt)
+DXGI_FORMAT ra_d3d11_get_format(const struct ra_format *fmt)
 {
     struct d3d_fmt *d3d = fmt->priv;
     return d3d->fmt;
@@ -273,7 +273,7 @@ static bool tex_init(struct ra *ra, struct ra_tex *tex)
         // texture format for textures created with tex_create, but it can be
         // different for wrapped planar video textures.
         D3D11_SHADER_RESOURCE_VIEW_DESC srvdesc = {
-            .Format = fmt_to_dxgi(params->format),
+            .Format = ra_d3d11_get_format(params->format),
         };
         switch (params->dimensions) {
         case 1:
@@ -393,7 +393,7 @@ static struct ra_tex *tex_create(struct ra *ra,
     tex->params.initial_data = NULL;
 
     struct d3d_tex *tex_p = tex->priv = talloc_zero(tex, struct d3d_tex);
-    DXGI_FORMAT fmt = fmt_to_dxgi(params->format);
+    DXGI_FORMAT fmt = ra_d3d11_get_format(params->format);
 
     D3D11_SUBRESOURCE_DATA data;
     D3D11_SUBRESOURCE_DATA *pdata = NULL;
@@ -564,7 +564,7 @@ struct ra_tex *ra_d3d11_wrap_tex(struct ra *ra, ID3D11Resource *res)
     }
 
     for (int i = 0; i < ra->num_formats; i++) {
-        DXGI_FORMAT target_fmt = fmt_to_dxgi(ra->formats[i]);
+        DXGI_FORMAT target_fmt = ra_d3d11_get_format(ra->formats[i]);
         if (fmt == target_fmt) {
             params->format = ra->formats[i];
             break;
@@ -641,6 +641,17 @@ struct ra_tex *ra_d3d11_wrap_tex_video(struct ra *ra, ID3D11Texture2D *res,
 error:
     tex_destroy(ra, tex);
     return NULL;
+}
+
+ID3D11Resource *ra_d3d11_get_raw_tex(struct ra *ra, struct ra_tex *tex,
+                                     int *array_slice)
+{
+    struct d3d_tex *tex_p = tex->priv;
+
+    ID3D11Resource_AddRef(tex_p->res);
+    if (array_slice)
+        *array_slice = tex_p->array_slice;
+    return tex_p->res;
 }
 
 static bool tex_upload(struct ra *ra, const struct ra_tex_upload_params *params)
