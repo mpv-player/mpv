@@ -48,6 +48,12 @@
 #include "video/out/opengl/ra_gl.h"
 #endif
 
+#if HAVE_D3D11 && defined(PL_HAVE_D3D11)
+#include <libplacebo/d3d11.h>
+#include "video/out/d3d11/ra_d3d11.h"
+#include "osdep/windows_utils.h"
+#endif
+
 struct osd_entry {
     pl_tex tex;
     struct pl_overlay_part *parts;
@@ -477,7 +483,21 @@ static pl_tex hwdec_get_tex(struct frame_priv *fp, int n)
     }
 #endif
 
-    // TODO: d3d11 wrapping/unwrapping
+#if HAVE_D3D11 && defined(PL_HAVE_D3D11)
+    if (ra_is_d3d11(ra)) {
+        int array_slice = 0;
+        ID3D11Resource *res = ra_d3d11_get_raw_tex(ra, ratex, &array_slice);
+        pl_tex tex = pl_d3d11_wrap(p->gpu, pl_d3d11_wrap_params(
+            .tex = res,
+            .array_slice = array_slice,
+            .fmt = ra_d3d11_get_format(ratex->params.format),
+            .w = ratex->params.w,
+            .h = ratex->params.h,
+        ));
+        SAFE_RELEASE(res);
+        return tex;
+    }
+#endif
 
     MP_ERR(p, "Failed mapping hwdec frame? Open a bug!\n");
     return false;
