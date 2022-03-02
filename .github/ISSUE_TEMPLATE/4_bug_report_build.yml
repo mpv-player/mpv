@@ -1,0 +1,42 @@
+name: "Report a build Problem"
+description: "Create a report for a build related Issue"
+labels: ["core:waf"]
+body:
+- type: textarea
+  attributes:
+    label: mpv version and platform versions
+    description: |
+      If you're not using git master or the latest release, update.
+      Releases are listed here: https://github.com/mpv-player/mpv/releases
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Reproduction steps
+    placeholder: |
+      Describe the reproduction steps as precise as possible. It's very likely that
+      the bug you experience wasn't reproduced by the developer because the workflow
+      differs from your own.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Behavior description
+    value: |
+      #### Expected behavior
+
+      #### Actual behavior
+
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Log file
+    description: |
+      Upload build/config.log or ./waf configure output to https://0x0.st/ or attach
+      it to the github issue.
+  validations:
+    required: true
