@@ -1176,26 +1176,40 @@ Video
     Whether hardware decoding is actually done depends on the video codec. If
     hardware decoding is not possible, mpv will fall back on software decoding.
 
-    Hardware decoding is not enabled by default, because it is typically an
-    additional source of errors. It is worth using only if your CPU is too
-    slow to decode a specific video.
+    Hardware decoding is not enabled by default, to keep the out-of-the-box
+    configuration as reliable as possible. However, when using modern hardware,
+    hardware video decoding should work correctly, offering reduced CPU usage,
+    and possibly lower power consumption. On older systems, it may be necessary
+    to use hardware decoding due to insufficient CPU resources; and even on
+    modern systems, sufficiently complex content (eg: 4K60 AV1) may require it.
 
     .. note::
 
         Use the ``Ctrl+h`` shortcut to toggle hardware decoding at runtime. It
         toggles this option between ``auto`` and ``no``.
 
-        Always enabling HW decoding by putting it into the config file is
-        discouraged. If you use the Ubuntu package, delete ``/etc/mpv/mpv.conf``,
-        as the package tries to enable HW decoding by default by setting
-        ``hwdec=vaapi`` (which is less than ideal, and may even cause
-        sub-optimal wrappers to be used). Or at least change it to
-        ``hwdec=auto-safe``.
+        If you decide you want to use hardware decoding by default, the general
+        recommendation is to try out decoding with the command line option, and
+        prove to yourself that it works as desired for the content you care
+        about. After that, you can add it to your config file.
 
-    Use one of the auto modes if you want to enable hardware decoding.
-    Explicitly selecting the mode is mostly meant for testing and debugging.
-    It's a bad idea to put explicit selection into the config file if you
-    want thing to just keep working after updates and so on.
+        When testing, you should start by using ``hwdec=auto-safe`` as it will
+        limit itself to choosing from hwdecs that are actively supported by the
+        development team. If that doesn't result in working hardare decoding,
+        you can try ``hwdec=auto`` to have it attempt to load every possible
+        hwdec, but if ``auto-safe`` didn't work, you will probably need to know
+        exactly which hwdec matches your hardware and read up on that entry
+        below.
+
+        If ``auto-safe`` or ``auto`` produced the desired results, we recommend
+        just sticking with that and only setting a specific hwdec in your config
+        file if it is really necessary.
+
+        If you use the Ubuntu package, keep in mind that their
+        ``/etc/mpv/mpv.conf`` contains ``hwdec=vaapi``, which is less than
+        ideal as it may not be the right choice for your system, and it may end
+        up using an inefficient wrapper library under the covers. We recommend
+        removing this line or deleting the file altogether.
 
     .. note::
 
@@ -1210,8 +1224,7 @@ Video
           ``Ctrl+h`` default binding to enable it at runtime.
         - If you're not sure, but want hardware decoding always enabled by
           default, put ``hwdec=auto-safe`` into your ``mpv.conf``, and
-          acknowledge that this use case is not "really" supported and may cause
-          problems.
+          acknowledge that this may cause problems.
         - If you want to test available hardware decoding methods, pass
           ``--hwdec=auto --hwdec-codecs=all`` and look at the terminal output.
         - If you're a developer, or want to perform elaborate tests, you may
@@ -1224,26 +1237,32 @@ Video
     :yes:       exactly the same as ``auto``
     :auto-safe: enable any whitelisted hw decoder (see below)
     :auto-copy: enable best hw decoder with copy-back (see below)
-    :vdpau:     requires ``--vo=gpu`` with X11, or ``--vo=vdpau`` (Linux only)
-    :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
-    :vaapi:     requires ``--vo=gpu`` or ``--vo=vaapi`` (Linux only)
-    :vaapi-copy: copies video back into system RAM (Linux with some GPUs only)
+
+    Actively supported hwdecs:
+
+    :d3d11va:   requires ``--vo=gpu`` with ``--gpu-context=d3d11`` or
+                ``--gpu-context=angle`` (Windows 8+ only)
+    :d3d11va-copy: copies video back to system RAM (Windows 8+ only)
     :videotoolbox: requires ``--vo=gpu`` (macOS 10.8 and up),
                    or ``--vo=libmpv`` (iOS 9.0 and up)
     :videotoolbox-copy: copies video back into system RAM (macOS 10.8 or iOS 9.0 and up)
+    :vaapi:     requires ``--vo=gpu`` or ``--vo=vaapi`` (Linux only)
+    :vaapi-copy: copies video back into system RAM (Linux with some GPUs only)
+    :nvdec:     requires ``--vo=gpu`` (Any platform CUDA is available)
+    :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
+
+    Other hwdecs (only use if you know you have to):
+
     :dxva2:     requires ``--vo=gpu`` with ``--gpu-context=d3d11``,
                 ``--gpu-context=angle`` or ``--gpu-context=dxinterop``
                 (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
-    :d3d11va:   requires ``--vo=gpu`` with ``--gpu-context=d3d11`` or
-                ``--gpu-context=angle`` (Windows 8+ only)
-    :d3d11va-copy: copies video back to system RAM (Windows 8+ only)
+    :vdpau:     requires ``--vo=gpu`` with X11, or ``--vo=vdpau`` (Linux only)
+    :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
     :mediacodec: requires ``--vo=mediacodec_embed`` (Android only)
     :mediacodec-copy: copies video back to system RAM (Android only)
     :mmal:      requires ``--vo=gpu`` (Raspberry Pi only - default if available)
     :mmal-copy: copies video back to system RAM (Raspberry Pi only)
-    :nvdec:     requires ``--vo=gpu`` (Any platform CUDA is available)
-    :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
     :cuda:      requires ``--vo=gpu`` (Any platform CUDA is available)
     :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
     :crystalhd: copies video back to system RAM (Any platform supported by hardware)
@@ -1280,7 +1299,7 @@ Video
 
     Because these copy the decoded video back to system RAM, they're often less
     efficient than the direct modes, and may not help too much over software
-    decoding.
+    decoding if you are short on CPU resources.
 
     .. note::
 
@@ -1309,7 +1328,12 @@ Video
         In theory, hardware decoding does not reduce video quality (at least
         for the codecs h264 and HEVC). However, due to restrictions in video
         output APIs, as well as bugs in the actual hardware decoders, there can
-        be some loss, or even blatantly incorrect results.
+        be some loss, or even blatantly incorrect results. This has largely
+        ceased to be a problem with modern hardware, but there is a lot of
+        hardware out there, so caveat emptor. Known problems are discussed
+        below, but the list cannot be considered exhaustive, as even hwdecs that
+        work well on certain hardware generations may be problematic on other
+        ones.
 
         In some cases, RGB conversion is forced, which means the RGB conversion
         is performed by the hardware decoding API, instead of the shaders
@@ -1324,10 +1348,6 @@ Video
         support newer colorspaces like BT.2020 correctly. However, ``vdpau``
         doesn't support 10 bit or HDR encodings, so these limitations are
         unlikely to be relevant.
-
-        ``vaapi`` and ``d3d11va`` are safe. Enabling deinterlacing (or simply
-        their respective post-processing filters) will possibly at least reduce
-        color quality by converting the output to a 8 bit format.
 
         ``dxva2`` is not safe. It appears to always use BT.601 for forced RGB
         conversion, but actual behavior depends on the GPU drivers. Some drivers
@@ -1350,20 +1370,9 @@ Video
         conversion. It also discards the top left pixel of each frame for
         some reason.
 
-        All other methods, in particular the copy-back methods (like
-        ``dxva2-copy`` etc.) should hopefully be safe, although they can still
-        cause random decoding issues. At the very least, they shouldn't affect
-        the colors of the image.
-
-        In particular, ``auto-copy`` will only select "safe" modes
-        (although potentially slower than other methods), but there's still no
-        guarantee the chosen hardware decoder will actually work correctly.
-
-        In general, it's very strongly advised to avoid hardware decoding
-        unless **absolutely** necessary, i.e. if your CPU is insufficient to
-        decode the file in questions. If you run into any weird decoding issues,
-        frame glitches or discoloration, and you have ``--hwdec`` turned on,
-        the first thing you should try is disabling it.
+        If you run into any weird decoding issues, frame glitches or
+        discoloration, and you have ``--hwdec`` turned on, the first thing you
+        should try is disabling it.
 
 ``--gpu-hwdec-interop=<auto|all|no|name>``
     This option is for troubleshooting hwdec interop issues. Since it's a
