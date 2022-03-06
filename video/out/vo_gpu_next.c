@@ -17,6 +17,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <pthread.h>
 #include <libplacebo/renderer.h>
 #include <libplacebo/shaders/lut.h>
 #include <libplacebo/utils/libav.h>
@@ -94,6 +95,11 @@ struct priv {
     struct ra_hwdec_mapper **hwdec_mappers;
     int num_hwdec_mappers;
 
+    // Allocated DR buffers
+    pthread_mutex_t dr_lock;
+    pl_buf *dr_buffers;
+    int num_dr_buffers;
+
     pl_log pllog;
     pl_gpu gpu;
     pl_renderer rr;
@@ -151,33 +157,36 @@ struct priv {
 static void update_render_options(struct vo *vo);
 static void update_lut(struct priv *p, struct user_lut *lut);
 
-// Struct used as the 'opaque' element of an AVBufferRef
-struct dr_buf {
-    uint64_t sentinel[2];
-    pl_gpu gpu;
-    pl_buf buf;
-};
-
-static const uint64_t dr_magic[2] = { 0xc6e9222474db53ae, 0x9d49b2de6c3b563e };
-
-static pl_buf get_dr_buf(struct mp_image *mpi)
+static pl_buf get_dr_buf(struct priv *p, const uint8_t *ptr)
 {
-    if (!mpi->bufs[0])
-        return NULL;
+    pl_buf buf = NULL;
+    pthread_mutex_lock(&p->dr_lock);
 
-    struct dr_buf *dr = av_buffer_get_opaque(mpi->bufs[0]);
-    if (dr && memcmp(dr->sentinel, dr_magic, sizeof(dr_magic)) == 0)
-        return dr->buf;
+    for (int i = 0; i < p->num_dr_buffers; i++) {
+        buf = p->dr_buffers[i];
+        if (ptr >= buf->data && ptr < buf->data + buf->params.size)
+            break;
+    }
 
-    return NULL;
+    pthread_mutex_unlock(&p->dr_lock);
+    return buf;
 }
 
 static void free_dr_buf(void *opaque, uint8_t *data)
 {
-    struct dr_buf *dr = opaque;
-    assert(memcmp(dr->sentinel, dr_magic, sizeof(dr_magic)) == 0);
-    pl_buf_destroy(dr->gpu, &dr->buf);
-    talloc_free(dr);
+    struct priv *p = opaque;
+    pthread_mutex_lock(&p->dr_lock);
+
+    for (int i = 0; i < p->num_dr_buffers; i++) {
+        if (p->dr_buffers[i]->data == data) {
+            pl_buf_destroy(p->gpu, &p->dr_buffers[i]);
+            MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, i);
+            pthread_mutex_unlock(&p->dr_lock);
+            return;
+        }
+    }
+
+    MP_ASSERT_UNREACHABLE();
 }
 
 static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
@@ -201,17 +210,16 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     if (!buf)
         return NULL;
 
-    struct dr_buf *dr = talloc_ptrtype(NULL, dr);
-    memcpy(dr->sentinel, dr_magic, sizeof(dr_magic));
-    dr->gpu = gpu;
-    dr->buf = buf;
-
     struct mp_image *mpi = mp_image_from_buffer(imgfmt, w, h, stride_align,
-                                                buf->data, size, dr, free_dr_buf);
+                                                buf->data, size, p, free_dr_buf);
     if (!mpi) {
         pl_buf_destroy(gpu, &buf);
         return NULL;
     }
+
+    pthread_mutex_lock(&p->dr_lock);
+    MP_TARRAY_APPEND(p, p->dr_buffers, p->num_dr_buffers, buf);
+    pthread_mutex_unlock(&p->dr_lock);
 
     return mpi;
 }
@@ -601,7 +609,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
                 data[n].row_stride = mpi->stride[n];
             }
 
-            pl_buf buf = get_dr_buf(mpi);
+            pl_buf buf = get_dr_buf(p, data[n].pixels);
             if (buf) {
                 data[n].buf = buf;
                 data[n].buf_offset = (uint8_t *) data[n].pixels - buf->data;
@@ -1271,6 +1279,9 @@ static void uninit(struct vo *vo)
         hwdec_devices_destroy(vo->hwdec_devs);
     }
 
+    assert(p->num_dr_buffers == 0);
+    pthread_mutex_destroy(&p->dr_lock);
+
     char *cache_file = get_cache_file(p);
     if (cache_file) {
         FILE *cache = fopen(cache_file, "wb");
@@ -1325,6 +1336,7 @@ static int preinit(struct vo *vo)
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
+    pthread_mutex_init(&p->dr_lock, NULL);
 
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
