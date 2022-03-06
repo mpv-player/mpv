@@ -151,8 +151,7 @@ struct priv {
 static void update_render_options(struct vo *vo);
 static void update_lut(struct priv *p, struct user_lut *lut);
 
-// This struct is stored at the end of DR-allocated buffers, and serves to both
-// detect such buffers and hold the reference to the actual GPU buffer.
+// Struct used as the 'opaque' element of an AVBufferRef
 struct dr_buf {
     uint64_t sentinel[2];
     pl_gpu gpu;
@@ -160,22 +159,14 @@ struct dr_buf {
 };
 
 static const uint64_t dr_magic[2] = { 0xc6e9222474db53ae, 0x9d49b2de6c3b563e };
-static const size_t dr_align = offsetof(struct { char c; struct dr_buf dr; }, dr);
-static inline struct dr_buf *dr_header(void *ptr, size_t size)
-{
-    uintptr_t start = (uintptr_t) ptr + size - sizeof(struct dr_buf);
-    uintptr_t aligned = MP_ALIGN_DOWN(start, dr_align);
-    assert(aligned >= (uintptr_t) ptr);
-    return (struct dr_buf *) aligned;
-}
 
 static pl_buf get_dr_buf(struct mp_image *mpi)
 {
-    if (!mpi->bufs[0] || mpi->bufs[0]->size < sizeof(struct dr_buf))
+    if (!mpi->bufs[0])
         return NULL;
 
-    struct dr_buf *dr = dr_header(mpi->bufs[0]->data, mpi->bufs[0]->size);
-    if (memcmp(dr->sentinel, dr_magic, sizeof(dr_magic)) == 0)
+    struct dr_buf *dr = av_buffer_get_opaque(mpi->bufs[0]);
+    if (dr && memcmp(dr->sentinel, dr_magic, sizeof(dr_magic)) == 0)
         return dr->buf;
 
     return NULL;
@@ -185,8 +176,8 @@ static void free_dr_buf(void *opaque, uint8_t *data)
 {
     struct dr_buf *dr = opaque;
     assert(memcmp(dr->sentinel, dr_magic, sizeof(dr_magic)) == 0);
-    // Can't use `&dr->buf` because it gets freed during `pl_buf_destroy`
-    pl_buf_destroy(dr->gpu, &(pl_buf) { dr->buf });
+    pl_buf_destroy(dr->gpu, &dr->buf);
+    talloc_free(dr);
 }
 
 static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
@@ -202,23 +193,21 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
         return NULL;
 
     pl_buf buf = pl_buf_create(gpu, &(struct pl_buf_params) {
-        .size = size + stride_align + sizeof(struct dr_buf) + dr_align,
         .memory_type = PL_BUF_MEM_HOST,
         .host_mapped = true,
+        .size = size,
     });
 
     if (!buf)
         return NULL;
 
-    // Store the DR header at the end of the allocation
-    struct dr_buf *dr = dr_header(buf->data, buf->params.size);
+    struct dr_buf *dr = talloc_ptrtype(NULL, dr);
     memcpy(dr->sentinel, dr_magic, sizeof(dr_magic));
     dr->gpu = gpu;
     dr->buf = buf;
 
     struct mp_image *mpi = mp_image_from_buffer(imgfmt, w, h, stride_align,
-                                                buf->data, buf->params.size,
-                                                dr, free_dr_buf);
+                                                buf->data, size, dr, free_dr_buf);
     if (!mpi) {
         pl_buf_destroy(gpu, &buf);
         return NULL;
