@@ -289,9 +289,9 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
     state->delay = p->delay / (double)p->par.rate;
 
     /* report unexpected EOF / underrun */
-    if (state->queued_samples && state->queued_samples &&
-        state->queued_samples < state->free_samples &&
-        p->playing || sio_eof(p->hdl))
+    if ((state->queued_samples && state->queued_samples &&
+        (state->queued_samples < state->free_samples) &&
+        p->playing) || sio_eof(p->hdl))
     {
         MP_VERBOSE(ao, "get_state: EOF/underrun detected.\n");
         MP_VERBOSE(ao, "get_state: free: %d, queued: %d, delay: %lf\n", \
