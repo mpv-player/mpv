@@ -465,6 +465,7 @@ static void select_and_set_hwdec(struct mp_filter *vd)
         MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
                    "on whitelist.\n", codec);
     } else {
+        bool hwdec_name_supported = false;  // relevant only if !hwdec_auto
         struct hwdec_info *hwdecs = NULL;
         int num_hwdecs = 0;
         add_all_hwdec_methods(&hwdecs, &num_hwdecs);
@@ -472,12 +473,13 @@ static void select_and_set_hwdec(struct mp_filter *vd)
         for (int n = 0; n < num_hwdecs; n++) {
             struct hwdec_info *hwdec = &hwdecs[n];
 
-            const char *hw_codec = mp_codec_from_av_codec_id(hwdec->codec->id);
-            if (!hw_codec || strcmp(hw_codec, codec) != 0)
-                continue;
-
             if (!hwdec_auto && !(bstr_equals0(opt, hwdec->method_name) ||
                                  bstr_equals0(opt, hwdec->name)))
+                continue;
+            hwdec_name_supported = true;
+
+            const char *hw_codec = mp_codec_from_av_codec_id(hwdec->codec->id);
+            if (!hw_codec || strcmp(hw_codec, codec) != 0)
                 continue;
 
             if (hwdec_auto_safe && !(hwdec->flags & HWDEC_FLAG_WHITELIST))
@@ -522,8 +524,11 @@ static void select_and_set_hwdec(struct mp_filter *vd)
 
         talloc_free(hwdecs);
 
-        if (!ctx->use_hwdec)
+        if (!ctx->use_hwdec) {
+            if (!hwdec_auto && !hwdec_name_supported)
+                MP_WARN(vd, "Unsupported hwdec: %s\n", ctx->opts->hwdec_api);
             MP_VERBOSE(vd, "No hardware decoding available for this codec.\n");
+        }
     }
 
     if (ctx->use_hwdec) {
