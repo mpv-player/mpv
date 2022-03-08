@@ -159,17 +159,18 @@ static void update_lut(struct priv *p, struct user_lut *lut);
 
 static pl_buf get_dr_buf(struct priv *p, const uint8_t *ptr)
 {
-    pl_buf buf = NULL;
     pthread_mutex_lock(&p->dr_lock);
 
     for (int i = 0; i < p->num_dr_buffers; i++) {
-        buf = p->dr_buffers[i];
-        if (ptr >= buf->data && ptr < buf->data + buf->params.size)
-            break;
+        pl_buf buf = p->dr_buffers[i];
+        if (ptr >= buf->data && ptr < buf->data + buf->params.size) {
+            pthread_mutex_unlock(&p->dr_lock);
+            return buf;
+        }
     }
 
     pthread_mutex_unlock(&p->dr_lock);
-    return buf;
+    return NULL;
 }
 
 static void free_dr_buf(void *opaque, uint8_t *data)
