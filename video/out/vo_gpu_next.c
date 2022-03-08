@@ -500,6 +500,37 @@ static pl_tex hwdec_get_tex(struct frame_priv *fp, int n)
     return false;
 }
 
+static void discard_frame(const struct pl_source_frame *src)
+{
+    struct mp_image *mpi = src->frame_data;
+    talloc_free(mpi);
+}
+
+static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
+                        const struct pl_source_frame *src)
+{
+    struct mp_image *mpi = src->frame_data;
+    struct frame_priv *fp = mpi->priv;
+    struct priv *p = fp->vo->priv;
+    if (fp->hwdec_mapper) {
+        // Clean up after wrapped plane textures
+        if (!ra_pl_get(fp->hwdec_mapper->ra)) {
+            for (int n = 0; n < frame->num_planes; n++)
+                pl_tex_destroy(p->gpu, &frame->planes[n].texture);
+        }
+
+        ra_hwdec_mapper_unmap(fp->hwdec_mapper);
+        MP_TARRAY_APPEND(p, p->hwdec_mappers, p->num_hwdec_mappers, fp->hwdec_mapper);
+        fp->hwdec_mapper = NULL;
+    }
+    for (int i = 0; i < MP_ARRAY_SIZE(fp->subs.entries); i++) {
+        pl_tex tex = fp->subs.entries[i].tex;
+        if (tex)
+            MP_TARRAY_APPEND(p, p->sub_tex, p->num_sub_tex, tex);
+    }
+    talloc_free(mpi);
+}
+
 static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src,
                       struct pl_frame *frame)
 {
@@ -520,6 +551,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             fp->hwdec_mapper = ra_hwdec_mapper_create(hwdec, &mpi->params);
             if (!fp->hwdec_mapper) {
                 MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
+                talloc_free(mpi);
                 return false;
             }
         }
@@ -528,6 +560,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             MP_ERR(p, "Mapping hardware decoded surface failed.\n");
             MP_TARRAY_APPEND(p, p->hwdec_mappers, p->num_hwdec_mappers, fp->hwdec_mapper);
             fp->hwdec_mapper = NULL;
+            talloc_free(mpi);
             return false;
         }
 
@@ -573,8 +606,10 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         for (int n = 0; n < frame->num_planes; n++) {
             struct pl_plane *plane = &frame->planes[n];
             plane->texture = hwdec_get_tex(fp, n);
-            if (!plane->texture)
+            if (!plane->texture) {
+                unmap_frame(gpu, frame, src);
                 return false;
+            }
 
             int *map = plane->component_mapping;
             for (int c = 0; c < mp_imgfmt_desc_get_num_comps(&desc); c++) {
@@ -622,6 +657,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             if (!pl_upload_plane(gpu, plane, &tex[n], &data[n])) {
                 MP_ERR(vo, "Failed uploading frame!\n");
                 talloc_free(data[n].priv);
+                unmap_frame(gpu, frame, src);
                 return false;
             }
         }
@@ -659,37 +695,6 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     frame->lut = p->image_lut.lut;
     frame->lut_type = p->image_lut.type;
     return true;
-}
-
-static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
-                        const struct pl_source_frame *src)
-{
-    struct mp_image *mpi = src->frame_data;
-    struct frame_priv *fp = mpi->priv;
-    struct priv *p = fp->vo->priv;
-    if (fp->hwdec_mapper) {
-        // Clean up after wrapped plane textures
-        if (!ra_pl_get(fp->hwdec_mapper->ra)) {
-            for (int n = 0; n < frame->num_planes; n++)
-                pl_tex_destroy(p->gpu, &frame->planes[n].texture);
-        }
-
-        ra_hwdec_mapper_unmap(fp->hwdec_mapper);
-        MP_TARRAY_APPEND(p, p->hwdec_mappers, p->num_hwdec_mappers, fp->hwdec_mapper);
-        fp->hwdec_mapper = NULL;
-    }
-    for (int i = 0; i < MP_ARRAY_SIZE(fp->subs.entries); i++) {
-        pl_tex tex = fp->subs.entries[i].tex;
-        if (tex)
-            MP_TARRAY_APPEND(p, p->sub_tex, p->num_sub_tex, tex);
-    }
-    talloc_free(mpi);
-}
-
-static void discard_frame(const struct pl_source_frame *src)
-{
-    struct mp_image *mpi = src->frame_data;
-    talloc_free(mpi);
 }
 
 static void info_callback(void *priv, const struct pl_render_info *info)
