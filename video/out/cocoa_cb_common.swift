@@ -21,6 +21,10 @@ class CocoaCB: Common {
     var libmpv: LibmpvHelper
     var layer: GLLayer?
 
+    override var videoLayer: VideoLayer? {
+        get { return layer }
+    }
+    
     @objc var isShuttingDown: Bool = false
 
     enum State {
@@ -121,9 +125,8 @@ class CocoaCB: Common {
         }
 
         libmpv.setRenderICCProfile(colorSpace)
-        if #available(macOS 10.11, *) {
-            layer?.colorspace = colorSpace.cgColorSpace
-        }
+        super.updateICCProfile()
+        
     }
 
     override func windowDidEndAnimation() {
