@@ -87,3 +87,9 @@ extension Int32 {
         self.init(bool ? 1 : 0)
     }
 }
+
+protocol VideoLayer: class {
+    var colorspace: CGColorSpace? { get set }
+}
+
+extension CAOpenGLLayer: VideoLayer {}
