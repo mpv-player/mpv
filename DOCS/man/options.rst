@@ -1255,6 +1255,8 @@ Video
     :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
     :drm:       requires ``--vo=gpu`` (Linux only)
     :drm-copy:   copies video back to system RAM (Linux only)
+    :vulkan:    requires ``--vo=gpu-next`` (Any platform with Vulkan Video Decoding)
+    :vulkan-copy: copies video back to system RAM (Any platform with Vulkan Video Decoding)
 
     Other hwdecs (only use if you know you have to):
 
@@ -1310,7 +1312,8 @@ Video
     .. note::
 
        Most non-copy methods only work with the OpenGL GPU backend. Currently,
-       only the ``vaapi``, ``nvdec`` and ``cuda`` methods work with Vulkan.
+       only the ``vaapi``, ``nvdec``, ``cuda`` and ``vulkan`` methods work with
+       Vulkan.
 
     The ``vaapi`` mode, if used with ``--vo=gpu``, requires Mesa 11, and most
     likely works with Intel and AMD GPUs only. It also requires the opengl EGL

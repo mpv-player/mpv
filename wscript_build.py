@@ -486,6 +486,7 @@ def build(ctx):
         ( "video/out/hwdec/hwdec_drmprime.c",    "drm" ),
         ( "video/out/hwdec/hwdec_drmprime_overlay.c","drm" ),
         ( "video/out/hwdec/hwdec_vaapi.c",       "vaapi-egl || vaapi-libplacebo" ),
+        ( "video/out/hwdec/hwdec_vulkan.c",      "vulkan-interop" ),
         ( "video/out/hwdec/dmabuf_interop_gl.c", "dmabuf-interop-gl" ),
         ( "video/out/hwdec/dmabuf_interop_pl.c", "dmabuf-interop-pl" ),
         ( "video/out/hwdec/dmabuf_interop_wl.c", "dmabuf-wayland" ),
