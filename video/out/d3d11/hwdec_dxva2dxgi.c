@@ -74,9 +74,9 @@ static int init(struct ra_hwdec *hw)
     int ret = -1;
     HRESULT hr;
 
-    if (!ra_is_d3d11(hw->ra))
+    if (!ra_is_d3d11(hw->ra_ctx->ra))
         goto done;
-    p->dev11 = ra_d3d11_get_device(hw->ra);
+    p->dev11 = ra_d3d11_get_device(hw->ra_ctx->ra);
     if (!p->dev11)
         goto done;
 

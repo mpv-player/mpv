@@ -423,7 +423,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
     case VOCTRL_LOAD_HWDEC_API:
-        assert(p->hwdec_ctx.ra);
+        assert(p->hwdec_ctx.ra_ctx);
         struct hwdec_imgfmt_request* req = (struct hwdec_imgfmt_request*)data;
         if (!is_supported_fmt(req->imgfmt))
             return 0;
@@ -529,11 +529,11 @@ static int preinit(struct vo *vo)
 
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
-    assert(!p->hwdec_ctx.ra);
+    assert(!p->hwdec_ctx.ra_ctx);
     p->hwdec_ctx = (struct ra_hwdec_ctx) {
         .log = p->log,
         .global = p->global,
-        .ra = p->ctx->ra,
+        .ra_ctx = p->ctx,
     };
 
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, NULL, true);

@@ -277,7 +277,7 @@ static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
 bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
                             struct dmabuf_interop *dmabuf_interop)
 {
-    if (!ra_is_gl(hw->ra)) {
+    if (!ra_is_gl(hw->ra_ctx->ra)) {
         // This is not an OpenGL RA.
         return false;
     }
@@ -289,7 +289,7 @@ bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
     if (!exts)
         return false;
 
-    GL *gl = ra_gl_get(hw->ra);
+    GL *gl = ra_gl_get(hw->ra_ctx->ra);
     if (!gl_check_extension(exts, "EGL_EXT_image_dma_buf_import") ||
         !gl_check_extension(exts, "EGL_KHR_image_base") ||
         !gl_check_extension(gl->extensions, "GL_OES_EGL_image") ||

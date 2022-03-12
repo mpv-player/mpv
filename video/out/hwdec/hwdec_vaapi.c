@@ -146,7 +146,7 @@ static int init(struct ra_hwdec *hw)
         return -1;
     }
 
-    p->display = create_native_va_display(hw->ra, hw->log);
+    p->display = create_native_va_display(hw->ra_ctx->ra, hw->log);
     if (!p->display) {
         MP_VERBOSE(hw, "Could not create a VA display.\n");
         return -1;
@@ -172,7 +172,7 @@ static int init(struct ra_hwdec *hw)
     }
 
     // it's now safe to set the display resource
-    ra_add_native_resource(hw->ra, "VADisplay", p->display);
+    ra_add_native_resource(hw->ra_ctx->ra, "VADisplay", p->display);
 
     p->ctx->hwctx.hw_imgfmt = IMGFMT_VAAPI;
     p->ctx->hwctx.supported_formats = p->formats;

@@ -67,7 +67,7 @@ static void unmap(struct ra_hwdec_mapper *mapper)
 bool dmabuf_interop_wl_init(const struct ra_hwdec *hw,
                             struct dmabuf_interop *dmabuf_interop)
 {
-    if (!ra_is_wldmabuf(hw->ra))
+    if (!ra_is_wldmabuf(hw->ra_ctx->ra))
         return false;
 
     if (strstr(hw->driver->name, "vaapi") != NULL)

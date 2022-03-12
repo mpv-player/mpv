@@ -81,14 +81,14 @@ static int init(struct render_backend *ctx, mpv_render_param *params)
             void *data = params[n].data;
             if (entry->size)
                 data = talloc_memdup(p, data, entry->size);
-            ra_add_native_resource(p->context->ra, entry->name, data);
+            ra_add_native_resource(p->context->ra_ctx->ra, entry->name, data);
         }
     }
 
-    p->renderer = gl_video_init(p->context->ra, ctx->log, ctx->global);
+    p->renderer = gl_video_init(p->context->ra_ctx->ra, ctx->log, ctx->global);
 
     ctx->hwdec_devs = hwdec_devices_create();
-    gl_video_init_hwdecs(p->renderer, ctx->hwdec_devs, true);
+    gl_video_init_hwdecs(p->renderer, p->context->ra_ctx, ctx->hwdec_devs, true);
     ctx->driver_caps = VO_CAP_ROTATE90;
     return 0;
 }
