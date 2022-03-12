@@ -308,7 +308,7 @@ static int preinit(struct vo *vo)
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
 
-    gl_video_init_hwdecs(p->renderer, vo->hwdec_devs, false);
+    gl_video_init_hwdecs(p->renderer, p->ctx, vo->hwdec_devs, false);
 
     return 0;
 

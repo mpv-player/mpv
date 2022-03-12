@@ -222,7 +222,8 @@ void gl_video_reset(struct gl_video *p);
 bool gl_video_showing_interpolated_frame(struct gl_video *p);
 
 struct mp_hwdec_devices;
-void gl_video_init_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
+void gl_video_init_hwdecs(struct gl_video *p, struct ra_ctx *ra_ctx,
+                          struct mp_hwdec_devices *devs,
                           bool load_all_by_default);
 struct hwdec_imgfmt_request;
 void gl_video_load_hwdecs_for_img_fmt(struct gl_video *p, struct mp_hwdec_devices *devs,

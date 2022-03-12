@@ -148,10 +148,12 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
     struct drm_frame next_frame = {0};
     int ret;
 
+    struct ra *ra = hw->ra_ctx->ra;
+
     // grab atomic request from native resources
     if (p->ctx) {
         struct mpv_opengl_drm_params_v2 *drm_params;
-        drm_params = (mpv_opengl_drm_params_v2 *)ra_get_native_resource(hw->ra, "drm_params_v2");
+        drm_params = (mpv_opengl_drm_params_v2 *)ra_get_native_resource(ra, "drm_params_v2");
         if (!drm_params) {
             MP_ERR(hw, "Failed to retrieve drm params from native resources\n");
             return -1;
@@ -168,7 +170,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
 
         // grab draw plane windowing info to eventually upscale the overlay
         // as egl windows could be upscaled to draw plane.
-        struct mpv_opengl_drm_draw_surface_size *draw_surface_size = ra_get_native_resource(hw->ra, "drm_draw_surface_size");
+        struct mpv_opengl_drm_draw_surface_size *draw_surface_size = ra_get_native_resource(ra, "drm_draw_surface_size");
         if (draw_surface_size) {
             scale_dst_rect(hw, draw_surface_size->width, draw_surface_size->height, dst, &p->dst);
         } else {
@@ -259,7 +261,7 @@ static int init(struct ra_hwdec *hw)
 
     struct mpv_opengl_drm_params_v2 *drm_params;
 
-    drm_params = ra_get_native_resource(hw->ra, "drm_params_v2");
+    drm_params = ra_get_native_resource(hw->ra_ctx->ra, "drm_params_v2");
     if (drm_params) {
         p->ctx = drm_atomic_create_context(p->log, drm_params->fd, drm_params->crtc_id,
                                            drm_params->connector_id, draw_plane, drmprime_video_plane);

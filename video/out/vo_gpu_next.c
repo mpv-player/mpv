@@ -1453,7 +1453,7 @@ static int preinit(struct vo *vo)
     p->hwdec_ctx = (struct ra_hwdec_ctx) {
         .log = p->log,
         .global = p->global,
-        .ra = p->ra_ctx->ra,
+        .ra_ctx = p->ra_ctx,
     };
 
     vo->hwdec_devs = hwdec_devices_create();

@@ -83,7 +83,7 @@ static int init(struct ra_hwdec *hw)
      * there are extensions that supposedly provide this information from the
      * drivers. Not properly documented. Of course.
      */
-    mpv_opengl_drm_params_v2 *params = ra_get_native_resource(hw->ra,
+    mpv_opengl_drm_params_v2 *params = ra_get_native_resource(hw->ra_ctx->ra,
                                                               "drm_params_v2");
 
     /*

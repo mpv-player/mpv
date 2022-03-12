@@ -60,7 +60,7 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
     p->gl->debug_context = debug;
     ra_gl_set_debug(p->ra_ctx->ra, debug);
 
-    ctx->ra = p->ra_ctx->ra;
+    ctx->ra_ctx = p->ra_ctx;
 
     return 0;
 }
