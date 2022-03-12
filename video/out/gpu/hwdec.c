@@ -26,17 +26,14 @@
 #include "hwdec.h"
 
 extern const struct ra_hwdec_driver ra_hwdec_vaegl;
-extern const struct ra_hwdec_driver ra_hwdec_vaglx;
 extern const struct ra_hwdec_driver ra_hwdec_videotoolbox;
 extern const struct ra_hwdec_driver ra_hwdec_vdpau;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2egl;
 extern const struct ra_hwdec_driver ra_hwdec_d3d11egl;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2gldx;
-extern const struct ra_hwdec_driver ra_hwdec_dxva2;
 extern const struct ra_hwdec_driver ra_hwdec_d3d11va;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2dxgi;
 extern const struct ra_hwdec_driver ra_hwdec_cuda;
-extern const struct ra_hwdec_driver ra_hwdec_cuda_nvdec;
 extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime_drm;
@@ -174,8 +171,9 @@ int ra_hwdec_mapper_map(struct ra_hwdec_mapper *mapper, struct mp_image *img)
     return 0;
 }
 
-int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                          struct bstr name, const char **value)
+static int ra_hwdec_validate_opt_full(struct mp_log *log, bool include_modes,
+                                      const m_option_t *opt,
+                                      struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
     bool help = bstr_equals0(param, "help");
@@ -190,18 +188,34 @@ int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
         }
     }
     if (help) {
-        mp_info(log, "    auto (behavior depends on context)\n"
-                     "    all (load all hwdecs)\n"
-                     "    no (do not load any and block loading on demand)\n");
+        if (include_modes) {
+            mp_info(log, "    auto (behavior depends on context)\n"
+                        "    all (load all hwdecs)\n"
+                        "    no (do not load any and block loading on demand)\n");
+        }
         return M_OPT_EXIT;
     }
     if (!param.len)
         return 1; // "" is treated specially
-    if (bstr_equals0(param, "all") || bstr_equals0(param, "auto") ||
-        bstr_equals0(param, "no"))
+    if (include_modes &&
+       (bstr_equals0(param, "all") || bstr_equals0(param, "auto") ||
+        bstr_equals0(param, "no")))
         return 1;
     mp_fatal(log, "No hwdec backend named '%.*s' found!\n", BSTR_P(param));
     return M_OPT_INVALID;
+}
+
+int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
+                          struct bstr name, const char **value)
+{
+    return ra_hwdec_validate_opt_full(log, true, opt, name, value);
+}
+
+int ra_hwdec_validate_drivers_only_opt(struct mp_log *log,
+                                       const m_option_t *opt,
+                                       struct bstr name, const char **value)
+{
+    return ra_hwdec_validate_opt_full(log, false, opt, name, value);
 }
 
 static void load_add_hwdec(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
@@ -322,4 +336,14 @@ struct ra_hwdec *ra_hwdec_get(struct ra_hwdec_ctx *ctx, int imgfmt)
     }
 
     return NULL;
+}
+
+int ra_hwdec_driver_get_imgfmt_for_name(const char *name)
+{
+    for (int i = 0; ra_hwdec_drivers[i]; i++) {
+        if (!strcmp(ra_hwdec_drivers[i]->name, name)) {
+            return ra_hwdec_drivers[i]->imgfmts[0];
+        }
+    }
+    return IMGFMT_NONE;
 }

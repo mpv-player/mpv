@@ -1257,7 +1257,7 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
     }
 
     struct mp_lavfi *l =
-        mp_lavfi_create_graph(mpctx->filter_root, 0, false, NULL, graph);
+        mp_lavfi_create_graph(mpctx->filter_root, 0, false, NULL, NULL, graph);
     if (!l)
         goto done;
     mpctx->lavfi = l->f;

@@ -18,6 +18,7 @@ struct mp_lavfi {
 //  graph: a libavfilter graph specification
 struct mp_lavfi *mp_lavfi_create_graph(struct mp_filter *parent,
                                        enum mp_frame_type type, bool bidir,
+                                       char *hwdec_interop,
                                        char **graph_opts, const char *graph);
 
 // Unlike mp_lavfi_create_graph(), this creates a single filter, using explicit
@@ -26,6 +27,7 @@ struct mp_lavfi *mp_lavfi_create_graph(struct mp_filter *parent,
 // (which are applied with mp_set_avopts()).
 struct mp_lavfi *mp_lavfi_create_filter(struct mp_filter *parent,
                                         enum mp_frame_type type, bool bidir,
+                                        char *hwdec_interop,
                                         char **graph_opts,
                                         const char *filter, char **filter_opts);
 
