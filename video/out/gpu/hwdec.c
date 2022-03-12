@@ -38,6 +38,7 @@ extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_aimagereader;
+extern const struct ra_hwdec_driver ra_hwdec_vulkan;
 
 const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #if HAVE_VAAPI_EGL || HAVE_VAAPI_LIBPLACEBO
@@ -78,6 +79,9 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #endif
 #if HAVE_ANDROID_MEDIA_NDK
     &ra_hwdec_aimagereader,
+#endif
+#if HAVE_VULKAN_INTEROP
+    &ra_hwdec_vulkan,
 #endif
 
     NULL

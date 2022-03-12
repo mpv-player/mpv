@@ -411,7 +411,7 @@ endif
 if darwin
     path_source = files('osdep/path-darwin.c')
     sources += path_source + files('osdep/timer-darwin.c')
-                     
+
 endif
 
 if posix and not darwin
@@ -933,6 +933,8 @@ if features['libplacebo-next']
                      'video/out/gpu_next/context.c')
 endif
 
+features += {'libplacebo-decode': features['libplacebo'] and libplacebo.version().version_compare('>=5.275.0')}
+
 sdl2_video = get_option('sdl2-video').require(
     features['sdl2'],
     error_message: 'sdl2 was not found!',
@@ -1307,6 +1309,16 @@ if features['cuda-interop'] and features['gl']
 endif
 if features['cuda-interop'] and features['vulkan']
     sources += files('video/out/hwdec/hwdec_cuda_vk.c')
+endif
+
+vulkan_interop = get_option('vulkan-interop').require(
+    vulkan.found() and features['libplacebo-decode'] and
+    libavutil.version().version_compare('>=58.11.100'),
+    error_message: 'Vulkan Interop requires vulkan, libplacebo >= 5.275.0, and libavutil >= 58.11.100',
+)
+features += {'vulkan-interop': vulkan_interop.allowed()}
+if vulkan_interop.allowed()
+    sources += files('video/out/hwdec/hwdec_vulkan.c')
 endif
 
 d3d_hwaccel = get_option('d3d-hwaccel').require(
