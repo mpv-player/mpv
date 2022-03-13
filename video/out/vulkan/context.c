@@ -166,6 +166,7 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     assert(vk->vkinst);
     vk->vulkan = pl_vulkan_create(vk->pllog, &(struct pl_vulkan_params) {
         .instance = vk->vkinst->instance,
+        .get_proc_addr = vk->vkinst->get_proc_addr,
         .surface = vk->surface,
         .async_transfer = p->opts->async_transfer,
         .async_compute = p->opts->async_compute,
