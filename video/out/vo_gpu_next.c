@@ -205,14 +205,15 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     pl_buf buf = pl_buf_create(gpu, &(struct pl_buf_params) {
         .memory_type = PL_BUF_MEM_HOST,
         .host_mapped = true,
-        .size = size,
+        .size = size + stride_align,
     });
 
     if (!buf)
         return NULL;
 
     struct mp_image *mpi = mp_image_from_buffer(imgfmt, w, h, stride_align,
-                                                buf->data, size, p, free_dr_buf);
+                                                buf->data, buf->params.size,
+                                                p, free_dr_buf);
     if (!mpi) {
         pl_buf_destroy(gpu, &buf);
         return NULL;
