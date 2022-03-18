@@ -106,15 +106,15 @@ static void check_in_format_change(struct mp_user_filter *u,
 
             if (u == p->input) {
                 p->public.input_params = img->params;
-
-                // Unfortunately there's no good place to update these.
-                // But a common case is enabling HW decoding, which
-                // might init some support of them in the VO, and update
-                // the VO's format list.
-                update_output_caps(p);
             } else if (u == p->output) {
                 p->public.output_params = img->params;
             }
+
+            // Unfortunately there's no good place to update these.
+            // But a common case is enabling HW decoding, which
+            // might init some support of them in the VO, and update
+            // the VO's format list.
+            update_output_caps(p);
 
             p->public.reconfig_happened = true;
         }

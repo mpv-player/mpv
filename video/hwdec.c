@@ -94,7 +94,7 @@ void hwdec_devices_set_loader(struct mp_hwdec_devices *devs,
 void hwdec_devices_request_for_img_fmt(struct mp_hwdec_devices *devs,
                                        struct hwdec_imgfmt_request *params)
 {
-    if (devs->load_api && !hwdec_devices_get_first(devs))
+    if (devs->load_api)
         devs->load_api(devs->load_api_ctx, params);
 }
 

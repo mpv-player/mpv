@@ -244,7 +244,7 @@ void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
      * obviously no interops will need to be loaded later.
      *
      * Finally, if a specific interop is requested, it will be loaded now, and
-     * no other interop will be loaded, even if requested later.
+     * other interops can be loaded, if requested later.
      */
     if (!type || !type[0] || strcmp(type, "auto") == 0) {
         if (!load_all_by_default)
