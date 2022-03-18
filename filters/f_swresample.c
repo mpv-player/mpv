@@ -327,26 +327,6 @@ static void reset(struct mp_filter *f)
         close_lavrr(p);
 }
 
-static void extra_output_conversion(struct mp_aframe *mpa)
-{
-    int format = af_fmt_from_planar(mp_aframe_get_format(mpa));
-    int num_planes = mp_aframe_get_planes(mpa);
-    uint8_t **planes = mp_aframe_get_data_rw(mpa);
-    if (!planes)
-        return;
-    for (int p = 0; p < num_planes; p++) {
-        void *ptr = planes[p];
-        int total = mp_aframe_get_total_plane_samples(mpa);
-        if (format == AF_FORMAT_FLOAT) {
-            for (int s = 0; s < total; s++)
-                ((float *)ptr)[s] = av_clipf(((float *)ptr)[s], -1.0f, 1.0f);
-        } else if (format == AF_FORMAT_DOUBLE) {
-            for (int s = 0; s < total; s++)
-                ((double *)ptr)[s] = MPCLAMP(((double *)ptr)[s], -1.0, 1.0);
-        }
-    }
-}
-
 // This relies on the tricky way mpa was allocated.
 static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
                            struct mp_chmap *newmap)
@@ -450,8 +430,6 @@ static struct mp_frame filter_resample_output(struct priv *p,
         if (got != out_samples)
             goto error;
     }
-
-    extra_output_conversion(out);
 
     if (in) {
         mp_aframe_copy_attributes(out, in);
