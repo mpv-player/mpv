@@ -704,7 +704,11 @@ struct AVBufferRef *mp_filter_load_hwdec_device(struct mp_filter *f, int avtype)
                "Unrecognised HW Device type requested. Loading all devices\n");
     }
 
-    hwdec_devices_request_for_img_fmt(info->hwdec_devs, imgfmt);
+    struct hwdec_imgfmt_request params = {
+        .imgfmt = imgfmt,
+        .probing = false,
+    };
+    hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
 
     return hwdec_devices_get_lavc(info->hwdec_devs, avtype);
 }

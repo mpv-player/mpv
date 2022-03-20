@@ -74,10 +74,11 @@ static int cuda_init(struct ra_hwdec *hw)
     int ret = 0;
     struct cuda_hw_priv *p = hw->priv;
     CudaFunctions *cu;
+    int level = hw->probing ? MSGL_V : MSGL_ERR;
 
     ret = cuda_load_functions(&p->cu, NULL);
     if (ret != 0) {
-        MP_VERBOSE(hw, "Failed to load CUDA symbols\n");
+        MP_MSG(hw, level, "Failed to load CUDA symbols\n");
         return -1;
     }
     cu = p->cu;
@@ -94,7 +95,8 @@ static int cuda_init(struct ra_hwdec *hw)
     }
 
     if (!p->ext_init || !p->ext_uninit) {
-        MP_VERBOSE(hw, "CUDA hwdec only works with OpenGL or Vulkan backends.\n");
+        MP_MSG(hw, level,
+               "CUDA hwdec only works with OpenGL or Vulkan backends.\n");
         return -1;
     }
 
@@ -109,7 +111,7 @@ static int cuda_init(struct ra_hwdec *hw)
 
     ret = av_hwdevice_ctx_init(hw_device_ctx);
     if (ret < 0) {
-        MP_ERR(hw, "av_hwdevice_ctx_init failed\n");
+        MP_MSG(hw, level, "av_hwdevice_ctx_init failed\n");
         goto error;
     }
 

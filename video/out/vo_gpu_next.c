@@ -1218,7 +1218,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
 
     case VOCTRL_LOAD_HWDEC_API:
-        ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, vo->hwdec_devs, (intptr_t) data);
+        ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, vo->hwdec_devs, data);
         return true;
     }
 
@@ -1312,9 +1312,9 @@ static void uninit(struct vo *vo)
     gpu_ctx_destroy(&p->context);
 }
 
-static void load_hwdec_api(void *ctx, int imgfmt)
+static void load_hwdec_api(void *ctx, struct hwdec_imgfmt_request *params)
 {
-    vo_control(ctx, VOCTRL_LOAD_HWDEC_API, (void *)(intptr_t) imgfmt);
+    vo_control(ctx, VOCTRL_LOAD_HWDEC_API, params);
 }
 
 static int preinit(struct vo *vo)

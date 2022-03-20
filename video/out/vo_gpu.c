@@ -52,7 +52,6 @@ struct gpu_priv {
 
     int events;
 };
-
 static void resize(struct vo *vo)
 {
     struct gpu_priv *p = vo->priv;
@@ -129,16 +128,15 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 static void request_hwdec_api(struct vo *vo, void *data)
 {
     struct gpu_priv *p = vo->priv;
-    int imgfmt = (intptr_t)data;
-
-    gl_video_load_hwdecs_for_img_fmt(p->renderer, vo->hwdec_devs, imgfmt);
+    gl_video_load_hwdecs_for_img_fmt(p->renderer, vo->hwdec_devs, data);
 }
 
-static void call_request_hwdec_api(void *ctx, int imgfmt)
+static void call_request_hwdec_api(void *ctx,
+                                   struct hwdec_imgfmt_request *params)
 {
     // Roundabout way to run hwdec loading on the VO thread.
     // Redirects to request_hwdec_api().
-    vo_control(ctx, VOCTRL_LOAD_HWDEC_API, (void *)(intptr_t)imgfmt);
+    vo_control(ctx, VOCTRL_LOAD_HWDEC_API, params);
 }
 
 static void get_and_update_icc_profile(struct gpu_priv *p)
