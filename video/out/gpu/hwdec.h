@@ -25,7 +25,7 @@ void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
 void ra_hwdec_ctx_uninit(struct ra_hwdec_ctx *ctx);
 
 void ra_hwdec_ctx_load_fmt(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
-                           int imgfmt);
+                           struct hwdec_imgfmt_request *params);
 
 // Gets the right `ra_hwdec` for a format, if any
 struct ra_hwdec *ra_hwdec_get(struct ra_hwdec_ctx *ctx, int imgfmt);

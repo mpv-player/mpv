@@ -431,8 +431,11 @@ static AVBufferRef *hwdec_create_dev(struct mp_filter *vd,
             return ref;
         }
     } else if (ctx->hwdec_devs) {
-        hwdec_devices_request_for_img_fmt(ctx->hwdec_devs,
-                                          pixfmt2imgfmt(hwdec->pix_fmt));
+        struct hwdec_imgfmt_request params = {
+            .imgfmt = pixfmt2imgfmt(hwdec->pix_fmt),
+            .probing = autoprobe,
+        };
+        hwdec_devices_request_for_img_fmt(ctx->hwdec_devs, &params);
         return hwdec_devices_get_lavc(ctx->hwdec_devs, hwdec->lavc_device);
     }
 
@@ -512,9 +515,14 @@ static void select_and_set_hwdec(struct mp_filter *vd)
             } else if (!hwdec->copying) {
                 // Most likely METHOD_INTERNAL, which often use delay-loaded
                 // VO support as well.
-                if (ctx->hwdec_devs)
+                if (ctx->hwdec_devs) {
+                    struct hwdec_imgfmt_request params = {
+                        .imgfmt = pixfmt2imgfmt(hwdec->pix_fmt),
+                        .probing = hwdec_auto,
+                    };
                     hwdec_devices_request_for_img_fmt(
-                        ctx->hwdec_devs, pixfmt2imgfmt(hwdec->pix_fmt));
+                        ctx->hwdec_devs, &params);
+                }
             }
 
             ctx->use_hwdec = true;

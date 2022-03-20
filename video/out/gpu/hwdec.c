@@ -275,8 +275,9 @@ void ra_hwdec_ctx_uninit(struct ra_hwdec_ctx *ctx)
 }
 
 void ra_hwdec_ctx_load_fmt(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
-                           int imgfmt)
+                           struct hwdec_imgfmt_request *params)
 {
+    int imgfmt = params->imgfmt;
     if (ctx->loading_done) {
         /*
          * If we previously marked interop loading as done (for reasons
@@ -307,7 +308,7 @@ void ra_hwdec_ctx_load_fmt(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *de
             continue;
         }
 
-        load_add_hwdec(ctx, devs, drv, false);
+        load_add_hwdec(ctx, devs, drv, params->probing);
     }
 }
 

@@ -13,7 +13,8 @@ struct mp_hwdec_devices {
     struct mp_hwdec_ctx **hwctxs;
     int num_hwctxs;
 
-    void (*load_api)(void *ctx, int imgfmt);
+    void (*load_api)(void *ctx,
+                     struct hwdec_imgfmt_request *params);
     void *load_api_ctx;
 };
 
@@ -95,16 +96,18 @@ void hwdec_devices_remove(struct mp_hwdec_devices *devs, struct mp_hwdec_ctx *ct
 }
 
 void hwdec_devices_set_loader(struct mp_hwdec_devices *devs,
-    void (*load_api)(void *ctx, int imgfmt), void *load_api_ctx)
+    void (*load_api)(void *ctx, struct hwdec_imgfmt_request *params),
+    void *load_api_ctx)
 {
     devs->load_api = load_api;
     devs->load_api_ctx = load_api_ctx;
 }
 
-void hwdec_devices_request_for_img_fmt(struct mp_hwdec_devices *devs, int imgfmt)
+void hwdec_devices_request_for_img_fmt(struct mp_hwdec_devices *devs,
+                                       struct hwdec_imgfmt_request *params)
 {
     if (devs->load_api && !hwdec_devices_get_first(devs))
-        devs->load_api(devs->load_api_ctx, imgfmt);
+        devs->load_api(devs->load_api_ctx, params);
 }
 
 char *hwdec_devices_get_names(struct mp_hwdec_devices *devs)

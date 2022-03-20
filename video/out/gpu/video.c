@@ -4323,10 +4323,9 @@ void gl_video_init_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
     ra_hwdec_ctx_init(&p->hwdec_ctx, devs, p->opts.hwdec_interop, load_all_by_default);
 }
 
-void gl_video_load_hwdecs_for_img_fmt(struct gl_video *p,
-                                      struct mp_hwdec_devices *devs,
-                                      int imgfmt)
+void gl_video_load_hwdecs_for_img_fmt(struct gl_video *p, struct mp_hwdec_devices *devs,
+                                      struct hwdec_imgfmt_request *params)
 {
     assert(p->hwdec_ctx.ra);
-    ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, devs, imgfmt);
+    ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, devs, params);
 }
