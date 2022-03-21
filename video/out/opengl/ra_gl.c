@@ -690,7 +690,7 @@ static void gl_clear(struct ra *ra, struct ra_tex *dst, float color[4],
 
     gl->Enable(GL_SCISSOR_TEST);
     gl->ClearColor(color[0], color[1], color[2], color[3]);
-    gl->Clear(GL_COLOR_BUFFER_BIT);
+    gl->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gl->Disable(GL_SCISSOR_TEST);
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
