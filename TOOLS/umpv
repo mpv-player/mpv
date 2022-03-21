@@ -6,11 +6,12 @@ playback with this script, it will try to reuse an already running instance of
 mpv (but only if that was started with umpv). Other mpv instances (not started
 by umpv) are ignored, and the script doesn't know about them.
 
-This only takes filenames as arguments. Custom options can't be used; the script
-interprets them as filenames. If mpv is already running, the files passed to
-umpv are appended to mpv's internal playlist. If a file does not exist or is
-otherwise not playable, mpv will skip the playlist entry when attempting to
-play it (from the GUI perspective, it's silently ignored).
+The only required argument is one or more filenames.  There is an optional argument,
+--socket-file, which specifies the instance of mpv to look for.  If mpv (with the
+specified socket file) is already running, the files passed to umpv are appended to
+mpv's internal playlist. If a file does not exist or is otherwise not playable, mpv
+will skip the playlist entry when attempting to play it (from the GUI perspective,
+it's silently ignored).
 
 If mpv isn't running yet, this script will start mpv and let it control the
 current terminal. It will not write output to stdout/stderr, because this
@@ -27,13 +28,21 @@ Note: you can supply custom mpv path and options with the MPV environment
 """
 
 import sys
+import argparse
 import os
 import socket
 import errno
 import subprocess
 import string
 
-files = sys.argv[1:]
+parser = argparse.ArgumentParser(description="A script to play media in a " + 
+                                             "unique instance of mpv.")
+parser.add_argument("files", metavar="FILES", type=str, nargs="+",
+                    help="files being opened by MPV.")
+parser.add_argument("--socket-file","-s",default=".umpv_socket",
+                    help="socket file specifying which instance of mpv " +
+                         "to interact with.")
+args = parser.parse_args()
 
 # this is the same method mpv uses to decide this
 def is_url(filename):
@@ -50,9 +59,9 @@ def make_abs(filename):
     if not is_url(filename):
         return os.path.abspath(filename)
     return filename
-files = (make_abs(f) for f in files)
+files = (make_abs(f) for f in args.files)
 
-SOCK = os.path.join(os.getenv("HOME"), ".umpv_socket")
+SOCK = os.path.join(os.getenv("HOME"), args.socket_file)
 
 sock = None
 try:
@@ -77,10 +86,8 @@ if sock:
         sock.send(("raw loadfile " + f + " append\n").encode("utf-8"))
 else:
     # Let mpv recreate socket if it doesn't already exist.
-
     opts = (os.getenv("MPV") or "mpv").split()
-    opts.extend(["--no-terminal", "--force-window", "--input-ipc-server=" + SOCK,
-                 "--"])
-    opts.extend(files)
+    opts.extend(["--player-operation-mode=pseudo-gui", "--force-window", "--input-ipc-server=" + SOCK])
+    opts.extend(args.files)
 
     subprocess.check_call(opts)
