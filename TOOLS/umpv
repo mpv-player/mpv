@@ -87,7 +87,8 @@ if sock:
 else:
     # Let mpv recreate socket if it doesn't already exist.
     opts = (os.getenv("MPV") or "mpv").split()
-    opts.extend(["--player-operation-mode=pseudo-gui", "--force-window", "--input-ipc-server=" + SOCK])
+    opts.extend(["--no-terminal", "--force-window", "--input-ipc-server=" + SOCK,
+                 "--"])
     opts.extend(args.files)
 
     subprocess.check_call(opts)
