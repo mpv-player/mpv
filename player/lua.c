@@ -248,13 +248,16 @@ static void load_file(lua_State *L, const char *fname)
 {
     struct script_ctx *ctx = get_ctx(L);
     MP_DBG(ctx, "loading file %s\n", fname);
-    struct bstr s = stream_read_file(fname, ctx, ctx->mpctx->global, 100000000);
+    void *tmp = talloc_new(ctx);
+    // according to Lua manaual chunkname should be '@' plus the filename
+    char *dispname = talloc_asprintf(tmp, "@%s", fname);
+    struct bstr s = stream_read_file(fname, tmp, ctx->mpctx->global, 100000000);
     if (!s.start)
         luaL_error(L, "Could not read file.\n");
-    if (luaL_loadbuffer(L, s.start, s.len, fname))
+    if (luaL_loadbuffer(L, s.start, s.len, dispname))
         lua_error(L);
     lua_call(L, 0, 1);
-    talloc_free(s.start);
+    talloc_free(tmp);
 }
 
 static int load_builtin(lua_State *L)
