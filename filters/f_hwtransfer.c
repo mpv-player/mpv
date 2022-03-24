@@ -198,10 +198,10 @@ static const struct mp_filter_info hwupload_filter = {
 // So filter out all not explicitly supported formats.
 static bool vo_supports(struct mp_hwdec_ctx *ctx, int hw_fmt, int sw_fmt)
 {
-    if (!ctx->hw_imgfmt)
-        return true; // if unset, all formats are allowed
     if (ctx->hw_imgfmt != hw_fmt)
         return false;
+    if (!ctx->supported_formats)
+        return true; // if unset, all formats are allowed
 
     for (int i = 0; ctx->supported_formats &&  ctx->supported_formats[i]; i++) {
         if (ctx->supported_formats[i] == sw_fmt)

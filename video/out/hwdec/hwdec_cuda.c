@@ -122,6 +122,7 @@ static int cuda_init(struct ra_hwdec *hw)
     p->hwctx = (struct mp_hwdec_ctx) {
         .driver_name = hw->driver->name,
         .av_device_ref = hw_device_ctx,
+        .hw_imgfmt = IMGFMT_CUDA,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
     return 0;

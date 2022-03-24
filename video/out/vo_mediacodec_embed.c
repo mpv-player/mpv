@@ -52,6 +52,7 @@ static int preinit(struct vo *vo)
     p->hwctx = (struct mp_hwdec_ctx){
         .driver_name = "mediacodec_embed",
         .av_device_ref = create_mediacodec_device_ref(vo),
+        .hw_imgfmt = IMGFMT_MEDIACODEC,
     };
     hwdec_devices_add(vo->hwdec_devs, &p->hwctx);
     return 0;

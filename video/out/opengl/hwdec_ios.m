@@ -70,6 +70,7 @@ static int init(struct ra_hwdec *hw)
 
     p->hwctx = (struct mp_hwdec_ctx){
         .driver_name = hw->driver->name,
+        .hw_imgfmt = IMGFMT_VIDEOTOOLBOX,
     };
 
     av_hwdevice_ctx_create(&p->hwctx.av_device_ref, AV_HWDEVICE_TYPE_VIDEOTOOLBOX,

@@ -435,12 +435,16 @@ static AVBufferRef *hwdec_create_dev(struct mp_filter *vd,
             return ref;
         }
     } else if (ctx->hwdec_devs) {
+        int imgfmt = pixfmt2imgfmt(hwdec->pix_fmt);
         struct hwdec_imgfmt_request params = {
-            .imgfmt = pixfmt2imgfmt(hwdec->pix_fmt),
+            .imgfmt = imgfmt,
             .probing = autoprobe,
         };
         hwdec_devices_request_for_img_fmt(ctx->hwdec_devs, &params);
-        return hwdec_devices_get_lavc(ctx->hwdec_devs, hwdec->lavc_device);
+
+        const struct mp_hwdec_ctx *hw_ctx =
+            hwdec_devices_get_by_imgfmt(ctx->hwdec_devs, imgfmt);
+        return hw_ctx ? av_buffer_ref(hw_ctx->av_device_ref) : NULL;
     }
 
     return NULL;
