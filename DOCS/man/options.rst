@@ -5338,21 +5338,68 @@ them.
         Propagate error to only two adjacent pixels. Fastest but low quality.
 
     ``sierra-lite``
-        Fast with reasonable quality. This is the default.
+        Fast with reasonable quality. This is the default. Simple dithering 
+        come from Frankie Sierra, who published the following matrices after
+        Sierra in 1990.
 
     ``floyd-steinberg``
         Most notable error diffusion kernel.
+        The first and arguably most famous error diffusion formula was 
+        published by Robert Floyd and Louis Steinberg in 1976.
 
     ``atkinson``
-        Looks different from other kernels because only fraction of errors will
-        be propagated during dithering. A typical use case of this kernel is
+        Dithering algorithms developed by Bill Atkinson in mid 1980. Looks 
+        different from other kernels because only fraction of errors will 
+        be propagated during dithering. A typical use case of this kernel is 
         saving dithered screenshot (in window mode). This kernel produces
         slightly smaller file, with still reasonable dithering quality.
+        Atkinson’s formula is a bit different from others because it only 
+        propagates a fraction of the error instead of the full amount. This
+        technique sometimes offered by modern graphics applications as 
+        a “reduced color bleed” option. By only propagating part of the 
+        error, speckling is reduced, but contiguous dark or bright sections 
+        of an image may become washed out.
 
-    There are other kernels (use ``--error-diffusion=help`` to list) but most of
-    them are much slower and demanding even larger amount of shared memory.
+    There are other kernels (use ``--error-diffusion=help`` to list) but most
+    of them are much slower and demanding even larger amount of shared memory.
     Among these kernels, ``burkes`` achieves a good balance between performance
     and quality, and probably is the one you want to try first.
+    
+    ``false-fs``
+        False Floyd-Steinberg. Simplification of the original Floyd-Steinberg
+        algorithm not only produces markedly worse output - but it does so 
+        without any conceivable advantage in terms of speed (or memory, as 
+        a forward-array to store error values for the next line is still 
+        required).
+    
+    ``jarvis-judice-ninke``
+        In the same year (1976) of Floyd and Steinberg published their dithering,
+        a lesser-known - but much more powerful - algorithm was also published. 
+        Jarvis, Judice, and Ninke filter is significantly more complex than 
+        Floyd-Steinberg. The error is distributed to three times as many pixels 
+        in Floyd-Steinberg, leading to much smoother and more subtle - output.
+        
+    ``stucki``
+        Five years after (1981) Jarvis, Judice, and Ninke published their
+        formula Peter Stucki published an adjusted version of it with slight
+        changes made to improve processing time. There will be minimal 
+        difference between output of Stucki and Jarvis-Judice-Ninke.
+        
+    ``burkes``
+        Seven years (1988) after Stucki published his improvement to 
+        Jarvis-Judice-Ninke dithering, Daniel Burkes suggested a further 
+        improvement. Burkes’s suggestion was to drop the bottom row of Stucki’s 
+        matrix. This change meant that all math involved in the error calculation 
+        could be accomplished by simple bit-shifting, with only a minor hit 
+        to quality.
+        
+    ``sierra-2``
+        Dithering algorithms come from Frankie Sierra, who published the 
+        following matrices in 1990. “Two-Row Sierra”, and “Sierra Lite”
+        
+    ``sierra-3``
+        Dithering algorithms come from Frankie Sierra, who published the 
+        first matrices in 1989
 
 ``--gpu-debug``
     Enables GPU debugging. What this means depends on the API type. For OpenGL,
