@@ -181,6 +181,7 @@ static int init(struct ra_hwdec *hw)
     p->hwctx = (struct mp_hwdec_ctx){
         .driver_name = hw->driver->name,
         .av_device_ref = d3d9_wrap_device_ref((IDirect3DDevice9 *)p->device9ex),
+        .hw_imgfmt = IMGFMT_DXVA2,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
 
