@@ -5,6 +5,7 @@ enum {
     // --- GL type aliases (for readability)
     T_U8        = GL_UNSIGNED_BYTE,
     T_U16       = GL_UNSIGNED_SHORT,
+    T_HFL       = GL_HALF_FLOAT,
     T_FL        = GL_FLOAT,
 };
 
@@ -85,6 +86,20 @@ const struct gl_format gl_formats[] = {
     {"rgb16f",  GL_RGB16F,   GL_RGB,             T_FL,  F_F16 | F_TF | F_ES3},
     {"rgba16f", GL_RGBA16F,  GL_RGBA,            T_FL,  F_F16 | F_TF | F_ES3},
 
+    // Support GL_HALF_FLOATs as well (sans-F_F16).
+    {"r16f",    GL_R16F,     GL_RED,             T_HFL,         F_CF | F_GL3 | F_GL2F},
+    {"rg16f",   GL_RG16F,    GL_RG,              T_HFL,         F_CF | F_GL3 | F_GL2F},
+    {"rgb16f",  GL_RGB16F,   GL_RGB,             T_HFL,         F_CF | F_GL3 | F_GL2F},
+    {"rgba16f", GL_RGBA16F,  GL_RGBA,            T_HFL,         F_CF | F_GL3 | F_GL2F},
+    {"r16f",    GL_R16F,     GL_RED,             T_HFL,         F_CF | F_ES32 | F_EXTF16},
+    {"rg16f",   GL_RG16F,    GL_RG,              T_HFL,         F_CF | F_ES32 | F_EXTF16},
+    {"rgb16f",  GL_RGB16F,   GL_RGB,             T_HFL,         F_TF | F_ES32 | F_EXTF16},
+    {"rgba16f", GL_RGBA16F,  GL_RGBA,            T_HFL,         F_CF | F_ES32 | F_EXTF16},
+    {"r16f",    GL_R16F,     GL_RED,             T_HFL,         F_TF | F_ES3},
+    {"rg16f",   GL_RG16F,    GL_RG,              T_HFL,         F_TF | F_ES3},
+    {"rgb16f",  GL_RGB16F,   GL_RGB,             T_HFL,         F_TF | F_ES3},
+    {"rgba16f", GL_RGBA16F,  GL_RGBA,            T_HFL,         F_TF | F_ES3},
+
     // These might be useful as FBO formats.
     {"rgb10_a2",GL_RGB10_A2, GL_RGBA,
      GL_UNSIGNED_INT_2_10_10_10_REV,                    F_CF | F_GL3 | F_ES3},
@@ -123,7 +138,7 @@ int gl_format_type(const struct gl_format *format)
 {
     if (!format)
         return 0;
-    if (format->type == GL_FLOAT)
+    if (format->type == GL_FLOAT || format->type == GL_HALF_FLOAT)
         return MPGL_TYPE_FLOAT;
     if (gl_integer_format_to_base(format->format))
         return MPGL_TYPE_UINT;
@@ -152,6 +167,7 @@ int gl_component_size(GLenum type)
     switch (type) {
     case GL_UNSIGNED_BYTE:                      return 1;
     case GL_UNSIGNED_SHORT:                     return 2;
+    case GL_HALF_FLOAT:                         return 2;
     case GL_FLOAT:                              return 4;
     }
     return 0;
