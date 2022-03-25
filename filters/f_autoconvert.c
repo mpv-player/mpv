@@ -191,21 +191,31 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
         dst_have_sw |= !is_hw;
     }
 
-    // Source is sw, all targets are hw -> try to upload.
-    bool sw_to_hw = imgfmt_is_sw && dst_all_hw;
     // Source is hw, some targets are sw -> try to download.
     bool hw_to_sw = !imgfmt_is_sw && dst_have_sw;
 
-    if (sw_to_hw && num_fmts > 0) {
+    if (dst_all_hw && num_fmts > 0) {
         // We can probably use this! Very lazy and very approximate.
         struct mp_hwupload *upload = mp_hwupload_create(conv, fmts[0]);
         if (upload) {
+            int sw_fmt = imgfmt_is_sw ? img->imgfmt : img->params.hw_subfmt;
+
             mp_info(log, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[0]));
             filters[2] = upload->f;
-            hwupload_fmt = mp_hwupload_find_upload_format(upload, img->imgfmt);
+            hwupload_fmt = mp_hwupload_find_upload_format(upload, sw_fmt);
             fmts = &hwupload_fmt;
             num_fmts = hwupload_fmt ? 1 : 0;
             hw_to_sw = false;
+
+            // We cannot do format conversions when transferring between
+            // two hardware devices, so fail immediately if that would be
+            // required.
+            if (!imgfmt_is_sw && hwupload_fmt != sw_fmt) {
+                mp_err(log, "Format %s is not supported by %s\n",
+                       mp_imgfmt_to_name(sw_fmt),
+                       mp_imgfmt_to_name(p->imgfmts[0]));
+                goto fail;
+            }
         }
     }
 
@@ -234,6 +244,11 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
     if (p->imgparams_set) {
         force_sws_params |= !mp_image_params_equal(&imgpar, &p->imgparams);
         need_sws |= force_sws_params;
+    }
+    if (!imgfmt_is_sw && dst_all_hw) {
+        // This is a hw -> hw upload, so the sw format must already be
+        // mutually understood. No conversion can be done.
+        need_sws = false;
     }
 
     if (need_sws) {
