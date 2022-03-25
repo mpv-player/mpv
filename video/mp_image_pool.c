@@ -325,7 +325,7 @@ bool mp_image_hw_upload(struct mp_image *hw_img, struct mp_image *src)
     if (hw_img->w != src->w || hw_img->h != src->h)
         return false;
 
-    if (!hw_img->hwctx || src->hwctx)
+    if (!hw_img->hwctx)
         return false;
 
     bool ok = false;
