@@ -230,13 +230,17 @@ static const struct pw_stream_events stream_events = {
 static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    if (p->loop)
+    if (p->loop) {
+        pw_thread_loop_lock(p->loop);
         pw_thread_loop_stop(p->loop);
+    }
     if (p->stream)
         pw_stream_destroy(p->stream);
     p->stream = NULL;
-    if (p->core)
+    if (p->core) {
         pw_core_disconnect(p->core);
+        pw_context_destroy(pw_core_get_context(p->core));
+    }
     p->core = NULL;
     if (p->loop)
         pw_thread_loop_destroy(p->loop);
@@ -347,26 +351,36 @@ static int pipewire_init_boilerplate(struct ao *ao)
 {
     struct priv *p = ao->priv;
     struct pw_context *context;
+    int ret;
 
     pw_init(NULL, NULL);
 
 
     p->loop = pw_thread_loop_new("ao-pipewire", NULL);
+    pw_thread_loop_lock(p->loop);
     if (p->loop == NULL)
-        return -1;
+        goto error;
 
     if (pw_thread_loop_start(p->loop) < 0)
-            return -1;
+        goto error;
 
     context = pw_context_new(pw_thread_loop_get_loop(p->loop), NULL, 0);
     if (!context)
-            return -1;
+        goto error;
 
     p->core = pw_context_connect(context, NULL, 0);
     if (!p->core)
-            return -1;
+        goto error;
 
-    return 0;
+    ret = 0;
+
+out:
+    pw_thread_loop_unlock(p->loop);
+    return ret;
+
+error:
+    ret = -1;
+    goto out;
 }
 
 
