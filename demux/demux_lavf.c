@@ -1342,6 +1342,8 @@ static void demux_close_lavf(demuxer_t *demuxer)
         // This will be a dangling pointer; but see below.
         AVIOContext *leaking = priv->avfc ? priv->avfc->pb : NULL;
         avformat_close_input(&priv->avfc);
+        if (leaking == priv->pb)
+            priv->pb = NULL; // already freed above
         // The ffmpeg garbage breaks its own API yet again: hls.c will call
         // io_open on the main playlist, but never calls io_close. This happens
         // to work out for us (since we don't really use custom I/O), but it's
