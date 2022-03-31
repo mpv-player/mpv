@@ -230,10 +230,8 @@ static const struct pw_stream_events stream_events = {
 static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    if (p->loop) {
-        pw_thread_loop_lock(p->loop);
+    if (p->loop)
         pw_thread_loop_stop(p->loop);
-    }
     if (p->stream)
         pw_stream_destroy(p->stream);
     p->stream = NULL;
