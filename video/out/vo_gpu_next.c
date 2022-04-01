@@ -687,6 +687,11 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     }
 #endif
 
+#ifdef PL_HAVE_LAV_FILM_GRAIN
+    if (mpi->film_grain)
+        pl_film_grain_from_av(&frame->film_grain, (AVFilmGrainParams *) mpi->film_grain->data);
+#endif
+
     // Compute a unique signature for any attached ICC profile. Wasteful in
     // theory if the ICC profile is the same for multiple frames, but in
     // practice ICC profiles are overwhelmingly going to be attached to
