@@ -205,6 +205,7 @@ static void mp_image_destructor(void *ptr)
     av_buffer_unref(&mpi->icc_profile);
     av_buffer_unref(&mpi->a53_cc);
     av_buffer_unref(&mpi->dovi);
+    av_buffer_unref(&mpi->film_grain);
     for (int n = 0; n < mpi->num_ff_side_data; n++)
         av_buffer_unref(&mpi->ff_side_data[n].buf);
     talloc_free(mpi->ff_side_data);
@@ -340,6 +341,7 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
     ref_buffer(&ok, &new->icc_profile);
     ref_buffer(&ok, &new->a53_cc);
     ref_buffer(&ok, &new->dovi);
+    ref_buffer(&ok, &new->film_grain);
 
     new->ff_side_data = talloc_memdup(NULL, new->ff_side_data,
                         new->num_ff_side_data * sizeof(new->ff_side_data[0]));
@@ -382,6 +384,7 @@ struct mp_image *mp_image_new_dummy_ref(struct mp_image *img)
     new->icc_profile = NULL;
     new->a53_cc = NULL;
     new->dovi = NULL;
+    new->film_grain = NULL;
     new->num_ff_side_data = 0;
     new->ff_side_data = NULL;
     return new;
@@ -532,6 +535,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     }
     assign_bufref(&dst->icc_profile, src->icc_profile);
     assign_bufref(&dst->dovi, src->dovi);
+    assign_bufref(&dst->film_grain, src->film_grain);
     assign_bufref(&dst->a53_cc, src->a53_cc);
 }
 
@@ -1010,6 +1014,12 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_DOVI_METADATA);
     if (sd)
         dst->dovi = sd->buf;
+#endif
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(56, 61, 100)
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_FILM_GRAIN_PARAMS);
+    if (sd)
+        dst->film_grain = sd->buf;
 #endif
 
     for (int n = 0; n < src->nb_side_data; n++) {
