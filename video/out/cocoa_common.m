@@ -976,7 +976,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 {
     [self recalcMovableByWindowBackground:point];
     if (!self.vout->cocoa->window_is_dragged)
-        mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
+        mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y, 0);
 }
 
 - (void)putKey:(int)mpkey withModifiers:(int)modifiers

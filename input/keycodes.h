@@ -238,6 +238,10 @@
 // Makes adjustments like turning "shift+z" into "Z"
 int mp_normalize_keycode(int keycode);
 
+// Parse modifier string (such as "ctrl+alt") and return modifier mask
+// or -1 on invalid input
+int mp_input_get_modifiers_combo_from_name(const char *name);
+
 // Get input key from its name.
 int mp_input_get_key_from_name(const char *name);
 

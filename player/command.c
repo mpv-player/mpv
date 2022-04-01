@@ -5833,11 +5833,17 @@ static void cmd_mouse(void *p)
         if (vo_res.w && vo_res.h && hover != oldhover)
             pre_key = hover ? MP_KEY_MOUSE_ENTER : MP_KEY_MOUSE_LEAVE;
     }
+    int mods = mp_input_get_modifiers_combo_from_name(cmd->args[4].v.s);
+    if (mods == -1) {
+        MP_ERR(mpctx, "%s is not a valid modifier.\n", cmd->args[4].v.s);
+        cmd->success = false;
+        return;
+    }
 
     if (button == -1) {// no button
         if (pre_key)
             mp_input_put_key_artificial(mpctx->input, pre_key);
-        mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
+        mp_input_set_mouse_pos_artificial(mpctx->input, x, y, mods);
         return;
     }
     if (button < 0 || button >= MP_KEY_MOUSE_BTN_COUNT) {// invalid button
@@ -5852,11 +5858,12 @@ static void cmd_mouse(void *p)
         cmd->success = false;
         return;
     }
+
     button += dbc ? MP_MBTN_DBL_BASE : MP_MBTN_BASE;
     if (pre_key)
         mp_input_put_key_artificial(mpctx->input, pre_key);
-    mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
-    mp_input_put_key_artificial(mpctx->input, button);
+    mp_input_set_mouse_pos_artificial(mpctx->input, x, y, mods);
+    mp_input_put_key_artificial(mpctx->input, button | mods);
 }
 
 static void cmd_key(void *p)
@@ -6411,6 +6418,8 @@ const struct mp_cmd_def mp_cmds[] = {
                             {"button", OPT_INT(v.i), OPTDEF_INT(-1)},
                             {"mode", OPT_CHOICE(v.i,
                                 {"single", 0}, {"double", 1}),
+                                .flags = MP_CMD_OPT_ARG},
+                            {"modifiers", OPT_STRING(v.s),
                                 .flags = MP_CMD_OPT_ARG}}},
     { "keybind", cmd_key_bind, { {"name", OPT_STRING(v.s)},
                                  {"cmd", OPT_STRING(v.s)} }},

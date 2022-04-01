@@ -472,7 +472,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
         if (code == MP_KEY_CLOSE_WIN)
             return mp_input_parse_cmd_strv(ictx->log, (const char*[]){"quit", 0});
         int msgl = MSGL_WARN;
-        if (MP_KEY_IS_MOUSE_MOVE(code))
+        if (MP_KEY_IS_MOUSE_MOVE(code & ~MP_KEY_MODIFIER_MASK))
             msgl = MSGL_TRACE;
         char *key_buf = mp_input_get_key_combo_name(&code, 1);
         MP_MSG(ictx, msgl, "No key binding found for key '%s'.\n", key_buf);
@@ -818,15 +818,15 @@ bool mp_input_vo_keyboard_enabled(struct input_ctx *ictx)
     return r;
 }
 
-void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
+void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y, int mods)
 {
     input_lock(ictx);
     if (ictx->opts->enable_mouse_movements)
-        mp_input_set_mouse_pos_artificial(ictx, x, y);
+        mp_input_set_mouse_pos_artificial(ictx, x, y, mods);
     input_unlock(ictx);
 }
 
-void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y)
+void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y, int mods)
 {
     input_lock(ictx);
     MP_TRACE(ictx, "mouse move %d/%d\n", x, y);
@@ -853,7 +853,8 @@ void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y)
     ictx->mouse_vo_y = y;
 
     update_mouse_section(ictx);
-    struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, MP_KEY_MOUSE_MOVE);
+    int code = MP_KEY_MOUSE_MOVE | mods;
+    struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, code);
     if (!cmd)
         cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
 
@@ -861,12 +862,13 @@ void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y)
         cmd->mouse_move = true;
         cmd->mouse_x = x;
         cmd->mouse_y = y;
+        cmd->mouse_move_mods = mods;
         if (should_drop_cmd(ictx, cmd)) {
             talloc_free(cmd);
         } else {
             // Coalesce with previous mouse move events (i.e. replace it)
             struct mp_cmd *tail = queue_peek_tail(&ictx->cmd_queue);
-            if (tail && tail->mouse_move) {
+            if (tail && tail->mouse_move && tail->mouse_move_mods == mods) {
                 queue_remove(&ictx->cmd_queue, tail);
                 talloc_free(tail);
             }

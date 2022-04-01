@@ -1247,7 +1247,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (x != w32->mouse_x || y != w32->mouse_y) {
             w32->mouse_x = x;
             w32->mouse_y = y;
-            mp_input_set_mouse_pos(w32->input_ctx, x, y);
+            mp_input_set_mouse_pos(w32->input_ctx, x, y, mod_state(w32));
         }
         break;
     }

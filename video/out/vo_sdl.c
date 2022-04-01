@@ -521,6 +521,20 @@ static void wakeup(struct vo *vo)
     SDL_PushEvent(&event);
 }
 
+static int sdl_mod_to_mpv_mod(int sdl_mod)
+{
+    int mpv_mod = 0;
+    if (sdl_mod & (KMOD_LSHIFT | KMOD_RSHIFT))
+        mpv_mod |= MP_KEY_MODIFIER_SHIFT;
+    if (sdl_mod & (KMOD_LCTRL | KMOD_RCTRL))
+        mpv_mod |= MP_KEY_MODIFIER_CTRL;
+    if (sdl_mod & (KMOD_LALT | KMOD_RALT))
+        mpv_mod |= MP_KEY_MODIFIER_ALT;
+    if (sdl_mod & (KMOD_LGUI | KMOD_RGUI))
+        mpv_mod |= MP_KEY_MODIFIER_META;
+    return mpv_mod;
+}
+
 static void wait_events(struct vo *vo, int64_t until_time_us)
 {
     int64_t wait_us = until_time_us - mp_time_us();
@@ -586,35 +600,34 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
                     break;
                 }
             if (keycode) {
-                if (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))
-                    keycode |= MP_KEY_MODIFIER_SHIFT;
-                if (ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL))
-                    keycode |= MP_KEY_MODIFIER_CTRL;
-                if (ev.key.keysym.mod & (KMOD_LALT | KMOD_RALT))
-                    keycode |= MP_KEY_MODIFIER_ALT;
-                if (ev.key.keysym.mod & (KMOD_LGUI | KMOD_RGUI))
-                    keycode |= MP_KEY_MODIFIER_META;
+                keycode |= sdl_mod_to_mpv_mod(ev.key.keysym.mod);
                 mp_input_put_key(vo->input_ctx, keycode);
             }
             break;
         }
-        case SDL_MOUSEMOTION:
-            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y);
+        case SDL_MOUSEMOTION: {
+            int mods = sdl_mod_to_mpv_mod(SDL_GetModState());
+            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y, mods);
             break;
+        }
         case SDL_MOUSEBUTTONDOWN: {
+            int mods = sdl_mod_to_mpv_mod(SDL_GetModState());
             int i;
             for (i = 0; i < sizeof(mousebtns) / sizeof(mousebtns[0]); ++i)
                 if (mousebtns[i].sdl == ev.button.button) {
-                    mp_input_put_key(vo->input_ctx, mousebtns[i].mpv | MP_KEY_STATE_DOWN);
+                    mp_input_put_key(vo->input_ctx,
+                                     mousebtns[i].mpv | MP_KEY_STATE_DOWN | mods);
                     break;
                 }
             break;
         }
         case SDL_MOUSEBUTTONUP: {
+            int mods = sdl_mod_to_mpv_mod(SDL_GetModState());
             int i;
             for (i = 0; i < sizeof(mousebtns) / sizeof(mousebtns[0]); ++i)
                 if (mousebtns[i].sdl == ev.button.button) {
-                    mp_input_put_key(vo->input_ctx, mousebtns[i].mpv | MP_KEY_STATE_UP);
+                    mp_input_put_key(vo->input_ctx,
+                                     mousebtns[i].mpv | MP_KEY_STATE_UP | mods);
                     break;
                 }
             break;
@@ -625,10 +638,11 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
 #else
             double multiplier = 0.1;
 #endif
+            int mpmod = sdl_mod_to_mpv_mod(SDL_GetModState());
             int y_code = ev.wheel.y > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
-            mp_input_put_wheel(vo->input_ctx, y_code, abs(ev.wheel.y) * multiplier);
+            mp_input_put_wheel(vo->input_ctx, y_code | mpmod, abs(ev.wheel.y) * multiplier);
             int x_code = ev.wheel.x > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
-            mp_input_put_wheel(vo->input_ctx, x_code, abs(ev.wheel.x) * multiplier);
+            mp_input_put_wheel(vo->input_ctx, x_code | mpmod, abs(ev.wheel.x) * multiplier);
             break;
         }
         }

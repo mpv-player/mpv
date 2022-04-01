@@ -73,7 +73,7 @@ class MPVHelper {
     }
 
     func setMousePosition(_ pos: NSPoint) {
-        mp_input_set_mouse_pos(input, Int32(pos.x), Int32(pos.y))
+        mp_input_set_mouse_pos(input, Int32(pos.x), Int32(pos.y), 0)
     }
 
     func putAxis(_ mpkey: Int32, delta: Double) {

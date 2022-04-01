@@ -180,7 +180,7 @@ static void check_events(struct vo *vo)
             mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             break;
         case CACA_EVENT_MOUSE_MOTION:
-            mp_input_set_mouse_pos(vo->input_ctx, cev.data.mouse.x, cev.data.mouse.y);
+            mp_input_set_mouse_pos(vo->input_ctx, cev.data.mouse.x, cev.data.mouse.y, 0);
             break;
         case CACA_EVENT_MOUSE_PRESS:
             mp_input_put_key(vo->input_ctx,

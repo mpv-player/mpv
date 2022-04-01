@@ -40,6 +40,8 @@ Interface changes
       `--tone-mapping-desaturate-exponent`.
     - add `dolbyvision` sub-parameter to `format` video filter
     - `--sub-visibility` no longer has any effect on secondary subtitles
+    - the MOUSE_MOVE input event can now be combined with modifiers
+    - modifiers can now be passed to the `mouse` input command
  --- mpv 0.34.0 ---
     - deprecate selecting by card number with `--drm-connector`, add
       `--drm-device` which can be used instead
