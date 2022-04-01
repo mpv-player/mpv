@@ -312,6 +312,10 @@ Available mpv-only filters are:
         Whether or not to include Dolby Vision metadata (default: yes). If
         disabled, any Dolby Vision metadata will be stripped from frames.
 
+    ``<film-grain=yes|no>``
+        Whether or not to include film grain metadata (default: yes). If
+        disabled, any film grain metadata will be stripped from frames.
+
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Use
         ``--vf=format:stereo-in=help`` to list all available modes. Check with
