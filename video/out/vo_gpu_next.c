@@ -18,10 +18,9 @@
  */
 
 #include <pthread.h>
-#include <libavutil/mastering_display_metadata.h>
 #include <libplacebo/renderer.h>
 #include <libplacebo/shaders/lut.h>
-#include <libplacebo/utils/upload.h>
+#include <libplacebo/utils/libav.h>
 #include <libplacebo/utils/frame_queue.h>
 
 #ifdef PL_HAVE_LCMS
