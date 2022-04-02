@@ -675,7 +675,9 @@ static void init_avctx(struct mp_filter *vd)
         avctx->opaque = vd;
         avctx->get_buffer2 = get_buffer2_direct;
 #if LIBAVCODEC_VERSION_MAJOR < 60
-        avctx->thread_safe_callbacks = 1;
+        AV_NOWARN_DEPRECATED({
+            avctx->thread_safe_callbacks = 1;
+        });
 #endif
     }
 
