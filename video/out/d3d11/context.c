@@ -166,7 +166,10 @@ static bool resize(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     HRESULT hr;
 
-    ra_tex_free(ctx->ra, &p->backbuffer);
+    if (p->backbuffer) {
+        MP_ERR(ctx, "Attempt at resizing while a frame was in progress!\n");
+        return false;
+    }
 
     hr = IDXGISwapChain_ResizeBuffers(p->swapchain, 0, ctx->vo->dwidth,
         ctx->vo->dheight, DXGI_FORMAT_UNKNOWN, 0);
@@ -174,8 +177,6 @@ static bool resize(struct ra_ctx *ctx)
         MP_FATAL(ctx, "Couldn't resize swapchain: %s\n", mp_HRESULT_to_str(hr));
         return false;
     }
-
-    p->backbuffer = get_backbuffer(ctx);
 
     return true;
 }
@@ -213,6 +214,9 @@ static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     if (!out_fbo)
         return true;
 
+    assert(!p->backbuffer);
+
+    p->backbuffer = get_backbuffer(sw->ctx);
     if (!p->backbuffer)
         return false;
 
@@ -227,7 +231,10 @@ static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 static bool d3d11_submit_frame(struct ra_swapchain *sw,
                                const struct vo_frame *frame)
 {
+    struct priv *p = sw->priv;
+
     ra_d3d11_flush(sw->ctx->ra);
+    ra_tex_free(sw->ctx->ra, &p->backbuffer);
     return true;
 }
 
@@ -524,10 +531,6 @@ static bool d3d11_init(struct ra_ctx *ctx)
         .usage = usage,
     };
     if (!mp_d3d11_create_swapchain(p->device, ctx->log, &scopts, &p->swapchain))
-        goto error;
-
-    p->backbuffer = get_backbuffer(ctx);
-    if (!p->backbuffer)
         goto error;
 
     return true;
