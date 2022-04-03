@@ -180,6 +180,8 @@ enum {
     VO_CAP_FRAMEDROP    = 1 << 1,
     // VO does not allow frames to be retained (vo_mediacodec_embed).
     VO_CAP_NORETAIN     = 1 << 2,
+    // VO supports applying film grain
+    VO_CAP_FILM_GRAIN   = 1 << 3,
 };
 
 #define VO_MAX_REQ_FRAMES 10

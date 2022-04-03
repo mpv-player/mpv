@@ -1679,6 +1679,17 @@ Video
     the number of packets that could not be decoded. Values below an unspecified
     count will not have this problem, because mpv retains the packets.
 
+``--vd-lavc-film-grain=<auto|cpu|gpu>``
+    Enables film grain application on the GPU. If video decoding is done on
+    the CPU, doing film grain application on the GPU can speed up decoding.
+    This option can also help hardware decoding, as it can reduce the number
+    of frame copies done.
+
+    By default, it's set to ``auto``, so if the VO supports film grain
+    application, then it will be treated as ``gpu``. If the VO does not
+    support this, then it will be treated as ``cpu``, regardless of the setting.
+    Currently, only ``gpu-next`` supports film grain application.
+
 ``--vd-lavc-dr=<yes|no>``
     Enable direct rendering (default: yes). If this is set to ``yes``, the
     video will be decoded directly to GPU video memory (or staging buffers).

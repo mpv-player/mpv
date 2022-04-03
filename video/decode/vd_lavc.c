@@ -72,6 +72,7 @@ static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
 
 struct vd_lavc_params {
     int fast;
+    int film_grain;
     int show_all;
     int skip_loop_filter;
     int skip_idct;
@@ -104,6 +105,8 @@ static const struct m_opt_choice_alternatives discard_names[] = {
 const struct m_sub_options vd_lavc_conf = {
     .opts = (const m_option_t[]){
         {"vd-lavc-fast", OPT_FLAG(fast)},
+        {"vd-lavc-film-grain", OPT_CHOICE(film_grain,
+            {"auto", -1}, {"cpu", 0}, {"gpu", 1})},
         {"vd-lavc-show-all", OPT_FLAG(show_all)},
         {"vd-lavc-skiploopfilter", OPT_DISCARD(skip_loop_filter)},
         {"vd-lavc-skipidct", OPT_DISCARD(skip_idct)},
@@ -127,6 +130,7 @@ const struct m_sub_options vd_lavc_conf = {
     },
     .size = sizeof(struct vd_lavc_params),
     .defaults = &(const struct vd_lavc_params){
+        .film_grain = -1 /*auto*/,
         .show_all = 0,
         .check_hw_profile = 1,
         .software_fallback = 3,
@@ -604,6 +608,7 @@ static void init_avctx(struct mp_filter *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     struct vd_lavc_params *lavc_param = ctx->opts;
     struct mp_codec_params *c = ctx->codec;
+    vd_ffmpeg_ctx *p = vd->priv;
 
     m_config_cache_update(ctx->opts_cache);
 
@@ -691,6 +696,15 @@ static void init_avctx(struct mp_filter *vd)
 
     if (lavc_codec->id == AV_CODEC_ID_H264 && lavc_param->old_x264)
         av_opt_set(avctx, "x264_build", "150", AV_OPT_SEARCH_CHILDREN);
+
+    if (ctx->opts->film_grain != 0 /*CPU*/) {
+        if (p->vo->driver->caps & VO_CAP_FILM_GRAIN) {
+            avctx->export_side_data |= AV_CODEC_EXPORT_DATA_FILM_GRAIN;
+        } else if (ctx->opts->film_grain == 1 /*GPU*/) {
+            MP_WARN(vd, "GPU film grain requested, but VO does not support "
+                    "applying film grain, disabling.\n");
+        }
+    }
 
     mp_set_avopts(vd->log, avctx, lavc_param->avopts);
 
