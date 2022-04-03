@@ -1694,7 +1694,11 @@ const struct m_opt_choice_alternatives lut_types[] = {
 const struct vo_driver video_out_gpu_next = {
     .description = "Video output based on libplacebo",
     .name = "gpu-next",
-    .caps = VO_CAP_ROTATE90,
+    .caps = VO_CAP_ROTATE90 |
+#ifdef PL_HAVE_LAV_FILM_GRAIN
+            VO_CAP_FILM_GRAIN |
+#endif
+            0x0,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
