@@ -35,6 +35,10 @@ struct priv {
     int *fmt_upload_index;
     int *fmt_upload_num;
 
+    // List of source formats that require hwmap instead of hwupload.
+    int *map_fmts;
+    int num_map_fmts;
+
     struct mp_hwupload public;
 };
 
@@ -54,6 +58,25 @@ static const struct ffmpeg_and_other_bugs shitlist[] = {
         .whitelist_formats = (const int[]){IMGFMT_NV12, IMGFMT_P010, IMGFMT_BGRA,
                                            IMGFMT_ABGR, IMGFMT_RGB0, 0},
         .force_same_upload_fmt = true,
+    },
+    {0}
+};
+
+struct hwmap_pairs {
+    int first_fmt;
+    int second_fmt;
+};
+
+// We cannot discover which pairs of hardware formats need to use hwmap to
+// convert between the formats, so we need a lookup table.
+static const struct hwmap_pairs hwmap_pairs[] = {
+    {
+        .first_fmt = IMGFMT_VAAPI,
+        .second_fmt = IMGFMT_VULKAN,
+    },
+    {
+        .first_fmt = IMGFMT_DRMPRIME,
+        .second_fmt = IMGFMT_VAAPI,
     },
     {0}
 };
@@ -183,7 +206,19 @@ static void process(struct mp_filter *f)
         goto error;
     }
 
-    struct mp_image *dst = mp_av_pool_image_hw_upload(p->hw_pool, src);
+    struct mp_image *dst;
+    bool map_images = false;
+    for (int n = 0; n < p->num_map_fmts; n++) {
+        if (src->imgfmt == p->map_fmts[n]) {
+            map_images = true;
+            break;
+        }
+    }
+
+    if (map_images)
+        dst = mp_av_pool_image_hw_map(p->hw_pool, src);
+    else
+        dst = mp_av_pool_image_hw_upload(p->hw_pool, src);
     if (!dst)
         goto error;
 
@@ -293,6 +328,16 @@ static bool probe_formats(struct mp_hwupload *u, int hw_imgfmt)
         if (shitlist[n].imgfmt == hw_imgfmt) {
             bugs = &shitlist[n];
             break;
+        }
+    }
+
+    for (int n = 0; hwmap_pairs[n].first_fmt; n++) {
+        if (hwmap_pairs[n].first_fmt == hw_imgfmt) {
+            MP_TARRAY_APPEND(p, p->map_fmts, p->num_map_fmts,
+                             hwmap_pairs[n].second_fmt);
+        } else if (hwmap_pairs[n].second_fmt == hw_imgfmt) {
+            MP_TARRAY_APPEND(p, p->map_fmts, p->num_map_fmts,
+                             hwmap_pairs[n].first_fmt);
         }
     }
 
