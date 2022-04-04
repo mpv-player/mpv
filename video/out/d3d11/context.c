@@ -189,11 +189,21 @@ static bool d3d11_reconfig(struct ra_ctx *ctx)
 static int d3d11_color_depth(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
+    DXGI_SWAP_CHAIN_DESC desc;
 
-    if (!p->backbuffer)
+    HRESULT hr = IDXGISwapChain_GetDesc(p->swapchain, &desc);
+    if (FAILED(hr)) {
+        MP_ERR(sw->ctx, "Failed to query swap chain description: %s!\n",
+               mp_HRESULT_to_str(hr));
+        return 0;
+    }
+
+    const struct ra_format *ra_fmt =
+        ra_d3d11_get_ra_format(sw->ctx->ra, desc.BufferDesc.Format);
+    if (!ra_fmt)
         return 0;
 
-    return p->backbuffer->params.format->component_depth[0];
+    return ra_fmt->component_depth[0];
 }
 
 static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
