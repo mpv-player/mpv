@@ -647,6 +647,18 @@ Available video output drivers are:
         Note: this option is only available with DRM atomic support.
         (default: display resolution)
 
+    ``--drm-vrr-enabled=<no|yes|auto>``
+        Toggle use of Variable Refresh Rate (VRR), aka Freesync or Adapative Sync
+        on compatible systems. VRR allows for the display to be refreshed at any
+        rate within a range (usually ~40Hz-60Hz for 60Hz displays). This can help
+        with playback of 24/25/50fps content. Support depends on the use of a
+        compatible monitor, GPU, and a sufficiently new kernel with drivers
+        that support the feature.
+
+        :no:    Do not attempt to enable VRR. (default)
+        :yes:   Attempt to enable VRR, whether the capability is reported or not.
+        :auto:  Attempt to enable VRR if support is reported.
+
 ``mediacodec_embed`` (Android)
     Renders ``IMGFMT_MEDIACODEC`` frames directly to an ``android.view.Surface``.
     Requires ``--hwdec=mediacodec`` for hardware decoding, along with

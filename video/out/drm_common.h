@@ -57,6 +57,7 @@ struct drm_opts {
     int drm_drmprime_video_plane;
     int drm_format;
     struct m_geometry drm_draw_surface_size;
+    int drm_vrr_enabled;
 };
 
 struct drm_vsync_tuple {

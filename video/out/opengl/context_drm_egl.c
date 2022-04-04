@@ -372,6 +372,24 @@ static bool crtc_setup_atomic(struct ra_ctx *ctx)
         goto err;
     }
 
+    /*
+     * VRR related properties were added in kernel 5.0. We will not fail if we
+     * cannot query or set the value, but we will log as appropriate.
+     */
+    uint64_t vrr_capable = 0;
+    drm_object_get_property(atomic_ctx->connector, "VRR_CAPABLE", &vrr_capable);
+    MP_VERBOSE(ctx->vo, "crtc is%s VRR capable\n", vrr_capable ? "" : " not");
+
+    uint64_t vrr_requested = ctx->vo->opts->drm_opts->drm_vrr_enabled;
+    if (vrr_requested == 1 || (vrr_capable && vrr_requested == -1)) {
+        if (drm_object_set_property(request, atomic_ctx->crtc, "VRR_ENABLED", 1) < 0) {
+            MP_WARN(ctx->vo, "Could not enable VRR on crtc\n");
+        } else {
+            MP_VERBOSE(ctx->vo, "Enabled VRR on crtc\n");
+        }
+    }
+
+
     drm_object_set_property(request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
     drm_object_set_property(request, atomic_ctx->draw_plane, "CRTC_ID", p->kms->crtc_id);
     drm_object_set_property(request, atomic_ctx->draw_plane, "SRC_X",   0);
