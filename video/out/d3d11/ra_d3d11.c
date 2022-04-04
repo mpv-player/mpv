@@ -202,6 +202,18 @@ DXGI_FORMAT ra_d3d11_get_format(const struct ra_format *fmt)
     return d3d->fmt;
 }
 
+const struct ra_format *ra_d3d11_get_ra_format(struct ra *ra, DXGI_FORMAT fmt)
+{
+    for (int i = 0; i < ra->num_formats; i++) {
+        struct ra_format *ra_fmt = ra->formats[i];
+
+        if (ra_d3d11_get_format(ra_fmt) == fmt)
+            return ra_fmt;
+    }
+
+    return NULL;
+}
+
 static void setup_formats(struct ra *ra)
 {
     // All formats must be usable as a 2D texture

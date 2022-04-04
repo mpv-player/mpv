@@ -11,6 +11,10 @@
 // Get the underlying DXGI format from an RA format
 DXGI_FORMAT ra_d3d11_get_format(const struct ra_format *fmt);
 
+// Gets the matching ra_format for a given DXGI format.
+// Returns a nullptr in case of no known match.
+const struct ra_format *ra_d3d11_get_ra_format(struct ra *ra, DXGI_FORMAT fmt);
+
 // Create an RA instance from a D3D11 device. This takes a reference to the
 // device, which is released when the RA instance is destroyed.
 struct ra *ra_d3d11_create(ID3D11Device *device, struct mp_log *log,
