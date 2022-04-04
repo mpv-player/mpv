@@ -561,8 +561,8 @@ static void init_graph(struct lavfi *c)
                 hwdec_ctx = hwdec_devices_get_first(info->hwdec_devs);
             }
             if (hwdec_ctx && hwdec_ctx->av_device_ref) {
-                MP_VERBOSE(c, "Configuring hwdec_interop=%s for filters\n",
-                           hwdec_ctx->driver_name);
+                MP_VERBOSE(c, "Configuring hwdec_interop=%s for filter graph: %s\n",
+                           hwdec_ctx->driver_name, c->graph_string);
                 for (int n = 0; n < c->graph->nb_filters; n++) {
                     AVFilterContext *filter = c->graph->filters[n];
                     filter->hw_device_ctx =
