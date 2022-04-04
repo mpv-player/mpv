@@ -56,6 +56,7 @@ struct drm_atomic_state {
     struct {
         struct drm_mode mode;
         uint64_t active;
+        uint64_t vrr_enabled;
     } crtc;
     struct drm_atomic_plane_state draw_plane;
     struct drm_atomic_plane_state drmprime_video_plane;

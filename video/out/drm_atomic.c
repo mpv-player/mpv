@@ -389,6 +389,9 @@ bool drm_atomic_save_old_state(struct drm_atomic_context *ctx)
     if (0 > drm_object_get_property(ctx->crtc, "ACTIVE", &ctx->old_state.crtc.active))
         ret = false;
 
+    // This property was added in kernel 5.0. We will just ignore any errors.
+    drm_object_get_property(ctx->crtc, "VRR_ENABLED", &ctx->old_state.crtc.vrr_enabled);
+
     if (0 > drm_object_get_property(ctx->connector, "CRTC_ID", &ctx->old_state.connector.crtc_id))
         ret = false;
 
@@ -411,6 +414,9 @@ bool drm_atomic_restore_old_state(drmModeAtomicReqPtr request, struct drm_atomic
 
     if (0 > drm_object_set_property(request, ctx->connector, "CRTC_ID", ctx->old_state.connector.crtc_id))
         ret = false;
+
+    // This property was added in kernel 5.0. We will just ignore any errors.
+    drm_object_set_property(request, ctx->crtc, "VRR_ENABLED", ctx->old_state.crtc.vrr_enabled);
 
     if (!drm_mode_ensure_blob(ctx->fd, &ctx->old_state.crtc.mode))
         ret = false;
