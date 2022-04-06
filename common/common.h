@@ -68,6 +68,24 @@ enum stream_type {
     STREAM_TYPE_COUNT,
 };
 
+enum video_sync {
+    VS_DEFAULT = 0,
+    VS_DISP_RESAMPLE,
+    VS_DISP_RESAMPLE_VDROP,
+    VS_DISP_RESAMPLE_NONE,
+    VS_DISP_ADROP,
+    VS_DISP_VDROP,
+    VS_DISP_NONE,
+    VS_NONE,
+};
+
+#define VS_IS_DISP(x) ((x) == VS_DISP_RESAMPLE ||       \
+                       (x) == VS_DISP_RESAMPLE_VDROP || \
+                       (x) == VS_DISP_RESAMPLE_NONE ||  \
+                       (x) == VS_DISP_ADROP ||          \
+                       (x) == VS_DISP_VDROP ||          \
+                       (x) == VS_DISP_NONE)
+
 extern const char mpv_version[];
 extern const char mpv_builddate[];
 extern const char mpv_copyright[];
