@@ -64,7 +64,7 @@ static void update_speed_filters(struct MPContext *mpctx)
         speed = 1.0;
     }
 
-    if (mpctx->display_sync_active && mpctx->opts->video_sync == VS_DISP_ADROP) {
+    if (mpctx->display_sync_active && mpctx->video_out->opts->video_sync == VS_DISP_ADROP) {
         drop *= speed * resample;
         resample = speed = 1.0;
     }

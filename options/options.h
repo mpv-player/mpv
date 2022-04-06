@@ -61,6 +61,7 @@ typedef struct mp_vo_opts {
 
     double override_display_fps;
     double timing_offset;
+    int video_sync;
 
     // vo_drm
     struct drm_opts *drm_opts;
@@ -215,7 +216,6 @@ typedef struct MPOpts {
     int hls_bitrate;
     int edition_id;
     int initial_audio_sync;
-    int video_sync;
     double sync_max_video_change;
     double sync_max_audio_change;
     int sync_max_factor;
