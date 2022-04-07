@@ -748,6 +748,8 @@ static const m_option_t mp_opts[] = {
 
     {"term-playing-msg", OPT_STRING(playing_msg)},
     {"osd-playing-msg", OPT_STRING(osd_playing_msg)},
+    {"osd-playing-msg-duration", OPT_INT(osd_playing_msg_duration),
+        M_RANGE(0, 3600000)},
     {"term-status-msg", OPT_STRING(status_msg), .flags = UPDATE_OSD},
     {"osd-status-msg", OPT_STRING(osd_status_msg), .flags = UPDATE_OSD},
     {"osd-msg1", OPT_STRING(osd_msg[0]), .flags = UPDATE_OSD},

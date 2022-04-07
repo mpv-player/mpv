@@ -4051,6 +4051,10 @@ OSD
 
     See `Property Expansion`_.
 
+``--osd-playing-msg-duration=<time>``
+    Set the duration of ``osd-playing-msg`` in ms. If this is unset,
+    ``osd-playing-msg`` stays on screen for the duration of ``osd-duration``.
+
 ``--osd-bar-align-x=<-1-1>``
     Position of the OSD bar. -1 is far left, 0 is centered, 1 is far right.
     Fractional values (like 0.5) are allowed.
