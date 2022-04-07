@@ -125,6 +125,8 @@ struct vo_wayland_state {
     uint32_t                pointer_id;
 };
 
+bool vo_wayland_check_visible(struct vo *vo);
+
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 int vo_wayland_init(struct vo *vo);
 int vo_wayland_reconfig(struct vo *vo);

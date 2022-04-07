@@ -1562,6 +1562,14 @@ static void vo_wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, in
 }
 
 /* Non-static */
+bool vo_wayland_check_visible(struct vo *vo)
+{
+    struct vo_wayland_state *wl = vo->wl;
+    bool render = !wl->hidden || wl->opts->disable_vsync;
+    wl->frame_wait = true;
+    return render;
+}
+
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_wayland_state *wl = vo->wl;
