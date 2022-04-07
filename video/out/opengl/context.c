@@ -223,6 +223,17 @@ int ra_gl_ctx_color_depth(struct ra_swapchain *sw)
 bool ra_gl_ctx_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
+
+    bool visible = true;
+    if (p->params.check_visible)
+        visible = p->params.check_visible(sw->ctx);
+    if (!visible)
+        return false;
+
+    // If out_fbo is NULL, this was called from vo_gpu_next. Bail out.
+    if (out_fbo == NULL || !visible)
+        return visible;
+
     if (!out_fbo)
         return true;
     *out_fbo = (struct ra_fbo) {
