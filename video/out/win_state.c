@@ -64,21 +64,8 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
     }
 }
 
-// Compute the "suggested" window size and position and return it in *out_geo.
-// screen is the bounding box of the current screen within the virtual desktop.
-// Does not change *vo.
-//  screen: position of the area on virtual desktop on which the video-content
-//          should be placed (maybe after excluding decorations, taskbars, etc)
-//  monitor: position of the monitor on virtual desktop (used for pixelaspect).
-//  dpi_scale: the DPI multiplier to get from virtual to real coordinates
-//             (>1 for "hidpi")
-// Use vo_apply_window_geometry() to copy the result into the vo.
-// NOTE: currently, all windowing backends do their own handling of window
-//       geometry additional to this code. This is to deal with initial window
-//       placement, fullscreen handling, avoiding resize on reconfig() with no
-//       size change, multi-monitor stuff, and possibly more.
-void vo_calc_window_geometry3(struct vo *vo, const struct mp_rect *screen,
-                              const struct mp_rect *monitor,
+void vo_calc_window_geometry4(struct vo *vo, const struct mp_rect *screen,
+                              const struct mp_rect *monitor, const struct mp_rect *vdparams,
                               double dpi_scale, struct vo_win_geometry *out_geo)
 {
     struct mp_vo_opts *opts = vo->opts;
@@ -96,11 +83,16 @@ void vo_calc_window_geometry3(struct vo *vo, const struct mp_rect *screen,
         dpi_scale = 1;
 
     int d_w, d_h;
-    mp_image_params_get_dsize(&params, &d_w, &d_h);
-    if ((vo->driver->caps & VO_CAP_ROTATE90) && params.rotate % 180 == 90)
-        MPSWAP(int, d_w, d_h);
-    d_w = MPCLAMP(d_w * opts->window_scale * dpi_scale, 1, 16000);
-    d_h = MPCLAMP(d_h * opts->window_scale * dpi_scale, 1, 16000);
+    if (opts->auto_window_resize || vdparams->x1 == 0) {
+        mp_image_params_get_dsize(&params, &d_w, &d_h);
+        if ((vo->driver->caps & VO_CAP_ROTATE90) && params.rotate % 180 == 90)
+            MPSWAP(int, d_w, d_h);
+        d_w = MPCLAMP(d_w * opts->window_scale * dpi_scale, 1, 16000);
+        d_h = MPCLAMP(d_h * opts->window_scale * dpi_scale, 1, 16000);
+    } else {
+        d_w = vdparams->x1;
+        d_h = vdparams->y1;
+    }
 
     int scr_w = screen->x1 - screen->x0;
     int scr_h = screen->y1 - screen->y0;
@@ -129,6 +121,26 @@ void vo_calc_window_geometry3(struct vo *vo, const struct mp_rect *screen,
 
     if (opts->geometry.xy_valid || opts->force_window_position)
         out_geo->flags |= VO_WIN_FORCE_POS;
+}
+
+// Compute the "suggested" window size and position and return it in *out_geo.
+// screen is the bounding box of the current screen within the virtual desktop.
+// Does not change *vo.
+//  screen: position of the area on virtual desktop on which the video-content
+//          should be placed (maybe after excluding decorations, taskbars, etc)
+//  monitor: position of the monitor on virtual desktop (used for pixelaspect).
+//  dpi_scale: the DPI multiplier to get from virtual to real coordinates
+//             (>1 for "hidpi")
+// Use vo_apply_window_geometry() to copy the result into the vo.
+// NOTE: currently, all windowing backends do their own handling of window
+//       geometry additional to this code. This is to deal with initial window
+//       placement, fullscreen handling, avoiding resize on reconfig() with no
+//       size change, multi-monitor stuff, and possibly more.
+void vo_calc_window_geometry3(struct vo *vo, const struct mp_rect *screen,
+                              const struct mp_rect *monitor,
+                              double dpi_scale, struct vo_win_geometry *out_geo)
+{
+    vo_calc_window_geometry4(vo, screen, screen, NULL, dpi_scale, out_geo);
 }
 
 // same as vo_calc_window_geometry3 with monitor assumed same as screen

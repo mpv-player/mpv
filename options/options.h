@@ -46,6 +46,7 @@ typedef struct mp_vo_opts {
     struct m_geometry autofit_smaller;
     double window_scale;
 
+    int auto_window_resize;
     int keepaspect;
     int keepaspect_window;
     int hidpi_window_scale;

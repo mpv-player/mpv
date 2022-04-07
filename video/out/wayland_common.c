@@ -1383,7 +1383,7 @@ static void set_geometry(struct vo_wayland_state *wl)
 
     struct vo_win_geometry geo;
     struct mp_rect screenrc = wl->current_output->geometry;
-    vo_calc_window_geometry(vo, &screenrc, &geo);
+    vo_calc_window_geometry4(vo, &screenrc, &screenrc, &wl->window_size, 1.0, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     greatest_common_divisor(wl, vo->dwidth, vo->dheight);
@@ -1392,8 +1392,13 @@ static void set_geometry(struct vo_wayland_state *wl)
 
     wl->vdparams.x0 = 0;
     wl->vdparams.y0 = 0;
-    wl->vdparams.x1 = vo->dwidth / wl->scaling;
-    wl->vdparams.y1 = vo->dheight / wl->scaling;
+    if (wl->vo_opts->auto_window_resize) {
+        wl->vdparams.x1 = vo->dwidth / wl->scaling;
+        wl->vdparams.y1 = vo->dheight / wl->scaling;
+    } else {
+        wl->vdparams.x1 = vo->dwidth;
+        wl->vdparams.y1 = vo->dheight;
+    }
 }
 
 static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
