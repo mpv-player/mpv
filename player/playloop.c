@@ -1139,7 +1139,9 @@ static void handle_playback_restart(struct MPContext *mpctx)
             if (opts->osd_playing_msg && opts->osd_playing_msg[0]) {
                 char *msg =
                     mp_property_expand_escaped_string(mpctx, opts->osd_playing_msg);
-                set_osd_msg(mpctx, 1, opts->osd_duration, "%s", msg);
+                set_osd_msg(mpctx, 1, opts->osd_playing_msg_duration ?
+                            opts->osd_playing_msg_duration : opts->osd_duration,
+                            "%s", msg);
                 talloc_free(msg);
             }
         }
