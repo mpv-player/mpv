@@ -26,6 +26,11 @@ struct priv {
     struct mpvk_ctx vk;
 };
 
+static bool xlib_check_visible(struct ra_ctx *ctx)
+{
+    return vo_x11_check_visible(ctx->vo);
+}
+
 static void xlib_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -56,7 +61,9 @@ static bool xlib_init(struct ra_ctx *ctx)
          .window = ctx->vo->x11->window,
     };
 
-    struct ra_vk_ctx_params params = {0};
+    struct ra_vk_ctx_params params = {
+        .check_visible = xlib_check_visible,
+    };
 
     VkInstance inst = vk->vkinst->instance;
     VkResult res = vkCreateXlibSurfaceKHR(inst, &xinfo, NULL, &vk->surface);

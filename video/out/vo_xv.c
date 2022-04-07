@@ -697,6 +697,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct xvctx *ctx = vo->priv;
 
     wait_for_completion(vo, ctx->num_buffers - 1);
+    bool render = vo_x11_check_visible(vo);
+    if (!render)
+        return;
 
     struct mp_image xv_buffer = get_xv_buffer(vo, ctx->current_buf);
     if (mpi) {

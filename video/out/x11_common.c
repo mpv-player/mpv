@@ -1043,6 +1043,7 @@ static void vo_x11_check_net_wm_state_change(struct vo *vo)
         }
 
         opts->window_minimized = is_minimized;
+        x11->hidden = is_minimized;
         m_config_cache_write_opt(x11->opts_cache, &opts->window_minimized);
         opts->window_maximized = is_maximized;
         m_config_cache_write_opt(x11->opts_cache, &opts->window_maximized);
@@ -1861,6 +1862,14 @@ static void vo_x11_set_geometry(struct vo *vo)
     } else {
         vo_x11_config_vo_window(vo);
     }
+}
+
+bool vo_x11_check_visible(struct vo *vo) {
+    struct vo_x11_state *x11 = vo->x11;
+    struct mp_vo_opts *opts = x11->opts;
+
+    bool render = !x11->hidden || VS_IS_DISP(opts->video_sync);
+    return render;
 }
 
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)

@@ -315,6 +315,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
 
     wait_for_completion(vo, 1);
+    bool render = vo_x11_check_visible(vo);
+    if (!render)
+        return;
 
     struct mp_image *img = &p->mp_ximages[p->current_buf];
 
