@@ -223,6 +223,11 @@ static void update_vsync_oml(struct ra_ctx *ctx)
     oml_sync_swap(&p->sync, ust, msc, sbc);
 }
 
+static bool glx_check_visible(struct ra_ctx *ctx)
+{
+    return vo_x11_check_visible(ctx->vo);
+}
+
 static void glx_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -313,6 +318,7 @@ static bool glx_init(struct ra_ctx *ctx)
         goto uninit;
 
     struct ra_gl_ctx_params params = {
+        .check_visible = glx_check_visible,
         .swap_buffers = glx_swap_buffers,
         .get_vsync    = glx_get_vsync,
     };

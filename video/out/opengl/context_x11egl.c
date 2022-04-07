@@ -75,6 +75,11 @@ static int pick_xrgba_config(void *user_data, EGLConfig *configs, int num_config
     return 0;
 }
 
+static bool mpegl_check_visible(struct ra_ctx *ctx)
+{
+    return vo_x11_check_visible(ctx->vo);
+}
+
 static void mpegl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -169,6 +174,7 @@ static bool mpegl_init(struct ra_ctx *ctx)
     mpegl_load_functions(&p->gl, ctx->log);
 
     struct ra_gl_ctx_params params = {
+        .check_visible = mpegl_check_visible,
         .swap_buffers = mpegl_swap_buffers,
         .get_vsync    = mpegl_get_vsync,
     };

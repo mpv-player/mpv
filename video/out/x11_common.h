@@ -80,6 +80,7 @@ struct vo_x11_state {
     Colormap colormap;
 
     int wm_type;
+    bool hidden; // _NET_WM_STATE_HIDDEN
     bool window_hidden; // the window was mapped at least once
     bool pseudo_mapped; // not necessarily mapped, but known window size
     int fs;     // whether we assume the window is in fullscreen mode
@@ -142,6 +143,7 @@ bool vo_x11_screen_is_composited(struct vo *vo);
 bool vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
                              const char *classname);
 void vo_x11_config_vo_window(struct vo *vo);
+bool vo_x11_check_visible(struct vo *vo);
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
 void vo_x11_wakeup(struct vo *vo);
 void vo_x11_wait_events(struct vo *vo, int64_t until_time_us);
