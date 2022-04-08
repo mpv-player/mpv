@@ -1278,6 +1278,7 @@ static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
     bool force_pos = opts->geometry.xy_valid ||     // explicitly forced by user
                      opts->force_window_position || // resize -> reset position
                      opts->screen_id >= 0 ||        // force onto screen area
+                     opts->screen_name ||           // also force onto screen area
                      x11->parent ||                 // force to fill parent
                      override_pos;                  // for fullscreen and such
 
