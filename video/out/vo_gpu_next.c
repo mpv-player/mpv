@@ -1190,7 +1190,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_UPDATE_RENDER_OPTS: {
         m_config_cache_update(p->opts_cache);
         const struct gl_video_opts *opts = p->opts_cache->opts;
-        p->ra_ctx->opts.want_alpha = opts->alpha_mode == ALPHA_YES;
+        p->ra_ctx->opts.want_alpha = (opts->window_transparent == 0) ?
+                                     (opts->alpha_mode == ALPHA_YES) :
+                                     (opts->window_transparent == 1);
         if (p->ra_ctx->fns->update_render_opts)
             p->ra_ctx->fns->update_render_opts(p->ra_ctx);
         update_render_options(vo);

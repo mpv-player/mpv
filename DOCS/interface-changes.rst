@@ -41,6 +41,8 @@ Interface changes
     - add `dolbyvision` sub-parameter to `format` video filter
     - `--sub-visibility` no longer has any effect on secondary subtitles
     - add `film-grain` sub-parameter to `format` video filter
+    - add `--window-transparent`, which controls whether a framebuffer with alpha
+      component is requested
  --- mpv 0.34.0 ---
     - deprecate selecting by card number with `--drm-connector`, add
       `--drm-device` which can be used instead

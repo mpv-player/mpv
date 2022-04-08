@@ -155,6 +155,7 @@ struct gl_video_opts {
     int temporal_dither_period;
     char *error_diffusion;
     char *fbo_format;
+    int window_transparent;
     int alpha_mode;
     int use_rectangle;
     struct m_color background;

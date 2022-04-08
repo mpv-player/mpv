@@ -6599,16 +6599,24 @@ them.
         Blend the frame against the background color (``--background``, normally
         black).
     yes
-        Try to create a framebuffer with alpha component. This only makes sense
-        if the video contains alpha information (which is extremely rare) or if
-        you make the background color transparent. May not be supported on all
-        platforms. If alpha framebuffers are unavailable, it silently falls
-        back on a normal framebuffer. Note that if you set the ``--fbo-format``
+        Render the frame as-is, preserving its alpha component. Blending is
+        done on the mpv window by the windowing system. This only works
+        if a framebuffer with alpha transparency is created (see
+        ``--window-transparent``). Note that if you set the ``--fbo-format``
         option to a non-default value, a format with alpha must be specified,
-        or this won't work. Whether this really works depends on the windowing
-        system and desktop environment.
+        or this won't work.
     no
         Ignore alpha component.
+
+``--window-transparent=<auto|yes|no>``
+    Try to create a framebuffer with alpha component. This only makes sense
+    if the video contains alpha information (which is extremely rare) or
+    if you make the background color transparent. May not be supported on
+    all platforms. If alpha framebuffers are unavailable, it silently falls
+    back on a normal framebuffer. Whether this really works depends on the
+    windowing system and desktop environment.
+    The special value ``auto`` (default) will enable transparent window if the
+    ``alpha`` option is set to ``yes``.
 
 ``--opengl-rectangle-textures``
     Force use of rectangle textures (default: no). Normally this shouldn't have

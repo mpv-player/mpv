@@ -175,9 +175,11 @@ static void update_ra_ctx_options(struct vo *vo)
 {
     struct gpu_priv *p = vo->priv;
 
-    /* Only the alpha option has any runtime toggle ability. */
+    /* Only the alpha and window-transparent options have any runtime toggle ability. */
     struct gl_video_opts *gl_opts = mp_get_config_group(p->ctx, vo->global, &gl_video_conf);
-    p->ctx->opts.want_alpha = gl_opts->alpha_mode == 1;
+    p->ctx->opts.want_alpha = (gl_opts->window_transparent == 0) ?
+                              (gl_opts->alpha_mode == ALPHA_YES) :
+                              (gl_opts->window_transparent == 1);
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -292,7 +294,9 @@ static int preinit(struct vo *vo)
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
     struct gl_video_opts *gl_opts = mp_get_config_group(vo, vo->global, &gl_video_conf);
     struct ra_ctx_opts opts = *ctx_opts;
-    opts.want_alpha = gl_opts->alpha_mode == 1;
+    opts.want_alpha = (gl_opts->window_transparent == 0) ?
+                      (gl_opts->alpha_mode == ALPHA_YES) :
+                      (gl_opts->window_transparent == 1);
     p->ctx = ra_ctx_create(vo, opts);
     talloc_free(ctx_opts);
     talloc_free(gl_opts);

@@ -425,6 +425,10 @@ const struct m_sub_options gl_video_conf = {
         {"sigmoid-center", OPT_FLOAT(sigmoid_center), M_RANGE(0.0, 1.0)},
         {"sigmoid-slope", OPT_FLOAT(sigmoid_slope), M_RANGE(1.0, 20.0)},
         {"fbo-format", OPT_STRING(fbo_format)},
+        {"window-transparent", OPT_CHOICE(window_transparent,
+            {"auto", 0},
+            {"yes", 1},
+            {"no", -1})},
         {"dither-depth", OPT_CHOICE(dither_depth, {"no", -1}, {"auto", 0}),
             M_RANGE(-1, 16)},
         {"dither", OPT_CHOICE(dither_algo,
@@ -3080,8 +3084,7 @@ static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
             struct m_color c = p->opts.background;
             GLSLF("vec4 background = vec4(%f, %f, %f, %f);\n",
                   c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
-            GLSL(color.rgb += background.rgb * (1.0 - color.a);)
-            GLSL(color.a = background.a;)
+            GLSL(color.rgba += background.rgba * (1.0 - color.a);)
         }
     }
 
@@ -3825,6 +3828,7 @@ static void check_gl_features(struct gl_video *p)
             .gamma_auto = p->opts.gamma_auto,
             .pbo = p->opts.pbo,
             .fbo_format = p->opts.fbo_format,
+            .window_transparent = p->opts.window_transparent,
             .alpha_mode = p->opts.alpha_mode,
             .use_rectangle = p->opts.use_rectangle,
             .background = p->opts.background,
