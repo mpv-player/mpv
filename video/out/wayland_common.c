@@ -39,6 +39,10 @@
 #include "generated/wayland/xdg-decoration-unstable-v1.h"
 #include "generated/wayland/xdg-shell.h"
 
+#if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 20
+#define HAVE_WAYLAND_1_20
+#endif
+
 static const struct mp_keymap keymap[] = {
     /* Special keys */
     {XKB_KEY_Pause,     MP_KEY_PAUSE}, {XKB_KEY_Escape, MP_KEY_ESC},
@@ -132,6 +136,7 @@ struct vo_wayland_output {
     double refresh_rate;
     char *make;
     char *model;
+    char *name;
     struct wl_list link;
 };
 
@@ -638,7 +643,7 @@ static void output_handle_mode(void *data, struct wl_output *wl_output,
     output->refresh_rate = (double)refresh * 0.001;
 }
 
-static void output_handle_done(void* data, struct wl_output *wl_output)
+static void output_handle_done(void *data, struct wl_output *wl_output)
 {
     struct vo_wayland_output *o = data;
     struct vo_wayland_state *wl = o->wl;
@@ -668,7 +673,7 @@ static void output_handle_done(void* data, struct wl_output *wl_output)
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
-static void output_handle_scale(void* data, struct wl_output *wl_output,
+static void output_handle_scale(void *data, struct wl_output *wl_output,
                                 int32_t factor)
 {
     struct vo_wayland_output *output = data;
@@ -679,11 +684,29 @@ static void output_handle_scale(void* data, struct wl_output *wl_output,
     output->scale = factor;
 }
 
+#ifdef HAVE_WAYLAND_1_20
+static void output_handle_name(void *data, struct wl_output *wl_output,
+                               const char *name)
+{
+    struct vo_wayland_output *output = data;
+    output->name = talloc_strdup(output->wl, name);
+}
+
+static void output_handle_description(void *data, struct wl_output *wl_output,
+                                      const char *description)
+{
+}
+#endif
+
 static const struct wl_output_listener output_listener = {
     output_handle_geometry,
     output_handle_mode,
     output_handle_done,
     output_handle_scale,
+#ifdef HAVE_WAYLAND_1_20
+    output_handle_name,
+    output_handle_description,
+#endif
 };
 
 static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
@@ -1039,8 +1062,10 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         output->wl     = wl;
         output->id     = id;
         output->scale  = 1;
-        output->output = wl_registry_bind(reg, id, &wl_output_interface, 2);
+        output->name   = "";
 
+        ver = MPMIN(ver, 4); /* Cap at 4 in case new events are added later. */
+        output->output = wl_registry_bind(reg, id, &wl_output_interface, ver);
         wl_output_add_listener(output->output, &output_listener, output);
         wl_list_insert(&wl->output_list, &output->link);
     }
@@ -1285,6 +1310,8 @@ static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
         if (index == 0)
             fallback_output = output;
         if (screen_id == -1 && !screen_name)
+            return output;
+        if (screen_id == -1 && screen_name && !strcmp(screen_name, output->name))
             return output;
         if (screen_id == -1 && screen_name && !strcmp(screen_name, output->model))
             return output;
