@@ -90,10 +90,7 @@ struct priv {
     struct ra_ctx *ra_ctx;
     struct gpu_ctx *context;
     struct ra_hwdec_ctx hwdec_ctx;
-
-    // Pooled/cached mappers, for performance
-    struct ra_hwdec_mapper **hwdec_mappers;
-    int num_hwdec_mappers;
+    struct ra_hwdec_mapper *hwdec_mapper;
 
     // Allocated DR buffers
     pthread_mutex_t dr_lock;
@@ -323,7 +320,7 @@ struct frame_priv {
     struct vo *vo;
     struct osd_state subs;
     uint64_t osd_sync;
-    struct ra_hwdec_mapper *hwdec_mapper;
+    struct ra_hwdec *hwdec;
 };
 
 static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
@@ -459,12 +456,31 @@ static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
     return csp;
 }
 
-// For RAs not based on ra_pl, this creates a new pl_tex wrapper
-static pl_tex hwdec_get_tex(struct frame_priv *fp, int n)
+static bool hwdec_reconfig(struct priv *p, struct ra_hwdec *hwdec,
+                           const struct mp_image_params *par)
 {
-    struct priv *p = fp->vo->priv;
-    struct ra_tex *ratex = fp->hwdec_mapper->tex[n];
-    struct ra *ra = fp->hwdec_mapper->ra;
+    if (p->hwdec_mapper) {
+        if (mp_image_params_equal(par, &p->hwdec_mapper->src_params)) {
+            return p->hwdec_mapper;
+        } else {
+            ra_hwdec_mapper_free(&p->hwdec_mapper);
+        }
+    }
+
+    p->hwdec_mapper = ra_hwdec_mapper_create(hwdec, par);
+    if (!p->hwdec_mapper) {
+        MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
+        return NULL;
+    }
+
+    return p->hwdec_mapper;
+}
+
+// For RAs not based on ra_pl, this creates a new pl_tex wrapper
+static pl_tex hwdec_get_tex(struct priv *p, int n)
+{
+    struct ra_tex *ratex = p->hwdec_mapper->tex[n];
+    struct ra *ra = p->hwdec_mapper->ra;
     if (ra_pl_get(ra))
         return (pl_tex) ratex->priv;
 
@@ -502,35 +518,38 @@ static pl_tex hwdec_get_tex(struct frame_priv *fp, int n)
     return false;
 }
 
-static void discard_frame(const struct pl_source_frame *src)
+static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
 {
-    struct mp_image *mpi = src->frame_data;
-    talloc_free(mpi);
-}
-
-static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
-                        const struct pl_source_frame *src)
-{
-    struct mp_image *mpi = src->frame_data;
+    struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
     struct priv *p = fp->vo->priv;
-    if (fp->hwdec_mapper) {
-        // Clean up after wrapped plane textures
-        if (!ra_pl_get(fp->hwdec_mapper->ra)) {
-            for (int n = 0; n < frame->num_planes; n++)
-                pl_tex_destroy(p->gpu, &frame->planes[n].texture);
-        }
+    if (!hwdec_reconfig(p, fp->hwdec, &mpi->params))
+        return false;
 
-        ra_hwdec_mapper_unmap(fp->hwdec_mapper);
-        MP_TARRAY_APPEND(p, p->hwdec_mappers, p->num_hwdec_mappers, fp->hwdec_mapper);
-        fp->hwdec_mapper = NULL;
+    if (ra_hwdec_mapper_map(p->hwdec_mapper, mpi) < 0) {
+        MP_ERR(p, "Mapping hardware decoded surface failed.\n");
+        return false;
     }
-    for (int i = 0; i < MP_ARRAY_SIZE(fp->subs.entries); i++) {
-        pl_tex tex = fp->subs.entries[i].tex;
-        if (tex)
-            MP_TARRAY_APPEND(p, p->sub_tex, p->num_sub_tex, tex);
+
+    for (int n = 0; n < frame->num_planes; n++) {
+        if (!(frame->planes[n].texture = hwdec_get_tex(p, n)))
+            return false;
     }
-    talloc_free(mpi);
+
+    return true;
+}
+
+static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
+{
+    struct mp_image *mpi = frame->user_data;
+    struct frame_priv *fp = mpi->priv;
+    struct priv *p = fp->vo->priv;
+    if (!ra_pl_get(p->hwdec_mapper->ra)) {
+        for (int n = 0; n < frame->num_planes; n++)
+            pl_tex_destroy(p->gpu, &frame->planes[n].texture);
+    }
+
+    ra_hwdec_mapper_unmap(p->hwdec_mapper);
 }
 
 static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src,
@@ -542,31 +561,18 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     struct vo *vo = fp->vo;
     struct priv *p = vo->priv;
 
-    struct ra_hwdec *hwdec = ra_hwdec_get(&p->hwdec_ctx, mpi->imgfmt);
-    if (hwdec) {
-        if (MP_TARRAY_POP(p->hwdec_mappers, p->num_hwdec_mappers, &fp->hwdec_mapper)) {
-            if (!mp_image_params_equal(&mpi->params, &fp->hwdec_mapper->src_params))
-                ra_hwdec_mapper_free(&fp->hwdec_mapper);
-        }
-
-        if (!fp->hwdec_mapper) {
-            fp->hwdec_mapper = ra_hwdec_mapper_create(hwdec, &mpi->params);
-            if (!fp->hwdec_mapper) {
-                MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
-                talloc_free(mpi);
-                return false;
-            }
-        }
-
-        if (ra_hwdec_mapper_map(fp->hwdec_mapper, mpi) < 0) {
-            MP_ERR(p, "Mapping hardware decoded surface failed.\n");
-            MP_TARRAY_APPEND(p, p->hwdec_mappers, p->num_hwdec_mappers, fp->hwdec_mapper);
-            fp->hwdec_mapper = NULL;
+    fp->hwdec = ra_hwdec_get(&p->hwdec_ctx, mpi->imgfmt);
+    if (fp->hwdec) {
+        // Note: We don't actually need the mapper to map the frame yet, we
+        // only reconfig the mapper here (potentially creating it) to access
+        // `dst_params`. In practice, though, this should not matter unless the
+        // image format changes mid-stream.
+        if (!hwdec_reconfig(p, fp->hwdec, &mpi->params)) {
             talloc_free(mpi);
             return false;
         }
 
-        par = &fp->hwdec_mapper->dst_params;
+        par = &p->hwdec_mapper->dst_params;
     }
 
     *frame = (struct pl_frame) {
@@ -601,18 +607,14 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     default: break;
     }
 
-    if (hwdec) {
+    if (fp->hwdec) {
 
         struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(par->imgfmt);
+        frame->acquire = hwdec_acquire;
+        frame->release = hwdec_release;
         frame->num_planes = desc.num_planes;
         for (int n = 0; n < frame->num_planes; n++) {
             struct pl_plane *plane = &frame->planes[n];
-            plane->texture = hwdec_get_tex(fp, n);
-            if (!plane->texture) {
-                unmap_frame(gpu, frame, src);
-                return false;
-            }
-
             int *map = plane->component_mapping;
             for (int c = 0; c < mp_imgfmt_desc_get_num_comps(&desc); c++) {
                 if (desc.comps[c].plane != n)
@@ -659,7 +661,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             if (!pl_upload_plane(gpu, plane, &tex[n], &data[n])) {
                 MP_ERR(vo, "Failed uploading frame!\n");
                 talloc_free(data[n].priv);
-                unmap_frame(gpu, frame, src);
+                talloc_free(mpi);
                 return false;
             }
         }
@@ -702,6 +704,26 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     frame->lut = p->image_lut.lut;
     frame->lut_type = p->image_lut.type;
     return true;
+}
+
+static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
+                        const struct pl_source_frame *src)
+{
+    struct mp_image *mpi = src->frame_data;
+    struct frame_priv *fp = mpi->priv;
+    struct priv *p = fp->vo->priv;
+    for (int i = 0; i < MP_ARRAY_SIZE(fp->subs.entries); i++) {
+        pl_tex tex = fp->subs.entries[i].tex;
+        if (tex)
+            MP_TARRAY_APPEND(p, p->sub_tex, p->num_sub_tex, tex);
+    }
+    talloc_free(mpi);
+}
+
+static void discard_frame(const struct pl_source_frame *src)
+{
+    struct mp_image *mpi = src->frame_data;
+    talloc_free(mpi);
 }
 
 static void info_callback(void *priv, const struct pl_render_info *info)
@@ -1284,8 +1306,7 @@ static void uninit(struct vo *vo)
         pl_mpv_user_shader_destroy(&p->user_hooks[i].hook);
 
     if (vo->hwdec_devs) {
-        for (int n = 0; n < p->num_hwdec_mappers; n++)
-            ra_hwdec_mapper_free(&p->hwdec_mappers[n]);
+        ra_hwdec_mapper_free(&p->hwdec_mapper);
         ra_hwdec_ctx_uninit(&p->hwdec_ctx);
         hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
         hwdec_devices_destroy(vo->hwdec_devs);

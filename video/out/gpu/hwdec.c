@@ -122,7 +122,7 @@ bool ra_hwdec_test_format(struct ra_hwdec *hwdec, int imgfmt)
 }
 
 struct ra_hwdec_mapper *ra_hwdec_mapper_create(struct ra_hwdec *hwdec,
-                                               struct mp_image_params *params)
+                                               const struct mp_image_params *params)
 {
     assert(ra_hwdec_test_format(hwdec, params->imgfmt));
 
