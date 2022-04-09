@@ -138,7 +138,7 @@ void ra_hwdec_uninit(struct ra_hwdec *hwdec);
 bool ra_hwdec_test_format(struct ra_hwdec *hwdec, int imgfmt);
 
 struct ra_hwdec_mapper *ra_hwdec_mapper_create(struct ra_hwdec *hwdec,
-                                               struct mp_image_params *params);
+                                               const struct mp_image_params *params);
 void ra_hwdec_mapper_free(struct ra_hwdec_mapper **mapper);
 void ra_hwdec_mapper_unmap(struct ra_hwdec_mapper *mapper);
 int ra_hwdec_mapper_map(struct ra_hwdec_mapper *mapper, struct mp_image *img);
