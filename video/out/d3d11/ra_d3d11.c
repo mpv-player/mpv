@@ -21,6 +21,10 @@
 #endif
 #define D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE (0x80)
 
+// D3D11.3 message IDs, not present in mingw-w64 v9
+#define D3D11_MESSAGE_ID_CREATE_FENCE  ((D3D11_MESSAGE_ID)0x300209)
+#define D3D11_MESSAGE_ID_DESTROY_FENCE ((D3D11_MESSAGE_ID)0x30020b)
+
 struct dll_version {
     uint16_t major;
     uint16_t minor;
@@ -2106,6 +2110,65 @@ static int map_msg_severity(D3D11_MESSAGE_SEVERITY sev)
     }
 }
 
+static int map_msg_severity_by_id(D3D11_MESSAGE_ID id,
+                                  D3D11_MESSAGE_SEVERITY sev)
+{
+    switch (id) {
+    // These are normal. The RA timer queue habitually reuses timer objects
+    // without retrieving the results.
+    case D3D11_MESSAGE_ID_QUERY_BEGIN_ABANDONING_PREVIOUS_RESULTS:
+    case D3D11_MESSAGE_ID_QUERY_END_ABANDONING_PREVIOUS_RESULTS:
+        return MSGL_TRACE;
+
+    // D3D11 writes log messages every time an object is created or
+    // destroyed. That results in a lot of log spam, so force MSGL_TRACE.
+#define OBJ_LIFETIME_MESSAGES(obj)          \
+    case D3D11_MESSAGE_ID_CREATE_ ## obj:   \
+    case D3D11_MESSAGE_ID_DESTROY_ ## obj
+
+    OBJ_LIFETIME_MESSAGES(CONTEXT):
+    OBJ_LIFETIME_MESSAGES(BUFFER):
+    OBJ_LIFETIME_MESSAGES(TEXTURE1D):
+    OBJ_LIFETIME_MESSAGES(TEXTURE2D):
+    OBJ_LIFETIME_MESSAGES(TEXTURE3D):
+    OBJ_LIFETIME_MESSAGES(SHADERRESOURCEVIEW):
+    OBJ_LIFETIME_MESSAGES(RENDERTARGETVIEW):
+    OBJ_LIFETIME_MESSAGES(DEPTHSTENCILVIEW):
+    OBJ_LIFETIME_MESSAGES(VERTEXSHADER):
+    OBJ_LIFETIME_MESSAGES(HULLSHADER):
+    OBJ_LIFETIME_MESSAGES(DOMAINSHADER):
+    OBJ_LIFETIME_MESSAGES(GEOMETRYSHADER):
+    OBJ_LIFETIME_MESSAGES(PIXELSHADER):
+    OBJ_LIFETIME_MESSAGES(INPUTLAYOUT):
+    OBJ_LIFETIME_MESSAGES(SAMPLER):
+    OBJ_LIFETIME_MESSAGES(BLENDSTATE):
+    OBJ_LIFETIME_MESSAGES(DEPTHSTENCILSTATE):
+    OBJ_LIFETIME_MESSAGES(RASTERIZERSTATE):
+    OBJ_LIFETIME_MESSAGES(QUERY):
+    OBJ_LIFETIME_MESSAGES(PREDICATE):
+    OBJ_LIFETIME_MESSAGES(COUNTER):
+    OBJ_LIFETIME_MESSAGES(COMMANDLIST):
+    OBJ_LIFETIME_MESSAGES(CLASSINSTANCE):
+    OBJ_LIFETIME_MESSAGES(CLASSLINKAGE):
+    OBJ_LIFETIME_MESSAGES(COMPUTESHADER):
+    OBJ_LIFETIME_MESSAGES(UNORDEREDACCESSVIEW):
+    OBJ_LIFETIME_MESSAGES(VIDEODECODER):
+    OBJ_LIFETIME_MESSAGES(VIDEOPROCESSORENUM):
+    OBJ_LIFETIME_MESSAGES(VIDEOPROCESSOR):
+    OBJ_LIFETIME_MESSAGES(DECODEROUTPUTVIEW):
+    OBJ_LIFETIME_MESSAGES(PROCESSORINPUTVIEW):
+    OBJ_LIFETIME_MESSAGES(PROCESSOROUTPUTVIEW):
+    OBJ_LIFETIME_MESSAGES(DEVICECONTEXTSTATE):
+    OBJ_LIFETIME_MESSAGES(FENCE):
+        return MSGL_TRACE;
+
+#undef OBJ_LIFETIME_MESSAGES
+
+    default:
+        return map_msg_severity(sev);
+    }
+}
+
 static void debug_marker(struct ra *ra, const char *msg)
 {
     struct ra_d3d11 *p = ra->priv;
@@ -2129,7 +2192,7 @@ static void debug_marker(struct ra *ra, const char *msg)
         if (FAILED(hr))
             goto done;
 
-        int msgl = map_msg_severity(d3dmsg->Severity);
+        int msgl = map_msg_severity_by_id(d3dmsg->ID, d3dmsg->Severity);
         if (mp_msg_test(ra->log, msgl)) {
             if (!printed_header)
                 MP_INFO(ra, "%s:\n", msg);
@@ -2246,11 +2309,6 @@ static void init_debug_layer(struct ra *ra)
         // the real maximum texture size by attempting to create a texture
         // larger than the current feature level allows.
         D3D11_MESSAGE_ID_CREATETEXTURE2D_INVALIDDIMENSIONS,
-
-        // These are normal. The RA timer queue habitually reuses timer objects
-        // without retrieving the results.
-        D3D11_MESSAGE_ID_QUERY_BEGIN_ABANDONING_PREVIOUS_RESULTS,
-        D3D11_MESSAGE_ID_QUERY_END_ABANDONING_PREVIOUS_RESULTS,
     };
     D3D11_INFO_QUEUE_FILTER filter = {
         .DenyList = {
