@@ -608,7 +608,6 @@ static void init_avctx(struct mp_filter *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     struct vd_lavc_params *lavc_param = ctx->opts;
     struct mp_codec_params *c = ctx->codec;
-    vd_ffmpeg_ctx *p = vd->priv;
 
     m_config_cache_update(ctx->opts_cache);
 
@@ -700,7 +699,7 @@ static void init_avctx(struct mp_filter *vd)
         av_opt_set(avctx, "x264_build", "150", AV_OPT_SEARCH_CHILDREN);
 
     if (ctx->opts->film_grain != 0 /*CPU*/) {
-        if (p->vo->driver->caps & VO_CAP_FILM_GRAIN) {
+        if (ctx->vo->driver->caps & VO_CAP_FILM_GRAIN) {
             avctx->export_side_data |= AV_CODEC_EXPORT_DATA_FILM_GRAIN;
         } else if (ctx->opts->film_grain == 1 /*GPU*/) {
             MP_WARN(vd, "GPU film grain requested, but VO does not support "
