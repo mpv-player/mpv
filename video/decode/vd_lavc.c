@@ -698,13 +698,27 @@ static void init_avctx(struct mp_filter *vd)
     if (lavc_codec->id == AV_CODEC_ID_H264 && lavc_param->old_x264)
         av_opt_set(avctx, "x264_build", "150", AV_OPT_SEARCH_CHILDREN);
 
-    if (ctx->opts->film_grain != 0 /*CPU*/) {
-        if (ctx->vo->driver->caps & VO_CAP_FILM_GRAIN) {
-            avctx->export_side_data |= AV_CODEC_EXPORT_DATA_FILM_GRAIN;
-        } else if (ctx->opts->film_grain == 1 /*GPU*/) {
-            MP_WARN(vd, "GPU film grain requested, but VO does not support "
-                    "applying film grain, disabling.\n");
+    switch(ctx->opts->film_grain) {
+    case 0: /*CPU*/
+        // default lavc flags handle film grain within the decoder.
+        break;
+    case 1: /*GPU*/
+        if (!ctx->vo ||
+            (ctx->vo && !(ctx->vo->driver->caps & VO_CAP_FILM_GRAIN))) {
+            MP_MSG(vd, ctx->vo ? MSGL_WARN : MSGL_V,
+                   "GPU film grain requested, but VO %s, expect wrong output.\n",
+                   ctx->vo ?
+                   "does not support applying film grain" :
+                   "is not available at decoder initialization to verify support");
         }
+
+        avctx->export_side_data |= AV_CODEC_EXPORT_DATA_FILM_GRAIN;
+        break;
+    default:
+        if (ctx->vo && (ctx->vo->driver->caps & VO_CAP_FILM_GRAIN))
+            avctx->export_side_data |= AV_CODEC_EXPORT_DATA_FILM_GRAIN;
+
+        break;
     }
 
     mp_set_avopts(vd->log, avctx, lavc_param->avopts);
