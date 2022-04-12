@@ -698,6 +698,12 @@ static void init_avctx(struct mp_filter *vd)
     if (lavc_codec->id == AV_CODEC_ID_H264 && lavc_param->old_x264)
         av_opt_set(avctx, "x264_build", "150", AV_OPT_SEARCH_CHILDREN);
 
+#ifndef AV_CODEC_EXPORT_DATA_FILM_GRAIN
+    if (ctx->opts->film_grain == 1)
+        MP_WARN(vd, "GPU film grain requested, but FFmpeg too old to expose "
+                    "film grain parameters. Please update to latest master, "
+                    "or at least to release 4.4.\n");
+#else
     switch(ctx->opts->film_grain) {
     case 0: /*CPU*/
         // default lavc flags handle film grain within the decoder.
@@ -720,6 +726,7 @@ static void init_avctx(struct mp_filter *vd)
 
         break;
     }
+#endif
 
     mp_set_avopts(vd->log, avctx, lavc_param->avopts);
 
