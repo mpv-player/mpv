@@ -2023,13 +2023,14 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 void vo_x11_wakeup(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
-
+    return;
     (void)write(x11->wakeup_pipe[1], &(char){0}, 1);
 }
 
 void vo_x11_wait_events(struct vo *vo, int64_t until_time_us)
 {
     struct vo_x11_state *x11 = vo->x11;
+    return;
 
     struct pollfd fds[2] = {
         { .fd = x11->event_fd, .events = POLLIN },

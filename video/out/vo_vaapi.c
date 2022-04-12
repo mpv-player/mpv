@@ -24,10 +24,6 @@
 #include <stdarg.h>
 #include <limits.h>
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <va/va_x11.h>
-
 #include "config.h"
 #include "common/msg.h"
 #include "video/out/vo.h"
@@ -41,6 +37,18 @@
 #include "video/mp_image.h"
 #include "video/vaapi.h"
 #include "video/hwdec.h"
+
+#if HAVE_VAAPI_WAYLAND
+#include "wayland_common.h"
+#include <va/va_wayland.h>
+#define FORCE_WAYLAND
+#endif
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+
+#include <va/va_x11.h>
 
 struct vaapi_osd_image {
     int            w, h;
@@ -455,7 +463,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     free_video_specific(p);
 
-    vo_x11_config_vo_window(vo);
+    //vo_x11_config_vo_window(vo);
 
     if (params->imgfmt != IMGFMT_VAAPI) {
         if (!alloc_swdec_surfaces(p, params->w, params->h, params->imgfmt))
@@ -475,6 +483,107 @@ static int query_format(struct vo *vo, int imgfmt)
 
     return 0;
 }
+
+#ifdef FORCE_WAYLAND
+
+struct drawable {
+    struct wl_display  *display;
+    struct wl_surface  *surface;
+    unsigned int        redraw_pending  : 1;
+};
+
+static void
+frame_redraw_callback(void *data, struct wl_callback *callback, uint32_t time)
+{
+    struct drawable * const drawable = data;
+
+    drawable->redraw_pending = 0;
+    wl_callback_destroy(callback);
+}
+
+static const struct wl_callback_listener frame_callback_listener = {
+    frame_redraw_callback
+};
+
+static VAStatus
+va_put_surface(
+    VADisplay           dpy,
+    struct drawable    *wl_drawable,
+    VASurfaceID         va_surface,
+    const VARectangle  *src_rect,
+    const VARectangle  *dst_rect,
+    const VARectangle  *cliprects,
+    unsigned int        num_cliprects,
+    unsigned int        flags
+)
+{
+    struct wl_callback *callback;
+    VAStatus va_status;
+    struct wl_buffer *buffer;
+    int ret = 0;
+
+    if (!wl_drawable)
+        return VA_STATUS_ERROR_INVALID_SURFACE;
+
+    /* Wait for the previous frame to complete redraw */
+    if (wl_drawable->redraw_pending) {
+        wl_display_flush(wl_drawable->display);
+        while (wl_drawable->redraw_pending && ret >= 0)
+            ret = wl_display_dispatch(wl_drawable->display);
+    }
+
+    va_status = vaGetSurfaceBufferWl(dpy, va_surface, VA_FRAME_PICTURE, &buffer);
+    if (va_status != VA_STATUS_SUCCESS)
+        return va_status;
+
+    wl_surface_attach(wl_drawable->surface, buffer, 0, 0);
+    wl_surface_damage(
+        wl_drawable->surface,
+        dst_rect->x, dst_rect->y, dst_rect->width, dst_rect->height
+    );
+
+    wl_display_flush(wl_drawable->display);
+    wl_drawable->redraw_pending = 1;
+    callback = wl_surface_frame(wl_drawable->surface);
+    wl_surface_commit(wl_drawable->surface);
+    wl_callback_add_listener(callback, &frame_callback_listener, wl_drawable);
+
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus
+vaPutSurfaceWl(
+    VADisplay           dpy,
+    VASurfaceID         surface,
+    struct drawable    *wl_drawable,
+    short               src_x,
+    short               src_y,
+    unsigned short      src_w,
+    unsigned short      src_h,
+    short               dst_x,
+    short               dst_y,
+    unsigned short      dst_w,
+    unsigned short      dst_h,
+    const VARectangle  *cliprects,
+    unsigned int        num_cliprects,
+    unsigned int        flags
+)
+{
+    VARectangle src_rect, dst_rect;
+
+    src_rect.x      = src_x;
+    src_rect.y      = src_y;
+    src_rect.width  = src_w;
+    src_rect.height = src_h;
+
+    dst_rect.x      = src_x;
+    dst_rect.y      = src_y;
+    dst_rect.width  = src_w;
+    dst_rect.height = src_h;
+    return va_put_surface(dpy, wl_drawable, surface, &src_rect, &dst_rect,
+                          cliprects, num_cliprects, flags);
+}
+#endif
 
 static bool render_to_screen(struct priv *p, struct mp_image *mpi)
 {
@@ -521,9 +630,17 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
 
     int flags = va_get_colorspace_flag(p->image_params.color.space) |
                 p->scaling | VA_FRAME_PICTURE;
-    status = vaPutSurface(p->display,
+
+#ifdef FORCE_WAYLAND
+
+    struct drawable test;
+    test.display = p->vo->wl->display;
+    test.surface = p->vo->wl->surface;
+    test.redraw_pending = 0;
+
+    status = vaPutSurfaceWl(p->display,
                           surface,
-                          p->vo->x11->window,
+                          &test,
                           p->src_rect.x0,
                           p->src_rect.y0,
                           p->src_rect.x1 - p->src_rect.x0,
@@ -534,6 +651,22 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
                           p->dst_rect.y1 - p->dst_rect.y0,
                           NULL, 0,
                           flags);
+#else
+    status = vaPutSurface(p->display,
+            surface,
+			p->vo->x11->window,
+            p->src_rect.x0,
+            p->src_rect.y0,
+            p->src_rect.x1 - p->src_rect.x0,
+            p->src_rect.y1 - p->src_rect.y0,
+            p->dst_rect.x0,
+            p->dst_rect.y0,
+            p->dst_rect.x1 - p->dst_rect.x0,
+            p->dst_rect.y1 - p->dst_rect.y0,
+            NULL, 0,
+            flags);
+
+#endif
     CHECK_VA_STATUS(p, "vaPutSurface()");
 
     if (part->active) {
@@ -704,6 +837,8 @@ error:
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+	return VO_TRUE;
+
     struct priv *p = vo->priv;
 
     switch (request) {
@@ -753,7 +888,17 @@ static int preinit(struct vo *vo)
     p->log = vo->log;
 
     VAStatus status;
+#ifdef FORCE_WAYLAND
 
+    if (!vo_wayland_init(vo)) {
+        vo_wayland_uninit(vo);
+        goto fail;
+    }
+
+    p->display = vaGetDisplayWl(vo->wl->display);
+    if (!p->display)
+        goto fail;
+#else
     if (!vo_x11_init(vo))
         goto fail;
 
@@ -763,6 +908,7 @@ static int preinit(struct vo *vo)
     p->display = vaGetDisplay(vo->x11->display);
     if (!p->display)
         goto fail;
+#endif
 
     p->mpvaapi = va_initialize(p->display, p->log, false);
     if (!p->mpvaapi) {
