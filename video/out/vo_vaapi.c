@@ -633,14 +633,14 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
 
 #ifdef FORCE_WAYLAND
 
-    struct drawable test;
-    test.display = p->vo->wl->display;
-    test.surface = p->vo->wl->surface;
-    test.redraw_pending = 0;
+    struct drawable d;
+    d.display = p->vo->wl->display;
+    d.surface = p->vo->wl->surface;
+    d.redraw_pending = 0;
 
     status = vaPutSurfaceWl(p->display,
                           surface,
-                          &test,
+                          &d,
                           p->src_rect.x0,
                           p->src_rect.y0,
                           p->src_rect.x1 - p->src_rect.x0,
