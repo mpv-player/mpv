@@ -1244,7 +1244,7 @@ if features['egl'] or features['egl-android'] or features['egl-angle-win32']
 endif
 
 if features['gl'] and features['egl']
-    sources += files('video/filter/vf_gpu.c')
+    sources += files('video/filter/vf_gpu_egl.c')
 endif
 
 if features['gl']
@@ -1269,7 +1269,8 @@ features += {'vulkan': vulkan.found()}
 if features['vulkan']
     dependencies += vulkan
     sources += files('video/out/vulkan/context.c',
-                     'video/out/vulkan/utils.c')
+                     'video/out/vulkan/utils.c',
+                     'video/filter/vf_gpu_vulkan.c')
 endif
 
 if features['vulkan'] and features['android']
@@ -1292,6 +1293,10 @@ features += {'vk-khr-display': cc.has_function('vkCreateDisplayPlaneSurfaceKHR',
                                                dependencies: [vulkan])}
 if features['vk-khr-display']
     sources += files('video/out/vulkan/context_display.c')
+endif
+
+if features['vulkan'] or (features['gl'] and features['egl'])
+    sources += files('video/filter/vf_gpu.c')
 endif
 
 
