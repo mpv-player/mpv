@@ -817,7 +817,7 @@ if audiounit['deps'].found() and audiounit['symbol']
     audiounit += {'use': true}
 endif
 
-coreaudio = dependency('appleframeworks', modules: ['CoreFoundation', 'CoreAudio', 
+coreaudio = dependency('appleframeworks', modules: ['CoreFoundation', 'CoreAudio',
                        'AudioUnit', 'AudioToolbox'], required: get_option('coreaudio'))
 if coreaudio.found()
     dependencies += coreaudio
@@ -1306,7 +1306,8 @@ if vulkan.found()
     features += 'vulkan'
     sources += files('video/out/vulkan/context.c',
                      'video/out/vulkan/context_display.c',
-                     'video/out/vulkan/utils.c')
+                     'video/out/vulkan/utils.c',
+                     'video/filter/vf_gpu_vulkan.c')
 endif
 
 if vulkan.found() and android

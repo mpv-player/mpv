@@ -785,3 +785,5 @@ Available mpv-only filters are:
         most ``--vo=gpu`` options are unconditionally applied to the ``gpu``
         filter. There is no mechanism in mpv to prevent this.
 
+``gpu_vulkan=...``
+    Same as the above ``gpu`` filter, implemented using Vulkan instead of EGL.

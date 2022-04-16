@@ -97,6 +97,9 @@ const struct mp_user_filter_entry *vf_list[] = {
 #if HAVE_EGL_HELPERS && HAVE_GL && HAVE_EGL
     &vf_gpu,
 #endif
+#if HAVE_VULKAN
+    &vf_gpu_vulkan,
+#endif
 };
 
 static bool get_vf_desc(struct m_obj_desc *dst, int index)

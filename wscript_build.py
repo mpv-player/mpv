@@ -410,6 +410,7 @@ def build(ctx):
         ( "video/filter/vf_fingerprint.c",       "zimg" ),
         ( "video/filter/vf_format.c" ),
         ( "video/filter/vf_gpu.c",               "egl-helpers && gl && egl" ),
+        ( "video/filter/vf_gpu_vulkan.c",        "vulkan" ),
         ( "video/filter/vf_sub.c" ),
         ( "video/filter/vf_vapoursynth.c",       "vapoursynth" ),
         ( "video/filter/vf_vavpp.c",             "vaapi" ),
