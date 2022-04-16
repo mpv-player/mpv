@@ -28,7 +28,6 @@
 #include "video/out/placebo/utils.h"
 
 #include "context.h"
-#include "utils.h"
 
 struct vulkan_opts {
     char *device; // force a specific GPU
@@ -174,19 +173,11 @@ void ra_vk_ctx_uninit(struct ra_ctx *ctx)
     TA_FREEP(&ctx->swapchain);
 }
 
-bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
-                    struct ra_vk_ctx_params params,
-                    VkPresentModeKHR preferred_mode)
+pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
+                             pl_vk_inst vkinst,
+                             pl_log pllog,
+                             VkSurfaceKHR surface)
 {
-    struct ra_swapchain *sw = ctx->swapchain = talloc_zero(NULL, struct ra_swapchain);
-    sw->ctx = ctx;
-    sw->fns = &vulkan_swapchain;
-
-    struct priv *p = sw->priv = talloc_zero(sw, struct priv);
-    p->vk = vk;
-    p->params = params;
-    p->opts = mp_get_config_group(p, ctx->global, &vulkan_conf);
-
     VkPhysicalDeviceFeatures2 features = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
     };
@@ -224,30 +215,47 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
 #endif
 
     AVUUID param_uuid = { 0 };
-    bool is_uuid = p->opts->device &&
-                   av_uuid_parse(p->opts->device, param_uuid) == 0;
+    bool is_uuid = opts->device &&
+                   av_uuid_parse(opts->device, param_uuid) == 0;
 
-    assert(vk->pllog);
-    assert(vk->vkinst);
+    assert(pllog);
+    assert(vkinst);
     struct pl_vulkan_params device_params = {
-        .instance = vk->vkinst->instance,
-        .get_proc_addr = vk->vkinst->get_proc_addr,
-        .surface = vk->surface,
-        .async_transfer = p->opts->async_transfer,
-        .async_compute = p->opts->async_compute,
-        .queue_count = p->opts->queue_count,
+        .instance = vkinst->instance,
+        .get_proc_addr = vkinst->get_proc_addr,
+        .surface = surface,
+        .async_transfer = opts->async_transfer,
+        .async_compute = opts->async_compute,
+        .queue_count = opts->queue_count,
 #if HAVE_VULKAN_INTEROP
         .extra_queues = VK_QUEUE_VIDEO_DECODE_BIT_KHR,
         .opt_extensions = opt_extensions,
         .num_opt_extensions = MP_ARRAY_SIZE(opt_extensions),
 #endif
         .features = &features,
-        .device_name = is_uuid ? NULL : p->opts->device,
+        .device_name = is_uuid ? NULL : opts->device,
     };
     if (is_uuid)
         av_uuid_copy(device_params.device_uuid, param_uuid);
 
-    vk->vulkan = pl_vulkan_create(vk->pllog, &device_params);
+    return pl_vulkan_create(pllog, &device_params);
+
+}
+
+bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
+                    struct ra_vk_ctx_params params,
+                    VkPresentModeKHR preferred_mode)
+{
+    struct ra_swapchain *sw = ctx->swapchain = talloc_zero(NULL, struct ra_swapchain);
+    sw->ctx = ctx;
+    sw->fns = &vulkan_swapchain;
+
+    struct priv *p = sw->priv = talloc_zero(sw, struct priv);
+    p->vk = vk;
+    p->params = params;
+    p->opts = mp_get_config_group(p, ctx->global, &vulkan_conf);
+
+    vk->vulkan = mppl_create_vulkan(p->opts, vk->vkinst, vk->pllog, vk->surface);
     if (!vk->vulkan)
         goto error;
 

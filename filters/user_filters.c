@@ -94,7 +94,7 @@ const struct mp_user_filter_entry *vf_list[] = {
 #if HAVE_D3D_HWACCEL
     &vf_d3d11vpp,
 #endif
-#if HAVE_GL && HAVE_EGL
+#if (HAVE_GL && HAVE_EGL) || HAVE_VULKAN
     &vf_gpu,
 #endif
 };
