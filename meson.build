@@ -1279,7 +1279,7 @@ if egl_helpers
 endif
 
 if egl['use'] and egl_helpers
-    sources += files('video/filter/vf_gpu.c')
+    sources += files('video/filter/vf_gpu_egl.c')
 endif
 
 if gl['use']
@@ -1324,6 +1324,10 @@ endif
 
 if vulkan.found() and x11['use']
      sources += files('video/out/vulkan/context_xlib.c')
+endif
+
+if vulkan.found() or (egl['use'] and egl_helpers)
+    sources += files('video/filter/vf_gpu.c')
 endif
 
 
