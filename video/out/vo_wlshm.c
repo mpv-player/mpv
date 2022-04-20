@@ -213,10 +213,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return ret;
 }
 
-static void draw_image(struct vo *vo, struct mp_image *src)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
+    struct mp_image *src = frame->current;
     struct buffer *buf;
 
     bool render = vo_wayland_check_visible(vo);
@@ -261,7 +262,6 @@ static void draw_image(struct vo *vo, struct mp_image *src)
         mp_image_clear(&buf->mpi, 0, 0, buf->mpi.w, buf->mpi.h);
         osd_draw_on_image(vo->osd, p->osd, 0, 0, &buf->mpi);
     }
-    talloc_free(src);
     wl_surface_attach(wl->surface, buf->buffer, 0, 0);
 }
 
@@ -310,7 +310,7 @@ const struct vo_driver video_out_wlshm = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .get_vsync = get_vsync,
     .wakeup = vo_wayland_wakeup,
