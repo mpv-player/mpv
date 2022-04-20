@@ -2942,6 +2942,19 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
         return talloc_dup(NULL, &rg);
     }
 
+    // The r128 replaygain tags declared in RFC 7845 for opus files. The tags
+    // are generated with EBU-R128, which does not use peak meters. And the
+    // values are stored as a Q7.8 fixed point number in dB.
+    if (decode_gain(log, tags, "R128_TRACK_GAIN", &rg.track_gain) >= 0) {
+        if (decode_gain(log, tags, "R128_ALBUM_GAIN", &rg.album_gain) < 0) {
+            // Album gain is undefined; fall back to track gain.
+            rg.album_gain = rg.track_gain;
+        }
+        rg.track_gain /= 256.;
+        rg.album_gain /= 256.;
+        return talloc_dup(NULL, &rg);
+    }
+
     return NULL;
 }
 
