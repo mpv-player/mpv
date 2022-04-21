@@ -3072,7 +3072,8 @@ Property list
     processed for C escape sequences before passing it to the OSD code. See
     `Flat command syntax`_ for details.
 
-    A list of tags can be found here: http://docs.aegisub.org/latest/ASS_Tags/
+    A list of tags can be found here:
+    https://aeg-dev.github.io/AegiSite/docs/3.2/ass_tags/
 
 ``vo-configured``
     Whether the VO is configured right now. Usually this corresponds to whether
