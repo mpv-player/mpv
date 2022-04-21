@@ -981,10 +981,9 @@ Program Behavior
     the overlay permanent).
 
 ``--load-osd-console=<yes|no>``
-    Enable the builtin script that shows a console on a key binding and lets
-    you enter commands (default: yes). By default,. The ``´`` key is used to
-    show the console, and ``ESC`` to hide it again. (This is based on  a user
-    script called ``repl.lua``.)
+    Enable the built-in script that shows a console on a key binding and lets
+    you enter commands (default: yes). The ````` key is used to show the
+    console by default, and ``ESC`` to hide it again.
 
 ``--load-auto-profiles=<yes|no|auto>``
     Enable the builtin script that does auto profiles (default: auto). See
