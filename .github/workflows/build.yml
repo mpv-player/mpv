@@ -127,6 +127,8 @@ jobs:
         run: |
           ./bootstrap.py
           zypper -n install meson
+          # workaround to avoid "fatal: unsafe repository" error
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Build with meson
         run: |
