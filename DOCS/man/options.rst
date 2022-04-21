@@ -2747,7 +2747,7 @@ Subtitles
 ``--sub-justify=<auto|left|center|right>``
     Control how multi line subs are justified irrespective of where they
     are aligned (default: ``auto`` which justifies as defined by
-    ``--sub-align-y``).
+    ``--sub-align-x``).
     Left justification is recommended to make the subs easier to read
     as it is easier for the eyes.
 
