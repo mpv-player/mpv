@@ -1021,8 +1021,10 @@ static void resize(struct vo *vo)
     struct mp_rect src, dst;
     struct mp_osd_res osd;
     vo_get_src_dst_rects(vo, &src, &dst, &osd);
-    gpu_ctx_resize(p->context, vo->dwidth, vo->dheight);
-    vo->want_redraw = true;
+    if (vo->dwidth && vo->dheight) {
+        gpu_ctx_resize(p->context, vo->dwidth, vo->dheight);
+        vo->want_redraw = true;
+    }
 
     if (mp_rect_equals(&p->src, &src) &&
         mp_rect_equals(&p->dst, &dst) &&
