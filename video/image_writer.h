@@ -35,6 +35,8 @@ struct image_writer_opts {
     int webp_lossless;
     int webp_quality;
     int webp_compression;
+    double jxl_distance;
+    int jxl_effort;
     int tag_csp;
 };
 
