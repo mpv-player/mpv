@@ -5,6 +5,7 @@
 *.pyc
 .depend
 
+/.cache
 /config.h
 /config.mak
 /config.log
