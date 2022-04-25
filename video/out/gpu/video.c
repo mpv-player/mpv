@@ -3246,7 +3246,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         }
 
         if (oversample) {
-            // Oversample uses the frame area as mix ratio, not the the vsync
+            // Oversample uses the frame area as mix ratio, not the vsync
             // position itself
             double vsync_dist = t->vsync_interval / t->ideal_frame_duration,
                    threshold = tscale->conf.kernel.params[0];

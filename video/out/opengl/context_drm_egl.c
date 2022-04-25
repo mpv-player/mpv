@@ -133,7 +133,7 @@ static const char *gbm_format_to_string(uint32_t format)
 
 // Allow falling back to an ARGB EGLConfig when we have an XRGB framebuffer.
 // Also allow falling back to an XRGB EGLConfig for ARGB framebuffers, since
-// this seems neccessary to work with broken Mali drivers that don't report
+// this seems necessary to work with broken Mali drivers that don't report
 // their EGLConfigs as supporting alpha properly.
 static uint32_t fallback_format_for(uint32_t format)
 {

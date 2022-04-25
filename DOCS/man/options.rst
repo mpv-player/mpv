@@ -1198,7 +1198,7 @@ Video
 
         When testing, you should start by using ``hwdec=auto-safe`` as it will
         limit itself to choosing from hwdecs that are actively supported by the
-        development team. If that doesn't result in working hardare decoding,
+        development team. If that doesn't result in working hardware decoding,
         you can try ``hwdec=auto`` to have it attempt to load every possible
         hwdec, but if ``auto-safe`` didn't work, you will probably need to know
         exactly which hwdec matches your hardware and read up on that entry

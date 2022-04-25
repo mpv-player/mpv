@@ -128,17 +128,17 @@ static void mp_lua_optarg(lua_State *L, int arg)
 // autofree lua C function: same as lua_CFunction but with these differences:
 // - It accepts an additional void* argument - a pre-initialized talloc context
 //   which it can use, and which is freed with its children once the function
-//   completes - regardless if a lua error occured or not. If a lua error did
+//   completes - regardless if a lua error occurred or not. If a lua error did
 //   occur then it's re-thrown after the ctx is freed.
 //   The stack/arguments/upvalues/return are the same as with lua_CFunction.
 // - It's inserted into the lua VM using af_pushc{function,closure} instead of
 //   lua_pushc{function,closure}, which takes care of wrapping it with the
-//   automatic talloc alocation + lua-error-handling + talloc release.
+//   automatic talloc allocation + lua-error-handling + talloc release.
 //   This requires using AF_ENTRY instead of FN_ENTRY at struct fn_entry.
 // - The autofree overhead per call is roughly two additional plain lua calls.
 //   Typically that's up to 20% slower than plain new+free without "auto",
 //   and at most about twice slower - compared to bare new+free lua_CFunction.
-// - The overhead of af_push* is one aditional lua-c-closure with two upvalues.
+// - The overhead of af_push* is one additional lua-c-closure with two upvalues.
 typedef int (*af_CFunction)(lua_State *L, void *ctx);
 
 static void af_pushcclosure(lua_State *L, af_CFunction fn, int n);
@@ -249,7 +249,7 @@ static void load_file(lua_State *L, const char *fname)
     struct script_ctx *ctx = get_ctx(L);
     MP_DBG(ctx, "loading file %s\n", fname);
     void *tmp = talloc_new(ctx);
-    // according to Lua manaual chunkname should be '@' plus the filename
+    // according to Lua manual chunkname should be '@' plus the filename
     char *dispname = talloc_asprintf(tmp, "@%s", fname);
     struct bstr s = stream_read_file(fname, tmp, ctx->mpctx->global, 100000000);
     if (!s.start)

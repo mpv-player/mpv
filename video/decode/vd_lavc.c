@@ -262,7 +262,7 @@ static int hwdec_compare(const void *p1, const void *p2)
     // List non-copying entries first, so --hwdec=auto takes them.
     if (h1->copying != h2->copying)
         return h1->copying ? 1 : -1;
-    // Order by autoprobe preferrence order.
+    // Order by autoprobe preference order.
     if (h1->auto_pos != h2->auto_pos)
         return h1->auto_pos > h2->auto_pos ? 1 : -1;
     // Fallback sort order to make sorting stable.

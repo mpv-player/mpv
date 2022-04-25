@@ -106,7 +106,7 @@ struct observe_property {
 };
 
 struct mpv_handle {
-    // -- immmutable
+    // -- immutable
     char name[MAX_CLIENT_NAME];
     struct mp_log *log;
     struct MPContext *mpctx;

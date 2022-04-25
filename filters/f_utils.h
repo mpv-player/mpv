@@ -10,7 +10,7 @@ struct mp_filter *mp_compute_frame_duration_create(struct mp_filter *parent);
 
 // Given the filters[0..num_filters] array, connect in with the input of the
 // first filter, connect the output of the first filter to the input to the
-// second filter, etc., until out. All filters are assumed to be bidrectional,
+// second filter, etc., until out. All filters are assumed to be bidirectional,
 // with input on pin 0 and output on pin 1. NULL entries are skipped.
 void mp_chain_filters(struct mp_pin *in, struct mp_pin *out,
                       struct mp_filter **filters, int num_filters);
@@ -68,10 +68,10 @@ void mp_subfilter_destroy(struct mp_subfilter *sub);
 // The filter is destroyed with talloc_free(sub->filter).
 bool mp_subfilter_drain_destroy(struct mp_subfilter *sub);
 
-// A bidrectional filter which passes through all data.
+// A bidirectional filter which passes through all data.
 struct mp_filter *mp_bidir_nop_filter_create(struct mp_filter *parent);
 
-// A bidrectional filter which does not connect its pins. Instead, the user is,
+// A bidirectional filter which does not connect its pins. Instead, the user is,
 // by convention, allowed to access the filter's private pins, and use them
 // freely. (This is sometimes convenient, such as when you need to pass a single
 // filter instance to other code, and you don't need a full "proper" filter.)

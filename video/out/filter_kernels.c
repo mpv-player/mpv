@@ -382,7 +382,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"ewa_lanczossoft", 3.2383154841662362, jinc, .blur = 1.015,
           .resizable = true}, .polar = true, .window = "jinc"},
     // Very soft (blurred) hanning-windowed jinc; removes almost all aliasing.
-    // Blur paramater picked to match orthogonal and diagonal contributions
+    // Blur parameter picked to match orthogonal and diagonal contributions
     {{"haasnsoft", 3.2383154841662362, jinc, .blur = 1.11, .resizable = true},
           .polar = true, .window = "hanning"},
     // Cubic filters

@@ -145,8 +145,8 @@ local function no_ASS(t)
         -- mp.set_osd_ass doesn't support ass-escape. roll our own.
         -- similar to mpv's sub/osd_libass.c:mangle_ass(...), excluding
         -- space after newlines because no_ASS is not used with multi-line.
-        -- space at the begining is replaced with "\\h" because it matters
-        -- at the begining of a line, and we can't know where our output
+        -- space at the beginning is replaced with "\\h" because it matters
+        -- at the beginning of a line, and we can't know where our output
         -- ends up. no issue if it ends up at the middle of a line.
         return tostring(t)
                :gsub("\\", ESC_BACKSLASH)

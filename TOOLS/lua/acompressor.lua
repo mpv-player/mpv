@@ -2,7 +2,7 @@
 -- filter including key bindings for adjusting parameters.
 --
 -- See https://ffmpeg.org/ffmpeg-filters.html#acompressor for explanation
--- of the parameteres.
+-- of the parameters.
 
 local mp = require 'mp'
 local options = require 'mp.options'
