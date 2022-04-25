@@ -648,7 +648,7 @@ Available video output drivers are:
         (default: display resolution)
 
     ``--drm-vrr-enabled=<no|yes|auto>``
-        Toggle use of Variable Refresh Rate (VRR), aka Freesync or Adapative Sync
+        Toggle use of Variable Refresh Rate (VRR), aka Freesync or Adaptive Sync
         on compatible systems. VRR allows for the display to be refreshed at any
         rate within a range (usually ~40Hz-60Hz for 60Hz displays). This can help
         with playback of 24/25/50fps content. Support depends on the use of a

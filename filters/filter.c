@@ -400,7 +400,7 @@ static void init_connection(struct mp_pin *p)
     if (out->manual_connection)
         assert(out->manual_connection->in->runner == runner);
 
-    // Logicaly, the ends are always manual connections. A pin chain without
+    // Logically, the ends are always manual connections. A pin chain without
     // manual connections at the ends is still disconnected (or if this
     // attempted to extend an existing connection, becomes dangling and gets
     // disconnected).

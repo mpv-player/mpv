@@ -179,7 +179,7 @@ static bstr read_file(struct mp_log *log, const char *filename)
     MP_ASSERT_UNREACHABLE();
 }
 
-// Load options and profiles from from a config file.
+// Load options and profiles from a config file.
 //  conffile: path to the config file
 //  initial_section: default section where to add normal options
 //  flags: M_SETOPT_* bits

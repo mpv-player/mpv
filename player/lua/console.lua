@@ -251,7 +251,7 @@ function next_utf8(str, pos)
     return pos
 end
 
--- As above, but finds the previous UTF-8 charcter in 'str' before 'pos'
+-- As above, but finds the previous UTF-8 character in 'str' before 'pos'
 function prev_utf8(str, pos)
     if pos <= 1 then return pos end
     repeat

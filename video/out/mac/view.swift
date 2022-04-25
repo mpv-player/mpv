@@ -65,7 +65,7 @@ class View: NSView {
     }
 
     func isURL(_ str: String) -> Bool {
-        // force unwrapping is fine here, regex is guarnteed to be valid
+        // force unwrapping is fine here, regex is guaranteed to be valid
         let regex = try! NSRegularExpression(pattern: "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$",
                                              options: .caseInsensitive)
         let isURL = regex.numberOfMatches(in: str,
@@ -127,7 +127,7 @@ class View: NSView {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
         common.titleBar?.hide()
-        common.setCursorVisiblility(true)
+        common.setCursorVisibility(true)
     }
 
     override func mouseMoved(with event: NSEvent) {

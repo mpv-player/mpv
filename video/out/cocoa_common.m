@@ -80,7 +80,7 @@ struct vo_cocoa_state {
     bool window_is_dragged;
     id event_monitor_mouseup;
 
-    bool embedded; // wether we are embedding in another GUI
+    bool embedded; // whether we are embedding in another GUI
 
     IOPMAssertionID power_mgmt_assertion;
     io_connect_t light_sensor;
@@ -185,7 +185,7 @@ static void set_application_icon(NSApplication *app)
 
 static int lmuvalue_to_lux(uint64_t v)
 {
-    // the polinomial approximation for apple lmu value -> lux was empirically
+    // the polynomial approximation for apple lmu value -> lux was empirically
     // derived by firefox developers (Apple provides no documentation).
     // https://bugzilla.mozilla.org/show_bug.cgi?id=793728
     double power_c4 = 1/pow((double)10,27);

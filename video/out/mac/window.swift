@@ -554,7 +554,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidResignKey(_ notification: Notification) {
-        common.setCursorVisiblility(true)
+        common.setCursorVisibility(true)
     }
 
     func windowDidBecomeKey(_ notification: Notification) {

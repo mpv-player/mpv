@@ -1685,7 +1685,7 @@ static void attempt_range_joining(struct demux_internal *in)
     // Try to find a join point, where packets obviously overlap. (It would be
     // better and faster to do this incrementally, but probably too complex.)
     // The current range can overlap arbitrarily with the next one, not only by
-    // by the seek overlap, but for arbitrary packet readahead as well.
+    // the seek overlap, but for arbitrary packet readahead as well.
     // We also drop the overlapping packets (if joining fails, we discard the
     // entire next range anyway, so this does no harm).
     for (int n = 0; n < in->num_streams; n++) {

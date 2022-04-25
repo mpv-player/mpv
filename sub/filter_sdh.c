@@ -219,7 +219,7 @@ static bool skip_bracketed(struct sd_filter *sd, char **rpp, struct buffer *buf)
     return true;
 }
 
-// check for paranthesed text, like (SOUND)
+// check for parenthesized text, like (SOUND)
 // and skip it while preserving ass tags
 // normal subtitles may include mixed case text in parentheses so
 // only upper case is accepted and lower case l which for some
@@ -233,9 +233,9 @@ static bool skip_bracketed(struct sd_filter *sd, char **rpp, struct buffer *buf)
 // scan in source string
 // the first character in source string must be the starting '('
 // and copy ass tags to destination string but
-// skipping paranthesed text if it looks like SDH
+// skipping parenthesized text if it looks like SDH
 //
-// return true if paranthesed text was removed.
+// return true if parenthesized text was removed.
 // if not valid SDH read pointer and write buffer position will be unchanged
 // otherwise they point to next position after text and next write position
 static bool skip_parenthesed(struct sd_filter *sd, char **rpp, struct buffer *buf)
@@ -413,7 +413,7 @@ static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t 
             }
         }
     }
-    // if no normal text i last line - remove last line
+    // if no normal text in last line - remove last line
     // by moving write pointer to start of last line
     if (!line_with_text) {
         buf->pos = wp_line_end;

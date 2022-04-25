@@ -152,7 +152,7 @@ class Common: NSObject {
     }
 
     func uninitCommon() {
-        setCursorVisiblility(true)
+        setCursorVisibility(true)
         stopDisplaylink()
         uninitLightSensor()
         removeDisplayReconfigureObserver()
@@ -388,10 +388,10 @@ class Common: NSObject {
     }
 
     func updateCursorVisibility() {
-        setCursorVisiblility(cursorVisibilityWanted)
+        setCursorVisibility(cursorVisibilityWanted)
     }
 
-    func setCursorVisiblility(_ visible: Bool) {
+    func setCursorVisibility(_ visible: Bool) {
         NSCursor.setHiddenUntilMouseMoves(!visible && (view?.canHideCursor() ?? false))
     }
 
@@ -593,7 +593,7 @@ class Common: NSObject {
             let cursorVisibility = data.assumingMemoryBound(to: CBool.self)
             cursorVisibilityWanted = cursorVisibility.pointee
             DispatchQueue.main.async {
-                self.setCursorVisiblility(self.cursorVisibilityWanted)
+                self.setCursorVisibility(self.cursorVisibilityWanted)
             }
             return VO_TRUE
         case VOCTRL_GET_ICC_PROFILE:

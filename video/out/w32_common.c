@@ -99,7 +99,7 @@ struct vo_w32_state {
 
     bool focused;
 
-    // whether the window position and size were intialized
+    // whether the window position and size were initialized
     bool window_bounds_initialized;
 
     bool current_fs;

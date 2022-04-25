@@ -18,7 +18,7 @@
 #ifndef MPV_MACOSX_MENU
 #define MPV_MACOSX_MENU
 
-// Menu Keys identifing menu items
+// Menu Keys identifying menu items
 typedef enum {
     MPM_H_SIZE,
     MPM_N_SIZE,
