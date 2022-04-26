@@ -4204,7 +4204,7 @@ Screenshot
     :jpg:       JPEG (default)
     :jpeg:      JPEG (alias for jpg)
     :webp:      WebP
-    :jxl:       Jpeg XL
+    :jxl:       JPEG XL
 
 ``--screenshot-tag-colorspace=<yes|no>``
     Tag screenshots with the appropriate colorspace.
@@ -4351,13 +4351,13 @@ Screenshot
     with lossy WebP files. The default is 4.
 
 ``--screenshot-jxl-distance=<0-15>``
-    Set the Jpeg XL Butteraugli distance. Lower means better quality. Lossless
+    Set the JPEG XL Butteraugli distance. Lower means better quality. Lossless
     is 0.0, and 1.0 is approximately equivalent to JPEG quality 90 for
     photographic content. Use 0.1 for "visually lossless" screenshots. The
     default is 1.0.
 
 ``--screenshot-jxl-effort=<1-9>``
-    Set the Jpeg XL compression effort. Higher effort (usually) means better
+    Set the JPEG XL compression effort. Higher effort (usually) means better
     compression, but takes more CPU time. The default is 3.
 
 ``--screenshot-sw=<yes|no>``
