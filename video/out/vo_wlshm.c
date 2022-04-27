@@ -269,8 +269,8 @@ static void flip_page(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
 
-    wl_surface_damage(wl->surface, 0, 0, mp_rect_w(wl->geometry),
-                      mp_rect_h(wl->geometry));
+    wl_surface_damage_buffer(wl->surface, 0, 0, vo->dwidth,
+                             vo->dheight);
     wl_surface_commit(wl->surface);
 
     if (!wl->opts->disable_vsync)

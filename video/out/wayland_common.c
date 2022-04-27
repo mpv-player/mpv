@@ -1045,8 +1045,8 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     int found = 1;
     struct vo_wayland_state *wl = data;
 
-    if (!strcmp(interface, wl_compositor_interface.name) && (ver >= 3) && found++) {
-        wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, 3);
+    if (!strcmp(interface, wl_compositor_interface.name) && (ver >= 4) && found++) {
+        wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, 4);
         wl->surface = wl_compositor_create_surface(wl->compositor);
         wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
@@ -1395,7 +1395,7 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
                               img->hotspot_x/wl->scaling, img->hotspot_y/wl->scaling);
         wl_surface_set_buffer_scale(wl->cursor_surface, wl->scaling);
         wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
-        wl_surface_damage(wl->cursor_surface, 0, 0, img->width, img->height);
+        wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
         wl_surface_commit(wl->cursor_surface);
     } else {
         wl_pointer_set_cursor(wl->pointer, wl->pointer_id, NULL, 0, 0);
