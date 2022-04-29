@@ -323,7 +323,11 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts)
 
 bool image_writer_high_depth(const struct image_writer_opts *opts)
 {
-    return opts->format == AV_CODEC_ID_PNG;
+    return opts->format == AV_CODEC_ID_PNG
+#if HAVE_JPEGXL
+           || opts->format == AV_CODEC_ID_JPEGXL
+#endif
+    ;
 }
 
 int image_writer_format_from_ext(const char *ext)
