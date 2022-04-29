@@ -20,10 +20,8 @@
 #include <string.h>
 
 #include <libavcodec/avcodec.h>
-#include <libavcodec/version.h>
 #include <libavutil/mem.h>
 #include <libavutil/opt.h>
-#include <libavutil/version.h>
 
 #include "config.h"
 
@@ -63,7 +61,7 @@ const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
     {"jpeg", AV_CODEC_ID_MJPEG},
     {"png",  AV_CODEC_ID_PNG},
     {"webp", AV_CODEC_ID_WEBP},
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 27, 100)
+#if HAVE_JPEGXL
     {"jxl",  AV_CODEC_ID_JPEGXL},
 #endif
     {0}
@@ -80,7 +78,7 @@ const struct m_option image_writer_opts[] = {
     {"webp-lossless", OPT_FLAG(webp_lossless)},
     {"webp-quality", OPT_INT(webp_quality), M_RANGE(0, 100)},
     {"webp-compression", OPT_INT(webp_compression), M_RANGE(0, 6)},
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 27, 100)
+#if HAVE_JPEGXL
     {"jxl-distance", OPT_DOUBLE(jxl_distance), M_RANGE(0.0, 15.0)},
     {"jxl-effort", OPT_INT(jxl_effort), M_RANGE(1, 9)},
 #endif
@@ -150,7 +148,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
                        AV_OPT_SEARCH_CHILDREN);
         av_opt_set_int(avctx, "quality", ctx->opts->webp_quality,
                        AV_OPT_SEARCH_CHILDREN);
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 27, 100)
+#if HAVE_JPEGXL
     } else if (codec->id == AV_CODEC_ID_JPEGXL) {
         av_opt_set_double(avctx, "distance", ctx->opts->jxl_distance,
                           AV_OPT_SEARCH_CHILDREN);

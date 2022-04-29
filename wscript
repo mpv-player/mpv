@@ -391,6 +391,10 @@ iconv support use --disable-iconv.",
         'desc': 'SDL2 gamepad input',
         'deps': 'sdl2',
         'func': check_true,
+    }, {
+        'name': 'jpegxl',
+        'desc': 'JPEG XL support via libavcodec',
+        'func': check_pkg_config('libavcodec >= 59.27.100'),
     }
 ]
 
