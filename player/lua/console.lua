@@ -229,19 +229,7 @@ end
 
 -- Escape a string for verbatim display on the OSD
 function ass_escape(str)
-    -- There is no escape for '\' in ASS (I think?) but '\' is used verbatim if
-    -- it isn't followed by a recognised character, so add a zero-width
-    -- non-breaking space
-    str = str:gsub('\\', '\\\239\187\191')
-    str = str:gsub('{', '\\{')
-    str = str:gsub('}', '\\}')
-    -- Precede newlines with a ZWNBSP to prevent ASS's weird collapsing of
-    -- consecutive newlines
-    str = str:gsub('\n', '\239\187\191\\N')
-    -- Turn leading spaces into hard spaces to prevent ASS from stripping them
-    str = str:gsub('\\N ', '\\N\\h')
-    str = str:gsub('^ ', '\\h')
-    return str
+    return mp.command_native({'escape-ass', str})
 end
 
 -- Takes a list of strings, a max width in characters and

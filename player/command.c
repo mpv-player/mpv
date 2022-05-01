@@ -5563,6 +5563,19 @@ static void cmd_expand_path(void *p)
     };
 }
 
+static void cmd_escape_ass(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    bstr dst = {0};
+
+    osd_mangle_ass(&dst, cmd->args[0].v.s, true);
+
+    cmd->result = (mpv_node){
+        .format = MPV_FORMAT_STRING,
+        .u.string = dst.len ? (char *)dst.start : talloc_strdup(NULL, ""),
+    };
+}
+
 static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
 {
     switch (action_flag) {
@@ -6659,6 +6672,8 @@ const struct mp_cmd_def mp_cmds[] = {
     { "expand-text", cmd_expand_text, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
     { "expand-path", cmd_expand_path, { {"text", OPT_STRING(v.s)} },
+        .is_noisy = true },
+    { "escape-ass", cmd_escape_ass, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
     { "show-progress", cmd_show_progress, .allow_auto_repeat = true,
         .is_noisy = true },

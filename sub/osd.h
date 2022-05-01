@@ -245,5 +245,6 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov);
 void osd_set_external_remove_owner(struct osd_state *osd, void *owner);
 void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h);
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
+void osd_mangle_ass(bstr *dst, const char *in, bool replace_newlines);
 
 #endif /* MPLAYER_SUB_H */
