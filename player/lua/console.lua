@@ -188,7 +188,7 @@ function update()
     -- cursor appear in front of the text.
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2)
+    ass:pos(2, screeny - 2 - global_margin_y * screeny)
     ass:append(style .. '{\\alpha&HFF&}> ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
