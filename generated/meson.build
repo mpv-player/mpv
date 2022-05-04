@@ -20,8 +20,7 @@ sources += [ebml_defs, ebml_types, version_h]
 # Just generate the com in here for windows builds.
 if win32 and get_option('cplayer')
     features += 'win32-executable'
-    wrapper_flags = ['-municode', '-Wl,--subsystem,console']
     wrapper_sources= '../osdep/win32-console-wrapper.c'
-    executable('mpv', wrapper_sources, c_args: wrapper_flags, link_args: wrapper_flags,
+    executable('mpv', wrapper_sources, c_args: '-municode', link_args: '-municode',
                name_suffix: 'com', install: true)
 endif

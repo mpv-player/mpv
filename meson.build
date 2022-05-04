@@ -297,18 +297,13 @@ endif
 mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DUNICODE', '-DCOBJMACROS',
                '-DINITGUID', '-U__STRICT_ANSI__']
 
-mswin_linkflags = ['-Wl,--major-os-version=6,--minor-os-version=0',
-                   '-Wl,--major-subsystem-version=6,--minor-subsystem-version=0']
-
 if host_machine.system() == 'windows'
     flags += [mswin_flags, '-D__USE_MINGW_ANSI_STDIO=1']
-    link_flags += [mswin_linkflags, '-mwindows']
 endif
 
 if host_machine.system() == 'cygwin'
     features += 'cygwin'
     flags += [mswin_flags, '-mwin32']
-    link_flags += mswin_linkflags
 endif
 
 noexecstack = false
@@ -1865,6 +1860,6 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    executable('mpv', sources, dependencies: dependencies,
+    executable('mpv', sources, dependencies: dependencies, win_subsystem: 'windows,6.0',
                include_directories: includedir, install: true)
 endif
