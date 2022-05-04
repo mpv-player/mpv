@@ -175,8 +175,10 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     pic->height = avctx->height;
     pic->color_range = avctx->color_range;
     if (ctx->opts->tag_csp) {
-        pic->color_primaries = mp_csp_prim_to_avcol_pri(image->params.color.primaries);
-        pic->color_trc = mp_csp_trc_to_avcol_trc(image->params.color.gamma);
+        avctx->color_primaries = pic->color_primaries =
+            mp_csp_prim_to_avcol_pri(image->params.color.primaries);
+        avctx->color_trc = pic->color_trc =
+            mp_csp_trc_to_avcol_trc(image->params.color.gamma);
     }
 
     int ret = avcodec_send_frame(avctx, pic);
