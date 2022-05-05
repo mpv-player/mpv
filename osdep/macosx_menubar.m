@@ -101,9 +101,8 @@
                         @"name"       : @"Hide Others",
                         @"action"     : @"hideOtherApplications:",
                         @"key"        : @"h",
-                        @"modifiers"  : [NSNumber numberWithUnsignedInteger:
-                                            NSEventModifierFlagCommand |
-                                            NSEventModifierFlagOption],
+                        @"modifiers"  : @(NSEventModifierFlagCommand |
+                                            NSEventModifierFlagOption),
                         @"target"     : NSApp
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
@@ -159,7 +158,8 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Save Screenshot",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"s",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"async screenshot"
                     }]
@@ -207,14 +207,16 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Toggle Fullscreen",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"f",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"cycle fullscreen"
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Toggle Float on Top",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"T",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"cycle ontop"
                     }],
@@ -242,14 +244,16 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Zoom Out",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"w",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"add panscan -0.1"
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Zoom In",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"W",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"add panscan 0.1"
                     }],
@@ -320,7 +324,8 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Next Audio Track",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"#",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"cycle audio"
                     }],
@@ -335,7 +340,8 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Toggle Mute",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"m",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"cycle mute"
                     }],
@@ -343,14 +349,16 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Play Audio Later",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"+",
+                        @"modifiers"  : @(NSEventModifierFlagControl),
                         @"target"     : self,
                         @"cmd"        : @"add audio-delay 0.1"
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Play Audio Earlier",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"-",
+                        @"modifiers"  : @(NSEventModifierFlagControl),
                         @"target"     : self,
                         @"cmd"        : @"add audio-delay -0.1"
                     }],
@@ -369,14 +377,16 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Next Subtitle Track",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"j",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"cycle sub"
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Previous Subtitle Track",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"J",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"cycle sub down"
                     }],
@@ -384,7 +394,8 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Toggle Force Style",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"u",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"cycle-values sub-ass-override \"force\" \"no\""
                     }],
@@ -392,14 +403,16 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Display Subtitles Later",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"Z",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"add sub-delay 0.1"
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Display Subtitles Earlier",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"z",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"add sub-delay -0.1"
                     }],
@@ -418,7 +431,8 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Toggle Pause",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @" ",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"cycle pause"
                     }],
@@ -439,7 +453,8 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Reset Speed",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @"⌫",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"set speed 1.0"
                     }],
@@ -520,14 +535,16 @@
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Step Forward",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @".",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"frame-step"
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Step Backward",
                         @"action"     : @"cmd:",
-                        @"key"        : @"",
+                        @"key"        : @",",
+                        @"modifiers"  : @(kNilOptions),
                         @"target"     : self,
                         @"cmd"        : @"frame-back-step"
                     }]
@@ -693,17 +710,19 @@
         [NSString stringWithFormat:@"%@/.mpv/", NSHomeDirectory()],
         [NSString stringWithFormat:@"%@/.config/mpv/", NSHomeDirectory()]];
 
-    for (id path in configPaths) {
+    for (NSString *path in configPaths) {
+        NSURL *directoryURL = [NSURL fileURLWithPath:path];
         NSString *fileP = [path stringByAppendingString:mItemDict[@"file"]];
+        NSURL *fileURL = [NSURL fileURLWithPath:fileP];
         if ([fileManager fileExistsAtPath:fileP]){
-            if ([workspace openFile:fileP])
+            if ([workspace openURL:fileURL])
                 return;
-            [workspace openFile:path];
+            [workspace openURL:directoryURL];
             [self alertWithTitle:mItemDict[@"alertTitle1"]
                          andText:mItemDict[@"alertText1"]];
             return;
         }
-        if ([workspace openFile:path]) {
+        if ([workspace openURL:directoryURL]) {
             [self alertWithTitle:mItemDict[@"alertTitle2"]
                          andText:mItemDict[@"alertText2"]];
             return;
