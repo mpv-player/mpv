@@ -428,7 +428,7 @@ static bool mp_imgfmt_get_desc_from_pixdesc(int mpfmt, struct mp_imgfmt_desc *ou
         desc.flags |= MP_IMGFLAG_TYPE_HW;
 
     // Pixdesc does not provide a flag for XYZ, so this is the best we can do.
-    if (strncmp(pd->name, "xyz", 3) == 0) {
+    if (pd->name && strncmp(pd->name, "xyz", 3) == 0) {
         desc.flags |= MP_IMGFLAG_COLOR_XYZ;
     } else if (pd->flags & AV_PIX_FMT_FLAG_RGB) {
         desc.flags |= MP_IMGFLAG_COLOR_RGB;
