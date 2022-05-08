@@ -2701,6 +2701,8 @@ static int dequeue_packet(struct demux_stream *ds, double min_pts,
             // if read-ahead went above min_pts.
             if (!lazy_stream_needs_wait(ds))
                 ds->eof = eof = true;
+            else
+                eof = false;
         }
         return eof ? -1 : 0;
     }
