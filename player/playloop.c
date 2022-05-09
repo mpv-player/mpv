@@ -1217,7 +1217,7 @@ void run_playloop(struct MPContext *mpctx)
 
     update_osd_msg(mpctx);
     if (mpctx->video_status == STATUS_EOF)
-        update_subtitles(mpctx, mpctx->playback_pts);
+        update_subtitles(mpctx, mpctx->playback_pts, false);
 
     handle_each_frame_screenshot(mpctx);
 
