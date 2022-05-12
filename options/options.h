@@ -32,6 +32,7 @@ typedef struct mp_vo_opts {
     int x11_netwm;
     int x11_bypass_compositor;
     int x11_present;
+    bool cursor_passthrough;
     bool native_keyrepeat;
 
     float panscan;

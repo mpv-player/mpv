@@ -1548,7 +1548,8 @@ static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b) {
     }
 }
 
-static void guess_focus(struct vo_wayland_state *wl) {
+static void guess_focus(struct vo_wayland_state *wl)
+{
     // We can't actually know if the window is focused or not in wayland,
     // so just guess it with some common sense. Obviously won't work if
     // the user has no keyboard.
@@ -1714,6 +1715,17 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
         if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
             wl->geometry = wl->window_size;
         wl->pending_vo_events |= VO_EVENT_RESIZE;
+    }
+}
+
+static void set_input_region(struct vo_wayland_state *wl, bool passthrough)
+{
+    if (passthrough) {
+        struct wl_region *region = wl_compositor_create_region(wl->compositor);
+        wl_surface_set_input_region(wl->surface, region);
+        wl_region_destroy(region);
+    } else {
+        wl_surface_set_input_region(wl->surface, NULL);
     }
 }
 
@@ -1967,6 +1979,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             }
             if (opt == &opts->content_type)
                 set_content_type(wl);
+            if (opt == &opts->cursor_passthrough)
+                set_input_region(wl, opts->cursor_passthrough);
             if (opt == &opts->fullscreen)
                 toggle_fullscreen(wl);
             if (opt == &opts->hidpi_window_scale)
@@ -2254,6 +2268,9 @@ bool vo_wayland_reconfig(struct vo *vo)
     {
         wl->geometry = wl->window_size;
     }
+
+    if (wl->vo_opts->cursor_passthrough)
+        set_input_region(wl, true);
 
     if (wl->vo_opts->fullscreen)
         toggle_fullscreen(wl);

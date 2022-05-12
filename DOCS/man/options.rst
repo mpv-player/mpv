@@ -4060,6 +4060,12 @@ Input
     driver. Necessary to use the OSC, or to select the buttons in DVD menus.
     Support depends on the VO in use.
 
+``--input-cursor-passthrough``, ``--no-input-cursor-passthrough``
+    (X11 and Wayland only)
+    Tell the backend windowing system to allow pointer events to passthrough
+    the mpv window. This allows windows under mpv to instead receive pointer
+    events as if the mpv window was never there.
+
 ``--input-media-keys=<yes|no>``
     On systems where mpv can choose between receiving media keys or letting
     the system handle them - this option controls whether mpv should receive
