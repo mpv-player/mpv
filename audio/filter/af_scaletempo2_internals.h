@@ -1,4 +1,4 @@
-// This filter was ported from Chromium 
+// This filter was ported from Chromium
 // (https://chromium.googlesource.com/chromium/chromium/+/51ed77e3f37a9a9b80d6d0a8259e84a8ca635259/media/filters/audio_renderer_algorithm.cc)
 //
 // Copyright 2015 The Chromium Authors. All rights reserved.

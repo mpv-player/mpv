@@ -743,9 +743,9 @@ void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
     p->channels = channels;
 
     p->samples_per_second = rate;
-    p->num_candidate_blocks = (int)(p->opts->wsola_search_interval_ms 
+    p->num_candidate_blocks = (int)(p->opts->wsola_search_interval_ms
         * p->samples_per_second / 1000);
-    p->ola_window_size = (int)(p->opts->ola_window_size_ms 
+    p->ola_window_size = (int)(p->opts->ola_window_size_ms
         * p->samples_per_second / 1000);
     // Make sure window size in an even number.
     p->ola_window_size += p->ola_window_size & 1;

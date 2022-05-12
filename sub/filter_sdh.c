@@ -297,7 +297,7 @@ static void remove_leading_hyphen_space(struct sd_filter *sd, int start_pos,
 {
     int old_pos = buf->pos;
     if (start_pos < 0 || start_pos >= old_pos)
-        return; 
+        return;
     append(sd, buf, '\0');  // \0 terminate for reading
 
     // move past leading ass tags

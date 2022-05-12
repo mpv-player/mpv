@@ -230,7 +230,7 @@ const struct mp_user_filter_entry af_scaletempo2 = {
             .wsola_search_interval_ms = 30,
         },
         .options = (const struct m_option[]) {
-            {"search-interval", 
+            {"search-interval",
                 OPT_FLOAT(wsola_search_interval_ms), M_RANGE(1, 1000)},
             {"window-size",
                 OPT_FLOAT(ola_window_size_ms), M_RANGE(1, 1000)},

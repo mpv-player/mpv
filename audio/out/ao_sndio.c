@@ -3,7 +3,7 @@
  * Copyright (c) 2013 Christian Neukirchen <chneukirchen@gmail.com>
  * Copyright (c) 2020 Rozhuk Ivan <rozhuk.im@gmail.com>
  * Copyright (c) 2021 Andrew Krasavin <noiseless-ak@yandex.ru>
- * 
+ *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.

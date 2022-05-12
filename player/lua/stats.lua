@@ -485,7 +485,7 @@ local function get_kbinfo_lines(width)
     -- key/subject pre/post formatting for terminal/ass.
     -- key/subject alignment uses spaces (with mono font if ass)
     -- word-wrapping is disabled for ass, or cut at 79 for the terminal
-    local LTR = string.char(0xE2, 0x80, 0x8E)  -- U+200E Left To Right mark 
+    local LTR = string.char(0xE2, 0x80, 0x8E)  -- U+200E Left To Right mark
     local term = not o.use_ass
     local kpre = term and "" or format("{\\q2\\fn%s}%s", o.font_mono, LTR)
     local kpost = term and " " or format(" {\\fn%s}", o.font)
