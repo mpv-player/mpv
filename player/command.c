@@ -1056,7 +1056,7 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
     if (!demuxer)
         return mp_property_generic_option(mpctx, prop, action, arg);
 
-    int ed = demuxer->edition;
+    int ed = ((demuxer->edition + 1) % demuxer->num_editions);
 
     if (demuxer->num_editions <= 1)
         return M_PROPERTY_UNAVAILABLE;
