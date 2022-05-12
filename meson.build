@@ -812,7 +812,7 @@ if audiounit['deps'].found() and audiounit['symbol']
     audiounit += {'use': true}
 endif
 
-coreaudio = dependency('appleframeworks', modules: ['CoreFoundation', 'CoreAudio', 
+coreaudio = dependency('appleframeworks', modules: ['CoreFoundation', 'CoreAudio',
                        'AudioUnit', 'AudioToolbox'], required: get_option('coreaudio'))
 if coreaudio.found()
     dependencies += coreaudio
