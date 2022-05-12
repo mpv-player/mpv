@@ -1139,13 +1139,12 @@ static int script_split_path(lua_State *L)
     return 2;
 }
 
-static int script_join_path(lua_State *L)
+static int script_join_path(lua_State *L, void *tmp)
 {
     const char *p1 = luaL_checkstring(L, 1);
     const char *p2 = luaL_checkstring(L, 2);
-    char *r = mp_path_join(NULL, p1, p2);
+    char *r = mp_path_join(tmp, p1, p2);
     lua_pushstring(L, r);
-    talloc_free(r);
     return 1;
 }
 
@@ -1240,7 +1239,7 @@ static const struct fn_entry utils_fns[] = {
     AF_ENTRY(readdir),
     FN_ENTRY(file_info),
     FN_ENTRY(split_path),
-    FN_ENTRY(join_path),
+    AF_ENTRY(join_path),
     AF_ENTRY(parse_json),
     AF_ENTRY(format_json),
     FN_ENTRY(get_env_list),
