@@ -1244,9 +1244,11 @@ static char **get_displays_spanned(struct vo_wayland_state *wl)
     int displays_spanned = 0;
     struct vo_wayland_output *output;
     wl_list_for_each(output, &wl->output_list, link) {
-        if (output->has_surface)
+        if (output->has_surface) {
+            char *name = output->name ? output->name : output->model;
             MP_TARRAY_APPEND(NULL, names, displays_spanned,
-                             talloc_strdup(NULL, output->model));
+                             talloc_strdup(NULL, name));
+        }
     }
     MP_TARRAY_APPEND(NULL, names, displays_spanned, NULL);
     return names;
