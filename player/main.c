@@ -378,7 +378,9 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return run_tests(mpctx) ? 1 : -1;
 #endif
 
-    if (!mpctx->playlist->num_entries && !opts->player_idle_mode) {
+    if (!mpctx->playlist->num_entries && !opts->player_idle_mode &&
+        options)
+    {
         // nothing to play
         mp_print_version(mpctx->log, true);
         MP_INFO(mpctx, "%s", mp_help_text);
