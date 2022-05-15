@@ -3303,6 +3303,10 @@ Property list
     The mpv version/copyright string. Depending on how the binary was built, it
     might contain either a release version, or just a git hash.
 
+``mpv-semantic-version``
+    The mpv version in the strict, semantic release format. When built from an
+    arbitrary git hash, the point release will always be 99 (i.e. 0.34.99).
+
 ``mpv-configuration``
     The configuration arguments which were passed to the build system
     (typically the way ``./waf configure ...`` was invoked).

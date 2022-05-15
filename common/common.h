@@ -87,6 +87,7 @@ enum video_sync {
                        (x) == VS_DISP_NONE)
 
 extern const char mpv_version[];
+extern const char mpv_semantic_version[];
 extern const char mpv_builddate[];
 extern const char mpv_copyright[];
 

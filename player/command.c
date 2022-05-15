@@ -3260,6 +3260,12 @@ static int mp_property_version(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, mpv_version);
 }
 
+static int mp_property_semantic_version(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
+{
+    return m_property_strdup_ro(action, arg, mpv_semantic_version);
+}
+
 static int mp_property_configuration(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3735,6 +3741,7 @@ static const struct m_property mp_properties_base[] = {
     {"input-key-list", mp_property_keylist},
 
     {"mpv-version", mp_property_version},
+    {"mpv-semantic-version", mp_property_semantic_version},
     {"mpv-configuration", mp_property_configuration},
     {"ffmpeg-version", mp_property_ffmpeg},
     {"libass-version", mp_property_libass_version},
