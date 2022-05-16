@@ -3405,8 +3405,10 @@ static struct demuxer *demux_open(struct stream *stream,
             check_levels = d_force;
         }
         for (int n = 0; demuxer_list[n]; n++) {
-            if (strcmp(demuxer_list[n]->name, force_format) == 0)
+            if (strcmp(demuxer_list[n]->name, force_format) == 0) {
                 check_desc = demuxer_list[n];
+                break;
+            }
         }
         if (!check_desc) {
             mp_err(log, "Demuxer %s does not exist.\n", force_format);
