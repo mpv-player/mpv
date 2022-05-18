@@ -25,6 +25,7 @@
 #include <limits.h>
 #include <math.h>
 #include <time.h>
+#include <drm_fourcc.h>
 
 #include "config.h"
 
@@ -1099,3 +1100,451 @@ fail:
     *closure->waiting_for_flip = false;
     talloc_free(closure);
 }
+
+const char* drm_format_string(uint drm_format) {
+
+    switch (drm_format) {
+    /* Reserve 0 for the invalid format specifier */
+    case DRM_FORMAT_INVALID:
+        return "DRM_FORMAT_INVALID";
+        break;
+        /* color index */
+    case DRM_FORMAT_C8:
+        return "DRM_FORMAT_C8";
+        break;
+        /* 8 bpp Red */
+    case DRM_FORMAT_R8:
+        return "DRM_FORMAT_R8";
+        break;
+        /* these formats are not in the header for some reason */
+#if 0
+    /* 10 bpp Red */
+    case DRM_FORMAT_R10:
+        return "DRM_FORMAT_R10";
+    break;
+    /* 12 bpp Red */
+    case DRM_FORMAT_R12:
+        return "DRM_FORMAT_R12";
+    break;
+#endif
+        /* 16 bpp Red */
+    case DRM_FORMAT_R16:
+        return "DRM_FORMAT_R16";
+        break;
+        /* 16 bpp RG */
+    case DRM_FORMAT_RG88:
+        return "DRM_FORMAT_RG88";
+        break;
+    case DRM_FORMAT_GR88:
+        return "DRM_FORMAT_GR88";
+        break;
+        /* 32 bpp RG */
+    case DRM_FORMAT_RG1616:
+        return "DRM_FORMAT_RG1616";
+        break;
+    case DRM_FORMAT_GR1616:
+        return "DRM_FORMAT_GR1616";
+        break;
+        /* 8 bpp RGB */
+    case DRM_FORMAT_RGB332:
+        return "DRM_FORMAT_RGB332";
+        break;
+    case DRM_FORMAT_BGR233:
+        return "DRM_FORMAT_BGR233";
+        break;
+        /* 16 bpp RGB */
+    case DRM_FORMAT_XRGB4444:
+        return "DRM_FORMAT_XRGB4444";
+        break;
+    case DRM_FORMAT_XBGR4444:
+        return "DRM_FORMAT_XBGR4444";
+        break;
+    case DRM_FORMAT_RGBX4444:
+        return "DRM_FORMAT_RGBX4444";
+        break;
+    case DRM_FORMAT_BGRX4444:
+        return "DRM_FORMAT_BGRX4444";
+        break;
+    case DRM_FORMAT_ARGB4444:
+        return "DRM_FORMAT_ARGB4444";
+        break;
+    case DRM_FORMAT_ABGR4444:
+        return "DRM_FORMAT_ABGR4444";
+        break;
+    case DRM_FORMAT_RGBA4444:
+        return "DRM_FORMAT_RGBA4444";
+        break;
+    case DRM_FORMAT_BGRA4444:
+        return "DRM_FORMAT_BGRA4444";
+        break;
+    case DRM_FORMAT_XRGB1555:
+        return "DRM_FORMAT_XRGB1555";
+        break;
+    case DRM_FORMAT_XBGR1555:
+        return "DRM_FORMAT_XBGR1555";
+        break;
+    case DRM_FORMAT_RGBX5551:
+        return "DRM_FORMAT_RGBX5551";
+        break;
+    case DRM_FORMAT_BGRX5551:
+        return "DRM_FORMAT_BGRX5551";
+        break;
+    case DRM_FORMAT_ARGB1555:
+        return "DRM_FORMAT_ARGB1555";
+        break;
+    case DRM_FORMAT_ABGR1555:
+        return "DRM_FORMAT_ABGR1555";
+        break;
+    case DRM_FORMAT_RGBA5551:
+        return "DRM_FORMAT_RGBA5551";
+        break;
+    case DRM_FORMAT_BGRA5551:
+        return "DRM_FORMAT_BGRA5551";
+        break;
+    case DRM_FORMAT_RGB565:
+        return "DRM_FORMAT_RGB565";
+        break;
+    case DRM_FORMAT_BGR565:
+        return "DRM_FORMAT_BGR565";
+        break;
+        /* 24 bpp RGB */
+    case DRM_FORMAT_RGB888:
+        return "DRM_FORMAT_RGB888";
+        break;
+    case DRM_FORMAT_BGR888:
+        return "DRM_FORMAT_BGR888";
+        break;
+        /* 32 bpp RGB */
+    case DRM_FORMAT_XRGB8888:
+        return "DRM_FORMAT_XRGB8888";
+        break;
+    case DRM_FORMAT_XBGR8888:
+        return "DRM_FORMAT_XBGR8888";
+        break;
+    case DRM_FORMAT_RGBX8888:
+        return "DRM_FORMAT_RGBX8888";
+        break;
+    case DRM_FORMAT_BGRX8888:
+        return "DRM_FORMAT_BGRX8888";
+        break;
+    case DRM_FORMAT_ARGB8888:
+        return "DRM_FORMAT_ARGB8888";
+        break;
+    case DRM_FORMAT_ABGR8888:
+        return "DRM_FORMAT_ABGR8888";
+        break;
+    case DRM_FORMAT_RGBA8888:
+        return "DRM_FORMAT_RGBA8888";
+        break;
+    case DRM_FORMAT_BGRA8888:
+        return "DRM_FORMAT_BGRA8888";
+        break;
+    case DRM_FORMAT_XRGB2101010:
+        return "DRM_FORMAT_XRGB2101010";
+        break;
+    case DRM_FORMAT_XBGR2101010:
+        return "DRM_FORMAT_XBGR2101010";
+        break;
+    case DRM_FORMAT_RGBX1010102:
+        return "DRM_FORMAT_RGBX1010102";
+        break;
+    case DRM_FORMAT_BGRX1010102:
+        return "DRM_FORMAT_BGRX1010102";
+        break;
+    case DRM_FORMAT_ARGB2101010:
+        return "DRM_FORMAT_ARGB2101010";
+        break;
+    case DRM_FORMAT_ABGR2101010:
+        return "DRM_FORMAT_ABGR2101010";
+        break;
+    case DRM_FORMAT_RGBA1010102:
+        return "DRM_FORMAT_RGBA1010102";
+        break;
+    case DRM_FORMAT_BGRA1010102:
+        return "DRM_FORMAT_BGRA1010102";
+        break;
+        /* 64 bpp RGB */
+    case DRM_FORMAT_XRGB16161616:
+        return "DRM_FORMAT_XRGB16161616";
+        break;
+    case DRM_FORMAT_XBGR16161616:
+        return "DRM_FORMAT_XBGR16161616";
+        break;
+    case DRM_FORMAT_ARGB16161616:
+        return "DRM_FORMAT_ARGB16161616";
+        break;
+    case DRM_FORMAT_ABGR16161616:
+        return "DRM_FORMAT_ABGR16161616";
+        break;
+        /*
+         * Floating point 64bpp RGB
+         * IEEE 754-2008 binary16 half-precision float
+         * [15:0] sign:exponent:mantissa 1:5:10
+         */
+    case DRM_FORMAT_XRGB16161616F:
+        return "DRM_FORMAT_XRGB16161616F";
+        break;
+    case DRM_FORMAT_XBGR16161616F:
+        return "DRM_FORMAT_XBGR16161616F";
+        break;
+    case DRM_FORMAT_ARGB16161616F:
+        return "DRM_FORMAT_ARGB16161616F";
+        break;
+    case DRM_FORMAT_ABGR16161616F:
+        return "DRM_FORMAT_ABGR16161616F";
+        break;
+        /*
+         * RGBA format with 10-bit components packed in 64-bit per pixel, with 6 bits
+         * of unused padding per component:
+         */
+    case DRM_FORMAT_AXBXGXRX106106106106:
+        return "DRM_FORMAT_AXBXGXRX106106106106";
+        break;
+        /* packed YCbCr */
+    case DRM_FORMAT_YUYV:
+        return "DRM_FORMAT_YUYV";
+        break;
+    case DRM_FORMAT_YVYU:
+        return "DRM_FORMAT_YVYU";
+        break;
+    case DRM_FORMAT_UYVY:
+        return "DRM_FORMAT_UYVY";
+        break;
+    case DRM_FORMAT_VYUY:
+        return "DRM_FORMAT_VYUY";
+        break;
+    case DRM_FORMAT_AYUV:
+        return "DRM_FORMAT_AYUV";
+        break;
+    case DRM_FORMAT_XYUV8888:
+        return "DRM_FORMAT_XYUV8888";
+        break;
+    case DRM_FORMAT_VUY888:
+        return "DRM_FORMAT_VUY888";
+        break;
+    case DRM_FORMAT_VUY101010:
+        return "DRM_FORMAT_VUY101010";
+        break;
+        /*
+         * packed Y2xx indicate for each component, xx valid data occupy msb
+         * 16-xx padding occupy lsb
+         */
+    case DRM_FORMAT_Y210:
+        return "DRM_FORMAT_Y210";
+        break;
+    case DRM_FORMAT_Y212:
+        return "DRM_FORMAT_Y212";
+        break;
+    case DRM_FORMAT_Y216:
+        return "DRM_FORMAT_Y216";
+        break;
+        /*
+         * packed Y4xx indicate for each component, xx valid data occupy msb
+         * 16-xx padding occupy lsb except Y410
+         */
+    case DRM_FORMAT_Y410:
+        return "DRM_FORMAT_Y410";
+        break;
+    case DRM_FORMAT_Y412:
+        return "DRM_FORMAT_Y412";
+        break;
+    case DRM_FORMAT_Y416:
+        return "DRM_FORMAT_Y416";
+        break;
+    case DRM_FORMAT_XVYU2101010:
+        return "DRM_FORMAT_XVYU2101010";
+        break;
+    case DRM_FORMAT_XVYU12_16161616:
+        return "DRM_FORMAT_XVYU12_16161616";
+        break;
+    case DRM_FORMAT_XVYU16161616:
+        return "DRM_FORMAT_XVYU16161616";
+        break;
+        /*
+         * packed YCbCr420 2x2 tiled formats
+         * first 64 bits will contain Y,Cb,Cr components for a 2x2 tile
+         */
+        /* [63:0]   A3:A2:Y3:0:Cr0:0:Y2:0:A1:A0:Y1:0:Cb0:0:Y0:0  1:1:8:2:8:2:8:2:1:1:8:2:8:2:8:2 little endian */
+    case DRM_FORMAT_Y0L0:
+        return "DRM_FORMAT_Y0L0";
+        break;
+        /* [63:0]   X3:X2:Y3:0:Cr0:0:Y2:0:X1:X0:Y1:0:Cb0:0:Y0:0  1:1:8:2:8:2:8:2:1:1:8:2:8:2:8:2 little endian */
+    case DRM_FORMAT_X0L0:
+        return "DRM_FORMAT_X0L0";
+        break;
+        /* [63:0]   A3:A2:Y3:Cr0:Y2:A1:A0:Y1:Cb0:Y0  1:1:10:10:10:1:1:10:10:10 little endian */
+    case DRM_FORMAT_Y0L2:
+        return "DRM_FORMAT_Y0L2";
+        break;
+        /* [63:0]   X3:X2:Y3:Cr0:Y2:X1:X0:Y1:Cb0:Y0  1:1:10:10:10:1:1:10:10:10 little endian */
+    case DRM_FORMAT_X0L2:
+        return "DRM_FORMAT_X0L2";
+        break;
+        /*
+         * 1-plane YUV 4:2:0
+         * In these formats, the component ordering is specified (Y, followed by U
+         * then V), but the exact Linear layout is undefined.
+         * These formats can only be used with a non-Linear modifier.
+         */
+    case DRM_FORMAT_YUV420_8BIT:
+        return "DRM_FORMAT_YUV420_8BIT";
+        break;
+    case DRM_FORMAT_YUV420_10BIT:
+        return "DRM_FORMAT_YUV420_10BIT";
+        break;
+        /*
+         * 2 plane RGB + A
+         * index 0 = RGB plane, same format as the corresponding non _A8 format has
+         * index 1 = A plane, [7:0] A
+         */
+    case DRM_FORMAT_XRGB8888_A8:
+        return "DRM_FORMAT_XRGB8888_A8";
+        break;
+    case DRM_FORMAT_XBGR8888_A8:
+        return "DRM_FORMAT_XBGR8888_A8";
+        break;
+    case DRM_FORMAT_RGBX8888_A8:
+        return "DRM_FORMAT_RGBX8888_A8";
+        break;
+    case DRM_FORMAT_BGRX8888_A8:
+        return "DRM_FORMAT_BGRX8888_A8";
+        break;
+    case DRM_FORMAT_RGB888_A8:
+        return "DRM_FORMAT_RGB888_A8";
+        break;
+    case DRM_FORMAT_BGR888_A8:
+        return "DRM_FORMAT_BGR888_A8";
+        break;
+    case DRM_FORMAT_RGB565_A8:
+        return "DRM_FORMAT_RGB565_A8";
+        break;
+    case DRM_FORMAT_BGR565_A8:
+        return "DRM_FORMAT_BGR565_A8";
+        break;
+        /*
+         * 2 plane YCbCr
+         * index 0 = Y plane, [7:0] Y
+         * index 1 = Cr:Cb plane, [15:0] Cr:Cb little endian
+         * or
+         * index 1 = Cb:Cr plane, [15:0] Cb:Cr little endian
+         */
+    case DRM_FORMAT_NV12:
+        return "DRM_FORMAT_NV12";
+        break;
+    case DRM_FORMAT_NV21:
+        return "DRM_FORMAT_NV21";
+        break;
+    case DRM_FORMAT_NV16:
+        return "DRM_FORMAT_NV16";
+        break;
+    case DRM_FORMAT_NV61:
+        return "DRM_FORMAT_NV61";
+        break;
+    case DRM_FORMAT_NV24:
+        return "DRM_FORMAT_NV24";
+        break;
+    case DRM_FORMAT_NV42:
+        return "DRM_FORMAT_NV42";
+        break; /*
+         * 2 plane YCbCr
+         * index 0 = Y plane, [39:0] Y3:Y2:Y1:Y0 little endian
+         * index 1 = Cr:Cb plane, [39:0] Cr1:Cb1:Cr0:Cb0 little endian
+         */
+    case DRM_FORMAT_NV15:
+        return "DRM_FORMAT_NV15";
+        break;
+        /*
+         * 2 plane YCbCr MSB aligned
+         * index 0 = Y plane, [15:0] Y:x [10:6] little endian
+         * index 1 = Cr:Cb plane, [31:0] Cr:x:Cb:x [10:6:10:6] little endian
+         */
+    case DRM_FORMAT_P210:
+        return "DRM_FORMAT_P210";
+        break;
+        /*
+         * 2 plane YCbCr MSB aligned
+         * index 0 = Y plane, [15:0] Y:x [10:6] little endian
+         * index 1 = Cr:Cb plane, [31:0] Cr:x:Cb:x [10:6:10:6] little endian
+         */
+    case DRM_FORMAT_P010:
+        return "DRM_FORMAT_P010";
+        break;
+        /*
+         * 2 plane YCbCr MSB aligned
+         * index 0 = Y plane, [15:0] Y:x [12:4] little endian
+         * index 1 = Cr:Cb plane, [31:0] Cr:x:Cb:x [12:4:12:4] little endian
+         */
+    case DRM_FORMAT_P012:
+        return "DRM_FORMAT_P012";
+        break;
+        /*
+         * 2 plane YCbCr MSB aligned
+         * index 0 = Y plane, [15:0] Y little endian
+         * index 1 = Cr:Cb plane, [31:0] Cr:Cb [16:16] little endian
+         */
+    case DRM_FORMAT_P016:
+        return "DRM_FORMAT_P016";
+        break;
+        /* 3 plane non-subsampled (444) YCbCr
+         * 16 bits per component, but only 10 bits are used and 6 bits are padded
+         * index 0: Y plane, [15:0] Y:x [10:6] little endian
+         * index 1: Cb plane, [15:0] Cb:x [10:6] little endian
+         * index 2: Cr plane, [15:0] Cr:x [10:6] little endian
+         */
+    case DRM_FORMAT_Q410:
+        return "DRM_FORMAT_Q410";
+        break;
+        /* 3 plane non-subsampled (444) YCrCb
+         * 16 bits per component, but only 10 bits are used and 6 bits are padded
+         * index 0: Y plane, [15:0] Y:x [10:6] little endian
+         * index 1: Cr plane, [15:0] Cr:x [10:6] little endian
+         * index 2: Cb plane, [15:0] Cb:x [10:6] little endian
+         */
+    case DRM_FORMAT_Q401:
+        return "DRM_FORMAT_Q401";
+        break;
+        /*
+         * 3 plane YCbCr
+         * index 0: Y plane, [7:0] Y
+         * index 1: Cb plane, [7:0] Cb
+         * index 2: Cr plane, [7:0] Cr
+         * or
+         * index 1: Cr plane, [7:0] Cr
+         * index 2: Cb plane, [7:0] Cb
+         */
+    case DRM_FORMAT_YUV410:
+        return "DRM_FORMAT_YUV410";
+        break;
+    case DRM_FORMAT_YVU410:
+        return "DRM_FORMAT_YVU410";
+        break;
+    case DRM_FORMAT_YUV411:
+        return "DRM_FORMAT_YUV411";
+        break;
+    case DRM_FORMAT_YVU411:
+        return "DRM_FORMAT_YVU411";
+        break;
+    case DRM_FORMAT_YUV420:
+        return "DRM_FORMAT_YUV420";
+        break;
+    case DRM_FORMAT_YVU420:
+        return "DRM_FORMAT_YVU420";
+        break;
+    case DRM_FORMAT_YUV422:
+        return "DRM_FORMAT_YUV422";
+        break;
+    case DRM_FORMAT_YVU422:
+        return "DRM_FORMAT_YVU422";
+        break;
+    case DRM_FORMAT_YUV444:
+        return "DRM_FORMAT_YUV444";
+        break;
+    case DRM_FORMAT_YVU444:
+        return "DRM_FORMAT_YVU444";
+        break;
+    default:
+        return "DRM_FORMAT_UNKNOWN";
+        break;
+    }
+}
+

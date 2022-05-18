@@ -36,10 +36,20 @@ struct vo_wayland_state {
     struct wayland_opts   *opts;
     struct wl_callback    *frame_callback;
     struct wl_compositor  *compositor;
+    struct wl_subcompositor  *subcompositor;
     struct wl_display     *display;
     struct wl_registry    *registry;
+    struct wp_viewporter *viewporter;
+    struct wp_viewport *viewport;
+    struct zwp_linux_dmabuf_v1 *dmabuf;
+    uint *drm_formats;
+    uint drm_format_ct;
+    uint drm_format_ct_max;
     struct wl_shm         *shm;
     struct wl_surface     *surface;
+    struct wl_surface     *video_surface;
+    struct wl_subsurface  *video_subsurface;
+    struct wp_viewport    *video_viewport;
 
     /* Geometry */
     struct mp_rect geometry;
@@ -137,5 +147,6 @@ void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
 void vo_wayland_wait_frame(struct vo_wayland_state *wl);
 void vo_wayland_wakeup(struct vo *vo);
+bool vo_wayland_supported_format(struct vo *vo,uint format);
 
 #endif /* MPLAYER_WAYLAND_COMMON_H */
