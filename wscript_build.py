@@ -127,6 +127,18 @@ def build(ctx):
         ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "unstable/xdg-decoration/xdg-decoration-unstable-v1",
             target    = "generated/wayland/xdg-decoration-unstable-v1.h")
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/linux-dmabuf/linux-dmabuf-unstable-v1",
+            target    = "generated/wayland/linux-dmabuf-unstable-v1.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/linux-dmabuf/linux-dmabuf-unstable-v1",
+            target    = "generated/wayland/linux-dmabuf-unstable-v1.h")
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "stable/viewporter/viewporter",
+            target    = "generated/wayland/viewporter.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "stable/viewporter/viewporter",
+            target    = "generated/wayland/viewporter.h")
 
     ctx(features = "ebml_header", target = "generated/ebml_types.h")
     ctx(features = "ebml_definitions", target = "generated/ebml_defs.inc")
@@ -506,6 +518,7 @@ def build(ctx):
         ( "video/out/vo_sixel.c",                "sixel" ),
         ( "video/out/vo_tct.c" ),
         ( "video/out/vo_vaapi.c",                "vaapi-x11 && gpl" ),
+        ( "video/out/vo_vaapi_wayland.c",        "vaapi-wayland-memfd"  ),
         ( "video/out/vo_vdpau.c",                "vdpau" ),
         ( "video/out/vo_wlshm.c",                "wayland && memfd_create" ),
         ( "video/out/vo_x11.c" ,                 "x11" ),
@@ -522,6 +535,8 @@ def build(ctx):
         ( "generated/wayland/presentation-time.c", "wayland" ),
         ( "generated/wayland/xdg-decoration-unstable-v1.c", "wayland" ),
         ( "generated/wayland/xdg-shell.c",       "wayland" ),
+        ( "generated/wayland/linux-dmabuf-unstable-v1.c", "wayland" ),
+        ( "generated/wayland/viewporter.c", "wayland" ),
         ( "video/out/wayland_common.c",          "wayland" ),
         ( "video/out/win32/displayconfig.c",     "win32-desktop" ),
         ( "video/out/win32/droptarget.c",        "win32-desktop" ),

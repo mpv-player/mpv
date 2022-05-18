@@ -650,6 +650,11 @@ video_output_features = [
         'deps': 'vaapi && gl-wayland',
         'func': check_pkg_config('libva-wayland', '>= 1.1.0'),
     }, {
+        'name': 'vaapi-wayland-memfd',
+        'desc': 'VAAPI (Wayland support)',
+        'deps': 'vaapi-wayland && memfd_create',
+        'func': check_true,
+    }, {
         'name': '--vaapi-drm',
         'desc': 'VAAPI (DRM/EGL support)',
         'deps': 'vaapi && egl-drm',

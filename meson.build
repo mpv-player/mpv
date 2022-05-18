@@ -1432,8 +1432,14 @@ vaapi_wayland = {
     'deps': dependency('libva-wayland', version: '>= 1.1.0', required: get_option('vaapi-wayland')),
 }
 vaapi_wayland += {'use': vaapi['use'] and egl_wayland['use'] and vaapi_wayland['deps'].found()}
+
 if vaapi_wayland['use']
     features += vaapi_wayland['name']
+endif
+
+if vaapi_wayland['use'] and memfd_create
+    features += 'vaapi-wayland-memfd'
+    sources += files('video/out/vo_vaapi_wayland.c')
 endif
 
 vaapi_x11 = {
