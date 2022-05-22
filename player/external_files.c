@@ -43,7 +43,7 @@ static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
                                          NULL};
 
 static const char *const image_exts[] = {"jpg", "jpeg", "png", "gif", "bmp",
-                                         "webp", "jxl",
+                                         "webp", "jxl", "tiff", "tif",
                                          NULL};
 
 // Stolen from: vlc/-/blob/master/modules/meta_engine/folder.c#L40
