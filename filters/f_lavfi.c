@@ -33,6 +33,8 @@
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 
+#include "config.h"
+
 #include "common/common.h"
 #include "common/av_common.h"
 #include "common/tags.h"
@@ -40,6 +42,7 @@
 
 #include "audio/format.h"
 #include "audio/aframe.h"
+#include "audio/chmap_avchannel.h"
 #include "video/mp_image.h"
 #include "audio/fmt-conversion.h"
 #include "video/fmt-conversion.h"
@@ -470,7 +473,11 @@ static bool init_pads(struct lavfi *c)
             params->sample_rate = mp_aframe_get_rate(fmt);
             struct mp_chmap chmap = {0};
             mp_aframe_get_chmap(fmt, &chmap);
+#if !HAVE_AV_CHANNEL_LAYOUT
             params->channel_layout = mp_chmap_to_lavc(&chmap);
+#else
+            mp_chmap_to_av_layout(&params->ch_layout, &chmap);
+#endif
             pad->timebase = (AVRational){1, mp_aframe_get_rate(fmt)};
             filter_name = "abuffer";
         } else if (pad->type == MP_FRAME_VIDEO) {
