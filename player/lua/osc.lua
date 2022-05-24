@@ -11,6 +11,7 @@ local utils = require 'mp.utils'
 local user_opts = {
     showwindowed = true,        -- show OSC when windowed?
     showfullscreen = true,      -- show OSC when fullscreen?
+    idlescreen = true,          -- show mpv logo on idle
     scalewindowed = 1,          -- scaling of the controller when windowed
     scalefullscreen = 1,        -- scaling of the controller when fullscreen
     scaleforcedwindow = 2,      -- scaling when rendered on a forced window
@@ -2579,23 +2580,27 @@ function tick()
 
         local ass = assdraw.ass_new()
         -- mpv logo
-        for i, line in ipairs(logo_lines) do
-            ass:new_event()
-            ass:append(line_prefix .. line)
+        if user_opts.idlescreen then
+            for i, line in ipairs(logo_lines) do
+                ass:new_event()
+                ass:append(line_prefix .. line)
+            end
         end
 
         -- Santa hat
-        if is_december and not user_opts.greenandgrumpy then
+        if is_december and user_opts.idlescreen and not user_opts.greenandgrumpy then
             for i, line in ipairs(santa_hat_lines) do
                 ass:new_event()
                 ass:append(line_prefix .. line)
             end
         end
 
-        ass:new_event()
-        ass:pos(320, icon_y+65)
-        ass:an(8)
-        ass:append("Drop files or URLs to play here.")
+        if user_opts.idlescreen then
+            ass:new_event()
+            ass:pos(320, icon_y+65)
+            ass:an(8)
+            ass:append("Drop files or URLs to play here.")
+        end
         set_osd(640, 360, ass.text)
 
         if state.showhide_enabled then
@@ -2844,9 +2849,35 @@ function visibility_mode(mode, no_osd)
     request_tick()
 end
 
+function idlescreen_visibility(mode, no_osd)
+    if mode == "cycle" then
+        if user_opts.idlescreen then
+            mode = "no"
+        else
+            mode = "yes"
+        end
+    end
+
+    if mode == "yes" then
+        user_opts.idlescreen = true
+    else
+        user_opts.idlescreen = false
+    end
+
+    utils.shared_script_property_set("osc-idlescreen", mode)
+
+    if not no_osd and tonumber(mp.get_property("osd-level")) >= 1 then
+        mp.osd_message("OSC logo visibility: " .. tostring(mode))
+    end
+
+    request_tick()
+end
+
 visibility_mode(user_opts.visibility, true)
 mp.register_script_message("osc-visibility", visibility_mode)
 mp.add_key_binding(nil, "visibility", function() visibility_mode("cycle") end)
+
+mp.register_script_message("osc-idlescreen", idlescreen_visibility)
 
 set_virt_mouse_area(0, 0, 0, 0, "input")
 set_virt_mouse_area(0, 0, 0, 0, "window-controls")
