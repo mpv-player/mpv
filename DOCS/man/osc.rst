@@ -236,6 +236,11 @@ Configurable Options
 
     Enable the OSC when fullscreen
 
+``showidlescreen``
+    Default: yes
+
+    Show the mpv logo and message when idle
+
 ``scalewindowed``
     Default: 1.0
 
@@ -417,6 +422,10 @@ to set auto mode (the default) with ``b``::
 
     a script-message osc-visibility never
     b script-message osc-visibility auto
+
+``osc-idlescreen``
+    Controls the visibility of the mpv logo on idle. Valid arguments are ``yes``,
+    ``no``, and ``cycle`` to toggle between yes and no.
 
 ``osc-playlist``, ``osc-chapterlist``, ``osc-tracklist``
     Shows a limited view of the respective type of list using the OSC. First
