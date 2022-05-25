@@ -675,6 +675,7 @@ int mpv_initialize(mpv_handle *ctx)
 static void dup_event_data(struct mpv_event *ev)
 {
     switch (ev->event_id) {
+    case MPV_EVENT_CLIENT_DATA_MESSAGE:
     case MPV_EVENT_CLIENT_MESSAGE: {
         struct mpv_event_client_message *src = ev->data;
         struct mpv_event_client_message *msg =
@@ -683,6 +684,9 @@ static void dup_event_data(struct mpv_event *ev)
             MP_TARRAY_APPEND(msg, msg->args, msg->num_args,
                              talloc_strdup(msg, src->args[n]));
         }
+        if (src->sender)
+            msg->sender = talloc_strdup(msg, src->sender);
+        msg->flag = src->flag;
         ev->data = msg;
         break;
     }
@@ -1530,6 +1534,81 @@ static void property_free(void *p)
     }
 }
 
+static int mpv_data_message(mpv_handle *ctx, const char *target,
+                            const char **args, mpv_request_flag flag)
+{
+    struct MPContext *mpctx = ctx->mpctx;
+    int num_args = 0;
+    while (args[num_args])
+        num_args++;
+
+    mpv_event_client_message *event = talloc_ptrtype(NULL, event);
+    *event = (mpv_event_client_message){0};
+    for (int n = 0; n < num_args; n++)
+        MP_TARRAY_APPEND(event, event->args, event->num_args,
+                         talloc_strdup(event, args[n]));
+    event->sender = ctx->name;
+    event->flag = flag;
+
+    if (mp_client_send_event(mpctx, target, 0,
+                             MPV_EVENT_CLIENT_DATA_MESSAGE, event) < 0)
+    {
+        MP_VERBOSE(mpctx, "Can't find script '%s' to send property to.\n",
+                   target);
+        return MPV_ERROR_COMMAND;
+    }
+    return 0;
+}
+
+int mpv_request_data(mpv_handle *ctx, const char *target,
+                     mpv_request_flag flag, const char **args)
+{
+    return mpv_data_message(ctx, target, args, flag);
+}
+
+int mpv_send_data(mpv_handle *ctx, const char *target,
+                  const char **args)
+{
+    return mpv_data_message(ctx, target, args, MPV_REQUEST_NONE);
+}
+
+static int mpv_data_message_node(mpv_handle *ctx, const char *target,
+                                 mpv_node *node, mpv_request_flag flag)
+{
+    struct MPContext *mpctx = ctx->mpctx;
+    mpv_node_list *args = node->u.list;
+    int num_args = args->num;
+
+    mpv_event_client_message *event = talloc_ptrtype(NULL, event);
+    *event = (mpv_event_client_message){0};
+    for (int n = 0; n < num_args; n++)
+        MP_TARRAY_APPEND(event, event->args, event->num_args,
+                         talloc_strdup(event, args->values[n].u.string));
+    event->sender = ctx->name;
+    event->flag = flag;
+
+    if (mp_client_send_event(mpctx, target, 0,
+                             MPV_EVENT_CLIENT_DATA_MESSAGE, event) < 0)
+    {
+        MP_VERBOSE(mpctx, "Can't find script '%s' to send property to.\n",
+                   target);
+        return MPV_ERROR_COMMAND;
+    }
+    return 0;
+}
+
+int mpv_request_data_node(mpv_handle *ctx, const char *target,
+                          mpv_request_flag flag, mpv_node *node)
+{
+    return mpv_data_message_node(ctx, target, node, flag);
+}
+
+int mpv_send_data_node(mpv_handle *ctx, const char *target,
+                       mpv_node *node)
+{
+    return mpv_data_message_node(ctx, target, node, MPV_REQUEST_NONE);
+}
+
 int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
                          const char *name, mpv_format format)
 {
@@ -1975,6 +2054,7 @@ int mpv_event_to_node(mpv_node *dst, mpv_event *event)
         break;
     }
 
+    case MPV_EVENT_CLIENT_DATA_MESSAGE:
     case MPV_EVENT_CLIENT_MESSAGE: {
         mpv_event_client_message *msg = event->data;
 
@@ -1984,6 +2064,18 @@ int mpv_event_to_node(mpv_node *dst, mpv_event *event)
             sn->format = MPV_FORMAT_STRING;
             sn->u.string = (char *)msg->args[n];
         }
+        if (msg->sender)
+            node_map_add_string(dst, "sender", msg->sender);
+
+        const char *flag;
+        switch (msg->flag) {
+        case MPV_REQUEST_NONE: flag = "none"; break;
+        case MPV_REQUEST_READ: flag = "read"; break;
+        case MPV_REQUEST_WRITE: flag = "write"; break;
+        default:
+            flag = "none";
+        }
+        node_map_add_string(dst, "flag", flag);
         break;
     }
 
@@ -2084,6 +2176,7 @@ static const char *const event_table[] = {
     [MPV_EVENT_PROPERTY_CHANGE] = "property-change",
     [MPV_EVENT_QUEUE_OVERFLOW] = "event-queue-overflow",
     [MPV_EVENT_HOOK] = "hook",
+    [MPV_EVENT_CLIENT_DATA_MESSAGE] = "client-data-message",
 };
 
 const char *mpv_event_name(mpv_event_id event)

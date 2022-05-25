@@ -242,7 +242,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 0)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 1)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -1148,6 +1148,85 @@ MPV_EXPORT char *mpv_get_property_osd_string(mpv_handle *ctx, const char *name);
 MPV_EXPORT int mpv_get_property_async(mpv_handle *ctx, uint64_t reply_userdata,
                                       const char *name, mpv_format format);
 
+typedef enum mpv_request_flag {
+    /**
+     * No request is being made. In practice, this is used internally by mpv_send_data.
+     */
+    MPV_REQUEST_NONE = 0,
+
+    /**
+     * Signals to the receiver of the message that it would like to read a value
+     * of a certain key. It is up to the receiver to reply back using mpv_data_send
+     * (or similar).
+     */
+    MPV_REQUEST_READ = 1,
+
+    /**
+     * Signals to the receive of the message that it would like to write a value
+     * of a certain key. It is up to the receiver to interpret this request and
+     * chose whether or not to update its internal data. It optionally may reply
+     * back using mpv_data_send to signal that it has updated.
+     */
+    MPV_REQUEST_WRITE = 2,
+} mpv_request_flag;
+
+/**
+ * Sends an MPV_EVENT_CLIENT_DATA_REQUEST event to a specified client target.
+ *
+ * @param name the name of the client that receives this event. If NULL is
+ * passed, this is broadcast to all clients.
+ * @param flag this lets the receiver know whether the request is a read or
+ * a write (see enum mpv_request_flag). The receiving client can choose to
+ * respond to this event or ignore it.
+ * @param args a string array of args that are passed to the receiver with the
+ * event. Interpretation is left to the reader.
+ * @return error code if sending the request failed
+ */
+MPV_EXPORT int mpv_request_data(mpv_handle *ctx, const char *name,
+                                mpv_request_flag flag, const char **args);
+
+/**
+ * Same as mpv_request_data(), but allows passing structured data in any format.
+ * The only difference is that the args are passed as an mpv_node instead.
+ *
+ * @param name the name of the client that receives this event. If NULL is
+ * passed, this is broadcast to all clients.
+ * @param flag this lets the receiver know whether the request is a read or
+ * a write (see enum mpv_request_flag). The receiving client can choose to
+ * respond to this event or ignore it.
+ * @param args a string array of args that are passed to the receiver with the
+ * event. Interpretation is left to the reader.
+ * @return error code if sending the request failed
+ */
+MPV_EXPORT int mpv_request_data_node(mpv_handle *ctx, const char *name,
+                                     mpv_request_flag flag, mpv_node *node);
+
+/**
+ * Sends an MPV_EVENT_CLIENT_DATA_SENT event to a specified client target
+ * along with accompanying data.
+ *
+ * @param name the name of the client that receives this event. If NULL is
+ * passed, this is broadcast to all clients.
+ * @param args a string array of args that are passed to the receiver with the
+ * event. Interpretation is left to the reader.
+ * @return error code if sending the request failed
+ */
+MPV_EXPORT int mpv_send_data(mpv_handle *ctx, const char *name,
+                             const char **args);
+
+/**
+ * Same as mpv_send_data(), but allows passing structured data in any format.
+ * The only difference is that the args are passed as an mpv_node instead.
+ *
+ * @param name the name of the client that receives this event. If NULL is
+ * passed, this is broadcast to all clients.
+ * @param node an mpv node representing the data that is passed to the receiver
+ * along with the event. Interpretation is left to the receiver of this event.
+ * @return error code if sending the request failed
+ */
+MPV_EXPORT int mpv_send_data_node(mpv_handle *ctx, const char *name,
+                                  mpv_node *node);
+
 /**
  * Get a notification whenever the given property changes. You will receive
  * updates as MPV_EVENT_PROPERTY_CHANGE. Note that this is not very precise:
@@ -1347,6 +1426,13 @@ typedef enum mpv_event_id {
      * See also mpv_event and mpv_event_hook.
      */
     MPV_EVENT_HOOK              = 25,
+    /**
+     * Triggered whenever one client performs mpv_send_data or mpv_request_data.
+     * This field contains additional information indicating what the client
+     * should do in responde. See mpv_send_data and mpv_request data for more
+     * details.
+     */
+    MPV_EVENT_CLIENT_DATA_MESSAGE  = 26,
     // Internal note: adjust INTERNAL_EVENT_BASE when adding new events.
 } mpv_event_id;
 
@@ -1530,9 +1616,14 @@ typedef struct mpv_event_client_message {
      * you can access args[0] through args[num_args - 1] (inclusive). What
      * these arguments mean is up to the sender and receiver.
      * None of the valid items are NULL.
+     * Since API version 2.1, this may contain the sender variable which denotes
+     * the client name of the sender as well as the mpv_request_flag denoting
+     * the type of data message.
      */
     int num_args;
     const char **args;
+    const char *sender;
+    mpv_request_flag flag;
 } mpv_event_client_message;
 
 typedef struct mpv_event_hook {

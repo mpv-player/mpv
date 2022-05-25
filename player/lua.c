@@ -940,6 +940,133 @@ static mpv_format check_property_format(lua_State *L, int arg)
     abort();
 }
 
+static int script_data_message(lua_State *L, const char *name, mpv_request_flag flag)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    int num = lua_gettop(L);
+    const char *args[50];
+    if (num + 1 > MP_ARRAY_SIZE(args))
+        luaL_error(L, "too many arguments");
+    for (int n = 1; n <= num; n++) {
+        const char *s = lua_tostring(L, n);
+        if (!s)
+            luaL_error(L, "argument %d is not a string", n);
+        args[n - 1] = s;
+    }
+    args[num] = NULL;
+
+    switch (flag) {
+    case MPV_REQUEST_NONE:
+        return check_error(L, mpv_send_data(ctx->client, name, args));
+    case MPV_REQUEST_READ:
+    case MPV_REQUEST_WRITE:
+        return check_error(L, mpv_request_data(ctx->client, name, flag, args));
+    }
+    return MPV_ERROR_COMMAND;
+}
+
+static int script_request_data(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    if (!strcmp(name, ""))
+        name = NULL;
+
+    const char *flagname = luaL_checkstring(L, 2);
+    mpv_request_flag flag = 0;
+    if (!strcmp(flagname, "read")) {
+        flag = MPV_REQUEST_READ;
+    } else if (!strcmp(flagname, "write")) {
+        flag = MPV_REQUEST_WRITE;
+    } else {
+        luaL_error(L, "The flag argument must be either 'read' or 'write'\n");
+    }
+
+    // Remove name and flag args
+    lua_remove(L, 1);
+    lua_remove(L, 1);
+
+    int num = lua_gettop(L);
+    if (num < 1)
+        luaL_error(L, "not enough arguments for mp.request_data");
+    return script_data_message(L, name, flag);
+}
+
+static int script_send_data(lua_State *L)
+{
+    const char *name = luaL_checkstring(L, 1);
+    if (!strcmp(name, ""))
+        name = NULL;
+
+    // Remove name arg
+    lua_remove(L, 1);
+
+    int num = lua_gettop(L);
+    if (num < 1)
+        luaL_error(L, "not enough arguments for mp.send_data");
+    return script_data_message(L, name, MPV_REQUEST_NONE);
+}
+
+static int script_data_message_native(lua_State *L, const char *name,
+                                      mpv_request_flag flag, void *tmp)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    struct mpv_node node;
+    makenode(tmp, &node, L, 1);
+    if (node.format != MPV_FORMAT_NODE_ARRAY && node.format != MPV_FORMAT_NODE_MAP)
+        luaL_error(L, "The data argument must be a table");
+
+    switch (flag) {
+    case MPV_REQUEST_NONE:
+        return check_error(L, mpv_send_data_node(ctx->client, name, &node));
+    case MPV_REQUEST_READ:
+    case MPV_REQUEST_WRITE:
+        return check_error(L, mpv_request_data_node(ctx->client, name, flag, &node));
+    }
+    return MPV_ERROR_COMMAND;
+}
+
+static int script_request_data_native(lua_State *L, void *tmp)
+{
+    const char *name = luaL_checkstring(L, 1);
+    if (!strcmp(name, ""))
+        name = NULL;
+
+    const char *flagname = luaL_checkstring(L, 2);
+    mpv_request_flag flag = 0;
+    if (!strcmp(flagname, "read")) {
+        flag = MPV_REQUEST_READ;
+    } else if (!strcmp(flagname, "write")) {
+        flag = MPV_REQUEST_WRITE;
+    } else {
+        luaL_error(L, "The flag argument must be either 'read' or 'write'\n");
+    }
+
+    // Remove name and flag args
+    lua_remove(L, 1);
+    lua_remove(L, 1);
+
+    /*int num = lua_gettop(L);
+    int required_args = flag == MPV_REQUEST_READ ? 3 : 4;
+    if (num < required_args)
+        luaL_error(L, "not enough arguments for mp.request_data");*/
+    return script_data_message_native(L, name, flag, tmp);
+}
+
+static int script_send_data_native(lua_State *L, void *tmp)
+{
+    const char *name = luaL_checkstring(L, 1);
+    if (!strcmp(name, ""))
+        name = NULL;
+
+    // Remove name arg
+    lua_remove(L, 1);
+
+    int num = lua_gettop(L);
+    if (num < 2)
+        luaL_error(L, "not enough arguments for mp.send_data");
+    return script_data_message_native(L, name, MPV_REQUEST_NONE, tmp);
+}
+
 // It has a raw_ prefix, because there is a more high level API in defaults.lua.
 static int script_raw_observe_property(lua_State *L)
 {
@@ -1223,6 +1350,10 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(set_property_bool),
     FN_ENTRY(set_property_number),
     AF_ENTRY(set_property_native),
+    FN_ENTRY(request_data),
+    AF_ENTRY(request_data_native),
+    FN_ENTRY(send_data),
+    AF_ENTRY(send_data_native),
     FN_ENTRY(raw_observe_property),
     FN_ENTRY(raw_unobserve_property),
     FN_ENTRY(get_time),

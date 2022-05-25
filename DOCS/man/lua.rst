@@ -581,6 +581,32 @@ are useful only in special situations.
     Undo a previous registration with ``mp.register_script_message``. Does
     nothing if the ``name`` wasn't registered.
 
+``mp.request_data(name, flag, arg1, arg2, ...)``
+    This is a special way for one script to read or write data to another
+    script. It sends a ``client-data-request`` event with ``arg1``, ``arg2``,
+    etc. stored in ``args``. The ``flag`` argument can be either ``read`` or
+    ``write``. Passing ``read`` indicates that the caller wants to read some
+    arbitrary data (perhaps an option). Passing ``write`` indicates that the
+    caller wants to write data to the receiver of the script. It is up to the
+    receiver of the event to interpret this and act on it. It may choose to
+    ignore it completely. Additionally the name argument can be passed as ``""``
+    to indicate that this event should be broadcasted to all clients insted of
+    specifically one.
+
+``mp.request_data_native(name, flag, table)``
+    The same as ``mp.request_data`` but instead the args are passed as a lua
+    table.
+
+``mp.send_data(name, arg1, arg2, ...)``
+    This is a special way for one script to send data to another script. It
+    sends a ``client-data-sent`` event with ``arg1``, ``arg2``, etc. stored
+    in ``args``. Additionally, the name argument can be passed as ``""`` to
+    indicate that that this event should be broadcasted to all clients instead
+    of specifically one.
+
+``mp.send_data_native(name, table)``
+    The same as ``mp.send_data`` but instead the args are passed as a lua table.
+
 ``mp.create_osd_overlay(format)``
     Create an OSD overlay. This is a very thin wrapper around the ``osd-overlay``
     command. The function returns a table, which mostly contains fields that

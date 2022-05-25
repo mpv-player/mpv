@@ -33,6 +33,11 @@ API changes
 ::
 
  --- mpv 0.35.0 ---
+ 2.1    - add mpv_send_data, mpv_send_data_node, mpv_request_data,
+          and mpv_request_data_node
+        - add mpv_request_flag enum
+        - add MPV_EVENT_CLIENT_DATA_MESSAGE event
+        - add the following fileds to mpv_event_client_message: sender and flag
  2.0    - remove headers/functions of the obsolete opengl_cb API
         - remove mpv_opengl_init_params.extra_exts field
         - remove deprecated mpv_detach_destroy. Use mpv_destroy instead.

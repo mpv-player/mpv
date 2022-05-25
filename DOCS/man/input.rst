@@ -1578,6 +1578,29 @@ This list uses the event name field value, and the C API symbol in brackets:
     ``result``
         The result (on success) of any ``mpv_node`` type, if any.
 
+``client-data-message`` (``MPV_EVENT_CLIENT_DATA_MESSAGE``)
+    This happens when one client sends data or requests data from this client.
+
+    This event has the following fields:
+    ``args``
+        Array of strings with the data from the client.
+
+    ``sender``
+        String containing the name of the sender of the event.
+
+    ``flags``
+        Has one of the following values:
+
+        ``none``
+            The flag was not set. This indicates that the other client is
+            sending data.
+
+        ``read``
+            The client that sent this event is asking to read data.
+
+        ``write``
+            The client that sent this event is asking to write data.
+
 ``client-message`` (``MPV_EVENT_CLIENT_MESSAGE``)
     Lua and possibly other backends treat this specially and may not pass the
     actual event to the user.
