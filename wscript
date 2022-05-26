@@ -651,7 +651,7 @@ video_output_features = [
         'func': check_pkg_config('libva-wayland', '>= 1.1.0'),
     }, {
         'name': 'vaapi-wayland-memfd',
-        'desc': 'VAAPI (Wayland support)',
+        'desc': 'VAAPI (Wayland dmabuf support)',
         'deps': 'vaapi-wayland && memfd_create',
         'func': check_true,
     }, {

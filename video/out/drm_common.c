@@ -1101,58 +1101,40 @@ fail:
     talloc_free(closure);
 }
 
-const char* drm_format_string(uint drm_format) {
-
-    switch (drm_format) {
-    /* Reserve 0 for the invalid format specifier */
-    case DRM_FORMAT_INVALID:
+const char *drm_format_string(uint32_t drm_format)
+{
+    switch (drm_format)
+    {
+     case DRM_FORMAT_INVALID:
         return "DRM_FORMAT_INVALID";
         break;
-        /* color index */
     case DRM_FORMAT_C8:
         return "DRM_FORMAT_C8";
         break;
-        /* 8 bpp Red */
     case DRM_FORMAT_R8:
         return "DRM_FORMAT_R8";
         break;
-        /* these formats are not in the header for some reason */
-#if 0
-    /* 10 bpp Red */
-    case DRM_FORMAT_R10:
-        return "DRM_FORMAT_R10";
-    break;
-    /* 12 bpp Red */
-    case DRM_FORMAT_R12:
-        return "DRM_FORMAT_R12";
-    break;
-#endif
-        /* 16 bpp Red */
     case DRM_FORMAT_R16:
         return "DRM_FORMAT_R16";
         break;
-        /* 16 bpp RG */
     case DRM_FORMAT_RG88:
         return "DRM_FORMAT_RG88";
         break;
     case DRM_FORMAT_GR88:
         return "DRM_FORMAT_GR88";
         break;
-        /* 32 bpp RG */
-    case DRM_FORMAT_RG1616:
+     case DRM_FORMAT_RG1616:
         return "DRM_FORMAT_RG1616";
         break;
     case DRM_FORMAT_GR1616:
         return "DRM_FORMAT_GR1616";
         break;
-        /* 8 bpp RGB */
     case DRM_FORMAT_RGB332:
         return "DRM_FORMAT_RGB332";
         break;
     case DRM_FORMAT_BGR233:
         return "DRM_FORMAT_BGR233";
         break;
-        /* 16 bpp RGB */
     case DRM_FORMAT_XRGB4444:
         return "DRM_FORMAT_XRGB4444";
         break;
@@ -1207,14 +1189,12 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_BGR565:
         return "DRM_FORMAT_BGR565";
         break;
-        /* 24 bpp RGB */
     case DRM_FORMAT_RGB888:
         return "DRM_FORMAT_RGB888";
         break;
     case DRM_FORMAT_BGR888:
         return "DRM_FORMAT_BGR888";
         break;
-        /* 32 bpp RGB */
     case DRM_FORMAT_XRGB8888:
         return "DRM_FORMAT_XRGB8888";
         break;
@@ -1263,7 +1243,6 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_BGRA1010102:
         return "DRM_FORMAT_BGRA1010102";
         break;
-        /* 64 bpp RGB */
     case DRM_FORMAT_XRGB16161616:
         return "DRM_FORMAT_XRGB16161616";
         break;
@@ -1276,11 +1255,6 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_ABGR16161616:
         return "DRM_FORMAT_ABGR16161616";
         break;
-        /*
-         * Floating point 64bpp RGB
-         * IEEE 754-2008 binary16 half-precision float
-         * [15:0] sign:exponent:mantissa 1:5:10
-         */
     case DRM_FORMAT_XRGB16161616F:
         return "DRM_FORMAT_XRGB16161616F";
         break;
@@ -1293,14 +1267,9 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_ABGR16161616F:
         return "DRM_FORMAT_ABGR16161616F";
         break;
-        /*
-         * RGBA format with 10-bit components packed in 64-bit per pixel, with 6 bits
-         * of unused padding per component:
-         */
     case DRM_FORMAT_AXBXGXRX106106106106:
         return "DRM_FORMAT_AXBXGXRX106106106106";
         break;
-        /* packed YCbCr */
     case DRM_FORMAT_YUYV:
         return "DRM_FORMAT_YUYV";
         break;
@@ -1325,10 +1294,6 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_VUY101010:
         return "DRM_FORMAT_VUY101010";
         break;
-        /*
-         * packed Y2xx indicate for each component, xx valid data occupy msb
-         * 16-xx padding occupy lsb
-         */
     case DRM_FORMAT_Y210:
         return "DRM_FORMAT_Y210";
         break;
@@ -1338,10 +1303,6 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_Y216:
         return "DRM_FORMAT_Y216";
         break;
-        /*
-         * packed Y4xx indicate for each component, xx valid data occupy msb
-         * 16-xx padding occupy lsb except Y410
-         */
     case DRM_FORMAT_Y410:
         return "DRM_FORMAT_Y410";
         break;
@@ -1360,43 +1321,24 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_XVYU16161616:
         return "DRM_FORMAT_XVYU16161616";
         break;
-        /*
-         * packed YCbCr420 2x2 tiled formats
-         * first 64 bits will contain Y,Cb,Cr components for a 2x2 tile
-         */
-        /* [63:0]   A3:A2:Y3:0:Cr0:0:Y2:0:A1:A0:Y1:0:Cb0:0:Y0:0  1:1:8:2:8:2:8:2:1:1:8:2:8:2:8:2 little endian */
     case DRM_FORMAT_Y0L0:
         return "DRM_FORMAT_Y0L0";
         break;
-        /* [63:0]   X3:X2:Y3:0:Cr0:0:Y2:0:X1:X0:Y1:0:Cb0:0:Y0:0  1:1:8:2:8:2:8:2:1:1:8:2:8:2:8:2 little endian */
     case DRM_FORMAT_X0L0:
         return "DRM_FORMAT_X0L0";
         break;
-        /* [63:0]   A3:A2:Y3:Cr0:Y2:A1:A0:Y1:Cb0:Y0  1:1:10:10:10:1:1:10:10:10 little endian */
     case DRM_FORMAT_Y0L2:
         return "DRM_FORMAT_Y0L2";
         break;
-        /* [63:0]   X3:X2:Y3:Cr0:Y2:X1:X0:Y1:Cb0:Y0  1:1:10:10:10:1:1:10:10:10 little endian */
     case DRM_FORMAT_X0L2:
         return "DRM_FORMAT_X0L2";
         break;
-        /*
-         * 1-plane YUV 4:2:0
-         * In these formats, the component ordering is specified (Y, followed by U
-         * then V), but the exact Linear layout is undefined.
-         * These formats can only be used with a non-Linear modifier.
-         */
     case DRM_FORMAT_YUV420_8BIT:
         return "DRM_FORMAT_YUV420_8BIT";
         break;
     case DRM_FORMAT_YUV420_10BIT:
         return "DRM_FORMAT_YUV420_10BIT";
         break;
-        /*
-         * 2 plane RGB + A
-         * index 0 = RGB plane, same format as the corresponding non _A8 format has
-         * index 1 = A plane, [7:0] A
-         */
     case DRM_FORMAT_XRGB8888_A8:
         return "DRM_FORMAT_XRGB8888_A8";
         break;
@@ -1421,13 +1363,6 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_BGR565_A8:
         return "DRM_FORMAT_BGR565_A8";
         break;
-        /*
-         * 2 plane YCbCr
-         * index 0 = Y plane, [7:0] Y
-         * index 1 = Cr:Cb plane, [15:0] Cr:Cb little endian
-         * or
-         * index 1 = Cb:Cr plane, [15:0] Cb:Cr little endian
-         */
     case DRM_FORMAT_NV12:
         return "DRM_FORMAT_NV12";
         break;
@@ -1445,73 +1380,28 @@ const char* drm_format_string(uint drm_format) {
         break;
     case DRM_FORMAT_NV42:
         return "DRM_FORMAT_NV42";
-        break; /*
-         * 2 plane YCbCr
-         * index 0 = Y plane, [39:0] Y3:Y2:Y1:Y0 little endian
-         * index 1 = Cr:Cb plane, [39:0] Cr1:Cb1:Cr0:Cb0 little endian
-         */
+        break;
     case DRM_FORMAT_NV15:
         return "DRM_FORMAT_NV15";
         break;
-        /*
-         * 2 plane YCbCr MSB aligned
-         * index 0 = Y plane, [15:0] Y:x [10:6] little endian
-         * index 1 = Cr:Cb plane, [31:0] Cr:x:Cb:x [10:6:10:6] little endian
-         */
     case DRM_FORMAT_P210:
         return "DRM_FORMAT_P210";
         break;
-        /*
-         * 2 plane YCbCr MSB aligned
-         * index 0 = Y plane, [15:0] Y:x [10:6] little endian
-         * index 1 = Cr:Cb plane, [31:0] Cr:x:Cb:x [10:6:10:6] little endian
-         */
     case DRM_FORMAT_P010:
         return "DRM_FORMAT_P010";
         break;
-        /*
-         * 2 plane YCbCr MSB aligned
-         * index 0 = Y plane, [15:0] Y:x [12:4] little endian
-         * index 1 = Cr:Cb plane, [31:0] Cr:x:Cb:x [12:4:12:4] little endian
-         */
     case DRM_FORMAT_P012:
         return "DRM_FORMAT_P012";
         break;
-        /*
-         * 2 plane YCbCr MSB aligned
-         * index 0 = Y plane, [15:0] Y little endian
-         * index 1 = Cr:Cb plane, [31:0] Cr:Cb [16:16] little endian
-         */
     case DRM_FORMAT_P016:
         return "DRM_FORMAT_P016";
         break;
-        /* 3 plane non-subsampled (444) YCbCr
-         * 16 bits per component, but only 10 bits are used and 6 bits are padded
-         * index 0: Y plane, [15:0] Y:x [10:6] little endian
-         * index 1: Cb plane, [15:0] Cb:x [10:6] little endian
-         * index 2: Cr plane, [15:0] Cr:x [10:6] little endian
-         */
     case DRM_FORMAT_Q410:
         return "DRM_FORMAT_Q410";
         break;
-        /* 3 plane non-subsampled (444) YCrCb
-         * 16 bits per component, but only 10 bits are used and 6 bits are padded
-         * index 0: Y plane, [15:0] Y:x [10:6] little endian
-         * index 1: Cr plane, [15:0] Cr:x [10:6] little endian
-         * index 2: Cb plane, [15:0] Cb:x [10:6] little endian
-         */
     case DRM_FORMAT_Q401:
         return "DRM_FORMAT_Q401";
         break;
-        /*
-         * 3 plane YCbCr
-         * index 0: Y plane, [7:0] Y
-         * index 1: Cb plane, [7:0] Cb
-         * index 2: Cr plane, [7:0] Cr
-         * or
-         * index 1: Cr plane, [7:0] Cr
-         * index 2: Cb plane, [7:0] Cb
-         */
     case DRM_FORMAT_YUV410:
         return "DRM_FORMAT_YUV410";
         break;
