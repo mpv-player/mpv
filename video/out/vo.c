@@ -95,7 +95,8 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_VAAPI_WAYLAND
     &video_out_vaapi_wayland,
-#elif HAVE_VAAPI_X11 && HAVE_GPL
+#endif
+#if HAVE_VAAPI_X11 && HAVE_GPL
     &video_out_vaapi,
 #endif
 #if HAVE_X11
