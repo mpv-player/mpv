@@ -1098,8 +1098,6 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
     if (!strcmp(interface, wl_subcompositor_interface.name) && (ver >= 1) && found++) {
         wl->subcompositor = wl_registry_bind(reg, id, &wl_subcompositor_interface, 1);
-        wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
-        wl_subsurface_set_desync (wl->video_subsurface);
     }
 
     if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 2) && found++) {
@@ -1111,8 +1109,6 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
     if (!strcmp (interface, wp_viewporter_interface.name) && (ver >= 1) && found++) {
        wl->viewporter = wl_registry_bind (reg, id, &wp_viewporter_interface, 1);
-       wl->viewport = wp_viewporter_get_viewport (wl->viewporter, wl->surface);
-       wl->video_viewport = wp_viewporter_get_viewport (wl->viewporter,wl->video_surface);
     }
 
     if (!strcmp(interface, wl_data_device_manager_interface.name) && (ver >= 3) && found++) {
@@ -1842,6 +1838,16 @@ int vo_wayland_init(struct vo *vo)
     /* Can't be initialized during registry due to multi-protocol dependence */
     if (create_xdg_surface(wl))
         return false;
+
+    if (wl->subcompositor) {
+        wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
+        wl_subsurface_set_desync(wl->video_subsurface);
+    }
+
+    if (wl->viewporter) {
+        wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
+        wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
+    }
 
     const char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
     if (xdg_current_desktop != NULL && strstr(xdg_current_desktop, "GNOME"))
