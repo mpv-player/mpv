@@ -928,6 +928,7 @@ drm = {
     'name': 'drm',
     'deps': dependency('libdrm', version: '>= 2.4.75', required: get_option('drm')),
     'header': vt_h or consio_h,
+    '64_bpp_rgb': false,
 }
 drm += {'use': drm['deps'].found() and drm['header']}
 if drm['use']
@@ -938,6 +939,7 @@ if drm['use']
                      'video/out/drm_prime.c',
                      'video/out/opengl/hwdec_drmprime_drm.c',
                      'video/out/vo_drm.c')
+    drm += {'64_bpp_rgb': drm['deps'].version().version_compare('>=2.4.108')}
 endif
 
 gbm = dependency('gbm', version: '>=17.1.0', required: get_option('gbm'))
@@ -1712,6 +1714,7 @@ conf_data.set10('HAVE_D3D11', d3d11.allowed())
 conf_data.set10('HAVE_DIRECT3D', direct3d)
 conf_data.set10('HAVE_DOS_PATHS', win32)
 conf_data.set10('HAVE_DRM', drm['use'])
+conf_data.set10('HAVE_DRM_64_BPP_RGB', drm['64_bpp_rgb'])
 conf_data.set10('HAVE_DVBIN', dvbin.allowed())
 conf_data.set10('HAVE_DVDNAV', dvdnav.found() and dvdread.found())
 conf_data.set10('HAVE_EGL', egl['use'])

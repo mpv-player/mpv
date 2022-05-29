@@ -1263,6 +1263,7 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_BGRA1010102:
         return "DRM_FORMAT_BGRA1010102";
         break;
+#if HAVE_DRM_64_BPP_RGB
         /* 64 bpp RGB */
     case DRM_FORMAT_XRGB16161616:
         return "DRM_FORMAT_XRGB16161616";
@@ -1276,6 +1277,7 @@ const char* drm_format_string(uint drm_format) {
     case DRM_FORMAT_ABGR16161616:
         return "DRM_FORMAT_ABGR16161616";
         break;
+#endif
         /*
          * Floating point 64bpp RGB
          * IEEE 754-2008 binary16 half-precision float
