@@ -926,7 +926,7 @@ endif
 
 drm = {
     'name': 'drm',
-    'deps': dependency('libdrm', version: '>= 2.4.75', required: get_option('drm')),
+    'deps': dependency('libdrm', version: '>= 2.4.96', required: get_option('drm')),
     'header': vt_h or consio_h,
     '64_bpp_rgb': false,
 }
