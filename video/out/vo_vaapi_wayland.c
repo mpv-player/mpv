@@ -29,6 +29,11 @@
 
 #define VA_POOL_NUM_ALLOCATED_INIT 30
 
+struct va_image_formats {
+    VAImageFormat *entries;
+    int num;
+};
+
 struct va_pool_entry {
     /* key */
     VASurfaceID surface;
@@ -36,13 +41,14 @@ struct va_pool_entry {
     VADRMPRIMESurfaceDescriptor desc;
     struct wl_buffer *buffer;
     struct zwp_linux_buffer_params_v1 *params;
-    uint drm_format;
+    uint32_t drm_format;
 };
+
 struct va_pool {
     struct vo *vo;
     struct va_pool_entry **entries;
-    uint num_entries;
-    uint num_allocated;
+    int num_entries;
+    int num_allocated;
 };
 
 struct priv {
@@ -60,14 +66,16 @@ struct priv {
     struct va_pool *va_pool;
 };
 
-static void va_close_surface_descriptor(VADRMPRIMESurfaceDescriptor desc) {
-    for (uint i = 0; i < desc.num_objects; i++) {
+static void va_close_surface_descriptor(VADRMPRIMESurfaceDescriptor desc)
+{
+    for (int i = 0; i < desc.num_objects; i++) {
         close(desc.objects[i].fd);
         desc.objects[i].fd = 0;
     }
 }
 
-static void va_free_entry(struct va_pool_entry *entry) {
+static void va_free_entry(struct va_pool_entry *entry)
+{
     if (!entry)
         return;
     va_close_surface_descriptor(entry->desc);
@@ -79,14 +87,17 @@ static void va_free_entry(struct va_pool_entry *entry) {
 }
 
 static VAStatus va_export_surface_handle(VADisplay display, VASurfaceID surface,
-        VADRMPRIMESurfaceDescriptor *desc) {
+                                         VADRMPRIMESurfaceDescriptor *desc)
+{
     return vaExportSurfaceHandle(display, surface,
-            VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
-            VA_EXPORT_SURFACE_COMPOSED_LAYERS | VA_EXPORT_SURFACE_READ_ONLY,
-            desc);
+                                 VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+                                 VA_EXPORT_SURFACE_COMPOSED_LAYERS |
+                                 VA_EXPORT_SURFACE_READ_ONLY,
+                                 desc);
 }
 
-static struct va_pool_entry* va_alloc_entry(struct vo *vo, struct mp_image *src) {
+static struct va_pool_entry *va_alloc_entry(struct vo *vo, struct mp_image *src)
+{
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
     VAStatus status;
@@ -100,8 +111,7 @@ static struct va_pool_entry* va_alloc_entry(struct vo *vo, struct mp_image *src)
         MP_VERBOSE(vo, "VA export to composed layers not supported.\n");
         va_free_entry(entry);
         return NULL;
-    } else if (!vo_wayland_supported_format(vo,
-            entry->desc.layers[0].drm_format)) {
+    } else if (!vo_wayland_supported_format(vo, entry->desc.layers[0].drm_format)) {
         MP_VERBOSE(vo, "%s is not supported.\n",
                    mp_tag_str(entry->desc.layers[0].drm_format));
         va_free_entry(entry);
@@ -110,64 +120,72 @@ static struct va_pool_entry* va_alloc_entry(struct vo *vo, struct mp_image *src)
         va_free_entry(entry);
         return NULL;
     } else {
-        uint i, j, plane = 0;
+        int i, j, plane = 0;
 
         entry->params = zwp_linux_dmabuf_v1_create_params(wl->dmabuf);
         for (i = 0; i < entry->desc.num_layers; i++) {
             entry->drm_format = entry->desc.layers[i].drm_format;
             for (j = 0; j < entry->desc.layers[i].num_planes; ++j) {
                 int object = entry->desc.layers[i].object_index[j];
-                uint64_t modifier =
-                        entry->desc.objects[object].drm_format_modifier;
+                uint64_t modifier = entry->desc.objects[object].drm_format_modifier;
                 zwp_linux_buffer_params_v1_add(entry->params,
-                        entry->desc.objects[object].fd, plane++,
-                        entry->desc.layers[i].offset[j],
-                        entry->desc.layers[i].pitch[j], modifier >> 32,
-                        modifier & 0xffffffff);
+                                               entry->desc.objects[object].fd, plane++,
+                                               entry->desc.layers[i].offset[j],
+                                               entry->desc.layers[i].pitch[j],
+                                               modifier >> 32,
+                                               modifier & 0xffffffff);
             }
         }
     }
+
     entry->buffer = zwp_linux_buffer_params_v1_create_immed(entry->params,
-            src->params.w, src->params.h, entry->drm_format, 0);
+                                                            src->params.w,
+                                                            src->params.h,
+                                                            entry->drm_format, 0);
 
     return entry;
 }
-static void va_pool_clean(struct va_pool *pool) {
+static void va_pool_clean(struct va_pool *pool)
+{
     if (!pool)
         return;
 
-    for (uint i = 0; i < pool->num_entries; ++i)
+    for (int i = 0; i < pool->num_entries; ++i)
         va_free_entry(pool->entries[i]);
     pool->num_entries = 0;
 }
 
-static void va_pool_free(struct va_pool *pool) {
+static void va_pool_free(struct va_pool *pool)
+{
     if (!pool)
         return;
 
     va_pool_clean(pool);
-    talloc_free(pool->entries);
     talloc_free(pool);
 }
-static struct va_pool* va_pool_alloc(struct vo *vo) {
+
+static struct va_pool *va_pool_alloc(struct vo *vo)
+{
     struct va_pool *pool = talloc(NULL, struct va_pool);
     memset(pool, 0, sizeof(struct va_pool));
     pool->num_allocated = VA_POOL_NUM_ALLOCATED_INIT;
-    pool->entries = talloc_array(NULL,struct va_pool_entry*, pool->num_allocated);
-    memset(pool->entries,0,pool->num_allocated * sizeof(struct va_pool_entry*));
+    pool->entries = talloc_array(pool, struct va_pool_entry *, pool->num_allocated);
+    memset(pool->entries, 0, pool->num_allocated * sizeof(struct va_pool_entry *));
     pool->vo = vo;
 
     return pool;
 }
-static struct va_pool_entry* va_pool_alloc_entry(struct vo *vo,
-        struct va_pool *pool, struct mp_image *src) {
+
+static struct va_pool_entry *va_pool_alloc_entry(struct vo *vo, struct va_pool *pool,
+                                                 struct mp_image *src)
+{
     VASurfaceID surface;
 
     if (!pool)
         return NULL;
 
     surface = va_surface_id(src);
-    for (uint i = 0; i < pool->num_entries; ++i) {
+    for (int i = 0; i < pool->num_entries; ++i) {
         struct va_pool_entry *item = pool->entries[i];
         if (item->surface == surface)
             return pool->entries[i];
@@ -178,10 +196,11 @@ static struct va_pool_entry* va_pool_alloc_entry(struct vo *vo,
         return NULL;
 
     if (pool->num_entries == pool->num_allocated) {
-        uint current_num_allocated = pool->num_allocated;
+        int current_num_allocated = pool->num_allocated;
         pool->num_allocated *= 2;
-        pool->entries = talloc_realloc(NULL,pool->entries,struct va_pool_entry*, pool->num_allocated);
-        for (uint i = current_num_allocated; i < pool->num_allocated; ++i)
+        pool->entries = talloc_realloc(pool, pool->entries, struct va_pool_entry *,
+                                       pool->num_allocated);
+        for (int i = current_num_allocated; i < pool->num_allocated; ++i)
             pool->entries[i] = NULL;
     }
     pool->entries[pool->num_entries++] = entry;
@@ -189,18 +208,14 @@ static struct va_pool_entry* va_pool_alloc_entry(struct vo *vo,
     return entry;
 }
 
-struct va_image_formats {
-    VAImageFormat *entries;
-    int num;
-};
-
-static void va_get_formats(struct priv *ctx) {
+static void va_get_formats(struct priv *ctx)
+{
     struct va_image_formats *formats = talloc_ptrtype(ctx, formats);
 
     formats->num = vaMaxNumImageFormats(ctx->display);
     formats->entries = talloc_array(formats, VAImageFormat, formats->num);
     VAStatus status = vaQueryImageFormats(ctx->display, formats->entries,
-            &formats->num);
+                                          &formats->num);
     if (!CHECK_VA_STATUS(ctx, "vaQueryImageFormats()"))
         return;
     MP_VERBOSE(ctx, "%d image formats available:\n", formats->num);
@@ -209,14 +224,17 @@ static void va_get_formats(struct priv *ctx) {
     ctx->image_formats = formats;
 }
 
-static void uninit(struct vo *vo) {
+static void uninit(struct vo *vo)
+{
     struct priv *p = vo->priv;
 
     va_pool_free(p->va_pool);
+
     if (p->solid_buffer_pool)
         wl_shm_pool_destroy(p->solid_buffer_pool);
     if (p->solid_buffer)
         wl_buffer_destroy(p->solid_buffer);
+
     vo_wayland_uninit(vo);
 
     if (vo->hwdec_devs) {
@@ -226,10 +244,14 @@ static void uninit(struct vo *vo) {
     if (p->mpvaapi)
         va_destroy(p->mpvaapi);
 }
-static int allocate_memfd(size_t size) {
+
+static int allocate_memfd(struct vo *vo, size_t size)
+{
     int fd = memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING);
-    if (fd < 0)
+    if (fd < 0) {
+        MP_ERR(vo, "Unable to create memfd file descriptor\n");
         return VO_ERROR;
+    }
 
     fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_SEAL);
 
@@ -237,10 +259,13 @@ static int allocate_memfd(size_t size) {
         return fd;
 
     close(fd);
+    MP_ERR(vo, "Unable to allocate memfd file descriptor\n");
+
     return VO_ERROR;
 }
 
-static int preinit(struct vo *vo) {
+static int preinit(struct vo *vo)
+{
     struct priv *p = vo->priv;
 
     p->vo = vo;
@@ -248,8 +273,10 @@ static int preinit(struct vo *vo) {
     if (!vo_wayland_init(vo))
         return VO_ERROR;
     p->display = vaGetDisplayWl(vo->wl->display);
-    if (!p->display)
+    if (!p->display) {
+        MP_ERR(vo, "Unable to get the VA Display.\n");
         return VO_ERROR;
+    }
     p->mpvaapi = va_initialize(p->display, p->log, false);
     if (!p->mpvaapi) {
         vaTerminate(p->display);
@@ -272,11 +299,13 @@ fail:
     return VO_ERROR;
 }
 
-static int query_format(struct vo *vo, int format) {
+static int query_format(struct vo *vo, int format)
+{
     return format == IMGFMT_VAAPI;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params) {
+static int reconfig(struct vo *vo, struct mp_image_params *params)
+{
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
 
@@ -284,47 +313,53 @@ static int reconfig(struct vo *vo, struct mp_image_params *params) {
         int width = 1;
         int height = 1;
         int stride = MP_ALIGN_UP(width * 4, 16);
-        int fd = allocate_memfd(stride);
+        int fd = allocate_memfd(vo, stride);
         if (fd < 0)
             return VO_ERROR;
         p->solid_buffer_pool = wl_shm_create_pool(wl->shm, fd, height * stride);
         if (!p->solid_buffer_pool)
             return VO_ERROR;
         p->solid_buffer = wl_shm_pool_create_buffer(p->solid_buffer_pool, 0,
-                width, height, stride, WL_SHM_FORMAT_XRGB8888);
+                                                    width, height, stride,
+                                                    WL_SHM_FORMAT_XRGB8888);
         if (!p->solid_buffer)
             return VO_ERROR;
     }
+
     if (!vo_wayland_reconfig(vo))
         return VO_ERROR;
 
     return 0;
 }
 
-static int resize(struct vo *vo) {
+static int resize(struct vo *vo)
+{
     struct vo_wayland_state *wl = vo->wl;
     struct priv *p = vo->priv;
 
     wl_subsurface_set_sync(wl->video_subsurface);
     vo_wayland_set_opaque_region(wl, 0);
-    const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
-    const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
+    const int width = wl->scaling * mp_rect_w(wl->geometry);
+    const int height = wl->scaling * mp_rect_h(wl->geometry);
     vo->dwidth = width;
     vo->dheight = height;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
+
     wp_viewport_set_destination(wl->viewport,
-            (p->dst.x0 << 1) + mp_rect_w(p->dst),
-            (p->dst.y0 << 1) + mp_rect_h(p->dst));
+                                (p->dst.x0 << 1) + mp_rect_w(p->dst),
+                                (p->dst.y0 << 1) + mp_rect_h(p->dst));
     wp_viewport_set_destination(wl->video_viewport, mp_rect_w(p->dst),
-            mp_rect_h(p->dst));
+                                mp_rect_h(p->dst));
     wl_subsurface_set_position(wl->video_subsurface, p->dst.x0, p->dst.y0);
+
     vo->want_redraw = true;
     wl_subsurface_set_desync(wl->video_subsurface);
 
     return VO_TRUE;
 }
 
-static int control(struct vo *vo, uint32_t request, void *data) {
+static int control(struct vo *vo, uint32_t request, void *data)
+{
     struct priv *p = vo->priv;
     int events = 0;
     int ret;
@@ -347,7 +382,8 @@ static int control(struct vo *vo, uint32_t request, void *data) {
     return ret;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame) {
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
+{
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
 
@@ -355,7 +391,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame) {
         return;
 
     struct va_pool_entry *entry = va_pool_alloc_entry(vo, p->va_pool,
-            frame->current);
+                                                      frame->current);
     if (!entry)
         return;
 
@@ -370,11 +406,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame) {
     if (wl->presentation)
         vo_wayland_sync_swap(wl);
 }
-static void flip_page(struct vo *vo) {
+static void flip_page(struct vo *vo)
+{
     /* no-op */
 }
 
-static void get_vsync(struct vo *vo, struct vo_vsync_info *info) {
+static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
+{
     struct vo_wayland_state *wl = vo->wl;
     if (wl->presentation) {
         info->vsync_duration = wl->vsync_duration;
@@ -383,18 +421,18 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info) {
     }
 }
 
-const struct vo_driver video_out_vaapi_wayland = { .description =
-        "VA API with Wayland video output",
-        .name = "vaapi-wayland",
-        .preinit = preinit,
-        .query_format = query_format,
-        .reconfig = reconfig,
-        .control = control,
-        .draw_frame = draw_frame,
-        .flip_page = flip_page,
-        .get_vsync = get_vsync,
-        .wakeup = vo_wayland_wakeup,
-        .wait_events = vo_wayland_wait_events,
-        .uninit = uninit,
-        .priv_size = sizeof(struct priv)
+const struct vo_driver video_out_vaapi_wayland = {
+    .description = "VA API with Wayland video output",
+    .name = "vaapi-wayland",
+    .preinit = preinit,
+    .query_format = query_format,
+    .reconfig = reconfig,
+    .control = control,
+    .draw_frame = draw_frame,
+    .flip_page = flip_page,
+    .get_vsync = get_vsync,
+    .wakeup = vo_wayland_wakeup,
+    .wait_events = vo_wayland_wait_events,
+    .uninit = uninit,
+    .priv_size = sizeof(struct priv)
 };

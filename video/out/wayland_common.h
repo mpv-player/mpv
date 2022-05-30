@@ -29,27 +29,20 @@ struct wayland_opts {
 };
 
 struct vo_wayland_state {
-    struct m_config_cache *vo_opts_cache;
-    struct mp_log         *log;
-    struct mp_vo_opts     *vo_opts;
-    struct vo             *vo;
-    struct wayland_opts   *opts;
-    struct wl_callback    *frame_callback;
-    struct wl_compositor  *compositor;
-    struct wl_subcompositor  *subcompositor;
-    struct wl_display     *display;
-    struct wl_registry    *registry;
-    struct wp_viewporter *viewporter;
-    struct wp_viewport *viewport;
-    struct zwp_linux_dmabuf_v1 *dmabuf;
-    uint *drm_formats;
-    uint drm_format_ct;
-    uint drm_format_ct_max;
-    struct wl_shm         *shm;
-    struct wl_surface     *surface;
-    struct wl_surface     *video_surface;
-    struct wl_subsurface  *video_subsurface;
-    struct wp_viewport    *video_viewport;
+    struct m_config_cache   *vo_opts_cache;
+    struct mp_log           *log;
+    struct mp_vo_opts       *vo_opts;
+    struct vo               *vo;
+    struct wayland_opts     *opts;
+    struct wl_callback      *frame_callback;
+    struct wl_compositor    *compositor;
+    struct wl_subcompositor *subcompositor;
+    struct wl_display       *display;
+    struct wl_registry      *registry;
+    struct wl_shm           *shm;
+    struct wl_surface       *surface;
+    struct wl_surface       *video_surface;
+    struct wl_subsurface    *video_subsurface;
 
     /* Geometry */
     struct mp_rect geometry;
@@ -85,15 +78,11 @@ struct vo_wayland_state {
     struct zwp_idle_inhibit_manager_v1 *idle_inhibit_manager;
     struct zwp_idle_inhibitor_v1 *idle_inhibitor;
 
-    /* xdg-decoration */
-    struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
-    struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration;
-    int requested_decoration;
-
-    /* xdg-shell */
-    struct xdg_wm_base      *wm_base;
-    struct xdg_surface      *xdg_surface;
-    struct xdg_toplevel     *xdg_toplevel;
+    /* linux-dmabuf */
+    struct zwp_linux_dmabuf_v1 *dmabuf;
+    int *drm_formats;
+    int drm_format_ct;
+    int drm_format_ct_max;
 
     /* presentation-time */
     struct wp_presentation  *presentation;
@@ -106,6 +95,21 @@ struct vo_wayland_state {
     int64_t last_queue_display_time;
     int64_t refresh_interval;
     int64_t vsync_duration;
+
+    /* xdg-decoration */
+    struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
+    struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration;
+    int requested_decoration;
+
+    /* xdg-shell */
+    struct xdg_wm_base      *wm_base;
+    struct xdg_surface      *xdg_surface;
+    struct xdg_toplevel     *xdg_toplevel;
+
+    /* viewporter */
+    struct wp_viewporter *viewporter;
+    struct wp_viewport   *viewport;
+    struct wp_viewport   *video_viewport;
 
     /* Input */
     struct wl_keyboard *keyboard;
@@ -136,6 +140,7 @@ struct vo_wayland_state {
 };
 
 bool vo_wayland_check_visible(struct vo *vo);
+bool vo_wayland_supported_format(struct vo *vo, uint32_t format);
 
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 int vo_wayland_init(struct vo *vo);
@@ -147,6 +152,5 @@ void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
 void vo_wayland_wait_frame(struct vo_wayland_state *wl);
 void vo_wayland_wakeup(struct vo *vo);
-bool vo_wayland_supported_format(struct vo *vo,uint format);
 
 #endif /* MPLAYER_WAYLAND_COMMON_H */
