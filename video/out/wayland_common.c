@@ -1492,8 +1492,9 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
 
 static void set_surface_scaling(struct vo_wayland_state *wl)
 {
+    bool vaapi_wayland = !strcmp(wl->vo->driver->name, "vaapi-wayland");
     int old_scale = wl->scaling;
-    if (wl->vo_opts->hidpi_window_scale) {
+    if (wl->vo_opts->hidpi_window_scale && !vaapi_wayland) {
         wl->scaling = wl->current_output->scale;
     } else {
         wl->scaling = 1;
