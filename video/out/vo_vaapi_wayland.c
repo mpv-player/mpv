@@ -24,7 +24,6 @@
 #include "sub/osd.h"
 #include "video/vaapi.h"
 #include "wayland_common.h"
-#include "drm_common.h"
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
 #include "generated/wayland/viewporter.h"
 
@@ -103,8 +102,8 @@ static struct va_pool_entry* va_alloc_entry(struct vo *vo, struct mp_image *src)
         return NULL;
     } else if (!vo_wayland_supported_format(vo,
             entry->desc.layers[0].drm_format)) {
-        MP_VERBOSE(vo, "%s not supported.\n",
-                drm_format_string(entry->desc.layers[0].drm_format));
+        MP_VERBOSE(vo, "%s is not supported.\n",
+                   mp_tag_str(entry->desc.layers[0].drm_format));
         va_free_entry(entry);
         return NULL;
     } else if (!CHECK_VA_STATUS(vo, "vaExportSurfaceHandle()")) {
