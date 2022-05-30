@@ -32,7 +32,6 @@
 #include "osdep/timer.h"
 #include "wayland_common.h"
 #include "win_state.h"
-#include "drm_common.h"
 
 // Generated from wayland-protocols
 #include "generated/wayland/idle-inhibit-unstable-v1.h"
@@ -1052,7 +1051,7 @@ static void dmabuf_format(void *data,
         wl->drm_formats = talloc_realloc(NULL,wl->drm_formats,uint, wl->drm_format_ct_max);
     }
     wl->drm_formats[wl->drm_format_ct++] = format;
-    MP_VERBOSE(wl, "%s available\n", drm_format_string(format));
+    MP_VERBOSE(wl, "%s is supported by the compositor.\n", mp_tag_str(format));
 }
 
 bool vo_wayland_supported_format(struct vo *vo, uint drm_format) {

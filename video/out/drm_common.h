@@ -97,6 +97,4 @@ double kms_get_display_fps(const struct kms *kms);
 void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
                   unsigned int usec, void *data);
 
-const char* drm_format_string(uint drm_format);
-
 #endif
