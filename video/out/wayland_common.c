@@ -2186,3 +2186,22 @@ void vo_wayland_wakeup(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
 }
+
+int vo_wayland_allocate_memfd(struct vo *vo, size_t size)
+{
+    int fd = memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    if (fd < 0) {
+        MP_ERR(vo, "Unable to create memfd file descriptor\n");
+        return VO_ERROR;
+    }
+
+    fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_SEAL);
+
+    if (posix_fallocate(fd, 0, size) == 0)
+        return fd;
+
+    close(fd);
+    MP_ERR(vo, "Unable to allocate memfd file descriptor\n");
+
+    return VO_ERROR;
+}

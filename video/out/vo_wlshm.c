@@ -74,21 +74,6 @@ static void buffer_destroy(void *p)
     munmap(buf->mpi.planes[0], buf->size);
 }
 
-static int allocate_memfd(size_t size)
-{
-    int fd = memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING);
-    if (fd < 0)
-        return -1;
-
-    fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_SEAL);
-
-    if (posix_fallocate(fd, 0, size) == 0)
-        return fd;
-
-    close(fd);
-    return -1;
-}
-
 static struct buffer *buffer_create(struct vo *vo, int width, int height)
 {
     struct priv *p = vo->priv;
@@ -101,7 +86,7 @@ static struct buffer *buffer_create(struct vo *vo, int width, int height)
 
     stride = MP_ALIGN_UP(width * 4, 16);
     size = height * stride;
-    fd = allocate_memfd(size);
+    fd = vo_wayland_allocate_memfd(vo, size);
     if (fd < 0)
         goto error0;
     data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);

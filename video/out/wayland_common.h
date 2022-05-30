@@ -148,5 +148,6 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);
 void vo_wayland_wait_frame(struct vo_wayland_state *wl);
 void vo_wayland_wakeup(struct vo *vo);
 bool vo_wayland_supported_format(struct vo *vo, uint32_t format);
+int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 
 #endif /* MPLAYER_WAYLAND_COMMON_H */

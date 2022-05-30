@@ -240,25 +240,6 @@ static void uninit(struct vo *vo)
         va_destroy(p->mpvaapi);
 }
 
-static int allocate_memfd(struct vo *vo, size_t size)
-{
-    int fd = memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING);
-    if (fd < 0) {
-        MP_ERR(vo, "Unable to create memfd file descriptor\n");
-        return VO_ERROR;
-    }
-
-    fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_SEAL);
-
-    if (posix_fallocate(fd, 0, size) == 0)
-        return fd;
-
-    close(fd);
-    MP_ERR(vo, "Unable to allocate memfd file descriptor\n");
-
-    return VO_ERROR;
-}
-
 static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -310,7 +291,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         int width = 1;
         int height = 1;
         int stride = MP_ALIGN_UP(width * 4, 16);
-        int fd = allocate_memfd(vo, stride);
+        int fd = vo_wayland_allocate_memfd(vo, stride);
         if (fd < 0)
             return VO_ERROR;
         p->solid_buffer_pool = wl_shm_create_pool(wl->shm, fd, height * stride);
