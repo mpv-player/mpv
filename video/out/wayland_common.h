@@ -142,6 +142,7 @@ struct vo_wayland_state {
 bool vo_wayland_check_visible(struct vo *vo);
 bool vo_wayland_supported_format(struct vo *vo, uint32_t format);
 
+int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 int vo_wayland_init(struct vo *vo);
 int vo_wayland_reconfig(struct vo *vo);

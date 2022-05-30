@@ -1638,6 +1638,29 @@ static void vo_wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, in
 }
 
 /* Non-static */
+int vo_wayland_allocate_memfd(struct vo *vo, size_t size)
+{
+#if !HAVE_MEMFD_CREATE
+    return VO_ERROR;
+#else
+    int fd = memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    if (fd < 0) {
+        MP_ERR(vo, "Failed to allocate memfd: %s\n", mp_strerror(errno));
+        return VO_ERROR;
+    }
+
+    fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_SEAL);
+
+    if (posix_fallocate(fd, 0, size) == 0)
+        return fd;
+
+    close(fd);
+    MP_ERR(vo, "Failed to allocate memfd: %s\n", mp_strerror(errno));
+
+    return VO_ERROR;
+#endif
+}
+
 bool vo_wayland_check_visible(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
