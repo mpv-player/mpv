@@ -35,10 +35,10 @@
 
 // Generated from wayland-protocols
 #include "generated/wayland/idle-inhibit-unstable-v1.h"
+#include "generated/wayland/linux-dmabuf-unstable-v1.h"
 #include "generated/wayland/presentation-time.h"
 #include "generated/wayland/xdg-decoration-unstable-v1.h"
 #include "generated/wayland/xdg-shell.h"
-#include "generated/wayland/linux-dmabuf-unstable-v1.h"
 #include "generated/wayland/viewporter.h"
 
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 20
@@ -1042,39 +1042,28 @@ static const struct wl_callback_listener frame_listener = {
     frame_callback,
 };
 
-static void dmabuf_format(void *data,
-        struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf, uint32_t format) {
+static void dmabuf_format(void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
+                          uint32_t format)
+{
     struct vo_wayland_state *wl = data;
 
     if (wl->drm_format_ct == wl->drm_format_ct_max) {
         wl->drm_format_ct_max *= 2;
-        wl->drm_formats = talloc_realloc(NULL,wl->drm_formats,uint, wl->drm_format_ct_max);
+        wl->drm_formats = talloc_realloc(wl, wl->drm_formats, int, wl->drm_format_ct_max);
     }
+
     wl->drm_formats[wl->drm_format_ct++] = format;
     MP_VERBOSE(wl, "%s is supported by the compositor.\n", mp_tag_str(format));
 }
 
-bool vo_wayland_supported_format(struct vo *vo, uint drm_format) {
-    struct vo_wayland_state *wl = vo->wl;
-
-    for (uint i = 0; i < wl->drm_format_ct; ++i) {
-        if (drm_format == wl->drm_formats[i])
-            return true;
-    }
-
-    return false;
-}
-
-/* currently unused */
-static void dmabuf_modifier(void *data,
-        struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf, uint32_t format,
-        uint32_t modifier_hi, uint32_t modifier_lo) {
-
+static void dmabuf_modifier(void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
+                            uint32_t format, uint32_t modifier_hi, uint32_t modifier_lo)
+{
 }
 
 static const struct zwp_linux_dmabuf_v1_listener dmabuf_listener = {
-        dmabuf_format,
-        dmabuf_modifier
+    dmabuf_format,
+    dmabuf_modifier
 };
 
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
@@ -1088,9 +1077,9 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->surface = wl_compositor_create_surface(wl->compositor);
         wl->video_surface = wl_compositor_create_surface(wl->compositor);
         /* never accept input events on the video surface */
-        struct wl_region *region = wl_compositor_create_region (wl->compositor);
-        wl_surface_set_input_region (wl->video_surface, region);
-        wl_region_destroy (region);
+        struct wl_region *region = wl_compositor_create_region(wl->compositor);
+        wl_surface_set_input_region(wl->video_surface, region);
+        wl_region_destroy(region);
         wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
     }
@@ -1100,10 +1089,10 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 2) && found++) {
-        wl->dmabuf = wl_registry_bind (reg, id, &zwp_linux_dmabuf_v1_interface, 2);
-        zwp_linux_dmabuf_v1_add_listener (wl->dmabuf, &dmabuf_listener, wl);
+        wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 2);
+        zwp_linux_dmabuf_v1_add_listener(wl->dmabuf, &dmabuf_listener, wl);
         wl->drm_format_ct_max = 64;
-        wl->drm_formats = talloc_array(NULL,uint,wl->drm_format_ct_max);
+        wl->drm_formats = talloc_array(wl, int, wl->drm_format_ct_max);
     }
 
     if (!strcmp (interface, wp_viewporter_interface.name) && (ver >= 1) && found++) {
@@ -1958,6 +1947,18 @@ void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha)
     }
 }
 
+bool vo_wayland_supported_format(struct vo *vo, uint32_t drm_format)
+{
+    struct vo_wayland_state *wl = vo->wl;
+
+    for (int i = 0; i < wl->drm_format_ct; ++i) {
+        if (drm_format == wl->drm_formats[i])
+            return true;
+    }
+
+    return false;
+}
+
 void vo_wayland_sync_swap(struct vo_wayland_state *wl)
 {
     int index = wl->sync_size - 1;
@@ -2110,10 +2111,6 @@ void vo_wayland_uninit(struct vo *vo)
     struct vo_wayland_output *output, *tmp;
     wl_list_for_each_safe(output, tmp, &wl->output_list, link)
         remove_output(output);
-
-    talloc_free(wl->drm_formats);
-
-    talloc_free(wl->dnd_mime_type);
 
     for (int n = 0; n < 2; n++)
         close(wl->wakeup_pipe[n]);
