@@ -23,6 +23,7 @@
 #include "vo.h"
 
 struct wayland_opts {
+    int configure_bounds;
     int disable_vsync;
     int edge_pixels_pointer;
     int edge_pixels_touch;
@@ -50,6 +51,8 @@ struct vo_wayland_state {
     struct mp_rect window_size;
     struct wl_list output_list;
     struct vo_wayland_output *current_output;
+    int bounded_height;
+    int bounded_width;
     int gcd;
     int reduced_height;
     int reduced_width;
