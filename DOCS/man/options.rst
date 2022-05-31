@@ -5570,6 +5570,14 @@ them.
 ``--wayland-app-id=<string>``
     Set the client app id for Wayland-based video output methods (default: ``mpv``).
 
+``--wayland-configure-bounds=<yes|no>``
+    Controls whether or not mpv opts into the configure bounds event if sent by the
+    compositor (default: yes). This restricts the initial size of the mpv window to
+    a certain maximum size intended by the compositor. In most cases, this simply
+    just prevents the mpv window from being larger than the size of the monitor when
+    it first renders. This option will take precedence over any ``autofit`` or
+    ``geometry`` type settings if the configure bounds are used.
+
 ``--wayland-disable-vsync=<yes|no>``
     Disable vsync for the wayland contexts (default: no). Useful for benchmarking
     the wayland context when combined with ``video-sync=display-desync``,

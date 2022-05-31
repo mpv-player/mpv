@@ -112,6 +112,7 @@ static const struct mp_keymap keymap[] = {
 #define OPT_BASE_STRUCT struct wayland_opts
 const struct m_sub_options wayland_conf = {
     .opts = (const struct m_option[]) {
+        {"wayland-configure-bounds", OPT_FLAG(configure_bounds)},
         {"wayland-disable-vsync", OPT_FLAG(disable_vsync)},
         {"wayland-edge-pixels-pointer", OPT_INT(edge_pixels_pointer),
             M_RANGE(0, INT_MAX)},
@@ -121,6 +122,7 @@ const struct m_sub_options wayland_conf = {
     },
     .size = sizeof(struct wayland_opts),
     .defaults = &(struct wayland_opts) {
+        .configure_bounds = true,
         .disable_vsync = false,
         .edge_pixels_pointer = 10,
         .edge_pixels_touch = 32,
@@ -918,9 +920,22 @@ static void handle_toplevel_close(void *data, struct xdg_toplevel *xdg_toplevel)
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
 }
 
+#ifdef XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION
+static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_toplevel,
+                                    int32_t width, int32_t height)
+{
+    struct vo_wayland_state *wl = data;
+    wl->bounded_width = width;
+    wl->bounded_height = height;
+}
+#endif
+
 static const struct xdg_toplevel_listener xdg_toplevel_listener = {
     handle_toplevel_config,
     handle_toplevel_close,
+#ifdef XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION
+    handle_configure_bounds,
+#endif
 };
 
 static void configure_decorations(void *data,
@@ -1117,7 +1132,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, xdg_wm_base_interface.name) && found++) {
-        ver = MPMIN(ver, 2); /* We can use either 1 or 2 */
+        ver = MPMIN(ver, 4); /* Cap at 4 in case new events are added later. */
         wl->wm_base = wl_registry_bind(reg, id, &xdg_wm_base_interface, ver);
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
     }
@@ -1477,6 +1492,14 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
 }
 
+static void set_window_bounds(struct vo_wayland_state *wl)
+{
+    if (wl->bounded_width && wl->bounded_width < wl->window_size.x1)
+        wl->window_size.x1 = wl->bounded_width;
+    if (wl->bounded_height && wl->bounded_height < wl->window_size.y1)
+        wl->window_size.y1 = wl->bounded_height;
+}
+
 static int spawn_cursor(struct vo_wayland_state *wl)
 {
     /* Reuse if size is identical */
@@ -1773,6 +1796,8 @@ int vo_wayland_init(struct vo *vo)
         .display = wl_display_connect(NULL),
         .vo = vo,
         .log = mp_log_new(wl, vo->log, "wayland"),
+        .bounded_width = 0,
+        .bounded_height = 0,
         .refresh_interval = 0,
         .scaling = 1,
         .wakeup_pipe = {-1, -1},
@@ -1885,8 +1910,10 @@ int vo_wayland_reconfig(struct vo *vo)
     }
 
     set_geometry(wl);
-
     wl->window_size = wl->vdparams;
+
+    if (wl->opts->configure_bounds)
+        set_window_bounds(wl);
 
     if ((!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) ||
         mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0)

@@ -45,6 +45,7 @@ Interface changes
     - add `--x11-present` for controlling whether to use xorg's present extension
     - add `engine` option to the `rubberband` audio filter to support the new
       engine introduced in rubberband 3.0.0. Defaults to `finer` (new engine).
+    - add `--wayland-configure-bounds` option
  --- mpv 0.34.0 ---
     - deprecate selecting by card number with `--drm-connector`, add
       `--drm-device` which can be used instead
