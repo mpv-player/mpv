@@ -40,6 +40,8 @@
 #include <libavutil/dovi_meta.h>
 #endif
 
+#include "audio/chmap_avchannel.h"
+
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
@@ -658,10 +660,22 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     case AVMEDIA_TYPE_AUDIO: {
         sh = demux_alloc_sh_stream(STREAM_AUDIO);
 
+#if !HAVE_AV_CHANNEL_LAYOUT
         // probably unneeded
         mp_chmap_set_unknown(&sh->codec->channels, codec->channels);
         if (codec->channel_layout)
             mp_chmap_from_lavc(&sh->codec->channels, codec->channel_layout);
+#else
+        if (!mp_chmap_from_av_layout(&sh->codec->channels, &codec->ch_layout)) {
+            char layout[128] = {0};
+            MP_WARN(demuxer,
+                    "Failed to convert channel layout %s to mpv one!\n",
+                    av_channel_layout_describe(&codec->ch_layout,
+                                               layout, 128) < 0 ?
+                    "undefined" : layout);
+        }
+#endif
+
         sh->codec->samplerate = codec->sample_rate;
         sh->codec->bitrate = codec->bit_rate;
 
