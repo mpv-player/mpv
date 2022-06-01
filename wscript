@@ -412,6 +412,10 @@ libav_dependencies = [
         'fmsg': "Unable to find development files for some of the required \
 FFmpeg libraries. Git master is recommended."
     }, {
+        'name': 'av-channel-layout',
+        'desc': 'FFmpeg AVChannelLayout API',
+        'func': check_pkg_config('libavutil', '>= 57.24.100'),
+    }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 57.0.0'),

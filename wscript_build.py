@@ -230,6 +230,7 @@ def build(ctx):
         ## Audio
         ( "audio/aframe.c" ),
         ( "audio/chmap.c" ),
+        ( "audio/chmap_avchannel.c", "av-channel-layout" ),
         ( "audio/chmap_sel.c" ),
         ( "audio/decode/ad_lavc.c" ),
         ( "audio/decode/ad_spdif.c" ),

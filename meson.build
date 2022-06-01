@@ -15,9 +15,11 @@ build_root = meson.project_build_root()
 source_root = meson.project_source_root()
 python = find_program('python3')
 
+avutil = dependency('libavutil', version: '>= 56.12.100')
+
 ffmpeg = {
     'name': 'ffmpeg',
-    'deps': [dependency('libavutil', version: '>= 56.12.100'),
+    'deps': [avutil,
              dependency('libavcodec', version: '>= 58.12.100'),
              dependency('libavformat', version: '>= 58.9.100'),
              dependency('libswscale', version: '>= 5.0.101'),
@@ -595,6 +597,12 @@ endif
 
 
 # misc dependencies
+av_ch_layout_available = avutil.version().version_compare('>= 57.24.100')
+if av_ch_layout_available
+    features += 'av-channel-layout'
+    sources += files('audio/chmap_avchannel.c')
+endif
+
 cdda_opt = get_option('cdda').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
@@ -1696,6 +1704,7 @@ conf_data.set_quoted('FULLCONFIG', feature_str)
 conf_data.set10('HAVE_ALSA', alsa.found())
 conf_data.set10('HAVE_ANDROID', android)
 conf_data.set10('HAVE_AUDIOUNIT', audiounit['use'])
+conf_data.set10('HAVE_AV_CHANNEL_LAYOUT', av_ch_layout_available)
 conf_data.set10('HAVE_BSD_FSTATFS', bsd_fstatfs)
 conf_data.set10('HAVE_BSD_THREAD_NAME', bsd_thread_name)
 conf_data.set10('HAVE_CACA', caca.found())
