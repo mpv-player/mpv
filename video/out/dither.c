@@ -37,20 +37,18 @@
 #define MAX_SIZE (1 << MAX_SIZEB)
 #define MAX_SIZE2 (MAX_SIZE * MAX_SIZE)
 
-typedef uint_fast32_t index_t;
-
-#define WRAP_SIZE2(k, x) ((index_t)((index_t)(x) & ((k)->size2 - 1)))
-#define XY(k, x, y) ((index_t)(((x) | ((y) << (k)->sizeb))))
+#define WRAP_SIZE2(k, x) ((unsigned int)((unsigned int)(x) & ((k)->size2 - 1)))
+#define XY(k, x, y) ((unsigned int)(((x) | ((y) << (k)->sizeb))))
 
 struct ctx {
     unsigned int sizeb, size, size2;
     unsigned int gauss_radius;
     unsigned int gauss_middle;
     uint64_t gauss[MAX_SIZE2];
-    index_t randomat[MAX_SIZE2];
+    unsigned int randomat[MAX_SIZE2];
     bool calcmat[MAX_SIZE2];
     uint64_t gaussmat[MAX_SIZE2];
-    index_t unimat[MAX_SIZE2];
+    unsigned int unimat[MAX_SIZE2];
     AVLFG avlfg;
 };
 
@@ -70,13 +68,13 @@ static void makegauss(struct ctx *k, unsigned int sizeb)
     unsigned int gauss_size = k->gauss_radius * 2 + 1;
     unsigned int gauss_size2 = gauss_size * gauss_size;
 
-    for (index_t c = 0; c < k->size2; c++)
+    for (unsigned int c = 0; c < k->size2; c++)
         k->gauss[c] = 0;
 
     double sigma = -log(1.5 / UINT64_MAX * gauss_size2) / k->gauss_radius;
 
-    for (index_t gy = 0; gy <= k->gauss_radius; gy++) {
-        for (index_t gx = 0; gx <= gy; gx++) {
+    for (unsigned int gy = 0; gy <= k->gauss_radius; gy++) {
+        for (unsigned int gx = 0; gx <= gy; gx++) {
             int cx = (int)gx - k->gauss_radius;
             int cy = (int)gy - k->gauss_radius;
             int sq = cx * cx + cy * cy;
@@ -93,14 +91,14 @@ static void makegauss(struct ctx *k, unsigned int sizeb)
         }
     }
     uint64_t total = 0;
-    for (index_t c = 0; c < k->size2; c++) {
+    for (unsigned int c = 0; c < k->size2; c++) {
         uint64_t oldtotal = total;
         total += k->gauss[c];
         assert(total >= oldtotal);
     }
 }
 
-static void setbit(struct ctx *k, index_t c)
+static void setbit(struct ctx *k, unsigned int c)
 {
     if (k->calcmat[c])
         return;
@@ -116,12 +114,12 @@ static void setbit(struct ctx *k, index_t c)
         *m++ += *g++;
 }
 
-static index_t getmin(struct ctx *k)
+static unsigned int getmin(struct ctx *k)
 {
     uint64_t min = UINT64_MAX;
-    index_t resnum = 0;
+    unsigned int resnum = 0;
     unsigned int size2 = k->size2;
-    for (index_t c = 0; c < size2; c++) {
+    for (unsigned int c = 0; c < size2; c++) {
         if (k->calcmat[c])
             continue;
         uint64_t total = k->gaussmat[c];
@@ -143,8 +141,8 @@ static index_t getmin(struct ctx *k)
 static void makeuniform(struct ctx *k)
 {
     unsigned int size2 = k->size2;
-    for (index_t c = 0; c < size2; c++) {
-        index_t r = getmin(k);
+    for (unsigned int c = 0; c < size2; c++) {
+        unsigned int r = getmin(k);
         setbit(k, r);
         k->unimat[r] = c;
     }
@@ -157,8 +155,8 @@ void mp_make_fruit_dither_matrix(float *out_matrix, int size)
     makegauss(k, size);
     makeuniform(k);
     float invscale = k->size2;
-    for(index_t y = 0; y < k->size; y++) {
-        for(index_t x = 0; x < k->size; x++)
+    for(unsigned int y = 0; y < k->size; y++) {
+        for(unsigned int x = 0; x < k->size; x++)
             out_matrix[x + y * k->size] = k->unimat[XY(k, x, y)] / invscale;
     }
     talloc_free(k);
@@ -180,15 +178,15 @@ void mp_make_ordered_dither_matrix(unsigned char *m, int size)
 
 static int index_cmp(const void *a, const void *b)
 {
-    index_t x = *(const index_t *)a;
-    index_t y = *(const index_t *)b;
+    unsigned int x = *(const unsigned int *)a;
+    unsigned int y = *(const unsigned int *)b;
     return x < y ? -1 : x > y;
 }
 
 static void fsck(struct ctx *k)
 {
     qsort(k->unimat, k->size2, sizeof k->unimat[0], index_cmp);
-    for (index_t c = 0; c < k->size2; c++)
+    for (unsigned int c = 0; c < k->size2; c++)
         assert(k->unimat[c] == c);
 }
 
@@ -200,16 +198,16 @@ static void print(struct ctx *k)
     printf("static const int mp_dither_size = %d;\n", k->size);
     printf("static const int mp_dither_size2 = %d;\n", k->size2);
     printf("static const uint16_t mp_dither_matrix[] = {\n");
-    for(index_t y = 0; y < k->size; y++) {
+    for(unsigned int y = 0; y < k->size; y++) {
         printf("\t");
-        for(index_t x = 0; x < k->size; x++)
-            printf("%4"PRIuFAST32", ", k->unimat[XY(k, x, y)]);
+        for(unsigned int x = 0; x < k->size; x++)
+            printf("%4u, ", k->unimat[XY(k, x, y)]);
         printf("\n");
     }
     puts("};");
 #else
-    for(index_t y = 0; y < k->size; y++) {
-        for(index_t x = 0; x < k->size; x++)
+    for(unsigned int y = 0; y < k->size; y++) {
+        for(unsigned int x = 0; x < k->size; x++)
             r[XY(k, x, y)] = k->unimat[XY(k, x, y)];
     }
 #endif
