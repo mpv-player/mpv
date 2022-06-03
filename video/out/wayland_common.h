@@ -111,6 +111,10 @@ struct vo_wayland_state {
     struct wp_viewport   *viewport;
     struct wp_viewport   *video_viewport;
 
+    /* content-type */
+    struct wp_content_type_manager_v1 *content_type_manager;
+    struct wp_content_type_v1         *content_type;
+
     /* Input */
     struct wl_keyboard *keyboard;
     struct wl_pointer  *pointer;

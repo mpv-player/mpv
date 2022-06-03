@@ -34,6 +34,7 @@
 #include "win_state.h"
 
 // Generated from wayland-protocols
+#include "generated/wayland/content-type-v1.h"
 #include "generated/wayland/idle-inhibit-unstable-v1.h"
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
 #include "generated/wayland/presentation-time.h"
@@ -1145,6 +1146,10 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->idle_inhibit_manager = wl_registry_bind(reg, id, &zwp_idle_inhibit_manager_v1_interface, 1);
     }
 
+    if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++) {
+        wl->content_type_manager = wl_registry_bind(reg, id, &wp_content_type_manager_v1_interface, 1);
+    }
+
     if (found > 1)
         MP_VERBOSE(wl, "Registered for protocol %s\n", interface);
 }
@@ -1898,6 +1903,11 @@ int vo_wayland_init(struct vo *vo)
                    zxdg_decoration_manager_v1_interface.name);
     }
 
+    if (wl->content_type_manager) {
+        wl->content_type = wp_content_type_manager_v1_get_surface_content_type(wl->content_type_manager, wl->surface);
+        wp_content_type_v1_set_content_type(wl->content_type, WP_CONTENT_TYPE_V1_CONTENT_TYPE_VIDEO);
+    }
+
     if (!wl->idle_inhibit_manager)
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    zwp_idle_inhibit_manager_v1_interface.name);
@@ -2108,6 +2118,12 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->xdg_decoration_manager)
         zxdg_decoration_manager_v1_destroy(wl->xdg_decoration_manager);
+
+    if (wl->content_type_manager)
+        wp_content_type_manager_v1_destroy(wl->content_type_manager);
+
+    if (wl->content_type)
+        wp_content_type_v1_destroy(wl->content_type);
 
     if (wl->xdg_toplevel)
         xdg_toplevel_destroy(wl->xdg_toplevel);
