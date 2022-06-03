@@ -1,4 +1,4 @@
-wl_protocol_dir = wayland['deps'][2].get_variable(pkgconfig: 'pkgdatadir')
+wl_protocol_dir = wayland['deps'][2].get_variable(pkgconfig: 'pkgdatadir', internal: 'pkgdatadir')
 protocols = [[wl_protocol_dir, 'stable/presentation-time/presentation-time.xml'],
              [wl_protocol_dir, 'stable/viewporter/viewporter.xml'],
              [wl_protocol_dir, 'stable/xdg-shell/xdg-shell.xml'],
