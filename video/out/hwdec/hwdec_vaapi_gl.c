@@ -166,6 +166,12 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
     GL *gl = ra_gl_get(mapper->ra);
 
     for (int n = 0; n < p_mapper->num_planes; n++) {
+        if (p_mapper->desc.layers[n].num_planes > 1) {
+            // Should never happen because we request separate layers
+            MP_ERR(mapper, "Multi-plane VA surfaces are not supported\n");
+            return false;
+        }
+
         int attribs[48] = {EGL_NONE};
         int num_attribs = 0;
 
