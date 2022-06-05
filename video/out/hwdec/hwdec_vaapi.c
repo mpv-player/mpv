@@ -249,12 +249,21 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     CHECK_VA_STATUS(mapper, "vaSyncSurface()");
     p->surface_acquired = true;
 
-    if (p->num_planes != p->desc.num_layers) {
+    // We can handle composed formats if the total number of planes is still
+    // equal the number of planes we expect. Complex formats with auxilliary
+    // planes cannot be supported.
+
+    int num_returned_planes = 0;
+    for (int i = 0; i < p->desc.num_layers; i++) {
+        num_returned_planes += p->desc.layers[i].num_planes;
+    }
+
+    if (p->num_planes != num_returned_planes) {
         mp_msg(mapper->log, p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR,
                "Mapped surface with format '%s' has unexpected number of planes. "
-               "(%d instead of %d)\n",
+               "(%d layers and %d planes, but expected %d planes)\n",
                mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
-               p->desc.num_layers, p->num_planes);
+               p->desc.num_layers, num_returned_planes, p->num_planes);
         goto err;
     }
 
