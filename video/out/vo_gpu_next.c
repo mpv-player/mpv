@@ -1109,8 +1109,8 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
 
     // Passing an interpolation radius of 0 guarantees that the first frame in
     // the resulting mix is the correct frame for this PTS
-    struct pl_frame *image = (struct pl_frame *) mix.frames[0];
-    struct mp_image *mpi = image->user_data;
+    struct pl_frame image = *(struct pl_frame *) mix.frames[0];
+    struct mp_image *mpi = image.user_data;
     struct mp_rect src = p->src, dst = p->dst;
     struct mp_osd_res osd = p->osd_res;
     if (!args->scaled) {
@@ -1159,7 +1159,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     };
 
     apply_target_options(p, &target);
-    apply_crop(image, src, mpi->params.w, mpi->params.h);
+    apply_crop(&image, src, mpi->params.w, mpi->params.h);
     apply_crop(&target, dst, fbo->params.w, fbo->params.h);
 
     int osd_flags = 0;
@@ -1167,9 +1167,10 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         osd_flags |= OSD_DRAW_OSD_ONLY;
     if (!args->osd)
         osd_flags |= OSD_DRAW_SUB_ONLY;
-    update_overlays(vo, osd, 0, osd_flags, &p->osd_state, &target);
+    update_overlays(vo, osd, mpi->pts, osd_flags, &p->osd_state, &target);
+    image.num_overlays = 0; // Disable on-screen overlays
 
-    if (!pl_render_image_mix(p->rr, &mix, &target, &p->params)) {
+    if (!pl_render_image(p->rr, &image, &target, &p->params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
         goto done;
     }
