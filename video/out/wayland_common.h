@@ -90,6 +90,9 @@ struct vo_wayland_state {
     struct mp_present *present;
     int64_t refresh_interval;
 
+    /* single-pixel-buffer */
+    struct wp_single_pixel_buffer_manager_v1 *single_pixel_manager;
+
     /* xdg-decoration */
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
     struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration;

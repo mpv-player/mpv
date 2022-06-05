@@ -133,6 +133,9 @@ def build(ctx):
         ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "unstable/linux-dmabuf/linux-dmabuf-unstable-v1",
             target    = "generated/wayland/linux-dmabuf-unstable-v1.h")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "staging/single-pixel-buffer/single-pixel-buffer-v1.h",
+            target    = "generated/wayland/single-pixel-buffer-v1.h")
         ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "stable/viewporter/viewporter",
             target    = "generated/wayland/viewporter.c")

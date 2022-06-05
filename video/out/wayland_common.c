@@ -38,6 +38,7 @@
 #include "generated/wayland/idle-inhibit-unstable-v1.h"
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
 #include "generated/wayland/presentation-time.h"
+#include "generated/wayland/single-pixel-buffer-v1.h"
 #include "generated/wayland/xdg-decoration-unstable-v1.h"
 #include "generated/wayland/xdg-shell.h"
 #include "generated/wayland/viewporter.h"
@@ -1130,6 +1131,10 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->idle_inhibit_manager = wl_registry_bind(reg, id, &zwp_idle_inhibit_manager_v1_interface, 1);
     }
 
+    if (!strcmp(interface, wp_single_pixel_buffer_manager_v1_interface.name) && found++) {
+        wl->single_pixel_manager = wl_registry_bind(reg, id, &wp_single_pixel_buffer_manager_v1_interface, 1);
+    }
+
     if (found > 1)
         MP_VERBOSE(wl, "Registered for protocol %s\n", interface);
 }
@@ -2031,6 +2036,9 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->xdg_surface)
         xdg_surface_destroy(wl->xdg_surface);
+
+    if (wl->single_pixel_manager)
+        wp_single_pixel_buffer_manager_v1_destroy(wl->single_pixel_manager);
 
     if (wl->xkb_context)
         xkb_context_unref(wl->xkb_context);

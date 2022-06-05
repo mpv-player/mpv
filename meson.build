@@ -1445,7 +1445,7 @@ if vaapi_wayland['use']
     features += vaapi_wayland['name']
 endif
 
-if vaapi_wayland['use'] and memfd_create
+if vaapi_wayland['use'] and memfd_create and wayland['deps'][2].version().version_compare('>= 1.26')
     features += 'vaapi-wayland-memfd'
     sources += files('video/out/vo_vaapi_wayland.c')
 endif

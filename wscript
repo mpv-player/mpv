@@ -662,7 +662,7 @@ video_output_features = [
         'name': 'vaapi-wayland-memfd',
         'desc': 'VAAPI (Wayland dmabuf support)',
         'deps': 'vaapi-wayland && memfd_create',
-        'func': check_true,
+        'func': check_pkg_config_datadir('wayland-protocols', '>=1.26'),
     }, {
         'name': '--vaapi-drm',
         'desc': 'VAAPI (DRM/EGL support)',

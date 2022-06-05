@@ -27,6 +27,7 @@
 #include "wayland_common.h"
 
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
+#include "generated/wayland/single-pixel-buffer-v1.h"
 #include "generated/wayland/viewporter.h"
 
 #define VA_POOL_NUM_ALLOCATED_INIT 30
@@ -269,23 +270,31 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
 
-    if (!p->solid_buffer_pool) {
-        int width = 1;
-        int height = 1;
-        int stride = MP_ALIGN_UP(width * 4, 16);
-        int fd = vo_wayland_allocate_memfd(vo, stride);
-        if (fd < 0)
-            return VO_ERROR;
-        p->solid_buffer_pool = wl_shm_create_pool(wl->shm, fd, height * stride);
-        if (!p->solid_buffer_pool)
-            return VO_ERROR;
-        p->solid_buffer = wl_shm_pool_create_buffer(p->solid_buffer_pool, 0,
-                                                    width, height, stride,
-                                                    WL_SHM_FORMAT_XRGB8888);
-        if (!p->solid_buffer)
-            return VO_ERROR;
-        wl_surface_attach(wl->surface, p->solid_buffer, 0, 0);
+    if (!p->solid_buffer) {
+        /* Use single-pixel if it exists, falling back to wl_shm */
+        if (wl->single_pixel_manager) {
+            p->solid_buffer = wp_single_pixel_buffer_manager_v1_create_u32_rgba_buffer(
+                wl->single_pixel_manager, 0, 0, 0, UINT32_MAX); /* R, G, B, A */
+            wl_surface_attach(wl->surface, p->solid_buffer, 0, 0);
+        } else {
+            int width = 1;
+            int height = 1;
+            int stride = MP_ALIGN_UP(width * 4, 16);
+            int fd = vo_wayland_allocate_memfd(vo, stride);
+            if (fd < 0)
+                return VO_ERROR;
+            p->solid_buffer_pool = wl_shm_create_pool(wl->shm, fd, height * stride);
+            if (!p->solid_buffer_pool)
+                return VO_ERROR;
+            p->solid_buffer = wl_shm_pool_create_buffer(p->solid_buffer_pool, 0,
+                                                        width, height, stride,
+                                                        WL_SHM_FORMAT_XRGB8888);
+            wl_surface_attach(wl->surface, p->solid_buffer, 0, 0);
+        }
     }
+
+    if (!p->solid_buffer)
+        return VO_ERROR;
 
     if (!vo_wayland_reconfig(vo))
         return VO_ERROR;
