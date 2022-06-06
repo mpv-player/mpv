@@ -1924,7 +1924,6 @@ int vo_wayland_reconfig(struct vo *vo)
         wl->current_output = find_output(wl);
         if (!wl->current_output)
             return false;
-        set_surface_scaling(wl);
         wl_surface_commit(wl->surface);
         configure = true;
     }
@@ -1946,7 +1945,6 @@ int vo_wayland_reconfig(struct vo *vo)
         do_minimize(wl);
 
     if (configure) {
-        wl->window_size = wl->vdparams;
         wl->geometry = wl->window_size;
         wl_display_roundtrip(wl->display);
         wl->pending_vo_events |= VO_EVENT_DPI;
