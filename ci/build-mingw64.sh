@@ -22,6 +22,22 @@ export RANLIB=$TARGET-ranlib
 export CFLAGS="-O2 -pipe -Wall -D_FORTIFY_SOURCE=2"
 export LDFLAGS="-fstack-protector-strong"
 
+cat > "${prefix_dir}/crossfile" << EOF
+[binaries]
+c = '${CC}'
+cpp = '${CXX}'
+ar = '${AR}'
+strip = '${TARGET}-strip'
+pkgconfig = 'pkg-config'
+exe_wrapper = 'wine64' # A command used to run generated executables.
+windres = '${TARGET}-windres'
+[host_machine]
+system = 'windows'
+cpu_family = '${CPU}'
+cpu = '${CPU}'
+endian = 'little'
+EOF
+
 function builddir () {
     [ -d "$1/builddir" ] && rm -rf "$1/builddir"
     mkdir -p "$1/builddir"
@@ -159,24 +175,8 @@ if [ $1 = "meson" ]; then
     CPU="x86_64"
     mkdir -p "${TARGET}_mingw_build" && pushd "${TARGET}_mingw_build"
 
-cat > mingw64_crossfile << EOF
-[binaries]
-c = '${CC}'
-cpp = '${CXX}'
-ar = '${AR}'
-strip = '${TARGET}-strip'
-pkgconfig = 'pkg-config'
-exe_wrapper = 'wine64' # A command used to run generated executables.
-windres = '${TARGET}-windres'
-[host_machine]
-system = 'windows'
-cpu_family = '${CPU}'
-cpu = '${CPU}'
-endian = 'little'
-EOF
-
     CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
-    meson .. --cross-file mingw64_crossfile --libdir lib \
+    meson .. --cross-file "${prefix_dir}/crossfile" --libdir lib \
         -Dlibmpv=true -Dlua=luajit -D{shaderc,spirv-cross,d3d11}=enabled
 
     meson compile
