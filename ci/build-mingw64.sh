@@ -113,6 +113,17 @@ if [ ! -e "$prefix_dir/lib/libspirv-cross-c-shared.dll.a" ]; then
     popd
 fi
 
+## libplacebo
+if [ ! -e "$prefix_dir/lib/libplacebo.dll.a" ]; then
+    [ -d libplacebo ] || $gitclone https://code.videolan.org/videolan/libplacebo.git
+    builddir libplacebo
+    meson .. \
+        --cross-file "${prefix_dir}/crossfile"
+    ninja
+    DESTDIR="$prefix_dir" ninja install
+    popd
+fi
+
 ## freetype2
 if [ ! -e "$prefix_dir/lib/libfreetype.dll.a" ]; then
     ver=2.11.0
@@ -177,7 +188,7 @@ if [ $1 = "meson" ]; then
 
     CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
     meson .. --cross-file "${prefix_dir}/crossfile" --libdir lib \
-        -Dlibmpv=true -Dlua=luajit -D{shaderc,spirv-cross,d3d11}=enabled
+        -Dlibmpv=true -Dlua=luajit -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
 
     meson compile
 fi
@@ -186,7 +197,7 @@ if [ $1 = "waf" ]; then
     PKG_CONFIG=pkg-config CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
     python3 ./waf configure \
         --enable-libmpv-shared --lua=luajit \
-        --enable-{shaderc,spirv-cross,d3d11}
+        --enable-{shaderc,spirv-cross,d3d11,libplacebo}
 
     python3 ./waf build --verbose
 fi
