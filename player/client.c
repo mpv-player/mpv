@@ -692,6 +692,9 @@ static void dup_event_data(struct mpv_event *ev)
     case MPV_EVENT_END_FILE:
         ev->data = talloc_memdup(NULL, ev->data, sizeof(mpv_event_end_file));
         break;
+    case MPV_EVENT_SCREENSHOT:
+        ev->data = talloc_strdup(NULL, (const char *) ev->data);
+        break;
     default:
         // Doesn't use events with memory allocation.
         if (ev->data)
@@ -2025,6 +2028,13 @@ int mpv_event_to_node(mpv_node *dst, mpv_event *event)
         break;
     }
 
+    case MPV_EVENT_SCREENSHOT: {
+        const char *filename = event->data;
+
+        node_map_add_string(dst, "filename", filename);
+        break;
+    }
+
     }
     return 0;
 }
@@ -2084,6 +2094,7 @@ static const char *const event_table[] = {
     [MPV_EVENT_PROPERTY_CHANGE] = "property-change",
     [MPV_EVENT_QUEUE_OVERFLOW] = "event-queue-overflow",
     [MPV_EVENT_HOOK] = "hook",
+    [MPV_EVENT_SCREENSHOT] = "screenshot",
 };
 
 const char *mpv_event_name(mpv_event_id event)

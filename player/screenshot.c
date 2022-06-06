@@ -91,6 +91,7 @@ static bool write_screenshot(struct mp_cmd_ctx *cmd, struct mp_image *img,
 
     if (ok) {
         mp_cmd_msg(cmd, MSGL_INFO, "Screenshot: '%s'", filename);
+        mp_notify(mpctx, MPV_EVENT_SCREENSHOT, (void *) filename);
     } else {
         mp_cmd_msg(cmd, MSGL_ERR, "Error writing screenshot!");
     }

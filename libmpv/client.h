@@ -1347,6 +1347,10 @@ typedef enum mpv_event_id {
      * See also mpv_event and mpv_event_hook.
      */
     MPV_EVENT_HOOK              = 25,
+    /**
+     * Happens when a screenshot is saved.
+     */
+    MPV_EVENT_SCREENSHOT        = 26,
     // Internal note: adjust INTERNAL_EVENT_BASE when adding new events.
 } mpv_event_id;
 
