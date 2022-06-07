@@ -1904,8 +1904,10 @@ int vo_wayland_init(struct vo *vo)
 
     wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
     wl->display_fd = wl_display_get_fd(wl->display);
+
     wl->frame_callback = wl_surface_frame(wl->surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
+    wl_surface_commit(wl->surface);
 
     update_app_id(wl);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
@@ -1916,7 +1918,6 @@ int vo_wayland_init(struct vo *vo)
 int vo_wayland_reconfig(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
-    bool configure = false;
 
     MP_VERBOSE(wl, "Reconfiguring!\n");
 
@@ -1924,16 +1925,19 @@ int vo_wayland_reconfig(struct vo *vo)
         wl->current_output = find_output(wl);
         if (!wl->current_output)
             return false;
-        wl_surface_commit(wl->surface);
-        configure = true;
+        set_surface_scaling(wl);
+        wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
     set_geometry(wl);
 
     wl->window_size = wl->vdparams;
 
-    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+    if ((!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) ||
+        mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0)
+    {
         wl->geometry = wl->window_size;
+    }
 
     if (wl->vo_opts->fullscreen)
         toggle_fullscreen(wl);
@@ -1943,12 +1947,6 @@ int vo_wayland_reconfig(struct vo *vo)
 
     if (wl->vo_opts->window_minimized)
         do_minimize(wl);
-
-    if (configure) {
-        wl->geometry = wl->window_size;
-        wl_display_roundtrip(wl->display);
-        wl->pending_vo_events |= VO_EVENT_DPI;
-    }
 
     wl->pending_vo_events |= VO_EVENT_RESIZE;
 
