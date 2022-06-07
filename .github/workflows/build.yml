@@ -1,13 +1,7 @@
 name: build
 
 on:
-  push:
-    branches:
-      - master
-      - ci
-      - 'release/**'
-  pull_request:
-    branches: [master]
+  workflow_dispatch:
 
 jobs:
   mingw:
