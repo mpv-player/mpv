@@ -298,10 +298,10 @@ Playback Control
     :no:       Never use precise seeks.
     :absolute: Use precise seeks if the seek is to an absolute position in the
                file, such as a chapter seek, but not for relative seeks like
-               the default behavior of arrow keys (default).
+               the default behavior of arrow keys.
     :default:  Like ``absolute``, but enable hr-seeks in audio-only cases. The
                exact behavior is implementation specific and may change with
-               new releases.
+               new releases (default).
     :yes:      Use precise seeks whenever possible.
     :always:   Same as ``yes`` (for compatibility).
 
