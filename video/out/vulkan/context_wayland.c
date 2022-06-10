@@ -16,6 +16,7 @@
  */
 
 #include "video/out/gpu/context.h"
+#include "video/out/present_sync.h"
 #include "video/out/wayland_common.h"
 
 #include "common.h"
@@ -39,17 +40,14 @@ static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
         vo_wayland_wait_frame(wl);
 
     if (wl->presentation)
-        vo_wayland_sync_swap(wl);
+        present_sync_swap(wl->present);
 }
 
 static void wayland_vk_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
-    if (wl->presentation) {
-        info->vsync_duration = wl->vsync_duration;
-        info->skipped_vsyncs = wl->last_skipped_vsyncs;
-        info->last_queue_display_time = wl->last_queue_display_time;
-    }
+    if (wl->presentation)
+        present_sync_get_info(wl->present, info);
 }
 
 static void wayland_vk_uninit(struct ra_ctx *ctx)

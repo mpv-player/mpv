@@ -21,9 +21,11 @@
 #include <va/va_wayland.h>
 #include <va/va_drmcommon.h>
 
+#include "present_sync.h"
 #include "sub/osd.h"
 #include "video/vaapi.h"
 #include "wayland_common.h"
+
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
 #include "generated/wayland/viewporter.h"
 
@@ -383,7 +385,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
     if (wl->presentation)
-        vo_wayland_sync_swap(wl);
+        present_sync_swap(wl->present);
 }
 static void flip_page(struct vo *vo)
 {
@@ -393,11 +395,8 @@ static void flip_page(struct vo *vo)
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
 {
     struct vo_wayland_state *wl = vo->wl;
-    if (wl->presentation) {
-        info->vsync_duration = wl->vsync_duration;
-        info->skipped_vsyncs = wl->last_skipped_vsyncs;
-        info->last_queue_display_time = wl->last_queue_display_time;
-    }
+    if (wl->presentation)
+        present_sync_get_info(wl->present, info);
 }
 
 const struct vo_driver video_out_vaapi_wayland = {

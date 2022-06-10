@@ -30,6 +30,7 @@
 #include "options/m_config.h"
 #include "osdep/io.h"
 #include "osdep/timer.h"
+#include "present_sync.h"
 #include "wayland_common.h"
 #include "win_state.h"
 
@@ -143,28 +144,18 @@ struct vo_wayland_output {
     struct wl_list link;
 };
 
-struct vo_wayland_sync {
-    int64_t ust;
-    int64_t msc;
-    int64_t sbc;
-    bool filled;
-};
-
 static int check_for_resize(struct vo_wayland_state *wl, wl_fixed_t x_w, wl_fixed_t y_w,
                             int edge_pixels, enum xdg_toplevel_resize_edge *edge);
 static int get_mods(struct vo_wayland_state *wl);
-static int last_available_sync(struct vo_wayland_state *wl);
 static int lookupkey(int key);
 static int set_cursor_visibility(struct vo_wayland_state *wl, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
 
 static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b);
-static void queue_new_sync(struct vo_wayland_state *wl);
 static void remove_output(struct vo_wayland_output *out);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void set_geometry(struct vo_wayland_state *wl);
 static void set_surface_scaling(struct vo_wayland_state *wl);
-static void sync_shift(struct vo_wayland_state *wl);
 static void window_move(struct vo_wayland_state *wl, uint32_t serial);
 
 /* Wayland listener boilerplate */
@@ -980,7 +971,6 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
                               uint32_t flags)
 {
     struct vo_wayland_state *wl = data;
-    sync_shift(wl);
 
     if (fback)
         wp_presentation_feedback_destroy(fback);
@@ -996,15 +986,10 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     //  - seq_lo + seq_hi is the equivalent of oml's msc
     //  - these values are updated everytime the compositor receives feedback.
 
-    int index = last_available_sync(wl);
-    if (index < 0) {
-        queue_new_sync(wl);
-        index = 0;
-    }
     int64_t sec = (uint64_t) tv_sec_lo + ((uint64_t) tv_sec_hi << 32);
-    wl->sync[index].ust = sec * 1000000LL + (uint64_t) tv_nsec / 1000;
-    wl->sync[index].msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
-    wl->sync[index].filled = true;
+    int64_t ust = sec * 1000000LL + (uint64_t) tv_nsec / 1000;
+    int64_t msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
+    present_update_sync_values(wl->present, ust, msc);
 }
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
@@ -1378,15 +1363,6 @@ static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
     return fallback_output;
 }
 
-static int last_available_sync(struct vo_wayland_state *wl)
-{
-    for (int i = wl->sync_size - 1; i > -1; --i) {
-        if (!wl->sync[i].filled)
-            return i;
-    }
-    return -1;
-}
-
 static int lookupkey(int key)
 {
     const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
@@ -1401,13 +1377,6 @@ static int lookupkey(int key)
         mpkey = lookup_keymap_table(keymap, key);
 
     return mpkey;
-}
-
-static void queue_new_sync(struct vo_wayland_state *wl)
-{
-    wl->sync_size += 1;
-    wl->sync = talloc_realloc(wl, wl->sync, struct vo_wayland_sync, wl->sync_size);
-    sync_shift(wl);
 }
 
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode)
@@ -1542,15 +1511,6 @@ static int spawn_cursor(struct vo_wayland_state *wl)
     wl->allocated_cursor_scale = wl->scaling;
 
     return 0;
-}
-
-static void sync_shift(struct vo_wayland_state *wl)
-{
-    for (int i = wl->sync_size - 1; i > 0; --i) {
-        wl->sync[i] = wl->sync[i-1];
-    }
-    struct vo_wayland_sync sync = {0, 0, 0, 0};
-    wl->sync[0] = sync;
 }
 
 static void toggle_fullscreen(struct vo_wayland_state *wl)
@@ -1813,6 +1773,7 @@ int vo_wayland_init(struct vo *vo)
         .display = wl_display_connect(NULL),
         .vo = vo,
         .log = mp_log_new(wl, vo->log, "wayland"),
+        .refresh_interval = 0,
         .scaling = 1,
         .wakeup_pipe = {-1, -1},
         .dnd_fd = -1,
@@ -1874,13 +1835,7 @@ int vo_wayland_init(struct vo *vo)
     }
 
     if (wl->presentation) {
-        wl->last_ust = 0;
-        wl->last_msc = 0;
-        wl->refresh_interval = 0;
-        wl->sync = talloc_zero_array(wl, struct vo_wayland_sync, 1);
-        struct vo_wayland_sync sync = {0, 0, 0, 0};
-        wl->sync[0] = sync;
-        wl->sync_size += 1;
+        wl->present = talloc_zero(wl, struct mp_present);
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_presentation_interface.name);
@@ -1977,43 +1932,6 @@ bool vo_wayland_supported_format(struct vo *vo, uint32_t drm_format)
     }
 
     return false;
-}
-
-void vo_wayland_sync_swap(struct vo_wayland_state *wl)
-{
-    int index = wl->sync_size - 1;
-
-    // If these are the same, presentation feedback has not been received.
-    // This can happen if a frame takes too long and misses vblank.
-    // Additionally, a compositor may return an ust value of 0. In either case,
-    // Don't attempt to use these statistics and wait until the next presentation
-    // event arrives.
-    if (!wl->sync[index].ust || wl->sync[index].ust == wl->last_ust) {
-        wl->last_skipped_vsyncs = -1;
-        wl->vsync_duration = -1;
-        wl->last_queue_display_time = -1;
-        return;
-    }
-
-    wl->last_skipped_vsyncs = 0;
-
-    int64_t ust_passed = wl->sync[index].ust ? wl->sync[index].ust - wl->last_ust: 0;
-    wl->last_ust = wl->sync[index].ust;
-    int64_t msc_passed = wl->sync[index].msc ? wl->sync[index].msc - wl->last_msc: 0;
-    wl->last_msc = wl->sync[index].msc;
-
-    if (msc_passed && ust_passed)
-        wl->vsync_duration = ust_passed / msc_passed;
-
-    struct timespec ts;
-    if (clock_gettime(CLOCK_MONOTONIC, &ts)) {
-        return;
-    }
-
-    uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
-    uint64_t ust_mp_time = mp_time_us() - (now_monotonic - wl->sync[index].ust);
-
-    wl->last_queue_display_time = ust_mp_time + wl->vsync_duration;
 }
 
 void vo_wayland_uninit(struct vo *vo)
@@ -2149,7 +2067,7 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
      * 4. make up crap if vblank_time is still <= 0 (better than nothing) */
 
     if (wl->presentation)
-        vblank_time = wl->vsync_duration;
+        vblank_time = wl->present->vsync_duration;
 
     if (vblank_time <= 0 && wl->refresh_interval > 0)
         vblank_time = wl->refresh_interval;

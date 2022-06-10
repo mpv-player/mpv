@@ -1099,6 +1099,10 @@ if xv.found()
     sources += files('video/out/vo_xv.c')
 endif
 
+if wayland['use'] or x11['use']
+    sources += ('video/out/present_sync.c')
+endif
+
 
 # OpenGL feature checking
 gl = {

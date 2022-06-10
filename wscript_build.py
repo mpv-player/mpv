@@ -503,6 +503,7 @@ def build(ctx):
         ( "video/out/opengl/oml_sync.c",         "egl-x11 || gl-x11" ),
         ( "video/out/opengl/ra_gl.c",            "gl" ),
         ( "video/out/opengl/utils.c",            "gl" ),
+        ( "video/out/present_sync.c",            "wayland || x11" ),
         ( "video/out/vo.c" ),
         ( "video/out/vo_caca.c",                 "caca" ),
         ( "video/out/vo_direct3d.c",             "direct3d" ),
