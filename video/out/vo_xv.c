@@ -45,6 +45,7 @@
 #include "common/msg.h"
 #include "vo.h"
 #include "video/mp_image.h"
+#include "present_sync.h"
 #include "x11_common.h"
 #include "sub/osd.h"
 #include "sub/draw_bmp.h"
@@ -689,6 +690,15 @@ static void flip_page(struct vo *vo)
 
     if (!ctx->Shmem_Flag)
         XSync(vo->x11->display, False);
+
+    vo_x11_present(vo);
+    present_sync_swap(vo->x11->present);
+}
+
+static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    present_sync_get_info(x11->present, info);
 }
 
 // Note: REDRAW_FRAME can call this with NULL.
@@ -889,6 +899,7 @@ const struct vo_driver video_out_xv = {
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,
+    .get_vsync = get_vsync,
     .wakeup = vo_x11_wakeup,
     .wait_events = vo_x11_wait_events,
     .uninit = uninit,

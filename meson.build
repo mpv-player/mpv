@@ -1071,6 +1071,7 @@ x11 = {
              dependency('xscrnsaver', version: '>= 1.0.0', required: x11_opt),
              dependency('xext', version: '>= 1.0.0', required: x11_opt),
              dependency('xinerama', version: '>= 1.0.0', required: x11_opt),
+             dependency('xpresent', version: '>= 1.0.0', required: x11_opt),
              dependency('xrandr', version: '>= 1.2.0', required: x11_opt)],
     'use': true,
 }
@@ -1253,10 +1254,6 @@ if egl_x11.allowed()
     features += 'egl-x11'
     gl += {'use': true}
     sources += files('video/out/opengl/context_x11egl.c')
-endif
-
-if egl_x11.allowed() or gl_x11.allowed()
-    sources += files('video/out/opengl/oml_sync.c')
 endif
 
 plain_gl = get_option('plain-gl').require(
