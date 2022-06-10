@@ -534,6 +534,7 @@ video_output_features = [
                                  'xscrnsaver',  '>= 1.0.0',
                                  'xext',        '>= 1.0.0',
                                  'xinerama',    '>= 1.0.0',
+                                 'xpresent',    '>= 1.0.0',
                                  'xrandr',      '>= 1.2.0'),
     } , {
         'name': '--xv',

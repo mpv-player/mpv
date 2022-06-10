@@ -38,9 +38,9 @@
 #endif
 
 #include "osdep/timer.h"
+#include "video/out/present_sync.h"
 #include "video/out/x11_common.h"
 #include "context.h"
-#include "oml_sync.h"
 #include "utils.h"
 
 struct priv {
@@ -48,9 +48,6 @@ struct priv {
     XVisualInfo *vinfo;
     GLXContext context;
     GLXFBConfig fbc;
-
-    Bool (*XGetSyncValues)(Display*, GLXDrawable, int64_t*, int64_t*, int64_t*);
-    struct oml_sync sync;
 };
 
 static void glx_uninit(struct ra_ctx *ctx)
@@ -154,14 +151,6 @@ static bool create_context_x11(struct ra_ctx *ctx, GL *gl, bool es)
     p->context = context;
 
     mpgl_load_functions(gl, (void *)glXGetProcAddressARB, glxstr, vo->log);
-
-    if (gl_check_extension(glxstr, "GLX_OML_sync_control")) {
-        p->XGetSyncValues =
-            (void *)glXGetProcAddressARB((const GLubyte *)"glXGetSyncValuesOML");
-    }
-    if (p->XGetSyncValues)
-        MP_VERBOSE(vo, "Using GLX_OML_sync_control.\n");
-
     return true;
 }
 
@@ -209,20 +198,6 @@ static void set_glx_attrib(int *attribs, int name, int value)
     }
 }
 
-static void update_vsync_oml(struct ra_ctx *ctx)
-{
-    struct priv *p = ctx->priv;
-
-    assert(p->XGetSyncValues);
-
-    int64_t ust, msc, sbc;
-    if (!p->XGetSyncValues(ctx->vo->x11->display, ctx->vo->x11->window,
-                           &ust, &msc, &sbc))
-        ust = msc = sbc = -1;
-
-    oml_sync_swap(&p->sync, ust, msc, sbc);
-}
-
 static bool glx_check_visible(struct ra_ctx *ctx)
 {
     return vo_x11_check_visible(ctx->vo);
@@ -230,18 +205,15 @@ static bool glx_check_visible(struct ra_ctx *ctx)
 
 static void glx_swap_buffers(struct ra_ctx *ctx)
 {
-    struct priv *p = ctx->priv;
-
     glXSwapBuffers(ctx->vo->x11->display, ctx->vo->x11->window);
-
-    if (p->XGetSyncValues)
-        update_vsync_oml(ctx);
+    vo_x11_present(ctx->vo);
+    present_sync_swap(ctx->vo->x11->present);
 }
 
 static void glx_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
-    struct priv *p = ctx->priv;
-    oml_sync_get_info(&p->sync, info);
+    struct vo_x11_state *x11 = ctx->vo->x11;
+    present_sync_get_info(x11->present, info);
 }
 
 static bool glx_init(struct ra_ctx *ctx)

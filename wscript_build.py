@@ -500,7 +500,6 @@ def build(ctx):
         ( "video/out/opengl/hwdec_rpi.c",        "rpi-mmal" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/opengl/libmpv_gl.c",        "gl" ),
-        ( "video/out/opengl/oml_sync.c",         "egl-x11 || gl-x11" ),
         ( "video/out/opengl/ra_gl.c",            "gl" ),
         ( "video/out/opengl/utils.c",            "gl" ),
         ( "video/out/present_sync.c",            "wayland || x11" ),

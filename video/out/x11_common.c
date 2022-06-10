@@ -36,6 +36,7 @@
 #include <X11/extensions/scrnsaver.h>
 #include <X11/extensions/dpms.h>
 #include <X11/extensions/Xinerama.h>
+#include <X11/extensions/Xpresent.h>
 #include <X11/extensions/Xrandr.h>
 
 #include "config.h"
@@ -48,6 +49,7 @@
 #include "input/event.h"
 #include "video/image_loader.h"
 #include "video/mp_image.h"
+#include "present_sync.h"
 #include "x11_common.h"
 #include "mpv_talloc.h"
 
@@ -593,6 +595,7 @@ int vo_x11_init(struct vo *vo)
 
     x11_error_output = x11->log;
     XSetErrorHandler(x11_errorhandler);
+    x11->present = talloc_zero(x11, struct mp_present);
 
     dispName = XDisplayName(NULL);
 
@@ -1277,6 +1280,21 @@ void vo_x11_check_events(struct vo *vo)
                 x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
             }
             break;
+        case GenericEvent: {
+            XGenericEventCookie *cookie = (XGenericEventCookie *)&Event.xcookie;
+            if (cookie->extension == x11->present_code && x11->have_present &&
+                x11->has_mesa && !x11->has_nvidia)
+            {
+                XGetEventData(x11->display, cookie);
+                if (cookie->evtype == PresentCompleteNotify) {
+                    XPresentCompleteNotifyEvent *present_event;
+                    present_event = (XPresentCompleteNotifyEvent *)cookie->data;
+                    present_update_sync_values(x11->present, present_event->ust,
+                                               present_event->msc);
+                }
+            }
+            break;
+        }
         default:
             if (Event.type == x11->ShmCompletionEvent) {
                 if (x11->ShmCompletionWaitCount > 0)
@@ -1503,6 +1521,14 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
                       vis->depth, CopyFromParent, vis->visual, xswamask, &xswa);
     Atom protos[1] = {XA(x11, WM_DELETE_WINDOW)};
     XSetWMProtocols(x11->display, x11->window, protos, 1);
+
+    if (!XPresentQueryExtension(x11->display, &x11->present_code, NULL, NULL)) {
+        MP_VERBOSE(x11, "The XPresent extension is not supported.\n");
+        x11->have_present = false;
+    } else {
+        x11->have_present = true;
+        XPresentSelectInput(x11->display, x11->window, PresentCompleteNotifyMask);
+    }
 
     x11->mouse_cursor_set = false;
     x11->mouse_cursor_visible = true;
@@ -2043,6 +2069,13 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     return VO_NOTIMPL;
+}
+
+void vo_x11_present(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    XPresentNotifyMSC(x11->display, x11->window,
+                      0, 0, 1, 0);
 }
 
 void vo_x11_wakeup(struct vo *vo)
