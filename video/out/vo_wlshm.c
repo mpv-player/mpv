@@ -24,6 +24,7 @@
 #include <libswscale/swscale.h>
 
 #include "osdep/endian.h"
+#include "present_sync.h"
 #include "sub/osd.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
@@ -262,17 +263,14 @@ static void flip_page(struct vo *vo)
         vo_wayland_wait_frame(wl);
 
     if (wl->presentation)
-        vo_wayland_sync_swap(wl);
+        present_sync_swap(wl->present);
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
 {
     struct vo_wayland_state *wl = vo->wl;
-    if (wl->presentation) {
-        info->vsync_duration = wl->vsync_duration;
-        info->skipped_vsyncs = wl->last_skipped_vsyncs;
-        info->last_queue_display_time = wl->last_queue_display_time;
-    }
+    if (wl->presentation)
+        present_sync_get_info(wl->present, info);
 }
 
 static void uninit(struct vo *vo)

@@ -87,14 +87,8 @@ struct vo_wayland_state {
     /* presentation-time */
     struct wp_presentation  *presentation;
     struct wp_presentation_feedback *feedback;
-    struct vo_wayland_sync *sync;
-    int sync_size;
-    int64_t last_ust;
-    int64_t last_msc;
-    int64_t last_skipped_vsyncs;
-    int64_t last_queue_display_time;
+    struct mp_present *present;
     int64_t refresh_interval;
-    int64_t vsync_duration;
 
     /* xdg-decoration */
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
