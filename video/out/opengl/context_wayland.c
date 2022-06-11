@@ -69,7 +69,7 @@ static void resize(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     struct vo_wayland_state *wl = ctx->vo->wl;
 
-    MP_VERBOSE(wl, "Handling resize on the egl side¥n");
+    MP_VERBOSE(wl, "Handling resize on the egl side\n");
 
     if (!p->egl_window)
         egl_create_window(ctx);
