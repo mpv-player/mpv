@@ -1905,12 +1905,12 @@ int vo_wayland_init(struct vo *vo)
     wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
     wl->display_fd = wl_display_get_fd(wl->display);
 
+    update_app_id(wl);
+    mp_make_wakeup_pipe(wl->wakeup_pipe);
+
     wl->frame_callback = wl_surface_frame(wl->surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     wl_surface_commit(wl->surface);
-
-    update_app_id(wl);
-    mp_make_wakeup_pipe(wl->wakeup_pipe);
 
     return true;
 }
