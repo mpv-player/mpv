@@ -1,5 +1,7 @@
 #include "audio/chmap.h"
+#include "audio/chmap_avchannel.h"
 #include "audio/chmap_sel.h"
+#include "common/msg.h"
 #include "tests.h"
 
 #define LAYOUTS(...) (char*[]){__VA_ARGS__, NULL}
@@ -28,6 +30,129 @@ static void test_sel(const char *input, const char *expected_selection,
     assert_string_equal(mp_chmap_to_str(&input_map),
                         mp_chmap_to_str(&expected_map));
 }
+
+#if HAVE_AV_CHANNEL_LAYOUT
+static bool layout_matches(const AVChannelLayout *av_layout,
+                           const struct mp_chmap *mp_layout,
+                           bool require_default_unspec)
+{
+    if (!mp_chmap_is_valid(mp_layout) ||
+        !av_channel_layout_check(av_layout) ||
+        av_layout->nb_channels != mp_layout->num ||
+        mp_layout->num > MP_NUM_CHANNELS)
+        return false;
+
+    switch (av_layout->order) {
+    case AV_CHANNEL_ORDER_UNSPEC:
+    {
+        if (!require_default_unspec)
+            return true;
+
+        // mp_chmap essentially does not have a concept of "unspecified"
+        // so we check if the mp layout matches the default layout for such
+        // channel count.
+        struct mp_chmap default_layout = { 0 };
+        mp_chmap_from_channels(&default_layout, mp_layout->num);
+        return mp_chmap_equals(mp_layout, &default_layout);
+    }
+    case AV_CHANNEL_ORDER_NATIVE:
+        return av_layout->u.mask == mp_chmap_to_lavc(mp_layout);
+    default:
+        // TODO: handle custom layouts
+        return false;
+    }
+
+    return true;
+}
+
+static void test_mp_chmap_to_av_channel_layout(const struct test_ctx *ctx)
+{
+    mp_ch_layout_tuple *mapping_array = NULL;
+    void *iter = NULL;
+    bool anything_failed = false;
+
+    MP_VERBOSE(ctx, "Testing mp_chmap -> AVChannelLayout conversions\n");
+
+    while ((mapping_array = mp_iterate_builtin_layouts(&iter))) {
+        const char *mapping_name = (*mapping_array)[0];
+        const char *mapping_str  = (*mapping_array)[1];
+        struct mp_chmap mp_layout = { 0 };
+        AVChannelLayout av_layout = { 0 };
+        char layout_desc[128] = {0};
+
+        assert_true(mp_chmap_from_str(&mp_layout, bstr0(mapping_str)));
+
+        mp_chmap_to_av_layout(&av_layout, &mp_layout);
+
+        assert_false(av_channel_layout_describe(&av_layout,
+                                                layout_desc, 128) < 0);
+
+        bool success =
+            (strcmp(layout_desc, mp_chmap_to_str(&mp_layout)) == 0 ||
+             layout_matches(&av_layout, &mp_layout, false));
+        if (!success)
+            anything_failed = true;
+
+        MP_MSG(ctx, success ? MSGL_V : MSGL_FATAL,
+               "%s: %s (%s) -> %s\n",
+               success ? "Success" : "Failure",
+               mapping_str, mapping_name, layout_desc);
+
+        av_channel_layout_uninit(&av_layout);
+    }
+
+    assert_false(anything_failed);
+}
+
+static void test_av_channel_layout_to_mp_chmap(const struct test_ctx *ctx)
+{
+    const AVChannelLayout *av_layout = NULL;
+    void *iter = NULL;
+    bool anything_failed = false;
+
+    MP_VERBOSE(ctx, "Testing AVChannelLayout -> mp_chmap conversions\n");
+
+    while ((av_layout = av_channel_layout_standard(&iter))) {
+        struct mp_chmap mp_layout = { 0 };
+        char layout_desc[128] = {0};
+
+        assert_false(av_channel_layout_describe(av_layout,
+                                                layout_desc, 128) < 0);
+
+        bool ret = mp_chmap_from_av_layout(&mp_layout, av_layout);
+        if (!ret) {
+            bool too_many_channels =
+                av_layout->nb_channels > MP_NUM_CHANNELS;
+            MP_MSG(ctx, too_many_channels ? MSGL_V : MSGL_FATAL,
+                    "Conversion from '%s' to mp_chmap failed (%s)!\n",
+                    layout_desc,
+                    too_many_channels ?
+                    "channel count was over max, ignoring" :
+                    "unexpected, failing");
+
+            // we should for now only fail with things such as 22.2
+            // due to mp_chmap being currently limited to 16 channels
+            assert_true(too_many_channels);
+
+            continue;
+        }
+
+        bool success =
+            (strcmp(layout_desc, mp_chmap_to_str(&mp_layout)) == 0 ||
+             layout_matches(av_layout, &mp_layout, true));
+        if (!success)
+            anything_failed = true;
+
+        MP_MSG(ctx, success ? MSGL_V : MSGL_FATAL,
+               "%s: %s -> %s\n",
+               success ? "Success" : "Failure",
+               layout_desc, mp_chmap_to_str(&mp_layout));
+    }
+
+    assert_false(anything_failed);
+}
+#endif
+
 
 static void run(struct test_ctx *ctx)
 {
@@ -84,6 +209,11 @@ static void run(struct test_ctx *ctx)
     mp_chmap_from_str(&b, bstr0("6.1(back)"));
     assert_int_equal(mp_chmap_diffn(&a, &b), 0);
     assert_int_equal(mp_chmap_diffn(&b, &a), 3);
+
+#if HAVE_AV_CHANNEL_LAYOUT
+    test_av_channel_layout_to_mp_chmap(ctx);
+    test_mp_chmap_to_av_channel_layout(ctx);
+#endif
 }
 
 const struct unittest test_chmap = {
