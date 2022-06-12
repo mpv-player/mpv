@@ -10,9 +10,10 @@ if [ "$1" = "meson" ]; then
       -Dlibmpv=true           \
       -Dmanpage-build=enabled \
       -Dshaderc=enabled       \
+      -Dtests=true            \
       -Dvulkan=enabled
     meson compile -C build --verbose
-    ./build/mpv
+    ./build/mpv --no-config -v --unittest=all-simple
 fi
 
 if [ "$1" = "waf" ]; then
@@ -24,7 +25,8 @@ if [ "$1" = "waf" ]; then
       --enable-libmpv-shared \
       --enable-manpage-build \
       --enable-shaderc       \
+      --enable-tests         \
       --enable-vulkan
     python3 ./waf build --verbose
-    ./build/mpv
+    ./build/mpv -v --no-config -v --unittest=all-simple
 fi
