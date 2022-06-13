@@ -58,7 +58,7 @@ function gettar () {
 
 ## iconv
 if [ ! -e "$prefix_dir/lib/libiconv.dll.a" ]; then
-    ver=1.16
+    ver=1.17
     gettar "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ver}.tar.gz"
     builddir libiconv-${ver}
     ../configure --host=$TARGET $commonflags
@@ -68,7 +68,7 @@ fi
 
 ## zlib
 if [ ! -e "$prefix_dir/lib/libz.dll.a" ]; then
-    ver=1.2.11
+    ver=1.2.12
     gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
     make -fwin32/Makefile.gcc PREFIX=$TARGET- SHARED_MODE=1 \
@@ -126,8 +126,8 @@ fi
 
 ## freetype2
 if [ ! -e "$prefix_dir/lib/libfreetype.dll.a" ]; then
-    ver=2.11.0
-    gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.gz"
+    ver=2.12.1
+    gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     ZLIB_LIBS="-L'$prefix_dir/lib' -lz" \
     ../configure --host=$TARGET $commonflags --with-png=no
@@ -138,7 +138,7 @@ fi
 
 ## fribidi
 if [ ! -e "$prefix_dir/lib/libfribidi.dll.a" ]; then
-    ver=1.0.11
+    ver=1.0.12
     gettar "https://github.com/fribidi/fribidi/releases/download/v${ver}/fribidi-${ver}.tar.xz"
     builddir fribidi-${ver}
     ../configure --host=$TARGET $commonflags
@@ -148,7 +148,7 @@ fi
 
 ## harfbuzz
 if [ ! -e "$prefix_dir/lib/libharfbuzz.dll.a" ]; then
-    ver=3.0.0
+    ver=4.3.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     ../configure --host=$TARGET $commonflags --with-icu=no

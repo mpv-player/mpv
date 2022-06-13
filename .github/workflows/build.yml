@@ -22,7 +22,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: mingw_prefix/
-          key: "${{ matrix.target }}-2"
+          key: "${{ matrix.target }}-3"
 
       - name: Install dependencies
         run: |
