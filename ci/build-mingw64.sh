@@ -69,7 +69,7 @@ fi
 ## zlib
 if [ ! -e "$prefix_dir/lib/libz.dll.a" ]; then
     ver=1.2.11
-    gettar "https://zlib.net/zlib-${ver}.tar.gz"
+    gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
     make -fwin32/Makefile.gcc PREFIX=$TARGET- SHARED_MODE=1 \
         DESTDIR="$prefix_dir" install \
