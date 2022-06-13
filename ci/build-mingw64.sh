@@ -188,7 +188,8 @@ if [ $1 = "meson" ]; then
 
     CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
     meson .. --cross-file "${prefix_dir}/crossfile" --libdir lib \
-        -Dlibmpv=true -Dlua=luajit -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
+        -D{libmpv,tests}=true -Dlua=luajit \
+        -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
 
     meson compile
 fi
@@ -197,7 +198,7 @@ if [ $1 = "waf" ]; then
     PKG_CONFIG=pkg-config CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
     python3 ./waf configure \
         --enable-libmpv-shared --lua=luajit \
-        --enable-{shaderc,spirv-cross,d3d11,libplacebo}
+        --enable-{shaderc,spirv-cross,d3d11,libplacebo,tests}
 
     python3 ./waf build --verbose
 fi
