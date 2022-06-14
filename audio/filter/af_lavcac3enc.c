@@ -270,6 +270,18 @@ static const struct mp_filter_info af_lavcac3enc_filter = {
     .destroy = destroy,
 };
 
+static void add_chmaps_to_autoconv(struct mp_autoconvert *conv,
+                                   const struct AVCodec *codec)
+{
+    const uint64_t *lch = codec->channel_layouts;
+    for (int n = 0; lch && lch[n]; n++) {
+        struct mp_chmap chmap = {0};
+        mp_chmap_from_lavc(&chmap, lch[n]);
+        if (mp_chmap_is_valid(&chmap))
+            mp_autoconvert_add_chmap(conv, &chmap);
+    }
+}
+
 static struct mp_filter *af_lavcac3enc_create(struct mp_filter *parent,
                                               void *options)
 {
@@ -342,13 +354,7 @@ static struct mp_filter *af_lavcac3enc_create(struct mp_filter *parent,
             mp_autoconvert_add_afmt(conv, mpfmt);
     }
 
-    const uint64_t *lch = s->lavc_acodec->channel_layouts;
-    for (int n = 0; lch && lch[n]; n++) {
-        struct mp_chmap chmap = {0};
-        mp_chmap_from_lavc(&chmap, lch[n]);
-        if (mp_chmap_is_valid(&chmap))
-            mp_autoconvert_add_chmap(conv, &chmap);
-    }
+    add_chmaps_to_autoconv(conv, s->lavc_acodec);
 
     // At least currently, the AC3 encoder doesn't export sample rates.
     mp_autoconvert_add_srate(conv, 48000);
