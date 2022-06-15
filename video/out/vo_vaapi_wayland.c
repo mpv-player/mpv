@@ -305,6 +305,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
                                                     WL_SHM_FORMAT_XRGB8888);
         if (!p->solid_buffer)
             return VO_ERROR;
+        wl_surface_attach(wl->surface, p->solid_buffer, 0, 0);
     }
 
     if (!vo_wayland_reconfig(vo))
@@ -374,7 +375,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!entry)
         return;
 
-    wl_surface_attach(wl->surface, p->solid_buffer, 0, 0);
     wl_surface_attach(wl->video_surface, entry->buffer, 0, 0);
     wl_surface_damage_buffer(wl->video_surface, 0, 0, INT32_MAX, INT32_MAX);
     wl_surface_commit(wl->video_surface);
