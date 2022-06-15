@@ -318,7 +318,6 @@ static int resize(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     struct priv *p = vo->priv;
 
-    wl_subsurface_set_sync(wl->video_subsurface);
     vo_wayland_set_opaque_region(wl, 0);
     const int width = wl->scaling * mp_rect_w(wl->geometry);
     const int height = wl->scaling * mp_rect_h(wl->geometry);
@@ -334,7 +333,6 @@ static int resize(struct vo *vo)
     wl_subsurface_set_position(wl->video_subsurface, p->dst.x0, p->dst.y0);
 
     vo->want_redraw = true;
-    wl_subsurface_set_desync(wl->video_subsurface);
 
     return VO_TRUE;
 }
