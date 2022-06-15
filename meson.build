@@ -30,8 +30,10 @@ ffmpeg = {
 libass = dependency('libass', version: '>= 0.12.2')
 pthreads = dependency('threads')
 
-dependencies = [ffmpeg['deps'],
-                libass,
+# the dependency order of libass -> ffmpeg is necessary due to
+# static linking symbol resolution between fontconfig and MinGW
+dependencies = [libass,
+                ffmpeg['deps'],
                 pthreads]
 
 features = [ffmpeg['name'], libass.name(), pthreads.name()]
