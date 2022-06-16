@@ -117,9 +117,6 @@ static bool mpegl_init(struct ra_ctx *ctx)
         .refine_config = ctx->opts.want_alpha ? pick_xrgba_config : NULL,
     };
 
-    if (!strcmp(eglQueryString(p->egl_display, EGL_VENDOR), "Mesa Project"))
-        ctx->opts.want_alpha = 0;
-
     EGLConfig config;
     if (!mpegl_create_context_cb(ctx, p->egl_display, cb, &p->egl_context, &config))
         goto uninit;
