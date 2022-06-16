@@ -243,6 +243,9 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
         priv->trim_samples -= trim;
     }
 
+    // Strip possibly bogus float values like Infinity, NaN, denormalized
+    mp_aframe_sanitize_float(mpframe);
+
     if (mp_aframe_get_size(mpframe) > 0) {
         *out = MAKE_FRAME(MP_FRAME_AUDIO, mpframe);
     } else {
