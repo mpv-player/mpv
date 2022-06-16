@@ -466,6 +466,37 @@ void mp_aframe_skip_samples(struct mp_aframe *f, int samples)
         f->pts += samples / mp_aframe_get_effective_rate(f);
 }
 
+// sanitize a floating point sample value
+#define sanitizef(f) do {       \
+    if (!isnormal(f))           \
+        (f) = 0;                \
+} while (0)
+
+void mp_aframe_sanitize_float(struct mp_aframe *mpa)
+{
+    int format = af_fmt_from_planar(mp_aframe_get_format(mpa));
+    if (format != AF_FORMAT_FLOAT && format != AF_FORMAT_DOUBLE)
+        return;
+    int num_planes = mp_aframe_get_planes(mpa);
+    uint8_t **planes = mp_aframe_get_data_rw(mpa);
+    if (!planes)
+        return;
+    for (int p = 0; p < num_planes; p++) {
+        void *ptr = planes[p];
+        int total = mp_aframe_get_total_plane_samples(mpa);
+        switch (format) {
+        case AF_FORMAT_FLOAT:
+            for (int s = 0; s < total; s++)
+                sanitizef(((float *)ptr)[s]);
+            break;
+        case AF_FORMAT_DOUBLE:
+            for (int s = 0; s < total; s++)
+                sanitizef(((double *)ptr)[s]);
+            break;
+        }
+    }
+}
+
 // Return the timestamp of the sample just after the end of this frame.
 double mp_aframe_end_pts(struct mp_aframe *f)
 {

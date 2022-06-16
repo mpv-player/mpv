@@ -60,6 +60,7 @@ char *mp_aframe_format_str_buf(char *buf, size_t buf_size, struct mp_aframe *fmt
 #define mp_aframe_format_str(fmt) mp_aframe_format_str_buf((char[32]){0}, 32, (fmt))
 
 void mp_aframe_skip_samples(struct mp_aframe *f, int samples);
+void mp_aframe_sanitize_float(struct mp_aframe *f);
 double mp_aframe_end_pts(struct mp_aframe *f);
 double mp_aframe_duration(struct mp_aframe *f);
 void mp_aframe_clip_timestamps(struct mp_aframe *f, double start, double end);
