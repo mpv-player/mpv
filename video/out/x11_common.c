@@ -381,6 +381,7 @@ static void xrandr_read(struct vo_x11_state *x11)
         talloc_free(x11->displays[i].name);
 
     x11->num_displays = 0;
+    bool randr_14 = false;
 
     if (x11->xrandr_event < 0) {
         int event_base, error_base;
@@ -388,6 +389,10 @@ static void xrandr_read(struct vo_x11_state *x11)
             MP_VERBOSE(x11, "Couldn't init Xrandr.\n");
             return;
         }
+        int major, minor;
+        XRRQueryVersion(x11->display, &major, &minor);
+        if (major >= 2 || minor >= 4)
+            randr_14 = true;
         x11->xrandr_event = event_base + RRNotify;
         XRRSelectInput(x11->display, x11->rootwin, RRScreenChangeNotifyMask |
                        RRCrtcChangeNotifyMask | RROutputChangeNotifyMask);
@@ -397,6 +402,26 @@ static void xrandr_read(struct vo_x11_state *x11)
     if (!r) {
         MP_VERBOSE(x11, "Xrandr doesn't work.\n");
         return;
+    }
+
+    /* Look at the available providers on the current screen and try to determine
+     * the driver. If amd/intel/radeon, assume this is mesa. If nvidia is found,
+     * assume nvidia. Because the same screen can have multiple providers (e.g.
+     * a laptop with switchable graphics), we need to know both of these things.
+     * In practice, this is used for determining whether or not to use XPresent
+     * (i.e. needs to be Mesa and not Nvidia). Requires Randr 1.4. */
+    if (randr_14) {
+        XRRProviderResources *pr = XRRGetProviderResources(x11->display, x11->rootwin);
+        for (int i = 0; i < pr->nproviders; i++) {
+            XRRProviderInfo *info = XRRGetProviderInfo(x11->display, r, pr->providers[i]);
+            char *amd = strcasestr(info->name, "amd");
+            char *intel = strcasestr(info->name, "intel");
+            char *nvidia = strcasestr(info->name, "nvidia");
+            char *radeon = strcasestr(info->name, "radeon");
+            x11->has_mesa = (amd || intel || radeon) ? true : false;
+            x11->has_nvidia = nvidia ? true : false;
+        }
+        XRRFreeProviderResources(pr);
     }
 
     int primary_id = -1;
