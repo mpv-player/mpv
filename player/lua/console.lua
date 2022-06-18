@@ -25,8 +25,10 @@ local opts = {
     -- have to be a monospaced font.
     font = "",
     -- Set the font size used for the REPL and the console. This will be
-    -- multiplied by "scale."
+    -- multiplied by "scale".
     font_size = 16,
+    -- Remove duplicate entries in history as to only keep the latest one.
+    history_dedup = true,
 }
 
 function detect_platform()
@@ -232,7 +234,7 @@ function show_and_type(text, cursor_pos)
 
     -- Save the line currently being edited, just in case
     if line ~= text and line ~= '' and history[#history] ~= line then
-        history[#history + 1] = line
+        history_add(line)
     end
 
     line = text
@@ -374,13 +376,28 @@ function help_command(param)
     log_add('', output)
 end
 
+-- Add a line to the history and deduplicate
+function history_add(text)
+    if opts.history_dedup then
+        -- More recent entries are more likely to be repeated
+        for i = #history, 1, -1 do
+            if history[i] == text then
+                table.remove(history, i)
+                break
+            end
+        end
+    end
+
+    history[#history + 1] = text
+end
+
 -- Run the current command and clear the line (Enter)
 function handle_enter()
     if line == '' then
         return
     end
     if history[#history] ~= line then
-        history[#history + 1] = line
+        history_add(line)
     end
 
     -- match "help [<text>]", return <text> or "", strip all whitespace
@@ -416,7 +433,7 @@ function go_history(new_pos)
     -- entry. This makes it much less frustrating to accidentally hit Up/Down
     -- while editing a line.
     if old_pos == #history + 1 and line ~= '' and history[#history] ~= line then
-        history[#history + 1] = line
+        history_add(line)
     end
 
     -- Now show the history line (or a blank line for #history + 1)
