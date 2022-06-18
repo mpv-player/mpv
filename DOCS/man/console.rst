@@ -142,4 +142,9 @@ Configurable Options
     Default: 16
 
     Set the font size used for the REPL and the console. This will be
-    multiplied by "scale."
+    multiplied by "scale".
+
+``history_dedup``
+    Default: true
+
+    Remove duplicate entries in history as to only keep the latest one.
