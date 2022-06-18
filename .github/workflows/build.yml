@@ -127,7 +127,7 @@ jobs:
       - name: Install dependencies
         run: |
           ./bootstrap.py
-          zypper -n install meson
+          zypper -n install --force-resolution --replacefiles meson
           # workaround to avoid "fatal: unsafe repository" error
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
