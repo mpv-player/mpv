@@ -55,6 +55,21 @@ end
 -- Apply user-set options
 options.read_options(opts)
 
+local styles = {
+    -- Colors are stolen from base16 Eighties by Chris Kempson
+    -- and converted to BGR as is required by ASS.
+    -- 2d2d2d 393939 515151 697374
+    -- 939fa0 c8d0d3 dfe6e8 ecf0f2
+    -- 7a77f2 5791f9 66ccff 99cc99
+    -- cccc66 cc9966 cc99cc 537bd2
+
+    debug = '{\\1c&Ha09f93&}',
+    verbose = '{\\1c&H99cc99&}',
+    warn = '{\\1c&H66ccff&}',
+    error = '{\\1c&H7a77f2&}',
+    fatal = '{\\1c&H5791f9&\\b1}',
+}
+
 local repl_active = false
 local insert_mode = false
 local pending_update = false
@@ -329,7 +344,6 @@ function help_command(param)
     table.sort(cmdlist, function(c1, c2)
         return c1.name < c2.name
     end)
-    local error_style = '{\\1c&H7a77f2&}'
     local output = ''
     if param == '' then
         output = 'Available commands:\n'
@@ -350,7 +364,7 @@ function help_command(param)
             end
         end
         if not cmd then
-            log_add(error_style, 'No command matches "' .. param .. '"!')
+            log_add(styles.error, 'No command matches "' .. param .. '"!')
             return
         end
         output = output .. 'Command "' .. cmd.name .. '"\n'
@@ -836,19 +850,18 @@ mp.register_event('log-message', function(e)
     -- OSD display itself.
     if e.level == 'trace' then return end
 
-    -- Use color for debug/v/warn/error/fatal messages. Colors are stolen from
-    -- base16 Eighties by Chris Kempson.
+    -- Use color for debug/v/warn/error/fatal messages.
     local style = ''
     if e.level == 'debug' then
-        style = '{\\1c&Ha09f93&}'
+        style = styles.debug
     elseif e.level == 'v' then
-        style = '{\\1c&H99cc99&}'
+        style = styles.verbose
     elseif e.level == 'warn' then
-        style = '{\\1c&H66ccff&}'
+        style = styles.warn
     elseif e.level == 'error' then
-        style = '{\\1c&H7a77f2&}'
+        style = styles.error
     elseif e.level == 'fatal' then
-        style = '{\\1c&H5791f9&\\b1}'
+        style = styles.fatal
     end
 
     log_add(style, '[' .. e.prefix .. '] ' .. e.text)
