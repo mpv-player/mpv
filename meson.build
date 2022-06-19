@@ -1494,8 +1494,12 @@ if vaapi_egl['use'] or vaapi_libplacebo['use']
     sources += files('video/out/hwdec/hwdec_vaapi.c')
 endif
 
-vdpau = dependency('vdpau', version: '>= 0.2', required: get_option('vdpau'))
-if vdpau.found() and x11['use']
+vdpau_opt = get_option('vdpau').require(
+    x11['use'],
+    error_message: 'x11 was not found!',
+)
+vdpau = dependency('vdpau', version: '>= 0.2', required: vdpau_opt)
+if vdpau.found()
     dependencies += vdpau
     features += 'vdpau'
     sources += files('video/filter/vf_vdpaupp.c',
