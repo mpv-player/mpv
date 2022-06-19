@@ -164,6 +164,7 @@ jobs:
                 ffmpeg \
                 libplacebo \
                 libxkbcommon \
+                libxpresent \
                 luajit \
                 meson \
                 openal-soft \
