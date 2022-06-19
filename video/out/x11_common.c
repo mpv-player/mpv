@@ -416,12 +416,14 @@ static void xrandr_read(struct vo_x11_state *x11)
         XRRProviderResources *pr = XRRGetProviderResources(x11->display, x11->rootwin);
         for (int i = 0; i < pr->nproviders; i++) {
             XRRProviderInfo *info = XRRGetProviderInfo(x11->display, r, pr->providers[i]);
-            char *amd = strcasestr(info->name, "amd");
-            char *intel = strcasestr(info->name, "intel");
-            char *nvidia = strcasestr(info->name, "nvidia");
-            char *radeon = strcasestr(info->name, "radeon");
-            x11->has_mesa = (amd || intel || radeon) ? true : false;
-            x11->has_nvidia = nvidia ? true : false;
+            struct bstr provider_name = bstrdup(x11, bstr0(info->name));
+            bstr_lower(provider_name);
+            int amd = bstr_find0(provider_name, "amd");
+            int intel = bstr_find0(provider_name, "intel");
+            int nvidia = bstr_find0(provider_name, "nvidia");
+            int radeon = bstr_find0(provider_name, "radeon");
+            x11->has_mesa = amd >= 0 || intel >= 0 || radeon >= 0;
+            x11->has_nvidia = nvidia >= 0;
         }
         XRRFreeProviderResources(pr);
     }
