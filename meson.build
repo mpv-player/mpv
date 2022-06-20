@@ -1010,11 +1010,6 @@ if spirv_cross.found()
     dependencies += spirv_cross
 endif
 
-d3d11 = {
-    'name': 'd3d11',
-    'use': win32_desktop and shaderc.found() and spirv_cross.found() and
-           get_option('d3d11').allowed(),
-}
 d3d11 = get_option('d3d11').require(
     win32_desktop and shaderc.found() and spirv_cross.found(),
     error_message: 'Either is not a win32 desktop or shaderc nor spirv-cross were found!',
