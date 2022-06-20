@@ -42,6 +42,7 @@ Interface changes
     - `--sub-visibility` no longer has any effect on secondary subtitles
     - add `film-grain` sub-parameter to `format` video filter
     - add experimental `--vo=vaapi-wayland` video output driver
+    - add `--x11-present` for controlling whether to use xorg's present extension
  --- mpv 0.34.0 ---
     - deprecate selecting by card number with `--drm-connector`, add
       `--drm-device` which can be used instead

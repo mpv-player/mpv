@@ -1286,11 +1286,13 @@ void vo_x11_check_events(struct vo *vo)
             break;
         case GenericEvent: {
             XGenericEventCookie *cookie = (XGenericEventCookie *)&Event.xcookie;
-            if (cookie->extension == x11->present_code && x11->have_present &&
-                x11->has_mesa && !x11->has_nvidia)
+            if (cookie->extension == x11->present_code && x11->have_present)
             {
+                int present = x11->opts->x11_present;
+                bool use_present = (x11->has_mesa && !x11->has_nvidia &&
+                                   present) || present == 2;
                 XGetEventData(x11->display, cookie);
-                if (cookie->evtype == PresentCompleteNotify) {
+                if (cookie->evtype == PresentCompleteNotify && use_present) {
                     XPresentCompleteNotifyEvent *present_event;
                     present_event = (XPresentCompleteNotifyEvent *)cookie->data;
                     present_update_sync_values(x11->present, present_event->ust,
