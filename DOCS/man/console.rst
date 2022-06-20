@@ -135,8 +135,9 @@ Configurable Options
 ``font``
     Default: unset (picks a hardcoded font depending on detected platform)
 
-    Set the font used for the REPL and the console. This probably doesn't
-    have to be a monospaced font.
+    Set the font used for the REPL and the console.
+    This has to be a monospaced font for the completion suggestions to be
+    aligned correctly.
 
 ``font_size``
     Default: 16
@@ -153,3 +154,10 @@ Configurable Options
     Default: true
 
     Remove duplicate entries in history as to only keep the latest one.
+    multiplied by "scale."
+
+``font_hw_ratio``
+    Default: 2.0
+
+    The ratio of font height to font width.
+    Adjusts table width of completion suggestions.

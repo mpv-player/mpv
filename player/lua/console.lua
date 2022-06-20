@@ -21,8 +21,8 @@ local opts = {
     -- All drawing is scaled by this value, including the text borders and the
     -- cursor. Change it if you have a high-DPI display.
     scale = 1,
-    -- Set the font used for the REPL and the console. This probably doesn't
-    -- have to be a monospaced font.
+    -- Set the font used for the REPL and the console.
+    -- This has to be a monospaced font.
     font = "",
     -- Set the font size used for the REPL and the console. This will be
     -- multiplied by "scale".
@@ -30,6 +30,9 @@ local opts = {
     border_size = 1,
     -- Remove duplicate entries in history as to only keep the latest one.
     history_dedup = true,
+    -- The ratio of font height to font width.
+    -- Adjusts table width of completion suggestions.
+    font_hw_ratio = 2.0,
 }
 
 function detect_platform()
@@ -136,6 +139,70 @@ function ass_escape(str)
     return str
 end
 
+-- Takes a list of strings and a max width in characters
+-- returns a string containing the formatted table
+function format_table(list, width_max)
+    if #list == 0 then
+        return ''
+    end
+
+    local spaces_min = 2
+    local spaces_max = 8
+    local list_size = #list
+    local column_count = 1
+    local row_count = list_size
+    local column_widths
+    -- total width without spacing
+    local width_total = 0
+
+    -- use as many columns as possible
+    for rows = 1, list_size do
+        local columns = math.ceil(list_size / rows)
+        column_widths = {}
+        width_total = 0
+
+        -- find out width of each column
+        for column = 1, columns do
+            local width = 0
+            for row = 1, rows do
+                local i = row + (column - 1) * rows
+                if i > #list then break end
+                local len = list[i]:len()
+                if width < len then
+                    width = len
+                end
+            end
+            column_widths[column] = width
+            width_total = width_total + width
+        end
+
+        if width_total + columns * spaces_min <= width_max then
+            row_count = rows
+            column_count = columns
+            break
+        end
+    end
+
+    local spaces = math.floor((width_max - width_total) / (column_count - 1))
+    spaces = math.max(spaces_min, math.min(spaces_max, spaces))
+    local spacing = column_count > 1 and string.format('%' .. spaces .. 's', ' ') or ''
+
+    local rows = {}
+    for row = 1, row_count do
+        local columns = {}
+        for column = 1, column_count do
+            local i = row + (column - 1) * row_count
+            if i > #list then break end
+            local format_string = column == column_count and '%s'
+                                  or '%-' .. column_widths[column] .. 's'
+            columns[column] = string.format(format_string, list[i])
+        end
+        -- first row is at the bottom
+        rows[row_count - row + 1] = table.concat(columns, spacing)
+    end
+    return table.concat(rows, '\n')
+end
+
 -- Render the REPL and console as an ASS OSD
 function update()
     pending_update = false
@@ -194,16 +261,18 @@ function update()
         log_ass = log_ass .. style .. log_buffer[i].style .. ass_escape(log_buffer[i].text)
     end
 
-    local suggestion_ass = ''
-    for _, l in ipairs(suggestion_buffer) do
-        suggestion_ass = suggestion_ass .. style .. styles.suggestion .. ass_escape(l)
-    end
+    -- estimate how many characters fit in a line
+    local width_max = math.ceil(screenx / opts.font_size * opts.font_hw_ratio)
+    local suggestions = ass_escape(format_table(suggestion_buffer, width_max))
+    local suggestion_ass = style .. styles.suggestion .. suggestions
 
     ass:new_event()
     ass:an(1)
     ass:pos(2, screeny - 2 - global_margins.b * screeny)
     ass:append(log_ass .. '\\N')
-    ass:append(suggestion_ass)
+    if #suggestions > 0 then
+        ass:append(suggestion_ass .. '\\N')
+    end
     ass:append(style .. '> ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. after_cur)
@@ -599,7 +668,7 @@ function complete()
                     table.sort(completions)
                     suggestion_buffer = {}
                     for i, completion in ipairs(completions) do
-                        suggestion_buffer[i] = completion .. '\n'
+                        suggestion_buffer[i] = completion
                     end
                 end
 
