@@ -139,11 +139,14 @@ function ass_escape(str)
     return str
 end
 
--- Takes a list of strings and a max width in characters
--- returns a string containing the formatted table
-function format_table(list, width_max)
+-- Takes a list of strings, a max width in characters and
+-- optionally a max row count.
+-- The result contains at least one column.
+-- Rows are cut off from the top if rows_max is specified.
+-- returns a string containing the formatted table and the row count
+function format_table(list, width_max, rows_max)
     if #list == 0 then
-        return ''
+        return '', 0
     end
 
     local spaces_min = 2
@@ -188,7 +191,8 @@ function format_table(list, width_max)
     local spacing = column_count > 1 and string.format('%' .. spaces .. 's', ' ') or ''
 
     local rows = {}
-    for row = 1, row_count do
+    local rows_truncated = math.min(row_count, rows_max)
+    for row = 1, rows_truncated do
         local columns = {}
         for column = 1, column_count do
             local i = row + (column - 1) * row_count
@@ -198,9 +202,9 @@ function format_table(list, width_max)
             columns[column] = string.format(format_string, list[i])
         end
         -- first row is at the bottom
-        rows[row_count - row + 1] = table.concat(columns, spacing)
+        rows[rows_truncated - row + 1] = table.concat(columns, spacing)
     end
-    return table.concat(rows, '\n')
+    return table.concat(rows, '\n'), rows_truncated
 end
 
 -- Render the REPL and console as an ASS OSD
@@ -246,25 +250,28 @@ function update()
     local before_cur = ass_escape(line:sub(1, cursor - 1))
     local after_cur = ass_escape(line:sub(cursor))
 
-    -- Render log messages as ASS. This will render at most screeny / font_size
-    -- messages.
+    -- Render log messages as ASS.
+    -- This will render at most screeny / font_size - 1 messages.
+
+    -- lines above the prompt
+    -- subtract 1.5 to account for the input line
+    local screeny_factor = (1 - global_margins.t - global_margins.b)
+    local lines_max = math.ceil(screeny * screeny_factor / opts.font_size - 1.5)
+    -- Estimate how many characters fit in one line
+    local width_max = math.ceil(screenx / opts.font_size * opts.font_hw_ratio)
+
+    local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
+    local suggestion_ass = style .. styles.suggestion .. ass_escape(suggestions)
+
     local log_ass = ''
     local log_messages = #log_buffer
-    local screeny_factor = (1 - global_margins.t - global_margins.b)
-    -- subtract 1.5 to account for the input line
-    local log_max_lines = screeny * screeny_factor / opts.font_size - 1.5
-    log_max_lines = math.ceil(log_max_lines)
+    local log_max_lines = math.max(0, lines_max - rows)
     if log_max_lines < log_messages then
         log_messages = log_max_lines
     end
     for i = #log_buffer - log_messages + 1, #log_buffer do
         log_ass = log_ass .. style .. log_buffer[i].style .. ass_escape(log_buffer[i].text)
     end
-
-    -- estimate how many characters fit in a line
-    local width_max = math.ceil(screenx / opts.font_size * opts.font_hw_ratio)
-    local suggestions = ass_escape(format_table(suggestion_buffer, width_max))
-    local suggestion_ass = style .. styles.suggestion .. suggestions
 
     ass:new_event()
     ass:an(1)
