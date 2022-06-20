@@ -31,11 +31,6 @@
 
 #define VA_POOL_NUM_ALLOCATED_INIT 30
 
-struct va_image_formats {
-    VAImageFormat *entries;
-    int num;
-};
-
 struct va_pool_entry {
     /* key */
     VASurfaceID surface;
@@ -62,7 +57,6 @@ struct priv {
 
     VADisplay display;
     struct mp_vaapi_ctx *mpvaapi;
-    struct va_image_formats *image_formats;
     struct wl_shm_pool *solid_buffer_pool;
     struct wl_buffer *solid_buffer;
     struct va_pool *va_pool;
@@ -210,22 +204,6 @@ static struct va_pool_entry *va_pool_alloc_entry(struct vo *vo, struct va_pool *
     return entry;
 }
 
-static void va_get_formats(struct priv *ctx)
-{
-    struct va_image_formats *formats = talloc_ptrtype(ctx, formats);
-
-    formats->num = vaMaxNumImageFormats(ctx->display);
-    formats->entries = talloc_array(formats, VAImageFormat, formats->num);
-    VAStatus status = vaQueryImageFormats(ctx->display, formats->entries,
-                                          &formats->num);
-    if (!CHECK_VA_STATUS(ctx, "vaQueryImageFormats()"))
-        return;
-    MP_VERBOSE(ctx, "%d image formats available:\n", formats->num);
-    for (int i = 0; i < formats->num; i++)
-        MP_VERBOSE(ctx, "  %s\n", mp_tag_str(formats->entries[i].fourcc));
-    ctx->image_formats = formats;
-}
-
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -255,20 +233,19 @@ static int preinit(struct vo *vo)
     p->log = vo->log;
     if (!vo_wayland_init(vo))
         return VO_ERROR;
+
     p->display = vaGetDisplayWl(vo->wl->display);
     if (!p->display) {
         MP_ERR(vo, "Unable to get the VA Display.\n");
         return VO_ERROR;
     }
+
     p->mpvaapi = va_initialize(p->display, p->log, false);
     if (!p->mpvaapi) {
         vaTerminate(p->display);
         p->display = NULL;
         goto fail;
     }
-    va_get_formats(p);
-    if (!p->image_formats)
-        goto fail;
 
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_add(vo->hwdec_devs, &p->mpvaapi->hwctx);
