@@ -1880,3 +1880,14 @@ if get_option('cplayer')
     executable('mpv', sources, dependencies: dependencies, win_subsystem: 'windows,6.0',
                include_directories: includedir, install: true)
 endif
+
+summary({'d3d11': d3d11.allowed(),
+         'gpu-next': libplacebo_next,
+         'javascript': javascript.found(),
+         'libmpv': get_option('libmpv'),
+         'lua': lua['use'],
+         'opengl': GL.found() or egl['use'],
+         'vulkan': vulkan.found(),
+         'wayland': wayland['use'],
+         'x11': x11['use']},
+         bool_yn: true)
