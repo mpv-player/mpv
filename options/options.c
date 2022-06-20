@@ -175,6 +175,8 @@ static const m_option_t mp_vo_opt_list[] = {
     {"x11-netwm", OPT_CHOICE(x11_netwm, {"auto", 0}, {"no", -1}, {"yes", 1})},
     {"x11-bypass-compositor", OPT_CHOICE(x11_bypass_compositor,
         {"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})},
+    {"x11-present", OPT_CHOICE(x11_present,
+        {"no", 0}, {"auto", 1}, {"yes", 2})},
 #endif
 #if HAVE_WIN32_DESKTOP
     {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
@@ -212,6 +214,7 @@ const struct m_sub_options vo_sub_opts = {
         .WinID = -1,
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,
+        .x11_present = 1,
         .mmcss_profile = "Playback",
         .ontop_level = -1,
         .timing_offset = 0.050,

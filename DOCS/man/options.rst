@@ -3354,6 +3354,23 @@ Window
 
     ``never`` asks the window manager to never disable the compositor.
 
+``--x11-present=<no|auto|yes>``
+    Whether or not to use presentation statistics from X11's presentation
+    extension (default: ``auto``).
+
+    mpv asks X11 for present events which it then may use for more accurate
+    frame presentation. This only has an effect if ``--video-sync=display-...``
+    is being used.
+
+    The auto option enumerates XRandr providers for autodetection. If amd, radeon,
+    intel, or nouveau (the standard x86 Mesa drivers) is found and nvidia is NOT
+    found, presentation feedback is enabled. Other drivers are not assumed to
+    work, so they are not enabled automatically.
+
+    ``yes`` or ``no`` can still be passed regardless to enable/disable this
+    mechanism in case there is good/bad behavior with whatever your combination
+    of hardware/drivers/etc. happens to be.
+
 
 Disc Devices
 ------------
