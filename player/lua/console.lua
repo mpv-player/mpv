@@ -68,6 +68,7 @@ local styles = {
     warn = '{\\1c&H66ccff&}',
     error = '{\\1c&H7a77f2&}',
     fatal = '{\\1c&H5791f9&\\b1}',
+    suggestion = '{\\1c&Hcc99cc&}',
 }
 
 local repl_active = false
@@ -78,6 +79,7 @@ local cursor = 1
 local history = {}
 local history_pos = 1
 local log_buffer = {}
+local suggestion_buffer = {}
 local key_bindings = {}
 local global_margins = { t = 0, b = 0 }
 
@@ -192,10 +194,16 @@ function update()
         log_ass = log_ass .. style .. log_buffer[i].style .. ass_escape(log_buffer[i].text)
     end
 
+    local suggestion_ass = ''
+    for _, l in ipairs(suggestion_buffer) do
+        suggestion_ass = suggestion_ass .. style .. styles.suggestion .. ass_escape(l)
+    end
+
     ass:new_event()
     ass:an(1)
     ass:pos(2, screeny - 2 - global_margins.b * screeny)
     ass:append(log_ass .. '\\N')
+    ass:append(suggestion_ass)
     ass:append(style .. '> ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. after_cur)
@@ -284,6 +292,7 @@ function handle_char_input(c)
         line = line:sub(1, cursor - 1) .. c .. line:sub(cursor)
     end
     cursor = cursor + #c
+    suggestion_buffer = {}
     update()
 end
 
@@ -293,6 +302,7 @@ function handle_backspace()
     local prev = prev_utf8(line, cursor)
     line = line:sub(1, prev - 1) .. line:sub(cursor)
     cursor = prev
+    suggestion_buffer = {}
     update()
 end
 
@@ -300,6 +310,7 @@ end
 function handle_del()
     if cursor > line:len() then return end
     line = line:sub(1, cursor - 1) .. line:sub(next_utf8(line, cursor))
+    suggestion_buffer = {}
     update()
 end
 
@@ -326,6 +337,7 @@ function clear()
     cursor = 1
     insert_mode = false
     history_pos = #history + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -529,31 +541,30 @@ function build_completers()
     }
 end
 
--- Use 'list' to find possible tab-completions for 'part.' Returns the longest
--- common prefix of all the matching list items and a flag that indicates
--- whether the match was unique or not.
+-- Use 'list' to find possible tab-completions for 'part.'
+-- Returns a list of all potential completions and the longest
+-- common prefix of all the matching list items.
 function complete_match(part, list)
-    local completion = nil
-    local full_match = false
+    local completions = {}
+    local prefix = nil
 
     for _, candidate in ipairs(list) do
         if candidate:sub(1, part:len()) == part then
-            if completion and completion ~= candidate then
+            if prefix and prefix ~= candidate then
                 local prefix_len = part:len()
-                while completion:sub(1, prefix_len + 1)
+                while prefix:sub(1, prefix_len + 1)
                        == candidate:sub(1, prefix_len + 1) do
                     prefix_len = prefix_len + 1
                 end
-                completion = candidate:sub(1, prefix_len)
-                full_match = false
+                prefix = candidate:sub(1, prefix_len)
             else
-                completion = candidate
-                full_match = true
+                prefix = candidate
             end
+            completions[#completions + 1] = candidate
         end
     end
 
-    return completion, full_match
+    return completions, prefix
 end
 
 -- Complete the option or property at the cursor (TAB)
@@ -577,17 +588,23 @@ function complete()
             -- If the completer's pattern found a word, check the completer's
             -- list for possible completions
             local part = before_cur:sub(s, e)
-            local c, full = complete_match(part, completer.list)
-            if c then
+            local completions, prefix = complete_match(part, completer.list)
+            if #completions > 0 then
                 -- If there was only one full match from the list, add
                 -- completer.append to the final string. This is normally a
                 -- space or a quotation mark followed by a space.
-                if full and completer.append then
-                    c = c .. completer.append
+                if #completions == 1 then
+                    prefix = prefix .. (completer.append or '')
+                else
+                    table.sort(completions)
+                    suggestion_buffer = {}
+                    for i, completion in ipairs(completions) do
+                        suggestion_buffer[i] = completion .. '\n'
+                    end
                 end
 
                 -- Insert the completion and update
-                before_cur = before_cur:sub(1, s - 1) .. c
+                before_cur = before_cur:sub(1, s - 1) .. prefix
                 cursor = before_cur:len() + 1
                 line = before_cur .. after_cur
                 update()
