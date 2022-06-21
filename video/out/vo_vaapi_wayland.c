@@ -23,13 +23,26 @@
 
 #include "present_sync.h"
 #include "sub/osd.h"
+#include "sub/draw_bmp.h"
 #include "video/vaapi.h"
 #include "wayland_common.h"
 
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
 #include "generated/wayland/viewporter.h"
 
+static void draw_osd(struct vo *vo, double pts);
+
+struct buffer {
+    struct vo *vo;
+    size_t size;
+    struct wl_shm_pool *pool;
+    struct wl_buffer *buffer;
+    struct mp_image mpi;
+    bool busy;
+};
+
 #define VA_POOL_NUM_ALLOCATED_INIT 30
+#define WL_SHM_POOL_NUM_BUFFERS 2
 
 struct va_pool_entry {
     /* key */
@@ -52,7 +65,17 @@ struct priv {
     struct vo *vo;
     struct mp_rect src;
     struct mp_rect dst;
-    struct mp_osd_res osd;
+    struct mp_osd_res screen_osd_res;
+    struct buffer *osd_buffer[WL_SHM_POOL_NUM_BUFFERS];
+    uint8_t osd_next_index;
+    struct mp_draw_sub_cache *osd_cache;
+    struct sub_bitmap_list *osd_sbs;
+    struct wl_shm_pool *shm_pool;
+    uint8_t *shm_data;
+    int shm_width;
+    int shm_stride;
+    int shm_height;
+
     struct mp_log *log;
 
     VADisplay display;
@@ -61,6 +84,114 @@ struct priv {
     struct wl_buffer *solid_buffer;
     struct va_pool *va_pool;
 };
+
+static void buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
+{
+    struct buffer *buf = data;
+
+    buf->busy = false;
+}
+
+static const struct wl_buffer_listener buffer_listener = {
+    buffer_handle_release,
+};
+
+static uint8_t buffer_get_available(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    for (uint8_t i = 0; i < WL_SHM_POOL_NUM_BUFFERS; ++i){
+        if (!p->osd_buffer[i]->busy)
+            return i;
+    }
+
+    return 0xFF;
+}
+
+static void buffer_destroy(void *p)
+{
+    struct buffer *buf = p;
+    wl_buffer_destroy(buf->buffer);
+    munmap(buf->mpi.planes[0], buf->size);
+}
+
+static struct buffer *buffer_create(struct vo *vo, uint8_t index)
+{
+    struct priv *p = vo->priv;
+    struct buffer *buf;
+
+    buf = talloc_zero(NULL, struct buffer);
+    if (!buf)
+        goto error1;
+    buf->vo = vo;
+    buf->size = p->shm_height * p->shm_stride;
+    mp_image_set_size(&buf->mpi, p->shm_width, p->shm_height);
+    buf->mpi.planes[0] = p->shm_data;
+    buf->mpi.stride[0] = p->shm_stride;
+    buf->pool = p->shm_pool;
+    buf->busy = false;
+
+    buf->buffer = wl_shm_pool_create_buffer(p->shm_pool,
+                                            index * p->shm_stride * p->shm_height,
+                                            p->shm_width, p->shm_height,
+                                            p->shm_stride, WL_SHM_FORMAT_ARGB8888);
+    if (!buf->buffer)
+        goto error1;
+
+    wl_buffer_add_listener(buf->buffer, &buffer_listener, buf);
+    talloc_set_destructor(buf, buffer_destroy);
+
+    return buf;
+
+error1:
+    talloc_free(buf);
+
+    return NULL;
+}
+
+static bool create_shm_pool(struct vo *vo, int width, int height)
+{
+    struct vo_wayland_state *wl = vo->wl;
+    struct priv *p = vo->priv;
+    int fd;
+    int stride;
+    size_t size;
+    uint8_t *data;
+    struct wl_shm_pool *pool;
+
+    stride = MP_ALIGN_UP(width * 4, 16);
+    size = WL_SHM_POOL_NUM_BUFFERS * height * stride;
+    fd = vo_wayland_allocate_memfd(vo, size);
+    if (fd < 0)
+        goto error0;
+    data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (data == MAP_FAILED)
+        goto error1;
+    pool = wl_shm_create_pool(wl->shm, fd, size);
+    if (!pool)
+        goto error2;
+    close(fd);
+
+    if (p->shm_pool)
+        wl_shm_pool_destroy(p->shm_pool);
+    p->shm_pool = pool;
+    p->shm_width = width;
+    p->shm_stride = stride;
+    p->shm_height = height;
+    p->shm_data = data;
+
+    for (uint8_t i = 0; i < WL_SHM_POOL_NUM_BUFFERS; ++i){
+        talloc_free(p->osd_buffer[i]);
+        p->osd_buffer[i] = buffer_create(vo,i);
+    }
+
+    return true;
+error2:
+    munmap(data, size);
+error1:
+    close(fd);
+error0:
+    return false;
+}
 
 static void va_close_surface_descriptor(VADRMPRIMESurfaceDescriptor desc)
 {
@@ -223,6 +354,12 @@ static void uninit(struct vo *vo)
     }
     if (p->mpvaapi)
         va_destroy(p->mpvaapi);
+
+    for (uint8_t i = 0; i < WL_SHM_POOL_NUM_BUFFERS; ++i)
+        talloc_free(p->osd_buffer[i]);
+
+    if (p->shm_pool)
+        wl_shm_pool_destroy(p->shm_pool);
 }
 
 static int preinit(struct vo *vo)
@@ -231,6 +368,7 @@ static int preinit(struct vo *vo)
 
     p->vo = vo;
     p->log = vo->log;
+
     if (!vo_wayland_init(vo))
         return VO_ERROR;
 
@@ -293,26 +431,77 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
+static void gen_sbs(struct vo *vo, double pts){
+    struct priv *p = vo->priv;
+    struct mp_osd_res *res = &p->screen_osd_res;
+
+    if (!p->osd_cache)
+        p->osd_cache = mp_draw_sub_alloc(p, vo->global);
+
+    p->osd_sbs = osd_render(vo->osd, *res, pts, 0,
+                                             mp_draw_sub_formats);
+    if (!p->osd_sbs->num_items) {
+        talloc_free(p->osd_sbs);
+        p->osd_sbs = NULL;
+    }
+}
+
+static void draw_osd(struct vo *vo, double pts)
+{
+    struct priv *p = vo->priv;
+    struct mp_image *cur = &p->osd_buffer[p->osd_next_index]->mpi;
+
+    if (!p->osd_sbs)
+        return;
+
+    struct mp_rect act_rc[1], mod_rc[64];
+    int num_act_rc = 0, num_mod_rc = 0;
+
+    struct mp_image *osd = mp_draw_sub_overlay(p->osd_cache, p->osd_sbs,
+                    act_rc, MP_ARRAY_SIZE(act_rc), &num_act_rc,
+                    mod_rc, MP_ARRAY_SIZE(mod_rc), &num_mod_rc);
+
+    if (!osd)
+        goto error;
+
+    for (int n = 0; n < num_mod_rc; n++) {
+        struct mp_rect *rc = &mod_rc[n];
+
+        int rw = mp_rect_w(*rc);
+        int rh = mp_rect_h(*rc);
+
+        void *src = mp_image_pixel_ptr(osd, 0, rc->x0, rc->y0);
+        void *dst = cur->planes[0] + rc->x0 * 4 + rc->y0 * cur->stride[0];
+
+        memcpy_pic(dst, src, rw * 4, rh, cur->stride[0], osd->stride[0]);
+    }
+
+error:
+    talloc_free(p->osd_sbs);
+    p->osd_sbs = NULL;
+}
+
 static int resize(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
     struct priv *p = vo->priv;
+    struct mp_osd_res *osdr = &p->screen_osd_res;
 
     vo_wayland_set_opaque_region(wl, 0);
-    const int width = wl->scaling * mp_rect_w(wl->geometry);
-    const int height = wl->scaling * mp_rect_h(wl->geometry);
-    vo->dwidth = width;
-    vo->dheight = height;
-    vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
-
-    wp_viewport_set_destination(wl->viewport,
-                                (p->dst.x0 << 1) + mp_rect_w(p->dst),
-                                (p->dst.y0 << 1) + mp_rect_h(p->dst));
+    vo->dwidth = wl->scaling * mp_rect_w(wl->geometry);
+    vo->dheight = wl->scaling * mp_rect_h(wl->geometry);
+    vo_get_src_dst_rects(vo, &p->src, &p->dst, osdr);
+    osdr->w = vo->dwidth;
+    osdr->h = vo->dheight;
+    create_shm_pool(vo, osdr->w, osdr->h);
+    wp_viewport_set_destination(wl->viewport, vo->dwidth, vo->dheight);
+    wl_subsurface_set_position(wl->video_subsurface, p->dst.x0, p->dst.y0);
     wp_viewport_set_destination(wl->video_viewport, mp_rect_w(p->dst),
                                 mp_rect_h(p->dst));
-    wl_subsurface_set_position(wl->video_subsurface, p->dst.x0, p->dst.y0);
-
+    wl_subsurface_set_position(wl->overlay_subsurface, 0, 0);
+    wp_viewport_set_destination(wl->overlay_viewport, vo->dwidth, vo->dheight);
     vo->want_redraw = true;
+    p->osd_next_index = 0;
 
     return VO_TRUE;
 }
@@ -345,6 +534,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
+    double pts = frame->current->pts;
 
     if (!vo_wayland_check_visible(vo))
         return;
@@ -353,17 +543,26 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                                                       frame->current);
     if (!entry)
         return;
-
     wl_surface_attach(wl->video_surface, entry->buffer, 0, 0);
     wl_surface_damage_buffer(wl->video_surface, 0, 0, INT32_MAX, INT32_MAX);
     wl_surface_commit(wl->video_surface);
+    gen_sbs(vo,pts);
+    if (p->osd_sbs) {
+        p->osd_next_index = buffer_get_available(vo);
+        draw_osd(vo,pts);
+        wl_surface_attach(wl->overlay_surface, p->osd_buffer[p->osd_next_index]->buffer, 0, 0);
+        wl_surface_damage_buffer(wl->overlay_surface, 0, 0, INT32_MAX, INT32_MAX);
+        wl_surface_commit(wl->overlay_surface);
+        p->osd_buffer[p->osd_next_index]->busy = true;
+    }
     wl_surface_commit(wl->surface);
-
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
     if (wl->presentation)
         present_sync_swap(wl->present);
+
 }
+
 static void flip_page(struct vo *vo)
 {
     /* no-op */

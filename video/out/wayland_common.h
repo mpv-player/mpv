@@ -41,6 +41,8 @@ struct vo_wayland_state {
     struct wl_registry      *registry;
     struct wl_shm           *shm;
     struct wl_surface       *surface;
+    struct wl_surface       *overlay_surface;
+    struct wl_subsurface    *overlay_subsurface;
     struct wl_surface       *video_surface;
     struct wl_subsurface    *video_subsurface;
 
@@ -104,6 +106,7 @@ struct vo_wayland_state {
     struct wp_viewporter *viewporter;
     struct wp_viewport   *viewport;
     struct wp_viewport   *video_viewport;
+    struct wp_viewport   *overlay_viewport;
 
     /* Input */
     struct wl_keyboard *keyboard;

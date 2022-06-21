@@ -1060,11 +1060,19 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     if (!strcmp(interface, wl_compositor_interface.name) && (ver >= 4) && found++) {
         wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, 4);
         wl->surface = wl_compositor_create_surface(wl->compositor);
+
+        wl->overlay_surface = wl_compositor_create_surface(wl->compositor);
+        /* never accept input events on the overlay surface */
+        struct wl_region *region = wl_compositor_create_region(wl->compositor);
+        wl_surface_set_input_region(wl->overlay_surface, region);
+        wl_region_destroy(region);
+
         wl->video_surface = wl_compositor_create_surface(wl->compositor);
         /* never accept input events on the video surface */
-        struct wl_region *region = wl_compositor_create_region(wl->compositor);
+        region = wl_compositor_create_region(wl->compositor);
         wl_surface_set_input_region(wl->video_surface, region);
         wl_region_destroy(region);
+
         wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
     }
@@ -1815,11 +1823,14 @@ int vo_wayland_init(struct vo *vo)
     if (wl->subcompositor) {
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
         wl_subsurface_set_desync(wl->video_subsurface);
+        wl->overlay_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->overlay_surface, wl->surface);
+        wl_subsurface_set_desync(wl->overlay_subsurface);
     }
 
     if (wl->viewporter) {
         wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
         wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
+        wl->overlay_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->overlay_surface);
     }
 
     const char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
@@ -1999,6 +2010,9 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->video_viewport)
         wp_viewport_destroy (wl->video_viewport);
 
+    if (wl->overlay_viewport)
+        wp_viewport_destroy (wl->overlay_viewport);
+
     if (wl->dmabuf)
         zwp_linux_dmabuf_v1_destroy (wl->dmabuf);
 
@@ -2016,6 +2030,12 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->video_subsurface)
         wl_subsurface_destroy(wl->video_subsurface);
+
+    if (wl->overlay_surface)
+        wl_surface_destroy(wl->overlay_surface);
+
+    if (wl->overlay_subsurface)
+        wl_subsurface_destroy(wl->overlay_subsurface);
 
     if (wl->wm_base)
         xdg_wm_base_destroy(wl->wm_base);
