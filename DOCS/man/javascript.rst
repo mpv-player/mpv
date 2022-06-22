@@ -91,7 +91,7 @@ Where the Lua APIs use ``nil`` to indicate error, JS APIs use ``undefined``.
 ``mp.command_native(table [,def])`` (LE)
 
 ``id = mp.command_native_async(table [,fn])`` (LE) Notes: ``id`` is true-thy on
-success, ``fn`` is called always a-sync, ``error`` is empty string on success.
+success, ``error`` is empty string on success.
 
 ``mp.abort_async_command(id)``
 
