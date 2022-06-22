@@ -691,14 +691,17 @@ static void flip_page(struct vo *vo)
     if (!ctx->Shmem_Flag)
         XSync(vo->x11->display, False);
 
-    vo_x11_present(vo);
-    present_sync_swap(vo->x11->present);
+    if (vo->x11->use_present) {
+        vo_x11_present(vo);
+        present_sync_swap(vo->x11->present);
+    }
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
 {
     struct vo_x11_state *x11 = vo->x11;
-    present_sync_get_info(x11->present, info);
+    if (x11->use_present)
+        present_sync_get_info(x11->present, info);
 }
 
 // Note: REDRAW_FRAME can call this with NULL.

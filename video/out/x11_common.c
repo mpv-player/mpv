@@ -377,6 +377,19 @@ static int vo_wm_detect(struct vo *vo)
     return wm;
 }
 
+static void xpresent_set(struct vo_x11_state *x11)
+{
+    int present = x11->opts->x11_present;
+    x11->use_present = x11->present_code &&
+                       ((x11->has_mesa && !x11->has_nvidia && present) ||
+                        present == 2);
+    if (x11->use_present) {
+        MP_VERBOSE(x11, "XPresent enabled.\n");
+    } else {
+        MP_VERBOSE(x11, "XPresent disabled.\n");
+    }
+}
+
 static void xrandr_read(struct vo_x11_state *x11)
 {
     for(int i = 0; i < x11->num_displays; i++)
@@ -427,6 +440,8 @@ static void xrandr_read(struct vo_x11_state *x11)
                             nouveau >= 0 || radeon >= 0;
             x11->has_nvidia = x11->has_nvidia || nvidia >= 0;
         }
+        if (x11->present_code)
+            xpresent_set(x11);
         XRRFreeProviderResources(pr);
     }
 
@@ -1286,13 +1301,10 @@ void vo_x11_check_events(struct vo *vo)
             break;
         case GenericEvent: {
             XGenericEventCookie *cookie = (XGenericEventCookie *)&Event.xcookie;
-            if (cookie->extension == x11->present_code && x11->have_present)
+            if (cookie->extension == x11->present_code && x11->use_present)
             {
-                int present = x11->opts->x11_present;
-                bool use_present = (x11->has_mesa && !x11->has_nvidia &&
-                                   present) || present == 2;
                 XGetEventData(x11->display, cookie);
-                if (cookie->evtype == PresentCompleteNotify && use_present) {
+                if (cookie->evtype == PresentCompleteNotify) {
                     XPresentCompleteNotifyEvent *present_event;
                     present_event = (XPresentCompleteNotifyEvent *)cookie->data;
                     present_update_sync_values(x11->present, present_event->ust,
@@ -1530,11 +1542,11 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
 
     if (!XPresentQueryExtension(x11->display, &x11->present_code, NULL, NULL)) {
         MP_VERBOSE(x11, "The XPresent extension is not supported.\n");
-        x11->have_present = false;
     } else {
-        x11->have_present = true;
+        MP_VERBOSE(x11, "The XPresent extension was found.\n");
         XPresentSelectInput(x11->display, x11->window, PresentCompleteNotifyMask);
     }
+    xpresent_set(x11);
 
     x11->mouse_cursor_set = false;
     x11->mouse_cursor_visible = true;
@@ -1962,6 +1974,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 vo_x11_minimize(vo);
             if (opt == &opts->window_maximized)
                 vo_x11_maximize(vo);
+            if (opt == &opts->x11_present)
+                xpresent_set(x11);
             if (opt == &opts->geometry || opt == &opts->autofit ||
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
