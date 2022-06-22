@@ -76,7 +76,7 @@ struct vo_x11_state {
     double screensaver_time_last;
 
     struct mp_present *present;
-    bool have_present;
+    bool use_present;
     int present_code;
 
     XIM xim;

@@ -82,14 +82,17 @@ static void mpegl_swap_buffers(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
 
     eglSwapBuffers(p->egl_display, p->egl_surface);
-    vo_x11_present(ctx->vo);
-    present_sync_swap(ctx->vo->x11->present);
+    if (ctx->vo->x11->use_present) {
+        vo_x11_present(ctx->vo);
+        present_sync_swap(ctx->vo->x11->present);
+    }
 }
 
 static void mpegl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
     struct vo_x11_state *x11 = ctx->vo->x11;
-    present_sync_get_info(x11->present, info);
+    if (ctx->vo->x11->use_present)
+        present_sync_get_info(x11->present, info);
 }
 
 static bool mpegl_init(struct ra_ctx *ctx)
