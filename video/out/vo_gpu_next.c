@@ -1608,6 +1608,9 @@ static void update_render_options(struct vo *vo)
     // Map scaler options as best we can
     p->params.upscaler = map_scaler(p, SCALER_SCALE);
     p->params.downscaler = map_scaler(p, SCALER_DSCALE);
+#if PL_API_VER >= 207
+    p->params.plane_upscaler = map_scaler(p, SCALER_CSCALE);
+#endif
     p->frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
 
     // Request as many frames as required from the decoder
