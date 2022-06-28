@@ -131,7 +131,7 @@ static void disable_video_plane(struct ra_hwdec *hw)
         drm_object_set_property(request, p->ctx->drmprime_video_plane, "CRTC_ID", 0);
 
         int ret = drmModeAtomicCommit(p->ctx->fd, request,
-                                  DRM_MODE_ATOMIC_NONBLOCK, NULL);
+                                  0, NULL);
 
         if (ret)
             MP_ERR(hw, "Failed to commit disable plane request (code %d)", ret);
