@@ -412,7 +412,7 @@ static bool mp_imgfmt_get_desc_from_pixdesc(int mpfmt, struct mp_imgfmt_desc *ou
 {
     enum AVPixelFormat fmt = imgfmt2pixfmt(mpfmt);
     const AVPixFmtDescriptor *pd = av_pix_fmt_desc_get(fmt);
-    if (!pd || pd->nb_components > 4)
+    if (!pd || !pd->name || pd->nb_components > 4)
         return false;
 
     struct mp_imgfmt_desc desc = {
