@@ -545,7 +545,7 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
             talloc_free(data);
         }
     }
-    p->waiting_for_flip = true;
+    p->waiting_for_flip = !ret;
 
     if (atomic_ctx) {
         drmModeAtomicFree(atomic_ctx->request);
