@@ -1819,7 +1819,7 @@ Property list
 
 .. note::
 
-    Most options can be set as runtime via properties as well. Just remove the
+    Most options can be set at runtime via properties as well. Just remove the
     leading ``--`` from the option name. These are not documented below, see
     `OPTIONS`_ instead. Only properties which do not exist as option with the
     same name, or which have very different behavior from the options are
