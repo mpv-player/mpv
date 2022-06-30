@@ -159,7 +159,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
         if (drm_params->atomic_request_ptr) {
             request = *drm_params->atomic_request_ptr;
         } else {
-            MP_ERR(hw, "drm params pointer to atomic request is invalid");
+            MP_ERR(hw, "drm params pointer to atomic request is invalid\n");
             return -1;
         }
     }
