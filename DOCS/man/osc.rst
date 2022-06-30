@@ -236,7 +236,7 @@ Configurable Options
 
     Enable the OSC when fullscreen
 
-``showidlescreen``
+``idlescreen``
     Default: yes
 
     Show the mpv logo and message when idle
