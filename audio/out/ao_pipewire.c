@@ -298,6 +298,7 @@ static void for_each_sink(struct ao *ao, void (cb) (struct ao *ao, uint32_t id,
 
     pw_thread_loop_lock(priv->loop);
 
+    spa_zero(core_listener);
     pw_core_add_listener(priv->core, &core_listener, &for_each_sink_core_events, priv->loop);
     registry = pw_core_get_registry(priv->core, PW_VERSION_REGISTRY, 0);
     pw_core_sync(priv->core, 0, 0);
@@ -308,6 +309,7 @@ static void for_each_sink(struct ao *ao, void (cb) (struct ao *ao, uint32_t id,
             .sink_cb = cb,
             .sink_cb_ctx = cb_ctx,
     };
+    spa_zero(registry_listener);
     pw_registry_add_listener(registry, &registry_listener, &for_each_sink_registry_events, &revents_ctx);
     pw_thread_loop_wait(priv->loop);
 
