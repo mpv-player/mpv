@@ -236,7 +236,6 @@ static void uninit(struct ao *ao)
         pw_stream_destroy(p->stream);
     p->stream = NULL;
     if (p->core) {
-        pw_core_disconnect(p->core);
         pw_context_destroy(pw_core_get_context(p->core));
     }
     p->core = NULL;
