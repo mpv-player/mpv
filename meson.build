@@ -1650,7 +1650,7 @@ if rst2html.found()
     custom_target('html-manpages',
         input: manpage,
         output: 'mpv.html',
-        command: [rst2html, manpage, '@INPUT@', '@OUTPUT@'],
+        command: [rst2html, '@INPUT@', '@OUTPUT@'],
         install: true,
         install_dir: join_paths(datadir, 'doc', 'mpv')
     )
