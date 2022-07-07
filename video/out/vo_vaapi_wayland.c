@@ -37,7 +37,6 @@ struct va_pool_entry {
 
     VADRMPRIMESurfaceDescriptor desc;
     struct wl_buffer *buffer;
-    struct zwp_linux_buffer_params_v1 *params;
     uint32_t drm_format;
 };
 
@@ -77,8 +76,6 @@ static void va_free_entry(struct va_pool_entry *entry)
     va_close_surface_descriptor(entry->desc);
     if (entry->buffer)
         wl_buffer_destroy(entry->buffer);
-    if (entry->params)
-        zwp_linux_buffer_params_v1_destroy(entry->params);
     talloc_free(entry);
 }
 
@@ -115,29 +112,31 @@ static struct va_pool_entry *va_alloc_entry(struct vo *vo, struct mp_image *src)
     } else if (!CHECK_VA_STATUS(vo, "vaExportSurfaceHandle()")) {
         va_free_entry(entry);
         return NULL;
-    } else {
-        int i, j, plane = 0;
+    }
 
-        entry->params = zwp_linux_dmabuf_v1_create_params(wl->dmabuf);
-        for (i = 0; i < entry->desc.num_layers; i++) {
-            entry->drm_format = entry->desc.layers[i].drm_format;
-            for (j = 0; j < entry->desc.layers[i].num_planes; ++j) {
-                int object = entry->desc.layers[i].object_index[j];
-                uint64_t modifier = entry->desc.objects[object].drm_format_modifier;
-                zwp_linux_buffer_params_v1_add(entry->params,
-                                               entry->desc.objects[object].fd, plane++,
-                                               entry->desc.layers[i].offset[j],
-                                               entry->desc.layers[i].pitch[j],
-                                               modifier >> 32,
-                                               modifier & 0xffffffff);
-            }
+    int i, j, plane = 0;
+    struct zwp_linux_buffer_params_v1 *params;
+
+    params = zwp_linux_dmabuf_v1_create_params(wl->dmabuf);
+    for (i = 0; i < entry->desc.num_layers; i++) {
+        entry->drm_format = entry->desc.layers[i].drm_format;
+        for (j = 0; j < entry->desc.layers[i].num_planes; ++j) {
+            int object = entry->desc.layers[i].object_index[j];
+            uint64_t modifier = entry->desc.objects[object].drm_format_modifier;
+            zwp_linux_buffer_params_v1_add(params,
+                                           entry->desc.objects[object].fd, plane++,
+                                           entry->desc.layers[i].offset[j],
+                                           entry->desc.layers[i].pitch[j],
+                                           modifier >> 32,
+                                           modifier & 0xffffffff);
         }
     }
 
-    entry->buffer = zwp_linux_buffer_params_v1_create_immed(entry->params,
+    entry->buffer = zwp_linux_buffer_params_v1_create_immed(params,
                                                             src->params.w,
                                                             src->params.h,
                                                             entry->drm_format, 0);
+    zwp_linux_buffer_params_v1_destroy(params);
 
     return entry;
 }
