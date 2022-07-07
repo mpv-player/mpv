@@ -75,11 +75,11 @@ static bool vaapi_dmabuf_importer(struct mp_image *src, struct wlbuf_pool_entry*
     int layer_no = 0;
     VAStatus status = vaExportSurfaceHandle(p->display, entry->key, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
                                             VA_EXPORT_SURFACE_COMPOSED_LAYERS | VA_EXPORT_SURFACE_READ_ONLY, &desc);
-
     if (status == VA_STATUS_ERROR_INVALID_SURFACE) {
         MP_VERBOSE(entry->vo, "VA export to composed layers not supported.\n");
-    } else if (!vo_wayland_supported_format(entry->vo, desc.layers[layer_no].drm_format)) {
-        MP_VERBOSE(entry->vo, "%s is not supported.\n", mp_tag_str(desc.layers[layer_no].drm_format));
+    } else if (!vo_wayland_supported_format(entry->vo, desc.layers[0].drm_format, desc.objects[0].drm_format_modifier)) {
+        MP_VERBOSE(entry->vo, "%s(%016lx) is not supported.\n",
+                   mp_tag_str(desc.layers[0].drm_format), desc.objects[0].drm_format_modifier);
     } else if (CHECK_VA_STATUS(entry->vo, "vaExportSurfaceHandle()")) {
         entry->drm_format = desc.layers[layer_no].drm_format;
         for (int plane_no = 0; plane_no < desc.layers[layer_no].num_planes; ++plane_no) {
