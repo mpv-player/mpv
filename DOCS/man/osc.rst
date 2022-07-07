@@ -400,6 +400,12 @@ Configurable Options
     Use ``no`` to disable chapter display on hover. Otherwise it's a lua
     ``string.format`` template and ``%s`` is replaced with the actual name.
 
+``unicodeminus``
+    Default: no
+
+    Use a Unicode minus sign instead of an ASCII hyphen when displaying
+    the remaining playback time.
+
 
 Script Commands
 ~~~~~~~~~~~~~~~
