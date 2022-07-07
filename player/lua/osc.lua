@@ -53,6 +53,7 @@ local user_opts = {
     chapters_osd = true,        -- whether to show chapters OSD on next/prev
     playlist_osd = true,        -- whether to show playlist OSD on next/prev
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
+    unicodeminus = false,       -- whether to use the Unicode minus sign character
 }
 
 -- read options from config and command-line
@@ -1731,6 +1732,8 @@ function update_options(list)
     request_init()
 end
 
+local UNICODE_MINUS = string.char(0xe2, 0x88, 0x92)  -- UTF-8 for U+2212 MINUS SIGN
+
 -- OSC INIT
 function osc_init()
     msg.debug("osc_init")
@@ -2060,10 +2063,11 @@ function osc_init()
     ne.visible = (mp.get_property_number("duration", 0) > 0)
     ne.content = function ()
         if (state.rightTC_trem) then
+            local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
             if state.tc_ms then
-                return ("-"..mp.get_property_osd("playtime-remaining/full"))
+                return (minus..mp.get_property_osd("playtime-remaining/full"))
             else
-                return ("-"..mp.get_property_osd("playtime-remaining"))
+                return (minus..mp.get_property_osd("playtime-remaining"))
             end
         else
             if state.tc_ms then
