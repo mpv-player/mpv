@@ -37,6 +37,7 @@ struct va_pool_entry {
 
     VADRMPRIMESurfaceDescriptor desc;
     struct wl_buffer *buffer;
+    bool busy;
     uint32_t drm_format;
 };
 
@@ -89,6 +90,19 @@ static VAStatus va_export_surface_handle(VADisplay display, VASurfaceID surface,
                                  desc);
 }
 
+static void
+buffer_release(void *data, struct wl_buffer *buffer)
+{
+    struct va_pool_entry *entry = data;
+
+    printf("buffer_release(wl_buffer@%d)\n", wl_proxy_get_id((struct wl_proxy *)entry->buffer));
+    entry->busy = false;
+}
+
+static const struct wl_buffer_listener buffer_listener = {
+    buffer_release
+};
+
 static struct va_pool_entry *va_alloc_entry(struct vo *vo, struct mp_image *src)
 {
     struct priv *p = vo->priv;
@@ -137,6 +151,7 @@ static struct va_pool_entry *va_alloc_entry(struct vo *vo, struct mp_image *src)
                                                             src->params.h,
                                                             entry->drm_format, 0);
     zwp_linux_buffer_params_v1_destroy(params);
+    wl_buffer_add_listener(entry->buffer, &buffer_listener, entry);
 
     return entry;
 }
@@ -175,18 +190,19 @@ static struct va_pool_entry *va_pool_alloc_entry(struct vo *vo, struct va_pool *
                                                  struct mp_image *src)
 {
     VASurfaceID surface;
+    struct va_pool_entry *entry;
 
     if (!pool)
         return NULL;
 
     surface = va_surface_id(src);
     for (int i = 0; i < pool->num_entries; ++i) {
-        struct va_pool_entry *item = pool->entries[i];
-        if (item->surface == surface)
-            return pool->entries[i];
+        entry = pool->entries[i];
+        if (entry->surface == surface && !entry->busy)
+            return entry;
     }
 
-    struct va_pool_entry *entry = va_alloc_entry(pool->vo, src);
+    entry = va_alloc_entry(pool->vo, src);
     if (!entry)
         return NULL;
 
@@ -362,6 +378,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         vo_wayland_wait_frame(wl);
     if (wl->presentation)
         present_sync_swap(wl->present);
+
+    printf("buffer_busy(wl_buffer@%d)\n", wl_proxy_get_id((struct wl_proxy *)entry->buffer));
+    entry->busy = true;
 }
 static void flip_page(struct vo *vo)
 {
