@@ -104,9 +104,9 @@ static struct va_pool_entry *va_alloc_entry(struct vo *vo, struct mp_image *src)
         MP_VERBOSE(vo, "VA export to composed layers not supported.\n");
         va_free_entry(entry);
         return NULL;
-    } else if (!vo_wayland_supported_format(vo, entry->desc.layers[0].drm_format)) {
-        MP_VERBOSE(vo, "%s is not supported.\n",
-                   mp_tag_str(entry->desc.layers[0].drm_format));
+    } else if (!vo_wayland_supported_format(vo, entry->desc.layers[0].drm_format, entry->desc.objects[0].drm_format_modifier)) {
+        MP_VERBOSE(vo, "%s(%016lx) is not supported.\n",
+                   mp_tag_str(entry->desc.layers[0].drm_format), entry->desc.objects[0].drm_format_modifier);
         va_free_entry(entry);
         return NULL;
     } else if (!CHECK_VA_STATUS(vo, "vaExportSurfaceHandle()")) {

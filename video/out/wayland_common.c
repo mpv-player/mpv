@@ -1045,6 +1045,66 @@ static const struct zwp_linux_dmabuf_v1_listener dmabuf_listener = {
     dmabuf_format,
 };
 
+static void done(void *data,
+                 struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
+{
+}
+
+static void format_table(void *data,
+                         struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                         int32_t fd,
+                         uint32_t size)
+{
+    struct vo_wayland_state *wl = data;
+
+    void *map = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+    close(fd);
+
+    if (map != MAP_FAILED) {
+        wl->format_map = map;
+        wl->format_size = size;
+    }
+}
+
+static void main_device(void *data,
+                        struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                        struct wl_array *device)
+{
+}
+
+static void tranche_done(void *data,
+                         struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
+{
+}
+
+static void tranche_target_device(void *data,
+                                  struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                                  struct wl_array *device)
+{
+}
+
+static void tranche_formats(void *data,
+                            struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                            struct wl_array *indices)
+{
+}
+
+static void tranche_flags(void *data,
+                          struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                          uint32_t flags)
+{
+}
+
+static const struct zwp_linux_dmabuf_feedback_v1_listener dmabuf_feedback_listener = {
+    done,
+    format_table,
+    main_device,
+    tranche_done,
+    tranche_target_device,
+    tranche_formats,
+    tranche_flags,
+};
+
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
                                 const char *interface, uint32_t ver)
 {
@@ -1067,7 +1127,12 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->subcompositor = wl_registry_bind(reg, id, &wl_subcompositor_interface, 1);
     }
 
-    if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 2) && found++) {
+    if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 4) && found++) {
+        wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 4);
+        wl->dmabuf_feedback = zwp_linux_dmabuf_v1_get_default_feedback(wl->dmabuf);
+        zwp_linux_dmabuf_feedback_v1_add_listener(wl->dmabuf_feedback, &dmabuf_feedback_listener, wl);
+    }
+    else if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 2) && found++) {
         wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 2);
         zwp_linux_dmabuf_v1_add_listener(wl->dmabuf, &dmabuf_listener, wl);
         wl->drm_format_ct_max = 64;
@@ -1916,10 +1981,22 @@ void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha)
     }
 }
 
-bool vo_wayland_supported_format(struct vo *vo, uint32_t drm_format)
+bool vo_wayland_supported_format(struct vo *vo, uint32_t drm_format, uint64_t modifier)
 {
     struct vo_wayland_state *wl = vo->wl;
 
+    const struct {
+        uint32_t format;
+        uint32_t padding;
+        uint64_t modifier;
+    } *formats = wl->format_map;
+
+    for (int i = 0; i < wl->format_size / 16; ++i) {
+        if (drm_format == formats[i].format && modifier == formats[i].modifier)
+            return true;
+    }
+
+    /* TODO: remove these once zwp_linux_dmabuf_v1 version 2 support is removed. */
     for (int i = 0; i < wl->drm_format_ct; ++i) {
         if (drm_format == wl->drm_formats[i])
             return true;
@@ -2039,6 +2116,8 @@ void vo_wayland_uninit(struct vo *vo)
         close(wl_display_get_fd(wl->display));
         wl_display_disconnect(wl->display);
     }
+
+    munmap(wl->format_map, wl->format_size);
 
     struct vo_wayland_output *output, *tmp;
     wl_list_for_each_safe(output, tmp, &wl->output_list, link)
