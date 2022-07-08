@@ -42,6 +42,12 @@
 #define PW_KEY_NODE_RATE "node.rate"
 #endif
 
+#if !PW_CHECK_VERSION(0, 3, 50)
+static inline int pw_stream_get_time_n(struct pw_stream *stream, struct pw_time *time, size_t size) {
+	return pw_stream_get_time(stream, time);
+}
+#endif
+
 struct priv {
     struct pw_thread_loop *loop;
     struct pw_stream *stream;
@@ -132,7 +138,7 @@ static void on_process(void *userdata)
         buf->datas[i].chunk->offset = 0;
     }
 
-    pw_stream_get_time(p->stream, &time);
+    pw_stream_get_time_n(p->stream, &time, sizeof(time));
     if (time.rate.denom == 0)
         time.rate.denom = ao->samplerate;
     if (time.rate.num == 0)
