@@ -1041,14 +1041,8 @@ static void dmabuf_format(void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmab
     MP_VERBOSE(wl, "%s is supported by the compositor.\n", mp_tag_str(format));
 }
 
-static void dmabuf_modifier(void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
-                            uint32_t format, uint32_t modifier_hi, uint32_t modifier_lo)
-{
-}
-
 static const struct zwp_linux_dmabuf_v1_listener dmabuf_listener = {
     dmabuf_format,
-    dmabuf_modifier
 };
 
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
