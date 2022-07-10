@@ -410,6 +410,8 @@ local function formats_to_edl(json, formats, use_all_formats)
                    (not track["abr"]) and (not track["vbr"])
     end
 
+    local has_requested_video = false
+    local has_requested_audio = false
     for index, track in ipairs(formats) do
         local edl_track = nil
         edl_track = edl_track_joined(track.fragments,
@@ -419,12 +421,16 @@ local function formats_to_edl(json, formats, use_all_formats)
             return nil
         end
 
+        local is_default = default_formats[track["format_id"]]
         local tracks = {}
         if track.vcodec and track.vcodec ~= "none" then
             tracks[#tracks + 1] = {
                 media_type = "video",
                 codec = map_codec_to_mpv(track.vcodec),
             }
+            if is_default then
+                has_requested_video = true
+            end
         end
         -- Tries to follow the strange logic that vcodec unset means it's
         -- an audio stream, even if acodec is sometimes unset.
@@ -434,6 +440,9 @@ local function formats_to_edl(json, formats, use_all_formats)
                 codec = map_codec_to_mpv(track.acodec) or
                         ext_map[track.ext],
             }
+            if is_default then
+                has_requested_audio = true
+            end
         end
         if #tracks == 0 then
             return nil
@@ -482,7 +491,7 @@ local function formats_to_edl(json, formats, use_all_formats)
                     title = title .. "muxed-" .. index
                 end
                 local flags = {}
-                if default_formats[track["format_id"]] then
+                if is_default then
                     flags[#flags + 1] = "default"
                 end
                 hdr[#hdr + 1] = "!track_meta,title=" ..
@@ -516,6 +525,13 @@ local function formats_to_edl(json, formats, use_all_formats)
         res.url = "edl://" .. table.concat(streams, ";")
     else
         return nil
+    end
+
+    if has_requested_audio ~= has_requested_video then
+        local not_req_prop = has_requested_video and "aid" or "vid"
+        if mp.get_property(not_req_prop) == "auto" then
+            mp.set_property("file-local-options/" .. not_req_prop, "no")
+        end
     end
 
     return res
