@@ -390,7 +390,7 @@ local function formats_to_edl(json, formats, use_all_formats)
     }
 
     local default_formats = {}
-    local requested_formats = json["requested_formats"]
+    local requested_formats = json["requested_formats"] or json["requested_downloads"]
     if use_all_formats and requested_formats then
         for _, track in ipairs(requested_formats) do
             local id = track["format_id"]
@@ -525,7 +525,7 @@ local function add_single_video(json)
     local streamurl = ""
     local format_info = ""
     local max_bitrate = 0
-    local requested_formats = json["requested_formats"]
+    local requested_formats = json["requested_formats"] or json["requested_downloads"]
     local all_formats = json["formats"]
     local has_requested_formats = requested_formats and #requested_formats > 0
     local http_headers = has_requested_formats
