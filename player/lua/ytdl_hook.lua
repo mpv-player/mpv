@@ -817,6 +817,7 @@ function run_ytdl_hook(url)
         end
 
         ytdl.searched = true
+        mp.commandv('script-message', 'ytdl_path', ytdl.path)
     end
 
     if aborted then
@@ -824,6 +825,7 @@ function run_ytdl_hook(url)
     end
 
     local parse_err = nil
+    local json_string = json
 
     if (es ~= 0) or (json == "") then
         json = nil
@@ -936,6 +938,8 @@ function run_ytdl_hook(url)
         elseif self_redirecting_url and #json.entries == 1 then
             msg.verbose("Playlist with single entry detected.")
             add_single_video(json.entries[1])
+            local json_string = utils.format_json(json.entries[1])
+            mp.commandv('script-message', 'ytdl_json', url, json_string)
         else
             local playlist_index = parse_yt_playlist(url, json)
             local playlist = {"#EXTM3U"}
@@ -982,6 +986,7 @@ function run_ytdl_hook(url)
 
     else -- probably a video
         add_single_video(json)
+        mp.commandv('script-message', 'ytdl_json', url, json_string)
     end
     msg.debug('script running time: '..os.clock()-start_time..' seconds')
 end

@@ -873,6 +873,38 @@ Example:
 
 For the existing event types, see `List of events`_.
 
+Script Messages
+---------------
+
+Script messages are notifications to scripts. A script message can be sent with
+the commands ``script-message`` and ``script-message-to``. You can register a
+script message handler with ``mp.register_script_message``.
+
+Note that all scripts receive events equally,
+and there's no such thing as blocking other scripts from receiving
+script messages.
+
+Example:
+
+::
+
+    function my_message_handler(url, json)
+        print("got json from ytdl for url!")
+    end
+    mp.register_script_message("ytdl_json", my_message_handler)
+
+This will print the message ``got json from ytdl for url!`` when ``ytdl_json``
+was received.
+
+::
+
+    mp.commandv('script-message', 'ytdl_path', 'path to ytdl')
+
+This sends the ``ytdl_path`` message to all scripts that have registered a
+message handler for it with ``'path to ytdl'`` as the argument.
+
+For script messages that are sent out by mpv, see `List of script messages`_.
+
 Extras
 ------
 

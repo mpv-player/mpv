@@ -1679,6 +1679,19 @@ The following hooks are currently defined:
     Run after an ``end-file`` event. Useful to drain property changes after a
     file has finished.
 
+List of script messages
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The following script messages are currently sent out,
+with the list of arguments supplied to the handler function in braces:
+
+``ytdl_path`` (``path``)
+    Sent after successfully finding the path to ytdl.
+
+``ytdl_json`` (``url, json``)
+    Sent after the JSON has been returned from ytdl for that URL.
+
+
 Input Command Prefixes
 ----------------------
 
