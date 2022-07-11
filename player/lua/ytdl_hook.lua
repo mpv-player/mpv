@@ -409,7 +409,13 @@ local function formats_to_edl(json, formats, use_all_formats)
 
     local has_requested_video = false
     local has_requested_audio = false
-    for index, track in ipairs(formats) do
+    -- Web players with quality selection always show the highest quality
+    -- option at the top. Since tracks are usually listed with the first
+    -- track at the top, that should also be the highest quality track.
+    -- yt-dlp/youtube-dl sorts it's formats from worst to best.
+    -- Iterate in reverse to get best track first.
+    for index = #formats, 1, -1 do
+        local track = formats[index]
         local edl_track = nil
         edl_track = edl_track_joined(track.fragments,
             track.protocol, json.is_live,
