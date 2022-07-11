@@ -1,5 +1,10 @@
 -- Compatibility shim for lua 5.2/5.3
 unpack = unpack or table.unpack
+table.pack = table.pack or function(...)
+    local t = {...}
+    t.n = select("#", ...)
+    return t
+end
 
 -- these are used internally by lua.c
 mp.UNKNOWN_TYPE.info = "this value is inserted if the C type is not supported"
@@ -265,17 +270,18 @@ local timers = {}
 local timer_mt = {}
 timer_mt.__index = timer_mt
 
-function mp.add_timeout(seconds, cb)
-    local t = mp.add_periodic_timer(seconds, cb)
+function mp.add_timeout(seconds, cb, ...)
+    local t = mp.add_periodic_timer(seconds, cb, ...)
     t.oneshot = true
     return t
 end
 
-function mp.add_periodic_timer(seconds, cb)
+function mp.add_periodic_timer(seconds, cb, ...)
     local t = {
         timeout = seconds,
         cb = cb,
         oneshot = false,
+        args = select("#", ...) > 0 and table.pack(...),
     }
     setmetatable(t, timer_mt)
     t:resume()
@@ -358,7 +364,12 @@ local function process_timers()
             else
                 timer.next_deadline = now + timer.timeout
             end
-            timer.cb()
+
+            if timer.args then
+                timer.cb(unpack(timer.args, 1, timer.args.n))
+            else
+                timer.cb()
+            end
         end
     end
 end

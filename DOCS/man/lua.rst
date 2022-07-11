@@ -432,19 +432,20 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     that are equal to the ``fn`` parameter. This uses normal Lua ``==``
     comparison, so be careful when dealing with closures.
 
-``mp.add_timeout(seconds, fn)``
-    Call the given function fn when the given number of seconds has elapsed.
+``mp.add_timeout(seconds, fn [,arg1 [,arg2...]])``
+    Call the given function ``fn`` when the given number of seconds has elapsed.
     Note that the number of seconds can be fractional. For now, the timer's
     resolution may be as low as 50 ms, although this will be improved in the
-    future.
+    future. Any additional arguments will be passed as arguments to ``fn``.
 
     This is a one-shot timer: it will be removed when it's fired.
 
     Returns a timer object. See ``mp.add_periodic_timer`` for details.
 
-``mp.add_periodic_timer(seconds, fn)``
+``mp.add_periodic_timer(seconds, fn [,arg1 [,arg2...]])``
     Call the given function periodically. This is like ``mp.add_timeout``, but
-    the timer is re-added after the function fn is run.
+    the timer is re-added after the function ``fn`` is run.
+    Any additional arguments will be passed as arguments to ``fn``.
 
     Returns a timer object. The timer object provides the following methods:
         ``stop()``
