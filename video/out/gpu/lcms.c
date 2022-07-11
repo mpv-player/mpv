@@ -289,7 +289,7 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
             cmsHPROFILE xyz_profile = cmsCreateXYZProfile();
             cmsHTRANSFORM xyz2src = cmsCreateTransformTHR(cms,
                     xyz_profile, TYPE_XYZ_DBL, rev_profile, TYPE_RGB_DBL,
-                    intent, 0);
+                    intent, cmsFLAGS_NOCACHE | cmsFLAGS_NOOPTIMIZE);
             cmsFreeToneCurve(linear);
             cmsCloseProfile(rev_profile);
             cmsCloseProfile(xyz_profile);
@@ -429,7 +429,8 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_hprofile, TYPE_RGB_16,
                                                 profile, TYPE_RGBA_16,
                                                 p->opts->intent,
-                                                cmsFLAGS_HIGHRESPRECALC |
+                                                cmsFLAGS_NOCACHE |
+                                                cmsFLAGS_NOOPTIMIZE |
                                                 cmsFLAGS_BLACKPOINTCOMPENSATION);
     cmsCloseProfile(profile);
     cmsCloseProfile(vid_hprofile);
