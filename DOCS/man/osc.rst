@@ -315,6 +315,14 @@ Configurable Options
 
     Display timecodes with milliseconds
 
+``tcspace``
+    Default: 100 (allowed: 50-200)
+
+    Adjust space reserved for timecodes (current time and time remaining) in
+    the ``bottombar`` and ``topbar`` layouts. The timecode width depends on the
+    font, and with some fonts the spacing near the timecodes becomes too small.
+    Use values above 100 to increase that spacing, or below 100 to decrease it.
+
 ``visibility``
     Default: auto (auto hide/show on mouse move)
 
