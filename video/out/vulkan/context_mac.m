@@ -51,7 +51,7 @@ static bool macos_vk_init(struct ra_ctx *ctx)
     struct mpvk_ctx *vk = &p->vk;
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
 
-    if (!mpvk_init(vk, ctx, VK_MVK_MACOS_SURFACE_EXTENSION_NAME))
+    if (!mpvk_init(vk, ctx, VK_EXT_METAL_SURFACE_EXTENSION_NAME))
         goto error;
 
     p->vo_macos = [[MacCommon alloc] init:ctx->vo];
