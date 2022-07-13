@@ -153,7 +153,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Test in FreeBSD VM
-      uses: vmactions/freebsd-vm@v0.1.5 # aka FreeBSD 13.0
+      uses: vmactions/freebsd-vm@v0.1.7 # aka FreeBSD 13.1
       with:
         usesh: true
         prepare: |
