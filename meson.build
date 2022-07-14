@@ -1379,7 +1379,7 @@ endif
 ios_gl = cc.has_header_symbol('OpenGLES/ES3/glext.h', 'GL_RGB32F', required: get_option('ios-gl'))
 features += {'ios-gl': ios_gl}
 if features['ios-gl']
-    sources += files('video/out/opengl/hwdec_ios.m')
+    sources += files('video/out/hwdec/hwdec_ios_gl.m')
 endif
 
 rpi_mmal_opt = get_option('rpi-mmal').require(
@@ -1460,8 +1460,21 @@ videotoolbox_gl = get_option('videotoolbox-gl').require(
     error_message: 'gl-cocoa nor ios-gl could be found!',
 )
 features += {'videotoolbox-gl': videotoolbox_gl.allowed()}
+corevideo = dependency('appleframeworks', modules: ['CoreVideo'], required: get_option('videotoolbox-pl'))
+videotoolbox_pl = get_option('videotoolbox-pl').require(
+    features['vulkan'] and corevideo.found(),
+    error_message: 'vulkan or CV metal support could be found!',
+)
+features += {'videotoolbox-pl': videotoolbox_pl.allowed()}
+if features['videotoolbox-gl'] or features['videotoolbox-pl']
+    sources += files('video/out/hwdec/hwdec_vt.c')
+endif
 if features['videotoolbox-gl']
-    sources += files('video/out/opengl/hwdec_osx.c')
+    sources += files('video/out/hwdec/hwdec_mac_gl.c')
+endif
+if features['videotoolbox-pl']
+    dependencies += corevideo
+    sources += files('video/out/hwdec/hwdec_vt_pl.m')
 endif
 
 

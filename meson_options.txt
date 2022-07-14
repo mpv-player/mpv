@@ -101,6 +101,7 @@ option('gl-dxinterop-d3d9', type: 'feature', value: 'auto', description: 'OpenGL
 option('ios-gl', type: 'feature', value: 'auto', description: 'iOS OpenGL ES hardware decoding interop support')
 option('rpi-mmal', type: 'feature', value: 'auto', description: 'Raspberry Pi MMAL hwaccel')
 option('videotoolbox-gl', type: 'feature', value: 'auto', description: 'Videotoolbox with OpenGL')
+option('videotoolbox-pl', type: 'feature', value: 'auto', description: 'Videotoolbox with libplacebo')
 option('vulkan-interop', type: 'feature', value: 'auto', description: 'Vulkan graphics interop')
 
 # macOS features
