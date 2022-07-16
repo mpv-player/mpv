@@ -5,7 +5,7 @@
 #include "video/csputils.h"
 
 #include <libplacebo/common.h>
-#include <libplacebo/context.h>
+#include <libplacebo/log.h>
 #include <libplacebo/colorspace.h>
 
 pl_log mppl_log_create(struct mp_log *log);
