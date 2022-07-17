@@ -755,6 +755,13 @@ if sdl2_gamepad.allowed()
     sources += files('input/sdl_gamepad.c')
 endif
 
+linux_evdev = cc.check_header('linux/input-event-codes.h')
+sys_eventfd = cc.check_header('sys/eventfd.h')
+if linux_evdev and sys_eventfd
+  features += 'evdev-gamepad'
+  sources += files('input/evdev_gamepad.c')
+endif
+
 stdatomic = cc.find_library('atomic', required: get_option('stdatomic'))
 if stdatomic.found()
     dependencies += stdatomic
@@ -1778,6 +1785,7 @@ conf_data.set10('HAVE_SDL2', sdl2.found())
 conf_data.set10('HAVE_SDL2_AUDIO', sdl2_audio.allowed())
 conf_data.set10('HAVE_SDL2_GAMEPAD', sdl2_gamepad.allowed())
 conf_data.set10('HAVE_SDL2_VIDEO', sdl2_video.allowed())
+conf_data.set10('HAVE_EVDEV_GAMEPAD', linux_evdev)
 conf_data.set10('HAVE_SHADERC', shaderc.found())
 conf_data.set10('HAVE_SIXEL', sixel.found())
 conf_data.set10('HAVE_SNDIO', sndio.found())

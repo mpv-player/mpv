@@ -200,7 +200,7 @@ const struct m_sub_options input_config = {
         {"input-cursor", OPT_FLAG(enable_mouse_movements)},
         {"input-vo-keyboard", OPT_FLAG(vo_key_input)},
         {"input-media-keys", OPT_FLAG(use_media_keys)},
-#if HAVE_SDL2_GAMEPAD
+#if HAVE_SDL2_GAMEPAD || HAVE_EVDEV_GAMEPAD
         {"input-gamepad", OPT_FLAG(use_gamepad)},
 #endif
         {"window-dragging", OPT_FLAG(allow_win_drag)},
@@ -1389,11 +1389,13 @@ void mp_input_load_config(struct input_ctx *ictx)
         talloc_free(tmp);
     }
 
-#if HAVE_SDL2_GAMEPAD
     if (ictx->opts->use_gamepad) {
+#if HAVE_SDL2_GAMEPAD
         mp_input_sdl_gamepad_add(ictx);
-    }
+#elif HAVE_EVDEV_GAMEPAD
+        mp_input_evdev_gamepad_add(ictx);
 #endif
+    }
 
     input_unlock(ictx);
 }
