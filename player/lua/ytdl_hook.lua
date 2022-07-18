@@ -423,7 +423,9 @@ local function formats_to_edl(json, formats, use_all_formats)
 
         local is_default = default_formats[track["format_id"]]
         local tracks = {}
-        if track.vcodec and track.vcodec ~= "none" then
+        -- "none" means it is not a video
+        -- nil means it is unknown
+        if (o.force_all_formats or track.vcodec) and track.vcodec ~= "none" then
             tracks[#tracks + 1] = {
                 media_type = "video",
                 codec = map_codec_to_mpv(track.vcodec),
@@ -432,9 +434,7 @@ local function formats_to_edl(json, formats, use_all_formats)
                 has_requested_video = true
             end
         end
-        -- Tries to follow the strange logic that vcodec unset means it's
-        -- an audio stream, even if acodec is sometimes unset.
-        if (#tracks == 0) or (track.acodec and track.acodec ~= "none") then
+        if (o.force_all_formats or track.acodec) and track.acodec ~= "none" then
             tracks[#tracks + 1] = {
                 media_type = "audio",
                 codec = map_codec_to_mpv(track.acodec) or
@@ -444,13 +444,10 @@ local function formats_to_edl(json, formats, use_all_formats)
                 has_requested_audio = true
             end
         end
-        if #tracks == 0 then
-            return nil
-        end
 
         local url = edl_track or track.url
         local hdr = {"!new_stream", "!no_clip", "!no_chapters"}
-        local skip = false
+        local skip = #tracks == 0
         local params = ""
 
         if use_all_formats then
@@ -504,12 +501,14 @@ local function formats_to_edl(json, formats, use_all_formats)
             end
         end
 
-        hdr[#hdr + 1] = edl_escape(url) .. params
+        if not skip then
+            hdr[#hdr + 1] = edl_escape(url) .. params
 
-        streams[#streams + 1] = table.concat(hdr, ";")
-        -- In case there is only 1 of these streams.
-        -- Note: assumes it has no important EDL headers
-        single_url = url
+            streams[#streams + 1] = table.concat(hdr, ";")
+            -- In case there is only 1 of these streams.
+            -- Note: assumes it has no important EDL headers
+            single_url = url
+        end
     end
 
     -- Merge all tracks into a single virtual file, but avoid EDL if it's
