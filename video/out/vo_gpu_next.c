@@ -885,11 +885,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     double vsync_offset = opts->interpolation ? frame->vsync_offset : 0;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
-        // Advance the queue state to the current PTS to discard unused frames
-        pl_queue_update(p->queue, NULL, pl_queue_params(
-            .pts = frame->current->pts + vsync_offset,
-            .radius = pl_frame_mix_radius(&p->params),
-        ));
+        if (frame->current) {
+            // Advance the queue state to the current PTS to discard unused frames
+            pl_queue_update(p->queue, NULL, pl_queue_params(
+                .pts = frame->current->pts + vsync_offset,
+                .radius = pl_frame_mix_radius(&p->params),
+            ));
+        }
         return;
     }
 
