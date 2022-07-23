@@ -1104,7 +1104,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         MP_ERR(vo, "Unknown error occured while trying to take screenshot!\n");
         return;
     }
-    if (status == PL_QUEUE_MORE || !mix.num_frames) {
+    if (!mix.num_frames) {
         MP_ERR(vo, "No frames available to take screenshot of? Open issue\n");
         return;
     }
