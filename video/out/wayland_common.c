@@ -592,7 +592,7 @@ static void data_device_handle_selection(void *data, struct wl_data_device *wl_d
     if (wl->dnd_offer) {
         wl_data_offer_destroy(wl->dnd_offer);
         wl->dnd_offer = NULL;
-        MP_VERBOSE(wl, "Received a new DND offer. Releasing the previous offer.");
+        MP_VERBOSE(wl, "Received a new DND offer. Releasing the previous offer.\n");
     }
 
 }
