@@ -149,11 +149,11 @@ jobs:
           cat ./build/config.log
 
   freebsd:
-    runs-on: macos-10.15 # until https://github.com/actions/runner/issues/385
+    runs-on: macos-12 # until https://github.com/actions/runner/issues/385
     steps:
     - uses: actions/checkout@v2
     - name: Test in FreeBSD VM
-      uses: vmactions/freebsd-vm@v0.1.7 # aka FreeBSD 13.1
+      uses: vmactions/freebsd-vm@v0.2.0 # aka FreeBSD 13.1
       with:
         usesh: true
         prepare: |
