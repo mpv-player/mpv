@@ -519,24 +519,27 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    char *name = NULL;
+    const char* name = NULL;
     if (mpctx->opts->media_title)
         name = mpctx->opts->media_title;
+    if ((!name || !name[0]) && mpctx->demuxer) {
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "service_name");
+        if (!name || !name[0]){
+            name = mp_tags_get_str(mpctx->demuxer->metadata, "title");
+            if (!name || !name[0])
+                name = mp_tags_get_str(mpctx->demuxer->metadata, "icy-title");
+        }
+    }
+    struct playlist_entry *const pe = mpctx->playing;
+    if (pe) {
+        if (!name || !name[0]){
+            name = pe->title;
+        } else if (!pe->title) {
+            pe->title = talloc_strdup(pe, name);
+        }
+    }
     if (name && name[0])
         return m_property_strdup_ro(action, arg, name);
-    if (mpctx->demuxer) {
-        name = mp_tags_get_str(mpctx->demuxer->metadata, "service_name");
-        if (name && name[0])
-            return m_property_strdup_ro(action, arg, name);
-        name = mp_tags_get_str(mpctx->demuxer->metadata, "title");
-        if (name && name[0])
-            return m_property_strdup_ro(action, arg, name);
-        name = mp_tags_get_str(mpctx->demuxer->metadata, "icy-title");
-        if (name && name[0])
-            return m_property_strdup_ro(action, arg, name);
-    }
-    if (mpctx->playing && mpctx->playing->title)
-        return m_property_strdup_ro(action, arg, mpctx->playing->title);
     return mp_property_filename(ctx, prop, action, arg);
 }
 
