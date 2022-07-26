@@ -42,6 +42,10 @@
 #include "generated/wayland/xdg-shell.h"
 #include "generated/wayland/viewporter.h"
 
+#if HAVE_GIO
+#include <gio/gio.h>
+#endif
+
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 20
 #define HAVE_WAYLAND_1_20
 #endif
@@ -143,6 +147,175 @@ struct vo_wayland_output {
     char *name;
     struct wl_list link;
 };
+
+#if HAVE_GIO
+
+struct vo_wayland_screensaver {
+    GDBusProxy *proxy;
+    bool use_portal;
+    guint32 cookie;
+    char *portal_inhibit_path;
+};
+
+const GDBusProxyFlags PROXY_FLAGS = G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS |
+                                    G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES;
+
+#define IDLE_INHIBIT_NOT_FOUND_ERROR "Compositor doesn't support the %s protocol or the org.freedesktop.ScreenSaver interface!\n"
+
+static int try_init_gio(struct vo_wayland_state *wl)
+{
+    if (!wl->idle_inhibit_manager) {
+        bool use_portal = false;
+        char *name_owner = NULL;
+        GDBusProxy *proxy;
+
+        proxy =
+            g_dbus_proxy_new_for_bus_sync(
+                G_BUS_TYPE_SESSION, PROXY_FLAGS, NULL,
+                "org.freedesktop.ScreenSaver",
+                "/org/freedesktop/ScreenSaver",
+                "org.freedesktop.ScreenSaver",
+                NULL, NULL);
+        // Check if the object actually exists
+        if (proxy) {
+            name_owner = g_dbus_proxy_get_name_owner(proxy);
+        }
+        if (!name_owner) {
+            /* If we are in a sandbox, the org.freedesktop.ScreenSaver interface
+             * may not be available, but the portal interface might be. */
+            use_portal = true;
+            proxy =
+                g_dbus_proxy_new_for_bus_sync(
+                    G_BUS_TYPE_SESSION, PROXY_FLAGS, NULL,
+                    "org.freedesktop.portal.Desktop",
+                    "/org/freedesktop/portal/desktop",
+                    "org.freedesktop.portal.Inhibit",
+                    NULL, NULL);
+            if (proxy) {
+                name_owner = g_dbus_proxy_get_name_owner(proxy);
+            }
+        }
+        if (proxy && !name_owner) {
+            g_clear_object(&proxy);
+        }
+        g_clear_pointer(&name_owner, g_free);
+        if (proxy) {
+            wl->screensaver = talloc_zero(wl, struct vo_wayland_screensaver);
+            wl->screensaver->proxy = proxy;
+            wl->screensaver->use_portal = use_portal;
+            return VO_TRUE;
+        }
+        return VO_FALSE;
+    }
+    return VO_NOTIMPL;
+}
+
+static int set_screensaver_inhibitor_gio(struct vo_wayland_state *wl, int state)
+{
+    struct vo_wayland_screensaver *ss = wl->screensaver;
+    GError *error = NULL;
+
+    if (!ss)
+        return VO_FALSE;
+    if (state == !!(ss->cookie || ss->portal_inhibit_path))
+        return VO_TRUE;
+
+    if (state) {
+        const char REASON[] = "video playing";
+        if (ss->use_portal) {
+            MP_VERBOSE(wl, "Enabling screen saver portal inhibitor\n");
+            GVariantBuilder builder;
+            g_variant_builder_init(&builder, G_VARIANT_TYPE_VARDICT);
+            g_variant_builder_add(&builder, "{sv}",
+                                  "reason", g_variant_new_string(REASON));
+            GVariant *options = g_variant_builder_end(&builder);
+            GVariant *ret = g_dbus_proxy_call_sync(
+                ss->proxy, "Inhibit",
+                g_variant_new("(su@a{sv})", "", 8, options),
+                G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+            if (ret) {
+                g_variant_get(ret, "(o)",
+                              &ss->portal_inhibit_path);
+                g_variant_unref(ret);
+            } else if (error) {
+                MP_VERBOSE(wl, "Failed to inhibit screensaver: %s\n",
+                           error->message);
+                g_error_free(error);
+            }
+        } else {
+            MP_VERBOSE(wl, "Enabling screen saver inhibitor\n");
+            GVariant *ret = g_dbus_proxy_call_sync(
+                ss->proxy, "Inhibit",
+                g_variant_new("(ss)", "mpv", REASON),
+                G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+            if (ret) {
+                g_variant_get(ret, "(u)", &ss->cookie);
+                g_variant_unref(ret);
+            } else if (error) {
+                MP_VERBOSE(wl, "Failed to inhibit screensaver: %s\n",
+                           error->message);
+                g_error_free(error);
+            }
+        }
+    } else {
+        if (ss->portal_inhibit_path) {
+            MP_VERBOSE(wl, "Disabling screen saver portal inhibitor at '%s'\n",
+                       ss->portal_inhibit_path);
+            GDBusProxy *proxy =
+                g_dbus_proxy_new_sync(
+                    g_dbus_proxy_get_connection(ss->proxy),
+                    PROXY_FLAGS, NULL,
+                    "org.freedesktop.portal.Desktop",
+                    ss->portal_inhibit_path,
+                    "org.freedesktop.portal.Request",
+                    NULL, NULL);
+            if (proxy) {
+                g_dbus_proxy_call(proxy, "Close", NULL,
+                    G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
+                g_object_unref(proxy);
+            }
+        } else if (ss->cookie) {
+            MP_VERBOSE(wl, "Disabling screen saver inhibitor %u\n",
+                       ss->cookie);
+            g_dbus_proxy_call(ss->proxy, "UnInhibit",
+                g_variant_new("(u)", ss->cookie),
+                G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
+        }
+        g_clear_pointer(&ss->portal_inhibit_path, g_free);
+        ss->cookie = 0;
+    }
+    return VO_TRUE;
+}
+
+static void uninit_gio(struct vo_wayland_state *wl)
+{
+    if (wl->screensaver) {
+        g_clear_pointer(&wl->screensaver->portal_inhibit_path, g_free);
+        g_clear_object(&wl->screensaver->proxy);
+        talloc_free(wl->screensaver);
+    }
+}
+
+#else
+
+#define IDLE_INHIBIT_NOT_FOUND_ERROR "Compositor doesn't support the %s protocol!\n"
+
+static inline int try_init_gio(struct vo_wayland_state *wl)
+{
+    return VO_NOTIMPL;
+}
+
+static inline int set_screensaver_inhibitor_gio(struct vo_wayland_state *wl,
+                                                int state)
+{
+    return VO_FALSE;
+}
+
+static inline void uninit_gio(struct vo_wayland_state *wl)
+{
+}
+
+#endif
 
 static int check_for_resize(struct vo_wayland_state *wl, wl_fixed_t x_w, wl_fixed_t y_w,
                             int edge_pixels, enum xdg_toplevel_resize_edge *edge);
@@ -1443,6 +1616,8 @@ static void set_geometry(struct vo_wayland_state *wl)
 
 static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
 {
+    if (set_screensaver_inhibitor_gio(wl, state) == VO_TRUE)
+        return VO_TRUE;
     if (!wl->idle_inhibit_manager)
         return VO_NOTIMPL;
     if (state == (!!wl->idle_inhibitor))
@@ -1822,10 +1997,6 @@ int vo_wayland_init(struct vo *vo)
         wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
     }
 
-    const char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
-    if (xdg_current_desktop != NULL && strstr(xdg_current_desktop, "GNOME"))
-        MP_WARN(wl, "GNOME's wayland compositor lacks support for the idle inhibit protocol. This means the screen can blank during playback.\n");
-
     if (wl->dnd_devman && wl->seat) {
         wl->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, wl->seat);
         wl_data_device_add_listener(wl->dnd_ddev, &data_device_listener, wl);
@@ -1853,9 +2024,10 @@ int vo_wayland_init(struct vo *vo)
                    zxdg_decoration_manager_v1_interface.name);
     }
 
-    if (!wl->idle_inhibit_manager)
-        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
-                   zwp_idle_inhibit_manager_v1_interface.name);
+    if (try_init_gio(wl) != VO_TRUE && !wl->idle_inhibit_manager) {
+        MP_WARN(wl, IDLE_INHIBIT_NOT_FOUND_ERROR,
+                zwp_idle_inhibit_manager_v1_interface.name);
+    }
 
     wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
     wl->display_fd = wl_display_get_fd(wl->display);
@@ -1977,6 +2149,8 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->idle_inhibit_manager)
         zwp_idle_inhibit_manager_v1_destroy(wl->idle_inhibit_manager);
+
+    uninit_gio(wl);
 
     if (wl->keyboard)
         wl_keyboard_destroy(wl->keyboard);

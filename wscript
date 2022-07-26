@@ -778,6 +778,11 @@ video_output_features = [
         'name': '--sixel',
         'desc': 'Sixel',
         'func': check_pkg_config('libsixel', '>= 1.5'),
+    }, {
+        'name': '--gio',
+        'desc': 'GNOME inhibit support',
+        'deps': 'wayland',
+        'func': check_pkg_config('gio-2.0', '>= 2.26'),
     }
 ]
 

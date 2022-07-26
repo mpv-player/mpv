@@ -68,6 +68,7 @@ option('egl-drm', type: 'feature', value: 'auto', description: 'OpenGL DRM EGL B
 option('egl-wayland', type: 'feature', value: 'auto', description: 'OpenGL Wayland Backend')
 option('egl-x11', type: 'feature', value: 'auto', description: 'OpenGL X11 EGL Backend')
 option('gbm', type: 'feature', value: 'auto', description: 'GBM')
+option('gio', type: 'feature', value: 'auto', description: 'GNOME inhibit support')
 option('gl', type: 'feature', value: 'enabled', description: 'OpenGL context support')
 option('gl-cocoa', type: 'feature', value: 'auto', description: 'gl-cocoa')
 option('gl-dxinterop', type: 'feature', value: 'auto', description: 'OpenGL/DirectX Interop Backend')

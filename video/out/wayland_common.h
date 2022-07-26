@@ -19,6 +19,7 @@
 #define MPLAYER_WAYLAND_COMMON_H
 
 #include <wayland-client.h>
+#include "config.h"
 #include "input/event.h"
 #include "vo.h"
 
@@ -131,6 +132,11 @@ struct vo_wayland_state {
     bool                    cursor_visible;
     int                     allocated_cursor_scale;
     uint32_t                pointer_id;
+
+#if HAVE_GIO
+    /* Screen Saver */
+    struct vo_wayland_screensaver *screensaver;
+#endif
 };
 
 bool vo_wayland_check_visible(struct vo *vo);

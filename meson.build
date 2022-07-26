@@ -1056,6 +1056,16 @@ if wayland['use'] and memfd_create
     sources += files('video/out/vo_wlshm.c')
 endif
 
+gio = {
+    'name': 'gio',
+    'deps': dependency('gio-2.0', version: '>= 2.26', required: get_option('gio')),
+}
+gio += {'use': gio['deps'].found() and wayland['use']}
+if gio['use']
+    dependencies += gio['deps']
+    features += gio['name']
+endif
+
 x11_opt = get_option('x11').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
@@ -1733,6 +1743,7 @@ conf_data.set10('HAVE_EGL_ANGLE_WIN32', egl_angle_win32.allowed())
 conf_data.set10('HAVE_EGL_DRM', egl_drm.allowed())
 conf_data.set10('HAVE_EGL_HELPERS', egl_helpers)
 conf_data.set10('HAVE_EGL_X11', egl_x11.allowed())
+conf_data.set10('HAVE_GIO', gio['use'])
 conf_data.set10('HAVE_GLIBC_THREAD_NAME', glibc_thread_name and posix)
 conf_data.set10('HAVE_GL', gl['use'])
 conf_data.set10('HAVE_GL_COCOA', gl_cocoa.allowed())
