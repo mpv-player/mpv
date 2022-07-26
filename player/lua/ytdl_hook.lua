@@ -215,7 +215,9 @@ end
 local function parse_yt_playlist(url, json)
     -- return 0-based index to use with --playlist-start
 
-    if not json.extractor or json.extractor ~= "youtube:playlist" then
+    if not json.extractor or
+       (json.extractor ~= "youtube:tab" and
+        json.extractor ~= "youtube:playlist") then
         return nil
     end
 
@@ -240,7 +242,7 @@ local function parse_yt_playlist(url, json)
 
     -- if there's no index or it doesn't match, look for video
     for i = 1, #json.entries do
-        if json.entries[i] == args["v"] then
+        if json.entries[i].id == args["v"] then
             msg.debug("found requested video in index " .. (i - 1))
             return i - 1
         end
