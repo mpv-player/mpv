@@ -196,7 +196,7 @@ double mp_pts_from_av(int64_t av_pts, AVRational *tb)
 // Set duration field only if tb is set.
 void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
 {
-    av_init_packet(dst);
+    dst = av_packet_alloc();
     dst->data = mpkt ? mpkt->buffer : NULL;
     dst->size = mpkt ? mpkt->len : 0;
     /* Some codecs (ZeroCodec, some cases of PNG) may want keyframe info
