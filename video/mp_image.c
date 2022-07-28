@@ -676,7 +676,7 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
         int p_w = mp_image_plane_w(&area, p);
         for (int y = 0; y < p_h; y++) {
             void *ptr = area.planes[p] + (ptrdiff_t)area.stride[p] * y;
-            if (plane_size[p] && plane_clear[p]) {
+            if (plane_size[p]) {
                 memset_pattern(ptr, p_w / misery, plane_clear[p], plane_size[p]);
             } else {
                 memset(ptr, 0, mp_image_plane_bytes(&area, p, 0, area.w));
