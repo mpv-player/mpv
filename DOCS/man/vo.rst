@@ -286,7 +286,7 @@ Available video output drivers are:
     ``--sdl-switch-mode``
         Instruct SDL to switch the monitor video mode when going fullscreen.
 
-``vaapi-wayland``
+``dmabuf-wayland``
     Experimental Wayland output driver designed for use with VA API hardware decoding.
     The driver is designed to avoid any GPU to CPU copies, and to perform scaling and
     color space conversion using fixed-function hardware, if available,

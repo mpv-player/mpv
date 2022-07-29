@@ -29,52 +29,32 @@
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
 #include "generated/wayland/viewporter.h"
 
-#define VA_POOL_NUM_ALLOCATED_INIT 30
+/********* wl_buffer pool *************************/
 
-struct va_pool_entry {
-    /* key */
-    VASurfaceID surface;
+#define WLBUF_POOL_NUM_ALLOCATED_INIT 30
 
-    VADRMPRIMESurfaceDescriptor desc;
+struct wlbuf_pool_entry {
+    uintptr_t key;
     struct wl_buffer *buffer;
     struct zwp_linux_buffer_params_v1 *params;
     uint32_t drm_format;
 };
 
-struct va_pool {
+typedef uintptr_t (*wlbuf_pool_key_provider)(struct mp_image *src);
+typedef bool (*wlbuf_pool_dmabuf_importer)(struct vo *vo, struct mp_image *src, struct wlbuf_pool_entry* entry);
+
+struct wlbuf_pool {
     struct vo *vo;
-    struct va_pool_entry **entries;
+    struct wlbuf_pool_entry **entries;
     int num_entries;
     int num_allocated;
+    wlbuf_pool_key_provider key_provider;
+    wlbuf_pool_dmabuf_importer dmabuf_importer;
 };
-
-struct priv {
-    struct vo *vo;
-    struct mp_rect src;
-    struct mp_rect dst;
-    struct mp_osd_res osd;
-    struct mp_log *log;
-
-    VADisplay display;
-    struct mp_vaapi_ctx *mpvaapi;
-    struct wl_shm_pool *solid_buffer_pool;
-    struct wl_buffer *solid_buffer;
-    struct va_pool *va_pool;
-};
-
-static void va_close_surface_descriptor(VADRMPRIMESurfaceDescriptor desc)
-{
-    for (int i = 0; i < desc.num_objects; i++) {
-        close(desc.objects[i].fd);
-        desc.objects[i].fd = 0;
-    }
-}
-
-static void va_free_entry(struct va_pool_entry *entry)
+static void wlbuf_pool_free_entry(struct wlbuf_pool_entry *entry)
 {
     if (!entry)
         return;
-    va_close_surface_descriptor(entry->desc);
     if (entry->buffer)
         wl_buffer_destroy(entry->buffer);
     if (entry->params)
@@ -82,119 +62,76 @@ static void va_free_entry(struct va_pool_entry *entry)
     talloc_free(entry);
 }
 
-static VAStatus va_export_surface_handle(VADisplay display, VASurfaceID surface,
-                                         VADRMPRIMESurfaceDescriptor *desc)
-{
-    return vaExportSurfaceHandle(display, surface,
-                                 VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
-                                 VA_EXPORT_SURFACE_COMPOSED_LAYERS |
-                                 VA_EXPORT_SURFACE_READ_ONLY,
-                                 desc);
-}
-
-static struct va_pool_entry *va_alloc_entry(struct vo *vo, struct mp_image *src)
-{
-    struct priv *p = vo->priv;
-    struct vo_wayland_state *wl = vo->wl;
-    VAStatus status;
-    struct va_pool_entry *entry = talloc(NULL, struct va_pool_entry);
-    memset(entry, 0, sizeof(struct va_pool_entry));
-
-    /* extract dmabuf surface descriptor */
-    entry->surface = va_surface_id(src);
-    status = va_export_surface_handle(p->display, entry->surface, &entry->desc);
-    if (status == VA_STATUS_ERROR_INVALID_SURFACE) {
-        MP_VERBOSE(vo, "VA export to composed layers not supported.\n");
-        va_free_entry(entry);
-        return NULL;
-    } else if (!vo_wayland_supported_format(vo, entry->desc.layers[0].drm_format)) {
-        MP_VERBOSE(vo, "%s is not supported.\n",
-                   mp_tag_str(entry->desc.layers[0].drm_format));
-        va_free_entry(entry);
-        return NULL;
-    } else if (!CHECK_VA_STATUS(vo, "vaExportSurfaceHandle()")) {
-        va_free_entry(entry);
-        return NULL;
-    } else {
-        int i, j, plane = 0;
-
-        entry->params = zwp_linux_dmabuf_v1_create_params(wl->dmabuf);
-        for (i = 0; i < entry->desc.num_layers; i++) {
-            entry->drm_format = entry->desc.layers[i].drm_format;
-            for (j = 0; j < entry->desc.layers[i].num_planes; ++j) {
-                int object = entry->desc.layers[i].object_index[j];
-                uint64_t modifier = entry->desc.objects[object].drm_format_modifier;
-                zwp_linux_buffer_params_v1_add(entry->params,
-                                               entry->desc.objects[object].fd, plane++,
-                                               entry->desc.layers[i].offset[j],
-                                               entry->desc.layers[i].pitch[j],
-                                               modifier >> 32,
-                                               modifier & 0xffffffff);
-            }
-        }
-    }
-
-    entry->buffer = zwp_linux_buffer_params_v1_create_immed(entry->params,
-                                                            src->params.w,
-                                                            src->params.h,
-                                                            entry->drm_format, 0);
-
-    return entry;
-}
-static void va_pool_clean(struct va_pool *pool)
+static void wlbuf_pool_clean(struct wlbuf_pool *pool)
 {
     if (!pool)
         return;
 
     for (int i = 0; i < pool->num_entries; ++i)
-        va_free_entry(pool->entries[i]);
+        wlbuf_pool_free_entry(pool->entries[i]);
     pool->num_entries = 0;
 }
 
-static void va_pool_free(struct va_pool *pool)
+static void wlbuf_pool_free(struct wlbuf_pool *pool)
 {
     if (!pool)
         return;
 
-    va_pool_clean(pool);
+    wlbuf_pool_clean(pool);
     talloc_free(pool);
 }
 
-static struct va_pool *va_pool_alloc(struct vo *vo)
+static struct wlbuf_pool *wlbuf_pool_alloc(struct vo *vo, wlbuf_pool_key_provider key_provider, wlbuf_pool_dmabuf_importer dmabuf_importer)
 {
-    struct va_pool *pool = talloc(NULL, struct va_pool);
-    memset(pool, 0, sizeof(struct va_pool));
-    pool->num_allocated = VA_POOL_NUM_ALLOCATED_INIT;
-    pool->entries = talloc_array(pool, struct va_pool_entry *, pool->num_allocated);
-    memset(pool->entries, 0, pool->num_allocated * sizeof(struct va_pool_entry *));
+    struct wlbuf_pool *pool = talloc(NULL, struct wlbuf_pool);
+    memset(pool, 0, sizeof(struct wlbuf_pool));
+    pool->num_allocated = WLBUF_POOL_NUM_ALLOCATED_INIT;
+    pool->entries = talloc_array(pool, struct wlbuf_pool_entry *, pool->num_allocated);
+    memset(pool->entries, 0, pool->num_allocated * sizeof(struct wlbuf_pool_entry *));
     pool->vo = vo;
+    pool->key_provider = key_provider;
+    pool->dmabuf_importer = dmabuf_importer;
 
     return pool;
 }
 
-static struct va_pool_entry *va_pool_alloc_entry(struct vo *vo, struct va_pool *pool,
+static struct wlbuf_pool_entry *wlbuf_pool_alloc_entry(struct vo *vo, struct wlbuf_pool *pool,
                                                  struct mp_image *src)
 {
-    VASurfaceID surface;
+    uintptr_t key;
+    struct wlbuf_pool_entry *entry;
+    struct vo_wayland_state *wl = vo->wl;
 
-    if (!pool)
+    if (!pool || !src)
         return NULL;
 
-    surface = va_surface_id(src);
+    /* 1. try to find existing entry in pool */
+    key = pool->key_provider(src);
     for (int i = 0; i < pool->num_entries; ++i) {
-        struct va_pool_entry *item = pool->entries[i];
-        if (item->surface == surface)
+        struct wlbuf_pool_entry *item = pool->entries[i];
+        if (item->key == key)
             return pool->entries[i];
     }
 
-    struct va_pool_entry *entry = va_alloc_entry(pool->vo, src);
-    if (!entry)
+    /* 2. otherwise allocate new entry and buffer */
+    entry = talloc(NULL, struct wlbuf_pool_entry);
+    memset(entry, 0, sizeof(struct wlbuf_pool_entry));
+    entry->params = zwp_linux_dmabuf_v1_create_params(wl->dmabuf);
+    entry->key = pool->key_provider(src);
+    if (!pool->dmabuf_importer(pool->vo, src,entry)) {
+        wlbuf_pool_free_entry(entry);
         return NULL;
+    }
+    entry->buffer = zwp_linux_buffer_params_v1_create_immed(entry->params,
+                                                            src->params.w,
+                                                            src->params.h,
+                                                            entry->drm_format, 0);
 
+    /* 3. add new entry to pool */
     if (pool->num_entries == pool->num_allocated) {
         int current_num_allocated = pool->num_allocated;
         pool->num_allocated *= 2;
-        pool->entries = talloc_realloc(pool, pool->entries, struct va_pool_entry *,
+        pool->entries = talloc_realloc(pool, pool->entries, struct wlbuf_pool_entry *,
                                        pool->num_allocated);
         for (int i = current_num_allocated; i < pool->num_allocated; ++i)
             pool->entries[i] = NULL;
@@ -203,12 +140,78 @@ static struct va_pool_entry *va_pool_alloc_entry(struct vo *vo, struct va_pool *
 
     return entry;
 }
+/***********************************************************/
+
+
+struct priv {
+    struct vo *vo;
+    struct mp_rect src;
+    struct mp_rect dst;
+    struct mp_osd_res osd;
+    struct mp_log *log;
+    struct wl_shm_pool *solid_buffer_pool;
+    struct wl_buffer *solid_buffer;
+    struct wlbuf_pool *wlbuf_pool;
+
+    /* va-api-specific fields */
+    VADisplay display;
+    struct mp_vaapi_ctx *mpvaapi;
+};
+
+static uintptr_t vaapi_key_provider(struct mp_image *src){
+    return va_surface_id(src);
+}
+
+/* va-api dmabuf importer */
+static bool vaapi_dmabuf_importer(struct vo *vo, struct mp_image *src,
+                                    struct wlbuf_pool_entry* entry)
+{
+    struct priv *p = vo->priv;
+    VAStatus status;
+    VADRMPRIMESurfaceDescriptor desc;
+    bool dmabuf_imported = false;
+    /* composed has single layer */
+    int layer_no = 0;
+
+    status = vaExportSurfaceHandle(p->display, entry->key,
+                                 VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+                                 VA_EXPORT_SURFACE_COMPOSED_LAYERS |
+                                 VA_EXPORT_SURFACE_READ_ONLY,
+                                 &desc);
+    if (status == VA_STATUS_ERROR_INVALID_SURFACE) {
+        MP_VERBOSE(vo, "VA export to composed layers not supported.\n");
+    } else if (!vo_wayland_supported_format(vo, desc.layers[layer_no].drm_format)) {
+        MP_VERBOSE(vo, "%s is not supported.\n",
+                   mp_tag_str(desc.layers[layer_no].drm_format));
+    } else if (CHECK_VA_STATUS(vo, "vaExportSurfaceHandle()")) {
+        entry->drm_format = desc.layers[layer_no].drm_format;
+        for (int plane_no = 0; plane_no < desc.layers[layer_no].num_planes; ++plane_no) {
+            int object = desc.layers[layer_no].object_index[plane_no];
+            uint64_t modifier = desc.objects[object].drm_format_modifier;
+            zwp_linux_buffer_params_v1_add(entry->params,
+                                           desc.objects[object].fd, plane_no,
+                                           desc.layers[layer_no].offset[plane_no],
+                                           desc.layers[layer_no].pitch[plane_no],
+                                           modifier >> 32,
+                                           modifier & 0xffffffff);
+        }
+        dmabuf_imported = true;
+    }
+
+    /* clean up descriptor */
+    for (int i = 0; i < desc.num_objects; i++) {
+        close(desc.objects[i].fd);
+        desc.objects[i].fd = 0;
+    }
+
+    return dmabuf_imported;
+}
 
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    va_pool_free(p->va_pool);
+    wlbuf_pool_free(p->wlbuf_pool);
 
     if (p->solid_buffer_pool)
         wl_shm_pool_destroy(p->solid_buffer_pool);
@@ -249,7 +252,7 @@ static int preinit(struct vo *vo)
 
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_add(vo->hwdec_devs, &p->mpvaapi->hwctx);
-    p->va_pool = va_pool_alloc(vo);
+    p->wlbuf_pool = wlbuf_pool_alloc(vo, vaapi_key_provider, vaapi_dmabuf_importer);
 
     return 0;
 
@@ -324,9 +327,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     int ret;
 
     switch (request) {
-    /* need to clean pool after seek to avoid artifacts */
+    /* need to clean buffer pool after seek to avoid judder */
     case VOCTRL_RESET:
-        va_pool_clean(p->va_pool);
+        wlbuf_pool_clean(p->wlbuf_pool);
         break;
     default:
         break;
@@ -349,7 +352,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!vo_wayland_check_visible(vo))
         return;
 
-    struct va_pool_entry *entry = va_pool_alloc_entry(vo, p->va_pool,
+    struct wlbuf_pool_entry *entry = wlbuf_pool_alloc_entry(vo, p->wlbuf_pool,
                                                       frame->current);
     if (!entry)
         return;
@@ -376,9 +379,9 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
         present_sync_get_info(wl->present, info);
 }
 
-const struct vo_driver video_out_vaapi_wayland = {
-    .description = "VA API with Wayland video output",
-    .name = "vaapi-wayland",
+const struct vo_driver video_out_dmabuf_wayland = {
+    .description = "Wayland dmabuf video output",
+    .name = "dmabuf-wayland",
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

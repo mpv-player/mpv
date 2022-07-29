@@ -1444,8 +1444,8 @@ if vaapi_wayland['use']
 endif
 
 if vaapi_wayland['use'] and memfd_create
-    features += 'vaapi-wayland-memfd'
-    sources += files('video/out/vo_vaapi_wayland.c')
+    features += 'dmabuf-wayland-memfd'
+    sources += files('video/out/vo_dmabuf_wayland.c')
 endif
 
 vaapi_x11 = {

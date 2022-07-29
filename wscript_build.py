@@ -519,7 +519,7 @@ def build(ctx):
         ( "video/out/vo_sixel.c",                "sixel" ),
         ( "video/out/vo_tct.c" ),
         ( "video/out/vo_vaapi.c",                "vaapi-x11 && gpl" ),
-        ( "video/out/vo_vaapi_wayland.c",        "vaapi-wayland-memfd"  ),
+        ( "video/out/vo_dmabuf_wayland.c",        "dmabuf-wayland-memfd"  ),
         ( "video/out/vo_vdpau.c",                "vdpau" ),
         ( "video/out/vo_wlshm.c",                "wayland && memfd_create" ),
         ( "video/out/vo_x11.c" ,                 "x11" ),
