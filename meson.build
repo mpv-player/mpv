@@ -1474,7 +1474,6 @@ vaapi_egl = {
 if vaapi_egl['use']
     dependencies += [vaapi_wayland['deps'], vaapi_drm['deps']]
     features += vaapi_egl['name']
-    sources += files('video/out/hwdec/dmabuf_interop_gl.c')
 endif
 
 vaapi_libplacebo = {
@@ -1483,11 +1482,30 @@ vaapi_libplacebo = {
 }
 if vaapi_libplacebo['use']
     features += vaapi_libplacebo['name']
-    sources += files('video/out/hwdec/dmabuf_interop_pl.c')
 endif
 
 if vaapi_egl['use'] or vaapi_libplacebo['use']
     sources += files('video/out/hwdec/hwdec_vaapi.c')
+endif
+
+dmabuf_interop_gl = {
+    'name': 'dmabuf-interop-gl',
+    'use': egl['use'] and drm['use']
+}
+
+if dmabuf_interop_gl['use']
+    features += dmabuf_interop_gl['name']
+    sources += files('video/out/hwdec/dmabuf_interop_gl.c')
+endif
+
+dmabuf_interop_pl = {
+    'name': 'dmabuf-interop-pl',
+    'use': vaapi_libplacebo['use']
+}
+
+if dmabuf_interop_pl['use']
+    features += dmabuf_interop_pl['name']
+    sources += files('video/out/hwdec/dmabuf_interop_pl.c')
 endif
 
 vdpau_opt = get_option('vdpau').require(
@@ -1721,6 +1739,8 @@ conf_data.set10('HAVE_D3D_HWACCEL', d3d_hwaccel.allowed())
 conf_data.set10('HAVE_D3D9_HWACCEL', d3d9_hwaccel.allowed())
 conf_data.set10('HAVE_D3D11', d3d11.allowed())
 conf_data.set10('HAVE_DIRECT3D', direct3d)
+conf_data.set10('HAVE_DMABUF_INTEROP_GL', dmabuf_interop_gl['use'])
+conf_data.set10('HAVE_DMABUF_INTEROP_PL', dmabuf_interop_pl['use'])
 conf_data.set10('HAVE_DOS_PATHS', win32)
 conf_data.set10('HAVE_DRM', drm['use'])
 conf_data.set10('HAVE_DVBIN', dvbin.allowed())
