@@ -782,6 +782,16 @@ video_output_features = [
         'name': '--sixel',
         'desc': 'Sixel',
         'func': check_pkg_config('libsixel', '>= 1.5'),
+    }, {
+        'name': 'dmabuf-interop-gl',
+        'desc': 'dmabuf GL Interop',
+        'deps': 'egl && drm',
+        'func': check_true,
+    }, {
+        'name': 'dmabuf-interop-pl',
+        'desc': 'dmabuf libplacebo interop',
+        'deps': 'vaapi-libplacebo',
+        'func': check_true,
     }
 ]
 

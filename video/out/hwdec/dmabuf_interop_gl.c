@@ -144,11 +144,11 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
     } while(0)
 
 #define ADD_PLANE_ATTRIBS(plane) do { \
-            uint64_t drm_format_modifier = p_mapper->desc.objects[p_mapper->desc.layers[n].object_index[plane]].drm_format_modifier; \
+            uint64_t drm_format_modifier = p_mapper->desc.objects[p_mapper->desc.layers[n].planes[plane].object_index].format_modifier; \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _FD_EXT, \
-                        p_mapper->desc.objects[p_mapper->desc.layers[n].object_index[plane]].fd); \
+                        p_mapper->desc.objects[p_mapper->desc.layers[n].planes[plane].object_index].fd); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _OFFSET_EXT, \
-                        p_mapper->desc.layers[n].offset[plane]); \
+                        p_mapper->desc.layers[n].planes[plane].offset); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
                         p_mapper->desc.layers[n].planes[plane].pitch); \
             if (dmabuf_interop->use_modifiers && drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
@@ -167,7 +167,7 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
     GL *gl = ra_gl_get(mapper->ra);
 
     for (int n = 0; n < p_mapper->num_planes; n++) {
-        if (p_mapper->desc.layers[n].num_planes > 1) {
+        if (p_mapper->desc.layers[n].nb_planes > 1) {
             // Should never happen because we request separate layers
             MP_ERR(mapper, "Multi-plane surfaces are not supported\n");
             return false;
@@ -176,16 +176,16 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
         int attribs[48] = {EGL_NONE};
         int num_attribs = 0;
 
-        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, p_mapper->desc.layers[n].drm_format);
+        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, p_mapper->desc.layers[n].format);
         ADD_ATTRIB(EGL_WIDTH,  p_mapper->tex[n]->params.w);
         ADD_ATTRIB(EGL_HEIGHT, p_mapper->tex[n]->params.h);
 
         ADD_PLANE_ATTRIBS(0);
-        if (p_mapper->desc.layers[n].num_planes > 1)
+        if (p_mapper->desc.layers[n].nb_planes > 1)
             ADD_PLANE_ATTRIBS(1);
-        if (p_mapper->desc.layers[n].num_planes > 2)
+        if (p_mapper->desc.layers[n].nb_planes > 2)
             ADD_PLANE_ATTRIBS(2);
-        if (p_mapper->desc.layers[n].num_planes > 3)
+        if (p_mapper->desc.layers[n].nb_planes > 3)
             ADD_PLANE_ATTRIBS(3);
 
         p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),

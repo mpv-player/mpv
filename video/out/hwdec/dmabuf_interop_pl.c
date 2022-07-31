@@ -41,11 +41,11 @@ static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper,
     for (int n = 0; n < p->num_planes; n++) {
 
         const struct ra_format *format = desc.planes[n];
-        int id = p->desc.layers[layer].object_index[layer_plane];
+        int id = p->desc.layers[layer].planes[layer_plane].object_index;
         int fd = p->desc.objects[id].fd;
         uint32_t size = p->desc.objects[id].size;
-        uint32_t offset = p->desc.layers[layer].offset[layer_plane];
-        uint32_t pitch = p->desc.layers[layer].pitch[layer_plane];
+        uint32_t offset = p->desc.layers[layer].planes[layer_plane].offset;
+        uint32_t pitch = p->desc.layers[layer].planes[layer_plane].pitch;
 
         // AMD drivers do not return the size in the surface description, so we
         // need to query it manually.
@@ -77,7 +77,7 @@ static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper,
                 },
                 .size = size,
                 .offset = offset,
-                .drm_format_mod = p->desc.objects[id].drm_format_modifier,
+                .drm_format_mod = p->desc.objects[id].format_modifier,
                 .stride_w = pitch,
             },
         };
@@ -101,7 +101,7 @@ static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper,
                 id, fd, ratex);
 
         layer_plane++;
-        if (layer_plane == p->desc.layers[layer].num_planes) {
+        if (layer_plane == p->desc.layers[layer].nb_planes) {
             layer_plane = 0;
             layer++;
         }

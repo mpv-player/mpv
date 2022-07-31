@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <va/va_drmcommon.h>
+#include <libavutil/hwcontext_drm.h>
 
 #include "config.h"
 #include "video/out/gpu/hwdec.h"
@@ -40,7 +40,7 @@ struct priv {
     struct mp_image layout;
     struct ra_tex *tex[4];
 
-    VADRMPRIMESurfaceDescriptor desc;
+    AVDRMFrameDescriptor desc;
     bool surface_acquired;
 
     void *interop_mapper_priv;

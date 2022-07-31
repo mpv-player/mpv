@@ -22,6 +22,7 @@
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
+#include <va/va_drmcommon.h>
 
 #include "config.h"
 
@@ -117,10 +118,10 @@ static void uninit(struct ra_hwdec *hw)
 }
 
 const static dmabuf_interop_init interop_inits[] = {
-#if HAVE_VAAPI_EGL
+#if HAVE_DMABUF_INTEROP_GL
     dmabuf_interop_gl_init,
 #endif
-#if HAVE_VAAPI_LIBPLACEBO
+#if HAVE_DMABUF_INTEROP_PL
     dmabuf_interop_pl_init,
 #endif
     NULL
@@ -181,7 +182,7 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
     p_owner->dmabuf_interop.interop_unmap(mapper);
 
     if (p->surface_acquired) {
-        for (int n = 0; n < p->desc.num_objects; n++)
+        for (int n = 0; n < p->desc.nb_objects; n++)
             close(p->desc.objects[n].fd);
         p->surface_acquired = false;
     }
@@ -242,12 +243,13 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     struct priv *p = mapper->priv;
     VAStatus status;
     VADisplay *display = p_owner->display;
+    VADRMPRIMESurfaceDescriptor desc;
 
     status = vaExportSurfaceHandle(display, va_surface_id(mapper->src),
                                    VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
                                    VA_EXPORT_SURFACE_READ_ONLY |
                                    VA_EXPORT_SURFACE_SEPARATE_LAYERS,
-                                   &p->desc);
+                                   &desc);
     if (!CHECK_VA_STATUS_LEVEL(mapper, "vaExportSurfaceHandle()",
                                p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR))
     {
@@ -258,21 +260,38 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     CHECK_VA_STATUS(mapper, "vaSyncSurface()");
     p->surface_acquired = true;
 
+    // We use AVDRMFrameDescriptor to store the dmabuf so we need to copy the
+    // values over.
+    int num_returned_planes = 0;
+    p->desc.nb_layers = desc.num_layers;
+    p->desc.nb_objects = desc.num_objects;
+    for (int i = 0; i < desc.num_layers; i++) {
+        p->desc.layers[i].format = desc.layers[i].drm_format;
+        p->desc.layers[i].nb_planes = desc.layers[i].num_planes;
+        for (int j = 0; j < desc.layers[i].num_planes; j++)
+        {
+            p->desc.layers[i].planes[j].object_index = desc.layers[i].object_index[j];
+            p->desc.layers[i].planes[j].offset = desc.layers[i].offset[j];
+            p->desc.layers[i].planes[j].pitch = desc.layers[i].pitch[j];
+        }
+
+        num_returned_planes += desc.layers[i].num_planes;
+    }
+    for (int i = 0; i < desc.num_objects; i++) {
+        p->desc.objects[i].format_modifier = desc.objects[i].drm_format_modifier;
+        p->desc.objects[i].fd = desc.objects[i].fd;
+        p->desc.objects[i].size = desc.objects[i].size;
+    }
+
     // We can handle composed formats if the total number of planes is still
     // equal the number of planes we expect. Complex formats with auxilliary
     // planes cannot be supported.
-
-    int num_returned_planes = 0;
-    for (int i = 0; i < p->desc.num_layers; i++) {
-        num_returned_planes += p->desc.layers[i].num_planes;
-    }
-
     if (p->num_planes != num_returned_planes) {
         mp_msg(mapper->log, p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR,
                "Mapped surface with format '%s' has unexpected number of planes. "
                "(%d layers and %d planes, but expected %d planes)\n",
                mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
-               p->desc.num_layers, num_returned_planes, p->num_planes);
+               desc.num_layers, num_returned_planes, p->num_planes);
         goto err;
     }
 
@@ -280,7 +299,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
                                              p_owner->probing_formats))
         goto err;
 
-    if (p->desc.fourcc == VA_FOURCC_YV12)
+    if (desc.fourcc == VA_FOURCC_YV12)
         MPSWAP(struct ra_tex*, mapper->tex[1], mapper->tex[2]);
 
     return 0;
