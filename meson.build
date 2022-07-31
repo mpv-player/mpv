@@ -943,10 +943,12 @@ drm += {'use': drm['deps'].found() and drm['header']}
 if drm['use']
     dependencies += drm['deps']
     features += drm['name']
-    sources += files('video/out/drm_atomic.c',
+    sources += files('video/drmprime.c',
+                     'video/out/drm_atomic.c',
                      'video/out/drm_common.c',
                      'video/out/drm_prime.c',
                      'video/out/opengl/hwdec_drmprime_drm.c',
+                     'video/out/hwdec/hwdec_drmprime.c',
                      'video/out/vo_drm.c')
 endif
 

@@ -1253,6 +1253,8 @@ Video
     :vaapi-copy: copies video back into system RAM (Linux with some GPUs only)
     :nvdec:     requires ``--vo=gpu`` (Any platform CUDA is available)
     :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
+    :drm:       requires ``--vo=gpu`` (Linux only)
+    :drm-copy:   copies video back to system RAM (Linux ony)
 
     Other hwdecs (only use if you know you have to):
 
