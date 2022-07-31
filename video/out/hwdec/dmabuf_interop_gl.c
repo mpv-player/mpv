@@ -150,17 +150,18 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _OFFSET_EXT, \
                         p_mapper->desc.layers[n].offset[plane]); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
-                        p_mapper->desc.layers[n].pitch[plane]); \
-            if (p_owner->use_modifiers && drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
+                        p_mapper->desc.layers[n].planes[plane].pitch); \
+            if (dmabuf_interop->use_modifiers && drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
                 ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_LO_EXT, drm_format_modifier & 0xfffffffful); \
                 ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_HI_EXT, drm_format_modifier >> 32); \
             }                               \
         } while (0)
 
-static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
+static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
+                         struct dmabuf_interop *dmabuf_interop,
+                         bool probing)
 {
     struct priv *p_mapper = mapper->priv;
-    struct priv_owner *p_owner = mapper->owner->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     GL *gl = ra_gl_get(mapper->ra);
@@ -168,7 +169,7 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
     for (int n = 0; n < p_mapper->num_planes; n++) {
         if (p_mapper->desc.layers[n].num_planes > 1) {
             // Should never happen because we request separate layers
-            MP_ERR(mapper, "Multi-plane VA surfaces are not supported\n");
+            MP_ERR(mapper, "Multi-plane surfaces are not supported\n");
             return false;
         }
 
@@ -190,7 +191,7 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
         p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),
             EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
         if (!p->images[n]) {
-            mp_msg(mapper->log, p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR,
+            mp_msg(mapper->log, probing ? MSGL_DEBUG : MSGL_ERR,
                    "Failed to import surface in EGL: %u\n", eglGetError());
             return false;
         }
@@ -218,9 +219,9 @@ static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
     }
 }
 
-bool dmabuf_interop_gl_init(const struct ra_hwdec *hw)
+bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
+                            struct dmabuf_interop *dmabuf_interop)
 {
-    struct priv_owner *p = hw->priv;
     if (!ra_is_gl(hw->ra)) {
         // This is not an OpenGL RA.
         return false;
@@ -240,14 +241,15 @@ bool dmabuf_interop_gl_init(const struct ra_hwdec *hw)
         !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return false;
 
-    p->use_modifiers = gl_check_extension(exts, "EGL_EXT_image_dma_buf_import_modifiers");
+    dmabuf_interop->use_modifiers =
+        gl_check_extension(exts, "EGL_EXT_image_dma_buf_import_modifiers");
 
-    MP_VERBOSE(hw, "using VAAPI EGL interop\n");
+    MP_VERBOSE(hw, "using EGL dmabuf interop\n");
 
-    p->interop_init = vaapi_gl_mapper_init;
-    p->interop_uninit = vaapi_gl_mapper_uninit;
-    p->interop_map = vaapi_gl_map;
-    p->interop_unmap = vaapi_gl_unmap;
+    dmabuf_interop->interop_init = vaapi_gl_mapper_init;
+    dmabuf_interop->interop_uninit = vaapi_gl_mapper_uninit;
+    dmabuf_interop->interop_map = vaapi_gl_map;
+    dmabuf_interop->interop_unmap = vaapi_gl_unmap;
 
     return true;
 }

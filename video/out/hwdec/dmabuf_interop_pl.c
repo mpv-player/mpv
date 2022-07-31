@@ -23,7 +23,9 @@
 #include "video/out/placebo/ra_pl.h"
 #include "video/out/placebo/utils.h"
 
-static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper, bool probing)
+static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper,
+                         struct dmabuf_interop *dmabuf_interop,
+                         bool probing)
 {
     struct priv *p = mapper->priv;
     pl_gpu gpu = ra_pl_get(mapper->ra);
@@ -113,9 +115,9 @@ static void vaapi_pl_unmap(struct ra_hwdec_mapper *mapper)
         ra_tex_free(mapper->ra, &mapper->tex[n]);
 }
 
-bool dmabuf_interop_pl_init(const struct ra_hwdec *hw)
+bool dmabuf_interop_pl_init(const struct ra_hwdec *hw,
+                            struct dmabuf_interop *dmabuf_interop)
 {
-    struct priv_owner *p = hw->priv;
     pl_gpu gpu = ra_pl_get(hw->ra);
     if (!gpu) {
         // This is not a libplacebo RA;
@@ -123,15 +125,15 @@ bool dmabuf_interop_pl_init(const struct ra_hwdec *hw)
     }
 
     if (!(gpu->import_caps.tex & PL_HANDLE_DMA_BUF)) {
-        MP_VERBOSE(hw, "VAAPI libplacebo interop requires support for "
+        MP_VERBOSE(hw, "libplacebo dmabuf interop requires support for "
                         "PL_HANDLE_DMA_BUF import.\n");
         return false;
     }
 
-    MP_VERBOSE(hw, "using VAAPI libplacebo interop\n");
+    MP_VERBOSE(hw, "using libplacebo dmabuf interop\n");
 
-    p->interop_map = vaapi_pl_map;
-    p->interop_unmap = vaapi_pl_unmap;
+    dmabuf_interop->interop_map = vaapi_pl_map;
+    dmabuf_interop->interop_unmap = vaapi_pl_unmap;
 
     return true;
 }

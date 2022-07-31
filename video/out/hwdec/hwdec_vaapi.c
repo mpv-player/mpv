@@ -99,6 +99,15 @@ static VADisplay *create_native_va_display(struct ra *ra, struct mp_log *log)
 
 static void determine_working_formats(struct ra_hwdec *hw);
 
+struct priv_owner {
+    struct mp_vaapi_ctx *ctx;
+    VADisplay *display;
+    int *formats;
+    bool probing_formats; // temporary during init
+
+    struct dmabuf_interop dmabuf_interop;
+};
+
 static void uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
@@ -122,12 +131,12 @@ static int init(struct ra_hwdec *hw)
     struct priv_owner *p = hw->priv;
 
     for (int i = 0; interop_inits[i]; i++) {
-        if (interop_inits[i](hw)) {
+        if (interop_inits[i](hw, &p->dmabuf_interop)) {
             break;
         }
     }
 
-    if (!p->interop_map || !p->interop_unmap) {
+    if (!p->dmabuf_interop.interop_map || !p->dmabuf_interop.interop_unmap) {
         MP_VERBOSE(hw, "VAAPI hwdec only works with OpenGL or Vulkan backends.\n");
         return -1;
     }
@@ -169,7 +178,7 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
     struct priv_owner *p_owner = mapper->owner->priv;
     struct priv *p = mapper->priv;
 
-    p_owner->interop_unmap(mapper);
+    p_owner->dmabuf_interop.interop_unmap(mapper);
 
     if (p->surface_acquired) {
         for (int n = 0; n < p->desc.num_objects; n++)
@@ -181,8 +190,8 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
-    if (p_owner->interop_uninit) {
-        p_owner->interop_uninit(mapper);
+    if (p_owner->dmabuf_interop.interop_uninit) {
+        p_owner->dmabuf_interop.interop_uninit(mapper);
     }
 }
 
@@ -213,8 +222,8 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     p->num_planes = desc.num_planes;
     mp_image_set_params(&p->layout, &mapper->dst_params);
 
-    if (p_owner->interop_init)
-        if (!p_owner->interop_init(mapper, &desc))
+    if (p_owner->dmabuf_interop.interop_init)
+        if (!p_owner->dmabuf_interop.interop_init(mapper, &desc))
             return -1;
 
     if (!p_owner->probing_formats && !check_fmt(mapper, mapper->dst_params.imgfmt))
@@ -267,7 +276,8 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         goto err;
     }
 
-    if (!p_owner->interop_map(mapper, p_owner->probing_formats))
+    if (!p_owner->dmabuf_interop.interop_map(mapper, &p_owner->dmabuf_interop,
+                                             p_owner->probing_formats))
         goto err;
 
     if (p->desc.fourcc == VA_FOURCC_YV12)
