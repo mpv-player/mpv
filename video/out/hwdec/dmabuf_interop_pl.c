@@ -19,7 +19,7 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "hwdec_vaapi.h"
+#include "dmabuf_interop.h"
 #include "video/out/placebo/ra_pl.h"
 #include "video/out/placebo/utils.h"
 
@@ -113,7 +113,7 @@ static void vaapi_pl_unmap(struct ra_hwdec_mapper *mapper)
         ra_tex_free(mapper->ra, &mapper->tex[n]);
 }
 
-bool vaapi_pl_init(const struct ra_hwdec *hw)
+bool dmabuf_interop_pl_init(const struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
     pl_gpu gpu = ra_pl_get(hw->ra);

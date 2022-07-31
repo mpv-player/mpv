@@ -1474,7 +1474,7 @@ vaapi_egl = {
 if vaapi_egl['use']
     dependencies += [vaapi_wayland['deps'], vaapi_drm['deps']]
     features += vaapi_egl['name']
-    sources += files('video/out/hwdec/hwdec_vaapi_gl.c')
+    sources += files('video/out/hwdec/dmabuf_interop_gl.c')
 endif
 
 vaapi_libplacebo = {
@@ -1483,7 +1483,7 @@ vaapi_libplacebo = {
 }
 if vaapi_libplacebo['use']
     features += vaapi_libplacebo['name']
-    sources += files('video/out/hwdec/hwdec_vaapi_pl.c')
+    sources += files('video/out/hwdec/dmabuf_interop_pl.c')
 endif
 
 if vaapi_egl['use'] or vaapi_libplacebo['use']

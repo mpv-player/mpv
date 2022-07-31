@@ -26,7 +26,7 @@
 #include "config.h"
 
 #include "video/out/gpu/hwdec.h"
-#include "video/out/hwdec/hwdec_vaapi.h"
+#include "video/out/hwdec/dmabuf_interop.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image_pool.h"
 #include "video/vaapi.h"
@@ -107,12 +107,12 @@ static void uninit(struct ra_hwdec *hw)
     va_destroy(p->ctx);
 }
 
-const static vaapi_interop_init interop_inits[] = {
+const static dmabuf_interop_init interop_inits[] = {
 #if HAVE_VAAPI_EGL
-    vaapi_gl_init,
+    dmabuf_interop_gl_init,
 #endif
 #if HAVE_VAAPI_LIBPLACEBO
-    vaapi_pl_init,
+    dmabuf_interop_pl_init,
 #endif
     NULL
 };

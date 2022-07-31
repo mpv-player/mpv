@@ -49,7 +49,7 @@ struct priv {
     void *interop_mapper_priv;
 };
 
-typedef bool (*vaapi_interop_init)(const struct ra_hwdec *hw);
+typedef bool (*dmabuf_interop_init)(const struct ra_hwdec *hw);
 
-bool vaapi_gl_init(const struct ra_hwdec *hw);
-bool vaapi_pl_init(const struct ra_hwdec *hw);
+bool dmabuf_interop_gl_init(const struct ra_hwdec *hw);
+bool dmabuf_interop_pl_init(const struct ra_hwdec *hw);
