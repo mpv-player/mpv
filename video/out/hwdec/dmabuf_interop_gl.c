@@ -16,7 +16,7 @@
  */
 
 #include "config.h"
-#include "hwdec_vaapi.h"
+#include "dmabuf_interop.h"
 
 #include <EGL/egl.h>
 #include "video/out/opengl/ra_gl.h"
@@ -218,7 +218,7 @@ static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
     }
 }
 
-bool vaapi_gl_init(const struct ra_hwdec *hw)
+bool dmabuf_interop_gl_init(const struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
     if (!ra_is_gl(hw->ra)) {
