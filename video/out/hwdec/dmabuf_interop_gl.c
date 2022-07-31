@@ -18,15 +18,12 @@
 #include "config.h"
 #include "dmabuf_interop.h"
 
+#include <drm_fourcc.h>
 #include <EGL/egl.h>
 #include "video/out/opengl/ra_gl.h"
 
 typedef void* GLeglImageOES;
 typedef void *EGLImageKHR;
-
-#ifndef DRM_FORMAT_MOD_INVALID
-#define DRM_FORMAT_MOD_INVALID  ((UINT64_C(1) << 56) - 1)
-#endif
 
 // Any EGL_EXT_image_dma_buf_import definitions used in this source file.
 #define EGL_LINUX_DMA_BUF_EXT             0x3270
@@ -144,13 +141,13 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
     } while(0)
 
 #define ADD_PLANE_ATTRIBS(plane) do { \
-            uint64_t drm_format_modifier = p_mapper->desc.objects[p_mapper->desc.layers[n].planes[plane].object_index].format_modifier; \
+            uint64_t drm_format_modifier = p_mapper->desc.objects[p_mapper->desc.layers[i].planes[j].object_index].format_modifier; \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _FD_EXT, \
-                        p_mapper->desc.objects[p_mapper->desc.layers[n].planes[plane].object_index].fd); \
+                        p_mapper->desc.objects[p_mapper->desc.layers[i].planes[j].object_index].fd); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _OFFSET_EXT, \
-                        p_mapper->desc.layers[n].planes[plane].offset); \
+                        p_mapper->desc.layers[i].planes[j].offset); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
-                        p_mapper->desc.layers[n].planes[plane].pitch); \
+                        p_mapper->desc.layers[i].planes[j].pitch); \
             if (dmabuf_interop->use_modifiers && drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
                 ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_LO_EXT, drm_format_modifier & 0xfffffffful); \
                 ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_HI_EXT, drm_format_modifier >> 32); \
@@ -166,41 +163,59 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
 
     GL *gl = ra_gl_get(mapper->ra);
 
-    for (int n = 0; n < p_mapper->num_planes; n++) {
-        if (p_mapper->desc.layers[n].nb_planes > 1) {
-            // Should never happen because we request separate layers
-            MP_ERR(mapper, "Multi-plane surfaces are not supported\n");
-            return false;
+    for (int i = 0, n = 0; i < p_mapper->desc.nb_layers; i++) {
+        /*
+         * As we must map surfaces as one texture per plane, we can only support
+         * a subset of possible multi-plane layer formats. This is due to having
+         * to manually establish what DRM format each synthetic layer should
+         * have.
+         */
+        uint32_t format[AV_DRM_MAX_PLANES] = {
+            p_mapper->desc.layers[i].format,
+        };
+
+        if (p_mapper->desc.layers[i].nb_planes > 1) {
+            switch (p_mapper->desc.layers[i].format) {
+            case DRM_FORMAT_NV12:
+                format[0] = DRM_FORMAT_R8;
+                format[1] = DRM_FORMAT_GR88;
+                break;
+            case DRM_FORMAT_P010:
+                format[0] = DRM_FORMAT_R16;
+                format[1] = DRM_FORMAT_GR1616;
+                break;
+            default:
+                mp_msg(mapper->log, probing ? MSGL_DEBUG : MSGL_ERR,
+                       "Cannot map unknown multi-plane format: 0x%08X\n",
+                       p_mapper->desc.layers[i].format);
+                return false;
+            }
         }
 
-        int attribs[48] = {EGL_NONE};
-        int num_attribs = 0;
+        for (int j = 0; j < p_mapper->desc.layers[i].nb_planes; j++, n++) {
+            int attribs[48] = {EGL_NONE};
+            int num_attribs = 0;
 
-        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, p_mapper->desc.layers[n].format);
-        ADD_ATTRIB(EGL_WIDTH,  p_mapper->tex[n]->params.w);
-        ADD_ATTRIB(EGL_HEIGHT, p_mapper->tex[n]->params.h);
+            ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, format[j]);
+            ADD_ATTRIB(EGL_WIDTH,  p_mapper->tex[n]->params.w);
+            ADD_ATTRIB(EGL_HEIGHT, p_mapper->tex[n]->params.h);
+            ADD_PLANE_ATTRIBS(0);
 
-        ADD_PLANE_ATTRIBS(0);
-        if (p_mapper->desc.layers[n].nb_planes > 1)
-            ADD_PLANE_ATTRIBS(1);
-        if (p_mapper->desc.layers[n].nb_planes > 2)
-            ADD_PLANE_ATTRIBS(2);
-        if (p_mapper->desc.layers[n].nb_planes > 3)
-            ADD_PLANE_ATTRIBS(3);
+            p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),
+                EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
+            if (!p->images[n]) {
+                mp_msg(mapper->log, probing ? MSGL_DEBUG : MSGL_ERR,
+                    "Failed to import surface in EGL: %u\n", eglGetError());
+                return false;
+            }
 
-        p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),
-            EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
-        if (!p->images[n]) {
-            mp_msg(mapper->log, probing ? MSGL_DEBUG : MSGL_ERR,
-                   "Failed to import surface in EGL: %u\n", eglGetError());
-            return false;
+            gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
+            p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+
+            mapper->tex[n] = p_mapper->tex[n];
         }
-
-        gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-        p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
-
-        mapper->tex[n] = p_mapper->tex[n];
     }
+
     gl->BindTexture(GL_TEXTURE_2D, 0);
     return true;
 }
