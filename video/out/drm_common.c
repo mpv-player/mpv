@@ -558,6 +558,21 @@ static char *get_primary_device_path(struct mp_log *log, int *card_no)
 
         const char *primary_node_path = dev->nodes[DRM_NODE_PRIMARY];
 
+        int fd = open_card_path(primary_node_path);
+        const int is_kms = fd != -1 && drmIsKMS(fd);
+        if (fd != -1)
+            close(fd);
+        if (!is_kms) {
+            if (card_no_given) {
+                mp_err(log,
+                       "DRM card number %d given, yet it does not support "
+                       "KMS!\n", i);
+                break;
+            }
+
+            continue;
+        }
+
         mp_verbose(log, "Picked DRM card %d, primary node %s%s.\n",
                    i, primary_node_path,
                    card_no_given ? "" : " as the default");
