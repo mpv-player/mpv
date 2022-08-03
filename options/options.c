@@ -168,6 +168,7 @@ static const m_option_t mp_vo_opt_list[] = {
         {"display-resample", VS_DISP_RESAMPLE},
         {"display-resample-vdrop", VS_DISP_RESAMPLE_VDROP},
         {"display-resample-desync", VS_DISP_RESAMPLE_NONE},
+        {"display-tempo", VS_DISP_TEMPO},
         {"display-adrop", VS_DISP_ADROP},
         {"display-vdrop", VS_DISP_VDROP},
         {"display-desync", VS_DISP_NONE},

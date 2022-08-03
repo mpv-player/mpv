@@ -64,9 +64,17 @@ static void update_speed_filters(struct MPContext *mpctx)
         speed = 1.0;
     }
 
-    if (mpctx->display_sync_active && mpctx->video_out->opts->video_sync == VS_DISP_ADROP) {
-        drop *= speed * resample;
-        resample = speed = 1.0;
+    if (mpctx->display_sync_active) {
+        switch (mpctx->video_out->opts->video_sync) {
+            case VS_DISP_ADROP:
+                drop *= speed * resample;
+                resample = speed = 1.0;
+                break;
+            case VS_DISP_TEMPO:
+                speed = mpctx->audio_speed;
+                resample = 1.0;
+                break;
+        }
     }
 
     mp_output_chain_set_audio_speed(ao_c->filter, speed, resample, drop);

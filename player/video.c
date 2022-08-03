@@ -736,12 +736,14 @@ static double compute_audio_drift(struct MPContext *mpctx, double vsync)
     return (sum_x * sum_y - num * sum_xy) / (sum_x * sum_x - num * sum_xx);
 }
 
-static void adjust_audio_resample_speed(struct MPContext *mpctx, double vsync)
+static void adjust_audio_drift_compensation(struct MPContext *mpctx, double vsync)
 {
     struct MPOpts *opts = mpctx->opts;
     int mode = mpctx->video_out->opts->video_sync;
 
-    if (mode != VS_DISP_RESAMPLE || mpctx->audio_status != STATUS_PLAYING) {
+    if ((mode != VS_DISP_RESAMPLE && mode != VS_DISP_TEMPO) ||
+        mpctx->audio_status != STATUS_PLAYING)
+    {
         mpctx->speed_factor_a = mpctx->speed_factor_v;
         return;
     }
@@ -813,7 +815,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||
                     mode == VS_DISP_RESAMPLE_NONE;
     bool drop = mode == VS_DISP_VDROP || mode == VS_DISP_RESAMPLE ||
-                mode == VS_DISP_ADROP || mode == VS_DISP_RESAMPLE_VDROP;
+                mode == VS_DISP_ADROP || mode == VS_DISP_RESAMPLE_VDROP ||
+                mode == VS_DISP_TEMPO;
     drop &= frame->can_drop;
 
     if (resample && using_spdif_passthrough(mpctx))
@@ -896,8 +899,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     mpctx->past_frames[0].num_vsyncs = num_vsyncs;
     mpctx->past_frames[0].av_diff = mpctx->last_av_difference;
 
-    if (resample || mode == VS_DISP_ADROP) {
-        adjust_audio_resample_speed(mpctx, vsync);
+    if (resample || mode == VS_DISP_ADROP || mode == VS_DISP_TEMPO) {
+        adjust_audio_drift_compensation(mpctx, vsync);
     } else {
         mpctx->speed_factor_a = 1.0;
     }

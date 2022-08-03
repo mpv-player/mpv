@@ -73,6 +73,7 @@ enum video_sync {
     VS_DISP_RESAMPLE,
     VS_DISP_RESAMPLE_VDROP,
     VS_DISP_RESAMPLE_NONE,
+    VS_DISP_TEMPO,
     VS_DISP_ADROP,
     VS_DISP_VDROP,
     VS_DISP_NONE,
@@ -82,6 +83,7 @@ enum video_sync {
 #define VS_IS_DISP(x) ((x) == VS_DISP_RESAMPLE ||       \
                        (x) == VS_DISP_RESAMPLE_VDROP || \
                        (x) == VS_DISP_RESAMPLE_NONE ||  \
+                       (x) == VS_DISP_TEMPO ||          \
                        (x) == VS_DISP_ADROP ||          \
                        (x) == VS_DISP_VDROP ||          \
                        (x) == VS_DISP_NONE)

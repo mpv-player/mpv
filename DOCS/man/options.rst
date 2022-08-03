@@ -6845,6 +6845,15 @@ Miscellaneous
     :display-resample-vdrop:  Resample audio to match the video. Drop video
                         frames to compensate for drift.
     :display-resample-desync: Like the previous mode, but no A/V compensation.
+    :display-tempo:     Same as ``display-resample``, but apply audio speed
+                        changes to audio filters instead of resampling to avoid
+                        the change in pitch. Beware that some audio filters
+                        don't do well with a speed close to 1. It is recommend
+                        to use a conditional profile to automatically switch to
+                        ``display-resample`` when speed gets too close to 1 for
+                        your filter setup. Use (speed * video_speed_correction)
+                        to get the actual playback speed in the condition.
+                        See `Conditional auto profiles`_ for details.
     :display-vdrop:     Drop or repeat video frames to compensate desyncing
                         video. (Although it should have the same effects as
                         ``audio``, the implementation is very different.)
@@ -6883,8 +6892,11 @@ Miscellaneous
     25 fps. We consider the pitch change too extreme to allow this behavior
     by default. Set this option to a value of ``5`` to enable it.
 
-    Note that in the ``--video-sync=display-resample`` mode, audio speed will
-    additionally be changed by a small amount if necessary for A/V sync. See
+    Note that ``--video-sync=display-tempo`` avoids this pitch change.
+
+    Also note that in the ``--video-sync=display-resample`` or
+    ``--video-sync=display-tempo`` mode, audio speed will additionally be
+    changed by a small amount if necessary for A/V sync. See
     ``--video-sync-max-audio-change``.
 
 ``--video-sync-max-audio-change=<value>``
