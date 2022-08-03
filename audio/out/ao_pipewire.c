@@ -123,7 +123,7 @@ static void on_process(void *userdata)
     void *data[MP_NUM_CHANNELS];
 
     if ((b = pw_stream_dequeue_buffer(p->stream)) == NULL) {
-        pw_log_warn("out of buffers: %m");
+        MP_WARN(ao, "out of buffers: %m\n");
         return;
     }
 
