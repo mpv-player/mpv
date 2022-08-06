@@ -666,20 +666,16 @@ double calc_average_frame_duration(struct MPContext *mpctx)
 // effective video FPS. If this is not possible, try to do it for multiples,
 // which still leads to an improved end result.
 // Both parameters are durations in seconds.
-static double calc_best_speed(double vsync, double frame, int max_factor)
+static double calc_best_speed(double vsync, double frame,
+                              double max_change, int max_factor)
 {
     double ratio = frame / vsync;
-    double best_scale = -1;
-    double best_dev = INFINITY;
     for (int factor = 1; factor <= max_factor; factor++) {
         double scale = ratio * factor / rint(ratio * factor);
-        double dev = fabs(scale - 1);
-        if (dev < best_dev) {
-            best_scale = scale;
-            best_dev = dev;
-        }
+        if (fabs(scale - 1) <= max_change)
+            return scale;
     }
-    return best_scale;
+    return -1;
 }
 
 static double find_best_speed(struct MPContext *mpctx, double vsync)
@@ -690,10 +686,15 @@ static double find_best_speed(struct MPContext *mpctx, double vsync)
         double dur = mpctx->past_frames[n].approx_duration;
         if (dur <= 0)
             continue;
-        total += calc_best_speed(vsync, dur / mpctx->opts->playback_speed,
+        double best = calc_best_speed(vsync, dur / mpctx->opts->playback_speed,
+                                 mpctx->opts->sync_max_video_change / 100,
                                  mpctx->opts->sync_max_factor);
+        if (best <= 0)
+            continue;
+        total += best;
         num++;
     }
+    // If it doesn't work, play at normal speed.
     return num > 0 ? total / num : 1;
 }
 
@@ -828,12 +829,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
         return;
 
     mpctx->speed_factor_v = 1.0;
-    if (mode != VS_DISP_VDROP) {
-        double best = find_best_speed(mpctx, vsync);
-        // If it doesn't work, play at normal speed.
-        if (fabs(best - 1.0) <= opts->sync_max_video_change / 100)
-            mpctx->speed_factor_v = best;
-    }
+    if (mode != VS_DISP_VDROP)
+        mpctx->speed_factor_v = find_best_speed(mpctx, vsync);
 
     // Determine for how many vsyncs a frame should be displayed. This can be
     // e.g. 2 for 30hz on a 60hz display. It can also be 0 if the video
