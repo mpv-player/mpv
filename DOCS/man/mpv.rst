@@ -1349,36 +1349,16 @@ a VO using the OS GUI API is active). ``--stop-screensaver=no`` disables this.
 
 A common problem is that Linux desktop environments ignore the standard
 screensaver APIs on which mpv relies. In particular, mpv uses the Screen Saver
-extension (XSS) on X11, and the idle-inhibit on Wayland.
+extension (XSS) on X11, and the idle-inhibit protocol on Wayland.
 
-GNOME is one of the worst offenders, and ignores even the now widely supported
-idle-inhibit protocol. (This is either due to a combination of malice and
-incompetence, but since implementing this protocol would only take a few lines
-of code, it is most likely the former. You will also notice how GNOME advocates
-react offended whenever their sabotage is pointed out, which indicates either
-hypocrisy, or even worse ignorance.)
-
-Such incompatible desktop environments (i.e. which ignore standards) typically
-require using a DBus API. This is ridiculous in several ways. The immediate
-practical problem is that it would require adding a quite unwieldy dependency
-for a DBus library, somehow integrating its mainloop into mpv, and other
-generally unacceptable things.
-
-However, since mpv does not officially support GNOME, this is not much of a
-problem. If you are one of those miserable users who want to use mpv on GNOME,
-report a bug on the GNOME issue tracker:
-https://gitlab.gnome.org/groups/GNOME/-/issues
-
-Alternatively, you may be able to write a Lua script that calls the
-``xdg-screensaver`` command line program. (By the way, this a command line
-program is an utterly horrible kludge that tries to identify your DE, and then
-tries to send the correct DBus command via a DBus CLI tool.) If you find the
-idea of having to write a script just so your screensaver doesn't kick in
-ridiculous, do not use GNOME, or use GNOME video software instead of mpv (good
-luck).
+GNOME in particular still ignores the idle-inhibit protocol, and has its own
+D-Bus interfaces for display power management, which mpv does not support.
 
 Before mpv 0.33.0, the X11 backend ran ``xdg-screensaver reset`` in 10 second
-intervals when not paused. This hack was removed in 0.33.0.
+intervals when not paused in order to support screensaver inhibition in these
+environments. This functionality was removed in 0.33.0, but it is possible to
+call the ``xdg-screensaver`` command line program from a user script instead.
+
 
 .. include:: options.rst
 
