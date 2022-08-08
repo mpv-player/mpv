@@ -149,7 +149,8 @@ static void on_process(void *userdata)
     end_time += (nframes * 1e6 / ao->samplerate) +
                 ((float) time.delay * SPA_USEC_PER_SEC * time.rate.num / time.rate.denom);
 
-    ao_read_data(ao, data, nframes, end_time);
+    int samples = ao_read_data(ao, data, nframes, end_time);
+    b->size = samples;
 
     pw_stream_queue_buffer(p->stream, b);
 }
