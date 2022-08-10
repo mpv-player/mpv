@@ -66,7 +66,7 @@ struct vaapi_gl_mapper_priv {
 static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
                                  const struct ra_imgfmt_desc *desc)
 {
-    struct priv *p_mapper = mapper->priv;
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = talloc_ptrtype(NULL, p);
     p_mapper->interop_mapper_priv = p;
 
@@ -117,7 +117,7 @@ static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
 
 static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p_mapper = mapper->priv;
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     if (p) {
@@ -158,7 +158,7 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
                          struct dmabuf_interop *dmabuf_interop,
                          bool probing)
 {
-    struct priv *p_mapper = mapper->priv;
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     GL *gl = ra_gl_get(mapper->ra);
@@ -222,7 +222,7 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
 
 static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p_mapper = mapper->priv;
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     if (p) {

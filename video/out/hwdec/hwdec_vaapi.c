@@ -177,7 +177,7 @@ static int init(struct ra_hwdec *hw)
 static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
-    struct priv *p = mapper->priv;
+    struct dmabuf_interop_priv *p = mapper->priv;
 
     p_owner->dmabuf_interop.interop_unmap(mapper);
 
@@ -209,7 +209,7 @@ static bool check_fmt(struct ra_hwdec_mapper *mapper, int fmt)
 static int mapper_init(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
-    struct priv *p = mapper->priv;
+    struct dmabuf_interop_priv *p = mapper->priv;
 
     mapper->dst_params = mapper->src_params;
     mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
@@ -240,7 +240,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
-    struct priv *p = mapper->priv;
+    struct dmabuf_interop_priv *p = mapper->priv;
     VAStatus status;
     VADisplay *display = p_owner->display;
     VADRMPRIMESurfaceDescriptor desc;
@@ -471,7 +471,7 @@ const struct ra_hwdec_driver ra_hwdec_vaegl = {
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){
-        .priv_size = sizeof(struct priv),
+        .priv_size = sizeof(struct dmabuf_interop_priv),
         .init = mapper_init,
         .uninit = mapper_uninit,
         .map = mapper_map,

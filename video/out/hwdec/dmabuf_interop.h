@@ -35,7 +35,7 @@ struct dmabuf_interop {
     void (*interop_unmap)(struct ra_hwdec_mapper *mapper);
 };
 
-struct priv {
+struct dmabuf_interop_priv {
     int num_planes;
     struct mp_image layout;
     struct ra_tex *tex[4];

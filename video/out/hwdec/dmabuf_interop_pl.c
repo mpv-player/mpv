@@ -27,7 +27,7 @@ static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper,
                          struct dmabuf_interop *dmabuf_interop,
                          bool probing)
 {
-    struct priv *p = mapper->priv;
+    struct dmabuf_interop_priv *p = mapper->priv;
     pl_gpu gpu = ra_pl_get(mapper->ra);
 
     struct ra_imgfmt_desc desc = {0};
