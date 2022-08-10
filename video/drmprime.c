@@ -30,11 +30,12 @@ static struct AVBufferRef *drm_create_standalone(struct mpv_global *global,
     void *tmp = talloc_new(NULL);
     struct drm_opts *drm_opts = mp_get_config_group(tmp, global, &drm_conf);
     const char *opt_path = drm_opts->drm_device_path;
-    talloc_free(tmp);
 
     const char *device_path = opt_path ? opt_path : "/dev/dri/renderD128";
     AVBufferRef* ref = NULL;
     av_hwdevice_ctx_create(&ref, AV_HWDEVICE_TYPE_DRM, device_path, NULL, 0);
+
+    talloc_free(tmp);
     return ref;
 }
 
