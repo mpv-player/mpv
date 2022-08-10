@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <fcntl.h>
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
@@ -78,7 +79,7 @@ static int init(struct ra_hwdec *hw)
      * there are extensions that supposedly provide this information from the
      * drivers. Not properly documented. Of course.
      */
-    mpv_opengl_drm_params_v2 *params = ra_get_native_resource(hw->ra,
+    mpv_opengl_drm_params_v2 *params = ra_get_native_resource(hw->ra_ctx->ra,
                                                               "drm_params_v2");
 
     /*
@@ -89,9 +90,8 @@ static int init(struct ra_hwdec *hw)
     void *tmp = talloc_new(NULL);
     struct drm_opts *drm_opts = mp_get_config_group(tmp, hw->global, &drm_conf);
     const char *opt_path = drm_opts->drm_device_path;
-    talloc_free(tmp);
 
-    const char *device_path = params && params->render_fd ?
+    const char *device_path = params && params->render_fd > -1 ?
                               drmGetRenderDeviceNameFromFd(params->render_fd) :
                               opt_path ? opt_path : "/dev/dri/renderD128";
     MP_VERBOSE(hw, "Using DRM device: %s\n", device_path);
@@ -99,6 +99,7 @@ static int init(struct ra_hwdec *hw)
     int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
                                      AV_HWDEVICE_TYPE_DRM,
                                      device_path, NULL, 0);
+    talloc_free(tmp);
     if (ret != 0) {
         MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
         return -1;
@@ -129,8 +130,10 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
     p_owner->dmabuf_interop.interop_unmap(mapper);
 
     if (p->surface_acquired) {
-        for (int n = 0; n < p->desc.nb_objects; n++)
-            close(p->desc.objects[n].fd);
+        for (int n = 0; n < p->desc.nb_objects; n++) {
+            if (p->desc.objects[n].fd > -1)
+                close(p->desc.objects[n].fd);
+        }
         p->surface_acquired = false;
     }
 }
@@ -209,10 +212,22 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     }
     for (int i = 0; i < desc->nb_objects; i++) {
         p->desc.objects[i].format_modifier = desc->objects[i].format_modifier;
-        p->desc.objects[i].fd = dup(desc->objects[i].fd);
         p->desc.objects[i].size = desc->objects[i].size;
+        // Initialise fds to -1 to make partial failure cleanup easier.
+        p->desc.objects[i].fd = -1;
     }
+    // Surface is now safe to treat as acquired to allow for unmapping to run.
     p->surface_acquired = true;
+
+    // Now actually dup the fds
+    for (int i = 0; i < desc->nb_objects; i++) {
+        p->desc.objects[i].fd = fcntl(desc->objects[i].fd, F_DUPFD_CLOEXEC, 0);
+        if (p->desc.objects[i].fd == -1) {
+            MP_ERR(mapper, "Failed to duplicate dmabuf fd: %s\n",
+                   mp_strerror(errno));
+            goto err;
+        }
+    }
 
     // We can handle composed formats if the total number of planes is still
     // equal the number of planes we expect. Complex formats with auxilliary
