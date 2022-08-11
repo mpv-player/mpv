@@ -2078,10 +2078,16 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_RES: {
-        if (!x11->window || x11->parent)
+        struct xrandr_display *selected_disp = NULL;
+        for (int n = 0; n < x11->num_displays; n++) {
+            struct xrandr_display *disp = &x11->displays[n];
+            if (disp->overlaps)
+                selected_disp = disp;
+        }
+        if (!x11->window || x11->parent || !selected_disp)
             return VO_NOTAVAIL;
-        ((int *)arg)[0] = x11->screenrc.x1;
-        ((int *)arg)[1] = x11->screenrc.y1;
+        ((int *)arg)[0] = selected_disp->rc.x1 - selected_disp->rc.x0;
+        ((int *)arg)[1] = selected_disp->rc.y1 - selected_disp->rc.y0;
         return VO_TRUE;
     }
     case VOCTRL_GET_HIDPI_SCALE:
