@@ -952,6 +952,15 @@ if drm['use']
                      'video/out/vo_drm.c')
 endif
 
+# This can be removed roughly when Debian 12 is released.
+drm_is_kms = {
+    'name': 'drm-is-kms',
+    'use': drm['use'] and drm['deps'].version().version_compare('>= 2.4.105')
+}
+if drm_is_kms['use']
+    features += drm_is_kms['name']
+endif
+
 gbm = dependency('gbm', version: '>=17.1.0', required: get_option('gbm'))
 if gbm.found()
     dependencies += gbm
@@ -1745,6 +1754,7 @@ conf_data.set10('HAVE_DMABUF_INTEROP_GL', dmabuf_interop_gl['use'])
 conf_data.set10('HAVE_DMABUF_INTEROP_PL', dmabuf_interop_pl['use'])
 conf_data.set10('HAVE_DOS_PATHS', win32)
 conf_data.set10('HAVE_DRM', drm['use'])
+conf_data.set10('HAVE_DRM_IS_KMS', drm_is_kms['use'])
 conf_data.set10('HAVE_DVBIN', dvbin.allowed())
 conf_data.set10('HAVE_DVDNAV', dvdnav.found() and dvdread.found())
 conf_data.set10('HAVE_EGL', egl['use'])
