@@ -523,6 +523,19 @@ static int open_card_path(const char *path)
     return open(path, O_RDWR | O_CLOEXEC);
 }
 
+static bool card_supports_kms(const char *path)
+{
+#if HAVE_DRM_IS_KMS
+    int fd = open_card_path(path);
+    bool ret = fd != -1 && drmIsKMS(fd);
+    if (fd != -1)
+        close(fd);
+    return ret;
+#else
+    return true;
+#endif
+}
+
 static char *get_primary_device_path(struct mp_log *log, int *card_no)
 {
     drmDevice *devices[DRM_MAX_MINOR] = { 0 };
@@ -558,11 +571,7 @@ static char *get_primary_device_path(struct mp_log *log, int *card_no)
 
         const char *primary_node_path = dev->nodes[DRM_NODE_PRIMARY];
 
-        int fd = open_card_path(primary_node_path);
-        const int is_kms = fd != -1 && drmIsKMS(fd);
-        if (fd != -1)
-            close(fd);
-        if (!is_kms) {
+        if (!card_supports_kms(primary_node_path)) {
             if (card_no_given) {
                 mp_err(log,
                        "DRM card number %d given, yet it does not support "

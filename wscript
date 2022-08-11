@@ -792,6 +792,12 @@ video_output_features = [
         'desc': 'dmabuf libplacebo interop',
         'deps': 'vaapi-libplacebo',
         'func': check_true,
+    }, {
+        # This can be removed roughly when Debian 12 is released.
+        'name': 'drm-is-kms',
+        'desc': 'drmIsKMS() function',
+        'deps': 'drm',
+        'func': check_pkg_config('libdrm', '>= 2.4.105'),
     }
 ]
 
