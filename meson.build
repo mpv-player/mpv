@@ -1291,7 +1291,7 @@ if egl_helpers
 endif
 
 if egl['use'] and egl_helpers
-    sources += files('video/filter/vf_gpu.c')
+    sources += files('video/filter/vf_gpu_egl.c')
 endif
 
 if gl['use']
@@ -1318,7 +1318,8 @@ if vulkan.found()
     features += 'vulkan'
     sources += files('video/out/vulkan/context.c',
                      'video/out/vulkan/context_display.c',
-                     'video/out/vulkan/utils.c')
+                     'video/out/vulkan/utils.c',
+                     'video/filter/vf_gpu_vulkan.c')
 endif
 
 if vulkan.found() and android
@@ -1335,6 +1336,10 @@ endif
 
 if vulkan.found() and x11['use']
      sources += files('video/out/vulkan/context_xlib.c')
+endif
+
+if vulkan.found() or (egl['use'] and egl_helpers)
+    sources += files('video/filter/vf_gpu.c')
 endif
 
 
