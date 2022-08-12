@@ -15,17 +15,13 @@ build_root = meson.project_build_root()
 source_root = meson.project_source_root()
 python = find_program('python3')
 
-avutil = dependency('libavutil', version: '>= 56.12.100')
-
-ffmpeg = {
-    'name': 'ffmpeg',
-    'deps': [avutil,
-             dependency('libavcodec', version: '>= 58.12.100'),
-             dependency('libavformat', version: '>= 58.9.100'),
-             dependency('libswscale', version: '>= 5.0.101'),
-             dependency('libavfilter', version: '>= 7.14.100'),
-             dependency('libswresample', version: '>= 3.0.100')],
-}
+# ffmpeg
+libavcodec = dependency('libavcodec', version: '>= 58.12.100')
+libavfilter = dependency('libavfilter', version: '>= 7.14.100')
+libavformat = dependency('libavformat', version: '>= 58.9.100')
+libavutil = dependency('libavutil', version: '>= 56.12.100')
+libswresample = dependency('libswresample', version: '>= 3.0.100')
+libswscale = dependency('libswscale', version: '>= 5.0.101')
 
 libass = dependency('libass', version: '>= 0.12.2')
 pthreads = dependency('threads')
@@ -33,10 +29,15 @@ pthreads = dependency('threads')
 # the dependency order of libass -> ffmpeg is necessary due to
 # static linking symbol resolution between fontconfig and MinGW
 dependencies = [libass,
-                ffmpeg['deps'],
+                libavcodec,
+                libavfilter,
+                libavformat,
+                libavutil,
+                libswresample,
+                libswscale,
                 pthreads]
 
-features = [ffmpeg['name'], libass.name(), pthreads.name()]
+features = ['ffmpeg', libass.name(), pthreads.name()]
 
 # Builtin options we'd like to add to features.
 if get_option('optimization') != '0'
@@ -604,7 +605,7 @@ endif
 
 
 # misc dependencies
-av_ch_layout_available = avutil.version().version_compare('>= 57.24.100')
+av_ch_layout_available = libavutil.version().version_compare('>= 57.24.100')
 if av_ch_layout_available
     features += 'av-channel-layout'
     sources += files('audio/chmap_avchannel.c')
@@ -697,10 +698,7 @@ if librt.found()
     features += 'librt'
 endif
 
-lua = {
-    'name': 'lua',
-    'use': false,
-}
+lua = dependency('', required: false)
 lua_opt = get_option('lua')
 if lua_opt != 'disabled'
     lua_version = [['lua', ['>=5.1.0', '<5.3.0']], # generic lua.pc
@@ -713,28 +711,26 @@ if lua_opt != 'disabled'
                    ['lua-5.1', '>= 5.1.0']]
     foreach version : lua_version
         if lua_opt == 'auto' or lua_opt == 'enabled'
-            lua += {'deps': dependency(version[0], version: version[1], required: false)}
-            if lua['deps'].found()
-                lua += {'use': true}
+            lua = dependency(version[0], version: version[1], required: false)
+            if lua.found()
                 break
             endif
         elif lua_opt == version[0]
-            lua += {'deps': dependency(version[0], version: version[1])}
-            if lua['deps'].found()
-                lua += {'use': true}
+            lua = dependency(version[0], version: version[1])
+            if lua.found()
                 break
             endif
         endif
     endforeach
 endif
 
-if lua['use']
-    dependencies += lua['deps']
-    features += lua['deps'].name()
+if lua.found()
+    dependencies += lua
+    features += lua.name()
     sources += files('player/lua.c')
     subdir(join_paths('generated', 'player', 'lua'))
 endif
-if not lua['use'] and lua_opt == 'enabled'
+if not lua.found() and lua_opt == 'enabled'
      error('lua enabled but no suitable lua version could be found!')
 endif
 
@@ -813,7 +809,6 @@ if alsa.found()
 endif
 
 audiounit = {
-    'name': 'audiounit',
     'deps': dependency('appleframeworks', modules: ['Foundation', 'AudioToolbox'],
                        required: get_option('audiounit')),
     'symbol': cc.has_header_symbol('AudioToolbox/AudioToolbox.h', 'kAudioUnitSubType_RemoteIO',
@@ -940,14 +935,13 @@ if direct3d
 endif
 
 drm = {
-    'name': 'drm',
     'deps': dependency('libdrm', version: '>= 2.4.75', required: get_option('drm')),
     'header': vt_h or consio_h,
 }
 drm += {'use': drm['deps'].found() and drm['header']}
 if drm['use']
     dependencies += drm['deps']
-    features += drm['name']
+    features += 'drm'
     sources += files('video/drmprime.c',
                      'video/out/drm_atomic.c',
                      'video/out/drm_common.c',
@@ -958,12 +952,9 @@ if drm['use']
 endif
 
 # This can be removed roughly when Debian 12 is released.
-drm_is_kms = {
-    'name': 'drm-is-kms',
-    'use': drm['use'] and drm['deps'].version().version_compare('>= 2.4.105')
-}
-if drm_is_kms['use']
-    features += drm_is_kms['name']
+drm_is_kms = drm['use'] and drm['deps'].version().version_compare('>= 2.4.105')
+if drm_is_kms
+    features += 'drm_is_kms'
 endif
 
 gbm = dependency('gbm', version: '>=17.1.0', required: get_option('gbm'))
@@ -1037,7 +1028,6 @@ if d3d11.allowed()
 endif
 
 wayland = {
-    'name': 'wayland',
     'deps': [dependency('wayland-client', version: '>= 1.15.0', required: get_option('wayland')),
              dependency('wayland-cursor', version: '>= 1.15.0', required: get_option('wayland')),
              dependency('wayland-protocols', version: '>= 1.15', required: get_option('wayland')),
@@ -1058,7 +1048,7 @@ if not wayland['header'] or not wayland['scanner'].found()
 endif
 
 if wayland['use']
-    features += wayland['name']
+    features += 'wayland'
     subdir(join_paths('generated', 'wayland'))
 endif
 
@@ -1077,7 +1067,6 @@ x11_opt = get_option('x11').require(
     error_message: 'the build is not GPL!',
 )
 x11 = {
-    'name': 'x11',
     'deps': [dependency('x11', version: '>= 1.0.0', required: x11_opt),
              dependency('xscrnsaver', version: '>= 1.0.0', required: x11_opt),
              dependency('xext', version: '>= 1.0.0', required: x11_opt),
@@ -1095,7 +1084,7 @@ endforeach
 
 if x11['use']
     dependencies += x11['deps']
-    features += x11['name']
+    features += 'x11'
     sources += files('video/out/vo_x11.c',
                      'video/out/x11_common.c')
 endif
@@ -1118,7 +1107,6 @@ endif
 
 # OpenGL feature checking
 gl = {
-    'name': 'gl',
     'opt': get_option('gl').allowed(),
     'use': false,
 }
@@ -1212,14 +1200,13 @@ if d3d11.allowed() or egl_angle_win32.allowed()
 endif
 
 egl = {
-    'name': 'egl',
     'deps': dependency('egl', version: '> 1.4.0', required: get_option('egl')),
     'use': false,
 }
 egl += {'use': egl['deps'].found() and gl['opt']}
 if egl['use']
     dependencies += egl['deps']
-    features += egl['name']
+    features += 'egl'
 endif
 
 egl_android_opt = get_option('egl-android').require(
@@ -1245,14 +1232,13 @@ if egl_drm.allowed()
 endif
 
 egl_wayland = {
-    'name': 'egl-wayland',
     'deps':  dependency('wayland-egl', version: '>= 9.0.0', required: get_option('egl-wayland')),
     'use': false,
 }
 egl_wayland += {'use': egl['use'] and egl_wayland['deps'].found() and gl['opt'] and wayland['use']}
 if egl_wayland['use']
     dependencies += egl_wayland['deps']
-    features += egl_wayland['name']
+    features += 'gl-wayland'
     gl += {'use': true}
     sources += files('video/out/opengl/context_wayland.c')
 endif
@@ -1277,14 +1263,13 @@ if plain_gl.allowed()
 endif
 
 rpi = {
-    'name': 'rpi',
     'deps': dependency('/opt/vc/lib/pkgconfig/brcmegl.pc', 'brcmegl', required: get_option('rpi')),
     'use': false,
 }
 rpi += {'use': gl['opt'] and rpi['deps'].found()}
 if rpi['use']
     dependencies += rpi['deps']
-    features += rpi['name']
+    features += 'rpi'
     gl += {'use': true}
     sources += files('video/out/opengl/context_rpi.c')
 endif
@@ -1428,35 +1413,31 @@ if rpi_mmal.found()
 endif
 
 vaapi = {
-    'name': 'vaapi',
     'deps': dependency('libva', version: '>= 1.1.0', required: get_option('vaapi')),
 }
 vaapi += {'use': vaapi['deps'].found() and libdl and
           (x11['use'] or wayland['use'] or egl_drm.allowed())}
 if vaapi['use']
     dependencies += vaapi['deps']
-    features += vaapi['name']
+    features += 'vaapi'
     sources += files('video/filter/vf_vavpp.c',
                      'video/vaapi.c')
 endif
 
 vaapi_drm = {
-    'name': 'vaapi-drm',
     'deps': dependency('libva-drm', version: '>= 1.1.0', required: get_option('vaapi-drm')),
 }
 vaapi_drm += {'use': vaapi['use'] and egl_drm.allowed() and vaapi_drm['deps'].found()}
 if vaapi_drm['use']
-    features += vaapi_drm['name']
+    features += 'vaapi-drm'
 endif
 
 vaapi_wayland = {
-    'name': 'vaapi-wayland',
     'deps': dependency('libva-wayland', version: '>= 1.1.0', required: get_option('vaapi-wayland')),
 }
 vaapi_wayland += {'use': vaapi['use'] and egl_wayland['use'] and vaapi_wayland['deps'].found()}
-
 if vaapi_wayland['use']
-    features += vaapi_wayland['name']
+    features += 'vaapi-wayland'
 endif
 
 if vaapi_wayland['use'] and memfd_create
@@ -1465,62 +1446,44 @@ if vaapi_wayland['use'] and memfd_create
 endif
 
 vaapi_x11 = {
-    'name': 'vaapi-x11',
     'deps': dependency('libva-x11', version: '>= 1.1.0', required: get_option('vaapi-x11')),
 }
 vaapi_x11 += {'use': vaapi['use'] and x11['use'] and vaapi_x11['deps'].found()}
 if vaapi_x11['use']
     dependencies += vaapi_x11['deps']
-    features += vaapi_x11['name']
+    features += 'vaapi-x11'
     sources += files('video/out/vo_vaapi.c')
 endif
 
-vaapi_x_egl = {
-    'name': 'vaapi-x-egl',
-    'use': vaapi_x11['use'] and egl_x11.allowed(),
-}
-if vaapi_x_egl['use']
-    features += vaapi_x_egl['name']
+vaapi_x_egl = vaapi_x11['use'] and egl_x11.allowed()
+if vaapi_x_egl
+    features += 'vaapi-x-egl'
 endif
 
-vaapi_egl = {
-    'name': 'vaapi-egl',
-    'use': vaapi_x_egl['use'] or vaapi_wayland['use'] or vaapi_drm['use'],
-}
-if vaapi_egl['use']
+vaapi_egl = vaapi_x_egl or vaapi_wayland['use'] or vaapi_drm['use']
+if vaapi_egl
     dependencies += [vaapi_wayland['deps'], vaapi_drm['deps']]
-    features += vaapi_egl['name']
+    features += 'vaapi-egl'
 endif
 
-vaapi_libplacebo = {
-    'name': 'vaapi-libplacebo',
-    'use': vaapi['use'] and libplacebo.found(),
-}
-if vaapi_libplacebo['use']
-    features += vaapi_libplacebo['name']
+vaapi_libplacebo = vaapi['use'] and libplacebo.found()
+if vaapi_libplacebo
+    features += 'vaapi-libplacebo'
 endif
 
-if vaapi_egl['use'] or vaapi_libplacebo['use']
+if vaapi_egl or vaapi_libplacebo
     sources += files('video/out/hwdec/hwdec_vaapi.c')
 endif
 
-dmabuf_interop_gl = {
-    'name': 'dmabuf-interop-gl',
-    'use': egl['use'] and drm['use']
-}
-
-if dmabuf_interop_gl['use']
-    features += dmabuf_interop_gl['name']
+dmabuf_interop_gl = egl['use'] and drm['use']
+if dmabuf_interop_gl
+    features += 'dmabuf-interop-gl'
     sources += files('video/out/hwdec/dmabuf_interop_gl.c')
 endif
 
-dmabuf_interop_pl = {
-    'name': 'dmabuf-interop-pl',
-    'use': vaapi_libplacebo['use']
-}
-
-if dmabuf_interop_pl['use']
-    features += dmabuf_interop_pl['name']
+dmabuf_interop_pl = vaapi_libplacebo
+if dmabuf_interop_pl
+    features += 'dmabuf-interop-pl'
     sources += files('video/out/hwdec/dmabuf_interop_pl.c')
 endif
 
@@ -1755,11 +1718,11 @@ conf_data.set10('HAVE_D3D_HWACCEL', d3d_hwaccel.allowed())
 conf_data.set10('HAVE_D3D9_HWACCEL', d3d9_hwaccel.allowed())
 conf_data.set10('HAVE_D3D11', d3d11.allowed())
 conf_data.set10('HAVE_DIRECT3D', direct3d)
-conf_data.set10('HAVE_DMABUF_INTEROP_GL', dmabuf_interop_gl['use'])
-conf_data.set10('HAVE_DMABUF_INTEROP_PL', dmabuf_interop_pl['use'])
+conf_data.set10('HAVE_DMABUF_INTEROP_GL', dmabuf_interop_gl)
+conf_data.set10('HAVE_DMABUF_INTEROP_PL', dmabuf_interop_pl)
 conf_data.set10('HAVE_DOS_PATHS', win32)
 conf_data.set10('HAVE_DRM', drm['use'])
-conf_data.set10('HAVE_DRM_IS_KMS', drm_is_kms['use'])
+conf_data.set10('HAVE_DRM_IS_KMS', drm_is_kms)
 conf_data.set10('HAVE_DVBIN', dvbin.allowed())
 conf_data.set10('HAVE_DVDNAV', dvdnav.found() and dvdread.found())
 conf_data.set10('HAVE_EGL', egl['use'])
@@ -1786,7 +1749,7 @@ conf_data.set10('HAVE_IOS_GL', ios_gl)
 conf_data.set10('HAVE_JACK', jack.found())
 conf_data.set10('HAVE_JAVASCRIPT', javascript.found())
 conf_data.set10('HAVE_JPEG', jpeg.found())
-conf_data.set10('HAVE_JPEGXL', ffmpeg['deps'][1].version().version_compare('>= 59.27.100'))
+conf_data.set10('HAVE_JPEGXL', libavformat.version().version_compare('>= 59.27.100'))
 conf_data.set10('HAVE_LCMS2', lcms2.found())
 conf_data.set10('HAVE_LIBARCHIVE', libarchive.found())
 conf_data.set10('HAVE_LIBAVDEVICE', libavdevice.found())
@@ -1794,7 +1757,7 @@ conf_data.set10('HAVE_LIBDL', libdl)
 conf_data.set10('HAVE_LIBBLURAY', libbluray.found())
 conf_data.set10('HAVE_LIBPLACEBO_NEXT', libplacebo_next)
 conf_data.set10('HAVE_LINUX_FSTATFS', linux_fstatfs)
-conf_data.set10('HAVE_LUA', lua['use'])
+conf_data.set10('HAVE_LUA', lua.found())
 conf_data.set10('HAVE_MACOS_10_11_FEATURES', macos_10_11_features.allowed())
 conf_data.set10('HAVE_MACOS_10_14_FEATURES', macos_10_14_features.allowed())
 conf_data.set10('HAVE_MACOS_COCOA_CB', macos_cocoa_cb.allowed())
@@ -1826,8 +1789,8 @@ conf_data.set10('HAVE_UCHARDET', uchardet.found())
 conf_data.set10('HAVE_UWP', uwp.found())
 conf_data.set10('HAVE_VAAPI', vaapi['use'])
 conf_data.set10('HAVE_VAAPI_DRM', vaapi_drm['use'])
-conf_data.set10('HAVE_VAAPI_EGL', vaapi_egl['use'])
-conf_data.set10('HAVE_VAAPI_LIBPLACEBO', vaapi_libplacebo['use'])
+conf_data.set10('HAVE_VAAPI_EGL', vaapi_egl)
+conf_data.set10('HAVE_VAAPI_LIBPLACEBO', vaapi_libplacebo)
 conf_data.set10('HAVE_VAAPI_WAYLAND', vaapi_wayland['use'])
 conf_data.set10('HAVE_VAAPI_X11', vaapi_x11['use'])
 conf_data.set10('HAVE_VAPOURSYNTH', vapoursynth.found() and vapoursynth_script.found())
@@ -1923,7 +1886,7 @@ summary({'d3d11': d3d11.allowed(),
          'gpu-next': libplacebo_next,
          'javascript': javascript.found(),
          'libmpv': get_option('libmpv'),
-         'lua': lua['use'],
+         'lua': lua.found(),
          'opengl': GL.found() or egl['use'],
          'vulkan': vulkan.found(),
          'wayland': wayland['use'],
