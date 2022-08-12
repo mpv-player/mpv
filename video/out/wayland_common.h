@@ -69,6 +69,7 @@ struct vo_wayland_state {
     int mouse_unscaled_y;
     int mouse_x;
     int mouse_y;
+    int output_overlaps;
     int pending_vo_events;
     int scaling;
     int timeout_count;

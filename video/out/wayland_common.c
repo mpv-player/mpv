@@ -723,6 +723,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     }
 
     wl->current_output->has_surface = true;
+    ++wl->output_overlaps;
     bool force_resize = false;
 
     if (wl->scaling != wl->current_output->scale) {
@@ -755,6 +756,7 @@ static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
     wl_list_for_each(o, &wl->output_list, link) {
         if (o->output == output) {
             o->has_surface = false;
+            --wl->output_overlaps;
             wl->pending_vo_events |= VO_EVENT_WIN_STATE;
             return;
         }
@@ -1773,6 +1775,7 @@ int vo_wayland_init(struct vo *vo)
         .display = wl_display_connect(NULL),
         .vo = vo,
         .log = mp_log_new(wl, vo->log, "wayland"),
+        .output_overlaps = 0,
         .refresh_interval = 0,
         .scaling = 1,
         .wakeup_pipe = {-1, -1},
@@ -2095,6 +2098,19 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
      * that this wait is accurate. Do a hacky block with wl_display_roundtrip. */
     if (!wl->presentation && !wl_display_get_error(wl->display))
         wl_display_roundtrip(wl->display);
+
+    /* Insane hack for the edge case of mpv overlapping multiple monitors and
+     * while using a display-* mode. The poll wait may wake up early by at least 
+     * one frame on some compositors. */
+    if (VS_IS_DISP(wl->vo_opts->video_sync) && wl->output_overlaps > 1) {
+        int64_t current_time = mp_time_us();
+        int64_t diff = finish_time - current_time;
+        /* If diff/vblank_time > 0.5 (arbitrary threshold but in proper behavior
+         * this should be very close to 0), then assume we hit this edge case and
+         * just sleep for the difference. */
+        if ((double)diff / vblank_time > 0.5)
+            mp_sleep_us(diff);
+    }
 
     if (wl->frame_wait) {
         // Only consider consecutive missed callbacks.
