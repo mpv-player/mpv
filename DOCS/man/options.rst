@@ -5571,10 +5571,9 @@ them.
     Set the client app id for Wayland-based video output methods (default: ``mpv``).
 
 ``--wayland-disable-vsync=<yes|no>``
-    Disable vsync for the wayland contexts (default: no). Useful for benchmarking
-    the wayland context when combined with ``video-sync=display-desync``,
-    ``--no-audio``, and ``--untimed=yes``. Only works with ``--gpu-context=wayland``
-    and ``--gpu-context=waylandvk``.
+    Disable mpv's internal vsync for Wayland-based video output (default: no).
+    This is mainly useful for benchmarking wayland VOs when combined with
+    ``video-sync=display-desync``, ``--no-audio``, and ``--untimed=yes``.
 
 ``--wayland-edge-pixels-pointer=<value>``
     Defines the size of an edge border (default: 10) to initiate client side
