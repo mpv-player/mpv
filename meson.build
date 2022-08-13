@@ -37,16 +37,16 @@ dependencies = [libass,
                 libswscale,
                 pthreads]
 
-features = ['ffmpeg', libass.name(), pthreads.name()]
-
-# Builtin options we'd like to add to features.
-if get_option('optimization') != '0'
-    features += 'optimize'
-endif
-
-if get_option('debug')
-    features += 'debug'
-endif
+# Keeps track of all enabled/disabled features
+features = {
+    'debug': get_option('debug'),
+    'ffmpeg': true,
+    'gpl': get_option('gpl'),
+    'jpegxl': libavformat.version().version_compare('>= 59.27.100'),
+    'libass': true,
+    'optimize': get_option('optimization') != '0',
+    'threads': true,
+}
 
 
 # generic sources
@@ -291,13 +291,9 @@ endif
 
 darwin = host_machine.system() == 'darwin'
 win32 = host_machine.system() == 'cygwin' or host_machine.system() == 'windows'
-posix = false
-if not win32
-    posix = true
-    features += 'posix'
-else
-    features += 'win32'
-endif
+posix = not win32
+features += {'posix': posix}
+features += {'dos-paths': win32, 'win32': win32}
 
 mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DUNICODE', '-DCOBJMACROS',
                '-DINITGUID', '-U__STRICT_ANSI__']
@@ -307,7 +303,6 @@ if host_machine.system() == 'windows'
 endif
 
 if host_machine.system() == 'cygwin'
-    features += 'cygwin'
     flags += [mswin_flags, '-mwin32']
 endif
 
@@ -322,38 +317,32 @@ if cc.has_link_argument('-Wl,--nxcompat,--no-seh,--dynamicbase')
     noexecstack = true
 endif
 
-if noexecstack
-    features += 'noexecstack'
-endif
+features += {'noexecstack': noexecstack}
 
 if not get_option('build-date')
     flags += '-DNO_BUILD_TIMESTAMPS'
-else
-    features += 'build-date'
 endif
+features += {'build-date': get_option('build-date')}
 
-if get_option('ta-leak-report')
-    features += 'ta-leak-report'
-endif
+features += {'ta-leak-report': get_option('ta-leak-report')}
 
 libdl_dep = cc.find_library('libdl', required: false)
 libdl = cc.has_function('dlopen', dependencies: libdl_dep, prefix: '#include <dlfcn.h>')
 if libdl
     dependencies += libdl_dep
-    features += 'libdl'
 endif
+features += {'libdl': libdl}
 
 cplugins = get_option('cplugins').require(
     libdl and not win32 and cc.has_link_argument('-rdynamic'),
     error_message: 'cplugins not supported by the os or compiler!',
 )
 if cplugins.allowed()
-    features += 'cplugins'
     link_flags += '-rdynamic'
 endif
+features += {'cplugins': cplugins.allowed()}
 
 if get_option('tests')
-    features += 'tests'
     sources += files('test/chmap.c',
                      'test/gl_video.c',
                      'test/img_format.c',
@@ -364,6 +353,7 @@ if get_option('tests')
                      'test/scale_test.c',
                      'test/tests.c')
 endif
+features += {'tests': get_option('tests')}
 
 # Note: this include is only used for windows pthreads and
 # must be accompanied immediately by the following flags.
@@ -376,7 +366,6 @@ win32_pthreads = get_option('win32-internal-pthreads').require(
     error_message: 'the os is not win32!',
 )
 if win32_pthreads.allowed()
-    features += 'win32-internal-pthreads'
     flags += ['-isystem', '-I', '-DIN_WINPTHREAD']
     # Note: Adding this include causes POSIX_TIMERS to be defined for
     # unclear reasons (some confusion with <pthread.h> probably).
@@ -384,15 +373,16 @@ if win32_pthreads.allowed()
     includedir += include_directories('osdep/win32/include')
     sources += files('osdep/win32/pthread.c')
 endif
+features += {'win32-internal-pthreads': win32_pthreads.allowed()}
 
 pthread_debug = get_option('pthread-debug').require(
     win32_pthreads.disabled(),
     error_message: 'win32-internal-pthreads was found!',
 )
 if pthread_debug.allowed()
-    features += 'pthread-debug'
     flags += '-DMP_PTHREAD_DEBUG'
 endif
+features += {'pthread-debug': pthread_debug.allowed()}
 
 add_project_arguments(flags, language: 'c')
 add_project_link_arguments(link_flags, language: ['c', 'objc'])
@@ -403,7 +393,6 @@ cocoa = dependency('appleframeworks', modules: ['Cocoa', 'IOKit', 'QuartzCore'],
                    required: get_option('cocoa'))
 if cocoa.found()
     dependencies += cocoa
-    features += 'cocoa'
     sources += files('osdep/macosx_application.m',
                      'osdep/macosx_events.m',
                      'osdep/macosx_menubar.m',
@@ -414,6 +403,7 @@ if cocoa.found()
                      'video/out/cocoa/video_view.m',
                      'video/out/cocoa/window.m')
 endif
+features += {'cocoa': cocoa.found()}
 
 if posix
     sources += files('input/ipc-unix.c',
@@ -467,13 +457,13 @@ endif
 android = host_machine.system() == 'android'
 if android
     dependencies += cc.find_library('android')
-    features += 'android'
     sources += files('audio/out/ao_audiotrack.c',
                      'misc/jni.c',
                      'osdep/android/strnlen.c',
                      'video/out/android_common.c',
                      'video/out/vo_mediacodec_embed.c')
 endif
+features += {'android': android}
 
 uwp_opt = get_option('uwp').require(
     not get_option('cplayer'),
@@ -482,15 +472,16 @@ uwp_opt = get_option('uwp').require(
 uwp = cc.find_library('windowsapp', required: uwp_opt)
 if uwp.found()
     dependencies += uwp
-    features += 'uwp'
     sources += files('osdep/path-uwp.c')
 endif
+features += {'uwp': uwp.found()}
 
 if win32
     sources += files('osdep/timer-win2.c',
                      'osdep/w32_keyboard.c',
                      'osdep/windows_utils.c')
 endif
+features += {'win32-executable': win32 and get_option('cplayer')}
 
 win32_desktop = win32 and not uwp.found()
 if win32_desktop
@@ -502,7 +493,6 @@ if win32_desktop
                           cc.find_library('version'),
                           cc.find_library('winmm')]
     dependencies += win32_desktop_libs
-    features += 'win32-desktop'
     sources += files('input/ipc-win.c',
                      'osdep/main-fn-win.c',
                      'osdep/path-win.c',
@@ -512,6 +502,7 @@ if win32_desktop
                      'video/out/win32/displayconfig.c',
                      'video/out/win32/droptarget.c')
 endif
+features += {'win32-desktop': win32_desktop}
 
 if not posix and not win32_desktop
     sources += files('input/ipc-dummy.c',
@@ -520,73 +511,54 @@ if not posix and not win32_desktop
 endif
 
 glob_posix = cc.has_function('glob', prefix: '#include <glob.h>')
-if glob_posix
-    features += 'glob_posix'
-endif
+features += {'glob-posix': glob_posix}
 
 glob_win32 = win32 and not posix
 if glob_win32
-    features += 'glob_win32'
     sources += files('osdep/glob-win.c')
 endif
+features += {'glob-win32': glob_win32}
 
 glob = glob_posix or glob_win32
-if glob
-    features += 'glob'
-endif
+features += {'glob': glob}
 
 vt_h = cc.has_header_symbol('sys/vt.h', 'VT_GETMODE')
-if vt_h
-    features += 'vt.h'
-endif
+features += {'vt.h': vt_h}
 
 consio_h = not vt_h and cc.has_header_symbol('sys/consio.h', 'VT_GETMODE')
-if consio_h
-    features += 'consio.h'
-endif
+features += {'consio.h': consio_h}
 
 fragments = join_paths(source_root, 'waftools', 'fragments')
 
 glibc_thread_name = cc.compiles(files(join_paths(fragments, 'glibc_thread_name.c')),
                                 name: 'glibc-thread-name check')
-if glibc_thread_name and posix
-    features += 'glibc-thread-name'
-endif
+features += {'glibc-thread-name': glibc_thread_name and posix}
 
 osx_thread_name = false
 if not glibc_thread_name
     osx_thread_name = cc.compiles(files(join_paths(fragments, 'osx_thread_name.c')),
                                   name: 'osx-thread-name check')
-    if osx_thread_name
-        features += 'osx-thread-name'
-    endif
 endif
+features += {'osx-thread-name': osx_thread_name}
 
 bsd_thread_name = false
 if not osx_thread_name and not glibc_thread_name
     bsd_thread_name = cc.compiles(files(join_paths(fragments, 'bsd_thread_name.c')),
                                   name: 'bsd-thread-name check')
-    if bsd_thread_name and posix
-        features += 'bsd-thread-name'
-    endif
 endif
-
-vector = cc.compiles(files(join_paths(fragments, 'vector.c')), name: 'vector check')
-if vector
-    features += 'vector'
-elif get_option('vector').enabled()
-    error('vector enabled but it could not be found!')
-endif
+features += {'bsd-thread-name': bsd_thread_name}
 
 bsd_fstatfs = cc.has_function('fstatfs', prefix: '#include <sys/mount.h>\n#include <sys/param.h>')
-if bsd_fstatfs
-    features += 'bsd-fstatfs'
-endif
+features += {'bsd-fstatfs': bsd_fstatfs}
 
 linux_fstatfs = cc.has_function('fstatfs', prefix: '#include <sys/vfs.h>')
-if linux_fstatfs
-    features += 'linux-fstatfs'
-endif
+features += {'linux-fstatfs': linux_fstatfs}
+
+vector = get_option('vector').require(
+    cc.compiles(files(join_paths(fragments, 'vector.c')), name: 'vector check'),
+    error_message: 'the compiler does not support gcc vectors!',
+)
+features += {'vector': vector.allowed()}
 
 
 # various file generations
@@ -607,9 +579,9 @@ endif
 # misc dependencies
 av_ch_layout_available = libavutil.version().version_compare('>= 57.24.100')
 if av_ch_layout_available
-    features += 'av-channel-layout'
     sources += files('audio/chmap_avchannel.c')
 endif
+features += {'av-channel-layout': av_ch_layout_available}
 
 cdda_opt = get_option('cdda').require(
     get_option('gpl'),
@@ -618,19 +590,19 @@ cdda_opt = get_option('cdda').require(
 cdda = dependency('libcdio_paranoia', required: cdda_opt)
 if cdda.found()
     dependencies += cdda
-    features += 'cdda'
     sources += files('stream/stream_cdda.c')
 endif
+features += {'cdda': cdda.found()}
 
 dvbin = get_option('dvbin').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
 )
 if dvbin.allowed()
-    features += 'dvbin'
     sources += files('stream/dvb_tune.c',
                      'stream/stream_dvb.c')
 endif
+features += {'dvbin': dvbin.allowed()}
 
 dvdnav_opt = get_option('dvdnav').require(
     get_option('gpl'),
@@ -640,63 +612,63 @@ dvdnav = dependency('dvdnav', version: '>= 4.2.0', required: dvdnav_opt)
 dvdread = dependency('dvdread', version: '>= 4.1.0', required: dvdnav_opt)
 if dvdnav.found() and dvdread.found()
     dependencies += [dvdnav, dvdread]
-    features += 'dvdnav'
     sources += files('stream/stream_dvdnav.c')
 endif
+features += {'dvdnav': dvdnav.found() and dvdread.found()}
 
 iconv = dependency('iconv', required: get_option('iconv'))
 if iconv.found()
     dependencies += iconv
-    features += 'iconv'
 endif
+features += {'iconv': iconv.found()}
 
 javascript = dependency('mujs', version: '>= 1.0.0', required: get_option('javascript'))
 if javascript.found()
     dependencies += javascript
-    features += 'javascript'
     sources += files('player/javascript.c',
                      'sub/filter_jsre.c')
     subdir(join_paths('generated', 'player', 'javascript'))
 endif
+features += {'javascript': javascript.found()}
 
 lcms2 = dependency('lcms2', version: '>= 2.6', required: get_option('lcms2'))
 if lcms2.found()
     dependencies += lcms2
-    features += 'lcms2'
 endif
+features += {'lcms2': lcms2.found()}
 
 libarchive = dependency('libarchive', version: '>= 3.4.0', required: get_option('libarchive'))
 if libarchive.found()
     dependencies += libarchive
-    features += 'libarchive'
     sources += files('demux/demux_libarchive.c',
                      'stream/stream_libarchive.c')
 endif
+features += {'libarchive': libarchive.found()}
 
 libavdevice = dependency('libavdevice', version: '>= 57.0.0', required: get_option('libavdevice'))
 if libavdevice.found()
     dependencies += libavdevice
-    features += 'libavdevice'
 endif
+features += {'libavdevice': libavdevice.found()}
 
 libbluray = dependency('libbluray', version: '>= 0.3.0', required: get_option('libbluray'))
 if libbluray.found()
     dependencies += libbluray
-    features += 'libbluray'
     sources += files('stream/stream_bluray.c')
 endif
+features += {'libbluray': libbluray.found()}
 
 libm = cc.find_library('m', required: false)
 if libm.found()
     dependencies += libm
-    features += 'libm'
 endif
+features += {'libm': libm.found()}
 
 librt = cc.find_library('rt', required: false)
 if librt.found()
     dependencies += librt
-    features += 'librt'
 endif
+features += {'librt': librt.found()}
 
 lua = dependency('', required: false)
 lua_opt = get_option('lua')
@@ -726,41 +698,43 @@ endif
 
 if lua.found()
     dependencies += lua
-    features += lua.name()
     sources += files('player/lua.c')
     subdir(join_paths('generated', 'player', 'lua'))
 endif
 if not lua.found() and lua_opt == 'enabled'
      error('lua enabled but no suitable lua version could be found!')
 endif
+features += {'lua': lua.found()}
+lua_version = lua.name()
 
 rubberband = dependency('rubberband', version: '>= 1.8.0', required: get_option('rubberband'))
 if rubberband.found()
     dependencies += rubberband
-    features += 'rubberband'
     sources += files('audio/filter/af_rubberband.c')
 endif
+features += {'rubberband': rubberband.found()}
+features += {'rubberband-3': rubberband.version().version_compare('>= 3.0.0')}
 
 sdl2 = dependency('sdl2', required: get_option('sdl2'))
 if sdl2.found()
     dependencies += sdl2
-    features += 'sdl2'
 endif
+features += {'sdl2': sdl2.found()}
 
 sdl2_gamepad = get_option('sdl2-gamepad').require(
     sdl2.found(),
     error_message: 'sdl2 was not found!',
 )
 if sdl2_gamepad.allowed()
-    features += 'sdl2-gamepad'
     sources += files('input/sdl_gamepad.c')
 endif
+features += {'sdl2-gamepad': sdl2_gamepad.allowed()}
 
 stdatomic = cc.find_library('atomic', required: get_option('stdatomic'))
 if stdatomic.found()
     dependencies += stdatomic
-    features += 'stdatomic'
 endif
+features += {'stdatomic': stdatomic.found()}
 
 uchardet_opt = get_option('uchardet').require(
     iconv.found(),
@@ -769,22 +743,21 @@ uchardet_opt = get_option('uchardet').require(
 uchardet = dependency('uchardet', required: uchardet_opt)
 if uchardet.found()
     dependencies += uchardet
-    features += 'uchardet'
 endif
+features += {'uchardet': uchardet.found()}
 
 vapoursynth = dependency('vapoursynth', version: '>= 24', required: get_option('vapoursynth'))
 vapoursynth_script = dependency('vapoursynth-script', version: '>= 23',
                                 required: get_option('vapoursynth'))
-if vapoursynth.found() and vapoursynth_script.found()
+features += {'vapoursynth': vapoursynth.found() and vapoursynth_script.found()}
+if features['vapoursynth']
     dependencies += [vapoursynth, vapoursynth_script]
-    features += 'vapoursynth'
     sources += files('video/filter/vf_vapoursynth.c')
 endif
 
 zimg = dependency('zimg', version: '>= 2.9', required: get_option('zimg'))
 if zimg.found()
     dependencies += zimg
-    features += 'zimg'
     sources += files('video/filter/vf_fingerprint.c',
                      'video/zimg.c')
     if get_option('tests')
@@ -792,47 +765,46 @@ if zimg.found()
                          'test/scale_zimg.c')
     endif
 endif
+features += {'zimg': zimg.found()}
 
 zlib = dependency('zlib', required: get_option('zlib'))
 if zlib.found()
     dependencies += zlib
-    features += 'zlib'
 endif
+features += {'zlib': zlib.found()}
 
 
 # audio output dependencies
 alsa = dependency('alsa', version: '>= 1.0.18', required: get_option('alsa'))
 if alsa.found()
     dependencies += alsa
-    features += 'alsa'
     sources += files('audio/out/ao_alsa.c')
 endif
+features += {'alsa': alsa.found()}
 
 audiounit = {
     'deps': dependency('appleframeworks', modules: ['Foundation', 'AudioToolbox'],
                        required: get_option('audiounit')),
     'symbol': cc.has_header_symbol('AudioToolbox/AudioToolbox.h', 'kAudioUnitSubType_RemoteIO',
                                    required: get_option('audiounit')),
-    'use': false,
 }
 if audiounit['deps'].found() and audiounit['symbol']
     dependencies += audiounit['deps']
-    features += 'audiounit'
     sources += files('audio/out/ao_audiounit.m')
-    audiounit += {'use': true}
 endif
+features += {'audiounit': audiounit['deps'].found() and audiounit['symbol']}
 
 coreaudio = dependency('appleframeworks', modules: ['CoreFoundation', 'CoreAudio',
                        'AudioUnit', 'AudioToolbox'], required: get_option('coreaudio'))
 if coreaudio.found()
     dependencies += coreaudio
-    features += 'coreaudio'
     sources += files('audio/out/ao_coreaudio.c',
                      'audio/out/ao_coreaudio_exclusive.c',
                      'audio/out/ao_coreaudio_properties.c')
 endif
+features += {'coreaudio': coreaudio.found()}
 
-if audiounit['use'] or coreaudio.found()
+if audiounit['deps'].found() and audiounit['symbol'] or coreaudio.found()
     sources += files('audio/out/ao_coreaudio_chmap.c',
                      'audio/out/ao_coreaudio_utils.c')
 endif
@@ -844,23 +816,23 @@ jack_opt = get_option('jack').require(
 jack = dependency('jack', required: jack_opt)
 if jack.found()
     dependencies += jack
-    features += 'jack'
     sources += files('audio/out/ao_jack.c')
 endif
+features += {'jack': jack.found()}
 
 openal = dependency('openal', version: '>= 1.13', required: get_option('openal'))
 if openal.found()
     dependencies += openal
-    features += 'openal'
     sources += files('audio/out/ao_openal.c')
 endif
+features += {'openal': openal.found()}
 
 opensles = cc.find_library('OpenSLES', required: get_option('opensles'))
 if opensles.found()
     dependencies += opensles
-    features += 'opensles'
     sources += files('audio/out/ao_opensles.c')
 endif
+features += {'opensles': opensles.found()}
 
 oss_opt = get_option('oss-audio').require(
     get_option('gpl'),
@@ -869,47 +841,47 @@ oss_opt = get_option('oss-audio').require(
 oss = cc.has_header_symbol('sys/soundcard.h', 'SNDCTL_DSP_SETPLAYVOL',
                            required: oss_opt)
 if oss
-    features += 'oss-audio'
     sources += files('audio/out/ao_oss.c')
 endif
+features += {'oss-audio': oss}
 
 pipewire = dependency('libpipewire-0.3', version: '>= 0.3', required: get_option('pipewire'))
 if pipewire.found()
     dependencies += pipewire
-    features += 'pipewire'
     sources += files('audio/out/ao_pipewire.c')
 endif
+features += {'pipewire': pipewire.found()}
 
 pulse = dependency('libpulse', version: '>= 1.0', required: get_option('pulse'))
 if pulse.found()
     dependencies += pulse
-    features += 'pulse'
     sources += files('audio/out/ao_pulse.c')
 endif
+features += {'pulse': pulse.found()}
 
 sdl2_audio = get_option('sdl2-audio').require(
     sdl2.found(),
     error_message: 'sdl2 was not found!',
 )
 if sdl2_audio.allowed()
-    features += 'sdl2-audio'
     sources += files('audio/out/ao_sdl.c')
 endif
+features += {'sdl2-audio': sdl2_audio.allowed()}
 
 sndio = dependency('sndio', required: get_option('sndio'))
 if sndio.found()
     dependencies += sndio
-    features += 'sndio'
     sources += files('audio/out/ao_sndio.c')
 endif
+features += {'sndio': sndio.found()}
 
 wasapi = cc.has_header_symbol('audioclient.h', 'IAudioClient', required: get_option('wasapi'))
 if wasapi
-    features += 'wasapi'
     sources += files('audio/out/ao_wasapi.c',
                      'audio/out/ao_wasapi_changenotify.c',
                      'audio/out/ao_wasapi_utils.c')
 endif
+features += {'wasapi': wasapi}
 
 
 # video output dependencies
@@ -920,9 +892,9 @@ caca_opt = get_option('caca').require(
 caca = dependency('caca', version: '>= 0.99.beta18', required: caca_opt)
 if caca.found()
     dependencies += caca
-    features += 'caca'
     sources += files('video/out/vo_caca.c')
 endif
+features += {'caca': caca.found()}
 
 direct3d_opt = get_option('direct3d').require(
     get_option('gpl') and win32_desktop,
@@ -930,18 +902,17 @@ direct3d_opt = get_option('direct3d').require(
 )
 direct3d = cc.check_header('d3d9.h', required: direct3d_opt)
 if direct3d
-    features += 'direct3d'
     sources += files('video/out/vo_direct3d.c')
 endif
+features += {'direct3d': direct3d}
 
 drm = {
     'deps': dependency('libdrm', version: '>= 2.4.75', required: get_option('drm')),
     'header': vt_h or consio_h,
 }
-drm += {'use': drm['deps'].found() and drm['header']}
-if drm['use']
+features += {'drm': drm['deps'].found() and drm['header']}
+if features['drm']
     dependencies += drm['deps']
-    features += 'drm'
     sources += files('video/drmprime.c',
                      'video/out/drm_atomic.c',
                      'video/out/drm_common.c',
@@ -952,33 +923,29 @@ if drm['use']
 endif
 
 # This can be removed roughly when Debian 12 is released.
-drm_is_kms = drm['use'] and drm['deps'].version().version_compare('>= 2.4.105')
-if drm_is_kms
-    features += 'drm_is_kms'
-endif
+drm_is_kms = features['drm'] and drm['deps'].version().version_compare('>= 2.4.105')
+features += {'drm-is-kms': drm_is_kms}
 
 gbm = dependency('gbm', version: '>=17.1.0', required: get_option('gbm'))
 if gbm.found()
     dependencies += gbm
-    features += 'gbm'
 endif
+features += {'gbm': gbm.found()}
 
 jpeg = dependency('libjpeg', required: get_option('jpeg'))
 if jpeg.found()
     dependencies += jpeg
-    features += 'jpeg'
 endif
+features += {'jpeg': jpeg.found()}
 
 libplacebo_next = false
 libplacebo = dependency('libplacebo', version: '>=4.157.0', required: get_option('libplacebo'))
 if libplacebo.found()
     dependencies += libplacebo
-    features += 'libplacebo'
     sources += files('video/out/placebo/ra_pl.c',
                      'video/out/placebo/utils.c')
     pl_api_ver = libplacebo.version().split('.')[1]
     if pl_api_ver.version_compare('>=202')
-        features += 'libplacebo-next'
         libplacebo_next = true
         message('libplacebo v4.202+ found! Enabling vo_gpu_next.')
         sources += files('video/out/vo_gpu_next.c',
@@ -987,45 +954,47 @@ if libplacebo.found()
         message('libplacebo v4.202+ not found! Disabling vo_gpu_next.')
     endif
 endif
+features += {'libplacebo': libplacebo.found()}
+features += {'libplacebo-next': libplacebo_next}
 
 sdl2_video = get_option('sdl2-video').require(
     sdl2.found(),
     error_message: 'sdl2 was not found!',
 )
 if sdl2_video.allowed()
-    features += 'sdl2-video'
     sources += files('video/out/vo_sdl.c')
 endif
+features += {'sdl2-video': sdl2_video.allowed()}
 
 shaderc = dependency('shaderc', required: get_option('shaderc'))
 if shaderc.found()
     dependencies += shaderc
-    features += shaderc.name()
     sources += files('video/out/gpu/spirv_shaderc.c')
 endif
+features += {'shaderc': shaderc.found()}
 
 sixel = dependency('libsixel', version: '>= 1.5', required: get_option('sixel'))
 if sixel.found()
     dependencies += sixel
-    features += 'sixel'
     sources += files('video/out/vo_sixel.c')
 endif
+features += {'sixel': sixel.found()}
 
 spirv_cross = dependency('spirv-cross-c-shared', required: get_option('spirv-cross'))
 if spirv_cross.found()
-    features += 'spirv-cross'
     dependencies += spirv_cross
 endif
+features += {'spirv-cross': spirv_cross.found()}
 
 d3d11 = get_option('d3d11').require(
     win32_desktop and shaderc.found() and spirv_cross.found(),
     error_message: 'Either is not a win32 desktop or shaderc nor spirv-cross were found!',
 )
 if d3d11.allowed()
-    features += 'd3d11'
     sources += files('video/out/d3d11/context.c',
                      'video/out/d3d11/ra_d3d11.c')
 endif
+features += {'d3d11': d3d11.allowed()}
 
 wayland = {
     'deps': [dependency('wayland-client', version: '>= 1.15.0', required: get_option('wayland')),
@@ -1034,33 +1003,29 @@ wayland = {
              dependency('xkbcommon', version: '>= 0.3.0', required: get_option('wayland'))],
     'header': cc.check_header('linux/input-event-codes.h', required: get_option('wayland')),
     'scanner': find_program('wayland-scanner', required: get_option('wayland')),
-    'use': true,
 }
+wayland_deps = true
 foreach dep: wayland['deps']
     if not dep.found()
-        wayland += {'use': false}
+        wayland_deps = false
         break
     endif
 endforeach
+features += {'wayland': wayland_deps and wayland['header'] and wayland['scanner'].found()}
 
-if not wayland['header'] or not wayland['scanner'].found()
-    wayland += {'use': false}
-endif
-
-if wayland['use']
-    features += 'wayland'
+if features['wayland']
     subdir(join_paths('generated', 'wayland'))
 endif
 
 memfd_create = false
-if wayland['use']
+if features['wayland']
     memfd_create = cc.has_function('memfd_create',
                                    prefix: '#define _GNU_SOURCE\n#include <sys/mman.h>')
 endif
-if wayland['use'] and memfd_create
-    features += 'memfd_create'
+if features['wayland'] and memfd_create
     sources += files('video/out/vo_wlshm.c')
 endif
+features += {'memfd_create': features['wayland'] and memfd_create}
 
 x11_opt = get_option('x11').require(
     get_option('gpl'),
@@ -1073,85 +1038,82 @@ x11 = {
              dependency('xinerama', version: '>= 1.0.0', required: x11_opt),
              dependency('xpresent', version: '>= 1.0.0', required: x11_opt),
              dependency('xrandr', version: '>= 1.2.0', required: x11_opt)],
-    'use': true,
 }
+x11_deps = true
 foreach dep: x11['deps']
     if not dep.found()
-        x11 += {'use': false}
+        x11_deps = false
         break
     endif
 endforeach
+features += {'x11': x11_deps}
 
-if x11['use']
+if features['x11']
     dependencies += x11['deps']
-    features += 'x11'
     sources += files('video/out/vo_x11.c',
                      'video/out/x11_common.c')
 endif
 
 xv_opt = get_option('xv').require(
-    x11['use'],
+    features['x11'],
     error_message: 'x11 could not be found!',
 )
 xv = dependency('xv', required: xv_opt)
 if xv.found()
     dependencies += xv
-    features += 'xv'
     sources += files('video/out/vo_xv.c')
 endif
+features += {'xv': xv.found()}
 
-if wayland['use'] or x11['use']
+if features['wayland'] or features['x11']
     sources += ('video/out/present_sync.c')
 endif
 
 
 # OpenGL feature checking
-gl = {
-    'opt': get_option('gl').allowed(),
-    'use': false,
-}
+gl_allowed = get_option('gl').allowed()
 
 GL = dependency('', required: false)
 if darwin
     GL = dependency('appleframeworks', modules: 'OpenGL', required: get_option('gl-cocoa'))
 elif win32_desktop
     GL = dependency('GL', required: get_option('gl-win32'))
-elif x11['use']
+elif features['x11']
     GL = dependency('GL', required: get_option('gl-x11'))
 endif
 
 gl_cocoa = get_option('gl-cocoa').require(
-    cocoa.found() and GL.found() and gl['opt'],
+    cocoa.found() and GL.found() and gl_allowed,
     error_message: 'cocoa and GL were not found!',
 )
 if gl_cocoa.allowed()
     dependencies += GL
-    features += 'gl-cocoa'
-    gl += {'use': true}
+    features += {'gl': true}
     sources += files('video/out/opengl/context_cocoa.c')
 endif
+features += {'gl-cocoa': gl_cocoa.allowed()}
 
 gl_win32 = get_option('gl-win32').require(
-    GL.found() and gl['opt'] and win32_desktop,
+    GL.found() and gl_allowed and win32_desktop,
     error_message: 'GL and win32 desktop were not found!',
 )
 if gl_win32.allowed()
     dependencies += GL
-    features += 'gl-win32'
-    gl += {'use': true}
+    features += {'gl': true}
     sources += files('video/out/opengl/context_win.c')
 endif
+features += {'gl-win32': gl_win32.allowed()}
 
 gl_x11 = get_option('gl-x11').require(
-    GL.found() and gl['opt'] and x11['use'],
+    GL.found() and gl_allowed and features['x11'],
     error_message: 'GL and x11 were not found!',
 )
 if gl_x11.allowed()
     dependencies += GL
-    features += 'gl-x11'
-    gl += {'use': true}
+    features += {'gl': true}
     sources += files('video/out/opengl/context_glx.c')
 endif
+features += {'gl-x11': gl_x11.allowed()}
 
 gl_dxinterop_d3d = gl_win32.allowed() and \
                    cc.has_header_symbol('GL/wglext.h', 'WGL_ACCESS_READ_ONLY_NV',
@@ -1162,9 +1124,9 @@ gl_dxinterop = get_option('gl-dxinterop').require(
     error_message: 'gl-dxinterop could not be found!',
 )
 if gl_dxinterop.allowed()
-    features += 'gl-dxinterop'
     sources += files('video/out/opengl/context_dxinterop.c')
 endif
+features += {'gl-dxinterop': gl_dxinterop.allowed()}
 
 egl_angle = get_option('egl-angle').require(
     gl_win32.allowed() and cc.has_header_symbol('EGL/eglext.h',
@@ -1173,126 +1135,111 @@ egl_angle = get_option('egl-angle').require(
     error_message: 'egl-angle could not be found!',
 )
 if egl_angle.allowed()
-    features += 'egl-angle'
     sources += files('video/out/opengl/angle_dynamic.c')
 endif
+features += {'egl-angle': egl_angle.allowed()}
 
 egl_angle_lib = get_option('egl-angle-lib').require(
     egl_angle.allowed() and cc.has_function('eglCreateWindowSurface',
                                             prefix: '#include <EGL/egl.h>'),
     error_message: 'egl-angle-lib could not be found!',
 )
-if egl_angle_lib.allowed()
-    features += 'egl-angle-lib'
-endif
+features += {'egl-angle-lib': egl_angle_lib.allowed()}
 
 egl_angle_win32 = get_option('egl-angle-win32').require(
     egl_angle.allowed() and win32_desktop,
     error_message: 'either this is not a win32 desktop or egl-angle was not found!',
 )
 if egl_angle_win32.allowed()
-    features += 'egl-angle-win32'
     sources += files('video/out/opengl/context_angle.c')
 endif
+features += {'egl-angle-win32': egl_angle_win32.allowed()}
 
 if d3d11.allowed() or egl_angle_win32.allowed()
     sources += files('video/out/gpu/d3d11_helpers.c')
 endif
 
-egl = {
-    'deps': dependency('egl', version: '> 1.4.0', required: get_option('egl')),
-    'use': false,
-}
-egl += {'use': egl['deps'].found() and gl['opt']}
-if egl['use']
-    dependencies += egl['deps']
-    features += 'egl'
+egl = dependency('egl', version: '> 1.4.0', required: get_option('egl'))
+features += {'egl': egl.found() and gl_allowed}
+if features['egl']
+    dependencies += egl
 endif
 
 egl_android_opt = get_option('egl-android').require(
-    android and gl['opt'],
+    android and gl_allowed,
     error_message: 'the OS is not android!',
 )
 egl_android = cc.find_library('EGL', required: egl_android_opt)
 if egl_android.found()
     dependencies += egl_android
-    features += 'egl-android'
-    gl += {'use': true}
+    features += {'gl': true}
     sources += files('video/out/opengl/context_android.c')
 endif
+features += {'egl-android': egl_android.found()}
 
 egl_drm = get_option('egl-drm').require(
-    drm['use'] and egl['use'] and gbm.found() and gl['opt'],
+    features['drm'] and features['egl'] and gbm.found() and gl_allowed,
     error_message: 'either drm, egl, or gbm could not be found!',
 )
 if egl_drm.allowed()
-    features += 'egl-drm'
-    gl += {'use': true}
+    features += {'gl': true}
     sources += files('video/out/opengl/context_drm_egl.c')
 endif
+features += {'egl-drm': egl_drm.allowed()}
 
-egl_wayland = {
-    'deps':  dependency('wayland-egl', version: '>= 9.0.0', required: get_option('egl-wayland')),
-    'use': false,
-}
-egl_wayland += {'use': egl['use'] and egl_wayland['deps'].found() and gl['opt'] and wayland['use']}
-if egl_wayland['use']
-    dependencies += egl_wayland['deps']
-    features += 'gl-wayland'
-    gl += {'use': true}
+egl_wayland = dependency('wayland-egl', version: '>= 9.0.0', required: get_option('egl-wayland'))
+features += {'gl-wayland': features['egl'] and egl_wayland.found() and gl_allowed and features['wayland']}
+if features['gl-wayland']
+    dependencies += egl_wayland
+    features += {'gl': true}
     sources += files('video/out/opengl/context_wayland.c')
 endif
 
 egl_x11 = get_option('egl-x11').require(
-    egl['use'] and gl['opt'] and x11['use'],
+    features['egl'] and gl_allowed and features['x11'],
     error_message: 'either egl or x11 could not be found!',
 )
 if egl_x11.allowed()
-    features += 'egl-x11'
-    gl += {'use': true}
+    features += {'gl': true}
     sources += files('video/out/opengl/context_x11egl.c')
 endif
+features += {'egl-x11': egl_x11.allowed()}
 
 plain_gl = get_option('plain-gl').require(
-    get_option('libmpv') and gl['opt'],
+    get_option('libmpv') and gl_allowed,
     error_message: 'libmpv was not enabled!',
 )
 if plain_gl.allowed()
-    features += 'plain-gl'
-    gl += {'use': true}
+    features += {'gl': true}
 endif
+features += {'plain-gl': plain_gl.allowed()}
 
-rpi = {
-    'deps': dependency('/opt/vc/lib/pkgconfig/brcmegl.pc', 'brcmegl', required: get_option('rpi')),
-    'use': false,
-}
-rpi += {'use': gl['opt'] and rpi['deps'].found()}
-if rpi['use']
-    dependencies += rpi['deps']
-    features += 'rpi'
-    gl += {'use': true}
+rpi = dependency('/opt/vc/lib/pkgconfig/brcmegl.pc', 'brcmegl', required: get_option('rpi'))
+features += {'rpi': gl_allowed and rpi.found()}
+if features['rpi']
+    dependencies += rpi
+    features += {'gl': true}
     sources += files('video/out/opengl/context_rpi.c')
 endif
 
-egl_helpers = egl['use'] or egl_android.found() or egl_angle_win32.allowed() or rpi['use']
+egl_helpers = features['egl'] or egl_android.found() or egl_angle_win32.allowed() or features['rpi']
 if egl_helpers
-    features += 'egl-helpers'
     sources += files('video/out/opengl/egl_helpers.c')
 endif
+features += {'egl-helpers': egl_helpers}
 
-if egl['use'] and egl_helpers
+if features['egl'] and egl_helpers
     sources += files('video/filter/vf_gpu.c')
 endif
 
-if gl['use']
-    features += 'gl'
+if features['gl']
     sources += files('video/out/opengl/common.c',
                      'video/out/opengl/context.c',
                      'video/out/opengl/formats.c',
                      'video/out/opengl/libmpv_gl.c',
                      'video/out/opengl/ra_gl.c',
                      'video/out/opengl/utils.c')
-elif not gl['use'] and get_option('gl').enabled()
+elif not features['gl'] and get_option('gl').enabled()
     error('gl enabled but no OpenGL video output could be found!')
 endif
 
@@ -1305,17 +1252,17 @@ vulkan_opt = get_option('vulkan').require(
 vulkan = dependency('vulkan', required: vulkan_opt)
 if vulkan.found()
     dependencies += vulkan
-    features += 'vulkan'
     sources += files('video/out/vulkan/context.c',
                      'video/out/vulkan/context_display.c',
                      'video/out/vulkan/utils.c')
 endif
+features += {'vulkan': vulkan.found()}
 
 if vulkan.found() and android
     sources += files('video/out/vulkan/context_android.c')
 endif
 
-if vulkan.found() and wayland['use']
+if vulkan.found() and features['wayland']
     sources += files('video/out/vulkan/context_wayland.c')
 endif
 
@@ -1323,7 +1270,7 @@ if vulkan.found() and win32_desktop
     sources += files('video/out/vulkan/context_win.c')
 endif
 
-if vulkan.found() and x11['use']
+if vulkan.found() and features['x11']
      sources += files('video/out/vulkan/context_xlib.c')
 endif
 
@@ -1332,40 +1279,41 @@ endif
 ffnvcodec = dependency('ffnvcodec', version: '>= 8.2.15.7', required: false)
 if ffnvcodec.found()
     dependencies += ffnvcodec
-    features += 'ffnvcodec'
     sources += files('video/cuda.c')
 endif
+features += {'ffnvcodec': ffnvcodec.found()}
 
 cuda_hwaccel = get_option('cuda-hwaccel').require(
     ffnvcodec.found(),
     error_message: 'ffnvcodec was not found!',
 )
 if cuda_hwaccel.allowed()
-    features += 'cuda-hwaccel'
     sources += files('video/out/hwdec/hwdec_cuda.c')
 endif
+features += {'cuda-hwaccel': cuda_hwaccel.allowed()}
 
 cuda_interop = get_option('cuda-interop').require(
-    cuda_hwaccel.allowed() and (gl['use'] or vulkan.found()),
+    cuda_hwaccel.allowed() and (features['gl'] or vulkan.found()),
     error_message: 'cuda-hwaccel and either gl or vulkan were not found!',
 )
-if cuda_interop.allowed() and gl['use']
-    features += 'cuda-interop'
+if cuda_interop.allowed() and features['gl']
     sources += files('video/out/hwdec/hwdec_cuda_gl.c')
 endif
 if cuda_interop.allowed() and vulkan.found()
     sources += files('video/out/hwdec/hwdec_cuda_vk.c')
 endif
+features += {'cuda-interop': cuda_interop.allowed() and (features['gl'] or vulkan.found())}
 
 d3d_hwaccel = get_option('d3d-hwaccel').require(
     win32,
     error_message: 'the os is not win32!',
 )
 if d3d_hwaccel.allowed()
-    features += 'd3d_hwaccel'
     sources += files('video/d3d.c',
                      'video/filter/vf_d3d11vpp.c')
 endif
+features += {'d3d-hwaccel': d3d_hwaccel.allowed()}
+
 if d3d_hwaccel.allowed() and egl_angle.allowed()
     sources += files('video/out/opengl/hwdec_d3d11egl.c')
 endif
@@ -1378,123 +1326,101 @@ d3d9_hwaccel = get_option('d3d9-hwaccel').require(
     error_message: 'd3d-hwaccel was not found!',
 )
 if d3d9_hwaccel.allowed() and egl_angle.allowed()
-    features += 'd3d9_hwaccel'
     sources += files('video/out/opengl/hwdec_dxva2egl.c')
 endif
 if d3d9_hwaccel.allowed() and d3d11.allowed()
     sources += files('video/out/d3d11/hwdec_dxva2dxgi.c')
 endif
+features += {'d3d9-hwaccel': d3d9_hwaccel.allowed()}
 
 gl_dxinterop_d3d9 = get_option('gl-dxinterop-d3d9').require(
     gl_dxinterop.allowed() and d3d9_hwaccel.allowed(),
     error_message: 'gl-dxinterop and d3d9-hwaccel were not found!',
 )
 if gl_dxinterop_d3d9.allowed()
-    features += 'gl-dxinterop-d3d9'
     sources += files('video/out/opengl/hwdec_dxva2gldx.c')
 endif
+features += {'gl-dxinterop-d3d9': gl_dxinterop_d3d9.allowed()}
 
 ios_gl = cc.has_header_symbol('OpenGLES/ES3/glext.h', 'GL_RGB32F', required: get_option('ios-gl'))
 if ios_gl
-    features += 'ios-gl'
     sources += files('video/out/opengl/hwdec_ios.m')
 endif
+features += {'ios-gl': ios_gl}
 
 rpi_mmal_opt = get_option('rpi-mmal').require(
-    rpi['use'],
+    features['rpi'],
     error_message: 'rpi was not found!',
 )
 rpi_mmal = dependency('/opt/vc/lib/pkgconfig/mmal.pc', 'mmal', required: rpi_mmal_opt)
 if rpi_mmal.found()
     dependencies += rpi_mmal
-    features += 'rpi-mmal'
     sources += files('video/out/opengl/hwdec_rpi.c',
                      'video/out/vo_rpi.c')
 endif
+features += {'rpi-mmal': rpi_mmal.found()}
 
-vaapi = {
-    'deps': dependency('libva', version: '>= 1.1.0', required: get_option('vaapi')),
-}
-vaapi += {'use': vaapi['deps'].found() and libdl and
-          (x11['use'] or wayland['use'] or egl_drm.allowed())}
-if vaapi['use']
-    dependencies += vaapi['deps']
-    features += 'vaapi'
+vaapi = dependency('libva', version: '>= 1.1.0', required: get_option('vaapi'))
+features += {'vaapi': vaapi.found() and libdl and (features['x11'] or
+             features['wayland'] or egl_drm.allowed())}
+
+if features['vaapi']
+    dependencies += vaapi
     sources += files('video/filter/vf_vavpp.c',
                      'video/vaapi.c')
 endif
 
-vaapi_drm = {
-    'deps': dependency('libva-drm', version: '>= 1.1.0', required: get_option('vaapi-drm')),
-}
-vaapi_drm += {'use': vaapi['use'] and egl_drm.allowed() and vaapi_drm['deps'].found()}
-if vaapi_drm['use']
-    features += 'vaapi-drm'
+vaapi_drm = dependency('libva-drm', version: '>= 1.1.0', required: get_option('vaapi-drm'))
+features += {'vaapi-drm': features['vaapi'] and egl_drm.allowed() and vaapi_drm.found()}
+if features['vaapi-drm']
+    dependencies += vaapi_drm
 endif
 
-vaapi_wayland = {
-    'deps': dependency('libva-wayland', version: '>= 1.1.0', required: get_option('vaapi-wayland')),
-}
-vaapi_wayland += {'use': vaapi['use'] and egl_wayland['use'] and vaapi_wayland['deps'].found()}
-if vaapi_wayland['use']
-    features += 'vaapi-wayland'
+vaapi_wayland = dependency('libva-wayland', version: '>= 1.1.0', required: get_option('vaapi-wayland'))
+features += {'vaapi-wayland': features['vaapi'] and features['gl-wayland'] and vaapi_wayland.found()}
+if features['vaapi-wayland']
+    dependencies += vaapi_wayland
 endif
 
-if vaapi_wayland['use'] and memfd_create
-    features += 'vaapi-wayland-memfd'
+features += {'vaapi-wayland-memfd': features['vaapi-wayland'] and memfd_create}
+if features['vaapi-wayland-memfd']
     sources += files('video/out/vo_vaapi_wayland.c')
 endif
 
-vaapi_x11 = {
-    'deps': dependency('libva-x11', version: '>= 1.1.0', required: get_option('vaapi-x11')),
-}
-vaapi_x11 += {'use': vaapi['use'] and x11['use'] and vaapi_x11['deps'].found()}
-if vaapi_x11['use']
-    dependencies += vaapi_x11['deps']
-    features += 'vaapi-x11'
+vaapi_x11 = dependency('libva-x11', version: '>= 1.1.0', required: get_option('vaapi-x11'))
+features += {'vaapi-x11': features['vaapi'] and features['x11'] and vaapi_x11.found()}
+if features['vaapi-x11']
+    dependencies += vaapi_x11
     sources += files('video/out/vo_vaapi.c')
 endif
 
-vaapi_x_egl = vaapi_x11['use'] and egl_x11.allowed()
-if vaapi_x_egl
-    features += 'vaapi-x-egl'
-endif
+features += {'vaapi-x-egl': features['vaapi-x11'] and egl_x11.allowed()}
+features += {'vaapi-egl': features['vaapi-x11'] or features['vaapi-wayland'] or features['drm']}
+features += {'vaapi-libplacebo': features['vaapi'] and libplacebo.found()}
 
-vaapi_egl = vaapi_x_egl or vaapi_wayland['use'] or vaapi_drm['use']
-if vaapi_egl
-    dependencies += [vaapi_wayland['deps'], vaapi_drm['deps']]
-    features += 'vaapi-egl'
-endif
-
-vaapi_libplacebo = vaapi['use'] and libplacebo.found()
-if vaapi_libplacebo
-    features += 'vaapi-libplacebo'
-endif
-
-if vaapi_egl or vaapi_libplacebo
+if features['vaapi-egl'] or features['vaapi-libplacebo']
     sources += files('video/out/hwdec/hwdec_vaapi.c')
 endif
 
-dmabuf_interop_gl = egl['use'] and drm['use']
+dmabuf_interop_gl = features['egl'] and features['drm']
 if dmabuf_interop_gl
-    features += 'dmabuf-interop-gl'
     sources += files('video/out/hwdec/dmabuf_interop_gl.c')
 endif
+features += {'dmabuf-interop-gl': dmabuf_interop_gl}
 
-dmabuf_interop_pl = vaapi_libplacebo
+dmabuf_interop_pl = features['vaapi-libplacebo']
 if dmabuf_interop_pl
-    features += 'dmabuf-interop-pl'
     sources += files('video/out/hwdec/dmabuf_interop_pl.c')
 endif
+features += {'dmabuf-interop-pl': dmabuf_interop_pl}
 
 vdpau_opt = get_option('vdpau').require(
-    x11['use'],
+    features['x11'],
     error_message: 'x11 was not found!',
 )
 vdpau = dependency('vdpau', version: '>= 0.2', required: vdpau_opt)
 if vdpau.found()
     dependencies += vdpau
-    features += 'vdpau'
     sources += files('video/filter/vf_vdpaupp.c',
                      'video/out/vo_vdpau.c',
                      'video/vdpau.c',
@@ -1504,15 +1430,17 @@ if vdpau.found() and gl_x11.allowed()
     features += 'vdpau-gl-x11'
     sources += files('video/out/opengl/hwdec_vdpau.c')
 endif
+features += {'vdpau': vdpau.found()}
+features += {'vdpau-gl-x11': vdpau.found() and gl_x11.allowed()}
 
 videotoolbox_gl = get_option('videotoolbox-gl').require(
     gl_cocoa.allowed() or ios_gl,
     error_message: 'gl-cocoa nor ios-gl could be found!',
 )
 if videotoolbox_gl.allowed()
-    features += 'videobox-gl'
     sources += files('video/out/opengl/hwdec_osx.c')
 endif
+features += {'videotoolbox-gl': videotoolbox_gl.allowed()}
 
 
 # macOS features
@@ -1591,19 +1519,19 @@ macos_cocoa_cb = get_option('macos-cocoa-cb').require(
     error_message: 'Either cocoa or swift could not be found!',
 )
 if macos_cocoa_cb.allowed()
-    features += 'macos-cocoa-cb'
     swift_sources += files('video/out/cocoa_cb_common.swift',
                            'video/out/mac/gl_layer.swift')
 endif
+features += {'macos-cocoa-cb': macos_cocoa_cb.allowed()}
 
 macos_media_player = get_option('macos-media-player').require(
     macos_10_12_2_features.allowed() and swift.allowed(),
     error_message: 'Either the macos sdk version is not at least 10.12.2 or swift was not found!',
 )
 if macos_media_player.allowed()
-    features += 'macos-media-player'
     swift_sources += files('osdep/macos/remote_command_center.swift')
 endif
+features += {'macos-media-player': macos_media_player.allowed()}
 
 if swift.allowed()
     subdir(join_paths('generated', 'osdep'))
@@ -1614,11 +1542,9 @@ macos_touchbar = {
     'deps': dependency('appleframeworks', modules: 'AppKit',
                        required: get_option('macos-touchbar')),
     'fragment': files(join_paths(fragments, 'touchbar.m')),
-    'use': false,
 }
-macos_touchbar += {'use': cc.compiles(macos_touchbar['fragment'], name: 'macos-touchbar check')}
-if macos_touchbar['use']
-    features += 'macos-touchbar'
+features += {'macos-touchbar': cc.compiles(macos_touchbar['fragment'], name: 'macos-touchbar check')}
+if features['macos-touchbar']
     sources += files('osdep/macosx_touchbar.m')
 elif get_option('macos-touchbar').enabled()
     error('macos-touchbar enabled but it could not be found!')
@@ -1629,7 +1555,6 @@ endif
 manpage = 'DOCS/man/mpv.rst'
 rst2man = find_program('rst2man', 'rst2man.py', required: get_option('manpage-build'))
 if rst2man.found()
-    features += 'manpage-build'
     mandir = get_option('mandir')
     custom_target('manpages',
         input: manpage,
@@ -1639,11 +1564,11 @@ if rst2man.found()
         install_dir: join_paths(mandir, 'man1')
     )
 endif
+features += {'manpage-build': rst2man.found()}
 
 rst2html = find_program('rst2html', required: get_option('html-build'))
 if rst2html.found()
     datadir = get_option('datadir')
-    features += 'html-build'
     custom_target('html-manpages',
         input: manpage,
         output: 'mpv.html',
@@ -1652,11 +1577,11 @@ if rst2html.found()
         install_dir: join_paths(datadir, 'doc', 'mpv')
     )
 endif
+features += {'html-build': rst2html.found()}
 
 rst2pdf = find_program('rst2pdf', required: get_option('pdf-build'))
 if rst2pdf.found()
     datadir = get_option('datadir')
-    features += 'pdf-build'
     custom_target('pdf-manpages',
         input: manpage,
         output: 'mpv.pdf',
@@ -1665,6 +1590,7 @@ if rst2pdf.found()
         install_dir: join_paths(datadir, 'doc', 'mpv')
     )
 endif
+features += {'pdf-build': rst2pdf.found()}
 
 
 # We can't easily get every single thing a user might have passed on the cli,
@@ -1673,146 +1599,47 @@ endif
 configuration = 'meson build '
 configuration += '-Dprefix=' + get_option('prefix')
 
-if get_option('cplayer')
-    features += 'cplayer'
-endif
+features += {'cplayer': get_option('cplayer')}
+features += {'libmpv-' + get_option('default_library'): get_option('libmpv')}
 
-if get_option('libmpv')
-    features += 'libmpv-' + get_option('default_library')
-endif
-
-
-# Script to sort the features object.
-feature_sort = '''
-#!/usr/bin/env python3
-import sys
-sys.argv.pop(0)
-features = sys.argv
-features.sort()
-features_str = " ".join(features)
-sys.stdout.write(features_str)
-'''
-feature_str = run_command(python, '-c', feature_sort, features, check: true).stdout()
 
 # Set config.h
 conf_data = configuration_data()
 conf_data.set_quoted('CONFIGURATION', configuration)
 conf_data.set_quoted('DEFAULT_DVD_DEVICE', dvd_device)
 conf_data.set_quoted('DEFAULT_CDROM_DEVICE', cd_device)
+
+# Loop over all features in the build, create a define and add them to config.h
+feature_keys = []
+foreach feature, allowed: features
+    define = 'HAVE_@0@'.format(feature.underscorify().to_upper())
+    conf_data.set10(define, allowed)
+    # special handling for lua
+    if feature == 'lua' and allowed
+        feature_keys += lua_version
+        continue
+    endif
+    if allowed
+        feature_keys += feature
+    endif
+endforeach
+
+
+# Script to sort the feature_keys object.
+feature_sort = '''
+#!/usr/bin/env python3
+import sys
+features = " ".join(sorted(sys.argv[1:]))
+sys.stdout.write(features)
+'''
+feature_str = run_command(python, '-c', feature_sort, feature_keys, check: true).stdout()
 conf_data.set_quoted('FULLCONFIG', feature_str)
-conf_data.set10('HAVE_ALSA', alsa.found())
-conf_data.set10('HAVE_ANDROID', android)
-conf_data.set10('HAVE_AUDIOUNIT', audiounit['use'])
-conf_data.set10('HAVE_AV_CHANNEL_LAYOUT', av_ch_layout_available)
-conf_data.set10('HAVE_BSD_FSTATFS', bsd_fstatfs)
-conf_data.set10('HAVE_BSD_THREAD_NAME', bsd_thread_name)
-conf_data.set10('HAVE_CACA', caca.found())
-conf_data.set10('HAVE_CDDA', cdda.found())
-conf_data.set10('HAVE_COCOA', cocoa.found())
-conf_data.set10('HAVE_CONSIO_H', consio_h)
-conf_data.set10('HAVE_COREAUDIO', coreaudio.found())
-conf_data.set10('HAVE_CPLUGINS', cplugins.allowed())
-conf_data.set10('HAVE_CUDA_HWACCEL', cuda_hwaccel.allowed())
-conf_data.set10('HAVE_CUDA_INTEROP', cuda_interop.allowed())
-conf_data.set10('HAVE_D3D_HWACCEL', d3d_hwaccel.allowed())
-conf_data.set10('HAVE_D3D9_HWACCEL', d3d9_hwaccel.allowed())
-conf_data.set10('HAVE_D3D11', d3d11.allowed())
-conf_data.set10('HAVE_DIRECT3D', direct3d)
-conf_data.set10('HAVE_DMABUF_INTEROP_GL', dmabuf_interop_gl)
-conf_data.set10('HAVE_DMABUF_INTEROP_PL', dmabuf_interop_pl)
-conf_data.set10('HAVE_DOS_PATHS', win32)
-conf_data.set10('HAVE_DRM', drm['use'])
-conf_data.set10('HAVE_DRM_IS_KMS', drm_is_kms)
-conf_data.set10('HAVE_DVBIN', dvbin.allowed())
-conf_data.set10('HAVE_DVDNAV', dvdnav.found() and dvdread.found())
-conf_data.set10('HAVE_EGL', egl['use'])
-conf_data.set10('HAVE_EGL_ANDROID', egl_android.found())
-conf_data.set10('HAVE_EGL_ANGLE', egl_angle.allowed())
-conf_data.set10('HAVE_EGL_ANGLE_LIB', egl_angle_lib.allowed())
-conf_data.set10('HAVE_EGL_ANGLE_WIN32', egl_angle_win32.allowed())
-conf_data.set10('HAVE_EGL_DRM', egl_drm.allowed())
-conf_data.set10('HAVE_EGL_HELPERS', egl_helpers)
-conf_data.set10('HAVE_EGL_X11', egl_x11.allowed())
-conf_data.set10('HAVE_GLIBC_THREAD_NAME', glibc_thread_name and posix)
-conf_data.set10('HAVE_GL', gl['use'])
-conf_data.set10('HAVE_GL_COCOA', gl_cocoa.allowed())
-conf_data.set10('HAVE_GL_DXINTEROP', gl_dxinterop.allowed())
-conf_data.set10('HAVE_GL_DXINTEROP_D3D9', gl_dxinterop_d3d9.allowed())
-conf_data.set10('HAVE_GL_WAYLAND', egl_wayland['use'])
-conf_data.set10('HAVE_GL_WIN32', gl_win32.allowed())
-conf_data.set10('HAVE_GL_X11', gl_x11.allowed())
-conf_data.set10('HAVE_GLOB', glob)
-conf_data.set10('HAVE_GLOB_POSIX', glob_posix)
-conf_data.set10('HAVE_GPL', get_option('gpl'))
-conf_data.set10('HAVE_ICONV', iconv.found())
-conf_data.set10('HAVE_IOS_GL', ios_gl)
-conf_data.set10('HAVE_JACK', jack.found())
-conf_data.set10('HAVE_JAVASCRIPT', javascript.found())
-conf_data.set10('HAVE_JPEG', jpeg.found())
-conf_data.set10('HAVE_JPEGXL', libavformat.version().version_compare('>= 59.27.100'))
-conf_data.set10('HAVE_LCMS2', lcms2.found())
-conf_data.set10('HAVE_LIBARCHIVE', libarchive.found())
-conf_data.set10('HAVE_LIBAVDEVICE', libavdevice.found())
-conf_data.set10('HAVE_LIBDL', libdl)
-conf_data.set10('HAVE_LIBBLURAY', libbluray.found())
-conf_data.set10('HAVE_LIBPLACEBO_NEXT', libplacebo_next)
-conf_data.set10('HAVE_LINUX_FSTATFS', linux_fstatfs)
-conf_data.set10('HAVE_LUA', lua.found())
-conf_data.set10('HAVE_MACOS_10_11_FEATURES', macos_10_11_features.allowed())
-conf_data.set10('HAVE_MACOS_10_14_FEATURES', macos_10_14_features.allowed())
-conf_data.set10('HAVE_MACOS_COCOA_CB', macos_cocoa_cb.allowed())
-conf_data.set10('HAVE_MACOS_MEDIA_PLAYER', macos_media_player.allowed())
-conf_data.set10('HAVE_MACOS_TOUCHBAR', macos_touchbar['use'])
-conf_data.set10('HAVE_MEMFD_CREATE', memfd_create)
-conf_data.set10('HAVE_OPENAL', openal.found())
-conf_data.set10('HAVE_OPENSLES', opensles.found())
-conf_data.set10('HAVE_OSS_AUDIO', oss)
-conf_data.set10('HAVE_OSX_THREAD_NAME', osx_thread_name)
-conf_data.set10('HAVE_PIPEWIRE', pipewire.found())
-conf_data.set10('HAVE_POSIX', posix)
-conf_data.set10('HAVE_PULSE', pulse.found())
-conf_data.set10('HAVE_RPI', rpi['use'])
-conf_data.set10('HAVE_RPI_MMAL', rpi_mmal.found())
-conf_data.set10('HAVE_RUBBERBAND', rubberband.found())
-conf_data.set10('HAVE_RUBBERBAND_3', rubberband.version().version_compare('>= 3.0.0'))
-conf_data.set10('HAVE_SDL2', sdl2.found())
-conf_data.set10('HAVE_SDL2_AUDIO', sdl2_audio.allowed())
-conf_data.set10('HAVE_SDL2_GAMEPAD', sdl2_gamepad.allowed())
-conf_data.set10('HAVE_SDL2_VIDEO', sdl2_video.allowed())
-conf_data.set10('HAVE_SHADERC', shaderc.found())
-conf_data.set10('HAVE_SIXEL', sixel.found())
-conf_data.set10('HAVE_SNDIO', sndio.found())
-conf_data.set10('HAVE_STDATOMIC', stdatomic.found())
-conf_data.set10('HAVE_TA_LEAK_REPORT', get_option('ta-leak-report'))
-conf_data.set10('HAVE_TESTS', get_option('tests'))
-conf_data.set10('HAVE_UCHARDET', uchardet.found())
-conf_data.set10('HAVE_UWP', uwp.found())
-conf_data.set10('HAVE_VAAPI', vaapi['use'])
-conf_data.set10('HAVE_VAAPI_DRM', vaapi_drm['use'])
-conf_data.set10('HAVE_VAAPI_EGL', vaapi_egl)
-conf_data.set10('HAVE_VAAPI_LIBPLACEBO', vaapi_libplacebo)
-conf_data.set10('HAVE_VAAPI_WAYLAND', vaapi_wayland['use'])
-conf_data.set10('HAVE_VAAPI_X11', vaapi_x11['use'])
-conf_data.set10('HAVE_VAPOURSYNTH', vapoursynth.found() and vapoursynth_script.found())
-conf_data.set10('HAVE_VECTOR', vector)
-conf_data.set10('HAVE_VDPAU', vdpau.found() and x11['use'])
-conf_data.set10('HAVE_VDPAU_GL_X11', vdpau.found() and gl_x11.allowed())
-conf_data.set10('HAVE_VIDEOTOOLBOX_GL', videotoolbox_gl.allowed())
-conf_data.set10('HAVE_VULKAN', vulkan.found())
-conf_data.set10('HAVE_WASAPI', wasapi)
-conf_data.set10('HAVE_WAYLAND', wayland['use'])
-conf_data.set10('HAVE_WIN32_DESKTOP', win32_desktop)
-conf_data.set10('HAVE_WIN32_INTERNAL_PTHREADS', win32_pthreads.allowed())
-conf_data.set10('HAVE_X11', x11['use'])
-conf_data.set10('HAVE_XV', xv.found())
-conf_data.set10('HAVE_ZIMG', zimg.found())
-conf_data.set10('HAVE_ZLIB', zlib.found())
 conf_data.set_quoted('MPV_CONFDIR', join_paths(get_option('sysconfdir'), 'mpv'))
 configure_file(output : 'config.h', configuration : conf_data)
 message('List of enabled features: ' + feature_str)
 
-# build targets
 
+# build targets
 if win32
     windows = import('windows')
     res_flags = ['--codepage=65001']
@@ -1887,8 +1714,8 @@ summary({'d3d11': d3d11.allowed(),
          'javascript': javascript.found(),
          'libmpv': get_option('libmpv'),
          'lua': lua.found(),
-         'opengl': GL.found() or egl['use'],
+         'opengl': features['gl'],
          'vulkan': vulkan.found(),
-         'wayland': wayland['use'],
-         'x11': x11['use']},
+         'wayland': features['wayland'],
+         'x11': features['x11']},
          bool_yn: true)
