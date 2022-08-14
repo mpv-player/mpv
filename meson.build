@@ -364,6 +364,11 @@ if get_option('tests')
                      'test/tests.c')
 endif
 
+# Note: this include is only used for windows pthreads and
+# must be accompanied immediately by the following flags.
+# This currently works because these are the last flags set
+# in the build for windows. Adding any new flags after this
+# will probably break something.
 includedir = []
 win32_pthreads = get_option('win32-internal-pthreads').require(
     win32 and not posix,
