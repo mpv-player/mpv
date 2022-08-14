@@ -42,26 +42,6 @@ struct priv {
     struct mp_hwupload public;
 };
 
-struct ffmpeg_and_other_bugs {
-    int imgfmt;                             // hw format
-    const int *const whitelist_formats;     // if non-NULL, allow only these
-                                            // sw formats
-    bool force_same_upload_fmt;             // force upload fmt == sw fmt
-};
-
-// This garbage is so complex and buggy. Hardcoding knowledge makes it work,
-// trying to use the dynamic information returned by the API does not. So fuck
-// this shit, I'll just whitelist the cases that work, what the fuck.
-static const struct ffmpeg_and_other_bugs shitlist[] = {
-    {
-        .imgfmt = IMGFMT_VAAPI,
-        .whitelist_formats = (const int[]){IMGFMT_NV12, IMGFMT_P010, IMGFMT_BGRA,
-                                           IMGFMT_ABGR, IMGFMT_RGB0, 0},
-        .force_same_upload_fmt = true,
-    },
-    {0}
-};
-
 struct hwmap_pairs {
     int first_fmt;
     int second_fmt;
@@ -323,14 +303,6 @@ static bool probe_formats(struct mp_hwupload *u, int hw_imgfmt)
     // supported formats. This should be relatively cheap as we don't create
     // any real frames (although some backends do for probing info).
 
-    const struct ffmpeg_and_other_bugs *bugs = NULL;
-    for (int n = 0; shitlist[n].imgfmt; n++) {
-        if (shitlist[n].imgfmt == hw_imgfmt) {
-            bugs = &shitlist[n];
-            break;
-        }
-    }
-
     for (int n = 0; hwmap_pairs[n].first_fmt; n++) {
         if (hwmap_pairs[n].first_fmt == hw_imgfmt) {
             MP_TARRAY_APPEND(p, p->map_fmts, p->num_map_fmts,
@@ -351,20 +323,6 @@ static bool probe_formats(struct mp_hwupload *u, int hw_imgfmt)
         MP_VERBOSE(u->f, "looking at format %s/%s\n",
                    mp_imgfmt_to_name(hw_imgfmt),
                    mp_imgfmt_to_name(imgfmt));
-
-        if (bugs && bugs->whitelist_formats) {
-            bool found = false;
-            for (int i = 0; bugs->whitelist_formats[i]; i++) {
-                if (bugs->whitelist_formats[i] == imgfmt) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                MP_VERBOSE(u->f, "... skipping blacklisted format\n");
-                continue;
-            }
-        }
 
         if (IMGFMT_IS_HWACCEL(imgfmt)) {
             // If the enumerated format is a hardware format, we don't need to
@@ -399,10 +357,6 @@ static bool probe_formats(struct mp_hwupload *u, int hw_imgfmt)
                 if (!fmt)
                     continue;
                 MP_VERBOSE(u->f, "  supports %s\n", mp_imgfmt_to_name(fmt));
-                if (bugs && bugs->force_same_upload_fmt && imgfmt != fmt) {
-                    MP_VERBOSE(u->f, "  ... skipping blacklisted format\n");
-                    continue;
-                }
                 if (!vo_supports(ctx, hw_imgfmt, fmt)) {
                     MP_VERBOSE(u->f, "  ... not supported by VO\n");
                     continue;
