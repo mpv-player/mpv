@@ -223,6 +223,7 @@
           <string>udp</string>
           <string>smb</string>
           <string>srt</string>
+          <string>rist</string>
         </array>
       </dict>
       <dict>
