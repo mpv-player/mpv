@@ -23,6 +23,7 @@
 #include "common/msg.h"
 #include "mpv_talloc.h"
 #include "options/path.h"
+#include "osdep/timer.h"
 
 #include "demux/demux.h"
 #include "stream/stream.h"
@@ -144,6 +145,7 @@ void playlist_add_file(struct playlist *pl, const char *filename)
 
 void playlist_shuffle(struct playlist *pl)
 {
+    srand(mp_time_us());
     for (int n = 0; n < pl->num_entries; n++)
         pl->entries[n]->original_index = n;
     for (int n = 0; n < pl->num_entries - 1; n++) {
