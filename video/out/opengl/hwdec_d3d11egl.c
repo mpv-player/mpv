@@ -100,12 +100,14 @@ static int init(struct ra_hwdec *hw)
 
     GL *gl = ra_gl_get(hw->ra);
 
+    const char *client_exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
     const char *exts = eglQueryString(egl_display, EGL_EXTENSIONS);
     if (!gl_check_extension(exts, "EGL_ANGLE_d3d_share_handle_client_buffer") ||
         !gl_check_extension(exts, "EGL_ANGLE_stream_producer_d3d_texture") ||
         !(gl_check_extension(gl->extensions, "GL_OES_EGL_image_external_essl3") ||
           gl->es == 200) ||
-        !gl_check_extension(exts, "EGL_EXT_device_query") ||
+        !(gl_check_extension(client_exts, "EGL_EXT_device_query") ||
+          gl_check_extension(exts, "EGL_EXT_device_query")) ||
         !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return -1;
 
