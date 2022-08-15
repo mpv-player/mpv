@@ -133,6 +133,7 @@ sources = files(
     'misc/json.c',
     'misc/natural_sort.c',
     'misc/node.c',
+    'misc/random.c',
     'misc/rendezvous.c',
     'misc/thread_pool.c',
     'misc/thread_tools.c',
