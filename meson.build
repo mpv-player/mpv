@@ -1051,6 +1051,7 @@ endif
 
 # OpenGL feature checking
 gl_allowed = get_option('gl').allowed()
+features += {'gl': false}
 
 GL = dependency('', required: false)
 if darwin
