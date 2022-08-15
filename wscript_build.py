@@ -335,6 +335,7 @@ def build(ctx):
         ( "misc/natural_sort.c" ),
         ( "misc/node.c" ),
         ( "misc/rendezvous.c" ),
+        ( "misc/random.c" ),
         ( "misc/thread_pool.c" ),
         ( "misc/thread_tools.c" ),
 
