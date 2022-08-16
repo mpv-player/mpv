@@ -320,7 +320,7 @@ endif
 features += {'noexecstack': noexecstack}
 
 features += {'build-date': get_option('build-date')}
-if features['build-date']
+if not features['build-date']
     flags += '-DNO_BUILD_TIMESTAMPS'
 endif
 
