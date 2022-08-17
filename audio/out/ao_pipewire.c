@@ -131,6 +131,10 @@ static void on_process(void *userdata)
 
     int bytes_per_channel = buf->datas[0].maxsize / ao->channels.num;
     int nframes = bytes_per_channel / ao->sstride;
+#if PW_CHECK_VERSION(0, 3, 49)
+    if (b->requested != 0)
+        nframes = b->requested;
+#endif
 
     for (int i = 0; i < buf->n_datas; i++) {
         data[i] = buf->datas[i].data;
