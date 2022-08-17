@@ -661,7 +661,8 @@ local function add_single_video(json)
                     edl = edl .. ",codec=" .. codec
                 end
                 edl = edl .. ";" .. edl_escape(sub)
-                mp.commandv("sub-add", edl, "auto", sub_info.ext, lang)
+                local title = sub_info.name or sub_info.ext
+                mp.commandv("sub-add", edl, "auto", title, lang)
             else
                 msg.verbose("No subtitle data/url for ["..lang.."]")
             end
