@@ -134,8 +134,8 @@ static void on_process(void *userdata)
 
     for (int i = 0; i < buf->n_datas; i++) {
         data[i] = buf->datas[i].data;
-        buf->datas[i].chunk->size = bytes_per_channel;
         buf->datas[i].chunk->offset = 0;
+        buf->datas[i].chunk->stride = ao->sstride;
     }
 
     pw_stream_get_time_n(p->stream, &time, sizeof(time));
@@ -151,6 +151,10 @@ static void on_process(void *userdata)
 
     int samples = ao_read_data(ao, data, nframes, end_time);
     b->size = samples;
+
+    for (int i = 0; i < buf->n_datas; i++) {
+        buf->datas[i].chunk->size = samples * ao->sstride;
+    }
 
     pw_stream_queue_buffer(p->stream, b);
 }
