@@ -136,11 +136,8 @@ static void on_process(void *userdata)
         nframes = b->requested;
 #endif
 
-    for (int i = 0; i < buf->n_datas; i++) {
+    for (int i = 0; i < buf->n_datas; i++)
         data[i] = buf->datas[i].data;
-        buf->datas[i].chunk->offset = 0;
-        buf->datas[i].chunk->stride = ao->sstride;
-    }
 
     pw_stream_get_time_n(p->stream, &time, sizeof(time));
     if (time.rate.denom == 0)
@@ -158,6 +155,8 @@ static void on_process(void *userdata)
 
     for (int i = 0; i < buf->n_datas; i++) {
         buf->datas[i].chunk->size = samples * ao->sstride;
+        buf->datas[i].chunk->offset = 0;
+        buf->datas[i].chunk->stride = ao->sstride;
     }
 
     pw_stream_queue_buffer(p->stream, b);
