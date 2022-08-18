@@ -19,6 +19,7 @@ meson build \
     $(pkg info -q v4l_compat && echo -Ddvbin=enabled) \
     $(pkg info -q libdvdnav && echo -Ddvdnav=enabled) \
     $(pkg info -q libcdio-paranoia && echo -Dcdda=enabled) \
+    $(pkg info -q pipewire && echo -Dpipewire=enabled) \
     $NULL
 
 meson compile -C build
@@ -42,6 +43,7 @@ python3 ./waf configure \
     $(pkg info -q v4l_compat && echo --enable-dvbin) \
     $(pkg info -q libdvdnav && echo --enable-dvdnav) \
     $(pkg info -q libcdio-paranoia && echo --enable-cdda) \
+    $(pkg info -q pipewire && echo --enable-pipewire) \
     $NULL
 
 python3 ./waf build

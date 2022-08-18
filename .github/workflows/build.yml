@@ -186,6 +186,7 @@ jobs:
                 libcdio-paranoia \
                 libdvdnav \
                 mujs \
+                pipewire \
                 pulseaudio \
                 rubberband \
                 sekrit-twc-zimg \
