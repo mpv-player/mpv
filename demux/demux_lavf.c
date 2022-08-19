@@ -1022,6 +1022,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
             av_dict_set(&dopts, "rtsp_transport", transport, 0);
     }
 
+    av_dict_set(&dopts, "scan_all_pmts", "1", AV_DICT_DONT_OVERWRITE);
+
     guess_and_set_vobsub_name(demuxer, &dopts);
 
     if (priv->format_hack.fix_editlists)
