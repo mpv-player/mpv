@@ -723,7 +723,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
                 bstr_endswith0(bstr0(priv->avif->name), "_pipe") ||
                 strcmp(priv->avif->name, "alias_pix") == 0 ||
                 strcmp(priv->avif->name, "gif") == 0 ||
-                strcmp(priv->avif->name, "image2pipe") == 0
+                strcmp(priv->avif->name, "image2pipe") == 0 ||
+                (codec->codec_id == AV_CODEC_ID_AV1 && st->nb_frames == 1)
             )) {
             MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
             sh->image = true;
