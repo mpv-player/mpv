@@ -129,6 +129,12 @@ static void on_process(void *userdata)
 
     struct spa_buffer *buf = b->buffer;
 
+    if (buf->n_datas == 0) {
+        MP_WARN(ao, "cannot write data to nonexistent buffer\n");
+        pw_stream_queue_buffer(p->stream, b);
+        return;
+    }
+
     int bytes_per_channel = buf->datas[0].maxsize / ao->channels.num;
     int nframes = bytes_per_channel / ao->sstride;
 #if PW_CHECK_VERSION(0, 3, 49)
