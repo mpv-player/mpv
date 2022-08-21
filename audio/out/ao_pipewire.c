@@ -133,7 +133,7 @@ static void on_process(void *userdata)
     int nframes = bytes_per_channel / ao->sstride;
 #if PW_CHECK_VERSION(0, 3, 49)
     if (b->requested != 0)
-        nframes = b->requested;
+        nframes = MPMIN(b->requested, nframes);
 #endif
 
     for (int i = 0; i < buf->n_datas; i++)
