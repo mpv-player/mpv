@@ -276,6 +276,21 @@ struct registry_event_global_ctx {
     void *sink_cb_ctx;
 };
 
+static bool is_sink_node(const char *type, const struct spa_dict *props)
+{
+    if (strcmp(type, PW_TYPE_INTERFACE_Node) != 0)
+        return false;
+
+    if (!props)
+        return false;
+
+    const char *class = spa_dict_lookup(props, PW_KEY_MEDIA_CLASS);
+    if (!class || strcmp(class, "Audio/Sink") != 0)
+        return false;
+
+    return true;
+}
+
 static void for_each_sink_registry_event_global(void *data, uint32_t id,
                                                 uint32_t permissions, const
                                                 char *type, uint32_t version,
@@ -283,14 +298,7 @@ static void for_each_sink_registry_event_global(void *data, uint32_t id,
 {
     struct registry_event_global_ctx *ctx = data;
 
-    if (strcmp(type, PW_TYPE_INTERFACE_Node) != 0)
-        return;
-
-    if (!props)
-        return;
-
-    const char *class = spa_dict_lookup(props, PW_KEY_MEDIA_CLASS);
-    if (!class || strcmp(class, "Audio/Sink") != 0)
+    if (!is_sink_node(type, props))
         return;
 
     ctx->sink_cb(ctx->ao, id, props, ctx->sink_cb_ctx);
