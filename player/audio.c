@@ -945,7 +945,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
                           (opts->gapless_audio && !ao_untimed(ao_c->ao))))
         {
             MP_VERBOSE(mpctx, "audio EOF reached\n");
-            ao_drain(mpctx->ao);
+            if (mpctx->ao)
+                ao_drain(mpctx->ao);
             mpctx->audio_status = STATUS_EOF;
             mp_wakeup_core(mpctx);
         }
