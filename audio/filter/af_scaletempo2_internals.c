@@ -472,10 +472,8 @@ static int frames_needed(struct mp_scaletempo2 *p)
 
 static void resize_input_buffer(struct mp_scaletempo2 *p, int size)
 {
-    if (size > p->input_buffer_size) {
-        p->input_buffer_size = size;
-        p->input_buffer = realloc_2d(p->input_buffer, p->channels, size);
-    }
+    p->input_buffer_size = size;
+    p->input_buffer = realloc_2d(p->input_buffer, p->channels, size);
 }
 
 int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
@@ -487,7 +485,8 @@ int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
     if (total_fill == 0) return 0;
 
     int required_size = total_fill + p->input_buffer_frames;
-    resize_input_buffer(p, required_size);
+    if (required_size > p->input_buffer_size)
+        resize_input_buffer(p, required_size);
 
     for (int i = 0; i < p->channels; ++i) {
         memcpy(p->input_buffer[i] + p->input_buffer_frames,
