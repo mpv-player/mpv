@@ -1227,7 +1227,7 @@ endif
 
 # vulkan
 vulkan_opt = get_option('vulkan').require(
-    libplacebo.found(),
+    libplacebo.get_variable('pl_has_vulkan', default_value: '0') == '1',
     error_message: 'libplacebo could not be found!',
 )
 vulkan = dependency('vulkan', required: vulkan_opt)
