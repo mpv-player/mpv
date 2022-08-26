@@ -185,7 +185,10 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
         return;
     }
 
-    pw_stream_update_params(p->stream, params, 1);
+    if (pw_stream_update_params(p->stream, params, 1) < 0) {
+        MP_ERR(ao, "Could not update stream parameters\n");
+        return;
+    }
 }
 
 static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_stream_state state, const char *error)
@@ -310,18 +313,24 @@ static const struct pw_core_events for_each_sink_core_events = {
     .done = for_each_sink_done,
 };
 
-static void for_each_sink(struct ao *ao, void (cb) (struct ao *ao, uint32_t id,
-                          const struct spa_dict *props, void *ctx), void *cb_ctx)
+static int for_each_sink(struct ao *ao, void (cb) (struct ao *ao, uint32_t id,
+                         const struct spa_dict *props, void *ctx), void *cb_ctx)
 {
     struct priv *priv = ao->priv;
     struct pw_registry *registry;
     struct spa_hook core_listener;
+    int ret = -1;
 
     pw_thread_loop_lock(priv->loop);
 
     spa_zero(core_listener);
-    pw_core_add_listener(priv->core, &core_listener, &for_each_sink_core_events, priv->loop);
+    if (pw_core_add_listener(priv->core, &core_listener, &for_each_sink_core_events, priv->loop) < 0)
+        goto unlock_loop;
+
     registry = pw_core_get_registry(priv->core, PW_VERSION_REGISTRY, 0);
+    if (!registry)
+        goto remove_core_listener;
+
     pw_core_sync(priv->core, 0, 0);
 
     struct spa_hook registry_listener;
@@ -331,15 +340,25 @@ static void for_each_sink(struct ao *ao, void (cb) (struct ao *ao, uint32_t id,
             .sink_cb_ctx = cb_ctx,
     };
     spa_zero(registry_listener);
-    pw_registry_add_listener(registry, &registry_listener, &for_each_sink_registry_events, &revents_ctx);
+    if (pw_registry_add_listener(registry, &registry_listener, &for_each_sink_registry_events, &revents_ctx) < 0)
+        goto destroy_registry;
+
     pw_thread_loop_wait(priv->loop);
 
-
-    spa_hook_remove(&core_listener);
     spa_hook_remove(&registry_listener);
+
+    ret = 0;
+
+destroy_registry:
     pw_proxy_destroy((struct pw_proxy *)registry);
 
+remove_core_listener:
+    spa_hook_remove(&core_listener);
+
+unlock_loop:
     pw_thread_loop_unlock(priv->loop);
+
+    return ret;
 }
 
 
@@ -363,7 +382,10 @@ static uint32_t get_target_id(struct ao *ao)
     if (ao->device == NULL)
         return PW_ID_ANY;
 
-    for_each_sink(ao, get_target_id_cb, &target_id);
+    if (for_each_sink(ao, get_target_id_cb, &target_id) < 0 && target_id == 0) {
+        MP_WARN(ao, "Could not iterate devices to find target, using default device\n");
+        return PW_ID_ANY;
+    }
 
     return target_id;
 }
@@ -605,7 +627,8 @@ static void list_devs(struct ao *ao, struct ao_device_list *list)
 
     ao_device_list_add(list, ao, &(struct ao_device_desc){});
 
-    for_each_sink(ao, add_device_to_list, list);
+    if (for_each_sink(ao, add_device_to_list, list) < 0)
+        MP_WARN(ao, "Could not list devices, list may be incomplete\n");
 
     uninit(ao);
 }
