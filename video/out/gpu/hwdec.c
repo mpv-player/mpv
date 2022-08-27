@@ -25,7 +25,7 @@
 #include "options/m_config.h"
 #include "hwdec.h"
 
-extern const struct ra_hwdec_driver ra_hwdec_vaegl;
+extern const struct ra_hwdec_driver ra_hwdec_vaapi;
 extern const struct ra_hwdec_driver ra_hwdec_videotoolbox;
 extern const struct ra_hwdec_driver ra_hwdec_vdpau;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2egl;
@@ -36,12 +36,12 @@ extern const struct ra_hwdec_driver ra_hwdec_dxva2dxgi;
 extern const struct ra_hwdec_driver ra_hwdec_cuda;
 extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime;
-extern const struct ra_hwdec_driver ra_hwdec_drmprime_drm;
+extern const struct ra_hwdec_driver ra_hwdec_drmprime_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_aimagereader;
 
 const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #if HAVE_VAAPI_EGL || HAVE_VAAPI_LIBPLACEBO
-    &ra_hwdec_vaegl,
+    &ra_hwdec_vaapi,
 #endif
 #if HAVE_VIDEOTOOLBOX_GL || HAVE_IOS_GL
     &ra_hwdec_videotoolbox,
@@ -73,7 +73,7 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
     &ra_hwdec_rpi_overlay,
 #endif
 #if HAVE_DRM
-    &ra_hwdec_drmprime_drm,
+    &ra_hwdec_drmprime_overlay,
     &ra_hwdec_drmprime,
 #endif
 #if HAVE_ANDROID_MEDIA_NDK
@@ -189,6 +189,8 @@ static int ra_hwdec_validate_opt_full(struct mp_log *log, bool include_modes,
             mp_info(log, "    %s\n", drv->name);
         } else if (bstr_equals0(param, drv->name)) {
             return 1;
+        } else if (bstr_equals0(param, drv->legacy_name)) {
+            return 1;
         }
     }
     if (help) {
@@ -277,6 +279,12 @@ void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
         for (int n = 0; ra_hwdec_drivers[n]; n++) {
             const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
             if (strcmp(type, drv->name) == 0) {
+                load_add_hwdec(ctx, devs, drv, false);
+                break;
+            } else if (strcmp(type, drv->legacy_name) == 0) {
+                MP_WARN(ctx, "gpu-hwdec-interop was selected with the legacy name '%s'. "
+                             "Please change it to '%s' in your config file or command line.\n",
+                             drv->legacy_name, drv->name);
                 load_add_hwdec(ctx, devs, drv, false);
                 break;
             }

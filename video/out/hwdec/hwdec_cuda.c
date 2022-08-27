@@ -271,7 +271,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 }
 
 const struct ra_hwdec_driver ra_hwdec_cuda = {
-    .name = "cuda-nvdec",
+    .name = "cuda",
     .imgfmts = {IMGFMT_CUDA, 0},
     .priv_size = sizeof(struct cuda_hw_priv),
     .init = cuda_init,
@@ -283,4 +283,5 @@ const struct ra_hwdec_driver ra_hwdec_cuda = {
         .map = mapper_map,
         .unmap = mapper_unmap,
     },
+    .legacy_name = "cuda-nvdec",
 };

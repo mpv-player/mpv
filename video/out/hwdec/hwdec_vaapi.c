@@ -464,8 +464,8 @@ done:
     MP_VERBOSE(hw, "Done probing surface formats.\n");
 }
 
-const struct ra_hwdec_driver ra_hwdec_vaegl = {
-    .name = "vaapi-egl",
+const struct ra_hwdec_driver ra_hwdec_vaapi = {
+    .name = "vaapi",
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_VAAPI, 0},
     .init = init,
@@ -477,4 +477,5 @@ const struct ra_hwdec_driver ra_hwdec_vaegl = {
         .map = mapper_map,
         .unmap = mapper_unmap,
     },
+    .legacy_name = "vaapi-egl"
 };
