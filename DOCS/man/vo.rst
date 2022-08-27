@@ -614,11 +614,11 @@ Available video output drivers are:
         based, and related to the CRTC.
         (default: primary)
 
-        When using this option with the drmprime-drm hwdec interop, only the OSD
-        is rendered to this plane.
+        When using this option with the drmprime-overlay hwdec interop, only the
+        OSD is rendered to this plane.
 
     ``--drm-drmprime-video-plane=<primary|overlay|N>``
-        Select the DRM plane to use for video with the drmprime-drm hwdec
+        Select the DRM plane to use for video with the drmprime-overlay hwdec
         interop (used by e.g. the rkmpp hwdec on RockChip SoCs, and v4l2 hwdec:s
         on various other SoC:s). The plane is unused otherwise. This option
         accepts the same values as ``--drm-draw-plane``. (default: overlay)
@@ -644,12 +644,12 @@ Available video output drivers are:
     ``--drm-draw-surface-size=<[WxH]>``
         Sets the size of the surface used on the draw plane. The surface will
         then be upscaled to the current screen resolution. This option can be
-        useful when used together with the drmprime-drm hwdec interop at high
-        resolutions, as it allows scaling the draw plane (which in this case
-        only handles the OSD) down to a size the GPU can handle.
+        useful when used together with the drmprime-overlay hwdec interop at
+        high resolutions, as it allows scaling the draw plane (which in this
+        case only handles the OSD) down to a size the GPU can handle.
 
-        When used without the drmprime-drm hwdec interop this option will just
-        cause the video to get rendered at a different resolution and then
+        When used without the drmprime-overlay hwdec interop this option will
+        just cause the video to get rendered at a different resolution and then
         scaled to screen size.
 
         Note: this option is only available with DRM atomic support.

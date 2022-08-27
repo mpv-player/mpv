@@ -274,7 +274,7 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
             mp_verbose(log, "Using %s plane %d as drmprime plane\n", plane_type, drmprime_video_plane_id);
             ctx->drmprime_video_plane = drm_object_create(log, ctx->fd, drmprime_video_plane_id, DRM_MODE_OBJECT_PLANE);
         } else {
-            mp_verbose(log, "Failed to find drmprime plane with idx=%d. drmprime-drm hwdec interop will not work\n", drmprime_video_plane_idx);
+            mp_verbose(log, "Failed to find drmprime plane with idx=%d. drmprime-overlay hwdec interop will not work\n", drmprime_video_plane_idx);
         }
     } else {
         mp_verbose(log, "Found drmprime plane with ID %d\n", ctx->drmprime_video_plane->id);
