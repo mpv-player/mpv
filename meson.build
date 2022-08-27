@@ -1376,7 +1376,7 @@ if features['vaapi-x11']
 endif
 
 features += {'vaapi-x-egl': features['vaapi-x11'] and egl_x11.allowed()}
-features += {'vaapi-egl': features['vaapi-x11'] or features['vaapi-wayland'] or features['drm']}
+features += {'vaapi-egl': features['vaapi-x11'] or features['vaapi-wayland'] or features['vaapi-drm']}
 features += {'vaapi-libplacebo': features['vaapi'] and libplacebo.found()}
 
 if features['vaapi-egl'] or features['vaapi-libplacebo']
