@@ -57,6 +57,17 @@ struct priv {
     int buffer_msec;
     bool muted;
     float volume[2];
+
+    struct {
+        struct pw_registry *registry;
+        struct spa_hook registry_listener;
+        struct spa_list sinks;
+    } hotplug;
+};
+
+struct id_list {
+    uint32_t id;
+    struct spa_list node;
 };
 
 static enum spa_audio_format af_fmt_to_pw(struct ao *ao, enum af_format format)
@@ -626,13 +637,101 @@ static void add_device_to_list(struct ao *ao, uint32_t id, const struct spa_dict
     ao_device_list_add(list, ao, &(struct ao_device_desc){name, description});
 }
 
+static void hotplug_registry_global_cb(void *data, uint32_t id,
+                                       uint32_t permissions, const char *type,
+                                       uint32_t version, const struct spa_dict *props)
+{
+    struct ao *ao = data;
+    struct priv *priv = ao->priv;
+
+    if (!is_sink_node(type, props))
+        return;
+
+    pw_thread_loop_lock(priv->loop);
+    struct id_list *item = talloc_size(ao, sizeof(*item));
+    item->id = id;
+    spa_list_init(&item->node);
+    spa_list_append(&priv->hotplug.sinks, &item->node);
+    pw_thread_loop_unlock(priv->loop);
+
+    ao_hotplug_event(ao);
+}
+
+static void hotplug_registry_global_remove_cb(void *data, uint32_t id)
+{
+    struct ao *ao = data;
+    struct priv *priv = ao->priv;
+    bool removed_sink = false;
+
+    struct id_list *e;
+
+    pw_thread_loop_lock(priv->loop);
+    spa_list_for_each(e, &priv->hotplug.sinks, node) {
+        if (e->id == id) {
+            removed_sink = true;
+            spa_list_remove(&e->node);
+            talloc_free(e);
+            goto done;
+        }
+    }
+done:
+    pw_thread_loop_unlock(priv->loop);
+
+    if (removed_sink) {
+        ao_hotplug_event(ao);
+    }
+}
+
+static const struct pw_registry_events hotplug_registry_events = {
+    .version = PW_VERSION_REGISTRY_EVENTS,
+    .global = hotplug_registry_global_cb,
+    .global_remove = hotplug_registry_global_remove_cb,
+};
+
+
 static int hotplug_init(struct ao *ao)
 {
-    return pipewire_init_boilerplate(ao);
+    struct priv *priv = ao->priv;
+
+    int res = pipewire_init_boilerplate(ao);
+    if (res)
+        return res;
+
+    pw_thread_loop_lock(priv->loop);
+
+    spa_memzero(&priv->hotplug, sizeof(priv->hotplug));
+    spa_list_init(&priv->hotplug.sinks);
+
+    priv->hotplug.registry = pw_core_get_registry(priv->core, PW_VERSION_REGISTRY, 0);
+    if (!priv->hotplug.registry) {
+        goto error;
+    }
+
+    if (pw_registry_add_listener(priv->hotplug.registry, &priv->hotplug.registry_listener, &hotplug_registry_events, ao) < 0) {
+        pw_proxy_destroy((struct pw_proxy *)priv->hotplug.registry);
+        goto error;
+    }
+
+    pw_thread_loop_unlock(priv->loop);
+
+    return res;
+
+error:
+    pw_thread_loop_unlock(priv->loop);
+    uninit(ao);
+    return -1;
 }
 
 static void hotplug_uninit(struct ao *ao)
 {
+    struct priv *priv = ao->priv;
+
+    pw_thread_loop_lock(priv->loop);
+
+    spa_hook_remove(&priv->hotplug.registry_listener);
+    pw_proxy_destroy((struct pw_proxy *)priv->hotplug.registry);
+
+    pw_thread_loop_unlock(priv->loop);
     uninit(ao);
 }
 
