@@ -333,7 +333,7 @@ static void print_leak_report(void)
             // Don't list those with parent; logically, only parents are listed
             if (!cur->next) {
                 size_t c_size = get_children_size(cur);
-                char name[30] = {0};
+                char name[50] = {0};
                 if (cur->name)
                     snprintf(name, sizeof(name), "%s", cur->name);
                 if (cur->name == &allocation_is_string) {
