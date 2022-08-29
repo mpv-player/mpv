@@ -126,8 +126,8 @@ struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
                                      void *wakeup_ctx);
 void ao_hotplug_destroy(struct ao_hotplug *hp);
 bool ao_hotplug_check_update(struct ao_hotplug *hp);
-struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp);
+struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp, struct ao *playback_ao);
 
-void ao_print_devices(struct mpv_global *global, struct mp_log *log);
+void ao_print_devices(struct mpv_global *global, struct mp_log *log, struct ao *playback_ao);
 
 #endif /* MPLAYER_AUDIO_OUT_H */
