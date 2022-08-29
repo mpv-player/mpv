@@ -646,19 +646,22 @@ static void add_device_to_list(struct ao *ao, uint32_t id, const struct spa_dict
     ao_device_list_add(list, ao, &(struct ao_device_desc){name, description});
 }
 
+static int hotplug_init(struct ao *ao)
+{
+    return pipewire_init_boilerplate(ao);
+}
+
+static void hotplug_uninit(struct ao *ao)
+{
+    uninit(ao);
+}
+
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
-    // we are not using hotplug_{,un}init() because the AO core will only call
-    // the hotplug functions of a single AO. That will probably be ao_pulse.
-    if (pipewire_init_boilerplate(ao) < 0)
-        return;
-
     ao_device_list_add(list, ao, &(struct ao_device_desc){});
 
     if (for_each_sink(ao, add_device_to_list, list) < 0)
         MP_WARN(ao, "Could not list devices, list may be incomplete\n");
-
-    uninit(ao);
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -674,7 +677,9 @@ const struct ao_driver audio_out_pipewire = {
 
     .control     = control,
 
-    .list_devs = list_devs,
+    .hotplug_init   = hotplug_init,
+    .hotplug_uninit = hotplug_uninit,
+    .list_devs      = list_devs,
 
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv)
