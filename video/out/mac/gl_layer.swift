@@ -156,12 +156,14 @@ class GLLayer: CAOpenGLLayer {
         needsFlip = false
         forceDraw = false
 
-        if draw.rawValue >= Draw.atomic.rawValue {
-             if draw == .atomic {
-                draw = .atomicEnd
-             } else {
-                atomicDrawingEnd()
-             }
+        if #available(macOS 10.11, *) {} else {
+            if draw.rawValue >= Draw.atomic.rawValue {
+                if draw == .atomic {
+                    draw = .atomicEnd
+                } else {
+                    atomicDrawingEnd()
+                }
+            }
         }
 
         updateSurfaceSize()
@@ -186,16 +188,20 @@ class GLLayer: CAOpenGLLayer {
     }
 
     func atomicDrawingStart() {
-        if draw == .normal {
-            NSDisableScreenUpdates()
-            draw = .atomic
+        if #available(macOS 10.11, *) {} else {
+            if draw == .normal {
+                NSDisableScreenUpdates()
+                draw = .atomic
+            }
         }
     }
 
     func atomicDrawingEnd() {
-        if draw.rawValue >= Draw.atomic.rawValue {
-            NSEnableScreenUpdates()
-            draw = .normal
+        if #available(macOS 10.11, *) {} else {
+            if draw.rawValue >= Draw.atomic.rawValue {
+                NSEnableScreenUpdates()
+                draw = .normal
+            }
         }
     }
 
