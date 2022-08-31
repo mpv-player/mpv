@@ -900,9 +900,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     // Calculate target
     struct pl_frame target;
+    int osd_flags = frame->current ? OSD_DRAW_OSD_ONLY : 0;
     pl_frame_from_swapchain(&target, &swframe);
     apply_target_options(p, &target);
-    update_overlays(vo, p->osd_res, 0, OSD_DRAW_OSD_ONLY, &p->osd_state, &target);
+    update_overlays(vo, p->osd_res, 0, osd_flags, &p->osd_state, &target);
     apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
 
     struct pl_frame_mix mix = {0};
