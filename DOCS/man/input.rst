@@ -1208,16 +1208,17 @@ Input Commands that are Possibly Subject to Change
         use the ``mp.create_osd_overlay()`` helper instead of invoking this
         command directly.
 
-``script-message [<arg1> [<arg2> [...]]]``
-    Send a message to all clients, and pass it the following list of arguments.
-    What this message means, how many arguments it takes, and what the arguments
-    mean is fully up to the receiver and the sender. Every client receives the
-    message, so be careful about name clashes (or use ``script-message-to``).
+``script-message <name> [<arg1> [<arg2> [...]]]``
+    Send a message ``<name>`` to all clients, and pass it the following list of
+    arguments. What this message means, how many arguments it takes, and what
+    the arguments mean is fully up to the receiver and the sender. Every client
+    receives the message, so be careful about name clashes
+    (or use ``script-message-to``).
 
     This command has a variable number of arguments, and cannot be used with
     named arguments.
 
-``script-message-to <target> [<arg1> [<arg2> [...]]]``
+``script-message-to <target> <name> [<arg1> [<arg2> [...]]]``
     Same as ``script-message``, but send it only to the client named
     ``<target>``. Each client (scripts etc.) has a unique name. For example,
     Lua scripts can get their name via ``mp.get_script_name()``. Note that
