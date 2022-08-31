@@ -133,7 +133,9 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     track->WrapStyle = 1; // end-of-line wrapping instead of smart wrapping
     track->Kerning = true;
     track->ScaledBorderAndShadow = true;
-
+#if LIBASS_VERSION >= 0x01600010
+    ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
+#endif
     update_playres(ass, &obj->vo_res);
 }
 
