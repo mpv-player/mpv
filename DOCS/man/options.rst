@@ -1710,7 +1710,7 @@ Video
 ``--vd-lavc-bitexact``
     Only use bit-exact algorithms in all decoding steps (for codec testing).
 
-``--vd-lavc-fast`` (MPEG-2, MPEG-4, and H.264 only)
+``--vd-lavc-fast`` (MPEG-1/2 and H.264 only)
     Enable optimizations which do not comply with the format specification and
     potentially cause problems, like simpler dequantization, simpler motion
     compensation, assuming use of the default quantization matrix, assuming YUV
@@ -1736,12 +1736,14 @@ Video
     no, libavcodec won't output frames that were either decoded before an
     initial keyframe was decoded, or frames that are recognized as corrupted.
 
-``--vd-lavc-skiploopfilter=<skipvalue> (H.264 only)``
-    Skips the loop filter (AKA deblocking) during H.264 decoding. Since
+``--vd-lavc-skiploopfilter=<skipvalue>`` (H.264, HEVC only)
+    Skips the loop filter (AKA deblocking) during decoding. Since
     the filtered frame is supposed to be used as reference for decoding
     dependent frames, this has a worse effect on quality than not doing
     deblocking on e.g. MPEG-2 video. But at least for high bitrate HDTV,
     this provides a big speedup with little visible quality loss.
+    Codecs other than H.264 or HEVC may have partial support for this option
+    (often only ``all`` and ``none``).
 
     ``<skipvalue>`` can be one of the following:
 
@@ -1753,7 +1755,7 @@ Video
     :nonkey:  Skip all frames except keyframes.
     :all:     Skip all frames.
 
-``--vd-lavc-skipidct=<skipvalue> (MPEG-1/2 only)``
+``--vd-lavc-skipidct=<skipvalue>`` (MPEG-1/2/4 only)
     Skips the IDCT step. This degrades quality a lot in almost all cases
     (see skiploopfilter for available skip values).
 
@@ -1776,7 +1778,7 @@ Video
     Normally, this is autodetected by libavcodec. But if the bitstream contains
     no x264 version info (or it was somehow skipped), and the stream was in fact
     encoded by an old x264 version (build 150 or earlier), and if the stream
-    uses ``4:4:4`` chroma, then libavcodec will by default show corrupted video.
+    uses 4:4:4 chroma, then libavcodec will by default show corrupted video.
     This option sets the libavcodec ``x264_build`` option to ``150``, which
     means that if the stream contains no version info, or was not encoded by
     x264 at all, it assumes it was encoded by the old version. Enabling this
