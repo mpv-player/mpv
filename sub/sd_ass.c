@@ -442,6 +442,10 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     ass_set_font_scale(priv, set_font_scale);
     ass_set_hinting(priv, set_hinting);
     ass_set_line_spacing(priv, set_line_spacing);
+#if LIBASS_VERSION >= 0x01600010
+    if (converted)
+        ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
+#endif
 }
 
 static bool has_overrides(char *s)
