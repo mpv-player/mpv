@@ -532,10 +532,13 @@ struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp,
             continue;
 
         if (ao->driver->hotplug_init) {
-            if (!hp->ao && ao->driver->hotplug_init(ao) >= 0)
-                hp->ao = ao; // keep this one
-            if (hp->ao && hp->ao->driver == d)
-                get_devices(hp->ao, list);
+            if (ao->driver->hotplug_init(ao) >= 0) {
+                get_devices(ao, list);
+                if (hp->ao)
+                    ao->driver->hotplug_uninit(ao);
+                else
+                    hp->ao = ao; // keep this one
+            }
         } else {
             get_devices(ao, list);
         }
