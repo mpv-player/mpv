@@ -51,6 +51,10 @@ static const struct keymap vk_map[] = {
     {VK_F4, MP_KEY_F+4}, {VK_F5, MP_KEY_F+5}, {VK_F6, MP_KEY_F+6},
     {VK_F7, MP_KEY_F+7}, {VK_F8, MP_KEY_F+8}, {VK_F9, MP_KEY_F+9},
     {VK_F10, MP_KEY_F+10}, {VK_F11, MP_KEY_F+11}, {VK_F12, MP_KEY_F+12},
+    {VK_F13, MP_KEY_F+13}, {VK_F14, MP_KEY_F+14}, {VK_F15, MP_KEY_F+15},
+    {VK_F16, MP_KEY_F+16}, {VK_F17, MP_KEY_F+17}, {VK_F18, MP_KEY_F+18},
+    {VK_F19, MP_KEY_F+19}, {VK_F20, MP_KEY_F+20}, {VK_F21, MP_KEY_F+21},
+    {VK_F22, MP_KEY_F+22}, {VK_F13, MP_KEY_F+23}, {VK_F24, MP_KEY_F+24},
 
     // numpad with numlock
     {VK_NUMPAD0, MP_KEY_KP0}, {VK_NUMPAD1, MP_KEY_KP1},
