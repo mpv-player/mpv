@@ -708,6 +708,10 @@ static const struct mp_keymap keymap[] = {
     {XK_F4, MP_KEY_F+4}, {XK_F5, MP_KEY_F+5}, {XK_F6, MP_KEY_F+6},
     {XK_F7, MP_KEY_F+7}, {XK_F8, MP_KEY_F+8}, {XK_F9, MP_KEY_F+9},
     {XK_F10, MP_KEY_F+10}, {XK_F11, MP_KEY_F+11}, {XK_F12, MP_KEY_F+12},
+    {XK_F13, MP_KEY_F+13}, {XK_F14, MP_KEY_F+14}, {XK_F15, MP_KEY_F+15},
+    {XK_F16, MP_KEY_F+16}, {XK_F17, MP_KEY_F+17}, {XK_F18, MP_KEY_F+18},
+    {XK_F19, MP_KEY_F+19}, {XK_F20, MP_KEY_F+20}, {XK_F21, MP_KEY_F+21},
+    {XK_F22, MP_KEY_F+22}, {XK_F23, MP_KEY_F+23}, {XK_F24, MP_KEY_F+24},
 
     // numpad independent of numlock
     {XK_KP_Subtract, '-'}, {XK_KP_Add, '+'}, {XK_KP_Multiply, '*'},
