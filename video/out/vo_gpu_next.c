@@ -874,7 +874,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         if (opts->target_prim)
             hint.primaries = mp_prim_to_pl(opts->target_prim);
         if (opts->target_trc)
-            hint.transfer = mp_prim_to_pl(opts->target_trc);
+            hint.transfer = mp_trc_to_pl(opts->target_trc);
         pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!p->target_hint) {
         pl_swapchain_colorspace_hint(p->sw, NULL);
