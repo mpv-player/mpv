@@ -64,7 +64,7 @@ Linkage to libmpv
 -----------------
 
 The current implementation requires that your plugins are **not** linked against
-libmpv. What your plugins uses are not symbols from a libmpv binary, but
+libmpv. What your plugins use are not symbols from a libmpv binary, but
 symbols from the mpv host binary.
 
 Examples
