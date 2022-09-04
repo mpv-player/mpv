@@ -550,15 +550,15 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
     switch (cmd) {
         case AOCONTROL_GET_VOLUME: {
-                struct ao_control_vol *vol = arg;
-                vol->left = spa_volume_to_mp_volume(p->volume[0]);
-                vol->right = spa_volume_to_mp_volume(p->volume[1]);
-                return CONTROL_OK;
+            struct ao_control_vol *vol = arg;
+            vol->left = spa_volume_to_mp_volume(p->volume[0]);
+            vol->right = spa_volume_to_mp_volume(p->volume[1]);
+            return CONTROL_OK;
         }
         case AOCONTROL_GET_MUTE: {
-                bool *muted = arg;
-                *muted = p->muted;
-                return CONTROL_OK;
+            bool *muted = arg;
+            *muted = p->muted;
+            return CONTROL_OK;
         }
         case AOCONTROL_SET_VOLUME:
         case AOCONTROL_SET_MUTE:
