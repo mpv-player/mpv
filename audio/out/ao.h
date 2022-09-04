@@ -35,6 +35,8 @@ enum aocontrol {
     AOCONTROL_SET_MUTE,
     // Has char* as argument, which contains the desired stream title.
     AOCONTROL_UPDATE_STREAM_TITLE,
+    // Has enum aocontrol_media_role* argument, which contains the current media role
+    AOCONTROL_UPDATE_MEDIA_ROLE,
 };
 
 // If set, then the queued audio data is the last. Note that after a while, new
@@ -63,6 +65,11 @@ typedef struct ao_control_vol {
     float left;
     float right;
 } ao_control_vol_t;
+
+enum aocontrol_media_role {
+    AOCONTROL_MEDIA_ROLE_MUSIC,
+    AOCONTROL_MEDIA_ROLE_MOVIE,
+};
 
 struct ao_device_desc {
     const char *name;   // symbolic name; will be set on ao->device
