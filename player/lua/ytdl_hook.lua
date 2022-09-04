@@ -193,11 +193,8 @@ end
 local function is_blacklisted(url)
     if o.exclude == "" then return false end
     if #ytdl.blacklisted == 0 then
-        local joined = o.exclude
-        while joined:match('%|?[^|]+') do
-            local _, e, substring = joined:find('%|?([^|]+)')
-            table.insert(ytdl.blacklisted, substring)
-            joined = joined:sub(e+1)
+        for match in o.exclude:gmatch('%|?([^|]+)') do
+            ytdl.blacklisted[#ytdl.blacklisted + 1] = match
         end
     end
     if #ytdl.blacklisted > 0 then
