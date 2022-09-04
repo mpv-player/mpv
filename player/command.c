@@ -6539,6 +6539,9 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
     }
     if (event == MP_EVENT_WIN_STATE2)
         ctx->cached_window_scale = 0;
+
+    if (event == MPV_EVENT_FILE_LOADED)
+        audio_update_media_role(mpctx);
 }
 
 void handle_command_updates(struct MPContext *mpctx)
