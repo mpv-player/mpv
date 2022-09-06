@@ -760,6 +760,10 @@ def build(ctx):
             ctx.env.DATADIR + '/applications',
             ['etc/mpv.desktop'] )
 
+        ctx.install_files(
+            ctx.env.DATADIR + '/metainfo',
+            ['etc/mpv.metainfo.xml'] )
+
         ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
 
         for size in '16x16 32x32 64x64 128x128'.split():

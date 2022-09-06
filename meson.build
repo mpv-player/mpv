@@ -1674,6 +1674,7 @@ if get_option('cplayer')
     install_data('etc/_mpv.zsh', install_dir: zsh_install_dir, rename: '_mpv')
 
     install_data('etc/mpv.desktop', install_dir: join_paths(datadir, 'applications'))
+    install_data('etc/mpv.metainfo.xml', install_dir: join_paths(datadir, 'metainfo'))
     install_data('etc/encoding-profiles.conf', install_dir: join_paths(confdir, 'mpv'))
 
     foreach size: ['16x16', '32x32', '64x64', '128x128']
