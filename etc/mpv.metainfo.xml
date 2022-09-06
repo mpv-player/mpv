@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>io.mpv.mpv</id>
+    <name>mpv</name>
+    <summary>A free, open source, and cross-platform media player</summary>
+    <description>
+        <p>mpv is a free (as in freedom) media player for the command line. It supports a wide variety of media file formats, audio and video codecs, and subtitle types.</p>
+        <p>mpv has an OpenGL, Vulkan, and D3D11 based video output that is capable of many features loved by videophiles, such as video scaling with popular high quality algorithms, color management, frame timing, interpolation, HDR, and more.</p>
+        <p>While mpv strives for minimalism and provides no real GUI, it has a small controller on top of the video for basic control.</p>
+        <p>mpv can leverage most hardware decoding APIs on all platforms. Hardware decoding can be enabled at runtime on demand.</p>
+        <p>Powerful scripting capabilities can make the player do almost anything. There is a large selection of user scripts on the wiki.</p>
+        <p>A straightforward C API was designed from the ground up to make mpv usable as a library and facilitate easy integration into other applications.</p>
+    </description>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-2.0-or-later AND LGPL-2.0-or-later</project_license>
+    <developer_name>mpv.io</developer_name>
+    <launchable type="desktop-id">mpv.desktop</launchable>
+    <content_rating type="oars-1.1" />
+    <screenshots>
+        <screenshot type="default">
+            <image>https://mpv.io/images/mpv-screenshot-34cd36ae.jpg</image>
+            <caption>Main window</caption>
+        </screenshot>
+    </screenshots>
+    <url type="homepage">https://mpv.io/</url>
+    <url type="bugtracker">https://github.com/mpv-player/mpv/issues</url>
+    <url type="faq">https://github.com/mpv-player/mpv/wiki/FAQ</url>
+    <url type="help">https://mpv.io/manual/stable</url>
+</component>
