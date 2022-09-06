@@ -2022,9 +2022,9 @@ Audio
 
         Using this mode is recommended for direct hardware output, especially
         over HDMI (see HDMI warning below).
-    - ``--audio-channels=stereo``
-        Force  a plain stereo downmix. This is a special-case of the previous
-        item. (See paragraphs below for implications.)
+    - ``--audio-channels=<stereo|mono>``
+        Force a downmix to stereo or mono. These are special-cases of the
+        previous item. (See paragraphs below for implications.)
 
     If a list of layouts is given, each item can be either an explicit channel
     layout name (like ``5.1``), or a channel number. Channel numbers refer to
