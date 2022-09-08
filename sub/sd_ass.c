@@ -359,10 +359,14 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             filter_and_add(sd, &pkt2);
         }
         if (ctx->duration_unknown) {
-            for (int n = 0; n < track->n_events - 1; n++) {
+            for (int n = track->n_events - 2; n >= 0; n--) {
                 if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
-                    track->events[n].Duration = track->events[n + 1].Start -
-                                                track->events[n].Start;
+                    if (track->events[n].Start != track->events[n + 1].Start) {
+                        track->events[n].Duration = track->events[n + 1].Start -
+                                                    track->events[n].Start;
+                    } else {
+                        track->events[n].Duration = track->events[n + 1].Duration;
+                    }
                 }
             }
         }
