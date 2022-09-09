@@ -1,43 +1,314 @@
 [Desktop Entry]
+Categories=AudioVideo;Audio;Video;Player;TV;
+Exec=mpv --player-operation-mode=pseudo-gui -- %U
+Icon=mpv
+MimeType=application/ogg;application/x-ogg;application/mxf;application/sdp;application/smil;application/x-smil;application/streamingmedia;application/x-streamingmedia;application/vnd.rn-realmedia;application/vnd.rn-realmedia-vbr;audio/aac;audio/x-aac;audio/vnd.dolby.heaac.1;audio/vnd.dolby.heaac.2;audio/aiff;audio/x-aiff;audio/m4a;audio/x-m4a;application/x-extension-m4a;audio/mp1;audio/x-mp1;audio/mp2;audio/x-mp2;audio/mp3;audio/x-mp3;audio/mpeg;audio/mpeg2;audio/mpeg3;audio/mpegurl;audio/x-mpegurl;audio/mpg;audio/x-mpg;audio/rn-mpeg;audio/musepack;audio/x-musepack;audio/ogg;audio/scpls;audio/x-scpls;audio/vnd.rn-realaudio;audio/wav;audio/x-pn-wav;audio/x-pn-windows-pcm;audio/x-realaudio;audio/x-pn-realaudio;audio/x-ms-wma;audio/x-pls;audio/x-wav;video/mpeg;video/x-mpeg2;video/x-mpeg3;video/mp4v-es;video/x-m4v;video/mp4;application/x-extension-mp4;video/divx;video/vnd.divx;video/msvideo;video/x-msvideo;video/ogg;video/quicktime;video/vnd.rn-realvideo;video/x-ms-afs;video/x-ms-asf;audio/x-ms-asf;application/vnd.ms-asf;video/x-ms-wmv;video/x-ms-wmx;video/x-ms-wvxvideo;video/x-avi;video/avi;video/x-flic;video/fli;video/x-flc;video/flv;video/x-flv;video/x-theora;video/x-theora+ogg;video/x-matroska;video/mkv;audio/x-matroska;application/x-matroska;video/webm;audio/webm;audio/vorbis;audio/x-vorbis;audio/x-vorbis+ogg;video/x-ogm;video/x-ogm+ogg;application/x-ogm;application/x-ogm-audio;application/x-ogm-video;application/x-shorten;audio/x-shorten;audio/x-ape;audio/x-wavpack;audio/x-tta;audio/AMR;audio/ac3;audio/eac3;audio/amr-wb;video/mp2t;audio/flac;audio/mp4;application/x-mpegurl;video/vnd.mpegurl;application/vnd.apple.mpegurl;audio/x-pn-au;video/3gp;video/3gpp;video/3gpp2;audio/3gpp;audio/3gpp2;video/dv;audio/dv;audio/opus;audio/vnd.dts;audio/vnd.dts.hd;audio/x-adpcm;application/x-cue;audio/m3u;
+Terminal=false
+TryExec=mpv
 Type=Application
-Name=mpv Media Player
+StartupWMClass=mpv
+X-KDE-Protocols=ftp,http,https,mms,rtmp,rtsp,sftp,smb,srt,rist
+
+Name=MPV Media Player
+Name[af]=MPV mediaspeler
+Name[am]=MPV ሚዲያ ማጫወቻ
+Name[ar]=ﻲﻓ ﻲﺑ ﻡﺍu200bu200b ﺎﻳﺪﻴﻣ ﻞﻐﺸﻣ
+Name[be]=MPV медыяплэер
+Name[bg]=MPV медиен плейър
+Name[bn]=এমপিভি মিডিয়া প্লেয়ার
 Name[ca]=Reproductor multimèdia mpv
-Name[cs]=mpv přehrávač
-Name[da]=mpv-medieafspiller
-Name[fr]=Lecteur multimédia mpv
+Name[cs]=MPV přehrávač
+Name[cy]=Chwaraewr Cyfryngau MPV
+Name[da]=MPV-medieafspiller
+Name[de]=Medienwiedergabe »MPV«
+Name[es]=Reproductor multimedia MPV
+Name[et]=MPV meediamängija
+Name[fi]=MPV mediasoitin
+Name[fr]=Lecteur multimédia MPV
+Name[fr_BE]=MPV Lecteur multimédia
+Name[gl]=Reproductor multimedia MPV
+Name[gu]=MPV મીડિયા પ્લેયર
+Name[he]=MPV הידמ ןגנ
+Name[hi]=एमपीवी मीडिया प्लेयर
+Name[id]=Pemutar Media MPV
+Name[is]=MPV fjölmiðlaspilari
+Name[it]=Lettore multimediale MPV
 Name[ja]=mpv メディアプレイヤー
+Name[ka]=MPV მედია ფლეერი
+Name[kk]=MPV медиа ойнатқышы
+Name[kn]=MPV ಮೀಡಿಯಾ ಪ್ಲೇಯರ್
+Name[ko]=MPV 미디어 플레이어
+Name[lv]=MPV multivides atskaņotājs
+Name[mk]=MPV медиа плеер
+Name[ml]=എംപിവി മീഡിയ പ്ലെയർ
+Name[mn]=MPV медиа тоглуулагч
+Name[mr]=एमपीव्ही मीडिया प्लेयर
+Name[ms]=Pemain Media MPV
+Name[my]=MPV မီဒီယာပလေယာ
+Name[nb]=MPV mediespiller
+Name[ne]=MPV मिडिया प्लेयर
+Name[nl]=MPV-mediaspeler
+Name[or]=MPV ମିଡିଆ ପ୍ଲେୟାର |
+Name[pa]=MPV ਮੀਡੀਆ ਪਲੇਅਰ
 Name[pl]=Odtwarzacz mpv
-Name[ru]=Проигрыватель mpv
-Name[tr]=mpv Ortam Oynatıcı
+Name[ps]=ﺮﯿﻠﭘ ﺎﯾډﯿﻣ MPV ﺩ
+Name[pt]=Leitor de multimédia MPV
+Name[pt_BR]=Reprodutor de Multimídia MPV
+Name[ru]=Проигрыватель MPV
+Name[rw]=MPV Media Media
+Name[sd]=ﺮﺌﻴﻠﭘ ﺎﻳڊﻴﻣ ﻱﻭ ﻲﭘ ﻢﻳﺍ
+Name[si]=MPV මාධ්u200dය වාදකය
+Name[sk]=MPV prehrávač médií
+Name[sl]=MPV medijski predvajalnik
+Name[sr]=МПВ Медиа Плаиер
+Name[sv]=MPV mediaspelare
+Name[ta]=MPV மீடியா பிளேயர்
+Name[te]=MPV మీడియా ప్లేయర్
+Name[th]=เครื่องเล่น MPV มีเดีย
+Name[tk]=MPV Media pleýer
+Name[tr]=MPV Ortam Oynatıcı
+Name[tt]=MPV Медиа Плеер
+Name[ur]=MPV ﺮﺌﯿﻠﭘ ﺎﯾﮉﯿﻣ
+Name[uz]=MPV media pleer
+Name[yi]=רעיַילפּ אַידימ וופּמ
 Name[zh_CN]=mpv 媒体播放器
 Name[zh_TW]=mpv 媒體播放器
+
 GenericName=Multimedia player
+GenericName[af]=Multimedia speler
+GenericName[am]=የመልቲሚዲያ ማጫወቻ
+GenericName[ar]=ﺓﺩﺪﻌﺘﻤﻟﺍ ﻂﺋﺎﺳﻮﻟﺍ ﻞﻐﺸﻣ
+GenericName[be]=Мультымедыйны прайгравальнік
+GenericName[bg]=Мултимедиен плейър
+GenericName[bn]=মাল্টিমিডিয়া প্লেয়ার
+GenericName[bs]=Multimedijalni plejer
+GenericName[ca]=Reproductor multimèdia
+GenericName[co]=lettore multimediale
 GenericName[cs]=Multimediální přehrávač
+GenericName[cy]=Chwaraewr amlgyfrwng
 GenericName[da]=Multimedieafspiller
+GenericName[de]=Multimedia-Wiedergabeprogramm
+GenericName[el]=Συσκευή αναπαραγωγής πολυμέσων
+GenericName[eo]=Plurmedia ludanto
+GenericName[es]=Reproductor multimedia
+GenericName[et]=Multimeediumipleier
+GenericName[eu]=Multimedia erreproduzitzailea
+GenericName[fa]=ﯼﺍ ﻪﻧﺎﺳﺭ ﺪﻨﭼ ﻩﺪﻨﻨﮐ ﺶﺨﭘ
+GenericName[fi]=Multimediasoitin
 GenericName[fr]=Lecteur multimédia
+GenericName[fr_BE]=Lecteur multimédia
+GenericName[fy]=Multimedia spiler
+GenericName[ga]=Imreoir ilmheán
+GenericName[gd]=Cluicheadair ioma-mheadhain
+GenericName[gl]=Reproductor multimedia
+GenericName[gu]=મલ્ટીમીડિયા પ્લેયર
+GenericName[haw]=Mea pāʻani multimedia
+GenericName[he]=הידמיטלומ ןגנ
+GenericName[hi]=मल्टीमीडिया प्लेयर
+GenericName[hr]=Multimedijski player
+GenericName[ht]=Jwè miltimedya
+GenericName[hu]=Multimédia lejátszó
+GenericName[hy]=Մուլտիմեդիա նվագարկիչ
+GenericName[id]=pemutar multimedia
+GenericName[is]=Margmiðlunarspilari
+GenericName[it]=Lettore multimediale
 GenericName[ja]=マルチメディアプレイヤー
+GenericName[jv]=Pamuter multimedia
+GenericName[ka]=მულტიმედიური პლეერი
+GenericName[kk]=Мультимедиялық ойнатқыш
+GenericName[km]=អ្នកលេងពហុព័ត៌មាន
+GenericName[kn]=ಮಲ್ಟಿಮೀಡಿಯಾ ಪ್ಲೇಯರ್
+GenericName[ko]=멀티미디어 플레이어
+GenericName[ku]=player Multimedia
+GenericName[ky]=Мультимедиа ойноткуч
+GenericName[lb]=Multimedia Spiller
+GenericName[lo]=ເຄື່ອງຫຼິ້ນມັນຕິມີເດຍ
+GenericName[lt]=Multimedijos grotuvas
+GenericName[lv]=Multivides atskaņotājs
+GenericName[mg]=Mpilalao multimedia
+GenericName[mi]=Kaitakaro rongorau
+GenericName[mk]=Мултимедијален плеер
+GenericName[ml]=മൾട്ടിമീഡിയ പ്ലെയർ
+GenericName[mn]=Мультимедиа тоглуулагч
+GenericName[mr]=मल्टीमीडिया प्लेयर
+GenericName[ms]=Pemain multimedia
+GenericName[my]=မာလ်တီမီဒီယာပလေယာ
+GenericName[nb]=Multimediaspiller
+GenericName[ne]=मल्टिमिडिया प्लेयर
+GenericName[nl]=Multimediaspeler
+GenericName[or]=ମଲ୍ଟିମିଡ଼ିଆ ପ୍ଲେୟାର
+GenericName[pa]=ਮਲਟੀਮੀਡੀਆ ਪਲੇਅਰ
+GenericName[pl]=Odtwarzacz multimedialny
+GenericName[ps]=ﺮﯿﻠﭘ ﺎﯾډﯿﻣ ﻲټﻠﻣ
+GenericName[pt]=Leitor de multimédia
+GenericName[pt_BR]=Reprodutor ou Tocador de Multimídia MPV
+GenericName[ro]=Player multimedia
+GenericName[ru]=Мультимедийный проигрыватель
+GenericName[rw]=Umukinnyi wa Multimediya
+GenericName[sd]=ﺮﺌﻴﻠﭘ ﺎﻳڊﻴﻣ ﻲٽﻠﻣ
+GenericName[si]=බහුමාධ්u200dය වාදකය
+GenericName[sk]=Multimediálny prehrávač
+GenericName[sl]=Multimedijski predvajalnik
+GenericName[sm]=Mea fai fa'asalalauga
+GenericName[sn]=Multimedia mutambi
+GenericName[so]=Ciyaartoyga warbaahinta badan
+GenericName[sq]=Luajtësi multimedial
+GenericName[sr]=Мултимедијални плејер
+GenericName[st]=Sebapali sa multimedia
+GenericName[su]=Pamuter multimedia
+GenericName[sv]=Multimediaspelare
+GenericName[sw]=Kicheza media titika
+GenericName[ta]=மல்டிமீடியா பிளேயர்
+GenericName[te]=మల్టీమీడియా ప్లేయర్
+GenericName[tg]=Плеери мултимедиявӣ
+GenericName[th]=เครื่องเล่นมัลติมีเดีย
+GenericName[tk]=Multimedia pleýer
 GenericName[tr]=Çoklu ortam oynatıcı
+GenericName[tt]=Мультимедиа плеер
+GenericName[uk]=Мультимедійний плеєр
+GenericName[ur]=ﺮﺌﯿﻠﭘ ﺎﯾﮉﯿﻣ ﯽﭩﻠﻣ
+GenericName[uz]=Multimedia pleer
+GenericName[vi]=Máy nghe nhạc đa phương tiện
+GenericName[xh]=Umdlali wemultimedia
+GenericName[yi]=רעליפּש אַידעמיטלומ
+GenericName[yo]=Multimedia ẹrọ orin
 GenericName[zh_CN]=多媒体播放器
 GenericName[zh_TW]=多媒體播放器
+
 Comment=Play movies and songs
+Comment[af]=Speel flieks en liedjies
+Comment[am]=ፊልሞችን እና ዘፈኖችን ይጫወቱ
+Comment[ar]=ﻲﻧﺎﻏﻷ﻿ﺍﻭ ﻡﻼ﻿ﻓﻷ﻿ﺍ ﻞﻴﻐﺸﺗ
+Comment[be]=Прайграваць фільмы і песні
+Comment[bg]=Пуснете филми и песни
+Comment[bn]=সিনেমা এবং গান চালান
+Comment[bs]=Pustite filmove i pjesme
 Comment[ca]=Reproduïu vídeos i cançons
+Comment[ceb]=Pagdula og mga salida ug mga kanta
+Comment[co]=Ghjucà filmi è canzoni
 Comment[cs]=Přehrává filmy a hudbu
+Comment[cy]=Chwarae ffilmiau a chaneuon
 Comment[da]=Afspil film og sange
 Comment[de]=Filme und Musik abspielen
+Comment[el]=Παίξτε ταινίες και τραγούδια
+Comment[eo]=Ludu filmojn kaj kantojn
 Comment[es]=Reproduzca vídeos y canciones
+Comment[et]=Esitage filme ja laule
+Comment[eu]=Erreproduzitu filmak eta abestiak
+Comment[fa]=ﮓﻨﻫﺁ ﻭ ﻢﻠﯿﻓ ﺶﺨﭘ
+Comment[fi]=Toista elokuvia ja kappaleita
+Comment[fil]=Maglaro ng mga pelikula at kanta
 Comment[fr]=Lire des vidéos et des musiques
-Comment[ja]=映画や音楽を再生する
+Comment[fr_BE]=Lecture de films et de chansons
+Comment[fy]=Spielje films en ferskes
+Comment[ga]=Seinn scannáin agus amhráin
+Comment[gd]=Cluich filmichean agus òrain
+Comment[gl]=Reproducir películas e cancións
+Comment[gu]=ફિલ્મો અને ગીતો વગાડો
+Comment[ha]=Kunna fina-finai da waƙoƙi
+Comment[haw]=E pāʻani i nā kiʻiʻoniʻoni a me nā mele
+Comment[he]=םירישו םיטרס ןגנ
+Comment[hi]=फिल्में और गाने चलाएं
+Comment[hr]=Pustite filmove i pjesme
+Comment[ht]=Jwe fim ak chante
+Comment[hu]=Játssz filmeket és dalokat
+Comment[hy]=Նվագարկել ֆիլմեր և երգեր
+Comment[id]=Putar film dan lagu
+Comment[is]=Spilaðu kvikmyndir og lög
 Comment[it]=Lettore multimediale
+Comment[ja]=映画や音楽を再生する
+Comment[jv]=Muter film lan lagu
+Comment[ka]=დაუკარით ფილმები და სიმღერები
+Comment[kk]=Фильмдер мен әндерді ойнатыңыз
+Comment[km]=លេងភាពយន្ត និងចម្រៀង
+Comment[kn]=ಚಲನಚಿತ್ರಗಳು ಮತ್ತು ಹಾಡುಗಳನ್ನು ಪ್ಲೇ ಮಾಡಿ
+Comment[ko]=영화 및 노래 재생
+Comment[ku]=Fîlm û stranan bilîzin
+Comment[ky]=Кинолорду жана ырларды ойнотуңуз
+Comment[lb]=Spillt Filmer a Lidder
+Comment[lo]=ຫຼິ້ນຮູບເງົາ ແລະເພງ
+Comment[lt]=Groti filmus ir dainas
+Comment[lv]=Spēlējiet filmas un dziesmas
+Comment[mg]=Milalao sarimihetsika sy hira
+Comment[mi]=Whakatangihia nga kiriata me nga waiata
+Comment[mk]=Репродуцирајте филмови и песни
+Comment[ml]=സിനിമകളും പാട്ടുകളും പ്ലേ ചെയ്യുക
+Comment[mn]=Кино, дуу тогло
+Comment[mr]=चित्रपट आणि गाणी प्ले करा
+Comment[ms]=Mainkan filem dan lagu
+Comment[mt]=Ilgħab films u kanzunetti
+Comment[my]=ရုပ်ရှင်များနှင့် သီချင်းများကို ဖွင့်ပါ။
+Comment[nb]=Spill filmer og sanger
+Comment[ne]=चलचित्र र गीतहरू प्ले गर्नुहोस्
+Comment[nl]=Films en liedjes afspelen
+Comment[ny]=Sewerani mafilimu ndi nyimbo
+Comment[or]=ଚଳଚ୍ଚିତ୍ର ଏବଂ ଗୀତ ଚଲାନ୍ତୁ |
+Comment[pa]=ਫਿਲਮਾਂ ਅਤੇ ਗੀਤ ਚਲਾਓ
 Comment[pl]=Odtwarzaj filmy i muzykę
+Comment[ps]=ﻝﻭږﻏ ﯤﺭﺪﻨﺳ ﻭﺍ ﻪﻧﻮﻤﻠﻓ
+Comment[pt]=Ver vídeos e ouvir músicas
+Comment[pt_BR]=Reproduzir ou tocar filmes e músicas
+Comment[ro]=Redați filme și cântece
 Comment[ru]=Воспроизвести фильмы и музыку
+Comment[rw]=Kina firime n'indirimbo
+Comment[sd]=ﻮﻳڏﻴﮐ ﺎﻧﺎﮔ ۽ ﻥﻮﻤﻠﻓ
+Comment[si]=චිත්u200dරපට සහ ගීත වාදනය කරන්න
+Comment[sk]=Prehrávajte filmy a pesničky
+Comment[sl]=Predvajajte filme in pesmi
+Comment[sm]=Ta'alo tifaga ma pese
+Comment[sn]=Tamba mafirimu nenziyo
+Comment[so]=Daar filimada iyo heesaha
+Comment[sq]=Luaj filma dhe këngë
+Comment[sr]=Пустите филмове и песме
+Comment[st]=Bapala lifilimi le lipina
+Comment[su]=Puter pilem sareng lagu
+Comment[sv]=Spela filmer och låtar
+Comment[sw]=Cheza filamu na nyimbo
+Comment[ta]=திரைப்படங்கள் மற்றும் பாடல்களை இயக்கவும்
+Comment[te]=సినిమాలు మరియు పాటలను ప్లే చేయండి
+Comment[tg]=Филмҳо ва сурудҳоро бозӣ кунед
+Comment[th]=เล่นภาพยนตร์และเพลง
+Comment[tk]=Kino we aýdym aýdyň
 Comment[tr]=Filmleri ve şarkıları oynatın
+Comment[tt]=Кино һәм җыр уйна
+Comment[ug]=ﯓﯘﻳﻮﻗ ﻰﻧﺭﻼ﻿ﯩﺸﺧﺎﻧ ەﯞ ﻮﻨﯩﻛ
+Comment[uk]=Відтворюйте фільми та пісні
+Comment[ur]=۔ﮟﯿﺋﻼ﻿ﭼ ﮯﻧﺎﮔ ﺭﻭﺍ ﮟﯿﻤﻠﻓ
+Comment[uz]=Filmlar va qo'shiqlarni ijro eting
+Comment[vi]=Phát phim và bài hát
+Comment[xh]=Dlala iimuvi kunye neengoma
+Comment[yi]=רעדיל ןוא אָניק ליפּש
+Comment[yo]=Mu awọn fiimu ati awọn orin ṣiṣẹ
 Comment[zh_CN]=播放电影和歌曲
 Comment[zh_TW]=播放電影和歌曲
-Icon=mpv
-TryExec=mpv
-Exec=mpv --player-operation-mode=pseudo-gui -- %U
-Terminal=false
-Categories=AudioVideo;Audio;Video;Player;TV;
-MimeType=application/ogg;application/x-ogg;application/mxf;application/sdp;application/smil;application/x-smil;application/streamingmedia;application/x-streamingmedia;application/vnd.rn-realmedia;application/vnd.rn-realmedia-vbr;audio/aac;audio/x-aac;audio/vnd.dolby.heaac.1;audio/vnd.dolby.heaac.2;audio/aiff;audio/x-aiff;audio/m4a;audio/x-m4a;application/x-extension-m4a;audio/mp1;audio/x-mp1;audio/mp2;audio/x-mp2;audio/mp3;audio/x-mp3;audio/mpeg;audio/mpeg2;audio/mpeg3;audio/mpegurl;audio/x-mpegurl;audio/mpg;audio/x-mpg;audio/rn-mpeg;audio/musepack;audio/x-musepack;audio/ogg;audio/scpls;audio/x-scpls;audio/vnd.rn-realaudio;audio/wav;audio/x-pn-wav;audio/x-pn-windows-pcm;audio/x-realaudio;audio/x-pn-realaudio;audio/x-ms-wma;audio/x-pls;audio/x-wav;video/mpeg;video/x-mpeg2;video/x-mpeg3;video/mp4v-es;video/x-m4v;video/mp4;application/x-extension-mp4;video/divx;video/vnd.divx;video/msvideo;video/x-msvideo;video/ogg;video/quicktime;video/vnd.rn-realvideo;video/x-ms-afs;video/x-ms-asf;audio/x-ms-asf;application/vnd.ms-asf;video/x-ms-wmv;video/x-ms-wmx;video/x-ms-wvxvideo;video/x-avi;video/avi;video/x-flic;video/fli;video/x-flc;video/flv;video/x-flv;video/x-theora;video/x-theora+ogg;video/x-matroska;video/mkv;audio/x-matroska;application/x-matroska;video/webm;audio/webm;audio/vorbis;audio/x-vorbis;audio/x-vorbis+ogg;video/x-ogm;video/x-ogm+ogg;application/x-ogm;application/x-ogm-audio;application/x-ogm-video;application/x-shorten;audio/x-shorten;audio/x-ape;audio/x-wavpack;audio/x-tta;audio/AMR;audio/ac3;audio/eac3;audio/amr-wb;video/mp2t;audio/flac;audio/mp4;application/x-mpegurl;video/vnd.mpegurl;application/vnd.apple.mpegurl;audio/x-pn-au;video/3gp;video/3gpp;video/3gpp2;audio/3gpp;audio/3gpp2;video/dv;audio/dv;audio/opus;audio/vnd.dts;audio/vnd.dts.hd;audio/x-adpcm;application/x-cue;audio/m3u;
-X-KDE-Protocols=ftp,http,https,mms,rtmp,rtsp,sftp,smb,srt,rist
-StartupWMClass=mpv
+
+# Translators: Search terms to find this application. Don't translate the semicolons! The list MUST also end with a semicolon!
+Keywords=mpv;media;player;video;movie;audio;songs;music;tv;
+Keywords[pt_BR]=mpv;mídia;reproduzir;tocar;vídeo;filme;áudio;som;música;tv;
+
+# Dear volunteer translators, please add your language abbreviation and name here in alphabetical order.
+#
+# ca:
+# cs:
+# da:
+# de: Robin.antiX
+# fr: 
+# fr_BE: Wallon
+# it: Spartak77, Daddylibre, Madibi
+# da: troc
+# hi: ashish.kujur2
+# hu: savarall
+# ja:
+# or: ashish.kujur2
+# pl:
+# pt_BR: marcelocripe
+# pt: PPC/Zeh
+# ru: 
+# so: cismat10
+# sv: bittin
+# tr:
+# uk: laslo_one
+#
+# zh_CN:
+# zh_TW:
+# Note: Other languages have been translated with internet translators and need to be proofread or corrected by native speakers of the respective languages.
