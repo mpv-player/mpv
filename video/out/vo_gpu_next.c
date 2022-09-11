@@ -1512,6 +1512,66 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
     return hook;
 }
 
+#if PL_API_VER >= 222
+
+static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
+{
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    if (!opts->icc_opts->cache_dir || !opts->icc_opts->cache_dir[0])
+        return NULL;
+
+    char cache_name[16+1];
+    for (int i = 0; i < 16; i++) {
+        cache_name[i] = "0123456789ABCDEF"[sig & 0xF];
+        sig >>= 4;
+    }
+    cache_name[16] = '\0';
+
+    char *cache_dir = mp_get_user_path(NULL, p->global, opts->icc_opts->cache_dir);
+    char *path = mp_path_join(NULL, cache_dir, cache_name);
+
+    stream_t *stream = NULL;
+    if (flags & STREAM_WRITE) {
+        mp_mkdirp(cache_dir);
+    } else {
+        // Exit silently if the file does not exist
+        if (stat(path, &(struct stat) {0}) < 0)
+            goto done;
+    }
+
+    flags |= STREAM_ORIGIN_DIRECT | STREAM_LOCAL_FS_ONLY | STREAM_LESS_NOISE;
+    stream = stream_create(path, flags, NULL, p->global);
+    // fall through
+done:
+    talloc_free(cache_dir);
+    talloc_free(path);
+    return stream;
+}
+
+static void icc_save(void *priv, uint64_t sig, const uint8_t *cache, size_t size)
+{
+    struct priv *p = priv;
+    stream_t *s = icc_open_cache(p, sig, STREAM_WRITE);
+    if (!s)
+        return;
+    stream_write_buffer(s, (void *) cache, size);
+    free_stream(s);
+}
+
+static bool icc_load(void *priv, uint64_t sig, uint8_t *cache, size_t size)
+{
+    struct priv *p = priv;
+    stream_t *s = icc_open_cache(p, sig, STREAM_READ);
+    if (!s)
+        return false;
+
+    int len = stream_read(s, cache, size);
+    free_stream(s);
+    return len == size;
+}
+
+#endif // PL_API_VER
+
 static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 {
     if (!opts)
@@ -1533,6 +1593,11 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
     p->icc.size_r = s_r;
     p->icc.size_g = s_g;
     p->icc.size_b = s_b;
+#if PL_API_VER >= 222
+    p->icc.cache_priv = p;
+    p->icc.cache_save = icc_save;
+    p->icc.cache_load = icc_load;
+#endif
 
     if (!opts->profile || !opts->profile[0]) {
         // No profile enabled, un-load any existing profiles
