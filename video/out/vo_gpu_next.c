@@ -401,7 +401,7 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
         if (total_bits % 8)
             return 0; // pixel size is not byte-aligned
 
-        data->pixel_stride = total_bits / 8;
+        data->pixel_stride = desc.bpp[p] / 8;
         data->type = (desc.flags & MP_IMGFLAG_TYPE_FLOAT)
                             ? PL_FMT_FLOAT
                             : PL_FMT_UNORM;
