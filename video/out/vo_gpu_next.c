@@ -348,6 +348,9 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
         struct pl_plane_data *data = &out_data[p];
         struct mp_imgfmt_comp_desc sorted[MP_NUM_COMPONENTS];
         int num_comps = 0;
+        if (desc.bpp[p] % 8)
+            return 0; // Pixel size is not byte-aligned
+
         for (int c = 0; c < mp_imgfmt_desc_get_num_comps(&desc); c++) {
             if (desc.comps[c].plane != p)
                 continue;
@@ -397,9 +400,6 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
                 }
             }
         }
-
-        if (total_bits % 8)
-            return 0; // pixel size is not byte-aligned
 
         data->pixel_stride = desc.bpp[p] / 8;
         data->type = (desc.flags & MP_IMGFLAG_TYPE_FLOAT)
