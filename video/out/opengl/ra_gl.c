@@ -117,8 +117,8 @@ static int ra_init_gl(struct ra *ra, GL *gl)
             ra->caps |= RA_CAP_BUF_RW;
     }
 
-    // textureGather is only supported in GLSL 400+
-    if (ra->glsl_version >= 400)
+    // textureGather is only supported in GLSL 400+ / ES 310+
+    if (ra->glsl_version >= (ra->glsl_es ? 310 : 400))
         ra->caps |= RA_CAP_GATHER;
 
     if (gl->BlitFramebuffer)
@@ -127,7 +127,14 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     // Disable compute shaders for GLSL < 420. This work-around is needed since
     // some buggy OpenGL drivers expose compute shaders for lower GLSL versions,
     // despite the spec requiring 420+.
-    if (ra->glsl_version < 420)
+    if (ra->glsl_version < (ra->glsl_es ? 310 : 420)) {
+        ra->caps &= ~RA_CAP_COMPUTE;
+    }
+
+    // While we can handle compute shaders on GLES the spec (intentionally)
+    // does not support binding textures for writing, which all uses inside mpv
+    // would require. So disable it unconditionally anyway.
+    if (ra->glsl_es)
         ra->caps &= ~RA_CAP_COMPUTE;
 
     int gl_fmt_features = gl_format_feature_flags(gl);
@@ -217,6 +224,8 @@ static int ra_init_gl(struct ra *ra, GL *gl)
     if (ra->caps & RA_CAP_COMPUTE) {
         gl->GetIntegerv(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE, &ival);
         ra->max_shmem = ival;
+        gl->GetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &ival);
+        ra->max_compute_group_threads = ival;
     }
 
     gl->Disable(GL_DITHER);
@@ -581,7 +590,7 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
 {
     GL *gl = ra_gl_get(ra);
 
-    if (params->host_mapped && gl->version < 440)
+    if (params->host_mapped && !gl->BufferStorage)
         return NULL;
 
     struct ra_buf *buf = talloc_zero(NULL, struct ra_buf);
@@ -989,7 +998,7 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
         gl->BindBufferBase(buf_gl->target, input->binding, buf_gl->buffer);
         // SSBOs are not implicitly coherent in OpengL
         if (input->type == RA_VARTYPE_BUF_RW)
-            gl->MemoryBarrier(buf_gl->target);
+            gl->MemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         break;
     }
     default:

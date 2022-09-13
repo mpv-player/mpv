@@ -105,7 +105,7 @@ static void *worker_thread(void *arg)
                 return NULL;
             }
         }
-        assert(0);
+        MP_ASSERT_UNREACHABLE();
     }
 
     pthread_mutex_unlock(&pool->lock);

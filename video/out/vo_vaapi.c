@@ -36,6 +36,7 @@
 #include "sub/draw_bmp.h"
 #include "sub/img_convert.h"
 #include "sub/osd.h"
+#include "present_sync.h"
 #include "x11_common.h"
 
 #include "video/mp_image.h"
@@ -553,6 +554,14 @@ static void flip_page(struct vo *vo)
     p->visible_surface = p->output_surface;
     render_to_screen(p, p->output_surfaces[p->output_surface]);
     p->output_surface = (p->output_surface + 1) % MAX_OUTPUT_SURFACES;
+    vo_x11_present(vo);
+    present_sync_swap(vo->x11->present);
+}
+
+static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    present_sync_get_info(x11->present, info);
 }
 
 static void draw_image(struct vo *vo, struct mp_image *mpi)
@@ -851,6 +860,7 @@ const struct vo_driver video_out_vaapi = {
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,
+    .get_vsync = get_vsync,
     .wakeup = vo_x11_wakeup,
     .wait_events = vo_x11_wait_events,
     .uninit = uninit,

@@ -1,12 +1,15 @@
 #include <math.h>
 #include <pthread.h>
 
+#include <libavutil/hwcontext.h>
+
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
 #include "osdep/atomic.h"
 #include "osdep/timer.h"
 #include "video/hwdec.h"
+#include "video/img_format.h"
 
 #include "filter.h"
 #include "filter_internal.h"
@@ -372,7 +375,7 @@ static struct mp_pin *find_connected_end(struct mp_pin *p)
             return other;
         p = other->user_conn;
     }
-    assert(0);
+    MP_ASSERT_UNREACHABLE();
 }
 
 // With p being part of a connection, create the pin_connection and set all
@@ -397,7 +400,7 @@ static void init_connection(struct mp_pin *p)
     if (out->manual_connection)
         assert(out->manual_connection->in->runner == runner);
 
-    // Logicaly, the ends are always manual connections. A pin chain without
+    // Logically, the ends are always manual connections. A pin chain without
     // manual connections at the ends is still disconnected (or if this
     // attempted to extend an existing connection, becomes dangling and gets
     // disconnected).
@@ -688,7 +691,24 @@ struct AVBufferRef *mp_filter_load_hwdec_device(struct mp_filter *f, int avtype)
     if (!info || !info->hwdec_devs)
         return NULL;
 
-    hwdec_devices_request_all(info->hwdec_devs);
+    int imgfmt = IMGFMT_NONE;
+    switch (avtype) {
+    case AV_HWDEVICE_TYPE_VAAPI:
+        imgfmt = IMGFMT_VAAPI;
+        break;
+    case AV_HWDEVICE_TYPE_VDPAU:
+        imgfmt = IMGFMT_VDPAU;
+        break;
+    default:
+        MP_WARN(f,
+               "Unrecognised HW Device type requested. Loading all devices\n");
+    }
+
+    struct hwdec_imgfmt_request params = {
+        .imgfmt = imgfmt,
+        .probing = false,
+    };
+    hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
 
     return hwdec_devices_get_lavc(info->hwdec_devs, avtype);
 }

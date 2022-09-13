@@ -72,6 +72,7 @@ static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
 
 struct vd_lavc_params {
     int fast;
+    int film_grain;
     int show_all;
     int skip_loop_filter;
     int skip_idct;
@@ -104,6 +105,8 @@ static const struct m_opt_choice_alternatives discard_names[] = {
 const struct m_sub_options vd_lavc_conf = {
     .opts = (const m_option_t[]){
         {"vd-lavc-fast", OPT_FLAG(fast)},
+        {"vd-lavc-film-grain", OPT_CHOICE(film_grain,
+            {"auto", -1}, {"cpu", 0}, {"gpu", 1})},
         {"vd-lavc-show-all", OPT_FLAG(show_all)},
         {"vd-lavc-skiploopfilter", OPT_DISCARD(skip_loop_filter)},
         {"vd-lavc-skipidct", OPT_DISCARD(skip_idct)},
@@ -127,6 +130,7 @@ const struct m_sub_options vd_lavc_conf = {
     },
     .size = sizeof(struct vd_lavc_params),
     .defaults = &(const struct vd_lavc_params){
+        .film_grain = -1 /*auto*/,
         .show_all = 0,
         .check_hw_profile = 1,
         .software_fallback = 3,
@@ -136,7 +140,7 @@ const struct m_sub_options vd_lavc_conf = {
         .framedrop = AVDISCARD_NONREF,
         .dr = 1,
         .hwdec_api = "no",
-        .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1",
+        .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores",
         // Maximum number of surfaces the player wants to buffer. This number
         // might require adjustment depending on whatever the player does;
         // for example, if vo_gpu increases the number of reference surfaces for
@@ -258,7 +262,7 @@ static int hwdec_compare(const void *p1, const void *p2)
     // List non-copying entries first, so --hwdec=auto takes them.
     if (h1->copying != h2->copying)
         return h1->copying ? 1 : -1;
-    // Order by autoprobe preferrence order.
+    // Order by autoprobe preference order.
     if (h1->auto_pos != h2->auto_pos)
         return h1->auto_pos > h2->auto_pos ? 1 : -1;
     // Fallback sort order to make sorting stable.
@@ -431,7 +435,11 @@ static AVBufferRef *hwdec_create_dev(struct mp_filter *vd,
             return ref;
         }
     } else if (ctx->hwdec_devs) {
-        hwdec_devices_request_all(ctx->hwdec_devs);
+        struct hwdec_imgfmt_request params = {
+            .imgfmt = pixfmt2imgfmt(hwdec->pix_fmt),
+            .probing = autoprobe,
+        };
+        hwdec_devices_request_for_img_fmt(ctx->hwdec_devs, &params);
         return hwdec_devices_get_lavc(ctx->hwdec_devs, hwdec->lavc_device);
     }
 
@@ -464,6 +472,7 @@ static void select_and_set_hwdec(struct mp_filter *vd)
         MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
                    "on whitelist.\n", codec);
     } else {
+        bool hwdec_name_supported = false;  // relevant only if !hwdec_auto
         struct hwdec_info *hwdecs = NULL;
         int num_hwdecs = 0;
         add_all_hwdec_methods(&hwdecs, &num_hwdecs);
@@ -471,12 +480,13 @@ static void select_and_set_hwdec(struct mp_filter *vd)
         for (int n = 0; n < num_hwdecs; n++) {
             struct hwdec_info *hwdec = &hwdecs[n];
 
-            const char *hw_codec = mp_codec_from_av_codec_id(hwdec->codec->id);
-            if (!hw_codec || strcmp(hw_codec, codec) != 0)
-                continue;
-
             if (!hwdec_auto && !(bstr_equals0(opt, hwdec->method_name) ||
                                  bstr_equals0(opt, hwdec->name)))
+                continue;
+            hwdec_name_supported = true;
+
+            const char *hw_codec = mp_codec_from_av_codec_id(hwdec->codec->id);
+            if (!hw_codec || strcmp(hw_codec, codec) != 0)
                 continue;
 
             if (hwdec_auto_safe && !(hwdec->flags & HWDEC_FLAG_WHITELIST))
@@ -509,8 +519,14 @@ static void select_and_set_hwdec(struct mp_filter *vd)
             } else if (!hwdec->copying) {
                 // Most likely METHOD_INTERNAL, which often use delay-loaded
                 // VO support as well.
-                if (ctx->hwdec_devs)
-                    hwdec_devices_request_all(ctx->hwdec_devs);
+                if (ctx->hwdec_devs) {
+                    struct hwdec_imgfmt_request params = {
+                        .imgfmt = pixfmt2imgfmt(hwdec->pix_fmt),
+                        .probing = hwdec_auto,
+                    };
+                    hwdec_devices_request_for_img_fmt(
+                        ctx->hwdec_devs, &params);
+                }
             }
 
             ctx->use_hwdec = true;
@@ -520,8 +536,11 @@ static void select_and_set_hwdec(struct mp_filter *vd)
 
         talloc_free(hwdecs);
 
-        if (!ctx->use_hwdec)
+        if (!ctx->use_hwdec) {
+            if (!hwdec_auto && !hwdec_name_supported)
+                MP_WARN(vd, "Unsupported hwdec: %s\n", ctx->opts->hwdec_api);
             MP_VERBOSE(vd, "No hardware decoding available for this codec.\n");
+        }
     }
 
     if (ctx->use_hwdec) {
@@ -660,7 +679,9 @@ static void init_avctx(struct mp_filter *vd)
         avctx->opaque = vd;
         avctx->get_buffer2 = get_buffer2_direct;
 #if LIBAVCODEC_VERSION_MAJOR < 60
-        avctx->thread_safe_callbacks = 1;
+        AV_NOWARN_DEPRECATED({
+            avctx->thread_safe_callbacks = 1;
+        });
 #endif
     }
 
@@ -676,6 +697,36 @@ static void init_avctx(struct mp_filter *vd)
 
     if (lavc_codec->id == AV_CODEC_ID_H264 && lavc_param->old_x264)
         av_opt_set(avctx, "x264_build", "150", AV_OPT_SEARCH_CHILDREN);
+
+#ifndef AV_CODEC_EXPORT_DATA_FILM_GRAIN
+    if (ctx->opts->film_grain == 1)
+        MP_WARN(vd, "GPU film grain requested, but FFmpeg too old to expose "
+                    "film grain parameters. Please update to latest master, "
+                    "or at least to release 4.4.\n");
+#else
+    switch(ctx->opts->film_grain) {
+    case 0: /*CPU*/
+        // default lavc flags handle film grain within the decoder.
+        break;
+    case 1: /*GPU*/
+        if (!ctx->vo ||
+            (ctx->vo && !(ctx->vo->driver->caps & VO_CAP_FILM_GRAIN))) {
+            MP_MSG(vd, ctx->vo ? MSGL_WARN : MSGL_V,
+                   "GPU film grain requested, but VO %s, expect wrong output.\n",
+                   ctx->vo ?
+                   "does not support applying film grain" :
+                   "is not available at decoder initialization to verify support");
+        }
+
+        avctx->export_side_data |= AV_CODEC_EXPORT_DATA_FILM_GRAIN;
+        break;
+    default:
+        if (ctx->vo && (ctx->vo->driver->caps & VO_CAP_FILM_GRAIN))
+            avctx->export_side_data |= AV_CODEC_EXPORT_DATA_FILM_GRAIN;
+
+        break;
+    }
+#endif
 
     mp_set_avopts(vd->log, avctx, lavc_param->avopts);
 

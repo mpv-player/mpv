@@ -31,7 +31,7 @@
 static const int blend_factors[SUBBITMAP_COUNT][4] = {
     [SUBBITMAP_LIBASS] = {RA_BLEND_SRC_ALPHA, RA_BLEND_ONE_MINUS_SRC_ALPHA,
                           RA_BLEND_ONE,       RA_BLEND_ONE_MINUS_SRC_ALPHA},
-    [SUBBITMAP_RGBA] =   {RA_BLEND_ONE,       RA_BLEND_ONE_MINUS_SRC_ALPHA,
+    [SUBBITMAP_BGRA] =   {RA_BLEND_ONE,       RA_BLEND_ONE_MINUS_SRC_ALPHA,
                           RA_BLEND_ONE,       RA_BLEND_ONE_MINUS_SRC_ALPHA},
 };
 
@@ -86,7 +86,7 @@ struct mpgl_osd *mpgl_osd_init(struct ra *ra, struct mp_log *log,
     };
 
     ctx->fmt_table[SUBBITMAP_LIBASS] = ra_find_unorm_format(ra, 1, 1);
-    ctx->fmt_table[SUBBITMAP_RGBA]   = ra_find_unorm_format(ra, 1, 4);
+    ctx->fmt_table[SUBBITMAP_BGRA]   = ra_find_unorm_format(ra, 1, 4);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++)
         ctx->parts[n] = talloc_zero(ctx, struct mpgl_osd_part);
@@ -215,7 +215,7 @@ bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
 
     gl_sc_uniform_texture(sc, "osdtex", part->texture);
     switch (fmt) {
-    case SUBBITMAP_RGBA: {
+    case SUBBITMAP_BGRA: {
         GLSL(color = texture(osdtex, texcoord).bgra;)
         break;
     }

@@ -92,24 +92,6 @@ struct seek_params {
     unsigned flags; // MPSEEK_FLAG_*
 };
 
-enum video_sync {
-    VS_DEFAULT = 0,
-    VS_DISP_RESAMPLE,
-    VS_DISP_RESAMPLE_VDROP,
-    VS_DISP_RESAMPLE_NONE,
-    VS_DISP_ADROP,
-    VS_DISP_VDROP,
-    VS_DISP_NONE,
-    VS_NONE,
-};
-
-#define VS_IS_DISP(x) ((x) == VS_DISP_RESAMPLE ||       \
-                       (x) == VS_DISP_RESAMPLE_VDROP || \
-                       (x) == VS_DISP_RESAMPLE_NONE ||  \
-                       (x) == VS_DISP_ADROP ||          \
-                       (x) == VS_DISP_VDROP ||          \
-                       (x) == VS_DISP_NONE)
-
 // Information about past video frames that have been sent to the VO.
 struct frame_info {
     double pts;
@@ -136,6 +118,7 @@ struct track {
     char *title;
     bool default_track, forced_track, dependent_track;
     bool visual_impaired_track, hearing_impaired_track;
+    bool image;
     bool attached_picture;
     char *lang;
 
@@ -504,6 +487,7 @@ int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track);
 void audio_update_volume(struct MPContext *mpctx);
 void audio_update_balance(struct MPContext *mpctx);
+void audio_update_media_role(struct MPContext *mpctx);
 void reload_audio_output(struct MPContext *mpctx);
 void audio_start_ao(struct MPContext *mpctx);
 

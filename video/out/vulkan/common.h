@@ -27,10 +27,11 @@
 
 // Shared struct used to hold vulkan context information
 struct mpvk_ctx {
-    struct mp_log *pl_log;
-    struct pl_context *ctx;
-    const struct pl_vk_inst *vkinst;
-    const struct pl_vulkan *vulkan;
-    const struct pl_gpu *gpu; // points to vulkan->gpu for convenience
+    struct mp_log *log;
+    pl_log pllog;
+    pl_vk_inst vkinst;
+    pl_vulkan vulkan;
+    pl_gpu gpu; // points to vulkan->gpu for convenience
+    pl_swapchain swapchain;
     VkSurfaceKHR surface;
 };

@@ -176,6 +176,7 @@ struct input_opts {
     int use_gamepad;
     int use_media_keys;
     int default_bindings;
+    int builtin_bindings;
     int enable_mouse_movements;
     int vo_key_input;
     int test;
@@ -190,6 +191,7 @@ const struct m_sub_options input_config = {
         {"input-keylist", OPT_PRINT(mp_print_key_list)},
         {"input-cmdlist", OPT_PRINT(mp_print_cmd_list)},
         {"input-default-bindings", OPT_FLAG(default_bindings)},
+        {"input-builtin-bindings", OPT_FLAG(builtin_bindings)},
         {"input-test", OPT_FLAG(test)},
         {"input-doubleclick-time", OPT_INT(doubleclick_time),
          M_RANGE(0, 1000)},
@@ -218,6 +220,7 @@ const struct m_sub_options input_config = {
         .enable_mouse_movements = 1,
         .use_media_keys = 1,
         .default_bindings = 1,
+        .builtin_bindings = 1,
         .vo_key_input = 1,
         .allow_win_drag = 1,
     },
@@ -1367,7 +1370,7 @@ void mp_input_load_config(struct input_ctx *ictx)
     // "Uncomment" the default key bindings in etc/input.conf and add them.
     // All lines that do not start with '# ' are parsed.
     bstr builtin = bstr0(builtin_input_conf);
-    while (builtin.len) {
+    while (ictx->opts->builtin_bindings && builtin.len) {
         bstr line = bstr_getline(builtin, &builtin);
         bstr_eatstart0(&line, "#");
         if (!bstr_startswith0(line, " "))

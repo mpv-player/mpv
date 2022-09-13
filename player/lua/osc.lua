@@ -11,6 +11,7 @@ local utils = require 'mp.utils'
 local user_opts = {
     showwindowed = true,        -- show OSC when windowed?
     showfullscreen = true,      -- show OSC when fullscreen?
+    idlescreen = true,          -- show mpv logo on idle
     scalewindowed = 1,          -- scaling of the controller when windowed
     scalefullscreen = 1,        -- scaling of the controller when fullscreen
     scaleforcedwindow = 2,      -- scaling when rendered on a forced window
@@ -34,7 +35,7 @@ local user_opts = {
     seekbarstyle = "bar",       -- bar, diamond or knob
     seekbarhandlesize = 0.6,    -- size ratio of the diamond and knob handle
     seekrangestyle = "inverted",-- bar, line, slider, inverted or none
-    seekrangeseparate = true,   -- wether the seekranges overlay on the bar-style seekbar
+    seekrangeseparate = true,   -- whether the seekranges overlay on the bar-style seekbar
     seekrangealpha = 200,       -- transparency of seekranges
     seekbarkeyframes = true,    -- use keyframes when dragging the seekbar
     title = "${media-title}",   -- string compatible with property-expansion
@@ -42,6 +43,7 @@ local user_opts = {
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
+    tcspace = 100,              -- timecode spacing (compensate font size estimation)
     visibility = "auto",        -- only used at init to set visibility_mode(...)
     boxmaxchars = 80,           -- title crop threshold for box layout
     boxvideo = false,           -- apply osc_param.video_margins to video
@@ -49,6 +51,10 @@ local user_opts = {
     windowcontrols_alignment = "right", -- which side to show window controls on
     greenandgrumpy = false,     -- disable santa hat
     livemarkers = true,         -- update seekbar chapter markers on duration change
+    chapters_osd = true,        -- whether to show chapters OSD on next/prev
+    playlist_osd = true,        -- whether to show playlist OSD on next/prev
+    chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
+    unicodeminus = false,       -- whether to use the Unicode minus sign character
 }
 
 -- read options from config and command-line
@@ -121,6 +127,7 @@ local state = {
     border = true,
     maximized = false,
     osd = mp.create_osd_overlay("ass-events"),
+    chapter_list = {},                      -- sorted by time
 }
 
 local window_control_box_width = 80
@@ -131,6 +138,12 @@ local is_december = os.date("*t").month == 12
 --
 -- Helperfunctions
 --
+
+function kill_animation()
+    state.anistart = nil
+    state.animation = nil
+    state.anitype =  nil
+end
 
 function set_osd(res_x, res_y, text)
     if state.osd.res_x == res_x and
@@ -357,7 +370,7 @@ end
 -- return a nice list of tracks of the given type (video, audio, sub)
 function get_tracklist(type)
     local msg = "Available " .. nicetypes[type] .. " Tracks: "
-    if #tracks_osc[type] == 0 then
+    if not tracks_osc or #tracks_osc[type] == 0 then
         msg = msg .. "none"
     else
         for n = 1, #tracks_osc[type] do
@@ -595,16 +608,13 @@ end
 
 -- returns nil or a chapter element from the native property chapter-list
 function get_chapter(possec)
-    local cl = mp.get_property_native("chapter-list", {})
-    local ch = nil
+    local cl = state.chapter_list  -- sorted, get latest before possec, if any
 
-    -- chapters might not be sorted by time. find nearest-before/at possec
-    for n=1, #cl do
-        if possec >= cl[n].time and (not ch or cl[n].time > ch.time) then
-            ch = cl[n]
+    for n=#cl,1,-1 do
+        if possec >= cl[n].time then
+            return cl[n]
         end
     end
-    return ch
 end
 
 function render_elements(master_ass)
@@ -614,13 +624,13 @@ function render_elements(master_ass)
     -- render iterations because the title may be rendered before the slider.
     state.forced_title = nil
     local se, ae = state.slider_element, elements[state.active_element]
-    if se and (ae == se or (not ae and mouse_hit(se))) then
+    if user_opts.chapter_fmt ~= "no" and se and (ae == se or (not ae and mouse_hit(se))) then
         local dur = mp.get_property_number("duration", 0)
         if dur > 0 then
             local possec = get_slider_value(se) * dur / 100 -- of mouse pos
             local ch = get_chapter(possec)
             if ch and ch.title and ch.title ~= "" then
-                state.forced_title = "Chapter: " .. ch.title
+                state.forced_title = string.format(user_opts.chapter_fmt, ch.title)
             end
         end
     end
@@ -1471,6 +1481,11 @@ function bar_layout(direction)
     local padY = 3
     local buttonW = 27
     local tcW = (state.tc_ms) and 170 or 110
+    if user_opts.tcspace >= 50 and user_opts.tcspace <= 200 then
+        -- adjust our hardcoded font size estimation
+        tcW = tcW * user_opts.tcspace / 100
+    end
+
     local tsW = 90
     local minW = (buttonW + padX)*5 + (tcW + padX)*4 + (tsW + padX)*2
 
@@ -1723,6 +1738,8 @@ function update_options(list)
     request_init()
 end
 
+local UNICODE_MINUS = string.char(0xe2, 0x88, 0x92)  -- UTF-8 for U+2212 MINUS SIGN
+
 -- OSC INIT
 function osc_init()
     msg.debug("osc_init")
@@ -1800,7 +1817,9 @@ function osc_init()
     ne.eventresponder["mbtn_left_up"] =
         function ()
             mp.commandv("playlist-prev", "weak")
-            show_message(get_playlist(), 3)
+            if user_opts.playlist_osd then
+                show_message(get_playlist(), 3)
+            end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () show_message(get_playlist(), 3) end
@@ -1815,7 +1834,9 @@ function osc_init()
     ne.eventresponder["mbtn_left_up"] =
         function ()
             mp.commandv("playlist-next", "weak")
-            show_message(get_playlist(), 3)
+            if user_opts.playlist_osd then
+                show_message(get_playlist(), 3)
+            end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () show_message(get_playlist(), 3) end
@@ -1870,7 +1891,9 @@ function osc_init()
     ne.eventresponder["mbtn_left_up"] =
         function ()
             mp.commandv("add", "chapter", -1)
-            show_message(get_chapterlist(), 3)
+            if user_opts.chapters_osd then
+                show_message(get_chapterlist(), 3)
+            end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () show_message(get_chapterlist(), 3) end
@@ -1885,7 +1908,9 @@ function osc_init()
     ne.eventresponder["mbtn_left_up"] =
         function ()
             mp.commandv("add", "chapter", 1)
-            show_message(get_chapterlist(), 3)
+            if user_opts.chapters_osd then
+                show_message(get_chapterlist(), 3)
+            end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () show_message(get_chapterlist(), 3) end
@@ -2044,10 +2069,11 @@ function osc_init()
     ne.visible = (mp.get_property_number("duration", 0) > 0)
     ne.content = function ()
         if (state.rightTC_trem) then
+            local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
             if state.tc_ms then
-                return ("-"..mp.get_property_osd("playtime-remaining/full"))
+                return (minus..mp.get_property_osd("playtime-remaining/full"))
             else
-                return ("-"..mp.get_property_osd("playtime-remaining"))
+                return (minus..mp.get_property_osd("playtime-remaining"))
             end
         else
             if state.tc_ms then
@@ -2078,10 +2104,10 @@ function osc_init()
             dmx_cache = state.dmx_cache
         end
         local min = math.floor(dmx_cache / 60)
-        local sec = dmx_cache % 60
+        local sec = math.floor(dmx_cache % 60) -- don't round e.g. 59.9 to 60
         return "Cache: " .. (min > 0 and
             string.format("%sm%02.0fs", min, sec) or
-            string.format("%3.0fs", dmx_cache))
+            string.format("%3.0fs", sec))
     end
 
     -- volume
@@ -2339,14 +2365,10 @@ function render()
             if (state.anitype == "out") then
                 osc_visible(false)
             end
-            state.anistart = nil
-            state.animation = nil
-            state.anitype =  nil
+            kill_animation()
         end
     else
-        state.anistart = nil
-        state.animation = nil
-        state.anitype =  nil
+        kill_animation()
     end
 
     --mouse show/hide area
@@ -2568,23 +2590,27 @@ function tick()
 
         local ass = assdraw.ass_new()
         -- mpv logo
-        for i, line in ipairs(logo_lines) do
-            ass:new_event()
-            ass:append(line_prefix .. line)
+        if user_opts.idlescreen then
+            for i, line in ipairs(logo_lines) do
+                ass:new_event()
+                ass:append(line_prefix .. line)
+            end
         end
 
         -- Santa hat
-        if is_december and not user_opts.greenandgrumpy then
+        if is_december and user_opts.idlescreen and not user_opts.greenandgrumpy then
             for i, line in ipairs(santa_hat_lines) do
                 ass:new_event()
                 ass:append(line_prefix .. line)
             end
         end
 
-        ass:new_event()
-        ass:pos(320, icon_y+65)
-        ass:an(8)
-        ass:append("Drop files or URLs to play here.")
+        if user_opts.idlescreen then
+            ass:new_event()
+            ass:pos(320, icon_y+65)
+            ass:an(8)
+            ass:append("Drop files or URLs to play here.")
+        end
         set_osd(640, 360, ass.text)
 
         if state.showhide_enabled then
@@ -2607,7 +2633,17 @@ function tick()
     state.tick_last_time = mp.get_time()
 
     if state.anitype ~= nil then
-        request_tick()
+        -- state.anistart can be nil - animation should now start, or it can
+        -- be a timestamp when it started. state.idle has no animation.
+        if not state.idle and
+           (not state.anistart or
+            mp.get_time() < 1 + state.anistart + user_opts.fadeduration/1000)
+        then
+            -- animating or starting, or still within 1s past the deadline
+            request_tick()
+        else
+            kill_animation()
+        end
     end
 end
 
@@ -2664,7 +2700,10 @@ mp.register_event("shutdown", shutdown)
 mp.register_event("start-file", request_init)
 mp.observe_property("track-list", nil, request_init)
 mp.observe_property("playlist", nil, request_init)
-mp.observe_property("chapter-list", nil, function()
+mp.observe_property("chapter-list", "native", function(_, list)
+    list = list or {}  -- safety, shouldn't return nil
+    table.sort(list, function(a, b) return a.time < b.time end)
+    state.chapter_list = list
     update_duration_watch()
     request_init()
 end)
@@ -2810,7 +2849,7 @@ function visibility_mode(mode, no_osd)
     end
 
     -- Reset the input state on a mode change. The input state will be
-    -- recalcuated on the next render cycle, except in 'never' mode where it
+    -- recalculated on the next render cycle, except in 'never' mode where it
     -- will just stay disabled.
     mp.disable_key_bindings("input")
     mp.disable_key_bindings("window-controls")
@@ -2820,9 +2859,35 @@ function visibility_mode(mode, no_osd)
     request_tick()
 end
 
+function idlescreen_visibility(mode, no_osd)
+    if mode == "cycle" then
+        if user_opts.idlescreen then
+            mode = "no"
+        else
+            mode = "yes"
+        end
+    end
+
+    if mode == "yes" then
+        user_opts.idlescreen = true
+    else
+        user_opts.idlescreen = false
+    end
+
+    utils.shared_script_property_set("osc-idlescreen", mode)
+
+    if not no_osd and tonumber(mp.get_property("osd-level")) >= 1 then
+        mp.osd_message("OSC logo visibility: " .. tostring(mode))
+    end
+
+    request_tick()
+end
+
 visibility_mode(user_opts.visibility, true)
 mp.register_script_message("osc-visibility", visibility_mode)
 mp.add_key_binding(nil, "visibility", function() visibility_mode("cycle") end)
+
+mp.register_script_message("osc-idlescreen", idlescreen_visibility)
 
 set_virt_mouse_area(0, 0, 0, 0, "input")
 set_virt_mouse_area(0, 0, 0, 0, "window-controls")

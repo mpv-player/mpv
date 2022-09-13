@@ -13,7 +13,8 @@ struct mp_hwdec_devices {
     struct mp_hwdec_ctx **hwctxs;
     int num_hwctxs;
 
-    void (*load_api)(void *ctx);
+    void (*load_api)(void *ctx,
+                     struct hwdec_imgfmt_request *params);
     void *load_api_ctx;
 };
 
@@ -95,16 +96,18 @@ void hwdec_devices_remove(struct mp_hwdec_devices *devs, struct mp_hwdec_ctx *ct
 }
 
 void hwdec_devices_set_loader(struct mp_hwdec_devices *devs,
-    void (*load_api)(void *ctx), void *load_api_ctx)
+    void (*load_api)(void *ctx, struct hwdec_imgfmt_request *params),
+    void *load_api_ctx)
 {
     devs->load_api = load_api;
     devs->load_api_ctx = load_api_ctx;
 }
 
-void hwdec_devices_request_all(struct mp_hwdec_devices *devs)
+void hwdec_devices_request_for_img_fmt(struct mp_hwdec_devices *devs,
+                                       struct hwdec_imgfmt_request *params)
 {
     if (devs->load_api && !hwdec_devices_get_first(devs))
-        devs->load_api(devs->load_api_ctx);
+        devs->load_api(devs->load_api_ctx, params);
 }
 
 char *hwdec_devices_get_names(struct mp_hwdec_devices *devs)
@@ -127,6 +130,9 @@ static const struct hwcontext_fns *const hwcontext_fns[] = {
 #endif
 #if HAVE_D3D9_HWACCEL
     &hwcontext_fns_dxva2,
+#endif
+#if HAVE_DRM
+    &hwcontext_fns_drmprime,
 #endif
 #if HAVE_VAAPI
     &hwcontext_fns_vaapi,

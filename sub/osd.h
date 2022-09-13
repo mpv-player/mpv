@@ -24,11 +24,11 @@
 
 #include "options/m_option.h"
 
-// NOTE: VOs must support at least SUBBITMAP_RGBA.
+// NOTE: VOs must support at least SUBBITMAP_BGRA.
 enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
-    SUBBITMAP_RGBA,     // IMGFMT_BGRA (MSB=A, LSB=B), scaled, premultiplied alpha
+    SUBBITMAP_BGRA,     // IMGFMT_BGRA (MSB=A, LSB=B), scaled, premultiplied alpha
 
     SUBBITMAP_COUNT
 };
@@ -64,7 +64,7 @@ struct sub_bitmaps {
     // Packed representation of the bitmap data. If non-NULL, then the
     // parts[].bitmap pointer points into the image data here (and stride will
     // correspond to packed->stride[0]).
-    //  SUBBITMAP_RGBA: IMGFMT_BGRA (exact match)
+    //  SUBBITMAP_BGRA: IMGFMT_BGRA (exact match)
     //  SUBBITMAP_LIBASS: IMGFMT_Y8 (not the same, but compatible layout)
     // Other formats have this set to NULL.
     struct mp_image *packed;
@@ -82,7 +82,7 @@ struct sub_bitmap_list {
     int64_t change_id;
 
     // Bounding box for rendering. It's notable that SUBBITMAP_LIBASS images are
-    // always within these bounds, while SUBBITMAP_RGBA is not necessarily.
+    // always within these bounds, while SUBBITMAP_BGRA is not necessarily.
     int w, h;
 
     // Sorted by sub_bitmaps.render_index. Unused parts are not in the array,

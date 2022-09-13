@@ -83,7 +83,9 @@ struct encoder_context {
     AVCodecContext *encoder;
     struct mux_stream *mux_stream;
 
+    // (essentially private)
     struct stream *twopass_bytebuffer;
+    AVPacket *pkt;
 };
 
 // Free with talloc_free(). (Keep in mind actual deinitialization requires

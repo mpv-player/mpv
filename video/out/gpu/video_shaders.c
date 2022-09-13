@@ -392,7 +392,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "             / (vec3(%f) - vec3(%f) * color.rgb);\n",
               PQ_C1, PQ_C2, PQ_C3);
         GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", 1.0 / PQ_M1);
-        // PQ's output range is 0-10000, but we need it to be relative to to
+        // PQ's output range is 0-10000, but we need it to be relative to
         // MP_REF_WHITE instead, so rescale
         GLSLF("color.rgb *= vec3(%f);\n", 10000 / MP_REF_WHITE);
         break;
@@ -609,7 +609,7 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     // pixel using shared memory first
     GLSLH(shared int wg_sum;)
     GLSLH(shared uint wg_max;)
-    GLSL(wg_sum = 0; wg_max = 0;)
+    GLSL(wg_sum = 0; wg_max = 0u;)
     GLSL(barrier();)
     GLSLF("float sig_log = log(max(sig_max, %f));\n", log_min);
     GLSLF("atomicAdd(wg_sum, int(sig_log * %f));\n", log_scale);
@@ -618,7 +618,7 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     // Have one thread per work group update the global atomics
     GLSL(memoryBarrierShared();)
     GLSL(barrier();)
-    GLSL(if (gl_LocalInvocationIndex == 0) {)
+    GLSL(if (gl_LocalInvocationIndex == 0u) {)
     GLSL(    int wg_avg = wg_sum / int(gl_WorkGroupSize.x * gl_WorkGroupSize.y);)
     GLSL(    atomicAdd(frame_sum, wg_avg);)
     GLSL(    atomicMax(frame_max, wg_max);)
@@ -628,8 +628,8 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
 
     // Finally, to update the global state, we increment a counter per dispatch
     GLSL(uint num_wg = gl_NumWorkGroups.x * gl_NumWorkGroups.y;)
-    GLSL(if (gl_LocalInvocationIndex == 0 && atomicAdd(counter, 1) == num_wg - 1) {)
-    GLSL(    counter = 0;)
+    GLSL(if (gl_LocalInvocationIndex == 0u && atomicAdd(counter, 1u) == num_wg - 1u) {)
+    GLSL(    counter = 0u;)
     GLSL(    vec2 cur = vec2(float(frame_sum) / float(num_wg), frame_max);)
     GLSLF("  cur *= vec2(1.0/%f, 1.0/%f);\n", log_scale, sig_scale);
     GLSL(    cur.x = exp(cur.x);)
@@ -650,7 +650,7 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
     GLSL(    average = mix(average, cur, weight);)
 
     // Reset SSBO state for the next frame
-    GLSL(    frame_sum = 0; frame_max = 0;)
+    GLSL(    frame_sum = 0; frame_max = 0u;)
     GLSL(    memoryBarrierBuffer();)
     GLSL(})
 }
@@ -692,7 +692,8 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     // This function always operates on an absolute scale, so ignore the
     // dst_peak normalization for it
     float dst_scale = dst_peak;
-    if (opts->curve == TONE_MAPPING_BT_2390)
+    enum tone_mapping curve = opts->curve ? opts->curve : TONE_MAPPING_BT_2390;
+    if (curve == TONE_MAPPING_BT_2390)
         dst_scale = 1.0;
 
     // Rescale the variables in order to bring it into a representation where
@@ -709,7 +710,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     GLSL(sig_peak *= slope;)
 
     float param = opts->curve_param;
-    switch (opts->curve) {
+    switch (curve) {
     case TONE_MAPPING_CLIP:
         GLSLF("sig = min(%f * sig, 1.0);\n", isnan(param) ? 1.0 : param);
         break;
@@ -808,18 +809,24 @@ static void pass_tone_map(struct gl_shader_cache *sc,
         abort();
     }
 
-    GLSL(vec3 sig_lin = color.rgb * (sig[sig_idx] / sig_orig);)
-
-    // Mix between the per-channel tone mapped and the linear tone mapped
-    // signal based on the desaturation strength
-    if (opts->desat > 0) {
-        float base = 0.18 * dst_scale;
-        GLSLF("float coeff = max(sig[sig_idx] - %f, 1e-6) / "
-              "              max(sig[sig_idx], 1.0);\n", base);
-        GLSLF("coeff = %f * pow(coeff, %f);\n", opts->desat, opts->desat_exp);
-        GLSLF("color.rgb = mix(sig_lin, %f * sig, coeff);\n", dst_scale);
-    } else {
-        GLSL(color.rgb = sig_lin;)
+    switch (opts->mode) {
+    case TONE_MAP_MODE_RGB:
+        GLSL(color.rgb = sig;)
+        break;
+    case TONE_MAP_MODE_MAX:
+        GLSL(color.rgb *= sig[sig_idx] / sig_orig;)
+        break;
+    case TONE_MAP_MODE_AUTO:
+    case TONE_MAP_MODE_HYBRID:
+        GLSLF("float coeff = max(sig[sig_idx] - %f, 1e-6) / \n"
+              "              max(sig[sig_idx], 1.0);        \n"
+              "coeff = %f * pow(coeff / %f, %f);            \n"
+              "color.rgb *= sig[sig_idx] / sig_orig;        \n"
+              "color.rgb = mix(color.rgb, %f * sig, coeff); \n",
+              0.18 / dst_scale, 0.90, dst_scale, 0.20, dst_scale);
+        break;
+    default:
+        abort();
     }
 }
 
@@ -881,7 +888,7 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
         gl_sc_uniform_mat3(sc, "cms_matrix", true, &m[0][0]);
         GLSL(color.rgb = cms_matrix * color.rgb;)
 
-        if (opts->gamut_clipping) {
+        if (!opts->gamut_mode || opts->gamut_mode == GAMUT_DESATURATE) {
             GLSL(float cmin = min(min(color.r, color.g), color.b);)
             GLSL(if (cmin < 0.0) {
                      float luma = dot(dst_luma, color.rgb);
@@ -906,8 +913,8 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
 
     GLSLF("color.rgb *= vec3(%f);\n", 1.0 / dst_range);
 
-    // Warn for remaining out-of-gamut colors is enabled
-    if (opts->gamut_warning) {
+    // Warn for remaining out-of-gamut colors if enabled
+    if (opts->gamut_mode == GAMUT_WARN) {
         GLSL(if (any(greaterThan(color.rgb, vec3(1.005))) ||
                  any(lessThan(color.rgb, vec3(-0.005)))))
             GLSL(color.rgb = vec3(1.0) - color.rgb;) // invert
@@ -936,14 +943,6 @@ static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
     gl_sc_uniform_dynamic(sc);
     gl_sc_uniform_f(sc, "random", (double)av_lfg_get(lfg) / UINT32_MAX);
 }
-
-struct deband_opts {
-    int enabled;
-    int iterations;
-    float threshold;
-    float range;
-    float grain;
-};
 
 const struct deband_opts deband_opts_def = {
     .iterations = 1,

@@ -250,7 +250,7 @@ static void fixed_aframe_size_process(struct mp_filter *f)
         int in_samples = mp_aframe_get_size(p->in);
         int copy = MPMIN(in_samples, p->samples - p->out_written);
         if (!mp_aframe_copy_samples(p->out, p->out_written, p->in, 0, copy))
-            assert(0);
+            MP_ASSERT_UNREACHABLE();
         mp_aframe_skip_samples(p->in, copy);
         p->out_written += copy;
     }

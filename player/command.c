@@ -155,7 +155,7 @@ static void hook_remove(struct MPContext *mpctx, struct hook_handler *h)
             return;
         }
     }
-    assert(0);
+    MP_ASSERT_UNREACHABLE();
 }
 
 bool mp_hook_test_completion(struct MPContext *mpctx, char *type)
@@ -993,7 +993,7 @@ static int parse_node_chapters(struct MPContext *mpctx,
         }
     }
 
-    mp_notify(mpctx, MPV_EVENT_CHAPTER_CHANGE, NULL);
+    mp_notify(mpctx, MP_EVENT_CHAPTER_CHANGE, NULL);
     mp_notify_property(mpctx, "chapter-list");
 
     return M_PROPERTY_OK;
@@ -1702,7 +1702,7 @@ static int mp_property_audio_device(void *ctx, struct m_property *prop,
         if (mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &name) < 1)
             name = NULL;
 
-        struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
+        struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug, mpctx->ao);
         for (int n = 0; n < list->num_devices; n++) {
             struct ao_device_desc *dev = &list->devices[n];
             if (dev->name && name && strcmp(dev->name, name) == 0) {
@@ -1724,7 +1724,7 @@ static int mp_property_audio_devices(void *ctx, struct m_property *prop,
     struct command_ctx *cmd = mpctx->command_ctx;
     create_hotplug(mpctx);
 
-    struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
+    struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug, mpctx->ao);
     return m_property_read_list(action, arg, list->num_devices,
                                 get_device_entry, list);
 }
@@ -1949,6 +1949,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !track->lang},
         {"audio-channels", SUB_PROP_INT(track_channels(track)),
                         .unavailable = track_channels(track) <= 0},
+        {"image",       SUB_PROP_FLAG(track->image)},
         {"albumart",    SUB_PROP_FLAG(track->attached_picture)},
         {"default",     SUB_PROP_FLAG(track->default_track)},
         {"forced",      SUB_PROP_FLAG(track->forced_track)},
@@ -2075,6 +2076,16 @@ static int property_current_tracks(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNKNOWN;
 
     struct track *t = mpctx->current_track[order][type];
+
+    if (!t && mpctx->lavfi) {
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            if (mpctx->tracks[n]->type == type && mpctx->tracks[n]->selected) {
+                t = mpctx->tracks[n];
+                break;
+            }
+        }
+    }
+
     if (!t)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -3377,14 +3388,14 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
         char **choices = NULL;
 
         if (opt->type == &m_option_type_choice) {
-            struct m_opt_choice_alternatives *alt = opt->priv;
+            const struct m_opt_choice_alternatives *alt = opt->priv;
             int num = 0;
             for ( ; alt->name; alt++)
                 MP_TARRAY_APPEND(NULL, choices, num, alt->name);
             MP_TARRAY_APPEND(NULL, choices, num, NULL);
         }
         if (opt->type == &m_option_type_obj_settings_list) {
-            struct m_obj_list *objs = opt->priv;
+            const struct m_obj_list *objs = opt->priv;
             int num = 0;
             for (int n = 0; ; n++) {
                 struct m_obj_desc desc = {0};
@@ -3759,8 +3770,8 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_END_FILE, "*"),
     E(MPV_EVENT_FILE_LOADED, "*"),
     E(MP_EVENT_CHANGE_ALL, "*"),
-    E(MPV_EVENT_TRACKS_CHANGED, "track-list", "current-tracks"),
-    E(MPV_EVENT_TRACK_SWITCHED, "track-list", "current-tracks"),
+    E(MP_EVENT_TRACKS_CHANGED, "track-list", "current-tracks"),
+    E(MP_EVENT_TRACK_SWITCHED, "track-list", "current-tracks"),
     E(MPV_EVENT_IDLE, "*"),
     E(MPV_EVENT_TICK, "time-pos", "audio-pts", "stream-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
@@ -3783,8 +3794,8 @@ static const char *const *const mp_event_property_change[] = {
       "audio-out-params", "volume-max", "mixer-active"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle", "eof-reached"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle", "eof-reached"),
-    E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),
-    E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
+    E(MP_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),
+    E(MP_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
     E(MP_EVENT_CACHE_UPDATE,
       "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache",
       "demuxer-cache-time", "cache-buffering-state", "cache-speed",
@@ -4177,7 +4188,7 @@ static void recreate_overlays(struct MPContext *mpctx)
     struct command_ctx *cmd = mpctx->command_ctx;
     int overlay_next = !cmd->overlay_osd_current;
     struct sub_bitmaps *new = &cmd->overlay_osd[overlay_next];
-    new->format = SUBBITMAP_RGBA;
+    new->format = SUBBITMAP_BGRA;
     new->change_id = 1;
 
     bool valid = false;
@@ -6528,6 +6539,9 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
     }
     if (event == MP_EVENT_WIN_STATE2)
         ctx->cached_window_scale = 0;
+
+    if (event == MPV_EVENT_FILE_LOADED)
+        audio_update_media_role(mpctx);
 }
 
 void handle_command_updates(struct MPContext *mpctx)
@@ -6592,9 +6606,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (co)
         mp_notify_property(mpctx, co->name);
 
-    if (opt_ptr == &opts->pause)
-        mp_notify(mpctx, opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
-
     if (self_update)
         return;
 
@@ -6611,6 +6622,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             }
         }
         osd_changed(mpctx->osd);
+        if (mpctx->video_out)
+            vo_control_async(mpctx->video_out, VOCTRL_OSD_CHANGED, NULL);
         if (flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD))
             mp_force_video_refresh(mpctx);
         mp_wakeup_core(mpctx);

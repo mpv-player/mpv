@@ -148,7 +148,7 @@ static int os_ctx_create(struct ra_ctx *ctx)
     }
 
     const char *wgl_exts = wglGetExtensionsStringARB(p->os_dc);
-    if (!strstr(wgl_exts, "WGL_ARB_create_context")) {
+    if (!gl_check_extension(wgl_exts, "WGL_ARB_create_context")) {
         MP_FATAL(ctx->vo, "The OpenGL driver does not support OpenGL 3.x\n");
         goto fail;
     }

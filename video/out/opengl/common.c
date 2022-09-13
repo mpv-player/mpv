@@ -143,6 +143,7 @@ static const struct gl_functions gl_functions[] = {
         .ver_core = 210,
         .provides = MPGL_CAP_ROW_LENGTH | MPGL_CAP_1D_TEX,
         .functions = (const struct gl_function[]) {
+            DEF_FN(DrawBuffer),
             DEF_FN(GetTexLevelParameteriv),
             DEF_FN(ReadBuffer),
             DEF_FN(TexImage1D),
@@ -307,6 +308,7 @@ static const struct gl_functions gl_functions[] = {
     },
     {
         .ver_core = 430,
+        .extension = "GL_ARB_invalidate_subdata",
         .functions = (const struct gl_function[]) {
             DEF_FN(InvalidateTexImage),
             {0}
@@ -338,8 +340,17 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    // Equivalent extension for ES
+    {
+        .extension = "GL_EXT_buffer_storage",
+        .functions = (const struct gl_function[]) {
+            DEF_FN_NAME(BufferStorage, "glBufferStorageEXT"),
+            {0}
+        },
+    },
     {
         .ver_core = 420,
+        .ver_es_core = 310,
         .extension = "GL_ARB_shader_image_load_store",
         .functions = (const struct gl_function[]) {
             DEF_FN(BindImageTexture),
@@ -349,16 +360,19 @@ static const struct gl_functions gl_functions[] = {
     },
     {
         .ver_core = 310,
+        .ver_es_core = 300,
         .extension = "GL_ARB_uniform_buffer_object",
         .provides = MPGL_CAP_UBO,
     },
     {
         .ver_core = 430,
+        .ver_es_core = 310,
         .extension = "GL_ARB_shader_storage_buffer_object",
         .provides = MPGL_CAP_SSBO,
     },
     {
         .ver_core = 430,
+        .ver_es_core = 310,
         .extension = "GL_ARB_compute_shader",
         .functions = (const struct gl_function[]) {
             DEF_FN(DispatchCompute),
@@ -454,21 +468,14 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
-    // These don't exist - they are for the sake of mpv internals, and libmpv
-    // interaction (see libmpv/opengl_cb.h).
-    // This is not used by the render API, only the deprecated opengl-cb API.
+    // ES version uses a different extension.
     {
-        .extension = "GL_MP_MPGetNativeDisplay",
+        .ver_es_core = 320,
+        .extension = "GL_KHR_debug",
+        .provides = MPGL_CAP_DEBUG,
         .functions = (const struct gl_function[]) {
-            DEF_FN(MPGetNativeDisplay),
-            {0}
-        },
-    },
-    // Same, but using the old name.
-    {
-        .extension = "GL_MP_D3D_interfaces",
-        .functions = (const struct gl_function[]) {
-            DEF_FN_NAME(MPGetNativeDisplay, "glMPGetD3DInterface"),
+            // (only functions needed by us)
+            DEF_FN(DebugMessageCallback),
             {0}
         },
     },
@@ -486,27 +493,6 @@ static const struct gl_functions gl_functions[] = {
 #undef DEF_FN
 #undef DEF_FN_NAME
 
-void mpgl_check_version(GL *gl, void *(*get_fn)(void *ctx, const char *n),
-                        void *fn_ctx)
-{
-    gl->GetString = get_fn(fn_ctx, "glGetString");
-    if (!gl->GetString) {
-        gl->version = 0;
-        return;
-    }
-    const char *version_string = gl->GetString(GL_VERSION);
-    if (!version_string) {
-        gl->version = 0;
-        return;
-    }
-    int major = 0, minor = 0;
-    if (sscanf(version_string, "%d.%d", &major, &minor) < 2) {
-        gl->version = 0;
-        return;
-    }
-    gl->version = MPGL_VER(major, minor);
-}
-
 // Fill the GL struct with function pointers and extensions from the current
 // GL context. Called by the backend.
 // get_fn: function to resolve function names
@@ -518,6 +504,8 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     talloc_free(gl->extensions);
     *gl = (GL) {
         .extensions = talloc_strdup(gl, ext2 ? ext2 : ""),
+        .get_fn = get_fn,
+        .fn_ctx = fn_ctx,
     };
 
     gl->GetString = get_fn(fn_ctx, "glGetString");
@@ -647,7 +635,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (gl->es >= 200)
             gl->glsl_version = 100;
         if (gl->es >= 300)
-            gl->glsl_version = 300;
+            gl->glsl_version = gl->es;
     } else {
         gl->glsl_version = 120;
         int glsl_major = 0, glsl_minor = 0;

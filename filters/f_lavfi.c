@@ -33,6 +33,8 @@
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 
+#include "config.h"
+
 #include "common/common.h"
 #include "common/av_common.h"
 #include "common/tags.h"
@@ -40,6 +42,7 @@
 
 #include "audio/format.h"
 #include "audio/aframe.h"
+#include "audio/chmap_avchannel.h"
 #include "video/mp_image.h"
 #include "audio/fmt-conversion.h"
 #include "video/fmt-conversion.h"
@@ -394,7 +397,7 @@ static bool init_pads(struct lavfi *c)
         } else if (pad->type == MP_FRAME_VIDEO) {
             dst_filter = avfilter_get_by_name("buffersink");
         } else {
-            assert(0);
+            MP_ASSERT_UNREACHABLE();
         }
 
         if (!dst_filter)
@@ -470,7 +473,11 @@ static bool init_pads(struct lavfi *c)
             params->sample_rate = mp_aframe_get_rate(fmt);
             struct mp_chmap chmap = {0};
             mp_aframe_get_chmap(fmt, &chmap);
+#if !HAVE_AV_CHANNEL_LAYOUT
             params->channel_layout = mp_chmap_to_lavc(&chmap);
+#else
+            mp_chmap_to_av_layout(&params->ch_layout, &chmap);
+#endif
             pad->timebase = (AVRational){1, mp_aframe_get_rate(fmt)};
             filter_name = "abuffer";
         } else if (pad->type == MP_FRAME_VIDEO) {
@@ -484,7 +491,7 @@ static bool init_pads(struct lavfi *c)
             params->frame_rate = av_d2q(fmt->nominal_fps, 1000000);
             filter_name = "buffer";
         } else {
-            assert(0);
+            MP_ASSERT_UNREACHABLE();
         }
 
         params->time_base = pad->timebase;
@@ -944,19 +951,19 @@ static struct mp_filter *lavfi_create(struct mp_filter *parent, void *options)
     return l ? l->f : NULL;
 }
 
-static bool is_single_media_only(const AVFilterPad *pads, int media_type)
-{
-    int count = avfilter_pad_count(pads);
-    if (count != 1)
-        return false;
-    return avfilter_pad_get_type(pads, 0) == media_type;
-}
-
 // Does it have exactly one video input and one video output?
 static bool is_usable(const AVFilter *filter, int media_type)
 {
-    return is_single_media_only(filter->inputs, media_type) &&
-           is_single_media_only(filter->outputs, media_type);
+#if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(8, 3, 0)
+    int nb_inputs  = avfilter_filter_pad_count(filter, 0),
+        nb_outputs = avfilter_filter_pad_count(filter, 1);
+#else
+    int nb_inputs  = avfilter_pad_count(filter->inputs),
+        nb_outputs = avfilter_pad_count(filter->outputs);
+#endif
+    return nb_inputs == 1 && nb_outputs == 1 &&
+           avfilter_pad_get_type(filter->inputs, 0) == media_type &&
+           avfilter_pad_get_type(filter->outputs, 0) == media_type;
 }
 
 bool mp_lavfi_is_usable(const char *name, int media_type)

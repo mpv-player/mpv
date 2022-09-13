@@ -38,10 +38,11 @@ extern const struct ra_hwdec_driver ra_hwdec_dxva2dxgi;
 extern const struct ra_hwdec_driver ra_hwdec_cuda;
 extern const struct ra_hwdec_driver ra_hwdec_cuda_nvdec;
 extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
+extern const struct ra_hwdec_driver ra_hwdec_drmprime;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime_drm;
 
 const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
-#if HAVE_VAAPI_EGL || HAVE_VAAPI_VULKAN
+#if HAVE_VAAPI_EGL || HAVE_VAAPI_LIBPLACEBO
     &ra_hwdec_vaegl,
 #endif
 #if HAVE_VIDEOTOOLBOX_GL || HAVE_IOS_GL
@@ -75,6 +76,7 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #endif
 #if HAVE_DRM
     &ra_hwdec_drmprime_drm,
+    &ra_hwdec_drmprime,
 #endif
 
     NULL
@@ -105,36 +107,6 @@ struct ra_hwdec *ra_hwdec_load_driver(struct ra *ra, struct mp_log *log,
     return hwdec;
 }
 
-int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                          struct bstr name, const char **value)
-{
-    struct bstr param = bstr0(*value);
-    bool help = bstr_equals0(param, "help");
-    if (help)
-        mp_info(log, "Available hwdecs:\n");
-    for (int n = 0; ra_hwdec_drivers[n]; n++) {
-        const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
-        if (help) {
-            mp_info(log, "    %s\n", drv->name);
-        } else if (bstr_equals0(param, drv->name)) {
-            return 1;
-        }
-    }
-    if (help) {
-        mp_info(log, "    auto (behavior depends on context)\n"
-                     "    all (load all hwdecs)\n"
-                     "    no (do not load any and block loading on demand)\n");
-        return M_OPT_EXIT;
-    }
-    if (!param.len)
-        return 1; // "" is treated specially
-    if (bstr_equals0(param, "all") || bstr_equals0(param, "auto") ||
-        bstr_equals0(param, "no"))
-        return 1;
-    mp_fatal(log, "No hwdec backend named '%.*s' found!\n", BSTR_P(param));
-    return M_OPT_INVALID;
-}
-
 void ra_hwdec_uninit(struct ra_hwdec *hwdec)
 {
     if (hwdec)
@@ -152,7 +124,7 @@ bool ra_hwdec_test_format(struct ra_hwdec *hwdec, int imgfmt)
 }
 
 struct ra_hwdec_mapper *ra_hwdec_mapper_create(struct ra_hwdec *hwdec,
-                                               struct mp_image_params *params)
+                                               const struct mp_image_params *params)
 {
     assert(ra_hwdec_test_format(hwdec, params->imgfmt));
 
@@ -186,6 +158,8 @@ void ra_hwdec_mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
     if (mapper->driver->unmap)
         mapper->driver->unmap(mapper);
+
+    // Clean up after the image if the mapper didn't already
     mp_image_unrefp(&mapper->src);
 }
 
@@ -198,4 +172,154 @@ int ra_hwdec_mapper_map(struct ra_hwdec_mapper *mapper, struct mp_image *img)
         return -1;
     }
     return 0;
+}
+
+int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
+                          struct bstr name, const char **value)
+{
+    struct bstr param = bstr0(*value);
+    bool help = bstr_equals0(param, "help");
+    if (help)
+        mp_info(log, "Available hwdecs:\n");
+    for (int n = 0; ra_hwdec_drivers[n]; n++) {
+        const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
+        if (help) {
+            mp_info(log, "    %s\n", drv->name);
+        } else if (bstr_equals0(param, drv->name)) {
+            return 1;
+        }
+    }
+    if (help) {
+        mp_info(log, "    auto (behavior depends on context)\n"
+                     "    all (load all hwdecs)\n"
+                     "    no (do not load any and block loading on demand)\n");
+        return M_OPT_EXIT;
+    }
+    if (!param.len)
+        return 1; // "" is treated specially
+    if (bstr_equals0(param, "all") || bstr_equals0(param, "auto") ||
+        bstr_equals0(param, "no"))
+        return 1;
+    mp_fatal(log, "No hwdec backend named '%.*s' found!\n", BSTR_P(param));
+    return M_OPT_INVALID;
+}
+
+static void load_add_hwdec(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
+                           const struct ra_hwdec_driver *drv, bool is_auto)
+{
+    // Don't load duplicate hwdecs
+    for (int j = 0; j < ctx->num_hwdecs; j++) {
+        if (ctx->hwdecs[j]->driver == drv)
+            return;
+    }
+
+    struct ra_hwdec *hwdec =
+        ra_hwdec_load_driver(ctx->ra, ctx->log, ctx->global, devs, drv, is_auto);
+    if (hwdec)
+        MP_TARRAY_APPEND(NULL, ctx->hwdecs, ctx->num_hwdecs, hwdec);
+}
+
+static void load_hwdecs_all(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs)
+{
+    if (!ctx->loading_done) {
+        for (int n = 0; ra_hwdec_drivers[n]; n++)
+            load_add_hwdec(ctx, devs, ra_hwdec_drivers[n], true);
+        ctx->loading_done = true;
+    }
+}
+
+void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
+                       const char *type, bool load_all_by_default)
+{
+    assert(ctx->ra);
+
+    /*
+     * By default, or if the option value is "auto", we will not pre-emptively
+     * load any interops, and instead allow them to be loaded on-demand.
+     *
+     * If the option value is "no", then no interops will be loaded now, and
+     * no interops will be loaded, even if requested later.
+     *
+     * If the option value is "all", then all interops will be loaded now, and
+     * obviously no interops will need to be loaded later.
+     *
+     * Finally, if a specific interop is requested, it will be loaded now, and
+     * no other interop will be loaded, even if requested later.
+     */
+    if (!type || !type[0] || strcmp(type, "auto") == 0) {
+        if (!load_all_by_default)
+            return;
+        type = "all";
+    }
+    if (strcmp(type, "no") == 0) {
+        // do nothing, just block further loading
+    } else if (strcmp(type, "all") == 0) {
+        load_hwdecs_all(ctx, devs);
+    } else {
+        for (int n = 0; ra_hwdec_drivers[n]; n++) {
+            const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
+            if (strcmp(type, drv->name) == 0) {
+                load_add_hwdec(ctx, devs, drv, false);
+                break;
+            }
+        }
+    }
+    ctx->loading_done = true;
+}
+
+void ra_hwdec_ctx_uninit(struct ra_hwdec_ctx *ctx)
+{
+    for (int n = 0; n < ctx->num_hwdecs; n++)
+        ra_hwdec_uninit(ctx->hwdecs[n]);
+
+    talloc_free(ctx->hwdecs);
+    memset(ctx, 0, sizeof(*ctx));
+}
+
+void ra_hwdec_ctx_load_fmt(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
+                           struct hwdec_imgfmt_request *params)
+{
+    int imgfmt = params->imgfmt;
+    if (ctx->loading_done) {
+        /*
+         * If we previously marked interop loading as done (for reasons
+         * discussed above), then do not load any other interops regardless
+         * of imgfmt.
+         */
+        return;
+    }
+
+    if (imgfmt == IMGFMT_NONE) {
+        MP_VERBOSE(ctx, "Loading hwdec drivers for all formats\n");
+        load_hwdecs_all(ctx, devs);
+        return;
+    }
+
+    MP_VERBOSE(ctx, "Loading hwdec drivers for format: '%s'\n",
+               mp_imgfmt_to_name(imgfmt));
+    for (int i = 0; ra_hwdec_drivers[i]; i++) {
+        bool matched_fmt = false;
+        const struct ra_hwdec_driver *drv = ra_hwdec_drivers[i];
+        for (int j = 0; drv->imgfmts[j]; j++) {
+            if (imgfmt == drv->imgfmts[j]) {
+                matched_fmt = true;
+                break;
+            }
+        }
+        if (!matched_fmt) {
+            continue;
+        }
+
+        load_add_hwdec(ctx, devs, drv, params->probing);
+    }
+}
+
+struct ra_hwdec *ra_hwdec_get(struct ra_hwdec_ctx *ctx, int imgfmt)
+{
+    for (int n = 0; n < ctx->num_hwdecs; n++) {
+        if (ra_hwdec_test_format(ctx->hwdecs[n], imgfmt))
+            return ctx->hwdecs[n];
+    }
+
+    return NULL;
 }

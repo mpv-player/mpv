@@ -25,7 +25,7 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
 
     mpgl_load_functions2(p->gl, init_params->get_proc_address,
                          init_params->get_proc_address_ctx,
-                         init_params->extra_exts, ctx->log);
+                         NULL, ctx->log);
     if (!p->gl->version && !p->gl->es) {
         MP_FATAL(ctx, "OpenGL not initialized.\n");
         return MPV_ERROR_UNSUPPORTED;
@@ -42,7 +42,7 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
 
     static const struct ra_swapchain_fns empty_swapchain_fns = {0};
     struct ra_gl_ctx_params gl_params = {
-        // vo_opengl_cb is essentially like a gigantic external swapchain where
+        // vo_libmpv is essentially like a gigantic external swapchain where
         // the user is in charge of presentation / swapping etc. But we don't
         // actually need to provide any of these functions, since we can just
         // not call them to begin with - so just set it to an empty object to
@@ -62,18 +62,6 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
     ra_gl_set_debug(p->ra_ctx->ra, debug);
 
     ctx->ra = p->ra_ctx->ra;
-
-    // Legacy API user loading for opengl-cb. Explicitly inactive for render API.
-    if (get_mpv_render_param(params, (mpv_render_param_type)-1, NULL) ==
-        ctx->global && p->gl->MPGetNativeDisplay)
-    {
-        void *x11 = p->gl->MPGetNativeDisplay("x11");
-        if (x11)
-            ra_add_native_resource(ctx->ra, "x11", x11);
-        void *wl = p->gl->MPGetNativeDisplay("wl");
-        if (wl)
-            ra_add_native_resource(ctx->ra, "wl", wl);
-    }
 
     return 0;
 }

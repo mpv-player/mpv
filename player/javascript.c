@@ -610,9 +610,10 @@ static void script__request_event(js_State *J)
     const char *event = js_tostring(J, 1);
     bool enable = js_toboolean(J, 2);
 
-    const char *name;
-    for (int n = 0; n < 256 && (name = mpv_event_name(n)); n++) {
-        if (strcmp(name, event) == 0) {
+    for (int n = 0; n < 256; n++) {
+        // some n's may be missing ("holes"), returning NULL
+        const char *name = mpv_event_name(n);
+        if (name && strcmp(name, event) == 0) {
             push_status(J, mpv_request_event(jclient(J), n, enable));
             return;
         }
@@ -943,12 +944,6 @@ static void script_join_path(js_State *J, void *af)
     js_pushstring(J, mp_path_join(af, js_tostring(J, 1), js_tostring(J, 2)));
 }
 
-static void script_get_user_path(js_State *J, void *af)
-{
-    const char *path = js_tostring(J, 1);
-    js_pushstring(J, mp_get_user_path(af, jctx(J)->mpctx->global, path));
-}
-
 // args: is_append, prefixed file name, data (c-str)
 static void script__write_file(js_State *J, void *af)
 {
@@ -1204,7 +1199,6 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(file_info, 1),
     FN_ENTRY(split_path, 1),
     AF_ENTRY(join_path, 2),
-    AF_ENTRY(get_user_path, 1),
     FN_ENTRY(get_env_list, 0),
 
     FN_ENTRY(read_file, 2),

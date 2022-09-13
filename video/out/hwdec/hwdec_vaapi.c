@@ -22,11 +22,12 @@
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
+#include <va/va_drmcommon.h>
 
 #include "config.h"
 
 #include "video/out/gpu/hwdec.h"
-#include "video/out/hwdec/hwdec_vaapi.h"
+#include "video/out/hwdec/dmabuf_interop.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image_pool.h"
 #include "video/vaapi.h"
@@ -99,6 +100,15 @@ static VADisplay *create_native_va_display(struct ra *ra, struct mp_log *log)
 
 static void determine_working_formats(struct ra_hwdec *hw);
 
+struct priv_owner {
+    struct mp_vaapi_ctx *ctx;
+    VADisplay *display;
+    int *formats;
+    bool probing_formats; // temporary during init
+
+    struct dmabuf_interop dmabuf_interop;
+};
+
 static void uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
@@ -107,12 +117,12 @@ static void uninit(struct ra_hwdec *hw)
     va_destroy(p->ctx);
 }
 
-const static vaapi_interop_init interop_inits[] = {
-#if HAVE_VAAPI_EGL
-    vaapi_gl_init,
+const static dmabuf_interop_init interop_inits[] = {
+#if HAVE_DMABUF_INTEROP_GL
+    dmabuf_interop_gl_init,
 #endif
-#if HAVE_VAAPI_VULKAN
-    vaapi_vk_init,
+#if HAVE_DMABUF_INTEROP_PL
+    dmabuf_interop_pl_init,
 #endif
     NULL
 };
@@ -122,12 +132,12 @@ static int init(struct ra_hwdec *hw)
     struct priv_owner *p = hw->priv;
 
     for (int i = 0; interop_inits[i]; i++) {
-        if (interop_inits[i](hw)) {
+        if (interop_inits[i](hw, &p->dmabuf_interop)) {
             break;
         }
     }
 
-    if (!p->interop_map || !p->interop_unmap) {
+    if (!p->dmabuf_interop.interop_map || !p->dmabuf_interop.interop_unmap) {
         MP_VERBOSE(hw, "VAAPI hwdec only works with OpenGL or Vulkan backends.\n");
         return -1;
     }
@@ -167,12 +177,12 @@ static int init(struct ra_hwdec *hw)
 static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
-    struct priv *p = mapper->priv;
+    struct dmabuf_interop_priv *p = mapper->priv;
 
-    p_owner->interop_unmap(mapper);
+    p_owner->dmabuf_interop.interop_unmap(mapper);
 
     if (p->surface_acquired) {
-        for (int n = 0; n < p->desc.num_objects; n++)
+        for (int n = 0; n < p->desc.nb_objects; n++)
             close(p->desc.objects[n].fd);
         p->surface_acquired = false;
     }
@@ -181,8 +191,8 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
-    if (p_owner->interop_uninit) {
-        p_owner->interop_uninit(mapper);
+    if (p_owner->dmabuf_interop.interop_uninit) {
+        p_owner->dmabuf_interop.interop_uninit(mapper);
     }
 }
 
@@ -199,7 +209,7 @@ static bool check_fmt(struct ra_hwdec_mapper *mapper, int fmt)
 static int mapper_init(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
-    struct priv *p = mapper->priv;
+    struct dmabuf_interop_priv *p = mapper->priv;
 
     mapper->dst_params = mapper->src_params;
     mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
@@ -213,8 +223,8 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     p->num_planes = desc.num_planes;
     mp_image_set_params(&p->layout, &mapper->dst_params);
 
-    if (p_owner->interop_init)
-        if (!p_owner->interop_init(mapper, &desc))
+    if (p_owner->dmabuf_interop.interop_init)
+        if (!p_owner->dmabuf_interop.interop_init(mapper, &desc))
             return -1;
 
     if (!p_owner->probing_formats && !check_fmt(mapper, mapper->dst_params.imgfmt))
@@ -230,15 +240,16 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
-    struct priv *p = mapper->priv;
+    struct dmabuf_interop_priv *p = mapper->priv;
     VAStatus status;
     VADisplay *display = p_owner->display;
+    VADRMPRIMESurfaceDescriptor desc;
 
     status = vaExportSurfaceHandle(display, va_surface_id(mapper->src),
                                    VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
                                    VA_EXPORT_SURFACE_READ_ONLY |
                                    VA_EXPORT_SURFACE_SEPARATE_LAYERS,
-                                   &p->desc);
+                                   &desc);
     if (!CHECK_VA_STATUS_LEVEL(mapper, "vaExportSurfaceHandle()",
                                p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR))
     {
@@ -249,10 +260,46 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     CHECK_VA_STATUS(mapper, "vaSyncSurface()");
     p->surface_acquired = true;
 
-    if (!p_owner->interop_map(mapper, p_owner->probing_formats))
+    // We use AVDRMFrameDescriptor to store the dmabuf so we need to copy the
+    // values over.
+    int num_returned_planes = 0;
+    p->desc.nb_layers = desc.num_layers;
+    p->desc.nb_objects = desc.num_objects;
+    for (int i = 0; i < desc.num_layers; i++) {
+        p->desc.layers[i].format = desc.layers[i].drm_format;
+        p->desc.layers[i].nb_planes = desc.layers[i].num_planes;
+        for (int j = 0; j < desc.layers[i].num_planes; j++)
+        {
+            p->desc.layers[i].planes[j].object_index = desc.layers[i].object_index[j];
+            p->desc.layers[i].planes[j].offset = desc.layers[i].offset[j];
+            p->desc.layers[i].planes[j].pitch = desc.layers[i].pitch[j];
+        }
+
+        num_returned_planes += desc.layers[i].num_planes;
+    }
+    for (int i = 0; i < desc.num_objects; i++) {
+        p->desc.objects[i].format_modifier = desc.objects[i].drm_format_modifier;
+        p->desc.objects[i].fd = desc.objects[i].fd;
+        p->desc.objects[i].size = desc.objects[i].size;
+    }
+
+    // We can handle composed formats if the total number of planes is still
+    // equal the number of planes we expect. Complex formats with auxilliary
+    // planes cannot be supported.
+    if (p->num_planes != num_returned_planes) {
+        mp_msg(mapper->log, p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR,
+               "Mapped surface with format '%s' has unexpected number of planes. "
+               "(%d layers and %d planes, but expected %d planes)\n",
+               mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
+               desc.num_layers, num_returned_planes, p->num_planes);
+        goto err;
+    }
+
+    if (!p_owner->dmabuf_interop.interop_map(mapper, &p_owner->dmabuf_interop,
+                                             p_owner->probing_formats))
         goto err;
 
-    if (p->desc.fourcc == VA_FOURCC_YV12)
+    if (desc.fourcc == VA_FOURCC_YV12)
         MPSWAP(struct ra_tex*, mapper->tex[1], mapper->tex[2]);
 
     return 0;
@@ -267,16 +314,20 @@ err:
 
 static bool try_format_map(struct ra_hwdec *hw, struct mp_image *surface)
 {
-    bool ok = false;
     struct ra_hwdec_mapper *mapper = ra_hwdec_mapper_create(hw, &surface->params);
-    if (mapper)
-        ok = ra_hwdec_mapper_map(mapper, surface) >= 0;
+    if (!mapper) {
+        MP_DBG(hw, "Failed to create mapper\n");
+        return false;
+    }
+
+    bool ok = ra_hwdec_mapper_map(mapper, surface) >= 0;
     ra_hwdec_mapper_free(&mapper);
     return ok;
 }
 
 static void try_format_pixfmt(struct ra_hwdec *hw, enum AVPixelFormat pixfmt)
 {
+    bool supported = false;
     struct priv_owner *p = hw->priv;
 
     int mp_fmt = pixfmt2imgfmt(pixfmt);
@@ -312,10 +363,15 @@ static void try_format_pixfmt(struct ra_hwdec *hw, enum AVPixelFormat pixfmt)
     if (!s || !mp_image_params_valid(&s->params))
         goto err;
     if (try_format_map(hw, s)) {
+        supported = true;
         MP_TARRAY_APPEND(p, p->formats, num_formats, mp_fmt);
         MP_TARRAY_APPEND(p, p->formats, num_formats, 0); // terminate it
     }
 err:
+    if (!supported)
+        MP_DBG(hw, "Unsupported format: %s\n",
+               mp_imgfmt_to_name(mp_fmt));
+
     talloc_free(s);
     av_frame_free(&frame);
     av_buffer_unref(&fref);
@@ -362,6 +418,10 @@ static void determine_working_formats(struct ra_hwdec *hw)
 
     for (int n = 0; n < num_profiles; n++) {
         VAProfile profile = profiles[n];
+        if (profile == VAProfileNone) {
+            // We don't use the None profile.
+            continue;
+        }
         int num_ep = 0;
         status = vaQueryConfigEntrypoints(p->display, profile, entrypoints,
                                           &num_ep);
@@ -371,6 +431,10 @@ static void determine_working_formats(struct ra_hwdec *hw)
             continue;
         }
         for (int ep = 0; ep < num_ep; ep++) {
+            if (entrypoints[ep] != VAEntrypointVLD) {
+                // We are only interested in decoding entrypoints.
+                continue;
+            }
             VAConfigID config = VA_INVALID_ID;
             status = vaCreateConfig(p->display, profile, entrypoints[ep],
                                     NULL, 0, &config);
@@ -407,7 +471,7 @@ const struct ra_hwdec_driver ra_hwdec_vaegl = {
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){
-        .priv_size = sizeof(struct priv),
+        .priv_size = sizeof(struct dmabuf_interop_priv),
         .init = mapper_init,
         .uninit = mapper_uninit,
         .map = mapper_map,

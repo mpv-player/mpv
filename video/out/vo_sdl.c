@@ -62,7 +62,7 @@ const struct formatmap_entry formats[] = {
     {SDL_PIXELFORMAT_RGBX8888, IMGFMT_RGB0, 0}, // has no alpha -> bad for OSD
     {SDL_PIXELFORMAT_BGR888, IMGFMT_0BGR, 0}, // BGR888 means XBGR8888
     {SDL_PIXELFORMAT_BGRX8888, IMGFMT_BGR0, 0}, // has no alpha -> bad for OSD
-    {SDL_PIXELFORMAT_ARGB8888, IMGFMT_ARGB, 1}, // matches SUBBITMAP_RGBA
+    {SDL_PIXELFORMAT_ARGB8888, IMGFMT_ARGB, 1}, // matches SUBBITMAP_BGRA
     {SDL_PIXELFORMAT_RGBA8888, IMGFMT_RGBA, 1},
     {SDL_PIXELFORMAT_ABGR8888, IMGFMT_ABGR, 1},
     {SDL_PIXELFORMAT_BGRA8888, IMGFMT_BGRA, 1},
@@ -71,7 +71,7 @@ const struct formatmap_entry formats[] = {
     {SDL_PIXELFORMAT_RGBX8888, IMGFMT_0BGR, 0}, // has no alpha -> bad for OSD
     {SDL_PIXELFORMAT_BGR888, IMGFMT_RGB0, 0}, // BGR888 means XBGR8888
     {SDL_PIXELFORMAT_BGRX8888, IMGFMT_0RGB, 0}, // has no alpha -> bad for OSD
-    {SDL_PIXELFORMAT_ARGB8888, IMGFMT_BGRA, 1}, // matches SUBBITMAP_RGBA
+    {SDL_PIXELFORMAT_ARGB8888, IMGFMT_BGRA, 1}, // matches SUBBITMAP_BGRA
     {SDL_PIXELFORMAT_RGBA8888, IMGFMT_ABGR, 1},
     {SDL_PIXELFORMAT_ABGR8888, IMGFMT_RGBA, 1},
     {SDL_PIXELFORMAT_BGRA8888, IMGFMT_ARGB, 1},
@@ -800,7 +800,7 @@ static void draw_osd(struct vo *vo)
     struct priv *vc = vo->priv;
 
     static const bool osdformats[SUBBITMAP_COUNT] = {
-        [SUBBITMAP_RGBA] = true,
+        [SUBBITMAP_BGRA] = true,
     };
 
     osd_draw(vo->osd, vc->osd_res, vc->osd_pts, 0, osdformats, draw_osd_cb, vo);

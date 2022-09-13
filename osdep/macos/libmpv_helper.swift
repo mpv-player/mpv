@@ -50,8 +50,7 @@ class LibmpvHelper {
         let advanced: CInt = 1
         let api = UnsafeMutableRawPointer(mutating: (MPV_RENDER_API_TYPE_OPENGL as NSString).utf8String)
         let pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
-                                              get_proc_address_ctx: nil,
-                                              extra_exts: nil)
+                                              get_proc_address_ctx: nil)
 
         MPVHelper.withUnsafeMutableRawPointers([pAddress, advanced]) { (pointers: [UnsafeMutableRawPointer?]) in
             var params: [mpv_render_param] = [
@@ -76,8 +75,8 @@ class LibmpvHelper {
                         -> UnsafeMutableRawPointer? in
         let symbol: CFString = CFStringCreateWithCString(
                                 kCFAllocatorDefault, name, kCFStringEncodingASCII)
-        let indentifier = CFBundleGetBundleWithIdentifier("com.apple.opengl" as CFString)
-        let addr = CFBundleGetFunctionPointerForName(indentifier, symbol)
+        let identifier = CFBundleGetBundleWithIdentifier("com.apple.opengl" as CFString)
+        let addr = CFBundleGetFunctionPointerForName(identifier, symbol)
 
         if symbol as String == "glFlush" {
             return unsafeBitCast(glDummy, to: UnsafeMutableRawPointer.self)

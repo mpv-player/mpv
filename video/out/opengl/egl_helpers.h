@@ -32,4 +32,7 @@ void mpegl_load_functions(struct GL *gl, struct mp_log *log);
 EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
                              void *native_display);
 
+EGLSurface mpegl_create_window_surface(EGLDisplay dpy, EGLConfig config,
+                                       void *native_window);
+
 #endif

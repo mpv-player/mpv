@@ -88,8 +88,7 @@ static int init(struct ra_hwdec *hw)
         return -1;
 
     const char *exts = eglQueryString(egl_display, EGL_EXTENSIONS);
-    if (!exts ||
-        !strstr(exts, "EGL_ANGLE_d3d_share_handle_client_buffer")) {
+    if (!gl_check_extension(exts, "EGL_ANGLE_d3d_share_handle_client_buffer")) {
         return -1;
     }
 

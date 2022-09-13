@@ -11,31 +11,45 @@ on:
 
 jobs:
   mingw:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         target: [i686-w64-mingw32, x86_64-w64-mingw32]
     steps:
       - uses: actions/checkout@v2
 
+      # Increase -N suffix here to force full rebuild after changes
       - uses: actions/cache@v2
         with:
           path: mingw_prefix/
-          key: ${{ matrix.target }}
+          key: "${{ matrix.target }}-3"
 
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib nasm yasm
+          # Meson from apt is too old
+          pip3 install --no-input meson ninja
           ./bootstrap.py
 
-      - name: Build
+      - name: Build with meson
         run: |
-          ./ci/build-mingw64.sh
+          ./ci/build-mingw64.sh meson
         env:
           TARGET: ${{ matrix.target }}
 
-      - name: Print configure log
+      - name: Print meson log
+        if: ${{ failure() }}
+        run: |
+          cat ./${{ matrix.target }}_mingw_build/meson-logs/meson-log.txt
+
+      - name: Build with waf
+        run: |
+          ./ci/build-mingw64.sh waf
+        env:
+          TARGET: ${{ matrix.target }}
+
+      - name: Print waf log
         if: ${{ failure() }}
         run: |
           cat ./build/config.log
@@ -48,22 +62,46 @@ jobs:
           - "clang"
         os:
           - "macos-10.15"
+          - "macos-11"
+          - "macos-12"
     steps:
       - uses: actions/checkout@v2
+
+      - name: Override Xcode 13.0 if it's the default toolchain
+        run: |
+          XCODE_PATH="$(xcode-select -p)"
+          case "${XCODE_PATH}" in
+            *Xcode_13.0*)
+              sudo xcode-select -s "/Applications/Xcode_13.1.app"
+              echo "Updated Xcode path ${XCODE_PATH} -> $(xcode-select -p)"
+              ;;
+          esac
 
       - name: Install dependencies
         run: |
           brew update
-          brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 luajit libass ffmpeg
+          brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 lua@5.1 libass ffmpeg meson
 
-      - name: Build
+      - name: Build with meson
         run: |
-          ./ci/build-macos.sh
+          ./ci/build-macos.sh meson
         env:
           CC: "${{ matrix.cc }}"
           TRAVIS_OS_NAME: "${{ matrix.os }}"
 
-      - name: Print configure log
+      - name: Print meson log
+        if: ${{ failure() }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Build with waf
+        run: |
+          ./ci/build-macos.sh waf
+        env:
+          CC: "${{ matrix.cc }}"
+          TRAVIS_OS_NAME: "${{ matrix.os }}"
+
+      - name: Print waf log
         if: ${{ failure() }}
         run: |
           cat ./build/config.log
@@ -71,7 +109,7 @@ jobs:
   linux:
     runs-on: "ubuntu-20.04"
     container:
-      image: "registry.cirno.systems/kiwi/containers/mpv-ci:stable-deps"
+      image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
       # Disable seccomp until a container manager in GitHub recognizes
       # clone3() syscall,
       # <https://github.com/actions/virtual-environments/issues/3812>.
@@ -89,36 +127,51 @@ jobs:
       - name: Install dependencies
         run: |
           ./bootstrap.py
+          # workaround to avoid "fatal: unsafe repository" error
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Build
+      - name: Build with meson
         run: |
-          ./ci/build-tumbleweed.sh
+          ./ci/build-tumbleweed.sh meson
 
-      - name: Print configure log
+      - name: Print meson log
+        if: ${{ failure() }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Build with waf
+        run: |
+          ./ci/build-tumbleweed.sh waf
+
+      - name: Print waf log
         if: ${{ failure() }}
         run: |
           cat ./build/config.log
 
   freebsd:
-    runs-on: macos-10.15 # until https://github.com/actions/runner/issues/385
+    runs-on: macos-12 # until https://github.com/actions/runner/issues/385
     steps:
     - uses: actions/checkout@v2
     - name: Test in FreeBSD VM
-      uses: vmactions/freebsd-vm@v0.1.5 # aka FreeBSD 13.0
+      uses: vmactions/freebsd-vm@v0
       with:
         usesh: true
         prepare: |
             # Requested in ci/build-freebsd.sh
             pkg install -y \
+                cmake \
                 evdev-proto \
                 ffmpeg \
                 libplacebo \
                 libxkbcommon \
+                libxpresent \
                 luajit \
+                meson \
                 openal-soft \
                 pkgconf \
                 python3 \
                 sdl2 \
+                sndio \
                 vulkan-headers \
                 wayland-protocols \
                 #
@@ -133,6 +186,7 @@ jobs:
                 libcdio-paranoia \
                 libdvdnav \
                 mujs \
+                pipewire \
                 pulseaudio \
                 rubberband \
                 sekrit-twc-zimg \

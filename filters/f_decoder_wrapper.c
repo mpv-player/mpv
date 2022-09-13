@@ -594,12 +594,14 @@ static void fix_image_params(struct priv *p,
     if (m.p_w <= 0 || m.p_h <= 0)
         m.p_w = m.p_h = 1;
 
-    m.rotate = p->codec->rotate;
     m.stereo3d = p->codec->stereo_mode;
 
     if (opts->video_rotate < 0) {
         m.rotate = 0;
     } else {
+        // ffmpeg commit 535a835e51 says that frame rotate takes priority
+        if (!m.rotate)
+            m.rotate = p->codec->rotate;
         m.rotate = (m.rotate + opts->video_rotate) % 360;
     }
 

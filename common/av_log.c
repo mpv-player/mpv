@@ -32,12 +32,18 @@
 
 #include <libavutil/avutil.h>
 #include <libavutil/log.h>
+#include <libavutil/version.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavcodec/version.h>
 #include <libavformat/avformat.h>
+#include <libavformat/version.h>
 #include <libswresample/swresample.h>
+#include <libswresample/version.h>
 #include <libswscale/swscale.h>
+#include <libswscale/version.h>
 #include <libavfilter/avfilter.h>
+#include <libavfilter/version.h>
 
 #if HAVE_LIBAVDEVICE
 #include <libavdevice/avdevice.h>

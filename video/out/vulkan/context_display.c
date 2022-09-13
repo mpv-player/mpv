@@ -15,10 +15,18 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "options/m_config.h"
-
 #include "context.h"
+#include "options/m_config.h"
 #include "utils.h"
+
+#if HAVE_DRM
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include "libmpv/render_gl.h"
+#include "video/out/drm_common.h"
+#endif
 
 struct vulkan_display_opts {
     int display;
@@ -278,7 +286,69 @@ struct priv {
     struct vulkan_display_opts *opts;
     uint32_t width;
     uint32_t height;
+
+#if HAVE_DRM
+    struct mpv_opengl_drm_params_v2 drm_params;
+#endif
 };
+
+#if HAVE_DRM
+static void open_render_fd(struct ra_ctx *ctx, const char *render_path)
+{
+    struct priv *p = ctx->priv;
+    p->drm_params.fd = -1;
+    p->drm_params.render_fd = open(render_path, O_RDWR | O_CLOEXEC);
+    if (p->drm_params.render_fd == -1) {
+        MP_WARN(ctx, "Failed to open render node: %s\n",
+                strerror(errno));
+    }
+}
+
+static bool drm_setup(struct ra_ctx *ctx, int display_idx,
+                      VkPhysicalDevicePCIBusInfoPropertiesEXT *pci_props)
+{
+    drmDevice *devs[32] = {};
+    int count = drmGetDevices2(0, devs, MP_ARRAY_SIZE(devs));
+    for (int i = 0; i < count; i++) {
+        drmDevice *dev = devs[i];
+
+        if (dev->bustype != DRM_BUS_PCI ||
+            dev->businfo.pci->domain != pci_props->pciDomain ||
+            dev->businfo.pci->bus != pci_props->pciBus ||
+            dev->businfo.pci->dev != pci_props->pciDevice ||
+            dev->businfo.pci->func != pci_props->pciFunction)
+        {
+            continue;
+        }
+
+        // Found our matching device.
+        MP_DBG(ctx, "DRM device found for Vulkan device at %04X:%02X:%02X:%02X\n",
+                pci_props->pciDomain, pci_props->pciBus,
+                pci_props->pciDevice, pci_props->pciFunction);
+
+        if (!(dev->available_nodes & 1 << DRM_NODE_RENDER)) {
+            MP_DBG(ctx, "Card does not have a render node.\n");
+            continue;
+        }
+
+        open_render_fd(ctx, dev->nodes[DRM_NODE_RENDER]);
+
+        break;
+    }
+    drmFreeDevices(devs, MP_ARRAY_SIZE(devs));
+
+    struct priv *p = ctx->priv;
+    if (p->drm_params.render_fd == -1) {
+        MP_WARN(ctx, "Couldn't open DRM render node for Vulkan device "
+                     "at: %04X:%02X:%02X:%02X\n",
+                     pci_props->pciDomain, pci_props->pciBus,
+                     pci_props->pciDevice, pci_props->pciFunction);
+        return false;
+    }
+
+    return true;
+}
+#endif
 
 static void display_uninit(struct ra_ctx *ctx)
 {
@@ -286,6 +356,13 @@ static void display_uninit(struct ra_ctx *ctx)
 
     ra_vk_ctx_uninit(ctx);
     mpvk_uninit(&p->vk);
+
+#if HAVE_DRM
+    if (p->drm_params.render_fd != -1) {
+        close(p->drm_params.render_fd);
+        p->drm_params.render_fd = -1;
+    }
+#endif
 }
 
 static bool display_init(struct ra_ctx *ctx)
@@ -311,12 +388,26 @@ static bool display_init(struct ra_ctx *ctx)
         .instance = vk->vkinst->instance,
         .device_name = device_name,
     };
-    VkPhysicalDevice device = pl_vulkan_choose_device(vk->ctx, &vulkan_params);
+    VkPhysicalDevice device = pl_vulkan_choose_device(vk->pllog, &vulkan_params);
     talloc_free(device_name);
     if (!device) {
         MP_MSG(ctx, msgl, "Failed to open physical device.\n");
         goto error;
     }
+
+#if HAVE_DRM
+        VkPhysicalDevicePCIBusInfoPropertiesEXT pci_props = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PCI_BUS_INFO_PROPERTIES_EXT,
+        };
+        VkPhysicalDeviceProperties2KHR props = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR,
+            .pNext = &pci_props,
+        };
+        vkGetPhysicalDeviceProperties2(device, &props);
+
+        if (!drm_setup(ctx, display_idx, &pci_props))
+            MP_WARN(ctx, "Failed to set up DRM.\n");
+#endif
 
     struct mode_selector selector = {
         .display_idx = display_idx,
@@ -350,6 +441,15 @@ static bool display_init(struct ra_ctx *ctx)
     struct ra_vk_ctx_params params = {0};
     if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
         goto error;
+
+#if HAVE_DRM
+    if (p->drm_params.render_fd > -1) {
+        ra_add_native_resource(ctx->ra, "drm_params_v2", &p->drm_params);
+    } else {
+        MP_WARN(ctx,
+               "No DRM render fd available. VAAPI hwaccel will not be usable.\n");
+    }
+#endif
 
     ret = true;
 

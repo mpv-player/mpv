@@ -428,7 +428,11 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
     if (!info || !info->hwdec_devs)
         goto fail;
 
-    hwdec_devices_request_all(info->hwdec_devs);
+    struct hwdec_imgfmt_request params = {
+        .imgfmt = IMGFMT_D3D11,
+        .probing = false,
+    };
+    hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
 
     struct mp_hwdec_ctx *hwctx =
         hwdec_devices_get_by_lavc(info->hwdec_devs, AV_HWDEVICE_TYPE_D3D11VA);

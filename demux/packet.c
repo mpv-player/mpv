@@ -39,9 +39,7 @@ void demux_packet_unref_contents(struct demux_packet *dp)
 {
     if (dp->avpacket) {
         assert(!dp->is_cached);
-        av_packet_unref(dp->avpacket);
-        talloc_free(dp->avpacket);
-        dp->avpacket = NULL;
+        av_packet_free(&dp->avpacket);
         dp->buffer = NULL;
         dp->len = 0;
     }
@@ -70,11 +68,12 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
         .start = MP_NOPTS_VALUE,
         .end = MP_NOPTS_VALUE,
         .stream = -1,
-        .avpacket = talloc_zero(dp, AVPacket),
+        .avpacket = av_packet_alloc(),
     };
-    av_init_packet(dp->avpacket);
     int r = -1;
-    if (avpkt->data) {
+    if (!dp->avpacket) {
+        // error
+    } else if (avpkt->data) {
         // We hope that this function won't need/access AVPacket input padding,
         // because otherwise new_demux_packet_from() wouldn't work.
         r = av_packet_ref(dp->avpacket, avpkt);
@@ -82,7 +81,6 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
         r = av_new_packet(dp->avpacket, avpkt->size);
     }
     if (r < 0) {
-        *dp->avpacket = (AVPacket){0};
         talloc_free(dp);
         return NULL;
     }

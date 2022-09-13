@@ -70,8 +70,6 @@ enum {
 
 #define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
 
-void mpgl_check_version(GL *gl, void *(*get_fn)(void *ctx, const char *n),
-                        void *fn_ctx);
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);
 void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
@@ -88,6 +86,11 @@ struct GL {
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
+
+    // Copy of function pointer used to load GL.
+    // Caution: Not necessarily valid to use after VO init has completed!
+    void *(*get_fn)(void *ctx, const char *n);
+    void *fn_ctx;
 
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
     void (GLAPIENTRY *Clear)(GLbitfield);
@@ -113,6 +116,7 @@ struct GL {
     void (GLAPIENTRY *ReadPixels)(GLint, GLint, GLsizei, GLsizei, GLenum,
                                   GLenum, GLvoid *);
     void (GLAPIENTRY *ReadBuffer)(GLenum);
+    void (GLAPIENTRY *DrawBuffer)(GLenum);
     void (GLAPIENTRY *DrawArrays)(GLenum, GLint, GLsizei);
     GLenum (GLAPIENTRY *GetError)(void);
     void (GLAPIENTRY *GetTexLevelParameteriv)(GLenum, GLint, GLenum, GLint *);
@@ -243,8 +247,6 @@ struct GL {
 
     void (GLAPIENTRY *DebugMessageCallback)(MP_GLDEBUGPROC callback,
                                             const void *userParam);
-
-    void *(GLAPIENTRY *MPGetNativeDisplay)(const char *name);
 };
 
 #endif /* MPLAYER_GL_COMMON_H */

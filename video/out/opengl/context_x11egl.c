@@ -18,14 +18,15 @@
 #include <assert.h>
 
 #include <X11/Xlib.h>
+#include <X11/extensions/Xpresent.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
 #include "common/common.h"
+#include "video/out/present_sync.h"
 #include "video/out/x11_common.h"
 #include "context.h"
 #include "egl_helpers.h"
-#include "oml_sync.h"
 #include "utils.h"
 
 #define EGL_PLATFORM_X11_EXT 0x31D5
@@ -35,10 +36,6 @@ struct priv {
     EGLDisplay egl_display;
     EGLContext egl_context;
     EGLSurface egl_surface;
-
-    EGLBoolean (*GetSyncValues)(EGLDisplay, EGLSurface,
-                                int64_t*, int64_t*, int64_t*);
-    struct oml_sync sync;
 };
 
 static void mpegl_uninit(struct ra_ctx *ctx)
@@ -75,23 +72,27 @@ static int pick_xrgba_config(void *user_data, EGLConfig *configs, int num_config
     return 0;
 }
 
+static bool mpegl_check_visible(struct ra_ctx *ctx)
+{
+    return vo_x11_check_visible(ctx->vo);
+}
+
 static void mpegl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+
     eglSwapBuffers(p->egl_display, p->egl_surface);
-
-    int64_t ust, msc, sbc;
-    if (!p->GetSyncValues || !p->GetSyncValues(p->egl_display, p->egl_surface,
-                                               &ust, &msc, &sbc))
-        ust = msc = sbc = -1;
-
-    oml_sync_swap(&p->sync, ust, msc, sbc);
+    if (ctx->vo->x11->use_present) {
+        vo_x11_present(ctx->vo);
+        present_sync_swap(ctx->vo->x11->present);
+    }
 }
 
 static void mpegl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
-    struct priv *p = ctx->priv;
-    oml_sync_get_info(&p->sync, info);
+    struct vo_x11_state *x11 = ctx->vo->x11;
+    if (ctx->vo->x11->use_present)
+        present_sync_get_info(x11->present, info);
 }
 
 static bool mpegl_init(struct ra_ctx *ctx)
@@ -115,9 +116,6 @@ static bool mpegl_init(struct ra_ctx *ctx)
         .user_data = ctx,
         .refine_config = ctx->opts.want_alpha ? pick_xrgba_config : NULL,
     };
-
-    if (!strcmp(eglQueryString(p->egl_display, EGL_VENDOR), "Mesa Project"))
-        ctx->opts.want_alpha = 0;
 
     EGLConfig config;
     if (!mpegl_create_context_cb(ctx, p->egl_display, cb, &p->egl_context, &config))
@@ -148,9 +146,12 @@ static bool mpegl_init(struct ra_ctx *ctx)
 
     XFree(vi);
 
-    p->egl_surface = eglCreateWindowSurface(p->egl_display, config,
-                                    (EGLNativeWindowType)vo->x11->window, NULL);
-
+    p->egl_surface = mpegl_create_window_surface(
+        p->egl_display, config, &vo->x11->window);
+    if (p->egl_surface == EGL_NO_SURFACE) {
+        p->egl_surface = eglCreateWindowSurface(
+            p->egl_display, config, (EGLNativeWindowType)vo->x11->window, NULL);
+    }
     if (p->egl_surface == EGL_NO_SURFACE) {
         MP_FATAL(ctx, "Could not create EGL surface!\n");
         goto uninit;
@@ -166,16 +167,13 @@ static bool mpegl_init(struct ra_ctx *ctx)
     mpegl_load_functions(&p->gl, ctx->log);
 
     struct ra_gl_ctx_params params = {
+        .check_visible = mpegl_check_visible,
         .swap_buffers = mpegl_swap_buffers,
         .get_vsync    = mpegl_get_vsync,
     };
 
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
         goto uninit;
-
-    const char *exts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
-    if (gl_check_extension(exts, "EGL_CHROMIUM_sync_control"))
-        p->GetSyncValues = (void *)eglGetProcAddress("eglGetSyncValuesCHROMIUM");
 
     ra_add_native_resource(ctx->ra, "x11", vo->x11->display);
 

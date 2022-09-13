@@ -111,7 +111,7 @@ int m_option_required_params(const m_option_t *opt)
     if (opt->flags & M_OPT_OPTIONAL_PARAM)
         return 0;
     if (opt->type == &m_option_type_choice) {
-        struct m_opt_choice_alternatives *alt;
+        const struct m_opt_choice_alternatives *alt;
         for (alt = opt->priv; alt->name; alt++) {
             if (strcmp(alt->name, "yes") == 0)
                 return 0;
@@ -620,7 +620,7 @@ const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
 
 static void print_choice_values(struct mp_log *log, const struct m_option *opt)
 {
-    struct m_opt_choice_alternatives *alt = opt->priv;
+    const struct m_opt_choice_alternatives *alt = opt->priv;
     for ( ; alt->name; alt++)
         mp_info(log, "    %s\n", alt->name[0] ? alt->name : "(passing nothing)");
     if (opt->min < opt->max)
@@ -630,7 +630,7 @@ static void print_choice_values(struct mp_log *log, const struct m_option *opt)
 static int parse_choice(struct mp_log *log, const struct m_option *opt,
                         struct bstr name, struct bstr param, void *dst)
 {
-    struct m_opt_choice_alternatives *alt = opt->priv;
+    const struct m_opt_choice_alternatives *alt = opt->priv;
     for ( ; alt->name; alt++) {
         if (!bstrcmp0(param, alt->name))
             break;
@@ -677,7 +677,7 @@ static void choice_get_min_max(const struct m_option *opt, int *min, int *max)
     assert(opt->type == &m_option_type_choice);
     *min = INT_MAX;
     *max = INT_MIN;
-    for (struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++) {
+    for (const struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++) {
         *min = MPMIN(*min, alt->value);
         *max = MPMAX(*max, alt->value);
     }
@@ -721,7 +721,7 @@ static void add_choice(const m_option_t *opt, void *val, double add, bool wrap)
         }
     }
 
-    for (struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++)
+    for (const struct m_opt_choice_alternatives *alt = opt->priv; alt->name; alt++)
         check_choice(dir, ival, &found, &best, alt->value);
 
     if (!found) {
@@ -754,11 +754,12 @@ static int choice_set(const m_option_t *opt, void *dst, struct mpv_node *src)
     return r;
 }
 
-static struct m_opt_choice_alternatives *get_choice(const m_option_t *opt,
-                                                    const void *val, int *out_val)
+static const struct m_opt_choice_alternatives *get_choice(const m_option_t *opt,
+                                                          const void *val,
+                                                          int *out_val)
 {
     int v = *(int *)val;
-    struct m_opt_choice_alternatives *alt;
+    const struct m_opt_choice_alternatives *alt;
     for (alt = opt->priv; alt->name; alt++) {
         if (alt->value == v)
             return alt;
@@ -776,7 +777,7 @@ static int choice_get(const m_option_t *opt, void *ta_parent,
                       struct mpv_node *dst, void *src)
 {
     int ival = 0;
-    struct m_opt_choice_alternatives *alt = get_choice(opt, src, &ival);
+    const struct m_opt_choice_alternatives *alt = get_choice(opt, src, &ival);
     // If a choice string looks like a number, return it as number
     if (alt) {
         char *end = NULL;
@@ -808,7 +809,7 @@ static int choice_get(const m_option_t *opt, void *ta_parent,
 static char *print_choice(const m_option_t *opt, const void *val)
 {
     int ival = 0;
-    struct m_opt_choice_alternatives *alt = get_choice(opt, val, &ival);
+    const struct m_opt_choice_alternatives *alt = get_choice(opt, val, &ival);
     return alt ? talloc_strdup(NULL, alt->name)
                : talloc_asprintf(NULL, "%d", ival);
 }
@@ -828,7 +829,7 @@ const struct m_option_type m_option_type_choice = {
 
 static int apply_flag(const struct m_option *opt, int *val, bstr flag)
 {
-    struct m_opt_choice_alternatives *alt;
+    const struct m_opt_choice_alternatives *alt;
     for (alt = opt->priv; alt->name; alt++) {
         if (bstr_equals0(flag, alt->name)) {
             if (*val & alt->value)
@@ -842,8 +843,8 @@ static int apply_flag(const struct m_option *opt, int *val, bstr flag)
 
 static const char *find_next_flag(const struct m_option *opt, int *val)
 {
-    struct m_opt_choice_alternatives *best = NULL;
-    struct m_opt_choice_alternatives *alt;
+    const struct m_opt_choice_alternatives *best = NULL;
+    const struct m_opt_choice_alternatives *alt;
     for (alt = opt->priv; alt->name; alt++) {
         if (alt->value && (alt->value & (*val)) == alt->value) {
             if (!best || av_popcount64(alt->value) > av_popcount64(best->value))
@@ -870,7 +871,7 @@ static int parse_flags(struct mp_log *log, const struct m_option *opt,
             mp_fatal(log, "Invalid flag for option %.*s: %.*s\n",
                      BSTR_P(name), BSTR_P(flag));
             mp_info(log, "Valid flags are:\n");
-            struct m_opt_choice_alternatives *alt;
+            const struct m_opt_choice_alternatives *alt;
             for (alt = opt->priv; alt->name; alt++)
                 mp_info(log, "    %s\n", alt->name);
             mp_info(log, "Flags can usually be combined with '+'.\n");
@@ -1864,7 +1865,7 @@ static int parse_msglevels(struct mp_log *log, const m_option_t *opt,
                            struct bstr name, struct bstr param, void *dst)
 {
     if (bstr_equals0(param, "help")) {
-        mp_info(log, "Syntax:\n\n   --msglevel=module1=level,module2=level,...\n\n"
+        mp_info(log, "Syntax:\n\n   --msg-level=module1=level,module2=level,...\n\n"
                      "'module' is output prefix as shown with -v, or a prefix\n"
                      "of it. level is one of:\n\n"
                      "  fatal error warn info status v debug trace\n\n"
@@ -3217,9 +3218,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt, int op,
     } else {
         char name[80];
         snprintf(name, sizeof(name), "%.*s", BSTR_P(str));
-        if (!list->allow_unknown_entries ||
-            (list->check_unknown_entry && !list->check_unknown_entry(name)))
-        {
+        if (list->check_unknown_entry && !list->check_unknown_entry(name)) {
             mp_err(log, "Option %.*s: %.*s doesn't exist.\n",
                    BSTR_P(opt), BSTR_P(str));
             return M_OPT_INVALID;
@@ -3313,7 +3312,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
     int op = OP_NONE;
     bool *mark_del = NULL;
     int num_items = obj_settings_list_num_items(dst ? VAL(dst) : 0);
-    struct m_obj_list *ol = opt->priv;
+    const struct m_obj_list *ol = opt->priv;
 
     assert(opt->priv);
 

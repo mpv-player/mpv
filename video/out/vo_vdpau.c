@@ -346,7 +346,7 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
                         "vdp_presentation_queue_target_create_x11");
     }
 
-    /* Emperically this seems to be the first call which fails when we
+    /* Empirically this seems to be the first call which fails when we
      * try to reinit after preemption while the user is still switched
      * from X to a virtual terminal (creating the vdp_device initially
      * succeeds, as does creating the flip_target above). This is
@@ -596,7 +596,7 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
     case SUBBITMAP_LIBASS:
         format = VDP_RGBA_FORMAT_A8;
         break;
-    case SUBBITMAP_RGBA:
+    case SUBBITMAP_BGRA:
         format = VDP_RGBA_FORMAT_B8G8R8A8;
         break;
     default:
@@ -687,7 +687,7 @@ static void draw_osd(struct vo *vo)
 
     bool formats[SUBBITMAP_COUNT] = {
         [SUBBITMAP_LIBASS] = vc->supports_a8,
-        [SUBBITMAP_RGBA] = true,
+        [SUBBITMAP_BGRA] = true,
     };
 
     double pts = vc->current_image ? vc->current_image->pts : 0;

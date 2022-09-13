@@ -22,6 +22,22 @@ export RANLIB=$TARGET-ranlib
 export CFLAGS="-O2 -pipe -Wall -D_FORTIFY_SOURCE=2"
 export LDFLAGS="-fstack-protector-strong"
 
+cat > "${prefix_dir}/crossfile" << EOF
+[binaries]
+c = '${CC}'
+cpp = '${CXX}'
+ar = '${AR}'
+strip = '${TARGET}-strip'
+pkgconfig = 'pkg-config'
+exe_wrapper = 'wine64' # A command used to run generated executables.
+windres = '${TARGET}-windres'
+[host_machine]
+system = 'windows'
+cpu_family = '${CPU}'
+cpu = '${CPU}'
+endian = 'little'
+EOF
+
 function builddir () {
     [ -d "$1/builddir" ] && rm -rf "$1/builddir"
     mkdir -p "$1/builddir"
@@ -42,7 +58,7 @@ function gettar () {
 
 ## iconv
 if [ ! -e "$prefix_dir/lib/libiconv.dll.a" ]; then
-    ver=1.16
+    ver=1.17
     gettar "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ver}.tar.gz"
     builddir libiconv-${ver}
     ../configure --host=$TARGET $commonflags
@@ -52,8 +68,8 @@ fi
 
 ## zlib
 if [ ! -e "$prefix_dir/lib/libz.dll.a" ]; then
-    ver=1.2.11
-    gettar "https://zlib.net/zlib-${ver}.tar.gz"
+    ver=1.2.12
+    gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
     make -fwin32/Makefile.gcc PREFIX=$TARGET- SHARED_MODE=1 \
         DESTDIR="$prefix_dir" install \
@@ -97,10 +113,21 @@ if [ ! -e "$prefix_dir/lib/libspirv-cross-c-shared.dll.a" ]; then
     popd
 fi
 
+## libplacebo
+if [ ! -e "$prefix_dir/lib/libplacebo.dll.a" ]; then
+    [ -d libplacebo ] || $gitclone https://code.videolan.org/videolan/libplacebo.git
+    builddir libplacebo
+    meson .. \
+        --cross-file "${prefix_dir}/crossfile"
+    ninja
+    DESTDIR="$prefix_dir" ninja install
+    popd
+fi
+
 ## freetype2
 if [ ! -e "$prefix_dir/lib/libfreetype.dll.a" ]; then
-    ver=2.10.2
-    gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.gz"
+    ver=2.12.1
+    gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     ZLIB_LIBS="-L'$prefix_dir/lib' -lz" \
     ../configure --host=$TARGET $commonflags --with-png=no
@@ -111,7 +138,7 @@ fi
 
 ## fribidi
 if [ ! -e "$prefix_dir/lib/libfribidi.dll.a" ]; then
-    ver=1.0.9
+    ver=1.0.12
     gettar "https://github.com/fribidi/fribidi/releases/download/v${ver}/fribidi-${ver}.tar.xz"
     builddir fribidi-${ver}
     ../configure --host=$TARGET $commonflags
@@ -121,7 +148,7 @@ fi
 
 ## harfbuzz
 if [ ! -e "$prefix_dir/lib/libharfbuzz.dll.a" ]; then
-    ver=2.7.2
+    ver=4.3.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     ../configure --host=$TARGET $commonflags --with-icu=no
@@ -154,9 +181,24 @@ if [ ! -e "$prefix_dir/lib/libluajit-5.1.a" ]; then
 fi
 
 ## mpv
-PKG_CONFIG=pkg-config CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
-python3 ./waf configure \
-    --enable-libmpv-shared --lua=luajit \
-    --enable-{shaderc,spirv-cross,d3d11}
 
-python3 ./waf build --verbose
+if [ $1 = "meson" ]; then
+    CPU="x86_64"
+    mkdir -p "${TARGET}_mingw_build" && pushd "${TARGET}_mingw_build"
+
+    CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
+    meson .. --cross-file "${prefix_dir}/crossfile" --libdir lib \
+        -D{libmpv,tests}=true -Dlua=luajit \
+        -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
+
+    meson compile
+fi
+
+if [ $1 = "waf" ]; then
+    PKG_CONFIG=pkg-config CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
+    python3 ./waf configure \
+        --enable-libmpv-shared --lua=luajit \
+        --enable-{shaderc,spirv-cross,d3d11,libplacebo,tests}
+
+    python3 ./waf build --verbose
+fi

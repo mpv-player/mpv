@@ -112,8 +112,8 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 };
 
-int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
-                    struct bstr name)
+static int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
+                           struct bstr name)
 {
     mp_info(log, "GPU APIs (contexts):\n");
     mp_info(log, "    auto (autodetect)\n");
@@ -122,8 +122,8 @@ int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
     return M_OPT_EXIT;
 }
 
-int ra_ctx_validate_api(struct mp_log *log, const struct m_option *opt,
-                        struct bstr name, const char **value)
+static int ra_ctx_validate_api(struct mp_log *log, const struct m_option *opt,
+                               struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
     if (bstr_equals0(param, "auto"))
@@ -135,8 +135,8 @@ int ra_ctx_validate_api(struct mp_log *log, const struct m_option *opt,
     return M_OPT_INVALID;
 }
 
-int ra_ctx_context_help(struct mp_log *log, const struct m_option *opt,
-                        struct bstr name)
+static int ra_ctx_context_help(struct mp_log *log, const struct m_option *opt,
+                               struct bstr name)
 {
     mp_info(log, "GPU contexts (APIs):\n");
     mp_info(log, "    auto (autodetect)\n");
@@ -145,8 +145,8 @@ int ra_ctx_context_help(struct mp_log *log, const struct m_option *opt,
     return M_OPT_EXIT;
 }
 
-int ra_ctx_validate_context(struct mp_log *log, const struct m_option *opt,
-                            struct bstr name, const char **value)
+static int ra_ctx_validate_context(struct mp_log *log, const struct m_option *opt,
+                                   struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
     if (bstr_equals0(param, "auto"))
@@ -160,11 +160,10 @@ int ra_ctx_validate_context(struct mp_log *log, const struct m_option *opt,
 
 // Create a VO window and create a RA context on it.
 //  vo_flags: passed to the backend's create window function
-struct ra_ctx *ra_ctx_create(struct vo *vo, const char *context_type,
-                             const char *context_name, struct ra_ctx_opts opts)
+struct ra_ctx *ra_ctx_create(struct vo *vo, struct ra_ctx_opts opts)
 {
-    bool api_auto = !context_type || strcmp(context_type, "auto") == 0;
-    bool ctx_auto = !context_name || strcmp(context_name, "auto") == 0;
+    bool api_auto = !opts.context_type || strcmp(opts.context_type, "auto") == 0;
+    bool ctx_auto = !opts.context_name || strcmp(opts.context_name, "auto") == 0;
 
     if (ctx_auto) {
         MP_VERBOSE(vo, "Probing for best GPU context.\n");
@@ -177,9 +176,9 @@ struct ra_ctx *ra_ctx_create(struct vo *vo, const char *context_type,
     vo->probing = opts.probing;
 
     for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
-        if (!opts.probing && strcmp(contexts[i]->name, context_name) != 0)
+        if (!opts.probing && strcmp(contexts[i]->name, opts.context_name) != 0)
             continue;
-        if (!api_auto && strcmp(contexts[i]->type, context_type) != 0)
+        if (!api_auto && strcmp(contexts[i]->type, opts.context_type) != 0)
             continue;
 
         struct ra_ctx *ctx = talloc_ptrtype(NULL, ctx);
@@ -223,3 +222,19 @@ void ra_ctx_destroy(struct ra_ctx **ctx_ptr)
 
     *ctx_ptr = NULL;
 }
+
+#define OPT_BASE_STRUCT struct ra_ctx_opts
+const struct m_sub_options ra_ctx_conf = {
+    .opts = (const m_option_t[]) {
+        {"gpu-context",
+            OPT_STRING_VALIDATE(context_name, ra_ctx_validate_context),
+            .help = ra_ctx_context_help},
+        {"gpu-api",
+            OPT_STRING_VALIDATE(context_type, ra_ctx_validate_api),
+            .help = ra_ctx_api_help},
+        {"gpu-debug", OPT_FLAG(debug)},
+        {"gpu-sw", OPT_FLAG(allow_sw)},
+        {0}
+    },
+    .size = sizeof(struct ra_ctx_opts),
+};

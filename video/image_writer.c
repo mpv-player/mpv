@@ -51,6 +51,8 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .webp_lossless = 0,
     .webp_quality = 75,
     .webp_compression = 4,
+    .jxl_distance = 1.0,
+    .jxl_effort = 3,
     .tag_csp = 0,
 };
 
@@ -59,6 +61,9 @@ const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
     {"jpeg", AV_CODEC_ID_MJPEG},
     {"png",  AV_CODEC_ID_PNG},
     {"webp", AV_CODEC_ID_WEBP},
+#if HAVE_JPEGXL
+    {"jxl",  AV_CODEC_ID_JPEGXL},
+#endif
     {0}
 };
 
@@ -73,6 +78,10 @@ const struct m_option image_writer_opts[] = {
     {"webp-lossless", OPT_FLAG(webp_lossless)},
     {"webp-quality", OPT_INT(webp_quality), M_RANGE(0, 100)},
     {"webp-compression", OPT_INT(webp_compression), M_RANGE(0, 6)},
+#if HAVE_JPEGXL
+    {"jxl-distance", OPT_DOUBLE(jxl_distance), M_RANGE(0.0, 15.0)},
+    {"jxl-effort", OPT_INT(jxl_effort), M_RANGE(1, 9)},
+#endif
     {"high-bit-depth", OPT_FLAG(high_bit_depth)},
     {"tag-colorspace", OPT_FLAG(tag_csp)},
     {0},
@@ -96,12 +105,9 @@ static enum AVPixelFormat replace_j_format(enum AVPixelFormat fmt)
 
 static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
 {
-    bool success = 0;
+    bool success = false;
     AVFrame *pic = NULL;
-    AVPacket pkt = {0};
-    int got_output = 0;
-
-    av_init_packet(&pkt);
+    AVPacket *pkt = NULL;
 
     const AVCodec *codec;
     if (ctx->opts->format == AV_CODEC_ID_WEBP) {
@@ -142,6 +148,13 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
                        AV_OPT_SEARCH_CHILDREN);
         av_opt_set_int(avctx, "quality", ctx->opts->webp_quality,
                        AV_OPT_SEARCH_CHILDREN);
+#if HAVE_JPEGXL
+    } else if (codec->id == AV_CODEC_ID_JPEGXL) {
+        av_opt_set_double(avctx, "distance", ctx->opts->jxl_distance,
+                          AV_OPT_SEARCH_CHILDREN);
+        av_opt_set_int(avctx, "effort", ctx->opts->jxl_effort,
+                       AV_OPT_SEARCH_CHILDREN);
+#endif
     }
 
     if (avcodec_open2(avctx, codec, NULL) < 0) {
@@ -162,8 +175,10 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     pic->height = avctx->height;
     pic->color_range = avctx->color_range;
     if (ctx->opts->tag_csp) {
-        pic->color_primaries = mp_csp_prim_to_avcol_pri(image->params.color.primaries);
-        pic->color_trc = mp_csp_trc_to_avcol_trc(image->params.color.gamma);
+        avctx->color_primaries = pic->color_primaries =
+            mp_csp_prim_to_avcol_pri(image->params.color.primaries);
+        avctx->color_trc = pic->color_trc =
+            mp_csp_trc_to_avcol_trc(image->params.color.gamma);
     }
 
     int ret = avcodec_send_frame(avctx, pic);
@@ -172,18 +187,20 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     ret = avcodec_send_frame(avctx, NULL); // send EOF
     if (ret < 0)
         goto error_exit;
-    ret = avcodec_receive_packet(avctx, &pkt);
+    pkt = av_packet_alloc();
+    if (!pkt)
+        goto error_exit;
+    ret = avcodec_receive_packet(avctx, pkt);
     if (ret < 0)
         goto error_exit;
-    got_output = 1;
+    success = true;
 
-    fwrite(pkt.data, pkt.size, 1, fp);
+    fwrite(pkt->data, pkt->size, 1, fp);
 
-    success = !!got_output;
 error_exit:
     avcodec_free_context(&avctx);
     av_frame_free(&pic);
-    av_packet_unref(&pkt);
+    av_packet_free(&pkt);
     return success;
 }
 
@@ -308,7 +325,11 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts)
 
 bool image_writer_high_depth(const struct image_writer_opts *opts)
 {
-    return opts->format == AV_CODEC_ID_PNG;
+    return opts->format == AV_CODEC_ID_PNG
+#if HAVE_JPEGXL
+           || opts->format == AV_CODEC_ID_JPEGXL
+#endif
+    ;
 }
 
 int image_writer_format_from_ext(const char *ext)

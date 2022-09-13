@@ -64,7 +64,7 @@ static void update_speed_filters(struct MPContext *mpctx)
         speed = 1.0;
     }
 
-    if (mpctx->display_sync_active && mpctx->opts->video_sync == VS_DISP_ADROP) {
+    if (mpctx->display_sync_active && mpctx->video_out->opts->video_sync == VS_DISP_ADROP) {
         drop *= speed * resample;
         resample = speed = 1.0;
     }
@@ -181,6 +181,30 @@ void update_playback_speed(struct MPContext *mpctx)
     mpctx->video_speed = mpctx->opts->playback_speed * mpctx->speed_factor_v;
 
     update_speed_filters(mpctx);
+}
+
+static bool has_video_track(struct MPContext *mpctx)
+{
+    if (mpctx->vo_chain && mpctx->vo_chain->is_coverart)
+        return false;
+
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+        if (track->type == STREAM_VIDEO && !track->attached_picture && !track->image)
+            return true;
+    }
+
+    return false;
+}
+
+void audio_update_media_role(struct MPContext *mpctx)
+{
+    if (!mpctx->ao)
+        return;
+
+    enum aocontrol_media_role role = has_video_track(mpctx) ?
+        AOCONTROL_MEDIA_ROLE_MOVIE : AOCONTROL_MEDIA_ROLE_MUSIC;
+    ao_control(mpctx->ao, AOCONTROL_UPDATE_MEDIA_ROLE, &role);
 }
 
 static void ao_chain_reset_state(struct ao_chain *ao_c)
@@ -471,6 +495,8 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
 
     audio_update_volume(mpctx);
 
+    audio_update_media_role(mpctx);
+
     // Almost nonsensical hack to deal with certain format change scenarios.
     if (mpctx->audio_status == STATUS_PLAYING)
         ao_start(mpctx->ao);
@@ -637,7 +663,7 @@ static void ao_process(struct mp_filter *f)
         return;
     }
 
-    // Due to mp_async_queue_set_notifier() thhis function is called when the
+    // Due to mp_async_queue_set_notifier() this function is called when the
     // queue becomes full. This affects state changes in the normal playloop,
     // so wake it up. But avoid redundant wakeups during normal playback.
     if (mpctx->audio_status != STATUS_PLAYING &&

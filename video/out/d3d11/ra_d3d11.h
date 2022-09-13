@@ -8,6 +8,13 @@
 #include "video/out/gpu/ra.h"
 #include "video/out/gpu/spirv.h"
 
+// Get the underlying DXGI format from an RA format
+DXGI_FORMAT ra_d3d11_get_format(const struct ra_format *fmt);
+
+// Gets the matching ra_format for a given DXGI format.
+// Returns a nullptr in case of no known match.
+const struct ra_format *ra_d3d11_get_ra_format(struct ra *ra, DXGI_FORMAT fmt);
+
 // Create an RA instance from a D3D11 device. This takes a reference to the
 // device, which is released when the RA instance is destroyed.
 struct ra *ra_d3d11_create(ID3D11Device *device, struct mp_log *log,
@@ -26,6 +33,11 @@ struct ra_tex *ra_d3d11_wrap_tex(struct ra *ra, ID3D11Resource *res);
 struct ra_tex *ra_d3d11_wrap_tex_video(struct ra *ra, ID3D11Texture2D *res,
                                        int w, int h, int array_slice,
                                        const struct ra_format *fmt);
+
+// Get the underlying D3D11 resource from an RA texture. The returned resource
+// is refcounted and must be released by the caller.
+ID3D11Resource *ra_d3d11_get_raw_tex(struct ra *ra, struct ra_tex *tex,
+                                     int *array_slice);
 
 // Get the underlying D3D11 device from an RA instance. The returned device is
 // refcounted and must be released by the caller.

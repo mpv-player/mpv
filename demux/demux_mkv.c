@@ -1300,6 +1300,7 @@ static void add_coverart(struct demuxer *demuxer)
             sh->attached_picture->pts = 0;
             talloc_steal(sh, sh->attached_picture);
             sh->attached_picture->keyframe = true;
+            sh->image = true;
         }
         sh->title = att->name;
         demux_add_sh_stream(demuxer, sh);
@@ -2871,7 +2872,7 @@ static int read_next_block_into_queue(demuxer_t *demuxer)
         if (mkv_d->cluster_end != EBML_UINT_INVALID)
             mkv_d->cluster_end += stream_tell(s);
     }
-    assert(0); // unreachable
+    MP_ASSERT_UNREACHABLE();
 
 add_block:
     index_block(demuxer, &block);

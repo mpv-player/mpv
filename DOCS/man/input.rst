@@ -431,7 +431,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Playback is stopped. If idle mode (``--idle``) is enabled, the player
         will enter idle mode, otherwise it will exit.
 
-    This comm and is similar to ``loadfile`` in that it only manipulates the
+    This command is similar to ``loadfile`` in that it only manipulates the
     state of what to play next, without waiting until the current file is
     unloaded, and the next one is loaded.
 
@@ -545,15 +545,15 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         argument list.
 
         The first array entry is either an absolute path to the executable, or
-        a filename with no path components, in which case the ``PATH``
-        environment variable. On Unix, this is equivalent to ``posix_spawnp``
-        and ``execvp`` behavior.
+        a filename with no path components, in which case the executable is
+        searched in the directories in the ``PATH`` environment variable. On
+        Unix, this is equivalent to ``posix_spawnp`` and ``execvp`` behavior.
 
     ``playback_only`` (``MPV_FORMAT_FLAG``)
         Boolean indicating whether the process should be killed when playback
-        terminates (optional, default: true). If enabled, stopping playback
-        will automatically kill the process, and you can't start it outside of
-        playback.
+        of the current playlist entry terminates (optional, default: true). If
+        enabled, stopping playback will automatically kill the process, and you
+        can't start it outside of playback.
 
     ``capture_size`` (``MPV_FORMAT_INT64``)
         Integer setting the maximum number of stdout plus stderr bytes that can
@@ -581,7 +581,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         instead. (Unlike the underlying OS mechanisms, the mpv command cannot
         start a process with empty environment. Fortunately, that is completely
         useless.) The format of the list is as in the ``execle()`` syscall. Each
-        string item defines an environment variable as in ``NANME=VALUE``.
+        string item defines an environment variable as in ``NAME=VALUE``.
 
         On Lua, you may use ``utils.get_env_list()`` to retrieve the current
         environment if you e.g. simply want to add a new variable.
@@ -600,12 +600,14 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     The command returns the following result (as ``MPV_FORMAT_NODE_MAP``):
 
     ``status`` (``MPV_FORMAT_INT64``)
-        The raw exit status of the process. It will be negative on error. The
-        meaning of negative values is undefined, other than meaning error (and
-        does not correspond to OS low level exit status values).
+        Typically this is the process exit code (0 or positive) if the process
+        terminates normally, or negative for other errors (failed to start,
+        terminated by mpv, and others).  The meaning of negative values is
+        undefined, other than meaning error (and does not correspond to OS low
+        level exit status values).
 
-        On Windows, it can happen that a negative return value is returned
-        even if the process exits gracefully, because the win32 ``UINT`` exit
+        On Windows, it can happen that a negative return value is returned even
+        if the process terminates normally, because the win32 ``UINT`` exit
         code is assigned to an ``int`` variable before being set as ``int64_t``
         field in the result map. This might be fixed later.
 
@@ -616,9 +618,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Same as ``stdout``, but for stderr.
 
     ``error_string`` (``MPV_FORMAT_STRING``)
-        Empty string if the process exited gracefully. The string ``killed`` if
-        the process was terminated in an unusual way. The string ``init`` if the
-        process could not be started.
+        Empty string if the process terminated normally. The string ``killed``
+        if the process was terminated in an unusual way. The string ``init`` if
+        the process could not be started.
 
         On Windows, ``killed`` is only returned when the process has been
         killed by mpv as a result of ``playback_only`` being set to true.
@@ -633,17 +635,19 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     it was somehow killed or returned an error status has to be queried from
     the result value.
 
-    This command can be asynchronously aborted via API.
+    This command can be asynchronously aborted via API. Also see `Asynchronous
+    command details`_. Only the ``run`` command can start processes in a truly
+    detached way.
 
-    In all cases, the subprocess will be terminated on player exit. Also see
-    `Asynchronous command details`_. Only the ``run`` command can start
-    processes in a truly detached way.
+    .. note:: The subprocess will always be terminated on player exit if it
+              wasn't started in detached mode, even if ``playback_only`` is
+              false.
 
     .. admonition:: Warning
 
-        Don't forget to set the ``playback_only`` field if you want the command
-        run while the player is in idle mode, or if you don't want that end of
-        playback kills the command.
+        Don't forget to set the ``playback_only`` field to false if you want
+        the command to run while the player is in idle mode, or if you don't
+        want the end of playback to kill the command.
 
     .. admonition:: Example
 
@@ -668,7 +672,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``quit-watch-later [<code>]``
     Exit player, and store current playback position. Playing that file later
     will seek to the previous position on start. The (optional) argument is
-    exactly as in the ``quit`` command.
+    exactly as in the ``quit`` command. See `RESUMING PLAYBACK`_.
 
 ``sub-add <url> [<flags> [<title> [<lang>]]]``
     Load the given subtitle file or stream. By default, it is selected as
@@ -1600,10 +1604,8 @@ This list uses the event name field value, and the C API symbol in brackets:
     ``data``
         The new value of the property.
 
-The following events also happen, but are deprecated: ``tracks-changed``,
-``track-switched``, ``pause``, ``unpause``, ``metadata-update``, ``idle``,
-``tick``, ``chapter-change``. Use ``mpv_observe_property()``
-(Lua: ``mp.observe_property()``) instead.
+The following events also happen, but are deprecated: ``idle``, ``tick``
+Use ``mpv_observe_property()`` (Lua: ``mp.observe_property()``) instead.
 
 Hooks
 ~~~~~
@@ -1817,7 +1819,7 @@ Property list
 
 .. note::
 
-    Most options can be set as runtime via properties as well. Just remove the
+    Most options can be set at runtime via properties as well. Just remove the
     leading ``--`` from the option name. These are not documented below, see
     `OPTIONS`_ instead. Only properties which do not exist as option with the
     same name, or which have very different behavior from the options are
@@ -2838,11 +2840,15 @@ Property list
     ``track-list/N/lang``
         Track language as identified by the file. Not always available.
 
-    ``track-list/N/albumart``
+    ``track-list/N/image``
         ``yes``/true if this is a video track that consists of a single
-        picture, ``no``/false or unavailable otherwise. This is used for video
-        tracks that are really images embedded in audio files and for external
-        cover art.
+        picture, ``no``/false or unavailable otherwise. The heuristic used to
+        determine if a stream is an image doesn't attempt to detect images in
+        codecs normally used for videos. Otherwise, it is reliable.
+
+    ``track-list/N/albumart``
+        ``yes``/true if this is an image embedded in an audio file or external
+        cover art, ``no``/false or unavailable otherwise.
 
     ``track-list/N/default``
         ``yes``/true if the track has the default flag set in the file,
@@ -2936,6 +2942,7 @@ Property list
                 "src-id"            MPV_FORMAT_INT64
                 "title"             MPV_FORMAT_STRING
                 "lang"              MPV_FORMAT_STRING
+                "image"             MPV_FORMAT_FLAG
                 "albumart"          MPV_FORMAT_FLAG
                 "default"           MPV_FORMAT_FLAG
                 "forced"            MPV_FORMAT_FLAG
@@ -2971,17 +2978,10 @@ Property list
     For example, ``current-tracks/audio/lang`` returns the current audio track's
     language field (the same value as ``track-list/N/lang``).
 
-    A sub-entry is accessible only if a track of that type is actually selected.
-    Tracks selected via ``--lavfi-complex`` never appear under this property.
-    ``current-tracks`` and ``current-tracks/`` are currently not accessible, and
-    will not return anything.
+    If tracks of the requested type are selected via ``--lavfi-complex``, the
+    first one is returned.
 
-    Scripts etc. should not use this. They should use ``track-list``, loop over
-    all tracks, and inspect the ``selected`` field to test whether a track is
-    selected (or compare the ``id`` field to the ``video`` / ``audio`` etc.
-    options).
-
-``chapter-list``
+``chapter-list`` (RW)
     List of chapters, current entry marked. Currently, the raw property value
     is useless.
 
@@ -3072,7 +3072,8 @@ Property list
     processed for C escape sequences before passing it to the OSD code. See
     `Flat command syntax`_ for details.
 
-    A list of tags can be found here: http://docs.aegisub.org/latest/ASS_Tags/
+    A list of tags can be found here:
+    https://aeg-dev.github.io/AegiSite/docs/3.2/ass_tags/
 
 ``vo-configured``
     Whether the VO is configured right now. Usually this corresponds to whether
@@ -3388,6 +3389,10 @@ Property list
     the value currently always being a string. Note that the options array is
     not a map, as order matters and duplicate entries are possible. Recursive
     profiles are not expanded, and show up as special ``profile`` options.
+
+    The ``profile-restore`` field is currently missing if it holds the default
+    value (either because it was not set, or set explicitly to ``default``),
+    but in the future it might hold the value ``default``.
 
 ``command-list``
     The list of input commands. This returns an array of maps, where each map

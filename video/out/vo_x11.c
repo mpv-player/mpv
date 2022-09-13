@@ -34,6 +34,7 @@
 
 #include <errno.h>
 
+#include "present_sync.h"
 #include "x11_common.h"
 
 #include <sys/ipc.h>
@@ -307,6 +308,17 @@ static void flip_page(struct vo *vo)
     struct priv *p = vo->priv;
     Display_Image(p, p->myximage[p->current_buf]);
     p->current_buf = (p->current_buf + 1) % 2;
+    if (vo->x11->use_present) {
+        vo_x11_present(vo);
+        present_sync_swap(vo->x11->present);
+    }
+}
+
+static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    if (x11->use_present)
+        present_sync_get_info(x11->present, info);
 }
 
 // Note: REDRAW_FRAME can call this with NULL.
@@ -315,6 +327,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
 
     wait_for_completion(vo, 1);
+    bool render = vo_x11_check_visible(vo);
+    if (!render)
+        return;
 
     struct mp_image *img = &p->mp_ximages[p->current_buf];
 
@@ -432,6 +447,7 @@ const struct vo_driver video_out_x11 = {
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,
+    .get_vsync = get_vsync,
     .wakeup = vo_x11_wakeup,
     .wait_events = vo_x11_wait_events,
     .uninit = uninit,

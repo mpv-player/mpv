@@ -391,6 +391,14 @@ iconv support use --disable-iconv.",
         'desc': 'SDL2 gamepad input',
         'deps': 'sdl2',
         'func': check_true,
+    }, {
+        'name': 'jpegxl',
+        'desc': 'JPEG XL support via libavcodec',
+        'func': check_pkg_config('libavcodec >= 59.27.100'),
+    }, {
+        'name': 'rubberband-3',
+        'desc': 'new engine support for librubberband',
+        'func': check_pkg_config('rubberband >= 3.0.0'),
     }
 ]
 
@@ -408,14 +416,13 @@ libav_dependencies = [
         'fmsg': "Unable to find development files for some of the required \
 FFmpeg libraries. Git master is recommended."
     }, {
+        'name': 'av-channel-layout',
+        'desc': 'FFmpeg AVChannelLayout API',
+        'func': check_pkg_config('libavutil', '>= 57.24.100'),
+    }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 57.0.0'),
-    }, {
-        'name': '--ffmpeg-strict-abi',
-        'desc': 'Disable all known FFmpeg ABI violations',
-        'func': check_true,
-        'default': 'enable',
     }
 ]
 
@@ -430,6 +437,15 @@ audio_output_features = [
         'desc': 'OSSv4 audio output',
         'func': check_statement(['sys/soundcard.h'], 'int x = SNDCTL_DSP_SETPLAYVOL'),
         'deps': 'posix && gpl',
+    }, {
+        'name': '--pipewire',
+        'desc': 'PipeWire audio output',
+        'func': check_pkg_config('libpipewire-0.3', '>= 0.3.0')
+    }, {
+        'name': '--sndio',
+        'desc': 'sndio audio input/output',
+        'func': check_pkg_config('sndio'),
+        'default': 'disable'
     }, {
         'name': '--pulse',
         'desc': 'PulseAudio audio output',
@@ -487,12 +503,12 @@ video_output_features = [
         'name': '--drm',
         'desc': 'DRM',
         'deps': 'vt.h || consio.h',
-        'func': check_pkg_config('libdrm', '>= 2.4.74'),
+        'func': check_pkg_config('libdrm', '>= 2.4.75'),
     }, {
         'name': '--gbm',
         'desc': 'GBM',
         'deps': 'gbm.h',
-        'func': check_pkg_config('gbm'),
+        'func': check_pkg_config('gbm', '>= 17.1.0'),
     } , {
         'name': '--wayland-scanner',
         'desc': 'wayland-scanner',
@@ -522,6 +538,7 @@ video_output_features = [
                                  'xscrnsaver',  '>= 1.0.0',
                                  'xext',        '>= 1.0.0',
                                  'xinerama',    '>= 1.0.0',
+                                 'xpresent',    '>= 1.0.0',
                                  'xrandr',      '>= 1.2.0'),
     } , {
         'name': '--xv',
@@ -642,6 +659,11 @@ video_output_features = [
         'deps': 'vaapi && gl-wayland',
         'func': check_pkg_config('libva-wayland', '>= 1.1.0'),
     }, {
+        'name': 'vaapi-wayland-memfd',
+        'desc': 'VAAPI (Wayland dmabuf support)',
+        'deps': 'vaapi-wayland && memfd_create',
+        'func': check_true,
+    }, {
         'name': '--vaapi-drm',
         'desc': 'VAAPI (DRM/EGL support)',
         'deps': 'vaapi && egl-drm',
@@ -676,14 +698,14 @@ video_output_features = [
         'desc': 'libshaderc SPIR-V compiler (shared library)',
         'deps': '!static-build',
         'groups': ['shaderc'],
-        'func': check_cc(header_name='shaderc/shaderc.h', lib='shaderc_shared'),
+        'func': check_pkg_config('shaderc'),
     }, {
         'name': 'shaderc-static',
         'desc': 'libshaderc SPIR-V compiler (static library)',
         'deps': '!shaderc-shared',
         'groups': ['shaderc'],
-        'func': check_cc(header_name='shaderc/shaderc.h',
-                         lib=['shaderc_combined', 'stdc++']),
+        'func': any_check(check_pkg_config('shaderc_combined'),
+                          check_pkg_config('shaderc_static')),
     }, {
         'name': '--shaderc',
         'desc': 'libshaderc SPIR-V compiler',
@@ -734,16 +756,22 @@ video_output_features = [
     }, {
         'name': '--libplacebo',
         'desc': 'libplacebo support',
-        'func': check_pkg_config('libplacebo >= 2.72.0'),
+        'func': check_pkg_config('libplacebo >= 4.157.0'),
+    }, {
+        'name': 'libplacebo-next',
+        'desc': 'libplacebo v4.202+, needed for vo_gpu_next',
+        'deps': 'libplacebo',
+        'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 202',
+                                   use='libplacebo'),
     }, {
         'name': '--vulkan',
         'desc':  'Vulkan context support',
         'deps': 'libplacebo',
         'func': check_pkg_config('vulkan'),
     }, {
-        'name': 'vaapi-vulkan',
-        'desc': 'VAAPI Vulkan',
-        'deps': 'vaapi && vulkan',
+        'name': 'vaapi-libplacebo',
+        'desc': 'VAAPI libplacebo',
+        'deps': 'vaapi && libplacebo',
         'func': check_true,
     }, {
         'name': 'egl-helpers',
@@ -754,6 +782,22 @@ video_output_features = [
         'name': '--sixel',
         'desc': 'Sixel',
         'func': check_pkg_config('libsixel', '>= 1.5'),
+    }, {
+        'name': 'dmabuf-interop-gl',
+        'desc': 'dmabuf GL Interop',
+        'deps': 'egl && drm',
+        'func': check_true,
+    }, {
+        'name': 'dmabuf-interop-pl',
+        'desc': 'dmabuf libplacebo interop',
+        'deps': 'vaapi-libplacebo',
+        'func': check_true,
+    }, {
+        # This can be removed roughly when Debian 12 is released.
+        'name': 'drm-is-kms',
+        'desc': 'drmIsKMS() function',
+        'deps': 'drm',
+        'func': check_pkg_config('libdrm', '>= 2.4.105'),
     }
 ]
 
@@ -907,7 +951,7 @@ def options(opt):
     group.add_option('--lua',
         type    = 'string',
         dest    = 'LUA_VER',
-        help    = "select Lua package which should be autodetected. Choices: 51 51deb 51obsd 51fbsd 52 52deb 52arch 52fbsd luajit")
+        help    = "select Lua package to autodetect. Choices (x is 1 or 2): luadef5x, lua5x, lua5.x, lua-5.x, luajit (luadef5x is for pkg-config name 'lua', the rest are exact pkg-config names)")
     group.add_option('--swift-flags',
         type    = 'string',
         dest    = 'SWIFT_FLAGS',

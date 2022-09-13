@@ -26,8 +26,11 @@
 #include <libavutil/common.h>
 #include <libavutil/intreadwrite.h>
 
+#include "config.h"
+
 #include "mpv_talloc.h"
 #include "audio/aframe.h"
+#include "audio/chmap_avchannel.h"
 #include "audio/fmt-conversion.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
@@ -106,8 +109,22 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
     lavc_context->pkt_timebase = ctx->codec_timebase;
 
     if (opts->downmix && mpopts->audio_output_channels.num_chmaps == 1) {
+        const struct mp_chmap *requested_layout =
+            &mpopts->audio_output_channels.chmaps[0];
+#if !HAVE_AV_CHANNEL_LAYOUT
         lavc_context->request_channel_layout =
-            mp_chmap_to_lavc(&mpopts->audio_output_channels.chmaps[0]);
+            mp_chmap_to_lavc(requested_layout);
+#else
+        AVChannelLayout av_layout = { 0 };
+        mp_chmap_to_av_layout(&av_layout, requested_layout);
+
+        // Always try to set requested output layout - currently only something
+        // supported by AC3, MLP/TrueHD, DTS and the fdk-aac wrapper.
+        av_opt_set_chlayout(lavc_context, "downmix", &av_layout,
+                            AV_OPT_SEARCH_CHILDREN);
+
+        av_channel_layout_uninit(&av_layout);
+#endif
     }
 
     // Always try to set - option only exists for AC3 at the moment
@@ -242,6 +259,9 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
         mp_aframe_set_size(mpframe, mp_aframe_get_size(mpframe) - trim);
         priv->trim_samples -= trim;
     }
+
+    // Strip possibly bogus float values like Infinity, NaN, denormalized
+    mp_aframe_sanitize_float(mpframe);
 
     if (mp_aframe_get_size(mpframe) > 0) {
         *out = MAKE_FRAME(MP_FRAME_AUDIO, mpframe);

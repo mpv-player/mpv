@@ -49,6 +49,7 @@
 #endif
 
 #define PATH_DEV_DSP "/dev/dsp"
+#define PATH_DEV_MIXER "/dev/mixer"
 
 struct priv {
     int dsp_fd;

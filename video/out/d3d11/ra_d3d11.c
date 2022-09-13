@@ -21,6 +21,10 @@
 #endif
 #define D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE (0x80)
 
+// D3D11.3 message IDs, not present in mingw-w64 v9
+#define D3D11_MESSAGE_ID_CREATE_FENCE  ((D3D11_MESSAGE_ID)0x300209)
+#define D3D11_MESSAGE_ID_DESTROY_FENCE ((D3D11_MESSAGE_ID)0x30020b)
+
 struct dll_version {
     uint16_t major;
     uint16_t minor;
@@ -196,10 +200,22 @@ static bool dll_version_equal(struct dll_version a, struct dll_version b)
            a.revision == b.revision;
 }
 
-static DXGI_FORMAT fmt_to_dxgi(const struct ra_format *fmt)
+DXGI_FORMAT ra_d3d11_get_format(const struct ra_format *fmt)
 {
     struct d3d_fmt *d3d = fmt->priv;
     return d3d->fmt;
+}
+
+const struct ra_format *ra_d3d11_get_ra_format(struct ra *ra, DXGI_FORMAT fmt)
+{
+    for (int i = 0; i < ra->num_formats; i++) {
+        struct ra_format *ra_fmt = ra->formats[i];
+
+        if (ra_d3d11_get_format(ra_fmt) == fmt)
+            return ra_fmt;
+    }
+
+    return NULL;
 }
 
 static void setup_formats(struct ra *ra)
@@ -273,7 +289,7 @@ static bool tex_init(struct ra *ra, struct ra_tex *tex)
         // texture format for textures created with tex_create, but it can be
         // different for wrapped planar video textures.
         D3D11_SHADER_RESOURCE_VIEW_DESC srvdesc = {
-            .Format = fmt_to_dxgi(params->format),
+            .Format = ra_d3d11_get_format(params->format),
         };
         switch (params->dimensions) {
         case 1:
@@ -393,7 +409,7 @@ static struct ra_tex *tex_create(struct ra *ra,
     tex->params.initial_data = NULL;
 
     struct d3d_tex *tex_p = tex->priv = talloc_zero(tex, struct d3d_tex);
-    DXGI_FORMAT fmt = fmt_to_dxgi(params->format);
+    DXGI_FORMAT fmt = ra_d3d11_get_format(params->format);
 
     D3D11_SUBRESOURCE_DATA data;
     D3D11_SUBRESOURCE_DATA *pdata = NULL;
@@ -564,7 +580,7 @@ struct ra_tex *ra_d3d11_wrap_tex(struct ra *ra, ID3D11Resource *res)
     }
 
     for (int i = 0; i < ra->num_formats; i++) {
-        DXGI_FORMAT target_fmt = fmt_to_dxgi(ra->formats[i]);
+        DXGI_FORMAT target_fmt = ra_d3d11_get_format(ra->formats[i]);
         if (fmt == target_fmt) {
             params->format = ra->formats[i];
             break;
@@ -641,6 +657,17 @@ struct ra_tex *ra_d3d11_wrap_tex_video(struct ra *ra, ID3D11Texture2D *res,
 error:
     tex_destroy(ra, tex);
     return NULL;
+}
+
+ID3D11Resource *ra_d3d11_get_raw_tex(struct ra *ra, struct ra_tex *tex,
+                                     int *array_slice)
+{
+    struct d3d_tex *tex_p = tex->priv;
+
+    ID3D11Resource_AddRef(tex_p->res);
+    if (array_slice)
+        *array_slice = tex_p->array_slice;
+    return tex_p->res;
 }
 
 static bool tex_upload(struct ra *ra, const struct ra_tex_upload_params *params)
@@ -2083,6 +2110,65 @@ static int map_msg_severity(D3D11_MESSAGE_SEVERITY sev)
     }
 }
 
+static int map_msg_severity_by_id(D3D11_MESSAGE_ID id,
+                                  D3D11_MESSAGE_SEVERITY sev)
+{
+    switch (id) {
+    // These are normal. The RA timer queue habitually reuses timer objects
+    // without retrieving the results.
+    case D3D11_MESSAGE_ID_QUERY_BEGIN_ABANDONING_PREVIOUS_RESULTS:
+    case D3D11_MESSAGE_ID_QUERY_END_ABANDONING_PREVIOUS_RESULTS:
+        return MSGL_TRACE;
+
+    // D3D11 writes log messages every time an object is created or
+    // destroyed. That results in a lot of log spam, so force MSGL_TRACE.
+#define OBJ_LIFETIME_MESSAGES(obj)          \
+    case D3D11_MESSAGE_ID_CREATE_ ## obj:   \
+    case D3D11_MESSAGE_ID_DESTROY_ ## obj
+
+    OBJ_LIFETIME_MESSAGES(CONTEXT):
+    OBJ_LIFETIME_MESSAGES(BUFFER):
+    OBJ_LIFETIME_MESSAGES(TEXTURE1D):
+    OBJ_LIFETIME_MESSAGES(TEXTURE2D):
+    OBJ_LIFETIME_MESSAGES(TEXTURE3D):
+    OBJ_LIFETIME_MESSAGES(SHADERRESOURCEVIEW):
+    OBJ_LIFETIME_MESSAGES(RENDERTARGETVIEW):
+    OBJ_LIFETIME_MESSAGES(DEPTHSTENCILVIEW):
+    OBJ_LIFETIME_MESSAGES(VERTEXSHADER):
+    OBJ_LIFETIME_MESSAGES(HULLSHADER):
+    OBJ_LIFETIME_MESSAGES(DOMAINSHADER):
+    OBJ_LIFETIME_MESSAGES(GEOMETRYSHADER):
+    OBJ_LIFETIME_MESSAGES(PIXELSHADER):
+    OBJ_LIFETIME_MESSAGES(INPUTLAYOUT):
+    OBJ_LIFETIME_MESSAGES(SAMPLER):
+    OBJ_LIFETIME_MESSAGES(BLENDSTATE):
+    OBJ_LIFETIME_MESSAGES(DEPTHSTENCILSTATE):
+    OBJ_LIFETIME_MESSAGES(RASTERIZERSTATE):
+    OBJ_LIFETIME_MESSAGES(QUERY):
+    OBJ_LIFETIME_MESSAGES(PREDICATE):
+    OBJ_LIFETIME_MESSAGES(COUNTER):
+    OBJ_LIFETIME_MESSAGES(COMMANDLIST):
+    OBJ_LIFETIME_MESSAGES(CLASSINSTANCE):
+    OBJ_LIFETIME_MESSAGES(CLASSLINKAGE):
+    OBJ_LIFETIME_MESSAGES(COMPUTESHADER):
+    OBJ_LIFETIME_MESSAGES(UNORDEREDACCESSVIEW):
+    OBJ_LIFETIME_MESSAGES(VIDEODECODER):
+    OBJ_LIFETIME_MESSAGES(VIDEOPROCESSORENUM):
+    OBJ_LIFETIME_MESSAGES(VIDEOPROCESSOR):
+    OBJ_LIFETIME_MESSAGES(DECODEROUTPUTVIEW):
+    OBJ_LIFETIME_MESSAGES(PROCESSORINPUTVIEW):
+    OBJ_LIFETIME_MESSAGES(PROCESSOROUTPUTVIEW):
+    OBJ_LIFETIME_MESSAGES(DEVICECONTEXTSTATE):
+    OBJ_LIFETIME_MESSAGES(FENCE):
+        return MSGL_TRACE;
+
+#undef OBJ_LIFETIME_MESSAGES
+
+    default:
+        return map_msg_severity(sev);
+    }
+}
+
 static void debug_marker(struct ra *ra, const char *msg)
 {
     struct ra_d3d11 *p = ra->priv;
@@ -2106,7 +2192,7 @@ static void debug_marker(struct ra *ra, const char *msg)
         if (FAILED(hr))
             goto done;
 
-        int msgl = map_msg_severity(d3dmsg->Severity);
+        int msgl = map_msg_severity_by_id(d3dmsg->ID, d3dmsg->Severity);
         if (mp_msg_test(ra->log, msgl)) {
             if (!printed_header)
                 MP_INFO(ra, "%s:\n", msg);
@@ -2143,7 +2229,7 @@ static void destroy(struct ra *ra)
     SAFE_RELEASE(p->dev1);
     SAFE_RELEASE(p->dev);
 
-    if (p->debug && p->ctx) {
+    if (p->ctx) {
         // Destroy the device context synchronously so referenced objects don't
         // show up in the leak check
         ID3D11DeviceContext_ClearState(p->ctx);
@@ -2223,11 +2309,6 @@ static void init_debug_layer(struct ra *ra)
         // the real maximum texture size by attempting to create a texture
         // larger than the current feature level allows.
         D3D11_MESSAGE_ID_CREATETEXTURE2D_INVALIDDIMENSIONS,
-
-        // These are normal. The RA timer queue habitually reuses timer objects
-        // without retrieving the results.
-        D3D11_MESSAGE_ID_QUERY_BEGIN_ABANDONING_PREVIOUS_RESULTS,
-        D3D11_MESSAGE_ID_QUERY_END_ABANDONING_PREVIOUS_RESULTS,
     };
     D3D11_INFO_QUEUE_FILTER filter = {
         .DenyList = {
@@ -2386,6 +2467,8 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
     if (p->fl >= D3D_FEATURE_LEVEL_11_0) {
         ra->caps |= RA_CAP_COMPUTE | RA_CAP_BUF_RW;
         ra->max_shmem = 32 * 1024;
+        ra->max_compute_group_threads =
+            D3D11_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
     }
 
     if (p->fl >= D3D_FEATURE_LEVEL_11_1) {

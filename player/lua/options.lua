@@ -1,12 +1,5 @@
 local msg = require 'mp.msg'
 
-local function val2str(val)
-    if type(val) == "boolean" then
-        if val then val = "yes" else val = "no" end
-    end
-    return val
-end
-
 -- converts val to type of desttypeval
 local function typeconv(desttypeval, val)
     if type(desttypeval) == "boolean" then

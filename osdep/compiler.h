@@ -23,4 +23,10 @@
 #define alignof(x) (offsetof(struct {char unalign_; x u;}, u))
 #endif
 
+#ifdef __GNUC__
+#define MP_ASSERT_UNREACHABLE() (assert(!"unreachable"), __builtin_unreachable())
+#else
+#define MP_ASSERT_UNREACHABLE() (assert(!"unreachable"), abort())
+#endif
+
 #endif

@@ -41,8 +41,16 @@
 #define EGL_CONTEXT_OPENGL_PROFILE_MASK         0x30FD
 #define EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT     0x00000001
 #define EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE   0x31B1
-#define EGL_OPENGL_ES3_BIT                      0x00000040
 typedef intptr_t EGLAttrib;
+#endif
+
+// Not every EGL provider (like RPI) has these.
+#ifndef EGL_CONTEXT_FLAGS_KHR
+#define EGL_CONTEXT_FLAGS_KHR EGL_NONE
+#endif
+
+#ifndef EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR
+#define EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR 0
 #endif
 
 struct mp_egl_config_attr {
@@ -92,9 +100,8 @@ static void *mpegl_get_proc_address(void *ctx, const char *name)
     return p;
 }
 
-// es_version: 0 (core), 2 or 3
 static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
-                           int es_version, struct mpegl_cb cb,
+                           bool es, struct mpegl_cb cb,
                            EGLContext *out_context, EGLConfig *out_config)
 {
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_FATAL;
@@ -103,23 +110,14 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     EGLint rend;
     const char *name;
 
-    switch (es_version) {
-    case 0:
+    if (!es) {
         api = EGL_OPENGL_API;
         rend = EGL_OPENGL_BIT;
         name = "Desktop OpenGL";
-        break;
-    case 2:
+    } else {
         api = EGL_OPENGL_ES_API;
         rend = EGL_OPENGL_ES2_BIT;
-        name = "GLES 2.x";
-        break;
-    case 3:
-        api = EGL_OPENGL_ES_API;
-        rend = EGL_OPENGL_ES3_BIT;
-        name = "GLES 3.x";
-        break;
-    default: abort();
+        name = "GLES 2.x +";
     }
 
     MP_VERBOSE(ctx, "Trying to create %s context.\n", name);
@@ -134,7 +132,7 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
         EGL_RED_SIZE, 8,
         EGL_GREEN_SIZE, 8,
         EGL_BLUE_SIZE, 8,
-        EGL_ALPHA_SIZE, ctx->opts.want_alpha ? 1 : 0,
+        EGL_ALPHA_SIZE, ctx->opts.want_alpha ? 8 : 0,
         EGL_RENDERABLE_TYPE, rend,
         EGL_NONE
     };
@@ -171,29 +169,19 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     MP_DBG(ctx, "Chosen EGLConfig:\n");
     dump_egl_config(ctx->log, MSGL_DEBUG, display, config);
 
+    int ctx_flags = ctx->opts.debug ? EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR : 0;
     EGLContext *egl_ctx = NULL;
 
-    if (es_version) {
-        if (!ra_gl_ctx_test_version(ctx, MPGL_VER(es_version, 0), true))
-            return false;
-
-        EGLint attrs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, es_version,
-            EGL_NONE
-        };
-
-        egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
-    } else {
-        for (int n = 0; mpgl_preferred_gl_versions[n]; n++) {
-            int ver = mpgl_preferred_gl_versions[n];
-            if (!ra_gl_ctx_test_version(ctx, ver, false))
-                continue;
+    if (!es) {
+        for (int n = 0; mpgl_min_required_gl_versions[n]; n++) {
+            int ver = mpgl_min_required_gl_versions[n];
 
             EGLint attrs[] = {
                 EGL_CONTEXT_MAJOR_VERSION, MPGL_VER_GET_MAJOR(ver),
                 EGL_CONTEXT_MINOR_VERSION, MPGL_VER_GET_MINOR(ver),
                 EGL_CONTEXT_OPENGL_PROFILE_MASK,
                     ver >= 320 ? EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT : 0,
+                EGL_CONTEXT_FLAGS_KHR, ctx_flags,
                 EGL_NONE
             };
 
@@ -201,22 +189,17 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
             if (egl_ctx)
                 break;
         }
+    }
+    if (!egl_ctx) {
+        // Fallback for EGL 1.4 without EGL_KHR_create_context or GLES
+        // Add the context flags only for GLES - GL has been attempted above
+        EGLint attrs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 2,
+            es ? EGL_CONTEXT_FLAGS_KHR : EGL_NONE, ctx_flags,
+            EGL_NONE
+        };
 
-        if (!egl_ctx) {
-            // Fallback for EGL 1.4 without EGL_KHR_create_context.
-            EGLint attrs[] = { EGL_NONE };
-            egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
-
-            GL *gl = talloc_zero(ctx, struct GL);
-            mpgl_check_version(gl, mpegl_get_proc_address, NULL);
-            if (gl->version < 210 ||
-                !ra_gl_ctx_test_version(ctx, gl->version, false))
-            {
-                eglDestroyContext(display, egl_ctx);
-                egl_ctx = NULL;
-            }
-            talloc_free(gl);
-        }
+        egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
     }
 
     if (!egl_ctx) {
@@ -256,11 +239,15 @@ bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
     MP_VERBOSE(ctx, "EGL_VERSION=%s\nEGL_VENDOR=%s\nEGL_CLIENT_APIS=%s\n",
                STR_OR_ERR(version), STR_OR_ERR(vendor), STR_OR_ERR(apis));
 
-    int es[] = {0, 3, 2}; // preference order
-    for (int i = 0; i < MP_ARRAY_SIZE(es); i++) {
-        if (create_context(ctx, display, es[i], cb, out_context, out_config))
-            return true;
-    }
+    enum gles_mode mode = ra_gl_ctx_get_glesmode(ctx);
+
+    if ((mode == GLES_NO || mode == GLES_AUTO) &&
+        create_context(ctx, display, false, cb, out_context, out_config))
+        return true;
+
+    if ((mode == GLES_YES || mode == GLES_AUTO) &&
+        create_context(ctx, display, true, cb, out_context, out_config))
+        return true;
 
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
     MP_MSG(ctx, msgl, "Could not create a GL context.\n");
@@ -287,6 +274,20 @@ void mpegl_load_functions(struct GL *gl, struct mp_log *log)
     mpgl_load_functions2(gl, mpegl_get_proc_address, NULL, egl_exts, log);
     if (!gl->SwapInterval)
         gl->SwapInterval = swap_interval;
+}
+
+static bool is_egl15(void)
+{
+    // It appears that EGL 1.4 is specified to _require_ an initialized display
+    // for EGL_VERSION, while EGL 1.5 is _required_ to return the EGL version.
+    const char *ver = eglQueryString(EGL_NO_DISPLAY, EGL_VERSION);
+    // Of course we have to go through the excruciating pain of parsing a
+    // version string, since EGL provides no other way without a display. In
+    // theory version!=NULL is already proof enough that it's 1.5, but be
+    // extra defensive, since this should have been true for EGL_EXTENSIONS as
+    // well, but then they added an extension that modified standard behavior.
+    int ma = 0, mi = 0;
+    return ver && sscanf(ver, "%d.%d", &ma, &mi) == 2 && (ma > 1 || mi >= 5);
 }
 
 // This is similar to eglGetPlatformDisplay(platform, native_display, NULL),
@@ -319,20 +320,11 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
     // If this is either EGL 1.5, or 1.4 with EGL_EXT_client_extensions, then
     // this must return a valid extension string.
     const char *exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
-    if (!exts || !gl_check_extension(exts, platform_ext_name))
+    if (!gl_check_extension(exts, platform_ext_name))
         return EGL_NO_DISPLAY;
 
     // Before we go through the EGL 1.4 BS, try if we can use native EGL 1.5
-    // It appears that EGL 1.4 is specified to _require_ an initialized display
-    // for EGL_VERSION, while EGL 1.5 is _required_ to return the EGL version.
-    const char *ver = eglQueryString(EGL_NO_DISPLAY, EGL_VERSION);
-    // Of course we have to go through the excruciating pain of parsing a
-    // version string, since EGL provides no other way without a display. In
-    // theory version!=NULL is already proof enough that it's 1.5, but be
-    // extra defensive, since this should have been true for EGL_EXTENSIONS as
-    // well, but then they added an extension that modified standard behavior.
-    int ma = 0, mi = 0;
-    if (ver && sscanf(ver, "%d.%d", &ma, &mi) == 2 && (ma > 1 || mi >= 5)) {
+    if (is_egl15()) {
         // This is EGL 1.5. It must support querying standard functions through
         // eglGetProcAddress(). Note that on EGL 1.4, even if the function is
         // unknown, it could return non-NULL anyway (because EGL is crazy).
@@ -344,8 +336,7 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
             return GetPlatformDisplay(platform, native_display, NULL);
     }
 
-    // (It should be impossible to be missing, but uh.)
-    if (!gl_check_extension(exts, "EGL_EXT_client_extensions"))
+    if (!gl_check_extension(exts, "EGL_EXT_platform_base"))
         return EGL_NO_DISPLAY;
 
     EGLDisplay (EGLAPIENTRYP GetPlatformDisplayEXT)(EGLenum, void*, const EGLint*)
@@ -356,4 +347,35 @@ EGLDisplay mpegl_get_display(EGLenum platform, const char *platform_ext_name,
         return GetPlatformDisplayEXT(platform, native_display, NULL);
 
     return EGL_NO_DISPLAY;
+}
+
+// The same mess but with eglCreatePlatformWindowSurface(EXT)
+// again no support for an attribute list because the type differs
+// Returns EGL_NO_SURFACE on failure.
+EGLSurface mpegl_create_window_surface(EGLDisplay dpy, EGLConfig config,
+                                       void *native_window)
+{
+    // Use the EGL 1.5 function if possible
+    if (is_egl15()) {
+        EGLSurface (EGLAPIENTRYP CreatePlatformWindowSurface)
+            (EGLDisplay, EGLConfig, void *, const EGLAttrib *) =
+            (void *)eglGetProcAddress("eglCreatePlatformWindowSurface");
+        // (It should be impossible to be NULL, but uh.)
+        if (CreatePlatformWindowSurface)
+            return CreatePlatformWindowSurface(dpy, config, native_window, NULL);
+    }
+
+    // Check the extension that provides the *EXT function
+    const char *exts = eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+    if (!gl_check_extension(exts, "EGL_EXT_platform_base"))
+        return EGL_NO_SURFACE;
+
+    EGLSurface (EGLAPIENTRYP CreatePlatformWindowSurfaceEXT)
+        (EGLDisplay, EGLConfig, void *, const EGLint *) =
+        (void *)eglGetProcAddress("eglCreatePlatformWindowSurfaceEXT");
+    // (It should be impossible to be NULL, but uh.)
+    if (CreatePlatformWindowSurfaceEXT)
+        return CreatePlatformWindowSurfaceEXT(dpy, config, native_window, NULL);
+
+    return EGL_NO_SURFACE;
 }

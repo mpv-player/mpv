@@ -285,7 +285,7 @@ static bool pack_rgba(struct mp_ass_packer *p, struct sub_bitmaps *res)
 
     struct sub_bitmaps imgs = {
         .change_id = res->change_id,
-        .format = SUBBITMAP_RGBA,
+        .format = SUBBITMAP_BGRA,
         .parts = p->rgba_imgs,
         .num_parts = num_bb,
     };
@@ -341,7 +341,7 @@ void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
                         int num_image_lists, bool image_lists_changed,
                         int preferred_osd_format, struct sub_bitmaps *out)
 {
-    int format = preferred_osd_format == SUBBITMAP_RGBA ? SUBBITMAP_RGBA
+    int format = preferred_osd_format == SUBBITMAP_BGRA ? SUBBITMAP_BGRA
                                                         : SUBBITMAP_LIBASS;
 
     if (p->cached_subs_valid && !image_lists_changed &&
@@ -379,7 +379,7 @@ void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
     }
 
     bool r = false;
-    if (format == SUBBITMAP_RGBA) {
+    if (format == SUBBITMAP_BGRA) {
         r = pack_rgba(p, &res);
     } else {
         r = pack_libass(p, &res);

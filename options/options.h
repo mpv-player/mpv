@@ -29,6 +29,7 @@ typedef struct mp_vo_opts {
     char *appid;
     int x11_netwm;
     int x11_bypass_compositor;
+    int x11_present;
     int native_keyrepeat;
 
     float panscan;
@@ -61,6 +62,7 @@ typedef struct mp_vo_opts {
 
     double override_display_fps;
     double timing_offset;
+    int video_sync;
 
     // vo_drm
     struct drm_opts *drm_opts;
@@ -215,7 +217,6 @@ typedef struct MPOpts {
     int hls_bitrate;
     int edition_id;
     int initial_audio_sync;
-    int video_sync;
     double sync_max_video_change;
     double sync_max_audio_change;
     int sync_max_factor;
@@ -233,6 +234,7 @@ typedef struct MPOpts {
     char *term_title;
     char *playing_msg;
     char *osd_playing_msg;
+    int osd_playing_msg_duration;
     char *status_msg;
     char *osd_status_msg;
     char *osd_msg[3];
@@ -305,6 +307,7 @@ typedef struct MPOpts {
     int sub_auto;
     int audiofile_auto;
     int coverart_auto;
+    bool coverart_whitelist;
     int osd_bar_visible;
 
     int w32_priority;
@@ -344,6 +347,7 @@ typedef struct MPOpts {
 
     struct mp_resample_opts *resample_opts;
 
+    struct ra_ctx_opts *ra_ctx_opts;
     struct gl_video_opts *gl_video_opts;
     struct angle_opts *angle_opts;
     struct opengl_opts *opengl_opts;

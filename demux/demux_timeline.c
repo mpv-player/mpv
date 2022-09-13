@@ -525,6 +525,7 @@ static void apply_meta(struct sh_stream *dst, struct sh_stream *src)
     dst->missing_timestamps = src->missing_timestamps;
     if (src->attached_picture)
         dst->attached_picture = src->attached_picture;
+    dst->image = src->image;
 }
 
 // This is mostly for EDL user-defined metadata.

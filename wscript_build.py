@@ -127,9 +127,21 @@ def build(ctx):
         ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
             protocol  = "unstable/xdg-decoration/xdg-decoration-unstable-v1",
             target    = "generated/wayland/xdg-decoration-unstable-v1.h")
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/linux-dmabuf/linux-dmabuf-unstable-v1",
+            target    = "generated/wayland/linux-dmabuf-unstable-v1.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/linux-dmabuf/linux-dmabuf-unstable-v1",
+            target    = "generated/wayland/linux-dmabuf-unstable-v1.h")
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "stable/viewporter/viewporter",
+            target    = "generated/wayland/viewporter.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "stable/viewporter/viewporter",
+            target    = "generated/wayland/viewporter.h")
 
     ctx(features = "ebml_header", target = "generated/ebml_types.h")
-    ctx(features = "ebml_definitions", target = "generated/ebml_defs.c")
+    ctx(features = "ebml_definitions", target = "generated/ebml_defs.inc")
 
     def swift(task):
         src = [x.abspath() for x in task.inputs]
@@ -218,6 +230,7 @@ def build(ctx):
         ## Audio
         ( "audio/aframe.c" ),
         ( "audio/chmap.c" ),
+        ( "audio/chmap_avchannel.c", "av-channel-layout" ),
         ( "audio/chmap_sel.c" ),
         ( "audio/decode/ad_lavc.c" ),
         ( "audio/decode/ad_spdif.c" ),
@@ -246,8 +259,10 @@ def build(ctx):
         ( "audio/out/ao_opensles.c",             "opensles" ),
         ( "audio/out/ao_oss.c",                  "oss-audio" ),
         ( "audio/out/ao_pcm.c" ),
+        ( "audio/out/ao_pipewire.c",             "pipewire" ),
         ( "audio/out/ao_pulse.c",                "pulse" ),
         ( "audio/out/ao_sdl.c",                  "sdl2-audio" ),
+        ( "audio/out/ao_sndio.c",                "sndio" ),
         ( "audio/out/ao_wasapi.c",               "wasapi" ),
         ( "audio/out/ao_wasapi_changenotify.c",  "wasapi" ),
         ( "audio/out/ao_wasapi_utils.c",         "wasapi" ),
@@ -320,6 +335,7 @@ def build(ctx):
         ( "misc/natural_sort.c" ),
         ( "misc/node.c" ),
         ( "misc/rendezvous.c" ),
+        ( "misc/random.c" ),
         ( "misc/thread_pool.c" ),
         ( "misc/thread_tools.c" ),
 
@@ -402,6 +418,7 @@ def build(ctx):
         ( "video/csputils.c" ),
         ( "video/cuda.c",                        "cuda-hwaccel" ),
         ( "video/d3d.c",                         "d3d-hwaccel" ),
+        ( "video/drmprime.c",                    "drm" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/filter/refqueue.c" ),
         ( "video/filter/vf_d3d11vpp.c",          "d3d-hwaccel" ),
@@ -451,12 +468,14 @@ def build(ctx):
         ( "video/out/gpu/utils.c" ),
         ( "video/out/gpu/video.c" ),
         ( "video/out/gpu/video_shaders.c" ),
+        ( "video/out/gpu_next/context.c",        "libplacebo-next" ),
         ( "video/out/hwdec/hwdec_cuda.c",        "cuda-interop" ),
         ( "video/out/hwdec/hwdec_cuda_gl.c",     "cuda-interop && gl" ),
         ( "video/out/hwdec/hwdec_cuda_vk.c",     "cuda-interop && vulkan" ),
-        ( "video/out/hwdec/hwdec_vaapi.c",       "vaapi-egl || vaapi-vulkan" ),
-        ( "video/out/hwdec/hwdec_vaapi_gl.c",    "vaapi-egl" ),
-        ( "video/out/hwdec/hwdec_vaapi_vk.c",    "vaapi-vulkan" ),
+        ( "video/out/hwdec/hwdec_drmprime.c",    "drm" ),
+        ( "video/out/hwdec/hwdec_vaapi.c",       "vaapi-egl || vaapi-libplacebo" ),
+        ( "video/out/hwdec/dmabuf_interop_gl.c", "dmabuf-interop-gl" ),
+        ( "video/out/hwdec/dmabuf_interop_pl.c", "dmabuf-interop-pl" ),
         ( "video/out/libmpv_sw.c" ),
         ( "video/out/placebo/ra_pl.c",           "libplacebo" ),
         ( "video/out/placebo/utils.c",           "libplacebo" ),
@@ -484,14 +503,15 @@ def build(ctx):
         ( "video/out/opengl/hwdec_rpi.c",        "rpi-mmal" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/opengl/libmpv_gl.c",        "gl" ),
-        ( "video/out/opengl/oml_sync.c",         "egl-x11 || gl-x11" ),
         ( "video/out/opengl/ra_gl.c",            "gl" ),
         ( "video/out/opengl/utils.c",            "gl" ),
+        ( "video/out/present_sync.c",            "wayland || x11" ),
         ( "video/out/vo.c" ),
         ( "video/out/vo_caca.c",                 "caca" ),
         ( "video/out/vo_direct3d.c",             "direct3d" ),
         ( "video/out/vo_drm.c",                  "drm" ),
         ( "video/out/vo_gpu.c" ),
+        ( "video/out/vo_gpu_next.c",             "libplacebo-next" ),
         ( "video/out/vo_image.c" ),
         ( "video/out/vo_lavc.c" ),
         ( "video/out/vo_libmpv.c" ),
@@ -502,6 +522,7 @@ def build(ctx):
         ( "video/out/vo_sixel.c",                "sixel" ),
         ( "video/out/vo_tct.c" ),
         ( "video/out/vo_vaapi.c",                "vaapi-x11 && gpl" ),
+        ( "video/out/vo_vaapi_wayland.c",        "vaapi-wayland-memfd"  ),
         ( "video/out/vo_vdpau.c",                "vdpau" ),
         ( "video/out/vo_wlshm.c",                "wayland && memfd_create" ),
         ( "video/out/vo_x11.c" ,                 "x11" ),
@@ -518,6 +539,8 @@ def build(ctx):
         ( "generated/wayland/presentation-time.c", "wayland" ),
         ( "generated/wayland/xdg-decoration-unstable-v1.c", "wayland" ),
         ( "generated/wayland/xdg-shell.c",       "wayland" ),
+        ( "generated/wayland/linux-dmabuf-unstable-v1.c", "wayland" ),
+        ( "generated/wayland/viewporter.c", "wayland" ),
         ( "video/out/wayland_common.c",          "wayland" ),
         ( "video/out/win32/displayconfig.c",     "win32-desktop" ),
         ( "video/out/win32/droptarget.c",        "win32-desktop" ),
@@ -709,7 +732,7 @@ def build(ctx):
             PRIV_LIBS    = get_deps(),
         )
 
-        headers = ["client.h", "opengl_cb.h", "render.h",
+        headers = ["client.h", "render.h",
                    "render_gl.h", "stream_cb.h"]
         for f in headers:
             ctx.install_as(ctx.env.INCLUDEDIR + '/mpv/' + f, 'libmpv/' + f)
@@ -736,6 +759,10 @@ def build(ctx):
         ctx.install_files(
             ctx.env.DATADIR + '/applications',
             ['etc/mpv.desktop'] )
+
+        ctx.install_files(
+            ctx.env.DATADIR + '/metainfo',
+            ['etc/mpv.metainfo.xml'] )
 
         ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
 

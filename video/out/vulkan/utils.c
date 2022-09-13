@@ -3,29 +3,26 @@
 
 bool mpvk_init(struct mpvk_ctx *vk, struct ra_ctx *ctx, const char *surface_ext)
 {
-    vk->ctx = pl_context_create(PL_API_VER, NULL);
-    if (!vk->ctx)
+    vk->log = mp_log_new(ctx, ctx->log, "libplacebo");
+    vk->pllog = mppl_log_create(vk->log);
+    if (!vk->pllog)
         goto error;
-
-    vk->pl_log = mp_log_new(ctx, ctx->log, "libplacebo");
-    mppl_ctx_set_log(vk->ctx, vk->pl_log, true);
-    mp_verbose(vk->pl_log, "Initialized libplacebo v%d\n", PL_API_VER);
 
     const char *exts[] = {
         VK_KHR_SURFACE_EXTENSION_NAME,
         surface_ext,
     };
 
-    vk->vkinst = pl_vk_inst_create(vk->ctx, &(struct pl_vk_inst_params) {
+    mppl_log_set_probing(vk->pllog, true);
+    vk->vkinst = pl_vk_inst_create(vk->pllog, &(struct pl_vk_inst_params) {
         .debug = ctx->opts.debug,
         .extensions = exts,
         .num_extensions = MP_ARRAY_SIZE(exts),
     });
-
+    mppl_log_set_probing(vk->pllog, false);
     if (!vk->vkinst)
         goto error;
 
-    mppl_ctx_set_log(vk->ctx, vk->pl_log, false); // disable probing
     return true;
 
 error:
@@ -42,6 +39,6 @@ void mpvk_uninit(struct mpvk_ctx *vk)
     }
 
     pl_vk_inst_destroy(&vk->vkinst);
-    pl_context_destroy(&vk->ctx);
-    TA_FREEP(&vk->pl_log);
+    pl_log_destroy(&vk->pllog);
+    TA_FREEP(&vk->log);
 }

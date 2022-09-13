@@ -155,7 +155,7 @@ static bool create_context_wgl_gl3(struct ra_ctx *ctx)
         goto unsupported;
 
     const char *wgl_exts = wglGetExtensionsStringARB(windc);
-    if (!strstr(wgl_exts, "WGL_ARB_create_context"))
+    if (!gl_check_extension(wgl_exts, "WGL_ARB_create_context"))
         goto unsupported;
 
     HGLRC (GLAPIENTRY *wglCreateContextAttribsARB)(HDC hDC, HGLRC hShareContext,

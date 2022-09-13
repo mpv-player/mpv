@@ -36,6 +36,7 @@
 #include <X11/extensions/scrnsaver.h>
 #include <X11/extensions/dpms.h>
 #include <X11/extensions/Xinerama.h>
+#include <X11/extensions/Xpresent.h>
 #include <X11/extensions/Xrandr.h>
 
 #include "config.h"
@@ -48,6 +49,7 @@
 #include "input/event.h"
 #include "video/image_loader.h"
 #include "video/mp_image.h"
+#include "present_sync.h"
 #include "x11_common.h"
 #include "mpv_talloc.h"
 
@@ -375,12 +377,26 @@ static int vo_wm_detect(struct vo *vo)
     return wm;
 }
 
+static void xpresent_set(struct vo_x11_state *x11)
+{
+    int present = x11->opts->x11_present;
+    x11->use_present = x11->present_code &&
+                       ((x11->has_mesa && !x11->has_nvidia && present) ||
+                        present == 2);
+    if (x11->use_present) {
+        MP_VERBOSE(x11, "XPresent enabled.\n");
+    } else {
+        MP_VERBOSE(x11, "XPresent disabled.\n");
+    }
+}
+
 static void xrandr_read(struct vo_x11_state *x11)
 {
     for(int i = 0; i < x11->num_displays; i++)
         talloc_free(x11->displays[i].name);
 
     x11->num_displays = 0;
+    bool randr_14 = false;
 
     if (x11->xrandr_event < 0) {
         int event_base, error_base;
@@ -388,6 +404,10 @@ static void xrandr_read(struct vo_x11_state *x11)
             MP_VERBOSE(x11, "Couldn't init Xrandr.\n");
             return;
         }
+        int major, minor;
+        XRRQueryVersion(x11->display, &major, &minor);
+        if (major >= 2 || minor >= 4)
+            randr_14 = true;
         x11->xrandr_event = event_base + RRNotify;
         XRRSelectInput(x11->display, x11->rootwin, RRScreenChangeNotifyMask |
                        RRCrtcChangeNotifyMask | RROutputChangeNotifyMask);
@@ -397,6 +417,32 @@ static void xrandr_read(struct vo_x11_state *x11)
     if (!r) {
         MP_VERBOSE(x11, "Xrandr doesn't work.\n");
         return;
+    }
+
+    /* Look at the available providers on the current screen and try to determine
+     * the driver. If amd/intel/radeon, assume this is mesa. If nvidia is found,
+     * assume nvidia. Because the same screen can have multiple providers (e.g.
+     * a laptop with switchable graphics), we need to know both of these things.
+     * In practice, this is used for determining whether or not to use XPresent
+     * (i.e. needs to be Mesa and not Nvidia). Requires Randr 1.4. */
+    if (randr_14) {
+        XRRProviderResources *pr = XRRGetProviderResources(x11->display, x11->rootwin);
+        for (int i = 0; i < pr->nproviders; i++) {
+            XRRProviderInfo *info = XRRGetProviderInfo(x11->display, r, pr->providers[i]);
+            struct bstr provider_name = bstrdup(x11, bstr0(info->name));
+            bstr_lower(provider_name);
+            int amd = bstr_find0(provider_name, "amd");
+            int intel = bstr_find0(provider_name, "intel");
+            int nouveau = bstr_find0(provider_name, "nouveau");
+            int nvidia = bstr_find0(provider_name, "nvidia");
+            int radeon = bstr_find0(provider_name, "radeon");
+            x11->has_mesa = x11->has_mesa || amd >= 0 || intel >= 0 ||
+                            nouveau >= 0 || radeon >= 0;
+            x11->has_nvidia = x11->has_nvidia || nvidia >= 0;
+        }
+        if (x11->present_code)
+            xpresent_set(x11);
+        XRRFreeProviderResources(pr);
     }
 
     int primary_id = -1;
@@ -568,6 +614,7 @@ int vo_x11_init(struct vo *vo)
 
     x11_error_output = x11->log;
     XSetErrorHandler(x11_errorhandler);
+    x11->present = talloc_zero(x11, struct mp_present);
 
     dispName = XDisplayName(NULL);
 
@@ -661,6 +708,10 @@ static const struct mp_keymap keymap[] = {
     {XK_F4, MP_KEY_F+4}, {XK_F5, MP_KEY_F+5}, {XK_F6, MP_KEY_F+6},
     {XK_F7, MP_KEY_F+7}, {XK_F8, MP_KEY_F+8}, {XK_F9, MP_KEY_F+9},
     {XK_F10, MP_KEY_F+10}, {XK_F11, MP_KEY_F+11}, {XK_F12, MP_KEY_F+12},
+    {XK_F13, MP_KEY_F+13}, {XK_F14, MP_KEY_F+14}, {XK_F15, MP_KEY_F+15},
+    {XK_F16, MP_KEY_F+16}, {XK_F17, MP_KEY_F+17}, {XK_F18, MP_KEY_F+18},
+    {XK_F19, MP_KEY_F+19}, {XK_F20, MP_KEY_F+20}, {XK_F21, MP_KEY_F+21},
+    {XK_F22, MP_KEY_F+22}, {XK_F23, MP_KEY_F+23}, {XK_F24, MP_KEY_F+24},
 
     // numpad independent of numlock
     {XK_KP_Subtract, '-'}, {XK_KP_Add, '+'}, {XK_KP_Multiply, '*'},
@@ -1043,6 +1094,7 @@ static void vo_x11_check_net_wm_state_change(struct vo *vo)
         }
 
         opts->window_minimized = is_minimized;
+        x11->hidden = is_minimized;
         m_config_cache_write_opt(x11->opts_cache, &opts->window_minimized);
         opts->window_maximized = is_maximized;
         m_config_cache_write_opt(x11->opts_cache, &opts->window_maximized);
@@ -1251,6 +1303,20 @@ void vo_x11_check_events(struct vo *vo)
                 x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
             }
             break;
+        case GenericEvent: {
+            XGenericEventCookie *cookie = (XGenericEventCookie *)&Event.xcookie;
+            if (cookie->extension == x11->present_code && x11->use_present)
+            {
+                XGetEventData(x11->display, cookie);
+                if (cookie->evtype == PresentCompleteNotify) {
+                    XPresentCompleteNotifyEvent *present_event;
+                    present_event = (XPresentCompleteNotifyEvent *)cookie->data;
+                    present_update_sync_values(x11->present, present_event->ust,
+                                               present_event->msc);
+                }
+            }
+            break;
+        }
         default:
             if (Event.type == x11->ShmCompletionEvent) {
                 if (x11->ShmCompletionWaitCount > 0)
@@ -1278,6 +1344,7 @@ static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
     bool force_pos = opts->geometry.xy_valid ||     // explicitly forced by user
                      opts->force_window_position || // resize -> reset position
                      opts->screen_id >= 0 ||        // force onto screen area
+                     opts->screen_name ||           // also force onto screen area
                      x11->parent ||                 // force to fill parent
                      override_pos;                  // for fullscreen and such
 
@@ -1363,8 +1430,13 @@ static void vo_x11_update_window_title(struct vo *vo)
 
     vo_x11_set_property_string(vo, XA_WM_NAME, x11->window_title);
     vo_x11_set_property_string(vo, XA_WM_ICON_NAME, x11->window_title);
-    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_NAME), x11->window_title);
-    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_ICON_NAME), x11->window_title);
+
+    /* _NET_WM_NAME and _NET_WM_ICON_NAME must be sanitized to UTF-8. */
+    void *tmp = talloc_new(NULL);
+    struct bstr b_title = bstr_sanitize_utf8_latin1(tmp, bstr0(x11->window_title));
+    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_NAME), b_title.start);
+    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_ICON_NAME), b_title.start);
+    talloc_free(tmp);
 }
 
 static void vo_x11_xembed_update(struct vo_x11_state *x11, int flags)
@@ -1471,6 +1543,14 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
                       vis->depth, CopyFromParent, vis->visual, xswamask, &xswa);
     Atom protos[1] = {XA(x11, WM_DELETE_WINDOW)};
     XSetWMProtocols(x11->display, x11->window, protos, 1);
+
+    if (!XPresentQueryExtension(x11->display, &x11->present_code, NULL, NULL)) {
+        MP_VERBOSE(x11, "The XPresent extension is not supported.\n");
+    } else {
+        MP_VERBOSE(x11, "The XPresent extension was found.\n");
+        XPresentSelectInput(x11->display, x11->window, PresentCompleteNotifyMask);
+    }
+    xpresent_set(x11);
 
     x11->mouse_cursor_set = false;
     x11->mouse_cursor_visible = true;
@@ -1847,11 +1927,22 @@ static void vo_x11_set_geometry(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
 
+    if (!x11->window)
+        return;
+
     if (x11->opts->window_maximized) {
         x11->pending_geometry_change = true;
     } else {
         vo_x11_config_vo_window(vo);
     }
+}
+
+bool vo_x11_check_visible(struct vo *vo) {
+    struct vo_x11_state *x11 = vo->x11;
+    struct mp_vo_opts *opts = x11->opts;
+
+    bool render = !x11->hidden || VS_IS_DISP(opts->video_sync);
+    return render;
 }
 
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
@@ -1887,6 +1978,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 vo_x11_minimize(vo);
             if (opt == &opts->window_maximized)
                 vo_x11_maximize(vo);
+            if (opt == &opts->x11_present)
+                xpresent_set(x11);
             if (opt == &opts->geometry || opt == &opts->autofit ||
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
@@ -1989,10 +2082,16 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_RES: {
-        if (!x11->window || x11->parent)
+        struct xrandr_display *selected_disp = NULL;
+        for (int n = 0; n < x11->num_displays; n++) {
+            struct xrandr_display *disp = &x11->displays[n];
+            if (disp->overlaps)
+                selected_disp = disp;
+        }
+        if (!x11->window || x11->parent || !selected_disp)
             return VO_NOTAVAIL;
-        ((int *)arg)[0] = x11->screenrc.x1;
-        ((int *)arg)[1] = x11->screenrc.y1;
+        ((int *)arg)[0] = selected_disp->rc.x1 - selected_disp->rc.x0;
+        ((int *)arg)[1] = selected_disp->rc.y1 - selected_disp->rc.y0;
         return VO_TRUE;
     }
     case VOCTRL_GET_HIDPI_SCALE:
@@ -2000,6 +2099,13 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     return VO_NOTIMPL;
+}
+
+void vo_x11_present(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    XPresentNotifyMSC(x11->display, x11->window,
+                      0, 0, 1, 0);
 }
 
 void vo_x11_wakeup(struct vo *vo)

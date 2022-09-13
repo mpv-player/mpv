@@ -145,8 +145,8 @@ local function no_ASS(t)
         -- mp.set_osd_ass doesn't support ass-escape. roll our own.
         -- similar to mpv's sub/osd_libass.c:mangle_ass(...), excluding
         -- space after newlines because no_ASS is not used with multi-line.
-        -- space at the begining is replaced with "\\h" because it matters
-        -- at the begining of a line, and we can't know where our output
+        -- space at the beginning is replaced with "\\h" because it matters
+        -- at the beginning of a line, and we can't know where our output
         -- ends up. no issue if it ends up at the middle of a line.
         return tostring(t)
                :gsub("\\", ESC_BACKSLASH)
@@ -211,18 +211,21 @@ local function generate_graph(values, i, len, v_max, v_avg, scale, x_tics)
     local y_max = o.font_size * 0.66
     local x = 0
 
-    -- try and center the graph if possible, but avoid going above `scale`
-    if v_avg then
-        scale = min(scale, v_max / (2 * v_avg))
-    end
+    if v_max > 0 then
+        -- try and center the graph if possible, but avoid going above `scale`
+        if v_avg and v_avg > 0 then
+            scale = min(scale, v_max / (2 * v_avg))
+        end
+        scale = scale * y_max / v_max
+    end  -- else if v_max==0 then all values are 0 and scale doesn't matter
 
-    local s = {format("m 0 0 n %f %f l ", x, y_max - (y_max * values[i] / v_max * scale))}
+    local s = {format("m 0 0 n %f %f l ", x, y_max - scale * values[i])}
     i = ((i - 2) % len) + 1
 
     for p = 1, len - 1 do
         if values[i] then
             x = x - x_tics
-            s[#s+1] = format("%f %f ", x, y_max - (y_max * values[i] / v_max * scale))
+            s[#s+1] = format("%f %f ", x, y_max - scale * values[i])
         end
         i = ((i - 2) % len) + 1
     end
@@ -277,6 +280,14 @@ local function append_property(s, prop, attr, excluded)
     return append(s, ret, attr)
 end
 
+local function sorted_keys(t, comp_fn)
+    local keys = {}
+    for k,_ in pairs(t) do
+        keys[#keys+1] = k
+    end
+    table.sort(keys, comp_fn)
+    return keys
+end
 
 local function append_perfdata(s, dedicated_page)
     local vo_p = mp.get_property_native("vo-passes")
@@ -324,7 +335,8 @@ local function append_perfdata(s, dedicated_page)
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                      "(last/average/peak  μs)", o.font_size)
 
-    for frame, data in pairs(vo_p) do
+    for _,frame in ipairs(sorted_keys(vo_p)) do  -- ensure fixed display order
+        local data = vo_p[frame]
         local f = "%s%s%s{\\fn%s}%s / %s / %s %s%s{\\fn%s}%s%s%s"
 
         if dedicated_page then
@@ -473,7 +485,7 @@ local function get_kbinfo_lines(width)
     -- key/subject pre/post formatting for terminal/ass.
     -- key/subject alignment uses spaces (with mono font if ass)
     -- word-wrapping is disabled for ass, or cut at 79 for the terminal
-    local LTR = string.char(0xE2, 0x80, 0x8E)  -- U+200E Left To Right mark 
+    local LTR = string.char(0xE2, 0x80, 0x8E)  -- U+200E Left To Right mark
     local term = not o.use_ass
     local kpre = term and "" or format("{\\q2\\fn%s}%s", o.font_mono, LTR)
     local kpost = term and " " or format(" {\\fn%s}", o.font)

@@ -176,9 +176,9 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
 
     // If possible, set this as parent so the decoder gets the hwdec and DR
     // interfaces.
-    // Note: at least mpv_opengl_cb_uninit_gl() relies on being able to get
-    //       rid of all references to the VO by destroying the VO chain. Thus,
-    //       decoders not linked to vo_chain must not use the hwdec context.
+    // Note: We rely on being able to get rid of all references to the VO by
+    //       destroying the VO chain. Thus, decoders not linked to vo_chain
+    //       must not use the hwdec context.
     if (track->vo_c)
         parent = track->vo_c->filter->f;
 
@@ -583,7 +583,7 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
 
     if (mpctx->video_status < STATUS_READY) {
         mpctx->time_frame = 0;
-    } else if (mpctx->display_sync_active || opts->video_sync == VS_NONE) {
+    } else if (mpctx->display_sync_active || vo->opts->video_sync == VS_NONE) {
         // don't touch the timing
     } else if (mpctx->audio_status == STATUS_PLAYING &&
                mpctx->video_status == STATUS_PLAYING &&
@@ -737,7 +737,7 @@ static double compute_audio_drift(struct MPContext *mpctx, double vsync)
 static void adjust_audio_resample_speed(struct MPContext *mpctx, double vsync)
 {
     struct MPOpts *opts = mpctx->opts;
-    int mode = opts->video_sync;
+    int mode = mpctx->video_out->opts->video_sync;
 
     if (mode != VS_DISP_RESAMPLE || mpctx->audio_status != STATUS_PLAYING) {
         mpctx->speed_factor_a = mpctx->speed_factor_v;
@@ -797,7 +797,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 {
     struct MPOpts *opts = mpctx->opts;
     struct vo *vo = mpctx->video_out;
-    int mode = opts->video_sync;
+    int mode = vo->opts->video_sync;
 
     if (!mpctx->display_sync_active) {
         mpctx->display_sync_error = 0.0;

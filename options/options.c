@@ -73,6 +73,7 @@ extern const struct m_sub_options vd_lavc_conf;
 extern const struct m_sub_options ad_lavc_conf;
 extern const struct m_sub_options input_config;
 extern const struct m_sub_options encode_config;
+extern const struct m_sub_options ra_ctx_conf;
 extern const struct m_sub_options gl_video_conf;
 extern const struct m_sub_options ao_alsa_conf;
 
@@ -161,10 +162,21 @@ static const m_option_t mp_vo_opt_list[] = {
     {"override-display-fps", OPT_DOUBLE(override_display_fps),
         M_RANGE(0, DBL_MAX)},
     {"video-timing-offset", OPT_DOUBLE(timing_offset), M_RANGE(0.0, 1.0)},
+    {"video-sync", OPT_CHOICE(video_sync,
+        {"audio", VS_DEFAULT},
+        {"display-resample", VS_DISP_RESAMPLE},
+        {"display-resample-vdrop", VS_DISP_RESAMPLE_VDROP},
+        {"display-resample-desync", VS_DISP_RESAMPLE_NONE},
+        {"display-adrop", VS_DISP_ADROP},
+        {"display-vdrop", VS_DISP_VDROP},
+        {"display-desync", VS_DISP_NONE},
+        {"desync", VS_NONE})},
 #if HAVE_X11
     {"x11-netwm", OPT_CHOICE(x11_netwm, {"auto", 0}, {"no", -1}, {"yes", 1})},
     {"x11-bypass-compositor", OPT_CHOICE(x11_bypass_compositor,
         {"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})},
+    {"x11-present", OPT_CHOICE(x11_present,
+        {"no", 0}, {"auto", 1}, {"yes", 2})},
 #endif
 #if HAVE_WIN32_DESKTOP
     {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
@@ -202,6 +214,7 @@ const struct m_sub_options vo_sub_opts = {
         .WinID = -1,
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,
+        .x11_present = 1,
         .mmcss_profile = "Playback",
         .ontop_level = -1,
         .timing_offset = 0.050,
@@ -601,6 +614,7 @@ static const m_option_t mp_opts[] = {
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
     {"cover-art-auto", OPT_CHOICE(coverart_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
+    {"cover-art-whitelist", OPT_BOOL(coverart_whitelist)},
 
     {"", OPT_SUBSTRUCT(subs_rend, mp_subtitle_sub_opts)},
     {"", OPT_SUBSTRUCT(subs_filt, mp_sub_filter_opts)},
@@ -647,7 +661,11 @@ static const m_option_t mp_opts[] = {
     {"cursor-autohide", OPT_CHOICE(cursor_autohide_delay,
         {"no", -1}, {"always", -2}), M_RANGE(0, 30000)},
     {"cursor-autohide-fs-only", OPT_FLAG(cursor_autohide_fs)},
-    {"stop-screensaver", OPT_FLAG(stop_screensaver), .flags = UPDATE_SCREENSAVER},
+    {"stop-screensaver", OPT_CHOICE(stop_screensaver,
+        {"no", 0},
+        {"yes", 1},
+        {"always", 2}),
+        .flags = UPDATE_SCREENSAVER},
 
     {"", OPT_SUBSTRUCT(video_equalizer, mp_csp_equalizer_conf)},
 
@@ -714,15 +732,6 @@ static const m_option_t mp_opts[] = {
 
     // a-v sync stuff:
     {"initial-audio-sync", OPT_FLAG(initial_audio_sync)},
-    {"video-sync", OPT_CHOICE(video_sync,
-        {"audio", VS_DEFAULT},
-        {"display-resample", VS_DISP_RESAMPLE},
-        {"display-resample-vdrop", VS_DISP_RESAMPLE_VDROP},
-        {"display-resample-desync", VS_DISP_RESAMPLE_NONE},
-        {"display-adrop", VS_DISP_ADROP},
-        {"display-vdrop", VS_DISP_VDROP},
-        {"display-desync", VS_DISP_NONE},
-        {"desync", VS_NONE})},
     {"video-sync-max-video-change", OPT_DOUBLE(sync_max_video_change),
         M_RANGE(0, DBL_MAX)},
     {"video-sync-max-audio-change", OPT_DOUBLE(sync_max_audio_change),
@@ -743,6 +752,8 @@ static const m_option_t mp_opts[] = {
 
     {"term-playing-msg", OPT_STRING(playing_msg)},
     {"osd-playing-msg", OPT_STRING(osd_playing_msg)},
+    {"osd-playing-msg-duration", OPT_INT(osd_playing_msg_duration),
+        M_RANGE(0, 3600000)},
     {"term-status-msg", OPT_STRING(status_msg), .flags = UPDATE_OSD},
     {"osd-status-msg", OPT_STRING(osd_status_msg), .flags = UPDATE_OSD},
     {"osd-msg1", OPT_STRING(osd_msg[0]), .flags = UPDATE_OSD},
@@ -779,6 +790,7 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(demux_cache_opts, demux_cache_conf)},
     {"", OPT_SUBSTRUCT(stream_opts, stream_conf)},
 
+    {"", OPT_SUBSTRUCT(ra_ctx_opts, ra_ctx_conf)},
     {"", OPT_SUBSTRUCT(gl_video_opts, gl_video_conf)},
     {"", OPT_SUBSTRUCT(spirv_opts, spirv_conf)},
 
@@ -1024,7 +1036,8 @@ static const struct MPOpts mp_default_opts = {
     .pitch_correction = 1,
     .sub_auto = 0,
     .audiofile_auto = -1,
-    .coverart_auto = 1,
+    .coverart_auto = 0,
+    .coverart_whitelist = true,
     .osd_bar_visible = 1,
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,

@@ -72,6 +72,9 @@ enum mp_voctrl {
     // you could install your own listener.
     VOCTRL_VO_OPTS_CHANGED,
 
+    // Triggered by any change to the OSD (e.g. OSD style changes)
+    VOCTRL_OSD_CHANGED,
+
     /* private to vo_gpu */
     VOCTRL_LOAD_HWDEC_API,
 
@@ -80,7 +83,7 @@ enum mp_voctrl {
     // be updated and redrawn. Optional; emulated if not available.
     VOCTRL_REDRAW_FRAME,
 
-    // Only used internally in vo_opengl_cb
+    // Only used internally in vo_libmpv
     VOCTRL_PREINIT,
     VOCTRL_UNINIT,
     VOCTRL_RECONFIG,
@@ -122,7 +125,7 @@ enum mp_voctrl {
     VOCTRL_GET_HIDPI_SCALE,             // double*
     VOCTRL_GET_DISPLAY_RES,             // int[2]
 
-    /* private to vo_gpu */
+    /* private to vo_gpu and vo_gpu_next */
     VOCTRL_EXTERNAL_RESIZE,
 };
 
@@ -177,6 +180,8 @@ enum {
     VO_CAP_FRAMEDROP    = 1 << 1,
     // VO does not allow frames to be retained (vo_mediacodec_embed).
     VO_CAP_NORETAIN     = 1 << 2,
+    // VO supports applying film grain
+    VO_CAP_FILM_GRAIN   = 1 << 3,
 };
 
 #define VO_MAX_REQ_FRAMES 10

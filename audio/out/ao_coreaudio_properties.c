@@ -16,7 +16,7 @@
  */
 
 /*
- * Abstractions on the CoreAudio API to make property setting/getting suck les
+ * Abstractions on the CoreAudio API to make property setting/getting suck less
 */
 
 #include "audio/out/ao_coreaudio_properties.h"

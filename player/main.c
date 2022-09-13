@@ -204,7 +204,7 @@ static bool handle_help_options(struct MPContext *mpctx)
     if (opts->ao_opts->audio_device &&
         strcmp(opts->ao_opts->audio_device, "help") == 0)
     {
-        ao_print_devices(mpctx->global, log);
+        ao_print_devices(mpctx->global, log, mpctx->ao);
         return true;
     }
     if (opts->property_print_help) {
@@ -378,7 +378,9 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return run_tests(mpctx) ? 1 : -1;
 #endif
 
-    if (!mpctx->playlist->num_entries && !opts->player_idle_mode) {
+    if (!mpctx->playlist->num_entries && !opts->player_idle_mode &&
+        options)
+    {
         // nothing to play
         mp_print_version(mpctx->log, true);
         MP_INFO(mpctx, "%s", mp_help_text);

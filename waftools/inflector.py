@@ -1,6 +1,6 @@
 import re
 
-def _underscore(word):
+def sanitize_id(word):
     """ Converts a word "into_it_s_underscored_version"
     Convert any "CamelCased" or "ordinary Word" into an
     "underscored_word"."""
@@ -10,7 +10,7 @@ def _underscore(word):
             re.sub('([A-Z]+)([A-Z][a-z])', '\\1_\\2', re.sub('::', '/', word)))).lower()
 
 def storage_key(dep):
-    return _underscore(dep)
+    return sanitize_id(dep)
 
 def define_key(dep):
     return ("have_" + storage_key(dep)).upper()

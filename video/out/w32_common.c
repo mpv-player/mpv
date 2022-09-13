@@ -99,7 +99,7 @@ struct vo_w32_state {
 
     bool focused;
 
-    // whether the window position and size were intialized
+    // whether the window position and size were initialized
     bool window_bounds_initialized;
 
     bool current_fs;
@@ -549,7 +549,7 @@ static void update_dpi(struct vo_w32_state *w32)
         ReleaseDC(NULL, hdc);
         MP_VERBOSE(w32, "DPI detected from the old API: %d\n", dpi);
     }
- 
+
     if (dpi <= 0) {
         dpi = 96;
         MP_VERBOSE(w32, "Couldn't determine DPI, falling back to %d\n", dpi);
@@ -1419,8 +1419,13 @@ static void gui_thread_reconfig(void *ptr)
     struct vo *vo = w32->vo;
 
     RECT r = get_working_area(w32);
-    if (!w32->current_fs && !IsMaximized(w32->window) && w32->opts->border)
+    // for normal window which is auto-positioned (centered), center the window
+    // rather than the content (by subtracting the borders from the work area)
+    if (!w32->current_fs && !IsMaximized(w32->window) && w32->opts->border &&
+        !w32->opts->geometry.xy_valid /* specific position not requested */)
+    {
         subtract_window_borders(w32, w32->window, &r);
+    }
     struct mp_rect screen = { r.left, r.top, r.right, r.bottom };
     struct vo_win_geometry geo;
 

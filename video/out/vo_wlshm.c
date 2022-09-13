@@ -24,6 +24,7 @@
 #include <libswscale/swscale.h>
 
 #include "osdep/endian.h"
+#include "present_sync.h"
 #include "sub/osd.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
@@ -74,21 +75,6 @@ static void buffer_destroy(void *p)
     munmap(buf->mpi.planes[0], buf->size);
 }
 
-static int allocate_memfd(size_t size)
-{
-    int fd = memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING);
-    if (fd < 0)
-        return -1;
-
-    fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_SEAL);
-
-    if (posix_fallocate(fd, 0, size) == 0)
-        return fd;
-
-    close(fd);
-    return -1;
-}
-
 static struct buffer *buffer_create(struct vo *vo, int width, int height)
 {
     struct priv *p = vo->priv;
@@ -101,7 +87,7 @@ static struct buffer *buffer_create(struct vo *vo, int width, int height)
 
     stride = MP_ALIGN_UP(width * 4, 16);
     size = height * stride;
-    fd = allocate_memfd(size);
+    fd = vo_wayland_allocate_memfd(vo, size);
     if (fd < 0)
         goto error0;
     data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -213,14 +199,14 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return ret;
 }
 
-static void draw_image(struct vo *vo, struct mp_image *src)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
+    struct mp_image *src = frame->current;
     struct buffer *buf;
-    bool render = !wl->hidden || wl->opts->disable_vsync;
-    wl->frame_wait = true;
 
+    bool render = vo_wayland_check_visible(vo);
     if (!render)
         return;
 
@@ -262,7 +248,6 @@ static void draw_image(struct vo *vo, struct mp_image *src)
         mp_image_clear(&buf->mpi, 0, 0, buf->mpi.w, buf->mpi.h);
         osd_draw_on_image(vo->osd, p->osd, 0, 0, &buf->mpi);
     }
-    talloc_free(src);
     wl_surface_attach(wl->surface, buf->buffer, 0, 0);
 }
 
@@ -270,25 +255,22 @@ static void flip_page(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
 
-    wl_surface_damage(wl->surface, 0, 0, mp_rect_w(wl->geometry),
-                      mp_rect_h(wl->geometry));
+    wl_surface_damage_buffer(wl->surface, 0, 0, vo->dwidth,
+                             vo->dheight);
     wl_surface_commit(wl->surface);
 
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
 
     if (wl->presentation)
-        vo_wayland_sync_swap(wl);
+        present_sync_swap(wl->present);
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
 {
     struct vo_wayland_state *wl = vo->wl;
-    if (wl->presentation) {
-        info->vsync_duration = wl->vsync_duration;
-        info->skipped_vsyncs = wl->last_skipped_vsyncs;
-        info->last_queue_display_time = wl->last_queue_display_time;
-    }
+    if (wl->presentation)
+        present_sync_get_info(wl->present, info);
 }
 
 static void uninit(struct vo *vo)
@@ -311,7 +293,7 @@ const struct vo_driver video_out_wlshm = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .get_vsync = get_vsync,
     .wakeup = vo_wayland_wakeup,

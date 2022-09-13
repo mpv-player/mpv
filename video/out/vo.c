@@ -52,6 +52,7 @@ extern const struct vo_driver video_out_x11;
 extern const struct vo_driver video_out_vdpau;
 extern const struct vo_driver video_out_xv;
 extern const struct vo_driver video_out_gpu;
+extern const struct vo_driver video_out_gpu_next;
 extern const struct vo_driver video_out_libmpv;
 extern const struct vo_driver video_out_null;
 extern const struct vo_driver video_out_image;
@@ -61,6 +62,7 @@ extern const struct vo_driver video_out_drm;
 extern const struct vo_driver video_out_direct3d;
 extern const struct vo_driver video_out_sdl;
 extern const struct vo_driver video_out_vaapi;
+extern const struct vo_driver video_out_vaapi_wayland;
 extern const struct vo_driver video_out_wlshm;
 extern const struct vo_driver video_out_rpi;
 extern const struct vo_driver video_out_tct;
@@ -73,6 +75,9 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_mediacodec_embed,
 #endif
     &video_out_gpu,
+#if HAVE_LIBPLACEBO_NEXT
+    &video_out_gpu_next,
+#endif
 #if HAVE_VDPAU
     &video_out_vdpau,
 #endif
@@ -87,6 +92,9 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_SDL2_VIDEO
     &video_out_sdl,
+#endif
+#if HAVE_VAAPI_WAYLAND && HAVE_MEMFD_CREATE
+    &video_out_vaapi_wayland,
 #endif
 #if HAVE_VAAPI_X11 && HAVE_GPL
     &video_out_vaapi,
@@ -207,7 +215,6 @@ const struct m_obj_list vo_obj_list = {
         {"opengl-cb", "libmpv"},
         {0}
     },
-    .allow_unknown_entries = true,
     .allow_trailer = true,
     .disallow_positional_parameters = true,
     .use_global_options = true,
@@ -675,6 +682,7 @@ void vo_control_async(struct vo *vo, int request, void *data)
         break;
     case VOCTRL_KILL_SCREENSAVER:
     case VOCTRL_RESTORE_SCREENSAVER:
+    case VOCTRL_OSD_CHANGED:
         break;
     default:
         abort(); // requires explicit support

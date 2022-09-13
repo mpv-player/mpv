@@ -731,6 +731,7 @@ static void encoder_destroy(void *ptr)
 {
     struct encoder_context *p = ptr;
 
+    av_packet_free(&p->pkt);
     avcodec_free_context(&p->encoder);
     free_stream(p->twopass_bytebuffer);
 }
@@ -910,6 +911,9 @@ bool encoder_init_codec_and_muxer(struct encoder_context *p,
     if (avcodec_parameters_from_context(p->info.codecpar, p->encoder) < 0)
         goto fail;
 
+    p->pkt = av_packet_alloc();
+    MP_HANDLE_OOM(p->pkt);
+
     encode_lavc_add_stream(p, p->encode_lavc_ctx, &p->info, on_ready, ctx);
     if (!p->mux_stream)
         goto fail;
@@ -930,11 +934,9 @@ bool encoder_encode(struct encoder_context *p, AVFrame *frame)
         goto fail;
     }
 
+    AVPacket *packet = p->pkt;
     for (;;) {
-        AVPacket packet = {0};
-        av_init_packet(&packet);
-
-        status = avcodec_receive_packet(p->encoder, &packet);
+        status = avcodec_receive_packet(p->encoder, packet);
         if (status == AVERROR(EAGAIN))
             break;
         if (status < 0 && status != AVERROR_EOF)
@@ -948,7 +950,7 @@ bool encoder_encode(struct encoder_context *p, AVFrame *frame)
         if (status == AVERROR_EOF)
             break;
 
-        encode_lavc_add_packet(p->mux_stream, &packet);
+        encode_lavc_add_packet(p->mux_stream, packet);
     }
 
     return true;
