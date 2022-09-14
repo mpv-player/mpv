@@ -36,6 +36,54 @@ struct priv {
     double device_latency;
 };
 
+static OSStatus au_get_ary(AudioUnit unit, AudioUnitPropertyID inID, AudioUnitScope inScope, AudioUnitElement inElement, void **data, UInt32 *outDataSize)
+{
+    OSStatus err;
+
+    err = AudioUnitGetPropertyInfo(unit, inID, inScope, inElement, outDataSize, NULL);
+    CHECK_CA_ERROR_SILENT_L(coreaudio_error);
+
+    *data = talloc_zero_size(NULL, *outDataSize);
+
+    err = AudioUnitGetProperty(unit, inID, inScope, inElement, *data, outDataSize);
+    CHECK_CA_ERROR_SILENT_L(coreaudio_error_free);
+
+    return err;
+coreaudio_error_free:
+    talloc_free(*data);
+coreaudio_error:
+    return err;
+}
+
+static AudioChannelLayout *convert_layout(AudioChannelLayout *layout, UInt32* size)
+{
+    AudioChannelLayoutTag tag = layout->mChannelLayoutTag;
+    AudioChannelLayout *new_layout;
+    if (tag == kAudioChannelLayoutTag_UseChannelDescriptions)
+        return layout;
+    else if (tag == kAudioChannelLayoutTag_UseChannelBitmap)
+        AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForBitmap,
+                                   sizeof(UInt32), &layout->mChannelBitmap, size);
+    else
+        AudioFormatGetPropertyInfo(kAudioFormatProperty_ChannelLayoutForTag,
+                                   sizeof(AudioChannelLayoutTag), &tag, size);
+    new_layout = talloc_zero_size(NULL, *size);
+    if (!new_layout) {
+        talloc_free(layout);
+        return NULL;
+    }
+    if (tag == kAudioChannelLayoutTag_UseChannelBitmap)
+        AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForBitmap,
+                               sizeof(UInt32), &layout->mChannelBitmap, size, new_layout);
+    else
+        AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForTag,
+                               sizeof(AudioChannelLayoutTag), &tag, size, new_layout);
+    new_layout->mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
+    talloc_free(layout);
+    return new_layout;
+}
+
+
 static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
                               const AudioTimeStamp *ts, UInt32 bus,
                               UInt32 frames, AudioBufferList *buffer_list)
@@ -59,11 +107,14 @@ static bool init_audiounit(struct ao *ao)
     AudioStreamBasicDescription asbd;
     OSStatus err;
     uint32_t size;
+    AudioChannelLayout *layout = NULL;
     struct priv *p = ao->priv;
     AVAudioSession *instance = AVAudioSession.sharedInstance;
     AVAudioSessionPortDescription *port = nil;
     NSInteger maxChannels = instance.maximumOutputNumberOfChannels;
     NSInteger prefChannels = MIN(maxChannels, ao->channels.num);
+
+    MP_VERBOSE(ao, "max channels: %ld, requested: %d\n", maxChannels, (int)ao->channels.num);
 
     [instance setCategory:AVAudioSessionCategoryPlayback error:nil];
     [instance setMode:AVAudioSessionModeMoviePlayback error:nil];
@@ -91,23 +142,33 @@ static bool init_audiounit(struct ao *ao)
     CHECK_CA_ERROR_L(coreaudio_error_component,
                      "unable to initialize audio unit");
 
+    err = au_get_ary(p->audio_unit, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output,
+                     0, (void**)&layout, &size);
+    CHECK_CA_ERROR_L(coreaudio_error_audiounit,
+                     "unable to retrieve audio unit channel layout");
+
+    MP_VERBOSE(ao, "AU channel layout tag: %x (%x)\n", layout->mChannelLayoutTag, layout->mChannelBitmap);
+
+    layout = convert_layout(layout, &size);
+    if (!layout) {
+        MP_ERR(ao, "unable to convert channel layout to list format\n");
+        goto coreaudio_error_audiounit;
+    }
+
+    for (UInt32 i = 0; i < layout->mNumberChannelDescriptions; i++) {
+        MP_VERBOSE(ao, "channel map: %i: %u\n", i, layout->mChannelDescriptions[i].mChannelLabel);
+    }
+
     if (af_fmt_is_spdif(ao->format) || instance.outputNumberOfChannels <= 2) {
         ao->channels = (struct mp_chmap)MP_CHMAP_INIT_STEREO;
+        MP_VERBOSE(ao, "using stereo output\n");
     } else {
-        port = instance.currentRoute.outputs.firstObject;
-        if (port.channels.count == 2 &&
-            port.channels[0].channelLabel == kAudioChannelLabel_Unknown) {
-            // Special case when using an HDMI adapter. The iOS device will
-            // perform SPDIF conversion for us, so send all available channels
-            // using the AC3 mapping.
-            ao->channels = (struct mp_chmap)MP_CHMAP6(FL, FC, FR, SL, SR, LFE);
-        } else {
-            ao->channels.num = (uint8_t)port.channels.count;
-            for (AVAudioSessionChannelDescription *ch in port.channels) {
-              ao->channels.speaker[ch.channelNumber - 1] =
-                  ca_label_to_mp_speaker_id(ch.channelLabel);
-            }
+        ao->channels.num = (uint8_t)layout->mNumberChannelDescriptions;
+        for (UInt32 i = 0; i < layout->mNumberChannelDescriptions; i++) {
+          ao->channels.speaker[i] =
+              ca_label_to_mp_speaker_id(layout->mChannelDescriptions[i].mChannelLabel);
         }
+        MP_VERBOSE(ao, "using standard channel mapping\n");
     }
 
     ca_fill_asbd(ao, &asbd);
@@ -132,6 +193,8 @@ static bool init_audiounit(struct ao *ao)
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "unable to set render callback on audio unit");
 
+    talloc_free(layout);
+
     return true;
 
 coreaudio_error_audiounit:
@@ -139,6 +202,7 @@ coreaudio_error_audiounit:
 coreaudio_error_component:
     AudioComponentInstanceDispose(p->audio_unit);
 coreaudio_error:
+    talloc_free(layout);
     return false;
 }
 
