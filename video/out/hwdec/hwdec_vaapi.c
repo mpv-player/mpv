@@ -380,16 +380,51 @@ err:
 static void try_format_config(struct ra_hwdec *hw, AVVAAPIHWConfig *hwconfig)
 {
     struct priv_owner *p = hw->priv;
+    enum AVPixelFormat *fmts = NULL;
+
     AVHWFramesConstraints *fc =
             av_hwdevice_get_hwframe_constraints(p->ctx->av_device_ref, hwconfig);
     if (!fc) {
         MP_WARN(hw, "failed to retrieve libavutil frame constraints\n");
         return;
     }
-    for (int n = 0; fc->valid_sw_formats &&
-                    fc->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++)
-        try_format_pixfmt(hw, fc->valid_sw_formats[n]);
+
+    /*
+     * We need a hwframe_ctx to be able to get the valid formats, but to
+     * initialise it, we need a format, so we get the first format from the
+     * hwconfig. We don't care about the other formats in the config because the
+     * transfer formats list will already include them.
+     */
+    AVBufferRef *fref = NULL;
+    fref = av_hwframe_ctx_alloc(p->ctx->av_device_ref);
+    if (!fref) {
+        MP_WARN(hw, "failed to alloc libavutil frame context\n");
+        goto err;
+    }
+    AVHWFramesContext *fctx = (void *)fref->data;
+    fctx->format = AV_PIX_FMT_VAAPI;
+    fctx->sw_format = fc->valid_sw_formats[0];
+    fctx->width = 128;
+    fctx->height = 128;
+    if (av_hwframe_ctx_init(fref) < 0) {
+        MP_WARN(hw, "failed to init libavutil frame context\n");
+        goto err;
+    }
+
+    int ret = av_hwframe_transfer_get_formats(fref, AV_HWFRAME_TRANSFER_DIRECTION_TO, &fmts, 0);
+    if (ret) {
+        MP_WARN(hw, "failed to get libavutil frame context supported formats\n");
+        goto err;
+    }
+
+    for (int n = 0; fmts &&
+                    fmts[n] != AV_PIX_FMT_NONE; n++)
+        try_format_pixfmt(hw, fmts[n]);
+
+err:
     av_hwframe_constraints_free(&fc);
+    av_buffer_unref(&fref);
+    av_free(fmts);
 }
 
 static void determine_working_formats(struct ra_hwdec *hw)
@@ -416,6 +451,12 @@ static void determine_working_formats(struct ra_hwdec *hw)
     if (!CHECK_VA_STATUS(hw, "vaQueryConfigProfiles()"))
         num_profiles = 0;
 
+    /*
+     * We need to find one declared format to bootstrap probing. So find a valid
+     * decoding profile and use its config. If try_format_config() finds any
+     * formats, they will be all the supported formats, and we don't need to
+     * look at any other profiles.
+     */
     for (int n = 0; n < num_profiles; n++) {
         VAProfile profile = profiles[n];
         if (profile == VAProfileNone) {
@@ -448,6 +489,9 @@ static void determine_working_formats(struct ra_hwdec *hw)
             try_format_config(hw, hwconfig);
 
             vaDestroyConfig(p->display, config);
+            if (p->formats && p->formats[0]) {
+                goto done;
+            }
         }
     }
 
