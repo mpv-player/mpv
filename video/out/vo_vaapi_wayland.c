@@ -378,7 +378,7 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
 
 const struct vo_driver video_out_vaapi_wayland = {
     .description = "VA API with Wayland video output",
-    .name = "vaapi-wayland",
+    .name = "dmabuf-wayland",
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
