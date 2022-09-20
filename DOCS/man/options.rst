@@ -5328,7 +5328,7 @@ them.
     cropping and video placement, which always invalidate the cache. Enabling
     this option makes dynamic updates of renderer settings slightly smoother at
     the cost of slightly higher latency in response to such changes. Defaults
-    to on. (Only affects ``--vo=gpu-next``, note that ``-vo=gpu`` always
+    to on. (Only affects ``--vo=gpu-next``, note that ``--vo=gpu`` always
     invalidates interpolated frames)
 
 ``--opengl-pbo``
@@ -6445,7 +6445,7 @@ them.
     allows no additional brightness boost. A value of 2.0 would allow
     over-exposing by a factor of 2, and so on. Raising this setting can help
     reveal details that would otherwise be hidden in dark scenes, but raising
-    it too high will make dark scenes appear unnaturally bright. (``-vo=gpu``
+    it too high will make dark scenes appear unnaturally bright. (``--vo=gpu``
     only)
 
 ``--tone-mapping-mode``
@@ -7010,7 +7010,7 @@ Miscellaneous
     that are unavailable to outside users.
 
     This replaces ``--record-file``. It is similar to the ancient/removed
-    ``--stream-capture``/``-capture`` options, and provides better behavior in
+    ``--stream-capture``/``--capture`` options, and provides better behavior in
     most cases (i.e. actually works).
 
 ``--lavfi-complex=<string>``
