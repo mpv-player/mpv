@@ -5,10 +5,10 @@
 import os, sys, stat, hashlib, subprocess
 from urllib.request import urlopen, URLError
 
-WAFRELEASE = "waf-2.0.20"
+WAFRELEASE = "waf-2.0.24"
 WAFURLS    = ["https://waf.io/" + WAFRELEASE,
-              "http://www.freehackers.org/~tnagy/release/" + WAFRELEASE]
-SHA256HASH = "bf971e98edc2414968a262c6aa6b88541a26c3cd248689c89f4c57370955ee7f"
+              "https://www.freehackers.org/~tnagy/release/" + WAFRELEASE]
+SHA256HASH = "93909bca823a675f9f40af7c65b24887c3a3c0efdf411ff1978ba827194bdeb0"
 
 if os.path.exists("waf"):
     wafver = subprocess.check_output([sys.executable, './waf', '--version']).decode()
