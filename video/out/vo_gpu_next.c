@@ -1744,19 +1744,27 @@ static void update_render_options(struct vo *vo)
         p->color_map.gamut_mode = gamut_modes[opts->tone_map.gamut_mode];
 
     switch (opts->dither_algo) {
-    case DITHER_ERROR_DIFFUSION:
-        MP_ERR(p, "Error diffusion dithering is not implemented.\n");
-        // fall through
     case DITHER_NONE:
         p->params.dither_params = NULL;
         break;
+    case DITHER_ERROR_DIFFUSION:
+#if PL_API_VER >= 225
+        p->params.error_diffusion = pl_find_error_diffusion_kernel(opts->error_diffusion);
+        if (!p->params.error_diffusion) {
+            MP_WARN(p, "Could not find error diffusion kernel '%s', falling "
+                    "back to fruit.\n", opts->error_diffusion);
+        }
+#else
+        MP_ERR(p, "Error diffusion dithering is not implemented.\n");
+#endif
+        // fall through
     case DITHER_ORDERED:
     case DITHER_FRUIT:
         p->params.dither_params = &p->dither;
         p->dither = pl_dither_default_params;
-        p->dither.method = opts->dither_algo == DITHER_FRUIT
-                                ? PL_DITHER_BLUE_NOISE
-                                : PL_DITHER_ORDERED_FIXED;
+        p->dither.method = opts->dither_algo == DITHER_ORDERED
+                                ? PL_DITHER_ORDERED_FIXED
+                                : PL_DITHER_BLUE_NOISE;
         p->dither.lut_size = opts->dither_size;
         p->dither.temporal = opts->temporal_dither;
         break;
