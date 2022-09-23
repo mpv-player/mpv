@@ -291,6 +291,8 @@ static const struct {
     { "db",             "mjpeg" },
     { "pcd",            "photocd" },
     { "pfm",            "pfm" },
+    { "phm",            "phm" },
+    { "hdr",            "hdr" },
     { "pcx",            "pcx" },
     { "png",            "png" },
     { "pns",            "png" },
@@ -319,6 +321,7 @@ static const struct {
     { "pix",            "brender_pix" },
     { "exr",            "exr" },
     { "pic",            "pictor" },
+    { "qoi",            "qoi" },
     { "xface",          "xface" },
     { "xwd",            "xwd" },
     {0}
