@@ -128,6 +128,7 @@ struct priv {
     struct scaler_params scalers[SCALER_COUNT];
     const struct pl_hook **hooks; // storage for `params.hooks`
     const struct pl_filter_config *frame_mixer;
+    enum mp_csp_levels output_levels;
 
 #ifdef PL_HAVE_LCMS
     struct pl_icc_params icc;
@@ -780,6 +781,7 @@ static void update_options(struct vo *vo)
     p->color_adjustment.hue = cparams.hue;
     p->color_adjustment.saturation = cparams.saturation;
     p->color_adjustment.gamma = cparams.gamma;
+    p->output_levels = cparams.levels_out;
 }
 
 static void apply_target_options(struct priv *p, struct pl_frame *target)
@@ -795,6 +797,8 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
 
     // Colorspace overrides
     const struct gl_video_opts *opts = p->opts_cache->opts;
+    if (p->output_levels)
+        target->repr.levels = mp_levels_to_pl(p->output_levels);
     if (opts->target_prim)
         target->color.primaries = mp_prim_to_pl(opts->target_prim);
     if (opts->target_trc)
