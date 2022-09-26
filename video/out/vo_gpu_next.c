@@ -731,22 +731,25 @@ static void info_callback(void *priv, const struct pl_render_info *info)
 {
     struct vo *vo = priv;
     struct priv *p = vo->priv;
+    if (info->index > VO_PASS_PERF_MAX)
+        return; // silently ignore clipped passes, whatever
 
-    int index;
     struct mp_frame_perf *frame;
     switch (info->stage) {
-    case PL_RENDER_STAGE_FRAME:
-        if (info->index > VO_PASS_PERF_MAX)
-            return; // silently ignore clipped passes, whatever
-        frame = &p->perf.fresh;
-        index = info->index;
-        break;
-    case PL_RENDER_STAGE_BLEND:
-        frame = &p->perf.redraw;
-        index = 0; // ignore blended frame count
-        break;
+    case PL_RENDER_STAGE_FRAME: frame = &p->perf.fresh; break;
+    case PL_RENDER_STAGE_BLEND: frame = &p->perf.redraw; break;
     default: abort();
     }
+
+    int index = info->index;
+#if PL_API_VER < 227
+    // Versions of libplacebo older than this used `index` to communicate the
+    // blended frame count, and implicitly clipped all subsequent passes. This
+    // functionaliy was removed in API ver 227, which makes `index` behave the
+    // same for frame and blend stages.
+    if (info->stage == PL_RENDER_STAGE_BLEND)
+        index = 0;
+#endif
 
     struct mp_pass_perf *perf = &frame->perf[index];
     const struct pl_dispatch_info *pass = info->pass;
