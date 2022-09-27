@@ -53,3 +53,5 @@ bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
                             struct dmabuf_interop *dmabuf_interop);
 bool dmabuf_interop_pl_init(const struct ra_hwdec *hw,
                             struct dmabuf_interop *dmabuf_interop);
+bool dmabuf_interop_wl_init(const struct ra_hwdec *hw,
+                            struct dmabuf_interop *dmabuf_interop);

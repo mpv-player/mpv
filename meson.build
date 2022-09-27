@@ -996,6 +996,9 @@ features += {'wayland': wayland_deps and wayland['header'] and wayland['scanner'
 
 if features['wayland']
     subdir(join_paths('generated', 'wayland'))
+    sources += files('video/out/wldmabuf/context_wldmabuf.c')
+    sources += files('video/out/wldmabuf/ra_wldmabuf.c')
+    sources += files('video/out/wlbuf_pool.c')
 endif
 
 features += {'memfd_create': false}
@@ -1402,6 +1405,12 @@ dmabuf_interop_pl = features['vaapi-libplacebo']
 features += {'dmabuf-interop-pl': dmabuf_interop_pl}
 if features['dmabuf-interop-pl']
     sources += files('video/out/hwdec/dmabuf_interop_pl.c')
+endif
+
+features += {'dmabuf-wayland' : features['wayland'] and features['memfd_create'] and (features['vaapi-wayland'] or features['drm'])}
+if features['dmabuf-wayland']
+    sources += files('video/out/vo_dmabuf_wayland.c')
+    sources += files('video/out/hwdec/dmabuf_interop_wl.c')
 endif
 
 vdpau_opt = get_option('vdpau').require(

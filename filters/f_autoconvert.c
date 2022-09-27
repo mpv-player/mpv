@@ -195,12 +195,13 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
     bool hw_to_sw = !imgfmt_is_sw && dst_have_sw;
 
     if (dst_all_hw && num_fmts > 0) {
+        bool upload_created = false;
+        int sw_fmt = imgfmt_is_sw ? img->imgfmt : img->params.hw_subfmt;
+
         for (int i = 0; i < num_fmts; i++) {
             // We can probably use this! Very lazy and very approximate.
             struct mp_hwupload *upload = mp_hwupload_create(conv, fmts[i]);
             if (upload) {
-                int sw_fmt = imgfmt_is_sw ? img->imgfmt : img->params.hw_subfmt;
-
                 mp_info(log, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[i]));
                 filters[2] = upload->f;
                 hwupload_fmt = mp_hwupload_find_upload_format(upload, sw_fmt);
@@ -215,8 +216,15 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
                     mp_err(log, "Format %s is not supported by %s\n",
                            mp_imgfmt_to_name(sw_fmt),
                            mp_imgfmt_to_name(p->imgfmts[i]));
+                    continue;
                 }
+                upload_created = true;
+                break;
             }
+        }
+        if (!upload_created) {
+            mp_err(log, "Failed to create HW uploader for format %s\n",
+                   mp_imgfmt_to_name(sw_fmt));
         }
     }
 
