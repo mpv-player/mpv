@@ -15,9 +15,9 @@ struct priv {
 
     AVBufferRef *hw_pool;
 
-    int last_input_fmt;
-    int last_upload_fmt;
-    int last_sw_fmt;
+    int last_source_fmt;
+    int last_hw_output_fmt;
+    int last_hw_input_fmt;
 
     // Hardware wrapper format, e.g. IMGFMT_VAAPI.
     int hw_imgfmt;
@@ -81,8 +81,22 @@ static const struct hwmap_pairs hwmap_pairs[] = {
     {0}
 };
 
+/**
+ * @brief Find the closest supported format when hw uploading
+ *
+ * Some hardware types support implicit format conversion on upload. For these
+ * types, it is possible for the set of formats that are accepts as inputs to
+ * the upload process to differ from the set of formats that can be outputs of
+ * the upload.
+ *
+ * hw_input_format -> hwupload -> hw_output_format
+ *
+ * Awareness of this is important because we can avoid doing software conversion
+ * if our input_fmt is accepted as a hw_input_format even if it cannot be the
+ * hw_output_format.
+ */
 static bool select_format(struct priv *p, int input_fmt,
-                          int *out_sw_fmt, int *out_upload_fmt)
+                          int *out_hw_input_fmt, int *out_hw_output_fmt)
 {
     if (!input_fmt)
         return false;
@@ -93,37 +107,36 @@ static bool select_format(struct priv *p, int input_fmt,
         return false;
     }
 
-    // First find the closest sw fmt. Some hwdec APIs return crazy lists of
+    // First find the closest hw input fmt. Some hwdec APIs return crazy lists of
     // "supported" formats, which then are not supported or crash (???), so
     // the this is a good way to avoid problems.
     // (Actually we should just have hardcoded everything instead of relying on
     // this fragile bullshit FFmpeg API and the fragile bullshit hwdec drivers.)
-    int sw_fmt = mp_imgfmt_select_best_list(p->fmts, p->num_fmts, input_fmt);
-    if (!sw_fmt)
+    int hw_input_fmt = mp_imgfmt_select_best_list(p->fmts, p->num_fmts, input_fmt);
+    if (!hw_input_fmt)
         return false;
 
-    // Dumb, but find index for p->fmts[index]==sw_fmt.
+    // Dumb, but find index for p->fmts[index]==hw_input_fmt.
     int index = -1;
     for (int n = 0; n < p->num_fmts; n++) {
-        if (p->fmts[n] == sw_fmt)
+        if (p->fmts[n] == hw_input_fmt)
             index = n;
     }
     if (index < 0)
         return false;
 
-    // Now check the available upload formats. This is the format our sw frame
-    // has to be in, and which the upload API will take (probably).
-
+    // Now check the available output formats. This is the format our sw frame
+    // will be in after the upload (probably).
     int *upload_fmts = &p->upload_fmts[p->fmt_upload_index[index]];
     int num_upload_fmts = p->fmt_upload_num[index];
 
-    int up_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts,
+    int hw_output_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts,
                                             input_fmt);
-    if (!up_fmt)
+    if (!hw_output_fmt)
         return false;
 
-    *out_sw_fmt = sw_fmt;
-    *out_upload_fmt = up_fmt;
+    *out_hw_input_fmt = hw_input_fmt;
+    *out_hw_output_fmt = hw_output_fmt;
     return true;
 }
 
@@ -133,7 +146,15 @@ int mp_hwupload_find_upload_format(struct mp_hwupload *u, int imgfmt)
 
     int sw = 0, up = 0;
     select_format(p, imgfmt, &sw, &up);
-    return sw;
+    // In th case where the imgfmt is not natively supported, it must be
+    // converted, either before or during upload. If the imgfmt is supported as
+    // an hw input format, then prefer that, and if the upload has to do implict
+    // conversion, that's fine. On the other hand, if the imgfmt is not a
+    // supported input format, then pick the output format as the conversion
+    // target to avoid doing two conversions (one before upload, and one during
+    // upload). Note that for most hardware types, there is no ability to convert
+    // during upload, and the two formats will always be the same.
+    return imgfmt == sw ? sw : up;
 }
 
 static void process(struct mp_filter *f)
@@ -168,34 +189,34 @@ static void process(struct mp_filter *f)
         return;
     }
 
-    if (src->imgfmt != p->last_input_fmt) {
+    if (src->imgfmt != p->last_source_fmt) {
         if (IMGFMT_IS_HWACCEL(src->imgfmt)) {
             // Because there cannot be any conversion of the sw format when the
             // input is a hw format, just pick the source sw format.
-            p->last_sw_fmt = src->params.hw_subfmt;
+            p->last_hw_input_fmt = p->last_hw_output_fmt = src->params.hw_subfmt;
         } else {
             if (!select_format(p, src->imgfmt,
-                               &p->last_sw_fmt, &p->last_upload_fmt))
+                               &p->last_hw_input_fmt, &p->last_hw_output_fmt))
             {
                 MP_ERR(f, "no hw upload format found\n");
                 goto error;
             }
-            if (src->imgfmt != p->last_upload_fmt) {
+            if (src->imgfmt != p->last_hw_input_fmt) {
                 // Should not fail; if it does, mp_hwupload_find_upload_format()
                 // does not return the src->imgfmt format.
-                MP_ERR(f, "input format not an upload format\n");
+                MP_ERR(f, "input format is not an upload format\n");
                 goto error;
             }
         }
-        p->last_input_fmt = src->imgfmt;
+        p->last_source_fmt = src->imgfmt;
         MP_INFO(f, "upload %s -> %s[%s]\n",
-                mp_imgfmt_to_name(p->last_input_fmt),
+                mp_imgfmt_to_name(p->last_source_fmt),
                 mp_imgfmt_to_name(p->hw_imgfmt),
-                mp_imgfmt_to_name(p->last_sw_fmt));
+                mp_imgfmt_to_name(p->last_hw_output_fmt));
     }
 
     if (!mp_update_av_hw_frames_pool(&p->hw_pool, p->av_device_ctx, p->hw_imgfmt,
-                                     p->last_sw_fmt, src->w, src->h))
+                                     p->last_hw_output_fmt, src->w, src->h))
     {
         MP_ERR(f, "failed to create frame pool\n");
         goto error;
