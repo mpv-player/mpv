@@ -50,7 +50,7 @@ jobs:
 
       - name: Build with waf
         run: |
-          ./ci/build-mingw64.sh waf
+          ./ci/build-mingw64.sh waf pack
         env:
           TARGET: ${{ matrix.target }}
 
@@ -58,6 +58,11 @@ jobs:
         if: ${{ failure() }}
         run: |
           cat ./build/config.log
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: mpv-${{ matrix.target }}
+          path: mpv-git-*.zip
 
   macos:
     runs-on: ${{ matrix.os }}
