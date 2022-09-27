@@ -195,26 +195,27 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
     bool hw_to_sw = !imgfmt_is_sw && dst_have_sw;
 
     if (dst_all_hw && num_fmts > 0) {
-        // We can probably use this! Very lazy and very approximate.
-        struct mp_hwupload *upload = mp_hwupload_create(conv, fmts[0]);
-        if (upload) {
-            int sw_fmt = imgfmt_is_sw ? img->imgfmt : img->params.hw_subfmt;
+        for (int i = 0; i < num_fmts; i++) {
+            // We can probably use this! Very lazy and very approximate.
+            struct mp_hwupload *upload = mp_hwupload_create(conv, fmts[i]);
+            if (upload) {
+                int sw_fmt = imgfmt_is_sw ? img->imgfmt : img->params.hw_subfmt;
 
-            mp_info(log, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[0]));
-            filters[2] = upload->f;
-            hwupload_fmt = mp_hwupload_find_upload_format(upload, sw_fmt);
-            fmts = &hwupload_fmt;
-            num_fmts = hwupload_fmt ? 1 : 0;
-            hw_to_sw = false;
+                mp_info(log, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[i]));
+                filters[2] = upload->f;
+                hwupload_fmt = mp_hwupload_find_upload_format(upload, sw_fmt);
+                fmts = &hwupload_fmt;
+                num_fmts = hwupload_fmt ? 1 : 0;
+                hw_to_sw = false;
 
-            // We cannot do format conversions when transferring between
-            // two hardware devices, so fail immediately if that would be
-            // required.
-            if (!imgfmt_is_sw && hwupload_fmt != sw_fmt) {
-                mp_err(log, "Format %s is not supported by %s\n",
-                       mp_imgfmt_to_name(sw_fmt),
-                       mp_imgfmt_to_name(p->imgfmts[0]));
-                goto fail;
+                // We cannot do format conversions when transferring between
+                // two hardware devices, so reject this format if that would be
+                // required.
+                if (!imgfmt_is_sw && hwupload_fmt != sw_fmt) {
+                    mp_err(log, "Format %s is not supported by %s\n",
+                           mp_imgfmt_to_name(sw_fmt),
+                           mp_imgfmt_to_name(p->imgfmts[i]));
+                }
             }
         }
     }
