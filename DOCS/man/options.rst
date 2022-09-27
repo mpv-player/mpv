@@ -6423,6 +6423,10 @@ them.
         Specifies the local contrast coefficient at the display peak. Defaults
         to 0.5, which means that in-gamut values will be about half as bright
         as when clipping.
+    bt.2390
+        Specifies the offset for the knee point. Defaults to 1.0, which is
+        higher than the value from the original ITU-R specification (0.5).
+        (``--vo=gpu-next`` only)
     gamma
         Specifies the exponent of the function. Defaults to 1.8.
     linear
