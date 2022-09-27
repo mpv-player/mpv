@@ -1022,6 +1022,8 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
 {
+    if (fback)
+        wp_presentation_feedback_destroy(fback);
 }
 
 static const struct wp_presentation_feedback_listener feedback_listener = {
