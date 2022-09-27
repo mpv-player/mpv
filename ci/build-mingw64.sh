@@ -6,7 +6,7 @@ ln -snf . "$prefix_dir/usr"
 ln -snf . "$prefix_dir/local"
 
 wget="wget -nc --progress=bar:force"
-gitclone="git clone --depth=10"
+gitclone="git clone --depth=10 --recursive"
 commonflags="--disable-static --enable-shared"
 
 export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
@@ -22,19 +22,23 @@ export RANLIB=$TARGET-ranlib
 export CFLAGS="-O2 -pipe -Wall -D_FORTIFY_SOURCE=2"
 export LDFLAGS="-fstack-protector-strong"
 
-cat > "${prefix_dir}/crossfile" << EOF
+fam=x86_64
+[[ "$TARGET" == "i686-"* ]] && fam=x86
+cat >"$prefix_dir/crossfile" <<EOF
+[built-in options]
+buildtype = 'release'
+wrap_mode = 'nodownload'
 [binaries]
 c = '${CC}'
 cpp = '${CXX}'
 ar = '${AR}'
 strip = '${TARGET}-strip'
 pkgconfig = 'pkg-config'
-exe_wrapper = 'wine64' # A command used to run generated executables.
 windres = '${TARGET}-windres'
 [host_machine]
 system = 'windows'
-cpu_family = '${CPU}'
-cpu = '${CPU}'
+cpu_family = '${fam}'
+cpu = '${TARGET%%-*}'
 endian = 'little'
 EOF
 
@@ -45,8 +49,13 @@ function builddir () {
 }
 
 function makeplusinstall () {
-    make -j$(nproc)
-    make DESTDIR="$prefix_dir" install
+    if [ -f build.ninja ]; then
+        ninja
+        DESTDIR="$prefix_dir" ninja install
+    else
+        make -j$(nproc)
+        make DESTDIR="$prefix_dir" install
+    fi
 }
 
 function gettar () {
@@ -71,6 +80,7 @@ if [ ! -e "$prefix_dir/lib/libz.dll.a" ]; then
     ver=1.2.12
     gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
+    make -fwin32/Makefile.gcc clean
     make -fwin32/Makefile.gcc PREFIX=$TARGET- SHARED_MODE=1 \
         DESTDIR="$prefix_dir" install \
         BINARY_PATH=/bin INCLUDE_PATH=/include LIBRARY_PATH=/lib
@@ -84,7 +94,7 @@ if [ ! -e "$prefix_dir/lib/libavcodec.dll.a" ]; then
     ../configure --pkg-config=pkg-config --target-os=mingw32 \
         --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*} \
         $commonflags \
-        --disable-{stripping,doc,programs,muxers,encoders,devices}
+        --disable-{doc,programs,muxers,encoders,devices}
     makeplusinstall
     popd
 fi
@@ -117,10 +127,8 @@ fi
 if [ ! -e "$prefix_dir/lib/libplacebo.dll.a" ]; then
     [ -d libplacebo ] || $gitclone https://code.videolan.org/videolan/libplacebo.git
     builddir libplacebo
-    meson .. \
-        --cross-file "${prefix_dir}/crossfile"
-    ninja
-    DESTDIR="$prefix_dir" ninja install
+    meson .. --cross-file "$prefix_dir/crossfile"
+    makeplusinstall
     popd
 fi
 
@@ -129,32 +137,31 @@ if [ ! -e "$prefix_dir/lib/libfreetype.dll.a" ]; then
     ver=2.12.1
     gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
-    ZLIB_LIBS="-L'$prefix_dir/lib' -lz" \
-    ../configure --host=$TARGET $commonflags --with-png=no
+    meson .. --cross-file "$prefix_dir/crossfile"
     makeplusinstall
     popd
 fi
-[ -f "$prefix_dir/lib/libfreetype.dll.a" ] || { echo "libtool fuckup"; exit 1; }
 
 ## fribidi
 if [ ! -e "$prefix_dir/lib/libfribidi.dll.a" ]; then
     ver=1.0.12
     gettar "https://github.com/fribidi/fribidi/releases/download/v${ver}/fribidi-${ver}.tar.xz"
     builddir fribidi-${ver}
-    ../configure --host=$TARGET $commonflags
+    meson .. --cross-file "$prefix_dir/crossfile" \
+        -D{tests,docs}=false
     makeplusinstall
     popd
 fi
 
 ## harfbuzz
 if [ ! -e "$prefix_dir/lib/libharfbuzz.dll.a" ]; then
-    ver=4.3.0
+    ver=5.3.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
-    ../configure --host=$TARGET $commonflags --with-icu=no
+    meson .. --cross-file "$prefix_dir/crossfile" \
+        -Dtests=disabled
     makeplusinstall
     popd
-    rm "$prefix_dir"/lib/*.la # fuck off
 fi
 
 ## libass
@@ -169,12 +176,13 @@ fi
 
 ## luajit
 if [ ! -e "$prefix_dir/lib/libluajit-5.1.a" ]; then
-    ver=2.0.5
+    ver=2.1.0-beta3
     gettar "http://luajit.org/download/LuaJIT-${ver}.tar.gz"
     pushd LuaJIT-${ver}
-    hostcc=gcc
+    hostcc=cc
     [[ "$TARGET" == "i686-"* ]] && hostcc="$hostcc -m32"
-    make HOST_CC="$hostcc" CROSS=$TARGET- TARGET_SYS=Windows \
+    make TARGET_SYS=Windows clean
+    make TARGET_SYS=Windows HOST_CC="$hostcc" CROSS=$TARGET- \
         BUILDMODE=static amalg
     make DESTDIR="$prefix_dir" INSTALL_DEP= FILE_T=luajit.exe install
     popd
@@ -182,23 +190,24 @@ fi
 
 ## mpv
 
-if [ $1 = "meson" ]; then
-    CPU="x86_64"
-    mkdir -p "${TARGET}_mingw_build" && pushd "${TARGET}_mingw_build"
+[ -z "$1" ] && exit 0
 
-    CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
-    meson setup .. --cross-file "${prefix_dir}/crossfile" --libdir lib \
+CFLAGS+=" -I'$prefix_dir/include'"
+LDFLAGS+=" -L'$prefix_dir/lib'"
+export CFLAGS LDFLAGS
+rm -rf build
+
+if [ "$1" = "meson" ]; then
+    meson setup build --cross-file "$prefix_dir/crossfile" \
+        --buildtype debugoptimized \
         -D{libmpv,tests}=true -Dlua=luajit \
         -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
 
-    meson compile
-fi
-
-if [ $1 = "waf" ]; then
-    PKG_CONFIG=pkg-config CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
-    python3 ./waf configure \
+    ninja -C build --verbose
+elif [ "$1" = "waf" ]; then
+    PKG_CONFIG=pkg-config ./waf configure \
         --enable-libmpv-shared --lua=luajit \
         --enable-{shaderc,spirv-cross,d3d11,libplacebo,tests}
 
-    python3 ./waf build --verbose
+    ./waf build --verbose
 fi
