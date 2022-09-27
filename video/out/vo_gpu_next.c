@@ -225,8 +225,8 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
 }
 
 static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
-                            int flags, struct osd_state *state,
-                            struct pl_frame *frame)
+                            int flags, enum pl_overlay_coords coords,
+                            struct osd_state *state, struct pl_frame *frame)
 {
     struct priv *p = vo->priv;
     static const bool subfmt_all[SUBBITMAP_COUNT] = {
@@ -292,7 +292,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
             .num_parts = entry->num_parts,
             .color.primaries = frame->color.primaries,
             .color.transfer = frame->color.transfer,
-            .coords = PL_OVERLAY_COORDS_DST_FRAME,
+            .coords = coords,
         };
 
         // Reject HDR/wide gamut subtitles out of the box, since these are
@@ -907,10 +907,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     // Calculate target
     struct pl_frame target;
-    int osd_flags = frame->current ? OSD_DRAW_OSD_ONLY : 0;
     pl_frame_from_swapchain(&target, &swframe);
     apply_target_options(p, &target);
-    update_overlays(vo, p->osd_res, 0, osd_flags, &p->osd_state, &target);
+    update_overlays(vo, p->osd_res, frame->current ? frame->current->pts : 0,
+                    (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
+                    PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target);
     apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
 
     struct pl_frame_mix mix = {0};
@@ -954,11 +955,29 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             struct frame_priv *fp = mpi->priv;
             apply_crop(image, p->src, vo->params->w, vo->params->h);
 
-            if (fp->osd_sync < p->osd_sync) {
-                // Only update the overlays if the state has changed
-                update_overlays(vo, p->osd_res, mpi->pts, OSD_DRAW_SUB_ONLY,
-                                &fp->subs, image);
-                fp->osd_sync = p->osd_sync;
+            if (opts->blend_subs) {
+                if (fp->osd_sync < p->osd_sync) {
+                    // Only update the overlays if the state has changed
+                    float rx = pl_rect_w(p->dst) / pl_rect_w(image->crop);
+                    float ry = pl_rect_h(p->dst) / pl_rect_h(image->crop);
+                    struct mp_osd_res res = {
+                        .w = pl_rect_w(p->dst),
+                        .h = pl_rect_h(p->dst),
+                        .ml = -image->crop.x0 * rx,
+                        .mr = (image->crop.x1 - vo->params->w) * rx,
+                        .mt = -image->crop.y0 * ry,
+                        .mb = (image->crop.y1 - vo->params->h) * ry,
+                        .display_par = 1.0,
+                    };
+                    update_overlays(vo, res, mpi->pts, OSD_DRAW_SUB_ONLY,
+                                    PL_OVERLAY_COORDS_DST_CROP,
+                                    &fp->subs, image);
+                    fp->osd_sync = p->osd_sync;
+                }
+            } else {
+                // Disable overlays when blend_subs is disabled
+                image->num_overlays = 0;
+                fp->osd_sync = 0;
             }
         }
     }
@@ -1180,7 +1199,8 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         osd_flags |= OSD_DRAW_OSD_ONLY;
     if (!args->osd)
         osd_flags |= OSD_DRAW_SUB_ONLY;
-    update_overlays(vo, osd, mpi->pts, osd_flags, &p->osd_state, &target);
+    update_overlays(vo, osd, mpi->pts, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
+                    &p->osd_state, &target);
     image.num_overlays = 0; // Disable on-screen overlays
 
     if (!pl_render_image(p->rr, &image, &target, &p->params)) {
