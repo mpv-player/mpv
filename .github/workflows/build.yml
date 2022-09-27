@@ -16,21 +16,26 @@ jobs:
       matrix:
         target: [i686-w64-mingw32, x86_64-w64-mingw32]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Increase -N suffix here to force full rebuild after changes
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: mingw_prefix/
-          key: "${{ matrix.target }}-3"
+          key: "${{ matrix.target }}-6"
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib nasm yasm
-          # Meson from apt is too old
-          pip3 install --no-input meson ninja
+          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib nasm ninja-build
+          pip3 install --no-input meson
           ./bootstrap.py
+
+      - name: Build libraries
+        run: |
+          ./ci/build-mingw64.sh
+        env:
+          TARGET: ${{ matrix.target }}
 
       - name: Build with meson
         run: |
@@ -41,7 +46,7 @@ jobs:
       - name: Print meson log
         if: ${{ failure() }}
         run: |
-          cat ./${{ matrix.target }}_mingw_build/meson-logs/meson-log.txt
+          cat ./build/meson-logs/meson-log.txt
 
       - name: Build with waf
         run: |
