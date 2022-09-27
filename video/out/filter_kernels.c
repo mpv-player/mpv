@@ -316,6 +316,18 @@ static double gaussian(params *p, double x)
     return exp(-2.0 * x * x / p->params[0]);
 }
 
+static double hpl_2007_179(params *p, double x)
+{
+    if (fabs(x) < 1e-8)
+        return 1.0;
+    double pix = M_PI * x;
+    double chi = p->params[0],
+           eta = p->params[1];
+    double n = M_PI * chi * x / (2.0 - eta);
+    n *= n;
+    return sin(pix) / pix * cosh(sqrt(2.0 * eta) * M_PI * chi * x / (2.0 - eta)) * pow(M_E, -n);
+}
+
 static double sinc(params *p, double x)
 {
     if (fabs(x) < 1e-8)
@@ -405,5 +417,6 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"nearest",        0.5, box}},
     {{"triangle",       1,   triangle, .resizable = true}},
     {{"gaussian",       2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
+    {{"hpl_2007_179",   2,   hpl_2007_179, .params = {0.414, 0.61}, .resizable = true}},
     {{0}}
 };
