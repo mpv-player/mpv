@@ -56,6 +56,9 @@ const static dmabuf_interop_init interop_inits[] = {
 #if HAVE_DMABUF_INTEROP_PL
     dmabuf_interop_pl_init,
 #endif
+#if HAVE_DMABUF_WAYLAND
+    dmabuf_interop_wl_init,
+#endif
     NULL
 };
 
@@ -167,7 +170,8 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 
     struct ra_imgfmt_desc desc = {0};
 
-    if (!ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
+    if (mapper->ra->num_formats &&
+            !ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
         return -1;
 
     p->num_planes = desc.num_planes;

@@ -6150,6 +6150,8 @@ them.
         X11/EGL
     android
         Android/EGL. Requires ``--wid`` be set to an ``android.view.Surface``.
+    wldmabuf
+        dmabuf buffers are rendered directly by Wayland compositor
 
 ``--gpu-api=<type>``
     Controls which type of graphics APIs will be accepted:
@@ -6162,6 +6164,9 @@ them.
         Allow only Vulkan (requires a valid/working ``--spirv-compiler``)
     d3d11
         Allow only ``--gpu-context=d3d11``
+    none
+        No graphics API is used - Wayland alone is used for rendering
+        (requires Wayland compositor)
 
 ``--opengl-es=<mode>``
     Controls which type of OpenGL context will be accepted:

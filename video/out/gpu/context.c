@@ -55,6 +55,9 @@ extern const struct ra_ctx_fns ra_ctx_vulkan_display;
 /* Direct3D 11 */
 extern const struct ra_ctx_fns ra_ctx_d3d11;
 
+/* No API */
+extern const struct ra_ctx_fns ra_ctx_wldmabuf;
+
 static const struct ra_ctx_fns *contexts[] = {
 #if HAVE_D3D11
     &ra_ctx_d3d11,
@@ -108,7 +111,11 @@ static const struct ra_ctx_fns *contexts[] = {
     &ra_ctx_vulkan_xlib,
 #endif
     &ra_ctx_vulkan_display,
+#endif
 
+/* No API contexts: */
+#if HAVE_WAYLAND
+    &ra_ctx_wldmabuf,
 #endif
 };
 

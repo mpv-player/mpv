@@ -309,7 +309,7 @@ static bool probe_formats(struct mp_hwupload *u, int hw_imgfmt)
     }
 
     if (!ctx) {
-        MP_ERR(u->f, "no support for this hw format\n");
+        MP_INFO(u->f, "no support for this hw format\n");
         return false;
     }
 
@@ -410,12 +410,12 @@ struct mp_hwupload *mp_hwupload_create(struct mp_filter *parent, int hw_imgfmt)
     mp_filter_add_pin(f, MP_PIN_OUT, "out");
 
     if (!probe_formats(u, hw_imgfmt)) {
-        MP_ERR(f, "hardware format not supported\n");
-        goto error;
+        MP_INFO(f, "hardware format not supported\n");
+        goto fail;
     }
 
     return u;
-error:
+fail:
     talloc_free(f);
     return NULL;
 }

@@ -52,7 +52,11 @@ static VADisplay *create_x11_va_display(struct ra *ra)
 static VADisplay *create_wayland_va_display(struct ra *ra)
 {
     struct wl_display *wl = ra_get_native_resource(ra, "wl");
-    return wl ? vaGetDisplayWl(wl) : NULL;
+    VADisplay rc = wl ? vaGetDisplayWl(wl) : NULL;
+    if (rc)
+        ra_add_native_resource(ra, "VADisplay", rc);
+
+    return rc;
 }
 #endif
 
@@ -123,6 +127,9 @@ const static dmabuf_interop_init interop_inits[] = {
 #endif
 #if HAVE_DMABUF_INTEROP_PL
     dmabuf_interop_pl_init,
+#endif
+#if HAVE_DMABUF_WAYLAND
+    dmabuf_interop_wl_init,
 #endif
     NULL
 };
@@ -217,8 +224,9 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 
     struct ra_imgfmt_desc desc = {0};
 
-    if (!ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
-        return -1;
+    if (mapper->ra->num_formats &&
+            !ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
+       return -1;
 
     p->num_planes = desc.num_planes;
     mp_image_set_params(&p->layout, &mapper->dst_params);
