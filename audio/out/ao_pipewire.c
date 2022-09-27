@@ -380,35 +380,6 @@ unlock_loop:
     return ret;
 }
 
-
-static void get_target_id_cb(struct ao *ao, uint32_t id, const struct spa_dict *props, void *ctx)
-{
-    int32_t *target_id = ctx;
-
-    const char *name = spa_dict_lookup(props, PW_KEY_NODE_NAME);
-    if (!name)
-        return;
-
-    if (strcmp(name, ao->device) == 0) {
-        *target_id = id;
-    }
-}
-
-static uint32_t get_target_id(struct ao *ao)
-{
-    uint32_t target_id = 0;
-
-    if (ao->device == NULL)
-        return PW_ID_ANY;
-
-    if (for_each_sink(ao, get_target_id_cb, &target_id) < 0 && target_id == 0) {
-        MP_WARN(ao, "Could not iterate devices to find target, using default device\n");
-        return PW_ID_ANY;
-    }
-
-    return target_id;
-}
-
 static int pipewire_init_boilerplate(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -461,6 +432,7 @@ static int init(struct ao *ao)
         PW_KEY_APP_ID, ao->client_name,
         PW_KEY_APP_ICON_NAME, ao->client_name,
         PW_KEY_NODE_ALWAYS_PROCESS, "true",
+        PW_KEY_TARGET_OBJECT, ao->device,
         NULL
     );
 
@@ -514,17 +486,8 @@ static int init(struct ao *ao)
                     &p->stream_listener,
                     &stream_events, ao);
 
-    pw_thread_loop_unlock(p->loop);
-
-    uint32_t target_id = get_target_id(ao);
-    if (target_id == 0)
-        goto error;
-
-    pw_thread_loop_lock(p->loop);
-
     if (pw_stream_connect(p->stream,
-                    PW_DIRECTION_OUTPUT,
-                    target_id,
+                    PW_DIRECTION_OUTPUT, PW_ID_ANY,
                     PW_STREAM_FLAG_AUTOCONNECT |
                     PW_STREAM_FLAG_INACTIVE |
                     PW_STREAM_FLAG_MAP_BUFFERS |
