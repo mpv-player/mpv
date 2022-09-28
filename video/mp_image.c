@@ -29,6 +29,10 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/mastering_display_metadata.h>
 
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 16, 100)
+# include <libavutil/dovi_meta.h>
+#endif
+
 #include "mpv_talloc.h"
 
 #include "config.h"
@@ -1012,8 +1016,14 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 16, 100)
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_DOVI_METADATA);
-    if (sd)
-        dst->dovi = sd->buf;
+    if (sd) {
+        // Strip DoVi metadata that requires an EL, since it's near-impossible
+        // for us to support easily or sanely
+        const AVDOVIMetadata *metadata = (AVDOVIMetadata *) sd->buf->data;
+        const AVDOVIRpuDataHeader *rpu = av_dovi_get_header(metadata);
+        if (rpu->disable_residual_flag)
+            dst->dovi = sd->buf;
+    }
 #endif
 
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(56, 61, 100)
