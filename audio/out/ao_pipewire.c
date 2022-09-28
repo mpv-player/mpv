@@ -419,9 +419,10 @@ static int pipewire_init_boilerplate(struct ao *ao)
 
 
     p->loop = pw_thread_loop_new("ao-pipewire", NULL);
-    pw_thread_loop_lock(p->loop);
     if (p->loop == NULL)
-        goto error;
+        return -1;
+
+    pw_thread_loop_lock(p->loop);
 
     if (pw_thread_loop_start(p->loop) < 0)
         goto error;
