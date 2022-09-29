@@ -62,7 +62,6 @@ extern const struct vo_driver video_out_drm;
 extern const struct vo_driver video_out_direct3d;
 extern const struct vo_driver video_out_sdl;
 extern const struct vo_driver video_out_vaapi;
-extern const struct vo_driver video_out_vaapi_wayland;
 extern const struct vo_driver video_out_dmabuf_wayland;
 extern const struct vo_driver video_out_wlshm;
 extern const struct vo_driver video_out_rpi;
@@ -96,9 +95,6 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_DMABUF_WAYLAND
     &video_out_dmabuf_wayland,
-#endif
-#if HAVE_VAAPI_WAYLAND
-    &video_out_vaapi_wayland,
 #endif
 #if HAVE_VAAPI_X11 && HAVE_GPL
     &video_out_vaapi,

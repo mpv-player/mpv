@@ -12,7 +12,7 @@ meson build \
     -Dopenal=enabled \
     -Dsdl2=enabled \
     -Dsndio=enabled \
-    -Dvaapi-wayland=enabled \
+    -Ddmabuf-wayland=enabled \
     -Dvdpau=enabled \
     -Dvulkan=enabled \
     -Doss-audio=enabled \
@@ -36,7 +36,7 @@ python3 ./waf configure \
     --enable-openal \
     --enable-sdl2 \
     --enable-sndio \
-    --enable-vaapi-wayland \
+    --enable-dmabuf-wayland \
     --enable-vdpau \
     --enable-vulkan \
     --enable-oss-audio \
