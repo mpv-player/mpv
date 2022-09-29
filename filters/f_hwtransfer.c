@@ -148,11 +148,6 @@ static void process(struct mp_filter *f)
         return;
     }
 
-    if (src->w % 2 || src->h % 2) {
-        MP_ERR(f, "non-mod 2 input frames unsupported\n");
-        goto error;
-    }
-
     if (src->imgfmt != p->last_input_fmt) {
         if (IMGFMT_IS_HWACCEL(src->imgfmt)) {
             // Because there cannot be any conversion of the sw format when the
