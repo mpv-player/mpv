@@ -1375,11 +1375,6 @@ if features['vaapi-wayland']
     dependencies += vaapi_wayland
 endif
 
-features += {'vaapi-wayland-memfd': features['vaapi-wayland'] and features['memfd_create']}
-if features['vaapi-wayland-memfd']
-    sources += files('video/out/vo_vaapi_wayland.c')
-endif
-
 vaapi_x11 = dependency('libva-x11', version: '>= 1.1.0', required: get_option('vaapi-x11'))
 features += {'vaapi-x11': features['vaapi'] and features['x11'] and vaapi_x11.found()}
 if features['vaapi-x11']
