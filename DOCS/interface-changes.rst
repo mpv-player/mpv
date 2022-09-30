@@ -46,6 +46,8 @@ Interface changes
     - add `engine` option to the `rubberband` audio filter to support the new
       engine introduced in rubberband 3.0.0. Defaults to `finer` (new engine).
     - add `--wayland-configure-bounds` option
+    - deprecate `--gamma-factor`
+    - deprecate `--gamma-auto`
  --- mpv 0.34.0 ---
     - deprecate selecting by card number with `--drm-connector`, add
       `--drm-device` which can be used instead
