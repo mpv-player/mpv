@@ -6188,25 +6188,13 @@ them.
     other ways (like with the ``--gamma`` option or key bindings and the
     ``gamma`` property), the value is multiplied with the other gamma value.
 
-    Recommended values based on the environmental brightness:
-
-    1.0
-        Pitch black or dimly lit room (default)
-    1.1
-        Moderately lit room, home
-    1.2
-        Brightly illuminated room, office
-
-    NOTE: This is based around the assumptions of typical movie content, which
-    contains an implicit end-to-end of about 0.8 from scene to display. For
-    bright environments it can be useful to cancel that out.
+    This option is deprecated and may be removed in the future.
 
 ``--gamma-auto``
     Automatically corrects the gamma value depending on ambient lighting
     conditions (adding a gamma boost for bright rooms).
 
-    With ambient illuminance of 16 lux, mpv will pick the 1.0 gamma value (no
-    boost), and slightly increase the boost up until 1.2 for 256 lux.
+    This option is deprecated and may be removed in the future.
 
     NOTE: Only implemented on macOS.
 
