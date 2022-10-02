@@ -54,9 +54,12 @@ struct priv {
     struct pw_core *core;
     struct spa_hook stream_listener;
 
-    int buffer_msec;
     bool muted;
     float volume[2];
+
+    struct {
+        int buffer_msec;
+    } options;
 
     struct {
         struct pw_registry *registry;
@@ -134,7 +137,7 @@ static void on_process(void *userdata)
     void *data[MP_NUM_CHANNELS];
 
     if ((b = pw_stream_dequeue_buffer(p->stream)) == NULL) {
-        MP_WARN(ao, "out of buffers: %m\n");
+        MP_WARN(ao, "out of buffers: %s\n", strerror(errno));
         return;
     }
 
@@ -440,7 +443,7 @@ static int init(struct ao *ao)
     if (pipewire_init_boilerplate(ao) < 0)
         goto error;
 
-    ao->device_buffer = p->buffer_msec * ao->samplerate / 1000;
+    ao->device_buffer = p->options.buffer_msec * ao->samplerate / 1000;
 
     pw_properties_setf(props, PW_KEY_NODE_LATENCY, "%d/%d", ao->device_buffer, ao->samplerate);
     pw_properties_setf(props, PW_KEY_NODE_RATE, "1/%d", ao->samplerate);
@@ -661,9 +664,8 @@ static void hotplug_registry_global_remove_cb(void *data, uint32_t id)
 done:
     pw_thread_loop_unlock(priv->loop);
 
-    if (removed_sink) {
+    if (removed_sink)
         ao_hotplug_event(ao);
-    }
 }
 
 static const struct pw_registry_events hotplug_registry_events = {
@@ -749,11 +751,11 @@ const struct ao_driver audio_out_pipewire = {
     {
         .loop = NULL,
         .stream = NULL,
-        .buffer_msec = 20,
+        .options.buffer_msec = 20,
     },
     .options_prefix = "pipewire",
     .options = (const struct m_option[]) {
-        {"buffer", OPT_INT(buffer_msec), M_RANGE(1, 2000)},
+        {"buffer", OPT_INT(options.buffer_msec), M_RANGE(1, 2000)},
         {0}
     },
 };
