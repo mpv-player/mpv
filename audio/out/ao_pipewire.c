@@ -59,6 +59,7 @@ struct priv {
 
     struct {
         int buffer_msec;
+        char *remote;
     } options;
 
     struct {
@@ -405,9 +406,15 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (!context)
         goto error;
 
-    p->core = pw_context_connect(context, NULL, 0);
-    if (!p->core)
+    p->core = pw_context_connect(
+            context,
+            pw_properties_new(PW_KEY_REMOTE_NAME, p->options.remote, NULL),
+            0);
+    if (!p->core) {
+        MP_WARN(ao, "Could not connect to context '%s': %s\n",
+                p->options.remote, strerror(errno));
         goto error;
+    }
 
     ret = 0;
 
@@ -756,6 +763,7 @@ const struct ao_driver audio_out_pipewire = {
     .options_prefix = "pipewire",
     .options = (const struct m_option[]) {
         {"buffer", OPT_INT(options.buffer_msec), M_RANGE(1, 2000)},
+        {"remote", OPT_STRING(options.remote) },
         {0}
     },
 };

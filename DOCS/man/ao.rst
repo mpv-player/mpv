@@ -156,6 +156,11 @@ Available audio output drivers are:
         value makes the audio stream react faster, e.g. to playback speed
         changes.
 
+    ``--pipewire-remote=<remote>``
+        Specify the PipeWire remote daemon name to connect to via local UNIX
+        sockets.
+        An empty <remote> string uses the default remote named ``pipewire-0``.
+
 ``sdl``
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL
     1.2, but may require the ``SDL_AUDIODRIVER`` environment variable to be set
