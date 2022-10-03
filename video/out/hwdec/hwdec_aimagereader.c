@@ -176,6 +176,7 @@ static int init(struct ra_hwdec *hw)
     p->hwctx = (struct mp_hwdec_ctx) {
         .driver_name = hw->driver->name,
         .av_device_ref = create_mediacodec_device_ref(p->surface),
+        .hw_imgfmt = IMGFMT_MEDIACODEC,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
 
