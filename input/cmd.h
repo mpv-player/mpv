@@ -23,7 +23,7 @@
 #include "misc/bstr.h"
 #include "options/m_option.h"
 
-#define MP_CMD_DEF_MAX_ARGS 9
+#define MP_CMD_DEF_MAX_ARGS 11
 #define MP_CMD_OPT_ARG M_OPT_OPTIONAL_PARAM
 
 struct mp_log;
