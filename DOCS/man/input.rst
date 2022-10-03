@@ -1033,7 +1033,7 @@ Input Commands that are Possibly Subject to Change
     information about the key state. The special key name ``unmapped`` can be
     used to match any unmapped key.
 
-``overlay-add <id> <x> <y> <file> <offset> <fmt> <w> <h> <stride>``
+``overlay-add <id> <x> <y> <file> <offset> <fmt> <w> <h> <stride> <dw> <dh>``
     Add an OSD overlay sourced from raw data. This might be useful for scripts
     and applications controlling mpv, and which want to display things on top
     of the video window.
@@ -1090,6 +1090,11 @@ Input Commands that are Possibly Subject to Change
     In general, the total amount of memory accessed is ``stride * h``.
     (Technically, the minimum size would be ``stride * (h - 1) + w * 4``, but
     for simplicity, the player will access all ``stride * h`` bytes.)
+
+    ``dw`` and ``dh`` specify the (optional) display size of the overlay.
+    The overlay visible portion of the overlay (``w`` and ``h``) is scaled to
+    in display to ``dw`` and ``dh``.  If parameters are not present, the
+    values for ``w`` and ``h`` are used.
 
     .. note::
 
