@@ -46,6 +46,10 @@
 #define HAVE_WAYLAND_1_20
 #endif
 
+#ifndef CLOCK_MONOTONIC_RAW
+#define CLOCK_MONOTONIC_RAW 4
+#endif
+
 
 static const struct mp_keymap keymap[] = {
     /* Special keys */
@@ -968,12 +972,12 @@ static const struct zxdg_toplevel_decoration_v1_listener decoration_listener = {
 };
 
 static void pres_set_clockid(void *data, struct wp_presentation *pres,
-                           uint32_t clockid)
+                             uint32_t clockid)
 {
     struct vo_wayland_state *wl = data;
 
-    if (clockid == CLOCK_MONOTONIC)
-        wl->presentation = pres;
+    if (clockid == CLOCK_MONOTONIC || clockid == CLOCK_MONOTONIC_RAW)
+        wl->use_present = true;
 }
 
 static const struct wp_presentation_listener pres_listener = {
@@ -995,6 +999,9 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
 
     if (fback)
         wp_presentation_feedback_destroy(fback);
+
+    if (!wl->use_present)
+        return;
 
     wl->refresh_interval = (int64_t)refresh_nsec / 1000;
 
@@ -2099,7 +2106,7 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
      * 3. refresh rate of the output reported by the compositor
      * 4. make up crap if vblank_time is still <= 0 (better than nothing) */
 
-    if (wl->presentation)
+    if (wl->use_present)
         vblank_time = wl->present->vsync_duration;
 
     if (vblank_time <= 0 && wl->refresh_interval > 0)
@@ -2126,7 +2133,7 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 
     /* If the compositor does not have presentation time, we cannot be sure
      * that this wait is accurate. Do a hacky block with wl_display_roundtrip. */
-    if (!wl->presentation && !wl_display_get_error(wl->display))
+    if (!wl->use_present && !wl_display_get_error(wl->display))
         wl_display_roundtrip(wl->display);
 
     if (wl->frame_wait) {

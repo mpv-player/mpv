@@ -262,14 +262,14 @@ static void flip_page(struct vo *vo)
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
 
-    if (wl->presentation)
+    if (wl->use_present)
         present_sync_swap(wl->present);
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
 {
     struct vo_wayland_state *wl = vo->wl;
-    if (wl->presentation)
+    if (wl->use_present)
         present_sync_get_info(wl->present, info);
 }
 
