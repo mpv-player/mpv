@@ -92,6 +92,7 @@ struct vo_wayland_state {
     struct wp_presentation_feedback *feedback;
     struct mp_present *present;
     int64_t refresh_interval;
+    bool use_present;
 
     /* xdg-decoration */
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
