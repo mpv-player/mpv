@@ -27,7 +27,6 @@ struct vulkan_opts {
     int queue_count;
     int async_transfer;
     int async_compute;
-    int disable_events;
 };
 
 static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
@@ -99,7 +98,7 @@ const struct m_sub_options vulkan_conf = {
         {"vulkan-queue-count", OPT_INT(queue_count), M_RANGE(1, 8)},
         {"vulkan-async-transfer", OPT_FLAG(async_transfer)},
         {"vulkan-async-compute", OPT_FLAG(async_compute)},
-        {"vulkan-disable-events", OPT_FLAG(disable_events)},
+        {"vulkan-disable-events", OPT_REMOVED("Unused")},
         {0}
     },
     .size = sizeof(struct vulkan_opts),
@@ -172,7 +171,6 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         .async_compute = p->opts->async_compute,
         .queue_count = p->opts->queue_count,
         .device_name = p->opts->device,
-        .disable_events = p->opts->disable_events,
     });
     if (!vk->vulkan)
         goto error;

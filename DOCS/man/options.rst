@@ -5471,11 +5471,6 @@ them.
     use of compute shaders over fragment shaders wherever possible. Enabled by
     default, although Nvidia users may want to disable it.
 
-``--vulkan-disable-events``
-    Disable the use of VkEvents, for debugging purposes or for compatibility
-    with some older drivers / vulkan portability layers that don't provide
-    working VkEvent support.
-
 ``--vulkan-display-display=<n>``
     The index of the display, on the selected Vulkan device, to present on when
     using the ``displayvk`` GPU context. Use ``--vulkan-display-display=help``
