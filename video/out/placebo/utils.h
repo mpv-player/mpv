@@ -8,7 +8,7 @@
 #include <libplacebo/log.h>
 #include <libplacebo/colorspace.h>
 
-pl_log mppl_log_create(struct mp_log *log);
+pl_log mppl_log_create(void *tactx, struct mp_log *log);
 void mppl_log_set_probing(pl_log log, bool probing);
 
 static inline struct pl_rect2d mp_rect2d_to_pl(struct mp_rect rc)
