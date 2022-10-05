@@ -127,7 +127,7 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
     }
 #endif
 
-    ctx->pllog = mppl_log_create(ctx->log);
+    ctx->pllog = mppl_log_create(ctx, ctx->log);
     if (!ctx->pllog)
         goto err_out;
 
