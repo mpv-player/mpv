@@ -582,7 +582,11 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
     struct vo *vo = mpctx->video_out;
 
     if (mpctx->video_status < STATUS_READY) {
-        mpctx->time_frame = 0;
+        // we don't want to reset time_frame if loop-file is enabled,
+        // as this will cause a delay in displaying frame at the beginning
+        // of the next loop
+        if (!opts->loop_file)
+            mpctx->time_frame = 0;
     } else if (mpctx->display_sync_active || vo->opts->video_sync == VS_NONE) {
         // don't touch the timing
     } else if (mpctx->audio_status == STATUS_PLAYING &&
