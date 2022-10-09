@@ -164,6 +164,7 @@ jobs:
                 ffmpeg \
                 libplacebo \
                 libxkbcommon \
+                libXinerama \
                 libxpresent \
                 luajit \
                 meson \
