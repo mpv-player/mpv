@@ -67,6 +67,7 @@
 #define vo_wm_STAYS_ON_TOP 4
 #define vo_wm_ABOVE 8
 #define vo_wm_BELOW 16
+#define vo_wm_STICKY 32
 
 /* EWMH state actions, see
          http://freedesktop.org/Standards/wm-spec/index.html#id2768769 */
@@ -149,6 +150,7 @@ static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
                                struct mp_rect rc);
 static void vo_x11_maximize(struct vo *vo);
 static void vo_x11_minimize(struct vo *vo);
+static void vo_x11_sticky(struct vo *vo, bool sticky);
 
 #define XA(x11, s) (XInternAtom((x11)->display, # s, False))
 #define XAs(x11, s) XInternAtom((x11)->display, s, False)
@@ -327,6 +329,7 @@ static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
     NET_WM_STATE_TEST(ABOVE);
     NET_WM_STATE_TEST(STAYS_ON_TOP);
     NET_WM_STATE_TEST(BELOW);
+    NET_WM_STATE_TEST(STICKY);
     return 0;
 }
 
@@ -1605,9 +1608,18 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
         x11_send_ewmh_msg(x11, "_NET_WM_FULLSCREEN_MONITORS", params);
     }
 
-    if (x11->opts->all_workspaces || x11->opts->geometry.ws > 0) {
-        long v = x11->opts->all_workspaces
-                ? 0xFFFFFFFF : x11->opts->geometry.ws - 1;
+    if (x11->opts->all_workspaces) {
+        if (x11->wm_type & vo_wm_STICKY) {
+            Atom state = XA(x11, _NET_WM_STATE_STICKY);
+            XChangeProperty(x11->display, x11->window, XA(x11, _NET_WM_STATE), XA_ATOM,
+                            32, PropModeReplace, (unsigned char *)&state, 1);
+        } else {
+            long v = 0xFFFFFFFF;
+            XChangeProperty(x11->display, x11->window, XA(x11, _NET_WM_DESKTOP),
+                            XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&v, 1);
+        }
+    } else if (x11->opts->geometry.ws > 0) {
+        long v = x11->opts->geometry.ws - 1;
         XChangeProperty(x11->display, x11->window, XA(x11, _NET_WM_DESKTOP),
                         XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&v, 1);
     }
@@ -1743,6 +1755,23 @@ void vo_x11_config_vo_window(struct vo *vo)
     vo_x11_update_geometry(vo);
     update_vo_size(vo);
     x11->pending_vo_events &= ~VO_EVENT_RESIZE; // implicitly done by the VO
+}
+
+static void vo_x11_sticky(struct vo *vo, bool sticky)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    if (x11->wm_type & vo_wm_STICKY) {
+        x11_set_ewmh_state(x11, "_NET_WM_STATE_STICKY", sticky);
+    } else {
+        long params[5] = {0xFFFFFFFF, 1};
+        if (!sticky) {
+            x11_get_property_copy(x11, x11->rootwin,
+                XA(x11, _NET_CURRENT_DESKTOP),
+                XA_CARDINAL, 32, &params[0],
+                sizeof(params[0]));
+        }
+        x11_send_ewmh_msg(x11, "_NET_WM_DESKTOP", params);
+    }
 }
 
 static void vo_x11_setlayer(struct vo *vo, bool ontop)
@@ -1966,16 +1995,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 vo_x11_setlayer(vo, opts->ontop);
             if (opt == &opts->border)
                 vo_x11_decoration(vo, opts->border);
-            if (opt == &opts->all_workspaces) {
-                long params[5] = {0xFFFFFFFF, 1};
-                if (!opts->all_workspaces) {
-                    x11_get_property_copy(x11, x11->rootwin,
-                                          XA(x11, _NET_CURRENT_DESKTOP),
-                                          XA_CARDINAL, 32, &params[0],
-                                          sizeof(params[0]));
-                }
-                x11_send_ewmh_msg(x11, "_NET_WM_DESKTOP", params);
-            }
+            if (opt == &opts->all_workspaces)
+                vo_x11_sticky(vo, opts->all_workspaces);
             if (opt == &opts->window_minimized)
                 vo_x11_minimize(vo);
             if (opt == &opts->window_maximized)
