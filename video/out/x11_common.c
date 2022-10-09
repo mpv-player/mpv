@@ -439,6 +439,7 @@ static void xrandr_read(struct vo_x11_state *x11)
             x11->has_mesa = x11->has_mesa || amd >= 0 || intel >= 0 ||
                             nouveau >= 0 || radeon >= 0;
             x11->has_nvidia = x11->has_nvidia || nvidia >= 0;
+            XRRFreeProviderInfo(info);
         }
         if (x11->present_code)
             xpresent_set(x11);
@@ -1315,6 +1316,7 @@ void vo_x11_check_events(struct vo *vo)
                                                present_event->msc);
                 }
             }
+            XFreeEventData(x11->display, cookie);
             break;
         }
         default:
