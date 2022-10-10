@@ -65,6 +65,9 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #if HAVE_COREAUDIO
     &audio_out_coreaudio,
 #endif
+#if HAVE_PIPEWIRE
+    &audio_out_pipewire,
+#endif
 #if HAVE_PULSE
     &audio_out_pulse,
 #endif
@@ -89,9 +92,6 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #endif
 #if HAVE_SDL2_AUDIO
     &audio_out_sdl,
-#endif
-#if HAVE_PIPEWIRE
-    &audio_out_pipewire,
 #endif
 #if HAVE_SNDIO
     &audio_out_sndio,
