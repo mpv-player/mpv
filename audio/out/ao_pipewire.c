@@ -388,7 +388,6 @@ static int pipewire_init_boilerplate(struct ao *ao)
 {
     struct priv *p = ao->priv;
     struct pw_context *context;
-    int ret;
 
     pw_init(NULL, NULL);
 
@@ -416,15 +415,12 @@ static int pipewire_init_boilerplate(struct ao *ao)
         goto error;
     }
 
-    ret = 0;
-
-out:
     pw_thread_loop_unlock(p->loop);
-    return ret;
+    return 0;
 
 error:
-    ret = -1;
-    goto out;
+    pw_thread_loop_unlock(p->loop);
+    return -1;
 }
 
 
