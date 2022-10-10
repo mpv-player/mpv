@@ -384,6 +384,22 @@ unlock_loop:
     return ret;
 }
 
+static void have_sink(struct ao *ao, uint32_t id, const struct spa_dict *props, void *ctx)
+{
+    bool *b = ctx;
+    *b = true;
+}
+
+static bool session_has_sinks(struct ao *ao)
+{
+    bool b = false;
+
+    if (for_each_sink(ao, have_sink, &b) < 0)
+        MP_WARN(ao, "Could not list devices, sink detection may be wrong\n");
+
+    return b;
+}
+
 static int pipewire_init_boilerplate(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -416,6 +432,12 @@ static int pipewire_init_boilerplate(struct ao *ao)
     }
 
     pw_thread_loop_unlock(p->loop);
+
+    if (!session_has_sinks(ao)) {
+        MP_VERBOSE(ao, "PipeWire does not have any audio sinks, skipping\n");
+        return -1;
+    }
+
     return 0;
 
 error:
