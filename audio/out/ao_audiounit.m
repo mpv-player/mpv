@@ -218,7 +218,7 @@ static void start(struct ao *ao)
     struct priv *p = ao->priv;
     AVAudioSession *instance = AVAudioSession.sharedInstance;
 
-    p->device_latency = [instance outputLatency] + [instance IOBufferDuration];
+    p->device_latency = [instance outputLatency];
 
     OSStatus err = AudioOutputUnitStart(p->audio_unit);
     CHECK_CA_WARN("can't start audio unit");
