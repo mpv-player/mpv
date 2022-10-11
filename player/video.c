@@ -1159,6 +1159,29 @@ void write_video(struct MPContext *mpctx)
     if (!vo_is_ready_for_frame(vo, mpctx->display_sync_active ? -1 : pts))
         return;
 
+    // do pts difference averaging when loop-file is enabled
+    if (mpctx->opts->loop_file) {
+        static int64_t pts_prev = 0;
+        static int counter = 0;
+        counter++;
+        if (pts_prev && counter > 4) {
+            static int diff_count = 0;
+            static int64_t pts_diff_total = 0;
+
+            int64_t pts_diff = pts - pts_prev;
+            pts_diff_total += pts_diff;
+            diff_count++;
+            int64_t pts_diff_avg = pts_diff_total / diff_count;
+            if (abs(pts_diff_avg - pts_diff) > 0.15 * pts_diff_avg) {
+                pts = pts_prev + pts_diff_avg;
+                pts_diff_total += pts_diff_avg - pts_diff;
+                pts_diff = pts_diff_avg;
+            }
+            //MP_ERR(mpctx,"write_video PTS difference : %ld\n",pts_diff);
+        }
+        pts_prev = pts;
+    }
+
     assert(mpctx->num_next_frames >= 1);
 
     if (mpctx->num_past_frames >= MAX_NUM_VO_PTS)
