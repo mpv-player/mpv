@@ -1352,7 +1352,7 @@ static void uninit(struct vo *vo)
     pthread_mutex_destroy(&p->dr_lock);
 
     char *cache_file = get_cache_file(p);
-    if (cache_file) {
+    if (cache_file && p->rr) {
         FILE *cache = fopen(cache_file, "wb");
         if (cache) {
             size_t size = pl_renderer_save(p->rr, NULL);
