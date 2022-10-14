@@ -190,6 +190,39 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
                        p_mapper->desc.layers[i].format);
                 return false;
             }
+        } else {
+            /*
+             * As OpenGL only has one guaranteed rgba format (rgba8), drivers
+             * that support importing dmabuf formats with different channel
+             * orders do implicit swizzling to get to rgba. However, we look at
+             * the original imgfmt to decide channel order, and we then swizzle
+             * based on that. So, we can get into a situation where we swizzle
+             * twice and end up with a mess.
+             *
+             * The simplest way to avoid that is to lie to OpenGL and say that
+             * the surface we are importing is in the natural channel order, so
+             * that our swizzling does the right thing.
+             *
+             * DRM ABGR corresponds to OpenGL RGBA due to different naming
+             * conventions.
+             */
+            switch (format[0]) {
+            case DRM_FORMAT_ARGB8888:
+            case DRM_FORMAT_RGBA8888:
+            case DRM_FORMAT_BGRA8888:
+                format[0] = DRM_FORMAT_ABGR8888;
+                break;
+            case DRM_FORMAT_XRGB8888:
+                format[0] = DRM_FORMAT_XBGR8888;
+                break;
+            case DRM_FORMAT_RGBX8888:
+            case DRM_FORMAT_BGRX8888:
+                // Logically, these two formats should be handled as above,
+                // but there appear to be additional problems that make the
+                // format change here insufficient or incorrect, so we're
+                // doing nothing for now.
+                break;
+            }
         }
 
         for (int j = 0; j < p_mapper->desc.layers[i].nb_planes; j++, n++) {
