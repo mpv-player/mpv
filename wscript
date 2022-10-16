@@ -516,11 +516,11 @@ video_output_features = [
         'deps': 'gbm.h',
         'func': check_pkg_config('gbm', '>= 17.1.0'),
     } , {
-        'name': '--wayland-scanner',
+        'name': 'wayland-scanner',
         'desc': 'wayland-scanner',
         'func': check_program('wayland-scanner', 'WAYSCAN')
     } , {
-        'name': '--wayland-protocols',
+        'name': 'wayland-protocols',
         'desc': 'wayland-protocols',
         'func': check_wl_protocols
     } , {
