@@ -824,10 +824,14 @@ end
 
 -- cb(name, value) on change and on init
 function mp_utils.shared_script_property_observe(name, cb)
+    -- values can be strings or nil, so declaring as a number ensures cb runs on init
+    local prev_val = -1
+    
     -- it's _very_ wasteful to observe the mpv core "super" property for every
     -- shared sub-property, but then again you shouldn't use this
     mp.observe_property("shared-script-properties", "native", function(_, val)
-        cb(name, val and val[name])
+        if val[name] ~= prev_val then cb(name, val and val[name]) end
+        prev_val = val[name]
     end)
 end
 
