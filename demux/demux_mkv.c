@@ -1362,6 +1362,8 @@ static const char *const mkv_video_tags[][2] = {
     {"V_SNOW",              "snow"},
     {"V_AV1",               "av1"},
     {"V_PNG",               "png"},
+    {"V_AVS2",              "avs2"},
+    {"V_AVS3",              "avs3"},
     {0}
 };
 
