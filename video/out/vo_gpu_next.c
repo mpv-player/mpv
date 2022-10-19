@@ -882,21 +882,38 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     }
 
     const struct gl_video_opts *opts = p->opts_cache->opts;
+    struct ra_swapchain *sw = p->ra_ctx->swapchain;
+
     if (p->target_hint && frame->current) {
         struct pl_color_space hint = get_mpi_csp(vo, frame->current);
+        struct mp_colorspace mpv_context_csp = { 0 };
         if (opts->target_prim)
             hint.primaries = mp_prim_to_pl(opts->target_prim);
         if (opts->target_trc)
             hint.transfer = mp_trc_to_pl(opts->target_trc);
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
+
+        // FIXME: placebo vs mpv context order of call, actually making use
+        //        of the result.
+        if (sw->fns->colorspace_hint &&
+            !sw->fns->colorspace_hint(sw, frame->current,
+                                      &mpv_context_csp)) {
+            MP_WARN(vo, "Passing a color space hint of %s/%s to context failed!\n",
+                    m_opt_choice_str(
+                        mp_csp_prim_names,
+                        frame->current->params.color.primaries),
+                    m_opt_choice_str(
+                        mp_csp_trc_names,
+                        frame->current->params.color.gamma));
+        }
+
         pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!p->target_hint) {
         pl_swapchain_colorspace_hint(p->sw, NULL);
     }
 
     struct pl_swapchain_frame swframe;
-    struct ra_swapchain *sw = p->ra_ctx->swapchain;
     double vsync_offset = opts->interpolation ? frame->vsync_offset : 0;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {

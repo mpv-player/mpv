@@ -76,6 +76,19 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct gpu_priv *p = vo->priv;
     struct ra_swapchain *sw = p->ctx->swapchain;
 
+    // vo_gpu utilizes the fbo color space to receive the configured result,
+    // so nullptr is passed for the result.
+    if (frame->current && sw->fns->colorspace_hint &&
+        !sw->fns->colorspace_hint(sw, frame->current, NULL)) {
+        MP_WARN(vo, "Passing a color space hint of %s/%s to context failed!\n",
+                m_opt_choice_str(
+                    mp_csp_prim_names,
+                    frame->current->params.color.primaries),
+                m_opt_choice_str(
+                    mp_csp_trc_names,
+                    frame->current->params.color.gamma));
+    }
+
     struct ra_fbo fbo;
     if (!sw->fns->start_frame(sw, &fbo))
         return;

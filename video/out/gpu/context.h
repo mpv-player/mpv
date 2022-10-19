@@ -79,6 +79,12 @@ struct ra_swapchain_fns {
     // Gets the current framebuffer depth in bits (0 if unknown). Optional.
     int (*color_depth)(struct ra_swapchain *sw);
 
+    // Called to provide the output context with color space metadata and
+    // CLL and MDCV side data.
+    bool (*colorspace_hint)(struct ra_swapchain *sw,
+                            const struct mp_image *csp_hint_frame,
+                            struct mp_colorspace *configured_csp);
+
     // Called when rendering starts. Returns NULL on failure. This must be
     // followed by submit_frame, to submit the rendered frame. This function
     // can also fail sporadically, and such errors should be ignored unless
