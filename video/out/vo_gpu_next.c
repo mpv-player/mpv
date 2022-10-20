@@ -1399,7 +1399,7 @@ static int preinit(struct vo *vo)
     p->hwdec_ctx = (struct ra_hwdec_ctx) {
         .log = p->log,
         .global = p->global,
-        .ra = p->ra_ctx->ra,
+        .ra = p->context->ra_hwdec,
     };
 
     vo->hwdec_devs = hwdec_devices_create();

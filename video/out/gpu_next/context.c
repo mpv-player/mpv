@@ -30,6 +30,7 @@
 #include "common/common.h"
 #include "options/m_config.h"
 #include "video/out/placebo/utils.h"
+#include "video/out/placebo/ra_pl.h"
 #include "video/out/gpu/video.h"
 
 #if HAVE_D3D11
@@ -95,6 +96,7 @@ static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx,
         goto err_out;
     }
 
+    ctx->ra_hwdec = ctx->ra_ctx->ra;
     success = true;
 
 err_out:
@@ -120,6 +122,7 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
 #if HAVE_VULKAN
     struct mpvk_ctx *vkctx = ra_vk_ctx_get(ctx->ra_ctx);
     if (vkctx) {
+        ctx->ra_hwdec = ctx->ra_ctx->ra;
         ctx->pllog = vkctx->pllog;
         ctx->gpu = vkctx->gpu;
         ctx->swapchain = vkctx->swapchain;
@@ -170,6 +173,9 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
         if (!ctx->swapchain)
             goto err_out;
 
+        ctx->ra_hwdec = ra_create_pl(ctx->gpu, ctx->log);
+        ctx->ra_hwdec->native_resources = ctx->ra_ctx->ra->native_resources;
+        ctx->ra_hwdec->num_native_resources = ctx->ra_ctx->ra->num_native_resources;
         return ctx;
     }
 #elif HAVE_GL
@@ -202,6 +208,9 @@ void gpu_ctx_destroy(struct gpu_ctx **ctxp)
         return;
     if (!ctx->ra_ctx)
         goto skip_common_pl_cleanup;
+
+    if (ctx->ra_hwdec != ctx->ra_ctx->ra)
+        ctx->ra_hwdec->fns->destroy(ctx->ra_hwdec);
 
 #if HAVE_VULKAN
     if (ra_vk_ctx_get(ctx->ra_ctx))
