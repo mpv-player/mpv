@@ -963,7 +963,7 @@ static void configure_decorations(void *data,
     } else {
         MP_VERBOSE(wl, "Disabling server decorations\n");
     }
-    opts->border = mode - 1;
+    opts->border = mode == ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE;
     m_config_cache_write_opt(wl->vo_opts_cache, &opts->border);
 }
 
@@ -1699,7 +1699,10 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                     opts->border = !opts->border;
                     m_config_cache_write_opt(wl->vo_opts_cache,
                                              &opts->border);
-                    request_decoration_mode(wl, !opts->border + 1);
+                    request_decoration_mode(
+                        wl, !opts->border ?
+                            ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE :
+                            ZXDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE);
                 } else {
                     opts->border = false;
                     m_config_cache_write_opt(wl->vo_opts_cache,
@@ -1882,7 +1885,10 @@ int vo_wayland_init(struct vo *vo)
     if (wl->xdg_decoration_manager) {
         wl->xdg_toplevel_decoration = zxdg_decoration_manager_v1_get_toplevel_decoration(wl->xdg_decoration_manager, wl->xdg_toplevel);
         zxdg_toplevel_decoration_v1_add_listener(wl->xdg_toplevel_decoration, &decoration_listener, wl);
-        request_decoration_mode(wl, wl->vo_opts->border + 1);
+        request_decoration_mode(
+            wl, wl->vo_opts->border ?
+                ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE :
+                ZXDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE);
     } else {
         wl->vo_opts->border = false;
         m_config_cache_write_opt(wl->vo_opts_cache,
