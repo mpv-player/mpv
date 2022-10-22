@@ -27,6 +27,7 @@ Interface changes
 ::
 
  --- mpv 0.36.0 ---
+    - add `--drm-hdr-metadata`
     - `playlist/N/title` gets set upon opening the file if it wasn't already set
       and a title is available.
     - add the `--vo=kitty` video output driver, as well as the options

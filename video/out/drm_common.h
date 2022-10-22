@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
+
+#include "video/csputils.h"
 #include "vo.h"
 
 #define DRM_OPTS_FORMAT_XRGB8888    0
@@ -50,6 +52,12 @@ struct drm_mode {
     uint32_t blob_id;
 };
 
+struct drm_hdr {
+    struct mp_colorspace new_csp;
+    struct mp_colorspace current_csp;
+    uint32_t blob_id;
+};
+
 struct drm_opts {
     char *device_path;
     char *connector_spec;
@@ -60,6 +68,7 @@ struct drm_opts {
     int drm_format;
     struct m_geometry draw_surface_size;
     int vrr_enabled;
+    int hdr_metadata;
 };
 
 struct vt_switcher {
@@ -69,6 +78,7 @@ struct vt_switcher {
     void *handler_data[2];
 };
 
+
 struct vo_drm_state {
     drmModeConnector *connector;
     drmModeEncoder *encoder;
@@ -77,6 +87,7 @@ struct vo_drm_state {
     struct drm_atomic_context *atomic_context;
     struct drm_mode mode;
     struct drm_opts *opts;
+    struct drm_hdr hdr_metadata;
     struct drm_vsync_tuple vsync;
     struct framebuffer *fb;
     struct mp_log *log;

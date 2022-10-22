@@ -895,6 +895,8 @@ if features['drm']
                      'video/out/vo_drm.c')
 endif
 
+features += {'drm-hdr': features['drm'] and drm.version().version_compare('>= 2.4.104')}
+
 # This can be removed roughly when Debian 12 is released.
 features += {'drm-is-kms': features['drm'] and drm.version().version_compare('>= 2.4.105')}
 

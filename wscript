@@ -520,6 +520,11 @@ video_output_features = [
         'deps': 'vt.h || consio.h',
         'func': check_pkg_config('libdrm', '>= 2.4.75'),
     }, {
+        'name': 'drm-hdr',
+        'desc': 'DRM HDR metadata support',
+        'deps': 'drm',
+        'func': check_pkg_config('libdrm', '>= 2.4.104'),
+    }, {
         'name': '--gbm',
         'desc': 'GBM',
         'deps': 'gbm.h',

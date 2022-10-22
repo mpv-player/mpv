@@ -80,7 +80,7 @@ struct priv {
     struct mpv_opengl_drm_params_v2 drm_params;
     struct mpv_opengl_drm_draw_surface_size draw_surface_size;
 
-    struct mp_colorspace out_color;
+    struct drm_hdr hdr_data;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -333,17 +333,28 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
     data->log = drm->log;
 
     struct drm_atomic_context *atomic_ctx = drm->atomic_context;
+    int flags = DRM_MODE_PAGE_FLIP_EVENT | DRM_MODE_ATOMIC_NONBLOCK;
+    int ret = 0;
+    if(drm->opts->hdr_metadata) {
+        ret = drm_create_hdr_metadata(atomic_ctx, &drm->hdr_metadata);
+        if (ret) {
+            MP_WARN(ctx->vo, "Failed to create HDR metadata (%d)\n", ret);
+        } else if (drm->hdr_metadata.blob_id != 0) {
+            drm_object_set_property(atomic_ctx->request, atomic_ctx->connector,
+                                    "HDR_OUTPUT_METADATA", drm->hdr_metadata.blob_id);
+            flags |= DRM_MODE_ATOMIC_ALLOW_MODESET;
+        }
+    }
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", drm->fb->id);
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "CRTC_ID", atomic_ctx->crtc->id);
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
 
-    int ret = drmModeAtomicCommit(drm->fd, atomic_ctx->request,
-                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, data);
-
+    ret = drmModeAtomicCommit(drm->fd, atomic_ctx->request, flags, data);
     if (ret) {
         MP_WARN(ctx->vo, "Failed to commit atomic request: %s\n", mp_strerror(ret));
         talloc_free(data);
     }
+
     drm->waiting_for_flip = !ret;
 
     drmModeAtomicFree(atomic_ctx->request);
@@ -474,7 +485,7 @@ static bool drm_egl_colorspace_hint(struct ra_swapchain *sw,
     struct priv *p = sw->ctx->priv;
 
     if (csp_hint_frame) {
-        p->out_color = csp_hint_frame->params.color;
+        p->hdr_data.new_csp = csp_hint_frame->params.color;
         return true;
     }
     return false;
@@ -492,10 +503,24 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     struct vo_drm_state *drm = ctx->vo->drm;
     struct drm_atomic_context *atomic_ctx = drm->atomic_context;
+    int flags = 0;
 
-    if (drmModeAtomicCommit(drm->fd, atomic_ctx->request, 0, NULL))
+     if (drm->hdr_metadata.blob_id != 0) {
+        drm->hdr_metadata.new_csp = (struct mp_colorspace){0};
+        int ret = drm_create_hdr_metadata(atomic_ctx, &p->hdr_data); 
+        if (ret)
+        {
+            MP_WARN(ctx->vo, "Failed to reset HDR state on display (%s)\n", mp_strerror(ret));
+        } else {
+            drm_object_set_property(atomic_ctx->request, atomic_ctx->connector,
+                                    "HDR_OUTPUT_METADATA", p->hdr_data.blob_id);
+            flags |= DRM_MODE_ATOMIC_ALLOW_MODESET;
+        }
+    }
+    if (drmModeAtomicCommit(drm->fd, atomic_ctx->request, flags, NULL))
         MP_ERR(ctx->vo, "Failed to commit atomic request: %s\n", mp_strerror(errno));
 
+    drm_destroy_hdr_metadata(atomic_ctx, &p->hdr_data);
     drmModeAtomicFree(atomic_ctx->request);
 
     vo_drm_uninit(ctx->vo);

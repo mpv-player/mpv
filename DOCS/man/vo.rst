@@ -713,6 +713,12 @@ Available video output drivers are:
         :yes:   Attempt to enable VRR, whether the capability is reported or not.
         :auto:  Attempt to enable VRR if support is reported.
 
+    ``--drm-hdr-metadata=<no|auto>``
+        Signal to the display that HDR metadata, if present, should be sent over
+        the connector.
+
+        (default: auto)
+
 ``mediacodec_embed`` (Android)
     Renders ``IMGFMT_MEDIACODEC`` frames directly to an ``android.view.Surface``.
     Requires ``--hwdec=mediacodec`` for hardware decoding, along with
