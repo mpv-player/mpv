@@ -281,7 +281,7 @@ void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
             if (strcmp(type, drv->name) == 0) {
                 load_add_hwdec(ctx, devs, drv, false);
                 break;
-            } else if (strcmp(type, drv->legacy_name) == 0) {
+            } else if (drv->legacy_name && strcmp(type, drv->legacy_name) == 0) {
                 MP_WARN(ctx, "gpu-hwdec-interop was selected with the legacy name '%s'. "
                              "Please change it to '%s' in your config file or command line.\n",
                              drv->legacy_name, drv->name);
