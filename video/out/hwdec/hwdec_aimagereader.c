@@ -139,7 +139,7 @@ static int init(struct ra_hwdec *hw)
         return -1;
 
     if (!load_lib_functions(p, hw->log))
-        return false;
+        return -1;
 
     static const char *es2_exts[] = {"GL_OES_EGL_image_external", 0};
     static const char *es3_exts[] = {"GL_OES_EGL_image_external_essl3", 0};
@@ -237,7 +237,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 
     if (!p->CreateImageKHR || !p->DestroyImageKHR ||
         !p->GetNativeClientBufferANDROID || !p->EGLImageTargetTexture2DOES)
-        return false;
+        return -1;
 
     AImageReader_ImageListener listener = {
         .context = p,
