@@ -79,6 +79,8 @@ struct priv {
 
     struct mpv_opengl_drm_params_v2 drm_params;
     struct mpv_opengl_drm_draw_surface_size draw_surface_size;
+
+    struct mp_colorspace out_color;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -465,10 +467,24 @@ static void drm_egl_swap_buffers(struct ra_swapchain *sw)
     }
 }
 
+static bool drm_egl_colorspace_hint(struct ra_swapchain *sw,
+                                    const struct mp_image *csp_hint_frame,
+                                    struct mp_colorspace *configured_csp)
+{
+    struct priv *p = sw->ctx->priv;
+
+    if (csp_hint_frame) {
+        p->out_color = csp_hint_frame->params.color;
+        return true;
+    }
+    return false;
+}
+
 static const struct ra_swapchain_fns drm_egl_swapchain = {
-    .start_frame   = drm_egl_start_frame,
-    .submit_frame  = drm_egl_submit_frame,
-    .swap_buffers  = drm_egl_swap_buffers,
+    .colorspace_hint = drm_egl_colorspace_hint,
+    .start_frame     = drm_egl_start_frame,
+    .submit_frame    = drm_egl_submit_frame,
+    .swap_buffers    = drm_egl_swap_buffers,
 };
 
 static void drm_egl_uninit(struct ra_ctx *ctx)

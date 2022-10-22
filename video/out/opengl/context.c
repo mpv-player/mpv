@@ -150,6 +150,8 @@ bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_gl_ctx_params params)
     if (ext) {
         if (ext->color_depth)
             p->fns.color_depth = ext->color_depth;
+        if (ext->colorspace_hint)
+            p->fns.colorspace_hint = ext->colorspace_hint;
         if (ext->start_frame)
             p->fns.start_frame = ext->start_frame;
         if (ext->submit_frame)
