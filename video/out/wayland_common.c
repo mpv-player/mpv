@@ -955,7 +955,8 @@ static void configure_decorations(void *data,
     struct vo_wayland_state *wl = data;
     struct mp_vo_opts *opts = wl->vo_opts;
 
-    if (wl->requested_decoration == mode)
+    /* If we got what we requested, do not re-request the mode */
+    if (wl->requested_decoration == (mode - 1))
         wl->requested_decoration = 0;
 
     if (mode == ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE) {
