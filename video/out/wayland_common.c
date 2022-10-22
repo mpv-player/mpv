@@ -1696,11 +1696,12 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                 // unless we get a configure event. Change it back to its old
                 // value and let configure_decorations handle it after the request.
                 if (wl->xdg_toplevel_decoration) {
+                    int requested_border_mode = opts->border;
                     opts->border = !opts->border;
                     m_config_cache_write_opt(wl->vo_opts_cache,
                                              &opts->border);
                     request_decoration_mode(
-                        wl, !opts->border ?
+                        wl, requested_border_mode ?
                             ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE :
                             ZXDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE);
                 } else {
