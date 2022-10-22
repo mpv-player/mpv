@@ -948,6 +948,18 @@ static const struct xdg_toplevel_listener xdg_toplevel_listener = {
 #endif
 };
 
+static const char *zxdg_decoration_mode_to_str(const uint32_t mode)
+{
+    switch (mode) {
+    case ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE:
+        return "server-side";
+    case ZXDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE:
+        return "client-side";
+    default:
+        return "<unknown>";
+    }
+}
+
 static void configure_decorations(void *data,
                                   struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration,
                                   uint32_t mode)
@@ -955,8 +967,18 @@ static void configure_decorations(void *data,
     struct vo_wayland_state *wl = data;
     struct mp_vo_opts *opts = wl->vo_opts;
 
-    if (wl->requested_decoration == mode)
+    if (wl->requested_decoration) {
+        if (mode != wl->requested_decoration) {
+            MP_MSG(wl, wl->warned_of_mismatch ? MSGL_DEBUG : MSGL_WARN,
+                   "Requested %s decorations but compositor responded with %s\n",
+                   zxdg_decoration_mode_to_str(wl->requested_decoration),
+                   zxdg_decoration_mode_to_str(mode));
+
+            wl->warned_of_mismatch = true;
+        }
+
         wl->requested_decoration = 0;
+    }
 
     if (mode == ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE) {
         MP_VERBOSE(wl, "Enabling server decorations\n");
