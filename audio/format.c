@@ -187,7 +187,7 @@ int af_format_conversion_score(int dst_format, int src_format)
     return score;
 }
 
-struct entry {
+struct mp_entry {
     int fmt;
     int score;
 };
@@ -195,7 +195,7 @@ struct entry {
 static int cmp_entry(const void *a, const void *b)
 {
 #define CMP_INT(a, b) (a > b ? 1 : (a < b ? -1 : 0))
-    return -CMP_INT(((struct entry *)a)->score, ((struct entry *)b)->score);
+    return -CMP_INT(((struct mp_entry *)a)->score, ((struct mp_entry *)b)->score);
 }
 
 // Return a list of sample format compatible to src_format, sorted by order
@@ -207,11 +207,11 @@ static int cmp_entry(const void *a, const void *b)
 void af_get_best_sample_formats(int src_format, int *out_formats)
 {
     int num = 0;
-    struct entry e[AF_FORMAT_COUNT + 1];
+    struct mp_entry e[AF_FORMAT_COUNT + 1];
     for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
         int score = af_format_conversion_score(fmt, src_format);
         if (score > INT_MIN)
-            e[num++] = (struct entry){fmt, score};
+            e[num++] = (struct mp_entry){fmt, score};
     }
     qsort(e, num, sizeof(e[0]), cmp_entry);
     for (int n = 0; n < num; n++)
