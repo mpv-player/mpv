@@ -128,6 +128,9 @@ m
 \#
     Cycle through the available audio tracks.
 
+E
+    Cycle through the available Editions.
+
 f
     Toggle fullscreen (see also ``--fs``).
 
