@@ -94,47 +94,31 @@ table.filter = function(t, iter)
     end
 end
 
--- splitbynum and alnumcomp from alphanum.lua (C) Andre Bogus
--- Released under the MIT License
--- http://www.davekoelle.com/files/alphanum.lua
+-- alphanum sorting for humans in Lua
+-- http://notebook.kulchenko.com/algorithms/alphanumeric-natural-sorting-for-humans-in-lua
 
--- split a string into a table of number and string values
-function splitbynum(s)
-    local result = {}
-    for x, y in (s or ""):gmatch("(%d*)(%D*)") do
-        if x ~= "" then table.insert(result, tonumber(x)) end
-        if y ~= "" then table.insert(result, y) end
+function alphanumsort(o)
+    local function padnum(d)
+        local dec, n = string.match(d, "(%.?)0*(.+)")
+        return #dec > 0 and ("%.12f"):format(d) or ("%s%03d%s"):format(dec, #n, n)
     end
-    return result
-end
-
-function clean_key(k)
-    k = (' '..k..' '):gsub("%s+", " "):sub(2, -2):lower()
-    return splitbynum(k)
-end
-
--- compare two strings
-function alnumcomp(x, y)
-    local xt, yt = clean_key(x), clean_key(y)
-    for i = 1, math.min(#xt, #yt) do
-        local xe, ye = xt[i], yt[i]
-        if type(xe) == "string" then ye = tostring(ye)
-        elseif type(ye) == "string" then xe = tostring(xe) end
-        if xe ~= ye then return xe < ye end
-    end
-    return #xt < #yt
+    table.sort(o, function(a,b)
+        return tostring(a):lower():gsub("%.?%d+",padnum)..("%3d"):format(#b)
+             < tostring(b):lower():gsub("%.?%d+",padnum)..("%3d"):format(#a) 
+    end)
+    return o
 end
 
 local autoloaded = nil
 
 function get_playlist_filenames()
-  local filenames = {}
-  for n = 0, pl_count - 1, 1 do
-    local filename = mp.get_property('playlist/'..n..'/filename')
-    local _, file = utils.split_path(filename)
-    filenames[file] = true
-  end
-  return filenames
+    local filenames = {}
+    for n = 0, pl_count - 1, 1 do
+        local filename = mp.get_property('playlist/'..n..'/filename')
+        local _, file = utils.split_path(filename)
+        filenames[file] = true
+    end
+    return filenames
 end
 
 function find_and_add_entries()
@@ -181,7 +165,7 @@ function find_and_add_entries()
         end
         return EXTENSIONS[string.lower(ext)]
     end)
-    table.sort(files, alnumcomp)
+    alphanumsort(files)
 
     if dir == "." then
         dir = ""
