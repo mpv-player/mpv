@@ -446,7 +446,7 @@ audio_output_features = [
     }, {
         'name': '--pipewire',
         'desc': 'PipeWire audio output',
-        'func': check_pkg_config('libpipewire-0.3', '>= 0.3.0')
+        'func': check_pkg_config('libpipewire-0.3', '>= 0.3.44')
     }, {
         'name': '--sndio',
         'desc': 'sndio audio input/output',
