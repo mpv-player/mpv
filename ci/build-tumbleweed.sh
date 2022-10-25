@@ -9,6 +9,7 @@ if [ "$1" = "meson" ]; then
       -Dlibarchive=enabled    \
       -Dlibmpv=true           \
       -Dmanpage-build=enabled \
+      -Dpipewire=enabled      \
       -Dshaderc=enabled       \
       -Dtests=true            \
       -Dvulkan=enabled
@@ -24,6 +25,7 @@ if [ "$1" = "waf" ]; then
       --enable-libarchive    \
       --enable-libmpv-shared \
       --enable-manpage-build \
+      --enable-pipewire      \
       --enable-shaderc       \
       --enable-tests         \
       --enable-vulkan
