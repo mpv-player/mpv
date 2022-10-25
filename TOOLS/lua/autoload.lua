@@ -97,16 +97,21 @@ end
 -- alphanum sorting for humans in Lua
 -- http://notebook.kulchenko.com/algorithms/alphanumeric-natural-sorting-for-humans-in-lua
 
-function alphanumsort(o)
+function alphanumsort(filenames)
     local function padnum(d)
         local dec, n = string.match(d, "(%.?)0*(.+)")
         return #dec > 0 and ("%.12f"):format(d) or ("%s%03d%s"):format(dec, #n, n)
     end
-    table.sort(o, function(a,b)
-        return tostring(a):lower():gsub("%.?%d+",padnum)..("%3d"):format(#b)
-             < tostring(b):lower():gsub("%.?%d+",padnum)..("%3d"):format(#a) 
+
+    local tuples = {}
+    for i, f in ipairs(filenames) do
+        tuples[i] = {f:lower():gsub("%.?%d+", padnum), f}
+    end
+    table.sort(tuples, function(a, b)
+        return a[1] == b[1] and #b[2] < #a[2] or a[1] < b[1]
     end)
-    return o
+    for i, tuple in ipairs(tuples) do filenames[i] = tuple[2] end
+    return filenames
 end
 
 local autoloaded = nil
