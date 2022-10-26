@@ -967,18 +967,15 @@ static void configure_decorations(void *data,
     struct vo_wayland_state *wl = data;
     struct mp_vo_opts *opts = wl->vo_opts;
 
-    if (wl->requested_decoration) {
-        if (mode != wl->requested_decoration) {
-            MP_MSG(wl, wl->warned_of_mismatch ? MSGL_DEBUG : MSGL_WARN,
-                   "Requested %s decorations but compositor responded with %s\n",
-                   zxdg_decoration_mode_to_str(wl->requested_decoration),
-                   zxdg_decoration_mode_to_str(mode));
-
-            wl->warned_of_mismatch = true;
-        }
-
-        wl->requested_decoration = 0;
+    if (wl->requested_decoration && mode != wl->requested_decoration) {
+        MP_DBG(wl,
+               "Requested %s decorations but compositor responded with %s. "
+               "It is likely that compositor wants us to stay in a given mode.\n",
+               zxdg_decoration_mode_to_str(wl->requested_decoration),
+               zxdg_decoration_mode_to_str(mode));
     }
+
+    wl->requested_decoration = 0;
 
     if (mode == ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE) {
         MP_VERBOSE(wl, "Enabling server decorations\n");
