@@ -335,7 +335,7 @@ static int preinit(struct vo *vo)
         .global = p->global,
         .ra = p->ctx->ra,
     };
-    ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, NULL, false);
+    ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, NULL, true);
 
     return 0;
 err_out:
