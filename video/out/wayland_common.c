@@ -1995,6 +1995,10 @@ int vo_wayland_init(struct vo *vo)
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     wl_surface_commit(wl->surface);
 
+    /* Do another roundtrip to ensure all of the above is initialized
+     * before mpv does anything else. */
+    wl_display_roundtrip(wl->display);
+
     return true;
 }
 
