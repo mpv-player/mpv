@@ -320,14 +320,10 @@ static void uninit(struct vo *vo)
 static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    struct ra_ctx_opts ctx_opts;
 
     p->log = vo->log;
     p->global = vo->global;
-    ctx_opts.context_name = "wldmabuf";
-    ctx_opts.context_type = "none";
-    ctx_opts.probing = false;
-    p->ctx = ra_ctx_create(vo, ctx_opts);
+    p->ctx = ra_ctx_create_by_name(vo, "wldmabuf");
     if (!p->ctx)
        goto err_out;
     assert(p->ctx->ra);
