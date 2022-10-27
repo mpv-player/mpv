@@ -196,3 +196,13 @@ jobs:
                 #
         run: |
           ./ci/build-freebsd.sh
+
+    - name: Print meson log
+      if: ${{ failure() }}
+      run: |
+        cat ./build/meson-logs/meson-log.txt
+
+    - name: Print waf log
+      if: ${{ failure() }}
+      run: |
+        cat ./build/config.log
