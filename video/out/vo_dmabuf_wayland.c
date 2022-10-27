@@ -20,8 +20,10 @@
 
 #include "config.h"
 
-#ifdef HAVE_VAAPI
+#if HAVE_VAAPI
 #include <va/va_drmcommon.h>
+#endif
+#if HAVE_DRM
 #include <libavutil/hwcontext_drm.h>
 #endif
 
@@ -33,7 +35,9 @@
 #include "gpu/hwdec.h"
 #include "gpu/video.h"
 
+#if HAVE_VAAPI
 #include "video/vaapi.h"
+#endif
 #include "present_sync.h"
 #include "wayland_common.h"
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
@@ -53,12 +57,12 @@ struct priv {
     bool want_reset;
     uint64_t reset_count;
 
-#ifdef HAVE_VAAPI
+#if HAVE_VAAPI
     VADisplay display;
 #endif
 };
 
-#ifdef HAVE_VAAPI
+#if HAVE_VAAPI
 static uintptr_t vaapi_key_provider(struct mp_image *src)
 {
     return va_surface_id(src);
