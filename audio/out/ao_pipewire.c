@@ -280,6 +280,8 @@ static void uninit(struct ao *ao)
     struct priv *p = ao->priv;
     if (p->loop)
         pw_thread_loop_stop(p->loop);
+    spa_hook_remove(&p->stream_listener);
+    spa_zero(p->stream_listener);
     if (p->stream)
         pw_stream_destroy(p->stream);
     p->stream = NULL;
