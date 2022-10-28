@@ -24,6 +24,7 @@
 #include <pipewire/global.h>
 #include <spa/param/audio/format-utils.h>
 #include <spa/param/props.h>
+#include <spa/utils/result.h>
 #include <math.h>
 
 #include "common/msg.h"
@@ -59,6 +60,7 @@ struct priv {
     struct pw_stream *stream;
     struct pw_core *core;
     struct spa_hook stream_listener;
+    struct spa_hook core_listener;
 
     bool muted;
     float volume[2];
@@ -406,6 +408,18 @@ static bool session_has_sinks(struct ao *ao)
     return b;
 }
 
+static void on_error(void *data, uint32_t id, int seq, int res, const char *message)
+{
+    struct ao *ao = data;
+
+    MP_WARN(ao, "Error during playback: %s, %s\n", spa_strerror(res), message);
+}
+
+static const struct pw_core_events core_events = {
+    .version = PW_VERSION_CORE_EVENTS,
+    .error = on_error,
+};
+
 static int pipewire_init_boilerplate(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -436,6 +450,9 @@ static int pipewire_init_boilerplate(struct ao *ao)
                 p->options.remote, strerror(errno));
         goto error;
     }
+
+    if (pw_core_add_listener(p->core, &p->core_listener, &core_events, ao) < 0)
+        goto error;
 
     pw_thread_loop_unlock(p->loop);
 
