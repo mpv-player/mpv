@@ -223,6 +223,11 @@ static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_s
         MP_WARN(ao, "Stream in error state, trying to reload...\n");
         ao_request_reload(ao);
     }
+
+    if (state == PW_STREAM_STATE_UNCONNECTED && old != PW_STREAM_STATE_UNCONNECTED) {
+        MP_WARN(ao, "Stream disconnected, trying to reload...\n");
+        ao_request_reload(ao);
+    }
 }
 
 static float spa_volume_to_mp_volume(float vol)
