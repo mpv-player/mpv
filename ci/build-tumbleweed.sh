@@ -2,7 +2,7 @@
 set -e
 
 if [ "$1" = "meson" ]; then
-    meson build \
+    meson setup build \
       -Dcdda=enabled          \
       -Ddvbin=enabled         \
       -Ddvdnav=enabled        \

@@ -187,7 +187,7 @@ if [ $1 = "meson" ]; then
     mkdir -p "${TARGET}_mingw_build" && pushd "${TARGET}_mingw_build"
 
     CFLAGS="-I'$prefix_dir/include'" LDFLAGS="-L'$prefix_dir/lib'" \
-    meson .. --cross-file "${prefix_dir}/crossfile" --libdir lib \
+    meson setup .. --cross-file "${prefix_dir}/crossfile" --libdir lib \
         -D{libmpv,tests}=true -Dlua=luajit \
         -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
 
