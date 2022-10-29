@@ -2137,16 +2137,21 @@ void vo_wayland_uninit(struct vo *vo)
         wl_registry_destroy(wl->registry);
 
     if (wl->viewporter)
-        wp_viewporter_destroy (wl->viewporter);
+        wp_viewporter_destroy(wl->viewporter);
 
     if (wl->viewport)
-        wp_viewport_destroy (wl->viewport);
+        wp_viewport_destroy(wl->viewport);
 
     if (wl->video_viewport)
-        wp_viewport_destroy (wl->video_viewport);
+        wp_viewport_destroy(wl->video_viewport);
 
     if (wl->dmabuf)
-        zwp_linux_dmabuf_v1_destroy (wl->dmabuf);
+        zwp_linux_dmabuf_v1_destroy(wl->dmabuf);
+
+#if HAVE_WAYLAND_PROTOCOLS_1_24
+    if (wl->dmabuf_feedback)
+        zwp_linux_dmabuf_feedback_v1_destroy(wl->dmabuf_feedback);
+#endif
 
     if (wl->seat)
         wl_seat_destroy(wl->seat);
