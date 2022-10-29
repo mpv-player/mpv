@@ -327,7 +327,7 @@ endif
 
 features += {'ta-leak-report': get_option('ta-leak-report')}
 
-libdl_dep = cc.find_library('libdl', required: false)
+libdl_dep = cc.find_library('dl', required: false)
 features += {'libdl': libdl_dep.found() and cc.has_function('dlopen', dependencies: libdl_dep, prefix: '#include <dlfcn.h>')}
 if features['libdl']
     dependencies += libdl_dep
