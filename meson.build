@@ -44,7 +44,6 @@ features = {
     'gpl': get_option('gpl'),
     'jpegxl': libavformat.version().version_compare('>= 59.27.100'),
     'libass': true,
-    'optimize': get_option('optimization') != '0',
     'threads': true,
 }
 
@@ -1587,11 +1586,12 @@ if features['pdf-build']
 endif
 
 
-# We can't easily get every single thing a user might have passed on the cli,
-# but we might as well add prefix (even if it's not specifically set) since
-# it's highly relevant and useful.
-configuration = 'meson configure build '
-configuration += '-Dprefix=' + get_option('prefix')
+# Currently, we can't easily get every single thing a user might have passed
+# on the cli, but we might as well just hardcode a few options (even if they are
+# not specifically set) for verbosity's sake.
+configuration = 'meson configure build ' + '-Dprefix=' + get_option('prefix') + \
+                ' -Dbuildtype=' + get_option('buildtype') + \
+                ' -Doptimization=' + get_option('optimization')
 
 features += {'cplayer': get_option('cplayer')}
 features += {'libmpv-' + get_option('default_library'): get_option('libmpv')}
