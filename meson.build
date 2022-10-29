@@ -1590,7 +1590,7 @@ endif
 # We can't easily get every single thing a user might have passed on the cli,
 # but we might as well add prefix (even if it's not specifically set) since
 # it's highly relevant and useful.
-configuration = 'meson build '
+configuration = 'meson configure build '
 configuration += '-Dprefix=' + get_option('prefix')
 
 features += {'cplayer': get_option('cplayer')}
