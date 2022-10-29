@@ -1041,8 +1041,17 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
 {
-    if (fback)
+    struct vo_wayland_state *wl = data;
+
+    // Really weird hack needed here. wlroots and weston send the discarded event
+    // only once (not every frame) if the window is hidden. If mpv quits in this
+    // state, fback will get destroyed but wl->feedback (in theory, this is supposed
+    // to be same as fback) will not be NULL and thus will be mistakenly tried to be
+    // free'd again. Hack this by just setting it to NULL explicitly.
+    if (fback) {
         wp_presentation_feedback_destroy(fback);
+        wl->feedback = NULL;
+    }
 }
 
 static const struct wp_presentation_feedback_listener feedback_listener = {
