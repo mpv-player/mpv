@@ -1094,6 +1094,7 @@ static const struct zwp_linux_dmabuf_v1_listener dmabuf_listener = {
     dmabuf_format
 };
 
+#if HAVE_WAYLAND_PROTOCOLS_1_24
 static void done(void *data,
                  struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
 {
@@ -1153,6 +1154,7 @@ static const struct zwp_linux_dmabuf_feedback_v1_listener dmabuf_feedback_listen
     tranche_formats,
     tranche_flags,
 };
+#endif
 
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
                                 const char *interface, uint32_t ver)
@@ -1178,10 +1180,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
     if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 4) && found++) {
         wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 4);
+#if HAVE_WAYLAND_PROTOCOLS_1_24
         wl->dmabuf_feedback = zwp_linux_dmabuf_v1_get_default_feedback(wl->dmabuf);
         zwp_linux_dmabuf_feedback_v1_add_listener(wl->dmabuf_feedback, &dmabuf_feedback_listener, wl);
-    }
-    else if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 2) && found++) {
+#endif
+    } else if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 2) && found++) {
         wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 2);
         zwp_linux_dmabuf_v1_add_listener(wl->dmabuf, &dmabuf_listener, wl);
         wl->drm_format_ct_max = 64;
