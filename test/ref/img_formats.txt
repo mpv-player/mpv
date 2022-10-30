@@ -1239,7 +1239,7 @@ videotoolbox: ctype=unknown
     planes=0, chroma=0:0 align=1:1
     {}
   AVD: name=videotoolbox_vld chroma=0:0 flags=0x8 [hw]
-vulkan: ctype=unknown
+vulkan: [GENERIC] ctype=unknown
   Basic desc: [le][be][hw]
     planes=0, chroma=0:0 align=1:1
     {}
