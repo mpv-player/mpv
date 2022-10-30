@@ -51,10 +51,6 @@ struct hwmap_pairs {
 // convert between the formats, so we need a lookup table.
 static const struct hwmap_pairs hwmap_pairs[] = {
     {
-        .first_fmt = IMGFMT_VAAPI,
-        .second_fmt = IMGFMT_VULKAN,
-    },
-    {
         .first_fmt = IMGFMT_DRMPRIME,
         .second_fmt = IMGFMT_VAAPI,
     },

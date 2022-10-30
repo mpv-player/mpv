@@ -318,7 +318,6 @@ enum mp_imgfmt {
     IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
     IMGFMT_VAAPI,
     IMGFMT_VIDEOTOOLBOX,    // CVPixelBufferRef
-    IMGFMT_VULKAN,          // VKImage
     IMGFMT_DRMPRIME,        // AVDRMFrameDescriptor
 
     // Generic pass-through of AV_PIX_FMT_*. Used for formats which don't have
