@@ -1016,8 +1016,10 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
 {
     struct vo_wayland_state *wl = data;
 
-    if (fback)
+    if (fback) {
         wp_presentation_feedback_destroy(fback);
+        wl->feedback = NULL;
+    }
 
     if (!wl->use_present)
         return;
