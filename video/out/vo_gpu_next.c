@@ -1238,7 +1238,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_PAUSE:
         if (p->is_interpolated)
             vo->want_redraw = true;
-        return VO_TRUE;
+        break;
 
     case VOCTRL_OSD_CHANGED:
         pl_renderer_flush_cache(p->rr);
