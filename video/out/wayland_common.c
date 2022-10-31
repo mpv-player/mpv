@@ -1019,8 +1019,10 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     // NULL is needed to prevent a dangling pointer since presentation_feedback
     // is created in the frame_callback and not in any of the actual presentation
     // events.
-    if (fback)
+    if (fback) {
         wp_presentation_feedback_destroy(fback);
+        wl->feedback = NULL;
+    }
 
     if (!wl->use_present)
         return;
