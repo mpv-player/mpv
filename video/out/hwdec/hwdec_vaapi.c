@@ -52,11 +52,8 @@ static VADisplay *create_x11_va_display(struct ra *ra)
 static VADisplay *create_wayland_va_display(struct ra *ra)
 {
     struct wl_display *wl = ra_get_native_resource(ra, "wl");
-    VADisplay rc = wl ? vaGetDisplayWl(wl) : NULL;
-    if (rc)
-        ra_add_native_resource(ra, "VADisplay", rc);
 
-    return rc;
+    return wl ? vaGetDisplayWl(wl) : NULL;
 }
 #endif
 
@@ -173,6 +170,9 @@ static int init(struct ra_hwdec *hw)
     if (!p->formats || !p->formats[0]) {
         return -1;
     }
+
+    // it's now safe to set the display resource
+    ra_add_native_resource(hw->ra, "VADisplay", p->display);
 
     p->ctx->hwctx.hw_imgfmt = IMGFMT_VAAPI;
     p->ctx->hwctx.supported_formats = p->formats;
