@@ -1698,6 +1698,7 @@ static void update_render_options(struct vo *vo)
     p->params.background_color[0] = opts->background.r / 255.0;
     p->params.background_color[1] = opts->background.g / 255.0;
     p->params.background_color[2] = opts->background.b / 255.0;
+    p->params.background_transparency = 1.0 - opts->background.a / 255.0;
     p->params.skip_anti_aliasing = !opts->correct_downscaling;
     p->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     p->params.disable_fbos = opts->dumb_mode == 1;
