@@ -158,9 +158,13 @@ static void resize(struct vo *vo)
 
     if (wl->viewport)
         wp_viewport_set_destination(wl->viewport, 2 * dst.x0 + mp_rect_w(dst), 2 * dst.y0 + mp_rect_h(dst));
-
-    if (wl->video_viewport)
-        wp_viewport_set_destination(wl->video_viewport, mp_rect_w(dst), mp_rect_h(dst));
+     if (wl->video_viewport)
+     {
+         wp_viewport_set_source(wl->video_viewport,
+                                wl_fixed_from_int(src.x0), wl_fixed_from_int(src.y0),
+                                wl_fixed_from_int(mp_rect_w(src)),wl_fixed_from_int(mp_rect_h(src)));
+         wp_viewport_set_destination(wl->video_viewport, mp_rect_w(dst), mp_rect_h(dst));
+     }
     wl_subsurface_set_position(wl->video_subsurface, dst.x0, dst.y0);
     vo->want_redraw = true;
 }
