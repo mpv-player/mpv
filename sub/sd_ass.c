@@ -904,7 +904,8 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
         };
     }
 
-    if (csp == params.color.space && levels == params.color.levels)
+    if ((csp == params.color.space && levels == params.color.levels) ||
+            params.color.space == MP_CSP_RGB) // Even VSFilter doesn't mangle on RGB video
         return;
 
     bool basic_conv = params.color.space == MP_CSP_BT_709 &&
