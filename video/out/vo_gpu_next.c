@@ -1682,6 +1682,62 @@ static void update_lut(struct priv *p, struct user_lut *lut)
     talloc_free(lutdata.start);
 }
 
+static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath,
+                             const struct pl_hook *hook)
+{
+    if (!opts)
+        return;
+
+#if PL_API_VER >= 233
+    const char *basename = mp_basename(shaderpath);
+    struct bstr shadername;
+    if (!mp_splitext(basename, &shadername))
+        shadername = bstr0(basename);
+
+    for (int n = 0; opts[n * 2]; n++) {
+        struct bstr k = bstr0(opts[n * 2 + 0]);
+        struct bstr v = bstr0(opts[n * 2 + 1]);
+        int pos;
+        if ((pos = bstrchr(k, '/')) >= 0) {
+            if (!bstr_equals(bstr_splice(k, 0, pos), shadername))
+                continue;
+            k = bstr_cut(k, pos + 1);
+        }
+
+        for (int i = 0; i < hook->num_parameters; i++) {
+            const struct pl_hook_par *hp = &hook->parameters[i];
+            if (!bstr_equals0(k, hp->name) != 0)
+                continue;
+
+            m_option_t opt = {
+                .name = hp->name,
+            };
+
+            switch (hp->type) {
+            case PL_VAR_FLOAT:
+                opt.type = &m_option_type_float;
+                opt.min = hp->minimum.f;
+                opt.max = hp->maximum.f;
+                break;
+            case PL_VAR_SINT:
+                opt.type = &m_option_type_int;
+                opt.min = hp->minimum.i;
+                opt.max = hp->maximum.i;
+                break;
+            case PL_VAR_UINT:
+                opt.type = &m_option_type_int;
+                opt.min = MPMIN(hp->minimum.u, INT_MAX);
+                opt.max = MPMIN(hp->maximum.u, INT_MAX);
+                break;
+            }
+
+            opt.type->parse(p->log, &opt, k, v, hp->data);
+            break;
+        }
+    }
+#endif
+}
+
 static void update_render_options(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -1808,8 +1864,10 @@ static void update_render_options(struct vo *vo)
 
     const struct pl_hook *hook;
     for (int i = 0; opts->user_shaders && opts->user_shaders[i]; i++) {
-        if ((hook = load_hook(p, opts->user_shaders[i])))
+        if ((hook = load_hook(p, opts->user_shaders[i]))) {
             MP_TARRAY_APPEND(p, p->hooks, p->params.num_hooks, hook);
+            update_hook_opts(p, opts->user_shader_opts, opts->user_shaders[i], hook);
+        }
     }
 
     p->params.hooks = p->hooks;
