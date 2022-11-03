@@ -114,7 +114,7 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 
 /* No API contexts: */
-#if HAVE_WAYLAND
+#if HAVE_DMABUF_WAYLAND
     &ra_ctx_wldmabuf,
 #endif
 };
