@@ -49,6 +49,7 @@ Interface changes
     - deprecate `--gamma-factor`
     - deprecate `--gamma-auto`
     - remove `--vulkan-disable-events`
+    - add `--glsl-shader-opts`
  --- mpv 0.34.0 ---
     - deprecate selecting by card number with `--drm-connector`, add
       `--drm-device` which can be used instead

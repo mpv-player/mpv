@@ -455,6 +455,7 @@ const struct m_sub_options gl_video_conf = {
             {"video", BLEND_SUBS_VIDEO})},
         {"glsl-shaders", OPT_PATHLIST(user_shaders), .flags = M_OPT_FILE},
         {"glsl-shader", OPT_CLI_ALIAS("glsl-shaders-append")},
+        {"glsl-shader-opts", OPT_KEYVALUELIST(user_shader_opts)},
         {"deband", OPT_FLAG(deband)},
         {"deband", OPT_SUBSTRUCT(deband_opts, deband_conf)},
         {"sharpen", OPT_FLOAT(unsharp)},
