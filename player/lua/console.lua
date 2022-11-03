@@ -158,6 +158,11 @@ function format_table(list, width_max, rows_max)
     -- total width without spacing
     local width_total = 0
 
+    local list_widths = {}
+    for i, item in ipairs(list) do
+        list_widths[i] = len_utf8(item)
+    end
+
     -- use as many columns as possible
     for rows = 1, list_size do
         local columns = math.ceil(list_size / rows)
@@ -170,9 +175,9 @@ function format_table(list, width_max, rows_max)
             for row = 1, rows do
                 local i = row + (column - 1) * rows
                 if i > #list then break end
-                local len = list[i]:len()
-                if width < len then
-                    width = len
+                local item_width = list_widths[i]
+                if width < item_width then
+                    width = item_width
                 end
             end
             column_widths[column] = width
@@ -358,6 +363,16 @@ function prev_utf8(str, pos)
         pos = pos - 1
     until pos <= 1 or str:byte(pos) < 0x80 or str:byte(pos) > 0xbf
     return pos
+end
+
+function len_utf8(str)
+    local len = 0
+    local pos = 1
+    while pos <= str:len() do
+        pos = next_utf8(str, pos)
+        len = len + 1
+    end
+    return len
 end
 
 -- Insert a character at the current cursor position (any_unicode)
