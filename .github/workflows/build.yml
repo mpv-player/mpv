@@ -70,7 +70,6 @@ jobs:
         cc:
           - "clang"
         os:
-          - "macos-10.15"
           - "macos-11"
           - "macos-12"
     steps:
