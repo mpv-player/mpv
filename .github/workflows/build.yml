@@ -105,7 +105,7 @@ jobs:
           cat ./build/config.log
 
   linux:
-    runs-on: "ubuntu-20.04"
+    runs-on: "ubuntu-22.04"
     container:
       image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
       # Disable seccomp until a container manager in GitHub recognizes
