@@ -102,15 +102,15 @@ static const char *mp_get_platform_path(void *talloc_ctx,
     return NULL;
 }
 
-char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
-                               const char *filename)
+char *mp_find_user_file(void *talloc_ctx, struct mpv_global *global,
+                        const char *type, const char *filename)
 {
     void *tmp = talloc_new(NULL);
-    char *res = (char *)mp_get_platform_path(tmp, global, config_dirs[0]);
+    char *res = (char *)mp_get_platform_path(tmp, global, type);
     if (res)
         res = mp_path_join(talloc_ctx, res, filename);
     talloc_free(tmp);
-    MP_DBG(global, "config path: '%s' -> '%s'\n", filename, res ? res : "-");
+    MP_DBG(global, "path: '%s' -> '%s'\n", filename, res ? res : "-");
     return res;
 }
 
@@ -378,9 +378,9 @@ void mp_mkdirp(const char *dir)
     talloc_free(path);
 }
 
-void mp_mk_config_dir(struct mpv_global *global, char *subdir)
+void mp_mk_user_dir(struct mpv_global *global, const char *type, char *subdir)
 {
-    char *dir = mp_find_user_config_file(NULL, global, subdir);
+    char *dir = mp_find_user_file(NULL, global, type, subdir);
     if (dir)
         mp_mkdirp(dir);
     talloc_free(dir);
