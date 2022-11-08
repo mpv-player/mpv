@@ -63,7 +63,7 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    mp_mk_config_dir(mpctx->global, "");
+    mp_mk_user_dir(mpctx->global, "home", "");
 
     char *p1 = mp_get_user_path(NULL, mpctx->global, "~~home/");
     char *p2 = mp_get_user_path(NULL, mpctx->global, "~~old_home/");
@@ -226,7 +226,7 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
 
     if (!mpctx->cached_watch_later_configdir) {
         mpctx->cached_watch_later_configdir =
-            mp_find_user_config_file(mpctx, mpctx->global, MP_WATCH_LATER_CONF);
+            mp_find_user_file(mpctx, mpctx->global, "home", MP_WATCH_LATER_CONF);
     }
 
     if (mpctx->cached_watch_later_configdir)
@@ -292,7 +292,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     if (!conffile)
         goto exit;
 
-    mp_mk_config_dir(mpctx->global, mpctx->cached_watch_later_configdir);
+    mp_mk_user_dir(mpctx->global, "home", mpctx->cached_watch_later_configdir);
 
     MP_INFO(mpctx, "Saving state.\n");
 
