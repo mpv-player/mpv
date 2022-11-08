@@ -293,6 +293,8 @@ endif
 darwin = host_machine.system() == 'darwin'
 win32 = host_machine.system() == 'cygwin' or host_machine.system() == 'windows'
 posix = not win32
+
+features += {'darwin': darwin}
 features += {'posix': posix}
 features += {'dos-paths': win32, 'win32': win32}
 
@@ -407,11 +409,14 @@ if posix and not features['cocoa']
 endif
 
 if darwin
-    sources += files('osdep/timer-darwin.c')
+    path_source = files('osdep/path-darwin.c')
+    sources += path_source + files('osdep/timer-darwin.c')
+                     
 endif
 
 if posix and not darwin
-    sources += files('osdep/timer-linux.c')
+    sources += files('osdep/path-unix.c',
+                     'osdep/timer-linux.c')
 endif
 
 cd_devices = {
