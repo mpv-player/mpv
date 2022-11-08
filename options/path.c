@@ -44,7 +44,9 @@ static const mp_get_platform_path_cb path_resolvers[] = {
 #if HAVE_COCOA
     mp_get_platform_path_osx,
 #endif
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#if HAVE_DARWIN
+    mp_get_platform_path_darwin,
+#elif !defined(_WIN32) || defined(__CYGWIN__)
     mp_get_platform_path_unix,
 #endif
 #if HAVE_UWP
