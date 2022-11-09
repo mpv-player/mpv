@@ -1684,7 +1684,7 @@ static int update_window_title(struct vo_wayland_state *wl, const char *title)
     /* The xdg-shell protocol requires that the title is UTF-8. */
     void *tmp = talloc_new(NULL);
     struct bstr b_title = bstr_sanitize_utf8_latin1(tmp, bstr0(title));
-    xdg_toplevel_set_title(wl->xdg_toplevel, b_title.start);
+    xdg_toplevel_set_title(wl->xdg_toplevel, bstrto0(tmp, b_title));
     talloc_free(tmp);
     return VO_TRUE;
 }
