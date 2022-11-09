@@ -1439,8 +1439,8 @@ static void vo_x11_update_window_title(struct vo *vo)
     /* _NET_WM_NAME and _NET_WM_ICON_NAME must be sanitized to UTF-8. */
     void *tmp = talloc_new(NULL);
     struct bstr b_title = bstr_sanitize_utf8_latin1(tmp, bstr0(x11->window_title));
-    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_NAME), b_title.start);
-    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_ICON_NAME), b_title.start);
+    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_NAME), bstrto0(tmp, b_title));
+    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_ICON_NAME), bstrto0(tmp, b_title));
     talloc_free(tmp);
 }
 
