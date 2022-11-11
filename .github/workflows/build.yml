@@ -75,6 +75,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Remove stray upstream python binary symlinks under /usr/local
+        run: |
+          find /usr/local/bin -lname '*/Library/Frameworks/Python.framework/*' -delete -print
+          brew unlink python && brew link --overwrite python
+
       - name: Install dependencies
         run: |
           brew update
