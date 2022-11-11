@@ -3243,6 +3243,12 @@ Window
     depending on GPU drivers and hardware. For other VOs, this just makes
     rendering slower.
 
+``--force-render``
+    Forces mpv to always render frames regardless of the visibility of the
+    window. Currently only affects X11 and Wayland VOs since they are the
+    only ones that have this optimization (i.e. everything else always renders
+    regardless of visibility).
+
 ``--force-window-position``
     Forcefully move mpv's video output window to default location whenever
     there is a change in video parameters, video stream or file. This used to

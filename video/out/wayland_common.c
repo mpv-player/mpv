@@ -1754,7 +1754,7 @@ int vo_wayland_allocate_memfd(struct vo *vo, size_t size)
 bool vo_wayland_check_visible(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
-    bool render = !wl->hidden || wl->opts->disable_vsync;
+    bool render = !wl->hidden || wl->vo_opts->force_render;
     wl->frame_wait = true;
     return render;
 }
