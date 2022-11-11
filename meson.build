@@ -1530,17 +1530,13 @@ if swift.allowed()
     subdir(join_paths('generated', 'osdep'))
 endif
 
-macos_touchbar = {
-    'name': 'macos-touchbar',
-    'deps': dependency('appleframeworks', modules: 'AppKit',
-                       required: get_option('macos-touchbar')),
-    'fragment': files(join_paths(fragments, 'touchbar.m')),
-}
-features += {'macos-touchbar': cc.compiles(macos_touchbar['fragment'], name: 'macos-touchbar check')}
+macos_touchbar = get_option('macos-touchbar').require(
+    cc.compiles(files(join_paths(fragments, 'touchbar.m')), name: 'macos-touchbar check') and features['cocoa'],
+    error_message: 'Either cocoa could not be found or the macos-touchbar check failed!',
+)
+features += {'macos-touchbar': macos_touchbar.allowed()}
 if features['macos-touchbar']
     sources += files('osdep/macosx_touchbar.m')
-elif get_option('macos-touchbar').enabled()
-    error('macos-touchbar enabled but it could not be found!')
 endif
 
 
