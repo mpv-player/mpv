@@ -126,6 +126,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"window-minimized", OPT_FLAG(window_minimized)},
     {"window-maximized", OPT_FLAG(window_maximized)},
     {"focus-on-open", OPT_BOOL(focus_on_open)},
+    {"force-render", OPT_FLAG(force_render)},
     {"force-window-position", OPT_FLAG(force_window_position)},
     {"x11-name", OPT_STRING(winname)},
     {"wayland-app-id", OPT_STRING(appid)},
