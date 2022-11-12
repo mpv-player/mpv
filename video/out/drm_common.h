@@ -88,8 +88,7 @@ struct kms *kms_create(struct mp_log *log,
                        const char *drm_device_path,
                        const char *connector_spec,
                        const char *mode_spec,
-                       int draw_plane, int drmprime_video_plane,
-                       bool use_atomic);
+                       int draw_plane, int drmprime_video_plane);
 void kms_destroy(struct kms *kms);
 double kms_get_display_fps(const struct kms *kms);
 

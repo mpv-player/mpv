@@ -80,7 +80,8 @@ const struct m_sub_options drm_conf = {
             .help = drm_connector_opt_help},
         {"drm-mode", OPT_STRING_VALIDATE(drm_mode_spec, drm_validate_mode_opt),
             .help = drm_mode_opt_help},
-        {"drm-atomic", OPT_CHOICE(drm_atomic, {"no", 0}, {"auto", 1})},
+        {"drm-atomic", OPT_CHOICE(drm_atomic, {"no", 0}, {"auto", 1}),
+            .deprecation_message = "this option is deprecated: DRM Atomic is required"},
         {"drm-draw-plane", OPT_CHOICE(drm_draw_plane,
             {"primary", DRM_OPTS_PRIMARY_PLANE},
             {"overlay", DRM_OPTS_OVERLAY_PLANE}),
@@ -625,8 +626,7 @@ struct kms *kms_create(struct mp_log *log,
                        const char *drm_device_path,
                        const char *connector_spec,
                        const char* mode_spec,
-                       int draw_plane, int drmprime_video_plane,
-                       bool use_atomic)
+                       int draw_plane, int drmprime_video_plane)
 {
     int card_no = -1;
     char *connector_name = NULL;
@@ -694,10 +694,9 @@ struct kms *kms_create(struct mp_log *log,
         mp_err(log, "Failed to set Universal planes capability\n");
     }
 
-    if (!use_atomic) {
-        mp_verbose(log, "Using Legacy Modesetting\n");
-    } else if (drmSetClientCap(kms->fd, DRM_CLIENT_CAP_ATOMIC, 1)) {
-        mp_verbose(log, "No DRM Atomic support found. Falling back to legacy modesetting\n");
+    if (drmSetClientCap(kms->fd, DRM_CLIENT_CAP_ATOMIC, 1)) {
+        mp_err(log, "Failed to create DRM atomic context, no DRM Atomic support\n");
+        goto err;
     } else {
         mp_verbose(log, "DRM Atomic support found\n");
         kms->atomic_context = drm_atomic_create_context(kms->log, kms->fd, kms->crtc_id,
