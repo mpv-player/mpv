@@ -77,7 +77,6 @@ struct priv {
     struct kms *kms;
 
     drmEventContext ev;
-    drmModeCrtc *old_crtc;
 
     struct egl egl;
     struct gbm gbm;
@@ -339,9 +338,13 @@ static void update_framebuffer_from_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
     p->fb = fb;
 }
 
-static bool crtc_setup_atomic(struct ra_ctx *ctx)
+static bool crtc_setup(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    if (p->active)
+        return true;
+    p->active = true;
+
     struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
 
     if (!drm_atomic_save_old_state(atomic_ctx)) {
@@ -389,7 +392,6 @@ static bool crtc_setup_atomic(struct ra_ctx *ctx)
         }
     }
 
-
     drm_object_set_property(request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
     drm_object_set_property(request, atomic_ctx->draw_plane, "CRTC_ID", p->kms->crtc_id);
     drm_object_set_property(request, atomic_ctx->draw_plane, "SRC_X",   0);
@@ -413,74 +415,42 @@ static bool crtc_setup_atomic(struct ra_ctx *ctx)
     return false;
 }
 
-static bool crtc_release_atomic(struct ra_ctx *ctx)
-{
-    struct priv *p = ctx->priv;
-
-    struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
-    drmModeAtomicReqPtr request = drmModeAtomicAlloc();
-    if (!request) {
-        MP_ERR(ctx->vo, "Failed to allocate drm atomic request\n");
-        return false;
-    }
-
-    if (!drm_atomic_restore_old_state(request, atomic_ctx)) {
-        MP_WARN(ctx->vo, "Got error while restoring old state\n");
-    }
-
-    int ret = drmModeAtomicCommit(p->kms->fd, request, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
-
-    if (ret)
-        MP_WARN(ctx->vo, "Failed to commit ModeSetting atomic request (%d)\n", ret);
-
-    drmModeAtomicFree(request);
-    return ret == 0;
-}
-
-static bool crtc_setup(struct ra_ctx *ctx)
-{
-    struct priv *p = ctx->priv;
-    if (p->active)
-        return true;
-
-    if (p->kms->atomic_context) {
-        int ret = crtc_setup_atomic(ctx);
-        p->active = true;
-        return ret;
-    } else {
-        p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
-        int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id, p->fb->id,
-                                 0, 0, &p->kms->connector->connector_id, 1,
-                                 &p->kms->mode.mode);
-        p->active = true;
-        return ret == 0;
-    }
-}
-
 static void crtc_release(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-
     if (!p->active)
         return;
     p->active = false;
 
-    if (p->kms->atomic_context) {
-        if (p->kms->atomic_context->old_state.saved) {
-            if (!crtc_release_atomic(ctx))
-                MP_ERR(ctx->vo, "Failed to restore previous mode\n");
-        }
-    } else {
-        if (p->old_crtc) {
-            drmModeSetCrtc(p->kms->fd,
-                           p->old_crtc->crtc_id, p->old_crtc->buffer_id,
-                           p->old_crtc->x, p->old_crtc->y,
-                           &p->kms->connector->connector_id, 1,
-                           &p->old_crtc->mode);
-            drmModeFreeCrtc(p->old_crtc);
-            p->old_crtc = NULL;
-        }
+    if (!p->kms->atomic_context->old_state.saved)
+        return;
+
+    bool success = true;
+    struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
+    drmModeAtomicReqPtr request = drmModeAtomicAlloc();
+    if (!request) {
+        MP_ERR(ctx->vo, "Failed to allocate drm atomic request\n");
+        success = false;
     }
+
+    if (request && !drm_atomic_restore_old_state(request, atomic_ctx)) {
+        MP_WARN(ctx->vo, "Got error while restoring old state\n");
+        success = false;
+    }
+
+    if (request) {
+        int ret = drmModeAtomicCommit(p->kms->fd, request,
+                                      DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
+        success = ret == 0;
+        if (!success)
+            MP_WARN(ctx->vo, "Failed to commit ModeSetting atomic request (%d)\n", ret);
+    }
+
+    if (request)
+        drmModeAtomicFree(request);
+    
+    if (!success)
+        MP_ERR(ctx->vo, "Failed to restore previous mode\n");
 }
 
 static void release_vt(void *data)
@@ -526,31 +496,20 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
     data->waiting_for_flip = &p->waiting_for_flip;
     data->log = ctx->log;
 
-    if (atomic_ctx) {
-        drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
-        drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "CRTC_ID", atomic_ctx->crtc->id);
-        drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
+    drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", p->fb->id);
+    drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "CRTC_ID", atomic_ctx->crtc->id);
+    drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
 
-        ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request,
-                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, data);
-        if (ret) {
-            MP_WARN(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
-            talloc_free(data);
-        }
-    } else {
-        ret = drmModePageFlip(p->kms->fd, p->kms->crtc_id, p->fb->id,
-                              DRM_MODE_PAGE_FLIP_EVENT, data);
-        if (ret) {
-            MP_WARN(ctx->vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
-            talloc_free(data);
-        }
+    ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request,
+                              DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, data);
+    if (ret) {
+        MP_WARN(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
+        talloc_free(data);
     }
     p->waiting_for_flip = !ret;
 
-    if (atomic_ctx) {
-        drmModeAtomicFree(atomic_ctx->request);
-        atomic_ctx->request = drmModeAtomicAlloc();
-    }
+    drmModeAtomicFree(atomic_ctx->request);
+    atomic_ctx->request = drmModeAtomicAlloc();
 }
 
 static void wait_on_flip(struct ra_ctx *ctx)
@@ -630,7 +589,7 @@ static bool drm_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     struct ra_ctx *ctx = sw->ctx;
     struct priv *p = ctx->priv;
 
-    if (p->kms->atomic_context && !p->kms->atomic_context->request) {
+    if (!p->kms->atomic_context->request) {
         p->kms->atomic_context->request = drmModeAtomicAlloc();
         p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
     }
@@ -697,12 +656,10 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     struct drm_atomic_context *atomic_ctx = p->kms->atomic_context;
 
-    if (atomic_ctx) {
-        int ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request, 0, NULL);
-        if (ret)
-            MP_ERR(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
-        drmModeAtomicFree(atomic_ctx->request);
-    }
+    int ret = drmModeAtomicCommit(p->kms->fd, atomic_ctx->request, 0, NULL);
+    if (ret)
+        MP_ERR(ctx->vo, "Failed to commit atomic request (%d)\n", ret);
+    drmModeAtomicFree(atomic_ctx->request);
 
     ra_gl_ctx_uninit(ctx);
 
@@ -743,13 +700,6 @@ static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t 
 {
     struct priv *p = ctx->priv;
 
-    if (!p->kms->atomic_context) {
-        p->gbm_format = xrgb_format;
-        MP_VERBOSE(ctx->vo, "Not using DRM Atomic: Use %s for draw plane.\n",
-                   gbm_format_to_string(xrgb_format));
-        return true;
-    }
-
     drmModePlane *drmplane =
         drmModeGetPlane(p->kms->fd, p->kms->atomic_context->draw_plane->id);
     bool have_argb = false;
@@ -781,11 +731,6 @@ static bool probe_gbm_format(struct ra_ctx *ctx, uint32_t argb_format, uint32_t 
 static bool probe_gbm_modifiers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-
-    if (!p->kms->atomic_context) {
-        MP_VERBOSE(ctx->vo, "Not using DRM Atomic: Not using modifiers.\n");
-        return false;
-    }
 
     drmModePropertyBlobPtr blob =
         drm_object_get_property_blob(p->kms->atomic_context->draw_plane, "IN_FORMATS");
@@ -848,22 +793,15 @@ static bool drm_egl_init(struct ra_ctx *ctx)
                         ctx->vo->opts->drm_opts->drm_connector_spec,
                         ctx->vo->opts->drm_opts->drm_mode_spec,
                         ctx->vo->opts->drm_opts->drm_draw_plane,
-                        ctx->vo->opts->drm_opts->drm_drmprime_video_plane,
-                        ctx->vo->opts->drm_opts->drm_atomic);
+                        ctx->vo->opts->drm_opts->drm_drmprime_video_plane);
     if (!p->kms) {
         MP_ERR(ctx, "Failed to create KMS.\n");
         return false;
     }
 
     if (ctx->vo->opts->drm_opts->drm_draw_surface_size.wh_valid) {
-        if (p->kms->atomic_context) {
-            p->draw_surface_size.width = ctx->vo->opts->drm_opts->drm_draw_surface_size.w;
-            p->draw_surface_size.height = ctx->vo->opts->drm_opts->drm_draw_surface_size.h;
-        } else {
-            p->draw_surface_size.width = p->kms->mode.mode.hdisplay;
-            p->draw_surface_size.height = p->kms->mode.mode.vdisplay;
-            MP_WARN(ctx, "Setting draw plane size is only available with DRM atomic, defaulting to screen resolution\n");
-        }
+        p->draw_surface_size.width = ctx->vo->opts->drm_opts->drm_draw_surface_size.w;
+        p->draw_surface_size.height = ctx->vo->opts->drm_opts->drm_draw_surface_size.h;
     } else {
         p->draw_surface_size.width = p->kms->mode.mode.hdisplay;
         p->draw_surface_size.height = p->kms->mode.mode.vdisplay;
@@ -942,8 +880,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     p->drm_params.fd = p->kms->fd;
     p->drm_params.crtc_id = p->kms->crtc_id;
     p->drm_params.connector_id = p->kms->connector->connector_id;
-    if (p->kms->atomic_context)
-        p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
+    p->drm_params.atomic_request_ptr = &p->kms->atomic_context->request;
     char *rendernode_path = drmGetRenderDeviceNameFromFd(p->kms->fd);
     if (rendernode_path) {
         MP_VERBOSE(ctx, "Opening render node \"%s\"\n", rendernode_path);

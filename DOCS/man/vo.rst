@@ -597,16 +597,6 @@ Available video output drivers are:
         Use ``--drm-mode=help`` to get a list of available modes for all active
         connectors.
 
-    ``--drm-atomic=<no|auto>``
-        Toggle use of atomic modesetting. Mostly useful for debugging.
-
-        :no:    Use legacy modesetting.
-        :auto:  Use atomic modesetting, falling back to legacy modesetting if
-                not available. (default)
-
-        Note: Only affects ``gpu-context=drm``. ``vo=drm`` supports legacy
-        modesetting only.
-
     ``--drm-draw-plane=<primary|overlay|N>``
         Select the DRM plane to which video and OSD is drawn to, under normal
         circumstances. The plane can be specified as ``primary``, which will
@@ -653,7 +643,6 @@ Available video output drivers are:
         just cause the video to get rendered at a different resolution and then
         scaled to screen size.
 
-        Note: this option is only available with DRM atomic support.
         (default: display resolution)
 
     ``--drm-vrr-enabled=<no|yes|auto>``

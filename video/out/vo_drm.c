@@ -569,7 +569,7 @@ static int preinit(struct vo *vo)
                         vo->opts->drm_opts->drm_device_path,
                         vo->opts->drm_opts->drm_connector_spec,
                         vo->opts->drm_opts->drm_mode_spec,
-                        0, 0, false);
+                        0, 0);
     if (!p->kms) {
         MP_ERR(vo, "Failed to create KMS.\n");
         goto err;
