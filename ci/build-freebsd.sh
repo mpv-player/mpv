@@ -24,27 +24,3 @@ meson setup build \
 
 meson compile -C build
 ./build/mpv -v --no-config
-
-if [ ! -e "./waf" ] ; then
-    python3 ./bootstrap.py
-fi
-
-python3 ./waf configure \
-    --out=build_waf \
-    --enable-libmpv-shared \
-    --enable-lua \
-    --enable-egl-drm \
-    --enable-openal \
-    --enable-sdl2 \
-    --enable-sndio \
-    --enable-vdpau \
-    --enable-vulkan \
-    --enable-oss-audio \
-    $(pkg info -q v4l_compat && echo --enable-dvbin) \
-    $(pkg info -q libdvdnav && echo --enable-dvdnav) \
-    $(pkg info -q libcdio-paranoia && echo --enable-cdda) \
-    $(pkg info -q pipewire && echo --enable-pipewire) \
-    $NULL
-
-python3 ./waf build
-./build_waf/mpv -v --no-config

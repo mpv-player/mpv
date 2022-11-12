@@ -23,7 +23,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib python3-pip ninja-build nasm
           sudo python3 -m pip install meson
-          ./bootstrap.py
 
       - name: Build libraries
         run: |
@@ -42,18 +41,6 @@ jobs:
         if: ${{ failure() && steps.build.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/meson-log.txt
-
-      - name: Build with waf
-        id: build_waf
-        run: |
-          ./ci/build-mingw64.sh waf
-        env:
-          TARGET: ${{ matrix.target }}
-
-      - name: Print waf log
-        if: ${{ failure() && steps.build_waf.outcome == 'failure' }}
-        run: |
-          cat ./build_waf/config.log
 
       - uses: actions/upload-artifact@v3
         with:
@@ -85,7 +72,7 @@ jobs:
       - name: Build with meson
         id: build
         run: |
-          ./ci/build-macos.sh meson
+          ./ci/build-macos.sh
         env:
           CC: "${{ matrix.cc }}"
           TRAVIS_OS_NAME: "${{ matrix.os }}"
@@ -104,19 +91,6 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
-
-      - name: Build with waf
-        id: build_waf
-        run: |
-          ./ci/build-macos.sh waf
-        env:
-          CC: "${{ matrix.cc }}"
-          TRAVIS_OS_NAME: "${{ matrix.os }}"
-
-      - name: Print waf log
-        if: ${{ failure() && steps.build_waf.outcome == 'failure' }}
-        run: |
-          cat ./build_waf/config.log
 
   linux:
     runs-on: "ubuntu-22.04"
@@ -134,14 +108,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ./bootstrap.py
           # workaround to avoid "fatal: unsafe repository" error
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Build with meson
         id: build
         run: |
-          ./ci/build-tumbleweed.sh meson
+          ./ci/build-tumbleweed.sh
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -157,16 +130,6 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
-
-      - name: Build with waf
-        id: build_waf
-        run: |
-          ./ci/build-tumbleweed.sh waf
-
-      - name: Print waf log
-        if: ${{ failure() && steps.build_waf.outcome == 'failure' }}
-        run: |
-          cat ./build_waf/config.log
 
   freebsd:
     runs-on: macos-12 # until https://github.com/actions/runner/issues/385
@@ -286,13 +249,3 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
-
-      - name: Build with waf
-        id: build_waf
-        run: |
-          ./ci/build-msys2.sh waf
-
-      - name: Print waf log
-        if: ${{ failure() && steps.build_waf.outcome == 'failure' }}
-        run: |
-          cat ./build_waf/config.log

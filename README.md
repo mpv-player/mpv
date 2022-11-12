@@ -73,17 +73,8 @@ Changes to the default key bindings are indicated in
 
 
 Compiling with full features requires development files for several
-external libraries. One of the two build systems supported by mpv is required:
-[meson](https://mesonbuild.com/index.html) or [waf](https://waf.io/). Meson
-can be obtained from your distro or PyPI. Waf can be downloaded by using the
-`./bootstrap.py` script. It will get the latest version of waf that was tested
-with mpv. Some documentation about the differences between the build systems are
-located in [build-system-differences][build-system-differences].
-
-**Note**: Building with waf is considered *deprecated* and will be removed in the
-future.
-
-### Meson
+external libraries. Mpv requires [meson](https://mesonbuild.com/index.html)
+to build. Meson can be obtained from your distro or PyPI.
 
 After creating your build directory (e.g. `meson setup build`), you can view a list
 of all the build options via `meson configure build`. You could also just simply
@@ -95,30 +86,6 @@ Example:
     meson setup build
     meson compile -C build
     meson install -C build
-
-### Waf
-
-For a list of the available build options use `./waf configure --help`. If
-you think you have support for some feature installed but configure fails to
-detect it, the file `build/config.log` may contain information about the
-reasons for the failure.
-
-NOTE: To avoid cluttering the output with unreadable spam, `--help` only shows
-one of the two switches for each option. If the option is autodetected or
-enabled by default, the `--disable-***` switch is printed; if the option is
-disabled by default, the `--enable-***` switch is printed. Either way, you can
-use `--enable-***` or `--disable-**` regardless of what is printed by `--help`.
-
-To build the software you can use `./waf build`: the result of the compilation
-will be located in `build/mpv`. You can use `./waf install` to install mpv
-to the *prefix* after it is compiled.
-
-Example:
-
-    ./bootstrap.py
-    ./waf configure
-    ./waf
-    ./waf install
 
 Essential dependencies (incomplete list):
 
@@ -233,4 +200,3 @@ Most activity happens on the IRC channel and the github issue tracker.
 [api-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/client-api-changes.rst
 [restore-old-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-old-bindings.conf
 [contribute.md]: https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md
-[build-system-differences]: https://github.com/mpv-player/mpv/blob/master/DOCS/build-system-differences.md
