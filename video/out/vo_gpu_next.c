@@ -1615,14 +1615,18 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
         p->icc_profile = (struct pl_icc_profile) {0};
     }
 
-    int s_r = 0, s_g = 0, s_b = 0;
-    gl_parse_3dlut_size(opts->size_str, &s_r, &s_g, &s_b);
     p->params.icc_params = &p->icc;
     p->icc = pl_icc_default_params;
     p->icc.intent = opts->intent;
-    p->icc.size_r = s_r;
-    p->icc.size_g = s_g;
-    p->icc.size_b = s_b;
+    if (opts->size_str) {
+        int s_r = 0, s_g = 0, s_b = 0;
+        gl_parse_3dlut_size(opts->size_str, &s_r, &s_g, &s_b);
+        p->icc.size_r = s_r;
+        p->icc.size_g = s_g;
+        p->icc.size_b = s_b;
+    } else {
+        MP_VERBOSE(p, "Using default ICC size.\n");
+    }
 #if PL_API_VER >= 222
     p->icc.cache_priv = p;
     p->icc.cache_save = icc_save;
