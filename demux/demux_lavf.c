@@ -565,7 +565,9 @@ static void guess_and_set_vobsub_name(struct demuxer *demuxer, AVDictionary **d)
             subname = replace_idx_ext(tmp, start);
             if (subname)
                 subname = talloc_asprintf(tmp, "%s?%.*s", subname, BSTR_P(end));
-        }
+        } else {
+	    bfilename = bstr0(mp_file_get_path(tmp, bfilename));
+	}
     }
     if (!subname)
         subname = replace_idx_ext(tmp, bfilename);
