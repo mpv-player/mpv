@@ -193,6 +193,7 @@ void check_library_versions(struct mp_log *log, int v)
         {"libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version()},
     };
 
+    mp_msg(log, v, "FFmpeg version: %s\n", av_version_info());
     mp_msg(log, v, "FFmpeg library versions:\n");
 
     for (int n = 0; n < MP_ARRAY_SIZE(libs); n++) {
@@ -209,8 +210,6 @@ void check_library_versions(struct mp_log *log, int v)
             abort();
         }
     }
-
-    mp_msg(log, v, "FFmpeg version: %s\n", av_version_info());
 }
 
 #undef V
