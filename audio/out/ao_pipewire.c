@@ -422,9 +422,20 @@ static void on_error(void *data, uint32_t id, int seq, int res, const char *mess
     MP_WARN(ao, "Error during playback: %s, %s\n", spa_strerror(res), message);
 }
 
+static void on_core_info(void *data, const struct pw_core_info *info)
+{
+    struct ao *ao = data;
+
+    MP_VERBOSE(ao, "Core user: %s\n", info->user_name);
+    MP_VERBOSE(ao, "Core host: %s\n", info->host_name);
+    MP_VERBOSE(ao, "Core version: %s\n", info->version);
+    MP_VERBOSE(ao, "Core name: %s\n", info->name);
+}
+
 static const struct pw_core_events core_events = {
     .version = PW_VERSION_CORE_EVENTS,
     .error = on_error,
+    .info = on_core_info,
 };
 
 static int pipewire_init_boilerplate(struct ao *ao)
@@ -434,6 +445,8 @@ static int pipewire_init_boilerplate(struct ao *ao)
 
     pw_init(NULL, NULL);
 
+    MP_VERBOSE(ao, "Headers version: %s\n", pw_get_headers_version());
+    MP_VERBOSE(ao, "Library version: %s\n", pw_get_library_version());
 
     p->loop = pw_thread_loop_new("ao-pipewire", NULL);
     if (p->loop == NULL)
