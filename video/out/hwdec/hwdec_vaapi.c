@@ -529,5 +529,4 @@ const struct ra_hwdec_driver ra_hwdec_vaapi = {
         .map = mapper_map,
         .unmap = mapper_unmap,
     },
-    .legacy_name = "vaapi-egl"
 };

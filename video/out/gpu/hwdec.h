@@ -127,11 +127,6 @@ struct ra_hwdec_driver {
     // hw_image==src==dst==NULL is passed to clear the overlay.
     int (*overlay_frame)(struct ra_hwdec *hw, struct mp_image *hw_image,
                          struct mp_rect *src, struct mp_rect *dst, bool newframe);
-
-    // Some interop backends have changed name over time. We record the old name
-    // so that config files and command lines continue to work when they
-    // reference the old name.
-    const char *legacy_name;
 };
 
 extern const struct ra_hwdec_driver *const ra_hwdec_drivers[];

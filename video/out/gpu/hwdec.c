@@ -189,8 +189,6 @@ static int ra_hwdec_validate_opt_full(struct mp_log *log, bool include_modes,
             mp_info(log, "    %s\n", drv->name);
         } else if (bstr_equals0(param, drv->name)) {
             return 1;
-        } else if (bstr_equals0(param, drv->legacy_name)) {
-            return 1;
         }
     }
     if (help) {
@@ -279,12 +277,6 @@ void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
         for (int n = 0; ra_hwdec_drivers[n]; n++) {
             const struct ra_hwdec_driver *drv = ra_hwdec_drivers[n];
             if (strcmp(type, drv->name) == 0) {
-                load_add_hwdec(ctx, devs, drv, false);
-                break;
-            } else if (drv->legacy_name && strcmp(type, drv->legacy_name) == 0) {
-                MP_WARN(ctx, "gpu-hwdec-interop was selected with the legacy name '%s'. "
-                             "Please change it to '%s' in your config file or command line.\n",
-                             drv->legacy_name, drv->name);
                 load_add_hwdec(ctx, devs, drv, false);
                 break;
             }

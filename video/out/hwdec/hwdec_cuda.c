@@ -283,5 +283,4 @@ const struct ra_hwdec_driver ra_hwdec_cuda = {
         .map = mapper_map,
         .unmap = mapper_unmap,
     },
-    .legacy_name = "cuda-nvdec",
 };
