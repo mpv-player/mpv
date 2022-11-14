@@ -318,5 +318,4 @@ const struct ra_hwdec_driver ra_hwdec_drmprime_overlay = {
     .init = init,
     .overlay_frame = overlay_frame,
     .uninit = uninit,
-    .legacy_name = "drmprime-drm",
 };
