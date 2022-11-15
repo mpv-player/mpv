@@ -329,6 +329,31 @@ static int preinit(struct vo *vo)
     if (!p->ctx)
        goto err_out;
     assert(p->ctx->ra);
+
+    if (!vo->wl->dmabuf) {
+        MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
+                 zwp_linux_dmabuf_v1_interface.name);
+        return VO_ERROR;
+    }
+
+    if (!vo->wl->shm) {
+        MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
+                 wl_shm_interface.name);
+        return VO_ERROR;
+    }
+
+    if (!vo->wl->video_subsurface) {
+        MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
+                 wl_subcompositor_interface.name);
+        return VO_ERROR;
+    }
+
+    if (!vo->wl->viewport) {
+        MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
+                 wp_viewporter_interface.name);
+        return VO_ERROR;
+    }
+
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
     assert(!p->hwdec_ctx.ra);
