@@ -5587,6 +5587,12 @@ them.
     it first renders. This option will take precedence over any ``autofit`` or
     ``geometry`` type settings if the configure bounds are used.
 
+``--wayland-content-type=<auto|none|photo|video|game>``
+    If supported by the compositor, mpv will send a hint using the content-type
+    protocol telling the compositor what type of content is being displayed. ``auto``
+    (default) will automatically switch between telling the compositor the content
+    is a photo, video or possibly none depending on internal heuristics.
+
 ``--wayland-disable-vsync=<yes|no>``
     Disable mpv's internal vsync for Wayland-based video output (default: no).
     This is mainly useful for benchmarking wayland VOs when combined with

@@ -140,6 +140,14 @@ def build(ctx):
             protocol  = "stable/viewporter/viewporter",
             target    = "generated/wayland/viewporter.h")
 
+    if ctx.dependency_satisfied('wayland-protocols-1-27'):
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "staging/content-type/content-type-v1",
+            target    = "generated/wayland/content-type-v1.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "staging/content-type/content-type-v1",
+            target    = "generated/wayland/content-type-v1.h")
+
     ctx(features = "ebml_header", target = "generated/ebml_types.h")
     ctx(features = "ebml_definitions", target = "generated/ebml_defs.inc")
 
@@ -540,6 +548,7 @@ def build(ctx):
         ( "video/out/vulkan/context_xlib.c",     "vulkan && x11" ),
         ( "video/out/vulkan/utils.c",            "vulkan" ),
         ( "video/out/w32_common.c",              "win32-desktop" ),
+        ( "generated/wayland/content-type-v1.c", "wayland-protocols-1-27" ),
         ( "generated/wayland/idle-inhibit-unstable-v1.c", "wayland" ),
         ( "generated/wayland/presentation-time.c", "wayland" ),
         ( "generated/wayland/xdg-decoration-unstable-v1.c", "wayland" ),

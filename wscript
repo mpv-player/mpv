@@ -536,6 +536,11 @@ video_output_features = [
         'deps': 'wayland',
         'func': check_pkg_config('wayland-protocols >= 1.24'),
     } , {
+        'name': 'wayland-protocols-1-27',
+        'desc': 'wayland-protocols version 1.27+',
+        'deps': 'wayland',
+        'func': check_pkg_config('wayland-protocols >= 1.27'),
+    } , {
         'name': 'memfd_create',
         'desc': "Linux's memfd_create()",
         'deps': 'wayland',

@@ -28,6 +28,7 @@ Interface changes
 
  --- mpv 0.36.0 ---
     - add `--force-render`
+    - add `--wayland-content-type`
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,
