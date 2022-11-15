@@ -556,6 +556,7 @@ double get_play_end_pts(struct MPContext *mpctx);
 double get_play_start_pts(struct MPContext *mpctx);
 bool get_ab_loop_times(struct MPContext *mpctx, double t[2]);
 void merge_playlist_files(struct playlist *pl);
+void update_content_type(struct MPContext *mpctx, struct track *track);
 void update_vo_playback_state(struct MPContext *mpctx);
 void update_window_title(struct MPContext *mpctx, bool force);
 void error_on_track(struct MPContext *mpctx, struct track *track);
