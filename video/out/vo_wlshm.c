@@ -134,6 +134,11 @@ static int preinit(struct vo *vo)
 
     if (!vo_wayland_init(vo))
         return -1;
+    if (!vo->wl->shm) {
+        MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
+                 wl_shm_interface.name);
+        return -1;
+    }
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
