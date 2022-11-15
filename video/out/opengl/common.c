@@ -504,6 +504,8 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     talloc_free(gl->extensions);
     *gl = (GL) {
         .extensions = talloc_strdup(gl, ext2 ? ext2 : ""),
+        .get_fn = get_fn,
+        .fn_ctx = fn_ctx,
     };
 
     gl->GetString = get_fn(fn_ctx, "glGetString");

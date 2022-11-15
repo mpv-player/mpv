@@ -1702,7 +1702,7 @@ static int mp_property_audio_device(void *ctx, struct m_property *prop,
         if (mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &name) < 1)
             name = NULL;
 
-        struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
+        struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug, mpctx->ao);
         for (int n = 0; n < list->num_devices; n++) {
             struct ao_device_desc *dev = &list->devices[n];
             if (dev->name && name && strcmp(dev->name, name) == 0) {
@@ -1724,7 +1724,7 @@ static int mp_property_audio_devices(void *ctx, struct m_property *prop,
     struct command_ctx *cmd = mpctx->command_ctx;
     create_hotplug(mpctx);
 
-    struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
+    struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug, mpctx->ao);
     return m_property_read_list(action, arg, list->num_devices,
                                 get_device_entry, list);
 }
@@ -6539,6 +6539,9 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
     }
     if (event == MP_EVENT_WIN_STATE2)
         ctx->cached_window_scale = 0;
+
+    if (event == MPV_EVENT_FILE_LOADED)
+        audio_update_media_role(mpctx);
 }
 
 void handle_command_updates(struct MPContext *mpctx)

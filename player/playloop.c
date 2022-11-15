@@ -947,8 +947,11 @@ static void handle_keep_open(struct MPContext *mpctx)
     {
         mpctx->stop_play = KEEP_PLAYING;
         if (mpctx->vo_chain) {
-            if (!vo_has_frame(mpctx->video_out)) // EOF not reached normally
+            if (!vo_has_frame(mpctx->video_out)) { // EOF not reached normally
                 seek_to_last_frame(mpctx);
+                mpctx->audio_status = STATUS_EOF;
+                mpctx->video_status = STATUS_EOF;
+            }
         }
         if (opts->keep_open_pause) {
             if (mpctx->ao && ao_is_playing(mpctx->ao))

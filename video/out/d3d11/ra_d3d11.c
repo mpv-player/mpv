@@ -2229,7 +2229,7 @@ static void destroy(struct ra *ra)
     SAFE_RELEASE(p->dev1);
     SAFE_RELEASE(p->dev);
 
-    if (p->debug && p->ctx) {
+    if (p->ctx) {
         // Destroy the device context synchronously so referenced objects don't
         // show up in the leak check
         ID3D11DeviceContext_ClearState(p->ctx);

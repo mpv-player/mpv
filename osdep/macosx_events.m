@@ -95,6 +95,9 @@ static const struct mp_keymap keymap[] = {
     {kVK_F4, MP_KEY_F + 4}, {kVK_F5, MP_KEY_F + 5}, {kVK_F6, MP_KEY_F + 6},
     {kVK_F7, MP_KEY_F + 7}, {kVK_F8, MP_KEY_F + 8}, {kVK_F9, MP_KEY_F + 9},
     {kVK_F10, MP_KEY_F + 10}, {kVK_F11, MP_KEY_F + 11}, {kVK_F12, MP_KEY_F + 12},
+    {kVK_F13, MP_KEY_F + 13}, {kVK_F14, MP_KEY_F + 14}, {kVK_F15, MP_KEY_F + 15},
+    {kVK_F16, MP_KEY_F + 16}, {kVK_F17, MP_KEY_F + 17}, {kVK_F18, MP_KEY_F + 18},
+    {kVK_F19, MP_KEY_F + 19}, {kVK_F20, MP_KEY_F + 20},
 
     // numpad
     {kVK_ANSI_KeypadPlus, '+'}, {kVK_ANSI_KeypadMinus, '-'},

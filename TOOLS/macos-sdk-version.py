@@ -23,7 +23,7 @@ def find_macos_sdk():
     if not sdk:
         sdk = check_output([xcrun, '--sdk', 'macosx', '--show-sdk-path'],
                             encoding="UTF-8")
-    
+
     # find macOS SDK paths and version
     if sdk_version == '0.0':
         # show-sdk-build-version: is not available on older command line tools, but returns a build version (eg 17A360)

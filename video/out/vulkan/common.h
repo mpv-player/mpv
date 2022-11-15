@@ -27,7 +27,6 @@
 
 // Shared struct used to hold vulkan context information
 struct mpvk_ctx {
-    struct mp_log *log;
     pl_log pllog;
     pl_vk_inst vkinst;
     pl_vulkan vulkan;

@@ -377,7 +377,7 @@ without causing conflicts with other library users in the same process. To any
 piece of code, a "safe" library's API can simply be used, without having to
 worry about other API users that may be around somewhere.
 
-Libraries are often not library safe, because they they use global mutable state
+Libraries are often not library safe, because they use global mutable state
 or other "global" resources. Typical examples include use of signals, simple
 global variables (like hsearch() in libc), or internal caches not protected by
 locks.
@@ -481,7 +481,7 @@ VOs, AOs, demuxers, and more. The frontend usually calls "down" the usage
 hierarchy: mpctx almost on top, then things like vo/ao, and utility code on the
 very bottom.
 
-"Callback hell" is when when components call both up and down the hierarchy,
+"Callback hell" is when components call both up and down the hierarchy,
 which for example leads to accidentally recursion, reentrancy problems, or
 locking nightmares. This is avoided by (mostly) calling only down the hierarchy.
 Basically the call graph forms a DAG. The other direction is handled by event

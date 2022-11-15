@@ -87,6 +87,11 @@ struct GL {
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
 
+    // Copy of function pointer used to load GL.
+    // Caution: Not necessarily valid to use after VO init has completed!
+    void *(*get_fn)(void *ctx, const char *n);
+    void *fn_ctx;
+
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
     void (GLAPIENTRY *Clear)(GLbitfield);
     void (GLAPIENTRY *GenTextures)(GLsizei, GLuint *);

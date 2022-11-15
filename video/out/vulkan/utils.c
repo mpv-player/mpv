@@ -3,8 +3,7 @@
 
 bool mpvk_init(struct mpvk_ctx *vk, struct ra_ctx *ctx, const char *surface_ext)
 {
-    vk->log = mp_log_new(ctx, ctx->log, "libplacebo");
-    vk->pllog = mppl_log_create(vk->log);
+    vk->pllog = mppl_log_create(ctx, ctx->vo->log);
     if (!vk->pllog)
         goto error;
 
@@ -40,5 +39,4 @@ void mpvk_uninit(struct mpvk_ctx *vk)
 
     pl_vk_inst_destroy(&vk->vkinst);
     pl_log_destroy(&vk->pllog);
-    TA_FREEP(&vk->log);
 }

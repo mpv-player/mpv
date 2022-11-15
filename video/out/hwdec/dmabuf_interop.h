@@ -17,39 +17,41 @@
 
 #pragma once
 
-#include <va/va_drmcommon.h>
+#include <libavutil/hwcontext_drm.h>
 
 #include "config.h"
-#include "video/vaapi.h"
 #include "video/out/gpu/hwdec.h"
 
-struct priv_owner {
-    struct mp_vaapi_ctx *ctx;
-    VADisplay *display;
-    int *formats;
-    bool probing_formats; // temporary during init
+struct dmabuf_interop {
     bool use_modifiers;
 
     bool (*interop_init)(struct ra_hwdec_mapper *mapper,
                          const struct ra_imgfmt_desc *desc);
     void (*interop_uninit)(const struct ra_hwdec_mapper *mapper);
 
-    bool (*interop_map)(struct ra_hwdec_mapper *mapper, bool probing);
+    bool (*interop_map)(struct ra_hwdec_mapper *mapper,
+                        struct dmabuf_interop *dmabuf_interop,
+                        bool probing);
     void (*interop_unmap)(struct ra_hwdec_mapper *mapper);
 };
 
-struct priv {
+struct dmabuf_interop_priv {
     int num_planes;
     struct mp_image layout;
     struct ra_tex *tex[4];
 
-    VADRMPRIMESurfaceDescriptor desc;
+    AVDRMFrameDescriptor desc;
     bool surface_acquired;
 
     void *interop_mapper_priv;
 };
 
-typedef bool (*vaapi_interop_init)(const struct ra_hwdec *hw);
+typedef bool (*dmabuf_interop_init)(const struct ra_hwdec *hw,
+                                    struct dmabuf_interop *dmabuf_interop);
 
-bool vaapi_gl_init(const struct ra_hwdec *hw);
-bool vaapi_pl_init(const struct ra_hwdec *hw);
+bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
+                            struct dmabuf_interop *dmabuf_interop);
+bool dmabuf_interop_pl_init(const struct ra_hwdec *hw,
+                            struct dmabuf_interop *dmabuf_interop);
+bool dmabuf_interop_wl_init(const struct ra_hwdec *hw,
+                            struct dmabuf_interop *dmabuf_interop);

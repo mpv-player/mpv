@@ -260,8 +260,8 @@ static void mark_rect(struct mp_draw_sub_cache *p, int x0, int y0, int x1, int y
     assert(x0 >= 0 && x0 <= x1 && x1 <= p->w);
     assert(y0 >= 0 && y0 <= y1 && y1 <= p->h);
 
-    int sx0 = x0 / SLICE_W;
-    int sx1 = x1 / SLICE_W;
+    const int sx0 = x0 / SLICE_W;
+    const int sx1 = MPMIN(x1 / SLICE_W, p->s_w - 1);
 
     for (int y = y0; y < y1; y++) {
         struct slice *line = &p->slices[y * p->s_w];
@@ -270,7 +270,7 @@ static void mark_rect(struct mp_draw_sub_cache *p, int x0, int y0, int x1, int y
         struct slice *s1 = &line[sx1];
 
         s0->x0 = MPMIN(s0->x0, x0 % SLICE_W);
-        s1->x1 = MPMAX(s1->x1, x1 % SLICE_W);
+        s1->x1 = MPMAX(s1->x1, ((x1 - 1) % SLICE_W) + 1);
 
         if (s0 != s1) {
             s0->x1 = SLICE_W;

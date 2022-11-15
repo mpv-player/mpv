@@ -133,7 +133,7 @@ static const char *gbm_format_to_string(uint32_t format)
 
 // Allow falling back to an ARGB EGLConfig when we have an XRGB framebuffer.
 // Also allow falling back to an XRGB EGLConfig for ARGB framebuffers, since
-// this seems neccessary to work with broken Mali drivers that don't report
+// this seems necessary to work with broken Mali drivers that don't report
 // their EGLConfigs as supporting alpha properly.
 static uint32_t fallback_format_for(uint32_t format)
 {
@@ -545,7 +545,7 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
             talloc_free(data);
         }
     }
-    p->waiting_for_flip = true;
+    p->waiting_for_flip = !ret;
 
     if (atomic_ctx) {
         drmModeAtomicFree(atomic_ctx->request);
@@ -967,6 +967,15 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     ra_add_native_resource(ctx->ra, "drm_params_v2", &p->drm_params);
     ra_add_native_resource(ctx->ra, "drm_draw_surface_size", &p->draw_surface_size);
+
+    if (ctx->vo->opts->force_monitor_aspect != 0.0) {
+        ctx->vo->monitor_par = p->fb->width / (double) p->fb->height /
+                               ctx->vo->opts->force_monitor_aspect;
+    } else {
+        ctx->vo->monitor_par = 1 / ctx->vo->opts->monitor_pixel_aspect;
+    }
+
+    mp_verbose(ctx->vo->log, "Monitor pixel aspect: %g\n", ctx->vo->monitor_par);
 
     p->vsync_info.vsync_duration = 0;
     p->vsync_info.skipped_vsyncs = -1;

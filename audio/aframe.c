@@ -18,9 +18,12 @@
 #include <libavutil/frame.h>
 #include <libavutil/mem.h>
 
+#include "config.h"
+
 #include "common/common.h"
 
 #include "chmap.h"
+#include "chmap_avchannel.h"
 #include "fmt-conversion.h"
 #include "format.h"
 #include "aframe.h"
@@ -121,6 +124,16 @@ struct mp_aframe *mp_aframe_from_avframe(struct AVFrame *av_frame)
     if (!av_frame || av_frame->width > 0 || av_frame->height > 0)
         return NULL;
 
+#if HAVE_AV_CHANNEL_LAYOUT
+    if (!av_channel_layout_check(&av_frame->ch_layout))
+        return NULL;
+
+    struct mp_chmap converted_map = { 0 };
+    if (!mp_chmap_from_av_layout(&converted_map, &av_frame->ch_layout)) {
+        return NULL;
+    }
+#endif
+
     int format = af_from_avformat(av_frame->format);
     if (!format && av_frame->format != AV_SAMPLE_FMT_NONE)
         return NULL;
@@ -132,11 +145,15 @@ struct mp_aframe *mp_aframe_from_avframe(struct AVFrame *av_frame)
         abort();
 
     frame->format = format;
+#if !HAVE_AV_CHANNEL_LAYOUT
     mp_chmap_from_lavc(&frame->chmap, frame->av_frame->channel_layout);
 
     // FFmpeg being a stupid POS again
     if (frame->chmap.num != frame->av_frame->channels)
         mp_chmap_from_channels(&frame->chmap, av_frame->channels);
+#else
+    frame->chmap = converted_map;
+#endif
 
     if (av_frame->opaque_ref) {
         struct avframe_opaque *op = (void *)av_frame->opaque_ref->data;
@@ -204,9 +221,16 @@ void mp_aframe_config_copy(struct mp_aframe *dst, struct mp_aframe *src)
 
     dst->av_frame->sample_rate = src->av_frame->sample_rate;
     dst->av_frame->format = src->av_frame->format;
+
+#if !HAVE_AV_CHANNEL_LAYOUT
     dst->av_frame->channel_layout = src->av_frame->channel_layout;
     // FFmpeg being a stupid POS again
     dst->av_frame->channels = src->av_frame->channels;
+#else
+    if (av_channel_layout_copy(&dst->av_frame->ch_layout,
+                               &src->av_frame->ch_layout) < 0)
+        abort();
+#endif
 }
 
 // Copy "soft" attributes from src to dst, excluding things which affect
@@ -315,13 +339,21 @@ bool mp_aframe_set_chmap(struct mp_aframe *frame, struct mp_chmap *in)
         return false;
     if (mp_aframe_is_allocated(frame) && in->num != frame->chmap.num)
         return false;
+
+#if !HAVE_AV_CHANNEL_LAYOUT
     uint64_t lavc_layout = mp_chmap_to_lavc_unchecked(in);
     if (!lavc_layout && in->num)
         return false;
+#endif
     frame->chmap = *in;
+
+#if !HAVE_AV_CHANNEL_LAYOUT
     frame->av_frame->channel_layout = lavc_layout;
     // FFmpeg being a stupid POS again
     frame->av_frame->channels = frame->chmap.num;
+#else
+    mp_chmap_to_av_layout(&frame->av_frame->ch_layout, in);
+#endif
     return true;
 }
 
@@ -432,6 +464,37 @@ void mp_aframe_skip_samples(struct mp_aframe *f, int samples)
 
     if (f->pts != MP_NOPTS_VALUE)
         f->pts += samples / mp_aframe_get_effective_rate(f);
+}
+
+// sanitize a floating point sample value
+#define sanitizef(f) do {       \
+    if (!isnormal(f))           \
+        (f) = 0;                \
+} while (0)
+
+void mp_aframe_sanitize_float(struct mp_aframe *mpa)
+{
+    int format = af_fmt_from_planar(mp_aframe_get_format(mpa));
+    if (format != AF_FORMAT_FLOAT && format != AF_FORMAT_DOUBLE)
+        return;
+    int num_planes = mp_aframe_get_planes(mpa);
+    uint8_t **planes = mp_aframe_get_data_rw(mpa);
+    if (!planes)
+        return;
+    for (int p = 0; p < num_planes; p++) {
+        void *ptr = planes[p];
+        int total = mp_aframe_get_total_plane_samples(mpa);
+        switch (format) {
+        case AF_FORMAT_FLOAT:
+            for (int s = 0; s < total; s++)
+                sanitizef(((float *)ptr)[s]);
+            break;
+        case AF_FORMAT_DOUBLE:
+            for (int s = 0; s < total; s++)
+                sanitizef(((double *)ptr)[s]);
+            break;
+        }
+    }
 }
 
 // Return the timestamp of the sample just after the end of this frame.

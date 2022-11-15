@@ -43,7 +43,7 @@ static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
                                          NULL};
 
 static const char *const image_exts[] = {"jpg", "jpeg", "png", "gif", "bmp",
-                                         "webp",
+                                         "webp", "jxl", "tiff", "tif",
                                          NULL};
 
 // Stolen from: vlc/-/blob/master/modules/meta_engine/folder.c#L40
@@ -246,7 +246,7 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         if (bstr_find(tmp_fname_trim, f_fname_trim) >= 0 && fuzz >= 1)
             prio |= 2; // contains the movie name
 
-        if (type == STREAM_VIDEO && fuzz >= 1 && prio == 0)
+        if (type == STREAM_VIDEO && opts->coverart_whitelist && prio == 0)
             prio = test_cover_filename(dename);
 
         // doesn't contain the movie name

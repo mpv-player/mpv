@@ -98,7 +98,7 @@ typedef struct d3d_priv {
     RECT fs_panscan_rect;       /**< PanScan source surface cropping in
                                 fullscreen */
     int src_width;              /**< Source (movie) width */
-    int src_height;             /**< Source (movie) heigth */
+    int src_height;             /**< Source (movie) height */
     struct mp_osd_res osd_res;
     int image_format;           /**< mplayer image format */
     struct mp_image_params params;

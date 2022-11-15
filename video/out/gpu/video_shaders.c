@@ -392,7 +392,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "             / (vec3(%f) - vec3(%f) * color.rgb);\n",
               PQ_C1, PQ_C2, PQ_C3);
         GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", 1.0 / PQ_M1);
-        // PQ's output range is 0-10000, but we need it to be relative to to
+        // PQ's output range is 0-10000, but we need it to be relative to
         // MP_REF_WHITE instead, so rescale
         GLSLF("color.rgb *= vec3(%f);\n", 10000 / MP_REF_WHITE);
         break;

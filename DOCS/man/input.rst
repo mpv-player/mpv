@@ -581,7 +581,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         instead. (Unlike the underlying OS mechanisms, the mpv command cannot
         start a process with empty environment. Fortunately, that is completely
         useless.) The format of the list is as in the ``execle()`` syscall. Each
-        string item defines an environment variable as in ``NANME=VALUE``.
+        string item defines an environment variable as in ``NAME=VALUE``.
 
         On Lua, you may use ``utils.get_env_list()`` to retrieve the current
         environment if you e.g. simply want to add a new variable.
@@ -672,7 +672,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``quit-watch-later [<code>]``
     Exit player, and store current playback position. Playing that file later
     will seek to the previous position on start. The (optional) argument is
-    exactly as in the ``quit`` command.
+    exactly as in the ``quit`` command. See `RESUMING PLAYBACK`_.
 
 ``sub-add <url> [<flags> [<title> [<lang>]]]``
     Load the given subtitle file or stream. By default, it is selected as
@@ -1819,7 +1819,7 @@ Property list
 
 .. note::
 
-    Most options can be set as runtime via properties as well. Just remove the
+    Most options can be set at runtime via properties as well. Just remove the
     leading ``--`` from the option name. These are not documented below, see
     `OPTIONS`_ instead. Only properties which do not exist as option with the
     same name, or which have very different behavior from the options are
@@ -3072,7 +3072,8 @@ Property list
     processed for C escape sequences before passing it to the OSD code. See
     `Flat command syntax`_ for details.
 
-    A list of tags can be found here: http://docs.aegisub.org/latest/ASS_Tags/
+    A list of tags can be found here:
+    https://aeg-dev.github.io/AegiSite/docs/3.2/ass_tags/
 
 ``vo-configured``
     Whether the VO is configured right now. Usually this corresponds to whether

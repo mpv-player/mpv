@@ -40,6 +40,8 @@
 #include <libavutil/dovi_meta.h>
 #endif
 
+#include "audio/chmap_avchannel.h"
+
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
@@ -645,6 +647,18 @@ static int dict_get_decimal(AVDictionary *dict, const char *entry, int def)
     return def;
 }
 
+static bool is_image(AVStream *st, bool attached_picture, const AVInputFormat *avif)
+{
+    return st->nb_frames <= 1 && (
+        attached_picture ||
+        bstr_endswith0(bstr0(avif->name), "_pipe") ||
+        strcmp(avif->name, "alias_pix") == 0 ||
+        strcmp(avif->name, "gif") == 0 ||
+        strcmp(avif->name, "image2pipe") == 0 ||
+        (st->codecpar->codec_id == AV_CODEC_ID_AV1 && st->nb_frames == 1)
+    );
+}
+
 static void handle_new_stream(demuxer_t *demuxer, int i)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -658,10 +672,22 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     case AVMEDIA_TYPE_AUDIO: {
         sh = demux_alloc_sh_stream(STREAM_AUDIO);
 
+#if !HAVE_AV_CHANNEL_LAYOUT
         // probably unneeded
         mp_chmap_set_unknown(&sh->codec->channels, codec->channels);
         if (codec->channel_layout)
             mp_chmap_from_lavc(&sh->codec->channels, codec->channel_layout);
+#else
+        if (!mp_chmap_from_av_layout(&sh->codec->channels, &codec->ch_layout)) {
+            char layout[128] = {0};
+            MP_WARN(demuxer,
+                    "Failed to convert channel layout %s to mpv one!\n",
+                    av_channel_layout_describe(&codec->ch_layout,
+                                               layout, 128) < 0 ?
+                    "undefined" : layout);
+        }
+#endif
+
         sh->codec->samplerate = codec->sample_rate;
         sh->codec->bitrate = codec->bit_rate;
 
@@ -704,13 +730,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->codec->disp_h = codec->height;
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
-        if (st->nb_frames <= 1 && (
-                sh->attached_picture ||
-                bstr_endswith0(bstr0(priv->avif->name), "_pipe") ||
-                strcmp(priv->avif->name, "alias_pix") == 0 ||
-                strcmp(priv->avif->name, "gif") == 0 ||
-                strcmp(priv->avif->name, "image2pipe") == 0
-            )) {
+        if (is_image(st, sh->attached_picture, priv->avif)) {
             MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
             sh->image = true;
             sh->codec->fps = priv->mf_fps;

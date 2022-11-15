@@ -1,4 +1,4 @@
-Release 0.34.0
+Release 0.35.0
 ==============
 
 This release requires FFmpeg 4.0 or newer.
@@ -7,6 +7,9 @@ For packagers: Note that mpv's build system is only supported on Python 3.
 If you use the `bootstrap.py` script it will take care of this, otherwise you
 need to explicitly invoke the build system using `python3 waf`.
 
+This release adds the Meson build system as an alternative to waf.
+It is supposed to be feature-complete but please report any issues you encounter.
+
 
 Features
 --------
@@ -14,34 +17,39 @@ Features
 Added
 ~~~~~
 
-- player: allow vo to be switched at runtime
-- input.conf syntax: support custom quotes in `XstringX` form & single quotes
-- ao_ass: readd OSSv4 audio output, default on *BSD
-- player: load cover art with the media filename
-- vo_gpu: vulkan: implement a VkDisplayKHR backed context
-- osc: seekbar hover/drag: display target chapter at the OSC title
-- stats.lua: add page 4 with a list of active key bindings
-- sub: add --sub-filter-jsre (JS regex)
-- vo_rpi: restore fullscreen handling
-- vo_tct: add resize capability
-- ytdl_hook.lua: search for yt-dlp by default (preferred over youtube-dl)
+- vo_gpu_next: add new libplacebo-based renderer
+- build: add meson build support
+- vo_gpu_next: forward Dolby Vision metadata to libplacebo
+- ao_pipewire: add PipeWire audio backend
+- ao_sndio: readd this audio output again
+- vo_gpu_next: apply film grain if such metadata is present
+- drm: context_drm_egl: add support for enabling VRR
+- demux: add support for R128 replaygain tags
+- x11: support X Present extension
+- af_rubberband: add support for new engine in rubberband 3.0.0
+- hwdec/drmprime: add drmprime hwdec-interop (commonly found on SoCs)
+- various: support binding functions keys beyond F12
+- audio: support hotplug events for multiple AOs
+- sub: use Unicode linebreaking for non-ASS subs and OSD
+- vo_gpu: hwdec: add Android hwdec utilizing AImageReader
+- vo_dmabuf_wayland: add wayland VO displaying dmabuf buffers (vaapi or drm hwdec only)
+- lua/console: add history deduplication
 
 
 Changed
 ~~~~~~~
 
-- vo_sixel: many fixes and improvements
-- filters: switch from scaletempo to scaletempo2, used for `speed` option
-- audio/vo_pulse: fix various edge cases and issues
-- stats.lua: move internal performance info from page 4 to page 0
-- command: don't hardcode command lists to be repeatable
+- filters: re-add vavpp hardware deinterlacing auto-filter (for --deinterlace)
+- swresample: don't forcibly clip audio on every conversion
+- ytdl_hook: always set HTTP headers to fix yt-dlp on certain sites
 
 
 Removed
 ~~~~~~~
 
-- mac: drop build support for swift versions earlier than 4.1
-- vo_gpu: drop support for libplacebo older than v3.104.0
+- libmpv: remove opengl_cb API and other deprecated symbols
+- lua: remove deprecated mp.suspend(), resume() and resume_all()
+- build: raise minimum libplacebo version requirement to v4.157.0
 
 
 Options and Commands
@@ -50,97 +58,98 @@ Options and Commands
 Added
 ~~~~~
 
-- vo_sixel: add --vo-sixel-exit-clear
-- player: add --screen-name and --fs-screen-name
-- player/command: add albumart argument to video-add
-- command: add pid (process id), display-width and display-height properties
-- sub: add secondary-sub-text, -start, and -end properties; secondary-sub-visibility option
-- vo_gpu: add --icc-force-contrast
-- player: add append-play flag to loadlist
-- command: add support for secondary subs to sub-seek and sub-step
-- options: add watch-later-options to configure which options are saved
-- player: add track-list/N/image sub-property
-- input: add --no-input-builtin-bindings option
-- drm_common: add --drm-device option
+- vo_gpu_next: add --target-colorspace-hint to facilitate HDR passthrough
+- vo_gpu_next: new tone mapping options 'auto', 'spline', 'bt.2446a'
+               and add --tone-mapping-crosstalk, --inverse-tone-mapping
+- vo_gpu: add --gamut-mapping-mode and --tone-mapping-mode
+- options: add 'always' choice to --stop-screensaver
+- options: add --osd-playing-msg-duration
+- player: add --cover-art-whitelist option
+- x11: add --x11-present option
 
 
 Changed
 ~~~~~~~
 
-- vo_sixel: change default dither to "auto"
-- vd_lavc: add VP8 to the default allowed hwdec codec list
-- vo_gpu: lower default deband threshold to preserve more detail
-- vo_gpu: adjust interpolation-threshold's default
-- demux: undeprecate --cache-secs
-- options: add `Uploader`, `Channel_URL` to --display-tags defaults
-- options: --audio-display determines cover priority
-- command: make current-window-scale writeable
+- ao_openal: enable --openal-direct-channels by default
+- options: only apply --sub-visibility to primary subtitles
+- options: make --cover-art-auto=exact the default
+- vo_gpu/hwdec: rename and introduce legacy names for some interops
 
 
 Deprecated
 ~~~~~~~~~~
 
-- win32: ignore and deprecate --fit-border
-- drm_common: deprecate selecting by card number in --drm-connector
+- vo_gpu: deprecate --gamma-factor and --gamma-auto
 
 
 Removed
 ~~~~~~~
 
-- vo_gpu: remove --icc-contrast
-- stats.lua: remove script-opts for the main keys (i/I)
-- vo_gpu: opengl: remove --opengl-restrict
+- vo_gpu: remove --gamut-clipping, --gamut-warning, --tone-mapping-desaturate and
+          --tone-mapping-desaturate-exponent (replacements available)
+- vulkan: remove --vulkan-disable-events
 
 
 Fixes and Minor Enhancements
 ----------------------------
 
-- terminal: correctly process input when foregrounded
-- vo_wlshm: support presentation time
-- mac: fix a window positioning bug when exiting fullscreen
-- csputils: add mappings for DCI-P3 (ST.431-2) and P3-D65 (ST.432-1)
-- player: make resetting of track selection to "auto" work
-- stream_lavf: support rtsps
-- vo_wlshm: support big endian systems
-- demux_mf: add support for more image codecs
-- msg: fix really-quiet option to only affect terminal output
-- mac: fix traditional fullscreen on macOS 11
-- ao_pulse: fix misbehavior with PipeWire when setting volume or mute
-- stats.lua: include a filter's @label when displaying filters on page 1
-- wayland, win32: support the display-hidpi-scale property
-- win32: keep the window title-bar inside the screen
-- filter_kernels: fix incorrect constant for quadric window
-- command: add display-width/display-height property
-- edl: add a way to add tags
-- stream_file: disable readahead for remote files on macOS to fix stutter
-- osxbundle: fix slow and wasteful memory allocation that caused stutter
-- vo_gpu: fix extreme clipping with --gamut-clipping for HDR outputs
-- af_scaletempo2: speed up using vector calculations
-- recorder: fix muxing of certain codecs
-- win32: support the focused property
-- js: add mp.utils.append_file
-- subs: fix missing subtitles on last frame
-- stats.lua: show scaled resolution
-- osc: expose osc-visibility via shared-script-properties
-- terminal-unix: fix ^Z identification and ignore unknown CSI sequences
-- context_drm_egl: allow autoprobe selection
-- wayland: improve behavior with touch events
-- command: make current-window-scale writeable
-- vo_vdpau: don't treat preemption as an error to fix VT switching
-- wayland: read XCURSOR_THEME to get cursor theme
-- demux_playlist: extend maximum line size (again) to 2M
-- win32: call timeBeginPeriod on demand on Windows 10
-- build: allow easier selection of lua version/package
-- vo_gpu: fix distortion with certain rotated videos
-- drm_common: skip non-primary devices during automatic choosing
-- drm_common: support USB, SPI, Writeback and unknown connector types (future proofing)
+- context_drm_egl: use gbm_surface_create_with_modifiers
+- context_drm_egl: add support for BGR surface formats
+- vo_gpu: vulkan: open DRM render fd when using VK_KHR_display
+- client API: use symbol visibility attributes
+- vo_gpu: hwdec_vaapi: add dma-buf modifiers support
+- wayland: fix various issues that could lead to jitter
+- osc: fix cache displaying 60s in some cases
+- player: make --keep-open=always work with --loop-playlist
+- opengl: support driver debug message under OpenGL ES
+- vo_gpu: opengl: fixes for OpenGL ES version and extension handling
+- f_decoder_wrapper: support frame rotation metadata (used by JPEG)
+- wscript: switch shaderc checks to pkgconfig
+- vd_lavc: enable hwdec for prores by default
+- vo_gpu: add HOOKED_gather for custom shaders
+- wayland, x11: sanitize window title for valid UTF-8
+- win32: apply geometry position to content instead of window
+- filter_kernels: add cosine window
+- vo_gpu: hwdec_vaapi: don't probe formats for irrelevant endpoints
+- vo_gpu: hwdec: load hwdec interops on-demand by default
+- stats.lua: graphs: fix bad rendering due to division by 0
+- hwdec: warn on unsupported --hwdec option value
+- x11: fix --screen-name option
+- x11: avoid wasteful rendering when possible
+- video/image_writer: add JPEG XL support
+- stream_lavf: enable ipfs, ipns and rist protocol support
+- osc.lua: fix crash when calling osc-tracklist while idle
+- player: add jxl, tiff, tif to list of image extensions
+- various: switch to new AVChannelLayout structure
+- lua: command_native_async: always run callback asynchronously (edge case)
+- context_x11egl: remove supposed transparency workaround
+- vo_gpu: fix 3DLUT precision
+- drm: avoid drmModeAtomicCommit races by blocking
+- drm_common: skip cards that don't support KMS for autodetection
+- hwdec/dmabuf_interop_gl: support basic multi-plane formats
+- misc/random: switch to internal xoshiro rng implementation
+- ytdl_hook: improve track detection
+- ad_lavc: strip non-normalized floats
+- mpv.metainfo.xml: add XDG appstream metadata manifest
+- mac: avoid unnecessary unsafe conversions; fixes crash in debug builds
+- af_scaletempo2: fix crash when the number of channels increases
+- wayland: correctly handle non-CLOCK_MONOTONIC clocks
+- x11: fix --on-all-workspaces option
+- sd_ass: improve handling of subtitles with unknown duration
+- hwdec/vaapi: improve probing of supported sw formats
+- demux_mf: enable support for QOI, PHM and HDR images
+- demux_mkv: add AVS2 and AVS3 to tag list
+- TOOLS/lua/autoload: fix incorrect duplicate file loading behavior
+- demux/codec_tags: support more WAVEFORMATEXTENSIBLE tags
+- sd_ass: never mangle colours on RGB video
 
 
 This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log v0.33.0..v0.34.0`
+A complete changelog can be seen by running `git log v0.34.0..v0.35.0`
 in the git repository or by visiting either
-https://github.com/mpv-player/mpv/compare/v0.33.0...v0.34.0 or
-https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.33.0..v0.34.0
+https://github.com/mpv-player/mpv/compare/v0.34.0...v0.35.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.34.0..v0.35.0

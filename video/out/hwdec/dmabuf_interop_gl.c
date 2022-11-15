@@ -16,17 +16,14 @@
  */
 
 #include "config.h"
-#include "hwdec_vaapi.h"
+#include "dmabuf_interop.h"
 
+#include <drm_fourcc.h>
 #include <EGL/egl.h>
 #include "video/out/opengl/ra_gl.h"
 
 typedef void* GLeglImageOES;
 typedef void *EGLImageKHR;
-
-#ifndef DRM_FORMAT_MOD_INVALID
-#define DRM_FORMAT_MOD_INVALID  ((UINT64_C(1) << 56) - 1)
-#endif
 
 // Any EGL_EXT_image_dma_buf_import definitions used in this source file.
 #define EGL_LINUX_DMA_BUF_EXT             0x3270
@@ -69,7 +66,7 @@ struct vaapi_gl_mapper_priv {
 static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
                                  const struct ra_imgfmt_desc *desc)
 {
-    struct priv *p_mapper = mapper->priv;
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = talloc_ptrtype(NULL, p);
     p_mapper->interop_mapper_priv = p;
 
@@ -120,7 +117,7 @@ static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
 
 static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p_mapper = mapper->priv;
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     if (p) {
@@ -144,63 +141,121 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
     } while(0)
 
 #define ADD_PLANE_ATTRIBS(plane) do { \
-            uint64_t drm_format_modifier = p_mapper->desc.objects[p_mapper->desc.layers[n].object_index[plane]].drm_format_modifier; \
+            uint64_t drm_format_modifier = p_mapper->desc.objects[p_mapper->desc.layers[i].planes[j].object_index].format_modifier; \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _FD_EXT, \
-                        p_mapper->desc.objects[p_mapper->desc.layers[n].object_index[plane]].fd); \
+                        p_mapper->desc.objects[p_mapper->desc.layers[i].planes[j].object_index].fd); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _OFFSET_EXT, \
-                        p_mapper->desc.layers[n].offset[plane]); \
+                        p_mapper->desc.layers[i].planes[j].offset); \
             ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
-                        p_mapper->desc.layers[n].pitch[plane]); \
-            if (p_owner->use_modifiers && drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
+                        p_mapper->desc.layers[i].planes[j].pitch); \
+            if (dmabuf_interop->use_modifiers && drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
                 ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_LO_EXT, drm_format_modifier & 0xfffffffful); \
                 ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_HI_EXT, drm_format_modifier >> 32); \
             }                               \
         } while (0)
 
-static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper, bool probing)
+static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
+                         struct dmabuf_interop *dmabuf_interop,
+                         bool probing)
 {
-    struct priv *p_mapper = mapper->priv;
-    struct priv_owner *p_owner = mapper->owner->priv;
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     GL *gl = ra_gl_get(mapper->ra);
 
-    for (int n = 0; n < p_mapper->num_planes; n++) {
-        int attribs[48] = {EGL_NONE};
-        int num_attribs = 0;
+    for (int i = 0, n = 0; i < p_mapper->desc.nb_layers; i++) {
+        /*
+         * As we must map surfaces as one texture per plane, we can only support
+         * a subset of possible multi-plane layer formats. This is due to having
+         * to manually establish what DRM format each synthetic layer should
+         * have.
+         */
+        uint32_t format[AV_DRM_MAX_PLANES] = {
+            p_mapper->desc.layers[i].format,
+        };
 
-        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, p_mapper->desc.layers[n].drm_format);
-        ADD_ATTRIB(EGL_WIDTH,  p_mapper->tex[n]->params.w);
-        ADD_ATTRIB(EGL_HEIGHT, p_mapper->tex[n]->params.h);
-
-        ADD_PLANE_ATTRIBS(0);
-        if (p_mapper->desc.layers[n].num_planes > 1)
-            ADD_PLANE_ATTRIBS(1);
-        if (p_mapper->desc.layers[n].num_planes > 2)
-            ADD_PLANE_ATTRIBS(2);
-        if (p_mapper->desc.layers[n].num_planes > 3)
-            ADD_PLANE_ATTRIBS(3);
-
-        p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),
-            EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
-        if (!p->images[n]) {
-            mp_msg(mapper->log, p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR,
-                   "Failed to import surface in EGL: %u\n", eglGetError());
-            return false;
+        if (p_mapper->desc.layers[i].nb_planes > 1) {
+            switch (p_mapper->desc.layers[i].format) {
+            case DRM_FORMAT_NV12:
+                format[0] = DRM_FORMAT_R8;
+                format[1] = DRM_FORMAT_GR88;
+                break;
+            case DRM_FORMAT_P010:
+                format[0] = DRM_FORMAT_R16;
+                format[1] = DRM_FORMAT_GR1616;
+                break;
+            default:
+                mp_msg(mapper->log, probing ? MSGL_DEBUG : MSGL_ERR,
+                       "Cannot map unknown multi-plane format: 0x%08X\n",
+                       p_mapper->desc.layers[i].format);
+                return false;
+            }
+        } else {
+            /*
+             * As OpenGL only has one guaranteed rgba format (rgba8), drivers
+             * that support importing dmabuf formats with different channel
+             * orders do implicit swizzling to get to rgba. However, we look at
+             * the original imgfmt to decide channel order, and we then swizzle
+             * based on that. So, we can get into a situation where we swizzle
+             * twice and end up with a mess.
+             *
+             * The simplest way to avoid that is to lie to OpenGL and say that
+             * the surface we are importing is in the natural channel order, so
+             * that our swizzling does the right thing.
+             *
+             * DRM ABGR corresponds to OpenGL RGBA due to different naming
+             * conventions.
+             */
+            switch (format[0]) {
+            case DRM_FORMAT_ARGB8888:
+            case DRM_FORMAT_RGBA8888:
+            case DRM_FORMAT_BGRA8888:
+                format[0] = DRM_FORMAT_ABGR8888;
+                break;
+            case DRM_FORMAT_XRGB8888:
+                format[0] = DRM_FORMAT_XBGR8888;
+                break;
+            case DRM_FORMAT_RGBX8888:
+            case DRM_FORMAT_BGRX8888:
+                // Logically, these two formats should be handled as above,
+                // but there appear to be additional problems that make the
+                // format change here insufficient or incorrect, so we're
+                // doing nothing for now.
+                break;
+            }
         }
 
-        gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-        p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+        for (int j = 0; j < p_mapper->desc.layers[i].nb_planes; j++, n++) {
+            int attribs[48] = {EGL_NONE};
+            int num_attribs = 0;
 
-        mapper->tex[n] = p_mapper->tex[n];
+            ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, format[j]);
+            ADD_ATTRIB(EGL_WIDTH,  p_mapper->tex[n]->params.w);
+            ADD_ATTRIB(EGL_HEIGHT, p_mapper->tex[n]->params.h);
+            ADD_PLANE_ATTRIBS(0);
+
+            p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),
+                EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
+            if (!p->images[n]) {
+                mp_msg(mapper->log, probing ? MSGL_DEBUG : MSGL_ERR,
+                    "Failed to import surface in EGL: %u\n", eglGetError());
+                return false;
+            }
+
+            gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
+            p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+
+            mapper->tex[n] = p_mapper->tex[n];
+        }
     }
+
     gl->BindTexture(GL_TEXTURE_2D, 0);
     return true;
 }
 
 static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
 {
-    struct priv *p_mapper = mapper->priv;
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     if (p) {
@@ -212,9 +267,9 @@ static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
     }
 }
 
-bool vaapi_gl_init(const struct ra_hwdec *hw)
+bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
+                            struct dmabuf_interop *dmabuf_interop)
 {
-    struct priv_owner *p = hw->priv;
     if (!ra_is_gl(hw->ra)) {
         // This is not an OpenGL RA.
         return false;
@@ -234,14 +289,15 @@ bool vaapi_gl_init(const struct ra_hwdec *hw)
         !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return false;
 
-    p->use_modifiers = gl_check_extension(exts, "EGL_EXT_image_dma_buf_import_modifiers");
+    dmabuf_interop->use_modifiers =
+        gl_check_extension(exts, "EGL_EXT_image_dma_buf_import_modifiers");
 
-    MP_VERBOSE(hw, "using VAAPI EGL interop\n");
+    MP_VERBOSE(hw, "using EGL dmabuf interop\n");
 
-    p->interop_init = vaapi_gl_mapper_init;
-    p->interop_uninit = vaapi_gl_mapper_uninit;
-    p->interop_map = vaapi_gl_map;
-    p->interop_unmap = vaapi_gl_unmap;
+    dmabuf_interop->interop_init = vaapi_gl_mapper_init;
+    dmabuf_interop->interop_uninit = vaapi_gl_mapper_uninit;
+    dmabuf_interop->interop_map = vaapi_gl_map;
+    dmabuf_interop->interop_unmap = vaapi_gl_unmap;
 
     return true;
 }

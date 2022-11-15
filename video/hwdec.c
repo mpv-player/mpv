@@ -35,32 +35,20 @@ void hwdec_devices_destroy(struct mp_hwdec_devices *devs)
     talloc_free(devs);
 }
 
-struct mp_hwdec_ctx *hwdec_devices_get_by_lavc(struct mp_hwdec_devices *devs,
-                                               int av_hwdevice_type)
+struct mp_hwdec_ctx *hwdec_devices_get_by_imgfmt(struct mp_hwdec_devices *devs,
+                                                 int hw_imgfmt)
 {
     struct mp_hwdec_ctx *res = NULL;
     pthread_mutex_lock(&devs->lock);
     for (int n = 0; n < devs->num_hwctxs; n++) {
         struct mp_hwdec_ctx *dev = devs->hwctxs[n];
-        if (dev->av_device_ref) {
-            AVHWDeviceContext *hwctx = (void *)dev->av_device_ref->data;
-            if (hwctx->type == av_hwdevice_type) {
-                res = dev;
-                break;
-            }
+        if (dev->hw_imgfmt == hw_imgfmt) {
+            res = dev;
+            break;
         }
     }
     pthread_mutex_unlock(&devs->lock);
     return res;
-}
-
-struct AVBufferRef *hwdec_devices_get_lavc(struct mp_hwdec_devices *devs,
-                                           int av_hwdevice_type)
-{
-    struct mp_hwdec_ctx *ctx = hwdec_devices_get_by_lavc(devs, av_hwdevice_type);
-    if (!ctx)
-        return NULL;
-    return av_buffer_ref(ctx->av_device_ref);
 }
 
 struct mp_hwdec_ctx *hwdec_devices_get_first(struct mp_hwdec_devices *devs)
@@ -106,7 +94,7 @@ void hwdec_devices_set_loader(struct mp_hwdec_devices *devs,
 void hwdec_devices_request_for_img_fmt(struct mp_hwdec_devices *devs,
                                        struct hwdec_imgfmt_request *params)
 {
-    if (devs->load_api && !hwdec_devices_get_first(devs))
+    if (devs->load_api)
         devs->load_api(devs->load_api_ctx, params);
 }
 
@@ -130,6 +118,9 @@ static const struct hwcontext_fns *const hwcontext_fns[] = {
 #endif
 #if HAVE_D3D9_HWACCEL
     &hwcontext_fns_dxva2,
+#endif
+#if HAVE_DRM
+    &hwcontext_fns_drmprime,
 #endif
 #if HAVE_VAAPI
     &hwcontext_fns_vaapi,

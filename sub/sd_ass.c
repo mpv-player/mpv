@@ -359,10 +359,14 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             filter_and_add(sd, &pkt2);
         }
         if (ctx->duration_unknown) {
-            for (int n = 0; n < track->n_events - 1; n++) {
+            for (int n = track->n_events - 2; n >= 0; n--) {
                 if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
-                    track->events[n].Duration = track->events[n + 1].Start -
-                                                track->events[n].Start;
+                    if (track->events[n].Start != track->events[n + 1].Start) {
+                        track->events[n].Duration = track->events[n + 1].Start -
+                                                    track->events[n].Start;
+                    } else {
+                        track->events[n].Duration = track->events[n + 1].Duration;
+                    }
                 }
             }
         }
@@ -442,6 +446,10 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     ass_set_font_scale(priv, set_font_scale);
     ass_set_hinting(priv, set_hinting);
     ass_set_line_spacing(priv, set_line_spacing);
+#if LIBASS_VERSION >= 0x01600010
+    if (converted)
+        ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
+#endif
 }
 
 static bool has_overrides(char *s)
@@ -896,7 +904,8 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
         };
     }
 
-    if (csp == params.color.space && levels == params.color.levels)
+    if ((csp == params.color.space && levels == params.color.levels) ||
+            params.color.space == MP_CSP_RGB) // Even VSFilter doesn't mangle on RGB video
         return;
 
     bool basic_conv = params.color.space == MP_CSP_BT_709 &&

@@ -470,6 +470,23 @@ char *mp_chmap_to_str_hr_buf(char *buf, size_t buf_size, const struct mp_chmap *
     return mp_chmap_to_str_buf(buf, buf_size, &map);
 }
 
+mp_ch_layout_tuple *mp_iterate_builtin_layouts(void **opaque)
+{
+    uintptr_t i = (uintptr_t)*opaque;
+
+    if (i >= MP_ARRAY_SIZE(std_layout_names) ||
+        !std_layout_names[i][0])
+        return NULL;
+
+    *opaque = (void *)(i + 1);
+
+    if (std_layout_names[i][1][0] == '\0') {
+        return mp_iterate_builtin_layouts(opaque);
+    }
+
+    return &std_layout_names[i];
+}
+
 void mp_chmap_print_help(struct mp_log *log)
 {
     mp_info(log, "Speakers:\n");

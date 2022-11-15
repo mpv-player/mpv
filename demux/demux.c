@@ -1685,7 +1685,7 @@ static void attempt_range_joining(struct demux_internal *in)
     // Try to find a join point, where packets obviously overlap. (It would be
     // better and faster to do this incrementally, but probably too complex.)
     // The current range can overlap arbitrarily with the next one, not only by
-    // by the seek overlap, but for arbitrary packet readahead as well.
+    // the seek overlap, but for arbitrary packet readahead as well.
     // We also drop the overlapping packets (if joining fails, we discard the
     // entire next range anyway, so this does no harm).
     for (int n = 0; n < in->num_streams; n++) {
@@ -2942,6 +2942,19 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
         return talloc_dup(NULL, &rg);
     }
 
+    // The r128 replaygain tags declared in RFC 7845 for opus files. The tags
+    // are generated with EBU-R128, which does not use peak meters. And the
+    // values are stored as a Q7.8 fixed point number in dB.
+    if (decode_gain(log, tags, "R128_TRACK_GAIN", &rg.track_gain) >= 0) {
+        if (decode_gain(log, tags, "R128_ALBUM_GAIN", &rg.album_gain) < 0) {
+            // Album gain is undefined; fall back to track gain.
+            rg.album_gain = rg.track_gain;
+        }
+        rg.track_gain /= 256.;
+        rg.album_gain /= 256.;
+        return talloc_dup(NULL, &rg);
+    }
+
     return NULL;
 }
 
@@ -3392,8 +3405,10 @@ static struct demuxer *demux_open(struct stream *stream,
             check_levels = d_force;
         }
         for (int n = 0; demuxer_list[n]; n++) {
-            if (strcmp(demuxer_list[n]->name, force_format) == 0)
+            if (strcmp(demuxer_list[n]->name, force_format) == 0) {
                 check_desc = demuxer_list[n];
+                break;
+            }
         }
         if (!check_desc) {
             mp_err(log, "Demuxer %s does not exist.\n", force_format);

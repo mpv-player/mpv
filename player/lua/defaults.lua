@@ -615,9 +615,10 @@ local async_next_id = 1
 function mp.command_native_async(node, cb)
     local id = async_next_id
     async_next_id = async_next_id + 1
+    cb = cb or function() end
     local res, err = mp.raw_command_native_async(id, node)
     if not res then
-        cb(false, nil, err)
+        mp.add_timeout(0, function() cb(false, nil, err) end)
         return res, err
     end
     local t = {cb = cb, id = id}

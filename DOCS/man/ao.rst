@@ -30,7 +30,8 @@ Available audio output drivers are:
         explicitly reject multichannel output, as there is no way to detect
         whether a certain channel layout is actually supported.
 
-        You can also try `using the upmix plugin <http://git.io/vfuAy>`_.
+        You can also try `using the upmix plugin
+        <https://github.com/mpv-player/mpv/wiki/ALSA-Surround-Sound-and-Upmixing>`_.
         This setup enables multichannel audio on the ``default`` device
         with automatic upmixing with shared access, so playing stereo
         and multichannel audio at the same time will work as expected.
@@ -154,6 +155,11 @@ Available audio output drivers are:
         more data, and has a lower probability of buffer underruns. A smaller
         value makes the audio stream react faster, e.g. to playback speed
         changes.
+
+    ``--pipewire-remote=<remote>``
+        Specify the PipeWire remote daemon name to connect to via local UNIX
+        sockets.
+        An empty <remote> string uses the default remote named ``pipewire-0``.
 
 ``sdl``
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL

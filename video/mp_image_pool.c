@@ -325,7 +325,7 @@ bool mp_image_hw_upload(struct mp_image *hw_img, struct mp_image *src)
     if (hw_img->w != src->w || hw_img->h != src->h)
         return false;
 
-    if (!hw_img->hwctx || src->hwctx)
+    if (!hw_img->hwctx)
         return false;
 
     bool ok = false;
@@ -422,6 +422,33 @@ struct mp_image *mp_av_pool_image_hw_upload(struct AVBufferRef *hw_frames_ctx,
         talloc_free(dst);
         return NULL;
     }
+
+    mp_image_copy_attributes(dst, src);
+    return dst;
+}
+
+struct mp_image *mp_av_pool_image_hw_map(struct AVBufferRef *hw_frames_ctx,
+                                         struct mp_image *src)
+{
+    AVFrame *dst_frame = av_frame_alloc();
+    if (!dst_frame)
+        return NULL;
+
+    dst_frame->format = ((AVHWFramesContext*)hw_frames_ctx->data)->format;
+    dst_frame->hw_frames_ctx = av_buffer_ref(hw_frames_ctx);
+
+    AVFrame *src_frame = mp_image_to_av_frame(src);
+    if (av_hwframe_map(dst_frame, src_frame, 0) < 0) {
+        av_frame_free(&src_frame);
+        av_frame_free(&dst_frame);
+        return NULL;
+    }
+    av_frame_free(&src_frame);
+
+    struct mp_image *dst = mp_image_from_av_frame(dst_frame);
+    av_frame_free(&dst_frame);
+    if (!dst)
+        return NULL;
 
     mp_image_copy_attributes(dst, src);
     return dst;

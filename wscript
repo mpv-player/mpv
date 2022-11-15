@@ -162,6 +162,12 @@ main_dependencies = [
         'desc': 'Android environment',
         'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
     }, {
+        'name': '--android-media-ndk',
+        'desc': 'Android Media APIs',
+        'deps': 'android',
+        # header only, library is dynamically loaded
+        'func': check_statement('media/NdkImageReader.h', 'int x = AIMAGE_FORMAT_PRIVATE'),
+    }, {
         'name': '--tvos',
         'desc': 'tvOS environment',
         'func': check_statement(
@@ -391,6 +397,14 @@ iconv support use --disable-iconv.",
         'desc': 'SDL2 gamepad input',
         'deps': 'sdl2',
         'func': check_true,
+    }, {
+        'name': 'jpegxl',
+        'desc': 'JPEG XL support via libavcodec',
+        'func': check_pkg_config('libavcodec >= 59.27.100'),
+    }, {
+        'name': 'rubberband-3',
+        'desc': 'new engine support for librubberband',
+        'func': check_pkg_config('rubberband >= 3.0.0'),
     }
 ]
 
@@ -407,6 +421,10 @@ libav_dependencies = [
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
 FFmpeg libraries. Git master is recommended."
+    }, {
+        'name': 'av-channel-layout',
+        'desc': 'FFmpeg AVChannelLayout API',
+        'func': check_pkg_config('libavutil', '>= 57.24.100'),
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
@@ -428,7 +446,7 @@ audio_output_features = [
     }, {
         'name': '--pipewire',
         'desc': 'PipeWire audio output',
-        'func': check_pkg_config('libpipewire-0.3', '>= 0.3.0')
+        'func': check_pkg_config('libpipewire-0.3', '>= 0.3.19')
     }, {
         'name': '--sndio',
         'desc': 'sndio audio input/output',
@@ -498,11 +516,11 @@ video_output_features = [
         'deps': 'gbm.h',
         'func': check_pkg_config('gbm', '>= 17.1.0'),
     } , {
-        'name': '--wayland-scanner',
+        'name': 'wayland-scanner',
         'desc': 'wayland-scanner',
         'func': check_program('wayland-scanner', 'WAYSCAN')
     } , {
-        'name': '--wayland-protocols',
+        'name': 'wayland-protocols',
         'desc': 'wayland-protocols',
         'func': check_wl_protocols
     } , {
@@ -512,6 +530,11 @@ video_output_features = [
         'func': check_pkg_config('wayland-client', '>= 1.15.0',
                                  'wayland-cursor', '>= 1.15.0',
                                  'xkbcommon',      '>= 0.3.0'),
+    } , {
+        'name': 'wayland-protocols-1-24',
+        'desc': 'wayland-protocols version 1.24+',
+        'deps': 'wayland',
+        'func': check_pkg_config('wayland-protocols >= 1.24'),
     } , {
         'name': 'memfd_create',
         'desc': "Linux's memfd_create()",
@@ -526,6 +549,7 @@ video_output_features = [
                                  'xscrnsaver',  '>= 1.0.0',
                                  'xext',        '>= 1.0.0',
                                  'xinerama',    '>= 1.0.0',
+                                 'xpresent',    '>= 1.0.0',
                                  'xrandr',      '>= 1.2.0'),
     } , {
         'name': '--xv',
@@ -646,6 +670,11 @@ video_output_features = [
         'deps': 'vaapi && gl-wayland',
         'func': check_pkg_config('libva-wayland', '>= 1.1.0'),
     }, {
+        'name': 'dmabuf-wayland',
+        'desc': 'Wayland dmabuf support',
+        'deps': 'wayland && memfd_create && (vaapi-wayland || drm)',
+        'func': check_true,
+    }, {
         'name': '--vaapi-drm',
         'desc': 'VAAPI (DRM/EGL support)',
         'deps': 'vaapi && egl-drm',
@@ -764,6 +793,22 @@ video_output_features = [
         'name': '--sixel',
         'desc': 'Sixel',
         'func': check_pkg_config('libsixel', '>= 1.5'),
+    }, {
+        'name': 'dmabuf-interop-gl',
+        'desc': 'dmabuf GL Interop',
+        'deps': 'egl && drm',
+        'func': check_true,
+    }, {
+        'name': 'dmabuf-interop-pl',
+        'desc': 'dmabuf libplacebo interop',
+        'deps': 'vaapi-libplacebo',
+        'func': check_true,
+    }, {
+        # This can be removed roughly when Debian 12 is released.
+        'name': 'drm-is-kms',
+        'desc': 'drmIsKMS() function',
+        'deps': 'drm',
+        'func': check_pkg_config('libdrm', '>= 2.4.105'),
     }
 ]
 

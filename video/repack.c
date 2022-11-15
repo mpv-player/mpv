@@ -245,6 +245,8 @@ UN_WORD_3(un_x8ccc8,  uint32_t, uint8_t,  8, 16, 24, 0xFFu)
 PA_WORD_3(pa_z8ccc8,  uint32_t, uint8_t,  8, 16, 24, 0)
 UN_WORD_3(un_ccc10x2, uint32_t, uint16_t, 0, 10, 20, 0x3FFu)
 PA_WORD_3(pa_ccc10z2, uint32_t, uint16_t, 0, 10, 20, 0)
+UN_WORD_3(un_ccc16x16, uint64_t, uint16_t, 0, 16, 32, 0xFFFFu)
+PA_WORD_3(pa_ccc16z16, uint64_t, uint16_t, 0, 16, 32, 0)
 
 #define PA_WORD_2(name, packed_t, plane_t, sh_c0, sh_c1, pad)               \
     static void name(void *dst, void *src[], int w) {                       \
@@ -305,15 +307,16 @@ struct regular_repacker {
 };
 
 static const struct regular_repacker regular_repackers[] = {
-    {32, 8,  0, 3, pa_ccc8z8,  un_ccc8x8},
-    {32, 8,  8, 3, pa_z8ccc8,  un_x8ccc8},
-    {32, 8,  0, 4, pa_cccc8,   un_cccc8},
-    {64, 16, 0, 4, pa_cccc16,  un_cccc16},
-    {24, 8,  0, 3, pa_ccc8,    un_ccc8},
-    {48, 16, 0, 3, pa_ccc16,   un_ccc16},
-    {16, 8,  0, 2, pa_cc8,     un_cc8},
-    {32, 16, 0, 2, pa_cc16,    un_cc16},
-    {32, 10, 0, 3, pa_ccc10z2, un_ccc10x2},
+    {32, 8,  0, 3, pa_ccc8z8,   un_ccc8x8},
+    {32, 8,  8, 3, pa_z8ccc8,   un_x8ccc8},
+    {32, 8,  0, 4, pa_cccc8,    un_cccc8},
+    {64, 16, 0, 4, pa_cccc16,   un_cccc16},
+    {64, 16, 0, 3, pa_ccc16z16, un_ccc16x16},
+    {24, 8,  0, 3, pa_ccc8,     un_ccc8},
+    {48, 16, 0, 3, pa_ccc16,    un_ccc16},
+    {16, 8,  0, 2, pa_cc8,      un_cc8},
+    {32, 16, 0, 2, pa_cc16,     un_cc16},
+    {32, 10, 0, 3, pa_ccc10z2,  un_ccc10x2},
 };
 
 static void packed_repack(struct mp_repack *rp,

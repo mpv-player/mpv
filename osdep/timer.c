@@ -25,6 +25,7 @@
 
 #include "common/common.h"
 #include "common/msg.h"
+#include "misc/random.h"
 #include "timer.h"
 
 static uint64_t raw_time_offset;
@@ -33,7 +34,7 @@ static pthread_once_t timer_init_once = PTHREAD_ONCE_INIT;
 static void do_timer_init(void)
 {
     mp_raw_time_init();
-    srand(mp_raw_time_us());
+    mp_rand_seed(mp_raw_time_us());
     raw_time_offset = mp_raw_time_us();
     // Arbitrary additional offset to avoid confusing relative/absolute times.
     // Also,we rule that the timer never returns 0 (so default-initialized

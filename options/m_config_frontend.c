@@ -1041,7 +1041,7 @@ int m_config_restore_profile(struct m_config *config, char *name)
         return M_OPT_INVALID;
 
     if (!p->backups)
-        MP_WARN(config, "Profile contains no restore data.\n");
+        MP_WARN(config, "Profile '%s' contains no restore data.\n", name);
 
     restore_backups(&p->backups, config);
 

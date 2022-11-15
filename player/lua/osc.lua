@@ -11,6 +11,7 @@ local utils = require 'mp.utils'
 local user_opts = {
     showwindowed = true,        -- show OSC when windowed?
     showfullscreen = true,      -- show OSC when fullscreen?
+    idlescreen = true,          -- show mpv logo on idle
     scalewindowed = 1,          -- scaling of the controller when windowed
     scalefullscreen = 1,        -- scaling of the controller when fullscreen
     scaleforcedwindow = 2,      -- scaling when rendered on a forced window
@@ -34,7 +35,7 @@ local user_opts = {
     seekbarstyle = "bar",       -- bar, diamond or knob
     seekbarhandlesize = 0.6,    -- size ratio of the diamond and knob handle
     seekrangestyle = "inverted",-- bar, line, slider, inverted or none
-    seekrangeseparate = true,   -- wether the seekranges overlay on the bar-style seekbar
+    seekrangeseparate = true,   -- whether the seekranges overlay on the bar-style seekbar
     seekrangealpha = 200,       -- transparency of seekranges
     seekbarkeyframes = true,    -- use keyframes when dragging the seekbar
     title = "${media-title}",   -- string compatible with property-expansion
@@ -42,6 +43,7 @@ local user_opts = {
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
+    tcspace = 100,              -- timecode spacing (compensate font size estimation)
     visibility = "auto",        -- only used at init to set visibility_mode(...)
     boxmaxchars = 80,           -- title crop threshold for box layout
     boxvideo = false,           -- apply osc_param.video_margins to video
@@ -52,6 +54,7 @@ local user_opts = {
     chapters_osd = true,        -- whether to show chapters OSD on next/prev
     playlist_osd = true,        -- whether to show playlist OSD on next/prev
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
+    unicodeminus = false,       -- whether to use the Unicode minus sign character
 }
 
 -- read options from config and command-line
@@ -367,7 +370,7 @@ end
 -- return a nice list of tracks of the given type (video, audio, sub)
 function get_tracklist(type)
     local msg = "Available " .. nicetypes[type] .. " Tracks: "
-    if #tracks_osc[type] == 0 then
+    if not tracks_osc or #tracks_osc[type] == 0 then
         msg = msg .. "none"
     else
         for n = 1, #tracks_osc[type] do
@@ -1478,6 +1481,11 @@ function bar_layout(direction)
     local padY = 3
     local buttonW = 27
     local tcW = (state.tc_ms) and 170 or 110
+    if user_opts.tcspace >= 50 and user_opts.tcspace <= 200 then
+        -- adjust our hardcoded font size estimation
+        tcW = tcW * user_opts.tcspace / 100
+    end
+
     local tsW = 90
     local minW = (buttonW + padX)*5 + (tcW + padX)*4 + (tsW + padX)*2
 
@@ -1729,6 +1737,8 @@ function update_options(list)
     update_duration_watch()
     request_init()
 end
+
+local UNICODE_MINUS = string.char(0xe2, 0x88, 0x92)  -- UTF-8 for U+2212 MINUS SIGN
 
 -- OSC INIT
 function osc_init()
@@ -2059,10 +2069,11 @@ function osc_init()
     ne.visible = (mp.get_property_number("duration", 0) > 0)
     ne.content = function ()
         if (state.rightTC_trem) then
+            local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
             if state.tc_ms then
-                return ("-"..mp.get_property_osd("playtime-remaining/full"))
+                return (minus..mp.get_property_osd("playtime-remaining/full"))
             else
-                return ("-"..mp.get_property_osd("playtime-remaining"))
+                return (minus..mp.get_property_osd("playtime-remaining"))
             end
         else
             if state.tc_ms then
@@ -2574,29 +2585,37 @@ function tick()
 
         -- render idle message
         msg.trace("idle message")
-        local icon_x, icon_y = 320 - 26, 140
+        local _, _, display_aspect = mp.get_osd_size()
+        local display_h = 360
+        local display_w = display_h * display_aspect
+        -- logo is rendered at 2^(6-1) = 32 times resolution with size 1800x1800
+        local icon_x, icon_y = (display_w - 1800 / 32) / 2, 140
         local line_prefix = ("{\\rDefault\\an7\\1a&H00&\\bord0\\shad0\\pos(%f,%f)}"):format(icon_x, icon_y)
 
         local ass = assdraw.ass_new()
         -- mpv logo
-        for i, line in ipairs(logo_lines) do
-            ass:new_event()
-            ass:append(line_prefix .. line)
+        if user_opts.idlescreen then
+            for i, line in ipairs(logo_lines) do
+                ass:new_event()
+                ass:append(line_prefix .. line)
+            end
         end
 
         -- Santa hat
-        if is_december and not user_opts.greenandgrumpy then
+        if is_december and user_opts.idlescreen and not user_opts.greenandgrumpy then
             for i, line in ipairs(santa_hat_lines) do
                 ass:new_event()
                 ass:append(line_prefix .. line)
             end
         end
 
-        ass:new_event()
-        ass:pos(320, icon_y+65)
-        ass:an(8)
-        ass:append("Drop files or URLs to play here.")
-        set_osd(640, 360, ass.text)
+        if user_opts.idlescreen then
+            ass:new_event()
+            ass:pos(display_w / 2, icon_y + 65)
+            ass:an(8)
+            ass:append("Drop files or URLs to play here.")
+        end
+        set_osd(display_w, display_h, ass.text)
 
         if state.showhide_enabled then
             mp.disable_key_bindings("showhide")
@@ -2834,7 +2853,7 @@ function visibility_mode(mode, no_osd)
     end
 
     -- Reset the input state on a mode change. The input state will be
-    -- recalcuated on the next render cycle, except in 'never' mode where it
+    -- recalculated on the next render cycle, except in 'never' mode where it
     -- will just stay disabled.
     mp.disable_key_bindings("input")
     mp.disable_key_bindings("window-controls")
@@ -2844,9 +2863,35 @@ function visibility_mode(mode, no_osd)
     request_tick()
 end
 
+function idlescreen_visibility(mode, no_osd)
+    if mode == "cycle" then
+        if user_opts.idlescreen then
+            mode = "no"
+        else
+            mode = "yes"
+        end
+    end
+
+    if mode == "yes" then
+        user_opts.idlescreen = true
+    else
+        user_opts.idlescreen = false
+    end
+
+    utils.shared_script_property_set("osc-idlescreen", mode)
+
+    if not no_osd and tonumber(mp.get_property("osd-level")) >= 1 then
+        mp.osd_message("OSC logo visibility: " .. tostring(mode))
+    end
+
+    request_tick()
+end
+
 visibility_mode(user_opts.visibility, true)
 mp.register_script_message("osc-visibility", visibility_mode)
 mp.add_key_binding(nil, "visibility", function() visibility_mode("cycle") end)
+
+mp.register_script_message("osc-idlescreen", idlescreen_visibility)
 
 set_virt_mouse_area(0, 0, 0, 0, "input")
 set_virt_mouse_area(0, 0, 0, 0, "window-controls")

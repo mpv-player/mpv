@@ -12,7 +12,7 @@ fi
 
 if [[ $1 = "meson" ]]; then
     PKG_CONFIG_PATH="${FFMPEG_SYSROOT}/lib/pkgconfig/" CC="${CC}" CXX="${CXX}" \
-      meson build \
+      meson setup build \
         -Dprefix="${MPV_INSTALL_PREFIX}" \
         -Dlibmpv=true \
         -D{gl,iconv,lcms2,lua,jpeg,plain-gl,zlib}=enabled \

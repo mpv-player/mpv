@@ -29,6 +29,7 @@ typedef struct mp_vo_opts {
     char *appid;
     int x11_netwm;
     int x11_bypass_compositor;
+    int x11_present;
     int native_keyrepeat;
 
     float panscan;
@@ -55,6 +56,7 @@ typedef struct mp_vo_opts {
 
     float force_monitor_aspect;
     float monitor_pixel_aspect;
+    int force_render;
     int force_window_position;
 
     char *mmcss_profile;
@@ -306,6 +308,7 @@ typedef struct MPOpts {
     int sub_auto;
     int audiofile_auto;
     int coverart_auto;
+    bool coverart_whitelist;
     int osd_bar_visible;
 
     int w32_priority;

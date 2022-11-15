@@ -126,6 +126,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"window-minimized", OPT_FLAG(window_minimized)},
     {"window-maximized", OPT_FLAG(window_maximized)},
     {"focus-on-open", OPT_BOOL(focus_on_open)},
+    {"force-render", OPT_FLAG(force_render)},
     {"force-window-position", OPT_FLAG(force_window_position)},
     {"x11-name", OPT_STRING(winname)},
     {"wayland-app-id", OPT_STRING(appid)},
@@ -175,6 +176,8 @@ static const m_option_t mp_vo_opt_list[] = {
     {"x11-netwm", OPT_CHOICE(x11_netwm, {"auto", 0}, {"no", -1}, {"yes", 1})},
     {"x11-bypass-compositor", OPT_CHOICE(x11_bypass_compositor,
         {"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})},
+    {"x11-present", OPT_CHOICE(x11_present,
+        {"no", 0}, {"auto", 1}, {"yes", 2})},
 #endif
 #if HAVE_WIN32_DESKTOP
     {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
@@ -212,6 +215,7 @@ const struct m_sub_options vo_sub_opts = {
         .WinID = -1,
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,
+        .x11_present = 1,
         .mmcss_profile = "Playback",
         .ontop_level = -1,
         .timing_offset = 0.050,
@@ -611,6 +615,7 @@ static const m_option_t mp_opts[] = {
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
     {"cover-art-auto", OPT_CHOICE(coverart_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
+    {"cover-art-whitelist", OPT_BOOL(coverart_whitelist)},
 
     {"", OPT_SUBSTRUCT(subs_rend, mp_subtitle_sub_opts)},
     {"", OPT_SUBSTRUCT(subs_filt, mp_sub_filter_opts)},
@@ -1032,7 +1037,8 @@ static const struct MPOpts mp_default_opts = {
     .pitch_correction = 1,
     .sub_auto = 0,
     .audiofile_auto = -1,
-    .coverart_auto = 1,
+    .coverart_auto = 0,
+    .coverart_whitelist = true,
     .osd_bar_visible = 1,
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,

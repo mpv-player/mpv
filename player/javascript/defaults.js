@@ -277,7 +277,7 @@ function dispatch_key_binding(name, state, key_name) {
 var binds_tid = 0;  // flush timer id. actual id's are always true-thy
 mp.flush_key_bindings = function flush_key_bindings() {
     function prioritized_inputs(arr) {
-        return arr.sort(function(a, b) { return a.id > b.id })
+        return arr.sort(function(a, b) { return a.id - b.id })
                   .map(function(bind) { return bind.input });
     }
 

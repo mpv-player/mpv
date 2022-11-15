@@ -191,6 +191,8 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     If starting the command failed for some reason, ``nil, error`` is returned,
     and ``fn`` is called indicating failure, using the same error value.
 
+    ``fn`` is always called asynchronously, even if the command failed to start.
+
 ``mp.abort_async_command(t)``
     Abort a ``mp.command_native_async`` call. The argument is the return value
     of that command (which starts asynchronous execution of the command).

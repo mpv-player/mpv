@@ -65,6 +65,9 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #if HAVE_COREAUDIO
     &audio_out_coreaudio,
 #endif
+#if HAVE_PIPEWIRE
+    &audio_out_pipewire,
+#endif
 #if HAVE_PULSE
     &audio_out_pulse,
 #endif
@@ -89,9 +92,6 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #endif
 #if HAVE_SDL2_AUDIO
     &audio_out_sdl,
-#endif
-#if HAVE_PIPEWIRE
-    &audio_out_pipewire,
 #endif
 #if HAVE_SNDIO
     &audio_out_sndio,
@@ -453,8 +453,9 @@ struct ao_hotplug {
     void *wakeup_ctx;
     // A single AO instance is used to listen to hotplug events. It wouldn't
     // make much sense to allow multiple AO drivers; all sane platforms have
-    // a single such audio API.
-    // This is _not_ the same AO instance as used for playing audio.
+    // a single audio API providing all events.
+    // This is _not_ necessarily the same AO instance as used for playing
+    // audio.
     struct ao *ao;
     // cached
     struct ao_device_list *list;
@@ -494,7 +495,8 @@ bool ao_hotplug_check_update(struct ao_hotplug *hp)
 }
 
 // The return value is valid until the next call to this API.
-struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp)
+struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp,
+                                                  struct ao *playback_ao)
 {
     if (hp->list && !hp->needs_update)
         return hp->list;
@@ -505,6 +507,19 @@ struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp)
 
     MP_TARRAY_APPEND(list, list->devices, list->num_devices,
         (struct ao_device_desc){"auto", "Autoselect device"});
+
+    // Try to use the same AO for hotplug handling as for playback.
+    // Different AOs may not agree and the playback one is the only one the
+    // user knows about and may even have configured explicitly.
+    if (!hp->ao && playback_ao && playback_ao->driver->hotplug_init) {
+        struct ao *ao = ao_alloc(true, hp->global, hp->wakeup_cb, hp->wakeup_ctx,
+                                 (char *)playback_ao->driver->name);
+        if (playback_ao->driver->hotplug_init(ao) >= 0) {
+            hp->ao = ao;
+        } else {
+            talloc_free(ao);
+        }
+    }
 
     for (int n = 0; audio_out_drivers[n]; n++) {
         const struct ao_driver *d = audio_out_drivers[n];
@@ -517,10 +532,13 @@ struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp)
             continue;
 
         if (ao->driver->hotplug_init) {
-            if (!hp->ao && ao->driver->hotplug_init(ao) >= 0)
-                hp->ao = ao; // keep this one
-            if (hp->ao && hp->ao->driver == d)
-                get_devices(hp->ao, list);
+            if (ao->driver->hotplug_init(ao) >= 0) {
+                get_devices(ao, list);
+                if (hp->ao)
+                    ao->driver->hotplug_uninit(ao);
+                else
+                    hp->ao = ao; // keep this one
+            }
         } else {
             get_devices(ao, list);
         }
@@ -569,10 +587,11 @@ static void dummy_wakeup(void *ctx)
 {
 }
 
-void ao_print_devices(struct mpv_global *global, struct mp_log *log)
+void ao_print_devices(struct mpv_global *global, struct mp_log *log,
+                      struct ao *playback_ao)
 {
     struct ao_hotplug *hp = ao_hotplug_create(global, dummy_wakeup, NULL);
-    struct ao_device_list *list = ao_hotplug_get_device_list(hp);
+    struct ao_device_list *list = ao_hotplug_get_device_list(hp, playback_ao);
     mp_info(log, "List of detected audio devices:\n");
     for (int n = 0; n < list->num_devices; n++) {
         struct ao_device_desc *desc = &list->devices[n];

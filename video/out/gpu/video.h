@@ -162,6 +162,7 @@ struct gl_video_opts {
     float interpolation_threshold;
     int blend_subs;
     char **user_shaders;
+    char **user_shader_opts;
     int deband;
     struct deband_opts *deband_opts;
     float unsharp;

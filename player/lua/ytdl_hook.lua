@@ -193,11 +193,8 @@ end
 local function is_blacklisted(url)
     if o.exclude == "" then return false end
     if #ytdl.blacklisted == 0 then
-        local joined = o.exclude
-        while joined:match('%|?[^|]+') do
-            local _, e, substring = joined:find('%|?([^|]+)')
-            table.insert(ytdl.blacklisted, substring)
-            joined = joined:sub(e+1)
+        for match in o.exclude:gmatch('%|?([^|]+)') do
+            ytdl.blacklisted[#ytdl.blacklisted + 1] = match
         end
     end
     if #ytdl.blacklisted > 0 then
@@ -215,7 +212,9 @@ end
 local function parse_yt_playlist(url, json)
     -- return 0-based index to use with --playlist-start
 
-    if not json.extractor or json.extractor ~= "youtube:playlist" then
+    if not json.extractor or
+       (json.extractor ~= "youtube:tab" and
+        json.extractor ~= "youtube:playlist") then
         return nil
     end
 
@@ -240,7 +239,7 @@ local function parse_yt_playlist(url, json)
 
     -- if there's no index or it doesn't match, look for video
     for i = 1, #json.entries do
-        if json.entries[i] == args["v"] then
+        if json.entries[i].id == args["v"] then
             msg.debug("found requested video in index " .. (i - 1))
             return i - 1
         end
@@ -388,7 +387,7 @@ local function formats_to_edl(json, formats, use_all_formats)
     }
 
     local default_formats = {}
-    local requested_formats = json["requested_formats"]
+    local requested_formats = json["requested_formats"] or json["requested_downloads"]
     if use_all_formats and requested_formats then
         for _, track in ipairs(requested_formats) do
             local id = track["format_id"]
@@ -408,7 +407,15 @@ local function formats_to_edl(json, formats, use_all_formats)
                    (not track["abr"]) and (not track["vbr"])
     end
 
-    for index, track in ipairs(formats) do
+    local has_requested_video = false
+    local has_requested_audio = false
+    -- Web players with quality selection always show the highest quality
+    -- option at the top. Since tracks are usually listed with the first
+    -- track at the top, that should also be the highest quality track.
+    -- yt-dlp/youtube-dl sorts it's formats from worst to best.
+    -- Iterate in reverse to get best track first.
+    for index = #formats, 1, -1 do
+        local track = formats[index]
         local edl_track = nil
         edl_track = edl_track_joined(track.fragments,
             track.protocol, json.is_live,
@@ -417,29 +424,33 @@ local function formats_to_edl(json, formats, use_all_formats)
             return nil
         end
 
+        local is_default = default_formats[track["format_id"]]
         local tracks = {}
-        if track.vcodec and track.vcodec ~= "none" then
+        -- "none" means it is not a video
+        -- nil means it is unknown
+        if (o.force_all_formats or track.vcodec) and track.vcodec ~= "none" then
             tracks[#tracks + 1] = {
                 media_type = "video",
                 codec = map_codec_to_mpv(track.vcodec),
             }
+            if is_default then
+                has_requested_video = true
+            end
         end
-        -- Tries to follow the strange logic that vcodec unset means it's
-        -- an audio stream, even if acodec is sometimes unset.
-        if (#tracks == 0) or (track.acodec and track.acodec ~= "none") then
+        if (o.force_all_formats or track.acodec) and track.acodec ~= "none" then
             tracks[#tracks + 1] = {
                 media_type = "audio",
                 codec = map_codec_to_mpv(track.acodec) or
                         ext_map[track.ext],
             }
-        end
-        if #tracks == 0 then
-            return nil
+            if is_default then
+                has_requested_audio = true
+            end
         end
 
         local url = edl_track or track.url
         local hdr = {"!new_stream", "!no_clip", "!no_chapters"}
-        local skip = false
+        local skip = #tracks == 0
         local params = ""
 
         if use_all_formats then
@@ -480,7 +491,7 @@ local function formats_to_edl(json, formats, use_all_formats)
                     title = title .. "muxed-" .. index
                 end
                 local flags = {}
-                if default_formats[track["format_id"]] then
+                if is_default then
                     flags[#flags + 1] = "default"
                 end
                 hdr[#hdr + 1] = "!track_meta,title=" ..
@@ -493,12 +504,14 @@ local function formats_to_edl(json, formats, use_all_formats)
             end
         end
 
-        hdr[#hdr + 1] = edl_escape(url) .. params
+        if not skip then
+            hdr[#hdr + 1] = edl_escape(url) .. params
 
-        streams[#streams + 1] = table.concat(hdr, ";")
-        -- In case there is only 1 of these streams.
-        -- Note: assumes it has no important EDL headers
-        single_url = url
+            streams[#streams + 1] = table.concat(hdr, ";")
+            -- In case there is only 1 of these streams.
+            -- Note: assumes it has no important EDL headers
+            single_url = url
+        end
     end
 
     -- Merge all tracks into a single virtual file, but avoid EDL if it's
@@ -516,6 +529,13 @@ local function formats_to_edl(json, formats, use_all_formats)
         return nil
     end
 
+    if has_requested_audio ~= has_requested_video then
+        local not_req_prop = has_requested_video and "aid" or "vid"
+        if mp.get_property(not_req_prop) == "auto" then
+            mp.set_property("file-local-options/" .. not_req_prop, "no")
+        end
+    end
+
     return res
 end
 
@@ -523,8 +543,12 @@ local function add_single_video(json)
     local streamurl = ""
     local format_info = ""
     local max_bitrate = 0
-    local requested_formats = json["requested_formats"]
+    local requested_formats = json["requested_formats"] or json["requested_downloads"]
     local all_formats = json["formats"]
+    local has_requested_formats = requested_formats and #requested_formats > 0
+    local http_headers = has_requested_formats
+                         and requested_formats[1].http_headers
+                         or json.http_headers
 
     if o.use_manifests and valid_manifest(json) then
         -- prefer manifest_url if present
@@ -554,7 +578,6 @@ local function add_single_video(json)
     if streamurl == ""  then
         -- possibly DASH/split tracks
         local res = nil
-        local has_requested_formats = requested_formats and #requested_formats > 0
 
         -- Not having requested_formats usually hints to HLS master playlist
         -- usage, which we don't want to split off, at least not yet.
@@ -591,13 +614,14 @@ local function add_single_video(json)
         end
         -- normal video or single track
         streamurl = edl_track or json.url
-        set_http_headers(json.http_headers)
     end
 
     if streamurl == "" then
         msg.error("No URL found in JSON data.")
         return
     end
+
+    set_http_headers(http_headers)
 
     msg.verbose("format selection: " .. format_info)
     msg.debug("streamurl: " .. streamurl)
@@ -640,7 +664,8 @@ local function add_single_video(json)
                     edl = edl .. ",codec=" .. codec
                 end
                 edl = edl .. ";" .. edl_escape(sub)
-                mp.commandv("sub-add", edl, "auto", sub_info.ext, lang)
+                local title = sub_info.name or sub_info.ext
+                mp.commandv("sub-add", edl, "auto", title, lang)
             else
                 msg.verbose("No subtitle data/url for ["..lang.."]")
             end

@@ -99,7 +99,7 @@ struct vo_w32_state {
 
     bool focused;
 
-    // whether the window position and size were intialized
+    // whether the window position and size were initialized
     bool window_bounds_initialized;
 
     bool current_fs;
@@ -549,7 +549,7 @@ static void update_dpi(struct vo_w32_state *w32)
         ReleaseDC(NULL, hdc);
         MP_VERBOSE(w32, "DPI detected from the old API: %d\n", dpi);
     }
- 
+
     if (dpi <= 0) {
         dpi = 96;
         MP_VERBOSE(w32, "Couldn't determine DPI, falling back to %d\n", dpi);

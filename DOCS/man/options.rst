@@ -298,10 +298,10 @@ Playback Control
     :no:       Never use precise seeks.
     :absolute: Use precise seeks if the seek is to an absolute position in the
                file, such as a chapter seek, but not for relative seeks like
-               the default behavior of arrow keys (default).
+               the default behavior of arrow keys.
     :default:  Like ``absolute``, but enable hr-seeks in audio-only cases. The
                exact behavior is implementation specific and may change with
-               new releases.
+               new releases (default).
     :yes:      Use precise seeks whenever possible.
     :always:   Same as ``yes`` (for compatibility).
 
@@ -746,23 +746,6 @@ Program Behavior
 
     Note that the ``--no-config`` option takes precedence over this option.
 
-``--save-position-on-quit``
-    Always save the current playback position on quit. When this file is
-    played again later, the player will seek to the old playback position on
-    start. This does not happen if playback of a file is stopped in any other
-    way than quitting. For example, going to the next file in the playlist
-    will not save the position, and start playback at beginning the next time
-    the file is played.
-
-    This behavior is disabled by default, but is always available when quitting
-    the player with Shift+Q.
-
-``--watch-later-directory=<path>``
-    The directory in which to store the "watch later" temporary files.
-
-    The default is a subdirectory named "watch_later" underneath the
-    config directory (usually ``~/.config/mpv/``).
-
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To
@@ -804,18 +787,6 @@ Program Behavior
     Pretend that all files passed to mpv are concatenated into a single, big
     file. This uses timeline/EDL support internally.
 
-``--no-resume-playback``
-    Do not restore playback position from the ``watch_later`` configuration
-    subdirectory (usually ``~/.config/mpv/watch_later/``).
-    See ``quit-watch-later`` input command.
-
-``--resume-playback-check-mtime``
-    Only restore the playback position from the ``watch_later`` configuration
-    subdirectory (usually ``~/.config/mpv/watch_later/``) if the file's
-    modification time is the same as at the time of saving. This may prevent
-    skipping forward in files with the same name which have different content.
-    (Default: ``no``)
-
 ``--profile=<profile1,profile2,...>``
     Use the given profile(s), ``--profile=help`` displays a list of the
     defined profiles.
@@ -850,42 +821,6 @@ Program Behavior
           during playback.
         - ``--reset-on-next-file=all``
           Try to reset all settings that were changed during playback.
-
-``--watch-later-options=option1,option2,...``
-    The options that are saved in "watch later" files if they have been changed
-    since when mpv started. These values will be restored the next time the
-    files are played. The playback position is always saved as ``start``, so
-    adding ``start`` to this list has no effect.
-
-    When removing options, existing watch later data won't be modified and will
-    still be applied fully, but new watch later data won't contain these
-    options.
-
-    This is a string list option. See `List Options`_ for details.
-
-    .. admonition:: Examples
-
-        - ``--watch-later-options-remove=fullscreen``
-          The fullscreen state won't be saved to watch later files.
-        - ``--watch-later-options-remove=volume``
-          ``--watch-later-options-remove=mute``
-          The volume and mute state won't be saved to watch later files.
-        - ``--watch-later-options-clr``
-          No option will be saved to watch later files except the starting
-          position.
-
-``--write-filename-in-watch-later-config``
-    Prepend the watch later config files with the name of the file they refer
-    to. This is simply written as comment on the top of the file.
-
-    .. warning::
-
-        This option may expose privacy-sensitive information and is thus
-        disabled by default.
-
-``--ignore-path-in-watch-later-config``
-    Ignore path (i.e. use filename only) when using watch later feature.
-    (Default: disabled)
 
 ``--show-profile=<profile>``
     Show the description and content of a profile. Lists all profiles if no
@@ -1046,10 +981,9 @@ Program Behavior
     the overlay permanent).
 
 ``--load-osd-console=<yes|no>``
-    Enable the builtin script that shows a console on a key binding and lets
-    you enter commands (default: yes). By default,. The ``´`` key is used to
-    show the console, and ``ESC`` to hide it again. (This is based on  a user
-    script called ``repl.lua``.)
+    Enable the built-in script that shows a console on a key binding and lets
+    you enter commands (default: yes). The ````` key is used to show the
+    console by default, and ``ESC`` to hide it again.
 
 ``--load-auto-profiles=<yes|no|auto>``
     Enable the builtin script that does auto profiles (default: auto). See
@@ -1061,6 +995,75 @@ Program Behavior
     options are changed. This option should not normally be used directly, but
     only by mpv internally, or mpv-provided scripts, config files, or .desktop
     files. See `PSEUDO GUI MODE`_ for details.
+
+Watch Later
+-----------
+
+``--save-position-on-quit``
+    Always save the current playback position on quit. When this file is
+    played again later, the player will seek to the old playback position on
+    start. This does not happen if playback of a file is stopped in any other
+    way than quitting. For example, going to the next file in the playlist
+    will not save the position, and start playback at beginning the next time
+    the file is played.
+
+    This behavior is disabled by default, but is always available when quitting
+    the player with Shift+Q.
+
+    See `RESUMING PLAYBACK`_.
+
+``--watch-later-directory=<path>``
+    The directory in which to store the "watch later" temporary files.
+
+    The default is a subdirectory named "watch_later" underneath the
+    config directory (usually ``~/.config/mpv/``).
+
+``--no-resume-playback``
+    Do not restore playback position from the ``watch_later`` configuration
+    subdirectory (usually ``~/.config/mpv/watch_later/``).
+
+``--resume-playback-check-mtime``
+    Only restore the playback position from the ``watch_later`` configuration
+    subdirectory (usually ``~/.config/mpv/watch_later/``) if the file's
+    modification time is the same as at the time of saving. This may prevent
+    skipping forward in files with the same name which have different content.
+    (Default: ``no``)
+
+``--watch-later-options=option1,option2,...``
+    The options that are saved in "watch later" files if they have been changed
+    since when mpv started. These values will be restored the next time the
+    files are played. The playback position is always saved as ``start``, so
+    adding ``start`` to this list has no effect.
+
+    When removing options, existing watch later data won't be modified and will
+    still be applied fully, but new watch later data won't contain these
+    options.
+
+    This is a string list option. See `List Options`_ for details.
+
+    .. admonition:: Examples
+
+        - ``--watch-later-options-remove=fullscreen``
+          The fullscreen state won't be saved to watch later files.
+        - ``--watch-later-options-remove=volume``
+          ``--watch-later-options-remove=mute``
+          The volume and mute state won't be saved to watch later files.
+        - ``--watch-later-options-clr``
+          No option will be saved to watch later files except the starting
+          position.
+
+``--write-filename-in-watch-later-config``
+    Prepend the watch later config files with the name of the file they refer
+    to. This is simply written as comment on the top of the file.
+
+    .. warning::
+
+        This option may expose privacy-sensitive information and is thus
+        disabled by default.
+
+``--ignore-path-in-watch-later-config``
+    Ignore path (i.e. use filename only) when using watch later feature.
+    (Default: disabled)
 
 Video
 -----
@@ -1195,7 +1198,7 @@ Video
 
         When testing, you should start by using ``hwdec=auto-safe`` as it will
         limit itself to choosing from hwdecs that are actively supported by the
-        development team. If that doesn't result in working hardare decoding,
+        development team. If that doesn't result in working hardware decoding,
         you can try ``hwdec=auto`` to have it attempt to load every possible
         hwdec, but if ``auto-safe`` didn't work, you will probably need to know
         exactly which hwdec matches your hardware and read up on that entry
@@ -1246,10 +1249,12 @@ Video
     :videotoolbox: requires ``--vo=gpu`` (macOS 10.8 and up),
                    or ``--vo=libmpv`` (iOS 9.0 and up)
     :videotoolbox-copy: copies video back into system RAM (macOS 10.8 or iOS 9.0 and up)
-    :vaapi:     requires ``--vo=gpu`` or ``--vo=vaapi`` (Linux only)
+    :vaapi:     requires ``--vo=gpu``, ``--vo=vaapi`` or ``--vo=dmabuf-wayland`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with some GPUs only)
     :nvdec:     requires ``--vo=gpu`` (Any platform CUDA is available)
     :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
+    :drm:       requires ``--vo=gpu`` (Linux only)
+    :drm-copy:   copies video back to system RAM (Linux ony)
 
     Other hwdecs (only use if you know you have to):
 
@@ -1259,7 +1264,8 @@ Video
     :dxva2-copy: copies video back to system RAM (Windows only)
     :vdpau:     requires ``--vo=gpu`` with X11, or ``--vo=vdpau`` (Linux only)
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
-    :mediacodec: requires ``--vo=mediacodec_embed`` (Android only)
+    :mediacodec: requires ``--vo=gpu --gpu-context=android``
+                 or ``--vo=mediacodec_embed`` (Android only)
     :mediacodec-copy: copies video back to system RAM (Android only)
     :mmal:      requires ``--vo=gpu`` (Raspberry Pi only - default if available)
     :mmal-copy: copies video back to system RAM (Raspberry Pi only)
@@ -1358,6 +1364,11 @@ Video
 
         ``rpi`` always uses the hardware overlay renderer, even with
         ``--vo=gpu``.
+
+        ``mediacodec`` is not safe. It forces RGB conversion (not with ``-copy``)
+        and how well it handles non-standard colorspaces is not known.
+        In the rare cases where 10-bit is supported the bit depth of the output
+        will be reduced to 8.
 
         ``cuda`` should usually be safe, but depending on how a file/stream
         has been mixed, it has been reported to corrupt the timestamps causing
@@ -1705,7 +1716,7 @@ Video
 ``--vd-lavc-bitexact``
     Only use bit-exact algorithms in all decoding steps (for codec testing).
 
-``--vd-lavc-fast`` (MPEG-2, MPEG-4, and H.264 only)
+``--vd-lavc-fast`` (MPEG-1/2 and H.264 only)
     Enable optimizations which do not comply with the format specification and
     potentially cause problems, like simpler dequantization, simpler motion
     compensation, assuming use of the default quantization matrix, assuming YUV
@@ -1731,12 +1742,14 @@ Video
     no, libavcodec won't output frames that were either decoded before an
     initial keyframe was decoded, or frames that are recognized as corrupted.
 
-``--vd-lavc-skiploopfilter=<skipvalue> (H.264 only)``
-    Skips the loop filter (AKA deblocking) during H.264 decoding. Since
+``--vd-lavc-skiploopfilter=<skipvalue>`` (H.264, HEVC only)
+    Skips the loop filter (AKA deblocking) during decoding. Since
     the filtered frame is supposed to be used as reference for decoding
     dependent frames, this has a worse effect on quality than not doing
     deblocking on e.g. MPEG-2 video. But at least for high bitrate HDTV,
     this provides a big speedup with little visible quality loss.
+    Codecs other than H.264 or HEVC may have partial support for this option
+    (often only ``all`` and ``none``).
 
     ``<skipvalue>`` can be one of the following:
 
@@ -1748,7 +1761,7 @@ Video
     :nonkey:  Skip all frames except keyframes.
     :all:     Skip all frames.
 
-``--vd-lavc-skipidct=<skipvalue> (MPEG-1/2 only)``
+``--vd-lavc-skipidct=<skipvalue>`` (MPEG-1/2/4 only)
     Skips the IDCT step. This degrades quality a lot in almost all cases
     (see skiploopfilter for available skip values).
 
@@ -1771,7 +1784,7 @@ Video
     Normally, this is autodetected by libavcodec. But if the bitstream contains
     no x264 version info (or it was somehow skipped), and the stream was in fact
     encoded by an old x264 version (build 150 or earlier), and if the stream
-    uses ``4:4:4`` chroma, then libavcodec will by default show corrupted video.
+    uses 4:4:4 chroma, then libavcodec will by default show corrupted video.
     This option sets the libavcodec ``x264_build`` option to ``150``, which
     means that if the stream contains no version info, or was not encoded by
     x264 at all, it assumes it was encoded by the old version. Enabling this
@@ -2015,9 +2028,9 @@ Audio
 
         Using this mode is recommended for direct hardware output, especially
         over HDMI (see HDMI warning below).
-    - ``--audio-channels=stereo``
-        Force  a plain stereo downmix. This is a special-case of the previous
-        item. (See paragraphs below for implications.)
+    - ``--audio-channels=<stereo|mono>``
+        Force a downmix to stereo or mono. These are special-cases of the
+        previous item. (See paragraphs below for implications.)
 
     If a list of layouts is given, each item can be either an explicit channel
     layout name (like ``5.1``), or a channel number. Channel numbers refer to
@@ -2696,12 +2709,6 @@ Subtitles
 ``--sub-border-color=<color>``
     See ``--sub-color``. Color used for the sub font border.
 
-    .. note::
-
-        ignored when ``--sub-back-color`` is
-        specified (or more exactly: when that option is not set to completely
-        transparent).
-
 ``--sub-border-size=<size>``
     Size of the sub font border in scaled pixels (see ``--sub-font-size``
     for details). A value of 0 disables borders.
@@ -2768,7 +2775,7 @@ Subtitles
 ``--sub-justify=<auto|left|center|right>``
     Control how multi line subs are justified irrespective of where they
     are aligned (default: ``auto`` which justifies as defined by
-    ``--sub-align-y``).
+    ``--sub-align-x``).
     Left justification is recommended to make the subs easier to read
     as it is easier for the eyes.
 
@@ -2779,6 +2786,12 @@ Subtitles
 
 ``--sub-shadow-color=<color>``
     See ``--sub-color``. Color used for sub text shadow.
+
+    .. note::
+
+        ignored when ``--sub-back-color`` is
+        specified (or more exactly: when that option is not set to completely
+        transparent).
 
 ``--sub-shadow-offset=<size>``
     Displacement of the sub text shadow in scaled pixels (see
@@ -2951,7 +2964,7 @@ Window
 
 ``--keep-open=<yes|no|always>``
     Do not terminate when playing or seeking beyond the end of the file, and
-    there is not next file to be played (and ``--loop`` is not used).
+    there is no next file to be played (and ``--loop`` is not used).
     Instead, pause the player. When trying to seek beyond end of the file, the
     player will attempt to seek to the last frame.
 
@@ -3230,6 +3243,12 @@ Window
     depending on GPU drivers and hardware. For other VOs, this just makes
     rendering slower.
 
+``--force-render``
+    Forces mpv to always render frames regardless of the visibility of the
+    window. Currently only affects X11 and Wayland VOs since they are the
+    only ones that have this optimization (i.e. everything else always renders
+    regardless of visibility).
+
 ``--force-window-position``
     Forcefully move mpv's video output window to default location whenever
     there is a change in video parameters, video stream or file. This used to
@@ -3310,7 +3329,7 @@ Window
     On Android, the ID is interpreted as ``android.view.Surface``. Pass it as a
     value cast to ``intptr_t``. Use with ``--vo=mediacodec_embed`` and
     ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with
-    ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec-copy``).
+    ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec``).
 
 ``--no-window-dragging``
     Don't move the window when clicking on it and moving the mouse pointer.
@@ -3350,6 +3369,23 @@ Window
     as declared by the EWMH specification, i.e. no change is done.
 
     ``never`` asks the window manager to never disable the compositor.
+
+``--x11-present=<no|auto|yes>``
+    Whether or not to use presentation statistics from X11's presentation
+    extension (default: ``auto``).
+
+    mpv asks X11 for present events which it then may use for more accurate
+    frame presentation. This only has an effect if ``--video-sync=display-...``
+    is being used.
+
+    The auto option enumerates XRandr providers for autodetection. If amd, radeon,
+    intel, or nouveau (the standard x86 Mesa drivers) is found and nvidia is NOT
+    found, presentation feedback is enabled. Other drivers are not assumed to
+    work, so they are not enabled automatically.
+
+    ``yes`` or ``no`` can still be passed regardless to enable/disable this
+    mechanism in case there is good/bad behavior with whatever your combination
+    of hardware/drivers/etc. happens to be.
 
 
 Disc Devices
@@ -4201,6 +4237,7 @@ Screenshot
     :jpg:       JPEG (default)
     :jpeg:      JPEG (alias for jpg)
     :webp:      WebP
+    :jxl:       JPEG XL
 
 ``--screenshot-tag-colorspace=<yes|no>``
     Tag screenshots with the appropriate colorspace.
@@ -4345,6 +4382,16 @@ Screenshot
     Set the WebP compression level. Higher means better compression, but takes
     more CPU time. Note that this also affects the screenshot quality when used
     with lossy WebP files. The default is 4.
+
+``--screenshot-jxl-distance=<0-15>``
+    Set the JPEG XL Butteraugli distance. Lower means better quality. Lossless
+    is 0.0, and 1.0 is approximately equivalent to JPEG quality 90 for
+    photographic content. Use 0.1 for "visually lossless" screenshots. The
+    default is 1.0.
+
+``--screenshot-jxl-effort=<1-9>``
+    Set the JPEG XL compression effort. Higher effort (usually) means better
+    compression, but takes more CPU time. The default is 3.
 
 ``--screenshot-sw=<yes|no>``
     Whether to use software rendering for screenshots (default: no).
@@ -5293,7 +5340,7 @@ them.
     cropping and video placement, which always invalidate the cache. Enabling
     this option makes dynamic updates of renderer settings slightly smoother at
     the cost of slightly higher latency in response to such changes. Defaults
-    to on. (Only affects ``--vo=gpu-next``, note that ``-vo=gpu`` always
+    to on. (Only affects ``--vo=gpu-next``, note that ``--vo=gpu`` always
     invalidates interpolated frames)
 
 ``--opengl-pbo``
@@ -5430,11 +5477,6 @@ them.
     use of compute shaders over fragment shaders wherever possible. Enabled by
     default, although Nvidia users may want to disable it.
 
-``--vulkan-disable-events``
-    Disable the use of VkEvents, for debugging purposes or for compatibility
-    with some older drivers / vulkan portability layers that don't provide
-    working VkEvent support.
-
 ``--vulkan-display-display=<n>``
     The index of the display, on the selected Vulkan device, to present on when
     using the ``displayvk`` GPU context. Use ``--vulkan-display-display=help``
@@ -5537,11 +5579,18 @@ them.
 ``--wayland-app-id=<string>``
     Set the client app id for Wayland-based video output methods (default: ``mpv``).
 
+``--wayland-configure-bounds=<yes|no>``
+    Controls whether or not mpv opts into the configure bounds event if sent by the
+    compositor (default: yes). This restricts the initial size of the mpv window to
+    a certain maximum size intended by the compositor. In most cases, this simply
+    just prevents the mpv window from being larger than the size of the monitor when
+    it first renders. This option will take precedence over any ``autofit`` or
+    ``geometry`` type settings if the configure bounds are used.
+
 ``--wayland-disable-vsync=<yes|no>``
-    Disable vsync for the wayland contexts (default: no). Useful for benchmarking
-    the wayland context when combined with ``video-sync=display-desync``,
-    ``--no-audio``, and ``--untimed=yes``. Only works with ``--gpu-context=wayland``
-    and ``--gpu-context=waylandvk``.
+    Disable mpv's internal vsync for Wayland-based video output (default: no).
+    This is mainly useful for benchmarking wayland VOs when combined with
+    ``video-sync=display-desync``, ``--no-audio``, and ``--untimed=yes``.
 
 ``--wayland-edge-pixels-pointer=<value>``
     Defines the size of an edge border (default: 10) to initiate client side
@@ -5813,6 +5862,13 @@ them.
 
 ``--glsl-shader=<file>``
     CLI/config file only alias for ``--glsl-shaders-append``.
+
+``--glsl-shader-opts=param1=value1,param2=value2,...``
+    Specifies the options to use for tunable shader parameters. You can target
+    specific named shaders by prefixing the shader name with a ``/``, e.g.
+    ``shader/param=value``. Without a prefix, parameters affect all shaders.
+    The shader name is the base part of the shader filename, without the
+    extension. (``--vo=gpu-next`` only)
 
 ``--deband``
     Enable the debanding algorithm. This greatly reduces the amount of visible
@@ -6146,25 +6202,13 @@ them.
     other ways (like with the ``--gamma`` option or key bindings and the
     ``gamma`` property), the value is multiplied with the other gamma value.
 
-    Recommended values based on the environmental brightness:
-
-    1.0
-        Pitch black or dimly lit room (default)
-    1.1
-        Moderately lit room, home
-    1.2
-        Brightly illuminated room, office
-
-    NOTE: This is based around the assumptions of typical movie content, which
-    contains an implicit end-to-end of about 0.8 from scene to display. For
-    bright environments it can be useful to cancel that out.
+    This option is deprecated and may be removed in the future.
 
 ``--gamma-auto``
     Automatically corrects the gamma value depending on ambient lighting
     conditions (adding a gamma boost for bright rooms).
 
-    With ambient illuminance of 16 lux, mpv will pick the 1.0 gamma value (no
-    boost), and slightly increase the boost up until 1.2 for 256 lux.
+    This option is deprecated and may be removed in the future.
 
     NOTE: Only implemented on macOS.
 
@@ -6381,6 +6425,10 @@ them.
         Specifies the local contrast coefficient at the display peak. Defaults
         to 0.5, which means that in-gamut values will be about half as bright
         as when clipping.
+    bt.2390
+        Specifies the offset for the knee point. Defaults to 1.0, which is
+        higher than the value from the original ITU-R specification (0.5).
+        (``--vo=gpu-next`` only)
     gamma
         Specifies the exponent of the function. Defaults to 1.8.
     linear
@@ -6403,7 +6451,7 @@ them.
     allows no additional brightness boost. A value of 2.0 would allow
     over-exposing by a factor of 2, and so on. Raising this setting can help
     reveal details that would otherwise be hidden in dark scenes, but raising
-    it too high will make dark scenes appear unnaturally bright. (``-vo=gpu``
+    it too high will make dark scenes appear unnaturally bright. (``--vo=gpu``
     only)
 
 ``--tone-mapping-mode``
@@ -6900,15 +6948,21 @@ Miscellaneous
     (which are not marked as cover art), external cover art will not be loaded.
 
     :no:    Don't automatically load cover art.
-    :exact: Load the media filename with an image file extension.
-    :fuzzy: Load all cover art containing the media filename and filenames
-            in an internal whitelist, such as ``cover.jpg`` (default).
+    :exact: Load the media filename with an image file extension (default).
+    :fuzzy: Load all cover art containing the media filename.
     :all:   Load all images in the current directory.
 
     See ``--cover-art-files`` for details about what constitutes cover art.
 
     See ``--audio-display`` how to control display of cover art (this can be
     used to disable cover art that is part of the file).
+
+``--cover-art-whitelist=<no|yes>``
+    Whether to load filenames in an internal whitelist, such as ``cover.jpg``,
+    as cover art. If ``cover-art-auto`` is set to ``no``, the whitelisted
+    filenames are never loaded even if this option is set to ``yes``.
+
+    Default: ``yes``.
 
 ``--autoload-files=<yes|no>``
     Automatically load/select external files (default: yes).
@@ -6962,7 +7016,7 @@ Miscellaneous
     that are unavailable to outside users.
 
     This replaces ``--record-file``. It is similar to the ancient/removed
-    ``--stream-capture``/``-capture`` options, and provides better behavior in
+    ``--stream-capture``/``--capture`` options, and provides better behavior in
     most cases (i.e. actually works).
 
 ``--lavfi-complex=<string>``

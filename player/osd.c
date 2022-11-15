@@ -460,7 +460,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
     }
 }
 
-// OSD messages initated by seeking commands are added lazily with this
+// OSD messages initiated by seeking commands are added lazily with this
 // function, because multiple successive seek commands can be coalesced.
 static void add_seek_osd_messages(struct MPContext *mpctx)
 {

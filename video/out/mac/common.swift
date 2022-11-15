@@ -152,7 +152,7 @@ class Common: NSObject {
     }
 
     func uninitCommon() {
-        setCursorVisiblility(true)
+        setCursorVisibility(true)
         stopDisplaylink()
         uninitLightSensor()
         removeDisplayReconfigureObserver()
@@ -388,10 +388,10 @@ class Common: NSObject {
     }
 
     func updateCursorVisibility() {
-        setCursorVisiblility(cursorVisibilityWanted)
+        setCursorVisibility(cursorVisibilityWanted)
     }
 
-    func setCursorVisiblility(_ visible: Bool) {
+    func setCursorVisibility(_ visible: Bool) {
         NSCursor.setHiddenUntilMouseMoves(!visible && (view?.canHideCursor() ?? false))
     }
 
@@ -523,7 +523,7 @@ class Common: NSObject {
     @objc func control(_ vo: UnsafeMutablePointer<vo>,
                          events: UnsafeMutablePointer<Int32>,
                          request: UInt32,
-                         data: UnsafeMutableRawPointer) -> Int32
+                         data: UnsafeMutableRawPointer?) -> Int32
     {
         guard let mpv = mpv else {
             log.sendWarning("Unexpected nil value in Control Callback")
@@ -573,11 +573,11 @@ class Common: NSObject {
             }
             return VO_TRUE
         case VOCTRL_GET_DISPLAY_FPS:
-            let fps = data.assumingMemoryBound(to: CDouble.self)
+            let fps = data!.assumingMemoryBound(to: CDouble.self)
             fps.pointee = currentFps()
             return VO_TRUE
         case VOCTRL_GET_HIDPI_SCALE:
-            let scaleFactor = data.assumingMemoryBound(to: CDouble.self)
+            let scaleFactor = data!.assumingMemoryBound(to: CDouble.self)
             let screen = getCurrentScreen()
             let factor = window?.backingScaleFactor ??
                          screen?.backingScaleFactor ?? 1.0
@@ -590,10 +590,10 @@ class Common: NSObject {
             disableDisplaySleep()
             return VO_TRUE
         case VOCTRL_SET_CURSOR_VISIBILITY:
-            let cursorVisibility = data.assumingMemoryBound(to: CBool.self)
+            let cursorVisibility = data!.assumingMemoryBound(to: CBool.self)
             cursorVisibilityWanted = cursorVisibility.pointee
             DispatchQueue.main.async {
-                self.setCursorVisiblility(self.cursorVisibilityWanted)
+                self.setCursorVisibility(self.cursorVisibilityWanted)
             }
             return VO_TRUE
         case VOCTRL_GET_ICC_PROFILE:
@@ -603,7 +603,7 @@ class Common: NSObject {
                 return VO_TRUE
             }
 
-            let icc = data.assumingMemoryBound(to: bstr.self)
+            let icc = data!.assumingMemoryBound(to: bstr.self)
             iccData.withUnsafeMutableBytes { (ptr: UnsafeMutableRawBufferPointer) in
                 guard let baseAddress = ptr.baseAddress, ptr.count > 0 else { return }
                 let u8Ptr = baseAddress.assumingMemoryBound(to: UInt8.self)
@@ -612,13 +612,13 @@ class Common: NSObject {
             return VO_TRUE
         case VOCTRL_GET_AMBIENT_LUX:
             if lightSensor != 0 {
-                let lux = data.assumingMemoryBound(to: Int32.self)
+                let lux = data!.assumingMemoryBound(to: Int32.self)
                 lux.pointee = Int32(lmuToLux(lastLmu))
                 return VO_TRUE;
             }
             return VO_NOTIMPL
         case VOCTRL_GET_UNFS_WINDOW_SIZE:
-            let sizeData = data.assumingMemoryBound(to: Int32.self)
+            let sizeData = data!.assumingMemoryBound(to: Int32.self)
             let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
             var rect = window?.unfsContentFrame ?? NSRect(x: 0, y: 0, width: 1280, height: 720)
             if let screen = window?.currentScreen, !Bool(mpv.opts.hidpi_window_scale) {
@@ -629,7 +629,7 @@ class Common: NSObject {
             size[1] = Int32(rect.size.height)
             return VO_TRUE
         case VOCTRL_SET_UNFS_WINDOW_SIZE:
-            let sizeData = data.assumingMemoryBound(to: Int32.self)
+            let sizeData = data!.assumingMemoryBound(to: Int32.self)
             let size = UnsafeBufferPointer(start: sizeData, count: 2)
             var rect = NSMakeRect(0, 0, CGFloat(size[0]), CGFloat(size[1]))
             DispatchQueue.main.async {
@@ -640,7 +640,7 @@ class Common: NSObject {
             }
             return VO_TRUE
         case VOCTRL_GET_DISPLAY_NAMES:
-            let dnames = data.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self)
+            let dnames = data!.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self)
             var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>? = nil
             var count: Int32 = 0
             let displayName = getCurrentScreen()?.displayName ?? "Unknown"
@@ -654,18 +654,18 @@ class Common: NSObject {
                 log.sendWarning("No Screen available to retrieve frame")
                 return VO_NOTAVAIL
             }
-            let sizeData = data.assumingMemoryBound(to: Int32.self)
+            let sizeData = data!.assumingMemoryBound(to: Int32.self)
             let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
             let frame = screen.convertRectToBacking(screen.frame)
             size[0] = Int32(frame.size.width)
             size[1] = Int32(frame.size.height)
             return VO_TRUE
         case VOCTRL_GET_FOCUSED:
-            let focus = data.assumingMemoryBound(to: CBool.self)
+            let focus = data!.assumingMemoryBound(to: CBool.self)
             focus.pointee = NSApp.isActive
             return VO_TRUE
         case VOCTRL_UPDATE_WINDOW_TITLE:
-            let titleData = data.assumingMemoryBound(to: Int8.self)
+            let titleData = data!.assumingMemoryBound(to: Int8.self)
             DispatchQueue.main.async {
                 let title = NSString(utf8String: titleData) as String?
                 self.title = title ?? "Unknown Title"

@@ -193,6 +193,7 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
 
     if (pos < samples && p->playing && !p->paused) {
         p->playing = false;
+        ao->wakeup_cb(ao->wakeup_ctx);
         // For ao_drain().
         pthread_cond_broadcast(&p->wakeup);
     }

@@ -75,8 +75,8 @@ class LibmpvHelper {
                         -> UnsafeMutableRawPointer? in
         let symbol: CFString = CFStringCreateWithCString(
                                 kCFAllocatorDefault, name, kCFStringEncodingASCII)
-        let indentifier = CFBundleGetBundleWithIdentifier("com.apple.opengl" as CFString)
-        let addr = CFBundleGetFunctionPointerForName(indentifier, symbol)
+        let identifier = CFBundleGetBundleWithIdentifier("com.apple.opengl" as CFString)
+        let addr = CFBundleGetFunctionPointerForName(identifier, symbol)
 
         if symbol as String == "glFlush" {
             return unsafeBitCast(glDummy, to: UnsafeMutableRawPointer.self)

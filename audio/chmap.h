@@ -75,6 +75,8 @@ struct mp_chmap {
     uint8_t speaker[MP_NUM_CHANNELS];
 };
 
+typedef const char * const (mp_ch_layout_tuple)[2];
+
 #define MP_SP(speaker) MP_SPEAKER_ID_ ## speaker
 
 #define MP_CHMAP2(a, b) \
@@ -128,6 +130,19 @@ char *mp_chmap_to_str_hr_buf(char *buf, size_t buf_size, const struct mp_chmap *
 #define mp_chmap_to_str_hr(m) mp_chmap_to_str_hr_buf((char[128]){0}, 128, (m))
 
 bool mp_chmap_from_str(struct mp_chmap *dst, bstr src);
+
+/**
+ * Iterate over all built-in channel layouts which have mapped channels.
+ *
+ * @param opaque a pointer where the iteration state is stored. Must point
+ *               to nullptr to start the iteration.
+ *
+ * @return nullptr when the iteration is finished.
+ *         Otherwise a pointer to an array of two char pointers.
+ *         - [0] being the human-readable layout name.
+ *         - [1] being the string representation of the layout.
+ */
+mp_ch_layout_tuple *mp_iterate_builtin_layouts(void **opaque);
 
 struct mp_log;
 void mp_chmap_print_help(struct mp_log *log);

@@ -19,32 +19,33 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "hwdec_vaapi.h"
+#include "dmabuf_interop.h"
 #include "video/out/placebo/ra_pl.h"
 #include "video/out/placebo/utils.h"
 
-static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper, bool probing)
+static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper,
+                         struct dmabuf_interop *dmabuf_interop,
+                         bool probing)
 {
-    struct priv *p = mapper->priv;
+    struct dmabuf_interop_priv *p = mapper->priv;
     pl_gpu gpu = ra_pl_get(mapper->ra);
 
     struct ra_imgfmt_desc desc = {0};
     if (!ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
         return false;
 
+    // The calling code validates that the total number of exported planes
+    // equals the number we expected in p->num_planes.
+    int layer = 0;
+    int layer_plane = 0;
     for (int n = 0; n < p->num_planes; n++) {
-        if (p->desc.layers[n].num_planes > 1) {
-            // Should never happen because we request separate layers
-            MP_ERR(mapper, "Multi-plane VA surfaces are not supported\n");
-            return false;
-        }
 
         const struct ra_format *format = desc.planes[n];
-        int id = p->desc.layers[n].object_index[0];
+        int id = p->desc.layers[layer].planes[layer_plane].object_index;
         int fd = p->desc.objects[id].fd;
         uint32_t size = p->desc.objects[id].size;
-        uint32_t offset = p->desc.layers[n].offset[0];
-        uint32_t pitch = p->desc.layers[n].pitch[0];
+        uint32_t offset = p->desc.layers[layer].planes[layer_plane].offset;
+        uint32_t pitch = p->desc.layers[layer].planes[layer_plane].pitch;
 
         // AMD drivers do not return the size in the surface description, so we
         // need to query it manually.
@@ -76,7 +77,7 @@ static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper, bool probing)
                 },
                 .size = size,
                 .offset = offset,
-                .drm_format_mod = p->desc.objects[id].drm_format_modifier,
+                .drm_format_mod = p->desc.objects[id].format_modifier,
                 .stride_w = pitch,
             },
         };
@@ -98,6 +99,12 @@ static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper, bool probing)
 
         MP_TRACE(mapper, "Object %d with fd %d imported as %p\n",
                 id, fd, ratex);
+
+        layer_plane++;
+        if (layer_plane == p->desc.layers[layer].nb_planes) {
+            layer_plane = 0;
+            layer++;
+        }
     }
     return true;
 }
@@ -108,9 +115,9 @@ static void vaapi_pl_unmap(struct ra_hwdec_mapper *mapper)
         ra_tex_free(mapper->ra, &mapper->tex[n]);
 }
 
-bool vaapi_pl_init(const struct ra_hwdec *hw)
+bool dmabuf_interop_pl_init(const struct ra_hwdec *hw,
+                            struct dmabuf_interop *dmabuf_interop)
 {
-    struct priv_owner *p = hw->priv;
     pl_gpu gpu = ra_pl_get(hw->ra);
     if (!gpu) {
         // This is not a libplacebo RA;
@@ -118,15 +125,15 @@ bool vaapi_pl_init(const struct ra_hwdec *hw)
     }
 
     if (!(gpu->import_caps.tex & PL_HANDLE_DMA_BUF)) {
-        MP_VERBOSE(hw, "VAAPI libplacebo interop requires support for "
+        MP_VERBOSE(hw, "libplacebo dmabuf interop requires support for "
                         "PL_HANDLE_DMA_BUF import.\n");
         return false;
     }
 
-    MP_VERBOSE(hw, "using VAAPI libplacebo interop\n");
+    MP_VERBOSE(hw, "using libplacebo dmabuf interop\n");
 
-    p->interop_map = vaapi_pl_map;
-    p->interop_unmap = vaapi_pl_unmap;
+    dmabuf_interop->interop_map = vaapi_pl_map;
+    dmabuf_interop->interop_unmap = vaapi_pl_unmap;
 
     return true;
 }

@@ -21,6 +21,7 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "misc/random.h"
 #include "mpv_talloc.h"
 #include "options/path.h"
 
@@ -147,7 +148,7 @@ void playlist_shuffle(struct playlist *pl)
     for (int n = 0; n < pl->num_entries; n++)
         pl->entries[n]->original_index = n;
     for (int n = 0; n < pl->num_entries - 1; n++) {
-        int j = (int)((double)(pl->num_entries - n) * rand() / (RAND_MAX + 1.0));
+        size_t j = (size_t)((pl->num_entries - n) * mp_rand_next_double());
         MPSWAP(struct playlist_entry *, pl->entries[n], pl->entries[n + j]);
     }
     playlist_update_indexes(pl, 0, -1);

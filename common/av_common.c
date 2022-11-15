@@ -30,6 +30,7 @@
 
 #include "config.h"
 
+#include "audio/chmap_avchannel.h"
 #include "common/common.h"
 #include "common/msg.h"
 #include "demux/packet.h"
@@ -108,9 +109,14 @@ AVCodecParameters *mp_codec_params_to_av(struct mp_codec_params *c)
     avp->sample_rate = c->samplerate;
     avp->bit_rate = c->bitrate;
     avp->block_align = c->block_align;
+
+#if !HAVE_AV_CHANNEL_LAYOUT
     avp->channels = c->channels.num;
     if (!mp_chmap_is_unknown(&c->channels))
         avp->channel_layout = mp_chmap_to_lavc(&c->channels);
+#else
+    mp_chmap_to_av_layout(&avp->ch_layout, &c->channels);
+#endif
 
     return avp;
 error:

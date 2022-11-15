@@ -25,8 +25,10 @@ local opts = {
     -- have to be a monospaced font.
     font = "",
     -- Set the font size used for the REPL and the console. This will be
-    -- multiplied by "scale."
+    -- multiplied by "scale".
     font_size = 16,
+    -- Remove duplicate entries in history as to only keep the latest one.
+    history_dedup = true,
 }
 
 function detect_platform()
@@ -64,7 +66,8 @@ local history = {}
 local history_pos = 1
 local log_buffer = {}
 local key_bindings = {}
-local global_margin_y = 0
+local global_margin_top = 0
+local global_margin_bottom = 0
 
 local update_timer = nil
 update_timer = mp.add_periodic_timer(0.05, function()
@@ -84,9 +87,11 @@ utils.shared_script_property_observe("osc-margins", function(_, val)
         for v in string.gmatch(val, "[^,]+") do
             vals[#vals + 1] = tonumber(v)
         end
-        global_margin_y = vals[4] -- bottom
+        global_margin_top = vals[3] -- top
+        global_margin_bottom = vals[4] -- bottom
     else
-        global_margin_y = 0
+        global_margin_top = 0
+        global_margin_bottom = 0
     end
     update()
 end)
@@ -143,12 +148,16 @@ function update()
         return
     end
 
+    local coordinate_top = math.floor(global_margin_top * screeny + 0.5)
+    local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
+                                 screenx .. ',' .. screeny
     local ass = assdraw.ass_new()
     local style = '{\\r' ..
                   '\\1a&H00&\\3a&H00&\\4a&H99&' ..
                   '\\1c&Heeeeee&\\3c&H111111&\\4c&H000000&' ..
                   '\\fn' .. opts.font .. '\\fs' .. opts.font_size ..
-                  '\\bord1\\xshad0\\yshad1\\fsp0\\q1}'
+                  '\\bord1\\xshad0\\yshad1\\fsp0\\q1' ..
+                  '\\clip(' .. clipping_coordinates .. ')}'
     -- Create the cursor glyph as an ASS drawing. ASS will draw the cursor
     -- inline with the surrounding text, but it sets the advance to the width
     -- of the drawing. So the cursor doesn't affect layout too much, make it as
@@ -168,7 +177,10 @@ function update()
     -- messages.
     local log_ass = ''
     local log_messages = #log_buffer
-    local log_max_lines = math.ceil(screeny / opts.font_size)
+    local screeny_factor = (1 - global_margin_top - global_margin_bottom)
+    -- subtract 1.5 to account for the input line
+    local log_max_lines = screeny * screeny_factor / opts.font_size - 1.5
+    log_max_lines = math.ceil(log_max_lines)
     if log_max_lines < log_messages then
         log_messages = log_max_lines
     end
@@ -178,7 +190,7 @@ function update()
 
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2 - global_margin_y * screeny)
+    ass:pos(2, screeny - 2 - global_margin_bottom * screeny)
     ass:append(log_ass .. '\\N')
     ass:append(style .. '> ' .. before_cur)
     ass:append(cglyph)
@@ -188,7 +200,7 @@ function update()
     -- cursor appear in front of the text.
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2)
+    ass:pos(2, screeny - 2 - global_margin_bottom * screeny)
     ass:append(style .. '{\\alpha&HFF&}> ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
@@ -222,7 +234,7 @@ function show_and_type(text, cursor_pos)
 
     -- Save the line currently being edited, just in case
     if line ~= text and line ~= '' and history[#history] ~= line then
-        history[#history + 1] = line
+        history_add(line)
     end
 
     line = text
@@ -251,7 +263,7 @@ function next_utf8(str, pos)
     return pos
 end
 
--- As above, but finds the previous UTF-8 charcter in 'str' before 'pos'
+-- As above, but finds the previous UTF-8 character in 'str' before 'pos'
 function prev_utf8(str, pos)
     if pos <= 1 then return pos end
     repeat
@@ -364,13 +376,28 @@ function help_command(param)
     log_add('', output)
 end
 
+-- Add a line to the history and deduplicate
+function history_add(text)
+    if opts.history_dedup then
+        -- More recent entries are more likely to be repeated
+        for i = #history, 1, -1 do
+            if history[i] == text then
+                table.remove(history, i)
+                break
+            end
+        end
+    end
+
+    history[#history + 1] = text
+end
+
 -- Run the current command and clear the line (Enter)
 function handle_enter()
     if line == '' then
         return
     end
     if history[#history] ~= line then
-        history[#history + 1] = line
+        history_add(line)
     end
 
     -- match "help [<text>]", return <text> or "", strip all whitespace
@@ -406,7 +433,7 @@ function go_history(new_pos)
     -- entry. This makes it much less frustrating to accidentally hit Up/Down
     -- while editing a line.
     if old_pos == #history + 1 and line ~= '' and history[#history] ~= line then
-        history[#history + 1] = line
+        history_add(line)
     end
 
     -- Now show the history line (or a blank line for #history + 1)

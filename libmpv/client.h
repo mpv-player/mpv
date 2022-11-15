@@ -27,10 +27,10 @@
 #include <stdint.h>
 
 /* New symbols must still be added to libmpv/mpv.def. */
-#if defined(__GNUC__) || defined(__clang__)
-#define MPV_EXPORT __attribute__((visibility("default")))
-#elif defined(_MSC_VER)
+#ifdef _WIN32
 #define MPV_EXPORT __declspec(dllexport)
+#elif defined(__GNUC__) || defined(__clang__)
+#define MPV_EXPORT __attribute__((visibility("default")))
 #else
 #define MPV_EXPORT
 #endif
@@ -152,8 +152,6 @@ extern "C" {
  * - Using UNIX IPC (off by default) will override the SIGPIPE signal handler,
  *   and set it to SIG_IGN. Some invocations of the "subprocess" command will
  *   also do that.
- * - mpv will reseed the legacy C random number generator by calling srand() at
- *   some random point once.
  * - mpv may start sub processes, so overriding SIGCHLD, or waiting on all PIDs
  *   (such as calling wait()) by the parent process or any other library within
  *   the process must be avoided. libmpv itself only waits for its own PIDs.

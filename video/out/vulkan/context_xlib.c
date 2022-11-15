@@ -16,6 +16,7 @@
  */
 
 #include "video/out/gpu/context.h"
+#include "video/out/present_sync.h"
 #include "video/out/x11_common.h"
 
 #include "common.h"
@@ -29,6 +30,21 @@ struct priv {
 static bool xlib_check_visible(struct ra_ctx *ctx)
 {
     return vo_x11_check_visible(ctx->vo);
+}
+
+static void xlib_vk_swap_buffers(struct ra_ctx *ctx)
+{
+    if (ctx->vo->x11->use_present) {
+        vo_x11_present(ctx->vo);
+        present_sync_swap(ctx->vo->x11->present);
+    }
+}
+
+static void xlib_vk_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
+{
+    struct vo_x11_state *x11 = ctx->vo->x11;
+    if (ctx->vo->x11->use_present)
+        present_sync_get_info(x11->present, info);
 }
 
 static void xlib_uninit(struct ra_ctx *ctx)
@@ -63,6 +79,8 @@ static bool xlib_init(struct ra_ctx *ctx)
 
     struct ra_vk_ctx_params params = {
         .check_visible = xlib_check_visible,
+        .swap_buffers = xlib_vk_swap_buffers,
+        .get_vsync = xlib_vk_get_vsync,
     };
 
     VkInstance inst = vk->vkinst->instance;
