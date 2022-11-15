@@ -179,6 +179,10 @@ static const m_option_t mp_vo_opt_list[] = {
     {"x11-present", OPT_CHOICE(x11_present,
         {"no", 0}, {"auto", 1}, {"yes", 2})},
 #endif
+#if HAVE_WAYLAND
+    {"wayland-content-type", OPT_CHOICE(content_type, {"auto", -1}, {"none", 0},
+        {"photo", 1}, {"video", 2}, {"game", 3})},
+#endif
 #if HAVE_WIN32_DESKTOP
     {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
 #endif
@@ -212,6 +216,7 @@ const struct m_sub_options vo_sub_opts = {
         .border = 1,
         .fit_border = 1,
         .appid = "mpv",
+        .content_type = -1,
         .WinID = -1,
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,

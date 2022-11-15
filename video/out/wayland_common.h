@@ -24,6 +24,7 @@
 
 struct wayland_opts {
     int configure_bounds;
+    int content_type;
     int disable_vsync;
     int edge_pixels_pointer;
     int edge_pixels_touch;
@@ -76,6 +77,12 @@ struct vo_wayland_state {
     int scaling;
     int timeout_count;
     int wakeup_pipe[2];
+
+    /* content-type */
+    /* TODO: unvoid these if required wayland protocols is bumped to 1.27+ */
+    void *content_type_manager;
+    void *content_type;
+    int current_content_type;
 
     /* idle-inhibit */
     struct zwp_idle_inhibit_manager_v1 *idle_inhibit_manager;

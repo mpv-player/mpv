@@ -10,6 +10,11 @@ wl_protocols_headers = []
 
 features += {'wayland_protocols_1_24': wayland['deps'][2].version().version_compare('>=1.24')}
 
+features += {'wayland_protocols_1_27': wayland['deps'][2].version().version_compare('>=1.27')}
+if features['wayland_protocols_1_27']
+    protocols += [[wl_protocol_dir, 'staging/content-type/content-type-v1.xml']]
+endif
+
 foreach p: protocols
     xml = join_paths(p)
     wl_protocols_source += custom_target(xml.underscorify() + '_c',
