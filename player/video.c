@@ -276,6 +276,7 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
     if (!recreate_video_filters(mpctx))
         goto err_out;
 
+    update_content_type(mpctx, track);
     update_screensaver_state(mpctx);
 
     vo_set_paused(vo_c->vo, get_internal_paused(mpctx));

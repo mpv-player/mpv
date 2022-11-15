@@ -1036,6 +1036,8 @@ int handle_force_window(struct MPContext *mpctx, bool force)
         };
         if (vo_reconfig(vo, &p) < 0)
             goto err;
+        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+        update_content_type(mpctx, track);
         update_screensaver_state(mpctx);
         vo_set_paused(vo, true);
         vo_redraw(vo);

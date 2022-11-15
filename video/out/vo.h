@@ -95,6 +95,8 @@ enum mp_voctrl {
 
     VOCTRL_SET_CURSOR_VISIBILITY,       // bool*
 
+    VOCTRL_CONTENT_TYPE,                // enum mp_content_type*
+
     VOCTRL_KILL_SCREENSAVER,
     VOCTRL_RESTORE_SCREENSAVER,
 
@@ -127,6 +129,13 @@ enum mp_voctrl {
 
     /* private to vo_gpu and vo_gpu_next */
     VOCTRL_EXTERNAL_RESIZE,
+};
+
+// Helper to expose what kind of content is curently playing to the VO.
+enum mp_content_type {
+    MP_CONTENT_NONE, // used for force-window
+    MP_CONTENT_IMAGE,
+    MP_CONTENT_VIDEO,
 };
 
 #define VO_TRUE         true
