@@ -1209,7 +1209,7 @@ if features['egl-helpers']
 endif
 
 if features['egl'] and features['egl-helpers']
-    sources += files('video/filter/vf_gpu.c')
+    sources += files('video/filter/vf_gpu_egl.c')
 endif
 
 if features['gl']
@@ -1235,7 +1235,8 @@ if features['vulkan']
     dependencies += vulkan
     sources += files('video/out/vulkan/context.c',
                      'video/out/vulkan/context_display.c',
-                     'video/out/vulkan/utils.c')
+                     'video/out/vulkan/utils.c',
+                     'video/filter/vf_gpu_vulkan.c')
 endif
 
 if features['vulkan'] and features['android']
@@ -1252,6 +1253,10 @@ endif
 
 if features['vulkan'] and features['x11']
      sources += files('video/out/vulkan/context_xlib.c')
+endif
+
+if features['vulkan'] or (features['egl'] and features['egl-helpers'])
+    sources += files('video/filter/vf_gpu.c')
 endif
 
 
