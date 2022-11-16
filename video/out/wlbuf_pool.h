@@ -15,6 +15,9 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "wayland_common.h"
+#include "generated/wayland/linux-dmabuf-unstable-v1.h"
+
 struct wlbuf_pool_entry;
 
 typedef uintptr_t (*wlbuf_pool_key_provider)(struct mp_image *src);

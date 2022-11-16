@@ -40,9 +40,9 @@
 #endif
 #include "present_sync.h"
 #include "wayland_common.h"
+#include "wlbuf_pool.h"
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
 #include "generated/wayland/viewporter.h"
-#include "wlbuf_pool.h"
 
 struct priv {
     struct mp_log *log;
