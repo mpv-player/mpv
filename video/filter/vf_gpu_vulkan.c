@@ -61,8 +61,7 @@ static struct offscreen_ctx *vk_offscreen_ctx_create(struct mpv_global *global,
     ractx->log = ctx->log;
     ractx->global = global;
 
-    vk->log = mp_log_new(ctx, ctx->log, "libplacebo");
-    vk->pllog = mppl_log_create(vk->log);
+    vk->pllog = mppl_log_create(ctx, ctx->log);
     if (!vk->pllog)
         goto error;
 
