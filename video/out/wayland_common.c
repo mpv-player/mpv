@@ -44,6 +44,7 @@
 
 #if HAVE_WAYLAND_PROTOCOLS_1_27
 #include "generated/wayland/content-type-v1.h"
+#include "generated/wayland/single-pixel-buffer-v1.h"
 #endif
 
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 20
@@ -1240,6 +1241,10 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++) {
         wl->content_type_manager = wl_registry_bind(reg, id, &wp_content_type_manager_v1_interface, 1);
     }
+
+    if (!strcmp(interface, wp_single_pixel_buffer_manager_v1_interface.name) && found++) {
+        wl->single_pixel_manager = wl_registry_bind(reg, id, &wp_single_pixel_buffer_manager_v1_interface, 1);
+    }
 #endif
 
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
@@ -2007,6 +2012,11 @@ int vo_wayland_init(struct vo *vo)
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_content_type_manager_v1_interface.name);
     }
+
+    if (!wl->single_pixel_manager) {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   wp_single_pixel_buffer_manager_v1_interface.name);
+    }
 #endif
 
     if (wl->dnd_devman && wl->seat) {
@@ -2224,6 +2234,11 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->shm)
         wl_shm_destroy(wl->shm);
+
+#if HAVE_WAYLAND_PROTOCOLS_1_27
+    if (wl->single_pixel_manager)
+        wp_single_pixel_buffer_manager_v1_destroy(wl->single_pixel_manager);
+#endif
 
     if (wl->surface)
         wl_surface_destroy(wl->surface);
