@@ -28,6 +28,7 @@
 
 #include <libavutil/rational.h>
 #include <libavutil/cpu.h>
+#include <libavutil/buffer.h>
 
 #include "config.h"
 
@@ -212,13 +213,15 @@ static void copy_mp_to_vs_frame_props_map(struct priv *p, VSMap *map,
 }
 
 static int set_vs_frame_props(struct priv *p, VSFrameRef *frame,
-                              struct mp_image *img, int dur_num, int dur_den)
+                              struct mp_image *img, int dur_num, int dur_den, int frameno)
 {
     VSMap *map = p->vsapi->getFramePropsRW(frame);
     if (!map)
         return -1;
     p->vsapi->propSetInt(map, "_DurationNum", dur_num, 0);
     p->vsapi->propSetInt(map, "_DurationDen", dur_den, 0);
+    p->vsapi->propSetInt(map, "__frameno", frameno, 0);
+
     copy_mp_to_vs_frame_props_map(p, map, img);
     return 0;
 }
@@ -304,6 +307,20 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
             MP_ERR(p, "Filter error at frame %d: %s\n", n, errorMsg);
         }
     }
+
+    // Copy DoVi side data from corresponding source frame
+    if(res && !p->eof)
+    {
+        int err;
+        const VSMap *map = p->vsapi->getFramePropsRO(f);
+        int frm = map ? p->vsapi->propGetInt(map, "__frameno", 0, &err) : -1;
+        int idx = frm - p->in_frameno;
+        if(err || idx < 0 || idx >= p->num_buffered)
+            idx = p->num_buffered-1;
+        if(p->buffered[idx]->dovi)
+            res->dovi = av_buffer_ref(p->buffered[idx]->dovi);
+    }
+
     p->requested[index] = res;
     pthread_cond_broadcast(&p->wakeup);
     pthread_mutex_unlock(&p->lock);
@@ -490,7 +507,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             mp_image_clear(&vsframe, 0, 0, p->fmt_in.w, p->fmt_in.h);
             struct mp_image dummy = {0};
             mp_image_set_params(&dummy, &p->fmt_in);
-            set_vs_frame_props(p, ret, &dummy, 0, 1);
+            set_vs_frame_props(p, ret, &dummy, 0, 1, 0);
             break;
         }
         if (frameno < p->in_frameno) {
@@ -538,7 +555,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             mp_image_copy(&vsframe, img);
             int res = 1e6;
             int dur = img->pkt_duration * res + 0.5;
-            set_vs_frame_props(p, ret, img, dur, res);
+            set_vs_frame_props(p, ret, img, dur, res, frameno);
             pthread_mutex_lock(&p->lock);
             break;
         }
