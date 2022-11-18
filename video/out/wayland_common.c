@@ -752,8 +752,8 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     if (!mp_rect_equals(&old_geometry, &wl->geometry) || force_resize)
         wl->pending_vo_events |= VO_EVENT_RESIZE;
 
-    MP_VERBOSE(wl, "Surface entered output %s %s (0x%x), scale = %i\n", o->make,
-               o->model, o->id, wl->scaling);
+    MP_VERBOSE(wl, "Surface entered output %s %s (0x%x), scale = %i, refresh rate = %f Hz\n",
+               o->make, o->model, o->id, wl->scaling, o->refresh_rate);
 
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
