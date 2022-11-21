@@ -486,11 +486,8 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
                                    struct bstr name, const char **value)
 {
-    struct bstr param = bstr0(*value);
     int p1, p2, p3;
-    char s[20];
-    snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
-    return gl_parse_3dlut_size(s, &p1, &p2, &p3);
+    return gl_parse_3dlut_size(*value, &p1, &p2, &p3) ? 0 : M_OPT_INVALID;
 }
 
 #define OPT_BASE_STRUCT struct mp_icc_opts
