@@ -716,10 +716,11 @@ if features['sdl2-gamepad']
     sources += files('input/sdl_gamepad.c')
 endif
 
-stdatomic = cc.find_library('atomic', required: get_option('stdatomic'))
-features += {'stdatomic': stdatomic.found()}
+stdatomic_dep = cc.find_library('atomic', required: false)
+features += {'stdatomic': cc.has_header_symbol('stdatomic.h', 'atomic_int', dependencies: stdatomic_dep,
+                                               required: get_option('stdatomic'))}
 if features['stdatomic']
-    dependencies += stdatomic
+    dependencies += stdatomic_dep
 endif
 
 uchardet_opt = get_option('uchardet').require(
