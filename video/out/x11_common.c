@@ -2118,6 +2118,12 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         ((int *)arg)[1] = selected_disp->rc.y1 - selected_disp->rc.y0;
         return VO_TRUE;
     }
+    case VOCTRL_GET_WINDOW_ID: {
+        if (!x11->window)
+            return VO_NOTAVAIL;
+        *(int64_t *)arg = x11->window;
+        return VO_TRUE;
+    }
     case VOCTRL_GET_HIDPI_SCALE:
         *(double *)arg = x11->dpi_scale;
         return VO_TRUE;
