@@ -2652,6 +2652,10 @@ Property list
     Any of these properties may be unavailable or set to dummy values if the
     VO window is not created or visible.
 
+``window-id``
+    Read-only - mpv's window id. May not always be available, i.e due to window
+    not being opened yet or not being supported by the VO.
+
 ``mouse-pos``
     Read-only - last known mouse position, normalizd to OSD dimensions.
 

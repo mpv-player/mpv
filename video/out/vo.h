@@ -126,6 +126,7 @@ enum mp_voctrl {
     VOCTRL_GET_DISPLAY_FPS,             // double*
     VOCTRL_GET_HIDPI_SCALE,             // double*
     VOCTRL_GET_DISPLAY_RES,             // int[2]
+    VOCTRL_GET_WINDOW_ID,               // int64_t*
 
     /* private to vo_gpu and vo_gpu_next */
     VOCTRL_EXTERNAL_RESIZE,

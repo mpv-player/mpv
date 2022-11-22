@@ -1344,6 +1344,17 @@ static int mp_property_idle(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, mpctx->stop_play == PT_STOP);
 }
 
+static int mp_property_window_id(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    int64_t wid;
+    if (!vo || vo_control(vo, VOCTRL_GET_WINDOW_ID, &wid) <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int64_ro(action, arg, wid);
+}
+
 static int mp_property_eof_reached(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
@@ -3616,6 +3627,7 @@ static const struct m_property mp_properties_base[] = {
     {"seekable", mp_property_seekable},
     {"partially-seekable", mp_property_partially_seekable},
     {"idle-active", mp_property_idle},
+    {"window-id", mp_property_window_id},
 
     {"chapter-list", mp_property_list_chapters},
     {"track-list", property_list_tracks},
