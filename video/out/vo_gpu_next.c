@@ -982,6 +982,15 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                 image->num_overlays = 0;
                 fp->osd_sync = 0;
             }
+
+            // Update the frame signature to include the current OSD sync
+            // value, in order to disambiguate between identical frames with
+            // modified OSD. Shift the OSD sync value by a lot to avoid
+            // collisions with low signature values.
+            //
+            // This is safe to do because `pl_frame_mix.signature` lives in
+            // temporary memory that is only valid for this `pl_queue_update`.
+            ((uint64_t *) mix.signatures)[i] ^= fp->osd_sync << 48;
         }
     }
 
@@ -1063,7 +1072,6 @@ static void resize(struct vo *vo)
         osd_res_equals(p->osd_res, osd))
         return;
 
-    pl_renderer_flush_cache(p->rr);
     p->osd_sync++;
     p->osd_res = osd;
     p->src = src;
@@ -1244,7 +1252,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
 
     case VOCTRL_OSD_CHANGED:
-        pl_renderer_flush_cache(p->rr);
         p->osd_sync++;
         return VO_TRUE;
 
