@@ -183,6 +183,8 @@ static void on_process(void *userdata)
     }
 
     pw_stream_queue_buffer(p->stream, b);
+
+    MP_TRACE(ao, "queued %d of %d samples\n", samples, nframes);
 }
 
 static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *param)
