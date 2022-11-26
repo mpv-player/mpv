@@ -357,7 +357,7 @@ void ao_set_paused(struct ao *ao, bool paused)
 
     pthread_mutex_lock(&p->lock);
 
-    if (p->playing && !p->paused && paused) {
+    if ((p->playing || !ao->driver->write) && !p->paused && paused) {
         if (p->streaming && !ao->stream_silence) {
             if (ao->driver->write) {
                 if (!p->recover_pause)
