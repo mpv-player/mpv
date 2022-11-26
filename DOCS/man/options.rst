@@ -5586,11 +5586,11 @@ them.
     results, as can missing or incorrect display FPS information (see
     ``--override-display-fps``).
 
-``--vulkan-device=<device name>``
-    The name of the Vulkan device to use for rendering and presentation. Use
+``--vulkan-device=<device name|UUID>``
+    The name or UUID of the Vulkan device to use for rendering and presentation. Use
     ``--vulkan-device=help`` to see the list of available devices and their
-    names. If left unspecified, the first enumerated hardware Vulkan device will
-    be used.
+    names and UUIDs. If left unspecified, the first enumerated hardware Vulkan
+    device will be used.
 
 ``--vulkan-swap-mode=<mode>``
     Controls the presentation mode of the vulkan swapchain. This is similar
