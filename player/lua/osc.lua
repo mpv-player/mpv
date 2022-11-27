@@ -122,6 +122,7 @@ local state = {
     enabled = true,
     input_enabled = true,
     showhide_enabled = false,
+    windowcontrols_buttons = false,
     dmx_cache = 0,
     using_video_margins = false,
     border = true,
@@ -2409,9 +2410,14 @@ function render()
         for _,cords in ipairs(osc_param.areas["window-controls"]) do
             if state.osc_visible then -- activate only when OSC is actually visible
                 set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "window-controls")
-                mp.enable_key_bindings("window-controls")
-            else
-                mp.disable_key_bindings("window-controls")
+            end
+            if state.osc_visible ~= state.windowcontrols_buttons then
+                if state.osc_visible then
+                    mp.enable_key_bindings("window-controls")
+                else
+                    mp.disable_key_bindings("window-controls")
+                end
+                state.windowcontrols_buttons = state.osc_visible
             end
 
             if (mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2)) then
