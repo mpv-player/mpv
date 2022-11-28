@@ -101,6 +101,10 @@ struct vo_wayland_state {
     void *fractional_scale_manager;
     void *fractional_scale;
 
+    /* ext-layer-shell */
+    void *layer_shell;
+    void *layer_surface;
+
     /* idle-inhibit */
     struct zwp_idle_inhibit_manager_v1 *idle_inhibit_manager;
     struct zwp_idle_inhibitor_v1 *idle_inhibitor;

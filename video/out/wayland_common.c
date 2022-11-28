@@ -55,6 +55,9 @@
 #include "cursor-shape-v1.h"
 #endif
 
+//TODO: guard this
+#include "generated/wayland/ext-layer-shell-v1.h"
+
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
 #define HAVE_WAYLAND_1_22
 #endif
@@ -1266,6 +1269,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     int found = 1;
     struct vo_wayland_state *wl = data;
 
+    //TODO: guard this
+    if (!strcmp(interface, ext_layer_surface_v1_interface.name) && found++) {
+        wl->layer_shell = wl_registry_bind(reg, id, &ext_layer_shell_v1_interface, 1);
+    }
+
     if (!strcmp(interface, wl_compositor_interface.name) && (ver >= 4) && found++) {
 #ifdef HAVE_WAYLAND_1_22
         ver = MPMIN(ver, 6); /* Cap at 6 in case new events are added later. */
@@ -1614,6 +1622,15 @@ static void guess_focus(struct vo_wayland_state *wl)
          wl->focused = !wl->focused;
          wl->pending_vo_events |= VO_EVENT_FOCUS;
      }
+}
+
+static void handle_ontop(struct vo_wayland_state *wl)
+{
+    //TODO: guard this
+    int layer = wl->vo_opts->ontop ? EXT_LAYER_SURFACE_V1_LAYER_TOP : EXT_LAYER_SURFACE_V1_LAYER_BOTTOM;
+    ext_layer_surface_v1_set_layer(wl->layer_surface, layer);
+    ext_layer_surface_v1_set_keyboard_interactivity(wl->layer_surface,
+                                                    EXT_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_ON_DEMAND);
 }
 
 static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
@@ -2066,6 +2083,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                 toggle_fullscreen(wl);
             if (opt == &opts->hidpi_window_scale)
                 set_geometry(wl, true);
+            if (opt == &opts->ontop)
+                handle_ontop(wl);
             if (opt == &opts->window_maximized)
                 toggle_maximized(wl);
             if (opt == &opts->window_minimized)
@@ -2238,6 +2257,14 @@ bool vo_wayland_init(struct vo *vo)
     if (create_xdg_surface(wl))
         goto err;
 
+    //TODO: Guard this
+    if (wl->layer_shell) {
+        wl->layer_surface = ext_layer_shell_v1_get_layer_surface(wl->layer_shell, wl->surface, NULL);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   ext_layer_shell_v1_interface.name);
+    }
+
     if (wl->subcompositor) {
         wl->osd_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->osd_surface, wl->video_surface);
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
@@ -2368,6 +2395,9 @@ bool vo_wayland_reconfig(struct vo *vo)
 
     if (wl->vo_opts->fullscreen)
         toggle_fullscreen(wl);
+
+    if (wl->vo_opts->ontop)
+        handle_ontop(wl);
 
     if (wl->vo_opts->window_maximized)
         toggle_maximized(wl);
