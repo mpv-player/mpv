@@ -196,7 +196,11 @@ double mp_pts_from_av(int64_t av_pts, AVRational *tb)
 // Set duration field only if tb is set.
 void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
 {
-    av_init_packet(dst);
+    dst->side_data = NULL;
+    dst->side_data_elems = 0;
+    dst->buf = NULL;
+    av_packet_unref(dst);
+
     dst->data = mpkt ? mpkt->buffer : NULL;
     dst->size = mpkt ? mpkt->len : 0;
     /* Some codecs (ZeroCodec, some cases of PNG) may want keyframe info
@@ -393,4 +397,22 @@ int mp_set_avopts_pos(struct mp_log *log, void *avobj, void *posargs, char **kv)
         }
     }
     return success;
+}
+
+/**
+ * Must be used to free an AVPacket that was used with mp_set_av_packet().
+ *
+ * We have a particular pattern where we "borrow" buffers and set them
+ * into an AVPacket to pass data to ffmpeg without extra copies.
+ * This applies to buf and side_data, so this function clears them before
+ * freeing.
+ */
+void mp_free_av_packet(AVPacket **pkt)
+{
+    if (*pkt) {
+        (*pkt)->side_data = NULL;
+        (*pkt)->side_data_elems = 0;
+        (*pkt)->buf = NULL;
+    }
+    av_packet_free(pkt);
 }
