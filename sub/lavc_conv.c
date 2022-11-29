@@ -34,6 +34,8 @@
 struct lavc_conv {
     struct mp_log *log;
     AVCodecContext *avctx;
+    AVPacket *avpkt;
+    AVPacket *avpkt_vtt;
     char *codec;
     char *extradata;
     AVSubtitle cur;
@@ -84,6 +86,11 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     if (mp_lavc_set_extradata(avctx, extradata, extradata_len) < 0)
         goto error;
 
+    priv->avpkt = av_packet_alloc();
+    priv->avpkt_vtt = av_packet_alloc();
+    if (!priv->avpkt || !priv->avpkt_vtt)
+        goto error;
+
 #if LIBAVCODEC_VERSION_MAJOR < 59
     av_dict_set(&opts, "sub_text_format", "ass", 0);
 #endif
@@ -107,6 +114,8 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     MP_FATAL(priv, "Could not open libavcodec subtitle converter\n");
     av_dict_free(&opts);
     av_free(avctx);
+    mp_free_av_packet(&priv->avpkt);
+    mp_free_av_packet(&priv->avpkt_vtt);
     talloc_free(priv);
     return NULL;
 }
@@ -224,26 +233,25 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
                         double *sub_pts, double *sub_duration)
 {
     AVCodecContext *avctx = priv->avctx;
-    AVPacket pkt;
-    AVPacket parsed_pkt = {0};
+    AVPacket *curr_pkt = priv->avpkt;
     int ret, got_sub;
     int num_cur = 0;
 
     avsubtitle_free(&priv->cur);
 
-    mp_set_av_packet(&pkt, packet, &avctx->time_base);
-    if (pkt.pts < 0)
-        pkt.pts = 0;
+    mp_set_av_packet(priv->avpkt, packet, &avctx->time_base);
+    if (priv->avpkt->pts < 0)
+        priv->avpkt->pts = 0;
 
     if (strcmp(priv->codec, "webvtt-webm") == 0) {
-        if (parse_webvtt(&pkt, &parsed_pkt) < 0) {
+        if (parse_webvtt(priv->avpkt, priv->avpkt_vtt) < 0) {
             MP_ERR(priv, "Error parsing subtitle\n");
             goto done;
         }
-        pkt = parsed_pkt;
+        curr_pkt = priv->avpkt_vtt;
     }
 
-    ret = avcodec_decode_subtitle2(avctx, &priv->cur, &got_sub, &pkt);
+    ret = avcodec_decode_subtitle2(avctx, &priv->cur, &got_sub, curr_pkt);
     if (ret < 0) {
         MP_ERR(priv, "Error decoding subtitle\n");
     } else if (got_sub) {
@@ -266,7 +274,7 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
     }
 
 done:
-    av_packet_unref(&parsed_pkt);
+    av_packet_unref(priv->avpkt_vtt);
     MP_TARRAY_APPEND(priv, priv->cur_list, num_cur, NULL);
     return priv->cur_list;
 }
@@ -280,5 +288,7 @@ void lavc_conv_uninit(struct lavc_conv *priv)
 {
     avsubtitle_free(&priv->cur);
     avcodec_free_context(&priv->avctx);
+    mp_free_av_packet(&priv->avpkt);
+    mp_free_av_packet(&priv->avpkt_vtt);
     talloc_free(priv);
 }

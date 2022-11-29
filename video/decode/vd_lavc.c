@@ -173,6 +173,7 @@ typedef struct lavc_ctx {
     struct mp_codec_params *codec;
     AVCodecContext *avctx;
     AVFrame *pic;
+    AVPacket *avpkt;
     bool use_hwdec;
     struct hwdec_info hwdec; // valid only if use_hwdec==true
     AVRational codec_timebase;
@@ -651,6 +652,10 @@ static void init_avctx(struct mp_filter *vd)
     if (!ctx->pic)
         goto error;
 
+    ctx->avpkt = av_packet_alloc();
+    if (!ctx->avpkt)
+        goto error;
+
     if (ctx->use_hwdec) {
         avctx->opaque = vd;
         avctx->thread_count = 1;
@@ -752,9 +757,8 @@ static void init_avctx(struct mp_filter *vd)
     // x264 build number (encoded in a SEI element), needed to enable a
     // workaround for broken 4:4:4 streams produced by older x264 versions.
     if (lavc_codec->id == AV_CODEC_ID_H264 && c->first_packet) {
-        AVPacket avpkt;
-        mp_set_av_packet(&avpkt, c->first_packet, &ctx->codec_timebase);
-        avcodec_send_packet(avctx, &avpkt);
+        mp_set_av_packet(ctx->avpkt, c->first_packet, &ctx->codec_timebase);
+        avcodec_send_packet(avctx, ctx->avpkt);
         avcodec_receive_frame(avctx, ctx->pic);
         av_frame_unref(ctx->pic);
         avcodec_flush_buffers(ctx->avctx);
@@ -802,6 +806,7 @@ static void uninit_avctx(struct mp_filter *vd)
 
     flush_all(vd);
     av_frame_free(&ctx->pic);
+    mp_free_av_packet(&ctx->avpkt);
     av_buffer_unref(&ctx->cached_hw_frames_ctx);
 
     avcodec_free_context(&ctx->avctx);
@@ -1067,10 +1072,9 @@ static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
     if (avctx->skip_frame == AVDISCARD_ALL)
         return 0;
 
-    AVPacket avpkt;
-    mp_set_av_packet(&avpkt, pkt, &ctx->codec_timebase);
+    mp_set_av_packet(ctx->avpkt, pkt, &ctx->codec_timebase);
 
-    int ret = avcodec_send_packet(avctx, pkt ? &avpkt : NULL);
+    int ret = avcodec_send_packet(avctx, pkt ? ctx->avpkt : NULL);
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         return ret;
 

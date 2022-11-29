@@ -64,6 +64,7 @@ struct mp_recorder_sink {
     struct mp_recorder *owner;
     struct sh_stream *sh;
     AVStream *av_stream;
+    AVPacket *avpkt;
     double max_out_pts;
     bool discont;
     bool proper_eof;
@@ -82,10 +83,11 @@ static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
         .owner = priv,
         .sh = sh,
         .av_stream = avformat_new_stream(priv->mux, NULL),
+        .avpkt = av_packet_alloc(),
         .max_out_pts = MP_NOPTS_VALUE,
     };
 
-    if (!rst->av_stream)
+    if (!rst->av_stream || !rst->avpkt)
         return -1;
 
     AVCodecParameters *avp = mp_codec_params_to_av(sh->codec);
@@ -237,15 +239,14 @@ static void mux_packet(struct mp_recorder_sink *rst,
 
     rst->max_out_pts = MP_PTS_MAX(rst->max_out_pts, pkt->pts);
 
-    AVPacket avpkt;
-    mp_set_av_packet(&avpkt, &mpkt, &rst->av_stream->time_base);
+    mp_set_av_packet(rst->avpkt, &mpkt, &rst->av_stream->time_base);
 
-    avpkt.stream_index = rst->av_stream->index;
+    rst->avpkt->stream_index = rst->av_stream->index;
 
-    if (avpkt.duration < 0 && rst->sh->type != STREAM_SUB)
-        avpkt.duration = 0;
+    if (rst->avpkt->duration < 0 && rst->sh->type != STREAM_SUB)
+        rst->avpkt->duration = 0;
 
-    AVPacket *new_packet = av_packet_clone(&avpkt);
+    AVPacket *new_packet = av_packet_clone(rst->avpkt);
     if (!new_packet) {
         MP_ERR(priv, "Failed to allocate packet.\n");
         return;
@@ -319,6 +320,7 @@ void mp_recorder_destroy(struct mp_recorder *priv)
         for (int n = 0; n < priv->num_streams; n++) {
             struct mp_recorder_sink *rst = priv->streams[n];
             mux_packets(rst);
+            mp_free_av_packet(&rst->avpkt);
         }
 
         if (av_write_trailer(priv->mux) < 0)

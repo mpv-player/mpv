@@ -46,6 +46,7 @@
 struct priv {
     AVCodecContext *avctx;
     AVFrame *avframe;
+    AVPacket *avpkt;
     struct mp_chmap force_channel_map;
     uint32_t skip_samples, trim_samples;
     bool preroll_done;
@@ -104,6 +105,7 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
     lavc_context = avcodec_alloc_context3(lavc_codec);
     ctx->avctx = lavc_context;
     ctx->avframe = av_frame_alloc();
+    ctx->avpkt = av_packet_alloc();
     lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id;
     lavc_context->pkt_timebase = ctx->codec_timebase;
@@ -160,6 +162,7 @@ static void destroy(struct mp_filter *da)
 
     avcodec_free_context(&ctx->avctx);
     av_frame_free(&ctx->avframe);
+    mp_free_av_packet(&ctx->avpkt);
 }
 
 static void reset(struct mp_filter *da)
@@ -185,10 +188,9 @@ static int send_packet(struct mp_filter *da, struct demux_packet *mpkt)
     if (mpkt && priv->next_pts == MP_NOPTS_VALUE)
         priv->next_pts = mpkt->pts;
 
-    AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt, &priv->codec_timebase);
+    mp_set_av_packet(priv->avpkt, mpkt, &priv->codec_timebase);
 
-    int ret = avcodec_send_packet(avctx, mpkt ? &pkt : NULL);
+    int ret = avcodec_send_packet(avctx, mpkt ? priv->avpkt : NULL);
     if (ret < 0)
         MP_ERR(da, "Error decoding audio.\n");
     return ret;

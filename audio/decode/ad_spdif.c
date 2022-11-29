@@ -41,6 +41,7 @@ struct spdifContext {
     struct mp_log   *log;
     enum AVCodecID   codec_id;
     AVFormatContext *lavf_ctx;
+    AVPacket        *avpkt;
     int              out_buffer_len;
     uint8_t          out_buffer[OUTBUF_SIZE];
     bool             need_close;
@@ -82,6 +83,7 @@ static void destroy(struct mp_filter *da)
         avformat_free_context(lavf_ctx);
         spdif_ctx->lavf_ctx = NULL;
     }
+    mp_free_av_packet(&spdif_ctx->avpkt);
 }
 
 static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
@@ -295,15 +297,14 @@ static void process(struct mp_filter *da)
     struct mp_aframe *out = NULL;
     double pts = mpkt->pts;
 
-    AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt, NULL);
-    pkt.pts = pkt.dts = 0;
+    mp_set_av_packet(spdif_ctx->avpkt, mpkt, NULL);
+    spdif_ctx->avpkt->pts = spdif_ctx->avpkt->dts = 0;
     if (!spdif_ctx->lavf_ctx) {
-        if (init_filter(da, &pkt) < 0)
+        if (init_filter(da, spdif_ctx->avpkt) < 0)
             goto done;
     }
     spdif_ctx->out_buffer_len  = 0;
-    int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
+    int ret = av_write_frame(spdif_ctx->lavf_ctx, spdif_ctx->avpkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
     if (ret < 0) {
         MP_ERR(da, "spdif mux error: '%s'\n", mp_strerror(AVUNERROR(ret)));
@@ -424,6 +425,10 @@ static struct mp_decoder *create(struct mp_filter *parent,
         talloc_free(da);
         return NULL;
     }
+
+    spdif_ctx->avpkt = av_packet_alloc();
+    MP_HANDLE_OOM(spdif_ctx->avpkt);
+
     return &spdif_ctx->public;
 }
 
