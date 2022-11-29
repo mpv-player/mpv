@@ -1026,11 +1026,9 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     }
 #endif
 
-#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(56, 61, 100)
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_FILM_GRAIN_PARAMS);
     if (sd)
         dst->film_grain = sd->buf;
-#endif
 
     for (int n = 0; n < src->nb_side_data; n++) {
         sd = src->side_data[n];

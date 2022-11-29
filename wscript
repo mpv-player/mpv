@@ -412,12 +412,12 @@ libav_dependencies = [
     {
         'name': 'ffmpeg',
         'desc': 'FFmpeg library',
-        'func': check_pkg_config('libavutil',     '>= 56.12.100',
-                                 'libavcodec',    '>= 58.16.100',
-                                 'libavformat',   '>= 58.9.100',
-                                 'libswscale',    '>= 5.0.101',
-                                 'libavfilter',   '>= 7.14.100',
-                                 'libswresample', '>= 3.0.100'),
+        'func': check_pkg_config('libavutil',     '>= 56.70.100',
+                                 'libavcodec',    '>= 58.134.100',
+                                 'libavformat',   '>= 58.76.100',
+                                 'libswscale',    '>= 5.9.100',
+                                 'libavfilter',   '>= 7.110.100',
+                                 'libswresample', '>= 3.9.100'),
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
 FFmpeg libraries. Git master is recommended."
@@ -428,7 +428,7 @@ FFmpeg libraries. Git master is recommended."
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
-        'func': check_pkg_config('libavdevice', '>= 57.0.0'),
+        'func': check_pkg_config('libavdevice', '>= 58.13.100'),
     }
 ]
 
