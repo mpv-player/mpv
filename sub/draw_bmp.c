@@ -283,6 +283,11 @@ static void mark_rect(struct mp_draw_sub_cache *p, int x0, int y0, int x1, int y
             }
         }
 
+        // Ensure the very last slice does not extend
+        // beyond the total width.
+        struct slice *last_s = &line[p->s_w - 1];
+        last_s->x1 = MPMIN(p->w - ((p->s_w - 1) * SLICE_W), last_s->x1);
+
         p->any_osd = true;
     }
 }
