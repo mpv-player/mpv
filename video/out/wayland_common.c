@@ -304,19 +304,20 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
                               int32_t id, wl_fixed_t x_w, wl_fixed_t y_w)
 {
     struct vo_wayland_state *wl = data;
-
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
 
+    enum xdg_toplevel_resize_edge edge;
+    if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y)) {
+        if (check_for_resize(wl, x_w, y_w, wl->opts->edge_pixels_touch, &edge)) {
+            xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
+        } else  {
+            xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
+        }
+    }
+
     mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
     mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN);
-
-    enum xdg_toplevel_resize_edge edge;
-    if (check_for_resize(wl, x_w, y_w, wl->opts->edge_pixels_touch, &edge)) {
-        xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
-    } else {
-        xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
-    }
 }
 
 static void touch_handle_up(void *data, struct wl_touch *wl_touch,
