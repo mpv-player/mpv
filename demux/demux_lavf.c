@@ -1307,10 +1307,11 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     if (priv->pcm_seek_hack && !priv->pcm_seek_hack_packet_size) {
         // This might for example be the initial seek. Fuck it up like the
         // bullshit it is.
-        AVPacket pkt = {0};
-        if (av_read_frame(priv->avfc, &pkt) >= 0)
-            priv->pcm_seek_hack_packet_size = pkt.size;
-        av_packet_unref(&pkt);
+        AVPacket *pkt = av_packet_alloc();
+        MP_HANDLE_OOM(pkt);
+        if (av_read_frame(priv->avfc, pkt) >= 0)
+            priv->pcm_seek_hack_packet_size = pkt->size;
+        av_packet_free(&pkt);
         add_new_streams(demuxer);
     }
     if (priv->pcm_seek_hack && priv->pcm_seek_hack_packet_size &&
