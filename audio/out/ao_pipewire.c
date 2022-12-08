@@ -511,7 +511,7 @@ static int init(struct ao *ao)
     );
 
     if (pipewire_init_boilerplate(ao) < 0)
-        goto error;
+        goto error_props;
 
     ao->device_buffer = p->options.buffer_msec * ao->samplerate / 1000;
 
@@ -535,7 +535,7 @@ static int init(struct ao *ao)
 
     params[0] = spa_format_audio_raw_build(&b, SPA_PARAM_EnumFormat, &audio_info);
     if (!params[0])
-        goto error;
+        goto error_props;
 
     if (af_fmt_is_planar(ao->format)) {
         ao->num_planes = ao->channels.num;
@@ -575,6 +575,8 @@ static int init(struct ao *ao)
 
     return 0;
 
+error_props:
+    pw_properties_free(props);
 error:
     uninit(ao);
     return -1;
