@@ -470,6 +470,7 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (!p->core) {
         MP_WARN(ao, "Could not connect to context '%s': %s\n",
                 p->options.remote, strerror(errno));
+        pw_context_destroy(context);
         goto error;
     }
 
