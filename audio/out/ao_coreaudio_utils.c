@@ -456,7 +456,15 @@ int64_t ca_get_device_latency_us(struct ao *ao, AudioDeviceID device)
         }
     }
 
-    return ca_frames_to_us(ao, latency_frames);
+    double sample_rate = ao->samplerate;
+    OSStatus err = CA_GET_O(device, kAudioDevicePropertyNominalSampleRate,
+                            &sample_rate);
+    CHECK_CA_WARN("cannot get device sample rate, falling back to AO sample rate!");
+    if (err == noErr) {
+        MP_VERBOSE(ao, "Device sample rate: %f\n", sample_rate);
+    }
+
+    return latency_frames / sample_rate * 1e6;
 }
 
 static OSStatus ca_change_format_listener(
