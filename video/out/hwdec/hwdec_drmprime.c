@@ -115,6 +115,7 @@ static int init(struct ra_hwdec *hw)
      */
     int num_formats = 0;
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_NV12);
+    MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_420P);
     MP_TARRAY_APPEND(p, p->formats, num_formats, 0); // terminate it
 
     p->hwctx.hw_imgfmt = IMGFMT_DRMPRIME;
