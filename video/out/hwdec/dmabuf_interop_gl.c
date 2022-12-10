@@ -180,6 +180,11 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
                 format[0] = DRM_FORMAT_R8;
                 format[1] = DRM_FORMAT_GR88;
                 break;
+            case DRM_FORMAT_YUV420:
+                format[0] = DRM_FORMAT_R8;
+                format[1] = DRM_FORMAT_R8;
+                format[2] = DRM_FORMAT_R8;
+                break;
             case DRM_FORMAT_P010:
                 format[0] = DRM_FORMAT_R16;
                 format[1] = DRM_FORMAT_GR1616;
