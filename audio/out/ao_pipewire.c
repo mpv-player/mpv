@@ -57,6 +57,7 @@ static inline int pw_stream_get_time_n(struct pw_stream *stream, struct pw_time 
 
 struct priv {
     struct pw_thread_loop *loop;
+    struct pw_context *context;
     struct pw_stream *stream;
     struct pw_core *core;
     struct spa_hook stream_listener;
@@ -292,10 +293,12 @@ static void uninit(struct ao *ao)
     if (p->stream)
         pw_stream_destroy(p->stream);
     p->stream = NULL;
-    if (p->core) {
-        pw_context_destroy(pw_core_get_context(p->core));
-    }
+    if (p->core)
+        pw_core_disconnect(p->core);
     p->core = NULL;
+    if (p->context)
+        pw_context_destroy(p->context);
+    p->context = NULL;
     if (p->loop)
         pw_thread_loop_destroy(p->loop);
     p->loop = NULL;
@@ -443,7 +446,6 @@ static const struct pw_core_events core_events = {
 static int pipewire_init_boilerplate(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    struct pw_context *context;
 
     pw_init(NULL, NULL);
 
@@ -459,12 +461,12 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (pw_thread_loop_start(p->loop) < 0)
         goto error;
 
-    context = pw_context_new(pw_thread_loop_get_loop(p->loop), NULL, 0);
-    if (!context)
+    p->context = pw_context_new(pw_thread_loop_get_loop(p->loop), NULL, 0);
+    if (!p->context)
         goto error;
 
     p->core = pw_context_connect(
-            context,
+            p->context,
             pw_properties_new(PW_KEY_REMOTE_NAME, p->options.remote, NULL),
             0);
     if (!p->core) {
