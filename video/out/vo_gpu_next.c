@@ -1217,6 +1217,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     }
 
     struct pl_frame target = {
+        .repr = pl_color_repr_rgb,
         .num_planes = 1,
         .planes[0] = {
             .texture = fbo,
