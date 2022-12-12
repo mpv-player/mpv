@@ -1229,6 +1229,8 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     if (args->scaled) {
         // Apply target LUT, ICC profile and CSP override only in window mode
         apply_target_options(p, &target);
+    } else {
+        target.color = pl_color_space_srgb;
     }
 
     apply_crop(&image, src, mpi->params.w, mpi->params.h);
@@ -1251,6 +1253,19 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     args->res = mp_image_alloc(mpfmt, fbo->params.w, fbo->params.h);
     if (!args->res)
         goto done;
+
+    if (args->scaled) {
+        // Provide tagging for target CSP info (if known)
+        const struct gl_video_opts *opts = p->opts_cache->opts;
+        args->res->params.color.primaries = opts->target_prim;
+        args->res->params.color.gamma = opts->target_trc;
+        args->res->params.color.levels = p->output_levels;
+        args->res->params.color.sig_peak = opts->target_peak;
+        args->res->params.p_w = args->res->params.p_h = 1;
+    } else {
+        args->res->params.color.primaries = MP_CSP_PRIM_BT_709;
+        args->res->params.color.gamma = MP_CSP_TRC_SRGB;
+    }
 
     bool ok = pl_tex_download(gpu, pl_tex_transfer_params(
         .tex = fbo,
