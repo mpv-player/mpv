@@ -369,6 +369,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
     if (image && need_add_subs)
         add_subs(mpctx, image);
 
+    mp_image_params_guess_csp(&image->params);
     return image;
 }
 
