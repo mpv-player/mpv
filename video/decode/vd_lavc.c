@@ -663,6 +663,17 @@ static void init_avctx(struct mp_filter *vd)
         if (!lavc_param->check_hw_profile)
             avctx->hwaccel_flags |= AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH;
 
+#ifdef AV_HWACCEL_FLAG_UNSAFE_OUTPUT
+        /*
+         * This flag primarily exists for nvdec which has a very limited
+         * output frame pool, which can get exhausted if consumers don't
+         * release frames quickly. However, as an implementation
+         * requirement, we have to copy the frames anyway, so we don't
+         * need this extra implicit copy.
+         */
+        avctx->hwaccel_flags |= AV_HWACCEL_FLAG_UNSAFE_OUTPUT;
+#endif
+
         if (ctx->hwdec.use_hw_device) {
             if (ctx->hwdec_dev)
                 avctx->hw_device_ctx = av_buffer_ref(ctx->hwdec_dev);
