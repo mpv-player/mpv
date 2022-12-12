@@ -19,6 +19,8 @@
 #include <string.h>
 #include <time.h>
 
+#include <libavcodec/avcodec.h>
+
 #include "config.h"
 
 #include "osdep/io.h"
@@ -332,6 +334,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
                                        bool high_depth)
 {
     struct mp_image *image = NULL;
+    const struct image_writer_opts *imgopts = mpctx->opts->screenshot_image_opts;
     if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
         mode = 0;
     bool need_add_subs = mode == MODE_SUBTITLES;
@@ -343,8 +346,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
             .scaled = mode == MODE_FULL_WINDOW,
             .subs = mode != 0,
             .osd = mode == MODE_FULL_WINDOW,
-            .high_bit_depth = high_depth &&
-                              mpctx->opts->screenshot_image_opts->high_bit_depth,
+            .high_bit_depth = high_depth && imgopts->high_bit_depth,
+            .native_csp = image_writer_flexible_csp(imgopts),
         };
         if (!mpctx->opts->screenshot_sw)
             vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &ctrl);
