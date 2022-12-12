@@ -1226,7 +1226,11 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         },
     };
 
-    apply_target_options(p, &target);
+    if (args->scaled) {
+        // Apply target LUT, ICC profile and CSP override only in window mode
+        apply_target_options(p, &target);
+    }
+
     apply_crop(&image, src, mpi->params.w, mpi->params.h);
     apply_crop(&target, dst, fbo->params.w, fbo->params.h);
 
