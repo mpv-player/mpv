@@ -240,7 +240,7 @@ static double kaiser(params *p, double x)
 {
     if (x > 1)
         return 0;
-    double i0a = 1.0 / bessel_i0(p->params[1]);
+    double i0a = 1.0 / bessel_i0(p->params[0]);
     return bessel_i0(p->params[0] * sqrt(1.0 - x * x)) * i0a;
 }
 
