@@ -1229,6 +1229,8 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     if (args->scaled) {
         // Apply target LUT, ICC profile and CSP override only in window mode
         apply_target_options(p, &target);
+    } else if (args->native_csp) {
+        target.color = image.color;
     } else {
         target.color = pl_color_space_srgb;
     }
@@ -1262,6 +1264,9 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         args->res->params.color.levels = p->output_levels;
         args->res->params.color.sig_peak = opts->target_peak;
         args->res->params.p_w = args->res->params.p_h = 1;
+    } else if (args->native_csp) {
+        args->res->params.color = mpi->params.color;
+        args->res->params.color.space = MP_CSP_RGB;
     } else {
         args->res->params.color.primaries = MP_CSP_PRIM_BT_709;
         args->res->params.color.gamma = MP_CSP_TRC_SRGB;
