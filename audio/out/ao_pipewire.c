@@ -754,7 +754,7 @@ static int hotplug_init(struct ao *ao)
 
     int res = pipewire_init_boilerplate(ao);
     if (res)
-        return res;
+        goto error_no_unlock;
 
     pw_thread_loop_lock(priv->loop);
 
@@ -777,6 +777,7 @@ static int hotplug_init(struct ao *ao)
 
 error:
     pw_thread_loop_unlock(priv->loop);
+error_no_unlock:
     uninit(ao);
     return -1;
 }
