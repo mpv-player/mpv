@@ -539,6 +539,7 @@ def build(ctx):
         ( "video/out/vo_rpi.c",                  "rpi-mmal" ),
         ( "video/out/vo_sdl.c",                  "sdl2-video" ),
         ( "video/out/vo_sixel.c",                "sixel" ),
+        ( "video/out/vo_kitty.c" ),
         ( "video/out/vo_tct.c" ),
         ( "video/out/vo_vaapi.c",                "vaapi-x11 && gpl" ),
         ( "video/out/vo_dmabuf_wayland.c",       "dmabuf-wayland"  ),

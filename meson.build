@@ -229,6 +229,7 @@ sources = files(
     'video/out/vo_libmpv.c',
     'video/out/vo_null.c',
     'video/out/vo_tct.c',
+    'video/out/vo_kitty.c',
     'video/out/win_state.c',
     'video/repack.c',
     'video/sws_utils.c',

@@ -27,6 +27,11 @@ Interface changes
 ::
 
  --- mpv 0.36.0 ---
+    - add the `--vo=kitty` video output driver, as well as the options
+      `--vo-kitty-cols`, `--vo-kitty-rows`, `--vo-kitty-width`,
+      `--vo-kitty-height`, `--vo-kitty-left`, `--vo-kitty-top`,
+      `--vo-kitty-config-clear`, `--vo-kitty-alt-screen` and
+      `--vo-kitty-use-shm`
     - add `--force-render`
     - add `--vo-sixel-config-clear`, `--vo-sixel-alt-screen` and
       `--vo-sixel-buffered`
