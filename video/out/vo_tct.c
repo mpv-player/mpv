@@ -17,95 +17,164 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <config.h>
-
-#if HAVE_POSIX
-#include <sys/ioctl.h>
-#endif
+#include <assert.h>
+#include <stdbool.h>
 
 #include <libswscale/swscale.h>
 
-#include "options/m_config.h"
 #include "config.h"
-#include "osdep/terminal.h"
-#include "osdep/io.h"
 #include "vo.h"
-#include "sub/osd.h"
-#include "video/sws_utils.h"
 #include "video/mp_image.h"
+#include "video/sws_utils.h"
+#include "osdep/terminal.h"
+#include "options/m_config.h"
+#include "osdep/io.h"
+#include "sub/osd.h"
+
+// T_* - terminal escape sequence.
+// *_F - contains a printf-style format.
+// *_P - is a prefix, arguments must be added.
+#define ESC "\x1B"
+#define CSI "\x1B["
+#define OSC "\x1B]"
+#define DCS "\x1BP"
+#define T_TITLE_STCK_PSH   CSI"22;0t"   // push current title onto the stack.
+#define T_TITLE_STCK_POP   CSI"23;0t"   // restore title from the stack top.
+#define T_TITLE_SET_F      OSC"0;%s\x7" // change the title to "%s".
+#define T_STATE_SAVE       CSI"?47h"    // save current terminal state.
+#define T_STATE_RSTR       CSI"?47l"    // restore saved terminal state.
+#define T_BUFF_ENBL        CSI"?1049h"  // enable the alternate buffer.
+#define T_BUFF_DSBL        CSI"?1049l"  // disable the alternate buffer.
+#define T_CURS_STCK_PSH    ESC"7"       // save current cursor pos. on stack.
+#define T_CURS_STCK_POP    ESC"8"       // restore cursor pos. from stack.
+#define T_CURS_HIDE        CSI"?25l"    // make cursor invisible.
+#define T_CURS_SHOW        CSI"?25h"    // make cursor visible.
+#define T_CURS_MOV_F       CSI"%d;%df"  // move the cursor to (x,y).
+#define T_CURS_FWD_F       CSI"%dC"     // move the cursor n chars right.
+#define T_CURS_HOME        CSI"H"       // move the cursor to (0,0).
+#define T_CLEAR_SCR_AFTC   CSI"0J"      // clear screen from cursor, to the end.
+#define T_CLEAR_SCR_BEFC   CSI"1J"      // clear screen from (0,0) to cursos.
+#define T_CLEAR_SCREEN     CSI"2J"      // clear the whole screen.
+#define T_ATTR_RESET_ALL   CSI"0m"      // reset all attributes (color,bold,..).
+#define T_COLOR_USE_GREG   CSI"?1070l"  // use the global color registry.
+#define T_COLOR_BG_P       CSI"48;2"
+#define T_COLOR_FG_P       CSI"38;2"
+#define T_COLOR_BG256_P    CSI"48;5"
+#define T_COLOR_FG256_P    CSI"38;5"
+#define T_COLOR_BG_F       CSI"48;2;%d;%d;%dm"
+#define T_COLOR_FG_F       CSI"38;2;%d;%d;%dm"
+#define T_COLOR_BG256_F    CSI"48;5;%dm"
+#define T_COLOR_FG256_F    CSI"38;5;%dm"
+#define T_COLOR_P_L        6
 
 #define IMGFMT IMGFMT_BGR24
 
-#define ALGO_PLAIN 1
-#define ALGO_HALF_BLOCKS 2
-#define ESC_HIDE_CURSOR "\033[?25l"
-#define ESC_RESTORE_CURSOR "\033[?25h"
-#define ESC_CLEAR_SCREEN "\033[2J"
-#define ESC_CLEAR_COLORS "\033[0m"
-#define ESC_GOTOXY "\033[%d;%df"
-#define ESC_COLOR_BG "\033[48;2"
-#define ESC_COLOR_FG "\033[38;2"
-#define ESC_COLOR256_BG "\033[48;5"
-#define ESC_COLOR256_FG "\033[38;5"
+#define BLIT_1x1 0x1
+#define BLIT_1x2 0x2
+#define BLIT_2x2 0x3
+
+#define UTF8_F_BLK  "\xe2\x96\x88"
+#define UTF8_LH_BLK "\xe2\x96\x84"
+#define UTF8_UH_BLK "\xe2\x96\x80"
+
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
+#define FOLAY_JUMP_THLD 1
 
-struct vo_tct_opts {
-    int algo;
-    int width;   // 0 -> default
-    int height;  // 0 -> default
-    int term256;  // 0 -> true color
-};
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
-#define OPT_BASE_STRUCT struct vo_tct_opts
-static const struct m_sub_options vo_tct_conf = {
-    .opts = (const m_option_t[]) {
-        {"vo-tct-algo", OPT_CHOICE(algo,
-            {"plain", ALGO_PLAIN},
-            {"half-blocks", ALGO_HALF_BLOCKS})},
-        {"vo-tct-width", OPT_INT(width)},
-        {"vo-tct-height", OPT_INT(height)},
-        {"vo-tct-256", OPT_FLAG(term256)},
-        {0}
-    },
-    .defaults = &(const struct vo_tct_opts) {
-        .algo = ALGO_HALF_BLOCKS,
-    },
-    .size = sizeof(struct vo_tct_opts),
-};
-
-struct lut_item {
+typedef struct {
     char str[4];
     int width;
-};
+} lut_item_t;
+
+// This struct is packed to 3 bytes, because its only purpose, is to simplify
+// byte pointer casts.
+typedef struct {
+    uint8_t b;
+    uint8_t g;
+    uint8_t r;
+} __attribute__((packed)) bgr_t;
+
+static inline bool bgr_eq(bgr_t x, bgr_t y)
+{
+    return (x.b == y.b) && (x.g == y.g) && (x.r == y.r);
+}
+
+static inline bgr_t bgr_avg(bgr_t x, bgr_t y)
+{
+    return (bgr_t){(x.b + y.b) / 2, (x.g + y.g) / 2, (x.r + y.r) / 2};
+}
+
+static inline unsigned bgr_dist(bgr_t x, bgr_t y) {
+    int a = (int)x.b - y.b;
+    int b = (int)x.g - y.g;
+    int c = (int)x.r - y.r;
+    return ((a*a)+(b*b)+(c*c));
+}
+
+static inline unsigned bgr_to_i(bgr_t x)
+{
+    return ((unsigned)x.b)<<16 | ((unsigned)x.g)<<8 | ((unsigned)x.r);
+}
+
+static inline bgr_t i_to_bgr(unsigned x)
+{
+    return (bgr_t){(x >> 16) & 0xFF, (x >> 8) & 0xFF, x & 0xFF};
+}
 
 struct priv {
-    struct vo_tct_opts *opts;
-    size_t buffer_size;
-    int swidth;
-    int sheight;
-    struct mp_image *frame;
+    int opt_blit;
+    int opt_width; // 0 -> default
+    int opt_height; // 0 -> default
+    int opt_term256; // 0 -> true color
+
+    int w; // frame char width
+    int h; // frame char height
+    int scale_w, scale_h; // number of pixels per char.
+    int ww; // w * scale_w
+    int hh; // h * scale_h,
+    int term_x, term_y; // starting position
+    int stride, p_stride; // frame stride
+    unsigned int bytes_written; // number of bytes written out.
+    bool resized, skip_draw, can_overlay;
+    uint8_t *data, *p_data;
+    char *fbuff; // framebuffer
+    size_t fbuff_size;
+    uint16_t *folay; // overlay between current and previous frames.
+    size_t folay_size;
+
     struct mp_rect src;
     struct mp_rect dst;
+    struct mp_image *frame; // current frame
+    struct mp_image *p_frame; // previous frame
     struct mp_sws_context *sws;
-    struct lut_item lut[256];
+
+    // int -> str lookup table for faster conversion.
+    lut_item_t lut[256];
+
+    // Escape code printing functions that are dispatched at reconfig. Used for
+    // generalizing the code between different algos and term256.
+    int (*sprint_bg)(char*, lut_item_t*, bgr_t);
+    int (*sprint_fg)(char*, lut_item_t*, bgr_t);
 };
 
-// Convert RGB24 to xterm-256 8-bit value
+// Convert RGB24 to xterm-256 8-bit value.
 // For simplicity, assume RGB space is perceptually uniform.
 // There are 5 places where one of two outputs needs to be chosen when the
 // input is the exact middle:
 // - The r/g/b channels and the gray value: the higher value output is chosen.
 // - If the gray and color have same distance from the input - color is chosen.
-static int rgb_to_x256(uint8_t r, uint8_t g, uint8_t b)
+static int rgb_to_x256(bgr_t c)
 {
     // Calculate the nearest 0-based color index at 16 .. 231
 #   define v2ci(v) (v < 48 ? 0 : v < 115 ? 1 : (v - 35) / 40)
-    int ir = v2ci(r), ig = v2ci(g), ib = v2ci(b);   // 0..5 each
+    int ir = v2ci(c.r), ig = v2ci(c.g), ib = v2ci(c.b);   // 0..5 each
 #   define color_index() (36 * ir + 6 * ig + ib)  /* 0..215, lazy evaluation */
 
     // Calculate the nearest 0-based gray index at 232 .. 255
-    int average = (r + g + b) / 3;
+    int average = (c.r + c.g + c.b) / 3;
     int gray_index = average > 238 ? 23 : (average - 3) / 10;  // 0..23
 
     // Calculate the represented colors back from the index
@@ -115,114 +184,406 @@ static int rgb_to_x256(uint8_t r, uint8_t g, uint8_t b)
 
     // Return the one which is nearer to the original input rgb value
 #   define dist_square(A,B,C, a,b,c) ((A-a)*(A-a) + (B-b)*(B-b) + (C-c)*(C-c))
-    int color_err = dist_square(cr, cg, cb, r, g, b);
-    int gray_err  = dist_square(gv, gv, gv, r, g, b);
+    int color_err = dist_square(cr, cg, cb, c.r, c.g, c.b);
+    int gray_err  = dist_square(gv, gv, gv, c.r, c.g, c.b);
     return color_err <= gray_err ? 16 + color_index() : 232 + gray_index;
 }
 
-static void print_seq3(struct lut_item *lut, const char* prefix,
-                       uint8_t r, uint8_t g, uint8_t b)
+static inline int sprint_seq3(char *buff, lut_item_t *lut, const char *prefix,
+                              bgr_t c)
 {
-// The fwrite implementation is about 25% faster than the printf code
-// (even if we use *.s with the lut values), however,
-// on windows we need to use printf in order to translate escape sequences and
-// UTF8 output for the console.
-#ifndef _WIN32
-    fputs(prefix, stdout);
-    fwrite(lut[r].str, lut[r].width, 1, stdout);
-    fwrite(lut[g].str, lut[g].width, 1, stdout);
-    fwrite(lut[b].str, lut[b].width, 1, stdout);
-    fputc('m', stdout);
-#else
-    printf("%s;%d;%d;%dm", prefix, (int)r, (int)g, (int)b);
-#endif
+    memcpy(buff, prefix,       T_COLOR_P_L);    buff += T_COLOR_P_L;
+    memcpy(buff, lut[c.r].str, lut[c.r].width); buff += lut[c.r].width;
+    memcpy(buff, lut[c.g].str, lut[c.g].width); buff += lut[c.g].width;
+    memcpy(buff, lut[c.b].str, lut[c.b].width); buff += lut[c.b].width;
+    *buff = 'm';
+
+    return T_COLOR_P_L + lut[c.r].width + lut[c.g].width + lut[c.b].width + 1;
 }
 
-static void print_seq1(struct lut_item *lut, const char* prefix, uint8_t c)
+static inline int sprint_seq1(char *buff, lut_item_t *lut, const char *prefix,
+                              uint8_t c)
 {
-#ifndef _WIN32
-    fputs(prefix, stdout);
-    fwrite(lut[c].str, lut[c].width, 1, stdout);
-    fputc('m', stdout);
-#else
-    printf("%s;%dm", prefix, (int)c);
-#endif
+    memcpy(buff, prefix,     T_COLOR_P_L);  buff += T_COLOR_P_L;
+    memcpy(buff, lut[c].str, lut[c].width); buff += lut[c].width;
+    *buff = 'm';
+
+    return T_COLOR_P_L + lut[c].width + 1;
 }
 
+// Used for generalizing the code between truecolor and xterm-256 options
+// (removes the need to check for it on every pixel).
+static int __x256_sprint_bg(char *buff, lut_item_t *lut, bgr_t c)
+{ return sprint_seq1(buff, lut, T_COLOR_BG256_P, rgb_to_x256(c));}
 
-static void write_plain(
-    const int dwidth, const int dheight,
-    const int swidth, const int sheight,
-    const unsigned char *source, const int source_stride,
-    bool term256, struct lut_item *lut)
+static int __x256_sprint_fg(char *buff, lut_item_t *lut, bgr_t c)
+{ return sprint_seq1(buff, lut, T_COLOR_FG256_P, rgb_to_x256(c));}
+
+static int __tc_sprint_bg(char *buff, lut_item_t *lut, bgr_t c)
+{ return sprint_seq3(buff, lut, T_COLOR_BG_P, c); }
+
+static int __tc_sprint_fg(char *buff, lut_item_t *lut, bgr_t c)
+{ return sprint_seq3(buff, lut, T_COLOR_FG_P, c); }
+
+
+// The {f}write() implementation is about 25% faster than the printf one (even
+// if using .*s with the lut values). However, on Windows we need to use printf
+// in order to translate escape sequences and UTF8 output for the console.
+// write() is also faster than fwrite() for large buffers.
+static inline void print_buff(char *buff, int size)
 {
-    assert(source);
-    const int tx = (dwidth - swidth) / 2;
-    const int ty = (dheight - sheight) / 2;
-    for (int y = 0; y < sheight; y++) {
-        const unsigned char *row = source + y * source_stride;
-        printf(ESC_GOTOXY, ty + y, tx);
-        for (int x = 0; x < swidth; x++) {
-            unsigned char b = *row++;
-            unsigned char g = *row++;
-            unsigned char r = *row++;
-            if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r, g, b));
-            } else {
-                print_seq3(lut, ESC_COLOR_BG, r, g, b);
-            }
-            printf(" ");
-        }
-        printf(ESC_CLEAR_COLORS);
+#   ifdef _WIN32
+    printf("%.*s", size, buff);
+#   elif __linux__
+    fwrite_unlocked(buff, size, 1, stdout);
+    // write(1, buff, size);
+#   else
+    fwrite(buff, size, 1, stdout);
+#   endif
+}
+
+static inline unsigned solve2x2(bgr_t nw, bgr_t ne, bgr_t sw, bgr_t se,
+                                bgr_t *restrict c1, bgr_t *restrict c2)
+{
+    unsigned nwi = bgr_to_i(nw);
+    unsigned nei = bgr_to_i(ne);
+    unsigned swi = bgr_to_i(sw);
+    unsigned sei = bgr_to_i(se);
+
+    bgr_t    colors[4]   = {nw , ne , sw , se };
+    unsigned i_colors[4] = {nwi, nei, swi, sei};
+    unsigned ret = 0b0000;
+
+    // count the number of distinct colors using the on/off principle.
+    unsigned ccnt = 4 - (nwi == nei)
+                  - ((nwi == swi) || (nei == swi))
+                  - ((nwi == sei) || (nei == sei) || (swi == sei));
+
+    if (ccnt == 1) {
+        *c1 = nw;
+        return ret;
     }
-    printf("\n");
+
+    unsigned dists[4][4] = {
+        {0               ,bgr_dist(nw, ne),bgr_dist(nw, sw),bgr_dist(nw, se)},
+        {bgr_dist(ne, nw),0               ,bgr_dist(ne, sw),bgr_dist(ne, se)},
+        {bgr_dist(sw, nw),bgr_dist(sw, ne),0               ,bgr_dist(sw, se)},
+        {bgr_dist(se, nw),bgr_dist(se, ne),bgr_dist(se, sw),0               },
+    };
+
+    unsigned max_dist_a_idx = 0;
+    unsigned max_dist_b_idx = 0;
+    unsigned max_dist = 0;
+
+    // find 2 data points (colors) with the highest distance and construct
+    // clusters around them.
+    for (unsigned i = 0; i < 4; i++) {
+        for (unsigned j = i + 1; j < 4; j++) {
+            if (dists[i][j] > max_dist) {
+                max_dist_a_idx = i;
+                max_dist_b_idx = j;
+                max_dist = dists[i][j];
+            }
+        }
+    }
+
+    unsigned cluster_a_size = 1;
+    unsigned cluster_b_size = 1;
+    unsigned cluster_a[4] = {i_colors[max_dist_a_idx]};
+    unsigned cluster_b[4] = {i_colors[max_dist_b_idx]};
+
+    for (unsigned i = 0; i < 4; i++) {
+        if (i == max_dist_a_idx || i == max_dist_b_idx) continue;
+        if (dists[max_dist_a_idx][i] < dists[max_dist_b_idx][i]) {
+            cluster_a[cluster_a_size++] = i_colors[i];
+        } else {
+            cluster_b[cluster_b_size++] = i_colors[i];
+        }
+    }
+
+    // For some reason subsampling, gives better / sharper results than
+    // clusterwise linear interpolation.
+    bgr_t _c1 = i_to_bgr(cluster_a[0]);
+    bgr_t _c2 = i_to_bgr(cluster_b[0]);
+
+    for (unsigned i = 0; i < 4; i++) {
+        ret |= ((bgr_dist(_c1, colors[i]) > bgr_dist(_c2, colors[i])) << i);
+    }
+
+    *c1 = _c1;
+    *c2 = _c2;
+
+    return ret;
 }
 
-static void write_half_blocks(
-    const int dwidth, const int dheight,
-    const int swidth, const int sheight,
-    unsigned char *source, int source_stride,
-    bool term256, struct lut_item *lut)
+static void draw_1x1(struct vo *vo)
 {
-    assert(source);
-    const int tx = (dwidth - swidth) / 2;
-    const int ty = (dheight - sheight) / 2;
-    for (int y = 0; y < sheight * 2; y += 2) {
-        const unsigned char *row_up = source + y * source_stride;
-        const unsigned char *row_down = source + (y + 1) * source_stride;
-        printf(ESC_GOTOXY, ty + y / 2, tx);
-        for (int x = 0; x < swidth; x++) {
-            unsigned char b_up = *row_up++;
-            unsigned char g_up = *row_up++;
-            unsigned char r_up = *row_up++;
-            unsigned char b_down = *row_down++;
-            unsigned char g_down = *row_down++;
-            unsigned char r_down = *row_down++;
-            if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
-                print_seq1(lut, ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
-            } else {
-                print_seq3(lut, ESC_COLOR_BG, r_up, g_up, b_up);
-                print_seq3(lut, ESC_COLOR_FG, r_down, g_down, b_down);
+    struct priv *p = vo->priv;
+    char *buffptr = p->fbuff;
+
+    for (int y = 0; y < p->hh; y++) {
+        buffptr += sprintf(buffptr, T_CURS_MOV_F, p->term_y + y, p->term_x);
+
+        // make sure that old != row[0], so the first color gets printed.
+        bgr_t *row = (bgr_t*)(p->data + y * p->stride);
+        bgr_t old_pix = row[0];
+
+        buffptr += p->sprint_bg(buffptr, p->lut, old_pix);
+        *buffptr++ = ' ';
+
+        for (int x = 1; x < p->ww; x++) {
+            bgr_t pix = row[x];
+
+            const int idx = y * p->w + x;
+            if (p->can_overlay && p->folay[idx] > FOLAY_JUMP_THLD) {
+                x += p->folay[idx];
+                buffptr += sprintf(buffptr, T_CURS_FWD_F, p->folay[idx] + 1);
+                continue;
             }
-            printf("\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
+
+            if (!bgr_eq(pix, old_pix))
+                buffptr += p->sprint_bg(buffptr, p->lut, pix);
+
+            *buffptr++ = ' ';
+            old_pix = pix;
         }
-        printf(ESC_CLEAR_COLORS);
+        buffptr += sprintf(buffptr, T_ATTR_RESET_ALL);
     }
-    printf("\n");
+    *buffptr++ = '\n';
+    const int bufflen = buffptr - p->fbuff;
+    p->bytes_written += bufflen;
+    print_buff(p->fbuff, bufflen);
+}
+
+static void draw_1x2(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    char *buffptr = p->fbuff;
+
+    for (int y = 0; y < p->hh; y += 2) {
+        buffptr += sprintf(buffptr, T_CURS_MOV_F, p->term_y + y / 2, p->term_x);
+
+        // make sure that old != row[0], so the first color gets printed.
+        bgr_t *row_n = (bgr_t*)(p->data + y * p->stride);
+        bgr_t *row_s = (bgr_t*)(p->data + (y + 1) * p->stride);
+        bgr_t old_pix_n = row_n[0];
+        bgr_t old_pix_s = row_s[0];
+
+        buffptr += p->sprint_bg(buffptr, p->lut, old_pix_n);
+        buffptr += p->sprint_fg(buffptr, p->lut, old_pix_s);
+        buffptr += sprintf(buffptr, "▄");
+
+        for (int x = 1; x < p->ww; x++) {
+            bgr_t pix_n = row_n[x];
+            bgr_t pix_s = row_s[x];
+
+            const int idx_n = p->w * y + x;
+            const int idx_s = p->w * (y + 1) + x;
+            const int folay_offset = MIN(p->folay[idx_n], p->folay[idx_s]) - 1;
+            // ^ in theory, this -1 is not needed, but in some cases, the colors
+            // were getting fucked up, and this fixes it.
+
+            if (p->can_overlay && folay_offset > FOLAY_JUMP_THLD) {
+                x += folay_offset;
+                buffptr += sprintf(buffptr, T_CURS_FWD_F, folay_offset + 1);
+                continue;
+            }
+
+            if (bgr_eq(pix_n, pix_s)) {
+                if (bgr_eq(pix_n, old_pix_n)) {
+                    // old bg is the same as new (bg,fg).
+                    *buffptr++ = ' ';
+                    continue;
+                }
+                if (bgr_eq(pix_n, old_pix_s)) {
+                    // old fg is the same as new (bg,fg).
+                    buffptr += sprintf(buffptr, "█");
+                    continue;
+                }
+                // change bg, since ' ' is shorter than "█".
+                buffptr += p->sprint_bg(buffptr, p->lut, pix_n);
+                *buffptr++ = ' ';
+                old_pix_n = pix_n;
+            } else {
+                if (bgr_eq(pix_n, old_pix_s) && bgr_eq(pix_s, old_pix_n)) {
+                    // old (bg,fg) are the same as new (fg,bg)
+                    buffptr += sprintf(buffptr, "▀");
+                    continue;
+                }
+                if (!bgr_eq(pix_n, old_pix_n))
+                    buffptr += p->sprint_bg(buffptr, p->lut, pix_n);
+
+                if (!bgr_eq(pix_s, old_pix_s))
+                    buffptr += p->sprint_fg(buffptr, p->lut, pix_s);
+
+                buffptr += sprintf(buffptr, "▄");
+                old_pix_n = pix_n;
+                old_pix_s = pix_s;
+            }
+        }
+        buffptr += sprintf(buffptr, T_ATTR_RESET_ALL);
+    }
+    *buffptr++ = '\n';
+    unsigned int bufflen = buffptr - p->fbuff;
+    p->bytes_written += bufflen;
+    print_buff(p->fbuff, bufflen);
+}
+
+static void draw_2x2(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    char *buffptr = p->fbuff;
+
+    for (int y = 0; y < p->hh; y += 2) {
+        buffptr += sprintf(buffptr, T_CURS_MOV_F, p->term_y + y / 2, p->term_x);
+
+        // make sure that old != row[0], so the first color gets printed.
+        bgr_t *row_n = (bgr_t*)(p->data + y * p->stride);
+        bgr_t *row_s = (bgr_t*)(p->data + (y + 1) * p->stride);
+
+        bgr_t old_bg = bgr_avg(row_n[0], row_n[1]);
+        bgr_t old_fg = bgr_avg(row_s[0], row_s[1]);
+
+        // print out a half block for the first character, because its easier.
+        buffptr += p->sprint_bg(buffptr, p->lut, old_bg);
+        buffptr += p->sprint_fg(buffptr, p->lut, old_fg);
+        buffptr += sprintf(buffptr, "▄");
+
+        for (int x = 0; x < p->ww; x += 2) {
+            // "▖""▗""▘""▝""▞""▚""▙""▟""▛""▜""█""▄""▀""▐""▌"" "
+
+            bgr_t bg = {0}, fg = {0};
+            // Don't know why, but flipping both horizontally and vertically
+            // fixes the antialiasing / interpolation problems.
+            // It worked without this magic fuckery when testing,
+            // but on "real" images it does not.
+            // DO NOT FUCKING TOUCH.
+            unsigned mask = solve2x2(row_s[x+1], row_s[x],
+                                     row_n[x+1], row_n[x], &bg, &fg);
+
+
+            // TODO @cloud11665: use folay for 2x2 and higher*
+
+#           define print_x_or_inverse(alpha, inv_alpha)               \
+                if (bgr_eq(bg, old_fg) && bgr_eq(fg, old_bg)) {       \
+                    buffptr += sprintf(buffptr, inv_alpha);           \
+                } else {                                              \
+                    if (!bgr_eq(bg, old_bg))                          \
+                        buffptr += p->sprint_bg(buffptr, p->lut, bg); \
+                    if (!bgr_eq(fg, old_fg))                          \
+                        buffptr += p->sprint_fg(buffptr, p->lut, fg); \
+                buffptr += sprintf(buffptr, alpha);                   \
+                    old_bg = bg;                                      \
+                    old_fg = fg;                                      \
+                }                                                     \
+                continue
+
+            switch (mask) {
+            case 0b0000: {
+                if (bgr_eq(bg, old_bg)) {
+                    *buffptr++ = ' ';
+                    continue;
+                }
+                if (bgr_eq(bg, old_fg)) {
+                    buffptr += sprintf(buffptr, "█");
+                    continue;
+                }
+                buffptr += p->sprint_bg(buffptr, p->lut, bg);
+                *buffptr++ = ' ';
+                old_bg = bg;
+                continue;
+            }
+            case 0b0001: print_x_or_inverse("▗", "▛");
+            case 0b0010: print_x_or_inverse("▖", "▜");
+            case 0b0011: print_x_or_inverse("▄", "▀");
+            case 0b0100: print_x_or_inverse("▝", "▙");
+            case 0b0101: print_x_or_inverse("▐", "▌");
+            case 0b0110: print_x_or_inverse("▞", "▚");
+            case 0b0111: print_x_or_inverse("▟", "▘");
+            case 0b1000: print_x_or_inverse("▘", "▟");
+            case 0b1001: print_x_or_inverse("▚", "▞");
+            case 0b1010: print_x_or_inverse("▌", "▐");
+            case 0b1011: print_x_or_inverse("▙", "▝");
+            case 0b1100: print_x_or_inverse("▀", "▄");
+            case 0b1101: print_x_or_inverse("▜", "▖");
+            case 0b1110: print_x_or_inverse("▛", "▗");
+            /* case 0b1111 never happenes. */
+            }
+        }
+        buffptr += sprintf(buffptr, T_ATTR_RESET_ALL);
+    }
+    *buffptr++ = '\n';
+    unsigned int bufflen = buffptr - p->fbuff;
+    p->bytes_written += bufflen;
+    print_buff(p->fbuff, bufflen);
+}
+
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
+{
+    assert(frame->current->planes[0]);
+
+    struct priv *p = vo->priv;
+    mp_sws_scale(p->sws, p->frame, frame->current);
+
+    p->skip_draw = false;
+    if (frame->repeat && !frame->redraw && !p->resized) {
+        p->skip_draw = true;
+        return;
+    }
+
+    p->data     = p->frame->planes[0];
+    p->stride   = p->frame->stride[0];
+    p->p_stride = (p->p_frame ? p->p_frame->stride[0] : -1);
+    p->p_data   = (p->p_frame ? p->p_frame->planes[0] : NULL);
+    p->can_overlay = p->p_stride == p->stride && !p->resized;
+
+    if (p->can_overlay) {
+        for (int y = 0; y < p->hh; y++) {
+            bgr_t *row = (bgr_t *)(p->data + y * p->stride);
+            bgr_t *p_row = (bgr_t *)(p->p_data + y * p->p_stride);
+            p->folay[(y + 1) * p->ww - 1] = 0;
+            p->folay[y * p->ww + 1] = 0;
+            for (int x = p->ww - 2; x > 1 ; x--) {
+                int idx = y * p->ww + x;
+                if (bgr_eq(row[x], p_row[x])) {
+                    p->folay[idx] = p->folay[idx + 1] + 1;
+                } else {
+                    p->folay[idx] = 0;
+                }
+            }
+        }
+    } else {
+        // To clear left-over text AFTER the resize.
+        printf(T_CLEAR_SCREEN T_ATTR_RESET_ALL);
+    }
+
+    switch (p->opt_blit) {
+    case BLIT_1x1:
+        draw_1x1(vo); break;
+    case BLIT_1x2:
+        draw_1x2(vo); break;
+    case BLIT_2x2:
+        draw_2x2(vo); break;
+    }
+
+
+    // TODO @cloud11665: implement frame switching to prevent this fuckery.
+    if (p->p_frame)
+        talloc_free(p->p_frame);
+    p->p_frame = mp_image_new_copy(p->frame);
 }
 
 static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
     struct priv *p = vo->priv;
-    *out_width = DEFAULT_WIDTH;
+    *out_width  = DEFAULT_WIDTH;
     *out_height = DEFAULT_HEIGHT;
 
     terminal_get_size(out_width, out_height);
 
-    if (p->opts->width > 0)
-        *out_width = p->opts->width;
-    if (p->opts->height > 0)
-        *out_height = p->opts->height;
+    if (p->opt_width > 0)
+        *out_width  = p->opt_width;
+    if (p->opt_height > 0)
+        *out_height = p->opt_height;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -233,85 +594,108 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     struct mp_osd_res osd;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &osd);
-    p->swidth = p->dst.x1 - p->dst.x0;
-    p->sheight = p->dst.y1 - p->dst.y0;
+    p->w = p->dst.x1 - p->dst.x0;
+    p->h = p->dst.y1 - p->dst.y0;
+    p->ww = p->w * p->scale_w;
+    p->hh = p->h * p->scale_h;
+    p->term_x   = (vo->dwidth - p->w) / 2;
+    p->term_y   = (vo->dheight - p->h) / 2;
 
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = IMGFMT,
-        .w = p->swidth,
-        .h = p->sheight,
+        .w = p->w,
+        .h = p->h,
         .p_w = 1,
         .p_h = 1,
     };
 
-    const int mul = (p->opts->algo == ALGO_PLAIN ? 1 : 2);
     if (p->frame)
         talloc_free(p->frame);
-    p->frame = mp_image_alloc(IMGFMT, p->swidth, p->sheight * mul);
+    p->frame = mp_image_alloc(IMGFMT, p->w * p->scale_w, p->h * p->scale_h);
+
+    const int max_seq_size = (p->opt_term256 ? 11 : 19);
+    const int chr_size     = (p->opt_blit == BLIT_1x1 ? 1 : 3);
+    p->fbuff_size = (max_seq_size * 2 + chr_size) * (p->w * p->h)
+                  + (10 + 4) * p->h // T_CURS_MOV_F + ESC_CLEAR_COLORS
+                  + 2; // "\n\0"
+    p->fbuff = realloc(p->fbuff, p->fbuff_size * sizeof(char));
+
+    p->folay_size = p->ww * p->hh * 2;
+    p->folay = realloc(p->folay, p->folay_size * sizeof(uint16_t));
+    p->can_overlay = false;
+    memset(p->folay, 0, p->folay_size);
+
+    if (p->p_frame)
+        talloc_free(p->p_frame);
+    p->p_frame = NULL;
+
+    if (p->opt_term256) {
+        p->sprint_bg = &__x256_sprint_bg;
+        p->sprint_fg = &__x256_sprint_fg;
+    } else {
+        p->sprint_bg = &__tc_sprint_bg;
+        p->sprint_fg = &__tc_sprint_fg;
+    }
+
     if (!p->frame)
         return -1;
-
+    if (!p->fbuff)
+        return -1;
+    if (!p->folay)
+        return -1;
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    printf(ESC_HIDE_CURSOR);
-    printf(ESC_CLEAR_SCREEN);
+    printf(T_CLEAR_SCREEN T_ATTR_RESET_ALL);
     vo->want_redraw = true;
     return 0;
-}
-
-static void draw_image(struct vo *vo, mp_image_t *mpi)
-{
-    struct priv *p = vo->priv;
-    struct mp_image src = *mpi;
-    // XXX: pan, crop etc.
-    mp_sws_scale(p->sws, p->frame, &src);
-    talloc_free(mpi);
 }
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
-
     int width, height;
     get_win_size(vo, &width, &height);
 
-    if (vo->dwidth != width || vo->dheight != height)
+    p->resized = false;
+    if (vo->dwidth != width || vo->dheight != height) {
+        p->resized = true;
         reconfig(vo, vo->params);
-
-    if (p->opts->algo == ALGO_PLAIN) {
-        write_plain(
-            vo->dwidth, vo->dheight, p->swidth, p->sheight,
-            p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256, p->lut);
-    } else {
-        write_half_blocks(
-            vo->dwidth, vo->dheight, p->swidth, p->sheight,
-            p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256, p->lut);
     }
+
+    if (p->skip_draw)
+        return;
+
     fflush(stdout);
 }
 
 static void uninit(struct vo *vo)
 {
-    printf(ESC_RESTORE_CURSOR);
-    printf(ESC_CLEAR_SCREEN);
-    printf(ESC_GOTOXY, 0, 0);
+    printf(T_TITLE_STCK_POP);
+    printf(T_CURS_SHOW);
+    printf(T_CURS_STCK_POP);
+    printf(T_BUFF_DSBL);
+    printf(T_STATE_RSTR);
+
     struct priv *p = vo->priv;
+    if (p->fbuff)
+        free(p->fbuff);
+    if (p->folay)
+        free(p->folay);
     if (p->frame)
         talloc_free(p->frame);
+    if (p->p_frame)
+        talloc_free(p->p_frame);
 }
 
 static int preinit(struct vo *vo)
 {
-    // most terminal characters aren't 1:1, so we default to 2:1.
-    // if user passes their own value of choice, it'll be scaled accordingly.
+    // Most terminal characters aren't 1:1, so we default to 2:1.
+    // If user passes their own value of choice, it'll be scaled accordingly.
     vo->monitor_par = vo->opts->monitor_pixel_aspect * 2;
 
     struct priv *p = vo->priv;
-    p->opts = mp_get_config_group(vo, vo->global, &vo_tct_conf);
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
@@ -319,8 +703,23 @@ static int preinit(struct vo *vo)
     for (int i = 0; i < 256; ++i) {
         char buff[8];
         p->lut[i].width = sprintf(buff, ";%d", i);
-        memcpy(p->lut[i].str, buff, 4); // some strings may not end on a null byte, but that's ok.
+        // some strings may not end on a null byte, but that's ok.
+        memcpy(p->lut[i].str, buff, 4);
     }
+
+    p->folay   = NULL;
+    p->fbuff   = NULL;
+    p->p_frame = NULL;
+    p->bytes_written = 0;
+
+    p->scale_w  = (p->opt_blit == BLIT_2x2 ? 2 : 1);
+    p->scale_h  = (p->opt_blit == BLIT_1x1 ? 1 : 2);
+
+    printf(T_TITLE_STCK_PSH);
+    printf(T_CURS_HIDE);
+    printf(T_CURS_STCK_PSH);
+    printf(T_BUFF_ENBL);
+    printf(T_STATE_SAVE);
 
     return 0;
 }
@@ -332,9 +731,24 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    struct priv *p = vo->priv;
+
+    switch (request) {
+        case VOCTRL_UPDATE_WINDOW_TITLE:
+            printf(T_TITLE_SET_F, (char *)data);
+            return VO_TRUE;
+        case VOCTRL_GET_DISPLAY_RES:
+            ((int *)data)[0] = p->w;
+            ((int *)data)[1] = p->h;
+            return VO_TRUE;
+        case VOCTRL_SET_PANSCAN:
+            reconfig(vo, vo->params);
+            return VO_TRUE;
+    }
     return VO_NOTIMPL;
 }
 
+#define OPT_BASE_STRUCT struct priv
 const struct vo_driver video_out_tct = {
     .name = "tct",
     .description = "true-color terminals",
@@ -342,9 +756,25 @@ const struct vo_driver video_out_tct = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
-    .global_opts = &vo_tct_conf,
+    .priv_defaults = &(const struct priv) {
+        .opt_blit = BLIT_2x2,
+        .opt_term256 = 0,
+        .opt_height = 0,
+        .opt_width = 0,
+    },
+    .options = (const m_option_t[]) {
+        {"algo", OPT_CHOICE(opt_blit,
+            {"plain", BLIT_1x1},
+            {"half-blocks", BLIT_1x2},
+            {"quad", BLIT_2x2})},
+        {"width", OPT_INT(opt_width)},
+        {"height", OPT_INT(opt_height)},
+        {"256", OPT_FLAG(opt_term256)},
+        {0}
+    },
+    .options_prefix = "vo-tct"
 };
