@@ -137,8 +137,12 @@ void mp_update_logging(struct MPContext *mpctx, bool preinit)
         }
     }
 
-    if (mp_msg_has_log_file(mpctx->global) && !had_log_file)
-        mp_print_version(mpctx->log, false); // for log-file=... in config files
+    if (mp_msg_has_log_file(mpctx->global) && !had_log_file) {
+        // for log-file=... in config files.
+        // we did flush earlier messages, but they were in a cyclic buffer, so
+        // the version might have been overwritten. ensure we have it.
+        mp_print_version(mpctx->log, false);
+    }
 
     if (enabled && !preinit && mpctx->opts->consolecontrols)
         terminal_setup_getch(mpctx->input);
