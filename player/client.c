@@ -1586,6 +1586,30 @@ int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
     return count;
 }
 
+static bool property_shared_prefix(const char *a0, const char *b0)
+{
+    bstr a = bstr0(a0);
+    bstr b = bstr0(b0);
+
+    // Treat options and properties as equivalent.
+    bstr_eatstart0(&a, "options/");
+    bstr_eatstart0(&b, "options/");
+
+    // Compare the potentially-common portion
+    if (memcmp(a.start, b.start, MPMIN(a.len, b.len)))
+        return false;
+
+    // If lengths were equal, we're done
+    if (a.len == b.len)
+        return true;
+
+    // Check for a slash in the first non-common byte of the longer string
+    if (a.len > b.len)
+        return a.start[b.len] == '/';
+    else
+        return b.start[a.len] == '/';
+}
+
 // Broadcast that a property has changed.
 void mp_client_property_change(struct MPContext *mpctx, const char *name)
 {
@@ -1599,7 +1623,8 @@ void mp_client_property_change(struct MPContext *mpctx, const char *name)
         struct mpv_handle *client = clients->clients[n];
         pthread_mutex_lock(&client->lock);
         for (int i = 0; i < client->num_properties; i++) {
-            if (client->properties[i]->id == id) {
+            if (client->properties[i]->id == id &&
+                property_shared_prefix(name, client->properties[i]->name)) {
                 client->properties[i]->change_ts += 1;
                 client->has_pending_properties = true;
                 any_pending = true;
