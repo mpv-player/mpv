@@ -613,6 +613,14 @@ static int script_commandv(lua_State *L)
     return check_error(L, mpv_command(ctx->client, args));
 }
 
+static int script_del_property(lua_State *L)
+{
+    struct script_ctx *ctx = get_ctx(L);
+    const char *p = luaL_checkstring(L, 1);
+
+    return check_error(L, mpv_del_property(ctx->client, p));
+}
+
 static int script_set_property(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -1219,6 +1227,7 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(get_property_bool),
     FN_ENTRY(get_property_number),
     AF_ENTRY(get_property_native),
+    FN_ENTRY(del_property),
     FN_ENTRY(set_property),
     FN_ENTRY(set_property_bool),
     FN_ENTRY(set_property_number),
