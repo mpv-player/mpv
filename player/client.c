@@ -1337,6 +1337,12 @@ int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
     return req.status;
 }
 
+int mpv_del_property(mpv_handle *ctx, const char *name)
+{
+    const char* args[] = { "del", name, NULL };
+    return mpv_command(ctx, args);
+}
+
 int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
 {
     return mpv_set_property(ctx, name, MPV_FORMAT_STRING, &data);
