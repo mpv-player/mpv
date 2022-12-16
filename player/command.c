@@ -4882,6 +4882,29 @@ static void cmd_set(void *p)
                         M_PROPERTY_SET_STRING, cmd->args[1].v.s);
 }
 
+static void cmd_del(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    const char *name = cmd->args[0].v.s;
+    int osdl = cmd->msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
+    int osd_duration = mpctx->opts->osd_duration;
+
+    int r = mp_property_do(name, M_PROPERTY_DELETE, NULL, mpctx);
+
+    if (r == M_PROPERTY_OK) {
+        set_osd_msg(mpctx, osdl, osd_duration, "Deleted property: '%s'", name);
+        cmd->success = true;
+    } else if (r == M_PROPERTY_UNKNOWN) {
+        set_osd_msg(mpctx, osdl, osd_duration, "Unknown property: '%s'", name);
+        cmd->success = false;
+    } else if (r <= 0) {
+        set_osd_msg(mpctx, osdl, osd_duration, "Failed to set property '%s'",
+                    name);
+        cmd->success = false;
+    }
+}
+
 static void cmd_change_list(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -6310,6 +6333,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
 
     { "set", cmd_set, {{"name", OPT_STRING(v.s)}, {"value", OPT_STRING(v.s)}}},
+    { "del", cmd_del, {{"name", OPT_STRING(v.s)}}},
     { "change-list", cmd_change_list, { {"name", OPT_STRING(v.s)},
                                         {"operation", OPT_STRING(v.s)},
                                         {"value", OPT_STRING(v.s)} }},

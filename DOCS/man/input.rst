@@ -334,6 +334,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``set <name> <value>``
     Set the given property or option to the given value.
 
+``del <name>``
+    Delete the given property. Most properties cannot be deleted.
+
 ``add <name> [<value>]``
     Add the given value to the property or option. On overflow or underflow,
     clamp the property to the maximum. If ``<value>`` is omitted, assume ``1``.
