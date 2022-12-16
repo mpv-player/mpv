@@ -698,6 +698,13 @@ static void script_get_property(js_State *J, void *af)
         js_pushstring(J, res);
 }
 
+// args: name
+static void script_del_property(js_State *J)
+{
+    int e = mpv_del_property(jclient(J), js_tostring(J, 1));
+    push_status(J, e);
+}
+
 // args: name [,def]
 static void script_get_property_bool(js_State *J)
 {
@@ -1171,6 +1178,7 @@ static const struct fn_entry main_fns[] = {
     AF_ENTRY(command_native, 2),
     AF_ENTRY(_command_native_async, 2),
     FN_ENTRY(_abort_async_command, 1),
+    FN_ENTRY(del_property, 1),
     FN_ENTRY(get_property_bool, 2),
     FN_ENTRY(get_property_number, 2),
     AF_ENTRY(get_property_native, 2),
