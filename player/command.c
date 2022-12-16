@@ -107,12 +107,17 @@ struct command_ctx {
     struct mp_cmd_ctx *cache_dump_cmd; // in progress cache dumping
 
     char **script_props;
+    mpv_node udata;
 
     double cached_window_scale;
 };
 
 static const struct m_option script_props_type = {
     .type = &m_option_type_keyvalue_list
+};
+
+static const struct m_option udata_type = {
+    .type = CONF_TYPE_NODE
 };
 
 struct overlay {
@@ -3555,6 +3560,168 @@ static int mp_property_script_props(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int do_list_udata(int item, int action, void *arg, void *ctx);
+
+struct udata_ctx {
+    MPContext *mpctx;
+    const char *path;
+    mpv_node *node;
+};
+
+static int do_op_udata(struct udata_ctx* ctx, int action, void *arg)
+{
+    MPContext *mpctx = ctx->mpctx;
+    mpv_node *node = ctx->node;
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = udata_type;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE: // same as GET, because type==mpv_node
+        assert(node);
+        m_option_copy(&udata_type, arg, node);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+        char *str = m_option_pretty_print(&udata_type, node);
+        *(char **)arg = str;
+        return str != NULL;
+    }
+    case M_PROPERTY_SET:
+    case M_PROPERTY_SET_NODE:
+        assert(node);
+        m_option_copy(&udata_type, node, arg);
+        mp_notify_property(mpctx, ctx->path);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_KEY_ACTION: {
+        assert(node);
+
+        // If we're operating on an array, sub-object access is handled by m_property_read_list
+        if (node->format == MPV_FORMAT_NODE_ARRAY)
+            return m_property_read_list(action, arg, node->u.list->num, &do_list_udata, ctx);
+
+        // Sub-objects only make sense for arrays and maps
+        if (node->format != MPV_FORMAT_NODE_MAP)
+            return M_PROPERTY_NOT_IMPLEMENTED;
+
+        struct m_property_action_arg *act = arg;
+
+        // See if the next layer down will also be a sub-object access
+        bstr key;
+        char *rem;
+        bool has_split = m_property_split_path(act->key, &key, &rem);
+
+        if (!has_split && act->action == M_PROPERTY_DELETE) {
+            // Find the object we're looking for
+            int i;
+            for (i = 0; i < node->u.list->num; i++) {
+                if (bstr_equals0(key, node->u.list->keys[i]))
+                    break;
+            }
+
+            // Return if it didn't exist
+            if (i == node->u.list->num)
+                return M_PROPERTY_UNKNOWN;
+
+            // Delete the item
+            m_option_free(&udata_type, &node->u.list->values[i]);
+            talloc_free(node->u.list->keys[i]);
+
+            // Shift the remaining items back
+            for (i++; i < node->u.list->num; i++) {
+                node->u.list->values[i - 1] = node->u.list->values[i];
+                node->u.list->keys[i - 1] = node->u.list->keys[i];
+            }
+
+            // And decrement the count
+            node->u.list->num--;
+
+            return M_PROPERTY_OK;
+        }
+
+        // Look up the next level down
+        mpv_node *cnode = node_map_bget(node, key);
+
+        if (!cnode) {
+            switch (act->action) {
+                case M_PROPERTY_SET:
+                case M_PROPERTY_SET_NODE: {
+                    // If we're doing a set, and the key doesn't exist, create it.
+                    // If we're recursing another layer down, make it an empty map;
+                    // otherwise, make it NONE, since we'll be overwriting it at the next level.
+                    cnode = node_map_badd(node, key, has_split ? MPV_FORMAT_NODE_MAP : MPV_FORMAT_NONE);
+                    if (!cnode)
+                        return M_PROPERTY_ERROR;
+                    break;
+                case M_PROPERTY_GET_TYPE:
+                    // Nonexistent keys have type NODE, so they can be overwritten
+                    *(struct m_option *)act->arg = udata_type;
+                    return M_PROPERTY_OK;
+                default:
+                    // We can't perform any other options on nonexistent keys
+                    return M_PROPERTY_UNKNOWN;
+                }
+            }
+        }
+
+        struct udata_ctx nctx = *ctx;
+        nctx.node = cnode;
+
+        // If we're going down another level, set up a new key-action.
+        if (has_split) {
+            struct m_property_action_arg sub_act = {
+                .key = rem,
+                .action = act->action,
+                .arg = act->arg,
+            };
+
+            return do_op_udata(&nctx, M_PROPERTY_KEY_ACTION, &sub_act);
+        } else {
+            return do_op_udata(&nctx, act->action, act->arg);
+        }
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int do_list_udata(int item, int action, void *arg, void *ctx)
+{
+    struct udata_ctx nctx = *(struct udata_ctx*)ctx;
+    nctx.node = &nctx.node->u.list->values[item];
+
+    return do_op_udata(&nctx, action, arg);
+}
+
+static int mp_property_udata(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    // The root of udata is a shared map; don't allow overwriting
+    // or deleting the whole thing
+    if (action == M_PROPERTY_SET || action == M_PROPERTY_SET_NODE ||
+        action == M_PROPERTY_DELETE)
+        return M_PROPERTY_NOT_IMPLEMENTED;
+
+    char *path = NULL;
+    if (action == M_PROPERTY_KEY_ACTION) {
+        struct m_property_action_arg *act = arg;
+        if (act->action == M_PROPERTY_SET || act->action == M_PROPERTY_SET_NODE)
+            path = talloc_asprintf(NULL, "%s/%s", prop->name, act->key);
+    }
+
+    struct MPContext *mpctx = ctx;
+    struct udata_ctx nctx = {
+        .mpctx = mpctx,
+        .path = path,
+        .node = &mpctx->command_ctx->udata,
+    };
+
+    int ret = do_op_udata(&nctx, action, arg);
+
+    talloc_free(path);
+
+    return ret;
+}
+
 // Redirect a property name to another
 #define M_PROPERTY_ALIAS(name, real_property) \
     {(name), mp_property_alias, .priv = (real_property)}
@@ -3757,6 +3924,7 @@ static const struct m_property mp_properties_base[] = {
     {"input-bindings", mp_property_bindings},
 
     {"shared-script-properties", mp_property_script_props},
+    {"user-data", mp_property_udata},
 
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),
@@ -6551,6 +6719,9 @@ void command_init(struct MPContext *mpctx)
 
         ctx->properties[count++] = prop;
     }
+
+    node_init(&ctx->udata, MPV_FORMAT_NODE_MAP, NULL);
+    talloc_steal(ctx, ctx->udata.u.list);
 }
 
 static void command_event(struct MPContext *mpctx, int event, void *arg)
