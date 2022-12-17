@@ -55,30 +55,13 @@ struct vo_tct_opts {
     int term256;  // 0 -> true color
 };
 
-#define OPT_BASE_STRUCT struct vo_tct_opts
-static const struct m_sub_options vo_tct_conf = {
-    .opts = (const m_option_t[]) {
-        {"vo-tct-algo", OPT_CHOICE(algo,
-            {"plain", ALGO_PLAIN},
-            {"half-blocks", ALGO_HALF_BLOCKS})},
-        {"vo-tct-width", OPT_INT(width)},
-        {"vo-tct-height", OPT_INT(height)},
-        {"vo-tct-256", OPT_FLAG(term256)},
-        {0}
-    },
-    .defaults = &(const struct vo_tct_opts) {
-        .algo = ALGO_HALF_BLOCKS,
-    },
-    .size = sizeof(struct vo_tct_opts),
-};
-
 struct lut_item {
     char str[4];
     int width;
 };
 
 struct priv {
-    struct vo_tct_opts *opts;
+    struct vo_tct_opts opts;
     size_t buffer_size;
     int swidth;
     int sheight;
@@ -217,10 +200,10 @@ static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
 
     terminal_get_size(out_width, out_height);
 
-    if (p->opts->width > 0)
-        *out_width = p->opts->width;
-    if (p->opts->height > 0)
-        *out_height = p->opts->height;
+    if (p->opts.width > 0)
+        *out_width = p->opts.width;
+    if (p->opts.height > 0)
+        *out_height = p->opts.height;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -243,7 +226,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         .p_h = 1,
     };
 
-    const int mul = (p->opts->algo == ALGO_PLAIN ? 1 : 2);
+    const int mul = (p->opts.algo == ALGO_PLAIN ? 1 : 2);
     if (p->frame)
         talloc_free(p->frame);
     p->frame = mp_image_alloc(IMGFMT, p->swidth, p->sheight * mul);
@@ -278,16 +261,16 @@ static void flip_page(struct vo *vo)
     if (vo->dwidth != width || vo->dheight != height)
         reconfig(vo, vo->params);
 
-    if (p->opts->algo == ALGO_PLAIN) {
+    if (p->opts.algo == ALGO_PLAIN) {
         write_plain(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256, p->lut);
+            p->opts.term256, p->lut);
     } else {
         write_half_blocks(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256, p->lut);
+            p->opts.term256, p->lut);
     }
     fflush(stdout);
 }
@@ -308,7 +291,6 @@ static int preinit(struct vo *vo)
     vo->monitor_par = vo->opts->monitor_pixel_aspect * 2;
 
     struct priv *p = vo->priv;
-    p->opts = mp_get_config_group(vo, vo->global, &vo_tct_conf);
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
@@ -335,6 +317,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct vo_driver video_out_tct = {
     .name = "tct",
     .description = "true-color terminals",
@@ -346,5 +330,17 @@ const struct vo_driver video_out_tct = {
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
-    .global_opts = &vo_tct_conf,
+    .priv_defaults = &(const struct priv) {
+        .opts.algo = ALGO_HALF_BLOCKS,
+    },
+    .options = (const m_option_t[]) {
+        {"algo", OPT_CHOICE(opts.algo,
+            {"plain", ALGO_PLAIN},
+            {"half-blocks", ALGO_HALF_BLOCKS})},
+        {"width", OPT_INT(opts.width)},
+        {"height", OPT_INT(opts.height)},
+        {"256", OPT_FLAG(opts.term256)},
+        {0}
+    },
+    .options_prefix = "vo-tct",
 };
