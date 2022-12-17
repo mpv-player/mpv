@@ -35,6 +35,10 @@
 #include "video/sws_utils.h"
 #include "video/mp_image.h"
 
+#if HAVE_POSIX
+#include <unistd.h>
+#endif
+
 #define IMGFMT IMGFMT_RGB24
 
 #define TERM_ESC_USE_GLOBAL_COLOR_REG   "\033[?1070l"
@@ -320,6 +324,26 @@ static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
+static inline int sixel_write(char *data, int size, void *priv)
+{
+    // On POSIX platforms, write() is the fastest method. It also is the only
+    // one that—if implemented correctly—ensures atomic writes so mpv’s
+    // output will not be interrupted by other processes or threads that write
+    // to stdout, which would cause screen corruption.
+#if HAVE_POSIX
+    return write(fileno((FILE *)priv), data, size);
+#else
+    int ret = fwrite(data, 1, size, (FILE *)priv);
+    fflush((FILE *)priv);
+    return ret;
+#endif
+}
+
+static inline void write_str(char *s)
+{
+    sixel_write(s, strlen(s), stdout);
+}
+
 static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *priv = vo->priv;
@@ -331,7 +355,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     }
 
     if (priv->opts.draw_clear)
-        printf(TERM_ESC_CLEAR_SCREEN);
+        write_str(TERM_ESC_CLEAR_SCREEN);
     vo->want_redraw = true;
 
     return ret;
@@ -361,7 +385,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         update_sixel_swscaler(vo, vo->params);
 
         if (priv->opts.draw_clear)
-            printf(TERM_ESC_CLEAR_SCREEN);
+            write_str(TERM_ESC_CLEAR_SCREEN);
         resized = true;
     }
 
@@ -418,11 +442,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         talloc_free(mpi);
 }
 
-static int sixel_write(char *data, int size, void *priv)
-{
-    return fwrite(data, 1, size, (FILE *)priv);
-}
-
 static void flip_page(struct vo *vo)
 {
     struct priv* priv = vo->priv;
@@ -438,10 +457,12 @@ static void flip_page(struct vo *vo)
         return;
 
     // Go to the offset row and column, then display the image
-    printf(TERM_ESC_GOTO_YX, priv->top, priv->left);
+    char *cmd = talloc_asprintf(NULL, TERM_ESC_GOTO_YX,
+                                priv->top, priv->left);
+    write_str(cmd);
+    talloc_free(cmd);
     sixel_encode(priv->buffer, priv->width, priv->height,
                  depth, priv->dither, priv->output);
-    fflush(stdout);
 }
 
 static int preinit(struct vo *vo)
@@ -465,11 +486,11 @@ static int preinit(struct vo *vo)
     sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
 
     if (priv->opts.exit_clear)
-        printf(TERM_ESC_SAVE_SCREEN);
-    printf(TERM_ESC_HIDE_CURSOR);
+        write_str(TERM_ESC_SAVE_SCREEN);
+    write_str(TERM_ESC_HIDE_CURSOR);
 
     /* don't use private color registers for each frame. */
-    printf(TERM_ESC_USE_GLOBAL_COLOR_REG);
+    write_str(TERM_ESC_USE_GLOBAL_COLOR_REG);
 
     priv->dither = NULL;
 
@@ -505,10 +526,10 @@ static void uninit(struct vo *vo)
 {
     struct priv *priv = vo->priv;
 
-    printf(TERM_ESC_RESTORE_CURSOR);
+    write_str(TERM_ESC_RESTORE_CURSOR);
 
     if (priv->opts.exit_clear)
-        printf(TERM_ESC_RESTORE_SCREEN);
+        write_str(TERM_ESC_RESTORE_SCREEN);
     fflush(stdout);
 
     if (priv->output) {
