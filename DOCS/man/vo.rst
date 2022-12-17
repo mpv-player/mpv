@@ -433,6 +433,9 @@ Available video output drivers are:
         to take into account padding at the report - this only works correctly
         when the overall padding per axis is smaller than the number of cells.
 
+    ``--vo-sixel-draw-clear=<yes|no>`` (default: yes)
+￼        Whether or not to clear the terminal while drawing frames.
+
     ``--vo-sixel-exit-clear=<yes|no>`` (default: yes)
         Whether or not to clear the terminal on quit. When set to no - the last
         sixel image stays on screen after quit, with the cursor following it.
