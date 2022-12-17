@@ -38,17 +38,13 @@
 
 #define ALGO_PLAIN 1
 #define ALGO_HALF_BLOCKS 2
-#define ESC_HIDE_CURSOR "\033[?25l"
-#define ESC_RESTORE_CURSOR "\033[?25h"
-#define ESC_CLEAR_SCREEN "\033[2J"
-#define ESC_CLEAR_COLORS "\033[0m"
-#define ESC_SAVE_SCREEN "\033[?1049h"
-#define ESC_RESTORE_SCREEN "\033[?1049l"
-#define ESC_GOTOXY "\033[%d;%df"
-#define ESC_COLOR_BG "\033[48;2"
-#define ESC_COLOR_FG "\033[38;2"
-#define ESC_COLOR256_BG "\033[48;5"
-#define ESC_COLOR256_FG "\033[38;5"
+
+#define TERM_ESC_CLEAR_COLORS           "\033[0m"
+#define TERM_ESC_COLOR256_BG            "\033[48;5"
+#define TERM_ESC_COLOR256_FG            "\033[38;5"
+#define TERM_ESC_COLOR24BIT_BG          "\033[48;2"
+#define TERM_ESC_COLOR24BIT_FG          "\033[38;2"
+
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
@@ -163,19 +159,19 @@ static void write_plain(
     const int ty = (dheight - sheight) / 2;
     for (int y = 0; y < sheight; y++) {
         const unsigned char *row = source + y * source_stride;
-        printf(ESC_GOTOXY, ty + y, tx);
+        printf(TERM_ESC_GOTO_YX, ty + y, tx);
         for (int x = 0; x < swidth; x++) {
             unsigned char b = *row++;
             unsigned char g = *row++;
             unsigned char r = *row++;
             if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r, g, b));
+                print_seq1(lut, TERM_ESC_COLOR256_BG, rgb_to_x256(r, g, b));
             } else {
-                print_seq3(lut, ESC_COLOR_BG, r, g, b);
+                print_seq3(lut, TERM_ESC_COLOR24BIT_BG, r, g, b);
             }
             printf(" ");
         }
-        printf(ESC_CLEAR_COLORS);
+        printf(TERM_ESC_CLEAR_COLORS);
     }
     printf("\n");
 }
@@ -192,7 +188,7 @@ static void write_half_blocks(
     for (int y = 0; y < sheight * 2; y += 2) {
         const unsigned char *row_up = source + y * source_stride;
         const unsigned char *row_down = source + (y + 1) * source_stride;
-        printf(ESC_GOTOXY, ty + y / 2, tx);
+        printf(TERM_ESC_GOTO_YX, ty + y / 2, tx);
         for (int x = 0; x < swidth; x++) {
             unsigned char b_up = *row_up++;
             unsigned char g_up = *row_up++;
@@ -201,15 +197,15 @@ static void write_half_blocks(
             unsigned char g_down = *row_down++;
             unsigned char r_down = *row_down++;
             if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
-                print_seq1(lut, ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
+                print_seq1(lut, TERM_ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
+                print_seq1(lut, TERM_ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
             } else {
-                print_seq3(lut, ESC_COLOR_BG, r_up, g_up, b_up);
-                print_seq3(lut, ESC_COLOR_FG, r_down, g_down, b_down);
+                print_seq3(lut, TERM_ESC_COLOR24BIT_BG, r_up, g_up, b_up);
+                print_seq3(lut, TERM_ESC_COLOR24BIT_FG, r_down, g_down, b_down);
             }
             printf("\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
         }
-        printf(ESC_CLEAR_COLORS);
+        printf(TERM_ESC_CLEAR_COLORS);
     }
     printf("\n");
 }
@@ -257,7 +253,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    printf(ESC_CLEAR_SCREEN);
+    printf(TERM_ESC_CLEAR_SCREEN);
 
     vo->want_redraw = true;
     return 0;
@@ -298,8 +294,8 @@ static void flip_page(struct vo *vo)
 
 static void uninit(struct vo *vo)
 {
-    printf(ESC_RESTORE_CURSOR);
-    printf(ESC_RESTORE_SCREEN);
+    printf(TERM_ESC_RESTORE_CURSOR);
+    printf(TERM_ESC_RESTORE_SCREEN);
     struct priv *p = vo->priv;
     if (p->frame)
         talloc_free(p->frame);
@@ -323,8 +319,8 @@ static int preinit(struct vo *vo)
         memcpy(p->lut[i].str, buff, 4); // some strings may not end on a null byte, but that's ok.
     }
 
-    printf(ESC_HIDE_CURSOR);
-    printf(ESC_SAVE_SCREEN);
+    printf(TERM_ESC_HIDE_CURSOR);
+    printf(TERM_ESC_SAVE_SCREEN);
 
     return 0;
 }
