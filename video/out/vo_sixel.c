@@ -68,6 +68,7 @@ struct priv {
     sixel_dither_t *dither;
     sixel_dither_t *testdither;
     uint8_t        *buffer;
+    char           *sixel_output_buf;
     bool            skip_frame_draw;
 
     int left, top;  // image origin cell (1 based)
@@ -324,24 +325,30 @@ static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static inline int sixel_write(char *data, int size, void *priv)
+static inline int sixel_buffer(char *data, int size, void *priv) {
+    char **out = (char **)priv;
+    *out = talloc_strndup_append_buffer(*out, data, size);
+    return size;
+}
+
+static inline int sixel_write(char *data, int size)
 {
     // On POSIX platforms, write() is the fastest method. It also is the only
     // one that—if implemented correctly—ensures atomic writes so mpv’s
     // output will not be interrupted by other processes or threads that write
     // to stdout, which would cause screen corruption.
 #if HAVE_POSIX
-    return write(fileno((FILE *)priv), data, size);
+    return write(fileno(stdout), data, size);
 #else
-    int ret = fwrite(data, 1, size, (FILE *)priv);
-    fflush((FILE *)priv);
+    int ret = fwrite(data, 1, size, stdout);
+    fflush(stdout);
     return ret;
 #endif
 }
 
-static inline void write_str(char *s)
+static inline void sixel_strwrite(char *s)
 {
-    sixel_write(s, strlen(s), stdout);
+    sixel_write(s, strlen(s));
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -355,7 +362,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     }
 
     if (priv->opts.draw_clear)
-        write_str(TERM_ESC_CLEAR_SCREEN);
+        sixel_strwrite(TERM_ESC_CLEAR_SCREEN);
     vo->want_redraw = true;
 
     return ret;
@@ -385,7 +392,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         update_sixel_swscaler(vo, vo->params);
 
         if (priv->opts.draw_clear)
-            write_str(TERM_ESC_CLEAR_SCREEN);
+            sixel_strwrite(TERM_ESC_CLEAR_SCREEN);
         resized = true;
     }
 
@@ -457,26 +464,26 @@ static void flip_page(struct vo *vo)
         return;
 
     // Go to the offset row and column, then display the image
-    char *cmd = talloc_asprintf(NULL, TERM_ESC_GOTO_YX,
-                                priv->top, priv->left);
-    write_str(cmd);
-    talloc_free(cmd);
+    priv->sixel_output_buf = talloc_asprintf(NULL, TERM_ESC_GOTO_YX,
+                                             priv->top, priv->left);
     sixel_encode(priv->buffer, priv->width, priv->height,
                  depth, priv->dither, priv->output);
+    sixel_write(priv->sixel_output_buf, ta_get_size(priv->sixel_output_buf));
+
+    talloc_free(priv->sixel_output_buf);
 }
 
 static int preinit(struct vo *vo)
 {
     struct priv *priv = vo->priv;
     SIXELSTATUS status = SIXEL_FALSE;
-    FILE* sixel_output_file = stdout;
 
     // Parse opts set by CLI or conf
     priv->sws = mp_sws_alloc(vo);
     priv->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(priv->sws, vo->global);
 
-    status = sixel_output_new(&priv->output, sixel_write, sixel_output_file, NULL);
+    status = sixel_output_new(&priv->output, sixel_buffer, &priv->sixel_output_buf, NULL);
     if (SIXEL_FAILED(status)) {
         MP_ERR(vo, "preinit: Failed to create output file: %s\n",
                sixel_helper_format_error(status));
@@ -486,11 +493,12 @@ static int preinit(struct vo *vo)
     sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
 
     if (priv->opts.exit_clear)
-        write_str(TERM_ESC_SAVE_SCREEN);
-    write_str(TERM_ESC_HIDE_CURSOR);
+        sixel_strwrite(TERM_ESC_SAVE_SCREEN);
+
+    sixel_strwrite(TERM_ESC_HIDE_CURSOR);
 
     /* don't use private color registers for each frame. */
-    write_str(TERM_ESC_USE_GLOBAL_COLOR_REG);
+    sixel_strwrite(TERM_ESC_USE_GLOBAL_COLOR_REG);
 
     priv->dither = NULL;
 
@@ -526,10 +534,10 @@ static void uninit(struct vo *vo)
 {
     struct priv *priv = vo->priv;
 
-    write_str(TERM_ESC_RESTORE_CURSOR);
+    sixel_strwrite(TERM_ESC_RESTORE_CURSOR);
 
     if (priv->opts.exit_clear)
-        write_str(TERM_ESC_RESTORE_SCREEN);
+        sixel_strwrite(TERM_ESC_RESTORE_SCREEN);
     fflush(stdout);
 
     if (priv->output) {
