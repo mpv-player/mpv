@@ -37,18 +37,12 @@
 
 #define IMGFMT IMGFMT_RGB24
 
+#define TERM_ESC_USE_GLOBAL_COLOR_REG   "\033[?1070l"
+
 #define TERMINAL_FALLBACK_COLS      80
 #define TERMINAL_FALLBACK_ROWS      25
 #define TERMINAL_FALLBACK_PX_WIDTH  320
 #define TERMINAL_FALLBACK_PX_HEIGHT 240
-
-#define ESC_HIDE_CURSOR             "\033[?25l"
-#define ESC_RESTORE_CURSOR          "\033[?25h"
-#define ESC_SAVE_SCREEN             "\033[?1049h"
-#define ESC_RESTORE_SCREEN          "\033[?1049l"
-#define ESC_CLEAR_SCREEN            "\033[2J"
-#define ESC_GOTOXY                  "\033[%d;%df"
-#define ESC_USE_GLOBAL_COLOR_REG    "\033[?1070l"
 
 struct priv {
 
@@ -338,7 +332,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         ret = update_sixel_swscaler(vo, params);
     }
 
-    printf(ESC_CLEAR_SCREEN);
+    printf(TERM_ESC_CLEAR_SCREEN);
     vo->want_redraw = true;
 
     return ret;
@@ -367,7 +361,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         // with a failed reconfig.
         update_sixel_swscaler(vo, vo->params);
 
-        printf(ESC_CLEAR_SCREEN);
+        printf(TERM_ESC_CLEAR_SCREEN);
         resized = true;
     }
 
@@ -444,7 +438,7 @@ static void flip_page(struct vo *vo)
         return;
 
     // Go to the offset row and column, then display the image
-    printf(ESC_GOTOXY, priv->top, priv->left);
+    printf(TERM_ESC_GOTO_YX, priv->top, priv->left);
     sixel_encode(priv->buffer, priv->width, priv->height,
                  depth, priv->dither, priv->output);
     fflush(stdout);
@@ -471,11 +465,11 @@ static int preinit(struct vo *vo)
     sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
 
     if (priv->opt_clear)
-        printf(ESC_SAVE_SCREEN);
-    printf(ESC_HIDE_CURSOR);
+        printf(TERM_ESC_SAVE_SCREEN);
+    printf(TERM_ESC_HIDE_CURSOR);
 
     /* don't use private color registers for each frame. */
-    printf(ESC_USE_GLOBAL_COLOR_REG);
+    printf(TERM_ESC_USE_GLOBAL_COLOR_REG);
 
     priv->dither = NULL;
 
@@ -511,10 +505,10 @@ static void uninit(struct vo *vo)
 {
     struct priv *priv = vo->priv;
 
-    printf(ESC_RESTORE_CURSOR);
+    printf(TERM_ESC_RESTORE_CURSOR);
 
     if (priv->opt_clear)
-        printf(ESC_RESTORE_SCREEN);
+        printf(TERM_ESC_RESTORE_SCREEN);
     fflush(stdout);
 
     if (priv->output) {
