@@ -42,6 +42,8 @@
 #define ESC_RESTORE_CURSOR "\033[?25h"
 #define ESC_CLEAR_SCREEN "\033[2J"
 #define ESC_CLEAR_COLORS "\033[0m"
+#define ESC_SAVE_SCREEN "\033[?1049h"
+#define ESC_RESTORE_SCREEN "\033[?1049l"
 #define ESC_GOTOXY "\033[%d;%df"
 #define ESC_COLOR_BG "\033[48;2"
 #define ESC_COLOR_FG "\033[38;2"
@@ -255,8 +257,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    printf(ESC_HIDE_CURSOR);
     printf(ESC_CLEAR_SCREEN);
+
     vo->want_redraw = true;
     return 0;
 }
@@ -297,8 +299,7 @@ static void flip_page(struct vo *vo)
 static void uninit(struct vo *vo)
 {
     printf(ESC_RESTORE_CURSOR);
-    printf(ESC_CLEAR_SCREEN);
-    printf(ESC_GOTOXY, 0, 0);
+    printf(ESC_RESTORE_SCREEN);
     struct priv *p = vo->priv;
     if (p->frame)
         talloc_free(p->frame);
@@ -321,6 +322,9 @@ static int preinit(struct vo *vo)
         p->lut[i].width = sprintf(buff, ";%d", i);
         memcpy(p->lut[i].str, buff, 4); // some strings may not end on a null byte, but that's ok.
     }
+
+    printf(ESC_HIDE_CURSOR);
+    printf(ESC_SAVE_SCREEN);
 
     return 0;
 }
