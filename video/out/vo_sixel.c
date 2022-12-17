@@ -44,6 +44,8 @@
 
 #define ESC_HIDE_CURSOR             "\033[?25l"
 #define ESC_RESTORE_CURSOR          "\033[?25h"
+#define ESC_SAVE_SCREEN             "\033[?1049h"
+#define ESC_RESTORE_SCREEN          "\033[?1049l"
 #define ESC_CLEAR_SCREEN            "\033[2J"
 #define ESC_GOTOXY                  "\033[%d;%df"
 #define ESC_USE_GLOBAL_COLOR_REG    "\033[?1070l"
@@ -468,6 +470,8 @@ static int preinit(struct vo *vo)
 
     sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
 
+    if (priv->opt_clear)
+        printf(ESC_SAVE_SCREEN);
     printf(ESC_HIDE_CURSOR);
 
     /* don't use private color registers for each frame. */
@@ -509,10 +513,8 @@ static void uninit(struct vo *vo)
 
     printf(ESC_RESTORE_CURSOR);
 
-    if (priv->opt_clear) {
-        printf(ESC_CLEAR_SCREEN);
-        printf(ESC_GOTOXY, 1, 1);
-    }
+    if (priv->opt_clear)
+        printf(ESC_RESTORE_SCREEN);
     fflush(stdout);
 
     if (priv->output) {
