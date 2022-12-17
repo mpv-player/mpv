@@ -59,7 +59,8 @@ struct priv {
     int opt_pad_x;
     int opt_rows;
     int opt_cols;
-    int opt_clear;
+    int opt_draw_clear;
+    int opt_exit_clear;
 
     // Internal data
     sixel_output_t *output;
@@ -332,7 +333,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         ret = update_sixel_swscaler(vo, params);
     }
 
-    printf(TERM_ESC_CLEAR_SCREEN);
+    if (priv->opt_draw_clear)
+        printf(TERM_ESC_CLEAR_SCREEN);
     vo->want_redraw = true;
 
     return ret;
@@ -361,7 +363,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         // with a failed reconfig.
         update_sixel_swscaler(vo, vo->params);
 
-        printf(TERM_ESC_CLEAR_SCREEN);
+        if (priv->opt_draw_clear)
+            printf(TERM_ESC_CLEAR_SCREEN);
         resized = true;
     }
 
@@ -464,7 +467,7 @@ static int preinit(struct vo *vo)
 
     sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
 
-    if (priv->opt_clear)
+    if (priv->opt_exit_clear)
         printf(TERM_ESC_SAVE_SCREEN);
     printf(TERM_ESC_HIDE_CURSOR);
 
@@ -507,7 +510,7 @@ static void uninit(struct vo *vo)
 
     printf(TERM_ESC_RESTORE_CURSOR);
 
-    if (priv->opt_clear)
+    if (priv->opt_exit_clear)
         printf(TERM_ESC_RESTORE_SCREEN);
     fflush(stdout);
 
@@ -545,7 +548,8 @@ const struct vo_driver video_out_sixel = {
         .opt_pad_x = -1,
         .opt_rows = 0,
         .opt_cols = 0,
-        .opt_clear = 1,
+        .opt_draw_clear = 1,
+        .opt_exit_clear = 1,
     },
     .options = (const m_option_t[]) {
         {"dither", OPT_CHOICE(opt_diffuse,
@@ -569,7 +573,8 @@ const struct vo_driver video_out_sixel = {
         {"pad-x", OPT_INT(opt_pad_x)},
         {"rows", OPT_INT(opt_rows)},
         {"cols", OPT_INT(opt_cols)},
-        {"exit-clear", OPT_FLAG(opt_clear), },
+        {"draw-clear", OPT_FLAG(opt_draw_clear), },
+        {"exit-clear", OPT_FLAG(opt_exit_clear), },
         {0}
     },
     .options_prefix = "vo-sixel",
