@@ -185,11 +185,6 @@ static void on_process(void *userdata)
     pw_stream_queue_buffer(p->stream, b);
 
     MP_TRACE(ao, "queued %d of %d samples\n", samples, nframes);
-
-    if (samples == 0 && !ao_is_playing(ao)) {
-        MP_DBG(ao, "end of playback\n");
-        pw_stream_flush(p->stream, true);
-    }
 }
 
 static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *param)
@@ -279,21 +274,12 @@ static void on_control_info(void *userdata, uint32_t id,
     }
 }
 
-static void on_drained(void *userdata) {
-    struct ao *ao = userdata;
-    struct priv *p = ao->priv;
-
-    MP_DBG(ao, "stream drained\n");
-    pw_stream_set_active(p->stream, false);
-}
-
 static const struct pw_stream_events stream_events = {
     .version = PW_VERSION_STREAM_EVENTS,
     .param_changed = on_param_changed,
     .process = on_process,
     .state_changed = on_state_changed,
     .control_info = on_control_info,
-    .drained = on_drained,
 };
 
 static void uninit(struct ao *ao)
