@@ -451,7 +451,7 @@ Available video output drivers are:
         Buffers the full output sequence before writing it to the terminal.
         On POSIX platforms, this can help prevent interruption (including from
         other applications) and thus broken images, but may come at a
-        performance cost with some terminals and is subjec to implementation
+        performance cost with some terminals and is subject to implementation
         details.
 
     Sixel image quality options:
