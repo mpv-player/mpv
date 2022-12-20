@@ -450,8 +450,9 @@ Available video output drivers are:
     ``--vo-sixel-buffered=<yes|no>`` (default: no)
         Buffers the full output sequence before writing it to the terminal.
         On POSIX platforms, this can help prevent interruption (including from
-        other applications) and thus broken images on POSIX platforms, but may
-        come at a performance cost with some terminals.
+        other applications) and thus broken images, but may come at a
+        performance cost with some terminals and is subjec to implementation
+        details.
 
     Sixel image quality options:
 
