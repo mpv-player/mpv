@@ -336,11 +336,23 @@ static inline int sixel_write(char *data, int size, void *priv)
 {
     FILE *p = (FILE *)priv;
     // On POSIX platforms, write() is the fastest method. It also is the only
-    // one that—if implemented correctly—ensures atomic writes so mpv’s
-    // output will not be interrupted by other processes or threads that write
-    // to stdout, which would cause screen corruption.
+    // one that allows atomic writes so mpv’s output will not be interrupted
+    // by other processes or threads that write to stdout, which would cause
+    // screen corruption. POSIX does not guarantee atomicity for writes
+    // exceeding PIPE_BUF, but at least Linux does seem to implement it that
+    // way.
 #if HAVE_POSIX
-    return write(fileno(p), data, size);
+    int remain = size;
+
+    while (remain > 0) {
+        ssize_t written = write(fileno(p), data, remain);
+        if (written < 0)
+            return written;
+        remain -= written;
+        data += written;
+    }
+
+    return size;
 #else
     int ret = fwrite(data, 1, size, p);
     fflush(p);
