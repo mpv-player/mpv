@@ -56,7 +56,7 @@ struct vo_sixel_opts {
     int width, height, top, left;
     int pad_y, pad_x;
     int rows, cols;
-    int draw_clear, exit_clear;
+    int draw_clear, alt_screen;
     int buffered;
 };
 
@@ -504,7 +504,7 @@ static int preinit(struct vo *vo)
 
     sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
 
-    if (priv->opts.exit_clear)
+    if (priv->opts.alt_screen)
         sixel_strwrite(TERM_ESC_SAVE_SCREEN);
 
     sixel_strwrite(TERM_ESC_HIDE_CURSOR);
@@ -548,7 +548,7 @@ static void uninit(struct vo *vo)
 
     sixel_strwrite(TERM_ESC_RESTORE_CURSOR);
 
-    if (priv->opts.exit_clear)
+    if (priv->opts.alt_screen)
         sixel_strwrite(TERM_ESC_RESTORE_SCREEN);
     fflush(stdout);
 
@@ -587,7 +587,7 @@ const struct vo_driver video_out_sixel = {
         .opts.rows = 0,
         .opts.cols = 0,
         .opts.draw_clear = 1,
-        .opts.exit_clear = 1,
+        .opts.alt_screen = 1,
         .opts.buffered = 0,
     },
     .options = (const m_option_t[]) {
@@ -613,7 +613,9 @@ const struct vo_driver video_out_sixel = {
         {"rows", OPT_INT(opts.rows)},
         {"cols", OPT_INT(opts.cols)},
         {"draw-clear", OPT_FLAG(opts.draw_clear), },
-        {"exit-clear", OPT_FLAG(opts.exit_clear), },
+        {"exit-clear", OPT_FLAG(opts.alt_screen),
+            .deprecation_message = "replaced by --vo-sixel-alt-screen"},
+        {"alt-screen", OPT_FLAG(opts.alt_screen), },
         {"buffered", OPT_FLAG(opts.buffered), },
         {0}
     },

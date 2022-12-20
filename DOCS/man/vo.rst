@@ -438,10 +438,13 @@ Available video output drivers are:
     ``--vo-sixel-draw-clear=<yes|no>`` (default: yes)
         Whether or not to clear the terminal while drawing frames.
 
-    ``--vo-sixel-exit-clear=<yes|no>`` (default: yes)
-        Whether or not to clear the terminal on quit. When set to no - the
-        last sixel image stays on screen after quit, with the cursor following
-        it.
+    ``--vo-sixel-alt-screen=<yes|no>`` (default: yes)
+        Whether or not to use the alternate screen buffer and return the
+        terminal to its previous state on exit. When set to no, the last
+        sixel image stays on screen after quit, with the cursor following it.
+
+        ``--vo-sixel-exit-clear`` is a deprecated alias for this option and
+        may be removed in the future.
 
     ``--vo-sixel-buffered=<yes|no>`` (default: no)
         Buffers the full output sequence before writing it to the terminal.

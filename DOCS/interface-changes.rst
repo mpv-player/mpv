@@ -28,8 +28,11 @@ Interface changes
 
  --- mpv 0.36.0 ---
     - add `--force-render`
-    - add `--vo-sixel-draw-clear` and `--vo-sixel-buffered`
+    - add `--vo-sixel-draw-clear`, `--vo-sixel-alt-screen` and
+      `--vo-sixel-buffered`
     - add `--wayland-content-type`
+    - deprecate `--vo-sixel-exit-clear` and alias it to
+      `--vo-sixel-alt-screen`
     - deprecate `--drm-atomic`
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
