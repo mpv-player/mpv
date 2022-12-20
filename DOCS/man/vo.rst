@@ -435,8 +435,9 @@ Available video output drivers are:
         to take into account padding at the report - this only works correctly
         when the overall padding per axis is smaller than the number of cells.
 
-    ``--vo-sixel-draw-clear=<yes|no>`` (default: yes)
-        Whether or not to clear the terminal while drawing frames.
+    ``--vo-sixel-config-clear=<yes|no>`` (default: yes)
+        Whether or not to clear the terminal whenever the output is
+        reconfigured (e.g. when video size changes).
 
     ``--vo-sixel-alt-screen=<yes|no>`` (default: yes)
         Whether or not to use the alternate screen buffer and return the

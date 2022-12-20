@@ -28,7 +28,7 @@ Interface changes
 
  --- mpv 0.36.0 ---
     - add `--force-render`
-    - add `--vo-sixel-draw-clear`, `--vo-sixel-alt-screen` and
+    - add `--vo-sixel-config-clear`, `--vo-sixel-alt-screen` and
       `--vo-sixel-buffered`
     - add `--wayland-content-type`
     - deprecate `--vo-sixel-exit-clear` and alias it to

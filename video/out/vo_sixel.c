@@ -56,7 +56,7 @@ struct vo_sixel_opts {
     int width, height, top, left;
     int pad_y, pad_x;
     int rows, cols;
-    int draw_clear, alt_screen;
+    int config_clear, alt_screen;
     int buffered;
 };
 
@@ -363,7 +363,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         ret = update_sixel_swscaler(vo, params);
     }
 
-    if (priv->opts.draw_clear)
+    if (priv->opts.config_clear)
         sixel_strwrite(TERM_ESC_CLEAR_SCREEN);
     vo->want_redraw = true;
 
@@ -393,7 +393,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         // with a failed reconfig.
         update_sixel_swscaler(vo, vo->params);
 
-        if (priv->opts.draw_clear)
+        if (priv->opts.config_clear)
             sixel_strwrite(TERM_ESC_CLEAR_SCREEN);
         resized = true;
     }
@@ -586,7 +586,7 @@ const struct vo_driver video_out_sixel = {
         .opts.pad_x = -1,
         .opts.rows = 0,
         .opts.cols = 0,
-        .opts.draw_clear = 1,
+        .opts.config_clear = 1,
         .opts.alt_screen = 1,
         .opts.buffered = 0,
     },
@@ -612,7 +612,7 @@ const struct vo_driver video_out_sixel = {
         {"pad-x", OPT_INT(opts.pad_x)},
         {"rows", OPT_INT(opts.rows)},
         {"cols", OPT_INT(opts.cols)},
-        {"draw-clear", OPT_FLAG(opts.draw_clear), },
+        {"config-clear", OPT_FLAG(opts.config_clear), },
         {"exit-clear", OPT_FLAG(opts.alt_screen),
             .deprecation_message = "replaced by --vo-sixel-alt-screen"},
         {"alt-screen", OPT_FLAG(opts.alt_screen), },
