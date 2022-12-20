@@ -28,6 +28,7 @@ Interface changes
 
  --- mpv 0.36.0 ---
     - add `--force-render`
+    - add `--vo-sixel-draw-clear`
     - add `--wayland-content-type`
     - deprecate `--drm-atomic`
  --- mpv 0.35.0 ---
