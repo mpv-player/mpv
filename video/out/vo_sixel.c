@@ -57,6 +57,7 @@ struct vo_sixel_opts {
     int pad_y, pad_x;
     int rows, cols;
     int draw_clear, exit_clear;
+    int buffered;
 };
 
 struct priv {
@@ -331,24 +332,25 @@ static inline int sixel_buffer(char *data, int size, void *priv) {
     return size;
 }
 
-static inline int sixel_write(char *data, int size)
+static inline int sixel_write(char *data, int size, void *priv)
 {
+    FILE *p = (FILE *)priv;
     // On POSIX platforms, write() is the fastest method. It also is the only
     // one that—if implemented correctly—ensures atomic writes so mpv’s
     // output will not be interrupted by other processes or threads that write
     // to stdout, which would cause screen corruption.
 #if HAVE_POSIX
-    return write(fileno(stdout), data, size);
+    return write(fileno(p), data, size);
 #else
-    int ret = fwrite(data, 1, size, stdout);
-    fflush(stdout);
+    int ret = fwrite(data, 1, size, p);
+    fflush(p);
     return ret;
 #endif
 }
 
 static inline void sixel_strwrite(char *s)
 {
-    sixel_write(s, strlen(s));
+    sixel_write(s, strlen(s), stdout);
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -466,9 +468,15 @@ static void flip_page(struct vo *vo)
     // Go to the offset row and column, then display the image
     priv->sixel_output_buf = talloc_asprintf(NULL, TERM_ESC_GOTO_YX,
                                              priv->top, priv->left);
+    if (!priv->opts.buffered)
+        sixel_strwrite(priv->sixel_output_buf);
+
     sixel_encode(priv->buffer, priv->width, priv->height,
                  depth, priv->dither, priv->output);
-    sixel_write(priv->sixel_output_buf, ta_get_size(priv->sixel_output_buf));
+
+    if (priv->opts.buffered)
+        sixel_write(priv->sixel_output_buf,
+                    ta_get_size(priv->sixel_output_buf), stdout);
 
     talloc_free(priv->sixel_output_buf);
 }
@@ -483,7 +491,11 @@ static int preinit(struct vo *vo)
     priv->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(priv->sws, vo->global);
 
-    status = sixel_output_new(&priv->output, sixel_buffer, &priv->sixel_output_buf, NULL);
+    if (priv->opts.buffered)
+        status = sixel_output_new(&priv->output, sixel_buffer,
+                                  &priv->sixel_output_buf, NULL);
+    else
+        status = sixel_output_new(&priv->output, sixel_write, stdout, NULL);
     if (SIXEL_FAILED(status)) {
         MP_ERR(vo, "preinit: Failed to create output file: %s\n",
                sixel_helper_format_error(status));
@@ -576,6 +588,7 @@ const struct vo_driver video_out_sixel = {
         .opts.cols = 0,
         .opts.draw_clear = 1,
         .opts.exit_clear = 1,
+        .opts.buffered = 0,
     },
     .options = (const m_option_t[]) {
         {"dither", OPT_CHOICE(opts.diffuse,
@@ -601,6 +614,7 @@ const struct vo_driver video_out_sixel = {
         {"cols", OPT_INT(opts.cols)},
         {"draw-clear", OPT_FLAG(opts.draw_clear), },
         {"exit-clear", OPT_FLAG(opts.exit_clear), },
+        {"buffered", OPT_FLAG(opts.buffered), },
         {0}
     },
     .options_prefix = "vo-sixel",

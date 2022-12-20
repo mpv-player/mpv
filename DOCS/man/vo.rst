@@ -387,9 +387,11 @@ Available video output drivers are:
     Graphical output for the terminal, using sixels. Tested with ``mlterm`` and
     ``xterm``.
 
-    Note: the Sixel image output is not synchronized with other terminal output
-    from mpv, which can lead to broken images. The option ``--really-quiet``
-    can help with that, and is recommended.
+    Note: the Sixel image output is not synchronized with other terminal
+    output from mpv, which can lead to broken images.
+    The option ``--really-quiet`` can help with that, and is recommended.
+    On some platforms, using the ``--vo-sixel-buffered`` option may work as
+    well.
 
     You may need to use ``--profile=sw-fast`` to get decent performance.
 
@@ -437,8 +439,15 @@ Available video output drivers are:
         Whether or not to clear the terminal while drawing frames.
 
     ``--vo-sixel-exit-clear=<yes|no>`` (default: yes)
-        Whether or not to clear the terminal on quit. When set to no - the last
-        sixel image stays on screen after quit, with the cursor following it.
+        Whether or not to clear the terminal on quit. When set to no - the
+        last sixel image stays on screen after quit, with the cursor following
+        it.
+
+    ``--vo-sixel-buffered=<yes|no>`` (default: no)
+        Buffers the full output sequence before writing it to the terminal.
+        On POSIX platforms, this can help prevent interruption (including from
+        other applications) and thus broken images on POSIX platforms, but may
+        come at a performance cost with some terminals.
 
     Sixel image quality options:
 
