@@ -28,8 +28,8 @@
 #define TERM_ESC_RESTORE_CURSOR     "\033[?25h"
 
 #define TERM_ESC_CLEAR_SCREEN       "\033[2J"
-#define TERM_ESC_SAVE_SCREEN        "\033[?1049h"
-#define TERM_ESC_RESTORE_SCREEN     "\033[?1049l"
+#define TERM_ESC_ALT_SCREEN         "\033[?1049h"
+#define TERM_ESC_NORMAL_SCREEN      "\033[?1049l"
 
 struct input_ctx;
 

@@ -505,7 +505,7 @@ static int preinit(struct vo *vo)
     sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
 
     if (priv->opts.alt_screen)
-        sixel_strwrite(TERM_ESC_SAVE_SCREEN);
+        sixel_strwrite(TERM_ESC_ALT_SCREEN);
 
     sixel_strwrite(TERM_ESC_HIDE_CURSOR);
 
@@ -549,7 +549,7 @@ static void uninit(struct vo *vo)
     sixel_strwrite(TERM_ESC_RESTORE_CURSOR);
 
     if (priv->opts.alt_screen)
-        sixel_strwrite(TERM_ESC_RESTORE_SCREEN);
+        sixel_strwrite(TERM_ESC_NORMAL_SCREEN);
     fflush(stdout);
 
     if (priv->output) {

@@ -278,7 +278,7 @@ static void flip_page(struct vo *vo)
 static void uninit(struct vo *vo)
 {
     printf(TERM_ESC_RESTORE_CURSOR);
-    printf(TERM_ESC_RESTORE_SCREEN);
+    printf(TERM_ESC_NORMAL_SCREEN);
     struct priv *p = vo->priv;
     if (p->frame)
         talloc_free(p->frame);
@@ -302,7 +302,7 @@ static int preinit(struct vo *vo)
     }
 
     printf(TERM_ESC_HIDE_CURSOR);
-    printf(TERM_ESC_SAVE_SCREEN);
+    printf(TERM_ESC_ALT_SCREEN);
 
     return 0;
 }
