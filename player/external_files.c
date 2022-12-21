@@ -254,7 +254,7 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         if (!limit_fuzziness && fuzz >= 2)
             prio |= 1;
 
-        mp_dbg(log, "Potential external file: \"%s\"  Priority: %d\n",
+        mp_trace(log, "Potential external file: \"%s\"  Priority: %d\n",
                de->d_name, prio);
 
         if (prio) {
