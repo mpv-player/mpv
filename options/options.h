@@ -258,7 +258,7 @@ typedef struct MPOpts {
     int write_filename_in_watch_later_config;
     int ignore_path_in_watch_later_config;
     char *watch_later_directory;
-    bool watch_later_use_title;
+    char *watch_later_key;
     char **watch_later_options;
     int pause;
     int keep_open;

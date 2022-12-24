@@ -1018,9 +1018,9 @@ Watch Later
     The default is a subdirectory named "watch_later" underneath the
     config directory (usually ``~/.config/mpv/``).
 
-``--watch-later-use-title``
-    Use the video title instead of the current file name for saving
-    and resuming.
+``--watch-later-key=<key>``
+    Use the specified key instead of the current file name to determine the file
+    name to save/resume from.
 
 ``--no-resume-playback``
     Do not restore playback position from the ``watch_later`` configuration
