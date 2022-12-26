@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include <config.h>
+#include "config.h"
 
 #if HAVE_POSIX
 #include <fcntl.h>
@@ -34,7 +34,6 @@
 #include <libswscale/swscale.h>
 #include <libavutil/base64.h>
 
-#include "config.h"
 #include "options/m_config.h"
 #include "osdep/terminal.h"
 #include "sub/osd.h"
@@ -109,7 +108,7 @@ static bool resized;
 
 static void close_shm(struct priv *p)
 {
-#if HAVE_POSIX
+#if HAVE_POSIX_SHM
     if (p->buffer != NULL) {
         munmap(p->buffer, p->buffer_size);
         p->buffer = NULL;
@@ -210,7 +209,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
 static int create_shm(struct vo *vo)
 {
-#if HAVE_POSIX
+#if HAVE_POSIX_SHM
     struct priv *p = vo->priv;
     p->shm_fd = shm_open(p->shm_path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if (p->shm_fd == -1) {
@@ -344,7 +343,9 @@ static int preinit(struct vo *vo)
     struct sigaction sa;
     sa.sa_handler = handle_winch;
     sigaction(SIGWINCH, &sa, &saved_sigaction);
+#endif
 
+#if HAVE_POSIX_SHM
     if (p->opts.use_shm) {
         p->shm_path = talloc_asprintf(vo, "/mpv-kitty-%p", vo);
         int p_size = strlen(p->shm_path) - 1;

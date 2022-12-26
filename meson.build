@@ -962,6 +962,11 @@ if features['sixel']
     sources += files('video/out/vo_sixel.c')
 endif
 
+features += {'posix_shm': false}
+if features['posix']
+    features += {'posix_shm': cc.has_function('shm_open', prefix: '#include <sys/mman.h>')}
+endif
+
 spirv_cross = dependency('spirv-cross-c-shared', required: get_option('spirv-cross'))
 features += {'spirv-cross': spirv_cross.found()}
 if features['spirv-cross']

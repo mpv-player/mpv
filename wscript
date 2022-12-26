@@ -814,6 +814,11 @@ video_output_features = [
         'desc': 'drmIsKMS() function',
         'deps': 'drm',
         'func': check_pkg_config('libdrm', '>= 2.4.105'),
+    }, {
+        'name': 'posix-shm',
+        'desc': "POSIX shared memory API",
+        'deps': 'posix',
+        'func': check_statement('sys/mman.h', 'shm_open("",0,0)')
     }
 ]
 
