@@ -436,11 +436,12 @@ static void xrandr_read(struct vo_x11_state *x11)
             bstr_lower(provider_name);
             int amd = bstr_find0(provider_name, "amd");
             int intel = bstr_find0(provider_name, "intel");
+            int modesetting = bstr_find0(provider_name, "modesetting");
             int nouveau = bstr_find0(provider_name, "nouveau");
             int nvidia = bstr_find0(provider_name, "nvidia");
             int radeon = bstr_find0(provider_name, "radeon");
             x11->has_mesa = x11->has_mesa || amd >= 0 || intel >= 0 ||
-                            nouveau >= 0 || radeon >= 0;
+                            modesetting >= 0 || nouveau >= 0 || radeon >= 0;
             x11->has_nvidia = x11->has_nvidia || nvidia >= 0;
             XRRFreeProviderInfo(info);
         }
