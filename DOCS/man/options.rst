@@ -3819,6 +3819,33 @@ Demuxer
     (This value tends to be fuzzy, because many file formats don't store linear
     timestamps.)
 
+``--demuxer-hysteresis-secs=<seconds>``
+    Once the ``--demuxer-max-bytes`` limit is reached, this value can be used
+    to specify a hysteresis before the demuxer will buffer ahead again. This
+    specifies the maximum number of seconds from the current playback position
+    that needs to be remaining in the cache before the demuxer will continue
+    buffering ahead.
+
+    For example, with a value of 10 seconds specified, the demuxer will buffer
+    ahead up to ``--demuxer-max-bytes`` and won't start buffering ahead again
+    until there is only 10 seconds of content left in the cache. When the
+    demuxer starts buffering ahead again, it will buffer ahead up to
+    ``--demuxer-max-bytes`` and stop until there's only 10 seconds of content
+    remaining in the cache, and so on.
+
+    This can provide significant power savings and reduce load by making the
+    demuxer only buffer ahead in chunks at a time rather than buffering ahead
+    nonstop to keep the cache filled.
+
+    If you want to save power and reduce load, configure this to a small number
+    that's much lower than ``--cache-secs`` or ``--demuxer-readahead-secs``.
+    If it takes a long time to buffer anything at all for a given stream (like
+    when reading from a very slow disk is involved), then the hysteresis value
+    should be larger to compensate.
+
+    The default value is 0 seconds, which disables the caching hysteresis. A
+    value of 10 seconds probably works well for most usecases.
+
 ``--prefetch-playlist=<yes|no>``
     Prefetch next playlist entry while playback of the current entry is ending
     (default: no).
