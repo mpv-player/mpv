@@ -39,6 +39,7 @@ Interface changes
     - deprecate `--vo-sixel-exit-clear` and alias it to
       `--vo-sixel-alt-screen`
     - deprecate `--drm-atomic`
+    - add `--demuxer-hysteresis-secs`
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,
