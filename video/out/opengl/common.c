@@ -37,12 +37,12 @@
 static bool is_software_gl(GL *gl)
 {
     const char *renderer = gl->GetString(GL_RENDERER);
-    const char *vendor = gl->GetString(GL_VENDOR);
-    return !(renderer && vendor) ||
+    // Note we don't attempt to blacklist Microsoft's fallback implementation.
+    // It only provides OpenGL 1.1 and will be skipped anyway.
+    return !renderer ||
            strcmp(renderer, "Software Rasterizer") == 0 ||
            strstr(renderer, "llvmpipe") ||
            strstr(renderer, "softpipe") ||
-           strcmp(vendor, "Microsoft Corporation") == 0 ||
            strcmp(renderer, "Mesa X11") == 0 ||
            strcmp(renderer, "Apple Software Renderer") == 0;
 }
