@@ -168,14 +168,12 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
         switch (cmd) {
         case AOCONTROL_SET_VOLUME: {
-            ao_control_vol_t *vol = arg;
-            set_vol = vol->left / f_multi + pmin + 0.5;
+            float *vol = arg;
+            set_vol = *vol / f_multi + pmin + 0.5;
 
             err = snd_mixer_selem_set_playback_volume(elem, 0, set_vol);
             CHECK_ALSA_ERROR("Error setting left channel");
             MP_DBG(ao, "left=%li, ", set_vol);
-
-            set_vol = vol->right / f_multi + pmin + 0.5;
 
             err = snd_mixer_selem_set_playback_volume(elem, 1, set_vol);
             CHECK_ALSA_ERROR("Error setting right channel");
@@ -184,12 +182,14 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             break;
         }
         case AOCONTROL_GET_VOLUME: {
-            ao_control_vol_t *vol = arg;
+            float *vol = arg;
+            float left, right;
             snd_mixer_selem_get_playback_volume(elem, 0, &get_vol);
-            vol->left = (get_vol - pmin) * f_multi;
+            left = (get_vol - pmin) * f_multi;
             snd_mixer_selem_get_playback_volume(elem, 1, &get_vol);
-            vol->right = (get_vol - pmin) * f_multi;
-            MP_DBG(ao, "left=%f, right=%f\n", vol->left, vol->right);
+            right = (get_vol - pmin) * f_multi;
+            *vol = (left + right) / 2.0;
+            MP_DBG(ao, "vol=%f\n", *vol);
             break;
         }
         case AOCONTROL_SET_MUTE: {

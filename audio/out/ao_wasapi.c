@@ -348,13 +348,10 @@ static int thread_control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg
     case AOCONTROL_GET_VOLUME:
         IAudioEndpointVolume_GetMasterVolumeLevelScalar(
             state->pEndpointVolume, &volume);
-        *(ao_control_vol_t *)arg = (ao_control_vol_t){
-            .left  = 100.0f * volume,
-            .right = 100.0f * volume,
-        };
+        *(float *)arg = volume;
         return CONTROL_OK;
     case AOCONTROL_SET_VOLUME:
-        volume = ((ao_control_vol_t *)arg)->left / 100.f;
+        volume = (*(float *)arg) / 100.f;
         IAudioEndpointVolume_SetMasterVolumeLevelScalar(
             state->pEndpointVolume, volume, NULL);
         return CONTROL_OK;
@@ -381,13 +378,10 @@ static int thread_control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
     switch(cmd) {
     case AOCONTROL_GET_VOLUME:
         ISimpleAudioVolume_GetMasterVolume(state->pAudioVolume, &volume);
-        *(ao_control_vol_t *)arg = (ao_control_vol_t){
-            .left  = 100.0f * volume,
-            .right = 100.0f * volume,
-        };
+        *(float *)arg = volume;
         return CONTROL_OK;
     case AOCONTROL_SET_VOLUME:
-        volume = ((ao_control_vol_t *)arg)->left / 100.f;
+        volume = (*(float *)arg) / 100.f;
         ISimpleAudioVolume_SetMasterVolume(state->pAudioVolume, volume, NULL);
         return CONTROL_OK;
     case AOCONTROL_GET_MUTE:

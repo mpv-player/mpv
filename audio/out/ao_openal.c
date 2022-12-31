@@ -67,13 +67,13 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     case AOCONTROL_GET_VOLUME:
     case AOCONTROL_SET_VOLUME: {
         ALfloat volume;
-        ao_control_vol_t *vol = (ao_control_vol_t *)arg;
+        float *vol = arg;
         if (cmd == AOCONTROL_SET_VOLUME) {
-            volume = (vol->left + vol->right) / 200.0;
+            volume = *vol / 100.0;
             alListenerf(AL_GAIN, volume);
         }
         alGetListenerf(AL_GAIN, &volume);
-        vol->left = vol->right = volume * 100;
+        *vol = volume * 100;
         return CONTROL_TRUE;
     }
     case AOCONTROL_GET_MUTE:

@@ -83,7 +83,7 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     return noErr;
 }
 
-static int get_volume(struct ao *ao, struct ao_control_vol *vol) {
+static int get_volume(struct ao *ao, float *vol) {
     struct priv *p = ao->priv;
     float auvol;
     OSStatus err =
@@ -91,15 +91,15 @@ static int get_volume(struct ao *ao, struct ao_control_vol *vol) {
                               kAudioUnitScope_Global, 0, &auvol);
 
     CHECK_CA_ERROR("could not get HAL output volume");
-    vol->left = vol->right = auvol * 100.0;
+    *vol = auvol * 100.0;
     return CONTROL_TRUE;
 coreaudio_error:
     return CONTROL_ERROR;
 }
 
-static int set_volume(struct ao *ao, struct ao_control_vol *vol) {
+static int set_volume(struct ao *ao, float *vol) {
     struct priv *p = ao->priv;
-    float auvol = (vol->left + vol->right) / 200.0;
+    float auvol = *vol / 100.0;
     OSStatus err =
         AudioUnitSetParameter(p->audio_unit, kHALOutputParam_Volume,
                               kAudioUnitScope_Global, 0, auvol, 0);

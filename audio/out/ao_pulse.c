@@ -680,14 +680,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         // we naively copied the struct, without updating pointers etc.
         // Pointers might point to invalid data, accessors might fail.
         if (cmd == AOCONTROL_GET_VOLUME) {
-            ao_control_vol_t *vol = arg;
-            if (priv->pi.volume.channels != 2)
-                vol->left = vol->right =
-                    VOL_PA2MP(pa_cvolume_avg(&priv->pi.volume));
-            else {
-                vol->left = VOL_PA2MP(priv->pi.volume.values[0]);
-                vol->right = VOL_PA2MP(priv->pi.volume.values[1]);
-            }
+            float *vol = arg;
+            *vol = VOL_PA2MP(pa_cvolume_avg(&priv->pi.volume));
         } else if (cmd == AOCONTROL_GET_MUTE) {
             bool *mute = arg;
             *mute = priv->pi.mute;
@@ -701,16 +695,11 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         priv->retval = 0;
         uint32_t stream_index = pa_stream_get_index(priv->stream);
         if (cmd == AOCONTROL_SET_VOLUME) {
-            const ao_control_vol_t *vol = arg;
+            const float *vol = arg;
             struct pa_cvolume volume;
 
             pa_cvolume_reset(&volume, ao->channels.num);
-            if (volume.channels != 2)
-                pa_cvolume_set(&volume, volume.channels, VOL_MP2PA(vol->left));
-            else {
-                volume.values[0] = VOL_MP2PA(vol->left);
-                volume.values[1] = VOL_MP2PA(vol->right);
-            }
+            pa_cvolume_set(&volume, volume.channels, VOL_MP2PA(*vol));
             if (!waitop(priv, pa_context_set_sink_input_volume(priv->context,
                                                                stream_index,
                                                                &volume,
