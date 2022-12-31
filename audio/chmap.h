@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include "misc/bstr.h"
 
-#define MP_NUM_CHANNELS 16
+#define MP_NUM_CHANNELS 64
 
 // Speaker a channel can be assigned to.
 // This corresponds to WAVEFORMATEXTENSIBLE channel mask bit indexes.
