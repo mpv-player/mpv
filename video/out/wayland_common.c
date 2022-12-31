@@ -144,6 +144,12 @@ const struct m_sub_options wayland_conf = {
     },
 };
 
+struct vo_wayland_feedback {
+    struct vo_wayland_state *wl;
+    struct wp_presentation_feedback *fback;
+    struct wl_list link;
+};
+
 struct vo_wayland_output {
     struct vo_wayland_state *wl;
     struct wl_output *output;
@@ -168,7 +174,9 @@ static int lookupkey(int key);
 static int set_cursor_visibility(struct vo_wayland_state *wl, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
 
+static void check_feedback(struct vo_wayland_feedback *fback);
 static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b);
+static void remove_feedback(struct vo_wayland_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void set_geometry(struct vo_wayland_state *wl);
@@ -1009,29 +1017,22 @@ static const struct wp_presentation_listener pres_listener = {
     pres_set_clockid,
 };
 
-static void feedback_sync_output(void *data, struct wp_presentation_feedback *fback,
+static void feedback_sync_output(void *data, struct wp_presentation_feedback *wp_fback,
                                struct wl_output *output)
 {
 }
 
-static void feedback_presented(void *data, struct wp_presentation_feedback *fback,
+static void feedback_presented(void *data, struct wp_presentation_feedback *wp_fback,
                               uint32_t tv_sec_hi, uint32_t tv_sec_lo,
                               uint32_t tv_nsec, uint32_t refresh_nsec,
                               uint32_t seq_hi, uint32_t seq_lo,
                               uint32_t flags)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_feedback *fback = data;
+    struct vo_wayland_state *wl = fback->wl;
 
-    // NULL is needed to prevent a dangling pointer since presentation_feedback
-    // is created in the frame_callback and not in any of the actual presentation
-    // events.
-    if (fback) {
-        wp_presentation_feedback_destroy(fback);
-        wl->feedback = NULL;
-    }
-
-    if (!wl->use_present)
-        return;
+    if (fback)
+        check_feedback(fback);
 
     wl->refresh_interval = (int64_t)refresh_nsec / 1000;
 
@@ -1050,15 +1051,11 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     present_update_sync_values(wl->present, ust, msc);
 }
 
-static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
+static void feedback_discarded(void *data, struct wp_presentation_feedback *wp_fback)
 {
-    struct vo_wayland_state *wl = data;
-
-    // Same logic in feedback_presented applies here.
-    if (fback) {
-        wp_presentation_feedback_destroy(fback);
-        wl->feedback = NULL;
-    }
+    struct vo_wayland_feedback *fback = data;
+    if (fback)
+        check_feedback(fback);
 }
 
 static const struct wp_presentation_feedback_listener feedback_listener = {
@@ -1079,9 +1076,12 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     wl->frame_callback = wl_surface_frame(wl->surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
-    if (wl->presentation) {
-        wl->feedback = wp_presentation_feedback(wl->presentation, wl->surface);
-        wp_presentation_feedback_add_listener(wl->feedback, &feedback_listener, wl);
+    if (wl->use_present) {
+        struct vo_wayland_feedback *fback = talloc_zero(wl, struct vo_wayland_feedback);
+        fback->wl = wl;
+        fback->fback = wp_presentation_feedback(wl->presentation, wl->surface);
+        wp_presentation_feedback_add_listener(fback->fback, &feedback_listener, fback);
+        wl_list_insert(&wl->feedback_list, &fback->link);
     }
 
     wl->frame_wait = false;
@@ -1399,6 +1399,17 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
     return 0;
 }
 
+static void check_feedback(struct vo_wayland_feedback *fback)
+{
+    struct vo_wayland_feedback *saved_fback, *tmp;
+    wl_list_for_each_safe(saved_fback, tmp, &fback->wl->feedback_list, link) {
+        if (saved_fback == fback) {
+            remove_feedback(fback);
+            return;
+        }
+    }
+}
+
 static void do_minimize(struct vo_wayland_state *wl)
 {
     if (!wl->xdg_toplevel)
@@ -1520,6 +1531,16 @@ static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode)
 {
     wl->requested_decoration = mode;
     zxdg_toplevel_decoration_v1_set_mode(wl->xdg_toplevel_decoration, mode);
+}
+
+static void remove_feedback(struct vo_wayland_feedback *fback)
+{
+    if (!fback)
+        return;
+
+    wl_list_remove(&fback->link);
+    wp_presentation_feedback_destroy(fback->fback);
+    talloc_free(fback);
 }
 
 static void remove_output(struct vo_wayland_output *out)
@@ -2029,6 +2050,7 @@ int vo_wayland_init(struct vo *vo)
     }
 
     if (wl->presentation) {
+        wl_list_init(&wl->feedback_list);
         wl->present = talloc_zero(wl, struct mp_present);
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
@@ -2189,9 +2211,6 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->dnd_offer)
         wl_data_offer_destroy(wl->dnd_offer);
 
-    if (wl->feedback)
-        wp_presentation_feedback_destroy(wl->feedback);
-
     if (wl->frame_callback)
         wl_callback_destroy(wl->frame_callback);
 
@@ -2274,6 +2293,10 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->xkb_state)
         xkb_state_unref(wl->xkb_state);
 
+    struct vo_wayland_feedback *fback, *tmp1;
+    wl_list_for_each_safe(fback, tmp1, &wl->feedback_list, link)
+        remove_feedback(fback);
+
     if (wl->display) {
         close(wl_display_get_fd(wl->display));
         wl_display_disconnect(wl->display);
@@ -2281,8 +2304,8 @@ void vo_wayland_uninit(struct vo *vo)
 
     munmap(wl->format_map, wl->format_size);
 
-    struct vo_wayland_output *output, *tmp;
-    wl_list_for_each_safe(output, tmp, &wl->output_list, link)
+    struct vo_wayland_output *output, *tmp2;
+    wl_list_for_each_safe(output, tmp2, &wl->output_list, link)
         remove_output(output);
 
     for (int n = 0; n < 2; n++)
