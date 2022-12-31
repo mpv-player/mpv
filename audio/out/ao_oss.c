@@ -267,7 +267,7 @@ static void uninit(struct ao *ao)
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct priv *p = ao->priv;
-    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
+    float *vol = arg;
     int v;
 
     if (p->dsp_fd < 0)
@@ -279,11 +279,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             MP_WARN_IOCTL_ERR(ao);
             return CONTROL_ERROR;
         }
-        vol->right = ((v & 0xff00) >> 8);
-        vol->left = (v & 0x00ff);
+        *vol = ((v & 0x00ff) + ((v & 0xff00) >> 8)) / 2.0;
         return CONTROL_OK;
     case AOCONTROL_SET_VOLUME:
-        v = ((int)vol->right << 8) | (int)vol->left;
+        v = ((int)*vol << 8) | (int)*vol;
         if (ioctl(p->dsp_fd, SNDCTL_DSP_SETPLAYVOL, &v) == -1) {
             MP_WARN_IOCTL_ERR(ao);
             return CONTROL_ERROR;

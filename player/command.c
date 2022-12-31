@@ -1616,17 +1616,14 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
 
     switch (action) {
     case M_PROPERTY_SET: {
-        float value = *(float *)arg;
-        ao_control_vol_t vol = {value, value};
+        float vol = *(float *)arg;
         if (ao_control(ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
             return M_PROPERTY_UNAVAILABLE;
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET: {
-        ao_control_vol_t vol = {0};
-        if (ao_control(ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK)
+        if (ao_control(ao, AOCONTROL_GET_VOLUME, arg) != CONTROL_OK)
             return M_PROPERTY_UNAVAILABLE;
-        *(float *)arg = (vol.left + vol.right) / 2.0f;
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
@@ -1637,10 +1634,10 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
         };
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
-        ao_control_vol_t vol = {0};
+        float vol = 0;
         if (ao_control(ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK)
             return M_PROPERTY_UNAVAILABLE;
-        *(char **)arg = talloc_asprintf(NULL, "%.f", (vol.left + vol.right) / 2.0f);
+        *(char **)arg = talloc_asprintf(NULL, "%.f", vol);
         return M_PROPERTY_OK;
     }
     }

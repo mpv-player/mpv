@@ -211,18 +211,18 @@ static void uninit(struct ao *ao)
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct priv *p = ao->priv;
-    ao_control_vol_t *vol = arg;
+    float *vol = arg;
 
     switch (cmd) {
     case AOCONTROL_GET_VOLUME:
         if (!p->havevol)
             return CONTROL_FALSE;
-        vol->left = vol->right = p->vol * 100 / SIO_MAXVOL;
+        *vol = p->vol * 100 / SIO_MAXVOL;
         break;
     case AOCONTROL_SET_VOLUME:
         if (!p->havevol)
             return CONTROL_FALSE;
-        sio_setvol(p->hdl, vol->left * SIO_MAXVOL / 100);
+        sio_setvol(p->hdl, *vol * SIO_MAXVOL / 100);
         break;
     default:
         return CONTROL_UNKNOWN;

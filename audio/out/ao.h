@@ -26,8 +26,7 @@
 #include "audio/chmap_sel.h"
 
 enum aocontrol {
-    // _VOLUME commands take struct ao_control_vol pointer for input/output.
-    // If there's only one volume, SET should use average of left/right.
+    // _VOLUME commands take a pointer to float for input/output.
     AOCONTROL_GET_VOLUME,
     AOCONTROL_SET_VOLUME,
     // _MUTE commands take a pointer to bool
@@ -60,11 +59,6 @@ enum {
     // Force exclusive mode, i.e. lock out the system mixer.
     AO_INIT_EXCLUSIVE = 1 << 3,
 };
-
-typedef struct ao_control_vol {
-    float left;
-    float right;
-} ao_control_vol_t;
 
 enum aocontrol_media_role {
     AOCONTROL_MEDIA_ROLE_MUSIC,

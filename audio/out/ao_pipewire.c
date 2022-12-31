@@ -63,7 +63,7 @@ struct priv {
     struct spa_hook core_listener;
 
     bool muted;
-    float volume[2];
+    float volume;
 
     struct {
         int buffer_msec;
@@ -262,14 +262,8 @@ static void on_control_info(void *userdata, uint32_t id,
                 p->muted = control->values[0] >= 0.5;
             break;
         case SPA_PROP_channelVolumes:
-            if (control->n_values == 2) {
-                p->volume[0] = control->values[0];
-                p->volume[1] = control->values[1];
-            } else if (control->n_values > 0) {
-                float volume = volume_avg(control->values, control->n_values);
-                p->volume[0] = volume;
-                p->volume[1] = volume;
-            }
+            if (control->n_values > 0)
+                p->volume = volume_avg(control->values, control->n_values);
             break;
     }
 }
@@ -608,9 +602,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
     switch (cmd) {
         case AOCONTROL_GET_VOLUME: {
-            struct ao_control_vol *vol = arg;
-            vol->left = spa_volume_to_mp_volume(p->volume[0]);
-            vol->right = spa_volume_to_mp_volume(p->volume[1]);
+            float *vol = arg;
+            *vol = spa_volume_to_mp_volume(p->volume);
             return CONTROL_OK;
         }
         case AOCONTROL_GET_MUTE: {
@@ -627,16 +620,11 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             pw_thread_loop_lock(p->loop);
             switch (cmd) {
                 case AOCONTROL_SET_VOLUME: {
-                    struct ao_control_vol *vol = arg;
+                    float *vol = arg;
                     uint8_t n = ao->channels.num;
                     float values[MP_NUM_CHANNELS] = {0};
-                    if (n == 2) {
-                        values[0] = mp_volume_to_spa_volume(vol->left);
-                        values[1] = mp_volume_to_spa_volume(vol->right);
-                    } else {
-                        for (int i = 0; i < n; i++)
-                            values[i] = mp_volume_to_spa_volume(vol->left);
-                    }
+                    for (int i = 0; i < n; i++)
+                        values[i] = mp_volume_to_spa_volume(*vol);
                     ret = CONTROL_RET(pw_stream_set_control(p->stream, SPA_PROP_channelVolumes, n, values, 0));
                     break;
                }
