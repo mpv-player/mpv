@@ -295,7 +295,7 @@ static int parse_txt(struct pl_parser *p)
         return 0;
     MP_WARN(p, "Reading plaintext playlist.\n");
     while (!pl_eof(p)) {
-        bstr line = bstr_strip(pl_get_line(p));
+        bstr line = pl_get_line(p);
         if (line.len == 0)
             continue;
         pl_add(p, line);
