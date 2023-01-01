@@ -101,7 +101,6 @@ struct vo_wayland_state {
 
     /* presentation-time */
     struct wp_presentation  *presentation;
-    struct wp_presentation_feedback *feedback;
     struct mp_present *present;
     int64_t refresh_interval;
     bool use_present;

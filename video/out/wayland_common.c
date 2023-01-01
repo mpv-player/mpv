@@ -1022,13 +1022,8 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
 {
     struct vo_wayland_state *wl = data;
 
-    // NULL is needed to prevent a dangling pointer since presentation_feedback
-    // is created in the frame_callback and not in any of the actual presentation
-    // events.
-    if (fback) {
+    if (fback)
         wp_presentation_feedback_destroy(fback);
-        wl->feedback = NULL;
-    }
 
     wl->refresh_interval = (int64_t)refresh_nsec / 1000;
 
@@ -1049,13 +1044,8 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
 {
-    struct vo_wayland_state *wl = data;
-
-    // Same logic in feedback_presented applies here.
-    if (fback) {
+    if (fback)
         wp_presentation_feedback_destroy(fback);
-        wl->feedback = NULL;
-    }
 }
 
 static const struct wp_presentation_feedback_listener feedback_listener = {
@@ -1073,12 +1063,15 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     if (callback)
         wl_callback_destroy(callback);
 
+    if (!wl->surface)
+        return;
+
     wl->frame_callback = wl_surface_frame(wl->surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
     if (wl->use_present) {
-        wl->feedback = wp_presentation_feedback(wl->presentation, wl->surface);
-        wp_presentation_feedback_add_listener(wl->feedback, &feedback_listener, wl);
+        struct wp_presentation_feedback *fback = wp_presentation_feedback(wl->presentation, wl->surface);
+        wp_presentation_feedback_add_listener(fback, &feedback_listener, wl);
     }
 
     wl->frame_wait = false;
@@ -1722,7 +1715,7 @@ static void window_move(struct vo_wayland_state *wl, uint32_t serial)
         xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
 }
 
-static void vo_wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int timeout)
+static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int timeout)
 {
     if (wl->display_fd == -1)
         return;
@@ -2156,6 +2149,21 @@ void vo_wayland_uninit(struct vo *vo)
     if (!wl)
         return;
 
+    // Destroy wl_surface and its roles first
+    // to trigger any discard events.
+    if (wl->xdg_toplevel)
+        xdg_toplevel_destroy(wl->xdg_toplevel);
+
+    if (wl->xdg_surface)
+        xdg_surface_destroy(wl->xdg_surface);
+
+    if (wl->surface)
+        wl_surface_destroy(wl->surface);
+
+    // Process any final events.
+    if (wl->display && wl_display_roundtrip(wl->display))
+        wayland_dispatch_events(wl, 1, 50); //TODO: make timeout 0
+
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
     if (wl->compositor)
@@ -2189,9 +2197,6 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->dnd_offer)
         wl_data_offer_destroy(wl->dnd_offer);
-
-    if (wl->feedback)
-        wp_presentation_feedback_destroy(wl->feedback);
 
     if (wl->frame_callback)
         wl_callback_destroy(wl->frame_callback);
@@ -2242,9 +2247,6 @@ void vo_wayland_uninit(struct vo *vo)
         wp_single_pixel_buffer_manager_v1_destroy(wl->single_pixel_manager);
 #endif
 
-    if (wl->surface)
-        wl_surface_destroy(wl->surface);
-
     if (wl->video_surface)
         wl_surface_destroy(wl->video_surface);
 
@@ -2257,14 +2259,8 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->xdg_decoration_manager)
         zxdg_decoration_manager_v1_destroy(wl->xdg_decoration_manager);
 
-    if (wl->xdg_toplevel)
-        xdg_toplevel_destroy(wl->xdg_toplevel);
-
     if (wl->xdg_toplevel_decoration)
         zxdg_toplevel_decoration_v1_destroy(wl->xdg_toplevel_decoration);
-
-    if (wl->xdg_surface)
-        xdg_surface_destroy(wl->xdg_surface);
 
     if (wl->xkb_context)
         xkb_context_unref(wl->xkb_context);
@@ -2324,7 +2320,7 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
         if (poll_time < 0) {
             poll_time = 0;
         }
-        vo_wayland_dispatch_events(wl, 1, poll_time);
+        wayland_dispatch_events(wl, 1, poll_time);
     }
 
     /* If the compositor does not have presentation time, we cannot be sure
@@ -2353,7 +2349,7 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
     int64_t wait_us = until_time_us - mp_time_us();
     int timeout_ms = MPCLAMP((wait_us + 999) / 1000, 0, 10000);
 
-    vo_wayland_dispatch_events(wl, 2, timeout_ms);
+    wayland_dispatch_events(wl, 2, timeout_ms);
 }
 
 void vo_wayland_wakeup(struct vo *vo)
