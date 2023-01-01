@@ -1030,9 +1030,6 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
         wl->feedback = NULL;
     }
 
-    if (!wl->use_present)
-        return;
-
     wl->refresh_interval = (int64_t)refresh_nsec / 1000;
 
     // Very similar to oml_sync_control, in this case we assume that every
@@ -1079,7 +1076,7 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     wl->frame_callback = wl_surface_frame(wl->surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
-    if (wl->presentation) {
+    if (wl->use_present) {
         wl->feedback = wp_presentation_feedback(wl->presentation, wl->surface);
         wp_presentation_feedback_add_listener(wl->feedback, &feedback_listener, wl);
     }
