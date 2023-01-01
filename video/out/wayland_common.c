@@ -1724,6 +1724,9 @@ static void window_move(struct vo_wayland_state *wl, uint32_t serial)
 
 static void vo_wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int timeout)
 {
+    if (wl->display_fd == -1)
+        return;
+
     struct pollfd fds[2] = {
         {.fd = wl->display_fd,     .events = POLLIN },
         {.fd = wl->wakeup_pipe[0], .events = POLLIN },
@@ -1947,6 +1950,7 @@ int vo_wayland_init(struct vo *vo)
         .refresh_interval = 0,
         .scaling = 1,
         .wakeup_pipe = {-1, -1},
+        .display_fd = -1,
         .dnd_fd = -1,
         .cursor_visible = true,
         .vo_opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
@@ -2345,9 +2349,6 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
 {
     struct vo_wayland_state *wl = vo->wl;
-
-    if (wl->display_fd == -1)
-        return;
 
     int64_t wait_us = until_time_us - mp_time_us();
     int timeout_ms = MPCLAMP((wait_us + 999) / 1000, 0, 10000);
