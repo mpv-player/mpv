@@ -285,11 +285,18 @@ static int open_f(stream_t *stream)
     }
 
     // Replace "mms://" with "mmsh://", so that most mms:// URLs just work.
+    // Replace "webdav://" with "http://" and "webdavs://" with "https://"
     bstr b_filename = bstr0(filename);
     if (bstr_eatstart0(&b_filename, "mms://") ||
         bstr_eatstart0(&b_filename, "mmshttp://"))
     {
         filename = talloc_asprintf(temp, "mmsh://%.*s", BSTR_P(b_filename));
+    } else if (bstr_eatstart0(&b_filename, "webdav://"))
+    {
+        filename = talloc_asprintf(temp, "http://%.*s", BSTR_P(b_filename));
+    } else if (bstr_eatstart0(&b_filename, "webdavs://"))
+    {
+        filename = talloc_asprintf(temp, "https://%.*s", BSTR_P(b_filename));
     }
 
     av_dict_set(&dict, "reconnect", "1", 0);
@@ -411,7 +418,8 @@ const stream_info_t stream_info_ffmpeg = {
   .protocols = (const char *const[]){
      "rtmp", "rtsp", "rtsps", "http", "https", "mms", "mmst", "mmsh", "mmshttp",
      "rtp", "httpproxy", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srt",
-     "rist", "srtp", "gopher", "gophers", "data", "ipfs", "ipns",
+     "rist", "srtp", "gopher", "gophers", "data", "ipfs", "ipns", "webdav",
+     "webdavs",
      NULL },
   .can_write = true,
   .stream_origin = STREAM_ORIGIN_NET,
