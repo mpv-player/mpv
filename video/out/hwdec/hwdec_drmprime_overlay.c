@@ -299,10 +299,14 @@ static int init(struct ra_hwdec *hw)
         .driver_name = hw->driver->name,
         .hw_imgfmt = IMGFMT_DRMPRIME,
     };
+
+    char *device = drmGetDeviceNameFromFd2(p->ctx->fd);
     if (!av_hwdevice_ctx_create(&p->hwctx.av_device_ref, AV_HWDEVICE_TYPE_DRM,
-                                drmGetDeviceNameFromFd2(p->ctx->fd), NULL, 0)) {
+                                device, NULL, 0)) {
         hwdec_devices_add(hw->devs, &p->hwctx);
     }
+    if (device)
+        free(device);
 
     return 0;
 
