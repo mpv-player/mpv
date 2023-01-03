@@ -186,7 +186,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     // to avoid stutter artifact
     p->reset_count++;
     if (p->want_reset &&  p->reset_count <= 2){
-        wlbuf_pool_clean(p->wlbuf_pool);
+        wlbuf_pool_clean(p->wlbuf_pool,false);
         if (p->reset_count == 2)
             p->want_reset = false;
     }
