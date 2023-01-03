@@ -2963,6 +2963,11 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
         }
         rg.track_gain /= 256.;
         rg.album_gain /= 256.;
+
+        // Add 5dB to compensate for the different reference levels between
+        // our reference of ReplayGain 2 (-18 LUFS) and EBU R128 (-23 LUFS).
+        rg.track_gain += 5.;
+        rg.album_gain += 5.;
         return talloc_dup(NULL, &rg);
     }
 
