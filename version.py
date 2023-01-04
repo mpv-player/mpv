@@ -33,7 +33,7 @@ date_str = date.strftime("%a %b %d %I:%M:%S %Y")
 NEW_REVISION = "#define VERSION \"" + version + "\"\n"
 OLD_REVISION = ""
 BUILDDATE = "#define BUILDDATE \"" + date_str + "\"\n"
-MPVCOPYRIGHT = "#define MPVCOPYRIGHT \"Copyright \u00A9 2000-2022 mpv/MPlayer/mplayer2 projects\"" + "\n"
+MPVCOPYRIGHT = "#define MPVCOPYRIGHT \"Copyright \u00A9 2000-2023 mpv/MPlayer/mplayer2 projects\"" + "\n"
 
 if os.path.isfile(sys.argv[1]):
     with open(sys.argv[1], "r") as f:
