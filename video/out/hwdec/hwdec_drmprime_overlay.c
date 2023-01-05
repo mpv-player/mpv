@@ -30,6 +30,7 @@
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "libmpv/render_gl.h"
+#include "video/out/drm_atomic.h"
 #include "video/out/drm_common.h"
 #include "video/out/drm_prime.h"
 #include "video/out/gpu/hwdec.h"
@@ -252,8 +253,8 @@ static int init(struct ra_hwdec *hw)
 
     void *tmp = talloc_new(NULL);
     struct drm_opts *opts = mp_get_config_group(tmp, hw->global, &drm_conf);
-    draw_plane = opts->drm_draw_plane;
-    drmprime_video_plane = opts->drm_drmprime_video_plane;
+    draw_plane = opts->draw_plane;
+    drmprime_video_plane = opts->drmprime_video_plane;
     talloc_free(tmp);
 
     struct mpv_opengl_drm_params_v2 *drm_params;

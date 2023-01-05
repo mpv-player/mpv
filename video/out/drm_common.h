@@ -21,24 +21,45 @@
 #include <stdbool.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
-#include "options/m_option.h"
-#include "drm_atomic.h"
+#include "vo.h"
 
 #define DRM_OPTS_FORMAT_XRGB8888    0
 #define DRM_OPTS_FORMAT_XRGB2101010 1
 #define DRM_OPTS_FORMAT_XBGR8888    2
 #define DRM_OPTS_FORMAT_XBGR2101010 3
 
-struct kms {
-    struct mp_log *log;
-    char *primary_node_path;
+struct framebuffer {
     int fd;
-    drmModeConnector *connector;
-    drmModeEncoder *encoder;
-    struct drm_mode mode;
-    uint32_t crtc_id;
-    int card_no;
-    struct drm_atomic_context *atomic_context;
+    uint32_t width;
+    uint32_t height;
+    uint32_t stride;
+    uint32_t size;
+    uint32_t handle;
+    uint8_t *map;
+    uint32_t id;
+};
+
+struct drm_vsync_tuple {
+    uint64_t ust;
+    unsigned int msc;
+    unsigned int sbc;
+};
+
+struct drm_mode {
+    drmModeModeInfo mode;
+    uint32_t blob_id;
+};
+
+struct drm_opts {
+    char *device_path;
+    char *connector_spec;
+    char *mode_spec;
+    int drm_atomic;
+    int draw_plane;
+    int drmprime_video_plane;
+    int drm_format;
+    struct m_geometry draw_surface_size;
+    int vrr_enabled;
 };
 
 struct vt_switcher {
@@ -48,22 +69,34 @@ struct vt_switcher {
     void *handler_data[2];
 };
 
-struct drm_opts {
-    char *drm_device_path;
-    char *drm_connector_spec;
-    char *drm_mode_spec;
-    int drm_atomic;
-    int drm_draw_plane;
-    int drm_drmprime_video_plane;
-    int drm_format;
-    struct m_geometry drm_draw_surface_size;
-    int drm_vrr_enabled;
-};
+struct vo_drm_state {
+    drmModeConnector *connector;
+    drmModeEncoder *encoder;
+    drmEventContext ev;
 
-struct drm_vsync_tuple {
-    uint64_t ust;
-    unsigned int msc;
-    unsigned int sbc;
+    struct drm_atomic_context *atomic_context;
+    struct drm_mode mode;
+    struct drm_opts *opts;
+    struct drm_vsync_tuple vsync;
+    struct framebuffer *fb;
+    struct mp_log *log;
+    struct vo *vo;
+    struct vt_switcher vt_switcher;
+    struct vo_vsync_info vsync_info;
+
+    bool active;
+    bool paused;
+    bool still;
+    bool vt_switcher_active;
+    bool waiting_for_flip;
+
+    char *card_path;
+    int card_no;
+    int fd;
+
+    uint32_t crtc_id;
+    uint32_t height;
+    uint32_t width;
 };
 
 struct drm_pflip_cb_closure {
@@ -74,26 +107,18 @@ struct drm_pflip_cb_closure {
     struct mp_log *log; // Needed to print error messages that shame bad drivers
 };
 
-bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log);
-void vt_switcher_destroy(struct vt_switcher *s);
-void vt_switcher_poll(struct vt_switcher *s, int timeout_ms);
-void vt_switcher_interrupt_poll(struct vt_switcher *s);
+bool vo_drm_init(struct vo *vo);
+int vo_drm_control(struct vo *vo, int *events, int request, void *arg);
 
-void vt_switcher_acquire(struct vt_switcher *s, void (*handler)(void*),
-                         void *user_data);
-void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*),
-                         void *user_data);
+double vo_drm_get_display_fps(struct vo_drm_state *drm);
+void vo_drm_get_vsync(struct vo *vo, struct vo_vsync_info *info);
+void vo_drm_set_monitor_par(struct vo *vo);
+void vo_drm_uninit(struct vo *vo);
+void vo_drm_wait_events(struct vo *vo, int64_t until_time_us);
+void vo_drm_wait_on_flip(struct vo_drm_state *drm);
+void vo_drm_wakeup(struct vo *vo);
 
-struct kms *kms_create(struct mp_log *log,
-                       const char *drm_device_path,
-                       const char *connector_spec,
-                       const char *mode_spec,
-                       int draw_plane, int drmprime_video_plane);
-void kms_destroy(struct kms *kms);
-double kms_get_display_fps(const struct kms *kms);
-
-// DRM Page Flip callback
-void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
-                  unsigned int usec, void *data);
+bool vo_drm_acquire_crtc(struct vo_drm_state *drm);
+void vo_drm_release_crtc(struct vo_drm_state *drm);
 
 #endif
