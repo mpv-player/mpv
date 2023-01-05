@@ -6751,11 +6751,23 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
 void handle_command_updates(struct MPContext *mpctx)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
+    int events = AO_EVENT_VOLUME | AO_EVENT_MUTE;
 
     // This is a bit messy: ao_hotplug wakes up the player, and then we have
     // to recheck the state. Then the client(s) will read the property.
     if (ctx->hotplug && ao_hotplug_check_update(ctx->hotplug))
         mp_notify_property(mpctx, "audio-device-list");
+
+    if (mpctx->ao && (events = ao_query_and_reset_events(mpctx->ao, events))) {
+        if (events & AO_EVENT_VOLUME) {
+            mp_notify_property(mpctx, "ao-volume");
+            show_property_osd(mpctx, "ao-volume", MP_ON_OSD_AUTO);
+        }
+        if (events & AO_EVENT_MUTE) {
+            mp_notify_property(mpctx, "ao-mute");
+            show_property_osd(mpctx, "ao-mute", MP_ON_OSD_AUTO);
+        }
+    }
 
     // Depends on polling demuxer wakeup callback notifications.
     cache_dump_poll(mpctx);

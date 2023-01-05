@@ -379,6 +379,16 @@ void ao_hotplug_event(struct ao *ao)
     ao_add_events(ao, AO_EVENT_HOTPLUG);
 }
 
+void ao_volume_event(struct ao *ao)
+{
+    ao_add_events(ao, AO_EVENT_VOLUME);
+}
+
+void ao_mute_event(struct ao *ao)
+{
+    ao_add_events(ao, AO_EVENT_MUTE);
+}
+
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map)
 {

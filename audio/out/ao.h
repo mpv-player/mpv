@@ -46,6 +46,8 @@ enum {
     AO_EVENT_RELOAD          = 1 << 0,
     AO_EVENT_HOTPLUG         = 1 << 1,
     AO_EVENT_INITIAL_UNBLOCK = 1 << 2,
+    AO_EVENT_VOLUME          = 1 << 3,
+    AO_EVENT_MUTE            = 1 << 4,
 };
 
 enum {
@@ -113,6 +115,8 @@ int ao_add_events(struct ao *ao, int events);
 void ao_unblock(struct ao *ao);
 void ao_request_reload(struct ao *ao);
 void ao_hotplug_event(struct ao *ao);
+void ao_volume_event(struct ao *ao);
+void ao_mute_event(struct ao *ao);
 
 struct ao_hotplug;
 struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
