@@ -43,9 +43,9 @@ enum aocontrol {
 #define PLAYER_FINAL_CHUNK 1
 
 enum {
-    AO_EVENT_RELOAD = 1,
-    AO_EVENT_HOTPLUG = 2,
-    AO_EVENT_INITIAL_UNBLOCK = 4,
+    AO_EVENT_RELOAD          = 1 << 0,
+    AO_EVENT_HOTPLUG         = 1 << 1,
+    AO_EVENT_INITIAL_UNBLOCK = 1 << 2,
 };
 
 enum {
