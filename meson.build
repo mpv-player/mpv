@@ -554,6 +554,7 @@ tools_directory = join_paths(source_root, 'TOOLS')
 file2string = find_program(join_paths(tools_directory, 'file2string.py'))
 matroska = find_program(join_paths(tools_directory, 'matroska.py'))
 version_py = find_program(join_paths(source_root, 'version.py'))
+docutils_wrapper = find_program(join_paths(tools_directory, 'docutils-wrapper.py'))
 
 subdir('generated')
 subdir(join_paths('generated', 'etc'))
@@ -1556,7 +1557,12 @@ if features['manpage-build']
     custom_target('manpages',
         input: manpage,
         output: 'mpv.1',
-        command: [rst2man, '--strip-elements-with-class=contents', '@INPUT@', '@OUTPUT@'],
+        command: [
+          docutils_wrapper, rst2man,
+          '--record-dependencies', '@DEPFILE@',
+          '--strip-elements-with-class=contents',
+          '@INPUT@', '@OUTPUT@'],
+        depfile: 'mpv.1.dep',
         install: true,
         install_dir: join_paths(mandir, 'man1')
     )
@@ -1569,7 +1575,11 @@ if features['html-build']
     custom_target('html-manpages',
         input: manpage,
         output: 'mpv.html',
-        command: [rst2html, '@INPUT@', '@OUTPUT@'],
+        command: [
+          docutils_wrapper, rst2html,
+          '--record-dependencies', '@DEPFILE@',
+          '@INPUT@', '@OUTPUT@'],
+        depfile: 'mpv.html.dep',
         install: true,
         install_dir: join_paths(datadir, 'doc', 'mpv')
     )
