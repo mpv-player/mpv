@@ -120,7 +120,6 @@ struct demux_packet *new_demux_packet_from(void *data, size_t len)
     if (!dp)
         return NULL;
     memcpy(dp->avpacket->data, data, len);
-    dp->buffer = data;
     return dp;
 }
 
