@@ -135,6 +135,7 @@ struct demux_packet *new_demux_packet(size_t len)
         talloc_free(dp);
         return NULL;
     }
+    dp->buffer = dp->avpacket->data;
     dp->len = len;
     return dp;
 }
