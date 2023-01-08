@@ -34,7 +34,7 @@ void mpvk_uninit(struct mpvk_ctx *vk)
     if (vk->surface) {
         assert(vk->vkinst);
         vkDestroySurfaceKHR(vk->vkinst->instance, vk->surface, NULL);
-        vk->surface = NULL;
+        vk->surface = VK_NULL_HANDLE;
     }
 
     pl_vk_inst_destroy(&vk->vkinst);
