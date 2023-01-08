@@ -128,22 +128,38 @@ error0:
     return NULL;
 }
 
+static void uninit(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct buffer *buf;
+
+    while (p->free_buffers) {
+        buf = p->free_buffers;
+        p->free_buffers = buf->next;
+        talloc_free(buf);
+    }
+    vo_wayland_uninit(vo);
+}
+
 static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
     if (!vo_wayland_init(vo))
-        return -1;
+        goto err;
     if (!vo->wl->shm) {
         MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
                  wl_shm_interface.name);
-        return -1;
+        goto err;
     }
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
 
     return 0;
+err:
+    uninit(vo);
+    return -1;
 }
 
 static int query_format(struct vo *vo, int format)
@@ -276,19 +292,6 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
     struct vo_wayland_state *wl = vo->wl;
     if (wl->use_present)
         present_sync_get_info(wl->present, info);
-}
-
-static void uninit(struct vo *vo)
-{
-    struct priv *p = vo->priv;
-    struct buffer *buf;
-
-    while (p->free_buffers) {
-        buf = p->free_buffers;
-        p->free_buffers = buf->next;
-        talloc_free(buf);
-    }
-    vo_wayland_uninit(vo);
 }
 
 const struct vo_driver video_out_wlshm = {
