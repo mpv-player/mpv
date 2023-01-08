@@ -1929,7 +1929,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-int vo_wayland_init(struct vo *vo)
+bool vo_wayland_init(struct vo *vo)
 {
     vo->wl = talloc_zero(NULL, struct vo_wayland_state);
     struct vo_wayland_state *wl = vo->wl;

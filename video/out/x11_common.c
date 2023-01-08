@@ -596,7 +596,7 @@ static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
     XFree(screens);
 }
 
-int vo_x11_init(struct vo *vo)
+bool vo_x11_init(struct vo *vo)
 {
     char *dispName;
 
@@ -685,11 +685,11 @@ int vo_x11_init(struct vo *vo)
 
     vo_x11_update_geometry(vo);
 
-    return 1;
+    return true;
 
 error:
     vo_x11_uninit(vo);
-    return 0;
+    return false;
 }
 
 static const struct mp_keymap keymap[] = {
