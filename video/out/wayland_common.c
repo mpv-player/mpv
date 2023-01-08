@@ -2069,7 +2069,7 @@ err:
     return false;
 }
 
-int vo_wayland_reconfig(struct vo *vo)
+bool vo_wayland_reconfig(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
 
