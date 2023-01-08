@@ -26,7 +26,7 @@
 
 struct vo;
 
-int vo_w32_init(struct vo *vo);
+bool vo_w32_init(struct vo *vo);
 void vo_w32_uninit(struct vo *vo);
 int vo_w32_control(struct vo *vo, int *events, int request, void *arg);
 void vo_w32_config(struct vo *vo);
