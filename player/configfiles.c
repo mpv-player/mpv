@@ -303,18 +303,23 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
 
     write_filename(mpctx, file, cur->filename);
 
+    bool write_start = true;
     double pos = get_current_time(mpctx);
 
     if ((demux && (!demux->seekable || demux->partially_seekable)) ||
         pos == MP_NOPTS_VALUE)
     {
+        write_start = false;
         MP_INFO(mpctx, "Not seekable, or time unknown - not saving position.\n");
-    } else {
-        fprintf(file, "start=%f\n", pos);
     }
     char **watch_later_options = mpctx->opts->watch_later_options;
     for (int i = 0; watch_later_options && watch_later_options[i]; i++) {
         char *pname = watch_later_options[i];
+        // Always save start if we have it in the array.
+        if (write_start && strcmp(pname, "start") == 0) {
+            fprintf(file, "%s=%f\n", pname, pos);
+            continue;
+        }
         // Only store it if it's different from the initial value.
         if (m_config_watch_later_backup_opt_changed(mpctx->mconfig, pname)) {
             char *val = NULL;
