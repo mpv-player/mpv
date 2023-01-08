@@ -315,31 +315,31 @@ static int preinit(struct vo *vo)
     p->global = vo->global;
     p->ctx = ra_ctx_create_by_name(vo, "wldmabuf");
     if (!p->ctx)
-       goto err_out;
+       goto err;
     assert(p->ctx->ra);
 
     if (!vo->wl->dmabuf) {
         MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
                  zwp_linux_dmabuf_v1_interface.name);
-        return VO_ERROR;
+        goto err;
     }
 
     if (!vo->wl->shm) {
         MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
                  wl_shm_interface.name);
-        return VO_ERROR;
+        goto err;
     }
 
     if (!vo->wl->video_subsurface) {
         MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
                  wl_subcompositor_interface.name);
-        return VO_ERROR;
+        goto err;
     }
 
     if (!vo->wl->viewport) {
         MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
                  wp_viewporter_interface.name);
-        return VO_ERROR;
+        goto err;
     }
 
 
@@ -354,15 +354,15 @@ static int preinit(struct vo *vo)
         int stride = MP_ALIGN_UP(width * 4, 16);
         int fd = vo_wayland_allocate_memfd(vo, stride);
         if (fd < 0)
-            return VO_ERROR;
+            goto err;
         p->solid_buffer_pool = wl_shm_create_pool(vo->wl->shm, fd, height * stride);
         if (!p->solid_buffer_pool)
-            return VO_ERROR;
+            goto err;
         p->solid_buffer = wl_shm_pool_create_buffer(
             p->solid_buffer_pool, 0, width, height, stride, WL_SHM_FORMAT_XRGB8888);
     }
     if (!p->solid_buffer)
-        return VO_ERROR;
+        goto err;
 
     wl_surface_attach(vo->wl->surface, p->solid_buffer, 0, 0);
 
@@ -377,10 +377,10 @@ static int preinit(struct vo *vo)
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, NULL, true);
 
     return 0;
-err_out:
-    uninit(vo);
 
-    return VO_ERROR;
+err:
+    uninit(vo);
+    return -1;
 }
 
 const struct vo_driver video_out_dmabuf_wayland = {
