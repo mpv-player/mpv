@@ -1953,10 +1953,10 @@ int vo_wayland_init(struct vo *vo)
     wl_list_init(&wl->output_list);
 
     if (!wl->display)
-        return false;
+        goto err;
 
     if (create_input(wl))
-        return false;
+        goto err;
 
     wl->registry = wl_display_get_registry(wl->display);
     wl_registry_add_listener(wl->registry, &registry_listener, wl);
@@ -1967,24 +1967,24 @@ int vo_wayland_init(struct vo *vo)
     if (!wl->surface) {
         MP_FATAL(wl, "Compositor doesn't support %s (ver. 4)\n",
                  wl_compositor_interface.name);
-        return false;
+        goto err;
     }
 
     if (!wl->wm_base) {
         MP_FATAL(wl, "Compositor doesn't support the required %s protocol!\n",
                  xdg_wm_base_interface.name);
-        return false;
+        goto err;
     }
 
     if (!wl_list_length(&wl->output_list)) {
         MP_FATAL(wl, "No outputs found or compositor doesn't support %s (ver. 2)\n",
                  wl_output_interface.name);
-        return false;
+        goto err;
     }
 
     /* Can't be initialized during registry due to multi-protocol dependence */
     if (create_xdg_surface(wl))
-        return false;
+        goto err;
 
     if (wl->subcompositor) {
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
@@ -2062,7 +2062,11 @@ int vo_wayland_init(struct vo *vo)
      * before mpv does anything else. */
     wl_display_roundtrip(wl->display);
 
-    return true;
+    return 1;
+
+err:
+    vo_wayland_uninit(vo);
+    return 0;
 }
 
 int vo_wayland_reconfig(struct vo *vo)
