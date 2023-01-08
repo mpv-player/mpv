@@ -154,11 +154,11 @@ struct vo_wayland_state {
 
 bool vo_wayland_check_visible(struct vo *vo);
 bool vo_wayland_init(struct vo *vo);
+bool vo_wayland_reconfig(struct vo *vo);
 bool vo_wayland_supported_format(struct vo *vo, uint32_t format, uint64_t modifier);
 
 int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
-int vo_wayland_reconfig(struct vo *vo);
 
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha);
 void vo_wayland_sync_swap(struct vo_wayland_state *wl);

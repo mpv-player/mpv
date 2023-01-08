@@ -149,10 +149,7 @@ static bool egl_create_context(struct ra_ctx *ctx)
 
 static bool wayland_egl_reconfig(struct ra_ctx *ctx)
 {
-    if (!vo_wayland_reconfig(ctx->vo))
-        return false;
-
-    return true;
+    return vo_wayland_reconfig(ctx->vo);
 }
 
 static void wayland_egl_uninit(struct ra_ctx *ctx)

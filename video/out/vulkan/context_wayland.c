@@ -123,10 +123,7 @@ static bool resize(struct ra_ctx *ctx)
 
 static bool wayland_vk_reconfig(struct ra_ctx *ctx)
 {
-    if (!vo_wayland_reconfig(ctx->vo))
-        return false;
-
-    return true;
+    return vo_wayland_reconfig(ctx->vo);
 }
 
 static int wayland_vk_control(struct ra_ctx *ctx, int *events, int request, void *arg)
