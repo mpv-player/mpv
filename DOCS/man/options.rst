@@ -1032,8 +1032,8 @@ Watch Later
 ``--watch-later-options=option1,option2,...``
     The options that are saved in "watch later" files if they have been changed
     since when mpv started. These values will be restored the next time the
-    files are played. The playback position is always saved as ``start``, so
-    adding ``start`` to this list has no effect.
+    files are played. Note that the playback position is saved via the ``start``
+    option.
 
     When removing options, existing watch later data won't be modified and will
     still be applied fully, but new watch later data won't contain these
@@ -1049,8 +1049,7 @@ Watch Later
           ``--watch-later-options-remove=mute``
           The volume and mute state won't be saved to watch later files.
         - ``--watch-later-options-clr``
-          No option will be saved to watch later files except the starting
-          position.
+          No option will be saved to watch later files.
 
 ``--write-filename-in-watch-later-config``
     Prepend the watch later config files with the name of the file they refer

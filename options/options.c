@@ -1069,6 +1069,7 @@ static const struct MPOpts mp_default_opts = {
     .cuda_device = -1,
 
     .watch_later_options = (char **)(const char*[]){
+        "start",
         "osd-level",
         "speed",
         "edition",
