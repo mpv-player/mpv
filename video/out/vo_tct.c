@@ -297,7 +297,7 @@ static int preinit(struct vo *vo)
 
     for (int i = 0; i < 256; ++i) {
         char buff[8];
-        p->lut[i].width = sprintf(buff, ";%d", i);
+        p->lut[i].width = snprintf(buff, sizeof(buff), ";%d", i);
         memcpy(p->lut[i].str, buff, 4); // some strings may not end on a null byte, but that's ok.
     }
 
