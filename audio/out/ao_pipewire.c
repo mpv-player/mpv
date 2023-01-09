@@ -444,7 +444,7 @@ static int pipewire_init_boilerplate(struct ao *ao)
     MP_VERBOSE(ao, "Headers version: %s\n", pw_get_headers_version());
     MP_VERBOSE(ao, "Library version: %s\n", pw_get_library_version());
 
-    p->loop = pw_thread_loop_new("ao-pipewire", NULL);
+    p->loop = pw_thread_loop_new("mpv/ao/pipewire", NULL);
     if (p->loop == NULL)
         return -1;
 
