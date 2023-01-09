@@ -2182,7 +2182,7 @@ static void debug_marker(struct ra *ra, const char *msg)
     bool printed_header = false;
     uint64_t messages = ID3D11InfoQueue_GetNumStoredMessages(p->iqueue);
     for (uint64_t i = 0; i < messages; i++) {
-        size_t len;
+        SIZE_T len;
         hr = ID3D11InfoQueue_GetMessage(p->iqueue, i, NULL, &len);
         if (FAILED(hr) || !len)
             goto done;
