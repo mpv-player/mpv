@@ -29,8 +29,7 @@
 #include <dirent.h>
 #include <inttypes.h>
 
-#include "osdep/io.h"
-
+#include "stream/stream.h"
 #include "options/options.h"
 #include "cookies.h"
 #include "common/msg.h"
@@ -77,65 +76,21 @@ static int parse_line(char **ptr, char *cols[7])
     return 1;
 }
 
-/* Loads a file into RAM */
-static char *load_file(struct mp_log *log, const char *filename, int64_t * length)
-{
-    int fd;
-    char *buffer = NULL;
-
-    mp_verbose(log, "Loading cookie file: %s\n", filename);
-
-    fd = open(filename, O_RDONLY | O_CLOEXEC);
-    if (fd < 0) {
-        mp_verbose(log, "Could not open");
-        goto err_out;
-    }
-
-    *length = lseek(fd, 0, SEEK_END);
-
-    if (*length < 0) {
-        mp_verbose(log, "Could not find EOF");
-        goto err_out;
-    }
-
-    if (*length > SIZE_MAX - 1) {
-        mp_verbose(log, "File too big, could not malloc.");
-        goto err_out;
-    }
-
-    lseek(fd, 0, SEEK_SET);
-
-    if (!(buffer = malloc(*length + 1))) {
-        mp_verbose(log, "Could not malloc.");
-        goto err_out;
-    }
-
-    if (read(fd, buffer, *length) != *length) {
-        mp_verbose(log, "Read is behaving funny.");
-        goto err_out;
-    }
-    close(fd);
-    buffer[*length] = 0;
-
-    return buffer;
-
-err_out:
-    if (fd != -1) close(fd);
-    free(buffer);
-    return NULL;
-}
-
 /* Loads a cookies.txt file into a linked list. */
 static struct cookie_list_type *load_cookies_from(void *ctx,
+                                                  struct mpv_global *global,
                                                   struct mp_log *log,
                                                   const char *filename)
 {
-    char *ptr, *file;
-    int64_t length;
-
-    ptr = file = load_file(log, filename, &length);
-    if (!ptr)
+    mp_verbose(log, "Loading cookie file: %s\n", filename);
+    bstr data = stream_read_file(filename, ctx, global, 1000000);
+    if (!data.start) {
+        mp_verbose(log, "Error reading\n");
         return NULL;
+    }
+
+    bstr_xappend(ctx, &data, (struct bstr){"", 1}); // null-terminate
+    char *ptr = data.start;
 
     struct cookie_list_type *list = NULL;
     while (*ptr) {
@@ -152,19 +107,22 @@ static struct cookie_list_type *load_cookies_from(void *ctx,
             list = new;
         }
     }
-    free(file);
+
     return list;
 }
 
 // Return a cookies string as expected by lavf (libavformat/http.c). The format
 // is like a Set-Cookie header (http://curl.haxx.se/rfc/cookie_spec.html),
 // separated by newlines.
-char *cookies_lavf(void *talloc_ctx, struct mp_log *log, char *file)
+char *cookies_lavf(void *talloc_ctx,
+                   struct mpv_global *global,
+                   struct mp_log *log,
+                   const char *file)
 {
     void *tmp = talloc_new(NULL);
     struct cookie_list_type *list = NULL;
     if (file && file[0])
-        list = load_cookies_from(tmp, log, file);
+        list = load_cookies_from(tmp, global, log, file);
 
     char *res = talloc_strdup(talloc_ctx, "");
 

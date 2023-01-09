@@ -23,6 +23,9 @@
 #ifndef MPLAYER_COOKIES_H
 #define MPLAYER_COOKIES_H
 
-char *cookies_lavf(void *talloc_ctx, struct mp_log *log, char *file);
+char *cookies_lavf(void *talloc_ctx,
+                   struct mpv_global *global,
+                   struct mp_log *log,
+                   const char *file);
 
 #endif /* MPLAYER_COOKIES_H */
