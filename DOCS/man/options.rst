@@ -3317,8 +3317,9 @@ Window
     draw directly on the root window.
 
     On win32, the ID is interpreted as ``HWND``. Pass it as value cast to
-    ``intptr_t``. mpv will create its own window, and set the wid window as
-    parent, like with X11.
+    ``uint32_t`` (all Windows handles are 32-bit), this is important as mpv will
+    not accept negative values. mpv will create its own window and set the
+    wid window as parent, like with X11.
 
     On macOS/Cocoa, the ID is interpreted as ``NSView*``. Pass it as value cast
     to ``intptr_t``. mpv will create its own sub-view. Because macOS does not
