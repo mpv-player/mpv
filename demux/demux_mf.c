@@ -126,10 +126,9 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
 
 #if HAVE_GLOB
     if (!strchr(filename, '%')) {
-        strcpy(fname, filename);
-        if (!strchr(filename, '*'))
-            strcat(fname, "*");
-
+        // append * if none present
+        snprintf(fname, fname_avail, "%s%c", filename,
+            strchr(filename, '*') ? 0 : '*');
         mp_info(log, "search expr: %s\n", fname);
 
         glob_t gg;
