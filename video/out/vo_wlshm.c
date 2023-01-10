@@ -209,6 +209,12 @@ static int resize(struct vo *vo)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    switch (request) {
+    case VOCTRL_SET_PANSCAN:
+        resize(vo);
+        return VO_TRUE;
+    }
+
     int events = 0;
     int ret = vo_wayland_control(vo, &events, request, data);
 
