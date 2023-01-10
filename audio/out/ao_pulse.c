@@ -729,8 +729,9 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
                 GENERIC_ERR_MSG("pa_context_set_sink_input_mute() failed");
                 return CONTROL_ERROR;
             }
-        } else
-            abort();
+        } else {
+            MP_ASSERT_UNREACHABLE();
+        }
         return CONTROL_OK;
     }
 

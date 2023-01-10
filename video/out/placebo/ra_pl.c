@@ -617,7 +617,7 @@ static void renderpass_run_pl(struct ra *ra,
             case RA_VARTYPE_BUF_RW:
                 bind.object = (* (struct ra_buf **) val->data)->priv;
                 break;
-            default: abort();
+            default: MP_ASSERT_UNREACHABLE();
             };
 
             p->binds[p->inp_index[val->index]] = bind;

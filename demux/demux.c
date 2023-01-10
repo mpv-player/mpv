@@ -2868,7 +2868,7 @@ static const char *d_level(enum demux_check level)
     case DEMUX_CHECK_REQUEST:return "request";
     case DEMUX_CHECK_NORMAL: return "normal";
     }
-    abort();
+    MP_ASSERT_UNREACHABLE();
 }
 
 static int decode_float(char *str, float *out)

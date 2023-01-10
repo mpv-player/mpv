@@ -785,7 +785,7 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
         break;
     }
     default:
-        abort();
+        MP_ASSERT_UNREACHABLE();
     };
 
     if (params->is_float)
@@ -822,7 +822,7 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
     case MP_CSP_LEVELS_PC: yuvlev = yuvfull; break;
     case -1: yuvlev = anyfull; break;
     default:
-        abort();
+        MP_ASSERT_UNREACHABLE();
     }
 
     int levels_out = params->levels_out;
@@ -836,7 +836,7 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
     case MP_CSP_LEVELS_TV: rgblev = rgblim; break;
     case MP_CSP_LEVELS_PC: rgblev = rgbfull; break;
     default:
-        abort();
+        MP_ASSERT_UNREACHABLE();
     }
 
     double ymul = (rgblev.max - rgblev.min) / (yuvlev.ymax - yuvlev.ymin);

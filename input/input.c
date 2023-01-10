@@ -1608,7 +1608,7 @@ static void mp_input_src_kill(struct mp_input_src *src)
             return;
         }
     }
-    abort();
+    MP_ASSERT_UNREACHABLE();
 }
 
 void mp_input_src_init_done(struct mp_input_src *src)

@@ -600,7 +600,7 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
         format = VDP_RGBA_FORMAT_B8G8R8A8;
         break;
     default:
-        abort();
+        MP_ASSERT_UNREACHABLE();
     };
 
     assert(imgs->packed);

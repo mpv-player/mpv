@@ -486,7 +486,7 @@ static const char *vao_glsl_type(const struct ra_renderpass_input *e)
     case 2: return "vec2";
     case 3: return "vec3";
     case 4: return "vec4";
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
 }
 
@@ -553,7 +553,7 @@ static void update_uniform(struct gl_shader_cache *sc, struct sc_entry *e,
         assert(e->pushc);
         update_pushc(sc->ra, e->pushc, u);
         break;
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
 }
 

@@ -510,7 +510,7 @@ static struct ra_tex *tex_create(struct ra *ra,
         tex_p->res = (ID3D11Resource *)tex_p->tex3d;
         break;
     default:
-        abort();
+        MP_ASSERT_UNREACHABLE();
     }
 
     tex_p->array_slice = -1;

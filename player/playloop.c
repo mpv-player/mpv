@@ -291,7 +291,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         if (len >= 0)
             seek_pts = seek.amount * len;
         break;
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
 
     double demux_pts = seek_pts;
@@ -458,7 +458,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
         *seek = (struct seek_params){ 0 };
         return;
     }
-    abort();
+    MP_ASSERT_UNREACHABLE();
 }
 
 void execute_queued_seek(struct MPContext *mpctx)

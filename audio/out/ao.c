@@ -702,7 +702,7 @@ static void convert_plane(int type, void *data, int num_samples)
         break;
     }
     default:
-        abort();
+        MP_ASSERT_UNREACHABLE();
     }
 }
 
