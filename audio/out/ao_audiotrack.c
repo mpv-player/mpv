@@ -648,11 +648,6 @@ static void uninit(struct ao *ao)
         p->timestamp = NULL;
     }
 
-    if (p->chunk) {
-        free(p->chunk);
-        p->chunk = NULL;
-    }
-
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);
 
@@ -728,7 +723,7 @@ static int init(struct ao *ao)
     ao->device_buffer = p->size / af_fmt_to_bytes(ao->format);
 
     p->chunksize = p->size;
-    p->chunk = malloc(p->size);
+    p->chunk = talloc_size(ao, p->size);
 
     jobject timestamp = MP_JNI_NEW(AudioTimestamp.clazz, AudioTimestamp.ctor);
     if (!timestamp || MP_JNI_EXCEPTION_LOG(ao) < 0) {
