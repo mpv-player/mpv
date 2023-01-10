@@ -563,7 +563,7 @@ static char *append_params(void *ta_parent, const char *device, const char *p)
         /* a simple list of parameters: add it at the end of the list */
         return talloc_asprintf(ta_parent, "%s,%s", device, p);
     }
-    abort();
+    MP_ASSERT_UNREACHABLE();
 }
 
 static int try_open_device(struct ao *ao, const char *device, int mode)

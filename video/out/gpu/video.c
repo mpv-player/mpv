@@ -1915,8 +1915,7 @@ static void pass_sample(struct gl_video *p, struct image img,
     } else if (scaler->kernel) {
         pass_sample_separated(p, img, scaler, w, h);
     } else {
-        // Should never happen
-        abort();
+        MP_ASSERT_UNREACHABLE(); // should never happen
     }
 
     // Apply any required multipliers. Separated scaling already does this in

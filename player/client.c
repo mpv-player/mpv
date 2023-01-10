@@ -763,7 +763,7 @@ static void send_reply(struct mpv_handle *ctx, uint64_t userdata,
     assert(ctx->reserved_events > 0);
     ctx->reserved_events--;
     if (append_event(ctx, *event, false) < 0)
-        abort(); // not reached
+        MP_ASSERT_UNREACHABLE();
     pthread_mutex_unlock(&ctx->lock);
 }
 

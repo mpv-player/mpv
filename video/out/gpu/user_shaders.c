@@ -102,7 +102,7 @@ bool eval_szexpr(struct mp_log *log, void *priv,
 
             switch (expr[i].val.op) {
             case SZEXP_OP_NOT: stack[idx-1] = !stack[idx-1]; break;
-            default: abort();
+            default: MP_ASSERT_UNREACHABLE();
             }
             continue;
 
@@ -125,7 +125,7 @@ bool eval_szexpr(struct mp_log *log, void *priv,
             case SZEXP_OP_GT:  res = op1 > op2; break;
             case SZEXP_OP_LT:  res = op1 < op2; break;
             case SZEXP_OP_EQ:  res = op1 == op2; break;
-            default: abort();
+            default: MP_ASSERT_UNREACHABLE();
             }
 
             if (!isfinite(res)) {

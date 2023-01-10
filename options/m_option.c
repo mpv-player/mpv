@@ -770,7 +770,7 @@ static const struct m_opt_choice_alternatives *get_choice(const m_option_t *opt,
             return NULL;
         }
     }
-    abort();
+    MP_ASSERT_UNREACHABLE();
 }
 
 static int choice_get(const m_option_t *opt, void *ta_parent,

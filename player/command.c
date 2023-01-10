@@ -409,7 +409,7 @@ static int mp_property_av_speed_correction(void *ctx, struct m_property *prop,
     switch (type[0]) {
     case 'a': val = mpctx->speed_factor_a; break;
     case 'v': val = mpctx->speed_factor_v; break;
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
 
     if (action == M_PROPERTY_PRINT) {

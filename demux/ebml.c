@@ -429,7 +429,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                                                       uint32_t, num_elems[i]);
                 break;
             default:
-                abort();
+                MP_ASSERT_UNREACHABLE();
             }
         }
     }
@@ -582,7 +582,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             MP_TRACE(ctx, "ebml_id %x\n", (unsigned)*idptr);
             break;
         default:
-            abort();
+            MP_ASSERT_UNREACHABLE();
         }
         *countptr += 1;
     error:

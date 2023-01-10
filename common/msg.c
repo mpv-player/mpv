@@ -810,7 +810,7 @@ void mp_msg_log_buffer_destroy(struct mp_log_buffer *buffer)
         }
     }
 
-    abort();
+    MP_ASSERT_UNREACHABLE();
 
 found:
 
