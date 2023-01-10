@@ -205,3 +205,67 @@ jobs:
       if: ${{ failure() }}
       run: |
         cat ./build/config.log
+
+  msys2:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sys:
+          - clang32
+          - clang64
+          - mingw32
+          - mingw64
+          - ucrt64
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys }}
+          update: true
+          install: git
+          pacboy: >-
+            angleproject:p
+            cc:p
+            diffutils:p
+            ffmpeg:p
+            lcms2:p
+            libarchive:p
+            libass:p
+            libcdio-paranoia:p
+            libdvdnav:p
+            libjpeg-turbo:p
+            libplacebo:p
+            luajit:p
+            meson:p
+            ninja:p
+            pkgconf:p
+            python:p
+            rst2pdf:p
+            rubberband:p
+            shaderc:p
+            spirv-cross:p
+            uchardet:p
+            vapoursynth:p
+            vulkan:p
+
+      - name: Build with meson
+        run: |
+          ./ci/build-msys2.sh meson
+
+      - name: Print meson log
+        if: ${{ failure() }}
+        run: |
+          cat ./build_meson/meson-logs/meson-log.txt
+
+      - name: Build with waf
+        run: |
+          ./ci/build-msys2.sh waf
+
+      - name: Print waf log
+        if: ${{ failure() }}
+        run: |
+          cat ./build/config.log
