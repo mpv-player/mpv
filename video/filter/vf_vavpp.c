@@ -172,8 +172,7 @@ static struct mp_image *alloc_out(struct mp_filter *vf)
     }
 
     AVFrame *av_frame = av_frame_alloc();
-    if (!av_frame)
-        abort();
+    MP_HANDLE_OOM(av_frame);
     if (av_hwframe_get_buffer(p->hw_pool, av_frame, 0) < 0) {
         MP_ERR(vf, "Failed to allocate frame from hw pool.\n");
         av_frame_free(&av_frame);

@@ -2658,8 +2658,7 @@ static int dequeue_packet(struct demux_stream *ds, double min_pts,
             return -1;
         ds->attached_picture_added = true;
         struct demux_packet *pkt = demux_copy_packet(ds->sh->attached_picture);
-        if (!pkt)
-            abort();
+        MP_HANDLE_OOM(pkt);
         pkt->stream = ds->sh->index;
         *res = pkt;
         return 1;

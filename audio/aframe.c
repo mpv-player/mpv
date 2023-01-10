@@ -52,8 +52,7 @@ struct mp_aframe *mp_aframe_create(void)
 {
     struct mp_aframe *frame = talloc_zero(NULL, struct mp_aframe);
     frame->av_frame = av_frame_alloc();
-    if (!frame->av_frame)
-        abort();
+    MP_HANDLE_OOM(frame->av_frame);
     talloc_set_destructor(frame, free_frame);
     mp_aframe_reset(frame);
     return frame;
@@ -701,8 +700,7 @@ int mp_aframe_pool_allocate(struct mp_aframe_pool *pool, struct mp_aframe *frame
     if (planes > AV_NUM_DATA_POINTERS) {
         av_frame->extended_data =
             av_calloc(planes, sizeof(av_frame->extended_data[0]));
-        if (!av_frame->extended_data)
-            abort();
+        MP_HANDLE_OOM(av_frame->extended_data);
     } else {
         av_frame->extended_data = av_frame->data;
     }

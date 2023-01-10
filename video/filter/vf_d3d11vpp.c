@@ -102,8 +102,7 @@ static struct mp_image *alloc_pool(void *pctx, int fmt, int w, int h)
         return NULL;
 
     struct mp_image *mpi = mp_image_new_custom_ref(NULL, texture, release_tex);
-    if (!mpi)
-        abort();
+    MP_HANDLE_OOM(mpi);
 
     mp_image_setfmt(mpi, IMGFMT_D3D11);
     mp_image_set_size(mpi, w, h);

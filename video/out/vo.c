@@ -1431,8 +1431,7 @@ struct vo_frame *vo_frame_ref(struct vo_frame *frame)
     *new = *frame;
     for (int n = 0; n < frame->num_frames; n++) {
         new->frames[n] = mp_image_new_ref(frame->frames[n]);
-        if (!new->frames[n])
-            abort(); // OOM on tiny allocs
+        MP_HANDLE_OOM(new->frames[n]);
     }
     new->current = new->num_frames ? new->frames[0] : NULL;
     return new;

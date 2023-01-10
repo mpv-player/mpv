@@ -169,8 +169,7 @@ static int init_filter(struct mp_filter *da, AVPacket *pkt)
         goto fail;
 
     void *buffer = av_mallocz(OUTBUF_SIZE);
-    if (!buffer)
-        abort();
+   MP_HANDLE_OOM(buffer);
     lavf_ctx->pb = avio_alloc_context(buffer, OUTBUF_SIZE, 1, spdif_ctx, NULL,
                                       write_packet, NULL);
     if (!lavf_ctx->pb) {

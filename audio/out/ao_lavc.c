@@ -210,8 +210,7 @@ static void encode(struct ao *ao, struct mp_aframe *af)
     double outpts = mp_aframe_get_pts(af);
 
     AVFrame *frame = mp_aframe_to_avframe(af);
-    if (!frame)
-        abort();
+    MP_HANDLE_OOM(frame);
 
     frame->pts = rint(outpts * av_q2d(av_inv_q(encoder->time_base)));
 
