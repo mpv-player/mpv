@@ -579,8 +579,7 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
         cache_dir = mp_get_user_path(tmp, sc->global, sc->cache_dir);
 
         struct AVSHA *sha = av_sha_alloc();
-        if (!sha)
-            abort();
+        MP_HANDLE_OOM(sha);
         av_sha_init(sha, 256);
         av_sha_update(sha, entry->total.start, entry->total.len);
 

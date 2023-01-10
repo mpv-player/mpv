@@ -140,8 +140,7 @@ static void sync_get_image(void *ptr)
 
     AVBufferRef *new_ref = av_buffer_create(ctx->ref->data, ctx->ref->size,
                                             free_dr_buffer_on_dr_thread, ctx, 0);
-    if (!new_ref)
-        abort(); // tiny malloc OOM
+    MP_HANDLE_OOM(new_ref);
 
     cmd->res->bufs[0] = new_ref;
 

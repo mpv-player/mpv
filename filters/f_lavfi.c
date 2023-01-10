@@ -260,8 +260,7 @@ static void precreate_graph(struct lavfi *c, bool first_init)
     c->failed = false;
 
     c->graph = avfilter_graph_alloc();
-    if (!c->graph)
-        abort();
+    MP_HANDLE_OOM(c->graph);
 
     if (mp_set_avopts(c->log, c->graph, c->graph_opts) < 0)
         goto error;
@@ -852,8 +851,7 @@ static struct lavfi *lavfi_alloc(struct mp_filter *parent)
     c->log = f->log;
     c->public.f = f;
     c->tmp_frame = av_frame_alloc();
-    if (!c->tmp_frame)
-        abort();
+    MP_HANDLE_OOM(c->tmp_frame);
 
     return c;
 }

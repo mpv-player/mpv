@@ -317,8 +317,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     if (vid_profile) {
         MP_VERBOSE(p, "Got an embedded ICC profile.\n");
         p->vid_profile = av_buffer_ref(vid_profile);
-        if (!p->vid_profile)
-            abort();
+        MP_HANDLE_OOM(p->vid_profile);
     }
 
     if (!gl_parse_3dlut_size(p->opts->size_str, &s_r, &s_g, &s_b))
@@ -344,8 +343,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 
         uint8_t hash[32];
         struct AVSHA *sha = av_sha_alloc();
-        if (!sha)
-            abort();
+        MP_HANDLE_OOM(sha);
         av_sha_init(sha, 256);
         av_sha_update(sha, cache_info, strlen(cache_info));
         if (vid_profile)

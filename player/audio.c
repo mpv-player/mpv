@@ -313,8 +313,7 @@ static bool keep_weak_gapless_format(struct mp_aframe *old, struct mp_aframe* ne
 {
     bool res = false;
     struct mp_aframe *new_mod = mp_aframe_new_ref(new);
-    if (!new_mod)
-        abort();
+    MP_HANDLE_OOM(new_mod);
 
     // If the sample formats are compatible (== libswresample generally can
     // convert them), keep the AO. On other changes, recreate it.
@@ -366,8 +365,7 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
 
     // The "ideal" filter output format
     struct mp_aframe *out_fmt = mp_aframe_new_ref(ao_c->filter->output_aformat);
-    if (!out_fmt)
-        abort();
+    MP_HANDLE_OOM(out_fmt);
 
     if (!mp_aframe_config_is_valid(out_fmt)) {
         talloc_free(out_fmt);

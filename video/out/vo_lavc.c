@@ -217,8 +217,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
     pthread_mutex_unlock(&ectx->lock);
 
     AVFrame *frame = mp_image_to_av_frame(mpi);
-    if (!frame)
-        abort();
+    MP_HANDLE_OOM(frame);
 
     frame->pts = rint(outpts * av_q2d(av_inv_q(avc->time_base)));
     frame->pict_type = 0; // keep this at unknown/undefined
