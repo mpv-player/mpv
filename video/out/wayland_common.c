@@ -1082,24 +1082,6 @@ static const struct wl_callback_listener frame_listener = {
     frame_callback,
 };
 
-static void dmabuf_format(void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
-                          uint32_t format)
-{
-    struct vo_wayland_state *wl = data;
-
-    if (wl->drm_format_ct == wl->drm_format_ct_max) {
-        wl->drm_format_ct_max *= 2;
-        wl->drm_formats = talloc_realloc(wl, wl->drm_formats, int, wl->drm_format_ct_max);
-    }
-
-    wl->drm_formats[wl->drm_format_ct++] = format;
-    MP_VERBOSE(wl, "%s is supported by the compositor.\n", mp_tag_str(format));
-}
-
-static const struct zwp_linux_dmabuf_v1_listener dmabuf_listener = {
-    dmabuf_format
-};
-
 #if HAVE_WAYLAND_PROTOCOLS_1_24
 static void done(void *data,
                  struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
@@ -1190,11 +1172,6 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->dmabuf_feedback = zwp_linux_dmabuf_v1_get_default_feedback(wl->dmabuf);
         zwp_linux_dmabuf_feedback_v1_add_listener(wl->dmabuf_feedback, &dmabuf_feedback_listener, wl);
 #endif
-    } else if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 2) && found++) {
-        wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 2);
-        zwp_linux_dmabuf_v1_add_listener(wl->dmabuf, &dmabuf_listener, wl);
-        wl->drm_format_ct_max = 64;
-        wl->drm_formats = talloc_array(wl, int, wl->drm_format_ct_max);
     }
 
     if (!strcmp (interface, wp_viewporter_interface.name) && (ver >= 1) && found++) {
@@ -2135,12 +2112,6 @@ bool vo_wayland_supported_format(struct vo *vo, uint32_t drm_format, uint64_t mo
 
     for (int i = 0; i < wl->format_size / 16; ++i) {
         if (drm_format == formats[i].format && modifier == formats[i].modifier)
-            return true;
-    }
-
-    /* TODO: remove these once zwp_linux_dmabuf_v1 version 2 support is removed. */
-    for (int i = 0; i < wl->drm_format_ct; ++i) {
-        if (drm_format == wl->drm_formats[i])
             return true;
     }
 
