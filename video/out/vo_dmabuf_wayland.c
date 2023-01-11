@@ -62,6 +62,8 @@ struct priv {
     struct wlbuf_pool *wlbuf_pool;
     bool want_reset;
     uint64_t reset_count;
+    struct mp_rect src;
+    bool resized;
 
 #if HAVE_VAAPI
     VADisplay display;
@@ -150,27 +152,57 @@ static bool drmprime_dmabuf_importer(struct mp_image *src, struct wlbuf_pool_ent
 }
 #endif
 
+static void set_viewport_source(struct vo *vo, struct mp_rect src) {
+    struct priv *p = vo->priv;
+    struct vo_wayland_state *wl = vo->wl;
+
+    if (wl->video_viewport && !mp_rect_equals(&p->src, &src)) {
+        // 1. update viewport source
+        wp_viewport_set_source(wl->video_viewport, src.x0 << 8,
+                               src.y0 << 8, mp_rect_w(src) << 8,
+                               mp_rect_h(src) << 8);
+        // 2. reset buffer pool
+        p->want_reset = true;
+        p->reset_count = 0;
+
+        // 3. update to new src dimensions
+        p->src = src;
+    }
+}
+
 static void resize(struct vo *vo)
 {
+    struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_osd_res osd;
+    struct mp_vo_opts *vo_opts = wl->vo_opts;
     const int width = wl->scaling * mp_rect_w(wl->geometry);
     const int height = wl->scaling * mp_rect_h(wl->geometry);
     
     vo_wayland_set_opaque_region(wl, 0);
     vo->dwidth = width;
     vo->dheight = height;
-    vo_get_src_dst_rects(vo, &src, &dst, &osd);
 
+    // top level viewport is calculated with pan set to zero
+    vo->opts->pan_x = 0;
+    vo->opts->pan_y = 0;
+    vo_get_src_dst_rects(vo, &src, &dst, &osd);
     if (wl->viewport)
         wp_viewport_set_destination(wl->viewport, 2 * dst.x0 + mp_rect_w(dst), 2 * dst.y0 + mp_rect_h(dst));
 
+    //now we restore pan for video viewport caculation
+    vo->opts->pan_x = vo_opts->pan_x;
+    vo->opts->pan_y = vo_opts->pan_y;
+    vo_get_src_dst_rects(vo, &src, &dst, &osd);
     if (wl->video_viewport)
         wp_viewport_set_destination(wl->video_viewport, mp_rect_w(dst), mp_rect_h(dst));
     wl_subsurface_set_position(wl->video_subsurface, dst.x0, dst.y0);
+    set_viewport_source(vo, src);
+
     vo->want_redraw = true;
+    p->resized = true;
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -264,6 +296,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     int ret;
 
     switch (request) {
+    case VOCTRL_SET_PANSCAN:
+        if (p->resized)
+            resize(vo);
+        return VO_TRUE;
     case VOCTRL_LOAD_HWDEC_API:
         assert(p->hwdec_ctx.ra);
         struct hwdec_imgfmt_request* req = (struct hwdec_imgfmt_request*)data;
@@ -375,6 +411,7 @@ static int preinit(struct vo *vo)
         .ra = p->ctx->ra,
     };
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, NULL, true);
+    p->src = (struct mp_rect){0, 0, 0, 0};
 
     return 0;
 
