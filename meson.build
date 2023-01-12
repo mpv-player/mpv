@@ -551,10 +551,10 @@ features += {'vector': vector.allowed()}
 
 # various file generations
 tools_directory = join_paths(source_root, 'TOOLS')
+docutils_wrapper = find_program(join_paths(tools_directory, 'docutils-wrapper.py'))
 file2string = find_program(join_paths(tools_directory, 'file2string.py'))
 matroska = find_program(join_paths(tools_directory, 'matroska.py'))
 version_py = find_program(join_paths(source_root, 'version.py'))
-docutils_wrapper = find_program(join_paths(tools_directory, 'docutils-wrapper.py'))
 
 subdir('generated')
 subdir(join_paths('generated', 'etc'))
