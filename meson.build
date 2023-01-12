@@ -1699,7 +1699,6 @@ if get_option('cplayer')
     zsh_install_dir = join_paths(datadir, 'zsh', 'site-functions')
     install_data('etc/_mpv.zsh', install_dir: zsh_install_dir, rename: '_mpv')
 
-    install_data('etc/mpv.desktop', install_dir: join_paths(datadir, 'applications'))
     install_data('etc/mpv.metainfo.xml', install_dir: join_paths(datadir, 'metainfo'))
     install_data('etc/encoding-profiles.conf', install_dir: join_paths(confdir, 'mpv'))
 
@@ -1713,8 +1712,22 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    executable('mpv', sources, dependencies: dependencies, win_subsystem: 'windows,6.0',
-               include_directories: includedir, install: true)
+    mpv = executable('mpv', sources, dependencies: dependencies, win_subsystem: 'windows,6.0',
+                     include_directories: includedir, install: true)
+
+    # Check the protocols in the compiled binary and generate a .desktop file.
+    # Skip this if we're not on windows for simplicity.
+    if not win32
+        generate_desktop = find_program(join_paths(tools_directory, 'generate-desktop-file.py'))
+        custom_target('mpv.desktop',
+                      input: 'etc/mpv.desktop',
+                      output: 'mpv.desktop',
+                      depends: mpv,
+                      command: [generate_desktop, mpv.full_path(), '@INPUT@', '@OUTPUT@'],
+                      install: true,
+                      install_dir: join_paths(datadir, 'applications')
+        )
+    endif
 endif
 
 summary({'d3d11': features['d3d11'],
