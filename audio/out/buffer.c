@@ -459,7 +459,7 @@ void ao_uninit(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
 
-    if (p->thread_valid) {
+    if (p && p->thread_valid) {
         pthread_mutex_lock(&p->pt_lock);
         p->terminate = true;
         pthread_cond_broadcast(&p->pt_wakeup);
@@ -472,17 +472,19 @@ void ao_uninit(struct ao *ao)
     if (ao->driver_initialized)
         ao->driver->uninit(ao);
 
-    talloc_free(p->filter_root);
-    talloc_free(p->queue);
-    talloc_free(p->pending);
-    talloc_free(p->convert_buffer);
-    talloc_free(p->temp_buf);
+    if (p) {
+        talloc_free(p->filter_root);
+        talloc_free(p->queue);
+        talloc_free(p->pending);
+        talloc_free(p->convert_buffer);
+        talloc_free(p->temp_buf);
 
-    pthread_cond_destroy(&p->wakeup);
-    pthread_mutex_destroy(&p->lock);
+        pthread_cond_destroy(&p->wakeup);
+        pthread_mutex_destroy(&p->lock);
 
-    pthread_cond_destroy(&p->pt_wakeup);
-    pthread_mutex_destroy(&p->pt_lock);
+        pthread_cond_destroy(&p->pt_wakeup);
+        pthread_mutex_destroy(&p->pt_lock);
+    }
 
     talloc_free(ao);
 }
