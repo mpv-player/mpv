@@ -80,6 +80,9 @@ can be obtained from your distro or PyPI. Waf can be downloaded by using the
 with mpv. Some documentation about the differences between the build systems are
 located in [build-system-differences][build-system-differences].
 
+**Note**: Building with waf is considered *deprecated* and will be removed in the
+future.
+
 ### Meson
 
 After creating your build directory (e.g. `meson setup build`), you can view a list
