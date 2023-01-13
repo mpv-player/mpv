@@ -98,14 +98,14 @@ end
 -- http://notebook.kulchenko.com/algorithms/alphanumeric-natural-sorting-for-humans-in-lua
 
 function alphanumsort(filenames)
-    local function padnum(d)
-        local dec, n = string.match(d, "(%.?)0*(.+)")
-        return #dec > 0 and ("%.12f"):format(d) or ("%s%03d%s"):format(dec, #n, n)
+    local function padnum(n, d)
+        return #d > 0 and ("%03d%s%.12f"):format(#n, n, tonumber(d) / (10 ^ #d))
+            or ("%03d%s"):format(#n, n)
     end
 
     local tuples = {}
     for i, f in ipairs(filenames) do
-        tuples[i] = {f:lower():gsub("%.?%d+", padnum), f}
+        tuples[i] = {f:lower():gsub("0*(%d+)%.?(%d*)", padnum), f}
     end
     table.sort(tuples, function(a, b)
         return a[1] == b[1] and #b[2] < #a[2] or a[1] < b[1]
