@@ -1568,7 +1568,7 @@ if features['manpage-build']
     )
 endif
 
-rst2html = find_program('rst2html', required: get_option('html-build'))
+rst2html = find_program('rst2html', 'rst2html.py', required: get_option('html-build'))
 features += {'html-build': rst2html.found()}
 if features['html-build']
     datadir = get_option('datadir')
