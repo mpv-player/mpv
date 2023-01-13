@@ -1063,6 +1063,8 @@ def configure(ctx):
         ctx.env.LINKFLAGS += ['-rdynamic']
 
     ctx.store_dependencies_lists()
+    from waflib import Logs
+    Logs.error("WARNING: Building mpv with waf is deprecated and will be removed the future! It is recommended to switch to meson as soon as possible.")
 
 def __write_version__(ctx):
     ctx.env.VERSIONH_ST = '--versionh="%s"'
