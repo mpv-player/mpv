@@ -121,7 +121,6 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
     &video_out_kitty,
     &video_out_lavc,
-    NULL
 };
 
 struct vo_internal {
@@ -189,7 +188,7 @@ static void *vo_thread(void *ptr);
 
 static bool get_desc(struct m_obj_desc *dst, int index)
 {
-    if (index >= MP_ARRAY_SIZE(video_out_drivers) - 1)
+    if (index >= MP_ARRAY_SIZE(video_out_drivers))
         return false;
     const struct vo_driver *vo = video_out_drivers[index];
     *dst = (struct m_obj_desc) {
@@ -371,7 +370,7 @@ struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex)
     }
 autoprobe:
     // now try the rest...
-    for (int i = 0; video_out_drivers[i]; i++) {
+    for (int i = 0; i < MP_ARRAY_SIZE(video_out_drivers); i++) {
         const struct vo_driver *driver = video_out_drivers[i];
         if (driver == &video_out_null)
             break;
