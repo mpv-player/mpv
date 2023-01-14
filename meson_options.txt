@@ -26,6 +26,7 @@ option('lua',
     value: 'auto',
     description: 'Lua'
 )
+option('modular-drivers', type: 'feature', value: 'disabled', description: 'build drivers (AOs/VOs) as dedicated shared libraries')
 option('pthread-debug', type: 'feature', value: 'disabled', description: 'pthread runtime debugging wrappers')
 option('rubberband', type: 'feature', value: 'auto', description: 'librubberband support')
 option('sdl2', type: 'feature', value: 'disabled', description: 'SDL2')
