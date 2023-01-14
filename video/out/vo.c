@@ -69,7 +69,7 @@ extern const struct vo_driver video_out_tct;
 extern const struct vo_driver video_out_sixel;
 extern const struct vo_driver video_out_kitty;
 
-const struct vo_driver *const video_out_drivers[] =
+static const struct vo_driver *const video_out_drivers[] =
 {
     &video_out_libmpv,
 #if HAVE_ANDROID
