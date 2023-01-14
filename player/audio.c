@@ -991,3 +991,8 @@ void clear_audio_output_buffers(struct MPContext *mpctx)
     if (mpctx->ao)
         ao_reset(mpctx->ao);
 }
+
+void mp_audio_init(struct MPContext *mpctx)
+{
+    ao_load_drivers(mpctx->global);
+}
