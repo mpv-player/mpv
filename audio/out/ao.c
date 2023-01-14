@@ -83,7 +83,7 @@ static struct mp_module audio_out_drivers[] = {
 #endif
     // wrappers:
 #if HAVE_JACK
-    MP_MODULE_BUILTIN(audio_out_jack),
+    MP_MODULE_MODULAR("jack", audio_out_jack),
 #endif
 #if HAVE_OPENAL
     MP_MODULE_BUILTIN(audio_out_openal),

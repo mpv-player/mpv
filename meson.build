@@ -829,8 +829,7 @@ jack_opt = get_option('jack').require(
 jack = dependency('jack', required: jack_opt)
 features += {'jack': jack.found()}
 if features['jack']
-    dependencies += jack
-    sources += files('audio/out/ao_jack.c')
+    modules += [['ao-jack', ['audio/out/ao_jack.c'], [jack]]]
 endif
 
 openal = dependency('openal', version: '>= 1.13', required: get_option('openal'))
