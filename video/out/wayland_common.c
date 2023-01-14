@@ -139,6 +139,12 @@ const struct m_sub_options wayland_conf = {
     },
 };
 
+struct vo_wayland_feedback_pool {
+    struct wp_presentation_feedback **fback;
+    struct vo_wayland_state *wl;
+    int len;
+};
+
 struct vo_wayland_output {
     struct vo_wayland_state *wl;
     struct wl_output *output;
@@ -163,7 +169,11 @@ static int lookupkey(int key);
 static int set_cursor_visibility(struct vo_wayland_state *wl, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
 
+static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
+                         struct wp_presentation_feedback *fback);
 static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b);
+static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
+                            struct wp_presentation_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void set_geometry(struct vo_wayland_state *wl);
@@ -1015,15 +1025,11 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
                               uint32_t seq_hi, uint32_t seq_lo,
                               uint32_t flags)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_feedback_pool *fback_pool = data;
+    struct vo_wayland_state *wl = fback_pool->wl;
 
-    // NULL is needed to prevent a dangling pointer since presentation_feedback
-    // is created in the frame_callback and not in any of the actual presentation
-    // events.
-    if (fback) {
-        wp_presentation_feedback_destroy(fback);
-        wl->feedback = NULL;
-    }
+    if (fback)
+        remove_feedback(fback_pool, fback);
 
     if (!wl->use_present)
         return;
@@ -1047,13 +1053,9 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
 {
-    struct vo_wayland_state *wl = data;
-
-    // Same logic in feedback_presented applies here.
-    if (fback) {
-        wp_presentation_feedback_destroy(fback);
-        wl->feedback = NULL;
-    }
+    struct vo_wayland_feedback_pool *fback_pool = data;
+    if (fback)
+        remove_feedback(fback_pool, fback);
 }
 
 static const struct wp_presentation_feedback_listener feedback_listener = {
@@ -1075,8 +1077,9 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
     if (wl->presentation) {
-        wl->feedback = wp_presentation_feedback(wl->presentation, wl->surface);
-        wp_presentation_feedback_add_listener(wl->feedback, &feedback_listener, wl);
+        struct wp_presentation_feedback *fback = wp_presentation_feedback(wl->presentation, wl->surface);
+        add_feedback(wl->fback_pool, fback);
+        wp_presentation_feedback_add_listener(fback, &feedback_listener, wl->fback_pool);
     }
 
     wl->frame_wait = false;
@@ -1384,6 +1387,21 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
     return 0;
 }
 
+static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
+                         struct wp_presentation_feedback *fback)
+{
+    for (int i = 0; i < fback_pool->len; ++i) {
+        if (!fback_pool->fback[i]) {
+            fback_pool->fback[i] = fback;
+            break;
+        } else if (i == fback_pool->len - 1) {
+            // Shouldn't happen in practice.
+            wp_presentation_feedback_destroy(fback_pool->fback[i]);
+            fback_pool->fback[i] = fback;
+        }
+    }
+}
+
 static void do_minimize(struct vo_wayland_state *wl)
 {
     if (!wl->xdg_toplevel)
@@ -1505,6 +1523,28 @@ static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode)
 {
     wl->requested_decoration = mode;
     zxdg_toplevel_decoration_v1_set_mode(wl->xdg_toplevel_decoration, mode);
+}
+
+static void clean_feedback_pool(struct vo_wayland_feedback_pool *fback_pool)
+{
+    for (int i = 0; i < fback_pool->len; ++i) {
+        if (fback_pool->fback[i]) {
+            wp_presentation_feedback_destroy(fback_pool->fback[i]);
+            fback_pool->fback[i] = NULL;
+        }
+    }
+}
+
+static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
+                            struct wp_presentation_feedback *fback)
+{
+    for (int i = 0; i < fback_pool->len; ++i) {
+        if (fback_pool->fback[i] == fback) {
+            wp_presentation_feedback_destroy(fback);
+            fback_pool->fback[i] = NULL;
+            break;
+        }
+    }
 }
 
 static void remove_output(struct vo_wayland_output *out)
@@ -1981,6 +2021,11 @@ int vo_wayland_init(struct vo *vo)
     }
 
     if (wl->presentation) {
+        wl->fback_pool = talloc_zero(wl, struct vo_wayland_feedback_pool);
+        wl->fback_pool->wl = wl;
+        wl->fback_pool->len = 8; // max swapchain depth allowed
+        wl->fback_pool->fback = talloc_zero_array(wl->fback_pool, struct wp_presentation_feedback *,
+                                                  wl->fback_pool->len);
         wl->present = talloc_zero(wl, struct mp_present);
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
@@ -2133,8 +2178,8 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->dnd_offer)
         wl_data_offer_destroy(wl->dnd_offer);
 
-    if (wl->feedback)
-        wp_presentation_feedback_destroy(wl->feedback);
+    if (wl->fback_pool)
+        clean_feedback_pool(wl->fback_pool);
 
     if (wl->frame_callback)
         wl_callback_destroy(wl->frame_callback);
