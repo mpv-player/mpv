@@ -27,6 +27,9 @@
 
 #if HAVE_WIN32_DESKTOP
 #include <versionhelpers.h>
+#define HANDLE_TYPE PL_HANDLE_WIN32
+#else
+#define HANDLE_TYPE PL_HANDLE_FD
 #endif
 
 #define CHECK_CU(x) check_cu((mapper)->owner, (x), #x)
@@ -62,7 +65,7 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
         .d = 0,
         .format = ra_pl_fmt_get(format),
         .sampleable = true,
-        .export_handle = p_owner->handle_type,
+        .export_handle = HANDLE_TYPE,
     };
 
     evk->pltex = pl_tex_create(gpu, &tex_params);
@@ -80,19 +83,14 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
     mapper->tex[n] = ratex;
 
 #if !HAVE_WIN32_DESKTOP
-    if (evk->pltex->params.export_handle == PL_HANDLE_FD) {
-        mem_fd = dup(evk->pltex->shared_mem.handle.fd);
-        if (mem_fd < 0) {
-            goto error;
-        }
-    }
+    mem_fd = dup(evk->pltex->shared_mem.handle.fd);
+    if (mem_fd < 0)
+        goto error;
 #endif
 
     CUDA_EXTERNAL_MEMORY_HANDLE_DESC ext_desc = {
 #if HAVE_WIN32_DESKTOP
-        .type = IsWindows8OrGreater()
-            ? CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32
-            : CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT,
+        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32,
         .handle.win32.handle = evk->pltex->shared_mem.handle.handle,
 #else
         .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD,
@@ -141,24 +139,20 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
     if (ret < 0)
         goto error;
 
-    evk->sync = pl_sync_create(gpu, p_owner->handle_type);
+    evk->sync = pl_sync_create(gpu, HANDLE_TYPE);
     if (!evk->sync) {
         ret = -1;
         goto error;
     }
 
 #if !HAVE_WIN32_DESKTOP
-    if (evk->sync->handle_type == PL_HANDLE_FD) {
-        wait_fd = dup(evk->sync->wait_handle.fd);
-        signal_fd = dup(evk->sync->signal_handle.fd);
-    }
+    wait_fd = dup(evk->sync->wait_handle.fd);
+    signal_fd = dup(evk->sync->signal_handle.fd);
 #endif
 
     CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC w_desc = {
 #if HAVE_WIN32_DESKTOP
-        .type = IsWindows8OrGreater()
-            ? CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32
-            : CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT,
+        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32,
         .handle.win32.handle = evk->sync->wait_handle.handle,
 #else
         .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD,
@@ -172,9 +166,7 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
 
     CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC s_desc = {
 #if HAVE_WIN32_DESKTOP
-        .type = IsWindows8OrGreater()
-            ? CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32
-            : CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT,
+        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32,
         .handle.win32.handle = evk->sync->signal_handle.handle,
 #else
         .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD,
@@ -271,22 +263,15 @@ bool cuda_vk_init(const struct ra_hwdec *hw) {
     struct cuda_hw_priv *p = hw->priv;
     CudaFunctions *cu = p->cu;
 
-    p->handle_type =
-#if HAVE_WIN32_DESKTOP
-        IsWindows8OrGreater() ? PL_HANDLE_WIN32 : PL_HANDLE_WIN32_KMT;
-#else
-        PL_HANDLE_FD;
-#endif
-
     pl_gpu gpu = ra_pl_get(hw->ra);
     if (gpu != NULL) {
-        if (!(gpu->export_caps.tex & p->handle_type)) {
+        if (!(gpu->export_caps.tex & HANDLE_TYPE)) {
             MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable texture memory of type 0x%X.\n",
-                       p->handle_type);
+                       HANDLE_TYPE);
             return false;
-        } else if (!(gpu->export_caps.sync & p->handle_type)) {
+        } else if (!(gpu->export_caps.sync & HANDLE_TYPE)) {
             MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable semaphores of type 0x%X.\n",
-                       p->handle_type);
+                       HANDLE_TYPE);
             return false;
         }
     } else {
