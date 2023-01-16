@@ -88,6 +88,11 @@ struct GL {
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
 
+    // Set to false if the implementation follows normal GL semantics, which is
+    // upside down. Set to true if it does *not*, i.e. if rendering is right
+    // side up
+    bool flipped;
+
     // Copy of function pointer used to load GL.
     // Caution: Not necessarily valid to use after VO init has completed!
     void *(*get_fn)(void *ctx, const char *n);
