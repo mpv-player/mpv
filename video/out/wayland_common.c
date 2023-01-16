@@ -2020,10 +2020,6 @@ bool vo_wayland_init(struct vo *vo)
         wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
     }
 
-    const char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
-    if (xdg_current_desktop != NULL && strstr(xdg_current_desktop, "GNOME"))
-        MP_WARN(wl, "GNOME's wayland compositor lacks support for the idle inhibit protocol. This means the screen can blank during playback.\n");
-
 #if HAVE_WAYLAND_PROTOCOLS_1_27
     if (wl->content_type_manager) {
         wl->content_type = wp_content_type_manager_v1_get_surface_content_type(wl->content_type_manager, wl->surface);
@@ -2073,9 +2069,14 @@ bool vo_wayland_init(struct vo *vo)
                    zxdg_decoration_manager_v1_interface.name);
     }
 
-    if (!wl->idle_inhibit_manager)
+    if (!wl->idle_inhibit_manager) {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    zwp_idle_inhibit_manager_v1_interface.name);
+
+        const char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
+        if (xdg_current_desktop != NULL && strstr(xdg_current_desktop, "GNOME"))
+            MP_WARN(wl, "GNOME's wayland compositor lacks support for the idle inhibit protocol. This means the screen can blank during playback.\n");
+    }
 
     wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
     wl->display_fd = wl_display_get_fd(wl->display);
