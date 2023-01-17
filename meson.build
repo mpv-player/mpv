@@ -1127,12 +1127,17 @@ if features['egl-angle']
     sources += files('video/out/opengl/angle_dynamic.c')
 endif
 
+egl_dep = cc.find_library('EGL', required: get_option('egl-angle-lib'))
 egl_angle_lib = get_option('egl-angle-lib').require(
     features['egl-angle'] and cc.has_function('eglCreateWindowSurface',
+                                               dependencies: egl_dep,
                                                prefix: '#include <EGL/egl.h>'),
     error_message: 'egl-angle-lib could not be found!',
 )
 features += {'egl-angle-lib': egl_angle_lib.allowed()}
+if features['egl-angle-lib']
+    dependencies += egl_dep
+endif
 
 egl_angle_win32 = get_option('egl-angle-win32').require(
     features['egl-angle'] and features['win32-desktop'],
