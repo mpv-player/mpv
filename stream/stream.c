@@ -92,7 +92,6 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_slice,
     &stream_info_fd,
     &stream_info_cb,
-    NULL
 };
 
 // Because of guarantees documented on STREAM_BUFFER_SIZE.
@@ -423,7 +422,7 @@ int stream_create_with_args(struct stream_open_args *args, struct stream **ret)
     if (args->sinfo) {
         r = stream_create_instance(args->sinfo, args, ret);
     } else {
-        for (int i = 0; stream_list[i]; i++) {
+        for (int i = 0; i < MP_ARRAY_SIZE(stream_list); i++) {
             r = stream_create_instance(stream_list[i], args, ret);
             if (r == STREAM_OK)
                 break;
@@ -852,7 +851,7 @@ char **stream_get_proto_list(void)
 {
     char **list = NULL;
     int num = 0;
-    for (int i = 0; stream_list[i]; i++) {
+    for (int i = 0; i < MP_ARRAY_SIZE(stream_list); i++) {
         const stream_info_t *stream_info = stream_list[i];
 
         if (!stream_info->protocols)
@@ -887,7 +886,7 @@ void stream_print_proto_list(struct mp_log *log)
 
 bool stream_has_proto(const char *proto)
 {
-    for (int i = 0; stream_list[i]; i++) {
+    for (int i = 0; i < MP_ARRAY_SIZE(stream_list); i++) {
         const stream_info_t *stream_info = stream_list[i];
 
         for (int j = 0; stream_info->protocols && stream_info->protocols[j]; j++) {
