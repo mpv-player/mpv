@@ -144,11 +144,11 @@ Installing mpv dependencies
 
 ```bash
 # Install MSYS2 build dependencies and a MinGW-w64 compiler
-pacman -S git python $MINGW_PACKAGE_PREFIX-{pkg-config,gcc,meson}
+pacman -S git $MINGW_PACKAGE_PREFIX-{python,pkgconf,gcc,meson}
 
 # Install the most important MinGW-w64 dependencies. libass and lcms2 are also
 # pulled in as dependencies of ffmpeg.
-pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,lua51}
+pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,luajit}
 ```
 
 Building mpv
