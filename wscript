@@ -647,8 +647,6 @@ video_output_features = [
         'groups': [ 'gl' ],
         'func': check_statement(['EGL/egl.h'],
                                 'eglCreateWindowSurface(0, 0, 0, 0)',
-                                cflags=['-DGL_APICALL=', '-DEGLAPI=',
-                                        '-DANGLE_NO_ALIASES', '-DANGLE_EXPORT='],
                                 lib=['EGL', 'GLESv2', 'dxguid', 'd3d9',
                                      'gdi32', 'stdc++'])
     }, {
