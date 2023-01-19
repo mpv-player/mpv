@@ -791,8 +791,7 @@ endif
 alsa = dependency('alsa', version: '>= 1.0.18', required: get_option('alsa'))
 features += {'alsa': alsa.found()}
 if features['alsa']
-    dependencies += alsa
-    sources += files('audio/out/ao_alsa.c')
+    modules += [['ao-alsa', ['audio/out/ao_alsa.c'], [alsa]]]
 endif
 
 audiounit = {

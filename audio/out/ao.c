@@ -73,7 +73,7 @@ static struct mp_module audio_out_drivers[] = {
     MP_MODULE_MODULAR("pulse", audio_out_pulse),
 #endif
 #if HAVE_ALSA
-    MP_MODULE_BUILTIN(audio_out_alsa),
+    MP_MODULE_MODULAR("alsa", audio_out_alsa),
 #endif
 #if HAVE_WASAPI
     MP_MODULE_BUILTIN(audio_out_wasapi),
