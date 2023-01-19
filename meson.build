@@ -1197,8 +1197,7 @@ plain_gl = get_option('plain-gl').require(
     gl_allowed,
     error_message: 'gl was not enabled!',
 )
-features += {'plain-gl': plain_gl.allowed()}
-if features['plain-gl']
+if plain_gl.allowed()
     features += {'gl': true}
 endif
 
