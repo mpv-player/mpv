@@ -3950,13 +3950,7 @@ Input
     like any other binding). See `INPUT.CONF`_.
 
 ``--input-terminal``, ``--no-input-terminal``
-    ``--no-input-terminal`` prevents the player from reading key events from
-    standard input. Useful when reading data from standard input. This is
-    automatically enabled when ``-`` is found on the command line. There are
-    situations where you have to set it manually, e.g. if you open
-    ``/dev/stdin`` (or the equivalent on your system), use stdin in a playlist
-    or intend to read from stdin later on via the loadfile or loadlist input
-    commands.
+    Prevents the player from reading key events from ``/dev/tty``.
 
 ``--input-ipc-server=<filename>``
     Enable the IPC support and create the listening socket at the given path.
