@@ -1,3 +1,5 @@
+#include <limits.h>
+
 #include <libavutil/pixfmt.h>
 
 #include "common/common.h"
@@ -30,6 +32,8 @@ struct entry {
 #define P32(...) (const uint32_t[]){__VA_ARGS__}
 #define SW16(v) ((((v) & 0xFF) << 8) | ((v) >> 8))
 #define SW32(v) ((SW16((v) & 0xFFFFu) << 16) | (SW16(((v) | 0u) >> 16)))
+
+#define ZIMG_IMAGE_DIMENSION_MAX ((size_t)(1) << (CHAR_BIT * sizeof(size_t) / 2 - 2))
 
 // Warning: only entries that match existing conversions are tested.
 static const struct entry repack_tests[] = {
@@ -320,7 +324,7 @@ static int try_repack(struct test_ctx *ctx, FILE *f, int imgfmt, int flags,
     return b;
 }
 
-static void check_float_repack(int imgfmt, enum mp_csp csp,
+static void check_float_repack(struct test_ctx *ctx, int imgfmt, enum mp_csp csp,
                                enum mp_csp_levels levels)
 {
     imgfmt = UNFUCK(imgfmt);
@@ -333,6 +337,15 @@ static void check_float_repack(int imgfmt, enum mp_csp csp,
     assert(bpp == 1 || bpp == 2);
 
     int w = 1 << (bpp * 8);
+
+    if (w > ZIMG_IMAGE_DIMENSION_MAX) {
+        MP_WARN(ctx,
+                "Image dimension (%d) exceeded maximum allowed by zimg (%zu)."
+                " Skipping test...\n",
+                w, ZIMG_IMAGE_DIMENSION_MAX);
+        return;
+    }
+
     struct mp_image *src = mp_image_alloc(imgfmt, w, 1);
     assert(src);
 
@@ -378,8 +391,10 @@ static void check_float_repack(int imgfmt, enum mp_csp csp,
     struct zimg_opts opts = zimg_opts_defaults;
     opts.dither = ZIMG_DITHER_NONE;
     s->zimg_opts = &opts;
-    mp_sws_scale(s, z_f, src);
-    mp_sws_scale(s, z_i, z_f);
+    int ret = mp_sws_scale(s, z_f, src);
+    assert_true(ret >= 0);
+    ret = mp_sws_scale(s, z_i, z_f);
+    assert_true(ret >= 0);
     talloc_free(s);
 
     repack_config_buffers(to_f, 0, r_f, 0, src, NULL);
@@ -486,15 +501,15 @@ static void run(struct test_ctx *ctx)
     assert_text_files_equal(ctx, "repack.txt", "repack.txt",
                 "This can fail if FFmpeg/libswscale adds or removes pixfmts.");
 
-    check_float_repack(-AV_PIX_FMT_GBRAP, MP_CSP_RGB, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_GBRAP10, MP_CSP_RGB, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_GBRAP16, MP_CSP_RGB, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
-    check_float_repack(-AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
-    check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+    check_float_repack(ctx, -AV_PIX_FMT_GBRAP, MP_CSP_RGB, MP_CSP_LEVELS_PC);
+    check_float_repack(ctx, -AV_PIX_FMT_GBRAP10, MP_CSP_RGB, MP_CSP_LEVELS_PC);
+    check_float_repack(ctx, -AV_PIX_FMT_GBRAP16, MP_CSP_RGB, MP_CSP_LEVELS_PC);
+    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
+    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
+    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
+    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
 
     // Determine the list of possible draw_bmp input formats. Do this here
     // because it mostly depends on repack and imgformat stuff.
