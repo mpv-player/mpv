@@ -865,8 +865,7 @@ endif
 pulse = dependency('libpulse', version: '>= 1.0', required: get_option('pulse'))
 features += {'pulse': pulse.found()}
 if features['pulse']
-    dependencies += pulse
-    sources += files('audio/out/ao_pulse.c')
+    modules += [['ao-pulse', ['audio/out/ao_pulse.c'], [pulse]]]
 endif
 
 sdl2_audio = get_option('sdl2-audio').require(
