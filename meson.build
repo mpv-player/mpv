@@ -1606,9 +1606,6 @@ configuration = 'meson configure build ' + '-Dprefix=' + get_option('prefix') + 
                 ' -Dbuildtype=' + get_option('buildtype') + \
                 ' -Doptimization=' + get_option('optimization')
 
-features += {'cplayer': get_option('cplayer')}
-features += {'libmpv-' + get_option('default_library'): get_option('libmpv')}
-
 
 # Set config.h
 conf_data = configuration_data()
@@ -1644,6 +1641,10 @@ conf_data.set_quoted('FULLCONFIG', feature_str)
 conf_data.set_quoted('MPV_CONFDIR', join_paths(get_option('prefix'), get_option('sysconfdir'), 'mpv'))
 configure_file(output : 'config.h', configuration : conf_data)
 message('List of enabled features: ' + feature_str)
+
+# These are intentionally not added to conf_data.
+features += {'cplayer': get_option('cplayer')}
+features += {'libmpv-' + get_option('default_library'): get_option('libmpv')}
 
 
 # build targets
