@@ -376,6 +376,7 @@ struct mp_filter_command {
     enum mp_filter_command_type type;
 
     // For MP_FILTER_COMMAND_TEXT
+    const char *target;
     const char *cmd;
     const char *arg;
 
