@@ -1296,16 +1296,21 @@ Input Commands that are Possibly Subject to Change
     The ``flags`` argument is like the first argument to ``screenshot`` and
     supports ``subtitles``, ``video``, ``window``.
 
-``vf-command <label> <command> <argument>``
-    Send a command to the filter with the given ``<label>``. Use ``all`` to send
-    it to all filters at once. The command and argument string is filter
-    specific. Currently, this only works with the ``lavfi`` filter - see
-    the libavfilter documentation for which commands a filter supports.
+``vf-command <label> <command> <argument> [<target>]``
+    Send a command to the filter. Note that currently, this only works with
+    the ``lavfi`` filter. Refer to the libavfilter documentation for the list
+    of supported commands for each filter.
 
-    Note that the ``<label>`` is a mpv filter label, not a libavfilter filter
-    name.
+    ``<label>`` is a mpv filter label, use ``all`` to send it to all filters
+    at once.
 
-``af-command <label> <command> <argument>``
+    ``<command>`` and ``<argument>`` are filter-specific strings.
+
+    ``<target>`` is a filter or filter instance name and defaults to ``all``.
+    Note that the target is an additional specifier for filters that
+    support them, such as complex ``lavfi`` filter chains.
+
+``af-command <label> <command> <argument> [<target>]``
     Same as ``vf-command``, but for audio filters.
 
 ``apply-profile <name> [<mode>]``

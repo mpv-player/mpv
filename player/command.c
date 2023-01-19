@@ -5999,6 +5999,7 @@ static void cmd_filter_command(void *p)
     }
     struct mp_filter_command filter_cmd = {
         .type = MP_FILTER_COMMAND_TEXT,
+        .target = cmd->args[3].v.s,
         .cmd = cmd->args[1].v.s,
         .arg = cmd->args[2].v.s,
     };
@@ -6643,13 +6644,23 @@ const struct mp_cmd_def mp_cmds[] = {
                           {"value", OPT_STRING(v.s)}, },
         .priv = &(const int){STREAM_VIDEO} },
 
-    { "af-command", cmd_filter_command, { {"label", OPT_STRING(v.s)},
-                                          {"command", OPT_STRING(v.s)},
-                                          {"argument", OPT_STRING(v.s)}, },
+    { "af-command", cmd_filter_command,
+        {
+            {"label", OPT_STRING(v.s)},
+            {"command", OPT_STRING(v.s)},
+            {"argument", OPT_STRING(v.s)},
+            {"target", OPT_STRING(v.s), OPTDEF_STR("all"),
+                .flags = MP_CMD_OPT_ARG},
+        },
         .priv = &(const int){STREAM_AUDIO} },
-    { "vf-command", cmd_filter_command, { {"label", OPT_STRING(v.s)},
-                                          {"command", OPT_STRING(v.s)},
-                                          {"argument", OPT_STRING(v.s)}, },
+    { "vf-command", cmd_filter_command,
+        {
+            {"label", OPT_STRING(v.s)},
+            {"command", OPT_STRING(v.s)},
+            {"argument", OPT_STRING(v.s)},
+            {"target", OPT_STRING(v.s), OPTDEF_STR("all"),
+                .flags = MP_CMD_OPT_ARG},
+        },
         .priv = &(const int){STREAM_VIDEO} },
 
     { "ao-reload", cmd_ao_reload },
