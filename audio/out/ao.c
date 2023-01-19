@@ -67,7 +67,7 @@ static struct mp_module audio_out_drivers[] = {
     MP_MODULE_BUILTIN(audio_out_coreaudio),
 #endif
 #if HAVE_PIPEWIRE
-    MP_MODULE_BUILTIN(audio_out_pipewire),
+    MP_MODULE_MODULAR("pipewire", audio_out_pipewire),
 #endif
 #if HAVE_PULSE
     MP_MODULE_BUILTIN(audio_out_pulse),

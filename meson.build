@@ -860,8 +860,7 @@ endif
 pipewire = dependency('libpipewire-0.3', version: '>= 0.3.19', required: get_option('pipewire'))
 features += {'pipewire': pipewire.found()}
 if features['pipewire']
-    dependencies += pipewire
-    sources += files('audio/out/ao_pipewire.c')
+    modules += [['ao-pipewire', ['audio/out/ao_pipewire.c'], [pipewire]]]
 endif
 
 pulse = dependency('libpulse', version: '>= 1.0', required: get_option('pulse'))
