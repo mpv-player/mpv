@@ -19,6 +19,7 @@ if [[ $1 = "meson" ]]; then
         -D{cocoa,coreaudio,gl-cocoa,macos-cocoa-cb,macos-touchbar,videotoolbox-gl}=enabled
 
     meson compile -C build -j4
+    meson test -C build
 
     meson install -C build
     ./build/mpv

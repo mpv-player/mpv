@@ -22,6 +22,7 @@ meson setup build \
     $NULL
 
 meson compile -C build
+meson test -C build
 ./build/mpv
 
 if [ ! -e "./waf" ] ; then
