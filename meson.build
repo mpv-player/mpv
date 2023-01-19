@@ -1444,15 +1444,16 @@ endif
 
 
 # macOS features
-macos_sdk_version_py = find_program(join_paths(source_root, 'TOOLS',
-                                    'macos-sdk-version.py'))
-macos_sdk_info = ['', '0.0']
-if darwin
+macos_sdk_version_py = find_program(join_paths(source_root, 'TOOLS', 'macos-sdk-version.py'),
+                                    required: get_option('swift-build').require(darwin))
+macos_sdk_path = ''
+macos_sdk_version = '0.0'
+if macos_sdk_version_py.found()
     macos_sdk_info = run_command(macos_sdk_version_py, check: true).stdout().split(',')
+    macos_sdk_path = macos_sdk_info[0].strip()
+    macos_sdk_version = macos_sdk_info[1]
 endif
 
-macos_sdk_path = macos_sdk_info[0].strip()
-macos_sdk_version = macos_sdk_info[1]
 if macos_sdk_path != ''
     message('Detected macOS sdk path: ' + macos_sdk_path)
 endif
@@ -1462,6 +1463,23 @@ if macos_sdk_version != '0.0'
     add_languages('objc')
     objc_link_flags = ['-isysroot', macos_sdk_path, '-L/usr/lib', '-L/usr/local/lib']
     add_project_link_arguments(objc_link_flags, language: ['c', 'objc'])
+endif
+
+xcrun = find_program('xcrun', required: get_option('swift-build').require(darwin))
+swift_ver = '0.0'
+if xcrun.found()
+    swift_prog = find_program(run_command(xcrun, '-find', 'swift', check: true).stdout().strip())
+    swift_ver_string = run_command(swift_prog, '-version', check: true).stdout()
+    verRe = '''
+#!/usr/bin/env python3
+import re
+import sys
+verRe = re.compile("(?i)version\s?([\d.]+)")
+swift_ver = verRe.search(sys.argv[1]).group(1)
+sys.stdout.write(swift_ver)
+'''
+    swift_ver = run_command(python, '-c', verRe, swift_ver_string, check: true).stdout()
+    message('Detected Swift version: ' + swift_ver)
 endif
 
 macos_10_11_features = get_option('macos-10-11-features').require(
@@ -1478,23 +1496,6 @@ macos_10_14_features = get_option('macos-10-14-features').require(
     macos_sdk_version.version_compare('>=10.14'),
     error_message: 'a suitable macos sdk version could not be found!',
 )
-
-xcrun = find_program('xcrun', required: get_option('swift-build'))
-swift_ver = '0.0'
-if xcrun.found()
-    swift_prog = find_program(run_command(xcrun, '-find', 'swift', check: true).stdout().strip())
-    swift_ver_string = run_command(swift_prog, '-version', check: true).stdout()
-    verRe = '''
-#!/usr/bin/env python3
-import re
-import sys
-verRe = re.compile("(?i)version\s?([\d.]+)")
-swift_ver = verRe.search(sys.argv[1]).group(1)
-sys.stdout.write(swift_ver)
-'''
-    swift_ver = run_command(python, '-c', verRe, swift_ver_string, check: true).stdout()
-    message('Detected Swift version: ' + swift_ver)
-endif
 
 swift = get_option('swift-build').require(
     darwin and macos_sdk_version.version_compare('>=10.10') and swift_ver.version_compare('>=4.1'),
@@ -1538,7 +1539,7 @@ if swift.allowed()
 endif
 
 macos_touchbar = get_option('macos-touchbar').require(
-    cc.compiles(files(join_paths(fragments, 'touchbar.m')), name: 'macos-touchbar check') and features['cocoa'],
+    features['cocoa'] and cc.compiles(files(join_paths(fragments, 'touchbar.m')), name: 'macos-touchbar check'),
     error_message: 'Either cocoa could not be found or the macos-touchbar check failed!',
 )
 features += {'macos-touchbar': macos_touchbar.allowed()}
