@@ -1683,6 +1683,9 @@ if get_option('libmpv')
     headers = ['libmpv/client.h', 'libmpv/render.h',
                'libmpv/render_gl.h', 'libmpv/stream_cb.h']
     install_headers(headers, subdir: 'mpv')
+
+    libmpv_test = executable('libmpv-test', 'libmpv/test.c', link_with: [libmpv])
+    test('libmpv', libmpv_test)
 endif
 
 if get_option('cplayer')
