@@ -14,6 +14,7 @@ if [ "$1" = "meson" ]; then
       -Dtests=true            \
       -Dvulkan=enabled
     meson compile -C build --verbose
+    meson test -C build
     ./build/mpv --no-config -v --unittest=all-simple
 fi
 

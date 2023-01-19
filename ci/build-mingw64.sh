@@ -204,6 +204,7 @@ if [ "$1" = "meson" ]; then
         -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
 
     ninja -C build --verbose
+    meson test -C build
 elif [ "$1" = "waf" ]; then
     PKG_CONFIG=pkg-config ./waf configure \
         --enable-libmpv-shared --lua=luajit \
