@@ -1194,8 +1194,8 @@ if features['egl-x11']
 endif
 
 plain_gl = get_option('plain-gl').require(
-    get_option('libmpv') and gl_allowed,
-    error_message: 'libmpv was not enabled!',
+    gl_allowed,
+    error_message: 'gl was not enabled!',
 )
 features += {'plain-gl': plain_gl.allowed()}
 if features['plain-gl']
