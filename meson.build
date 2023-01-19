@@ -1367,19 +1367,19 @@ if features['vaapi']
                      'video/vaapi.c')
 endif
 
-vaapi_drm = dependency('libva-drm', version: '>= 1.1.0', required: get_option('vaapi-drm'))
+vaapi_drm = dependency('libva-drm', version: '>= 1.1.0', required: get_option('vaapi-drm').require(features['vaapi']))
 features += {'vaapi-drm': features['vaapi'] and egl_drm.allowed() and vaapi_drm.found()}
 if features['vaapi-drm']
     dependencies += vaapi_drm
 endif
 
-vaapi_wayland = dependency('libva-wayland', version: '>= 1.1.0', required: get_option('vaapi-wayland'))
+vaapi_wayland = dependency('libva-wayland', version: '>= 1.1.0', required: get_option('vaapi-wayland').require(features['vaapi']))
 features += {'vaapi-wayland': features['vaapi'] and features['gl-wayland'] and vaapi_wayland.found()}
 if features['vaapi-wayland']
     dependencies += vaapi_wayland
 endif
 
-vaapi_x11 = dependency('libva-x11', version: '>= 1.1.0', required: get_option('vaapi-x11'))
+vaapi_x11 = dependency('libva-x11', version: '>= 1.1.0', required: get_option('vaapi-x11').require(features['vaapi']))
 features += {'vaapi-x11': features['vaapi'] and features['x11'] and vaapi_x11.found()}
 if features['vaapi-x11']
     dependencies += vaapi_x11
