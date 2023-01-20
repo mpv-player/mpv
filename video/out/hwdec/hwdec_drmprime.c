@@ -167,7 +167,17 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     struct dmabuf_interop_priv *p = mapper->priv;
 
     mapper->dst_params = mapper->src_params;
-    mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
+
+    /*
+     * rpi4_8 and rpi4_10 function identically to NV12. These two pixel
+     * formats however are not defined in upstream ffmpeg so a string
+     * comparison is used to identify them instead of a mpv IMGFMT.
+     */
+    const char* fmt_name = mp_imgfmt_to_name(mapper->src_params.hw_subfmt);
+    if (strcmp(fmt_name, "rpi4_8") == 0 || strcmp(fmt_name, "rpi4_10") == 0)
+        mapper->dst_params.imgfmt = IMGFMT_NV12;
+    else
+        mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
     mapper->dst_params.hw_subfmt = 0;
 
     struct ra_imgfmt_desc desc = {0};
