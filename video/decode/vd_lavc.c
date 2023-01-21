@@ -985,7 +985,7 @@ static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags)
     struct mp_image *img = mp_image_pool_get_no_alloc(p->dr_pool, imgfmt, w, h);
     if (!img) {
         MP_DBG(p, "Allocating new DR image...\n");
-        img = vo_get_image(p->vo, imgfmt, w, h, stride_align);
+        img = vo_get_image(p->vo, imgfmt, w, h, stride_align, 0);
         if (!img) {
             MP_DBG(p, "...failed..\n");
             goto fallback;

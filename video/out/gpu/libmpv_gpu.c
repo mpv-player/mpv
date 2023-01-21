@@ -192,11 +192,11 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
 }
 
 static struct mp_image *get_image(struct render_backend *ctx, int imgfmt,
-                                  int w, int h, int stride_align)
+                                  int w, int h, int stride_align, int flags)
 {
     struct priv *p = ctx->priv;
 
-    return gl_video_get_image(p->renderer, imgfmt, w, h, stride_align);
+    return gl_video_get_image(p->renderer, imgfmt, w, h, stride_align, flags);
 }
 
 static void screenshot(struct render_backend *ctx, struct vo_frame *frame,

@@ -189,7 +189,7 @@ static void free_dr_buf(void *opaque, uint8_t *data)
 }
 
 static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
-                                  int stride_align)
+                                  int stride_align, int flags)
 {
     struct priv *p = vo->priv;
     pl_gpu gpu = p->gpu;

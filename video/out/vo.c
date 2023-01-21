@@ -1067,10 +1067,10 @@ static void do_redraw(struct vo *vo)
 }
 
 static struct mp_image *get_image_vo(void *ctx, int imgfmt, int w, int h,
-                                     int stride_align)
+                                     int stride_align, int flags)
 {
     struct vo *vo = ctx;
-    return vo->driver->get_image(vo, imgfmt, w, h, stride_align);
+    return vo->driver->get_image(vo, imgfmt, w, h, stride_align, flags);
 }
 
 static void *vo_thread(void *ptr)
@@ -1401,12 +1401,12 @@ struct vo_frame *vo_get_current_vo_frame(struct vo *vo)
 }
 
 struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
-                              int stride_align)
+                              int stride_align, int flags)
 {
     if (vo->driver->get_image_ts)
-        return vo->driver->get_image_ts(vo, imgfmt, w, h, stride_align);
+        return vo->driver->get_image_ts(vo, imgfmt, w, h, stride_align, flags);
     if (vo->in->dr_helper)
-        return dr_helper_get_image(vo->in->dr_helper, imgfmt, w, h, stride_align);
+        return dr_helper_get_image(vo->in->dr_helper, imgfmt, w, h, stride_align, flags);
     return NULL;
 }
 
