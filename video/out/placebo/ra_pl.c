@@ -52,6 +52,10 @@ struct ra *ra_create_pl(pl_gpu gpu, struct mp_log *log)
     if (gpu->limits.max_variables)
         ra->caps |= RA_CAP_GLOBAL_UNIFORM;
 #endif
+#if PL_API_VER >= 234
+    if (!gpu->limits.host_cached)
+        ra->caps |= RA_CAP_SLOW_DR;
+#endif
 
     if (gpu->limits.max_tex_1d_dim)
         ra->caps |= RA_CAP_TEX_1D;

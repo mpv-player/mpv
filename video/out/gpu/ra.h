@@ -80,6 +80,7 @@ enum {
     RA_CAP_FRAGCOORD      = 1 << 10, // supports reading from gl_FragCoord
     RA_CAP_PARALLEL_COMPUTE  = 1 << 11, // supports parallel compute shaders
     RA_CAP_NUM_GROUPS     = 1 << 12, // supports gl_NumWorkGroups
+    RA_CAP_SLOW_DR        = 1 << 13, // direct rendering is assumed to be slow
 };
 
 enum ra_ctype {
