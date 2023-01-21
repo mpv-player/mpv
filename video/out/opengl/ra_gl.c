@@ -103,6 +103,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
         {RA_CAP_COMPUTE,            MPGL_CAP_COMPUTE_SHADER},
         {RA_CAP_NUM_GROUPS,         MPGL_CAP_COMPUTE_SHADER},
         {RA_CAP_NESTED_ARRAY,       MPGL_CAP_NESTED_ARRAY},
+        {RA_CAP_SLOW_DR,            MPGL_CAP_SLOW_DR},
     };
 
     for (int i = 0; i < MP_ARRAY_SIZE(caps_map); i++) {
