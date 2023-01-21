@@ -26,6 +26,9 @@ Interface changes
 
 ::
 
+=======
+ --- mpv 0.35.1 --- (feature backport due to special circumstances)
+    - add `--vd-lavc-dr=auto` and make it the default
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,

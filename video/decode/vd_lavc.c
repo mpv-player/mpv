@@ -119,7 +119,8 @@ const struct m_sub_options vd_lavc_conf = {
         {"vd-lavc-software-fallback", OPT_CHOICE(software_fallback,
             {"no", INT_MAX}, {"yes", 1}), M_RANGE(1, INT_MAX)},
         {"vd-lavc-o", OPT_KEYVALUELIST(avopts)},
-        {"vd-lavc-dr", OPT_FLAG(dr)},
+        {"vd-lavc-dr", OPT_CHOICE(dr,
+            {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"hwdec", OPT_STRING(hwdec_api),
             .help = hwdec_opt_help,
             .flags = M_OPT_OPTIONAL_PARAM | UPDATE_HWDEC},
@@ -138,7 +139,7 @@ const struct m_sub_options vd_lavc_conf = {
         .skip_idct = AVDISCARD_DEFAULT,
         .skip_frame = AVDISCARD_DEFAULT,
         .framedrop = AVDISCARD_NONREF,
-        .dr = 1,
+        .dr = -1,
         .hwdec_api = "no",
         .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores",
         // Maximum number of surfaces the player wants to buffer. This number
@@ -967,8 +968,10 @@ static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags)
 
     struct mp_image *img = mp_image_pool_get_no_alloc(p->dr_pool, imgfmt, w, h);
     if (!img) {
-        MP_DBG(p, "Allocating new DR image...\n");
-        img = vo_get_image(p->vo, imgfmt, w, h, stride_align, 0);
+        bool host_cached = p->opts->dr == -1; // auto
+        int dr_flags = host_cached ? VO_DR_FLAG_HOST_CACHED : 0;
+        MP_DBG(p, "Allocating new%s DR image...\n", host_cached ? " (host-cached)" : "");
+        img = vo_get_image(p->vo, imgfmt, w, h, stride_align, dr_flags);
         if (!img) {
             MP_DBG(p, "...failed..\n");
             goto fallback;
