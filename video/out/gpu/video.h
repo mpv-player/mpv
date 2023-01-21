@@ -229,7 +229,7 @@ struct vo;
 void gl_video_configure_queue(struct gl_video *p, struct vo *vo);
 
 struct mp_image *gl_video_get_image(struct gl_video *p, int imgfmt, int w, int h,
-                                    int stride_align);
+                                    int stride_align, int flags);
 
 
 #endif

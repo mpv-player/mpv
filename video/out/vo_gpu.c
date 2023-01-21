@@ -265,11 +265,11 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
 }
 
 static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
-                                  int stride_align)
+                                  int stride_align, int flags)
 {
     struct gpu_priv *p = vo->priv;
 
-    return gl_video_get_image(p->renderer, imgfmt, w, h, stride_align);
+    return gl_video_get_image(p->renderer, imgfmt, w, h, stride_align, flags);
 }
 
 static void uninit(struct vo *vo)
