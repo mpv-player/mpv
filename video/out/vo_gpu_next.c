@@ -196,6 +196,11 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     if (!gpu->limits.thread_safe || !gpu->limits.max_mapped_size)
         return NULL;
 
+#if PL_API_VER >= 234
+    if ((flags & VO_DR_FLAG_HOST_CACHED) && !gpu->limits.host_cached)
+        return NULL;
+#endif
+
     int size = mp_image_get_alloc_size(imgfmt, w, h, stride_align);
     if (size < 0)
         return NULL;
