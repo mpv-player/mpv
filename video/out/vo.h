@@ -194,6 +194,11 @@ enum {
     VO_CAP_FILM_GRAIN   = 1 << 3,
 };
 
+enum {
+    // Require DR buffers to be host-cached (i.e. fast readback)
+    VO_DR_FLAG_HOST_CACHED = 1 << 0,
+};
+
 #define VO_MAX_REQ_FRAMES 10
 
 struct vo;
