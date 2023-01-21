@@ -359,6 +359,8 @@ struct vo_driver {
      * stride_align is always a value >=1 that is a power of 2. The stride
      * values of the returned image must be divisible by this value.
      *
+     * flags is a combination of VO_DR_FLAG_* flags.
+     *
      * Currently, the returned image must have exactly 1 AVBufferRef set, for
      * internal implementation simplicity.
      *
@@ -366,7 +368,7 @@ struct vo_driver {
      * will silently fallback to a default allocator
      */
     struct mp_image *(*get_image)(struct vo *vo, int imgfmt, int w, int h,
-                                  int stride_align);
+                                  int stride_align, int flags);
 
     /*
      * Thread-safe variant of get_image. Set at most one of these callbacks.
@@ -374,7 +376,7 @@ struct vo_driver {
      * vo_driver.uninit is not called before this function returns.
      */
     struct mp_image *(*get_image_ts)(struct vo *vo, int imgfmt, int w, int h,
-                                     int stride_align);
+                                     int stride_align, int flags);
 
     /*
      * Render the given frame to the VO's backbuffer. This operation will be
@@ -526,7 +528,7 @@ double vo_get_delay(struct vo *vo);
 void vo_discard_timing_info(struct vo *vo);
 struct vo_frame *vo_get_current_vo_frame(struct vo *vo);
 struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
-                              int stride_align);
+                              int stride_align, int flags);
 
 void vo_wakeup(struct vo *vo);
 void vo_wait_default(struct vo *vo, int64_t until_time);
