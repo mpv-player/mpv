@@ -885,11 +885,11 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         // function, but this field can still be relevant for guiding gamut
         // mapping optimizations, and it's also used by `mp_get_csp_matrix`
         // when deciding what RGB space to map XYZ to for VOs that don't want
-        // to directly ingest XYZ into their color pipeline. BT.709 would be a
-        // sane default here, but it runs the risk of clipping any wide gamut
-        // content, so we pick BT.2020 instead to be on the safer side.
+        // to directly ingest XYZ into their color pipeline. We pick DCI-P3
+        // because it is the colorspace most closely matching digital cinema
+        // content, and also has the correct DCI whitepoint.
         if (params->color.primaries == MP_CSP_PRIM_AUTO)
-            params->color.primaries = MP_CSP_PRIM_BT_2020;
+            params->color.primaries = MP_CSP_PRIM_DCI_P3;
         if (params->color.gamma == MP_CSP_TRC_AUTO)
             params->color.gamma = MP_CSP_TRC_LINEAR;
     } else {
