@@ -45,6 +45,7 @@ Interface changes
       watch-later. It is still written by default but you may
       need to explictly add `start` depending on how you have
       `--watch-later-options` configured.
+    - add `--vd-lavc-dr=auto` and make it the default
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,

@@ -1700,14 +1700,18 @@ Video
     support this, then it will be treated as ``cpu``, regardless of the setting.
     Currently, only ``gpu-next`` supports film grain application.
 
-``--vd-lavc-dr=<yes|no>``
-    Enable direct rendering (default: yes). If this is set to ``yes``, the
+``--vd-lavc-dr=<auto|yes|no>``
+    Enable direct rendering (default: auto). If this is set to ``yes``, the
     video will be decoded directly to GPU video memory (or staging buffers).
     This can speed up video upload, and may help with large resolutions or
     slow hardware. This works only with the following VOs:
 
         - ``gpu``: requires at least OpenGL 4.4 or Vulkan.
         - ``libmpv``: The libmpv render API has optional support.
+
+    The ``auto`` option will try to guess whether DR can improve performance
+    on your particular hardware. Currently this enables it on AMD or NVIDIA
+    if using OpenGL or unconditionally if using Vulkan.
 
     Using video filters of any kind that write to the image data (or output
     newly allocated frames) will silently disable the DR code path.
