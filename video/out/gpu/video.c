@@ -2333,7 +2333,7 @@ static void pass_convert_yuv(struct gl_video *p)
 
     // Pre-colormatrix input gamma correction
     if (cparams.color.space == MP_CSP_XYZ)
-        GLSL(color.rgb = pow(color.rgb, vec3(2.6));) // linear light
+        pass_linearize(p->sc, p->image_params.color.gamma);
 
     // We always explicitly normalize the range in pass_read_video
     cparams.input_bits = cparams.texture_bits = 0;
@@ -2346,6 +2346,13 @@ static void pass_convert_yuv(struct gl_video *p)
     gl_sc_uniform_vec3(sc, "colormatrix_c", m.c);
 
     GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
+
+    if (cparams.color.space == MP_CSP_XYZ) {
+        pass_delinearize(p->sc, p->image_params.color.gamma);
+        // mp_get_csp_matrix implicitly converts XYZ to DCI-P3
+        p->image_params.color.space = MP_CSP_RGB;
+        p->image_params.color.primaries = MP_CSP_PRIM_DCI_P3;
+    }
 
     if (p->image_params.color.space == MP_CSP_BT_2020_C) {
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
