@@ -920,21 +920,21 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
         wl->window_size.x0 = 0;
         wl->window_size.y0 = 0;
-        wl->window_size.x1 = width;
-        wl->window_size.y1 = height;
+        wl->window_size.x1 = round(width * wl->scaling);
+        wl->window_size.y1 = round(height * wl->scaling);
     }
     wl->geometry.x0 = 0;
     wl->geometry.y0 = 0;
-    wl->geometry.x1 = width;
-    wl->geometry.y1 = height;
+    wl->geometry.x1 = round(width * wl->scaling);
+    wl->geometry.y1 = round(height * wl->scaling);
 
     if (mp_rect_equals(&old_geometry, &wl->geometry))
         return;
 
 resize:
     MP_VERBOSE(wl, "Resizing due to xdg from %ix%i to %ix%i\n",
-               mp_rect_w(old_geometry)*wl->scaling, mp_rect_h(old_geometry)*wl->scaling,
-               mp_rect_w(wl->geometry)*wl->scaling, mp_rect_h(wl->geometry)*wl->scaling);
+               mp_rect_w(old_geometry), mp_rect_h(old_geometry),
+               mp_rect_w(wl->geometry), mp_rect_h(wl->geometry));
 
     wl->pending_vo_events |= VO_EVENT_RESIZE;
     wl->toplevel_configured = true;
@@ -1593,17 +1593,14 @@ static void set_geometry(struct vo_wayland_state *wl)
 
     struct vo_win_geometry geo;
     struct mp_rect screenrc = wl->current_output->geometry;
-    vo_calc_window_geometry(vo, &screenrc, &geo);
+    vo_calc_window_geometry2(vo, &screenrc, wl->scaling, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     greatest_common_divisor(wl, vo->dwidth, vo->dheight);
     wl->reduced_width = vo->dwidth / wl->gcd;
     wl->reduced_height = vo->dheight / wl->gcd;
 
-    wl->vdparams.x0 = 0;
-    wl->vdparams.y0 = 0;
-    wl->vdparams.x1 = vo->dwidth / wl->scaling;
-    wl->vdparams.y1 = vo->dheight / wl->scaling;
+    wl->window_size = (struct mp_rect){0, 0, vo->dwidth, vo->dheight};
 }
 
 static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
@@ -1635,10 +1632,11 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
     }
 
     double factor = (double)old_scale / wl->scaling;
-    wl->vdparams.x1 *= factor;
-    wl->vdparams.y1 *= factor;
-    wl->window_size.x1 *= factor;
-    wl->window_size.y1 *= factor;
+    wl->window_size.x1 /= factor;
+    wl->window_size.y1 /= factor;
+    wl->geometry.x1 /= factor;
+    wl->geometry.y1 /= factor;
+
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
 }
 
@@ -1865,7 +1863,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             {
                 if (wl->current_output) {
                     set_geometry(wl);
-                    wl->window_size = wl->vdparams;
                     if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
                         wl->geometry = wl->window_size;
                     wl->pending_vo_events |= VO_EVENT_RESIZE;
@@ -1892,11 +1889,11 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (wl->vo_opts->window_maximized) {
-            s[0] = mp_rect_w(wl->geometry) * wl->scaling;
-            s[1] = mp_rect_h(wl->geometry) * wl->scaling;
+            s[0] = mp_rect_w(wl->geometry);
+            s[1] = mp_rect_h(wl->geometry);
         } else {
-            s[0] = mp_rect_w(wl->window_size) * wl->scaling;
-            s[1] = mp_rect_h(wl->window_size) * wl->scaling;
+            s[0] = mp_rect_w(wl->window_size);
+            s[1] = mp_rect_h(wl->window_size);
         }
         return VO_TRUE;
     }
@@ -1904,8 +1901,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         int *s = arg;
         wl->window_size.x0 = 0;
         wl->window_size.y0 = 0;
-        wl->window_size.x1 = s[0] / wl->scaling;
-        wl->window_size.y1 = s[1] / wl->scaling;
+        wl->window_size.x1 = s[0];
+        wl->window_size.y1 = s[1];
         if (!wl->vo_opts->fullscreen) {
             if (wl->vo_opts->window_maximized) {
                 xdg_toplevel_unset_maximized(wl->xdg_toplevel);
@@ -2114,7 +2111,6 @@ bool vo_wayland_reconfig(struct vo *vo)
     }
 
     set_geometry(wl);
-    wl->window_size = wl->vdparams;
 
     if (wl->opts->configure_bounds)
         set_window_bounds(wl);
@@ -2141,8 +2137,8 @@ bool vo_wayland_reconfig(struct vo *vo)
 
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha)
 {
-    const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
-    const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
+    const int32_t width = mp_rect_w(wl->geometry);
+    const int32_t height = mp_rect_h(wl->geometry);
     if (!alpha) {
         struct wl_region *region = wl_compositor_create_region(wl->compositor);
         wl_region_add(region, 0, 0, width, height);

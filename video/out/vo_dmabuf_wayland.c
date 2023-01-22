@@ -1,6 +1,4 @@
 /*
- * Based on vo_gl.c by Reimar Doeffinger.
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -178,8 +176,8 @@ static void resize(struct vo *vo)
     struct mp_rect dst;
     struct mp_osd_res osd;
     struct mp_vo_opts *vo_opts = wl->vo_opts;
-    const int width = wl->scaling * mp_rect_w(wl->geometry);
-    const int height = wl->scaling * mp_rect_h(wl->geometry);
+    const int width = mp_rect_w(wl->geometry);
+    const int height = mp_rect_h(wl->geometry);
     
     vo_wayland_set_opaque_region(wl, 0);
     vo->dwidth = width;
@@ -377,7 +375,6 @@ static int preinit(struct vo *vo)
                  wp_viewporter_interface.name);
         goto err;
     }
-
 
     if (vo->wl->single_pixel_manager) {
 #if HAVE_WAYLAND_PROTOCOLS_1_27

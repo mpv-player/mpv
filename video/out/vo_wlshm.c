@@ -182,8 +182,8 @@ static int resize(struct vo *vo)
 {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
-    const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
-    const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
+    const int32_t width = mp_rect_w(wl->geometry);
+    const int32_t height = mp_rect_h(wl->geometry);
     struct buffer *buf;
 
     vo_wayland_set_opaque_region(wl, 0);
