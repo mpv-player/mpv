@@ -48,7 +48,6 @@ struct vo_wayland_state {
 
     /* Geometry */
     struct mp_rect geometry;
-    struct mp_rect vdparams;
     struct mp_rect window_size;
     struct wl_list output_list;
     struct vo_wayland_output *current_output;

@@ -43,8 +43,8 @@ static void egl_create_window(struct ra_ctx *ctx)
     struct vo_wayland_state *wl = ctx->vo->wl;
 
     p->egl_window = wl_egl_window_create(wl->surface,
-                                         mp_rect_w(wl->geometry) * wl->scaling,
-                                         mp_rect_h(wl->geometry) * wl->scaling);
+                                         mp_rect_w(wl->geometry),
+                                         mp_rect_h(wl->geometry));
 
     p->egl_surface = mpegl_create_window_surface(
         p->egl_display, p->egl_config, p->egl_window);
@@ -75,8 +75,8 @@ static void resize(struct ra_ctx *ctx)
     if (!p->egl_window)
         egl_create_window(ctx);
 
-    const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
-    const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
+    const int32_t width = mp_rect_w(wl->geometry);
+    const int32_t height = mp_rect_h(wl->geometry);
 
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
     if (p->egl_window)
