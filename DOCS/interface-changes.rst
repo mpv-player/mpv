@@ -46,6 +46,10 @@ Interface changes
       need to explictly add `start` depending on how you have
       `--watch-later-options` configured.
     - add `--vd-lavc-dr=auto` and make it the default
+    - add support for the fractional scale protocol in wayland
+    - in wayland, hidpi window scaling now scales the window by the compositor's
+      dpi scale factor by default (can be disabled with --no-hidpi-window-scale
+      if fractional scaling support exists).
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,

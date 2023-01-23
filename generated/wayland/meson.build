@@ -16,6 +16,11 @@ if features['wayland_protocols_1_27']
                   [wl_protocol_dir, 'staging/single-pixel-buffer/single-pixel-buffer-v1.xml']]
 endif
 
+features += {'wayland_protocols_1_31': wayland['deps'][2].version().version_compare('>=1.31')}
+if features['wayland_protocols_1_31']
+    protocols += [[wl_protocol_dir, 'staging/fractional-scale/fractional-scale-v1.xml']]
+endif
+
 foreach p: protocols
     xml = join_paths(p)
     wl_protocols_source += custom_target(xml.underscorify() + '_c',
