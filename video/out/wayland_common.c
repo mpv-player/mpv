@@ -47,6 +47,10 @@
 #include "generated/wayland/single-pixel-buffer-v1.h"
 #endif
 
+#if HAVE_WAYLAND_PROTOCOLS_1_31
+#include "generated/wayland/fractional-scale-v1.h"
+#endif
+
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 20
 #define HAVE_WAYLAND_1_20
 #endif
@@ -181,6 +185,7 @@ static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
+static void rescale_geometry(struct vo_wayland_state *wl, double old_scale);
 static void set_geometry(struct vo_wayland_state *wl);
 static void set_surface_scaling(struct vo_wayland_state *wl);
 static void window_move(struct vo_wayland_state *wl, uint32_t serial);
@@ -753,7 +758,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     wl->current_output->has_surface = true;
     bool force_resize = false;
 
-    if (wl->scaling != wl->current_output->scale) {
+    if (!wl->fractional_scale_manager && wl->scaling != wl->current_output->scale) {
         set_surface_scaling(wl);
         spawn_cursor(wl);
         force_resize = true;
@@ -768,7 +773,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     if (!mp_rect_equals(&old_geometry, &wl->geometry) || force_resize)
         wl->pending_vo_events |= VO_EVENT_RESIZE;
 
-    MP_VERBOSE(wl, "Surface entered output %s %s (0x%x), scale = %i, refresh rate = %f Hz\n",
+    MP_VERBOSE(wl, "Surface entered output %s %s (0x%x), scale = %f, refresh rate = %f Hz\n",
                o->make, o->model, o->id, wl->scaling, o->refresh_rate);
 
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
@@ -963,6 +968,32 @@ static const struct xdg_toplevel_listener xdg_toplevel_listener = {
     handle_configure_bounds,
 #endif
 };
+
+#if HAVE_WAYLAND_PROTOCOLS_1_31
+static void preferred_scale(void *data,
+                            struct wp_fractional_scale_v1 *fractional_scale,
+                            uint32_t scale)
+{
+    struct vo_wayland_state *wl = data;
+    double old_scale = wl->scaling;
+
+    // dmabuf_wayland is always wl->scaling = 1
+    bool dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
+    wl->scaling = !dmabuf_wayland ? (double)scale / 120 : 1;
+    MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
+               wl->scaling);
+    wl->pending_vo_events |= VO_EVENT_DPI;
+    if (wl->current_output) {
+        rescale_geometry(wl, old_scale);
+        set_geometry(wl);
+        wl->pending_vo_events |= VO_EVENT_RESIZE;
+    }
+}
+
+static const struct wp_fractional_scale_v1_listener fractional_scale_listener = {
+    preferred_scale,
+};
+#endif
 
 static const char *zxdg_decoration_mode_to_str(const uint32_t mode)
 {
@@ -1225,6 +1256,12 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 #endif
 
+#if HAVE_WAYLAND_PROTOCOLS_1_31
+    if (!strcmp(interface, wp_fractional_scale_manager_v1_interface.name) && found++) {
+        wl->fractional_scale_manager = wl_registry_bind(reg, id, &wp_fractional_scale_manager_v1_interface, 1);
+    }
+#endif
+
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
         wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, 1);
         wp_presentation_add_listener(wl->presentation, &pres_listener, wl);
@@ -1363,6 +1400,20 @@ static bool create_input(struct vo_wayland_state *wl)
     return 0;
 }
 
+static int create_viewports(struct vo_wayland_state *wl)
+{
+    if (wl->viewporter) {
+        wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
+        wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
+    }
+
+    if (wl->viewporter && (!wl->viewport || !wl->video_viewport)) {
+        MP_ERR(wl, "failed to create viewport interfaces!\n");
+        return 1;
+    }
+    return 0;
+}
+
 static int create_xdg_surface(struct vo_wayland_state *wl)
 {
     wl->xdg_surface = xdg_wm_base_get_xdg_surface(wl->wm_base, wl->surface);
@@ -1371,8 +1422,10 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
     wl->xdg_toplevel = xdg_surface_get_toplevel(wl->xdg_surface);
     xdg_toplevel_add_listener(wl->xdg_toplevel, &xdg_toplevel_listener, wl);
 
-    if (!wl->xdg_surface || !wl->xdg_toplevel)
+    if (!wl->xdg_surface || !wl->xdg_toplevel) {
+        MP_ERR(wl, "failled to create xdg_surface and xdg_toplevel!\n");
         return 1;
+    }
     return 0;
 }
 
@@ -1514,6 +1567,15 @@ static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode)
     zxdg_toplevel_decoration_v1_set_mode(wl->xdg_toplevel_decoration, mode);
 }
 
+static void rescale_geometry(struct vo_wayland_state *wl, double old_scale)
+{
+    double factor = old_scale / wl->scaling;
+    wl->window_size.x1 /= factor;
+    wl->window_size.y1 /= factor;
+    wl->geometry.x1 /= factor;
+    wl->geometry.y1 /= factor;
+}
+
 static void clean_feedback_pool(struct vo_wayland_feedback_pool *fback_pool)
 {
     for (int i = 0; i < fback_pool->len; ++i) {
@@ -1623,20 +1685,19 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
 
 static void set_surface_scaling(struct vo_wayland_state *wl)
 {
+    if (wl->fractional_scale_manager)
+        return;
+
+    // dmabuf_wayland is always wl->scaling = 1
     bool dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
-    int old_scale = wl->scaling;
+    double old_scale = wl->scaling;
     if (wl->vo_opts->hidpi_window_scale && !dmabuf_wayland) {
         wl->scaling = wl->current_output->scale;
     } else {
         wl->scaling = 1;
     }
 
-    double factor = (double)old_scale / wl->scaling;
-    wl->window_size.x1 /= factor;
-    wl->window_size.y1 /= factor;
-    wl->geometry.x1 /= factor;
-    wl->geometry.y1 /= factor;
-
+    rescale_geometry(wl, old_scale);
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
 }
 
@@ -1862,7 +1923,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
                 if (wl->current_output) {
-                    set_geometry(wl);
                     if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
                         wl->geometry = wl->window_size;
                     wl->pending_vo_events |= VO_EVENT_RESIZE;
@@ -1950,6 +2010,14 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
+void vo_wayland_handle_fractional_scale(struct vo_wayland_state *wl)
+{
+    if (wl->fractional_scale_manager && wl->viewport)
+        wp_viewport_set_destination(wl->viewport,
+                                    round(mp_rect_w(wl->geometry) / wl->scaling),
+                                    round(mp_rect_h(wl->geometry) / wl->scaling));
+}
+
 bool vo_wayland_init(struct vo *vo)
 {
     vo->wl = talloc_zero(NULL, struct vo_wayland_state);
@@ -2004,17 +2072,15 @@ bool vo_wayland_init(struct vo *vo)
     }
 
     /* Can't be initialized during registry due to multi-protocol dependence */
+    if (create_viewports(wl))
+        goto err;
+
     if (create_xdg_surface(wl))
         goto err;
 
     if (wl->subcompositor) {
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
         wl_subsurface_set_desync(wl->video_subsurface);
-    }
-
-    if (wl->viewporter) {
-        wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
-        wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
     }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_27
@@ -2028,6 +2094,16 @@ bool vo_wayland_init(struct vo *vo)
     if (!wl->single_pixel_manager) {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_single_pixel_buffer_manager_v1_interface.name);
+    }
+#endif
+
+#if HAVE_WAYLAND_PROTOCOLS_1_31
+    if (wl->fractional_scale_manager) {
+        wl->fractional_scale = wp_fractional_scale_manager_v1_get_fractional_scale(wl->fractional_scale_manager, wl->surface);
+        wp_fractional_scale_v1_add_listener(wl->fractional_scale, &fractional_scale_listener, wl);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   wp_fractional_scale_manager_v1_interface.name);
     }
 #endif
 
@@ -2209,6 +2285,14 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->fback_pool)
         clean_feedback_pool(wl->fback_pool);
+
+#if HAVE_WAYLAND_PROTOCOLS_1_31
+    if (wl->fractional_scale)
+        wp_fractional_scale_v1_destroy(wl->fractional_scale);
+
+    if (wl->fractional_scale_manager)
+        wp_fractional_scale_manager_v1_destroy(wl->fractional_scale_manager);
+#endif
 
     if (wl->frame_callback)
         wl_callback_destroy(wl->frame_callback);

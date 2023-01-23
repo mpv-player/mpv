@@ -84,6 +84,8 @@ static void resize(struct ra_ctx *ctx)
 
     wl->vo->dwidth  = width;
     wl->vo->dheight = height;
+
+    vo_wayland_handle_fractional_scale(wl);
 }
 
 static bool wayland_egl_check_visible(struct ra_ctx *ctx)

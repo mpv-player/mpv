@@ -204,6 +204,9 @@ static int resize(struct vo *vo)
         p->free_buffers = buf->next;
         talloc_free(buf);
     }
+
+    vo_wayland_handle_fractional_scale(wl);
+
     return mp_sws_reinit(p->sws);
 }
 
