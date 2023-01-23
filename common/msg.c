@@ -43,7 +43,9 @@
 #include "msg.h"
 #include "msg_control.h"
 
+// log buffer size (lines) for terminal level and logfile level
 #define TERM_BUF 100
+#define FILE_BUF 100
 
 struct mp_log_root {
     struct mpv_global *global;
@@ -642,7 +644,7 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
             root->log_file = fopen(root->log_path, "wb");
             if (root->log_file) {
                 root->log_file_buffer =
-                    mp_msg_log_buffer_new(global, 100, MP_LOG_BUFFER_MSGL_LOGFILE,
+                    mp_msg_log_buffer_new(global, FILE_BUF, MP_LOG_BUFFER_MSGL_LOGFILE,
                                           wakeup_log_file, root);
                 root->log_file_thread_active = true;
                 if (pthread_create(&root->log_file_thread, NULL, log_file_thread,
