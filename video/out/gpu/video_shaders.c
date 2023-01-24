@@ -422,6 +422,9 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "    %s(lessThanEqual(vec3(%f), color.rgb)));                \n",
               SLOG_Q, SLOG_P, SLOG_C, SLOG_A, SLOG_B, SLOG_K2, gl_sc_bvec(sc, 3), SLOG_Q);
         break;
+    case MP_CSP_TRC_ST428:
+        GLSL(color.rgb = vec3(52.37/48.0) * pow(color.rgb, vec3(2.6)););
+        break;
     default:
         abort();
     }
@@ -511,6 +514,9 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "                    + vec3(%f),                                 \n"
               "                %s(lessThanEqual(vec3(0.0), color.rgb)));       \n",
               SLOG_P, SLOG_Q, SLOG_A / M_LN10, SLOG_K2, SLOG_B, SLOG_C, gl_sc_bvec(sc, 3));
+        break;
+    case MP_CSP_TRC_ST428:
+        GLSL(color.rgb = pow(color.rgb * vec3(48.0/52.37), vec3(1.0/2.6)););
         break;
     default:
         abort();
