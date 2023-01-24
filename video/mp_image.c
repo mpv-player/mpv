@@ -529,10 +529,15 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.chroma_location = src->params.chroma_location;
     dst->params.alpha = src->params.alpha;
     dst->nominal_fps = src->nominal_fps;
+
     // ensure colorspace consistency
-    if (mp_image_params_get_forced_csp(&dst->params) !=
-        mp_image_params_get_forced_csp(&src->params))
-        dst->params.color = (struct mp_colorspace){0};
+    enum mp_csp dst_forced_csp = mp_image_params_get_forced_csp(&dst->params);
+    if (mp_image_params_get_forced_csp(&src->params) != dst_forced_csp) {
+        dst->params.color.space = dst_forced_csp != MP_CSP_AUTO ?
+                                    dst_forced_csp :
+                                    mp_csp_guess_colorspace(src->w, src->h);
+    }
+
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
         if (dst->planes[1] && src->planes[1]) {
             if (mp_image_make_writeable(dst))
