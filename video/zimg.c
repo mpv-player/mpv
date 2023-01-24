@@ -30,6 +30,7 @@
 #include "video/fmt-conversion.h"
 #include "video/img_format.h"
 #include "zimg.h"
+#include "config.h"
 
 static_assert(MP_IMAGE_BYTE_ALIGN >= ZIMG_ALIGN, "");
 
@@ -155,6 +156,9 @@ static zimg_transfer_characteristics_e mp_to_z_trc(enum mp_csp_trc trc)
     case MP_CSP_TRC_GAMMA28:    return ZIMG_TRANSFER_BT470_BG;
     case MP_CSP_TRC_PQ:         return ZIMG_TRANSFER_ST2084;
     case MP_CSP_TRC_HLG:        return ZIMG_TRANSFER_ARIB_B67;
+#if HAVE_ZIMG_ST428
+    case MP_CSP_TRC_ST428:      return ZIMG_TRANSFER_ST428;
+#endif
     case MP_CSP_TRC_GAMMA18:    // ?
     case MP_CSP_TRC_GAMMA20:
     case MP_CSP_TRC_GAMMA24:
