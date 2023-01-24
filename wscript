@@ -6,12 +6,15 @@ sys.path.insert(0, os.getcwd())
 from shlex import split
 from waflib.Configure import conf
 from waflib.Tools import c_preproc
+from waflib.Tools.compiler_c import c_compiler
 from waflib import Utils
 from waftools.checks.generic import *
 from waftools.checks.custom import *
 
 c_preproc.go_absolute=True # enable system folders
 c_preproc.standard_includes.append('/usr/local/include')
+
+c_compiler['win32'].remove('msvc')
 
 APPNAME = 'mpv'
 
