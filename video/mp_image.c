@@ -888,18 +888,10 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     } else if (forced_csp == MP_CSP_XYZ) {
         params->color.space = MP_CSP_XYZ;
         params->color.levels = MP_CSP_LEVELS_PC;
-
-        // In theory, XYZ data does not really need a concept of 'primaries' to
-        // function, but this field can still be relevant for guiding gamut
-        // mapping optimizations, and it's also used by `mp_get_csp_matrix`
-        // when deciding what RGB space to map XYZ to for VOs that don't want
-        // to directly ingest XYZ into their color pipeline. We pick DCI-P3
-        // because it is the colorspace most closely matching digital cinema
-        // content, and also has the correct DCI whitepoint.
-        if (params->color.primaries == MP_CSP_PRIM_AUTO)
-            params->color.primaries = MP_CSP_PRIM_DCI_P3;
-        if (params->color.gamma == MP_CSP_TRC_AUTO)
-            params->color.gamma = MP_CSP_TRC_LINEAR;
+        // Force gamma to ST428 as this is the only correct for DCDM X'Y'Z'
+        params->color.gamma = MP_CSP_TRC_ST428;
+        // Don't care about primaries, they shouldn't be used, or if anything
+        // MP_CSP_PRIM_ST428 should be defined.
     } else {
         // We have no clue.
         params->color.space = MP_CSP_AUTO;
