@@ -408,6 +408,10 @@ iconv support use --disable-iconv.",
         'name': 'rubberband-3',
         'desc': 'new engine support for librubberband',
         'func': check_pkg_config('rubberband >= 3.0.0'),
+    }, {
+        'name': 'zimg-st428',
+        'desc': 'ZIMG suport for ZIMG_TRANSFER_ST428',
+        'func': check_pkg_config('zimg', '>= 3.0.5'),
     }
 ]
 

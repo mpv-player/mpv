@@ -756,6 +756,7 @@ if features['zimg']
         sources += files('test/repack.c',
                          'test/scale_zimg.c')
     endif
+    features += {'zimg-st428': zimg.version().version_compare('>= 3.0.5')}
 endif
 
 zlib = dependency('zlib', required: get_option('zlib'))
