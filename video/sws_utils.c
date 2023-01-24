@@ -404,6 +404,16 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
         return mp_zimg_convert(ctx->zimg, dst, src) ? 0 : -1;
 #endif
 
+    if (src->params.color.space == MP_CSP_XYZ && dst->params.color.space != MP_CSP_XYZ) {
+        // swsscale has hardcoded gamma 2.2 internally and 2.6 for XYZ
+        dst->params.color.gamma = MP_CSP_TRC_GAMMA22;
+        // and sRGB primaries...
+        dst->params.color.primaries = MP_CSP_PRIM_BT_709;
+        // it doesn't adjust white point though, but it is not worth to support
+        // this case. It would require custom prim with equal energy white point
+        // and sRGB primaries.
+    }
+
     struct mp_image *a_src = check_alignment(ctx->log, &ctx->aligned_src, src);
     struct mp_image *a_dst = check_alignment(ctx->log, &ctx->aligned_dst, dst);
     if (!a_src || !a_dst) {
