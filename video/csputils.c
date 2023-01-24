@@ -87,6 +87,7 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"v-log",       MP_CSP_TRC_V_LOG},
     {"s-log1",      MP_CSP_TRC_S_LOG1},
     {"s-log2",      MP_CSP_TRC_S_LOG2},
+    {"st428",       MP_CSP_TRC_ST428},
     {0}
 };
 
@@ -208,6 +209,7 @@ enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
     case AVCOL_TRC_GAMMA28:      return MP_CSP_TRC_GAMMA28;
     case AVCOL_TRC_SMPTEST2084:  return MP_CSP_TRC_PQ;
     case AVCOL_TRC_ARIB_STD_B67: return MP_CSP_TRC_HLG;
+    case AVCOL_TRC_SMPTE428:     return MP_CSP_TRC_ST428;
     default:                     return MP_CSP_TRC_AUTO;
     }
 }
@@ -260,6 +262,7 @@ int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
     case MP_CSP_TRC_GAMMA28:      return AVCOL_TRC_GAMMA28;
     case MP_CSP_TRC_PQ:           return AVCOL_TRC_SMPTEST2084;
     case MP_CSP_TRC_HLG:          return AVCOL_TRC_ARIB_STD_B67;
+    case MP_CSP_TRC_ST428:        return AVCOL_TRC_SMPTE428;
     default:                      return AVCOL_TRC_UNSPECIFIED;
     }
 }
