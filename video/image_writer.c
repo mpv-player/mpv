@@ -355,6 +355,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
         .h = d_h,
         .p_w = 1,
         .p_h = 1,
+        .color = image->params.color,
     };
     mp_image_params_guess_csp(&p);
 
