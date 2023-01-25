@@ -77,7 +77,6 @@ unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
     unsigned int ret_mask = 0, delsys;
     struct dtv_property prop[1];
     struct dtv_properties cmdseq = {.num = 1, .props = prop};
-    struct dvb_frontend_info fe_info;
 
     mp_verbose(log, "Querying tuner frontend type via DVBv5 API for frontend FD %d\n",
                fe_fd);
@@ -425,8 +424,6 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
 {
     int hi_lo = 0, bandwidth_hz = 0;
     dvb_state_t* state = priv->state;
-    struct dvb_frontend_parameters feparams;
-
 
     MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, %s freq %lu, srate %lu, "
                "pol %c, diseqc %u\n", fd_frontend,
