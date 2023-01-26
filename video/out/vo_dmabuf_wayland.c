@@ -389,6 +389,7 @@ static int preinit(struct vo *vo)
         if (fd < 0)
             goto err;
         p->solid_buffer_pool = wl_shm_create_pool(vo->wl->shm, fd, height * stride);
+        close(fd);
         if (!p->solid_buffer_pool)
             goto err;
         p->solid_buffer = wl_shm_pool_create_buffer(
