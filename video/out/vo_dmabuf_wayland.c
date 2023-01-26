@@ -74,6 +74,12 @@ static uintptr_t vaapi_key_provider(struct mp_image *src)
     return va_surface_id(src);
 }
 
+static void close_file_descriptors(VADRMPRIMESurfaceDescriptor desc)
+{
+    for (int i = 0; i < desc.num_objects; i++)
+        close(desc.objects[i].fd);
+}
+
 /* va-api dmabuf importer */
 static bool vaapi_dmabuf_importer(struct mp_image *src, struct wlbuf_pool_entry* entry,
                                   struct zwp_linux_buffer_params_v1 *params)
@@ -89,6 +95,8 @@ static bool vaapi_dmabuf_importer(struct mp_image *src, struct wlbuf_pool_entry*
         /* invalid surface warning => composed layers not supported */
         if (status == VA_STATUS_ERROR_INVALID_SURFACE)
             MP_VERBOSE(entry->vo, "vaExportSurfaceHandle: composed layers not supported.\n");
+        close_file_descriptors(desc);
+
         return false;
     }
     bool success = false;
@@ -108,8 +116,7 @@ static bool vaapi_dmabuf_importer(struct mp_image *src, struct wlbuf_pool_entry*
     success = true;
 
 done:
-    for (int i = 0; i < desc.num_objects; i++)
-        close(desc.objects[i].fd);
+    close_file_descriptors(desc);
 
     return success;
 }
