@@ -131,7 +131,8 @@ static const struct mp_keymap keymap[] = {
 #define OPT_BASE_STRUCT struct wayland_opts
 const struct m_sub_options wayland_conf = {
     .opts = (const struct m_option[]) {
-        {"wayland-configure-bounds", OPT_FLAG(configure_bounds)},
+        {"wayland-configure-bounds", OPT_CHOICE(configure_bounds,
+            {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"wayland-disable-vsync", OPT_FLAG(disable_vsync)},
         {"wayland-edge-pixels-pointer", OPT_INT(edge_pixels_pointer),
             M_RANGE(0, INT_MAX)},
@@ -141,7 +142,7 @@ const struct m_sub_options wayland_conf = {
     },
     .size = sizeof(struct wayland_opts),
     .defaults = &(struct wayland_opts) {
-        .configure_bounds = true,
+        .configure_bounds = -1,
         .disable_vsync = false,
         .edge_pixels_pointer = 10,
         .edge_pixels_touch = 32,
@@ -1706,6 +1707,15 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
 
 static void set_window_bounds(struct vo_wayland_state *wl)
 {
+    // If the user has set geometry/autofit and the option is auto,
+    // don't use these.
+    if (wl->opts->configure_bounds == -1 && (wl->vo_opts->geometry.wh_valid ||
+        wl->vo_opts->autofit.wh_valid || wl->vo_opts->autofit_larger.wh_valid ||
+        wl->vo_opts->autofit_smaller.wh_valid))
+    {
+        return;
+    }
+
     if (wl->bounded_width && wl->bounded_width < wl->window_size.x1)
         wl->window_size.x1 = wl->bounded_width;
     if (wl->bounded_height && wl->bounded_height < wl->window_size.y1)
