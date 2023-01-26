@@ -1698,11 +1698,7 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
     // dmabuf_wayland is always wl->scaling = 1
     bool dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
     double old_scale = wl->scaling;
-    if (wl->vo_opts->hidpi_window_scale && !dmabuf_wayland) {
-        wl->scaling = wl->current_output->scale;
-    } else {
-        wl->scaling = 1;
-    }
+    wl->scaling = !dmabuf_wayland ? wl->current_output->scale : 1;
 
     rescale_geometry(wl, old_scale);
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
@@ -1921,7 +1917,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             if (opt == &opts->fullscreen)
                 toggle_fullscreen(wl);
             if (opt == &opts->hidpi_window_scale)
-                set_surface_scaling(wl);
+                set_geometry(wl, true);
             if (opt == &opts->window_maximized)
                 toggle_maximized(wl);
             if (opt == &opts->window_minimized)
