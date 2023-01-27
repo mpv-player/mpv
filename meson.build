@@ -1668,15 +1668,18 @@ if win32
 endif
 
 
-if get_option('libmpv')
-    client_h_define = cc.get_define('MPV_CLIENT_API_VERSION', prefix: '#include "libmpv/client.h"',
-                                    include_directories: include_directories('.'))
-    major = client_h_define.split('|')[0].split('<<')[0].strip('() ')
-    minor = client_h_define.split('|')[1].strip('() ')
-    client_api_version = major + '.' + minor + '.0'
+client_h_define = cc.get_define('MPV_CLIENT_API_VERSION', prefix: '#include "libmpv/client.h"',
+                                include_directories: include_directories('.'))
+major = client_h_define.split('|')[0].split('<<')[0].strip('() ')
+minor = client_h_define.split('|')[1].strip('() ')
+client_api_version = major + '.' + minor + '.0'
 
-    libmpv = library('mpv', sources, dependencies: dependencies, gnu_symbol_visibility: 'hidden',
-                     version: client_api_version, include_directories: includedir, install: true)
+libmpv = library('mpv', sources, dependencies: dependencies, gnu_symbol_visibility: 'hidden',
+                 version: client_api_version, include_directories: includedir,
+                 install: get_option('libmpv'), build_by_default: get_option('libmpv'))
+
+
+if get_option('libmpv')
     pkg = import('pkgconfig')
     pkg.generate(libmpv, version: client_api_version,
                  description: 'mpv media player client library')
@@ -1717,8 +1720,8 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    executable('mpv', sources, dependencies: dependencies, win_subsystem: 'windows,6.0',
-               include_directories: includedir, install: true)
+    executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
+               win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
 endif
 
 summary({'d3d11': features['d3d11'],
