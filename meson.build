@@ -879,8 +879,7 @@ endif
 sndio = dependency('sndio', required: get_option('sndio'))
 features += {'sndio': sndio.found()}
 if features['sndio']
-    dependencies += sndio
-    sources += files('audio/out/ao_sndio.c')
+    modules += [['ao-sndio', ['audio/out/ao_sndio.c'], [sndio]]]
 endif
 
 wasapi = cc.has_header_symbol('audioclient.h', 'IAudioClient', required: get_option('wasapi'))

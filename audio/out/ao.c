@@ -95,7 +95,7 @@ static struct mp_module audio_out_drivers[] = {
     MP_MODULE_BUILTIN(audio_out_sdl),
 #endif
 #if HAVE_SNDIO
-    MP_MODULE_BUILTIN(audio_out_sndio),
+    MP_MODULE_MODULAR("sndio", audio_out_sndio),
 #endif
     MP_MODULE_BUILTIN(audio_out_null),
 #if HAVE_COREAUDIO
