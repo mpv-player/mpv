@@ -118,6 +118,7 @@ static const struct m_option script_props_type = {
 struct overlay {
     struct mp_image *source;
     int x, y;
+    int dw, dh;
 };
 
 struct hook_handler {
@@ -4210,8 +4211,8 @@ static void recreate_overlays(struct MPContext *mpctx)
             struct sub_bitmap b = {
                 .bitmap = s->planes[0],
                 .stride = s->stride[0],
-                .w = s->w, .dw = s->w,
-                .h = s->h, .dh = s->h,
+                .w = s->w, .dw = o->dw,
+                .h = s->h, .dh = o->dh,
                 .x = o->x,
                 .y = o->y,
             };
@@ -4308,7 +4309,12 @@ static void cmd_overlay_add(void *pcmd)
     int offset = cmd->args[4].v.i;
     char *fmt = cmd->args[5].v.s;
     int w = cmd->args[6].v.i, h = cmd->args[7].v.i, stride = cmd->args[8].v.i;
+    int dw = cmd->args[9].v.i, dh = cmd->args[10].v.i;
 
+    if (dw <= 0)
+      dw = w;
+    if (dh <= 0)
+      dh = h;
     if (strcmp(fmt, "bgra") != 0) {
         MP_ERR(mpctx, "overlay-add: unsupported OSD format '%s'\n", fmt);
         goto error;
@@ -4325,6 +4331,8 @@ static void cmd_overlay_add(void *pcmd)
         .source = mp_image_alloc(IMGFMT_BGRA, w, h),
         .x = x,
         .y = y,
+        .dw = dw,
+        .dh = dh,
     };
     if (!overlay.source)
         goto error;
@@ -6394,7 +6402,9 @@ const struct mp_cmd_def mp_cmds[] = {
                                         {"fmt", OPT_STRING(v.s)},
                                         {"w", OPT_INT(v.i)},
                                         {"h", OPT_INT(v.i)},
-                                        {"stride", OPT_INT(v.i)}, }},
+                                        {"stride", OPT_INT(v.i)},
+                                        {"dw", OPT_INT(v.i)},
+                                        {"dh", OPT_INT(v.i)}, }},
     { "overlay-remove", cmd_overlay_remove, { {"id", OPT_INT(v.i)} } },
 
     { "osd-overlay", cmd_osd_overlay,
