@@ -824,34 +824,6 @@ strictly part of the guaranteed API.
     This is a legacy wrapper around calling the ``run`` command with
     ``mp.commandv`` and other functions.
 
-``utils.user_data_set(path, val)``
-    Sets a user-data value.
-
-    ``path`` is a path within the ``user-data`` property.
-
-    This is a convenience wrapper around ``mp.set_property_native``.
-
-``utils.user_data_get(path)``
-    Gets a user-data value.
-
-    ``path`` is a path within the ``user-data`` property.
-
-    This is a convenience wrapper around ``mp.get_property_native``.
-
-``utils.user_data_del(path)``
-    Deletes a user-data value.
-
-    ``path`` is a path within the ``user-data`` property.
-
-    This is a convenience wrapper around ``mp.del_property_native``.
-
-``utils.user_data_observe(path, type, fn)``
-    Observes a user-data value.
-
-    ``path`` is a path within the ``user-data`` property.
-
-    See ``mp.observe_property`` for further details.
-
 ``utils.getpid()``
     Returns the process ID of the running mpv process. This can be used to identify
     the calling mpv when launching (detached) subprocesses.
