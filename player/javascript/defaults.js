@@ -199,30 +199,6 @@ mp.utils.shared_script_property_set = shared_script_property_set;
 mp.utils.shared_script_property_get = shared_script_property_get;
 mp.utils.shared_script_property_observe = shared_script_property_observe;
 
-// user_data - always an object, even if empty
-function user_data_set(path, val) {
-    return mp.set_proprty_native("user-data/" + path, val);
-}
-
-function user_data_del(path) {
-    return mp.del_property("user-data/" + path);
-}
-
-function user_data_get(path) {
-    return mp.get_property_native("user-data/" + path);
-}
-
-function user_data_observe(path, t, cb) {
-    return mp.observe_property("user-data/" + path, t,
-        function user_data_cb(_name, val) { cb(path, val) }
-    );
-}
-
-mp.utils.user_data_set = user_data_set;
-mp.utils.user_data_del = user_data_del;
-mp.utils.user_data_get = user_data_get;
-mp.utils.user_data_observe = user_data_observe;
-
 // osd-ass
 var next_assid = 1;
 mp.create_osd_overlay = function create_osd_overlay(format) {

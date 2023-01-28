@@ -3269,8 +3269,6 @@ Property list
 
     The top-level object itself cannot be written directly; write to sub-paths instead.
 
-    Lua scripting has helpers starting with ``utils.user_data_``.
-
     Converting this property or its sub-properties to strings will give a JSON
     representation. If converting a leaf-level object (i.e. not a map or array)
     and not using raw mode, the underlying content will be given (e.g. strings will be
