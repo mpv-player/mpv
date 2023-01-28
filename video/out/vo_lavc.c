@@ -134,6 +134,17 @@ static int reconfig2(struct vo *vo, struct mp_image *img)
 
     encoder->time_base = av_inv_q(tb);
 
+    // Used for rate control, level selection, etc.
+    // Usually it's not too catastrophic if this isn't exactly correct,
+    // as long as it's not off by orders of magnitude.
+    // If we don't set anything, encoders will use the time base,
+    // and 24000 is so high that the output can end up extremely screwy (see #11215),
+    // so we default to 240 if we don't have a real value.
+    if (img->nominal_fps > 0)
+        encoder->framerate = av_d2q(img->nominal_fps, img->nominal_fps * 1001 + 2); // Hopefully give exact results for NTSC rates
+    else
+        encoder->framerate = (AVRational){ 240, 1 };
+
     if (!encoder_init_codec_and_muxer(vc->enc, on_ready, vo))
         goto error;
 
