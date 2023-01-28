@@ -824,31 +824,31 @@ strictly part of the guaranteed API.
     This is a legacy wrapper around calling the ``run`` command with
     ``mp.commandv`` and other functions.
 
-``utils.udata_set(path, val)``
-    Sets a udata value.
+``utils.custom_property_set(path, val)``
+    Sets a custom-property value.
 
-    ``path`` is a path within the ``udata`` property.
+    ``path`` is a path within the ``custom-properties`` property.
 
     This is a convenience wrapper around ``mp.set_property_native``.
 
-``utils.udata_get(path)``
-    Gets a udata value.
+``utils.custom_property_get(path)``
+    Gets a custom-property value.
 
-    ``path`` is a path within the ``udata`` property.
+    ``path`` is a path within the ``custom-properties`` property.
 
     This is a convenience wrapper around ``mp.get_property_native``.
 
-``utils.udata_del(path)``
-    Deletes a udata value.
+``utils.custom_property_del(path)``
+    Deletes a custom-property value.
 
-    ``path`` is a path within the ``udata`` property.
+    ``path`` is a path within the ``custom-properties`` property.
 
     This is a convenience wrapper around ``mp.del_property_native``.
 
-``utils.udata_observe(path, type, fn)``
-    Observes a udata value.
+``utils.custom_property_observe(path, type, fn)``
+    Observes a custom-property value.
 
-    ``path`` is a path within the ``udata`` property.
+    ``path`` is a path within the ``custom-properties`` property.
 
     See ``mp.observe_property`` for further details.
 

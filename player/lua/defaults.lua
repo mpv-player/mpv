@@ -831,21 +831,21 @@ function mp_utils.shared_script_property_observe(name, cb)
     end)
 end
 
-function mp_utils.user_data_set(path, value)
-    return mp.set_property_native("user-data/" .. path, value)
+function mp_utils.custom_property_set(path, value)
+    return mp.set_property_native("custom-properties/" .. path, value)
 end
 
-function mp_utils.user_data_get(path)
-    return mp.get_property_native("user-data/" .. path)
+function mp_utils.custom_property_get(path)
+    return mp.get_property_native("custom-properties/" .. path)
 end
 
-function mp_utils.user_data_del(path)
-    return mp.del_property_native("user-data/" .. path)
+function mp_utils.custom_property_del(path)
+    return mp.del_property_native("custom-properties/" .. path)
 end
 
 -- cb(name, value) on change and on init
-function mp_utils.user_data_observe(path, t, cb)
-    return mp.observe_property("user-data/" .. path, t, function(_, val)
+function mp_utils.custom_property_observe(path, t, cb)
+    return mp.observe_property("custom-properties/" .. path, t, function(_, val)
         cb(path, val)
     end)
 end

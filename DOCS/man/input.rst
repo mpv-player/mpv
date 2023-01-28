@@ -3256,7 +3256,7 @@ Property list
     (There is no way to ensure synchronization if two scripts try to update the
     same key at the same time.)
 
-``user-data`` (RW)
+``custom-properties`` (RW)
     This is a recursive key/value map of arbitrary nodes shared between clients for
     general use (i.e. scripts, IPC clients, host applications, etc).
     The player itself does not use any data in it (although some builtin scripts may).
@@ -3264,12 +3264,12 @@ Property list
 
     This is a more powerful replacement for ``shared-script-properties``.
 
-    Sub-paths can be accessed directly; e.g. ``user-data/my-script/state/a`` can be
+    Sub-paths can be accessed directly; e.g. ``custom-properties/my-script/state/a`` can be
     read, written, or observed.
 
     The top-level object itself cannot be written directly; write to sub-paths instead.
 
-    Lua scripting has helpers starting with ``utils.user_data_``.
+    Lua scripting has helpers starting with ``utils.custom_property_``.
 
     Converting this property or its sub-properties to strings will give a JSON
     representation. If converting a leaf-level object (i.e. not a map or array)

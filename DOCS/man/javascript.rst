@@ -186,13 +186,13 @@ meta-paths like ``~~/foo`` (other JS file functions do expand meta paths).
 
 ``mp.utils.subprocess_detached(t)``
 
-``mp.utils.udata_set(path, val)``
+``mp.utils.custom_property_set(path, val)``
 
-``mp.utils.udata_get(path)``
+``mp.utils.custom_property_get(path)``
 
-``mp.utils.udata_del(path)``
+``mp.utils.custom_property_del(path)``
 
-``mp.utils.udata_observe(path, type, fn)``
+``mp.utils.custom_property_observe(path, type, fn)``
 
 ``mp.utils.get_env_list()``
 

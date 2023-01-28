@@ -3924,7 +3924,7 @@ static const struct m_property mp_properties_base[] = {
     {"input-bindings", mp_property_bindings},
 
     {"shared-script-properties", mp_property_script_props},
-    {"user-data", mp_property_udata},
+    {"custom-properties", mp_property_udata},
 
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),

@@ -199,29 +199,29 @@ mp.utils.shared_script_property_set = shared_script_property_set;
 mp.utils.shared_script_property_get = shared_script_property_get;
 mp.utils.shared_script_property_observe = shared_script_property_observe;
 
-// user_data - always an object, even if empty
-function user_data_set(path, val) {
-    return mp.set_proprty_native("user-data/" + path, val);
+// custom_property - always an object, even if empty
+function custom_property_set(path, val) {
+    return mp.set_proprty_native("custom-properties/" + path, val);
 }
 
-function user_data_del(path) {
-    return mp.del_property_native("user-data/" + path);
+function custom_property_del(path) {
+    return mp.del_property_native("custom-properties/" + path);
 }
 
-function user_data_get(path) {
-    return mp.get_property_native("user-data/" + path);
+function custom_property_get(path) {
+    return mp.get_property_native("custom-properties/" + path);
 }
 
-function user_data_observe(path, t, cb) {
-    return mp.observe_property("user-data/" + path, t,
-        function user_data_cb(_name, val) { cb(path, val) }
+function custom_property_observe(path, t, cb) {
+    return mp.observe_property("custom-properties/" + path, t,
+        function custom_property_cb(_name, val) { cb(path, val) }
     );
 }
 
-mp.utils.user_data_set = user_data_set;
-mp.utils.user_data_del = user_data_del;
-mp.utils.user_data_get = user_data_get;
-mp.utils.user_data_observe = user_data_observe;
+mp.utils.custom_property_set = custom_property_set;
+mp.utils.custom_property_del = custom_property_del;
+mp.utils.custom_property_get = custom_property_get;
+mp.utils.custom_property_observe = custom_property_observe;
 
 // osd-ass
 var next_assid = 1;
