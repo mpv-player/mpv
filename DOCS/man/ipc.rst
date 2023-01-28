@@ -193,8 +193,8 @@ And this is the completion:
     {"request_id":123,"error":"success","data":null}
 
 By design, you will not get a confirmation that the command was started. If a
-command is long running, sending the message will lead to any reply until much
-later when the command finishes.
+command is long running, sending the message will not lead to any reply until
+much later when the command finishes.
 
 Some commands execute synchronously, but these will behave like asynchronous
 commands that finished execution immediately.
