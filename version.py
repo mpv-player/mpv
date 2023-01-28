@@ -6,15 +6,16 @@ import time
 
 from datetime import datetime,timezone
 from shutil import which
-from subprocess import check_output
+from subprocess import check_output, DEVNULL
 
 srcdir = os.path.dirname(os.path.abspath(sys.argv[0]))
 git_dir = os.path.join(srcdir, ".git")
 git = which('git')
 
 if git and os.path.exists(git_dir):
+    # stdin is set to DEVNULL to workaround waf preforking issues
     version = check_output([git, "-C", srcdir, "describe", "--always", "--tags",
-                            "--dirty"], encoding="UTF-8")
+                            "--dirty"], stdin=DEVNULL, encoding="UTF-8")
     version = version[1:].strip()
 else:
     version_path = os.path.join(srcdir, "VERSION")
