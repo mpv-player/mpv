@@ -66,8 +66,7 @@ local history = {}
 local history_pos = 1
 local log_buffer = {}
 local key_bindings = {}
-local global_margin_top = 0
-local global_margin_bottom = 0
+local global_margins = { t = 0, b = 0 }
 
 local update_timer = nil
 update_timer = mp.add_periodic_timer(0.05, function()
@@ -79,19 +78,11 @@ update_timer = mp.add_periodic_timer(0.05, function()
 end)
 update_timer:kill()
 
-utils.shared_script_property_observe("osc-margins", function(_, val)
+mp.observe_property("user-data/osc/margins", "native", function(_, val)
     if val then
-        -- formatted as "%f,%f,%f,%f" with left, right, top, bottom, each
-        -- value being the border size as ratio of the window size (0.0-1.0)
-        local vals = {}
-        for v in string.gmatch(val, "[^,]+") do
-            vals[#vals + 1] = tonumber(v)
-        end
-        global_margin_top = vals[3] -- top
-        global_margin_bottom = vals[4] -- bottom
+        global_margins = val
     else
-        global_margin_top = 0
-        global_margin_bottom = 0
+        global_margins = { t = 0, b = 0 }
     end
     update()
 end)
@@ -148,7 +139,7 @@ function update()
         return
     end
 
-    local coordinate_top = math.floor(global_margin_top * screeny + 0.5)
+    local coordinate_top = math.floor(global_margins.t * screeny + 0.5)
     local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
                                  screenx .. ',' .. screeny
     local ass = assdraw.ass_new()
@@ -177,7 +168,7 @@ function update()
     -- messages.
     local log_ass = ''
     local log_messages = #log_buffer
-    local screeny_factor = (1 - global_margin_top - global_margin_bottom)
+    local screeny_factor = (1 - global_margins.t - global_margins.b)
     -- subtract 1.5 to account for the input line
     local log_max_lines = screeny * screeny_factor / opts.font_size - 1.5
     log_max_lines = math.ceil(log_max_lines)
@@ -190,7 +181,7 @@ function update()
 
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2 - global_margin_bottom * screeny)
+    ass:pos(2, screeny - 2 - global_margins.b * screeny)
     ass:append(log_ass .. '\\N')
     ass:append(style .. '> ' .. before_cur)
     ass:append(cglyph)
@@ -200,7 +191,7 @@ function update()
     -- cursor appear in front of the text.
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2 - global_margin_bottom * screeny)
+    ass:pos(2, screeny - 2 - global_margins.b * screeny)
     ass:append(style .. '{\\alpha&HFF&}> ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
