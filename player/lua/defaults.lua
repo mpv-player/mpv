@@ -840,7 +840,7 @@ function mp_utils.custom_property_get(path)
 end
 
 function mp_utils.custom_property_del(path)
-    return mp.del_property_native("custom-properties/" .. path)
+    return mp.del_property("custom-properties/" .. path)
 end
 
 -- cb(name, value) on change and on init

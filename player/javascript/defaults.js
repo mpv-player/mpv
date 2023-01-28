@@ -205,7 +205,7 @@ function custom_property_set(path, val) {
 }
 
 function custom_property_del(path) {
-    return mp.del_property_native("custom-properties/" + path);
+    return mp.del_property("custom-properties/" + path);
 }
 
 function custom_property_get(path) {
