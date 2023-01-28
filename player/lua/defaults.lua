@@ -840,7 +840,7 @@ function mp_utils.user_data_get(path)
 end
 
 function mp_utils.user_data_del(path)
-    return mp.del_property_native("user-data/" .. path)
+    return mp.del_property("user-data/" .. path)
 end
 
 -- cb(name, value) on change and on init

@@ -205,7 +205,7 @@ function user_data_set(path, val) {
 }
 
 function user_data_del(path) {
-    return mp.del_property_native("user-data/" + path);
+    return mp.del_property("user-data/" + path);
 }
 
 function user_data_get(path) {
