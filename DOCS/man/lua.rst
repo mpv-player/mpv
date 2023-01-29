@@ -824,34 +824,6 @@ strictly part of the guaranteed API.
     This is a legacy wrapper around calling the ``run`` command with
     ``mp.commandv`` and other functions.
 
-``utils.custom_property_set(path, val)``
-    Sets a custom-property value.
-
-    ``path`` is a path within the ``custom-properties`` property.
-
-    This is a convenience wrapper around ``mp.set_property_native``.
-
-``utils.custom_property_get(path)``
-    Gets a custom-property value.
-
-    ``path`` is a path within the ``custom-properties`` property.
-
-    This is a convenience wrapper around ``mp.get_property_native``.
-
-``utils.custom_property_del(path)``
-    Deletes a custom-property value.
-
-    ``path`` is a path within the ``custom-properties`` property.
-
-    This is a convenience wrapper around ``mp.del_property_native``.
-
-``utils.custom_property_observe(path, type, fn)``
-    Observes a custom-property value.
-
-    ``path`` is a path within the ``custom-properties`` property.
-
-    See ``mp.observe_property`` for further details.
-
 ``utils.getpid()``
     Returns the process ID of the running mpv process. This can be used to identify
     the calling mpv when launching (detached) subprocesses.
