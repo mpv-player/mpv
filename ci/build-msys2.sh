@@ -22,7 +22,7 @@ if [ "$1" = "meson" ]; then
       -D uchardet=enabled        \
       -D vapoursynth=enabled     \
       -D vulkan=enabled
-    meson compile -C build_meson --verbose
+    meson compile -C build_meson
     cp ./build_meson/generated/mpv.com ./build_meson
     meson test -C build_meson
     ./build_meson/mpv.com --no-config -v --unittest=all-simple
@@ -51,6 +51,6 @@ if [ "$1" = "waf" ]; then
       --enable-vapoursynth     \
       --lua=luajit             \
       --enable-vulkan
-    ./waf build --verbose
+    ./waf build
     ./build/mpv.com -v --no-config -v --unittest=all-simple
 fi
