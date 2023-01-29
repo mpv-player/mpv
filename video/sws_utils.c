@@ -127,11 +127,13 @@ bool mp_sws_supported_format(int imgfmt)
         && sws_isSupportedOutput(av_format);
 }
 
+#if HAVE_ZIMG
 static bool allow_zimg(struct mp_sws_context *ctx)
 {
     return ctx->force_scaler == MP_SWS_ZIMG ||
            (ctx->force_scaler == MP_SWS_AUTO && ctx->allow_zimg);
 }
+#endif
 
 static bool allow_sws(struct mp_sws_context *ctx)
 {
@@ -337,7 +339,10 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     if (sws_init_context(ctx->sws, ctx->src_filter, ctx->dst_filter) < 0)
         return -1;
 
+#if HAVE_ZIMG
 success:
+#endif
+
     ctx->force_reload = false;
     *ctx->cached = *ctx;
     return 1;
