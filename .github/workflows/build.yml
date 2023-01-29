@@ -38,7 +38,7 @@ jobs:
 
       - name: Build with meson
         run: |
-          ./ci/build-mingw64.sh meson
+          ./ci/build-mingw64.sh meson pack
         env:
           TARGET: ${{ matrix.target }}
 
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build with waf
         run: |
-          ./ci/build-mingw64.sh waf pack
+          ./ci/build-mingw64.sh waf
         env:
           TARGET: ${{ matrix.target }}
 
