@@ -203,14 +203,14 @@ if [ "$1" = "meson" ]; then
         -D{libmpv,tests}=true -Dlua=luajit \
         -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
 
-    ninja -C build --verbose
+    ninja -C build
     meson test -C build
 elif [ "$1" = "waf" ]; then
     PKG_CONFIG=pkg-config ./waf configure \
         --enable-libmpv-shared --lua=luajit \
         --enable-{shaderc,spirv-cross,d3d11,libplacebo,tests}
 
-    ./waf build --verbose
+    ./waf build
 fi
 
 if [ "$2" = pack ]; then
