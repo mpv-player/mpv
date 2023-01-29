@@ -32,6 +32,7 @@ if [[ $1 = "waf" ]]; then
 
     PKG_CONFIG_PATH="${FFMPEG_SYSROOT}/lib/pkgconfig/" CC="${CC}" CXX="${CXX}" python3 \
       ./waf configure \
+        --out=build_waf \
         --variant="${MPV_VARIANT}" \
         --prefix="${MPV_INSTALL_PREFIX}" \
         --enable-{gl,iconv,lcms2,libmpv-shared,lua,jpeg,plain-gl,zlib} \
@@ -41,5 +42,5 @@ if [[ $1 = "waf" ]]; then
     python3 ./waf build --variant="${MPV_VARIANT}" -j4
 
     python3 ./waf install --variant="${MPV_VARIANT}"
-    ./build/mpv
+    ${MPV_INSTALL_PREFIX}/bin/mpv
 fi
