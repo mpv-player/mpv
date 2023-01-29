@@ -531,10 +531,10 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
             pl_params.blend_params = &blend_params;
             blend_params = (struct pl_blend_params) {
                 // Same enum order as ra_blend
-                .src_rgb = (enum ra_blend) params->blend_src_rgb,
-                .dst_rgb = (enum ra_blend) params->blend_dst_rgb,
-                .src_alpha = (enum ra_blend) params->blend_src_alpha,
-                .dst_alpha = (enum ra_blend) params->blend_dst_alpha,
+                .src_rgb = (enum pl_blend_mode) params->blend_src_rgb,
+                .dst_rgb = (enum pl_blend_mode) params->blend_dst_rgb,
+                .src_alpha = (enum pl_blend_mode) params->blend_src_alpha,
+                .dst_alpha = (enum pl_blend_mode) params->blend_dst_alpha,
             };
         }
 
