@@ -182,18 +182,8 @@ fail:
 static void uninit(struct ao *ao)
 {
     struct priv *ac = ao->priv;
-    struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
 
     if (!ac->shutdown) {
-        double outpts = ac->expected_next_pts;
-
-        pthread_mutex_lock(&ectx->lock);
-        if (!ac->enc->options->rawts)
-            outpts += ectx->discontinuity_pts_offset;
-        pthread_mutex_unlock(&ectx->lock);
-
-        outpts += encoder_get_offset(ac->enc);
-
         if (!write_frame(ao, MP_EOF_FRAME))
             MP_WARN(ao, "could not flush last frame\n");
         encoder_encode(ac->enc, NULL);
