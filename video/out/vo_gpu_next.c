@@ -1859,7 +1859,7 @@ static void update_render_options(struct vo *vo)
 #else
         MP_ERR(p, "Error diffusion dithering is not implemented.\n");
 #endif
-        // fall through
+        MP_FALLTHROUGH;
     case DITHER_ORDERED:
     case DITHER_FRUIT:
         p->params.dither_params = &p->dither;

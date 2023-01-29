@@ -261,7 +261,7 @@ bool ra_gl_ctx_submit_frame(struct ra_swapchain *sw, const struct vo_frame *fram
     case FLUSH_AUTO:
         if (frame->display_synced)
             break;
-        // fall through
+        MP_FALLTHROUGH;
     case FLUSH_YES:
         gl->Flush();
     }

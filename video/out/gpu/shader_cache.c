@@ -699,7 +699,7 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
         case RA_VARTYPE_INT:
         case RA_VARTYPE_FLOAT:
             assert(sc->ra->caps & RA_CAP_GLOBAL_UNIFORM);
-            // fall through
+            MP_FALLTHROUGH;
         case RA_VARTYPE_TEX:
             // Vulkan requires explicitly assigning the bindings in the shader
             // source. For OpenGL it's optional, but requires higher GL version
