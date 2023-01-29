@@ -6,9 +6,11 @@
 #ifdef __GNUC__
 #define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format(printf, a1, a2)))
 #define MP_NORETURN __attribute__((noreturn))
+#define MP_FALLTHROUGH __attribute__((fallthrough))
 #else
 #define PRINTF_ATTRIBUTE(a1, a2)
 #define MP_NORETURN
+#define MP_FALLTHROUGH do {} while (0)
 #endif
 
 // Broken crap with __USE_MINGW_ANSI_STDIO
