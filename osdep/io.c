@@ -683,7 +683,7 @@ char *mp_getenv(const char *name)
     return NULL;
 }
 
-char ***mp_penviron()
+char ***mp_penviron(void)
 {
     mp_getenv("");  // ensure init
     return &utf8_environ;  // `environ' should be an l-value
