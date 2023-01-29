@@ -2425,10 +2425,6 @@ static void execute_trackswitch(struct demux_internal *in)
 {
     in->tracks_switched = false;
 
-    bool any_selected = false;
-    for (int n = 0; n < in->num_streams; n++)
-        any_selected |= in->streams[n]->ds->selected;
-
     pthread_mutex_unlock(&in->lock);
 
     if (in->d_thread->desc->switched_tracks)
