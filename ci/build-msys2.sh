@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 if [ "$1" = "meson" ]; then
-    meson setup build_meson      \
+    meson setup build            \
       -D cdda=enabled            \
       -D d3d-hwaccel=enabled     \
       -D d3d11=enabled           \
@@ -22,15 +22,16 @@ if [ "$1" = "meson" ]; then
       -D uchardet=enabled        \
       -D vapoursynth=enabled     \
       -D vulkan=enabled
-    meson compile -C build_meson
-    cp ./build_meson/generated/mpv.com ./build_meson
-    meson test -C build_meson
-    ./build_meson/mpv.com --no-config -v --unittest=all-simple
+    meson compile -C build
+    cp ./build/generated/mpv.com ./build
+    meson test -C build
+    ./build/mpv.com --no-config -v --unittest=all-simple
 fi
 
 if [ "$1" = "waf" ]; then
     ./bootstrap.py
     ./waf configure            \
+      --out=build_waf          \
       --enable-cdda            \
       --enable-d3d-hwaccel     \
       --enable-d3d11           \
@@ -52,5 +53,5 @@ if [ "$1" = "waf" ]; then
       --lua=luajit             \
       --enable-vulkan
     ./waf build
-    ./build/mpv.com -v --no-config -v --unittest=all-simple
+    ./build_waf/mpv.com -v --no-config -v --unittest=all-simple
 fi
