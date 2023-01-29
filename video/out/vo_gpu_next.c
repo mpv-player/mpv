@@ -1557,7 +1557,7 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
     return hook;
 }
 
-#if PL_API_VER >= 222
+#if PL_API_VER >= 222 && defined(PL_HAVE_LCMS)
 
 static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
 {
