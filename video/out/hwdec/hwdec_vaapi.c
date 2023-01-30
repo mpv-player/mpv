@@ -257,7 +257,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     struct dmabuf_interop_priv *p = mapper->priv;
     VAStatus status;
     VADisplay *display = p_owner->display;
-    VADRMPRIMESurfaceDescriptor desc;
+    VADRMPRIMESurfaceDescriptor desc = {0};
 
     status = vaExportSurfaceHandle(display, va_surface_id(mapper->src),
                                    VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
