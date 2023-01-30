@@ -236,7 +236,8 @@ static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
              (unsigned) wf->nSamplesPerSec);
     return buf;
 }
-#define waveformat_to_str(wf) waveformat_to_str_buf((char[64]){0}, 64, (wf))
+#define waveformat_to_str_(wf, sz) waveformat_to_str_buf((char[sz]){0}, sz, (wf))
+#define waveformat_to_str(wf) waveformat_to_str_(wf, MP_NUM_CHANNELS * 4 + 42)
 
 static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
 {
