@@ -3774,6 +3774,16 @@ static void dup_node(void *ta_parent, struct mpv_node *node)
         }
         break;
     }
+    case MPV_FORMAT_BYTE_ARRAY: {
+        struct mpv_byte_array *old = node->u.ba;
+        struct mpv_byte_array *new = talloc_zero(ta_parent, struct mpv_byte_array);
+        node->u.ba = new;
+        if (old->size > 0) {
+            *new = *old;
+            new->data = talloc_memdup(new, old->data, old->size);
+        }
+        break;
+    }
     case MPV_FORMAT_NONE:
     case MPV_FORMAT_FLAG:
     case MPV_FORMAT_INT64:

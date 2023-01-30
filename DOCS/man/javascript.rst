@@ -95,6 +95,8 @@ success, ``error`` is empty string on success.
 
 ``mp.abort_async_command(id)``
 
+``mp.del_property(name)`` (LE)
+
 ``mp.get_property(name [,def])`` (LE)
 
 ``mp.get_property_osd(name [,def])`` (LE)

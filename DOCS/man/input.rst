@@ -334,6 +334,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``set <name> <value>``
     Set the given property or option to the given value.
 
+``del <name>``
+    Delete the given property. Most properties cannot be deleted.
+
 ``add <name> [<value>]``
     Add the given value to the property or option. On overflow or underflow,
     clamp the property to the maximum. If ``<value>`` is omitted, assume ``1``.
@@ -3252,6 +3255,24 @@ Property list
 
     (There is no way to ensure synchronization if two scripts try to update the
     same key at the same time.)
+
+``user-data`` (RW)
+    This is a recursive key/value map of arbitrary nodes shared between clients for
+    general use (i.e. scripts, IPC clients, host applications, etc).
+    The player itself does not use any data in it (although some builtin scripts may).
+    The property is not preserved across player restarts.
+
+    This is a more powerful replacement for ``shared-script-properties``.
+
+    Sub-paths can be accessed directly; e.g. ``user-data/my-script/state/a`` can be
+    read, written, or observed.
+
+    The top-level object itself cannot be written directly; write to sub-paths instead.
+
+    Converting this property or its sub-properties to strings will give a JSON
+    representation. If converting a leaf-level object (i.e. not a map or array)
+    and not using raw mode, the underlying content will be given (e.g. strings will be
+    printed directly, rather than quoted and JSON-escaped).
 
 ``working-directory``
     The working directory of the mpv process. Can be useful for JSON IPC users,

@@ -131,7 +131,8 @@ static const struct mp_keymap keymap[] = {
 #define OPT_BASE_STRUCT struct wayland_opts
 const struct m_sub_options wayland_conf = {
     .opts = (const struct m_option[]) {
-        {"wayland-configure-bounds", OPT_FLAG(configure_bounds)},
+        {"wayland-configure-bounds", OPT_CHOICE(configure_bounds,
+            {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"wayland-disable-vsync", OPT_FLAG(disable_vsync)},
         {"wayland-edge-pixels-pointer", OPT_INT(edge_pixels_pointer),
             M_RANGE(0, INT_MAX)},
@@ -141,7 +142,7 @@ const struct m_sub_options wayland_conf = {
     },
     .size = sizeof(struct wayland_opts),
     .defaults = &(struct wayland_opts) {
-        .configure_bounds = true,
+        .configure_bounds = -1,
         .disable_vsync = false,
         .edge_pixels_pointer = 10,
         .edge_pixels_touch = 32,
@@ -186,7 +187,7 @@ static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
 static void remove_output(struct vo_wayland_output *out);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale);
-static void set_geometry(struct vo_wayland_state *wl);
+static void set_geometry(struct vo_wayland_state *wl, bool resize);
 static void set_surface_scaling(struct vo_wayland_state *wl);
 static void window_move(struct vo_wayland_state *wl, uint32_t serial);
 
@@ -692,7 +693,7 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
     if (wl->current_output && wl->current_output->output == wl_output) {
         set_surface_scaling(wl);
         spawn_cursor(wl);
-        set_geometry(wl);
+        set_geometry(wl, false);
         wl->pending_vo_events |= VO_EVENT_DPI;
         wl->pending_vo_events |= VO_EVENT_RESIZE;
     }
@@ -766,7 +767,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     }
 
     if (!mp_rect_equals(&old_output_geometry, &wl->current_output->geometry)) {
-        set_geometry(wl);
+        set_geometry(wl, false);
         force_resize = true;
     }
 
@@ -985,7 +986,7 @@ static void preferred_scale(void *data,
     wl->pending_vo_events |= VO_EVENT_DPI;
     if (wl->current_output) {
         rescale_geometry(wl, old_scale);
-        set_geometry(wl);
+        set_geometry(wl, false);
         wl->pending_vo_events |= VO_EVENT_RESIZE;
     }
 }
@@ -1648,10 +1649,11 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
     return VO_TRUE;
 }
 
-static void set_geometry(struct vo_wayland_state *wl)
+static void set_geometry(struct vo_wayland_state *wl, bool resize)
 {
     struct vo *vo = wl->vo;
-    assert(wl->current_output);
+    if (!wl->current_output)
+        return;
 
     struct vo_win_geometry geo;
     struct mp_rect screenrc = wl->current_output->geometry;
@@ -1663,6 +1665,12 @@ static void set_geometry(struct vo_wayland_state *wl)
     wl->reduced_height = vo->dheight / wl->gcd;
 
     wl->window_size = (struct mp_rect){0, 0, vo->dwidth, vo->dheight};
+
+    if (resize) {
+        if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+            wl->geometry = wl->window_size;
+        wl->pending_vo_events |= VO_EVENT_RESIZE;
+    }
 }
 
 static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
@@ -1691,11 +1699,7 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
     // dmabuf_wayland is always wl->scaling = 1
     bool dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
     double old_scale = wl->scaling;
-    if (wl->vo_opts->hidpi_window_scale && !dmabuf_wayland) {
-        wl->scaling = wl->current_output->scale;
-    } else {
-        wl->scaling = 1;
-    }
+    wl->scaling = !dmabuf_wayland ? wl->current_output->scale : 1;
 
     rescale_geometry(wl, old_scale);
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
@@ -1703,6 +1707,15 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
 
 static void set_window_bounds(struct vo_wayland_state *wl)
 {
+    // If the user has set geometry/autofit and the option is auto,
+    // don't use these.
+    if (wl->opts->configure_bounds == -1 && (wl->vo_opts->geometry.wh_valid ||
+        wl->vo_opts->autofit.wh_valid || wl->vo_opts->autofit_larger.wh_valid ||
+        wl->vo_opts->autofit_smaller.wh_valid))
+    {
+        return;
+    }
+
     if (wl->bounded_width && wl->bounded_width < wl->window_size.x1)
         wl->window_size.x1 = wl->bounded_width;
     if (wl->bounded_height && wl->bounded_height < wl->window_size.y1)
@@ -1914,7 +1927,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             if (opt == &opts->fullscreen)
                 toggle_fullscreen(wl);
             if (opt == &opts->hidpi_window_scale)
-                set_surface_scaling(wl);
+                set_geometry(wl, true);
             if (opt == &opts->window_maximized)
                 toggle_maximized(wl);
             if (opt == &opts->window_minimized)
@@ -1922,11 +1935,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             if (opt == &opts->geometry || opt == &opts->autofit ||
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
-                if (wl->current_output) {
-                    if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
-                        wl->geometry = wl->window_size;
-                    wl->pending_vo_events |= VO_EVENT_RESIZE;
-                }
+                set_geometry(wl, true);
             }
         }
         return VO_TRUE;
@@ -2186,7 +2195,7 @@ bool vo_wayland_reconfig(struct vo *vo)
         wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
-    set_geometry(wl);
+    set_geometry(wl, false);
 
     if (wl->opts->configure_bounds)
         set_window_bounds(wl);

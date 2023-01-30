@@ -86,6 +86,11 @@ enum mp_property_action {
     // Pass down an action to a sub-property.
     //  arg: struct m_property_action_arg*
     M_PROPERTY_KEY_ACTION,
+
+    // Delete a value.
+    // Most properties do not implement this.
+    //  arg: (ignored)
+    M_PROPERTY_DELETE,
 };
 
 // Argument for M_PROPERTY_SWITCH

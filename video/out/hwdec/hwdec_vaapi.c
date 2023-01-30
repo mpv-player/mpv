@@ -245,13 +245,19 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     return 0;
 }
 
+static void close_file_descriptors(VADRMPRIMESurfaceDescriptor desc)
+{
+    for (int i = 0; i < desc.num_objects; i++)
+        close(desc.objects[i].fd);
+}
+
 static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
     struct dmabuf_interop_priv *p = mapper->priv;
     VAStatus status;
     VADisplay *display = p_owner->display;
-    VADRMPRIMESurfaceDescriptor desc;
+    VADRMPRIMESurfaceDescriptor desc = {0};
 
     status = vaExportSurfaceHandle(display, va_surface_id(mapper->src),
                                    VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
@@ -261,6 +267,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     if (!CHECK_VA_STATUS_LEVEL(mapper, "vaExportSurfaceHandle()",
                                p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR))
     {
+        close_file_descriptors(desc);
         goto err;
     }
     vaSyncSurface(display, va_surface_id(mapper->src));
