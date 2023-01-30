@@ -271,7 +271,7 @@ test_flags = ['-Werror=implicit-function-declaration',
 flags += cc.get_supported_arguments(test_flags)
 
 if cc.has_multi_arguments('-Wformat', '-Werror=format-security')
-    flags += '-Werror=format-security'
+    flags += ['-Wformat', '-Werror=format-security']
 endif
 
 if cc.get_id() == 'gcc'
