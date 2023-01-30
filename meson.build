@@ -888,7 +888,7 @@ direct3d_opt = get_option('direct3d').require(
     get_option('gpl') and features['win32-desktop'],
     error_message: 'the build is not GPL or this is not a win32 desktop!',
 )
-direct3d = cc.check_header('d3d9.h', required: direct3d_opt)
+direct3d = cc.has_header('d3d9.h', required: direct3d_opt)
 features += {'direct3d': direct3d}
 if features['direct3d']
     sources += files('video/out/vo_direct3d.c')
@@ -989,7 +989,7 @@ wayland = {
              dependency('wayland-cursor', version: '>= 1.15.0', required: get_option('wayland')),
              dependency('wayland-protocols', version: '>= 1.15', required: get_option('wayland')),
              dependency('xkbcommon', version: '>= 0.3.0', required: get_option('wayland'))],
-    'header': cc.check_header('linux/input-event-codes.h', required: get_option('wayland')),
+    'header': cc.has_header('linux/input-event-codes.h', required: get_option('wayland')),
     'scanner': find_program('wayland-scanner', required: get_option('wayland')),
 }
 wayland_deps = true
