@@ -640,7 +640,11 @@ static HRESULT create_swapchain_1_2(ID3D11Device *dev, IDXGIFactory2 *factory,
             desc.BufferUsage &= ~DXGI_USAGE_UNORDERED_ACCESS;
         }
 
-        desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+        if (IsWindows10OrGreater()) {
+            desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        } else {
+            desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+        }
         desc.BufferCount = opts->length;
     } else {
         desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -931,7 +935,9 @@ bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
 
     DXGI_SWAP_CHAIN_DESC scd = {0};
     IDXGISwapChain_GetDesc(swapchain, &scd);
-    if (scd.SwapEffect == DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL) {
+    if (scd.SwapEffect == DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL ||
+        scd.SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD)
+    {
         mp_verbose(log, "Using flip-model presentation\n");
     } else {
         mp_verbose(log, "Using bitblt-model presentation\n");
