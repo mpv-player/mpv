@@ -540,10 +540,12 @@ features += {'bsd-fstatfs': cc.has_function('fstatfs', prefix: '#include <sys/mo
 
 features += {'linux-fstatfs': cc.has_function('fstatfs', prefix: '#include <sys/vfs.h>')}
 
-fragments = join_paths(source_root, 'waftools', 'fragments')
-
+vector_attribute = '''int main() {
+float v __attribute__((vector_size(32)));
+}
+'''
 vector = get_option('vector').require(
-    cc.compiles(files(join_paths(fragments, 'vector.c')), name: 'vector check'),
+    cc.compiles(vector_attribute, name: 'vector check'),
     error_message: 'the compiler does not support gcc vectors!',
 )
 features += {'vector': vector.allowed()}
