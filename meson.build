@@ -1544,8 +1544,8 @@ if swift.allowed()
 endif
 
 macos_touchbar = get_option('macos-touchbar').require(
-    features['cocoa'] and cc.compiles(files(join_paths(fragments, 'touchbar.m')), name: 'macos-touchbar check'),
-    error_message: 'Either cocoa could not be found or the macos-touchbar check failed!',
+    features['cocoa'] and cc.has_header('AppKit/NSTouchBar.h'),
+    error_message: 'Either cocoa could not be found or AppKit/NSTouchBar.h could not be found!',
 )
 features += {'macos-touchbar': macos_touchbar.allowed()}
 if features['macos-touchbar']
