@@ -521,26 +521,26 @@ features += {'vt.h': cc.has_header_symbol('sys/vt.h', 'VT_GETMODE')}
 
 features += {'consio.h': not features['vt.h'] and cc.has_header_symbol('sys/consio.h', 'VT_GETMODE')}
 
-fragments = join_paths(source_root, 'waftools', 'fragments')
+# macOS's pthread_setname_np is a special snowflake and differs from literally every other platform.
+features += {'osx-thread-name': darwin}
 
-features += {'glibc-thread-name': cc.compiles(files(join_paths(fragments, 'glibc_thread_name.c')),
-                                              name: 'glibc-thread-name check') and posix}
-
-features += {'osx-thread-name': false}
-if not features['glibc-thread-name']
-    features += {'osx-thread-name': cc.compiles(files(join_paths(fragments, 'osx_thread_name.c')),
-                                                name: 'osx-thread-name check')}
+features += {'glibc-thread-name': false}
+if not features['osx-thread-name']
+    features += {'glibc-thread-name': posix and cc.has_function('pthread_setname_np', args: '-D_GNU_SOURCE',
+                                                                dependencies: pthreads, prefix: '#include <pthread.h>')}
 endif
 
 features += {'bsd-thread-name': false}
 if not features['osx-thread-name'] and not features['glibc-thread-name']
-    features += {'bsd-thread-name': cc.compiles(files(join_paths(fragments, 'bsd_thread_name.c')),
-                                                name: 'bsd-thread-name check')}
+    features += {'bsd-thread-name': posix and cc.has_function('pthread_set_name_np', dependencies: pthreads,
+                                                              prefix: '#include <pthread.h>\n#include <pthread_np.h>')}
 endif
 
 features += {'bsd-fstatfs': cc.has_function('fstatfs', prefix: '#include <sys/mount.h>\n#include <sys/param.h>')}
 
 features += {'linux-fstatfs': cc.has_function('fstatfs', prefix: '#include <sys/vfs.h>')}
+
+fragments = join_paths(source_root, 'waftools', 'fragments')
 
 vector = get_option('vector').require(
     cc.compiles(files(join_paths(fragments, 'vector.c')), name: 'vector check'),
