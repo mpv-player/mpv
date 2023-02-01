@@ -549,13 +549,13 @@ static int init(struct ao *ao)
 
     pw_stream_add_listener(p->stream, &p->stream_listener, &stream_events, ao);
 
+    enum pw_stream_flags flags = PW_STREAM_FLAG_AUTOCONNECT |
+                                 PW_STREAM_FLAG_INACTIVE |
+                                 PW_STREAM_FLAG_MAP_BUFFERS |
+                                 PW_STREAM_FLAG_RT_PROCESS;
+
     if (pw_stream_connect(p->stream,
-                    PW_DIRECTION_OUTPUT, PW_ID_ANY,
-                    PW_STREAM_FLAG_AUTOCONNECT |
-                    PW_STREAM_FLAG_INACTIVE |
-                    PW_STREAM_FLAG_MAP_BUFFERS |
-                    PW_STREAM_FLAG_RT_PROCESS,
-                    params, 1) < 0) {
+                    PW_DIRECTION_OUTPUT, PW_ID_ANY, flags, params, 1) < 0) {
         pw_thread_loop_unlock(p->loop);
         goto error;
     }
