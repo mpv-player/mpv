@@ -1846,10 +1846,10 @@ Audio
     Enable exclusive output mode. In this mode, the system is usually locked
     out, and only mpv will be able to output audio.
 
-    This only works for some audio outputs, such as ``wasapi`` and
-    ``coreaudio``. Other audio outputs silently ignore this options. They either
-    have no concept of exclusive mode, or the mpv side of the implementation is
-    missing.
+    This only works for some audio outputs, such as ``wasapi``, ``coreaudio``
+    and ``pipewire``. Other audio outputs silently ignore this option.
+    They either have no concept of exclusive mode, or the mpv side of the
+    implementation is missing.
 
 ``--audio-fallback-to-null=<yes|no>``
     If no audio device can be opened, behave as if ``--ao=null`` was given. This
