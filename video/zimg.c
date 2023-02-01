@@ -431,7 +431,10 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     zfmt->matrix_coefficients = mp_to_z_matrix(fmt.color.space);
     zfmt->transfer_characteristics = mp_to_z_trc(fmt.color.gamma);
-    zfmt->color_primaries = mp_to_z_prim(fmt.color.primaries);
+    // For MP_CSP_XYZ only valid primaries are defined in ST 428-1
+    zfmt->color_primaries = fmt.color.space == MP_CSP_XYZ
+                                ? ZIMG_PRIMARIES_ST428
+                                : mp_to_z_prim(fmt.color.primaries);
     zfmt->chroma_location = mp_to_z_chroma(fmt.chroma_location);
 
     if (ctx && ctx->opts.fast) {
