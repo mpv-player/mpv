@@ -179,9 +179,9 @@ static zimg_color_primaries_e mp_to_z_prim(enum mp_csp_prim prim)
     case MP_CSP_PRIM_BT_709:    return ZIMG_PRIMARIES_BT709;
     case MP_CSP_PRIM_BT_2020:   return ZIMG_PRIMARIES_BT2020;
     case MP_CSP_PRIM_BT_470M:   return ZIMG_PRIMARIES_BT470_M;
-    case MP_CSP_PRIM_CIE_1931:  return ZIMG_PRIMARIES_ST428;
     case MP_CSP_PRIM_DCI_P3:    return ZIMG_PRIMARIES_ST431_2;
     case MP_CSP_PRIM_DISPLAY_P3:return ZIMG_PRIMARIES_ST432_1;
+    case MP_CSP_PRIM_CIE_1931:
     case MP_CSP_PRIM_APPLE:     // ?
     case MP_CSP_PRIM_ADOBE:
     case MP_CSP_PRIM_PRO_PHOTO:
