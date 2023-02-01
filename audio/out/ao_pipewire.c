@@ -554,6 +554,9 @@ static int init(struct ao *ao)
                                  PW_STREAM_FLAG_MAP_BUFFERS |
                                  PW_STREAM_FLAG_RT_PROCESS;
 
+    if (ao->init_flags & AO_INIT_EXCLUSIVE)
+        flags |= PW_STREAM_FLAG_EXCLUSIVE;
+
     if (pw_stream_connect(p->stream,
                     PW_DIRECTION_OUTPUT, PW_ID_ANY, flags, params, 1) < 0) {
         pw_thread_loop_unlock(p->loop);
