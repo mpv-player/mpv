@@ -143,7 +143,19 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
 
     wformat->SubFormat                   = *format_to_subtype(format->mp_format);
     wformat->Samples.wValidBitsPerSample = format->used_msb;
-    wformat->dwChannelMask               = mp_chmap_to_waveext(channels);
+
+    uint64_t chans = mp_chmap_to_waveext(channels);
+    wformat->dwChannelMask = chans;
+
+    if (wformat->Format.nChannels > 8 || wformat->dwChannelMask != chans) {
+        // IAudioClient::IsFormatSupported tend to fallback to stereo for closest
+        // format match when there are more channels. Remix to standard layout.
+        // Also if input channel mask has channels outside 32-bits override it
+        // and hope for the best...
+        wformat->dwChannelMask = KSAUDIO_SPEAKER_7POINT1_SURROUND;
+        wformat->Format.nChannels = 8;
+    }
+
     update_waveformat_datarate(wformat);
 }
 
