@@ -55,6 +55,11 @@ enum mp_speaker_id {
     MP_SPEAKER_ID_SDL,          // SURROUND_DIRECT_LEFT
     MP_SPEAKER_ID_SDR,          // SURROUND_DIRECT_RIGHT
     MP_SPEAKER_ID_LFE2,         // LOW_FREQUENCY_2
+    MP_SPEAKER_ID_TSL,          // TOP_SIDE_LEFT
+    MP_SPEAKER_ID_TSR,          // TOP_SIDE_RIGHT,
+    MP_SPEAKER_ID_BFC,          // BOTTOM_FRONT_CENTER
+    MP_SPEAKER_ID_BFL,          // BOTTOM_FRONT_LEFT
+    MP_SPEAKER_ID_BFR,          // BOTTOM_FRONT_RIGHT
 
     // Speaker IDs >= 64 are not representable in WAVEFORMATEXTENSIBLE or libav*.
 
