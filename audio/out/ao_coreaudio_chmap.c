@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <Availability.h>
+
 #include "common/common.h"
 
 #include "ao_coreaudio_utils.h"
@@ -47,6 +49,13 @@ static const int speaker_map[][2] = {
     { kAudioChannelLabel_LeftWide,             MP_SPEAKER_ID_WL   },
     { kAudioChannelLabel_RightWide,            MP_SPEAKER_ID_WR   },
     { kAudioChannelLabel_LFE2,                 MP_SPEAKER_ID_LFE2 },
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 130000
+    { kAudioChannelLabel_LeftTopSurround,      MP_SPEAKER_ID_TSL  },
+    { kAudioChannelLabel_RightTopSurround,     MP_SPEAKER_ID_TSR  },
+    { kAudioChannelLabel_CenterBottom,         MP_SPEAKER_ID_BFC  },
+    { kAudioChannelLabel_LeftBottom,           MP_SPEAKER_ID_BFL  },
+    { kAudioChannelLabel_RightBottom,          MP_SPEAKER_ID_BFR  },
+#endif
 
     { kAudioChannelLabel_HeadphonesLeft,       MP_SPEAKER_ID_DL   },
     { kAudioChannelLabel_HeadphonesRight,      MP_SPEAKER_ID_DR   },

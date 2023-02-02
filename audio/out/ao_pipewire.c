@@ -133,6 +133,11 @@ static enum spa_audio_channel mp_speaker_id_to_spa(struct ao *ao, enum mp_speake
     case MP_SPEAKER_ID_SDL:  return SPA_AUDIO_CHANNEL_SL;
     case MP_SPEAKER_ID_SDR:  return SPA_AUDIO_CHANNEL_SL;
     case MP_SPEAKER_ID_LFE2: return SPA_AUDIO_CHANNEL_LFE2;
+    case MP_SPEAKER_ID_TSL:  return SPA_AUDIO_CHANNEL_TSL;
+    case MP_SPEAKER_ID_TSR:  return SPA_AUDIO_CHANNEL_TSR;
+    case MP_SPEAKER_ID_BFC:  return SPA_AUDIO_CHANNEL_BC;
+    case MP_SPEAKER_ID_BFL:  return SPA_AUDIO_CHANNEL_BLC;
+    case MP_SPEAKER_ID_BFR:  return SPA_AUDIO_CHANNEL_BRC;
     case MP_SPEAKER_ID_NA:   return SPA_AUDIO_CHANNEL_NA;
     default:
                              MP_WARN(ao, "Unhandled channel %d\n", mp_speaker_id);
