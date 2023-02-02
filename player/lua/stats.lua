@@ -737,7 +737,7 @@ local function add_video(s)
     local hdrpeak = r["sig-peak"] or 0
     local hdrinfo = ""
     if hdrpeak > 1 then
-        hdrinfo = " (HDR peak: " .. format("%.2f", hdrpeak) .. ")"
+        hdrinfo = " (HDR peak: " .. format("%.2f", hdrpeak * 203) .. " nits)"
     end
 
     append(s, r["gamma"], {prefix="Gamma:", suffix=hdrinfo})
