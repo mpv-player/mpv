@@ -55,12 +55,19 @@ static inline int pw_stream_get_time_n(struct pw_stream *stream, struct pw_time 
 }
 #endif
 
+enum init_state {
+    INIT_STATE_NONE,
+    INIT_STATE_SUCCESS,
+    INIT_STATE_ERROR,
+};
+
 struct priv {
     struct pw_thread_loop *loop;
     struct pw_stream *stream;
     struct pw_core *core;
     struct spa_hook stream_listener;
     struct spa_hook core_listener;
+    enum init_state init_state;
 
     bool muted;
     float volume;
@@ -194,6 +201,14 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
     uint8_t buffer[1024];
     struct spa_pod_builder b = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
 
+    /* We want to know when our node is linked.
+     * As there is no proper callback for this we use the Latency param for this
+     */
+    if (id == SPA_PARAM_Latency) {
+        p->init_state = INIT_STATE_SUCCESS;
+        pw_thread_loop_signal(p->loop, false);
+    }
+
     if (param == NULL || id != SPA_PARAM_Format)
         return;
 
@@ -218,11 +233,14 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
 static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_stream_state state, const char *error)
 {
     struct ao *ao = userdata;
+    struct priv *p = ao->priv;
     MP_DBG(ao, "Stream state changed: old_state=%s state=%s error=%s\n",
            pw_stream_state_as_string(old), pw_stream_state_as_string(state), error);
 
     if (state == PW_STREAM_STATE_ERROR) {
         MP_WARN(ao, "Stream in error state, trying to reload...\n");
+        p->init_state = INIT_STATE_ERROR;
+        pw_thread_loop_signal(p->loop, false);
         ao_request_reload(ao);
     }
 
@@ -485,6 +503,27 @@ error:
     return -1;
 }
 
+static void wait_for_init_done(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    struct timespec abstime;
+    int r;
+
+    r = pw_thread_loop_get_time(p->loop, &abstime, 50 * SPA_NSEC_PER_MSEC);
+    if (r < 0) {
+        MP_WARN(ao, "Could not get timeout for initialization: %s\n", spa_strerror(r));
+        return;
+    }
+
+    while (p->init_state == INIT_STATE_NONE) {
+        r = pw_thread_loop_timed_wait_full(p->loop, &abstime);
+        if (r < 0) {
+            MP_WARN(ao, "Could not wait for initialization: %s\n", spa_strerror(r));
+            return;
+        }
+    }
+}
+
 static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -563,7 +602,12 @@ static int init(struct ao *ao)
         goto error;
     }
 
+    wait_for_init_done(ao);
+
     pw_thread_loop_unlock(p->loop);
+
+    if (p->init_state == INIT_STATE_ERROR)
+        goto error;
 
     return 0;
 
@@ -808,6 +852,7 @@ const struct ao_driver audio_out_pipewire = {
     {
         .loop = NULL,
         .stream = NULL,
+        .init_state = INIT_STATE_NONE,
         .options.buffer_msec = 20,
     },
     .options_prefix = "pipewire",
