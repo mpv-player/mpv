@@ -689,7 +689,7 @@ static void hotplug_registry_global_cb(void *data, uint32_t id,
         return;
 
     pw_thread_loop_lock(priv->loop);
-    struct id_list *item = talloc_size(ao, sizeof(*item));
+    struct id_list *item = talloc(ao, struct id_list);
     item->id = id;
     spa_list_init(&item->node);
     spa_list_append(&priv->hotplug.sinks, &item->node);
