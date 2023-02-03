@@ -15,6 +15,9 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef MPLAYER_VIDEO_OUT_WLBUF_POOL_H
+#define MPLAYER_VIDEO_OUT_WLBUF_POOL_H
+
 #include "wayland_common.h"
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
 
@@ -24,6 +27,12 @@ typedef uintptr_t (*wlbuf_pool_key_provider)(struct mp_image *src);
 typedef bool (*wlbuf_pool_dmabuf_importer)(struct mp_image *src, struct wlbuf_pool_entry* entry,
                                            struct zwp_linux_buffer_params_v1 *params);
 
+#define WLBUF_NUM_PURG_ENTRIES 60
+
+struct wlbuf_purgatory {
+    struct wlbuf_pool_entry *entries[WLBUF_NUM_PURG_ENTRIES];
+};
+
 struct wlbuf_pool {
     struct vo *vo;
     struct vo_wayland_state *wl;
@@ -32,8 +41,7 @@ struct wlbuf_pool {
     int num_allocated;
     wlbuf_pool_key_provider key_provider;
     wlbuf_pool_dmabuf_importer dmabuf_importer;
-    pthread_mutex_t lock;
-    bool final_clean;
+    struct wlbuf_purgatory purg;
 };
 
 struct wlbuf_pool_entry {
@@ -41,9 +49,9 @@ struct wlbuf_pool_entry {
     struct vo *vo;
     struct wl_buffer *buffer;
     uint32_t drm_format;
-    struct mp_image *frame;
-    bool pending_delete;
-    pthread_mutex_t *pool_lock;
+    struct mp_image *image;
+    bool pending_free;
+    struct wlbuf_pool *pool;
 };
 
 /**
@@ -55,7 +63,7 @@ struct wlbuf_pool *wlbuf_pool_alloc(struct vo *vo, struct vo_wayland_state *wl, 
 /**
  * Free pool entries but leave pool itself intact
  */
-void wlbuf_pool_clean(struct wlbuf_pool *pool);
+void wlbuf_pool_clean(struct wlbuf_pool *pool, bool final_clean);
 
 /**
  * Free pool
@@ -66,3 +74,5 @@ void wlbuf_pool_free(struct wlbuf_pool *pool);
  * Get pool entry - will allocate entry if not present in pool.
  */
 struct wlbuf_pool_entry *wlbuf_pool_get_entry(struct wlbuf_pool *pool, struct mp_image *src);
+
+#endif

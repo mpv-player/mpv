@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <unistd.h>
 
 #include "mpv_talloc.h"
 #include "common/global.h"
@@ -28,7 +27,57 @@
 
 #define WLBUF_POOL_NUM_ALLOCATED_INIT 30
 
-static void wlbuf_pool_entry_free(struct wlbuf_pool_entry *entry);
+static void wlbuf_pool_entry_free(struct wlbuf_pool_entry *entry, bool force);
+
+/**
+ * When trying to free pool entries that are being held by Wayland,
+ * these entries are set to pending free state. They will be freed
+ * when either the frame listener gets called, or the vo is uninitialized
+*/
+static bool set_pending_free(struct wlbuf_pool_entry *entry) {
+    if (entry->image) {
+        MP_TRACE(entry->vo, "Pending free for buffer pool entry : %lu\n",
+                entry->key);
+        entry->pending_free = true;
+        // add to purgatory
+        struct wlbuf_pool *pool = entry->pool;
+        for (int i = 0; i < WLBUF_NUM_PURG_ENTRIES; ++i) {
+            if (pool->purg.entries[i] == NULL) {
+                pool->purg.entries[i] = entry;
+                break;
+            }
+        }
+    }
+
+    return entry->image;
+}
+
+/**
+ * Complete pending free of entry.
+ *
+ */
+static void complete_pending_free(struct wlbuf_pool_entry *entry) {
+    if (entry->pending_free) {
+        // 1. remove from purgatory
+        struct wlbuf_pool *pool = entry->pool;
+        for (int i = 0; i < WLBUF_NUM_PURG_ENTRIES; ++i) {
+            if (pool->purg.entries[i] == entry) {
+                pool->purg.entries[i] = NULL;
+                break;
+            }
+        }
+        // 2. free entry
+        wlbuf_pool_entry_free(entry, false);
+    }
+}
+
+/**
+ * Free all purgatory entries
+ */
+static void free_purgatory(struct wlbuf_pool *pool){
+    for (int i = 0; i < WLBUF_NUM_PURG_ENTRIES; ++i)
+        wlbuf_pool_entry_free(pool->purg.entries[i], true);
+}
 
 struct wlbuf_pool *wlbuf_pool_alloc(struct vo *vo, struct vo_wayland_state *wl, wlbuf_pool_key_provider key_provider,
                                     wlbuf_pool_dmabuf_importer dmabuf_importer)
@@ -41,78 +90,73 @@ struct wlbuf_pool *wlbuf_pool_alloc(struct vo *vo, struct vo_wayland_state *wl, 
     pool->vo = vo;
     pool->key_provider = key_provider;
     pool->dmabuf_importer = dmabuf_importer;
-    pthread_mutex_init(&pool->lock, NULL);
     pool->wl = wl;
+    for (int i = 0; i < WLBUF_NUM_PURG_ENTRIES; ++i)
+        pool->purg.entries[i] = NULL;
 
     return pool;
 }
 
-void wlbuf_pool_clean(struct wlbuf_pool *pool)
+void wlbuf_pool_clean(struct wlbuf_pool *pool, bool final_clean)
 {
     int i;
     if (!pool)
         return;
-    pthread_mutex_lock(&pool->lock);
-    MP_VERBOSE(pool->vo, "Begin clean pool\n");
+    MP_TRACE(pool->vo, "Begin clean pool\n");
+    if (final_clean)
+        free_purgatory(pool);
     for (i = 0; i < pool->num_allocated; ++i) {
         struct wlbuf_pool_entry *entry = pool->entries[i];
         if (!entry)
             continue;
-        // force frame unref
-        if (pool->final_clean && entry->frame){
-            mp_image_unrefp(&entry->frame);
-            entry->frame = NULL;
-        }
-        wlbuf_pool_entry_free(entry);
+        wlbuf_pool_entry_free(entry, final_clean);
         pool->entries[i] = NULL;
     }
     pool->num_entries = 0;
-    MP_VERBOSE(pool->vo, "End clean pool\n");
-    pthread_mutex_unlock(&pool->lock);
+    MP_TRACE(pool->vo, "End clean pool\n");
 }
 
 void wlbuf_pool_free(struct wlbuf_pool *pool)
 {
     if (!pool)
         return;
-    pool->final_clean = true;
-    wlbuf_pool_clean(pool);
-    pthread_mutex_destroy(&pool->lock);
+
+    wlbuf_pool_clean(pool, true);
     talloc_free(pool);
 }
 
-static void wlbuf_pool_entry_free(struct wlbuf_pool_entry *entry)
+static void wlbuf_pool_entry_free(struct wlbuf_pool_entry *entry, bool force)
 {
     if (!entry)
         return;
-    if (entry->frame) {
-        MP_VERBOSE(entry->vo, "Pending free buffer pool entry : %lu\n",entry->key );
-        entry->pending_delete = true;
+    if (force && entry->image) {
+        mp_image_unrefp(&entry->image);
+        entry->image = NULL;
     }
-    else {
-        MP_VERBOSE(entry->vo, "Free buffer pool entry : %lu\n",entry->key );
+    if (!set_pending_free(entry)) {
+        MP_TRACE(entry->vo, "Free buffer pool entry : %lu\n", entry->key);
         if (entry->buffer)
             wl_buffer_destroy(entry->buffer);
-        entry->buffer = NULL;
         talloc_free(entry);
     }
 }
 
+/**
+ * Unref pool entry's image, and also free entry itself if it's set to pending_free
+ */
 static void wlbuf_pool_entry_release(void *data, struct wl_buffer *wl_buffer)
 {
-    struct wlbuf_pool_entry *entry = (struct wlbuf_pool_entry*)data;
-    struct mp_image *frame;
-    pthread_mutex_t *lock = entry->pool_lock;
+    struct wlbuf_pool_entry *entry = (struct wlbuf_pool_entry*) data;
 
-    MP_VERBOSE(entry->vo, "Release buffer pool entry : %lu\n",entry->key );
-    pthread_mutex_lock(lock);
-    frame = entry->frame;
-    entry->frame = NULL;
-    if (entry->pending_delete)
-        wlbuf_pool_entry_free(entry);
-    if (frame)
-        mp_image_unrefp(&frame);
-    pthread_mutex_unlock(lock);
+    MP_TRACE(entry->vo, "Release buffer pool entry : %lu\n", entry->key);
+
+    // 1. always unref image
+    if (entry->image)
+        mp_image_unrefp(&entry->image);
+    entry->image = NULL;
+
+    // 2. complete pending free if needed
+    complete_pending_free(entry);
 }
 
 static const struct wl_buffer_listener wlbuf_pool_listener = {
@@ -133,58 +177,53 @@ struct wlbuf_pool_entry *wlbuf_pool_get_entry(struct wlbuf_pool *pool, struct mp
     /* 1. try to find existing entry in pool */
     src = mp_image_new_ref(src);
     key = pool->key_provider(src);
-    pthread_mutex_lock(&pool->lock);
     for (int i = 0; i < pool->num_entries; ++i) {
         struct wlbuf_pool_entry *item = pool->entries[i];
+        if (!item)
+            continue;
         if (item->key == key) {
-            pthread_mutex_unlock(&pool->lock);
-            if (item->frame){
+            if (item->image) {
                 mp_image_unrefp(&src);
+                MP_DBG(item->vo, "Buffer already scheduled - returning NULL.\n");
                 return NULL;
             } else {
-                item->frame = src;
+                item->image = src;
                 return item;
             }
         }
     }
-    pthread_mutex_unlock(&pool->lock);
     /* 2. otherwise allocate new entry and buffer */
     entry = talloc(pool, struct wlbuf_pool_entry);
     memset(entry, 0, sizeof(struct wlbuf_pool_entry));
     entry->vo = pool->vo;
     entry->key = pool->key_provider(src);
-    entry->pool_lock = &pool->lock;
-    MP_VERBOSE(entry->vo, "Allocate buffer pool entry : %lu\n",entry->key );
+    entry->pool = pool;
+    MP_TRACE(entry->vo, "Allocate buffer pool entry : %lu\n", entry->key);
     params = zwp_linux_dmabuf_v1_create_params(wl->dmabuf);
-    import_successful = pool->dmabuf_importer(src,entry,params);
+    import_successful = pool->dmabuf_importer(src, entry, params);
     if (!import_successful) {
-        MP_VERBOSE(entry->vo, "Failed to import\n");
-        wlbuf_pool_entry_free(entry);
+        MP_DBG(entry->vo, "Failed to import\n");
+        wlbuf_pool_entry_free(entry, false);
     } else {
         entry->buffer = zwp_linux_buffer_params_v1_create_immed(params, src->params.w, src->params.h,
                                                                 entry->drm_format, 0);
     }
     zwp_linux_buffer_params_v1_destroy(params);
-    if (!import_successful){
-         mp_image_unrefp(&src);
-         return NULL;
+    if (!import_successful) {
+        mp_image_unrefp(&src);
+        return NULL;
     }
-
     /* 3. add new entry to pool */
     if (pool->num_entries == pool->num_allocated) {
         int current_num_allocated = pool->num_allocated;
         pool->num_allocated *= 2;
-        pthread_mutex_lock(&pool->lock);
         pool->entries = talloc_realloc(pool, pool->entries, struct wlbuf_pool_entry *, pool->num_allocated);
         for (int i = current_num_allocated; i < pool->num_allocated; ++i)
             pool->entries[i] = NULL;
-        pthread_mutex_unlock(&pool->lock);
     }
     wl_buffer_add_listener(entry->buffer, &wlbuf_pool_listener, entry);
-    entry->frame = src;
-    pthread_mutex_lock(&pool->lock);
+    entry->image = src;
     pool->entries[pool->num_entries++] = entry;
-    pthread_mutex_unlock(&pool->lock);
 
     return entry;
 }
