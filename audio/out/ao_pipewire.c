@@ -218,7 +218,8 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
 static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_stream_state state, const char *error)
 {
     struct ao *ao = userdata;
-    MP_DBG(ao, "Stream state changed: old_state=%d state=%d error=%s\n", old, state, error);
+    MP_DBG(ao, "Stream state changed: old_state=%s state=%s error=%s\n",
+           pw_stream_state_as_string(old), pw_stream_state_as_string(state), error);
 
     if (state == PW_STREAM_STATE_ERROR) {
         MP_WARN(ao, "Stream in error state, trying to reload...\n");
