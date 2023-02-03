@@ -346,8 +346,8 @@ bool mp_image_hw_upload(struct mp_image *hw_img, struct mp_image *src)
     ok = av_hwframe_transfer_data(dstav, srcav, 0) >= 0;
 
 done:
-    av_frame_unref(srcav);
-    av_frame_unref(dstav);
+    av_frame_free(&srcav);
+    av_frame_free(&dstav);
 
     if (ok)
         mp_image_copy_attributes(hw_img, src);
