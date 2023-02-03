@@ -239,11 +239,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     // ensure the pool is reset after hwdec seek,
     // to avoid stutter artifact
     if (p->want_reset)
-        wlbuf_pool_clean(p->wlbuf_pool);
+        wlbuf_pool_clean(p->wlbuf_pool,false);
     if (p->want_resize)
         resize(vo);
 
-    MP_VERBOSE(entry->vo, "Schedule buffer pool entry : %lu\n",entry->key );
+    MP_TRACE(entry->vo, "Schedule buffer pool entry : %lu\n",entry->key );
     wl_surface_attach(wl->video_surface, entry->buffer, 0, 0);
     wl_surface_damage_buffer(wl->video_surface, 0, 0, INT32_MAX, INT32_MAX);
 }
@@ -260,7 +260,7 @@ static void flip_page(struct vo *vo)
     if (wl->use_present)
        present_sync_swap(wl->present);
     if (p->want_reset) {
-        wlbuf_pool_clean(p->wlbuf_pool);
+        wlbuf_pool_clean(p->wlbuf_pool,false);
         p->want_reset = false;
     }
 }
