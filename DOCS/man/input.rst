@@ -2678,8 +2678,6 @@ Property list
     stripped. If the subtitle is not text-based (i.e. DVD/BD subtitles), an
     empty string is returned.
 
-    This property is experimental and might be removed in the future.
-
 ``sub-text-ass``
     Like ``sub-text``, but return the text in ASS format. Text subtitles in
     other formats are converted. For native ASS subtitles, events that do
@@ -2690,8 +2688,6 @@ Property list
     This property is not enough to render ASS subtitles correctly, because ASS
     header and per-event metadata are not returned. You likely need to do
     further filtering on the returned string to make it useful.
-
-    This property is experimental and might be removed in the future.
 
 ``secondary-sub-text``
     Same as ``sub-text``, but for the secondary subtitles.
