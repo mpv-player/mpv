@@ -712,10 +712,10 @@ static void hotplug_registry_global_remove_cb(void *data, uint32_t id)
             removed_sink = true;
             spa_list_remove(&e->node);
             talloc_free(e);
-            goto done;
+            break;
         }
     }
-done:
+
     pw_thread_loop_unlock(priv->loop);
 
     if (removed_sink)
