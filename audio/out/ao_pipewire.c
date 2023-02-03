@@ -541,18 +541,13 @@ static int init(struct ao *ao)
 
     pw_thread_loop_lock(p->loop);
 
-    p->stream = pw_stream_new(
-                    p->core,
-                    "audio-src",
-                    props);
+    p->stream = pw_stream_new(p->core, "audio-src", props);
     if (p->stream == NULL) {
         pw_thread_loop_unlock(p->loop);
         goto error;
     }
 
-    pw_stream_add_listener(p->stream,
-                    &p->stream_listener,
-                    &stream_events, ao);
+    pw_stream_add_listener(p->stream, &p->stream_listener, &stream_events, ao);
 
     if (pw_stream_connect(p->stream,
                     PW_DIRECTION_OUTPUT, PW_ID_ANY,
