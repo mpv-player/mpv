@@ -461,8 +461,8 @@ static int pipewire_init_boilerplate(struct ao *ao)
             pw_properties_new(PW_KEY_REMOTE_NAME, p->options.remote, NULL),
             0);
     if (!p->core) {
-        MP_WARN(ao, "Could not connect to context '%s': %s\n",
-                p->options.remote, strerror(errno));
+        MP_VERBOSE(ao, "Could not connect to context '%s': %s\n",
+                   p->options.remote, strerror(errno));
         pw_context_destroy(context);
         goto error;
     }
