@@ -286,9 +286,8 @@ static void uninit(struct ao *ao)
     if (p->stream)
         pw_stream_destroy(p->stream);
     p->stream = NULL;
-    if (p->core) {
+    if (p->core)
         pw_context_destroy(pw_core_get_context(p->core));
-    }
     p->core = NULL;
     if (p->loop)
         pw_thread_loop_destroy(p->loop);
@@ -750,9 +749,8 @@ static int hotplug_init(struct ao *ao)
     spa_list_init(&priv->hotplug.sinks);
 
     priv->hotplug.registry = pw_core_get_registry(priv->core, PW_VERSION_REGISTRY, 0);
-    if (!priv->hotplug.registry) {
+    if (!priv->hotplug.registry)
         goto error;
-    }
 
     if (pw_registry_add_listener(priv->hotplug.registry, &priv->hotplug.registry_listener, &hotplug_registry_events, ao) < 0) {
         pw_proxy_destroy((struct pw_proxy *)priv->hotplug.registry);
