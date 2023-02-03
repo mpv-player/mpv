@@ -59,7 +59,6 @@ struct priv {
     struct wl_buffer *solid_buffer;
     struct wlbuf_pool *wlbuf_pool;
     bool want_reset;
-    uint64_t reset_count;
     bool want_resize;
     struct mp_rect src;
     bool resized;
@@ -169,7 +168,6 @@ static void set_viewport_source(struct vo *vo, struct mp_rect src) {
                                mp_rect_h(src) << 8);
         // 2. reset buffer pool
         p->want_reset = true;
-        p->reset_count = 0;
 
         // 3. update to new src dimensions
         p->src = src;
@@ -222,15 +220,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!vo_wayland_check_visible(vo))
         return;
 
-    // ensure the pool is reset after hwdec seek,
-    // to avoid stutter artifact
-    p->reset_count++;
-    if (p->want_reset &&  p->reset_count <= 2){
-        wlbuf_pool_clean(p->wlbuf_pool);
-        if (p->reset_count == 2)
-            p->want_reset = false;
-    }
-
     /* lazy initialization of buffer pool */
     if (!p->wlbuf_pool) {
 #if HAVE_VAAPI
@@ -247,6 +236,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!entry)
         return;
 
+    // ensure the pool is reset after hwdec seek,
+    // to avoid stutter artifact
+    if (p->want_reset)
+        wlbuf_pool_clean(p->wlbuf_pool);
     if (p->want_resize)
         resize(vo);
 
@@ -258,6 +251,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 static void flip_page(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
+    struct priv *p = vo->priv;
 
     wl_surface_commit(wl->video_surface);
     wl_surface_commit(wl->surface);
@@ -265,6 +259,10 @@ static void flip_page(struct vo *vo)
         vo_wayland_wait_frame(wl);
     if (wl->use_present)
        present_sync_swap(wl->present);
+    if (p->want_reset) {
+        wlbuf_pool_clean(p->wlbuf_pool);
+        p->want_reset = false;
+    }
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
@@ -320,7 +318,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         break;
 	case VOCTRL_RESET:
         p->want_reset = true;
-        p->reset_count = 0;
 	    return VO_TRUE;
 	    break;
     }
