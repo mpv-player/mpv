@@ -60,6 +60,7 @@ struct priv {
     struct wlbuf_pool *wlbuf_pool;
     bool want_reset;
     uint64_t reset_count;
+    bool want_resize;
     struct mp_rect src;
     bool resized;
 
@@ -208,6 +209,8 @@ static void resize(struct vo *vo)
 
     vo->want_redraw = true;
     p->resized = true;
+    p->want_reset = true;
+    p->want_resize = false;
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -243,6 +246,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     entry = wlbuf_pool_get_entry(p->wlbuf_pool, frame->current);
     if (!entry)
         return;
+
+    if (p->want_resize)
+        resize(vo);
 
     MP_VERBOSE(entry->vo, "Schedule buffer pool entry : %lu\n",entry->key );
     wl_surface_attach(wl->video_surface, entry->buffer, 0, 0);
@@ -302,8 +308,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
     case VOCTRL_SET_PANSCAN:
-        if (p->resized)
-            resize(vo);
+        p->want_resize = true;
         return VO_TRUE;
     case VOCTRL_LOAD_HWDEC_API:
         assert(p->hwdec_ctx.ra);
@@ -321,8 +326,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
 
     ret = vo_wayland_control(vo, &events, request, data);
-    if (events & VO_EVENT_RESIZE)
-        resize(vo);
+    if (events & VO_EVENT_RESIZE){
+        p->want_resize = true;
+        if (!p->resized)
+            resize(vo);
+    }
     if (events & VO_EVENT_EXPOSE)
         vo->want_redraw = true;
     vo_event(vo, events);
