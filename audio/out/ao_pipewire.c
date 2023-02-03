@@ -740,7 +740,7 @@ static int hotplug_init(struct ao *ao)
 
     pw_thread_loop_lock(priv->loop);
 
-    spa_memzero(&priv->hotplug, sizeof(priv->hotplug));
+    spa_zero(priv->hotplug);
     spa_list_init(&priv->hotplug.sinks);
 
     priv->hotplug.registry = pw_core_get_registry(priv->core, PW_VERSION_REGISTRY, 0);
