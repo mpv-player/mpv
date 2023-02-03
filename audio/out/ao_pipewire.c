@@ -136,7 +136,6 @@ static enum spa_audio_channel mp_speaker_id_to_spa(struct ao *ao, enum mp_speake
     };
 }
 
-
 static void on_process(void *userdata)
 {
     struct ao *ao = userdata;
@@ -484,7 +483,6 @@ error:
     return -1;
 }
 
-
 static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -728,7 +726,6 @@ static const struct pw_registry_events hotplug_registry_events = {
     .global = hotplug_registry_global_cb,
     .global_remove = hotplug_registry_global_remove_cb,
 };
-
 
 static int hotplug_init(struct ao *ao)
 {
