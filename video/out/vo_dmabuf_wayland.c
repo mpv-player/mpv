@@ -339,6 +339,7 @@ static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
+    wlbuf_pool_free(p->wlbuf_pool);
     if (p->solid_buffer_pool)
         wl_shm_pool_destroy(p->solid_buffer_pool);
     if (p->solid_buffer)
@@ -348,7 +349,6 @@ static void uninit(struct vo *vo)
         hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
         hwdec_devices_destroy(vo->hwdec_devs);
     }
-    wlbuf_pool_free(p->wlbuf_pool);
     vo_wayland_uninit(vo);
     ra_ctx_destroy(&p->ctx);
 }
