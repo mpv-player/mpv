@@ -6881,9 +6881,6 @@ Miscellaneous
     See ``--interpolation-threshold`` for how this option affects
     interpolation.
 
-    This is mostly for testing, and the option may be randomly changed in the
-    future without notice.
-
 ``--video-sync-max-video-change=<value>``
     Maximum speed difference in percent that is applied to video with
     ``--video-sync=display-...`` (default: 1). Display sync mode will be
