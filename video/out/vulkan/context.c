@@ -161,6 +161,47 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     p->params = params;
     p->opts = mp_get_config_group(p, ctx->global, &vulkan_conf);
 
+#if HAVE_VULKAN_INTEROP && defined(VK_EXT_descriptor_buffer)
+    /*
+     * Request the additional extensions and features required to make full use
+     * of the ffmpeg Vulkan hwcontext and video decoding capability.
+     */
+    const char *opt_extensions[] = {
+        VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
+        VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
+        VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME,
+        VK_KHR_VIDEO_DECODE_H264_EXTENSION_NAME,
+        VK_KHR_VIDEO_DECODE_H265_EXTENSION_NAME,
+        VK_KHR_VIDEO_QUEUE_EXTENSION_NAME,
+    };
+
+    VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
+        .pNext = NULL,
+        .descriptorBuffer = true,
+        .descriptorBufferPushDescriptors = true,
+    };
+
+    VkPhysicalDeviceShaderAtomicFloatFeaturesEXT atomic_float_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT,
+        .pNext = &descriptor_buffer_feature,
+        .shaderBufferFloat32Atomics = true,
+        .shaderBufferFloat32AtomicAdd = true,
+    };
+
+    VkPhysicalDeviceFeatures2 features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+        .pNext = &atomic_float_feature,
+    };
+
+#else
+    const char *opt_extensions[] = {
+    };
+    VkPhysicalDeviceFeatures2 features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+    };
+#endif // HAVE_VULKAN_INTEROP && defined(VK_EXT_descriptor_buffer)
+
     assert(vk->pllog);
     assert(vk->vkinst);
     vk->vulkan = pl_vulkan_create(vk->pllog, &(struct pl_vulkan_params) {
@@ -171,6 +212,12 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         .async_compute = p->opts->async_compute,
         .queue_count = p->opts->queue_count,
         .device_name = p->opts->device,
+#if HAVE_VULKAN_INTEROP && defined(VK_EXT_descriptor_buffer)
+        .extra_queues = VK_QUEUE_VIDEO_DECODE_BIT_KHR,
+#endif
+        .features = &features,
+        .opt_extensions = opt_extensions,
+        .num_opt_extensions = MP_ARRAY_SIZE(opt_extensions),
     });
     if (!vk->vulkan)
         goto error;
