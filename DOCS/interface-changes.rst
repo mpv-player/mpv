@@ -51,6 +51,7 @@ Interface changes
       dpi scale factor by default (can be disabled with --no-hidpi-window-scale
       if fractional scaling support exists).
     - change --screenshot-tag-colorspace default value from `no` to `yes`
+    - undeprecate vf_sub
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,
