@@ -244,7 +244,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         num_returned_planes += p->desc.layers[i].nb_planes;
     }
 
-    if (p->num_planes != num_returned_planes) {
+    if (p->num_planes != 0 && p->num_planes != num_returned_planes) {
         MP_ERR(mapper,
                "Mapped surface with format '%s' has unexpected number of planes. "
                "(%d layers and %d planes, but expected %d planes)\n",

@@ -39,6 +39,7 @@
 #include "present_sync.h"
 #include "wayland_common.h"
 #include "wlbuf_pool.h"
+#include "wldmabuf/ra_wldmabuf.h"
 
 // Generated from wayland-protocols
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
@@ -101,10 +102,13 @@ static bool vaapi_dmabuf_importer(struct mp_image *src, struct wlbuf_pool_entry*
     }
     bool success = false;
     uint32_t drm_format = desc.layers[layer_no].drm_format;
-    if (!vo_wayland_supported_format(entry->vo, drm_format, desc.objects[0].drm_format_modifier)) {
-        MP_VERBOSE(entry->vo, "%s(%016lx) is not supported.\n",
-                   mp_tag_str(drm_format), desc.objects[0].drm_format_modifier);
-        goto done;
+    if (!ra_compatible_format(p->ctx->ra, drm_format, desc.objects[0].drm_format_modifier)) {
+            MP_VERBOSE(entry->vo, "Surface with format %s; drm format '%s(%016lx)' is "
+                                  "not supported by compositor.\n",
+                                   mp_imgfmt_to_name(src->params.hw_subfmt),
+                                   mp_tag_str(drm_format),
+                                   desc.objects[0].drm_format_modifier);
+            goto done;
     }
     entry->drm_format = drm_format;
     for (int plane_no = 0; plane_no < desc.layers[layer_no].num_planes; ++plane_no) {
