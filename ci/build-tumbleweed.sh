@@ -13,13 +13,14 @@ if [ "$1" = "meson" ]; then
       -Dshaderc=enabled       \
       -Dtests=true            \
       -Dvulkan=enabled
-    meson compile -C build --verbose
+    meson compile -C build
     meson test -C build
     ./build/mpv --no-config -v --unittest=all-simple
 fi
 
 if [ "$1" = "waf" ]; then
-    python3 ./waf configure \
+    python3 ./waf configure  \
+      --out=build_waf        \
       --enable-cdda          \
       --enable-dvbin         \
       --enable-dvdnav        \
@@ -30,6 +31,6 @@ if [ "$1" = "waf" ]; then
       --enable-shaderc       \
       --enable-tests         \
       --enable-vulkan
-    python3 ./waf build --verbose
-    ./build/mpv -v --no-config -v --unittest=all-simple
+    python3 ./waf build
+    ./build_waf/mpv -v --no-config -v --unittest=all-simple
 fi

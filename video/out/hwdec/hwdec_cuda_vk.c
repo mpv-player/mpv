@@ -152,10 +152,10 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
 
     CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC w_desc = {
 #if HAVE_WIN32_DESKTOP
-        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32,
+        .type = CU_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32,
         .handle.win32.handle = evk->sync->wait_handle.handle,
 #else
-        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD,
+        .type = CU_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD,
         .handle.fd = wait_fd,
 #endif
     };
@@ -166,10 +166,10 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
 
     CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC s_desc = {
 #if HAVE_WIN32_DESKTOP
-        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32,
+        .type = CU_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32,
         .handle.win32.handle = evk->sync->signal_handle.handle,
 #else
-        .type = CU_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD,
+        .type = CU_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD,
         .handle.fd = signal_fd,
 #endif
     };

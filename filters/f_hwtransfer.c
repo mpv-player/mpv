@@ -385,6 +385,7 @@ static bool probe_formats(struct mp_hwupload *u, int hw_imgfmt)
         av_buffer_unref(&frames);
     }
 
+    av_hwframe_constraints_free(&cstr);
     p->av_device_ctx = av_buffer_ref(ctx->av_device_ref);
     if (!p->av_device_ctx)
         return false;

@@ -203,20 +203,21 @@ if [ "$1" = "meson" ]; then
         -D{libmpv,tests}=true -Dlua=luajit \
         -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
 
-    ninja -C build --verbose
+    meson compile -C build
     meson test -C build
 elif [ "$1" = "waf" ]; then
     PKG_CONFIG=pkg-config ./waf configure \
+        --out=build_waf \
         --enable-libmpv-shared --lua=luajit \
         --enable-{shaderc,spirv-cross,d3d11,libplacebo,tests}
 
-    ./waf build --verbose
+    ./waf build
 fi
 
 if [ "$2" = pack ]; then
     mkdir -p artifact
     echo "Copying:"
-    cp -pv build/mpv.{com,exe} "$prefix_dir/bin/"*.dll artifact/
+    cp -pv build/generated/mpv.com build/mpv.exe "$prefix_dir/bin/"*.dll artifact/
     # ship everything and the kitchen sink
     shopt -s nullglob
     for file in /usr/lib/gcc/$TARGET/*-posix/*.dll /usr/$TARGET/lib/*.dll; do

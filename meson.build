@@ -271,7 +271,7 @@ test_flags = ['-Werror=implicit-function-declaration',
 flags += cc.get_supported_arguments(test_flags)
 
 if cc.has_multi_arguments('-Wformat', '-Werror=format-security')
-    flags += '-Werror=format-security'
+    flags += ['-Wformat', '-Werror=format-security']
 endif
 
 if cc.get_id() == 'gcc'
@@ -521,29 +521,31 @@ features += {'vt.h': cc.has_header_symbol('sys/vt.h', 'VT_GETMODE')}
 
 features += {'consio.h': not features['vt.h'] and cc.has_header_symbol('sys/consio.h', 'VT_GETMODE')}
 
-fragments = join_paths(source_root, 'waftools', 'fragments')
+# macOS's pthread_setname_np is a special snowflake and differs from literally every other platform.
+features += {'osx-thread-name': darwin}
 
-features += {'glibc-thread-name': cc.compiles(files(join_paths(fragments, 'glibc_thread_name.c')),
-                                              name: 'glibc-thread-name check') and posix}
-
-features += {'osx-thread-name': false}
-if not features['glibc-thread-name']
-    features += {'osx-thread-name': cc.compiles(files(join_paths(fragments, 'osx_thread_name.c')),
-                                                name: 'osx-thread-name check')}
+features += {'glibc-thread-name': false}
+if not features['osx-thread-name']
+    features += {'glibc-thread-name': posix and cc.has_function('pthread_setname_np', args: '-D_GNU_SOURCE',
+                                                                dependencies: pthreads, prefix: '#include <pthread.h>')}
 endif
 
 features += {'bsd-thread-name': false}
 if not features['osx-thread-name'] and not features['glibc-thread-name']
-    features += {'bsd-thread-name': cc.compiles(files(join_paths(fragments, 'bsd_thread_name.c')),
-                                                name: 'bsd-thread-name check')}
+    features += {'bsd-thread-name': posix and cc.has_function('pthread_set_name_np', dependencies: pthreads,
+                                                              prefix: '#include <pthread.h>\n#include <pthread_np.h>')}
 endif
 
 features += {'bsd-fstatfs': cc.has_function('fstatfs', prefix: '#include <sys/mount.h>\n#include <sys/param.h>')}
 
 features += {'linux-fstatfs': cc.has_function('fstatfs', prefix: '#include <sys/vfs.h>')}
 
+vector_attribute = '''int main() {
+float v __attribute__((vector_size(32)));
+}
+'''
 vector = get_option('vector').require(
-    cc.compiles(files(join_paths(fragments, 'vector.c')), name: 'vector check'),
+    cc.compiles(vector_attribute, name: 'vector check'),
     error_message: 'the compiler does not support gcc vectors!',
 )
 features += {'vector': vector.allowed()}
@@ -888,7 +890,7 @@ direct3d_opt = get_option('direct3d').require(
     get_option('gpl') and features['win32-desktop'],
     error_message: 'the build is not GPL or this is not a win32 desktop!',
 )
-direct3d = cc.check_header('d3d9.h', required: direct3d_opt)
+direct3d = cc.has_header('d3d9.h', required: direct3d_opt)
 features += {'direct3d': direct3d}
 if features['direct3d']
     sources += files('video/out/vo_direct3d.c')
@@ -989,7 +991,7 @@ wayland = {
              dependency('wayland-cursor', version: '>= 1.15.0', required: get_option('wayland')),
              dependency('wayland-protocols', version: '>= 1.15', required: get_option('wayland')),
              dependency('xkbcommon', version: '>= 0.3.0', required: get_option('wayland'))],
-    'header': cc.check_header('linux/input-event-codes.h', required: get_option('wayland')),
+    'header': cc.has_header('linux/input-event-codes.h', required: get_option('wayland')),
     'scanner': find_program('wayland-scanner', required: get_option('wayland')),
 }
 wayland_deps = true
@@ -1544,8 +1546,8 @@ if swift.allowed()
 endif
 
 macos_touchbar = get_option('macos-touchbar').require(
-    features['cocoa'] and cc.compiles(files(join_paths(fragments, 'touchbar.m')), name: 'macos-touchbar check'),
-    error_message: 'Either cocoa could not be found or the macos-touchbar check failed!',
+    features['cocoa'] and cc.has_header('AppKit/NSTouchBar.h'),
+    error_message: 'Either cocoa could not be found or AppKit/NSTouchBar.h could not be found!',
 )
 features += {'macos-touchbar': macos_touchbar.allowed()}
 if features['macos-touchbar']

@@ -2325,7 +2325,7 @@ static struct dll_version get_dll_version(HMODULE dll)
     struct dll_version ret = { 0 };
 
     HRSRC rsrc = FindResourceW(dll, MAKEINTRESOURCEW(VS_VERSION_INFO),
-                               MAKEINTRESOURCEW(VS_FILE_INFO));
+                               VS_FILE_INFO);
     if (!rsrc)
         goto done;
     DWORD size = SizeofResource(dll, rsrc);

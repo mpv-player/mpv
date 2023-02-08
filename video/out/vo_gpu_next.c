@@ -1557,7 +1557,7 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
     return hook;
 }
 
-#if PL_API_VER >= 222
+#if PL_API_VER >= 222 && defined(PL_HAVE_LCMS)
 
 static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
 {
@@ -1859,7 +1859,7 @@ static void update_render_options(struct vo *vo)
 #else
         MP_ERR(p, "Error diffusion dithering is not implemented.\n");
 #endif
-        // fall through
+        MP_FALLTHROUGH;
     case DITHER_ORDERED:
     case DITHER_FRUIT:
         p->params.dither_params = &p->dither;
