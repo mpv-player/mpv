@@ -53,7 +53,7 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .webp_compression = 4,
     .jxl_distance = 1.0,
     .jxl_effort = 3,
-    .tag_csp = 0,
+    .tag_csp = 1,
 };
 
 const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
