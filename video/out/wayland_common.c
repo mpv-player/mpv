@@ -55,6 +55,10 @@
 #define HAVE_WAYLAND_1_20
 #endif
 
+#if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
+#define HAVE_WAYLAND_1_22
+#endif
+
 #ifndef CLOCK_MONOTONIC_RAW
 #define CLOCK_MONOTONIC_RAW 4
 #endif
@@ -756,7 +760,9 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     wl->current_output->has_surface = true;
     bool force_resize = false;
 
-    if (!wl->fractional_scale_manager && wl->scaling != wl->current_output->scale) {
+    if (!wl->fractional_scale_manager && wl_surface_get_version(wl_surface) < 6 &&
+        wl->scaling != wl->current_output->scale)
+    {
         set_surface_scaling(wl);
         spawn_cursor(wl);
         force_resize = true;
@@ -792,9 +798,45 @@ static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
     }
 }
 
+#ifdef HAVE_WAYLAND_1_22
+
+static void surface_handle_preferred_buffer_scale(void *data,
+                                                  struct wl_surface *wl_surface,
+                                                  int32_t scale)
+{
+    struct vo_wayland_state *wl = data;
+    double old_scale = wl->scaling;
+
+    if (wl->fractional_scale_manager)
+        return;
+
+    // dmabuf_wayland is always wl->scaling = 1
+    wl->scaling = !wl->using_dmabuf_wayland ? scale : 1;
+    MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
+               wl->scaling);
+    wl->pending_vo_events |= VO_EVENT_DPI;
+    if (wl->current_output) {
+        rescale_geometry(wl, old_scale);
+        set_geometry(wl, false);
+        wl->pending_vo_events |= VO_EVENT_RESIZE;
+    }
+}
+
+static void surface_handle_preferred_buffer_transform(void *data,
+                                                      struct wl_surface *wl_surface,
+                                                      uint32_t transform)
+{
+}
+
+#endif
+
 static const struct wl_surface_listener surface_listener = {
     surface_handle_enter,
     surface_handle_leave,
+#ifdef HAVE_WAYLAND_1_22
+    surface_handle_preferred_buffer_scale,
+    surface_handle_preferred_buffer_transform,
+#endif
 };
 
 static void xdg_wm_base_ping(void *data, struct xdg_wm_base *wm_base, uint32_t serial)
@@ -1207,7 +1249,12 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     struct vo_wayland_state *wl = data;
 
     if (!strcmp(interface, wl_compositor_interface.name) && (ver >= 4) && found++) {
-        wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, 4);
+#ifdef HAVE_WAYLAND_1_22
+        ver = MPMIN(ver, 6); /* Cap at 6 in case new events are added later. */
+#else
+        ver = 4;
+#endif
+        wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, ver);
         wl->surface = wl_compositor_create_surface(wl->compositor);
         wl->video_surface = wl_compositor_create_surface(wl->compositor);
         /* never accept input events on the video surface */
