@@ -22,6 +22,12 @@
 #include "input/event.h"
 #include "vo.h"
 
+typedef struct {
+    uint32_t format;
+    uint32_t padding;
+    uint64_t modifier;
+} wayland_format;
+
 struct wayland_opts {
     int configure_bounds;
     int content_type;
@@ -96,7 +102,7 @@ struct vo_wayland_state {
     struct zwp_linux_dmabuf_v1 *dmabuf;
     /* TODO: unvoid this if required wayland protocols is bumped to 1.24+ */
     void *dmabuf_feedback;
-    void *format_map;
+    wayland_format *format_map;
     uint32_t format_size;
 
     /* presentation-time */

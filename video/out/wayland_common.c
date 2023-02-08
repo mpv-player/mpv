@@ -2234,24 +2234,6 @@ void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha)
     }
 }
 
-bool vo_wayland_supported_format(struct vo *vo, uint32_t drm_format, uint64_t modifier)
-{
-    struct vo_wayland_state *wl = vo->wl;
-
-    const struct {
-        uint32_t format;
-        uint32_t padding;
-        uint64_t modifier;
-    } *formats = wl->format_map;
-
-    for (int i = 0; i < wl->format_size / 16; ++i) {
-        if (drm_format == formats[i].format && modifier == formats[i].modifier)
-            return true;
-    }
-
-    return false;
-}
-
 void vo_wayland_uninit(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;

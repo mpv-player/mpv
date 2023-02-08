@@ -29,7 +29,7 @@ static bool init(struct ra_ctx *ctx)
 {
     if (!vo_wayland_init(ctx->vo))
         return false;
-    ctx->ra = ra_create_wayland(ctx->log, ctx->vo->wl->display);
+    ctx->ra = ra_create_wayland(ctx->log, ctx->vo);
 
     return true;
 }
