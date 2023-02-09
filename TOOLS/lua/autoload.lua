@@ -122,6 +122,13 @@ table.filter = function(t, iter)
     end
 end
 
+table.append = function(t1, t2)
+    local t1_size = #t1
+    for i = 1, #t2 do
+        t1[t1_size + i] = t2[i]
+    end
+end
+
 -- alphanum sorting for humans in Lua
 -- http://notebook.kulchenko.com/algorithms/alphanumeric-natural-sorting-for-humans-in-lua
 
@@ -147,8 +154,7 @@ local autoloaded = nil
 function get_playlist_filenames(playlist)
     local filenames = {}
     for i = 1, #playlist do
-        local _, file = utils.split_path(playlist[i].filename)
-        filenames[file] = true
+        filenames[playlist[i].filename] = true
     end
     return filenames
 end
@@ -194,10 +200,13 @@ function find_and_add_entries()
         utils.to_string(pl)))
 
     local files = utils.readdir(dir, "files")
-    if files == nil then
-        msg.verbose("no other files in directory")
+    local load_dirs = mp.get_property("directory-mode") ~= "ignore"
+    local dirs = load_dirs and utils.readdir(dir, "dirs") or nil
+    if files == nil and dirs == nil then
+        msg.verbose("no other files or directories in directory")
         return
     end
+    files, dirs = files or {}, dirs or {}
     table.filter(files, function (v, k)
         -- The current file could be a hidden file, ignoring it doesn't load other
         -- files from the current directory.
@@ -210,7 +219,12 @@ function find_and_add_entries()
         end
         return EXTENSIONS_TARGET[string.lower(ext)]
     end)
+    table.filter(dirs, function(d)
+        return not ((o.ignore_hidden and string.match(d, "^%.")))
+    end)
     alphanumsort(files)
+    alphanumsort(dirs)
+    table.append(files, dirs)
 
     if dir == "." then
         dir = ""
@@ -243,12 +257,12 @@ function find_and_add_entries()
             -- skip files already in playlist
             if not filenames[file] then
                 if direction == -1 then
-                    msg.info("Prepending " .. file)
-                    table.insert(append[-1], 1, {filepath, pos - 1})
+                    msg.info("Prepending " .. filepath)
+                    table.insert(append[-1], 1, {filepath, pl_current + i * direction + 1})
                 else
-                    msg.info("Adding " .. file)
+                    msg.info("Adding " .. filepath)
                     if pl_count > 1 then
-                        table.insert(append[1], {filepath, pos - 1})
+                        table.insert(append[1], {filepath, pl_current + i * direction - 1})
                     else
                         mp.commandv("loadfile", filepath, "append")
                     end
