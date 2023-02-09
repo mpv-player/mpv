@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <unistd.h>
 
+#include <unistd.h>
 #include "config.h"
 
 #if HAVE_VAAPI
@@ -25,21 +25,19 @@
 #include <libavutil/hwcontext_drm.h>
 #endif
 
-#include "mpv_talloc.h"
 #include "common/global.h"
-#include "vo.h"
-#include "video/mp_image.h"
-
 #include "gpu/hwdec.h"
 #include "gpu/video.h"
+#include "mpv_talloc.h"
+#include "present_sync.h"
+#include "video/mp_image.h"
+#include "vo.h"
+#include "wayland_common.h"
+#include "wldmabuf/ra_wldmabuf.h"
 
 #if HAVE_VAAPI
 #include "video/vaapi.h"
 #endif
-#include "present_sync.h"
-#include "wayland_common.h"
-#include "wlbuf_pool.h"
-#include "wldmabuf/ra_wldmabuf.h"
 
 // Generated from wayland-protocols
 #include "generated/wayland/linux-dmabuf-unstable-v1.h"
@@ -49,138 +47,272 @@
 #include "generated/wayland/single-pixel-buffer-v1.h"
 #endif
 
+// We need at least enough buffers to avoid a
+// flickering artifact in certain formats.
+#define WL_BUFFERS_WANTED 8
+
+enum hwdec_type {
+    HWDEC_NONE,
+    HWDEC_VAAPI,
+    HWDEC_DRMPRIME,
+};
+
+struct buffer {
+    struct vo *vo;
+    struct wl_buffer *buffer;
+    struct wl_list link;
+    struct mp_image *image;
+
+    uint32_t drm_format;
+    uintptr_t id;
+};
+
 struct priv {
     struct mp_log *log;
-    struct ra_ctx *ctx;
+    struct mp_rect src;
     struct mpv_global *global;
+
+    struct ra_ctx *ctx;
     struct ra_hwdec_ctx hwdec_ctx;
-    int events;
 
     struct wl_shm_pool *solid_buffer_pool;
     struct wl_buffer *solid_buffer;
-    struct wlbuf_pool *wlbuf_pool;
-    bool want_reset;
-    bool want_resize;
-    struct mp_rect src;
-    bool resized;
+    struct wl_list buffer_list;
 
-#if HAVE_VAAPI
-    VADisplay display;
-#endif
+    bool destroy_buffers;
+    enum hwdec_type hwdec_type;
+};
+
+static void buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
+{
+    struct buffer *buf = data;
+    if (buf->image) {
+        mp_image_unrefp(&buf->image);
+        buf->image = NULL;
+    }
+}
+
+static const struct wl_buffer_listener buffer_listener = {
+    buffer_handle_release,
 };
 
 #if HAVE_VAAPI
-static uintptr_t vaapi_key_provider(struct mp_image *src)
-{
-    return va_surface_id(src);
-}
-
 static void close_file_descriptors(VADRMPRIMESurfaceDescriptor desc)
 {
     for (int i = 0; i < desc.num_objects; i++)
         close(desc.objects[i].fd);
 }
+#endif
 
-/* va-api dmabuf importer */
-static bool vaapi_dmabuf_importer(struct mp_image *src, struct wlbuf_pool_entry* entry,
+static uintptr_t vaapi_surface_id(struct mp_image *src)
+{
+    uintptr_t id = 0;
+#if HAVE_VAAPI
+    id = (uintptr_t)va_surface_id(src);
+#endif
+    return id;
+}
+
+static void vaapi_dmabuf_importer(struct buffer *buf, struct mp_image *src,
                                   struct zwp_linux_buffer_params_v1 *params)
 {
-    struct priv *p = entry->vo->priv;
-    VADRMPRIMESurfaceDescriptor desc = { 0 };
+#if HAVE_VAAPI
+    struct vo *vo = buf->vo;
+    struct priv *p = vo->priv;
+    VADRMPRIMESurfaceDescriptor desc = {0};
+    VADisplay display = ra_get_native_resource(p->ctx->ra, "VADisplay");
+
     /* composed has single layer */
     int layer_no = 0;
-    VAStatus status = vaExportSurfaceHandle(p->display, entry->key, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+    buf->id = vaapi_surface_id(src);
+    VAStatus status = vaExportSurfaceHandle(display, buf->id, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
                                             VA_EXPORT_SURFACE_COMPOSED_LAYERS | VA_EXPORT_SURFACE_READ_ONLY, &desc);
 
-    if (!CHECK_VA_STATUS(entry->vo, "vaExportSurfaceHandle()")) {
+    if (!CHECK_VA_STATUS(vo, "vaExportSurfaceHandle()")) {
         /* invalid surface warning => composed layers not supported */
         if (status == VA_STATUS_ERROR_INVALID_SURFACE)
-            MP_VERBOSE(entry->vo, "vaExportSurfaceHandle: composed layers not supported.\n");
-        close_file_descriptors(desc);
-
-        return false;
+            MP_VERBOSE(vo, "vaExportSurfaceHandle: composed layers not supported.\n");
+        goto done;
     }
-    bool success = false;
-    uint32_t drm_format = desc.layers[layer_no].drm_format;
-    if (!ra_compatible_format(p->ctx->ra, drm_format, desc.objects[0].drm_format_modifier)) {
-            MP_VERBOSE(entry->vo, "Surface with format %s; drm format '%s(%016lx)' is "
-                                  "not supported by compositor.\n",
-                                   mp_imgfmt_to_name(src->params.hw_subfmt),
-                                   mp_tag_str(drm_format),
-                                   desc.objects[0].drm_format_modifier);
-            goto done;
+    buf->drm_format = desc.layers[layer_no].drm_format;
+    if (!ra_compatible_format(p->ctx->ra, buf->drm_format, desc.objects[0].drm_format_modifier)) {
+        MP_VERBOSE(vo, "%s(%016lx) is not supported.\n",
+                   mp_tag_str(buf->drm_format), desc.objects[0].drm_format_modifier);
+        buf->drm_format = 0;
+        goto done;
     }
-    entry->drm_format = drm_format;
     for (int plane_no = 0; plane_no < desc.layers[layer_no].num_planes; ++plane_no) {
         int object = desc.layers[layer_no].object_index[plane_no];
         uint64_t modifier = desc.objects[object].drm_format_modifier;
         zwp_linux_buffer_params_v1_add(params, desc.objects[object].fd, plane_no, desc.layers[layer_no].offset[plane_no],
                                        desc.layers[layer_no].pitch[plane_no], modifier >> 32, modifier & 0xffffffff);
     }
-    success = true;
 
 done:
     close_file_descriptors(desc);
-
-    return success;
-}
 #endif
+}
 
-#if HAVE_DRM
-
-static uintptr_t drmprime_key_provider(struct mp_image *src)
+static uintptr_t drmprime_surface_id(struct mp_image *src)
 {
+    uintptr_t id = 0;
+#if HAVE_DRM
     struct AVDRMFrameDescriptor *desc = (AVDRMFrameDescriptor *)src->planes[0];
 
     AVDRMObjectDescriptor object = desc->objects[0];
-    return (uintptr_t)object.fd;
+    id = (uintptr_t)object.fd;
+#endif
+    return id;
 }
 
-static bool drmprime_dmabuf_importer(struct mp_image *src, struct wlbuf_pool_entry *entry,
+static void drmprime_dmabuf_importer(struct buffer *buf, struct mp_image *src,
                                      struct zwp_linux_buffer_params_v1 *params)
 {
+#if HAVE_DRM
     int layer_no, plane_no;
-    const AVDRMFrameDescriptor *avdesc = (AVDRMFrameDescriptor *)src->planes[0];
+    int max_planes = 0;
+    const AVDRMFrameDescriptor *desc = (AVDRMFrameDescriptor *)src->planes[0];
+    if (!desc)
+        return;
 
-    for (layer_no = 0; layer_no < avdesc->nb_layers; layer_no++) {
-        AVDRMLayerDescriptor layer = avdesc->layers[layer_no];
+    buf->id = drmprime_surface_id(src);
+    for (layer_no = 0; layer_no < desc->nb_layers; layer_no++) {
+        AVDRMLayerDescriptor layer = desc->layers[layer_no];
 
-        entry->drm_format = layer.format;
+        buf->drm_format = layer.format;
+        max_planes = MPMAX(max_planes, layer.nb_planes);
         for (plane_no = 0; plane_no < layer.nb_planes; ++plane_no) {
             AVDRMPlaneDescriptor plane = layer.planes[plane_no];
             int object_index = plane.object_index;
-            AVDRMObjectDescriptor object = avdesc->objects[object_index];
+            AVDRMObjectDescriptor object = desc->objects[object_index];
             uint64_t modifier = object.format_modifier;
 
             zwp_linux_buffer_params_v1_add(params, object.fd, plane_no, plane.offset,
                                            plane.pitch, modifier >> 32, modifier & 0xffffffff);
         }
     }
-
-    return true;
-}
 #endif
+}
+
+static intptr_t surface_id(struct vo *vo, struct mp_image *src)
+{
+    struct priv *p = vo->priv;
+    switch(p->hwdec_type) {
+    case HWDEC_VAAPI:
+        return vaapi_surface_id(src);
+    case HWDEC_DRMPRIME:
+        return drmprime_surface_id(src);
+    default:
+        return 0;
+    }
+}
+
+static struct buffer *buffer_check(struct vo *vo, struct mp_image *src)
+{
+    struct priv *p = vo->priv;
+
+    /* Make more buffers if we're not at the desired amount yet. */
+    if (wl_list_length(&p->buffer_list) < WL_BUFFERS_WANTED)
+        goto done;
+
+    uintptr_t id = surface_id(vo, src);
+    struct buffer *buf;
+    wl_list_for_each(buf, &p->buffer_list, link) {
+        if (buf->id == id) {
+            if (buf->image) {
+                mp_image_unrefp(&buf->image);
+                buf->image = NULL;
+                goto done;
+            } else {
+                buf->image = src;
+                return buf;
+            }
+        }
+    }
+
+done:
+    return NULL;
+}
+
+static struct buffer *buffer_create(struct vo *vo, struct mp_image *src)
+{
+    struct vo_wayland_state *wl = vo->wl;
+    struct priv *p = vo->priv;
+
+    struct buffer *buf = talloc_zero(vo, struct buffer);
+    buf->vo = vo;
+    buf->image = src;
+
+    struct zwp_linux_buffer_params_v1 *params = zwp_linux_dmabuf_v1_create_params(wl->dmabuf);
+
+    switch(p->hwdec_type) {
+    case HWDEC_VAAPI:
+        vaapi_dmabuf_importer(buf, src, params);
+        break;
+    case HWDEC_DRMPRIME:
+        drmprime_dmabuf_importer(buf, src, params);
+        break;
+    }
+
+    if (!buf->drm_format) {
+        mp_image_unrefp(&buf->image);
+        talloc_free(buf);
+        zwp_linux_buffer_params_v1_destroy(params);
+        return NULL;
+    }
+
+    buf->buffer = zwp_linux_buffer_params_v1_create_immed(params, src->params.w, src->params.h,
+                                                          buf->drm_format, 0);
+    zwp_linux_buffer_params_v1_destroy(params);
+    wl_buffer_add_listener(buf->buffer, &buffer_listener, buf);
+    wl_list_insert(&p->buffer_list, &buf->link);
+    return buf;
+}
+
+static struct buffer *buffer_get(struct vo *vo, struct mp_image *src)
+{
+    /* Reuse existing buffer if possible. */
+    struct buffer *buf = buffer_check(vo, src);
+    if (buf) {
+        return buf;
+    } else {
+        return buffer_create(vo, src);
+    }
+}
+
+static void destroy_buffers(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct buffer *buf, *tmp;
+    p->destroy_buffers = false;
+    wl_list_for_each_safe(buf, tmp, &p->buffer_list, link) {
+        wl_list_remove(&buf->link);
+        if (buf->image) {
+            mp_image_unrefp(&buf->image);
+            buf->image = NULL;
+        }
+        if (buf->buffer) {
+            wl_buffer_destroy(buf->buffer);
+            buf->buffer = NULL;
+        }
+        talloc_free(buf);
+    }
+}
 
 static void set_viewport_source(struct vo *vo, struct mp_rect src) {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
 
     if (wl->video_viewport && !mp_rect_equals(&p->src, &src)) {
-        // 1. update viewport source
         wp_viewport_set_source(wl->video_viewport, src.x0 << 8,
                                src.y0 << 8, mp_rect_w(src) << 8,
                                mp_rect_h(src) << 8);
-        // 2. reset buffer pool
-        p->want_reset = true;
-
-        // 3. update to new src dimensions
         p->src = src;
     }
 }
 
 static void resize(struct vo *vo)
 {
-    struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
     struct mp_rect src;
     struct mp_rect dst;
@@ -188,6 +320,9 @@ static void resize(struct vo *vo)
     struct mp_vo_opts *vo_opts = wl->vo_opts;
     const int width = mp_rect_w(wl->geometry);
     const int height = mp_rect_h(wl->geometry);
+
+    if (width == 0 || height == 0)
+        return;
     
     vo_wayland_set_opaque_region(wl, false);
     vo->dwidth = width;
@@ -208,83 +343,59 @@ static void resize(struct vo *vo)
         wp_viewport_set_destination(wl->video_viewport, mp_rect_w(dst), mp_rect_h(dst));
     wl_subsurface_set_position(wl->video_subsurface, dst.x0, dst.y0);
     set_viewport_source(vo, src);
-
-    vo->want_redraw = true;
-    p->resized = true;
-    p->want_reset = true;
-    p->want_resize = false;
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
-    struct wlbuf_pool_entry *entry;
-    
-    if (!vo_wayland_check_visible(vo))
+    struct buffer *buf;
+
+    if (!vo_wayland_check_visible(vo) || !frame->current)
         return;
 
-    /* lazy initialization of buffer pool */
-    if (!p->wlbuf_pool) {
-#if HAVE_VAAPI
-        p->display = (VADisplay)ra_get_native_resource(p->ctx->ra, "VADisplay");
-        if (p->display)
-            p->wlbuf_pool = wlbuf_pool_alloc(vo, wl, vaapi_key_provider, vaapi_dmabuf_importer);
-#endif
-#if HAVE_DRM
-        if (!p->wlbuf_pool)
-            p->wlbuf_pool = wlbuf_pool_alloc(vo, wl, drmprime_key_provider, drmprime_dmabuf_importer);
-#endif
+    if (p->destroy_buffers)
+        destroy_buffers(vo);
+
+    struct mp_image *src = mp_image_new_ref(frame->current);
+    buf = buffer_get(vo, src);
+
+    if (buf && buf->image) {
+        wl_surface_attach(wl->video_surface, buf->buffer, 0, 0);
+        wl_surface_damage_buffer(wl->video_surface, 0, 0, buf->image->params.w,
+                                 buf->image->params.h);
     }
-    entry = wlbuf_pool_get_entry(p->wlbuf_pool, frame->current);
-    if (!entry)
-        return;
-
-    // ensure the pool is reset after hwdec seek,
-    // to avoid stutter artifact
-    if (p->want_reset)
-        wlbuf_pool_clean(p->wlbuf_pool,false);
-    if (p->want_resize)
-        resize(vo);
-
-    MP_TRACE(entry->vo, "Schedule buffer pool entry : %lu\n",entry->key );
-    wl_surface_attach(wl->video_surface, entry->buffer, 0, 0);
-    wl_surface_damage_buffer(wl->video_surface, 0, 0, INT32_MAX, INT32_MAX);
 }
 
 static void flip_page(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
-    struct priv *p = vo->priv;
 
     wl_surface_commit(wl->video_surface);
     wl_surface_commit(wl->surface);
+
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
+
     if (wl->use_present)
        present_sync_swap(wl->present);
-    if (p->want_reset) {
-        wlbuf_pool_clean(p->wlbuf_pool,false);
-        p->want_reset = false;
-    }
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
 {
     struct vo_wayland_state *wl = vo->wl;
-
     if (wl->use_present)
         present_sync_get_info(wl->present, info);
 }
 
 static bool is_supported_fmt(int fmt)
 {
-    return  (fmt == IMGFMT_DRMPRIME || fmt == IMGFMT_VAAPI);
+    return (fmt == IMGFMT_DRMPRIME || fmt == IMGFMT_VAAPI);
 }
 
 static int query_format(struct vo *vo, int format)
 {
-    return  is_supported_fmt(format);
+    return is_supported_fmt(format);
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -292,6 +403,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (!vo_wayland_reconfig(vo))
         return VO_ERROR;
 
+    // Immediately destroy all buffers if params change.
+    destroy_buffers(vo);
     return 0;
 }
 
@@ -309,9 +422,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     int ret;
 
     switch (request) {
-    case VOCTRL_SET_PANSCAN:
-        p->want_resize = true;
-        return VO_TRUE;
     case VOCTRL_LOAD_HWDEC_API:
         assert(p->hwdec_ctx.ra);
         struct hwdec_imgfmt_request* req = (struct hwdec_imgfmt_request*)data;
@@ -319,19 +429,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
             return 0;
         ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, vo->hwdec_devs, req);
         return (p->hwdec_ctx.num_hwdecs > 0);
-        break;
-	case VOCTRL_RESET:
-        p->want_reset = true;
-	    return VO_TRUE;
-	    break;
+    case VOCTRL_RESET:
+        p->destroy_buffers = true;
+        return VO_TRUE;
+    case VOCTRL_SET_PANSCAN:
+        resize(vo);
+        return VO_TRUE;
     }
 
     ret = vo_wayland_control(vo, &events, request, data);
-    if (events & VO_EVENT_RESIZE){
-        p->want_resize = true;
-        if (!p->resized)
-            resize(vo);
-    }
+    if (events & VO_EVENT_RESIZE)
+        resize(vo);
     if (events & VO_EVENT_EXPOSE)
         vo->want_redraw = true;
     vo_event(vo, events);
@@ -343,7 +451,7 @@ static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    wlbuf_pool_free(p->wlbuf_pool);
+    destroy_buffers(vo);
     if (p->solid_buffer_pool)
         wl_shm_pool_destroy(p->solid_buffer_pool);
     if (p->solid_buffer)
@@ -353,6 +461,7 @@ static void uninit(struct vo *vo)
         hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
         hwdec_devices_destroy(vo->hwdec_devs);
     }
+
     vo_wayland_uninit(vo);
     ra_ctx_destroy(&p->ctx);
 }
@@ -367,6 +476,8 @@ static int preinit(struct vo *vo)
     if (!p->ctx)
        goto err;
     assert(p->ctx->ra);
+
+    wl_list_init(&p->buffer_list);
 
     if (!vo->wl->dmabuf) {
         MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
@@ -424,9 +535,24 @@ static int preinit(struct vo *vo)
         .global = p->global,
         .ra = p->ctx->ra,
     };
-    ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, NULL, true);
-    p->src = (struct mp_rect){0, 0, 0, 0};
 
+    ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, NULL, true);
+
+    for (int i = 0; i < p->hwdec_ctx.num_hwdecs; i++) {
+        struct ra_hwdec *hw = p->hwdec_ctx.hwdecs[i];
+        if (ra_get_native_resource(p->ctx->ra, "VADisplay")) {
+            p->hwdec_type = HWDEC_VAAPI;
+        } else if (strcmp(hw->driver->name, "drmprime") == 0) {
+            p->hwdec_type = HWDEC_DRMPRIME;
+        }
+    }
+
+    if (p->hwdec_type == HWDEC_NONE) {
+        MP_ERR(vo, "No valid hardware decoding driver could be loaded!");
+        goto err;
+    }
+
+    p->src = (struct mp_rect){0, 0, 0, 0};
     return 0;
 
 err:
