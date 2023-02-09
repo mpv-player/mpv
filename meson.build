@@ -1420,7 +1420,6 @@ if features['dmabuf-wayland']
     sources += files('video/out/hwdec/dmabuf_interop_wl.c')
     sources += files('video/out/wldmabuf/context_wldmabuf.c')
     sources += files('video/out/wldmabuf/ra_wldmabuf.c')
-    sources += files('video/out/wlbuf_pool.c')
 endif
 
 vdpau_opt = get_option('vdpau').require(
