@@ -2594,6 +2594,9 @@ function tick()
         -- render idle message
         msg.trace("idle message")
         local _, _, display_aspect = mp.get_osd_size()
+        if display_aspect == 0 then
+            return
+        end
         local display_h = 360
         local display_w = display_h * display_aspect
         -- logo is rendered at 2^(6-1) = 32 times resolution with size 1800x1800
