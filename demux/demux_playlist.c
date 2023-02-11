@@ -24,6 +24,7 @@
 
 #include "common/common.h"
 #include "options/options.h"
+#include "options/m_config.h"
 #include "common/msg.h"
 #include "common/playlist.h"
 #include "misc/thread_tools.h"
@@ -34,6 +35,31 @@
 #include "demux.h"
 
 #define PROBE_SIZE (8 * 1024)
+
+enum dir_mode {
+    DIR_RECURSIVE,
+    DIR_LAZY,
+    DIR_IGNORE,
+};
+
+#define OPT_BASE_STRUCT struct demux_playlist_opts
+struct demux_playlist_opts {
+    int dir_mode;
+};
+
+struct m_sub_options demux_playlist_conf = {
+    .opts = (const struct m_option[]) {
+        {"directory-mode", OPT_CHOICE(dir_mode,
+            {"recursive", DIR_RECURSIVE},
+            {"lazy", DIR_LAZY},
+            {"ignore", DIR_IGNORE})},
+        {0}
+    },
+    .size = sizeof(struct demux_playlist_opts),
+    .defaults = &(const struct demux_playlist_opts){
+        .dir_mode = DIR_RECURSIVE,
+    },
+};
 
 static bool check_mimetype(struct stream *s, const char *const *list)
 {
@@ -59,6 +85,7 @@ struct pl_parser {
     enum demux_check check_level;
     struct stream *real_stream;
     char *format;
+    struct demux_playlist_opts *opts;
 };
 
 
@@ -323,6 +350,7 @@ static bool scan_dir(struct pl_parser *p, char *path,
         return false;
     }
 
+    int dir_mode = p->opts->dir_mode;
     struct dirent *ep;
     while ((ep = readdir(dp))) {
         if (ep->d_name[0] == '.')
@@ -334,16 +362,18 @@ static bool scan_dir(struct pl_parser *p, char *path,
         char *file = mp_path_join(p, path, ep->d_name);
 
         struct stat st;
-        if (stat(file, &st) == 0 && S_ISDIR(st.st_mode)) {
-            for (int n = 0; n < num_dir_stack; n++) {
-                if (same_st(&dir_stack[n], &st)) {
-                    MP_VERBOSE(p, "Skip recursive entry: %s\n", file);
-                    goto skip;
+        if (dir_mode != DIR_LAZY && stat(file, &st) == 0 && S_ISDIR(st.st_mode)) {
+            if (dir_mode != DIR_IGNORE) {
+                for (int n = 0; n < num_dir_stack; n++) {
+                    if (same_st(&dir_stack[n], &st)) {
+                        MP_VERBOSE(p, "Skip recursive entry: %s\n", file);
+                        goto skip;
+                    }
                 }
-            }
 
-            dir_stack[num_dir_stack] = st;
-            scan_dir(p, file, dir_stack, num_dir_stack + 1, files, num_files);
+                dir_stack[num_dir_stack] = st;
+                scan_dir(p, file, dir_stack, num_dir_stack + 1, files, num_files);
+            }
         } else {
             MP_TARRAY_APPEND(p, *files, *num_files, file);
         }
@@ -458,6 +488,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->error = false;
     p->s = demuxer->stream;
     p->utf16 = stream_skip_bom(p->s);
+    p->opts = mp_get_config_group(demuxer, demuxer->global, &demux_playlist_conf);
     bool ok = fmt->parse(p) >= 0 && !p->error;
     if (p->add_base)
         playlist_add_base_path(p->pl, mp_dirname(demuxer->filename));
@@ -471,7 +502,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     return ok ? 0 : -1;
 }
 
-const struct demuxer_desc demuxer_desc_playlist = {
+const demuxer_desc_t demuxer_desc_playlist = {
     .name = "playlist",
     .desc = "Playlist file",
     .open = open_file,
