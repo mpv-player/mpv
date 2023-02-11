@@ -1835,6 +1835,10 @@ static void update_render_options(struct vo *vo)
         [TONE_MAPPING_SPLINE]   = &pl_tone_map_spline,
         [TONE_MAPPING_BT_2390]  = &pl_tone_map_bt2390,
         [TONE_MAPPING_BT_2446A] = &pl_tone_map_bt2446a,
+#if PL_API_VER >= 246
+        [TONE_MAPPING_ST2094_40] = &pl_tone_map_st2094_40,
+        [TONE_MAPPING_ST2094_10] = &pl_tone_map_st2094_10,
+#endif
     };
 
     static const enum pl_gamut_mode gamut_modes[] = {
