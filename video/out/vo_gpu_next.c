@@ -422,6 +422,17 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
+static inline void *get_side_data(const struct mp_image *mpi,
+                                  enum AVFrameSideDataType type)
+{
+    for (int i = 0; i <mpi->num_ff_side_data; i++) {
+        if (mpi->ff_side_data[i].type == type)
+            return (void *) mpi->ff_side_data[i].buf->data;
+    }
+
+    return NULL;
+}
+
 static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
 {
     struct pl_color_space csp = {
@@ -430,6 +441,13 @@ static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
         .hdr.max_luma = mpi->params.color.sig_peak * MP_REF_WHITE,
     };
 
+#ifdef PL_HAVE_LAV_HDR
+    pl_map_hdr_metadata(&csp.hdr, &(struct pl_av_hdr_metadata) {
+        .mdm = get_side_data(mpi, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA),
+        .clm = get_side_data(mpi, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
+        .dhp = get_side_data(mpi, AV_FRAME_DATA_DYNAMIC_HDR_PLUS),
+    });
+#else // back-compat fallback for older libplacebo
     for (int i = 0; i < mpi->num_ff_side_data; i++) {
         void *data = mpi->ff_side_data[i].buf->data;
         switch (mpi->ff_side_data[i].type) {
@@ -461,6 +479,7 @@ static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
         default: break;
         }
     }
+#endif // PL_HAVE_LAV_HDR
 
     return csp;
 }
