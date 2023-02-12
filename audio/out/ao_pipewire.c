@@ -61,6 +61,11 @@ enum init_state {
     INIT_STATE_ERROR,
 };
 
+enum {
+    VOLUME_MODE_CHANNEL,
+    VOLUME_MODE_GLOBAL,
+};
+
 struct priv {
     struct pw_thread_loop *loop;
     struct pw_stream *stream;
@@ -75,6 +80,7 @@ struct priv {
     struct {
         int buffer_msec;
         char *remote;
+        int volume_mode;
     } options;
 
     struct {
@@ -280,8 +286,16 @@ static void on_control_info(void *userdata, uint32_t id,
                 p->muted = control->values[0] >= 0.5;
             break;
         case SPA_PROP_channelVolumes:
+            if (p->options.volume_mode != VOLUME_MODE_CHANNEL)
+                break;
             if (control->n_values > 0)
                 p->volume = volume_avg(control->values, control->n_values);
+            break;
+        case SPA_PROP_volume:
+            if (p->options.volume_mode != VOLUME_MODE_GLOBAL)
+                break;
+            if (control->n_values > 0)
+                p->volume = control->values[0];
             break;
     }
 }
@@ -663,12 +677,19 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
                 case AOCONTROL_SET_VOLUME: {
                     float *vol = arg;
                     uint8_t n = ao->channels.num;
-                    float values[MP_NUM_CHANNELS] = {0};
-                    for (int i = 0; i < n; i++)
-                        values[i] = mp_volume_to_spa_volume(*vol);
-                    ret = CONTROL_RET(pw_stream_set_control(p->stream, SPA_PROP_channelVolumes, n, values, 0));
+                    if (p->options.volume_mode == VOLUME_MODE_CHANNEL) {
+                        float values[MP_NUM_CHANNELS] = {0};
+                        for (int i = 0; i < n; i++)
+                            values[i] = mp_volume_to_spa_volume(*vol);
+                        ret = CONTROL_RET(pw_stream_set_control(
+                                    p->stream, SPA_PROP_channelVolumes, n, values, 0));
+                    } else {
+                        float value = mp_volume_to_spa_volume(*vol);
+                        ret = CONTROL_RET(pw_stream_set_control(
+                                    p->stream, SPA_PROP_volume, 1, &value, 0));
+                    }
                     break;
-               }
+                }
                 case AOCONTROL_SET_MUTE: {
                     bool *muted = arg;
                     float value = *muted ? 1.f : 0.f;
@@ -854,11 +875,14 @@ const struct ao_driver audio_out_pipewire = {
         .stream = NULL,
         .init_state = INIT_STATE_NONE,
         .options.buffer_msec = 20,
+        .options.volume_mode = VOLUME_MODE_CHANNEL,
     },
     .options_prefix = "pipewire",
     .options = (const struct m_option[]) {
         {"buffer", OPT_INT(options.buffer_msec), M_RANGE(1, 2000)},
         {"remote", OPT_STRING(options.remote) },
+        {"volume-mode", OPT_CHOICE(options.volume_mode,
+            {"channel", VOLUME_MODE_CHANNEL}, {"global", VOLUME_MODE_GLOBAL})},
         {0}
     },
 };

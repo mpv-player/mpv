@@ -161,6 +161,11 @@ Available audio output drivers are:
         sockets.
         An empty <remote> string uses the default remote named ``pipewire-0``.
 
+    ``--pipewire-volume-mode=<channel|global>``
+        Specify if the ``ao-volume`` property should apply to the channel
+        volumes or the global volume.
+        By default the channel volumes are used.
+
 ``sdl``
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL
     1.2, but may require the ``SDL_AUDIODRIVER`` environment variable to be set

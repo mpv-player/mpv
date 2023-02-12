@@ -4275,7 +4275,7 @@ Screenshot
 
     Note that not all formats are supported.
 
-    Default: ``no``.
+    Default: ``yes``.
 
 ``--screenshot-high-bit-depth=<yes|no>``
     If possible, write screenshots with a bit depth similar to the source
@@ -6880,9 +6880,6 @@ Miscellaneous
 
     See ``--interpolation-threshold`` for how this option affects
     interpolation.
-
-    This is mostly for testing, and the option may be randomly changed in the
-    future without notice.
 
 ``--video-sync-max-video-change=<value>``
     Maximum speed difference in percent that is applied to video with
