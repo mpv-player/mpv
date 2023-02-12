@@ -4,7 +4,7 @@
  * Original author: A'rpi
  * Support for >2 output channels added 2001-11-25
  * - Steve Davies <steve@daviesfam.org>
- * Rozhuk Ivan <rozhuk.im@gmail.com> 2020
+ * Rozhuk Ivan <rozhuk.im@gmail.com> 2020-2023
  *
  * This file is part of mpv.
  *
@@ -53,7 +53,6 @@
 
 struct priv {
     int dsp_fd;
-    bool playing;
     double bps; /* Bytes per second. */
 };
 
@@ -241,7 +240,6 @@ static int init(struct ao *ao)
     ao->samplerate = samplerate;
     ao->channels = channels;
     p->bps = (channels.num * samplerate * af_fmt_to_bytes(format));
-    p->playing = false;
 
     return 0;
 
@@ -261,7 +259,6 @@ static void uninit(struct ao *ao)
     ioctl(p->dsp_fd, SNDCTL_DSP_HALT, NULL);
     close(p->dsp_fd);
     p->dsp_fd = -1;
-    p->playing = false;
 }
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -299,7 +296,6 @@ static void reset(struct ao *ao)
     int trig = 0;
 
     /* Clear buf and do not start playback after data written. */
-    p->playing = false;
     if (ioctl(p->dsp_fd, SNDCTL_DSP_HALT, NULL) == -1 ||
         ioctl(p->dsp_fd, SNDCTL_DSP_SETTRIGGER, &trig) == -1)
     {
@@ -319,7 +315,6 @@ static void start(struct ao *ao)
         MP_WARN_IOCTL_ERR(ao);
         return;
     }
-    p->playing = true;
 }
 
 static bool audio_write(struct ao *ao, void **data, int samples)
@@ -336,13 +331,11 @@ static bool audio_write(struct ao *ao, void **data, int samples)
 			continue;
         MP_WARN(ao, "audio_write: write() fail, err = %i: %s.\n",
             errno, strerror(errno));
-        p->playing = false;
         return false;
     }
     if ((size_t)rc != size) {
         MP_WARN(ao, "audio_write: unexpected partial write: required: %zu, written: %zu.\n",
             size, (size_t)rc);
-        p->playing = false;
         return false;
     }
 
@@ -359,7 +352,6 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
         ioctl(p->dsp_fd, SNDCTL_DSP_GETODELAY, &odelay) == -1)
     {
         MP_WARN_IOCTL_ERR(ao);
-        p->playing = false;
         memset(state, 0x00, sizeof(struct mp_pcm_state));
         state->delay = 0.0;
         return;
@@ -367,7 +359,7 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
     state->free_samples = (info.bytes / ao->sstride);
     state->queued_samples = (ao->device_buffer - state->free_samples);
     state->delay = (odelay / p->bps);
-    state->playing = p->playing;
+    state->playing = (state->queued_samples != 0);
 }
 
 static void list_devs(struct ao *ao, struct ao_device_list *list)
@@ -405,6 +397,5 @@ const struct ao_driver audio_out_oss = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .dsp_fd = -1,
-        .playing = false,
     },
 };
