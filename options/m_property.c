@@ -239,11 +239,10 @@ static void m_property_unkey(int *action, void **arg)
 static int m_property_do_bstr(const struct m_property *prop_list, bstr name,
                               int action, void *arg, void *ctx)
 {
-    char name0[64];
-    if (name.len >= sizeof(name0))
-        return M_PROPERTY_UNKNOWN;
-    snprintf(name0, sizeof(name0), "%.*s", BSTR_P(name));
-    return m_property_do(NULL, prop_list, name0, action, arg, ctx);
+    char *name0 = bstrdup0(NULL, name);
+    int ret = m_property_do(NULL, prop_list, name0, action, arg, ctx);
+    talloc_free(name0);
+    return ret;
 }
 
 static void append_str(char **s, int *len, bstr append)
