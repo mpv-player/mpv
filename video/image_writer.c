@@ -332,6 +332,19 @@ bool image_writer_high_depth(const struct image_writer_opts *opts)
     ;
 }
 
+bool image_writer_flexible_csp(const struct image_writer_opts *opts)
+{
+    return false
+#if HAVE_JPEGXL
+        || opts->format == AV_CODEC_ID_JPEGXL
+#endif
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 58, 100)
+        // This version added support for cICP tag writing
+        || opts->format == AV_CODEC_ID_PNG
+#endif
+    ;
+}
+
 int image_writer_format_from_ext(const char *ext)
 {
     for (int n = 0; mp_image_writer_formats[n].name; n++) {

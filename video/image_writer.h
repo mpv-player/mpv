@@ -50,6 +50,9 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts);
 // Return whether the selected format likely supports >8 bit per component.
 bool image_writer_high_depth(const struct image_writer_opts *opts);
 
+// Return whether the selected format likely supports non-sRGB colorspaces
+bool image_writer_flexible_csp(const struct image_writer_opts *opts);
+
 // Map file extension to format ID - return 0 (which is invalid) if unknown.
 int image_writer_format_from_ext(const char *ext);
 
