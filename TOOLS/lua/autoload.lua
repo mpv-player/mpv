@@ -150,14 +150,7 @@ function alphanumsort(filenames)
 end
 
 local autoloaded = nil
-
-function get_playlist_filenames(playlist)
-    local filenames = {}
-    for i = 1, #playlist do
-        filenames[playlist[i].filename] = true
-    end
-    return filenames
-end
+local added_entries = {}
 
 function find_and_add_entries()
     local path = mp.get_property("path", "")
@@ -171,7 +164,7 @@ function find_and_add_entries()
         return
     end
 
-    pl_count = mp.get_property_number("playlist-count", 1)
+    local pl_count = mp.get_property_number("playlist-count", 1)
     this_ext = get_extension(filename)
     -- check if this is a manually made playlist
     if (pl_count > 1 and autoloaded == nil) or
@@ -179,7 +172,10 @@ function find_and_add_entries()
         msg.verbose("stopping: manually made playlist")
         return
     else
-        autoloaded = true
+        if pl_count == 1 then
+            autoloaded = true
+            added_entries = {}
+        end
     end
 
     if o.same_type then
@@ -243,8 +239,13 @@ function find_and_add_entries()
     end
     msg.trace("current file position in files: "..current)
 
+    -- treat already existing playlist entries, independent of how they got added
+    -- as if they got added by autoload
+    for _, entry in ipairs(pl) do
+        added_entries[entry.filename] = true
+    end
+
     local append = {[-1] = {}, [1] = {}}
-    local filenames = get_playlist_filenames(pl)
     for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
         for i = 1, MAXENTRIES do
             local pos = current + i * direction
@@ -254,8 +255,8 @@ function find_and_add_entries()
             end
 
             local filepath = dir .. file
-            -- skip files already in playlist
-            if not filenames[file] then
+            -- skip files that are/were already in the playlist
+            if not added_entries[filepath] then
                 if direction == -1 then
                     msg.info("Prepending " .. filepath)
                     table.insert(append[-1], 1, {filepath, pl_current + i * direction + 1})
@@ -268,6 +269,7 @@ function find_and_add_entries()
                     end
                 end
             end
+            added_entries[filepath] = true
         end
         if pl_count == 1 and direction == -1 and #append[-1] > 0 then
             for i = 1, #append[-1] do
