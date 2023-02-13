@@ -25,6 +25,7 @@ same_type=yes
 --]]
 
 MAXENTRIES = 5000
+MAXDIRSTACK = 20
 
 local msg = require 'mp.msg'
 local options = require 'mp.options'
@@ -151,6 +152,51 @@ end
 
 local autoloaded = nil
 local added_entries = {}
+local autoloaded_dir = nil
+
+function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_files)
+    if dir_depth == MAXDIRSTACK then
+        return
+    end
+    msg.trace("scanning: " .. path)
+    local files = utils.readdir(path, "files") or {}
+    local dirs = dir_mode ~= "ignore" and utils.readdir(path, "dirs") or {}
+    local prefix = path == "." and "" or path
+    table.filter(files, function (v)
+        -- The current file could be a hidden file, ignoring it doesn't load other
+        -- files from the current directory.
+        if (o.ignore_hidden and not (prefix .. v == current_file) and string.match(v, "^%.")) then
+            return false
+        end
+        local ext = get_extension(v)
+        if ext == nil then
+            return false
+        end
+        return EXTENSIONS[string.lower(ext)]
+    end)
+    table.filter(dirs, function(d)
+        return not ((o.ignore_hidden and string.match(d, "^%.")))
+    end)
+    alphanumsort(files)
+    alphanumsort(dirs)
+
+    for i, file in ipairs(files) do
+        files[i] = prefix .. file
+    end
+
+    table.append(total_files, files)
+    if dir_mode == "recursive" then
+        for _, dir in ipairs(dirs) do
+            scan_dir(prefix .. dir .. separator, current_file, dir_mode,
+                     separator, dir_depth + 1, total_files)
+        end
+    else
+        for i, dir in ipairs(dirs) do
+            dirs[i] = prefix .. dir
+        end
+        table.append(total_files, dirs)
+    end
+end
 
 function find_and_add_entries()
     local path = mp.get_property("path", "")
@@ -174,6 +220,7 @@ function find_and_add_entries()
     else
         if pl_count == 1 then
             autoloaded = true
+            autoloaded_dir = dir
             added_entries = {}
         end
     end
@@ -195,41 +242,22 @@ function find_and_add_entries()
     msg.trace(("playlist-pos-1: %s, playlist: %s"):format(pl_current,
         utils.to_string(pl)))
 
-    local files = utils.readdir(dir, "files")
-    local load_dirs = mp.get_property("directory-mode") ~= "ignore"
-    local dirs = load_dirs and utils.readdir(dir, "dirs") or nil
-    if files == nil and dirs == nil then
+    local files = {}
+    do
+        local dir_mode = mp.get_property("directory-mode")
+        local separator = mp.get_property_native("platform") == "windows" and "\\" or "/"
+        scan_dir(autoloaded_dir, path, dir_mode, separator, 0, files)
+    end
+
+    if next(files) == nil then
         msg.verbose("no other files or directories in directory")
         return
-    end
-    files, dirs = files or {}, dirs or {}
-    table.filter(files, function (v, k)
-        -- The current file could be a hidden file, ignoring it doesn't load other
-        -- files from the current directory.
-        if (o.ignore_hidden and not (v == filename) and string.match(v, "^%.")) then
-            return false
-        end
-        local ext = get_extension(v)
-        if ext == nil then
-            return false
-        end
-        return EXTENSIONS_TARGET[string.lower(ext)]
-    end)
-    table.filter(dirs, function(d)
-        return not ((o.ignore_hidden and string.match(d, "^%.")))
-    end)
-    alphanumsort(files)
-    alphanumsort(dirs)
-    table.append(files, dirs)
-
-    if dir == "." then
-        dir = ""
     end
 
     -- Find the current pl entry (dir+"/"+filename) in the sorted dir list
     local current
     for i = 1, #files do
-        if files[i] == filename then
+        if files[i] == path then
             current = i
             break
         end
@@ -254,22 +282,21 @@ function find_and_add_entries()
                 break
             end
 
-            local filepath = dir .. file
             -- skip files that are/were already in the playlist
-            if not added_entries[filepath] then
+            if not added_entries[file] then
                 if direction == -1 then
-                    msg.info("Prepending " .. filepath)
-                    table.insert(append[-1], 1, {filepath, pl_current + i * direction + 1})
+                    msg.info("Prepending " .. file)
+                    table.insert(append[-1], 1, {file, pl_current + i * direction + 1})
                 else
-                    msg.info("Adding " .. filepath)
+                    msg.info("Adding " .. file)
                     if pl_count > 1 then
-                        table.insert(append[1], {filepath, pl_current + i * direction - 1})
+                        table.insert(append[1], {file, pl_current + i * direction - 1})
                     else
-                        mp.commandv("loadfile", filepath, "append")
+                        mp.commandv("loadfile", file, "append")
                     end
                 end
             end
-            added_entries[filepath] = true
+            added_entries[file] = true
         end
         if pl_count == 1 and direction == -1 and #append[-1] > 0 then
             for i = 1, #append[-1] do
