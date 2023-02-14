@@ -699,22 +699,8 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     // Update chroma location, must be done after initializing planes
     pl_frame_set_chroma_location(frame, mp_chroma_to_pl(par->chroma_location));
 
-#ifdef PL_HAVE_LAV_DOLBY_VISION
-    if (mpi->dovi) {
-        const AVDOVIMetadata *metadata = (AVDOVIMetadata *) mpi->dovi->data;
-        struct pl_dovi_metadata *dovi = talloc_ptrtype(mpi, dovi);
-        const AVDOVIColorMetadata *color = av_dovi_get_color(metadata);
-        pl_map_dovi_metadata(dovi, metadata);
-        frame->repr.dovi = dovi;
-        frame->repr.sys = PL_COLOR_SYSTEM_DOLBYVISION;
-        frame->color.primaries = PL_COLOR_PRIM_BT_2020;
-        frame->color.transfer = PL_COLOR_TRC_PQ;
-        frame->color.hdr.min_luma =
-            pl_hdr_rescale(PL_HDR_PQ, PL_HDR_NITS, color->source_min_pq / 4095.0f);
-        frame->color.hdr.max_luma =
-            pl_hdr_rescale(PL_HDR_PQ, PL_HDR_NITS, color->source_max_pq / 4095.0f);
-    }
-#endif
+    // Set the frame DOVI metadata
+    mp_map_dovi_metadata_to_pl(mpi, frame);
 
 #ifdef PL_HAVE_LAV_FILM_GRAIN
     if (mpi->film_grain)
