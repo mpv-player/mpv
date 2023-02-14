@@ -52,7 +52,7 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .webp_quality = 75,
     .webp_compression = 4,
     .jxl_distance = 1.0,
-    .jxl_effort = 3,
+    .jxl_effort = 4,
     .tag_csp = 1,
 };
 
