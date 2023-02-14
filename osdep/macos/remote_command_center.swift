@@ -25,6 +25,7 @@ class RemoteCommandCenter: NSObject {
     }
 
     var config: [MPRemoteCommand:[String:Any]] = [
+        MPRemoteCommandCenter.shared().changePlaybackPositionCommand: [:],
         MPRemoteCommandCenter.shared().pauseCommand: [
             "mpKey": MP_KEY_PAUSEONLY,
             "keyType": KeyType.normal
@@ -77,7 +78,6 @@ class RemoteCommandCenter: NSObject {
         MPRemoteCommandCenter.shared().changeShuffleModeCommand,
         MPRemoteCommandCenter.shared().skipForwardCommand,
         MPRemoteCommandCenter.shared().skipBackwardCommand,
-        MPRemoteCommandCenter.shared().changePlaybackPositionCommand,
         MPRemoteCommandCenter.shared().enableLanguageOptionCommand,
         MPRemoteCommandCenter.shared().disableLanguageOptionCommand,
         MPRemoteCommandCenter.shared().ratingCommand,
@@ -88,6 +88,7 @@ class RemoteCommandCenter: NSObject {
 
     var mpInfoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
     var isPaused: Bool = false { didSet { updatePlaybackState() } }
+    var lastTimePos: Double = 0
 
     @objc override init() {
         super.init()
@@ -143,9 +144,21 @@ class RemoteCommandCenter: NSObject {
 
     func updatePlaybackState() {
         mpInfoCenter.playbackState = isPaused ? .paused : .playing
+
+        updateElapsedTime()
+    }
+    
+    func updateElapsedTime() {
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = NSNumber(value: lastTimePos)
+        mpInfoCenter.nowPlayingInfo = nowPlayingInfo
     }
 
     func cmdHandler(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
+        if event is MPChangePlaybackPositionCommandEvent {
+            updateElapsedTime()
+            return .success
+        }
+
         guard let cmdConfig = config[event.command],
               let mpKey = cmdConfig["mpKey"] as? Int32,
               let keyType = cmdConfig["keyType"] as? KeyType else
@@ -185,6 +198,16 @@ class RemoteCommandCenter: NSObject {
         }
 
         switch String(cString: property.name) {
+        case "duration" where property.format == MPV_FORMAT_DOUBLE:
+            let duration = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = NSNumber(value: Int(duration))
+            mpInfoCenter.nowPlayingInfo = nowPlayingInfo
+        case "time-pos" where property.format == MPV_FORMAT_DOUBLE:
+           let oldTimePos = lastTimePos
+           lastTimePos = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0
+            if lastTimePos - oldTimePos >= 1 || lastTimePos - oldTimePos <= -1 {
+                updateElapsedTime()
+            }
         case "pause" where property.format == MPV_FORMAT_FLAG:
             isPaused = LibmpvHelper.mpvFlagToBool(property.data) ?? false
         default:
