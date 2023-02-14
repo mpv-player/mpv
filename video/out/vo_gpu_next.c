@@ -422,6 +422,17 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
+static inline void *get_side_data(const struct mp_image *mpi,
+                                  enum AVFrameSideDataType type)
+{
+    for (int i = 0; i <mpi->num_ff_side_data; i++) {
+        if (mpi->ff_side_data[i].type == type)
+            return (void *) mpi->ff_side_data[i].buf->data;
+    }
+
+    return NULL;
+}
+
 static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
 {
     struct pl_color_space csp = {
@@ -430,6 +441,13 @@ static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
         .hdr.max_luma = mpi->params.color.sig_peak * MP_REF_WHITE,
     };
 
+#ifdef PL_HAVE_LAV_HDR
+    pl_map_hdr_metadata(&csp.hdr, &(struct pl_av_hdr_metadata) {
+        .mdm = get_side_data(mpi, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA),
+        .clm = get_side_data(mpi, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
+        .dhp = get_side_data(mpi, AV_FRAME_DATA_DYNAMIC_HDR_PLUS),
+    });
+#else // back-compat fallback for older libplacebo
     for (int i = 0; i < mpi->num_ff_side_data; i++) {
         void *data = mpi->ff_side_data[i].buf->data;
         switch (mpi->ff_side_data[i].type) {
@@ -461,6 +479,7 @@ static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
         default: break;
         }
     }
+#endif // PL_HAVE_LAV_HDR
 
     return csp;
 }
@@ -1198,6 +1217,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     }
 
     struct pl_frame target = {
+        .repr = pl_color_repr_rgb,
         .num_planes = 1,
         .planes[0] = {
             .texture = fbo,
@@ -1206,7 +1226,15 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         },
     };
 
-    apply_target_options(p, &target);
+    if (args->scaled) {
+        // Apply target LUT, ICC profile and CSP override only in window mode
+        apply_target_options(p, &target);
+    } else if (args->native_csp) {
+        target.color = image.color;
+    } else {
+        target.color = pl_color_space_srgb;
+    }
+
     apply_crop(&image, src, mpi->params.w, mpi->params.h);
     apply_crop(&target, dst, fbo->params.w, fbo->params.h);
 
@@ -1227,6 +1255,22 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     args->res = mp_image_alloc(mpfmt, fbo->params.w, fbo->params.h);
     if (!args->res)
         goto done;
+
+    if (args->scaled) {
+        // Provide tagging for target CSP info (if known)
+        const struct gl_video_opts *opts = p->opts_cache->opts;
+        args->res->params.color.primaries = opts->target_prim;
+        args->res->params.color.gamma = opts->target_trc;
+        args->res->params.color.levels = p->output_levels;
+        args->res->params.color.sig_peak = opts->target_peak;
+        args->res->params.p_w = args->res->params.p_h = 1;
+    } else if (args->native_csp) {
+        args->res->params.color = mpi->params.color;
+        args->res->params.color.space = MP_CSP_RGB;
+    } else {
+        args->res->params.color.primaries = MP_CSP_PRIM_BT_709;
+        args->res->params.color.gamma = MP_CSP_TRC_SRGB;
+    }
 
     bool ok = pl_tex_download(gpu, pl_tex_transfer_params(
         .tex = fbo,
@@ -1816,6 +1860,10 @@ static void update_render_options(struct vo *vo)
         [TONE_MAPPING_SPLINE]   = &pl_tone_map_spline,
         [TONE_MAPPING_BT_2390]  = &pl_tone_map_bt2390,
         [TONE_MAPPING_BT_2446A] = &pl_tone_map_bt2446a,
+#if PL_API_VER >= 246
+        [TONE_MAPPING_ST2094_40] = &pl_tone_map_st2094_40,
+        [TONE_MAPPING_ST2094_10] = &pl_tone_map_st2094_10,
+#endif
     };
 
     static const enum pl_gamut_mode gamut_modes[] = {

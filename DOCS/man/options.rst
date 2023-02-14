@@ -6442,6 +6442,15 @@ them.
         HDR<->SDR mapping specified in ITU-R Report BT.2446, method A. This is
         the recommended curve for well-mastered content. (``--vo=gpu-next``
         only)
+    st2094-40
+        Dynamic HDR10+ tone-mapping method specified in SMPTE ST2094-40 Annex
+        B. In the absence of metadata, falls back to a fixed spline matched to
+        the input/output average brightness characteristics. (``--vo=gpu-next``
+        only)
+    st2094-10
+        Dynamic tone-mapping method specified in SMPTE ST2094-10 Annex B.2.
+        Conceptually simpler than ST2094-40, and generally produces worse
+        results.
 
 ``--tone-mapping-param=<value>``
     Set tone mapping parameters. By default, this is set to the special string
@@ -6472,6 +6481,8 @@ them.
         Specifies the scale factor to use while stretching. Defaults to 1.0.
     spline
         Specifies the knee point (in PQ space). Defaults to 0.30.
+    st2094-10
+        Specifies the contrast (slope) at the knee point. Defaults to 1.0.
 
 ``--inverse-tone-mapping``
     If set, allows inverse tone mapping (expanding SDR to HDR). Not supported

@@ -332,6 +332,19 @@ bool image_writer_high_depth(const struct image_writer_opts *opts)
     ;
 }
 
+bool image_writer_flexible_csp(const struct image_writer_opts *opts)
+{
+    return false
+#if HAVE_JPEGXL
+        || opts->format == AV_CODEC_ID_JPEGXL
+#endif
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 58, 100)
+        // This version added support for cICP tag writing
+        || opts->format == AV_CODEC_ID_PNG
+#endif
+    ;
+}
+
 int image_writer_format_from_ext(const char *ext)
 {
     for (int n = 0; mp_image_writer_formats[n].name; n++) {
@@ -343,6 +356,7 @@ int image_writer_format_from_ext(const char *ext)
 
 static struct mp_image *convert_image(struct mp_image *image, int destfmt,
                                       enum mp_csp_levels yuv_levels,
+                                      const struct image_writer_opts *opts,
                                       struct mpv_global *global,
                                       struct mp_log *log)
 {
@@ -359,13 +373,17 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
     };
     mp_image_params_guess_csp(&p);
 
-    // If RGB, just assume everything is correct.
-    if (p.color.space != MP_CSP_RGB) {
-        // Currently, assume what FFmpeg's jpg encoder or libwebp needs.
-        // Of course this works only for non-HDR (no HDR support in libswscale).
-        p.color.levels = yuv_levels;
-        p.color.space = MP_CSP_BT_601;
-        p.chroma_location = MP_CHROMA_CENTER;
+    if (!image_writer_flexible_csp(opts)) {
+        // Formats that don't support non-sRGB csps should be forced to sRGB
+        p.color.primaries = MP_CSP_PRIM_BT_709;
+        p.color.gamma = MP_CSP_TRC_SRGB;
+        p.color.light = MP_CSP_LIGHT_DISPLAY;
+        p.color.sig_peak = 0;
+        if (p.color.space != MP_CSP_RGB) {
+            p.color.levels = yuv_levels;
+            p.color.space = MP_CSP_BT_601;
+            p.chroma_location = MP_CHROMA_CENTER;
+        }
         mp_image_params_guess_csp(&p);
     }
 
@@ -432,7 +450,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
         levels = MP_CSP_LEVELS_PC;
     }
 
-    struct mp_image *dst = convert_image(image, destfmt, levels, global, log);
+    struct mp_image *dst = convert_image(image, destfmt, levels, opts, global, log);
     if (!dst)
         return false;
 

@@ -179,7 +179,7 @@ struct voctrl_performance_data {
 };
 
 struct voctrl_screenshot {
-    bool scaled, subs, osd, high_bit_depth;
+    bool scaled, subs, osd, high_bit_depth, native_csp;
     struct mp_image *res;
 };
 
