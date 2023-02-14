@@ -112,6 +112,8 @@ typedef struct mp_image {
     struct AVBufferRef *dovi;
     // Film grain data, if any
     struct AVBufferRef *film_grain;
+    // Dolby Vision RPU buffer, if any
+    struct AVBufferRef *dovi_buf;
     // Other side data we don't care about.
     struct mp_ff_side_data *ff_side_data;
     int num_ff_side_data;
