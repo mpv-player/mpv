@@ -204,26 +204,6 @@ extern const struct m_opt_choice_alternatives mp_alpha_names[];
 
 extern const struct m_sub_options mp_csp_equalizer_conf;
 
-enum mp_csp_equalizer_param {
-    MP_CSP_EQ_BRIGHTNESS,
-    MP_CSP_EQ_CONTRAST,
-    MP_CSP_EQ_HUE,
-    MP_CSP_EQ_SATURATION,
-    MP_CSP_EQ_GAMMA,
-    MP_CSP_EQ_COUNT,
-};
-
-// Default initialization with 0 is enough, except for the capabilities field
-struct mp_csp_equalizer_opts {
-    // Value for each property is in the range [-100.0, 100.0].
-    // 0.0 is default, meaning neutral or no change.
-    float values[MP_CSP_EQ_COUNT];
-    int output_levels;
-};
-
-void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
-                                  const struct mp_csp_equalizer_opts *eq);
-
 struct mpv_global;
 struct mp_csp_equalizer_state *mp_csp_equalizer_create(void *ta_parent,
                                                     struct mpv_global *global);
