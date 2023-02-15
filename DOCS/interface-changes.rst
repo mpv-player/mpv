@@ -55,6 +55,8 @@ Interface changes
     - add `--tone-mapping=st2094-40` and `--tone-mapping=st2094-10`
     - change `--screenshot-jxl-effort` default from `3` to `4`.
     - add `--tone-mapping-visualize`
+    - change type of `--brightness`, `--saturation`, `--contrast`, `--hue` and
+      `--gamma` to float.
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,
