@@ -879,18 +879,18 @@ bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
 
 const struct m_sub_options mp_csp_equalizer_conf = {
     .opts = (const m_option_t[]) {
-        {"brightness", OPT_INT(values[MP_CSP_EQ_BRIGHTNESS]),
+        {"brightness", OPT_FLOAT(values[MP_CSP_EQ_BRIGHTNESS]),
             M_RANGE(-100, 100)},
-        {"saturation", OPT_INT(values[MP_CSP_EQ_SATURATION]),
+        {"saturation", OPT_FLOAT(values[MP_CSP_EQ_SATURATION]),
             M_RANGE(-100, 100)},
-        {"contrast", OPT_INT(values[MP_CSP_EQ_CONTRAST]),
+        {"contrast", OPT_FLOAT(values[MP_CSP_EQ_CONTRAST]),
             M_RANGE(-100, 100)},
-        {"hue", OPT_INT(values[MP_CSP_EQ_HUE]),
+        {"hue", OPT_FLOAT(values[MP_CSP_EQ_HUE]),
             M_RANGE(-100, 100)},
-        {"gamma", OPT_INT(values[MP_CSP_EQ_GAMMA]),
+        {"gamma", OPT_FLOAT(values[MP_CSP_EQ_GAMMA]),
             M_RANGE(-100, 100)},
         {"video-output-levels",
-            OPT_CHOICE_C(values[MP_CSP_EQ_OUTPUT_LEVELS], mp_csp_levels_names)},
+            OPT_CHOICE_C(output_levels, mp_csp_levels_names)},
         {0}
     },
     .size = sizeof(struct mp_csp_equalizer_opts),
@@ -905,7 +905,7 @@ void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
     params->hue = eq->values[MP_CSP_EQ_HUE] / 100.0 * M_PI;
     params->saturation = (eq->values[MP_CSP_EQ_SATURATION] + 100) / 100.0;
     params->gamma = exp(log(8.0) * eq->values[MP_CSP_EQ_GAMMA] / 100.0);
-    params->levels_out = eq->values[MP_CSP_EQ_OUTPUT_LEVELS];
+    params->levels_out = eq->output_levels;
 }
 
 struct mp_csp_equalizer_state *mp_csp_equalizer_create(void *ta_parent,
