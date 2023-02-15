@@ -267,6 +267,8 @@ static void flip_page(struct vo *vo)
         wlbuf_pool_clean(p->wlbuf_pool,false);
         p->want_reset = false;
     }
+
+    p->resized = false;
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
