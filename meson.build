@@ -1021,7 +1021,7 @@ x11_opt = get_option('x11').require(
     error_message: 'the build is not GPL!',
 )
 x11 = {
-    'deps': [dependency('x11', version: '>= 1.0.0', required: x11_opt),
+    'deps': [dependency('x11', version: '>= 1.4.0', required: x11_opt),
              dependency('xscrnsaver', version: '>= 1.0.0', required: x11_opt),
              dependency('xext', version: '>= 1.0.0', required: x11_opt),
              dependency('xinerama', version: '>= 1.0.0', required: x11_opt),
