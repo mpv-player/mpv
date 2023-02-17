@@ -104,6 +104,10 @@ struct vo_wayland_state {
     void *dmabuf_feedback;
     wayland_format *format_map;
     uint32_t format_size;
+    /* TODO: remove these once zwp_linux_dmabuf_v1 version 2 support is removed. */
+    int *drm_formats;
+    int drm_format_ct;
+    int drm_format_ct_max;
 
     /* presentation-time */
     struct wp_presentation  *presentation;
@@ -162,7 +166,6 @@ struct vo_wayland_state {
 bool vo_wayland_check_visible(struct vo *vo);
 bool vo_wayland_init(struct vo *vo);
 bool vo_wayland_reconfig(struct vo *vo);
-bool vo_wayland_supported_format(struct vo *vo, uint32_t format, uint64_t modifier);
 
 int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
