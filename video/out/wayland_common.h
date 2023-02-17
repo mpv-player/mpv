@@ -50,6 +50,7 @@ struct vo_wayland_state {
     struct wl_shm           *shm;
     struct wl_surface       *surface;
     struct wl_surface       *video_surface;
+    struct wl_surface       *callback_surface;
     struct wl_subsurface    *video_subsurface;
 
     /* Geometry */
