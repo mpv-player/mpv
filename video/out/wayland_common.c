@@ -1105,11 +1105,11 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     if (callback)
         wl_callback_destroy(callback);
 
-    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
     if (wl->use_present) {
-        struct wp_presentation_feedback *fback = wp_presentation_feedback(wl->presentation, wl->surface);
+        struct wp_presentation_feedback *fback = wp_presentation_feedback(wl->presentation, wl->callback_surface);
         add_feedback(wl->fback_pool, fback);
         wp_presentation_feedback_add_listener(fback, &feedback_listener, wl->fback_pool);
     }
@@ -2187,7 +2187,8 @@ bool vo_wayland_init(struct vo *vo)
     update_app_id(wl);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
 
-    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl->callback_surface = wl->using_dmabuf_wayland ? wl->video_surface : wl->surface;
+    wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     wl_surface_commit(wl->surface);
 
