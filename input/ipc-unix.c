@@ -26,8 +26,6 @@
 #include <sys/stat.h>
 #include <sys/un.h>
 
-#include "config.h"
-
 #include "osdep/io.h"
 #include "osdep/threads.h"
 

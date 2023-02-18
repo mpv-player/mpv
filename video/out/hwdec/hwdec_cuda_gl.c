@@ -17,7 +17,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
 #include "hwdec_cuda.h"
 #include "options/m_config.h"
 #include "video/out/opengl/formats.h"

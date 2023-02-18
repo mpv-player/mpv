@@ -22,8 +22,6 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "config.h"
-
 #include "osdep/io.h"
 #include "common/global.h"
 #include "common/msg.h"

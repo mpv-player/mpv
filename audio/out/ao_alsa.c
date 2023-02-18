@@ -34,7 +34,6 @@
 #include <math.h>
 #include <string.h>
 
-#include "config.h"
 #include "options/options.h"
 #include "options/m_config.h"
 #include "options/m_option.h"

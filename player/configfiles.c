@@ -26,7 +26,6 @@
 
 #include <libavutil/md5.h>
 
-#include "config.h"
 #include "mpv_talloc.h"
 
 #include "osdep/io.h"

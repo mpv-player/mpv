@@ -39,7 +39,6 @@
 #include <X11/extensions/Xpresent.h>
 #include <X11/extensions/Xrandr.h>
 
-#include "config.h"
 #include "misc/bstr.h"
 #include "options/options.h"
 #include "options/m_config.h"

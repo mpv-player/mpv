@@ -32,7 +32,6 @@
 #include "options/m_option.h"
 #include "ao.h"
 #include "audio/format.h"
-#include "config.h"
 #include "internal.h"
 #include "osdep/timer.h"
 

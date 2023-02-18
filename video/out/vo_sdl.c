@@ -44,7 +44,6 @@
 #include "video/mp_image.h"
 
 #include "win_state.h"
-#include "config.h"
 #include "vo.h"
 
 struct formatmap_entry {

@@ -21,8 +21,6 @@
 #include <string.h>
 #include <assert.h>
 
-#include "config.h"
-
 #include "mpv_talloc.h"
 #include "misc/bstr.h"
 #include "common/common.h"

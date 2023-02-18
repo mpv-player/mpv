@@ -25,8 +25,6 @@
 
 #include <libavutil/hwcontext.h>
 
-#include "config.h"
-
 #include "video/out/gpu/hwdec.h"
 #include "video/mp_image_pool.h"
 #include "ra_gl.h"

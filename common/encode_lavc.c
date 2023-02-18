@@ -23,7 +23,6 @@
 #include <libavutil/avutil.h>
 #include <libavutil/timestamp.h>
 
-#include "config.h"
 #include "encode_lavc.h"
 #include "common/av_common.h"
 #include "common/global.h"

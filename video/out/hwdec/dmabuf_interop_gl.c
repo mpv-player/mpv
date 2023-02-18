@@ -15,7 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
 #include "dmabuf_interop.h"
 
 #include <drm_fourcc.h>

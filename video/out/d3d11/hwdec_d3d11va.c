@@ -19,8 +19,6 @@
 #include <d3d11.h>
 #include <d3d11_1.h>
 
-#include "config.h"
-
 #include "common/common.h"
 #include "options/m_config.h"
 #include "osdep/windows_utils.h"

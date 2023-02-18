@@ -23,7 +23,6 @@
 
 #include "client.h"
 #include "command.h"
-#include "config.h"
 #include "core.h"
 #include "mpv_talloc.h"
 #include "screenshot.h"

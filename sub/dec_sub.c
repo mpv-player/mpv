@@ -22,7 +22,6 @@
 #include <assert.h>
 #include <pthread.h>
 
-#include "config.h"
 #include "demux/demux.h"
 #include "sd.h"
 #include "dec_sub.h"

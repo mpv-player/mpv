@@ -3,7 +3,6 @@
 #include "video/out/vo.h"
 #include "video/csputils.h"
 
-#include "config.h"
 #include "ra.h"
 
 struct ra_ctx_opts {

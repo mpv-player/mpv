@@ -27,7 +27,6 @@
 #include <libavutil/common.h>
 #include <libavutil/rational.h>
 
-#include "config.h"
 #include "options/options.h"
 #include "common/msg.h"
 #include "options/m_config.h"

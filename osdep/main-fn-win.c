@@ -4,8 +4,6 @@
 #define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE (0x0001)
 #endif
 
-#include "config.h"
-
 #include "common/common.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"

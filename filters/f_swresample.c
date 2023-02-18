@@ -22,8 +22,6 @@
 #include <libavutil/mathematics.h>
 #include <libswresample/swresample.h>
 
-#include "config.h"
-
 #include "audio/aframe.h"
 #include "audio/fmt-conversion.h"
 #include "audio/format.h"

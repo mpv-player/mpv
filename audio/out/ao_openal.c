@@ -19,8 +19,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
