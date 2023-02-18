@@ -4422,7 +4422,7 @@ Screenshot
 
 ``--screenshot-jxl-effort=<1-9>``
     Set the JPEG XL compression effort. Higher effort (usually) means better
-    compression, but takes more CPU time. The default is 3.
+    compression, but takes more CPU time. The default is 4.
 
 ``--screenshot-sw=<yes|no>``
     Whether to use software rendering for screenshots (default: no).

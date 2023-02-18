@@ -53,6 +53,7 @@ Interface changes
     - change --screenshot-tag-colorspace default value from `no` to `yes`
     - undeprecate vf_sub
     - add `--tone-mapping=st2094-40` and `--tone-mapping=st2094-10`
+    - change `--screenshot-jxl-effort` default from `3` to `4`.
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,
