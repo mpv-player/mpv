@@ -35,7 +35,6 @@
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/frontend.h>
 
-#include "config.h"
 #include "osdep/io.h"
 #include "dvbin.h"
 #include "dvb_tune.h"

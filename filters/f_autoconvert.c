@@ -1,5 +1,3 @@
-#include "config.h"
-
 #include "audio/aframe.h"
 #include "audio/chmap_sel.h"
 #include "audio/format.h"

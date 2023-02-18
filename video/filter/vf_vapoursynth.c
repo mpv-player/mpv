@@ -29,8 +29,6 @@
 #include <libavutil/rational.h>
 #include <libavutil/cpu.h>
 
-#include "config.h"
-
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "options/path.h"

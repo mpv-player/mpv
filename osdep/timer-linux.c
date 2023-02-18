@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
-#include "config.h"
 #include "timer.h"
 
 void mp_sleep_us(int64_t us)

@@ -18,7 +18,6 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "dmabuf_interop.h"
 #include "video/out/placebo/ra_pl.h"
 #include "video/out/placebo/utils.h"

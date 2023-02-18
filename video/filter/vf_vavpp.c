@@ -23,7 +23,6 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
 
-#include "config.h"
 #include "options/options.h"
 #include "filters/filter.h"
 #include "filters/filter_internal.h"

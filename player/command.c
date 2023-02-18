@@ -31,7 +31,6 @@
 #include <libavutil/avstring.h>
 #include <libavutil/common.h>
 
-#include "config.h"
 #include "mpv_talloc.h"
 #include "client.h"
 #include "common/av_common.h"

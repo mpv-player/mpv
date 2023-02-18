@@ -35,7 +35,6 @@
 #endif
 #include <sys/types.h>
 
-#include "config.h"
 #include "audio/format.h"
 #include "common/msg.h"
 #include "options/options.h"

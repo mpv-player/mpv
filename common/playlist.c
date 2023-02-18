@@ -16,7 +16,6 @@
  */
 
 #include <assert.h>
-#include "config.h"
 #include "playlist.h"
 #include "common/common.h"
 #include "common/global.h"

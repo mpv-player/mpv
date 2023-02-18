@@ -28,7 +28,6 @@
 #include <X11/Xutil.h>
 #include <va/va_x11.h>
 
-#include "config.h"
 #include "common/msg.h"
 #include "video/out/vo.h"
 #include "video/mp_image_pool.h"

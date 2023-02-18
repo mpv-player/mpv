@@ -28,7 +28,6 @@
 
 #include <pulse/pulseaudio.h>
 
-#include "config.h"
 #include "audio/format.h"
 #include "common/msg.h"
 #include "options/m_option.h"

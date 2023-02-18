@@ -18,8 +18,6 @@
  */
 
 
-#include "config.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,7 +25,6 @@
 #include <assert.h>
 #include <libavutil/common.h>
 
-#include "config.h"
 #include "common/msg.h"
 #include "filters/filter.h"
 #include "filters/filter_internal.h"

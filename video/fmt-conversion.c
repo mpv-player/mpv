@@ -20,7 +20,6 @@
 
 #include "video/img_format.h"
 #include "fmt-conversion.h"
-#include "config.h"
 
 static const struct {
     int fmt;

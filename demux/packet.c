@@ -23,8 +23,6 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/intreadwrite.h>
 
-#include "config.h"
-
 #include "common/av_common.h"
 #include "common/common.h"
 #include "demux.h"

@@ -35,7 +35,6 @@
 
 #include "mpv_talloc.h"
 
-#include "config.h"
 #include "common/av_common.h"
 #include "common/common.h"
 #include "hwdec.h"
