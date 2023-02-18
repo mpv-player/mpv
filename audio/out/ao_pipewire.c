@@ -33,7 +33,6 @@
 #include "ao.h"
 #include "audio/format.h"
 #include "config.h"
-#include "generated/version.h"
 #include "internal.h"
 #include "osdep/timer.h"
 
