@@ -1758,6 +1758,8 @@ if get_option('libmpv')
 
     libmpv_test = executable('libmpv-test', 'libmpv/test.c', link_with: [libmpv])
     test('libmpv', libmpv_test)
+
+    executable('libmpv-simple', 'libmpv/simple.c', link_with: [libmpv])
 endif
 
 if get_option('cplayer')
