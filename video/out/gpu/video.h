@@ -130,6 +130,7 @@ struct gl_tone_map_opts {
     float scene_threshold_low;
     float scene_threshold_high;
     int gamut_mode;
+    int visualize;
 };
 
 struct gl_video_opts {

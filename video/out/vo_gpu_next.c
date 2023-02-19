@@ -1878,6 +1878,9 @@ static void update_render_options(struct vo *vo)
         p->color_map.tone_mapping_param = 0.0;
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
         p->color_map.gamut_mode = gamut_modes[opts->tone_map.gamut_mode];
+#if PL_API_VER >= 247
+    p->color_map.visualize_lut = opts->tone_map.visualize;
+#endif
 
     switch (opts->dither_algo) {
     case DITHER_NONE:

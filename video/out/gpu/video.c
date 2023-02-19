@@ -399,6 +399,7 @@ const struct m_sub_options gl_video_conf = {
             {"max",         TONE_MAP_MODE_MAX},
             {"hybrid",      TONE_MAP_MODE_HYBRID},
             {"luma",        TONE_MAP_MODE_LUMA})},
+        {"tone-mapping-visualize", OPT_FLAG(tone_map.visualize)},
         {"gamut-mapping-mode", OPT_CHOICE(tone_map.gamut_mode,
             {"auto",        GAMUT_AUTO},
             {"clip",        GAMUT_CLIP},

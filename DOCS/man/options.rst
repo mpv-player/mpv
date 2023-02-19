@@ -6524,6 +6524,16 @@ them.
         reductions to account for brightness-related perceptual nonuniformity.
         (``--vo=gpu-next`` only)
 
+``--tone-mapping-visualize``
+    Display a (PQ-PQ) graph of the active tone-mapping LUT. Intended only for
+    debugging purposes. The X axis shows PQ input values, the Y axis shows PQ
+    output values. The tone-mapping curve is shown in green/yellow. Yellow
+    means the brightness has been boosted from the source, dark blue regions
+    show where the brightness has been reduced. The extra colored regions and
+    lines indicate various monitor limits, as well a reference diagonal
+    (neutral tone-mapping) and source scene average brightness information (if
+    available). (``--vo=gpu-next`` only)
+
 ``--gamut-mapping-mode``
     Specifies the algorithm used for reducing the gamut of images for the
     target display, after any tone mapping is done.
