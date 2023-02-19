@@ -487,7 +487,10 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (pw_thread_loop_start(p->loop) < 0)
         goto error;
 
-    context = pw_context_new(pw_thread_loop_get_loop(p->loop), NULL, 0);
+    context = pw_context_new(
+            pw_thread_loop_get_loop(p->loop),
+            pw_properties_new(PW_KEY_CONFIG_NAME, "client-rt.conf", NULL),
+            0);
     if (!context)
         goto error;
 
