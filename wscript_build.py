@@ -557,7 +557,7 @@ def build(ctx):
         ( "video/out/vo_x11.c" ,                 "x11" ),
         ( "video/out/vo_xv.c",                   "xv" ),
         ( "video/out/vulkan/context.c",          "vulkan" ),
-        ( "video/out/vulkan/context_display.c",  "vulkan" ),
+        ( "video/out/vulkan/context_display.c",  "vulkan && vk-khr-display" ),
         ( "video/out/vulkan/context_android.c",  "vulkan && android" ),
         ( "video/out/vulkan/context_wayland.c",  "vulkan && wayland" ),
         ( "video/out/vulkan/context_win.c",      "vulkan && win32-desktop" ),
