@@ -176,7 +176,7 @@ char* m_properties_expand_string(const struct m_property *prop_list,
                                  const char *str, void *ctx);
 
 // Trivial helpers for implementing properties.
-int m_property_flag_ro(int action, void* arg, int var);
+int m_property_bool_ro(int action, void* arg, int var);
 int m_property_int_ro(int action, void* arg, int var);
 int m_property_int64_ro(int action, void* arg, int64_t var);
 int m_property_float_ro(int action, void* arg, float var);
@@ -207,8 +207,8 @@ struct m_sub_property {
     .type = {.type = CONF_TYPE_FLOAT}, .value = {.float_ = (f)}
 #define SUB_PROP_DOUBLE(f) \
     .type = {.type = CONF_TYPE_DOUBLE}, .value = {.double_ = (f)}
-#define SUB_PROP_FLAG(f) \
-    .type = {.type = CONF_TYPE_FLAG}, .value = {.flag = (f)}
+#define SUB_PROP_BOOL(f) \
+    .type = {.type = CONF_TYPE_BOOL}, .value = {.bool_ = (f)}
 #define SUB_PROP_PTS(f) \
     .type = {.type = &m_option_type_time}, .value = {.double_ = (f)}
 

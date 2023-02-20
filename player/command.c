@@ -429,7 +429,7 @@ static int mp_property_display_sync_active(void *ctx, struct m_property *prop,
                                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg, mpctx->display_sync_active);
+    return m_property_bool_ro(action, arg, mpctx->display_sync_active);
 }
 
 static int mp_property_pid(void *ctx, struct m_property *prop,
@@ -1104,7 +1104,7 @@ static int get_edition_entry(int item, int action, void *arg, void *ctx)
         {"id",          SUB_PROP_INT(item)},
         {"title",       SUB_PROP_STR(title),
                         .unavailable = !title},
-        {"default",     SUB_PROP_FLAG(ed->default_edition)},
+        {"default",     SUB_PROP_BOOL(ed->default_edition)},
         {0}
     };
 
@@ -1339,14 +1339,14 @@ static int mp_property_core_idle(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg, !mpctx->playback_active);
+    return m_property_bool_ro(action, arg, !mpctx->playback_active);
 }
 
 static int mp_property_idle(void *ctx, struct m_property *prop,
                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg, mpctx->stop_play == PT_STOP);
+    return m_property_bool_ro(action, arg, mpctx->stop_play == PT_STOP);
 }
 
 static int mp_property_window_id(void *ctx, struct m_property *prop,
@@ -1368,7 +1368,7 @@ static int mp_property_eof_reached(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
     bool eof = mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF;
-    return m_property_flag_ro(action, arg, eof);
+    return m_property_bool_ro(action, arg, eof);
 }
 
 static int mp_property_seeking(void *ctx, struct m_property *prop,
@@ -1377,14 +1377,14 @@ static int mp_property_seeking(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_flag_ro(action, arg, !mpctx->restart_complete);
+    return m_property_bool_ro(action, arg, !mpctx->restart_complete);
 }
 
 static int mp_property_playback_abort(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg, !mpctx->playing || mpctx->stop_play);
+    return m_property_bool_ro(action, arg, !mpctx->playing || mpctx->stop_play);
 }
 
 static int mp_property_cache_speed(void *ctx, struct m_property *prop,
@@ -1448,7 +1448,7 @@ static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
     struct demux_reader_state s;
     demux_get_reader_state(mpctx->demuxer, &s);
 
-    return m_property_flag_ro(action, arg, s.idle);
+    return m_property_bool_ro(action, arg, s.idle);
 }
 
 static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
@@ -1527,7 +1527,7 @@ static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_flag_ro(action, arg, mpctx->paused_for_cache);
+    return m_property_bool_ro(action, arg, mpctx->paused_for_cache);
 }
 
 static int mp_property_cache_buffering(void *ctx, struct m_property *prop,
@@ -1547,7 +1547,7 @@ static int mp_property_demuxer_is_network(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_flag_ro(action, arg, mpctx->demuxer->is_network);
+    return m_property_bool_ro(action, arg, mpctx->demuxer->is_network);
 }
 
 
@@ -1569,7 +1569,7 @@ static int mp_property_seekable(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_flag_ro(action, arg, mpctx->demuxer->seekable);
+    return m_property_bool_ro(action, arg, mpctx->demuxer->seekable);
 }
 
 static int mp_property_partially_seekable(void *ctx, struct m_property *prop,
@@ -1578,14 +1578,14 @@ static int mp_property_partially_seekable(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_flag_ro(action, arg, mpctx->demuxer->partially_seekable);
+    return m_property_bool_ro(action, arg, mpctx->demuxer->partially_seekable);
 }
 
 static int mp_property_mixer_active(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg, !!mpctx->ao);
+    return m_property_bool_ro(action, arg, !!mpctx->ao);
 }
 
 /// Volume (RW)
@@ -1673,7 +1673,7 @@ static int mp_property_ao_mute(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_BOOL};
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1962,15 +1962,15 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !track->lang},
         {"audio-channels", SUB_PROP_INT(track_channels(track)),
                         .unavailable = track_channels(track) <= 0},
-        {"image",       SUB_PROP_FLAG(track->image)},
-        {"albumart",    SUB_PROP_FLAG(track->attached_picture)},
-        {"default",     SUB_PROP_FLAG(track->default_track)},
-        {"forced",      SUB_PROP_FLAG(track->forced_track)},
-        {"dependent",   SUB_PROP_FLAG(track->dependent_track)},
-        {"visual-impaired",  SUB_PROP_FLAG(track->visual_impaired_track)},
-        {"hearing-impaired", SUB_PROP_FLAG(track->hearing_impaired_track)},
-        {"external",    SUB_PROP_FLAG(track->is_external)},
-        {"selected",    SUB_PROP_FLAG(track->selected)},
+        {"image",       SUB_PROP_BOOL(track->image)},
+        {"albumart",    SUB_PROP_BOOL(track->attached_picture)},
+        {"default",     SUB_PROP_BOOL(track->default_track)},
+        {"forced",      SUB_PROP_BOOL(track->forced_track)},
+        {"dependent",   SUB_PROP_BOOL(track->dependent_track)},
+        {"visual-impaired",  SUB_PROP_BOOL(track->visual_impaired_track)},
+        {"hearing-impaired", SUB_PROP_BOOL(track->hearing_impaired_track)},
+        {"external",    SUB_PROP_BOOL(track->is_external)},
+        {"selected",    SUB_PROP_BOOL(track->selected)},
         {"main-selection", SUB_PROP_INT(order), .unavailable = order < 0},
         {"external-filename", SUB_PROP_STR(track->external_filename),
                         .unavailable = !track->external_filename},
@@ -2330,9 +2330,9 @@ static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
 
     struct m_sub_property props[] = {
         {"picture-type",    SUB_PROP_STR(pict_type), .unavailable = !pict_type},
-        {"interlaced",      SUB_PROP_FLAG(!!(f->fields & MP_IMGFIELD_INTERLACED))},
-        {"tff",             SUB_PROP_FLAG(!!(f->fields & MP_IMGFIELD_TOP_FIRST))},
-        {"repeat",          SUB_PROP_FLAG(!!(f->fields & MP_IMGFIELD_REPEAT_FIRST))},
+        {"interlaced",      SUB_PROP_BOOL(!!(f->fields & MP_IMGFIELD_INTERLACED))},
+        {"tff",             SUB_PROP_BOOL(!!(f->fields & MP_IMGFIELD_TOP_FIRST))},
+        {"repeat",          SUB_PROP_BOOL(!!(f->fields & MP_IMGFIELD_REPEAT_FIRST))},
         {0}
     };
 
@@ -2492,7 +2492,7 @@ static int mp_property_focused(void *ctx, struct m_property *prop,
     if (vo_control(vo, VOCTRL_GET_FOCUSED, &focused) < 1)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_flag_ro(action, arg, focused);
+    return m_property_bool_ro(action, arg, focused);
 }
 
 static int mp_property_display_names(void *ctx, struct m_property *prop,
@@ -2523,7 +2523,7 @@ static int mp_property_vo_configured(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg,
+    return m_property_bool_ro(action, arg,
                         mpctx->video_out && mpctx->video_out->config_ok);
 }
 
@@ -3028,8 +3028,8 @@ static int get_playlist_entry(int item, int action, void *arg, void *ctx)
     bool playing = mpctx->playing == e;
     struct m_sub_property props[] = {
         {"filename",    SUB_PROP_STR(e->filename)},
-        {"current",     SUB_PROP_FLAG(1), .unavailable = !current},
-        {"playing",     SUB_PROP_FLAG(1), .unavailable = !playing},
+        {"current",     SUB_PROP_BOOL(1), .unavailable = !current},
+        {"playing",     SUB_PROP_BOOL(1), .unavailable = !playing},
         {"title",       SUB_PROP_STR(e->title), .unavailable = !e->title},
         {"id",          SUB_PROP_INT64(e->id)},
         {0}
@@ -3422,8 +3422,8 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
         struct m_sub_property props[] = {
             {"name",                    SUB_PROP_STR(co->name)},
             {"type",                    SUB_PROP_STR(opt->type->name)},
-            {"set-from-commandline",    SUB_PROP_FLAG(co->is_set_from_cmdline)},
-            {"set-locally",             SUB_PROP_FLAG(co->is_set_locally)},
+            {"set-from-commandline",    SUB_PROP_BOOL(co->is_set_from_cmdline)},
+            {"set-locally",             SUB_PROP_BOOL(co->is_set_locally)},
             {"default-value",           *opt, def},
             {"min",                     SUB_PROP_DOUBLE(opt->min),
              .unavailable = !(has_minmax && opt->min != DBL_MIN)},
