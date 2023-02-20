@@ -605,9 +605,6 @@ extern const char m_option_path_separator;
 #define OPT_BOOL(field) \
     OPT_TYPED_FIELD(m_option_type_bool, bool, field)
 
-#define OPT_FLAG(field) \
-    OPT_TYPED_FIELD(m_option_type_flag, int, field)
-
 #define OPT_INT(field) \
     OPT_TYPED_FIELD(m_option_type_int, int, field)
 

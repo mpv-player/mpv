@@ -224,69 +224,7 @@ const m_option_type_t m_option_type_bool = {
 
 #undef VAL
 
-// Flag
-
-#define VAL(x) (*(int *)(x))
-
-static int parse_flag(struct mp_log *log, const m_option_t *opt,
-                      struct bstr name, struct bstr param, void *dst)
-{
-    bool bdst = false;
-    int r = parse_bool(log, opt, name, param, &bdst);
-    if (dst)
-        VAL(dst) = bdst;
-    return r;
-}
-
-static char *print_flag(const m_option_t *opt, const void *val)
-{
-    return print_bool(opt, &(bool){VAL(val)});
-}
-
-static void add_flag(const m_option_t *opt, void *val, double add, bool wrap)
-{
-    bool bval = VAL(val);
-    add_bool(opt, &bval, add, wrap);
-    VAL(val) = bval;
-}
-
-static int flag_set(const m_option_t *opt, void *dst, struct mpv_node *src)
-{
-    bool bdst = false;
-    int r = bool_set(opt, &bdst, src);
-    if (r >= 0)
-        VAL(dst) = bdst;
-    return r;
-}
-
-static int flag_get(const m_option_t *opt, void *ta_parent,
-                    struct mpv_node *dst, void *src)
-{
-    return bool_get(opt, ta_parent, dst, &(bool){VAL(src)});
-}
-
-static bool flag_equal(const m_option_t *opt, void *a, void *b)
-{
-    return VAL(a) == VAL(b);
-}
-
-const m_option_type_t m_option_type_flag = {
-    // need yes or no in config files
-    .name  = "Flag",
-    .size  = sizeof(int),
-    .flags = M_OPT_TYPE_OPTIONAL_PARAM | M_OPT_TYPE_CHOICE,
-    .parse = parse_flag,
-    .print = print_flag,
-    .copy  = copy_opt,
-    .add   = add_flag,
-    .set   = flag_set,
-    .get   = flag_get,
-    .equal = flag_equal,
-};
-
 // Integer
-
-#undef VAL
 
 static int clamp_longlong(const m_option_t *opt, long long i_min, long long i_max,
                           void *val)
