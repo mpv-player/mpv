@@ -26,6 +26,7 @@
 #include "mpv_talloc.h"
 #include "common/msg.h"
 #include "common/av_common.h"
+#include "demux/stheader.h"
 #include "misc/bstr.h"
 #include "sd.h"
 
@@ -65,13 +66,13 @@ static void disable_styles(bstr header)
     }
 }
 
-struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
-                                   char *extradata, int extradata_len)
+struct lavc_conv *lavc_conv_create(struct mp_log *log,
+                                   const struct mp_codec_params *mp_codec)
 {
     struct lavc_conv *priv = talloc_zero(NULL, struct lavc_conv);
     priv->log = log;
     priv->cur_list = talloc_array(priv, char*, 0);
-    priv->codec = talloc_strdup(priv, codec_name);
+    priv->codec = talloc_strdup(priv, mp_codec->codec);
     AVCodecContext *avctx = NULL;
     AVDictionary *opts = NULL;
     const char *fmt = get_lavc_format(priv->codec);
@@ -81,7 +82,7 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     avctx = avcodec_alloc_context3(codec);
     if (!avctx)
         goto error;
-    if (mp_lavc_set_extradata(avctx, extradata, extradata_len) < 0)
+    if (mp_set_avctx_codec_headers(avctx, mp_codec) < 0)
         goto error;
 
     priv->avpkt = av_packet_alloc();
@@ -93,7 +94,7 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     av_dict_set(&opts, "sub_text_format", "ass", 0);
 #endif
     av_dict_set(&opts, "flags2", "+ass_ro_flush_noop", 0);
-    if (strcmp(codec_name, "eia_608") == 0)
+    if (strcmp(priv->codec, "eia_608") == 0)
         av_dict_set(&opts, "real_time", "1", 0);
     if (avcodec_open2(avctx, codec, &opts) < 0)
         goto error;
