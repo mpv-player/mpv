@@ -1,6 +1,10 @@
 #include "common/common.h"
 #include "utils.h"
 
+#if PL_API_VER >= 251
+#include <libplacebo/utils/dolbyvision.h>
+#endif
+
 static const int pl_log_to_msg_lev[PL_LOG_ALL+1] = {
     [PL_LOG_FATAL] = MSGL_FATAL,
     [PL_LOG_ERR]   = MSGL_ERR,
@@ -164,4 +168,42 @@ enum pl_chroma_location mp_chroma_to_pl(enum mp_chroma_location chroma)
     }
 
     MP_ASSERT_UNREACHABLE();
+}
+
+void mp_map_dovi_metadata_to_pl(struct mp_image *mpi,
+                                struct pl_frame *frame)
+{
+#ifdef PL_HAVE_LAV_DOLBY_VISION
+    if (mpi->dovi) {
+        const AVDOVIMetadata *metadata = (AVDOVIMetadata *) mpi->dovi->data;
+        const AVDOVIRpuDataHeader *header = av_dovi_get_header(metadata);
+
+        if (header->disable_residual_flag) {
+            // Only automatically map DoVi RPUs that don't require an EL
+            struct pl_dovi_metadata *dovi = talloc_ptrtype(mpi, dovi);
+
+#if PL_API_VER >= 250
+            pl_frame_map_avdovi_metadata(frame, dovi, metadata);
+#else // back-compat fallback for older libplacebo
+            const AVDOVIColorMetadata *color = av_dovi_get_color(metadata);
+            pl_map_dovi_metadata(dovi, metadata);
+            frame->repr.dovi = dovi;
+            frame->repr.sys = PL_COLOR_SYSTEM_DOLBYVISION;
+            frame->color.primaries = PL_COLOR_PRIM_BT_2020;
+            frame->color.transfer = PL_COLOR_TRC_PQ;
+            frame->color.hdr.min_luma =
+                pl_hdr_rescale(PL_HDR_PQ, PL_HDR_NITS, color->source_min_pq / 4095.0f);
+            frame->color.hdr.max_luma =
+                pl_hdr_rescale(PL_HDR_PQ, PL_HDR_NITS, color->source_max_pq / 4095.0f);
+#endif
+        }
+    }
+
+#if PL_API_VER >= 251 && defined(PL_HAVE_LIBDOVI)
+    if (mpi->dovi_buf)
+        pl_hdr_metadata_from_dovi_rpu(&frame->color.hdr, mpi->dovi_buf->data,
+                                      mpi->dovi_buf->size);
+#endif
+
+#endif // PL_HAVE_LAV_DOLBY_VISION
 }

@@ -7,8 +7,6 @@
 #include <pthread.h>
 #include <assert.h>
 
-#include "config.h"
-
 #include "mpv_talloc.h"
 #include "common/common.h"
 #include "misc/bstr.h"

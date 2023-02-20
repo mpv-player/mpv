@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "config.h"
 #include "common/common.h"
 #include "options/options.h"
 #include "video/fmt-conversion.h"

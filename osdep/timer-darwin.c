@@ -23,7 +23,6 @@
 #include <sys/time.h>
 #include <mach/mach_time.h>
 
-#include "config.h"
 #include "common/msg.h"
 #include "timer.h"
 

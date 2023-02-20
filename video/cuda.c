@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include "hwdec.h"
 #include "options/m_config.h"
 

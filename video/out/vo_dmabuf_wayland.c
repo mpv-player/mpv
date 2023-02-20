@@ -368,8 +368,8 @@ static int preinit(struct vo *vo)
        goto err;
     assert(p->ctx->ra);
 
-    if (!vo->wl->dmabuf || !vo->wl->dmabuf_feedback) {
-        MP_FATAL(vo->wl, "Compositor doesn't support the %s (ver. 4) protocol!\n",
+    if (!vo->wl->dmabuf) {
+        MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
                  zwp_linux_dmabuf_v1_interface.name);
         goto err;
     }

@@ -31,7 +31,6 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "config.h"
 #include "video/vdpau.h"
 #include "video/vdpau_mixer.h"
 #include "video/hwdec.h"

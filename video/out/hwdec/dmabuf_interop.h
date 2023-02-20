@@ -19,7 +19,6 @@
 
 #include <libavutil/hwcontext_drm.h>
 
-#include "config.h"
 #include "video/out/gpu/hwdec.h"
 
 struct dmabuf_interop {

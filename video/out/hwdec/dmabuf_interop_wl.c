@@ -15,7 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "video/out/wldmabuf/ra_wldmabuf.h"
-#include "config.h"
 #include "dmabuf_interop.h"
 
 static bool mapper_init(struct ra_hwdec_mapper *mapper,

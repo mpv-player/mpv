@@ -22,7 +22,6 @@
 #include <math.h>
 #include <assert.h>
 
-#include "config.h"
 #include "mpv_talloc.h"
 
 #include "common/msg.h"

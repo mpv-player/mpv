@@ -154,8 +154,10 @@ static void vf_format_process(struct mp_filter *f)
             mp_image_params_guess_csp(&img->params);
         }
 
-        if (!priv->opts->dovi)
+        if (!priv->opts->dovi) {
             av_buffer_unref(&img->dovi);
+            av_buffer_unref(&img->dovi_buf);
+        }
 
         if (!priv->opts->film_grain)
             av_buffer_unref(&img->film_grain);

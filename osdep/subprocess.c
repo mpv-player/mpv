@@ -17,8 +17,6 @@
 
 #include <pthread.h>
 
-#include "config.h"
-
 #include "common/common.h"
 #include "common/msg.h"
 #include "common/msg_control.h"

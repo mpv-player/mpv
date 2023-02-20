@@ -791,6 +791,12 @@ video_output_features = [
         'deps': 'libplacebo',
         'func': check_pkg_config('vulkan'),
     }, {
+        'name': 'vk-khr-display',
+        'desc': "VK_KHR_display extension",
+        'deps': 'vulkan',
+        'func': check_statement('vulkan/vulkan_core.h', 'vkCreateDisplayPlaneSurfaceKHR(0, 0, 0, 0)',
+                                use='vulkan')
+    }, {
         'name': 'vaapi-libplacebo',
         'desc': 'VAAPI libplacebo',
         'deps': 'vaapi && libplacebo',

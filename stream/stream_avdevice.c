@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include "stream.h"
 
 static int open_f(stream_t *stream)

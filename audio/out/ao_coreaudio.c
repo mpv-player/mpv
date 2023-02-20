@@ -17,7 +17,6 @@
 
 #include <CoreAudio/HostTime.h>
 
-#include "config.h"
 #include "ao.h"
 #include "internal.h"
 #include "audio/format.h"

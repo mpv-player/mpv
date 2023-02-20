@@ -34,9 +34,13 @@ bool ra_compatible_format(struct ra* ra, uint32_t drm_format, uint64_t modifier)
     struct vo_wayland_state *wl = p->vo->wl;
     const wayland_format *formats = wl->format_map;
 
-    for (int i = 0; i < wl->format_size / sizeof(wayland_format); i++)
-    {
+    for (int i = 0; i < wl->format_size / sizeof(wayland_format); i++) {
         if (drm_format == formats[i].format && modifier == formats[i].modifier)
+            return true;
+    }
+
+    for (int i = 0; i < wl->drm_format_ct; i++) {
+        if (drm_format == wl->drm_formats[i])
             return true;
     }
 

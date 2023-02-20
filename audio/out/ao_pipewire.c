@@ -32,8 +32,6 @@
 #include "options/m_option.h"
 #include "ao.h"
 #include "audio/format.h"
-#include "config.h"
-#include "generated/version.h"
 #include "internal.h"
 #include "osdep/timer.h"
 
@@ -53,6 +51,11 @@
 static inline int pw_stream_get_time_n(struct pw_stream *stream, struct pw_time *time, size_t size) {
 	return pw_stream_get_time(stream, time);
 }
+#endif
+
+#if !PW_CHECK_VERSION(0, 3, 57)
+// Earlier versions segfault on zeroed hooks
+#define spa_hook_remove(hook) if ((hook)->link.prev) spa_hook_remove(hook)
 #endif
 
 enum init_state {

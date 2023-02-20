@@ -22,7 +22,6 @@
 
 #include <libavutil/common.h>
 
-#include "config.h"
 #include "common/common.h"
 #include "options/options.h"
 #include "common/msg.h"

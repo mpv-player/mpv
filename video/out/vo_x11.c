@@ -24,7 +24,6 @@
 
 #include <libswscale/swscale.h>
 
-#include "config.h"
 #include "vo.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"

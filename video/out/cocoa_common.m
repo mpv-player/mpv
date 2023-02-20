@@ -34,8 +34,6 @@
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_events_objc.h"
 
-#include "config.h"
-
 #include "osdep/timer.h"
 #include "osdep/macosx_application.h"
 #include "osdep/macosx_application_objc.h"
