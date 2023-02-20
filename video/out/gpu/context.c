@@ -269,8 +269,8 @@ const struct m_sub_options ra_ctx_conf = {
         {"gpu-api",
             OPT_STRING_VALIDATE(context_type, ra_ctx_validate_api),
             .help = ra_ctx_api_help},
-        {"gpu-debug", OPT_FLAG(debug)},
-        {"gpu-sw", OPT_FLAG(allow_sw)},
+        {"gpu-debug", OPT_BOOL(debug)},
+        {"gpu-sw", OPT_BOOL(allow_sw)},
         {0}
     },
     .size = sizeof(struct ra_ctx_opts),

@@ -56,9 +56,9 @@ struct ao_alsa_opts {
     char *mixer_device;
     char *mixer_name;
     int mixer_index;
-    int resample;
-    int ni;
-    int ignore_chmap;
+    bool resample;
+    bool ni;
+    bool ignore_chmap;
     int buffer_time;
     int frags;
 };
@@ -66,12 +66,12 @@ struct ao_alsa_opts {
 #define OPT_BASE_STRUCT struct ao_alsa_opts
 static const struct m_sub_options ao_alsa_conf = {
     .opts = (const struct m_option[]) {
-        {"alsa-resample", OPT_FLAG(resample)},
+        {"alsa-resample", OPT_BOOL(resample)},
         {"alsa-mixer-device", OPT_STRING(mixer_device)},
         {"alsa-mixer-name", OPT_STRING(mixer_name)},
         {"alsa-mixer-index", OPT_INT(mixer_index), M_RANGE(0, 99)},
-        {"alsa-non-interleaved", OPT_FLAG(ni)},
-        {"alsa-ignore-chmap", OPT_FLAG(ignore_chmap)},
+        {"alsa-non-interleaved", OPT_BOOL(ni)},
+        {"alsa-ignore-chmap", OPT_BOOL(ignore_chmap)},
         {"alsa-buffer-time", OPT_INT(buffer_time), M_RANGE(0, INT_MAX)},
         {"alsa-periods", OPT_INT(frags), M_RANGE(0, INT_MAX)},
         {0}
@@ -80,7 +80,6 @@ static const struct m_sub_options ao_alsa_conf = {
         .mixer_device = "default",
         .mixer_name = "Master",
         .mixer_index = 0,
-        .ni = 0,
         .buffer_time = 100000,
         .frags = 4,
     },

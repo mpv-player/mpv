@@ -72,7 +72,7 @@ struct priv {
     AudioStreamBasicDescription original_asbd;
 
     // Output s16 physical format, float32 virtual format, ac3/dts mpv format
-    int spdif_hack;
+    bool spdif_hack;
 
     bool changed_mixing;
 
@@ -461,10 +461,9 @@ const struct ao_driver audio_out_coreaudio_exclusive = {
         .hog_pid = -1,
         .stream = 0,
         .stream_idx = -1,
-        .changed_mixing = false,
     },
     .options = (const struct m_option[]){
-        {"spdif-hack", OPT_FLAG(spdif_hack)},
+        {"spdif-hack", OPT_BOOL(spdif_hack)},
         {0}
     },
     .options_prefix = "coreaudio",

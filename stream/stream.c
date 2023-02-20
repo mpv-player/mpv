@@ -103,7 +103,7 @@ static const stream_info_t *const stream_list[] = {
 
 struct stream_opts {
     int64_t buffer_size;
-    int load_unsafe_playlists;
+    bool load_unsafe_playlists;
 };
 
 #define OPT_BASE_STRUCT struct stream_opts
@@ -112,7 +112,7 @@ const struct m_sub_options stream_conf = {
     .opts = (const struct m_option[]){
         {"stream-buffer-size", OPT_BYTE_SIZE(buffer_size),
             M_RANGE(STREAM_MIN_BUFFER_SIZE, STREAM_MAX_BUFFER_SIZE)},
-        {"load-unsafe-playlists", OPT_FLAG(load_unsafe_playlists)},
+        {"load-unsafe-playlists", OPT_BOOL(load_unsafe_playlists)},
         {0}
     },
     .size = sizeof(struct stream_opts),
@@ -353,8 +353,8 @@ static int stream_create_instance(const stream_info_t *sinfo,
     if (flags & STREAM_LESS_NOISE)
         mp_msg_set_max_level(s->log, MSGL_WARN);
 
-    int opt;
-    mp_read_option_raw(s->global, "access-references", &m_option_type_flag, &opt);
+    bool opt;
+    mp_read_option_raw(s->global, "access-references", &m_option_type_bool, &opt);
     s->access_references = opt;
 
     MP_VERBOSE(s, "Opening %s\n", url);

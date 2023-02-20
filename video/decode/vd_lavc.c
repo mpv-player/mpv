@@ -70,17 +70,17 @@ static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
 #define OPT_BASE_STRUCT struct vd_lavc_params
 
 struct vd_lavc_params {
-    int fast;
+    bool fast;
     int film_grain;
-    int show_all;
+    bool show_all;
     int skip_loop_filter;
     int skip_idct;
     int skip_frame;
     int framedrop;
     int threads;
-    int bitexact;
-    int old_x264;
-    int check_hw_profile;
+    bool bitexact;
+    bool old_x264;
+    bool check_hw_profile;
     int software_fallback;
     char **avopts;
     int dr;
@@ -103,18 +103,18 @@ static const struct m_opt_choice_alternatives discard_names[] = {
 
 const struct m_sub_options vd_lavc_conf = {
     .opts = (const m_option_t[]){
-        {"vd-lavc-fast", OPT_FLAG(fast)},
+        {"vd-lavc-fast", OPT_BOOL(fast)},
         {"vd-lavc-film-grain", OPT_CHOICE(film_grain,
             {"auto", -1}, {"cpu", 0}, {"gpu", 1})},
-        {"vd-lavc-show-all", OPT_FLAG(show_all)},
+        {"vd-lavc-show-all", OPT_BOOL(show_all)},
         {"vd-lavc-skiploopfilter", OPT_DISCARD(skip_loop_filter)},
         {"vd-lavc-skipidct", OPT_DISCARD(skip_idct)},
         {"vd-lavc-skipframe", OPT_DISCARD(skip_frame)},
         {"vd-lavc-framedrop", OPT_DISCARD(framedrop)},
         {"vd-lavc-threads", OPT_INT(threads), M_RANGE(0, DBL_MAX)},
-        {"vd-lavc-bitexact", OPT_FLAG(bitexact)},
-        {"vd-lavc-assume-old-x264", OPT_FLAG(old_x264)},
-        {"vd-lavc-check-hw-profile", OPT_FLAG(check_hw_profile)},
+        {"vd-lavc-bitexact", OPT_BOOL(bitexact)},
+        {"vd-lavc-assume-old-x264", OPT_BOOL(old_x264)},
+        {"vd-lavc-check-hw-profile", OPT_BOOL(check_hw_profile)},
         {"vd-lavc-software-fallback", OPT_CHOICE(software_fallback,
             {"no", INT_MAX}, {"yes", 1}), M_RANGE(1, INT_MAX)},
         {"vd-lavc-o", OPT_KEYVALUELIST(avopts)},
@@ -131,8 +131,7 @@ const struct m_sub_options vd_lavc_conf = {
     .size = sizeof(struct vd_lavc_params),
     .defaults = &(const struct vd_lavc_params){
         .film_grain = -1 /*auto*/,
-        .show_all = 0,
-        .check_hw_profile = 1,
+        .check_hw_profile = true,
         .software_fallback = 3,
         .skip_loop_filter = AVDISCARD_DEFAULT,
         .skip_idct = AVDISCARD_DEFAULT,

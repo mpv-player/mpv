@@ -43,17 +43,16 @@
 
 const struct image_writer_opts image_writer_opts_defaults = {
     .format = AV_CODEC_ID_MJPEG,
-    .high_bit_depth = 1,
+    .high_bit_depth = true,
     .png_compression = 7,
     .png_filter = 5,
     .jpeg_quality = 90,
-    .jpeg_source_chroma = 1,
-    .webp_lossless = 0,
+    .jpeg_source_chroma = true,
     .webp_quality = 75,
     .webp_compression = 4,
     .jxl_distance = 1.0,
     .jxl_effort = 4,
-    .tag_csp = 1,
+    .tag_csp = true,
 };
 
 const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
@@ -72,18 +71,18 @@ const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
 const struct m_option image_writer_opts[] = {
     {"format", OPT_CHOICE_C(format, mp_image_writer_formats)},
     {"jpeg-quality", OPT_INT(jpeg_quality), M_RANGE(0, 100)},
-    {"jpeg-source-chroma", OPT_FLAG(jpeg_source_chroma)},
+    {"jpeg-source-chroma", OPT_BOOL(jpeg_source_chroma)},
     {"png-compression", OPT_INT(png_compression), M_RANGE(0, 9)},
     {"png-filter", OPT_INT(png_filter), M_RANGE(0, 5)},
-    {"webp-lossless", OPT_FLAG(webp_lossless)},
+    {"webp-lossless", OPT_BOOL(webp_lossless)},
     {"webp-quality", OPT_INT(webp_quality), M_RANGE(0, 100)},
     {"webp-compression", OPT_INT(webp_compression), M_RANGE(0, 6)},
 #if HAVE_JPEGXL
     {"jxl-distance", OPT_DOUBLE(jxl_distance), M_RANGE(0.0, 15.0)},
     {"jxl-effort", OPT_INT(jxl_effort), M_RANGE(1, 9)},
 #endif
-    {"high-bit-depth", OPT_FLAG(high_bit_depth)},
-    {"tag-colorspace", OPT_FLAG(tag_csp)},
+    {"high-bit-depth", OPT_BOOL(high_bit_depth)},
+    {"tag-colorspace", OPT_BOOL(tag_csp)},
     {0},
 };
 

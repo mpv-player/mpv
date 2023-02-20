@@ -47,8 +47,8 @@
 struct jack_opts {
     char *port;
     char *client_name;
-    int connect;
-    int autostart;
+    bool connect;
+    bool autostart;
     int stdlayout;
 };
 
@@ -57,15 +57,15 @@ static const struct m_sub_options ao_jack_conf = {
     .opts = (const struct m_option[]){
         {"jack-port", OPT_STRING(port)},
         {"jack-name", OPT_STRING(client_name)},
-        {"jack-autostart", OPT_FLAG(autostart)},
-        {"jack-connect", OPT_FLAG(connect)},
+        {"jack-autostart", OPT_BOOL(autostart)},
+        {"jack-connect", OPT_BOOL(connect)},
         {"jack-std-channel-layout", OPT_CHOICE(stdlayout,
             {"waveext", 0}, {"any", 1})},
         {0}
     },
     .defaults = &(const struct jack_opts) {
         .client_name = "mpv",
-        .connect = 1,
+        .connect = true,
     },
     .size = sizeof(struct jack_opts),
 };

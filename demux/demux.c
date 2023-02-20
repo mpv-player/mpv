@@ -86,24 +86,24 @@ static const demuxer_desc_t *const demuxer_list[] = {
 
 struct demux_opts {
     int enable_cache;
-    int disk_cache;
+    bool disk_cache;
     int64_t max_bytes;
     int64_t max_bytes_bw;
-    int donate_fw;
+    bool donate_fw;
     double min_secs;
     double hyst_secs;
-    int force_seekable;
+    bool force_seekable;
     double min_secs_cache;
-    int access_references;
+    bool access_references;
     int seekable_cache;
-    int create_ccs;
+    bool create_ccs;
     char *record_file;
     int video_back_preroll;
     int audio_back_preroll;
     int back_batch[STREAM_TYPE_COUNT];
     double back_seek_size;
     char *meta_cp;
-    int force_retry_eof;
+    bool force_retry_eof;
 };
 
 #define OPT_BASE_STRUCT struct demux_opts
@@ -114,20 +114,20 @@ const struct m_sub_options demux_conf = {
     .opts = (const struct m_option[]){
         {"cache", OPT_CHOICE(enable_cache,
             {"no", 0}, {"auto", -1}, {"yes", 1})},
-        {"cache-on-disk", OPT_FLAG(disk_cache)},
+        {"cache-on-disk", OPT_BOOL(disk_cache)},
         {"demuxer-readahead-secs", OPT_DOUBLE(min_secs), M_RANGE(0, DBL_MAX)},
         {"demuxer-hysteresis-secs", OPT_DOUBLE(hyst_secs), M_RANGE(0, DBL_MAX)},
         {"demuxer-max-bytes", OPT_BYTE_SIZE(max_bytes),
             M_RANGE(0, M_MAX_MEM_BYTES)},
         {"demuxer-max-back-bytes", OPT_BYTE_SIZE(max_bytes_bw),
             M_RANGE(0, M_MAX_MEM_BYTES)},
-        {"demuxer-donate-buffer", OPT_FLAG(donate_fw)},
-        {"force-seekable", OPT_FLAG(force_seekable)},
+        {"demuxer-donate-buffer", OPT_BOOL(donate_fw)},
+        {"force-seekable", OPT_BOOL(force_seekable)},
         {"cache-secs", OPT_DOUBLE(min_secs_cache), M_RANGE(0, DBL_MAX)},
-        {"access-references", OPT_FLAG(access_references)},
+        {"access-references", OPT_BOOL(access_references)},
         {"demuxer-seekable-cache", OPT_CHOICE(seekable_cache,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
-        {"sub-create-cc-track", OPT_FLAG(create_ccs)},
+        {"sub-create-cc-track", OPT_BOOL(create_ccs)},
         {"stream-record", OPT_STRING(record_file)},
         {"video-backward-overlap", OPT_CHOICE(video_back_preroll, {"auto", -1}),
             M_RANGE(0, 1024)},
@@ -140,7 +140,7 @@ const struct m_sub_options demux_conf = {
         {"demuxer-backward-playback-step", OPT_DOUBLE(back_seek_size),
             M_RANGE(0, DBL_MAX)},
         {"metadata-codepage", OPT_STRING(meta_cp)},
-        {"demuxer-force-retry-on-eof", OPT_FLAG(force_retry_eof),
+        {"demuxer-force-retry-on-eof", OPT_BOOL(force_retry_eof),
          .deprecation_message = "temporary debug option, no replacement"},
         {0}
     },
@@ -149,11 +149,11 @@ const struct m_sub_options demux_conf = {
         .enable_cache = -1, // auto
         .max_bytes = 150 * 1024 * 1024,
         .max_bytes_bw = 50 * 1024 * 1024,
-        .donate_fw = 1,
+        .donate_fw = true,
         .min_secs = 1.0,
         .min_secs_cache = 1000.0 * 60 * 60,
         .seekable_cache = -1,
-        .access_references = 1,
+        .access_references = true,
         .video_back_preroll = -1,
         .audio_back_preroll = -1,
         .back_seek_size = 60,

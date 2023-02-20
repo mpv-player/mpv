@@ -55,10 +55,10 @@ struct vf_format_opts {
     int w, h;
     int dw, dh;
     double dar;
-    int convert;
+    bool convert;
     int force_scaler;
-    int dovi;
-    int film_grain;
+    bool dovi;
+    bool film_grain;
 };
 
 static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
@@ -219,9 +219,9 @@ static const m_option_t vf_opts_fields[] = {
     {"dw", OPT_INT(dw)},
     {"dh", OPT_INT(dh)},
     {"dar", OPT_DOUBLE(dar)},
-    {"convert", OPT_FLAG(convert)},
-    {"dolbyvision", OPT_FLAG(dovi)},
-    {"film-grain", OPT_FLAG(film_grain)},
+    {"convert", OPT_BOOL(convert)},
+    {"dolbyvision", OPT_BOOL(dovi)},
+    {"film-grain", OPT_BOOL(film_grain)},
     {"force-scaler", OPT_CHOICE(force_scaler,
                                 {"auto", MP_SWS_AUTO},
                                 {"sws", MP_SWS_SWS},
@@ -238,8 +238,8 @@ const struct mp_user_filter_entry vf_format = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT){
             .rotate = -1,
-            .dovi = 1,
-            .film_grain = 1,
+            .dovi = true,
+            .film_grain = true,
         },
         .options = vf_opts_fields,
     },

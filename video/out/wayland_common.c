@@ -133,7 +133,7 @@ const struct m_sub_options wayland_conf = {
     .opts = (const struct m_option[]) {
         {"wayland-configure-bounds", OPT_CHOICE(configure_bounds,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
-        {"wayland-disable-vsync", OPT_FLAG(disable_vsync)},
+        {"wayland-disable-vsync", OPT_BOOL(disable_vsync)},
         {"wayland-edge-pixels-pointer", OPT_INT(edge_pixels_pointer),
             M_RANGE(0, INT_MAX)},
         {"wayland-edge-pixels-touch", OPT_INT(edge_pixels_touch),
@@ -143,7 +143,6 @@ const struct m_sub_options wayland_conf = {
     .size = sizeof(struct wayland_opts),
     .defaults = &(struct wayland_opts) {
         .configure_bounds = -1,
-        .disable_vsync = false,
         .edge_pixels_pointer = 10,
         .edge_pixels_touch = 32,
     },

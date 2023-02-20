@@ -43,8 +43,8 @@
 #define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_FRAME_RATE_CONVERSION 0x20
 
 struct opts {
-    int deint_enabled;
-    int interlaced_only;
+    bool deint_enabled;
+    bool interlaced_only;
     int mode;
 };
 
@@ -429,7 +429,6 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
 
     struct hwdec_imgfmt_request params = {
         .imgfmt = IMGFMT_D3D11,
-        .probing = false,
     };
     hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
 
@@ -479,8 +478,8 @@ fail:
 
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
-    {"deint", OPT_FLAG(deint_enabled)},
-    {"interlaced-only", OPT_FLAG(interlaced_only)},
+    {"deint", OPT_BOOL(deint_enabled)},
+    {"interlaced-only", OPT_BOOL(interlaced_only)},
     {"mode", OPT_CHOICE(mode,
         {"blend", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND},
         {"bob", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB},
@@ -497,8 +496,7 @@ const struct mp_user_filter_entry vf_d3d11vpp = {
         .name = "d3d11vpp",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
-            .deint_enabled = 1,
-            .interlaced_only = 0,
+            .deint_enabled = true,
             .mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB,
         },
         .options = vf_opts_fields,

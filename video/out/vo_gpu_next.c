@@ -147,9 +147,9 @@ struct priv {
     // Performance data of last frame
     struct voctrl_performance_data perf;
 
-    int delayed_peak;
-    int inter_preserve;
-    int target_hint;
+    bool delayed_peak;
+    bool inter_preserve;
+    bool target_hint;
 };
 
 static void update_render_options(struct vo *vo);
@@ -1961,14 +1961,14 @@ const struct vo_driver video_out_gpu_next = {
     },
 
     .options = (const struct m_option[]) {
-        {"allow-delayed-peak-detect", OPT_FLAG(delayed_peak)},
-        {"interpolation-preserve", OPT_FLAG(inter_preserve)},
+        {"allow-delayed-peak-detect", OPT_BOOL(delayed_peak)},
+        {"interpolation-preserve", OPT_BOOL(inter_preserve)},
         {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
         {"lut-type", OPT_CHOICE_C(lut.type, lut_types)},
         {"image-lut", OPT_STRING(image_lut.opt), .flags = M_OPT_FILE},
         {"image-lut-type", OPT_CHOICE_C(image_lut.type, lut_types)},
         {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
-        {"target-colorspace-hint", OPT_FLAG(target_hint)},
+        {"target-colorspace-hint", OPT_BOOL(target_hint)},
         // No `target-lut-type` because we don't support non-RGB targets
         {0}
     },

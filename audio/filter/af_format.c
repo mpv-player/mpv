@@ -30,7 +30,7 @@ struct f_opts {
     int out_srate;
     struct m_channels out_channels;
 
-    int fail;
+    bool fail;
 };
 
 struct priv {
@@ -135,7 +135,7 @@ const struct mp_user_filter_entry af_format = {
             {"out-srate", OPT_INT(out_srate), M_RANGE(1000, 8*48000)},
             {"out-channels", OPT_CHANNELS(out_channels),
                 .flags = M_OPT_CHANNELS_LIMITED},
-            {"fail", OPT_FLAG(fail)},
+            {"fail", OPT_BOOL(fail)},
             {0}
         },
     },

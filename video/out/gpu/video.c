@@ -25,6 +25,7 @@
 #include <libavutil/common.h>
 #include <libavutil/lfg.h>
 
+#include "options/m_option.h"
 #include "video.h"
 
 #include "misc/bstr.h"
@@ -312,7 +313,7 @@ static const struct gl_video_opts gl_video_opts_def = {
         {{"mitchell", .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .clamp = 1, }, // tscale
     },
-    .scaler_resizes_only = 1,
+    .scaler_resizes_only = true,
     .scaler_lut_size = 6,
     .interpolation_threshold = 0.01,
     .alpha_mode = ALPHA_BLEND_TILES,
@@ -368,7 +369,7 @@ const struct m_sub_options gl_video_conf = {
             {"auto", 0}, {"yes", 1}, {"no", -1})},
         {"gamma-factor", OPT_FLOAT(gamma), M_RANGE(0.1, 2.0),
             .deprecation_message = "no replacement"},
-        {"gamma-auto", OPT_FLAG(gamma_auto),
+        {"gamma-auto", OPT_BOOL(gamma_auto),
             .deprecation_message = "no replacement"},
         {"target-prim", OPT_CHOICE_C(target_prim, mp_csp_prim_names)},
         {"target-trc", OPT_CHOICE_C(target_trc, mp_csp_trc_names)},
@@ -388,7 +389,7 @@ const struct m_sub_options gl_video_conf = {
             {"st2094-40", TONE_MAPPING_ST2094_40},
             {"st2094-10", TONE_MAPPING_ST2094_10})},
         {"tone-mapping-param", OPT_FLOATDEF(tone_map.curve_param)},
-        {"inverse-tone-mapping", OPT_FLAG(tone_map.inverse)},
+        {"inverse-tone-mapping", OPT_BOOL(tone_map.inverse)},
         {"tone-mapping-crosstalk", OPT_FLOAT(tone_map.crosstalk),
             M_RANGE(0.0, 0.3)},
         {"tone-mapping-max-boost", OPT_FLOAT(tone_map.max_boost),
@@ -399,7 +400,7 @@ const struct m_sub_options gl_video_conf = {
             {"max",         TONE_MAP_MODE_MAX},
             {"hybrid",      TONE_MAP_MODE_HYBRID},
             {"luma",        TONE_MAP_MODE_LUMA})},
-        {"tone-mapping-visualize", OPT_FLAG(tone_map.visualize)},
+        {"tone-mapping-visualize", OPT_BOOL(tone_map.visualize)},
         {"gamut-mapping-mode", OPT_CHOICE(tone_map.gamut_mode,
             {"auto",        GAMUT_AUTO},
             {"clip",        GAMUT_CLIP},
@@ -416,17 +417,17 @@ const struct m_sub_options gl_video_conf = {
             M_RANGE(0, 20.0)},
         {"hdr-scene-threshold-high", OPT_FLOAT(tone_map.scene_threshold_high),
             M_RANGE(0, 20.0)},
-        {"opengl-pbo", OPT_FLAG(pbo)},
+        {"opengl-pbo", OPT_BOOL(pbo)},
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
         SCALER_OPTS("cscale", SCALER_CSCALE),
         SCALER_OPTS("tscale", SCALER_TSCALE),
         {"scaler-lut-size", OPT_INT(scaler_lut_size), M_RANGE(4, 10)},
-        {"scaler-resizes-only", OPT_FLAG(scaler_resizes_only)},
-        {"correct-downscaling", OPT_FLAG(correct_downscaling)},
-        {"linear-downscaling", OPT_FLAG(linear_downscaling)},
-        {"linear-upscaling", OPT_FLAG(linear_upscaling)},
-        {"sigmoid-upscaling", OPT_FLAG(sigmoid_upscaling)},
+        {"scaler-resizes-only", OPT_BOOL(scaler_resizes_only)},
+        {"correct-downscaling", OPT_BOOL(correct_downscaling)},
+        {"linear-downscaling", OPT_BOOL(linear_downscaling)},
+        {"linear-upscaling", OPT_BOOL(linear_upscaling)},
+        {"sigmoid-upscaling", OPT_BOOL(sigmoid_upscaling)},
         {"sigmoid-center", OPT_FLOAT(sigmoid_center), M_RANGE(0.0, 1.0)},
         {"sigmoid-slope", OPT_FLOAT(sigmoid_slope), M_RANGE(1.0, 20.0)},
         {"fbo-format", OPT_STRING(fbo_format)},
@@ -438,7 +439,7 @@ const struct m_sub_options gl_video_conf = {
             {"error-diffusion", DITHER_ERROR_DIFFUSION},
             {"no", DITHER_NONE})},
         {"dither-size-fruit", OPT_INT(dither_size), M_RANGE(2, 8)},
-        {"temporal-dither", OPT_FLAG(temporal_dither)},
+        {"temporal-dither", OPT_BOOL(temporal_dither)},
         {"temporal-dither-period", OPT_INT(temporal_dither_period),
             M_RANGE(1, 128)},
         {"error-diffusion",
@@ -448,9 +449,9 @@ const struct m_sub_options gl_video_conf = {
             {"yes", ALPHA_YES},
             {"blend", ALPHA_BLEND},
             {"blend-tiles", ALPHA_BLEND_TILES})},
-        {"opengl-rectangle-textures", OPT_FLAG(use_rectangle)},
+        {"opengl-rectangle-textures", OPT_BOOL(use_rectangle)},
         {"background", OPT_COLOR(background)},
-        {"interpolation", OPT_FLAG(interpolation)},
+        {"interpolation", OPT_BOOL(interpolation)},
         {"interpolation-threshold", OPT_FLOAT(interpolation_threshold)},
         {"blend-subtitles", OPT_CHOICE(blend_subs,
             {"no", BLEND_SUBS_NO},
@@ -459,7 +460,7 @@ const struct m_sub_options gl_video_conf = {
         {"glsl-shaders", OPT_PATHLIST(user_shaders), .flags = M_OPT_FILE},
         {"glsl-shader", OPT_CLI_ALIAS("glsl-shaders-append")},
         {"glsl-shader-opts", OPT_KEYVALUELIST(user_shader_opts)},
-        {"deband", OPT_FLAG(deband)},
+        {"deband", OPT_BOOL(deband)},
         {"deband", OPT_SUBSTRUCT(deband_opts, deband_conf)},
         {"sharpen", OPT_FLOAT(unsharp)},
         {"gpu-tex-pad-x", OPT_INT(tex_pad_x), M_RANGE(0, 4096)},
@@ -3876,7 +3877,7 @@ static void check_gl_features(struct gl_video *p)
                 // p->opts is a copy => we can just mess with it.
                 p->opts.scaler[n].kernel.name = "bilinear";
                 if (n == SCALER_TSCALE)
-                    p->opts.interpolation = 0;
+                    p->opts.interpolation = false;
             }
         }
     }
@@ -3900,7 +3901,7 @@ static void check_gl_features(struct gl_video *p)
         MP_WARN(p, "Disabling color management (GLSL version too old).\n");
     }
     if (!have_mglsl && p->opts.deband) {
-        p->opts.deband = 0;
+        p->opts.deband = false;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
 }

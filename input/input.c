@@ -171,15 +171,15 @@ struct input_opts {
     // Autorepeat config (be aware of mp_input_set_repeat_info())
     int ar_delay;
     int ar_rate;
-    int use_alt_gr;
-    int use_gamepad;
-    int use_media_keys;
-    int default_bindings;
-    int builtin_bindings;
-    int enable_mouse_movements;
-    int vo_key_input;
-    int test;
-    int allow_win_drag;
+    bool use_alt_gr;
+    bool use_gamepad;
+    bool use_media_keys;
+    bool default_bindings;
+    bool builtin_bindings;
+    bool enable_mouse_movements;
+    bool vo_key_input;
+    bool test;
+    bool allow_win_drag;
 };
 
 const struct m_sub_options input_config = {
@@ -189,20 +189,20 @@ const struct m_sub_options input_config = {
         {"input-ar-rate", OPT_INT(ar_rate)},
         {"input-keylist", OPT_PRINT(mp_print_key_list)},
         {"input-cmdlist", OPT_PRINT(mp_print_cmd_list)},
-        {"input-default-bindings", OPT_FLAG(default_bindings)},
-        {"input-builtin-bindings", OPT_FLAG(builtin_bindings)},
-        {"input-test", OPT_FLAG(test)},
+        {"input-default-bindings", OPT_BOOL(default_bindings)},
+        {"input-builtin-bindings", OPT_BOOL(builtin_bindings)},
+        {"input-test", OPT_BOOL(test)},
         {"input-doubleclick-time", OPT_INT(doubleclick_time),
          M_RANGE(0, 1000)},
-        {"input-right-alt-gr", OPT_FLAG(use_alt_gr)},
+        {"input-right-alt-gr", OPT_BOOL(use_alt_gr)},
         {"input-key-fifo-size", OPT_INT(key_fifo_size), M_RANGE(2, 65000)},
-        {"input-cursor", OPT_FLAG(enable_mouse_movements)},
-        {"input-vo-keyboard", OPT_FLAG(vo_key_input)},
-        {"input-media-keys", OPT_FLAG(use_media_keys)},
+        {"input-cursor", OPT_BOOL(enable_mouse_movements)},
+        {"input-vo-keyboard", OPT_BOOL(vo_key_input)},
+        {"input-media-keys", OPT_BOOL(use_media_keys)},
 #if HAVE_SDL2_GAMEPAD
-        {"input-gamepad", OPT_FLAG(use_gamepad)},
+        {"input-gamepad", OPT_BOOL(use_gamepad)},
 #endif
-        {"window-dragging", OPT_FLAG(allow_win_drag)},
+        {"window-dragging", OPT_BOOL(allow_win_drag)},
         {"input-x11-keyboard", OPT_REPLACED("input-vo-keyboard")},
 #if HAVE_COCOA
         {"input-appleremote", OPT_REMOVED("replaced by MediaPlayer support")},
@@ -215,13 +215,13 @@ const struct m_sub_options input_config = {
         .doubleclick_time = 300,
         .ar_delay = 200,
         .ar_rate = 40,
-        .use_alt_gr = 1,
-        .enable_mouse_movements = 1,
-        .use_media_keys = 1,
-        .default_bindings = 1,
-        .builtin_bindings = 1,
-        .vo_key_input = 1,
-        .allow_win_drag = 1,
+        .use_alt_gr = true,
+        .enable_mouse_movements = true,
+        .use_media_keys = true,
+        .default_bindings = true,
+        .builtin_bindings = true,
+        .vo_key_input = true,
+        .allow_win_drag = true,
     },
     .change_flags = UPDATE_INPUT,
 };
@@ -1474,7 +1474,6 @@ void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command)
         .cmd = bstrdup0(bs->binds, command),
         .location = talloc_strdup(bs->binds, "keybind-command"),
         .owner = bs,
-        .is_builtin = false,
         .num_keys = 1,
     };
     memcpy(bind->keys, &key, 1 * sizeof(bind->keys[0]));
@@ -1698,4 +1697,3 @@ void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay)
     ictx->opts->ar_delay = delay;
     input_unlock(ictx);
 }
-

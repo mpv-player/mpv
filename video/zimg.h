@@ -19,7 +19,7 @@ struct zimg_opts {
     int scaler_chroma;
     double scaler_chroma_params[2];
     int dither;
-    int fast;
+    bool fast;
     int threads;
 };
 

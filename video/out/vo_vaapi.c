@@ -81,7 +81,7 @@ struct priv {
     int                      output_surface;
     int                      visible_surface;
     int                      scaling;
-    int                      force_scaled_osd;
+    bool                     force_scaled_osd;
 
     VAImageFormat            osd_format; // corresponds to OSD_VA_FORMAT
     struct vaapi_osd_part    osd_part;
@@ -873,7 +873,7 @@ const struct vo_driver video_out_vaapi = {
             {"fast", VA_FILTER_SCALING_FAST},
             {"hq", VA_FILTER_SCALING_HQ},
             {"nla", VA_FILTER_SCALING_NL_ANAMORPHIC})},
-        {"scaled-osd", OPT_FLAG(force_scaled_osd)},
+        {"scaled-osd", OPT_BOOL(force_scaled_osd)},
         {0}
     },
     .options_prefix = "vo-vaapi",

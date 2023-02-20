@@ -85,13 +85,13 @@ struct vdpctx {
     int                                output_surface_w, output_surface_h;
     int                                rotation;
 
-    int                                force_yuv;
+    bool                               force_yuv;
     struct mp_vdpau_mixer             *video_mixer;
-    int                                pullup;
+    bool                               pullup;
     float                              denoise;
     float                              sharpen;
     int                                hqscaling;
-    int                                chroma_deint;
+    bool                               chroma_deint;
     int                                flip_offset_window;
     int                                flip_offset_fs;
     int64_t                            flip_offset_us;
@@ -105,7 +105,7 @@ struct vdpctx {
     int                                query_surface_num;
     VdpTime                            recent_vsync_time;
     float                              user_fps;
-    int                                composite_detect;
+    bool                               composite_detect;
     int                                vsync_interval;
     uint64_t                           last_queue_time;
     uint64_t                           queue_time[MAX_OUTPUT_SURFACES];
@@ -1118,20 +1118,20 @@ const struct vo_driver video_out_vdpau = {
     .uninit = uninit,
     .priv_size = sizeof(struct vdpctx),
     .options = (const struct m_option []){
-        {"chroma-deint", OPT_FLAG(chroma_deint), OPTDEF_INT(1)},
-        {"pullup", OPT_FLAG(pullup)},
+        {"chroma-deint", OPT_BOOL(chroma_deint), OPTDEF_INT(1)},
+        {"pullup", OPT_BOOL(pullup)},
         {"denoise", OPT_FLOAT(denoise), M_RANGE(0, 1)},
         {"sharpen", OPT_FLOAT(sharpen), M_RANGE(-1, 1)},
         {"hqscaling", OPT_INT(hqscaling), M_RANGE(0, 9)},
         {"fps", OPT_FLOAT(user_fps)},
-        {"composite-detect", OPT_FLAG(composite_detect), OPTDEF_INT(1)},
+        {"composite-detect", OPT_BOOL(composite_detect), OPTDEF_INT(1)},
         {"queuetime-windowed", OPT_INT(flip_offset_window), OPTDEF_INT(50)},
         {"queuetime-fs", OPT_INT(flip_offset_fs), OPTDEF_INT(50)},
         {"output-surfaces", OPT_INT(num_output_surfaces),
             M_RANGE(2, MAX_OUTPUT_SURFACES), OPTDEF_INT(3)},
         {"colorkey", OPT_COLOR(colorkey),
             .defval = &(const struct m_color){.r = 2, .g = 5, .b = 7, .a = 255}},
-        {"force-yuv", OPT_FLAG(force_yuv)},
+        {"force-yuv", OPT_BOOL(force_yuv)},
         {"queuetime_windowed", OPT_REPLACED("queuetime-windowed")},
         {"queuetime_fs", OPT_REPLACED("queuetime-fs")},
         {"output_surfaces", OPT_REPLACED("output-surfaces")},

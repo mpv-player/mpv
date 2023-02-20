@@ -56,7 +56,7 @@ struct priv {
     ALenum al_format;
     int num_buffers;
     int num_samples;
-    int direct_channels;
+    bool direct_channels;
 };
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -389,12 +389,12 @@ const struct ao_driver audio_out_openal = {
     .priv_defaults = &(const struct priv) {
         .num_buffers = 4,
         .num_samples = 8192,
-        .direct_channels = 1,
+        .direct_channels = true,
     },
     .options = (const struct m_option[]) {
         {"num-buffers", OPT_INT(num_buffers), M_RANGE(2, MAX_BUF)},
         {"num-samples", OPT_INT(num_samples), M_RANGE(256, MAX_SAMPLES)},
-        {"direct-channels", OPT_FLAG(direct_channels)},
+        {"direct-channels", OPT_BOOL(direct_channels)},
         {0}
     },
     .options_prefix = "openal",
