@@ -10,9 +10,9 @@
 extern const struct m_sub_options mp_icc_conf;
 
 struct mp_icc_opts {
-    int use_embedded;
+    bool use_embedded;
     char *profile;
-    int profile_auto;
+    bool profile_auto;
     char *cache_dir;
     char *size_str;
     int intent;

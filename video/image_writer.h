@@ -22,7 +22,7 @@ struct mp_log;
 
 struct image_writer_opts {
     int format;
-    int high_bit_depth;
+    bool high_bit_depth;
     int png_compression;
     int png_filter;
     int jpeg_quality;
@@ -31,13 +31,13 @@ struct image_writer_opts {
     int jpeg_dpi;
     int jpeg_progressive;
     int jpeg_baseline;
-    int jpeg_source_chroma;
-    int webp_lossless;
+    bool jpeg_source_chroma;
+    bool webp_lossless;
     int webp_quality;
     int webp_compression;
     double jxl_distance;
     int jxl_effort;
-    int tag_csp;
+    bool tag_csp;
 };
 
 extern const struct image_writer_opts image_writer_opts_defaults;

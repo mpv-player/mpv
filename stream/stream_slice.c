@@ -177,5 +177,4 @@ const stream_info_t stream_info_slice = {
     .name = "slice",
     .open2 = open2,
     .protocols = (const char*const[]){ "slice", NULL },
-    .can_write = false,
 };

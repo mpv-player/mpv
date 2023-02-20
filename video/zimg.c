@@ -51,7 +51,7 @@ const struct zimg_opts zimg_opts_defaults = {
     .scaler_chroma_params = {NAN, NAN},
     .scaler_chroma = ZIMG_RESIZE_BILINEAR,
     .dither = ZIMG_DITHER_RANDOM,
-    .fast = 1,
+    .fast = true,
 };
 
 #define OPT_PARAM(var) OPT_DOUBLE(var), .flags = M_OPT_DEFAULT_NAN
@@ -70,7 +70,7 @@ const struct m_sub_options zimg_conf = {
             {"ordered",         ZIMG_DITHER_ORDERED},
             {"random",          ZIMG_DITHER_RANDOM},
             {"error-diffusion", ZIMG_DITHER_ERROR_DIFFUSION})},
-        {"fast", OPT_FLAG(fast)},
+        {"fast", OPT_BOOL(fast)},
         {"threads", OPT_CHOICE(threads, {"auto", 0}), M_RANGE(1, 64)},
         {0}
     },

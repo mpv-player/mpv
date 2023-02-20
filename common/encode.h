@@ -40,10 +40,10 @@ struct encode_opts {
     char **aopts;
     float voffset;
     float aoffset;
-    int rawts;
-    int video_first;
-    int audio_first;
-    int copy_metadata;
+    bool rawts;
+    bool video_first;
+    bool audio_first;
+    bool copy_metadata;
     char **set_metadata;
     char **remove_metadata;
 };

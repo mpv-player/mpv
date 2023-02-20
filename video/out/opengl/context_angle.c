@@ -53,7 +53,7 @@ struct angle_opts {
     int d3d11_warp;
     int d3d11_feature_level;
     int egl_windowing;
-    int flip;
+    bool flip;
 };
 
 #define OPT_BASE_STRUCT struct angle_opts
@@ -76,7 +76,7 @@ const struct m_sub_options angle_conf = {
             {"auto", -1},
             {"no", 0},
             {"yes", 1})},
-        {"angle-flip", OPT_FLAG(flip)},
+        {"angle-flip", OPT_BOOL(flip)},
         {"angle-max-frame-latency", OPT_REPLACED("swapchain-depth")},
         {"angle-swapchain-length", OPT_REMOVED("controlled by --swapchain-depth")},
         {0}
@@ -86,7 +86,7 @@ const struct m_sub_options angle_conf = {
         .d3d11_warp = -1,
         .d3d11_feature_level = D3D_FEATURE_LEVEL_11_0,
         .egl_windowing = -1,
-        .flip = 1,
+        .flip = true,
     },
     .size = sizeof(struct angle_opts),
 };

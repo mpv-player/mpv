@@ -51,13 +51,13 @@
 struct vo_sixel_opts {
     int diffuse;
     int reqcolors;
-    int fixedpal;
+    bool fixedpal;
     int threshold;
     int width, height, top, left;
     int pad_y, pad_x;
     int rows, cols;
-    int config_clear, alt_screen;
-    int buffered;
+    bool config_clear, alt_screen;
+    bool buffered;
 };
 
 struct priv {
@@ -591,16 +591,15 @@ const struct vo_driver video_out_sixel = {
         .opts.height = 0,
         .opts.reqcolors = 256,
         .opts.threshold = -1,
-        .opts.fixedpal = 1,
+        .opts.fixedpal = true,
         .opts.top = 0,
         .opts.left = 0,
         .opts.pad_y = -1,
         .opts.pad_x = -1,
         .opts.rows = 0,
         .opts.cols = 0,
-        .opts.config_clear = 1,
-        .opts.alt_screen = 1,
-        .opts.buffered = 0,
+        .opts.config_clear = true,
+        .opts.alt_screen = true,
     },
     .options = (const m_option_t[]) {
         {"dither", OPT_CHOICE(opts.diffuse,
@@ -616,7 +615,7 @@ const struct vo_driver video_out_sixel = {
         {"width", OPT_INT(opts.width)},
         {"height", OPT_INT(opts.height)},
         {"reqcolors", OPT_INT(opts.reqcolors)},
-        {"fixedpalette", OPT_FLAG(opts.fixedpal)},
+        {"fixedpalette", OPT_BOOL(opts.fixedpal)},
         {"threshold", OPT_INT(opts.threshold)},
         {"top", OPT_INT(opts.top)},
         {"left", OPT_INT(opts.left)},
@@ -624,11 +623,11 @@ const struct vo_driver video_out_sixel = {
         {"pad-x", OPT_INT(opts.pad_x)},
         {"rows", OPT_INT(opts.rows)},
         {"cols", OPT_INT(opts.cols)},
-        {"config-clear", OPT_FLAG(opts.config_clear), },
-        {"exit-clear", OPT_FLAG(opts.alt_screen),
+        {"config-clear", OPT_BOOL(opts.config_clear), },
+        {"exit-clear", OPT_BOOL(opts.alt_screen),
             .deprecation_message = "replaced by --vo-sixel-alt-screen"},
-        {"alt-screen", OPT_FLAG(opts.alt_screen), },
-        {"buffered", OPT_FLAG(opts.buffered), },
+        {"alt-screen", OPT_BOOL(opts.alt_screen), },
+        {"buffered", OPT_BOOL(opts.buffered), },
         {0}
     },
     .options_prefix = "vo-sixel",

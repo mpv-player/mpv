@@ -80,12 +80,12 @@ struct d3dtex {
 typedef struct d3d_priv {
     struct mp_log *log;
 
-    int opt_disable_texture_align;
+    bool opt_disable_texture_align;
     // debugging
-    int opt_force_power_of_2;
+    bool opt_force_power_of_2;
     int opt_texture_memory;
-    int opt_swap_discard;
-    int opt_exact_backbuffer;
+    bool opt_swap_discard;
+    bool opt_exact_backbuffer;
 
     struct vo *vo;
 
@@ -1222,16 +1222,16 @@ static void draw_osd(struct vo *vo)
 #define OPT_BASE_STRUCT d3d_priv
 
 static const struct m_option opts[] = {
-    {"force-power-of-2", OPT_FLAG(opt_force_power_of_2)},
-    {"disable-texture-align", OPT_FLAG(opt_disable_texture_align)},
+    {"force-power-of-2", OPT_BOOL(opt_force_power_of_2)},
+    {"disable-texture-align", OPT_BOOL(opt_disable_texture_align)},
     {"texture-memory", OPT_CHOICE(opt_texture_memory,
         {"default", 0},
         {"managed", 1},
         {"default-pool", 2},
         {"default-pool-shadow", 3},
         {"scratch", 4})},
-    {"swap-discard", OPT_FLAG(opt_swap_discard)},
-    {"exact-backbuffer", OPT_FLAG(opt_exact_backbuffer)},
+    {"swap-discard", OPT_BOOL(opt_swap_discard)},
+    {"exact-backbuffer", OPT_BOOL(opt_exact_backbuffer)},
     {0}
 };
 

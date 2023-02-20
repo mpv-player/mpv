@@ -170,7 +170,6 @@ static bool parse_hook(struct mp_log *log, struct bstr *body,
     *out = (struct gl_user_shader_hook){
         .pass_desc = bstr0("(unknown)"),
         .offset = identity_trans,
-        .align_offset = false,
         .width = {{ SZEXP_VAR_W, { .varname = bstr0("HOOKED") }}},
         .height = {{ SZEXP_VAR_H, { .varname = bstr0("HOOKED") }}},
         .cond = {{ SZEXP_CONST, { .cval = 1.0 }}},

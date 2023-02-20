@@ -77,7 +77,7 @@ const struct m_sub_options stream_dvb_conf = {
         {"card", OPT_INT(cfg_devno), M_RANGE(0, MAX_ADAPTERS-1)},
         {"timeout", OPT_INT(cfg_timeout), M_RANGE(1, 30)},
         {"file", OPT_STRING(cfg_file), .flags = M_OPT_FILE},
-        {"full-transponder", OPT_FLAG(cfg_full_transponder)},
+        {"full-transponder", OPT_BOOL(cfg_full_transponder)},
         {"channel-switch-offset", OPT_INT(cfg_channel_switch_offset),
             .flags = UPDATE_DVB_PROG},
         {0}

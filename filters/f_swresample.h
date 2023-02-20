@@ -19,9 +19,9 @@ struct mp_swresample {
 struct mp_resample_opts {
     int filter_size;
     int phase_shift;
-    int linear;
+    bool linear;
     double cutoff;
-    int normalize;
+    bool normalize;
     int allow_passthrough;
     double max_output_frame_size;
     char **avopts;

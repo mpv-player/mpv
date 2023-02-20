@@ -693,7 +693,6 @@ struct mp_hwdec_ctx *mp_filter_load_hwdec_device(struct mp_filter *f, int imgfmt
 
     struct hwdec_imgfmt_request params = {
         .imgfmt = imgfmt,
-        .probing = false,
     };
     hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
 

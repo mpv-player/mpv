@@ -491,9 +491,9 @@ static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
 #define OPT_BASE_STRUCT struct mp_icc_opts
 const struct m_sub_options mp_icc_conf = {
     .opts = (const m_option_t[]) {
-        {"use-embedded-icc-profile", OPT_FLAG(use_embedded)},
+        {"use-embedded-icc-profile", OPT_BOOL(use_embedded)},
         {"icc-profile", OPT_STRING(profile), .flags = M_OPT_FILE},
-        {"icc-profile-auto", OPT_FLAG(profile_auto)},
+        {"icc-profile-auto", OPT_BOOL(profile_auto)},
         {"icc-cache-dir", OPT_STRING(cache_dir), .flags = M_OPT_FILE},
         {"icc-intent", OPT_INT(intent)},
         {"icc-force-contrast", OPT_CHOICE(contrast, {"no", 0}, {"inf", -1}),

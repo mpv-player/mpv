@@ -76,14 +76,14 @@ struct demux_lavf_opts {
     int probescore;
     float analyzeduration;
     int buffersize;
-    int allow_mimetype;
+    bool allow_mimetype;
     char *format;
     char **avopts;
-    int hacks;
+    bool hacks;
     char *sub_cp;
     int rtsp_transport;
     int linearize_ts;
-    int propagate_opts;
+    bool propagate_opts;
 };
 
 const struct m_sub_options demux_lavf_conf = {
@@ -96,10 +96,10 @@ const struct m_sub_options demux_lavf_conf = {
          M_RANGE(0, 3600)},
         {"demuxer-lavf-buffersize", OPT_INT(buffersize),
          M_RANGE(1, 10 * 1024 * 1024), OPTDEF_INT(BIO_BUFFER_SIZE)},
-        {"demuxer-lavf-allow-mimetype", OPT_FLAG(allow_mimetype)},
+        {"demuxer-lavf-allow-mimetype", OPT_BOOL(allow_mimetype)},
         {"demuxer-lavf-probescore", OPT_INT(probescore),
          M_RANGE(1, AVPROBE_SCORE_MAX)},
-        {"demuxer-lavf-hacks", OPT_FLAG(hacks)},
+        {"demuxer-lavf-hacks", OPT_BOOL(hacks)},
         {"demuxer-lavf-o", OPT_KEYVALUELIST(avopts)},
         {"sub-codepage", OPT_STRING(sub_cp)},
         {"rtsp-transport", OPT_CHOICE(rtsp_transport,
@@ -110,14 +110,14 @@ const struct m_sub_options demux_lavf_conf = {
             {"udp_multicast", 4})},
         {"demuxer-lavf-linearize-timestamps", OPT_CHOICE(linearize_ts,
             {"no", 0}, {"auto", -1}, {"yes", 1})},
-        {"demuxer-lavf-propagate-opts", OPT_FLAG(propagate_opts)},
+        {"demuxer-lavf-propagate-opts", OPT_BOOL(propagate_opts)},
         {0}
     },
     .size = sizeof(struct demux_lavf_opts),
     .defaults = &(const struct demux_lavf_opts){
         .probeinfo = -1,
-        .allow_mimetype = 1,
-        .hacks = 1,
+        .allow_mimetype = true,
+        .hacks = true,
         // AVPROBE_SCORE_MAX/4 + 1 is the "recommended" limit. Below that, the
         // user is supposed to retry with larger probe sizes until a higher
         // value is reached.
@@ -125,7 +125,7 @@ const struct m_sub_options demux_lavf_conf = {
         .sub_cp = "auto",
         .rtsp_transport = 2,
         .linearize_ts = -1,
-        .propagate_opts = 1,
+        .propagate_opts = true,
     },
 };
 
