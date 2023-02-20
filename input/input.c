@@ -172,7 +172,6 @@ struct input_opts {
     int ar_delay;
     int ar_rate;
     int use_alt_gr;
-    int use_appleremote;
     int use_gamepad;
     int use_media_keys;
     int default_bindings;
