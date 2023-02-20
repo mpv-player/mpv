@@ -429,6 +429,7 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
 
     struct hwdec_imgfmt_request params = {
         .imgfmt = IMGFMT_D3D11,
+        .probing = false,
     };
     hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
 

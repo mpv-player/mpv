@@ -221,6 +221,7 @@ static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 
     *out_fbo = (struct ra_fbo) {
         .tex = p->backbuffer,
+        .flip = false,
         .color_space = p->swapchain_csp
     };
     return true;

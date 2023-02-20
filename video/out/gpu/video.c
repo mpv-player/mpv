@@ -25,7 +25,6 @@
 #include <libavutil/common.h>
 #include <libavutil/lfg.h>
 
-#include "options/m_option.h"
 #include "video.h"
 
 #include "misc/bstr.h"
