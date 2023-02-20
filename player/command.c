@@ -4574,8 +4574,8 @@ static void cmd_osd_overlay(void *p)
         .res_x  = cmd->args[3].v.i,
         .res_y  = cmd->args[4].v.i,
         .z      = cmd->args[5].v.i,
-        .hidden = cmd->args[6].v.i,
-        .out_rc = cmd->args[7].v.i ? rc : NULL,
+        .hidden = cmd->args[6].v.b,
+        .out_rc = cmd->args[7].v.b ? rc : NULL,
     };
 
     osd_set_external(mpctx->osd, &ov);
@@ -5516,7 +5516,7 @@ static void cmd_track_add(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     int type = *(int *)cmd->priv;
     bool is_albumart = type == STREAM_VIDEO &&
-                       cmd->args[4].v.i;
+                       cmd->args[4].v.b;
 
     if (mpctx->stop_play) {
         cmd->success = false;
@@ -5694,11 +5694,11 @@ static void cmd_subprocess(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     char **args = cmd->args[0].v.str_list;
-    bool playback_only = cmd->args[1].v.i;
-    bool detach = cmd->args[5].v.i;
+    bool playback_only = cmd->args[1].v.b;
+    bool detach = cmd->args[5].v.b;
     char **env = cmd->args[6].v.str_list;
     bstr stdin_data = bstr0(cmd->args[7].v.s);
-    bool passthrough_stdin = cmd->args[8].v.i;
+    bool passthrough_stdin = cmd->args[8].v.b;
 
     if (env && !env[0])
         env = NULL; // do not actually set an empty environment
@@ -5727,8 +5727,8 @@ static void cmd_subprocess(void *p)
             .msgl = fd == 2 ? MSGL_ERR : MSGL_INFO,
         };
     }
-    fdctx[1].capture = cmd->args[3].v.i;
-    fdctx[2].capture = cmd->args[4].v.i;
+    fdctx[1].capture = cmd->args[3].v.b;
+    fdctx[2].capture = cmd->args[4].v.b;
 
     pthread_mutex_lock(&mpctx->abort_lock);
     cmd->abort->coupled_to_playback = playback_only;
@@ -6367,7 +6367,7 @@ const struct mp_cmd_def mp_cmds[] = {
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"lang", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
-            {"albumart", OPT_FLAG(v.i), .flags = MP_CMD_OPT_ARG},
+            {"albumart", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
         },
         .priv = &(const int){STREAM_VIDEO},
         .spawn_thread = true,
@@ -6485,15 +6485,15 @@ const struct mp_cmd_def mp_cmds[] = {
     { "subprocess", cmd_subprocess,
         {
             {"args", OPT_STRINGLIST(v.str_list)},
-            {"playback_only", OPT_FLAG(v.i), OPTDEF_INT(1)},
+            {"playback_only", OPT_BOOL(v.b), OPTDEF_INT(1)},
             {"capture_size", OPT_BYTE_SIZE(v.i64), M_RANGE(0, INT_MAX),
                 OPTDEF_INT64(64 * 1024 * 1024)},
-            {"capture_stdout", OPT_FLAG(v.i), .flags = MP_CMD_OPT_ARG},
-            {"capture_stderr", OPT_FLAG(v.i), .flags = MP_CMD_OPT_ARG},
-            {"detach", OPT_FLAG(v.i), .flags = MP_CMD_OPT_ARG},
+            {"capture_stdout", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
+            {"capture_stderr", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
+            {"detach", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
             {"env", OPT_STRINGLIST(v.str_list), .flags = MP_CMD_OPT_ARG},
             {"stdin_data", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
-            {"passthrough_stdin", OPT_FLAG(v.i), .flags = MP_CMD_OPT_ARG},
+            {"passthrough_stdin", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
         },
         .spawn_thread = true,
         .can_abort = true,
@@ -6596,8 +6596,8 @@ const struct mp_cmd_def mp_cmds[] = {
             {"res_x", OPT_INT(v.i), OPTDEF_INT(0)},
             {"res_y", OPT_INT(v.i), OPTDEF_INT(720)},
             {"z", OPT_INT(v.i), OPTDEF_INT(0)},
-            {"hidden", OPT_FLAG(v.i), OPTDEF_INT(0)},
-            {"compute_bounds", OPT_FLAG(v.i), OPTDEF_INT(0)},
+            {"hidden", OPT_BOOL(v.b), OPTDEF_INT(0)},
+            {"compute_bounds", OPT_BOOL(v.b), OPTDEF_INT(0)},
         },
         .is_noisy = true,
     },

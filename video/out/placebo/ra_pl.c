@@ -153,6 +153,7 @@ bool mppl_wrap_tex(struct ra *ra, pl_tex pltex, struct ra_tex *out_tex)
             .downloadable = pltex->params.host_readable,
             // These don't exist upstream, so just pick something reasonable
             .src_linear = pltex->params.format->caps & PL_FMT_CAP_LINEAR,
+            .src_repeat = false,
         },
         .priv = (void *) pltex,
     };

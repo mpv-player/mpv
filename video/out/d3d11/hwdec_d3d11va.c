@@ -37,8 +37,7 @@ const struct m_sub_options d3d11va_conf = {
         {"d3d11va-zero-copy", OPT_BOOL(zero_copy)},
         {0}
     },
-    .defaults = &(const struct d3d11va_opts) {
-    },
+    .defaults = &(const struct d3d11va_opts) {0},
     .size = sizeof(struct d3d11va_opts)
 };
 

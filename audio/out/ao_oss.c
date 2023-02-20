@@ -404,5 +404,6 @@ const struct ao_driver audio_out_oss = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .dsp_fd = -1,
+        .playing = false,
     },
 };

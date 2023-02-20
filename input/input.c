@@ -1474,6 +1474,7 @@ void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command)
         .cmd = bstrdup0(bs->binds, command),
         .location = talloc_strdup(bs->binds, "keybind-command"),
         .owner = bs,
+        .is_builtin = false,
         .num_keys = 1,
     };
     memcpy(bind->keys, &key, 1 * sizeof(bind->keys[0]));
