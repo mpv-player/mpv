@@ -64,7 +64,7 @@ enum AVMediaType mp_to_av_stream_type(int type)
     }
 }
 
-AVCodecParameters *mp_codec_params_to_av(struct mp_codec_params *c)
+AVCodecParameters *mp_codec_params_to_av(const struct mp_codec_params *c)
 {
     AVCodecParameters *avp = avcodec_parameters_alloc();
     if (!avp)
@@ -125,7 +125,7 @@ error:
 }
 
 // Set avctx codec headers for decoding. Returns <0 on failure.
-int mp_set_avctx_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
+int mp_set_avctx_codec_headers(AVCodecContext *avctx, const struct mp_codec_params *c)
 {
     enum AVMediaType codec_type = avctx->codec_type;
     enum AVCodecID codec_id = avctx->codec_id;
@@ -145,7 +145,7 @@ int mp_set_avctx_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
 
 // Pick a "good" timebase, which will be used to convert double timestamps
 // back to fractions for passing them through libavcodec.
-AVRational mp_get_codec_timebase(struct mp_codec_params *c)
+AVRational mp_get_codec_timebase(const struct mp_codec_params *c)
 {
     AVRational tb = {c->native_tb_num, c->native_tb_den};
     if (tb.num < 1 || tb.den < 1) {
