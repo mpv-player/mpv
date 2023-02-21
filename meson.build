@@ -199,6 +199,7 @@ sources = files(
     'stream/stream_mpv.c',
     'stream/stream_null.c',
     'stream/stream_slice.c',
+    'stream/stream_bstr.c',
 
     ## Subtitles
     'sub/ass_mp.c',
