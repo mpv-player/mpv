@@ -1277,6 +1277,8 @@ static struct sh_stream *demuxer_get_cc_track_locked(struct sh_stream *stream)
             return NULL;
         sh->codec->codec = "eia_608";
         sh->default_track = true;
+        sh->hls_bitrate = stream->hls_bitrate;
+        sh->program_id = stream->program_id;
         stream->ds->cc = sh;
         demux_add_sh_stream_locked(stream->ds->in, sh);
         sh->ds->ignore_eof = true;
