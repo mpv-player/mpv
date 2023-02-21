@@ -1293,6 +1293,10 @@ PROTOCOLS
 
     Like ``memory://``, but the string is interpreted as hexdump.
 
+``env://variable``
+
+    Read the environment variable ``variable`` as source data.
+
 PSEUDO GUI MODE
 ===============
 

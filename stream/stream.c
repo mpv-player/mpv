@@ -61,6 +61,7 @@ extern const stream_info_t stream_info_bdnav;
 extern const stream_info_t stream_info_edl;
 extern const stream_info_t stream_info_libarchive;
 extern const stream_info_t stream_info_cb;
+extern const stream_info_t stream_info_env;
 
 static const stream_info_t *const stream_list[] = {
 #if HAVE_CDDA
@@ -92,6 +93,7 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_slice,
     &stream_info_fd,
     &stream_info_cb,
+    &stream_info_env,
 };
 
 // Because of guarantees documented on STREAM_BUFFER_SIZE.
