@@ -978,6 +978,7 @@ struct sh_stream *demux_alloc_sh_stream(enum stream_type type)
         .index = -1,
         .ff_index = -1,     // may be overwritten by demuxer
         .demuxer_id = -1,   // ... same
+        .program_id = -1,   // ... same
         .codec = talloc_zero(sh, struct mp_codec_params),
         .tags = talloc_zero(sh, struct mp_tags),
     };

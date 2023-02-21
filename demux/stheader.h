@@ -51,6 +51,7 @@ struct sh_stream {
     bool image;                 // video stream is an image
     bool still_image;           // video stream contains still images
     int hls_bitrate;
+    int program_id;
 
     struct mp_tags *tags;
 
