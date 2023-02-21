@@ -459,6 +459,7 @@ static int match_lang(char **langs, char *lang)
  * 0b) track is not from --external-file
  * 1) track is external (no_default cancels this)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
+ * 1c) track matches the program ID of the video
  * 2) earlier match in lang list
  * 3a) track is marked forced and we're preferring forced tracks
  * 3b) track is marked non-forced and we're preferring non-forced tracks
@@ -472,7 +473,7 @@ static int match_lang(char **langs, char *lang)
  */
 // Return whether t1 is preferred over t2
 static bool compare_track(struct track *t1, struct track *t2, char **langs,
-                          int prefer_forced, struct MPOpts *opts)
+                          int prefer_forced, struct MPOpts *opts, int preferred_program)
 {
     if (!opts->autoload_files && t1->is_external != t2->is_external)
         return !t1->is_external;
@@ -486,6 +487,11 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
     }
     if (t1->auto_loaded != t2->auto_loaded)
         return !t1->auto_loaded;
+    if (preferred_program != -1 && t1->program_id != -1 && t2->program_id != -1) {
+        if ((t1->program_id == preferred_program) !=
+            (t2->program_id == preferred_program))
+            return t1->program_id == preferred_program;
+    }
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
     if (l1 != l2)
         return l1 > l2;
@@ -529,6 +535,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
                         (!opts->subs_with_matching_audio &&
                          mpctx->current_track[0][STREAM_AUDIO] &&
                          match_lang(langs, mpctx->current_track[0][STREAM_AUDIO]->lang));
+    int preferred_program = (type != STREAM_VIDEO && mpctx->current_track[0][STREAM_VIDEO]) ?
+                            mpctx->current_track[0][STREAM_VIDEO]->program_id : -1;
     if (tid == -2)
         return NULL;
     bool select_fallback = type == STREAM_VIDEO || type == STREAM_AUDIO;
@@ -545,7 +553,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (duplicate_track(mpctx, order, type, track))
             continue;
-        if (!pick || compare_track(track, pick, langs, prefer_forced, mpctx->opts))
+        if (!pick || compare_track(track, pick, langs, prefer_forced, mpctx->opts, preferred_program))
             pick = track;
     }
     if (pick && !select_fallback && !(pick->is_external && !pick->no_default)
