@@ -1492,6 +1492,10 @@ PROTOCOLS
 
         This will play ``video.mkv`` in the archive file ``file.zip``.
 
+``env://variable``
+
+    Read the environment variable ``variable`` as source data.
+
 PSEUDO GUI MODE
 ===============
 

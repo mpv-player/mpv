@@ -62,6 +62,7 @@ extern const stream_info_t stream_info_edl;
 extern const stream_info_t stream_info_libarchive;
 extern const stream_info_t stream_info_cb;
 extern const stream_info_t stream_info_curl;
+extern const stream_info_t stream_info_env;
 
 static const stream_info_t *const stream_list[] = {
     &stream_info_mpv,
@@ -96,6 +97,7 @@ static const stream_info_t *const stream_list[] = {
 #endif
     &stream_info_ffmpeg,
     &stream_info_ffmpeg_unsafe,
+    &stream_info_env,
 };
 
 // Because of guarantees documented on STREAM_BUFFER_SIZE.
