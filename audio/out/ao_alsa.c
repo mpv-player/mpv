@@ -79,7 +79,6 @@ static const struct m_sub_options ao_alsa_conf = {
     .defaults = &(const struct ao_alsa_opts) {
         .mixer_device = "default",
         .mixer_name = "Master",
-        .mixer_index = 0,
         .buffer_time = 100000,
         .frags = 4,
     },

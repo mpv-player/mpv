@@ -85,7 +85,6 @@ const struct m_sub_options stream_dvb_conf = {
     .size = sizeof(dvb_opts_t),
     .defaults = &(const dvb_opts_t){
         .cfg_prog = NULL,
-        .cfg_devno = 0,
         .cfg_timeout = 30,
     },
 };
