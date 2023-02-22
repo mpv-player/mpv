@@ -51,6 +51,7 @@ struct mode_selector {
 static bool walk_display_properties(struct mp_log *log,
                                     int msgl_err,
                                     VkPhysicalDevice device,
+                                    VkInstance inst,
                                     struct mode_selector *selector) {
     bool ret = false;
     VkResult res;
@@ -60,15 +61,30 @@ static bool walk_display_properties(struct mp_log *log,
     // Use a dummy as parent for all other allocations.
     void *tmp = talloc_new(NULL);
 
+    // Load all vulkan functions.
+    VK_LOAD_FUN(inst, GetPhysicalDeviceProperties);
+    VK_LOAD_FUN(inst, GetPhysicalDeviceDisplayPropertiesKHR);
+    VK_LOAD_FUN(inst, GetPhysicalDeviceDisplayPlanePropertiesKHR);
+    VK_LOAD_FUN(inst, GetDisplayPlaneSupportedDisplaysKHR);
+    VK_LOAD_FUN(inst, GetDisplayModePropertiesKHR);
+
+    if (!GetPhysicalDeviceProperties || !GetPhysicalDeviceDisplayPropertiesKHR ||
+        !GetPhysicalDeviceDisplayPlanePropertiesKHR || !GetDisplayPlaneSupportedDisplaysKHR ||
+        !GetDisplayModePropertiesKHR)
+    {
+        mp_msg(log, msgl_err, "Unable to load necccesary vulkan functions!\n");
+        goto done;
+    }
+
     VkPhysicalDeviceProperties prop;
-    vkGetPhysicalDeviceProperties(device, &prop);
+    GetPhysicalDeviceProperties(device, &prop);
     mp_msg(log, msgl_info, "  '%s' (GPU ID %x:%x)\n", prop.deviceName,
            (unsigned)prop.vendorID, (unsigned)prop.deviceID);
 
     // Count displays. This must be done before enumerating planes with the
     // Intel driver, or it will not enumerate any planes. WTF.
     int num_displays = 0;
-    vkGetPhysicalDeviceDisplayPropertiesKHR(device, &num_displays, NULL);
+    GetPhysicalDeviceDisplayPropertiesKHR(device, &num_displays, NULL);
     if (!num_displays) {
         mp_msg(log, msgl_info, "    No available displays for device.\n");
         goto done;
@@ -81,7 +97,7 @@ static bool walk_display_properties(struct mp_log *log,
 
     // Enumerate Planes
     int num_planes = 0;
-    vkGetPhysicalDeviceDisplayPlanePropertiesKHR(device, &num_planes, NULL);
+    GetPhysicalDeviceDisplayPlanePropertiesKHR(device, &num_planes, NULL);
     if (!num_planes) {
         mp_msg(log, msgl_info, "    No available planes for device.\n");
         goto done;
@@ -94,8 +110,8 @@ static bool walk_display_properties(struct mp_log *log,
 
     VkDisplayPlanePropertiesKHR *planes =
         talloc_array(tmp, VkDisplayPlanePropertiesKHR, num_planes);
-    res = vkGetPhysicalDeviceDisplayPlanePropertiesKHR(device, &num_planes,
-                                                       planes);
+    res = GetPhysicalDeviceDisplayPlanePropertiesKHR(device, &num_planes,
+                                                     planes);
     if (res != VK_SUCCESS) {
         mp_msg(log, msgl_err, "    Failed enumerating planes\n");
         goto done;
@@ -106,8 +122,8 @@ static bool walk_display_properties(struct mp_log *log,
         talloc_zero_array(tmp, VkDisplayKHR *, num_planes);
     for (int j = 0; j < num_planes; j++) {
         int num_displays_for_plane = 0;
-        vkGetDisplayPlaneSupportedDisplaysKHR(device, j,
-                                              &num_displays_for_plane, NULL);
+        GetDisplayPlaneSupportedDisplaysKHR(device, j,
+                                            &num_displays_for_plane, NULL);
         if (!num_displays_for_plane)
             continue;
 
@@ -115,9 +131,9 @@ static bool walk_display_properties(struct mp_log *log,
         VkDisplayKHR *displays =
             talloc_zero_array(planes_to_displays, VkDisplayKHR,
                               num_displays_for_plane + 1);
-        res = vkGetDisplayPlaneSupportedDisplaysKHR(device, j,
-                                                    &num_displays_for_plane,
-                                                    displays);
+        res = GetDisplayPlaneSupportedDisplaysKHR(device, j,
+                                                  &num_displays_for_plane,
+                                                  displays);
         if (res != VK_SUCCESS) {
             mp_msg(log, msgl_err, "      Failed enumerating plane displays\n");
             continue;
@@ -128,7 +144,7 @@ static bool walk_display_properties(struct mp_log *log,
     // Enumerate Displays and Modes
     VkDisplayPropertiesKHR *props =
         talloc_array(tmp, VkDisplayPropertiesKHR, num_displays);
-    res = vkGetPhysicalDeviceDisplayPropertiesKHR(device, &num_displays, props);
+    res = GetPhysicalDeviceDisplayPropertiesKHR(device, &num_displays, props);
     if (res != VK_SUCCESS) {
         mp_msg(log, msgl_err, "    Failed enumerating display properties\n");
         goto done;
@@ -149,7 +165,7 @@ static bool walk_display_properties(struct mp_log *log,
         mp_msg(log, msgl_info, "    Modes:\n");
 
         int num_modes = 0;
-        vkGetDisplayModePropertiesKHR(device, display, &num_modes, NULL);
+        GetDisplayModePropertiesKHR(device, display, &num_modes, NULL);
         if (!num_modes) {
             mp_msg(log, msgl_info, "      No available modes for display.\n");
             continue;
@@ -162,7 +178,7 @@ static bool walk_display_properties(struct mp_log *log,
 
         VkDisplayModePropertiesKHR *modes =
             talloc_array(tmp, VkDisplayModePropertiesKHR, num_modes);
-        res = vkGetDisplayModePropertiesKHR(device, display, &num_modes, modes);
+        res = GetDisplayModePropertiesKHR(device, display, &num_modes, modes);
         if (res != VK_SUCCESS) {
             mp_msg(log, msgl_err, "      Failed enumerating display modes\n");
             continue;
@@ -250,7 +266,7 @@ static int print_display_info(struct mp_log *log, const struct m_option *opt,
 
     mp_info(log, "Vulkan Devices:\n");
     for (int i = 0; i < num_devices; i++) {
-        walk_display_properties(log, MSGL_WARN, devices[i], NULL);
+        walk_display_properties(log, MSGL_WARN, devices[i], inst, NULL);
     }
 
 done:
@@ -411,8 +427,11 @@ static bool display_init(struct ra_ctx *ctx)
         .plane_idx = plane_idx,
 
     };
-    if (!walk_display_properties(ctx->log, msgl, device, &selector))
+    if (!walk_display_properties(ctx->log, msgl, device,
+                                 vk->vkinst->instance, &selector))
+    {
         goto error;
+    }
     mode = selector.out_mode_props;
 
     VkDisplaySurfaceCreateInfoKHR xinfo = {
@@ -424,8 +443,14 @@ static bool display_init(struct ra_ctx *ctx)
         .alphaMode = VK_DISPLAY_PLANE_ALPHA_OPAQUE_BIT_KHR,
     };
 
-    res = vkCreateDisplayPlaneSurfaceKHR(vk->vkinst->instance, &xinfo, NULL,
-                                         &vk->surface);
+    VK_LOAD_FUN_PL(vk->vkinst, CreateDisplayPlaneSurfaceKHR);
+    if (!CreateDisplayPlaneSurfaceKHR) {
+        MP_ERR(ctx, "VK_KHR_display is not supported by the driver!\n");
+        goto error;
+    }
+
+    res = CreateDisplayPlaneSurfaceKHR(vk->vkinst->instance, &xinfo, NULL,
+                                       &vk->surface);
     if (res != VK_SUCCESS) {
         MP_MSG(ctx, msgl, "Failed creating Display surface\n");
         goto error;

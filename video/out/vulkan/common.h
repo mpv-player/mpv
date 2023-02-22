@@ -11,6 +11,13 @@
 #include "common/common.h"
 #include "common/msg.h"
 
+// Helpers for loading functions at runtime. Omit the "vk" prefix.
+// VK_LOAD_FUN_PL is preferred if possible.
+#define VK_LOAD_FUN_PL(vkinst, name) \
+    PFN_vk##name name = (PFN_vk##name) vkinst->get_proc_addr(vkinst->instance, "vk" #name);
+#define VK_LOAD_FUN(inst, name) \
+    PFN_vk##name name = (PFN_vk##name) vkGetInstanceProcAddr(inst, "vk" #name);
+
 // We need to define all platforms we want to support. Since we have
 // our own mechanism for checking this, we re-define the right symbols
 #if HAVE_WAYLAND
