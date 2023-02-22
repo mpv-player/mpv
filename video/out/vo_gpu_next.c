@@ -819,7 +819,8 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
         target->color.primaries = mp_prim_to_pl(opts->target_prim);
     if (opts->target_trc)
         target->color.transfer = mp_trc_to_pl(opts->target_trc);
-    if (opts->target_peak)
+    // If swapchain returned a value use this, override is used in hint
+    if (opts->target_peak && !target->color.hdr.max_luma)
         target->color.hdr.max_luma = opts->target_peak;
     if (opts->dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
@@ -895,6 +896,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.primaries = mp_prim_to_pl(opts->target_prim);
         if (opts->target_trc)
             hint.transfer = mp_trc_to_pl(opts->target_trc);
+        if (opts->target_peak)
+            hint.hdr.max_luma = opts->target_peak;
         pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!p->target_hint) {
         pl_swapchain_colorspace_hint(p->sw, NULL);
