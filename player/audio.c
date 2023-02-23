@@ -55,13 +55,15 @@ static void update_speed_filters(struct MPContext *mpctx)
         return;
 
     double speed = mpctx->opts->playback_speed;
-    double resample = mpctx->speed_factor_a;
+    double resample = mpctx->speed_factor_a * mpctx->opts->playback_pitch;
     double drop = 1.0;
 
     if (!mpctx->opts->pitch_correction) {
         resample *= speed;
         speed = 1.0;
     }
+
+    speed /= mpctx->opts->playback_pitch;
 
     if (mpctx->display_sync_active) {
         switch (mpctx->video_out->opts->video_sync) {
