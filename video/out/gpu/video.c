@@ -4295,7 +4295,7 @@ struct mp_image *gl_video_get_image(struct gl_video *p, int imgfmt, int w, int h
 {
     if (flags & VO_DR_FLAG_HOST_CACHED) {
         if (p->ra->caps & RA_CAP_SLOW_DR) {
-            MP_VERBOSE(p, "DR path suspected slow/uncached, disabling..");
+            MP_VERBOSE(p, "DR path suspected slow/uncached, disabling.\n");
             return NULL;
         }
     }
