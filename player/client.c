@@ -1848,7 +1848,7 @@ int mpv_hook_continue(mpv_handle *ctx, uint64_t id)
 int mpv_load_config_file(mpv_handle *ctx, const char *filename)
 {
     lock_core(ctx);
-    int r = m_config_parse_config_file(ctx->mpctx->mconfig, filename, NULL, 0);
+    int r = m_config_parse_config_file(ctx->mpctx->mconfig, ctx->mpctx->global, filename, NULL, 0);
     unlock_core(ctx);
     if (r == 0)
         return MPV_ERROR_INVALID_PARAMETER;
