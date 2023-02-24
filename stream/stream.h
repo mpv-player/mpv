@@ -24,7 +24,6 @@
 #include <string.h>
 #include <inttypes.h>
 #include <sys/types.h>
-#include <fcntl.h>
 
 #include "misc/bstr.h"
 
