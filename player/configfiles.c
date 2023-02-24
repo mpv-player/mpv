@@ -52,7 +52,7 @@ static void load_all_cfgfiles(struct MPContext *mpctx, char *section,
 {
     char **cf = mp_find_all_config_files(NULL, mpctx->global, filename);
     for (int i = 0; cf && cf[i]; i++)
-        m_config_parse_config_file(mpctx->mconfig, cf[i], section, 0);
+        m_config_parse_config_file(mpctx->mconfig, mpctx->global, cf[i], section, 0);
     talloc_free(cf);
 }
 
@@ -99,7 +99,7 @@ static int try_load_config(struct MPContext *mpctx, const char *file, int flags,
     if (!mp_path_exists(file))
         return 0;
     MP_MSG(mpctx, msgl, "Loading config '%s'\n", file);
-    m_config_parse_config_file(mpctx->mconfig, file, NULL, flags);
+    m_config_parse_config_file(mpctx->mconfig, mpctx->global, file, NULL, flags);
     return 1;
 }
 
