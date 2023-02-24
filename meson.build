@@ -342,19 +342,6 @@ if features['cplugins']
     link_flags += '-rdynamic'
 endif
 
-features += {'tests': get_option('tests')}
-if features['tests']
-    sources += files('test/chmap.c',
-                     'test/gl_video.c',
-                     'test/img_format.c',
-                     'test/json.c',
-                     'test/linked_list.c',
-                     'test/paths.c',
-                     'test/scale_sws.c',
-                     'test/scale_test.c',
-                     'test/tests.c')
-endif
-
 # Note: this include is only used for windows pthreads and
 # must be accompanied immediately by the following flags.
 # This currently works because these are the last flags set
@@ -752,10 +739,6 @@ if features['zimg']
     dependencies += zimg
     sources += files('video/filter/vf_fingerprint.c',
                      'video/zimg.c')
-    if features['tests']
-        sources += files('test/repack.c',
-                         'test/scale_zimg.c')
-    endif
     features += {'zimg-st428': zimg.version().version_compare('>= 3.0.5')}
 endif
 

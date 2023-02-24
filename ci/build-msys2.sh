@@ -25,7 +25,7 @@ if [ "$1" = "meson" ]; then
     meson compile -C build
     cp ./build/generated/mpv.com ./build
     meson test -C build
-    ./build/mpv.com --no-config -v --unittest=all-simple
+    ./build/mpv.com -v --no-config
 fi
 
 if [ "$1" = "waf" ]; then
@@ -53,5 +53,5 @@ if [ "$1" = "waf" ]; then
       --lua=luajit             \
       --enable-vulkan
     ./waf build
-    ./build_waf/mpv.com -v --no-config -v --unittest=all-simple
+    ./build_waf/mpv.com -v --no-config
 fi
