@@ -212,7 +212,7 @@ struct m_sub_options {
     bool (*get_sub_options)(int index, const struct m_sub_options **sub);
 };
 
-#define CONF_TYPE_FLAG          (&m_option_type_flag)
+#define CONF_TYPE_BOOL          (&m_option_type_bool)
 #define CONF_TYPE_INT           (&m_option_type_int)
 #define CONF_TYPE_INT64         (&m_option_type_int64)
 #define CONF_TYPE_FLOAT         (&m_option_type_float)
@@ -232,7 +232,6 @@ struct m_sub_options {
 // size/alignment requirements for option values in general.
 union m_option_value {
     bool bool_;
-    int flag; // not the C type "bool"!
     int int_;
     int64_t int64;
     float float_;
@@ -605,9 +604,6 @@ extern const char m_option_path_separator;
 
 #define OPT_BOOL(field) \
     OPT_TYPED_FIELD(m_option_type_bool, bool, field)
-
-#define OPT_FLAG(field) \
-    OPT_TYPED_FIELD(m_option_type_flag, int, field)
 
 #define OPT_INT(field) \
     OPT_TYPED_FIELD(m_option_type_int, int, field)

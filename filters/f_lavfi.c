@@ -946,7 +946,7 @@ struct lavfi_user_opts {
     char *filter_name;
     char **filter_opts;
 
-    int fix_pts;
+    bool fix_pts;
 
     char *hwdec_interop;
 };
@@ -1119,7 +1119,7 @@ const struct mp_user_filter_entry af_lavfi = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
             {"graph", OPT_STRING(graph)},
-            {"fix-pts", OPT_FLAG(fix_pts)},
+            {"fix-pts", OPT_BOOL(fix_pts)},
             {"o", OPT_KEYVALUELIST(avopts)},
             {"hwdec_interop",
              OPT_STRING_VALIDATE(hwdec_interop,

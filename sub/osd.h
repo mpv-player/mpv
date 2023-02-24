@@ -153,8 +153,8 @@ struct osd_style_opts {
     int align_x;
     int align_y;
     float blur;
-    int bold;
-    int italic;
+    bool bold;
+    bool italic;
     int justify;
     int font_provider;
 };

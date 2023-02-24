@@ -269,12 +269,12 @@ class GLLayer: CAOpenGLLayer {
             glBase.insert(CGLPixelFormatAttribute(ver.rawValue), at: 1)
 
             var glFormat = [glBase]
-            if (ccb.libmpv.macOpts.cocoa_cb_10bit_context == 1) {
+            if ccb.libmpv.macOpts.cocoa_cb_10bit_context {
                 glFormat += [glFormat10Bit]
             }
             glFormat += glFormatOptional
 
-            if (ccb.libmpv.macOpts.macos_force_dedicated_gpu == 0) {
+            if !ccb.libmpv.macOpts.macos_force_dedicated_gpu {
                 glFormat += [glFormatAutoGPU]
             }
 

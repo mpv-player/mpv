@@ -633,7 +633,7 @@ class Common: NSObject {
             let size = UnsafeBufferPointer(start: sizeData, count: 2)
             var rect = NSMakeRect(0, 0, CGFloat(size[0]), CGFloat(size[1]))
             DispatchQueue.main.async {
-                if let screen = self.window?.currentScreen, !Bool(self.mpv?.opts.hidpi_window_scale ?? 1) {
+                if let screen = self.window?.currentScreen, !Bool(self.mpv?.opts.hidpi_window_scale ?? true) {
                     rect = screen.convertRectFromBacking(rect)
                 }
                 self.window?.updateSize(rect.size)

@@ -9,8 +9,8 @@
 
 struct mp_vdpau_mixer_opts {
     int deint;
-    int chroma_deint;
-    int pullup;
+    bool chroma_deint;
+    bool pullup;
     float denoise;
     float sharpen;
     int hqscaling;

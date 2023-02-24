@@ -224,7 +224,7 @@ struct demux_mkv_opts {
     double subtitle_preroll_secs;
     double subtitle_preroll_secs_index;
     int probe_duration;
-    int probe_start_time;
+    bool probe_start_time;
 };
 
 const struct m_sub_options demux_mkv_conf = {
@@ -237,7 +237,7 @@ const struct m_sub_options demux_mkv_conf = {
             M_RANGE(0, DBL_MAX)},
         {"probe-video-duration", OPT_CHOICE(probe_duration,
             {"no", 0}, {"yes", 1}, {"full", 2})},
-        {"probe-start-time", OPT_FLAG(probe_start_time)},
+        {"probe-start-time", OPT_BOOL(probe_start_time)},
         {0}
     },
     .size = sizeof(struct demux_mkv_opts),
@@ -245,7 +245,7 @@ const struct m_sub_options demux_mkv_conf = {
         .subtitle_preroll = 2,
         .subtitle_preroll_secs = 1.0,
         .subtitle_preroll_secs_index = 10.0,
-        .probe_start_time = 1,
+        .probe_start_time = true,
     },
 };
 

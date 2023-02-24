@@ -56,8 +56,8 @@ struct priv {
 
     char *cfg_host;
     int cfg_buffer;
-    int cfg_latency_hacks;
-    int cfg_allow_suspended;
+    bool cfg_latency_hacks;
+    bool cfg_allow_suspended;
 };
 
 #define GENERIC_ERR_MSG(str) \
@@ -810,8 +810,8 @@ const struct ao_driver audio_out_pulse = {
         {"host", OPT_STRING(cfg_host)},
         {"buffer", OPT_CHOICE(cfg_buffer, {"native", 0}),
             M_RANGE(1, 2000)},
-        {"latency-hacks", OPT_FLAG(cfg_latency_hacks)},
-        {"allow-suspended", OPT_FLAG(cfg_allow_suspended)},
+        {"latency-hacks", OPT_BOOL(cfg_latency_hacks)},
+        {"allow-suspended", OPT_BOOL(cfg_allow_suspended)},
         {0}
     },
     .options_prefix = "pulse",

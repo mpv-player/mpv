@@ -52,7 +52,7 @@ struct vo_tct_opts {
     int algo;
     int width;   // 0 -> default
     int height;  // 0 -> default
-    int term256;  // 0 -> true color
+    bool term256;  // 0 -> true color
 };
 
 struct lut_item {
@@ -339,7 +339,7 @@ const struct vo_driver video_out_tct = {
             {"half-blocks", ALGO_HALF_BLOCKS})},
         {"width", OPT_INT(opts.width)},
         {"height", OPT_INT(opts.height)},
-        {"256", OPT_FLAG(opts.term256)},
+        {"256", OPT_BOOL(opts.term256)},
         {0}
     },
     .options_prefix = "vo-tct",

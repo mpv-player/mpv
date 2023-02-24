@@ -87,12 +87,12 @@ const struct m_sub_options encode_config = {
             .deprecation_message = "--audio-delay (once unbroken)"},
         {"oaoffset", OPT_FLOAT(aoffset), M_RANGE(-1000000.0, 1000000.0),
             .deprecation_message = "--audio-delay (once unbroken)"},
-        {"orawts", OPT_FLAG(rawts)},
-        {"ovfirst", OPT_FLAG(video_first),
+        {"orawts", OPT_BOOL(rawts)},
+        {"ovfirst", OPT_BOOL(video_first),
             .deprecation_message = "no replacement"},
-        {"oafirst", OPT_FLAG(audio_first),
+        {"oafirst", OPT_BOOL(audio_first),
             .deprecation_message = "no replacement"},
-        {"ocopy-metadata", OPT_FLAG(copy_metadata)},
+        {"ocopy-metadata", OPT_BOOL(copy_metadata)},
         {"oset-metadata", OPT_KEYVALUELIST(set_metadata)},
         {"oremove-metadata", OPT_STRINGLIST(remove_metadata)},
 
@@ -106,7 +106,7 @@ const struct m_sub_options encode_config = {
     },
     .size = sizeof(struct encode_opts),
     .defaults = &(const struct encode_opts){
-        .copy_metadata = 1,
+        .copy_metadata = true,
     },
 };
 

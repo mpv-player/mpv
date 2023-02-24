@@ -1691,7 +1691,7 @@ terminate_playback:
     update_core_idle_state(mpctx);
 
     if (mpctx->step_frames) {
-        opts->pause = 1;
+        opts->pause = true;
         m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->pause);
     }
 

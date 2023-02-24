@@ -25,8 +25,8 @@ struct vulkan_opts {
     char *device; // force a specific GPU
     int swap_mode;
     int queue_count;
-    int async_transfer;
-    int async_compute;
+    bool async_transfer;
+    bool async_compute;
 };
 
 static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
@@ -96,8 +96,8 @@ const struct m_sub_options vulkan_conf = {
             {"mailbox",      VK_PRESENT_MODE_MAILBOX_KHR},
             {"immediate",    VK_PRESENT_MODE_IMMEDIATE_KHR})},
         {"vulkan-queue-count", OPT_INT(queue_count), M_RANGE(1, 8)},
-        {"vulkan-async-transfer", OPT_FLAG(async_transfer)},
-        {"vulkan-async-compute", OPT_FLAG(async_compute)},
+        {"vulkan-async-transfer", OPT_BOOL(async_transfer)},
+        {"vulkan-async-compute", OPT_BOOL(async_compute)},
         {"vulkan-disable-events", OPT_REMOVED("Unused")},
         {0}
     },

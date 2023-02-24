@@ -60,7 +60,7 @@ struct priv {
 #define OPT_BASE_STRUCT struct ad_lavc_params
 struct ad_lavc_params {
     float ac3drc;
-    int downmix;
+    bool downmix;
     int threads;
     char **avopts;
 };
@@ -68,7 +68,7 @@ struct ad_lavc_params {
 const struct m_sub_options ad_lavc_conf = {
     .opts = (const m_option_t[]) {
         {"ac3drc", OPT_FLOAT(ac3drc), M_RANGE(0, 6)},
-        {"downmix", OPT_FLAG(downmix)},
+        {"downmix", OPT_BOOL(downmix)},
         {"threads", OPT_INT(threads), M_RANGE(0, 16)},
         {"o", OPT_KEYVALUELIST(avopts)},
         {0}
@@ -76,7 +76,6 @@ const struct m_sub_options ad_lavc_conf = {
     .size = sizeof(struct ad_lavc_params),
     .defaults = &(const struct ad_lavc_params){
         .ac3drc = 0,
-        .downmix = 0,
         .threads = 1,
     },
 };

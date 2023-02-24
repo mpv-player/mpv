@@ -67,10 +67,10 @@ typedef struct cdda_params {
     int search_overlap;
     int toc_bias;
     int toc_offset;
-    int skip;
+    bool skip;
     char *device;
     int span[2];
-    int cdtext;
+    bool cdtext;
 } cdda_priv;
 
 #define OPT_BASE_STRUCT struct cdda_params
@@ -82,17 +82,17 @@ const struct m_sub_options stream_cdda_conf = {
         {"overlap", OPT_INT(search_overlap), M_RANGE(0, 75)},
         {"toc-bias", OPT_INT(toc_bias)},
         {"toc-offset", OPT_INT(toc_offset)},
-        {"skip", OPT_FLAG(skip)},
+        {"skip", OPT_BOOL(skip)},
         {"span-a", OPT_INT(span[0])},
         {"span-b", OPT_INT(span[1])},
-        {"cdtext", OPT_FLAG(cdtext)},
+        {"cdtext", OPT_BOOL(cdtext)},
         {"span", OPT_REMOVED("use span-a/span-b")},
         {0}
     },
     .size = sizeof(struct cdda_params),
     .defaults = &(const struct cdda_params){
         .search_overlap = -1,
-        .skip = 1,
+        .skip = true,
     },
 };
 

@@ -79,8 +79,8 @@ static inline void write_str(const char *s)
 
 struct vo_kitty_opts {
     int width, height, top, left, rows, cols;
-    int config_clear, alt_screen;
-    int use_shm;
+    bool config_clear, alt_screen;
+    bool use_shm;
 };
 
 struct priv {
@@ -414,8 +414,8 @@ const struct vo_driver video_out_kitty = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .shm_fd = -1,
-        .opts.config_clear = 1,
-        .opts.alt_screen = 1,
+        .opts.config_clear = true,
+        .opts.alt_screen = true,
     },
     .options = (const m_option_t[]) {
         {"width", OPT_INT(opts.width)},
@@ -424,9 +424,9 @@ const struct vo_driver video_out_kitty = {
         {"left", OPT_INT(opts.left)},
         {"rows", OPT_INT(opts.rows)},
         {"cols", OPT_INT(opts.cols)},
-        {"config-clear", OPT_FLAG(opts.config_clear), },
-        {"alt-screen", OPT_FLAG(opts.alt_screen), },
-        {"use-shm", OPT_FLAG(opts.use_shm), },
+        {"config-clear", OPT_BOOL(opts.config_clear), },
+        {"alt-screen", OPT_BOOL(opts.alt_screen), },
+        {"use-shm", OPT_BOOL(opts.use_shm), },
         {0}
     },
     .options_prefix = "vo-kitty",

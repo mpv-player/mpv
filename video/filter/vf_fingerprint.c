@@ -33,8 +33,8 @@
 
 struct f_opts {
     int type;
-    int clear;
-    int print;
+    bool clear;
+    bool print;
 };
 
 const struct m_opt_choice_alternatives type_names[] = {
@@ -46,14 +46,14 @@ const struct m_opt_choice_alternatives type_names[] = {
 #define OPT_BASE_STRUCT struct f_opts
 static const struct m_option f_opts_list[] = {
     {"type", OPT_CHOICE_C(type, type_names)},
-    {"clear-on-query", OPT_FLAG(clear)},
-    {"print", OPT_FLAG(print)},
+    {"clear-on-query", OPT_BOOL(clear)},
+    {"print", OPT_BOOL(print)},
     {0}
 };
 
 static const struct f_opts f_opts_def = {
     .type = 16,
-    .clear = 1,
+    .clear = true,
 };
 
 struct print_entry {
@@ -212,7 +212,7 @@ static struct mp_filter *f_create(struct mp_filter *parent, void *options)
         .scaler_chroma_params = {NAN, NAN},
         .scaler_chroma = ZIMG_RESIZE_BILINEAR,
         .dither = ZIMG_DITHER_NONE,
-        .fast = 1,
+        .fast = true,
     };
     return f;
 }

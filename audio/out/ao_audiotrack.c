@@ -54,7 +54,7 @@ struct priv {
     jfloatArray floatarray;
     jobject bbuf;
 
-    int cfg_pcm_float;
+    bool cfg_pcm_float;
     int cfg_session_id;
 
     bool needs_timestamp_offset;
@@ -818,7 +818,7 @@ const struct ao_driver audio_out_audiotrack = {
     .start     = start,
     .priv_size = sizeof(struct priv),
     .options   = (const struct m_option[]) {
-        {"pcm-float", OPT_FLAG(cfg_pcm_float)},
+        {"pcm-float", OPT_BOOL(cfg_pcm_float)},
         {"session-id", OPT_INT(cfg_session_id)},
         {0}
     },

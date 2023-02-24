@@ -6183,7 +6183,7 @@ them.
     d3d11
         Win32, with native Direct3D 11 rendering.
     x11
-        X11/GLX
+        X11/GLX (deprecated/legacy, EGL is preferred these days)
     x11vk
         VK_KHR_xlib_surface
     wayland

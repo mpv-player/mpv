@@ -37,12 +37,12 @@
 #define OPT_BASE_STRUCT struct stream_lavf_params
 struct stream_lavf_params {
     char **avopts;
-    int cookies_enabled;
+    bool cookies_enabled;
     char *cookies_file;
     char *useragent;
     char *referrer;
     char **http_header_fields;
-    int tls_verify;
+    bool tls_verify;
     char *tls_ca_file;
     char *tls_cert_file;
     char *tls_key_file;
@@ -56,9 +56,9 @@ const struct m_sub_options stream_lavf_conf = {
         {"http-header-fields", OPT_STRINGLIST(http_header_fields)},
         {"user-agent", OPT_STRING(useragent)},
         {"referrer", OPT_STRING(referrer)},
-        {"cookies", OPT_FLAG(cookies_enabled)},
+        {"cookies", OPT_BOOL(cookies_enabled)},
         {"cookies-file", OPT_STRING(cookies_file), .flags = M_OPT_FILE},
-        {"tls-verify", OPT_FLAG(tls_verify)},
+        {"tls-verify", OPT_BOOL(tls_verify)},
         {"tls-ca-file", OPT_STRING(tls_ca_file), .flags = M_OPT_FILE},
         {"tls-cert-file", OPT_STRING(tls_cert_file), .flags = M_OPT_FILE},
         {"tls-key-file", OPT_STRING(tls_key_file), .flags = M_OPT_FILE},

@@ -51,8 +51,8 @@ struct pipeline {
 
 struct opts {
     int deint_type;
-    int interlaced_only;
-    int reversal_bug;
+    bool interlaced_only;
+    bool reversal_bug;
 };
 
 struct priv {
@@ -482,8 +482,8 @@ static const m_option_t vf_opts_fields[] = {
         {"weave", 3},
         {"motion-adaptive", 4},
         {"motion-compensated", 5})},
-    {"interlaced-only", OPT_FLAG(interlaced_only)},
-    {"reversal-bug", OPT_FLAG(reversal_bug)},
+    {"interlaced-only", OPT_BOOL(interlaced_only)},
+    {"reversal-bug", OPT_BOOL(reversal_bug)},
     {0}
 };
 
@@ -494,8 +494,7 @@ const struct mp_user_filter_entry vf_vavpp = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT){
             .deint_type = -1,
-            .interlaced_only = 0,
-            .reversal_bug = 1,
+            .reversal_bug = true,
         },
         .options = vf_opts_fields,
     },

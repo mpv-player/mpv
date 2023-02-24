@@ -192,9 +192,9 @@ struct priv {
     struct m_config_cache *opts_cache;
 
     // options
-    int allow_sw;
-    int switch_mode;
-    int vsync;
+    bool allow_sw;
+    bool switch_mode;
+    bool vsync;
 };
 
 static bool lock_texture(struct vo *vo, struct mp_image *texmpi)
@@ -240,7 +240,7 @@ static bool lock_texture(struct vo *vo, struct mp_image *texmpi)
 }
 
 static bool is_good_renderer(SDL_RendererInfo *ri,
-                             const char *driver_name_wanted, int allow_sw,
+                             const char *driver_name_wanted, bool allow_sw,
                              struct formatmap_entry *osd_format)
 {
     if (driver_name_wanted && driver_name_wanted[0])
@@ -975,13 +975,12 @@ const struct vo_driver video_out_sdl = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .renderer_index = -1,
-        .vsync = 1,
-        .screensaver_enabled = false,
+        .vsync = true,
     },
     .options = (const struct m_option []){
-        {"sw", OPT_FLAG(allow_sw)},
-        {"switch-mode", OPT_FLAG(switch_mode)},
-        {"vsync", OPT_FLAG(vsync)},
+        {"sw", OPT_BOOL(allow_sw)},
+        {"switch-mode", OPT_BOOL(switch_mode)},
+        {"vsync", OPT_BOOL(vsync)},
         {NULL}
     },
     .preinit = preinit,

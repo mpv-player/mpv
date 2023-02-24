@@ -52,9 +52,9 @@ struct sws_opts {
     int chr_hshift;
     float chr_sharpen;
     float lum_sharpen;
-    int fast;
-    int bitexact;
-    int zimg;
+    bool fast;
+    bool bitexact;
+    bool zimg;
 };
 
 #define OPT_BASE_STRUCT struct sws_opts
@@ -78,15 +78,15 @@ const struct m_sub_options sws_conf = {
         {"chs", OPT_INT(chr_hshift)},
         {"ls", OPT_FLOAT(lum_sharpen), M_RANGE(-100.0, 100.0)},
         {"cs", OPT_FLOAT(chr_sharpen), M_RANGE(-100.0, 100.0)},
-        {"fast", OPT_FLAG(fast)},
-        {"bitexact", OPT_FLAG(bitexact)},
-        {"allow-zimg", OPT_FLAG(zimg)},
+        {"fast", OPT_BOOL(fast)},
+        {"bitexact", OPT_BOOL(bitexact)},
+        {"allow-zimg", OPT_BOOL(zimg)},
         {0}
     },
     .size = sizeof(struct sws_opts),
     .defaults = &(const struct sws_opts){
         .scaler = SWS_LANCZOS,
-        .zimg = 1,
+        .zimg = true,
     },
 };
 
