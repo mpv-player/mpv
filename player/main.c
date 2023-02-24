@@ -61,7 +61,6 @@
 #include "audio/out/ao.h"
 #include "misc/thread_tools.h"
 #include "sub/osd.h"
-#include "test/tests.h"
 #include "video/out/vo.h"
 
 #include "core.h"
@@ -384,11 +383,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return 1; // help
 
     check_library_versions(mp_null_log, 0);
-
-#if HAVE_TESTS
-    if (opts->test_mode && opts->test_mode[0])
-        return run_tests(mpctx) ? 1 : -1;
-#endif
 
     if (!mpctx->playlist->num_entries && !opts->player_idle_mode &&
         options)

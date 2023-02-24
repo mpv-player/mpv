@@ -7166,21 +7166,3 @@ Miscellaneous
     code is the same.)
 
     Conversion is not applied to metadata that is updated at runtime.
-
-
-Debugging
----------
-
-``--unittest=<name>``
-    Run an internal unit test. There are multiple, and the name specifies which.
-
-    The special value ``all-simple`` runs all tests which do not need further
-    setup (other arguments and such). Some tests may need additional arguments
-    to do anything useful.
-
-    On success, the player binary exits with exit status 0, otherwise it returns
-    with an undefined non-0 exit status (it may crash or abort itself on test
-    failures).
-
-    This is only enabled if built with ``--enable-tests``, and should normally
-    be enabled and used by developers only.

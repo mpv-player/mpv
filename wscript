@@ -79,11 +79,6 @@ build_options = [
         'default': 'enable',
         'func': check_true
     }, {
-        'name': '--tests',
-        'desc': 'unit tests (development only)',
-        'default': 'disable',
-        'func': check_true
-    }, {
         # Reminder: normally always built, but enabled by MPV_LEAK_REPORT.
         # Building it can be disabled only by defining NDEBUG through CFLAGS.
         'name': '--ta-leak-report',

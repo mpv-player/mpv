@@ -403,10 +403,6 @@ static const m_option_t mp_opts[] = {
     {"version", OPT_PRINT(print_version)},
     {"V", OPT_PRINT(print_version)},
 
-#if HAVE_TESTS
-    {"unittest", OPT_STRING(test_mode), .flags = CONF_NOCFG | M_OPT_NOPROP},
-#endif
-
     {"player-operation-mode", OPT_CHOICE(operation_mode,
         {"cplayer", 0}, {"pseudo-gui", 1}),
         .flags = M_OPT_PRE_PARSE | M_OPT_NOPROP},
