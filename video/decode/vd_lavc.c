@@ -267,6 +267,9 @@ static int hwdec_compare(const void *p1, const void *p2)
     // Order by autoprobe preference order.
     if (h1->auto_pos != h2->auto_pos)
         return h1->auto_pos > h2->auto_pos ? 1 : -1;
+    // Put hwdecs without hw_device_ctx last
+    if ((!!h1->lavc_device) != (!!h2->lavc_device))
+        return h1->lavc_device ? -1 : 1;
     // Fallback sort order to make sorting stable.
     return h1->rank > h2->rank ? 1 :-1;
 }
