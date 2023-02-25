@@ -1964,7 +1964,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_CONTENT_TYPE: {
 #if HAVE_WAYLAND_PROTOCOLS_1_27
-        wl->current_content_type = (enum mp_content_type)arg;
+        wl->current_content_type = *(enum mp_content_type *)arg;
         set_content_type(wl);
 #endif
         return VO_TRUE;
