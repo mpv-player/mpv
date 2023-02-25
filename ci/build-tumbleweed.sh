@@ -12,6 +12,7 @@ if [ "$1" = "meson" ]; then
       -Dpipewire=enabled      \
       -Dshaderc=enabled       \
       -Dtests=true            \
+      -Dmodular-drivers=enabled \
       -Dvulkan=enabled
     meson compile -C build
     meson test -C build
