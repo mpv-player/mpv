@@ -23,7 +23,7 @@ meson setup build \
 
 meson compile -C build
 meson test -C build
-./build/mpv
+./build/mpv -v --no-config
 
 if [ ! -e "./waf" ] ; then
     python3 ./bootstrap.py
@@ -47,3 +47,4 @@ python3 ./waf configure \
     $NULL
 
 python3 ./waf build
+./build_waf/mpv -v --no-config
