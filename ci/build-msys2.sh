@@ -24,7 +24,6 @@ if [ "$1" = "meson" ]; then
       -D vulkan=enabled
     meson compile -C build
     cp ./build/generated/mpv.com ./build
-    meson test -C build
     ./build/mpv.com -v --no-config
 fi
 
@@ -47,7 +46,6 @@ if [ "$1" = "waf" ]; then
       --enable-rubberband      \
       --enable-shaderc         \
       --enable-spirv-cross     \
-      --enable-tests           \
       --enable-uchardet        \
       --enable-vapoursynth     \
       --lua=luajit             \

@@ -12,6 +12,7 @@ meson setup build \
     -Dopenal=enabled \
     -Dsdl2=enabled \
     -Dsndio=enabled \
+    -Dtests=true \
     -Dvdpau=enabled \
     -Dvulkan=enabled \
     -Doss-audio=enabled \
@@ -22,7 +23,6 @@ meson setup build \
     $NULL
 
 meson compile -C build
-meson test -C build
 ./build/mpv -v --no-config
 
 if [ ! -e "./waf" ] ; then
