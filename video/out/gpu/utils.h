@@ -65,6 +65,9 @@ void gl_transform_trans(struct gl_transform t, struct gl_transform *x);
 
 void gl_transform_ortho_fbo(struct gl_transform *t, struct ra_fbo fbo);
 
+float gl_video_scale_ambient_lux(float lmin, float lmax,
+                                 float rmin, float rmax, float lux);
+
 // A pool of buffers, which can grow as needed
 struct ra_buf_pool {
     struct ra_buf_params current_params;

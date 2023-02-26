@@ -840,6 +840,14 @@ struct mp_draw_sub_cache *mp_draw_sub_alloc(void *ta_parent, struct mpv_global *
     return c;
 }
 
+// For tests.
+struct mp_draw_sub_cache *mp_draw_sub_alloc_test(struct mp_image *dst)
+{
+    struct mp_draw_sub_cache *c = talloc_zero(NULL, struct mp_draw_sub_cache);
+    reinit_to_video(c);
+    return c;
+}
+
 bool mp_draw_sub_bitmaps(struct mp_draw_sub_cache *p, struct mp_image *dst,
                          struct sub_bitmap_list *sbs_list)
 {

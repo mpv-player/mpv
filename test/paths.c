@@ -1,7 +1,8 @@
 #include "common/common.h"
+#include "common/msg.h"
 #include "config.h"
 #include "options/path.h"
-#include "tests.h"
+#include "test_utils.h"
 
 static void test_join(char *file, int line, char *a, char *b, char *c)
 {
@@ -29,7 +30,7 @@ static void test_abs(char *file, int line, bool abs, char *a)
 #define TEST_ABS(abs, a) \
     test_abs(__FILE__, __LINE__, abs, a)
 
-static void run(struct test_ctx *ctx)
+int main(void)
 {
     TEST_ABS(true, "/ab");
     TEST_ABS(false, "ab");
@@ -60,9 +61,5 @@ static void run(struct test_ctx *ctx)
     TEST_JOIN("c:a",        "b",            "c:a/b");
     TEST_JOIN("c:",         "b",            "c:b");
 #endif
+    return 0;
 }
-
-const struct unittest test_paths = {
-    .name = "paths",
-    .run = run,
-};

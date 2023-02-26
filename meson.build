@@ -393,10 +393,11 @@ if features['cocoa']
 endif
 
 if posix
-    sources += files('input/ipc-unix.c',
-                     'osdep/path-unix.c',
+    path_source = files('osdep/path-unix.c')
+    subprocess_source = files('osdep/subprocess-posix.c')
+    sources += path_source + subprocess_source + \
+               files('input/ipc-unix.c',
                      'osdep/polldev.c',
-                     'osdep/subprocess-posix.c',
                      'osdep/terminal-unix.c',
                      'sub/filter_regex.c')
 endif
@@ -479,10 +480,11 @@ if features['win32-desktop']
                           cc.find_library('version'),
                           cc.find_library('winmm')]
     dependencies += win32_desktop_libs
-    sources += files('input/ipc-win.c',
+    path_source = files('osdep/path-win.c')
+    subprocess_source = files('osdep/subprocess-win.c')
+    sources += path_source + subprocess_source + \
+               files('input/ipc-win.c',
                      'osdep/main-fn-win.c',
-                     'osdep/path-win.c',
-                     'osdep/subprocess-win.c',
                      'osdep/terminal-win.c',
                      'video/out/w32_common.c',
                      'video/out/win32/displayconfig.c',
@@ -490,9 +492,8 @@ if features['win32-desktop']
 endif
 
 if not posix and not features['win32-desktop']
-    sources += files('input/ipc-dummy.c',
-                     'osdep/subprocess-dummy.c',
-                     'osdep/terminal-dummy.c')
+    subprocess_source = files('osdep/subprocess-dummy.c')
+    sources += subprocess_source + files('input/ipc-dummy.c')
 endif
 
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
@@ -1685,9 +1686,6 @@ if get_option('libmpv')
     headers = ['libmpv/client.h', 'libmpv/render.h',
                'libmpv/render_gl.h', 'libmpv/stream_cb.h']
     install_headers(headers, subdir: 'mpv')
-
-    libmpv_test = executable('libmpv-test', 'libmpv/test.c', link_with: [libmpv])
-    test('libmpv', libmpv_test)
 endif
 
 if get_option('cplayer')
@@ -1718,8 +1716,12 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
-               win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
+    mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
+                     win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
+endif
+
+if get_option('tests')
+    subdir('test')
 endif
 
 summary({'d3d11': features['d3d11'],

@@ -39,6 +39,21 @@ void gl_transform_ortho_fbo(struct gl_transform *t, struct ra_fbo fbo)
     gl_transform_ortho(t, 0, fbo.tex->params.w, 0, fbo.tex->params.h * y_dir);
 }
 
+float gl_video_scale_ambient_lux(float lmin, float lmax,
+                                 float rmin, float rmax, float lux)
+{
+    assert(lmax > lmin);
+
+    float num = (rmax - rmin) * (log10(lux) - log10(lmin));
+    float den = log10(lmax) - log10(lmin);
+    float result = num / den + rmin;
+
+    // clamp the result
+    float max = MPMAX(rmax, rmin);
+    float min = MPMIN(rmax, rmin);
+    return MPMAX(MPMIN(result, max), min);
+}
+
 void ra_buf_pool_uninit(struct ra *ra, struct ra_buf_pool *pool)
 {
     for (int i = 0; i < pool->num_buffers; i++)
