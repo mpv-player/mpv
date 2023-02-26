@@ -970,7 +970,7 @@ void mpv_wakeup(mpv_handle *ctx)
 // map client API types to internal types
 static const struct m_option type_conv[] = {
     [MPV_FORMAT_STRING]     = { .type = CONF_TYPE_STRING },
-    [MPV_FORMAT_FLAG]       = { .type = CONF_TYPE_BOOL },
+    [MPV_FORMAT_FLAG]       = { .type = CONF_TYPE_FLAG },
     [MPV_FORMAT_INT64]      = { .type = CONF_TYPE_INT64 },
     [MPV_FORMAT_DOUBLE]     = { .type = CONF_TYPE_DOUBLE },
     [MPV_FORMAT_NODE]       = { .type = CONF_TYPE_NODE },
