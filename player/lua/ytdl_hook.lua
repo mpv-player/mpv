@@ -47,6 +47,7 @@ local tag_list = {
     -- (default --display-tags does not include this name)
     ["description"]     = "ytdl_description",
     -- "title" is handled by force-media-title
+    -- tags don't work with all_formats=yes
 }
 
 local safe_protos = Set {
@@ -629,7 +630,9 @@ local function add_single_video(json)
 
     mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
 
-    mp.set_property("file-local-options/force-media-title", json.title)
+    if mp.get_property("force-media-title", "") == "" then
+        mp.set_property("file-local-options/force-media-title", json.title)
+    end
 
     -- set hls-bitrate for dash track selection
     if max_bitrate > 0 and
@@ -925,7 +928,7 @@ function run_ytdl_hook(url)
             set_http_headers(json.entries[1].http_headers)
 
             mp.set_property("stream-open-filename", playlist)
-            if not (json.title == nil) then
+            if json.title and mp.get_property("force-media-title", "") == "" then
                 mp.set_property("file-local-options/force-media-title",
                     json.title)
             end
