@@ -14,7 +14,6 @@ if [ "$1" = "meson" ]; then
       -Dtests=true            \
       -Dvulkan=enabled
     meson compile -C build
-    meson test -C build
     ./build/mpv -v --no-config
 fi
 
@@ -29,7 +28,6 @@ if [ "$1" = "waf" ]; then
       --enable-manpage-build \
       --enable-pipewire      \
       --enable-shaderc       \
-      --enable-tests         \
       --enable-vulkan
     python3 ./waf build
     ./build_waf/mpv -v --no-config

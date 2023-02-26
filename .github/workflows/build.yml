@@ -37,26 +37,28 @@ jobs:
           TARGET: ${{ matrix.target }}
 
       - name: Build with meson
+        id: build
         run: |
           ./ci/build-mingw64.sh meson pack
         env:
           TARGET: ${{ matrix.target }}
 
       - name: Print meson log
-        if: ${{ failure() }}
+        if: steps.build.outcome == 'failure'
         run: |
           cat ./build/meson-logs/meson-log.txt
 
       - name: Build with waf
+        id: build_waf
         run: |
           ./ci/build-mingw64.sh waf
         env:
           TARGET: ${{ matrix.target }}
 
       - name: Print waf log
-        if: ${{ failure() }}
+        if: steps.build_waf.outcome == 'failure'
         run: |
-          cat ./build/config.log
+          cat ./build_waf/config.log
 
       - uses: actions/upload-artifact@v3
         with:
@@ -86,6 +88,7 @@ jobs:
           brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 lua@5.1 libass ffmpeg meson
 
       - name: Build with meson
+        id: build
         run: |
           ./ci/build-macos.sh meson
         env:
@@ -93,11 +96,22 @@ jobs:
           TRAVIS_OS_NAME: "${{ matrix.os }}"
 
       - name: Print meson log
-        if: ${{ failure() }}
+        if: steps.build.outcome == 'failure'
         run: |
           cat ./build/meson-logs/meson-log.txt
 
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: steps.tests.outcome == 'failure'
+        run: |
+          cat ./build/meson-logs/testlog.txt
+
       - name: Build with waf
+        id: build_waf
         run: |
           ./ci/build-macos.sh waf
         env:
@@ -105,9 +119,9 @@ jobs:
           TRAVIS_OS_NAME: "${{ matrix.os }}"
 
       - name: Print waf log
-        if: ${{ failure() }}
+        if: steps.build_waf.outcome == 'failure'
         run: |
-          cat ./build/config.log
+          cat ./build_waf/config.log
 
   linux:
     runs-on: "ubuntu-22.04"
@@ -130,22 +144,34 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Build with meson
+        id: build
         run: |
           ./ci/build-tumbleweed.sh meson
 
       - name: Print meson log
-        if: ${{ failure() }}
+        if: steps.build.outcome == 'failure'
         run: |
           cat ./build/meson-logs/meson-log.txt
 
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: steps.tests.outcome == 'failure'
+        run: |
+          cat ./build/meson-logs/testlog.txt
+
       - name: Build with waf
+        id: build_waf
         run: |
           ./ci/build-tumbleweed.sh waf
 
       - name: Print waf log
-        if: ${{ failure() }}
+        if: steps.build_waf.outcome == 'failure'
         run: |
-          cat ./build/config.log
+          cat ./build_waf/config.log
 
   freebsd:
     runs-on: macos-12 # until https://github.com/actions/runner/issues/385
@@ -195,16 +221,22 @@ jobs:
                 #
         run: |
           ./ci/build-freebsd.sh
+          meson test -C build
 
     - name: Print meson log
       if: ${{ failure() }}
       run: |
         cat ./build/meson-logs/meson-log.txt
 
+    - name: Print meson test log
+      if: ${{ failure() }}
+      run: |
+        cat ./build/meson-logs/testlog.txt
+
     - name: Print waf log
       if: ${{ failure() }}
       run: |
-        cat ./build/config.log
+        cat ./build_waf/config.log
 
   msys2:
     runs-on: windows-latest
@@ -253,19 +285,31 @@ jobs:
             vulkan:p
 
       - name: Build with meson
+        id: build
         run: |
           ./ci/build-msys2.sh meson
 
       - name: Print meson log
-        if: ${{ failure() }}
+        if: steps.build.outcome == 'failure'
         run: |
-          cat ./build_meson/meson-logs/meson-log.txt
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: steps.tests.outcome == 'failure'
+        run: |
+          cat ./build/meson-logs/testlog.txt
 
       - name: Build with waf
+        id: build_waf
         run: |
           ./ci/build-msys2.sh waf
 
       - name: Print waf log
-        if: ${{ failure() }}
+        if: steps.build_waf.outcome == 'failure'
         run: |
-          cat ./build/config.log
+          cat ./build_waf/config.log

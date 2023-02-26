@@ -14,13 +14,11 @@ if [[ $1 = "meson" ]]; then
     PKG_CONFIG_PATH="${FFMPEG_SYSROOT}/lib/pkgconfig/" CC="${CC}" CXX="${CXX}" \
       meson setup build \
         -Dprefix="${MPV_INSTALL_PREFIX}" \
-        -Dlibmpv=true \
+        -D{libmpv,tests}=true \
         -D{gl,iconv,lcms2,lua,jpeg,plain-gl,zlib}=enabled \
         -D{cocoa,coreaudio,gl-cocoa,macos-cocoa-cb,macos-touchbar,videotoolbox-gl}=enabled
 
     meson compile -C build -j4
-    meson test -C build
-
     meson install -C build
     ./build/mpv -v --no-config
 fi
