@@ -22,7 +22,7 @@ if [[ $1 = "meson" ]]; then
     meson test -C build
 
     meson install -C build
-    ./build/mpv
+    ./build/mpv -v --no-config
 fi
 
 if [[ $1 = "waf" ]]; then
@@ -40,7 +40,6 @@ if [[ $1 = "waf" ]]; then
         --swift-flags="${CI_SWIFT_FLAGS}"
 
     python3 ./waf build --variant="${MPV_VARIANT}" -j4
-
     python3 ./waf install --variant="${MPV_VARIANT}"
-    ${MPV_INSTALL_PREFIX}/bin/mpv
+    ${MPV_INSTALL_PREFIX}/bin/mpv -v --no-config
 fi
