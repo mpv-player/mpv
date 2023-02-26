@@ -213,6 +213,9 @@ struct mp_sws_context *mp_sws_alloc(void *talloc_ctx)
 // if the user changes any options.
 void mp_sws_enable_cmdline_opts(struct mp_sws_context *ctx, struct mpv_global *g)
 {
+    // Should only ever be NULL for tests.
+    if (!g)
+        return;
     if (ctx->opts_cache)
         return;
 

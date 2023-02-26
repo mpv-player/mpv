@@ -10,6 +10,9 @@ struct mp_draw_sub_cache;
 
 struct mp_draw_sub_cache *mp_draw_sub_alloc(void *ta_parent, struct mpv_global *g);
 
+// Only for use in tests.
+struct mp_draw_sub_cache *mp_draw_sub_alloc_test(struct mp_image *dst);
+
 // Render the sub-bitmaps in sbs_list to dst. sbs_list must have been rendered
 // for an OSD resolution equivalent to dst's size (UB if not).
 // Warning: if dst is a format with alpha, and dst is not set to MP_ALPHA_PREMUL

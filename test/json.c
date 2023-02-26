@@ -1,7 +1,6 @@
-#include "common/common.h"
 #include "misc/json.h"
 #include "misc/node.h"
-#include "tests.h"
+#include "test_utils.h"
 
 struct entry {
     const char *src;
@@ -66,7 +65,7 @@ static const struct entry entries[] = {
 
 #define MAX_DEPTH 10
 
-static void run(struct test_ctx *ctx)
+int main(void)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(entries); n++) {
         const struct entry *e = &entries[n];
@@ -86,9 +85,5 @@ static void run(struct test_ctx *ctx)
         assert_true(equal_mpv_node(&e->out_data, &res));
         talloc_free(tmp);
     }
+    return 0;
 }
-
-const struct unittest test_json = {
-    .name = "json",
-    .run = run,
-};

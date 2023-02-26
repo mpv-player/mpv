@@ -3,10 +3,13 @@
 #include <libavutil/pixfmt.h>
 
 #include "common/common.h"
+#include "common/global.h"
+#include "img_utils.h"
 #include "sub/draw_bmp.h"
 #include "sub/osd.h"
-#include "tests.h"
+#include "test_utils.h"
 #include "video/fmt-conversion.h"
+#include "video/mp_image.h"
 #include "video/img_format.h"
 #include "video/repack.h"
 #include "video/sws_utils.h"
@@ -185,8 +188,7 @@ static bool is_true_planar(int imgfmt)
     return true;
 }
 
-static int try_repack(struct test_ctx *ctx, FILE *f, int imgfmt, int flags,
-                      int not_if_fmt)
+static int try_repack(FILE *f, int imgfmt, int flags, int not_if_fmt)
 {
     char *head = mp_tprintf(80, "%-15s =>", mp_imgfmt_to_name(imgfmt));
     struct mp_repack *un = mp_repack_create_planar(imgfmt, false, flags);
@@ -324,7 +326,7 @@ static int try_repack(struct test_ctx *ctx, FILE *f, int imgfmt, int flags,
     return b;
 }
 
-static void check_float_repack(struct test_ctx *ctx, int imgfmt, enum mp_csp csp,
+static void check_float_repack(int imgfmt, enum mp_csp csp,
                                enum mp_csp_levels levels)
 {
     imgfmt = UNFUCK(imgfmt);
@@ -339,10 +341,8 @@ static void check_float_repack(struct test_ctx *ctx, int imgfmt, enum mp_csp csp
     int w = 1 << (bpp * 8);
 
     if (w > ZIMG_IMAGE_DIMENSION_MAX) {
-        MP_WARN(ctx,
-                "Image dimension (%d) exceeded maximum allowed by zimg (%zu)."
-                " Skipping test...\n",
-                w, ZIMG_IMAGE_DIMENSION_MAX);
+        printf("Image dimension (%d) exceeded maximum allowed by zimg (%zu)."
+               " Skipping test...\n", w, ZIMG_IMAGE_DIMENSION_MAX);
         return;
     }
 
@@ -433,7 +433,7 @@ static void check_float_repack(struct test_ctx *ctx, int imgfmt, enum mp_csp csp
     talloc_free(from_f);
 }
 
-static bool try_draw_bmp(struct mpv_global *g, FILE *f, int imgfmt)
+static bool try_draw_bmp(FILE *f, int imgfmt)
 {
     bool ok = false;
 
@@ -465,7 +465,7 @@ static bool try_draw_bmp(struct mpv_global *g, FILE *f, int imgfmt)
         .num_items = 1,
     };
 
-    struct mp_draw_sub_cache *c = mp_draw_sub_alloc(NULL, g);
+    struct mp_draw_sub_cache *c = mp_draw_sub_alloc_test(dst);
     if (mp_draw_sub_bitmaps(c, dst, &sbs_list)) {
         char *info = mp_draw_sub_get_dbg_info(c);
         fprintf(f, "%s\n", info);
@@ -482,53 +482,51 @@ done:
     return ok;
 }
 
-static void run(struct test_ctx *ctx)
+int main(int argc, char *argv[])
 {
-    FILE *f = test_open_out(ctx, "repack.txt");
+    const char *refdir = argv[1];
+    const char *outdir = argv[2];
+    FILE *f = test_open_out(outdir, "repack.txt");
 
     init_imgfmts_list();
     for (int n = 0; n < num_imgfmts; n++) {
         int imgfmt = imgfmts[n];
 
-        int other = try_repack(ctx, f, imgfmt, 0, 0);
-        try_repack(ctx, f, imgfmt, REPACK_CREATE_ROUND_DOWN, other);
-        try_repack(ctx, f, imgfmt, REPACK_CREATE_EXPAND_8BIT, other);
-        try_repack(ctx, f, imgfmt, REPACK_CREATE_PLANAR_F32, other);
+        int other = try_repack(f, imgfmt, 0, 0);
+        try_repack(f, imgfmt, REPACK_CREATE_ROUND_DOWN, other);
+        try_repack(f, imgfmt, REPACK_CREATE_EXPAND_8BIT, other);
+        try_repack(f, imgfmt, REPACK_CREATE_PLANAR_F32, other);
     }
 
     fclose(f);
 
-    assert_text_files_equal(ctx, "repack.txt", "repack.txt",
-                "This can fail if FFmpeg/libswscale adds or removes pixfmts.");
+    assert_text_files_equal(refdir, outdir, "repack.txt",
+                            "This can fail if FFmpeg/libswscale adds or removes pixfmts.");
 
-    check_float_repack(ctx, -AV_PIX_FMT_GBRAP, MP_CSP_RGB, MP_CSP_LEVELS_PC);
-    check_float_repack(ctx, -AV_PIX_FMT_GBRAP10, MP_CSP_RGB, MP_CSP_LEVELS_PC);
-    check_float_repack(ctx, -AV_PIX_FMT_GBRAP16, MP_CSP_RGB, MP_CSP_LEVELS_PC);
-    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
-    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
-    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
-    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
-    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
-    check_float_repack(ctx, -AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+    check_float_repack(-AV_PIX_FMT_GBRAP, MP_CSP_RGB, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_GBRAP10, MP_CSP_RGB, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_GBRAP16, MP_CSP_RGB, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+    check_float_repack(-AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+    check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
+    check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
 
     // Determine the list of possible draw_bmp input formats. Do this here
     // because it mostly depends on repack and imgformat stuff.
-    f = test_open_out(ctx, "draw_bmp.txt");
+    f = test_open_out(outdir, "draw_bmp.txt");
 
     for (int n = 0; n < num_imgfmts; n++) {
         int imgfmt = imgfmts[n];
 
         fprintf(f, "%-12s= ", mp_imgfmt_to_name(imgfmt));
-        try_draw_bmp(ctx->global, f, imgfmt);
+        try_draw_bmp(f, imgfmt);
     }
 
     fclose(f);
 
-    assert_text_files_equal(ctx, "draw_bmp.txt", "draw_bmp.txt",
-                "This can fail if FFmpeg/libswscale adds or removes pixfmts.");
+    assert_text_files_equal(refdir, outdir, "draw_bmp.txt",
+                            "This can fail if FFmpeg/libswscale adds or removes pixfmts.");
+    return 0;
 }
-
-const struct unittest test_repack = {
-    .name = "repack",
-    .run = run,
-};

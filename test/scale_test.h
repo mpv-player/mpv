@@ -1,6 +1,7 @@
 #pragma once
 
-#include "tests.h"
+#include "img_utils.h"
+#include "test_utils.h"
 #include "video/mp_image.h"
 
 struct scale_test_fns {
@@ -13,7 +14,8 @@ struct scale_test {
     const struct scale_test_fns *fns;
     void *fns_priv;
     const char *test_name;
-    struct test_ctx *ctx;
+    const char *refdir;
+    const char *outdir;
 
     // Private.
     struct mp_image *img_repack_rgb8;

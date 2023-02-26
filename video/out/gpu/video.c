@@ -4239,21 +4239,6 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
     return r;
 }
 
-float gl_video_scale_ambient_lux(float lmin, float lmax,
-                                 float rmin, float rmax, float lux)
-{
-    assert(lmax > lmin);
-
-    float num = (rmax - rmin) * (log10(lux) - log10(lmin));
-    float den = log10(lmax) - log10(lmin);
-    float result = num / den + rmin;
-
-    // clamp the result
-    float max = MPMAX(rmax, rmin);
-    float min = MPMIN(rmax, rmin);
-    return MPMAX(MPMIN(result, max), min);
-}
-
 void gl_video_set_ambient_lux(struct gl_video *p, int lux)
 {
     if (p->opts.gamma_auto) {

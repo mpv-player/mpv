@@ -27,6 +27,7 @@ that you get for free. In some cases, these overlapped with custom waf options.
   supported in the meson build. Instead, pass the generic pkg-config values
   such as ``lua52``, ``lua5.2``, etc.
 * ``--lgpl`` was changed to ``gpl``. If ``gpl`` is false, the build is LGPL2.1+.
+* ``--tests`` was removed since unit tests now explictly require meson to run
 
 ### Boolean Options
 
