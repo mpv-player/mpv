@@ -176,7 +176,7 @@ char* m_properties_expand_string(const struct m_property *prop_list,
                                  const char *str, void *ctx);
 
 // Trivial helpers for implementing properties.
-int m_property_bool_ro(int action, void* arg, int var);
+int m_property_bool_ro(int action, void* arg, bool var);
 int m_property_int_ro(int action, void* arg, int var);
 int m_property_int64_ro(int action, void* arg, int64_t var);
 int m_property_float_ro(int action, void* arg, float var);
