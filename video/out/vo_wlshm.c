@@ -186,7 +186,7 @@ static int resize(struct vo *vo)
     const int32_t height = mp_rect_h(wl->geometry);
     struct buffer *buf;
 
-    vo_wayland_set_opaque_region(wl, 0);
+    vo_wayland_set_opaque_region(wl, false);
     vo->want_redraw = true;
     vo->dwidth = width;
     vo->dheight = height;

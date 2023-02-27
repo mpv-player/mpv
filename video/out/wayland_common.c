@@ -2242,7 +2242,7 @@ bool vo_wayland_reconfig(struct vo *vo)
     return true;
 }
 
-void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha)
+void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha)
 {
     const int32_t width = mp_rect_w(wl->geometry);
     const int32_t height = mp_rect_h(wl->geometry);
