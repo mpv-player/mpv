@@ -189,7 +189,7 @@ static void resize(struct vo *vo)
     const int width = mp_rect_w(wl->geometry);
     const int height = mp_rect_h(wl->geometry);
     
-    vo_wayland_set_opaque_region(wl, 0);
+    vo_wayland_set_opaque_region(wl, false);
     vo->dwidth = width;
     vo->dheight = height;
 
