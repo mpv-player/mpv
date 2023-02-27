@@ -85,6 +85,15 @@ enum pl_color_primaries mp_prim_to_pl(enum mp_csp_prim prim)
     case MP_CSP_PRIM_DISPLAY_P3:    return PL_COLOR_PRIM_DISPLAY_P3;
     case MP_CSP_PRIM_V_GAMUT:       return PL_COLOR_PRIM_V_GAMUT;
     case MP_CSP_PRIM_S_GAMUT:       return PL_COLOR_PRIM_S_GAMUT;
+    case MP_CSP_PRIM_EBU_3213:      return PL_COLOR_PRIM_EBU_3213;
+    case MP_CSP_PRIM_FILM_C:        return PL_COLOR_PRIM_FILM_C;
+#if PL_API_VER >= 230
+    case MP_CSP_PRIM_ACES_AP0:      return PL_COLOR_PRIM_ACES_AP0;
+    case MP_CSP_PRIM_ACES_AP1:      return PL_COLOR_PRIM_ACES_AP1;
+#else
+    case MP_CSP_PRIM_ACES_AP0:
+    case MP_CSP_PRIM_ACES_AP1:      return PL_COLOR_PRIM_UNKNOWN;
+#endif
     case MP_CSP_PRIM_COUNT:         return PL_COLOR_PRIM_COUNT;
     }
 

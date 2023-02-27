@@ -67,6 +67,10 @@ const struct m_opt_choice_alternatives mp_csp_prim_names[] = {
     {"display-p3",  MP_CSP_PRIM_DISPLAY_P3},
     {"v-gamut",     MP_CSP_PRIM_V_GAMUT},
     {"s-gamut",     MP_CSP_PRIM_S_GAMUT},
+    {"ebu3213",     MP_CSP_PRIM_EBU_3213},
+    {"film-c",      MP_CSP_PRIM_FILM_C},
+    {"aces-ap0",    MP_CSP_PRIM_ACES_AP0},
+    {"aces-ap1",    MP_CSP_PRIM_ACES_AP1},
     {0}
 };
 
@@ -478,6 +482,38 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .green = {0.140, 0.855},
             .blue  = {0.100, -0.05},
             .white = d65
+        };
+    // from EBU Tech. 3213-E
+    case MP_CSP_PRIM_EBU_3213:
+        return (struct mp_csp_primaries) {
+            .red   = {0.630, 0.340},
+            .green = {0.295, 0.605},
+            .blue  = {0.155, 0.077},
+            .white = d65
+        };
+    // From H.273, traditional film with Illuminant C
+    case MP_CSP_PRIM_FILM_C:
+        return (struct mp_csp_primaries) {
+            .red   = {0.681, 0.319},
+            .green = {0.243, 0.692},
+            .blue  = {0.145, 0.049},
+            .white = c
+        };
+    // From libplacebo source code
+    case MP_CSP_PRIM_ACES_AP0:
+        return (struct mp_csp_primaries) {
+            .red   = {0.7347, 0.2653},
+            .green = {0.0000, 1.0000},
+            .blue  = {0.0001, -0.0770},
+            .white = {0.32168, 0.33767},
+        };
+    // From libplacebo source code
+    case MP_CSP_PRIM_ACES_AP1:
+        return (struct mp_csp_primaries) {
+            .red   = {0.713, 0.293},
+            .green = {0.165, 0.830},
+            .blue  = {0.128, 0.044},
+            .white = {0.32168, 0.33767},
         };
     default:
         return (struct mp_csp_primaries) {{0}};
