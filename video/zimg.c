@@ -181,12 +181,16 @@ static zimg_color_primaries_e mp_to_z_prim(enum mp_csp_prim prim)
     case MP_CSP_PRIM_BT_470M:   return ZIMG_PRIMARIES_BT470_M;
     case MP_CSP_PRIM_DCI_P3:    return ZIMG_PRIMARIES_ST431_2;
     case MP_CSP_PRIM_DISPLAY_P3:return ZIMG_PRIMARIES_ST432_1;
+    case MP_CSP_PRIM_EBU_3213:  return ZIMG_PRIMARIES_EBU3213_E;
+    case MP_CSP_PRIM_FILM_C:    return ZIMG_PRIMARIES_FILM;
     case MP_CSP_PRIM_CIE_1931:
     case MP_CSP_PRIM_APPLE:     // ?
     case MP_CSP_PRIM_ADOBE:
     case MP_CSP_PRIM_PRO_PHOTO:
     case MP_CSP_PRIM_V_GAMUT:
     case MP_CSP_PRIM_S_GAMUT:   // ?
+    case MP_CSP_PRIM_ACES_AP0:
+    case MP_CSP_PRIM_ACES_AP1:
     default:                    return ZIMG_PRIMARIES_BT709;
     }
 }
