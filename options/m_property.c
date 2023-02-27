@@ -352,11 +352,11 @@ void m_properties_print_help_list(struct mp_log *log,
     mp_info(log, "\nTotal: %d properties\n", count);
 }
 
-int m_property_bool_ro(int action, void* arg, int var)
+int m_property_bool_ro(int action, void* arg, bool var)
 {
     switch (action) {
     case M_PROPERTY_GET:
-        *(int *)arg = !!var;
+        *(bool *)arg = !!var;
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_BOOL};

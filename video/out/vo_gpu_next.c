@@ -422,6 +422,7 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
+#ifdef PL_HAVE_LAV_HDR
 static inline void *get_side_data(const struct mp_image *mpi,
                                   enum AVFrameSideDataType type)
 {
@@ -432,6 +433,7 @@ static inline void *get_side_data(const struct mp_image *mpi,
 
     return NULL;
 }
+#endif
 
 static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
 {

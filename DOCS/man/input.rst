@@ -2789,9 +2789,10 @@ Property list
         entry, ``no``/false or unavailable otherwise.
 
     ``playlist/N/title``
-        Name of the Nth entry. Only available if the playlist file contains
-        such fields, and only if mpv's parser supports it for the given
-        playlist format.
+        Name of the Nth entry. Available if the playlist file contains
+        such fields and mpv's parser supports it for the given
+        playlist format, or if the playlist entry has been opened before and a
+        media-title other then then filename has been aquired.
 
     ``playlist/N/id``
         Unique ID for this entry. This is an automatically assigned integer ID
