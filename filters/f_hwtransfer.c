@@ -198,7 +198,8 @@ static void process(struct mp_filter *f)
     }
 
     if (!mp_update_av_hw_frames_pool(&p->hw_pool, p->av_device_ctx, p->hw_imgfmt,
-                                     p->last_hw_output_fmt, src->w, src->h))
+                                     p->last_hw_output_fmt, src->w, src->h,
+                                     src->imgfmt == IMGFMT_CUDA))
     {
         MP_ERR(f, "failed to create frame pool\n");
         goto error;
@@ -353,7 +354,7 @@ static bool probe_formats(struct mp_hwupload *u, int hw_imgfmt)
         // Creates an AVHWFramesContexts with the given parameters.
         AVBufferRef *frames = NULL;
         if (!mp_update_av_hw_frames_pool(&frames, ctx->av_device_ref,
-                                         hw_imgfmt, imgfmt, 128, 128))
+                                         hw_imgfmt, imgfmt, 128, 128, false))
         {
             MP_WARN(u->f, "failed to allocate pool\n");
             continue;
