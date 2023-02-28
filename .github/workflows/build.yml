@@ -128,6 +128,7 @@ jobs:
           ./bootstrap.py
           # workaround to avoid "fatal: unsafe repository" error
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          zypper -n install python310-pycparser
 
       - name: Build with meson
         run: |

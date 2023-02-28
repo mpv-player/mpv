@@ -11,6 +11,8 @@ project('mpv',
         ]
 )
 
+fs = import('fs')
+
 build_root = meson.project_build_root()
 source_root = meson.project_source_root()
 python = find_program('python3')
@@ -333,6 +335,22 @@ if features['libdl']
     dependencies += libdl_dep
 endif
 
+features += {'modular-drivers': get_option('modular-drivers').require(
+    posix and features['libdl'] and
+    run_command(python, '-c', 'import pycparser').returncode() == 0,
+    error_message: 'modular drivers are only supported on posix with libdl and pycparser',
+).enabled()}
+modules = []
+moduledir = get_option('libdir') / 'mpv'
+if features['modular-drivers']
+    prefix = get_option('prefix')
+    build_rpath = meson.current_build_dir()
+    install_rpath = prefix / moduledir
+else
+    build_rpath = ''
+    install_rpath = ''
+endif
+
 cplugins = get_option('cplugins').require(
     features['libdl'] and not win32 and cc.has_link_argument('-rdynamic'),
     error_message: 'cplugins not supported by the os or compiler!',
@@ -412,6 +430,10 @@ if posix
                      'osdep/subprocess-posix.c',
                      'osdep/terminal-unix.c',
                      'sub/filter_regex.c')
+
+    if features['modular-drivers']
+        sources += files('osdep/module-posix.c')
+    endif
 endif
 
 if posix and not features['cocoa']
@@ -769,8 +791,7 @@ endif
 alsa = dependency('alsa', version: '>= 1.0.18', required: get_option('alsa'))
 features += {'alsa': alsa.found()}
 if features['alsa']
-    dependencies += alsa
-    sources += files('audio/out/ao_alsa.c')
+    modules += [['ao-alsa', ['audio/out/ao_alsa.c'], [alsa]]]
 endif
 
 audiounit = {
@@ -807,8 +828,7 @@ jack_opt = get_option('jack').require(
 jack = dependency('jack', required: jack_opt)
 features += {'jack': jack.found()}
 if features['jack']
-    dependencies += jack
-    sources += files('audio/out/ao_jack.c')
+    modules += [['ao-jack', ['audio/out/ao_jack.c'], [jack]]]
 endif
 
 openal = dependency('openal', version: '>= 1.13', required: get_option('openal'))
@@ -838,15 +858,13 @@ endif
 pipewire = dependency('libpipewire-0.3', version: '>= 0.3.19', required: get_option('pipewire'))
 features += {'pipewire': pipewire.found()}
 if features['pipewire']
-    dependencies += pipewire
-    sources += files('audio/out/ao_pipewire.c')
+    modules += [['ao-pipewire', ['audio/out/ao_pipewire.c'], [pipewire]]]
 endif
 
 pulse = dependency('libpulse', version: '>= 1.0', required: get_option('pulse'))
 features += {'pulse': pulse.found()}
 if features['pulse']
-    dependencies += pulse
-    sources += files('audio/out/ao_pulse.c')
+    modules += [['ao-pulse', ['audio/out/ao_pulse.c'], [pulse]]]
 endif
 
 sdl2_audio = get_option('sdl2-audio').require(
@@ -861,8 +879,7 @@ endif
 sndio = dependency('sndio', required: get_option('sndio'))
 features += {'sndio': sndio.found()}
 if features['sndio']
-    dependencies += sndio
-    sources += files('audio/out/ao_sndio.c')
+    modules += [['ao-sndio', ['audio/out/ao_sndio.c'], [sndio]]]
 endif
 
 wasapi = cc.has_header_symbol('audioclient.h', 'IAudioClient', required: get_option('wasapi'))
@@ -1560,6 +1577,20 @@ if features['macos-touchbar']
     sources += files('osdep/macosx_touchbar.m')
 endif
 
+foreach m: modules
+    if features['modular-drivers']
+        shared_module(
+            'mpv-' + m[0],
+            sources: m[1],
+            dependencies: m[2],
+            install: true,
+            install_dir: moduledir,
+        )
+    else
+        sources += m[1]
+        dependencies += m[2]
+    endif
+endforeach
 
 # manpages
 manpage = 'DOCS/man/mpv.rst'
@@ -1682,28 +1713,54 @@ if win32
 endif
 
 
-client_h_define = cc.get_define('MPV_CLIENT_API_VERSION', prefix: '#include "libmpv/client.h"',
-                                include_directories: include_directories('.'))
-major = client_h_define.split('|')[0].split('<<')[0].strip('() ')
-minor = client_h_define.split('|')[1].strip('() ')
-client_api_version = major + '.' + minor + '.0'
-
-libmpv = library('mpv', sources, dependencies: dependencies, gnu_symbol_visibility: 'hidden',
-                 version: client_api_version, include_directories: includedir,
-                 install: get_option('libmpv'), build_by_default: get_option('libmpv'))
+libmpvcore = library('mpvcore', sources, dependencies: dependencies,
+                     include_directories: includedir,
+                     install: true, build_by_default: true,
+                     build_rpath: build_rpath, install_rpath: install_rpath, )
 
 
 if get_option('libmpv')
-    pkg = import('pkgconfig')
-    pkg.generate(libmpv, version: client_api_version,
-                 description: 'mpv media player client library')
-
     headers = ['libmpv/client.h', 'libmpv/render.h',
                'libmpv/render_gl.h', 'libmpv/stream_cb.h']
     install_headers(headers, subdir: 'mpv')
 
+    if features['modular-drivers']
+        libmpv_sources = custom_target('gen-libmpvshim', input: headers, output: ['libmpvshim.c'],
+                                       depends: [libmpvcore],
+                                       command: [
+                                           tools_directory / 'genshim.py',
+                                           '--output', '@OUTPUT@',
+                                           '--includedir', source_root / 'TOOLS' / 'genshim.inc',
+                                           '--compiler', cc.cmd_array(),
+                                           '--library', fs.name(libmpvcore.path()),
+                                           '@INPUT@'],
+                                       )
+    else
+        libmpv_sources = sources
+    endif
+
+    client_h_define = cc.get_define('MPV_CLIENT_API_VERSION', prefix: '#include "libmpv/client.h"',
+                                    include_directories: include_directories('.'))
+    major = client_h_define.split('|')[0].split('<<')[0].strip('() ')
+    minor = client_h_define.split('|')[1].strip('() ')
+    client_api_version = major + '.' + minor + '.0'
+
+
+    libmpv = library('mpv', libmpv_sources, gnu_symbol_visibility: 'hidden',
+                     version: client_api_version, include_directories: includedir,
+                     dependencies: features['modular-drivers'] ? [] : dependencies,
+                     install: true, build_by_default: true,
+                     build_rpath: build_rpath, install_rpath: install_rpath, )
+
+    pkg = import('pkgconfig')
+    pkg.generate(libmpv, version: client_api_version,
+                 description: 'mpv media player client library')
+
+
     libmpv_test = executable('libmpv-test', 'libmpv/test.c', link_with: [libmpv])
     test('libmpv', libmpv_test)
+
+    executable('libmpv-simple', 'libmpv/simple.c', link_with: [libmpv])
 endif
 
 if get_option('cplayer')
@@ -1734,8 +1791,9 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
-               win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
+    executable('mpv', objects: libmpvcore.extract_all_objects(recursive: true), dependencies: dependencies,
+               win_subsystem: 'windows,6.0', include_directories: includedir, install: true,
+               build_rpath: build_rpath, install_rpath: install_rpath, )
 endif
 
 summary({'d3d11': features['d3d11'],

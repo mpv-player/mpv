@@ -490,6 +490,7 @@ void audio_update_balance(struct MPContext *mpctx);
 void audio_update_media_role(struct MPContext *mpctx);
 void reload_audio_output(struct MPContext *mpctx);
 void audio_start_ao(struct MPContext *mpctx);
+void mp_audio_init(struct MPContext *mpctx);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);

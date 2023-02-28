@@ -92,6 +92,7 @@ struct ao *ao_init_best(struct mpv_global *global,
                         void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels);
+void ao_load_drivers(struct mpv_global *global);
 void ao_uninit(struct ao *ao);
 void ao_get_format(struct ao *ao,
                    int *samplerate, int *format, struct mp_chmap *channels);

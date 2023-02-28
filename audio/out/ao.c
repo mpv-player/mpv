@@ -34,6 +34,7 @@
 #include "common/msg.h"
 #include "common/common.h"
 #include "common/global.h"
+#include "osdep/module.h"
 
 extern const struct ao_driver audio_out_oss;
 extern const struct ao_driver audio_out_audiotrack;
@@ -54,61 +55,65 @@ extern const struct ao_driver audio_out_pcm;
 extern const struct ao_driver audio_out_lavc;
 extern const struct ao_driver audio_out_sdl;
 
-static const struct ao_driver * const audio_out_drivers[] = {
+static struct mp_module audio_out_drivers[] = {
 // native:
 #if HAVE_ANDROID
-    &audio_out_audiotrack,
+    MP_MODULE_BUILTIN(audio_out_audiotrack),
 #endif
 #if HAVE_AUDIOUNIT
-    &audio_out_audiounit,
+    MP_MODULE_BUILTIN(audio_out_audiounit),
 #endif
 #if HAVE_COREAUDIO
-    &audio_out_coreaudio,
+    MP_MODULE_BUILTIN(audio_out_coreaudio),
 #endif
 #if HAVE_PIPEWIRE
-    &audio_out_pipewire,
+    MP_MODULE_MODULAR("pipewire", audio_out_pipewire),
 #endif
 #if HAVE_PULSE
-    &audio_out_pulse,
+    MP_MODULE_MODULAR("pulse", audio_out_pulse),
 #endif
 #if HAVE_ALSA
-    &audio_out_alsa,
+    MP_MODULE_MODULAR("alsa", audio_out_alsa),
 #endif
 #if HAVE_WASAPI
-    &audio_out_wasapi,
+    MP_MODULE_BUILTIN(audio_out_wasapi),
 #endif
 #if HAVE_OSS_AUDIO
-    &audio_out_oss,
+    MP_MODULE_BUILTIN(audio_out_oss),
 #endif
     // wrappers:
 #if HAVE_JACK
-    &audio_out_jack,
+    MP_MODULE_MODULAR("jack", audio_out_jack),
 #endif
 #if HAVE_OPENAL
-    &audio_out_openal,
+    MP_MODULE_BUILTIN(audio_out_openal),
 #endif
 #if HAVE_OPENSLES
-    &audio_out_opensles,
+    MP_MODULE_BUILTIN(audio_out_opensles),
 #endif
 #if HAVE_SDL2_AUDIO
-    &audio_out_sdl,
+    MP_MODULE_BUILTIN(audio_out_sdl),
 #endif
 #if HAVE_SNDIO
-    &audio_out_sndio,
+    MP_MODULE_MODULAR("sndio", audio_out_sndio),
 #endif
-    &audio_out_null,
+    MP_MODULE_BUILTIN(audio_out_null),
 #if HAVE_COREAUDIO
-    &audio_out_coreaudio_exclusive,
+    MP_MODULE_BUILTIN(audio_out_coreaudio_exclusive),
 #endif
-    &audio_out_pcm,
-    &audio_out_lavc,
+    MP_MODULE_BUILTIN(audio_out_pcm),
+    MP_MODULE_BUILTIN(audio_out_lavc),
 };
 
 static bool get_desc(struct m_obj_desc *dst, int index)
 {
     if (index >= MP_ARRAY_SIZE(audio_out_drivers))
         return false;
-    const struct ao_driver *ao = audio_out_drivers[index];
+    const struct ao_driver *ao = audio_out_drivers[index].driver;
+    if (!ao) {
+        *dst = (struct m_obj_desc) {};
+        return true;
+    }
     *dst = (struct m_obj_desc) {
         .name = ao->name,
         .description = ao->description,
@@ -313,7 +318,9 @@ struct ao *ao_init_best(struct mpv_global *global,
 
     if (autoprobe) {
         for (int n = 0; n < MP_ARRAY_SIZE(audio_out_drivers); n++) {
-            const struct ao_driver *driver = audio_out_drivers[n];
+            const struct ao_driver *driver = audio_out_drivers[n].driver;
+            if (!driver)
+                continue;
             if (driver == &audio_out_null)
                 break;
             MP_TARRAY_APPEND(tmp, ao_list, ao_num,
@@ -521,7 +528,11 @@ struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp,
     }
 
     for (int n = 0; n < MP_ARRAY_SIZE(audio_out_drivers); n++) {
-        const struct ao_driver *d = audio_out_drivers[n];
+        const struct ao_driver *d = audio_out_drivers[n].driver;
+
+        if (!d)
+            continue;
+
         if (d == &audio_out_null)
             break; // don't add unsafe/special entries
 
@@ -716,4 +727,16 @@ void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples
     int plane_samples = num_samples * (planar ? 1: fmt->channels);
     for (int n = 0; n < planes; n++)
         convert_plane(type, data[n], plane_samples);
+}
+
+void ao_load_drivers(struct mpv_global *global)
+{
+    for (int n = 0; n < MP_ARRAY_SIZE(audio_out_drivers); n++) {
+        struct mp_module *module = &audio_out_drivers[n];
+        if (module->driver)
+            continue;
+
+        module->driver = mp_load_module(global, "ao", module->module,
+                                        module->entrypoint);
+    }
 }
