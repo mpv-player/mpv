@@ -978,8 +978,7 @@ static void preferred_scale(void *data,
     double old_scale = wl->scaling;
 
     // dmabuf_wayland is always wl->scaling = 1
-    bool dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
-    wl->scaling = !dmabuf_wayland ? (double)scale / 120 : 1;
+    wl->scaling = !wl->using_dmabuf_wayland ? (double)scale / 120 : 1;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -1719,9 +1718,8 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
         return;
 
     // dmabuf_wayland is always wl->scaling = 1
-    bool dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
     double old_scale = wl->scaling;
-    wl->scaling = !dmabuf_wayland ? wl->current_output->scale : 1;
+    wl->scaling = !wl->using_dmabuf_wayland ? wl->current_output->scale : 1;
 
     rescale_geometry(wl, old_scale);
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
@@ -2069,6 +2067,7 @@ bool vo_wayland_init(struct vo *vo)
         .vo_opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
     wl->vo_opts = wl->vo_opts_cache->opts;
+    wl->using_dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
 
     wl_list_init(&wl->output_list);
 

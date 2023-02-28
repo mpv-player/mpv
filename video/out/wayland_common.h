@@ -104,6 +104,7 @@ struct vo_wayland_state {
     void *dmabuf_feedback;
     wayland_format *format_map;
     uint32_t format_size;
+    bool using_dmabuf_wayland;
     /* TODO: remove these once zwp_linux_dmabuf_v1 version 2 support is removed. */
     int *drm_formats;
     int drm_format_ct;
