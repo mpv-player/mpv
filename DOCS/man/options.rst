@@ -3234,9 +3234,9 @@ Window
     ``--window-minimized`` for further remarks.
 
 ``--cursor-autohide=<number|no|always>``
-    Make mouse cursor automatically hide after given number of milliseconds.
-    ``no`` will disable cursor autohide. ``always`` means the cursor will stay
-    hidden.
+    Make mouse cursor automatically hide after given number of milliseconds
+    (default: 1000 ms). ``no`` will disable cursor autohide. ``always``
+    means the cursor will stay hidden.
 
 ``--cursor-autohide-fs-only``
     If this option is given, the cursor is always visible in windowed mode. In
