@@ -79,11 +79,6 @@ build_options = [
         'default': 'enable',
         'func': check_true
     }, {
-        'name': '--tests',
-        'desc': 'unit tests (development only)',
-        'default': 'disable',
-        'func': check_true
-    }, {
         # Reminder: normally always built, but enabled by MPV_LEAK_REPORT.
         # Building it can be disabled only by defining NDEBUG through CFLAGS.
         'name': '--ta-leak-report',
@@ -408,6 +403,10 @@ iconv support use --disable-iconv.",
         'name': 'rubberband-3',
         'desc': 'new engine support for librubberband',
         'func': check_pkg_config('rubberband >= 3.0.0'),
+    }, {
+        'name': 'zimg-st428',
+        'desc': 'ZIMG suport for ZIMG_TRANSFER_ST428',
+        'func': check_pkg_config('zimg', '>= 3.0.5'),
     }
 ]
 
@@ -1053,6 +1052,8 @@ def configure(ctx):
     ctx.parse_dependencies(audio_output_features)
     ctx.parse_dependencies(video_output_features)
     ctx.parse_dependencies(hwaccel_features)
+
+    ctx.define('PLATFORM', check_platform(ctx))
 
     if ctx.options.SWIFT_FLAGS:
         ctx.env.SWIFT_FLAGS.extend(split(ctx.options.SWIFT_FLAGS))

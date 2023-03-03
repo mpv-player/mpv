@@ -118,6 +118,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"autofit", OPT_SIZE_BOX(autofit)},
     {"autofit-larger", OPT_SIZE_BOX(autofit_larger)},
     {"autofit-smaller", OPT_SIZE_BOX(autofit_smaller)},
+    {"auto-window-resize", OPT_BOOL(auto_window_resize)},
     {"window-scale", OPT_DOUBLE(window_scale), M_RANGE(0.001, 100)},
     {"window-minimized", OPT_BOOL(window_minimized)},
     {"window-maximized", OPT_BOOL(window_maximized)},
@@ -201,6 +202,7 @@ const struct m_sub_options vo_sub_opts = {
         .panscan = 0.0f,
         .scale_x = 1.0f,
         .scale_y = 1.0f,
+        .auto_window_resize = true,
         .keepaspect = true,
         .keepaspect_window = true,
         .hidpi_window_scale = true,
@@ -400,10 +402,6 @@ static const m_option_t mp_opts[] = {
     {"list-protocols", OPT_PRINT(stream_print_proto_list)},
     {"version", OPT_PRINT(print_version)},
     {"V", OPT_PRINT(print_version)},
-
-#if HAVE_TESTS
-    {"unittest", OPT_STRING(test_mode), .flags = CONF_NOCFG | M_OPT_NOPROP},
-#endif
 
     {"player-operation-mode", OPT_CHOICE(operation_mode,
         {"cplayer", 0}, {"pseudo-gui", 1}),

@@ -110,6 +110,11 @@ enum pl_color_transfer mp_trc_to_pl(enum mp_csp_trc trc)
     case MP_CSP_TRC_V_LOG:          return PL_COLOR_TRC_V_LOG;
     case MP_CSP_TRC_S_LOG1:         return PL_COLOR_TRC_S_LOG1;
     case MP_CSP_TRC_S_LOG2:         return PL_COLOR_TRC_S_LOG2;
+#if PL_API_VER >= 240
+    case MP_CSP_TRC_ST428:          return PL_COLOR_TRC_ST428;
+#else
+    case MP_CSP_TRC_ST428:          return PL_COLOR_TRC_UNKNOWN;
+#endif
     case MP_CSP_TRC_COUNT:          return PL_COLOR_TRC_COUNT;
     }
 

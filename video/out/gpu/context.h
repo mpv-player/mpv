@@ -7,7 +7,7 @@
 
 struct ra_ctx_opts {
     bool allow_sw;        // allow software renderers
-    int want_alpha;      // create an alpha framebuffer if possible
+    bool want_alpha;      // create an alpha framebuffer if possible
     bool debug;           // enable debugging layers/callbacks etc.
     bool probing;        // the backend was auto-probed
     char *context_name;  // filter by `ra_ctx_fns.name`

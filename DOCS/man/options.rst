@@ -2904,6 +2904,15 @@ Subtitles
     name does not match, it may prefer not to render any text that uses the
     missing font.)
 
+``--sub-fonts-dir=<path>``
+    Font files in this directory are used by mpv/libass for subtitles. Useful
+    if you do not want to install fonts to your system. Note that files in this
+    directory are loaded into memory before being used by mpv. If you have a
+    lot of fonts, consider using fonts.conf (see `FILES`_ section) to include
+    additional mpv user settings.
+
+    If this option is not specified, ``~~/fonts`` will be used by default.
+
 Window
 ------
 
@@ -3225,9 +3234,9 @@ Window
     ``--window-minimized`` for further remarks.
 
 ``--cursor-autohide=<number|no|always>``
-    Make mouse cursor automatically hide after given number of milliseconds.
-    ``no`` will disable cursor autohide. ``always`` means the cursor will stay
-    hidden.
+    Make mouse cursor automatically hide after given number of milliseconds
+    (default: 1000 ms). ``no`` will disable cursor autohide. ``always``
+    means the cursor will stay hidden.
 
 ``--cursor-autohide-fs-only``
     If this option is given, the cursor is always visible in windowed mode. In
@@ -3257,6 +3266,13 @@ Window
     there is a change in video parameters, video stream or file. This used to
     be the default behavior. Currently only affects X11 VOs.
 
+``--auto-window-resize=<yes|no>``
+    (Wayland, Win32, and X11)
+    By default, mpv will automatically resize itself if the video's size changes
+    (i.e. advancing forward in a playlist). Setting this to ``no`` disables this
+    behavior so the window size never changes automatically. This option does
+    not have any impact on the ``--autofit`` or ``--geometry`` options.
+
 ``--no-keepaspect``, ``--keepaspect``
     ``--no-keepaspect`` will always stretch the video to window size, and will
     disable the window manager hints that force the window aspect ratio.
@@ -3285,8 +3301,7 @@ Window
     (macOS, Windows, X11, and Wayland only)
     Scale the window size according to the backing scale factor (default: yes).
     On regular HiDPI resolutions the window opens with double the size but appears
-    as having the same size as on non-HiDPI resolutions. This is enabled by
-    default on macOS.
+    as having the same size as on non-HiDPI resolutions.
 
 ``--native-fs``, ``--no-native-fs``
     (macOS only)
@@ -4255,6 +4270,9 @@ OSD
 ``--osd-font-provider=<...>``
     See ``--sub-font-provider`` for details and accepted values. Note that
     unlike subtitles, OSD never uses embedded fonts from media files.
+
+``--osd-fonts-dir=<path>``
+    See ``--sub-fonts-dir`` for details.  Defaults to ``~~/fonts``.
 
 Screenshot
 ----------
@@ -7148,21 +7166,3 @@ Miscellaneous
     code is the same.)
 
     Conversion is not applied to metadata that is updated at runtime.
-
-
-Debugging
----------
-
-``--unittest=<name>``
-    Run an internal unit test. There are multiple, and the name specifies which.
-
-    The special value ``all-simple`` runs all tests which do not need further
-    setup (other arguments and such). Some tests may need additional arguments
-    to do anything useful.
-
-    On success, the player binary exits with exit status 0, otherwise it returns
-    with an undefined non-0 exit status (it may crash or abort itself on test
-    failures).
-
-    This is only enabled if built with ``--enable-tests``, and should normally
-    be enabled and used by developers only.

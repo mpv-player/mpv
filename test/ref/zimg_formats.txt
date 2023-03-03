@@ -95,6 +95,14 @@
          p010be    Zin   Zout  SWSin  SWSout |
            p016    Zin   Zout  SWSin  SWSout |
          p016be    Zin   Zout  SWSin  SWSout |
+           p210    Zin   Zout  SWSin  SWSout |
+         p210be    Zin   Zout  SWSin  SWSout |
+           p216    Zin   Zout  SWSin  SWSout |
+         p216be    Zin   Zout  SWSin  SWSout |
+           p410    Zin   Zout  SWSin  SWSout |
+         p410be    Zin   Zout  SWSin  SWSout |
+           p416    Zin   Zout  SWSin  SWSout |
+         p416be    Zin   Zout  SWSin  SWSout |
            pal8    Zin         SWSin         |
             qsv                              |
            rgb0    Zin   Zout  SWSin  SWSout |
@@ -117,12 +125,12 @@
         uyvy422    Zin   Zout  SWSin  SWSout |
       uyyvyy411    Zin   Zout                |
           vaapi                              |
-     vaapi_idct                              |
-     vaapi_moco                              |
           vdpau                              |
    vdpau_output                              |
    videotoolbox                              |
          vulkan                              |
+        x2bgr10    Zin   Zout  SWSin  SWSout |
+      x2bgr10be    Zin   Zout                |
       x2rgb10be    Zin   Zout                |
            xvmc                              |
           xyz12    Zin   Zout  SWSin  SWSout |

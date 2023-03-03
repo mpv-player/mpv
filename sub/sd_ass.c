@@ -206,7 +206,7 @@ static void assobjects_init(struct sd *sd)
     struct sd_ass_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
 
-    ctx->ass_library = mp_ass_init(sd->global, sd->log);
+    ctx->ass_library = mp_ass_init(sd->global, sd->opts->sub_style, sd->log);
     ass_set_extract_fonts(ctx->ass_library, opts->use_embedded_fonts);
 
     add_subtitle_fonts(sd);

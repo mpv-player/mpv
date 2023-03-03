@@ -87,6 +87,7 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"v-log",       MP_CSP_TRC_V_LOG},
     {"s-log1",      MP_CSP_TRC_S_LOG1},
     {"s-log2",      MP_CSP_TRC_S_LOG2},
+    {"st428",       MP_CSP_TRC_ST428},
     {0}
 };
 
@@ -208,6 +209,7 @@ enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
     case AVCOL_TRC_GAMMA28:      return MP_CSP_TRC_GAMMA28;
     case AVCOL_TRC_SMPTEST2084:  return MP_CSP_TRC_PQ;
     case AVCOL_TRC_ARIB_STD_B67: return MP_CSP_TRC_HLG;
+    case AVCOL_TRC_SMPTE428:     return MP_CSP_TRC_ST428;
     default:                     return MP_CSP_TRC_AUTO;
     }
 }
@@ -260,6 +262,7 @@ int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
     case MP_CSP_TRC_GAMMA28:      return AVCOL_TRC_GAMMA28;
     case MP_CSP_TRC_PQ:           return AVCOL_TRC_SMPTEST2084;
     case MP_CSP_TRC_HLG:          return AVCOL_TRC_ARIB_STD_B67;
+    case MP_CSP_TRC_ST428:        return AVCOL_TRC_SMPTE428;
     default:                      return AVCOL_TRC_UNSPECIFIED;
     }
 }
@@ -616,21 +619,22 @@ void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest
     mp_mul_matrix3x3(m, tmp);
 }
 
-// get the coefficients of an SMPTE 428-1 xyz -> rgb conversion matrix
+// get the coefficients of an ST 428-1 xyz -> rgb conversion matrix
 // intent = the rendering intent used to convert to the target primaries
 static void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params,
                                   enum mp_render_intent intent, struct mp_cmat *m)
 {
-    struct mp_csp_primaries prim = mp_get_csp_primaries(params->color.primaries);
+    // Convert to DCI-P3
+    struct mp_csp_primaries prim = mp_get_csp_primaries(MP_CSP_PRIM_DCI_P3);
     float brightness = params->brightness;
     mp_get_rgb2xyz_matrix(prim, m->m);
     mp_invert_matrix3x3(m->m);
 
     // All non-absolute mappings want to map source white to target white
     if (intent != MP_INTENT_ABSOLUTE_COLORIMETRIC) {
-        // SMPTE 428-1 defines the calibration white point as CIE xy (0.314, 0.351)
-        static const struct mp_csp_col_xy smpte428 = {0.314, 0.351};
-        mp_apply_chromatic_adaptation(smpte428, prim.white, m->m);
+        // SMPTE EG 432-1 Annex H defines the white point as equal energy
+        static const struct mp_csp_col_xy smpte432 = {1.0/3.0, 1.0/3.0};
+        mp_apply_chromatic_adaptation(smpte432, prim.white, m->m);
     }
 
     // Since this outputs linear RGB rather than companded RGB, we

@@ -12,6 +12,7 @@ meson setup build \
     -Dopenal=enabled \
     -Dsdl2=enabled \
     -Dsndio=enabled \
+    -Dtests=true \
     -Dvdpau=enabled \
     -Dvulkan=enabled \
     -Doss-audio=enabled \
@@ -22,8 +23,7 @@ meson setup build \
     $NULL
 
 meson compile -C build
-meson test -C build
-./build/mpv
+./build/mpv -v --no-config
 
 if [ ! -e "./waf" ] ; then
     python3 ./bootstrap.py
@@ -47,3 +47,4 @@ python3 ./waf configure \
     $NULL
 
 python3 ./waf build
+./build_waf/mpv -v --no-config

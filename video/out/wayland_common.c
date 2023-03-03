@@ -978,8 +978,7 @@ static void preferred_scale(void *data,
     double old_scale = wl->scaling;
 
     // dmabuf_wayland is always wl->scaling = 1
-    bool dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
-    wl->scaling = !dmabuf_wayland ? (double)scale / 120 : 1;
+    wl->scaling = !wl->using_dmabuf_wayland ? (double)scale / 120 : 1;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -1106,11 +1105,11 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     if (callback)
         wl_callback_destroy(callback);
 
-    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
     if (wl->use_present) {
-        struct wp_presentation_feedback *fback = wp_presentation_feedback(wl->presentation, wl->surface);
+        struct wp_presentation_feedback *fback = wp_presentation_feedback(wl->presentation, wl->callback_surface);
         add_feedback(wl->fback_pool, fback);
         wp_presentation_feedback_add_listener(fback, &feedback_listener, wl->fback_pool);
     }
@@ -1719,9 +1718,8 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
         return;
 
     // dmabuf_wayland is always wl->scaling = 1
-    bool dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
     double old_scale = wl->scaling;
-    wl->scaling = !dmabuf_wayland ? wl->current_output->scale : 1;
+    wl->scaling = !wl->using_dmabuf_wayland ? wl->current_output->scale : 1;
 
     rescale_geometry(wl, old_scale);
     wl_surface_set_buffer_scale(wl->surface, wl->scaling);
@@ -2069,6 +2067,7 @@ bool vo_wayland_init(struct vo *vo)
         .vo_opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
     wl->vo_opts = wl->vo_opts_cache->opts;
+    wl->using_dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
 
     wl_list_init(&wl->output_list);
 
@@ -2188,7 +2187,8 @@ bool vo_wayland_init(struct vo *vo)
     update_app_id(wl);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
 
-    wl->frame_callback = wl_surface_frame(wl->surface);
+    wl->callback_surface = wl->using_dmabuf_wayland ? wl->video_surface : wl->surface;
+    wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     wl_surface_commit(wl->surface);
 
@@ -2217,7 +2217,11 @@ bool vo_wayland_reconfig(struct vo *vo)
         wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
-    set_geometry(wl, false);
+    if (wl->vo_opts->auto_window_resize || mp_rect_w(wl->geometry) == 0 ||
+        mp_rect_h(wl->geometry) == 0)
+    {
+        set_geometry(wl, false);
+    }
 
     if (wl->opts->configure_bounds)
         set_window_bounds(wl);
@@ -2242,7 +2246,7 @@ bool vo_wayland_reconfig(struct vo *vo)
     return true;
 }
 
-void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha)
+void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha)
 {
     const int32_t width = mp_rect_w(wl->geometry);
     const int32_t height = mp_rect_h(wl->geometry);

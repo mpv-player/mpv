@@ -3341,6 +3341,12 @@ Property list
     somewhat weird form (apparently "hex BCD"), indicating the release version
     of the libass library linked to mpv.
 
+``platform``
+    Returns a string describing what target platform mpv was built for. The value
+    of this is dependent on what the underlying build system detects. Some of the
+    most common values are: ``windows``, ``darwin`` (macos or ios), ``linux``,
+    ``android``, and ``freebsd``. Note that this is not a complete listing.
+
 ``options/<name>`` (RW)
     The value of option ``--<name>``. Most options can be changed at runtime by
     writing to this property. Note that many options require reloading the file

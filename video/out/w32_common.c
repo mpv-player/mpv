@@ -1438,8 +1438,9 @@ static void gui_thread_reconfig(void *ptr)
     vo_calc_window_geometry3(vo, &screen, &mon, w32->dpi_scale, &geo);
     vo_apply_window_geometry(vo, &geo);
 
-    bool reset_size = w32->o_dwidth != vo->dwidth ||
-                      w32->o_dheight != vo->dheight;
+    bool reset_size = (w32->o_dwidth != vo->dwidth ||
+                       w32->o_dheight != vo->dheight) &&
+                       w32->opts->auto_window_resize;
 
     w32->o_dwidth = vo->dwidth;
     w32->o_dheight = vo->dheight;

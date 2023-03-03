@@ -248,7 +248,7 @@ bgr4_byte: [GENERIC] fcsp=rgb ctype=uint
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
     0: 8bits {0:1} {1:2} {3:1} {}
-  AVD: name=bgr4_byte chroma=0:0 flags=0x60 [rgb]
+  AVD: name=bgr4_byte chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=1  o=0  sh=0  d=1
     1: p=0  st=1  o=0  sh=1  d=2
     2: p=0  st=1  o=0  sh=3  d=1
@@ -293,7 +293,7 @@ bgr8: [GENERIC] fcsp=rgb ctype=uint
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
     0: 8bits {0:3} {3:3} {6:2} {}
-  AVD: name=bgr8 chroma=0:0 flags=0x60 [rgb]
+  AVD: name=bgr8 chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=1  o=0  sh=0  d=3
     1: p=0  st=1  o=0  sh=3  d=3
     2: p=0  st=1  o=0  sh=6  d=2
@@ -742,7 +742,7 @@ gray: ctype=uint
     0: 8bits {0:8} {} {} {}
   Regular: planes=1 compbytes=1 bitpad=0 chroma=1x1 ctype=uint
     0: {1}
-  AVD: name=gray chroma=0:0 flags=0x40
+  AVD: name=gray chroma=0:0 flags=0x0
     0: p=0  st=1  o=0  sh=0  d=8
 gray10: [GENERIC] ctype=uint
   Basic desc: [ba][bb][yuvp][yuv][gray][le][uint]
@@ -1012,6 +1012,98 @@ p016be: [GENERIC] ctype=uint
     0: p=0  st=2  o=0  sh=0  d=16
     1: p=1  st=4  o=0  sh=0  d=16
     2: p=1  st=4  o=2  sh=0  d=16
+p210: [GENERIC] ctype=uint
+  Basic desc: [ba][bb][nv][yuv][le][uint]
+    planes=2, chroma=1:0 align=2:1
+    {16/[0:0] 32/[1:0] }
+    0: 16bits {0:16/6} {} {} {}
+    1: 32bits {} {0:16/6} {16:16/6} {}
+  Regular: planes=2 compbytes=2 bitpad=6 chroma=2x1 ctype=uint
+    0: {1}
+    1: {2, 3}
+  AVD: name=p210le chroma=1:0 flags=0x10 [planar]
+    0: p=0  st=2  o=0  sh=6  d=10
+    1: p=1  st=4  o=0  sh=6  d=10
+    2: p=1  st=4  o=2  sh=6  d=10
+p210be: [GENERIC] ctype=uint
+  Basic desc: [ba][bb][nv][yuv][be][uint]
+    planes=2, chroma=1:0 align=2:1
+    {16/[0:0] 32/[1:0] }
+    0: 16bits endian_bytes=2 {0:16/6} {} {} {}
+    1: 32bits endian_bytes=2 {} {0:16/6} {16:16/6} {}
+  AVD: name=p210be chroma=1:0 flags=0x11 [be][planar]
+    0: p=0  st=2  o=0  sh=6  d=10
+    1: p=1  st=4  o=0  sh=6  d=10
+    2: p=1  st=4  o=2  sh=6  d=10
+p216: [GENERIC] ctype=uint
+  Basic desc: [ba][bb][nv][yuv][le][uint]
+    planes=2, chroma=1:0 align=2:1
+    {16/[0:0] 32/[1:0] }
+    0: 16bits {0:16} {} {} {}
+    1: 32bits {} {0:16} {16:16} {}
+  Regular: planes=2 compbytes=2 bitpad=0 chroma=2x1 ctype=uint
+    0: {1}
+    1: {2, 3}
+  AVD: name=p216le chroma=1:0 flags=0x10 [planar]
+    0: p=0  st=2  o=0  sh=0  d=16
+    1: p=1  st=4  o=0  sh=0  d=16
+    2: p=1  st=4  o=2  sh=0  d=16
+p216be: [GENERIC] ctype=uint
+  Basic desc: [ba][bb][nv][yuv][be][uint]
+    planes=2, chroma=1:0 align=2:1
+    {16/[0:0] 32/[1:0] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
+    1: 32bits endian_bytes=2 {} {0:16} {16:16} {}
+  AVD: name=p216be chroma=1:0 flags=0x11 [be][planar]
+    0: p=0  st=2  o=0  sh=0  d=16
+    1: p=1  st=4  o=0  sh=0  d=16
+    2: p=1  st=4  o=2  sh=0  d=16
+p410: [GENERIC] ctype=uint
+  Basic desc: [ba][bb][nv][yuv][le][uint]
+    planes=2, chroma=0:0 align=1:1
+    {16/[0:0] 32/[0:0] }
+    0: 16bits {0:16/6} {} {} {}
+    1: 32bits {} {0:16/6} {16:16/6} {}
+  Regular: planes=2 compbytes=2 bitpad=6 chroma=1x1 ctype=uint
+    0: {1}
+    1: {2, 3}
+  AVD: name=p410le chroma=0:0 flags=0x10 [planar]
+    0: p=0  st=2  o=0  sh=6  d=10
+    1: p=1  st=4  o=0  sh=6  d=10
+    2: p=1  st=4  o=2  sh=6  d=10
+p410be: [GENERIC] ctype=uint
+  Basic desc: [ba][bb][nv][yuv][be][uint]
+    planes=2, chroma=0:0 align=1:1
+    {16/[0:0] 32/[0:0] }
+    0: 16bits endian_bytes=2 {0:16/6} {} {} {}
+    1: 32bits endian_bytes=2 {} {0:16/6} {16:16/6} {}
+  AVD: name=p410be chroma=0:0 flags=0x11 [be][planar]
+    0: p=0  st=2  o=0  sh=6  d=10
+    1: p=1  st=4  o=0  sh=6  d=10
+    2: p=1  st=4  o=2  sh=6  d=10
+p416: [GENERIC] ctype=uint
+  Basic desc: [ba][bb][nv][yuv][le][uint]
+    planes=2, chroma=0:0 align=1:1
+    {16/[0:0] 32/[0:0] }
+    0: 16bits {0:16} {} {} {}
+    1: 32bits {} {0:16} {16:16} {}
+  Regular: planes=2 compbytes=2 bitpad=0 chroma=1x1 ctype=uint
+    0: {1}
+    1: {2, 3}
+  AVD: name=p416le chroma=0:0 flags=0x10 [planar]
+    0: p=0  st=2  o=0  sh=0  d=16
+    1: p=1  st=4  o=0  sh=0  d=16
+    2: p=1  st=4  o=2  sh=0  d=16
+p416be: [GENERIC] ctype=uint
+  Basic desc: [ba][bb][nv][yuv][be][uint]
+    planes=2, chroma=0:0 align=1:1
+    {16/[0:0] 32/[0:0] }
+    0: 16bits endian_bytes=2 {0:16} {} {} {}
+    1: 32bits endian_bytes=2 {} {0:16} {16:16} {}
+  AVD: name=p416be chroma=0:0 flags=0x11 [be][planar]
+    0: p=0  st=2  o=0  sh=0  d=16
+    1: p=1  st=4  o=0  sh=0  d=16
+    2: p=1  st=4  o=2  sh=0  d=16
 pal8: fcsp=rgb ctype=unknown
   Basic desc: [ba][a][rgb][le][be][pal]
     planes=1, chroma=0:0 align=1:1
@@ -1107,7 +1199,7 @@ rgb4_byte: [GENERIC] fcsp=rgb ctype=uint
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
     0: 8bits {3:1} {1:2} {0:1} {}
-  AVD: name=rgb4_byte chroma=0:0 flags=0x60 [rgb]
+  AVD: name=rgb4_byte chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=1  o=0  sh=3  d=1
     1: p=0  st=1  o=0  sh=1  d=2
     2: p=0  st=1  o=0  sh=0  d=1
@@ -1152,7 +1244,7 @@ rgb8: [GENERIC] fcsp=rgb ctype=uint
     planes=1, chroma=0:0 align=1:1
     {8/[0:0] }
     0: 8bits {5:3} {2:3} {0:2} {}
-  AVD: name=rgb8 chroma=0:0 flags=0x60 [rgb]
+  AVD: name=rgb8 chroma=0:0 flags=0x20 [rgb]
     0: p=0  st=1  o=0  sh=6  d=2
     1: p=0  st=1  o=0  sh=3  d=3
     2: p=0  st=1  o=0  sh=0  d=3
@@ -1214,17 +1306,7 @@ vaapi: ctype=unknown
   Basic desc: [le][be][hw]
     planes=0, chroma=1:1 align=2:2
     {}
-  AVD: name=vaapi_vld chroma=1:1 flags=0x8 [hw]
-vaapi_idct: [GENERIC] ctype=unknown
-  Basic desc: [le][be][hw]
-    planes=0, chroma=1:1 align=2:2
-    {}
-  AVD: name=vaapi_idct chroma=1:1 flags=0x8 [hw]
-vaapi_moco: [GENERIC] ctype=unknown
-  Basic desc: [le][be][hw]
-    planes=0, chroma=1:1 align=2:2
-    {}
-  AVD: name=vaapi_moco chroma=1:1 flags=0x8 [hw]
+  AVD: name=vaapi chroma=1:1 flags=0x8 [hw]
 vdpau: ctype=unknown
   Basic desc: [le][be][hw]
     planes=0, chroma=1:1 align=2:2
@@ -1244,6 +1326,24 @@ vulkan: [GENERIC] ctype=unknown
     planes=0, chroma=0:0 align=1:1
     {}
   AVD: name=vulkan chroma=0:0 flags=0x8 [hw]
+x2bgr10: [GENERIC] fcsp=rgb ctype=uint
+  Basic desc: [ba][rgb][le][uint]
+    planes=1, chroma=0:0 align=1:1
+    {32/[0:0] }
+    0: 32bits {0:10} {10:10} {20:10} {}
+  AVD: name=x2bgr10le chroma=0:0 flags=0x20 [rgb]
+    0: p=0  st=4  o=0  sh=0  d=10
+    1: p=0  st=4  o=1  sh=2  d=10
+    2: p=0  st=4  o=2  sh=4  d=10
+x2bgr10be: [GENERIC] fcsp=rgb ctype=uint
+  Basic desc: [ba][rgb][be][uint]
+    planes=1, chroma=0:0 align=1:1
+    {32/[0:0] }
+    0: 32bits endian_bytes=4 {0:10} {10:10} {20:10} {}
+  AVD: name=x2bgr10be chroma=0:0 flags=0x21 [be][rgb]
+    0: p=0  st=4  o=2  sh=0  d=10
+    1: p=0  st=4  o=1  sh=2  d=10
+    2: p=0  st=4  o=0  sh=4  d=10
 x2rgb10be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be][uint]
     planes=1, chroma=0:0 align=1:1

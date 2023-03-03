@@ -21,7 +21,7 @@ static const struct scale_test_fns fns = {
     .supports_fmts = supports_fmts,
 };
 
-static void run(struct test_ctx *ctx)
+int main(int argc, char *argv[])
 {
     struct mp_zimg_context *zimg = mp_zimg_alloc();
     zimg->opts.threads = 1;
@@ -30,12 +30,12 @@ static void run(struct test_ctx *ctx)
     stest->fns = &fns;
     stest->fns_priv = zimg;
     stest->test_name = "repack_zimg";
-    stest->ctx = ctx;
+    stest->refdir = talloc_strdup(stest, argv[1]);
+    stest->outdir = talloc_strdup(stest, argv[2]);
 
     repack_test_run(stest);
 
-    FILE *f = test_open_out(ctx, "zimg_formats.txt");
-    init_imgfmts_list();
+    FILE *f = test_open_out(stest->outdir, "zimg_formats.txt");
     for (int n = 0; n < num_imgfmts; n++) {
         int imgfmt = imgfmts[n];
         fprintf(f, "%15s%7s%7s%7s%8s |\n", mp_imgfmt_to_name(imgfmt),
@@ -47,14 +47,10 @@ static void run(struct test_ctx *ctx)
     }
     fclose(f);
 
-    assert_text_files_equal(stest->ctx, "zimg_formats.txt", "zimg_formats.txt",
+    assert_text_files_equal(stest->refdir, stest->outdir, "zimg_formats.txt",
                 "This can fail if FFmpeg/libswscale adds or removes pixfmts.");
 
     talloc_free(stest);
     talloc_free(zimg);
+    return 0;
 }
-
-const struct unittest test_repack_zimg = {
-    .name = "repack_zimg",
-    .run = run,
-};

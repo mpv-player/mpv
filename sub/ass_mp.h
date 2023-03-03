@@ -47,7 +47,8 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
 
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
                             struct mpv_global *global, struct mp_log *log);
-ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log);
+ASS_Library *mp_ass_init(struct mpv_global *global,
+                         struct osd_style_opts *opts, struct mp_log *log);
 
 struct sub_bitmaps;
 struct mp_ass_packer;

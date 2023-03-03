@@ -2333,7 +2333,7 @@ static void pass_convert_yuv(struct gl_video *p)
 
     // Pre-colormatrix input gamma correction
     if (cparams.color.space == MP_CSP_XYZ)
-        GLSL(color.rgb = pow(color.rgb, vec3(2.6));) // linear light
+        pass_linearize(p->sc, p->image_params.color.gamma);
 
     // We always explicitly normalize the range in pass_read_video
     cparams.input_bits = cparams.texture_bits = 0;
@@ -2346,6 +2346,13 @@ static void pass_convert_yuv(struct gl_video *p)
     gl_sc_uniform_vec3(sc, "colormatrix_c", m.c);
 
     GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
+
+    if (cparams.color.space == MP_CSP_XYZ) {
+        pass_delinearize(p->sc, p->image_params.color.gamma);
+        // mp_get_csp_matrix implicitly converts XYZ to DCI-P3
+        p->image_params.color.space = MP_CSP_RGB;
+        p->image_params.color.primaries = MP_CSP_PRIM_DCI_P3;
+    }
 
     if (p->image_params.color.space == MP_CSP_BT_2020_C) {
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
@@ -3476,6 +3483,7 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
         .downloadable = true,
         .w = p->osd_rect.w,
         .h = p->osd_rect.h,
+        .d = 1,
         .render_dst = true,
     };
 
@@ -4229,21 +4237,6 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
             mp_fatal(log, "No error diffusion kernel named '%s' found!\n", s);
     }
     return r;
-}
-
-float gl_video_scale_ambient_lux(float lmin, float lmax,
-                                 float rmin, float rmax, float lux)
-{
-    assert(lmax > lmin);
-
-    float num = (rmax - rmin) * (log10(lux) - log10(lmin));
-    float den = log10(lmax) - log10(lmin);
-    float result = num / den + rmin;
-
-    // clamp the result
-    float max = MPMAX(rmax, rmin);
-    float min = MPMIN(rmax, rmin);
-    return MPMAX(MPMIN(result, max), min);
 }
 
 void gl_video_set_ambient_lux(struct gl_video *p, int lux)

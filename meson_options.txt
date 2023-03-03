@@ -3,7 +3,7 @@ option('gpl', type: 'boolean', value: true, description: 'GPL (version 2 or late
 option('cplayer', type: 'boolean', value: true, description: 'mpv CLI player')
 option('libmpv', type: 'boolean', value: false, description: 'libmpv library')
 option('build-date', type: 'boolean', value: true, description: 'whether to include binary compile time')
-option('tests', type: 'boolean', value: false, description: 'unit tests (development only)')
+option('tests', type: 'boolean', value: false, description: 'meson unit tests')
 # Reminder: normally always built, but enabled by MPV_LEAK_REPORT.
 # Building it can be disabled only by defining NDEBUG through CFLAGS.
 option('ta-leak-report', type: 'boolean', value: false, description: 'enable ta leak report by default (development only)')

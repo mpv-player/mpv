@@ -50,6 +50,7 @@ struct vo_wayland_state {
     struct wl_shm           *shm;
     struct wl_surface       *surface;
     struct wl_surface       *video_surface;
+    struct wl_surface       *callback_surface;
     struct wl_subsurface    *video_subsurface;
 
     /* Geometry */
@@ -104,6 +105,7 @@ struct vo_wayland_state {
     void *dmabuf_feedback;
     wayland_format *format_map;
     uint32_t format_size;
+    bool using_dmabuf_wayland;
     /* TODO: remove these once zwp_linux_dmabuf_v1 version 2 support is removed. */
     int *drm_formats;
     int drm_format_ct;
@@ -171,7 +173,7 @@ int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 
 void vo_wayland_handle_fractional_scale(struct vo_wayland_state *wl);
-void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha);
+void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha);
 void vo_wayland_sync_swap(struct vo_wayland_state *wl);
 void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);

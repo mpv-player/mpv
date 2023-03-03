@@ -342,19 +342,6 @@ if features['cplugins']
     link_flags += '-rdynamic'
 endif
 
-features += {'tests': get_option('tests')}
-if features['tests']
-    sources += files('test/chmap.c',
-                     'test/gl_video.c',
-                     'test/img_format.c',
-                     'test/json.c',
-                     'test/linked_list.c',
-                     'test/paths.c',
-                     'test/scale_sws.c',
-                     'test/scale_test.c',
-                     'test/tests.c')
-endif
-
 # Note: this include is only used for windows pthreads and
 # must be accompanied immediately by the following flags.
 # This currently works because these are the last flags set
@@ -406,10 +393,11 @@ if features['cocoa']
 endif
 
 if posix
-    sources += files('input/ipc-unix.c',
-                     'osdep/path-unix.c',
+    path_source = files('osdep/path-unix.c')
+    subprocess_source = files('osdep/subprocess-posix.c')
+    sources += path_source + subprocess_source + \
+               files('input/ipc-unix.c',
                      'osdep/polldev.c',
-                     'osdep/subprocess-posix.c',
                      'osdep/terminal-unix.c',
                      'sub/filter_regex.c')
 endif
@@ -492,10 +480,11 @@ if features['win32-desktop']
                           cc.find_library('version'),
                           cc.find_library('winmm')]
     dependencies += win32_desktop_libs
-    sources += files('input/ipc-win.c',
+    path_source = files('osdep/path-win.c')
+    subprocess_source = files('osdep/subprocess-win.c')
+    sources += path_source + subprocess_source + \
+               files('input/ipc-win.c',
                      'osdep/main-fn-win.c',
-                     'osdep/path-win.c',
-                     'osdep/subprocess-win.c',
                      'osdep/terminal-win.c',
                      'video/out/w32_common.c',
                      'video/out/win32/displayconfig.c',
@@ -503,9 +492,8 @@ if features['win32-desktop']
 endif
 
 if not posix and not features['win32-desktop']
-    sources += files('input/ipc-dummy.c',
-                     'osdep/subprocess-dummy.c',
-                     'osdep/terminal-dummy.c')
+    subprocess_source = files('osdep/subprocess-dummy.c')
+    sources += subprocess_source + files('input/ipc-dummy.c')
 endif
 
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
@@ -752,10 +740,7 @@ if features['zimg']
     dependencies += zimg
     sources += files('video/filter/vf_fingerprint.c',
                      'video/zimg.c')
-    if features['tests']
-        sources += files('test/repack.c',
-                         'test/scale_zimg.c')
-    endif
+    features += {'zimg-st428': zimg.version().version_compare('>= 3.0.5')}
 endif
 
 zlib = dependency('zlib', required: get_option('zlib'))
@@ -1652,6 +1637,7 @@ sys.stdout.write(features)
 feature_str = run_command(python, '-c', feature_sort, feature_keys, check: true).stdout()
 conf_data.set_quoted('FULLCONFIG', feature_str)
 conf_data.set_quoted('MPV_CONFDIR', join_paths(get_option('prefix'), get_option('sysconfdir'), 'mpv'))
+conf_data.set_quoted('PLATFORM', host_machine.system())
 configure_file(output : 'config.h', configuration : conf_data)
 message('List of enabled features: ' + feature_str)
 
@@ -1700,9 +1686,6 @@ if get_option('libmpv')
     headers = ['libmpv/client.h', 'libmpv/render.h',
                'libmpv/render_gl.h', 'libmpv/stream_cb.h']
     install_headers(headers, subdir: 'mpv')
-
-    libmpv_test = executable('libmpv-test', 'libmpv/test.c', link_with: [libmpv])
-    test('libmpv', libmpv_test)
 endif
 
 if get_option('cplayer')
@@ -1733,8 +1716,12 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
-               win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
+    mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
+                     win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
+endif
+
+if get_option('tests')
+    subdir('test')
 endif
 
 summary({'d3d11': features['d3d11'],

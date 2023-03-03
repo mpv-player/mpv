@@ -150,6 +150,22 @@ p016            => [pa] [un] yuv420p16       | a=2:2
 p016            => [pa] [un] yuv420pf        | a=2:2 [planar-f32]
 p016be          => [pa] [un] yuv420p16       | a=2:2
 p016be          => [pa] [un] yuv420pf        | a=2:2 [planar-f32]
+p210            => [pa] [un] yuv422p16       | a=2:1
+p210            => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+p210be          => [pa] [un] yuv422p16       | a=2:1
+p210be          => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+p216            => [pa] [un] yuv422p16       | a=2:1
+p216            => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+p216be          => [pa] [un] yuv422p16       | a=2:1
+p216be          => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+p410            => [pa] [un] yuv444p16       | a=1:1
+p410            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+p410be          => [pa] [un] yuv444p16       | a=1:1
+p410be          => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+p416            => [pa] [un] yuv444p16       | a=1:1
+p416            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+p416be          => [pa] [un] yuv444p16       | a=1:1
+p416be          => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
 pal8            =>      [un] gbrap           | a=1:1
 pal8            =>      [un] gbrapf32        | a=1:1 [planar-f32]
 qsv             => no
@@ -203,12 +219,14 @@ uyvy422         => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
 uyyvyy411       => [pa] [un] yuv411p         | a=4:1 [tu] [tp]
 uyyvyy411       => [pa] [un] yuv411pf        | a=4:1 [planar-f32]
 vaapi           => no
-vaapi_idct      => no
-vaapi_moco      => no
 vdpau           => no
 vdpau_output    => no
 videotoolbox    => no
 vulkan          => no
+x2bgr10         => [pa] [un] gbrp10          | a=1:1
+x2bgr10         => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
+x2bgr10be       => [pa] [un] gbrp10          | a=1:1
+x2bgr10be       => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 x2rgb10be       => [pa] [un] gbrp10          | a=1:1 [tu] [tp]
 x2rgb10be       => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 xvmc            => no
