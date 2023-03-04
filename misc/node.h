@@ -11,6 +11,7 @@ struct mpv_node *node_map_badd(struct mpv_node *dst, struct bstr key, int format
 void node_map_add_string(struct mpv_node *dst, const char *key, const char *val);
 void node_map_add_int64(struct mpv_node *dst, const char *key, int64_t v);
 void node_map_add_double(struct mpv_node *dst, const char *key, double v);
+void node_map_add_bool(struct mpv_node *dst, const char *key, bool v);
 void node_map_add_flag(struct mpv_node *dst, const char *key, bool v);
 mpv_node *node_map_get(mpv_node *src, const char *key);
 mpv_node *node_map_bget(mpv_node *src, struct bstr key);

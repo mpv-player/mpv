@@ -970,6 +970,7 @@ void mpv_wakeup(mpv_handle *ctx)
 // map client API types to internal types
 static const struct m_option type_conv[] = {
     [MPV_FORMAT_STRING]     = { .type = CONF_TYPE_STRING },
+    [MPV_FORMAT_BOOL]       = { .type = CONF_TYPE_BOOL },
     [MPV_FORMAT_FLAG]       = { .type = CONF_TYPE_BOOL },
     [MPV_FORMAT_INT64]      = { .type = CONF_TYPE_INT64 },
     [MPV_FORMAT_DOUBLE]     = { .type = CONF_TYPE_DOUBLE },
@@ -1003,7 +1004,7 @@ static bool conv_node_to_format(void *dst, mpv_format dst_fmt, mpv_node *src)
         return true;
     }
     // Must convert back to int for FLAG.
-    if (dst_fmt == MPV_FORMAT_FLAG) {
+    if (dst_fmt == MPV_FORMAT_FLAG && src->format == MPV_FORMAT_BOOL) {
         *(int *)dst = src->u.bool_;
         return true;
     }
@@ -1041,7 +1042,7 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
         data = &tmp;
     } else if (format == MPV_FORMAT_FLAG) {
         // Convert int to bool.
-        tmp.format = MPV_FORMAT_FLAG;
+        tmp.format = MPV_FORMAT_BOOL;
         int flag = *(int *)data;
         tmp.u.bool_ = (bool)flag;
         data = &tmp;
@@ -1302,7 +1303,7 @@ static void setproperty_fn(void *arg)
         node = req->data;
     } else if (req->format == MPV_FORMAT_FLAG) {
         // Convert int to bool.
-        tmp.format = MPV_FORMAT_FLAG;
+        tmp.format = MPV_FORMAT_BOOL;
         int flag = *(int *)req->data;
         tmp.u.bool_ = (bool)flag;
         node = &tmp;
@@ -1435,6 +1436,7 @@ static void getproperty_fn(void *arg)
         break;
     }
     case MPV_FORMAT_NODE:
+    case MPV_FORMAT_BOOL:
     case MPV_FORMAT_FLAG:
     case MPV_FORMAT_INT64:
     case MPV_FORMAT_DOUBLE: {
@@ -1454,7 +1456,8 @@ static void getproperty_fn(void *arg)
             break;
         if (req->format == MPV_FORMAT_NODE) {
             // Always change bool to int for libmpv.
-            if (node.format == MPV_FORMAT_FLAG) {
+            if (node.format == MPV_FORMAT_BOOL) {
+                node.format = MPV_FORMAT_FLAG;
                 node.u.flag = (int)node.u.bool_;
             }
             *(struct mpv_node *)data = node;
@@ -2051,6 +2054,9 @@ int mpv_event_to_node(mpv_node *dst, mpv_event *event)
             break;
         case MPV_FORMAT_DOUBLE:
             node_map_add_double(dst, "data", *(double *)prop->data);
+            break;
+        case MPV_FORMAT_BOOL:
+            node_map_add_bool(dst, "data", *(bool *)prop->data);
             break;
         case MPV_FORMAT_FLAG:
             node_map_add_flag(dst, "data", *(int *)prop->data);
