@@ -157,7 +157,7 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     if ([[EventsResponder sharedInstance] setMpvHandle:ctx]) {
         mpv_observe_property(ctx, 0, "duration", MPV_FORMAT_DOUBLE);
         mpv_observe_property(ctx, 0, "time-pos", MPV_FORMAT_DOUBLE);
-        mpv_observe_property(ctx, 0, "pause", MPV_FORMAT_FLAG);
+        mpv_observe_property(ctx, 0, "pause", MPV_FORMAT_BOOL);
         mpv_set_wakeup_callback(ctx, wakeup, NULL);
     }
 }

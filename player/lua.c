@@ -634,9 +634,9 @@ static int script_set_property_bool(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     const char *p = luaL_checkstring(L, 1);
-    int v = lua_toboolean(L, 2);
+    bool v = lua_toboolean(L, 2);
 
-    return check_error(L, mpv_set_property(ctx->client, p, MPV_FORMAT_FLAG, &v));
+    return check_error(L, mpv_set_property(ctx->client, p, MPV_FORMAT_BOOL, &v));
 }
 
 static bool is_int(double d)
@@ -684,7 +684,7 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
         break;
     }
     case LUA_TBOOLEAN:
-        dst->format = MPV_FORMAT_FLAG;
+        dst->format = MPV_FORMAT_BOOL;
         dst->u.bool_ = lua_toboolean(L, t);
         break;
     case LUA_TSTRING: {
@@ -833,8 +833,8 @@ static int script_get_property_bool(lua_State *L)
     struct script_ctx *ctx = get_ctx(L);
     const char *name = luaL_checkstring(L, 1);
 
-    int result = 0;
-    int err = mpv_get_property(ctx->client, name, MPV_FORMAT_FLAG, &result);
+    bool result = false;
+    int err = mpv_get_property(ctx->client, name, MPV_FORMAT_BOOL, &result);
     if (err >= 0) {
         lua_pushboolean(L, !!result);
         return 1;
@@ -880,6 +880,8 @@ static void pushnode(lua_State *L, mpv_node *node)
     case MPV_FORMAT_NONE:
         lua_pushnil(L);
         break;
+    // Must keep FLAG since it pushes to clients.
+    case MPV_FORMAT_BOOL:
     case MPV_FORMAT_FLAG:
         lua_pushboolean(L, node->u.flag);
         break;
@@ -941,7 +943,7 @@ static mpv_format check_property_format(lua_State *L, int arg)
     switch (luaL_checkoption(L, arg, "none", fmts)) {
     case 0: return MPV_FORMAT_NONE;
     case 1: return MPV_FORMAT_NODE;
-    case 2: return MPV_FORMAT_FLAG;
+    case 2: return MPV_FORMAT_BOOL;
     case 3: return MPV_FORMAT_STRING;
     case 4: return MPV_FORMAT_DOUBLE;
     }
