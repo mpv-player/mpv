@@ -337,39 +337,43 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
         mode = 0;
     bool need_add_subs = mode == MODE_SUBTITLES;
 
-    if (mpctx->video_out && mpctx->video_out->config_ok) {
-        vo_wait_frame(mpctx->video_out); // important for each-frame mode
+    if (!mpctx->video_out || !mpctx->video_out->config_ok)
+        return NULL;
 
-        struct voctrl_screenshot ctrl = {
-            .scaled = mode == MODE_FULL_WINDOW,
-            .subs = mode != 0,
-            .osd = mode == MODE_FULL_WINDOW,
-            .high_bit_depth = high_depth && imgopts->high_bit_depth,
-            .native_csp = image_writer_flexible_csp(imgopts),
-        };
-        if (!mpctx->opts->screenshot_sw)
-            vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &ctrl);
-        image = ctrl.res;
-        if (image)
-            need_add_subs = false;
+    vo_wait_frame(mpctx->video_out); // important for each-frame mode
 
-        if (!image && mode != MODE_FULL_WINDOW)
-            image = vo_get_current_frame(mpctx->video_out);
-        if (!image) {
-            vo_control(mpctx->video_out, VOCTRL_SCREENSHOT_WIN, &image);
-            mode = MODE_FULL_WINDOW;
-        }
+    struct voctrl_screenshot ctrl = {
+        .scaled = mode == MODE_FULL_WINDOW,
+        .subs = mode != 0,
+        .osd = mode == MODE_FULL_WINDOW,
+        .high_bit_depth = high_depth && imgopts->high_bit_depth,
+        .native_csp = image_writer_flexible_csp(imgopts),
+    };
+    if (!mpctx->opts->screenshot_sw)
+        vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &ctrl);
+    image = ctrl.res;
+    if (image)
+        need_add_subs = false;
+
+    if (!image && mode != MODE_FULL_WINDOW)
+        image = vo_get_current_frame(mpctx->video_out);
+    if (!image) {
+        vo_control(mpctx->video_out, VOCTRL_SCREENSHOT_WIN, &image);
+        mode = MODE_FULL_WINDOW;
     }
+    if (!image)
+        return NULL;
 
-    if (image && (image->fmt.flags & MP_IMGFLAG_HWACCEL)) {
+    if (image->fmt.flags & MP_IMGFLAG_HWACCEL) {
         struct mp_image *nimage = mp_image_hw_download(image, NULL);
         talloc_free(image);
+        if (!nimage)
+            return NULL;
         image = nimage;
     }
 
-    if (image && need_add_subs)
+    if (need_add_subs)
         add_subs(mpctx, image);
-
     mp_image_params_guess_csp(&image->params);
     return image;
 }
