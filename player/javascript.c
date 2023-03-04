@@ -1098,7 +1098,7 @@ static void makenode(void *ta_ctx, mpv_node *dst, js_State *J, int idx)
 
     } else if (js_isboolean(J, idx)) {
         dst->format = MPV_FORMAT_FLAG;
-        dst->u.flag = js_toboolean(J, idx);
+        dst->u.bool_ = js_toboolean(J, idx);
 
     } else if (js_isnumber(J, idx)) {
         double val = js_tonumber(J, idx);

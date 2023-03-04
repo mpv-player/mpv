@@ -200,7 +200,7 @@ static int bool_get(const m_option_t *opt, void *ta_parent,
                     struct mpv_node *dst, void *src)
 {
     dst->format = MPV_FORMAT_FLAG;
-    dst->u.flag = !!VAL(src);
+    dst->u.bool_ = VAL(src);
     return 1;
 }
 
@@ -210,7 +210,7 @@ static bool bool_equal(const m_option_t *opt, void *a, void *b)
 }
 
 const m_option_type_t m_option_type_bool = {
-    .name  = "Flag", // same as m_option_type_flag; transparent to user
+    .name  = "Bool",
     .size  = sizeof(bool),
     .flags = M_OPT_TYPE_OPTIONAL_PARAM | M_OPT_TYPE_CHOICE,
     .parse = parse_bool,
@@ -220,69 +220,6 @@ const m_option_type_t m_option_type_bool = {
     .set   = bool_set,
     .get   = bool_get,
     .equal = bool_equal,
-};
-
-#undef VAL
-
-// Flag
-
-#define VAL(x) (*(int *)(x))
-
-static int parse_flag(struct mp_log *log, const m_option_t *opt,
-                      struct bstr name, struct bstr param, void *dst)
-{
-    bool bdst = false;
-    int r = parse_bool(log, opt, name, param, &bdst);
-    if (dst)
-        VAL(dst) = bdst;
-    return r;
-}
-
-static char *print_flag(const m_option_t *opt, const void *val)
-{
-    return print_bool(opt, &(bool){VAL(val)});
-}
-
-static void add_flag(const m_option_t *opt, void *val, double add, bool wrap)
-{
-    bool bval = VAL(val);
-    add_bool(opt, &bval, add, wrap);
-    VAL(val) = bval;
-}
-
-static int flag_set(const m_option_t *opt, void *dst, struct mpv_node *src)
-{
-    bool bdst = false;
-    int r = bool_set(opt, &bdst, src);
-    if (r >= 0)
-        VAL(dst) = bdst;
-    return r;
-}
-
-static int flag_get(const m_option_t *opt, void *ta_parent,
-                    struct mpv_node *dst, void *src)
-{
-    return bool_get(opt, ta_parent, dst, &(bool){VAL(src)});
-}
-
-static bool flag_equal(const m_option_t *opt, void *a, void *b)
-{
-    return VAL(a) == VAL(b);
-}
-
-// Only exists for libmpv interopability and should not be used anywhere.
-const m_option_type_t m_option_type_flag = {
-    // need yes or no in config files
-    .name  = "Flag",
-    .size  = sizeof(int),
-    .flags = M_OPT_TYPE_OPTIONAL_PARAM | M_OPT_TYPE_CHOICE,
-    .parse = parse_flag,
-    .print = print_flag,
-    .copy  = copy_opt,
-    .add   = add_flag,
-    .set   = flag_set,
-    .get   = flag_get,
-    .equal = flag_equal,
 };
 
 // Integer
@@ -744,7 +681,7 @@ static int choice_set(const m_option_t *opt, void *dst, struct mpv_node *src)
     } else if (src->format == MPV_FORMAT_STRING) {
         src_str = src->u.string;
     } else if (src->format == MPV_FORMAT_FLAG) {
-        src_str = src->u.flag ? "yes" : "no";
+        src_str = src->u.bool_ ? "yes" : "no";
     }
     if (!src_str)
         return M_OPT_UNKNOWN;
@@ -795,7 +732,7 @@ static int choice_get(const m_option_t *opt, void *ta_parent,
         }
         if (b >= 0) {
             dst->format = MPV_FORMAT_FLAG;
-            dst->u.flag = b;
+            dst->u.bool_ = b;
         } else {
             dst->format = MPV_FORMAT_STRING;
             dst->u.string = talloc_strdup(ta_parent, alt->name);
@@ -3594,7 +3531,7 @@ static int set_obj_settings_list(const m_option_t *opt, void *dst,
             } else if (strcmp(key, "enabled") == 0) {
                 if (val->format != MPV_FORMAT_FLAG)
                     goto error;
-                entry->enabled = val->u.flag;
+                entry->enabled = val->u.bool_;
             } else if (strcmp(key, "params") == 0) {
                 if (val->format != MPV_FORMAT_NODE_MAP)
                     goto error;
@@ -3662,7 +3599,7 @@ static int get_obj_settings_list(const m_option_t *opt, void *ta_parent,
             add_map_string(nentry, "label", entry->label);
         struct mpv_node *enabled = add_map_entry(nentry, "enabled");
         enabled->format = MPV_FORMAT_FLAG;
-        enabled->u.flag = entry->enabled;
+        enabled->u.bool_ = entry->enabled;
         struct mpv_node *params = add_map_entry(nentry, "params");
         params->format = MPV_FORMAT_NODE_MAP;
         params->u.list = talloc_zero(ta_parent, struct mpv_node_list);

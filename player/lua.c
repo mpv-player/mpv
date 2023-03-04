@@ -685,7 +685,7 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
     }
     case LUA_TBOOLEAN:
         dst->format = MPV_FORMAT_FLAG;
-        dst->u.flag = !!lua_toboolean(L, t);
+        dst->u.bool_ = lua_toboolean(L, t);
         break;
     case LUA_TSTRING: {
         size_t len = 0;

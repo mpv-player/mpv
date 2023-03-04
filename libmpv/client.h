@@ -23,6 +23,7 @@
 #ifndef MPV_CLIENT_API_H_
 #define MPV_CLIENT_API_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -750,6 +751,7 @@ typedef enum mpv_format {
 typedef struct mpv_node {
     union {
         char *string;   /** valid if format==MPV_FORMAT_STRING */
+        bool bool_;     /** strictly for internal use; do not access **/
         int flag;       /** valid if format==MPV_FORMAT_FLAG   */
         int64_t int64;  /** valid if format==MPV_FORMAT_INT64  */
         double double_; /** valid if format==MPV_FORMAT_DOUBLE */
@@ -778,7 +780,8 @@ typedef struct mpv_node {
      *  MPV_FORMAT_NONE         (no member)
      *
      * If you encounter a value you don't know, you must not make any
-     * assumptions about the contents of union u.
+     * assumptions about the contents of union u. The u.bool_ member also
+     * exists, but you should not attempt to access it.
      */
     mpv_format format;
 } mpv_node;

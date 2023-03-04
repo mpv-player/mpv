@@ -970,7 +970,7 @@ void mpv_wakeup(mpv_handle *ctx)
 // map client API types to internal types
 static const struct m_option type_conv[] = {
     [MPV_FORMAT_STRING]     = { .type = CONF_TYPE_STRING },
-    [MPV_FORMAT_FLAG]       = { .type = CONF_TYPE_FLAG },
+    [MPV_FORMAT_FLAG]       = { .type = CONF_TYPE_BOOL },
     [MPV_FORMAT_INT64]      = { .type = CONF_TYPE_INT64 },
     [MPV_FORMAT_DOUBLE]     = { .type = CONF_TYPE_DOUBLE },
     [MPV_FORMAT_NODE]       = { .type = CONF_TYPE_NODE },
@@ -1002,6 +1002,11 @@ static bool conv_node_to_format(void *dst, mpv_format dst_fmt, mpv_node *src)
         memcpy(dst, &src->u, type->type->size);
         return true;
     }
+    // Must convert back to int for FLAG.
+    if (dst_fmt == MPV_FORMAT_FLAG) {
+        *(int *)dst = src->u.bool_;
+        return true;
+    }
     if (dst_fmt == MPV_FORMAT_DOUBLE && src->format == MPV_FORMAT_INT64) {
         *(double *)dst = src->u.int64;
         return true;
@@ -1030,9 +1035,15 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
     if (!type)
         return MPV_ERROR_OPTION_FORMAT;
     struct mpv_node tmp;
-    if (format != MPV_FORMAT_NODE) {
+    if (format != MPV_FORMAT_NODE && format != MPV_FORMAT_FLAG) {
         tmp.format = format;
         memcpy(&tmp.u, data, type->type->size);
+        data = &tmp;
+    } else if (format == MPV_FORMAT_FLAG) {
+        // Convert int to bool.
+        tmp.format = MPV_FORMAT_FLAG;
+        int flag = *(int *)data;
+        tmp.u.bool_ = (bool)flag;
         data = &tmp;
     }
     lock_core(ctx);
@@ -1289,6 +1300,12 @@ static void setproperty_fn(void *arg)
     struct mpv_node tmp;
     if (req->format == MPV_FORMAT_NODE) {
         node = req->data;
+    } else if (req->format == MPV_FORMAT_FLAG) {
+        // Convert int to bool.
+        tmp.format = MPV_FORMAT_FLAG;
+        int flag = *(int *)req->data;
+        tmp.u.bool_ = (bool)flag;
+        node = &tmp;
     } else {
         tmp.format = req->format;
         memcpy(&tmp.u, req->data, type->type->size);
@@ -1436,6 +1453,10 @@ static void getproperty_fn(void *arg)
         } else if (err <= 0)
             break;
         if (req->format == MPV_FORMAT_NODE) {
+            // Always change bool to int for libmpv.
+            if (node.format == MPV_FORMAT_FLAG) {
+                node.u.flag = (int)node.u.bool_;
+            }
             *(struct mpv_node *)data = node;
         } else {
             if (!conv_node_to_format(data, req->format, &node)) {
