@@ -516,6 +516,8 @@ static void assign_bufref(AVBufferRef **dst, AVBufferRef *new)
 
 void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
 {
+    assert(dst != src);
+
     dst->pict_type = src->pict_type;
     dst->fields = src->fields;
     dst->pts = src->pts;
