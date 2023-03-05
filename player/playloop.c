@@ -395,6 +395,15 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
     if (internal_paused != mpctx->paused) {
         mpctx->paused = internal_paused;
 
+        if (mpctx->video_status == STATUS_EOF &&
+            mpctx->audio_status == STATUS_EOF &&
+            !internal_paused)
+        {
+            struct playlist *pl = mpctx->playlist;
+            struct playlist_entry *next = playlist_get_next(pl, 1);
+            mp_set_playlist_entry(mpctx, next ? next : playlist_get_first(pl));
+        }
+
         if (mpctx->ao)
             ao_set_paused(mpctx->ao, internal_paused);
 
