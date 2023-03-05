@@ -297,7 +297,7 @@ local function edl_track_joined(fragments, protocol, is_live, base)
         local args = ""
 
         -- assume MP4 DASH initialization segment
-        if not fragments[1].duration then
+        if not fragments[1].duration and #fragments > 1 then
             msg.debug("Using init segment")
             args = args .. ",init=" .. edl_escape(join_url(base, fragments[1]))
             offset = 2
@@ -309,7 +309,7 @@ local function edl_track_joined(fragments, protocol, is_live, base)
         -- if not available in all, give up.
         for i = offset, #fragments do
             if not fragments[i].duration then
-                msg.error("EDL doesn't support fragments" ..
+                msg.verbose("EDL doesn't support fragments " ..
                          "without duration with MP4 DASH")
                 return nil
             end
@@ -423,6 +423,7 @@ local function formats_to_edl(json, formats, use_all_formats)
             track.protocol, json.is_live,
             track.fragment_base_url)
         if not edl_track and not url_is_safe(track.url) then
+            msg.error("No safe URL or supported fragmented stream available")
             return nil
         end
 
