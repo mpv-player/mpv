@@ -549,6 +549,18 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     assign_bufref(&dst->dovi_buf, src->dovi_buf);
     assign_bufref(&dst->film_grain, src->film_grain);
     assign_bufref(&dst->a53_cc, src->a53_cc);
+
+    for (int n = 0; n < dst->num_ff_side_data; n++)
+        av_buffer_unref(&dst->ff_side_data[n].buf);
+
+    MP_RESIZE_ARRAY(NULL, dst->ff_side_data, src->num_ff_side_data);
+    dst->num_ff_side_data = src->num_ff_side_data;
+
+    for (int n = 0; n < dst->num_ff_side_data; n++) {
+        dst->ff_side_data[n].type = src->ff_side_data[n].type;
+        dst->ff_side_data[n].buf = av_buffer_ref(src->ff_side_data[n].buf);
+        MP_HANDLE_OOM(dst->ff_side_data[n].buf);
+    }
 }
 
 // Crop the given image to (x0, y0)-(x1, y1) (bottom/right border exclusive)
