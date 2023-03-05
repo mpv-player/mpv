@@ -286,6 +286,11 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     if (!cur)
         goto exit;
 
+    if (mpctx->video_status == STATUS_EOF &&
+        mpctx->audio_status == STATUS_EOF &&
+        mpctx->opts->keep_open_pause)
+        goto exit;
+
     struct demuxer *demux = mpctx->demuxer;
 
     conffile = mp_get_playback_resume_config_filename(mpctx, cur->filename);
