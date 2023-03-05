@@ -151,41 +151,6 @@ bool get_internal_paused(struct MPContext *mpctx)
     return mpctx->opts->pause || mpctx->paused_for_cache;
 }
 
-// The value passed here is the new value for mpctx->opts->pause
-void set_pause_state(struct MPContext *mpctx, bool user_pause)
-{
-    struct MPOpts *opts = mpctx->opts;
-
-    opts->pause = user_pause;
-
-    bool internal_paused = get_internal_paused(mpctx);
-    if (internal_paused != mpctx->paused) {
-        mpctx->paused = internal_paused;
-
-        if (mpctx->ao)
-            ao_set_paused(mpctx->ao, internal_paused);
-
-        if (mpctx->video_out)
-            vo_set_paused(mpctx->video_out, internal_paused);
-
-        mpctx->osd_function = 0;
-        mpctx->osd_force_update = true;
-
-        mp_wakeup_core(mpctx);
-
-        if (internal_paused) {
-            mpctx->step_frames = 0;
-            mpctx->time_frame -= get_relative_time(mpctx);
-        } else {
-            (void)get_relative_time(mpctx); // ignore time that passed during pause
-        }
-    }
-
-    update_core_idle_state(mpctx);
-
-    m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->pause);
-}
-
 void update_internal_pause_state(struct MPContext *mpctx)
 {
     set_pause_state(mpctx, mpctx->opts->pause);
@@ -417,6 +382,41 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     update_ab_loop_clip(mpctx);
 
     mpctx->current_seek = seek;
+}
+
+// The value passed here is the new value for mpctx->opts->pause
+void set_pause_state(struct MPContext *mpctx, bool user_pause)
+{
+    struct MPOpts *opts = mpctx->opts;
+
+    opts->pause = user_pause;
+
+    bool internal_paused = get_internal_paused(mpctx);
+    if (internal_paused != mpctx->paused) {
+        mpctx->paused = internal_paused;
+
+        if (mpctx->ao)
+            ao_set_paused(mpctx->ao, internal_paused);
+
+        if (mpctx->video_out)
+            vo_set_paused(mpctx->video_out, internal_paused);
+
+        mpctx->osd_function = 0;
+        mpctx->osd_force_update = true;
+
+        mp_wakeup_core(mpctx);
+
+        if (internal_paused) {
+            mpctx->step_frames = 0;
+            mpctx->time_frame -= get_relative_time(mpctx);
+        } else {
+            (void)get_relative_time(mpctx); // ignore time that passed during pause
+        }
+    }
+
+    update_core_idle_state(mpctx);
+
+    m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->pause);
 }
 
 // This combines consecutive seek requests.
