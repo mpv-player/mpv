@@ -55,8 +55,11 @@ for opt, optarg in zip(argv, argv[1:]):
         depfile = optarg
 
 try:
-    subprocess.run(argv)
+    proc = subprocess.run(argv, check=True)
     convert_depfile(output, depfile)
 except:
     remove(output)
     remove(depfile)
+    sys.exit(1)
+
+sys.exit(proc.returncode)
