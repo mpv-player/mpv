@@ -515,28 +515,34 @@ static int mp_property_file_size(void *ctx, struct m_property *prop,
     return m_property_int64_ro(action, arg, size);
 }
 
+static const char *find_non_filename_media_title(MPContext *mpctx)
+{
+    const char *name = mpctx->opts->media_title;
+    if (name && name[0])
+        return name;
+    if (mpctx->demuxer) {
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "service_name");
+        if (name && name[0])
+            return name;
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "title");
+        if (name && name[0])
+            return name;
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "icy-title");
+        if (name && name[0])
+            return name;
+    }
+    if (mpctx->playing && mpctx->playing->title)
+        return mpctx->playing->title;
+    return NULL;
+}
+
 static int mp_property_media_title(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    char *name = NULL;
-    if (mpctx->opts->media_title)
-        name = mpctx->opts->media_title;
+    const char *name = find_non_filename_media_title(mpctx);
     if (name && name[0])
         return m_property_strdup_ro(action, arg, name);
-    if (mpctx->demuxer) {
-        name = mp_tags_get_str(mpctx->demuxer->metadata, "service_name");
-        if (name && name[0])
-            return m_property_strdup_ro(action, arg, name);
-        name = mp_tags_get_str(mpctx->demuxer->metadata, "title");
-        if (name && name[0])
-            return m_property_strdup_ro(action, arg, name);
-        name = mp_tags_get_str(mpctx->demuxer->metadata, "icy-title");
-        if (name && name[0])
-            return m_property_strdup_ro(action, arg, name);
-    }
-    if (mpctx->playing && mpctx->playing->title)
-        return m_property_strdup_ro(action, arg, mpctx->playing->title);
     return mp_property_filename(ctx, prop, action, arg);
 }
 
@@ -6761,6 +6767,17 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
 
     if (event == MPV_EVENT_FILE_LOADED)
         audio_update_media_role(mpctx);
+
+    if (event == MP_EVENT_METADATA_UPDATE) {
+        struct playlist_entry *const pe = mpctx->playing;
+        if (!pe->title) {
+            const char *const name = find_non_filename_media_title(mpctx);
+            if (name && name[0]) {
+                pe->title = talloc_strdup(pe, name);
+                mp_notify_property(mpctx, "playlist");
+            }
+        }
+    }
 }
 
 void handle_command_updates(struct MPContext *mpctx)
