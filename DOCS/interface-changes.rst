@@ -27,6 +27,8 @@ Interface changes
 ::
 
  --- mpv 0.36.0 ---
+    - `playlist/N/title` gets set upon opening the file if it wasn't already set
+      and a title is available.
     - add the `--vo=kitty` video output driver, as well as the options
       `--vo-kitty-cols`, `--vo-kitty-rows`, `--vo-kitty-width`,
       `--vo-kitty-height`, `--vo-kitty-left`, `--vo-kitty-top`,
