@@ -1015,8 +1015,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     p->params.skip_caching_single_frame = !cache_frame;
 #endif
     p->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
-    p->params.allow_delayed_peak_detect = p->delayed_peak;
     p->params.frame_mixer = frame->still ? NULL : p->frame_mixer;
+
+#if PL_API_VER >= 254
+    p->peak_detect.allow_delayed = p->delayed_peak;
+#else
+    p->params.allow_delayed_peak_detect = p->delayed_peak;
+#endif
 
     // Render frame
     if (!pl_render_image_mix(p->rr, &mix, &target, &p->params)) {
@@ -1145,8 +1150,13 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     p->params.info_callback = NULL;
     p->params.skip_caching_single_frame = true;
     p->params.preserve_mixing_cache = false;
-    p->params.allow_delayed_peak_detect = false;
     p->params.frame_mixer = NULL;
+
+#if PL_API_VER >= 254
+    p->peak_detect.allow_delayed = false;
+#else
+    p->params.allow_delayed_peak_detect = false;
+#endif
 
     // Retrieve the current frame from the frame queue
     struct pl_frame_mix mix;
