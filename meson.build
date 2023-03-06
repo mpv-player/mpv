@@ -1586,11 +1586,21 @@ endif
 rst2pdf = find_program('rst2pdf', required: get_option('pdf-build'))
 features += {'pdf-build': rst2pdf.found()}
 if features['pdf-build']
+    rst2pdf_help = run_command(
+        rst2pdf, '--help',
+        check: true, capture: true
+    ).stdout()
     datadir = get_option('datadir')
     custom_target('pdf-manpages',
         input: manpage,
         output: 'mpv.pdf',
-        command: [rst2pdf, '-c', '-b', '1', '--repeat-table-rows', '@INPUT@', '-o', '@OUTPUT@'],
+        command: [
+            docutils_wrapper, rst2pdf,
+            '-c', '-b', '1', '--repeat-table-rows',
+            rst2pdf_help.contains('--record-dependencies') ?
+                ['--record-dependencies', '@DEPFILE@'] : [],
+            '@INPUT@', '-o', '@OUTPUT@'],
+        depfile: 'mpv.pdf.dep',
         install: true,
         install_dir: join_paths(datadir, 'doc', 'mpv')
     )
