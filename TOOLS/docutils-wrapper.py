@@ -39,6 +39,12 @@ def convert_depfile(output, depfile):
             f.write(os.path.abspath(dep))
             f.write(' \\\n')
 
+def remove(path):
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
+
 argv = sys.argv[1:]
 
 depfile = None
@@ -52,5 +58,5 @@ try:
     subprocess.run(argv)
     convert_depfile(output, depfile)
 except:
-    os.remove(output)
-    os.remove(depfile)
+    remove(output)
+    remove(depfile)
