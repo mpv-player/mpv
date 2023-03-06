@@ -272,7 +272,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN)) {
         uint32_t edges;
         // Implement an edge resize zone if there are no decorations
-        if (!wl->xdg_toplevel_decoration &&
+        if (!wl->vo_opts->border &&
             check_for_resize(wl, wl->mouse_unscaled_x, wl->mouse_unscaled_y,
                              wl->opts->edge_pixels_pointer, &edges))
             xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edges);
