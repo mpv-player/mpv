@@ -143,7 +143,7 @@ const struct m_sub_options wayland_conf = {
     .size = sizeof(struct wayland_opts),
     .defaults = &(struct wayland_opts) {
         .configure_bounds = -1,
-        .edge_pixels_pointer = 10,
+        .edge_pixels_pointer = 16,
         .edge_pixels_touch = 32,
     },
 };
