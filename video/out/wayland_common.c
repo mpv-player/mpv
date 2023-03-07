@@ -24,6 +24,7 @@
 #include <wayland-cursor.h>
 #include <xkbcommon/xkbcommon.h>
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "input/input.h"
 #include "input/keycodes.h"
@@ -902,6 +903,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     bool is_activated = false;
     bool is_suspended = false;
     bool is_tiled = false;
+    bool is_resizing = false;
     enum xdg_toplevel_state *state;
     wl_array_for_each(state, states) {
         switch (*state) {
@@ -909,6 +911,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
             is_fullscreen = true;
             break;
         case XDG_TOPLEVEL_STATE_RESIZING:
+            is_resizing = true;
             break;
         case XDG_TOPLEVEL_STATE_ACTIVATED:
             is_activated = true;
@@ -935,6 +938,9 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
             break;
         }
     }
+
+    if (!is_resizing)
+        wl->resizing = 0;
 
     if (wl->hidden != is_suspended)
         wl->hidden = is_suspended;
@@ -990,10 +996,42 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
 
     if (!wl->locked_size) {
         if (vo_opts->keepaspect) {
-            double scale_factor = (double)width / wl->reduced_width;
-            width = ceil(wl->reduced_width * scale_factor);
-            if (vo_opts->keepaspect_window)
-                height = ceil(wl->reduced_height * scale_factor);
+            int real_width = round(width * wl->scaling);
+            int real_height = round(height * wl->scaling);
+            if (real_width - mp_rect_w(wl->window_size) || real_height - mp_rect_h(wl->window_size)) {
+                wl->resizing |= wl->toplevel_width - old_toplevel_width ? 1 : 0;
+                wl->resizing |= wl->toplevel_height - old_toplevel_height ? 2 : 0;
+            }
+            switch (wl->resizing) {
+                case 1: { // horizontal
+                    double scale_factor = (double)width / wl->reduced_width;
+                    width = ceil(wl->reduced_width * scale_factor);
+                    if (vo_opts->keepaspect_window)
+                        height = ceil(wl->reduced_height * scale_factor);
+                    break;
+                }
+                case 2: { // vertical
+                    double scale_factor = (double)height / wl->reduced_height;
+                    height = ceil(wl->reduced_height * scale_factor);
+                    if (vo_opts->keepaspect_window)
+                        width = ceil(wl->reduced_width * scale_factor);
+                    break;
+                }
+                case 3: { // both
+                    if (vo_opts->keepaspect_window) {
+                        double sf_w = (double)width / wl->reduced_width;
+                        double sf_h = (double)height / wl->reduced_height;
+                        if (sf_w > sf_h) {
+                            width = ceil(wl->reduced_width * sf_w);
+                            height = ceil(wl->reduced_height * sf_w);
+                        } else {
+                            width = ceil(wl->reduced_width * sf_h);
+                            height = ceil(wl->reduced_height * sf_h);
+                        }
+                    }
+                    break;
+                }
+            }
         }
         wl->window_size.x0 = 0;
         wl->window_size.y0 = 0;
