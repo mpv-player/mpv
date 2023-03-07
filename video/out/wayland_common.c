@@ -171,8 +171,8 @@ struct vo_wayland_output {
     struct wl_list link;
 };
 
-static int check_for_resize(struct vo_wayland_state *wl, wl_fixed_t x_w, wl_fixed_t y_w,
-                            int edge_pixels, enum xdg_toplevel_resize_edge *edge);
+static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
+                            enum xdg_toplevel_resize_edge *edge);
 static int get_mods(struct vo_wayland_state *wl);
 static int lookupkey(int key);
 static int set_cursor_visibility(struct vo_wayland_state *wl, bool on);
@@ -218,8 +218,6 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
 
     wl->mouse_x = wl_fixed_to_int(sx) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(sy) * wl->scaling;
-    wl->mouse_unscaled_x = sx;
-    wl->mouse_unscaled_y = sy;
 
     if (!wl->toplevel_configured)
         mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
@@ -269,15 +267,15 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         (!wl->vo_opts->fullscreen) && (!wl->vo_opts->window_maximized) &&
-        (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN)) {
+        (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN))
+    {
         uint32_t edges;
         // Implement an edge resize zone if there are no decorations
-        if (!wl->vo_opts->border &&
-            check_for_resize(wl, wl->mouse_unscaled_x, wl->mouse_unscaled_y,
-                             wl->opts->edge_pixels_pointer, &edges))
+        if (!wl->vo_opts->border && check_for_resize(wl, wl->opts->edge_pixels_pointer, &edges)) {
             xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edges);
-        else
+        } else {
             window_move(wl, serial);
+        }
         // Explictly send an UP event after the client finishes a move/resize
         mp_input_put_key(wl->vo->input_ctx, button | MP_KEY_STATE_UP);
     }
@@ -324,7 +322,7 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
 
     enum xdg_toplevel_resize_edge edge;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y)) {
-        if (check_for_resize(wl, x_w, y_w, wl->opts->edge_pixels_touch, &edge)) {
+        if (check_for_resize(wl, wl->opts->edge_pixels_touch, &edge)) {
             xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
         } else  {
             xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
@@ -1374,13 +1372,13 @@ end:
     }
 }
 
-static int check_for_resize(struct vo_wayland_state *wl, wl_fixed_t x_w, wl_fixed_t y_w,
-                            int edge_pixels, enum xdg_toplevel_resize_edge *edge)
+static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
+                            enum xdg_toplevel_resize_edge *edge)
 {
     if (wl->vo_opts->fullscreen || wl->vo_opts->window_maximized)
         return 0;
 
-    int pos[2] = { wl_fixed_to_double(x_w), wl_fixed_to_double(y_w) };
+    int pos[2] = { wl->mouse_x, wl->mouse_y };
     int left_edge   = pos[0] < edge_pixels;
     int top_edge    = pos[1] < edge_pixels;
     int right_edge  = pos[0] > (mp_rect_w(wl->geometry) - edge_pixels);

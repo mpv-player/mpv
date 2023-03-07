@@ -75,8 +75,6 @@ struct vo_wayland_state {
     bool state_change;
     bool toplevel_configured;
     int display_fd;
-    int mouse_unscaled_x;
-    int mouse_unscaled_y;
     int mouse_x;
     int mouse_y;
     int pending_vo_events;
