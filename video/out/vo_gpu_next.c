@@ -1015,8 +1015,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     p->params.skip_caching_single_frame = !cache_frame;
 #endif
     p->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
-    p->params.allow_delayed_peak_detect = p->delayed_peak;
     p->params.frame_mixer = frame->still ? NULL : p->frame_mixer;
+
+#if PL_API_VER >= 254
+    p->peak_detect.allow_delayed = p->delayed_peak;
+#else
+    p->params.allow_delayed_peak_detect = p->delayed_peak;
+#endif
 
     // Render frame
     if (!pl_render_image_mix(p->rr, &mix, &target, &p->params)) {
@@ -1145,8 +1150,13 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     p->params.info_callback = NULL;
     p->params.skip_caching_single_frame = true;
     p->params.preserve_mixing_cache = false;
-    p->params.allow_delayed_peak_detect = false;
     p->params.frame_mixer = NULL;
+
+#if PL_API_VER >= 254
+    p->peak_detect.allow_delayed = false;
+#else
+    p->params.allow_delayed_peak_detect = false;
+#endif
 
     // Retrieve the current frame from the frame queue
     struct pl_frame_mix mix;
@@ -1247,21 +1257,12 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     if (!args->res)
         goto done;
 
-    if (args->scaled) {
-        // Provide tagging for target CSP info (if known)
-        const struct gl_video_opts *opts = p->opts_cache->opts;
-        args->res->params.color.primaries = opts->target_prim;
-        args->res->params.color.gamma = opts->target_trc;
-        args->res->params.color.levels = p->output_levels;
-        args->res->params.color.sig_peak = opts->target_peak;
+    args->res->params.color.primaries = mp_prim_from_pl(target.color.primaries);
+    args->res->params.color.gamma = mp_trc_from_pl(target.color.transfer);
+    args->res->params.color.levels = mp_levels_from_pl(target.repr.levels);
+    args->res->params.color.sig_peak = target.color.hdr.max_luma / MP_REF_WHITE;
+    if (args->scaled)
         args->res->params.p_w = args->res->params.p_h = 1;
-    } else if (args->native_csp) {
-        args->res->params.color = mpi->params.color;
-        args->res->params.color.space = MP_CSP_RGB;
-    } else {
-        args->res->params.color.primaries = MP_CSP_PRIM_BT_709;
-        args->res->params.color.gamma = MP_CSP_TRC_SRGB;
-    }
 
     bool ok = pl_tex_download(gpu, pl_tex_transfer_params(
         .tex = fbo,

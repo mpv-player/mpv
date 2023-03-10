@@ -5648,7 +5648,7 @@ them.
     ``video-sync=display-desync``, ``--no-audio``, and ``--untimed=yes``.
 
 ``--wayland-edge-pixels-pointer=<value>``
-    Defines the size of an edge border (default: 10) to initiate client side
+    Defines the size of an edge border (default: 16) to initiate client side
     resize events in the wayland contexts with the mouse. This is only active if
     there are no server side decorations from the compositor.
 
