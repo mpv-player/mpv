@@ -27,6 +27,7 @@ local opts = {
     -- Set the font size used for the REPL and the console. This will be
     -- multiplied by "scale".
     font_size = 16,
+    border_size = 1,
     -- Remove duplicate entries in history as to only keep the latest one.
     history_dedup = true,
 }
@@ -144,7 +145,7 @@ function update()
                   '\\1a&H00&\\3a&H00&\\4a&H99&' ..
                   '\\1c&Heeeeee&\\3c&H111111&\\4c&H000000&' ..
                   '\\fn' .. opts.font .. '\\fs' .. opts.font_size ..
-                  '\\bord1\\xshad0\\yshad1\\fsp0\\q1' ..
+                  '\\bord' .. opts.border_size .. '\\xshad0\\yshad1\\fsp0\\q1' ..
                   '\\clip(' .. clipping_coordinates .. ')}'
     -- Create the cursor glyph as an ASS drawing. ASS will draw the cursor
     -- inline with the surrounding text, but it sets the advance to the width
