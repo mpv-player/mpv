@@ -265,7 +265,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
         ok = pl_tex_upload(p->gpu, &(struct pl_tex_transfer_params) {
             .tex        = entry->tex,
             .rc         = { .x1 = item->packed_w, .y1 = item->packed_h, },
-            .stride_w   = item->packed->stride[0] / tex_fmt->texel_size,
+            .row_pitch  = item->packed->stride[0],
             .ptr        = item->packed->planes[0],
         });
         if (!ok) {
@@ -882,6 +882,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
         pl_queue_push(p->queue, &(struct pl_source_frame) {
             .pts = mpi->pts,
+#if PL_API_VER >= 219
+            .duration = frame->ideal_frame_duration,
+#endif
             .frame_data = mpi,
             .map = map_frame,
             .unmap = unmap_frame,
@@ -939,7 +942,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             .pts = frame->current->pts + vsync_offset,
             .radius = pl_frame_mix_radius(&p->params),
             .vsync_duration = frame->vsync_interval,
+#if PL_API_VER < 219
             .frame_duration = frame->ideal_frame_duration,
+#endif
             .interpolation_threshold = opts->interpolation_threshold,
         };
 
