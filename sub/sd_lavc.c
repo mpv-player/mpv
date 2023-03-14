@@ -99,7 +99,8 @@ static int init(struct sd *sd)
     priv->avpkt = av_packet_alloc();
     if (!priv->avpkt)
         goto error;
-    mp_lavc_set_extradata(ctx, sd->codec->extradata, sd->codec->extradata_size);
+    if (mp_set_avctx_codec_headers(ctx, sd->codec) < 0)
+        goto error;
     priv->pkt_timebase = mp_get_codec_timebase(sd->codec);
     ctx->pkt_timebase = priv->pkt_timebase;
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
