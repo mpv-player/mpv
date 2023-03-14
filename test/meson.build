@@ -105,7 +105,7 @@ endif
 
 # Minimum required libavutil version that works with these tests.
 # Will need to be manually updated when ffmpeg adds/removes more formats in the future.
-if libavutil.version().version_compare('>= 57.10.101')
+if libavutil.version().version_compare('>= 57.39.101')
 
 # The CI can randomly fail if libavutil isn't explictly linked again here.
     img_format = executable('img-format', 'img_format.c', include_directories: incdir,
