@@ -2285,6 +2285,12 @@ Property list
     Similar to ``ao-volume``, but controls the mute state. May be unimplemented
     even if ``ao-volume`` works.
 
+``volume-db``
+    Read-only - mpv's internal volume in decibel format.
+
+``ao-volume-db``
+    Read-only - mpv's system volume in decibel format.
+
 ``audio-codec``
     Audio codec selected for decoding.
 

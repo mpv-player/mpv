@@ -1651,6 +1651,41 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_decibel(float f, float vol, int action, void *arg)
+{
+    vol = (vol <= 0.0) ? -INFINITY : f * log(vol / 100.0);
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(float *)arg = vol;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLOAT};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT:
+        *(char **)arg = talloc_asprintf(NULL, "%+g dB",
+            floor(vol * 100.0 + 0.5) / 100.0);
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_volume_db(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    float vol = ((MPContext *)ctx)->opts->softvol_volume;
+    return mp_property_decibel(60.0 / M_LN10, vol, action, arg);
+}
+
+static int mp_property_ao_volume_db(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    float vol = 0;
+    struct ao *ao = ((MPContext *)ctx)->ao;
+    if (ao_control(ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK)
+        return M_PROPERTY_UNAVAILABLE;
+    return mp_property_decibel(20.0 / M_LN10, vol, action, arg);
+}
+
 
 static int mp_property_ao_mute(void *ctx, struct m_property *prop,
                                int action, void *arg)
@@ -3821,6 +3856,8 @@ static const struct m_property mp_properties_base[] = {
     {"mixer-active", mp_property_mixer_active},
     {"volume", mp_property_volume},
     {"ao-volume", mp_property_ao_volume},
+    {"volume-db", mp_property_volume_db},
+    {"ao-volume-db", mp_property_ao_volume_db},
     {"ao-mute", mp_property_ao_mute},
     {"audio-delay", mp_property_audio_delay},
     {"audio-codec-name", mp_property_audio_codec_name},
