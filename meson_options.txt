@@ -42,6 +42,7 @@ option('zlib', type: 'feature', value: 'auto', description: 'zlib')
 # audio output features
 option('alsa', type: 'feature', value: 'auto', description: 'ALSA audio output')
 option('audiounit', type: 'feature', value: 'auto', description: 'AudioUnit output for iOS')
+option('avfoundation', type: 'feature', value: 'auto', description: 'AVFoundation audio output')
 option('coreaudio', type: 'feature', value: 'auto', description: 'CoreAudio audio output')
 option('jack', type: 'feature', value: 'auto', description: 'JACK audio output')
 option('openal', type: 'feature', value: 'disabled', description: 'OpenAL audio output')

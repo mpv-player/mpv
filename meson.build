@@ -792,6 +792,18 @@ if features['audiounit']
     sources += files('audio/out/ao_audiounit.m')
 endif
 
+avfoundation = {
+    'deps': dependency('appleframeworks', modules: ['AVFoundation', 'CoreMedia'],
+                       required: get_option('avfoundation')),
+    'symbol': cc.has_header('AVFoundation/AVSampleBufferAudioRenderer.h',
+                                   required: get_option('avfoundation')),
+}
+features += {'avfoundation': avfoundation['deps'].found() and avfoundation['symbol']}
+if features['avfoundation']
+    dependencies += avfoundation['deps']
+    sources += files('audio/out/ao_avfoundation.m')
+endif
+
 coreaudio = dependency('appleframeworks', modules: ['CoreFoundation', 'CoreAudio',
                        'AudioUnit', 'AudioToolbox'], required: get_option('coreaudio'))
 features += {'coreaudio': coreaudio.found()}
@@ -802,7 +814,7 @@ if features['coreaudio']
                      'audio/out/ao_coreaudio_properties.c')
 endif
 
-if features['audiounit'] or features['coreaudio']
+if features['audiounit'] or features['avfoundation'] or features['coreaudio']
     sources += files('audio/out/ao_coreaudio_chmap.c',
                      'audio/out/ao_coreaudio_utils.c')
 endif
