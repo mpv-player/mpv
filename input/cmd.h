@@ -74,6 +74,7 @@ enum mp_cmd_flags {
     // the command parser (prefixes and mp_cmd_def.default_async).
     MP_ASYNC_CMD = 32,          // do not wait for command to complete
     MP_SYNC_CMD = 64,           // block on command completion
+    MP_ON_VOL_DB = 128,         // display volume as decibels, if applicable
 
     MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
                       MP_ON_OSD_BAR | MP_ON_OSD_MSG,

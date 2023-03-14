@@ -1725,6 +1725,9 @@ prefixes can be specified. They are separated by whitespace.
     Allow synchronous execution (if possible). Normally, all commands are
     synchronous by default, but some are asynchronous by default for
     compatibility with older behavior.
+``dB``
+    If a request is made to print the volume or ao-volume property, it will be
+    shown in decibels.
 
 All of the osd prefixes are still overridden by the global ``--osd-level``
 settings.

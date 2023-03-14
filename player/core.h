@@ -267,6 +267,7 @@ typedef struct MPContext {
     bool osd_force_update, osd_idle_update;
     char *osd_msg_text;
     bool osd_show_pos;
+    bool osd_decibels;
     struct osd_progbar_state osd_progbar;
 
     struct playlist *playlist;

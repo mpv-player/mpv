@@ -1605,9 +1605,18 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
             .max = opts->softvol_max,
         };
         return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT:
-        *(char **)arg = talloc_asprintf(NULL, "%i", (int)opts->softvol_volume);
+    case M_PROPERTY_PRINT: {
+        float vol = opts->softvol_volume;
+        if (mpctx->osd_decibels) {
+            vol = (vol <= 0.0) ? -INFINITY : 60.0 / M_LN10 * log(vol / 100.0);
+            *(char **)arg = talloc_asprintf(NULL, "%+g dB",
+                floor(vol * 100.0 + 0.5) / 100.0);
+        } else {
+            *(char **)arg = talloc_asprintf(NULL, "%g%%",
+                floor(vol * 100.0 + 0.5) / 100.0);
+        }
         return M_PROPERTY_OK;
+    }
     }
 
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -1644,7 +1653,14 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
         float vol = 0;
         if (ao_control(ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK)
             return M_PROPERTY_UNAVAILABLE;
-        *(char **)arg = talloc_asprintf(NULL, "%.f", vol);
+        if (mpctx->osd_decibels) {
+            vol = (vol <= 0.0) ? -INFINITY : 20.0 / M_LN10 * log(vol / 100.0);
+            *(char **)arg = talloc_asprintf(NULL, "%+g dB",
+                floor(vol * 100.0 + 0.5) / 100.0);
+        } else {
+            *(char **)arg = talloc_asprintf(NULL, "%g%%",
+                floor(vol * 100.0 + 0.5) / 100.0);
+        }
         return M_PROPERTY_OK;
     }
     }
@@ -4199,10 +4215,10 @@ static const struct property_osd_display {
     {"edition", "Edition"},
     // audio
     {"volume", "Volume",
-     .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
+     .msg = "Volume: ${?volume:${volume} ${?mute==yes:(Muted)}}${!volume:${volume}}",
      .osd_progbar = OSD_VOLUME, .marker = 100},
     {"ao-volume", "AO Volume",
-     .msg = "AO Volume: ${?ao-volume:${ao-volume}% ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
+     .msg = "AO Volume: ${?ao-volume:${ao-volume} ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
      .osd_progbar = OSD_VOLUME, .marker = 100},
     {"mute", "Mute"},
     {"ao-mute", "AO Mute"},
@@ -4945,6 +4961,7 @@ void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
     ctx->bar_osd = auto_osd || (ctx->on_osd & MP_ON_OSD_BAR);
     ctx->seek_msg_osd = auto_osd ? opts->osd_on_seek & 2 : ctx->msg_osd;
     ctx->seek_bar_osd = auto_osd ? opts->osd_on_seek & 1 : ctx->bar_osd;
+    mpctx->osd_decibels = cmd->flags & MP_ON_VOL_DB;
 
     bool noise = cmd->def->is_noisy || cmd->mouse_move;
     mp_cmd_dump(mpctx->log, noise ? MSGL_TRACE : MSGL_DEBUG, "Run command:", cmd);

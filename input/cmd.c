@@ -54,6 +54,7 @@ static const struct flag cmd_flags[] = {
     {"repeatable",          0,               MP_ALLOW_REPEAT},
     {"async",               MP_SYNC_CMD,     MP_ASYNC_CMD},
     {"sync",                MP_ASYNC_CMD,     MP_SYNC_CMD},
+    {"dB",                  0,               MP_ON_VOL_DB},
     {0}
 };
 
