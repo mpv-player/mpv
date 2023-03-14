@@ -40,20 +40,6 @@
 #include "av_common.h"
 #include "codecs.h"
 
-int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size)
-{
-    if (size) {
-        av_free(avctx->extradata);
-        avctx->extradata_size = 0;
-        avctx->extradata = av_mallocz(size + AV_INPUT_BUFFER_PADDING_SIZE);
-        if (!avctx->extradata)
-            return -1;
-        avctx->extradata_size = size;
-        memcpy(avctx->extradata, ptr, size);
-    }
-    return 0;
-}
-
 enum AVMediaType mp_to_av_stream_type(int type)
 {
     switch (type) {

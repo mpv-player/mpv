@@ -31,7 +31,6 @@ struct mp_codec_params;
 struct AVDictionary;
 struct mp_log;
 
-int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size);
 enum AVMediaType mp_to_av_stream_type(int type);
 AVCodecParameters *mp_codec_params_to_av(const struct mp_codec_params *c);
 int mp_set_avctx_codec_headers(AVCodecContext *avctx, const struct mp_codec_params *c);
