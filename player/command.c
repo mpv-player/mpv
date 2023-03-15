@@ -3579,6 +3579,7 @@ struct udata_ctx {
     MPContext *mpctx;
     const char *path;
     mpv_node *node;
+    void *ta_parent;
 };
 
 static int do_op_udata(struct udata_ctx* ctx, int action, void *arg)
@@ -3604,6 +3605,7 @@ static int do_op_udata(struct udata_ctx* ctx, int action, void *arg)
     case M_PROPERTY_SET_NODE:
         assert(node);
         m_option_copy(&udata_type, node, arg);
+        talloc_steal(ctx->ta_parent, node_get_alloc(node));
         mp_notify_property(mpctx, ctx->path);
         return M_PROPERTY_OK;
     case M_PROPERTY_KEY_ACTION: {
@@ -3679,6 +3681,7 @@ static int do_op_udata(struct udata_ctx* ctx, int action, void *arg)
 
         struct udata_ctx nctx = *ctx;
         nctx.node = cnode;
+        nctx.ta_parent = node_get_alloc(node);
 
         // If we're going down another level, set up a new key-action.
         if (has_split) {
@@ -3701,6 +3704,7 @@ static int do_list_udata(int item, int action, void *arg, void *ctx)
 {
     struct udata_ctx nctx = *(struct udata_ctx*)ctx;
     nctx.node = &nctx.node->u.list->values[item];
+    nctx.ta_parent = &nctx.node->u.list;
 
     return do_op_udata(&nctx, action, arg);
 }
@@ -3726,6 +3730,7 @@ static int mp_property_udata(void *ctx, struct m_property *prop,
         .mpctx = mpctx,
         .path = path,
         .node = &mpctx->command_ctx->udata,
+        .ta_parent = &mpctx->command_ctx,
     };
 
     int ret = do_op_udata(&nctx, action, arg);
