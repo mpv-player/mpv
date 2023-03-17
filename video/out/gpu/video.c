@@ -1338,18 +1338,20 @@ static const char *get_tex_swizzle(struct image *img)
 
 // Copy a texture to the vec4 color, while increasing offset. Also applies
 // the texture multiplier to the sampled color
-static void copy_image(struct gl_video *p, int *offset, struct image img)
+static void copy_image(struct gl_video *p, unsigned int *offset, struct image img)
 {
-    int count = img.components;
-    assert(*offset + count <= 4);
-    assert(img.padding + count <= 4);
-
-    int id = pass_bind(p, img);
+    const unsigned int count = img.components;
     char src[5] = {0};
     char dst[5] = {0};
+
+    assert(*offset + count < sizeof(dst));
+    assert(img.padding + count < sizeof(src));
+
+    int id = pass_bind(p, img);
+
     const char *tex_fmt = get_tex_swizzle(&img);
     const char *dst_fmt = "rgba";
-    for (int i = 0; i < count; i++) {
+    for (unsigned int i = 0; i < count; i++) {
         src[i] = tex_fmt[img.padding + i];
         dst[i] = dst_fmt[*offset + i];
     }
