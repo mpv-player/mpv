@@ -477,6 +477,7 @@ if features['win32-desktop']
                           cc.find_library('gdi32'),
                           cc.find_library('ole32'),
                           cc.find_library('uuid'),
+                          cc.find_library('uxtheme'),
                           cc.find_library('version'),
                           cc.find_library('winmm')]
     dependencies += win32_desktop_libs

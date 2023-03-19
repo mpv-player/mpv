@@ -54,6 +54,10 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define WM_DPICHANGED (0x02E0)
 #endif
 
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
+
 #ifndef DPI_ENUMS_DECLARED
 typedef enum MONITOR_DPI_TYPE {
     MDT_EFFECTIVE_DPI = 0,
@@ -70,6 +74,8 @@ struct w32_api {
     HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
     BOOL (WINAPI *pImmDisableIME)(DWORD);
     BOOL (WINAPI *pAdjustWindowRectExForDpi)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
+    BOOLEAN (WINAPI *pShouldAppsUseDarkMode)(void);
+    DWORD (WINAPI *pSetPreferredAppMode)(DWORD mode);
 };
 
 struct vo_w32_state {
@@ -1000,6 +1006,36 @@ static void reinit_window_state(struct vo_w32_state *w32)
     update_window_state(w32);
 }
 
+// Follow Windows settings and update dark mode state
+// Microsoft documented how to enable dark mode for title bar:
+// https://learn.microsoft.com/windows/apps/desktop/modernize/apply-windows-themes
+// https://learn.microsoft.com/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+// Documentation says to set the DWMWA_USE_IMMERSIVE_DARK_MODE attribute to
+// TRUE to honor dark mode for the window, FALSE to always use light mode. While
+// in fact setting it to TRUE causes dark mode to be always enabled, regardless
+// of the settings. Since it is quite unlikely that it will be fixed, just use
+// UxTheme API to check if dark mode should be applied and while at it enable it
+// fully. Ideally this function should only call the DwmSetWindowAttribute(),
+// but it just doesn't work as documented.
+static void update_dark_mode(const struct vo_w32_state *w32)
+{
+    if (w32->api.pSetPreferredAppMode)
+        w32->api.pSetPreferredAppMode(1); // allow dark mode
+
+    HIGHCONTRAST hc = {sizeof(hc)};
+    SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0);
+    bool high_contrast = hc.dwFlags & HCF_HIGHCONTRASTON;
+
+    // if pShouldAppsUseDarkMode is not available, just assume it to be true
+    const BOOL use_dark_mode = !high_contrast && (!w32->api.pShouldAppsUseDarkMode ||
+                                                  w32->api.pShouldAppsUseDarkMode());
+
+    SetWindowTheme(w32->window, use_dark_mode ? L"DarkMode_Explorer" : L"", NULL);
+
+    DwmSetWindowAttribute(w32->window, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                          &use_dark_mode, sizeof(use_dark_mode));
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -1293,6 +1329,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_DISPLAYCHANGE:
         force_update_display_info(w32);
         break;
+    case WM_SETTINGCHANGE:
+        update_dark_mode(w32);
+        break;
     }
 
     if (message == w32->tbtnCreatedMsg) {
@@ -1502,6 +1541,13 @@ static void w32_api_load(struct vo_w32_state *w32)
     HMODULE imm32_dll = LoadLibraryW(L"imm32.dll");
     w32->api.pImmDisableIME = !imm32_dll ? NULL :
                 (void *)GetProcAddress(imm32_dll, "ImmDisableIME");
+
+    // Dark mode related functions, avaliable since a Win10 update
+    HMODULE uxtheme_dll = GetModuleHandle(L"uxtheme.dll");
+    w32->api.pShouldAppsUseDarkMode = !uxtheme_dll ? NULL :
+                (void *)GetProcAddress(uxtheme_dll, MAKEINTRESOURCEA(132));
+    w32->api.pSetPreferredAppMode = !uxtheme_dll ? NULL :
+                (void *)GetProcAddress(uxtheme_dll, MAKEINTRESOURCEA(135));
 }
 
 static void *gui_thread(void *ptr)
@@ -1542,6 +1588,8 @@ static void *gui_thread(void *ptr)
         MP_ERR(w32, "unable to create window!\n");
         goto done;
     }
+
+    update_dark_mode(w32);
 
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
