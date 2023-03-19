@@ -164,6 +164,8 @@ struct vo_w32_state {
     int snap_dx;
     int snap_dy;
 
+    LONG top_border_reduce;
+
     HANDLE avrt_handle;
 };
 
@@ -176,6 +178,8 @@ static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
     } else {
         AdjustWindowRect(rc, GetWindowLongPtrW(hwnd, GWL_STYLE), 0);
     }
+    if (w32->opts->border && !w32->opts->title_bar && !w32->current_fs)
+        rc->top += w32->top_border_reduce;
 }
 
 // basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
@@ -811,6 +815,20 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
     return style;
 }
 
+static LONG get_invisible_border_size(struct vo_w32_state *w32)
+{
+    RECT rect, frame;
+    if (GetWindowRect(w32->window, &rect) &&
+        SUCCEEDED(DwmGetWindowAttribute(w32->window, DWMWA_EXTENDED_FRAME_BOUNDS,
+                                        &frame, sizeof(RECT))))
+    {
+        return frame.left - rect.left;
+    }
+
+    return 0;
+}
+
+
 static void update_window_style(struct vo_w32_state *w32)
 {
     if (w32->parent)
@@ -822,6 +840,8 @@ static void update_window_style(struct vo_w32_state *w32)
     const DWORD style = GetWindowLongPtrW(w32->window, GWL_STYLE);
     SetWindowLongPtrW(w32->window, GWL_STYLE, update_style(w32, style));
     w32->windowrc = wr;
+    w32->top_border_reduce = (w32->opts->border && !w32->opts->title_bar &&
+                              !w32->current_fs) ? get_invisible_border_size(w32) : 0;
 }
 
 // If rc is wider/taller than n_w/n_h, shrink rc size while keeping the center.
@@ -1352,6 +1372,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_SETTINGCHANGE:
         update_dark_mode(w32);
+        break;
+    case WM_NCCALCSIZE:
+        // DWM makes part of left, right and bottom border invisible. Reduce the
+        // top border width to have the same look all around the window.
+        if (wParam && lParam && w32->opts->border && !w32->opts->title_bar &&
+            !w32->current_fs && !w32->parent)
+        {
+            w32->top_border_reduce = get_invisible_border_size(w32);
+            ((LPNCCALCSIZE_PARAMS) lParam)->rgrc[0].top -= w32->top_border_reduce;
+        }
         break;
     }
 
