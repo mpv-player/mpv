@@ -3135,6 +3135,12 @@ Window
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.
 
+``--title-bar``, ``--no-title-bar``
+    (Windows only)
+    Play video with the window title bar. Since this is on by default,
+    use --no-title-bar to hide the title bar. The --no-border option takes
+    precedence.
+
 ``--on-all-workspaces``
     (X11 and macOS only)
     Show the video window on all virtual desktops.
