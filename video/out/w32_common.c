@@ -805,6 +805,8 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
         style |= FULLSCREEN;
     } else {
         style |= w32->opts->border ? FRAME : NO_FRAME;
+        if (!w32->opts->title_bar)
+            style &= ~WS_CAPTION;
     }
     return style;
 }
@@ -1802,7 +1804,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                 update_affinity(w32);
             } else if (changed_option == &vo_opts->ontop) {
                 update_window_state(w32);
-            } else if (changed_option == &vo_opts->border) {
+            } else if (changed_option == &vo_opts->border ||
+                       changed_option == &vo_opts->title_bar)
+            {
                 update_window_style(w32);
                 update_window_state(w32);
             } else if (changed_option == &vo_opts->window_minimized) {
