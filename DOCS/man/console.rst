@@ -73,7 +73,7 @@ DOWN and Ctrl+N
 PGUP
     Go to the first command in the history.
 
-PGDN
+PGDWN
     Stop navigating the command history.
 
 INSERT
