@@ -226,7 +226,8 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
     params[0] = spa_pod_builder_add_object(&b,
                     SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers,
                     SPA_PARAM_BUFFERS_blocks,     SPA_POD_Int(ao->num_planes),
-                    SPA_PARAM_BUFFERS_size,       SPA_POD_Int(buffer_size),
+                    SPA_PARAM_BUFFERS_size,       SPA_POD_CHOICE_RANGE_Int(
+                                                    buffer_size, 0, INT32_MAX),
                     SPA_PARAM_BUFFERS_stride,     SPA_POD_Int(ao->sstride));
     if (!params[0]) {
         MP_ERR(ao, "Could not build parameter pod\n");
