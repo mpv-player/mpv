@@ -567,9 +567,12 @@ static int init(struct ao *ao)
     if (pipewire_init_boilerplate(ao) < 0)
         goto error_props;
 
-    ao->device_buffer = p->options.buffer_msec * ao->samplerate / 1000;
+    if (p->options.buffer_msec) {
+        ao->device_buffer = p->options.buffer_msec * ao->samplerate / 1000;
 
-    pw_properties_setf(props, PW_KEY_NODE_LATENCY, "%d/%d", ao->device_buffer, ao->samplerate);
+        pw_properties_setf(props, PW_KEY_NODE_LATENCY, "%d/%d", ao->device_buffer, ao->samplerate);
+    }
+
     pw_properties_setf(props, PW_KEY_NODE_RATE, "1/%d", ao->samplerate);
 
     enum spa_audio_format spa_format = af_fmt_to_pw(ao, ao->format);
@@ -886,7 +889,8 @@ const struct ao_driver audio_out_pipewire = {
     },
     .options_prefix = "pipewire",
     .options = (const struct m_option[]) {
-        {"buffer", OPT_INT(options.buffer_msec), M_RANGE(1, 2000)},
+        {"buffer", OPT_CHOICE(options.buffer_msec, {"native", 0}),
+            M_RANGE(1, 2000)},
         {"remote", OPT_STRING(options.remote) },
         {"volume-mode", OPT_CHOICE(options.volume_mode,
             {"channel", VOLUME_MODE_CHANNEL}, {"global", VOLUME_MODE_GLOBAL})},
