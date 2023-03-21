@@ -70,7 +70,7 @@ consists of multiple source files, or requires other files (you can use
 ``mp.get_script_directory()`` to get the location and e.g. load data files).
 
 Making a script a git repository, basically a repository which contains a
-``main.lua``` file in the root directory, makes scripts easily updateable
+``main.lua`` file in the root directory, makes scripts easily updateable
 (without the dangers of auto-updates). Another suggestion is to use git
 submodules to share common files or libraries.
 
