@@ -154,7 +154,7 @@ Available audio output drivers are:
         Set the audio buffer size in milliseconds. A higher value buffers
         more data, and has a lower probability of buffer underruns. A smaller
         value makes the audio stream react faster, e.g. to playback speed
-        changes.
+        changes. "native" lets the sound server determine buffers.
 
     ``--pipewire-remote=<remote>``
         Specify the PipeWire remote daemon name to connect to via local UNIX
