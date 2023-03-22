@@ -439,7 +439,7 @@ static const m_option_t mp_opts[] = {
         .flags = CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE},
     {"reset-on-next-file", OPT_STRINGLIST(reset_options)},
 
-#if HAVE_LUA || HAVE_JAVASCRIPT
+#if HAVE_LUA || HAVE_JAVASCRIPT || HAVE_CPLUGINS
     {"scripts", OPT_PATHLIST(script_files), .flags = M_OPT_FILE},
     {"script", OPT_CLI_ALIAS("scripts-append")},
     {"script-opts", OPT_KEYVALUELIST(script_opts)},
