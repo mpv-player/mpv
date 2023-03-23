@@ -386,6 +386,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     ``async`` flag to make encoding/writing the image file asynchronous. For
     normal standalone commands, this is always asynchronous, and the flag has
     no effect. (This behavior changed with mpv 0.29.0.)
+    
+    On success, returns a ``mpv_node`` with a ``filename`` field set to the
+    saved screenshot location.
 
 ``screenshot-to-file <filename> <flags>``
     Take a screenshot and save it to a given file. The format of the file will
