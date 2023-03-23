@@ -460,6 +460,7 @@ void cmd_screenshot(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
+    struct mpv_node *res = &cmd->result;
     int mode = cmd->args[0].v.i & 3;
     bool each_frame_toggle = (cmd->args[0].v.i | cmd->args[1].v.i) & 8;
     bool each_frame_mode = cmd->args[0].v.i & 16;
@@ -491,8 +492,13 @@ void cmd_screenshot(void *p)
 
     if (image) {
         char *filename = gen_fname(cmd, image_writer_file_ext(opts));
-        if (filename)
+        if (filename) {
             cmd->success = write_screenshot(cmd, image, filename, NULL);
+            if (cmd->success) {
+                node_init(res, MPV_FORMAT_NODE_MAP, NULL);
+                node_map_add_string(res, "filename", filename);
+            }
+        }
         talloc_free(filename);
     } else {
         mp_cmd_msg(cmd, MSGL_ERR, "Taking screenshot failed.");
