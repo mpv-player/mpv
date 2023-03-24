@@ -32,6 +32,9 @@ struct image_writer_opts {
     int webp_compression;
     double jxl_distance;
     int jxl_effort;
+    char *avif_encoder;
+    char *avif_pixfmt;
+    char **avif_opts;
     bool tag_csp;
 };
 

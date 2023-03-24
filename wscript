@@ -412,6 +412,10 @@ iconv support use --disable-iconv.",
         'desc': 'JPEG XL support via libavcodec',
         'func': check_pkg_config('libavcodec >= 59.27.100'),
     }, {
+        'name': 'avif_muxer',
+        'desc': 'avif support via libavcodec',
+        'func': check_pkg_config('libavformat >= 59.24.100'),
+    }, {
         'name': 'rubberband-3',
         'desc': 'new engine support for librubberband',
         'func': check_pkg_config('rubberband >= 3.0.0'),

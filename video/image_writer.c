@@ -20,9 +20,12 @@
 #include <string.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 #include <libavutil/mem.h>
 #include <libavutil/opt.h>
+#include <libavutil/pixdesc.h>
 
+#include "common/msg.h"
 #include "config.h"
 
 #if HAVE_JPEG
@@ -32,11 +35,13 @@
 
 #include "osdep/io.h"
 
+#include "common/av_common.h"
+#include "common/msg.h"
 #include "image_writer.h"
 #include "mpv_talloc.h"
+#include "video/fmt-conversion.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
-#include "video/fmt-conversion.h"
 #include "video/sws_utils.h"
 
 #include "options/m_option.h"
@@ -52,6 +57,15 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .webp_compression = 4,
     .jxl_distance = 1.0,
     .jxl_effort = 4,
+    .avif_encoder = "libaom-av1",
+    .avif_pixfmt = "yuv420p",
+    .avif_opts = (char*[]){
+        "usage",    "allintra",
+        "crf",      "32",
+        "cpu-used", "8",
+        "tune",     "ssim",
+        NULL
+    },
     .tag_csp = true,
 };
 
@@ -62,6 +76,9 @@ const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
     {"webp", AV_CODEC_ID_WEBP},
 #if HAVE_JPEGXL
     {"jxl",  AV_CODEC_ID_JPEGXL},
+#endif
+#if HAVE_AVIF_MUXER
+    {"avif",  AV_CODEC_ID_AV1},
 #endif
     {0}
 };
@@ -80,6 +97,11 @@ const struct m_option image_writer_opts[] = {
 #if HAVE_JPEGXL
     {"jxl-distance", OPT_DOUBLE(jxl_distance), M_RANGE(0.0, 15.0)},
     {"jxl-effort", OPT_INT(jxl_effort), M_RANGE(1, 9)},
+#endif
+#if HAVE_AVIF_MUXER
+    {"avif-encoder", OPT_STRING(avif_encoder)},
+    {"avif-opts", OPT_KEYVALUELIST(avif_opts)},
+    {"avif-pixfmt", OPT_STRING(avif_pixfmt)},
 #endif
     {"high-bit-depth", OPT_BOOL(high_bit_depth)},
     {"tag-colorspace", OPT_BOOL(tag_csp)},
@@ -102,8 +124,15 @@ static enum AVPixelFormat replace_j_format(enum AVPixelFormat fmt)
     return fmt;
 }
 
-static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
+
+static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, const char *filename)
 {
+    FILE* fp = fopen(filename, "wb");
+    if (!fp) {
+        MP_ERR(ctx, "Error opening '%s' for writing!\n", filename);
+        return false;
+    }
+
     bool success = false;
     AVFrame *pic = NULL;
     AVPacket *pkt = NULL;
@@ -208,7 +237,7 @@ error_exit:
     avcodec_free_context(&avctx);
     av_frame_free(&pic);
     av_packet_free(&pkt);
-    return success;
+    return !fclose(fp) && success;
 }
 
 #if HAVE_JPEG
@@ -222,8 +251,15 @@ static void write_jpeg_error_exit(j_common_ptr cinfo)
   longjmp(*(jmp_buf*)cinfo->client_data, 1);
 }
 
-static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
+static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image,
+                       const char *filename)
 {
+    FILE *fp = fopen(filename, "wb");
+    if (!fp) {
+        MP_ERR(ctx, "Error opening '%s' for writing!\n", filename);
+        return false;
+    }
+
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
 
@@ -270,7 +306,242 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 
     jpeg_destroy_compress(&cinfo);
 
-    return true;
+    return !fclose(fp);
+}
+
+#endif
+
+#if HAVE_AVIF_MUXER
+
+static void log_side_data(struct image_writer_ctx *ctx, AVPacketSideData *data,
+                          size_t size)
+{
+    if (!mp_msg_test(ctx->log, MSGL_DEBUG))
+        return;
+    char dbgbuff[129];
+    if (size)
+        MP_DBG(ctx, "write_avif() packet side data:\n");
+    for (int i = 0; i < size; i++) {
+        AVPacketSideData *sd = &data[i];
+        int k = 0;
+        for (; k < MPMIN(sd->size, 64); k++)
+            sprintf(dbgbuff + k*2, "%02x", sd->data[k]);
+        dbgbuff[k] = '\0';
+        MP_DBG(ctx, "  [%d] = {[%s], '%s'}\n",
+               i, av_packet_side_data_name(sd->type), dbgbuff);
+    }
+}
+
+static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
+                       const char *filename)
+{
+    const AVCodec *codec = NULL;
+    const AVOutputFormat *ofmt = NULL;
+    AVCodecContext *avctx = NULL;
+    AVIOContext *avioctx = NULL;
+    AVFormatContext *fmtctx = NULL;
+    AVStream *stream = NULL;
+    AVFrame *pic = NULL;
+    AVPacket *pkt = NULL;
+    int ret;
+    bool success = false;
+
+    codec = avcodec_find_encoder_by_name(ctx->opts->avif_encoder);
+    if (!codec) {
+        MP_ERR(ctx, "Could not find encoder '%s', for saving images\n",
+               ctx->opts->avif_encoder);
+        goto free_data;
+    }
+
+    ofmt = av_guess_format("avif", NULL, NULL);
+    if (!ofmt) {
+        MP_ERR(ctx, "Could not guess output format 'avif'\n");
+        goto free_data;
+    }
+
+    avctx = avcodec_alloc_context3(codec);
+    if (!avctx) {
+        MP_ERR(ctx, "Failed to allocate AVContext.\n");
+        goto free_data;
+    }
+
+    avctx->width = image->w;
+    avctx->height = image->h;
+    avctx->time_base = (AVRational){1, 30};
+    avctx->pkt_timebase = (AVRational){1, 30};
+    avctx->codec_type = AVMEDIA_TYPE_VIDEO;
+    avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
+
+    av_opt_set_int(avctx, "still-image", 1, AV_OPT_SEARCH_CHILDREN);
+
+    AVDictionary *avd = NULL;
+    mp_set_avdict(&avd, ctx->opts->avif_opts);
+    av_opt_set_dict2(avctx, &avd, AV_OPT_SEARCH_CHILDREN);
+    av_dict_free(&avd);
+
+    pic = av_frame_alloc();
+    if (!pic) {
+        MP_ERR(ctx, "Could not allocate AVFrame\n");
+        goto free_data;
+    }
+
+    for (int n = 0; n < 4; n++) {
+        pic->data[n] = image->planes[n];
+        pic->linesize[n] = image->stride[n];
+    }
+    pic->format = avctx->pix_fmt;
+    pic->width = avctx->width;
+    pic->height = avctx->height;
+    // Not setting this flag caused ffmpeg to output avif that was not passing
+    // standard checks but ffmpeg would still read and not complain...
+    avctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+    avctx->color_range = pic->color_range =
+        mp_csp_levels_to_avcol_range(image->params.color.levels);
+    avctx->color_primaries = pic->color_primaries =
+        mp_csp_prim_to_avcol_pri(image->params.color.primaries);
+    avctx->color_trc = pic->color_trc =
+        mp_csp_trc_to_avcol_trc(image->params.color.gamma);
+    avctx->colorspace = pic->colorspace =
+        mp_csp_to_avcol_spc(image->params.color.space);
+    avctx->chroma_sample_location = pic->chroma_location =
+        mp_chroma_location_to_av(image->params.chroma_location);
+
+    ret = avcodec_open2(avctx, codec, NULL);
+    if (ret < 0) {
+        MP_ERR(ctx, "Could not open libavcodec encoder for saving images\n");
+        goto free_data;
+    }
+
+    ret = avio_open(&avioctx, filename, AVIO_FLAG_WRITE);
+    if (ret < 0) {
+        MP_ERR(ctx, "Could not open file '%s' for saving images\n", filename);
+        goto free_data;
+    }
+
+    fmtctx = avformat_alloc_context();
+    if (!fmtctx) {
+        MP_ERR(ctx, "Could not allocate format context\n");
+        goto free_data;
+    }
+    fmtctx->pb = avioctx;
+    fmtctx->oformat = ofmt;
+
+    stream = avformat_new_stream(fmtctx, codec);
+    if (!stream) {
+        MP_ERR(ctx, "Could not allocate stream\n");
+        goto free_data;
+    }
+
+    ret = avcodec_parameters_from_context(stream->codecpar, avctx);
+    if (ret < 0) {
+        MP_ERR(ctx, "Could not copy parameters from context\n");
+        goto free_data;
+    }
+
+    MP_DBG(ctx, "write_avif() Codec Context:\n"
+        "  color_trc = %s\n"
+        "  color_primaries = %s\n"
+        "  color_range = %s\n"
+        "  colorspace = %s\n"
+        "  chroma_sample_location = %s\n",
+        av_color_transfer_name(avctx->color_trc),
+        av_color_primaries_name(avctx->color_primaries),
+        av_color_range_name(avctx->color_range),
+        av_color_space_name(avctx->colorspace),
+        av_chroma_location_name(avctx->chroma_sample_location)
+    );
+
+    ret = avformat_init_output(fmtctx, NULL);
+    if (ret < 0) {
+        MP_ERR(ctx, "Could not initialize output\n");
+        goto free_data;
+    }
+
+    ret = avformat_write_header(fmtctx, NULL);
+    if (ret < 0) {
+        MP_ERR(ctx, "Could not write format header\n");
+        goto free_data;
+    }
+
+    pkt = av_packet_alloc();
+    if (!pkt) {
+        MP_ERR(ctx, "Could not allocate packet\n");
+        goto free_data;
+    }
+
+    ret = avcodec_send_frame(avctx, pic);
+    if (ret < 0) {
+        MP_ERR(ctx, "Error sending frame\n");
+        goto free_data;
+    }
+
+    int pts = 0;
+    log_side_data(ctx, avctx->coded_side_data, avctx->nb_coded_side_data);
+    while (ret >= 0) {
+        ret = avcodec_receive_packet(avctx, pkt);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            break;
+        if (ret < 0) {
+            MP_ERR(ctx, "Error receiving packet\n");
+            goto free_data;
+        }
+        pkt->pts = ++pts;
+        pkt->dts = pts;
+        pkt->stream_index = stream->index;
+        log_side_data(ctx, pkt->side_data, pkt->side_data_elems);
+
+        ret = av_write_frame(fmtctx, pkt);
+        if (ret < 0) {
+            MP_ERR(ctx, "Error writing frame\n");
+            goto free_data;
+        }
+        av_packet_unref(pkt);
+    }
+
+    ret = avcodec_send_frame(avctx, NULL);
+    if (ret < 0)  {
+        MP_ERR(ctx, "Error sending flushing frame\n");
+        goto free_data;
+    }
+
+    while (ret >= 0) {
+        ret = avcodec_receive_packet(avctx, pkt);
+        if (ret == AVERROR_EOF)
+            break;
+        if (ret != 0) {
+            MP_ERR(ctx, "Error receiving packet\n");
+            goto free_data;
+        }
+        pkt->pts = ++pts;
+        pkt->dts = pts;
+        pkt->stream_index = stream->index;
+        log_side_data(ctx, pkt->side_data, pkt->side_data_elems);
+
+        ret = av_write_frame(fmtctx, pkt);
+        if (ret < 0) {
+            MP_ERR(ctx, "Error writing frame\n");
+            goto free_data;
+        }
+        av_packet_unref(pkt);
+    }
+
+    ret = av_write_trailer(fmtctx);
+    if (ret < 0) {
+        MP_ERR(ctx, "Could not write trailer\n");
+        goto free_data;
+    }
+    MP_DBG(ctx, "write_avif(): avio_size() = %ld\n", avio_size(avioctx));
+
+    success = true;
+
+free_data:
+    success = !avio_closep(&avioctx) && success;
+    avformat_free_context(fmtctx);
+    avcodec_free_context(&avctx);
+    av_packet_free(&pkt);
+    av_frame_free(&pic);
+
+    return success;
 }
 
 #endif
@@ -336,6 +607,9 @@ bool image_writer_high_depth(const struct image_writer_opts *opts)
 #if HAVE_JPEGXL
            || opts->format == AV_CODEC_ID_JPEGXL
 #endif
+#if HAVE_AVIF_MUXER
+           || opts->format == AV_CODEC_ID_AV1
+#endif
     ;
 }
 
@@ -344,6 +618,9 @@ bool image_writer_flexible_csp(const struct image_writer_opts *opts)
     return false
 #if HAVE_JPEGXL
         || opts->format == AV_CODEC_ID_JPEGXL
+#endif
+#if HAVE_AVIF_MUXER
+        || opts->format == AV_CODEC_ID_AV1
 #endif
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 58, 100)
         // This version added support for cICP tag writing
@@ -423,7 +700,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
 }
 
 bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
-                const char *filename, struct mpv_global *global,
+                 const char *filename, struct mpv_global *global,
                  struct mp_log *log)
 {
     struct image_writer_opts defs = image_writer_opts_defaults;
@@ -431,13 +708,19 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
         opts = &defs;
 
     struct image_writer_ctx ctx = { log, opts, image->fmt };
-    bool (*write)(struct image_writer_ctx *, mp_image_t *, FILE *) = write_lavc;
+    bool (*write)(struct image_writer_ctx *, mp_image_t *, const char *) = write_lavc;
     int destfmt = 0;
 
 #if HAVE_JPEG
     if (opts->format == AV_CODEC_ID_MJPEG) {
         write = write_jpeg;
         destfmt = IMGFMT_RGB24;
+    }
+#endif
+#if HAVE_AVIF_MUXER
+    if (opts->format == AV_CODEC_ID_AV1) {
+        write = write_avif;
+        destfmt = mp_imgfmt_from_name(bstr0(opts->avif_pixfmt));
     }
 #endif
     if (opts->format == AV_CODEC_ID_WEBP && !opts->webp_lossless) {
@@ -461,16 +744,9 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     if (!dst)
         return false;
 
-    FILE *fp = fopen(filename, "wb");
-    bool success = false;
-    if (fp == NULL) {
-        mp_err(log, "Error opening '%s' for writing!\n", filename);
-    } else {
-        success = write(&ctx, dst, fp);
-        success = !fclose(fp) && success;
-        if (!success)
-            mp_err(log, "Error writing file '%s'!\n", filename);
-    }
+    bool success = write(&ctx, dst, filename);
+    if (!success)
+        mp_err(log, "Error writing file '%s'!\n", filename);
 
     talloc_free(dst);
     return success;
