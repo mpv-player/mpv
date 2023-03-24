@@ -43,6 +43,7 @@ features = {
     'ffmpeg': true,
     'gpl': get_option('gpl'),
     'jpegxl': libavformat.version().version_compare('>= 59.27.100'),
+    'avif_muxer': libavformat.version().version_compare('>= 59.24.100'),
     'libass': true,
     'threads': true,
 }
