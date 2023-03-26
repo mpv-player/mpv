@@ -780,9 +780,9 @@ video_output_features = [
         'func': check_pkg_config('libplacebo >= 4.157.0'),
     }, {
         'name': 'libplacebo-next',
-        'desc': 'libplacebo v4.202+, needed for vo_gpu_next',
+        'desc': 'libplacebo v5.264.0+, needed for vo_gpu_next',
         'deps': 'libplacebo',
-        'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 202',
+        'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 264',
                                    use='libplacebo'),
     }, {
         'name': '--vulkan',
