@@ -196,10 +196,8 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     if (!gpu->limits.thread_safe || !gpu->limits.max_mapped_size)
         return NULL;
 
-#if PL_API_VER >= 234
     if ((flags & VO_DR_FLAG_HOST_CACHED) && !gpu->limits.host_cached)
         return NULL;
-#endif
 
     int size = mp_image_get_alloc_size(imgfmt, w, h, stride_align);
     if (size < 0)
@@ -757,15 +755,6 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     }
 
     int index = info->index;
-#if PL_API_VER < 227
-    // Versions of libplacebo older than this used `index` to communicate the
-    // blended frame count, and implicitly clipped all subsequent passes. This
-    // functionaliy was removed in API ver 227, which makes `index` behave the
-    // same for frame and blend stages.
-    if (info->stage == PL_RENDER_STAGE_BLEND)
-        index = 0;
-#endif
-
     struct mp_pass_perf *perf = &frame->perf[index];
     const struct pl_dispatch_info *pass = info->pass;
     static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
@@ -882,9 +871,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
         pl_queue_push(p->queue, &(struct pl_source_frame) {
             .pts = mpi->pts,
-#if PL_API_VER >= 219
             .duration = frame->ideal_frame_duration,
-#endif
             .frame_data = mpi,
             .map = map_frame,
             .unmap = unmap_frame,
@@ -942,9 +929,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             .pts = frame->current->pts + vsync_offset,
             .radius = pl_frame_mix_radius(&p->params),
             .vsync_duration = frame->vsync_interval,
-#if PL_API_VER < 219
-            .frame_duration = frame->ideal_frame_duration,
-#endif
             .interpolation_threshold = opts->interpolation_threshold,
         };
 
@@ -1014,19 +998,12 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         }
     }
 
-#if PL_API_VER >= 179
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
     bool cache_frame = will_redraw || frame->still;
     p->params.skip_caching_single_frame = !cache_frame;
-#endif
     p->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
     p->params.frame_mixer = frame->still ? NULL : p->frame_mixer;
-
-#if PL_API_VER >= 254
     p->peak_detect.allow_delayed = p->delayed_peak;
-#else
-    p->params.allow_delayed_peak_detect = p->delayed_peak;
-#endif
 
     // Render frame
     if (!pl_render_image_mix(p->rr, &mix, &target, &p->params)) {
@@ -1156,12 +1133,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     p->params.skip_caching_single_frame = true;
     p->params.preserve_mixing_cache = false;
     p->params.frame_mixer = NULL;
-
-#if PL_API_VER >= 254
     p->peak_detect.allow_delayed = false;
-#else
-    p->params.allow_delayed_peak_detect = false;
-#endif
 
     // Retrieve the current frame from the frame queue
     struct pl_frame_mix mix;
@@ -1598,7 +1570,7 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
     return hook;
 }
 
-#if PL_API_VER >= 222 && defined(PL_HAVE_LCMS)
+#ifdef PL_HAVE_LCMS
 
 static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
 {
@@ -1656,7 +1628,7 @@ static bool icc_load(void *priv, uint64_t sig, uint8_t *cache, size_t size)
     return len == size;
 }
 
-#endif // PL_API_VER
+#endif // PL_HAVE_LCMS
 
 static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 {
@@ -1679,11 +1651,9 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
     p->icc.size_r = s_r;
     p->icc.size_g = s_g;
     p->icc.size_b = s_b;
-#if PL_API_VER >= 222
     p->icc.cache_priv = p;
     p->icc.cache_save = icc_save;
     p->icc.cache_load = icc_load;
-#endif
 
     if (!opts->profile || !opts->profile[0]) {
         // No profile enabled, un-load any existing profiles
@@ -1744,7 +1714,6 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
     if (!opts)
         return;
 
-#if PL_API_VER >= 233
     const char *basename = mp_basename(shaderpath);
     struct bstr shadername;
     if (!mp_splitext(basename, &shadername))
@@ -1791,7 +1760,6 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
             break;
         }
     }
-#endif
 }
 
 static void update_render_options(struct vo *vo)
@@ -1819,9 +1787,7 @@ static void update_render_options(struct vo *vo)
     // Map scaler options as best we can
     p->params.upscaler = map_scaler(p, SCALER_SCALE);
     p->params.downscaler = map_scaler(p, SCALER_DSCALE);
-#if PL_API_VER >= 207
     p->params.plane_upscaler = map_scaler(p, SCALER_CSCALE);
-#endif
     p->frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
 
     // Request as many frames as required from the decoder
@@ -1857,10 +1823,8 @@ static void update_render_options(struct vo *vo)
         [TONE_MAPPING_SPLINE]   = &pl_tone_map_spline,
         [TONE_MAPPING_BT_2390]  = &pl_tone_map_bt2390,
         [TONE_MAPPING_BT_2446A] = &pl_tone_map_bt2446a,
-#if PL_API_VER >= 246
         [TONE_MAPPING_ST2094_40] = &pl_tone_map_st2094_40,
         [TONE_MAPPING_ST2094_10] = &pl_tone_map_st2094_10,
-#endif
     };
 
     static const enum pl_gamut_mode gamut_modes[] = {
@@ -1889,24 +1853,18 @@ static void update_render_options(struct vo *vo)
         p->color_map.tone_mapping_param = 0.0;
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
         p->color_map.gamut_mode = gamut_modes[opts->tone_map.gamut_mode];
-#if PL_API_VER >= 247
     p->color_map.visualize_lut = opts->tone_map.visualize;
-#endif
 
     switch (opts->dither_algo) {
     case DITHER_NONE:
         p->params.dither_params = NULL;
         break;
     case DITHER_ERROR_DIFFUSION:
-#if PL_API_VER >= 225
         p->params.error_diffusion = pl_find_error_diffusion_kernel(opts->error_diffusion);
         if (!p->params.error_diffusion) {
             MP_WARN(p, "Could not find error diffusion kernel '%s', falling "
                     "back to fruit.\n", opts->error_diffusion);
         }
-#else
-        MP_ERR(p, "Error diffusion dithering is not implemented.\n");
-#endif
         MP_FALLTHROUGH;
     case DITHER_ORDERED:
     case DITHER_FRUIT:
