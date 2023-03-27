@@ -301,7 +301,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     }
 
     // We can handle composed formats if the total number of planes is still
-    // equal the number of planes we expect. Complex formats with auxilliary
+    // equal the number of planes we expect. Complex formats with auxiliary
     // planes cannot be supported.
     if (p->num_planes != 0 && p->num_planes != num_returned_planes) {
         mp_msg(mapper->log, p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR,

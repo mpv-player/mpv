@@ -1756,7 +1756,7 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
     }
 
     if (param.len) {
-        mp_err(log, "Unparseable garbage at end of option value: '%.*s'\n",
+        mp_err(log, "Unparsable garbage at end of option value: '%.*s'\n",
                BSTR_P(param));
         r = M_OPT_INVALID;
     }
@@ -1948,7 +1948,7 @@ const m_option_type_t m_option_type_dummy_flag = {
 
 // Read s sub-option name, or a positional sub-opt value.
 // termset is a string containing the set of chars that terminate an option.
-// Return 0 on succes, M_OPT_ error code otherwise.
+// Return 0 on success, M_OPT_ error code otherwise.
 // optname is for error reporting.
 static int read_subparam(struct mp_log *log, bstr optname, char *termset,
                          bstr *str, bstr *out_subparam)
@@ -2274,7 +2274,7 @@ void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
             *widw = *widh * asp;
         }
         // Center window after resize. If valid x:y values are passed to
-        // geometry, then those values will be overriden.
+        // geometry, then those values will be overridden.
         *xpos += prew / 2 - *widw / 2;
         *ypos += preh / 2 - *widh / 2;
     }

@@ -186,7 +186,7 @@ character at the value.
 
 Custom quotes also take the content literally, but are more flexible than single
 quotes. They start with ````` (back-quote) followed by any ASCII character,
-and end at the first occurance of the same pair in reverse order, e.g.
+and end at the first occurrence of the same pair in reverse order, e.g.
 ```-foo-``` or ````bar````. The final pair sequence is not allowed at the
 value - in these examples ``-``` and `````` respectively. In the second
 example the last character of the value also can't be a back-quote.
@@ -1097,7 +1097,7 @@ Input Commands that are Possibly Subject to Change
         Before mpv 0.18.1, you had to do manual "double buffering" when updating
         an overlay by replacing it with a different memory buffer. Since mpv
         0.18.1, the memory is simply copied and doesn't reference any of the
-        memory indicated by the command's arguments after the commend returns.
+        memory indicated by the command's arguments after the command returns.
         If you want to use this command before mpv 0.18.1, reads the old docs
         to see how to handle this correctly.
 
@@ -1389,7 +1389,7 @@ Input Commands that are Possibly Subject to Change
 
         This was mostly created for network streams. For local files, there may
         be much better methods to create excerpts and such. There are tons of
-        much more user-friendly Lua scripts, that will reencode parts of a file
+        much more user-friendly Lua scripts, that will re-encode parts of a file
         by spawning a separate instance of ``ffmpeg``. With network streams,
         this is not that easily possible, as the stream would have to be
         downloaded again. Even if ``--stream-record`` is used to record the
@@ -2795,7 +2795,7 @@ Property list
         Name of the Nth entry. Available if the playlist file contains
         such fields and mpv's parser supports it for the given
         playlist format, or if the playlist entry has been opened before and a
-        media-title other then then filename has been aquired.
+        media-title other then then filename has been acquired.
 
     ``playlist/N/id``
         Unique ID for this entry. This is an automatically assigned integer ID

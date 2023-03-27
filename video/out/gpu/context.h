@@ -103,5 +103,5 @@ struct ra_swapchain_fns {
 struct ra_ctx *ra_ctx_create(struct vo *vo, struct ra_ctx_opts opts);
 void ra_ctx_destroy(struct ra_ctx **ctx);
 
-// Special case of creating a ra_ctx while specifiying a specific context by name.
+// Special case of creating a ra_ctx while specifying a specific context by name.
 struct ra_ctx *ra_ctx_create_by_name(struct vo *vo, const char *name);

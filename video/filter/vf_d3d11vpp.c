@@ -180,7 +180,7 @@ static int recreate_video_proc(struct mp_filter *vf)
         rindex = 0;
     }
 
-    // TOOD: so, how do we select which rate conversion mode the processor uses?
+    // TODO: so, how do we select which rate conversion mode the processor uses?
 
     hr = ID3D11VideoDevice_CreateVideoProcessor(p->video_dev, p->vp_enum, rindex,
                                                 &p->video_proc);

@@ -69,7 +69,7 @@ int m_config_parse(m_config_t *config, const char *location, bstr data,
                 goto error;
             }
             if (skip_ws(&line)) {
-                MP_ERR(config, "%s unparseable extra characters: '%.*s'\n",
+                MP_ERR(config, "%s unparsable extra characters: '%.*s'\n",
                        loc, BSTR_P(line));
                 goto error;
             }
@@ -120,7 +120,7 @@ int m_config_parse(m_config_t *config, const char *location, bstr data,
             }
         }
         if (skip_ws(&line)) {
-            MP_ERR(config, "%s unparseable extra characters: '%.*s'\n",
+            MP_ERR(config, "%s unparsable extra characters: '%.*s'\n",
                    loc, BSTR_P(line));
             goto error;
         }

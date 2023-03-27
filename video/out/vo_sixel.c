@@ -161,7 +161,7 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
     SIXELSTATUS status = SIXEL_FALSE;
     struct priv *priv = vo->priv;
 
-    /* create histgram and construct color palette
+    /* create histogram and construct color palette
      * with median cut algorithm. */
     status = sixel_dither_initialize(priv->testdither, priv->buffer,
                                      priv->width, priv->height,
