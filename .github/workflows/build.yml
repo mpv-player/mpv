@@ -27,7 +27,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib meson nasm
+          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib python3-pip ninja-build nasm
+          sudo python3 -m pip install meson
           ./bootstrap.py
 
       - name: Build libraries
