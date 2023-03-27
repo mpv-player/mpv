@@ -911,20 +911,20 @@ endif
 
 libplacebo = dependency('libplacebo', version: '>=4.157.0', required: get_option('libplacebo'))
 features += {'libplacebo': libplacebo.found()}
-features += {'libplacebo-next': false}
 if features['libplacebo']
     dependencies += libplacebo
     sources += files('video/out/placebo/ra_pl.c',
                      'video/out/placebo/utils.c')
-    pl_api_ver = libplacebo.version().split('.')[1]
-    if pl_api_ver.version_compare('>=264')
-        features += {'libplacebo-next': true}
-        message('libplacebo v5.264.0+ found! Enabling vo_gpu_next.')
-        sources += files('video/out/vo_gpu_next.c',
-                         'video/out/gpu_next/context.c')
-    else
-        message('libplacebo v5.264.0+ not found! Disabling vo_gpu_next.')
-    endif
+endif
+
+libplacebo_next = get_option('libplacebo-next').require(
+    features['libplacebo'] and libplacebo.version().version_compare('>=5.264.0'),
+    error_message: 'libplacebo v5.264.0+ was not found!',
+)
+features += {'libplacebo-next': libplacebo_next.allowed()}
+if features['libplacebo-next']
+    sources += files('video/out/vo_gpu_next.c',
+                     'video/out/gpu_next/context.c')
 endif
 
 sdl2_video = get_option('sdl2-video').require(
