@@ -132,7 +132,7 @@ enum mp_voctrl {
     VOCTRL_EXTERNAL_RESIZE,
 };
 
-// Helper to expose what kind of content is curently playing to the VO.
+// Helper to expose what kind of content is currently playing to the VO.
 enum mp_content_type {
     MP_CONTENT_NONE, // used for force-window
     MP_CONTENT_IMAGE,

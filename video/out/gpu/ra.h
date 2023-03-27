@@ -461,7 +461,7 @@ struct ra_fns {
 
     // Copy a sub-rectangle from one texture to another. The source/dest region
     // is always within the texture bounds. Areas outside the dest region are
-    // preserved. The formats of the textures must be losely compatible. The
+    // preserved. The formats of the textures must be loosely compatible. The
     // dst texture can be a swapchain framebuffer, but src can not. Only 2D
     // textures are supported.
     // The textures must have blit_src and blit_dst set, respectively.

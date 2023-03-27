@@ -1141,7 +1141,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     status = pl_queue_update(p->queue, &mix, pl_queue_params(.pts = p->last_pts));
     assert(status != PL_QUEUE_EOF);
     if (status == PL_QUEUE_ERR) {
-        MP_ERR(vo, "Unknown error occured while trying to take screenshot!\n");
+        MP_ERR(vo, "Unknown error occurred while trying to take screenshot!\n");
         return;
     }
     if (!mix.num_frames) {

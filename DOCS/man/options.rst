@@ -260,7 +260,7 @@ Playback Control
 
         The way older versions of mpv played playlist files via ``--playlist``
         was not safe against maliciously constructed files. Such files may
-        trigger harmful actions. This has been the case for all verions of
+        trigger harmful actions. This has been the case for all versions of
         mpv prior to 0.31.0, and all MPlayer versions, but unfortunately this
         fact was not well documented earlier, and some people have even
         misguidedly recommended the use of ``--playlist`` with untrusted
@@ -1253,7 +1253,7 @@ Video
     :nvdec:     requires ``--vo=gpu`` (Any platform CUDA is available)
     :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
     :drm:       requires ``--vo=gpu`` (Linux only)
-    :drm-copy:   copies video back to system RAM (Linux ony)
+    :drm-copy:   copies video back to system RAM (Linux only)
 
     Other hwdecs (only use if you know you have to):
 
@@ -3076,7 +3076,7 @@ Window
 
     :window:  On top of all other windows.
     :system:  On top of system elements like Taskbar, Menubar and Dock.
-    :desktop: On top of the Dekstop behind windows and Desktop icons.
+    :desktop: On top of the Desktop behind windows and Desktop icons.
     :level:   A level as integer.
 
 ``--focus-on-open``, ``--no-focus-on-open``
@@ -6103,7 +6103,7 @@ them.
 
     ``<material>`` can be one of the following:
 
-    :titlebar:              The standard macOS titel bar material.
+    :titlebar:              The standard macOS title bar material.
     :selection:             The standard macOS selection material.
     :menu:                  The standard macOS menu material. (macOS 10.11+)
     :popover:               The standard macOS popover material. (macOS 10.11+)

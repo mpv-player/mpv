@@ -45,7 +45,7 @@ Interface changes
     - add `--video-sync=display-tempo`
     - the `start` option is no longer unconditionally written by
       watch-later. It is still written by default but you may
-      need to explictly add `start` depending on how you have
+      need to explicitly add `start` depending on how you have
       `--watch-later-options` configured.
     - add `--vd-lavc-dr=auto` and make it the default
     - add support for the fractional scale protocol in wayland

@@ -124,7 +124,7 @@ int mp_hwupload_find_upload_format(struct mp_hwupload *u, int imgfmt)
     select_format(p, imgfmt, &sw, &up);
     // In th case where the imgfmt is not natively supported, it must be
     // converted, either before or during upload. If the imgfmt is supported as
-    // an hw input format, then prefer that, and if the upload has to do implict
+    // an hw input format, then prefer that, and if the upload has to do implicit
     // conversion, that's fine. On the other hand, if the imgfmt is not a
     // supported input format, then pick the output format as the conversion
     // target to avoid doing two conversions (one before upload, and one during

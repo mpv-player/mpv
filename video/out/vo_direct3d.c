@@ -570,7 +570,7 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
         }
     } else {
         if (FAILED(IDirect3DDevice9_Reset(priv->d3d_device, &present_params))) {
-            MP_ERR(priv, "Reseting Direct3D device failed.\n");
+            MP_ERR(priv, "Resetting Direct3D device failed.\n");
             return 0;
         }
     }

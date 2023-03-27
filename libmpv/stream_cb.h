@@ -119,7 +119,7 @@ typedef int64_t (*mpv_stream_cb_read_fn)(void *cookie, char *buf, uint64_t nbyte
  *
  * @param cookie opaque cookie identifying the stream,
  *               returned from mpv_stream_cb_open_fn
- * @param offset target absolut stream position
+ * @param offset target absolute stream position
  * @return the resulting offset of the stream
  *         MPV_ERROR_UNSUPPORTED or MPV_ERROR_GENERIC if the seek failed
  */

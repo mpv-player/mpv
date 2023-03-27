@@ -274,7 +274,7 @@ int mp_image_hw_download_get_sw_format(struct mp_image *src)
     return imgfmt;
 }
 
-// Copies the contents of the HW surface src to system memory and retuns it.
+// Copies the contents of the HW surface src to system memory and returns it.
 // If swpool is not NULL, it's used to allocate the target image.
 // src must be a hw surface with a AVHWFramesContext attached.
 // The returned image is cropped as needed.
