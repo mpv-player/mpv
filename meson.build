@@ -917,7 +917,7 @@ if features['libplacebo']
     sources += files('video/out/placebo/ra_pl.c',
                      'video/out/placebo/utils.c')
     pl_api_ver = libplacebo.version().split('.')[1]
-    if pl_api_ver.version_compare('>=264.0')
+    if pl_api_ver.version_compare('>=264')
         features += {'libplacebo-next': true}
         message('libplacebo v5.264.0+ found! Enabling vo_gpu_next.')
         sources += files('video/out/vo_gpu_next.c',
