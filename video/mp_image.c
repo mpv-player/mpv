@@ -136,7 +136,7 @@ static bool mp_image_fill_alloc(struct mp_image *mpi, int stride_align,
 // The allocated size of buffer must be given by buffer_size. buffer_size should
 // be at least the value returned by mp_image_get_alloc_size(). If buffer is not
 // already aligned to stride_align, the function will attempt to align the
-// pointer itself by incrementing the buffer pointer until ther alignment is
+// pointer itself by incrementing the buffer pointer until their alignment is
 // achieved (if buffer_size is not large enough to allow aligning the buffer
 // safely, the function fails). To be safe, you may want to overallocate the
 // buffer by stride_align bytes, and include the overallocation in buffer_size.
@@ -939,7 +939,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
 
     if (params->color.light == MP_CSP_LIGHT_AUTO) {
         // HLG is always scene-referred (using its own OOTF), everything else
-        // we assume is display-refered by default.
+        // we assume is display-referred by default.
         if (params->color.gamma == MP_CSP_TRC_HLG) {
             params->color.light = MP_CSP_LIGHT_SCENE_HLG;
         } else {

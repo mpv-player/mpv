@@ -186,7 +186,7 @@ character at the value.
 
 Custom quotes also take the content literally, but are more flexible than single
 quotes. They start with ````` (back-quote) followed by any ASCII character,
-and end at the first occurance of the same pair in reverse order, e.g.
+and end at the first occurrence of the same pair in reverse order, e.g.
 ```-foo-``` or ````bar````. The final pair sequence is not allowed at the
 value - in these examples ``-``` and `````` respectively. In the second
 example the last character of the value also can't be a back-quote.
@@ -2565,7 +2565,7 @@ Property list
     is unavailable if no video is active.
 
     When setting this property in the fullscreen or maximized state, the behavior
-    is the same as window-scale. In all ther cases, setting the value of this
+    is the same as window-scale. In all other cases, setting the value of this
     property will always resize the window. This does not affect the value of
     ``window-scale``.
 
@@ -2795,7 +2795,7 @@ Property list
         Name of the Nth entry. Available if the playlist file contains
         such fields and mpv's parser supports it for the given
         playlist format, or if the playlist entry has been opened before and a
-        media-title other then then filename has been aquired.
+        media-title other then then filename has been acquired.
 
     ``playlist/N/id``
         Unique ID for this entry. This is an automatically assigned integer ID

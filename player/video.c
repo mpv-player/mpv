@@ -598,7 +598,7 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
 
         if (opts->autosync) {
             /* Smooth reported playback position from AO by averaging
-             * it with the value expected based on previus value and
+             * it with the value expected based on previous value and
              * time elapsed since then. May help smooth video timing
              * with audio output that have inaccurate position reporting.
              * This is badly implemented; the behavior of the smoothing

@@ -405,7 +405,7 @@ iconv support use --disable-iconv.",
         'func': check_pkg_config('rubberband >= 3.0.0'),
     }, {
         'name': 'zimg-st428',
-        'desc': 'ZIMG suport for ZIMG_TRANSFER_ST428',
+        'desc': 'ZIMG support for ZIMG_TRANSFER_ST428',
         'func': check_pkg_config('zimg', '>= 3.0.5'),
     }
 ]

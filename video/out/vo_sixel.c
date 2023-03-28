@@ -77,7 +77,7 @@ struct priv {
     int num_cols, num_rows;  // terminal size in cells
     int canvas_ok;  // whether canvas vo->dwidth and vo->dheight are positive
 
-    int previous_histgram_colors;
+    int previous_histogram_colors;
 
     struct mp_rect src_rect;
     struct mp_rect dst_rect;
@@ -91,23 +91,23 @@ static const unsigned int depth = 3;
 static int detect_scene_change(struct vo* vo)
 {
     struct priv* priv = vo->priv;
-    int previous_histgram_colors = priv->previous_histgram_colors;
-    int histgram_colors = 0;
+    int previous_histogram_colors = priv->previous_histogram_colors;
+    int histogram_colors = 0;
 
     // If threshold is set negative, then every frame must be a scene change
     if (priv->dither == NULL || priv->opts.threshold < 0)
         return 1;
 
-    histgram_colors = sixel_dither_get_num_of_histogram_colors(priv->testdither);
+    histogram_colors = sixel_dither_get_num_of_histogram_colors(priv->testdither);
 
-    int color_difference_count = previous_histgram_colors - histgram_colors;
+    int color_difference_count = previous_histogram_colors - histogram_colors;
     color_difference_count = (color_difference_count > 0) ?  // abs value
                               color_difference_count : -color_difference_count;
 
     if (100 * color_difference_count >
-        priv->opts.threshold * previous_histgram_colors)
+        priv->opts.threshold * previous_histogram_colors)
     {
-        priv->previous_histgram_colors = histgram_colors; // update history
+        priv->previous_histogram_colors = histogram_colors; // update history
         return 1;
     } else {
         return 0;
@@ -161,7 +161,7 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
     SIXELSTATUS status = SIXEL_FALSE;
     struct priv *priv = vo->priv;
 
-    /* create histgram and construct color palette
+    /* create histogram and construct color palette
      * with median cut algorithm. */
     status = sixel_dither_initialize(priv->testdither, priv->buffer,
                                      priv->width, priv->height,
@@ -536,7 +536,7 @@ static int preinit(struct vo *vo)
         }
     }
 
-    priv->previous_histgram_colors = 0;
+    priv->previous_histogram_colors = 0;
 
     return 0;
 }
