@@ -480,6 +480,7 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
                                     struct d3d11_device_opts *opts,
                                     ID3D11Device **dev_out)
 {
+    bool debug = opts->debug;
     bool warp = opts->force_warp;
     int max_fl = opts->max_feature_level;
     int min_fl = opts->min_feature_level;
@@ -510,7 +511,15 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
         max_fl = max_fl ? max_fl : D3D_FEATURE_LEVEL_11_0;
         min_fl = min_fl ? min_fl : D3D_FEATURE_LEVEL_9_1;
 
-        hr = create_device(log, adapter, warp, opts->debug, max_fl, min_fl, &dev);
+        hr = create_device(log, adapter, warp, debug, max_fl, min_fl, &dev);
+
+        // Retry without debug, if SDK is not available
+        if (debug && hr == DXGI_ERROR_SDK_COMPONENT_MISSING) {
+            mp_warn(log, "gpu-debug disabled due to error: %s\n", mp_HRESULT_to_str(hr));
+            debug = false;
+            continue;
+        }
+
         if (SUCCEEDED(hr))
             break;
 
