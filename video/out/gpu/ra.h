@@ -408,7 +408,7 @@ struct ra_fns {
     void (*tex_destroy)(struct ra *ra, struct ra_tex *tex);
 
     // Upload data to a texture. This is an extremely common operation. When
-    // using a buffer, the contants of the buffer must exactly match the image
+    // using a buffer, the contents of the buffer must exactly match the image
     // - conversions between bit depth etc. are not supported. The buffer *may*
     // be marked as "in use" while this operation is going on, and the contents
     // must not be touched again by the API user until buf_poll returns true.

@@ -29,7 +29,7 @@
 void mp_rand_seed(uint64_t seed);
 
 /*
- * Return the next 64-bit psuedo-random integer, and update the state
+ * Return the next 64-bit pseudo-random integer, and update the state
  * accordingly.
  */
 uint64_t mp_rand_next(void);
