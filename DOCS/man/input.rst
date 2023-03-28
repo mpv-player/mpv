@@ -2565,7 +2565,7 @@ Property list
     is unavailable if no video is active.
 
     When setting this property in the fullscreen or maximized state, the behavior
-    is the same as window-scale. In all ther cases, setting the value of this
+    is the same as window-scale. In all other cases, setting the value of this
     property will always resize the window. This does not affect the value of
     ``window-scale``.
 

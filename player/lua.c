@@ -123,7 +123,7 @@ static void mp_lua_optarg(lua_State *L, int arg)
 
 // autofree: avoid leaks if a lua-error occurs between talloc new/free.
 // If a lua c-function does a new allocation (not tied to an existing context),
-// and an uncaught lua-error occures before "free" - the allocation is leaked.
+// and an uncaught lua-error occurs before "free" - the allocation is leaked.
 
 // autofree lua C function: same as lua_CFunction but with these differences:
 // - It accepts an additional void* argument - a pre-initialized talloc context
@@ -174,7 +174,7 @@ static void add_af_mpv_alloc(void *parent, char *ma)
 
 
 // Perform the equivalent of mpv_free_node_contents(node) when tmp is freed.
-static void steal_node_alloctions(void *tmp, mpv_node *node)
+static void steal_node_allocations(void *tmp, mpv_node *node)
 {
     talloc_steal(tmp, node_get_alloc(node));
 }
@@ -552,7 +552,7 @@ static int script_raw_wait_event(lua_State *L, void *tmp)
 
     struct mpv_node rn;
     mpv_event_to_node(&rn, event);
-    steal_node_alloctions(tmp, &rn);
+    steal_node_allocations(tmp, &rn);
 
     pushnode(L, &rn); // event
 
@@ -924,7 +924,7 @@ static int script_get_property_native(lua_State *L, void *tmp)
     mpv_node node;
     int err = mpv_get_property(ctx->client, name, MPV_FORMAT_NODE, &node);
     if (err >= 0) {
-        steal_node_alloctions(tmp, &node);
+        steal_node_allocations(tmp, &node);
         pushnode(L, &node);
         return 1;
     }
@@ -975,7 +975,7 @@ static int script_command_native(lua_State *L, void *tmp)
     makenode(tmp, &node, L, 1);
     int err = mpv_command_node(ctx->client, &node, &result);
     if (err >= 0) {
-        steal_node_alloctions(tmp, &result);
+        steal_node_allocations(tmp, &result);
         pushnode(L, &result);
         return 1;
     }
