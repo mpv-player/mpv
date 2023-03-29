@@ -475,33 +475,38 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo_drm_state *drm = ctx->vo->drm;
-    struct drm_atomic_context *atomic_ctx = drm->atomic_context;
+    if (drm) {
+        struct drm_atomic_context *atomic_ctx = drm->atomic_context;
 
-    if (drmModeAtomicCommit(drm->fd, atomic_ctx->request, 0, NULL))
-        MP_ERR(ctx->vo, "Failed to commit atomic request: %s\n", mp_strerror(errno));
+        if (drmModeAtomicCommit(drm->fd, atomic_ctx->request, 0, NULL))
+            MP_ERR(ctx->vo, "Failed to commit atomic request: %s\n",
+                    mp_strerror(errno));
 
-    drmModeAtomicFree(atomic_ctx->request);
+        drmModeAtomicFree(atomic_ctx->request);
+    }
 
     vo_drm_uninit(ctx->vo);
     ra_gl_ctx_uninit(ctx);
 
-    // According to GBM documentation all BO:s must be released before
-    // gbm_surface_destroy can be called on the surface.
-    while (p->gbm.num_bos) {
-        swapchain_step(ctx);
+    if (p) {
+        // According to GBM documentation all BO:s must be released
+        // before gbm_surface_destroy can be called on the surface.
+        while (p->gbm.num_bos) {
+            swapchain_step(ctx);
+        }
+
+        eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                       EGL_NO_CONTEXT);
+        eglDestroyContext(p->egl.display, p->egl.context);
+        eglDestroySurface(p->egl.display, p->egl.surface);
+        gbm_surface_destroy(p->gbm.surface);
+        eglTerminate(p->egl.display);
+        gbm_device_destroy(p->gbm.device);
+        p->egl.context = EGL_NO_CONTEXT;
+        eglDestroyContext(p->egl.display, p->egl.context);
+
+        close(p->drm_params.render_fd);
     }
-
-    eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                   EGL_NO_CONTEXT);
-    eglDestroyContext(p->egl.display, p->egl.context);
-    eglDestroySurface(p->egl.display, p->egl.surface);
-    gbm_surface_destroy(p->gbm.surface);
-    eglTerminate(p->egl.display);
-    gbm_device_destroy(p->gbm.device);
-    p->egl.context = EGL_NO_CONTEXT;
-    eglDestroyContext(p->egl.display, p->egl.context);
-
-    close(p->drm_params.render_fd);
 }
 
 // If the draw plane supports ARGB we want to use that, but if it doesn't we
