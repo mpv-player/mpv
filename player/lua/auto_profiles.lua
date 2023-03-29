@@ -87,8 +87,13 @@ function get(name, default)
     -- Normally, we use the cached value only
     if not watched_properties[name] then
         watched_properties[name] = true
+        local res, err = mp.get_property_native(name)
+        if err == "property not found" then
+            msg.error("Property '" .. name .. "' was not found.")
+            return default
+        end
+        cached_properties[name] = res
         mp.observe_property(name, "native", on_property_change)
-        cached_properties[name] = mp.get_property_native(name)
     end
     -- The first time the property is read we need add it to the
     -- properties_to_profiles table, which will be used to mark the profile
