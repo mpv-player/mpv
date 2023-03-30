@@ -276,7 +276,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         } else {
             window_move(wl, serial);
         }
-        // Explictly send an UP event after the client finishes a move/resize
+        // Explicitly send an UP event after the client finishes a move/resize
         mp_input_put_key(wl->vo->input_ctx, button | MP_KEY_STATE_UP);
     }
 }
@@ -1073,7 +1073,7 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     // Notes:
     //  - tv_sec_lo + tv_sec_hi is the equivalent of oml's ust
     //  - seq_lo + seq_hi is the equivalent of oml's msc
-    //  - these values are updated everytime the compositor receives feedback.
+    //  - these values are updated every time the compositor receives feedback.
 
     int64_t sec = (uint64_t) tv_sec_lo + ((uint64_t) tv_sec_hi << 32);
     int64_t ust = sec * 1000000LL + (uint64_t) tv_nsec / 1000;
@@ -1443,7 +1443,7 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
     xdg_toplevel_add_listener(wl->xdg_toplevel, &xdg_toplevel_listener, wl);
 
     if (!wl->xdg_surface || !wl->xdg_toplevel) {
-        MP_ERR(wl, "failled to create xdg_surface and xdg_toplevel!\n");
+        MP_ERR(wl, "failed to create xdg_surface and xdg_toplevel!\n");
         return 1;
     }
     return 0;
@@ -2414,7 +2414,7 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
     /* We need some vblank interval to use for the timeout in
      * this function. The order of preference of values to use is:
      * 1. vsync duration from presentation time
-     * 2. refresh inteval reported by presentation time
+     * 2. refresh interval reported by presentation time
      * 3. refresh rate of the output reported by the compositor
      * 4. make up crap if vblank_time is still <= 0 (better than nothing) */
 

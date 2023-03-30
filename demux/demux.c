@@ -471,7 +471,7 @@ static void prune_old_packets(struct demux_internal *in);
 static void dumper_close(struct demux_internal *in);
 static void demux_convert_tags_charset(struct demuxer *demuxer);
 
-static uint64_t get_foward_buffered_bytes(struct demux_stream *ds)
+static uint64_t get_forward_buffered_bytes(struct demux_stream *ds)
 {
     if (!ds->reader_head)
         return 0;
@@ -541,7 +541,7 @@ static void check_queue_consistency(struct demux_internal *in)
                 // ...reader_head and others must be in the queue.
                 assert(is_forward == !!queue->ds->reader_head);
                 assert(kf_found == !!queue->keyframe_latest);
-                uint64_t fw_bytes2 = get_foward_buffered_bytes(queue->ds);
+                uint64_t fw_bytes2 = get_forward_buffered_bytes(queue->ds);
                 assert(fw_bytes == fw_bytes2);
             }
 
@@ -2124,7 +2124,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
         ds->base_ts = queue->last_ts;
 
     const char *num_pkts = queue->head == queue->tail ? "1" : ">1";
-    uint64_t fw_bytes = get_foward_buffered_bytes(ds);
+    uint64_t fw_bytes = get_forward_buffered_bytes(ds);
     MP_TRACE(in, "append packet to %s: size=%zu pts=%f dts=%f pos=%"PRIi64" "
              "[num=%s size=%zd]\n", stream_type_name(stream->type),
              dp->len, dp->pts, dp->dts, dp->pos, num_pkts, (size_t)fw_bytes);
@@ -2218,7 +2218,7 @@ static bool read_packet(struct demux_internal *in)
             if (!in->hyst_active)
                 prefetch_more |= ds->queue->last_ts - ds->base_ts < in->min_secs;
         }
-        total_fw_bytes += get_foward_buffered_bytes(ds);
+        total_fw_bytes += get_forward_buffered_bytes(ds);
     }
 
     MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d, refresh_more=%d\n",
@@ -2239,7 +2239,7 @@ static bool read_packet(struct demux_internal *in)
                     for (struct demux_packet *dp = ds->reader_head;
                          dp; dp = dp->next)
                         num_pkts++;
-                    uint64_t fw_bytes = get_foward_buffered_bytes(ds);
+                    uint64_t fw_bytes = get_forward_buffered_bytes(ds);
                     MP_WARN(in, "  %s/%d: %zd packets, %zd bytes%s%s\n",
                             stream_type_name(ds->type), n,
                             num_pkts, (size_t)fw_bytes,
@@ -2320,7 +2320,7 @@ static void prune_old_packets(struct demux_internal *in)
         uint64_t fw_bytes = 0;
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
-            fw_bytes += get_foward_buffered_bytes(ds);
+            fw_bytes += get_forward_buffered_bytes(ds);
         }
         uint64_t max_avail = in->max_bytes_bw;
         // Backward cache (if enabled at all) can use unused forward cache.
@@ -4520,7 +4520,7 @@ void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *
             r->ts_end = MP_PTS_MAX(r->ts_end, ds->queue->last_ts);
             any_packets |= !!ds->reader_head;
         }
-        r->fw_bytes += get_foward_buffered_bytes(ds);
+        r->fw_bytes += get_forward_buffered_bytes(ds);
     }
     r->idle = (!in->reading && !r->underrun) || r->eof;
     r->underrun &= !r->idle && in->threading;

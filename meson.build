@@ -911,20 +911,20 @@ endif
 
 libplacebo = dependency('libplacebo', version: '>=4.157.0', required: get_option('libplacebo'))
 features += {'libplacebo': libplacebo.found()}
-features += {'libplacebo-next': false}
 if features['libplacebo']
     dependencies += libplacebo
     sources += files('video/out/placebo/ra_pl.c',
                      'video/out/placebo/utils.c')
-    pl_api_ver = libplacebo.version().split('.')[1]
-    if pl_api_ver.version_compare('>=202')
-        features += {'libplacebo-next': true}
-        message('libplacebo v4.202+ found! Enabling vo_gpu_next.')
-        sources += files('video/out/vo_gpu_next.c',
-                         'video/out/gpu_next/context.c')
-    else
-        message('libplacebo v4.202+ not found! Disabling vo_gpu_next.')
-    endif
+endif
+
+libplacebo_next = get_option('libplacebo-next').require(
+    features['libplacebo'] and libplacebo.version().version_compare('>=5.264.0'),
+    error_message: 'libplacebo v5.264.0+ was not found!',
+)
+features += {'libplacebo-next': libplacebo_next.allowed()}
+if features['libplacebo-next']
+    sources += files('video/out/vo_gpu_next.c',
+                     'video/out/gpu_next/context.c')
 endif
 
 sdl2_video = get_option('sdl2-video').require(
@@ -1586,11 +1586,21 @@ endif
 rst2pdf = find_program('rst2pdf', required: get_option('pdf-build'))
 features += {'pdf-build': rst2pdf.found()}
 if features['pdf-build']
+    rst2pdf_help = run_command(
+        rst2pdf, '--help',
+        check: true, capture: true
+    ).stdout()
     datadir = get_option('datadir')
     custom_target('pdf-manpages',
         input: manpage,
         output: 'mpv.pdf',
-        command: [rst2pdf, '-c', '-b', '1', '--repeat-table-rows', '@INPUT@', '-o', '@OUTPUT@'],
+        command: [
+            docutils_wrapper, rst2pdf,
+            '-c', '-b', '1', '--repeat-table-rows',
+            rst2pdf_help.contains('--record-dependencies') ?
+                ['--record-dependencies', '@DEPFILE@'] : [],
+            '@INPUT@', '-o', '@OUTPUT@'],
+        depfile: 'mpv.pdf.dep',
         install: true,
         install_dir: join_paths(datadir, 'doc', 'mpv')
     )

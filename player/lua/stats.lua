@@ -431,7 +431,7 @@ local function keyname_cells(k)
 end
 
 local function get_kbinfo_lines(width)
-    -- active keys: only highest priotity of each key, and not our (stats) keys
+    -- active keys: only highest priority of each key, and not our (stats) keys
     local bindings = mp.get_property_native("input-bindings", {})
     local active = {}  -- map: key-name -> bind-info
     for _, bind in pairs(bindings) do

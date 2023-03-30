@@ -39,6 +39,12 @@ def convert_depfile(output, depfile):
             f.write(os.path.abspath(dep))
             f.write(' \\\n')
 
+def remove(path):
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
+
 argv = sys.argv[1:]
 
 depfile = None
@@ -49,8 +55,13 @@ for opt, optarg in zip(argv, argv[1:]):
         depfile = optarg
 
 try:
-    subprocess.run(argv)
-    convert_depfile(output, depfile)
+    proc = subprocess.run(argv, check=True)
+    if depfile is not None:
+        convert_depfile(output, depfile)
 except:
-    os.remove(output)
-    os.remove(depfile)
+    remove(output)
+    if depfile is not None:
+        remove(depfile)
+    sys.exit(1)
+
+sys.exit(proc.returncode)

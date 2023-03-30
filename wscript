@@ -405,7 +405,7 @@ iconv support use --disable-iconv.",
         'func': check_pkg_config('rubberband >= 3.0.0'),
     }, {
         'name': 'zimg-st428',
-        'desc': 'ZIMG suport for ZIMG_TRANSFER_ST428',
+        'desc': 'ZIMG support for ZIMG_TRANSFER_ST428',
         'func': check_pkg_config('zimg', '>= 3.0.5'),
     }
 ]
@@ -779,10 +779,10 @@ video_output_features = [
         'desc': 'libplacebo support',
         'func': check_pkg_config('libplacebo >= 4.157.0'),
     }, {
-        'name': 'libplacebo-next',
-        'desc': 'libplacebo v4.202+, needed for vo_gpu_next',
+        'name': '--libplacebo-next',
+        'desc': 'libplacebo v5.264.0+, needed for vo_gpu_next',
         'deps': 'libplacebo',
-        'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 202',
+        'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 264',
                                    use='libplacebo'),
     }, {
         'name': '--vulkan',

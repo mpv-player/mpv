@@ -201,14 +201,14 @@ if [ "$1" = "meson" ]; then
     meson setup build --cross-file "$prefix_dir/crossfile" \
         --buildtype debugoptimized \
         -Dlibmpv=true -Dlua=luajit \
-        -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
+        -D{shaderc,spirv-cross,d3d11,libplacebo,libplacebo-next}=enabled
 
     meson compile -C build
 elif [ "$1" = "waf" ]; then
     PKG_CONFIG=pkg-config ./waf configure \
         --out=build_waf \
         --enable-libmpv-shared --lua=luajit \
-        --enable-{shaderc,spirv-cross,d3d11,libplacebo}
+        --enable-{shaderc,spirv-cross,d3d11,libplacebo,libplacebo-next}
 
     ./waf build
 fi

@@ -174,7 +174,7 @@ Configurable Options
 ``seekbarhandlesize``
     Default: 0.6
 
-    Size ratio of the seek handle if ``seekbarstyle`` is set to ``dimaond``
+    Size ratio of the seek handle if ``seekbarstyle`` is set to ``diamond``
     or ``knob``. This is relative to the full height of the seekbar.
 
 ``seekbarkeyframes``

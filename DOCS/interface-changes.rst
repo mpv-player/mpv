@@ -27,6 +27,8 @@ Interface changes
 ::
 
  --- mpv 0.36.0 ---
+    - `playlist/N/title` gets set upon opening the file if it wasn't already set
+      and a title is available.
     - add the `--vo=kitty` video output driver, as well as the options
       `--vo-kitty-cols`, `--vo-kitty-rows`, `--vo-kitty-width`,
       `--vo-kitty-height`, `--vo-kitty-left`, `--vo-kitty-top`,
@@ -43,7 +45,7 @@ Interface changes
     - add `--video-sync=display-tempo`
     - the `start` option is no longer unconditionally written by
       watch-later. It is still written by default but you may
-      need to explictly add `start` depending on how you have
+      need to explicitly add `start` depending on how you have
       `--watch-later-options` configured.
     - add `--vd-lavc-dr=auto` and make it the default
     - add support for the fractional scale protocol in wayland

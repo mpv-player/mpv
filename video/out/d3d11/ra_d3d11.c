@@ -2021,7 +2021,7 @@ static ra_timer *timer_create(struct ra *ra)
 
     // Measuring duration in D3D11 requires three queries: start and end
     // timestamps, and a disjoint query containing a flag which says whether
-    // the timestamps are usable or if a discontinuity occured between them,
+    // the timestamps are usable or if a discontinuity occurred between them,
     // like a change in power state or clock speed. The disjoint query also
     // contains the timer frequency, so the timestamps are useless without it.
     hr = ID3D11Device_CreateQuery(p->dev,
