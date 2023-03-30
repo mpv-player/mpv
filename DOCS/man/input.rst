@@ -1429,8 +1429,8 @@ IPC sees. Note that the C API has separate C-level declarations with
 ``mpv_event``, which may be slightly different.
 
 Note that events are asynchronous: the player core continues running while
-events are delivered to scripts and other clients. In some cases, you can hooks
-to enforce synchronous execution.
+events are delivered to scripts and other clients. In some cases, you can use
+hooks to enforce synchronous execution.
 
 All events can have the following fields:
 
