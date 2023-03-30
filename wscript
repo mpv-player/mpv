@@ -637,8 +637,9 @@ video_output_features = [
         'desc': 'OpenGL ANGLE headers',
         'deps': 'os-win32 || os-cygwin',
         'groups': [ 'gl' ],
-        'func': check_statement(['EGL/egl.h', 'EGL/eglext.h'],
-                                'int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE')
+        'func': check_statement(['EGL/egl.h', 'EGL/eglext.h', 'EGL/eglext_angle.h'],
+                                'int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE; '
+                                'PFNEGLCREATEDEVICEANGLEPROC y = NULL')
     } , {
         'name': '--egl-angle-lib',
         'desc': 'OpenGL Win32 ANGLE Library',
