@@ -923,7 +923,7 @@ static void update_maximized_state(struct vo_w32_state *w32)
     WINDOWPLACEMENT wp = { .length = sizeof wp };
     GetWindowPlacement(w32->window, &wp);
 
-    if (wp.showCmd == SW_SHOWMINIMIZED) {
+    if (wp.showCmd == SW_SHOWMINIMIZED || wp.showCmd == SW_SHOWMINNOACTIVE) {
         // When the window is minimized, setting this property just changes
         // whether it will be maximized when it's restored
         if (w32->opts->window_maximized) {
@@ -962,7 +962,7 @@ static void update_window_state(struct vo_w32_state *w32)
     // Show the window if it's not yet visible
     if (!is_visible(w32->window)) {
         if (w32->opts->window_minimized) {
-            ShowWindow(w32->window, SW_SHOWMINIMIZED);
+            ShowWindow(w32->window, SW_SHOWMINNOACTIVE);
             update_maximized_state(w32); // Set the WPF_RESTORETOMAXIMIZED flag
         } else if (w32->opts->window_maximized) {
             ShowWindow(w32->window, SW_SHOWMAXIMIZED);
@@ -1085,7 +1085,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             WINDOWPLACEMENT wp = { .length = sizeof wp };
             GetWindowPlacement(w32->window, &wp);
 
-            bool is_minimized = wp.showCmd == SW_SHOWMINIMIZED;
+            bool is_minimized = (wp.showCmd == SW_SHOWMINIMIZED) || (wp.showCmd == SW_SHOWMINNOACTIVE);
             if (w32->opts->window_minimized != is_minimized) {
                 w32->opts->window_minimized = is_minimized;
                 m_config_cache_write_opt(w32->opts_cache,
@@ -1093,7 +1093,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
 
             bool is_maximized = wp.showCmd == SW_SHOWMAXIMIZED ||
-                (wp.showCmd == SW_SHOWMINIMIZED &&
+                ((wp.showCmd == SW_SHOWMINIMIZED) || (wp.showCmd == SW_SHOWMINNOACTIVE) &&
                     (wp.flags & WPF_RESTORETOMAXIMIZED));
             if (w32->opts->window_maximized != is_maximized) {
                 w32->opts->window_maximized = is_maximized;
