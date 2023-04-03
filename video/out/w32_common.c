@@ -631,6 +631,7 @@ static void update_playback_state(struct vo_w32_state *w32)
 struct get_monitor_data {
     int i;
     int target;
+    const wchar_t *path;
     HMONITOR mon;
 };
 
@@ -638,7 +639,15 @@ static BOOL CALLBACK get_monitor_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
 {
     struct get_monitor_data *data = (struct get_monitor_data*)p;
 
-    if (data->i == data->target) {
+    if (data->path) {
+        MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
+        if (GetMonitorInfoW(mon, (LPMONITORINFO)&mi) &&
+            !wcsncmp(data->path, mi.szDevice, CCHDEVICENAME))
+        {
+            data->mon = mon;
+            return FALSE;
+        }
+    } else if (data->i == data->target) {
         data->mon = mon;
         return FALSE;
     }
@@ -653,10 +662,93 @@ static HMONITOR get_monitor(int id)
     return data.mon;
 }
 
+static HMONITOR get_monitor_by_path(const wchar_t* path)
+{
+    struct get_monitor_data data = { .path = path };
+    EnumDisplayMonitors(NULL, NULL, get_monitor_proc, (LPARAM)&data);
+    return data.mon;
+}
+
+static HMONITOR get_monitor_by_name(const wchar_t* name)
+{
+    HMONITOR mon = NULL;
+    DISPLAYCONFIG_PATH_INFO *paths = NULL;
+    DISPLAYCONFIG_MODE_INFO *modes = NULL;
+    uint32_t pathCount = 0, modeCount = 0;
+    uint32_t flags = QDC_ONLY_ACTIVE_PATHS | QDC_VIRTUAL_MODE_AWARE;
+    long result = ERROR_SUCCESS;
+    do
+    {
+        // Determine how many path and mode structures to allocate
+        result = GetDisplayConfigBufferSizes(flags, &pathCount, &modeCount);
+        if (result != ERROR_SUCCESS)
+            goto done;
+
+        // Allocate the path and mode arrays
+        paths = realloc(paths, pathCount * sizeof(DISPLAYCONFIG_PATH_INFO));
+        modes = realloc(modes, modeCount * sizeof(DISPLAYCONFIG_MODE_INFO));
+
+        // Get all active paths and their modes
+        // The function may have returned fewer paths/modes than estimated
+        result = QueryDisplayConfig(flags, &pathCount, paths,
+                                    &modeCount, modes, NULL);
+
+        // It's possible that between the call to GetDisplayConfigBufferSizes
+        // and QueryDisplayConfig that the display state changed, so loop on
+        // the case of ERROR_INSUFFICIENT_BUFFER.
+    } while (result == ERROR_INSUFFICIENT_BUFFER);
+
+    if (result != ERROR_SUCCESS)
+        goto done;
+
+    // For each active path
+    for (uint32_t i = 0; !mon && i < pathCount; i++) {
+        // Find the target (monitor) friendly name
+        DISPLAYCONFIG_TARGET_DEVICE_NAME targetName;
+        targetName.header.adapterId = paths[i].targetInfo.adapterId;
+        targetName.header.id = paths[i].targetInfo.id;
+        targetName.header.type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME;
+        targetName.header.size = sizeof(targetName);
+        result = DisplayConfigGetDeviceInfo(&targetName.header);
+        if (result != ERROR_SUCCESS ||
+            wcsncmp(targetName.monitorFriendlyDeviceName, name, 64))
+            continue;
+
+        // Find the source device name
+        DISPLAYCONFIG_SOURCE_DEVICE_NAME sourceName;
+        sourceName.header.adapterId = paths[i].targetInfo.adapterId;
+        sourceName.header.id = paths[i].sourceInfo.id;
+        sourceName.header.type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME;
+        sourceName.header.size = sizeof(sourceName);
+        result = DisplayConfigGetDeviceInfo(&sourceName.header);
+        if (result == ERROR_SUCCESS)
+            mon = get_monitor_by_path(sourceName.viewGdiDeviceName);
+    }
+
+done:
+    free(paths);
+    free(modes);
+    return mon;
+}
+
 static HMONITOR get_default_monitor(struct vo_w32_state *w32)
 {
     const int id = w32->current_fs ? w32->opts->fsscreen_id :
                                      w32->opts->screen_id;
+
+    // Handle --fs-screen-name and --screen-name
+    if (id == -1 && (w32->opts->fsscreen_name || w32->opts->screen_name)) {
+        char *screen_name = w32->current_fs ? w32->opts->fsscreen_name :
+                                              w32->opts->screen_name;
+        if (screen_name) {
+            wchar_t *name = mp_from_utf8(w32, screen_name);
+            HMONITOR mon = get_monitor_by_name(name);
+            talloc_free(name);
+            if (mon)
+                return mon;
+            MP_WARN(w32, "Screen name %s not found!\n", screen_name);
+        }
+    }
 
     // Handle --fs-screen=<all|default> and --screen=default
     if (id < 0)
