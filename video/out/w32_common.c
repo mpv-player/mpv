@@ -1490,7 +1490,7 @@ static void gui_thread_reconfig(void *ptr)
                 geo.win.x0 + vo->dwidth, geo.win.y0 + vo->dheight);
         w32->prev_windowrc = w32->windowrc;
         w32->window_bounds_initialized = true;
-        w32->fit_on_screen = true;
+        w32->fit_on_screen = !(geo.flags & VO_WIN_FORCE_POS);
         goto finish;
     }
 
