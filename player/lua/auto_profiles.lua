@@ -25,11 +25,8 @@ local function evaluate(profile)
         -- errors can be "normal", e.g. in case properties are unavailable
         msg.verbose("Profile condition error on evaluating: " .. res)
         res = false
-    elseif type(res) ~= "boolean" then
-        msg.verbose("Profile condition did not return a boolean, but "
-                    .. type(res) .. ".")
-        res = false
     end
+    res = not not res
     if res ~= profile.status then
         if res == true then
             msg.info("Applying auto profile: " .. profile.name)
