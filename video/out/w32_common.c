@@ -681,8 +681,12 @@ static MONITORINFO get_monitor_info(struct vo_w32_state *w32)
     HMONITOR mon;
     if (IsWindowVisible(w32->window) && !w32->current_fs) {
         mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
-    } else {
+	} else if (w32->window_bounds_initialized && !w32->current_fs) {
         // The window is not visible during initialization, so get the
+        // monitor by the cached window rect, or fallback to primary.
+        mon = MonitorFromRect(&w32->windowrc, MONITOR_DEFAULTTOPRIMARY);
+    } else {
+        // The window bounds have not been initialized, so get the
         // monitor by --screen or --fs-screen id, or fallback to primary.
         mon = get_default_monitor(w32);
     }
