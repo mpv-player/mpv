@@ -3088,6 +3088,13 @@ Window
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.
 
+``--window-transparency=<default|0-255>``
+    (Windows only)
+    Sets the transparency of the mpv window.
+
+    :default: No change in transparency.
+    :0-255: Level of transparency, 255 being completely opaque.
+
 ``--on-all-workspaces``
     (X11 and macOS only)
     Show the video window on all virtual desktops.

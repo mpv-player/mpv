@@ -953,6 +953,28 @@ static bool is_visible(HWND window)
     return GetWindowLongPtrW(window, GWL_STYLE) & WS_VISIBLE;
 }
 
+static bool update_transparency(struct vo_w32_state *w32, bool handleDefault) {
+    if (!w32 || w32->parent) {
+        return false;
+    }
+
+    int transparency = w32->opts->window_transparency;
+
+    if (transparency == -1 && handleDefault) { // Reset the window attributes
+        // Remove the WS_EX_LAYERED flag from the extended style and set the alpha value to 255
+        return SetWindowLong(w32->window, GWL_EXSTYLE, GetWindowLong(w32->window, GWL_EXSTYLE) & ~WS_EX_LAYERED)
+            && SetLayeredWindowAttributes(w32->window, 0, 255, LWA_ALPHA);
+    } else if (transparency <= -1 && !handleDefault) {
+        return false;
+    } else { // Set the window transparency
+        // Clamp the transparency value to 0 or 255 if it exceeds the minimum or maximum, respectively
+        int alpha = MPCLAMP(transparency, 0, 255);
+        // Set the WS_EX_LAYERED flag in the extended style and set the alpha value for the window
+        return SetWindowLong(w32->window, GWL_EXSTYLE, GetWindowLong(w32->window, GWL_EXSTYLE) | WS_EX_LAYERED)
+            && SetLayeredWindowAttributes(w32->window, 0, alpha, LWA_ALPHA);
+    }
+}
+
 static void update_window_state(struct vo_w32_state *w32)
 {
     if (w32->parent)
@@ -1590,6 +1612,7 @@ static void *gui_thread(void *ptr)
     }
 
     update_dark_mode(w32);
+    update_transparency(w32, false);
 
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
@@ -1769,6 +1792,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             } else if (changed_option == &vo_opts->border) {
                 update_window_style(w32);
                 update_window_state(w32);
+            } else if (changed_option == &vo_opts->window_transparency) {
+                update_transparency(w32, true);
             } else if (changed_option == &vo_opts->window_minimized) {
                 update_minimized_state(w32);
             } else if (changed_option == &vo_opts->window_maximized) {

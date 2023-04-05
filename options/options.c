@@ -111,6 +111,9 @@ static const m_option_t mp_vo_opt_list[] = {
     {"ontop-level", OPT_CHOICE(ontop_level, {"window", -1}, {"system", -2},
         {"desktop", -3}), M_RANGE(0, INT_MAX)},
     {"border", OPT_BOOL(border)},
+    #if HAVE_WIN32_DESKTOP
+    {"window-transparency", OPT_CHOICE(window_transparency, {"default", -1}), M_RANGE(0, 255)},
+    #endif
     {"fit-border", OPT_BOOL(fit_border),
      .deprecation_message = "the option is ignored and no longer needed"},
     {"on-all-workspaces", OPT_BOOL(all_workspaces)},
@@ -209,6 +212,7 @@ const struct m_sub_options vo_sub_opts = {
         .native_fs = true,
         .taskbar_progress = true,
         .border = true,
+        .window_transparency = -1,
         .fit_border = true,
         .appid = "mpv",
         .content_type = -1,
@@ -1070,6 +1074,7 @@ static const struct MPOpts mp_default_opts = {
         "fullscreen",
         "ontop",
         "border",
+        "window-transparency",
         "gamma",
         "brightness",
         "contrast",
