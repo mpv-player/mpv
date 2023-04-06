@@ -14,6 +14,12 @@ local pending_hooks = {}            -- as set (keys only, meaningless values)
 -- profile the condition is evaluated for.
 local current_profile = nil
 
+-- Cached set of all top-level mpv properities. Only used for extra validation.
+local property_set = {}
+for _, property in pairs(mp.get_property_native("property-list")) do
+    property_set[property] = true
+end
+
 local function evaluate(profile)
     msg.verbose("Re-evaluating auto profile " .. profile.name)
 
@@ -85,7 +91,10 @@ function get(name, default)
     if not watched_properties[name] then
         watched_properties[name] = true
         local res, err = mp.get_property_native(name)
-        if err == "property not found" then
+        -- Property has to not exist and the toplevel of property in the name must also
+        -- not have an existing match in the property set for this to be considered an error.
+        -- This allows things like user-data/test to still work.
+        if err == "property not found" and property_set[name:match("^([^/]+)")] == nil then
             msg.error("Property '" .. name .. "' was not found.")
             return default
         end
