@@ -793,9 +793,10 @@ Conditional auto profiles
 
 Profiles which have the ``profile-cond`` option set are applied automatically
 if the associated condition matches (unless auto profiles are disabled). The
-option takes a string, which is interpreted as Lua condition. If evaluating the
-expression returns true, the profile is applied, if it returns false, it is
-ignored. This Lua code execution is not sandboxed.
+option takes a string, which is interpreted as Lua expression. If the
+expression evaluates as truthy, the profile is applied. If the expression
+errors or evaluates as falsy, the profile is not applied. This Lua code
+execution is not sandboxed.
 
 Any variables in condition expressions can reference properties. If an
 identifier is not already defined by Lua or mpv, it is interpreted as property.
@@ -816,13 +817,13 @@ cause errors if used in expressions. These are logged in verbose mode, and the
 expression is considered to be false.
 
 Whenever a property referenced by a profile condition changes, the condition
-is re-evaluated. If the return value of the condition changes from false or
-error to true, the profile is applied.
+is re-evaluated. If the return value of the condition changes from falsy or
+error to truthy, the profile is applied.
 
-This mechanism tries to "unapply" profiles once the condition changes from true
-to false. If you want to use this, you need to set ``profile-restore`` for the
-profile. Another possibility it to create another profile with an inverse
-condition to undo the other profile.
+This mechanism tries to "unapply" profiles once the condition changes from
+truthy to falsy or error. If you want to use this, you need to set
+``profile-restore`` for the profile. Another possibility it to create another
+profile with an inverse condition to undo the other profile.
 
 Recursive profiles can be used. But it is discouraged to reference other
 conditional profiles in a conditional profile, since this can lead to tricky

@@ -477,6 +477,7 @@ if features['win32-desktop']
                           cc.find_library('gdi32'),
                           cc.find_library('ole32'),
                           cc.find_library('uuid'),
+                          cc.find_library('uxtheme'),
                           cc.find_library('version'),
                           cc.find_library('winmm')]
     dependencies += win32_desktop_libs
@@ -1104,9 +1105,14 @@ if features['gl-dxinterop']
 endif
 
 egl_angle = get_option('egl-angle').require(
-    features['gl-win32'] and cc.has_header_symbol('EGL/eglext.h',
-                                                  'EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE',
-                                                  prefix: '#include <EGL/egl.h>'),
+    features['gl-win32'] and
+        cc.has_header_symbol('EGL/eglext.h',
+                             'EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE',
+                             prefix: '#include <EGL/egl.h>') and
+        cc.has_header_symbol('EGL/eglext_angle.h',
+                             'PFNEGLCREATEDEVICEANGLEPROC',
+                             # TODO: change to list when meson 1.0.0 is required
+                             prefix: '#include <EGL/egl.h>\n#include <EGL/eglext.h>'),
     error_message: 'egl-angle could not be found!',
 )
 features += {'egl-angle': egl_angle.allowed()}

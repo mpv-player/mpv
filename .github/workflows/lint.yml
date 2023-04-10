@@ -1,0 +1,22 @@
+name: lint
+
+on:
+  push:
+    branches:
+      - master
+      - ci
+      - 'release/**'
+  pull_request:
+    branches: [master]
+
+jobs:
+  commit-msg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 50
+
+      - name: Lint
+        run: |
+          ./ci/lint-commit-msg.py

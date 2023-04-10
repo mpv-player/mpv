@@ -201,7 +201,14 @@ main_dependencies = [
         'name': 'win32-desktop',
         'desc': 'win32 desktop APIs',
         'deps': '(os-win32 || os-cygwin) && !uwp',
-        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt', 'dwmapi', 'version']),
+        'func': check_cc(lib=['avrt',
+                              'dwmapi',
+                              'gdi32',
+                              'ole32',
+                              'uuid',
+                              'uxtheme',
+                              'version',
+                              'winmm']),
     }, {
         'name': '--win32-internal-pthreads',
         'desc': 'internal pthread wrapper for win32 (Vista+)',
@@ -637,8 +644,9 @@ video_output_features = [
         'desc': 'OpenGL ANGLE headers',
         'deps': 'os-win32 || os-cygwin',
         'groups': [ 'gl' ],
-        'func': check_statement(['EGL/egl.h', 'EGL/eglext.h'],
-                                'int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE')
+        'func': check_statement(['EGL/egl.h', 'EGL/eglext.h', 'EGL/eglext_angle.h'],
+                                'int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE; '
+                                'PFNEGLCREATEDEVICEANGLEPROC y = NULL')
     } , {
         'name': '--egl-angle-lib',
         'desc': 'OpenGL Win32 ANGLE Library',
