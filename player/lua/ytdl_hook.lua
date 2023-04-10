@@ -693,11 +693,21 @@ local function add_single_video(json)
     end
 
     -- set start time
-    if not (json.start_time == nil) and
+    if (json.start_time or json.section_start) and
         not option_was_set("start") and
         not option_was_set_locally("start") then
-        msg.debug("Setting start to: " .. json.start_time .. " secs")
-        mp.set_property("file-local-options/start", json.start_time)
+        local start_time = json.start_time or json.section_start
+        msg.debug("Setting start to: " .. start_time .. " secs")
+        mp.set_property("file-local-options/start", start_time)
+    end
+
+    -- set end time
+    if (json.end_time or json.section_end) and
+        not option_was_set("end") and
+        not option_was_set_locally("end") then
+        local end_time = json.end_time or json.section_end
+        msg.debug("Setting end to: " .. end_time .. " secs")
+        mp.set_property("file-local-options/end", end_time)
     end
 
     -- set aspect ratio for anamorphic video
