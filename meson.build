@@ -1613,12 +1613,15 @@ if features['pdf-build']
 endif
 
 
-# Currently, we can't easily get every single thing a user might have passed
-# on the cli, but we might as well just hardcode a few options (even if they are
-# not specifically set) for verbosity's sake.
-configuration = 'meson configure build ' + '-Dprefix=' + get_option('prefix') + \
-                ' -Dbuildtype=' + get_option('buildtype') + \
-                ' -Doptimization=' + get_option('optimization')
+if meson.version().version_compare('>= 1.1.0')
+    configuration = meson.build_options()
+else
+    # Arbitrary hardcoded things to pass if the meson version is too
+    # old to have the build_options method.
+    configuration = 'meson configure build ' + '-Dprefix=' + get_option('prefix') + \
+                    ' -Dbuildtype=' + get_option('buildtype') + \
+                    ' -Doptimization=' + get_option('optimization')
+endif
 
 
 # Set config.h

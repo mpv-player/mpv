@@ -3329,8 +3329,9 @@ Property list
     might contain either a release version, or just a git hash.
 
 ``mpv-configuration``
-    The configuration arguments which were passed to the build system
-    (typically the way ``./waf configure ...`` was invoked).
+    The configuration arguments that were passed to the build system. If the
+    meson version used to compile mpv is older than 1.1.0, then a hardcoded
+    string of a few, arbitrary options is displayed instead.
 
 ``ffmpeg-version``
     The contents of the ``av_version_info()`` API call. This is a string which

@@ -954,8 +954,8 @@ static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_topleve
                                     int32_t width, int32_t height)
 {
     struct vo_wayland_state *wl = data;
-    wl->bounded_width = width;
-    wl->bounded_height = height;
+    wl->bounded_width = width * wl->scaling;
+    wl->bounded_height = height * wl->scaling;
 }
 #endif
 

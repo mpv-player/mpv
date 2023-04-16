@@ -182,7 +182,7 @@ extern "C" {
  * Embedding the video window
  * --------------------------
  *
- * Using the render API (in render_cb.h) is recommended. This API requires
+ * Using the render API (in render.h) is recommended. This API requires
  * you to create and maintain an OpenGL context, to which you can render
  * video using a specific API call. This API does not include keyboard or mouse
  * input directly.
