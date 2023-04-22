@@ -1542,8 +1542,20 @@ static void w32_api_load(struct vo_w32_state *w32)
     w32->api.pImmDisableIME = !imm32_dll ? NULL :
                 (void *)GetProcAddress(imm32_dll, "ImmDisableIME");
 
-    // Dark mode related functions, avaliable since a Win10 update
-    HMODULE uxtheme_dll = GetModuleHandle(L"uxtheme.dll");
+    // Dark mode related functions, available since the 1809 Windows 10 update
+    // Check the Windows build version as on previous versions used ordinals
+    // may point to unexpected code/data. Alternatively could check uxtheme.dll
+    // version directly, but it is little bit more boilerplate code, and build
+    // number is good enough check.
+    void (WINAPI *pRtlGetNtVersionNumbers)(LPDWORD, LPDWORD, LPDWORD) =
+        (void *)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlGetNtVersionNumbers");
+
+    DWORD major, build;
+    pRtlGetNtVersionNumbers(&major, NULL, &build);
+    build &= ~0xF0000000;
+
+    HMODULE uxtheme_dll = (major < 10 || build < 17763) ? NULL :
+                GetModuleHandle(L"uxtheme.dll");
     w32->api.pShouldAppsUseDarkMode = !uxtheme_dll ? NULL :
                 (void *)GetProcAddress(uxtheme_dll, MAKEINTRESOURCEA(132));
     w32->api.pSetPreferredAppMode = !uxtheme_dll ? NULL :
