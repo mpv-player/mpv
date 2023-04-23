@@ -27,6 +27,10 @@ Interface changes
 ::
 
  --- mpv 0.36.0 ---
+    - Target luminance value is now also applied when ICC profile is used.
+      `--icc-use-luma` has been added to use ICC profile luminance value.
+      If target luminance and ICC luminance is not used, old behavior apply,
+      defaulting to 203 nits. (Only applies for `--vo=gpu-next`)
     - `playlist/N/title` gets set upon opening the file if it wasn't already set
       and a title is available.
     - add the `--vo=kitty` video output driver, as well as the options

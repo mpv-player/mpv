@@ -6674,6 +6674,9 @@ them.
     value ``inf`` causes the BT.1886 curve to be treated as a pure power gamma
     2.4 function.
 
+``--icc-use-luma``
+    Use ICC profile luminance value. (Only for ``--vo=gpu-next``)
+
 ``--lut=<file>``
     Specifies a custom LUT (in Adobe .cube format) to apply to the colors
     as part of color conversion. The exact interpretation depends on the value
