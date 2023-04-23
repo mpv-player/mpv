@@ -164,14 +164,12 @@ struct mp_pass_perf {
 };
 
 #define VO_PASS_PERF_MAX 64
+#define VO_PASS_DESC_MAX_LEN 128
 
 struct mp_frame_perf {
     int count;
     struct mp_pass_perf perf[VO_PASS_PERF_MAX];
-    // The owner of this struct does not have ownership over the names, and
-    // they may change at any time - so this struct should not be stored
-    // anywhere or the results reused
-    char *desc[VO_PASS_PERF_MAX];
+    char desc[VO_PASS_PERF_MAX][VO_PASS_DESC_MAX_LEN];
 };
 
 struct voctrl_performance_data {

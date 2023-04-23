@@ -769,8 +769,8 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     perf->peak = pass->peak;
     perf->avg = pass->average;
 
-    talloc_free(frame->desc[index]);
-    frame->desc[index] = talloc_strdup(p, pass->shader->description);
+    strncpy(frame->desc[index], pass->shader->description, sizeof(frame->desc[index]) - 1);
+    frame->desc[index][sizeof(frame->desc[index]) - 1] = '\0';
     frame->count = index + 1;
 
     pthread_mutex_unlock(&p->perf_lock);
