@@ -798,10 +798,6 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
     target->lut = p->target_lut.lut;
     target->lut_type = p->target_lut.type;
 
-#ifdef PL_HAVE_LCMS
-    target->profile = p->icc_profile;
-#endif
-
     // Colorspace overrides
     const struct gl_video_opts *opts = p->opts_cache->opts;
     if (p->output_levels)
@@ -818,6 +814,20 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
         tbits->color_depth += opts->dither_depth - tbits->sample_depth;
         tbits->sample_depth = opts->dither_depth;
     }
+
+#ifdef PL_HAVE_LCMS
+    target->profile = p->icc_profile;
+
+    if (opts->icc_opts->icc_use_luma) {
+        // Use detected luminance
+        p->icc.max_luma = 0;
+    } else {
+        // Use HDR levels if available, fall back to default luminance
+        p->icc.max_luma = target->color.hdr.max_luma;
+        if (!p->icc.max_luma)
+            p->icc.max_luma = pl_icc_default_params.max_luma;
+    }
+#endif
 }
 
 static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
