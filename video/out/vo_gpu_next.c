@@ -1462,7 +1462,7 @@ err_out:
 static const struct pl_filter_config *map_scaler(struct priv *p,
                                                  enum scaler_unit unit)
 {
-    static const struct pl_filter_preset fixed_scalers[] = {
+    const struct pl_filter_preset fixed_scalers[] = {
         { "bilinear",       &pl_filter_bilinear },
         { "bicubic_fast",   &pl_filter_bicubic },
         { "nearest",        &pl_filter_nearest },
@@ -1470,7 +1470,7 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
         {0},
     };
 
-    static const struct pl_filter_preset fixed_frame_mixers[] = {
+    const struct pl_filter_preset fixed_frame_mixers[] = {
         { "linear",         &pl_filter_bilinear },
         { "oversample",     &pl_filter_oversample },
         {0},
@@ -1812,7 +1812,7 @@ static void update_render_options(struct vo *vo)
     p->peak_detect.scene_threshold_low = opts->tone_map.scene_threshold_low;
     p->peak_detect.scene_threshold_high = opts->tone_map.scene_threshold_high;
 
-    static const struct pl_tone_map_function * const tone_map_funs[] = {
+    const struct pl_tone_map_function * const tone_map_funs[] = {
         [TONE_MAPPING_AUTO]     = &pl_tone_map_auto,
         [TONE_MAPPING_CLIP]     = &pl_tone_map_clip,
         [TONE_MAPPING_MOBIUS]   = &pl_tone_map_mobius,
