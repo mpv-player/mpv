@@ -161,6 +161,9 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
 bstr mp_iconv_to_utf8(struct mp_log *log, bstr buf, const char *cp, int flags)
 {
 #if HAVE_ICONV
+    if (!buf.len)
+        return buf;
+
     if (!cp || !cp[0] || mp_charset_is_utf8(cp))
         return buf;
 
