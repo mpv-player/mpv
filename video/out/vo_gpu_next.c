@@ -744,7 +744,7 @@ static void info_callback(void *priv, const struct pl_render_info *info)
 {
     struct vo *vo = priv;
     struct priv *p = vo->priv;
-    if (info->index > VO_PASS_PERF_MAX)
+    if (info->index >= VO_PASS_PERF_MAX)
         return; // silently ignore clipped passes, whatever
 
     struct mp_frame_perf *frame;
