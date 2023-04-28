@@ -146,6 +146,7 @@ struct priv {
 
     // Performance data of last frame
     struct voctrl_performance_data perf;
+    pthread_mutex_t perf_lock;
 
     bool delayed_peak;
     bool inter_preserve;
@@ -758,6 +759,9 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     struct mp_pass_perf *perf = &frame->perf[index];
     const struct pl_dispatch_info *pass = info->pass;
     static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
+
+    pthread_mutex_lock(&p->perf_lock);
+
     memcpy(perf->samples, pass->samples, pass->num_samples * sizeof(pass->samples[0]));
     perf->count = pass->num_samples;
     perf->last = pass->last;
@@ -767,6 +771,8 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     talloc_free(frame->desc[index]);
     frame->desc[index] = talloc_strdup(p, pass->shader->description);
     frame->count = index + 1;
+
+    pthread_mutex_unlock(&p->perf_lock);
 }
 
 static void update_options(struct vo *vo)
@@ -1307,7 +1313,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
 
     case VOCTRL_PERFORMANCE_DATA:
+        pthread_mutex_lock(&p->perf_lock);
         *(struct voctrl_performance_data *) data = p->perf;
+        pthread_mutex_unlock(&p->perf_lock);
         return true;
 
     case VOCTRL_SCREENSHOT:
@@ -1410,6 +1418,8 @@ static void uninit(struct vo *vo)
 
     pl_renderer_destroy(&p->rr);
 
+    pthread_mutex_destroy(&p->perf_lock);
+
     p->ra_ctx = NULL;
     p->pllog = NULL;
     p->gpu = NULL;
@@ -1449,6 +1459,7 @@ static int preinit(struct vo *vo)
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
     pthread_mutex_init(&p->dr_lock, NULL);
+    pthread_mutex_init(&p->perf_lock, NULL);
 
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
