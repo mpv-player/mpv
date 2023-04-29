@@ -759,11 +759,12 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     struct mp_pass_perf *perf = &frame->perf[index];
     const struct pl_dispatch_info *pass = info->pass;
     static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
+    assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
 
     pthread_mutex_lock(&p->perf_lock);
 
-    memcpy(perf->samples, pass->samples, pass->num_samples * sizeof(pass->samples[0]));
-    perf->count = pass->num_samples;
+    perf->count = MPMIN(pass->num_samples, VO_PERF_SAMPLE_COUNT);
+    memcpy(perf->samples, pass->samples, perf->count * sizeof(pass->samples[0]));
     perf->last = pass->last;
     perf->peak = pass->peak;
     perf->avg = pass->average;
