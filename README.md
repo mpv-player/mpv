@@ -37,7 +37,7 @@ Releases can be found on the [release list][releases].
 ## System requirements
 
 - A not too ancient Linux (usually, only the latest releases of distributions
-  are actively supported), Windows 10 or later, or macOS 10.15 or later.
+  are actively supported), Windows 10 1607 or later, or macOS 10.15 or later.
 - A somewhat capable CPU. Hardware decoding might help if the CPU is too slow to
   decode video in realtime, but must be explicitly enabled with the `--hwdec`
   option.
