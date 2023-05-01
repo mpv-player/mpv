@@ -1003,6 +1003,7 @@ done:
     return ret;
 }
 
+#if HAVE_DXGI_DEBUG
 void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
                                    IDXGIInfoQueue **iqueue)
 {
@@ -1037,3 +1038,4 @@ void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
         return;
     }
 }
+#endif

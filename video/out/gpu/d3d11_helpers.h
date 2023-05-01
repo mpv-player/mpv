@@ -23,7 +23,10 @@
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <dxgi1_6.h>
+
+#if HAVE_DXGI_DEBUG
 #include <dxgidebug.h>
+#endif
 
 #include "video/mp_image.h"
 
@@ -114,7 +117,9 @@ bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
                                struct d3d11_swapchain_opts *opts,
                                IDXGISwapChain **swapchain_out);
 
+#if HAVE_DXGI_DEBUG
 void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
                                    IDXGIInfoQueue **iqueue);
+#endif
 
 #endif
