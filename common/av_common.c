@@ -385,6 +385,19 @@ int mp_set_avopts_pos(struct mp_log *log, void *avobj, void *posargs, char **kv)
     return success;
 }
 
+// kv is in the format as by OPT_KEYVALUELIST(): kv[0]=key0, kv[1]=val0, ...
+// Find a value by key
+char *mp_get_avopts(char **kv, char *key)
+{
+    for (int n = 0; kv && kv[n * 2]; n++) {
+        char *k = kv[n * 2 + 0];
+        char *v = kv[n * 2 + 1];
+        if (strcmp(k, key) == 0)
+            return v;
+    }
+    return NULL;
+}
+
 /**
  * Must be used to free an AVPacket that was used with mp_set_av_packet().
  *

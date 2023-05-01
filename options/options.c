@@ -293,6 +293,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-clear-on-seek", OPT_BOOL(sub_clear_on_seek)},
         {"teletext-page", OPT_INT(teletext_page), M_RANGE(1, 999)},
         {"sub-past-video-end", OPT_BOOL(sub_past_video_end)},
+        {"sd-lavc-o", OPT_KEYVALUELIST(sdopts)},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),

@@ -49,6 +49,7 @@ void mp_set_avdict(struct AVDictionary **dict, char **kv);
 void mp_avdict_print_unset(struct mp_log *log, int msgl, struct AVDictionary *d);
 int mp_set_avopts(struct mp_log *log, void *avobj, char **kv);
 int mp_set_avopts_pos(struct mp_log *log, void *avobj, void *posargs, char **kv);
+char *mp_get_avopts(char **kv, char *key);
 void mp_free_av_packet(AVPacket **pkt);
 
 #endif

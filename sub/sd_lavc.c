@@ -103,7 +103,10 @@ static int init(struct sd *sd)
         goto error;
     priv->pkt_timebase = mp_get_codec_timebase(sd->codec);
     ctx->pkt_timebase = priv->pkt_timebase;
-    if (avcodec_open2(ctx, sub_codec, NULL) < 0)
+
+    mp_set_avopts(sd->log, ctx, sd->opts->sdopts);
+
+    if (avcodec_open2(ctx, sub_codec, &opts) < 0)
         goto error;
     priv->avctx = ctx;
     sd->priv = priv;

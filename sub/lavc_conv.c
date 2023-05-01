@@ -67,7 +67,8 @@ static void disable_styles(bstr header)
 }
 
 struct lavc_conv *lavc_conv_create(struct mp_log *log,
-                                   const struct mp_codec_params *mp_codec)
+                                   const struct mp_codec_params *mp_codec,
+                                   char **sdopts)
 {
     struct lavc_conv *priv = talloc_zero(NULL, struct lavc_conv);
     priv->log = log;
@@ -96,6 +97,9 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log,
     av_dict_set(&opts, "flags2", "+ass_ro_flush_noop", 0);
     if (strcmp(priv->codec, "eia_608") == 0)
         av_dict_set(&opts, "real_time", "1", 0);
+
+    mp_set_avopts(log, avctx, sdopts);
+
     if (avcodec_open2(avctx, codec, &opts) < 0)
         goto error;
     av_dict_free(&opts);
