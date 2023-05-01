@@ -2,7 +2,7 @@ project('mpv',
         'c',
         license: ['GPL2+', 'LGPL2.1+'],
         version: files('./VERSION'),
-        meson_version: '>=0.60.3',
+        meson_version: '>=0.62.0',
         default_options: [
             'buildtype=debugoptimized',
             'b_lundef=false',
@@ -327,10 +327,10 @@ endif
 
 features += {'ta-leak-report': get_option('ta-leak-report')}
 
-libdl_dep = cc.find_library('dl', required: false)
-features += {'libdl': cc.has_function('dlopen', dependencies: libdl_dep, prefix: '#include <dlfcn.h>')}
+libdl = dependency('dl', required: false)
+features += {'libdl': libdl.found()}
 if features['libdl']
-    dependencies += libdl_dep
+    dependencies += libdl
 endif
 
 cplugins = get_option('cplugins').require(
@@ -1592,10 +1592,7 @@ endif
 rst2pdf = find_program('rst2pdf', required: get_option('pdf-build'))
 features += {'pdf-build': rst2pdf.found()}
 if features['pdf-build']
-    rst2pdf_help = run_command(
-        rst2pdf, '--help',
-        check: true, capture: true
-    ).stdout()
+    dependency_file = rst2pdf.version().version_compare('>=0.100')
     datadir = get_option('datadir')
     custom_target('pdf-manpages',
         input: manpage,
@@ -1603,8 +1600,7 @@ if features['pdf-build']
         command: [
             docutils_wrapper, rst2pdf,
             '-c', '-b', '1', '--repeat-table-rows',
-            rst2pdf_help.contains('--record-dependencies') ?
-                ['--record-dependencies', '@DEPFILE@'] : [],
+            dependency_file ? ['--record-dependencies', '@DEPFILE@'] : [],
             '@INPUT@', '-o', '@OUTPUT@'],
         depfile: 'mpv.pdf.dep',
         install: true,
