@@ -23,6 +23,7 @@
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <dxgi1_6.h>
+#include <dxgidebug.h>
 
 #include "video/mp_image.h"
 
@@ -34,6 +35,10 @@
 #define DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_LEFT_P709     ((DXGI_COLOR_SPACE_TYPE)22)
 #define DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_LEFT_P2020    ((DXGI_COLOR_SPACE_TYPE)23)
 #define DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_TOPLEFT_P2020 ((DXGI_COLOR_SPACE_TYPE)24)
+
+#if !HAVE_DXGI_DEBUG_D3D11
+DEFINE_GUID(DXGI_DEBUG_D3D11, 0x4b99317b, 0xac39, 0x4aa6, 0xbb, 0xb, 0xba, 0xa0, 0x47, 0x84, 0x79, 0x8f);
+#endif
 
 struct d3d11_device_opts {
     // Enable the debug layer (D3D11_CREATE_DEVICE_DEBUG)
@@ -108,5 +113,8 @@ struct d3d11_swapchain_opts {
 bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
                                struct d3d11_swapchain_opts *opts,
                                IDXGISwapChain **swapchain_out);
+
+void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
+                                   IDXGIInfoQueue **iqueue);
 
 #endif

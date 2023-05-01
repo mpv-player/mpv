@@ -32,14 +32,17 @@
 // Windows 8 enum value, not present in mingw-w64 headers
 #define DXGI_ADAPTER_FLAG_SOFTWARE (2)
 typedef HRESULT(WINAPI *PFN_CREATE_DXGI_FACTORY)(REFIID riid, void **ppFactory);
+typedef HRESULT(WINAPI *PFN_DXGI_GET_DEBUG_INTERFACE)(REFIID riid, void **ppDebug);
 
 static mp_once d3d11_once = MP_STATIC_ONCE_INITIALIZER;
 static PFN_D3D11_CREATE_DEVICE pD3D11CreateDevice = NULL;
 static PFN_CREATE_DXGI_FACTORY pCreateDXGIFactory1 = NULL;
+static PFN_DXGI_GET_DEBUG_INTERFACE pDXGIGetDebugInterface = NULL;
 static void d3d11_load(void)
 {
     HMODULE d3d11   = LoadLibraryW(L"d3d11.dll");
     HMODULE dxgilib = LoadLibraryW(L"dxgi.dll");
+    HMODULE dxgidebuglib = LoadLibraryW(L"dxgidebug.dll");
     if (!d3d11 || !dxgilib)
         return;
 
@@ -47,6 +50,10 @@ static void d3d11_load(void)
         GetProcAddress(d3d11, "D3D11CreateDevice");
     pCreateDXGIFactory1 = (PFN_CREATE_DXGI_FACTORY)
         GetProcAddress(dxgilib, "CreateDXGIFactory1");
+    if (dxgidebuglib) {
+        pDXGIGetDebugInterface = (PFN_DXGI_GET_DEBUG_INTERFACE)
+            GetProcAddress(dxgidebuglib, "DXGIGetDebugInterface");
+    }
 }
 
 static bool load_d3d11_functions(struct mp_log *log)
@@ -994,4 +1001,39 @@ done:
     SAFE_RELEASE(output);
     SAFE_RELEASE(output6);
     return ret;
+}
+
+void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
+                                   IDXGIInfoQueue **iqueue)
+{
+    load_d3d11_functions(log);
+
+    *iqueue = NULL;
+    *debug = NULL;
+
+    if (!pDXGIGetDebugInterface)
+        return;
+
+    HRESULT hr;
+
+    hr = pDXGIGetDebugInterface(&IID_IDXGIInfoQueue, (void **) iqueue);
+    if (FAILED(hr)) {
+        mp_fatal(log, "Failed to get info queue: %s\n", mp_HRESULT_to_str(hr));
+        return;
+    }
+
+    // Store an unlimited amount of messages in the buffer. This is fine
+    // because we flush stored messages regularly (in debug_marker.)
+    IDXGIInfoQueue_SetMessageCountLimit(*iqueue, DXGI_DEBUG_D3D11, -1);
+    IDXGIInfoQueue_SetMessageCountLimit(*iqueue, DXGI_DEBUG_DXGI, -1);
+
+    // Push empty filter to get everything
+    DXGI_INFO_QUEUE_FILTER filter = {0};
+    IDXGIInfoQueue_PushStorageFilter(*iqueue, DXGI_DEBUG_ALL, &filter);
+
+    hr = pDXGIGetDebugInterface(&IID_IDXGIDebug, (void **) debug);
+    if (FAILED(hr)) {
+        mp_fatal(log, "Failed to get debug device: %s\n", mp_HRESULT_to_str(hr));
+        return;
+    }
 }
