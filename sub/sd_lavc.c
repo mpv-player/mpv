@@ -75,6 +75,7 @@ struct sd_lavc_priv {
 static int init(struct sd *sd)
 {
     enum AVCodecID cid = mp_codec_to_av_codec_id(sd->codec->codec);
+    char *sub_type = NULL;
 
     // Supported codecs must be known to decode to paletted bitmaps
     switch (cid) {
@@ -84,6 +85,13 @@ static int init(struct sd *sd)
     case AV_CODEC_ID_XSUB:
     case AV_CODEC_ID_DVD_SUBTITLE:
         break;
+    case AV_CODEC_ID_ARIB_CAPTION:
+        // Use bitmap subtitles driver only when the sub_type option is set to 'bitmap'
+        sub_type = mp_get_avopts(sd->opts->sdopts, "sub_type");
+        if (sub_type != NULL && strcmp(sub_type, "bitmap") == 0)
+            break;
+
+        return -1; // If set to other values, try other drivers
     default:
         return -1;
     }
@@ -106,7 +114,7 @@ static int init(struct sd *sd)
 
     mp_set_avopts(sd->log, ctx, sd->opts->sdopts);
 
-    if (avcodec_open2(ctx, sub_codec, &opts) < 0)
+    if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
     priv->avctx = ctx;
     sd->priv = priv;
