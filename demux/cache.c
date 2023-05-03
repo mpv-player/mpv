@@ -100,10 +100,12 @@ struct demux_cache *demux_cache_create(struct mpv_global *global,
     cache->fd = -1;
 
     char *cache_dir = cache->opts->cache_dir;
-    if (!(cache_dir && cache_dir[0])) {
-        MP_ERR(cache, "No cache data directory supplied.\n");
-        goto fail;
+    if (cache_dir && cache_dir[0]) {
+        cache_dir = mp_get_user_path(NULL, global, cache_dir);
+    } else {
+        cache_dir = mp_find_user_file(NULL, global, "cache", "");
     }
+    mp_mkdirp(cache_dir);
 
     cache->filename = mp_path_join(cache, cache_dir, "mpv-cache-XXXXXX.dat");
     cache->fd = mp_mkostemps(cache->filename, 4, O_CLOEXEC);

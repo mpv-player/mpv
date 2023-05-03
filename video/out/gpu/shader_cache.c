@@ -557,9 +557,14 @@ static void update_uniform(struct gl_shader_cache *sc, struct sc_entry *e,
     }
 }
 
-void gl_sc_set_cache_dir(struct gl_shader_cache *sc, const char *dir)
+void gl_sc_set_cache_dir(struct gl_shader_cache *sc, char *dir)
 {
     talloc_free(sc->cache_dir);
+    if (dir && dir[0]) {
+        dir = mp_get_user_path(NULL, sc->global, dir);
+    } else {
+        dir = mp_find_user_file(NULL, sc->global, "cache", "");
+    }
     sc->cache_dir = talloc_strdup(sc, dir);
 }
 

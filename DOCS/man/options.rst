@@ -4771,8 +4771,6 @@ Cache
     This makes sense only with ``--cache``. If the normal cache is disabled,
     this option is ignored.
 
-    You need to set ``--cache-dir`` to use this.
-
     The cache file is append-only. Even if the player appears to prune data, the
     file space freed by it is not reused. The cache file is deleted when
     playback is closed.
@@ -4795,7 +4793,8 @@ Cache
     continue to use the cache file that was opened first.
 
 ``--cache-dir=<path>``
-    Directory where to create temporary files (default: none).
+    Directory where to create temporary files. Cache is stored in the system's
+    cache directory (usually ``~/.cache/mpv``) if this is unset.
 
     Currently, this is used for ``--cache-on-disk`` only.
 
@@ -6634,14 +6633,19 @@ them.
     Applications using libmpv with the render API need to provide the ICC
     profile via ``MPV_RENDER_PARAM_ICC_PROFILE``.
 
-``--icc-cache-dir=<dirname>``
-    Store and load the 3D LUTs created from the ICC profile in this directory.
-    This can be used to speed up loading, since LittleCMS 2 can take a while to
-    create a 3D LUT. Note that these files contain uncompressed LUTs. Their
-    size depends on the ``--icc-3dlut-size``, and can be very big.
+``--icc-cache``
+    Store and load 3D LUTs created from the ICC profile on disk in the
+    cache directory. This can be used to speed up loading, since LittleCMS
+    2 can take a while to create a 3D LUT. Note that these files contain
+    uncompressed LUTs. Their size depends on the ``--icc-3dlut-size``, and
+    can be very big.
 
     NOTE: This is not cleaned automatically, so old, unused cache files may
     stick around indefinitely.
+
+``--icc-cache-dir``
+    The directory where icc cache is stored. Cache is stored in the system's
+    cache directory (usually ``~/.cache/mpv``) if this is unset.
 
 ``--icc-intent=<value>``
     Specifies the ICC intent used for the color transformation (when using
@@ -6775,15 +6779,19 @@ them.
 
     This option might be silently removed in the future.
 
-``--gpu-shader-cache-dir=<dirname>``
-    Store and load compiled GLSL shaders in this directory. Normally, shader
-    compilation is very fast, so this is usually not needed. It mostly matters
+``--gpu-shader-cache``
+    Store and load compiled GLSL shaders in the cache directory. Normally, shader
+    compilation is very fast, so this is not usually needed. It mostly matters
     for GPU APIs that require internally recompiling shaders to other languages,
     for example anything based on ANGLE or Vulkan. Enabling this can improve
     startup performance on these platforms.
 
     NOTE: This is not cleaned automatically, so old, unused cache files may
     stick around indefinitely.
+
+``--gpu-shader-cache-dir``
+    The directory where gpu shader cache is stored. Cache is stored in the system's
+    cache directory (usually ``~/.cache/mpv``) if this is unset.
 
 Miscellaneous
 -------------

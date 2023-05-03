@@ -461,6 +461,8 @@ Name             Meaning
 ``~~desktop/``   the path to the desktop (win32, macOS)
 ``~~exe_dir/``   win32 only: the path to the directory containing the exe (for
                  config file purposes; ``$MPV_HOME`` overrides it)
+``~~cache/``     the path to application cache data (``~/.cache/mpv/``)
+                 On some platforms, this will be the same as ``~~home/``.
 ``~~state/``     the path to application state data (``~/.local/state/mpv/``)
                  On some platforms, this will be the same as ``~~home/``.
 ``~~old_home/``  do not use
