@@ -3353,7 +3353,7 @@ Window
 ``--no-window-dragging``
     Don't move the window when clicking on it and moving the mouse pointer.
 
-``--x11-name``
+``--x11-name=<string>``
     Set the window class name for X11-based video output methods.
 
 ``--x11-netwm=<yes|no|auto>``
