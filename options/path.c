@@ -65,19 +65,6 @@ static const char *const config_dirs[] = {
     "global",
 };
 
-void mp_init_paths(struct mpv_global *global, struct MPOpts *opts)
-{
-    TA_FREEP(&global->configdir);
-
-    const char *force_configdir = getenv("MPV_HOME");
-    if (opts->force_configdir && opts->force_configdir[0])
-        force_configdir = opts->force_configdir;
-    if (!opts->load_config)
-        force_configdir = "";
-
-    global->configdir = talloc_strdup(global, force_configdir);
-}
-
 // Return a platform specific path using a path type as defined in osdep/path.h.
 // Keep in mind that the only way to free the return value is freeing talloc_ctx
 // (or its children), as this function can return a statically allocated string.
@@ -87,12 +74,18 @@ static const char *mp_get_platform_path(void *talloc_ctx,
 {
     assert(talloc_ctx);
 
-    if (global->configdir) {
+    bool config_dir = strcmp(type, "state") != 0;
+    if (global->configdir && config_dir) {
         for (int n = 0; n < MP_ARRAY_SIZE(config_dirs); n++) {
             if (strcmp(config_dirs[n], type) == 0)
                 return (n == 0 && global->configdir[0]) ? global->configdir : NULL;
         }
     }
+
+    // Return the native config path if the platform doesn't support the
+    // type we are trying to fetch.
+    if (strcmp(type, "state") == 0 && global->no_statedir)
+        type = "home";
 
     for (int n = 0; n < MP_ARRAY_SIZE(path_resolvers); n++) {
         const char *path = path_resolvers[n](talloc_ctx, type);
@@ -100,6 +93,27 @@ static const char *mp_get_platform_path(void *talloc_ctx,
             return path;
     }
     return NULL;
+}
+
+void mp_init_paths(struct mpv_global *global, struct MPOpts *opts)
+{
+    TA_FREEP(&global->configdir);
+
+    // Check if the platform has unique directories that differ from
+    // the standard config directory.
+    void *tmp = talloc_new(NULL);
+    const char *state = mp_get_platform_path(tmp, global, "state");
+    if (!state)
+        global->no_statedir = true;
+    talloc_free(tmp);
+
+    const char *force_configdir = getenv("MPV_HOME");
+    if (opts->force_configdir && opts->force_configdir[0])
+        force_configdir = opts->force_configdir;
+    if (!opts->load_config)
+        force_configdir = "";
+
+    global->configdir = talloc_strdup(global, force_configdir);
 }
 
 char *mp_find_user_file(void *talloc_ctx, struct mpv_global *global,

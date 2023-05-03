@@ -192,6 +192,17 @@ static bool copy_mtime(const char *f1, const char *f2)
     return true;
 }
 
+static char *mp_get_playback_resume_dir(struct MPContext *mpctx)
+{
+    char *wl_dir = mpctx->opts->watch_later_directory;
+    if (wl_dir && wl_dir[0]) {
+        wl_dir = mp_get_user_path(mpctx, mpctx->global, wl_dir);
+    } else {
+        wl_dir = mp_find_user_file(mpctx, mpctx->global, "state", MP_WATCH_LATER_CONF);
+    }
+    return wl_dir;
+}
+
 static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
                                                     const char *fname)
 {
@@ -216,21 +227,9 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
     for (int i = 0; i < 16; i++)
         conf = talloc_asprintf_append(conf, "%02X", md5[i]);
 
-    if (!mpctx->cached_watch_later_configdir) {
-        char *wl_dir = mpctx->opts->watch_later_directory;
-        if (wl_dir && wl_dir[0]) {
-            mpctx->cached_watch_later_configdir =
-                mp_get_user_path(mpctx, mpctx->global, wl_dir);
-        }
-    }
-
-    if (!mpctx->cached_watch_later_configdir) {
-        mpctx->cached_watch_later_configdir =
-            mp_find_user_file(mpctx, mpctx->global, "home", MP_WATCH_LATER_CONF);
-    }
-
-    if (mpctx->cached_watch_later_configdir)
-        res = mp_path_join(NULL, mpctx->cached_watch_later_configdir, conf);
+    char *wl_dir = mp_get_playback_resume_dir(mpctx);
+    if (wl_dir && wl_dir[0])
+        res = mp_path_join(NULL, wl_dir, conf);
 
 exit:
     talloc_free(tmp);
@@ -292,7 +291,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     if (!conffile)
         goto exit;
 
-    mp_mk_user_dir(mpctx->global, "home", mpctx->cached_watch_later_configdir);
+    char *wl_dir = mp_get_playback_resume_dir(mpctx);
+    mp_mk_user_dir(mpctx->global, "state", wl_dir);
 
     MP_INFO(mpctx, "Saving state.\n");
 

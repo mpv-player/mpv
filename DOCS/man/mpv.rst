@@ -461,6 +461,8 @@ Name             Meaning
 ``~~desktop/``   the path to the desktop (win32, macOS)
 ``~~exe_dir/``   win32 only: the path to the directory containing the exe (for
                  config file purposes; ``$MPV_HOME`` overrides it)
+``~~state/``     the path to application state data (``~/.local/state/mpv/``)
+                 On some platforms, this will be the same as ``~~home/``.
 ``~~old_home/``  do not use
 ================ ===============================================================
 
@@ -1584,7 +1586,7 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
 
     See `Script location`_ for details.
 
-``~/.config/mpv/watch_later/``
+``~/.local/state/mpv/watch_later/``
     Contains temporary config files needed for resuming playback of files with
     the watch later feature. See for example the ``Q`` key binding, or the
     ``quit-watch-later`` input command.

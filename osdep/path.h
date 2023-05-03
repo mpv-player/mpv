@@ -11,6 +11,12 @@
 //  "global"        the least priority, global config file location
 //  "desktop"       path to desktop contents
 //
+//  These additional types are also defined. However, they are not necessarily
+//  implemented on every platform. Unlike some other type values that are
+//  platform specific (like "osxbundle"), the value of "home" is returned
+//  instead if these types are not explicitly defined.
+//  "state"         the native mpv-specific user state dir
+//
 // It is allowed to return a static string, so the caller must set talloc_ctx
 // to something other than NULL to avoid memory leaks.
 typedef const char *(*mp_get_platform_path_cb)(void *talloc_ctx, const char *type);

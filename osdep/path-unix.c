@@ -27,14 +27,16 @@ static pthread_once_t path_init_once = PTHREAD_ONCE_INIT;
 
 static char mpv_home[512];
 static char old_home[512];
+static char mpv_state[512];
 
 static void path_init(void)
 {
     char *home = getenv("HOME");
-    char *xdg_dir = getenv("XDG_CONFIG_HOME");
+    char *xdg_config = getenv("XDG_CONFIG_HOME");
+    char *xdg_state = getenv("XDG_STATE_HOME");
 
-    if (xdg_dir && xdg_dir[0]) {
-        snprintf(mpv_home, sizeof(mpv_home), "%s/mpv", xdg_dir);
+    if (xdg_config && xdg_config[0]) {
+        snprintf(mpv_home, sizeof(mpv_home), "%s/mpv", xdg_config);
     } else if (home && home[0]) {
         snprintf(mpv_home, sizeof(mpv_home), "%s/.config/mpv", home);
     }
@@ -43,10 +45,17 @@ static void path_init(void)
     if (home && home[0])
         snprintf(old_home, sizeof(old_home), "%s/.mpv", home);
 
+    if (xdg_state && xdg_state[0]) {
+        snprintf(mpv_state, sizeof(mpv_state), "%s/mpv", xdg_state);
+    } else if (home && home[0]) {
+        snprintf(mpv_state, sizeof(mpv_state), "%s/.local/state/mpv", home);
+    }
+
     // If the old ~/.mpv exists, and the XDG config dir doesn't, use the old
-    // config dir only.
+    // config dir only. Also do not use any other XDG directories.
     if (mp_path_exists(old_home) && !mp_path_exists(mpv_home)) {
         snprintf(mpv_home, sizeof(mpv_home), "%s", old_home);
+        snprintf(mpv_state, sizeof(mpv_state), "%s", old_home);
         old_home[0] = '\0';
     }
 }
@@ -58,6 +67,8 @@ const char *mp_get_platform_path_unix(void *talloc_ctx, const char *type)
         return mpv_home;
     if (strcmp(type, "old_home") == 0)
         return old_home;
+    if (strcmp(type, "state") == 0)
+        return mpv_state;
     if (strcmp(type, "global") == 0)
         return MPV_CONFDIR;
     if (strcmp(type, "desktop") == 0)

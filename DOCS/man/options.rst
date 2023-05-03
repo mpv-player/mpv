@@ -1015,8 +1015,9 @@ Watch Later
 ``--watch-later-directory=<path>``
     The directory in which to store the "watch later" temporary files.
 
-    The default is a subdirectory named "watch_later" underneath the
-    config directory (usually ``~/.config/mpv/``).
+    If this option is unset, the files will be stored in a subdirectory
+    named "watch_later" underneath the local state directory
+    (usually ``~/.local/state/mpv/``).
 
 ``--no-resume-playback``
     Do not restore playback position from the ``watch_later`` configuration
