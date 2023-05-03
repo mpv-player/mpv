@@ -465,6 +465,7 @@ const struct m_sub_options gl_video_conf = {
         {"gpu-tex-pad-x", OPT_INT(tex_pad_x), M_RANGE(0, 4096)},
         {"gpu-tex-pad-y", OPT_INT(tex_pad_y), M_RANGE(0, 4096)},
         {"", OPT_SUBSTRUCT(icc_opts, mp_icc_conf)},
+        {"gpu-shader-cache", OPT_BOOL(shader_cache)},
         {"gpu-shader-cache-dir", OPT_STRING(shader_cache_dir), .flags = M_OPT_FILE},
         {"gpu-hwdec-interop",
             OPT_STRING_VALIDATE(hwdec_interop, ra_hwdec_validate_opt)},
@@ -4099,7 +4100,8 @@ static void reinit_from_options(struct gl_video *p)
 
     check_gl_features(p);
     uninit_rendering(p);
-    gl_sc_set_cache_dir(p->sc, p->opts.shader_cache_dir);
+    if (p->opts.shader_cache)
+        gl_sc_set_cache_dir(p->sc, p->opts.shader_cache_dir);
     p->ra->use_pbo = p->opts.pbo;
     gl_video_setup_hooks(p);
     reinit_osd(p);

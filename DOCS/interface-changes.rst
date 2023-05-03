@@ -64,6 +64,13 @@ Interface changes
     - `--save-position-on-quit` and its associated commands now store state files in
       the XDG_STATE_HOME directory by default. This only has an effect on linux/bsd
       systems.
+    - mpv now implictly saves cache files in XDG_CACHE_HOME by default. This only has
+      an effect if the user enables options that would lead to cache being stored and
+      only makes a difference on linux/bsd systems.
+    - `--cache-on-disk` no longer requires explictly setting the `--cache-dir` option
+    - add `--icc-cache` and `--gpu-shader-cache` options to control whether or not to
+      save cache files for these features; explictly setting `--icc-cache-dir` and
+      `--gpu-shader-cache` is no longer required
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,

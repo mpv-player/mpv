@@ -74,7 +74,7 @@ static const char *mp_get_platform_path(void *talloc_ctx,
 {
     assert(talloc_ctx);
 
-    bool config_dir = strcmp(type, "state") != 0;
+    bool config_dir = strcmp(type, "cache") != 0 && strcmp(type, "state") != 0;
     if (global->configdir && config_dir) {
         for (int n = 0; n < MP_ARRAY_SIZE(config_dirs); n++) {
             if (strcmp(config_dirs[n], type) == 0)
@@ -84,6 +84,8 @@ static const char *mp_get_platform_path(void *talloc_ctx,
 
     // Return the native config path if the platform doesn't support the
     // type we are trying to fetch.
+    if (strcmp(type, "cache") == 0 && global->no_cachedir)
+        type = "home";
     if (strcmp(type, "state") == 0 && global->no_statedir)
         type = "home";
 
@@ -102,7 +104,10 @@ void mp_init_paths(struct mpv_global *global, struct MPOpts *opts)
     // Check if the platform has unique directories that differ from
     // the standard config directory.
     void *tmp = talloc_new(NULL);
+    const char *cache = mp_get_platform_path(tmp, global, "cache");
     const char *state = mp_get_platform_path(tmp, global, "state");
+    if (!cache)
+        global->no_cachedir = true;
     if (!state)
         global->no_statedir = true;
     talloc_free(tmp);

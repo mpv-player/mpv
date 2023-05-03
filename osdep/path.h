@@ -15,6 +15,7 @@
 //  implemented on every platform. Unlike some other type values that are
 //  platform specific (like "osxbundle"), the value of "home" is returned
 //  instead if these types are not explicitly defined.
+//  "cache"         the native mpv-specific user cache dir
 //  "state"         the native mpv-specific user state dir
 //
 // It is allowed to return a static string, so the caller must set talloc_ctx
