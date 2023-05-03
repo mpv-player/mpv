@@ -424,8 +424,6 @@ typedef struct MPContext {
 
     struct mp_recorder *recorder;
 
-    char *cached_watch_later_configdir;
-
     struct screenshot_ctx *screenshot_ctx;
     struct command_ctx *command_ctx;
     struct encode_lavc_context *encode_lavc_ctx;
