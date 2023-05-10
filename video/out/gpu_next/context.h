@@ -27,6 +27,7 @@ struct gl_video_opts;
 struct gpu_ctx {
     struct mp_log *log;
     struct ra_ctx *ra_ctx;
+    struct ra *ra_hwdec; // `ra` to use for hwdec purposes
 
     pl_log pllog;
     pl_gpu gpu;
