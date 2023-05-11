@@ -272,7 +272,7 @@ jobs:
             libdvdnav:p
             libjpeg-turbo:p
             libplacebo:p
-            luajit:p
+            lua51:p
             meson:p
             ninja:p
             pkgconf:p

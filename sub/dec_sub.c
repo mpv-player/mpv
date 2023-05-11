@@ -421,10 +421,18 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
         if (r == CONTROL_OK)
             a[0] = pts_from_subtitle(sub, arg2[0]);
         break;
-    case SD_CTRL_UPDATE_OPTS:
+    }
+    case SD_CTRL_UPDATE_OPTS: {
+        int flags = (uintptr_t)arg;
         if (m_config_cache_update(sub->opts_cache))
             update_subtitle_speed(sub);
         propagate = true;
+        if (flags & UPDATE_SUB_HARD) {
+            // forget about the previous preload because
+            // UPDATE_SUB_HARD will cause a sub reinit
+            // that clears all preloaded sub packets
+            sub->preload_attempted = false;
+        }
         break;
     }
     default:

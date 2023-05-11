@@ -144,6 +144,11 @@ Configurable Options
     Set the font size used for the REPL and the console. This will be
     multiplied by "scale".
 
+``border_size``
+    Default: 1
+
+    Set the font border size used for the REPL and the console.
+
 ``history_dedup``
     Default: true
 

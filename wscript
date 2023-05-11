@@ -156,6 +156,11 @@ main_dependencies = [
         'desc': 'POSIX environment',
         'func': check_statement(['unistd.h'], 'long x = _POSIX_VERSION'),
     }, {
+        'name': 'darwin',
+        'desc': 'Darwin environment',
+        'deps': 'os-darwin',
+        'func': check_true,
+    }, {
         'name': '--android',
         'desc': 'Android environment',
         'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header

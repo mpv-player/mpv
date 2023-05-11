@@ -13,6 +13,7 @@ struct mp_icc_opts {
     bool use_embedded;
     char *profile;
     bool profile_auto;
+    bool cache;
     char *cache_dir;
     char *size_str;
     int intent;

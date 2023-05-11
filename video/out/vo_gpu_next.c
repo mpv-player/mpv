@@ -1348,10 +1348,15 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
 static char *get_cache_file(struct priv *p)
 {
     struct gl_video_opts *opts = p->opts_cache->opts;
-    if (!opts->shader_cache_dir || !opts->shader_cache_dir[0])
+    if (!opts->shader_cache)
         return NULL;
 
-    char *dir = mp_get_user_path(NULL, p->global, opts->shader_cache_dir);
+    char *dir = opts->shader_cache_dir;
+    if (dir && dir[0]) {
+        dir = mp_get_user_path(NULL, p->global, dir);
+    } else {
+        dir = mp_find_user_file(NULL, p->global, "cache", "");
+    }
     char *file = mp_path_join(NULL, dir, "libplacebo.cache");
     mp_mkdirp(dir);
     talloc_free(dir);
@@ -1462,7 +1467,7 @@ err_out:
 static const struct pl_filter_config *map_scaler(struct priv *p,
                                                  enum scaler_unit unit)
 {
-    static const struct pl_filter_preset fixed_scalers[] = {
+    const struct pl_filter_preset fixed_scalers[] = {
         { "bilinear",       &pl_filter_bilinear },
         { "bicubic_fast",   &pl_filter_bicubic },
         { "nearest",        &pl_filter_nearest },
@@ -1470,7 +1475,7 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
         {0},
     };
 
-    static const struct pl_filter_preset fixed_frame_mixers[] = {
+    const struct pl_filter_preset fixed_frame_mixers[] = {
         { "linear",         &pl_filter_bilinear },
         { "oversample",     &pl_filter_oversample },
         {0},
@@ -1575,7 +1580,7 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
 static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
-    if (!opts->icc_opts->cache_dir || !opts->icc_opts->cache_dir[0])
+    if (!opts->icc_opts->cache)
         return NULL;
 
     char cache_name[16+1];
@@ -1585,7 +1590,12 @@ static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
     }
     cache_name[16] = '\0';
 
-    char *cache_dir = mp_get_user_path(NULL, p->global, opts->icc_opts->cache_dir);
+    char *cache_dir = opts->icc_opts->cache_dir;
+    if (cache_dir && cache_dir[0]) {
+        cache_dir = mp_get_user_path(NULL, p->global, cache_dir);
+    } else {
+        cache_dir = mp_find_user_file(NULL, p->global, "cache", "");
+    }
     char *path = mp_path_join(NULL, cache_dir, cache_name);
 
     stream_t *stream = NULL;
@@ -1812,7 +1822,7 @@ static void update_render_options(struct vo *vo)
     p->peak_detect.scene_threshold_low = opts->tone_map.scene_threshold_low;
     p->peak_detect.scene_threshold_high = opts->tone_map.scene_threshold_high;
 
-    static const struct pl_tone_map_function * const tone_map_funs[] = {
+    const struct pl_tone_map_function * const tone_map_funs[] = {
         [TONE_MAPPING_AUTO]     = &pl_tone_map_auto,
         [TONE_MAPPING_CLIP]     = &pl_tone_map_clip,
         [TONE_MAPPING_MOBIUS]   = &pl_tone_map_mobius,

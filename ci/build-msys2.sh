@@ -13,7 +13,7 @@ if [ "$1" = "meson" ]; then
       -D libbluray=enabled       \
       -D libmpv=true             \
       -D libplacebo=enabled      \
-      -D lua=luajit              \
+      -D lua=enabled             \
       -D pdf-build=enabled       \
       -D rubberband=enabled      \
       -D shaderc=enabled         \
@@ -48,7 +48,7 @@ if [ "$1" = "waf" ]; then
       --enable-spirv-cross     \
       --enable-uchardet        \
       --enable-vapoursynth     \
-      --lua=luajit             \
+      --enable-lua             \
       --enable-vulkan
     ./waf build
     ./build_waf/mpv.com -v --no-config

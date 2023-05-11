@@ -231,7 +231,7 @@ static int cfg_include(void *ctx, char *filename, int flags)
 {
     struct MPContext *mpctx = ctx;
     char *fname = mp_get_user_path(NULL, mpctx->global, filename);
-    int r = m_config_parse_config_file(mpctx->mconfig, fname, NULL, flags);
+    int r = m_config_parse_config_file(mpctx->mconfig, mpctx->global, fname, NULL, flags);
     talloc_free(fname);
     return r;
 }

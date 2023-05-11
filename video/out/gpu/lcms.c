@@ -332,7 +332,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     cmsContext cms = NULL;
 
     char *cache_file = NULL;
-    if (p->opts->cache_dir && p->opts->cache_dir[0]) {
+    if (p->opts->cache) {
         // Gamma is included in the header to help uniquely identify it,
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
@@ -352,7 +352,13 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         av_sha_final(sha, hash);
         av_free(sha);
 
-        char *cache_dir = mp_get_user_path(tmp, p->global, p->opts->cache_dir);
+        char *cache_dir = p->opts->cache_dir;
+        if (cache_dir && cache_dir[0]) {
+            cache_dir = mp_get_user_path(NULL, p->global, cache_dir);
+        } else {
+            cache_dir = mp_find_user_file(NULL, p->global, "cache", "");
+        }
+
         cache_file = talloc_strdup(tmp, "");
         for (int i = 0; i < sizeof(hash); i++)
             cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
@@ -494,13 +500,13 @@ const struct m_sub_options mp_icc_conf = {
         {"use-embedded-icc-profile", OPT_BOOL(use_embedded)},
         {"icc-profile", OPT_STRING(profile), .flags = M_OPT_FILE},
         {"icc-profile-auto", OPT_BOOL(profile_auto)},
+        {"icc-cache", OPT_BOOL(cache)},
         {"icc-cache-dir", OPT_STRING(cache_dir), .flags = M_OPT_FILE},
         {"icc-intent", OPT_INT(intent)},
         {"icc-force-contrast", OPT_CHOICE(contrast, {"no", 0}, {"inf", -1}),
             M_RANGE(0, 1000000)},
         {"icc-3dlut-size", OPT_STRING_VALIDATE(size_str, validate_3dlut_size_opt)},
         {"3dlut-size", OPT_REPLACED("icc-3dlut-size")},
-        {"icc-cache", OPT_REMOVED("see icc-cache-dir")},
         {"icc-contrast", OPT_REMOVED("see icc-force-contrast")},
         {0}
     },

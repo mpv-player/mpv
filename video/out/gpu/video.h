@@ -171,6 +171,7 @@ struct gl_video_opts {
     float unsharp;
     int tex_pad_x, tex_pad_y;
     struct mp_icc_opts *icc_opts;
+    bool shader_cache;
     int early_flush;
     char *shader_cache_dir;
     char *hwdec_interop;
