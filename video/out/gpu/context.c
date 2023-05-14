@@ -104,7 +104,7 @@ static const struct ra_ctx_fns *contexts[] = {
 #if HAVE_WIN32_DESKTOP
     &ra_ctx_vulkan_win,
 #endif
-#if HAVE_WAYLAND
+#if HAVE_WAYLAND && HAVE_VK_KHR_WAYLAND
     &ra_ctx_vulkan_wayland,
 #endif
 #if HAVE_X11

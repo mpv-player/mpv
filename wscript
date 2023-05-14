@@ -809,6 +809,12 @@ video_output_features = [
         'func': check_statement('vulkan/vulkan_core.h', 'vkCreateDisplayPlaneSurfaceKHR(0, 0, 0, 0)',
                                 use='vulkan')
     }, {
+        'name': 'vk-khr-wayland',
+        'desc': "VK_KHR_wayland extension",
+        'deps': 'vulkan && wayland',
+        'func': check_statement('vulkan/vulkan_wayland.h', 'vkCreateWaylandSurfaceKHR(0, 0, 0, 0)',
+                                use='vulkan')
+    }, {
         'name': 'vaapi-libplacebo',
         'desc': 'VAAPI libplacebo',
         'deps': 'vaapi && libplacebo',

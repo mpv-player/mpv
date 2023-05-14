@@ -411,7 +411,7 @@ endif
 if darwin
     path_source = files('osdep/path-darwin.c')
     sources += path_source + files('osdep/timer-darwin.c')
-                     
+
 endif
 
 if posix and not darwin
@@ -1251,7 +1251,10 @@ if features['vulkan'] and features['android']
     sources += files('video/out/vulkan/context_android.c')
 endif
 
-if features['vulkan'] and features['wayland']
+features += {'vk_khr_wayland': cc.has_function('vkCreateWaylandSurfaceKHR', prefix: '#include <vulkan/vulkan_wayland.h>',
+                                               dependencies: [vulkan, wayland['deps']])}
+
+if features['vk_khr_wayland']
     sources += files('video/out/vulkan/context_wayland.c')
 endif
 
