@@ -6305,7 +6305,7 @@ them.
         wide/unusual gamuts get automatically adapted to BT.709, while standard
         gamut (i.e. BT.601 and BT.709) content is not touched. (default)
     bt.470m
-        ITU-R BT.470 M
+        ITU-R BT.470 System M, CIE C white point
     bt.601-525
         ITU-R BT.601 (525-line SD systems, eg. NTSC), SMPTE 170M/240M
     bt.601-625
@@ -6323,7 +6323,9 @@ them.
     cie1931
         CIE 1931 RGB (not to be confused with CIE XYZ)
     dci-p3
-        DCI-P3 (Digital Cinema Colorspace), SMPTE RP431-2
+        DCI-P3 (Digital Cinema Colorspace), SMPTE RP431-2, DCI white point
+    display-p3
+        P3-D65, SMPTE EG432-1
     v-gamut
         Panasonic V-Gamut (VARICAM) primaries
     s-gamut
