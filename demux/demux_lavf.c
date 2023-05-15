@@ -423,17 +423,6 @@ static char *remove_prefix(char *s, const char *const *prefixes)
 static const char *const prefixes[] =
     {"ffmpeg://", "lavf://", "avdevice://", "av://", NULL};
 
-/*
- * https://www.rfc-editor.org/rfc/rfc8216.txt
- *
- * application/x-mpegurl is a legacy mimetype in Apple's HLS docs
- */
-static const char *const hls_mime_types[] = {
-    "application/x-mpegurl",
-    "application/vnd.apple.mpegurl",
-    "audio/mpegurl",
-};
-
 static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -477,23 +466,9 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         }
     }
 
-    bool matches_hls_mime = 0;
-    for (int i = 0; i < MP_ARRAY_SIZE(hls_mime_types); i++) {
-        if (!strcasecmp(mime_type, hls_mime_types[i])) {
-            matches_hls_mime = 1;
-            break;
-        }
-    }
-
     AVProbeData avpd = {
-        /*
-         * Disable file-extension matching with normal checks,
-         * unless it's an HLS mimetype.
-         *
-         * The HLS check works around a regression introduced by FFmpeg commit
-         * 6b1f68ccb04d791f0250e05687c346a99ff47ea1 that is unlikely to be reverted.
-         */
-        .filename = matches_hls_mime ? "dummy.m3u8" : (check <= DEMUX_CHECK_REQUEST ? priv->filename : ""),
+        // Disable file-extension matching with normal checks
+        .filename = check <= DEMUX_CHECK_REQUEST ? priv->filename : "",
         .buf_size = 0,
         .buf = av_mallocz(PROBE_BUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE),
     };
