@@ -185,6 +185,7 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
 static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b);
+static void guess_focus(struct vo_wayland_state *wl);
 static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
@@ -415,6 +416,7 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_state *wl = data;
     wl->has_keyboard_input = true;
+    guess_focus(wl);
 }
 
 static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
@@ -422,6 +424,7 @@ static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_state *wl = data;
     wl->has_keyboard_input = false;
+    guess_focus(wl);
 }
 
 static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
@@ -923,12 +926,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
 
     if (wl->activated != is_activated) {
         wl->activated = is_activated;
-        if ((!wl->focused && wl->activated && wl->has_keyboard_input) ||
-            (wl->focused && !wl->activated))
-        {
-            wl->focused = !wl->focused;
-            wl->pending_vo_events |= VO_EVENT_FOCUS;
-        }
+        guess_focus(wl);
         /* Just force a redraw to be on the safe side. */
         if (wl->activated) {
             wl->hidden = false;
@@ -1580,6 +1578,18 @@ static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b) {
     } else {
         greatest_common_divisor(wl, smaller, remainder);
     }
+}
+
+static void guess_focus(struct vo_wayland_state *wl) {
+    // We can't actually know if the window is focused or not in wayland,
+    // so just guess it with some common sense. Obviously won't work if
+    // the user has no keyboard.
+    if ((!wl->focused && wl->activated && wl->has_keyboard_input) ||
+        (wl->focused && !wl->activated))
+     {
+         wl->focused = !wl->focused;
+         wl->pending_vo_events |= VO_EVENT_FOCUS;
+     }
 }
 
 static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
