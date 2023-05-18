@@ -467,10 +467,12 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     }
 
     AVProbeData avpd = {
-        // Disable file-extension matching with normal checks
-        .filename = check <= DEMUX_CHECK_REQUEST ? priv->filename : "",
+        // Disable file-extension matching with normal checks, except for HLS
+        .filename = av_match_ext(priv->filename, "m3u8,m3u") ||
+                    check <= DEMUX_CHECK_REQUEST ? priv->filename : "",
         .buf_size = 0,
         .buf = av_mallocz(PROBE_BUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE),
+        .mime_type = lavfdopts->allow_mimetype ? mime_type : NULL,
     };
     if (!avpd.buf)
         return -1;
