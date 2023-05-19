@@ -88,6 +88,11 @@ struct vo_wayland_state {
     void *content_type;
     int current_content_type;
 
+    /* cursor-shape */
+    /* TODO: unvoid these if required wayland protocols is bumped to 1.32+ */
+    void *cursor_shape_manager;
+    void *cursor_shape_device;
+
     /* fractional-scale */
     /* TODO: unvoid these if required wayland protocols is bumped to 1.31+ */
     void *fractional_scale_manager;

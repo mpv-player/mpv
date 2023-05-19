@@ -51,6 +51,10 @@
 #include "generated/wayland/fractional-scale-v1.h"
 #endif
 
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+#include "generated/wayland/cursor-shape-v1.h"
+#endif
+
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
 #define HAVE_WAYLAND_1_22
 #endif
@@ -180,6 +184,7 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
+static void get_shape_device(struct vo_wayland_state *wl);
 static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b);
 static void guess_focus(struct vo_wayland_state *wl);
 static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
@@ -482,6 +487,7 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
 
     if ((caps & WL_SEAT_CAPABILITY_POINTER) && !wl->pointer) {
         wl->pointer = wl_seat_get_pointer(seat);
+        get_shape_device(wl);
         wl_pointer_add_listener(wl->pointer, &pointer_listener, wl);
     } else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && wl->pointer) {
         wl_pointer_destroy(wl->pointer);
@@ -1295,6 +1301,12 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 #endif
 
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (!strcmp(interface, wp_cursor_shape_manager_v1_interface.name) && found++) {
+        wl->cursor_shape_manager = wl_registry_bind(reg, id, &wp_cursor_shape_manager_v1_interface, 1);
+    }
+#endif
+
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
         wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, 1);
         wp_presentation_add_listener(wl->presentation, &pres_listener, wl);
@@ -1529,7 +1541,18 @@ static int get_mods(struct vo_wayland_state *wl)
     return modifiers;
 }
 
-static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b) {
+static void get_shape_device(struct vo_wayland_state *wl)
+{
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (!wl->cursor_shape_device && wl->cursor_shape_manager) {
+        wl->cursor_shape_device = wp_cursor_shape_manager_v1_get_pointer(wl->cursor_shape_manager,
+                                                                         wl->pointer);
+    }
+#endif
+}
+
+static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b)
+{
     // euclidean algorithm
     int larger;
     int smaller;
@@ -1673,21 +1696,33 @@ static void set_content_type(struct vo_wayland_state *wl)
 #endif
 }
 
+static void set_cursor_shape(struct vo_wayland_state *wl)
+{
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    wp_cursor_shape_device_v1_set_shape(wl->cursor_shape_device, wl->pointer_id,
+                                        WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
+#endif
+}
+
 static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
 {
     wl->cursor_visible = on;
     if (on) {
-        if (spawn_cursor(wl))
-            return VO_FALSE;
-        struct wl_cursor_image *img = wl->default_cursor->images[0];
-        struct wl_buffer *buffer = wl_cursor_image_get_buffer(img);
-        if (!buffer)
-            return VO_FALSE;
-        wl_pointer_set_cursor(wl->pointer, wl->pointer_id, wl->cursor_surface,
-                              img->hotspot_x/wl->scaling, img->hotspot_y/wl->scaling);
-        wl_surface_set_buffer_scale(wl->cursor_surface, wl->scaling);
-        wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
-        wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
+        if (wl->cursor_shape_device) {
+            set_cursor_shape(wl);
+        } else {
+            if (spawn_cursor(wl))
+                return VO_FALSE;
+            struct wl_cursor_image *img = wl->default_cursor->images[0];
+            struct wl_buffer *buffer = wl_cursor_image_get_buffer(img);
+            if (!buffer)
+                return VO_FALSE;
+            wl_pointer_set_cursor(wl->pointer, wl->pointer_id, wl->cursor_surface,
+                                  img->hotspot_x/wl->scaling, img->hotspot_y/wl->scaling);
+            wl_surface_set_buffer_scale(wl->cursor_surface, wl->scaling);
+            wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
+            wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
+        }
         wl_surface_commit(wl->cursor_surface);
     } else {
         wl_pointer_set_cursor(wl->pointer, wl->pointer_id, NULL, 0, 0);
@@ -1780,6 +1815,9 @@ static void set_window_bounds(struct vo_wayland_state *wl)
 
 static int spawn_cursor(struct vo_wayland_state *wl)
 {
+    /* Don't use this if we have cursor-shape. */
+    if (wl->cursor_shape_device)
+        return 0;
     /* Reuse if size is identical */
     if (!wl->pointer || wl->allocated_cursor_scale == wl->scaling)
         return 0;
@@ -2314,6 +2352,14 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->subcompositor)
         wl_subcompositor_destroy(wl->subcompositor);
+
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (wl->cursor_shape_device)
+        wp_cursor_shape_device_v1_destroy(wl->cursor_shape_device);
+
+    if (wl->cursor_shape_manager)
+        wp_cursor_shape_manager_v1_destroy(wl->cursor_shape_manager);
+#endif
 
     if (wl->cursor_surface)
         wl_surface_destroy(wl->cursor_surface);
