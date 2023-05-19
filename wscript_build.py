@@ -163,6 +163,20 @@ def build(ctx):
             protocol  = "staging/fractional-scale/fractional-scale-v1",
             target    = "generated/wayland/fractional-scale-v1.h")
 
+    if ctx.dependency_satisfied('wayland-protocols-1-32'):
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "staging/cursor-shape/cursor-shape-v1",
+            target    = "generated/wayland/cursor-shape-v1.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "staging/cursor-shape/cursor-shape-v1",
+            target    = "generated/wayland/cursor-shape-v1.h")
+        ctx.wayland_protocol_code(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/tablet/tablet-unstable-v2",
+            target    = "generated/wayland/tablet-unstable-v2.c")
+        ctx.wayland_protocol_header(proto_dir = ctx.env.WL_PROTO_DIR,
+            protocol  = "unstable/tablet/tablet-unstable-v2",
+            target    = "generated/wayland/tablet-unstable-v2.h")
+
     ctx(features = "ebml_header", target = "generated/ebml_types.h")
     ctx(features = "ebml_definitions", target = "generated/ebml_defs.inc")
 
