@@ -10,8 +10,6 @@ struct mpv_global {
     struct mp_client_api *client_api;
     char *configdir;
     struct stats_base *stats;
-    bool no_cachedir;
-    bool no_statedir;
 };
 
 #endif
