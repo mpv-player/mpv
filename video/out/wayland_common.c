@@ -534,10 +534,12 @@ static void data_offer_source_actions(void *data, struct wl_data_offer *offer, u
 static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, uint32_t dnd_action)
 {
     struct vo_wayland_state *wl = data;
-    wl->dnd_action = dnd_action & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY ?
-                     DND_REPLACE : DND_APPEND;
-    MP_VERBOSE(wl, "DND action is %s\n",
-               wl->dnd_action == DND_REPLACE ? "DND_REPLACE" : "DND_APPEND");
+    if (dnd_action) {
+        wl->dnd_action = dnd_action & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY ?
+                         DND_REPLACE : DND_APPEND;
+        MP_VERBOSE(wl, "DND action is %s\n",
+                   wl->dnd_action == DND_REPLACE ? "DND_REPLACE" : "DND_APPEND");
+    }
 }
 
 static const struct wl_data_offer_listener data_offer_listener = {
