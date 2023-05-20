@@ -64,6 +64,12 @@ static const char *const config_dirs[] = {
     "exe_dir",
     "global",
 };
+// types that configdir replaces (if set)
+// These are not part of any fallback order so need to be overriden separately.
+static const char *const config_dir_replaces[] = {
+    "state",
+    "cache",
+};
 
 // Return a platform specific path using a path type as defined in osdep/path.h.
 // Keep in mind that the only way to free the return value is freeing talloc_ctx
@@ -74,11 +80,15 @@ static const char *mp_get_platform_path(void *talloc_ctx,
 {
     assert(talloc_ctx);
 
-    bool config_dir = strcmp(type, "cache") != 0 && strcmp(type, "state") != 0;
-    if (global->configdir && config_dir) {
+    if (global->configdir) {
+        // force all others to NULL, only first returns the path
         for (int n = 0; n < MP_ARRAY_SIZE(config_dirs); n++) {
             if (strcmp(config_dirs[n], type) == 0)
                 return (n == 0 && global->configdir[0]) ? global->configdir : NULL;
+        }
+        for (int n = 0; n < MP_ARRAY_SIZE(config_dir_replaces); n++) {
+            if (strcmp(config_dir_replaces[n], type) == 0)
+                return global->configdir[0] ? global->configdir : NULL;
         }
     }
 
@@ -122,7 +132,7 @@ char *mp_find_user_file(void *talloc_ctx, struct mpv_global *global,
     if (res)
         res = mp_path_join(talloc_ctx, res, filename);
     talloc_free(tmp);
-    MP_DBG(global, "path: '%s' -> '%s'\n", filename, res ? res : "-");
+    MP_DBG(global, "%s path: '%s' -> '%s'\n", type, filename, res ? res : "-");
     return res;
 }
 
