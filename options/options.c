@@ -106,6 +106,8 @@ static const struct m_sub_options screenshot_conf = {
 static const m_option_t mp_vo_opt_list[] = {
     {"vo", OPT_SETTINGSLIST(video_driver_list, &vo_obj_list)},
     {"taskbar-progress", OPT_BOOL(taskbar_progress)},
+    {"drag-and-drop", OPT_CHOICE(drag_and_drop, {"auto", -1}, {"replace", 0},
+        {"append", 1})},
     {"snap-window", OPT_BOOL(snap_window)},
     {"ontop", OPT_BOOL(ontop)},
     {"ontop-level", OPT_CHOICE(ontop_level, {"window", -1}, {"system", -2},
@@ -196,6 +198,7 @@ const struct m_sub_options vo_sub_opts = {
     .size = sizeof(struct mp_vo_opts),
     .defaults = &(const struct mp_vo_opts){
         .video_driver_list = NULL,
+        .drag_and_drop = -1,
         .monitor_pixel_aspect = 1.0,
         .screen_id = -1,
         .fsscreen_id = -1,
