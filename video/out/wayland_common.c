@@ -535,8 +535,12 @@ static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, u
 {
     struct vo_wayland_state *wl = data;
     if (dnd_action) {
-        wl->dnd_action = dnd_action & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY ?
-                         DND_REPLACE : DND_APPEND;
+        if (wl->vo_opts->drag_and_drop >= 0) {
+            wl->dnd_action = wl->vo_opts->drag_and_drop;
+        } else {
+            wl->dnd_action = dnd_action & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY ?
+                             DND_REPLACE : DND_APPEND;
+        }
         MP_VERBOSE(wl, "DND action is %s\n",
                    wl->dnd_action == DND_REPLACE ? "DND_REPLACE" : "DND_APPEND");
     }
