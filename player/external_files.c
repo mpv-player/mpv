@@ -248,10 +248,9 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
             prio |= 32; // exact movie name match
 
         bstr lang = {0};
+        int start = 0;
+        lang = guess_lang_from_filename(tmp_fname_trim, &start);
         if (bstr_startswith(tmp_fname_trim, f_fname_trim)) {
-            int start = 0;
-            lang = guess_lang_from_filename(tmp_fname_trim, &start);
-
             if (lang.len && start == f_fname_trim.len)
                 prio |= 16; // exact movie name + followed by lang
         }
