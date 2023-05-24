@@ -63,6 +63,10 @@
 #define CLOCK_MONOTONIC_RAW 4
 #endif
 
+#ifndef XDG_TOPLEVEL_STATE_SUSPENDED
+#define XDG_TOPLEVEL_STATE_SUSPENDED 9
+#endif
+
 
 static const struct mp_keymap keymap[] = {
     /* Special keys */
@@ -885,6 +889,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     bool is_maximized = false;
     bool is_fullscreen = false;
     bool is_activated = false;
+    bool is_suspended = false;
     enum xdg_toplevel_state *state;
     wl_array_for_each(state, states) {
         switch (*state) {
@@ -911,8 +916,14 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         case XDG_TOPLEVEL_STATE_MAXIMIZED:
             is_maximized = true;
             break;
+        case XDG_TOPLEVEL_STATE_SUSPENDED:
+            is_suspended = true;
+            break;
         }
     }
+
+    if (wl->hidden != is_suspended)
+        wl->hidden = is_suspended;
 
     if (vo_opts->fullscreen != is_fullscreen) {
         wl->state_change = true;
@@ -1313,7 +1324,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, xdg_wm_base_interface.name) && found++) {
-        ver = MPMIN(ver, 4); /* Cap at 4 in case new events are added later. */
+        ver = MPMIN(ver, 6); /* Cap at 6 in case new events are added later. */
         wl->wm_base = wl_registry_bind(reg, id, &xdg_wm_base_interface, ver);
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
     }
@@ -2532,7 +2543,8 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
     if (!wl->use_present && !wl_display_get_error(wl->display))
         wl_display_roundtrip(wl->display);
 
-    if (wl->frame_wait) {
+    /* Only use this heuristic if the compositor doesn't support the suspended state. */
+    if (wl->frame_wait && xdg_toplevel_get_version(wl->xdg_toplevel) < 6) {
         // Only consider consecutive missed callbacks.
         if (wl->timeout_count > 1) {
             wl->hidden = true;
