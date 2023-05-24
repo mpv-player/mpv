@@ -1867,7 +1867,6 @@ static void update_render_options(struct vo *vo)
     p->color_map.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
     p->color_map.tone_mapping_param = opts->tone_map.curve_param;
     p->color_map.inverse_tone_mapping = opts->tone_map.inverse;
-    p->color_map.tone_mapping_crosstalk = opts->tone_map.crosstalk;
     p->color_map.tone_mapping_mode = tone_map_modes[opts->tone_map.mode];
     if (isnan(p->color_map.tone_mapping_param)) // vo_gpu compatibility
         p->color_map.tone_mapping_param = 0.0;

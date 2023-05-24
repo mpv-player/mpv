@@ -75,6 +75,7 @@ Interface changes
     - add `--icc-cache` and `--gpu-shader-cache` options to control whether or not to
       save cache files for these features; explictly setting `--icc-cache-dir` and
       `--gpu-shader-cache` is no longer required
+    - remove the `--tone-mapping-crosstalk` option
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,

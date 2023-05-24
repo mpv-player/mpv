@@ -123,7 +123,6 @@ struct gl_tone_map_opts {
     float curve_param;
     float max_boost;
     bool inverse;
-    float crosstalk;
     int mode;
     int compute_peak;
     float decay_rate;
