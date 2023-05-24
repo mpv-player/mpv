@@ -1894,7 +1894,6 @@ static void update_render_options(struct vo *vo)
         p->color_map.hybrid_mix = hybrid_mix[opts->tone_map.mode];
 #else
     p->color_map.intent = opts->icc_opts->intent;
-    p->color_map.tone_mapping_crosstalk = opts->tone_map.crosstalk;
     p->color_map.tone_mapping_mode = tone_map_modes[opts->tone_map.mode];
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
         p->color_map.gamut_mode = gamut_modes[opts->tone_map.gamut_mode];
