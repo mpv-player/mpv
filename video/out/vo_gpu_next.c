@@ -146,6 +146,7 @@ struct priv {
 
     // Performance data of last frame
     struct voctrl_performance_data perf;
+    pthread_mutex_t perf_lock;
 
     bool delayed_peak;
     bool inter_preserve;
@@ -744,7 +745,7 @@ static void info_callback(void *priv, const struct pl_render_info *info)
 {
     struct vo *vo = priv;
     struct priv *p = vo->priv;
-    if (info->index > VO_PASS_PERF_MAX)
+    if (info->index >= VO_PASS_PERF_MAX)
         return; // silently ignore clipped passes, whatever
 
     struct mp_frame_perf *frame;
@@ -758,15 +759,21 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     struct mp_pass_perf *perf = &frame->perf[index];
     const struct pl_dispatch_info *pass = info->pass;
     static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
-    memcpy(perf->samples, pass->samples, pass->num_samples * sizeof(pass->samples[0]));
-    perf->count = pass->num_samples;
+    assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
+
+    pthread_mutex_lock(&p->perf_lock);
+
+    perf->count = MPMIN(pass->num_samples, VO_PERF_SAMPLE_COUNT);
+    memcpy(perf->samples, pass->samples, perf->count * sizeof(pass->samples[0]));
     perf->last = pass->last;
     perf->peak = pass->peak;
     perf->avg = pass->average;
 
-    talloc_free(frame->desc[index]);
-    frame->desc[index] = talloc_strdup(p, pass->shader->description);
+    strncpy(frame->desc[index], pass->shader->description, sizeof(frame->desc[index]) - 1);
+    frame->desc[index][sizeof(frame->desc[index]) - 1] = '\0';
     frame->count = index + 1;
+
+    pthread_mutex_unlock(&p->perf_lock);
 }
 
 static void update_options(struct vo *vo)
@@ -1307,7 +1314,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
 
     case VOCTRL_PERFORMANCE_DATA:
+        pthread_mutex_lock(&p->perf_lock);
         *(struct voctrl_performance_data *) data = p->perf;
+        pthread_mutex_unlock(&p->perf_lock);
         return true;
 
     case VOCTRL_SCREENSHOT:
@@ -1410,6 +1419,8 @@ static void uninit(struct vo *vo)
 
     pl_renderer_destroy(&p->rr);
 
+    pthread_mutex_destroy(&p->perf_lock);
+
     p->ra_ctx = NULL;
     p->pllog = NULL;
     p->gpu = NULL;
@@ -1449,6 +1460,7 @@ static int preinit(struct vo *vo)
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
     pthread_mutex_init(&p->dr_lock, NULL);
+    pthread_mutex_init(&p->perf_lock, NULL);
 
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
@@ -1847,6 +1859,22 @@ static void update_render_options(struct vo *vo)
         [TONE_MAPPING_ST2094_10] = &pl_tone_map_st2094_10,
     };
 
+#if PL_API_VER >= 269
+    static const struct pl_gamut_map_function *gamut_modes[] = {
+        [GAMUT_CLIP]            = &pl_gamut_map_clip,
+        [GAMUT_WARN]            = &pl_gamut_map_highlight,
+        [GAMUT_DESATURATE]      = &pl_gamut_map_desaturate,
+        [GAMUT_DARKEN]          = &pl_gamut_map_darken,
+    };
+
+    // Back-compat approximation, taken from libplacebo source code
+    static const float hybrid_mix[] = {
+        [TONE_MAP_MODE_RGB]     = 1.0f,
+        [TONE_MAP_MODE_MAX]     = 0.0f,
+        [TONE_MAP_MODE_LUMA]    = 0.0f,
+        [TONE_MAP_MODE_HYBRID]  = 0.20f,
+    };
+#else
     static const enum pl_gamut_mode gamut_modes[] = {
         [GAMUT_CLIP]            = PL_GAMUT_CLIP,
         [GAMUT_WARN]            = PL_GAMUT_WARN,
@@ -1861,19 +1889,27 @@ static void update_render_options(struct vo *vo)
         [TONE_MAP_MODE_HYBRID]  = PL_TONE_MAP_HYBRID,
         [TONE_MAP_MODE_LUMA]    = PL_TONE_MAP_LUMA,
     };
+#endif
 
     p->color_map = pl_color_map_default_params;
-    p->color_map.intent = opts->icc_opts->intent;
     p->color_map.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
     p->color_map.tone_mapping_param = opts->tone_map.curve_param;
     p->color_map.inverse_tone_mapping = opts->tone_map.inverse;
-    p->color_map.tone_mapping_crosstalk = opts->tone_map.crosstalk;
-    p->color_map.tone_mapping_mode = tone_map_modes[opts->tone_map.mode];
     if (isnan(p->color_map.tone_mapping_param)) // vo_gpu compatibility
         p->color_map.tone_mapping_param = 0.0;
+    p->color_map.visualize_lut = opts->tone_map.visualize;
+
+#if PL_API_VER >= 269
+    if (opts->tone_map.gamut_mode != GAMUT_AUTO)
+        p->color_map.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
+    if (opts->tone_map.mode != TONE_MAP_MODE_AUTO)
+        p->color_map.hybrid_mix = hybrid_mix[opts->tone_map.mode];
+#else
+    p->color_map.intent = opts->icc_opts->intent;
+    p->color_map.tone_mapping_mode = tone_map_modes[opts->tone_map.mode];
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
         p->color_map.gamut_mode = gamut_modes[opts->tone_map.gamut_mode];
-    p->color_map.visualize_lut = opts->tone_map.visualize;
+#endif
 
     switch (opts->dither_algo) {
     case DITHER_NONE:

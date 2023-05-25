@@ -292,13 +292,15 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
 
     char *wl_dir = mp_get_playback_resume_dir(mpctx);
-    mp_mk_user_dir(mpctx->global, "state", wl_dir);
+    mp_mkdirp(wl_dir);
 
     MP_INFO(mpctx, "Saving state.\n");
 
     FILE *file = fopen(conffile, "wb");
-    if (!file)
+    if (!file) {
+        MP_WARN(mpctx, "Can't open %s for writing\n", conffile);
         goto exit;
+    }
 
     write_filename(mpctx, file, cur->filename);
 

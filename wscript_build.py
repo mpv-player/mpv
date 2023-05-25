@@ -520,7 +520,6 @@ def build(ctx):
         ( "video/out/present_sync.c",            "wayland || x11" ),
         ( "video/out/wldmabuf/context_wldmabuf.c", "dmabuf-wayland" ),
         ( "video/out/wldmabuf/ra_wldmabuf.c",      "dmabuf-wayland" ),
-        ( "video/out/wlbuf_pool.c",                "dmabuf-wayland" ),
         ( "video/out/vo.c" ),
         ( "video/out/vo_caca.c",                 "caca" ),
         ( "video/out/vo_direct3d.c",             "direct3d" ),

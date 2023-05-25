@@ -2303,19 +2303,8 @@ static void init_debug_layer(struct ra *ra)
     // because we flush stored messages regularly (in debug_marker.)
     ID3D11InfoQueue_SetMessageCountLimit(p->iqueue, -1);
 
-    // Filter some annoying messages
-    D3D11_MESSAGE_ID deny_ids[] = {
-        // This error occurs during context creation when we try to figure out
-        // the real maximum texture size by attempting to create a texture
-        // larger than the current feature level allows.
-        D3D11_MESSAGE_ID_CREATETEXTURE2D_INVALIDDIMENSIONS,
-    };
-    D3D11_INFO_QUEUE_FILTER filter = {
-        .DenyList = {
-            .NumIDs = MP_ARRAY_SIZE(deny_ids),
-            .pIDList = deny_ids,
-        },
-    };
+    // Push empty filter to get everything
+    D3D11_INFO_QUEUE_FILTER filter = {0};
     ID3D11InfoQueue_PushStorageFilter(p->iqueue, &filter);
 }
 
@@ -2485,10 +2474,17 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
         &(D3D11_QUERY_DESC) { D3D11_QUERY_TIMESTAMP }, NULL);
     p->has_timestamp_queries = SUCCEEDED(hr);
 
+    debug_marker(ra, "before maximum Texture2D size lookup");
+
     // According to MSDN, the above texture sizes are just minimums and drivers
     // may support larger textures. See:
     // https://msdn.microsoft.com/en-us/library/windows/desktop/ff476874.aspx
     find_max_texture_dimension(ra);
+
+    // Ignore any messages during find_max_texture_dimension
+    if (p->iqueue)
+        ID3D11InfoQueue_ClearStoredMessages(p->iqueue);
+
     MP_VERBOSE(ra, "Maximum Texture2D size: %dx%d\n", ra->max_texture_wh,
                ra->max_texture_wh);
 

@@ -64,6 +64,12 @@ static const char *const config_dirs[] = {
     "exe_dir",
     "global",
 };
+// types that configdir replaces (if set)
+// These are not part of any fallback order so need to be overriden separately.
+static const char *const config_dir_replaces[] = {
+    "state",
+    "cache",
+};
 
 // Return a platform specific path using a path type as defined in osdep/path.h.
 // Keep in mind that the only way to free the return value is freeing talloc_ctx
@@ -74,25 +80,33 @@ static const char *mp_get_platform_path(void *talloc_ctx,
 {
     assert(talloc_ctx);
 
-    bool config_dir = strcmp(type, "cache") != 0 && strcmp(type, "state") != 0;
-    if (global->configdir && config_dir) {
+    if (global->configdir) {
+        // force all others to NULL, only first returns the path
         for (int n = 0; n < MP_ARRAY_SIZE(config_dirs); n++) {
             if (strcmp(config_dirs[n], type) == 0)
                 return (n == 0 && global->configdir[0]) ? global->configdir : NULL;
+        }
+        for (int n = 0; n < MP_ARRAY_SIZE(config_dir_replaces); n++) {
+            if (strcmp(config_dir_replaces[n], type) == 0)
+                return global->configdir[0] ? global->configdir : NULL;
         }
     }
 
     // Return the native config path if the platform doesn't support the
     // type we are trying to fetch.
-    if (strcmp(type, "cache") == 0 && global->no_cachedir)
-        type = "home";
-    if (strcmp(type, "state") == 0 && global->no_statedir)
-        type = "home";
+    const char *fallback_type = NULL;
+    if (!strcmp(type, "cache") || !strcmp(type, "state"))
+        fallback_type = "home";
 
     for (int n = 0; n < MP_ARRAY_SIZE(path_resolvers); n++) {
         const char *path = path_resolvers[n](talloc_ctx, type);
         if (path && path[0])
             return path;
+    }
+
+    if (fallback_type) {
+        assert(strcmp(fallback_type, type) != 0);
+        return mp_get_platform_path(talloc_ctx, global, fallback_type);
     }
     return NULL;
 }
@@ -100,17 +114,6 @@ static const char *mp_get_platform_path(void *talloc_ctx,
 void mp_init_paths(struct mpv_global *global, struct MPOpts *opts)
 {
     TA_FREEP(&global->configdir);
-
-    // Check if the platform has unique directories that differ from
-    // the standard config directory.
-    void *tmp = talloc_new(NULL);
-    const char *cache = mp_get_platform_path(tmp, global, "cache");
-    const char *state = mp_get_platform_path(tmp, global, "state");
-    if (!cache)
-        global->no_cachedir = true;
-    if (!state)
-        global->no_statedir = true;
-    talloc_free(tmp);
 
     const char *force_configdir = getenv("MPV_HOME");
     if (opts->force_configdir && opts->force_configdir[0])
@@ -129,7 +132,7 @@ char *mp_find_user_file(void *talloc_ctx, struct mpv_global *global,
     if (res)
         res = mp_path_join(talloc_ctx, res, filename);
     talloc_free(tmp);
-    MP_DBG(global, "path: '%s' -> '%s'\n", filename, res ? res : "-");
+    MP_DBG(global, "%s path: '%s' -> '%s'\n", type, filename, res ? res : "-");
     return res;
 }
 

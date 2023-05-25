@@ -6506,11 +6506,6 @@ them.
     If set, allows inverse tone mapping (expanding SDR to HDR). Not supported
     by all tone mapping curves. Use with caution. (``--vo=gpu-next`` only)
 
-``--tone-mapping-crosstalk=<0.0..0.30>``
-    If nonzero, apply an extra crosstalk matrix before tone mapping. Can help
-    improve the appearance of strongly saturated monochromatic highlights.
-    (Default: 0.04, only affects ``--vo=gpu-next``)
-
 ``--tone-mapping-max-boost=<1.0..10.0>``
     Upper limit for how much the tone mapping algorithm is allowed to boost
     the average brightness by over-exposing the image. The default value of 1.0
