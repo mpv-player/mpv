@@ -18,12 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Increase -N suffix here to force full rebuild after changes
-      - uses: actions/cache@v3
-        with:
-          path: mingw_prefix/
-          key: "${{ matrix.target }}-7"
-
       - name: Install dependencies
         run: |
           sudo apt-get update
