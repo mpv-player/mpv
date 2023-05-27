@@ -1860,7 +1860,7 @@ static void update_render_options(struct vo *vo)
     };
 
 #if PL_API_VER >= 269
-    static const struct pl_gamut_map_function *gamut_modes[] = {
+    const struct pl_gamut_map_function *gamut_modes[] = {
         [GAMUT_CLIP]            = &pl_gamut_map_clip,
         [GAMUT_WARN]            = &pl_gamut_map_highlight,
         [GAMUT_DESATURATE]      = &pl_gamut_map_desaturate,
