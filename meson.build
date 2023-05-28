@@ -1287,6 +1287,10 @@ if features['vulkan'] and features['x11']
      sources += files('video/out/vulkan/context_xlib.c')
 endif
 
+if features['vulkan'] and features['cocoa']
+     sources += files('video/out/vulkan/context_mac.m')
+endif
+
 features += {'vk-khr-display': cc.has_function('vkCreateDisplayPlaneSurfaceKHR', prefix: '#include <vulkan/vulkan_core.h>',
                                                dependencies: [vulkan])}
 if features['vk-khr-display']
@@ -1561,6 +1565,10 @@ features += {'macos-cocoa-cb': macos_cocoa_cb.allowed()}
 if features['macos-cocoa-cb']
     swift_sources += files('video/out/cocoa_cb_common.swift',
                            'video/out/mac/gl_layer.swift')
+endif
+if features['cocoa'] and features['vulkan']
+    swift_sources += files('video/out/mac_common.swift',
+                           'video/out/mac/metal_layer.swift')
 endif
 
 macos_media_player = get_option('macos-media-player').require(
