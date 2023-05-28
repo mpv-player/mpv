@@ -1551,6 +1551,7 @@ if cocoa.found() and swift.allowed()
                            'osdep/macos/mpv_helper.swift',
                            'osdep/macos/swift_compat.swift',
                            'osdep/macos/swift_extensions.swift',
+                           'osdep/macos/precise_timer.swift',
                            'video/out/mac/common.swift',
                            'video/out/mac/title_bar.swift',
                            'video/out/mac/view.swift',
