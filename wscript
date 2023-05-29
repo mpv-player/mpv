@@ -815,9 +815,14 @@ video_output_features = [
         'func': check_statement('vulkan/vulkan_core.h', 'vkCreateDisplayPlaneSurfaceKHR(0, 0, 0, 0)',
                                 use='vulkan')
     }, {
+        'name': 'vulkan-decode-headers',
+        'desc': 'Vulkan headers with decode support',
+        'deps': 'vulkan',
+        'func': check_pkg_config('vulkan', '>= 1.3.238'),
+    }, {
         'name': '--vulkan-interop',
         'desc': 'Vulkan graphics interop',
-        'deps': 'vulkan && libplacebo-next',
+        'deps': 'vulkan-decode-headers && libplacebo-decode',
         'func': check_pkg_config('libavutil', '>= 58.11.100'),
     }, {
         'name': 'vaapi-libplacebo',
