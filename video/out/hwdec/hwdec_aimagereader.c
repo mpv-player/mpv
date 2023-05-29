@@ -143,7 +143,7 @@ static int init(struct ra_hwdec *hw)
 
     static const char *es2_exts[] = {"GL_OES_EGL_image_external", 0};
     static const char *es3_exts[] = {"GL_OES_EGL_image_external_essl3", 0};
-    GL *gl = ra_gl_get(hw->ra);
+    GL *gl = ra_gl_get(hw->ra_ctx->ra);
     if (gl_check_extension(gl->extensions, es3_exts[0]))
         hw->glsl_extensions = es3_exts;
     else
