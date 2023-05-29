@@ -799,9 +799,9 @@ video_output_features = [
                                    use='libplacebo'),
     }, {
         'name': 'libplacebo-decode',
-        'desc': 'libplacebo v5.275.0+, needed for Vulkan video decode',
+        'desc': 'libplacebo v6.278.0+, needed for Vulkan video decode',
         'deps': 'libplacebo',
-        'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 275',
+        'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 278',
                                    use='libplacebo'),
     }, {
         'name': '--vulkan',
