@@ -195,8 +195,6 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     };
 
 #else
-    const char *opt_extensions[] = {
-    };
     VkPhysicalDeviceFeatures2 features = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
     };
@@ -214,10 +212,10 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         .device_name = p->opts->device,
 #if HAVE_VULKAN_INTEROP && defined(VK_EXT_descriptor_buffer)
         .extra_queues = VK_QUEUE_VIDEO_DECODE_BIT_KHR,
-#endif
-        .features = &features,
         .opt_extensions = opt_extensions,
         .num_opt_extensions = MP_ARRAY_SIZE(opt_extensions),
+#endif
+        .features = &features,
     });
     if (!vk->vulkan)
         goto error;
