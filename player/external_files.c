@@ -253,18 +253,18 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         if (bstr_startswith(tmp_fname_trim, f_fname_trim)) {
             if (lang.len && start == f_fname_trim.len)
                 prio |= 16; // exact movie name + followed by lang
-        }
 
-        for (int n = 0; langs && langs[n]; n++) {
-            if (lang.len && bstr_case_startswith(lang, bstr0(langs[n]))) {
-                if (fuzz >= 1)
-                    prio |= 8; // known language -> boost priority
-                break;
+            if (lang.len && fuzz >= 1)
+                prio |= 4; // matches the movie name + a language was matched
+
+            for (int n = 0; langs && langs[n]; n++) {
+                if (lang.len && bstr_case_startswith(lang, bstr0(langs[n]))) {
+                    if (fuzz >= 1)
+                        prio |= 8; // known language -> boost priority
+                    break;
+                }
             }
         }
-
-        if (lang.len && fuzz >= 1)
-            prio |= 4; // matches the movie name + a language was matched
 
         if (bstr_find(tmp_fname_trim, f_fname_trim) >= 0 && fuzz >= 1)
             prio |= 2; // contains the movie name
