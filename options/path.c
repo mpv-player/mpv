@@ -232,12 +232,14 @@ char *mp_basename(const char *path)
     char *s;
 
 #if HAVE_DOS_PATHS
-    s = strrchr(path, '\\');
-    if (s)
-        path = s + 1;
-    s = strrchr(path, ':');
-    if (s)
-        path = s + 1;
+    if (!mp_is_url(bstr0(path))) {
+        s = strrchr(path, '\\');
+        if (s)
+            path = s + 1;
+        s = strrchr(path, ':');
+        if (s)
+            path = s + 1;
+    }
 #endif
     s = strrchr(path, '/');
     return s ? s + 1 : (char *)path;
