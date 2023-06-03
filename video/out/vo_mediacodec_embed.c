@@ -37,6 +37,7 @@ static AVBufferRef *create_mediacodec_device_ref(struct vo *vo)
 
     AVHWDeviceContext *ctx = (void *)device_ref->data;
     AVMediaCodecDeviceContext *hwctx = ctx->hwctx;
+    assert(vo->opts->WinID != 0 && vo->opts->WinID != -1);
     hwctx->surface = (void *)(intptr_t)(vo->opts->WinID);
 
     if (av_hwdevice_ctx_init(device_ref) < 0)
