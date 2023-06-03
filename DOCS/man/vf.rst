@@ -141,6 +141,11 @@ Available mpv-only filters are:
 
             For a list of available formats, use ``--vf=format=fmt=help``.
 
+        .. note::
+
+            Conversion between hardware formats is supported in some cases.
+            eg: ``cuda`` to ``vulkan``, or ``vaapi`` to ``vulkan``.
+
     ``<convert=yes|no>``
         Force conversion of color parameters (default: no).
 
@@ -163,6 +168,9 @@ Available mpv-only filters are:
 
         If input and output video parameters are the same, conversion is always
         skipped.
+
+        When converting between hardware formats, this parameter has no effect,
+        and the only conversion that is done is the format conversion.
 
         .. admonition:: Examples
 

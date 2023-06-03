@@ -42,10 +42,10 @@ struct priv {
 
 static bool check_hwdec(struct ra_hwdec *hw)
 {
-    if (!ra_is_gl(hw->ra))
+    if (!ra_is_gl(hw->ra_ctx->ra))
         return false;
 
-    GL *gl = ra_gl_get(hw->ra);
+    GL *gl = ra_gl_get(hw->ra_ctx->ra);
     if (gl->es < 200) {
         MP_ERR(hw, "need OpenGLES 2.0 for CVOpenGLESTextureCacheCreateTextureFromImage()\n");
         return false;

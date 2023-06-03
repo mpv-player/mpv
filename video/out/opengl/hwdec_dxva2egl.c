@@ -73,7 +73,7 @@ static int init(struct ra_hwdec *hw)
     struct priv_owner *p = hw->priv;
     HRESULT hr;
 
-    if (!ra_is_gl(hw->ra))
+    if (!ra_is_gl(hw->ra_ctx->ra))
         return -1;
     if (!angle_load())
         return -1;

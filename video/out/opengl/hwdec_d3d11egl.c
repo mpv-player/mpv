@@ -86,7 +86,7 @@ static int init(struct ra_hwdec *hw)
     struct priv_owner *p = hw->priv;
     HRESULT hr;
 
-    if (!ra_is_gl(hw->ra))
+    if (!ra_is_gl(hw->ra_ctx->ra))
         return -1;
     if (!angle_load())
         return -1;
@@ -98,7 +98,7 @@ static int init(struct ra_hwdec *hw)
     if (!eglGetCurrentContext())
         return -1;
 
-    GL *gl = ra_gl_get(hw->ra);
+    GL *gl = ra_gl_get(hw->ra_ctx->ra);
 
     const char *exts = eglQueryString(egl_display, EGL_EXTENSIONS);
     if (!gl_check_extension(exts, "EGL_ANGLE_d3d_share_handle_client_buffer") ||

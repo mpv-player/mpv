@@ -164,7 +164,8 @@ static struct mp_image *alloc_out(struct mp_filter *vf)
     int src_h = hw_frames->height;
 
     if (!mp_update_av_hw_frames_pool(&p->hw_pool, p->av_device_ref,
-                                     IMGFMT_VAAPI, IMGFMT_NV12, src_w, src_h))
+                                     IMGFMT_VAAPI, IMGFMT_NV12, src_w, src_h,
+                                     false))
     {
         MP_ERR(vf, "Failed to create hw pool.\n");
         return NULL;

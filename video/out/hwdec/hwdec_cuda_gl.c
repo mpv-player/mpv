@@ -110,8 +110,8 @@ bool cuda_gl_init(const struct ra_hwdec *hw) {
     struct cuda_hw_priv *p = hw->priv;
     CudaFunctions *cu = p->cu;
 
-    if (ra_is_gl(hw->ra)) {
-        GL *gl = ra_gl_get(hw->ra);
+    if (ra_is_gl(hw->ra_ctx->ra)) {
+        GL *gl = ra_gl_get(hw->ra_ctx->ra);
         if (gl->version < 210 && gl->es < 300) {
             MP_VERBOSE(hw, "need OpenGL >= 2.1 or OpenGL-ES >= 3.0\n");
             return false;

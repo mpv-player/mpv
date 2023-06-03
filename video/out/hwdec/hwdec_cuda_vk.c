@@ -263,7 +263,7 @@ bool cuda_vk_init(const struct ra_hwdec *hw) {
     struct cuda_hw_priv *p = hw->priv;
     CudaFunctions *cu = p->cu;
 
-    pl_gpu gpu = ra_pl_get(hw->ra);
+    pl_gpu gpu = ra_pl_get(hw->ra_ctx->ra);
     if (gpu != NULL) {
         if (!(gpu->export_caps.tex & HANDLE_TYPE)) {
             MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable texture memory of type 0x%X.\n",

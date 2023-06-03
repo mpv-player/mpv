@@ -4319,14 +4319,15 @@ struct mp_image *gl_video_get_image(struct gl_video *p, int imgfmt, int w, int h
     return res;
 }
 
-void gl_video_init_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
+void gl_video_init_hwdecs(struct gl_video *p, struct ra_ctx *ra_ctx,
+                          struct mp_hwdec_devices *devs,
                           bool load_all_by_default)
 {
-    assert(!p->hwdec_ctx.ra);
+    assert(!p->hwdec_ctx.ra_ctx);
     p->hwdec_ctx = (struct ra_hwdec_ctx) {
         .log = p->log,
         .global = p->global,
-        .ra = p->ra,
+        .ra_ctx = ra_ctx,
     };
 
     ra_hwdec_ctx_init(&p->hwdec_ctx, devs, p->opts.hwdec_interop, load_all_by_default);
@@ -4335,6 +4336,6 @@ void gl_video_init_hwdecs(struct gl_video *p, struct mp_hwdec_devices *devs,
 void gl_video_load_hwdecs_for_img_fmt(struct gl_video *p, struct mp_hwdec_devices *devs,
                                       struct hwdec_imgfmt_request *params)
 {
-    assert(p->hwdec_ctx.ra);
+    assert(p->hwdec_ctx.ra_ctx);
     ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, devs, params);
 }

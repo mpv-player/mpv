@@ -798,6 +798,12 @@ video_output_features = [
         'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 264',
                                    use='libplacebo'),
     }, {
+        'name': 'libplacebo-decode',
+        'desc': 'libplacebo v6.278.0+, needed for Vulkan video decode',
+        'deps': 'libplacebo',
+        'func': check_preprocessor('libplacebo/config.h', 'PL_API_VER >= 278',
+                                   use='libplacebo'),
+    }, {
         'name': '--vulkan',
         'desc':  'Vulkan context support',
         'deps': 'libplacebo',
@@ -808,6 +814,16 @@ video_output_features = [
         'deps': 'vulkan',
         'func': check_statement('vulkan/vulkan_core.h', 'vkCreateDisplayPlaneSurfaceKHR(0, 0, 0, 0)',
                                 use='vulkan')
+    }, {
+        'name': 'vulkan-decode-headers',
+        'desc': 'Vulkan headers with decode support',
+        'deps': 'vulkan',
+        'func': check_pkg_config('vulkan', '>= 1.3.238'),
+    }, {
+        'name': '--vulkan-interop',
+        'desc': 'Vulkan graphics interop',
+        'deps': 'vulkan-decode-headers && libplacebo-decode',
+        'func': check_pkg_config('libavutil', '>= 58.11.100'),
     }, {
         'name': 'vaapi-libplacebo',
         'desc': 'VAAPI libplacebo',

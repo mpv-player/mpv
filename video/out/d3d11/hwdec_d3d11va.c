@@ -73,9 +73,9 @@ static int init(struct ra_hwdec *hw)
     struct priv_owner *p = hw->priv;
     HRESULT hr;
 
-    if (!ra_is_d3d11(hw->ra))
+    if (!ra_is_d3d11(hw->ra_ctx->ra))
         return -1;
-    p->device = ra_d3d11_get_device(hw->ra);
+    p->device = ra_d3d11_get_device(hw->ra_ctx->ra);
     if (!p->device)
         return -1;
 
