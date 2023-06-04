@@ -1272,7 +1272,7 @@ endif
 
 
 # hwaccel
-ffnvcodec = dependency('ffnvcodec', version: '>= 8.2.15.7', required: false)
+ffnvcodec = dependency('ffnvcodec', version: '>= 11.1.5.1', required: false)
 features += {'ffnvcodec': ffnvcodec.found()}
 if features['ffnvcodec']
     dependencies += ffnvcodec
