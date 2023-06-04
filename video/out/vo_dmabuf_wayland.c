@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <sys/mman.h>
 #include <unistd.h>
 #include "config.h"
 
@@ -30,6 +31,7 @@
 #include "gpu/video.h"
 #include "mpv_talloc.h"
 #include "present_sync.h"
+#include "sub/draw_bmp.h"
 #include "video/mp_image.h"
 #include "vo.h"
 #include "wayland_common.h"
@@ -67,6 +69,14 @@ struct buffer {
     uintptr_t id;
 };
 
+struct osd_buffer {
+    struct vo *vo;
+    struct wl_buffer *buffer;
+    struct wl_list link;
+    struct mp_image image;
+    size_t size;
+};
+
 struct priv {
     struct mp_log *log;
     struct mp_rect src;
@@ -78,6 +88,17 @@ struct priv {
     struct wl_shm_pool *solid_buffer_pool;
     struct wl_buffer *solid_buffer;
     struct wl_list buffer_list;
+    struct wl_list osd_buffer_list;
+
+    struct wl_shm_pool *osd_shm_pool;
+    uint8_t *osd_shm_data;
+    int osd_shm_width;
+    int osd_shm_stride;
+    int osd_shm_height;
+
+    struct osd_buffer *osd_buffer;
+    struct mp_draw_sub_cache *osd_cache;
+    struct mp_osd_res screen_osd_res;
 
     bool destroy_buffers;
     enum hwdec_type hwdec_type;
@@ -94,6 +115,21 @@ static void buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
 
 static const struct wl_buffer_listener buffer_listener = {
     buffer_handle_release,
+};
+
+static void osd_buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
+{
+    struct osd_buffer *osd_buf = data;
+    wl_list_remove(&osd_buf->link);
+    if (osd_buf->buffer) {
+        wl_buffer_destroy(osd_buf->buffer);
+        osd_buf->buffer = NULL;
+    }
+    talloc_free(osd_buf);
+}
+
+static const struct wl_buffer_listener osd_buffer_listener = {
+    osd_buffer_handle_release,
 };
 
 #if HAVE_VAAPI
@@ -295,7 +331,105 @@ static void destroy_buffers(struct vo *vo)
     }
 }
 
-static void set_viewport_source(struct vo *vo, struct mp_rect src) {
+static void destroy_osd_buffers(struct vo *vo)
+{
+    // Remove any existing buffer before we destroy them.
+    wl_surface_attach(vo->wl->osd_surface, NULL, 0, 0);
+    wl_surface_commit(vo->wl->osd_surface);
+
+    struct priv *p = vo->priv;
+    struct osd_buffer *osd_buf, *tmp;
+    wl_list_for_each_safe(osd_buf, tmp, &p->osd_buffer_list, link) {
+        wl_list_remove(&osd_buf->link);
+        munmap(osd_buf->image.planes[0], osd_buf->size);
+        if (osd_buf->buffer) {
+            wl_buffer_destroy(osd_buf->buffer);
+            osd_buf->buffer = NULL;
+        }
+    }
+}
+
+static struct osd_buffer *osd_buffer_check(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct osd_buffer *osd_buf;
+    wl_list_for_each(osd_buf, &p->osd_buffer_list, link) {
+        return osd_buf;
+    }
+    return NULL;
+}
+
+static struct osd_buffer *osd_buffer_create(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct osd_buffer *osd_buf = talloc_zero(vo, struct osd_buffer);
+
+    osd_buf->vo = vo;
+    osd_buf->size = p->osd_shm_height * p->osd_shm_stride;
+    mp_image_set_size(&osd_buf->image, p->osd_shm_width, p->osd_shm_height);
+    osd_buf->image.planes[0] = p->osd_shm_data;
+    osd_buf->image.stride[0] = p->osd_shm_stride;
+    osd_buf->buffer = wl_shm_pool_create_buffer(p->osd_shm_pool, 0,
+                                                p->osd_shm_width, p->osd_shm_height,
+                                                p->osd_shm_stride, WL_SHM_FORMAT_ARGB8888);
+
+    if (!osd_buf->buffer) {
+        talloc_free(osd_buf);
+        return NULL;
+    }
+
+    wl_list_insert(&p->osd_buffer_list, &osd_buf->link);
+    wl_buffer_add_listener(osd_buf->buffer, &osd_buffer_listener, osd_buf);
+    return osd_buf;
+}
+
+static struct osd_buffer *osd_buffer_get(struct vo *vo)
+{
+    struct osd_buffer *osd_buf = osd_buffer_check(vo);
+    if (osd_buf) {
+        return osd_buf;
+    } else {
+        return osd_buffer_create(vo);
+    }
+}
+
+static void create_shm_pool(struct vo *vo)
+{
+    struct vo_wayland_state *wl = vo->wl;
+    struct priv *p = vo->priv;
+
+    int stride = MP_ALIGN_UP(vo->dwidth * 4, 16);
+    size_t size = vo->dheight * stride;
+    int fd = vo_wayland_allocate_memfd(vo, size);
+    if (fd < 0)
+        return;
+    uint8_t *data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (data == MAP_FAILED)
+        goto error1;
+    struct wl_shm_pool *pool = wl_shm_create_pool(wl->shm, fd, size);
+    if (!pool)
+        goto error2;
+    close(fd);
+
+    destroy_osd_buffers(vo);
+
+    if (p->osd_shm_pool)
+        wl_shm_pool_destroy(p->osd_shm_pool);
+    p->osd_shm_pool = pool;
+    p->osd_shm_width = vo->dwidth;
+    p->osd_shm_height = vo->dheight;
+    p->osd_shm_stride = stride;
+    p->osd_shm_data = data;
+    return;
+
+error2:
+    munmap(data, size);
+error1:
+    close(fd);
+}
+
+static void set_viewport_source(struct vo *vo, struct mp_rect src)
+{
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
 
@@ -310,33 +444,85 @@ static void set_viewport_source(struct vo *vo, struct mp_rect src) {
 static void resize(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
+    struct priv *p = vo->priv;
+
     struct mp_rect src;
     struct mp_rect dst;
-    struct mp_osd_res osd;
     struct mp_vo_opts *vo_opts = wl->vo_opts;
+
     const int width = mp_rect_w(wl->geometry);
     const int height = mp_rect_h(wl->geometry);
 
     if (width == 0 || height == 0)
         return;
-    
+
     vo_wayland_set_opaque_region(wl, false);
     vo->dwidth = width;
     vo->dheight = height;
 
+    create_shm_pool(vo);
+
     // top level viewport is calculated with pan set to zero
     vo->opts->pan_x = 0;
     vo->opts->pan_y = 0;
-    vo_get_src_dst_rects(vo, &src, &dst, &osd);
+    vo_get_src_dst_rects(vo, &src, &dst, &p->screen_osd_res);
     wp_viewport_set_destination(wl->viewport, 2 * dst.x0 + mp_rect_w(dst), 2 * dst.y0 + mp_rect_h(dst));
 
     //now we restore pan for video viewport calculation
     vo->opts->pan_x = vo_opts->pan_x;
     vo->opts->pan_y = vo_opts->pan_y;
-    vo_get_src_dst_rects(vo, &src, &dst, &osd);
+    vo_get_src_dst_rects(vo, &src, &dst, &p->screen_osd_res);
     wp_viewport_set_destination(wl->video_viewport, mp_rect_w(dst), mp_rect_h(dst));
     wl_subsurface_set_position(wl->video_subsurface, dst.x0, dst.y0);
+    wp_viewport_set_destination(wl->osd_viewport, vo->dwidth, vo->dheight);
+    wl_subsurface_set_position(wl->osd_subsurface, 0 - dst.x0, 0 - dst.y0);
     set_viewport_source(vo, src);
+}
+
+static bool draw_osd(struct vo *vo, struct mp_image *cur, double pts)
+{
+    struct priv *p = vo->priv;
+    struct mp_osd_res *res = &p->screen_osd_res;
+    bool draw = false;
+
+    struct sub_bitmap_list *sbs = osd_render(vo->osd, *res, pts, 0, mp_draw_sub_formats);
+
+    if (!sbs)
+        return draw;
+
+    struct mp_rect act_rc[1], mod_rc[64];
+    int num_act_rc = 0, num_mod_rc = 0;
+
+    if (!p->osd_cache)
+        p->osd_cache = mp_draw_sub_alloc(p, vo->global);
+
+    struct mp_image *osd = mp_draw_sub_overlay(p->osd_cache, sbs, act_rc,
+                                               MP_ARRAY_SIZE(act_rc), &num_act_rc,
+                                               mod_rc, MP_ARRAY_SIZE(mod_rc), &num_mod_rc);
+
+    if (!osd || !num_mod_rc)
+        goto done;
+
+    for (int n = 0; n < num_mod_rc; n++) {
+        struct mp_rect rc = mod_rc[n];
+
+        int rw = mp_rect_w(rc);
+        int rh = mp_rect_h(rc);
+
+        void *src = mp_image_pixel_ptr(osd, 0, rc.x0, rc.y0);
+        void *dst = cur->planes[0] + rc.x0 * 4 + rc.y0 * cur->stride[0];
+
+        // Avoid overflowing if we have this special case.
+        if (n == num_mod_rc - 1)
+            --rh;
+
+        memcpy_pic(dst, src, rw * 4, rh, cur->stride[0], osd->stride[0]);
+    }
+
+    draw = true;
+done:
+    talloc_free(sbs);
+    return draw;
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -344,6 +530,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
     struct buffer *buf;
+    struct osd_buffer *osd_buf;
+    double pts = frame->current->pts;
 
     if (!vo_wayland_check_visible(vo) || !frame->current)
         return;
@@ -353,11 +541,20 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     struct mp_image *src = mp_image_new_ref(frame->current);
     buf = buffer_get(vo, src);
+    osd_buf = osd_buffer_get(vo);
 
     if (buf && buf->image) {
         wl_surface_attach(wl->video_surface, buf->buffer, 0, 0);
-        wl_surface_damage_buffer(wl->video_surface, 0, 0, buf->image->params.w,
-                                 buf->image->params.h);
+        wl_surface_damage_buffer(wl->video_surface, 0, 0, buf->image->w,
+                                 buf->image->h);
+
+        if (osd_buf && osd_buf->buffer) {
+            if (draw_osd(vo, &osd_buf->image, pts)) {
+                wl_surface_attach(wl->osd_surface, osd_buf->buffer, 0, 0);
+                wl_surface_damage_buffer(wl->osd_surface, 0, 0, osd_buf->image.w,
+                                         osd_buf->image.h);
+            }
+        }
     }
 }
 
@@ -366,13 +563,14 @@ static void flip_page(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
 
     wl_surface_commit(wl->video_surface);
+    wl_surface_commit(wl->osd_surface);
     wl_surface_commit(wl->surface);
 
     if (!wl->opts->disable_vsync)
         vo_wayland_wait_frame(wl);
 
     if (wl->use_present)
-       present_sync_swap(wl->present);
+        present_sync_swap(wl->present);
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
@@ -446,6 +644,9 @@ static void uninit(struct vo *vo)
     struct priv *p = vo->priv;
 
     destroy_buffers(vo);
+    destroy_osd_buffers(vo);
+    if (p->osd_shm_pool)
+        wl_shm_pool_destroy(p->osd_shm_pool);
     if (p->solid_buffer_pool)
         wl_shm_pool_destroy(p->solid_buffer_pool);
     if (p->solid_buffer)
@@ -468,6 +669,7 @@ static int preinit(struct vo *vo)
     p->global = vo->global;
     p->ctx = ra_ctx_create_by_name(vo, "wldmabuf");
     wl_list_init(&p->buffer_list);
+    wl_list_init(&p->osd_buffer_list);
     if (!p->ctx)
        goto err;
 
