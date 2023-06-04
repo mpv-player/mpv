@@ -1257,10 +1257,14 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, ver);
         wl->surface = wl_compositor_create_surface(wl->compositor);
         wl->video_surface = wl_compositor_create_surface(wl->compositor);
-        /* never accept input events on the video surface */
+        wl->osd_surface = wl_compositor_create_surface(wl->compositor);
+
+        /* never accept input events on anything besides the main surface */
         struct wl_region *region = wl_compositor_create_region(wl->compositor);
+        wl_surface_set_input_region(wl->osd_surface, region);
         wl_surface_set_input_region(wl->video_surface, region);
         wl_region_destroy(region);
+
         wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
     }
@@ -1470,10 +1474,11 @@ static int create_viewports(struct vo_wayland_state *wl)
 {
     if (wl->viewporter) {
         wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
+        wl->osd_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->osd_surface);
         wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
     }
 
-    if (wl->viewporter && (!wl->viewport || !wl->video_viewport)) {
+    if (wl->viewporter && (!wl->viewport || !wl->osd_viewport || !wl->video_viewport)) {
         MP_ERR(wl, "failed to create viewport interfaces!\n");
         return 1;
     }
@@ -2206,6 +2211,7 @@ bool vo_wayland_init(struct vo *vo)
         goto err;
 
     if (wl->subcompositor) {
+        wl->osd_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->osd_surface, wl->video_surface);
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
         wl_subsurface_set_desync(wl->video_subsurface);
     }
@@ -2443,6 +2449,9 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->viewport)
         wp_viewport_destroy(wl->viewport);
 
+    if (wl->osd_viewport)
+        wp_viewport_destroy(wl->osd_viewport);
+
     if (wl->video_viewport)
         wp_viewport_destroy(wl->video_viewport);
 
@@ -2465,6 +2474,12 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->surface)
         wl_surface_destroy(wl->surface);
+
+    if (wl->osd_surface)
+        wl_surface_destroy(wl->osd_surface);
+
+    if (wl->osd_subsurface)
+        wl_subsurface_destroy(wl->osd_subsurface);
 
     if (wl->video_surface)
         wl_surface_destroy(wl->video_surface);
