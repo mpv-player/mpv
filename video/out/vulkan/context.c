@@ -121,7 +121,7 @@ static const struct ra_swapchain_fns vulkan_swapchain;
 
 struct mpvk_ctx *ra_vk_ctx_get(struct ra_ctx *ctx)
 {
-    if (ctx->swapchain->fns != &vulkan_swapchain)
+    if (!ctx->swapchain || ctx->swapchain->fns != &vulkan_swapchain)
         return NULL;
 
     struct priv *p = ctx->swapchain->priv;
