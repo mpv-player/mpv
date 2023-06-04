@@ -176,6 +176,7 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
     if (ret < 0)
         goto error;
     // CUDA takes ownership of an imported FD *but not* an imported Handle.
+    evk->sem_handle.fd = -1;
 #else
     evk->sync = pl_sync_create(gpu, HANDLE_TYPE);
     if (!evk->sync) {
