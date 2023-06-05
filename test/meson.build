@@ -116,19 +116,19 @@ if libavutil.version().version_compare('>= 57.39.101')
     scale_sws_objects = libmpv.extract_objects('video/image_writer.c',
                                                'video/repack.c')
     scale_sws = executable('scale-sws', ['scale_sws.c', 'scale_test.c'], include_directories: incdir,
-                           objects: scale_sws_objects, dependencies: [libswscale, jpeg, zimg],
+                           objects: scale_sws_objects, dependencies: [libavutil, libavformat, libswscale, jpeg, zimg],
                            link_with: [img_utils, test_utils])
     test('scale-sws', scale_sws, args: [refdir, outdir], suite: 'ffmpeg')
 
     if features['zimg']
         repack_objects = libmpv.extract_objects('sub/draw_bmp.c')
         repack = executable('repack', 'repack.c', include_directories: incdir, objects: repack_objects,
-                            dependencies: [libswscale, zimg], link_with: [img_utils, test_utils])
+                            dependencies: [libavutil, libswscale, zimg], link_with: [img_utils, test_utils])
         test('repack', repack, args: [refdir, outdir], suite: 'ffmpeg')
 
         scale_zimg_objects = libmpv.extract_objects('video/image_writer.c')
         scale_zimg = executable('scale-zimg', ['scale_test.c', 'scale_zimg.c'], include_directories: incdir,
-                                objects: scale_zimg_objects, dependencies:[libswscale, jpeg, zimg],
+                                objects: scale_zimg_objects, dependencies:[libavutil, libavformat, libswscale, jpeg, zimg],
                                 link_with: [img_utils, test_utils])
         test('scale-zimg', scale_zimg, args: [refdir, outdir], suite: 'ffmpeg')
     endif

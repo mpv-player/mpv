@@ -52,6 +52,8 @@ void mp_msg(struct mp_log *log, int lev, const char *format, ...)
 int mp_msg_find_level(const char *s);
 int mp_msg_level(struct mp_log *log);
 void mp_write_console_ansi(void);
+typedef struct AVDictionary AVDictionary;
+void mp_set_avdict(AVDictionary **dict, char **kv);
 
 // Windows additionally requires timer related code so it will actually
 // import the real versions of these functions and use them. On other
