@@ -35,6 +35,7 @@ ar = '${AR}'
 strip = '${TARGET}-strip'
 pkgconfig = 'pkg-config'
 windres = '${TARGET}-windres'
+dlltool = '${TARGET}-dlltool'
 [host_machine]
 system = 'windows'
 cpu_family = '${fam}'
