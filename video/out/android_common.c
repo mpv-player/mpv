@@ -44,6 +44,7 @@ bool vo_android_init(struct vo *vo)
         goto fail;
     }
 
+    assert(vo->opts->WinID != 0 && vo->opts->WinID != -1);
     jobject surface = (jobject)(intptr_t)vo->opts->WinID;
     ctx->native_window = ANativeWindow_fromSurface(env, surface);
     if (!ctx->native_window) {

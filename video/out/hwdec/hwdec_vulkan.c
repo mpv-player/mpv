@@ -55,16 +55,17 @@ static int vulkan_init(struct ra_hwdec *hw)
     AVBufferRef *hw_device_ctx = NULL;
     int ret = 0;
     struct vulkan_hw_priv *p = hw->priv;
+    int level = hw->probing ? MSGL_V : MSGL_ERR;
 
     struct mpvk_ctx *vk = ra_vk_ctx_get(hw->ra_ctx);
     if (!vk) {
-        MP_ERR(hw, "This is not a libplacebo vulkan gpu api context.\n");
+        MP_MSG(hw, level, "This is not a libplacebo vulkan gpu api context.\n");
         return 0;
     }
 
     p->gpu = ra_pl_get(hw->ra_ctx->ra);
     if (!p->gpu) {
-        MP_ERR(hw, "Failed to obtain pl_gpu.\n");
+        MP_MSG(hw, level, "Failed to obtain pl_gpu.\n");
         return 0;
     }
 
@@ -124,7 +125,7 @@ static int vulkan_init(struct ra_hwdec *hw)
 
     ret = av_hwdevice_ctx_init(hw_device_ctx);
     if (ret < 0) {
-        MP_ERR(hw, "av_hwdevice_ctx_init failed\n");
+        MP_MSG(hw, level, "av_hwdevice_ctx_init failed\n");
         goto error;
     }
 

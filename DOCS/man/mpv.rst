@@ -844,6 +844,14 @@ and unintuitive behavior.
         profile-cond=width >= 1280
         hue=-50
 
+    Make only videos containing "youtube" or "youtu.be" in their path brighter:
+
+    ::
+
+        [youtube]
+        profile-cond=path:find('youtu%.?be')
+        gamma=20
+
     If you want the profile to be reverted if the condition goes to false again,
     you can set ``profile-restore``:
 
