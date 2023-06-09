@@ -38,3 +38,6 @@
 /Makefile
 
 /subprojects
+
+/.vscode
+/.idea
