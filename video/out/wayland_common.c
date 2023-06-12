@@ -51,10 +51,6 @@
 #include "generated/wayland/fractional-scale-v1.h"
 #endif
 
-#if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 20
-#define HAVE_WAYLAND_1_20
-#endif
-
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
 #define HAVE_WAYLAND_1_22
 #endif
@@ -722,7 +718,6 @@ static void output_handle_scale(void *data, struct wl_output *wl_output,
     output->scale = factor;
 }
 
-#ifdef HAVE_WAYLAND_1_20
 static void output_handle_name(void *data, struct wl_output *wl_output,
                                const char *name)
 {
@@ -734,17 +729,14 @@ static void output_handle_description(void *data, struct wl_output *wl_output,
                                       const char *description)
 {
 }
-#endif
 
 static const struct wl_output_listener output_listener = {
     output_handle_geometry,
     output_handle_mode,
     output_handle_done,
     output_handle_scale,
-#ifdef HAVE_WAYLAND_1_20
     output_handle_name,
     output_handle_description,
-#endif
 };
 
 static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
