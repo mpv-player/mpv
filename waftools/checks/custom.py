@@ -102,7 +102,7 @@ def check_lua(ctx, dependency_identifier):
 
 def check_wl_protocols(ctx, dependency_identifier):
     def fn(ctx, dependency_identifier):
-        ret = check_pkg_config_datadir("wayland-protocols", ">= 1.15")
+        ret = check_pkg_config_datadir("wayland-protocols", ">= 1.25")
         ret = ret(ctx, dependency_identifier)
         if ret != None:
             ctx.env.WL_PROTO_DIR = ret.split()[0]
