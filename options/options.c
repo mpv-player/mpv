@@ -105,16 +105,10 @@ static const struct m_sub_options screenshot_conf = {
 
 static const m_option_t mp_vo_opt_list[] = {
     {"vo", OPT_SETTINGSLIST(video_driver_list, &vo_obj_list)},
-    {"taskbar-progress", OPT_BOOL(taskbar_progress)},
     {"drag-and-drop", OPT_CHOICE(drag_and_drop, {"auto", -1}, {"replace", 0},
         {"append", 1})},
-    {"snap-window", OPT_BOOL(snap_window)},
     {"ontop", OPT_BOOL(ontop)},
-    {"ontop-level", OPT_CHOICE(ontop_level, {"window", -1}, {"system", -2},
-        {"desktop", -3}), M_RANGE(0, INT_MAX)},
     {"border", OPT_BOOL(border)},
-    {"fit-border", OPT_BOOL(fit_border),
-     .deprecation_message = "the option is ignored and no longer needed"},
     {"on-all-workspaces", OPT_BOOL(all_workspaces)},
     {"geometry", OPT_GEOMETRY(geometry)},
     {"autofit", OPT_SIZE_BOX(autofit)},
@@ -124,11 +118,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"window-scale", OPT_DOUBLE(window_scale), M_RANGE(0.001, 100)},
     {"window-minimized", OPT_BOOL(window_minimized)},
     {"window-maximized", OPT_BOOL(window_maximized)},
-    {"focus-on-open", OPT_BOOL(focus_on_open)},
     {"force-render", OPT_BOOL(force_render)},
-    {"force-window-position", OPT_BOOL(force_window_position)},
-    {"x11-name", OPT_STRING(winname)},
-    {"wayland-app-id", OPT_STRING(appid)},
     {"monitoraspect", OPT_FLOAT(force_monitor_aspect), M_RANGE(0.0, 9.0)},
     {"monitorpixelaspect", OPT_FLOAT(monitor_pixel_aspect),
         M_RANGE(1.0/32.0, 32.0)},
@@ -158,7 +148,6 @@ static const m_option_t mp_vo_opt_list[] = {
     {"keepaspect", OPT_BOOL(keepaspect)},
     {"keepaspect-window", OPT_BOOL(keepaspect_window)},
     {"hidpi-window-scale", OPT_BOOL(hidpi_window_scale)},
-    {"native-fs", OPT_BOOL(native_fs)},
     {"override-display-fps", OPT_DOUBLE(override_display_fps),
         M_RANGE(0, DBL_MAX)},
     {"video-timing-offset", OPT_DOUBLE(timing_offset), M_RANGE(0.0, 1.0)},
@@ -172,7 +161,15 @@ static const m_option_t mp_vo_opt_list[] = {
         {"display-vdrop", VS_DISP_VDROP},
         {"display-desync", VS_DISP_NONE},
         {"desync", VS_NONE})},
+#if HAVE_COCOA
+    {"focus-on-open", OPT_BOOL(focus_on_open)},
+    {"native-fs", OPT_BOOL(native_fs)},
+    {"ontop-level", OPT_CHOICE(ontop_level, {"window", -1}, {"system", -2},
+        {"desktop", -3}), M_RANGE(0, INT_MAX)},
+#endif
 #if HAVE_X11
+    {"force-window-position", OPT_BOOL(force_window_position)},
+    {"x11-name", OPT_STRING(winname)},
     {"x11-netwm", OPT_CHOICE(x11_netwm, {"auto", 0}, {"no", -1}, {"yes", 1})},
     {"x11-bypass-compositor", OPT_CHOICE(x11_bypass_compositor,
         {"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})},
@@ -180,10 +177,15 @@ static const m_option_t mp_vo_opt_list[] = {
         {"no", 0}, {"auto", 1}, {"yes", 2})},
 #endif
 #if HAVE_WAYLAND
+    {"wayland-app-id", OPT_STRING(appid)},
     {"wayland-content-type", OPT_CHOICE(content_type, {"auto", -1}, {"none", 0},
         {"photo", 1}, {"video", 2}, {"game", 3})},
 #endif
 #if HAVE_WIN32_DESKTOP
+    {"fit-border", OPT_BOOL(fit_border),
+     .deprecation_message = "the option is ignored and no longer needed"},
+    {"snap-window", OPT_BOOL(snap_window)},
+    {"taskbar-progress", OPT_BOOL(taskbar_progress)},
     {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
 #endif
 #if HAVE_EGL_ANDROID
