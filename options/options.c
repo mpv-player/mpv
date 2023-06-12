@@ -38,6 +38,7 @@
 #include "m_config.h"
 #include "m_option.h"
 #include "common/common.h"
+#include "input/event.h"
 #include "stream/stream.h"
 #include "video/csputils.h"
 #include "video/hwdec.h"
@@ -106,8 +107,8 @@ static const struct m_sub_options screenshot_conf = {
 static const m_option_t mp_vo_opt_list[] = {
     {"vo", OPT_SETTINGSLIST(video_driver_list, &vo_obj_list)},
     {"taskbar-progress", OPT_BOOL(taskbar_progress)},
-    {"drag-and-drop", OPT_CHOICE(drag_and_drop, {"auto", -1}, {"replace", 0},
-        {"append", 1})},
+    {"drag-and-drop", OPT_CHOICE(drag_and_drop, {"no", -2}, {"auto", -1},
+        {"replace", DND_REPLACE}, {"append", DND_APPEND})},
     {"snap-window", OPT_BOOL(snap_window)},
     {"ontop", OPT_BOOL(ontop)},
     {"ontop-level", OPT_CHOICE(ontop_level, {"window", -1}, {"system", -2},
