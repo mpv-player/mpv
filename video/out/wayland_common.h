@@ -99,8 +99,7 @@ struct vo_wayland_state {
 
     /* linux-dmabuf */
     struct zwp_linux_dmabuf_v1 *dmabuf;
-    /* TODO: unvoid this if required wayland protocols is bumped to 1.24+ */
-    void *dmabuf_feedback;
+    struct zwp_linux_dmabuf_feedback_v1 *dmabuf_feedback;
     wayland_format *format_map;
     uint32_t format_size;
     bool using_dmabuf_wayland;
