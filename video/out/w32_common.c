@@ -1594,7 +1594,7 @@ static void *gui_thread(void *ptr)
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
 
-        IDropTarget *dt = mp_w32_droptarget_create(w32->log, w32->input_ctx);
+        IDropTarget *dt = mp_w32_droptarget_create(w32->log, w32->opts, w32->input_ctx);
         RegisterDragDrop(w32->window, dt);
 
         // ITaskbarList2 has the MarkFullscreenWindow method, which is used to
