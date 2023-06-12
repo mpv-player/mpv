@@ -25,9 +25,11 @@
 #include "input/input.h"
 #include "common/msg.h"
 #include "common/common.h"
+#include "options/options.h"
 
 // Create a IDropTarget implementation that sends dropped files to input_ctx
 IDropTarget *mp_w32_droptarget_create(struct mp_log *log,
+                                      struct mp_vo_opts *opts,
                                       struct input_ctx *input_ctx);
 
 #endif
