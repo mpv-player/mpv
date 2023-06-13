@@ -2394,8 +2394,8 @@ Subtitles
 
 ``--sub-ass-styles=<filename>``
     Load all SSA/ASS styles found in the specified file and use them for
-    rendering text subtitles. The syntax of the file is exactly like the ``[V4
-    Styles]`` / ``[V4+ Styles]`` section of SSA/ASS.
+    rendering SSA/ASS subtitles (if ``sub-ass-override`` is set to ``yes``). 
+    The syntax of the file is exactly like the ``[V4 Styles]`` / ``[V4+ Styles]`` section of SSA/ASS.
 
     .. note::
 
