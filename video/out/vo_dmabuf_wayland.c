@@ -49,7 +49,7 @@
 
 // We need at least enough buffers to avoid a
 // flickering artifact in certain formats.
-#define WL_BUFFERS_WANTED 8
+#define WL_BUFFERS_WANTED 15
 
 enum hwdec_type {
     HWDEC_NONE,
