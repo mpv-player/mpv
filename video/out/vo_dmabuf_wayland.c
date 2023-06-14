@@ -219,14 +219,10 @@ static struct buffer *buffer_check(struct vo *vo, struct mp_image *src)
     struct buffer *buf;
     wl_list_for_each(buf, &p->buffer_list, link) {
         if (buf->id == id) {
-            if (buf->image) {
+            if (buf->image)
                 mp_image_unrefp(&buf->image);
-                buf->image = NULL;
-                goto done;
-            } else {
-                buf->image = src;
-                return buf;
-            }
+            buf->image = src;
+            return buf;
         }
     }
 
