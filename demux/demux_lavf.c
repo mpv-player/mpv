@@ -969,10 +969,12 @@ static void nested_io_close(struct AVFormatContext *s, AVIOContext *pb)
 
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
-    AVFormatContext *avfc;
+    AVFormatContext *avfc = NULL;
     AVDictionaryEntry *t = NULL;
     float analyze_duration = 0;
     lavf_priv_t *priv = talloc_zero(NULL, lavf_priv_t);
+    AVDictionary *dopts = NULL;
+
     demuxer->priv = priv;
     priv->stream = demuxer->stream;
 
@@ -986,11 +988,11 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                        &priv->mf_fps);
 
     if (lavf_check_file(demuxer, check) < 0)
-        return -1;
+        goto fail;
 
     avfc = avformat_alloc_context();
     if (!avfc)
-        return -1;
+        goto fail;
 
     if (index_mode != 1)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
@@ -1012,8 +1014,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                    "analyzeduration to %f\n", analyze_duration);
     }
 
-    AVDictionary *dopts = NULL;
-
     if ((priv->avif_flags & AVFMT_NOFILE) || priv->format_hack.no_stream) {
         mp_setup_av_network_options(&dopts, priv->avif->name,
                                     demuxer->global, demuxer->log);
@@ -1022,12 +1022,12 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     } else {
         void *buffer = av_malloc(lavfdopts->buffersize);
         if (!buffer)
-            return -1;
+            goto fail;
         priv->pb = avio_alloc_context(buffer, lavfdopts->buffersize, 0,
                                       demuxer, mp_read, NULL, mp_seek);
         if (!priv->pb) {
             av_free(buffer);
-            return -1;
+            goto fail;
         }
         priv->pb->read_seek = mp_read_seek;
         priv->pb->seekable = demuxer->seekable ? AVIO_SEEKABLE_NORMAL : 0;
@@ -1077,8 +1077,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     mp_set_avdict(&dopts, lavfdopts->avopts);
 
     if (av_dict_copy(&priv->av_opts, dopts, 0) < 0) {
-        av_dict_free(&dopts);
-        return -1;
+        MP_ERR(demuxer, "av_dict_copy() failed\n");
+        goto fail;
     }
 
     if (priv->format_hack.readall_on_no_streamseek && priv->pb &&
@@ -1097,8 +1097,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (avformat_open_input(&avfc, priv->filename, priv->avif, &dopts) < 0) {
         MP_ERR(demuxer, "avformat_open_input() failed\n");
-        av_dict_free(&dopts);
-        return -1;
+        goto fail;
     }
 
     mp_avdict_print_unset(demuxer->log, MSGL_V, dopts);
@@ -1116,7 +1115,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (probeinfo) {
         if (avformat_find_stream_info(avfc, NULL) < 0) {
             MP_ERR(demuxer, "av_find_stream_info() failed\n");
-            return -1;
+            goto fail;
         }
 
         MP_VERBOSE(demuxer, "avformat_find_stream_info() finished after %"PRId64
@@ -1196,6 +1195,13 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     }
 
     return 0;
+
+fail:
+    if (!priv->avfc)
+        avformat_free_context(avfc);
+    av_dict_free(&dopts);
+
+    return -1;
 }
 
 static bool demux_lavf_read_packet(struct demuxer *demux,
