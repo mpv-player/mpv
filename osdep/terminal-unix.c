@@ -418,7 +418,7 @@ static void *terminal_thread(void *ptr)
         int r = polldev(fds, stdin_ok ? 2 : 1, buf.len ? ESC_TIMEOUT : INPUT_TIMEOUT);
         if (fds[0].revents)
             break;
-        if (fds[1].revents) {
+        if (fds[1].revents & POLLIN) {
             int retval = read(tty_in, &buf.b[buf.len], BUF_LEN - buf.len);
             if (!retval || (retval == -1 && (errno == EBADF || errno == EINVAL)))
                 break; // EOF/closed
@@ -426,6 +426,9 @@ static void *terminal_thread(void *ptr)
                 buf.len += retval;
                 process_input(input_ctx, false);
             }
+        }
+        if (fds[1].revents & POLLHUP) {
+            break;
         }
         if (r == 0)
             process_input(input_ctx, true);
