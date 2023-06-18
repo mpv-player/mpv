@@ -84,7 +84,7 @@ struct vd_lavc_params {
     int software_fallback;
     char **avopts;
     int dr;
-    char *hwdec_api;
+    char **hwdec_api;
     char *hwdec_codecs;
     int hwdec_image_format;
     int hwdec_extra_frames;
@@ -100,6 +100,8 @@ static const struct m_opt_choice_alternatives discard_names[] = {
     {0}
 };
 #define OPT_DISCARD(field) OPT_CHOICE_C(field, discard_names)
+
+static char *default_hwdec_api[] = { "no", NULL, };
 
 const struct m_sub_options vd_lavc_conf = {
     .opts = (const m_option_t[]){
@@ -120,7 +122,7 @@ const struct m_sub_options vd_lavc_conf = {
         {"vd-lavc-o", OPT_KEYVALUELIST(avopts)},
         {"vd-lavc-dr", OPT_CHOICE(dr,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
-        {"hwdec", OPT_STRING(hwdec_api),
+        {"hwdec", OPT_STRINGLIST(hwdec_api),
             .help = hwdec_opt_help,
             .flags = M_OPT_OPTIONAL_PARAM | UPDATE_HWDEC},
         {"hwdec-codecs", OPT_STRING(hwdec_codecs)},
@@ -138,7 +140,7 @@ const struct m_sub_options vd_lavc_conf = {
         .skip_frame = AVDISCARD_DEFAULT,
         .framedrop = AVDISCARD_NONREF,
         .dr = -1,
-        .hwdec_api = "no",
+        .hwdec_api = default_hwdec_api,
         .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores",
         // Maximum number of surfaces the player wants to buffer. This number
         // might require adjustment depending on whatever the player does;
@@ -465,94 +467,97 @@ static void select_and_set_hwdec(struct mp_filter *vd)
 
     m_config_cache_update(ctx->opts_cache);
 
-    bstr opt = bstr0(ctx->opts->hwdec_api);
+    struct hwdec_info *hwdecs = NULL;
+    int num_hwdecs = 0;
+    add_all_hwdec_methods(&hwdecs, &num_hwdecs);
 
-    bool hwdec_requested = !bstr_equals0(opt, "no");
-    bool hwdec_auto_all = bstr_equals0(opt, "auto") ||
-                          bstr_equals0(opt, "yes") ||
-                          bstr_equals0(opt, "");
-    bool hwdec_auto_safe = bstr_equals0(opt, "auto-safe") ||
-                           bstr_equals0(opt, "auto-copy-safe");
-    bool hwdec_auto_copy = bstr_equals0(opt, "auto-copy") ||
-                           bstr_equals0(opt, "auto-copy-safe");
-    bool hwdec_auto = hwdec_auto_all || hwdec_auto_copy || hwdec_auto_safe;
+    char **hwdec_api = ctx->opts->hwdec_api;
+    for (int i = 0; hwdec_api[i]; i++) {
+        bstr opt = bstr0(hwdec_api[i]);
 
-    if (!hwdec_requested) {
-        MP_VERBOSE(vd, "No hardware decoding requested.\n");
-    } else if (!hwdec_codec_allowed(vd, codec)) {
-        MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
-                   "on whitelist.\n", codec);
-    } else {
-        bool hwdec_name_supported = false;  // relevant only if !hwdec_auto
-        struct hwdec_info *hwdecs = NULL;
-        int num_hwdecs = 0;
-        add_all_hwdec_methods(&hwdecs, &num_hwdecs);
+        bool hwdec_requested = !bstr_equals0(opt, "no");
+        bool hwdec_auto_all = bstr_equals0(opt, "auto") ||
+                            bstr_equals0(opt, "yes") ||
+                            bstr_equals0(opt, "");
+        bool hwdec_auto_safe = bstr_equals0(opt, "auto-safe") ||
+                            bstr_equals0(opt, "auto-copy-safe");
+        bool hwdec_auto_copy = bstr_equals0(opt, "auto-copy") ||
+                            bstr_equals0(opt, "auto-copy-safe");
+        bool hwdec_auto = hwdec_auto_all || hwdec_auto_copy || hwdec_auto_safe;
 
-        for (int n = 0; n < num_hwdecs; n++) {
-            struct hwdec_info *hwdec = &hwdecs[n];
+        if (!hwdec_requested) {
+            MP_VERBOSE(vd, "No hardware decoding requested.\n");
+            break;
+        } else if (!hwdec_codec_allowed(vd, codec)) {
+            MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
+                    "on whitelist.\n", codec);
+            break;
+        } else {
+            bool hwdec_name_supported = false;  // relevant only if !hwdec_auto
+            for (int n = 0; n < num_hwdecs; n++) {
+                struct hwdec_info *hwdec = &hwdecs[n];
 
-            if (!hwdec_auto && !(bstr_equals0(opt, hwdec->method_name) ||
-                                 bstr_equals0(opt, hwdec->name)))
-                continue;
-            hwdec_name_supported = true;
+                if (!hwdec_auto && !(bstr_equals0(opt, hwdec->method_name) ||
+                                    bstr_equals0(opt, hwdec->name)))
+                    continue;
+                hwdec_name_supported = true;
 
-            const char *hw_codec = mp_codec_from_av_codec_id(hwdec->codec->id);
-            if (!hw_codec || strcmp(hw_codec, codec) != 0)
-                continue;
+                const char *hw_codec = mp_codec_from_av_codec_id(hwdec->codec->id);
+                if (!hw_codec || strcmp(hw_codec, codec) != 0)
+                    continue;
 
-            if (hwdec_auto_safe && !(hwdec->flags & HWDEC_FLAG_WHITELIST))
-                continue;
+                if (hwdec_auto_safe && !(hwdec->flags & HWDEC_FLAG_WHITELIST))
+                    continue;
 
-            MP_VERBOSE(vd, "Looking at hwdec %s...\n", hwdec->name);
+                MP_VERBOSE(vd, "Looking at hwdec %s...\n", hwdec->name);
 
-            if (hwdec_auto_copy && !hwdec->copying) {
-                MP_VERBOSE(vd, "Not using this for auto-copy.\n");
-                continue;
-            }
-
-            if (hwdec->lavc_device) {
-                ctx->hwdec_dev = hwdec_create_dev(vd, hwdec, hwdec_auto);
-                if (!ctx->hwdec_dev) {
-                    MP_VERBOSE(vd, "Could not create device.\n");
+                if (hwdec_auto_copy && !hwdec->copying) {
+                    MP_VERBOSE(vd, "Not using this for auto-copy.\n");
                     continue;
                 }
 
-                const struct hwcontext_fns *fns =
-                            hwdec_get_hwcontext_fns(hwdec->lavc_device);
-                if (fns && fns->is_emulated && fns->is_emulated(ctx->hwdec_dev)) {
-                    if (hwdec_auto) {
-                        MP_VERBOSE(vd, "Not using emulated API.\n");
-                        av_buffer_unref(&ctx->hwdec_dev);
+                if (hwdec->lavc_device) {
+                    ctx->hwdec_dev = hwdec_create_dev(vd, hwdec, hwdec_auto);
+                    if (!ctx->hwdec_dev) {
+                        MP_VERBOSE(vd, "Could not create device.\n");
                         continue;
                     }
-                    MP_WARN(vd, "Using emulated hardware decoding API.\n");
+
+                    const struct hwcontext_fns *fns =
+                                hwdec_get_hwcontext_fns(hwdec->lavc_device);
+                    if (fns && fns->is_emulated && fns->is_emulated(ctx->hwdec_dev)) {
+                        if (hwdec_auto) {
+                            MP_VERBOSE(vd, "Not using emulated API.\n");
+                            av_buffer_unref(&ctx->hwdec_dev);
+                            continue;
+                        }
+                        MP_WARN(vd, "Using emulated hardware decoding API.\n");
+                    }
+                } else if (!hwdec->copying) {
+                    // Most likely METHOD_INTERNAL, which often use delay-loaded
+                    // VO support as well.
+                    if (ctx->hwdec_devs) {
+                        struct hwdec_imgfmt_request params = {
+                            .imgfmt = pixfmt2imgfmt(hwdec->pix_fmt),
+                            .probing = hwdec_auto,
+                        };
+                        hwdec_devices_request_for_img_fmt(
+                            ctx->hwdec_devs, &params);
+                    }
                 }
-            } else if (!hwdec->copying) {
-                // Most likely METHOD_INTERNAL, which often use delay-loaded
-                // VO support as well.
-                if (ctx->hwdec_devs) {
-                    struct hwdec_imgfmt_request params = {
-                        .imgfmt = pixfmt2imgfmt(hwdec->pix_fmt),
-                        .probing = hwdec_auto,
-                    };
-                    hwdec_devices_request_for_img_fmt(
-                        ctx->hwdec_devs, &params);
-                }
+
+                ctx->use_hwdec = true;
+                ctx->hwdec = *hwdec;
+                break;
             }
-
-            ctx->use_hwdec = true;
-            ctx->hwdec = *hwdec;
-            break;
-        }
-
-        talloc_free(hwdecs);
-
-        if (!ctx->use_hwdec) {
-            if (!hwdec_auto && !hwdec_name_supported)
-                MP_WARN(vd, "Unsupported hwdec: %s\n", ctx->opts->hwdec_api);
-            MP_VERBOSE(vd, "No hardware decoding available for this codec.\n");
+            if (ctx->use_hwdec)
+                break;
+            else if (!hwdec_auto && !hwdec_name_supported)
+                MP_WARN(vd, "Unsupported hwdec: %.*s\n", BSTR_P(opt));
         }
     }
+    talloc_free(hwdecs);
+
 
     if (ctx->use_hwdec) {
         MP_VERBOSE(vd, "Trying hardware decoding via %s.\n", ctx->hwdec.name);

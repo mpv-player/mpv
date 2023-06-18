@@ -1185,7 +1185,7 @@ Video
 ``--display-fps=<fps>``
     Deprecated alias for ``--override-display-fps``.
 
-``--hwdec=<api>``
+``--hwdec=<api1,api2,...|no|auto|auto-safe|auto-copy>``
     Specify the hardware video decoding API that should be used if possible.
     Whether hardware decoding is actually done depends on the video codec. If
     hardware decoding is not possible, mpv will fall back on software decoding.
@@ -1244,13 +1244,20 @@ Video
         - If you're a developer, or want to perform elaborate tests, you may
           need any of the other possible option values.
 
-    ``<api>`` can be one of the following:
+    This option accepts a comma delimited list of ``api`` types, along with certain
+    special values:
 
     :no:        always use software decoding (default)
     :auto:      forcibly enable any hw decoder found (see below)
     :yes:       exactly the same as ``auto``
     :auto-safe: enable any whitelisted hw decoder (see below)
     :auto-copy: enable best hw decoder with copy-back (see below)
+
+    .. note::
+
+        Special values can be mixed with api names. eg: ``vaapi,auto`` will try
+        and use the ``vaapi`` hwdec, and if that fails, will run through the
+        normal ``auto`` logic.
 
     Actively supported hwdecs:
 
