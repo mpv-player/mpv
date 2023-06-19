@@ -151,6 +151,8 @@ struct priv {
     bool delayed_peak;
     bool inter_preserve;
     bool target_hint;
+
+    float corner_rounding;
 };
 
 static void update_render_options(struct vo *vo);
@@ -1815,6 +1817,9 @@ static void update_render_options(struct vo *vo)
     p->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     p->params.disable_fbos = opts->dumb_mode == 1;
     p->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
+#if PL_API_VER >= 277
+    p->params.corner_rounding = p->corner_rounding;
+#endif
 
     // Map scaler options as best we can
     p->params.upscaler = map_scaler(p, SCALER_SCALE);
@@ -1998,6 +2003,7 @@ const struct vo_driver video_out_gpu_next = {
 
     .options = (const struct m_option[]) {
         {"allow-delayed-peak-detect", OPT_BOOL(delayed_peak)},
+        {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
         {"interpolation-preserve", OPT_BOOL(inter_preserve)},
         {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
         {"lut-type", OPT_CHOICE_C(lut.type, lut_types)},
