@@ -1862,9 +1862,14 @@ static void update_render_options(struct vo *vo)
 #if PL_API_VER >= 269
     const struct pl_gamut_map_function *gamut_modes[] = {
         [GAMUT_CLIP]            = &pl_gamut_map_clip,
-        [GAMUT_WARN]            = &pl_gamut_map_highlight,
+        [GAMUT_PERCEPTUAL]      = &pl_gamut_map_perceptual,
+        [GAMUT_RELATIVE]        = &pl_gamut_map_relative,
+        [GAMUT_SATURATION]      = &pl_gamut_map_saturation,
+        [GAMUT_ABSOLUTE]        = &pl_gamut_map_absolute,
         [GAMUT_DESATURATE]      = &pl_gamut_map_desaturate,
         [GAMUT_DARKEN]          = &pl_gamut_map_darken,
+        [GAMUT_WARN]            = &pl_gamut_map_highlight,
+        [GAMUT_LINEAR]          = &pl_gamut_map_linear,
     };
 
     // Back-compat approximation, taken from libplacebo source code
@@ -1880,6 +1885,12 @@ static void update_render_options(struct vo *vo)
         [GAMUT_WARN]            = PL_GAMUT_WARN,
         [GAMUT_DESATURATE]      = PL_GAMUT_DESATURATE,
         [GAMUT_DARKEN]          = PL_GAMUT_DARKEN,
+        // Unsupported
+        [GAMUT_PERCEPTUAL]      = PL_GAMUT_CLIP,
+        [GAMUT_RELATIVE]        = PL_GAMUT_CLIP,
+        [GAMUT_SATURATION]      = PL_GAMUT_CLIP,
+        [GAMUT_ABSOLUTE]        = PL_GAMUT_CLIP,
+        [GAMUT_LINEAR]          = PL_GAMUT_CLIP,
     };
 
     static const enum pl_tone_map_mode tone_map_modes[] = {
