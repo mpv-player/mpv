@@ -185,6 +185,12 @@ static int init(struct ra_hwdec *hw)
         .supported_formats = subfmts,
         .hw_imgfmt = IMGFMT_D3D11,
     };
+
+    if (!p->hwctx.av_device_ref) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx\n");
+        return -1;
+    }
+
     hwdec_devices_add(hw->devs, &p->hwctx);
 
     return 0;

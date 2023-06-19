@@ -83,6 +83,12 @@ static int init(struct ra_hwdec *hw)
         .av_device_ref = d3d9_wrap_device_ref((IDirect3DDevice9 *)p->device),
         .hw_imgfmt = IMGFMT_DXVA2,
     };
+
+    if (!p->hwctx.av_device_ref) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx\n");
+        return -1;
+    }
+
     hwdec_devices_add(hw->devs, &p->hwctx);
     return 0;
 }

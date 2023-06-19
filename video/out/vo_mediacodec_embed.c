@@ -55,6 +55,12 @@ static int preinit(struct vo *vo)
         .av_device_ref = create_mediacodec_device_ref(vo),
         .hw_imgfmt = IMGFMT_MEDIACODEC,
     };
+
+    if (!p->hwctx.av_device_ref) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx\n");
+        return -1;
+    }
+
     hwdec_devices_add(vo->hwdec_devs, &p->hwctx);
     return 0;
 }
