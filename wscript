@@ -398,6 +398,12 @@ iconv support use --disable-iconv.",
         'func': check_true,
         'default': 'disable',
     }, {
+        'name': '--dvbv5',
+        'desc': 'DVBv5 input module',
+        'deps': 'gpl',
+        'func': check_pkg_config('libdvbv5'),
+        'default': 'disable',
+    }, {
         'name': '--sdl2',
         'desc': 'SDL2',
         'func': check_pkg_config('sdl2'),

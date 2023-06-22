@@ -401,6 +401,7 @@ def build(ctx):
         ( "stream/stream_concat.c" ),
         ( "stream/stream_slice.c" ),
         ( "stream/stream_dvb.c",                 "dvbin" ),
+        ( "stream/stream_dvbv5.c",               "dvbv5" ),
         ( "stream/stream_dvdnav.c",              "dvdnav" ),
         ( "stream/stream_edl.c" ),
         ( "stream/stream_file.c" ),
