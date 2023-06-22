@@ -51,10 +51,6 @@
 #include "generated/wayland/fractional-scale-v1.h"
 #endif
 
-#if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 20
-#define HAVE_WAYLAND_1_20
-#endif
-
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
 #define HAVE_WAYLAND_1_22
 #endif
@@ -534,10 +530,16 @@ static void data_offer_source_actions(void *data, struct wl_data_offer *offer, u
 static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, uint32_t dnd_action)
 {
     struct vo_wayland_state *wl = data;
-    wl->dnd_action = dnd_action & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY ?
-                     DND_REPLACE : DND_APPEND;
-    MP_VERBOSE(wl, "DND action is %s\n",
-               wl->dnd_action == DND_REPLACE ? "DND_REPLACE" : "DND_APPEND");
+    if (dnd_action) {
+        if (wl->vo_opts->drag_and_drop >= 0) {
+            wl->dnd_action = wl->vo_opts->drag_and_drop;
+        } else {
+            wl->dnd_action = dnd_action & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY ?
+                             DND_REPLACE : DND_APPEND;
+        }
+        MP_VERBOSE(wl, "DND action is %s\n",
+                   wl->dnd_action == DND_REPLACE ? "DND_REPLACE" : "DND_APPEND");
+    }
 }
 
 static const struct wl_data_offer_listener data_offer_listener = {
@@ -716,7 +718,6 @@ static void output_handle_scale(void *data, struct wl_output *wl_output,
     output->scale = factor;
 }
 
-#ifdef HAVE_WAYLAND_1_20
 static void output_handle_name(void *data, struct wl_output *wl_output,
                                const char *name)
 {
@@ -728,17 +729,14 @@ static void output_handle_description(void *data, struct wl_output *wl_output,
                                       const char *description)
 {
 }
-#endif
 
 static const struct wl_output_listener output_listener = {
     output_handle_geometry,
     output_handle_mode,
     output_handle_done,
     output_handle_scale,
-#ifdef HAVE_WAYLAND_1_20
     output_handle_name,
     output_handle_description,
-#endif
 };
 
 static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
@@ -802,7 +800,6 @@ static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
 }
 
 #ifdef HAVE_WAYLAND_1_22
-
 static void surface_handle_preferred_buffer_scale(void *data,
                                                   struct wl_surface *wl_surface,
                                                   int32_t scale)
@@ -830,7 +827,6 @@ static void surface_handle_preferred_buffer_transform(void *data,
                                                       uint32_t transform)
 {
 }
-
 #endif
 
 static const struct wl_surface_listener surface_listener = {
@@ -989,7 +985,6 @@ static void handle_toplevel_close(void *data, struct xdg_toplevel *xdg_toplevel)
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
 }
 
-#ifdef XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION
 static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_toplevel,
                                     int32_t width, int32_t height)
 {
@@ -997,14 +992,11 @@ static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_topleve
     wl->bounded_width = width * wl->scaling;
     wl->bounded_height = height * wl->scaling;
 }
-#endif
 
 static const struct xdg_toplevel_listener xdg_toplevel_listener = {
     handle_toplevel_config,
     handle_toplevel_close,
-#ifdef XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION
     handle_configure_bounds,
-#endif
 };
 
 #if HAVE_WAYLAND_PROTOCOLS_1_31
@@ -1160,25 +1152,6 @@ static const struct wl_callback_listener frame_listener = {
     frame_callback,
 };
 
-static void dmabuf_format(void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
-                          uint32_t format)
-{
-    struct vo_wayland_state *wl = data;
-
-    if (wl->drm_format_ct == wl->drm_format_ct_max) {
-        wl->drm_format_ct_max *= 2;
-        wl->drm_formats = talloc_realloc(wl, wl->drm_formats, int, wl->drm_format_ct_max);
-    }
-
-    wl->drm_formats[wl->drm_format_ct++] = format;
-    MP_VERBOSE(wl, "%s is supported by the compositor.\n", mp_tag_str(format));
-}
-
-static const struct zwp_linux_dmabuf_v1_listener dmabuf_listener = {
-    dmabuf_format
-};
-
-#if HAVE_WAYLAND_PROTOCOLS_1_24
 static void done(void *data,
                  struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
 {
@@ -1238,7 +1211,6 @@ static const struct zwp_linux_dmabuf_feedback_v1_listener dmabuf_feedback_listen
     tranche_formats,
     tranche_flags,
 };
-#endif
 
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
                                 const char *interface, uint32_t ver)
@@ -1269,15 +1241,8 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
     if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 4) && found++) {
         wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 4);
-#if HAVE_WAYLAND_PROTOCOLS_1_24
         wl->dmabuf_feedback = zwp_linux_dmabuf_v1_get_default_feedback(wl->dmabuf);
         zwp_linux_dmabuf_feedback_v1_add_listener(wl->dmabuf_feedback, &dmabuf_feedback_listener, wl);
-#endif
-    } else if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 2) && found++) {
-        wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 2);
-        zwp_linux_dmabuf_v1_add_listener(wl->dmabuf, &dmabuf_listener, wl);
-        wl->drm_format_ct_max = 64;
-        wl->drm_formats = talloc_array(wl, int, wl->drm_format_ct_max);
     }
 
     if (!strcmp (interface, wp_viewporter_interface.name) && (ver >= 1) && found++) {
@@ -2399,10 +2364,8 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->dmabuf)
         zwp_linux_dmabuf_v1_destroy(wl->dmabuf);
 
-#if HAVE_WAYLAND_PROTOCOLS_1_24
     if (wl->dmabuf_feedback)
         zwp_linux_dmabuf_feedback_v1_destroy(wl->dmabuf_feedback);
-#endif
 
     if (wl->seat)
         wl_seat_destroy(wl->seat);

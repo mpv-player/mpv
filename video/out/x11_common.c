@@ -988,9 +988,13 @@ static void vo_x11_dnd_handle_selection(struct vo *vo, XSelectionEvent *se)
         void *prop = x11_get_property(x11, x11->window, XAs(x11, DND_PROPERTY),
                                       x11->dnd_requested_format, 8, &nitems);
         if (prop) {
-            enum mp_dnd_action action =
-                x11->dnd_requested_action == XA(x11, XdndActionCopy) ?
-                DND_REPLACE : DND_APPEND;
+            enum mp_dnd_action action;
+            if (x11->opts->drag_and_drop >= 0) {
+                action = x11->opts->drag_and_drop;
+            } else {
+                action = x11->dnd_requested_action == XA(x11, XdndActionCopy) ?
+                         DND_REPLACE : DND_APPEND;
+            }
 
             char *mime_type = x11_dnd_mime_type(x11, x11->dnd_requested_format);
             MP_VERBOSE(x11, "Dropping type: %s (%s)\n",

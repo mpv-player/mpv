@@ -39,11 +39,6 @@ bool ra_compatible_format(struct ra* ra, uint32_t drm_format, uint64_t modifier)
             return true;
     }
 
-    for (int i = 0; i < wl->drm_format_ct; i++) {
-        if (drm_format == wl->drm_formats[i])
-            return true;
-    }
-
     return false;
 }
 

@@ -541,14 +541,9 @@ video_output_features = [
         'name': '--wayland',
         'desc': 'Wayland',
         'deps': 'wayland-protocols && wayland-scanner && linux-input-event-codes',
-        'func': check_pkg_config('wayland-client', '>= 1.15.0',
-                                 'wayland-cursor', '>= 1.15.0',
+        'func': check_pkg_config('wayland-client', '>= 1.20.0',
+                                 'wayland-cursor', '>= 1.20.0',
                                  'xkbcommon',      '>= 0.3.0'),
-    } , {
-        'name': 'wayland-protocols-1-24',
-        'desc': 'wayland-protocols version 1.24+',
-        'deps': 'wayland',
-        'func': check_pkg_config('wayland-protocols >= 1.24'),
     } , {
         'name': 'wayland-protocols-1-27',
         'desc': 'wayland-protocols version 1.27+',

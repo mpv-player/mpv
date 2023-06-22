@@ -11,6 +11,7 @@ typedef struct mp_vo_opts {
 
     bool taskbar_progress;
     bool snap_window;
+    int drag_and_drop;
     bool ontop;
     int ontop_level;
     bool fullscreen;

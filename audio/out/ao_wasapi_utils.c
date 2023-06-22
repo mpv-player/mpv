@@ -31,8 +31,6 @@
 #include "osdep/strnlen.h"
 #include "ao_wasapi.h"
 
-#define MIXER_DEFAULT_LABEL L"mpv - video player"
-
 DEFINE_PROPERTYKEY(mp_PKEY_Device_FriendlyName,
                    0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
                    0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14);
@@ -545,7 +543,7 @@ exit_label:
     return hr;
 }
 
-static void init_session_display(struct wasapi_state *state) {
+static void init_session_display(struct wasapi_state *state, const char *name) {
     HRESULT hr = IAudioClient_GetService(state->pAudioClient,
                                          &IID_IAudioSessionControl,
                                          (void **)&state->pSessionControl);
@@ -560,14 +558,20 @@ static void init_session_display(struct wasapi_state *state) {
                 mp_HRESULT_to_str(hr));
     }
 
-    hr = IAudioSessionControl_SetDisplayName(state->pSessionControl,
-                                             MIXER_DEFAULT_LABEL, NULL);
+    assert(name);
+    if (!name)
+        return;
+
+    wchar_t *title = mp_from_utf8(NULL, name);
+    hr = IAudioSessionControl_SetDisplayName(state->pSessionControl, title, NULL);
+    talloc_free(title);
+
     EXIT_ON_ERROR(hr);
     return;
 exit_label:
     // if we got here then the session control is useless - release it
     SAFE_RELEASE(state->pSessionControl);
-    MP_WARN(state, "Error setting audio session display name: %s\n",
+    MP_WARN(state, "Error setting audio session name: %s\n",
             mp_HRESULT_to_str(hr));
     return;
 }
@@ -668,7 +672,7 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
     hr = init_clock(state);
     EXIT_ON_ERROR(hr);
 
-    init_session_display(state);
+    init_session_display(state, ao->client_name);
     init_volume_control(state);
 
 #if !HAVE_UWP

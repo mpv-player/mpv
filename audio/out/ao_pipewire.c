@@ -35,18 +35,6 @@
 #include "internal.h"
 #include "osdep/timer.h"
 
-// Added in Pipewire 0.3.33
-// remove the fallback when we require a newer version
-#ifndef PW_KEY_NODE_RATE
-#define PW_KEY_NODE_RATE "node.rate"
-#endif
-
-// Added in Pipewire 0.3.44
-// remove the fallback when we require a newer version
-#ifndef PW_KEY_TARGET_OBJECT
-#define PW_KEY_TARGET_OBJECT "target.object"
-#endif
-
 #if !PW_CHECK_VERSION(0, 3, 50)
 static inline int pw_stream_get_time_n(struct pw_stream *stream, struct pw_time *time, size_t size) {
 	return pw_stream_get_time(stream, time);

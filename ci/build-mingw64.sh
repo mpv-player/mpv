@@ -136,7 +136,7 @@ fi
 ## freetype2
 if [ ! -e "$prefix_dir/lib/libfreetype.dll.a" ]; then
     ver=2.13.0
-    gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz"
+    gettar "https://mirror.netcologne.de/savannah/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     meson .. --cross-file "$prefix_dir/crossfile"
     makeplusinstall

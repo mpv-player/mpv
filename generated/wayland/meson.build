@@ -8,8 +8,6 @@ protocols = [[wl_protocol_dir, 'stable/presentation-time/presentation-time.xml']
 wl_protocols_source = []
 wl_protocols_headers = []
 
-features += {'wayland_protocols_1_24': wayland['deps'][2].version().version_compare('>=1.24')}
-
 features += {'wayland_protocols_1_27': wayland['deps'][2].version().version_compare('>=1.27')}
 if features['wayland_protocols_1_27']
     protocols += [[wl_protocol_dir, 'staging/content-type/content-type-v1.xml'],

@@ -3067,6 +3067,14 @@ Window
 ``--snap-window``
     (Windows only) Snap the player window to screen edges.
 
+``--drag-and-drop=<auto|replace|append>``
+    (X11 and Wayland only)
+    Controls the default behavior of drag and drop on platforms that support this.
+    ``auto`` will obey what the underlying os/platform gives mpv. Typically, holding
+    shift during the drag and drop will append the item to the playlist. Otherwise,
+    it will completely replace it. ``replace`` and ``append`` always force replacing
+    and appending to the playlist respectively.
+
 ``--ontop``
     Makes the player window stay on top of other windows.
 
@@ -3119,7 +3127,7 @@ Window
 
         Generally only supported by GUI VOs. Ignored for encoding.
 
-    .. admonition: Note (macOS)
+    .. admonition:: Note (macOS)
 
         On macOS, the origin of the screen coordinate system is located on the
         bottom-left corner. For instance, ``0:0`` will place the window at the
@@ -5959,6 +5967,12 @@ them.
     remaining quantization artifacts. Higher numbers add more noise. (Default
     48)
 
+``--corner-rounding=<0..1>``
+    If set to a value above 0.0, the output will be rendered with rounded
+    corners, as if an alpha transparency mask had been applied. The value
+    indicates the relative fraction of the side length to round - a value of
+    1.0 rounds the corners as much as possible. (``--vo=gpu-next`` only)
+
 ``--sharpen=<value>``
     If set to a value other than 0, enable an unsharp masking filter. Positive
     values will sharpen the image (but add more ringing and aliasing). Negative
@@ -6557,16 +6571,36 @@ them.
     auto
         Choose the best mode automatically. (Default)
     clip
-        Hard-clip to the gamut (per-channel).
-    warn
-        Simply highlight out-of-gamut pixels.
-    desaturate
-        Chromatically desaturate out-of-gamut colors towards white.
-    darken
-        Linearly darken the entire image, then clip to the color volume. Unlike
-        ``clip``, this does not destroy detail in saturated regions, but comes
-        at the cost of sometimes significantly lowering output brightness.
+        Hard-clip to the gamut (per-channel). Very low quality, but free.
+    perceptual
+        Performs a perceptually balanced gamut mapping using a soft knee
+        function to roll-off clipped regions, and a hue shifting function to
+        preserve saturation. (``--vo=gpu-next`` only)
+    relative
+        Performs relative colorimetric clipping, while maintaining an
+        exponential relationship between brightness and chromaticity.
         (``--vo=gpu-next`` only)
+    saturation
+        Performs simple RGB->RGB saturation mapping. The input R/G/B channels
+        are mapped directly onto the output R/G/B channels. Will never clip,
+        but will distort all hues and/or result in a faded look.
+        (``--vo=gpu-next`` only)
+    absolute
+        Performs absolute colorimetric clipping. Like ``relative``, but does
+        not adapt the white point. (``--vo=gpu-next`` only)
+    desaturate
+        Performs constant-luminance colorimetric clipping, desaturing colors
+        towards white until they're in-range.
+    darken
+        Uniformly darkens the input slightly to prevent clipping on blown-out
+        highlights, then clamps colorimetrically to the input gamut boundary,
+        biased slightly to preserve chromaticity over luminance.
+        (``--vo=gpu-next`` only)
+    warn
+        Performs no gamut mapping, but simply highlights out-of-gamut pixels.
+    linear
+        Linearly/uniformly desaturates the image in order to bring the entire
+        image into the target gamut. (``--vo=gpu-next`` only)
 
 ``--hdr-compute-peak=<auto|yes|no>``
     Compute the HDR peak and frame average brightness per-frame instead of

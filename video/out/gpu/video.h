@@ -113,9 +113,14 @@ enum tone_mapping_mode {
 enum gamut_mode {
     GAMUT_AUTO,
     GAMUT_CLIP,
-    GAMUT_WARN,
+    GAMUT_PERCEPTUAL,
+    GAMUT_RELATIVE,
+    GAMUT_SATURATION,
+    GAMUT_ABSOLUTE,
     GAMUT_DESATURATE,
     GAMUT_DARKEN,
+    GAMUT_WARN,
+    GAMUT_LINEAR,
 };
 
 struct gl_tone_map_opts {

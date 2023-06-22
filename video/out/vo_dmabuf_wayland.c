@@ -49,7 +49,7 @@
 
 // We need at least enough buffers to avoid a
 // flickering artifact in certain formats.
-#define WL_BUFFERS_WANTED 8
+#define WL_BUFFERS_WANTED 15
 
 enum hwdec_type {
     HWDEC_NONE,
@@ -219,14 +219,10 @@ static struct buffer *buffer_check(struct vo *vo, struct mp_image *src)
     struct buffer *buf;
     wl_list_for_each(buf, &p->buffer_list, link) {
         if (buf->id == id) {
-            if (buf->image) {
+            if (buf->image)
                 mp_image_unrefp(&buf->image);
-                buf->image = NULL;
-                goto done;
-            } else {
-                buf->image = src;
-                return buf;
-            }
+            buf->image = src;
+            return buf;
         }
     }
 
@@ -479,8 +475,8 @@ static int preinit(struct vo *vo)
 
     wl_list_init(&p->buffer_list);
 
-    if (!vo->wl->dmabuf) {
-        MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
+    if (!vo->wl->dmabuf || !vo->wl->dmabuf_feedback) {
+        MP_FATAL(vo->wl, "Compositor doesn't support the %s (ver. 4) protocol!\n",
                  zwp_linux_dmabuf_v1_interface.name);
         goto err;
     }

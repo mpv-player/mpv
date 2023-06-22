@@ -151,6 +151,8 @@ struct priv {
     bool delayed_peak;
     bool inter_preserve;
     bool target_hint;
+
+    float corner_rounding;
 };
 
 static void update_render_options(struct vo *vo);
@@ -1815,6 +1817,9 @@ static void update_render_options(struct vo *vo)
     p->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     p->params.disable_fbos = opts->dumb_mode == 1;
     p->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
+#if PL_API_VER >= 277
+    p->params.corner_rounding = p->corner_rounding;
+#endif
 
     // Map scaler options as best we can
     p->params.upscaler = map_scaler(p, SCALER_SCALE);
@@ -1862,9 +1867,14 @@ static void update_render_options(struct vo *vo)
 #if PL_API_VER >= 269
     const struct pl_gamut_map_function *gamut_modes[] = {
         [GAMUT_CLIP]            = &pl_gamut_map_clip,
-        [GAMUT_WARN]            = &pl_gamut_map_highlight,
+        [GAMUT_PERCEPTUAL]      = &pl_gamut_map_perceptual,
+        [GAMUT_RELATIVE]        = &pl_gamut_map_relative,
+        [GAMUT_SATURATION]      = &pl_gamut_map_saturation,
+        [GAMUT_ABSOLUTE]        = &pl_gamut_map_absolute,
         [GAMUT_DESATURATE]      = &pl_gamut_map_desaturate,
         [GAMUT_DARKEN]          = &pl_gamut_map_darken,
+        [GAMUT_WARN]            = &pl_gamut_map_highlight,
+        [GAMUT_LINEAR]          = &pl_gamut_map_linear,
     };
 
     // Back-compat approximation, taken from libplacebo source code
@@ -1880,6 +1890,12 @@ static void update_render_options(struct vo *vo)
         [GAMUT_WARN]            = PL_GAMUT_WARN,
         [GAMUT_DESATURATE]      = PL_GAMUT_DESATURATE,
         [GAMUT_DARKEN]          = PL_GAMUT_DARKEN,
+        // Unsupported
+        [GAMUT_PERCEPTUAL]      = PL_GAMUT_CLIP,
+        [GAMUT_RELATIVE]        = PL_GAMUT_CLIP,
+        [GAMUT_SATURATION]      = PL_GAMUT_CLIP,
+        [GAMUT_ABSOLUTE]        = PL_GAMUT_CLIP,
+        [GAMUT_LINEAR]          = PL_GAMUT_CLIP,
     };
 
     static const enum pl_tone_map_mode tone_map_modes[] = {
@@ -1987,6 +2003,7 @@ const struct vo_driver video_out_gpu_next = {
 
     .options = (const struct m_option[]) {
         {"allow-delayed-peak-detect", OPT_BOOL(delayed_peak)},
+        {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
         {"interpolation-preserve", OPT_BOOL(inter_preserve)},
         {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
         {"lut-type", OPT_CHOICE_C(lut.type, lut_types)},
