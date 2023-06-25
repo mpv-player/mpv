@@ -450,6 +450,34 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     if (converted)
         ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
 #endif
+    if (converted) {
+        bool override_playres = true;
+        char **ass_force_style_list = opts->ass_force_style_list;
+        for (int i = 0; ass_force_style_list && ass_force_style_list[i]; i++) {
+            if (bstr_find0(bstr0(ass_force_style_list[i]), "PlayResX") >= 0)
+                override_playres = false;
+        }
+
+        // srt to ass conversion from ffmpeg has fixed PlayResX of 384 with an
+        // aspect of 4:3. Starting with libass f08f8ea5 (pre 0.17) PlayResX
+        // affects shadow and border widths, among others, so to render borders
+        // and shadows correctly, we adjust PlayResX according to the DAR.
+        // But PlayResX also affects margins, so we adjust those too.
+        // This should ensure basic srt-to-ass ffmpeg conversion has correct
+        // borders, but there could be other issues with some srt extensions
+        // and/or different source formats which would be exposed over time.
+        // Make these adjustments only if the user didn't set PlayResX.
+        if (override_playres) {
+            int vidw = dim->w - (dim->ml + dim->mr);
+            int vidh = dim->h - (dim->mt + dim->mb);
+            track->PlayResX = track->PlayResY * (double)vidw / MPMAX(vidh, 1);
+            // ffmpeg and mpv use a default PlayResX of 384 when it is not known,
+            // this comes from VSFilter.
+            double fix_margins = track->PlayResX / 384.0;
+            track->styles->MarginL = round(track->styles->MarginL * fix_margins);
+            track->styles->MarginR = round(track->styles->MarginR * fix_margins);
+        }
+    }
 }
 
 static bool has_overrides(char *s)
