@@ -2,6 +2,7 @@
 
 if [ "$1" = "meson" ]; then
     meson setup build            \
+      --native-file=ci/msys2-meson.txt \
       -D cdda=enabled            \
       -D d3d-hwaccel=enabled     \
       -D d3d11=enabled           \

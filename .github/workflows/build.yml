@@ -271,7 +271,7 @@ jobs:
             meson:p
             ninja:p
             pkgconf:p
-            python:p
+            python3.11:p
             rst2pdf:p
             rubberband:p
             shaderc:p
