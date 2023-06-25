@@ -105,7 +105,7 @@ filter list.
     compared. (Passing multiple filters is currently still possible, but
     deprecated.)
 
-``-vf-toggle=filter``
+``--vf-toggle=filter``
     Add the given filter to the list if it was not present yet, or remove it
     from the list if it was present. Matching of filters works as described in
     ``--vf-remove``.
