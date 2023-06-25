@@ -1,0 +1,2 @@
+[binaries]
+python3 = 'python3.11'
