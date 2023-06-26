@@ -175,6 +175,7 @@ jobs:
     - name: Test in FreeBSD VM
       uses: vmactions/freebsd-vm@v0
       with:
+        mem: 8192
         usesh: true
         prepare: |
             # Requested in ci/build-freebsd.sh
