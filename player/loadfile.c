@@ -652,8 +652,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         // If the codec is DVD or PGS, we can display it in forced-only mode.
         // This isn't really meaningful for other codecs, so we'll just pick nothing.
         if (pick->stream &&
-            !strcmp(pick->stream->codec->codec, "dvd_subtitle") ||
-            !strcmp(pick->stream->codec->codec, "hdmv_pgs_subtitle"))
+            (!strcmp(pick->stream->codec->codec, "dvd_subtitle") ||
+             !strcmp(pick->stream->codec->codec, "hdmv_pgs_subtitle")))
             pick->forced_only_def = 1;
         else
             pick = NULL;
