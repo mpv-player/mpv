@@ -176,6 +176,7 @@ jobs:
       uses: vmactions/freebsd-vm@v0
       with:
         mem: 8192
+        copyback: false
         usesh: true
         prepare: |
             # Requested in ci/build-freebsd.sh
@@ -218,21 +219,6 @@ jobs:
         run: |
           ./ci/build-freebsd.sh
           meson test -C build
-
-    - name: Print meson log
-      if: ${{ failure() }}
-      run: |
-        cat ./build/meson-logs/meson-log.txt
-
-    - name: Print meson test log
-      if: ${{ failure() }}
-      run: |
-        cat ./build/meson-logs/testlog.txt
-
-    - name: Print waf log
-      if: ${{ failure() }}
-      run: |
-        cat ./build_waf/config.log
 
   msys2:
     runs-on: windows-latest
