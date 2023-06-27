@@ -57,7 +57,7 @@ static int preinit(struct vo *vo)
     };
 
     if (!p->hwctx.av_device_ref) {
-        MP_VERBOSE(hw, "Failed to create hwdevice_ctx\n");
+        MP_VERBOSE(vo, "Failed to create hwdevice_ctx\n");
         return -1;
     }
 
