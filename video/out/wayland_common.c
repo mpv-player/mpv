@@ -1338,7 +1338,7 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
     if (wl->dnd_fd == -1)
         return;
 
-    struct pollfd fdp = { wl->dnd_fd, POLLIN | POLLERR | POLLHUP, 0 };
+    struct pollfd fdp = { wl->dnd_fd, POLLIN | POLLHUP, 0 };
     if (poll(&fdp, 1, 0) <= 0)
         return;
 
