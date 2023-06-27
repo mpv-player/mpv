@@ -544,6 +544,7 @@ static bool append_lang(size_t *nb, char ***out, char *in)
     MP_TARRAY_GROW(NULL, *out, *nb + 1);
     (*out)[(*nb)++] = in;
     (*out)[*nb] = NULL;
+    ta_set_parent(in, *out);
     return true;
 }
 
@@ -552,7 +553,7 @@ static bool add_auto_langs(size_t *nb, char ***out)
     bool ret = false;
     char **autos = mp_get_user_langs();
     for (int i = 0; autos && autos[i]; i++) {
-        if (!append_lang(nb, out, talloc_steal(*out, autos[i])))
+        if (!append_lang(nb, out, autos[i]))
             goto cleanup;
     }
     ret = true;
@@ -571,7 +572,7 @@ static char **process_langs(char **in)
             if (!add_auto_langs(&nb, &out))
                 break;
         } else {
-            if (!append_lang(&nb, &out, talloc_strdup(out, in[i])))
+            if (!append_lang(&nb, &out, talloc_strdup(NULL, in[i])))
                 break;
         }
     }
