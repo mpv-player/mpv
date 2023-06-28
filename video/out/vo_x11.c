@@ -153,8 +153,13 @@ static void freeMyXImage(struct priv *p, int foo)
         XDestroyImage(p->myximage[foo]);
         shmdt(p->Shminfo[foo].shmaddr);
     } else {
-        if (p->myximage[foo])
+        if (p->myximage[foo]) {
+            // XDestroyImage() would free the data too since XFree() just calls
+            // free(), but do it ourselves for portability reasons
+            free(p->myximage[foo]->data);
+            p->myximage[foo]->data = NULL;
             XDestroyImage(p->myximage[foo]);
+        }
     }
     p->myximage[foo] = NULL;
 }
