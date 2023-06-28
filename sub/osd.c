@@ -548,7 +548,6 @@ struct sub_bitmaps *sub_bitmaps_copy(struct sub_bitmap_copy_cache **p_cache,
     assert(in->packed && in->packed->bufs[0]);
 
     res->packed = mp_image_new_ref(res->packed);
-    MP_HANDLE_OOM(res->packed);
     talloc_steal(res, res->packed);
 
     res->parts = NULL;

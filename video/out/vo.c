@@ -1438,10 +1438,8 @@ struct vo_frame *vo_frame_ref(struct vo_frame *frame)
     struct vo_frame *new = talloc_ptrtype(NULL, new);
     talloc_set_destructor(new, destroy_frame);
     *new = *frame;
-    for (int n = 0; n < frame->num_frames; n++) {
+    for (int n = 0; n < frame->num_frames; n++)
         new->frames[n] = mp_image_new_ref(frame->frames[n]);
-        MP_HANDLE_OOM(new->frames[n]);
-    }
     new->current = new->num_frames ? new->frames[0] : NULL;
     return new;
 }

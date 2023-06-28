@@ -266,7 +266,6 @@ struct mp_image *mp_refqueue_execute_reinit(struct mp_refqueue *q)
     mp_refqueue_flush(q);
 
     q->in_format = mp_image_new_ref(cur);
-    MP_HANDLE_OOM(q->in_format);
     mp_image_unref_data(q->in_format);
 
     mp_refqueue_add_input(q, cur);
