@@ -133,12 +133,14 @@ shmemerror:
         p->myximage[foo] =
             XCreateImage(vo->x11->display, p->vinfo.visual, p->depth, ZPixmap,
                          0, NULL, p->image_width, p->image_height, 8, 0);
-        if (!p->myximage[foo]) {
+        if (p->myximage[foo]) {
+            p->myximage[foo]->data =
+                calloc(1, p->myximage[foo]->bytes_per_line * p->image_height + 32);
+        }
+        if (!p->myximage[foo] || !p->myximage[foo]->data) {
             MP_WARN(vo, "could not allocate image");
             return false;
         }
-        p->myximage[foo]->data =
-            calloc(1, p->myximage[foo]->bytes_per_line * p->image_height + 32);
     }
     return true;
 }
