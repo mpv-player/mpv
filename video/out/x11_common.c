@@ -834,10 +834,8 @@ void vo_x11_uninit(struct vo *vo)
 
     set_screensaver(x11, true);
 
-    if (x11->window != None && x11->window != x11->rootwin) {
-        XUnmapWindow(x11->display, x11->window);
+    if (x11->window != None && x11->window != x11->rootwin)
         XDestroyWindow(x11->display, x11->window);
-    }
     if (x11->xic)
         XDestroyIC(x11->xic);
     if (x11->colormap != None)
