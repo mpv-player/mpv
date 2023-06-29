@@ -137,7 +137,11 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
                mp_imgfmt_to_name(image->imgfmt));
         goto error_exit;
     }
-    if (codec->id == AV_CODEC_ID_PNG) {
+
+    if (codec->id == AV_CODEC_ID_MJPEG) {
+        avctx->flags |= AV_CODEC_FLAG_QSCALE;
+        // jpeg_quality is set below
+    } else if (codec->id == AV_CODEC_ID_PNG) {
         avctx->compression_level = ctx->opts->png_compression;
         av_opt_set_int(avctx, "pred", ctx->opts->png_filter,
                        AV_OPT_SEARCH_CHILDREN);
@@ -173,6 +177,10 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     pic->width = avctx->width;
     pic->height = avctx->height;
     pic->color_range = avctx->color_range;
+    if (codec->id == AV_CODEC_ID_MJPEG) {
+        int qscale = 1 + (100 - ctx->opts->jpeg_quality) * 30 / 100;
+        pic->quality = qscale * FF_QP2LAMBDA;
+    }
     if (ctx->opts->tag_csp) {
         avctx->color_primaries = pic->color_primaries =
             mp_csp_prim_to_avcol_pri(image->params.color.primaries);
