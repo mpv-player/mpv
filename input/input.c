@@ -648,7 +648,7 @@ static bool process_wheel(struct input_ctx *ictx, int code, double *scale,
 {
     // Size of the deadzone in scroll units. The user must scroll at least this
     // much in any direction before their scroll is registered.
-    static const double DEADZONE_DIST = 0.125;
+    static const double DEADZONE_DIST = 0;
     // The deadzone accumulator is reset if no scrolls happened in this many
     // seconds, eg. the user is assumed to have finished scrolling.
     static const double DEADZONE_SCROLL_TIME = 0;
