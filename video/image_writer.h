@@ -26,11 +26,6 @@ struct image_writer_opts {
     int png_compression;
     int png_filter;
     int jpeg_quality;
-    int jpeg_optimize;
-    int jpeg_smooth;
-    int jpeg_dpi;
-    int jpeg_progressive;
-    int jpeg_baseline;
     bool jpeg_source_chroma;
     bool webp_lossless;
     int webp_quality;
