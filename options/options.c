@@ -1033,9 +1033,7 @@ static const struct MPOpts mp_default_opts = {
                      [STREAM_VIDEO] = -2,
                      [STREAM_SUB] = -2, }, },
     .stream_lang = {
-        NULL, // video
-        NULL, // audio
-        (char**)(const char*[]) {"auto", NULL} // subtitles
+        [STREAM_SUB] = (char**)(const char*[]) {"auto", NULL},
     },
     .stream_auto_sel = true,
     .subs_with_matching_audio = false,
