@@ -101,8 +101,6 @@ static const struct m_opt_choice_alternatives discard_names[] = {
 };
 #define OPT_DISCARD(field) OPT_CHOICE_C(field, discard_names)
 
-static char *default_hwdec_api[] = { "no", NULL, };
-
 const struct m_sub_options vd_lavc_conf = {
     .opts = (const m_option_t[]){
         {"vd-lavc-fast", OPT_BOOL(fast)},
@@ -140,7 +138,7 @@ const struct m_sub_options vd_lavc_conf = {
         .skip_frame = AVDISCARD_DEFAULT,
         .framedrop = AVDISCARD_NONREF,
         .dr = -1,
-        .hwdec_api = default_hwdec_api,
+        .hwdec_api = (char *[]){"no", NULL,},
         .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores",
         // Maximum number of surfaces the player wants to buffer. This number
         // might require adjustment depending on whatever the player does;
