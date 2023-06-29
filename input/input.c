@@ -651,7 +651,7 @@ static bool process_wheel(struct input_ctx *ictx, int code, double *scale,
     static const double DEADZONE_DIST = 0.125;
     // The deadzone accumulator is reset if no scrolls happened in this many
     // seconds, eg. the user is assumed to have finished scrolling.
-    static const double DEADZONE_SCROLL_TIME = 0.2;
+    static const double DEADZONE_SCROLL_TIME = 0;
     // The scale_units accumulator is reset if no scrolls happened in this many
     // seconds. This value should be fairly large, so commands will still be
     // sent when the user scrolls slowly.
