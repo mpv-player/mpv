@@ -18,6 +18,7 @@
  */
 
 #include <pthread.h>
+#include <libplacebo/colorspace.h>
 #include <libplacebo/renderer.h>
 #include <libplacebo/shaders/lut.h>
 #include <libplacebo/utils/libav.h>
@@ -788,6 +789,32 @@ static void update_options(struct vo *vo)
     p->output_levels = cparams.levels_out;
 }
 
+static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
+{
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+
+    // Auto mode, leave as is
+    if (!opts->target_contrast)
+        return;
+
+    // Infinite contrast
+    if (opts->target_contrast == -1) {
+        color->hdr.max_luma = 1e-7;
+        return;
+    }
+
+    // Infer max_luma for current pl_color_space
+    pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
+        .color = color,
+        // with HDR10 meta to respect value if already set
+        .metadata = PL_HDR_METADATA_HDR10,
+        .scaling = PL_HDR_NITS,
+        .out_max = &color->hdr.max_luma
+    ));
+
+    color->hdr.min_luma = color->hdr.max_luma / opts->target_contrast;
+}
+
 static void apply_target_options(struct priv *p, struct pl_frame *target)
 {
 
@@ -806,6 +833,8 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
     // If swapchain returned a value use this, override is used in hint
     if (opts->target_peak && !target->color.hdr.max_luma)
         target->color.hdr.max_luma = opts->target_peak;
+    if (!target->color.hdr.min_luma)
+        apply_target_contrast(p, &target->color);
     if (opts->dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
         tbits->color_depth += opts->dither_depth - tbits->sample_depth;
@@ -897,6 +926,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.transfer = mp_trc_to_pl(opts->target_trc);
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
+        apply_target_contrast(p, &hint);
         pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!p->target_hint) {
         pl_swapchain_colorspace_hint(p->sw, NULL);

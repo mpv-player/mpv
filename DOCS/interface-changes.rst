@@ -27,6 +27,7 @@ Interface changes
 ::
 
  --- mpv 0.36.0 ---
+    - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
       `--icc-use-luma` has been added to use ICC profile luminance value.
       If target luminance and ICC luminance is not used, old behavior apply,
