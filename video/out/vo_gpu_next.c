@@ -1877,6 +1877,7 @@ static void update_render_options(struct vo *vo)
         [GAMUT_LINEAR]          = &pl_gamut_map_linear,
     };
 
+#if PL_API_VER < 290
     // Back-compat approximation, taken from libplacebo source code
     static const float hybrid_mix[] = {
         [TONE_MAP_MODE_RGB]     = 1.0f,
@@ -1884,6 +1885,7 @@ static void update_render_options(struct vo *vo)
         [TONE_MAP_MODE_LUMA]    = 0.0f,
         [TONE_MAP_MODE_HYBRID]  = 0.20f,
     };
+#endif
 #else
     static const enum pl_gamut_mode gamut_modes[] = {
         [GAMUT_CLIP]            = PL_GAMUT_CLIP,
@@ -1918,8 +1920,10 @@ static void update_render_options(struct vo *vo)
 #if PL_API_VER >= 269
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
         p->color_map.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
+#if PL_API_VER < 290
     if (opts->tone_map.mode != TONE_MAP_MODE_AUTO)
         p->color_map.hybrid_mix = hybrid_mix[opts->tone_map.mode];
+#endif
 #else
     p->color_map.intent = opts->icc_opts->intent;
     p->color_map.tone_mapping_mode = tone_map_modes[opts->tone_map.mode];
