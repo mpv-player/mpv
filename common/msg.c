@@ -306,7 +306,8 @@ static void print_terminal_line(struct mp_log *log, int lev,
         return;
 
     struct mp_log_root *root = log->root;
-    FILE *stream = (root->force_stderr || lev == MSGL_STATUS) ? stderr : stdout;
+    FILE *stream = (root->force_stderr || lev == MSGL_STATUS || lev == MSGL_FATAL ||
+                    lev == MSGL_ERR || lev == MSGL_WARN) ? stderr : stdout;
 
     if (lev != MSGL_STATUS)
         flush_status_line(root);
