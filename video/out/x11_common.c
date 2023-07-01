@@ -982,7 +982,8 @@ static void vo_x11_dnd_handle_selection(struct vo *vo, XSelectionEvent *se)
 
     if (se->selection == XA(x11, XdndSelection) &&
         se->property == XAs(x11, DND_PROPERTY) &&
-        se->target == x11->dnd_requested_format)
+        se->target == x11->dnd_requested_format &&
+        x11->opts->drag_and_drop != -2)
     {
         int nitems;
         void *prop = x11_get_property(x11, x11->window, XAs(x11, DND_PROPERTY),

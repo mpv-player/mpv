@@ -304,12 +304,18 @@ static int init(struct ra_hwdec *hw)
     };
 
     char *device = drmGetDeviceNameFromFd2(p->ctx->fd);
-    if (!av_hwdevice_ctx_create(&p->hwctx.av_device_ref, AV_HWDEVICE_TYPE_DRM,
-                                device, NULL, 0)) {
-        hwdec_devices_add(hw->devs, &p->hwctx);
-    }
+    int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
+                                     AV_HWDEVICE_TYPE_DRM, device, NULL, 0);
+
     if (device)
         free(device);
+
+    if (ret != 0) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
+        goto err;
+    }
+
+    hwdec_devices_add(hw->devs, &p->hwctx);
 
     return 0;
 

@@ -1,4 +1,6 @@
 /*
+ * User language lookup for Apple platforms
+ *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -15,21 +17,29 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MP_WIN32_DROPTARGET_H_
-#define MP_WIN32_DROPTARGET_H_
+#include "misc/language.h"
 
-#include <windows.h>
-#include <ole2.h>
-#include <shobjidl.h>
+#include "apple_utils.h"
+#include "mpv_talloc.h"
 
-#include "input/input.h"
-#include "common/msg.h"
-#include "common/common.h"
-#include "options/options.h"
+char **mp_get_user_langs(void)
+{
+    CFArrayRef arr = CFLocaleCopyPreferredLanguages();
+    if (!arr)
+        return NULL;
+    CFIndex count = CFArrayGetCount(arr);
+    if (!count)
+        return NULL;
 
-// Create a IDropTarget implementation that sends dropped files to input_ctx
-IDropTarget *mp_w32_droptarget_create(struct mp_log *log,
-                                      struct mp_vo_opts *opts,
-                                      struct input_ctx *input_ctx);
+    char **ret = talloc_array_ptrtype(NULL, ret, count + 1);
 
-#endif
+    for (CFIndex i = 0; i < count; i++) {
+        CFStringRef cfstr = CFArrayGetValueAtIndex(arr, i);
+        ret[i] = talloc_steal(ret, cfstr_get_cstr(cfstr));
+    }
+
+    ret[count] = NULL;
+
+    CFRelease(arr);
+    return ret;
+}

@@ -35,6 +35,7 @@ struct droptarget {
     atomic_int ref_cnt;
     struct mp_log *log;
     struct input_ctx *input_ctx;
+    struct mp_vo_opts *opts;
     DWORD last_effect;
     IDataObject *data_obj;
 };
@@ -129,12 +130,20 @@ static STDMETHODIMP DropTarget_Drop(IDropTarget *self, IDataObject *pDataObj,
                                     DWORD *pdwEffect)
 {
     struct droptarget *t = (struct droptarget *)self;
-    enum mp_dnd_action action = (grfKeyState & MK_SHIFT) ? DND_APPEND : DND_REPLACE;
+
+    enum mp_dnd_action action;
+    if (t->opts->drag_and_drop >= 0) {
+        action = t->opts->drag_and_drop;
+    } else {
+        action = (grfKeyState & MK_SHIFT) ? DND_APPEND : DND_REPLACE;
+    }
 
     SAFE_RELEASE(t->data_obj);
 
     STGMEDIUM medium;
-    if (SUCCEEDED(IDataObject_GetData(pDataObj, &fmtetc_file, &medium))) {
+    if (t->opts->drag_and_drop == -2) {
+        t->last_effect = DROPEFFECT_NONE;
+    } else if (SUCCEEDED(IDataObject_GetData(pDataObj, &fmtetc_file, &medium))) {
         if (GlobalLock(medium.hGlobal)) {
             HDROP drop = medium.hGlobal;
 
@@ -200,6 +209,7 @@ static IDropTargetVtbl idroptarget_vtbl = {
 };
 
 IDropTarget *mp_w32_droptarget_create(struct mp_log *log,
+                                      struct mp_vo_opts *opts,
                                       struct input_ctx *input_ctx)
 {
     fmtetc_url.cfFormat = RegisterClipboardFormatW(L"UniformResourceLocatorW");
@@ -210,6 +220,7 @@ IDropTarget *mp_w32_droptarget_create(struct mp_log *log,
     dt->last_effect = 0;
     dt->data_obj = NULL;
     dt->log = mp_log_new(dt, log, "droptarget");
+    dt->opts = opts;
     dt->input_ctx = input_ctx;
 
     return &dt->iface;

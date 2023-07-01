@@ -1,4 +1,6 @@
 /*
+ * Apple-specific utility functions
+ *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -15,21 +17,12 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MP_WIN32_DROPTARGET_H_
-#define MP_WIN32_DROPTARGET_H_
+#ifndef MPV_APPLE_UTILS
+#define MPV_APPLE_UTILS
 
-#include <windows.h>
-#include <ole2.h>
-#include <shobjidl.h>
+#include <CoreFoundation/CoreFoundation.h>
 
-#include "input/input.h"
-#include "common/msg.h"
-#include "common/common.h"
-#include "options/options.h"
+CFStringRef cfstr_from_cstr(const char *str);
+char *cfstr_get_cstr(const CFStringRef cfstr);
 
-// Create a IDropTarget implementation that sends dropped files to input_ctx
-IDropTarget *mp_w32_droptarget_create(struct mp_log *log,
-                                      struct mp_vo_opts *opts,
-                                      struct input_ctx *input_ctx);
-
-#endif
+#endif /* MPV_APPLE_UTILS */

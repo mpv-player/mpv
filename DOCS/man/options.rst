@@ -5,10 +5,14 @@ Track Selection
 ---------------
 
 ``--alang=<languagecode[,languagecode,...]>``
-    Specify a priority list of audio languages to use. Different container
-    formats employ different language codes. DVDs use ISO 639-1 two-letter
-    language codes, Matroska, MPEG-TS and NUT use ISO 639-2 three-letter
-    language codes, while OGM uses a free-form identifier. See also ``--aid``.
+    Specify a priority list of audio languages to use, as IETF language tags.
+    Equivalent ISO 639-1 two-letter and ISO 639-2 three-letter codes are treated the same.
+    The first tag in the list whose language matches a track in the file will be used.
+    A track that matches more subtags will be preferred over one that matches fewer,
+    with preference given to earlier subtags over later ones. See also ``--aid``.
+
+    The special value "auto" can be included anywhere in the list,
+    and is equivalent to the user's OS-level list of preferred languages.
 
     This is a string list option. See `List Options`_ for details.
 
@@ -20,10 +24,7 @@ Track Selection
           audio.
 
 ``--slang=<languagecode[,languagecode,...]>``
-    Specify a priority list of subtitle languages to use. Different container
-    formats employ different language codes. DVDs use ISO 639-1 two letter
-    language codes, Matroska uses ISO 639-2 three letter language codes while
-    OGM uses a free-form identifier. See also ``--sid``.
+    Equivalent to ``--alang``, for subtitle tracks (default: auto).
 
     This is a string list option. See `List Options`_ for details.
 
@@ -33,6 +34,8 @@ Track Selection
           a DVD and falls back on English if Hungarian is not available.
         - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
           subtitles.
+        - ``mpv --slang=pt-BR example.mkv`` plays a Matroska file with Brazilian
+          Portuguese subtitles if available, and otherwise any Portuguese subtitles.
 
 ``--vlang=<...>``
     Equivalent to ``--alang`` and ``--slang``, for video tracks.
@@ -136,9 +139,17 @@ Track Selection
     referenced tracks are always selected.
 
 ``--subs-with-matching-audio=<yes|no>``
-    When autoselecting a subtitle track, select a non-forced one even if the selected
-    audio stream matches your preferred subtitle language (default: yes). Disable this
-    if you'd like to only show subtitles for foreign audio or onscreen text.
+    When autoselecting a subtitle track, select a full/non-forced one even if the selected
+    audio stream matches your preferred subtitle language (default: no).
+
+``--subs-fallback=<yes|default|no>``
+    When autoselecting a subtitle track, if no tracks match your preferred languages,
+    select a full track even if it doesn't match your preferred subtitle language (default: no).
+    Setting this to `default` means that only streams flagged as `default` will be selected.
+
+``--subs-fallback-forced=<yes|no>``
+    When autoselecting a subtitle track, if no tracks match your preferred languages,
+    select a forced track that matches the language of the selected audio track (default: yes).
 
 
 Playback Control
@@ -1174,7 +1185,7 @@ Video
 ``--display-fps=<fps>``
     Deprecated alias for ``--override-display-fps``.
 
-``--hwdec=<api>``
+``--hwdec=<api1,api2,...|no|auto|auto-safe|auto-copy>``
     Specify the hardware video decoding API that should be used if possible.
     Whether hardware decoding is actually done depends on the video codec. If
     hardware decoding is not possible, mpv will fall back on software decoding.
@@ -1233,13 +1244,20 @@ Video
         - If you're a developer, or want to perform elaborate tests, you may
           need any of the other possible option values.
 
-    ``<api>`` can be one of the following:
+    This option accepts a comma delimited list of ``api`` types, along with certain
+    special values:
 
     :no:        always use software decoding (default)
     :auto:      forcibly enable any hw decoder found (see below)
     :yes:       exactly the same as ``auto``
     :auto-safe: enable any whitelisted hw decoder (see below)
     :auto-copy: enable best hw decoder with copy-back (see below)
+
+    .. note::
+
+        Special values can be mixed with api names. eg: ``vaapi,auto`` will try
+        and use the ``vaapi`` hwdec, and if that fails, will run through the
+        normal ``auto`` logic.
 
     Actively supported hwdecs:
 
@@ -3067,13 +3085,14 @@ Window
 ``--snap-window``
     (Windows only) Snap the player window to screen edges.
 
-``--drag-and-drop=<auto|replace|append>``
-    (X11 and Wayland only)
+``--drag-and-drop=<no|auto|replace|append>``
+    (X11, Wayland and Windows only)
     Controls the default behavior of drag and drop on platforms that support this.
     ``auto`` will obey what the underlying os/platform gives mpv. Typically, holding
     shift during the drag and drop will append the item to the playlist. Otherwise,
     it will completely replace it. ``replace`` and ``append`` always force replacing
-    and appending to the playlist respectively.
+    and appending to the playlist respectively. ``no`` disables all drag and drop
+    behavior.
 
 ``--ontop``
     Makes the player window stay on top of other windows.
@@ -4299,6 +4318,7 @@ Screenshot
     :jpeg:      JPEG (alias for jpg)
     :webp:      WebP
     :jxl:       JPEG XL
+    :avif:      AVIF
 
 ``--screenshot-tag-colorspace=<yes|no>``
     Tag screenshots with the appropriate colorspace.
@@ -4453,6 +4473,33 @@ Screenshot
 ``--screenshot-jxl-effort=<1-9>``
     Set the JPEG XL compression effort. Higher effort (usually) means better
     compression, but takes more CPU time. The default is 4.
+
+``--screenshot-avif-encoder=<encoder>``
+    Specify the AV1 encoder to be used by libavcodec for encoding avif
+    screenshots.
+
+    Default: ``libaom-av1``
+
+``--screenshot-avif-pixfmt=<format>``
+    Specify the pixel format to the libavcodec encoder.
+
+    Default: ``yuv420p``
+
+``--screenshot-avif-opts=key1=value1,key2=value2,...``
+    Specifies libavcodec options for selected encoder. For more information,
+    consult the FFmpeg documentation.
+
+    Default: ``usage=allintra,crf=32,cpu-used=8,tune=ssim``
+
+    Note: the default is only guaranteed to work with the libaom-av1 encoder.
+    Above options may not be valid and or optimal for other encoders.
+
+    This is a key/value list option. See `List Options`_ for details.
+
+    .. admonition:: Example
+
+        "``--screenshot-avif-opts=crf=32,aq-mode=complexity``"
+            sets the crf to 32 and quantization (aq-mode) to complexity based.
 
 ``--screenshot-sw=<yes|no>``
     Whether to use software rendering for screenshots (default: no).

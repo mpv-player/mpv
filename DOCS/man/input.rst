@@ -2712,6 +2712,9 @@ Property list
 ``secondary-sub-end``
     Same as ``sub-end``, but for the secondary subtitles.
 
+``sub-forced-only-cur``
+    Read-only - whether the current subtitle track is being shown in forced-only mode.
+
 ``playlist-pos`` (RW)
     Current position on playlist. The first entry is on position 0. Writing to
     this property may start playback at the new position.
@@ -2863,6 +2866,10 @@ Property list
 
     ``track-list/N/forced``
         ``yes``/true if the track has the forced flag set in the file,
+        ``no``/false or unavailable otherwise.
+
+    ``track-list/N/auto-forced-only``
+        ``yes``/true if the track was autoselected in forced-only mode,
         ``no``/false or unavailable otherwise.
 
     ``track-list/N/codec``

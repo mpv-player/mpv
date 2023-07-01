@@ -1972,6 +1972,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"albumart",    SUB_PROP_BOOL(track->attached_picture)},
         {"default",     SUB_PROP_BOOL(track->default_track)},
         {"forced",      SUB_PROP_BOOL(track->forced_track)},
+        {"auto-forced-only", SUB_PROP_BOOL(track->forced_only_def)},
         {"dependent",   SUB_PROP_BOOL(track->dependent_track)},
         {"visual-impaired",  SUB_PROP_BOOL(track->visual_impaired_track)},
         {"hearing-impaired", SUB_PROP_BOOL(track->hearing_impaired_track)},
@@ -2943,6 +2944,18 @@ static int mp_property_sub_end(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, end);
 }
 
+static int mp_property_sub_forced_only_cur(void *ctx, struct m_property *prop,
+                                           int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int ret = mpctx->opts->subs_rend->forced_subs_only;
+    if (ret == -1) {
+        struct track *track = mpctx->current_track[0][STREAM_SUB];
+        ret = track && track->forced_only_def;
+    }
+    return m_property_bool_ro(action, arg, ret);
+}
+
 static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
@@ -3899,6 +3912,7 @@ static const struct m_property mp_properties_base[] = {
         .priv = (void *)&(const int){0}},
     {"secondary-sub-end", mp_property_sub_end,
         .priv = (void *)&(const int){1}},
+    {"sub-forced-only-cur", mp_property_sub_forced_only_cur},
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},

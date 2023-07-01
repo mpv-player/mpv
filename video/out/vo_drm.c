@@ -382,17 +382,12 @@ static void flip_page(struct vo *vo)
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    struct vo_drm_state *drm = vo->drm;
-    int fd = drm->fd;
 
     vo_drm_uninit(vo);
 
     while (p->fb_queue_len > 0) {
         swapchain_step(vo);
     }
-
-    for (int i = 0; i < p->buf_count; ++i)
-        destroy_framebuffer(fd, p->bufs[i]);
 
     talloc_free(p->last_input);
     talloc_free(p->cur_frame);

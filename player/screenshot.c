@@ -21,6 +21,7 @@
 
 #include <libavcodec/avcodec.h>
 
+#include "common/global.h"
 #include "osdep/io.h"
 
 #include "mpv_talloc.h"
@@ -48,6 +49,7 @@
 
 typedef struct screenshot_ctx {
     struct MPContext *mpctx;
+    struct mp_log *log;
 
     // Command to repeat in each-frame mode.
     struct mp_cmd *each_frame;
@@ -62,6 +64,7 @@ void screenshot_init(struct MPContext *mpctx)
     *mpctx->screenshot_ctx = (screenshot_ctx) {
         .mpctx = mpctx,
         .frameno = 1,
+        .log = mp_log_new(mpctx, mpctx->log, "screenshot")
     };
 }
 
@@ -85,7 +88,7 @@ static bool write_screenshot(struct mp_cmd_ctx *cmd, struct mp_image *img,
     mp_core_unlock(mpctx);
 
     bool ok = img && write_image(img, &opts_copy, filename, mpctx->global,
-                                 mpctx->log);
+                                 mpctx->screenshot_ctx->log);
 
     mp_core_lock(mpctx);
 

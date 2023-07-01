@@ -69,6 +69,8 @@ struct dec_sub {
     struct sd *sd;
 
     struct demux_packet *new_segment;
+
+    bool forced_only_def;
 };
 
 static void update_subtitle_speed(struct dec_sub *sub)
@@ -142,6 +144,7 @@ static struct sd *init_decoder(struct dec_sub *sub)
             .attachments = sub->attachments,
             .codec = sub->codec,
             .preload_ok = true,
+            .forced_only_def = sub->forced_only_def,
         };
 
         if (sd->driver->init(sd) >= 0)
@@ -160,18 +163,18 @@ static struct sd *init_decoder(struct dec_sub *sub)
 // do not need to acquire locks.
 // Ownership of attachments goes to the callee, and is released with
 // talloc_free() (even on failure).
-struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
+struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
                            struct attachment_list *attachments, int order)
 {
-    assert(sh && sh->type == STREAM_SUB);
+    assert(track->stream && track->stream->type == STREAM_SUB);
 
     struct dec_sub *sub = talloc(NULL, struct dec_sub);
     *sub = (struct dec_sub){
         .log = mp_log_new(sub, global->log, "sub"),
         .global = global,
         .opts_cache = m_config_cache_alloc(sub, global, &mp_subtitle_sub_opts),
-        .sh = sh,
-        .codec = sh->codec,
+        .sh = track->stream,
+        .codec = track->stream->codec,
         .attachments = talloc_steal(sub, attachments),
         .play_dir = 1,
         .order = order,
@@ -179,6 +182,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
         .last_vo_pts = MP_NOPTS_VALUE,
         .start = MP_NOPTS_VALUE,
         .end = MP_NOPTS_VALUE,
+        .forced_only_def = track->forced_only_def,
     };
     sub->opts = sub->opts_cache->opts;
     mpthread_mutex_init_recursive(&sub->lock);

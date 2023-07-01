@@ -1,4 +1,6 @@
 /*
+ * Language code utility functions
+ *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -15,21 +17,15 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MP_WIN32_DROPTARGET_H_
-#define MP_WIN32_DROPTARGET_H_
+#ifndef MP_LANGUAGE_H
+#define MP_LANGUAGE_H
 
-#include <windows.h>
-#include <ole2.h>
-#include <shobjidl.h>
+#define LANGUAGE_SCORE_BITS 16
+#define LANGUAGE_SCORE_MAX (1 << LANGUAGE_SCORE_BITS)
 
-#include "input/input.h"
-#include "common/msg.h"
-#include "common/common.h"
-#include "options/options.h"
+// Where applicable, l1 is the user-specified code and l2 is the code being checked against it
+int mp_match_lang_single(const char *l1, const char *l2);
 
-// Create a IDropTarget implementation that sends dropped files to input_ctx
-IDropTarget *mp_w32_droptarget_create(struct mp_log *log,
-                                      struct mp_vo_opts *opts,
-                                      struct input_ctx *input_ctx);
+char **mp_get_user_langs(void);
 
-#endif
+#endif /* MP_LANGUAGE_H */

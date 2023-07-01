@@ -38,6 +38,7 @@
 #include "m_config.h"
 #include "m_option.h"
 #include "common/common.h"
+#include "input/event.h"
 #include "stream/stream.h"
 #include "video/csputils.h"
 #include "video/hwdec.h"
@@ -106,8 +107,8 @@ static const struct m_sub_options screenshot_conf = {
 static const m_option_t mp_vo_opt_list[] = {
     {"vo", OPT_SETTINGSLIST(video_driver_list, &vo_obj_list)},
     {"taskbar-progress", OPT_BOOL(taskbar_progress)},
-    {"drag-and-drop", OPT_CHOICE(drag_and_drop, {"auto", -1}, {"replace", 0},
-        {"append", 1})},
+    {"drag-and-drop", OPT_CHOICE(drag_and_drop, {"no", -2}, {"auto", -1},
+        {"replace", DND_REPLACE}, {"append", DND_APPEND})},
     {"snap-window", OPT_BOOL(snap_window)},
     {"ontop", OPT_BOOL(ontop)},
     {"ontop-level", OPT_CHOICE(ontop_level, {"window", -1}, {"system", -2},
@@ -518,6 +519,8 @@ static const m_option_t mp_opts[] = {
     {"vlang", OPT_STRINGLIST(stream_lang[STREAM_VIDEO])},
     {"track-auto-selection", OPT_BOOL(stream_auto_sel)},
     {"subs-with-matching-audio", OPT_BOOL(subs_with_matching_audio)},
+    {"subs-fallback", OPT_CHOICE(subs_fallback, {"no", 0}, {"default", 1}, {"yes", 2})},
+    {"subs-fallback-forced", OPT_BOOL(subs_fallback_forced)},
 
     {"lavfi-complex", OPT_STRING(lavfi_complex), .flags = UPDATE_LAVFI_COMPLEX},
 
@@ -1030,8 +1033,12 @@ static const struct MPOpts mp_default_opts = {
                    { [STREAM_AUDIO] = -2,
                      [STREAM_VIDEO] = -2,
                      [STREAM_SUB] = -2, }, },
+    .stream_lang = {
+        [STREAM_SUB] = (char *[]){ "auto", NULL },
+    },
     .stream_auto_sel = true,
-    .subs_with_matching_audio = true,
+    .subs_with_matching_audio = false,
+    .subs_fallback_forced = true,
     .audio_display = 1,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,
@@ -1051,7 +1058,7 @@ static const struct MPOpts mp_default_opts = {
 
     .mf_fps = 1.0,
 
-    .display_tags = (char **)(const char*[]){
+    .display_tags = (char *[]){
         "Artist", "Album", "Album_Artist", "Comment", "Composer",
         "Date", "Description", "Genre", "Performer", "Rating",
         "Series", "Title", "Track", "icy-title", "service_name",
@@ -1061,7 +1068,7 @@ static const struct MPOpts mp_default_opts = {
 
     .cuda_device = -1,
 
-    .watch_later_options = (char **)(const char*[]){
+    .watch_later_options = (char *[]){
         "start",
         "osd-level",
         "speed",

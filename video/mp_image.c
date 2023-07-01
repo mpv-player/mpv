@@ -314,12 +314,11 @@ void mp_image_unref_data(struct mp_image *img)
     }
 }
 
-static void ref_buffer(bool *ok, AVBufferRef **dst)
+static void ref_buffer(AVBufferRef **dst)
 {
     if (*dst) {
         *dst = av_buffer_ref(*dst);
-        if (!*dst)
-            *ok = false;
+        MP_HANDLE_OOM(*dst);
     }
 }
 
@@ -337,29 +336,22 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
     talloc_set_destructor(new, mp_image_destructor);
     *new = *img;
 
-    bool ok = true;
     for (int p = 0; p < MP_MAX_PLANES; p++)
-        ref_buffer(&ok, &new->bufs[p]);
+        ref_buffer(&new->bufs[p]);
 
-    ref_buffer(&ok, &new->hwctx);
-    ref_buffer(&ok, &new->icc_profile);
-    ref_buffer(&ok, &new->a53_cc);
-    ref_buffer(&ok, &new->dovi);
-    ref_buffer(&ok, &new->film_grain);
-    ref_buffer(&ok, &new->dovi_buf);
+    ref_buffer(&new->hwctx);
+    ref_buffer(&new->icc_profile);
+    ref_buffer(&new->a53_cc);
+    ref_buffer(&new->dovi);
+    ref_buffer(&new->film_grain);
+    ref_buffer(&new->dovi_buf);
 
     new->ff_side_data = talloc_memdup(NULL, new->ff_side_data,
                         new->num_ff_side_data * sizeof(new->ff_side_data[0]));
     for (int n = 0; n < new->num_ff_side_data; n++)
-        ref_buffer(&ok, &new->ff_side_data[n].buf);
+        ref_buffer(&new->ff_side_data[n].buf);
 
-    if (ok)
-        return new;
-
-    // Do this after _all_ bufs were changed; we don't want it to free bufs
-    // from the original image if this fails.
-    talloc_free(new);
-    return NULL;
+    return new;
 }
 
 struct free_args {
