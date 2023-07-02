@@ -479,10 +479,10 @@ static void select_and_set_hwdec(struct mp_filter *vd)
 
         bool hwdec_requested = !bstr_equals0(opt, "no");
         bool hwdec_auto_all = bstr_equals0(opt, "auto") ||
-                            bstr_equals0(opt, "yes") ||
                             bstr_equals0(opt, "");
         bool hwdec_auto_safe = bstr_equals0(opt, "auto-safe") ||
-                            bstr_equals0(opt, "auto-copy-safe");
+                            bstr_equals0(opt, "auto-copy-safe") ||
+                            bstr_equals0(opt, "yes");
         bool hwdec_auto_copy = bstr_equals0(opt, "auto-copy") ||
                             bstr_equals0(opt, "auto-copy-safe");
         bool hwdec_auto = hwdec_auto_all || hwdec_auto_copy || hwdec_auto_safe;

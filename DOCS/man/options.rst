@@ -1250,7 +1250,7 @@ Video
     :no:        always use software decoding (default)
     :auto-safe: enable any whitelisted hw decoder (see below)
     :auto:      forcibly enable any hw decoder found (see below)
-    :yes:       exactly the same as ``auto``
+    :yes:       exactly the same as ``auto-safe``
     :auto-copy: enable best hw decoder with copy-back (see below)
 
     .. note::
