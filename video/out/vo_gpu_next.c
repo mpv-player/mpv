@@ -150,7 +150,6 @@ struct priv {
     int num_user_hooks;
 
     // Performance data of last frame
-    pthread_mutex_t perf_lock;
     struct frame_info perf_fresh;
     struct frame_info perf_redraw;
 
@@ -763,12 +762,8 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     default: abort();
     }
 
-    pthread_mutex_lock(&p->perf_lock);
-
     frame->count = info->index + 1;
     pl_dispatch_info_move(&frame->info[info->index], info->pass);
-
-    pthread_mutex_unlock(&p->perf_lock);
 }
 
 static void update_options(struct vo *vo)
@@ -1333,11 +1328,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
 
     case VOCTRL_PERFORMANCE_DATA: {
-        pthread_mutex_lock(&p->perf_lock);
         struct voctrl_performance_data *perf = data;
         copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh);
         copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw);
-        pthread_mutex_unlock(&p->perf_lock);
         return true;
     }
 
@@ -1441,7 +1434,6 @@ static void uninit(struct vo *vo)
 
     pl_renderer_destroy(&p->rr);
 
-    pthread_mutex_destroy(&p->perf_lock);
     for (int i = 0; i < VO_PASS_PERF_MAX; ++i) {
         pl_shader_info_deref(&p->perf_fresh.info[i].shader);
         pl_shader_info_deref(&p->perf_redraw.info[i].shader);
@@ -1486,7 +1478,6 @@ static int preinit(struct vo *vo)
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
     pthread_mutex_init(&p->dr_lock, NULL);
-    pthread_mutex_init(&p->perf_lock, NULL);
 
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
