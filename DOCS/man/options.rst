@@ -1200,7 +1200,7 @@ Video
     .. note::
 
         Use the ``Ctrl+h`` shortcut to toggle hardware decoding at runtime. It
-        toggles this option between ``auto`` and ``no``.
+        toggles this option between ``auto-safe`` and ``no``.
 
         If you decide you want to use hardware decoding by default, the general
         recommendation is to try out decoding with the command line option, and
@@ -1248,9 +1248,9 @@ Video
     special values:
 
     :no:        always use software decoding (default)
+    :auto-safe: enable any whitelisted hw decoder (see below)
     :auto:      forcibly enable any hw decoder found (see below)
     :yes:       exactly the same as ``auto``
-    :auto-safe: enable any whitelisted hw decoder (see below)
     :auto-copy: enable best hw decoder with copy-back (see below)
 
     .. note::
