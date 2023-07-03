@@ -467,11 +467,11 @@ static int preinit(struct vo *vo)
     p->log = vo->log;
     p->global = vo->global;
     p->ctx = ra_ctx_create_by_name(vo, "wldmabuf");
+    wl_list_init(&p->buffer_list);
     if (!p->ctx)
        goto err;
-    assert(p->ctx->ra);
 
-    wl_list_init(&p->buffer_list);
+    assert(p->ctx->ra);
 
     if (!vo->wl->dmabuf || !vo->wl->dmabuf_feedback) {
         MP_FATAL(vo->wl, "Compositor doesn't support the %s (ver. 4) protocol!\n",
