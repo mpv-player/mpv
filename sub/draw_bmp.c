@@ -485,6 +485,10 @@ static void clear_rgba_overlay(struct mp_draw_sub_cache *p)
         for (int sx = 0; sx < p->s_w; sx++) {
             struct slice *s = &line[sx];
 
+            // Ensure this final slice doesn't extend beyond the width of p->s_w
+            if (s->x1 == SLICE_W && sx == p->s_w - 1 && y == p->rgba_overlay->h - 1)
+                s->x1 = MPMIN(p->w - ((p->s_w - 1) * SLICE_W), s->x1);
+
             if (s->x0 <= s->x1) {
                 memset(px + s->x0, 0, (s->x1 - s->x0) * 4);
                 *s = (struct slice){SLICE_W, 0};
