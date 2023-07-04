@@ -6720,10 +6720,10 @@ them.
 
 ``--icc-cache``
     Store and load 3D LUTs created from the ICC profile on disk in the
-    cache directory. This can be used to speed up loading, since LittleCMS
-    2 can take a while to create a 3D LUT. Note that these files contain
-    uncompressed LUTs. Their size depends on the ``--icc-3dlut-size``, and
-    can be very big.
+    cache directory (Default: ``yes``). This can be used to speed up loading,
+    since LittleCMS 2 can take a while to create a 3D LUT. Note that these
+    files contain uncompressed LUTs. Their size depends on the
+    ``--icc-3dlut-size``, and can be very big.
 
     NOTE: This is not cleaned automatically, so old, unused cache files may
     stick around indefinitely.
@@ -6868,11 +6868,11 @@ them.
     This option might be silently removed in the future.
 
 ``--gpu-shader-cache``
-    Store and load compiled GLSL shaders in the cache directory. Normally, shader
-    compilation is very fast, so this is not usually needed. It mostly matters
-    for GPU APIs that require internally recompiling shaders to other languages,
-    for example anything based on ANGLE or Vulkan. Enabling this can improve
-    startup performance on these platforms.
+    Store and load compiled GLSL shaders in the cache directory (Default: ``yes``).
+    Normally, shader compilation is very fast, so this is not usually needed.
+    It mostly matters for GPU APIs that require internally recompiling shaders to
+    other languages, for example anything based on ANGLE or Vulkan. Enabling this
+    can improve startup performance on these platforms.
 
     NOTE: This is not cleaned automatically, so old, unused cache files may
     stick around indefinitely.

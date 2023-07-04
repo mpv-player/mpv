@@ -516,5 +516,6 @@ const struct m_sub_options mp_icc_conf = {
         .size_str = "64x64x64",
         .intent = MP_INTENT_RELATIVE_COLORIMETRIC,
         .use_embedded = true,
+        .cache = true,
     },
 };
