@@ -566,6 +566,7 @@ void gl_sc_set_cache_dir(struct gl_shader_cache *sc, char *dir)
         dir = mp_find_user_file(NULL, sc->global, "cache", "");
     }
     sc->cache_dir = talloc_strdup(sc, dir);
+    talloc_free(dir);
 }
 
 static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
