@@ -16,6 +16,9 @@ disabled=no
 images=no
 videos=yes
 audio=yes
+additional_image_exts=list,of,ext
+additional_video_exts=list,of,ext
+additional_audio_exts=list,of,ext
 ignore_hidden=yes
 
 --]]
@@ -31,6 +34,9 @@ o = {
     images = true,
     videos = true,
     audio = true,
+    additional_image_exts = "",
+    additional_video_exts = "",
+    additional_audio_exts = "",
     ignore_hidden = true
 }
 options.read_options(o)
@@ -48,6 +54,12 @@ function SetUnion (a,b)
     return res
 end
 
+function Split (s)
+    local set = {}
+    for v in string.gmatch(s, '([^,]+)') do set[v] = true end
+    return set
+end
+
 EXTENSIONS_VIDEO = Set {
     '3g2', '3gp', 'avi', 'flv', 'm2ts', 'm4v', 'mj2', 'mkv', 'mov',
     'mp4', 'mpeg', 'mpg', 'ogv', 'rmvb', 'webm', 'wmv', 'y4m'
@@ -62,6 +74,10 @@ EXTENSIONS_IMAGES = Set {
     'avif', 'bmp', 'gif', 'j2k', 'jp2', 'jpeg', 'jpg', 'jxl', 'png',
     'svg', 'tga', 'tif', 'tiff', 'webp'
 }
+
+EXTENSIONS_VIDEO = SetUnion(EXTENSIONS_VIDEO, Split(o.additional_video_exts))
+EXTENSIONS_AUDIO = SetUnion(EXTENSIONS_AUDIO, Split(o.additional_audio_exts))
+EXTENSIONS_IMAGES = SetUnion(EXTENSIONS_IMAGES, Split(o.additional_image_exts))
 
 EXTENSIONS = Set {}
 if o.videos then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_VIDEO) end
