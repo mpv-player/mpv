@@ -105,8 +105,11 @@ struct demux_cache *demux_cache_create(struct mpv_global *global,
     } else {
         cache_dir = mp_find_user_file(NULL, global, "cache", "");
     }
-    mp_mkdirp(cache_dir);
 
+    if (!cache_dir || !cache_dir[0])
+        goto fail;
+
+    mp_mkdirp(cache_dir);
     cache->filename = mp_path_join(cache, cache_dir, "mpv-cache-XXXXXX.dat");
     cache->fd = mp_mkostemps(cache->filename, 4, O_CLOEXEC);
     if (cache->fd < 0) {

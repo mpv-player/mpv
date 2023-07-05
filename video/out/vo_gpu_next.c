@@ -1381,9 +1381,10 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
 
 static char *get_cache_file(struct priv *p)
 {
+    char *file = NULL;
     struct gl_video_opts *opts = p->opts_cache->opts;
     if (!opts->shader_cache)
-        return NULL;
+        goto done;
 
     char *dir = opts->shader_cache_dir;
     if (dir && dir[0]) {
@@ -1391,9 +1392,12 @@ static char *get_cache_file(struct priv *p)
     } else {
         dir = mp_find_user_file(NULL, p->global, "cache", "");
     }
-    char *file = mp_path_join(NULL, dir, "libplacebo.cache");
-    mp_mkdirp(dir);
+    if (dir && dir[0]) {
+        file = mp_path_join(NULL, dir, "libplacebo.cache");
+        mp_mkdirp(dir);
+    }
     talloc_free(dir);
+done:
     return file;
 }
 
@@ -1635,8 +1639,11 @@ static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
     } else {
         cache_dir = mp_find_user_file(NULL, p->global, "cache", "");
     }
-    char *path = mp_path_join(NULL, cache_dir, cache_name);
 
+    if (!cache_dir || !cache_dir[0])
+        return NULL;
+
+    char *path = mp_path_join(NULL, cache_dir, cache_name);
     stream_t *stream = NULL;
     if (flags & STREAM_WRITE) {
         mp_mkdirp(cache_dir);

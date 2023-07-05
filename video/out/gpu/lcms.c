@@ -359,12 +359,13 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
             cache_dir = mp_find_user_file(tmp, p->global, "cache", "");
         }
 
-        cache_file = talloc_strdup(tmp, "");
-        for (int i = 0; i < sizeof(hash); i++)
-            cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
-        cache_file = mp_path_join(tmp, cache_dir, cache_file);
-
-        mp_mkdirp(cache_dir);
+        if (cache_dir && cache_dir[0]) {
+            cache_file = talloc_strdup(tmp, "");
+            for (int i = 0; i < sizeof(hash); i++)
+                cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
+            cache_file = mp_path_join(tmp, cache_dir, cache_file);
+            mp_mkdirp(cache_dir);
+        }
     }
 
     // check cache
