@@ -22,7 +22,7 @@
 testfun()
 {
     $ILDETECT_MPV "$@" \
-        --vf-add=lavfi="[idet]" --msg-level ffmpeg=v \
+        --vf-add=lavfi="[idet]" --msg-level=ffmpeg=v \
         --o= --vo=null --no-audio --untimed \
         $ILDETECT_MPVFLAGS \
         | { if [ -n "$ILDETECT_QUIET" ]; then cat; else tee /dev/stderr; fi } \
