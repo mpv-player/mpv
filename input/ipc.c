@@ -126,7 +126,7 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
     bool async = false;
     bool send_reply = true;
 
-    rc = json_parse(ta_parent, &msg_node, &src, 50);
+    rc = json_parse(ta_parent, &msg_node, &src, MAX_JSON_DEPTH);
     if (rc < 0) {
         mp_err(log, "malformed JSON received: '%s'\n", src);
         rc = MPV_ERROR_INVALID_PARAMETER;

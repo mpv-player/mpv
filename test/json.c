@@ -63,8 +63,6 @@ static const struct entry entries[] = {
         NODE_MAP(L("_a12"), L(NODE_STR("b")))},
 };
 
-#define MAX_DEPTH 10
-
 int main(void)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(entries); n++) {
@@ -73,7 +71,7 @@ int main(void)
         char *s = talloc_strdup(tmp, e->src);
         json_skip_whitespace(&s);
         struct mpv_node res;
-        bool ok = json_parse(tmp, &res, &s, MAX_DEPTH) >= 0;
+        bool ok = json_parse(tmp, &res, &s, MAX_JSON_DEPTH) >= 0;
         assert_true(ok != e->expect_fail);
         if (!ok) {
             talloc_free(tmp);
