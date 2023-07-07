@@ -719,9 +719,9 @@ Program Behavior
     Print version string and exit.
 
 ``--no-config``
-    Do not load default configuration files. This prevents loading of both the
-    user-level and system-wide ``mpv.conf`` and ``input.conf`` files. Other
-    configuration files are blocked as well, such as resume playback files.
+    Do not load default configuration or any user files. This prevents loading of
+    both the user-level and system-wide ``mpv.conf`` and ``input.conf`` files. Other
+    user files are blocked as well, such as resume playback files and cache files.
 
     .. note::
 
@@ -3945,6 +3945,13 @@ Demuxer
     libarchive opens all volumes anyway when playing the main file, even though
     mpv iterated no archive entries yet.
 
+``--directory-mode=<recursive|lazy|ignore>``
+    When opening a directory, open subdirectories recursively, lazily or not at
+    all (default: recursive).
+
+    Values other then ``recursive`` can lead to problems with resuming playlists
+    (`RESUMING PLAYBACK`_) and possibly other things.
+
 Input
 -----
 
@@ -4059,6 +4066,12 @@ Input
     Permit mpv to receive pointer events reported by the video output
     driver. Necessary to use the OSC, or to select the buttons in DVD menus.
     Support depends on the VO in use.
+
+``--input-cursor-passthrough``, ``--no-input-cursor-passthrough``
+    (X11 and Wayland only)
+    Tell the backend windowing system to allow pointer events to passthrough
+    the mpv window. This allows windows under mpv to instead receive pointer
+    events as if the mpv window was never there.
 
 ``--input-media-keys=<yes|no>``
     On systems where mpv can choose between receiving media keys or letting
@@ -6714,10 +6727,10 @@ them.
 
 ``--icc-cache``
     Store and load 3D LUTs created from the ICC profile on disk in the
-    cache directory. This can be used to speed up loading, since LittleCMS
-    2 can take a while to create a 3D LUT. Note that these files contain
-    uncompressed LUTs. Their size depends on the ``--icc-3dlut-size``, and
-    can be very big.
+    cache directory (Default: ``yes``). This can be used to speed up loading,
+    since LittleCMS 2 can take a while to create a 3D LUT. Note that these
+    files contain uncompressed LUTs. Their size depends on the
+    ``--icc-3dlut-size``, and can be very big.
 
     NOTE: This is not cleaned automatically, so old, unused cache files may
     stick around indefinitely.
@@ -6862,11 +6875,11 @@ them.
     This option might be silently removed in the future.
 
 ``--gpu-shader-cache``
-    Store and load compiled GLSL shaders in the cache directory. Normally, shader
-    compilation is very fast, so this is not usually needed. It mostly matters
-    for GPU APIs that require internally recompiling shaders to other languages,
-    for example anything based on ANGLE or Vulkan. Enabling this can improve
-    startup performance on these platforms.
+    Store and load compiled GLSL shaders in the cache directory (Default: ``yes``).
+    Normally, shader compilation is very fast, so this is not usually needed.
+    It mostly matters for GPU APIs that require internally recompiling shaders to
+    other languages, for example anything based on ANGLE or Vulkan. Enabling this
+    can improve startup performance on these platforms.
 
     NOTE: This is not cleaned automatically, so old, unused cache files may
     stick around indefinitely.

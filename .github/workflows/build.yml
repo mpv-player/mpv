@@ -255,7 +255,6 @@ jobs:
             libjpeg-turbo:p
             libplacebo:p
             lua51:p
-            meson:p
             ninja:p
             pkgconf:p
             python3.11:p
@@ -280,6 +279,7 @@ jobs:
       - name: Run meson tests
         id: tests
         run: |
+          source ./venv/bin/activate
           meson test -C build
 
       - name: Print meson test log

@@ -354,17 +354,18 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 
         char *cache_dir = p->opts->cache_dir;
         if (cache_dir && cache_dir[0]) {
-            cache_dir = mp_get_user_path(NULL, p->global, cache_dir);
+            cache_dir = mp_get_user_path(tmp, p->global, cache_dir);
         } else {
-            cache_dir = mp_find_user_file(NULL, p->global, "cache", "");
+            cache_dir = mp_find_user_file(tmp, p->global, "cache", "");
         }
 
-        cache_file = talloc_strdup(tmp, "");
-        for (int i = 0; i < sizeof(hash); i++)
-            cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
-        cache_file = mp_path_join(tmp, cache_dir, cache_file);
-
-        mp_mkdirp(cache_dir);
+        if (cache_dir && cache_dir[0]) {
+            cache_file = talloc_strdup(tmp, "");
+            for (int i = 0; i < sizeof(hash); i++)
+                cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
+            cache_file = mp_path_join(tmp, cache_dir, cache_file);
+            mp_mkdirp(cache_dir);
+        }
     }
 
     // check cache
@@ -516,5 +517,6 @@ const struct m_sub_options mp_icc_conf = {
         .size_str = "64x64x64",
         .intent = MP_INTENT_RELATIVE_COLORIMETRIC,
         .use_embedded = true,
+        .cache = true,
     },
 };

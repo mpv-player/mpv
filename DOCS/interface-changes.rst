@@ -80,6 +80,11 @@ Interface changes
     - add `--corner-rounding` option
     - change `--subs-with-matching-audio` default from `yes` to `no`
     - change `--slang` default from blank to `auto`
+    - add `--input-cursor-passthrough` option to allow pointer events to completely
+      passthrough the mpv window
+    - icc and gpu-shader cache are now saved by default (use --no-icc-shader-cache and
+      --no-gpu-shader-cache to disable)
+    - add `--directory-mode=recursive|lazy|ignore`
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,

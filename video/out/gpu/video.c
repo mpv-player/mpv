@@ -327,6 +327,7 @@ static const struct gl_video_opts gl_video_opts_def = {
         .scene_threshold_high = 10.0,
     },
     .early_flush = -1,
+    .shader_cache = true,
     .hwdec_interop = "auto",
 };
 

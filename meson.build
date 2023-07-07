@@ -930,8 +930,8 @@ if features['libplacebo']
 endif
 
 libplacebo_next = get_option('libplacebo-next').require(
-    features['libplacebo'] and libplacebo.version().version_compare('>=5.264.0'),
-    error_message: 'libplacebo v5.264.0+ was not found!',
+    features['libplacebo'] and libplacebo.version().version_compare('>=5.266.0'),
+    error_message: 'libplacebo v5.266.0+ was not found!',
 )
 features += {'libplacebo-next': libplacebo_next.allowed()}
 if features['libplacebo-next']

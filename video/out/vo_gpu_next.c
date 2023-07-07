@@ -84,6 +84,11 @@ struct user_lut {
     struct pl_custom_lut *lut;
 };
 
+struct frame_info {
+    int count;
+    struct pl_dispatch_info info[VO_PASS_PERF_MAX];
+};
+
 struct priv {
     struct mp_log *log;
     struct mpv_global *global;
@@ -145,8 +150,8 @@ struct priv {
     int num_user_hooks;
 
     // Performance data of last frame
-    struct voctrl_performance_data perf;
-    pthread_mutex_t perf_lock;
+    struct frame_info perf_fresh;
+    struct frame_info perf_redraw;
 
     bool delayed_peak;
     bool inter_preserve;
@@ -750,32 +755,15 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     if (info->index >= VO_PASS_PERF_MAX)
         return; // silently ignore clipped passes, whatever
 
-    struct mp_frame_perf *frame;
+    struct frame_info *frame;
     switch (info->stage) {
-    case PL_RENDER_STAGE_FRAME: frame = &p->perf.fresh; break;
-    case PL_RENDER_STAGE_BLEND: frame = &p->perf.redraw; break;
+    case PL_RENDER_STAGE_FRAME: frame = &p->perf_fresh; break;
+    case PL_RENDER_STAGE_BLEND: frame = &p->perf_redraw; break;
     default: abort();
     }
 
-    int index = info->index;
-    struct mp_pass_perf *perf = &frame->perf[index];
-    const struct pl_dispatch_info *pass = info->pass;
-    static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
-    assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
-
-    pthread_mutex_lock(&p->perf_lock);
-
-    perf->count = MPMIN(pass->num_samples, VO_PERF_SAMPLE_COUNT);
-    memcpy(perf->samples, pass->samples, perf->count * sizeof(pass->samples[0]));
-    perf->last = pass->last;
-    perf->peak = pass->peak;
-    perf->avg = pass->average;
-
-    strncpy(frame->desc[index], pass->shader->description, sizeof(frame->desc[index]) - 1);
-    frame->desc[index][sizeof(frame->desc[index]) - 1] = '\0';
-    frame->count = index + 1;
-
-    pthread_mutex_unlock(&p->perf_lock);
+    frame->count = info->index + 1;
+    pl_dispatch_info_move(&frame->info[info->index], info->pass);
 }
 
 static void update_options(struct vo *vo)
@@ -1274,6 +1262,30 @@ done:
     pl_tex_destroy(gpu, &fbo);
 }
 
+static inline void copy_frame_info_to_mp(struct frame_info *pl,
+                                         struct mp_frame_perf *mp) {
+    static_assert(MP_ARRAY_SIZE(pl->info) == MP_ARRAY_SIZE(mp->perf), "");
+    assert(pl->count <= VO_PASS_PERF_MAX);
+    mp->count = MPMIN(pl->count, VO_PASS_PERF_MAX);
+
+    for (int i = 0; i < mp->count; ++i) {
+        const struct pl_dispatch_info *pass = &pl->info[i];
+
+        static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
+        assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
+
+        struct mp_pass_perf *perf = &mp->perf[i];
+        perf->count = MPMIN(pass->num_samples, VO_PERF_SAMPLE_COUNT);
+        memcpy(perf->samples, pass->samples, perf->count * sizeof(pass->samples[0]));
+        perf->last = pass->last;
+        perf->peak = pass->peak;
+        perf->avg = pass->average;
+
+        strncpy(mp->desc[i], pass->shader->description, sizeof(mp->desc[i]) - 1);
+        mp->desc[i][sizeof(mp->desc[i]) - 1] = '\0';
+    }
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -1315,11 +1327,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         p->want_reset = true;
         return VO_TRUE;
 
-    case VOCTRL_PERFORMANCE_DATA:
-        pthread_mutex_lock(&p->perf_lock);
-        *(struct voctrl_performance_data *) data = p->perf;
-        pthread_mutex_unlock(&p->perf_lock);
+    case VOCTRL_PERFORMANCE_DATA: {
+        struct voctrl_performance_data *perf = data;
+        copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh);
+        copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw);
         return true;
+    }
 
     case VOCTRL_SCREENSHOT:
         video_screenshot(vo, data);
@@ -1368,9 +1381,10 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
 
 static char *get_cache_file(struct priv *p)
 {
+    char *file = NULL;
     struct gl_video_opts *opts = p->opts_cache->opts;
     if (!opts->shader_cache)
-        return NULL;
+        goto done;
 
     char *dir = opts->shader_cache_dir;
     if (dir && dir[0]) {
@@ -1378,9 +1392,12 @@ static char *get_cache_file(struct priv *p)
     } else {
         dir = mp_find_user_file(NULL, p->global, "cache", "");
     }
-    char *file = mp_path_join(NULL, dir, "libplacebo.cache");
-    mp_mkdirp(dir);
+    if (dir && dir[0]) {
+        file = mp_path_join(NULL, dir, "libplacebo.cache");
+        mp_mkdirp(dir);
+    }
     talloc_free(dir);
+done:
     return file;
 }
 
@@ -1421,7 +1438,10 @@ static void uninit(struct vo *vo)
 
     pl_renderer_destroy(&p->rr);
 
-    pthread_mutex_destroy(&p->perf_lock);
+    for (int i = 0; i < VO_PASS_PERF_MAX; ++i) {
+        pl_shader_info_deref(&p->perf_fresh.info[i].shader);
+        pl_shader_info_deref(&p->perf_redraw.info[i].shader);
+    }
 
     p->ra_ctx = NULL;
     p->pllog = NULL;
@@ -1462,7 +1482,6 @@ static int preinit(struct vo *vo)
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
     pthread_mutex_init(&p->dr_lock, NULL);
-    pthread_mutex_init(&p->perf_lock, NULL);
 
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
@@ -1620,8 +1639,11 @@ static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
     } else {
         cache_dir = mp_find_user_file(NULL, p->global, "cache", "");
     }
-    char *path = mp_path_join(NULL, cache_dir, cache_name);
 
+    if (!cache_dir || !cache_dir[0])
+        return NULL;
+
+    char *path = mp_path_join(NULL, cache_dir, cache_name);
     stream_t *stream = NULL;
     if (flags & STREAM_WRITE) {
         mp_mkdirp(cache_dir);
