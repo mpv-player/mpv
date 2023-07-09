@@ -1652,6 +1652,7 @@ static void remove_output(struct vo_wayland_output *out)
     MP_VERBOSE(out->wl, "Deregistering output %s %s (0x%x)\n", out->make,
                out->model, out->id);
     wl_list_remove(&out->link);
+    wl_output_destroy(out->output);
     talloc_free(out->make);
     talloc_free(out->model);
     talloc_free(out);
@@ -2314,9 +2315,6 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->subcompositor)
         wl_subcompositor_destroy(wl->subcompositor);
 
-    if (wl->current_output && wl->current_output->output)
-        wl_output_destroy(wl->current_output->output);
-
     if (wl->cursor_surface)
         wl_surface_destroy(wl->cursor_surface);
 
@@ -2431,16 +2429,16 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->xkb_state)
         xkb_state_unref(wl->xkb_state);
 
+    struct vo_wayland_output *output, *tmp;
+    wl_list_for_each_safe(output, tmp, &wl->output_list, link)
+        remove_output(output);
+
     if (wl->display) {
         close(wl_display_get_fd(wl->display));
         wl_display_disconnect(wl->display);
     }
 
     munmap(wl->format_map, wl->format_size);
-
-    struct vo_wayland_output *output, *tmp;
-    wl_list_for_each_safe(output, tmp, &wl->output_list, link)
-        remove_output(output);
 
     for (int n = 0; n < 2; n++)
         close(wl->wakeup_pipe[n]);
