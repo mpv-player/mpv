@@ -1590,7 +1590,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     mp_load_auto_profiles(mpctx);
 
-    mp_load_playback_resume(mpctx, mpctx->filename);
+    bool watch_later = mp_load_playback_resume(mpctx, mpctx->filename);
 
     load_per_file_options(mpctx->mconfig, mpctx->playing->params,
                           mpctx->playing->num_params);
@@ -1736,6 +1736,9 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->playback_initialized = true;
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
     update_screensaver_state(mpctx);
+
+    if (watch_later)
+        mp_delete_watch_later_conf(mpctx, mpctx->filename);
 
     if (mpctx->max_frames == 0) {
         if (!mpctx->stop_play)

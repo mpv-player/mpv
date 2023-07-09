@@ -420,7 +420,7 @@ static void *terminal_thread(void *ptr)
             break;
         if (fds[1].revents) {
             int retval = read(tty_in, &buf.b[buf.len], BUF_LEN - buf.len);
-            if (!retval || (retval == -1 && (errno == EBADF || errno == EINVAL)))
+            if (!retval || (retval == -1 && errno != EINTR && errno != EAGAIN))
                 break; // EOF/closed
             if (retval > 0) {
                 buf.len += retval;

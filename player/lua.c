@@ -1163,7 +1163,7 @@ static int script_parse_json(lua_State *L, void *tmp)
     bool trail = lua_toboolean(L, 2);
     bool ok = false;
     struct mpv_node node;
-    if (json_parse(tmp, &node, &text, 32) >= 0) {
+    if (json_parse(tmp, &node, &text, MAX_JSON_DEPTH) >= 0) {
         json_skip_whitespace(&text);
         ok = !text[0] || trail;
     }
