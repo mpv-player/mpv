@@ -35,13 +35,6 @@ UP      Scroll one line up
 DOWN    Scroll one line down
 ====   ==================
 
-Font
-~~~~
-
-For optimal visual experience, a font with support for many font weights and
-monospaced digits is recommended. By default, the open source font
-`Source Sans Pro <https://github.com/adobe-fonts/source-sans-pro>`_ is used.
-
 Configuration
 -------------
 
@@ -110,13 +103,13 @@ Configurable Options
     Clear data buffers used for drawing graphs when toggling.
 
 ``font``
-    Default: Source Sans Pro
+    Default: sans-serif
 
     Font name. Should support as many font weights as possible for optimal
     visual experience.
 
 ``font_mono``
-    Default: Source Sans Pro
+    Default: monospace
 
     Font name for parts where monospaced characters are necessary to align
     text. Currently, monospaced digits are sufficient.
