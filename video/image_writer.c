@@ -270,6 +270,7 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image,
     cinfo.client_data = &error_return_jmpbuf;
     if (setjmp(cinfo.client_data)) {
         jpeg_destroy_compress(&cinfo);
+        fclose(fp);
         return false;
     }
 
