@@ -1013,10 +1013,20 @@ static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_topleve
     wl->bounded_height = height * wl->scaling;
 }
 
+#ifdef XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION
+static void handle_wm_capabilities(void *data, struct xdg_toplevel *xdg_toplevel,
+                                   struct wl_array *capabilities)
+{
+}
+#endif
+
 static const struct xdg_toplevel_listener xdg_toplevel_listener = {
     handle_toplevel_config,
     handle_toplevel_close,
     handle_configure_bounds,
+#ifdef XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION
+    handle_wm_capabilities,
+#endif
 };
 
 #if HAVE_WAYLAND_PROTOCOLS_1_31
