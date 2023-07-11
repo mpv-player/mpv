@@ -575,6 +575,8 @@ def build(ctx):
         ( "generated/wayland/single-pixel-buffer-v1.c", "wayland-protocols-1-27" ),
         ( "generated/wayland/content-type-v1.c", "wayland-protocols-1-27" ),
         ( "generated/wayland/fractional-scale-v1.c", "wayland-protocols-1-31"),
+        ( "generated/wayland/cursor-shape-v1.c", "wayland-protocols-1-32"),
+        ( "generated/wayland/tablet-unstable-v2.c", "wayland-protocols-1-32"),
         ( "generated/wayland/idle-inhibit-unstable-v1.c", "wayland" ),
         ( "generated/wayland/presentation-time.c", "wayland" ),
         ( "generated/wayland/xdg-decoration-unstable-v1.c", "wayland" ),
