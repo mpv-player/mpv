@@ -531,7 +531,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct vo_wayland_state *wl = vo->wl;
     struct buffer *buf;
     struct osd_buffer *osd_buf;
-    double pts = frame->current->pts;
+    double pts;
 
     if (!vo_wayland_check_visible(vo) || !frame->current)
         return;
@@ -539,6 +539,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (p->destroy_buffers)
         destroy_buffers(vo);
 
+    pts = frame->current->pts;
     struct mp_image *src = mp_image_new_ref(frame->current);
     buf = buffer_get(vo, src);
     osd_buf = osd_buffer_get(vo);
