@@ -183,6 +183,7 @@ typedef struct lavc_ctx {
     const char *decoder;
     bool hwdec_failed;
     bool hwdec_notified;
+    bool force_eof;
 
     bool intra_only;
     int framedrop_flags;
@@ -589,7 +590,14 @@ static void select_and_set_hwdec(struct mp_filter *vd)
             MP_VERBOSE(vd, "Using underlying hw-decoder '%s'\n",
                        ctx->hwdec.codec->name);
     } else {
-        MP_VERBOSE(vd, "Using software decoding.\n");
+        // If software fallback is disabled and we get here, all hwdec must
+        // have failed. Tell the ctx to always force an eof.
+        if (ctx->opts->software_fallback == INT_MAX) {
+            MP_WARN(ctx, "Software decoding fallback is disabled.\n");
+            ctx->force_eof = true;
+        } else {
+            MP_VERBOSE(vd, "Using software decoding.\n");
+        }
     }
 }
 
@@ -1167,7 +1175,7 @@ static int decode_frame(struct mp_filter *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
 
-    if (!avctx)
+    if (!avctx || ctx->force_eof)
         return AVERROR_EOF;
 
     prepare_decoding(vd);
