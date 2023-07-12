@@ -996,6 +996,7 @@ resize:
                mp_rect_w(wl->geometry), mp_rect_h(wl->geometry));
 
     wl->pending_vo_events |= VO_EVENT_RESIZE;
+    xdg_surface_set_window_geometry(wl->xdg_surface, 0, 0, width, height);
     wl->toplevel_configured = true;
 }
 
