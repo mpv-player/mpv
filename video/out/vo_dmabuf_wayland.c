@@ -601,13 +601,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static void call_request_hwdec_api(void *ctx, struct hwdec_imgfmt_request *params)
-{
-    // Roundabout way to run hwdec loading on the VO thread.
-    // Redirects to request_hwdec_api().
-    vo_control(ctx, VOCTRL_LOAD_HWDEC_API, params);
-}
-
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -615,13 +608,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     int ret;
 
     switch (request) {
-    case VOCTRL_LOAD_HWDEC_API:
-        assert(p->hwdec_ctx.ra_ctx);
-        struct hwdec_imgfmt_request* req = (struct hwdec_imgfmt_request*)data;
-        if (!is_supported_fmt(req->imgfmt))
-            return 0;
-        ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, vo->hwdec_devs, req);
-        return (p->hwdec_ctx.num_hwdecs > 0);
     case VOCTRL_RESET:
         p->destroy_buffers = true;
         return VO_TRUE;
@@ -725,15 +711,24 @@ static int preinit(struct vo *vo)
     wl_surface_attach(vo->wl->surface, p->solid_buffer, 0, 0);
 
     vo->hwdec_devs = hwdec_devices_create();
-    hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
-    assert(!p->hwdec_ctx.ra_ctx);
     p->hwdec_ctx = (struct ra_hwdec_ctx) {
         .log = p->log,
         .global = p->global,
         .ra_ctx = p->ctx,
     };
-
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, NULL, true);
+
+    // Loop through hardware accelerated formats and only request known
+    // supported formats.
+    for (int i = IMGFMT_VDPAU_OUTPUT; i < IMGFMT_AVPIXFMT_START; ++i) {
+        if (is_supported_fmt(i)) {
+            struct hwdec_imgfmt_request params = {
+                .imgfmt = i,
+                .probing = false,
+            };
+            ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, vo->hwdec_devs, &params);
+        }
+    }
 
     for (int i = 0; i < p->hwdec_ctx.num_hwdecs; i++) {
         struct ra_hwdec *hw = p->hwdec_ctx.hwdecs[i];
