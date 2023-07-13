@@ -15,15 +15,13 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <libavutil/hwcontext_drm.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #include "config.h"
 
 #if HAVE_VAAPI
 #include <va/va_drmcommon.h>
-#endif
-#if HAVE_DRM
-#include <libavutil/hwcontext_drm.h>
 #endif
 
 #include "common/global.h"
@@ -192,19 +190,16 @@ done:
 static uintptr_t drmprime_surface_id(struct mp_image *src)
 {
     uintptr_t id = 0;
-#if HAVE_DRM
     struct AVDRMFrameDescriptor *desc = (AVDRMFrameDescriptor *)src->planes[0];
 
     AVDRMObjectDescriptor object = desc->objects[0];
     id = (uintptr_t)object.fd;
-#endif
     return id;
 }
 
 static void drmprime_dmabuf_importer(struct buffer *buf, struct mp_image *src,
                                      struct zwp_linux_buffer_params_v1 *params)
 {
-#if HAVE_DRM
     int layer_no, plane_no;
     int max_planes = 0;
     const AVDRMFrameDescriptor *desc = (AVDRMFrameDescriptor *)src->planes[0];
@@ -227,7 +222,6 @@ static void drmprime_dmabuf_importer(struct buffer *buf, struct mp_image *src,
                                            plane.pitch, modifier >> 32, modifier & 0xffffffff);
         }
     }
-#endif
 }
 
 static intptr_t surface_id(struct vo *vo, struct mp_image *src)

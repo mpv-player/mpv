@@ -569,6 +569,11 @@ video_output_features = [
         'deps': 'wayland',
         'func': check_statement('sys/mman.h',
                                 'memfd_create("mpv", MFD_CLOEXEC | MFD_ALLOW_SEALING)')
+    }, {
+        'name': '--dmabuf-wayland',
+        'desc': 'dmabuf-wayland video output',
+        'deps': 'wayland && memfd_create && drm',
+        'func': check_true,
     } , {
         'name': '--x11',
         'desc': 'X11',
@@ -696,11 +701,6 @@ video_output_features = [
         'desc': 'VAAPI (Wayland support)',
         'deps': 'vaapi && gl-wayland',
         'func': check_pkg_config('libva-wayland', '>= 1.1.0'),
-    }, {
-        'name': 'dmabuf-wayland',
-        'desc': 'Wayland dmabuf support',
-        'deps': 'wayland && memfd_create && (vaapi-wayland || drm)',
-        'func': check_true,
     }, {
         'name': '--vaapi-drm',
         'desc': 'VAAPI (DRM/EGL support)',
