@@ -30,6 +30,7 @@
 #include "mpv_talloc.h"
 #include "present_sync.h"
 #include "sub/draw_bmp.h"
+#include "video/fmt-conversion.h"
 #include "video/mp_image.h"
 #include "vo.h"
 #include "wayland_common.h"
@@ -100,6 +101,8 @@ struct priv {
 
     bool destroy_buffers;
     enum hwdec_type hwdec_type;
+    uint32_t drm_format;
+    uint64_t drm_modifier;
 };
 
 static void buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
@@ -145,6 +148,33 @@ static uintptr_t vaapi_surface_id(struct mp_image *src)
     id = (uintptr_t)va_surface_id(src);
 #endif
     return id;
+}
+
+static bool vaapi_drm_format(struct vo *vo, struct mp_image *src)
+{
+    bool format = false;
+#if HAVE_VAAPI
+    struct priv *p = vo->priv;
+    VADRMPRIMESurfaceDescriptor desc = {0};
+
+    uintptr_t id = vaapi_surface_id(src);
+    VADisplay display = ra_get_native_resource(p->ctx->ra, "VADisplay");
+    VAStatus status = vaExportSurfaceHandle(display, id, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+                                            VA_EXPORT_SURFACE_COMPOSED_LAYERS | VA_EXPORT_SURFACE_READ_ONLY, &desc);
+
+    if (!CHECK_VA_STATUS(vo, "vaExportSurfaceHandle()")) {
+        /* invalid surface warning => composed layers not supported */
+        if (status == VA_STATUS_ERROR_INVALID_SURFACE)
+            MP_VERBOSE(vo, "vaExportSurfaceHandle: composed layers not supported.\n");
+        goto done;
+    }
+    p->drm_format = desc.layers[0].drm_format;
+    p->drm_modifier = desc.objects[0].drm_format_modifier;
+    format = true;
+done:
+    close_file_descriptors(desc);
+#endif
+    return format;
 }
 
 static void vaapi_dmabuf_importer(struct buffer *buf, struct mp_image *src,
@@ -197,6 +227,20 @@ static uintptr_t drmprime_surface_id(struct mp_image *src)
     return id;
 }
 
+static bool drmprime_drm_format(struct vo *vo, struct mp_image *src)
+{
+    struct priv *p = vo->priv;
+    struct AVDRMFrameDescriptor *desc = (AVDRMFrameDescriptor *)src->planes[0];
+    if (!desc)
+        return false;
+
+    // Just check the very first layer/plane.
+    p->drm_format = desc->layers[0].format;
+    int object_index = desc->layers[0].planes[0].object_index;
+    p->drm_modifier = desc->objects[object_index].format_modifier;
+    return true;
+}
+
 static void drmprime_dmabuf_importer(struct buffer *buf, struct mp_image *src,
                                      struct zwp_linux_buffer_params_v1 *params)
 {
@@ -235,6 +279,18 @@ static intptr_t surface_id(struct vo *vo, struct mp_image *src)
     default:
         return 0;
     }
+}
+
+static bool drm_format_check(struct vo *vo, struct mp_image *src)
+{
+    struct priv *p = vo->priv;
+    switch(p->hwdec_type) {
+    case HWDEC_VAAPI:
+        return vaapi_drm_format(vo, src);
+    case HWDEC_DRMPRIME:
+        return drmprime_drm_format(vo, src);
+    }
+    return false;
 }
 
 static struct buffer *buffer_check(struct vo *vo, struct mp_image *src)
@@ -588,8 +644,21 @@ static int query_format(struct vo *vo, int format)
     return is_supported_fmt(format);
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params)
+static int reconfig(struct vo *vo, struct mp_image *img)
 {
+    struct priv *p = vo->priv;
+
+    if (!drm_format_check(vo, img)) {
+        MP_ERR(vo, "Unable to get drm format from hardware decoding!\n");
+        return VO_ERROR;
+    }
+
+    if (!ra_compatible_format(p->ctx->ra, p->drm_format, p->drm_modifier)) {
+        MP_ERR(vo, "Format '%s' with modifier '(%016lx)' is not supported by"
+               " the compositor.\n", mp_tag_str(p->drm_format), p->drm_modifier);
+        return VO_ERROR;
+    }
+
     if (!vo_wayland_reconfig(vo))
         return VO_ERROR;
 
@@ -754,7 +823,7 @@ const struct vo_driver video_out_dmabuf_wayland = {
     .name = "dmabuf-wayland",
     .preinit = preinit,
     .query_format = query_format,
-    .reconfig = reconfig,
+    .reconfig2 = reconfig,
     .control = control,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
