@@ -1013,6 +1013,18 @@ if features['wayland'] and features['memfd_create']
     sources += files('video/out/vo_wlshm.c')
 endif
 
+dmabuf_wayland = get_option('dmabuf-wayland').require(
+    features['drm'] and features['memfd_create'] and features['wayland'],
+    error_message: 'drm, memfd_create, or wayland was not found!',
+)
+features += {'dmabuf-wayland': dmabuf_wayland.allowed()}
+if features['dmabuf-wayland']
+    sources += files('video/out/vo_dmabuf_wayland.c')
+    sources += files('video/out/hwdec/dmabuf_interop_wl.c')
+    sources += files('video/out/wldmabuf/context_wldmabuf.c')
+    sources += files('video/out/wldmabuf/ra_wldmabuf.c')
+endif
+
 x11_opt = get_option('x11').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
@@ -1429,14 +1441,6 @@ dmabuf_interop_pl = features['vaapi-libplacebo']
 features += {'dmabuf-interop-pl': dmabuf_interop_pl}
 if features['dmabuf-interop-pl']
     sources += files('video/out/hwdec/dmabuf_interop_pl.c')
-endif
-
-features += {'dmabuf-wayland' : features['wayland'] and features['memfd_create'] and (features['vaapi-wayland'] or features['drm'])}
-if features['dmabuf-wayland']
-    sources += files('video/out/vo_dmabuf_wayland.c')
-    sources += files('video/out/hwdec/dmabuf_interop_wl.c')
-    sources += files('video/out/wldmabuf/context_wldmabuf.c')
-    sources += files('video/out/wldmabuf/ra_wldmabuf.c')
 endif
 
 vdpau_opt = get_option('vdpau').require(
