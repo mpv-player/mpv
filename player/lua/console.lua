@@ -30,6 +30,8 @@ local opts = {
     border_size = 1,
     -- Remove duplicate entries in history as to only keep the latest one.
     history_dedup = true,
+    -- Set the maximum message level that the console will show.
+    max_msg_level = 'v'
 }
 
 function detect_platform()
@@ -52,8 +54,41 @@ else
     opts.font = 'monospace'
 end
 
+function new_console_level(log_level, style)
+    return { log_level = log_level, style = style }
+end
+
+-- mpv's log (message) levels. see:
+--   https://github.com/mpv-player/mpv/blob/e7902eb83dc68dcb0adb99568d72bd3f9a4e4550/libmpv/client.h#L1410
+-- Colors from base16 Eighties by Chris Kempson. see:
+--   https://github.com/chriskempson/base16-vim/blob/3be3cd82cd31acfcab9a41bad853d9c68d30478d/colors/base16-eighties.vim
+local console_levels = {
+    no    = new_console_level(0),
+    fatal = new_console_level(10, '{\\1c&H5791f9&\\b1}'),
+    error = new_console_level(20, '{\\1c&H7a77f2&}'),
+    warn  = new_console_level(30, '{\\1c&H66ccff&}'),
+    info  = new_console_level(40, '{\\1c&Hffffff&}'),
+    v     = new_console_level(50, '{\\1c&H99cc99&}'),
+    debug = new_console_level(60, '{\\1c&Ha09f93&}'),
+    trace = new_console_level(70, '{\\1c&Ha09f93&}')
+}
+-- Add alias 'verbose' for 'v'
+console_levels.verbose = console_levels.v
+
+-- Returns the console_level that corresponds to message_prefix
+function console_level_from(message_prefix)
+    local console_level = console_levels[message_prefix]
+
+    if console_level ~= nil then
+        return console_level end
+
+    mp.msg.error('unknown message level:', message_prefix)
+    return console_levels.fatal
+end
+
 -- Apply user-set options
 options.read_options(opts)
+local max_log_level = console_level_from(opts.max_msg_level).log_level
 
 local repl_active = false
 local insert_mode = false
@@ -326,7 +361,6 @@ end
 
 function help_command(param)
     local cmdlist = mp.get_property_native('command-list')
-    local error_style = '{\\1c&H7a77f2&}'
     local output = ''
     if param == '' then
         output = 'Available commands:\n'
@@ -347,7 +381,7 @@ function help_command(param)
             end
         end
         if not cmd then
-            log_add(error_style, 'No command matches "' .. param .. '"!')
+            log_add(console_levels.error.style, 'No command matches "' .. param .. '"!\n')
             return
         end
         output = output .. 'Command "' .. cmd.name .. '"\n'
@@ -825,28 +859,12 @@ mp.register_event('log-message', function(e)
     -- have been offscreen anyway.
     if e.prefix == 'overflow' then return end
 
-    -- Filter out trace-level log messages, even if the terminal-default log
-    -- level includes them. These aren't too useful for an on-screen display
-    -- without scrollback and they include messages that are generated from the
-    -- OSD display itself.
-    if e.level == 'trace' then return end
+    local message_level = console_level_from(e.level)
 
-    -- Use color for debug/v/warn/error/fatal messages. Colors are stolen from
-    -- base16 Eighties by Chris Kempson.
-    local style = ''
-    if e.level == 'debug' then
-        style = '{\\1c&Ha09f93&}'
-    elseif e.level == 'v' then
-        style = '{\\1c&H99cc99&}'
-    elseif e.level == 'warn' then
-        style = '{\\1c&H66ccff&}'
-    elseif e.level == 'error' then
-        style = '{\\1c&H7a77f2&}'
-    elseif e.level == 'fatal' then
-        style = '{\\1c&H5791f9&\\b1}'
-    end
+    if message_level.log_level > max_log_level then
+        return end
 
-    log_add(style, '[' .. e.prefix .. '] ' .. e.text)
+    log_add(message_level.style, '[' .. e.prefix .. '] ' .. e.text)
 end)
 
 collectgarbage()

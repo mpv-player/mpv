@@ -153,3 +153,15 @@ Configurable Options
     Default: true
 
     Remove duplicate entries in history as to only keep the latest one.
+
+``max_msg_level``
+    Default: v
+
+    Set the maximum message level for the console. Use the levels from
+    ``--msg-level``, excluding ``status``. ``--max_msg_level`` only affects the
+    console, not the outputs of the terminal or log file.
+
+    .. note::
+
+        ``status`` is not a standard verbosity level. It controls the
+        `TERMINAL STATUS LINE`_.
