@@ -333,6 +333,9 @@ static void destroy_buffers(struct vo *vo)
 
 static void destroy_osd_buffers(struct vo *vo)
 {
+    if (!vo->wl)
+        return;
+
     // Remove any existing buffer before we destroy them.
     wl_surface_attach(vo->wl->osd_surface, NULL, 0, 0);
     wl_surface_commit(vo->wl->osd_surface);
