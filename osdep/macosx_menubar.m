@@ -253,12 +253,40 @@
                         @"target"     : self,
                         @"cmd"        : @"add panscan 0.1"
                     }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
+		    [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Reset Zoom",
                         @"action"     : @"cmd:",
                         @"key"        : @"",
                         @"target"     : self,
                         @"cmd"        : @"set panscan 0"
+                    }],
+		    [NSMutableDictionary dictionaryWithDictionary:@{
+			@"name"	      : @"Rotate (90°)",
+			@"action"     : @"cmd:",
+			@"key"        : @"",
+			@"target"     : self,
+			@"cmd"	      : @"set vf transpose=1"
+		    }],
+		    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Rotate (180°)",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"set vf transpose=2,transpose=2"
+                    }],
+		    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Rotate (270°)",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"set vf transpose=2"
+                    }],
+		    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Reset rotation",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"set vf transpose=2,transpose=1"
                     }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
