@@ -262,6 +262,35 @@
                     }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Rotate (90°)",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"set video-rotate 90"
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Rotate (180°)",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"set video-rotate 180"
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Rotate (270°)",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"set video-rotate 270"
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Reset rotation",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"set video-rotate 0"
+                    }],
+                    @{ @"name": @"separator" },
+                    [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Aspect Ratio 4:3",
                         @"action"     : @"cmd:",
                         @"key"        : @"",
