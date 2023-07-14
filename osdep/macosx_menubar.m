@@ -1,19 +1,19 @@
 /*
  * This file is part of mpv.
- *
- * mpv is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * mpv is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
- */
+*
+* mpv is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 2.1 of the License, or (at your option) any later version.
+*
+* mpv is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "config.h"
 #include "common/common.h"
@@ -24,270 +24,271 @@
 
 @implementation MenuBar
 {
-    NSArray *menuTree;
+NSArray *menuTree;
 }
 
 - (id)init
 {
-    if (self = [super init]) {
-        NSUserDefaults *userDefaults =[NSUserDefaults standardUserDefaults];
-        [userDefaults setBool:NO forKey:@"NSFullScreenMenuItemEverywhere"];
-        [userDefaults setBool:YES forKey:@"NSDisabledDictationMenuItem"];
-        [userDefaults setBool:YES forKey:@"NSDisabledCharacterPaletteMenuItem"];
+if (self = [super init]) {
+NSUserDefaults *userDefaults =[NSUserDefaults standardUserDefaults];
+[userDefaults setBool:NO forKey:@"NSFullScreenMenuItemEverywhere"];
+[userDefaults setBool:YES forKey:@"NSDisabledDictationMenuItem"];
+[userDefaults setBool:YES forKey:@"NSDisabledCharacterPaletteMenuItem"];
 
-        if ([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)])
-            [NSWindow setAllowsAutomaticWindowTabbing: NO];
+if ([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)])
+    [NSWindow setAllowsAutomaticWindowTabbing: NO];
 
-        menuTree = @[
-            @{
-                @"name": @"Apple",
-                @"menu": @[
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"About mpv",
-                        @"action"     : @"about",
-                        @"key"        : @"",
-                        @"target"     : self
-                    }],
-                    @{ @"name": @"separator" },
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Preferences…",
-                        @"action"     : @"preferences:",
-                        @"key"        : @",",
-                        @"target"     : self,
-                        @"file"       : @"mpv.conf",
-                        @"alertTitle1": @"No Application found to open your config file.",
-                        @"alertText1" : @"Please open the mpv.conf file with "
-                                        "your preferred text editor in the now "
-                                        "open folder to edit your config.",
-                        @"alertTitle2": @"No config file found.",
-                        @"alertText2" : @"Please create a mpv.conf file with your "
-                                        "preferred text editor in the now open folder.",
-                        @"alertTitle3": @"No config path or file found.",
-                        @"alertText3" : @"Please create the following path ~/.config/mpv/ "
-                                        "and a mpv.conf file within with your preferred "
-                                        "text editor."
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Keyboard Shortcuts Config…",
-                        @"action"     : @"preferences:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"file"       : @"input.conf",
-                        @"alertTitle1": @"No Application found to open your config file.",
-                        @"alertText1" : @"Please open the input.conf file with "
-                                        "your preferred text editor in the now "
-                                        "open folder to edit your config.",
-                        @"alertTitle2": @"No config file found.",
-                        @"alertText2" : @"Please create a input.conf file with your "
-                                        "preferred text editor in the now open folder.",
-                        @"alertTitle3": @"No config path or file found.",
-                        @"alertText3" : @"Please create the following path ~/.config/mpv/ "
-                                        "and a input.conf file within with your preferred "
-                                        "text editor."
-                    }],
-                    @{ @"name": @"separator" },
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Services",
-                        @"key"        : @"",
-                    }],
-                    @{ @"name": @"separator" },
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Hide mpv",
-                        @"action"     : @"hide:",
-                        @"key"        : @"h",
-                        @"target"     : NSApp
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Hide Others",
-                        @"action"     : @"hideOtherApplications:",
-                        @"key"        : @"h",
-                        @"modifiers"  : [NSNumber numberWithUnsignedInteger:
-                                            NSEventModifierFlagCommand |
-                                            NSEventModifierFlagOption],
-                        @"target"     : NSApp
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Show All",
-                        @"action"     : @"unhideAllApplications:",
-                        @"key"        : @"",
-                        @"target"     : NSApp
-                    }],
-                    @{ @"name": @"separator" },
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Quit and Remember Position",
-                        @"action"     : @"quit:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"quit-watch-later"
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Quit mpv",
-                        @"action"     : @"quit:",
-                        @"key"        : @"q",
-                        @"target"     : self,
-                        @"cmd"        : @"quit"
-                    }]
-                ]
-            },
-            @{
-                @"name": @"File",
-                @"menu": @[
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Open File…",
-                        @"action"     : @"openFile",
-                        @"key"        : @"o",
-                        @"target"     : self
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Open URL…",
-                        @"action"     : @"openURL",
-                        @"key"        : @"O",
-                        @"target"     : self
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Open Playlist…",
-                        @"action"     : @"openPlaylist",
-                        @"key"        : @"",
-                        @"target"     : self
-                    }],
-                    @{ @"name": @"separator" },
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Close",
-                        @"action"     : @"performClose:",
-                        @"key"        : @"w"
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Save Screenshot",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"async screenshot"
-                    }]
-                ]
-            },
-            @{
-                @"name": @"Edit",
-                @"menu": @[
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Undo",
-                        @"action"     : @"undo:",
-                        @"key"        : @"z"
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Redo",
-                        @"action"     : @"redo:",
-                        @"key"        : @"Z"
-                    }],
-                    @{ @"name": @"separator" },
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Cut",
-                        @"action"     : @"cut:",
-                        @"key"        : @"x"
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Copy",
-                        @"action"     : @"copy:",
-                        @"key"        : @"c"
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Paste",
-                        @"action"     : @"paste:",
-                        @"key"        : @"v"
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Select All",
-                        @"action"     : @"selectAll:",
-                        @"key"        : @"a"
-                    }]
-                ]
-            },
-            @{
-                @"name": @"View",
-                @"menu": @[
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Toggle Fullscreen",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"cycle fullscreen"
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Toggle Float on Top",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"cycle ontop"
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Toggle Visibility on All Workspaces",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"cycle on-all-workspaces"
-                    }],
+menuTree = @[
+    @{
+	@"name": @"Apple",
+	@"menu": @[
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"About mpv",
+		@"action"     : @"about",
+		@"key"        : @"",
+		@"target"     : self
+	    }],
+	    @{ @"name": @"separator" },
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Preferences…",
+		@"action"     : @"preferences:",
+		@"key"        : @",",
+		@"target"     : self,
+		@"file"       : @"mpv.conf",
+		@"alertTitle1": @"No Application found to open your config file.",
+		@"alertText1" : @"Please open the mpv.conf file with "
+				"your preferred text editor in the now "
+				"open folder to edit your config.",
+		@"alertTitle2": @"No config file found.",
+		@"alertText2" : @"Please create a mpv.conf file with your "
+				"preferred text editor in the now open folder.",
+		@"alertTitle3": @"No config path or file found.",
+		@"alertText3" : @"Please create the following path ~/.config/mpv/ "
+				"and a mpv.conf file within with your preferred "
+				"text editor."
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Keyboard Shortcuts Config…",
+		@"action"     : @"preferences:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"file"       : @"input.conf",
+		@"alertTitle1": @"No Application found to open your config file.",
+		@"alertText1" : @"Please open the input.conf file with "
+				"your preferred text editor in the now "
+				"open folder to edit your config.",
+		@"alertTitle2": @"No config file found.",
+		@"alertText2" : @"Please create a input.conf file with your "
+				"preferred text editor in the now open folder.",
+		@"alertTitle3": @"No config path or file found.",
+		@"alertText3" : @"Please create the following path ~/.config/mpv/ "
+				"and a input.conf file within with your preferred "
+				"text editor."
+	    }],
+	    @{ @"name": @"separator" },
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Services",
+		@"key"        : @"",
+	    }],
+	    @{ @"name": @"separator" },
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Hide mpv",
+		@"action"     : @"hide:",
+		@"key"        : @"h",
+		@"target"     : NSApp
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Hide Others",
+		@"action"     : @"hideOtherApplications:",
+		@"key"        : @"h",
+		@"modifiers"  : [NSNumber numberWithUnsignedInteger:
+				    NSEventModifierFlagCommand |
+				    NSEventModifierFlagOption],
+		@"target"     : NSApp
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Show All",
+		@"action"     : @"unhideAllApplications:",
+		@"key"        : @"",
+		@"target"     : NSApp
+	    }],
+	    @{ @"name": @"separator" },
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Quit and Remember Position",
+		@"action"     : @"quit:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"cmd"        : @"quit-watch-later"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Quit mpv",
+		@"action"     : @"quit:",
+		@"key"        : @"q",
+		@"target"     : self,
+		@"cmd"        : @"quit"
+	    }]
+	]
+    },
+    @{
+	@"name": @"File",
+	@"menu": @[
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Open File…",
+		@"action"     : @"openFile",
+		@"key"        : @"o",
+		@"target"     : self
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Open URL…",
+		@"action"     : @"openURL",
+		@"key"        : @"O",
+		@"target"     : self
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Open Playlist…",
+		@"action"     : @"openPlaylist",
+		@"key"        : @"",
+		@"target"     : self
+	    }],
+	    @{ @"name": @"separator" },
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Close",
+		@"action"     : @"performClose:",
+		@"key"        : @"w"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Save Screenshot",
+		@"action"     : @"cmd:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"cmd"        : @"async screenshot"
+	    }]
+	]
+    },
+    @{
+	@"name": @"Edit",
+	@"menu": @[
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Undo",
+		@"action"     : @"undo:",
+		@"key"        : @"z"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Redo",
+		@"action"     : @"redo:",
+		@"key"        : @"Z"
+	    }],
+	    @{ @"name": @"separator" },
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Cut",
+		@"action"     : @"cut:",
+		@"key"        : @"x"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Copy",
+		@"action"     : @"copy:",
+		@"key"        : @"c"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Paste",
+		@"action"     : @"paste:",
+		@"key"        : @"v"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Select All",
+		@"action"     : @"selectAll:",
+		@"key"        : @"a"
+	    }]
+	]
+    },
+    @{
+	@"name": @"View",
+	@"menu": @[
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Toggle Fullscreen",
+		@"action"     : @"cmd:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"cmd"        : @"cycle fullscreen"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Toggle Float on Top",
+		@"action"     : @"cmd:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"cmd"        : @"cycle ontop"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Toggle Visibility on All Workspaces",
+		@"action"     : @"cmd:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"cmd"        : @"cycle on-all-workspaces"
+	    }],
 #if HAVE_MACOS_TOUCHBAR
-                    @{ @"name": @"separator" },
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Customize Touch Bar…",
-                        @"action"     : @"toggleTouchBarCustomizationPalette:",
-                        @"key"        : @"",
-                        @"target"     : NSApp
-                    }]
+	    @{ @"name": @"separator" },
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Customize Touch Bar…",
+		@"action"     : @"toggleTouchBarCustomizationPalette:",
+		@"key"        : @"",
+		@"target"     : NSApp
+	    }]
 #endif
-                ]
-            },
-            @{
-                @"name": @"Video",
-                @"menu": @[
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Zoom Out",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"add panscan -0.1"
-                    }],
-                    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Zoom In",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"add panscan 0.1"
-                    }],
-		    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Reset Zoom",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"set panscan 0"
-                    }],
-		    [NSMutableDictionary dictionaryWithDictionary:@{
-			@"name"	      : @"Rotate (90°)",
-			@"action"     : @"cmd:",
-			@"key"        : @"",
-			@"target"     : self,
-			@"cmd"	      : @"set vf transpose=1"
-		    }],
-		    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Rotate (180°)",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"set vf transpose=2,transpose=2"
-                    }],
-		    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Rotate (270°)",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"set vf transpose=2"
-                    }],
-		    [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"Reset rotation",
-                        @"action"     : @"cmd:",
-                        @"key"        : @"",
-                        @"target"     : self,
-                        @"cmd"        : @"set vf transpose=2,transpose=1"
-                    }],
+	]
+    },
+    @{
+	@"name": @"Video",
+	@"menu": @[
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Zoom Out",
+		@"action"     : @"cmd:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"cmd"        : @"add panscan -0.1"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Zoom In",
+		@"action"     : @"cmd:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"cmd"        : @"add panscan 0.1"
+	    }],
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"       : @"Reset Zoom",
+		@"action"     : @"cmd:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"cmd"        : @"set panscan 0"
+	    }],
+            @{ @"name": @"separator" },
+	    [NSMutableDictionary dictionaryWithDictionary:@{
+		@"name"	      : @"Rotate (90°)",
+		@"action"     : @"cmd:",
+		@"key"        : @"",
+		@"target"     : self,
+		@"cmd"	      : @"set video-rotate 90"
+	    }],
+            [NSMutableDictionary dictionaryWithDictionary:@{
+                @"name"       : @"Rotate (180°)",
+                @"action"     : @"cmd:",
+                @"key"        : @"",
+                @"target"     : self,
+                @"cmd"        : @"set video-rotate 180"
+            }],
+            [NSMutableDictionary dictionaryWithDictionary:@{
+                @"name"       : @"Rotate (270°)",
+                @"action"     : @"cmd:",
+                @"key"        : @"",
+                @"target"     : self,
+                @"cmd"        : @"set video-rotate 270"
+            }],
+            [NSMutableDictionary dictionaryWithDictionary:@{
+                @"name"       : @"Reset rotation",
+                @"action"     : @"cmd:",
+                @"key"        : @"",
+                @"target"     : self,
+                @"cmd"        : @"set video-rotate 0"
+            }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Aspect Ratio 4:3",
