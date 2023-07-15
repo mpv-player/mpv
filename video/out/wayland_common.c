@@ -240,8 +240,6 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
                                   uint32_t state)
 {
     struct vo_wayland_state *wl = data;
-    int mpmod = 0;
-
     state = state == WL_POINTER_BUTTON_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                      : MP_KEY_STATE_UP;
 
@@ -270,11 +268,8 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         button = 0;
     }
 
-    if (wl->keyboard)
-        mpmod = get_mods(wl);
-
     if (button)
-        mp_input_put_key(wl->vo->input_ctx, button | state | mpmod);
+        mp_input_put_key(wl->vo->input_ctx, button | state | wl->mpmod);
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         (!wl->vo_opts->fullscreen) && (!wl->vo_opts->window_maximized) &&
@@ -297,20 +292,19 @@ static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
 {
     struct vo_wayland_state *wl = data;
 
-    int mpmod = get_mods(wl);
     double val = wl_fixed_to_double(value) < 0 ? -1 : 1;
     switch (axis) {
     case WL_POINTER_AXIS_VERTICAL_SCROLL:
         if (value > 0)
-            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_DOWN | mpmod, +val);
+            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_DOWN | wl->mpmod, +val);
         if (value < 0)
-            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_UP | mpmod, -val);
+            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_UP | wl->mpmod, -val);
         break;
     case WL_POINTER_AXIS_HORIZONTAL_SCROLL:
         if (value > 0)
-            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_RIGHT | mpmod, +val);
+            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_RIGHT | wl->mpmod, +val);
         if (value < 0)
-            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT | mpmod, -val);
+            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT | wl->mpmod, -val);
         break;
     }
 }
@@ -441,18 +435,21 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
 
     wl->keyboard_code = key + 8;
     xkb_keysym_t sym = xkb_state_key_get_one_sym(wl->xkb_state, wl->keyboard_code);
+    int mpkey = lookupkey(sym);
+
+    // Assume a modifier was pressed and handle it in the mod event instead.
+    if (!mpkey && MP_KEY_STATE_DOWN)
+        return;
 
     state = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                    : MP_KEY_STATE_UP;
-    int mpmod = get_mods(wl);
-    int mpkey = lookupkey(sym);
-    if (mpkey) {
-        mp_input_put_key(wl->vo->input_ctx, mpkey | state | mpmod);
-    } else {
-        char s[128];
-        if (xkb_keysym_to_utf8(sym, s, sizeof(s)) > 0)
-            mp_input_put_key_utf8(wl->vo->input_ctx, state | mpmod, bstr0(s));
-    }
+
+    if (mpkey)
+        mp_input_put_key(wl->vo->input_ctx, mpkey | state | wl->mpmod);
+    if (state == MP_KEY_STATE_DOWN)
+        wl->mpkey = mpkey;
+    if (wl->mpkey == mpkey && state == MP_KEY_STATE_UP)
+        wl->mpkey = 0;
 }
 
 static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboard,
@@ -465,6 +462,9 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboar
     if (wl->xkb_state) {
         xkb_state_update_mask(wl->xkb_state, mods_depressed, mods_latched,
                               mods_locked, 0, 0, group);
+        wl->mpmod = get_mods(wl);
+        if (wl->mpkey)
+            mp_input_put_key(wl->vo->input_ctx, wl->mpkey | MP_KEY_STATE_DOWN | wl->mpmod);
     }
 }
 
