@@ -147,6 +147,8 @@ struct vo_wayland_state {
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
     uint32_t keyboard_code;
+    int mpkey;
+    int mpmod;
 
     /* DND */
     struct wl_data_device *dnd_ddev;
