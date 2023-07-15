@@ -127,7 +127,7 @@ static enum AVPixelFormat replace_j_format(enum AVPixelFormat fmt)
 
 static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, const char *filename)
 {
-    FILE* fp = fopen(filename, "wb");
+    FILE *fp = fopen(filename, "wb");
     if (!fp) {
         MP_ERR(ctx, "Error opening '%s' for writing!\n", filename);
         return false;
@@ -229,9 +229,8 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, const ch
     ret = avcodec_receive_packet(avctx, pkt);
     if (ret < 0)
         goto error_exit;
-    success = true;
 
-    fwrite(pkt->data, pkt->size, 1, fp);
+    success = fwrite(pkt->data, pkt->size, 1, fp) == 1;
 
 error_exit:
     avcodec_free_context(&avctx);
@@ -270,6 +269,7 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image,
     cinfo.client_data = &error_return_jmpbuf;
     if (setjmp(cinfo.client_data)) {
         jpeg_destroy_compress(&cinfo);
+        fclose(fp);
         return false;
     }
 

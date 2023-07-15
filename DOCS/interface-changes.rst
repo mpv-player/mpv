@@ -85,6 +85,7 @@ Interface changes
     - icc and gpu-shader cache are now saved by default (use --no-icc-shader-cache and
       --no-gpu-shader-cache to disable)
     - add `--directory-mode=recursive|lazy|ignore`
+    - ctrl+h now uses `auto-safe` rather than `auto` when turing on hardware decoding
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,

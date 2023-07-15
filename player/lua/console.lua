@@ -326,6 +326,9 @@ end
 
 function help_command(param)
     local cmdlist = mp.get_property_native('command-list')
+    table.sort(cmdlist, function(c1, c2)
+        return c1.name < c2.name
+    end)
     local error_style = '{\\1c&H7a77f2&}'
     local output = ''
     if param == '' then

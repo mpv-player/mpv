@@ -37,43 +37,12 @@ struct priv {
     struct wl_egl_window *egl_window;
 };
 
-static void egl_create_window(struct ra_ctx *ctx)
-{
-    struct priv *p = ctx->priv;
-    struct vo_wayland_state *wl = ctx->vo->wl;
-
-    p->egl_window = wl_egl_window_create(wl->surface,
-                                         mp_rect_w(wl->geometry),
-                                         mp_rect_h(wl->geometry));
-
-    p->egl_surface = mpegl_create_window_surface(
-        p->egl_display, p->egl_config, p->egl_window);
-    if (p->egl_surface == EGL_NO_SURFACE) {
-        p->egl_surface = eglCreateWindowSurface(
-            p->egl_display, p->egl_config, p->egl_window, NULL);
-    }
-
-    eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface, p->egl_context);
-    // eglMakeCurrent may not configure the draw or read buffers if the context
-    // has been made current previously. On nvidia GL_NONE is bound because EGL_NO_SURFACE
-    // is used initially and we must bind the read and draw buffers here.
-    if(!p->gl.es) {
-        p->gl.ReadBuffer(GL_BACK);
-        p->gl.DrawBuffer(GL_BACK);
-    }
-
-    eglSwapInterval(p->egl_display, 0);
-}
-
 static void resize(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo_wayland_state *wl = ctx->vo->wl;
 
     MP_VERBOSE(wl, "Handling resize on the egl side\n");
-
-    if (!p->egl_window)
-        egl_create_window(ctx);
 
     const int32_t width = mp_rect_w(wl->geometry);
     const int32_t height = mp_rect_h(wl->geometry);
@@ -149,9 +118,45 @@ static bool egl_create_context(struct ra_ctx *ctx)
     return true;
 }
 
+static void egl_create_window(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    struct vo_wayland_state *wl = ctx->vo->wl;
+
+    p->egl_window = wl_egl_window_create(wl->surface,
+                                         mp_rect_w(wl->geometry),
+                                         mp_rect_h(wl->geometry));
+
+    p->egl_surface = mpegl_create_window_surface(
+        p->egl_display, p->egl_config, p->egl_window);
+    if (p->egl_surface == EGL_NO_SURFACE) {
+        p->egl_surface = eglCreateWindowSurface(
+            p->egl_display, p->egl_config, p->egl_window, NULL);
+    }
+
+    eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface, p->egl_context);
+    // eglMakeCurrent may not configure the draw or read buffers if the context
+    // has been made current previously. On nvidia GL_NONE is bound because EGL_NO_SURFACE
+    // is used initially and we must bind the read and draw buffers here.
+    if(!p->gl.es) {
+        p->gl.ReadBuffer(GL_BACK);
+        p->gl.DrawBuffer(GL_BACK);
+    }
+
+    eglSwapInterval(p->egl_display, 0);
+}
+
 static bool wayland_egl_reconfig(struct ra_ctx *ctx)
 {
-    return vo_wayland_reconfig(ctx->vo);
+    struct priv *p = ctx->priv;
+
+    if (!vo_wayland_reconfig(ctx->vo))
+        return false;
+
+    if (!p->egl_window)
+        egl_create_window(ctx);
+
+    return true;
 }
 
 static void wayland_egl_uninit(struct ra_ctx *ctx)

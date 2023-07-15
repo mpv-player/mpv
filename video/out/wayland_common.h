@@ -49,6 +49,8 @@ struct vo_wayland_state {
     struct wl_registry      *registry;
     struct wl_shm           *shm;
     struct wl_surface       *surface;
+    struct wl_surface       *osd_surface;
+    struct wl_subsurface    *osd_subsurface;
     struct wl_surface       *video_surface;
     struct wl_surface       *callback_surface;
     struct wl_subsurface    *video_subsurface;
@@ -87,6 +89,11 @@ struct vo_wayland_state {
     void *content_type_manager;
     void *content_type;
     int current_content_type;
+
+    /* cursor-shape */
+    /* TODO: unvoid these if required wayland protocols is bumped to 1.32+ */
+    void *cursor_shape_manager;
+    void *cursor_shape_device;
 
     /* fractional-scale */
     /* TODO: unvoid these if required wayland protocols is bumped to 1.31+ */
@@ -128,6 +135,7 @@ struct vo_wayland_state {
     /* viewporter */
     struct wp_viewporter *viewporter;
     struct wp_viewport   *viewport;
+    struct wp_viewport   *osd_viewport;
     struct wp_viewport   *video_viewport;
 
     /* Input */

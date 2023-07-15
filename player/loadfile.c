@@ -1629,6 +1629,8 @@ static void play_current_file(struct MPContext *mpctx)
         goto terminate_playback;
 
     if (mpctx->demuxer->playlist) {
+        if (watch_later)
+            mp_delete_watch_later_conf(mpctx, mpctx->filename);
         struct playlist *pl = mpctx->demuxer->playlist;
         transfer_playlist(mpctx, pl, &end_event.playlist_insert_id,
                           &end_event.playlist_insert_num_entries);

@@ -174,6 +174,8 @@ typedef struct lavc_ctx {
     AVPacket *avpkt;
     bool use_hwdec;
     struct hwdec_info hwdec; // valid only if use_hwdec==true
+    bstr *attempted_hwdecs;
+    int num_attempted_hwdecs;
     AVRational codec_timebase;
     enum AVDiscard skip_frame;
     bool flushing;
@@ -233,14 +235,16 @@ struct autoprobe_info {
 const struct autoprobe_info hwdec_autoprobe_info[] = {
     {"d3d11va",         HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"dxva2",           HWDEC_FLAG_AUTO},
-    {"dxva2-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"d3d11va-copy",    HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"dxva2-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"nvdec",           HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"nvdec-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"vaapi",           HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"vaapi-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"vdpau",           HWDEC_FLAG_AUTO},
     {"vdpau-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"drm",             HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"drm-copy",        HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"mmal",            HWDEC_FLAG_AUTO},
     {"mmal-copy",       HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"mediacodec",      HWDEC_FLAG_AUTO},
@@ -475,10 +479,10 @@ static void select_and_set_hwdec(struct mp_filter *vd)
 
         bool hwdec_requested = !bstr_equals0(opt, "no");
         bool hwdec_auto_all = bstr_equals0(opt, "auto") ||
-                            bstr_equals0(opt, "yes") ||
                             bstr_equals0(opt, "");
         bool hwdec_auto_safe = bstr_equals0(opt, "auto-safe") ||
-                            bstr_equals0(opt, "auto-copy-safe");
+                            bstr_equals0(opt, "auto-copy-safe") ||
+                            bstr_equals0(opt, "yes");
         bool hwdec_auto_copy = bstr_equals0(opt, "auto-copy") ||
                             bstr_equals0(opt, "auto-copy-safe");
         bool hwdec_auto = hwdec_auto_all || hwdec_auto_copy || hwdec_auto_safe;
@@ -500,6 +504,18 @@ static void select_and_set_hwdec(struct mp_filter *vd)
                     continue;
                 hwdec_name_supported = true;
 
+                bool already_attempted = false;
+                for (int j = 0; j < ctx->num_attempted_hwdecs; j++) {
+                    if (bstr_equals0(ctx->attempted_hwdecs[j], hwdec->name)) {
+                        MP_DBG(vd, "Skipping previously attempted hwdec: %s\n",
+                               hwdec->name);
+                        already_attempted = true;
+                        break;
+                    }
+                }
+                if (already_attempted)
+                    continue;
+
                 const char *hw_codec = mp_codec_from_av_codec_id(hwdec->codec->id);
                 if (!hw_codec || strcmp(hw_codec, codec) != 0)
                     continue;
@@ -508,6 +524,16 @@ static void select_and_set_hwdec(struct mp_filter *vd)
                     continue;
 
                 MP_VERBOSE(vd, "Looking at hwdec %s...\n", hwdec->name);
+
+                /*
+                 * Past this point, any kind of failure that results in us
+                 * looking for a new hwdec should not lead to use trying this
+                 * hwdec again - so add it to the list, regardless of whether
+                 * initialisation will succeed or not.
+                 */
+                MP_TARRAY_APPEND(ctx, ctx->attempted_hwdecs,
+                                 ctx->num_attempted_hwdecs,
+                                 bstrdup(ctx, bstr0(hwdec->name)));
 
                 if (hwdec_auto_copy && !hwdec->copying) {
                     MP_VERBOSE(vd, "Not using this for auto-copy.\n");
@@ -599,7 +625,9 @@ static void force_fallback(struct mp_filter *vd)
 
     uninit_avctx(vd);
     int lev = ctx->hwdec_notified ? MSGL_WARN : MSGL_V;
-    mp_msg(vd->log, lev, "Falling back to software decoding.\n");
+    mp_msg(vd->log, lev, "Attempting next decoding method after failure of %.*s.\n",
+           BSTR_P(ctx->attempted_hwdecs[ctx->num_attempted_hwdecs - 1]));
+    select_and_set_hwdec(vd);
     init_avctx(vd);
 }
 
@@ -608,6 +636,16 @@ static void reinit(struct mp_filter *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
 
     uninit_avctx(vd);
+
+    /*
+     * Reset attempted hwdecs so that if the hwdec list is reconfigured
+     * we attempt all of them from the beginning. The most practical
+     * reason for this is that ctrl+h toggles between `no` and
+     * `auto-safe`, and we want to reevaluate from a clean slate each time.
+     */
+    TA_FREEP(&ctx->attempted_hwdecs);
+    ctx->num_attempted_hwdecs = 0;
+    ctx->hwdec_notified = false;
 
     select_and_set_hwdec(vd);
 
@@ -1116,7 +1154,6 @@ static void send_queued_packet(struct mp_filter *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
 
     assert(ctx->num_requeue_packets);
-    assert(!ctx->hw_probing);
 
     if (send_packet(vd, ctx->requeue_packets[0]) != AVERROR(EAGAIN)) {
         talloc_free(ctx->requeue_packets[0]);
@@ -1215,11 +1252,11 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
     if (ret == AVERROR(EAGAIN) && ctx->num_requeue_packets)
         return 0; // force retry, so send_queued_packet() gets called
 
-    if (!ctx->num_delay_queue)
+    if (ctx->num_delay_queue <= ctx->max_delay_queue && ret != AVERROR_EOF)
         return ret;
 
-    if (ctx->num_delay_queue <= ctx->max_delay_queue && ret != AVERROR_EOF)
-        return AVERROR(EAGAIN);
+    if (!ctx->num_delay_queue)
+        return ret;
 
     struct mp_image *res = ctx->delay_queue[0];
     MP_TARRAY_REMOVE_AT(ctx->delay_queue, ctx->num_delay_queue, 0);
