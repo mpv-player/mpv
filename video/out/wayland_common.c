@@ -1034,11 +1034,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         width = height = 0;
     }
 
-    int old_toplevel_width = wl->toplevel_width;
-    int old_toplevel_height = wl->toplevel_height;
-    wl->toplevel_width = width;
-    wl->toplevel_height = height;
-
     if (!wl->configured) {
         /* Save initial window size if the compositor gives us a hint here. */
         bool autofit_or_geometry = vo_opts->geometry.wh_valid || vo_opts->autofit.wh_valid ||
@@ -1137,10 +1132,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
         goto resize;
     }
-
-    if (old_toplevel_width == wl->toplevel_width &&
-        old_toplevel_height == wl->toplevel_height)
-        return;
 
     if (!wl->locked_size) {
         if (vo_opts->keepaspect) {
