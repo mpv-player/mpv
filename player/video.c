@@ -573,6 +573,16 @@ static bool check_for_hwdec_fallback(struct MPContext *mpctx)
     return true;
 }
 
+static bool check_for_forced_eof(struct MPContext *mpctx)
+{
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    struct mp_decoder_wrapper *dec = vo_c->track->dec;
+
+    bool forced_eof = false;
+    mp_decoder_wrapper_control(dec, VDCTRL_CHECK_FORCED_EOF, &forced_eof);
+    return forced_eof;
+}
+
 /* Update avsync before a new video frame is displayed. Actually, this can be
  * called arbitrarily often before the actual display.
  * This adjusts the time of the next video frame */
@@ -1041,6 +1051,11 @@ void write_video(struct MPContext *mpctx)
     if (r == VD_EOF) {
         if (check_for_hwdec_fallback(mpctx))
             return;
+        if (check_for_forced_eof(mpctx)) {
+            uninit_video_chain(mpctx);
+            handle_force_window(mpctx, true);
+            return;
+        }
         if (vo_c->filter->failed_output_conversion)
             goto error;
 

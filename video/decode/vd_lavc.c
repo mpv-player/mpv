@@ -1325,6 +1325,10 @@ static int control(struct mp_filter *vd, enum dec_ctrl cmd, void *arg)
     case VDCTRL_SET_FRAMEDROP:
         ctx->framedrop_flags = *(int *)arg;
         return CONTROL_TRUE;
+    case VDCTRL_CHECK_FORCED_EOF: {
+        *(bool *)arg = ctx->force_eof;
+        return CONTROL_TRUE;
+    }
     case VDCTRL_GET_BFRAMES: {
         AVCodecContext *avctx = ctx->avctx;
         if (!avctx)
