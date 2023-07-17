@@ -1898,9 +1898,7 @@ static void update_render_options(struct vo *vo)
     p->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     p->params.disable_fbos = opts->dumb_mode == 1;
     p->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
-#if PL_API_VER >= 277
     p->params.corner_rounding = p->corner_rounding;
-#endif
 
     // Map scaler options as best we can
     p->params.upscaler = map_scaler(p, SCALER_SCALE);
@@ -1946,7 +1944,6 @@ static void update_render_options(struct vo *vo)
         [TONE_MAPPING_ST2094_10] = &pl_tone_map_st2094_10,
     };
 
-#if PL_API_VER >= 269
     const struct pl_gamut_map_function *gamut_modes[] = {
         [GAMUT_CLIP]            = &pl_gamut_map_clip,
         [GAMUT_PERCEPTUAL]      = &pl_gamut_map_perceptual,
@@ -1959,36 +1956,6 @@ static void update_render_options(struct vo *vo)
         [GAMUT_LINEAR]          = &pl_gamut_map_linear,
     };
 
-    // Back-compat approximation, taken from libplacebo source code
-    static const float hybrid_mix[] = {
-        [TONE_MAP_MODE_RGB]     = 1.0f,
-        [TONE_MAP_MODE_MAX]     = 0.0f,
-        [TONE_MAP_MODE_LUMA]    = 0.0f,
-        [TONE_MAP_MODE_HYBRID]  = 0.20f,
-    };
-#else
-    static const enum pl_gamut_mode gamut_modes[] = {
-        [GAMUT_CLIP]            = PL_GAMUT_CLIP,
-        [GAMUT_WARN]            = PL_GAMUT_WARN,
-        [GAMUT_DESATURATE]      = PL_GAMUT_DESATURATE,
-        [GAMUT_DARKEN]          = PL_GAMUT_DARKEN,
-        // Unsupported
-        [GAMUT_PERCEPTUAL]      = PL_GAMUT_CLIP,
-        [GAMUT_RELATIVE]        = PL_GAMUT_CLIP,
-        [GAMUT_SATURATION]      = PL_GAMUT_CLIP,
-        [GAMUT_ABSOLUTE]        = PL_GAMUT_CLIP,
-        [GAMUT_LINEAR]          = PL_GAMUT_CLIP,
-    };
-
-    static const enum pl_tone_map_mode tone_map_modes[] = {
-        [TONE_MAP_MODE_AUTO]    = PL_TONE_MAP_AUTO,
-        [TONE_MAP_MODE_RGB]     = PL_TONE_MAP_RGB,
-        [TONE_MAP_MODE_MAX]     = PL_TONE_MAP_MAX,
-        [TONE_MAP_MODE_HYBRID]  = PL_TONE_MAP_HYBRID,
-        [TONE_MAP_MODE_LUMA]    = PL_TONE_MAP_LUMA,
-    };
-#endif
-
     p->color_map = pl_color_map_default_params;
     p->color_map.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
     p->color_map.tone_mapping_param = opts->tone_map.curve_param;
@@ -1996,23 +1963,10 @@ static void update_render_options(struct vo *vo)
     if (isnan(p->color_map.tone_mapping_param)) // vo_gpu compatibility
         p->color_map.tone_mapping_param = 0.0;
     p->color_map.visualize_lut = opts->tone_map.visualize;
-
-#if PL_API_VER >= 285
     p->color_map.contrast_recovery = opts->tone_map.contrast_recovery;
     p->color_map.contrast_smoothness = opts->tone_map.contrast_smoothness;
-#endif
-
-#if PL_API_VER >= 269
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
         p->color_map.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
-    if (opts->tone_map.mode != TONE_MAP_MODE_AUTO)
-        p->color_map.hybrid_mix = hybrid_mix[opts->tone_map.mode];
-#else
-    p->color_map.intent = opts->icc_opts->intent;
-    p->color_map.tone_mapping_mode = tone_map_modes[opts->tone_map.mode];
-    if (opts->tone_map.gamut_mode != GAMUT_AUTO)
-        p->color_map.gamut_mode = gamut_modes[opts->tone_map.gamut_mode];
-#endif
 
     switch (opts->dither_algo) {
     case DITHER_NONE:
