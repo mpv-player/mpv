@@ -474,6 +474,9 @@ static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
         MP_ERR(ctx, "Error sending frame\n");
         goto free_data;
     }
+    ret = avcodec_send_frame(avctx, NULL); // send EOF
+    if (ret < 0)
+        goto free_data;
 
     int pts = 0;
     log_side_data(ctx, avctx->coded_side_data, avctx->nb_coded_side_data);
@@ -485,35 +488,7 @@ static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
             MP_ERR(ctx, "Error receiving packet\n");
             goto free_data;
         }
-        pkt->pts = ++pts;
-        pkt->dts = pts;
-        pkt->stream_index = stream->index;
-        log_side_data(ctx, pkt->side_data, pkt->side_data_elems);
-
-        ret = av_write_frame(fmtctx, pkt);
-        if (ret < 0) {
-            MP_ERR(ctx, "Error writing frame\n");
-            goto free_data;
-        }
-        av_packet_unref(pkt);
-    }
-
-    ret = avcodec_send_frame(avctx, NULL);
-    if (ret < 0)  {
-        MP_ERR(ctx, "Error sending flushing frame\n");
-        goto free_data;
-    }
-
-    while (ret >= 0) {
-        ret = avcodec_receive_packet(avctx, pkt);
-        if (ret == AVERROR_EOF)
-            break;
-        if (ret != 0) {
-            MP_ERR(ctx, "Error receiving packet\n");
-            goto free_data;
-        }
-        pkt->pts = ++pts;
-        pkt->dts = pts;
+        pkt->dts = pkt->pts = ++pts;
         pkt->stream_index = stream->index;
         log_side_data(ctx, pkt->side_data, pkt->side_data_elems);
 
