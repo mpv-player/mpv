@@ -587,6 +587,8 @@ bool image_writer_high_depth(const struct image_writer_opts *opts)
 
 bool image_writer_flexible_csp(const struct image_writer_opts *opts)
 {
+    if (!opts->tag_csp)
+        return false;
     return false
 #if HAVE_JPEGXL
         || opts->format == AV_CODEC_ID_JPEGXL

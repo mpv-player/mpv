@@ -350,7 +350,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
         .subs = mode != 0,
         .osd = mode == MODE_FULL_WINDOW,
         .high_bit_depth = high_depth && imgopts->high_bit_depth,
-        .native_csp = imgopts->tag_csp && image_writer_flexible_csp(imgopts),
+        .native_csp = image_writer_flexible_csp(imgopts),
     };
     if (!mpctx->opts->screenshot_sw)
         vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &ctrl);
