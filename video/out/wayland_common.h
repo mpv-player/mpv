@@ -62,7 +62,6 @@ struct vo_wayland_state {
     struct vo_wayland_output *current_output;
     int bounded_height;
     int bounded_width;
-    int gcd;
     int reduced_height;
     int reduced_width;
     int toplevel_width;
