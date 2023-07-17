@@ -124,6 +124,43 @@ static enum AVPixelFormat replace_j_format(enum AVPixelFormat fmt)
     return fmt;
 }
 
+static void prepare_avframe(AVFrame *pic, AVCodecContext *avctx,
+                            mp_image_t *image, bool tag_csp,
+                            struct mp_log *log)
+{
+    for (int n = 0; n < 4; n++) {
+        pic->data[n] = image->planes[n];
+        pic->linesize[n] = image->stride[n];
+    }
+    pic->format = avctx->pix_fmt;
+    pic->width = avctx->width;
+    pic->height = avctx->height;
+    avctx->color_range = pic->color_range =
+        mp_csp_levels_to_avcol_range(image->params.color.levels);
+
+    if (!tag_csp)
+        return;
+    avctx->color_primaries = pic->color_primaries =
+        mp_csp_prim_to_avcol_pri(image->params.color.primaries);
+    avctx->color_trc = pic->color_trc =
+        mp_csp_trc_to_avcol_trc(image->params.color.gamma);
+    avctx->colorspace = pic->colorspace =
+        mp_csp_to_avcol_spc(image->params.color.space);
+    avctx->chroma_sample_location = pic->chroma_location =
+        mp_chroma_location_to_av(image->params.chroma_location);
+    mp_dbg(log, "mapped color params:\n"
+        "  trc = %s\n"
+        "  primaries = %s\n"
+        "  range = %s\n"
+        "  colorspace = %s\n"
+        "  chroma_location = %s\n",
+        av_color_transfer_name(avctx->color_trc),
+        av_color_primaries_name(avctx->color_primaries),
+        av_color_range_name(avctx->color_range),
+        av_color_space_name(avctx->colorspace),
+        av_chroma_location_name(avctx->chroma_sample_location)
+    );
+}
 
 static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, const char *filename)
 {
@@ -154,7 +191,6 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, const ch
     avctx->time_base = AV_TIME_BASE_Q;
     avctx->width = image->w;
     avctx->height = image->h;
-    avctx->color_range = mp_csp_levels_to_avcol_range(image->params.color.levels);
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
     if (codec->id == AV_CODEC_ID_MJPEG) {
         // Annoying deprecated garbage for the jpg encoder.
@@ -198,23 +234,10 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, const ch
     pic = av_frame_alloc();
     if (!pic)
         goto error_exit;
-    for (int n = 0; n < 4; n++) {
-        pic->data[n] = image->planes[n];
-        pic->linesize[n] = image->stride[n];
-    }
-    pic->format = avctx->pix_fmt;
-    pic->width = avctx->width;
-    pic->height = avctx->height;
-    pic->color_range = avctx->color_range;
+    prepare_avframe(pic, avctx, image, ctx->opts->tag_csp, ctx->log);
     if (codec->id == AV_CODEC_ID_MJPEG) {
         int qscale = 1 + (100 - ctx->opts->jpeg_quality) * 30 / 100;
         pic->quality = qscale * FF_QP2LAMBDA;
-    }
-    if (ctx->opts->tag_csp) {
-        avctx->color_primaries = pic->color_primaries =
-            mp_csp_prim_to_avcol_pri(image->params.color.primaries);
-        avctx->color_trc = pic->color_trc =
-            mp_csp_trc_to_avcol_trc(image->params.color.gamma);
     }
 
     int ret = avcodec_send_frame(avctx, pic);
@@ -390,26 +413,10 @@ static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
         goto free_data;
     }
 
-    for (int n = 0; n < 4; n++) {
-        pic->data[n] = image->planes[n];
-        pic->linesize[n] = image->stride[n];
-    }
-    pic->format = avctx->pix_fmt;
-    pic->width = avctx->width;
-    pic->height = avctx->height;
+    prepare_avframe(pic, avctx, image, ctx->opts->tag_csp, ctx->log);
     // Not setting this flag caused ffmpeg to output avif that was not passing
     // standard checks but ffmpeg would still read and not complain...
     avctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-    avctx->color_range = pic->color_range =
-        mp_csp_levels_to_avcol_range(image->params.color.levels);
-    avctx->color_primaries = pic->color_primaries =
-        mp_csp_prim_to_avcol_pri(image->params.color.primaries);
-    avctx->color_trc = pic->color_trc =
-        mp_csp_trc_to_avcol_trc(image->params.color.gamma);
-    avctx->colorspace = pic->colorspace =
-        mp_csp_to_avcol_spc(image->params.color.space);
-    avctx->chroma_sample_location = pic->chroma_location =
-        mp_chroma_location_to_av(image->params.chroma_location);
 
     ret = avcodec_open2(avctx, codec, NULL);
     if (ret < 0) {
@@ -442,19 +449,6 @@ static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
         MP_ERR(ctx, "Could not copy parameters from context\n");
         goto free_data;
     }
-
-    MP_DBG(ctx, "write_avif() Codec Context:\n"
-        "  color_trc = %s\n"
-        "  color_primaries = %s\n"
-        "  color_range = %s\n"
-        "  colorspace = %s\n"
-        "  chroma_sample_location = %s\n",
-        av_color_transfer_name(avctx->color_trc),
-        av_color_primaries_name(avctx->color_primaries),
-        av_color_range_name(avctx->color_range),
-        av_color_space_name(avctx->colorspace),
-        av_chroma_location_name(avctx->chroma_sample_location)
-    );
 
     ret = avformat_init_output(fmtctx, NULL);
     if (ret < 0) {
