@@ -579,7 +579,7 @@ static char **process_langs(char **in)
     return out;
 }
 
-const char *get_audio_lang(struct MPContext *mpctx)
+static const char *get_audio_lang(struct MPContext *mpctx)
 {
     // If we have a single current audio track, this is simple.
     if (mpctx->current_track[0][STREAM_AUDIO])
