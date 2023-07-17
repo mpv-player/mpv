@@ -1235,13 +1235,25 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
     int ret = decode_frame(vd);
 
     if (ctx->hwdec_failed) {
-        // Failed hardware decoding? Try again in software.
+        // Failed hardware decoding? Try the next one, and eventually software.
         struct demux_packet **pkts = ctx->sent_packets;
         int num_pkts = ctx->num_sent_packets;
         ctx->sent_packets = NULL;
         ctx->num_sent_packets = 0;
 
-        force_fallback(vd);
+        /*
+         * We repeatedly force_fallback until we get an avctx, because there are
+         * certain hwdecs that are really full decoders, and so if these fail,
+         * they also fail to give us a valid avctx, and the early return path
+         * here will simply give up on decoding completely if there is no
+         * decoder. We should never hit an infinite loop as the hwdec list is
+         * finite and we will eventually exhaust it and fall back to software
+         * decoding (and in practice, most hwdecs are hwaccels and so the
+         * decoder will successfully init even if the hwaccel fails later.)
+         */
+        do {
+            force_fallback(vd);
+        } while (!ctx->avctx);
 
         ctx->requeue_packets = pkts;
         ctx->num_requeue_packets = num_pkts;
