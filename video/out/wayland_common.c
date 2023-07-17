@@ -189,7 +189,7 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
 static void get_shape_device(struct vo_wayland_state *wl);
-static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b);
+static int greatest_common_divisor(int a, int b);
 static void guess_focus(struct vo_wayland_state *wl);
 static void prepare_resize(struct vo_wayland_state *wl, int width, int height);
 static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
@@ -1584,24 +1584,12 @@ static void get_shape_device(struct vo_wayland_state *wl)
 #endif
 }
 
-static void greatest_common_divisor(struct vo_wayland_state *wl, int a, int b)
+static int greatest_common_divisor(int a, int b)
 {
-    // euclidean algorithm
-    int larger;
-    int smaller;
-    if (a > b) {
-        larger = a;
-        smaller = b;
-    } else {
-        larger = b;
-        smaller = a;
-    }
-    int remainder = larger - smaller * floor(larger/smaller);
-    if (remainder == 0) {
-        wl->gcd = smaller;
-    } else {
-        greatest_common_divisor(wl, smaller, remainder);
-    }
+    int rem = a % b;
+    if (rem == 0)
+        return b;
+    return greatest_common_divisor(b, rem);
 }
 
 static void guess_focus(struct vo_wayland_state *wl)
@@ -1784,9 +1772,9 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
     vo_calc_window_geometry2(vo, &screenrc, wl->scaling, &geo);
     vo_apply_window_geometry(vo, &geo);
 
-    greatest_common_divisor(wl, vo->dwidth, vo->dheight);
-    wl->reduced_width = vo->dwidth / wl->gcd;
-    wl->reduced_height = vo->dheight / wl->gcd;
+    int gcd = greatest_common_divisor(vo->dwidth, vo->dheight);
+    wl->reduced_width = vo->dwidth / gcd;
+    wl->reduced_height = vo->dheight / gcd;
 
     wl->window_size = (struct mp_rect){0, 0, vo->dwidth, vo->dheight};
 
