@@ -372,7 +372,7 @@ static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
 
-    av_opt_set_int(avctx, "still-image", 1, AV_OPT_SEARCH_CHILDREN);
+    av_opt_set_int(avctx, "still-picture", 1, AV_OPT_SEARCH_CHILDREN);
 
     AVDictionary *avd = NULL;
     mp_set_avdict(&avd, ctx->opts->avif_opts);
