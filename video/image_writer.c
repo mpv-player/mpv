@@ -346,10 +346,8 @@ static void log_side_data(struct image_writer_ctx *ctx, AVPacketSideData *data,
         MP_DBG(ctx, "write_avif() packet side data:\n");
     for (int i = 0; i < size; i++) {
         AVPacketSideData *sd = &data[i];
-        int k = 0;
-        for (; k < MPMIN(sd->size, 64); k++)
-            sprintf(dbgbuff + k*2, "%02x", sd->data[k]);
-        dbgbuff[k] = '\0';
+        for (int k = 0; k < MPMIN(sd->size, 64); k++)
+            snprintf(dbgbuff + k*2, 3, "%02x", (int)sd->data[k]);
         MP_DBG(ctx, "  [%d] = {[%s], '%s'}\n",
                i, av_packet_side_data_name(sd->type), dbgbuff);
     }
