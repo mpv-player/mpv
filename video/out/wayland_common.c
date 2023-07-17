@@ -890,6 +890,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     bool is_fullscreen = false;
     bool is_activated = false;
     bool is_suspended = false;
+    bool is_tiled = false;
     enum xdg_toplevel_state *state;
     wl_array_for_each(state, states) {
         switch (*state) {
@@ -913,6 +914,8 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         case XDG_TOPLEVEL_STATE_TILED_LEFT:
         case XDG_TOPLEVEL_STATE_TILED_RIGHT:
         case XDG_TOPLEVEL_STATE_TILED_BOTTOM:
+            is_tiled = true;
+            break;
         case XDG_TOPLEVEL_STATE_MAXIMIZED:
             is_maximized = true;
             break;
@@ -937,7 +940,9 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->window_maximized);
     }
 
-    wl->locked_size = is_fullscreen || is_maximized;
+    wl->tiled = is_tiled;
+
+    wl->locked_size = is_fullscreen || is_maximized || is_tiled;
 
     if (wl->requested_decoration)
         request_decoration_mode(wl, wl->requested_decoration);
@@ -2091,7 +2096,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        if (wl->vo_opts->window_maximized) {
+        if (wl->vo_opts->window_maximized || wl->tiled) {
             s[0] = mp_rect_w(wl->geometry);
             s[1] = mp_rect_h(wl->geometry);
         } else {
@@ -2106,7 +2111,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         wl->window_size.y0 = 0;
         wl->window_size.x1 = s[0];
         wl->window_size.y1 = s[1];
-        if (!wl->vo_opts->fullscreen) {
+        if (!wl->vo_opts->fullscreen && !wl->tiled) {
             if (wl->vo_opts->window_maximized) {
                 xdg_toplevel_unset_maximized(wl->xdg_toplevel);
                 wl_display_dispatch_pending(wl->display);
