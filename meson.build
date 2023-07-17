@@ -934,16 +934,8 @@ features += {'libplacebo': libplacebo.found()}
 if features['libplacebo']
     dependencies += libplacebo
     sources += files('video/out/placebo/ra_pl.c',
-                     'video/out/placebo/utils.c')
-endif
-
-libplacebo_next = get_option('libplacebo-next').require(
-    features['libplacebo'] and libplacebo.version().version_compare('>=5.264.0'),
-    error_message: 'libplacebo v5.264.0+ was not found!',
-)
-features += {'libplacebo-next': libplacebo_next.allowed()}
-if features['libplacebo-next']
-    sources += files('video/out/vo_gpu_next.c',
+                     'video/out/placebo/utils.c',
+                     'video/out/vo_gpu_next.c',
                      'video/out/gpu_next/context.c')
 endif
 
@@ -1779,7 +1771,7 @@ if get_option('tests')
 endif
 
 summary({'d3d11': features['d3d11'],
-         'gpu-next': features['libplacebo-next'],
+         'gpu-next': features['libplacebo'],
          'javascript': features['javascript'],
          'libmpv': get_option('libmpv'),
          'lua': features['lua'],
