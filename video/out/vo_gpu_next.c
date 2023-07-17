@@ -1967,6 +1967,11 @@ static void update_render_options(struct vo *vo)
         p->color_map.tone_mapping_param = 0.0;
     p->color_map.visualize_lut = opts->tone_map.visualize;
 
+#if PL_API_VER >= 285
+    p->color_map.contrast_recovery = opts->tone_map.contrast_recovery;
+    p->color_map.contrast_smoothness = opts->tone_map.contrast_smoothness;
+#endif
+
 #if PL_API_VER >= 269
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
         p->color_map.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];

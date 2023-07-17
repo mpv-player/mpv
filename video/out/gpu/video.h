@@ -133,6 +133,8 @@ struct gl_tone_map_opts {
     float decay_rate;
     float scene_threshold_low;
     float scene_threshold_high;
+    float contrast_recovery;
+    float contrast_smoothness;
     int gamut_mode;
     bool visualize;
 };
