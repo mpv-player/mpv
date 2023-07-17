@@ -371,6 +371,11 @@ static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
     avctx->pkt_timebase = (AVRational){1, 30};
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
+    if (avctx->pix_fmt == AV_PIX_FMT_NONE) {
+        MP_ERR(ctx, "Image format %s not supported by lavc.\n",
+               mp_imgfmt_to_name(image->imgfmt));
+        goto free_data;
+    }
 
     av_opt_set_int(avctx, "still-picture", 1, AV_OPT_SEARCH_CHILDREN);
 
