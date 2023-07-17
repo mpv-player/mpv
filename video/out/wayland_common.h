@@ -74,6 +74,7 @@ struct vo_wayland_state {
     bool focused;
     bool frame_wait;
     bool hidden;
+    bool locked_size;
     bool state_change;
     bool toplevel_configured;
     int display_fd;
