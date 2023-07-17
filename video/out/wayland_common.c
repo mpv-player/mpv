@@ -272,8 +272,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         mp_input_put_key(wl->vo->input_ctx, button | state | wl->mpmod);
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
-        (!wl->vo_opts->fullscreen) && (!wl->vo_opts->window_maximized) &&
-        (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN))
+        !wl->locked_size && (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN))
     {
         uint32_t edges;
         // Implement an edge resize zone if there are no decorations
@@ -938,6 +937,8 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->window_maximized);
     }
 
+    wl->locked_size = is_fullscreen || is_maximized;
+
     if (wl->requested_decoration)
         request_decoration_mode(wl, wl->requested_decoration);
 
@@ -952,7 +953,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     }
 
     if (wl->state_change) {
-        if (!is_fullscreen && !is_maximized) {
+        if (!wl->locked_size) {
             wl->geometry = wl->window_size;
             wl->state_change = false;
             goto resize;
@@ -961,7 +962,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
 
     /* Reuse old size if either of these are 0. */
     if (width == 0 || height == 0) {
-        if (!is_fullscreen && !is_maximized) {
+        if (!wl->locked_size) {
             wl->geometry = wl->window_size;
         }
         goto resize;
@@ -971,7 +972,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         old_toplevel_height == wl->toplevel_height)
         return;
 
-    if (!is_fullscreen && !is_maximized) {
+    if (!wl->locked_size) {
         if (vo_opts->keepaspect) {
             double scale_factor = (double)width / wl->reduced_width;
             width = ceil(wl->reduced_width * scale_factor);
@@ -1785,7 +1786,7 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
     wl->window_size = (struct mp_rect){0, 0, vo->dwidth, vo->dheight};
 
     if (resize) {
-        if (!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized)
+        if (!wl->locked_size)
             wl->geometry = wl->window_size;
         prepare_resize(wl, 0, 0);
     }
@@ -2340,8 +2341,8 @@ bool vo_wayland_reconfig(struct vo *vo)
     if (wl->opts->configure_bounds)
         set_window_bounds(wl);
 
-    if ((!wl->vo_opts->fullscreen && !wl->vo_opts->window_maximized) ||
-        mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0)
+    if (mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0 ||
+        !wl->locked_size)
     {
         wl->geometry = wl->window_size;
     }
