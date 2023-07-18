@@ -77,6 +77,10 @@ function _mpv_generate_arguments {
       # Save this for later; we might not have parsed the target option yet
       option_aliases+="$name $match[2]"
 
+    elif [[ $desc =~ $'^removed ' ]]; then
+
+      # skip
+
     else
 
       # Option takes argument
