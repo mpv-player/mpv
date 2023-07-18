@@ -42,7 +42,7 @@ function _mpv_generate_arguments {
   local -a option_aliases=()
 
   local list_options_line
-  for list_options_line in "${(@f)$($~words[1] --list-options)}"; do
+  for list_options_line in "${(@f)$($~words[1] --no-config --list-options)}"; do
 
     [[ $list_options_line =~ $'^[ \t]+--([^ \t]+)[ \t]*(.*)' ]] || continue
 
