@@ -18,7 +18,7 @@
 #
 
 # Cache all the mpv options
-_mpv_options=$(mpv --list-options)
+_mpv_options=$(mpv --no-config --list-options)
 
 _mpv_get_args()
 {
