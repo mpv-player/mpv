@@ -73,9 +73,12 @@ _mpv_get_args()
 }
 
 # This regex detects special options where we don't want an '=' appended
-_mpv_special_regex='Flag.*\[not in config files\]|Print'
-_mpv_regular_options=($(echo "$_mpv_options" | grep -v -E "$_mpv_special_regex" |awk '{print "\\"$1;}' | grep '\--'))
-_mpv_special_options=($(echo "$_mpv_options" | grep -E "$_mpv_special_regex" |awk '{print "\\"$1;}' | grep '\--'))
+_mpv_special_regex='\s(Flag.*\[not in config files\]|Print)'
+_mpv_skip_regex='\sremoved \[deprecated\]'
+_mpv_regular_options=($(echo "$_mpv_options" | grep -vE "$_mpv_skip_regex" | \
+  grep -vE "$_mpv_special_regex" | awk '{print "\\"$1;}' | grep '\--'))
+_mpv_special_options=($(echo "$_mpv_options" | grep -vE "$_mpv_skip_regex" | \
+  grep -E "$_mpv_special_regex" | awk '{print "\\"$1;}' | grep '\--'))
 
 _mpv()
 {
