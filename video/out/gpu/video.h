@@ -102,14 +102,6 @@ enum tone_mapping {
     TONE_MAPPING_ST2094_10,
 };
 
-enum tone_mapping_mode {
-    TONE_MAP_MODE_AUTO,
-    TONE_MAP_MODE_RGB,
-    TONE_MAP_MODE_MAX,
-    TONE_MAP_MODE_HYBRID,
-    TONE_MAP_MODE_LUMA,
-};
-
 enum gamut_mode {
     GAMUT_AUTO,
     GAMUT_CLIP,
@@ -128,7 +120,6 @@ struct gl_tone_map_opts {
     float curve_param;
     float max_boost;
     bool inverse;
-    int mode;
     int compute_peak;
     float decay_rate;
     float scene_threshold_low;
