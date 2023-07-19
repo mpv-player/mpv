@@ -324,11 +324,13 @@ static char *gen_fname(struct mp_cmd_ctx *cmd, const char *file_ext)
     }
 }
 
-static void add_subs(struct MPContext *mpctx, struct mp_image *image)
+static void add_osd(struct MPContext *mpctx, struct mp_image *image, int mode)
 {
     struct mp_osd_res res = osd_res_from_image_params(&image->params);
-    osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
-                      OSD_DRAW_SUB_ONLY, image);
+    if (mode == MODE_SUBTITLES) {
+        osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
+                          OSD_DRAW_SUB_ONLY, image);
+    }
 }
 
 static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
@@ -338,35 +340,38 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
     const struct image_writer_opts *imgopts = mpctx->opts->screenshot_image_opts;
     if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
         mode = 0;
-    bool need_add_subs = mode == MODE_SUBTITLES;
 
     if (!mpctx->video_out || !mpctx->video_out->config_ok)
         return NULL;
 
     vo_wait_frame(mpctx->video_out); // important for each-frame mode
 
+    bool use_sw = mpctx->opts->screenshot_sw;
+    bool window = mode == MODE_FULL_WINDOW;
     struct voctrl_screenshot ctrl = {
-        .scaled = mode == MODE_FULL_WINDOW,
+        .scaled = window,
         .subs = mode != 0,
-        .osd = mode == MODE_FULL_WINDOW,
+        .osd = window,
         .high_bit_depth = high_depth && imgopts->high_bit_depth,
         .native_csp = image_writer_flexible_csp(imgopts),
     };
-    if (!mpctx->opts->screenshot_sw)
+    if (!use_sw)
         vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &ctrl);
     image = ctrl.res;
-    if (image)
-        need_add_subs = false;
 
-    if (!image && mode != MODE_FULL_WINDOW)
-        image = vo_get_current_frame(mpctx->video_out);
-    if (!image) {
+    if (!use_sw && !image && window)
         vo_control(mpctx->video_out, VOCTRL_SCREENSHOT_WIN, &image);
-        mode = MODE_FULL_WINDOW;
+
+    if (!image) {
+        use_sw = true;
+        MP_VERBOSE(mpctx->screenshot_ctx, "Falling back to software screenshot.\n");
+        image = vo_get_current_frame(mpctx->video_out);
     }
+
     if (!image)
         return NULL;
 
+    // vo_get_current_frame() can return a hardware frame, which we have to download first.
     if (image->fmt.flags & MP_IMGFLAG_HWACCEL) {
         struct mp_image *nimage = mp_image_hw_download(image, NULL);
         talloc_free(image);
@@ -375,8 +380,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
         image = nimage;
     }
 
-    if (need_add_subs)
-        add_subs(mpctx, image);
+    if (use_sw && mode != 0)
+        add_osd(mpctx, image, mode);
     mp_image_params_guess_csp(&image->params);
     return image;
 }
