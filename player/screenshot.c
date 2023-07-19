@@ -326,10 +326,16 @@ static char *gen_fname(struct mp_cmd_ctx *cmd, const char *file_ext)
 
 static void add_osd(struct MPContext *mpctx, struct mp_image *image, int mode)
 {
-    struct mp_osd_res res = osd_res_from_image_params(&image->params);
-    if (mode == MODE_SUBTITLES) {
+    bool window = mode == MODE_FULL_WINDOW;
+    struct mp_osd_res res = window ? osd_get_vo_res(mpctx->video_out->osd) :
+                            osd_res_from_image_params(&image->params);
+    if (mode == MODE_SUBTITLES || window) {
         osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
                           OSD_DRAW_SUB_ONLY, image);
+    }
+    if (window) {
+        osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
+                          OSD_DRAW_OSD_ONLY, image);
     }
 }
 
@@ -368,17 +374,34 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
         image = vo_get_current_frame(mpctx->video_out);
     }
 
-    if (!image)
-        return NULL;
-
     // vo_get_current_frame() can return a hardware frame, which we have to download first.
-    if (image->fmt.flags & MP_IMGFLAG_HWACCEL) {
+    if (image && image->fmt.flags & MP_IMGFLAG_HWACCEL) {
         struct mp_image *nimage = mp_image_hw_download(image, NULL);
         talloc_free(image);
         if (!nimage)
             return NULL;
         image = nimage;
     }
+
+    if (use_sw && image && window) {
+        struct mp_osd_res res = osd_get_vo_res(mpctx->video_out->osd);
+        struct mp_osd_res image_res = osd_res_from_image_params(&image->params);
+        if (!osd_res_equals(res, image_res)) {
+            struct mp_image *nimage = mp_image_alloc(image->imgfmt, res.w, res.h);
+            if (!nimage) {
+                talloc_free(image);
+                return NULL;
+            }
+            struct mp_sws_context *sws = mp_sws_alloc(NULL);
+            mp_sws_scale(sws, nimage, image);
+            talloc_free(image);
+            talloc_free(sws);
+            image = nimage;
+        }
+    }
+
+    if (!image)
+        return NULL;
 
     if (use_sw && mode != 0)
         add_osd(mpctx, image, mode);
