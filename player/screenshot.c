@@ -324,11 +324,17 @@ static char *gen_fname(struct mp_cmd_ctx *cmd, const char *file_ext)
     }
 }
 
-static void add_subs(struct MPContext *mpctx, struct mp_image *image)
+static void render_on_top(struct MPContext *mpctx, struct mp_image *image,
+                          bool add_subs, bool add_osd)
 {
     struct mp_osd_res res = osd_res_from_image_params(&image->params);
-    osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
-                      OSD_DRAW_SUB_ONLY, image);
+    if (add_subs)
+        osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
+                          OSD_DRAW_SUB_ONLY, image);
+    if (add_osd)
+        osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
+                          OSD_DRAW_OSD_ONLY, image);
+
 }
 
 static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
@@ -338,7 +344,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
     const struct image_writer_opts *imgopts = mpctx->opts->screenshot_image_opts;
     if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
         mode = 0;
-    bool need_add_subs = mode == MODE_SUBTITLES;
+    bool need_add_osd = mode == MODE_FULL_WINDOW && mpctx->opts->screenshot_sw;
+    bool need_add_subs = mode == MODE_SUBTITLES || need_add_osd;
 
     if (!mpctx->video_out || !mpctx->video_out->config_ok)
         return NULL;
@@ -358,12 +365,13 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
     if (image)
         need_add_subs = false;
 
-    if (!image && mode != MODE_FULL_WINDOW)
+    if (!image)
         image = vo_get_current_frame(mpctx->video_out);
     if (!image) {
         vo_control(mpctx->video_out, VOCTRL_SCREENSHOT_WIN, &image);
         mode = MODE_FULL_WINDOW;
     }
+
     if (!image)
         return NULL;
 
@@ -375,8 +383,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
         image = nimage;
     }
 
-    if (need_add_subs)
-        add_subs(mpctx, image);
+    if (need_add_subs || need_add_osd)
+        render_on_top(mpctx, image, need_add_subs, need_add_osd);
     mp_image_params_guess_csp(&image->params);
     return image;
 }
