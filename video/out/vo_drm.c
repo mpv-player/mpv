@@ -440,12 +440,7 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *arg)
 {
-    struct priv *p = vo->priv;
-
     switch (request) {
-    case VOCTRL_SCREENSHOT_WIN:
-        *(struct mp_image**)arg = mp_image_new_copy(p->cur_frame);
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         if (vo->config_ok)
             reconfig(vo, vo->params);
