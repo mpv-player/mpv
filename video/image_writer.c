@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -502,7 +503,7 @@ static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
         MP_ERR(ctx, "Could not write trailer\n");
         goto free_data;
     }
-    MP_DBG(ctx, "write_avif(): avio_size() = %ld\n", avio_size(avioctx));
+    MP_DBG(ctx, "write_avif(): avio_size() = %"PRIi64"\n", avio_size(avioctx));
 
     success = true;
 
