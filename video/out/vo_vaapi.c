@@ -684,6 +684,10 @@ static void draw_osd(struct vo *vo)
         int rw = mp_rect_w(*rc);
         int rh = mp_rect_h(*rc);
 
+        // reduce width of last slice to prevent overflow
+        if (n == num_mod_rc - 1)
+            rw = w - rc->x0;
+
         void *src = mp_image_pixel_ptr(osd, 0, rc->x0, rc->y0);
         void *dst = vaimg.planes[0] + rc->y0 * vaimg.stride[0] + rc->x0 * 4;
 
