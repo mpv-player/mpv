@@ -1142,9 +1142,8 @@ function window_controls(topbar)
     -- deadzone below window controls
     local sh_area_y0, sh_area_y1
     sh_area_y0 = user_opts.barmargin
-    sh_area_y1 = (wc_geo.y + (wc_geo.h / 2)) +
-                 get_align(1 - (2 * user_opts.deadzonesize),
-                 osc_param.playresy - (wc_geo.y + (wc_geo.h / 2)), 0, 0)
+    sh_area_y1 = wc_geo.y + get_align(1 - (2 * user_opts.deadzonesize),
+                                      osc_param.playresy - wc_geo.y, 0, 0)
     add_area("showhide_wc", wc_geo.x, sh_area_y0, wc_geo.w, sh_area_y1)
 
     if topbar then
@@ -1532,13 +1531,11 @@ function bar_layout(direction)
     if direction > 0 then
         -- deadzone below OSC
         sh_area_y0 = user_opts.barmargin
-        sh_area_y1 = (osc_geo.y + (osc_geo.h / 2)) +
-                     get_align(1 - (2*user_opts.deadzonesize),
-                     osc_param.playresy - (osc_geo.y + (osc_geo.h / 2)), 0, 0)
+        sh_area_y1 = osc_geo.y + get_align(1 - (2 * user_opts.deadzonesize),
+                                           osc_param.playresy - osc_geo.y, 0, 0)
     else
         -- deadzone above OSC
-        sh_area_y0 = get_align(-1 + (2*user_opts.deadzonesize),
-                               osc_geo.y - (osc_geo.h / 2), 0, 0)
+        sh_area_y0 = get_align(-1 + (2 * user_opts.deadzonesize), osc_geo.y, 0, 0)
         sh_area_y1 = osc_param.playresy - user_opts.barmargin
     end
     add_area("showhide", 0, sh_area_y0, osc_param.playresx, sh_area_y1)
