@@ -43,6 +43,7 @@ struct sd_ass_priv {
     struct ass_renderer *ass_renderer;
     struct ass_track *ass_track;
     struct ass_track *shadow_track; // for --sub-ass=no rendering
+    bool ass_configured;
     bool is_converted;
     struct lavc_conv *converter;
     struct sd_filter **filters;
@@ -54,6 +55,7 @@ struct sd_ass_priv {
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
+    struct mp_osd_res osd;
     int64_t *seen_packets;
     int num_seen_packets;
     bool duration_unknown;
@@ -448,6 +450,34 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     if (converted)
         ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
 #endif
+    if (converted) {
+        bool override_playres = true;
+        char **ass_force_style_list = opts->ass_force_style_list;
+        for (int i = 0; ass_force_style_list && ass_force_style_list[i]; i++) {
+            if (bstr_find0(bstr0(ass_force_style_list[i]), "PlayResX") >= 0)
+                override_playres = false;
+        }
+
+        // srt to ass conversion from ffmpeg has fixed PlayResX of 384 with an
+        // aspect of 4:3. Starting with libass f08f8ea5 (pre 0.17) PlayResX
+        // affects shadow and border widths, among others, so to render borders
+        // and shadows correctly, we adjust PlayResX according to the DAR.
+        // But PlayResX also affects margins, so we adjust those too.
+        // This should ensure basic srt-to-ass ffmpeg conversion has correct
+        // borders, but there could be other issues with some srt extensions
+        // and/or different source formats which would be exposed over time.
+        // Make these adjustments only if the user didn't set PlayResX.
+        if (override_playres) {
+            int vidw = dim->w - (dim->ml + dim->mr);
+            int vidh = dim->h - (dim->mt + dim->mb);
+            track->PlayResX = track->PlayResY * (double)vidw / MPMAX(vidh, 1);
+            // ffmpeg and mpv use a default PlayResX of 384 when it is not known,
+            // this comes from VSFilter.
+            double fix_margins = track->PlayResX / 384.0;
+            track->styles->MarginL = round(track->styles->MarginL * fix_margins);
+            track->styles->MarginR = round(track->styles->MarginR * fix_margins);
+        }
+    }
 }
 
 static bool has_overrides(char *s)
@@ -537,6 +567,10 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     ASS_Renderer *renderer = ctx->ass_renderer;
     struct sub_bitmaps *res = &(struct sub_bitmaps){0};
 
+    // Always update the osd_res
+    struct mp_osd_res old_osd = ctx->osd;
+    ctx->osd = dim;
+
     if (pts == MP_NOPTS_VALUE || !renderer)
         goto done;
 
@@ -555,7 +589,10 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
         if (isnormal(par))
             scale *= par;
     }
-    configure_ass(sd, &dim, converted, track);
+    if (!ctx->ass_configured || !osd_res_equals(old_osd, ctx->osd)) {
+        configure_ass(sd, &dim, converted, track);
+        ctx->ass_configured = true;
+    }
     ass_set_pixel_aspect(renderer, scale);
     if (!converted && (!opts->ass_style_override ||
                        opts->ass_vsfilter_blur_compat))
@@ -831,6 +868,7 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
             assobjects_destroy(sd);
             assobjects_init(sd);
         }
+        ctx->ass_configured = false; // ass always needs to be reconfigured
         return CONTROL_OK;
     }
     default:

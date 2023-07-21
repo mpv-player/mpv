@@ -4334,11 +4334,11 @@ Screenshot
     :avif:      AVIF
 
 ``--screenshot-tag-colorspace=<yes|no>``
-    Tag screenshots with the appropriate colorspace.
+    Tag screenshots with the appropriate colorspace (default: yes).
 
-    Note that not all formats are supported.
-
-    Default: ``yes``.
+    Note that not all formats support this. When it is unsupported, or when
+    this option is disabled, screenshots will be converted to sRGB before
+    being written.
 
 ``--screenshot-high-bit-depth=<yes|no>``
     If possible, write screenshots with a bit depth similar to the source
@@ -6487,6 +6487,15 @@ them.
         In such a configuration, we highly recommend setting ``--tone-mapping``
         to ``mobius`` or even ``clip``.
 
+``--target-contrast=<auto|10-1000000|inf>``
+    Specifies the measured contrast of the output display. ``--target-contrast``
+    in conjunction with ``--target-peak`` value is used to calculate display
+    black point. Used in black point compensation during HDR tone-mapping.
+    ``auto`` is the default and assumes 1000:1 contrast as a typical SDR display
+    would have or an infinite contrast when HDR ``--target-trc`` is used.
+    ``inf`` contrast specifies display with perfect black level, in practice OLED.
+    (Only for ``--vo=gpu-next``)
+
 ``--target-lut=<file>``
     Specifies a custom LUT file (in Adobe .cube format) to apply to the colors
     before display on-screen. This LUT is fed values in normalized RGB, after
@@ -6703,6 +6712,18 @@ them.
     exceeds the low threshold, mpv will make the averaging filter more
     aggressive, up to the limit of the high threshold (at which point the
     filter becomes instant).
+
+``--hdr-contrast-recovery=<0.0..2.0>``, ``--hdr-contrast-smoothness=<1.0..100.0>``
+    Enables the HDR contrast recovery algorithm, which is to designed to
+    enhance contrast of HDR video after tone mapping. The strength (default:
+    0.0) indicates the degree of contrast recovery, with 0.0 being completely
+    disabled and 1.0 being 100% strength. Values higher than 1.0 are allowed,
+    but may result in excessive sharpening. The smoothness (default: 3.5)
+    indicates the degree to which the HDR source is low-passed in order to
+    obtain contrast information - a value of 2.0 corresponds to 2x downscaling.
+    Users on low DPI displays (<= 100) may want to lower this value, while
+    users on very high DPI displays ("retina") may want to increase it. (Only
+    for ``vo=gpu-next``)
 
 ``--use-embedded-icc-profile``
     Load the embedded ICC profile contained in media files such as PNG images.

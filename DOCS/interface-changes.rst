@@ -27,6 +27,7 @@ Interface changes
 ::
 
  --- mpv 0.36.0 ---
+    - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
       `--icc-use-luma` has been added to use ICC profile luminance value.
       If target luminance and ICC luminance is not used, old behavior apply,
@@ -86,6 +87,8 @@ Interface changes
       --no-gpu-shader-cache to disable)
     - add `--directory-mode=recursive|lazy|ignore`
     - ctrl+h now uses `auto-safe` rather than `auto` when turing on hardware decoding
+    - add `--hdr-contrast-recovery` and `--hdr-contrast-smoothness`
+    - include `--hdr-contrast-recovery` in the `gpu-hq` profile
  --- mpv 0.35.0 ---
     - add the `--vo=gpu-next` video output driver, as well as the options
       `--allow-delayed-peak-detect`, `--builtin-scalers`,

@@ -540,8 +540,9 @@ static bool mp_zimg_state_init(struct mp_zimg_context *ctx,
     if (opts->fast)
         params.allow_approximate_gamma = 1;
 
-    if (ctx->src.color.sig_peak > 0)
-        params.nominal_peak_luminance = ctx->src.color.sig_peak;
+    // leave at default for SDR, which means 100 cd/m^2 for zimg
+    if (ctx->dst.color.sig_peak > 0 && mp_trc_is_hdr(ctx->dst.color.gamma))
+        params.nominal_peak_luminance = ctx->dst.color.sig_peak * MP_REF_WHITE;
 
     st->graph = zimg_filter_graph_build(&src_fmt, &dst_fmt, &params);
     if (!st->graph) {

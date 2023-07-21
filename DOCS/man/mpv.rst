@@ -1678,3 +1678,11 @@ future.
 
 Note that mpv likes to mix ``/`` and ``\`` path separators for simplicity.
 kernel32.dll accepts this, but cmd.exe does not.
+
+FILES ON MACOS
+==============
+
+On macOS the watch later directory is located at ``~/.config/mpv/watch_later/``
+and the cache directory is set to ``~/Library/Caches/io.mpv/``. These directories
+can't be overwritten by enviroment variables.
+Everything else is the same as `FILES`_.
