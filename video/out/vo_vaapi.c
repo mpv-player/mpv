@@ -792,6 +792,7 @@ static int preinit(struct vo *vo)
     if (!p->image_formats)
         goto fail;
 
+    p->mpvaapi->hwctx.hw_imgfmt = IMGFMT_VAAPI;
     p->pool = mp_image_pool_new(p);
     va_pool_set_allocator(p->pool, p->mpvaapi, VA_RT_FORMAT_YUV420);
 
