@@ -15,7 +15,6 @@ if [ "$1" = "meson" ]; then
       -D lcms2=enabled           \
       -D libarchive=enabled      \
       -D libbluray=enabled       \
-      -D libmpv=true             \
       -D libplacebo=enabled      \
       -D lua=enabled             \
       -D pdf-build=enabled       \
