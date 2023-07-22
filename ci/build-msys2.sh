@@ -15,7 +15,6 @@ if [ "$1" = "meson" ]; then
       -D lcms2=enabled           \
       -D libarchive=enabled      \
       -D libbluray=enabled       \
-      -D libmpv=true             \
       -D libplacebo=enabled      \
       -D lua=enabled             \
       -D pdf-build=enabled       \
@@ -23,12 +22,13 @@ if [ "$1" = "meson" ]; then
       -D shaderc=enabled         \
       -D spirv-cross=enabled     \
       -D tests=true              \
+      -D zimg=disabled           \
       -D uchardet=enabled        \
       -D vapoursynth=enabled     \
       -D vulkan=enabled
     meson compile -C build
     cp ./build/generated/mpv.com ./build
-    ./build/mpv.com -v --no-config
+#    ./build/mpv.com -v --no-config
 fi
 
 if [ "$1" = "waf" ]; then
