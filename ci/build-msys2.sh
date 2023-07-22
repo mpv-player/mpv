@@ -23,6 +23,7 @@ if [ "$1" = "meson" ]; then
       -D shaderc=enabled         \
       -D spirv-cross=enabled     \
       -D tests=true              \
+      -D zimg=disabled           \
       -D uchardet=enabled        \
       -D vapoursynth=enabled     \
       -D vulkan=enabled
