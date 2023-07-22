@@ -29,7 +29,7 @@ if [ "$1" = "meson" ]; then
       -D vulkan=enabled
     meson compile -C build
     cp ./build/generated/mpv.com ./build
-    ./build/mpv.com -v --no-config
+    #./build/mpv.com -v --no-config
 fi
 
 if [ "$1" = "waf" ]; then
