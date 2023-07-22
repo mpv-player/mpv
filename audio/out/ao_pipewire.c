@@ -65,6 +65,7 @@ struct priv {
     struct spa_hook core_listener;
     enum init_state init_state;
 
+    bool started;
     bool muted;
     float volume;
 
@@ -235,6 +236,9 @@ static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_s
     MP_DBG(ao, "Stream state changed: old_state=%s state=%s error=%s\n",
            pw_stream_state_as_string(old), pw_stream_state_as_string(state), error);
 
+    if (state == PW_STREAM_STATE_STREAMING)
+        p->started = true;
+
     if (state == PW_STREAM_STATE_ERROR) {
         MP_WARN(ao, "Stream in error state, trying to reload...\n");
         p->init_state = INIT_STATE_ERROR;
@@ -274,21 +278,31 @@ static void on_control_info(void *userdata, uint32_t id,
 
     switch (id) {
         case SPA_PROP_mute:
-            if (control->n_values == 1)
-                p->muted = control->values[0] >= 0.5;
+            if (control->n_values == 1) {
+                bool muted = control->values[0] >= 0.5;
+                if (p->started && muted != p->muted)
+                    ao_mute_event(ao);
+                p->muted = muted;
+            }
             break;
         case SPA_PROP_channelVolumes:
-            if (p->options.volume_mode != VOLUME_MODE_CHANNEL)
-                break;
-            if (control->n_values > 0)
-                p->volume = volume_avg(control->values, control->n_values);
+        case SPA_PROP_volume: {
+            float volume = p->volume;
+            if (id == SPA_PROP_channelVolumes &&
+                p->options.volume_mode == VOLUME_MODE_CHANNEL) {
+                if (control->n_values > 0)
+                    volume = volume_avg(control->values, control->n_values);
+
+            } else if (id == SPA_PROP_volume &&
+                       p->options.volume_mode == VOLUME_MODE_GLOBAL) {
+                if (control->n_values > 0)
+                    volume = control->values[0];
+            }
+            if (p->started && p->volume != volume)
+                ao_volume_event(ao);
+            p->volume = volume;
             break;
-        case SPA_PROP_volume:
-            if (p->options.volume_mode != VOLUME_MODE_GLOBAL)
-                break;
-            if (control->n_values > 0)
-                p->volume = control->values[0];
-            break;
+        }
     }
 }
 
@@ -872,6 +886,7 @@ const struct ao_driver audio_out_pipewire = {
         .loop = NULL,
         .stream = NULL,
         .init_state = INIT_STATE_NONE,
+        .started = false,
         .options.buffer_msec = 20,
         .options.volume_mode = VOLUME_MODE_CHANNEL,
     },
