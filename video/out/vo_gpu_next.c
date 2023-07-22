@@ -85,11 +85,6 @@ struct user_lut {
     struct pl_custom_lut *lut;
 };
 
-struct frame_info {
-    int count;
-    struct pl_dispatch_info info[VO_PASS_PERF_MAX];
-};
-
 struct priv {
     struct mp_log *log;
     struct mpv_global *global;
@@ -151,8 +146,7 @@ struct priv {
     int num_user_hooks;
 
     // Performance data of last frame
-    struct frame_info perf_fresh;
-    struct frame_info perf_redraw;
+    struct voctrl_performance_data perf;
 
     bool delayed_peak;
     bool inter_preserve;
@@ -756,15 +750,28 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     if (info->index >= VO_PASS_PERF_MAX)
         return; // silently ignore clipped passes, whatever
 
-    struct frame_info *frame;
+    struct mp_frame_perf *frame;
     switch (info->stage) {
-    case PL_RENDER_STAGE_FRAME: frame = &p->perf_fresh; break;
-    case PL_RENDER_STAGE_BLEND: frame = &p->perf_redraw; break;
+    case PL_RENDER_STAGE_FRAME: frame = &p->perf.fresh; break;
+    case PL_RENDER_STAGE_BLEND: frame = &p->perf.redraw; break;
     default: abort();
     }
 
-    frame->count = info->index + 1;
-    pl_dispatch_info_move(&frame->info[info->index], info->pass);
+    int index = info->index;
+    struct mp_pass_perf *perf = &frame->perf[index];
+    const struct pl_dispatch_info *pass = info->pass;
+    static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
+    assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
+
+    perf->count = MPMIN(pass->num_samples, VO_PERF_SAMPLE_COUNT);
+    memcpy(perf->samples, pass->samples, perf->count * sizeof(pass->samples[0]));
+    perf->last = pass->last;
+    perf->peak = pass->peak;
+    perf->avg = pass->average;
+
+    strncpy(frame->desc[index], pass->shader->description, sizeof(frame->desc[index]) - 1);
+    frame->desc[index][sizeof(frame->desc[index]) - 1] = '\0';
+    frame->count = index + 1;
 }
 
 static void update_options(struct vo *vo)
@@ -1292,30 +1299,6 @@ done:
     pl_tex_destroy(gpu, &fbo);
 }
 
-static inline void copy_frame_info_to_mp(struct frame_info *pl,
-                                         struct mp_frame_perf *mp) {
-    static_assert(MP_ARRAY_SIZE(pl->info) == MP_ARRAY_SIZE(mp->perf), "");
-    assert(pl->count <= VO_PASS_PERF_MAX);
-    mp->count = MPMIN(pl->count, VO_PASS_PERF_MAX);
-
-    for (int i = 0; i < mp->count; ++i) {
-        const struct pl_dispatch_info *pass = &pl->info[i];
-
-        static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
-        assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
-
-        struct mp_pass_perf *perf = &mp->perf[i];
-        perf->count = MPMIN(pass->num_samples, VO_PERF_SAMPLE_COUNT);
-        memcpy(perf->samples, pass->samples, perf->count * sizeof(pass->samples[0]));
-        perf->last = pass->last;
-        perf->peak = pass->peak;
-        perf->avg = pass->average;
-
-        strncpy(mp->desc[i], pass->shader->description, sizeof(mp->desc[i]) - 1);
-        mp->desc[i][sizeof(mp->desc[i]) - 1] = '\0';
-    }
-}
-
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -1357,12 +1340,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         p->want_reset = true;
         return VO_TRUE;
 
-    case VOCTRL_PERFORMANCE_DATA: {
-        struct voctrl_performance_data *perf = data;
-        copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh);
-        copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw);
+    case VOCTRL_PERFORMANCE_DATA:
+        *(struct voctrl_performance_data *) data = p->perf;
         return true;
-    }
 
     case VOCTRL_SCREENSHOT:
         video_screenshot(vo, data);
@@ -1467,11 +1447,6 @@ static void uninit(struct vo *vo)
     }
 
     pl_renderer_destroy(&p->rr);
-
-    for (int i = 0; i < VO_PASS_PERF_MAX; ++i) {
-        pl_shader_info_deref(&p->perf_fresh.info[i].shader);
-        pl_shader_info_deref(&p->perf_redraw.info[i].shader);
-    }
 
     p->ra_ctx = NULL;
     p->pllog = NULL;
