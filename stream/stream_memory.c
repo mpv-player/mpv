@@ -16,44 +16,10 @@
  */
 
 #include "common/common.h"
-#include "stream.h"
-
-struct priv {
-    bstr data;
-};
-
-static int fill_buffer(stream_t *s, void *buffer, int len)
-{
-    struct priv *p = s->priv;
-    bstr data = p->data;
-    if (s->pos < 0 || s->pos > data.len)
-        return 0;
-    len = MPMIN(len, data.len - s->pos);
-    memcpy(buffer, data.start + s->pos, len);
-    return len;
-}
-
-static int seek(stream_t *s, int64_t newpos)
-{
-    return 1;
-}
-
-static int64_t get_size(stream_t *s)
-{
-    struct priv *p = s->priv;
-    return p->data.len;
-}
+#include "stream_bstr.h"
 
 static int open2(stream_t *stream, const struct stream_open_args *args)
 {
-    stream->fill_buffer = fill_buffer;
-    stream->seek = seek;
-    stream->seekable = true;
-    stream->get_size = get_size;
-
-    struct priv *p = talloc_zero(stream, struct priv);
-    stream->priv = p;
-
     // Initial data
     bstr data = bstr0(stream->url);
     bool use_hex = bstr_eatstart0(&data, "hex://");
@@ -63,14 +29,14 @@ static int open2(stream_t *stream, const struct stream_open_args *args)
     if (args->special_arg)
         data = *(bstr *)args->special_arg;
 
-    p->data = bstrdup(stream, data);
+    data = bstrdup(stream, data);
 
-    if (use_hex && !bstr_decode_hex(stream, p->data, &p->data)) {
+    if (use_hex && !bstr_decode_hex(stream, data, &data)) {
         MP_FATAL(stream, "Invalid data.\n");
         return STREAM_ERROR;
     }
 
-    return STREAM_OK;
+    return stream_bstr_open2(stream, args, data);
 }
 
 const stream_info_t stream_info_memory = {

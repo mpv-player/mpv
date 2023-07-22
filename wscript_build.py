@@ -430,6 +430,8 @@ def build(ctx):
         ( "stream/stream_memory.c" ),
         ( "stream/stream_mf.c" ),
         ( "stream/stream_null.c" ),
+        ( "stream/stream_bstr.c" ),
+        ( "stream/stream_env.c" ),
 
         ## Subtitles
         ( "sub/ass_mp.c" ),
