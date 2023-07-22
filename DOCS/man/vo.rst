@@ -291,8 +291,12 @@ Available video output drivers are:
     or VA API hardware decoding. The driver is designed to avoid any GPU to CPU copies,
     and to perform scaling and color space conversion using fixed-function hardware,
     if available, rather than GPU shaders. This frees up GPU resources for other tasks.
-    Currently this driver is experimental and only works with the ``--hwdec=vaapi``
-    or ``hwdec=drm`` drivers. Supported compositors : Weston and Sway.
+    It is highly recommended to use this VO with the appropriate ``--hwdec`` option such
+    as ``auto-safe``. It can still work in some circumstances without ``--hwdec`` due to
+    mpv's internal conversion filters, but this is not recommended as it's a needless
+    extra step. Correct output depends on support from your GPU, drivers, and compositor.
+    Weston and wlroots-based compositors like Sway and Intel GPUs are known to generally
+    work.
 
 ``vaapi``
     Intel VA API video output driver with support for hardware decoding. Note
