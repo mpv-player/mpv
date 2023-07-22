@@ -1760,8 +1760,12 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
+    if meson.backend() != 'xcode'
+        mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
                      win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
+    else
+        mpv = executable('mpv', sources, dependencies: dependencies, include_directories: includedir)
+    endif
 endif
 
 if get_option('tests')
