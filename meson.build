@@ -1197,8 +1197,8 @@ if features['egl-drm']
 endif
 
 egl_wayland = dependency('wayland-egl', version: '>= 9.0.0', required: get_option('egl-wayland'))
-features += {'gl-wayland': features['egl'] and egl_wayland.found() and gl_allowed and features['wayland']}
-if features['gl-wayland']
+features += {'egl-wayland': features['egl'] and egl_wayland.found() and gl_allowed and features['wayland']}
+if features['egl-wayland']
     dependencies += egl_wayland
     features += {'gl': true}
     sources += files('video/out/opengl/context_wayland.c')
@@ -1411,7 +1411,7 @@ if features['vaapi-drm']
 endif
 
 vaapi_wayland = dependency('libva-wayland', version: '>= 1.1.0', required: get_option('vaapi-wayland').require(features['vaapi']))
-features += {'vaapi-wayland': features['vaapi'] and features['gl-wayland'] and vaapi_wayland.found()}
+features += {'vaapi-wayland': features['vaapi'] and features['egl-wayland'] and vaapi_wayland.found()}
 if features['vaapi-wayland']
     dependencies += vaapi_wayland
 endif
