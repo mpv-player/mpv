@@ -13,6 +13,7 @@ jobs:
   mingw:
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         target: [i686-w64-mingw32, x86_64-w64-mingw32]
     steps:
