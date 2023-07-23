@@ -23,5 +23,5 @@ meson setup build            \
   -D vapoursynth=enabled     \
   -D vulkan=enabled
 meson compile -C build
-cp ./build/generated/mpv.com ./build
+cp ./build/player/mpv.com ./build
 ./build/mpv.com -v --no-config
