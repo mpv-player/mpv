@@ -110,19 +110,19 @@ typedef struct
 } MotifWmHints;
 
 static const char x11_icon_16[] =
-#include "generated/etc/mpv-icon-8bit-16x16.png.inc"
+#include "etc/mpv-icon-8bit-16x16.png.inc"
 ;
 
 static const char x11_icon_32[] =
-#include "generated/etc/mpv-icon-8bit-32x32.png.inc"
+#include "etc/mpv-icon-8bit-32x32.png.inc"
 ;
 
 static const char x11_icon_64[] =
-#include "generated/etc/mpv-icon-8bit-64x64.png.inc"
+#include "etc/mpv-icon-8bit-64x64.png.inc"
 ;
 
 static const char x11_icon_128[] =
-#include "generated/etc/mpv-icon-8bit-128x128.png.inc"
+#include "etc/mpv-icon-8bit-128x128.png.inc"
 ;
 
 #define ICON_ENTRY(var) { (char *)var, sizeof(var) }

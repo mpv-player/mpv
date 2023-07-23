@@ -41,11 +41,11 @@
 #endif
 
 // Generated from wayland-protocols
-#include "generated/wayland/linux-dmabuf-unstable-v1.h"
-#include "generated/wayland/viewporter.h"
+#include "linux-dmabuf-unstable-v1.h"
+#include "viewporter.h"
 
 #if HAVE_WAYLAND_PROTOCOLS_1_27
-#include "generated/wayland/single-pixel-buffer-v1.h"
+#include "single-pixel-buffer-v1.h"
 #endif
 
 // We need at least enough buffers to avoid a

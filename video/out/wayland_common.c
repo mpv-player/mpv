@@ -35,24 +35,24 @@
 #include "win_state.h"
 
 // Generated from wayland-protocols
-#include "generated/wayland/idle-inhibit-unstable-v1.h"
-#include "generated/wayland/linux-dmabuf-unstable-v1.h"
-#include "generated/wayland/presentation-time.h"
-#include "generated/wayland/xdg-decoration-unstable-v1.h"
-#include "generated/wayland/xdg-shell.h"
-#include "generated/wayland/viewporter.h"
+#include "idle-inhibit-unstable-v1.h"
+#include "linux-dmabuf-unstable-v1.h"
+#include "presentation-time.h"
+#include "xdg-decoration-unstable-v1.h"
+#include "xdg-shell.h"
+#include "viewporter.h"
 
 #if HAVE_WAYLAND_PROTOCOLS_1_27
-#include "generated/wayland/content-type-v1.h"
-#include "generated/wayland/single-pixel-buffer-v1.h"
+#include "content-type-v1.h"
+#include "single-pixel-buffer-v1.h"
 #endif
 
 #if HAVE_WAYLAND_PROTOCOLS_1_31
-#include "generated/wayland/fractional-scale-v1.h"
+#include "fractional-scale-v1.h"
 #endif
 
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-#include "generated/wayland/cursor-shape-v1.h"
+#include "cursor-shape-v1.h"
 #endif
 
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
