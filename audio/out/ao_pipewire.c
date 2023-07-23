@@ -872,7 +872,7 @@ const struct ao_driver audio_out_pipewire = {
         .loop = NULL,
         .stream = NULL,
         .init_state = INIT_STATE_NONE,
-        .options.buffer_msec = 20,
+        .options.buffer_msec = 0,
         .options.volume_mode = VOLUME_MODE_CHANNEL,
     },
     .options_prefix = "pipewire",

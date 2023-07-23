@@ -648,6 +648,11 @@ static int reconfig(struct vo *vo, struct mp_image *img)
 {
     struct priv *p = vo->priv;
 
+    // If we have a supported format but no hw_subfmt, this
+    // is probably handle_force_window. Consider it valid.
+    if (is_supported_fmt(img->params.imgfmt) && img->params.hw_subfmt == IMGFMT_NONE)
+        goto done;
+
     if (!drm_format_check(vo, img)) {
         MP_ERR(vo, "Unable to get drm format from hardware decoding!\n");
         return VO_ERROR;
@@ -659,6 +664,7 @@ static int reconfig(struct vo *vo, struct mp_image *img)
         return VO_ERROR;
     }
 
+done:
     if (!vo_wayland_reconfig(vo))
         return VO_ERROR;
 
@@ -806,7 +812,7 @@ static int preinit(struct vo *vo)
     }
 
     if (p->hwdec_type == HWDEC_NONE) {
-        MP_ERR(vo, "No valid hardware decoding driver could be loaded!");
+        MP_ERR(vo, "No valid hardware decoding driver could be loaded!\n");
         goto err;
     }
 

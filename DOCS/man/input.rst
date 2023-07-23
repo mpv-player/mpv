@@ -369,8 +369,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         behavior depends on the selected video output.
     <window>
         Save the contents of the mpv window. Typically scaled, with OSD and
-        subtitles. The exact behavior depends on the selected video output, and
-        if no support is available, this will act like ``video``.
+        subtitles. The exact behavior depends on the selected video output.
     <each-frame>
         Take a screenshot each frame. Issue this command again to stop taking
         screenshots. Note that you should disable frame-dropping when using

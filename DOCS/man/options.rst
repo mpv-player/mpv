@@ -4517,17 +4517,18 @@ Screenshot
 ``--screenshot-sw=<yes|no>``
     Whether to use software rendering for screenshots (default: no).
 
-    If set to no, the screenshot will be rendered by the current VO if possible
-    (only vo_gpu currently). The advantage is that this will (probably) always
+    If set to no, the screenshot will be rendered by the current VO (only vo_gpu
+    or vo_gpu_next currently). The advantage is that this will (probably) always
     show up as in the video window, because the same code is used for rendering.
     But since the renderer needs to be reinitialized, this can be slow and
-    interrupt playback. (Unless the ``window`` mode is used with the
-    ``screenshot`` command.)
+    interrupt playback.
 
     If set to yes, the software scaler is used to convert the video to RGB (or
     whatever the target screenshot requires). In this case, conversion will
     run in a separate thread and will probably not interrupt playback. The
     software renderer may lack some capabilities, such as HDR rendering.
+    If ``window`` mode is used, the image will also be scaled in software
+    which may not accurately reflect the actual visible result.
 
 Software Scaler
 ---------------
