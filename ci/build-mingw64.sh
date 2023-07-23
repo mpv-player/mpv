@@ -216,6 +216,7 @@ if [ "$2" = pack ]; then
     done
     echo "Archiving:"
     pushd artifact
+    wine64 ./mpv.com -v --no-config
     zip -9r "../mpv-git-$(date +%F)-$(git rev-parse --short HEAD)-${TARGET%%-*}.zip" -- *
     popd
 fi
