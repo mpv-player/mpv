@@ -6,7 +6,7 @@ ln -snf . "$prefix_dir/usr"
 ln -snf . "$prefix_dir/local"
 
 wget="wget -nc --progress=bar:force"
-gitclone="git clone --depth=10 --recursive"
+gitclone="git clone --depth=1 --recursive"
 commonflags="--disable-static --enable-shared"
 
 export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
