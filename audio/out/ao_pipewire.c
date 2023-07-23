@@ -354,6 +354,11 @@ static void for_each_sink_registry_event_global(void *data, uint32_t id,
 }
 
 
+struct for_each_done_ctx {
+    struct pw_thread_loop *loop;
+    bool done;
+};
+
 static const struct pw_registry_events for_each_sink_registry_events = {
     .version = PW_VERSION_REGISTRY_EVENTS,
     .global = for_each_sink_registry_event_global,
@@ -361,8 +366,9 @@ static const struct pw_registry_events for_each_sink_registry_events = {
 
 static void for_each_sink_done(void *data, uint32_t it, int seq)
 {
-    struct pw_thread_loop *loop = data;
-    pw_thread_loop_signal(loop, false);
+    struct for_each_done_ctx *ctx = data;
+    ctx->done = true;
+    pw_thread_loop_signal(ctx->loop, false);
 }
 
 static const struct pw_core_events for_each_sink_core_events = {
@@ -376,12 +382,16 @@ static int for_each_sink(struct ao *ao, void (cb) (struct ao *ao, uint32_t id,
     struct priv *priv = ao->priv;
     struct pw_registry *registry;
     struct spa_hook core_listener;
+    struct for_each_done_ctx done_ctx = {
+        .loop = priv->loop,
+        .done = false,
+    };
     int ret = -1;
 
     pw_thread_loop_lock(priv->loop);
 
     spa_zero(core_listener);
-    if (pw_core_add_listener(priv->core, &core_listener, &for_each_sink_core_events, priv->loop) < 0)
+    if (pw_core_add_listener(priv->core, &core_listener, &for_each_sink_core_events, &done_ctx) < 0)
         goto unlock_loop;
 
     registry = pw_core_get_registry(priv->core, PW_VERSION_REGISTRY, 0);
@@ -400,7 +410,8 @@ static int for_each_sink(struct ao *ao, void (cb) (struct ao *ao, uint32_t id,
     if (pw_registry_add_listener(registry, &registry_listener, &for_each_sink_registry_events, &revents_ctx) < 0)
         goto destroy_registry;
 
-    pw_thread_loop_wait(priv->loop);
+    while (!done_ctx.done)
+        pw_thread_loop_wait(priv->loop);
 
     spa_hook_remove(&registry_listener);
 
