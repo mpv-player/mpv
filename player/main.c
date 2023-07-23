@@ -69,7 +69,7 @@
 #include "screenshot.h"
 
 static const char def_config[] =
-#include "generated/etc/builtin.conf.inc"
+#include "etc/builtin.conf.inc"
 ;
 
 #if HAVE_COCOA

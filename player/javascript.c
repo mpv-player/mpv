@@ -51,7 +51,7 @@
 // All these are generated from player/javascript/*.js
 static const char *const builtin_files[][3] = {
     {"@/defaults.js",
-#   include "generated/player/javascript/defaults.js.inc"
+#   include "player/javascript/defaults.js.inc"
     },
     {0}
 };
