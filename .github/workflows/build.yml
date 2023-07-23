@@ -12,6 +12,10 @@ on:
 jobs:
   mingw:
     runs-on: ubuntu-22.04
+    env:
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 500M
     strategy:
       fail-fast: false
       matrix:
@@ -19,11 +23,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get time
+        id: get_time
+        run: echo "timestamp=`date +%s%N`" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
+          restore-keys: ${{ matrix.target }}-
+
       - name: Install dependencies
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib python3-pip ninja-build nasm wine wine32 wine64
+          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib python3-pip ninja-build nasm wine wine32 wine64 ccache
           sudo python3 -m pip install meson
 
       - name: Build libraries

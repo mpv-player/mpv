@@ -29,8 +29,8 @@ cat >"$prefix_dir/crossfile" <<EOF
 buildtype = 'release'
 wrap_mode = 'nodownload'
 [binaries]
-c = '${CC}'
-cpp = '${CXX}'
+c = ['ccache', '${CC}']
+cpp = ['ccache', '${CXX}']
 ar = '${AR}'
 strip = '${TARGET}-strip'
 pkgconfig = 'pkg-config'
@@ -42,6 +42,9 @@ cpu_family = '${fam}'
 cpu = '${TARGET%%-*}'
 endian = 'little'
 EOF
+
+export CC="ccache $CC"
+export CXX="ccache $CXX"
 
 function builddir () {
     [ -d "$1/builddir" ] && rm -rf "$1/builddir"
@@ -82,7 +85,7 @@ if [ ! -e "$prefix_dir/lib/libz.dll.a" ]; then
     gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
     make -fwin32/Makefile.gcc clean
-    make -fwin32/Makefile.gcc PREFIX=$TARGET- SHARED_MODE=1 \
+    make -fwin32/Makefile.gcc PREFIX=$TARGET- CC="$CC" SHARED_MODE=1 \
         DESTDIR="$prefix_dir" install \
         BINARY_PATH=/bin INCLUDE_PATH=/include LIBRARY_PATH=/lib
     popd
@@ -94,7 +97,7 @@ if [ ! -e "$prefix_dir/lib/libavcodec.dll.a" ]; then
     builddir ffmpeg
     ../configure --pkg-config=pkg-config --target-os=mingw32 \
         --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*} \
-        $commonflags \
+        --cc="$CC" --cxx="$CXX" $commonflags \
         --disable-{doc,programs,muxers,encoders,devices}
     makeplusinstall
     popd
@@ -179,11 +182,11 @@ fi
 if [ ! -e "$prefix_dir/lib/libluajit-5.1.a" ]; then
     $gitclone https://github.com/LuaJIT/LuaJIT.git
     pushd LuaJIT
-    hostcc=cc
+    hostcc="ccache cc"
     flags=
     [[ "$TARGET" == "i686-"* ]] && { hostcc="$hostcc -m32"; flags=XCFLAGS=-DLUAJIT_NO_UNWIND; }
     make TARGET_SYS=Windows clean
-    make TARGET_SYS=Windows HOST_CC="$hostcc" CROSS=$TARGET- \
+    make TARGET_SYS=Windows HOST_CC="$hostcc" CROSS="ccache $TARGET-" \
         BUILDMODE=static $flags amalg
     make DESTDIR="$prefix_dir" INSTALL_DEP= FILE_T=luajit.exe install
     popd
