@@ -268,7 +268,14 @@ static bool wrap_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r,
     if (r->pack) {
         mpi = &r->cropped_tmp;
         *mpi = *a_mpi;
-        mp_image_crop(mpi, 0, st->slice_y, mpi->w, st->slice_y + st->slice_h);
+        int y1 = st->slice_y + st->slice_h;
+        // Due to subsampling we may assume the image to be bigger than it
+        // actually is (see real_h in setup_format).
+        if (mpi->h < y1) {
+            assert(y1 - mpi->h < 4);
+            mp_image_set_size(mpi, mpi->w, y1);
+        }
+        mp_image_crop(mpi, 0, st->slice_y, mpi->w, y1);
     }
 
     bool direct[MP_MAX_PLANES] = {0};
