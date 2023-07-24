@@ -731,6 +731,7 @@ static void encoder_destroy(void *ptr)
     struct encoder_context *p = ptr;
 
     av_packet_free(&p->pkt);
+    avcodec_parameters_free(&p->info.codecpar);
     avcodec_free_context(&p->encoder);
     free_stream(p->twopass_bytebuffer);
 }
