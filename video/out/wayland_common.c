@@ -436,15 +436,20 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
     xkb_keysym_t sym = xkb_state_key_get_one_sym(wl->xkb_state, wl->keyboard_code);
     int mpkey = lookupkey(sym);
 
-    // Assume a modifier was pressed and handle it in the mod event instead.
-    if (!mpkey && MP_KEY_STATE_DOWN)
-        return;
-
     state = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                    : MP_KEY_STATE_UP;
 
-    if (mpkey)
+    if (mpkey) {
         mp_input_put_key(wl->vo->input_ctx, mpkey | state | wl->mpmod);
+    } else {
+        char s[128];
+        if (xkb_keysym_to_utf8(sym, s, sizeof(s)) > 0) {
+            mp_input_put_key_utf8(wl->vo->input_ctx, state | wl->mpmod, bstr0(s));
+        } else {
+            // Assume a modifier was pressed and handle it in the mod event instead.
+            return;
+        }
+    }
     if (state == MP_KEY_STATE_DOWN)
         wl->mpkey = mpkey;
     if (wl->mpkey == mpkey && state == MP_KEY_STATE_UP)
