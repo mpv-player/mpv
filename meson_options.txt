@@ -89,7 +89,7 @@ option('vaapi', type: 'feature', value: 'auto', description: 'VAAPI acceleration
 option('vaapi-drm', type: 'feature', value: 'auto', description: 'VAAPI (DRM support)')
 option('vaapi-wayland', type: 'feature', value: 'auto', description: 'VAAPI (Wayland support)')
 option('vaapi-x11', type: 'feature', value: 'auto', description: 'VAAPI (X11 support)')
-option('vaapi-x-egl', type: 'feature', value: 'auto', description: 'VAAPI EGL on X11')
+option('vaapi-egl', type: 'feature', value: 'auto', description: 'VAAPI (EGL support)')
 option('vulkan', type: 'feature', value: 'auto', description: 'Vulkan context support')
 option('wayland', type: 'feature', value: 'auto', description: 'Wayland')
 option('x11', type: 'feature', value: 'auto', description: 'X11')

@@ -1423,7 +1423,6 @@ if features['vaapi-x11']
     sources += files('video/out/vo_vaapi.c')
 endif
 
-features += {'vaapi-x-egl': features['vaapi-x11'] and egl_x11.allowed()}
 features += {'vaapi-egl': (features['vaapi-x11'] or features['vaapi-wayland'] or features['vaapi-drm']) and features['egl']}
 features += {'vaapi-libplacebo': features['vaapi'] and libplacebo.found()}
 
