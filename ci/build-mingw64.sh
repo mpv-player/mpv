@@ -177,14 +177,14 @@ fi
 
 ## luajit
 if [ ! -e "$prefix_dir/lib/libluajit-5.1.a" ]; then
-    ver=2.1.0-beta3
-    gettar "http://luajit.org/download/LuaJIT-${ver}.tar.gz"
-    pushd LuaJIT-${ver}
+    $gitclone https://github.com/LuaJIT/LuaJIT.git
+    pushd LuaJIT
     hostcc=cc
-    [[ "$TARGET" == "i686-"* ]] && hostcc="$hostcc -m32"
+    flags=
+    [[ "$TARGET" == "i686-"* ]] && { hostcc="$hostcc -m32"; flags=XCFLAGS=-DLUAJIT_NO_UNWIND; }
     make TARGET_SYS=Windows clean
     make TARGET_SYS=Windows HOST_CC="$hostcc" CROSS=$TARGET- \
-        BUILDMODE=static amalg
+        BUILDMODE=static $flags amalg
     make DESTDIR="$prefix_dir" INSTALL_DEP= FILE_T=luajit.exe install
     popd
 fi
