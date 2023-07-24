@@ -235,8 +235,13 @@ static void reset(struct ao *ao)
     if (p->playing) {
         p->playing = false;
 
+#if HAVE_SNDIO_1_9
+        if (!sio_flush(p->hdl)) {
+            MP_ERR(ao, "reset: couldn't sio_flush()\n");
+#else
         if (!sio_stop(p->hdl)) {
             MP_ERR(ao, "reset: couldn't sio_stop()\n");
+#endif
         }
         p->delay = 0;
         if (!sio_start(p->hdl)) {
