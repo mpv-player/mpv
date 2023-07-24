@@ -1405,13 +1405,13 @@ if features['vaapi']
 endif
 
 vaapi_drm = dependency('libva-drm', version: '>= 1.1.0', required: get_option('vaapi-drm').require(features['vaapi']))
-features += {'vaapi-drm': features['vaapi'] and egl_drm.allowed() and vaapi_drm.found()}
+features += {'vaapi-drm': features['vaapi'] and vaapi_drm.found()}
 if features['vaapi-drm']
     dependencies += vaapi_drm
 endif
 
 vaapi_wayland = dependency('libva-wayland', version: '>= 1.1.0', required: get_option('vaapi-wayland').require(features['vaapi']))
-features += {'vaapi-wayland': features['vaapi'] and features['egl-wayland'] and vaapi_wayland.found()}
+features += {'vaapi-wayland': features['vaapi'] and vaapi_wayland.found()}
 if features['vaapi-wayland']
     dependencies += vaapi_wayland
 endif
