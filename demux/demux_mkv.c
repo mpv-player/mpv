@@ -865,7 +865,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
                           time, trackpos->cue_duration);
             mkv_d->index_has_durations |= trackpos->n_cue_duration > 0;
             MP_TRACE(demuxer, "|+ found cue point for track %"PRIu64": "
-                     "timecode %"PRIu64", filepos: %"PRIu64""
+                     "timecode %"PRIu64", filepos: %"PRIu64" "
                      "offset %"PRIu64", duration %"PRIu64"\n",
                      trackpos->cue_track, time, pos,
                      trackpos->cue_relative_position, trackpos->cue_duration);
