@@ -857,6 +857,7 @@ endif
 
 sndio = dependency('sndio', required: get_option('sndio'))
 features += {'sndio': sndio.found()}
+features += {'sndio-1-9': sndio.version().version_compare('>= 1.9.0')}
 if features['sndio']
     dependencies += sndio
     sources += files('audio/out/ao_sndio.c')
