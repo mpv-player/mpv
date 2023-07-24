@@ -649,6 +649,8 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
     if (mp_image_params_equal(&p, &image->params))
         return mp_image_new_ref(image);
 
+    mp_dbg(log, "Will convert image to %s\n", mp_imgfmt_to_name(p.imgfmt));
+
     struct mp_image *dst = mp_image_alloc(p.imgfmt, p.w, p.h);
     if (!dst) {
         mp_err(log, "Out of memory.\n");
