@@ -1394,36 +1394,41 @@ if features['rpi-mmal']
                      'video/out/vo_rpi.c')
 endif
 
-vaapi = dependency('libva', version: '>= 1.1.0', required: get_option('vaapi'))
-features += {'vaapi': vaapi.found() and features['libdl'] and (features['x11'] or
-             features['wayland'] or egl_drm.allowed())}
+libva = dependency('libva', version: '>= 1.1.0', required: get_option('vaapi'))
 
-if features['vaapi']
-    dependencies += vaapi
-    sources += files('video/filter/vf_vavpp.c',
-                     'video/vaapi.c')
-endif
-
-vaapi_drm = dependency('libva-drm', version: '>= 1.1.0', required: get_option('vaapi-drm').require(features['vaapi']))
-features += {'vaapi-drm': features['vaapi'] and vaapi_drm.found()}
+vaapi_drm = dependency('libva-drm', version: '>= 1.1.0',
+                       required: get_option('vaapi-drm').require(libva.found() and features['drm']))
+features += {'vaapi-drm': vaapi_drm.found()}
 if features['vaapi-drm']
     dependencies += vaapi_drm
 endif
 
-vaapi_wayland = dependency('libva-wayland', version: '>= 1.1.0', required: get_option('vaapi-wayland').require(features['vaapi']))
-features += {'vaapi-wayland': features['vaapi'] and vaapi_wayland.found()}
+vaapi_wayland = dependency('libva-wayland', version: '>= 1.1.0',
+                           required: get_option('vaapi-wayland').require(libva.found() and features['wayland']))
+features += {'vaapi-wayland': vaapi_wayland.found()}
 if features['vaapi-wayland']
     dependencies += vaapi_wayland
 endif
 
-vaapi_x11 = dependency('libva-x11', version: '>= 1.1.0', required: get_option('vaapi-x11').require(features['vaapi']))
-features += {'vaapi-x11': features['vaapi'] and features['x11'] and vaapi_x11.found()}
+vaapi_x11 = dependency('libva-x11', version: '>= 1.1.0',
+                       required: get_option('vaapi-x11').require(libva.found() and features['x11']))
+features += {'vaapi-x11': vaapi_x11.found()}
 if features['vaapi-x11']
     dependencies += vaapi_x11
     sources += files('video/out/vo_vaapi.c')
 endif
 
-features += {'vaapi-egl': (features['vaapi-x11'] or features['vaapi-wayland'] or features['vaapi-drm']) and features['egl']}
+vaapi = get_option('vaapi').require(libva.found() and features['libdl'] and
+    (features['vaapi-drm'] or features['vaapi-wayland'] or features['vaapi-x11']))
+features += {'vaapi': vaapi.allowed()}
+
+if features['vaapi']
+    dependencies += libva
+    sources += files('video/filter/vf_vavpp.c',
+                     'video/vaapi.c')
+endif
+
+features += {'vaapi-egl': features['vaapi'] and features['egl'] and features['drm']}
 features += {'vaapi-libplacebo': features['vaapi'] and libplacebo.found()}
 
 if features['vaapi-egl'] or features['vaapi-libplacebo']
