@@ -1418,8 +1418,8 @@ if features['vaapi-x11']
     sources += files('video/out/vo_vaapi.c')
 endif
 
-vaapi = get_option('vaapi').require(libva.found() and features['libdl'] and
-    (features['vaapi-drm'] or features['vaapi-wayland'] or features['vaapi-x11']))
+vaapi = get_option('vaapi').require(libva.found() and (features['vaapi-drm'] or
+                                    features['vaapi-wayland'] or features['vaapi-x11']))
 features += {'vaapi': vaapi.allowed()}
 
 if features['vaapi']
