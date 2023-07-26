@@ -1655,6 +1655,8 @@ Other config files (such as ``input.conf``) are in the same directory. See the
 
 The cache directory is located at ``%LOCALAPPDATA%/mpv/cache``.
 
+The watch_later directory is located at ``%LOCALAPPDATA%/mpv/watch_later``.
+
 The environment variable ``$MPV_HOME`` completely overrides these, like on
 UNIX.
 
