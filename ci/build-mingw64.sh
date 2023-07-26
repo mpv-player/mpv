@@ -6,7 +6,7 @@ ln -snf . "$prefix_dir/usr"
 ln -snf . "$prefix_dir/local"
 
 wget="wget -nc --progress=bar:force"
-gitclone="git clone --depth=10 --recursive"
+gitclone="git clone --depth=1 --recursive"
 commonflags="--disable-static --enable-shared"
 
 export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
@@ -29,8 +29,8 @@ cat >"$prefix_dir/crossfile" <<EOF
 buildtype = 'release'
 wrap_mode = 'nodownload'
 [binaries]
-c = '${CC}'
-cpp = '${CXX}'
+c = ['ccache', '${CC}']
+cpp = ['ccache', '${CXX}']
 ar = '${AR}'
 strip = '${TARGET}-strip'
 pkgconfig = 'pkg-config'
@@ -42,6 +42,9 @@ cpu_family = '${fam}'
 cpu = '${TARGET%%-*}'
 endian = 'little'
 EOF
+
+export CC="ccache $CC"
+export CXX="ccache $CXX"
 
 function builddir () {
     [ -d "$1/builddir" ] && rm -rf "$1/builddir"
@@ -82,7 +85,7 @@ if [ ! -e "$prefix_dir/lib/libz.dll.a" ]; then
     gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
     make -fwin32/Makefile.gcc clean
-    make -fwin32/Makefile.gcc PREFIX=$TARGET- SHARED_MODE=1 \
+    make -fwin32/Makefile.gcc PREFIX=$TARGET- CC="$CC" SHARED_MODE=1 \
         DESTDIR="$prefix_dir" install \
         BINARY_PATH=/bin INCLUDE_PATH=/include LIBRARY_PATH=/lib
     popd
@@ -94,7 +97,7 @@ if [ ! -e "$prefix_dir/lib/libavcodec.dll.a" ]; then
     builddir ffmpeg
     ../configure --pkg-config=pkg-config --target-os=mingw32 \
         --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*} \
-        $commonflags \
+        --cc="$CC" --cxx="$CXX" $commonflags \
         --disable-{doc,programs,muxers,encoders,devices}
     makeplusinstall
     popd
@@ -177,14 +180,14 @@ fi
 
 ## luajit
 if [ ! -e "$prefix_dir/lib/libluajit-5.1.a" ]; then
-    ver=2.1.0-beta3
-    gettar "http://luajit.org/download/LuaJIT-${ver}.tar.gz"
-    pushd LuaJIT-${ver}
-    hostcc=cc
-    [[ "$TARGET" == "i686-"* ]] && hostcc="$hostcc -m32"
+    $gitclone https://github.com/LuaJIT/LuaJIT.git
+    pushd LuaJIT
+    hostcc="ccache cc"
+    flags=
+    [[ "$TARGET" == "i686-"* ]] && { hostcc="$hostcc -m32"; flags=XCFLAGS=-DLUAJIT_NO_UNWIND; }
     make TARGET_SYS=Windows clean
-    make TARGET_SYS=Windows HOST_CC="$hostcc" CROSS=$TARGET- \
-        BUILDMODE=static amalg
+    make TARGET_SYS=Windows HOST_CC="$hostcc" CROSS="ccache $TARGET-" \
+        BUILDMODE=static $flags amalg
     make DESTDIR="$prefix_dir" INSTALL_DEP= FILE_T=luajit.exe install
     popd
 fi
@@ -198,21 +201,12 @@ LDFLAGS+=" -L'$prefix_dir/lib'"
 export CFLAGS LDFLAGS
 rm -rf build
 
-if [ "$1" = "meson" ]; then
-    meson setup build --cross-file "$prefix_dir/crossfile" \
-        --buildtype debugoptimized \
-        -Dlibmpv=true -Dlua=luajit \
-        -D{shaderc,spirv-cross,d3d11,libplacebo,libplacebo-next}=enabled
+meson setup build --cross-file "$prefix_dir/crossfile" \
+    --buildtype debugoptimized \
+    -Dlibmpv=true -Dlua=luajit \
+    -D{shaderc,spirv-cross,d3d11,libplacebo,libplacebo-next}=enabled
 
-    meson compile -C build
-elif [ "$1" = "waf" ]; then
-    PKG_CONFIG=pkg-config ./waf configure \
-        --out=build_waf \
-        --enable-libmpv-shared --lua=luajit \
-        --enable-{shaderc,spirv-cross,d3d11,libplacebo,libplacebo-next}
-
-    ./waf build
-fi
+meson compile -C build
 
 if [ "$2" = pack ]; then
     mkdir -p artifact
@@ -225,6 +219,7 @@ if [ "$2" = pack ]; then
     done
     echo "Archiving:"
     pushd artifact
+    wine64 ./mpv.com -v --no-config
     zip -9r "../mpv-git-$(date +%F)-$(git rev-parse --short HEAD)-${TARGET%%-*}.zip" -- *
     popd
 fi

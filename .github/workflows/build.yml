@@ -12,18 +12,33 @@ on:
 jobs:
   mingw:
     runs-on: ubuntu-22.04
+    env:
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 500M
     strategy:
+      fail-fast: false
       matrix:
         target: [i686-w64-mingw32, x86_64-w64-mingw32]
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get time
+        id: get_time
+        run: echo "timestamp=`date +%s%N`" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
+          restore-keys: ${{ matrix.target }}-
+
       - name: Install dependencies
         run: |
+          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib python3-pip ninja-build nasm
+          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib python3-pip ninja-build nasm wine wine32 wine64 ccache
           sudo python3 -m pip install meson
-          ./bootstrap.py
 
       - name: Build libraries
         run: |
@@ -42,18 +57,6 @@ jobs:
         if: ${{ failure() && steps.build.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/meson-log.txt
-
-      - name: Build with waf
-        id: build_waf
-        run: |
-          ./ci/build-mingw64.sh waf
-        env:
-          TARGET: ${{ matrix.target }}
-
-      - name: Print waf log
-        if: ${{ failure() && steps.build_waf.outcome == 'failure' }}
-        run: |
-          cat ./build_waf/config.log
 
       - uses: actions/upload-artifact@v3
         with:
@@ -85,7 +88,7 @@ jobs:
       - name: Build with meson
         id: build
         run: |
-          ./ci/build-macos.sh meson
+          ./ci/build-macos.sh
         env:
           CC: "${{ matrix.cc }}"
           TRAVIS_OS_NAME: "${{ matrix.os }}"
@@ -104,19 +107,6 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
-
-      - name: Build with waf
-        id: build_waf
-        run: |
-          ./ci/build-macos.sh waf
-        env:
-          CC: "${{ matrix.cc }}"
-          TRAVIS_OS_NAME: "${{ matrix.os }}"
-
-      - name: Print waf log
-        if: ${{ failure() && steps.build_waf.outcome == 'failure' }}
-        run: |
-          cat ./build_waf/config.log
 
   linux:
     runs-on: "ubuntu-22.04"
@@ -134,14 +124,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ./bootstrap.py
           # workaround to avoid "fatal: unsafe repository" error
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Build with meson
         id: build
         run: |
-          ./ci/build-tumbleweed.sh meson
+          ./ci/build-tumbleweed.sh
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -157,16 +146,6 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
-
-      - name: Build with waf
-        id: build_waf
-        run: |
-          ./ci/build-tumbleweed.sh waf
-
-      - name: Print waf log
-        if: ${{ failure() && steps.build_waf.outcome == 'failure' }}
-        run: |
-          cat ./build_waf/config.log
 
   freebsd:
     runs-on: macos-12 # until https://github.com/actions/runner/issues/385
@@ -286,13 +265,3 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
-
-      - name: Build with waf
-        id: build_waf
-        run: |
-          ./ci/build-msys2.sh waf
-
-      - name: Print waf log
-        if: ${{ failure() && steps.build_waf.outcome == 'failure' }}
-        run: |
-          cat ./build_waf/config.log

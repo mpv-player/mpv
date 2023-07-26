@@ -26,7 +26,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* New symbols must still be added to libmpv/mpv.def. */
 #ifdef _WIN32
 #define MPV_EXPORT __declspec(dllexport)
 #elif defined(__GNUC__) || defined(__clang__)
