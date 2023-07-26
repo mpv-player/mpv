@@ -100,7 +100,8 @@ test('paths', paths)
 if get_option('libmpv')
     libmpv_test = executable('libmpv-test', 'libmpv_test.c',
                              include_directories: incdir, link_with: libmpv)
-    test('libmpv', libmpv_test)
+    file = join_paths(source_root, 'etc', 'mpv-icon-8bit-16x16.png')
+    test('libmpv', libmpv_test, args: file)
 endif
 
 # Minimum required libavutil version that works with these tests.
