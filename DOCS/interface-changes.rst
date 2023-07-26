@@ -26,6 +26,9 @@ Interface changes
 
 ::
 
+ --- mpv 0.37.0 ---
+    - `--save-position-on-quit` and its associated commands now store state files
+      in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
