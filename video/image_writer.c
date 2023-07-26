@@ -633,9 +633,9 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
     mp_image_params_guess_csp(&p);
 
     if (!image_writer_flexible_csp(opts)) {
-        // Formats that don't support non-sRGB csps should be forced to sRGB
+        // If our format can't tag csps, set something sane
         p.color.primaries = MP_CSP_PRIM_BT_709;
-        p.color.gamma = MP_CSP_TRC_SRGB;
+        p.color.gamma = MP_CSP_TRC_AUTO;
         p.color.light = MP_CSP_LIGHT_DISPLAY;
         p.color.sig_peak = 0;
         if (p.color.space != MP_CSP_RGB) {
@@ -648,6 +648,8 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
 
     if (mp_image_params_equal(&p, &image->params))
         return mp_image_new_ref(image);
+
+    mp_dbg(log, "Will convert image to %s\n", mp_imgfmt_to_name(p.imgfmt));
 
     struct mp_image *dst = mp_image_alloc(p.imgfmt, p.w, p.h);
     if (!dst) {
