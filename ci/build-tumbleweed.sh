@@ -2,6 +2,7 @@
 set -e
 
 meson setup build \
+  -Db_sanitize=address,undefined \
   -Dcdda=enabled          \
   -Ddvbin=enabled         \
   -Ddvdnav=enabled        \
