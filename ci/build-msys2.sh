@@ -1,8 +1,5 @@
 #!/bin/sh -e
 
-python3.11 -m venv venv
-source ./venv/bin/activate
-python -m pip install meson
 meson setup build            \
   -D cdda=enabled            \
   -D d3d-hwaccel=enabled     \
