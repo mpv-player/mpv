@@ -149,9 +149,12 @@ done:
         MP_WARN(da, "Failed to parse codec profile.\n");
 }
 
-static int init_filter(struct mp_filter *da, AVPacket *pkt)
+static int init_filter(struct mp_filter *da)
 {
     struct spdifContext *spdif_ctx = da->priv;
+
+    AVPacket *pkt = spdif_ctx->avpkt = av_packet_alloc();
+    MP_HANDLE_OOM(spdif_ctx->avpkt);
 
     int profile = FF_PROFILE_UNKNOWN;
     int c_rate = 0;
@@ -296,12 +299,14 @@ static void process(struct mp_filter *da)
     struct mp_aframe *out = NULL;
     double pts = mpkt->pts;
 
+    if (!spdif_ctx->lavf_ctx) {
+        if (init_filter(da) < 0)
+            goto done;
+        assert(spdif_ctx->avpkt);
+    }
+
     mp_set_av_packet(spdif_ctx->avpkt, mpkt, NULL);
     spdif_ctx->avpkt->pts = spdif_ctx->avpkt->dts = 0;
-    if (!spdif_ctx->lavf_ctx) {
-        if (init_filter(da, spdif_ctx->avpkt) < 0)
-            goto done;
-    }
     spdif_ctx->out_buffer_len  = 0;
     int ret = av_write_frame(spdif_ctx->lavf_ctx, spdif_ctx->avpkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
@@ -424,9 +429,6 @@ static struct mp_decoder *create(struct mp_filter *parent,
         talloc_free(da);
         return NULL;
     }
-
-    spdif_ctx->avpkt = av_packet_alloc();
-    MP_HANDLE_OOM(spdif_ctx->avpkt);
 
     return &spdif_ctx->public;
 }
