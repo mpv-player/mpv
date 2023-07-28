@@ -1569,6 +1569,14 @@ endif
 
 if swift.allowed()
     subdir('osdep')
+    # Xcode supports mixed targets, so we can add them here.
+    if meson.backend() == 'xcode'
+        add_languages('swift')
+        add_project_arguments(swift_flags, language: 'swift')
+        sources += swift_sources
+        # Include the bridging header, or compiling will fail.
+        sources += bridge
+    endif
 endif
 
 macos_touchbar = get_option('macos-touchbar').require(
