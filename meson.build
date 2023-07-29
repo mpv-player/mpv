@@ -375,6 +375,10 @@ if features['pthread-debug']
     flags += '-DMP_PTHREAD_DEBUG'
 endif
 
+if meson.backend() == 'xcode'
+    flags += '-DXCODE_BACKEND'
+endif
+
 add_project_arguments(flags, language: 'c')
 add_project_link_arguments(link_flags, language: ['c', 'objc'])
 
@@ -390,12 +394,15 @@ if features['cocoa']
                      'osdep/macosx_application.m',
                      'osdep/macosx_events.m',
                      'osdep/macosx_menubar.m',
-                     'osdep/main-fn-cocoa.c',
                      'osdep/path-macosx.m',
                      'video/out/cocoa_common.m',
                      'video/out/cocoa/events_view.m',
                      'video/out/cocoa/video_view.m',
                      'video/out/cocoa/window.m')
+    # Xcode will use this in its own target.
+    if meson.backend() != 'xcode'
+        sources += files('osdep/main-fn-cocoa.c')
+    endif
 endif
 
 if posix
@@ -1768,11 +1775,13 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
+    # Xcode does not support object-only targets.
     if meson.backend() != 'xcode'
         mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
                      win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
     else
-        mpv = executable('mpv', sources, dependencies: dependencies, include_directories: includedir)
+        mpv = executable('mpv', 'osdep/main-fn-cocoa.c', dependencies: dependencies, include_directories: includedir,
+                     link_with: libmpv)
     endif
 endif
 

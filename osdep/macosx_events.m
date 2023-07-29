@@ -40,7 +40,11 @@
 #include "config.h"
 
 #if HAVE_MACOS_COCOA_CB
+#if XCODE_BACKEND
+#import <mpv_2-Swift.h>
+#else
 #include "osdep/macOS_swift.h"
+#endif
 #endif
 
 @interface EventsResponder ()
