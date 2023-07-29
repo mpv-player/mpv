@@ -1063,14 +1063,17 @@ done:
     if (!valid) // clear with purple to indicate error
         pl_tex_clear(gpu, swframe.fbo, (float[4]){ 0.5, 0.0, 1.0, 1.0 });
 
-    if (!pl_swapchain_submit_frame(p->sw))
-        MP_ERR(vo, "Failed presenting frame!\n");
+    pl_gpu_flush(gpu);
 }
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
+
+    if (!pl_swapchain_submit_frame(p->sw))
+        MP_ERR(vo, "Failed presenting frame!\n");
+
     sw->fns->swap_buffers(sw);
 }
 
