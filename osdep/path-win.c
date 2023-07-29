@@ -98,6 +98,8 @@ const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
         if (strcmp(type, "home") == 0)
             return mp_get_win_app_dir(talloc_ctx);
         if (strcmp(type, "cache") == 0)
+            return mp_path_join(talloc_ctx, mp_get_win_local_app_dir(talloc_ctx), "cache");
+        if (strcmp(type, "state") == 0)
             return mp_get_win_local_app_dir(talloc_ctx);
         if (strcmp(type, "exe_dir") == 0)
             return mp_get_win_exe_dir(talloc_ctx);

@@ -562,7 +562,7 @@ static bool check_for_hwdec_fallback(struct MPContext *mpctx)
 {
     struct vo_chain *vo_c = mpctx->vo_chain;
 
-    if (!vo_c->filter->failed_output_conversion || !vo_c->track)
+    if (!vo_c->filter->failed_output_conversion || !vo_c->track || !vo_c->track->dec)
         return false;
 
     if (mp_decoder_wrapper_control(vo_c->track->dec,
@@ -576,9 +576,13 @@ static bool check_for_hwdec_fallback(struct MPContext *mpctx)
 static bool check_for_forced_eof(struct MPContext *mpctx)
 {
     struct vo_chain *vo_c = mpctx->vo_chain;
-    struct mp_decoder_wrapper *dec = vo_c->track->dec;
 
+    if (!vo_c->track || !vo_c->track->dec)
+        return false;
+
+    struct mp_decoder_wrapper *dec = vo_c->track->dec;
     bool forced_eof = false;
+
     mp_decoder_wrapper_control(dec, VDCTRL_CHECK_FORCED_EOF, &forced_eof);
     return forced_eof;
 }

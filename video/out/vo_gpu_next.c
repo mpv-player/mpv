@@ -116,6 +116,7 @@ struct priv {
     double last_pts;
     bool is_interpolated;
     bool want_reset;
+    bool frame_pending;
 
     struct m_config_cache *opts_cache;
     struct mp_csp_equalizer_state *video_eq;
@@ -1063,14 +1064,21 @@ done:
     if (!valid) // clear with purple to indicate error
         pl_tex_clear(gpu, swframe.fbo, (float[4]){ 0.5, 0.0, 1.0, 1.0 });
 
-    if (!pl_swapchain_submit_frame(p->sw))
-        MP_ERR(vo, "Failed presenting frame!\n");
+    pl_gpu_flush(gpu);
+    p->frame_pending = true;
 }
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
+
+    if (p->frame_pending) {
+        if (!pl_swapchain_submit_frame(p->sw))
+            MP_ERR(vo, "Failed presenting frame!\n");
+        p->frame_pending = false;
+    }
+
     sw->fns->swap_buffers(sw);
 }
 

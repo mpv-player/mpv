@@ -1653,7 +1653,9 @@ You can find the exact path by running ``echo %APPDATA%\mpv\mpv.conf`` in cmd.ex
 Other config files (such as ``input.conf``) are in the same directory. See the
 `FILES`_ section above.
 
-The cache directory is located at ``%LOCALAPPDATA%/mpv``.
+The cache directory is located at ``%LOCALAPPDATA%/mpv/cache``.
+
+The watch_later directory is located at ``%LOCALAPPDATA%/mpv/watch_later``.
 
 The environment variable ``$MPV_HOME`` completely overrides these, like on
 UNIX.
