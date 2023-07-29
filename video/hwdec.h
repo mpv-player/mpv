@@ -18,6 +18,11 @@ struct mp_hwdec_ctx {
     const int *supported_formats;
     // HW format used by the hwdec
     int hw_imgfmt;
+
+    // The name of this hwdec's matching conversion filter if available.
+    // This will be used for hardware conversion of frame formats.
+    // NULL otherwise.
+    const char *conversion_filter_name;
 };
 
 // Used to communicate hardware decoder device handles from VO to video decoder.
