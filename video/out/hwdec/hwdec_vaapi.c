@@ -131,6 +131,8 @@ const static dmabuf_interop_init interop_inits[] = {
     NULL
 };
 
+const static char *conversion_filter_name = "scale_vaapi";
+
 static int init(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
@@ -177,6 +179,7 @@ static int init(struct ra_hwdec *hw)
     p->ctx->hwctx.hw_imgfmt = IMGFMT_VAAPI;
     p->ctx->hwctx.supported_formats = p->formats;
     p->ctx->hwctx.driver_name = hw->driver->name;
+    p->ctx->hwctx.conversion_filter_name = conversion_filter_name;
     hwdec_devices_add(hw->devs, &p->ctx->hwctx);
     return 0;
 }
