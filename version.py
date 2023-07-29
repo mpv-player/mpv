@@ -25,21 +25,18 @@ if len(sys.argv) < 2:
     print(version)
     sys.exit()
 
-date = datetime.utcfromtimestamp(int(os.environ.get('SOURCE_DATE_EPOCH', time.time())))
-if date == "":
-    date = datetime.now(timezone.utc).astimezone()
-date_str = date.strftime("%a %b %d %I:%M:%S %Y")
+ts = float(os.environ.get('SOURCE_DATE_EPOCH', time.time()))
+date = datetime.fromtimestamp(ts, timezone.utc)
 
-NEW_REVISION = "#define VERSION \"" + version + "\"\n"
 OLD_REVISION = ""
-BUILDDATE = "#define BUILDDATE \"" + date_str + "\"\n"
-MPVCOPYRIGHT = "#define MPVCOPYRIGHT \"Copyright \u00A9 2000-2023 mpv/MPlayer/mplayer2 projects\"" + "\n"
+NEW_REVISION = f'#define VERSION "{version}"'
+BUILDDATE = f'#define BUILDDATE "{date.ctime()}"'
+MPVCOPYRIGHT = f'#define MPVCOPYRIGHT "Copyright © 2000-2023 mpv/MPlayer/mplayer2 projects"'
 
 if os.path.isfile(sys.argv[1]):
     with open(sys.argv[1], "r") as f:
-        OLD_REVISION = f.readline()
+        OLD_REVISION = f.readline().strip()
 
-if NEW_REVISION != OLD_REVISION:
+if NEW_REVISION != OLD_REVISION or NEW_REVISION.endswith('dirty"'):
     with open(sys.argv[1], "w", encoding="utf-8") as f:
-        f.writelines([NEW_REVISION, BUILDDATE, MPVCOPYRIGHT])
-
+        f.writelines(f"{l}{os.linesep}" for l in [NEW_REVISION, BUILDDATE, MPVCOPYRIGHT])
