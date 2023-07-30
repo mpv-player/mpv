@@ -488,7 +488,6 @@ int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track);
 void audio_update_volume(struct MPContext *mpctx);
 void audio_update_balance(struct MPContext *mpctx);
-void audio_update_media_role(struct MPContext *mpctx);
 void reload_audio_output(struct MPContext *mpctx);
 void audio_start_ao(struct MPContext *mpctx);
 
