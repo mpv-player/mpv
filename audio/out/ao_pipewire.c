@@ -553,6 +553,7 @@ static int init(struct ao *ao)
     struct pw_properties *props = pw_properties_new(
         PW_KEY_MEDIA_TYPE, "Audio",
         PW_KEY_MEDIA_CATEGORY, "Playback",
+        PW_KEY_MEDIA_ROLE, "Movie",
         PW_KEY_NODE_NAME, ao->client_name,
         PW_KEY_NODE_DESCRIPTION, ao->client_name,
         PW_KEY_APP_NAME, ao->client_name,
@@ -677,8 +678,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         }
         case AOCONTROL_SET_VOLUME:
         case AOCONTROL_SET_MUTE:
-        case AOCONTROL_UPDATE_STREAM_TITLE:
-        case AOCONTROL_UPDATE_MEDIA_ROLE: {
+        case AOCONTROL_UPDATE_STREAM_TITLE: {
             int ret;
 
             pw_thread_loop_lock(p->loop);
@@ -709,26 +709,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
                     char *title = arg;
                     struct spa_dict_item items[1];
                     items[0] = SPA_DICT_ITEM_INIT(PW_KEY_MEDIA_NAME, title);
-                    ret = CONTROL_RET(pw_stream_update_properties(p->stream, &SPA_DICT_INIT(items, MP_ARRAY_SIZE(items))));
-                    break;
-                }
-                case AOCONTROL_UPDATE_MEDIA_ROLE: {
-                    enum aocontrol_media_role *role = arg;
-                    struct spa_dict_item items[1];
-                    const char *role_str;
-                    switch (*role) {
-                        case AOCONTROL_MEDIA_ROLE_MOVIE:
-                            role_str = "Movie";
-                            break;
-                        case AOCONTROL_MEDIA_ROLE_MUSIC:
-                            role_str = "Music";
-                            break;
-                        default:
-                            MP_WARN(ao, "Unknown media role %d\n", *role);
-                            role_str = "";
-                            break;
-                    }
-                    items[0] = SPA_DICT_ITEM_INIT(PW_KEY_MEDIA_ROLE, role_str);
                     ret = CONTROL_RET(pw_stream_update_properties(p->stream, &SPA_DICT_INIT(items, MP_ARRAY_SIZE(items))));
                     break;
                 }
