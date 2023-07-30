@@ -565,10 +565,6 @@ static bool draw_osd(struct vo *vo, struct mp_image *cur, double pts)
         void *src = mp_image_pixel_ptr(osd, 0, rc.x0, rc.y0);
         void *dst = cur->planes[0] + rc.x0 * 4 + rc.y0 * cur->stride[0];
 
-        // Avoid overflowing if we have this special case.
-        if (n == num_mod_rc - 1)
-            --rh;
-
         memcpy_pic(dst, src, rw * 4, rh, cur->stride[0], osd->stride[0]);
     }
 
