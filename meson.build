@@ -556,7 +556,6 @@ tools_directory = join_paths(source_root, 'TOOLS')
 docutils_wrapper = find_program(join_paths(tools_directory, 'docutils-wrapper.py'))
 file2string = find_program(join_paths(tools_directory, 'file2string.py'))
 matroska = find_program(join_paths(tools_directory, 'matroska.py'))
-version_py = find_program(join_paths(source_root, 'version.py'))
 
 ebml_defs = custom_target('ebml_defs.inc',
     output: 'ebml_defs.inc',
@@ -568,13 +567,9 @@ ebml_types = custom_target('ebml_types.h',
     command: [matroska, '--generate-header', '@OUTPUT@'],
 )
 
-version_h = custom_target('version.h',
-    output: 'version.h',
-    command: [version_py, '@OUTPUT@'],
-    build_always_stale: true,
-)
-sources += [ebml_defs, ebml_types, version_h]
+sources += [ebml_defs, ebml_types]
 
+subdir('common')
 subdir('etc')
 subdir('player')
 subdir('sub')
