@@ -968,7 +968,8 @@ static void mark_rcs(struct mp_draw_sub_cache *p, struct rc_grid *gr)
                 rc->y0 = MPMIN(rc->y0, y);
                 rc->y1 = MPMAX(rc->y1, y + 1);
                 rc->x0 = MPMIN(rc->x0, xpos + s->x0);
-                rc->x1 = MPMAX(rc->x1, xpos + s->x1);
+                // Ensure this does not extend beyond the total width
+                rc->x1 = MPCLAMP(xpos + s->x1, rc->x1, p->w);
             }
         }
     }
