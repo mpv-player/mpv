@@ -15,7 +15,6 @@ struct priv {
     bool sent_final;
     struct mp_aframe *pending;
     bool initialized;
-    double frame_delay;
     float speed;
 };
 
@@ -67,7 +66,6 @@ static void process(struct mp_filter *f)
             uint8_t **planes = mp_aframe_get_data_ro(p->pending);
             int read = mp_scaletempo2_fill_input_buffer(&p->data,
                 planes, frame_size, final);
-            p->frame_delay += read;
             mp_aframe_skip_samples(p->pending, read);
         }
         p->sent_final |= final;
@@ -109,11 +107,11 @@ static void process(struct mp_filter *f)
             (float**)planes, out_samples, p->speed);
 
         double pts = mp_aframe_get_pts(p->pending);
-        p->frame_delay -= out_samples * p->speed;
-
         if (pts != MP_NOPTS_VALUE) {
-            double delay = p->frame_delay / mp_aframe_get_effective_rate(out);
-            mp_aframe_set_pts(out, pts - delay);
+            double frame_delay = p->data.input_buffer_frames - p->data.search_block_index
+                                 + p->data.num_complete_frames * p->speed
+                                 + out_samples * p->speed;
+            mp_aframe_set_pts(out, pts - frame_delay / mp_aframe_get_effective_rate(out));
         }
 
         mp_aframe_set_size(out, out_samples);
@@ -137,7 +135,6 @@ static bool init_scaletempo2(struct mp_filter *f)
     mp_aframe_reset(p->cur_format);
     p->initialized = true;
     p->sent_final = false;
-    p->frame_delay = 0;
     mp_aframe_config_copy(p->cur_format, p->pending);
 
     mp_scaletempo2_init(&p->data, mp_aframe_get_channels(p->pending),
@@ -163,7 +160,6 @@ static void reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
     mp_scaletempo2_reset(&p->data);
-    p->frame_delay = 0;
     p->initialized = false;
     TA_FREEP(&p->pending);
 }
