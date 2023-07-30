@@ -190,30 +190,6 @@ void update_playback_speed(struct MPContext *mpctx)
     update_speed_filters(mpctx);
 }
 
-static bool has_video_track(struct MPContext *mpctx)
-{
-    if (mpctx->vo_chain && mpctx->vo_chain->is_coverart)
-        return false;
-
-    for (int n = 0; n < mpctx->num_tracks; n++) {
-        struct track *track = mpctx->tracks[n];
-        if (track->type == STREAM_VIDEO && !track->attached_picture && !track->image)
-            return true;
-    }
-
-    return false;
-}
-
-void audio_update_media_role(struct MPContext *mpctx)
-{
-    if (!mpctx->ao)
-        return;
-
-    enum aocontrol_media_role role = has_video_track(mpctx) ?
-        AOCONTROL_MEDIA_ROLE_MOVIE : AOCONTROL_MEDIA_ROLE_MUSIC;
-    ao_control(mpctx->ao, AOCONTROL_UPDATE_MEDIA_ROLE, &role);
-}
-
 static void ao_chain_reset_state(struct ao_chain *ao_c)
 {
     ao_c->last_out_pts = MP_NOPTS_VALUE;
@@ -498,8 +474,6 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
     ao_chain_set_ao(ao_c, mpctx->ao);
 
     audio_update_volume(mpctx);
-
-    audio_update_media_role(mpctx);
 
     // Almost nonsensical hack to deal with certain format change scenarios.
     if (mpctx->audio_status == STATUS_PLAYING)

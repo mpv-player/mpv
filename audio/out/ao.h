@@ -34,8 +34,6 @@ enum aocontrol {
     AOCONTROL_SET_MUTE,
     // Has char* as argument, which contains the desired stream title.
     AOCONTROL_UPDATE_STREAM_TITLE,
-    // Has enum aocontrol_media_role* argument, which contains the current media role
-    AOCONTROL_UPDATE_MEDIA_ROLE,
 };
 
 // If set, then the queued audio data is the last. Note that after a while, new
@@ -58,11 +56,6 @@ enum {
     AO_INIT_STREAM_SILENCE = 1 << 2,
     // Force exclusive mode, i.e. lock out the system mixer.
     AO_INIT_EXCLUSIVE = 1 << 3,
-};
-
-enum aocontrol_media_role {
-    AOCONTROL_MEDIA_ROLE_MUSIC,
-    AOCONTROL_MEDIA_ROLE_MOVIE,
 };
 
 struct ao_device_desc {
