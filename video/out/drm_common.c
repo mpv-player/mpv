@@ -809,15 +809,11 @@ static int open_card_path(const char *path)
 
 static bool card_supports_kms(const char *path)
 {
-#if HAVE_DRM_IS_KMS
     int fd = open_card_path(path);
     bool ret = fd != -1 && drmIsKMS(fd);
     if (fd != -1)
         close(fd);
     return ret;
-#else
-    return true;
-#endif
 }
 
 static void get_primary_device_path(struct vo_drm_state *drm)
