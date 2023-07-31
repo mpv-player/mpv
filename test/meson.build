@@ -98,10 +98,18 @@ paths = executable('paths', 'paths.c', include_directories: incdir,
 test('paths', paths)
 
 if get_option('libmpv')
-    libmpv_test = executable('libmpv-test', 'libmpv_test.c',
-                             include_directories: incdir, link_with: libmpv)
+    libmpv_test_utils = static_library('libmpv-test-utils', 'libmpv_test_utils.c',
+                                       include_directories: incdir, link_with: libmpv)
+    libmpv_lavfi_complex = executable('libmpv-lavfi-complex', 'libmpv_lavfi_complex.c',
+                                      include_directories: incdir, link_with: libmpv_test_utils)
+    libmpv_load_file = executable('libmpv-load-file', 'libmpv_load_file.c',
+                                  include_directories: incdir, link_with: libmpv_test_utils)
+    libmpv_options = executable('libmpv-options', 'libmpv_options.c',
+                                include_directories: incdir, link_with: libmpv_test_utils)
     file = join_paths(source_root, 'etc', 'mpv-icon-8bit-16x16.png')
-    test('libmpv', libmpv_test, args: file)
+    test('libmpv-lavfi-complex-test', libmpv_lavfi_complex, args: file)
+    test('libmpv-load-file-test', libmpv_load_file, args: file)
+    test('libmpv-options-test', libmpv_options, args: file)
 endif
 
 # Minimum required libavutil version that works with these tests.
