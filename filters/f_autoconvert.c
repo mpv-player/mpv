@@ -358,8 +358,8 @@ static void handle_video_frame(struct mp_filter *f)
     }
 
     if (!mp_subfilter_drain_destroy(&p->sub)) {
-        p->in_imgfmt = p->in_subfmt = 0;
-        return;
+        MP_VERBOSE(f, "Sub-filter requires draining but we must destroy it now.\n");
+        mp_subfilter_destroy(&p->sub);
     }
 
     p->in_imgfmt = img->params.imgfmt;
