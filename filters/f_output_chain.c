@@ -114,7 +114,11 @@ static void check_in_format_change(struct mp_user_filter *u,
             // But a common case is enabling HW decoding, which
             // might init some support of them in the VO, and update
             // the VO's format list.
-            update_output_caps(p);
+            //
+            // But as this is only relevant to the "convert" filter, don't
+            // do this for the other filters as it is wasted work.
+            if (strcmp(u->name, "convert") == 0)
+                update_output_caps(p);
 
             p->public.reconfig_happened = true;
         }
