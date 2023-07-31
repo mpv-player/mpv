@@ -894,7 +894,7 @@ if features['direct3d']
     sources += files('video/out/vo_direct3d.c')
 endif
 
-drm = dependency('libdrm', version: '>= 2.4.75', required: get_option('drm'))
+drm = dependency('libdrm', version: '>= 2.4.105', required: get_option('drm'))
 features += {'drm': drm.found() and (features['vt.h'] or features['consio.h'])}
 if features['drm']
     dependencies += drm
@@ -906,9 +906,6 @@ if features['drm']
                      'video/out/hwdec/hwdec_drmprime_overlay.c',
                      'video/out/vo_drm.c')
 endif
-
-# This can be removed roughly when Debian 12 is released.
-features += {'drm-is-kms': features['drm'] and drm.version().version_compare('>= 2.4.105')}
 
 gbm = dependency('gbm', version: '>=17.1.0', required: get_option('gbm'))
 features += {'gbm': gbm.found()}
