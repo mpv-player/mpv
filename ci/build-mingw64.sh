@@ -211,7 +211,7 @@ meson compile -C build
 if [ "$2" = pack ]; then
     mkdir -p artifact
     echo "Copying:"
-    cp -pv build/generated/mpv.com build/mpv.exe "$prefix_dir/bin/"*.dll artifact/
+    cp -pv build/player/mpv.com build/mpv.exe "$prefix_dir/bin/"*.dll artifact/
     # ship everything and the kitchen sink
     shopt -s nullglob
     for file in /usr/lib/gcc/$TARGET/*-posix/*.dll /usr/$TARGET/lib/*.dll; do

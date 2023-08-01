@@ -558,12 +558,29 @@ file2string = find_program(join_paths(tools_directory, 'file2string.py'))
 matroska = find_program(join_paths(tools_directory, 'matroska.py'))
 version_py = find_program(join_paths(source_root, 'version.py'))
 
-subdir('generated')
-subdir(join_paths('generated', 'etc'))
-subdir(join_paths('generated', 'sub'))
+ebml_defs = custom_target('ebml_defs.inc',
+    output: 'ebml_defs.inc',
+    command: [matroska, '--generate-definitions', '@OUTPUT@'],
+)
+
+ebml_types = custom_target('ebml_types.h',
+    output: 'ebml_types.h',
+    command: [matroska, '--generate-header', '@OUTPUT@'],
+)
+
+version_h = custom_target('version.h',
+    output: 'version.h',
+    command: [version_py, '@OUTPUT@'],
+    build_always_stale: true,
+)
+sources += [ebml_defs, ebml_types, version_h]
+
+subdir('etc')
+subdir('player')
+subdir('sub')
 
 if darwin
-    subdir(join_paths('generated', 'TOOLS', 'osxbundle', 'mpv.app', 'Contents', 'Resources'))
+    subdir(join_paths('TOOLS', 'osxbundle'))
 endif
 
 
@@ -618,7 +635,6 @@ if features['javascript']
     dependencies += javascript
     sources += files('player/javascript.c',
                      'sub/filter_jsre.c')
-    subdir(join_paths('generated', 'player', 'javascript'))
 endif
 
 lcms2 = dependency('lcms2', version: '>= 2.6', required: get_option('lcms2'))
@@ -691,7 +707,6 @@ lua_version = lua.name()
 if features['lua']
     dependencies += lua
     sources += files('player/lua.c')
-    subdir(join_paths('generated', 'player', 'lua'))
 endif
 if not features['lua'] and lua_opt == 'enabled'
      error('lua enabled but no suitable lua version could be found!')
@@ -894,7 +909,7 @@ if features['direct3d']
     sources += files('video/out/vo_direct3d.c')
 endif
 
-drm = dependency('libdrm', version: '>= 2.4.75', required: get_option('drm'))
+drm = dependency('libdrm', version: '>= 2.4.105', required: get_option('drm'))
 features += {'drm': drm.found() and (features['vt.h'] or features['consio.h'])}
 if features['drm']
     dependencies += drm
@@ -906,9 +921,6 @@ if features['drm']
                      'video/out/hwdec/hwdec_drmprime_overlay.c',
                      'video/out/vo_drm.c')
 endif
-
-# This can be removed roughly when Debian 12 is released.
-features += {'drm-is-kms': features['drm'] and drm.version().version_compare('>= 2.4.105')}
 
 gbm = dependency('gbm', version: '>=17.1.0', required: get_option('gbm'))
 features += {'gbm': gbm.found()}
@@ -1004,7 +1016,7 @@ endforeach
 features += {'wayland': wayland_deps and wayland['header'] and wayland['scanner'].found()}
 
 if features['wayland']
-    subdir(join_paths('generated', 'wayland'))
+    subdir(join_paths('video', 'out'))
 endif
 
 features += {'memfd_create': false}
@@ -1571,7 +1583,7 @@ if features['macos-media-player']
 endif
 
 if swift.allowed()
-    subdir(join_paths('generated', 'osdep'))
+    subdir('osdep')
 endif
 
 macos_touchbar = get_option('macos-touchbar').require(

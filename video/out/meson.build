@@ -48,4 +48,4 @@ client_protocols = declare_dependency(link_with: lib_client_protocols,
 
 dependencies += [client_protocols, wayland['deps']]
 
-sources += ['video/out/wayland_common.c']
+sources += files('wayland_common.c')
