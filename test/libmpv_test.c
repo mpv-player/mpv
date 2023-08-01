@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 // Stolen from osdep/compiler.h
 #ifdef __GNUC__
@@ -151,10 +150,7 @@ static void test_file_loading(char *file)
     check_api_error(mpv_command(ctx, cmd));
     int loaded = 0;
     int finished = 0;
-    time_t end = time(NULL) + 10;
-    while (time(NULL) < end) {
-        if (finished)
-            break;
+    while (!finished) {
         mpv_event *event = mpv_wait_event(ctx, 0);
         switch (event->event_id) {
         case MPV_EVENT_FILE_LOADED:
@@ -177,10 +173,7 @@ static void test_lavfi_complex(char *file)
     check_api_error(mpv_command(ctx, cmd));
     int finished = 0;
     int loaded = 0;
-    time_t end = time(NULL) + 10;
-    while (time(NULL) < end) {
-        if (finished)
-            break;
+    while (!finished) {
         mpv_event *event = mpv_wait_event(ctx, 0);
         switch (event->event_id) {
         case MPV_EVENT_FILE_LOADED:
