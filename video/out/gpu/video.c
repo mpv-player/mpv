@@ -1729,6 +1729,12 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 
     uninit_scaler(p, scaler);
 
+    if (conf && scaler->index == SCALER_DSCALE && (!conf->kernel.name ||
+        !conf->kernel.name[0]))
+    {
+        conf = &p->opts.scaler[SCALER_SCALE];
+    }
+
     struct filter_kernel bare_window;
     const struct filter_kernel *t_kernel = mp_find_filter_kernel(conf->kernel.name);
     const struct filter_window *t_window = mp_find_filter_window(conf->window.name);
