@@ -260,7 +260,7 @@ static bool vo_supports(struct mp_hwdec_ctx *ctx, int hw_fmt, int sw_fmt)
     return false;
 }
 
-static bool probe_formats(struct mp_filter *f, int hw_imgfmt)
+static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversion_filter)
 {
     struct priv *p = f->priv;
 
@@ -276,6 +276,7 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt)
 
     struct mp_hwdec_ctx *ctx = NULL;
     AVHWFramesConstraints *cstr = NULL;
+    AVHWFramesConstraints *conversion_cstr = NULL;
 
     struct hwdec_imgfmt_request params = {
         .imgfmt = hw_imgfmt,
@@ -326,6 +327,16 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt)
         }
     }
 
+    if (use_conversion_filter) {
+        // We will not be doing a transfer, so do not probe for transfer
+        // formats. This can produce incorrect results. Instead, we need to
+        // obtain the constraints for a conversion configuration.
+
+        conversion_cstr =
+            av_hwdevice_get_hwframe_constraints(ctx->av_device_ref,
+                                                ctx->conversion_config);
+    }
+
     for (int n = 0; cstr->valid_sw_formats &&
                     cstr->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++)
     {
@@ -345,19 +356,10 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt)
             continue;
         }
 
-        // Creates an AVHWFramesContexts with the given parameters.
-        AVBufferRef *frames = NULL;
-        if (!mp_update_av_hw_frames_pool(&frames, ctx->av_device_ref,
-                                         hw_imgfmt, imgfmt, 128, 128, false))
-        {
-            MP_WARN(f, "failed to allocate pool\n");
-            continue;
-        }
-
-        enum AVPixelFormat *fmts;
-        if (av_hwframe_transfer_get_formats(frames,
-                            AV_HWFRAME_TRANSFER_DIRECTION_TO, &fmts, 0) >= 0)
-        {
+        if (use_conversion_filter) {
+            // The conversion constraints are universal, and do not vary with
+            // source format, so we will associate the same set of target formats
+            // with all source formats.
             int index = p->num_fmts;
             MP_TARRAY_APPEND(p, p->fmts, p->num_fmts, imgfmt);
             MP_TARRAY_GROW(p, p->fmt_upload_index, index);
@@ -365,7 +367,8 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt)
 
             p->fmt_upload_index[index] = p->num_upload_fmts;
 
-            for (int i = 0; fmts[i] != AV_PIX_FMT_NONE; i++) {
+            enum AVPixelFormat *fmts = conversion_cstr->valid_sw_formats;
+            for (int i = 0; fmts && fmts[i] != AV_PIX_FMT_NONE; i++) {
                 int fmt = pixfmt2imgfmt(fmts[i]);
                 if (!fmt)
                     continue;
@@ -379,14 +382,51 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt)
 
             p->fmt_upload_num[index] =
                 p->num_upload_fmts - p->fmt_upload_index[index];
+        } else {
+            // Creates an AVHWFramesContexts with the given parameters.
+            AVBufferRef *frames = NULL;
+            if (!mp_update_av_hw_frames_pool(&frames, ctx->av_device_ref,
+                                            hw_imgfmt, imgfmt, 128, 128, false))
+            {
+                MP_WARN(f, "failed to allocate pool\n");
+                continue;
+            }
 
-            av_free(fmts);
+            enum AVPixelFormat *fmts;
+            if (av_hwframe_transfer_get_formats(frames,
+                                AV_HWFRAME_TRANSFER_DIRECTION_TO, &fmts, 0) >= 0)
+            {
+                int index = p->num_fmts;
+                MP_TARRAY_APPEND(p, p->fmts, p->num_fmts, imgfmt);
+                MP_TARRAY_GROW(p, p->fmt_upload_index, index);
+                MP_TARRAY_GROW(p, p->fmt_upload_num, index);
+
+                p->fmt_upload_index[index] = p->num_upload_fmts;
+
+                for (int i = 0; fmts[i] != AV_PIX_FMT_NONE; i++) {
+                    int fmt = pixfmt2imgfmt(fmts[i]);
+                    if (!fmt)
+                        continue;
+                    MP_VERBOSE(f, "  supports %s\n", mp_imgfmt_to_name(fmt));
+                    if (!vo_supports(ctx, hw_imgfmt, fmt)) {
+                        MP_VERBOSE(f, "  ... not supported by VO\n");
+                        continue;
+                    }
+                    MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
+                }
+
+                p->fmt_upload_num[index] =
+                    p->num_upload_fmts - p->fmt_upload_index[index];
+
+                av_free(fmts);
+            }
+
+            av_buffer_unref(&frames);
         }
-
-        av_buffer_unref(&frames);
     }
 
     av_hwframe_constraints_free(&cstr);
+    av_hwframe_constraints_free(&conversion_cstr);
     p->av_device_ctx = av_buffer_ref(ctx->av_device_ref);
     if (!p->av_device_ctx)
         return false;
@@ -407,7 +447,7 @@ struct mp_hwupload mp_hwupload_create(struct mp_filter *parent, int hw_imgfmt,
     mp_filter_add_pin(f, MP_PIN_IN, "in");
     mp_filter_add_pin(f, MP_PIN_OUT, "out");
 
-    if (!probe_formats(f, hw_imgfmt)) {
+    if (!probe_formats(f, hw_imgfmt, src_is_same_hw)) {
         MP_INFO(f, "hardware format not supported\n");
         goto fail;
     }

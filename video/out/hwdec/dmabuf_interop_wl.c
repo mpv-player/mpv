@@ -54,7 +54,8 @@ static bool map(struct ra_hwdec_mapper *mapper,
         return false;
     }
 
-    MP_VERBOSE(mapper, "Supported Wayland display format: '%s(%016lx)'\n",
+    MP_VERBOSE(mapper, "Supported Wayland display format %s: '%s(%016lx)'\n",
+               mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
                mp_tag_str(drm_format), mapper_p->desc.objects[0].format_modifier);
 
     return true;
