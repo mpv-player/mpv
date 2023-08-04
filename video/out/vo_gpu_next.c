@@ -1883,6 +1883,7 @@ static void update_render_options(struct vo *vo)
     p->peak_detect.smoothing_period = opts->tone_map.decay_rate;
     p->peak_detect.scene_threshold_low = opts->tone_map.scene_threshold_low;
     p->peak_detect.scene_threshold_high = opts->tone_map.scene_threshold_high;
+    p->peak_detect.percentile = opts->tone_map.peak_percentile;
 
     const struct pl_tone_map_function * const tone_map_funs[] = {
         [TONE_MAPPING_AUTO]     = &pl_tone_map_auto,

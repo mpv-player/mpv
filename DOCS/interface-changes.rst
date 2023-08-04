@@ -31,6 +31,7 @@ Interface changes
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.
     - change `--subs-with-matching-audio` default from `no` to `yes`
     - change `--subs-fallback` default from `no` to `default`
+    - add the `--hdr-peak-percentile` option
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
