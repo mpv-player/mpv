@@ -56,6 +56,12 @@
 #include "osdep/windows_utils.h"
 #endif
 
+enum quality_preset {
+    PRESET_DEFAULT,
+    PRESET_FAST,
+    PRESET_HQ,
+};
+
 struct osd_entry {
     pl_tex tex;
     struct pl_overlay_part *parts;
@@ -152,6 +158,7 @@ struct priv {
     bool delayed_peak;
     bool inter_preserve;
     bool target_hint;
+    int preset;
 
     float corner_rounding;
 };
@@ -1835,7 +1842,22 @@ static void update_render_options(struct vo *vo)
 {
     struct priv *p = vo->priv;
     const struct gl_video_opts *opts = p->opts_cache->opts;
-    p->params = pl_render_default_params;
+
+    switch (p->preset)
+    {
+    case PRESET_FAST:
+        p->params = pl_render_fast_params;
+        break;
+    case PRESET_DEFAULT:
+        p->params = pl_render_default_params;
+        break;
+    case PRESET_HQ:
+        p->params = pl_render_high_quality_params;
+        break;
+    default:
+        MP_ASSERT_UNREACHABLE();
+    }
+
     p->params.lut_entries = 1 << opts->scaler_lut_size;
     p->params.antiringing_strength = opts->scaler[0].antiring;
     p->params.polar_cutoff = opts->scaler[0].cutoff;
@@ -1879,7 +1901,21 @@ static void update_render_options(struct vo *vo)
     p->sigmoid.center = opts->sigmoid_center;
     p->sigmoid.slope = opts->sigmoid_slope;
 
-    p->peak_detect = pl_peak_detect_default_params;
+    switch (p->preset)
+    {
+    case PRESET_HQ:
+#if PL_API_VER >= 292
+        p->peak_detect = pl_peak_detect_high_quality_params;
+        break;
+#endif
+    case PRESET_FAST:
+    case PRESET_DEFAULT:
+        p->peak_detect = pl_peak_detect_default_params;
+        break;
+    default:
+        MP_ASSERT_UNREACHABLE();
+    }
+
     p->peak_detect.smoothing_period = opts->tone_map.decay_rate;
     p->peak_detect.scene_threshold_low = opts->tone_map.scene_threshold_low;
     p->peak_detect.scene_threshold_high = opts->tone_map.scene_threshold_high;
@@ -1943,7 +1979,21 @@ static void update_render_options(struct vo *vo)
     };
 #endif
 
-    p->color_map = pl_color_map_default_params;
+    switch (p->preset)
+    {
+    case PRESET_HQ:
+#if PL_API_VER >= 292
+        p->color_map = pl_color_map_high_quality_params;
+        break;
+#endif
+    case PRESET_FAST:
+    case PRESET_DEFAULT:
+        p->color_map = pl_color_map_default_params;
+        break;
+    default:
+        MP_ASSERT_UNREACHABLE();
+    }
+
     p->color_map.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
     p->color_map.tone_mapping_param = opts->tone_map.curve_param;
     p->color_map.inverse_tone_mapping = opts->tone_map.inverse;
@@ -2017,6 +2067,13 @@ const struct m_opt_choice_alternatives lut_types[] = {
     {0}
 };
 
+const struct m_opt_choice_alternatives preset_types[] = {
+    {"fast",        PRESET_FAST},
+    {"default",     PRESET_DEFAULT},
+    {"highquality", PRESET_HQ},
+    {0}
+};
+
 const struct vo_driver video_out_gpu_next = {
     .description = "Video output based on libplacebo",
     .name = "gpu-next",
@@ -2052,6 +2109,7 @@ const struct vo_driver video_out_gpu_next = {
         {"image-lut-type", OPT_CHOICE_C(image_lut.type, lut_types)},
         {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
         {"target-colorspace-hint", OPT_BOOL(target_hint)},
+        {"libplacebo-preset", OPT_CHOICE_C(preset, preset_types)},
         // No `target-lut-type` because we don't support non-RGB targets
         {0}
     },

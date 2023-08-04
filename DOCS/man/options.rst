@@ -6041,6 +6041,11 @@ them.
     alternatives like the ``ewa_lanczossharp`` scale filter, or the
     ``--scale-blur`` option. (Only for ``--vo=gpu``)
 
+``--libplacebo-preset=<fast|default|highquality>``
+    Initialized inital gpu-next parameters with selected preset.
+    This covers parameters not exposed by other options and which are implicitly
+    initialized by libplacebo. (``--vo=gpu-next`` only)
+
 ``--opengl-glfinish``
     Call ``glFinish()`` before swapping buffers (default: disabled). Slower,
     but might improve results when doing framedropping. Can completely ruin
