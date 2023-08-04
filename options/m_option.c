@@ -2651,9 +2651,18 @@ static int parse_timestring(struct bstr str, double *time, char endchar)
     int h, m, len;
     double s;
     *time = 0; /* ensure initialization for error cases */
+    bool neg = bstr_eatstart0(&str, "-");
+    if (!neg)
+        bstr_eatstart0(&str, "+");
+    if (bstrchr(str, '-') >= 0 || bstrchr(str, '+') >= 0)
+        return 0; /* the timestamp shouldn't contain anymore +/- after this point */
     if (bstr_sscanf(str, "%d:%d:%lf%n", &h, &m, &s, &len) >= 3) {
+        if (m >= 60 || s >= 60)
+            return 0; /* minutes or seconds are out of range */
         *time = 3600 * h + 60 * m + s;
     } else if (bstr_sscanf(str, "%d:%lf%n", &m, &s, &len) >= 2) {
+        if (s >= 60)
+            return 0; /* seconds are out of range */
         *time = 60 * m + s;
     } else if (bstr_sscanf(str, "%lf%n", &s, &len) >= 1) {
         *time = s;
@@ -2664,6 +2673,8 @@ static int parse_timestring(struct bstr str, double *time, char endchar)
         return 0;  /* invalid extra characters at the end */
     if (!isfinite(*time))
         return 0;
+    if (neg)
+        *time = -*time;
     return len;
 }
 
