@@ -6697,7 +6697,7 @@ them.
     distribution is progressively cut off. Setting this too low will cause
     clipping of very bright details, but can improve the dynamic brightness
     range of scenes with very bright isolated highlights. Values other than 100
-    come with a small performance penalty. (Only for ``--vo=gpu-next`)
+    come with a small performance penalty. (Only for ``--vo=gpu-next``)
 
 ``--hdr-peak-decay-rate=<1.0..1000.0>``
     The decay rate used for the HDR peak detection algorithm (default: 100.0).
