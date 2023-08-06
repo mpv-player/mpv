@@ -714,11 +714,17 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    int min = 0.075 * p->samplerate * af_fmt_to_bytes(ao->format) * ao->channels.num;
+    // Choose double of the minimum buffer size suggested by the driver, but not
+    // less than 75ms or more than 150ms.
+    const int bps = af_fmt_to_bytes(ao->format);
+    int min = 0.075 * p->samplerate * bps * ao->channels.num;
     int max = min * 2;
+    min = MP_ALIGN_UP(min, bps);
+    max = MP_ALIGN_UP(max, bps);
     p->size = MPCLAMP(buffer_size * 2, min, max);
     MP_VERBOSE(ao, "Setting bufferSize = %d (driver=%d, min=%d, max=%d)\n", p->size, buffer_size, min, max);
-    ao->device_buffer = p->size / af_fmt_to_bytes(ao->format);
+    assert(p->size % bps == 0);
+    ao->device_buffer = p->size / bps;
 
     p->chunksize = p->size;
     p->chunk = talloc_size(ao, p->size);
