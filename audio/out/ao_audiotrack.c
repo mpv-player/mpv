@@ -575,8 +575,7 @@ static void *playthread(void *arg)
             ts += (read_samples / (double)(ao->samplerate)) * 1e6;
             ts += AudioTrack_getLatency(ao) * 1e6;
             int samples = ao_read_data(ao, &p->chunk, read_samples, ts);
-            int write_samples = read_samples;
-            int ret = AudioTrack_write(ao, write_samples * ao->sstride);
+            int ret = AudioTrack_write(ao, samples * ao->sstride);
             if (ret >= 0) {
                 p->written_frames += ret / ao->sstride;
             } else if (ret == AudioManager.ERROR_DEAD_OBJECT) {
