@@ -332,7 +332,7 @@ static int AudioTrack_New(struct ao *ao)
             p->cfg_session_id
         );
     }
-    if (!audiotrack || MP_JNI_EXCEPTION_LOG(ao) < 0) {
+    if (MP_JNI_EXCEPTION_LOG(ao) < 0 || !audiotrack) {
         MP_FATAL(ao, "AudioTrack Init failed\n");
         return -1;
     }
@@ -709,7 +709,7 @@ static int init(struct ao *ao)
         p->channel_config,
         p->format
     );
-    if (buffer_size <= 0 || MP_JNI_EXCEPTION_LOG(ao) < 0) {
+    if (MP_JNI_EXCEPTION_LOG(ao) < 0 || buffer_size <= 0) {
         MP_FATAL(ao, "AudioTrack.getMinBufferSize returned an invalid size: %d", buffer_size);
         return -1;
     }
@@ -724,7 +724,7 @@ static int init(struct ao *ao)
     p->chunk = talloc_size(ao, p->size);
 
     jobject timestamp = MP_JNI_NEW(AudioTimestamp.clazz, AudioTimestamp.ctor);
-    if (!timestamp || MP_JNI_EXCEPTION_LOG(ao) < 0) {
+    if (MP_JNI_EXCEPTION_LOG(ao) < 0 || !timestamp) {
         MP_FATAL(ao, "AudioTimestamp could not be created\n");
         return -1;
     }
