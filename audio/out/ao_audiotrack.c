@@ -187,19 +187,13 @@ struct JNIAudioFormat {
     jint ENCODING_PCM_16BIT;
     jint ENCODING_PCM_FLOAT;
     jint ENCODING_IEC61937;
-    jint ENCODING_AC3;
     jint CHANNEL_OUT_MONO;
     jint CHANNEL_OUT_STEREO;
-    jint CHANNEL_OUT_FRONT_LEFT;
-    jint CHANNEL_OUT_FRONT_RIGHT;
-    jint CHANNEL_OUT_BACK_LEFT;
-    jint CHANNEL_OUT_BACK_RIGHT;
     jint CHANNEL_OUT_FRONT_CENTER;
-    jint CHANNEL_OUT_LOW_FREQUENCY;
-    jint CHANNEL_OUT_BACK_CENTER;
+    jint CHANNEL_OUT_QUAD;
     jint CHANNEL_OUT_5POINT1;
-    jint CHANNEL_OUT_SIDE_LEFT;
-    jint CHANNEL_OUT_SIDE_RIGHT;
+    jint CHANNEL_OUT_BACK_CENTER;
+    jint CHANNEL_OUT_7POINT1_SURROUND;
     struct MPJniField mapping[];
 } AudioFormat = {.mapping = {
     #define OFFSET(member) offsetof(struct JNIAudioFormat, member)
@@ -207,20 +201,14 @@ struct JNIAudioFormat {
     {"android/media/AudioFormat", "ENCODING_PCM_8BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_8BIT), 1},
     {"android/media/AudioFormat", "ENCODING_PCM_16BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_16BIT), 1},
     {"android/media/AudioFormat", "ENCODING_PCM_FLOAT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_FLOAT), 1},
-    {"android/media/AudioFormat", "ENCODING_AC3", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_AC3), 0},
     {"android/media/AudioFormat", "ENCODING_IEC61937", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_IEC61937), 0},
     {"android/media/AudioFormat", "CHANNEL_OUT_MONO", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_MONO), 1},
     {"android/media/AudioFormat", "CHANNEL_OUT_STEREO", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_STEREO), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_5POINT1", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_5POINT1), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_FRONT_LEFT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_FRONT_LEFT), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_FRONT_RIGHT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_FRONT_RIGHT), 1},
     {"android/media/AudioFormat", "CHANNEL_OUT_FRONT_CENTER", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_FRONT_CENTER), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_LOW_FREQUENCY", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_LOW_FREQUENCY), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_BACK_LEFT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_BACK_LEFT), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_BACK_RIGHT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_BACK_RIGHT), 1},
+    {"android/media/AudioFormat", "CHANNEL_OUT_QUAD", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_QUAD), 1},
+    {"android/media/AudioFormat", "CHANNEL_OUT_5POINT1", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_5POINT1), 1},
     {"android/media/AudioFormat", "CHANNEL_OUT_BACK_CENTER", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_BACK_CENTER), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_SIDE_LEFT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_SIDE_LEFT), 0},
-    {"android/media/AudioFormat", "CHANNEL_OUT_SIDE_RIGHT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_SIDE_RIGHT), 0},
+    {"android/media/AudioFormat", "CHANNEL_OUT_7POINT1_SURROUND", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_7POINT1_SURROUND), 0},
     {0}
     #undef OFFSET
 }};
@@ -694,16 +682,42 @@ static int init(struct ao *ao)
     }
     p->samplerate = ao->samplerate;
 
+    /* https://developer.android.com/reference/android/media/AudioFormat#channelPositionMask */
+    static const struct mp_chmap layouts[] = {
+        {0},                                        // empty
+        MP_CHMAP_INIT_MONO,                         // mono
+        MP_CHMAP_INIT_STEREO,                       // stereo
+        MP_CHMAP3(FL, FR, FC),                      // 3.0
+        MP_CHMAP4(FL, FR, BL, BR),                  // quad
+        MP_CHMAP5(FL, FR, FC, BL, BR),              // 5.0
+        MP_CHMAP6(FL, FR, FC, LFE, BL, BR),         // 5.1
+        MP_CHMAP7(FL, FR, FC, LFE, BL, BR, BC),     // 6.1
+        MP_CHMAP8(FL, FR, FC, LFE, BL, BR, SL, SR), // 7.1
+    };
+    const jint layout_map[] = {
+        0,
+        AudioFormat.CHANNEL_OUT_MONO,
+        AudioFormat.CHANNEL_OUT_STEREO,
+        AudioFormat.CHANNEL_OUT_STEREO | AudioFormat.CHANNEL_OUT_FRONT_CENTER,
+        AudioFormat.CHANNEL_OUT_QUAD,
+        AudioFormat.CHANNEL_OUT_QUAD | AudioFormat.CHANNEL_OUT_FRONT_CENTER,
+        AudioFormat.CHANNEL_OUT_5POINT1,
+        AudioFormat.CHANNEL_OUT_5POINT1 | AudioFormat.CHANNEL_OUT_BACK_CENTER,
+        AudioFormat.CHANNEL_OUT_7POINT1_SURROUND,
+    };
+    static_assert(MP_ARRAY_SIZE(layout_map) == MP_ARRAY_SIZE(layouts), "");
     if (p->format == AudioFormat.ENCODING_IEC61937) {
         p->channel_config = AudioFormat.CHANNEL_OUT_STEREO;
-    } else if (ao->channels.num == 1) {
-        p->channel_config = AudioFormat.CHANNEL_OUT_MONO;
-    } else if (ao->channels.num == 6) {
-        p->channel_config = AudioFormat.CHANNEL_OUT_5POINT1;
-        ao->channels = (struct mp_chmap)MP_CHMAP6(FL, FR, FC, LFE, BL, BR);
     } else {
-        p->channel_config = AudioFormat.CHANNEL_OUT_STEREO;
-        ao->channels = (struct mp_chmap)MP_CHMAP_INIT_STEREO;
+        struct mp_chmap_sel sel = {0};
+        for (int i = 0; i < MP_ARRAY_SIZE(layouts); i++) {
+            if (layout_map[i])
+                mp_chmap_sel_add_map(&sel, &layouts[i]);
+        }
+        if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+            goto error;
+        p->channel_config = layout_map[ao->channels.num];
+        assert(p->channel_config);
     }
 
     jint buffer_size = MP_JNI_CALL_STATIC_INT(
