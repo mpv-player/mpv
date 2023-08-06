@@ -659,8 +659,11 @@ static void reinit(struct mp_filter *vd)
 
     bool use_hwdec = ctx->use_hwdec;
     init_avctx(vd);
-    if (!ctx->avctx && use_hwdec)
-        force_fallback(vd);
+    if (!ctx->avctx && use_hwdec) {
+        do {
+            force_fallback(vd);
+        } while (!ctx->avctx);
+    }
 }
 
 static void init_avctx(struct mp_filter *vd)
