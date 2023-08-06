@@ -501,19 +501,20 @@ static int AudioTrack_write(struct ao *ao, int len)
         if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
         if (ret > 0) ret *= 2;
 
+    } else if (AudioTrack.writeBufferV21) {
+        // reset positions for reading
+        jobject bbuf = MP_JNI_CALL_OBJECT(p->bbuf, ByteBuffer.clear);
+        if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
+        (*env)->DeleteLocalRef(env, bbuf);
+        ret = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.writeBufferV21, p->bbuf, len, AudioTrack.WRITE_BLOCKING);
+        if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
+
     } else if (p->format == AudioFormat.ENCODING_PCM_FLOAT) {
         (*env)->SetFloatArrayRegion(env, p->floatarray, 0, len / sizeof(float), buf);
         if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
         ret = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.writeFloat, p->floatarray, 0, len / sizeof(float), AudioTrack.WRITE_BLOCKING);
         if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
         if (ret > 0) ret *= sizeof(float);
-
-    } else if (AudioTrack.writeBufferV21) {
-        jobject bbuf = MP_JNI_CALL_OBJECT(p->bbuf, ByteBuffer.clear);
-        if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
-        (*env)->DeleteLocalRef(env, bbuf);
-        ret = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.writeBufferV21, p->bbuf, len, AudioTrack.WRITE_BLOCKING);
-        if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
 
     } else {
         (*env)->SetByteArrayRegion(env, p->bytearray, 0, len, buf);
@@ -669,7 +670,7 @@ static int init(struct ao *ao)
         p->format = AudioFormat.ENCODING_IEC61937;
     } else if (ao->format == AF_FORMAT_U8) {
         p->format = AudioFormat.ENCODING_PCM_8BIT;
-    } else if (p->cfg_pcm_float && (ao->format == AF_FORMAT_FLOAT || ao->format == AF_FORMAT_FLOATP)) {
+    } else if (p->cfg_pcm_float && af_fmt_is_float(ao->format)) {
         ao->format = AF_FORMAT_FLOAT;
         p->format = AudioFormat.ENCODING_PCM_FLOAT;
     } else {
@@ -737,18 +738,20 @@ static int init(struct ao *ao)
     p->timestamp = (*env)->NewGlobalRef(env, timestamp);
     (*env)->DeleteLocalRef(env, timestamp);
 
+    // decide and create buffer of right type
     if (p->format == AudioFormat.ENCODING_IEC61937) {
         jshortArray shortarray = (*env)->NewShortArray(env, p->chunksize / 2);
         p->shortarray = (*env)->NewGlobalRef(env, shortarray);
         (*env)->DeleteLocalRef(env, shortarray);
+    } else if (AudioTrack.writeBufferV21) {
+        MP_VERBOSE(ao, "Using NIO ByteBuffer\n");
+        jobject bbuf = (*env)->NewDirectByteBuffer(env, p->chunk, p->chunksize);
+        p->bbuf = (*env)->NewGlobalRef(env, bbuf);
+        (*env)->DeleteLocalRef(env, bbuf);
     } else if (p->format == AudioFormat.ENCODING_PCM_FLOAT) {
         jfloatArray floatarray = (*env)->NewFloatArray(env, p->chunksize / sizeof(float));
         p->floatarray = (*env)->NewGlobalRef(env, floatarray);
         (*env)->DeleteLocalRef(env, floatarray);
-    } else if (AudioTrack.writeBufferV21) {
-        jobject bbuf = (*env)->NewDirectByteBuffer(env, p->chunk, p->chunksize);
-        p->bbuf = (*env)->NewGlobalRef(env, bbuf);
-        (*env)->DeleteLocalRef(env, bbuf);
     } else {
         jbyteArray bytearray = (*env)->NewByteArray(env, p->chunksize);
         p->bytearray = (*env)->NewGlobalRef(env, bytearray);
