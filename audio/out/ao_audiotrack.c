@@ -150,12 +150,14 @@ struct JNIAudioTrack {
 struct JNIAudioAttributes {
     jclass clazz;
     jint CONTENT_TYPE_MOVIE;
+    jint CONTENT_TYPE_MUSIC;
     jint USAGE_MEDIA;
     struct MPJniField mapping[];
 } AudioAttributes = {.mapping = {
     #define OFFSET(member) offsetof(struct JNIAudioAttributes, member)
     {"android/media/AudioAttributes", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
     {"android/media/AudioAttributes", "CONTENT_TYPE_MOVIE", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MOVIE), 0},
+    {"android/media/AudioAttributes", "CONTENT_TYPE_MUSIC", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MUSIC), 0},
     {"android/media/AudioAttributes", "USAGE_MEDIA", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(USAGE_MEDIA), 0},
     {0}
     #undef OFFSET
@@ -301,7 +303,9 @@ static int AudioTrack_New(struct ao *ao)
         MP_JNI_EXCEPTION_LOG(ao);
         tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setUsage, AudioAttributes.USAGE_MEDIA);
         MP_JNI_DELETELOCAL(tmp);
-        tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setContentType, AudioAttributes.CONTENT_TYPE_MOVIE);
+        jint content_type = (ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC) ?
+            AudioAttributes.CONTENT_TYPE_MUSIC : AudioAttributes.CONTENT_TYPE_MOVIE;
+        tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setContentType, content_type);
         MP_JNI_DELETELOCAL(tmp);
         jobject attr = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.build);
         MP_JNI_DELETELOCAL(attr_builder);
