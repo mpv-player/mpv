@@ -684,8 +684,8 @@ static int init(struct ao *ao)
             AudioManager.STREAM_MUSIC
         );
         if (MP_JNI_EXCEPTION_LOG(ao) == 0) {
-            ao->samplerate = samplerate;
             MP_VERBOSE(ao, "AudioTrack.nativeOutputSampleRate = %d\n", samplerate);
+            ao->samplerate = MPMIN(samplerate, ao->samplerate);
         }
     }
     p->samplerate = ao->samplerate;
