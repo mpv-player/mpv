@@ -841,6 +841,9 @@ const struct ao_driver audio_out_audiotrack = {
     .reset     = stop,
     .start     = start,
     .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const OPT_BASE_STRUCT) {
+        .cfg_pcm_float = 1,
+    },
     .options   = (const struct m_option[]) {
         {"pcm-float", OPT_BOOL(cfg_pcm_float)},
         {"session-id", OPT_INT(cfg_session_id)},
