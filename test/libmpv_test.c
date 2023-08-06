@@ -257,8 +257,13 @@ int main(int argc, char *argv[])
     check_api_error(mpv_set_option_string(ctx, "terminal", "yes"));
     check_api_error(mpv_set_option_string(ctx, "msg-level", "all=debug"));
 
+    const char *fmt = "================ TEST: %s ================\n";
+
+    printf(fmt, "test_options_and_properties");
     test_options_and_properties();
+    printf(fmt, "test_file_loading");
     test_file_loading(argv[1]);
+    printf(fmt, "test_lavfi_complex");
     test_lavfi_complex(argv[1]);
 
     mpv_destroy(ctx);
