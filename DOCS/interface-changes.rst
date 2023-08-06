@@ -33,6 +33,7 @@ Interface changes
     - change `--subs-fallback` default from `no` to `default`
     - add the `--hdr-peak-percentile` option
     - include `--hdr-peak-percentile` in the `gpu-hq` profile
+    - change `--audiotrack-pcm-float` default from `no` to `yes`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
