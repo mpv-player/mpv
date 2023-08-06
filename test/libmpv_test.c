@@ -253,8 +253,9 @@ int main(int argc, char *argv[])
     if (!ctx)
         return 1;
 
-    // Use tct for all video-related stuff.
-    check_api_error(mpv_set_property_string(ctx, "vo", "tct"));
+    check_api_error(mpv_set_option_string(ctx, "vo", "null"));
+    check_api_error(mpv_set_option_string(ctx, "terminal", "yes"));
+    check_api_error(mpv_set_option_string(ctx, "msg-level", "all=debug"));
 
     test_options_and_properties();
     test_file_loading(argv[1]);
