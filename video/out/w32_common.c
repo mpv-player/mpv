@@ -563,6 +563,7 @@ static void update_dpi(struct vo_w32_state *w32)
 
     w32->dpi = dpi;
     w32->dpi_scale = w32->opts->hidpi_window_scale ? w32->dpi / 96.0 : 1.0;
+    signal_events(w32, VO_EVENT_DPI);
 }
 
 static void update_display_info(struct vo_w32_state *w32)
