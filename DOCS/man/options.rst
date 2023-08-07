@@ -139,6 +139,12 @@ Track Selection
     When autoselecting a subtitle track, select a full/non-forced one even if the selected
     audio stream matches your preferred subtitle language (default: yes).
 
+``--subs-match-os-language=<yes|no>``
+    When autoselecting a subtitle track, select the track that matches the language of your OS
+    if the audio stream is in a different language if suitable (default track or a forced track
+    under the right conditions). Note that if ``-slang`` is set, this will be completely ignored
+    (default: yes).
+
 ``--subs-fallback=<yes|default|no>``
     When autoselecting a subtitle track, if no tracks match your preferred languages,
     select a full track even if it doesn't match your preferred subtitle language (default: default).
