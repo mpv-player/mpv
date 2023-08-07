@@ -1831,6 +1831,17 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
                 .name = hp->name,
             };
 
+#if PL_API_VER >= 308
+            if (hp->names) {
+                for (int j = hp->minimum.i; j <= hp->maximum.i; j++) {
+                    if (bstr_equals0(v, hp->names[j])) {
+                        hp->data->i = j;
+                        goto next_hook;
+                    }
+                }
+            }
+#endif
+
             switch (hp->type) {
             case PL_VAR_FLOAT:
                 opt.type = &m_option_type_float;
@@ -1850,8 +1861,10 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
             }
 
             opt.type->parse(p->log, &opt, k, v, hp->data);
-            break;
+            goto next_hook;
         }
+
+    next_hook:;
     }
 }
 
