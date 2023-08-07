@@ -367,6 +367,32 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
 
             p->fmt_upload_index[index] = p->num_upload_fmts;
 
+            /*
+             * First check if the VO supports the source format. If it does,
+             * ensure it is in the target list, so that we never do an
+             * unnecessary conversion. This explicit step is required because
+             * there can be situations where the conversion filter cannot output
+             * the source format, but the VO can accept it, so just looking at
+             * the supported conversion targets can make it seem as if a
+             * conversion is required.
+             */
+            if (!ctx->supported_formats) {
+                /*
+                 * If supported_formats is unset, that means we should assume
+                 * the VO can accept all source formats, so append the source
+                 * format.
+                 */
+                MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, imgfmt);
+            } else {
+                for (int i = 0; ctx->supported_formats[i]; i++) {
+                    int fmt = ctx->supported_formats[i];
+                    if (fmt == imgfmt) {
+                        MP_VERBOSE(f, "  vo accepts %s\n", mp_imgfmt_to_name(fmt));
+                        MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
+                    }
+                }
+            }
+
             enum AVPixelFormat *fmts = conversion_cstr->valid_sw_formats;
             for (int i = 0; fmts && fmts[i] != AV_PIX_FMT_NONE; i++) {
                 int fmt = pixfmt2imgfmt(fmts[i]);
