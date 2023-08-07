@@ -1042,9 +1042,6 @@ static const struct MPOpts mp_default_opts = {
                    { [STREAM_AUDIO] = -2,
                      [STREAM_VIDEO] = -2,
                      [STREAM_SUB] = -2, }, },
-    .stream_lang = {
-        [STREAM_SUB] = (char *[]){ "auto", NULL },
-    },
     .stream_auto_sel = true,
     .subs_with_matching_audio = true,
     .subs_fallback = 1,
