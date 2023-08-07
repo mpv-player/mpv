@@ -1890,7 +1890,7 @@ static void update_render_options(struct vo *vo)
     if (p->frame_mixer) {
         vo_set_queue_params(vo, 0, 2 + ceilf(p->frame_mixer->kernel->radius));
     } else {
-        vo_set_queue_params(vo, 0, 1);
+        vo_set_queue_params(vo, 0, 2);
     }
 
     p->deband = pl_deband_default_params;
