@@ -6690,6 +6690,15 @@ them.
     advanced scaling is enabled. Defaults to on. (Only affects
     ``--vo=gpu-next``, note that ``--vo=gpu`` always delays the peak.)
 
+``--hdr-peak-percentile=<0.0..100.0>``
+    Which percentile of the input image brightness histogram to consider as the
+    true peak of the scene. If this is set to 100 (default), the
+    brightest pixel is measured. Otherwise, the top of the frequency
+    distribution is progressively cut off. Setting this too low will cause
+    clipping of very bright details, but can improve the dynamic brightness
+    range of scenes with very bright isolated highlights. Values other than 100
+    come with a small performance penalty. (Only for ``--vo=gpu-next``)
+
 ``--hdr-peak-decay-rate=<1.0..1000.0>``
     The decay rate used for the HDR peak detection algorithm (default: 100.0).
     This is only relevant when ``--hdr-compute-peak`` is enabled. Higher values

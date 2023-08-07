@@ -37,7 +37,7 @@
 #define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
 #endif
 
-// Dummy values for the test.
+// Dummy values for test_options_and_properties
 static const char *str = "string";
 static int flag = 1;
 static int64_t int_ = 20;
@@ -66,36 +66,36 @@ static void check_api_error(int status)
         fail("mpv API error: %s\n", mpv_error_string(status));
 }
 
-static void check_double(const char *property)
+static void check_double(const char *property, double expect)
 {
     double result_double;
     check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_DOUBLE, &result_double));
-    if (double_ != result_double)
-        fail("Double: expected '%f' but got '%f'!\n", double_, result_double);
+    if (expect != result_double)
+        fail("Double: expected '%f' but got '%f'!\n", expect, result_double);
 }
 
-static void check_flag(const char *property)
+static void check_flag(const char *property, int expect)
 {
     int result_flag;
     check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_FLAG, &result_flag));
-    if (flag != result_flag)
-        fail("Flag: expected '%d' but got '%d'!\n", flag, result_flag);
+    if (expect != result_flag)
+        fail("Flag: expected '%d' but got '%d'!\n", expect, result_flag);
 }
 
-static void check_int(const char *property)
+static void check_int(const char *property, int64_t expect)
 {
     int64_t result_int;
     check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_INT64, &result_int));
-    if (int_ != result_int)
-        fail("Int: expected '%" PRId64 "' but got '%" PRId64 "'!\n", int_, result_int);
+    if (expect != result_int)
+        fail("Int: expected '%" PRId64 "' but got '%" PRId64 "'!\n", expect, result_int);
 }
 
-static void check_string(const char *property)
+static void check_string(const char *property, const char *expect)
 {
     char *result_string;
     check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_STRING, &result_string));
-    if (strcmp(str, result_string) != 0)
-        fail("String: expected '%s' but got '%s'!\n", str, result_string);
+    if (strcmp(expect, result_string) != 0)
+        fail("String: expected '%s' but got '%s'!\n", expect, result_string);
     mpv_free(result_string);
 }
 
@@ -104,16 +104,16 @@ static void check_results(const char *properties[], enum mpv_format formats[])
     for (int i = 0; properties[i]; i++) {
         switch (formats[i]) {
         case MPV_FORMAT_STRING:
-            check_string(properties[i]);
+            check_string(properties[i], str);
             break;
         case MPV_FORMAT_FLAG:
-            check_flag(properties[i]);
+            check_flag(properties[i], flag);
             break;
         case MPV_FORMAT_INT64:
-            check_int(properties[i]);
+            check_int(properties[i], int_);
             break;
         case MPV_FORMAT_DOUBLE:
-            check_double(properties[i]);
+            check_double(properties[i], double_);
             break;
         }
     }
@@ -253,11 +253,17 @@ int main(int argc, char *argv[])
     if (!ctx)
         return 1;
 
-    // Use tct for all video-related stuff.
-    check_api_error(mpv_set_property_string(ctx, "vo", "tct"));
+    check_api_error(mpv_set_option_string(ctx, "vo", "null"));
+    check_api_error(mpv_set_option_string(ctx, "terminal", "yes"));
+    check_api_error(mpv_set_option_string(ctx, "msg-level", "all=debug"));
 
+    const char *fmt = "================ TEST: %s ================\n";
+
+    printf(fmt, "test_options_and_properties");
     test_options_and_properties();
+    printf(fmt, "test_file_loading");
     test_file_loading(argv[1]);
+    printf(fmt, "test_lavfi_complex");
     test_lavfi_complex(argv[1]);
 
     mpv_destroy(ctx);

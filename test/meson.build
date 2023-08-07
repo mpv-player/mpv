@@ -77,7 +77,8 @@ if features['av-channel-layout']
 endif
 chmap_objects = libmpv.extract_objects(chmap_files)
 chmap = executable('chmap', 'chmap.c', include_directories: incdir,
-                   objects: chmap_objects, link_with: test_utils)
+                   dependencies: [libavutil], objects: chmap_objects,
+                   link_with: test_utils)
 test('chmap', chmap)
 
 gl_video_objects = libmpv.extract_objects('video/out/gpu/ra.c',

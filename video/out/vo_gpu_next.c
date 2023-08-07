@@ -69,8 +69,10 @@ struct osd_state {
 
 struct scaler_params {
     struct pl_filter_config config;
+#if PL_API_VER < 303
     struct pl_filter_function kernel;
     struct pl_filter_function window;
+#endif
 };
 
 struct user_hook {
@@ -1542,7 +1544,7 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
 
     const struct gl_video_opts *opts = p->opts_cache->opts;
     const struct scaler_config *cfg = &opts->scaler[unit];
-    if (unit == SCALER_DSCALE && !cfg->kernel.name)
+    if (unit == SCALER_DSCALE && (!cfg->kernel.name || !strcmp(cfg->kernel.name, "")))
         cfg = &opts->scaler[SCALER_SCALE];
 
     for (int i = 0; fixed_presets[i].name; i++) {
@@ -1556,13 +1558,16 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
     const struct pl_filter_function_preset *fpreset;
     if ((preset = pl_find_filter_preset(cfg->kernel.name))) {
         par->config = *preset->filter;
-        par->kernel = *par->config.kernel;
     } else if ((fpreset = pl_find_filter_function_preset(cfg->kernel.name))) {
-        par->config = (struct pl_filter_config) {0};
-        par->kernel = *fpreset->function;
+        par->config = (struct pl_filter_config) {
+            .kernel = fpreset->function,
+#if PL_API_VER >= 303
+            .params[0] = fpreset->function->params[0],
+            .params[1] = fpreset->function->params[1],
+#endif
+        };
     } else if (!strcmp(cfg->kernel.name, "ewa_lanczossharp")) {
         par->config = pl_filter_ewa_lanczos;
-        par->kernel = *par->config.kernel;
         par->config.blur = 0.9812505644269356;
         MP_WARN(p, "'ewa_lanczossharp' is deprecated and will be removed from "
                 "vo=gpu-next in the future, use --scale=ewa_lanczos "
@@ -1573,29 +1578,48 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
         return &pl_filter_bilinear;
     }
 
+    const struct pl_filter_function_preset *wpreset;
+    if ((wpreset = pl_find_filter_function_preset(cfg->window.name))) {
+        par->config.window = wpreset->function;
+#if PL_API_VER >= 303
+        par->config.wparams[0] = wpreset->function->params[0];
+        par->config.wparams[1] = wpreset->function->params[1];
+#endif
+    }
+
+#if PL_API_VER < 303
+    par->kernel = *par->config.kernel;
     par->config.kernel = &par->kernel;
     if (par->config.window) {
         par->window = *par->config.window;
         par->config.window = &par->window;
     }
-
-    const struct pl_filter_function_preset *wpreset;
-    if ((wpreset = pl_find_filter_function_preset(cfg->window.name)))
-        par->window = *wpreset->function;
+#endif
 
     for (int i = 0; i < 2; i++) {
+#if PL_API_VER >= 303
+        if (!isnan(cfg->kernel.params[i]))
+            par->config.params[i] = cfg->kernel.params[i];
+        if (!isnan(cfg->window.params[i]))
+            par->config.wparams[i] = cfg->window.params[i];
+#else
         if (!isnan(cfg->kernel.params[i]))
             par->kernel.params[i] = cfg->kernel.params[i];
         if (!isnan(cfg->window.params[i]))
             par->window.params[i] = cfg->window.params[i];
+#endif
     }
 
     par->config.clamp = cfg->clamp;
     par->config.blur = cfg->kernel.blur;
     par->config.taper = cfg->kernel.taper;
     if (cfg->radius > 0.0) {
-        if (par->kernel.resizable) {
+        if (par->config.kernel->resizable) {
+#if PL_API_VER >= 303
+            par->config.radius = cfg->radius;
+#else
             par->kernel.radius = cfg->radius;
+#endif
         } else {
             MP_WARN(p, "Filter radius specified but filter '%s' is not "
                     "resizable, ignoring\n", cfg->kernel.name);
@@ -1866,7 +1890,7 @@ static void update_render_options(struct vo *vo)
     if (p->frame_mixer) {
         vo_set_queue_params(vo, 0, 2 + ceilf(p->frame_mixer->kernel->radius));
     } else {
-        vo_set_queue_params(vo, 0, 1);
+        vo_set_queue_params(vo, 0, 2);
     }
 
     p->deband = pl_deband_default_params;
@@ -1883,6 +1907,7 @@ static void update_render_options(struct vo *vo)
     p->peak_detect.smoothing_period = opts->tone_map.decay_rate;
     p->peak_detect.scene_threshold_low = opts->tone_map.scene_threshold_low;
     p->peak_detect.scene_threshold_high = opts->tone_map.scene_threshold_high;
+    p->peak_detect.percentile = opts->tone_map.peak_percentile;
 
     const struct pl_tone_map_function * const tone_map_funs[] = {
         [TONE_MAPPING_AUTO]     = &pl_tone_map_auto,

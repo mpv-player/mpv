@@ -1028,6 +1028,7 @@ static int preinit(struct vo *vo)
         vo_x11_uninit(vo);
         return -1;
     }
+    vc->mpvdp->hwctx.hw_imgfmt = IMGFMT_VDPAU;
 
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_add(vo->hwdec_devs, &vc->mpvdp->hwctx);

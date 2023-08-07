@@ -416,6 +416,8 @@ const struct m_sub_options gl_video_conf = {
             {"auto", 0},
             {"yes", 1},
             {"no", -1})},
+        {"hdr-peak-percentile", OPT_FLOAT(tone_map.peak_percentile),
+            M_RANGE(0.0, 100.0)},
         {"hdr-peak-decay-rate", OPT_FLOAT(tone_map.decay_rate),
             M_RANGE(1.0, 1000.0)},
         {"hdr-scene-threshold-low", OPT_FLOAT(tone_map.scene_threshold_low),
@@ -1726,6 +1728,12 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
         return;
 
     uninit_scaler(p, scaler);
+
+    if (conf && scaler->index == SCALER_DSCALE && (!conf->kernel.name ||
+        !conf->kernel.name[0]))
+    {
+        conf = &p->opts.scaler[SCALER_SCALE];
+    }
 
     struct filter_kernel bare_window;
     const struct filter_kernel *t_kernel = mp_find_filter_kernel(conf->kernel.name);
