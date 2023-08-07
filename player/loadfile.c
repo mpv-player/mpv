@@ -568,13 +568,8 @@ static char **process_langs(char **in)
     size_t nb = 0;
     char **out = NULL;
     for (int i = 0; in && in[i]; i++) {
-        if (!strcmp(in[i], "auto")) {
-            if (!add_auto_langs(&nb, &out))
-                break;
-        } else {
-            if (!append_lang(&nb, &out, talloc_strdup(NULL, in[i])))
-                break;
-        }
+        if (!append_lang(&nb, &out, talloc_strdup(NULL, in[i])))
+            break;
     }
     return out;
 }

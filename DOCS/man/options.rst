@@ -11,9 +11,6 @@ Track Selection
     A track that matches more subtags will be preferred over one that matches fewer,
     with preference given to earlier subtags over later ones. See also ``--aid``.
 
-    The special value "auto" can be included anywhere in the list,
-    and is equivalent to the user's OS-level list of preferred languages.
-
     This is a string list option. See `List Options`_ for details.
 
     .. admonition:: Examples
@@ -24,7 +21,7 @@ Track Selection
           audio.
 
 ``--slang=<languagecode[,languagecode,...]>``
-    Equivalent to ``--alang``, for subtitle tracks (default: auto).
+    Equivalent to ``--alang``, for subtitle tracks.
 
     This is a string list option. See `List Options`_ for details.
 
