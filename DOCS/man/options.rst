@@ -1539,9 +1539,7 @@ Video
 
 ``--video-pan-x=<value>``, ``--video-pan-y=<value>``
     Moves the displayed video rectangle by the given value in the X or Y
-    direction. The unit is in fractions of the size of the scaled video (the
-    full size, even if parts of the video are not visible due to panscan or
-    other options).
+    direction. The unit is in fractions of the size of the destination rectangle.
 
     For example, displaying a 1280x720 video fullscreen on a 1680x1050 screen
     with ``--video-pan-x=-0.1`` would move the video 168 pixels to the left
