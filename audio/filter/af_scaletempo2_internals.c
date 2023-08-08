@@ -427,12 +427,6 @@ static void seek_buffer(struct mp_scaletempo2 *p, int frames)
     }
 }
 
-static void read_buffer(struct mp_scaletempo2 *p, int frames, float **dest)
-{
-    peek_buffer(p, frames, 0, 0, dest);
-    seek_buffer(p, frames);
-}
-
 static int write_completed_frames_to(struct mp_scaletempo2 *p,
     int requested_frames, int dest_offset, float **dest)
 {
@@ -642,6 +636,18 @@ static bool run_one_wsola_iteration(struct mp_scaletempo2 *p, float playback_rat
     return true;
 }
 
+static int read_input_buffer(struct mp_scaletempo2 *p, int dest_size, float **dest)
+{
+    int frames_to_copy = MPMIN(dest_size, p->input_buffer_frames - p->target_block_index);
+
+    if (frames_to_copy <= 0)
+        return 0; // There is nothing to read from input buffer; return.
+
+    peek_buffer(p, frames_to_copy, p->target_block_index, 0, dest);
+    seek_buffer(p, frames_to_copy);
+    return frames_to_copy;
+}
+
 int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
     float **dest, int dest_size, float playback_rate)
 {
@@ -680,9 +686,7 @@ int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
     // Optimize the most common |playback_rate| ~= 1 case to use a single copy
     // instead of copying frame by frame.
     if (p->ola_window_size <= faster_step && slower_step >= p->ola_window_size) {
-        int frames_to_copy = MPMIN(dest_size, p->input_buffer_frames);
-        read_buffer(p, frames_to_copy, dest);
-        return frames_to_copy;
+        return read_input_buffer(p, dest_size, dest);
     }
 
     int rendered_frames = 0;
