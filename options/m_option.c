@@ -1109,6 +1109,32 @@ const m_option_type_t m_option_type_double = {
     .equal = double_equal,
 };
 
+static int parse_double_aspect(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param, void *dst)
+{
+    if (bstr_equals0(param, "no")) {
+        if (dst)
+            VAL(dst) = 0.0;
+        return 1;
+    }
+    return parse_double(log, opt, name, param, dst);
+}
+
+const m_option_type_t m_option_type_aspect = {
+    .name  = "Aspect",
+    .size  = sizeof(double),
+    .flags = M_OPT_TYPE_CHOICE | M_OPT_TYPE_USES_RANGE,
+    .parse = parse_double_aspect,
+    .print = print_double,
+    .pretty_print = print_double_f3,
+    .copy  = copy_opt,
+    .add = add_double,
+    .multiply = multiply_double,
+    .set   = double_set,
+    .get   = double_get,
+    .equal = double_equal,
+};
+
 #undef VAL
 #define VAL(x) (*(float *)(x))
 
@@ -1175,32 +1201,6 @@ const m_option_type_t m_option_type_float = {
     .flags = M_OPT_TYPE_USES_RANGE,
     .size  = sizeof(float),
     .parse = parse_float,
-    .print = print_float,
-    .pretty_print = print_float_f3,
-    .copy  = copy_opt,
-    .add = add_float,
-    .multiply = multiply_float,
-    .set   = float_set,
-    .get   = float_get,
-    .equal = float_equal,
-};
-
-static int parse_float_aspect(struct mp_log *log, const m_option_t *opt,
-                              struct bstr name, struct bstr param, void *dst)
-{
-    if (bstr_equals0(param, "no")) {
-        if (dst)
-            VAL(dst) = 0.0f;
-        return 1;
-    }
-    return parse_float(log, opt, name, param, dst);
-}
-
-const m_option_type_t m_option_type_aspect = {
-    .name  = "Aspect",
-    .size  = sizeof(float),
-    .flags = M_OPT_TYPE_CHOICE | M_OPT_TYPE_USES_RANGE,
-    .parse = parse_float_aspect,
     .print = print_float,
     .pretty_print = print_float_f3,
     .copy  = copy_opt,
