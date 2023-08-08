@@ -1545,7 +1545,7 @@ Video
 
     For example, displaying a 1280x720 video fullscreen on a 1680x1050 screen
     with ``--video-pan-x=-0.1`` would move the video 168 pixels to the left
-    (making 128 pixels of the source video invisible).
+    (making 168 pixels of the source video invisible).
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
