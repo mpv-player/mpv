@@ -83,6 +83,7 @@ static void src_dst_split_scaling(int src_size, int dst_size,
                                   int *osd_margin_a, int *osd_margin_b)
 {
     scaled_src_size *= powf(2, zoom) * scale;
+    scaled_src_size = MPMAX(scaled_src_size, 1);
     align = (align + 1) / 2;
 
     *src_start = 0;
