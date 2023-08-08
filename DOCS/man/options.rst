@@ -2308,7 +2308,8 @@ Subtitles
     .. note::
 
         This affects ASS subtitles as well, and may lead to incorrect subtitle
-        rendering. Use with care, or use ``--sub-font-size`` instead.
+        rendering. Use with care, or set ``--sub-ass-override=scale`` instead
+        to make it try to be smarter about it.
 
 ``--sub-scale-by-window=<yes|no>``
     Whether to scale subtitles with the window size (default: yes). If this is
