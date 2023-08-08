@@ -1210,7 +1210,8 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     struct mp_rect src = p->src, dst = p->dst;
     struct mp_osd_res osd = p->osd_res;
     if (!args->scaled) {
-        int w = mpi->params.w, h = mpi->params.h;
+        int w, h;
+        mp_image_params_get_dsize(&mpi->params, &w, &h);
         if (mpi->params.rotate % 180 == 90)
             MPSWAP(int, w, h);
         src = dst = (struct mp_rect) {0, 0, w, h};
@@ -1831,6 +1832,17 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
                 .name = hp->name,
             };
 
+#if PL_API_VER >= 308
+            if (hp->names) {
+                for (int j = hp->minimum.i; j <= hp->maximum.i; j++) {
+                    if (bstr_equals0(v, hp->names[j])) {
+                        hp->data->i = j;
+                        goto next_hook;
+                    }
+                }
+            }
+#endif
+
             switch (hp->type) {
             case PL_VAR_FLOAT:
                 opt.type = &m_option_type_float;
@@ -1850,8 +1862,10 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
             }
 
             opt.type->parse(p->log, &opt, k, v, hp->data);
-            break;
+            goto next_hook;
         }
+
+    next_hook:;
     }
 }
 
