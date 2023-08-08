@@ -80,6 +80,9 @@ struct mp_scaletempo2 {
     // them and can be copied to output if fill_buffer() is called. It also
     // specifies the index where the next WSOLA window has to overlap-and-add.
     int num_complete_frames;
+    // Whether |wsola_output| contains an additional |ola_hop_size| of overlap
+    // frames for the next iteration.
+    bool wsola_output_started;
     // Overlap-and-add window.
     float *ola_window;
     // Transition window, used to update |optimal_block| by a weighted sum of

@@ -620,17 +620,24 @@ static bool run_one_wsola_iteration(struct mp_scaletempo2 *p, float playback_rat
     for (int k = 0; k < p->channels; ++k) {
         float* ch_opt_frame = p->optimal_block[k];
         float* ch_output = p->wsola_output[k] + p->num_complete_frames;
-        for (int n = 0; n < p->ola_hop_size; ++n) {
-            ch_output[n] = ch_output[n] * p->ola_window[p->ola_hop_size + n] +
-                ch_opt_frame[n] * p->ola_window[n];
-        }
+        if (p->wsola_output_started) {
+            for (int n = 0; n < p->ola_hop_size; ++n) {
+                ch_output[n] = ch_output[n] * p->ola_window[p->ola_hop_size + n] +
+                    ch_opt_frame[n] * p->ola_window[n];
+            }
 
-        // Copy the second half to the output.
-        memcpy(&ch_output[p->ola_hop_size], &ch_opt_frame[p->ola_hop_size],
-               sizeof(*ch_opt_frame) * p->ola_hop_size);
+            // Copy the second half to the output.
+            memcpy(&ch_output[p->ola_hop_size], &ch_opt_frame[p->ola_hop_size],
+                   sizeof(*ch_opt_frame) * p->ola_hop_size);
+        } else {
+            // No overlap for the first iteration.
+            memcpy(ch_output, ch_opt_frame,
+                   sizeof(*ch_opt_frame) * p->ola_window_size);
+        }
     }
 
     p->num_complete_frames += p->ola_hop_size;
+    p->wsola_output_started = true;
     update_output_time(p, playback_rate, p->ola_hop_size);
     remove_old_input_frames(p, playback_rate);
     return true;
@@ -686,6 +693,7 @@ int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
     // Optimize the most common |playback_rate| ~= 1 case to use a single copy
     // instead of copying frame by frame.
     if (p->ola_window_size <= faster_step && slower_step >= p->ola_window_size) {
+        p->wsola_output_started = false;
         return read_input_buffer(p, dest_size, dest);
     }
 
@@ -730,6 +738,7 @@ void mp_scaletempo2_reset(struct mp_scaletempo2 *p)
     // Clear the queue of decoded packets.
     zero_2d(p->wsola_output, p->channels, p->wsola_output_size);
     p->num_complete_frames = 0;
+    p->wsola_output_started = false;
 }
 
 // Return a "periodic" Hann window. This is the first L samples of an L+1
@@ -748,6 +757,7 @@ void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
     p->search_block_center_offset = 0;
     p->search_block_index = 0;
     p->num_complete_frames = 0;
+    p->wsola_output_started = false;
     p->channels = channels;
 
     p->samples_per_second = rate;
