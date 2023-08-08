@@ -1210,7 +1210,8 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     struct mp_rect src = p->src, dst = p->dst;
     struct mp_osd_res osd = p->osd_res;
     if (!args->scaled) {
-        int w = mpi->params.w, h = mpi->params.h;
+        int w, h;
+        mp_image_params_get_dsize(&mpi->params, &w, &h);
         if (mpi->params.rotate % 180 == 90)
             MPSWAP(int, w, h);
         src = dst = (struct mp_rect) {0, 0, w, h};
