@@ -661,7 +661,7 @@ extern const char m_option_path_separator;
     OPT_TYPED_FIELD(m_option_type_msglevels, char **, field)
 
 #define OPT_ASPECT(field) \
-    OPT_TYPED_FIELD(m_option_type_aspect, float, field)
+    OPT_TYPED_FIELD(m_option_type_aspect, double, field)
 
 #define OPT_IMAGEFORMAT(field) \
     OPT_TYPED_FIELD(m_option_type_imgfmt, int, field)
