@@ -79,8 +79,11 @@ void mp_flush_wakeup_pipe(int pipe_end);
 
 #ifdef _WIN32
 #include <wchar.h>
+#include "options/path.h"
 wchar_t *mp_from_utf8(void *talloc_ctx, const char *s);
 char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
+wchar_t *mp_get_absolute_path(void *talloc_ctx, const char *path, const wchar_t *prefix);
+wchar_t *mp_resolve_path(void *talloc_ctx, const char *path);
 #endif
 
 #ifdef __CYGWIN__

@@ -140,6 +140,32 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
     return ret;
 }
 
+wchar_t *mp_get_absolute_path(void *talloc_ctx, const char *path, const wchar_t *prefix) {
+    size_t prefix_length = wcslen(prefix);
+    size_t buffer_size = strlen(path) + 1;
+    wchar_t *buffer = talloc_array(talloc_ctx, wchar_t, buffer_size + prefix_length);
+    wcscpy(buffer, prefix);
+    wchar_t *wpath = mp_from_utf8(talloc_ctx, path);
+    DWORD ret = GetFullPathNameW(wpath, buffer_size, buffer + prefix_length, NULL);
+    if (ret > buffer_size) {
+        buffer = talloc_realloc(talloc_ctx, buffer, wchar_t, ret + prefix_length);
+        GetFullPathNameW(wpath, ret, buffer + prefix_length, NULL);
+    }
+    return buffer;
+}
+
+wchar_t *mp_resolve_path(void *talloc_ctx, const char *path) {
+    bstr bpath = bstr0(path);
+    bool absolute = mp_path_is_absolute(bpath);
+    if (strncmp("\\\\", path, 2) == 0) {
+        return mp_get_absolute_path(talloc_ctx, path, L"");
+    } else if (absolute && bpath.len < MAX_PATH) {
+        return mp_from_utf8(talloc_ctx, path);
+    } else {
+        return mp_get_absolute_path(talloc_ctx, path, L"\\\\?\\");
+    }
+}
+
 #endif // _WIN32
 
 #ifdef __MINGW32__
@@ -270,12 +296,13 @@ static int hstat(HANDLE h, struct mp_stat *buf)
 
 int mp_stat(const char *path, struct mp_stat *buf)
 {
-    wchar_t *wpath = mp_from_utf8(NULL, path);
+    void *ctx = talloc_new(NULL);
+    wchar_t *wpath = mp_resolve_path(ctx, path);
     HANDLE h = CreateFileW(wpath, FILE_READ_ATTRIBUTES,
         FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
         OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | SECURITY_SQOS_PRESENT |
         SECURITY_IDENTIFICATION, NULL);
-    talloc_free(wpath);
+    talloc_free(ctx);
     if (h == INVALID_HANDLE_VALUE) {
         set_errno_from_lasterror();
         return -1;
@@ -458,9 +485,10 @@ int mp_open(const char *filename, int oflag, ...)
     }
 
     // Open the Windows file handle
-    wchar_t *wpath = mp_from_utf8(NULL, filename);
+    void *ctx = talloc_new(NULL);
+    wchar_t *wpath = mp_resolve_path(ctx, filename);
     HANDLE h = CreateFileW(wpath, access, share, NULL, disposition, flags, NULL);
-    talloc_free(wpath);
+    talloc_free(ctx);
     if (h == INVALID_HANDLE_VALUE) {
         set_errno_from_lasterror();
         return -1;
@@ -562,9 +590,10 @@ struct mp_dir {
 
 DIR* mp_opendir(const char *path)
 {
-    wchar_t *wpath = mp_from_utf8(NULL, path);
+    void *ctx = talloc_new(NULL);
+    wchar_t *wpath = mp_resolve_path(ctx, path);
     _WDIR *wdir = _wopendir(wpath);
-    talloc_free(wpath);
+    talloc_free(ctx);
     if (!wdir)
         return NULL;
     struct mp_dir *mpdir = talloc(NULL, struct mp_dir);
