@@ -33,6 +33,7 @@
 
 #include "mpv_talloc.h"
 #include "client.h"
+#include "external_files.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
 #include "common/msg.h"
@@ -6945,6 +6946,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (flags & UPDATE_INPUT)
         mp_input_update_opts(mpctx->input);
+
+    if (flags & UPDATE_SUB_EXTS)
+        mp_update_subtitle_exts(mpctx->opts);
 
     if (init || opt_ptr == &opts->ipc_path || opt_ptr == &opts->ipc_client) {
         mp_uninit_ipc(mpctx->ipc_ctx);

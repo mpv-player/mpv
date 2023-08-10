@@ -2187,6 +2187,11 @@ Audio
     :all:   Load all audio files in the current and ``--audio-file-paths``
             directories.
 
+``--audio-file-auto-exts=ext1,ext2,...``
+    Audio file extentions to try and match when using ``audio-file-auto``.
+
+    This is a string list option. See `List Options`_ for details.
+
 ``--audio-file-paths=<path1:path2:...>``
     Equivalent to ``--sub-file-paths`` option, but for auto-loaded audio files.
 
@@ -2565,6 +2570,13 @@ Subtitles
             language suffixes (default).
     :fuzzy: Load all subs containing the media filename.
     :all:   Load all subs in the current and ``--sub-file-paths`` directories.
+
+``--sub-auto-exts=ext1,ext2,...``
+    Subtitle extentions to try and match when using ``--sub-auto``. Note that
+    modifying this list will also affect what mpv recognizes as subtitles when
+    using drag and drop.
+
+    This is a string list option. See `List Options`_ for details.
 
 ``--sub-codepage=<codepage>``
     You can use this option to specify the subtitle codepage. uchardet will be
@@ -7190,6 +7202,11 @@ Miscellaneous
 
     See ``--audio-display`` how to control display of cover art (this can be
     used to disable cover art that is part of the file).
+
+``--cover-art-auto-exts=ext1,ext2,...``
+    Cover art extentions to try and match when using ``cover-art-auto``.
+
+    This is a string list option. See `List Options`_ for details.
 
 ``--cover-art-whitelist=<no|yes>``
     Whether to load filenames in an internal whitelist, such as ``cover.jpg``,
