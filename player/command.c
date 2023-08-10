@@ -2137,7 +2137,7 @@ static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
 
     char *current = NULL;
     mp_decoder_wrapper_control(dec, VDCTRL_GET_HWDEC, &current);
-    if (!current)
+    if (!current || !current[0])
         current = "no";
     return m_property_strdup_ro(action, arg, current);
 }
