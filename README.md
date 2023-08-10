@@ -21,7 +21,7 @@
 
 * [Wiki](https://github.com/mpv-player/mpv/wiki)
 * [FAQ][FAQ]
-* [Manual](https://mpv.io/manual/master/)
+* [Manual](https://mpv.io/manual/master/) & [How to edit or extend the manual](#how-to-edit-or-extend-the-manual)
 
 
 ## Overview
@@ -147,8 +147,8 @@ Releases other than the latest release are unsupported and unmaintained.
 
 See the [release policy document][release-policy] for more information.
 
-## Bug reports
 
+## Bug reports
 
 Please use the [issue tracker][issue-tracker] provided by GitHub to send us bug
 reports or feature requests. Follow the template's instructions or the issue
@@ -157,8 +157,16 @@ will likely be ignored or closed as invalid.
 Using the bug tracker as place for simple questions is fine but IRC is
 recommended (see [Contact](#Contact) below).
 
-## Contributing
 
+## How to edit or extend the manual
+
+- https://mpv.io/manual/master/ is one very long document generated from multiple `.rst` files located in the folder: https://github.com/mpv-player/mpv/tree/master/DOCS/man
+  - The `.rst` files use the [ReStructuredText](https://en.wikipedia.org/wiki/ReStructuredText) markup language.
+  - If you have difficulties finding the underlying `.rst` file, just identify a "long enough unique text snippet" from the live website and use Github repo search with the scope set to that folder and it will give you the `.rst` file in which it is contained.
+  - Then just add/remove/change text as needed.
+  - And submit the change as a pull request.
+
+## Contributing
 
 Please read [contribute.md][contribute.md].
 
