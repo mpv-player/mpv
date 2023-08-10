@@ -615,10 +615,13 @@ static const m_option_t mp_opts[] = {
 
     {"sub-auto", OPT_CHOICE(sub_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
+    {"sub-auto-exts", OPT_STRINGLIST(sub_auto_exts), .flags = UPDATE_SUB_EXTS},
     {"audio-file-auto", OPT_CHOICE(audiofile_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
+    {"audio-file-auto-exts", OPT_STRINGLIST(audiofile_auto_exts)},
     {"cover-art-auto", OPT_CHOICE(coverart_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
+    {"cover-art-auto-exts", OPT_STRINGLIST(coverart_auto_exts)},
     {"cover-art-whitelist", OPT_BOOL(coverart_whitelist)},
 
     {"", OPT_SUBSTRUCT(subs_rend, mp_subtitle_sub_opts)},
@@ -1055,6 +1058,58 @@ static const struct MPOpts mp_default_opts = {
     .osd_bar_visible = true,
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,
+
+    .audiofile_auto_exts = (char *[]){
+        "aac",
+        "ac3",
+        "dts",
+        "eac3",
+        "flac",
+        "m4a",
+        "mka",
+        "mp3",
+        "ogg",
+        "opus",
+        "thd",
+        "wav",
+        "wv",
+        NULL
+    },
+
+    .coverart_auto_exts = (char *[]){
+        "avif",
+        "bmp",
+        "gif",
+        "jpeg",
+        "jpg",
+        "jxl",
+        "png",
+        "tif",
+        "tiff",
+        "webp",
+        NULL
+    },
+
+    .sub_auto_exts = (char *[]){
+        "ass",
+        "idx",
+        "lrc",
+        "mks",
+        "pgs",
+        "rt",
+        "sbv",
+        "scc",
+        "smi",
+        "srt",
+        "ssa",
+        "sub",
+        "sup",
+        "utf",
+        "utf-8",
+        "utf8",
+        "vtt",
+        NULL
+    },
 
     .audio_output_channels = {
         .set = 1,

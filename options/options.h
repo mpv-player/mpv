@@ -309,8 +309,11 @@ typedef struct MPOpts {
     char **external_files;
     bool autoload_files;
     int sub_auto;
+    char **sub_auto_exts;
     int audiofile_auto;
+    char **audiofile_auto_exts;
     int coverart_auto;
+    char **coverart_auto_exts;
     bool coverart_whitelist;
     bool osd_bar_visible;
 
