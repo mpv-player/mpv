@@ -1881,8 +1881,11 @@ static int property_switch_track(void *ctx, struct m_property *prop,
     case M_PROPERTY_PRINT:
         if (track) {
             char *lang = track->lang;
-            if (!lang)
+            if (!lang && type != STREAM_VIDEO) {
                 lang = "unknown";
+            } else if (!lang) {
+                lang = "";
+            }
 
             if (track->title) {
                 *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
