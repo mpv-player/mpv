@@ -2243,6 +2243,8 @@ Subtitles
 
 .. note::
 
+.. note::
+
     Changing styling and position does not work with all subtitles. Image-based
     subtitles (DVD, Bluray/PGS, DVB) cannot changed for fundamental reasons.
     Subtitles in ASS format are normally not changed intentionally, but
@@ -2252,6 +2254,16 @@ Subtitles
     ``--sub-text-*``, they are now named ``--sub-*``, and those specifically
     for ASS have been renamed from ``--ass-*`` to ``--sub-ass-*``.
     They are now all in this section.
+
+    Supported subtitle formats and file extensions:
+
+    * `mpv` supports exactly the same subtitle file formats that ffmpeg supports → See ffmpeg documentation → Support matrix `Subtitle-Formats <https://ffmpeg.org/general.html#Subtitle-Formats>`_ → "Decoding" column → Compatibility symbol/remark.
+
+    * If you use `--sub-auto` with option `exact` or `fuzzy` or `all` then mpv looks for matching files which in addition also have one of the supported "autoload" file extensions as defined in `external_files.c <https://github.com/mpv-player/mpv/blob/master/player/external_files.c>`_ → `sub_exts <https://github.com/mpv-player/mpv/blob/master/player/external_files.c#L35>`_ -- which as of 2023-08-10 are:
+
+    `utf, utf8, utf-8, idx, sub, srt, rt, ssa, ass, mks, vtt, sup, scc, smi, lrc, pgs and NULL (that is a file without any extension)`
+
+    
 
 ``--sub-demuxer=<[+]name>``
     Force subtitle demuxer type for ``--sub-file``. Give the demuxer name as
