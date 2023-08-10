@@ -1097,7 +1097,11 @@ void write_video(struct MPContext *mpctx)
             }
         }
 
-        MP_DBG(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
+        // Avoid pointlessly spamming the logs every frame.
+        if (!vo_c->is_sparse || !vo_c->sparse_eof_signalled) {
+            MP_DBG(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
+            vo_c->sparse_eof_signalled = vo_c->is_sparse;
+        }
         return;
     }
 
