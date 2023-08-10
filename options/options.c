@@ -181,6 +181,7 @@ static const m_option_t mp_vo_opt_list[] = {
         {"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})},
     {"x11-present", OPT_CHOICE(x11_present,
         {"no", 0}, {"auto", 1}, {"yes", 2})},
+    {"x11-wid-title", OPT_BOOL(x11_wid_title)},
 #endif
 #if HAVE_WAYLAND
     {"wayland-content-type", OPT_CHOICE(content_type, {"auto", -1}, {"none", 0},

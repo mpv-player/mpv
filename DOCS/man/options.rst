@@ -3437,6 +3437,10 @@ Window
     mechanism in case there is good/bad behavior with whatever your combination
     of hardware/drivers/etc. happens to be.
 
+``--x11-wid-title`` ``--no-x11-wid-title``
+    Whether or not to set the window title when mpv is embedded on X11 (default:
+    ``no``).
+
 
 Disc Devices
 ------------
