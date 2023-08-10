@@ -2909,7 +2909,7 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%d/100", opts->subs_rend->sub_pos);
+        *(char **)arg = talloc_asprintf(NULL, "%4.2f%%/100", opts->subs_rend->sub_pos);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);

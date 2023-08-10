@@ -78,7 +78,7 @@ typedef struct mp_vo_opts {
 struct mp_subtitle_opts {
     bool sub_visibility;
     bool sec_sub_visibility;
-    int sub_pos;
+    float sub_pos;
     float sub_delay;
     float sub_fps;
     float sub_speed;
