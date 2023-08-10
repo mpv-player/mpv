@@ -312,12 +312,6 @@ static void init_cocoa_application(bool regular)
     });
 }
 
-static bool bundle_started_from_finder(char **argv)
-{
-    NSString *binary_path = [NSString stringWithUTF8String:argv[0]];
-    return [binary_path hasSuffix:@"mpv-bundle"];
-}
-
 static bool is_psn_argument(char *arg_to_check)
 {
     NSString *arg = [NSString stringWithUTF8String:arg_to_check];
@@ -340,7 +334,6 @@ static void setup_bundle(int *argc, char *argv[])
                                                     @"/opt/local/bin",
                                                     @"/opt/local/sbin"];
     setenv("PATH", [path_new UTF8String], 1);
-    setenv("MPVBUNDLE", "true", 1);
 }
 
 int cocoa_main(int argc, char *argv[])
@@ -353,7 +346,9 @@ int cocoa_main(int argc, char *argv[])
         ctx.argc     = &argc;
         ctx.argv     = &argv;
 
-        if (bundle_started_from_finder(argv)) {
+        NSString* bundle = [[[NSProcessInfo processInfo] environment] objectForKey:@"MPVBUNDLE"];
+
+        if ([bundle isEqual:@"true"]) {
             setup_bundle(&argc, argv);
             init_cocoa_application(true);
         } else {
