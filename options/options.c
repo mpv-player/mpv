@@ -267,7 +267,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"stretch-image-subs-to-screen", OPT_BOOL(stretch_image_subs)},
         {"image-subs-video-resolution", OPT_BOOL(image_subs_video_res)},
         {"sub-fix-timing", OPT_BOOL(sub_fix_timing)},
-        {"sub-pos", OPT_INT(sub_pos), M_RANGE(0, 150)},
+        {"sub-pos", OPT_FLOAT(sub_pos), M_RANGE(0.0, 150.0)},
         {"sub-gauss", OPT_FLOAT(sub_gauss), M_RANGE(0.0, 3.0)},
         {"sub-gray", OPT_BOOL(sub_gray)},
         {"sub-ass", OPT_BOOL(ass_enabled), .flags = UPDATE_SUB_HARD},

@@ -35,6 +35,7 @@ Interface changes
     - include `--hdr-peak-percentile` in the `gpu-hq` profile
     - change `--audiotrack-pcm-float` default from `no` to `yes`
     - add video-params/aspect-name
+    - change type of `--sub-pos` to float
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
