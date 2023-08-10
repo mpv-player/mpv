@@ -168,6 +168,7 @@ struct vo_chain {
     bool is_coverart;
     // - video consists of sparse still images
     bool is_sparse;
+    bool sparse_eof_signalled;
 
     bool underrun;
     bool underrun_signaled;
