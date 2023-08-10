@@ -33,8 +33,8 @@
 #include "external_files.h"
 
 static const char *const sub_exts[] = {"ass", "idx", "lrc", "mks", "pgs", "rt",
-                                       "scc", "smi", "srt", "ssa", "sub", "sup",
-                                       "utf", "utf-8", "utf8", "vtt",
+                                       "sbv", "scc", "smi", "srt", "ssa", "sub",
+                                       "sup", "utf", "utf-8", "utf8", "vtt",
                                        NULL};
 
 static const char *const audio_exts[] = {"aac", "ac3", "dts", "eac3", "flac",
