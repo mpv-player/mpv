@@ -1659,6 +1659,7 @@ static void play_current_file(struct MPContext *mpctx)
         if (watch_later)
             mp_delete_watch_later_conf(mpctx, mpctx->filename);
         struct playlist *pl = mpctx->demuxer->playlist;
+        playlist_populate_playlist_path(pl, mpctx->filename);
         transfer_playlist(mpctx, pl, &end_event.playlist_insert_id,
                           &end_event.playlist_insert_num_entries);
         mp_notify_property(mpctx, "playlist");
