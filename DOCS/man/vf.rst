@@ -583,6 +583,12 @@ Available mpv-only filters are:
     ``display_fps``
         Refresh rate of the current display. Note that this value can be 0.
 
+    ``display_res``
+        Resolution of the current display. This is an integer array with the
+        first entry corresponding to the width and the second entry coresponding
+        to the height. These values can be 0. Note that this will not respond to
+        monitor changes and may not work on all platforms.
+
 ``vavpp``
     VA-API video post processing. Requires the system to support VA-API,
     i.e. Linux/BSD only. Works with ``--vo=vaapi`` and ``--vo=gpu`` only.

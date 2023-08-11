@@ -747,8 +747,8 @@ if features['uchardet']
     dependencies += uchardet
 endif
 
-vapoursynth = dependency('vapoursynth', version: '>= 24', required: get_option('vapoursynth'))
-vapoursynth_script = dependency('vapoursynth-script', version: '>= 23',
+vapoursynth = dependency('vapoursynth', version: '>= 26', required: get_option('vapoursynth'))
+vapoursynth_script = dependency('vapoursynth-script', version: '>= 26',
                                 required: get_option('vapoursynth'))
 features += {'vapoursynth': vapoursynth.found() and vapoursynth_script.found()}
 if features['vapoursynth']

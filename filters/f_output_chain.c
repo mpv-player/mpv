@@ -357,6 +357,13 @@ static double get_display_fps(struct mp_stream_info *i)
     return res;
 }
 
+static void get_display_res(struct mp_stream_info *i, int *res)
+{
+    struct chain *p = i->priv;
+    if (p->vo)
+        vo_control(p->vo, VOCTRL_GET_DISPLAY_RES, res);
+}
+
 void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo)
 {
     struct chain *p = c->f->priv;
@@ -617,6 +624,7 @@ static void create_video_things(struct chain *p)
 
     p->stream_info.priv = p;
     p->stream_info.get_display_fps = get_display_fps;
+    p->stream_info.get_display_res = get_display_res;
 
     p->f->stream_info = &p->stream_info;
 
