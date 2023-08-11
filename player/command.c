@@ -2218,6 +2218,48 @@ static int mp_property_video_codec(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, desc[0] ? desc : NULL);
 }
 
+static const char *get_aspect_ratio_name(double ratio)
+{
+    // Depending on cropping/mastering exact ratio may differ.
+#define RATIO_THRESH 0.025
+#define RATIO_CASE(ref, name)                     \
+    if (fabs(ratio - (ref)) < RATIO_THRESH)       \
+        return name;                              \
+
+    // https://en.wikipedia.org/wiki/Aspect_ratio_(image)
+    RATIO_CASE(9.0 / 16.0, "Vertical")
+    RATIO_CASE(1.0, "Square");
+    RATIO_CASE(19.0 / 16.0, "Movietone Ratio");
+    RATIO_CASE(5.0 / 4.0, "5:4");
+    RATIO_CASE(4.0 / 3.0, "4:3");
+    RATIO_CASE(11.0 / 8.0, "Academy Ratio");
+    RATIO_CASE(1.43, "IMAX Ratio");
+    RATIO_CASE(3.0 / 2.0, "VistaVision Ratio");
+    RATIO_CASE(16.0 / 10.0, "16:10");
+    RATIO_CASE(5.0 / 3.0, "35mm Widescreen Ratio");
+    RATIO_CASE(16.0 / 9.0, "16:9");
+    RATIO_CASE(7.0 / 4.0, "Early 35mm Widescreen Ratio");
+    RATIO_CASE(1.85, "Academy Flat");
+    RATIO_CASE(256.0 / 135.0, "SMPTE/DCI Ratio");
+    RATIO_CASE(2.0, "Univisium");
+    RATIO_CASE(2.208, "70mm film");
+    RATIO_CASE(2.35, "Scope");
+    RATIO_CASE(2.39, "Panavision");
+    RATIO_CASE(2.55, "Original CinemaScope");
+    RATIO_CASE(2.59, "Full-frame Cinerama");
+    RATIO_CASE(24.0 / 9.0, "Full-frame Super 16mm");
+    RATIO_CASE(2.76, "Ultra Panavision 70");
+    RATIO_CASE(32.0 / 9.0, "32:9");
+    RATIO_CASE(3.6, "Ultra-WideScreen 3.6");
+    RATIO_CASE(4.0, "Polyvision");
+    RATIO_CASE(12.0, "Circle-Vision 360°");
+
+    return NULL;
+
+#undef RATIO_THRESH
+#undef RATIO_CASE
+}
+
 static int property_imgparams(struct mp_image_params p, int action, void *arg)
 {
     if (!p.imgfmt)
@@ -2238,6 +2280,7 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
             (desc.flags & MP_IMGFLAG_ALPHA) ? MP_ALPHA_STRAIGHT : MP_ALPHA_AUTO;
     }
 
+    const char *aspect_name = get_aspect_ratio_name(d_w / (double)d_h);
     struct m_sub_property props[] = {
         {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p.imgfmt))},
         {"hw-pixelformat",  SUB_PROP_STR(mp_imgfmt_to_name(p.hw_subfmt)),
@@ -2249,6 +2292,7 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"dw",              SUB_PROP_INT(d_w)},
         {"dh",              SUB_PROP_INT(d_h)},
         {"aspect",          SUB_PROP_FLOAT(d_w / (double)d_h)},
+        {"aspect-name",     SUB_PROP_STR(aspect_name), .unavailable = !aspect_name},
         {"par",             SUB_PROP_FLOAT(p.p_w / (double)p.p_h)},
         {"colormatrix",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p.color.space))},
@@ -3996,7 +4040,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
-      "width", "height", "fps", "aspect", "vo-configured", "current-vo",
+      "width", "height", "fps", "aspect", "aspect-name", "vo-configured", "current-vo",
       "video-aspect", "video-dec-params", "osd-dimensions",
       "hwdec", "hwdec-current", "hwdec-interop"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
