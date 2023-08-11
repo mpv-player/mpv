@@ -3092,15 +3092,27 @@ static int get_playlist_entry(int item, int action, void *arg, void *ctx)
     bool current = mpctx->playlist->current == e;
     bool playing = mpctx->playing == e;
     struct m_sub_property props[] = {
-        {"filename",    SUB_PROP_STR(e->filename)},
-        {"current",     SUB_PROP_BOOL(1), .unavailable = !current},
-        {"playing",     SUB_PROP_BOOL(1), .unavailable = !playing},
-        {"title",       SUB_PROP_STR(e->title), .unavailable = !e->title},
-        {"id",          SUB_PROP_INT64(e->id)},
+        {"filename",      SUB_PROP_STR(e->filename)},
+        {"current",       SUB_PROP_BOOL(1), .unavailable = !current},
+        {"playing",       SUB_PROP_BOOL(1), .unavailable = !playing},
+        {"title",         SUB_PROP_STR(e->title), .unavailable = !e->title},
+        {"id",            SUB_PROP_INT64(e->id)},
+        {"playlist-path", SUB_PROP_STR(e->playlist_path), .unavailable = !e->playlist_path},
         {0}
     };
 
     return m_property_read_sub(props, action, arg);
+}
+
+static int mp_property_playlist_path(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->playlist->current)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct playlist_entry *e = mpctx->playlist->current;
+    return m_property_strdup_ro(action, arg, e->playlist_path);
 }
 
 static int mp_property_playlist(void *ctx, struct m_property *prop,
@@ -3875,6 +3887,7 @@ static const struct m_property mp_properties_base[] = {
     {"edition-list", property_list_editions},
 
     {"playlist", mp_property_playlist},
+    {"playlist-path", mp_property_playlist_path},
     {"playlist-pos", mp_property_playlist_pos},
     {"playlist-pos-1", mp_property_playlist_pos_1},
     {"playlist-current-pos", mp_property_playlist_current_pos},

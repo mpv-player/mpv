@@ -33,6 +33,7 @@ struct playlist_entry {
     uint64_t id;
 
     char *filename;
+    char *playlist_path;
 
     struct playlist_param *params;
     int num_params;
@@ -93,6 +94,7 @@ void playlist_move(struct playlist *pl, struct playlist_entry *entry,
                    struct playlist_entry *at);
 
 void playlist_add_file(struct playlist *pl, const char *filename);
+void playlist_populate_playlist_path(struct playlist *pl, const char *path);
 void playlist_shuffle(struct playlist *pl);
 void playlist_unshuffle(struct playlist *pl);
 struct playlist_entry *playlist_get_first(struct playlist *pl);

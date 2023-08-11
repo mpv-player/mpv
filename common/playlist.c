@@ -142,6 +142,14 @@ void playlist_add_file(struct playlist *pl, const char *filename)
     playlist_add(pl, playlist_entry_new(filename));
 }
 
+void playlist_populate_playlist_path(struct playlist *pl, const char *path)
+{
+    for (int n = 0; n < pl->num_entries; n++) {
+        struct playlist_entry *e = pl->entries[n];
+        e->playlist_path = talloc_strdup(e, path);
+    }
+}
+
 void playlist_shuffle(struct playlist *pl)
 {
     for (int n = 0; n < pl->num_entries; n++)
