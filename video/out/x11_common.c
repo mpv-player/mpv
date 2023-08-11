@@ -1426,9 +1426,7 @@ static void vo_x11_set_property_string(struct vo *vo, Atom name, const char *t)
         // can do this correctly.
         vo_x11_set_property_utf8(vo, name, t);
     }
-
-    if (prop.value)
-        XFree(prop.value);
+    XFree(prop.value);
 }
 
 static void vo_x11_update_window_title(struct vo *vo)
