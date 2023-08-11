@@ -32,18 +32,18 @@
 #include "options/path.h"
 #include "external_files.h"
 
-static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub",
-                                       "srt", "rt", "ssa", "ass", "mks", "vtt",
-                                       "sup", "scc", "smi", "lrc", "pgs",
+static const char *const sub_exts[] = {"ass", "idx", "lrc", "mks", "pgs", "rt",
+                                       "sbv", "scc", "smi", "srt", "ssa", "sub",
+                                       "sup", "utf", "utf-8", "utf8", "vtt",
                                        NULL};
 
-static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
-                                         "ogg", "m4a", "ac3", "opus", "wav",
-                                         "wv", "eac3", "thd",
+static const char *const audio_exts[] = {"aac", "ac3", "dts", "eac3", "flac",
+                                         "m4a", "mka", "mp3", "ogg", "opus",
+                                         "thd", "wav", "wv",
                                          NULL};
 
-static const char *const image_exts[] = {"jpg", "jpeg", "png", "gif", "bmp",
-                                         "webp", "jxl", "tiff", "tif", "avif",
+static const char *const image_exts[] = {"avif", "bmp", "gif", "jpeg", "jpg",
+                                         "jxl", "png", "tif", "tiff", "webp",
                                          NULL};
 
 // Stolen from: vlc/-/blob/master/modules/meta_engine/folder.c#L40
