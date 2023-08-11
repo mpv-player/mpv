@@ -720,7 +720,9 @@ local function add_video(s)
     end
     append_property(s, "current-window-scale", {prefix="Window Scale:"})
     if r["aspect"] ~= nil then
-        append(s, format("%.2f", r["aspect"]), {prefix="Aspect Ratio:"})
+        append(s, format("%.2f:1", r["aspect"]), {prefix="Aspect Ratio:"})
+        append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
+                                     prefix_sep="", no_prefix_markup=true})
     end
     append(s, r["pixelformat"], {prefix="Pixel Format:"})
     if r["hw-pixelformat"] ~= nil then
