@@ -2800,29 +2800,25 @@ skip_warn: ;
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static bool floats_equal(float x, float y) {
-    float TOLERANCE = 0.001;
-    float difference = fabsf(x - y);
-    return difference <= TOLERANCE;
-}
+#define doubles_equal(x, y) (fabs((x) - (y)) <= 0.001)
 
 static int mp_property_video_aspect_override(void *ctx, struct m_property *prop,
                                              int action, void *arg)
 {
     MPContext *mpctx = ctx;
     if (action == M_PROPERTY_PRINT) {
-        float aspect_ratio;
+        double aspect_ratio;
         mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &aspect_ratio);
 
-        if (floats_equal(aspect_ratio, 2.35F / 1.0F))
+        if (doubles_equal(aspect_ratio, 2.35 / 1.0))
             *(char **)arg = talloc_asprintf(NULL, "2.35:1");
-        else if (floats_equal(aspect_ratio, 16.0F / 9.0F))
+        else if (doubles_equal(aspect_ratio, 16.0 / 9.0))
             *(char **)arg = talloc_asprintf(NULL, "16:9");
-        else if (floats_equal(aspect_ratio, 16.0F / 10.0F))
+        else if (doubles_equal(aspect_ratio, 16.0 / 10.0))
             *(char **)arg = talloc_asprintf(NULL, "16:10");
-        else if (floats_equal(aspect_ratio, 4.0F / 3.0F))
+        else if (doubles_equal(aspect_ratio, 4.0 / 3.0))
             *(char **)arg = talloc_asprintf(NULL, "4:3");
-        else if (floats_equal(aspect_ratio, -1.0F))
+        else if (doubles_equal(aspect_ratio, -1.0))
             *(char **)arg = talloc_asprintf(NULL, "Original");
         else
             *(char **)arg = talloc_asprintf(NULL, "%.3f", aspect_ratio);
