@@ -42,6 +42,8 @@ local user_opts = {
                                 -- to be shown as OSC title
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
+    remaining_playtime = true,  -- display the remaining time in playtime or video-time mode
+                                -- playtime takes speed into account, whereas video-time doesn't
     timems = false,             -- display timecodes with milliseconds?
     tcspace = 100,              -- timecode spacing (compensate font size estimation)
     visibility = "auto",        -- only used at init to set visibility_mode(...)
@@ -2105,10 +2107,12 @@ function osc_init()
     ne.content = function ()
         if (state.rightTC_trem) then
             local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
+            local property = user_opts.remaining_playtime and "playtime-remaining"
+                                                           or "time-remaining"
             if state.tc_ms then
-                return (minus..mp.get_property_osd("playtime-remaining/full"))
+                return (minus..mp.get_property_osd(property .. "/full"))
             else
-                return (minus..mp.get_property_osd("playtime-remaining"))
+                return (minus..mp.get_property_osd(property))
             end
         else
             if state.tc_ms then
