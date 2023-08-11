@@ -311,7 +311,6 @@ Configurable Options
     Show total time instead of time remaining
 
 ``remaining_playtime``
-
     Default: yes
 
     Whether the time-remaining display takes speed into account,
