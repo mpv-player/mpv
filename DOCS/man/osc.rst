@@ -314,8 +314,11 @@ Configurable Options
     Default: yes
 
     Whether the time-remaining display takes speed into account,
+
     `yes` - how much playback time remains
+
     or ignores the speed,
+    
     `no` - how much video-time remains.
 
 ``timems``
