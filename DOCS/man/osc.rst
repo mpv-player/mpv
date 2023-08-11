@@ -310,6 +310,15 @@ Configurable Options
 
     Show total time instead of time remaining
 
+``remaining_playtime``
+
+    Default: yes
+
+    Whether the time-remaining display takes speed into account,
+    `yes` - how much playback time remains
+    or ignores the speed,
+    `no` - how much video-time remains.
+
 ``timems``
     Default: no
 

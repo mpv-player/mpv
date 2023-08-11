@@ -42,8 +42,8 @@ local user_opts = {
                                 -- to be shown as OSC title
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
-    playtime = true,            -- display the remaining time in wallclock time it takes to finish
-                                -- as opposed to the original time, before applying speed modifiers 
+    remaining_playtime = true,  -- display the remaining time in playtime or video-time mode
+                                -- playtime takes speed into account, whereas video-time doesn't  
     timems = false,             -- display timecodes with milliseconds?
     tcspace = 100,              -- timecode spacing (compensate font size estimation)
     visibility = "auto",        -- only used at init to set visibility_mode(...)
@@ -107,7 +107,7 @@ local state = {
     active_element = nil,                   -- nil = none, 0 = background, 1+ = see elements[]
     active_event_source = nil,              -- the "button" that issued the current event
     rightTC_trem = not user_opts.timetotal, -- if the right timecode should display total or remaining time
-    playtime = user_opts.playtime,	        -- remaining time is wallclock versus original time
+    remaining_playtime = user_opts.remaining_playtime, -- whether the remaining time display depends on playback speed
     tc_ms = user_opts.timems,               -- Should the timecodes display their time with milliseconds
     mp_screen_sizeX, mp_screen_sizeY,       -- last screen-resolution, to detect resolution changes to issue reINITs
     initREQ = false,                        -- is a re-init request pending?
@@ -2108,18 +2108,12 @@ function osc_init()
     ne.content = function ()
         if (state.rightTC_trem) then
             local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
-            if state.playtime then
-                if state.tc_ms then
-                    return (minus..mp.get_property_osd("playtime-remaining/full"))
-                else
-                    return (minus..mp.get_property_osd("playtime-remaining"))
-                end
+            local property = state.playtime and "playtime-remaining" or "time-remaining"
+
+            if state.tc_ms then
+                return (minus..mp.get_property_osd(property.."/full"))
             else
-                if state.tc_ms then
-                    return (minus..mp.get_property_osd("time-remaining/full"))
-                else
-                    return (minus..mp.get_property_osd("time-remaining"))
-                end
+                return (minus..mp.get_property_osd(property))
             end
         else
             if state.tc_ms then
