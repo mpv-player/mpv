@@ -162,8 +162,10 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
     if (internal_paused != mpctx->paused) {
         mpctx->paused = internal_paused;
 
-        if (mpctx->ao)
-            ao_set_paused(mpctx->ao, internal_paused);
+        if (mpctx->ao) {
+            bool eof = mpctx->audio_status == STATUS_EOF;
+            ao_set_paused(mpctx->ao, internal_paused, eof);
+        }
 
         if (mpctx->video_out)
             vo_set_paused(mpctx->video_out, internal_paused);

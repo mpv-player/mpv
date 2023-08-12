@@ -349,11 +349,16 @@ void ao_start(struct ao *ao)
     ao_wakeup_playthread(ao);
 }
 
-void ao_set_paused(struct ao *ao, bool paused)
+void ao_set_paused(struct ao *ao, bool paused, bool eof)
 {
     struct buffer_state *p = ao->buffer_state;
     bool wakeup = false;
     bool do_reset = false, do_start = false;
+
+    // If we are going to pause on eof and ao is still playing,
+    // be sure to drain the ao first for gapless.
+    if (eof && paused && ao_is_playing(ao))
+        ao_drain(ao);
 
     pthread_mutex_lock(&p->lock);
 

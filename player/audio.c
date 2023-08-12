@@ -486,7 +486,8 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
     ao_c->ao_resume_time =
         opts->audio_wait_open > 0 ? mp_time_sec() + opts->audio_wait_open : 0;
 
-    ao_set_paused(mpctx->ao, get_internal_paused(mpctx));
+    bool eof = mpctx->audio_status == STATUS_EOF;
+    ao_set_paused(mpctx->ao, get_internal_paused(mpctx), eof);
 
     ao_chain_set_ao(ao_c, mpctx->ao);
 

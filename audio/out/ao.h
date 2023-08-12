@@ -98,7 +98,7 @@ void ao_set_gain(struct ao *ao, float gain);
 double ao_get_delay(struct ao *ao);
 void ao_reset(struct ao *ao);
 void ao_start(struct ao *ao);
-void ao_set_paused(struct ao *ao, bool paused);
+void ao_set_paused(struct ao *ao, bool paused, bool eof);
 void ao_drain(struct ao *ao);
 bool ao_is_playing(struct ao *ao);
 struct mp_async_queue;
