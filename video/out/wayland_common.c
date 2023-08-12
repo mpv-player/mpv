@@ -2118,16 +2118,28 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_FPS: {
-        if (!wl->current_output)
+        struct vo_wayland_output *out;
+        if (wl->current_output) {
+            out = wl->current_output;
+        } else {
+            out = find_output(wl);
+        }
+        if (!out)
             return VO_NOTAVAIL;
-        *(double *)arg = wl->current_output->refresh_rate;
+        *(double *)arg = out->refresh_rate;
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_RES: {
-        if (!wl->current_output)
+        struct vo_wayland_output *out;
+        if (wl->current_output) {
+            out = wl->current_output;
+        } else {
+            out = find_output(wl);
+        }
+        if (!out)
             return VO_NOTAVAIL;
-        ((int *)arg)[0] = wl->current_output->geometry.x1;
-        ((int *)arg)[1] = wl->current_output->geometry.y1;
+        ((int *)arg)[0] = out->geometry.x1;
+        ((int *)arg)[1] = out->geometry.y1;
         return VO_TRUE;
     }
     case VOCTRL_GET_HIDPI_SCALE: {
