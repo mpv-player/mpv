@@ -400,7 +400,6 @@ static void xrandr_read(struct vo_x11_state *x11)
         talloc_free(x11->displays[i].name);
 
     x11->num_displays = 0;
-    bool randr_14 = false;
 
     if (x11->xrandr_event < 0) {
         int event_base, error_base;
@@ -408,10 +407,6 @@ static void xrandr_read(struct vo_x11_state *x11)
             MP_VERBOSE(x11, "Couldn't init Xrandr.\n");
             return;
         }
-        int major, minor;
-        XRRQueryVersion(x11->display, &major, &minor);
-        if (major >= 2 || minor >= 4)
-            randr_14 = true;
         x11->xrandr_event = event_base + RRNotify;
         XRRSelectInput(x11->display, x11->rootwin, RRScreenChangeNotifyMask |
                        RRCrtcChangeNotifyMask | RROutputChangeNotifyMask);
@@ -429,27 +424,25 @@ static void xrandr_read(struct vo_x11_state *x11)
      * a laptop with switchable graphics), we need to know both of these things.
      * In practice, this is used for determining whether or not to use XPresent
      * (i.e. needs to be Mesa and not Nvidia). Requires Randr 1.4. */
-    if (randr_14) {
-        XRRProviderResources *pr = XRRGetProviderResources(x11->display, x11->rootwin);
-        for (int i = 0; i < pr->nproviders; i++) {
-            XRRProviderInfo *info = XRRGetProviderInfo(x11->display, r, pr->providers[i]);
-            struct bstr provider_name = bstrdup(x11, bstr0(info->name));
-            bstr_lower(provider_name);
-            int amd = bstr_find0(provider_name, "amd");
-            int intel = bstr_find0(provider_name, "intel");
-            int modesetting = bstr_find0(provider_name, "modesetting");
-            int nouveau = bstr_find0(provider_name, "nouveau");
-            int nvidia = bstr_find0(provider_name, "nvidia");
-            int radeon = bstr_find0(provider_name, "radeon");
-            x11->has_mesa = x11->has_mesa || amd >= 0 || intel >= 0 ||
-                            modesetting >= 0 || nouveau >= 0 || radeon >= 0;
-            x11->has_nvidia = x11->has_nvidia || nvidia >= 0;
-            XRRFreeProviderInfo(info);
-        }
-        if (x11->present_code)
-            xpresent_set(x11);
-        XRRFreeProviderResources(pr);
+    XRRProviderResources *pr = XRRGetProviderResources(x11->display, x11->rootwin);
+    for (int i = 0; i < pr->nproviders; i++) {
+        XRRProviderInfo *info = XRRGetProviderInfo(x11->display, r, pr->providers[i]);
+        struct bstr provider_name = bstrdup(x11, bstr0(info->name));
+        bstr_lower(provider_name);
+        int amd = bstr_find0(provider_name, "amd");
+        int intel = bstr_find0(provider_name, "intel");
+        int modesetting = bstr_find0(provider_name, "modesetting");
+        int nouveau = bstr_find0(provider_name, "nouveau");
+        int nvidia = bstr_find0(provider_name, "nvidia");
+        int radeon = bstr_find0(provider_name, "radeon");
+        x11->has_mesa = x11->has_mesa || amd >= 0 || intel >= 0 ||
+                        modesetting >= 0 || nouveau >= 0 || radeon >= 0;
+        x11->has_nvidia = x11->has_nvidia || nvidia >= 0;
+        XRRFreeProviderInfo(info);
     }
+    if (x11->present_code)
+        xpresent_set(x11);
+    XRRFreeProviderResources(pr);
 
     int primary_id = -1;
     RROutput primary = XRRGetOutputPrimary(x11->display, x11->rootwin);
