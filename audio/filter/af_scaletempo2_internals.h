@@ -112,6 +112,13 @@ struct mp_scaletempo2 {
     float **input_buffer;
     int input_buffer_size;
     int input_buffer_frames;
+    // How many frames in |input_buffer| need to be flushed by padding with
+    // silence to process the final packet. While this is nonzero, the filter
+    // appends silence to |input_buffer| until these frames are processed.
+    int input_buffer_final_frames;
+    // How many additional frames of silence have been added to |input_buffer|
+    // for padding after the final packet.
+    int input_buffer_added_silence;
     float *energy_candidate_blocks;
 };
 
@@ -120,7 +127,8 @@ void mp_scaletempo2_reset(struct mp_scaletempo2 *p);
 void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate);
 double mp_scaletempo2_get_latency(struct mp_scaletempo2 *p, double playback_rate);
 int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
-    uint8_t **planes, int frame_size, bool final, double playback_rate);
+    uint8_t **planes, int frame_size, double playback_rate);
+void mp_scaletempo2_set_final(struct mp_scaletempo2 *p);
 int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
     float **dest, int dest_size, double playback_rate);
 bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p, double playback_rate);

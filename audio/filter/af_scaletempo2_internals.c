@@ -421,6 +421,9 @@ static void seek_buffer(struct mp_scaletempo2 *p, int frames)
 {
     assert(p->input_buffer_frames >= frames);
     p->input_buffer_frames -= frames;
+    if (p->input_buffer_final_frames > 0) {
+        p->input_buffer_final_frames = MPMAX(0, p->input_buffer_final_frames - frames);
+    }
     for (int i = 0; i < p->channels; ++i) {
         memmove(p->input_buffer[i], p->input_buffer[i] + frames,
             p->input_buffer_frames * sizeof(float));
@@ -483,27 +486,53 @@ static void resize_input_buffer(struct mp_scaletempo2 *p, int size)
     p->input_buffer = realloc_2d(p->input_buffer, p->channels, size);
 }
 
+// pad end with silence until a wsola iteration can be performed
+static void add_input_buffer_final_silence(struct mp_scaletempo2 *p, double playback_rate)
+{
+    int needed = frames_needed(p, playback_rate);
+    if (needed <= 0)
+        return; // no silence needed for iteration
+
+    int required_size = needed + p->input_buffer_frames;
+    if (required_size > p->input_buffer_size)
+        resize_input_buffer(p, required_size);
+
+    for (int i = 0; i < p->channels; ++i) {
+        float *ch_input = p->input_buffer[i];
+        for (int j = 0; j < needed; ++j) {
+            ch_input[p->input_buffer_frames + j] = 0.0f;
+        }
+    }
+
+    p->input_buffer_added_silence += needed;
+    p->input_buffer_frames += needed;
+}
+
+void mp_scaletempo2_set_final(struct mp_scaletempo2 *p)
+{
+    if (p->input_buffer_final_frames <= 0) {
+        p->input_buffer_final_frames = p->input_buffer_frames;
+    }
+}
+
 int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
-    uint8_t **planes, int frame_size, bool final, double playback_rate)
+    uint8_t **planes, int frame_size, double playback_rate)
 {
     int needed = frames_needed(p, playback_rate);
     int read = MPMIN(needed, frame_size);
-    int total_fill = final ? needed : read;
-    if (total_fill == 0) return 0;
+    if (read == 0)
+        return 0;
 
-    int required_size = total_fill + p->input_buffer_frames;
+    int required_size = read + p->input_buffer_frames;
     if (required_size > p->input_buffer_size)
         resize_input_buffer(p, required_size);
 
     for (int i = 0; i < p->channels; ++i) {
         memcpy(p->input_buffer[i] + p->input_buffer_frames,
             planes[i], read * sizeof(float));
-        for (int j = read; j < total_fill; ++j) {
-            p->input_buffer[i][p->input_buffer_frames + j] = 0.0f;
-        }
     }
 
-    p->input_buffer_frames += total_fill;
+    p->input_buffer_frames += read;
     return read;
 }
 
@@ -669,6 +698,10 @@ int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
 {
     if (playback_rate == 0) return 0;
 
+    if (p->input_buffer_final_frames > 0) {
+        add_input_buffer_final_silence(p, playback_rate);
+    }
+
     // Optimize the muted case to issue a single clear instead of performing
     // the full crossfade and clearing each crossfaded frame.
     if (playback_rate < p->opts->min_playback_rate
@@ -726,12 +759,15 @@ int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
 double mp_scaletempo2_get_latency(struct mp_scaletempo2 *p, double playback_rate)
 {
     return p->input_buffer_frames - p->output_time
+        - p->input_buffer_added_silence
         + p->num_complete_frames * playback_rate;
 }
 
 bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p, double playback_rate)
 {
-    return can_perform_wsola(p, playback_rate) || p->num_complete_frames > 0;
+    return p->input_buffer_final_frames > p->target_block_index
+        || can_perform_wsola(p, playback_rate)
+        || p->num_complete_frames > 0;
 }
 
 void mp_scaletempo2_destroy(struct mp_scaletempo2 *p)
@@ -749,6 +785,8 @@ void mp_scaletempo2_destroy(struct mp_scaletempo2 *p)
 void mp_scaletempo2_reset(struct mp_scaletempo2 *p)
 {
     p->input_buffer_frames = 0;
+    p->input_buffer_final_frames = 0;
+    p->input_buffer_added_silence = 0;
     p->output_time = 0.0;
     p->search_block_index = 0;
     p->target_block_index = 0;
@@ -827,6 +865,8 @@ void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
 
     resize_input_buffer(p, 4 * MPMAX(p->ola_window_size, p->search_block_size));
     p->input_buffer_frames = 0;
+    p->input_buffer_final_frames = 0;
+    p->input_buffer_added_silence = 0;
 
     p->energy_candidate_blocks = realloc(p->energy_candidate_blocks,
         sizeof(float) * p->channels * p->num_candidate_blocks);
