@@ -1043,7 +1043,6 @@ x11 = {
     'deps': [dependency('x11', version: '>= 1.0.0', required: x11_opt),
              dependency('xscrnsaver', version: '>= 1.0.0', required: x11_opt),
              dependency('xext', version: '>= 1.0.0', required: x11_opt),
-             dependency('xinerama', version: '>= 1.0.0', required: x11_opt),
              dependency('xpresent', version: '>= 1.0.0', required: x11_opt),
              dependency('xrandr', version: '>= 1.4.0', required: x11_opt)],
 }
