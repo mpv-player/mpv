@@ -423,6 +423,10 @@ static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_state *wl = data;
     wl->has_keyboard_input = false;
+    wl->keyboard_code = 0;
+    wl->mpkey = 0;
+    wl->mpmod = 0;
+    mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
     guess_focus(wl);
 }
 
