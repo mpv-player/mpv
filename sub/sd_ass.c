@@ -59,6 +59,7 @@ struct sd_ass_priv {
     int64_t *seen_packets;
     int num_seen_packets;
     bool duration_unknown;
+    int PlayResX;
 };
 
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
@@ -230,8 +231,10 @@ static void assobjects_init(struct sd *sd)
         extradata = lavc_conv_get_extradata(ctx->converter);
         extradata_size = extradata ? strlen(extradata) : 0;
     }
-    if (extradata)
+    if (extradata) {
         ass_process_codec_private(ctx->ass_track, extradata, extradata_size);
+        ctx->PlayResX = ctx->ass_track->PlayResX;
+    }
 
     mp_ass_add_default_styles(ctx->ass_track, opts);
 
