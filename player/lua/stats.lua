@@ -718,7 +718,9 @@ local function add_video(s)
     if append(s, scaled_width, {prefix="Scaled Resolution:"}) then
         append(s, scaled_height, {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
-    append_property(s, "current-window-scale", {prefix="Window Scale:"})
+    if not mp.get_property_native("fullscreen") then
+        append_property(s, "current-window-scale", {prefix="Window Scale:"})
+    end
     if r["aspect"] ~= nil then
         append(s, format("%.2f:1", r["aspect"]), {prefix="Aspect Ratio:"})
         append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
