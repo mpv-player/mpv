@@ -694,6 +694,12 @@ int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
     return rendered_frames;
 }
 
+double mp_scaletempo2_get_latency(struct mp_scaletempo2 *p, double playback_rate)
+{
+    return p->input_buffer_frames - p->search_block_index
+        + p->num_complete_frames * playback_rate;
+}
+
 bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p)
 {
     return can_perform_wsola(p) || p->num_complete_frames > 0;

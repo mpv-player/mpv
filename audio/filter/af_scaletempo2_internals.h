@@ -114,6 +114,7 @@ struct mp_scaletempo2 {
 void mp_scaletempo2_destroy(struct mp_scaletempo2 *p);
 void mp_scaletempo2_reset(struct mp_scaletempo2 *p);
 void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate);
+double mp_scaletempo2_get_latency(struct mp_scaletempo2 *p, double playback_rate);
 int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
     uint8_t **planes, int frame_size, bool final);
 int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
