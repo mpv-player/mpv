@@ -41,7 +41,8 @@ struct xrandr_display {
     double fps;
     char *name;
     bool overlaps;
-    int atom_id;
+    int atom_id; // offset by location of primary
+    int screen;
 };
 
 struct vo_x11_state {
@@ -65,7 +66,7 @@ struct vo_x11_state {
 
     struct xrandr_display displays[MAX_DISPLAYS];
     int num_displays;
-    int current_icc_screen;
+    int current_screen;
 
     int xrandr_event;
     bool has_mesa;
