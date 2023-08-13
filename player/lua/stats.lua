@@ -670,11 +670,29 @@ local function add_file(s)
 end
 
 
+local function append_resolution(s, r, prefix)
+    if not r then
+        return
+    end
+    if append(s, r["w"], {prefix=prefix}) then
+        append(s, r["h"], {prefix="x", nl="", indent=" ", prefix_sep=" ",
+                           no_prefix_markup=true})
+        if r["aspect"] ~= nil then
+            append(s, format("%.2f:1", r["aspect"]), {prefix=", ", nl="", indent="",
+                                                      no_prefix_markup=true})
+            append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
+                                         prefix_sep="", no_prefix_markup=true})
+        end
+    end
+end
+
+
 local function add_video(s)
     local r = mp.get_property_native("video-params")
+    local ro = mp.get_property_native("video-out-params")
     -- in case of e.g. lavfi-complex there can be no input video, only output
     if not r then
-        r = mp.get_property_native("video-out-params")
+        r = ro
     end
     if not r then
         return
@@ -712,19 +730,13 @@ local function add_video(s)
     append_display_sync(s)
     append_perfdata(s, o.print_perfdata_passes)
 
-    if append(s, r["w"], {prefix="Native Resolution:"}) then
-        append(s, r["h"], {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    append_resolution(s, r, "Native Resolution:")
+    if ro and (r["w"] ~= ro["w"] or r["h"] ~= ro["h"]) then
+        append_resolution(s, ro, "Output Resolution:")
     end
-    if append(s, scaled_width, {prefix="Scaled Resolution:"}) then
-        append(s, scaled_height, {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
-    end
+    append_resolution(s, {w=scaled_width, h=scaled_height}, "Scaled Resolution:")
     if not mp.get_property_native("fullscreen") then
         append_property(s, "current-window-scale", {prefix="Window Scale:"})
-    end
-    if r["aspect"] ~= nil then
-        append(s, format("%.2f:1", r["aspect"]), {prefix="Aspect Ratio:"})
-        append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
-                                     prefix_sep="", no_prefix_markup=true})
     end
     append(s, r["pixelformat"], {prefix="Pixel Format:"})
     if r["hw-pixelformat"] ~= nil then
