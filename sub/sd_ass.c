@@ -54,6 +54,7 @@ struct sd_ass_priv {
     struct sub_bitmap_copy_cache *copy_cache;
     char last_text[500];
     struct mp_image_params video_params;
+    struct mp_image_params out_params;
     struct mp_image_params last_params;
     struct mp_osd_res osd;
     int64_t *seen_packets;
@@ -852,6 +853,9 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     }
     case SD_CTRL_SET_VIDEO_PARAMS:
         ctx->video_params = *(struct mp_image_params *)arg;
+        return CONTROL_OK;
+    case SD_CTRL_SET_OUT_PARAMS:
+        ctx->out_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;
     case SD_CTRL_SET_TOP:
         ctx->on_top = *(bool *)arg;

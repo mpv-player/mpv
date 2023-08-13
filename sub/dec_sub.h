@@ -20,6 +20,7 @@ enum sd_ctrl {
     SD_CTRL_SET_TOP,
     SD_CTRL_SET_VIDEO_DEF_FPS,
     SD_CTRL_UPDATE_OPTS,
+    SD_CTRL_SET_OUT_PARAMS,
 };
 
 enum sd_text_type {

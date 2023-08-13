@@ -88,9 +88,12 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
         return true;
 
     if (mpctx->vo_chain) {
-        struct mp_image_params params = mpctx->vo_chain->filter->input_params;
-        if (params.imgfmt)
-            sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
+        struct mp_image_params video_params = mpctx->vo_chain->filter->input_params;
+        if (video_params.imgfmt)
+            sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &video_params);
+        struct mp_image_params out_params = mpctx->vo_chain->filter->output_params;
+        if (out_params.imgfmt)
+            sub_control(dec_sub, SD_CTRL_SET_OUT_PARAMS, &out_params);
     }
 
     if (track->demuxer->fully_read && sub_can_preload(dec_sub)) {
