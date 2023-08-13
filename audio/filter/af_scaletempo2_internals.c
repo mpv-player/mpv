@@ -492,7 +492,7 @@ int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
         memcpy(p->input_buffer[i] + p->input_buffer_frames,
             planes[i], read * sizeof(float));
         for (int j = read; j < total_fill; ++j) {
-            p->input_buffer[p->input_buffer_frames + j] = 0;
+            p->input_buffer[i][p->input_buffer_frames + j] = 0.0f;
         }
     }
 
