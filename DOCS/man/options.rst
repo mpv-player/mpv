@@ -2454,6 +2454,23 @@ Subtitles
     Renamed from ``--sub-ass-use-margins``. To place ASS subtitles in the borders
     too (like the old option did), also add ``--sub-ass-force-margins``.
 
+``--sub-ass-horizontal-scaling-compat``
+    Override the PlayResX to attempt to mimic old x-axis scaling behavior from
+    libass versions 0.16.0 or older. This fixes borders and shadows being too
+    thick or too thin, if a crop filter is inserted, depending on the crop
+    dimensions.
+
+    This option works by setting PlayResX = PlayResY * Display Aspect Ratio, if
+    the display aspect ratio is not the same as storage aspect ratio (e.g. a crop
+    filter is inserted), and automatically reverting back to the old PlayResX
+    if e.g. the filter is removed and the display resolution matches the script
+    resolution again.
+
+    Note that it will break signs due to explicit vector coordinates changing,
+    so use with care.
+
+    Default: no.
+
 ``--sub-ass-vsfilter-aspect-compat=<yes|no>``
     Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
     with traditional VSFilter behavior. This switch has no effect when the

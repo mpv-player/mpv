@@ -40,6 +40,7 @@ Interface changes
       You can disable this with `--no-term-remaining-playtime`.
     - add `playlist-path` and `playlist/N/playlist-path` properties
     - add `--x11-wid-title` option
+    - add the '--sub-ass-horizontal-scaling-compat' option
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

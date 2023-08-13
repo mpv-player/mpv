@@ -276,6 +276,8 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-ass-line-spacing", OPT_FLOAT(ass_line_spacing),
             M_RANGE(-1000, 1000)},
         {"sub-use-margins", OPT_BOOL(sub_use_margins)},
+        {"sub-ass-horizontal-scaling-compat",
+            OPT_BOOL(ass_horizontal_scaling_compat)},
         {"sub-ass-force-margins", OPT_BOOL(ass_use_margins)},
         {"sub-ass-vsfilter-aspect-compat", OPT_BOOL(ass_vsfilter_aspect_compat)},
         {"sub-ass-vsfilter-color-compat", OPT_CHOICE(ass_vsfilter_color_compat,

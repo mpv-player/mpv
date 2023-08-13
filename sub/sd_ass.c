@@ -454,6 +454,15 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     if (converted)
         ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
 #endif
+    if (!converted && opts->ass_horizontal_scaling_compat) {
+        if (ctx->out_params.w != ctx->video_params.w &&
+            ctx->out_params.h != ctx->video_params.h) {
+            track->PlayResX = track->PlayResY *
+                ((double)ctx->out_params.w / ctx->out_params.h);
+        } else {
+            track->PlayResX = ctx->PlayResX;
+        }
+    }
     if (converted) {
         bool override_playres = true;
         char **ass_force_style_list = opts->ass_force_style_list;
