@@ -481,12 +481,10 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         // and/or different source formats which would be exposed over time.
         // Make these adjustments only if the user didn't set PlayResX.
         if (override_playres) {
-            int vidw = dim->w - (dim->ml + dim->mr);
-            int vidh = dim->h - (dim->mt + dim->mb);
-            track->PlayResX = track->PlayResY * (double)vidw / MPMAX(vidh, 1);
-            // ffmpeg and mpv use a default PlayResX of 384 when it is not known,
-            // this comes from VSFilter.
-            double fix_margins = track->PlayResX / 384.0;
+            track->PlayResX = track->PlayResY *
+                ((double)ctx->out_params.w / ctx->out_params.h);
+            // Divide the new PlayResX by the old PlayResX
+            double fix_margins = track->PlayResX / (double)ctx->PlayResX;
             track->styles->MarginL = round(track->styles->MarginL * fix_margins);
             track->styles->MarginR = round(track->styles->MarginR * fix_margins);
         }
