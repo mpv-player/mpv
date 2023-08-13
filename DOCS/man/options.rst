@@ -4332,6 +4332,7 @@ Screenshot
     :webp:      WebP
     :jxl:       JPEG XL
     :avif:      AVIF
+    :bgra:      BGRA
 
 ``--screenshot-tag-colorspace=<yes|no>``
     Tag screenshots with the appropriate colorspace (default: yes).

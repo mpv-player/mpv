@@ -557,6 +557,8 @@ Available video output drivers are:
             PNG files.
         webp
             WebP files.
+        bgra
+            BGRA files.
 
     ``--vo-image-png-compression=<0-9>``
         PNG compression factor (speed vs. file size tradeoff) (default: 7)
