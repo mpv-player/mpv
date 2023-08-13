@@ -108,9 +108,8 @@ static void process(struct mp_filter *f)
 
         double pts = mp_aframe_get_pts(p->pending);
         if (pts != MP_NOPTS_VALUE) {
-            double frame_delay = p->data.input_buffer_frames - p->data.search_block_index
-                                 + p->data.num_complete_frames * p->speed
-                                 + out_samples * p->speed;
+            double frame_delay = mp_scaletempo2_get_latency(&p->data, p->speed)
+                + out_samples * p->speed;
             mp_aframe_set_pts(out, pts - frame_delay / mp_aframe_get_effective_rate(out));
         }
 
