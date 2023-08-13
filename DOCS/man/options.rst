@@ -945,7 +945,7 @@ Program Behavior
         paths should be separated by : on Unix and ; on Windows. mpv looks in
         order for the configured paths in PATH and in mpv's config directory.
         The defaults are "yt-dlp", "yt-dlp_x86" and "youtube-dl". On Windows
-        the suffix extension ".exe" is always appended.
+        the suffix extension is not necessary, but only ".exe" is acceptable.
 
     .. admonition:: Why do the option names mix ``_`` and ``-``?
 
