@@ -111,6 +111,20 @@ static void process(struct mp_filter *f)
             double frame_delay = mp_scaletempo2_get_latency(&p->data, p->speed)
                 + out_samples * p->speed;
             mp_aframe_set_pts(out, pts - frame_delay / mp_aframe_get_effective_rate(out));
+
+            if (p->sent_final) {
+                double remain_pts = pts - mp_aframe_get_pts(out);
+                double rate = mp_aframe_get_effective_rate(out) / p->speed;
+                int max_samples = MPMAX(0, (int) (remain_pts * rate));
+                // truncate final packet to expected length
+                if (out_samples >= max_samples) {
+                    out_samples = max_samples;
+
+                    // reset the filter to ensure it stops generating audio
+                    // and mp_scaletempo2_frames_available returns false
+                    mp_scaletempo2_reset(&p->data);
+                }
+            }
         }
 
         mp_aframe_set_size(out, out_samples);
