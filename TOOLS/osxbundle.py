@@ -39,8 +39,10 @@ def apply_plist_template(plist_file, version):
         print(line.rstrip().replace('${VERSION}', version))
 
 def create_bundle_symlink(binary_name, symlink_name):
-    os.symlink(os.path.basename(binary_name),
-               os.path.join(target_directory(binary_name), symlink_name))
+    binary_path =  target_binary(binary_name)
+    symlink_path = os.path.join(target_directory(binary_name), symlink_name)
+    os.rename(binary_path, symlink_path)
+    os.symlink(symlink_path, binary_path)
 
 def bundle_version():
     if os.path.exists('VERSION'):
@@ -50,6 +52,9 @@ def bundle_version():
     else:
         version = sh("./version.sh").strip()
     return version
+
+def codesign_app(binary_name):
+    sh(f"codesign --force --deep -s - {binary_name}.app")
 
 def main():
     version = bundle_version().rstrip()
@@ -76,6 +81,8 @@ def main():
     create_bundle_symlink(binary_name, "mpv-bundle")
     print("> generating Info.plist")
     apply_plist_template(target_plist(binary_name), version)
+    print("> codesigning the app")
+    codesign_app(binary_name)
 
     if options.deps:
         print("> bundling dependencies")
