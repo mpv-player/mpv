@@ -834,10 +834,8 @@ void vo_x11_uninit(struct vo *vo)
 
     set_screensaver(x11, true);
 
-    if (x11->window != None && x11->window != x11->rootwin) {
-        XUnmapWindow(x11->display, x11->window);
+    if (x11->window != None && x11->window != x11->rootwin)
         XDestroyWindow(x11->display, x11->window);
-    }
     if (x11->xic)
         XDestroyIC(x11->xic);
     if (x11->colormap != None)
@@ -1428,9 +1426,7 @@ static void vo_x11_set_property_string(struct vo *vo, Atom name, const char *t)
         // can do this correctly.
         vo_x11_set_property_utf8(vo, name, t);
     }
-
-    if (prop.value)
-        XFree(prop.value);
+    XFree(prop.value);
 }
 
 static void vo_x11_update_window_title(struct vo *vo)
@@ -1579,10 +1575,11 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
     if (!x11->parent) {
         vo_x11_update_composition_hint(vo);
         vo_x11_set_wm_icon(x11);
-        vo_x11_update_window_title(vo);
         vo_x11_dnd_init_window(vo);
         vo_x11_set_property_utf8(vo, XA(x11, _GTK_THEME_VARIANT), "dark");
     }
+    if (!x11->parent || x11->opts->x11_wid_title)
+        vo_x11_update_window_title(vo);
     vo_x11_xembed_update(x11, 0);
 }
 
@@ -2130,7 +2127,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         talloc_free(x11->window_title);
         x11->window_title = talloc_strdup(x11, (char *)arg);
-        if (!x11->parent)
+        if (!x11->parent || x11->opts->x11_wid_title)
             vo_x11_update_window_title(vo);
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS: {

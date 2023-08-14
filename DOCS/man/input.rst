@@ -2413,6 +2413,10 @@ Property list
     ``video-params/aspect``
         Display aspect ratio as float.
 
+    ``video-params/aspect-name``
+        Display aspect ratio name as string. The name coresponds to motion
+        picture film format that introduced given aspect ratio in film.
+
     ``video-params/par``
         Pixel aspect ratio.
 
@@ -2772,6 +2776,11 @@ Property list
 ``playlist-count``
     Number of total playlist entries.
 
+``playlist-path``
+    The original path of the playlist for the current entry before mpv expanded
+    the entries. Unavailable if the file was not originally associated with a
+    playlist in some way.
+
 ``playlist``
     Playlist, current entry marked. Currently, the raw property value is
     useless.
@@ -2804,6 +2813,11 @@ Property list
         that is unique for the entire life time of the current mpv core
         instance. Other commands, events, etc. use this as ``playlist_entry_id``
         fields.
+
+    ``playlist/N/playlist-path``
+        The original path of the playlist for this entry before mpv expanded
+        it. Unavailable if the file was not originally associated with a playlist
+        in some way.
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with

@@ -181,6 +181,7 @@ static const m_option_t mp_vo_opt_list[] = {
         {"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})},
     {"x11-present", OPT_CHOICE(x11_present,
         {"no", 0}, {"auto", 1}, {"yes", 2})},
+    {"x11-wid-title", OPT_BOOL(x11_wid_title)},
 #endif
 #if HAVE_WAYLAND
     {"wayland-content-type", OPT_CHOICE(content_type, {"auto", -1}, {"none", 0},
@@ -267,7 +268,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"stretch-image-subs-to-screen", OPT_BOOL(stretch_image_subs)},
         {"image-subs-video-resolution", OPT_BOOL(image_subs_video_res)},
         {"sub-fix-timing", OPT_BOOL(sub_fix_timing)},
-        {"sub-pos", OPT_INT(sub_pos), M_RANGE(0, 150)},
+        {"sub-pos", OPT_FLOAT(sub_pos), M_RANGE(0.0, 150.0)},
         {"sub-gauss", OPT_FLOAT(sub_gauss), M_RANGE(0.0, 3.0)},
         {"sub-gray", OPT_BOOL(sub_gray)},
         {"sub-ass", OPT_BOOL(ass_enabled), .flags = UPDATE_SUB_HARD},
@@ -752,6 +753,7 @@ static const m_option_t mp_opts[] = {
 
     {"term-osd-bar", OPT_BOOL(term_osd_bar), .flags = UPDATE_OSD},
     {"term-osd-bar-chars", OPT_STRING(term_osd_bar_chars), .flags = UPDATE_OSD},
+    {"term-remaining-playtime", OPT_BOOL(term_remaining_playtime), .flags = UPDATE_OSD},
     {"term-title", OPT_STRING(term_title), .flags = UPDATE_OSD},
 
     {"term-playing-msg", OPT_STRING(playing_msg)},
@@ -1024,6 +1026,7 @@ static const struct MPOpts mp_default_opts = {
     .frame_dropping = 1,
     .term_osd = 2,
     .term_osd_bar_chars = "[-+-]",
+    .term_remaining_playtime = true,
     .consolecontrols = true,
     .playlist_pos = -1,
     .play_frames = -1,

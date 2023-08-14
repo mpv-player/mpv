@@ -945,7 +945,7 @@ Program Behavior
         paths should be separated by : on Unix and ; on Windows. mpv looks in
         order for the configured paths in PATH and in mpv's config directory.
         The defaults are "yt-dlp", "yt-dlp_x86" and "youtube-dl". On Windows
-        the suffix extension ".exe" is always appended.
+        the suffix extension is not necessary, but only ".exe" is acceptable.
 
     .. admonition:: Why do the option names mix ``_`` and ``-``?
 
@@ -3437,6 +3437,10 @@ Window
     mechanism in case there is good/bad behavior with whatever your combination
     of hardware/drivers/etc. happens to be.
 
+``--x11-wid-title`` ``--no-x11-wid-title``
+    Whether or not to set the window title when mpv is embedded on X11 (default:
+    ``no``).
+
 
 Disc Devices
 ------------
@@ -4786,6 +4790,10 @@ Terminal
     ``file:`` followed by a space and the currently played filename.
 
     See `Property Expansion`_.
+
+``--term-remaining-playtime``, ``--no-term-remaining-playtime``
+    When printing out the time on the terminal, show the remaining time adjusted by
+    playback speed. Default: ``yes``
 
 ``--term-status-msg=<string>``
     Print out a custom string during playback instead of the standard status

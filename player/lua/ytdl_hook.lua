@@ -834,7 +834,7 @@ function run_ytdl_hook(url)
 
         for _, path in pairs(ytdl.paths_to_search) do
             -- search for youtube-dl in mpv's config dir
-            local exesuf = platform_is_windows() and ".exe" or ""
+            local exesuf = platform_is_windows() and not path:lower():match("%.exe$") and ".exe" or ""
             local ytdl_cmd = mp.find_config_file(path .. exesuf)
             if ytdl_cmd then
                 msg.verbose("Found youtube-dl at: " .. ytdl_cmd)
@@ -847,9 +847,9 @@ function run_ytdl_hook(url)
                 command[1] = path
                 result = exec(command)
                 if result.error_string == "init" then
-                    msg.verbose("youtube-dl with path " .. path .. exesuf .. " not found in PATH or not enough permissions")
+                    msg.verbose("youtube-dl with path " .. path .. " not found in PATH or not enough permissions")
                 else
-                    msg.verbose("Found youtube-dl with path " .. path .. exesuf .. " in PATH")
+                    msg.verbose("Found youtube-dl with path " .. path .. " in PATH")
                     ytdl.path = path
                     break
                 end

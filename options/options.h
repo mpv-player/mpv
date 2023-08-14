@@ -32,6 +32,7 @@ typedef struct mp_vo_opts {
     int x11_netwm;
     int x11_bypass_compositor;
     int x11_present;
+    bool x11_wid_title;
     bool cursor_passthrough;
     bool native_keyrepeat;
 
@@ -78,7 +79,7 @@ typedef struct mp_vo_opts {
 struct mp_subtitle_opts {
     bool sub_visibility;
     bool sec_sub_visibility;
-    int sub_pos;
+    float sub_pos;
     float sub_delay;
     float sub_fps;
     float sub_speed;
@@ -231,6 +232,7 @@ typedef struct MPOpts {
     int term_osd;
     bool term_osd_bar;
     char *term_osd_bar_chars;
+    bool term_remaining_playtime;
     char *term_title;
     char *playing_msg;
     char *osd_playing_msg;

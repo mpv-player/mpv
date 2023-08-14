@@ -388,7 +388,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
 
     bool set_use_margins = false;
-    int set_sub_pos = 0;
+    float set_sub_pos = 0.0f;
     float set_line_spacing = 0;
     float set_font_scale = 1;
     int set_hinting = 0;
@@ -406,7 +406,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_use_margins = opts->ass_use_margins;
     }
     if (converted || opts->ass_style_override) {
-        set_sub_pos = 100 - opts->sub_pos;
+        set_sub_pos = 100.0f - opts->sub_pos;
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
         set_font_scale = opts->sub_scale;

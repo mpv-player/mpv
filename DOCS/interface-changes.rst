@@ -34,6 +34,12 @@ Interface changes
     - add the `--hdr-peak-percentile` option
     - include `--hdr-peak-percentile` in the `gpu-hq` profile
     - change `--audiotrack-pcm-float` default from `no` to `yes`
+    - add video-params/aspect-name
+    - change type of `--sub-pos` to float
+    - The remaining time printed in the terminal is now adjusted for speed by default.
+      You can disable this with `--no-term-remaining-playtime`.
+    - add `playlist-path` and `playlist/N/playlist-path` properties
+    - add `--x11-wid-title` option
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
