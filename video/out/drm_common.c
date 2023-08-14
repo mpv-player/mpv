@@ -816,6 +816,24 @@ static bool card_supports_kms(const char *path)
     return ret;
 }
 
+static bool card_has_connection(const char *path)
+{
+    int fd = open_card_path(path);
+    bool ret = false;
+    if (fd != -1) {
+        drmModeRes *res = drmModeGetResources(fd);
+        if (res) {
+            drmModeConnector *connector = get_first_connected_connector(res, fd);
+            if (connector)
+                ret = true;
+            drmModeFreeConnector(connector);
+            drmModeFreeResources(res);
+        }
+        close(fd);
+    }
+    return ret;
+}
+
 static void get_primary_device_path(struct vo_drm_state *drm)
 {
     if (drm->opts->device_path) {
@@ -859,6 +877,17 @@ static void get_primary_device_path(struct vo_drm_state *drm)
                 MP_ERR(drm,
                        "DRM card number %d given, but it does not support "
                        "KMS!\n", i);
+                break;
+            }
+
+            continue;
+        }
+
+        if (!card_has_connection(card_path)) {
+            if (card_no_given) {
+                MP_ERR(drm,
+                        "DRM card number %d given, but it does not have any "
+                        "connected outputs.\n", i);
                 break;
             }
 
