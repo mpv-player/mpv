@@ -275,6 +275,8 @@ typedef struct MPContext {
     struct playlist_entry *playing; // currently playing file
     char *filename; // immutable copy of playing->filename (or NULL)
     char *stream_open_filename;
+    char **playlist_paths; // used strictly for playlist validation
+    int playlist_paths_len;
     enum stop_play_reason stop_play;
     bool playback_initialized; // playloop can be run/is running
     int error_playing;
