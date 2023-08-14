@@ -981,9 +981,16 @@ static bool is_usable(const AVFilter *filter, int media_type)
     int nb_inputs  = avfilter_pad_count(filter->inputs),
         nb_outputs = avfilter_pad_count(filter->outputs);
 #endif
-    return nb_inputs == 1 && nb_outputs == 1 &&
-           avfilter_pad_get_type(filter->inputs, 0) == media_type &&
-           avfilter_pad_get_type(filter->outputs, 0) == media_type;
+    bool ret = false;
+    if (nb_inputs == 1 && nb_outputs == 1) {
+        ret = avfilter_pad_get_type(filter->inputs, 0) == media_type &&
+              avfilter_pad_get_type(filter->outputs, 0) == media_type;
+    } else {
+        if ((nb_inputs != 1 && filter->flags & AVFILTER_FLAG_DYNAMIC_INPUTS) ||
+            (nb_outputs != 1 && filter->flags & AVFILTER_FLAG_DYNAMIC_OUTPUTS))
+            ret = true;
+    }
+    return ret;
 }
 
 bool mp_lavfi_is_usable(const char *name, int media_type)
