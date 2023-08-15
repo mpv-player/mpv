@@ -836,7 +836,7 @@ oss_opt = get_option('oss-audio').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
 )
-features += {'oss-audio': cc.has_header_symbol('sys/soundcard.h', 'SNDCTL_DSP_SETPLAYVOL',
+features += {'oss-audio': cc.has_header_symbol('sys/soundcard.h', 'SNDCTL_DSP_HALT',
                                                required: oss_opt)}
 if features['oss-audio']
     sources += files('audio/out/ao_oss.c')
