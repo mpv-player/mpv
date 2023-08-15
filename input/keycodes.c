@@ -165,6 +165,10 @@ static const struct key_name key_names[] = {
   { MP_KEY_CHANNEL_DOWN,"CHANNEL_DOWN" },
   { MP_KEY_PLAYONLY,    "PLAYONLY" },
   { MP_KEY_PAUSEONLY,   "PAUSEONLY" },
+  { MP_KEY_BACK,        "BACK" },
+  { MP_KEY_TOOLS,       "TOOLS" },
+  { MP_KEY_ZOOMIN,      "ZOOMIN" },
+  { MP_KEY_ZOOMOUT,     "ZOOMOUT" },
 
   // These are kept for backward compatibility
   { MP_KEY_PAUSE,   "XF86_PAUSE" },
