@@ -207,7 +207,7 @@ static int parse_m3u(struct pl_parser *p)
             char probe[PROBE_SIZE];
             int len = stream_read_peek(p->real_stream, probe, sizeof(probe));
             bstr data = {probe, len};
-            if (ext && data.len > 10 && maybe_text(data)) {
+            if (ext && data.len >= 2 && maybe_text(data)) {
                 const char *exts[] = {"m3u", "m3u8", NULL};
                 for (int n = 0; exts[n]; n++) {
                     if (strcasecmp(ext, exts[n]) == 0)
