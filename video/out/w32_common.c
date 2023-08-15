@@ -1848,9 +1848,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         *(double*) arg = w32->display_fps;
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_RES: ;
-        RECT r = get_screen_area(w32);
-        ((int *)arg)[0] = r.right;
-        ((int *)arg)[1] = r.bottom;
+        RECT monrc = get_monitor_info(w32).rcMonitor;
+        ((int *)arg)[0] = monrc.right - monrc.left;
+        ((int *)arg)[1] = monrc.bottom - monrc.top;
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_NAMES:
         *(char ***)arg = get_disp_names(w32);
