@@ -702,7 +702,15 @@ int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
     // Optimize the most common |playback_rate| ~= 1 case to use a single copy
     // instead of copying frame by frame.
     if (p->ola_window_size <= faster_step && slower_step >= p->ola_window_size) {
-        p->wsola_output_started = false;
+
+        if (p->wsola_output_started) {
+            p->wsola_output_started = false;
+
+            // sync audio precisely again
+            set_output_time(p, p->target_block_index + p->search_block_center_offset);
+            remove_old_input_frames(p);
+        }
+
         return read_input_buffer(p, dest_size, dest);
     }
 
