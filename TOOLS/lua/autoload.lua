@@ -20,6 +20,7 @@ additional_image_exts=list,of,ext
 additional_video_exts=list,of,ext
 additional_audio_exts=list,of,ext
 ignore_hidden=yes
+same_type=yes
 
 --]]
 
@@ -37,7 +38,8 @@ o = {
     additional_image_exts = "",
     additional_video_exts = "",
     additional_audio_exts = "",
-    ignore_hidden = true
+    ignore_hidden = true,
+    same_type = false
 }
 options.read_options(o)
 
@@ -153,13 +155,26 @@ function find_and_add_entries()
     end
 
     pl_count = mp.get_property_number("playlist-count", 1)
+    this_ext = get_extension(filename)
     -- check if this is a manually made playlist
     if (pl_count > 1 and autoloaded == nil) or
-       (pl_count == 1 and EXTENSIONS[string.lower(get_extension(filename))] == nil) then
+       (pl_count == 1 and EXTENSIONS[string.lower(this_ext)] == nil) then
         msg.verbose("stopping: manually made playlist")
         return
     else
         autoloaded = true
+    end
+
+    if o.same_type then
+        if EXTENSIONS_VIDEO[string.lower(this_ext)] ~= nil then
+            EXTENSIONS_TARGET = EXTENSIONS_VIDEO
+        elseif EXTENSIONS_AUDIO[string.lower(this_ext)] ~= nil then
+            EXTENSIONS_TARGET = EXTENSIONS_AUDIO
+        else
+            EXTENSIONS_TARGET = EXTENSIONS_IMAGES
+        end
+    else
+        EXTENSIONS_TARGET = EXTENSIONS
     end
 
     local pl = mp.get_property_native("playlist", {})
@@ -182,7 +197,7 @@ function find_and_add_entries()
         if ext == nil then
             return false
         end
-        return EXTENSIONS[string.lower(ext)]
+        return EXTENSIONS_TARGET[string.lower(ext)]
     end)
     alphanumsort(files)
 
