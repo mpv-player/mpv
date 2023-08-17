@@ -64,7 +64,8 @@ struct mp_scaletempo2 {
     double output_time;
     // The offset of the center frame of |search_block| w.r.t. its first frame.
     int search_block_center_offset;
-    // Index of the beginning of the |search_block|, in frames.
+    // Index of the beginning of the |search_block|, in frames. This may be
+    // negative, which is handled by |peek_audio_with_zero_prepend|.
     int search_block_index;
     // Number of Blocks to search to find the most similar one to the target
     // frame.
