@@ -158,6 +158,11 @@ jobs:
         copyback: false
         usesh: true
         prepare: |
+            # Update to latest release channel
+            mkdir -p /usr/local/etc/pkg/repos
+            echo "FreeBSD: { url: "pkg+http://pkg.freebsd.org/\${ABI}/latest" }" \
+                > /usr/local/etc/pkg/repos/FreeBSD.conf
+            pkg update
             # Requested in ci/build-freebsd.sh
             pkg install -y \
                 cmake \
