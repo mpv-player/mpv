@@ -6927,6 +6927,14 @@ them.
     The directory where gpu shader cache is stored. Cache is stored in the system's
     cache directory (usually ``~/.cache/mpv``) if this is unset.
 
+``--libplacebo-opts=<key>=<value>[,<key>=<value>[,...]]``
+    Passes extra raw option to the libplacebo rendering backend (used by
+    ``--vo=gpu-next``). May override the effects of any other options set using
+    the normal options system. Requires libplacebo v6.309 or higher. Included
+    for debugging purposes only. For more information, see:
+
+    https://code.videolan.org/videolan/libplacebo/-/blob/master/src/options.c#L877
+
 Miscellaneous
 -------------
 

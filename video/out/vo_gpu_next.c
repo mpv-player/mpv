@@ -145,6 +145,7 @@ struct priv {
     const struct pl_hook **hooks; // storage for `params.hooks`
     const struct pl_filter_config *frame_mixer;
     enum mp_csp_levels output_levels;
+    char **raw_opts;
 
     struct pl_icc_profile icc_profile;
     char *icc_path;
@@ -794,6 +795,11 @@ static void update_options(struct vo *vo)
     pars->color_adjustment.saturation = cparams.saturation;
     pars->color_adjustment.gamma = cparams.gamma;
     p->output_levels = cparams.levels_out;
+
+#if PL_API_VER >= 309
+    for (char **kv = p->raw_opts; kv && kv[0]; kv += 2)
+        pl_options_set_str(pars, kv[0], kv[1]);
+#endif
 }
 
 static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
@@ -2085,6 +2091,7 @@ const struct vo_driver video_out_gpu_next = {
         {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
         {"target-colorspace-hint", OPT_BOOL(target_hint)},
         // No `target-lut-type` because we don't support non-RGB targets
+        {"libplacebo-opts", OPT_KEYVALUELIST(raw_opts)},
         {0}
     },
 };
