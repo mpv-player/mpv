@@ -41,7 +41,14 @@ o = {
     ignore_hidden = true,
     same_type = false
 }
-options.read_options(o)
+options.read_options(o, nil, function(list)
+    split_option_exts(list.additional_video_exts, list.additional_audio_exts, list.additional_image_exts)
+    if list.videos or list.additional_video_exts or
+        list.audio or list.additional_audio_exts or
+        list.images or list.additional_image_exts then
+        create_extensions()
+    end
+end)
 
 function Set (t)
     local set = {}
@@ -50,10 +57,8 @@ function Set (t)
 end
 
 function SetUnion (a,b)
-    local res = {}
-    for k in pairs(a) do res[k] = true end
-    for k in pairs(b) do res[k] = true end
-    return res
+    for k in pairs(b) do a[k] = true end
+    return a
 end
 
 function Split (s)
@@ -77,14 +82,20 @@ EXTENSIONS_IMAGES = Set {
     'svg', 'tga', 'tif', 'tiff', 'webp'
 }
 
-EXTENSIONS_VIDEO = SetUnion(EXTENSIONS_VIDEO, Split(o.additional_video_exts))
-EXTENSIONS_AUDIO = SetUnion(EXTENSIONS_AUDIO, Split(o.additional_audio_exts))
-EXTENSIONS_IMAGES = SetUnion(EXTENSIONS_IMAGES, Split(o.additional_image_exts))
+function split_option_exts(video, audio, image)
+    if video then o.additional_video_exts = Split(o.additional_video_exts) end
+    if audio then o.additional_audio_exts = Split(o.additional_audio_exts) end
+    if image then o.additional_image_exts = Split(o.additional_image_exts) end
+end
+split_option_exts(true, true, true)
 
-EXTENSIONS = Set {}
-if o.videos then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_VIDEO) end
-if o.audio then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_AUDIO) end
-if o.images then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_IMAGES) end
+function create_extensions()
+    EXTENSIONS = {}
+    if o.videos then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_VIDEO), o.additional_video_exts) end
+    if o.audio then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_AUDIO), o.additional_audio_exts) end
+    if o.images then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_IMAGES), o.additional_image_exts) end
+end
+create_extensions()
 
 function add_files(files)
     local oldcount = mp.get_property_number("playlist-count", 1)
