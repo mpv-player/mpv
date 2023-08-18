@@ -6707,12 +6707,12 @@ them.
     range of scenes with very bright isolated highlights. Values other than 100
     come with a small performance penalty. (Only for ``--vo=gpu-next``)
 
-``--hdr-peak-decay-rate=<1.0..1000.0>``
+``--hdr-peak-decay-rate=<0.0..1000.0>``
     The decay rate used for the HDR peak detection algorithm (default: 100.0).
     This is only relevant when ``--hdr-compute-peak`` is enabled. Higher values
     make the peak decay more slowly, leading to more stable values at the cost
     of more "eye adaptation"-like effects (although this is mitigated somewhat
-    by ``--hdr-scene-threshold``). A value of 1.0 (the lowest possible) disables
+    by ``--hdr-scene-threshold``). A value of 0.0 (the lowest possible) disables
     all averaging, meaning each frame's value is used directly as measured,
     but doing this is not recommended for "noisy" sources since it may lead
     to excessive flicker. (In signal theory terms, this controls the time
