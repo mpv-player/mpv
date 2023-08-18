@@ -644,9 +644,12 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
 
     // Use an IIR low-pass filter to smooth out the detected values, with a
     // configurable decay rate based on the desired time constant (tau)
-    float a = 1.0 - cos(1.0 / opts->decay_rate);
-    float decay = sqrt(a*a + 2*a) - a;
-    GLSLF("  average += %f * (cur - average);\n", decay);
+    if (opts->decay_rate) {
+        float decay = 1.0f - expf(-1.0f / opts->decay_rate);
+        GLSLF("  average += %f * (cur - average);\n", decay);
+    } else {
+        GLSLF("  average = cur;\n");
+    }
 
     // Scene change hysteresis
     float log_db = 10.0 / log(10.0);
