@@ -21,12 +21,9 @@
 #include <libplacebo/colorspace.h>
 #include <libplacebo/renderer.h>
 #include <libplacebo/shaders/lut.h>
+#include <libplacebo/shaders/icc.h>
 #include <libplacebo/utils/libav.h>
 #include <libplacebo/utils/frame_queue.h>
-
-#ifdef PL_HAVE_LCMS
-#include <libplacebo/shaders/icc.h>
-#endif
 
 #include "config.h"
 #include "common/common.h"
@@ -87,6 +84,11 @@ struct user_lut {
     struct pl_custom_lut *lut;
 };
 
+struct frame_info {
+    int count;
+    struct pl_dispatch_info info[VO_PASS_PERF_MAX];
+};
+
 struct priv {
     struct mp_log *log;
     struct mpv_global *global;
@@ -134,11 +136,9 @@ struct priv {
     const struct pl_filter_config *frame_mixer;
     enum mp_csp_levels output_levels;
 
-#ifdef PL_HAVE_LCMS
     struct pl_icc_params icc;
     struct pl_icc_profile icc_profile;
     char *icc_path;
-#endif
 
     struct user_lut image_lut;
     struct user_lut target_lut;
@@ -149,7 +149,8 @@ struct priv {
     int num_user_hooks;
 
     // Performance data of last frame
-    struct voctrl_performance_data perf;
+    struct frame_info perf_fresh;
+    struct frame_info perf_redraw;
 
     bool delayed_peak;
     bool inter_preserve;
@@ -753,28 +754,15 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     if (info->index >= VO_PASS_PERF_MAX)
         return; // silently ignore clipped passes, whatever
 
-    struct mp_frame_perf *frame;
+    struct frame_info *frame;
     switch (info->stage) {
-    case PL_RENDER_STAGE_FRAME: frame = &p->perf.fresh; break;
-    case PL_RENDER_STAGE_BLEND: frame = &p->perf.redraw; break;
+    case PL_RENDER_STAGE_FRAME: frame = &p->perf_fresh; break;
+    case PL_RENDER_STAGE_BLEND: frame = &p->perf_redraw; break;
     default: abort();
     }
 
-    int index = info->index;
-    struct mp_pass_perf *perf = &frame->perf[index];
-    const struct pl_dispatch_info *pass = info->pass;
-    static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
-    assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
-
-    perf->count = MPMIN(pass->num_samples, VO_PERF_SAMPLE_COUNT);
-    memcpy(perf->samples, pass->samples, perf->count * sizeof(pass->samples[0]));
-    perf->last = pass->last;
-    perf->peak = pass->peak;
-    perf->avg = pass->average;
-
-    strncpy(frame->desc[index], pass->shader->description, sizeof(frame->desc[index]) - 1);
-    frame->desc[index][sizeof(frame->desc[index]) - 1] = '\0';
-    frame->count = index + 1;
+    frame->count = info->index + 1;
+    pl_dispatch_info_move(&frame->info[info->index], info->pass);
 }
 
 static void update_options(struct vo *vo)
@@ -851,7 +839,6 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
         tbits->sample_depth = opts->dither_depth;
     }
 
-#ifdef PL_HAVE_LCMS
     target->profile = p->icc_profile;
 
     if (opts->icc_opts->icc_use_luma) {
@@ -863,7 +850,6 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
         if (!p->icc.max_luma)
             p->icc.max_luma = pl_icc_default_params.max_luma;
     }
-#endif
 }
 
 static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
@@ -1146,8 +1132,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
 static bool update_auto_profile(struct priv *p, int *events)
 {
-#ifdef PL_HAVE_LCMS
-
     const struct gl_video_opts *opts = p->opts_cache->opts;
     if (!opts->icc_opts || !opts->icc_opts->profile_auto || p->icc_path)
         return false;
@@ -1164,13 +1148,11 @@ static bool update_auto_profile(struct priv *p, int *events)
         }
 
         talloc_free((void *) p->icc_profile.data);
-        p->icc_profile.data = icc.start;
+        p->icc_profile.data = talloc_steal(p, icc.start);
         p->icc_profile.len = icc.len;
         pl_icc_profile_compute_signature(&p->icc_profile);
         return true;
     }
-
-#endif // PL_HAVE_LCMS
 
     return false;
 }
@@ -1318,6 +1300,30 @@ done:
     pl_tex_destroy(gpu, &fbo);
 }
 
+static inline void copy_frame_info_to_mp(struct frame_info *pl,
+                                         struct mp_frame_perf *mp) {
+    static_assert(MP_ARRAY_SIZE(pl->info) == MP_ARRAY_SIZE(mp->perf), "");
+    assert(pl->count <= VO_PASS_PERF_MAX);
+    mp->count = MPMIN(pl->count, VO_PASS_PERF_MAX);
+
+    for (int i = 0; i < mp->count; ++i) {
+        const struct pl_dispatch_info *pass = &pl->info[i];
+
+        static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
+        assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
+
+        struct mp_pass_perf *perf = &mp->perf[i];
+        perf->count = MPMIN(pass->num_samples, VO_PERF_SAMPLE_COUNT);
+        memcpy(perf->samples, pass->samples, perf->count * sizeof(pass->samples[0]));
+        perf->last = pass->last;
+        perf->peak = pass->peak;
+        perf->avg = pass->average;
+
+        strncpy(mp->desc[i], pass->shader->description, sizeof(mp->desc[i]) - 1);
+        mp->desc[i][sizeof(mp->desc[i]) - 1] = '\0';
+    }
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -1359,9 +1365,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         p->want_reset = true;
         return VO_TRUE;
 
-    case VOCTRL_PERFORMANCE_DATA:
-        *(struct voctrl_performance_data *) data = p->perf;
+    case VOCTRL_PERFORMANCE_DATA: {
+        struct voctrl_performance_data *perf = data;
+        copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh);
+        copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw);
         return true;
+    }
 
     case VOCTRL_SCREENSHOT:
         video_screenshot(vo, data);
@@ -1466,6 +1475,11 @@ static void uninit(struct vo *vo)
     }
 
     pl_renderer_destroy(&p->rr);
+
+    for (int i = 0; i < VO_PASS_PERF_MAX; ++i) {
+        pl_shader_info_deref(&p->perf_fresh.info[i].shader);
+        pl_shader_info_deref(&p->perf_redraw.info[i].shader);
+    }
 
     p->ra_ctx = NULL;
     p->pllog = NULL;
@@ -1664,8 +1678,6 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
     return hook;
 }
 
-#ifdef PL_HAVE_LCMS
-
 static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
@@ -1730,14 +1742,10 @@ static bool icc_load(void *priv, uint64_t sig, uint8_t *cache, size_t size)
     return len == size;
 }
 
-#endif // PL_HAVE_LCMS
-
 static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 {
     if (!opts)
         return;
-
-#ifdef PL_HAVE_LCMS
 
     if (!opts->profile_auto && !p->icc_path && p->icc_profile.len) {
         // Un-set any auto-loaded profiles if icc-profile-auto was disabled
@@ -1782,8 +1790,6 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
     // Update cached path
     talloc_free(p->icc_path);
     p->icc_path = talloc_strdup(p, opts->profile);
-
-#endif // PL_HAVE_LCMS
 }
 
 static void update_lut(struct priv *p, struct user_lut *lut)
@@ -1898,9 +1904,7 @@ static void update_render_options(struct vo *vo)
     p->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     p->params.disable_fbos = opts->dumb_mode == 1;
     p->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
-#if PL_API_VER >= 277
     p->params.corner_rounding = p->corner_rounding;
-#endif
 
     // Map scaler options as best we can
     p->params.upscaler = map_scaler(p, SCALER_SCALE);
@@ -1946,7 +1950,6 @@ static void update_render_options(struct vo *vo)
         [TONE_MAPPING_ST2094_10] = &pl_tone_map_st2094_10,
     };
 
-#if PL_API_VER >= 269
     const struct pl_gamut_map_function *gamut_modes[] = {
         [GAMUT_CLIP]            = &pl_gamut_map_clip,
         [GAMUT_PERCEPTUAL]      = &pl_gamut_map_perceptual,
@@ -1959,36 +1962,6 @@ static void update_render_options(struct vo *vo)
         [GAMUT_LINEAR]          = &pl_gamut_map_linear,
     };
 
-    // Back-compat approximation, taken from libplacebo source code
-    static const float hybrid_mix[] = {
-        [TONE_MAP_MODE_RGB]     = 1.0f,
-        [TONE_MAP_MODE_MAX]     = 0.0f,
-        [TONE_MAP_MODE_LUMA]    = 0.0f,
-        [TONE_MAP_MODE_HYBRID]  = 0.20f,
-    };
-#else
-    static const enum pl_gamut_mode gamut_modes[] = {
-        [GAMUT_CLIP]            = PL_GAMUT_CLIP,
-        [GAMUT_WARN]            = PL_GAMUT_WARN,
-        [GAMUT_DESATURATE]      = PL_GAMUT_DESATURATE,
-        [GAMUT_DARKEN]          = PL_GAMUT_DARKEN,
-        // Unsupported
-        [GAMUT_PERCEPTUAL]      = PL_GAMUT_CLIP,
-        [GAMUT_RELATIVE]        = PL_GAMUT_CLIP,
-        [GAMUT_SATURATION]      = PL_GAMUT_CLIP,
-        [GAMUT_ABSOLUTE]        = PL_GAMUT_CLIP,
-        [GAMUT_LINEAR]          = PL_GAMUT_CLIP,
-    };
-
-    static const enum pl_tone_map_mode tone_map_modes[] = {
-        [TONE_MAP_MODE_AUTO]    = PL_TONE_MAP_AUTO,
-        [TONE_MAP_MODE_RGB]     = PL_TONE_MAP_RGB,
-        [TONE_MAP_MODE_MAX]     = PL_TONE_MAP_MAX,
-        [TONE_MAP_MODE_HYBRID]  = PL_TONE_MAP_HYBRID,
-        [TONE_MAP_MODE_LUMA]    = PL_TONE_MAP_LUMA,
-    };
-#endif
-
     p->color_map = pl_color_map_default_params;
     p->color_map.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
     p->color_map.tone_mapping_param = opts->tone_map.curve_param;
@@ -1996,23 +1969,10 @@ static void update_render_options(struct vo *vo)
     if (isnan(p->color_map.tone_mapping_param)) // vo_gpu compatibility
         p->color_map.tone_mapping_param = 0.0;
     p->color_map.visualize_lut = opts->tone_map.visualize;
-
-#if PL_API_VER >= 285
     p->color_map.contrast_recovery = opts->tone_map.contrast_recovery;
     p->color_map.contrast_smoothness = opts->tone_map.contrast_smoothness;
-#endif
-
-#if PL_API_VER >= 269
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
         p->color_map.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
-    if (opts->tone_map.mode != TONE_MAP_MODE_AUTO)
-        p->color_map.hybrid_mix = hybrid_mix[opts->tone_map.mode];
-#else
-    p->color_map.intent = opts->icc_opts->intent;
-    p->color_map.tone_mapping_mode = tone_map_modes[opts->tone_map.mode];
-    if (opts->tone_map.gamut_mode != GAMUT_AUTO)
-        p->color_map.gamut_mode = gamut_modes[opts->tone_map.gamut_mode];
-#endif
 
     switch (opts->dither_algo) {
     case DITHER_NONE:

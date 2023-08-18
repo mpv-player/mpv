@@ -836,7 +836,7 @@ oss_opt = get_option('oss-audio').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
 )
-features += {'oss-audio': cc.has_header_symbol('sys/soundcard.h', 'SNDCTL_DSP_SETPLAYVOL',
+features += {'oss-audio': cc.has_header_symbol('sys/soundcard.h', 'SNDCTL_DSP_HALT',
                                                required: oss_opt)}
 if features['oss-audio']
     sources += files('audio/out/ao_oss.c')
@@ -929,21 +929,13 @@ if features['jpeg']
     dependencies += jpeg
 endif
 
-libplacebo = dependency('libplacebo', version: '>=4.157.0', required: get_option('libplacebo'))
+libplacebo = dependency('libplacebo', version: '>=6.292.0', required: get_option('libplacebo'))
 features += {'libplacebo': libplacebo.found()}
 if features['libplacebo']
     dependencies += libplacebo
     sources += files('video/out/placebo/ra_pl.c',
-                     'video/out/placebo/utils.c')
-endif
-
-libplacebo_next = get_option('libplacebo-next').require(
-    features['libplacebo'] and libplacebo.version().version_compare('>=5.264.0'),
-    error_message: 'libplacebo v5.264.0+ was not found!',
-)
-features += {'libplacebo-next': libplacebo_next.allowed()}
-if features['libplacebo-next']
-    sources += files('video/out/vo_gpu_next.c',
+                     'video/out/placebo/utils.c',
+                     'video/out/vo_gpu_next.c',
                      'video/out/gpu_next/context.c')
 endif
 
@@ -1779,7 +1771,7 @@ if get_option('tests')
 endif
 
 summary({'d3d11': features['d3d11'],
-         'gpu-next': features['libplacebo-next'],
+         'gpu-next': features['libplacebo'],
          'javascript': features['javascript'],
          'libmpv': get_option('libmpv'),
          'lua': features['lua'],

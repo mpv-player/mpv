@@ -1309,6 +1309,28 @@ void prefetch_next(struct MPContext *mpctx)
     }
 }
 
+static void clear_playlist_paths(struct MPContext *mpctx)
+{
+    TA_FREEP(&mpctx->playlist_paths);
+    mpctx->playlist_paths_len = 0;
+}
+
+static bool infinite_playlist_loading_loop(struct MPContext *mpctx, struct playlist *pl)
+{
+    if (pl->num_entries) {
+        struct playlist_entry *e = pl->entries[0];
+        for (int n = 0; n < mpctx->playlist_paths_len; n++) {
+            if (strcmp(mpctx->playlist_paths[n], e->filename) == 0) {
+                clear_playlist_paths(mpctx);
+                return true;
+            }
+        }
+    }
+    MP_TARRAY_APPEND(mpctx, mpctx->playlist_paths, mpctx->playlist_paths_len,
+                     talloc_strdup(mpctx->playlist_paths, mpctx->filename));
+    return false;
+}
+
 // Destroy the complex filter, and remove the references to the filter pads.
 // (Call cleanup_deassociated_complex_filters() to close decoders/VO/AO
 // that are not connected anymore due to this.)
@@ -1660,6 +1682,11 @@ static void play_current_file(struct MPContext *mpctx)
             mp_delete_watch_later_conf(mpctx, mpctx->filename);
         struct playlist *pl = mpctx->demuxer->playlist;
         playlist_populate_playlist_path(pl, mpctx->filename);
+        if (infinite_playlist_loading_loop(mpctx, pl)) {
+            mpctx->stop_play = PT_STOP;
+            MP_ERR(mpctx, "Infinite playlist loading loop detected.\n");
+            goto terminate_playback;
+        }
         transfer_playlist(mpctx, pl, &end_event.playlist_insert_id,
                           &end_event.playlist_insert_num_entries);
         mp_notify_property(mpctx, "playlist");
@@ -1766,6 +1793,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->playback_initialized = true;
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
     update_screensaver_state(mpctx);
+    clear_playlist_paths(mpctx);
 
     if (watch_later)
         mp_delete_watch_later_conf(mpctx, mpctx->filename);
