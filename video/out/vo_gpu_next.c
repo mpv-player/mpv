@@ -1046,7 +1046,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     bool cache_frame = will_redraw || frame->still;
     pars->params.skip_caching_single_frame = !cache_frame;
     pars->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
-    pars->params.frame_mixer = frame->still ? NULL : p->frame_mixer;
+    if (frame->still)
+        pars->params.frame_mixer = NULL;
 
     // Render frame
     if (!pl_render_image_mix(p->rr, &mix, &target, &pars->params)) {
