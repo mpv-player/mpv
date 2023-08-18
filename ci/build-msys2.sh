@@ -12,7 +12,6 @@ meson setup build            \
   -D libarchive=enabled      \
   -D libbluray=enabled       \
   -D libmpv=true             \
-  -D libplacebo=enabled      \
   -D lua=enabled             \
   -D pdf-build=enabled       \
   -D rubberband=enabled      \
@@ -20,8 +19,7 @@ meson setup build            \
   -D spirv-cross=enabled     \
   -D tests=true              \
   -D uchardet=enabled        \
-  -D vapoursynth=enabled     \
-  -D vulkan=enabled
+  -D vapoursynth=enabled
 meson compile -C build
 cp ./build/player/mpv.com ./build
 ./build/mpv.com -v --no-config
