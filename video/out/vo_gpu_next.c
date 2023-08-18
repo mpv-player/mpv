@@ -1148,7 +1148,7 @@ static bool update_auto_profile(struct priv *p, int *events)
         }
 
         talloc_free((void *) p->icc_profile.data);
-        p->icc_profile.data = icc.start;
+        p->icc_profile.data = talloc_steal(p, icc.start);
         p->icc_profile.len = icc.len;
         pl_icc_profile_compute_signature(&p->icc_profile);
         return true;
