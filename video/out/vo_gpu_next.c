@@ -1047,7 +1047,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     pars->params.skip_caching_single_frame = !cache_frame;
     pars->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
     pars->params.frame_mixer = frame->still ? NULL : p->frame_mixer;
-    pars->peak_detect_params.allow_delayed = p->delayed_peak;
 
     // Render frame
     if (!pl_render_image_mix(p->rr, &mix, &target, &pars->params)) {
@@ -1961,6 +1960,7 @@ static void update_render_options(struct vo *vo)
     pars->peak_detect_params.scene_threshold_low = opts->tone_map.scene_threshold_low;
     pars->peak_detect_params.scene_threshold_high = opts->tone_map.scene_threshold_high;
     pars->peak_detect_params.percentile = opts->tone_map.peak_percentile;
+    pars->peak_detect_params.allow_delayed = p->delayed_peak;
 
     const struct pl_tone_map_function * const tone_map_funs[] = {
         [TONE_MAPPING_AUTO]     = &pl_tone_map_auto,
