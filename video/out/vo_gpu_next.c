@@ -1177,7 +1177,7 @@ static bool update_auto_profile(struct priv *p, int *events)
 static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
 {
     struct priv *p = vo->priv;
-    pl_options pars = pars;
+    pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
     pl_tex fbo = NULL;
     args->res = NULL;
