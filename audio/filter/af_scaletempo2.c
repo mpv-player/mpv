@@ -29,7 +29,7 @@ static void process(struct mp_filter *f)
         return;
 
     while (!p->initialized || !p->pending ||
-           !mp_scaletempo2_frames_available(&p->data))
+           !mp_scaletempo2_frames_available(&p->data, p->speed))
     {
         bool eof = false;
         if (!p->pending || !mp_aframe_get_size(p->pending)) {
@@ -65,12 +65,12 @@ static void process(struct mp_filter *f)
             int frame_size = mp_aframe_get_size(p->pending);
             uint8_t **planes = mp_aframe_get_data_ro(p->pending);
             int read = mp_scaletempo2_fill_input_buffer(&p->data,
-                planes, frame_size, final);
+                planes, frame_size, final, p->speed);
             mp_aframe_skip_samples(p->pending, read);
         }
         p->sent_final |= final;
 
-        if (mp_scaletempo2_frames_available(&p->data)) {
+        if (mp_scaletempo2_frames_available(&p->data, p->speed)) {
             if (eof) {
                 mp_pin_out_repeat_eof(p->in_pin); // drain more next time
             }
@@ -89,7 +89,7 @@ static void process(struct mp_filter *f)
     }
 
     assert(p->pending);
-    if (mp_scaletempo2_frames_available(&p->data)) {
+    if (mp_scaletempo2_frames_available(&p->data, p->speed)) {
         struct mp_aframe *out = mp_aframe_new_ref(p->cur_format);
         int out_samples = p->data.ola_hop_size;
         if (mp_aframe_pool_allocate(p->out_pool, out, out_samples) < 0) {
