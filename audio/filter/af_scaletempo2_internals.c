@@ -720,7 +720,7 @@ void mp_scaletempo2_destroy(struct mp_scaletempo2 *p)
 void mp_scaletempo2_reset(struct mp_scaletempo2 *p)
 {
     p->input_buffer_frames = 0;
-    p->output_time = 0.0;
+    p->output_time = p->search_block_center_offset;
     p->search_block_index = 0;
     p->target_block_index = 0;
     // Clear the queue of decoded packets.
@@ -741,7 +741,6 @@ static void get_symmetric_hanning_window(int window_length, float* window)
 void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
 {
     p->muted_partial_frame = 0;
-    p->output_time = 0;
     p->search_block_center_offset = 0;
     p->search_block_index = 0;
     p->num_complete_frames = 0;
@@ -782,6 +781,8 @@ void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
     p->transition_window = realloc(p->transition_window,
         sizeof(float) * p->ola_window_size * 2);
     get_symmetric_hanning_window(2 * p->ola_window_size, p->transition_window);
+
+    p->output_time = p->search_block_center_offset;
 
     p->wsola_output_size = p->ola_window_size + p->ola_hop_size;
     p->wsola_output = realloc_2d(p->wsola_output, p->channels, p->wsola_output_size);
