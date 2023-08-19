@@ -2034,6 +2034,7 @@ static void update_render_options(struct vo *vo)
 
     update_icc_opts(p, opts->icc_opts);
 
+    pars->params.num_hooks = 0;
     const struct pl_hook *hook;
     for (int i = 0; opts->user_shaders && opts->user_shaders[i]; i++) {
         if ((hook = load_hook(p, opts->user_shaders[i]))) {
