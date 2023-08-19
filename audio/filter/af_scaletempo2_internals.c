@@ -450,18 +450,31 @@ static int write_completed_frames_to(struct mp_scaletempo2 *p,
     return rendered_frames;
 }
 
-static bool can_perform_wsola(struct mp_scaletempo2 *p)
+// next output_time for the given playback_rate
+static double get_updated_time(struct mp_scaletempo2 *p, double playback_rate)
 {
-    return p->target_block_index + p->ola_window_size <= p->input_buffer_frames
-        && p->search_block_index + p->search_block_size <= p->input_buffer_frames;
+    return p->output_time + p->ola_hop_size * playback_rate;
+}
+
+// search_block_index for the given output_time
+static int get_search_block_index(struct mp_scaletempo2 *p, double output_time)
+{
+    return (int)(output_time - p->search_block_center_offset + 0.5);
 }
 
 // number of frames needed until a wsola iteration can be performed
-static int frames_needed(struct mp_scaletempo2 *p)
+static int frames_needed(struct mp_scaletempo2 *p, double playback_rate)
 {
+    int search_block_index =
+        get_search_block_index(p, get_updated_time(p, playback_rate));
     return MPMAX(0, MPMAX(
         p->target_block_index + p->ola_window_size - p->input_buffer_frames,
-        p->search_block_index + p->search_block_size - p->input_buffer_frames));
+        search_block_index + p->search_block_size - p->input_buffer_frames));
+}
+
+static bool can_perform_wsola(struct mp_scaletempo2 *p, double playback_rate)
+{
+    return frames_needed(p, playback_rate) <= 0;
 }
 
 static void resize_input_buffer(struct mp_scaletempo2 *p, int size)
@@ -471,9 +484,9 @@ static void resize_input_buffer(struct mp_scaletempo2 *p, int size)
 }
 
 int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
-    uint8_t **planes, int frame_size, bool final)
+    uint8_t **planes, int frame_size, bool final, double playback_rate)
 {
-    int needed = frames_needed(p);
+    int needed = frames_needed(p, playback_rate);
     int read = MPMIN(needed, frame_size);
     int total_fill = final ? needed : read;
     if (total_fill == 0) return 0;
@@ -581,17 +594,13 @@ static void get_optimal_block(struct mp_scaletempo2 *p)
     p->target_block_index = optimal_index + p->ola_hop_size;
 }
 
-static void update_output_time(struct mp_scaletempo2 *p,
-    float playback_rate, double time_change)
+static void set_output_time(struct mp_scaletempo2 *p, double output_time)
 {
-    p->output_time += time_change;
-    // Center of the search region, in frames.
-    int search_block_center_index = (int)(p->output_time * playback_rate + 0.5);
-    p->search_block_index = search_block_center_index
-        - p->search_block_center_offset;
+    p->output_time = output_time;
+    p->search_block_index = get_search_block_index(p, output_time);
 }
 
-static void remove_old_input_frames(struct mp_scaletempo2 *p, float playback_rate)
+static void remove_old_input_frames(struct mp_scaletempo2 *p)
 {
     const int earliest_used_index = MPMIN(
         p->target_block_index, p->search_block_index);
@@ -601,18 +610,20 @@ static void remove_old_input_frames(struct mp_scaletempo2 *p, float playback_rat
     // Remove frames from input and adjust indices accordingly.
     seek_buffer(p, earliest_used_index);
     p->target_block_index -= earliest_used_index;
-
-    // Adjust output index.
-    double output_time_change = ((double) earliest_used_index) / playback_rate;
-    assert(p->output_time >= output_time_change);
-    update_output_time(p, playback_rate, -output_time_change);
+    p->output_time -= earliest_used_index;
+    p->search_block_index -= earliest_used_index;
 }
 
-static bool run_one_wsola_iteration(struct mp_scaletempo2 *p, float playback_rate)
+static bool run_one_wsola_iteration(struct mp_scaletempo2 *p, double playback_rate)
 {
-    if (!can_perform_wsola(p)){
+    if (!can_perform_wsola(p, playback_rate)) {
         return false;
     }
+
+    set_output_time(p, get_updated_time(p, playback_rate));
+    remove_old_input_frames(p);
+
+    assert(p->search_block_index + p->search_block_size <= p->input_buffer_frames);
 
     get_optimal_block(p);
 
@@ -638,8 +649,6 @@ static bool run_one_wsola_iteration(struct mp_scaletempo2 *p, float playback_rat
 
     p->num_complete_frames += p->ola_hop_size;
     p->wsola_output_started = true;
-    update_output_time(p, playback_rate, p->ola_hop_size);
-    remove_old_input_frames(p, playback_rate);
     return true;
 }
 
@@ -656,7 +665,7 @@ static int read_input_buffer(struct mp_scaletempo2 *p, int dest_size, float **de
 }
 
 int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
-    float **dest, int dest_size, float playback_rate)
+    float **dest, int dest_size, double playback_rate)
 {
     if (playback_rate == 0) return 0;
 
@@ -712,9 +721,9 @@ double mp_scaletempo2_get_latency(struct mp_scaletempo2 *p, double playback_rate
         + p->num_complete_frames * playback_rate;
 }
 
-bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p)
+bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p, double playback_rate)
 {
-    return can_perform_wsola(p) || p->num_complete_frames > 0;
+    return can_perform_wsola(p, playback_rate) || p->num_complete_frames > 0;
 }
 
 void mp_scaletempo2_destroy(struct mp_scaletempo2 *p)

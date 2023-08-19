@@ -53,14 +53,14 @@ struct mp_scaletempo2 {
     int samples_per_second;
     // If muted, keep track of partial frames that should have been skipped over.
     double muted_partial_frame;
-    // Book keeping of the current time of generated audio, in frames. This
-    // should be appropriately updated when out samples are generated, regardless
-    // of whether we push samples out when fill_buffer() is called or we store
-    // audio in |wsola_output| for the subsequent calls to fill_buffer().
-    // Furthermore, if samples from |audio_buffer| are evicted then this
-    // member variable should be updated based on |playback_rate|.
-    // Note that this member should be updated ONLY by calling update_output_time(),
-    // so that |search_block_index| is update accordingly.
+    // Book keeping of the current time of generated audio, in frames.
+    // Corresponds to the center of |search_block|. This is increased in
+    // intervals of |ola_hop_size| multiplied by the current playback_rate,
+    // for every WSOLA iteration. This tracks the number of advanced frames as
+    // a double to achieve accurate playback rates beyond the integer precision
+    // of |search_block_index|.
+    // Needs to be adjusted like any other index when frames are evicted from
+    // |input_buffer|.
     double output_time;
     // The offset of the center frame of |search_block| w.r.t. its first frame.
     int search_block_center_offset;
@@ -119,7 +119,7 @@ void mp_scaletempo2_reset(struct mp_scaletempo2 *p);
 void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate);
 double mp_scaletempo2_get_latency(struct mp_scaletempo2 *p, double playback_rate);
 int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
-    uint8_t **planes, int frame_size, bool final);
+    uint8_t **planes, int frame_size, bool final, double playback_rate);
 int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
-    float **dest, int dest_size, float playback_rate);
-bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p);
+    float **dest, int dest_size, double playback_rate);
+bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p, double playback_rate);
