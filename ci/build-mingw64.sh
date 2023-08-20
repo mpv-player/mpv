@@ -181,7 +181,7 @@ _libplacebo () {
     [ -d libplacebo ] || $gitclone https://code.videolan.org/videolan/libplacebo.git
     builddir libplacebo
     meson setup .. --cross-file "$prefix_dir/crossfile" \
-        -Ddemos=false -D{opengl,d3d11,vulkan}=enabled
+        -Ddemos=false -D{opengl,d3d11}=enabled
     makeplusinstall
     popd
 }
@@ -243,10 +243,14 @@ _luajit () {
 }
 _luajit_mark=lib/libluajit-5.1.a
 
-for x in \
-    iconv zlib ffmpeg shaderc spirv-cross vulkan-headers vulkan-loader \
-    libplacebo freetype fribidi harfbuzz libass luajit
-do
+for x in iconv zlib ffmpeg shaderc spirv-cross; do
+    build_if_missing $x
+done
+if [[ "$TARGET" != "i686-"* ]]; then
+    build_if_missing vulkan-headers
+    build_if_missing vulkan-loader
+fi
+for x in libplacebo freetype fribidi harfbuzz libass luajit; do
     build_if_missing $x
 done
 
@@ -263,7 +267,7 @@ rm -rf $build
 meson setup $build --cross-file "$prefix_dir/crossfile" \
     --buildtype debugoptimized \
     -Dlibmpv=true -Dlua=luajit \
-    -D{shaderc,spirv-cross,d3d11,vulkan,libplacebo}=enabled
+    -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
 
 meson compile -C $build
 
