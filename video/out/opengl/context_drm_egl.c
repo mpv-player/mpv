@@ -693,13 +693,12 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         MP_VERBOSE(ctx, "Opening render node \"%s\"\n", rendernode_path);
         p->drm_params.render_fd = open(rendernode_path, O_RDWR | O_CLOEXEC);
         if (p->drm_params.render_fd == -1) {
-            MP_WARN(ctx, "Cannot open render node \"%s\": %s. VAAPI hwdec will be disabled\n",
-                    rendernode_path, mp_strerror(errno));
+            MP_WARN(ctx, "Cannot open render node: %s\n", mp_strerror(errno));
         }
         free(rendernode_path);
     } else {
         p->drm_params.render_fd = -1;
-        MP_VERBOSE(ctx, "Could not find path to render node. VAAPI hwdec will be disabled\n");
+        MP_VERBOSE(ctx, "Could not find path to render node.\n");
     }
 
     struct ra_gl_ctx_params params = {
