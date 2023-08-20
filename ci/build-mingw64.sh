@@ -268,16 +268,29 @@ meson setup $build --cross-file "$prefix_dir/crossfile" \
 meson compile -C $build
 
 if [ "$2" = pack ]; then
-    mkdir -p artifact
+    mkdir -p artifact/tmp
     echo "Copying:"
-    cp -pv $build/player/mpv.com $build/mpv.exe "$prefix_dir/bin/"*.dll artifact/
-    # ship everything and the kitchen sink
+    cp -pv $build/player/mpv.com $build/mpv.exe artifact/
+    # copy everything we can get our hands on
+    cp -p "$prefix_dir/bin/"*.dll artifact/tmp/
     shopt -s nullglob
     for file in /usr/lib/gcc/$TARGET/*-posix/*.dll /usr/$TARGET/lib/*.dll; do
-        cp -pv "$file" artifact/
+        cp -p "$file" artifact/tmp/
     done
+    # pick DLLs we need
+    pushd artifact/tmp
+    dlls=(
+        libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll # compiler runtime
+        av*.dll sw*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
+        lib{shaderc_shared,spirv-cross-c-shared}.dll zlib1.dll
+        # note: vulkan-1.dll is not here since drivers provide it
+    )
+    mv -v "${dlls[@]}" ..
+    popd
+
     echo "Archiving:"
     pushd artifact
+    rm -rf tmp
     zip -9r "../mpv-git-$(date +%F)-$(git rev-parse --short HEAD)-${TARGET%%-*}.zip" -- *
     popd
 fi
