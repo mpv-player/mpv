@@ -7,10 +7,6 @@ ln -snf . "$prefix_dir/local"
 
 wget="wget -nc --progress=bar:force"
 gitclone="git clone --depth=1 --recursive"
-commonflags="--disable-static --enable-shared"
-
-export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
-export PKG_CONFIG_LIBDIR="$PKG_CONFIG_SYSROOT_DIR/lib/pkgconfig"
 
 # -posix is Ubuntu's variant with pthreads support
 export CC=$TARGET-gcc-posix
@@ -22,6 +18,14 @@ export RANLIB=$TARGET-ranlib
 export CFLAGS="-O2 -pipe -Wall -D_FORTIFY_SOURCE=2"
 export LDFLAGS="-fstack-protector-strong"
 
+# anything that uses pkg-config
+export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
+export PKG_CONFIG_LIBDIR="$PKG_CONFIG_SYSROOT_DIR/lib/pkgconfig"
+
+# autotools(-like)
+commonflags="--disable-static --enable-shared"
+
+# meson
 fam=x86_64
 [[ "$TARGET" == "i686-"* ]] && fam=x86
 cat >"$prefix_dir/crossfile" <<EOF
@@ -42,6 +46,15 @@ cpu_family = '${fam}'
 cpu = '${TARGET%%-*}'
 endian = 'little'
 EOF
+
+# CMake
+cmake_args=(
+    -Wno-dev
+    -DCMAKE_SYSTEM_NAME=Windows
+    -DCMAKE_FIND_ROOT_PATH="$PKG_CONFIG_SYSROOT_DIR"
+    -DCMAKE_RC_COMPILER="${TARGET}-windres"
+    -DCMAKE_BUILD_TYPE=Release
+)
 
 export CC="ccache $CC"
 export CXX="ccache $CXX"
@@ -110,9 +123,8 @@ if [ ! -e "$prefix_dir/lib/libshaderc_shared.dll.a" ]; then
         (cd shaderc && ./utils/git-sync-deps)
     fi
     builddir shaderc
-    cmake .. -DCMAKE_SYSTEM_NAME=Windows \
-        -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
-        -DSHADERC_SKIP_TESTS=ON -DCMAKE_INSTALL_PREFIX=/
+    cmake .. "${cmake_args[@]}" \
+        -DBUILD_SHARED_LIBS=OFF -DSHADERC_SKIP_TESTS=ON
     makeplusinstall
     popd
 fi
@@ -121,17 +133,38 @@ fi
 if [ ! -e "$prefix_dir/lib/libspirv-cross-c-shared.dll.a" ]; then
     [ -d SPIRV-Cross ] || $gitclone https://github.com/KhronosGroup/SPIRV-Cross
     builddir SPIRV-Cross
-    cmake .. -DCMAKE_SYSTEM_NAME=Windows \
+    cmake .. "${cmake_args[@]}" \
         -DSPIRV_CROSS_SHARED=ON -DSPIRV_CROSS_{CLI,STATIC}=OFF
     makeplusinstall
     popd
+fi
+
+## vulkan-headers
+if [ ! -e "$prefix_dir/include/vulkan/vulkan.h" ]; then
+    [ -d Vulkan-Headers ] || $gitclone https://github.com/KhronosGroup/Vulkan-Headers
+    builddir Vulkan-Headers
+    cmake .. "${cmake_args[@]}"
+    makeplusinstall
+    popd
+fi
+
+## vulkan-loader
+if [ ! -e "$prefix_dir/lib/libvulkan-1.dll.a" ]; then
+    [ -d Vulkan-Loader ] || $gitclone https://github.com/KhronosGroup/Vulkan-Loader
+    builddir Vulkan-Loader
+    cmake .. "${cmake_args[@]}" \
+        -DENABLE_WERROR=OFF -DUSE_MASM=OFF
+    makeplusinstall
+    popd
+    sed -re '/libdir=/s|Lib(32)?|lib|' -i "$prefix_dir/lib/pkgconfig/vulkan.pc" # wat?
 fi
 
 ## libplacebo
 if [ ! -e "$prefix_dir/lib/libplacebo.dll.a" ]; then
     [ -d libplacebo ] || $gitclone https://code.videolan.org/videolan/libplacebo.git
     builddir libplacebo
-    meson .. --cross-file "$prefix_dir/crossfile"
+    meson setup .. --cross-file "$prefix_dir/crossfile" \
+        -Ddemos=false -D{opengl,d3d11,vulkan}=enabled
     makeplusinstall
     popd
 fi
@@ -199,19 +232,20 @@ fi
 CFLAGS+=" -I'$prefix_dir/include'"
 LDFLAGS+=" -L'$prefix_dir/lib'"
 export CFLAGS LDFLAGS
-rm -rf build
+build=mingw_build
+rm -rf $build
 
-meson setup build --cross-file "$prefix_dir/crossfile" \
+meson setup $build --cross-file "$prefix_dir/crossfile" \
     --buildtype debugoptimized \
     -Dlibmpv=true -Dlua=luajit \
-    -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
+    -D{shaderc,spirv-cross,d3d11,vulkan,libplacebo}=enabled
 
-meson compile -C build
+meson compile -C $build
 
 if [ "$2" = pack ]; then
     mkdir -p artifact
     echo "Copying:"
-    cp -pv build/player/mpv.com build/mpv.exe "$prefix_dir/bin/"*.dll artifact/
+    cp -pv $build/player/mpv.com $build/mpv.exe "$prefix_dir/bin/"*.dll artifact/
     # ship everything and the kitchen sink
     shopt -s nullglob
     for file in /usr/lib/gcc/$TARGET/*-posix/*.dll /usr/$TARGET/lib/*.dll; do
