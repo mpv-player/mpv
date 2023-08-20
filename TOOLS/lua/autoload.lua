@@ -20,6 +20,7 @@ additional_image_exts=list,of,ext
 additional_video_exts=list,of,ext
 additional_audio_exts=list,of,ext
 ignore_hidden=yes
+same_type=yes
 
 --]]
 
@@ -37,9 +38,17 @@ o = {
     additional_image_exts = "",
     additional_video_exts = "",
     additional_audio_exts = "",
-    ignore_hidden = true
+    ignore_hidden = true,
+    same_type = false
 }
-options.read_options(o)
+options.read_options(o, nil, function(list)
+    split_option_exts(list.additional_video_exts, list.additional_audio_exts, list.additional_image_exts)
+    if list.videos or list.additional_video_exts or
+        list.audio or list.additional_audio_exts or
+        list.images or list.additional_image_exts then
+        create_extensions()
+    end
+end)
 
 function Set (t)
     local set = {}
@@ -48,10 +57,8 @@ function Set (t)
 end
 
 function SetUnion (a,b)
-    local res = {}
-    for k in pairs(a) do res[k] = true end
-    for k in pairs(b) do res[k] = true end
-    return res
+    for k in pairs(b) do a[k] = true end
+    return a
 end
 
 function Split (s)
@@ -75,14 +82,20 @@ EXTENSIONS_IMAGES = Set {
     'svg', 'tga', 'tif', 'tiff', 'webp'
 }
 
-EXTENSIONS_VIDEO = SetUnion(EXTENSIONS_VIDEO, Split(o.additional_video_exts))
-EXTENSIONS_AUDIO = SetUnion(EXTENSIONS_AUDIO, Split(o.additional_audio_exts))
-EXTENSIONS_IMAGES = SetUnion(EXTENSIONS_IMAGES, Split(o.additional_image_exts))
+function split_option_exts(video, audio, image)
+    if video then o.additional_video_exts = Split(o.additional_video_exts) end
+    if audio then o.additional_audio_exts = Split(o.additional_audio_exts) end
+    if image then o.additional_image_exts = Split(o.additional_image_exts) end
+end
+split_option_exts(true, true, true)
 
-EXTENSIONS = Set {}
-if o.videos then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_VIDEO) end
-if o.audio then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_AUDIO) end
-if o.images then EXTENSIONS = SetUnion(EXTENSIONS, EXTENSIONS_IMAGES) end
+function create_extensions()
+    EXTENSIONS = {}
+    if o.videos then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_VIDEO), o.additional_video_exts) end
+    if o.audio then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_AUDIO), o.additional_audio_exts) end
+    if o.images then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_IMAGES), o.additional_image_exts) end
+end
+create_extensions()
 
 function add_files(files)
     local oldcount = mp.get_property_number("playlist-count", 1)
@@ -153,13 +166,26 @@ function find_and_add_entries()
     end
 
     pl_count = mp.get_property_number("playlist-count", 1)
+    this_ext = get_extension(filename)
     -- check if this is a manually made playlist
     if (pl_count > 1 and autoloaded == nil) or
-       (pl_count == 1 and EXTENSIONS[string.lower(get_extension(filename))] == nil) then
+       (pl_count == 1 and EXTENSIONS[string.lower(this_ext)] == nil) then
         msg.verbose("stopping: manually made playlist")
         return
     else
         autoloaded = true
+    end
+
+    if o.same_type then
+        if EXTENSIONS_VIDEO[string.lower(this_ext)] ~= nil then
+            EXTENSIONS_TARGET = EXTENSIONS_VIDEO
+        elseif EXTENSIONS_AUDIO[string.lower(this_ext)] ~= nil then
+            EXTENSIONS_TARGET = EXTENSIONS_AUDIO
+        else
+            EXTENSIONS_TARGET = EXTENSIONS_IMAGES
+        end
+    else
+        EXTENSIONS_TARGET = EXTENSIONS
     end
 
     local pl = mp.get_property_native("playlist", {})
@@ -182,7 +208,7 @@ function find_and_add_entries()
         if ext == nil then
             return false
         end
-        return EXTENSIONS[string.lower(ext)]
+        return EXTENSIONS_TARGET[string.lower(ext)]
     end)
     alphanumsort(files)
 

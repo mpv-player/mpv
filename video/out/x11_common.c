@@ -36,7 +36,6 @@
 #include <X11/extensions/scrnsaver.h>
 #include <X11/extensions/dpms.h>
 #include <X11/extensions/shape.h>
-#include <X11/extensions/Xinerama.h>
 #include <X11/extensions/Xpresent.h>
 #include <X11/extensions/Xrandr.h>
 
@@ -137,6 +136,7 @@ static const struct bstr x11_icons[] = {
 static struct mp_log *x11_error_output;
 static atomic_int x11_error_silence;
 
+static bool rc_overlaps(struct mp_rect rc1, struct mp_rect rc2);
 static void vo_x11_update_geometry(struct vo *vo);
 static void vo_x11_fullscreen(struct vo *vo);
 static void xscreensaver_heartbeat(struct vo_x11_state *x11);
@@ -400,7 +400,6 @@ static void xrandr_read(struct vo_x11_state *x11)
         talloc_free(x11->displays[i].name);
 
     x11->num_displays = 0;
-    bool randr_14 = false;
 
     if (x11->xrandr_event < 0) {
         int event_base, error_base;
@@ -408,10 +407,6 @@ static void xrandr_read(struct vo_x11_state *x11)
             MP_VERBOSE(x11, "Couldn't init Xrandr.\n");
             return;
         }
-        int major, minor;
-        XRRQueryVersion(x11->display, &major, &minor);
-        if (major >= 2 || minor >= 4)
-            randr_14 = true;
         x11->xrandr_event = event_base + RRNotify;
         XRRSelectInput(x11->display, x11->rootwin, RRScreenChangeNotifyMask |
                        RRCrtcChangeNotifyMask | RROutputChangeNotifyMask);
@@ -429,27 +424,25 @@ static void xrandr_read(struct vo_x11_state *x11)
      * a laptop with switchable graphics), we need to know both of these things.
      * In practice, this is used for determining whether or not to use XPresent
      * (i.e. needs to be Mesa and not Nvidia). Requires Randr 1.4. */
-    if (randr_14) {
-        XRRProviderResources *pr = XRRGetProviderResources(x11->display, x11->rootwin);
-        for (int i = 0; i < pr->nproviders; i++) {
-            XRRProviderInfo *info = XRRGetProviderInfo(x11->display, r, pr->providers[i]);
-            struct bstr provider_name = bstrdup(x11, bstr0(info->name));
-            bstr_lower(provider_name);
-            int amd = bstr_find0(provider_name, "amd");
-            int intel = bstr_find0(provider_name, "intel");
-            int modesetting = bstr_find0(provider_name, "modesetting");
-            int nouveau = bstr_find0(provider_name, "nouveau");
-            int nvidia = bstr_find0(provider_name, "nvidia");
-            int radeon = bstr_find0(provider_name, "radeon");
-            x11->has_mesa = x11->has_mesa || amd >= 0 || intel >= 0 ||
-                            modesetting >= 0 || nouveau >= 0 || radeon >= 0;
-            x11->has_nvidia = x11->has_nvidia || nvidia >= 0;
-            XRRFreeProviderInfo(info);
-        }
-        if (x11->present_code)
-            xpresent_set(x11);
-        XRRFreeProviderResources(pr);
+    XRRProviderResources *pr = XRRGetProviderResources(x11->display, x11->rootwin);
+    for (int i = 0; i < pr->nproviders; i++) {
+        XRRProviderInfo *info = XRRGetProviderInfo(x11->display, r, pr->providers[i]);
+        struct bstr provider_name = bstrdup(x11, bstr0(info->name));
+        bstr_lower(provider_name);
+        int amd = bstr_find0(provider_name, "amd");
+        int intel = bstr_find0(provider_name, "intel");
+        int modesetting = bstr_find0(provider_name, "modesetting");
+        int nouveau = bstr_find0(provider_name, "nouveau");
+        int nvidia = bstr_find0(provider_name, "nvidia");
+        int radeon = bstr_find0(provider_name, "radeon");
+        x11->has_mesa = x11->has_mesa || amd >= 0 || intel >= 0 ||
+                        modesetting >= 0 || nouveau >= 0 || radeon >= 0;
+        x11->has_nvidia = x11->has_nvidia || nvidia >= 0;
+        XRRFreeProviderInfo(info);
     }
+    if (x11->present_code)
+        xpresent_set(x11);
+    XRRFreeProviderResources(pr);
 
     int primary_id = -1;
     RROutput primary = XRRGetOutputPrimary(x11->display, x11->rootwin);
@@ -498,6 +491,7 @@ static void xrandr_read(struct vo_x11_state *x11)
 
     for (int i = 0; i < x11->num_displays; i++) {
         struct xrandr_display *d = &(x11->displays[i]);
+        d->screen = i;
 
         if (i == primary_id) {
             d->atom_id = 0;
@@ -513,19 +507,13 @@ static void xrandr_read(struct vo_x11_state *x11)
     XRRFreeScreenResources(r);
 }
 
-static void vo_x11_update_screeninfo(struct vo *vo)
+static int vo_x11_select_screen(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct mp_vo_opts *opts = x11->opts;
-    bool all_screens = opts->fullscreen && opts->fsscreen_id == -2;
-    x11->screenrc = (struct mp_rect){.x1 = x11->ws_width, .y1 = x11->ws_height};
-    if ((opts->screen_id >= -1 || opts->screen_name) && XineramaIsActive(x11->display) &&
-         !all_screens)
-    {
-        int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
-        XineramaScreenInfo *screens;
-        int num_screens;
-
+    int screen = -2; // all displays
+    if (!opts->fullscreen || opts->fsscreen_id != -2) {
+        screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
         if (opts->fullscreen && opts->fsscreen_id == -1)
             screen = opts->screen_id;
 
@@ -546,32 +534,54 @@ static void vo_x11_update_screeninfo(struct vo *vo)
             }
         }
 
-        screens = XineramaQueryScreens(x11->display, &num_screens);
-        if (screen >= num_screens)
-            screen = num_screens - 1;
+        if (screen >= x11->num_displays)
+            screen = x11->num_displays - 1;
+    }
+    return screen;
+}
+
+static void vo_x11_update_screeninfo(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    x11->screenrc = (struct mp_rect){.x1 = x11->ws_width, .y1 = x11->ws_height};
+    int screen = vo_x11_select_screen(vo);
+    if (screen >= -1) {
         if (screen == -1) {
             int x = x11->winrc.x0 + RC_W(x11->winrc) / 2;
             int y = x11->winrc.y0 + RC_H(x11->winrc) / 2;
-            for (screen = num_screens - 1; screen > 0; screen--) {
-                int left = screens[screen].x_org;
-                int right = left + screens[screen].width;
-                int top = screens[screen].y_org;
-                int bottom = top + screens[screen].height;
+            for (screen = x11->num_displays - 1; screen > 0; screen--) {
+                struct xrandr_display *disp = &x11->displays[screen];
+                int left = disp->rc.x0;
+                int right = disp->rc.x1;
+                int top = disp->rc.y0;
+                int bottom = disp->rc.y1;
                 if (left <= x && x <= right && top <= y && y <= bottom)
                     break;
             }
         }
+
         if (screen < 0)
             screen = 0;
         x11->screenrc = (struct mp_rect){
-            .x0 = screens[screen].x_org,
-            .y0 = screens[screen].y_org,
-            .x1 = screens[screen].x_org + screens[screen].width,
-            .y1 = screens[screen].y_org + screens[screen].height,
+            .x0 = x11->displays[screen].rc.x0,
+            .y0 = x11->displays[screen].rc.y0,
+            .x1 = x11->displays[screen].rc.x1,
+            .y1 = x11->displays[screen].rc.y1,
         };
-
-        XFree(screens);
     }
+}
+
+static struct xrandr_display *get_current_display(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    struct xrandr_display *selected_disp = NULL;
+    for (int n = 0; n < x11->num_displays; n++) {
+        struct xrandr_display *disp = &x11->displays[n];
+        disp->overlaps = rc_overlaps(disp->rc, x11->winrc);
+        if (disp->overlaps && (!selected_disp || disp->fps < selected_disp->fps))
+            selected_disp = disp;
+    }
+    return selected_disp;
 }
 
 // Get the monitors for the 4 edges of the rectangle spanning all screens.
@@ -579,22 +589,17 @@ static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
 {
     //top  bottom left   right
     b[0] = b[1] = b[2] = b[3] = 0;
-    int num_screens = 0;
-    XineramaScreenInfo *screens = XineramaQueryScreens(x11->display, &num_screens);
-    if (!screens)
-        return;
-    for (int n = 0; n < num_screens; n++) {
-        XineramaScreenInfo *s = &screens[n];
-        if (s->y_org < screens[b[0]].y_org)
+    for (int n = 0; n < x11->num_displays; n++) {
+        struct xrandr_display *d = &x11->displays[n];
+        if (d->rc.y0 < x11->displays[b[0]].rc.y0)
             b[0] = n;
-        if (s->y_org + s->height > screens[b[1]].y_org + screens[b[1]].height)
+        if (d->rc.y1 < x11->displays[b[1]].rc.y1)
             b[1] = n;
-        if (s->x_org < screens[b[2]].x_org)
+        if (d->rc.x0 < x11->displays[b[2]].rc.x0)
             b[2] = n;
-        if (s->x_org + s->width > screens[b[3]].x_org + screens[b[3]].width)
+        if (d->rc.x1 < x11->displays[b[3]].rc.x1)
             b[3] = n;
     }
-    XFree(screens);
 }
 
 bool vo_x11_init(struct vo *vo)
@@ -1278,7 +1283,7 @@ void vo_x11_check_events(struct vo *vo)
         case MapNotify:
             x11->window_hidden = false;
             x11->pseudo_mapped = true;
-            x11->current_icc_screen = -1;
+            x11->current_screen = -1;
             vo_x11_update_geometry(vo);
             break;
         case DestroyNotify:
@@ -1351,9 +1356,13 @@ static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
     if (!x11->window || x11->parent)
         return;
 
+    bool screen = opts->screen_id >= 0 || (opts->screen_name &&
+                                           opts->screen_name[0]);
+    bool fsscreen = opts->fsscreen_id >= 0 || (opts->fsscreen_name &&
+                                               opts->fsscreen_name[0]);
     bool force_pos = opts->geometry.xy_valid ||     // explicitly forced by user
                      opts->force_window_position || // resize -> reset position
-                     opts->screen_id >= 0 ||        // force onto screen area
+                     screen || fsscreen          || // force onto screen area
                      opts->screen_name ||           // also force onto screen area
                      x11->parent ||                 // force to fill parent
                      override_pos;                  // for fullscreen and such
@@ -1828,23 +1837,6 @@ static bool rc_overlaps(struct mp_rect rc1, struct mp_rect rc2)
     return mp_rect_intersection(&rc1, &rc2); // changes the first argument
 }
 
-// which screen's ICC profile we're going to use
-static int get_icc_screen(struct vo *vo)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    int cx = x11->winrc.x0 + (x11->winrc.x1 - x11->winrc.x0)/2,
-    cy = x11->winrc.y0 + (x11->winrc.y1 - x11->winrc.y0)/2;
-    int screen = x11->current_icc_screen; // xinerama screen number
-    for (int n = 0; n < x11->num_displays; n++) {
-        struct xrandr_display *disp = &x11->displays[n];
-        if (mp_rect_contains(&disp->rc, cx, cy)) {
-            screen = n;
-            break;
-        }
-    }
-    return screen;
-}
-
 // update x11->winrc with current boundaries of vo->x11->window
 static void vo_x11_update_geometry(struct vo *vo)
 {
@@ -1864,25 +1856,25 @@ static void vo_x11_update_geometry(struct vo *vo)
                               &x, &y, &dummy_win);
         x11->winrc = (struct mp_rect){x, y, x + w, y + h};
     }
-    double fps = 1000.0;
-    for (int n = 0; n < x11->num_displays; n++) {
-        struct xrandr_display *disp = &x11->displays[n];
-        disp->overlaps = rc_overlaps(disp->rc, x11->winrc);
-        if (disp->overlaps)
-            fps = MPMIN(fps, disp->fps);
+    struct xrandr_display *disp = get_current_display(vo);
+    // Try to fallback to something reasonable if we have no disp yet
+    if (!disp) {
+        int screen = vo_x11_select_screen(vo);
+        if (screen > -1) {
+            disp = &x11->displays[screen];
+        } else if (x11->current_screen > - 1) {
+            disp = &x11->displays[x11->current_screen];
+        }
     }
-    double fallback = x11->num_displays > 0 ? x11->displays[0].fps : 0;
-    fps = fps < 1000.0 ? fps : fallback;
+    double fps = disp ? disp->fps : 0;
     if (fps != x11->current_display_fps)
         MP_VERBOSE(x11, "Current display FPS: %f\n", fps);
     x11->current_display_fps = fps;
-    // might have changed displays
-    x11->pending_vo_events |= VO_EVENT_WIN_STATE;
-    int icc_screen = get_icc_screen(vo);
-    if (x11->current_icc_screen != icc_screen) {
-        x11->current_icc_screen = icc_screen;
+    if (disp && x11->current_screen != disp->screen) {
+        x11->current_screen = disp->screen;
         x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
     }
+    x11->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
 static void vo_x11_fullscreen(struct vo *vo)
@@ -2095,15 +2087,14 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_GET_ICC_PROFILE: {
         if (!x11->pseudo_mapped)
             return VO_NOTAVAIL;
-        int screen = get_icc_screen(vo);
-        int atom_id = x11->displays[screen].atom_id;
+        int atom_id = x11->displays[x11->current_screen].atom_id;
         char prop[80];
         snprintf(prop, sizeof(prop), "_ICC_PROFILE");
         if (atom_id > 0)
             mp_snprintf_cat(prop, sizeof(prop), "_%d", atom_id);
         x11->icc_profile_property = XAs(x11, prop);
         int len;
-        MP_VERBOSE(x11, "Retrieving ICC profile for display: %d\n", screen);
+        MP_VERBOSE(x11, "Retrieving ICC profile for display: %d\n", x11->current_screen);
         void *icc = x11_get_property(x11, x11->rootwin, x11->icc_profile_property,
                                      XA_CARDINAL, 8, &len);
         if (!icc)
@@ -2138,16 +2129,13 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_RES: {
-        struct xrandr_display *selected_disp = NULL;
-        for (int n = 0; n < x11->num_displays; n++) {
-            struct xrandr_display *disp = &x11->displays[n];
-            if (disp->overlaps)
-                selected_disp = disp;
-        }
-        if (!x11->window || x11->parent || !selected_disp)
+        struct xrandr_display *disp = NULL;
+        if (x11->current_screen > -1)
+            disp = &x11->displays[x11->current_screen];
+        if (!x11->window || x11->parent || !disp)
             return VO_NOTAVAIL;
-        ((int *)arg)[0] = selected_disp->rc.x1 - selected_disp->rc.x0;
-        ((int *)arg)[1] = selected_disp->rc.y1 - selected_disp->rc.y0;
+        ((int *)arg)[0] = mp_rect_w(disp->rc);
+        ((int *)arg)[1] = mp_rect_h(disp->rc);
         return VO_TRUE;
     }
     case VOCTRL_GET_WINDOW_ID: {

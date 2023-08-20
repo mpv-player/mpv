@@ -53,6 +53,22 @@
 #include "osdep/windows_utils.h"
 #endif
 
+#if PL_API_VER >= 309
+#include <libplacebo/options.h>
+#else
+typedef struct pl_options_t {
+    // Backwards compatibility shim of this struct
+    struct pl_render_params params;
+    struct pl_deband_params deband_params;
+    struct pl_sigmoid_params sigmoid_params;
+    struct pl_color_adjustment color_adjustment;
+    struct pl_peak_detect_params peak_detect_params;
+    struct pl_color_map_params color_map_params;
+    struct pl_dither_params dither_params;
+    struct pl_icc_params icc_params;
+} *pl_options;
+#endif
+
 struct osd_entry {
     pl_tex tex;
     struct pl_overlay_part *parts;
@@ -122,21 +138,15 @@ struct priv {
     bool want_reset;
     bool frame_pending;
 
+    pl_options pars;
     struct m_config_cache *opts_cache;
     struct mp_csp_equalizer_state *video_eq;
-    struct pl_render_params params;
-    struct pl_deband_params deband;
-    struct pl_sigmoid_params sigmoid;
-    struct pl_color_adjustment color_adjustment;
-    struct pl_peak_detect_params peak_detect;
-    struct pl_color_map_params color_map;
-    struct pl_dither_params dither;
     struct scaler_params scalers[SCALER_COUNT];
     const struct pl_hook **hooks; // storage for `params.hooks`
     const struct pl_filter_config *frame_mixer;
     enum mp_csp_levels output_levels;
+    char **raw_opts;
 
-    struct pl_icc_params icc;
     struct pl_icc_profile icc_profile;
     char *icc_path;
 
@@ -768,23 +778,28 @@ static void info_callback(void *priv, const struct pl_render_info *info)
 static void update_options(struct vo *vo)
 {
     struct priv *p = vo->priv;
+    pl_options pars = p->pars;
     if (m_config_cache_update(p->opts_cache))
         update_render_options(vo);
 
     update_lut(p, &p->lut);
-    p->params.lut = p->lut.lut;
-    p->params.lut_type = p->lut.type;
+    pars->params.lut = p->lut.lut;
+    pars->params.lut_type = p->lut.type;
 
     // Update equalizer state
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
     mp_csp_equalizer_state_get(p->video_eq, &cparams);
-    p->color_adjustment = pl_color_adjustment_neutral;
-    p->color_adjustment.brightness = cparams.brightness;
-    p->color_adjustment.contrast = cparams.contrast;
-    p->color_adjustment.hue = cparams.hue;
-    p->color_adjustment.saturation = cparams.saturation;
-    p->color_adjustment.gamma = cparams.gamma;
+    pars->color_adjustment.brightness = cparams.brightness;
+    pars->color_adjustment.contrast = cparams.contrast;
+    pars->color_adjustment.hue = cparams.hue;
+    pars->color_adjustment.saturation = cparams.saturation;
+    pars->color_adjustment.gamma = cparams.gamma;
     p->output_levels = cparams.levels_out;
+
+#if PL_API_VER >= 309
+    for (char **kv = p->raw_opts; kv && kv[0]; kv += 2)
+        pl_options_set_str(pars, kv[0], kv[1]);
+#endif
 }
 
 static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
@@ -815,6 +830,7 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
 
 static void apply_target_options(struct priv *p, struct pl_frame *target)
 {
+    pl_options pars = p->pars;
 
     update_lut(p, &p->target_lut);
     target->lut = p->target_lut.lut;
@@ -843,12 +859,12 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
 
     if (opts->icc_opts->icc_use_luma) {
         // Use detected luminance
-        p->icc.max_luma = 0;
+        pars->icc_params.max_luma = 0;
     } else {
         // Use HDR levels if available, fall back to default luminance
-        p->icc.max_luma = target->color.hdr.max_luma;
-        if (!p->icc.max_luma)
-            p->icc.max_luma = pl_icc_default_params.max_luma;
+        pars->icc_params.max_luma = target->color.hdr.max_luma;
+        if (!pars->icc_params.max_luma)
+            pars->icc_params.max_luma = pl_icc_default_params.max_luma;
     }
 }
 
@@ -878,10 +894,11 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
+    pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
     update_options(vo);
-    p->params.info_callback = info_callback;
-    p->params.info_priv = vo;
+    pars->params.info_callback = info_callback;
+    pars->params.info_priv = vo;
 
     // Push all incoming frames into the frame queue
     for (int n = 0; n < frame->num_frames; n++) {
@@ -937,7 +954,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             // Advance the queue state to the current PTS to discard unused frames
             pl_queue_update(p->queue, NULL, pl_queue_params(
                 .pts = frame->current->pts + vsync_offset,
-                .radius = pl_frame_mix_radius(&p->params),
+                .radius = pl_frame_mix_radius(&pars->params),
             ));
         }
         return;
@@ -960,7 +977,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         // Update queue state
         struct pl_queue_params qparams = {
             .pts = frame->current->pts + vsync_offset,
-            .radius = pl_frame_mix_radius(&p->params),
+            .radius = pl_frame_mix_radius(&pars->params),
             .vsync_duration = frame->vsync_interval,
             .interpolation_threshold = opts->interpolation_threshold,
         };
@@ -1033,13 +1050,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
     bool cache_frame = will_redraw || frame->still;
-    p->params.skip_caching_single_frame = !cache_frame;
-    p->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
-    p->params.frame_mixer = frame->still ? NULL : p->frame_mixer;
-    p->peak_detect.allow_delayed = p->delayed_peak;
+    pars->params.skip_caching_single_frame = !cache_frame;
+    pars->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
+    if (frame->still)
+        pars->params.frame_mixer = NULL;
 
     // Render frame
-    if (!pl_render_image_mix(p->rr, &mix, &target, &p->params)) {
+    if (!pl_render_image_mix(p->rr, &mix, &target, &pars->params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
         goto done;
     }
@@ -1160,16 +1177,17 @@ static bool update_auto_profile(struct priv *p, int *events)
 static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
 {
     struct priv *p = vo->priv;
+    pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
     pl_tex fbo = NULL;
     args->res = NULL;
 
     update_options(vo);
-    p->params.info_callback = NULL;
-    p->params.skip_caching_single_frame = true;
-    p->params.preserve_mixing_cache = false;
-    p->params.frame_mixer = NULL;
-    p->peak_detect.allow_delayed = false;
+    pars->params.info_callback = NULL;
+    pars->params.skip_caching_single_frame = true;
+    pars->params.preserve_mixing_cache = false;
+    pars->params.frame_mixer = NULL;
+    pars->peak_detect_params.allow_delayed = false;
 
     // Retrieve the current frame from the frame queue
     struct pl_frame_mix mix;
@@ -1270,7 +1288,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
                     &p->osd_state, &target);
     image.num_overlays = 0; // Disable on-screen overlays
 
-    if (!pl_render_image(p->rr, &image, &target, &p->params)) {
+    if (!pl_render_image(p->rr, &image, &target, &pars->params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
         goto done;
     }
@@ -1481,6 +1499,10 @@ static void uninit(struct vo *vo)
         pl_shader_info_deref(&p->perf_redraw.info[i].shader);
     }
 
+#if PL_API_VER >= 309
+    pl_options_free(&p->pars);
+#endif
+
     p->ra_ctx = NULL;
     p->pllog = NULL;
     p->gpu = NULL;
@@ -1537,6 +1559,23 @@ static int preinit(struct vo *vo)
         talloc_free(cache_file);
     }
 
+#if PL_API_VER >= 309
+    p->pars = pl_options_alloc(p->pllog);
+#else
+    p->pars = talloc_ptrtype(p, p->pars);
+    p->pars->params                  = pl_render_default_params;
+    p->pars->deband_params           = pl_deband_default_params;
+    p->pars->sigmoid_params          = pl_sigmoid_default_params;
+    p->pars->color_adjustment        = pl_color_adjustment_neutral;
+    p->pars->peak_detect_params      = pl_peak_detect_default_params;
+    p->pars->color_map_params        = pl_color_map_default_params;
+    p->pars->dither_params           = pl_dither_default_params;
+    p->pars->icc_params              = pl_icc_default_params;
+    // Redirect always-enabled params structs to shim
+    p->pars->params.color_adjustment = &p->pars->color_adjustment;
+    p->pars->params.color_map_params = &p->pars->color_map_params;
+    p->pars->params.icc_params       = &p->pars->icc_params;
+#endif
     update_render_options(vo);
     return 0;
 
@@ -1744,6 +1783,7 @@ static bool icc_load(void *priv, uint64_t sig, uint8_t *cache, size_t size)
 
 static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 {
+    pl_options pars = p->pars;
     if (!opts)
         return;
 
@@ -1755,15 +1795,13 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 
     int s_r = 0, s_g = 0, s_b = 0;
     gl_parse_3dlut_size(opts->size_str, &s_r, &s_g, &s_b);
-    p->params.icc_params = &p->icc;
-    p->icc = pl_icc_default_params;
-    p->icc.intent = opts->intent;
-    p->icc.size_r = s_r;
-    p->icc.size_g = s_g;
-    p->icc.size_b = s_b;
-    p->icc.cache_priv = p;
-    p->icc.cache_save = icc_save;
-    p->icc.cache_load = icc_load;
+    pars->icc_params.intent = opts->intent;
+    pars->icc_params.size_r = s_r;
+    pars->icc_params.size_g = s_g;
+    pars->icc_params.size_b = s_b;
+    pars->icc_params.cache_priv = p;
+    pars->icc_params.cache_save = icc_save;
+    pars->icc_params.cache_load = icc_load;
 
     if (!opts->profile || !opts->profile[0]) {
         // No profile enabled, un-load any existing profiles
@@ -1886,30 +1924,25 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
 static void update_render_options(struct vo *vo)
 {
     struct priv *p = vo->priv;
+    pl_options pars = p->pars;
     const struct gl_video_opts *opts = p->opts_cache->opts;
-    p->params = pl_render_default_params;
-    p->params.lut_entries = 1 << opts->scaler_lut_size;
-    p->params.antiringing_strength = opts->scaler[0].antiring;
-    p->params.polar_cutoff = opts->scaler[0].cutoff;
-    p->params.deband_params = opts->deband ? &p->deband : NULL;
-    p->params.sigmoid_params = opts->sigmoid_upscaling ? &p->sigmoid : NULL;
-    p->params.color_adjustment = &p->color_adjustment;
-    p->params.peak_detect_params = opts->tone_map.compute_peak >= 0 ? &p->peak_detect : NULL;
-    p->params.color_map_params = &p->color_map;
-    p->params.background_color[0] = opts->background.r / 255.0;
-    p->params.background_color[1] = opts->background.g / 255.0;
-    p->params.background_color[2] = opts->background.b / 255.0;
-    p->params.background_transparency = 1.0 - opts->background.a / 255.0;
-    p->params.skip_anti_aliasing = !opts->correct_downscaling;
-    p->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
-    p->params.disable_fbos = opts->dumb_mode == 1;
-    p->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
-    p->params.corner_rounding = p->corner_rounding;
+    pars->params.lut_entries = 1 << opts->scaler_lut_size;
+    pars->params.antiringing_strength = opts->scaler[0].antiring;
+    pars->params.polar_cutoff = opts->scaler[0].cutoff;
+    pars->params.background_color[0] = opts->background.r / 255.0;
+    pars->params.background_color[1] = opts->background.g / 255.0;
+    pars->params.background_color[2] = opts->background.b / 255.0;
+    pars->params.background_transparency = 1.0 - opts->background.a / 255.0;
+    pars->params.skip_anti_aliasing = !opts->correct_downscaling;
+    pars->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
+    pars->params.disable_fbos = opts->dumb_mode == 1;
+    pars->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
+    pars->params.corner_rounding = p->corner_rounding;
 
     // Map scaler options as best we can
-    p->params.upscaler = map_scaler(p, SCALER_SCALE);
-    p->params.downscaler = map_scaler(p, SCALER_DSCALE);
-    p->params.plane_upscaler = map_scaler(p, SCALER_CSCALE);
+    pars->params.upscaler = map_scaler(p, SCALER_SCALE);
+    pars->params.downscaler = map_scaler(p, SCALER_DSCALE);
+    pars->params.plane_upscaler = map_scaler(p, SCALER_CSCALE);
     p->frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
 
     // Request as many frames as required from the decoder
@@ -1919,21 +1952,22 @@ static void update_render_options(struct vo *vo)
         vo_set_queue_params(vo, 0, 2);
     }
 
-    p->deband = pl_deband_default_params;
-    p->deband.iterations = opts->deband_opts->iterations;
-    p->deband.radius = opts->deband_opts->range;
-    p->deband.threshold = opts->deband_opts->threshold / 16.384;
-    p->deband.grain = opts->deband_opts->grain / 8.192;
+    pars->params.deband_params = opts->deband ? &pars->deband_params : NULL;
+    pars->deband_params.iterations = opts->deband_opts->iterations;
+    pars->deband_params.radius = opts->deband_opts->range;
+    pars->deband_params.threshold = opts->deband_opts->threshold / 16.384;
+    pars->deband_params.grain = opts->deband_opts->grain / 8.192;
 
-    p->sigmoid = pl_sigmoid_default_params;
-    p->sigmoid.center = opts->sigmoid_center;
-    p->sigmoid.slope = opts->sigmoid_slope;
+    pars->params.sigmoid_params = opts->sigmoid_upscaling ? &pars->sigmoid_params : NULL;
+    pars->sigmoid_params.center = opts->sigmoid_center;
+    pars->sigmoid_params.slope = opts->sigmoid_slope;
 
-    p->peak_detect = pl_peak_detect_default_params;
-    p->peak_detect.smoothing_period = opts->tone_map.decay_rate;
-    p->peak_detect.scene_threshold_low = opts->tone_map.scene_threshold_low;
-    p->peak_detect.scene_threshold_high = opts->tone_map.scene_threshold_high;
-    p->peak_detect.percentile = opts->tone_map.peak_percentile;
+    pars->params.peak_detect_params = opts->tone_map.compute_peak >= 0 ? &pars->peak_detect_params : NULL;
+    pars->peak_detect_params.smoothing_period = opts->tone_map.decay_rate;
+    pars->peak_detect_params.scene_threshold_low = opts->tone_map.scene_threshold_low;
+    pars->peak_detect_params.scene_threshold_high = opts->tone_map.scene_threshold_high;
+    pars->peak_detect_params.percentile = opts->tone_map.peak_percentile;
+    pars->peak_detect_params.allow_delayed = p->delayed_peak;
 
     const struct pl_tone_map_function * const tone_map_funs[] = {
         [TONE_MAPPING_AUTO]     = &pl_tone_map_auto,
@@ -1962,55 +1996,54 @@ static void update_render_options(struct vo *vo)
         [GAMUT_LINEAR]          = &pl_gamut_map_linear,
     };
 
-    p->color_map = pl_color_map_default_params;
-    p->color_map.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
-    p->color_map.tone_mapping_param = opts->tone_map.curve_param;
-    p->color_map.inverse_tone_mapping = opts->tone_map.inverse;
-    if (isnan(p->color_map.tone_mapping_param)) // vo_gpu compatibility
-        p->color_map.tone_mapping_param = 0.0;
-    p->color_map.visualize_lut = opts->tone_map.visualize;
-    p->color_map.contrast_recovery = opts->tone_map.contrast_recovery;
-    p->color_map.contrast_smoothness = opts->tone_map.contrast_smoothness;
+    pars->color_map_params.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
+    pars->color_map_params.tone_mapping_param = opts->tone_map.curve_param;
+    pars->color_map_params.inverse_tone_mapping = opts->tone_map.inverse;
+    if (isnan(pars->color_map_params.tone_mapping_param)) // vo_gpu compatibility
+        pars->color_map_params.tone_mapping_param = 0.0;
+    pars->color_map_params.contrast_recovery = opts->tone_map.contrast_recovery;
+    pars->color_map_params.visualize_lut = opts->tone_map.visualize;
+    pars->color_map_params.contrast_smoothness = opts->tone_map.contrast_smoothness;
     if (opts->tone_map.gamut_mode != GAMUT_AUTO)
-        p->color_map.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
+        pars->color_map_params.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
 
     switch (opts->dither_algo) {
     case DITHER_NONE:
-        p->params.dither_params = NULL;
+        pars->params.dither_params = NULL;
         break;
     case DITHER_ERROR_DIFFUSION:
-        p->params.error_diffusion = pl_find_error_diffusion_kernel(opts->error_diffusion);
-        if (!p->params.error_diffusion) {
+        pars->params.error_diffusion = pl_find_error_diffusion_kernel(opts->error_diffusion);
+        if (!pars->params.error_diffusion) {
             MP_WARN(p, "Could not find error diffusion kernel '%s', falling "
                     "back to fruit.\n", opts->error_diffusion);
         }
         MP_FALLTHROUGH;
     case DITHER_ORDERED:
     case DITHER_FRUIT:
-        p->params.dither_params = &p->dither;
-        p->dither = pl_dither_default_params;
-        p->dither.method = opts->dither_algo == DITHER_ORDERED
+        pars->params.dither_params = &pars->dither_params;
+        pars->dither_params.method = opts->dither_algo == DITHER_ORDERED
                                 ? PL_DITHER_ORDERED_FIXED
                                 : PL_DITHER_BLUE_NOISE;
-        p->dither.lut_size = opts->dither_size;
-        p->dither.temporal = opts->temporal_dither;
+        pars->dither_params.lut_size = opts->dither_size;
+        pars->dither_params.temporal = opts->temporal_dither;
         break;
     }
 
     if (opts->dither_depth < 0)
-        p->params.dither_params = NULL;
+        pars->params.dither_params = NULL;
 
     update_icc_opts(p, opts->icc_opts);
 
+    pars->params.num_hooks = 0;
     const struct pl_hook *hook;
     for (int i = 0; opts->user_shaders && opts->user_shaders[i]; i++) {
         if ((hook = load_hook(p, opts->user_shaders[i]))) {
-            MP_TARRAY_APPEND(p, p->hooks, p->params.num_hooks, hook);
+            MP_TARRAY_APPEND(p, p->hooks, pars->params.num_hooks, hook);
             update_hook_opts(p, opts->user_shader_opts, opts->user_shaders[i], hook);
         }
     }
 
-    p->params.hooks = p->hooks;
+    pars->params.hooks = p->hooks;
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -2059,6 +2092,7 @@ const struct vo_driver video_out_gpu_next = {
         {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
         {"target-colorspace-hint", OPT_BOOL(target_hint)},
         // No `target-lut-type` because we don't support non-RGB targets
+        {"libplacebo-opts", OPT_KEYVALUELIST(raw_opts)},
         {0}
     },
 };
