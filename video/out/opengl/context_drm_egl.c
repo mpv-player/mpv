@@ -485,8 +485,8 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
         drmModeAtomicFree(atomic_ctx->request);
     }
 
-    vo_drm_uninit(ctx->vo);
     ra_gl_ctx_uninit(ctx);
+    vo_drm_uninit(ctx->vo);
 
     if (p) {
         // According to GBM documentation all BO:s must be released
@@ -497,18 +497,17 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
 
         eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                        EGL_NO_CONTEXT);
-        if (p->egl.display) {
-            eglDestroyContext(p->egl.display, p->egl.context);
+        if (p->egl.display != EGL_NO_DISPLAY) {
             eglDestroySurface(p->egl.display, p->egl.surface);
+            eglDestroyContext(p->egl.display, p->egl.context);
         }
         if (p->gbm.surface)
             gbm_surface_destroy(p->gbm.surface);
         eglTerminate(p->egl.display);
         gbm_device_destroy(p->gbm.device);
-        p->egl.context = EGL_NO_CONTEXT;
-        eglDestroyContext(p->egl.display, p->egl.context);
 
-        close(p->drm_params.render_fd);
+        if (p->drm_params.render_fd != -1)
+            close(p->drm_params.render_fd);
     }
 }
 
