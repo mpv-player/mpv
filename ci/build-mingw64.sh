@@ -59,13 +59,13 @@ cmake_args=(
 export CC="ccache $CC"
 export CXX="ccache $CXX"
 
-function builddir () {
+function builddir {
     [ -d "$1/builddir" ] && rm -rf "$1/builddir"
     mkdir -p "$1/builddir"
     pushd "$1/builddir"
 }
 
-function makeplusinstall () {
+function makeplusinstall {
     if [ -f build.ninja ]; then
         ninja
         DESTDIR="$prefix_dir" ninja install
@@ -75,26 +75,42 @@ function makeplusinstall () {
     fi
 }
 
-function gettar () {
-    name="${1##*/}"
+function gettar {
+    local name="${1##*/}"
     [ -d "${name%%.*}" ] && return 0
     $wget "$1"
     tar -xaf "$name"
 }
 
-## iconv
-if [ ! -e "$prefix_dir/lib/libiconv.dll.a" ]; then
-    ver=1.17
+function build_if_missing {
+    local name=${1//-/_}
+    local mark_var=_${name}_mark
+    local mark_file=$prefix_dir/${!mark_var}
+    [ -e "$mark_file" ] && return 0
+    echo "::group::Building $1"
+    _$name
+    echo "::endgroup::"
+    if [ ! -e "$mark_file" ]; then
+        echo "Error: Build of $1 completed but $mark_file was not created."
+        return 2
+    fi
+}
+
+
+## mpv's dependencies
+
+_iconv () {
+    local ver=1.17
     gettar "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ver}.tar.gz"
     builddir libiconv-${ver}
     ../configure --host=$TARGET $commonflags
     makeplusinstall
     popd
-fi
+}
+_iconv_mark=lib/libiconv.dll.a
 
-## zlib
-if [ ! -e "$prefix_dir/lib/libz.dll.a" ]; then
-    ver=1.3
+_zlib () {
+    local ver=1.3
     gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
     make -fwin32/Makefile.gcc clean
@@ -102,10 +118,10 @@ if [ ! -e "$prefix_dir/lib/libz.dll.a" ]; then
         DESTDIR="$prefix_dir" install \
         BINARY_PATH=/bin INCLUDE_PATH=/include LIBRARY_PATH=/lib
     popd
-fi
+}
+_zlib_mark=lib/libz.dll.a
 
-## ffmpeg
-if [ ! -e "$prefix_dir/lib/libavcodec.dll.a" ]; then
+_ffmpeg () {
     [ -d ffmpeg ] || $gitclone https://github.com/FFmpeg/FFmpeg.git ffmpeg
     builddir ffmpeg
     ../configure --pkg-config=pkg-config --target-os=mingw32 \
@@ -115,10 +131,10 @@ if [ ! -e "$prefix_dir/lib/libavcodec.dll.a" ]; then
         --enable-encoder=mjpeg,png
     makeplusinstall
     popd
-fi
+}
+_ffmpeg_mark=lib/libavcodec.dll.a
 
-## shaderc
-if [ ! -e "$prefix_dir/lib/libshaderc_shared.dll.a" ]; then
+_shaderc () {
     if [ ! -d shaderc ]; then
         $gitclone https://github.com/google/shaderc.git
         (cd shaderc && ./utils/git-sync-deps)
@@ -128,29 +144,29 @@ if [ ! -e "$prefix_dir/lib/libshaderc_shared.dll.a" ]; then
         -DBUILD_SHARED_LIBS=OFF -DSHADERC_SKIP_TESTS=ON
     makeplusinstall
     popd
-fi
+}
+_shaderc_mark=lib/libshaderc_shared.dll.a
 
-## spirv-cross
-if [ ! -e "$prefix_dir/lib/libspirv-cross-c-shared.dll.a" ]; then
+_spirv_cross () {
     [ -d SPIRV-Cross ] || $gitclone https://github.com/KhronosGroup/SPIRV-Cross
     builddir SPIRV-Cross
     cmake .. "${cmake_args[@]}" \
         -DSPIRV_CROSS_SHARED=ON -DSPIRV_CROSS_{CLI,STATIC}=OFF
     makeplusinstall
     popd
-fi
+}
+_spirv_cross_mark=lib/libspirv-cross-c-shared.dll.a
 
-## vulkan-headers
-if [ ! -e "$prefix_dir/include/vulkan/vulkan.h" ]; then
+_vulkan_headers () {
     [ -d Vulkan-Headers ] || $gitclone https://github.com/KhronosGroup/Vulkan-Headers
     builddir Vulkan-Headers
     cmake .. "${cmake_args[@]}"
     makeplusinstall
     popd
-fi
+}
+_vulkan_headers_mark=include/vulkan/vulkan.h
 
-## vulkan-loader
-if [ ! -e "$prefix_dir/lib/libvulkan-1.dll.a" ]; then
+_vulkan_loader () {
     [ -d Vulkan-Loader ] || $gitclone https://github.com/KhronosGroup/Vulkan-Loader
     builddir Vulkan-Loader
     cmake .. "${cmake_args[@]}" \
@@ -158,73 +174,81 @@ if [ ! -e "$prefix_dir/lib/libvulkan-1.dll.a" ]; then
     makeplusinstall
     popd
     sed -re '/libdir=/s|Lib(32)?|lib|' -i "$prefix_dir/lib/pkgconfig/vulkan.pc" # wat?
-fi
+}
+_vulkan_loader_mark=lib/libvulkan-1.dll.a
 
-## libplacebo
-if [ ! -e "$prefix_dir/lib/libplacebo.dll.a" ]; then
+_libplacebo () {
     [ -d libplacebo ] || $gitclone https://code.videolan.org/videolan/libplacebo.git
     builddir libplacebo
     meson setup .. --cross-file "$prefix_dir/crossfile" \
         -Ddemos=false -D{opengl,d3d11,vulkan}=enabled
     makeplusinstall
     popd
-fi
+}
+_libplacebo_mark=lib/libplacebo.dll.a
 
-## freetype2
-if [ ! -e "$prefix_dir/lib/libfreetype.dll.a" ]; then
-    ver=2.13.1
+_freetype () {
+    local ver=2.13.1
     gettar "https://mirror.netcologne.de/savannah/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
-    meson .. --cross-file "$prefix_dir/crossfile"
+    meson setup .. --cross-file "$prefix_dir/crossfile"
     makeplusinstall
     popd
-fi
+}
+_freetype_mark=lib/libfreetype.dll.a
 
-## fribidi
-if [ ! -e "$prefix_dir/lib/libfribidi.dll.a" ]; then
-    ver=1.0.13
+_fribidi () {
+    local ver=1.0.13
     gettar "https://github.com/fribidi/fribidi/releases/download/v${ver}/fribidi-${ver}.tar.xz"
     builddir fribidi-${ver}
-    meson .. --cross-file "$prefix_dir/crossfile" \
+    meson setup .. --cross-file "$prefix_dir/crossfile" \
         -D{tests,docs}=false
     makeplusinstall
     popd
-fi
+}
+_fribidi_mark=lib/libfribidi.dll.a
 
-## harfbuzz
-if [ ! -e "$prefix_dir/lib/libharfbuzz.dll.a" ]; then
-    ver=8.1.1
+_harfbuzz () {
+    local ver=8.1.1
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
-    meson .. --cross-file "$prefix_dir/crossfile" \
+    meson setup .. --cross-file "$prefix_dir/crossfile" \
         -Dtests=disabled
     makeplusinstall
     popd
-fi
+}
+_harfbuzz_mark=lib/libharfbuzz.dll.a
 
-## libass
-if [ ! -e "$prefix_dir/lib/libass.dll.a" ]; then
+_libass () {
     [ -d libass ] || $gitclone https://github.com/libass/libass.git
     builddir libass
     [ -f ../configure ] || (cd .. && ./autogen.sh)
     ../configure --host=$TARGET $commonflags
     makeplusinstall
     popd
-fi
+}
+_libass_mark=lib/libass.dll.a
 
-## luajit
-if [ ! -e "$prefix_dir/lib/libluajit-5.1.a" ]; then
-    $gitclone https://github.com/LuaJIT/LuaJIT.git
+_luajit () {
+    [ -d LuaJIT ] || $gitclone https://github.com/LuaJIT/LuaJIT.git
     pushd LuaJIT
-    hostcc="ccache cc"
-    flags=
+    local hostcc="ccache cc"
+    local flags=
     [[ "$TARGET" == "i686-"* ]] && { hostcc="$hostcc -m32"; flags=XCFLAGS=-DLUAJIT_NO_UNWIND; }
     make TARGET_SYS=Windows clean
     make TARGET_SYS=Windows HOST_CC="$hostcc" CROSS="ccache $TARGET-" \
         BUILDMODE=static $flags amalg
     make DESTDIR="$prefix_dir" INSTALL_DEP= FILE_T=luajit.exe install
     popd
-fi
+}
+_luajit_mark=lib/libluajit-5.1.a
+
+for x in \
+    iconv zlib ffmpeg shaderc spirv-cross vulkan-headers vulkan-loader \
+    libplacebo freetype fribidi harfbuzz libass luajit
+do
+    build_if_missing $x
+done
 
 ## mpv
 
