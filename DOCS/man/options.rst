@@ -1541,9 +1541,9 @@ Video
     Moves the displayed video rectangle by the given value in the X or Y
     direction. The unit is in fractions of the size of the destination rectangle.
 
-    For example, displaying a 1280x720 video fullscreen on a 1680x1050 screen
-    with ``--video-pan-x=-0.1`` would move the video 168 pixels to the left
-    (making 168 pixels of the source video invisible).
+    For example, displaying a video fullscreen on a 1920x1080 screen with
+    ``--video-pan-x=-0.1`` would move the video 192 pixels to the left and
+    ``--video-pan-y=-0.1`` would move the video 108 pixels up.
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
