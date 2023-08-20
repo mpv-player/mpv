@@ -81,7 +81,7 @@ fi
 
 ## zlib
 if [ ! -e "$prefix_dir/lib/libz.dll.a" ]; then
-    ver=1.2.13
+    ver=1.3
     gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
     make -fwin32/Makefile.gcc clean
@@ -138,7 +138,7 @@ fi
 
 ## freetype2
 if [ ! -e "$prefix_dir/lib/libfreetype.dll.a" ]; then
-    ver=2.13.0
+    ver=2.13.1
     gettar "https://mirror.netcologne.de/savannah/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     meson .. --cross-file "$prefix_dir/crossfile"
@@ -159,7 +159,7 @@ fi
 
 ## harfbuzz
 if [ ! -e "$prefix_dir/lib/libharfbuzz.dll.a" ]; then
-    ver=7.3.0
+    ver=8.1.1
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     meson .. --cross-file "$prefix_dir/crossfile" \
