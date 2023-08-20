@@ -58,6 +58,13 @@ jobs:
         run: |
           cat ./build/meson-logs/meson-log.txt
 
+      - name: Functional test
+        id: tests
+        run: |
+          cd artifact && wine64 ./mpv.com -v --no-config
+        env:
+          WINEDEBUG: '+loaddll'
+
       - uses: actions/upload-artifact@v3
         with:
           name: mpv-${{ matrix.target }}
