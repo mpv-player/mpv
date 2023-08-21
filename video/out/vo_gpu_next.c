@@ -1999,9 +1999,9 @@ static void update_render_options(struct vo *vo)
 
     pars->color_map_params.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
     pars->color_map_params.tone_mapping_param = opts->tone_map.curve_param;
-    pars->color_map_params.inverse_tone_mapping = opts->tone_map.inverse;
     if (isnan(pars->color_map_params.tone_mapping_param)) // vo_gpu compatibility
         pars->color_map_params.tone_mapping_param = 0.0;
+    pars->color_map_params.inverse_tone_mapping = opts->tone_map.inverse;
     pars->color_map_params.contrast_recovery = opts->tone_map.contrast_recovery;
     pars->color_map_params.visualize_lut = opts->tone_map.visualize;
     pars->color_map_params.contrast_smoothness = opts->tone_map.contrast_smoothness;
