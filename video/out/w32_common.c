@@ -877,6 +877,18 @@ static void fit_window_on_screen(struct vo_w32_state *w32)
     if (w32->opts->border)
         subtract_window_borders(w32, w32->window, &screen);
 
+    // Check for invisible borders and adjust the work area size
+    RECT frame, window;
+    if (GetWindowRect(w32->window, &window) &&
+        SUCCEEDED(DwmGetWindowAttribute(w32->window, DWMWA_EXTENDED_FRAME_BOUNDS,
+                                        &frame, sizeof(RECT))))
+    {
+        screen.left -= frame.left - window.left;
+        screen.top -= frame.top - window.top;
+        screen.right += window.right - frame.right;
+        screen.bottom += window.bottom - frame.bottom;
+    }
+
     bool adjusted = fit_rect_size(&w32->windowrc, rect_w(screen), rect_h(screen));
 
     if (w32->windowrc.top < screen.top) {
