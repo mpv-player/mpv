@@ -66,6 +66,7 @@ typedef struct mp_vo_opts {
 
     int window_affinity;
     char *mmcss_profile;
+    int window_corners;
 
     double override_display_fps;
     double timing_offset;

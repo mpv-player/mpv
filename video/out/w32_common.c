@@ -58,6 +58,8 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 
+#define DWMWA_WINDOW_CORNER_PREFERENCE 33
+
 #ifndef DPI_ENUMS_DECLARED
 typedef enum MONITOR_DPI_TYPE {
     MDT_EFFECTIVE_DPI = 0,
@@ -1090,6 +1092,12 @@ static void update_dark_mode(const struct vo_w32_state *w32)
                           &use_dark_mode, sizeof(use_dark_mode));
 }
 
+static void update_corners_pref(const struct vo_w32_state *w32) {
+    DwmSetWindowAttribute(w32->window, DWMWA_WINDOW_CORNER_PREFERENCE,
+                          &w32->opts->window_corners,
+                          sizeof(w32->opts->window_corners));
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -1666,6 +1674,7 @@ static void *gui_thread(void *ptr)
     }
 
     update_dark_mode(w32);
+    update_corners_pref(w32);
     if (w32->opts->window_affinity)
         update_affinity(w32);
 
@@ -1855,6 +1864,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                 update_minimized_state(w32);
             } else if (changed_option == &vo_opts->window_maximized) {
                 update_maximized_state(w32);
+            } else if (changed_option == &vo_opts->window_corners) {
+                update_corners_pref(w32);
             }
         }
 
