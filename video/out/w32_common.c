@@ -1043,6 +1043,15 @@ static void update_window_state(struct vo_w32_state *w32)
     signal_events(w32, VO_EVENT_RESIZE);
 }
 
+static void update_corners_pref(const struct vo_w32_state *w32) {
+    if (w32->parent)
+        return;
+
+    int pref = w32->current_fs ? 0 : w32->opts->window_corners;
+    DwmSetWindowAttribute(w32->window, DWMWA_WINDOW_CORNER_PREFERENCE,
+                          &pref, sizeof(pref));
+}
+
 static void reinit_window_state(struct vo_w32_state *w32)
 {
     if (w32->parent)
@@ -1050,6 +1059,7 @@ static void reinit_window_state(struct vo_w32_state *w32)
 
     // The order matters: fs state should be updated prior to changing styles
     update_fullscreen_state(w32);
+    update_corners_pref(w32);
     update_window_style(w32);
 
     // fit_on_screen is applied at most once when/if applicable (normal win).
@@ -1090,12 +1100,6 @@ static void update_dark_mode(const struct vo_w32_state *w32)
 
     DwmSetWindowAttribute(w32->window, DWMWA_USE_IMMERSIVE_DARK_MODE,
                           &use_dark_mode, sizeof(use_dark_mode));
-}
-
-static void update_corners_pref(const struct vo_w32_state *w32) {
-    DwmSetWindowAttribute(w32->window, DWMWA_WINDOW_CORNER_PREFERENCE,
-                          &w32->opts->window_corners,
-                          sizeof(w32->opts->window_corners));
 }
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
