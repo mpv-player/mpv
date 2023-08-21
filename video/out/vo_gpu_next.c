@@ -1199,7 +1199,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         return;
     }
     if (!mix.num_frames) {
-        MP_ERR(vo, "No frames available to take screenshot of? Open issue\n");
+        MP_ERR(vo, "No frames available to take screenshot of, is a file loaded?\n");
         return;
     }
 
