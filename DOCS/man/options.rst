@@ -3131,6 +3131,15 @@ Window
     Focus the video window on creation and makes it the front most window. This
     is on by default.
 
+``--window-corners=<default|donotround|round|roundsmall>``
+    (Windows only)
+    Set the preference for window corner rounding.
+
+    :default: Let the system decide whether or not to round window corners
+    :donotround: Never round window corners
+    :round: Round the corners if appropriate
+    :roundsmall: Round the corners if appropriate, with a small radius
+
 ``--border``, ``--no-border``
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.

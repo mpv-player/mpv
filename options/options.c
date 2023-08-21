@@ -32,6 +32,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <dwmapi.h>
 #endif
 
 #include "options.h"
@@ -190,6 +191,16 @@ static const m_option_t mp_vo_opt_list[] = {
     {"window-affinity", OPT_CHOICE(window_affinity, {"default", WDA_NONE},
         {"excludefromcapture", WDA_EXCLUDEFROMCAPTURE}, {"monitor", WDA_MONITOR})},
     {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
+// For old MinGW-w64 compatibility
+#define DWMWCP_DEFAULT 0
+#define DWMWCP_DONOTROUND 1
+#define DWMWCP_ROUND 2
+#define DWMWCP_ROUNDSMALL 3
+    {"window-corners", OPT_CHOICE(window_corners,
+        {"default", DWMWCP_DEFAULT},
+        {"donotround", DWMWCP_DONOTROUND},
+        {"round", DWMWCP_ROUND},
+        {"roundsmall", DWMWCP_ROUNDSMALL})},
 #endif
 #if HAVE_EGL_ANDROID
     {"android-surface-size", OPT_SIZE_BOX(android_surface_size)},
