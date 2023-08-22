@@ -147,6 +147,8 @@ struct vo_w32_state {
     // entire virtual desktop area - but we still limit to one monitor size.
     bool fit_on_screen;
 
+    bool win_force_pos;
+
     ITaskbarList2 *taskbar_list;
     ITaskbarList3 *taskbar_list3;
     UINT tbtnCreatedMsg;
@@ -666,8 +668,15 @@ static HMONITOR get_default_monitor(struct vo_w32_state *w32)
                                      w32->opts->screen_id;
 
     // Handle --fs-screen=<all|default> and --screen=default
-    if (id < 0)
-        return MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+    if (id < 0) {
+        if (w32->win_force_pos && !w32->current_fs) {
+            // Get window from forced position
+            return MonitorFromRect(&w32->windowrc, MONITOR_DEFAULTTOPRIMARY);
+        } else {
+            // Let compositor decide
+            return MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+        }
+    }
 
     HMONITOR mon = get_monitor(id);
     if (mon)
@@ -681,12 +690,8 @@ static MONITORINFO get_monitor_info(struct vo_w32_state *w32)
     HMONITOR mon;
     if (IsWindowVisible(w32->window) && !w32->current_fs) {
         mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
-	} else if (w32->window_bounds_initialized && !w32->current_fs) {
-        // The window is not visible during initialization, so get the
-        // monitor by the cached window rect, or fallback to primary.
-        mon = MonitorFromRect(&w32->windowrc, MONITOR_DEFAULTTOPRIMARY);
     } else {
-        // The window bounds have not been initialized, so get the
+        // The window is not visible during initialization, so get the
         // monitor by --screen or --fs-screen id, or fallback to primary.
         mon = get_default_monitor(w32);
     }
@@ -1494,7 +1499,8 @@ static void gui_thread_reconfig(void *ptr)
                 geo.win.x0 + vo->dwidth, geo.win.y0 + vo->dheight);
         w32->prev_windowrc = w32->windowrc;
         w32->window_bounds_initialized = true;
-        w32->fit_on_screen = !(geo.flags & VO_WIN_FORCE_POS);
+        w32->win_force_pos = geo.flags & VO_WIN_FORCE_POS;
+        w32->fit_on_screen = !w32->win_force_pos;
         goto finish;
     }
 
