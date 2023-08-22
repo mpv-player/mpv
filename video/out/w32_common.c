@@ -1276,7 +1276,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_NCHITTEST:
         // Provide sizing handles for borderless windows
-        if (!w32->opts->border && !w32->current_fs) {
+        if ((!w32->opts->border || !w32->opts->title_bar) && !w32->current_fs) {
             return borderless_nchittest(w32, GET_X_LPARAM(lParam),
                                         GET_Y_LPARAM(lParam));
         }
