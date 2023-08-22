@@ -962,9 +962,9 @@ if features['sixel']
     sources += files('video/out/vo_sixel.c')
 endif
 
-features += {'posix_shm': false}
+features += {'posix-shm': false}
 if features['posix']
-    features += {'posix_shm': cc.has_function('shm_open', prefix: '#include <sys/mman.h>')}
+    features += {'posix-shm': cc.has_function('shm_open', prefix: '#include <sys/mman.h>')}
 endif
 
 spirv_cross = dependency('spirv-cross-c-shared', required: get_option('spirv-cross'))
@@ -1006,18 +1006,18 @@ if features['wayland']
     subdir(join_paths('video', 'out'))
 endif
 
-features += {'memfd_create': false}
+features += {'memfd-create': false}
 if features['wayland']
-    features += {'memfd_create': cc.has_function('memfd_create',
+    features += {'memfd-create': cc.has_function('memfd_create',
                                                  prefix: '#define _GNU_SOURCE\n#include <sys/mman.h>')}
 endif
-if features['wayland'] and features['memfd_create']
+if features['wayland'] and features['memfd-create']
     sources += files('video/out/vo_wlshm.c')
 endif
 
 dmabuf_wayland = get_option('dmabuf-wayland').require(
-    features['drm'] and features['memfd_create'] and features['wayland'],
-    error_message: 'drm, memfd_create, or wayland was not found!',
+    features['drm'] and features['memfd-create'] and features['wayland'],
+    error_message: 'drm, memfd-create or wayland was not found!',
 )
 features += {'dmabuf-wayland': dmabuf_wayland.allowed()}
 if features['dmabuf-wayland']
@@ -1282,10 +1282,9 @@ if features['vulkan'] and features['x11']
      sources += files('video/out/vulkan/context_xlib.c')
 endif
 
-features += {'vk_khr_display': cc.has_function('vkCreateDisplayPlaneSurfaceKHR', prefix: '#include <vulkan/vulkan_core.h>',
+features += {'vk-khr-display': cc.has_function('vkCreateDisplayPlaneSurfaceKHR', prefix: '#include <vulkan/vulkan_core.h>',
                                                dependencies: [vulkan])}
-
-if features['vk_khr_display']
+if features['vk-khr-display']
     sources += files('video/out/vulkan/context_display.c')
 endif
 

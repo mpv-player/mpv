@@ -41,6 +41,7 @@ Interface changes
     - add `playlist-path` and `playlist/N/playlist-path` properties
     - add `--x11-wid-title` option
     - add `--libplacebo-opts` option
+    - change `--video-pan-x/y` to be relative to the destination rectangle
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

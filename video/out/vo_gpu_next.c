@@ -1199,7 +1199,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         return;
     }
     if (!mix.num_frames) {
-        MP_ERR(vo, "No frames available to take screenshot of? Open issue\n");
+        MP_ERR(vo, "No frames available to take screenshot of, is a file loaded?\n");
         return;
     }
 
@@ -1984,7 +1984,8 @@ static void update_render_options(struct vo *vo)
         [TONE_MAPPING_ST2094_10] = &pl_tone_map_st2094_10,
     };
 
-    const struct pl_gamut_map_function *gamut_modes[] = {
+    const struct pl_gamut_map_function * const gamut_modes[] = {
+        [GAMUT_AUTO]            = pl_color_map_default_params.gamut_mapping,
         [GAMUT_CLIP]            = &pl_gamut_map_clip,
         [GAMUT_PERCEPTUAL]      = &pl_gamut_map_perceptual,
         [GAMUT_RELATIVE]        = &pl_gamut_map_relative,
@@ -1998,14 +1999,13 @@ static void update_render_options(struct vo *vo)
 
     pars->color_map_params.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
     pars->color_map_params.tone_mapping_param = opts->tone_map.curve_param;
-    pars->color_map_params.inverse_tone_mapping = opts->tone_map.inverse;
     if (isnan(pars->color_map_params.tone_mapping_param)) // vo_gpu compatibility
         pars->color_map_params.tone_mapping_param = 0.0;
+    pars->color_map_params.inverse_tone_mapping = opts->tone_map.inverse;
     pars->color_map_params.contrast_recovery = opts->tone_map.contrast_recovery;
     pars->color_map_params.visualize_lut = opts->tone_map.visualize;
     pars->color_map_params.contrast_smoothness = opts->tone_map.contrast_smoothness;
-    if (opts->tone_map.gamut_mode != GAMUT_AUTO)
-        pars->color_map_params.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
+    pars->color_map_params.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
 
     switch (opts->dither_algo) {
     case DITHER_NONE:

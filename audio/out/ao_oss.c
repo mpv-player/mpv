@@ -186,11 +186,11 @@ static int init(struct ao *ao)
 
     /* Channels count. */
     if (af_fmt_is_spdif(format)) {
-        /* Probably could be fixed by setting number of channels;
-         * needs testing. */
-        if (channels.num != 2) {
-            MP_ERR(ao, "Format %s not implemented.\n", af_fmt_to_str(format));
-            goto err_out;
+        nchannels = reqchannels = channels.num;
+        if (ioctl(p->dsp_fd, SNDCTL_DSP_CHANNELS, &nchannels) == -1) {
+            MP_ERR(ao, "Failed to set audio device to %d channels.\n",
+                reqchannels);
+            goto err_out_ioctl;
         }
     } else {
         struct mp_chmap_sel sel = {0};

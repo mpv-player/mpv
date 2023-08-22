@@ -485,8 +485,8 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
         drmModeAtomicFree(atomic_ctx->request);
     }
 
-    vo_drm_uninit(ctx->vo);
     ra_gl_ctx_uninit(ctx);
+    vo_drm_uninit(ctx->vo);
 
     if (p) {
         // According to GBM documentation all BO:s must be released
@@ -497,18 +497,17 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
 
         eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                        EGL_NO_CONTEXT);
-        if (p->egl.display) {
-            eglDestroyContext(p->egl.display, p->egl.context);
+        if (p->egl.display != EGL_NO_DISPLAY) {
             eglDestroySurface(p->egl.display, p->egl.surface);
+            eglDestroyContext(p->egl.display, p->egl.context);
         }
         if (p->gbm.surface)
             gbm_surface_destroy(p->gbm.surface);
         eglTerminate(p->egl.display);
         gbm_device_destroy(p->gbm.device);
-        p->egl.context = EGL_NO_CONTEXT;
-        eglDestroyContext(p->egl.display, p->egl.context);
 
-        close(p->drm_params.render_fd);
+        if (p->drm_params.render_fd != -1)
+            close(p->drm_params.render_fd);
     }
 }
 
@@ -694,13 +693,12 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         MP_VERBOSE(ctx, "Opening render node \"%s\"\n", rendernode_path);
         p->drm_params.render_fd = open(rendernode_path, O_RDWR | O_CLOEXEC);
         if (p->drm_params.render_fd == -1) {
-            MP_WARN(ctx, "Cannot open render node \"%s\": %s. VAAPI hwdec will be disabled\n",
-                    rendernode_path, mp_strerror(errno));
+            MP_WARN(ctx, "Cannot open render node: %s\n", mp_strerror(errno));
         }
         free(rendernode_path);
     } else {
         p->drm_params.render_fd = -1;
-        MP_VERBOSE(ctx, "Could not find path to render node. VAAPI hwdec will be disabled\n");
+        MP_VERBOSE(ctx, "Could not find path to render node.\n");
     }
 
     struct ra_gl_ctx_params params = {
