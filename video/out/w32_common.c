@@ -166,12 +166,10 @@ struct vo_w32_state {
     int snap_dx;
     int snap_dy;
 
-    LONG top_border_reduce;
-
     HANDLE avrt_handle;
 };
 
-static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
+static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
     if (w32->api.pAdjustWindowRectExForDpi) {
         w32->api.pAdjustWindowRectExForDpi(rc,
@@ -180,8 +178,15 @@ static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
     } else {
         AdjustWindowRect(rc, GetWindowLongPtrW(hwnd, GWL_STYLE), 0);
     }
+}
+
+static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
+{
+    RECT win = *rc;
+    adjust_window_rect(w32, hwnd, rc);
+    // Adjust for title bar height that will be hidden in WM_NCCALCSIZE
     if (w32->opts->border && !w32->opts->title_bar && !w32->current_fs)
-        rc->top += w32->top_border_reduce;
+        rc->top -= rc->top - win.top;
 }
 
 // basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
@@ -811,25 +816,16 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
         style |= FULLSCREEN;
     } else {
         style |= w32->opts->border ? FRAME : NO_FRAME;
-        if (!w32->opts->title_bar)
-            style &= ~WS_CAPTION;
     }
     return style;
 }
 
-static LONG get_invisible_border_size(struct vo_w32_state *w32)
+static LONG get_title_bar_height(struct vo_w32_state *w32)
 {
-    RECT rect, frame;
-    if (GetWindowRect(w32->window, &rect) &&
-        SUCCEEDED(DwmGetWindowAttribute(w32->window, DWMWA_EXTENDED_FRAME_BOUNDS,
-                                        &frame, sizeof(RECT))))
-    {
-        return frame.left - rect.left;
-    }
-
-    return 0;
+    RECT rc = {0};
+    adjust_window_rect(w32, w32->window, &rc);
+    return -rc.top;
 }
-
 
 static void update_window_style(struct vo_w32_state *w32)
 {
@@ -842,8 +838,6 @@ static void update_window_style(struct vo_w32_state *w32)
     const DWORD style = GetWindowLongPtrW(w32->window, GWL_STYLE);
     SetWindowLongPtrW(w32->window, GWL_STYLE, update_style(w32, style));
     w32->windowrc = wr;
-    w32->top_border_reduce = (w32->opts->border && !w32->opts->title_bar &&
-                              !w32->current_fs) ? get_invisible_border_size(w32) : 0;
 }
 
 // If rc is wider/taller than n_w/n_h, shrink rc size while keeping the center.
@@ -1398,13 +1392,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         update_dark_mode(w32);
         break;
     case WM_NCCALCSIZE:
-        // DWM makes part of left, right and bottom border invisible. Reduce the
-        // top border width to have the same look all around the window.
+        // Apparently removing WS_CAPTION disables some window animation, instead
+        // just reduce non-client size to remove title bar.
         if (wParam && lParam && w32->opts->border && !w32->opts->title_bar &&
             !w32->current_fs && !w32->parent)
         {
-            w32->top_border_reduce = get_invisible_border_size(w32);
-            ((LPNCCALCSIZE_PARAMS) lParam)->rgrc[0].top -= w32->top_border_reduce;
+            ((LPNCCALCSIZE_PARAMS) lParam)->rgrc[0].top -= get_title_bar_height(w32);
         }
         break;
     }
