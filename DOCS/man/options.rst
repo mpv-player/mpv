@@ -5136,8 +5136,8 @@ DVB
 ``--dvbin-file=<filename>``
     Instructs mpv to read the channels list from ``<filename>``. The default is
     in the mpv configuration directory (usually ``~/.config/mpv``) with the
-    filename ``channels.conf.{sat,ter,cbl,atsc}`` (based on your card type) or
-    ``channels.conf`` as a last resort.
+    filename ``channels.conf.{sat,ter,cbl,atsc,isdbt}`` (based on your card
+    type) or ``channels.conf`` as a last resort.
     For DVB-S/2 cards, a VDR 1.7.x format channel list is recommended
     as it allows tuning to DVB-S2 channels, enabling subtitles and
     decoding the PMT (which largely improves the demuxing).
