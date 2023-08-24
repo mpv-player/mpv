@@ -94,6 +94,8 @@ struct priv {
     int osd_shm_width;
     int osd_shm_stride;
     int osd_shm_height;
+    bool osd_surface_is_mapped;
+    bool osd_surface_has_contents;
 
     struct osd_buffer *osd_buffer;
     struct mp_draw_sub_cache *osd_cache;
@@ -553,6 +555,8 @@ static bool draw_osd(struct vo *vo, struct mp_image *cur, double pts)
                                                MP_ARRAY_SIZE(act_rc), &num_act_rc,
                                                mod_rc, MP_ARRAY_SIZE(mod_rc), &num_mod_rc);
 
+    p->osd_surface_has_contents = num_act_rc > 0;
+
     if (!osd || !num_mod_rc)
         goto done;
 
@@ -599,10 +603,14 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                                  buf->image->h);
 
         if (osd_buf && osd_buf->buffer) {
-            if (draw_osd(vo, &osd_buf->image, pts)) {
+            if (draw_osd(vo, &osd_buf->image, pts) && p->osd_surface_has_contents) {
                 wl_surface_attach(wl->osd_surface, osd_buf->buffer, 0, 0);
                 wl_surface_damage_buffer(wl->osd_surface, 0, 0, osd_buf->image.w,
                                          osd_buf->image.h);
+                p->osd_surface_is_mapped = true;
+            } else if (!p->osd_surface_has_contents && p->osd_surface_is_mapped) {
+                wl_surface_attach(wl->osd_surface, NULL, 0, 0);
+                p->osd_surface_is_mapped = false;
             }
         }
     }
