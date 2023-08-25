@@ -192,6 +192,8 @@ struct priv {
     float corner_rounding;
 
     struct pl_hdr_metadata last_hdr_metadata;
+
+    bool hdr_icc_warn;
 };
 
 static void update_render_options(struct vo *vo);
@@ -1021,6 +1023,15 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
     apply_target_options(p, &target);
+
+    if (!p->hdr_icc_warn && target.profile.len && target.color.hdr.max_luma) {
+        MP_WARN(vo, "HDR passthrough has been engaged with the ICC profile "
+                    "enabled, this is uncommon. Make sure the correct ICC "
+                    "profile is being used, one that accounts for the display "
+                    "characteristics in HDR mode.\n");
+        p->hdr_icc_warn = true;
+    }
+
     update_overlays(vo, p->osd_res, frame->current ? frame->current->pts : 0,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target);
