@@ -1128,8 +1128,8 @@ void write_video(struct MPContext *mpctx)
     }
 
     // Filter output is different from VO input?
-    struct mp_image_params p = mpctx->next_frames[0]->params;
-    if (!vo->params || !mp_image_params_equal(&p, vo->params)) {
+    struct mp_image_params *p = &mpctx->next_frames[0]->params;
+    if (!vo->params || !mp_image_params_equal(p, vo->params)) {
         // Changing config deletes the current frame; wait until it's finished.
         if (vo_still_displaying(vo)) {
             vo_request_wakeup_on_done(vo);
@@ -1138,16 +1138,16 @@ void write_video(struct MPContext *mpctx)
 
         const struct vo_driver *info = mpctx->video_out->driver;
         char extra[20] = {0};
-        if (p.p_w != p.p_h) {
+        if (p->p_w != p->p_h) {
             int d_w, d_h;
-            mp_image_params_get_dsize(&p, &d_w, &d_h);
+            mp_image_params_get_dsize(p, &d_w, &d_h);
             snprintf(extra, sizeof(extra), " => %dx%d", d_w, d_h);
         }
         char sfmt[20] = {0};
-        if (p.hw_subfmt)
-            snprintf(sfmt, sizeof(sfmt), "[%s]", mp_imgfmt_to_name(p.hw_subfmt));
+        if (p->hw_subfmt)
+            snprintf(sfmt, sizeof(sfmt), "[%s]", mp_imgfmt_to_name(p->hw_subfmt));
         MP_INFO(mpctx, "VO: [%s] %dx%d%s %s%s\n",
-                info->name, p.w, p.h, extra, mp_imgfmt_to_name(p.imgfmt), sfmt);
+                info->name, p->w, p->h, extra, mp_imgfmt_to_name(p->imgfmt), sfmt);
         MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
         int vo_r = vo_reconfig2(vo, mpctx->next_frames[0]);
