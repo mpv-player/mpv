@@ -2410,6 +2410,12 @@ Property list
     ``video-params/dw``, ``video-params/dh``
         Video size as integers, scaled for correct aspect ratio.
 
+    ``video-params/crop-x``, ``video-params/crop-y``
+        Crop offset of the source video frame.
+
+    ``video-params/crop-w``, ``video-params/crop-h``
+        Video size after cropping.
+
     ``video-params/aspect``
         Display aspect ratio as float.
 
