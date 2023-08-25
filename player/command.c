@@ -813,7 +813,7 @@ static bool time_remaining(MPContext *mpctx, double *remaining)
     if (playback == MP_NOPTS_VALUE || len <= 0)
         return false;
 
-    *remaining = len - playback;
+    *remaining = MPMAX(len - playback, 0);
 
     return len >= 0;
 }
