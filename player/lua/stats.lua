@@ -330,10 +330,11 @@ local function append_perfdata(s, dedicated_page)
 
     -- ensure that the fixed title is one element and every scrollable line is
     -- also one single element.
-    s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}",
+    s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s{\\fs%s}",
                      dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
-                     "(last/average/peak  μs)", o.font_size)
+                     "(last/average/peak μs)",
+                     dedicated_page and " (hint: scroll with ↑↓)" or "", o.font_size)
 
     for _,frame in ipairs(sorted_keys(vo_p)) do  -- ensure fixed display order
         local data = vo_p[frame]
@@ -862,7 +863,9 @@ local function keybinding_info(after_scroll)
     local page = pages[o.key_page_4]
     eval_ass_formatting()
     add_header(header)
-    append(header, "", {prefix=page.desc .. ":", nl="", indent=""})
+    append(header, "", {prefix=format("%s: {\\fs%s}%s{\\fs%s}", page.desc,
+           o.font_size * 0.66, "(hint: scroll with ↑↓)", o.font_size), nl="",
+           indent=""})
 
     if not kbinfo_lines or not after_scroll then
         kbinfo_lines = get_kbinfo_lines()
