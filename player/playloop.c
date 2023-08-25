@@ -1085,8 +1085,7 @@ static void handle_playback_time(struct MPContext *mpctx)
     } else if (mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF)
     {
-        double apts =
-            mpctx->ao_chain ? mpctx->ao_chain->last_out_pts : MP_NOPTS_VALUE;
+        double apts = playing_audio_pts(mpctx);
         double vpts = mpctx->video_pts;
         double mpts = MP_PTS_MAX(apts, vpts);
         if (mpts != MP_NOPTS_VALUE)
