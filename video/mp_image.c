@@ -726,12 +726,26 @@ void mp_image_vflip(struct mp_image *img)
     }
 }
 
+bool mp_image_crop_valid(const struct mp_image_params *p)
+{
+    return p->crop.x1 > p->crop.x0 && p->crop.y1 > p->crop.y0 &&
+           p->crop.x0 >= 0 && p->crop.y0 >= 0 &&
+           p->crop.x1 <= p->w && p->crop.y1 <= p->h;
+}
+
 // Display size derived from image size and pixel aspect ratio.
 void mp_image_params_get_dsize(const struct mp_image_params *p,
                                int *d_w, int *d_h)
 {
-    *d_w = p->w;
-    *d_h = p->h;
+    if (mp_image_crop_valid(p))
+    {
+        *d_w = mp_rect_w(p->crop);
+        *d_h = mp_rect_h(p->crop);
+    } else {
+        *d_w = p->w;
+        *d_h = p->h;
+    }
+
     if (p->p_w > p->p_h && p->p_h >= 1)
         *d_w = MPCLAMP(*d_w * (int64_t)p->p_w / p->p_h, 1, INT_MAX);
     if (p->p_h > p->p_w && p->p_w >= 1)
@@ -765,6 +779,10 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
             mp_snprintf_cat(b, bs, " SP=%f", p->color.sig_peak);
         mp_snprintf_cat(b, bs, " CL=%s",
                         m_opt_choice_str(mp_chroma_names, p->chroma_location));
+        if (mp_image_crop_valid(p)) {
+            mp_snprintf_cat(b, bs, " crop=%dx%d+%d+%d", mp_rect_w(p->crop),
+                            mp_rect_h(p->crop), p->crop.x0, p->crop.y0);
+        }
         if (p->rotate)
             mp_snprintf_cat(b, bs, " rot=%d", p->rotate);
         if (p->stereo3d > 0) {
@@ -820,7 +838,8 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate &&
            p1->stereo3d == p2->stereo3d &&
-           p1->alpha == p2->alpha;
+           p1->alpha == p2->alpha &&
+           mp_rect_equals(&p1->crop, &p2->crop);
 }
 
 // Set most image parameters, but not image format or size.
