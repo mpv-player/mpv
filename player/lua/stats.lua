@@ -670,12 +670,14 @@ local function add_file(s)
 end
 
 
-local function append_resolution(s, r, prefix)
+local function append_resolution(s, r, prefix, w_prop, h_prop)
     if not r then
         return
     end
-    if append(s, r["w"], {prefix=prefix}) then
-        append(s, r["h"], {prefix="x", nl="", indent=" ", prefix_sep=" ",
+    w_prop = w_prop or "w"
+    h_prop = h_prop or "h"
+    if append(s, r[w_prop], {prefix=prefix}) then
+        append(s, r[h_prop], {prefix="x", nl="", indent=" ", prefix_sep=" ",
                            no_prefix_markup=true})
         if r["aspect"] ~= nil then
             append(s, format("%.2f:1", r["aspect"]), {prefix=", ", nl="", indent="",
@@ -731,8 +733,8 @@ local function add_video(s)
     append_perfdata(s, o.print_perfdata_passes)
 
     append_resolution(s, r, "Native Resolution:")
-    if ro and (r["w"] ~= ro["w"] or r["h"] ~= ro["h"]) then
-        append_resolution(s, ro, "Output Resolution:")
+    if ro and (r["w"] ~= ro["dw"] or r["h"] ~= ro["dh"]) then
+        append_resolution(s, ro, "Output Resolution:", "dw", "dh")
     end
     append_resolution(s, {w=scaled_width, h=scaled_height}, "Scaled Resolution:")
     if not mp.get_property_native("fullscreen") then
