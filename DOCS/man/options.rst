@@ -1564,6 +1564,13 @@ Video
     software decoding and hardware decoding methods that copy the video back to
     system memory support all values between 0 and 359.
 
+``--video-crop=<[W[xH]][+x+y]>``, ``--video-crop=<x:y>``
+    Crop the video by starting at the x, y offset for w, h pixels. The crop is
+    applied to the source video rectangle (before anamorphic stretch) by the VO.
+    A crop rectangle that is not within the video rectangle will be ignored.
+    This works with hwdec, unlike the equivalent 'lavfi-crop'. Setting the crop
+    to '0x0' disables it.
+
 ``--video-zoom=<value>``
     Adjust the video display scale factor by the given value. The parameter is
     given log 2. For example, ``--video-zoom=0`` is unscaled,
