@@ -2820,67 +2820,6 @@ static int mp_property_vf_fps(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, 1.0 / avg);
 }
 
-/// Video aspect (RW) (deprecated)
-// FIXME: please delete this mess as soon as the deprecation period is over
-static int mp_property_aspect(void *ctx, struct m_property *prop,
-                              int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct m_config_option *opt;
-    opt = m_config_get_co_raw(mpctx->mconfig, bstr0("video-aspect-override"));
-
-    struct command_ctx *cmd = mpctx->command_ctx;
-    for (int n = 0; n < cmd->num_warned_deprecated; n++) {
-        if (strcmp(cmd->warned_deprecated[n], prop->name) == 0)
-            goto skip_warn;
-    }
-
-    MP_WARN(mpctx, "Warning: property 'video-aspect' is deprecated, refer to "
-            "'video-params/aspect' and 'video-aspect-override'.\n");
-    MP_TARRAY_APPEND(cmd, cmd->warned_deprecated, cmd->num_warned_deprecated,
-                     (char *)prop->name);
-
-skip_warn: ;
-
-    float aspect = *(float *)opt->data;
-    if (mpctx->vo_chain && aspect <= 0) {
-        struct mp_image_params *params = &mpctx->vo_chain->filter->input_params;
-        if (params && params->p_w > 0 && params->p_h > 0) {
-            int d_w, d_h;
-            mp_image_params_get_dsize(params, &d_w, &d_h);
-            aspect = (float)d_w / d_h;
-        }
-    }
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    if (track && track->stream && aspect <= 0) {
-        struct mp_codec_params *c = track->stream->codec;
-        if (c->disp_w && c->disp_h)
-            aspect = (float)c->disp_w / c->disp_h;
-    }
-
-    switch (action) {
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = *(opt->opt);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT: {
-        if (aspect < 0) {
-            *(char **)arg = talloc_asprintf(NULL, "%.3f (original)", aspect);
-            return M_PROPERTY_OK;
-        }
-        break;
-    }
-    case M_PROPERTY_GET: {
-        *(float *)arg = aspect;
-        return M_PROPERTY_OK;
-    }
-    case M_PROPERTY_SET:
-        if (m_config_set_option_raw(mpctx->mconfig, opt, arg, 0) < 0)
-            return M_PROPERTY_ERROR;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
 #define doubles_equal(x, y) (fabs((x) - (y)) <= 0.001)
 
 static int mp_property_video_aspect_override(void *ctx, struct m_property *prop,
@@ -3973,7 +3912,6 @@ static const struct m_property mp_properties_base[] = {
     {"current-vo", mp_property_vo},
     {"container-fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
-    {"video-aspect", mp_property_aspect},
     {"video-aspect-override", mp_property_video_aspect_override},
     {"vid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_VIDEO}},
     {"hwdec-current", mp_property_hwdec_current},
@@ -4101,7 +4039,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "aspect-name", "vo-configured", "current-vo",
-      "video-aspect", "video-dec-params", "osd-dimensions",
+      "video-dec-params", "osd-dimensions",
       "hwdec", "hwdec-current", "hwdec-interop"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute",
