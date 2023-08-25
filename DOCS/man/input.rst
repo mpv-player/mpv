@@ -2663,13 +2663,6 @@ Property list
     It may be saner to report an absolute DPI, however, this is the way HiDPI
     support is implemented on most OS APIs. See also ``--hidpi-window-scale``.
 
-``video-aspect`` (RW)
-    Deprecated. This is tied to ``--video-aspect-override``, but always
-    reports the current video aspect if video is active.
-
-    The read and write components of this option can be split up into
-    ``video-params/aspect`` and ``video-aspect-override`` respectively.
-
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the
     ``overlay-add`` command. It gives you the actual OSD/window size (not
