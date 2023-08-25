@@ -1905,9 +1905,12 @@ Audio
 
     .. admonition:: Warning
 
-        There is not much reason to use this. HDMI supports uncompressed
-        multichannel PCM, and mpv supports lossless DTS-HD decoding via
-        FFmpeg's new DCA decoder (based on libdcadec).
+        In general it is not recommended to use passthrough, since HDMI
+        supports uncompressed multichannel PCM, and mpv supports lossless
+        DTS-HD decoding via FFmpeg's new DCA decoder (based on libdcadec).
+        
+        Nevertheless, there are some cases in which it must be activated,
+        such as using 3D audio formats like Atmos or Auro-3D.
 
 ``--ad=<decoder1,decoder2,...[-]>``
     Specify a priority list of audio decoders to be used, according to their
