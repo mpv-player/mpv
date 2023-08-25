@@ -2325,7 +2325,13 @@ static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
     if (!mpctx->vo_chain)
         return (struct mp_image_params){0};
 
-    return mpctx->vo_chain->filter->output_params;
+    struct mp_image_params o_params = mpctx->vo_chain->filter->output_params;
+    if (mpctx->video_out) {
+        m_rect_apply(&o_params.crop, o_params.w, o_params.h,
+                     &mpctx->video_out->opts->video_crop);
+    }
+
+    return o_params;
 }
 
 static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
