@@ -693,6 +693,10 @@ local function append_resolution(s, r, prefix, w_prop, h_prop)
                                                indent=" ", prefix_sep="",
                                                no_prefix_markup=true})
         end
+        if r["crop-w"] and r["crop-w"] > 0 then
+            append(s, format("[x: %d, y: %d, w: %d, h: %d]", r["crop-x"], r["crop-y"], r["crop-w"],
+                   r["crop-h"]), {prefix=", ", nl="", indent="", no_prefix_markup=true})
+        end
     end
 end
 
