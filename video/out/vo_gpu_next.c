@@ -884,7 +884,10 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
 
     target->profile = p->icc_profile;
 
-    if (opts->icc_opts->icc_use_luma) {
+    // Never use ICC luma value when the hint is enabled. We must target
+    // whatever the swapchain has been configured for.
+    bool disable_icc_luma = p->target_hint && target->color.hdr.max_luma;
+    if (!disable_icc_luma && opts->icc_opts->icc_use_luma) {
         // Use detected luminance
         pars->icc_params.max_luma = 0;
     } else {
