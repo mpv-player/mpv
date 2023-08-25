@@ -852,7 +852,7 @@ local function keybinding_info(after_scroll)
     local page = pages[o.key_page_4]
     eval_ass_formatting()
     add_header(header)
-    append(header, "", {prefix=o.nl .. page.desc .. ":", nl="", indent=""})
+    append(header, "", {prefix=page.desc .. ":", nl="", indent=""})
 
     if not kbinfo_lines or not after_scroll then
         kbinfo_lines = get_kbinfo_lines()
@@ -874,7 +874,7 @@ local function perf_stats()
     eval_ass_formatting()
     add_header(stats)
     local page = pages[o.key_page_0]
-    append(stats, "", {prefix=o.nl .. o.nl .. page.desc .. ":", nl="", indent=""})
+    append(stats, "", {prefix=page.desc .. ":", nl="", indent=""})
     page.offset = append_general_perfdata(stats, page.offset)
     return table.concat(stats)
 end
@@ -892,7 +892,7 @@ local function cache_stats()
 
     eval_ass_formatting()
     add_header(stats)
-    append(stats, "", {prefix=o.nl .. o.nl .. "Cache info:", nl="", indent=""})
+    append(stats, "", {prefix="Cache info:", nl="", indent=""})
 
     local info = mp.get_property_native("demuxer-cache-state")
     if info == nil then
