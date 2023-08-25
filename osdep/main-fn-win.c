@@ -33,7 +33,8 @@ static void microsoft_nonsense(void)
     // Always use safe search paths for DLLs and other files, ie. never use the
     // current directory
     SetDllDirectoryW(L"");
-    SetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
+    SetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE |
+                      BASE_SEARCH_PATH_PERMANENT);
 }
 
 int main(int argc_, char **argv_)
