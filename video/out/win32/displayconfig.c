@@ -24,46 +24,10 @@
 
 #include "mpv_talloc.h"
 
-static pthread_once_t displayconfig_load_ran = PTHREAD_ONCE_INIT;
-static bool displayconfig_loaded = false;
-
-static LONG (WINAPI *pDisplayConfigGetDeviceInfo)(
-        DISPLAYCONFIG_DEVICE_INFO_HEADER*);
-static LONG (WINAPI *pGetDisplayConfigBufferSizes)(UINT32, UINT32*, UINT32*);
-static LONG (WINAPI *pQueryDisplayConfig)(UINT32, UINT32*,
-        DISPLAYCONFIG_PATH_INFO*, UINT32*, DISPLAYCONFIG_MODE_INFO*,
-        DISPLAYCONFIG_TOPOLOGY_ID*);
-
 static bool is_valid_refresh_rate(DISPLAYCONFIG_RATIONAL rr)
 {
     // DisplayConfig sometimes reports a rate of 1 when the rate is not known
     return rr.Denominator != 0 && rr.Numerator / rr.Denominator > 1;
-}
-
-static void displayconfig_load(void)
-{
-    HMODULE user32 = GetModuleHandleW(L"user32.dll");
-    if (!user32)
-        return;
-
-    pDisplayConfigGetDeviceInfo =
-        (LONG (WINAPI*)(DISPLAYCONFIG_DEVICE_INFO_HEADER*))
-        GetProcAddress(user32, "DisplayConfigGetDeviceInfo");
-    if (!pDisplayConfigGetDeviceInfo)
-        return;
-    pGetDisplayConfigBufferSizes =
-        (LONG (WINAPI*)(UINT32, UINT32*, UINT32*))
-        GetProcAddress(user32, "GetDisplayConfigBufferSizes");
-    if (!pGetDisplayConfigBufferSizes)
-        return;
-    pQueryDisplayConfig =
-        (LONG (WINAPI*)(UINT32, UINT32*, DISPLAYCONFIG_PATH_INFO*, UINT32*,
-                        DISPLAYCONFIG_MODE_INFO*, DISPLAYCONFIG_TOPOLOGY_ID*))
-        GetProcAddress(user32, "QueryDisplayConfig");
-    if (!pQueryDisplayConfig)
-        return;
-
-    displayconfig_loaded = true;
 }
 
 static int get_config(void *ctx,
@@ -78,8 +42,8 @@ static int get_config(void *ctx,
     // GetDisplayConfigBufferSizes and the call to QueryDisplayConfig, so call
     // them in a loop until the correct buffer size is chosen
     do {
-        res = pGetDisplayConfigBufferSizes(QDC_ONLY_ACTIVE_PATHS, num_paths,
-                                           num_modes);
+        res = GetDisplayConfigBufferSizes(QDC_ONLY_ACTIVE_PATHS, num_paths,
+                                          num_modes);
         if (res != ERROR_SUCCESS)
             goto fail;
 
@@ -89,8 +53,8 @@ static int get_config(void *ctx,
         *paths = talloc_array(ctx, DISPLAYCONFIG_PATH_INFO, *num_paths);
         *modes = talloc_array(ctx, DISPLAYCONFIG_MODE_INFO, *num_modes);
 
-        res = pQueryDisplayConfig(QDC_ONLY_ACTIVE_PATHS, num_paths, *paths,
-                                  num_modes, *modes, NULL);
+        res = QueryDisplayConfig(QDC_ONLY_ACTIVE_PATHS, num_paths, *paths,
+                                 num_modes, *modes, NULL);
     } while (res == ERROR_INSUFFICIENT_BUFFER);
     if (res != ERROR_SUCCESS)
         goto fail;
@@ -117,7 +81,7 @@ static DISPLAYCONFIG_PATH_INFO *get_path(UINT32 num_paths,
                 .id = paths[i].sourceInfo.id,
             }
         };
-        if (pDisplayConfigGetDeviceInfo(&source.header) != ERROR_SUCCESS)
+        if (DisplayConfigGetDeviceInfo(&source.header) != ERROR_SUCCESS)
             return NULL;
 
         // Check if the device name matches
@@ -144,11 +108,6 @@ static double get_refresh_rate_from_mode(DISPLAYCONFIG_MODE_INFO *mode)
 
 double mp_w32_displayconfig_get_refresh_rate(const wchar_t *device)
 {
-    // Load Windows 7 DisplayConfig API
-    pthread_once(&displayconfig_load_ran, displayconfig_load);
-    if (!displayconfig_loaded)
-        return 0.0;
-
     void *ctx = talloc_new(NULL);
     double freq = 0.0;
 
