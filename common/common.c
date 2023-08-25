@@ -120,7 +120,7 @@ bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2)
     return rc->x1 > rc->x0 && rc->y1 > rc->y0;
 }
 
-bool mp_rect_equals(struct mp_rect *rc1, struct mp_rect *rc2)
+bool mp_rect_equals(const struct mp_rect *rc1, const struct mp_rect *rc2)
 {
     return rc1->x0 == rc2->x0 && rc1->y0 == rc2->y0 &&
            rc1->x1 == rc2->x1 && rc1->y1 == rc2->y1;
