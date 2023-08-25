@@ -685,6 +685,11 @@ local function append_resolution(s, r, prefix, w_prop, h_prop)
             append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
                                          prefix_sep="", no_prefix_markup=true})
         end
+        if r['s'] then
+            append(s, format("%.2f", r["s"]), {prefix="(", suffix="x)", nl="",
+                                               indent=" ", prefix_sep="",
+                                               no_prefix_markup=true})
+        end
     end
 end
 
@@ -736,29 +741,34 @@ local function add_video(s)
     if ro and (r["w"] ~= ro["dw"] or r["h"] ~= ro["dh"]) then
         append_resolution(s, ro, "Output Resolution:", "dw", "dh")
     end
-    append_resolution(s, {w=scaled_width, h=scaled_height}, "Scaled Resolution:")
+    local scale = nil
     if not mp.get_property_native("fullscreen") then
-        append_property(s, "current-window-scale", {prefix="Window Scale:"})
+        scale = mp.get_property_native("current-window-scale")
     end
+    append_resolution(s, {w=scaled_width, h=scaled_height, s=scale}, "Scaled Resolution:")
+
+    if mp.get_property_native("deinterlace") then
+        append_property(s, "deinterlace", {prefix="Deinterlacing:"})
+    end
+
     append(s, r["pixelformat"], {prefix="Pixel Format:"})
     if r["hw-pixelformat"] ~= nil then
         append(s, r["hw-pixelformat"], {prefix_sep="[", nl="", indent=" ",
                 suffix="]"})
     end
+    append(s, r["colorlevels"], {prefix="Levels:", nl=""})
 
     -- Group these together to save vertical space
-    local prim = append(s, r["primaries"], {prefix="Primaries:"})
-    local cmat = append(s, r["colormatrix"], {prefix="Colormatrix:", nl=prim and "" or o.nl})
-    append(s, r["colorlevels"], {prefix="Levels:", nl=cmat and "" or o.nl})
-
+    append(s, r["colormatrix"], {prefix="Colormatrix:"})
+    append(s, r["primaries"], {prefix="Primaries:", nl=""})
+    append(s, r["gamma"], {prefix="Transfer:", nl=""})
     -- Append HDR metadata conditionally (only when present and interesting)
     local hdrpeak = r["sig-peak"] or 0
-    local hdrinfo = ""
     if hdrpeak > 1 then
-        hdrinfo = " (HDR peak: " .. format("%.2f", hdrpeak * 203) .. " nits)"
+        append(s, format("%.0f", hdrpeak * 203),
+               {prefix="(HDR peak", suffix=" nits)", nl="",
+                indent=" ", prefix_sep=": ", no_prefix_markup=true})
     end
-
-    append(s, r["gamma"], {prefix="Gamma:", suffix=hdrinfo})
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "vf", "Filters:")
 end
