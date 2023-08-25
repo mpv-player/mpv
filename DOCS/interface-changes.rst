@@ -58,6 +58,7 @@ Interface changes
     - remove `--tone-mapping-mode`
     - add `auto` to `--sub-fix-timing` and make it the default
     - change `--subs-fallback-forced` so that it works alongside `--slang`
+    - enable `--icc-use-luma` by default
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

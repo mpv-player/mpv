@@ -6822,7 +6822,9 @@ them.
     2.4 function.
 
 ``--icc-use-luma``
-    Use ICC profile luminance value. (Only for ``--vo=gpu-next``)
+    Use ICC profile luminance value. Enabled by default. This option is ignored
+    when the swapchain is configured for HDR passthrough with a specific target
+    luminance value. (Only for ``--vo=gpu-next``)
 
 ``--lut=<file>``
     Specifies a custom LUT (in Adobe .cube format) to apply to the colors
