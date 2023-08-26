@@ -2679,6 +2679,11 @@ Property list
         coordinates should be ignored when this value is false, because the
         video backends update them only when the pointer hovers the window.
 
+``sub-ass-extradata``
+    The current ASS subtitle track's extradata. There is no formatting done.
+    The extradata is returned as a string as-is. This property is not
+    available for non-ASS subtitle tracks.
+
 ``sub-text``
     The current subtitle text regardless of sub visibility. Formatting is
     stripped. If the subtitle is not text-based (i.e. DVD/BD subtitles), an
