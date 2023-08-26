@@ -42,6 +42,7 @@ Interface changes
     - add `--x11-wid-title` option
     - add `--libplacebo-opts` option
     - change `--video-pan-x/y` to be relative to the destination rectangle
+    - add `--audio-file-exts`, `--cover-art-auto-exts`, and `--sub-auto-exts`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

@@ -82,6 +82,10 @@
 #define MP_KEY_CHANNEL_DOWN     (MP_KEY_MM_BASE+22)
 #define MP_KEY_PLAYONLY         (MP_KEY_MM_BASE+23)
 #define MP_KEY_PAUSEONLY        (MP_KEY_MM_BASE+24)
+#define MP_KEY_BACK             (MP_KEY_MM_BASE+25)
+#define MP_KEY_TOOLS            (MP_KEY_MM_BASE+26)
+#define MP_KEY_ZOOMIN           (MP_KEY_MM_BASE+27)
+#define MP_KEY_ZOOMOUT          (MP_KEY_MM_BASE+28)
 
 /*  Function keys  */
 #define MP_KEY_F (MP_KEY_BASE+0x40)
@@ -102,6 +106,14 @@
 #define MP_KEY_KPINS    (MP_KEY_KEYPAD+11)
 #define MP_KEY_KPDEL    (MP_KEY_KEYPAD+12)
 #define MP_KEY_KPENTER  (MP_KEY_KEYPAD+13)
+#define MP_KEY_KPHOME  (MP_KEY_KEYPAD+14)
+#define MP_KEY_KPEND  (MP_KEY_KEYPAD+15)
+#define MP_KEY_KPPGUP  (MP_KEY_KEYPAD+16)
+#define MP_KEY_KPPGDOWN  (MP_KEY_KEYPAD+17)
+#define MP_KEY_KPRIGHT  (MP_KEY_KEYPAD+18)
+#define MP_KEY_KPLEFT  (MP_KEY_KEYPAD+19)
+#define MP_KEY_KPDOWN  (MP_KEY_KEYPAD+20)
+#define MP_KEY_KPUP  (MP_KEY_KEYPAD+21)
 
 // Mouse events from VOs
 #define MP_MBTN_BASE     ((MP_KEY_BASE+0xA0)|MP_NO_REPEAT_KEY|MP_KEY_EMIT_ON_UP)

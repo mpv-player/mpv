@@ -32,20 +32,6 @@
 #include "options/path.h"
 #include "external_files.h"
 
-static const char *const sub_exts[] = {"ass", "idx", "lrc", "mks", "pgs", "rt",
-                                       "sbv", "scc", "smi", "srt", "ssa", "sub",
-                                       "sup", "utf", "utf-8", "utf8", "vtt",
-                                       NULL};
-
-static const char *const audio_exts[] = {"aac", "ac3", "dts", "eac3", "flac",
-                                         "m4a", "mka", "mp3", "ogg", "opus",
-                                         "thd", "wav", "wv",
-                                         NULL};
-
-static const char *const image_exts[] = {"avif", "bmp", "gif", "jpeg", "jpg",
-                                         "jxl", "png", "tif", "tiff", "webp",
-                                         NULL};
-
 // Stolen from: vlc/-/blob/master/modules/meta_engine/folder.c#L40
 // sorted by priority (descending)
 static const char *const cover_files[] = {
@@ -92,22 +78,28 @@ static const char *const cover_files[] = {
     NULL
 };
 
-static bool test_ext_list(bstr ext, const char *const *list)
+// Needed for mp_might_be_subtitle_file
+char **sub_exts;
+
+static bool test_ext_list(bstr ext, char **list)
 {
+    if (!list)
+        goto done;
     for (int n = 0; list[n]; n++) {
         if (bstrcasecmp(bstr0(list[n]), ext) == 0)
             return true;
     }
+done:
     return false;
 }
 
-static int test_ext(bstr ext)
+static int test_ext(MPOpts *opts, bstr ext)
 {
-    if (test_ext_list(ext, sub_exts))
+    if (test_ext_list(ext, opts->sub_auto_exts))
         return STREAM_SUB;
-    if (test_ext_list(ext, audio_exts))
+    if (test_ext_list(ext, opts->audiofile_auto_exts))
         return STREAM_AUDIO;
-    if (test_ext_list(ext, image_exts))
+    if (test_ext_list(ext, opts->coverart_auto_exts))
         return STREAM_VIDEO;
     return -1;
 }
@@ -124,7 +116,12 @@ static int test_cover_filename(bstr fname)
 
 bool mp_might_be_subtitle_file(const char *filename)
 {
-    return test_ext(bstr_get_ext(bstr0(filename))) == STREAM_SUB;
+    return test_ext_list(bstr_get_ext(bstr0(filename)), sub_exts);
+}
+
+void mp_update_subtitle_exts(struct MPOpts *opts)
+{
+    sub_exts = opts->sub_auto_exts;
 }
 
 static int compare_sub_filename(const void *a, const void *b)
@@ -220,7 +217,7 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
             talloc_steal(tmpmem2, dename.start);
 
         // check what it is (most likely)
-        int type = test_ext(tmp_fname_ext);
+        int type = test_ext(opts, tmp_fname_ext);
         char **langs = NULL;
         int fuzz = -1;
         switch (type) {
