@@ -646,8 +646,10 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         if (!pick || compare_track(track, pick, langs, os_langs, mpctx->opts, preferred_program))
             pick = track;
 
-        // We only try to autoselect forced tracks if they match the audio language and are subs
-        if (fallback_forced && track->forced_track && mp_match_lang_single(audio_lang, track->lang) &&
+        // We only try to autoselect forced tracks if they match the audio language and are subs or
+        // if the user always wants forced sub tracks
+        if (fallback_forced && track->forced_track &&
+            (mp_match_lang_single(audio_lang, track->lang) || opts->subs_fallback_forced == 2) &&
             (!forced_pick || compare_track(track, forced_pick, langs, os_langs, mpctx->opts, preferred_program)))
             forced_pick = track;
     }

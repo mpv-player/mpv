@@ -270,7 +270,7 @@ typedef struct MPOpts {
     bool subs_with_matching_audio;
     bool subs_match_os_language;
     int subs_fallback;
-    bool subs_fallback_forced;
+    int subs_fallback_forced;
     int audio_display;
     char **display_tags;
 
