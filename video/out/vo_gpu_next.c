@@ -143,7 +143,6 @@ struct priv {
     struct mp_csp_equalizer_state *video_eq;
     struct scaler_params scalers[SCALER_COUNT];
     const struct pl_hook **hooks; // storage for `params.hooks`
-    const struct pl_filter_config *frame_mixer;
     enum mp_csp_levels output_levels;
     char **raw_opts;
 
@@ -1952,11 +1951,11 @@ static void update_render_options(struct vo *vo)
     pars->params.upscaler = map_scaler(p, SCALER_SCALE);
     pars->params.downscaler = map_scaler(p, SCALER_DSCALE);
     pars->params.plane_upscaler = map_scaler(p, SCALER_CSCALE);
-    p->frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
+    pars->params.frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
 
     // Request as many frames as required from the decoder
-    if (p->frame_mixer) {
-        vo_set_queue_params(vo, 0, 2 + ceilf(p->frame_mixer->kernel->radius));
+    if (pars->params.frame_mixer) {
+        vo_set_queue_params(vo, 0, 2 + ceilf(pars->params.frame_mixer->kernel->radius));
     } else {
         vo_set_queue_params(vo, 0, 2);
     }
