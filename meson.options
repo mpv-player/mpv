@@ -46,6 +46,7 @@ option('avfoundation', type: 'feature', value: 'auto', description: 'AVFoundatio
 option('jack', type: 'feature', value: 'auto', description: 'JACK audio output')
 option('openal', type: 'feature', value: 'disabled', description: 'OpenAL audio output')
 option('audiotrack', type: 'feature', value: 'auto', description: 'Android AudioTrack audio output')
+option('aaudio', type: 'feature', value: 'auto', description: 'Android AAudio audio output')
 option('opensles', type: 'feature', value: 'auto', description: 'OpenSL ES audio output')
 option('oss-audio', type: 'feature', value: 'auto', description: 'OSSv4 audio output')
 option('pipewire', type: 'feature', value: 'auto', description: 'PipeWire audio output')
