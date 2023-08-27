@@ -67,6 +67,26 @@ typedef struct pl_options_t {
     struct pl_dither_params dither_params;
     struct pl_icc_params icc_params;
 } *pl_options;
+
+static inline pl_options pl_options_alloc(pl_log log)
+{
+    struct pl_options_t *opts = talloc_ptrtype(NULL, opts);
+    opts->params                  = pl_render_default_params;
+    opts->deband_params           = pl_deband_default_params;
+    opts->sigmoid_params          = pl_sigmoid_default_params;
+    opts->color_adjustment        = pl_color_adjustment_neutral;
+    opts->peak_detect_params      = pl_peak_detect_default_params;
+    opts->color_map_params        = pl_color_map_default_params;
+    opts->dither_params           = pl_dither_default_params;
+    opts->icc_params              = pl_icc_default_params;
+    // Redirect always-enabled params structs to shim
+    opts->params.color_adjustment = &opts->color_adjustment;
+    opts->params.color_map_params = &opts->color_map_params;
+    opts->params.icc_params       = &opts->icc_params;
+    return opts;
+}
+
+#define pl_options_free TA_FREEP
 #endif
 
 struct osd_entry {
@@ -1507,9 +1527,7 @@ static void uninit(struct vo *vo)
         pl_shader_info_deref(&p->perf_redraw.info[i].shader);
     }
 
-#if PL_API_VER >= 309
     pl_options_free(&p->pars);
-#endif
 
     p->ra_ctx = NULL;
     p->pllog = NULL;
@@ -1567,23 +1585,7 @@ static int preinit(struct vo *vo)
         talloc_free(cache_file);
     }
 
-#if PL_API_VER >= 309
     p->pars = pl_options_alloc(p->pllog);
-#else
-    p->pars = talloc_ptrtype(p, p->pars);
-    p->pars->params                  = pl_render_default_params;
-    p->pars->deband_params           = pl_deband_default_params;
-    p->pars->sigmoid_params          = pl_sigmoid_default_params;
-    p->pars->color_adjustment        = pl_color_adjustment_neutral;
-    p->pars->peak_detect_params      = pl_peak_detect_default_params;
-    p->pars->color_map_params        = pl_color_map_default_params;
-    p->pars->dither_params           = pl_dither_default_params;
-    p->pars->icc_params              = pl_icc_default_params;
-    // Redirect always-enabled params structs to shim
-    p->pars->params.color_adjustment = &p->pars->color_adjustment;
-    p->pars->params.color_map_params = &p->pars->color_map_params;
-    p->pars->params.icc_params       = &p->pars->icc_params;
-#endif
     update_render_options(vo);
     return 0;
 
