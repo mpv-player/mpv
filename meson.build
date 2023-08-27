@@ -866,6 +866,13 @@ if features['audiotrack']
     sources += files('audio/out/ao_audiotrack.c')
 endif
 
+aaudio_opt = get_option('aaudio').require(features['android'])
+features += {'aaudio': cc.has_header_symbol('aaudio/AAudio.h',
+                                            'AAudioStream', required: aaudio_opt)}
+if features['aaudio']
+    sources += files('audio/out/ao_aaudio.c')
+endif
+
 opensles = cc.find_library('OpenSLES', required: get_option('opensles'))
 features += {'opensles': opensles.found()}
 if features['opensles']
