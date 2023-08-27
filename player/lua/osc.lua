@@ -1315,10 +1315,13 @@ layouts["box"] = function ()
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 7, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
 
-    lo = add_layout("tog_forced_only")
-    lo.geometry =
+    sub_codec = mp.get_property("current-tracks/sub/codec")
+    if (sub_codec == "dvd_subtitle" or sub_codec == "hdmv_pgs_subtitle") then
+        lo = add_layout("tog_forced_only")
+        lo.geometry =
         {x = posX - pos_offsetX + 70, y = bigbtnrowY - 1, an = 7, w = 25, h = 18}
-    lo.style = osc_styles.smallButtonsL
+        lo.style = osc_styles.smallButtonsL
+    end
 
     lo = add_layout("tog_fs")
     lo.geometry =
@@ -1627,10 +1630,13 @@ function bar_layout(direction)
     lo.style = osc_styles.smallButtonsBar
 
     -- Forced-subs-only button
-    geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("tog_forced_only")
-    lo.geometry = geo
-    lo.style = osc_styles.smallButtonsBar
+    sub_codec = mp.get_property("current-tracks/sub/codec")
+    if (sub_codec == "dvd_subtitle" or sub_codec == "hdmv_pgs_subtitle") then
+        geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+        lo = add_layout("tog_forced_only")
+        lo.geometry = geo
+        lo.style = osc_styles.smallButtonsBar
+    end
 
     -- Track selection buttons
     geo = { x = geo.x - tsW - padX, y = geo.y, an = geo.an, w = tsW, h = geo.h }
@@ -1971,13 +1977,8 @@ function osc_init()
 
     -- tog_forced_only
     local tog_forced_only = new_element("tog_forced_only", "button")
-
     ne = tog_forced_only
     ne.content = function ()
-        sub_codec = mp.get_property("current-tracks/sub/codec")
-        if (sub_codec ~= "dvd_subtitle" and sub_codec ~= "hdmv_pgs_subtitle") then
-            return ""
-        end
         local base_a = tog_forced_only.layout.alpha
         local alpha = base_a[1]
         if not mp.get_property_bool("sub-forced-only-cur") then
