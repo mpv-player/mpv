@@ -2306,10 +2306,6 @@ bool vo_wayland_init(struct vo *vo)
     if (!wl->idle_inhibit_manager) {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    zwp_idle_inhibit_manager_v1_interface.name);
-
-        const char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
-        if (xdg_current_desktop != NULL && strstr(xdg_current_desktop, "GNOME"))
-            MP_WARN(wl, "GNOME's wayland compositor lacks support for the idle inhibit protocol. This means the screen can blank during playback.\n");
     }
 
     wl->opts = mp_get_config_group(wl, wl->vo->global, &wayland_conf);
