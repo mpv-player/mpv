@@ -897,8 +897,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
     update_options(vo);
-    pars->params.info_callback = info_callback;
-    pars->params.info_priv = vo;
+
+    struct pl_render_params params = pars->params;
+    params.info_callback = info_callback;
+    params.info_priv = vo;
 
     // Push all incoming frames into the frame queue
     for (int n = 0; n < frame->num_frames; n++) {
@@ -954,7 +956,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             // Advance the queue state to the current PTS to discard unused frames
             pl_queue_update(p->queue, NULL, pl_queue_params(
                 .pts = frame->current->pts + vsync_offset,
-                .radius = pl_frame_mix_radius(&pars->params),
+                .radius = pl_frame_mix_radius(&params),
             ));
         }
         return;
@@ -977,7 +979,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         // Update queue state
         struct pl_queue_params qparams = {
             .pts = frame->current->pts + vsync_offset,
-            .radius = pl_frame_mix_radius(&pars->params),
+            .radius = pl_frame_mix_radius(&params),
             .vsync_duration = frame->vsync_interval,
             .interpolation_threshold = opts->interpolation_threshold,
         };
@@ -1050,13 +1052,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
     bool cache_frame = will_redraw || frame->still;
-    pars->params.skip_caching_single_frame = !cache_frame;
-    pars->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
+    params.skip_caching_single_frame = !cache_frame;
+    params.preserve_mixing_cache = p->inter_preserve && !frame->still;
     if (frame->still)
-        pars->params.frame_mixer = NULL;
+        params.frame_mixer = NULL;
 
     // Render frame
-    if (!pl_render_image_mix(p->rr, &mix, &target, &pars->params)) {
+    if (!pl_render_image_mix(p->rr, &mix, &target, &params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
         goto done;
     }
