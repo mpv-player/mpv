@@ -918,8 +918,14 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     update_options(vo);
 
     struct pl_render_params params = pars->params;
+    bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
+    bool cache_frame = will_redraw || frame->still;
     params.info_callback = info_callback;
     params.info_priv = vo;
+    params.skip_caching_single_frame = !cache_frame;
+    params.preserve_mixing_cache = p->inter_preserve && !frame->still;
+    if (frame->still)
+        params.frame_mixer = NULL;
 
     // Push all incoming frames into the frame queue
     for (int n = 0; n < frame->num_frames; n++) {
@@ -1068,13 +1074,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             ((uint64_t *) mix.signatures)[i] ^= fp->osd_sync << 48;
         }
     }
-
-    bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
-    bool cache_frame = will_redraw || frame->still;
-    params.skip_caching_single_frame = !cache_frame;
-    params.preserve_mixing_cache = p->inter_preserve && !frame->still;
-    if (frame->still)
-        params.frame_mixer = NULL;
 
     // Render frame
     if (!pl_render_image_mix(p->rr, &mix, &target, &params)) {
