@@ -1185,11 +1185,18 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     args->res = NULL;
 
     update_options(vo);
-    pars->params.info_callback = NULL;
-    pars->params.skip_caching_single_frame = true;
-    pars->params.preserve_mixing_cache = false;
-    pars->params.frame_mixer = NULL;
-    pars->peak_detect_params.allow_delayed = false;
+    struct pl_render_params params = pars->params;
+    params.info_callback = NULL;
+    params.skip_caching_single_frame = true;
+    params.preserve_mixing_cache = false;
+    params.frame_mixer = NULL;
+
+    struct pl_peak_detect_params peak_params;
+    if (params.peak_detect_params) {
+        peak_params = *params.peak_detect_params;
+        params.peak_detect_params = &peak_params;
+        peak_params.allow_delayed = false;
+    }
 
     // Retrieve the current frame from the frame queue
     struct pl_frame_mix mix;
@@ -1290,7 +1297,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
                     &p->osd_state, &target);
     image.num_overlays = 0; // Disable on-screen overlays
 
-    if (!pl_render_image(p->rr, &image, &target, &pars->params)) {
+    if (!pl_render_image(p->rr, &image, &target, &params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
         goto done;
     }
