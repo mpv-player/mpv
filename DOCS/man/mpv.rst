@@ -1372,9 +1372,6 @@ A common problem is that Linux desktop environments ignore the standard
 screensaver APIs on which mpv relies. In particular, mpv uses the Screen Saver
 extension (XSS) on X11, and the idle-inhibit protocol on Wayland.
 
-GNOME in particular still ignores the idle-inhibit protocol, and has its own
-D-Bus interfaces for display power management, which mpv does not support.
-
 Before mpv 0.33.0, the X11 backend ran ``xdg-screensaver reset`` in 10 second
 intervals when not paused in order to support screensaver inhibition in these
 environments. This functionality was removed in 0.33.0, but it is possible to
