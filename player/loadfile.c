@@ -1086,8 +1086,6 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl,
     if (pl->num_entries) {
         prepare_playlist(mpctx, pl);
         struct playlist_entry *new = pl->current;
-        if (mpctx->playlist->current)
-            playlist_add_redirect(pl, mpctx->playlist->current->filename);
         *num_new_entries = pl->num_entries;
         *start_id = playlist_transfer_entries(mpctx->playlist, pl);
         // current entry is replaced
@@ -1649,7 +1647,7 @@ static void play_current_file(struct MPContext *mpctx)
     handle_force_window(mpctx, false);
 
     if (mpctx->playlist->num_entries > 1 ||
-        mpctx->playing->num_redirects)
+        mpctx->playing->playlist_path)
         MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
     assert(mpctx->demuxer == NULL);
