@@ -54,11 +54,15 @@ extern const struct ao_driver audio_out_wasapi;
 extern const struct ao_driver audio_out_pcm;
 extern const struct ao_driver audio_out_lavc;
 extern const struct ao_driver audio_out_sdl;
+extern const struct ao_driver audio_out_aaudio;
 
 static const struct ao_driver * const audio_out_drivers[] = {
 // native:
 #if HAVE_AUDIOTRACK
     &audio_out_audiotrack,
+#endif
+#if HAVE_AAUDIO
+    &audio_out_aaudio,
 #endif
 #if HAVE_AUDIOUNIT
     &audio_out_audiounit,

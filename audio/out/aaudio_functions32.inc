@@ -1,0 +1,1 @@
+AAUDIO_FUNCTION(AAudioStreamBuilder_setChannelMask, void, AAudioStreamBuilder *builder, aaudio_channel_mask_t channelMask)
