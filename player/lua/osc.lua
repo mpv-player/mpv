@@ -1632,7 +1632,8 @@ function bar_layout(direction)
     -- Forced-subs-only button
     sub_codec = mp.get_property("current-tracks/sub/codec")
     if (sub_codec == "dvd_subtitle" or sub_codec == "hdmv_pgs_subtitle") then
-        geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+        geo = { x = geo.x - geo.w - padX - 10,
+                y = geo.y, an = geo.an, w = geo.w, h = geo.h }
         lo = add_layout("tog_forced_only")
         lo.geometry = geo
         lo.style = osc_styles.smallButtonsBar
