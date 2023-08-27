@@ -1954,11 +1954,10 @@ static void update_render_options(struct vo *vo)
     pars->params.frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
 
     // Request as many frames as required from the decoder
-    if (pars->params.frame_mixer) {
-        vo_set_queue_params(vo, 0, 2 + ceilf(pars->params.frame_mixer->kernel->radius));
-    } else {
-        vo_set_queue_params(vo, 0, 2);
-    }
+    int req_frames = 2;
+    if (pars->params.frame_mixer)
+        req_frames += ceilf(pars->params.frame_mixer->kernel->radius);
+    vo_set_queue_params(vo, 0, req_frames);
 
     pars->params.deband_params = opts->deband ? &pars->deband_params : NULL;
     pars->deband_params.iterations = opts->deband_opts->iterations;
