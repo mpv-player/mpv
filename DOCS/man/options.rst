@@ -1910,7 +1910,7 @@ Audio
         DTS-HD decoding via FFmpeg's new DCA decoder (based on libdcadec).
         
         Nevertheless there are some cases in which it must be activated for correct playback,
-        such as 3D audio formats like Dolby Atmos or Auro-3D.
+        such as 3D audio formats like Dolby Atmos or DTS:X.
 
 ``--ad=<decoder1,decoder2,...[-]>``
     Specify a priority list of audio decoders to be used, according to their
