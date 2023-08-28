@@ -277,7 +277,7 @@ local function sorted_keys(t, comp_fn)
     return keys
 end
 
-local function append_perfdata(s, dedicated_page, print_passes)
+local function append_perfdata(header, s, dedicated_page, print_passes)
     local vo_p = mp.get_property_native("vo-passes")
     if not vo_p then
         return
@@ -318,7 +318,8 @@ local function append_perfdata(s, dedicated_page, print_passes)
 
     -- ensure that the fixed title is one element and every scrollable line is
     -- also one single element.
-    s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s{\\fs%s}",
+    local h = dedicated_page and header or s
+    h[#h+1] = format("%s%s%s%s{\\fs%s}%s%s{\\fs%s}",
                      dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                      "(last/average/peak μs)",
@@ -503,32 +504,20 @@ local function get_kbinfo_lines(width)
     return info_lines
 end
 
-local function append_general_perfdata(s, offset)
-    local perf_info = mp.get_property_native("perf-info") or {}
-    local count = 0
-    for _, data in ipairs(perf_info) do
-        count = count + 1
-    end
-    offset = max(1, min((offset or 1), count))
+local function append_general_perfdata(s)
+    for i, data in ipairs(mp.get_property_native("perf-info") or {}) do
+        append(s, data.text or data.value, {prefix="["..tostring(i).."] "..data.name..":"})
 
-    local i = 0
-    for _, data in ipairs(perf_info) do
-        i = i + 1
-        if i >= offset then
-            append(s, data.text or data.value, {prefix="["..tostring(i).."] "..data.name..":"})
-
-            if o.plot_perfdata and o.use_ass and data.value then
-                buf = perf_buffers[data.name]
-                if not buf then
-                    buf = {0, pos = 1, len = 50, max = 0}
-                    perf_buffers[data.name] = buf
-                end
-                graph_add_value(buf, data.value)
-                s[#s+1] = generate_graph(buf, buf.pos, buf.len, buf.max, nil, 0.8, 1)
+        if o.plot_perfdata and o.use_ass and data.value then
+            buf = perf_buffers[data.name]
+            if not buf then
+                buf = {0, pos = 1, len = 50, max = 0}
+                perf_buffers[data.name] = buf
             end
+            graph_add_value(buf, data.value)
+            s[#s] = s[#s] .. generate_graph(buf, buf.pos, buf.len, buf.max, nil, 0.8, 1)
         end
     end
-    return offset
 end
 
 local function append_display_sync(s)
@@ -865,7 +854,7 @@ local function add_video_out(s)
         append_property(s, "frame-drop-count", {suffix=" (output)", nl="", indent=""})
     end
     append_display_sync(s)
-    append_perfdata(s, false, o.print_perfdata_passes)
+    append_perfdata(nil, s, false, o.print_perfdata_passes)
 
     if mp.get_property_native("deinterlace-active") then
         append_property(s, "deinterlace", {prefix="Deinterlacing:"})
@@ -1037,32 +1026,18 @@ local function default_stats()
     return table.concat(stats)
 end
 
-local function scroll_vo_stats(stats, fixed_items, offset)
-    local ret = {}
-    local count = #stats - fixed_items
-    offset = max(1, min((offset or 1), count))
-
-    for i, line in pairs(stats) do
-        if i <= fixed_items or i >= fixed_items + offset then
-            ret[#ret+1] = stats[i]
-        end
-    end
-    return ret, offset
-end
-
 -- Returns an ASS string with extended VO stats
 local function vo_stats()
-    local stats = {}
+    local header, content = {}, {}
     eval_ass_formatting()
-    add_header(stats)
-
-    -- first line (title) added next is considered fixed
-    local fixed_items = #stats + 1
-    append_perfdata(stats, true, true)
+    add_header(header)
+    append_perfdata(header, content, true, true)
+    header = {table.concat(header)}
 
     local page = pages[o.key_page_2]
-    stats, page.offset = scroll_vo_stats(stats, fixed_items, page.offset)
-    return table.concat(stats)
+    local res = nil
+    res, page.offset = compose_page(header, content, page.offset)
+    return res
 end
 
 local kbinfo_lines = nil
@@ -1086,13 +1061,16 @@ local function keybinding_info(after_scroll)
 end
 
 local function perf_stats()
-    local stats = {}
+    local header, content = {}, {}
     eval_ass_formatting()
-    add_header(stats)
+    add_header(header)
     local page = pages[o.key_page_0]
-    append(stats, "", {prefix=page.desc .. ":", nl="", indent=""})
-    page.offset = append_general_perfdata(stats, page.offset)
-    return table.concat(stats)
+    append(header, "", {prefix=page.desc .. ":", nl="", indent=""})
+    append_general_perfdata(content)
+    header = {table.concat(header)}
+    local res = nil
+    res, page.offset = compose_page(header, content, page.offset)
+    return res
 end
 
 local function opt_time(t)
