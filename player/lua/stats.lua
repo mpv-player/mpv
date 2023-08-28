@@ -1006,6 +1006,25 @@ local function eval_ass_formatting()
 end
 
 
+-- Composes the output with header and scrollable content
+-- Returns string of the finished page and the actually chosen offset
+--
+-- header   : table of the header where each entry is one line
+-- content  : table of the content where each entry is one line
+-- offset   : the desired scroll offset of the content from the first line at the top
+local function compose_page(header, content, offset)
+    -- up to 22 lines for the terminal - so that mpv can also print
+    -- the status line without scrolling, and up to 40 lines for libass
+    -- because it can put a big performance toll on libass to process
+    -- many lines which end up outside (below) the screen.
+    local max_content_lines = (o.use_ass and 40 or 22) - #header
+    -- in the terminal the scrolling should stop once the last line is visible
+    local max_offset = o.use_ass and #content or #content - max_content_lines + 1
+    local from = max(1, min((offset or 1), max_offset))
+    local to = min(#content, from + max_content_lines - 1)
+    return table.concat(header) .. table.concat(content, "", from, to), from
+end
+
 -- Returns an ASS string with "normal" stats
 local function default_stats()
     local stats = {}
@@ -1055,20 +1074,15 @@ local function keybinding_info(after_scroll)
     append(header, "", {prefix=format("%s: {\\fs%s}%s{\\fs%s}", page.desc,
            o.font_size * 0.66, "(hint: scroll with ↑↓)", o.font_size), nl="",
            indent=""})
+    header = {table.concat(header)}
 
     if not kbinfo_lines or not after_scroll then
         kbinfo_lines = get_kbinfo_lines()
     end
-    -- up to 20 lines for the terminal - so that mpv can also print
-    -- the status line without scrolling, and up to 40 lines for libass
-    -- because it can put a big performance toll on libass to process
-    -- many lines which end up outside (below) the screen.
-    local term = not o.use_ass
-    local nlines = #kbinfo_lines
-    page.offset = max(1, min((page.offset or 1), term and nlines - 20 or nlines))
-    local maxline = min(nlines, page.offset + (term and 20 or 40))
-    return table.concat(header) ..
-           table.concat(kbinfo_lines, "", page.offset, maxline)
+
+    local res = nil
+    res, page.offset = compose_page(header, kbinfo_lines, page.offset)
+    return res
 end
 
 local function perf_stats()
