@@ -831,7 +831,7 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
 
     // Infinite contrast
     if (opts->target_contrast == -1) {
-        color->hdr.max_luma = 1e-7;
+        color->hdr.min_luma = 1e-7;
         return;
     }
 
