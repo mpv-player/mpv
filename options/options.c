@@ -262,8 +262,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-speed", OPT_FLOAT(sub_speed)},
         {"sub-visibility", OPT_BOOL(sub_visibility)},
         {"secondary-sub-visibility", OPT_BOOL(sec_sub_visibility)},
-        {"sub-forced-only", OPT_CHOICE(forced_subs_only,
-            {"auto", -1}, {"no", 0}, {"yes", 1})},
+        {"sub-forced-only", OPT_BOOL(forced_subs_only)},
         {"stretch-dvd-subs", OPT_BOOL(stretch_dvd_subs)},
         {"stretch-image-subs-to-screen", OPT_BOOL(stretch_image_subs)},
         {"image-subs-video-resolution", OPT_BOOL(image_subs_video_res)},
@@ -306,7 +305,6 @@ const struct m_sub_options mp_subtitle_sub_opts = {
     .defaults = &(OPT_BASE_STRUCT){
         .sub_visibility = true,
         .sec_sub_visibility = true,
-        .forced_subs_only = -1,
         .sub_pos = 100,
         .sub_speed = 1.0,
         .ass_enabled = true,

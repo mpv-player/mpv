@@ -47,6 +47,8 @@ Interface changes
     - remove special handling of the `auto` value from `--alang/slang/vlang` options
     - add `--subs-match-os-language` as a replacement for `--slang=auto`
     - add `always` option to `--subs-fallback-forced`
+    - remove `auto` choice from `--sub-forced-only`
+    - remove `auto-forced-only` property
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

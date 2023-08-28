@@ -2621,12 +2621,11 @@ Subtitles
     subtitles (if the difference is smaller than 210 ms, the gap or overlap
     is removed).
 
-``--sub-forced-only=<auto|yes|no>``
-    Display only forced subtitles for the DVD subtitle stream selected by e.g.
-    ``--slang`` (default: ``auto``). When set to ``auto``, enabled when the
-    ``--subs-with-matching-audio`` option is on and a non-forced stream is selected.
-    Enabling this will hide all subtitles in streams that don't make a distinction
-    between forced and unforced events within a stream.
+``--sub-forced-only=<yes|no>``
+    Enabling this displays only forced events within subtitle streams. Only
+    some bitmap subtitle formats (such as DVD or PGS) are capable of having a
+    mixture of forced and unforced events within the stream. Enabling this on
+    text subtitles will cause no subtitles to be displayed (default: ``no``).
 
 ``--sub-fps=<rate>``
     Specify the framerate of the subtitle file (default: video fps). Affects
