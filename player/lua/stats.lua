@@ -29,7 +29,12 @@ local o = {
     persistent_overlay = false,      -- whether the stats can be overwritten by other output
     print_perfdata_passes = false,   -- when true, print the full information about all passes
     filter_params_max_length = 100,  -- a filter list longer than this many characters will be shown one filter per line instead
+<<<<<<< HEAD
     show_frame_info = false,          -- whether to show the current frame info
+=======
+    term_width_limit = -1,           -- overwrites the terminal width
+    term_height_limit = -1,          -- overwrites the terminal height
+>>>>>>> 89493c38fb (stats.lua: truncate long lines for the terminal)
     debug = false,
 
     -- Graph options and style
@@ -82,6 +87,15 @@ local o = {
     bindlist = "no",  -- print page 4 to the terminal on startup and quit mpv
 }
 options.read_options(o)
+
+o.term_width_limit = tonumber(o.term_width_limit) or -1
+o.term_height_limit = tonumber(o.term_height_limit) or -1
+if o.term_width_limit < 0 then
+    o.term_width_limit = nil
+end
+if o.term_height_limit < 0 then
+    o.term_height_limit = nil
+end
 
 local format = string.format
 local max = math.max
@@ -366,7 +380,7 @@ end
 
 local function ellipsis(s, maxlen)
     if not maxlen or s:len() <= maxlen then return s end
-    return s:sub(1, maxlen - 3) .. "..."
+    return s:sub(1, max(0, maxlen - 3)) .. "..."
 end
 
 -- command prefix tokens to strip - includes generic property commands
@@ -994,24 +1008,89 @@ local function eval_ass_formatting()
     end
 end
 
+-- assumptions:
+--   s is composed of SGR escape sequences and/or printable UTF8 sequences
+--   printable codepoints occupy one terminal cell (we don't have wcwidth)
+--   tabstops are 8, 16, 24..., and the output starts at 0 or a tabstop
+-- note: if maxwidth <= 2 and s doesn't fit: the result is "..." (more than 2)
+function term_ellipsis(s, maxwidth)
+    local TAB, ESC, SGR_END = 9, 27, ("m"):byte()
+    local width, ellipsis = 0, "..."
+    local fit_len, in_sgr
+
+    for i = 1, #s do
+        local x = s:byte(i)
+
+        if in_sgr then
+            in_sgr = x ~= SGR_END
+        elseif x == ESC then
+            in_sgr = true
+            ellipsis = "\27[0m..."  -- ensure SGR reset
+        elseif x < 128 or x >= 192 then  -- non UTF8-continuation
+            -- tab adds till the next stop, else add 1
+            width = width + (x == TAB and 8 - width % 8 or 1)
+
+            if fit_len == nil and width > maxwidth - 3 then
+                fit_len = i - 1  -- adding "..." still fits maxwidth
+            end
+            if width > maxwidth then
+                return s:sub(1, fit_len) .. ellipsis
+            end
+        end
+    end
+
+    return s
+end
+
+local function term_ellipsis_array(arr, from, to, max_width)
+    for i = from, to do
+        arr[i] = term_ellipsis(arr[i], max_width)
+    end
+    return arr
+end
+
+-- split str into a table
+-- example: local t = split(s, "\n")
+-- plain: whether pat is a plain string (default false - pat is a pattern)
+local function split(str, pat, plain)
+    local init = 1
+    local r, i, find, sub = {}, 1, string.find, string.sub
+    repeat
+        local f0, f1 = find(str, pat, init, plain)
+        r[i], i = sub(str, init, f0 and f0 - 1), i+1
+        init = f0 and f1 + 1
+    until f0 == nil
+    return r
+end
 
 -- Composes the output with header and scrollable content
 -- Returns string of the finished page and the actually chosen offset
 --
--- header   : table of the header where each entry is one line
--- content  : table of the content where each entry is one line
--- offset   : the desired scroll offset of the content from the first line at the top
-local function compose_page(header, content, offset)
-    -- up to 22 lines for the terminal - so that mpv can also print
-    -- the status line without scrolling, and up to 40 lines for libass
-    -- because it can put a big performance toll on libass to process
-    -- many lines which end up outside (below) the screen.
-    local max_content_lines = (o.use_ass and 40 or 22) - #header
-    -- in the terminal the scrolling should stop once the last line is visible
-    local max_offset = o.use_ass and #content or #content - max_content_lines + 1
-    local from = max(1, min((offset or 1), max_offset))
-    local to = min(#content, from + max_content_lines - 1)
-    return table.concat(header) .. table.concat(content, "", from, to), from
+-- header      : table of the header where each entry is one line
+-- content     : table of the content where each entry is one line
+-- apply_scroll: scroll the content
+local function finalize_page(header, content, apply_scroll)
+    local term_width = o.term_width_limit or 80
+    local term_height = o.term_height_limit or 24
+    local from, to = 1, #content
+    if apply_scroll and term_height > 0 then
+        -- Up to 40 lines for libass because it can put a big performance toll on
+        -- libass to process many lines which end up outside (below) the screen.
+        -- In the terminal reduce height by 2 for the status line (can be more then one line)
+        local max_content_lines = (o.use_ass and 40 or term_height - 2) - #header
+        -- in the terminal the scrolling should stop once the last line is visible
+        local max_offset = o.use_ass and #content or #content - max_content_lines + 1
+        from = max(1, min((pages[curr_page].offset or 1), max_offset))
+        to = min(#content, from + max_content_lines - 1)
+        pages[curr_page].offset = from
+    end
+    local output = table.concat(header) .. table.concat(content, "", from, to)
+    if not o.use_ass and term_width > 0 and curr_page ~= o.key_page_4 then
+        local t = split(output, "\n", true)
+        -- limit width for the terminal
+        output = table.concat(term_ellipsis_array(t, 1, #t, term_width), "\n")
+    end
+    return output, from
 end
 
 -- Returns an ASS string with "normal" stats
@@ -1023,7 +1102,7 @@ local function default_stats()
     add_video_out(stats)
     add_video(stats)
     add_audio(stats)
-    return table.concat(stats)
+    return finalize_page({}, stats, false)
 end
 
 -- Returns an ASS string with extended VO stats
@@ -1033,11 +1112,7 @@ local function vo_stats()
     add_header(header)
     append_perfdata(header, content, true, true)
     header = {table.concat(header)}
-
-    local page = pages[o.key_page_2]
-    local res = nil
-    res, page.offset = compose_page(header, content, page.offset)
-    return res
+    return finalize_page(header, content, false)
 end
 
 local kbinfo_lines = nil
@@ -1052,12 +1127,10 @@ local function keybinding_info(after_scroll)
     header = {table.concat(header)}
 
     if not kbinfo_lines or not after_scroll then
-        kbinfo_lines = get_kbinfo_lines()
+        kbinfo_lines = get_kbinfo_lines(o.term_width_limit)
     end
 
-    local res = nil
-    res, page.offset = compose_page(header, kbinfo_lines, page.offset)
-    return res
+    return finalize_page(header, kbinfo_lines, true)
 end
 
 local function perf_stats()
@@ -1068,9 +1141,7 @@ local function perf_stats()
     append(header, "", {prefix=page.desc .. ":", nl="", indent=""})
     append_general_perfdata(content)
     header = {table.concat(header)}
-    local res = nil
-    res, page.offset = compose_page(header, content, page.offset)
-    return res
+    return finalize_page(header, content, true)
 end
 
 local function opt_time(t)
@@ -1091,7 +1162,7 @@ local function cache_stats()
     local info = mp.get_property_native("demuxer-cache-state")
     if info == nil then
         append(stats, "Unavailable.", {})
-        return table.concat(stats)
+        return finalize_page({}, stats, false)
     end
 
     local a = info["reader-pts"]
@@ -1169,7 +1240,7 @@ local function cache_stats()
                {prefix = format("Range %s:", n)})
     end
 
-    return table.concat(stats)
+    return finalize_page({}, stats, false)
 end
 
 -- Record 1 sample of cache statistics.
