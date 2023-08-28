@@ -124,11 +124,15 @@ _zlib_mark=lib/libz.dll.a
 _ffmpeg () {
     [ -d ffmpeg ] || $gitclone https://github.com/FFmpeg/FFmpeg.git ffmpeg
     builddir ffmpeg
-    ../configure --pkg-config=pkg-config --target-os=mingw32 \
-        --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*} \
-        --cc="$CC" --cxx="$CXX" $commonflags \
-        --disable-{doc,programs,muxers,encoders} \
+    local args=(
+        --pkg-config=pkg-config --target-os=mingw32
+        --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*}
+        --cc="$CC" --cxx="$CXX" $commonflags
+        --disable-{doc,programs,muxers,encoders}
         --enable-encoder=mjpeg,png
+    )
+    pkg-config vulkan && args+=(--enable-vulkan --enable-libshaderc)
+    ../configure "${args[@]}"
     makeplusinstall
     popd
 }
@@ -243,14 +247,14 @@ _luajit () {
 }
 _luajit_mark=lib/libluajit-5.1.a
 
-for x in iconv zlib ffmpeg shaderc spirv-cross; do
+for x in iconv zlib shaderc spirv-cross; do
     build_if_missing $x
 done
 if [[ "$TARGET" != "i686-"* ]]; then
     build_if_missing vulkan-headers
     build_if_missing vulkan-loader
 fi
-for x in libplacebo freetype fribidi harfbuzz libass luajit; do
+for x in ffmpeg libplacebo freetype fribidi harfbuzz libass luajit; do
     build_if_missing $x
 done
 
