@@ -85,6 +85,7 @@ seekbar
 
     =============   ================================================
     left-click      seek to position
+    mouse wheel     seek forward/backward
     =============   ================================================
 
 time left
