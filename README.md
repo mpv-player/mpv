@@ -90,7 +90,7 @@ Example:
 Essential dependencies (incomplete list):
 
 - gcc or clang
-- X development headers (xlib, xrandr, xext, xscrnsaver, xinerama, libvdpau,
+- X development headers (xlib, xrandr, xext, xscrnsaver, xpresent, libvdpau,
   libGL, GLX, EGL, xv, ...)
 - Audio output development headers (libasound/ALSA, pulseaudio)
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter

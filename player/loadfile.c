@@ -472,10 +472,11 @@ static int match_lang(char **langs, const char *lang)
  * 1) track is external (no_default cancels this)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 1c) track matches the program ID of the video
- * 2) earlier match in lang list
+ * 2) earlier match in lang list but not if we're using os_langs
  * 3a) track is marked forced and we're preferring forced tracks
  * 3b) track is marked non-forced and we're preferring non-forced tracks
  * 3c) track is marked default
+ * 3d) match in lang list with os_langs
  * 4) attached picture, HLS bitrate
  * 5) lower track number
  * If select_fallback is not set, 5) is only used to determine whether a
@@ -485,7 +486,7 @@ static int match_lang(char **langs, const char *lang)
  */
 // Return whether t1 is preferred over t2
 static bool compare_track(struct track *t1, struct track *t2, char **langs,
-                          int prefer_forced, struct MPOpts *opts, int preferred_program)
+                          bool os_langs, struct MPOpts *opts, int preferred_program)
 {
     if (!opts->autoload_files && t1->is_external != t2->is_external)
         return !t1->is_external;
@@ -505,12 +506,12 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
             return t1->program_id == preferred_program;
     }
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
-    if (l1 != l2)
+    if (!os_langs && l1 != l2)
         return l1 > l2;
-    if (t1->forced_track != t2->forced_track)
-        return prefer_forced ? t1->forced_track : !t1->forced_track;
     if (t1->default_track != t2->default_track)
         return t1->default_track;
+    if (os_langs && l1 != l2)
+        return l1 > l2;
     if (t1->attached_picture != t2->attached_picture)
         return !t1->attached_picture;
     if (t1->stream && t2->stream && opts->hls_bitrate >= 0 &&
@@ -548,19 +549,19 @@ static bool append_lang(size_t *nb, char ***out, char *in)
     return true;
 }
 
-static bool add_auto_langs(size_t *nb, char ***out)
+static char **add_os_langs(void)
 {
-    bool ret = false;
+    size_t nb = 0;
+    char **out = NULL;
     char **autos = mp_get_user_langs();
     for (int i = 0; autos && autos[i]; i++) {
-        if (!append_lang(nb, out, autos[i]))
+        if (!append_lang(&nb, &out, autos[i]))
             goto cleanup;
     }
-    ret = true;
 
 cleanup:
     talloc_free(autos);
-    return ret;
+    return out;
 }
 
 static char **process_langs(char **in)
@@ -568,13 +569,8 @@ static char **process_langs(char **in)
     size_t nb = 0;
     char **out = NULL;
     for (int i = 0; in && in[i]; i++) {
-        if (!strcmp(in[i], "auto")) {
-            if (!add_auto_langs(&nb, &out))
-                break;
-        } else {
-            if (!append_lang(&nb, &out, talloc_strdup(NULL, in[i])))
-                break;
-        }
+        if (!append_lang(&nb, &out, talloc_strdup(NULL, in[i])))
+            break;
     }
     return out;
 }
@@ -618,11 +614,18 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     if (tid == -2)
         return NULL;
     char **langs = process_langs(opts->stream_lang[type]);
+    bool os_langs = false;
+    // Try to add OS languages if enabled by the user and we don't already have a lang from slang.
+    if (type == STREAM_SUB && (!langs || !strcmp(langs[0], "")) && opts->subs_match_os_language) {
+        talloc_free(langs);
+        langs = add_os_langs();
+        os_langs = true;
+    }
     const char *audio_lang = get_audio_lang(mpctx);
-    bool audio_matches = match_lang(langs, audio_lang);
-    int prefer_forced = type == STREAM_SUB && !opts->subs_with_matching_audio && audio_matches;
-    bool select_fallback = type == STREAM_VIDEO || type == STREAM_AUDIO || (type == STREAM_SUB && opts->subs_fallback == 2);
-    bool fallback_forced = (type == STREAM_SUB && !prefer_forced && opts->subs_fallback_forced);
+    bool sub = type == STREAM_SUB;
+    bool fallback_forced = sub && opts->subs_fallback_forced;
+    bool audio_matches = false;
+    bool sub_fallback = false;
     struct track *pick = NULL;
     struct track *forced_pick = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
@@ -640,51 +643,41 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (duplicate_track(mpctx, order, type, track))
             continue;
-        if (!pick || compare_track(track, pick, langs, false, mpctx->opts, preferred_program))
+        if (!pick || compare_track(track, pick, langs, os_langs, mpctx->opts, preferred_program))
             pick = track;
 
-        // We only try to autoselect forced tracks if they match the audio language
-        if ((prefer_forced || fallback_forced) && mp_match_lang_single(audio_lang, track->lang) &&
-            (!forced_pick || compare_track(track, forced_pick, langs, true, mpctx->opts, preferred_program)))
+        // We only try to autoselect forced tracks if they match the audio language and are subs or
+        // if the user always wants forced sub tracks
+        if (fallback_forced && track->forced_track &&
+            (mp_match_lang_single(audio_lang, track->lang) || opts->subs_fallback_forced == 2) &&
+            (!forced_pick || compare_track(track, forced_pick, langs, os_langs, mpctx->opts, preferred_program)))
             forced_pick = track;
     }
 
-    // If we're trying for a forced track, and found something that matches the audio, go with that
-    if (prefer_forced)
+    // If we found a forced track, use that.
+    if (forced_pick)
         pick = forced_pick;
 
-    // If our best pick for a subtitle track isn't suitable, we'll fall back on forced,
-    // or clear it out altogether.
-    if (pick && !select_fallback && !(pick->is_external && !pick->no_default)
-        && (!match_lang(langs, pick->lang) || (prefer_forced && !pick->forced_track))
-        && (!opts->subs_fallback || !pick->default_track)) {
-        if (fallback_forced) {
-            prefer_forced = 1;
-            // If we found a suitable forced track (matching the audio), fallback on that.
-            // Otherwise, if our currently-selected track matches the audio,
-            // we'll try using it in forced-only mode.
-            // If it doesn't, none of the available tracks make sense, so we give up.
-            if (forced_pick)
-                pick = forced_pick;
-            else if (!match_lang(langs, pick->lang))
-                pick = NULL;
-        } else {
-            pick = NULL;
-        }
+    // Clear out any picks for these special cases for subtitles
+    if (pick) {
+        audio_matches = mp_match_lang_single(pick->lang, audio_lang);
+        sub_fallback = (pick->is_external && !pick->no_default) || opts->subs_fallback == 2 ||
+                        (opts->subs_fallback == 1 && pick->default_track);
     }
+    if (pick && !forced_pick && sub && (!match_lang(langs, pick->lang) || os_langs) &&
+        ((!opts->subs_with_matching_audio && audio_matches) || !sub_fallback))
+        pick = NULL;
+
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
         pick = NULL;
     if (pick && !opts->autoload_files && pick->is_external)
         pick = NULL;
-    if (pick && type == STREAM_SUB && prefer_forced && !pick->forced_track) {
+    if (pick && sub && !pick->forced_track) {
         // If the codec is DVD or PGS, we can display it in forced-only mode.
-        // This isn't really meaningful for other codecs, so we'll just pick nothing.
         if (pick->stream &&
             (!strcmp(pick->stream->codec->codec, "dvd_subtitle") ||
              !strcmp(pick->stream->codec->codec, "hdmv_pgs_subtitle")))
-            pick->forced_only_def = 1;
-        else
-            pick = NULL;
+            pick->forced_only_def = true;
     }
 cleanup:
     talloc_free(langs);
@@ -1086,8 +1079,6 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl,
     if (pl->num_entries) {
         prepare_playlist(mpctx, pl);
         struct playlist_entry *new = pl->current;
-        if (mpctx->playlist->current)
-            playlist_add_redirect(pl, mpctx->playlist->current->filename);
         *num_new_entries = pl->num_entries;
         *start_id = playlist_transfer_entries(mpctx->playlist, pl);
         // current entry is replaced
@@ -1649,7 +1640,7 @@ static void play_current_file(struct MPContext *mpctx)
     handle_force_window(mpctx, false);
 
     if (mpctx->playlist->num_entries > 1 ||
-        mpctx->playing->num_redirects)
+        mpctx->playing->playlist_path)
         MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
     assert(mpctx->demuxer == NULL);

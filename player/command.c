@@ -2917,6 +2917,29 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+static int mp_property_sub_ass_extradata(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct track *track = mpctx->current_track[0][STREAM_SUB];
+    struct dec_sub *sub = track ? track->d_sub : NULL;
+    if (!sub)
+        return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_GET: {
+        char *data = sub_ass_get_extradata(sub);
+        if (!data)
+            return M_PROPERTY_UNAVAILABLE;
+        *(char **)arg = data;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int get_sub_text(void *ctx, struct m_property *prop,
                         int action, void *arg, int sub_index)
 {
@@ -3955,6 +3978,7 @@ static const struct m_property mp_properties_base[] = {
     {"sub-delay", mp_property_sub_delay},
     {"sub-speed", mp_property_sub_speed},
     {"sub-pos", mp_property_sub_pos},
+    {"sub-ass-extradata", mp_property_sub_ass_extradata},
     {"sub-text", mp_property_sub_text,
         .priv = (void *)&(const int){SD_TEXT_TYPE_PLAIN}},
     {"secondary-sub-text", mp_property_secondary_sub_text,

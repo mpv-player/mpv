@@ -278,16 +278,41 @@ static void write_redirect(struct MPContext *mpctx, char *path)
     }
 }
 
+static void write_redirects_for_parent_dirs(struct MPContext *mpctx, char *path)
+{
+    if (mp_is_url(bstr0(path)))
+        return;
+
+    // Write redirect entries for the file's parent directories to allow
+    // resuming playback when playing parent directories whose entries are
+    // expanded only the first time they are "played". For example, if
+    // "/a/b/c.mkv" is the current entry, also create resume files for /a/b and
+    // /a, so that "mpv --directory-mode=lazy /a" resumes playback from
+    // /a/b/c.mkv even when b isn't the first directory in /a.
+    bstr dir = mp_dirname(path);
+    // There is no need to write a redirect entry for "/".
+    while (dir.len > 1 && dir.len < strlen(path)) {
+        path[dir.len] = '\0';
+        mp_path_strip_trailing_separator(path);
+        write_redirect(mpctx, path);
+        dir = mp_dirname(path);
+    }
+}
+
 void mp_write_watch_later_conf(struct MPContext *mpctx)
 {
     struct playlist_entry *cur = mpctx->playing;
     char *conffile = NULL;
+    void *ctx = talloc_new(NULL);
+
     if (!cur)
         goto exit;
 
+    char *path = mp_normalize_path(ctx, cur->filename);
+
     struct demuxer *demux = mpctx->demuxer;
 
-    conffile = mp_get_playback_resume_config_filename(mpctx, cur->filename);
+    conffile = mp_get_playback_resume_config_filename(mpctx, path);
     if (!conffile)
         goto exit;
 
@@ -302,7 +327,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
     }
 
-    write_filename(mpctx, file, cur->filename);
+    write_filename(mpctx, file, path);
 
     bool write_start = true;
     double pos = get_current_time(mpctx);
@@ -336,47 +361,29 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     }
     fclose(file);
 
-    if (mpctx->opts->position_check_mtime &&
-        !mp_is_url(bstr0(cur->filename)) &&
-        !copy_mtime(cur->filename, conffile))
+    if (mpctx->opts->position_check_mtime && !mp_is_url(bstr0(path)) &&
+        !copy_mtime(path, conffile))
     {
         MP_WARN(mpctx, "Can't copy mtime from %s to %s\n", cur->filename,
                 conffile);
     }
 
-    // This allows us to recursively resume directories etc., whose entries are
-    // expanded the first time it's "played". For example, if "/a/b/c.mkv" is
-    // the current entry, then we want to resume this file if the user does
-    // "mpv /a". This would expand to the directory entries in "/a", and if
-    // "/a/a.mkv" is not the first entry, this would be played.
-    // Here, we write resume entries for "/a" and "/a/b".
-    // (Unfortunately, this will leave stray resume files on resume, because
-    // obviously it resumes only from one of those paths.)
-    for (int n = 0; n < cur->num_redirects; n++)
-        write_redirect(mpctx, cur->redirects[n]);
-    // And at last, for local directories, we write an entry for each path
-    // prefix, so the user can resume from an arbitrary directory. This starts
-    // with the first redirect (all other redirects are further prefixes).
-    if (cur->num_redirects) {
-        char *path = cur->redirects[0];
-        char tmp[4096];
-        if (!mp_is_url(bstr0(path)) && strlen(path) < sizeof(tmp)) {
-            snprintf(tmp, sizeof(tmp), "%s", path);
-            for (;;) {
-                bstr dir = mp_dirname(tmp);
-                if (dir.len == strlen(tmp) || !dir.len || bstr_equals0(dir, "."))
-                    break;
+    write_redirects_for_parent_dirs(mpctx, path);
 
-                tmp[dir.len] = '\0';
-                if (strlen(tmp) >= 2) // keep "/"
-                    mp_path_strip_trailing_separator(tmp);
-                write_redirect(mpctx, tmp);
-            }
-        }
+    // Also write redirect entries for a playlist that mpv expanded if the
+    // current entry is a URL, this is mostly useful for playing multiple
+    // archives of images, e.g. with mpv 1.zip 2.zip and quit-watch-later
+    // on 2.zip, write redirect entries for 2.zip, not just for the archive://
+    // URL.
+    if (cur->playlist_path && mp_is_url(bstr0(path))) {
+        char *playlist_path = mp_normalize_path(ctx, cur->playlist_path);
+        write_redirect(mpctx, playlist_path);
+        write_redirects_for_parent_dirs(mpctx, playlist_path);
     }
 
 exit:
     talloc_free(conffile);
+    talloc_free(ctx);
 }
 
 void mp_delete_watch_later_conf(struct MPContext *mpctx, const char *file)
@@ -391,9 +398,30 @@ void mp_delete_watch_later_conf(struct MPContext *mpctx, const char *file)
     }
 
     char *fname = mp_get_playback_resume_config_filename(mpctx, file);
-    if (fname)
+    if (fname) {
         unlink(fname);
-    talloc_free(fname);
+        talloc_free(fname);
+    }
+
+    if (mp_is_url(bstr0(file)))
+        return;
+
+    void *ctx = talloc_new(NULL);
+    char *path = mp_normalize_path(ctx, file);
+
+    bstr dir = mp_dirname(path);
+    while (dir.len > 1 && dir.len < strlen(path)) {
+        path[dir.len] = '\0';
+        mp_path_strip_trailing_separator(path);
+        fname = mp_get_playback_resume_config_filename(mpctx, path);
+        if (fname) {
+            unlink(fname);
+            talloc_free(fname);
+        }
+        dir = mp_dirname(path);
+    }
+
+    talloc_free(ctx);
 }
 
 bool mp_load_playback_resume(struct MPContext *mpctx, const char *file)

@@ -341,6 +341,14 @@ char *mp_getcwd(void *talloc_ctx)
     return wd;
 }
 
+char *mp_normalize_path(void *talloc_ctx, const char *path)
+{
+    if (mp_is_url(bstr0(path)))
+        return talloc_strdup(talloc_ctx, path);
+
+    return mp_path_join(talloc_ctx, mp_getcwd(talloc_ctx), path);
+}
+
 bool mp_path_exists(const char *path)
 {
     struct stat st;

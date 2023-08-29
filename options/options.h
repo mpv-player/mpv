@@ -268,8 +268,9 @@ typedef struct MPOpts {
     char **stream_lang[STREAM_TYPE_COUNT];
     bool stream_auto_sel;
     bool subs_with_matching_audio;
+    bool subs_match_os_language;
     int subs_fallback;
-    bool subs_fallback_forced;
+    int subs_fallback_forced;
     int audio_display;
     char **display_tags;
 

@@ -83,6 +83,8 @@ bool mp_path_is_absolute(struct bstr path);
 
 char *mp_getcwd(void *talloc_ctx);
 
+char *mp_normalize_path(void *talloc_ctx, const char *path);
+
 bool mp_path_exists(const char *path);
 bool mp_path_isdir(const char *path);
 

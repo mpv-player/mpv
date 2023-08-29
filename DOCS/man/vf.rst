@@ -44,6 +44,12 @@ The exact syntax is:
     the ``lavfi`` filter, which uses a very similar syntax as mpv (MPlayer
     historically) to specify filters and their parameters.
 
+.. note::
+
+    ``--vf`` can only take a single track as input, even if the filter supports
+    dynamic input. Filters that require multiple inputs can't be used.
+    Use ``--lavfi-complex`` for such a use case. This also applies for ``--af``.
+
 Filters can be manipulated at run time. You can use ``@`` labels as described
 above in combination with the ``vf`` command (see `COMMAND INTERFACE`_) to get
 more control over this. Initially disabled filters with ``!`` are useful for

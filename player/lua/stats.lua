@@ -330,10 +330,11 @@ local function append_perfdata(s, dedicated_page)
 
     -- ensure that the fixed title is one element and every scrollable line is
     -- also one single element.
-    s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}",
+    s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s{\\fs%s}",
                      dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
-                     "(last/average/peak  μs)", o.font_size)
+                     "(last/average/peak μs)",
+                     dedicated_page and " (hint: scroll with ↑↓)" or "", o.font_size)
 
     for _,frame in ipairs(sorted_keys(vo_p)) do  -- ensure fixed display order
         local data = vo_p[frame]
@@ -670,18 +671,25 @@ local function add_file(s)
 end
 
 
-local function append_resolution(s, r, prefix)
+local function append_resolution(s, r, prefix, w_prop, h_prop)
     if not r then
         return
     end
-    if append(s, r["w"], {prefix=prefix}) then
-        append(s, r["h"], {prefix="x", nl="", indent=" ", prefix_sep=" ",
+    w_prop = w_prop or "w"
+    h_prop = h_prop or "h"
+    if append(s, r[w_prop], {prefix=prefix}) then
+        append(s, r[h_prop], {prefix="x", nl="", indent=" ", prefix_sep=" ",
                            no_prefix_markup=true})
         if r["aspect"] ~= nil then
             append(s, format("%.2f:1", r["aspect"]), {prefix=", ", nl="", indent="",
                                                       no_prefix_markup=true})
             append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
                                          prefix_sep="", no_prefix_markup=true})
+        end
+        if r['s'] then
+            append(s, format("%.2f", r["s"]), {prefix="(", suffix="x)", nl="",
+                                               indent=" ", prefix_sep="",
+                                               no_prefix_markup=true})
         end
     end
 end
@@ -731,32 +739,37 @@ local function add_video(s)
     append_perfdata(s, o.print_perfdata_passes)
 
     append_resolution(s, r, "Native Resolution:")
-    if ro and (r["w"] ~= ro["w"] or r["h"] ~= ro["h"]) then
-        append_resolution(s, ro, "Output Resolution:")
+    if ro and (r["w"] ~= ro["dw"] or r["h"] ~= ro["dh"]) then
+        append_resolution(s, ro, "Output Resolution:", "dw", "dh")
     end
-    append_resolution(s, {w=scaled_width, h=scaled_height}, "Scaled Resolution:")
+    local scale = nil
     if not mp.get_property_native("fullscreen") then
-        append_property(s, "current-window-scale", {prefix="Window Scale:"})
+        scale = mp.get_property_native("current-window-scale")
     end
+    append_resolution(s, {w=scaled_width, h=scaled_height, s=scale}, "Scaled Resolution:")
+
+    if mp.get_property_native("deinterlace") then
+        append_property(s, "deinterlace", {prefix="Deinterlacing:"})
+    end
+
     append(s, r["pixelformat"], {prefix="Pixel Format:"})
     if r["hw-pixelformat"] ~= nil then
         append(s, r["hw-pixelformat"], {prefix_sep="[", nl="", indent=" ",
                 suffix="]"})
     end
+    append(s, r["colorlevels"], {prefix="Levels:", nl=""})
 
     -- Group these together to save vertical space
-    local prim = append(s, r["primaries"], {prefix="Primaries:"})
-    local cmat = append(s, r["colormatrix"], {prefix="Colormatrix:", nl=prim and "" or o.nl})
-    append(s, r["colorlevels"], {prefix="Levels:", nl=cmat and "" or o.nl})
-
+    append(s, r["colormatrix"], {prefix="Colormatrix:"})
+    append(s, r["primaries"], {prefix="Primaries:", nl=""})
+    append(s, r["gamma"], {prefix="Transfer:", nl=""})
     -- Append HDR metadata conditionally (only when present and interesting)
     local hdrpeak = r["sig-peak"] or 0
-    local hdrinfo = ""
     if hdrpeak > 1 then
-        hdrinfo = " (HDR peak: " .. format("%.2f", hdrpeak * 203) .. " nits)"
+        append(s, format("%.0f", hdrpeak * 203),
+               {prefix="(HDR peak", suffix=" nits)", nl="",
+                indent=" ", prefix_sep=": ", no_prefix_markup=true})
     end
-
-    append(s, r["gamma"], {prefix="Gamma:", suffix=hdrinfo})
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "vf", "Filters:")
 end
@@ -850,7 +863,9 @@ local function keybinding_info(after_scroll)
     local page = pages[o.key_page_4]
     eval_ass_formatting()
     add_header(header)
-    append(header, "", {prefix=o.nl .. page.desc .. ":", nl="", indent=""})
+    append(header, "", {prefix=format("%s: {\\fs%s}%s{\\fs%s}", page.desc,
+           o.font_size * 0.66, "(hint: scroll with ↑↓)", o.font_size), nl="",
+           indent=""})
 
     if not kbinfo_lines or not after_scroll then
         kbinfo_lines = get_kbinfo_lines()
@@ -872,7 +887,7 @@ local function perf_stats()
     eval_ass_formatting()
     add_header(stats)
     local page = pages[o.key_page_0]
-    append(stats, "", {prefix=o.nl .. o.nl .. page.desc .. ":", nl="", indent=""})
+    append(stats, "", {prefix=page.desc .. ":", nl="", indent=""})
     page.offset = append_general_perfdata(stats, page.offset)
     return table.concat(stats)
 end
@@ -890,7 +905,7 @@ local function cache_stats()
 
     eval_ass_formatting()
     add_header(stats)
-    append(stats, "", {prefix=o.nl .. o.nl .. "Cache info:", nl="", indent=""})
+    append(stats, "", {prefix="Cache info:", nl="", indent=""})
 
     local info = mp.get_property_native("demuxer-cache-state")
     if info == nil then

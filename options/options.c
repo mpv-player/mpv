@@ -522,8 +522,10 @@ static const m_option_t mp_opts[] = {
     {"vlang", OPT_STRINGLIST(stream_lang[STREAM_VIDEO])},
     {"track-auto-selection", OPT_BOOL(stream_auto_sel)},
     {"subs-with-matching-audio", OPT_BOOL(subs_with_matching_audio)},
+    {"subs-match-os-language", OPT_BOOL(subs_match_os_language)},
     {"subs-fallback", OPT_CHOICE(subs_fallback, {"no", 0}, {"default", 1}, {"yes", 2})},
-    {"subs-fallback-forced", OPT_BOOL(subs_fallback_forced)},
+    {"subs-fallback-forced", OPT_CHOICE(subs_fallback_forced, {"no", 0},
+        {"yes", 1}, {"always", 2})},
 
     {"lavfi-complex", OPT_STRING(lavfi_complex), .flags = UPDATE_LAVFI_COMPLEX},
 
@@ -1042,13 +1044,11 @@ static const struct MPOpts mp_default_opts = {
                    { [STREAM_AUDIO] = -2,
                      [STREAM_VIDEO] = -2,
                      [STREAM_SUB] = -2, }, },
-    .stream_lang = {
-        [STREAM_SUB] = (char *[]){ "auto", NULL },
-    },
     .stream_auto_sel = true,
     .subs_with_matching_audio = true,
+    .subs_match_os_language = true,
     .subs_fallback = 1,
-    .subs_fallback_forced = true,
+    .subs_fallback_forced = 1,
     .audio_display = 1,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,

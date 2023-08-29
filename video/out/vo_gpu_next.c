@@ -67,6 +67,26 @@ typedef struct pl_options_t {
     struct pl_dither_params dither_params;
     struct pl_icc_params icc_params;
 } *pl_options;
+
+static inline pl_options pl_options_alloc(pl_log log)
+{
+    struct pl_options_t *opts = talloc_ptrtype(NULL, opts);
+    opts->params                  = pl_render_default_params;
+    opts->deband_params           = pl_deband_default_params;
+    opts->sigmoid_params          = pl_sigmoid_default_params;
+    opts->color_adjustment        = pl_color_adjustment_neutral;
+    opts->peak_detect_params      = pl_peak_detect_default_params;
+    opts->color_map_params        = pl_color_map_default_params;
+    opts->dither_params           = pl_dither_default_params;
+    opts->icc_params              = pl_icc_default_params;
+    // Redirect always-enabled params structs to shim
+    opts->params.color_adjustment = &opts->color_adjustment;
+    opts->params.color_map_params = &opts->color_map_params;
+    opts->params.icc_params       = &opts->icc_params;
+    return opts;
+}
+
+#define pl_options_free TA_FREEP
 #endif
 
 struct osd_entry {
@@ -143,7 +163,6 @@ struct priv {
     struct mp_csp_equalizer_state *video_eq;
     struct scaler_params scalers[SCALER_COUNT];
     const struct pl_hook **hooks; // storage for `params.hooks`
-    const struct pl_filter_config *frame_mixer;
     enum mp_csp_levels output_levels;
     char **raw_opts;
 
@@ -812,7 +831,7 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
 
     // Infinite contrast
     if (opts->target_contrast == -1) {
-        color->hdr.max_luma = 1e-7;
+        color->hdr.min_luma = 1e-7;
         return;
     }
 
@@ -897,8 +916,16 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
     update_options(vo);
-    pars->params.info_callback = info_callback;
-    pars->params.info_priv = vo;
+
+    struct pl_render_params params = pars->params;
+    bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
+    bool cache_frame = will_redraw || frame->still;
+    params.info_callback = info_callback;
+    params.info_priv = vo;
+    params.skip_caching_single_frame = !cache_frame;
+    params.preserve_mixing_cache = p->inter_preserve && !frame->still;
+    if (frame->still)
+        params.frame_mixer = NULL;
 
     // Push all incoming frames into the frame queue
     for (int n = 0; n < frame->num_frames; n++) {
@@ -954,7 +981,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             // Advance the queue state to the current PTS to discard unused frames
             pl_queue_update(p->queue, NULL, pl_queue_params(
                 .pts = frame->current->pts + vsync_offset,
-                .radius = pl_frame_mix_radius(&pars->params),
+                .radius = pl_frame_mix_radius(&params),
             ));
         }
         return;
@@ -977,7 +1004,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         // Update queue state
         struct pl_queue_params qparams = {
             .pts = frame->current->pts + vsync_offset,
-            .radius = pl_frame_mix_radius(&pars->params),
+            .radius = pl_frame_mix_radius(&params),
             .vsync_duration = frame->vsync_interval,
             .interpolation_threshold = opts->interpolation_threshold,
         };
@@ -1048,15 +1075,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         }
     }
 
-    bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
-    bool cache_frame = will_redraw || frame->still;
-    pars->params.skip_caching_single_frame = !cache_frame;
-    pars->params.preserve_mixing_cache = p->inter_preserve && !frame->still;
-    if (frame->still)
-        pars->params.frame_mixer = NULL;
-
     // Render frame
-    if (!pl_render_image_mix(p->rr, &mix, &target, &pars->params)) {
+    if (!pl_render_image_mix(p->rr, &mix, &target, &params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
         goto done;
     }
@@ -1183,11 +1203,18 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     args->res = NULL;
 
     update_options(vo);
-    pars->params.info_callback = NULL;
-    pars->params.skip_caching_single_frame = true;
-    pars->params.preserve_mixing_cache = false;
-    pars->params.frame_mixer = NULL;
-    pars->peak_detect_params.allow_delayed = false;
+    struct pl_render_params params = pars->params;
+    params.info_callback = NULL;
+    params.skip_caching_single_frame = true;
+    params.preserve_mixing_cache = false;
+    params.frame_mixer = NULL;
+
+    struct pl_peak_detect_params peak_params;
+    if (params.peak_detect_params) {
+        peak_params = *params.peak_detect_params;
+        params.peak_detect_params = &peak_params;
+        peak_params.allow_delayed = false;
+    }
 
     // Retrieve the current frame from the frame queue
     struct pl_frame_mix mix;
@@ -1288,7 +1315,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
                     &p->osd_state, &target);
     image.num_overlays = 0; // Disable on-screen overlays
 
-    if (!pl_render_image(p->rr, &image, &target, &pars->params)) {
+    if (!pl_render_image(p->rr, &image, &target, &params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
         goto done;
     }
@@ -1499,9 +1526,7 @@ static void uninit(struct vo *vo)
         pl_shader_info_deref(&p->perf_redraw.info[i].shader);
     }
 
-#if PL_API_VER >= 309
     pl_options_free(&p->pars);
-#endif
 
     p->ra_ctx = NULL;
     p->pllog = NULL;
@@ -1559,23 +1584,7 @@ static int preinit(struct vo *vo)
         talloc_free(cache_file);
     }
 
-#if PL_API_VER >= 309
     p->pars = pl_options_alloc(p->pllog);
-#else
-    p->pars = talloc_ptrtype(p, p->pars);
-    p->pars->params                  = pl_render_default_params;
-    p->pars->deband_params           = pl_deband_default_params;
-    p->pars->sigmoid_params          = pl_sigmoid_default_params;
-    p->pars->color_adjustment        = pl_color_adjustment_neutral;
-    p->pars->peak_detect_params      = pl_peak_detect_default_params;
-    p->pars->color_map_params        = pl_color_map_default_params;
-    p->pars->dither_params           = pl_dither_default_params;
-    p->pars->icc_params              = pl_icc_default_params;
-    // Redirect always-enabled params structs to shim
-    p->pars->params.color_adjustment = &p->pars->color_adjustment;
-    p->pars->params.color_map_params = &p->pars->color_map_params;
-    p->pars->params.icc_params       = &p->pars->icc_params;
-#endif
     update_render_options(vo);
     return 0;
 
@@ -1943,14 +1952,13 @@ static void update_render_options(struct vo *vo)
     pars->params.upscaler = map_scaler(p, SCALER_SCALE);
     pars->params.downscaler = map_scaler(p, SCALER_DSCALE);
     pars->params.plane_upscaler = map_scaler(p, SCALER_CSCALE);
-    p->frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
+    pars->params.frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
 
     // Request as many frames as required from the decoder
-    if (p->frame_mixer) {
-        vo_set_queue_params(vo, 0, 2 + ceilf(p->frame_mixer->kernel->radius));
-    } else {
-        vo_set_queue_params(vo, 0, 2);
-    }
+    int req_frames = 2;
+    if (pars->params.frame_mixer)
+        req_frames += ceilf(pars->params.frame_mixer->kernel->radius);
+    vo_set_queue_params(vo, 0, req_frames);
 
     pars->params.deband_params = opts->deband ? &pars->deband_params : NULL;
     pars->deband_params.iterations = opts->deband_opts->iterations;
