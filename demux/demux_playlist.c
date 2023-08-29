@@ -37,8 +37,8 @@
 #define PROBE_SIZE (8 * 1024)
 
 enum dir_mode {
-    DIR_RECURSIVE,
     DIR_LAZY,
+    DIR_RECURSIVE,
     DIR_IGNORE,
 };
 
@@ -50,14 +50,14 @@ struct demux_playlist_opts {
 struct m_sub_options demux_playlist_conf = {
     .opts = (const struct m_option[]) {
         {"directory-mode", OPT_CHOICE(dir_mode,
-            {"recursive", DIR_RECURSIVE},
             {"lazy", DIR_LAZY},
+            {"recursive", DIR_RECURSIVE},
             {"ignore", DIR_IGNORE})},
         {0}
     },
     .size = sizeof(struct demux_playlist_opts),
     .defaults = &(const struct demux_playlist_opts){
-        .dir_mode = DIR_RECURSIVE,
+        .dir_mode = DIR_LAZY,
     },
 };
 
