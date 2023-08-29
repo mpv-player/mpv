@@ -262,7 +262,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
     char line[CHANNEL_LINE_LEN], *colon;
 
     if (!filename)
-        return NULL;
+        return list;
 
     int fields, cnt, k;
     int has8192, has0;
@@ -283,7 +283,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                filename, get_dvb_delsys(delsys));
     if ((f = fopen(filename, "r")) == NULL) {
         mp_fatal(log, "CAN'T READ CONFIG FILE %s\n", filename);
-        return NULL;
+        return list;
     }
 
     if (list == NULL) {
