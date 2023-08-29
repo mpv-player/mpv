@@ -3013,7 +3013,7 @@ static int mp_property_sub_forced_only_cur(void *ctx, struct m_property *prop,
                                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    int ret = mpctx->opts->subs_rend->forced_subs_only;
+    int ret = mpctx->opts->subs_rend->sub_forced_events_only;
     return m_property_bool_ro(action, arg, ret);
 }
 
@@ -4296,7 +4296,7 @@ static const struct property_osd_display {
     {"secondary-sub-visibility",
      .msg = "Secondary Subtitles ${!secondary-sub-visibility==yes:hidden}"
       "${?secondary-sub-visibility==yes:visible${?secondary-sid==no: (but no secondary subtitles selected)}}"},
-    {"sub-forced-only", "Forced sub only"},
+    {"sub-forced-events-only", "Forced sub only"},
     {"sub-scale", "Sub Scale"},
     {"sub-ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
     {"sub-ass-override", "ASS subtitle style override"},

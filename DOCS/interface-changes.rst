@@ -49,6 +49,7 @@ Interface changes
     - add `always` option to `--subs-fallback-forced`
     - remove `auto` choice from `--sub-forced-only`
     - remove `auto-forced-only` property
+    - rename `--sub-forced-only` to `--sub-forced-events-only`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

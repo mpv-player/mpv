@@ -229,7 +229,7 @@ Command Line Switches
     ``-endpos``                 ``--length``
     ``-fixed-vo``               (removed; always the default)
     ``-font``                   ``--osd-font``
-    ``-forcedsubsonly``         ``--sub-forced-only``
+    ``-forcedsubsonly``         ``--sub-forced-events-only``
     ``-forceidx``               ``--index``
     ``-format``                 ``--audio-format``
     ``-fsmode-dontuse``         (removed)

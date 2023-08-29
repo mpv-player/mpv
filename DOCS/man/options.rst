@@ -2621,7 +2621,7 @@ Subtitles
     subtitles (if the difference is smaller than 210 ms, the gap or overlap
     is removed).
 
-``--sub-forced-only=<yes|no>``
+``--sub-forced-events-only=<yes|no>``
     Enabling this displays only forced events within subtitle streams. Only
     some bitmap subtitle formats (such as DVD or PGS) are capable of having a
     mixture of forced and unforced events within the stream. Enabling this on
