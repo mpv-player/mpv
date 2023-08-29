@@ -3009,14 +3009,6 @@ static int mp_property_sub_end(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, end);
 }
 
-static int mp_property_sub_forced_only_cur(void *ctx, struct m_property *prop,
-                                           int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    int ret = mpctx->opts->subs_rend->sub_forced_events_only;
-    return m_property_bool_ro(action, arg, ret);
-}
-
 static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
@@ -3987,7 +3979,6 @@ static const struct m_property mp_properties_base[] = {
         .priv = (void *)&(const int){0}},
     {"secondary-sub-end", mp_property_sub_end,
         .priv = (void *)&(const int){1}},
-    {"sub-forced-only-cur", mp_property_sub_forced_only_cur},
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
@@ -4047,6 +4038,7 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("colormatrix-primaries", "video-params/primaries"),
     M_PROPERTY_ALIAS("colormatrix-gamma", "video-params/gamma"),
 
+    M_PROPERTY_DEPRECATED_ALIAS("sub-forced-only-cur", "sub-forced-events-only"),
     M_PROPERTY_DEPRECATED_ALIAS("drop-frame-count", "decoder-frame-drop-count"),
     M_PROPERTY_DEPRECATED_ALIAS("vo-drop-frame-count", "frame-drop-count"),
 };
