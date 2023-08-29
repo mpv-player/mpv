@@ -1315,14 +1315,6 @@ layouts["box"] = function ()
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 7, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
 
-    sub_codec = mp.get_property("current-tracks/sub/codec")
-    if (sub_codec == "dvd_subtitle" or sub_codec == "hdmv_pgs_subtitle") then
-        lo = add_layout("tog_forced_only")
-        lo.geometry =
-        {x = posX - pos_offsetX + 70, y = bigbtnrowY - 1, an = 7, w = 25, h = 18}
-        lo.style = osc_styles.smallButtonsL
-    end
-
     lo = add_layout("tog_fs")
     lo.geometry =
         {x = posX+pos_offsetX - 25, y = bigbtnrowY, an = 4, w = 25, h = 25}
@@ -1628,16 +1620,6 @@ function bar_layout(direction)
     lo = add_layout("volume")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
-
-    -- Forced-subs-only button
-    sub_codec = mp.get_property("current-tracks/sub/codec")
-    if (sub_codec == "dvd_subtitle" or sub_codec == "hdmv_pgs_subtitle") then
-        geo = { x = geo.x - geo.w - padX - 10,
-                y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-        lo = add_layout("tog_forced_only")
-        lo.geometry = geo
-        lo.style = osc_styles.smallButtonsBar
-    end
 
     -- Track selection buttons
     geo = { x = geo.x - tsW - padX, y = geo.y, an = geo.an, w = tsW, h = geo.h }
@@ -1975,27 +1957,6 @@ function osc_init()
         function () set_track("sub", -1) end
     ne.eventresponder["shift+mbtn_left_down"] =
         function () show_message(get_tracklist("sub"), 2) end
-
-    -- tog_forced_only
-    local tog_forced_only = new_element("tog_forced_only", "button")
-    ne = tog_forced_only
-    ne.content = function ()
-        local base_a = tog_forced_only.layout.alpha
-        local alpha = base_a[1]
-        if not mp.get_property_bool("sub-forced-events-only") then
-            alpha = 255
-        end
-        local ret = assdraw.ass_new()
-        ret:append("[")
-        ass_append_alpha(ret, {[1] = alpha, [2] = 1, [3] = base_a[3], [4] = base_a[4]}, 0)
-        ret:append("F")
-        ass_append_alpha(ret, base_a, 0)
-        ret:append("]")
-        return ret.text
-    end
-    ne.eventresponder["mbtn_left_up"] = function ()
-        mp.set_property_bool("sub-forced-events-only", (not mp.get_property_bool("sub-forced-events-only")))
-    end
 
     --tog_fs
     ne = new_element("tog_fs", "button")
