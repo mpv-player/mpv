@@ -260,7 +260,7 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     char b[2048] = {0};
     bool forced_only = false;
     if (t->type == STREAM_SUB) {
-        bool forced_opt = mpctx->opts->subs_rend->forced_subs_only;
+        bool forced_opt = mpctx->opts->subs_rend->sub_forced_events_only;
         if (forced_opt)
             forced_only = t->selected;
     }

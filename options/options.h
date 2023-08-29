@@ -83,7 +83,7 @@ struct mp_subtitle_opts {
     float sub_delay;
     float sub_fps;
     float sub_speed;
-    bool forced_subs_only;
+    bool sub_forced_events_only;
     bool stretch_dvd_subs;
     bool stretch_image_subs;
     bool image_subs_video_res;
