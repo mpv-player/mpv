@@ -36,7 +36,7 @@ Releases can be found on the [release list][releases].
 
 ## System requirements
 
-- A not too ancient Linux, Windows 7 or later, or OSX 10.8 or later.
+- A not too ancient Linux, Windows 10 or later, or macOS 10.8 or later.
 - A somewhat capable CPU. Hardware decoding might help if the CPU is too slow to
   decode video in realtime, but must be explicitly enabled with the `--hwdec`
   option.
@@ -48,6 +48,11 @@ Releases can be found on the [release list][releases].
   sure the graphics drivers are current. In some cases, ancient fallback video
   output methods can help (such as `--vo=xv` on Linux), but this use is not
   recommended or supported.
+
+mpv does not go out of its way to break on older hardware or old, unsupported
+operating systems, but development is not done with them in mind. Keeping
+compatibility with such setups is not guaranteed. If things work, consider it
+a happy accident.
 
 ## Downloads
 
