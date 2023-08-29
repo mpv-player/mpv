@@ -195,9 +195,12 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
             MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
             continue;
         }
-        if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && (opts->forced_subs_only == 1 ||
-            (opts->forced_subs_only && sd->forced_only_def)))
+        if (r->flags & AV_SUBTITLE_FLAG_FORCED) {
+            sd->has_forced_subevents = true;
+        } else if (opts->forced_subs_only == 1 || (opts->forced_subs_only &&
+                   sd->forced_only_def)) {
             continue;
+        }
         if (r->w <= 0 || r->h <= 0)
             continue;
 

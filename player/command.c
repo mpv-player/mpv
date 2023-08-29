@@ -3022,6 +3022,19 @@ static int mp_property_sub_forced_only_cur(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, ret);
 }
 
+static int mp_property_sub_has_forced_subevents(void *ctx,
+                                                  struct m_property *prop,
+                                                  int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct track *track = mpctx->current_track[0][STREAM_SUB];
+    struct dec_sub *sub = track ? track->d_sub : NULL;
+    if (!sub)
+        return M_PROPERTY_UNAVAILABLE;
+    bool ret = sub_has_forced_subevents(sub);
+    return m_property_bool_ro(action, arg, ret);
+}
+
 static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
@@ -3993,6 +4006,7 @@ static const struct m_property mp_properties_base[] = {
     {"secondary-sub-end", mp_property_sub_end,
         .priv = (void *)&(const int){1}},
     {"sub-forced-only-cur", mp_property_sub_forced_only_cur},
+    {"sub-has-forced-subevents", mp_property_sub_has_forced_subevents},
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},

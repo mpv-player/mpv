@@ -55,6 +55,7 @@ void sub_set_recorder_sink(struct dec_sub *sub, struct mp_recorder_sink *sink);
 void sub_set_play_dir(struct dec_sub *sub, int dir);
 bool sub_is_primary_visible(struct dec_sub *sub);
 bool sub_is_secondary_visible(struct dec_sub *sub);
+bool sub_has_forced_subevents(struct dec_sub *sub);
 
 int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg);
 

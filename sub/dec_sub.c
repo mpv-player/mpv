@@ -480,3 +480,8 @@ bool sub_is_secondary_visible(struct dec_sub *sub)
 {
     return !!sub->opts->sec_sub_visibility;
 }
+
+bool sub_has_forced_subevents(struct dec_sub *sub)
+{
+    return sub->sd->has_forced_subevents;
+}

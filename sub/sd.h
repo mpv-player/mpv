@@ -26,6 +26,7 @@ struct sd {
     bool preload_ok;
 
     bool forced_only_def;
+    bool has_forced_subevents;
 };
 
 struct sd_functions {

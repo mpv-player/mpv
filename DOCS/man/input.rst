@@ -2723,6 +2723,12 @@ Property list
 ``sub-forced-only-cur``
     Read-only - whether the current subtitle track is being shown in forced-only mode.
 
+``sub-has-forced-subevents``
+    Returns true if the currently active subtitle track has any subevents with
+    the forced flag set.
+
+    This property can only ever be true for bitmap subtitles.
+
 ``playlist-pos`` (RW)
     Current position on playlist. The first entry is on position 0. Writing to
     this property may start playback at the new position.
