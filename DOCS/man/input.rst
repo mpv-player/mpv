@@ -2480,6 +2480,54 @@ Property list
             "average-bpp"       MPV_FORMAT_INT64
             "alpha"             MPV_FORMAT_STRING
 
+``hdr-metadata``
+    Video HDR metadata per frame, including peak detection result.
+    This has a number of sub-properties:
+
+    ``hdr-metadata/min-luma``
+        Minimum luminance, as reported by HDR10 metadata (in cd/m²)
+
+    ``hdr-metadata/max-luma``
+        Maximum luminance, as reported by HDR10 metadata (in cd/m²)
+
+    ``hdr-metadata/max-cll``
+        Maximum content light level, as reported by HDR10 metadata (in cd/m²)
+
+    ``hdr-metadata/max-fall``
+        Maximum frame average light level, as reported by HDR10 metadata (in cd/m²)
+
+    ``hdr-metadata/scene-max-r``
+        MaxRGB of a scene for R component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``hdr-metadata/scene-max-g``
+        MaxRGB of a scene for G component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``hdr-metadata/scene-max-b``
+        MaxRGB of a scene for B component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``hdr-metadata/max-pq-y``
+        Maximum PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
+
+    ``hdr-metadata/avg-pq-y``
+        Average PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "min-luma"     MPV_FORMAT_DOUBLE
+            "max-luma"     MPV_FORMAT_DOUBLE
+            "max-cll"      MPV_FORMAT_DOUBLE
+            "max-fall"     MPV_FORMAT_DOUBLE
+            "scene-max-r"  MPV_FORMAT_DOUBLE
+            "scene-max-g"  MPV_FORMAT_DOUBLE
+            "scene-max-b"  MPV_FORMAT_DOUBLE
+            "max-pq-y"     MPV_FORMAT_DOUBLE
+            "avg-pq-y"     MPV_FORMAT_DOUBLE
+
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling
     have been applied. The actual video window size can still be different

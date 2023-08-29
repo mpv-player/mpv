@@ -2664,6 +2664,40 @@ out:
     return ret;
 }
 
+static int mp_property_hdr_metadata(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->video_out)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct mp_hdr_metadata data;
+    if (vo_control(mpctx->video_out, VOCTRL_HDR_METADATA, &data) != VO_TRUE)
+        return M_PROPERTY_UNAVAILABLE;
+
+    bool has_hdr10 = data.max_luma;
+    bool has_hdr10plus = data.scene_avg && (data.scene_max[0] ||
+                                            data.scene_max[1] ||
+                                            data.scene_max[2]);
+    bool has_cie_y = data.max_pq_y && data.avg_pq_y;
+
+    struct m_sub_property props[] = {
+        {"min-luma",    SUB_PROP_FLOAT(data.min_luma),     .unavailable = !has_hdr10},
+        {"max-luma",    SUB_PROP_FLOAT(data.max_luma),     .unavailable = !has_hdr10},
+        {"max-cll",     SUB_PROP_FLOAT(data.max_cll),      .unavailable = !has_hdr10},
+        {"max-fall",    SUB_PROP_FLOAT(data.max_fall),     .unavailable = !has_hdr10},
+        {"scene-max-r", SUB_PROP_FLOAT(data.scene_max[0]), .unavailable = !has_hdr10plus},
+        {"scene-max-g", SUB_PROP_FLOAT(data.scene_max[1]), .unavailable = !has_hdr10plus},
+        {"scene-max-b", SUB_PROP_FLOAT(data.scene_max[2]), .unavailable = !has_hdr10plus},
+        {"scene-avg",   SUB_PROP_FLOAT(data.scene_avg),    .unavailable = !has_hdr10plus},
+        {"max-pq-y",    SUB_PROP_FLOAT(data.max_pq_y),     .unavailable = !has_cie_y},
+        {"avg-pq-y",    SUB_PROP_FLOAT(data.avg_pq_y),     .unavailable = !has_cie_y},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
 static int mp_property_perf_info(void *ctx, struct m_property *p, int action,
                                  void *arg)
 {
@@ -3934,6 +3968,7 @@ static const struct m_property mp_properties_base[] = {
     {"current-window-scale", mp_property_current_window_scale},
     {"vo-configured", mp_property_vo_configured},
     {"vo-passes", mp_property_vo_passes},
+    {"hdr-metadata", mp_property_hdr_metadata},
     {"perf-info", mp_property_perf_info},
     {"current-vo", mp_property_vo},
     {"container-fps", mp_property_fps},

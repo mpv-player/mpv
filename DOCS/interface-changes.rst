@@ -51,6 +51,7 @@ Interface changes
     - remove `auto-forced-only` property
     - rename `--sub-forced-only` to `--sub-forced-events-only`
     - remove `sub-forced-only-cur` property (`--sub-forced-events-only` is a replacement)
+    - add `hdr-metadata` property
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
