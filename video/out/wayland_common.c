@@ -850,6 +850,16 @@ static void surface_handle_preferred_buffer_transform(void *data,
                                                       struct wl_surface *wl_surface,
                                                       uint32_t transform)
 {
+    struct vo_wayland_state *wl = data;
+    // Don't handle any of the flipped/reflected variants.
+    if (transform <= 3) {
+        struct m_config_cache *opts_cache = m_config_cache_alloc(NULL, wl->vo->global,
+                                                                 &dec_wrapper_conf);
+        struct dec_wrapper_opts *opts = opts_cache->opts;
+        opts->video_rotate = transform * 90;
+        m_config_cache_write_opt(opts_cache, &opts->video_rotate);
+        talloc_free(opts_cache);
+    }
 }
 #endif
 

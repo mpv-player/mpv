@@ -377,6 +377,21 @@ typedef struct MPOpts {
     int cuda_device;
 } MPOpts;
 
+struct dec_wrapper_opts {
+    double movie_aspect;
+    int aspect_method;
+    double force_fps;
+    bool correct_pts;
+    int video_rotate;
+    char *audio_decoders;
+    char *video_decoders;
+    char *audio_spdif;
+    struct dec_queue_opts *vdec_queue_opts;
+    struct dec_queue_opts *adec_queue_opts;
+    int64_t video_reverse_size;
+    int64_t audio_reverse_size;
+};
+
 struct dvd_opts {
     int angle;
     int speed;

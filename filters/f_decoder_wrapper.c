@@ -92,21 +92,6 @@ static const struct m_sub_options adec_queue_conf = {
 #undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct dec_wrapper_opts
 
-struct dec_wrapper_opts {
-    double movie_aspect;
-    int aspect_method;
-    double force_fps;
-    bool correct_pts;
-    int video_rotate;
-    char *audio_decoders;
-    char *video_decoders;
-    char *audio_spdif;
-    struct dec_queue_opts *vdec_queue_opts;
-    struct dec_queue_opts *adec_queue_opts;
-    int64_t video_reverse_size;
-    int64_t audio_reverse_size;
-};
-
 static int decoder_list_help(struct mp_log *log, const m_option_t *opt,
                              struct bstr name);
 
