@@ -186,6 +186,8 @@ struct priv {
     bool target_hint;
 
     float corner_rounding;
+
+    struct pl_hdr_metadata last_hdr_metadata;
 };
 
 static void update_render_options(struct vo *vo);
@@ -1081,6 +1083,23 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         goto done;
     }
 
+    const struct pl_frame *cur_frame = NULL;
+    for (int i = 0; i < mix.num_frames; i++) {
+        if (mix.timestamps[i] > 0.0f)
+            break;
+        cur_frame = mix.frames[i];
+    }
+
+    if (cur_frame) {
+        p->last_hdr_metadata = cur_frame->color.hdr;
+#if PL_API_VER >= 314
+        // Augment metadata with peak detection max_pq_y / avg_pq_y
+        pl_renderer_get_hdr_metadata(p->rr, &p->last_hdr_metadata);
+#endif
+    } else {
+        p->last_hdr_metadata = (struct pl_hdr_metadata){0};
+    }
+
     p->is_interpolated = mix.num_frames > 1;
     valid = true;
     // fall through
@@ -1414,6 +1433,21 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_performance_data *perf = data;
         copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh);
         copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw);
+        return true;
+    }
+
+    case VOCTRL_HDR_METADATA: {
+        struct mp_hdr_metadata *hdr = data;
+        hdr->min_luma = p->last_hdr_metadata.min_luma;
+        hdr->max_luma = p->last_hdr_metadata.max_luma;
+        hdr->max_cll = p->last_hdr_metadata.max_cll;
+        hdr->max_fall = p->last_hdr_metadata.max_fall;
+        hdr->scene_max[0] = p->last_hdr_metadata.scene_max[0];
+        hdr->scene_max[1] = p->last_hdr_metadata.scene_max[1];
+        hdr->scene_max[2] = p->last_hdr_metadata.scene_max[2];
+        hdr->scene_avg = p->last_hdr_metadata.scene_avg;
+        hdr->max_pq_y = p->last_hdr_metadata.max_pq_y;
+        hdr->avg_pq_y = p->last_hdr_metadata.avg_pq_y;
         return true;
     }
 
