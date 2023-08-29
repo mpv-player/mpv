@@ -137,7 +137,9 @@ Track Selection
 
 ``--subs-with-matching-audio=<yes|no>``
     When autoselecting a subtitle track, select a full/non-forced one even if the selected
-    audio stream matches your preferred subtitle language (default: yes).
+    audio stream matches your preferred subtitle language (default: yes). If this option is
+    set to ``no``, a non-forced subtitle track that matches the audio language will never be
+    autoselected by mpv regardless of the value of ``--slang`` or ``--subs-fallback``.
 
 ``--subs-match-os-language=<yes|no>``
     When autoselecting a subtitle track, select the track that matches the language of your OS

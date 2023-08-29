@@ -663,8 +663,10 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         sub_fallback = (pick->is_external && !pick->no_default) || opts->subs_fallback == 2 ||
                         (opts->subs_fallback == 1 && pick->default_track);
     }
-    if (pick && !forced_pick && sub && (!match_lang(langs, pick->lang) || os_langs) &&
-        ((!opts->subs_with_matching_audio && audio_matches) || !sub_fallback))
+    if (pick && !forced_pick && sub && (!match_lang(langs, pick->lang) || os_langs) && !sub_fallback)
+        pick = NULL;
+    // Handle this after matching langs and selecting a fallback.
+    if (pick && !forced_pick && sub && (!opts->subs_with_matching_audio && audio_matches))
         pick = NULL;
 
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
