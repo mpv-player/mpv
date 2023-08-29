@@ -1315,8 +1315,7 @@ layouts["box"] = function ()
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 7, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
 
-    sub_codec = mp.get_property("current-tracks/sub/codec")
-    if (sub_codec == "dvd_subtitle" or sub_codec == "hdmv_pgs_subtitle") then
+    if (mp.get_property_native("sub-has-forced-subevents")) then
         lo = add_layout("tog_forced_only")
         lo.geometry =
         {x = posX - pos_offsetX + 70, y = bigbtnrowY - 1, an = 7, w = 25, h = 18}
@@ -1630,8 +1629,7 @@ function bar_layout(direction)
     lo.style = osc_styles.smallButtonsBar
 
     -- Forced-subs-only button
-    sub_codec = mp.get_property("current-tracks/sub/codec")
-    if (sub_codec == "dvd_subtitle" or sub_codec == "hdmv_pgs_subtitle") then
+    if (mp.get_property_native("sub-has-forced-subevents")) then
         geo = { x = geo.x - geo.w - padX - 10,
                 y = geo.y, an = geo.an, w = geo.w, h = geo.h }
         lo = add_layout("tog_forced_only")
