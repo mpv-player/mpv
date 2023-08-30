@@ -5129,6 +5129,9 @@ DVB
     in the mpv configuration directory (usually ``~/.config/mpv``) with the
     filename ``channels.conf.{sat,ter,cbl,atsc,isdbt}`` (based on your card
     type) or ``channels.conf`` as a last resort.
+    Please note that using specific file name with card type is recommended,
+    since the legacy channel format is not fully standardized
+    so autodetection of the delivery system may fail otherwise.
     For DVB-S/2 cards, a VDR 1.7.x format channel list is recommended
     as it allows tuning to DVB-S2 channels, enabling subtitles and
     decoding the PMT (which largely improves the demuxing).
