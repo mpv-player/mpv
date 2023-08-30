@@ -1200,6 +1200,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                 if (!DELSYS_IS_SET(delsys_mask[f], delsys))
                     continue; /* Skip unsupported. */
 
+                mp_verbose(log, "Searching channel list for delivery system %s\n", get_dvb_delsys(delsys));
                 switch (delsys) {
                 case SYS_DVBC_ANNEX_A:
                 case SYS_DVBC_ANNEX_C:
@@ -1271,6 +1272,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
             &delsys_mask, (sizeof(unsigned int) * MAX_FRONTENDS));
         state->adapters[state->adapters_count].list = list;
         state->adapters_count++;
+        mp_verbose(log, "Added adapter with channels to state list, contains %d adapters.\n", state->adapters_count);
     }
 
     if (state->adapters_count == 0) {
