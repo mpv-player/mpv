@@ -352,14 +352,12 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                         &num_chars);
 
         bool is_vdr_conf = (num_chars == strlen(&line[k]));
-        mp_verbose(log, "This does look like a VDR style channel config file.\n");
 
         // Special case: DVB-T style ZAP config also has 13 columns.
         // Most columns should have non-numeric content, but some channel list generators insert 0
         // if a value is not used. However, INVERSION_* should always set after frequency.
         if (is_vdr_conf && !strncmp(vdr_par_str, "INVERSION_", 10)) {
             is_vdr_conf = false;
-            mp_verbose(log, "Found INVERSION field after frequency, assuming ZAP style channel config file.\n");
         }
 
         if (is_vdr_conf) {
