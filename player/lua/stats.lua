@@ -35,6 +35,7 @@ local o = {
     plot_perfdata = true,
     plot_vsync_ratio = true,
     plot_vsync_jitter = true,
+    plot_tonemapping_lut = true,     -- also enable tone-mapping-visualize
     skip_frames = 5,
     global_max = true,
     flush_graph_data = true,         -- clear data buffers when toggling
@@ -95,6 +96,7 @@ local cache_recorder_timer = nil
 local curr_page = o.key_page_1
 local pages = {}
 local scroll_bound = false
+local tm_viz_prev = nil
 -- Save these sequences locally as we'll need them a lot
 local ass_start = mp.get_property_osd("osd-ass-cc/0")
 local ass_stop = mp.get_property_osd("osd-ass-cc/1")
@@ -1209,6 +1211,10 @@ local function process_key_binding(oneshot)
         elseif not display_timer.oneshot and not oneshot then
             display_timer:kill()
             cache_recorder_timer:stop()
+            if tm_viz_prev ~= nil then
+                mp.set_property_native("tone-mapping-visualize", tm_viz_prev)
+                tm_viz_prev = nil
+            end
             clear_screen()
             remove_page_bindings()
             if recorder then
@@ -1225,6 +1231,10 @@ local function process_key_binding(oneshot)
             -- Will stop working if "vsync-jitter" property change notification
             -- changes, but it's fine for an internal script.
             mp.observe_property("vsync-jitter", "none", recorder)
+        end
+        if not oneshot and o.plot_tonemapping_lut then
+            tm_viz_prev = mp.get_property_native("tone-mapping-visualize")
+            mp.set_property_native("tone-mapping-visualize", true)
         end
         if not oneshot then
             cache_ahead_buf = {0, pos = 1, len = 50, max = 0}
