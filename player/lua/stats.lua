@@ -29,12 +29,9 @@ local o = {
     persistent_overlay = false,      -- whether the stats can be overwritten by other output
     print_perfdata_passes = false,   -- when true, print the full information about all passes
     filter_params_max_length = 100,  -- a filter list longer than this many characters will be shown one filter per line instead
-<<<<<<< HEAD
     show_frame_info = false,          -- whether to show the current frame info
-=======
     term_width_limit = -1,           -- overwrites the terminal width
     term_height_limit = -1,          -- overwrites the terminal height
->>>>>>> 89493c38fb (stats.lua: truncate long lines for the terminal)
     debug = false,
 
     -- Graph options and style
@@ -291,6 +288,12 @@ local function sorted_keys(t, comp_fn)
     return keys
 end
 
+local function scroll_hint()
+    local hint = format("(hint: scroll with %s/%s)", o.key_scroll_up, o.key_scroll_down)
+    if not o.use_ass then return " " .. hint end
+    return format(" {\\fs%s}%s{\\fs%s}", o.font_size * 0.66, hint, o.font_size)
+end
+
 local function append_perfdata(header, s, dedicated_page, print_passes)
     local vo_p = mp.get_property_native("vo-passes")
     if not vo_p then
@@ -333,11 +336,11 @@ local function append_perfdata(header, s, dedicated_page, print_passes)
     -- ensure that the fixed title is one element and every scrollable line is
     -- also one single element.
     local h = dedicated_page and header or s
-    h[#h+1] = format("%s%s%s%s{\\fs%s}%s%s{\\fs%s}",
+    h[#h+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}%s",
                      dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
-                     "(last/average/peak μs)",
-                     dedicated_page and " (hint: scroll with ↑↓)" or "", o.font_size)
+                     "(last/average/peak μs)", o.font_size,
+                     dedicated_page and scroll_hint() or "")
 
     for _,frame in ipairs(sorted_keys(vo_p)) do  -- ensure fixed display order
         local data = vo_p[frame]
@@ -1113,9 +1116,7 @@ local function keybinding_info(after_scroll, bindlist)
     local page = pages[o.key_page_4]
     eval_ass_formatting()
     add_header(header)
-    append(header, "", {prefix=format("%s: {\\fs%s}%s{\\fs%s}", page.desc,
-           o.font_size * 0.66, "(hint: scroll with ↑↓)", o.font_size), nl="",
-           indent=""})
+    append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint()), nl="", indent=""})
     header = {table.concat(header)}
 
     if not kbinfo_lines or not after_scroll then
@@ -1130,7 +1131,7 @@ local function perf_stats()
     eval_ass_formatting()
     add_header(header)
     local page = pages[o.key_page_0]
-    append(header, "", {prefix=page.desc .. ":", nl="", indent=""})
+    append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint()), nl="", indent=""})
     append_general_perfdata(content)
     header = {table.concat(header)}
     return finalize_page(header, content, true)
