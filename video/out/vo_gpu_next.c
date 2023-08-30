@@ -912,6 +912,29 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
     }
 }
 
+static void update_tm_viz(struct pl_color_map_params *params,
+                          const struct pl_frame *target,
+                          double pts)
+{
+    if (!params->visualize_lut)
+        return;
+
+    // Use right half of sceen for TM visualization, constrain to 1:1 AR
+    const float out_w = fabsf(pl_rect_w(target->crop));
+    const float out_h = fabsf(pl_rect_h(target->crop));
+    const float size = MPMIN(out_w / 2.0f, out_h);
+    params->visualize_rect = (pl_rect2df) {
+        .x0 = 1.0f - size / out_w,
+        .x1 = 1.0f,
+        .y0 = 0.0f,
+        .y1 = size / out_h,
+    };
+
+    // Complete one full rotation of the hue plane every 10 seconds
+    const float tm_period = 10.0;
+    params->visualize_hue = 2 * M_PI * pts / tm_period;
+}
+
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
@@ -1015,6 +1038,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         // initialization, but pl_queue does not like these. Hard-clamp as
         // a simple work-around.
         qparams.pts = p->last_pts = MPMAX(qparams.pts, p->last_pts);
+        update_tm_viz(&pars->color_map_params, &target, qparams.pts);
 
         switch (pl_queue_update(p->queue, &mix, &qparams)) {
         case PL_QUEUE_ERR:
@@ -1324,6 +1348,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
 
     apply_crop(&image, src, mpi->params.w, mpi->params.h);
     apply_crop(&target, dst, fbo->params.w, fbo->params.h);
+    update_tm_viz(&pars->color_map_params, &target, p->last_pts);
 
     int osd_flags = 0;
     if (!args->subs)
