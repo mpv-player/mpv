@@ -2329,8 +2329,9 @@ static int property_imgparams(const struct mp_image_params *p, int action, void 
 
     int bpp = 0;
     enum pl_alpha_mode alpha = p->repr.alpha;
-    if (p->imgfmt) {
-        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->imgfmt);
+    int fmt = p->hw_subfmt ? p->hw_subfmt : p->imgfmt;
+    if (fmt) {
+        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
         for (int i = 0; i < desc.num_planes; i++)
             bpp += desc.bpp[i] >> (desc.xs[i] + desc.ys[i]);
 
