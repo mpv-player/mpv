@@ -2804,6 +2804,19 @@ Property list
     Any of these properties may be unavailable or set to dummy values if the
     VO window is not created or visible.
 
+``term-size``
+    The current terminal size.
+
+    This has two sub-properties.
+
+    ``term-size/w``
+        width of the terminal in cells
+    ``term-size/h``
+        height of the terminal in cells
+
+    This property is not observable. Reacting to size changes requires
+    polling.
+
 ``window-id``
     Read-only - mpv's window id. May not always be available, i.e due to window
     not being opened yet or not being supported by the VO.
