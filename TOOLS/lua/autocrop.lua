@@ -142,7 +142,10 @@ function cleanup()
 
     -- Remove all existing filters.
     for key, value in pairs(labels) do
-        remove_filter(value)
+        -- No need to remove initial crop in vo_crop mode
+        if not (options.use_vo_crop and value == labels.crop) then
+            remove_filter(value)
+        end
     end
 
     -- Kill all timers.
