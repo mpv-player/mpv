@@ -2315,22 +2315,24 @@ static const char *get_aspect_ratio_name(double ratio)
 
 static int property_imgparams(const struct mp_image_params *p, int action, void *arg)
 {
-    if (!p->imgfmt)
+    if (!p->imgfmt && !p->imgfmt_name)
         return M_PROPERTY_UNAVAILABLE;
 
     int d_w, d_h;
     mp_image_params_get_dsize(p, &d_w, &d_h);
 
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->imgfmt);
     int bpp = 0;
-    for (int i = 0; i < desc.num_planes; i++)
-        bpp += desc.bpp[i] >> (desc.xs[i] + desc.ys[i]);
-
     enum pl_alpha_mode alpha = p->repr.alpha;
-    // Alpha type is not supported by FFmpeg, so PL_ALPHA_UNKNOWN may mean alpha
-    // is of an unknown type, or simply not present. Normalize to AUTO=no alpha.
-    if (!!(desc.flags & MP_IMGFLAG_ALPHA) != (alpha != PL_ALPHA_UNKNOWN))
-        alpha = (desc.flags & MP_IMGFLAG_ALPHA) ? PL_ALPHA_INDEPENDENT : PL_ALPHA_UNKNOWN;
+    if (p->imgfmt) {
+        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->imgfmt);
+        for (int i = 0; i < desc.num_planes; i++)
+            bpp += desc.bpp[i] >> (desc.xs[i] + desc.ys[i]);
+
+        // Alpha type is not supported by FFmpeg, so PL_ALPHA_UNKNOWN may mean alpha
+        // is of an unknown type, or simply not present. Normalize to AUTO=no alpha.
+        if (!!(desc.flags & MP_IMGFLAG_ALPHA) != (alpha != PL_ALPHA_UNKNOWN))
+            alpha = (desc.flags & MP_IMGFLAG_ALPHA) ? PL_ALPHA_INDEPENDENT : PL_ALPHA_UNKNOWN;
+    }
 
     const struct pl_hdr_metadata *hdr = &p->color.hdr;
     bool has_cie_y     = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_CIE_Y);
@@ -2340,8 +2342,10 @@ static int property_imgparams(const struct mp_image_params *p, int action, void 
     bool has_crop = mp_rect_w(p->crop) > 0 && mp_rect_h(p->crop) > 0;
     const char *aspect_name = get_aspect_ratio_name(d_w / (double)d_h);
     const char *sar_name = get_aspect_ratio_name(p->w / (double)p->h);
+    const char *pixelformat_name = p->imgfmt_name ? p->imgfmt_name :
+                                                   mp_imgfmt_to_name(p->imgfmt);
     struct m_sub_property props[] = {
-        {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p->imgfmt))},
+        {"pixelformat",     SUB_PROP_STR(pixelformat_name)},
         {"hw-pixelformat",  SUB_PROP_STR(mp_imgfmt_to_name(p->hw_subfmt)),
                             .unavailable = !p->hw_subfmt},
         {"average-bpp",     SUB_PROP_INT(bpp),
