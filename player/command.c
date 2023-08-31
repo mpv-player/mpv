@@ -2291,6 +2291,11 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
             (desc.flags & MP_IMGFLAG_ALPHA) ? MP_ALPHA_STRAIGHT : MP_ALPHA_AUTO;
     }
 
+    const struct pl_hdr_metadata *hdr = &p.color.hdr;
+    bool has_cie_y     = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_CIE_Y);
+    bool has_hdr10     = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_HDR10);
+    bool has_hdr10plus = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_HDR10PLUS);
+
     bool has_crop = mp_rect_w(p.crop) > 0 && mp_rect_h(p.crop) > 0;
     const char *aspect_name = get_aspect_ratio_name(d_w / (double)d_h);
     struct m_sub_property props[] = {
@@ -2330,6 +2335,16 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
             SUB_PROP_STR(m_opt_choice_str(mp_alpha_names, p.alpha)),
             // avoid using "auto" for "no", so just make it unavailable
             .unavailable = p.alpha == MP_ALPHA_AUTO},
+        {"min-luma",    SUB_PROP_FLOAT(hdr->min_luma),     .unavailable = !has_hdr10},
+        {"max-luma",    SUB_PROP_FLOAT(hdr->max_luma),     .unavailable = !has_hdr10},
+        {"max-cll",     SUB_PROP_FLOAT(hdr->max_cll),      .unavailable = !has_hdr10},
+        {"max-fall",    SUB_PROP_FLOAT(hdr->max_fall),     .unavailable = !has_hdr10},
+        {"scene-max-r", SUB_PROP_FLOAT(hdr->scene_max[0]), .unavailable = !has_hdr10plus},
+        {"scene-max-g", SUB_PROP_FLOAT(hdr->scene_max[1]), .unavailable = !has_hdr10plus},
+        {"scene-max-b", SUB_PROP_FLOAT(hdr->scene_max[2]), .unavailable = !has_hdr10plus},
+        {"scene-avg",   SUB_PROP_FLOAT(hdr->scene_avg),    .unavailable = !has_hdr10plus},
+        {"max-pq-y",    SUB_PROP_FLOAT(hdr->max_pq_y),     .unavailable = !has_cie_y},
+        {"avg-pq-y",    SUB_PROP_FLOAT(hdr->avg_pq_y),     .unavailable = !has_cie_y},
         {0}
     };
 
@@ -2360,7 +2375,13 @@ static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
     if (valid != M_PROPERTY_VALID)
         return valid;
 
-    return property_imgparams(get_video_out_params(ctx), action, arg);
+    struct mp_image_params p = get_video_out_params(ctx);
+
+    MPContext *mpctx = ctx;
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_HDR_METADATA, &p.color.hdr);
+
+    return property_imgparams(p, action, arg);
 }
 
 static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,

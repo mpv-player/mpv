@@ -2476,7 +2476,7 @@ Property list
     ``video-params/gamma``
         The gamma function in use as string. (Exact values subject to change.)
 
-    ``video-params/sig-peak``
+    ``video-params/sig-peak`` (deprecated)
         The video file's tagged signal peak as float.
 
     ``video-params/light``
@@ -2496,6 +2496,33 @@ Property list
         Alpha type. If the format has no alpha channel, this will be unavailable
         (but in future releases, it could change to ``no``). If alpha is
         present, this is set to ``straight`` or ``premul``.
+
+    ``video-params/min-luma``
+        Minimum luminance, as reported by HDR10 metadata (in cd/m²)
+
+    ``video-params/max-luma``
+        Maximum luminance, as reported by HDR10 metadata (in cd/m²)
+
+    ``video-params/max-cll``
+        Maximum content light level, as reported by HDR10 metadata (in cd/m²)
+
+    ``video-params/max-fall``
+        Maximum frame average light level, as reported by HDR10 metadata (in cd/m²)
+
+    ``video-params/scene-max-r``
+        MaxRGB of a scene for R component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``video-params/scene-max-g``
+        MaxRGB of a scene for G component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``video-params/scene-max-b``
+        MaxRGB of a scene for B component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``video-params/max-pq-y``
+        Maximum PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
+
+    ``video-params/avg-pq-y``
+        Average PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
@@ -2526,6 +2553,7 @@ Property list
 
 ``hdr-metadata``
     Video HDR metadata per frame, including peak detection result.
+    If supported the same information is also included in ``video-out-params``.
     This has a number of sub-properties:
 
     ``hdr-metadata/min-luma``
