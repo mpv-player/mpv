@@ -673,7 +673,19 @@ local function add_file(s)
 end
 
 
-local function append_resolution(s, r, prefix, w_prop, h_prop)
+local function crop_noop(w, h, r)
+    return r["crop-x"] == 0 and r["crop-y"] == 0 and
+           r["crop-w"] == w and r["crop-h"] == h
+end
+
+
+local function crop_equal(r, ro)
+    return r["crop-x"] == ro["crop-x"] and r["crop-y"] == ro["crop-y"] and
+           r["crop-w"] == ro["crop-w"] and r["crop-h"] == ro["crop-h"]
+end
+
+
+local function append_resolution(s, r, prefix, w_prop, h_prop, video_res)
     if not r then
         return
     end
@@ -693,9 +705,12 @@ local function append_resolution(s, r, prefix, w_prop, h_prop)
                                                indent=" ", prefix_sep="",
                                                no_prefix_markup=true})
         end
-        if r["crop-w"] and r["crop-w"] > 0 then
-            append(s, format("[x: %d, y: %d, w: %d, h: %d]", r["crop-x"], r["crop-y"], r["crop-w"],
-                   r["crop-h"]), {prefix=", ", nl="", indent="", no_prefix_markup=true})
+        -- We can skip crop if it is the same as video decoded resolution
+        if r["crop-w"] and (not video_res or
+                            not crop_noop(r[w_prop], r[h_prop], r)) then
+            append(s, format("[x: %d, y: %d, w: %d, h: %d]",
+                            r["crop-x"], r["crop-y"], r["crop-w"], r["crop-h"]),
+                            {prefix=", ", nl="", indent="", no_prefix_markup=true})
         end
     end
 end
@@ -804,8 +819,11 @@ local function add_video(s)
     append_display_sync(s)
     append_perfdata(s, o.print_perfdata_passes)
 
-    append_resolution(s, r, "Native Resolution:")
+    append_resolution(s, r, "Native Resolution:", "w", "h", true)
     if ro and (r["w"] ~= ro["dw"] or r["h"] ~= ro["dh"]) then
+        if ro["crop-w"] and (crop_noop(r["w"], r["h"], ro) or crop_equal(r, ro)) then
+            ro["crop-w"] = nil
+        end
         append_resolution(s, ro, "Output Resolution:", "dw", "dh")
     end
     local scale = nil
