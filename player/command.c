@@ -2280,6 +2280,7 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
             (desc.flags & MP_IMGFLAG_ALPHA) ? MP_ALPHA_STRAIGHT : MP_ALPHA_AUTO;
     }
 
+    bool has_crop = mp_rect_w(p.crop) > 0 && mp_rect_h(p.crop) > 0;
     const char *aspect_name = get_aspect_ratio_name(d_w / (double)d_h);
     struct m_sub_property props[] = {
         {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p.imgfmt))},
@@ -2291,10 +2292,10 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"h",               SUB_PROP_INT(p.h)},
         {"dw",              SUB_PROP_INT(d_w)},
         {"dh",              SUB_PROP_INT(d_h)},
-        {"crop-x",          SUB_PROP_INT(p.crop.x0)},
-        {"crop-y",          SUB_PROP_INT(p.crop.y0)},
-        {"crop-w",          SUB_PROP_INT(mp_rect_w(p.crop))},
-        {"crop-h",          SUB_PROP_INT(mp_rect_h(p.crop))},
+        {"crop-x",          SUB_PROP_INT(p.crop.x0), .unavailable = !has_crop},
+        {"crop-y",          SUB_PROP_INT(p.crop.y0), .unavailable = !has_crop},
+        {"crop-w",          SUB_PROP_INT(mp_rect_w(p.crop)), .unavailable = !has_crop},
+        {"crop-h",          SUB_PROP_INT(mp_rect_h(p.crop)), .unavailable = !has_crop},
         {"aspect",          SUB_PROP_FLOAT(d_w / (double)d_h)},
         {"aspect-name",     SUB_PROP_STR(aspect_name), .unavailable = !aspect_name},
         {"par",             SUB_PROP_FLOAT(p.p_w / (double)p.p_h)},
