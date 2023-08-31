@@ -736,17 +736,22 @@ local function pq_eotf(x)
 end
 
 
-local function append_hdr(s, hdr)
+local function append_hdr(s, hdr, video_out)
     if not hdr then
         return
     end
+
+    -- If we are printing video out parameters it is just display, not mastering
+    local display_prefix = video_out and "Display:" or "Mastering display:"
 
     if (hdr["max-cll"] and hdr["max-cll"] > 203) or
         hdr["max-luma"] and hdr["max-luma"] > 203 then
         append(s, "", {prefix="HDR10:"})
         if hdr["min-luma"] and hdr["max-luma"] and hdr["max-luma"] > 203 then
+            -- libplacebo uses close to zero values as "defined zero"
+            hdr["min-luma"] = hdr["min-luma"] <= 1e-6 and 0 or hdr["min-luma"]
             append(s, format("%.2g / %.0f", hdr["min-luma"], hdr["max-luma"]),
-                {prefix="Mastering display:", suffix=" cd/m²", nl=""})
+                {prefix=display_prefix, suffix=" cd/m²", nl=""})
         end
         if hdr["max-cll"] and hdr["max-cll"] > 203 then
             append(s, hdr["max-cll"], {prefix="maxCLL:", suffix=" cd/m²", nl=""})
@@ -776,6 +781,85 @@ local function append_hdr(s, hdr)
 end
 
 
+local function append_img_params(s, r, ro)
+    if not r then
+        return
+    end
+
+    append_resolution(s, r, "Resolution:", "w", "h", true)
+    if ro and (r["w"] ~= ro["dw"] or r["h"] ~= ro["dh"]) then
+        if ro["crop-w"] and (crop_noop(r["w"], r["h"], ro) or crop_equal(r, ro)) then
+            ro["crop-w"] = nil
+        end
+        append_resolution(s, ro, "Output Resolution:", "dw", "dh")
+    end
+
+    append(s, r["pixelformat"], {prefix="Pixel Format:"})
+    if r["hw-pixelformat"] ~= nil then
+        append(s, r["hw-pixelformat"], {prefix_sep="[", nl="", indent=" ",
+                suffix="]"})
+    end
+    append(s, r["colorlevels"], {prefix="Levels:", nl=""})
+
+    -- Group these together to save vertical space
+    append(s, r["colormatrix"], {prefix="Colormatrix:"})
+    append(s, r["primaries"], {prefix="Primaries:", nl=""})
+    append(s, r["gamma"], {prefix="Transfer:", nl=""})
+end
+
+
+local function add_video_out(s)
+    local vo = mp.get_property_native("current-vo")
+    if not vo then
+        return
+    end
+
+    append(s, "", {prefix=o.nl .. o.nl .. "Display:", nl="", indent=""})
+    append(s, vo, {prefix_sep="", nl="", indent=""})
+    append_property(s, "display-names", {prefix_sep="", prefix="(", suffix=")",
+                                         no_prefix_markup=true, nl="", indent=" "})
+    append_property(s, "avsync", {prefix="A-V:"})
+    if append_property(s, compat("decoder-frame-drop-count"),
+                       {prefix="Dropped Frames:", suffix=" (decoder)"}) then
+        append_property(s, compat("frame-drop-count"), {suffix=" (output)", nl="", indent=""})
+    end
+    if append_property(s, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
+        append_property(s, "estimated-display-fps",
+                        {suffix=" (estimated)", nl="", indent=""})
+    else
+        append_property(s, "estimated-display-fps",
+                        {prefix="Display FPS:", suffix=" (estimated)"})
+    end
+    append_display_sync(s)
+    append_perfdata(s, o.print_perfdata_passes)
+
+    if mp.get_property_native("deinterlace") then
+        append_property(s, "deinterlace", {prefix="Deinterlacing:"})
+    end
+
+    local scale = nil
+    if not mp.get_property_native("fullscreen") then
+        scale = mp.get_property_native("current-window-scale")
+    end
+
+    local r = mp.get_property_native("video-target-params")
+    if not r then
+        local osd_dims = mp.get_property_native("osd-dimensions")
+        local scaled_width = osd_dims["w"] - osd_dims["ml"] - osd_dims["mr"]
+        local scaled_height = osd_dims["h"] - osd_dims["mt"] - osd_dims["mb"]
+        append_resolution(s, {w=scaled_width, h=scaled_height, s=scale},
+                          "Resolution:")
+        return
+    end
+
+    -- Add window scale
+    r["s"] = scale
+
+    append_img_params(s, r)
+    append_hdr(s, r, true)
+end
+
+
 local function add_video(s)
     local r = mp.get_property_native("video-params")
     local ro = mp.get_property_native("video-out-params")
@@ -796,18 +880,6 @@ local function add_video(s)
         append_property(s, "hwdec-current", {prefix="(hwdec:", nl="", indent=" ",
                          no_prefix_markup=true, suffix=")"}, {no=true, [""]=true})
     end
-    append_property(s, "avsync", {prefix="A-V:"})
-    if append_property(s, compat("decoder-frame-drop-count"),
-                       {prefix="Dropped Frames:", suffix=" (decoder)"}) then
-        append_property(s, compat("frame-drop-count"), {suffix=" (output)", nl="", indent=""})
-    end
-    if append_property(s, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
-        append_property(s, "estimated-display-fps",
-                        {suffix=" (estimated)", nl="", indent=""})
-    else
-        append_property(s, "estimated-display-fps",
-                        {prefix="Display FPS:", suffix=" (estimated)"})
-    end
     if append_property(s, compat("container-fps"), {prefix="FPS:", suffix=" (specified)"}) then
         append_property(s, "estimated-vf-fps",
                         {suffix=" (estimated)", nl="", indent=""})
@@ -816,37 +888,7 @@ local function add_video(s)
                         {prefix="FPS:", suffix=" (estimated)"})
     end
 
-    append_display_sync(s)
-    append_perfdata(s, o.print_perfdata_passes)
-
-    append_resolution(s, r, "Native Resolution:", "w", "h", true)
-    if ro and (r["w"] ~= ro["dw"] or r["h"] ~= ro["dh"]) then
-        if ro["crop-w"] and (crop_noop(r["w"], r["h"], ro) or crop_equal(r, ro)) then
-            ro["crop-w"] = nil
-        end
-        append_resolution(s, ro, "Output Resolution:", "dw", "dh")
-    end
-    local scale = nil
-    if not mp.get_property_native("fullscreen") then
-        scale = mp.get_property_native("current-window-scale")
-    end
-    append_resolution(s, {w=scaled_width, h=scaled_height, s=scale}, "Scaled Resolution:")
-
-    if mp.get_property_native("deinterlace") then
-        append_property(s, "deinterlace", {prefix="Deinterlacing:"})
-    end
-
-    append(s, r["pixelformat"], {prefix="Pixel Format:"})
-    if r["hw-pixelformat"] ~= nil then
-        append(s, r["hw-pixelformat"], {prefix_sep="[", nl="", indent=" ",
-                suffix="]"})
-    end
-    append(s, r["colorlevels"], {prefix="Levels:", nl=""})
-
-    -- Group these together to save vertical space
-    append(s, r["colormatrix"], {prefix="Colormatrix:"})
-    append(s, r["primaries"], {prefix="Primaries:", nl=""})
-    append(s, r["gamma"], {prefix="Transfer:", nl=""})
+    append_img_params(s, r, ro)
 
     local hdr = mp.get_property_native("hdr-metadata")
     if not hdr then
@@ -909,6 +951,7 @@ local function default_stats()
     eval_ass_formatting()
     add_header(stats)
     add_file(stats)
+    add_video_out(stats)
     add_video(stats)
     add_audio(stats)
     return table.concat(stats)
