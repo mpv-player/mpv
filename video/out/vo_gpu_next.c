@@ -1114,8 +1114,20 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         goto done;
     }
 
-    const struct pl_frame *cur_frame = pl_frame_mix_nearest(&mix);
     mp_mutex_lock(&vo->params_mutex);
+    if (!vo->target_params)
+        vo->target_params = talloc(vo, struct mp_image_params);
+    *vo->target_params = (struct mp_image_params){
+        .imgfmt_name = swframe.fbo->params.format
+                        ? swframe.fbo->params.format->name : NULL,
+        .w = swframe.fbo->params.w,
+        .h = swframe.fbo->params.h,
+        .color = target.color,
+        .repr = target.repr,
+        .rotate = target.rotation,
+    };
+
+    const struct pl_frame *cur_frame = pl_frame_mix_nearest(&mix);
     if (cur_frame && vo->params) {
         vo->params->color.hdr = cur_frame->color.hdr;
         // Augment metadata with peak detection max_pq_y / avg_pq_y
