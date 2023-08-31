@@ -2439,6 +2439,22 @@ static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
     return property_imgparams(&p, action, arg);
 }
 
+static int mp_property_tgt_imgparams(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!mpctx->video_out)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int valid = m_property_read_sub_validate(ctx, prop, action, arg);
+    if (valid != M_PROPERTY_VALID)
+        return valid;
+
+    struct mp_image_params p = vo_get_target_params(vo);
+    return property_imgparams(&p, action, arg);
+}
+
 static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
@@ -3965,6 +3981,7 @@ static const struct m_property mp_properties_base[] = {
     {"current-ao", mp_property_ao},
 
     // Video
+    {"video-target-params", mp_property_tgt_imgparams},
     {"video-out-params", mp_property_vo_imgparams},
     {"video-dec-params", mp_property_dec_imgparams},
     {"video-params", mp_property_vd_imgparams},
@@ -4107,7 +4124,7 @@ static const char *const *const mp_event_property_change[] = {
       "decoder-frame-drop-count", "frame-drop-count", "video-frame-info",
       "vf-metadata", "af-metadata", "sub-start", "sub-end", "secondary-sub-start",
       "secondary-sub-end", "video-out-params", "video-dec-params", "video-params",
-      "deinterlace-active"),
+      "deinterlace-active", "video-target-params"),
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
