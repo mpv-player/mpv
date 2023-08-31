@@ -559,8 +559,10 @@ local function append_display_sync(s)
                         {prefix="DS:" .. o.prefix_sep .. " - / ", prefix_sep=""})
     end
 
-    append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
-    append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
+    append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl="",
+                                                indent=o.prefix_sep .. o.prefix_sep})
+    append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl="",
+                                                  indent=o.prefix_sep .. o.prefix_sep})
 
     -- As we need to plot some graphs we print jitter and ratio on their own lines
     if not display_timer.oneshot and (o.plot_vsync_ratio or o.plot_vsync_jitter) and o.use_ass then
@@ -576,8 +578,10 @@ local function append_display_sync(s)
         append_property(s, "vsync-jitter", {prefix="VSync Jitter:", suffix=o.prefix_sep .. jitter_graph})
     else
         -- Since no graph is needed we can print ratio/jitter on the same line and save some space
-        local vratio = append_property(s, "vsync-ratio", {prefix="VSync Ratio:"})
-        append_property(s, "vsync-jitter", {prefix="VSync Jitter:", nl="" or o.nl})
+        local vr = append_property(s, "vsync-ratio", {prefix="VSync Ratio:"})
+        append_property(s, "vsync-jitter", {prefix="VSync Jitter:",
+                            nl=vr and "" or o.nl,
+                            indent=vr and o.prefix_sep .. o.prefix_sep})
     end
 end
 
@@ -651,12 +655,14 @@ local function add_file(s)
         append_property(s, "chapter-list/" .. tostring(ch_index) .. "/title", {prefix="Chapter:",
                         nl=ed_cond and "" or o.nl})
         append_property(s, "chapter-list/count",
-                        {prefix="(" .. tostring(ch_index + 1) .. "/", suffix=")", nl="",
+                        {prefix="(" .. tostring(ch_index + 1) .. " /", suffix=")", nl="",
                          indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
 
     local fs = append_property(s, "file-size", {prefix="Size:"})
-    append_property(s, "file-format", {prefix="Format/Protocol:", nl=fs and "" or o.nl})
+    append_property(s, "file-format", {prefix="Format/Protocol:",
+                                       nl=fs and "" or o.nl,
+                                       indent=fs and o.prefix_sep .. o.prefix_sep})
 
     local demuxer_cache = mp.get_property_native("demuxer-cache-state", {})
     if demuxer_cache["fw-bytes"] then
@@ -695,14 +701,14 @@ local function append_resolution(s, r, prefix, w_prop, h_prop, video_res)
         append(s, r[h_prop], {prefix="x", nl="", indent=" ", prefix_sep=" ",
                            no_prefix_markup=true})
         if r["aspect"] ~= nil then
-            append(s, format("%.2f:1", r["aspect"]), {prefix=", ", nl="", indent="",
+            append(s, format("%.2f:1", r["aspect"]), {prefix="", nl="", indent="",
                                                       no_prefix_markup=true})
             append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
                                          prefix_sep="", no_prefix_markup=true})
         end
-        if r['s'] then
+        if r["s"] then
             append(s, format("%.2f", r["s"]), {prefix="(", suffix="x)", nl="",
-                                               indent=" ", prefix_sep="",
+                                               indent=o.prefix_sep, prefix_sep="",
                                                no_prefix_markup=true})
         end
         -- We can skip crop if it is the same as video decoded resolution
@@ -710,7 +716,7 @@ local function append_resolution(s, r, prefix, w_prop, h_prop, video_res)
                             not crop_noop(r[w_prop], r[h_prop], r)) then
             append(s, format("[x: %d, y: %d, w: %d, h: %d]",
                             r["crop-x"], r["crop-y"], r["crop-w"], r["crop-h"]),
-                            {prefix=", ", nl="", indent="", no_prefix_markup=true})
+                            {prefix="", nl="", indent="", no_prefix_markup=true})
         end
     end
 end
@@ -748,38 +754,48 @@ local function append_hdr(s, hdr, video_out)
     -- If we are printing video out parameters it is just display, not mastering
     local display_prefix = video_out and "Display:" or "Mastering display:"
 
+    local indent = ""
+
     if should_show(hdr["max-cll"]) or should_show(hdr["max-luma"]) then
         append(s, "", {prefix="HDR10:"})
         if hdr["min-luma"] and should_show(hdr["max-luma"]) then
             -- libplacebo uses close to zero values as "defined zero"
             hdr["min-luma"] = hdr["min-luma"] <= 1e-6 and 0 or hdr["min-luma"]
             append(s, format("%.2g / %.0f", hdr["min-luma"], hdr["max-luma"]),
-                {prefix=display_prefix, suffix=" cd/m²", nl=""})
+                {prefix=display_prefix, suffix=" cd/m²", nl="", indent=indent})
+            indent = o.prefix_sep .. o.prefix_sep
         end
         if should_show(hdr["max-cll"]) then
-            append(s, hdr["max-cll"], {prefix="maxCLL:", suffix=" cd/m²", nl=""})
+            append(s, hdr["max-cll"], {prefix="MaxCLL:", suffix=" cd/m²", nl="",
+                                       indent=indent})
+            indent = o.prefix_sep .. o.prefix_sep
         end
         if hdr["max-fall"] and hdr["max-fall"] > 0 then
-            append(s, hdr["max-fall"], {prefix="maxFALL:", suffix=" cd/m²", nl=""})
+            append(s, hdr["max-fall"], {prefix="MaxFALL:", suffix=" cd/m²", nl="",
+                                        indent=indent})
         end
     end
+
+    indent = o.prefix_sep .. o.prefix_sep
 
     if hdr["scene-max-r"] or hdr["scene-max-g"] or
        hdr["scene-max-b"] or hdr["scene-avg"] then
         append(s, "", {prefix="HDR10+:"})
         append(s, format("%.1f / %.1f / %.1f", hdr["scene-max-r"] or 0,
                          hdr["scene-max-g"] or 0, hdr["scene-max-b"] or 0),
-               {prefix="MaxRGB:", suffix=" cd/m²", nl=""})
+               {prefix="MaxRGB:", suffix=" cd/m²", nl="", indent=""})
         append(s, format("%.1f", hdr["scene-avg"] or 0),
-               {prefix="Avg:", suffix=" cd/m²", nl=""})
+               {prefix="Avg:", suffix=" cd/m²", nl="", indent=indent})
     end
 
     if hdr["max-pq-y"] and hdr["avg-pq-y"] then
         append(s, "", {prefix="PQ(Y):"})
         append(s, format("%.2f cd/m² (%.2f%% PQ)", pq_eotf(hdr["max-pq-y"]),
-                         hdr["max-pq-y"] * 100), {prefix="Max:", nl=""})
+                         hdr["max-pq-y"] * 100), {prefix="Max:", nl="",
+                         indent=""})
         append(s, format("%.2f cd/m² (%.2f%% PQ)", pq_eotf(hdr["avg-pq-y"]),
-                         hdr["avg-pq-y"] * 100), {prefix="Avg:", nl=""})
+                         hdr["avg-pq-y"] * 100), {prefix="Avg:", nl="",
+                         indent=indent})
     end
 end
 
@@ -797,17 +813,19 @@ local function append_img_params(s, r, ro)
         append_resolution(s, ro, "Output Resolution:", "dw", "dh")
     end
 
+    local indent = o.prefix_sep .. o.prefix_sep
+
     append(s, r["pixelformat"], {prefix="Pixel Format:"})
     if r["hw-pixelformat"] ~= nil then
         append(s, r["hw-pixelformat"], {prefix_sep="[", nl="", indent=" ",
                 suffix="]"})
     end
-    append(s, r["colorlevels"], {prefix="Levels:", nl=""})
+    append(s, r["colorlevels"], {prefix="Levels:", nl="", indent=indent})
 
     -- Group these together to save vertical space
     append(s, r["colormatrix"], {prefix="Colormatrix:"})
-    append(s, r["primaries"], {prefix="Primaries:", nl=""})
-    append(s, r["gamma"], {prefix="Transfer:", nl=""})
+    append(s, r["primaries"], {prefix="Primaries:", nl="", indent=indent})
+    append(s, r["gamma"], {prefix="Transfer:", nl="", indent=indent})
 end
 
 
@@ -880,8 +898,9 @@ local function add_video(s)
 
     append(s, "", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""})
     if append_property(s, "video-codec", {prefix_sep="", nl="", indent=""}) then
-        append_property(s, "hwdec-current", {prefix="(hwdec:", nl="", indent=" ",
-                         no_prefix_markup=true, suffix=")"}, {no=true, [""]=true})
+        append_property(s, "hwdec-current", {prefix="HW:", nl="",
+                        indent=o.prefix_sep .. o.prefix_sep,
+                        no_prefix_markup=false, suffix=""}, {no=true, [""]=true})
     end
     if append_property(s, compat("container-fps"), {prefix="FPS:", suffix=" (specified)"}) then
         append_property(s, "estimated-vf-fps",
@@ -918,7 +937,8 @@ local function add_audio(s)
     append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
     append_property(s, "audio-codec", {prefix_sep="", nl="", indent=""})
     local cc = append(s, r["channel-count"], {prefix="Channels:"})
-    append(s, r["format"], {prefix="Format:", nl=cc and "" or o.nl})
+    append(s, r["format"], {prefix="Format:", nl=cc and "" or o.nl,
+                            indent=cc and o.prefix_sep .. o.prefix_sep})
     append(s, r["samplerate"], {prefix="Sample Rate:", suffix=" Hz"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "af", "Filters:")
