@@ -86,7 +86,7 @@ static void src_dst_split_scaling(int src_size, int dst_size,
     scaled_src_size = MPMAX(scaled_src_size, 1);
     align = (align + 1) / 2;
 
-    *dst_start = (dst_size - scaled_src_size) * align + pan * dst_size;
+    *dst_start = (dst_size - scaled_src_size) * align + pan * scaled_src_size;
     *dst_end = *dst_start + scaled_src_size;
 
     // Distance of screen frame to video
