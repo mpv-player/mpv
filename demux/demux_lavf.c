@@ -1150,25 +1150,25 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     demuxer->is_network |= priv->format_hack.is_network;
     demuxer->seekable &= !priv->format_hack.no_seek;
 
-    if (priv->avfc->duration > 0) {
-        demuxer->duration = (double)priv->avfc->duration / AV_TIME_BASE;
-    } else {
-        double total_duration = 0;
-        double av_duration = 0;
-        for (int n = 0; n < priv->avfc->nb_streams; n++) {
-            AVStream *st = priv->avfc->streams[n];
-            if (st->duration <= 0)
-                continue;
-            double f_duration = st->duration * av_q2d(st->time_base);
-            total_duration = MPMAX(total_duration, f_duration);
-            if (st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO ||
-                st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
-                av_duration = MPMAX(av_duration, f_duration);
-        }
-        double duration = av_duration > 0 ? av_duration : total_duration;
-        if (duration > 0)
-            demuxer->duration = duration;
+    // We initially prefer track durations over container durations because they
+    // have a higher degree of precision over the container duration which are
+    // only accurate to the 6th decimal place. This is probably a lavf bug.
+    double total_duration = 0;
+    double av_duration = 0;
+    for (int n = 0; n < priv->avfc->nb_streams; n++) {
+        AVStream *st = priv->avfc->streams[n];
+        if (st->duration <= 0)
+            continue;
+        double f_duration = st->duration * av_q2d(st->time_base);
+        total_duration = MPMAX(total_duration, f_duration);
+        if (st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO ||
+            st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
+            av_duration = MPMAX(av_duration, f_duration);
     }
+    double duration = av_duration > 0 ? av_duration : total_duration;
+    if (duration == 0 && priv->avfc->duration > 0)
+        duration = (double)priv->avfc->duration / AV_TIME_BASE;
+    demuxer->duration = duration;
 
     if (demuxer->duration < 0 && priv->format_hack.no_seek_on_no_duration)
         demuxer->seekable = false;
