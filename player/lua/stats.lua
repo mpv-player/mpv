@@ -934,13 +934,11 @@ local function add_video(s)
     end
     append_img_params(s, r, ro)
 
-    local hdr = mp.get_property_native("hdr-metadata")
-    if not hdr then
-        local hdrpeak = r["sig-peak"] or 0
-        hdr = {["max-cll"]=math.floor(hdrpeak * 203)}
+    if not ro["max-cll"] then
+        ro["max-cll"] = math.floor((ro["sig-peak"] or 0) * 203)
     end
 
-    append_hdr(s, hdr)
+    append_hdr(s, ro)
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "vf", "Filters:")
 end

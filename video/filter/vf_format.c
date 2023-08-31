@@ -81,8 +81,10 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
             out->color.light = MP_CSP_LIGHT_AUTO;
         }
     }
-    if (p->sig_peak)
+    if (p->sig_peak) {
         out->color.sig_peak = p->sig_peak;
+        out->color.hdr.max_cll = p->sig_peak;
+    }
     if (p->light)
         out->color.light = p->light;
     if (p->chroma_location)
