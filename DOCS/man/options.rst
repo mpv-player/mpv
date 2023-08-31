@@ -1571,7 +1571,7 @@ Video
     applied to the source video rectangle (before anamorphic stretch) by the VO.
     A crop rectangle that is not within the video rectangle will be ignored.
     This works with hwdec, unlike the equivalent 'lavfi-crop'. Setting the crop
-    to '0x0' disables it.
+    to '0' disables it. When offset is omitted, the central area will be cropped.
 
 ``--video-zoom=<value>``
     Adjust the video display scale factor by the given value. The parameter is
