@@ -614,6 +614,10 @@ static void run_reconfig(void *p)
         mp_mutex_unlock(&vo->params_mutex);
     }
 
+    mp_mutex_lock(&vo->params_mutex);
+    talloc_free(vo->target_params);
+    vo->target_params = NULL;
+    mp_mutex_unlock(&vo->params_mutex);
     mp_mutex_lock(&in->lock);
     talloc_free(in->current_frame);
     in->current_frame = NULL;
@@ -1477,6 +1481,16 @@ struct mp_image_params vo_get_current_params(struct vo *vo)
     mp_mutex_lock(&vo->params_mutex);
     if (vo->params)
         p = *vo->params;
+    mp_mutex_unlock(&vo->params_mutex);
+    return p;
+}
+
+struct mp_image_params vo_get_target_params(struct vo *vo)
+{
+    struct mp_image_params p = {0};
+    mp_mutex_lock(&vo->params_mutex);
+    if (vo->target_params)
+        p = *vo->target_params;
     mp_mutex_unlock(&vo->params_mutex);
     return p;
 }

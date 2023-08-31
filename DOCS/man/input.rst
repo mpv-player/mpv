@@ -2639,6 +2639,11 @@ Property list
 
     Has the same sub-properties as ``video-params``.
 
+``video-target-params``
+    Same as ``video-params``, but with the target properties that VO outputs to.
+
+    Has the same sub-properties as ``video-params``.
+
 ``video-frame-info``
     Approximate information of the current frame. Note that if any of these
     are used on OSD, the information might be off by a few frames due to OSD
