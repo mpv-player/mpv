@@ -1065,8 +1065,9 @@ end
 -- content     : table of the content where each entry is one line
 -- apply_scroll: scroll the content
 local function finalize_page(header, content, apply_scroll)
-    local term_width = o.term_width_limit or 80
-    local term_height = o.term_height_limit or 24
+    local term_size = mp.get_property_native("term-size", {})
+    local term_width = o.term_width_limit or term_size.w or 80
+    local term_height = o.term_height_limit or term_size.h or 24
     local from, to = 1, #content
     if apply_scroll and term_height > 0 then
         -- Up to 40 lines for libass because it can put a big performance toll on
@@ -1483,7 +1484,7 @@ if o.bindlist ~= "no" then
     mp.add_timeout(0, function()  -- wait for all other scripts to finish init
         o.ass_formatting = false
         o.no_ass_indent = " "
-        o.term_size.w = width
+        o.term_size = { w = width , h = 0}
         io.write(keybinding_info(false, true) .. "\n")
         mp.command("quit")
     end)
