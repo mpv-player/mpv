@@ -21,6 +21,7 @@ additional_video_exts=list,of,ext
 additional_audio_exts=list,of,ext
 ignore_hidden=yes
 same_type=yes
+directory_mode=recursive
 
 --]]
 
@@ -40,7 +41,8 @@ o = {
     additional_video_exts = "",
     additional_audio_exts = "",
     ignore_hidden = true,
-    same_type = false
+    same_type = false,
+    directory_mode = "auto"
 }
 options.read_options(o, nil, function(list)
     split_option_exts(list.additional_video_exts, list.additional_audio_exts, list.additional_image_exts)
@@ -48,6 +50,9 @@ options.read_options(o, nil, function(list)
         list.audio or list.additional_audio_exts or
         list.images or list.additional_image_exts then
         create_extensions()
+    end
+    if list.directory_mode then
+        validate_directory_mode()
     end
 end)
 
@@ -97,6 +102,13 @@ function create_extensions()
     if o.images then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_IMAGES), o.additional_image_exts) end
 end
 create_extensions()
+
+function validate_directory_mode()
+    if o.directory_mode ~= "recursive" and o.directory_mode ~= "lazy" and o.directory_mode ~= "ignore" then
+        o.directory_mode = nil
+    end
+end
+validate_directory_mode()
 
 function add_files(files)
     local oldcount = mp.get_property_number("playlist-count", 1)
@@ -244,7 +256,7 @@ function find_and_add_entries()
 
     local files = {}
     do
-        local dir_mode = mp.get_property("directory-mode")
+        local dir_mode = o.directory_mode or mp.get_property("directory-mode", "lazy")
         local separator = mp.get_property_native("platform") == "windows" and "\\" or "/"
         scan_dir(autoloaded_dir, path, dir_mode, separator, 0, files)
     end
