@@ -741,19 +741,22 @@ local function append_hdr(s, hdr, video_out)
         return
     end
 
+    local function should_show(val)
+        return val and val ~= 203 and val > 0
+    end
+
     -- If we are printing video out parameters it is just display, not mastering
     local display_prefix = video_out and "Display:" or "Mastering display:"
 
-    if (hdr["max-cll"] and hdr["max-cll"] > 203) or
-        hdr["max-luma"] and hdr["max-luma"] > 203 then
+    if should_show(hdr["max-cll"]) or should_show(hdr["max-luma"]) then
         append(s, "", {prefix="HDR10:"})
-        if hdr["min-luma"] and hdr["max-luma"] and hdr["max-luma"] > 203 then
+        if hdr["min-luma"] and should_show(hdr["max-luma"]) then
             -- libplacebo uses close to zero values as "defined zero"
             hdr["min-luma"] = hdr["min-luma"] <= 1e-6 and 0 or hdr["min-luma"]
             append(s, format("%.2g / %.0f", hdr["min-luma"], hdr["max-luma"]),
                 {prefix=display_prefix, suffix=" cd/m²", nl=""})
         end
-        if hdr["max-cll"] and hdr["max-cll"] > 203 then
+        if should_show(hdr["max-cll"]) then
             append(s, hdr["max-cll"], {prefix="maxCLL:", suffix=" cd/m²", nl=""})
         end
         if hdr["max-fall"] and hdr["max-fall"] > 0 then
