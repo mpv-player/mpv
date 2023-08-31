@@ -137,7 +137,7 @@ function cleanup()
     for index, timer in pairs(timers) do
         if timer then
             timer:kill()
-            timer = nil
+            timers[index] = nil
         end
     end
 end
