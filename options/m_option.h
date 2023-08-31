@@ -105,7 +105,7 @@ struct m_geometry {
 
 void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
                       int scrw, int scrh, struct m_geometry *gm);
-void m_rect_apply(struct mp_rect *rc, int scrw, int scrh, struct m_geometry *gm);
+void m_rect_apply(struct mp_rect *rc, int w, int h, struct m_geometry *gm);
 
 struct m_channels {
     bool set : 1;
