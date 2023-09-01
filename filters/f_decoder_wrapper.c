@@ -450,8 +450,8 @@ static bool reinit_decoder(struct priv *p)
         p->decoder = driver->create(p->decf, p->codec, sel->decoder);
         if (p->decoder) {
             pthread_mutex_lock(&p->cache_lock);
-            p->decoder_desc =
-                talloc_asprintf(p, "%s (%s)", sel->decoder, sel->desc);
+            const char *d = sel->desc && sel->desc[0] ? sel->desc : sel->decoder;
+            p->decoder_desc = talloc_strdup(p, d);
             MP_VERBOSE(p, "Selected codec: %s\n", p->decoder_desc);
             pthread_mutex_unlock(&p->cache_lock);
             break;
