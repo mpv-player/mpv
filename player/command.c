@@ -2332,8 +2332,12 @@ static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
 
     struct mp_image_params o_params = mpctx->vo_chain->filter->output_params;
     if (mpctx->video_out) {
-        m_rect_apply(&o_params.crop, o_params.w, o_params.h,
-                     &mpctx->video_out->opts->video_crop);
+        struct m_geometry *gm = &mpctx->video_out->opts->video_crop;
+        if (gm->xy_valid || (gm->wh_valid && (gm->w > 0 || gm->w_per > 0 ||
+                                              gm->h > 0 || gm->h_per > 0)))
+        {
+            m_rect_apply(&o_params.crop, o_params.w, o_params.h, gm);
+        }
     }
 
     return o_params;
