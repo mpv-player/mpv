@@ -1959,6 +1959,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         }
     }
 
+    bool has_crop = mp_rect_w(p.crop) > 0 && mp_rect_h(p.crop) > 0;
     struct m_sub_property props[] = {
         {"id",          SUB_PROP_INT(track->user_tid)},
         {"type",        SUB_PROP_STR(stream_type_name(track->type)),
@@ -1994,6 +1995,10 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !p.codec},
         {"demux-w",     SUB_PROP_INT(p.disp_w), .unavailable = !p.disp_w},
         {"demux-h",     SUB_PROP_INT(p.disp_h), .unavailable = !p.disp_h},
+        {"demux-crop-x",SUB_PROP_INT(p.crop.x0), .unavailable = !has_crop},
+        {"demux-crop-y",SUB_PROP_INT(p.crop.y0), .unavailable = !has_crop},
+        {"demux-crop-w",SUB_PROP_INT(mp_rect_w(p.crop)), .unavailable = !has_crop},
+        {"demux-crop-h",SUB_PROP_INT(mp_rect_h(p.crop)), .unavailable = !has_crop},
         {"demux-channel-count", SUB_PROP_INT(p.channels.num),
                         .unavailable = !p.channels.num},
         {"demux-channels", SUB_PROP_STR(mp_chmap_to_str(&p.channels)),
