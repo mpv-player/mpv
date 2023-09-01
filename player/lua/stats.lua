@@ -29,6 +29,7 @@ local o = {
     persistent_overlay = false,      -- whether the stats can be overwritten by other output
     print_perfdata_passes = false,   -- when true, print the full information about all passes
     filter_params_max_length = 100,  -- a filter list longer than this many characters will be shown one filter per line instead
+    show_frame_info = false,          -- whether to show the current frame info
     debug = false,
 
     -- Graph options and style
@@ -920,6 +921,28 @@ local function add_video(s)
                         indent=o.prefix_sep .. o.prefix_sep,
                         no_prefix_markup=false, suffix=""}, {no=true, [""]=true})
     end
+    local has_prefix = false
+    if o.show_frame_info then
+        if append_property(s, "estimated-frame-number", {prefix="Frame:"}) then
+            append_property(s, "estimated-frame-count", {indent=" / ", nl="",
+                                                        prefix_sep=""})
+            has_prefix = true
+        end
+        local frame_info = mp.get_property_native("video-frame-info")
+        if frame_info and frame_info["picture-type"] then
+            local attrs = has_prefix and {prefix="(", suffix=")", indent=" ", nl="",
+                                          prefix_sep="", no_prefix_markup=true}
+                                      or {prefix="Picture Type:"}
+            append(s, frame_info["picture-type"], attrs)
+            has_prefix = true
+        end
+        if frame_info and frame_info["interlaced"] then
+            local attrs = has_prefix and {indent=" ", nl="", prefix_sep=""}
+                                      or {prefix="Picture Type:"}
+            append(s, "Interlaced", attrs)
+        end
+    end
+
     append_fps(s, "container-fps", "estimated-vf-fps")
     append_img_params(s, r, ro)
 
