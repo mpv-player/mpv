@@ -4068,7 +4068,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
-      "width", "height", "fps", "aspect", "aspect-name", "vo-configured", "current-vo",
+      "width", "height", "container-fps", "aspect", "aspect-name", "vo-configured", "current-vo",
       "video-dec-params", "osd-dimensions",
       "hwdec", "hwdec-current", "hwdec-interop"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
