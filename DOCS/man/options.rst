@@ -1834,6 +1834,14 @@ Video
     this can break on streams not encoded by x264, or if a stream encoded by a
     newer x264 version contains no version info.
 
+``--vd-apply-cropping``
+    Certain video codecs support cropping, meaning that only a sub-rectangle of
+    the decoded frame is intended for display. This option controls how cropping
+    is handled by libavcodec. Cropping during decoding has certain limitations
+    with regards to alignment and hardware decoding. If this option is enabled,
+    decoder will apply the crop. Disabled by default, VO will apply the crop in
+    a more robust way.
+
 ``--swapchain-depth=<N>``
     Allow up to N in-flight frames. This essentially controls the frame
     latency. Increasing the swapchain depth can improve pipelining and prevent
