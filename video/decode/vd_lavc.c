@@ -80,6 +80,7 @@ struct vd_lavc_params {
     int threads;
     bool bitexact;
     bool old_x264;
+    bool apply_cropping;
     bool check_hw_profile;
     int software_fallback;
     char **avopts;
@@ -120,6 +121,7 @@ const struct m_sub_options vd_lavc_conf = {
         {"vd-lavc-o", OPT_KEYVALUELIST(avopts)},
         {"vd-lavc-dr", OPT_CHOICE(dr,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
+        {"vd-apply-cropping", OPT_BOOL(apply_cropping)},
         {"hwdec", OPT_STRINGLIST(hwdec_api),
             .help = hwdec_opt_help,
             .flags = M_OPT_OPTIONAL_PARAM | UPDATE_HWDEC},
@@ -772,6 +774,7 @@ static void init_avctx(struct mp_filter *vd)
     avctx->skip_loop_filter = lavc_param->skip_loop_filter;
     avctx->skip_idct = lavc_param->skip_idct;
     avctx->skip_frame = lavc_param->skip_frame;
+    avctx->apply_cropping = lavc_param->apply_cropping;
 
     if (lavc_codec->id == AV_CODEC_ID_H264 && lavc_param->old_x264)
         av_opt_set(avctx, "x264_build", "150", AV_OPT_SEARCH_CHILDREN);
