@@ -816,11 +816,8 @@ local function append_img_params(s, r, ro)
 
     local indent = o.prefix_sep .. o.prefix_sep
 
-    append(s, r["pixelformat"], {prefix="Pixel Format:"})
-    if r["hw-pixelformat"] ~= nil then
-        append(s, r["hw-pixelformat"], {prefix_sep="[", nl="", indent=" ",
-                suffix="]"})
-    end
+    local pixel_format = r["hw-pixelformat"] or r["pixelformat"]
+    append(s, pixel_format, {prefix="Pixel Format:"})
     append(s, r["colorlevels"], {prefix="Levels:", nl="", indent=indent})
 
     -- Group these together to save vertical space
