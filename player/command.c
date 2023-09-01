@@ -2351,6 +2351,10 @@ static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
 static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
+    int valid = m_property_read_sub_validate(ctx, prop, action, arg);
+    if (valid != M_PROPERTY_VALID)
+        return valid;
+
     return property_imgparams(get_video_out_params(ctx), action, arg);
 }
 
@@ -2360,8 +2364,14 @@ static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct mp_image_params p = {0};
     struct vo_chain *vo_c = mpctx->vo_chain;
-    if (vo_c && vo_c->track)
-        mp_decoder_wrapper_get_video_dec_params(vo_c->track->dec, &p);
+    if (!vo_c || !vo_c->track)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int valid = m_property_read_sub_validate(ctx, prop, action, arg);
+    if (valid != M_PROPERTY_VALID)
+        return valid;
+
+    mp_decoder_wrapper_get_video_dec_params(vo_c->track->dec, &p);
     if (!p.imgfmt)
         return M_PROPERTY_UNAVAILABLE;
     return property_imgparams(p, action, arg);
@@ -2396,8 +2406,14 @@ static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct mp_image *f =
-        mpctx->video_out ? vo_get_current_frame(mpctx->video_out) : NULL;
+    if (!mpctx->video_out)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int valid = m_property_read_sub_validate(ctx, prop, action, arg);
+    if (valid != M_PROPERTY_VALID)
+        return valid;
+
+    struct mp_image *f = vo_get_current_frame(mpctx->video_out);
     if (!f)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -2629,17 +2645,23 @@ static int mp_property_vo_passes(void *ctx, struct m_property *prop,
     if (!mpctx->video_out)
         return M_PROPERTY_UNAVAILABLE;
 
-    // Return the type right away if requested, to avoid having to
-    // go through a completely unnecessary VOCTRL
-    if (action == M_PROPERTY_GET_TYPE) {
+    // Return early, to avoid having to go through a completely unnecessary VOCTRL
+    switch (action) {
+    case M_PROPERTY_PRINT:
+    case M_PROPERTY_GET:
+        break;
+    case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
         return M_PROPERTY_OK;
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
-    int ret = M_PROPERTY_UNAVAILABLE;
     struct voctrl_performance_data *data = talloc_ptrtype(NULL, data);
-    if (vo_control(mpctx->video_out, VOCTRL_PERFORMANCE_DATA, data) <= 0)
-        goto out;
+    if (vo_control(mpctx->video_out, VOCTRL_PERFORMANCE_DATA, data) <= 0) {
+        talloc_free(data);
+        return M_PROPERTY_UNAVAILABLE;
+    }
 
     switch (action) {
     case M_PROPERTY_PRINT: {
@@ -2649,8 +2671,7 @@ static int mp_property_vo_passes(void *ctx, struct m_property *prop,
         res = talloc_asprintf_append(res, "\nredraw:\n");
         res = asprint_perf(res, &data->redraw);
         *(char **)arg = res;
-        ret = M_PROPERTY_OK;
-        goto out;
+        break;
     }
 
     case M_PROPERTY_GET: {
@@ -2661,16 +2682,12 @@ static int mp_property_vo_passes(void *ctx, struct m_property *prop,
         get_frame_perf(fresh, &data->fresh);
         get_frame_perf(redraw, &data->redraw);
         *(struct mpv_node *)arg = node;
-        ret = M_PROPERTY_OK;
-        goto out;
+        break;
     }
     }
 
-    ret = M_PROPERTY_NOT_IMPLEMENTED;
-
-out:
     talloc_free(data);
-    return ret;
+    return M_PROPERTY_OK;
 }
 
 static int mp_property_hdr_metadata(void *ctx, struct m_property *prop,
@@ -2679,6 +2696,10 @@ static int mp_property_hdr_metadata(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->video_out)
         return M_PROPERTY_UNAVAILABLE;
+
+    int valid = m_property_read_sub_validate(ctx, prop, action, arg);
+    if (valid != M_PROPERTY_VALID)
+        return valid;
 
     struct mp_hdr_metadata data;
     if (vo_control(mpctx->video_out, VOCTRL_HDR_METADATA, &data) != VO_TRUE)
