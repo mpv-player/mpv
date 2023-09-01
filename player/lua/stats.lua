@@ -829,6 +829,30 @@ local function append_img_params(s, r, ro)
 end
 
 
+local function append_fps(s, prop, eprop)
+    local fps = mp.get_property_osd(prop)
+    local efps = mp.get_property_osd(eprop)
+    local single = fps ~= "" and efps ~= "" and fps == efps
+    local unit = prop == "display-fps" and " Hz" or " fps"
+    local suffix = single and "" or " (specified)"
+    local esuffix = single and "" or " (estimated)"
+    local prefix = prop == "display-fps" and "Refresh Rate:" or "Frame rate:"
+    local nl = o.nl
+    local indent = o.indent
+
+    if fps ~= "" and append(s, fps, {prefix=prefix, suffix=unit .. suffix}) then
+        prefix = ""
+        nl = ""
+        indent = ""
+    end
+
+    if not single and efps ~= "" then
+        append(s, efps,
+               {prefix=prefix, suffix=unit .. esuffix, nl=nl, indent=indent})
+    end
+end
+
+
 local function add_video_out(s)
     local vo = mp.get_property_native("current-vo")
     if not vo then
@@ -840,16 +864,10 @@ local function add_video_out(s)
     append_property(s, "display-names", {prefix_sep="", prefix="(", suffix=")",
                                          no_prefix_markup=true, nl="", indent=" "})
     append_property(s, "avsync", {prefix="A-V:"})
+    append_fps(s, "display-fps", "estimated-display-fps")
     if append_property(s, compat("decoder-frame-drop-count"),
                        {prefix="Dropped Frames:", suffix=" (decoder)"}) then
         append_property(s, compat("frame-drop-count"), {suffix=" (output)", nl="", indent=""})
-    end
-    if append_property(s, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
-        append_property(s, "estimated-display-fps",
-                        {suffix=" (estimated)", nl="", indent=""})
-    else
-        append_property(s, "estimated-display-fps",
-                        {prefix="Display FPS:", suffix=" (estimated)"})
     end
     append_display_sync(s)
     append_perfdata(s, o.print_perfdata_passes)
@@ -902,14 +920,7 @@ local function add_video(s)
                         indent=o.prefix_sep .. o.prefix_sep,
                         no_prefix_markup=false, suffix=""}, {no=true, [""]=true})
     end
-    if append_property(s, compat("container-fps"), {prefix="FPS:", suffix=" (specified)"}) then
-        append_property(s, "estimated-vf-fps",
-                        {suffix=" (estimated)", nl="", indent=""})
-    else
-        append_property(s, "estimated-vf-fps",
-                        {prefix="FPS:", suffix=" (estimated)"})
-    end
-
+    append_fps(s, "container-fps", "estimated-vf-fps")
     append_img_params(s, r, ro)
 
     local hdr = mp.get_property_native("hdr-metadata")
