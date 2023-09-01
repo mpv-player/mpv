@@ -1130,19 +1130,23 @@ void write_video(struct MPContext *mpctx)
     // Filter output is different from VO input?
     struct mp_image_params *p = &mpctx->next_frames[0]->params;
     // Inject vo crop to notify and reconfig if needed
-    struct mp_rect rc;
-    m_rect_apply(&rc, p->w, p->h, &vo->opts->video_crop);
-    if (rc.x1 > 0 && rc.y1 > 0)
+    struct m_geometry *gm = &vo->opts->video_crop;
+    struct mp_rect rc = {0};
+    if (gm->xy_valid || (gm->wh_valid && (gm->w > 0 || gm->w_per > 0 ||
+                                          gm->h > 0 || gm->h_per > 0)))
     {
+        m_rect_apply(&rc, p->w, p->h, gm);
+    }
+    if (rc.x1 > 0 && rc.y1 > 0) {
         p->crop = rc;
         if (!mp_image_crop_valid(p)) {
-            char *str = m_option_type_rect.print(NULL, &vo->opts->video_crop);
+            char *str = m_option_type_rect.print(NULL, gm);
             MP_WARN(vo, "Ignoring invalid --video-crop=%s for %dx%d image\n",
                     str, p->w, p->h);
             talloc_free(str);
             if (vo->params) {
                 p->crop = vo->params->crop;
-                vo->opts->video_crop = (struct m_geometry){
+                *gm = (struct m_geometry){
                     .x = p->crop.x0,
                     .y = p->crop.y0,
                     .w = mp_rect_w(p->crop),
@@ -1153,7 +1157,7 @@ void write_video(struct MPContext *mpctx)
             }
             if (!mp_image_crop_valid(p)) {
                 p->crop = (struct mp_rect){0};
-                vo->opts->video_crop = (struct m_geometry){0};
+                *gm = (struct m_geometry){0};
             }
         }
     }

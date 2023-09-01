@@ -1570,8 +1570,11 @@ Video
     Crop the video by starting at the x, y offset for w, h pixels. The crop is
     applied to the source video rectangle (before anamorphic stretch) by the VO.
     A crop rectangle that is not within the video rectangle will be ignored.
-    This works with hwdec, unlike the equivalent 'lavfi-crop'. Setting the crop
-    to '0' disables it. When offset is omitted, the central area will be cropped.
+    This works with hwdec, unlike the equivalent 'lavfi-crop'. When offset is
+    omitted, the central area will be cropped. Setting the crop to empty one
+    ``--video-crop=0x0+0+0`` overrides container crop and disables cropping.
+    Setting the crop to ``--video-crop=0`` disables manual cropping and restores
+    the container crop if it's specified.
 
 ``--video-zoom=<value>``
     Adjust the video display scale factor by the given value. The parameter is
