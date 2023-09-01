@@ -317,7 +317,7 @@ local function append_perfdata(s, dedicated_page)
     -- Pretty print measured time
     local function pp(i)
         -- rescale to microseconds for a saner display
-        return format("%05d", i / 1000)
+        return format("%5d", i / 1000)
     end
 
     -- Format n/m with a font weight based on the ratio
@@ -328,7 +328,7 @@ local function append_perfdata(s, dedicated_page)
         end
         -- Calculate font weight. 100 is minimum, 400 is normal, 700 bold, 900 is max
         local w = (700 * math.sqrt(i)) + 200
-        return format("{\\b%d}%02d%%{\\b0}", w, i * 100)
+        return format("{\\b%d}%2d%%{\\b0}", w, i * 100)
     end
 
     -- ensure that the fixed title is one element and every scrollable line is
