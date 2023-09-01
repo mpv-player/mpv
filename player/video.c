@@ -1128,8 +1128,36 @@ void write_video(struct MPContext *mpctx)
     }
 
     // Filter output is different from VO input?
-    struct mp_image_params p = mpctx->next_frames[0]->params;
-    if (!vo->params || !mp_image_params_equal(&p, vo->params)) {
+    struct mp_image_params *p = &mpctx->next_frames[0]->params;
+    // Inject vo crop to notify and reconfig if needed
+    struct mp_rect rc;
+    m_rect_apply(&rc, p->w, p->h, &vo->opts->video_crop);
+    if (rc.x1 > 0 && rc.y1 > 0)
+    {
+        p->crop = rc;
+        if (!mp_image_crop_valid(p)) {
+            char *str = m_option_type_rect.print(NULL, &vo->opts->video_crop);
+            MP_WARN(vo, "Ignoring invalid --video-crop=%s for %dx%d image\n",
+                    str, p->w, p->h);
+            talloc_free(str);
+            if (vo->params) {
+                p->crop = vo->params->crop;
+                vo->opts->video_crop = (struct m_geometry){
+                    .x = p->crop.x0,
+                    .y = p->crop.y0,
+                    .w = mp_rect_w(p->crop),
+                    .h = mp_rect_h(p->crop),
+                    .xy_valid = true,
+                    .wh_valid = true,
+                };
+            }
+            if (!mp_image_crop_valid(p)) {
+                p->crop = (struct mp_rect){0};
+                vo->opts->video_crop = (struct m_geometry){0};
+            }
+        }
+    }
+    if (!vo->params || !mp_image_params_equal(p, vo->params)) {
         // Changing config deletes the current frame; wait until it's finished.
         if (vo_still_displaying(vo)) {
             vo_request_wakeup_on_done(vo);
@@ -1138,16 +1166,16 @@ void write_video(struct MPContext *mpctx)
 
         const struct vo_driver *info = mpctx->video_out->driver;
         char extra[20] = {0};
-        if (p.p_w != p.p_h) {
+        if (p->p_w != p->p_h) {
             int d_w, d_h;
-            mp_image_params_get_dsize(&p, &d_w, &d_h);
+            mp_image_params_get_dsize(p, &d_w, &d_h);
             snprintf(extra, sizeof(extra), " => %dx%d", d_w, d_h);
         }
         char sfmt[20] = {0};
-        if (p.hw_subfmt)
-            snprintf(sfmt, sizeof(sfmt), "[%s]", mp_imgfmt_to_name(p.hw_subfmt));
+        if (p->hw_subfmt)
+            snprintf(sfmt, sizeof(sfmt), "[%s]", mp_imgfmt_to_name(p->hw_subfmt));
         MP_INFO(mpctx, "VO: [%s] %dx%d%s %s%s\n",
-                info->name, p.w, p.h, extra, mp_imgfmt_to_name(p.imgfmt), sfmt);
+                info->name, p->w, p->h, extra, mp_imgfmt_to_name(p->imgfmt), sfmt);
         MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
         int vo_r = vo_reconfig2(vo, mpctx->next_frames[0]);

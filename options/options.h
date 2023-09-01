@@ -73,6 +73,8 @@ typedef struct mp_vo_opts {
     struct m_geometry android_surface_size;
 
     int swapchain_depth;  // max number of images to render ahead
+
+    struct m_geometry video_crop;
 } mp_vo_opts;
 
 // Subtitle options needed by the subtitle decoders/renderers.
@@ -83,7 +85,7 @@ struct mp_subtitle_opts {
     float sub_delay;
     float sub_fps;
     float sub_speed;
-    int forced_subs_only;
+    bool sub_forced_events_only;
     bool stretch_dvd_subs;
     bool stretch_image_subs;
     bool image_subs_video_res;

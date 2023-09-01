@@ -72,6 +72,7 @@ local options = {
     detect_min_ratio = 0.5,
     detect_seconds = 1,
     suppress_osd = false,
+    use_vo_crop = false,
 }
 read_options(options)
 
@@ -122,6 +123,12 @@ function is_cropable(time_needed)
 end
 
 function remove_filter(label)
+    if options.use_vo_crop and label == labels.crop then
+        local ro = mp.get_property_native("video-out-params")
+        mp.command(string.format("%s set video-crop 0", command_prefix))
+        return ro and ro["crop-w"] and ro["crop-w"] > 0
+    end
+
     if is_filter_present(label) then
         mp.command(string.format('%s vf remove @%s', command_prefix, label))
         return true
@@ -242,6 +249,13 @@ function apply_crop(meta)
     if is_excessive then
         mp.msg.info("The area to be cropped is too large.")
         mp.msg.info("You might need to decrease detect_min_ratio.")
+        return
+    end
+
+    if options.use_vo_crop then
+        -- Apply crop.
+        mp.command(string.format("%s set video-crop %sx%s+%s+%s",
+                                 command_prefix, meta.w, meta.h, meta.x, meta.y))
         return
     end
 

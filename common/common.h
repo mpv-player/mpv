@@ -106,9 +106,10 @@ struct mp_rect {
 void mp_rect_union(struct mp_rect *rc, const struct mp_rect *src);
 bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2);
 bool mp_rect_contains(struct mp_rect *rc, int x, int y);
-bool mp_rect_equals(struct mp_rect *rc1, struct mp_rect *rc2);
+bool mp_rect_equals(const struct mp_rect *rc1, const struct mp_rect *rc2);
 int mp_rect_subtract(const struct mp_rect *rc1, const struct mp_rect *rc2,
                      struct mp_rect res_array[4]);
+void mp_rect_rotate(struct mp_rect *rc, int w, int h, int rotation);
 
 unsigned int mp_log2(uint32_t v);
 uint32_t mp_round_next_power_of_2(uint32_t v);

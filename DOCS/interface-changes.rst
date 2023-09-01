@@ -47,6 +47,15 @@ Interface changes
     - remove special handling of the `auto` value from `--alang/slang/vlang` options
     - add `--subs-match-os-language` as a replacement for `--slang=auto`
     - add `always` option to `--subs-fallback-forced`
+    - remove `auto` choice from `--sub-forced-only`
+    - remove `auto-forced-only` property
+    - rename `--sub-forced-only` to `--sub-forced-events-only`
+    - remove `sub-forced-only-cur` property (`--sub-forced-events-only` is a replacement)
+    - add `hdr-metadata` property
+    - change `--directory-mode` default to `lazy`
+    - remove deprecated `video-aspect` property
+    - add `--video-crop`
+    - add `video-params/crop-[w,h,x,y]`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

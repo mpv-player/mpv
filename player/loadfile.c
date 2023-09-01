@@ -260,8 +260,8 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     char b[2048] = {0};
     bool forced_only = false;
     if (t->type == STREAM_SUB) {
-        int forced_opt = mpctx->opts->subs_rend->forced_subs_only;
-        if (forced_opt == 1 || (forced_opt && t->forced_only_def))
+        bool forced_opt = mpctx->opts->subs_rend->sub_forced_events_only;
+        if (forced_opt)
             forced_only = t->selected;
     }
     APPEND(b, " %3s %-5s", t->selected ? (forced_only ? "(*)" : "(+)") : "", tname);
@@ -630,7 +630,6 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     struct track *forced_pick = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
-        track->forced_only_def = false;
         if (track->type != type)
             continue;
         if (track->user_tid == tid) {
@@ -664,21 +663,16 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         sub_fallback = (pick->is_external && !pick->no_default) || opts->subs_fallback == 2 ||
                         (opts->subs_fallback == 1 && pick->default_track);
     }
-    if (pick && !forced_pick && sub && (!match_lang(langs, pick->lang) || os_langs) &&
-        ((!opts->subs_with_matching_audio && audio_matches) || !sub_fallback))
+    if (pick && !forced_pick && sub && (!match_lang(langs, pick->lang) || os_langs) && !sub_fallback)
+        pick = NULL;
+    // Handle this after matching langs and selecting a fallback.
+    if (pick && !forced_pick && sub && (!opts->subs_with_matching_audio && audio_matches))
         pick = NULL;
 
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
         pick = NULL;
     if (pick && !opts->autoload_files && pick->is_external)
         pick = NULL;
-    if (pick && sub && !pick->forced_track) {
-        // If the codec is DVD or PGS, we can display it in forced-only mode.
-        if (pick->stream &&
-            (!strcmp(pick->stream->codec->codec, "dvd_subtitle") ||
-             !strcmp(pick->stream->codec->codec, "hdmv_pgs_subtitle")))
-            pick->forced_only_def = true;
-    }
 cleanup:
     talloc_free(langs);
     return pick;

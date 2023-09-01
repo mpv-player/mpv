@@ -25,6 +25,7 @@
 
 #include "misc/bstr.h"
 #include "audio/chmap.h"
+#include "common/common.h"
 
 // m_option allows to parse, print and copy data of various types.
 
@@ -66,6 +67,7 @@ extern const m_option_type_t m_option_type_channels;
 extern const m_option_type_t m_option_type_aspect;
 extern const m_option_type_t m_option_type_obj_settings_list;
 extern const m_option_type_t m_option_type_node;
+extern const m_option_type_t m_option_type_rect;
 
 // Used internally by m_config.c
 extern const m_option_type_t m_option_type_alias;
@@ -103,6 +105,7 @@ struct m_geometry {
 
 void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
                       int scrw, int scrh, struct m_geometry *gm);
+void m_rect_apply(struct mp_rect *rc, int scrw, int scrh, struct m_geometry *gm);
 
 struct m_channels {
     bool set : 1;
@@ -653,6 +656,9 @@ extern const char m_option_path_separator;
 
 #define OPT_SIZE_BOX(field) \
     OPT_TYPED_FIELD(m_option_type_size_box, struct m_geometry, field)
+
+#define OPT_RECT(field) \
+    OPT_TYPED_FIELD(m_option_type_rect, struct m_geometry, field)
 
 #define OPT_TRACKCHOICE(field) \
     OPT_CHOICE(field, {"no", -2}, {"auto", -1}), \

@@ -52,6 +52,7 @@ struct mp_image_params {
     int rotate;
     enum mp_stereo3d_mode stereo3d; // image is encoded with this mode
     enum mp_alpha_type alpha;   // usually auto; only set if explicitly known
+    struct mp_rect crop;        // crop applied on image
 };
 
 /* Memory management:
@@ -169,6 +170,7 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
                                  const struct mp_image_params *p);
 #define mp_image_params_to_str(p) mp_image_params_to_str_buf((char[256]){0}, 256, p)
 
+bool mp_image_crop_valid(const struct mp_image_params *p);
 bool mp_image_params_valid(const struct mp_image_params *p);
 bool mp_image_params_equal(const struct mp_image_params *p1,
                            const struct mp_image_params *p2);

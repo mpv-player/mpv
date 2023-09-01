@@ -385,7 +385,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     ``async`` flag to make encoding/writing the image file asynchronous. For
     normal standalone commands, this is always asynchronous, and the flag has
     no effect. (This behavior changed with mpv 0.29.0.)
-    
+
     On success, returns a ``mpv_node`` with a ``filename`` field set to the
     saved screenshot location.
 
@@ -2410,6 +2410,12 @@ Property list
     ``video-params/dw``, ``video-params/dh``
         Video size as integers, scaled for correct aspect ratio.
 
+    ``video-params/crop-x``, ``video-params/crop-y``
+        Crop offset of the source video frame.
+
+    ``video-params/crop-w``, ``video-params/crop-h``
+        Video size after cropping.
+
     ``video-params/aspect``
         Display aspect ratio as float.
 
@@ -2479,6 +2485,54 @@ Property list
             "stereo-in"         MPV_FORMAT_STRING
             "average-bpp"       MPV_FORMAT_INT64
             "alpha"             MPV_FORMAT_STRING
+
+``hdr-metadata``
+    Video HDR metadata per frame, including peak detection result.
+    This has a number of sub-properties:
+
+    ``hdr-metadata/min-luma``
+        Minimum luminance, as reported by HDR10 metadata (in cd/m²)
+
+    ``hdr-metadata/max-luma``
+        Maximum luminance, as reported by HDR10 metadata (in cd/m²)
+
+    ``hdr-metadata/max-cll``
+        Maximum content light level, as reported by HDR10 metadata (in cd/m²)
+
+    ``hdr-metadata/max-fall``
+        Maximum frame average light level, as reported by HDR10 metadata (in cd/m²)
+
+    ``hdr-metadata/scene-max-r``
+        MaxRGB of a scene for R component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``hdr-metadata/scene-max-g``
+        MaxRGB of a scene for G component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``hdr-metadata/scene-max-b``
+        MaxRGB of a scene for B component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``hdr-metadata/max-pq-y``
+        Maximum PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
+
+    ``hdr-metadata/avg-pq-y``
+        Average PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "min-luma"     MPV_FORMAT_DOUBLE
+            "max-luma"     MPV_FORMAT_DOUBLE
+            "max-cll"      MPV_FORMAT_DOUBLE
+            "max-fall"     MPV_FORMAT_DOUBLE
+            "scene-max-r"  MPV_FORMAT_DOUBLE
+            "scene-max-g"  MPV_FORMAT_DOUBLE
+            "scene-max-b"  MPV_FORMAT_DOUBLE
+            "max-pq-y"     MPV_FORMAT_DOUBLE
+            "avg-pq-y"     MPV_FORMAT_DOUBLE
 
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling
@@ -2615,13 +2669,6 @@ Property list
     It may be saner to report an absolute DPI, however, this is the way HiDPI
     support is implemented on most OS APIs. See also ``--hidpi-window-scale``.
 
-``video-aspect`` (RW)
-    Deprecated. This is tied to ``--video-aspect-override``, but always
-    reports the current video aspect if video is active.
-
-    The read and write components of this option can be split up into
-    ``video-params/aspect`` and ``video-aspect-override`` respectively.
-
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the
     ``overlay-add`` command. It gives you the actual OSD/window size (not
@@ -2719,9 +2766,6 @@ Property list
 
 ``secondary-sub-end``
     Same as ``sub-end``, but for the secondary subtitles.
-
-``sub-forced-only-cur``
-    Read-only - whether the current subtitle track is being shown in forced-only mode.
 
 ``playlist-pos`` (RW)
     Current position on playlist. The first entry is on position 0. Writing to
@@ -2884,10 +2928,6 @@ Property list
 
     ``track-list/N/forced``
         ``yes``/true if the track has the forced flag set in the file,
-        ``no``/false or unavailable otherwise.
-
-    ``track-list/N/auto-forced-only``
-        ``yes``/true if the track was autoselected in forced-only mode,
         ``no``/false or unavailable otherwise.
 
     ``track-list/N/codec``

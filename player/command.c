@@ -1976,7 +1976,6 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"albumart",    SUB_PROP_BOOL(track->attached_picture)},
         {"default",     SUB_PROP_BOOL(track->default_track)},
         {"forced",      SUB_PROP_BOOL(track->forced_track)},
-        {"auto-forced-only", SUB_PROP_BOOL(track->forced_only_def)},
         {"dependent",   SUB_PROP_BOOL(track->dependent_track)},
         {"visual-impaired",  SUB_PROP_BOOL(track->visual_impaired_track)},
         {"hearing-impaired", SUB_PROP_BOOL(track->hearing_impaired_track)},
@@ -2293,6 +2292,10 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"h",               SUB_PROP_INT(p.h)},
         {"dw",              SUB_PROP_INT(d_w)},
         {"dh",              SUB_PROP_INT(d_h)},
+        {"crop-x",          SUB_PROP_INT(p.crop.x0)},
+        {"crop-y",          SUB_PROP_INT(p.crop.y0)},
+        {"crop-w",          SUB_PROP_INT(mp_rect_w(p.crop))},
+        {"crop-h",          SUB_PROP_INT(mp_rect_h(p.crop))},
         {"aspect",          SUB_PROP_FLOAT(d_w / (double)d_h)},
         {"aspect-name",     SUB_PROP_STR(aspect_name), .unavailable = !aspect_name},
         {"par",             SUB_PROP_FLOAT(p.p_w / (double)p.p_h)},
@@ -2327,7 +2330,13 @@ static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
     if (!mpctx->vo_chain)
         return (struct mp_image_params){0};
 
-    return mpctx->vo_chain->filter->output_params;
+    struct mp_image_params o_params = mpctx->vo_chain->filter->output_params;
+    if (mpctx->video_out) {
+        m_rect_apply(&o_params.crop, o_params.w, o_params.h,
+                     &mpctx->video_out->opts->video_crop);
+    }
+
+    return o_params;
 }
 
 static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
@@ -2666,6 +2675,40 @@ out:
     return ret;
 }
 
+static int mp_property_hdr_metadata(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->video_out)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct mp_hdr_metadata data;
+    if (vo_control(mpctx->video_out, VOCTRL_HDR_METADATA, &data) != VO_TRUE)
+        return M_PROPERTY_UNAVAILABLE;
+
+    bool has_hdr10 = data.max_luma;
+    bool has_hdr10plus = data.scene_avg && (data.scene_max[0] ||
+                                            data.scene_max[1] ||
+                                            data.scene_max[2]);
+    bool has_cie_y = data.max_pq_y && data.avg_pq_y;
+
+    struct m_sub_property props[] = {
+        {"min-luma",    SUB_PROP_FLOAT(data.min_luma),     .unavailable = !has_hdr10},
+        {"max-luma",    SUB_PROP_FLOAT(data.max_luma),     .unavailable = !has_hdr10},
+        {"max-cll",     SUB_PROP_FLOAT(data.max_cll),      .unavailable = !has_hdr10},
+        {"max-fall",    SUB_PROP_FLOAT(data.max_fall),     .unavailable = !has_hdr10},
+        {"scene-max-r", SUB_PROP_FLOAT(data.scene_max[0]), .unavailable = !has_hdr10plus},
+        {"scene-max-g", SUB_PROP_FLOAT(data.scene_max[1]), .unavailable = !has_hdr10plus},
+        {"scene-max-b", SUB_PROP_FLOAT(data.scene_max[2]), .unavailable = !has_hdr10plus},
+        {"scene-avg",   SUB_PROP_FLOAT(data.scene_avg),    .unavailable = !has_hdr10plus},
+        {"max-pq-y",    SUB_PROP_FLOAT(data.max_pq_y),     .unavailable = !has_cie_y},
+        {"avg-pq-y",    SUB_PROP_FLOAT(data.avg_pq_y),     .unavailable = !has_cie_y},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
 static int mp_property_perf_info(void *ctx, struct m_property *p, int action,
                                  void *arg)
 {
@@ -2786,67 +2829,6 @@ static int mp_property_vf_fps(void *ctx, struct m_property *prop,
     if (avg <= 0)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_double_ro(action, arg, 1.0 / avg);
-}
-
-/// Video aspect (RW) (deprecated)
-// FIXME: please delete this mess as soon as the deprecation period is over
-static int mp_property_aspect(void *ctx, struct m_property *prop,
-                              int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct m_config_option *opt;
-    opt = m_config_get_co_raw(mpctx->mconfig, bstr0("video-aspect-override"));
-
-    struct command_ctx *cmd = mpctx->command_ctx;
-    for (int n = 0; n < cmd->num_warned_deprecated; n++) {
-        if (strcmp(cmd->warned_deprecated[n], prop->name) == 0)
-            goto skip_warn;
-    }
-
-    MP_WARN(mpctx, "Warning: property 'video-aspect' is deprecated, refer to "
-            "'video-params/aspect' and 'video-aspect-override'.\n");
-    MP_TARRAY_APPEND(cmd, cmd->warned_deprecated, cmd->num_warned_deprecated,
-                     (char *)prop->name);
-
-skip_warn: ;
-
-    float aspect = *(float *)opt->data;
-    if (mpctx->vo_chain && aspect <= 0) {
-        struct mp_image_params *params = &mpctx->vo_chain->filter->input_params;
-        if (params && params->p_w > 0 && params->p_h > 0) {
-            int d_w, d_h;
-            mp_image_params_get_dsize(params, &d_w, &d_h);
-            aspect = (float)d_w / d_h;
-        }
-    }
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    if (track && track->stream && aspect <= 0) {
-        struct mp_codec_params *c = track->stream->codec;
-        if (c->disp_w && c->disp_h)
-            aspect = (float)c->disp_w / c->disp_h;
-    }
-
-    switch (action) {
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = *(opt->opt);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT: {
-        if (aspect < 0) {
-            *(char **)arg = talloc_asprintf(NULL, "%.3f (original)", aspect);
-            return M_PROPERTY_OK;
-        }
-        break;
-    }
-    case M_PROPERTY_GET: {
-        *(float *)arg = aspect;
-        return M_PROPERTY_OK;
-    }
-    case M_PROPERTY_SET:
-        if (m_config_set_option_raw(mpctx->mconfig, opt, arg, 0) < 0)
-            return M_PROPERTY_ERROR;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 #define doubles_equal(x, y) (fabs((x) - (y)) <= 0.001)
@@ -3009,18 +2991,6 @@ static int mp_property_sub_end(void *ctx, struct m_property *prop,
     if (end == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_double_ro(action, arg, end);
-}
-
-static int mp_property_sub_forced_only_cur(void *ctx, struct m_property *prop,
-                                           int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    int ret = mpctx->opts->subs_rend->forced_subs_only;
-    if (ret == -1) {
-        struct track *track = mpctx->current_track[0][STREAM_SUB];
-        ret = track && track->forced_only_def;
-    }
-    return m_property_bool_ro(action, arg, ret);
 }
 
 static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
@@ -3948,11 +3918,11 @@ static const struct m_property mp_properties_base[] = {
     {"current-window-scale", mp_property_current_window_scale},
     {"vo-configured", mp_property_vo_configured},
     {"vo-passes", mp_property_vo_passes},
+    {"hdr-metadata", mp_property_hdr_metadata},
     {"perf-info", mp_property_perf_info},
     {"current-vo", mp_property_vo},
     {"container-fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
-    {"video-aspect", mp_property_aspect},
     {"video-aspect-override", mp_property_video_aspect_override},
     {"vid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_VIDEO}},
     {"hwdec-current", mp_property_hwdec_current},
@@ -3993,7 +3963,6 @@ static const struct m_property mp_properties_base[] = {
         .priv = (void *)&(const int){0}},
     {"secondary-sub-end", mp_property_sub_end,
         .priv = (void *)&(const int){1}},
-    {"sub-forced-only-cur", mp_property_sub_forced_only_cur},
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
@@ -4053,6 +4022,7 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("colormatrix-primaries", "video-params/primaries"),
     M_PROPERTY_ALIAS("colormatrix-gamma", "video-params/gamma"),
 
+    M_PROPERTY_DEPRECATED_ALIAS("sub-forced-only-cur", "sub-forced-events-only"),
     M_PROPERTY_DEPRECATED_ALIAS("drop-frame-count", "decoder-frame-drop-count"),
     M_PROPERTY_DEPRECATED_ALIAS("vo-drop-frame-count", "frame-drop-count"),
 };
@@ -4080,7 +4050,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "aspect-name", "vo-configured", "current-vo",
-      "video-aspect", "video-dec-params", "osd-dimensions",
+      "video-dec-params", "osd-dimensions",
       "hwdec", "hwdec-current", "hwdec-interop"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute",
@@ -4302,7 +4272,7 @@ static const struct property_osd_display {
     {"secondary-sub-visibility",
      .msg = "Secondary Subtitles ${!secondary-sub-visibility==yes:hidden}"
       "${?secondary-sub-visibility==yes:visible${?secondary-sid==no: (but no secondary subtitles selected)}}"},
-    {"sub-forced-only", "Forced sub only"},
+    {"sub-forced-events-only", "Forced sub only"},
     {"sub-scale", "Sub Scale"},
     {"sub-ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
     {"sub-ass-override", "ASS subtitle style override"},

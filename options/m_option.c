@@ -2381,6 +2381,64 @@ const m_option_type_t m_option_type_size_box = {
     .equal = geometry_equal,
 };
 
+void m_rect_apply(struct mp_rect *rc, int scrw, int scrh, struct m_geometry *gm)
+{
+    *rc = (struct mp_rect){0};
+    m_geometry_apply(&rc->x0, &rc->y0, &rc->x1, &rc->y1, scrw, scrh, gm);
+    if (!gm->xy_valid && gm->wh_valid && rc->x1 == 0 && rc->y1 == 0)
+        return;
+    if (!gm->xy_valid) {
+        rc->x0 = 0;
+        rc->y0 = 0;
+    }
+    if (!gm->wh_valid || rc->x1 == 0 || rc->x1 == INT_MIN)
+        rc->x1 = scrw - rc->x0;
+    if (!gm->wh_valid || rc->y1 == 0 || rc->y1 == INT_MIN)
+        rc->y1 = scrh - rc->y0;
+    rc->x1 += rc->x0;
+    rc->y1 += rc->y0;
+}
+
+static int parse_rect(struct mp_log *log, const m_option_t *opt,
+                      struct bstr name, struct bstr param, void *dst)
+{
+    bool is_help = bstr_equals0(param, "help");
+    if (is_help)
+        goto exit;
+
+    struct m_geometry gm;
+    if (!parse_geometry_str(&gm, param))
+        goto exit;
+
+    if (gm.x_sign || gm.y_sign || gm.ws ||
+       (gm.wh_valid && (gm.w < 0 || gm.h < 0)) ||
+       (gm.xy_valid && (gm.x < 0 || gm.y < 0)))
+    {
+        goto exit;
+    }
+
+    if (dst)
+        *((struct m_geometry *)dst) = gm;
+
+    return 1;
+
+exit:
+    if (!is_help) {
+        mp_err(log, "Option %.*s: invalid rect: '%.*s'\n",
+               BSTR_P(name), BSTR_P(param));
+    }
+    mp_info(log, "Valid format: W[%%][xH[%%]][+x+y]\n");
+    return is_help ? M_OPT_EXIT : M_OPT_INVALID;
+}
+
+const m_option_type_t m_option_type_rect = {
+    .name  = "Video rect",
+    .size  = sizeof(struct m_geometry),
+    .parse = parse_rect,
+    .print = print_geometry,
+    .copy  = copy_opt,
+    .equal = geometry_equal,
+};
 
 #include "video/img_format.h"
 

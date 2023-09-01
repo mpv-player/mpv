@@ -137,7 +137,6 @@ struct track {
 
     // Current subtitle state (or cached state if selected==false).
     struct dec_sub *d_sub;
-    bool forced_only_def;
 
     // Current decoding state (NULL if selected==false)
     struct mp_decoder_wrapper *dec;

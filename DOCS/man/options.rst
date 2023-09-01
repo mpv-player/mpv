@@ -137,7 +137,9 @@ Track Selection
 
 ``--subs-with-matching-audio=<yes|no>``
     When autoselecting a subtitle track, select a full/non-forced one even if the selected
-    audio stream matches your preferred subtitle language (default: yes).
+    audio stream matches your preferred subtitle language (default: yes). If this option is
+    set to ``no``, a non-forced subtitle track that matches the audio language will never be
+    autoselected by mpv regardless of the value of ``--slang`` or ``--subs-fallback``.
 
 ``--subs-match-os-language=<yes|no>``
     When autoselecting a subtitle track, select the track that matches the language of your OS
@@ -1562,6 +1564,13 @@ Video
     software decoding and hardware decoding methods that copy the video back to
     system memory support all values between 0 and 359.
 
+``--video-crop=<[W[xH]][+x+y]>``, ``--video-crop=<x:y>``
+    Crop the video by starting at the x, y offset for w, h pixels. The crop is
+    applied to the source video rectangle (before anamorphic stretch) by the VO.
+    A crop rectangle that is not within the video rectangle will be ignored.
+    This works with hwdec, unlike the equivalent 'lavfi-crop'. Setting the crop
+    to '0x0' disables it.
+
 ``--video-zoom=<value>``
     Adjust the video display scale factor by the given value. The parameter is
     given log 2. For example, ``--video-zoom=0`` is unscaled,
@@ -2621,12 +2630,11 @@ Subtitles
     subtitles (if the difference is smaller than 210 ms, the gap or overlap
     is removed).
 
-``--sub-forced-only=<auto|yes|no>``
-    Display only forced subtitles for the DVD subtitle stream selected by e.g.
-    ``--slang`` (default: ``auto``). When set to ``auto``, enabled when the
-    ``--subs-with-matching-audio`` option is on and a non-forced stream is selected.
-    Enabling this will hide all subtitles in streams that don't make a distinction
-    between forced and unforced events within a stream.
+``--sub-forced-events-only=<yes|no>``
+    Enabling this displays only forced events within subtitle streams. Only
+    some bitmap subtitle formats (such as DVD or PGS) are capable of having a
+    mixture of forced and unforced events within the stream. Enabling this on
+    text subtitles will cause no subtitles to be displayed (default: ``no``).
 
 ``--sub-fps=<rate>``
     Specify the framerate of the subtitle file (default: video fps). Affects
@@ -3964,12 +3972,9 @@ Demuxer
     libarchive opens all volumes anyway when playing the main file, even though
     mpv iterated no archive entries yet.
 
-``--directory-mode=<recursive|lazy|ignore>``
-    When opening a directory, open subdirectories recursively, lazily or not at
-    all (default: recursive).
-
-    Values other then ``recursive`` can lead to problems with resuming playlists
-    (`RESUMING PLAYBACK`_) and possibly other things.
+``--directory-mode=<lazy|recursive|ignore>``
+    When opening a directory, open subdirectories lazily, recursively or not at
+    all (default: lazy).
 
 Input
 -----

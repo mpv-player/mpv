@@ -35,6 +35,7 @@ local o = {
     plot_perfdata = true,
     plot_vsync_ratio = true,
     plot_vsync_jitter = true,
+    plot_tonemapping_lut = true,     -- also enable tone-mapping-visualize
     skip_frames = 5,
     global_max = true,
     flush_graph_data = true,         -- clear data buffers when toggling
@@ -95,6 +96,7 @@ local cache_recorder_timer = nil
 local curr_page = o.key_page_1
 local pages = {}
 local scroll_bound = false
+local tm_viz_prev = nil
 -- Save these sequences locally as we'll need them a lot
 local ass_start = mp.get_property_osd("osd-ass-cc/0")
 local ass_stop = mp.get_property_osd("osd-ass-cc/1")
@@ -691,6 +693,70 @@ local function append_resolution(s, r, prefix, w_prop, h_prop)
                                                indent=" ", prefix_sep="",
                                                no_prefix_markup=true})
         end
+        if r["crop-w"] and r["crop-w"] > 0 then
+            append(s, format("[x: %d, y: %d, w: %d, h: %d]", r["crop-x"], r["crop-y"], r["crop-w"],
+                   r["crop-h"]), {prefix=", ", nl="", indent="", no_prefix_markup=true})
+        end
+    end
+end
+
+
+local function pq_eotf(x)
+    if not x then
+        return x;
+    end
+
+    local PQ_M1 = 2610.0 / 4096 * 1.0 / 4
+    local PQ_M2 = 2523.0 / 4096 * 128
+    local PQ_C1 = 3424.0 / 4096
+    local PQ_C2 = 2413.0 / 4096 * 32
+    local PQ_C3 = 2392.0 / 4096 * 32
+
+    x = x ^ (1.0 / PQ_M2)
+    x = max(x - PQ_C1, 0.0) / (PQ_C2 - PQ_C3 * x)
+    x = x ^ (1.0 / PQ_M1)
+    x = x * 10000.0
+
+    return x
+end
+
+
+local function append_hdr(s, hdr)
+    if not hdr then
+        return
+    end
+
+    if (hdr["max-cll"] and hdr["max-cll"] > 203) or
+        hdr["max-luma"] and hdr["max-luma"] > 203 then
+        append(s, "", {prefix="HDR10:"})
+        if hdr["min-luma"] and hdr["max-luma"] and hdr["max-luma"] > 203 then
+            append(s, format("%.2g / %.0f", hdr["min-luma"], hdr["max-luma"]),
+                {prefix="Mastering display:", suffix=" cd/m²", nl=""})
+        end
+        if hdr["max-cll"] and hdr["max-cll"] > 203 then
+            append(s, hdr["max-cll"], {prefix="maxCLL:", suffix=" cd/m²", nl=""})
+        end
+        if hdr["max-fall"] and hdr["max-fall"] > 0 then
+            append(s, hdr["max-fall"], {prefix="maxFALL:", suffix=" cd/m²", nl=""})
+        end
+    end
+
+    if hdr["scene-max-r"] or hdr["scene-max-g"] or
+       hdr["scene-max-b"] or hdr["scene-avg"] then
+        append(s, "", {prefix="HDR10+:"})
+        append(s, format("%.1f / %.1f / %.1f", hdr["scene-max-r"] or 0,
+                         hdr["scene-max-g"] or 0, hdr["scene-max-b"] or 0),
+               {prefix="MaxRGB:", suffix=" cd/m²", nl=""})
+        append(s, format("%.1f", hdr["scene-avg"] or 0),
+               {prefix="Avg:", suffix=" cd/m²", nl=""})
+    end
+
+    if hdr["max-pq-y"] and hdr["avg-pq-y"] then
+        append(s, "", {prefix="PQ(Y):"})
+        append(s, format("%.2f cd/m² (%.2f%% PQ)", pq_eotf(hdr["max-pq-y"]),
+                         hdr["max-pq-y"] * 100), {prefix="Max:", nl=""})
+        append(s, format("%.2f cd/m² (%.2f%% PQ)", pq_eotf(hdr["avg-pq-y"]),
+                         hdr["avg-pq-y"] * 100), {prefix="Avg:", nl=""})
     end
 end
 
@@ -763,13 +829,14 @@ local function add_video(s)
     append(s, r["colormatrix"], {prefix="Colormatrix:"})
     append(s, r["primaries"], {prefix="Primaries:", nl=""})
     append(s, r["gamma"], {prefix="Transfer:", nl=""})
-    -- Append HDR metadata conditionally (only when present and interesting)
-    local hdrpeak = r["sig-peak"] or 0
-    if hdrpeak > 1 then
-        append(s, format("%.0f", hdrpeak * 203),
-               {prefix="(HDR peak", suffix=" nits)", nl="",
-                indent=" ", prefix_sep=": ", no_prefix_markup=true})
+
+    local hdr = mp.get_property_native("hdr-metadata")
+    if not hdr then
+        local hdrpeak = r["sig-peak"] or 0
+        hdr = {["max-cll"]=math.floor(hdrpeak * 203)}
     end
+
+    append_hdr(s, hdr)
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "vf", "Filters:")
 end
@@ -1148,6 +1215,10 @@ local function process_key_binding(oneshot)
         elseif not display_timer.oneshot and not oneshot then
             display_timer:kill()
             cache_recorder_timer:stop()
+            if tm_viz_prev ~= nil then
+                mp.set_property_native("tone-mapping-visualize", tm_viz_prev)
+                tm_viz_prev = nil
+            end
             clear_screen()
             remove_page_bindings()
             if recorder then
@@ -1164,6 +1235,10 @@ local function process_key_binding(oneshot)
             -- Will stop working if "vsync-jitter" property change notification
             -- changes, but it's fine for an internal script.
             mp.observe_property("vsync-jitter", "none", recorder)
+        end
+        if not oneshot and o.plot_tonemapping_lut then
+            tm_viz_prev = mp.get_property_native("tone-mapping-visualize")
+            mp.set_property_native("tone-mapping-visualize", true)
         end
         if not oneshot then
             cache_ahead_buf = {0, pos = 1, len = 50, max = 0}
