@@ -129,6 +129,8 @@ struct gl_tone_map_opts {
     float contrast_smoothness;
     int gamut_mode;
     bool visualize;
+    float visualize_hue;
+    float visualize_theta;
 };
 
 struct gl_video_opts {

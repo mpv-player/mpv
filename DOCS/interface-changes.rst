@@ -56,6 +56,7 @@ Interface changes
     - add `--video-crop`
     - add `video-params/crop-[w,h,x,y]`
     - remove `--tone-mapping-mode`
+    - add `--tone-mapping-visualize-hue`, `--tone-mapping-visualize-theta`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

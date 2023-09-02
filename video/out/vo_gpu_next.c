@@ -928,9 +928,6 @@ static void update_tm_viz(struct pl_color_map_params *params,
         .y0 = 0.0f,
         .y1 = size / out_h,
     };
-
-    // Visualize red-blue plane
-    params->visualize_hue = M_PI / 4.0;
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -2069,6 +2066,8 @@ static void update_render_options(struct vo *vo)
     pars->color_map_params.inverse_tone_mapping = opts->tone_map.inverse;
     pars->color_map_params.contrast_recovery = opts->tone_map.contrast_recovery;
     pars->color_map_params.visualize_lut = opts->tone_map.visualize;
+    pars->color_map_params.visualize_hue = opts->tone_map.visualize_hue;
+    pars->color_map_params.visualize_theta = opts->tone_map.visualize_theta;
     pars->color_map_params.contrast_smoothness = opts->tone_map.contrast_smoothness;
     pars->color_map_params.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
 
