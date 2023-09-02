@@ -172,7 +172,7 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     int cancel_fd = -1;
     char *path = getenv("PATH");
     if (!path)
-        path = ""; // failure, who cares
+        path = "/usr/local/bin:/bin:/usr/bin"; // fallback to sensible default
 
     *res = (struct mp_subprocess_result){0};
 
