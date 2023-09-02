@@ -150,7 +150,7 @@ function _mpv_generate_arguments {
 function _mpv_generate_protocols {
   _mpv_completion_protocols=()
   local list_protos_line
-  for list_protos_line in "${(@f)$($~words[1] --list-protocols)}"; do
+  for list_protos_line in "${(@f)$($~words[1] --no-config --list-protocols)}"; do
     if [[ $list_protos_line =~ $'^[ \t]+(.*)' ]]; then
       _mpv_completion_protocols+="$match[1]"
     fi
@@ -211,7 +211,7 @@ case $state in
     esac
     local -a values
     local current
-    for current in "${(@f)$($~words[1] --${option_name}=help)}"; do
+    for current in "${(@f)$($~words[1] --no-config --${option_name}=help)}"; do
       [[ $current =~ $pattern ]] || continue;
       local name=${match[name_group]//:/\\:} desc=${match[desc_group]}
       if [[ -n $desc ]]; then
