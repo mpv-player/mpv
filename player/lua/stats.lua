@@ -378,11 +378,6 @@ local function append_perfdata(header, s, dedicated_page, print_passes)
     end
 end
 
-local function ellipsis(s, maxlen)
-    if not maxlen or s:len() <= maxlen then return s end
-    return s:sub(1, max(0, maxlen - 3)) .. "..."
-end
-
 -- command prefix tokens to strip - includes generic property commands
 local cmd_prefixes = {
     osd_auto=1, no_osd=1, osd_bar=1, osd_msg=1, osd_msg_bar=1, raw=1, sync=1,
@@ -434,7 +429,7 @@ local function keyname_cells(k)
     return klen
 end
 
-local function get_kbinfo_lines(width)
+local function get_kbinfo_lines()
     -- active keys: only highest priority of each key, and not our (stats) keys
     local bindings = mp.get_property_native("input-bindings", {})
     local active = {}  -- map: key-name -> bind-info
@@ -497,8 +492,6 @@ local function get_kbinfo_lines(width)
                        or format("{\\q2\\fn%s}%s   {\\fn%s}{\\fs%d\\u1}",
                                  o.font_mono, kspaces, o.font, 1.3*o.font_size)
     local spost = term and "" or format("{\\u0\\fs%d}", o.font_size)
-    local _, itabs = o.indent:gsub("\t", "")
-    local cutoff = term and (width or 79) - o.indent:len() - itabs * 7 - spre:len()
 
     -- create the display lines
     local info_lines = {}
@@ -512,8 +505,7 @@ local function get_kbinfo_lines(width)
         if bind.comment then
             bind.cmd = bind.cmd .. "  # " .. bind.comment
         end
-        append(info_lines, ellipsis(bind.cmd, cutoff),
-               { prefix = kpre .. no_ASS(align_right(bind.key)) .. kpost })
+        append(info_lines, bind.cmd, { prefix = kpre .. no_ASS(align_right(bind.key)) .. kpost })
     end
     return info_lines
 end
@@ -1085,7 +1077,7 @@ local function finalize_page(header, content, apply_scroll)
         pages[curr_page].offset = from
     end
     local output = table.concat(header) .. table.concat(content, "", from, to)
-    if not o.use_ass and term_width > 0 and curr_page ~= o.key_page_4 then
+    if not o.use_ass and term_width > 0 then
         local t = split(output, "\n", true)
         -- limit width for the terminal
         output = table.concat(term_ellipsis_array(t, 1, #t, term_width), "\n")
@@ -1116,7 +1108,7 @@ local function vo_stats()
 end
 
 local kbinfo_lines = nil
-local function keybinding_info(after_scroll)
+local function keybinding_info(after_scroll, bindlist)
     local header = {}
     local page = pages[o.key_page_4]
     eval_ass_formatting()
@@ -1130,7 +1122,7 @@ local function keybinding_info(after_scroll)
         kbinfo_lines = get_kbinfo_lines(o.term_width_limit)
     end
 
-    return finalize_page(header, kbinfo_lines, true)
+    return finalize_page(header, kbinfo_lines, not bindlist)
 end
 
 local function perf_stats()
@@ -1490,9 +1482,8 @@ if o.bindlist ~= "no" then
     mp.add_timeout(0, function()  -- wait for all other scripts to finish init
         o.ass_formatting = false
         o.no_ass_indent = " "
-        eval_ass_formatting()
-        io.write(pages[o.key_page_4].desc .. ":" ..
-                 table.concat(get_kbinfo_lines(width)) .. "\n")
+        o.term_size.w = width
+        io.write(keybinding_info(false, true) .. "\n")
         mp.command("quit")
     end)
 end
