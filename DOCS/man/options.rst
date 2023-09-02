@@ -1556,6 +1556,16 @@ Video
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
+``--output-pan-x=<value>``, ``--output-pan-y=<value>``
+    Same as ``--video-pan-x`` and ``--video-pan-y`` except unit of the value is
+    in fractions of the size of the destination rectangle.
+
+    For example, displaying a video fullscreen on a 1920x1080 screen with
+    ``--output-pan-x=-0.1`` would move the video 192 pixels to the left and
+    ``--output-pan-y=-0.1`` would move the video 108 pixels up.
+
+    This options is disabled if the ``--no-keepaspect`` option is used.
+
 ``--video-rotate=<0-359|no>``
     Rotate the video clockwise, in degrees. If ``no`` is given, the video is
     never rotated, even if the file has rotation metadata. (The rotation value

@@ -142,6 +142,8 @@ static const m_option_t mp_vo_opt_list[] = {
     {"video-zoom", OPT_FLOAT(zoom), M_RANGE(-20.0, 20.0)},
     {"video-pan-x", OPT_FLOAT(pan_x)},
     {"video-pan-y", OPT_FLOAT(pan_y)},
+    {"output-pan-x", OPT_FLOAT(outpan_x)},
+    {"output-pan-y", OPT_FLOAT(outpan_y)},
     {"video-align-x", OPT_FLOAT(align_x), M_RANGE(-1.0, 1.0)},
     {"video-align-y", OPT_FLOAT(align_y), M_RANGE(-1.0, 1.0)},
     {"video-scale-x", OPT_FLOAT(scale_x), M_RANGE(0, 10000.0)},

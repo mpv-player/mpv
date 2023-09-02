@@ -39,6 +39,7 @@ typedef struct mp_vo_opts {
     float panscan;
     float zoom;
     float pan_x, pan_y;
+    float outpan_x, outpan_y;
     float align_x, align_y;
     float scale_x, scale_y;
     float margin_x[2];
