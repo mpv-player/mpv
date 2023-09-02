@@ -505,13 +505,16 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
             (t2->program_id == preferred_program))
             return t1->program_id == preferred_program;
     }
+    int forced = t1->type == STREAM_SUB ? opts->subs_fallback_forced : 1;
+    bool force_match = forced == 1 || (t1->forced_track && forced == 2) ||
+                       (!t1->forced_track && !forced);
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
     if (!os_langs && l1 != l2)
-        return l1 > l2;
+        return l1 > l2 && force_match;
     if (t1->default_track != t2->default_track)
-        return t1->default_track;
+        return t1->default_track && force_match;
     if (os_langs && l1 != l2)
-        return l1 > l2;
+        return l1 > l2 && force_match;
     if (t1->attached_picture != t2->attached_picture)
         return !t1->attached_picture;
     if (t1->stream && t2->stream && opts->hls_bitrate >= 0 &&
@@ -648,10 +651,11 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         // Autoselecting forced sub tracks requires the following:
         // 1. Matches the audio language or --subs-fallback-forced=always.
         // 2. Matches the users list of preferred languages or none were specified (i.e. slang was not set).
-        // 3. A track *wasn't* already selected by slang previously.
-        if (fallback_forced && track->forced_track &&
-            (os_langs || (match_lang(langs, track->lang) && !match_lang(langs, pick->lang))) &&
-            (mp_match_lang_single(audio_lang, track->lang) || opts->subs_fallback_forced == 2) &&
+        // 3. A track *wasn't* already selected by slang previously or the track->lang matches pick->lang and isn't forced.
+        bool valid_forced_slang = (os_langs || (mp_match_lang_single(pick->lang, track->lang) && !pick->forced_track) ||
+                                   (match_lang(langs, track->lang) && !match_lang(langs, pick->lang)));
+        bool audio_lang_match = mp_match_lang_single(audio_lang, track->lang);
+        if (fallback_forced && track->forced_track && valid_forced_slang && audio_lang_match &&
             (!forced_pick || compare_track(track, forced_pick, langs, os_langs, mpctx->opts, preferred_program)))
         {
             forced_pick = track;
@@ -671,8 +675,14 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     if (pick && !forced_pick && sub && (!match_lang(langs, pick->lang) || os_langs) && !sub_fallback)
         pick = NULL;
     // Handle this after matching langs and selecting a fallback.
-    if (pick && !forced_pick && sub && (!opts->subs_with_matching_audio && audio_matches))
+    if (pick && sub && (!opts->subs_with_matching_audio && audio_matches))
         pick = NULL;
+    // Handle edge cases if we picked a track that doesn't match the --subs-fallback-force value
+    if (pick && sub && ((!pick->forced_track && opts->subs_fallback_forced == 2) ||
+        (pick->forced_track && !opts->subs_fallback_forced)))
+    {
+        pick = NULL;
+    }
 
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
         pick = NULL;
