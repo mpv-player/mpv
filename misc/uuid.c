@@ -61,8 +61,8 @@
  */
 
 #include "uuid.h"
-#include "error.h"
-#include "avstring.h"
+#include "libavutil/error.h"
+#include "libavutil/avstring.h"
 
 int av_uuid_parse(const char *in, AVUUID uu)
 {
