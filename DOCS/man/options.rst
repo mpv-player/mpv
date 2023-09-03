@@ -1546,7 +1546,9 @@ Video
 
 ``--video-pan-x=<value>``, ``--video-pan-y=<value>``
     Moves the displayed video rectangle by the given value in the X or Y
-    direction. The unit is in fractions of the size of the destination rectangle.
+    direction. The unit is in fractions of the size of the scaled video (the
+    full size, even if parts of the video are not visible due to panscan or
+    other options).
 
     For example, displaying a video fullscreen on a 1920x1080 screen with
     ``--video-pan-x=-0.1`` would move the video 192 pixels to the left and
@@ -6629,28 +6631,6 @@ them.
     reveal details that would otherwise be hidden in dark scenes, but raising
     it too high will make dark scenes appear unnaturally bright. (``--vo=gpu``
     only)
-
-``--tone-mapping-mode``
-    Controls how the tone mapping function is applied to colors.
-
-    auto
-        Choose the best mode automatically. (Default)
-    rgb
-        Tone-map per-channel (RGB). Has a tendency to severely distort colors,
-        desaturate highlights, and is generally not very recommended. However,
-        this is the mode used in many displays and TVs (especially early ones),
-        and so sometimes it's needed to reproduce the artistic intent a film
-        was mastered with.
-    max
-        Tone-map on the brightest component in the video. Has a tendency to
-        lead to weirdly oversaturated colors, and loss of dark details.
-    hybrid
-        A hybrid approach that uses linear tone-mapping for midtones and
-        per-channel tone mapping for highlights.
-    luma
-        Luminance-based method from ITU-R BT.2446a, including fixed gamut
-        reductions to account for brightness-related perceptual nonuniformity.
-        (``--vo=gpu-next`` only)
 
 ``--tone-mapping-visualize``
     Display a (PQ-PQ) graph of the active tone-mapping LUT. Intended only for

@@ -913,8 +913,7 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
 }
 
 static void update_tm_viz(struct pl_color_map_params *params,
-                          const struct pl_frame *target,
-                          double pts)
+                          const struct pl_frame *target)
 {
     if (!params->visualize_lut)
         return;
@@ -930,9 +929,8 @@ static void update_tm_viz(struct pl_color_map_params *params,
         .y1 = size / out_h,
     };
 
-    // Complete one full rotation of the hue plane every 10 seconds
-    const float tm_period = 10.0;
-    params->visualize_hue = 2 * M_PI * pts / tm_period;
+    // Visualize red-blue plane
+    params->visualize_hue = M_PI / 4.0;
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -1023,6 +1021,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target);
     apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
+    update_tm_viz(&pars->color_map_params, &target);
 
     struct pl_frame_mix mix = {0};
     if (frame->current) {
@@ -1038,7 +1037,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         // initialization, but pl_queue does not like these. Hard-clamp as
         // a simple work-around.
         qparams.pts = p->last_pts = MPMAX(qparams.pts, p->last_pts);
-        update_tm_viz(&pars->color_map_params, &target, qparams.pts);
 
         switch (pl_queue_update(p->queue, &mix, &qparams)) {
         case PL_QUEUE_ERR:
@@ -1348,7 +1346,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
 
     apply_crop(&image, src, mpi->params.w, mpi->params.h);
     apply_crop(&target, dst, fbo->params.w, fbo->params.h);
-    update_tm_viz(&pars->color_map_params, &target, p->last_pts);
+    update_tm_viz(&pars->color_map_params, &target);
 
     int osd_flags = 0;
     if (!args->subs)

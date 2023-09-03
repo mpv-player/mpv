@@ -41,7 +41,6 @@ Interface changes
     - add `playlist-path` and `playlist/N/playlist-path` properties
     - add `--x11-wid-title` option
     - add `--libplacebo-opts` option
-    - change `--video-pan-x/y` to be relative to the destination rectangle
     - add `--audio-file-exts`, `--cover-art-auto-exts`, and `--sub-auto-exts`
     - change `slang` default back to NULL
     - remove special handling of the `auto` value from `--alang/slang/vlang` options
@@ -56,6 +55,7 @@ Interface changes
     - remove deprecated `video-aspect` property
     - add `--video-crop`
     - add `video-params/crop-[w,h,x,y]`
+    - remove `--tone-mapping-mode`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

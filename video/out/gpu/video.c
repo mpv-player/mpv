@@ -394,12 +394,6 @@ const struct m_sub_options gl_video_conf = {
         {"inverse-tone-mapping", OPT_BOOL(tone_map.inverse)},
         {"tone-mapping-max-boost", OPT_FLOAT(tone_map.max_boost),
             M_RANGE(1.0, 10.0)},
-        {"tone-mapping-mode", OPT_CHOICE(tone_map.mode,
-            {"auto",        TONE_MAP_MODE_AUTO},
-            {"rgb",         TONE_MAP_MODE_RGB},
-            {"max",         TONE_MAP_MODE_MAX},
-            {"hybrid",      TONE_MAP_MODE_HYBRID},
-            {"luma",        TONE_MAP_MODE_LUMA})},
         {"tone-mapping-visualize", OPT_BOOL(tone_map.visualize)},
         {"gamut-mapping-mode", OPT_CHOICE(tone_map.gamut_mode,
             {"auto",        GAMUT_AUTO},
@@ -499,6 +493,7 @@ const struct m_sub_options gl_video_conf = {
         {"tone-mapping-desaturate", OPT_REMOVED("Replaced by --tone-mapping-mode")},
         {"tone-mapping-desaturate-exponent", OPT_REMOVED("Replaced by --tone-mapping-mode")},
         {"tone-mapping-crosstalk", OPT_REMOVED("Hard-coded as 0.04")},
+        {"tone-mapping-mode", OPT_REMOVED("no replacement")},
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -2673,18 +2668,6 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     default:
         MP_WARN(p, "Tone mapping curve unsupported by vo_gpu, falling back.\n");
         p->opts.tone_map.curve = TONE_MAPPING_AUTO;
-        break;
-    }
-
-    switch (p->opts.tone_map.mode) {
-    case TONE_MAP_MODE_AUTO:
-    case TONE_MAP_MODE_RGB:
-    case TONE_MAP_MODE_MAX:
-    case TONE_MAP_MODE_HYBRID:
-        break;
-    default:
-        MP_WARN(p, "Tone mapping mode unsupported by vo_gpu, falling back.\n");
-        p->opts.tone_map.mode = TONE_MAP_MODE_AUTO;
         break;
     }
 

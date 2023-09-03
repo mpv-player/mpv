@@ -42,7 +42,7 @@ _mpv_get_args()
         _filedir 2>/dev/null || COMPREPLY=($(compgen -f))
         return 0
       else
-        candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
+        candidates=($(mpv --no-config $1=help | grep -v ':' | awk '{print $1;}'))
         candidates+=("help")
       fi
       ;;
@@ -50,16 +50,16 @@ _mpv_get_args()
       candidates=("yes" "no" "help")
       ;;
     Choices:|Object)
-      candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
+      candidates=($(mpv --no-config $1=help | grep -v ':' | awk '{print $1;}'))
       candidates+=("help")
       ;;
     Image)
-      candidates=($(mpv $1=help))
+      candidates=($(mpv --no-config $1=help))
       candidates=("${candidates[@]:2}")
       candidates+=("help")
       ;;
     Profile)
-      candidates=($(mpv $1= | grep -v ':' | awk '{print $1;}'))
+      candidates=($(mpv --no-config $1= | grep -v ':' | awk '{print $1;}'))
       ;;
     *)
       # There are other categories; some of which we could do something smarter

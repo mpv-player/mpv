@@ -95,7 +95,8 @@ def no_merge(body):
 
 @lint_rule("Subject line should be shorter than 72 characters")
 def line_too_long(body):
-	return len(body[0]) <= 72
+	revert = re.search(r"^Revert \"(.*)\"", body[0])
+	return True if revert else len(body[0]) <= 72
 
 @lint_rule("Prefix should not include C file extensions (use `vo_gpu: ...` not `vo_gpu.c: ...`)")
 def no_file_exts(body):

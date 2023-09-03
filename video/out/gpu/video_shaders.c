@@ -818,25 +818,12 @@ static void pass_tone_map(struct gl_shader_cache *sc,
         abort();
     }
 
-    switch (opts->mode) {
-    case TONE_MAP_MODE_RGB:
-        GLSL(color.rgb = sig;)
-        break;
-    case TONE_MAP_MODE_MAX:
-        GLSL(color.rgb *= sig[sig_idx] / sig_orig;)
-        break;
-    case TONE_MAP_MODE_AUTO:
-    case TONE_MAP_MODE_HYBRID:
-        GLSLF("float coeff = max(sig[sig_idx] - %f, 1e-6) / \n"
-              "              max(sig[sig_idx], 1.0);        \n"
-              "coeff = %f * pow(coeff / %f, %f);            \n"
-              "color.rgb *= sig[sig_idx] / sig_orig;        \n"
-              "color.rgb = mix(color.rgb, %f * sig, coeff); \n",
-              0.18 / dst_scale, 0.90, dst_scale, 0.20, dst_scale);
-        break;
-    default:
-        abort();
-    }
+    GLSLF("float coeff = max(sig[sig_idx] - %f, 1e-6) / \n"
+          "              max(sig[sig_idx], 1.0);        \n"
+          "coeff = %f * pow(coeff / %f, %f);            \n"
+          "color.rgb *= sig[sig_idx] / sig_orig;        \n"
+          "color.rgb = mix(color.rgb, %f * sig, coeff); \n",
+          0.18 / dst_scale, 0.90, dst_scale, 0.20, dst_scale);
 }
 
 // Map colors from one source space to another. These source spaces must be
