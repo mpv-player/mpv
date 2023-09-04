@@ -26,8 +26,10 @@ _mpv_get_args()
   local partial="$2"
   local type=$(echo "$doc" | awk '{print $2;}')
 
+  # We special-case profiles to ensure we read the config
   if [ "$1" = "--show-profile" ]; then
-    # This is a special case
+    type="ShowProfile"
+  elif [ "$1" = "--profile" ]; then
     type="Profile"
   fi
 
@@ -59,7 +61,11 @@ _mpv_get_args()
       candidates+=("help")
       ;;
     Profile)
-      candidates=($(mpv --no-config $1= | grep -v ':' | awk '{print $1;}'))
+      candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
+      candidates+=("help")
+      ;;
+    ShowProfile)
+      candidates=($(mpv $1= | grep -v ':' | awk '{print $1;}'))
       ;;
     *)
       # There are other categories; some of which we could do something smarter

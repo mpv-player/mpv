@@ -262,7 +262,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
     char line[CHANNEL_LINE_LEN], *colon;
 
     if (!filename)
-        return NULL;
+        return list;
 
     int fields, cnt, k;
     int has8192, has0;
@@ -283,7 +283,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                filename, get_dvb_delsys(delsys));
     if ((f = fopen(filename, "r")) == NULL) {
         mp_fatal(log, "CAN'T READ CONFIG FILE %s\n", filename);
-        return NULL;
+        return list;
     }
 
     if (list == NULL) {
@@ -351,7 +351,16 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                         vpid_str, apid_str, tpid_str, &ptr->service_id,
                         &num_chars);
 
-        if (num_chars == strlen(&line[k])) {
+        bool is_vdr_conf = (num_chars == strlen(&line[k]));
+
+        // Special case: DVB-T style ZAP config also has 13 columns.
+        // Most columns should have non-numeric content, but some channel list generators insert 0
+        // if a value is not used. However, INVERSION_* should always set after frequency.
+        if (is_vdr_conf && !strncmp(vdr_par_str, "INVERSION_", 10)) {
+            is_vdr_conf = false;
+        }
+
+        if (is_vdr_conf) {
             // Modulation parsed here, not via old xine-parsing path.
             mod[0] = '\0';
             // It's a VDR-style config line.
@@ -386,6 +395,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             case SYS_DVBC_ANNEX_C:
             case SYS_ATSC:
             case SYS_DVBC_ANNEX_B:
+            case SYS_ISDBT:
                 mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
                            "FREQ: %d, SRATE: %d",
                            get_dvb_delsys(delsys),
@@ -434,9 +444,11 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 break;
             }
         } else {
+            // ZAP style channel config file.
             switch (delsys) {
             case SYS_DVBT:
             case SYS_DVBT2:
+            case SYS_ISDBT:
                 fields = sscanf(&line[k], ter_conf,
                                 &ptr->freq, inv, bw, cr, tmp_lcr, mod,
                                 transm, gi, tmp_hier, vpid_str, apid_str);
@@ -553,6 +565,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
+        case SYS_ISDBT:
         case SYS_DVBC_ANNEX_A:
         case SYS_DVBC_ANNEX_C:
             if (!strcmp(inv, "INVERSION_ON")) {
@@ -586,6 +599,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
+        case SYS_ISDBT:
         case SYS_DVBC_ANNEX_A:
         case SYS_DVBC_ANNEX_C:
         case SYS_ATSC:
@@ -624,6 +638,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
+        case SYS_ISDBT:
             if (!strcmp(bw, "BANDWIDTH_5_MHZ")) {
                 ptr->bw = BANDWIDTH_5_MHZ;
             } else if (!strcmp(bw, "BANDWIDTH_6_MHZ")) {
@@ -1183,6 +1198,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                 if (!DELSYS_IS_SET(delsys_mask[f], delsys))
                     continue; /* Skip unsupported. */
 
+                mp_verbose(log, "Searching channel list for delivery system %s\n", get_dvb_delsys(delsys));
                 switch (delsys) {
                 case SYS_DVBC_ANNEX_A:
                 case SYS_DVBC_ANNEX_C:
@@ -1198,6 +1214,9 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                     break;
                 case SYS_DVBT2:
                     conf_file_name = "channels.conf.ter";
+                    break;
+                case SYS_ISDBT:
+                    conf_file_name = "channels.conf.isdbt";
                     break;
                 case SYS_DVBS:
                     if (DELSYS_IS_SET(delsys_mask[f], SYS_DVBS2))
@@ -1251,6 +1270,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
             &delsys_mask, (sizeof(unsigned int) * MAX_FRONTENDS));
         state->adapters[state->adapters_count].list = list;
         state->adapters_count++;
+        mp_verbose(log, "Added adapter with channels to state list, contains %d adapters.\n", state->adapters_count);
     }
 
     if (state->adapters_count == 0) {

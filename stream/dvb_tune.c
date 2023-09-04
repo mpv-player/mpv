@@ -447,6 +447,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
     switch (delsys) {
     case SYS_DVBT2:
     case SYS_DVBT:
+    case SYS_ISDBT:
         if (freq < 1000000)
             freq *= 1000UL;
         switch (bandwidth) {
@@ -563,6 +564,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
         break;
     case SYS_DVBT:
     case SYS_DVBT2:
+    case SYS_ISDBT:
         {
             struct dtv_property p[] = {
                 { .cmd = DTV_DELIVERY_SYSTEM, .u.data = delsys },
