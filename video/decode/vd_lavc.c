@@ -139,12 +139,12 @@ const struct m_sub_options vd_lavc_conf = {
         .framedrop = AVDISCARD_NONREF,
         .dr = -1,
         .hwdec_api = (char *[]){"no", NULL,},
-        .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores",
+        .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores,mpeg2video",
         // Maximum number of surfaces the player wants to buffer. This number
         // might require adjustment depending on whatever the player does;
         // for example, if vo_gpu increases the number of reference surfaces for
         // interpolation, this value has to be increased too.
-        .hwdec_extra_frames = 6,
+        .hwdec_extra_frames = 8,
     },
 };
 
