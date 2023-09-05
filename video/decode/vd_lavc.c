@@ -144,7 +144,7 @@ const struct m_sub_options vd_lavc_conf = {
         // might require adjustment depending on whatever the player does;
         // for example, if vo_gpu increases the number of reference surfaces for
         // interpolation, this value has to be increased too.
-        .hwdec_extra_frames = 6,
+        .hwdec_extra_frames = 8,
     },
 };
 
