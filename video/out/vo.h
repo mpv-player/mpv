@@ -526,7 +526,7 @@ int vo_query_and_reset_events(struct vo *vo, int events);
 struct mp_image *vo_get_current_frame(struct vo *vo);
 void vo_set_queue_params(struct vo *vo, int64_t offset_us, int num_req_frames);
 int vo_get_num_req_frames(struct vo *vo);
-int64_t vo_get_vsync_interval(struct vo *vo);
+double vo_get_vsync_interval(struct vo *vo);
 double vo_get_estimated_vsync_interval(struct vo *vo);
 double vo_get_estimated_vsync_jitter(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
