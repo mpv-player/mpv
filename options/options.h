@@ -89,7 +89,7 @@ struct mp_subtitle_opts {
     bool stretch_dvd_subs;
     bool stretch_image_subs;
     bool image_subs_video_res;
-    bool sub_fix_timing;
+    int sub_fix_timing;
     bool sub_scale_by_window;
     bool sub_scale_with_window;
     bool ass_scale_with_window;

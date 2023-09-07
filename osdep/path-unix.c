@@ -29,6 +29,7 @@ static pthread_once_t path_init_once = PTHREAD_ONCE_INIT;
 static char mpv_home[CONF_MAX];
 static char old_home[CONF_MAX];
 static char mpv_cache[CONF_MAX];
+static char old_cache[CONF_MAX];
 static char mpv_state[CONF_MAX];
 #define MKPATH(BUF, ...) (snprintf((BUF), CONF_MAX, __VA_ARGS__) >= CONF_MAX)
 
@@ -47,8 +48,10 @@ static void path_init(void)
     }
 
     // Maintain compatibility with old ~/.mpv
-    if (home && home[0])
+    if (home && home[0]) {
         err = err || MKPATH(old_home, "%s/.mpv", home);
+        err = err || MKPATH(old_cache, "%s/.mpv/cache", home);
+    }
 
     if (xdg_cache && xdg_cache[0]) {
         err = err || MKPATH(mpv_cache, "%s/mpv", xdg_cache);
@@ -66,9 +69,10 @@ static void path_init(void)
     // config dir only. Also do not use any other XDG directories.
     if (mp_path_exists(old_home) && !mp_path_exists(mpv_home)) {
         err = err || MKPATH(mpv_home, "%s", old_home);
-        err = err || MKPATH(mpv_cache, "%s", old_home);
+        err = err || MKPATH(mpv_cache, "%s", old_cache);
         err = err || MKPATH(mpv_state, "%s", old_home);
         old_home[0] = '\0';
+        old_cache[0] = '\0';
     }
 
     if (err) {
