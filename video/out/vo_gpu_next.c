@@ -1364,9 +1364,31 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         osd_flags |= OSD_DRAW_OSD_ONLY;
     if (!args->osd)
         osd_flags |= OSD_DRAW_SUB_ONLY;
-    update_overlays(vo, osd, mpi->pts, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
-                    &p->osd_state, &target);
-    image.num_overlays = 0; // Disable on-screen overlays
+
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    struct frame_priv *fp = mpi->priv;
+    if (opts->blend_subs) {
+            // Only update the overlays if the state has changed
+            float rx = pl_rect_w(p->dst) / pl_rect_w(image.crop);
+            float ry = pl_rect_h(p->dst) / pl_rect_h(image.crop);
+            struct mp_osd_res res = {
+                .w = pl_rect_w(p->dst),
+                .h = pl_rect_h(p->dst),
+                .ml = -image.crop.x0 * rx,
+                .mr = (image.crop.x1 - vo->params->w) * rx,
+                .mt = -image.crop.y0 * ry,
+                .mb = (image.crop.y1 - vo->params->h) * ry,
+                .display_par = 1.0,
+            };
+            update_overlays(vo, res, mpi->pts, osd_flags,
+                            PL_OVERLAY_COORDS_DST_CROP,
+                            &fp->subs, &image);
+    } else {
+        // Disable overlays when blend_subs is disabled
+        update_overlays(vo, osd, mpi->pts, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
+                        &p->osd_state, &target);
+        image.num_overlays = 0;
+    }
 
     if (!pl_render_image(p->rr, &image, &target, &params)) {
         MP_ERR(vo, "Failed rendering frame!\n");
