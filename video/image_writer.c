@@ -651,12 +651,25 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
 
     mp_dbg(log, "Will convert image to %s\n", mp_imgfmt_to_name(p.imgfmt));
 
+    struct mp_image *src = image;
+    if (mp_image_crop_valid(&src->params) &&
+        (mp_rect_w(src->params.crop) != src->w ||
+         mp_rect_h(src->params.crop) != src->h))
+    {
+        src = mp_image_new_ref(src);
+        if (!src) {
+            mp_err(log, "mp_image_new_ref failed!\n");
+            return NULL;
+        }
+        mp_image_crop_rc(src, src->params.crop);
+    }
+
     struct mp_image *dst = mp_image_alloc(p.imgfmt, p.w, p.h);
     if (!dst) {
         mp_err(log, "Out of memory.\n");
         return NULL;
     }
-    mp_image_copy_attributes(dst, image);
+    mp_image_copy_attributes(dst, src);
 
     dst->params = p;
 
@@ -664,8 +677,11 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
     sws->log = log;
     if (global)
         mp_sws_enable_cmdline_opts(sws, global);
-    bool ok = mp_sws_scale(sws, dst, image) >= 0;
+    bool ok = mp_sws_scale(sws, dst, src) >= 0;
     talloc_free(sws);
+
+    if (src != image)
+        talloc_free(src);
 
     if (!ok) {
         mp_err(log, "Error when converting image.\n");
