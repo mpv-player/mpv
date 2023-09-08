@@ -1645,7 +1645,7 @@ function bar_layout(direction)
 
     -- Seekbar
     geo = { x = sb_l, y = geo.y, an = geo.an,
-            w = math.max(0, sb_r - sb_l), h = geo.h }
+            w = math.max(0, sb_r - sb_l), h = geo.h - 15}
     new_element("bgbar1", "box")
     lo = add_layout("bgbar1")
 
@@ -1663,9 +1663,9 @@ function bar_layout(direction)
     lo.geometry = geo
     lo.style = osc_styles.timecodesBar
     lo.slider.border = 0
-    lo.slider.gap = 2
+    lo.slider.gap = 3
     lo.slider.tooltip_style = osc_styles.timePosBar
-    lo.slider.tooltip_an = 5
+    lo.slider.tooltip_an = 2
     lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.rtype = user_opts["seekrangestyle"]
 
