@@ -384,6 +384,19 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
     }
 
     if (use_sw && image && window) {
+        if (mp_image_crop_valid(&image->params) &&
+            (mp_rect_w(image->params.crop) != image->w ||
+             mp_rect_h(image->params.crop) != image->h))
+        {
+            struct mp_image *nimage = mp_image_new_ref(image);
+            if (!nimage) {
+                MP_ERR(mpctx->screenshot_ctx, "mp_image_new_ref failed!\n");
+                return NULL;
+            }
+            mp_image_crop_rc(nimage, image->params.crop);
+            talloc_free(image);
+            image = nimage;
+        }
         struct mp_osd_res res = osd_get_vo_res(mpctx->video_out->osd);
         struct mp_osd_res image_res = osd_res_from_image_params(&image->params);
         if (!osd_res_equals(res, image_res)) {
