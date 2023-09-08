@@ -72,7 +72,7 @@ local options = {
     detect_min_ratio = 0.5,
     detect_seconds = 1,
     suppress_osd = false,
-    use_vo_crop = false,
+    use_vo_crop = true,
 }
 read_options(options)
 
@@ -124,9 +124,11 @@ end
 
 function remove_filter(label)
     if options.use_vo_crop and label == labels.crop then
-        local ro = mp.get_property_native("video-out-params")
-        mp.command(string.format("%s set video-crop 0", command_prefix))
-        return ro and ro["crop-w"] and ro["crop-w"] > 0
+        if mp.get_property('video-crop') ~= '0x0' then
+            mp.command(string.format("%s set video-crop 0", command_prefix))
+            return true
+        end
+        return false
     end
 
     if is_filter_present(label) then
@@ -140,7 +142,10 @@ function cleanup()
 
     -- Remove all existing filters.
     for key, value in pairs(labels) do
-        remove_filter(value)
+        -- No need to remove initial crop in vo_crop mode
+        if not (options.use_vo_crop and value == labels.crop) then
+            remove_filter(value)
+        end
     end
 
     -- Kill all timers.

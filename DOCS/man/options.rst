@@ -1570,8 +1570,11 @@ Video
     Crop the video by starting at the x, y offset for w, h pixels. The crop is
     applied to the source video rectangle (before anamorphic stretch) by the VO.
     A crop rectangle that is not within the video rectangle will be ignored.
-    This works with hwdec, unlike the equivalent 'lavfi-crop'. Setting the crop
-    to '0x0' disables it.
+    This works with hwdec, unlike the equivalent 'lavfi-crop'. When offset is
+    omitted, the central area will be cropped. Setting the crop to empty one
+    ``--video-crop=0x0+0+0`` overrides container crop and disables cropping.
+    Setting the crop to ``--video-crop=0`` disables manual cropping and restores
+    the container crop if it's specified.
 
 ``--video-zoom=<value>``
     Adjust the video display scale factor by the given value. The parameter is
@@ -1830,6 +1833,14 @@ Video
     option is pretty safe if you want your broken files to work, but in theory
     this can break on streams not encoded by x264, or if a stream encoded by a
     newer x264 version contains no version info.
+
+``--vd-apply-cropping``
+    Certain video codecs support cropping, meaning that only a sub-rectangle of
+    the decoded frame is intended for display. This option controls how cropping
+    is handled by libavcodec. Cropping during decoding has certain limitations
+    with regards to alignment and hardware decoding. If this option is enabled,
+    decoder will apply the crop. Disabled by default, VO will apply the crop in
+    a more robust way.
 
 ``--swapchain-depth=<N>``
     Allow up to N in-flight frames. This essentially controls the frame

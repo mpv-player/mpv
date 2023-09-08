@@ -2381,20 +2381,18 @@ const m_option_type_t m_option_type_size_box = {
     .equal = geometry_equal,
 };
 
-void m_rect_apply(struct mp_rect *rc, int scrw, int scrh, struct m_geometry *gm)
+void m_rect_apply(struct mp_rect *rc, int w, int h, struct m_geometry *gm)
 {
-    *rc = (struct mp_rect){0};
-    m_geometry_apply(&rc->x0, &rc->y0, &rc->x1, &rc->y1, scrw, scrh, gm);
+    *rc = (struct mp_rect){0, 0, w, h};
+    if (!w || !h)
+        return;
+    m_geometry_apply(&rc->x0, &rc->y0, &rc->x1, &rc->y1, w, h, gm);
     if (!gm->xy_valid && gm->wh_valid && rc->x1 == 0 && rc->y1 == 0)
         return;
-    if (!gm->xy_valid) {
-        rc->x0 = 0;
-        rc->y0 = 0;
-    }
     if (!gm->wh_valid || rc->x1 == 0 || rc->x1 == INT_MIN)
-        rc->x1 = scrw - rc->x0;
+        rc->x1 = w - rc->x0;
     if (!gm->wh_valid || rc->y1 == 0 || rc->y1 == INT_MIN)
-        rc->y1 = scrh - rc->y0;
+        rc->y1 = h - rc->y0;
     rc->x1 += rc->x0;
     rc->y1 += rc->y0;
 }

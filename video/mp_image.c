@@ -522,6 +522,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.color = src->params.color;
     dst->params.chroma_location = src->params.chroma_location;
     dst->params.alpha = src->params.alpha;
+    dst->params.crop = src->params.crop;
     dst->nominal_fps = src->nominal_fps;
 
     // ensure colorspace consistency
@@ -1011,6 +1012,11 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 
     dst->pict_type = src->pict_type;
 
+    dst->params.crop.x0 = src->crop_left;
+    dst->params.crop.y0 = src->crop_top;
+    dst->params.crop.x1 = src->width - src->crop_right;
+    dst->params.crop.y1 = src->height - src->crop_bottom;
+
     dst->fields = 0;
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(58, 7, 100)
     if (src->flags & AV_FRAME_FLAG_INTERLACED)
@@ -1042,6 +1048,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         // Might be incorrect if colorspace changes.
         dst->params.color.light = p->color.light;
         dst->params.alpha = p->alpha;
+        dst->params.crop = p->crop;
     }
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_DISPLAYMATRIX);
