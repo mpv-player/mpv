@@ -300,16 +300,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     AVCodecContext *ctx = priv->avctx;
     double pts = packet->pts;
     double endpts = MP_NOPTS_VALUE;
-    double duration = packet->duration;
     AVSubtitle sub;
-
-    // libavformat sets duration==0, even if the duration is unknown. Some files
-    // also have actually subtitle packets with duration explicitly set to 0
-    // (yes, at least some of such mkv files were muxed by libavformat).
-    // Assume there are no bitmap subs that actually use duration==0 for
-    // hidden subtitle events.
-    if (duration == 0)
-        duration = -1;
 
     if (pts == MP_NOPTS_VALUE)
         MP_WARN(sd, "Subtitle with unknown start time.\n");
@@ -334,12 +325,9 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         if (sub.end_display_time > sub.start_display_time &&
             sub.end_display_time != UINT32_MAX)
         {
-            duration = (sub.end_display_time - sub.start_display_time) / 1000.0;
+            endpts = pts + sub.end_display_time / 1000.0;
         }
         pts += sub.start_display_time / 1000.0;
-
-        if (duration >= 0)
-            endpts = pts + duration;
 
         // set end time of previous sub
         struct sub *prev = &priv->subs[0];
