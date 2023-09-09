@@ -1010,6 +1010,41 @@ static void calculate_frame_duration(struct MPContext *mpctx)
     MP_STATS(mpctx, "value %f frame-duration-approx", MPMAX(0, approx_duration));
 }
 
+static void apply_video_crop(struct vo *vo, struct mp_image_params *p)
+{
+    struct m_geometry *gm = &vo->opts->video_crop;
+    struct mp_rect rc = {0};
+    if (gm->xy_valid || (gm->wh_valid && (gm->w > 0 || gm->w_per > 0 ||
+                                          gm->h > 0 || gm->h_per > 0)))
+    {
+        m_rect_apply(&rc, p->w, p->h, gm);
+    }
+    if (rc.x1 > 0 && rc.y1 > 0) {
+        p->crop = rc;
+        if (!mp_image_crop_valid(p)) {
+            char *str = m_option_type_rect.print(NULL, gm);
+            MP_WARN(vo, "Ignoring invalid --video-crop=%s for %dx%d image\n",
+                    str, p->w, p->h);
+            talloc_free(str);
+            if (vo->params) {
+                p->crop = vo->params->crop;
+                *gm = (struct m_geometry){
+                    .x = p->crop.x0,
+                    .y = p->crop.y0,
+                    .w = mp_rect_w(p->crop),
+                    .h = mp_rect_h(p->crop),
+                    .xy_valid = true,
+                    .wh_valid = true,
+                };
+            }
+            if (!mp_image_crop_valid(p)) {
+                p->crop = (struct mp_rect){0};
+                *gm = (struct m_geometry){0};
+            }
+        }
+    }
+}
+
 void write_video(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -1127,40 +1162,12 @@ void write_video(struct MPContext *mpctx)
         }
     }
 
+    // Inject vo crop to notify and reconfig if needed
+    for (int n = 0; n < mpctx->num_next_frames; n++)
+        apply_video_crop(vo, &mpctx->next_frames[n]->params);
+
     // Filter output is different from VO input?
     struct mp_image_params *p = &mpctx->next_frames[0]->params;
-    // Inject vo crop to notify and reconfig if needed
-    struct m_geometry *gm = &vo->opts->video_crop;
-    struct mp_rect rc = {0};
-    if (gm->xy_valid || (gm->wh_valid && (gm->w > 0 || gm->w_per > 0 ||
-                                          gm->h > 0 || gm->h_per > 0)))
-    {
-        m_rect_apply(&rc, p->w, p->h, gm);
-    }
-    if (rc.x1 > 0 && rc.y1 > 0) {
-        p->crop = rc;
-        if (!mp_image_crop_valid(p)) {
-            char *str = m_option_type_rect.print(NULL, gm);
-            MP_WARN(vo, "Ignoring invalid --video-crop=%s for %dx%d image\n",
-                    str, p->w, p->h);
-            talloc_free(str);
-            if (vo->params) {
-                p->crop = vo->params->crop;
-                *gm = (struct m_geometry){
-                    .x = p->crop.x0,
-                    .y = p->crop.y0,
-                    .w = mp_rect_w(p->crop),
-                    .h = mp_rect_h(p->crop),
-                    .xy_valid = true,
-                    .wh_valid = true,
-                };
-            }
-            if (!mp_image_crop_valid(p)) {
-                p->crop = (struct mp_rect){0};
-                *gm = (struct m_geometry){0};
-            }
-        }
-    }
     if (!vo->params || !mp_image_params_equal(p, vo->params)) {
         // Changing config deletes the current frame; wait until it's finished.
         if (vo_still_displaying(vo)) {
