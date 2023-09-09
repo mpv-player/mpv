@@ -62,8 +62,8 @@ that uses the ``.foo`` file extension.
 mpv also appends the top level directory of the script to the start of Lua's
 package path so you can import scripts from there too. Be aware that this will
 shadow Lua libraries that use the same package path. (Single file scripts do not
-include mpv specific directory the Lua package path. This was silently changed
-in mpv 0.32.0.)
+include mpv specific directories in the Lua package path. This was silently
+changed in mpv 0.32.0.)
 
 Using a script directory is the recommended way to package a script that
 consists of multiple source files, or requires other files (you can use
