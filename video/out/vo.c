@@ -145,14 +145,14 @@ struct vo_internal {
     int queued_events;              // event mask for the user
     int internal_events;            // event mask for us
 
-    int64_t nominal_vsync_interval;
+    double nominal_vsync_interval;
 
-    int64_t vsync_interval;
+    double vsync_interval;
     int64_t *vsync_samples;
     int num_vsync_samples;
     int64_t num_total_vsync_samples;
-    int64_t prev_vsync;
-    int64_t base_vsync;
+    double prev_vsync;
+    double base_vsync;
     int drop_point;
     double estimated_vsync_interval;
     double estimated_vsync_jitter;
@@ -415,7 +415,7 @@ static void reset_vsync_timings(struct vo *vo)
     in->num_successive_vsyncs = 0;
 }
 
-static double vsync_stddef(struct vo *vo, int64_t ref_vsync)
+static double vsync_stddef(struct vo *vo, double ref_vsync)
 {
     struct vo_internal *in = vo->in;
     double jitter = 0;
@@ -460,7 +460,7 @@ static void check_estimated_display_fps(struct vo *vo)
                        1e6 / in->nominal_vsync_interval);
         }
     }
-    in->vsync_interval = use_estimated ? (int64_t)in->estimated_vsync_interval
+    in->vsync_interval = use_estimated ? in->estimated_vsync_interval
                                        : in->nominal_vsync_interval;
 }
 
@@ -471,7 +471,7 @@ static void vsync_skip_detection(struct vo *vo)
     struct vo_internal *in = vo->in;
 
     int window = 4;
-    int64_t t_r = in->prev_vsync, t_e = in->base_vsync, diff = 0, desync_early = 0;
+    double t_r = in->prev_vsync, t_e = in->base_vsync, diff = 0.0, desync_early = 0.0;
     for (int n = 0; n < in->drop_point; n++) {
         diff += t_r - t_e;
         t_r -= in->vsync_samples[n];
@@ -479,9 +479,9 @@ static void vsync_skip_detection(struct vo *vo)
         if (n == window + 1)
             desync_early = diff / window;
     }
-    int64_t desync = diff / in->num_vsync_samples;
+    double desync = diff / in->num_vsync_samples;
     if (in->drop_point > window * 2 &&
-        llabs(desync - desync_early) >= in->vsync_interval * 3 / 4)
+        fabs(desync - desync_early) >= in->vsync_interval * 3 / 4)
     {
         // Assume a drop. An underflow can technically speaking not be a drop
         // (it's up to the driver what this is supposed to mean), but no reason
@@ -1279,11 +1279,11 @@ int vo_get_num_req_frames(struct vo *vo)
     return res;
 }
 
-int64_t vo_get_vsync_interval(struct vo *vo)
+double vo_get_vsync_interval(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    int64_t res = vo->in->vsync_interval > 1 ? vo->in->vsync_interval : -1;
+    double res = vo->in->vsync_interval > 1 ? vo->in->vsync_interval : -1;
     pthread_mutex_unlock(&in->lock);
     return res;
 }
