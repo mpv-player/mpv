@@ -498,7 +498,7 @@ static long long find_timestamp(struct sd *sd, double pts)
 
     long long ts = llrint(pts * 1000);
 
-    if (sd->opts->sub_fix_timing != 1 || sd->opts->ass_style_override == 0)
+    if (!sd->opts->sub_fix_timing || sd->opts->ass_style_override == 0)
         return ts;
 
     // Try to fix small gaps and overlaps.

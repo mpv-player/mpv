@@ -2639,11 +2639,10 @@ Subtitles
         particular subtitles in mkv files) are always assumed to be UTF-8.
 
 
-``--sub-fix-timing=<auto|yes|no>``
+``--sub-fix-timing=<yes|no>``
     Adjust subtitle timing is to remove minor gaps or overlaps between
     subtitles (if the difference is smaller than 210 ms, the gap or overlap
-    is removed). The ``auto`` value enables this for non-text subtitles such
-    as PGS or DVD (default: ``auto``).
+    is removed).
 
 ``--sub-forced-events-only=<yes|no>``
     Enabling this displays only forced events within subtitle streams. Only
