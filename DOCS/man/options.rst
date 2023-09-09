@@ -5286,6 +5286,13 @@ them.
         ``--scale-param1`` and ``--scale-param2``. This filter is very good at
         downscaling (see ``--dscale``).
 
+    ``catmull_rom``
+        Catmull-Rom. A Cubic filter in the same vein as ``mitchell``, where
+        the ``B`` and ``C`` parameters are ``0.0`` and ``0.5`` respectively.
+        This filter is sharper than ``mitchell``, but it results in mild
+        ringing. Like ``mitchell``, this filter is good at downscaling (see 
+        ``--dscale``).
+
     ``oversample``
         A version of nearest neighbour that (naively) oversamples pixels, so
         that pixels overlapping edges get linearly interpolated instead of
