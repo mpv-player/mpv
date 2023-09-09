@@ -1840,8 +1840,7 @@ Video
     the decoded frame is intended for display. This option controls how cropping
     is handled by libavcodec. Cropping during decoding has certain limitations
     with regards to alignment and hardware decoding. If this option is enabled,
-    decoder will apply the crop. Disabled by default, VO will apply the crop in
-    a more robust way.
+    decoder will apply the crop, else VO will handle it. Enabled by default.
 
 ``--swapchain-depth=<N>``
     Allow up to N in-flight frames. This essentially controls the frame
