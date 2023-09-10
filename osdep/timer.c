@@ -34,8 +34,8 @@ static pthread_once_t timer_init_once = PTHREAD_ONCE_INIT;
 static void do_timer_init(void)
 {
     mp_raw_time_init();
-    mp_rand_seed(mp_raw_time_us());
-    raw_time_offset = mp_raw_time_us();
+    mp_rand_seed(mp_raw_time_ns());
+    raw_time_offset = mp_raw_time_ns();
     // Arbitrary additional offset to avoid confusing relative/absolute times.
     // Also,we rule that the timer never returns 0 (so default-initialized
     // time values will be always in the past).
@@ -49,7 +49,12 @@ void mp_time_init(void)
 
 int64_t mp_time_us(void)
 {
-    int64_t r = mp_raw_time_us() - raw_time_offset;
+    return mp_time_ns() / 1000;
+}
+
+int64_t mp_time_ns(void)
+{
+    uint64_t r = mp_raw_time_ns() - raw_time_offset;
     if (r < MP_START_TIME)
         r = MP_START_TIME;
     return r;
@@ -57,19 +62,31 @@ int64_t mp_time_us(void)
 
 double mp_time_sec(void)
 {
-    return mp_time_us() / (double)(1000 * 1000);
+    return mp_time_ns() / 1e9;
 }
 
 int64_t mp_time_us_add(int64_t time_us, double timeout_sec)
 {
     assert(time_us > 0); // mp_time_us() returns strictly positive values
-    double t = MPCLAMP(timeout_sec * (1000 * 1000), -0x1p63, 0x1p63);
+    double t = MPCLAMP(timeout_sec * 1e6, -0x1p63, 0x1p63);
     int64_t ti = t == 0x1p63 ? INT64_MAX : (int64_t)t;
     if (ti > INT64_MAX - time_us)
         return INT64_MAX;
     if (ti <= -time_us)
         return 1;
     return time_us + ti;
+}
+
+int64_t mp_time_ns_add(int64_t time_ns, double timeout_sec)
+{
+    assert(time_ns > 0); // mp_time_ns() returns strictly positive values
+    double t = MPCLAMP(timeout_sec * 1e9, -0x1p63, 0x1p63);
+    int64_t ti = t == 0x1p63 ? INT64_MAX : (int64_t)t;
+    if (ti > INT64_MAX - time_ns)
+        return INT64_MAX;
+    if (ti <= -time_ns)
+        return 1;
+    return time_ns + ti;
 }
 
 static int get_realtime(struct timespec *out_ts)
@@ -88,15 +105,17 @@ static int get_realtime(struct timespec *out_ts)
 
 struct timespec mp_time_us_to_realtime(int64_t time_us)
 {
+    return mp_time_ns_to_realtime(MPMIN(INT64_MAX / 1000, time_us) * 1000);
+}
+
+struct timespec mp_time_ns_to_realtime(int64_t time_ns)
+{
     struct timespec ts = {0};
     if (get_realtime(&ts) != 0)
         return ts;
 
-    int64_t time_ns = MPMIN(INT64_MAX / 1000, time_us) * 1000;
-    int64_t time_now = mp_time_us() * 1000;
-
     // clamp to 1000 days in the future
-    int64_t time_rel = MPMIN(time_now - time_ns,
+    int64_t time_rel = MPMIN(mp_time_ns() - time_ns,
                              1000 * 24 * 60 * 60 * INT64_C(1000000000));
     ts.tv_sec += time_rel / INT64_C(1000000000);
     ts.tv_nsec += time_rel % INT64_C(1000000000);
@@ -111,5 +130,5 @@ struct timespec mp_time_us_to_realtime(int64_t time_us)
 
 struct timespec mp_rel_time_to_timespec(double timeout_sec)
 {
-    return mp_time_us_to_realtime(mp_time_us_add(mp_time_us(), timeout_sec));
+    return mp_time_ns_to_realtime(mp_time_ns_add(mp_time_ns(), timeout_sec));
 }
