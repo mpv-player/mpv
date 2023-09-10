@@ -26,13 +26,16 @@ void mp_time_init(void);
 // Return time in microseconds. Never wraps. Never returns 0 or negative values.
 int64_t mp_time_us(void);
 
+// Return time in nanoseconds. Never wraps. Never returns 0 or negative values.
+int64_t mp_time_ns(void);
+
 // Return time in seconds. Can have down to 1 microsecond resolution, but will
 // be much worse when casted to float.
 double mp_time_sec(void);
 
 // Provided by OS specific functions (timer-linux.c)
 void mp_raw_time_init(void);
-uint64_t mp_raw_time_us(void);
+uint64_t mp_raw_time_ns(void);
 
 // Sleep in microseconds.
 void mp_sleep_us(int64_t us);
@@ -54,8 +57,15 @@ void mp_end_hires_timers(int resolution_ms);
 // Takes care of possible overflows. Never returns a negative or 0 time.
 int64_t mp_time_us_add(int64_t time_us, double timeout_sec);
 
+// Add a time in seconds to the given time in nanoseconds, and return it.
+// Takes care of possible overflows. Never returns a negative or 0 time.
+int64_t mp_time_ns_add(int64_t time_ns, double timeout_sec);
+
 // Convert the mp time in microseconds to a timespec using CLOCK_REALTIME.
 struct timespec mp_time_us_to_realtime(int64_t time_us);
+
+// Convert the mp time in nanoseconds to a timespec using CLOCK_REALTIME.
+struct timespec mp_time_ns_to_realtime(int64_t time_ns);
 
 // Convert the relative timeout in seconds to a timespec.
 // The timespec is absolute, using CLOCK_REALTIME.

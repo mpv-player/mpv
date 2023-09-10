@@ -372,7 +372,7 @@ static uint32_t AudioTrack_getPlaybackHeadPosition(struct ao *ao)
         return 0;
     JNIEnv *env = MP_JNI_GET_ENV(ao);
     uint32_t pos = 0;
-    int64_t now = mp_raw_time_us() * 1000;
+    int64_t now = mp_raw_time_ns();
     int state = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.getPlayState);
 
     int stable_count = 20;

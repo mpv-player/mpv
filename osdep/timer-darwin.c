@@ -26,18 +26,18 @@
 #include "common/msg.h"
 #include "timer.h"
 
-static double timebase_ratio;
+static double timebase_ratio_ns;
 
 void mp_sleep_us(int64_t us)
 {
-    uint64_t deadline = us / 1e6 / timebase_ratio + mach_absolute_time();
+    uint64_t deadline = us * 1e3 / timebase_ratio_ns + mach_absolute_time();
 
     mach_wait_until(deadline);
 }
 
-uint64_t mp_raw_time_us(void)
+uint64_t mp_raw_time_ns(void)
 {
-    return mach_absolute_time() * timebase_ratio * 1e6;
+    return mach_absolute_time() * timebase_ratio_ns;
 }
 
 void mp_raw_time_init(void)
@@ -45,5 +45,5 @@ void mp_raw_time_init(void)
     struct mach_timebase_info timebase;
 
     mach_timebase_info(&timebase);
-    timebase_ratio = (double)timebase.numer / (double)timebase.denom * 1e-9;
+    timebase_ratio_ns = (double)timebase.numer / (double)timebase.denom;
 }
