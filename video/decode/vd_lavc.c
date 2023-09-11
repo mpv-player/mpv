@@ -147,6 +147,7 @@ const struct m_sub_options vd_lavc_conf = {
         // for example, if vo_gpu increases the number of reference surfaces for
         // interpolation, this value has to be increased too.
         .hwdec_extra_frames = 8,
+        .apply_cropping = true,
     },
 };
 

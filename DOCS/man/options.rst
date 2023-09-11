@@ -1840,8 +1840,7 @@ Video
     the decoded frame is intended for display. This option controls how cropping
     is handled by libavcodec. Cropping during decoding has certain limitations
     with regards to alignment and hardware decoding. If this option is enabled,
-    decoder will apply the crop. Disabled by default, VO will apply the crop in
-    a more robust way.
+    decoder will apply the crop, else VO will handle it. Enabled by default.
 
 ``--swapchain-depth=<N>``
     Allow up to N in-flight frames. This essentially controls the frame
@@ -2639,11 +2638,10 @@ Subtitles
         particular subtitles in mkv files) are always assumed to be UTF-8.
 
 
-``--sub-fix-timing=<auto|yes|no>``
+``--sub-fix-timing=<yes|no>``
     Adjust subtitle timing is to remove minor gaps or overlaps between
     subtitles (if the difference is smaller than 210 ms, the gap or overlap
-    is removed). The ``auto`` value enables this for non-text subtitles such
-    as PGS or DVD (default: ``auto``).
+    is removed).
 
 ``--sub-forced-events-only=<yes|no>``
     Enabling this displays only forced events within subtitle streams. Only

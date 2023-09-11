@@ -56,7 +56,6 @@ Interface changes
     - add `--video-crop`
     - add `video-params/crop-[w,h,x,y]`
     - remove `--tone-mapping-mode`
-    - add `auto` to `--sub-fix-timing` and make it the default
     - change `--subs-fallback-forced` so that it works alongside `--slang`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
