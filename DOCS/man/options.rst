@@ -5252,17 +5252,16 @@ them.
     The filter function to use when upscaling video.
 
     ``bilinear``
-        Bilinear hardware texture filtering (fastest, very low quality). This
-        is the default for compatibility reasons.
+        Bilinear hardware texture filtering (fastest, very low quality). This is
+        the default when using the ``fast`` profile.
 
     ``spline36``
-        Mid quality and speed. This is the default when using ``gpu-hq``.
+        Mid quality and speed.
 
     ``lanczos``
-        Lanczos scaling. Provides mid quality and speed. Generally worse than
-        ``spline36``, but it results in a slightly sharper image which is good
-        for some content types. The number of taps can be controlled with
-        ``scale-radius``, but is best left unchanged.
+        Lanczos scaling. Provides good balance between quality and performance.
+        This is the default for ``scale``. The number of taps can be controlled
+        with ``scale-radius``, but is best left unchanged.
 
         (This filter is an alias for ``sinc``-windowed ``sinc``)
 
@@ -5275,8 +5274,8 @@ them.
         (This filter is an alias for ``jinc``-windowed ``jinc``)
 
     ``ewa_lanczossharp``
-        A slightly sharpened version of ewa_lanczos. If your hardware can run
-        it, this is probably what you should use by default.
+        A slightly sharpened version of ewa_lanczos. This is the default when
+        using the ``high-quality`` profile.
 
     ``ewa_lanczos4sharpest``
         Very sharp scaler, but also slightly slower than ``ewa_lanczossharp``.
@@ -5287,7 +5286,7 @@ them.
     ``mitchell``
         Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
         ``--scale-param1`` and ``--scale-param2``. This filter is very good at
-        downscaling (see ``--dscale``).
+        downscaling. This is the default for ``--dscale``.
 
     ``catmull_rom``
         Catmull-Rom. A Cubic filter in the same vein as ``mitchell``, where
@@ -5318,8 +5317,7 @@ them.
     the filter implied by ``--scale`` will be applied.
 
 ``--dscale=<filter>``
-    Like ``--scale``, but apply these filters on downscaling instead. If this
-    option is unset, the filter implied by ``--scale`` will be applied.
+    Like ``--scale``, but apply these filters on downscaling instead.
 
 ``--tscale=<filter>``
     The filter used for interpolating the temporal axis (frames). This is only
@@ -5445,7 +5443,7 @@ them.
     better than without it) since it will extend the size to match only the
     milder of the scale factors between the axes.
 
-    Note: this option is ignored when using bilinear downscaling (the default).
+    Note: this option is ignored when using bilinear downscaling with ``--vo=gpu``.
 
 ``--linear-downscaling``
     Scale in linear light when downscaling. It should only be used with a
@@ -5528,7 +5526,7 @@ them.
     might be slower or cause latency issues.
 
 ``--dither-depth=<N|no|auto>``
-    Set dither target depth to N. Default: no.
+    Set dither target depth to N. Default: auto.
 
     no
         Disable any dithering done by mpv.
