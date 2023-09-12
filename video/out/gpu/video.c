@@ -295,7 +295,6 @@ struct gl_video {
 
 static const struct gl_video_opts gl_video_opts_def = {
     .dither_algo = DITHER_FRUIT,
-    .dither_depth = -1,
     .dither_size = 6,
     .temporal_dither_period = 1,
     .error_diffusion = "sierra-lite",
@@ -303,9 +302,9 @@ static const struct gl_video_opts gl_video_opts_def = {
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .scaler = {
-        {{"bilinear", .params={NAN, NAN}}, {.params = {NAN, NAN}},
+        {{"lanczos", .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // scale
-        {{NULL,       .params={NAN, NAN}}, {.params = {NAN, NAN}},
+        {{"mitchell", .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // dscale
         {{NULL, .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // cscale
