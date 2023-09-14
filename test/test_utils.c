@@ -111,5 +111,5 @@ void mp_set_avdict(AVDictionary **dict, char **kv) {};
 void mp_add_timeout(void) {};
 void mp_rel_time_to_timespec(void) {};
 void mp_time_us(void) {};
-void mp_time_us_to_timespec(void) {};
+void mp_time_us_to_realtime(void) {};
 #endif

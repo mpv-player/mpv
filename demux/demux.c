@@ -2557,7 +2557,7 @@ static void *demux_thread(void *pctx)
         if (thread_work(in))
             continue;
         pthread_cond_signal(&in->wakeup);
-        struct timespec until = mp_time_us_to_timespec(in->next_cache_update);
+        struct timespec until = mp_time_us_to_realtime(in->next_cache_update);
         pthread_cond_timedwait(&in->wakeup, &in->lock, &until);
     }
 

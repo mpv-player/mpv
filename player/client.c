@@ -363,7 +363,7 @@ static int wait_wakeup(struct mpv_handle *ctx, int64_t end)
     pthread_mutex_unlock(&ctx->lock);
     pthread_mutex_lock(&ctx->wakeup_lock);
     if (!ctx->need_wakeup) {
-        struct timespec ts = mp_time_us_to_timespec(end);
+        struct timespec ts = mp_time_us_to_realtime(end);
         r = pthread_cond_timedwait(&ctx->wakeup, &ctx->wakeup_lock, &ts);
     }
     if (r == 0)
