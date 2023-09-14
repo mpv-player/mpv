@@ -166,7 +166,7 @@ local autoloaded = nil
 local added_entries = {}
 local autoloaded_dir = nil
 
-function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_files)
+function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_files, extensions)
     if dir_depth == MAXDIRSTACK then
         return
     end
@@ -184,7 +184,7 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
         if ext == nil then
             return false
         end
-        return EXTENSIONS_TARGET[string.lower(ext)]
+        return extensions[string.lower(ext)]
     end)
     table.filter(dirs, function(d)
         return not ((o.ignore_hidden and string.match(d, "^%.")))
@@ -237,6 +237,7 @@ function find_and_add_entries()
         end
     end
 
+    local EXTENSIONS_TARGET = {}
     if o.same_type then
         if EXTENSIONS_VIDEO[string.lower(this_ext)] ~= nil then
             EXTENSIONS_TARGET = EXTENSIONS_VIDEO
@@ -258,7 +259,7 @@ function find_and_add_entries()
     do
         local dir_mode = o.directory_mode or mp.get_property("directory-mode", "lazy")
         local separator = mp.get_property_native("platform") == "windows" and "\\" or "/"
-        scan_dir(autoloaded_dir, path, dir_mode, separator, 0, files)
+        scan_dir(autoloaded_dir, path, dir_mode, separator, 0, files, EXTENSIONS_TARGET)
     end
 
     if next(files) == nil then
