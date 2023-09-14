@@ -43,7 +43,7 @@ features = {
     'ffmpeg': true,
     'gpl': get_option('gpl'),
     'jpegxl': libavformat.version().version_compare('>= 59.27.100'),
-    'avif_muxer': libavformat.version().version_compare('>= 59.24.100'),
+    'avif-muxer': libavformat.version().version_compare('>= 59.24.100'),
     'libass': true,
     'threads': true,
 }
@@ -1263,7 +1263,7 @@ vulkan_opt = get_option('vulkan').require(
     libplacebo.get_variable('pl_has_vulkan', default_value: '0') == '1',
     error_message: 'libplacebo could not be found!',
 )
-vulkan = dependency('vulkan', required: vulkan_opt)
+vulkan = dependency('vulkan', version: '>= 1.1.70', required: vulkan_opt)
 features += {'vulkan': vulkan.found()}
 if features['vulkan']
     dependencies += vulkan
