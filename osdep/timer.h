@@ -55,7 +55,7 @@ void mp_end_hires_timers(int resolution_ms);
 int64_t mp_add_timeout(int64_t time_us, double timeout_sec);
 
 // Convert the mp time in microseconds to a timespec using CLOCK_REALTIME.
-struct timespec mp_time_us_to_timespec(int64_t time_us);
+struct timespec mp_time_us_to_realtime(int64_t time_us);
 
 // Convert the relative timeout in seconds to a timespec.
 // The timespec is absolute, using CLOCK_REALTIME.

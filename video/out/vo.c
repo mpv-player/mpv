@@ -719,7 +719,7 @@ void vo_wait_default(struct vo *vo, int64_t until_time)
 
     pthread_mutex_lock(&in->lock);
     if (!in->need_wakeup) {
-        struct timespec ts = mp_time_us_to_timespec(until_time);
+        struct timespec ts = mp_time_us_to_realtime(until_time);
         pthread_cond_timedwait(&in->wakeup, &in->lock, &ts);
     }
     pthread_mutex_unlock(&in->lock);
@@ -867,7 +867,7 @@ void vo_wait_frame(struct vo *vo)
 static void wait_until(struct vo *vo, int64_t target)
 {
     struct vo_internal *in = vo->in;
-    struct timespec ts = mp_time_us_to_timespec(target);
+    struct timespec ts = mp_time_us_to_realtime(target);
     pthread_mutex_lock(&in->lock);
     while (target > mp_time_us()) {
         if (in->queued_events & VO_EVENT_LIVE_RESIZING)
