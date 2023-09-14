@@ -2046,6 +2046,9 @@ static void update_render_options(struct vo *vo)
     pars->params.disable_fbos = opts->dumb_mode == 1;
     pars->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
     pars->params.corner_rounding = p->corner_rounding;
+#if PL_API_VER >= 324
+    pars->params.correct_subpixel_offsets = !opts->scaler_resizes_only;
+#endif
 
     // Map scaler options as best we can
     pars->params.upscaler = map_scaler(p, SCALER_SCALE);
