@@ -6812,9 +6812,10 @@ them.
     3
         absolute colorimetric
 
-``--icc-3dlut-size=<r>x<g>x<b>``
-    Size of the 3D LUT generated from the ICC profile in each dimension.
-    Default is 64x64x64. Sizes may range from 2 to 512.
+``--icc-3dlut-size=<auto|RxGxB>``
+    Size of the 3D LUT generated from the ICC profile in each dimension. The
+    default of ``auto`` means to pick the size automatically based on internal
+    heuristics. Sizes may range from 2 to 512.
 
 ``--icc-force-contrast=<no|0-1000000|inf>``
     Override the target device's detected contrast ratio by a specific value.

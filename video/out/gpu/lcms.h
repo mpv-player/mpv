@@ -44,6 +44,10 @@ bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
 
 static inline bool gl_parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
 {
+    if (!strcmp(arg, "auto")) {
+        *p1 = *p2 = *p3 = 0;
+        return true;
+    }
     if (sscanf(arg, "%dx%dx%d", p1, p2, p3) != 3)
         return false;
     for (int n = 0; n < 3; n++) {
