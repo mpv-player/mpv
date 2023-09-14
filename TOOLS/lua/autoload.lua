@@ -184,7 +184,7 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
         if ext == nil then
             return false
         end
-        return EXTENSIONS[string.lower(ext)]
+        return EXTENSIONS_TARGET[string.lower(ext)]
     end)
     table.filter(dirs, function(d)
         return not ((o.ignore_hidden and string.match(d, "^%.")))
