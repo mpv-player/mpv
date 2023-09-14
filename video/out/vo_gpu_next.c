@@ -65,7 +65,6 @@ typedef struct pl_options_t {
     struct pl_peak_detect_params peak_detect_params;
     struct pl_color_map_params color_map_params;
     struct pl_dither_params dither_params;
-    struct pl_icc_params icc_params;
 } *pl_options;
 
 static inline pl_options pl_options_alloc(pl_log log)
@@ -78,11 +77,9 @@ static inline pl_options pl_options_alloc(pl_log log)
     opts->peak_detect_params      = pl_peak_detect_default_params;
     opts->color_map_params        = pl_color_map_default_params;
     opts->dither_params           = pl_dither_default_params;
-    opts->icc_params              = pl_icc_default_params;
     // Redirect always-enabled params structs to shim
     opts->params.color_adjustment = &opts->color_adjustment;
     opts->params.color_map_params = &opts->color_map_params;
-    opts->params.icc_params       = &opts->icc_params;
     return opts;
 }
 
@@ -170,8 +167,13 @@ struct priv {
     enum mp_csp_levels output_levels;
     char **raw_opts;
 
-    struct pl_icc_profile icc_profile;
+    struct pl_icc_params icc_params;
     char *icc_path;
+#if PL_API_VER >= 327
+    pl_icc_object icc_profile;
+#else
+    struct pl_icc_profile icc_profile;
+#endif
 
     struct user_lut image_lut;
     struct user_lut target_lut;
@@ -855,8 +857,6 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
 
 static void apply_target_options(struct priv *p, struct pl_frame *target)
 {
-    pl_options pars = p->pars;
-
     update_lut(p, &p->target_lut);
     target->lut = p->target_lut.lut;
     target->lut_type = p->target_lut.type;
@@ -880,17 +880,23 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
         tbits->sample_depth = opts->dither_depth;
     }
 
-    target->profile = p->icc_profile;
-
     if (opts->icc_opts->icc_use_luma) {
-        // Use detected luminance
-        pars->icc_params.max_luma = 0;
+        p->icc_params.max_luma = 0.0f;
     } else {
-        // Use HDR levels if available, fall back to default luminance
-        pars->icc_params.max_luma = target->color.hdr.max_luma;
-        if (!pars->icc_params.max_luma)
-            pars->icc_params.max_luma = pl_icc_default_params.max_luma;
+        pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
+            .color    = &target->color,
+            .metadata = PL_HDR_METADATA_HDR10, // use only static HDR nits
+            .scaling  = PL_HDR_NITS,
+            .out_max  = &p->icc_params.max_luma,
+        ));
     }
+
+#if PL_API_VER >= 327
+    pl_icc_update(p->pllog, &p->icc_profile, NULL, &p->icc_params);
+    target->icc = p->icc_profile;
+#else
+    target->profile = p->icc_profile;
+#endif
 }
 
 static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
@@ -1212,6 +1218,29 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
+// Takes over ownership of `icc`. Can be used to unload profile (icc.len == 0)
+static bool update_icc(struct priv *p, struct bstr icc)
+{
+    struct pl_icc_profile profile = {
+        .data = icc.start,
+        .len  = icc.len,
+    };
+
+    pl_icc_profile_compute_signature(&profile);
+
+#if PL_API_VER >= 327
+    bool ok = pl_icc_update(p->pllog, &p->icc_profile, &profile, &p->icc_params);
+    talloc_free(icc.start);
+    return ok;
+#else
+    talloc_free((void *) p->icc_profile.data);
+    profile.data = talloc_steal(p, profile.data);
+    p->icc_profile = profile;
+    return true;
+#endif
+}
+
+// Returns whether the ICC profile was updated (even on failure)
 static bool update_auto_profile(struct priv *p, int *events)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
@@ -1229,10 +1258,7 @@ static bool update_auto_profile(struct priv *p, int *events)
             MP_ERR(p, "icc-profile-auto not implemented on this platform.\n");
         }
 
-        talloc_free((void *) p->icc_profile.data);
-        p->icc_profile.data = talloc_steal(p, icc.start);
-        p->icc_profile.len = icc.len;
-        pl_icc_profile_compute_signature(&p->icc_profile);
+        update_icc(p, icc);
         return true;
     }
 
@@ -1891,33 +1917,32 @@ static bool icc_load(void *priv, uint64_t sig, uint8_t *cache, size_t size)
 
 static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 {
-    pl_options pars = p->pars;
     if (!opts)
         return;
 
-    if (!opts->profile_auto && !p->icc_path && p->icc_profile.len) {
+    if (!opts->profile_auto && !p->icc_path) {
         // Un-set any auto-loaded profiles if icc-profile-auto was disabled
-        talloc_free((void *) p->icc_profile.data);
-        p->icc_profile = (struct pl_icc_profile) {0};
+        update_icc(p, (bstr) {0});
     }
 
     int s_r = 0, s_g = 0, s_b = 0;
     gl_parse_3dlut_size(opts->size_str, &s_r, &s_g, &s_b);
-    pars->icc_params.intent = opts->intent;
-    pars->icc_params.size_r = s_r;
-    pars->icc_params.size_g = s_g;
-    pars->icc_params.size_b = s_b;
-    pars->icc_params.cache_priv = p;
-    pars->icc_params.cache_save = icc_save;
-    pars->icc_params.cache_load = icc_load;
+    p->icc_params = pl_icc_default_params;
+    p->icc_params.intent = opts->intent;
+    p->icc_params.size_r = s_r;
+    p->icc_params.size_g = s_g;
+    p->icc_params.size_b = s_b;
+    p->icc_params.cache_priv = p;
+    p->icc_params.cache_save = icc_save;
+    p->icc_params.cache_load = icc_load;
+#if PL_API_VER < 327
+    p->pars->params.icc_params = &p->icc_params;
+#endif
 
     if (!opts->profile || !opts->profile[0]) {
         // No profile enabled, un-load any existing profiles
-        if (p->icc_path) {
-            talloc_free((void *) p->icc_profile.data);
-            TA_FREEP(&p->icc_path);
-            p->icc_profile = (struct pl_icc_profile) {0};
-        }
+        update_icc(p, (bstr) {0});
+        TA_FREEP(&p->icc_path);
         return;
     }
 
@@ -1926,12 +1951,9 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 
     char *fname = mp_get_user_path(NULL, p->global, opts->profile);
     MP_VERBOSE(p, "Opening ICC profile '%s'\n", fname);
-    talloc_free((void *) p->icc_profile.data);
     struct bstr icc = stream_read_file(fname, p, p->global, 100000000); // 100 MB
-    p->icc_profile.data = icc.start;
-    p->icc_profile.len = icc.len;
-    pl_icc_profile_compute_signature(&p->icc_profile);
     talloc_free(fname);
+    update_icc(p, icc);
 
     // Update cached path
     talloc_free(p->icc_path);
