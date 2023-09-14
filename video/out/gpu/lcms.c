@@ -326,6 +326,12 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     if (!gl_lcms_has_profile(p))
         return false;
 
+    // For simplicity, default to 65x65x65, which is large enough to cover
+    // typical profiles with good accuracy while not being too wasteful
+    s_r = s_r ? s_r : 65;
+    s_g = s_g ? s_g : 65;
+    s_b = s_b ? s_b : 65;
+
     void *tmp = talloc_new(NULL);
     uint16_t *output = talloc_array(tmp, uint16_t, s_r * s_g * s_b * 4);
     struct lut3d *lut = NULL;
@@ -514,7 +520,7 @@ const struct m_sub_options mp_icc_conf = {
     },
     .size = sizeof(struct mp_icc_opts),
     .defaults = &(const struct mp_icc_opts) {
-        .size_str = "64x64x64",
+        .size_str = "auto",
         .intent = MP_INTENT_RELATIVE_COLORIMETRIC,
         .use_embedded = true,
         .cache = true,
