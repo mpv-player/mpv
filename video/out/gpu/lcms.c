@@ -518,5 +518,6 @@ const struct m_sub_options mp_icc_conf = {
         .intent = MP_INTENT_RELATIVE_COLORIMETRIC,
         .use_embedded = true,
         .cache = true,
+        .icc_use_luma = true,
     },
 };
