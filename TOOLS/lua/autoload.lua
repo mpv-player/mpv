@@ -237,17 +237,17 @@ function find_and_add_entries()
         end
     end
 
-    local EXTENSIONS_TARGET = {}
+    local extensions = {}
     if o.same_type then
         if EXTENSIONS_VIDEO[string.lower(this_ext)] ~= nil then
-            EXTENSIONS_TARGET = EXTENSIONS_VIDEO
+            extensions = EXTENSIONS_VIDEO
         elseif EXTENSIONS_AUDIO[string.lower(this_ext)] ~= nil then
-            EXTENSIONS_TARGET = EXTENSIONS_AUDIO
+            extensions = EXTENSIONS_AUDIO
         else
-            EXTENSIONS_TARGET = EXTENSIONS_IMAGES
+            extensions = EXTENSIONS_IMAGES
         end
     else
-        EXTENSIONS_TARGET = EXTENSIONS
+        extensions = EXTENSIONS
     end
 
     local pl = mp.get_property_native("playlist", {})
@@ -259,7 +259,7 @@ function find_and_add_entries()
     do
         local dir_mode = o.directory_mode or mp.get_property("directory-mode", "lazy")
         local separator = mp.get_property_native("platform") == "windows" and "\\" or "/"
-        scan_dir(autoloaded_dir, path, dir_mode, separator, 0, files, EXTENSIONS_TARGET)
+        scan_dir(autoloaded_dir, path, dir_mode, separator, 0, files, extensions)
     end
 
     if next(files) == nil then
