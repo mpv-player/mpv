@@ -272,7 +272,7 @@ void mp_dispatch_run(struct mp_dispatch_queue *queue,
 void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
 {
     pthread_mutex_lock(&queue->lock);
-    queue->wait = timeout > 0 ? mp_add_timeout(mp_time_us(), timeout) : 0;
+    queue->wait = timeout > 0 ? mp_time_us_add(mp_time_us(), timeout) : 0;
     assert(!queue->in_process); // recursion not allowed
     queue->in_process = true;
     queue->in_process_thread = pthread_self();

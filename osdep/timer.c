@@ -60,7 +60,7 @@ double mp_time_sec(void)
     return mp_time_us() / (double)(1000 * 1000);
 }
 
-int64_t mp_add_timeout(int64_t time_us, double timeout_sec)
+int64_t mp_time_us_add(int64_t time_us, double timeout_sec)
 {
     assert(time_us > 0); // mp_time_us() returns strictly positive values
     double t = MPCLAMP(timeout_sec * (1000 * 1000), -0x1p63, 0x1p63);
@@ -111,5 +111,5 @@ struct timespec mp_time_us_to_realtime(int64_t time_us)
 
 struct timespec mp_rel_time_to_timespec(double timeout_sec)
 {
-    return mp_time_us_to_realtime(mp_add_timeout(mp_time_us(), timeout_sec));
+    return mp_time_us_to_realtime(mp_time_us_add(mp_time_us(), timeout_sec));
 }

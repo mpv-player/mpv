@@ -108,7 +108,7 @@ void mp_write_console_ansi(void) {};
 void mp_set_avdict(AVDictionary **dict, char **kv) {};
 
 #ifndef WIN32_TESTS
-void mp_add_timeout(void) {};
+void mp_time_us_add(void) {};
 void mp_rel_time_to_timespec(void) {};
 void mp_time_us(void) {};
 void mp_time_us_to_realtime(void) {};
