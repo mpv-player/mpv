@@ -5278,6 +5278,12 @@ them.
         A slightly sharpened version of ewa_lanczos. If your hardware can run
         it, this is probably what you should use by default.
 
+    ``ewa_lanczos4sharpest``
+        Very sharp scaler, but also slightly slower than ``ewa_lanczossharp``.
+        Prone to ringing, so it's recommended to combine this with an
+        anti-ringing shader. On ``--vo=gpu-next``, setting this filter enables
+        built-in anti-ringing, so no extra action needs to be taken.
+
     ``mitchell``
         Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
         ``--scale-param1`` and ``--scale-param2``. This filter is very good at

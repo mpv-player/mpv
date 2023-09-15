@@ -58,6 +58,7 @@ Interface changes
     - remove `--tone-mapping-mode`
     - change `--subs-fallback-forced` so that it works alongside `--slang`
     - add `--icc-3dlut-size=auto` and make it the default
+    - add `--scale=ewa_lanczos4sharpest`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
