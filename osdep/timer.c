@@ -72,41 +72,40 @@ int64_t mp_add_timeout(int64_t time_us, double timeout_sec)
     return time_us + ti;
 }
 
-static void get_realtime(struct timespec *out_ts)
+static int get_realtime(struct timespec *out_ts)
 {
 #if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
-    clock_gettime(CLOCK_REALTIME, out_ts);
+    return clock_gettime(CLOCK_REALTIME, out_ts);
 #else
     // OSX
     struct timeval tv;
     gettimeofday(&tv, NULL);
     out_ts->tv_sec = tv.tv_sec;
     out_ts->tv_nsec = tv.tv_usec * 1000UL;
+    return 0;
 #endif
 }
 
 struct timespec mp_time_us_to_realtime(int64_t time_us)
 {
-    struct timespec ts;
-    get_realtime(&ts);
-    // We don't know what time source mp_time_us() uses, but usually it's not
-    // CLOCK_REALTIME - so we have to remap the times.
-    int64_t unow = mp_time_us();
-    int64_t diff_us = time_us - unow;
-    int64_t diff_secs = diff_us / (1000L * 1000L);
-    long diff_nsecs = (diff_us - diff_secs * (1000L * 1000L)) * 1000L;
-    if (diff_nsecs < 0) {
-        diff_secs -= 1;
-        diff_nsecs += 1000000000L;
+    struct timespec ts = {0};
+    if (get_realtime(&ts) != 0)
+        return ts;
+
+    int64_t time_ns = MPMIN(INT64_MAX / 1000, time_us) * 1000;
+    int64_t time_now = mp_time_us() * 1000;
+
+    // clamp to 1000 days in the future
+    int64_t time_rel = MPMIN(time_now - time_ns,
+                             1000 * 24 * 60 * 60 * INT64_C(1000000000));
+    ts.tv_sec += time_rel / INT64_C(1000000000);
+    ts.tv_nsec += time_rel % INT64_C(1000000000);
+
+    if (ts.tv_nsec >= INT64_C(1000000000)) {
+        ts.tv_sec++;
+        ts.tv_nsec -= INT64_C(1000000000);
     }
-    if (diff_nsecs + ts.tv_nsec >= 1000000000UL) {
-        diff_secs += 1;
-        diff_nsecs -= 1000000000UL;
-    }
-    // OSX can't deal with large timeouts. Also handles tv_sec/time_t overflows.
-    diff_secs = MPMIN(diff_secs, 10000000);
-    ts.tv_sec += diff_secs;
-    ts.tv_nsec += diff_nsecs;
+
     return ts;
 }
 
