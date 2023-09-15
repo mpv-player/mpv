@@ -31,6 +31,9 @@ test_utils_files = [
     'ta/ta_talloc.c',
     'ta/ta_utils.c'
 ]
+
+test_utils_deps = [libavutil, libm]
+
 # The zimg code requires using threads. On windows, threads
 # also requires timer code so this is added.
 if features['win32-internal-pthreads']
@@ -39,9 +42,10 @@ if features['win32-internal-pthreads']
                          'osdep/timer-win2.c',
                          'osdep/win32/pthread.c',
                          'osdep/windows_utils.c']
+else
+    test_utils_deps += pthreads
 endif
 
-test_utils_deps = [libavutil, libm, pthreads]
 if features['win32-desktop']
     test_utils_deps += cc.find_library('winmm')
 endif
