@@ -4170,7 +4170,7 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
-    char s[20] = {0};
+    char s[32] = {0};
     int r = 1;
     bool tscale = bstr_equals0(name, "tscale");
     if (bstr_equals0(param, "help")) {
@@ -4211,7 +4211,7 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
-    char s[20] = {0};
+    char s[32] = {0};
     int r = 1;
     if (bstr_equals0(param, "help")) {
         r = M_OPT_EXIT;
@@ -4237,7 +4237,7 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
                                         struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
-    char s[20] = {0};
+    char s[32] = {0};
     int r = 1;
     if (bstr_equals0(param, "help")) {
         r = M_OPT_EXIT;
