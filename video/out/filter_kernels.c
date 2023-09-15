@@ -363,6 +363,7 @@ const struct filter_window mp_filter_windows[] = {
 };
 
 #define JINC_R3 3.2383154841662362
+#define JINC_R4 4.2410628637960699
 
 const struct filter_kernel mp_filter_kernels[] = {
     // Spline filters
@@ -381,6 +382,11 @@ const struct filter_kernel mp_filter_kernels[] = {
     // Slightly sharpened to minimize the 1D step response error (to better
     // preserve horizontal/vertical lines)
     {{"ewa_lanczossharp", JINC_R3, jinc, .blur = 0.9812505837223707, .resizable = true},
+        .polar = true, .window = "jinc"},
+    // Similar to the above, but sharpened substantially to the point of
+    // minimizing the total impulse response error on an integer grid. Tends
+    // to preserve hash patterns well. Very sharp but rings a lot.
+    {{"ewa_lanczos4sharpest", JINC_R4, jinc, .blur = 0.8845120932605005, .resizable = true},
         .polar = true, .window = "jinc"},
     // Similar to the above, but softened instead, to make even/odd integer
     // contributions exactly symmetrical. Designed to smooth out hash patterns.
