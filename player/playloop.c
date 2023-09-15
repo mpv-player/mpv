@@ -75,7 +75,7 @@ void mp_set_timeout(struct MPContext *mpctx, double sleeptime)
 {
     if (mpctx->sleeptime > sleeptime) {
         mpctx->sleeptime = sleeptime;
-        int64_t abstime = mp_add_timeout(mp_time_us(), sleeptime);
+        int64_t abstime = mp_time_us_add(mp_time_us(), sleeptime);
         mp_dispatch_adjust_timeout(mpctx->dispatch, abstime);
     }
 }

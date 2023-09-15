@@ -214,7 +214,7 @@ bool mp_filter_graph_run(struct mp_filter *filter)
 
     int64_t end_time = 0;
     if (isfinite(r->max_run_time))
-        end_time = mp_add_timeout(mp_time_us(), MPMAX(r->max_run_time, 0));
+        end_time = mp_time_us_add(mp_time_us(), MPMAX(r->max_run_time, 0));
 
     // (could happen with separate filter graphs calling each other, for now
     // ignore this issue as we don't use such a setup anywhere)

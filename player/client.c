@@ -905,7 +905,7 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
     if (timeout < 0)
         timeout = 1e20;
 
-    int64_t deadline = mp_add_timeout(mp_time_us(), timeout);
+    int64_t deadline = mp_time_us_add(mp_time_us(), timeout);
 
     *event = (mpv_event){0};
     talloc_free_children(event);
