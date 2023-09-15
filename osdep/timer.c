@@ -113,38 +113,3 @@ struct timespec mp_rel_time_to_timespec(double timeout_sec)
 {
     return mp_time_us_to_realtime(mp_add_timeout(mp_time_us(), timeout_sec));
 }
-
-#if 0
-#include <stdio.h>
-#include "threads.h"
-
-#define TEST_SLEEP 1
-
-int main(void) {
-    int c = 2000000;
-    int64_t j, r, t = 0;
-    pthread_mutex_t mtx;
-    pthread_mutex_init(&mtx, NULL);
-    pthread_cond_t cnd;
-    pthread_cond_init(&cnd, NULL);
-
-    mp_time_init();
-
-    for (int i = 0; i < c; i++) {
-        const int delay = rand() / (RAND_MAX / 1e5);
-        r = mp_time_us();
-#if TEST_SLEEP
-        mp_sleep_us(delay);
-#else
-        struct timespec ts = mp_time_us_to_realtime(r + delay);
-        pthread_cond_timedwait(&cnd, &mtx, &ts);
-#endif
-        j = (mp_time_us() - r) - delay;
-        printf("sleep time: t=%"PRId64" sleep=%8i err=%5i\n", r, delay, (int)j);
-        t += j;
-    }
-    fprintf(stderr, "average error:\t%i\n", (int)(t / c));
-
-    return 0;
-}
-#endif
