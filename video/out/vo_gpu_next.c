@@ -1762,12 +1762,6 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
             .params[1] = fpreset->function->params[1],
 #endif
         };
-    } else if (!strcmp(cfg->kernel.name, "ewa_lanczossharp")) {
-        par->config = pl_filter_ewa_lanczos;
-        par->config.blur = 0.9812505644269356;
-        MP_WARN(p, "'ewa_lanczossharp' is deprecated and will be removed from "
-                "vo=gpu-next in the future, use --scale=ewa_lanczos "
-                "--scale-blur=%f to replicate it.\n", par->config.blur);
     } else {
         MP_ERR(p, "Failed mapping filter function '%s', no libplacebo analog?\n",
                cfg->kernel.name);
