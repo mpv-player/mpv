@@ -200,7 +200,7 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
     if dir_mode == "recursive" then
         for _, dir in ipairs(dirs) do
             scan_dir(prefix .. dir .. separator, current_file, dir_mode,
-                     separator, dir_depth + 1, total_files)
+                     separator, dir_depth + 1, total_files, extensions)
         end
     else
         for i, dir in ipairs(dirs) do
