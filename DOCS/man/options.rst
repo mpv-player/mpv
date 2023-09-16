@@ -5351,12 +5351,12 @@ them.
         never interpolate, thus behaving as if the regular nearest neighbour
         algorithm was used. Defaults to 0.0.
 
-``--scale-blur=<value>``, ``--scale-wblur=<value>``, ``--cscale-blur=<value>``, ``--cscale-wblur=<value>``, ``--dscale-blur=<value>``, ``--dscale-wblur=<value>``, ``--tscale-blur=<value>``, ``--tscale-wblur=<value>``
-    Kernel/window scaling factor (also known as a blur factor). Decreasing this
-    makes the result sharper, increasing it makes it blurrier (default 0). If
-    set to 0, the kernel's preferred blur factor is used. Note that setting
-    this too low (eg. 0.5) leads to bad results. It's generally recommended to
-    stick to values between 0.8 and 1.2.
+``--scale-blur=<value>``, ``--cscale-blur=<value>``, ``--dscale-blur=<value>``, ``--tscale-blur=<value>``
+    Kernel scaling factor (also known as a blur factor). Decreasing this makes
+    the result sharper, increasing it makes it blurrier (default 0). If set to
+    0, the kernel's preferred blur factor is used. Note that setting this too
+    low (eg. 0.5) leads to bad results. It's generally recommended to stick to
+    values between 0.8 and 1.2.
 
 ``--scale-clamp=<0.0-1.0>``, ``--cscale-clamp``, ``--dscale-clamp``, ``--tscale-clamp``
     Specifies a weight bias to multiply into negative coefficients. Specifying
