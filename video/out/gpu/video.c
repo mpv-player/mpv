@@ -356,7 +356,7 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
     {n"-cutoff", OPT_FLOAT(scaler[i].cutoff), M_RANGE(0.0, 1.0)},          \
     {n"-taper",  OPT_FLOAT(scaler[i].kernel.taper), M_RANGE(0.0, 1.0)},    \
     {n"-wparam", OPT_FLOATDEF(scaler[i].window.params[0])},                \
-    {n"-wblur",  OPT_FLOAT(scaler[i].window.blur)},                        \
+    {n"-wblur",  OPT_REMOVED("Just adjust filter radius directly")},       \
     {n"-wtaper", OPT_FLOAT(scaler[i].window.taper), M_RANGE(0.0, 1.0)},    \
     {n"-clamp",  OPT_FLOAT(scaler[i].clamp), M_RANGE(0.0, 1.0)},           \
     {n"-radius", OPT_FLOAT(scaler[i].radius), M_RANGE(0.5, 16.0)},         \
@@ -4170,7 +4170,7 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
-    char s[20] = {0};
+    char s[32] = {0};
     int r = 1;
     bool tscale = bstr_equals0(name, "tscale");
     if (bstr_equals0(param, "help")) {
@@ -4211,7 +4211,7 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
-    char s[20] = {0};
+    char s[32] = {0};
     int r = 1;
     if (bstr_equals0(param, "help")) {
         r = M_OPT_EXIT;
@@ -4237,7 +4237,7 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
                                         struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
-    char s[20] = {0};
+    char s[32] = {0};
     int r = 1;
     if (bstr_equals0(param, "help")) {
         r = M_OPT_EXIT;

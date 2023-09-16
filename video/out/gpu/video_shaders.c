@@ -103,7 +103,7 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
 static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
                          int x, int y, int components, bool planar)
 {
-    double radius = scaler->kernel->f.radius * scaler->kernel->filter_scale;
+    double radius = scaler->kernel->radius * scaler->kernel->filter_scale;
     double radius_cutoff = scaler->kernel->radius_cutoff;
 
     // Since we can't know the subpixel position in advance, assume a

@@ -35,11 +35,12 @@ struct filter_kernel {
     bool polar;         // whether or not the filter uses polar coordinates
     // The following values are set by mp_init_filter() at runtime.
     int size;           // number of coefficients (may depend on radius)
+    double radius;        // true filter radius, derived from f.radius and f.blur
     double filter_scale;  // Factor to convert the mathematical filter
                           // function radius to the possibly wider
                           // (in the case of downsampling) filter sample
                           // radius.
-    double radius_cutoff; // the true radius at which we can cut off the filter
+    double radius_cutoff; // the radius at which we can cut off the filter
 };
 
 extern const struct filter_window mp_filter_windows[];

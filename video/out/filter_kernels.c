@@ -60,16 +60,19 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double inv_scale)
 {
     assert(filter->f.radius > 0);
+    double blur = filter->f.blur > 0.0 ? filter->f.blur : 1.0;
+    filter->radius = blur * filter->f.radius;
+
     // Only downscaling requires widening the filter
     filter->filter_scale = MPMAX(1.0, inv_scale);
-    double src_radius = filter->f.radius * filter->filter_scale;
+    double src_radius = filter->radius * filter->filter_scale;
     // Polar filters are dependent solely on the radius
     if (filter->polar) {
         filter->size = 1; // Not meaningful for EWA/polar scalers.
         // Safety precaution to avoid generating a gigantic shader
         if (src_radius > 16.0) {
             src_radius = 16.0;
-            filter->filter_scale = src_radius / filter->f.radius;
+            filter->filter_scale = src_radius / filter->radius;
             return false;
         }
         return true;
@@ -89,7 +92,7 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
         // largest filter available. This is incorrect, but better than refusing
         // to do anything.
         filter->size = cursize[-1];
-        filter->filter_scale = (filter->size/2.0) / filter->f.radius;
+        filter->filter_scale = (filter->size/2.0) / filter->radius;
         return false;
     }
 }
@@ -116,7 +119,7 @@ static double sample_window(struct filter_window *kernel, double x)
 static double sample_filter(struct filter_kernel *filter, double x)
 {
     // The window is always stretched to the entire kernel
-    double w = sample_window(&filter->w, x / filter->f.radius * filter->w.radius);
+    double w = sample_window(&filter->w, x / filter->radius * filter->w.radius);
     double k = w * sample_window(&filter->f, x);
     return k < 0 ? (1 - filter->clamp) * k : k;
 }
@@ -158,7 +161,7 @@ void mp_compute_lut(struct filter_kernel *filter, int count, int stride,
         filter->radius_cutoff = 0.0;
         // Compute a 1D array indexed by radius
         for (int x = 0; x < count; x++) {
-            double r = x * filter->f.radius / (count - 1);
+            double r = x * filter->radius / (count - 1);
             out_array[x] = sample_filter(filter, r);
 
             if (fabs(out_array[x]) > filter->value_cutoff)
@@ -359,6 +362,9 @@ const struct filter_window mp_filter_windows[] = {
     {0}
 };
 
+#define JINC_R3 3.2383154841662362
+#define JINC_R4 4.2410628637960699
+
 const struct filter_kernel mp_filter_kernels[] = {
     // Spline filters
     {{"spline16",       2,   spline16}},
@@ -369,22 +375,27 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"lanczos",        3,  sinc, .resizable = true}, .window = "sinc"},
     {{"ginseng",        3,  sinc, .resizable = true}, .window = "jinc"},
     // Jinc filters
-    {{"jinc",           3,  jinc, .resizable = true}, .polar = true},
-    {{"ewa_lanczos",    3,  jinc, .resizable = true}, .polar = true, .window = "jinc"},
-    {{"ewa_hanning",    3,  jinc, .resizable = true}, .polar = true, .window = "hanning" },
-    {{"ewa_ginseng",    3,  jinc, .resizable = true}, .polar = true, .window = "sinc"},
-    // Radius is based on the true jinc radius, slightly sharpened as per
-    // calculations by Nicolas Robidoux. Source: Imagemagick's magick/resize.c
-    {{"ewa_lanczossharp", 3.2383154841662362, jinc, .blur = 0.9812505644269356,
-          .resizable = true}, .polar = true, .window = "jinc"},
-    // Similar to the above, but softened instead. This one makes hash patterns
-    // disappear completely. Blur determined by trial and error.
-    {{"ewa_lanczossoft", 3.2383154841662362, jinc, .blur = 1.015,
-          .resizable = true}, .polar = true, .window = "jinc"},
+    {{"jinc",           JINC_R3, jinc, .resizable = true}, .polar = true},
+    {{"ewa_lanczos",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "jinc"},
+    {{"ewa_hanning",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "hanning" },
+    {{"ewa_ginseng",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "sinc"},
+    // Slightly sharpened to minimize the 1D step response error (to better
+    // preserve horizontal/vertical lines)
+    {{"ewa_lanczossharp", JINC_R3, jinc, .blur = 0.9812505837223707, .resizable = true},
+        .polar = true, .window = "jinc"},
+    // Similar to the above, but sharpened substantially to the point of
+    // minimizing the total impulse response error on an integer grid. Tends
+    // to preserve hash patterns well. Very sharp but rings a lot.
+    {{"ewa_lanczos4sharpest", JINC_R4, jinc, .blur = 0.8845120932605005, .resizable = true},
+        .polar = true, .window = "jinc"},
+    // Similar to the above, but softened instead, to make even/odd integer
+    // contributions exactly symmetrical. Designed to smooth out hash patterns.
+    {{"ewa_lanczossoft", JINC_R3, jinc, .blur = 1.0164667662867047, .resizable = true},
+        .polar = true, .window = "jinc"},
     // Very soft (blurred) hanning-windowed jinc; removes almost all aliasing.
     // Blur parameter picked to match orthogonal and diagonal contributions
-    {{"haasnsoft", 3.2383154841662362, jinc, .blur = 1.11, .resizable = true},
-          .polar = true, .window = "hanning"},
+    {{"haasnsoft", JINC_R3, jinc, .blur = 1.11, .resizable = true},
+        .polar = true, .window = "hanning"},
     // Cubic filters
     {{"bicubic",        2,   bicubic}},
     {{"bcspline",       2,   cubic_bc, .params = {0.5, 0.5} }},

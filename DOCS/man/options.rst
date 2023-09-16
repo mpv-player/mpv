@@ -5275,9 +5275,14 @@ them.
         (This filter is an alias for ``jinc``-windowed ``jinc``)
 
     ``ewa_lanczossharp``
-        A slightly sharpened version of ewa_lanczos, preconfigured to use an
-        ideal radius and parameter. If your hardware can run it, this is
-        probably what you should use by default.
+        A slightly sharpened version of ewa_lanczos. If your hardware can run
+        it, this is probably what you should use by default.
+
+    ``ewa_lanczos4sharpest``
+        Very sharp scaler, but also slightly slower than ``ewa_lanczossharp``.
+        Prone to ringing, so it's recommended to combine this with an
+        anti-ringing shader. On ``--vo=gpu-next``, setting this filter enables
+        built-in anti-ringing, so no extra action needs to be taken.
 
     ``mitchell``
         Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
@@ -5346,12 +5351,12 @@ them.
         never interpolate, thus behaving as if the regular nearest neighbour
         algorithm was used. Defaults to 0.0.
 
-``--scale-blur=<value>``, ``--scale-wblur=<value>``, ``--cscale-blur=<value>``, ``--cscale-wblur=<value>``, ``--dscale-blur=<value>``, ``--dscale-wblur=<value>``, ``--tscale-blur=<value>``, ``--tscale-wblur=<value>``
-    Kernel/window scaling factor (also known as a blur factor). Decreasing this
-    makes the result sharper, increasing it makes it blurrier (default 0). If
-    set to 0, the kernel's preferred blur factor is used. Note that setting
-    this too low (eg. 0.5) leads to bad results. It's generally recommended to
-    stick to values between 0.8 and 1.2.
+``--scale-blur=<value>``, ``--cscale-blur=<value>``, ``--dscale-blur=<value>``, ``--tscale-blur=<value>``
+    Kernel scaling factor (also known as a blur factor). Decreasing this makes
+    the result sharper, increasing it makes it blurrier (default 0). If set to
+    0, the kernel's preferred blur factor is used. Note that setting this too
+    low (eg. 0.5) leads to bad results. It's generally recommended to stick to
+    values between 0.8 and 1.2.
 
 ``--scale-clamp=<0.0-1.0>``, ``--cscale-clamp``, ``--dscale-clamp``, ``--tscale-clamp``
     Specifies a weight bias to multiply into negative coefficients. Specifying
@@ -6812,9 +6817,10 @@ them.
     3
         absolute colorimetric
 
-``--icc-3dlut-size=<r>x<g>x<b>``
-    Size of the 3D LUT generated from the ICC profile in each dimension.
-    Default is 64x64x64. Sizes may range from 2 to 512.
+``--icc-3dlut-size=<auto|RxGxB>``
+    Size of the 3D LUT generated from the ICC profile in each dimension. The
+    default of ``auto`` means to pick the size automatically based on internal
+    heuristics. Sizes may range from 2 to 512.
 
 ``--icc-force-contrast=<no|0-1000000|inf>``
     Override the target device's detected contrast ratio by a specific value.

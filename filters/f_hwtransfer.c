@@ -340,18 +340,20 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
     for (int n = 0; cstr->valid_sw_formats &&
                     cstr->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++)
     {
+        int *not_supported_by_vo = NULL;
+        int num_not_supported = 0;
         int imgfmt = pixfmt2imgfmt(cstr->valid_sw_formats[n]);
         if (!imgfmt)
             continue;
 
-        MP_VERBOSE(f, "looking at format %s/%s\n",
+        MP_DBG(f, "looking at format %s/%s\n",
                    mp_imgfmt_to_name(hw_imgfmt),
                    mp_imgfmt_to_name(imgfmt));
 
         if (IMGFMT_IS_HWACCEL(imgfmt)) {
             // If the enumerated format is a hardware format, we don't need to
             // do any further probing. It will be supported.
-            MP_VERBOSE(f, "  supports %s (a hardware format)\n",
+            MP_DBG(f, "  supports %s (a hardware format)\n",
                        mp_imgfmt_to_name(imgfmt));
             continue;
         }
@@ -387,24 +389,32 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
                 for (int i = 0; ctx->supported_formats[i]; i++) {
                     int fmt = ctx->supported_formats[i];
                     if (fmt == imgfmt) {
-                        MP_VERBOSE(f, "  vo accepts %s\n", mp_imgfmt_to_name(fmt));
+                        MP_DBG(f, "  vo accepts %s\n", mp_imgfmt_to_name(fmt));
                         MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
                     }
                 }
             }
 
             enum AVPixelFormat *fmts = conversion_cstr->valid_sw_formats;
+            MP_DBG(f, "  supports:");
             for (int i = 0; fmts && fmts[i] != AV_PIX_FMT_NONE; i++) {
                 int fmt = pixfmt2imgfmt(fmts[i]);
                 if (!fmt)
                     continue;
-                MP_VERBOSE(f, "  supports %s\n", mp_imgfmt_to_name(fmt));
                 if (!vo_supports(ctx, hw_imgfmt, fmt)) {
-                    MP_VERBOSE(f, "  ... not supported by VO\n");
+                    MP_TARRAY_APPEND(p, not_supported_by_vo, num_not_supported, fmt);
                     continue;
                 }
+                MP_DBG(f, " %s", mp_imgfmt_to_name(fmt));
                 MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
             }
+            if (num_not_supported) {
+                MP_DBG(f, "\n  not supported by VO:");
+                for (int i = 0; i < num_not_supported; i++) {
+                    MP_DBG(f, " %s", mp_imgfmt_to_name(not_supported_by_vo[i]));
+                }
+            }
+            MP_DBG(f, "\n");
 
             p->fmt_upload_num[index] =
                 p->num_upload_fmts - p->fmt_upload_index[index];
@@ -429,17 +439,25 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
 
                 p->fmt_upload_index[index] = p->num_upload_fmts;
 
+                MP_DBG(f, "  supports:");
                 for (int i = 0; fmts[i] != AV_PIX_FMT_NONE; i++) {
                     int fmt = pixfmt2imgfmt(fmts[i]);
                     if (!fmt)
                         continue;
-                    MP_VERBOSE(f, "  supports %s\n", mp_imgfmt_to_name(fmt));
                     if (!vo_supports(ctx, hw_imgfmt, fmt)) {
-                        MP_VERBOSE(f, "  ... not supported by VO\n");
+                        MP_TARRAY_APPEND(p, not_supported_by_vo, num_not_supported, fmt);
                         continue;
                     }
+                    MP_DBG(f, " %s", mp_imgfmt_to_name(fmt));
                     MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
                 }
+                if (num_not_supported) {
+                    MP_DBG(f, "\n  not supported by VO:");
+                    for (int i = 0; i < num_not_supported; i++) {
+                        MP_DBG(f, " %s", mp_imgfmt_to_name(not_supported_by_vo[i]));
+                    }
+                }
+                MP_DBG(f, "\n");
 
                 p->fmt_upload_num[index] =
                     p->num_upload_fmts - p->fmt_upload_index[index];
@@ -449,6 +467,7 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
 
             av_buffer_unref(&frames);
         }
+        talloc_free(not_supported_by_vo);
     }
 
     av_hwframe_constraints_free(&cstr);
