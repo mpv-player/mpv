@@ -1255,8 +1255,8 @@ Video
     This option accepts a comma delimited list of ``api`` types, along with certain
     special values:
 
-    :no:        always use software decoding (default)
-    :auto-safe: enable any whitelisted hw decoder (see below)
+    :no:        always use software decoding
+    :auto-safe: enable any whitelisted hw decoder (default) (see below)
     :auto:      forcibly enable any hw decoder found (see below)
     :yes:       exactly the same as ``auto-safe``
     :auto-copy: enable best hw decoder with copy-back (see below)

@@ -60,6 +60,7 @@ Interface changes
     - add `--icc-3dlut-size=auto` and make it the default
     - add `--scale=ewa_lanczos4sharpest`
     - remove `--scale-wblur`, `--cscale-wblur`, `--dscale-wblur`, `--tscale-wblur`
+    - change to `--hwdec=auto-safe` by default
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
