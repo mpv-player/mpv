@@ -60,16 +60,19 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double inv_scale)
 {
     assert(filter->f.radius > 0);
+    double blur = filter->f.blur > 0.0 ? filter->f.blur : 1.0;
+    filter->radius = blur * filter->f.radius;
+
     // Only downscaling requires widening the filter
     filter->filter_scale = MPMAX(1.0, inv_scale);
-    double src_radius = filter->f.radius * filter->filter_scale;
+    double src_radius = filter->radius * filter->filter_scale;
     // Polar filters are dependent solely on the radius
     if (filter->polar) {
         filter->size = 1; // Not meaningful for EWA/polar scalers.
         // Safety precaution to avoid generating a gigantic shader
         if (src_radius > 16.0) {
             src_radius = 16.0;
-            filter->filter_scale = src_radius / filter->f.radius;
+            filter->filter_scale = src_radius / filter->radius;
             return false;
         }
         return true;
@@ -89,7 +92,7 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
         // largest filter available. This is incorrect, but better than refusing
         // to do anything.
         filter->size = cursize[-1];
-        filter->filter_scale = (filter->size/2.0) / filter->f.radius;
+        filter->filter_scale = (filter->size/2.0) / filter->radius;
         return false;
     }
 }
@@ -116,7 +119,7 @@ static double sample_window(struct filter_window *kernel, double x)
 static double sample_filter(struct filter_kernel *filter, double x)
 {
     // The window is always stretched to the entire kernel
-    double w = sample_window(&filter->w, x / filter->f.radius * filter->w.radius);
+    double w = sample_window(&filter->w, x / filter->radius * filter->w.radius);
     double k = w * sample_window(&filter->f, x);
     return k < 0 ? (1 - filter->clamp) * k : k;
 }
@@ -158,7 +161,7 @@ void mp_compute_lut(struct filter_kernel *filter, int count, int stride,
         filter->radius_cutoff = 0.0;
         // Compute a 1D array indexed by radius
         for (int x = 0; x < count; x++) {
-            double r = x * filter->f.radius / (count - 1);
+            double r = x * filter->radius / (count - 1);
             out_array[x] = sample_filter(filter, r);
 
             if (fabs(out_array[x]) > filter->value_cutoff)
