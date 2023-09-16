@@ -5275,9 +5275,8 @@ them.
         (This filter is an alias for ``jinc``-windowed ``jinc``)
 
     ``ewa_lanczossharp``
-        A slightly sharpened version of ewa_lanczos, preconfigured to use an
-        ideal radius and parameter. If your hardware can run it, this is
-        probably what you should use by default.
+        A slightly sharpened version of ewa_lanczos. If your hardware can run
+        it, this is probably what you should use by default.
 
     ``mitchell``
         Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
