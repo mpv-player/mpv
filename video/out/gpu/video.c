@@ -313,6 +313,9 @@ static const struct gl_video_opts gl_video_opts_def = {
          .clamp = 1, }, // tscale
     },
     .scaler_resizes_only = true,
+    .correct_downscaling = true,
+    .linear_downscaling = true,
+    .sigmoid_upscaling = true,
     .scaler_lut_size = 6,
     .interpolation_threshold = 0.01,
     .alpha_mode = ALPHA_BLEND_TILES,
