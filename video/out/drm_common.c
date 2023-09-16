@@ -943,14 +943,14 @@ static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
         struct timespec ts;
         if (clock_gettime(CLOCK_MONOTONIC, &ts))
             goto fail;
-        const uint64_t now_monotonic = ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
-        const uint64_t ust_mp_time = mp_time_us() - (now_monotonic - vsync->ust);
+        int64_t now_monotonic = ts.tv_sec * UINT64_C(1000000000) + ts.tv_nsec;
+        int64_t ust_mp_time = mp_time_ns() - (now_monotonic - vsync->ust * 1000);
 
         const uint64_t     ust_since_enqueue = vsync->ust - frame_vsync->ust;
         const unsigned int msc_since_enqueue = vsync->msc - frame_vsync->msc;
         const unsigned int sbc_since_enqueue = vsync->sbc - frame_vsync->sbc;
 
-        vsync_info->vsync_duration = ust_since_enqueue / msc_since_enqueue;
+        vsync_info->vsync_duration = ust_since_enqueue * 1000 / msc_since_enqueue;
         vsync_info->skipped_vsyncs = msc_since_last_flip - 1; // Valid iff swap_buffers is called every vsync
         vsync_info->last_queue_display_time = ust_mp_time + (sbc_since_enqueue * vsync_info->vsync_duration);
     }

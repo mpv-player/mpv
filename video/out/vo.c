@@ -151,7 +151,7 @@ struct vo_internal {
     int64_t *vsync_samples;
     int num_vsync_samples;
     int64_t num_total_vsync_samples;
-    double prev_vsync;
+    int64_t prev_vsync;
     double base_vsync;
     int drop_point;
     double estimated_vsync_interval;
@@ -437,8 +437,8 @@ static void check_estimated_display_fps(struct vo *vo)
 
     bool use_estimated = false;
     if (in->num_total_vsync_samples >= MAX_VSYNC_SAMPLES / 2 &&
-        in->estimated_vsync_interval <= 1e6 / 20.0 &&
-        in->estimated_vsync_interval >= 1e6 / 99.0)
+        in->estimated_vsync_interval <= 1e9 / 20.0 &&
+        in->estimated_vsync_interval >= 1e9 / 99.0)
     {
         for (int n = 0; n < in->num_vsync_samples; n++) {
             if (fabs(in->vsync_samples[n] - in->estimated_vsync_interval)
@@ -451,13 +451,13 @@ static void check_estimated_display_fps(struct vo *vo)
             use_estimated = true;
         done: ;
     }
-    if (use_estimated == (in->vsync_interval == in->nominal_vsync_interval)) {
+    if (use_estimated == (fabs(in->vsync_interval - in->nominal_vsync_interval) < 1e9)) {
         if (use_estimated) {
             MP_VERBOSE(vo, "adjusting display FPS to a value closer to %.3f Hz\n",
-                       1e6 / in->estimated_vsync_interval);
+                       1e9 / in->estimated_vsync_interval);
         } else {
             MP_VERBOSE(vo, "switching back to assuming display fps = %.3f Hz\n",
-                       1e6 / in->nominal_vsync_interval);
+                       1e9 / in->nominal_vsync_interval);
         }
     }
     in->vsync_interval = use_estimated ? in->estimated_vsync_interval
@@ -537,7 +537,7 @@ static void update_vsync_timing_after_swap(struct vo *vo,
     vsync_skip_detection(vo);
 
     MP_STATS(vo, "value %f jitter", in->estimated_vsync_jitter);
-    MP_STATS(vo, "value %f vsync-diff", in->vsync_samples[0] / 1e6);
+    MP_STATS(vo, "value %f vsync-diff", in->vsync_samples[0] / 1e9);
 }
 
 // to be called from VO thread only
@@ -563,7 +563,7 @@ static void update_display_fps(struct vo *vo)
         display_fps = in->reported_display_fps;
 
     if (in->display_fps != display_fps) {
-        in->nominal_vsync_interval =  display_fps > 0 ? 1e6 / display_fps : 0;
+        in->nominal_vsync_interval =  display_fps > 0 ? 1e9 / display_fps : 0;
         in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
         in->display_fps = display_fps;
 
@@ -926,7 +926,7 @@ static bool render_frame(struct vo *vo)
     in->dropped_frame &= frame->can_drop;
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
     // instead of just freezing the display forever.
-    in->dropped_frame &= now - in->prev_vsync < 100 * 1000;
+    in->dropped_frame &= now - (in->prev_vsync / 1000.0) < 100 * 1000;
     in->dropped_frame &= in->hasframe_rendered;
 
     // Setup parameters for the next time this frame is drawn. ("frame" is the
@@ -944,7 +944,7 @@ static bool render_frame(struct vo *vo)
 
     bool use_vsync = in->current_frame->display_synced && !in->paused;
     if (use_vsync && !in->expecting_vsync) // first DS frame in a row
-        in->prev_vsync = now;
+        in->prev_vsync = now * 1000;
     in->expecting_vsync = use_vsync;
 
     // Store the initial value before we unlock.
@@ -991,7 +991,7 @@ static bool render_frame(struct vo *vo)
 
         // Make up some crap if presentation feedback is missing.
         if (vsync.last_queue_display_time < 0)
-            vsync.last_queue_display_time = mp_time_us();
+            vsync.last_queue_display_time = mp_time_ns();
 
         stats_time_end(in->stats, "video-flip");
 
@@ -1303,7 +1303,7 @@ double vo_get_estimated_vsync_interval(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    double res = in->estimated_vsync_interval / 1e6;
+    double res = in->estimated_vsync_interval / 1e9;
     pthread_mutex_unlock(&in->lock);
     return res;
 }
@@ -1337,7 +1337,7 @@ double vo_get_delay(struct vo *vo)
             res = 0;
     }
     pthread_mutex_unlock(&in->lock);
-    return res ? (res - mp_time_us()) / 1e6 : 0;
+    return res ? (res - mp_time_ns()) / 1e9 : 0;
 }
 
 void vo_discard_timing_info(struct vo *vo)

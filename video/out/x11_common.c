@@ -1327,7 +1327,8 @@ void vo_x11_check_events(struct vo *vo)
                 if (cookie->evtype == PresentCompleteNotify) {
                     XPresentCompleteNotifyEvent *present_event;
                     present_event = (XPresentCompleteNotifyEvent *)cookie->data;
-                    present_update_sync_values(x11->present, present_event->ust,
+                    present_update_sync_values(x11->present,
+                                               present_event->ust * 1000,
                                                present_event->msc);
                 }
             }

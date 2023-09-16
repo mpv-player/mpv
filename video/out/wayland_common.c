@@ -1144,7 +1144,7 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     if (fback)
         remove_feedback(fback_pool, fback);
 
-    wl->refresh_interval = (int64_t)refresh_nsec / 1000;
+    wl->refresh_interval = (int64_t)refresh_nsec;
 
     // Very similar to oml_sync_control, in this case we assume that every
     // time the compositor receives feedback, a buffer swap has been already
@@ -1156,7 +1156,7 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     //  - these values are updated every time the compositor receives feedback.
 
     int64_t sec = (uint64_t) tv_sec_lo + ((uint64_t) tv_sec_hi << 32);
-    int64_t ust = sec * 1000000LL + (uint64_t) tv_nsec / 1000;
+    int64_t ust = sec * UINT64_C(1000000000) + (uint64_t) tv_nsec;
     int64_t msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
     present_update_sync_values(wl->present, ust, msc);
 }
@@ -2566,18 +2566,18 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
         vblank_time = wl->refresh_interval;
 
     if (vblank_time <= 0 && wl->current_output->refresh_rate > 0)
-        vblank_time = 1e6 / wl->current_output->refresh_rate;
+        vblank_time = 1e9 / wl->current_output->refresh_rate;
 
     // Ideally you should never reach this point.
     if (vblank_time <= 0)
-        vblank_time = 1e6 / 60;
+        vblank_time = 1e9 / 60;
 
     // Completely arbitrary amount of additional time to wait.
     vblank_time += 0.05 * vblank_time;
-    int64_t finish_time = mp_time_us() + vblank_time;
+    int64_t finish_time = mp_time_ns() + vblank_time;
 
-    while (wl->frame_wait && finish_time > mp_time_us()) {
-        int poll_time = ceil((double)(finish_time - mp_time_us()) / 1000);
+    while (wl->frame_wait && finish_time > mp_time_ns()) {
+        int poll_time = ceil((finish_time - mp_time_ns()) / 1e6);
         if (poll_time < 0) {
             poll_time = 0;
         }
