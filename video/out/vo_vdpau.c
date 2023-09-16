@@ -766,7 +766,7 @@ static void flip_page(struct vo *vo)
     if (vc->user_fps > 0) {
         vc->vsync_interval = 1e9 / vc->user_fps;
     } else if (vc->user_fps == 0) {
-        vc->vsync_interval = vo_get_vsync_interval(vo) * 1000;
+        vc->vsync_interval = vo_get_vsync_interval(vo);
     }
     vc->vsync_interval = MPMAX(vc->vsync_interval, 1);
 
@@ -782,7 +782,7 @@ static void flip_page(struct vo *vo)
     vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
     CHECK_VDP_WARNING(vo, "Error when calling vdp_presentation_queue_get_time");
 
-    int64_t rel_pts_ns = (pts_us - mp_time_us()) * 1000;
+    int64_t rel_pts_ns = (pts_us * 1000) - mp_time_ns();
     if (!pts_us || rel_pts_ns < 0)
         rel_pts_ns = 0;
 

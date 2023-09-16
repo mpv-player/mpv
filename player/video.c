@@ -835,7 +835,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     if (resample && using_spdif_passthrough(mpctx))
         return;
 
-    double vsync = vo_get_vsync_interval(vo) / 1e6;
+    double vsync = vo_get_vsync_interval(vo) / 1e9;
     if (vsync <= 0)
         return;
 
