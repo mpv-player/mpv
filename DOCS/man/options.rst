@@ -5314,7 +5314,8 @@ them.
 
 ``--cscale=<filter>``
     As ``--scale``, but for interpolating chroma information. If the image is
-    not subsampled, this option is ignored entirely.
+    not subsampled, this option is ignored entirely. If this option is unset,
+    the filter implied by ``--scale`` will be applied.
 
 ``--dscale=<filter>``
     Like ``--scale``, but apply these filters on downscaling instead. If this
