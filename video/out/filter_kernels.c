@@ -362,6 +362,8 @@ const struct filter_window mp_filter_windows[] = {
     {0}
 };
 
+#define JINC_R3 3.2383154841662362
+
 const struct filter_kernel mp_filter_kernels[] = {
     // Spline filters
     {{"spline16",       2,   spline16}},
@@ -378,16 +380,16 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"ewa_ginseng",    3,  jinc, .resizable = true}, .polar = true, .window = "sinc"},
     // Radius is based on the true jinc radius, slightly sharpened as per
     // calculations by Nicolas Robidoux. Source: Imagemagick's magick/resize.c
-    {{"ewa_lanczossharp", 3.2383154841662362, jinc, .blur = 0.9812505644269356,
-          .resizable = true}, .polar = true, .window = "jinc"},
+    {{"ewa_lanczossharp", JINC_R3, jinc, .blur = 0.9812505644269356, .resizable = true},
+        .polar = true, .window = "jinc"},
     // Similar to the above, but softened instead. This one makes hash patterns
     // disappear completely. Blur determined by trial and error.
-    {{"ewa_lanczossoft", 3.2383154841662362, jinc, .blur = 1.015,
-          .resizable = true}, .polar = true, .window = "jinc"},
+    {{"ewa_lanczossoft", JINC_R3, jinc, .blur = 1.015, .resizable = true},
+        .polar = true, .window = "jinc"},
     // Very soft (blurred) hanning-windowed jinc; removes almost all aliasing.
     // Blur parameter picked to match orthogonal and diagonal contributions
-    {{"haasnsoft", 3.2383154841662362, jinc, .blur = 1.11, .resizable = true},
-          .polar = true, .window = "hanning"},
+    {{"haasnsoft", JINC_R3, jinc, .blur = 1.11, .resizable = true},
+        .polar = true, .window = "hanning"},
     // Cubic filters
     {{"bicubic",        2,   bicubic}},
     {{"bcspline",       2,   cubic_bc, .params = {0.5, 0.5} }},
