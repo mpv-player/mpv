@@ -356,7 +356,7 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
     {n"-cutoff", OPT_FLOAT(scaler[i].cutoff), M_RANGE(0.0, 1.0)},          \
     {n"-taper",  OPT_FLOAT(scaler[i].kernel.taper), M_RANGE(0.0, 1.0)},    \
     {n"-wparam", OPT_FLOATDEF(scaler[i].window.params[0])},                \
-    {n"-wblur",  OPT_FLOAT(scaler[i].window.blur)},                        \
+    {n"-wblur",  OPT_REMOVED("Just adjust filter radius directly")},       \
     {n"-wtaper", OPT_FLOAT(scaler[i].window.taper), M_RANGE(0.0, 1.0)},    \
     {n"-clamp",  OPT_FLOAT(scaler[i].clamp), M_RANGE(0.0, 1.0)},           \
     {n"-radius", OPT_FLOAT(scaler[i].radius), M_RANGE(0.5, 16.0)},         \
