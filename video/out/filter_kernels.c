@@ -378,13 +378,13 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"ewa_lanczos",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "jinc"},
     {{"ewa_hanning",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "hanning" },
     {{"ewa_ginseng",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "sinc"},
-    // Radius is based on the true jinc radius, slightly sharpened as per
-    // calculations by Nicolas Robidoux. Source: Imagemagick's magick/resize.c
-    {{"ewa_lanczossharp", JINC_R3, jinc, .blur = 0.9812505644269356, .resizable = true},
+    // Slightly sharpened to minimize the 1D step response error (to better
+    // preserve horizontal/vertical lines)
+    {{"ewa_lanczossharp", JINC_R3, jinc, .blur = 0.9812505837223707, .resizable = true},
         .polar = true, .window = "jinc"},
-    // Similar to the above, but softened instead. This one makes hash patterns
-    // disappear completely. Blur determined by trial and error.
-    {{"ewa_lanczossoft", JINC_R3, jinc, .blur = 1.015, .resizable = true},
+    // Similar to the above, but softened instead, to make even/odd integer
+    // contributions exactly symmetrical. Designed to smooth out hash patterns.
+    {{"ewa_lanczossoft", JINC_R3, jinc, .blur = 1.0164667662867047, .resizable = true},
         .polar = true, .window = "jinc"},
     // Very soft (blurred) hanning-windowed jinc; removes almost all aliasing.
     // Blur parameter picked to match orthogonal and diagonal contributions
