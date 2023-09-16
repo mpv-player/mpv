@@ -20,6 +20,8 @@
 
 #include <sys/types.h>
 
+#define _POSIX_TIMERS 0
+
 // Note: all pthread functions are mangled to make static linking easier.
 #define pthread_once m_pthread_once
 #define pthread_mutex_destroy m_pthread_mutex_destroy

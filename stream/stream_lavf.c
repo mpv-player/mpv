@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <pthread.h>
+
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
 #include <libavutil/opt.h>
