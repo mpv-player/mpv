@@ -5293,7 +5293,7 @@ them.
         Catmull-Rom. A Cubic filter in the same vein as ``mitchell``, where
         the ``B`` and ``C`` parameters are ``0.0`` and ``0.5`` respectively.
         This filter is sharper than ``mitchell``, but it results in mild
-        ringing. Like ``mitchell``, this filter is good at downscaling (see 
+        ringing. Like ``mitchell``, this filter is good at downscaling (see
         ``--dscale``).
 
     ``oversample``
@@ -5438,6 +5438,7 @@ them.
 ``--correct-downscaling``
     When using convolution based filters, extend the filter size when
     downscaling. Increases quality, but reduces performance while downscaling.
+    Enabled by default.
 
     This will perform slightly sub-optimally for anamorphic video (but still
     better than without it) since it will extend the size to match only the
@@ -5448,7 +5449,7 @@ them.
 ``--linear-downscaling``
     Scale in linear light when downscaling. It should only be used with a
     ``--fbo-format`` that has at least 16 bit precision. This option
-    has no effect on HDR content.
+    has no effect on HDR content. Enabled by default.
 
 ``--linear-upscaling``
     Scale in linear light when upscaling. Like ``--linear-downscaling``, it
@@ -5459,7 +5460,7 @@ them.
 
 ``--sigmoid-upscaling``
     When upscaling, use a sigmoidal color transform to avoid emphasizing
-    ringing artifacts. This is incompatible with and replaces
+    ringing artifacts. Enabled by default. This is incompatible with and replaces
     ``--linear-upscaling``. (Note that sigmoidization also requires
     linearization, so the ``LINEAR`` rendering step fires in both cases)
 
