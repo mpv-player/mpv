@@ -374,10 +374,10 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"lanczos",        3,  sinc, .resizable = true}, .window = "sinc"},
     {{"ginseng",        3,  sinc, .resizable = true}, .window = "jinc"},
     // Jinc filters
-    {{"jinc",           3,  jinc, .resizable = true}, .polar = true},
-    {{"ewa_lanczos",    3,  jinc, .resizable = true}, .polar = true, .window = "jinc"},
-    {{"ewa_hanning",    3,  jinc, .resizable = true}, .polar = true, .window = "hanning" },
-    {{"ewa_ginseng",    3,  jinc, .resizable = true}, .polar = true, .window = "sinc"},
+    {{"jinc",           JINC_R3, jinc, .resizable = true}, .polar = true},
+    {{"ewa_lanczos",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "jinc"},
+    {{"ewa_hanning",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "hanning" },
+    {{"ewa_ginseng",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "sinc"},
     // Radius is based on the true jinc radius, slightly sharpened as per
     // calculations by Nicolas Robidoux. Source: Imagemagick's magick/resize.c
     {{"ewa_lanczossharp", JINC_R3, jinc, .blur = 0.9812505644269356, .resizable = true},
