@@ -399,6 +399,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     // Cubic filters
     {{"bicubic",        2,   bicubic}},
     {{"bcspline",       2,   cubic_bc, .params = {0.5, 0.5} }},
+    {{"hermite",        1,   cubic_bc, .params = {0.0, 0.0} }},
     {{"catmull_rom",    2,   cubic_bc, .params = {0.0, 0.5} }},
     {{"mitchell",       2,   cubic_bc, .params = {1.0/3.0, 1.0/3.0} }},
     {{"robidoux",       2,   cubic_bc, .params = {12 / (19 + 9 * M_SQRT2),
