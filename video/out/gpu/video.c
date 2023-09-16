@@ -307,7 +307,7 @@ static const struct gl_video_opts gl_video_opts_def = {
          .cutoff = 0.001}, // scale
         {{NULL,       .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // dscale
-        {{"bilinear", .params={NAN, NAN}}, {.params = {NAN, NAN}},
+        {{NULL, .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // cscale
         {{"mitchell", .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .clamp = 1, }, // tscale
@@ -1733,6 +1733,12 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
         conf = &p->opts.scaler[SCALER_SCALE];
     }
 
+    if (conf && scaler->index == SCALER_CSCALE && (!conf->kernel.name ||
+        !conf->kernel.name[0]))
+    {
+        conf = &p->opts.scaler[SCALER_SCALE];
+    }
+
     struct filter_kernel bare_window;
     const struct filter_kernel *t_kernel = mp_find_filter_kernel(conf->kernel.name);
     const struct filter_window *t_window = mp_find_filter_window(conf->window.name);
@@ -2302,6 +2308,13 @@ static void pass_read_video(struct gl_video *p)
             continue;
 
         const struct scaler_config *conf = &p->opts.scaler[scaler_id];
+
+        if (scaler_id == SCALER_CSCALE && (!conf->kernel.name ||
+            !conf->kernel.name[0]))
+        {
+            conf = &p->opts.scaler[SCALER_SCALE];
+        }
+
         struct scaler *scaler = &p->scaler[scaler_id];
 
         // bilinear scaling is a free no-op thanks to GPU sampling
@@ -4180,6 +4193,8 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
         r = M_OPT_EXIT;
     } else if (bstr_equals0(name, "dscale") && !param.len) {
         return r; // empty dscale means "use same as upscaler"
+    } else if (bstr_equals0(name, "cscale") && !param.len) {
+        return r; // empty cscale means "use same as upscaler"
     } else {
         snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
         if (!handle_scaler_opt(s, tscale))
