@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <pthread.h>
 #include <float.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -24,7 +25,6 @@
 #include <assert.h>
 #include <time.h>
 #include <math.h>
-#include <pthread.h>
 #include <sys/types.h>
 
 #include <ass/ass.h>

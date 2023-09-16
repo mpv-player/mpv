@@ -17,6 +17,7 @@
 
 #include "config.h"
 
+#include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -28,7 +29,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
-#include <pthread.h>
 #include <assert.h>
 
 #include "osdep/io.h"

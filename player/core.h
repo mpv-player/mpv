@@ -18,8 +18,8 @@
 #ifndef MPLAYER_MP_CORE_H
 #define MPLAYER_MP_CORE_H
 
-#include <stdbool.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #include "osdep/atomic.h"
 

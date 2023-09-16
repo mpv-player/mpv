@@ -357,9 +357,6 @@ win32_pthreads = get_option('win32-internal-pthreads').require(
 features += {'win32-internal-pthreads': win32_pthreads.allowed()}
 if features['win32-internal-pthreads']
     flags += ['-isystem', '-I', '-DIN_WINPTHREAD']
-    # Note: Adding this include causes POSIX_TIMERS to be defined for
-    # unclear reasons (some confusion with <pthread.h> probably).
-    # Hack around it by using HAVE_WIN32_INTERNAL_PTHREADS.
     includedir += include_directories('osdep/win32/include')
     sources += files('osdep/win32/pthread.c')
 else

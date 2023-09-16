@@ -69,8 +69,7 @@ struct stat_entry {
 // Overflows only after I'm dead.
 static int64_t get_thread_cpu_time_ns(pthread_t thread)
 {
-#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0 && defined(_POSIX_THREAD_CPUTIME) && \
-    !HAVE_WIN32_INTERNAL_PTHREADS
+#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0 && defined(_POSIX_THREAD_CPUTIME)
     clockid_t id;
     struct timespec tv;
     if (pthread_getcpuclockid(thread, &id) == 0 &&
