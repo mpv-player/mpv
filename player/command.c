@@ -419,7 +419,7 @@ static int mp_property_av_speed_correction(void *ctx, struct m_property *prop,
     }
 
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%+.05f%%", (val - 1) * 100);
+        *(char **)arg = talloc_asprintf(NULL, "%+.3g%%", (val - 1) * 100);
         return M_PROPERTY_OK;
     }
 
@@ -652,7 +652,12 @@ static int mp_property_avsync(void *ctx, struct m_property *prop,
     if (!mpctx->ao_chain || !mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%7.3f", mpctx->last_av_difference);
+        // Don't print small values resulting from calculation inaccuracies
+        if (fabs(mpctx->last_av_difference) < 1e-5) {
+            *(char **)arg = talloc_strdup(NULL, "0");
+        } else {
+            *(char **)arg = talloc_asprintf(NULL, "%+.2g", mpctx->last_av_difference);
+        }
         return M_PROPERTY_OK;
     }
     return m_property_double_ro(action, arg, mpctx->last_av_difference);

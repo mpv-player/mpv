@@ -1023,12 +1023,12 @@ static char *print_double(const m_option_t *opt, const void *val)
     return talloc_asprintf(NULL, "%f", f);
 }
 
-static char *print_double_f3(const m_option_t *opt, const void *val)
+static char *print_double_7g(const m_option_t *opt, const void *val)
 {
     double f = VAL(val);
     if (isnan(f))
         return print_double(opt, val);
-    return talloc_asprintf(NULL, "%.3f", f);
+    return talloc_asprintf(NULL, "%.7g", f);
 }
 
 static void add_double(const m_option_t *opt, void *val, double add, bool wrap)
@@ -1100,7 +1100,7 @@ const m_option_type_t m_option_type_double = {
     .size  = sizeof(double),
     .parse = parse_double,
     .print = print_double,
-    .pretty_print = print_double_f3,
+    .pretty_print = print_double_7g,
     .copy  = copy_opt,
     .add = add_double,
     .multiply = multiply_double,
@@ -1126,7 +1126,7 @@ const m_option_type_t m_option_type_aspect = {
     .flags = M_OPT_TYPE_CHOICE | M_OPT_TYPE_USES_RANGE,
     .parse = parse_double_aspect,
     .print = print_double,
-    .pretty_print = print_double_f3,
+    .pretty_print = print_double_7g,
     .copy  = copy_opt,
     .add = add_double,
     .multiply = multiply_double,
@@ -1157,7 +1157,7 @@ static char *print_float(const m_option_t *opt, const void *val)
 static char *print_float_f3(const m_option_t *opt, const void *val)
 {
     double tmp = VAL(val);
-    return print_double_f3(opt, &tmp);
+    return print_double_7g(opt, &tmp);
 }
 
 static void add_float(const m_option_t *opt, void *val, double add, bool wrap)
