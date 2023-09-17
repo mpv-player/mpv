@@ -1088,7 +1088,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         signal_events(w32, VO_EVENT_WIN_STATE);
 
         update_display_info(w32);  // if we moved between monitors
-        MP_DBG(w32, "move window: %d:%d\n", x, y);
         break;
     }
     case WM_MOVING: {
