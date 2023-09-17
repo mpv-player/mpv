@@ -1150,6 +1150,9 @@ static void *vo_thread(void *ptr)
         if (vo->want_redraw) // might have been set by VOCTRLs
             wait_until = 0;
 
+        if (wait_until <= now)
+            continue;
+
         wait_vo(vo, wait_until);
     }
     forget_frames(vo); // implicitly synchronized
