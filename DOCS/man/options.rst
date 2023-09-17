@@ -5338,8 +5338,8 @@ them.
     filter is not tunable. Currently, this affects the following filter
     parameters:
 
-    bcspline
-        Spline parameters (``B`` and ``C``). Defaults to 0.5 for both.
+    bicubic
+        Spline parameters (``B`` and ``C``). Defaults to B=1 and C=0.
 
     gaussian
         Scale parameter (``t``). Increasing this makes the result blurrier.
