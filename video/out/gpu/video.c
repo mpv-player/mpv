@@ -309,8 +309,7 @@ static const struct gl_video_opts gl_video_opts_def = {
          .cutoff = 0.001}, // dscale
         {{NULL, .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // cscale
-        {{"mitchell", .params={NAN, NAN}}, {.params = {NAN, NAN}},
-         .clamp = 1, }, // tscale
+        {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
     },
     .scaler_resizes_only = true,
     .correct_downscaling = true,
