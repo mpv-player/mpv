@@ -5325,7 +5325,7 @@ them.
     The filter used for interpolating the temporal axis (frames). This is only
     used if ``--interpolation`` is enabled. The only valid choices for
     ``--tscale`` are separable convolution filters (use ``--tscale=help`` to
-    get a list). The default is ``mitchell``.
+    get a list). The default is ``oversample``.
 
     Common ``--tscale`` choices include ``oversample``, ``linear``,
     ``catmull_rom``, ``mitchell``, ``gaussian``, or ``bicubic``. These are

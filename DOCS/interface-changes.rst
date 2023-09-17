@@ -65,6 +65,7 @@ Interface changes
       `--demuxer-cache-unlink-files`
     - enable `--correct-downscaling`, `--linear-downscaling`, `--sigmoid-upscaling`
     - `--cscale` defaults to `--scale` if not defined
+    - change `--tscale` default to `oversample`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
