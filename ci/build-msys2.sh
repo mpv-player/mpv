@@ -1,6 +1,8 @@
 #!/bin/sh -e
 
 meson setup build            \
+  --werror                   \
+  -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
   -D cdda=enabled            \
   -D d3d-hwaccel=enabled     \
   -D d3d11=enabled           \
