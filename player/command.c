@@ -2491,7 +2491,7 @@ static int mp_property_estimated_display_fps(void *ctx, struct m_property *prop,
     struct vo *vo = mpctx->video_out;
     if (!vo)
         return M_PROPERTY_UNAVAILABLE;
-    double interval = vo_get_estimated_vsync_interval(vo);
+    double interval = vo_get_estimated_vsync_interval(vo) / 1e9;
     if (interval <= 0)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_double_ro(action, arg, 1.0 / interval);
