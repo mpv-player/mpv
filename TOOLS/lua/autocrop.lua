@@ -124,8 +124,8 @@ end
 
 function remove_filter(label)
     if options.use_vo_crop and label == labels.crop then
-        if mp.get_property('video-crop') ~= '0x0' then
-            mp.command(string.format("%s set video-crop 0", command_prefix))
+        if mp.get_property('video-crop') ~= "" then
+            mp.command(string.format("%s set video-crop ''", command_prefix))
             return true
         end
         return false

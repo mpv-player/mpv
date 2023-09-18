@@ -2393,8 +2393,10 @@ void m_rect_apply(struct mp_rect *rc, int w, int h, struct m_geometry *gm)
         rc->x1 = w - rc->x0;
     if (!gm->wh_valid || rc->y1 == 0 || rc->y1 == INT_MIN)
         rc->y1 = h - rc->y0;
-    rc->x1 += rc->x0;
-    rc->y1 += rc->y0;
+    if (gm->wh_valid && (gm->w || gm->h))
+        rc->x1 += rc->x0;
+    if (gm->wh_valid && (gm->w || gm->h))
+        rc->y1 += rc->y0;
 }
 
 static int parse_rect(struct mp_log *log, const m_option_t *opt,
@@ -2408,12 +2410,12 @@ static int parse_rect(struct mp_log *log, const m_option_t *opt,
     if (!parse_geometry_str(&gm, param))
         goto exit;
 
-    if (gm.x_sign || gm.y_sign || gm.ws ||
-       (gm.wh_valid && (gm.w < 0 || gm.h < 0)) ||
-       (gm.xy_valid && (gm.x < 0 || gm.y < 0)))
-    {
+    bool invalid = gm.x_sign || gm.y_sign || gm.ws;
+    invalid |= gm.wh_valid && (gm.w < 0 || gm.h < 0);
+    invalid |= gm.wh_valid && !gm.xy_valid && gm.w <= 0 && gm.h <= 0;
+
+    if (invalid)
         goto exit;
-    }
 
     if (dst)
         *((struct m_geometry *)dst) = gm;
