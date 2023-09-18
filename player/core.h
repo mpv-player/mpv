@@ -391,7 +391,7 @@ typedef struct MPContext {
     double start_timestamp;
 
     // Timestamp from the last time some timing functions read the
-    // current time, in microseconds.
+    // current time, in nanoseconds.
     // Used to turn a new time value to a delta from last time.
     int64_t last_time;
 

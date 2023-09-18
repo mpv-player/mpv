@@ -123,10 +123,10 @@ static void mp_process_input(struct MPContext *mpctx)
 
 double get_relative_time(struct MPContext *mpctx)
 {
-    int64_t new_time = mp_time_us();
+    int64_t new_time = mp_time_ns();
     int64_t delta = new_time - mpctx->last_time;
     mpctx->last_time = new_time;
-    return delta * 0.000001;
+    return delta * 1e-9;
 }
 
 void update_core_idle_state(struct MPContext *mpctx)
