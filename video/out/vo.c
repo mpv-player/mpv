@@ -1261,12 +1261,11 @@ double vo_get_vsync_interval(struct vo *vo)
     return res;
 }
 
-// Returns duration of a display refresh in seconds.
 double vo_get_estimated_vsync_interval(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    double res = in->estimated_vsync_interval / 1e9;
+    double res = in->estimated_vsync_interval;
     pthread_mutex_unlock(&in->lock);
     return res;
 }
