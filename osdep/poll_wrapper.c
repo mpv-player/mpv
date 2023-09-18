@@ -1,6 +1,4 @@
 /*
- * poll shim that supports device files on macOS.
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -22,9 +20,12 @@
 #include <sys/select.h>
 #include <stdio.h>
 
-#include "osdep/polldev.h"
+#include "poll_wrapper.h"
 
-int polldev(struct pollfd fds[], nfds_t nfds, int timeout) {
+
+// poll shim that supports device files on macOS.
+int polldev(struct pollfd fds[], nfds_t nfds, int timeout)
+{
 #ifdef __APPLE__
     int maxfd = 0;
     fd_set readfds, writefds;

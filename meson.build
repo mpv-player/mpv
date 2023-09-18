@@ -403,7 +403,7 @@ if posix
     subprocess_source = files('osdep/subprocess-posix.c')
     sources += path_source + subprocess_source + \
                files('input/ipc-unix.c',
-                     'osdep/polldev.c',
+                     'osdep/poll_wrapper.c',
                      'osdep/terminal-unix.c',
                      'sub/filter_regex.c')
 endif
