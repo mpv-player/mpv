@@ -341,9 +341,9 @@ const struct m_sub_options mp_osd_render_sub_opts = {
     },
     .size = sizeof(OPT_BASE_STRUCT),
     .defaults = &(OPT_BASE_STRUCT){
-        .osd_bar_align_y = 0.5,
-        .osd_bar_w = 75.0,
-        .osd_bar_h = 3.125,
+        .osd_bar_align_y = 0.8,
+        .osd_bar_w = 13.5,
+        .osd_bar_h = 2.875,
         .osd_scale = 1,
         .osd_scale_by_window = true,
     },
