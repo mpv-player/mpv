@@ -474,7 +474,7 @@ static void display_wakeup(struct ra_ctx *ctx)
     // TODO
 }
 
-static void display_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
+static void display_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 {
     // TODO
 }

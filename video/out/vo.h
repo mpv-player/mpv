@@ -414,7 +414,7 @@ struct vo_driver {
      * immediately.
      */
     void (*wakeup)(struct vo *vo);
-    void (*wait_events)(struct vo *vo, int64_t until_time_us);
+    void (*wait_events)(struct vo *vo, int64_t until_time_ns);
 
     /*
      * Closes driver. Should restore the original state of the system.

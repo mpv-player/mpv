@@ -114,7 +114,7 @@ double vo_drm_get_display_fps(struct vo_drm_state *drm);
 void vo_drm_get_vsync(struct vo *vo, struct vo_vsync_info *info);
 void vo_drm_set_monitor_par(struct vo *vo);
 void vo_drm_uninit(struct vo *vo);
-void vo_drm_wait_events(struct vo *vo, int64_t until_time_us);
+void vo_drm_wait_events(struct vo *vo, int64_t until_time_ns);
 void vo_drm_wait_on_flip(struct vo_drm_state *drm);
 void vo_drm_wakeup(struct vo *vo);
 

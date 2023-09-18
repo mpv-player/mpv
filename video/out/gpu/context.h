@@ -48,7 +48,7 @@ struct ra_ctx_fns {
     // These behave exactly like vo_driver.wakeup/wait_events. They are
     // optional.
     void (*wakeup)(struct ra_ctx *ctx);
-    void (*wait_events)(struct ra_ctx *ctx, int64_t until_time_us);
+    void (*wait_events)(struct ra_ctx *ctx, int64_t until_time_ns);
     void (*update_render_opts)(struct ra_ctx *ctx);
 
     // Initialize/destroy the 'struct ra' and possibly the underlying VO backend.

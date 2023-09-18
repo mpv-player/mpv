@@ -734,9 +734,9 @@ static int drm_egl_control(struct ra_ctx *ctx, int *events, int request,
     return ret;
 }
 
-static void drm_egl_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
+static void drm_egl_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 {
-    vo_drm_wait_events(ctx->vo, until_time_us);
+    vo_drm_wait_events(ctx->vo, until_time_ns);
 }
 
 static void drm_egl_wakeup(struct ra_ctx *ctx)

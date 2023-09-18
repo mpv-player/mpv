@@ -520,10 +520,10 @@ static void wakeup(struct vo *vo)
     SDL_PushEvent(&event);
 }
 
-static void wait_events(struct vo *vo, int64_t until_time_us)
+static void wait_events(struct vo *vo, int64_t until_time_ns)
 {
-    int64_t wait_us = until_time_us - mp_time_us();
-    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+    int64_t wait_ns = until_time_ns - mp_time_ns();
+    int timeout_ms = MPCLAMP(wait_ns / 1e6, 1, 10000);
     SDL_Event ev;
 
     while (SDL_WaitEventTimeout(&ev, timeout_ms)) {
