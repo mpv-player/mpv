@@ -102,6 +102,7 @@ audio and sub
     left-click      cycle audio/sub tracks forward
     right-click     cycle audio/sub tracks backwards
     shift+L-click   show available audio/sub tracks
+    mouse wheel     cycle audio/sub tracks forward/backwards
     =============   ================================================
 
 vol

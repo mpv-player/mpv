@@ -672,6 +672,8 @@ done:
     if (!vo_wayland_reconfig(vo))
         return VO_ERROR;
 
+    wl_surface_set_buffer_transform(vo->wl->video_surface, img->params.rotate / 90);
+
     // Immediately destroy all buffers if params change.
     destroy_buffers(vo);
     return 0;
@@ -831,6 +833,7 @@ err:
 const struct vo_driver video_out_dmabuf_wayland = {
     .description = "Wayland dmabuf video output",
     .name = "dmabuf-wayland",
+    .caps = VO_CAP_ROTATE90,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig2 = reconfig,

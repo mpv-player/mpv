@@ -2965,6 +2965,12 @@ Property list
     ``track-list/N/demux-w``, ``track-list/N/demux-h``
         Video size hint as indicated by the container. (Not always accurate.)
 
+    ``track-list/N/demux-crop-x``, ``track-list/N/demux-crop-y``
+        Crop offset of the source video frame.
+
+    ``track-list/N/demux-crop-w``, ``track-list/N/demux-crop-h``
+        Video size after cropping.
+
     ``track-list/N/demux-channel-count``
         Number of audio channels as indicated by the container. (Not always
         accurate - in particular, the track could be decoded as a different
@@ -3027,6 +3033,10 @@ Property list
                 "decoder-desc"      MPV_FORMAT_STRING
                 "demux-w"           MPV_FORMAT_INT64
                 "demux-h"           MPV_FORMAT_INT64
+                "demux-crop-x"      MPV_FORMAT_INT64
+                "demux-crop-y"      MPV_FORMAT_INT64
+                "demux-crop-w"      MPV_FORMAT_INT64
+                "demux-crop-h"      MPV_FORMAT_INT64
                 "demux-channel-count" MPV_FORMAT_INT64
                 "demux-channels"    MPV_FORMAT_STRING
                 "demux-samplerate"  MPV_FORMAT_INT64

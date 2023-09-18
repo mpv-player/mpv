@@ -1801,8 +1801,10 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
     }
 
     par->config.clamp = cfg->clamp;
-    par->config.blur = cfg->kernel.blur;
-    par->config.taper = cfg->kernel.taper;
+    if (cfg->kernel.blur > 0.0)
+        par->config.blur = cfg->kernel.blur;
+    if (cfg->kernel.taper > 0.0)
+        par->config.taper = cfg->kernel.taper;
     if (cfg->radius > 0.0) {
         if (par->config.kernel->resizable) {
 #if PL_API_VER >= 303

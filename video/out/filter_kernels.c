@@ -216,15 +216,6 @@ static double quadric(params *p, double x)
     return 0.0;
 }
 
-#define POW3(x) ((x) <= 0 ? 0 : (x) * (x) * (x))
-static double bicubic(params *p, double x)
-{
-    return (1.0/6.0) * (      POW3(x + 2)
-                        - 4 * POW3(x + 1)
-                        + 6 * POW3(x)
-                        - 4 * POW3(x - 1));
-}
-
 static double bessel_i0(double x)
 {
     double s = 1.0;
@@ -397,8 +388,8 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"haasnsoft", JINC_R3, jinc, .blur = 1.11, .resizable = true},
         .polar = true, .window = "hanning"},
     // Cubic filters
-    {{"bicubic",        2,   bicubic}},
-    {{"bcspline",       2,   cubic_bc, .params = {0.5, 0.5} }},
+    {{"bicubic",        2,   cubic_bc, .params = {1.0, 0.0} }},
+    {{"hermite",        1,   cubic_bc, .params = {0.0, 0.0} }},
     {{"catmull_rom",    2,   cubic_bc, .params = {0.0, 0.5} }},
     {{"mitchell",       2,   cubic_bc, .params = {1.0/3.0, 1.0/3.0} }},
     {{"robidoux",       2,   cubic_bc, .params = {12 / (19 + 9 * M_SQRT2),

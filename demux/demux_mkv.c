@@ -108,6 +108,10 @@ typedef struct mkv_track {
     uint32_t colorspace;
     int stereo_mode;
     struct mp_colorspace color;
+    uint32_t v_crop_top, v_crop_left, v_crop_right, v_crop_bottom;
+    bool v_crop_top_set, v_crop_left_set, v_crop_right_set, v_crop_bottom_set;
+    float v_projection_pose_roll;
+    bool v_projection_pose_roll_set;
 
     uint32_t a_channels, a_bps;
     float a_sfreq;
@@ -604,6 +608,20 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
     }
 }
 
+static void parse_trackprojection(struct demuxer *demuxer, struct mkv_track *track,
+                                  struct ebml_projection *projection)
+{
+    if (projection->n_projection_pose_yaw || projection->n_projection_pose_pitch)
+          MP_WARN(demuxer, "Projection pose yaw/pitch not supported!\n");
+
+    if (projection->n_projection_pose_roll) {
+        track->v_projection_pose_roll = projection->projection_pose_roll;
+        track->v_projection_pose_roll_set = true;
+        MP_DBG(demuxer, "|   + Projection pose roll: %f\n",
+               track->v_projection_pose_roll);
+    }
+}
+
 static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
                              struct ebml_video *video)
 {
@@ -643,8 +661,30 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
                     video->stereo_mode);
         }
     }
+    if (video->n_pixel_crop_top) {
+        track->v_crop_top = video->pixel_crop_top;
+        track->v_crop_top_set = true;
+        MP_DBG(demuxer, "|   + Crop top: %"PRIu32"\n", track->v_crop_top);
+    }
+    if (video->n_pixel_crop_left) {
+        track->v_crop_left = video->pixel_crop_left;
+        track->v_crop_left_set = true;
+        MP_DBG(demuxer, "|   + Crop left: %"PRIu32"\n", track->v_crop_left);
+    }
+    if (video->n_pixel_crop_right) {
+        track->v_crop_right = video->pixel_crop_right;
+        track->v_crop_right_set = true;
+        MP_DBG(demuxer, "|   + Crop right: %"PRIu32"\n", track->v_crop_right);
+    }
+    if (video->n_pixel_crop_bottom) {
+        track->v_crop_bottom = video->pixel_crop_bottom;
+        track->v_crop_bottom_set = true;
+        MP_DBG(demuxer, "|   + Crop bottom: %"PRIu32"\n", track->v_crop_bottom);
+    }
     if (video->n_colour)
         parse_trackcolour(demuxer, track, &video->colour);
+    if (video->n_projection)
+        parse_trackprojection(demuxer, track, &video->projection);
 }
 
 /**
@@ -1479,6 +1519,18 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 
     sh_v->stereo_mode = track->stereo_mode;
     sh_v->color = track->color;
+
+    sh_v->crop.x0 = track->v_crop_left_set ? track->v_crop_left : 0;
+    sh_v->crop.y0 = track->v_crop_top_set ? track->v_crop_top : 0;
+    sh_v->crop.x1 = track->v_width -
+                        (track->v_crop_right_set ? track->v_crop_right : 0);
+    sh_v->crop.y1 = track->v_height -
+                        (track->v_crop_bottom_set ? track->v_crop_bottom : 0);
+
+    if (track->v_projection_pose_roll_set) {
+        int rotate = lrintf(fmodf(fmodf(track->v_projection_pose_roll, 360) + 360, 360));
+        sh_v->rotate = rotate;
+    }
 
 done:
     demux_add_sh_stream(demuxer, sh);

@@ -316,25 +316,6 @@ Available video output drivers are:
         nla
             ``non-linear anamorphic scaling``
 
-    ``--vo-vaapi-deint-mode=<mode>``
-        Select deinterlacing algorithm. Note that by default deinterlacing is
-        initially always off, and needs to be enabled with the ``d`` key
-        (default key binding for ``cycle deinterlace``).
-
-        This option doesn't apply if libva supports video post processing (vpp).
-        In this case, the default for ``deint-mode`` is ``no``, and enabling
-        deinterlacing via user interaction using the methods mentioned above
-        actually inserts the ``vavpp`` video filter. If vpp is not actually
-        supported with the libva backend in use, you can use this option to
-        forcibly enable VO based deinterlacing.
-
-        no
-            Don't allow deinterlacing (default for newer libva).
-        first-field
-            Show only first field.
-        bob
-            bob deinterlacing (default for older libva).
-
     ``--vo-vaapi-scaled-osd=<yes|no>``
         If enabled, then the OSD is rendered at video resolution and scaled to
         display resolution. By default, this is disabled, and the OSD is
