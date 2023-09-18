@@ -63,6 +63,9 @@ Interface changes
     - remove `bcspline` filter (`bicubic` is now the same as `bcspline`)
     - rename `--cache-dir` and `--cache-unlink-files` to `--demuxer-cache-dir` and
       `--demuxer-cache-unlink-files`
+    - add `--write-user-files-in-config-dir` option
+    - `--config-dir` no longer silently saves cache and watch_later files in the same
+      directory. This is controlled by `--write-user-files-in-config-dir`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

@@ -87,8 +87,13 @@ static const char *mp_get_platform_path(void *talloc_ctx,
                 return (n == 0 && global->configdir[0]) ? global->configdir : NULL;
         }
         for (int n = 0; n < MP_ARRAY_SIZE(config_dir_replaces); n++) {
-            if (strcmp(config_dir_replaces[n], type) == 0)
-                return global->configdir[0] ? global->configdir : NULL;
+            if (strcmp(config_dir_replaces[n], type) == 0) {
+                if (global->configdir[0] && global->force_user_files) {
+                    return global->configdir;
+                } else if (!global->configdir[0]) {
+                    return NULL;
+                }
+            }
         }
     }
 
@@ -122,6 +127,7 @@ void mp_init_paths(struct mpv_global *global, struct MPOpts *opts)
         force_configdir = "";
 
     global->configdir = talloc_strdup(global, force_configdir);
+    global->force_user_files = opts->write_user_files_in_config_dir;
 }
 
 char *mp_find_user_file(void *talloc_ctx, struct mpv_global *global,

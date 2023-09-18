@@ -443,6 +443,7 @@ static const m_option_t mp_opts[] = {
     {"config", OPT_BOOL(load_config), .flags = CONF_PRE_PARSE},
     {"config-dir", OPT_STRING(force_configdir),
         .flags = CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE},
+    {"write-user-files-in-config-dir", OPT_BOOL(write_user_files_in_config_dir)},
     {"reset-on-next-file", OPT_STRINGLIST(reset_options)},
 
 #if HAVE_LUA || HAVE_JAVASCRIPT || HAVE_CPLUGINS

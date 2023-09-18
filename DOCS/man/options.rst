@@ -765,6 +765,13 @@ Program Behavior
 
     Note that the ``--no-config`` option takes precedence over this option.
 
+``--write-user-files-in-config-dir=<yes|no>``
+    If the default config directory is being overrwritten with ``--config-dir``,
+    also force all user files (such has ``cache`` and ``state``) to be written
+    in this directory as well. This has no effect if ``--config-dir`` isn't used.
+    Note that options like ``--watch-later-directory`` which specifically set
+    a directory for some files will have priority over this if they are set.
+
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To

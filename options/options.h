@@ -216,6 +216,7 @@ typedef struct MPOpts {
     bool quiet;
     bool load_config;
     char *force_configdir;
+    bool write_user_files_in_config_dir;
     bool use_filedir_conf;
     int hls_bitrate;
     int edition_id;
