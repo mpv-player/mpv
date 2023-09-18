@@ -717,7 +717,7 @@ void vo_wait_default(struct vo *vo, int64_t until_time)
 
     pthread_mutex_lock(&in->lock);
     if (!in->need_wakeup) {
-        struct timespec ts = mp_time_us_to_realtime(until_time);
+        struct timespec ts = mp_time_ns_to_realtime(until_time);
         pthread_cond_timedwait(&in->wakeup, &in->lock, &ts);
     }
     pthread_mutex_unlock(&in->lock);
@@ -1064,7 +1064,7 @@ static void *vo_thread(void *ptr)
         stats_event(in->stats, "iterations");
         vo->driver->control(vo, VOCTRL_CHECK_EVENTS, NULL);
         bool working = render_frame(vo);
-        int64_t now = mp_time_us();
+        int64_t now = mp_time_ns();
         int64_t wait_until = now + (working ? 0 : (int64_t)1e9);
 
         pthread_mutex_lock(&in->lock);

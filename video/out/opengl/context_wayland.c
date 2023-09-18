@@ -198,9 +198,9 @@ static void wayland_egl_wakeup(struct ra_ctx *ctx)
     vo_wayland_wakeup(ctx->vo);
 }
 
-static void wayland_egl_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
+static void wayland_egl_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 {
-    vo_wayland_wait_events(ctx->vo, until_time_us);
+    vo_wayland_wait_events(ctx->vo, until_time_ns);
 }
 
 static void wayland_egl_update_render_opts(struct ra_ctx *ctx)

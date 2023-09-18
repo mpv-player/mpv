@@ -1304,15 +1304,15 @@ void vo_drm_set_monitor_par(struct vo *vo)
     MP_VERBOSE(drm, "Monitor pixel aspect: %g\n", vo->monitor_par);
 }
 
-void vo_drm_wait_events(struct vo *vo, int64_t until_time_us)
+void vo_drm_wait_events(struct vo *vo, int64_t until_time_ns)
 {
     struct vo_drm_state *drm = vo->drm;
     if (drm->vt_switcher_active) {
-        int64_t wait_us = until_time_us - mp_time_us();
-        int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+        int64_t wait_ns = until_time_ns - mp_time_ns();
+        int timeout_ms = MPCLAMP(wait_ns / 1e6, 1, 10000);
         vt_switcher_poll(&drm->vt_switcher, timeout_ms);
     } else {
-        vo_wait_default(vo, until_time_us);
+        vo_wait_default(vo, until_time_ns);
     }
 }
 
