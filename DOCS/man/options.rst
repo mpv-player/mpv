@@ -4165,7 +4165,7 @@ OSD
     completely, use ``--osd-level=0``.
 
 ``--osd-on-seek=<no,bar,msg,msg-bar>``
-    Set what is displayed on the OSD during seeks. The default is ``bar``.
+    Set what is displayed on the OSD during seeks. The default is ``msg``.
 
     You can configure this on a per-command basis in input.conf using ``osd-``
     prefixes, see ``Input Command Prefixes``.
