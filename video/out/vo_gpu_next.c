@@ -1245,7 +1245,7 @@ static bool update_icc(struct priv *p, struct bstr icc)
     return ok;
 #else
     talloc_free((void *) p->icc_profile.data);
-    profile.data = talloc_steal(p, profile.data);
+    profile.data = talloc_steal(p, (void *) profile.data);
     p->icc_profile = profile;
     return true;
 #endif
