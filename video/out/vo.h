@@ -207,10 +207,10 @@ struct vo_extra {
 };
 
 struct vo_frame {
-    // If > 0, realtime when frame should be shown, in mp_time_us() units.
+    // If > 0, realtime when frame should be shown, in mp_time_ns() units.
     // If 0, present immediately.
     int64_t pts;
-    // Approximate frame duration, in us.
+    // Approximate frame duration, in ns.
     int duration;
     // Realtime of estimated distance between 2 vsync events.
     double vsync_interval;
@@ -508,7 +508,7 @@ void vo_query_formats(struct vo *vo, uint8_t *list);
 void vo_event(struct vo *vo, int event);
 int vo_query_and_reset_events(struct vo *vo, int events);
 struct mp_image *vo_get_current_frame(struct vo *vo);
-void vo_set_queue_params(struct vo *vo, int64_t offset_us, int num_req_frames);
+void vo_set_queue_params(struct vo *vo, int64_t offset_ns, int num_req_frames);
 int vo_get_num_req_frames(struct vo *vo);
 double vo_get_vsync_interval(struct vo *vo);
 double vo_get_estimated_vsync_interval(struct vo *vo);

@@ -1198,7 +1198,7 @@ void write_video(struct MPContext *mpctx)
     }
 
     double time_frame = MPMAX(mpctx->time_frame, -1);
-    int64_t pts = mp_time_us() + (int64_t)(time_frame * 1e6);
+    int64_t pts = mp_time_ns() + (int64_t)(time_frame * 1e9);
 
     // wait until VO wakes us up to get more frames
     // (NB: in theory, the 1st frame after display sync mode change uses the
@@ -1240,7 +1240,7 @@ void write_video(struct MPContext *mpctx)
         diff /= mpctx->video_speed;
         if (mpctx->time_frame < 0)
             diff += mpctx->time_frame;
-        frame->duration = MPCLAMP(diff, 0, 10) * 1e6;
+        frame->duration = MPCLAMP(diff, 0, 10) * 1e9;
     }
 
     mpctx->video_pts = mpctx->next_frames[0]->pts;
