@@ -55,6 +55,7 @@
 #include "vo.h"
 #include "win_state.h"
 #include "osdep/io.h"
+#include "osdep/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "osdep/subprocess.h"
 
@@ -2177,9 +2178,9 @@ void vo_x11_wait_events(struct vo *vo, int64_t until_time_ns)
         { .fd = x11->wakeup_pipe[0], .events = POLLIN },
     };
     int64_t wait_ns = until_time_ns - mp_time_ns();
-    int timeout_ms = MPCLAMP(wait_ns / 1e6, 1, 10000);
+    int64_t timeout_ns = MPCLAMP(wait_ns, 1e6, 1e10);
 
-    poll(fds, 2, timeout_ms);
+    mp_poll(fds, 2, timeout_ns);
 
     if (fds[1].revents & POLLIN)
         mp_flush_wakeup_pipe(x11->wakeup_pipe[0]);
