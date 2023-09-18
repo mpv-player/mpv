@@ -4905,7 +4905,7 @@ Cache
     media is closed. If the option is disabled and enabled again, it will
     continue to use the cache file that was opened first.
 
-``--cache-dir=<path>``
+``--demuxer-cache-dir=<path>``
     Directory where to create temporary files. Cache is stored in the system's
     cache directory (usually ``~/.cache/mpv``) if this is unset.
 
@@ -4939,7 +4939,7 @@ Cache
 
     This option also triggers when playback is restarted after seeking.
 
-``--cache-unlink-files=<immediate|whendone|no>``
+``--demuxer-cache-unlink-files=<immediate|whendone|no>``
     Whether or when to unlink cache files (default: immediate). This affects
     cache files which are inherently temporary, and which make no sense to
     remain on disk after the player terminates. This is a debugging option.
