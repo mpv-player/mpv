@@ -1574,7 +1574,7 @@ Video
     This works with hwdec, unlike the equivalent 'lavfi-crop'. When offset is
     omitted, the central area will be cropped. Setting the crop to empty one
     ``--video-crop=0x0+0+0`` overrides container crop and disables cropping.
-    Setting the crop to ``--video-crop=0`` disables manual cropping and restores
+    Setting the crop to ``--video-crop=""`` disables manual cropping and restores
     the container crop if it's specified.
 
 ``--video-zoom=<value>``

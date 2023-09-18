@@ -1015,8 +1015,7 @@ static void apply_video_crop(struct MPContext *mpctx, struct vo *vo)
     for (int n = 0; n < mpctx->num_next_frames; n++) {
         struct m_geometry *gm = &vo->opts->video_crop;
         struct mp_image_params p = mpctx->next_frames[n]->params;
-        if (gm->xy_valid || (gm->wh_valid && (gm->w > 0 || gm->w_per > 0 ||
-                                            gm->h > 0 || gm->h_per > 0)))
+        if (gm->xy_valid || (gm->wh_valid && (gm->w > 0 || gm->h > 0)))
         {
             m_rect_apply(&p.crop, p.w, p.h, gm);
         }
