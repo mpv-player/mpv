@@ -424,6 +424,9 @@ if posix and not darwin
                      'osdep/timer-linux.c')
 endif
 
+features += {'ppoll': cc.has_function('ppoll', args: '-D_GNU_SOURCE',
+                                      prefix: '#include <poll.h>')}
+
 cd_devices = {
     'windows': 'D:',
     'cygwin': 'D:',
