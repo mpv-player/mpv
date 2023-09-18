@@ -2,6 +2,8 @@
 set -e
 
 meson setup build \
+  --werror        \
+  -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
   -Db_sanitize=address,undefined \
   -Dcdda=enabled          \
   -Ddvbin=enabled         \

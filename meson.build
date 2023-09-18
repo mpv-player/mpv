@@ -256,8 +256,6 @@ flags = ['-D_ISOC99_SOURCE', '-D_GNU_SOURCE',
 link_flags = []
 
 test_flags = ['-Werror=implicit-function-declaration',
-              '-Wno-error=deprecated-declarations',
-              '-Wno-error=unused-function',
               '-Wempty-body',
               '-Wdisabled-optimization',
               '-Wstrict-prototypes',

@@ -268,6 +268,8 @@ build=mingw_build
 rm -rf $build
 
 meson setup $build --cross-file "$prefix_dir/crossfile" \
+    --werror                   \
+    -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
     --buildtype debugoptimized \
     -Dlibmpv=true -Dlua=luajit \
     -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
