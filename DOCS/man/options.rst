@@ -3985,9 +3985,10 @@ Demuxer
     libarchive opens all volumes anyway when playing the main file, even though
     mpv iterated no archive entries yet.
 
-``--directory-mode=<lazy|recursive|ignore>``
+``--directory-mode=<auto|lazy|recursive|ignore>``
     When opening a directory, open subdirectories lazily, recursively or not at
-    all (default: lazy).
+    all. The default is ``auto``, which behaves like ``recursive`` with
+    ``--shuffle``, and like ``lazy`` otherwise.
 
 Input
 -----

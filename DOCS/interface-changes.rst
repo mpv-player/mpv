@@ -72,6 +72,7 @@ Interface changes
     - update defaults to `--hdr-peak-decay-rate=20`, `--hdr-scene-threshold-low=1.0`,
       `--hdr-scene-threshold-high=3.0`
     - update defaults to `--deband-threshold=48`, `--deband-grain=32`
+    - add `--directory-mode=auto` and make it the default
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
