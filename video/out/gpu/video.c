@@ -4129,13 +4129,13 @@ static void reinit_from_options(struct gl_video *p)
     gl_video_setup_hooks(p);
     reinit_osd(p);
 
-    int vs;
-    mp_read_option_raw(p->global, "video-sync", &m_option_type_choice, &vs);
-    if (p->opts.interpolation && !vs && !p->dsi_warned) {
+    struct mp_vo_opts *vo_opts = mp_get_config_group(p, p->global, &vo_sub_opts);
+    if (p->opts.interpolation && !vo_opts->video_sync && !p->dsi_warned) {
         MP_WARN(p, "Interpolation now requires enabling display-sync mode.\n"
                    "E.g.: --video-sync=display-resample\n");
         p->dsi_warned = true;
     }
+    talloc_free(vo_opts);
 
     if (p->opts.correct_downscaling && !p->correct_downscaling_warned) {
         const char *name = p->opts.scaler[SCALER_DSCALE].kernel.name;
