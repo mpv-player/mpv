@@ -95,6 +95,7 @@ extern const struct m_sub_options d3d11va_conf;
 extern const struct m_sub_options angle_conf;
 extern const struct m_sub_options macos_conf;
 extern const struct m_sub_options wayland_conf;
+extern const struct m_sub_options wingl_conf;
 extern const struct m_sub_options vaapi_conf;
 
 static const struct m_sub_options screenshot_conf = {
@@ -840,8 +841,7 @@ static const m_option_t mp_opts[] = {
 #endif
 
 #if HAVE_GL_WIN32
-    {"opengl-dwmflush", OPT_CHOICE(wingl_dwm_flush,
-        {"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})},
+    {"", OPT_SUBSTRUCT(wingl_opts, wingl_conf)},
 #endif
 
 #if HAVE_CUDA_HWACCEL
