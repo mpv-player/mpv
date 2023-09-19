@@ -3472,8 +3472,8 @@ Window
 Disc Devices
 ------------
 
-``--cdrom-device=<path>``
-    Specify the CD-ROM device (default: ``/dev/cdrom``).
+``--cdda-device=<path>``
+    Specify the CD device for CDDA playback (default: ``/dev/cdrom``).
 
 ``--dvd-device=<path>``
     Specify the DVD device or .iso filename (default: ``/dev/dvd``). You can
