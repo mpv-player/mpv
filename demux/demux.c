@@ -84,30 +84,6 @@ static const demuxer_desc_t *const demuxer_list[] = {
     NULL
 };
 
-struct demux_opts {
-    int enable_cache;
-    bool disk_cache;
-    int64_t max_bytes;
-    int64_t max_bytes_bw;
-    bool donate_fw;
-    double min_secs;
-    double hyst_secs;
-    bool force_seekable;
-    double min_secs_cache;
-    bool access_references;
-    int seekable_cache;
-    int index_mode;
-    double mf_fps;
-    char *mf_type;
-    bool create_ccs;
-    char *record_file;
-    int video_back_preroll;
-    int audio_back_preroll;
-    int back_batch[STREAM_TYPE_COUNT];
-    double back_seek_size;
-    char *meta_cp;
-};
-
 #define OPT_BASE_STRUCT struct demux_opts
 
 static bool get_demux_sub_opts(int index, const struct m_sub_options **sub);
@@ -191,9 +167,6 @@ struct demux_internal {
     pthread_t thread;
 
     // -- All the following fields are protected by lock.
-
-    struct demux_opts *opts;
-    struct m_config_cache *opts_cache;
 
     bool thread_terminate;
     bool threading;
@@ -1033,7 +1006,7 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
 
     switch (ds->type) {
     case STREAM_AUDIO:
-        ds->back_preroll = in->opts->audio_back_preroll;
+        ds->back_preroll = in->d_user->opts->audio_back_preroll;
         if (ds->back_preroll < 0) { // auto
             ds->back_preroll = mp_codec_is_lossless(sh->codec->codec) ? 0 : 1;
             if (sh->codec->codec && (strcmp(sh->codec->codec, "opus") == 0 ||
@@ -1043,7 +1016,7 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
         }
         break;
     case STREAM_VIDEO:
-        ds->back_preroll = in->opts->video_back_preroll;
+        ds->back_preroll = in->d_user->opts->video_back_preroll;
         if (ds->back_preroll < 0)
             ds->back_preroll = 0; // auto
         break;
@@ -1471,7 +1444,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
 
     // Number of renderable keyframes to return to user.
     // (Excludes preroll, which is decoded by user, but then discarded.)
-    int batch = MPMAX(in->opts->back_batch[ds->type], 1);
+    int batch = MPMAX(in->d_user->opts->back_batch[ds->type], 1);
     // Number of keyframes to return to the user in total.
     int total = batch + ds->back_preroll;
 
@@ -1583,7 +1556,7 @@ resume_earlier:
             in->back_any_need_recheck = true;
             pthread_cond_signal(&in->wakeup);
         } else {
-            ds->back_seek_pos -= in->opts->back_seek_size;
+            ds->back_seek_pos -= in->d_user->opts->back_seek_size;
             in->need_back_seek = true;
         }
     }
@@ -1990,13 +1963,13 @@ static void record_packet(struct demux_internal *in, struct demux_packet *dp)
 {
     // (should preferably be outside of the lock)
     if (in->enable_recording && !in->recorder &&
-        in->opts->record_file && in->opts->record_file[0])
+        in->d_user->opts->record_file && in->d_user->opts->record_file[0])
     {
         // Later failures shouldn't make it retry and overwrite the previously
         // recorded file.
         in->enable_recording = false;
 
-        in->recorder = recorder_create(in, in->opts->record_file);
+        in->recorder = recorder_create(in, in->d_user->opts->record_file);
         if (!in->recorder)
             MP_ERR(in, "Disabling recording.\n");
     }
@@ -2075,7 +2048,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 
     record_packet(in, dp);
 
-    if (in->cache && in->opts->disk_cache) {
+    if (in->cache && in->d_user->opts->disk_cache) {
         int64_t pos = demux_cache_write(in->cache, dp);
         if (pos >= 0) {
             demux_packet_unref_contents(dp);
@@ -2330,7 +2303,7 @@ static void prune_old_packets(struct demux_internal *in)
         uint64_t max_avail = in->max_bytes_bw;
         // Backward cache (if enabled at all) can use unused forward cache.
         // Still leave 1 byte free, so the read_packet logic doesn't get stuck.
-        if (max_avail && in->max_bytes > (fw_bytes + 1) && in->opts->donate_fw)
+        if (max_avail && in->max_bytes > (fw_bytes + 1) && in->d_user->opts->donate_fw)
             max_avail += in->max_bytes - (fw_bytes + 1);
         if (in->total_bytes - fw_bytes <= max_avail)
             break;
@@ -2475,9 +2448,10 @@ static void execute_seek(struct demux_internal *in)
     in->seeking_in_progress = MP_NOPTS_VALUE;
 }
 
-static void update_opts(struct demux_internal *in)
+static void update_opts(struct demuxer *demuxer)
 {
-    struct demux_opts *opts = in->opts;
+    struct demux_opts *opts = demuxer->opts;
+    struct demux_internal *in = demuxer->in;
 
     in->min_secs = opts->min_secs;
     in->hyst_secs = opts->hyst_secs;
@@ -2543,8 +2517,8 @@ static void update_opts(struct demux_internal *in)
 // Make demuxing progress. Return whether progress was made.
 static bool thread_work(struct demux_internal *in)
 {
-    if (m_config_cache_update(in->opts_cache))
-        update_opts(in);
+    if (m_config_cache_update(in->d_user->opts_cache))
+        update_opts(in->d_user);
     if (in->tracks_switched) {
         execute_trackswitch(in);
         return true;
@@ -3303,6 +3277,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .is_streaming = sinfo->is_streaming,
         .stream_origin = sinfo->stream_origin,
         .access_references = opts->access_references,
+        .opts = opts,
+        .opts_cache = opts_cache,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
     };
@@ -3314,8 +3290,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .stats = stats_ctx_create(in, global, "demuxer"),
         .can_cache = params && params->is_top_level,
         .can_record = params && params->stream_record,
-        .opts = opts,
-        .opts_cache = opts_cache,
         .d_thread = talloc(demuxer, struct demuxer),
         .d_user = demuxer,
         .after_seek = true, // (assumed identical to initial demuxer state)
@@ -3384,7 +3358,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
 
         switch_to_fresh_cache_range(in);
 
-        update_opts(in);
+        update_opts(demuxer);
 
         demux_update(demuxer, MP_NOPTS_VALUE);
 
@@ -4624,7 +4598,7 @@ static void demux_convert_tags_charset(struct demuxer *demuxer)
 {
     struct demux_internal *in = demuxer->in;
 
-    char *cp = in->opts->meta_cp;
+    char *cp = demuxer->opts->meta_cp;
     if (!cp || mp_charset_is_utf8(cp))
         return;
 
