@@ -244,7 +244,6 @@ typedef struct lavf_priv {
     double seek_delay;
 
     struct demux_lavf_opts *opts;
-    double mf_fps;
 
     bool pcm_seek_hack_disabled;
     AVStream *pcm_seek_hack;
@@ -746,7 +745,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         if (is_image(st, sh->attached_picture, priv->avif)) {
             MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
             sh->image = true;
-            sh->codec->fps = priv->mf_fps;
+            sh->codec->fps = demuxer->opts->mf_fps;
         }
         sh->codec->par_w = st->sample_aspect_ratio.num;
         sh->codec->par_h = st->sample_aspect_ratio.den;
@@ -981,12 +980,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     priv->opts = mp_get_config_group(priv, demuxer->global, &demux_lavf_conf);
     struct demux_lavf_opts *lavfdopts = priv->opts;
 
-    int index_mode;
-    mp_read_option_raw(demuxer->global, "index", &m_option_type_choice,
-                       &index_mode);
-    mp_read_option_raw(demuxer->global, "mf-fps", &m_option_type_double,
-                       &priv->mf_fps);
-
     if (lavf_check_file(demuxer, check) < 0)
         goto fail;
 
@@ -994,7 +987,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (!avfc)
         goto fail;
 
-    if (index_mode != 1)
+    if (demuxer->opts->index_mode != 1)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
     if (lavfdopts->probesize) {
