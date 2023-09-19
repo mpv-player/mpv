@@ -89,6 +89,7 @@ Interface changes
       instead)
     - add `--title-bar` option
     - add `--window-corners` option
+    - rename `--cdrom-device` to `--cdda-device`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

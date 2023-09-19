@@ -547,7 +547,7 @@ static const m_option_t mp_opts[] = {
 
 #if HAVE_CDDA
     {"cdda", OPT_SUBSTRUCT(stream_cdda_opts, stream_cdda_conf)},
-    {"cdrom-device", OPT_STRING(cdrom_device), .flags = M_OPT_FILE},
+    {"cdrom-device", OPT_REPLACED("cdda-device")},
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
