@@ -23,6 +23,9 @@ libavutil = dependency('libavutil', version: '>= 56.70.100')
 libswresample = dependency('libswresample', version: '>= 3.9.100')
 libswscale = dependency('libswscale', version: '>= 5.9.100')
 
+libplacebo = dependency('libplacebo', version: '>=6.338.0', fallback: ['libplacebo', 'libplacebo'],
+    default_options: ['default_library=static', 'demos=false'])
+
 libass = dependency('libass', version: '>= 0.12.2')
 
 # the dependency order of libass -> ffmpeg is necessary due to
@@ -32,6 +35,7 @@ dependencies = [libass,
                 libavfilter,
                 libavformat,
                 libavutil,
+                libplacebo,
                 libswresample,
                 libswscale]
 
@@ -44,6 +48,7 @@ features = {
     'avif-muxer': libavformat.version().version_compare('>= 59.24.100'),
     'libass': true,
     'threads': true,
+    'libplacebo': true,
 }
 
 
@@ -233,6 +238,12 @@ sources = files(
     'video/out/win_state.c',
     'video/repack.c',
     'video/sws_utils.c',
+
+    ## libplacebo
+    'video/out/placebo/ra_pl.c',
+    'video/out/placebo/utils.c',
+    'video/out/vo_gpu_next.c',
+    'video/out/gpu_next/context.c',
 
     ## osdep
     'osdep/io.c',
@@ -930,16 +941,6 @@ if features['jpeg']
     dependencies += jpeg
 endif
 
-libplacebo = dependency('libplacebo', version: '>=6.292.0', required: get_option('libplacebo'))
-features += {'libplacebo': libplacebo.found()}
-if features['libplacebo']
-    dependencies += libplacebo
-    sources += files('video/out/placebo/ra_pl.c',
-                     'video/out/placebo/utils.c',
-                     'video/out/vo_gpu_next.c',
-                     'video/out/gpu_next/context.c')
-endif
-
 sdl2_video = get_option('sdl2-video').require(
     features['sdl2'],
     error_message: 'sdl2 was not found!',
@@ -1257,7 +1258,7 @@ endif
 # vulkan
 vulkan_opt = get_option('vulkan').require(
     libplacebo.get_variable('pl_has_vulkan', default_value: '0') == '1',
-    error_message: 'libplacebo could not be found!',
+    error_message: 'libplacebo compiled without vulkan support!',
 )
 vulkan = dependency('vulkan', version: '>= 1.1.70', required: vulkan_opt)
 features += {'vulkan': vulkan.found()}
@@ -1330,9 +1331,8 @@ endif
 
 vulkan_interop = get_option('vulkan-interop').require(
     features['vulkan'] and vulkan.version().version_compare('>=1.3.238') and
-    features['libplacebo'] and
     libavutil.version().version_compare('>=58.11.100'),
-    error_message: 'Vulkan Interop requires vulkan headers >= 1.3.238, libplacebo, and libavutil >= 58.11.100',
+    error_message: 'Vulkan Interop requires vulkan headers >= 1.3.238, and libavutil >= 58.11.100',
 )
 features += {'vulkan-interop': vulkan_interop.allowed()}
 if vulkan_interop.allowed()
@@ -1426,26 +1426,15 @@ features += {'vaapi': vaapi.allowed()}
 if features['vaapi']
     dependencies += libva
     sources += files('video/filter/vf_vavpp.c',
-                     'video/vaapi.c')
-endif
-
-features += {'vaapi-egl': features['vaapi'] and features['egl'] and features['drm']}
-features += {'vaapi-libplacebo': features['vaapi'] and libplacebo.found()}
-
-if features['vaapi-egl'] or features['vaapi-libplacebo']
-    sources += files('video/out/hwdec/hwdec_vaapi.c')
+                     'video/vaapi.c',
+                     'video/out/hwdec/hwdec_vaapi.c',
+                     'video/out/hwdec/dmabuf_interop_pl.c')
 endif
 
 dmabuf_interop_gl = features['egl'] and features['drm']
 features += {'dmabuf-interop-gl': dmabuf_interop_gl}
 if features['dmabuf-interop-gl']
     sources += files('video/out/hwdec/dmabuf_interop_gl.c')
-endif
-
-dmabuf_interop_pl = features['vaapi-libplacebo']
-features += {'dmabuf-interop-pl': dmabuf_interop_pl}
-if features['dmabuf-interop-pl']
-    sources += files('video/out/hwdec/dmabuf_interop_pl.c')
 endif
 
 vdpau_opt = get_option('vdpau').require(
@@ -1786,7 +1775,6 @@ if get_option('tests')
 endif
 
 summary({'d3d11': features['d3d11'],
-         'gpu-next': features['libplacebo'],
          'javascript': features['javascript'],
          'libmpv': get_option('libmpv'),
          'lua': features['lua'],
