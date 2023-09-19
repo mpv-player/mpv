@@ -56,6 +56,7 @@ static void print_version(struct mp_log *log)
 }
 
 extern const struct m_sub_options tv_params_conf;
+extern const struct m_sub_options stream_bluray_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
@@ -483,7 +484,7 @@ static const m_option_t mp_opts[] = {
 #endif
     {"edition", OPT_CHOICE(edition_id, {"auto", -1}), M_RANGE(0, 8190)},
 #if HAVE_LIBBLURAY
-    {"bluray-device", OPT_STRING(bluray_device), .flags = M_OPT_FILE},
+    {"bluray", OPT_SUBSTRUCT(stream_bluray_opts, stream_bluray_conf)},
 #endif /* HAVE_LIBBLURAY */
 
 // ------------------------- demuxer options --------------------
