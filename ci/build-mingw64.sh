@@ -270,7 +270,7 @@ rm -rf $build
 meson setup $build --cross-file "$prefix_dir/crossfile" \
     --buildtype debugoptimized \
     -Dlibmpv=true -Dlua=luajit \
-    -D{shaderc,spirv-cross,d3d11,libplacebo}=enabled
+    -D{shaderc,spirv-cross,d3d11}=enabled
 
 meson compile -C $build
 

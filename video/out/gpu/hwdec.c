@@ -41,7 +41,7 @@ extern const struct ra_hwdec_driver ra_hwdec_aimagereader;
 extern const struct ra_hwdec_driver ra_hwdec_vulkan;
 
 const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
-#if HAVE_VAAPI_EGL || HAVE_VAAPI_LIBPLACEBO
+#if HAVE_VAAPI
     &ra_hwdec_vaapi,
 #endif
 #if HAVE_VIDEOTOOLBOX_GL || HAVE_IOS_GL

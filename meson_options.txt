@@ -75,7 +75,6 @@ option('gl-dxinterop', type: 'feature', value: 'auto', description: 'OpenGL/Dire
 option('gl-win32', type: 'feature', value: 'auto', description: 'OpenGL Win32 Backend')
 option('gl-x11', type: 'feature', value: 'disabled', description: 'OpenGL X11/GLX (deprecated/legacy)')
 option('jpeg', type: 'feature', value: 'auto', description: 'JPEG support')
-option('libplacebo', type: 'feature', value: 'auto', description: 'libplacebo support')
 option('rpi', type: 'feature', value: 'disabled', description: 'Raspberry Pi support')
 option('sdl2-video', type: 'feature', value: 'auto', description: 'SDL2 video output')
 option('shaderc', type: 'feature', value: 'auto', description: 'libshaderc SPIR-V compiler')
