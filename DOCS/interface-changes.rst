@@ -63,6 +63,8 @@ Interface changes
     - remove `bcspline` filter (`bicubic` is now the same as `bcspline`)
     - rename `--cache-dir` and `--cache-unlink-files` to `--demuxer-cache-dir` and
       `--demuxer-cache-unlink-files`
+    - remove `triangle` option from `--scale`, `--cscale`, `--dscale`,
+      and `--tscale`. Use `bilinear` or `linear` instead.
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

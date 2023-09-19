@@ -185,11 +185,6 @@ static double box(params *p, double x)
     return 1.0;
 }
 
-static double triangle(params *p, double x)
-{
-    return fmax(0.0, 1.0 - fabs(x / p->radius));
-}
-
 static double cosine(params *p, double x)
 {
     return cos(x);
@@ -336,8 +331,6 @@ static double sphinx(params *p, double x)
 
 const struct filter_window mp_filter_windows[] = {
     {"box",            1,   box},
-    {"triangle",       1,   triangle},
-    {"bartlett",       1,   triangle},
     {"cosine",         M_PI_2, cosine},
     {"hanning",        1,   hanning},
     {"tukey",          1,   hanning, .taper = 0.5},
@@ -405,7 +398,6 @@ const struct filter_kernel mp_filter_kernels[] = {
     // Miscellaneous filters
     {{"box",            1,   box, .resizable = true}},
     {{"nearest",        0.5, box}},
-    {{"triangle",       1,   triangle, .resizable = true}},
     {{"gaussian",       2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
     {{0}}
 };
