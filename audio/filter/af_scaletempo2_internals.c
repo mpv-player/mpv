@@ -810,8 +810,8 @@ void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
 {
     p->muted_partial_frame = 0;
     p->output_time = 0;
-    p->search_block_center_offset = 0;
     p->search_block_index = 0;
+    p->target_block_index = 0;
     p->num_complete_frames = 0;
     p->wsola_output_started = false;
     p->channels = channels;
