@@ -365,6 +365,7 @@ typedef struct MPOpts {
     struct drm_opts *drm_opts;
     struct wayland_opts *wayland_opts;
     struct wingl_opts *wingl_opts;
+    struct cuda_opts *cuda_opts;
     struct dvd_opts *dvd_opts;
     struct vaapi_opts *vaapi_opts;
     struct sws_opts *sws_opts;
@@ -372,6 +373,10 @@ typedef struct MPOpts {
 
     int cuda_device;
 } MPOpts;
+
+struct cuda_opts {
+    int cuda_device;
+};
 
 struct dvd_opts {
     int angle;
@@ -384,6 +389,7 @@ struct filter_opts {
 };
 
 extern const struct m_sub_options vo_sub_opts;
+extern const struct m_sub_options cuda_conf;
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_sub_filter_opts;

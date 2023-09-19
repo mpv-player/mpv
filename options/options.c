@@ -364,6 +364,21 @@ const struct m_sub_options mp_osd_render_sub_opts = {
 };
 
 #undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct cuda_opts
+
+const struct m_sub_options cuda_conf = {
+    .opts = (const struct m_option[]){
+        {"decode-device", OPT_CHOICE(cuda_device, {"auto", -1}),
+            M_RANGE(0, INT_MAX)},
+        {0}
+    },
+    .size = sizeof(struct cuda_opts),
+    .defaults = &(const struct cuda_opts){
+        .cuda_device = -1,
+    },
+};
+
+#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct dvd_opts
 
 const struct m_sub_options dvd_conf = {
@@ -845,8 +860,7 @@ static const m_option_t mp_opts[] = {
 #endif
 
 #if HAVE_CUDA_HWACCEL
-    {"cuda-decode-device", OPT_CHOICE(cuda_device, {"auto", -1}),
-        M_RANGE(0, INT_MAX)},
+    {"cuda", OPT_SUBSTRUCT(cuda_opts, cuda_conf)},
 #endif
 
 #if HAVE_VAAPI
