@@ -46,6 +46,7 @@
 #include "common/av_common.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
+#include "options/options.h"
 #include "misc/bstr.h"
 #include "stream/stream.h"
 #include "video/csputils.h"
@@ -190,7 +191,6 @@ typedef struct mkv_demuxer {
     mkv_index_t *indexes;
     size_t num_indexes;
     bool index_complete;
-    int index_mode;
 
     int edition_id;
 
@@ -865,7 +865,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
 
-    if (mkv_d->index_mode != 1 || mkv_d->index_complete) {
+    if (demuxer->opts->index_mode != 1 || mkv_d->index_complete) {
         ebml_read_skip(demuxer->log, -1, s);
         return 0;
     }
@@ -1315,7 +1315,7 @@ static void read_deferred_cues(demuxer_t *demuxer)
 {
     mkv_demuxer_t *mkv_d = demuxer->priv;
 
-    if (mkv_d->index_complete || mkv_d->index_mode != 1)
+    if (mkv_d->index_complete || demuxer->opts->index_mode != 1)
         return;
 
     for (int n = 0; n < mkv_d->num_headers; n++) {
@@ -2117,10 +2117,10 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     mkv_d->segment_start = stream_tell(s);
     mkv_d->segment_end = end_pos;
 
-    mp_read_option_raw(demuxer->global, "index", &m_option_type_choice,
-                       &mkv_d->index_mode);
-    mp_read_option_raw(demuxer->global, "edition", &m_option_type_choice,
-                       &mkv_d->edition_id);
+    struct MPOpts *mp_opts = mp_get_config_group(mkv_d, demuxer->global, &mp_opt_root);
+    mkv_d->edition_id = mp_opts->edition_id;
+    talloc_free(mp_opts);
+
     mkv_d->opts = mp_get_config_group(mkv_d, demuxer->global, &demux_mkv_conf);
 
     if (demuxer->params && demuxer->params->matroska_was_valid)
