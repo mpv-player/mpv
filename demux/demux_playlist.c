@@ -37,6 +37,7 @@
 #define PROBE_SIZE (8 * 1024)
 
 enum dir_mode {
+    DIR_AUTO,
     DIR_LAZY,
     DIR_RECURSIVE,
     DIR_IGNORE,
@@ -50,6 +51,7 @@ struct demux_playlist_opts {
 struct m_sub_options demux_playlist_conf = {
     .opts = (const struct m_option[]) {
         {"directory-mode", OPT_CHOICE(dir_mode,
+            {"auto", DIR_AUTO},
             {"lazy", DIR_LAZY},
             {"recursive", DIR_RECURSIVE},
             {"ignore", DIR_IGNORE})},
@@ -57,7 +59,7 @@ struct m_sub_options demux_playlist_conf = {
     },
     .size = sizeof(struct demux_playlist_opts),
     .defaults = &(const struct demux_playlist_opts){
-        .dir_mode = DIR_LAZY,
+        .dir_mode = DIR_AUTO,
     },
 };
 
@@ -73,6 +75,7 @@ static bool check_mimetype(struct stream *s, const char *const *list)
 }
 
 struct pl_parser {
+    struct mpv_global *global;
     struct mp_log *log;
     struct stream *s;
     char buffer[2 * 1024 * 1024];
@@ -434,6 +437,12 @@ static int parse_dir(struct pl_parser *p)
 
     struct stat dir_stack[MAX_DIR_STACK];
 
+    if (p->opts->dir_mode == DIR_AUTO) {
+        struct MPOpts *opts = mp_get_config_group(NULL, p->global, &mp_opt_root);
+        p->opts->dir_mode = opts->shuffle ? DIR_RECURSIVE : DIR_LAZY;
+        talloc_free(opts);
+    }
+
     scan_dir(p, path, dir_stack, 0);
 
     p->add_base = false;
@@ -486,6 +495,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     bool force = check < DEMUX_CHECK_UNSAFE || check == DEMUX_CHECK_REQUEST;
 
     struct pl_parser *p = talloc_zero(NULL, struct pl_parser);
+    p->global = demuxer->global;
     p->log = demuxer->log;
     p->pl = talloc_zero(p, struct playlist);
     p->real_stream = demuxer->stream;
