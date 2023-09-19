@@ -96,6 +96,9 @@ struct demux_opts {
     double min_secs_cache;
     bool access_references;
     int seekable_cache;
+    int index_mode;
+    double mf_fps;
+    char *mf_type;
     bool create_ccs;
     char *record_file;
     int video_back_preroll;
@@ -126,6 +129,9 @@ const struct m_sub_options demux_conf = {
         {"access-references", OPT_BOOL(access_references)},
         {"demuxer-seekable-cache", OPT_CHOICE(seekable_cache,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
+        {"index", OPT_CHOICE(index_mode, {"default", 1}, {"recreate", 0})},
+        {"mf-fps", OPT_DOUBLE(mf_fps)},
+        {"mf-type", OPT_STRING(mf_type)},
         {"sub-create-cc-track", OPT_BOOL(create_ccs)},
         {"stream-record", OPT_STRING(record_file)},
         {"video-backward-overlap", OPT_CHOICE(video_back_preroll, {"auto", -1}),
@@ -150,6 +156,8 @@ const struct m_sub_options demux_conf = {
         .min_secs = 1.0,
         .min_secs_cache = 1000.0 * 60 * 60,
         .seekable_cache = -1,
+        .index_mode = 1,
+        .mf_fps = 1.0,
         .access_references = true,
         .video_back_preroll = -1,
         .audio_back_preroll = -1,

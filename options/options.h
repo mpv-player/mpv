@@ -295,8 +295,6 @@ typedef struct MPOpts {
     char *screenshot_directory;
     bool screenshot_sw;
 
-    int index_mode;
-
     struct m_channels audio_output_channels;
     int audio_output_format;
     int force_srate;
@@ -329,9 +327,6 @@ typedef struct MPOpts {
 
     char *cdrom_device;
     char *bluray_device;
-
-    double mf_fps;
-    char *mf_type;
 
     struct demux_rawaudio_opts *demux_rawaudio;
     struct demux_rawvideo_opts *demux_rawvideo;
