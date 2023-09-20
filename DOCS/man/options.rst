@@ -6735,7 +6735,7 @@ them.
     come with a small performance penalty. (Only for ``--vo=gpu-next``)
 
 ``--hdr-peak-decay-rate=<0.0..1000.0>``
-    The decay rate used for the HDR peak detection algorithm (default: 100.0).
+    The decay rate used for the HDR peak detection algorithm (default: 20.0).
     This is only relevant when ``--hdr-compute-peak`` is enabled. Higher values
     make the peak decay more slowly, leading to more stable values at the cost
     of more "eye adaptation"-like effects (although this is mitigated somewhat
@@ -6747,7 +6747,7 @@ them.
 
 ``--hdr-scene-threshold-low=<0.0..100.0>``, ``--hdr-scene-threshold-high=<0.0..100.0>``
     The lower and upper thresholds (in dB) for a brightness difference
-    to be considered a scene change (default: 5.5 low, 10.0 high). This is only
+    to be considered a scene change (default: 1.0 low, 3.0 high). This is only
     relevant when ``--hdr-compute-peak`` is enabled. Normally, small
     fluctuations in the frame brightness are compensated for by the peak
     averaging mechanism, but for large jumps in the brightness this can result
