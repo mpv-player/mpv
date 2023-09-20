@@ -5255,9 +5255,6 @@ them.
         Bilinear hardware texture filtering (fastest, very low quality). This is
         the default when using the ``fast`` profile.
 
-    ``spline36``
-        Mid quality and speed.
-
     ``lanczos``
         Lanczos scaling. Provides good balance between quality and performance.
         This is the default for ``scale``. The number of taps can be controlled
