@@ -3834,16 +3834,6 @@ Demuxer
     ``--cache-secs`` is used (i.e. when the stream appears to be a network
     stream or the stream cache is enabled).
 
-``--demuxer-force-retry-on-eof=<yes|no>``
-    Whether to keep retrying making the demuxer thread read more packets each
-    time the decoder dequeues a packet, even if the end of the file was reached
-    (default: no). This does not really make sense, but was the default behavior
-    in mpv 0.32.0 and earlier. This option will be silently removed after a
-    while, and exists only to restore the old behavior for testing, in case this
-    was actually needed somewhere. This does _not_ help with files that are
-    being appended to (in these cases use ``appending://``, or disable the
-    cache).
-
 ``--demuxer-thread=<yes|no>``
     Run the demuxer in a separate thread, and let it prefetch a certain amount
     of packets (default: yes). Having this enabled leads to smoother playback,
