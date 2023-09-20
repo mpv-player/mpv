@@ -75,8 +75,10 @@ struct mp_recorder_sink {
 static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
 {
     enum AVMediaType av_type = mp_to_av_stream_type(sh->type);
+    int ret = -1;
+    AVCodecParameters *avp = NULL;
     if (av_type == AVMEDIA_TYPE_UNKNOWN)
-        return -1;
+        goto done;
 
     struct mp_recorder_sink *rst = talloc(priv, struct mp_recorder_sink);
     *rst = (struct mp_recorder_sink) {
@@ -88,11 +90,11 @@ static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
     };
 
     if (!rst->av_stream || !rst->avpkt)
-        return -1;
+        goto done;
 
-    AVCodecParameters *avp = mp_codec_params_to_av(sh->codec);
+    avp = mp_codec_params_to_av(sh->codec);
     if (!avp)
-        return -1;
+        goto done;
 
     // Check if we get the same codec_id for the output format;
     // otherwise clear it to have a chance at muxing
@@ -108,15 +110,20 @@ static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
         avp->video_delay = 16;
 
     if (avp->codec_id == AV_CODEC_ID_NONE)
-        return -1;
+        goto done;
 
     if (avcodec_parameters_copy(rst->av_stream->codecpar, avp) < 0)
-        return -1;
+        goto done;
 
+    ret = 0;
     rst->av_stream->time_base = mp_get_codec_timebase(sh->codec);
 
     MP_TARRAY_APPEND(priv, priv->streams, priv->num_streams, rst);
-    return 0;
+
+done:
+    if (avp)
+        avcodec_parameters_free(&avp);
+    return ret;
 }
 
 struct mp_recorder *mp_recorder_create(struct mpv_global *global,
@@ -254,6 +261,8 @@ static void mux_packet(struct mp_recorder_sink *rst,
 
     if (av_interleaved_write_frame(priv->mux, new_packet) < 0)
         MP_ERR(priv, "Failed writing packet.\n");
+
+    av_packet_free(&new_packet);
 }
 
 // Write all packets available in the stream queue
