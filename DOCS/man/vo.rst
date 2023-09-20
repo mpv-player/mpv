@@ -569,14 +569,7 @@ Available video output drivers are:
 ``rpi`` (Raspberry Pi)
     Native video output on the Raspberry Pi using the MMAL API.
 
-    This is deprecated. Use ``--vo=gpu`` instead, which is the default and
-    provides the same functionality. The ``rpi`` VO will be removed in
-    mpv 0.23.0. Its functionality was folded into --vo=gpu, which now uses
-    RPI hardware decoding by treating it as a hardware overlay (without applying
-    GL filtering). Also to be changed in 0.23.0: the --fs flag will be reset to
-    "no" by default (like on the other platforms).
-
-    The following deprecated global options are supported by this video output:
+    The following global options are supported by this video output:
 
     ``--rpi-display=<number>``
         Select the display number on which the video overlay should be shown
