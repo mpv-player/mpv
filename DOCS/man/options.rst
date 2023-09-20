@@ -5347,14 +5347,6 @@ them.
     moving edges) in exchange for potentially adding more blur. The default for
     ``--tscale-clamp`` is 1.0, the others default to 0.0.
 
-``--scale-cutoff=<value>``, ``--cscale-cutoff=<value>``, ``--dscale-cutoff=<value>``
-    Cut off the filter kernel prematurely once the value range drops below
-    this threshold. Doing so allows more aggressive pruning of skippable
-    coefficients by disregarding parts of the LUT which are effectively zeroed
-    out by the window function. Only affects polar (EWA) filters. The default
-    is 0.001 for each, which is perceptually transparent but provides a 10%-20%
-    speedup, depending on the exact radius and filter kernel chosen.
-
 ``--scale-taper=<value>``, ``--scale-wtaper=<value>``, ``--dscale-taper=<value>``, ``--dscale-wtaper=<value>``, ``--cscale-taper=<value>``, ``--cscale-wtaper=<value>``, ``--tscale-taper=<value>``, ``--tscale-wtaper=<value>``
     Kernel/window taper factor. Increasing this flattens the filter function.
     Value range is 0 to 1. A value of 0 (the default) means no flattening, a

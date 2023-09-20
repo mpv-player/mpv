@@ -302,12 +302,9 @@ static const struct gl_video_opts gl_video_opts_def = {
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .scaler = {
-        {{"lanczos", .params={NAN, NAN}}, {.params = {NAN, NAN}},
-         .cutoff = 0.001}, // scale
-        {{"hermite", .params={NAN, NAN}}, {.params = {NAN, NAN}},
-         .cutoff = 0.001}, // dscale
-        {{NULL, .params={NAN, NAN}}, {.params = {NAN, NAN}},
-         .cutoff = 0.001}, // cscale
+        {{"lanczos", .params={NAN, NAN}}, {.params = {NAN, NAN}}},    // scale
+        {{"hermite", .params={NAN, NAN}}, {.params = {NAN, NAN}}},    // dscale
+        {{NULL, .params={NAN, NAN}}, {.params = {NAN, NAN}}},         // cscale
         {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
     },
     .scaler_resizes_only = true,
@@ -354,7 +351,7 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
     {n"-param1", OPT_FLOATDEF(scaler[i].kernel.params[0])},                \
     {n"-param2", OPT_FLOATDEF(scaler[i].kernel.params[1])},                \
     {n"-blur",   OPT_FLOAT(scaler[i].kernel.blur)},                        \
-    {n"-cutoff", OPT_FLOAT(scaler[i].cutoff), M_RANGE(0.0, 1.0)},          \
+    {n"-cutoff", OPT_REMOVED("Hard-coded as 0.001")},                      \
     {n"-taper",  OPT_FLOAT(scaler[i].kernel.taper), M_RANGE(0.0, 1.0)},    \
     {n"-wparam", OPT_FLOATDEF(scaler[i].window.params[0])},                \
     {n"-wblur",  OPT_REMOVED("Just adjust filter radius directly")},       \
@@ -1776,8 +1773,6 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
         scaler->kernel->f.radius = conf->radius;
 
     scaler->kernel->clamp = conf->clamp;
-    scaler->kernel->value_cutoff = conf->cutoff;
-
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 
     int size = scaler->kernel->size;

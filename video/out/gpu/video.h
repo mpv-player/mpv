@@ -40,7 +40,6 @@ struct scaler_config {
     struct scaler_fun window;
     float radius;
     float antiring;
-    float cutoff;
     float clamp;
 };
 

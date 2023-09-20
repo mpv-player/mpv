@@ -164,7 +164,7 @@ void mp_compute_lut(struct filter_kernel *filter, int count, int stride,
             double r = x * filter->radius / (count - 1);
             out_array[x] = sample_filter(filter, r);
 
-            if (fabs(out_array[x]) > filter->value_cutoff)
+            if (fabs(out_array[x]) > 1e-3f)
                 filter->radius_cutoff = r;
         }
     } else {
