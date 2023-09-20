@@ -168,18 +168,9 @@ static int m_config_set_obj_params(struct m_config *config, struct mp_log *log,
 
 struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
     struct mp_log *log, struct mpv_global *global, struct m_obj_desc *desc,
-    const char *name, struct m_obj_settings *defaults, char **args)
+    char **args)
 {
     struct m_config *config = m_config_from_obj_desc(ta_parent, log, global, desc);
-
-    for (int n = 0; defaults && defaults[n].name; n++) {
-        struct m_obj_settings *entry = &defaults[n];
-        if (name && strcmp(entry->name, name) == 0) {
-            if (m_config_set_obj_params(config, log, global, desc, entry->attribs) < 0)
-                goto error;
-        }
-    }
-
     if (m_config_set_obj_params(config, log, global, desc, args) < 0)
         goto error;
 

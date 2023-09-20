@@ -299,8 +299,8 @@ typedef struct MPOpts {
     int force_srate;
     double playback_speed;
     bool pitch_correction;
-    struct m_obj_settings *vf_settings, *vf_defs;
-    struct m_obj_settings *af_settings, *af_defs;
+    struct m_obj_settings *vf_settings;
+    struct m_obj_settings *af_settings;
     struct filter_opts *filter_opts;
     struct dec_wrapper_opts *dec_wrapper;
     char **sub_name;
