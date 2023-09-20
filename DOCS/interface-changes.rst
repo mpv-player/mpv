@@ -76,6 +76,9 @@ Interface changes
     - remove deprecated `--profile=opengl-hq`
     - remove several legacy fallbacks for old deprecated options (now they will just
       error out like normal)
+    - remove deprecated `drop-frame-count` and `vo-drop-frame-count` property aliases
+    - remove the ability to write to the `display-fps` property (use `override-display-fps`
+      instead)
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
