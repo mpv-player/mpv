@@ -574,11 +574,7 @@ static const m_option_t mp_opts[] = {
 
 // ------------------------- codec/vfilter options --------------------
 
-    {"af-defaults", OPT_SETTINGSLIST(af_defs, &af_obj_list),
-        .deprecation_message = "use --af + enable/disable flags"},
     {"af", OPT_SETTINGSLIST(af_settings, &af_obj_list)},
-    {"vf-defaults", OPT_SETTINGSLIST(vf_defs, &vf_obj_list),
-        .deprecation_message = "use --vf + enable/disable flags"},
     {"vf", OPT_SETTINGSLIST(vf_settings, &vf_obj_list)},
 
     {"", OPT_SUBSTRUCT(filter_opts, filter_conf)},
