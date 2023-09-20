@@ -98,10 +98,6 @@ const struct m_sub_options drm_conf = {
         {"drm-draw-surface-size", OPT_SIZE_BOX(draw_surface_size)},
         {"drm-vrr-enabled", OPT_CHOICE(vrr_enabled,
             {"no", 0}, {"yes", 1}, {"auto", -1})},
-
-        {"drm-osd-plane-id", OPT_REPLACED("drm-draw-plane")},
-        {"drm-video-plane-id", OPT_REPLACED("drm-drmprime-video-plane")},
-        {"drm-osd-size", OPT_REPLACED("drm-draw-surface-size")},
         {0},
     },
     .defaults = &(const struct drm_opts) {

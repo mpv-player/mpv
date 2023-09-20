@@ -95,13 +95,6 @@ const struct m_sub_options encode_config = {
         {"ocopy-metadata", OPT_BOOL(copy_metadata)},
         {"oset-metadata", OPT_KEYVALUELIST(set_metadata)},
         {"oremove-metadata", OPT_STRINGLIST(remove_metadata)},
-
-        {"ocopyts", OPT_REMOVED("ocopyts is now the default")},
-        {"oneverdrop", OPT_REMOVED("no replacement")},
-        {"oharddup", OPT_REMOVED("use --vf-add=fps=VALUE")},
-        {"ofps", OPT_REMOVED("no replacement (use --vf-add=fps=VALUE for CFR)")},
-        {"oautofps", OPT_REMOVED("no replacement")},
-        {"omaxfps", OPT_REMOVED("no replacement")},
         {0}
     },
     .size = sizeof(struct encode_opts),

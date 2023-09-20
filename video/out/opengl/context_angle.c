@@ -78,8 +78,6 @@ const struct m_sub_options angle_conf = {
             {"no", 0},
             {"yes", 1})},
         {"angle-flip", OPT_BOOL(flip)},
-        {"angle-max-frame-latency", OPT_REPLACED("swapchain-depth")},
-        {"angle-swapchain-length", OPT_REMOVED("controlled by --swapchain-depth")},
         {0}
     },
     .defaults = &(const struct angle_opts) {

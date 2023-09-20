@@ -1190,9 +1190,6 @@ Video
     Set this option only if you have reason to believe the automatically
     determined value is wrong.
 
-``--display-fps=<fps>``
-    Deprecated alias for ``--override-display-fps``.
-
 ``--hwdec=<api1,api2,...|no|auto|auto-safe|auto-copy>``
     Specify the hardware video decoding API that should be used if possible.
     Whether hardware decoding is actually done depends on the video codec. If
@@ -1437,10 +1434,6 @@ Video
 
     Runtime changes to this are ignored (the current option value is used
     whenever the renderer is created).
-
-    The old aliases ``--opengl-hwdec-interop`` and ``--hwdec-preload`` are
-    barely related to this anymore, but will be somewhat compatible in some
-    cases.
 
 ``--hwdec-extra-frames=<N>``
     Number of GPU frames hardware decoding should preallocate (default: see
@@ -2198,11 +2191,9 @@ Audio
     their start timestamps differ, and then video timing is gradually adjusted
     if necessary to reach correct synchronization later.
 
-``--volume-max=<100.0-1000.0>``, ``--softvol-max=<...>``
+``--volume-max=<100.0-1000.0>``
     Set the maximum amplification level in percent (default: 130). A value of
     130 will allow you to adjust the volume up to about double the normal level.
-
-    ``--softvol-max`` is a deprecated alias and should not be used.
 
 ``--audio-file-auto=<no|exact|fuzzy|all>``, ``--no-audio-file-auto``
     Load additional audio files matching the video filename. The parameter
@@ -2277,11 +2268,6 @@ Subtitles
     subtitles (DVD, Bluray/PGS, DVB) cannot changed for fundamental reasons.
     Subtitles in ASS format are normally not changed intentionally, but
     overriding them can be controlled with ``--sub-ass-override``.
-
-    Previously some options working on text subtitles were called
-    ``--sub-text-*``, they are now named ``--sub-*``, and those specifically
-    for ASS have been renamed from ``--ass-*`` to ``--sub-ass-*``.
-    They are now all in this section.
 
 ``--sub-demuxer=<[+]name>``
     Force subtitle demuxer type for ``--sub-file``. Give the demuxer name as
@@ -2481,9 +2467,6 @@ Subtitles
 
     Default: yes.
 
-    Renamed from ``--sub-ass-use-margins``. To place ASS subtitles in the borders
-    too (like the old option did), also add ``--sub-ass-force-margins``.
-
 ``--sub-ass-vsfilter-aspect-compat=<yes|no>``
     Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
     with traditional VSFilter behavior. This switch has no effect when the
@@ -2676,9 +2659,6 @@ Subtitles
     .. note::
 
         Never applied to text subtitles.
-
-``--sub-paths=<path1:path2:...>``
-    Deprecated, use ``--sub-file-paths``.
 
 ``--sub-file-paths=<path-list>``
     Specify extra directories to search for subtitles matching the video.
@@ -3310,10 +3290,6 @@ Window
     fullscreen mode, the cursor is shown or hidden according to
     ``--cursor-autohide``.
 
-``--no-fixed-vo``, ``--fixed-vo``
-    ``--no-fixed-vo`` enforces closing and reopening the video window for
-    multiple files (one (un)initialization for each file).
-
 ``--force-rgba-osd-rendering``
     Change how some video outputs render the OSD and text subtitles. This
     does not change appearance of the subtitles and only has performance
@@ -3680,7 +3656,7 @@ Demuxer
     If this option is deemed unnecessary at some point in the future, it will
     be removed without notice.
 
-``--demuxer-mkv-subtitle-preroll=<yes|index|no>``, ``--mkv-subtitle-preroll``
+``--demuxer-mkv-subtitle-preroll=<yes|index|no>``
     Try harder to show embedded soft subtitles when seeking somewhere. Normally,
     it can happen that the subtitle at the seek target is not shown due to how
     some container file formats are designed. The subtitles appear only if
@@ -3722,8 +3698,6 @@ Demuxer
     similar effect, but only if hr-seek is active. It works with any demuxer,
     but makes seeking much slower, as it has to decode audio and video data
     instead of just skipping over it.
-
-    ``--mkv-subtitle-preroll`` is a deprecated alias.
 
 ``--demuxer-mkv-subtitle-preroll-secs=<value>``
     See ``--demuxer-mkv-subtitle-preroll``.
@@ -4149,8 +4123,6 @@ Input
     and with this option disabled. Note that ``input-default-bindings`` is
     disabled by default in libmpv as well - it should be enabled if you want
     the mpv default key bindings.
-
-    (This option was renamed from ``--input-x11-keyboard``.)
 
 OSD
 ---
@@ -6153,9 +6125,7 @@ them.
     chain will be used for D3D9. This option is mainly for debugging purposes,
     in case the custom swap chain has poor performance or does not work.
 
-    If set to ``yes``, the ``--angle-max-frame-latency``,
-    ``--angle-swapchain-length`` and ``--angle-flip`` options will have no
-    effect.
+    If set to ``yes``, the ``--angle-flip`` option will have no effect.
 
     Windows with ANGLE only.
 
@@ -7284,10 +7254,6 @@ Miscellaneous
     it works with the ``ffmpeg`` tool. One reason for this is that ``ffmpeg``
     and its libraries contain certain hacks and workarounds for these issues,
     that are unavailable to outside users.
-
-    This replaces ``--record-file``. It is similar to the ancient/removed
-    ``--stream-capture``/``--capture`` options, and provides better behavior in
-    most cases (i.e. actually works).
 
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can
