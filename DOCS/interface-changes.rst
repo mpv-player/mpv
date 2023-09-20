@@ -74,6 +74,8 @@ Interface changes
     - update defaults to `--deband-threshold=48`, `--deband-grain=32`
     - add `--directory-mode=auto` and make it the default
     - remove deprecated `--profile=opengl-hq`
+    - remove several legacy fallbacks for old deprecated options (now they will just
+      error out like normal)
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

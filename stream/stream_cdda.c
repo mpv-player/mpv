@@ -86,7 +86,6 @@ const struct m_sub_options stream_cdda_conf = {
         {"span-a", OPT_INT(span[0])},
         {"span-b", OPT_INT(span[1])},
         {"cdtext", OPT_BOOL(cdtext)},
-        {"span", OPT_REMOVED("use span-a/span-b")},
         {0}
     },
     .size = sizeof(struct cdda_params),

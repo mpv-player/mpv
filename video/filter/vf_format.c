@@ -226,8 +226,6 @@ static const m_option_t vf_opts_fields[] = {
                                 {"auto", MP_SWS_AUTO},
                                 {"sws", MP_SWS_SWS},
                                 {"zimg", MP_SWS_ZIMG})},
-    {"outputlevels", OPT_REMOVED("use the --video-output-levels global option")},
-    {"peak", OPT_REMOVED("use sig-peak instead (changed value scale!)")},
     {0}
 };
 

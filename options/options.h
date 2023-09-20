@@ -367,7 +367,6 @@ typedef struct MPOpts {
     struct spirv_opts *spirv_opts;
     struct d3d11_opts *d3d11_opts;
     struct d3d11va_opts *d3d11va_opts;
-    struct cocoa_opts *cocoa_opts;
     struct macos_opts *macos_opts;
     struct drm_opts *drm_opts;
     struct wayland_opts *wayland_opts;
