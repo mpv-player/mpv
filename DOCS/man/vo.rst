@@ -28,10 +28,11 @@ Available video output drivers are:
 
     See `GPU renderer options`_ for options specific to this VO.
 
-    By default, it tries to use fast and fail-safe settings. Use the
-    ``gpu-hq`` profile to use this driver with defaults set to high quality
-    rendering. The profile can be applied with ``--profile=gpu-hq`` and its
-    contents can be viewed with ``--show-profile=gpu-hq``.
+    By default, mpv utilizes settings that balance quality and performance.
+    Additionally, two predefined profiles are available: ``fast`` for maximum
+    performance and ``high-quality`` for superior rendering quality. You can
+    apply a specific profile using the ``--profile=<name>`` option and inspect
+    its contents using ``--show-profile=<name>``.
 
     This VO abstracts over several possible graphics APIs and windowing
     contexts, which can be influenced using the ``--gpu-api`` and
