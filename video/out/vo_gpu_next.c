@@ -2065,7 +2065,6 @@ static void update_render_options(struct vo *vo)
     const struct gl_video_opts *opts = p->opts_cache->opts;
     pars->params.lut_entries = 1 << opts->scaler_lut_size;
     pars->params.antiringing_strength = opts->scaler[0].antiring;
-    pars->params.polar_cutoff = opts->scaler[0].cutoff;
     pars->params.background_color[0] = opts->background.r / 255.0;
     pars->params.background_color[1] = opts->background.g / 255.0;
     pars->params.background_color[2] = opts->background.b / 255.0;
