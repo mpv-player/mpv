@@ -7041,9 +7041,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         mp_wakeup_core(mpctx);
     }
 
-    if (opt_ptr == &opts->record_file)
-        open_recorder(mpctx, false);
-
     if (opt_ptr == &opts->vf_settings)
         set_filters(mpctx, STREAM_VIDEO, opts->vf_settings);
 

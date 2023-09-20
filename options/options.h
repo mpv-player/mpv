@@ -201,7 +201,6 @@ typedef struct MPOpts {
 
     bool untimed;
     char *stream_dump;
-    char *record_file;
     bool stop_playback_on_init_failure;
     int loop_times;
     int loop_file;

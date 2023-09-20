@@ -7205,16 +7205,6 @@ Miscellaneous
     This does not affect playlist expansion, redirection, or other loading of
     referenced files like with ordered chapters.
 
-``--record-file=<file>``
-    Deprecated, use ``--stream-record``, or the ``dump-cache`` command.
-
-    Record the current stream to the given target file. The target file will
-    always be overwritten without asking.
-
-    This was deprecated because it isn't very nice to use. For one, seeking
-    while this is enabled will be directly reflected in the output, which was
-    not useful and annoying.
-
 ``--stream-record=<file>``
     Write received/read data from the demuxer to the given output file. The
     output file will always be overwritten without asking. The output format
