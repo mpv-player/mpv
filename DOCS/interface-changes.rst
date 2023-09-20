@@ -83,6 +83,7 @@ Interface changes
       `playlist-play-index` instead)
     - remove deprecated `--oaoffset`, `--oafirst`, `--ovoffset`, `--ovfirst`,
       `--demuxer-force-retry-on-eof`, `--fit-border` options
+    - remove deprecated `--record-file` option
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

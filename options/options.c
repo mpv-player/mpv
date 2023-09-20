@@ -784,9 +784,6 @@ static const m_option_t mp_opts[] = {
         .flags = M_OPT_FILE},
     {"screenshot-sw", OPT_BOOL(screenshot_sw)},
 
-    {"record-file", OPT_STRING(record_file), .flags = M_OPT_FILE,
-        .deprecation_message = "use --stream-record or the dump-cache command"},
-
     {"", OPT_SUBSTRUCT(resample_opts, resample_conf)},
 
     {"", OPT_SUBSTRUCT(input_opts, input_config)},
