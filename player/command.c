@@ -3037,11 +3037,8 @@ static int mp_property_playlist_pos_x(void *ctx, struct m_property *prop,
     }
     case M_PROPERTY_SET: {
         int pos = *(int *)arg - base;
-        if (pos >= 0 && playlist_entry_to_index(pl, pl->current) == pos) {
-            MP_WARN(mpctx, "Behavior of %s when writing the same value will "
-                    "change (currently restarts, it will stop doing this).\n",
-                    prop->name);
-        }
+        if (pos >= 0 && playlist_entry_to_index(pl, pl->current) == pos)
+            return M_PROPERTY_OK;
         mp_set_playlist_entry(mpctx, playlist_entry_from_index(pl, pos));
         return M_PROPERTY_OK;
     }

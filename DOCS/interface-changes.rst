@@ -79,6 +79,8 @@ Interface changes
     - remove deprecated `drop-frame-count` and `vo-drop-frame-count` property aliases
     - remove the ability to write to the `display-fps` property (use `override-display-fps`
       instead)
+    - writing the current value to playlist-pos will no longer restart playback (use
+      `playlist-play-index` instead)
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
