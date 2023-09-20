@@ -73,6 +73,7 @@ Interface changes
       `--hdr-scene-threshold-high=3.0`
     - update defaults to `--deband-threshold=48`, `--deband-grain=32`
     - add `--directory-mode=auto` and make it the default
+    - remove deprecated `--profile=opengl-hq`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
