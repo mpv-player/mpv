@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include "filter.h"
 
 // A thread safe queue, which buffers a configurable number of frames like a
