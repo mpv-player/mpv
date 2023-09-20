@@ -2772,10 +2772,9 @@ Property list
     (Before mpv 0.33.0, instead of returning -1, this property was unavailable
     if no playlist entry was current.)
 
-    Writing the current value back to the property is subject to change.
-    Currently, it will restart playback of the playlist entry. But in the
-    future, writing the current value will be ignored. Use the
-    ``playlist-play-index`` command to get guaranteed behavior.
+    Writing the current value back to the property will have no effect.
+    Use ``playlist-play-index`` to restart the playback of the current entry if
+    desired.
 
 ``playlist-pos-1`` (RW)
     Same as ``playlist-pos``, but 1-based.
