@@ -6070,7 +6070,7 @@ them.
 ``--deband-threshold=<0..4096>``
     The debanding filter's cut-off threshold. Higher numbers increase the
     debanding strength dramatically but progressively diminish image details.
-    (Default 32)
+    (Default 48)
 
 ``--deband-range=<1..64>``
     The debanding filter's initial radius. The radius increases linearly for
@@ -6083,7 +6083,7 @@ them.
 ``--deband-grain=<0..4096>``
     Add some extra noise to the image. This significantly helps cover up
     remaining quantization artifacts. Higher numbers add more noise. (Default
-    48)
+    32)
 
 ``--corner-rounding=<0..1>``
     If set to a value above 0.0, the output will be rendered with rounded
