@@ -26,8 +26,10 @@
 #include <ass/ass.h>
 #include <ass/ass_types.h>
 
-// This is probably arbitrary.
-// sd_lavc_conv might indirectly still assume this PlayResY, though.
+// These PlayResX and PlayResY values are arbitrary and taken from lavc.
+// lavc assumes these values when converting to ass generally. Moreover, these
+// values are also used by default in VSFilter, so it isn't that arbitrary.
+#define MP_ASS_FONT_PLAYRESX 384
 #define MP_ASS_FONT_PLAYRESY 288
 
 #define MP_ASS_RGBA(r, g, b, a) \
