@@ -5282,23 +5282,22 @@ them.
 
     ``mitchell``
         Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
-        ``--scale-param1`` and ``--scale-param2``. This filter is very good at
-        downscaling. This is the default for ``--dscale``.
+        ``--scale-param1`` and ``--scale-param2``. This is the default for
+        ``--dscale``.
 
     ``catmull_rom``
         Catmull-Rom. A Cubic filter in the same vein as ``mitchell``, where
         the ``B`` and ``C`` parameters are ``0.0`` and ``0.5`` respectively.
-        This filter is sharper than ``mitchell``, but it results in mild
-        ringing. Like ``mitchell``, this filter is good at downscaling (see
-        ``--dscale``).
+        This filter is sharper than ``mitchell``, but it results in more
+        ringing.
 
     ``oversample``
         A version of nearest neighbour that (naively) oversamples pixels, so
         that pixels overlapping edges get linearly interpolated instead of
         rounded. This essentially removes the small imperfections and judder
         artifacts caused by nearest-neighbour interpolation, in exchange for
-        adding some blur. This filter is good at temporal interpolation, and
-        also known as "smoothmotion" (see ``--tscale``).
+        adding some blur. This can also be used for frame mixing, where it
+        is commonly known as "smoothmotion" (see ``--tscale``).
 
     ``linear``
         A ``--tscale`` filter.
