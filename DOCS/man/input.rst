@@ -1939,12 +1939,8 @@ Property list
     situations, e.g. when video packets are damaged, or the decoder doesn't
     follow the usual rules. Unavailable if video is disabled.
 
-    ``drop-frame-count`` is a deprecated alias.
-
 ``frame-drop-count``
     Frames dropped by VO (when using ``--framedrop=vo``).
-
-    ``vo-drop-frame-count`` is a deprecated alias.
 
 ``mistimed-frame-count``
     Number of video frames that were not timed correctly in display-sync mode
@@ -2644,11 +2640,6 @@ Property list
     APIs (e.g. xrandr on X11). It is not the measured FPS. It's not necessarily
     available on all platforms. Note that any of the listed facts may change
     any time without a warning.
-
-    Writing to this property is deprecated. It has the same effect as writing to
-    ``override-display-fps``. Since mpv 0.31.0, this property is unavailable
-    if no display FPS was reported (e.g. if no video is active), while in older
-    versions, it returned the ``--display-fps`` option value.
 
 ``estimated-display-fps``
     The actual rate at which display refreshes seem to occur, measured by
