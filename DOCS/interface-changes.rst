@@ -69,6 +69,8 @@ Interface changes
     - change `--dither-depth` to `auto`
     - deprecate `--profile=gpu-hq`, add `--profile=<fast|high-quality>`
     - change `--dscale` default to `hermite`
+    - update defaults to `--hdr-peak-decay-rate=20`, `--hdr-scene-threshold-low=1.0`,
+      `--hdr-scene-threshold-high=3.0`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
