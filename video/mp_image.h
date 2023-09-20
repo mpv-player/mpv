@@ -46,6 +46,7 @@ struct mp_image_params {
     enum mp_imgfmt hw_subfmt;   // underlying format for some hwaccel pixfmts
     int w, h;                   // image dimensions
     int p_w, p_h;               // define pixel aspect ratio (undefined: 0/0)
+    bool force_window;          // fake image created by handle_force_window
     struct mp_colorspace color;
     enum mp_chroma_location chroma_location;
     // The image should be rotated clockwise (0-359 degrees).
