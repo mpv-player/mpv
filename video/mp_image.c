@@ -835,6 +835,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            p1->hw_subfmt == p2->hw_subfmt &&
            p1->w == p2->w && p1->h == p2->h &&
            p1->p_w == p2->p_w && p1->p_h == p2->p_h &&
+           p1->force_window == p2->force_window &&
            mp_colorspace_equal(p1->color, p2->color) &&
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate &&
