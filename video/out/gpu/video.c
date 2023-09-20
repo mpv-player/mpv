@@ -304,7 +304,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .scaler = {
         {{"lanczos", .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // scale
-        {{"mitchell", .params={NAN, NAN}}, {.params = {NAN, NAN}},
+        {{"hermite", .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // dscale
         {{NULL, .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // cscale

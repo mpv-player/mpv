@@ -5282,13 +5282,13 @@ them.
 
     ``mitchell``
         Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
-        ``--scale-param1`` and ``--scale-param2``. This is the default for
-        ``--dscale``.
+        ``--scale-param1`` and ``--scale-param2``.
 
     ``hermite``
         Hermite spline. Similar to ``bicubic`` but with ``B`` set to ``0.0``.
         This filter has the special property of having a support of radius 1.0,
-        making it very fast in comparison, but prone to blocking.
+        making it very fast in comparison, but prone to blocking. This is the
+        default for ``--dscale``.
 
     ``catmull_rom``
         Catmull-Rom. A Cubic filter in the same vein as ``mitchell``, where
