@@ -212,8 +212,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
         outpts = pts + ectx->discontinuity_pts_offset;
     }
 
-    outpts += encoder_get_offset(enc);
-
     if (!enc->options->rawts) {
         // calculate expected pts of next video frame
         double timeunit = av_q2d(avc->time_base);

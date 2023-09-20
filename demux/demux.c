@@ -103,7 +103,6 @@ struct demux_opts {
     int back_batch[STREAM_TYPE_COUNT];
     double back_seek_size;
     char *meta_cp;
-    bool force_retry_eof;
 };
 
 #define OPT_BASE_STRUCT struct demux_opts
@@ -140,8 +139,6 @@ const struct m_sub_options demux_conf = {
         {"demuxer-backward-playback-step", OPT_DOUBLE(back_seek_size),
             M_RANGE(0, DBL_MAX)},
         {"metadata-codepage", OPT_STRING(meta_cp)},
-        {"demuxer-force-retry-on-eof", OPT_BOOL(force_retry_eof),
-         .deprecation_message = "temporary debug option, no replacement"},
         {0}
     },
     .size = sizeof(struct demux_opts),
@@ -2663,7 +2660,7 @@ static int dequeue_packet(struct demux_stream *ds, double min_pts,
         return 1;
     }
 
-    if (!in->reading && (!in->eof || in->opts->force_retry_eof)) {
+    if (!in->reading && !in->eof) {
         in->reading = true; // enable demuxer thread prefetching
         pthread_cond_signal(&in->wakeup);
     }
