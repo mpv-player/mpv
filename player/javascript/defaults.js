@@ -177,28 +177,6 @@ mp.abort_async_command = function abort_async_command(id) {
         mp._abort_async_command(id);
 }
 
-// shared-script-properties - always an object, even if without properties
-function shared_script_property_set(name, val) {
-    if (arguments.length > 1)
-        return mp.commandv("change-list", "shared-script-properties", "append", "" + name + "=" + val);
-    else
-        return mp.commandv("change-list", "shared-script-properties", "remove", name);
-}
-
-function shared_script_property_get(name) {
-    return mp.get_property_native("shared-script-properties")[name];
-}
-
-function shared_script_property_observe(name, cb) {
-    return mp.observe_property("shared-script-properties", "native",
-        function shared_props_cb(_name, val) { cb(name, val[name]) }
-    );
-}
-
-mp.utils.shared_script_property_set = shared_script_property_set;
-mp.utils.shared_script_property_get = shared_script_property_get;
-mp.utils.shared_script_property_observe = shared_script_property_observe;
-
 // osd-ass
 var next_assid = 1;
 mp.create_osd_overlay = function create_osd_overlay(format) {
