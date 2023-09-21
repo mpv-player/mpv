@@ -1759,9 +1759,10 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
             struct wl_buffer *buffer = wl_cursor_image_get_buffer(img);
             if (!buffer)
                 return VO_FALSE;
+            int scale = MPMAX(wl->scaling, 1);
             wl_pointer_set_cursor(wl->pointer, wl->pointer_id, wl->cursor_surface,
-                                  img->hotspot_x/wl->scaling, img->hotspot_y/wl->scaling);
-            wl_surface_set_buffer_scale(wl->cursor_surface, wl->scaling);
+                                  img->hotspot_x / scale, img->hotspot_y / scale);
+            wl_surface_set_buffer_scale(wl->cursor_surface, scale);
             wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
             wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
         }
