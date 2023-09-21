@@ -186,6 +186,8 @@ static const m_option_t mp_vo_opt_list[] = {
         {"photo", 1}, {"video", 2}, {"game", 3})},
 #endif
 #if HAVE_WIN32_DESKTOP
+    {"window-affinity", OPT_CHOICE(window_affinity, {"default", WDA_NONE},
+        {"excludefromcapture", WDA_EXCLUDEFROMCAPTURE}, {"monitor", WDA_MONITOR})},
     {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
 #endif
 #if HAVE_EGL_ANDROID

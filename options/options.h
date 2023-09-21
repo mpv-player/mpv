@@ -63,6 +63,7 @@ typedef struct mp_vo_opts {
     bool force_render;
     bool force_window_position;
 
+    int window_affinity;
     char *mmcss_profile;
 
     double override_display_fps;
