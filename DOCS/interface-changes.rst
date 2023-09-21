@@ -26,6 +26,8 @@ Interface changes
 
 ::
 
+ --- mpv 0.38.0 ---
+    - remove shared-script-properties (user-data is a replacement)
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

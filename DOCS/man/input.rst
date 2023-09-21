@@ -3328,35 +3328,11 @@ Property list
 ``current-ao``
     Current audio output driver (name as used with ``--ao``).
 
-``shared-script-properties`` (RW)
-    This is a key/value map of arbitrary strings shared between scripts for
-    general use. The player itself does not use any data in it (although some
-    builtin scripts may). The property is not preserved across player restarts.
-
-    This is very primitive, inefficient, and annoying to use. It's a makeshift
-    solution which could go away any time (for example, when a better solution
-    becomes available). This is also why this property has an annoying name. You
-    should avoid using it, unless you absolutely have to.
-
-    Lua scripting has helpers starting with ``utils.shared_script_property_``.
-    They are undocumented because you should not use this property. If you still
-    think you must, you should use the helpers instead of the property directly.
-
-    You are supposed to use the ``change-list`` command to modify the contents.
-    Reading, modifying, and writing the property manually could data loss if two
-    scripts update different keys at the same time due to lack of
-    synchronization. The Lua helpers take care of this.
-
-    (There is no way to ensure synchronization if two scripts try to update the
-    same key at the same time.)
-
 ``user-data`` (RW)
     This is a recursive key/value map of arbitrary nodes shared between clients for
     general use (i.e. scripts, IPC clients, host applications, etc).
     The player itself does not use any data in it (although some builtin scripts may).
     The property is not preserved across player restarts.
-
-    This is a more powerful replacement for ``shared-script-properties``.
 
     Sub-paths can be accessed directly; e.g. ``user-data/my-script/state/a`` can be
     read, written, or observed.
