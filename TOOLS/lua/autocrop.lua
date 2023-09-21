@@ -87,6 +87,8 @@ timers = {
     detect_crop = nil
 }
 
+local hwdec_backup
+
 local command_prefix = options.suppress_osd and 'no-osd' or ''
 
 function is_filter_present(label)
@@ -138,6 +140,13 @@ function remove_filter(label)
     return false
 end
 
+function restore_hwdec()
+    if hwdec_backup then
+        mp.set_property("hwdec", hwdec_backup)
+        hwdec_backup = nil
+    end
+end
+
 function cleanup()
 
     -- Remove all existing filters.
@@ -155,6 +164,8 @@ function cleanup()
             timers[index] = nil
         end
     end
+
+    restore_hwdec()
 end
 
 function detect_crop()
@@ -162,6 +173,13 @@ function detect_crop()
 
     if not is_cropable(time_needed) then
         return
+    end
+
+    local hwdec_current = mp.get_property("hwdec-current")
+    if hwdec_current:find("-copy$") == nil and hwdec_current ~= "no" and
+       hwdec_current ~= "crystalhd" and hwdec_current ~= "rkmpp" then
+        hwdec_backup = mp.get_property("hwdec")
+        mp.set_property("hwdec", "auto-copy-safe")
     end
 
     -- Insert the cropdetect filter.
@@ -195,6 +213,8 @@ function detect_end()
         timers.detect_crop:kill()
         timers.detect_crop = nil
     end
+
+    restore_hwdec()
 
     local meta = {}
 
