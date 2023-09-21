@@ -3863,8 +3863,18 @@ static void check_gl_features(struct gl_video *p)
                        "Most extended features will be disabled.\n");
         }
         p->dumb_mode = true;
+        static const struct scaler_config dumb_scaler_config = {
+            {"bilinear", .params = {NAN, NAN}},
+            {.params = {NAN, NAN}},
+        };
         // Most things don't work, so whitelist all options that still work.
         p->opts = (struct gl_video_opts){
+            .scaler = {
+                [SCALER_SCALE] = dumb_scaler_config,
+                [SCALER_DSCALE] = dumb_scaler_config,
+                [SCALER_CSCALE] = dumb_scaler_config,
+                [SCALER_TSCALE] = dumb_scaler_config,
+            },
             .gamma = p->opts.gamma,
             .gamma_auto = p->opts.gamma_auto,
             .pbo = p->opts.pbo,
@@ -3888,8 +3898,6 @@ static void check_gl_features(struct gl_video *p)
             .target_prim = p->opts.target_prim,
             .target_peak = p->opts.target_peak,
         };
-        for (int n = 0; n < SCALER_COUNT; n++)
-            p->opts.scaler[n] = gl_video_opts_def.scaler[n];
         if (!have_fbo)
             p->use_lut_3d = false;
         return;
