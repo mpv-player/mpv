@@ -963,6 +963,16 @@ static bool is_visible(HWND window)
     return GetWindowLongPtrW(window, GWL_STYLE) & WS_VISIBLE;
 }
 
+//Set the mpv window's affinity.
+//This will affect how it's displayed on the desktop and in system-level operations like taking screenshots.
+static void update_affinity(struct vo_w32_state *w32)
+{
+    if (!w32 || w32->parent) {
+        return;
+    }
+    SetWindowDisplayAffinity(w32->window, w32->opts->window_affinity);
+}
+
 static void update_window_state(struct vo_w32_state *w32)
 {
     if (w32->parent)
@@ -1612,6 +1622,8 @@ static void *gui_thread(void *ptr)
     }
 
     update_dark_mode(w32);
+    if (w32->opts->window_affinity)
+        update_affinity(w32);
 
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
@@ -1786,6 +1798,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 
             if (changed_option == &vo_opts->fullscreen) {
                 reinit_window_state(w32);
+            } else if (changed_option == &vo_opts->window_affinity) {
+                update_affinity(w32);
             } else if (changed_option == &vo_opts->ontop) {
                 update_window_state(w32);
             } else if (changed_option == &vo_opts->border) {
