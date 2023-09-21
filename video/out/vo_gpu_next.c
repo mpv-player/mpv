@@ -1395,11 +1395,11 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     struct frame_priv *fp = mpi->priv;
     if (opts->blend_subs) {
             // Only update the overlays if the state has changed
-            float rx = pl_rect_w(p->dst) / pl_rect_w(image.crop);
-            float ry = pl_rect_h(p->dst) / pl_rect_h(image.crop);
+            float rx = pl_rect_w(dst) / pl_rect_w(image.crop);
+            float ry = pl_rect_h(dst) / pl_rect_h(image.crop);
             struct mp_osd_res res = {
-                .w = pl_rect_w(p->dst),
-                .h = pl_rect_h(p->dst),
+                .w = pl_rect_w(dst),
+                .h = pl_rect_h(dst),
                 .ml = -image.crop.x0 * rx,
                 .mr = (image.crop.x1 - vo->params->w) * rx,
                 .mt = -image.crop.y0 * ry,
