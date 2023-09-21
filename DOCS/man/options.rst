@@ -6061,7 +6061,7 @@ them.
     virtually always an improvement - the only reason to disable it would be
     for performance.
 
-``--deband-iterations=<1..16>``
+``--deband-iterations=<0..16>``
     The number of debanding steps to perform per sample. Each step reduces a
     bit more banding, but takes time to compute. Note that the strength of each
     step falls off very quickly, so high numbers (>4) are practically useless.
