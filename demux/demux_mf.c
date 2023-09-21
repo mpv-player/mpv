@@ -337,6 +337,7 @@ static const struct {
     { "qoi",            "qoi" },
     { "xface",          "xface" },
     { "xwd",            "xwd" },
+    { "svg",            "svg" },
     {0}
 };
 
