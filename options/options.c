@@ -190,14 +190,23 @@ static const m_option_t mp_vo_opt_list[] = {
         {"photo", 1}, {"video", 2}, {"game", 3})},
 #endif
 #if HAVE_WIN32_DESKTOP
-    {"window-affinity", OPT_CHOICE(window_affinity, {"default", WDA_NONE},
-        {"excludefromcapture", WDA_EXCLUDEFROMCAPTURE}, {"monitor", WDA_MONITOR})},
-    {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
 // For old MinGW-w64 compatibility
 #define DWMWCP_DEFAULT 0
 #define DWMWCP_DONOTROUND 1
 #define DWMWCP_ROUND 2
 #define DWMWCP_ROUNDSMALL 3
+
+#define DWMSBT_AUTO 0
+#define DWMSBT_NONE 1
+#define DWMSBT_MAINWINDOW 2
+#define DWMSBT_TRANSIENTWINDOW 3
+#define DWMSBT_TABBEDWINDOW 4
+
+    {"backdrop-type", OPT_CHOICE(backdrop_type, {"auto", DWMSBT_AUTO}, {"none", DWMSBT_NONE},
+        {"mica", DWMSBT_MAINWINDOW}, {"acrylic", DWMSBT_TRANSIENTWINDOW}, {"mica-alt", DWMSBT_TABBEDWINDOW})},
+    {"window-affinity", OPT_CHOICE(window_affinity, {"default", WDA_NONE},
+        {"excludefromcapture", WDA_EXCLUDEFROMCAPTURE}, {"monitor", WDA_MONITOR})},
+    {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
     {"window-corners", OPT_CHOICE(window_corners,
         {"default", DWMWCP_DEFAULT},
         {"donotround", DWMWCP_DONOTROUND},

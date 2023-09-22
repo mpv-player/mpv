@@ -64,6 +64,7 @@ typedef struct mp_vo_opts {
     bool force_render;
     bool force_window_position;
 
+    int backdrop_type;
     int window_affinity;
     char *mmcss_profile;
     int window_corners;

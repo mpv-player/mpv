@@ -7110,6 +7110,16 @@ Miscellaneous
 
     This is a key/value list option. See `List Options`_ for details.
 
+``--backdrop-type=<auto|none|mica|acrylic|mica-alt>``
+    (Windows only)
+    Controls the backdrop/border style.
+
+    :auto: Default Windows behavior
+    :none: The backdrop will be black or white depending on the system's theme settings.
+    :mica: Enables the Mica style, which is the default on Windows 11.
+    :acrylic: Enables the Acrylic style (frosted glass look).
+    :mica-alt: Same as Mica, except reversed.
+
 ``--window-affinity=<default|excludefromcmcapture|monitor>``
     (Windows only)
     Controls the window affinity behavior of mpv.
