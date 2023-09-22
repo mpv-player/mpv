@@ -716,7 +716,7 @@ or at runtime with the ``apply-profile <name>`` command.
         [slow]
         profile-desc="some profile name"
         # reference a builtin profile
-        profile=gpu-hq
+        profile=high-quality
 
         [fast]
         vo=vdpau

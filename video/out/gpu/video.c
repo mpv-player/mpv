@@ -295,7 +295,6 @@ struct gl_video {
 
 static const struct gl_video_opts gl_video_opts_def = {
     .dither_algo = DITHER_FRUIT,
-    .dither_depth = -1,
     .dither_size = 6,
     .temporal_dither_period = 1,
     .error_diffusion = "sierra-lite",
@@ -303,16 +302,18 @@ static const struct gl_video_opts gl_video_opts_def = {
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .scaler = {
-        {{"bilinear", .params={NAN, NAN}}, {.params = {NAN, NAN}},
+        {{"lanczos", .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // scale
-        {{NULL,       .params={NAN, NAN}}, {.params = {NAN, NAN}},
+        {{"hermite", .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // dscale
-        {{"bilinear", .params={NAN, NAN}}, {.params = {NAN, NAN}},
+        {{NULL, .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .cutoff = 0.001}, // cscale
-        {{"mitchell", .params={NAN, NAN}}, {.params = {NAN, NAN}},
-         .clamp = 1, }, // tscale
+        {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
     },
     .scaler_resizes_only = true,
+    .correct_downscaling = true,
+    .linear_downscaling = true,
+    .sigmoid_upscaling = true,
     .scaler_lut_size = 6,
     .interpolation_threshold = 0.01,
     .alpha_mode = ALPHA_BLEND_TILES,
@@ -322,9 +323,9 @@ static const struct gl_video_opts gl_video_opts_def = {
         .curve = TONE_MAPPING_AUTO,
         .curve_param = NAN,
         .max_boost = 1.0,
-        .decay_rate = 100.0,
-        .scene_threshold_low = 5.5,
-        .scene_threshold_high = 10.0,
+        .decay_rate = 20.0,
+        .scene_threshold_low = 1.0,
+        .scene_threshold_high = 3.0,
         .contrast_smoothness = 3.5,
     },
     .early_flush = -1,
@@ -475,19 +476,6 @@ const struct m_sub_options gl_video_conf = {
         {"gpu-shader-cache-dir", OPT_STRING(shader_cache_dir), .flags = M_OPT_FILE},
         {"gpu-hwdec-interop",
             OPT_STRING_VALIDATE(hwdec_interop, ra_hwdec_validate_opt)},
-        {"opengl-hwdec-interop", OPT_REPLACED("gpu-hwdec-interop")},
-        {"hwdec-preload", OPT_REPLACED("opengl-hwdec-interop")},
-        {"hdr-tone-mapping", OPT_REPLACED("tone-mapping")},
-        {"opengl-shaders", OPT_REPLACED("glsl-shaders")},
-        {"opengl-shader", OPT_REPLACED("glsl-shader")},
-        {"opengl-shader-cache-dir", OPT_REPLACED("gpu-shader-cache-dir")},
-        {"opengl-tex-pad-x", OPT_REPLACED("gpu-tex-pad-x")},
-        {"opengl-tex-pad-y", OPT_REPLACED("gpu-tex-pad-y")},
-        {"opengl-fbo-format", OPT_REPLACED("fbo-format")},
-        {"opengl-dumb-mode", OPT_REPLACED("gpu-dumb-mode")},
-        {"opengl-gamma", OPT_REPLACED("gamma-factor")},
-        {"linear-scaling", OPT_REMOVED("Split into --linear-upscaling and "
-                                        "--linear-downscaling")},
         {"gamut-warning", OPT_REMOVED("Replaced by --gamut-mapping-mode=warn")},
         {"gamut-clipping", OPT_REMOVED("Replaced by --gamut-mapping-mode=desaturate")},
         {"tone-mapping-desaturate", OPT_REMOVED("Replaced by --tone-mapping-mode")},
@@ -1730,6 +1718,12 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
         conf = &p->opts.scaler[SCALER_SCALE];
     }
 
+    if (conf && scaler->index == SCALER_CSCALE && (!conf->kernel.name ||
+        !conf->kernel.name[0]))
+    {
+        conf = &p->opts.scaler[SCALER_SCALE];
+    }
+
     struct filter_kernel bare_window;
     const struct filter_kernel *t_kernel = mp_find_filter_kernel(conf->kernel.name);
     const struct filter_window *t_window = mp_find_filter_window(conf->window.name);
@@ -2299,6 +2293,13 @@ static void pass_read_video(struct gl_video *p)
             continue;
 
         const struct scaler_config *conf = &p->opts.scaler[scaler_id];
+
+        if (scaler_id == SCALER_CSCALE && (!conf->kernel.name ||
+            !conf->kernel.name[0]))
+        {
+            conf = &p->opts.scaler[SCALER_SCALE];
+        }
+
         struct scaler *scaler = &p->scaler[scaler_id];
 
         // bilinear scaling is a free no-op thanks to GPU sampling
@@ -3849,8 +3850,18 @@ static void check_gl_features(struct gl_video *p)
                        "Most extended features will be disabled.\n");
         }
         p->dumb_mode = true;
+        static const struct scaler_config dumb_scaler_config = {
+            {"bilinear", .params = {NAN, NAN}},
+            {.params = {NAN, NAN}},
+        };
         // Most things don't work, so whitelist all options that still work.
         p->opts = (struct gl_video_opts){
+            .scaler = {
+                [SCALER_SCALE] = dumb_scaler_config,
+                [SCALER_DSCALE] = dumb_scaler_config,
+                [SCALER_CSCALE] = dumb_scaler_config,
+                [SCALER_TSCALE] = dumb_scaler_config,
+            },
             .gamma = p->opts.gamma,
             .gamma_auto = p->opts.gamma_auto,
             .pbo = p->opts.pbo,
@@ -3874,8 +3885,6 @@ static void check_gl_features(struct gl_video *p)
             .target_prim = p->opts.target_prim,
             .target_peak = p->opts.target_peak,
         };
-        for (int n = 0; n < SCALER_COUNT; n++)
-            p->opts.scaler[n] = gl_video_opts_def.scaler[n];
         if (!have_fbo)
             p->use_lut_3d = false;
         return;
@@ -4120,13 +4129,13 @@ static void reinit_from_options(struct gl_video *p)
     gl_video_setup_hooks(p);
     reinit_osd(p);
 
-    int vs;
-    mp_read_option_raw(p->global, "video-sync", &m_option_type_choice, &vs);
-    if (p->opts.interpolation && !vs && !p->dsi_warned) {
+    struct mp_vo_opts *vo_opts = mp_get_config_group(p, p->global, &vo_sub_opts);
+    if (p->opts.interpolation && !vo_opts->video_sync && !p->dsi_warned) {
         MP_WARN(p, "Interpolation now requires enabling display-sync mode.\n"
                    "E.g.: --video-sync=display-resample\n");
         p->dsi_warned = true;
     }
+    talloc_free(vo_opts);
 
     if (p->opts.correct_downscaling && !p->correct_downscaling_warned) {
         const char *name = p->opts.scaler[SCALER_DSCALE].kernel.name;
@@ -4177,6 +4186,8 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
         r = M_OPT_EXIT;
     } else if (bstr_equals0(name, "dscale") && !param.len) {
         return r; // empty dscale means "use same as upscaler"
+    } else if (bstr_equals0(name, "cscale") && !param.len) {
+        return r; // empty cscale means "use same as upscaler"
     } else {
         snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
         if (!handle_scaler_opt(s, tscale))

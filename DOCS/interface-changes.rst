@@ -63,6 +63,33 @@ Interface changes
     - remove `bcspline` filter (`bicubic` is now the same as `bcspline`)
     - rename `--cache-dir` and `--cache-unlink-files` to `--demuxer-cache-dir` and
       `--demuxer-cache-unlink-files`
+    - enable `--correct-downscaling`, `--linear-downscaling`, `--sigmoid-upscaling`
+    - `--cscale` defaults to `--scale` if not defined
+    - change `--tscale` default to `oversample`
+    - change `--dither-depth` to `auto`
+    - deprecate `--profile=gpu-hq`, add `--profile=<fast|high-quality>`
+    - change `--dscale` default to `hermite`
+    - update defaults to `--hdr-peak-decay-rate=20`, `--hdr-scene-threshold-low=1.0`,
+      `--hdr-scene-threshold-high=3.0`
+    - update defaults to `--deband-threshold=48`, `--deband-grain=32`
+    - add `--directory-mode=auto` and make it the default
+    - remove deprecated `--profile=opengl-hq`
+    - remove several legacy fallbacks for old deprecated options (now they will just
+      error out like normal)
+    - remove deprecated `drop-frame-count` and `vo-drop-frame-count` property aliases
+    - remove the ability to write to the `display-fps` property (use `override-display-fps`
+      instead)
+    - writing the current value to playlist-pos will no longer restart playback (use
+      `playlist-play-index` instead)
+    - remove deprecated `--oaoffset`, `--oafirst`, `--ovoffset`, `--ovfirst`,
+      `--demuxer-force-retry-on-eof`, `--fit-border` options
+    - remove deprecated `--record-file` option
+    - remove deprecated `--vf-defaults` and `--af-defaults` options
+    - `--drm-connector` no longer allows selecting the card number (use `--drm-device`
+      instead)
+    - add `--title-bar` option
+    - add `--window-corners` option
+    - rename `--cdrom-device` to `--cdda-device`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

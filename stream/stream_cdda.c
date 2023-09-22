@@ -61,6 +61,7 @@ typedef struct cdda_params {
     size_t data_pos;
 
     // options
+    char *cdda_device;
     int speed;
     int paranoia_mode;
     int sector_size;
@@ -76,6 +77,7 @@ typedef struct cdda_params {
 #define OPT_BASE_STRUCT struct cdda_params
 const struct m_sub_options stream_cdda_conf = {
     .opts = (const m_option_t[]) {
+        {"device", OPT_STRING(cdda_device), .flags = M_OPT_FILE},
         {"speed", OPT_INT(speed), M_RANGE(1, 100)},
         {"paranoia", OPT_INT(paranoia_mode), M_RANGE(0, 2)},
         {"sector-size", OPT_INT(sector_size), M_RANGE(1, 100)},
@@ -86,7 +88,6 @@ const struct m_sub_options stream_cdda_conf = {
         {"span-a", OPT_INT(span[0])},
         {"span-b", OPT_INT(span[1])},
         {"cdtext", OPT_BOOL(cdtext)},
-        {"span", OPT_REMOVED("use span-a/span-b")},
         {0}
     },
     .size = sizeof(struct cdda_params),
@@ -287,15 +288,10 @@ static int open_cdda(stream_t *st)
     cdrom_drive_t *cdd = NULL;
     int last_track;
 
-    char *global_device;
-    mp_read_option_raw(st->global, "cdrom-device", &m_option_type_string,
-                       &global_device);
-    talloc_steal(st, global_device);
-
     if (st->path[0]) {
         p->device = st->path;
-    } else if (global_device && global_device[0]) {
-        p->device = global_device;
+    } else if (p->cdda_device && p->cdda_device[0]) {
+        p->device = p->cdda_device;
     } else {
         p->device = DEFAULT_CDROM_DEVICE;
     }

@@ -19,6 +19,7 @@
 
 #include "hwdec_cuda.h"
 #include "options/m_config.h"
+#include "options/options.h"
 #include "video/out/opengl/formats.h"
 #include "video/out/opengl/ra_gl.h"
 
@@ -135,9 +136,9 @@ bool cuda_gl_init(const struct ra_hwdec *hw) {
 
     p->decode_ctx = p->display_ctx;
 
-    int decode_dev_idx = -1;
-    mp_read_option_raw(hw->global, "cuda-decode-device", &m_option_type_choice,
-                       &decode_dev_idx);
+    struct cuda_opts *opts = mp_get_config_group(NULL, hw->global, &cuda_conf);
+    int decode_dev_idx = opts->cuda_device;
+    talloc_free(opts);
 
     if (decode_dev_idx > -1) {
         CUcontext dummy;

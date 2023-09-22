@@ -28,10 +28,11 @@ Available video output drivers are:
 
     See `GPU renderer options`_ for options specific to this VO.
 
-    By default, it tries to use fast and fail-safe settings. Use the
-    ``gpu-hq`` profile to use this driver with defaults set to high quality
-    rendering. The profile can be applied with ``--profile=gpu-hq`` and its
-    contents can be viewed with ``--show-profile=gpu-hq``.
+    By default, mpv utilizes settings that balance quality and performance.
+    Additionally, two predefined profiles are available: ``fast`` for maximum
+    performance and ``high-quality`` for superior rendering quality. You can
+    apply a specific profile using the ``--profile=<name>`` option and inspect
+    its contents using ``--show-profile=<name>``.
 
     This VO abstracts over several possible graphics APIs and windowing
     contexts, which can be influenced using the ``--gpu-api`` and
@@ -569,14 +570,7 @@ Available video output drivers are:
 ``rpi`` (Raspberry Pi)
     Native video output on the Raspberry Pi using the MMAL API.
 
-    This is deprecated. Use ``--vo=gpu`` instead, which is the default and
-    provides the same functionality. The ``rpi`` VO will be removed in
-    mpv 0.23.0. Its functionality was folded into --vo=gpu, which now uses
-    RPI hardware decoding by treating it as a hardware overlay (without applying
-    GL filtering). Also to be changed in 0.23.0: the --fs flag will be reset to
-    "no" by default (like on the other platforms).
-
-    The following deprecated global options are supported by this video output:
+    The following global options are supported by this video output:
 
     ``--rpi-display=<number>``
         Select the display number on which the video overlay should be shown
@@ -608,18 +602,15 @@ Available video output drivers are:
 
     The following global options are supported by this video output:
 
-    ``--drm-connector=[<gpu_number>.]<name>``
+    ``--drm-connector=<name>``
         Select the connector to use (usually this is a monitor.) If ``<name>``
         is empty or ``auto``, mpv renders the output on the first available
         connector. Use ``--drm-connector=help`` to get a list of available
-        connectors. The ``<gpu_number>`` argument can be used to disambiguate
-        multiple graphic cards, but is deprecated in favor of ``--drm-device``.
-        (default: empty)
+        connectors. (default: empty)
 
     ``--drm-device=<path>``
         Select the DRM device file to use. If specified this overrides automatic
-        card selection and any card number specified ``--drm-connector``.
-        (default: empty)
+        card selection. (default: empty)
 
     ``--drm-mode=<preferred|highest|N|WxH[@R]>``
         Mode to use (resolution and frame rate).

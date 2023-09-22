@@ -21,6 +21,7 @@
 #include <stdbool.h>
 
 #include "libmpv/client.h"
+#include "osdep/compiler.h"
 
 struct MPContext;
 struct mp_cmd;

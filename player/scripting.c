@@ -40,6 +40,8 @@
 #include "core.h"
 #include "client.h"
 #include "libmpv/client.h"
+#include "libmpv/render.h"
+#include "libmpv/stream_cb.h"
 
 extern const struct mp_scripting mp_scripting_lua;
 extern const struct mp_scripting mp_scripting_cplugin;
@@ -295,10 +297,82 @@ bool mp_load_scripts(struct MPContext *mpctx)
 
 #if HAVE_CPLUGINS
 
+#if !HAVE_WIN32
 #include <dlfcn.h>
+#endif
 
 #define MPV_DLOPEN_FN "mpv_open_cplugin"
 typedef int (*mpv_open_cplugin)(mpv_handle *handle);
+
+static void init_sym_table(struct mp_script_args *args, void *lib) {
+#define INIT_SYM(name)                                                         \
+    {                                                                          \
+        void **sym = (void **)dlsym(lib, "pfn_" #name);                        \
+        if (sym) {                                                             \
+            if (*sym && *sym != &name)                                         \
+                MP_ERR(args, "Overriding already set function " #name "\n");   \
+            *sym = &name;                                                      \
+        }                                                                      \
+    }
+
+    INIT_SYM(mpv_client_api_version);
+    INIT_SYM(mpv_error_string);
+    INIT_SYM(mpv_free);
+    INIT_SYM(mpv_client_name);
+    INIT_SYM(mpv_client_id);
+    INIT_SYM(mpv_create);
+    INIT_SYM(mpv_initialize);
+    INIT_SYM(mpv_destroy);
+    INIT_SYM(mpv_terminate_destroy);
+    INIT_SYM(mpv_create_client);
+    INIT_SYM(mpv_create_weak_client);
+    INIT_SYM(mpv_load_config_file);
+    INIT_SYM(mpv_get_time_us);
+    INIT_SYM(mpv_free_node_contents);
+    INIT_SYM(mpv_set_option);
+    INIT_SYM(mpv_set_option_string);
+    INIT_SYM(mpv_command);
+    INIT_SYM(mpv_command_node);
+    INIT_SYM(mpv_command_ret);
+    INIT_SYM(mpv_command_string);
+    INIT_SYM(mpv_command_async);
+    INIT_SYM(mpv_command_node_async);
+    INIT_SYM(mpv_abort_async_command);
+    INIT_SYM(mpv_set_property);
+    INIT_SYM(mpv_set_property_string);
+    INIT_SYM(mpv_del_property);
+    INIT_SYM(mpv_set_property_async);
+    INIT_SYM(mpv_get_property);
+    INIT_SYM(mpv_get_property_string);
+    INIT_SYM(mpv_get_property_osd_string);
+    INIT_SYM(mpv_get_property_async);
+    INIT_SYM(mpv_observe_property);
+    INIT_SYM(mpv_unobserve_property);
+    INIT_SYM(mpv_event_name);
+    INIT_SYM(mpv_event_to_node);
+    INIT_SYM(mpv_request_event);
+    INIT_SYM(mpv_request_log_messages);
+    INIT_SYM(mpv_wait_event);
+    INIT_SYM(mpv_wakeup);
+    INIT_SYM(mpv_set_wakeup_callback);
+    INIT_SYM(mpv_wait_async_requests);
+    INIT_SYM(mpv_hook_add);
+    INIT_SYM(mpv_hook_continue);
+    INIT_SYM(mpv_get_wakeup_pipe);
+
+    INIT_SYM(mpv_render_context_create);
+    INIT_SYM(mpv_render_context_set_parameter);
+    INIT_SYM(mpv_render_context_get_info);
+    INIT_SYM(mpv_render_context_set_update_callback);
+    INIT_SYM(mpv_render_context_update);
+    INIT_SYM(mpv_render_context_render);
+    INIT_SYM(mpv_render_context_report_swap);
+    INIT_SYM(mpv_render_context_free);
+
+    INIT_SYM(mpv_stream_cb_add_ro);
+
+#undef INIT_SYM
+}
 
 static int load_cplugin(struct mp_script_args *args)
 {
@@ -310,6 +384,9 @@ static int load_cplugin(struct mp_script_args *args)
     mpv_open_cplugin sym = (mpv_open_cplugin)dlsym(lib, MPV_DLOPEN_FN);
     if (!sym)
         goto error;
+
+    init_sym_table(args, lib);
+
     return sym(args->client) ? -1 : 0;
 error: ;
     char *err = dlerror();
@@ -319,8 +396,13 @@ error: ;
 }
 
 const struct mp_scripting mp_scripting_cplugin = {
+    #if HAVE_WIN32
+    .name = "DLL plugin",
+    .file_ext = "dll",
+    #else
     .name = "SO plugin",
     .file_ext = "so",
+    #endif
     .load = load_cplugin,
 };
 

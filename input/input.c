@@ -203,10 +203,6 @@ const struct m_sub_options input_config = {
         {"input-gamepad", OPT_BOOL(use_gamepad)},
 #endif
         {"window-dragging", OPT_BOOL(allow_win_drag)},
-        {"input-x11-keyboard", OPT_REPLACED("input-vo-keyboard")},
-#if HAVE_COCOA
-        {"input-appleremote", OPT_REMOVED("replaced by MediaPlayer support")},
-#endif
         {0}
     },
     .size = sizeof(struct input_opts),

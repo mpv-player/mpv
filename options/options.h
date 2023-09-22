@@ -16,7 +16,7 @@ typedef struct mp_vo_opts {
     int ontop_level;
     bool fullscreen;
     bool border;
-    bool fit_border;
+    bool title_bar;
     bool all_workspaces;
     bool window_minimized;
     bool window_maximized;
@@ -64,7 +64,9 @@ typedef struct mp_vo_opts {
     bool force_render;
     bool force_window_position;
 
+    int window_affinity;
     char *mmcss_profile;
+    int window_corners;
 
     double override_display_fps;
     double timing_offset;
@@ -202,7 +204,6 @@ typedef struct MPOpts {
 
     bool untimed;
     char *stream_dump;
-    char *record_file;
     bool stop_playback_on_init_failure;
     int loop_times;
     int loop_file;
@@ -294,15 +295,13 @@ typedef struct MPOpts {
     char *screenshot_directory;
     bool screenshot_sw;
 
-    int index_mode;
-
     struct m_channels audio_output_channels;
     int audio_output_format;
     int force_srate;
     double playback_speed;
     bool pitch_correction;
-    struct m_obj_settings *vf_settings, *vf_defs;
-    struct m_obj_settings *af_settings, *af_defs;
+    struct m_obj_settings *vf_settings;
+    struct m_obj_settings *af_settings;
     struct filter_opts *filter_opts;
     struct dec_wrapper_opts *dec_wrapper;
     char **sub_name;
@@ -322,15 +321,12 @@ typedef struct MPOpts {
 
     int w32_priority;
 
-    struct cdda_params *stream_cdda_opts;
-    struct dvb_params *stream_dvb_opts;
-    struct stream_lavf_params *stream_lavf_opts;
+    struct bluray_opts *stream_bluray_opts;
+    struct cdda_opts *stream_cdda_opts;
+    struct dvb_opts *stream_dvb_opts;
+    struct lavf_opts *stream_lavf_opts;
 
-    char *cdrom_device;
     char *bluray_device;
-
-    double mf_fps;
-    char *mf_type;
 
     struct demux_rawaudio_opts *demux_rawaudio;
     struct demux_rawvideo_opts *demux_rawvideo;
@@ -354,8 +350,6 @@ typedef struct MPOpts {
     char *ipc_path;
     char *ipc_client;
 
-    int wingl_dwm_flush;
-
     struct mp_resample_opts *resample_opts;
 
     struct ra_ctx_opts *ra_ctx_opts;
@@ -367,10 +361,11 @@ typedef struct MPOpts {
     struct spirv_opts *spirv_opts;
     struct d3d11_opts *d3d11_opts;
     struct d3d11va_opts *d3d11va_opts;
-    struct cocoa_opts *cocoa_opts;
     struct macos_opts *macos_opts;
     struct drm_opts *drm_opts;
     struct wayland_opts *wayland_opts;
+    struct wingl_opts *wingl_opts;
+    struct cuda_opts *cuda_opts;
     struct dvd_opts *dvd_opts;
     struct vaapi_opts *vaapi_opts;
     struct sws_opts *sws_opts;
@@ -378,6 +373,10 @@ typedef struct MPOpts {
 
     int cuda_device;
 } MPOpts;
+
+struct cuda_opts {
+    int cuda_device;
+};
 
 struct dvd_opts {
     int angle;
@@ -390,6 +389,7 @@ struct filter_opts {
 };
 
 extern const struct m_sub_options vo_sub_opts;
+extern const struct m_sub_options cuda_conf;
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_sub_filter_opts;

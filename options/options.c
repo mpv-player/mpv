@@ -32,6 +32,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <dwmapi.h>
 #endif
 
 #include "options.h"
@@ -55,6 +56,7 @@ static void print_version(struct mp_log *log)
 }
 
 extern const struct m_sub_options tv_params_conf;
+extern const struct m_sub_options stream_bluray_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
@@ -91,9 +93,9 @@ extern const struct m_sub_options spirv_conf;
 extern const struct m_sub_options d3d11_conf;
 extern const struct m_sub_options d3d11va_conf;
 extern const struct m_sub_options angle_conf;
-extern const struct m_sub_options cocoa_conf;
 extern const struct m_sub_options macos_conf;
 extern const struct m_sub_options wayland_conf;
+extern const struct m_sub_options wingl_conf;
 extern const struct m_sub_options vaapi_conf;
 
 static const struct m_sub_options screenshot_conf = {
@@ -115,8 +117,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"ontop-level", OPT_CHOICE(ontop_level, {"window", -1}, {"system", -2},
         {"desktop", -3}), M_RANGE(0, INT_MAX)},
     {"border", OPT_BOOL(border)},
-    {"fit-border", OPT_BOOL(fit_border),
-     .deprecation_message = "the option is ignored and no longer needed"},
+    {"title-bar", OPT_BOOL(title_bar)},
     {"on-all-workspaces", OPT_BOOL(all_workspaces)},
     {"geometry", OPT_GEOMETRY(geometry)},
     {"autofit", OPT_SIZE_BOX(autofit)},
@@ -189,7 +190,19 @@ static const m_option_t mp_vo_opt_list[] = {
         {"photo", 1}, {"video", 2}, {"game", 3})},
 #endif
 #if HAVE_WIN32_DESKTOP
+    {"window-affinity", OPT_CHOICE(window_affinity, {"default", WDA_NONE},
+        {"excludefromcapture", WDA_EXCLUDEFROMCAPTURE}, {"monitor", WDA_MONITOR})},
     {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
+// For old MinGW-w64 compatibility
+#define DWMWCP_DEFAULT 0
+#define DWMWCP_DONOTROUND 1
+#define DWMWCP_ROUND 2
+#define DWMWCP_ROUNDSMALL 3
+    {"window-corners", OPT_CHOICE(window_corners,
+        {"default", DWMWCP_DEFAULT},
+        {"donotround", DWMWCP_DONOTROUND},
+        {"round", DWMWCP_ROUND},
+        {"roundsmall", DWMWCP_ROUNDSMALL})},
 #endif
 #if HAVE_EGL_ANDROID
     {"android-surface-size", OPT_SIZE_BOX(android_surface_size)},
@@ -217,7 +230,7 @@ const struct m_sub_options vo_sub_opts = {
         .native_fs = true,
         .taskbar_progress = true,
         .border = true,
-        .fit_border = true,
+        .title_bar = true,
         .appid = "mpv",
         .content_type = -1,
         .WinID = -1,
@@ -351,6 +364,21 @@ const struct m_sub_options mp_osd_render_sub_opts = {
 };
 
 #undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct cuda_opts
+
+const struct m_sub_options cuda_conf = {
+    .opts = (const struct m_option[]){
+        {"decode-device", OPT_CHOICE(cuda_device, {"auto", -1}),
+            M_RANGE(0, INT_MAX)},
+        {0}
+    },
+    .size = sizeof(struct cuda_opts),
+    .defaults = &(const struct cuda_opts){
+        .cuda_device = -1,
+    },
+};
+
+#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct dvd_opts
 
 const struct m_sub_options dvd_conf = {
@@ -472,7 +500,7 @@ static const m_option_t mp_opts[] = {
 #endif
     {"edition", OPT_CHOICE(edition_id, {"auto", -1}), M_RANGE(0, 8190)},
 #if HAVE_LIBBLURAY
-    {"bluray-device", OPT_STRING(bluray_device), .flags = M_OPT_FILE},
+    {"bluray", OPT_SUBSTRUCT(stream_bluray_opts, stream_bluray_conf)},
 #endif /* HAVE_LIBBLURAY */
 
 // ------------------------- demuxer options --------------------
@@ -505,8 +533,6 @@ static const m_option_t mp_opts[] = {
     {"image-display-duration", OPT_DOUBLE(image_display_duration),
         M_RANGE(0, INFINITY)},
 
-     {"index", OPT_CHOICE(index_mode, {"default", 1}, {"recreate", 0})},
-
     // select audio/video/subtitle stream
     // keep in sync with num_ptracks[] and MAX_PTRACKS
     {"aid", OPT_TRACKCHOICE(stream_id[0][STREAM_AUDIO])},
@@ -538,7 +564,7 @@ static const m_option_t mp_opts[] = {
 
 #if HAVE_CDDA
     {"cdda", OPT_SUBSTRUCT(stream_cdda_opts, stream_cdda_conf)},
-    {"cdrom-device", OPT_STRING(cdrom_device), .flags = M_OPT_FILE},
+    {"cdrom-device", OPT_REPLACED("cdda-device")},
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
@@ -553,8 +579,6 @@ static const m_option_t mp_opts[] = {
     {"cache-pause-initial", OPT_BOOL(cache_pause_initial)},
     {"cache-pause-wait", OPT_FLOAT(cache_pause_wait), M_RANGE(0, DBL_MAX)},
 
-    {"mf-fps", OPT_DOUBLE(mf_fps)},
-    {"mf-type", OPT_STRING(mf_type)},
 #if HAVE_DVBIN
     {"dvbin", OPT_SUBSTRUCT(stream_dvb_opts, stream_dvb_conf)},
 #endif
@@ -578,11 +602,7 @@ static const m_option_t mp_opts[] = {
 
 // ------------------------- codec/vfilter options --------------------
 
-    {"af-defaults", OPT_SETTINGSLIST(af_defs, &af_obj_list),
-        .deprecation_message = "use --af + enable/disable flags"},
     {"af", OPT_SETTINGSLIST(af_settings, &af_obj_list)},
-    {"vf-defaults", OPT_SETTINGSLIST(vf_defs, &vf_obj_list),
-        .deprecation_message = "use --vf + enable/disable flags"},
     {"vf", OPT_SETTINGSLIST(vf_settings, &vf_obj_list)},
 
     {"", OPT_SUBSTRUCT(filter_opts, filter_conf)},
@@ -788,9 +808,6 @@ static const m_option_t mp_opts[] = {
         .flags = M_OPT_FILE},
     {"screenshot-sw", OPT_BOOL(screenshot_sw)},
 
-    {"record-file", OPT_STRING(record_file), .flags = M_OPT_FILE,
-        .deprecation_message = "use --stream-record or the dump-cache command"},
-
     {"", OPT_SUBSTRUCT(resample_opts, resample_conf)},
 
     {"", OPT_SUBSTRUCT(input_opts, input_config)},
@@ -826,10 +843,6 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(angle_opts, angle_conf)},
 #endif
 
-#if HAVE_GL_COCOA
-    {"", OPT_SUBSTRUCT(cocoa_opts, cocoa_conf)},
-#endif
-
 #if HAVE_COCOA
     {"", OPT_SUBSTRUCT(macos_opts, macos_conf)},
 #endif
@@ -843,13 +856,11 @@ static const m_option_t mp_opts[] = {
 #endif
 
 #if HAVE_GL_WIN32
-    {"opengl-dwmflush", OPT_CHOICE(wingl_dwm_flush,
-        {"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})},
+    {"", OPT_SUBSTRUCT(wingl_opts, wingl_conf)},
 #endif
 
 #if HAVE_CUDA_HWACCEL
-    {"cuda-decode-device", OPT_CHOICE(cuda_device, {"auto", -1}),
-        M_RANGE(0, INT_MAX)},
+    {"cuda", OPT_SUBSTRUCT(cuda_opts, cuda_conf)},
 #endif
 
 #if HAVE_VAAPI
@@ -864,122 +875,7 @@ static const m_option_t mp_opts[] = {
 
     {"", OPT_SUBSTRUCT(encode_opts, encode_config)},
 
-    {"a52drc", OPT_REMOVED("use --ad-lavc-ac3drc=level")},
-    {"afm", OPT_REMOVED("use --ad=...")},
-    {"aspect", OPT_REPLACED("video-aspect-override")},
-    {"ass-bottom-margin", OPT_REMOVED("use --vf=sub=bottom:top")},
-    {"ass", OPT_REPLACED("sub-ass")},
-    {"audiofile", OPT_REPLACED("audio-file")},
-    {"benchmark", OPT_REMOVED("use --untimed (no stats)")},
-    {"capture", OPT_REMOVED(NULL)},
-    {"stream-capture", OPT_REMOVED(NULL)},
-    {"channels", OPT_REMOVED("use --audio-channels (changed semantics)")},
-    {"cursor-autohide-delay", OPT_REPLACED("cursor-autohide")},
-    {"delay", OPT_REPLACED("audio-delay")},
-    {"dumpstream", OPT_REMOVED("use --stream-dump=<filename>")},
-    {"dvdangle", OPT_REPLACED("dvd-angle")},
-    {"endpos", OPT_REPLACED("length")},
-    {"font", OPT_REPLACED("osd-font")},
     {"sub-forced-only", OPT_REPLACED("sub-forced-events-only")},
-    {"forcedsubsonly", OPT_REPLACED("sub-forced-only")},
-    {"format", OPT_REPLACED("audio-format")},
-    {"hardframedrop", OPT_REMOVED(NULL)},
-    {"identify", OPT_REMOVED("use TOOLS/mpv_identify.sh")},
-    {"lavdopts", OPT_REMOVED("use --vd-lavc-...")},
-    {"lavfdopts", OPT_REMOVED("use --demuxer-lavf-...")},
-    {"lua", OPT_REPLACED("script")},
-    {"lua-opts", OPT_REPLACED("script-opts")},
-    {"mixer-channel", OPT_REMOVED("use AO suboptions (alsa, oss)")},
-    {"mixer", OPT_REMOVED("use AO suboptions (alsa, oss)")},
-    {"mouse-movements", OPT_REPLACED("input-cursor")},
-    {"msgcolor", OPT_REPLACED("msg-color")},
-    {"msglevel", OPT_REMOVED("use --msg-level (changed semantics)")},
-    {"msgmodule", OPT_REPLACED("msg-module")},
-    {"name", OPT_REPLACED("x11-name")},
-    {"noar", OPT_REPLACED("no-input-appleremote")},
-    {"noautosub", OPT_REPLACED("no-sub-auto")},
-    {"noconsolecontrols", OPT_REPLACED("no-input-terminal")},
-    {"nosound", OPT_REPLACED("no-audio")},
-    {"osdlevel", OPT_REPLACED("osd-level")},
-    {"panscanrange", OPT_REMOVED("use --video-zoom, --video-pan-x/y")},
-    {"playing-msg", OPT_REPLACED("term-playing-msg")},
-    {"pp", OPT_REMOVED(NULL)},
-    {"pphelp", OPT_REMOVED(NULL)},
-    {"rawaudio", OPT_REMOVED("use --demuxer-rawaudio-...")},
-    {"rawvideo", OPT_REMOVED("use --demuxer-rawvideo-...")},
-    {"spugauss", OPT_REPLACED("sub-gauss")},
-    {"srate", OPT_REPLACED("audio-samplerate")},
-    {"ss", OPT_REPLACED("start")},
-    {"stop-xscreensaver", OPT_REPLACED("stop-screensaver")},
-    {"sub-fuzziness", OPT_REPLACED("sub-auto")},
-    {"subcp", OPT_REPLACED("sub-codepage")},
-    {"subdelay", OPT_REPLACED("sub-delay")},
-    {"subfile", OPT_REPLACED("sub-file")},
-    {"subfont-text-scale", OPT_REPLACED("sub-scale")},
-    {"subfont", OPT_REPLACED("sub-text-font")},
-    {"subfps", OPT_REPLACED("sub-fps")},
-    {"subpos", OPT_REPLACED("sub-pos")},
-    {"tvscan", OPT_REPLACED("tv-scan")},
-    {"use-filename-title", OPT_REMOVED("use --title='${filename}'")},
-    {"vc", OPT_REMOVED("use --vd=..., --hwdec=...")},
-    {"vobsub", OPT_REMOVED("use --sub-file (pass the .idx file)")},
-    {"xineramascreen", OPT_REMOVED("use --screen (different values)")},
-    {"xy", OPT_REMOVED("use --autofit")},
-    {"zoom", OPT_REMOVED("Inverse available as ``--video-unscaled")},
-    {"media-keys", OPT_REPLACED("input-media-keys")},
-    {"right-alt-gr", OPT_REPLACED("input-right-alt-gr")},
-    {"autosub", OPT_REPLACED("sub-auto")},
-    {"autosub-match", OPT_REPLACED("sub-auto")},
-    {"status-msg", OPT_REPLACED("term-status-msg")},
-    {"idx", OPT_REPLACED("index")},
-    {"forceidx", OPT_REPLACED("index")},
-    {"cache-pause-below", OPT_REMOVED("for 'no', use --no-cache-pause")},
-    {"no-cache-pause-below", OPT_REMOVED("use --no-cache-pause")},
-    {"volstep", OPT_REMOVED("edit input.conf directly instead")},
-    {"fixed-vo", OPT_REMOVED("--fixed-vo=yes is now the default")},
-    {"mkv-subtitle-preroll", OPT_REPLACED("demuxer-mkv-subtitle-preroll")},
-    {"ass-use-margins", OPT_REPLACED("sub-use-margins")},
-    {"media-title", OPT_REPLACED("force-media-title")},
-    {"input-unix-socket", OPT_REPLACED("input-ipc-server")},
-    {"softvol-max", OPT_REPLACED("volume-max")},
-    {"bluray-angle", OPT_REMOVED("this didn't do anything for a few releases")},
-    {"sub-text-font", OPT_REPLACED("sub-font")},
-    {"sub-text-font-size", OPT_REPLACED("sub-font-size")},
-    {"sub-text-color", OPT_REPLACED("sub-color")},
-    {"sub-text-border-color", OPT_REPLACED("sub-border-color")},
-    {"sub-text-shadow-color", OPT_REPLACED("sub-shadow-color")},
-    {"sub-text-back-color", OPT_REPLACED("sub-back-color")},
-    {"sub-text-border-size", OPT_REPLACED("sub-border-size")},
-    {"sub-text-shadow-offset", OPT_REPLACED("sub-shadow-offset")},
-    {"sub-text-spacing", OPT_REPLACED("sub-spacing")},
-    {"sub-text-margin-x", OPT_REPLACED("sub-margin-x")},
-    {"sub-text-margin-y", OPT_REPLACED("sub-margin-y")},
-    {"sub-text-align-x", OPT_REPLACED("sub-align-x")},
-    {"sub-text-align-y", OPT_REPLACED("sub-align-y")},
-    {"sub-text-blur", OPT_REPLACED("sub-blur")},
-    {"sub-text-bold", OPT_REPLACED("sub-bold")},
-    {"sub-text-italic", OPT_REPLACED("sub-italic")},
-    {"ass-line-spacing", OPT_REPLACED("sub-ass-line-spacing")},
-    {"ass-force-margins", OPT_REPLACED("sub-ass-force-margins")},
-    {"ass-vsfilter-aspect-compat", OPT_REPLACED("sub-ass-vsfilter-aspect-compat")},
-    {"ass-vsfilter-color-compat", OPT_REPLACED("sub-ass-vsfilter-color-compat")},
-    {"ass-vsfilter-blur-compat", OPT_REPLACED("sub-ass-vsfilter-blur-compat")},
-    {"ass-force-style", OPT_REPLACED("sub-ass-force-style")},
-    {"ass-styles", OPT_REPLACED("sub-ass-styles")},
-    {"ass-hinting", OPT_REPLACED("sub-ass-hinting")},
-    {"ass-shaper", OPT_REPLACED("sub-ass-shaper")},
-    {"ass-style-override", OPT_REPLACED("sub-ass-style-override")},
-    {"ass-scale-with-window", OPT_REPLACED("sub-ass-scale-with-window")},
-    {"sub-ass-style-override", OPT_REPLACED("sub-ass-override")},
-    {"fs-black-out-screens", OPT_REMOVED(NULL)},
-    {"sub-paths", OPT_REPLACED("sub-file-paths")},
-    {"heartbeat-cmd", OPT_REMOVED("use Lua scripting instead")},
-    {"no-ometadata", OPT_REMOVED("use --no-ocopy-metadata")},
-    {"video-stereo-mode", OPT_REMOVED("removed, try --vf=stereo3d")},
-    {"chapter", OPT_REMOVED("use '--start=#123' '--end=#124' (for chapter 123)")},
-    {"video-aspect", OPT_REPLACED("video-aspect-override")},
-    {"display-fps", OPT_REPLACED("override-display-fps")},
-
     {0}
 };
 
@@ -1115,10 +1011,6 @@ static const struct MPOpts mp_default_opts = {
         .set = 1,
         .auto_safe = 1,
     },
-
-    .index_mode = 1,
-
-    .mf_fps = 1.0,
 
     .display_tags = (char *[]){
         "Artist", "Album", "Album_Artist", "Comment", "Composer",

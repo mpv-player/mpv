@@ -1939,12 +1939,8 @@ Property list
     situations, e.g. when video packets are damaged, or the decoder doesn't
     follow the usual rules. Unavailable if video is disabled.
 
-    ``drop-frame-count`` is a deprecated alias.
-
 ``frame-drop-count``
     Frames dropped by VO (when using ``--framedrop=vo``).
-
-    ``vo-drop-frame-count`` is a deprecated alias.
 
 ``mistimed-frame-count``
     Number of video frames that were not timed correctly in display-sync mode
@@ -2645,11 +2641,6 @@ Property list
     available on all platforms. Note that any of the listed facts may change
     any time without a warning.
 
-    Writing to this property is deprecated. It has the same effect as writing to
-    ``override-display-fps``. Since mpv 0.31.0, this property is unavailable
-    if no display FPS was reported (e.g. if no video is active), while in older
-    versions, it returned the ``--display-fps`` option value.
-
 ``estimated-display-fps``
     The actual rate at which display refreshes seem to occur, measured by
     system time. Only available if display-sync mode (as selected by
@@ -2781,10 +2772,9 @@ Property list
     (Before mpv 0.33.0, instead of returning -1, this property was unavailable
     if no playlist entry was current.)
 
-    Writing the current value back to the property is subject to change.
-    Currently, it will restart playback of the playlist entry. But in the
-    future, writing the current value will be ignored. Use the
-    ``playlist-play-index`` command to get guaranteed behavior.
+    Writing the current value back to the property will have no effect.
+    Use ``playlist-play-index`` to restart the playback of the current entry if
+    desired.
 
 ``playlist-pos-1`` (RW)
     Same as ``playlist-pos``, but 1-based.

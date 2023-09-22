@@ -271,9 +271,12 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     return mpi;
 }
 
-static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
+static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi);
+
+static void update_overlays(struct vo *vo, struct mp_osd_res res,
                             int flags, enum pl_overlay_coords coords,
-                            struct osd_state *state, struct pl_frame *frame)
+                            struct osd_state *state, struct pl_frame *frame,
+                            struct mp_image *src)
 {
     struct priv *p = vo->priv;
     static const bool subfmt_all[SUBBITMAP_COUNT] = {
@@ -281,6 +284,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
         [SUBBITMAP_BGRA]   = true,
     };
 
+    double pts = src ? src->pts : 0;
     struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, subfmt_all);
     frame->overlays = state->overlays;
     frame->num_overlays = 0;
@@ -337,22 +341,27 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res, double pts,
             .tex = entry->tex,
             .parts = entry->parts,
             .num_parts = entry->num_parts,
-            .color.primaries = frame->color.primaries,
-            .color.transfer = frame->color.transfer,
+            .color = {
+                .primaries = PL_COLOR_PRIM_BT_709,
+                .transfer = PL_COLOR_TRC_SRGB,
+            },
             .coords = coords,
         };
-
-        // Reject HDR/wide gamut subtitles out of the box, since these are
-        // probably not intended to match the video color space.
-        if (pl_color_primaries_is_wide_gamut(ol->color.primaries))
-            ol->color.primaries = PL_COLOR_PRIM_UNKNOWN;
-        if (pl_color_transfer_is_hdr(ol->color.transfer))
-            ol->color.transfer = PL_COLOR_TRC_UNKNOWN;
 
         switch (item->format) {
         case SUBBITMAP_BGRA:
             ol->mode = PL_OVERLAY_NORMAL;
             ol->repr.alpha = PL_ALPHA_PREMULTIPLIED;
+            // Infer bitmap colorspace from source
+            if (src) {
+                ol->color = get_mpi_csp(vo, src);
+                // Seems like HDR subtitles are targeting SDR white
+                if (pl_color_transfer_is_hdr(ol->color.transfer)) {
+                    ol->color.hdr = (struct pl_hdr_metadata) {
+                        .max_luma = PL_COLOR_SDR_WHITE,
+                    };
+                }
+            }
             break;
         case SUBBITMAP_LIBASS:
             ol->mode = PL_OVERLAY_MONOCHROME;
@@ -1027,9 +1036,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
     apply_target_options(p, &target);
-    update_overlays(vo, p->osd_res, frame->current ? frame->current->pts : 0,
+    update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
-                    PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target);
+                    PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
     apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
     update_tm_viz(&pars->color_map_params, &target);
 
@@ -1087,9 +1096,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                         .mb = (image->crop.y1 - vo->params->h) * ry,
                         .display_par = 1.0,
                     };
-                    update_overlays(vo, res, mpi->pts, OSD_DRAW_SUB_ONLY,
+                    update_overlays(vo, res, OSD_DRAW_SUB_ONLY,
                                     PL_OVERLAY_COORDS_DST_CROP,
-                                    &fp->subs, image);
+                                    &fp->subs, image, mpi);
                     fp->osd_sync = p->osd_sync;
                 }
             } else {
@@ -1395,24 +1404,24 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     struct frame_priv *fp = mpi->priv;
     if (opts->blend_subs) {
             // Only update the overlays if the state has changed
-            float rx = pl_rect_w(p->dst) / pl_rect_w(image.crop);
-            float ry = pl_rect_h(p->dst) / pl_rect_h(image.crop);
+            float rx = pl_rect_w(dst) / pl_rect_w(image.crop);
+            float ry = pl_rect_h(dst) / pl_rect_h(image.crop);
             struct mp_osd_res res = {
-                .w = pl_rect_w(p->dst),
-                .h = pl_rect_h(p->dst),
+                .w = pl_rect_w(dst),
+                .h = pl_rect_h(dst),
                 .ml = -image.crop.x0 * rx,
                 .mr = (image.crop.x1 - vo->params->w) * rx,
                 .mt = -image.crop.y0 * ry,
                 .mb = (image.crop.y1 - vo->params->h) * ry,
                 .display_par = 1.0,
             };
-            update_overlays(vo, res, mpi->pts, osd_flags,
+            update_overlays(vo, res, osd_flags,
                             PL_OVERLAY_COORDS_DST_CROP,
-                            &fp->subs, &image);
+                            &fp->subs, &image, mpi);
     } else {
         // Disable overlays when blend_subs is disabled
-        update_overlays(vo, osd, mpi->pts, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
-                        &p->osd_state, &target);
+        update_overlays(vo, osd, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
+                        &p->osd_state, &target, mpi);
         image.num_overlays = 0;
     }
 
@@ -1740,7 +1749,9 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
 
     const struct gl_video_opts *opts = p->opts_cache->opts;
     const struct scaler_config *cfg = &opts->scaler[unit];
-    if (unit == SCALER_DSCALE && (!cfg->kernel.name || !strcmp(cfg->kernel.name, "")))
+    if (unit == SCALER_DSCALE && (!cfg->kernel.name || !cfg->kernel.name[0]))
+        cfg = &opts->scaler[SCALER_SCALE];
+    if (unit == SCALER_CSCALE && (!cfg->kernel.name || !cfg->kernel.name[0]))
         cfg = &opts->scaler[SCALER_SCALE];
 
     for (int i = 0; fixed_presets[i].name; i++) {

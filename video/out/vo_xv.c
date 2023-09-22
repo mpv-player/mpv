@@ -926,7 +926,6 @@ const struct vo_driver video_out_xv = {
             {"auto", CK_METHOD_AUTOPAINT})},
         {"colorkey", OPT_INT(colorkey)},
         {"buffers", OPT_INT(cfg_buffers), M_RANGE(1, MAX_BUFFERS)},
-        {"no-colorkey", OPT_REMOVED("use ck-method=none instead")},
         {0}
     },
     .options_prefix = "xv",

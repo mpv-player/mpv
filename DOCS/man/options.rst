@@ -602,7 +602,7 @@ Playback Control
     Tuning:
 
     - Remove all ``--vf``/``--af`` filters you have set. Disable hardware
-      decoding. Disable idiotic nonsense like SPDIF passthrough.
+      decoding. Disable functions like SPDIF passthrough.
 
     - Increasing ``--video-reversal-buffer`` might help if reversal queue
       overflow is reported, which may happen in high bitrate video, or video
@@ -1190,9 +1190,6 @@ Video
     Set this option only if you have reason to believe the automatically
     determined value is wrong.
 
-``--display-fps=<fps>``
-    Deprecated alias for ``--override-display-fps``.
-
 ``--hwdec=<api1,api2,...|no|auto|auto-safe|auto-copy>``
     Specify the hardware video decoding API that should be used if possible.
     Whether hardware decoding is actually done depends on the video codec. If
@@ -1438,10 +1435,6 @@ Video
     Runtime changes to this are ignored (the current option value is used
     whenever the renderer is created).
 
-    The old aliases ``--opengl-hwdec-interop`` and ``--hwdec-preload`` are
-    barely related to this anymore, but will be somewhat compatible in some
-    cases.
-
 ``--hwdec-extra-frames=<N>``
     Number of GPU frames hardware decoding should preallocate (default: see
     ``--list-options`` output). If this is too low, frame allocation may fail
@@ -1574,7 +1567,7 @@ Video
     This works with hwdec, unlike the equivalent 'lavfi-crop'. When offset is
     omitted, the central area will be cropped. Setting the crop to empty one
     ``--video-crop=0x0+0+0`` overrides container crop and disables cropping.
-    Setting the crop to ``--video-crop=0`` disables manual cropping and restores
+    Setting the crop to ``--video-crop=""`` disables manual cropping and restores
     the container crop if it's specified.
 
 ``--video-zoom=<value>``
@@ -2198,11 +2191,9 @@ Audio
     their start timestamps differ, and then video timing is gradually adjusted
     if necessary to reach correct synchronization later.
 
-``--volume-max=<100.0-1000.0>``, ``--softvol-max=<...>``
+``--volume-max=<100.0-1000.0>``
     Set the maximum amplification level in percent (default: 130). A value of
     130 will allow you to adjust the volume up to about double the normal level.
-
-    ``--softvol-max`` is a deprecated alias and should not be used.
 
 ``--audio-file-auto=<no|exact|fuzzy|all>``, ``--no-audio-file-auto``
     Load additional audio files matching the video filename. The parameter
@@ -2277,11 +2268,6 @@ Subtitles
     subtitles (DVD, Bluray/PGS, DVB) cannot changed for fundamental reasons.
     Subtitles in ASS format are normally not changed intentionally, but
     overriding them can be controlled with ``--sub-ass-override``.
-
-    Previously some options working on text subtitles were called
-    ``--sub-text-*``, they are now named ``--sub-*``, and those specifically
-    for ASS have been renamed from ``--ass-*`` to ``--sub-ass-*``.
-    They are now all in this section.
 
 ``--sub-demuxer=<[+]name>``
     Force subtitle demuxer type for ``--sub-file``. Give the demuxer name as
@@ -2481,9 +2467,6 @@ Subtitles
 
     Default: yes.
 
-    Renamed from ``--sub-ass-use-margins``. To place ASS subtitles in the borders
-    too (like the old option did), also add ``--sub-ass-force-margins``.
-
 ``--sub-ass-vsfilter-aspect-compat=<yes|no>``
     Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
     with traditional VSFilter behavior. This switch has no effect when the
@@ -2676,9 +2659,6 @@ Subtitles
     .. note::
 
         Never applied to text subtitles.
-
-``--sub-paths=<path1:path2:...>``
-    Deprecated, use ``--sub-file-paths``.
 
 ``--sub-file-paths=<path-list>``
     Specify extra directories to search for subtitles matching the video.
@@ -3151,9 +3131,24 @@ Window
     Focus the video window on creation and makes it the front most window. This
     is on by default.
 
+``--window-corners=<default|donotround|round|roundsmall>``
+    (Windows only)
+    Set the preference for window corner rounding.
+
+    :default: Let the system decide whether or not to round window corners
+    :donotround: Never round window corners
+    :round: Round the corners if appropriate
+    :roundsmall: Round the corners if appropriate, with a small radius
+
 ``--border``, ``--no-border``
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.
+
+``--title-bar``, ``--no-title-bar``
+    (Windows only)
+    Play video with the window title bar. Since this is on by default,
+    use --no-title-bar to hide the title bar. The --no-border option takes
+    precedence.
 
 ``--on-all-workspaces``
     (X11 and macOS only)
@@ -3309,10 +3304,6 @@ Window
     If this option is given, the cursor is always visible in windowed mode. In
     fullscreen mode, the cursor is shown or hidden according to
     ``--cursor-autohide``.
-
-``--no-fixed-vo``, ``--fixed-vo``
-    ``--no-fixed-vo`` enforces closing and reopening the video window for
-    multiple files (one (un)initialization for each file).
 
 ``--force-rgba-osd-rendering``
     Change how some video outputs render the OSD and text subtitles. This
@@ -3481,8 +3472,8 @@ Window
 Disc Devices
 ------------
 
-``--cdrom-device=<path>``
-    Specify the CD-ROM device (default: ``/dev/cdrom``).
+``--cdda-device=<path>``
+    Specify the CD device for CDDA playback (default: ``/dev/cdrom``).
 
 ``--dvd-device=<path>``
     Specify the DVD device or .iso filename (default: ``/dev/dvd``). You can
@@ -3680,7 +3671,7 @@ Demuxer
     If this option is deemed unnecessary at some point in the future, it will
     be removed without notice.
 
-``--demuxer-mkv-subtitle-preroll=<yes|index|no>``, ``--mkv-subtitle-preroll``
+``--demuxer-mkv-subtitle-preroll=<yes|index|no>``
     Try harder to show embedded soft subtitles when seeking somewhere. Normally,
     it can happen that the subtitle at the seek target is not shown due to how
     some container file formats are designed. The subtitles appear only if
@@ -3722,8 +3713,6 @@ Demuxer
     similar effect, but only if hr-seek is active. It works with any demuxer,
     but makes seeking much slower, as it has to decode audio and video data
     instead of just skipping over it.
-
-    ``--mkv-subtitle-preroll`` is a deprecated alias.
 
 ``--demuxer-mkv-subtitle-preroll-secs=<value>``
     See ``--demuxer-mkv-subtitle-preroll``.
@@ -3860,16 +3849,6 @@ Demuxer
     ``--cache-secs`` is used (i.e. when the stream appears to be a network
     stream or the stream cache is enabled).
 
-``--demuxer-force-retry-on-eof=<yes|no>``
-    Whether to keep retrying making the demuxer thread read more packets each
-    time the decoder dequeues a packet, even if the end of the file was reached
-    (default: no). This does not really make sense, but was the default behavior
-    in mpv 0.32.0 and earlier. This option will be silently removed after a
-    while, and exists only to restore the old behavior for testing, in case this
-    was actually needed somewhere. This does _not_ help with files that are
-    being appended to (in these cases use ``appending://``, or disable the
-    cache).
-
 ``--demuxer-thread=<yes|no>``
     Run the demuxer in a separate thread, and let it prefetch a certain amount
     of packets (default: yes). Having this enabled leads to smoother playback,
@@ -3985,9 +3964,10 @@ Demuxer
     libarchive opens all volumes anyway when playing the main file, even though
     mpv iterated no archive entries yet.
 
-``--directory-mode=<lazy|recursive|ignore>``
+``--directory-mode=<auto|lazy|recursive|ignore>``
     When opening a directory, open subdirectories lazily, recursively or not at
-    all (default: lazy).
+    all. The default is ``auto``, which behaves like ``recursive`` with
+    ``--shuffle``, and like ``lazy`` otherwise.
 
 Input
 -----
@@ -4148,8 +4128,6 @@ Input
     and with this option disabled. Note that ``input-default-bindings`` is
     disabled by default in libmpv as well - it should be enabled if you want
     the mpv default key bindings.
-
-    (This option was renamed from ``--input-x11-keyboard``.)
 
 OSD
 ---
@@ -5252,17 +5230,13 @@ them.
     The filter function to use when upscaling video.
 
     ``bilinear``
-        Bilinear hardware texture filtering (fastest, very low quality). This
-        is the default for compatibility reasons.
-
-    ``spline36``
-        Mid quality and speed. This is the default when using ``gpu-hq``.
+        Bilinear hardware texture filtering (fastest, very low quality). This is
+        the default when using the ``fast`` profile.
 
     ``lanczos``
-        Lanczos scaling. Provides mid quality and speed. Generally worse than
-        ``spline36``, but it results in a slightly sharper image which is good
-        for some content types. The number of taps can be controlled with
-        ``scale-radius``, but is best left unchanged.
+        Lanczos scaling. Provides good balance between quality and performance.
+        This is the default for ``scale``. The number of taps can be controlled
+        with ``scale-radius``, but is best left unchanged.
 
         (This filter is an alias for ``sinc``-windowed ``sinc``)
 
@@ -5275,8 +5249,8 @@ them.
         (This filter is an alias for ``jinc``-windowed ``jinc``)
 
     ``ewa_lanczossharp``
-        A slightly sharpened version of ewa_lanczos. If your hardware can run
-        it, this is probably what you should use by default.
+        A slightly sharpened version of ewa_lanczos. This is the default when
+        using the ``high-quality`` profile.
 
     ``ewa_lanczos4sharpest``
         Very sharp scaler, but also slightly slower than ``ewa_lanczossharp``.
@@ -5286,23 +5260,27 @@ them.
 
     ``mitchell``
         Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
-        ``--scale-param1`` and ``--scale-param2``. This filter is very good at
-        downscaling (see ``--dscale``).
+        ``--scale-param1`` and ``--scale-param2``.
+
+    ``hermite``
+        Hermite spline. Similar to ``bicubic`` but with ``B`` set to ``0.0``.
+        This filter has the special property of having a support of radius 1.0,
+        making it very fast in comparison, but prone to blocking. This is the
+        default for ``--dscale``.
 
     ``catmull_rom``
         Catmull-Rom. A Cubic filter in the same vein as ``mitchell``, where
         the ``B`` and ``C`` parameters are ``0.0`` and ``0.5`` respectively.
-        This filter is sharper than ``mitchell``, but it results in mild
-        ringing. Like ``mitchell``, this filter is good at downscaling (see 
-        ``--dscale``).
+        This filter is sharper than ``mitchell``, but it results in more
+        ringing.
 
     ``oversample``
         A version of nearest neighbour that (naively) oversamples pixels, so
         that pixels overlapping edges get linearly interpolated instead of
         rounded. This essentially removes the small imperfections and judder
         artifacts caused by nearest-neighbour interpolation, in exchange for
-        adding some blur. This filter is good at temporal interpolation, and
-        also known as "smoothmotion" (see ``--tscale``).
+        adding some blur. This can also be used for frame mixing, where it
+        is commonly known as "smoothmotion" (see ``--tscale``).
 
     ``linear``
         A ``--tscale`` filter.
@@ -5314,17 +5292,17 @@ them.
 
 ``--cscale=<filter>``
     As ``--scale``, but for interpolating chroma information. If the image is
-    not subsampled, this option is ignored entirely.
+    not subsampled, this option is ignored entirely. If this option is unset,
+    the filter implied by ``--scale`` will be applied.
 
 ``--dscale=<filter>``
-    Like ``--scale``, but apply these filters on downscaling instead. If this
-    option is unset, the filter implied by ``--scale`` will be applied.
+    Like ``--scale``, but apply these filters on downscaling instead.
 
 ``--tscale=<filter>``
     The filter used for interpolating the temporal axis (frames). This is only
     used if ``--interpolation`` is enabled. The only valid choices for
     ``--tscale`` are separable convolution filters (use ``--tscale=help`` to
-    get a list). The default is ``mitchell``.
+    get a list). The default is ``oversample``.
 
     Common ``--tscale`` choices include ``oversample``, ``linear``,
     ``catmull_rom``, ``mitchell``, ``gaussian``, or ``bicubic``. These are
@@ -5438,17 +5416,18 @@ them.
 ``--correct-downscaling``
     When using convolution based filters, extend the filter size when
     downscaling. Increases quality, but reduces performance while downscaling.
+    Enabled by default.
 
     This will perform slightly sub-optimally for anamorphic video (but still
     better than without it) since it will extend the size to match only the
     milder of the scale factors between the axes.
 
-    Note: this option is ignored when using bilinear downscaling (the default).
+    Note: this option is ignored when using bilinear downscaling with ``--vo=gpu``.
 
 ``--linear-downscaling``
     Scale in linear light when downscaling. It should only be used with a
     ``--fbo-format`` that has at least 16 bit precision. This option
-    has no effect on HDR content.
+    has no effect on HDR content. Enabled by default.
 
 ``--linear-upscaling``
     Scale in linear light when upscaling. Like ``--linear-downscaling``, it
@@ -5459,7 +5438,7 @@ them.
 
 ``--sigmoid-upscaling``
     When upscaling, use a sigmoidal color transform to avoid emphasizing
-    ringing artifacts. This is incompatible with and replaces
+    ringing artifacts. Enabled by default. This is incompatible with and replaces
     ``--linear-upscaling``. (Note that sigmoidization also requires
     linearization, so the ``LINEAR`` rendering step fires in both cases)
 
@@ -5526,7 +5505,7 @@ them.
     might be slower or cause latency issues.
 
 ``--dither-depth=<N|no|auto>``
-    Set dither target depth to N. Default: no.
+    Set dither target depth to N. Default: auto.
 
     no
         Disable any dithering done by mpv.
@@ -6060,7 +6039,7 @@ them.
     virtually always an improvement - the only reason to disable it would be
     for performance.
 
-``--deband-iterations=<1..16>``
+``--deband-iterations=<0..16>``
     The number of debanding steps to perform per sample. Each step reduces a
     bit more banding, but takes time to compute. Note that the strength of each
     step falls off very quickly, so high numbers (>4) are practically useless.
@@ -6069,7 +6048,7 @@ them.
 ``--deband-threshold=<0..4096>``
     The debanding filter's cut-off threshold. Higher numbers increase the
     debanding strength dramatically but progressively diminish image details.
-    (Default 32)
+    (Default 48)
 
 ``--deband-range=<1..64>``
     The debanding filter's initial radius. The radius increases linearly for
@@ -6082,7 +6061,7 @@ them.
 ``--deband-grain=<0..4096>``
     Add some extra noise to the image. This significantly helps cover up
     remaining quantization artifacts. Higher numbers add more noise. (Default
-    48)
+    32)
 
 ``--corner-rounding=<0..1>``
     If set to a value above 0.0, the output will be rendered with rounded
@@ -6110,6 +6089,7 @@ them.
     X11/GLX only.
 
 ``--opengl-dwmflush=<no|windowed|yes|auto>``
+    (Windows only)
     Calls ``DwmFlush`` after swapping buffers on Windows (default: auto). It
     also sets ``SwapInterval(0)`` to ignore the OpenGL timing. Values are: no
     (disabled), windowed (only in windowed mode), yes (also in full screen).
@@ -6120,8 +6100,6 @@ them.
     This may help to get more consistent frame intervals, especially with
     high-fps clips - which might also reduce dropped frames. Typically, a value
     of ``windowed`` should be enough, since full screen may bypass the DWM.
-
-    Windows only.
 
 ``--angle-d3d11-feature-level=<11_0|10_1|10_0|9_3>``
     Selects a specific feature level when using the ANGLE backend with D3D11.
@@ -6151,9 +6129,7 @@ them.
     chain will be used for D3D9. This option is mainly for debugging purposes,
     in case the custom swap chain has poor performance or does not work.
 
-    If set to ``yes``, the ``--angle-max-frame-latency``,
-    ``--angle-swapchain-length`` and ``--angle-flip`` options will have no
-    effect.
+    If set to ``yes``, the ``--angle-flip`` option will have no effect.
 
     Windows with ANGLE only.
 
@@ -6734,7 +6710,7 @@ them.
     come with a small performance penalty. (Only for ``--vo=gpu-next``)
 
 ``--hdr-peak-decay-rate=<0.0..1000.0>``
-    The decay rate used for the HDR peak detection algorithm (default: 100.0).
+    The decay rate used for the HDR peak detection algorithm (default: 20.0).
     This is only relevant when ``--hdr-compute-peak`` is enabled. Higher values
     make the peak decay more slowly, leading to more stable values at the cost
     of more "eye adaptation"-like effects (although this is mitigated somewhat
@@ -6746,7 +6722,7 @@ them.
 
 ``--hdr-scene-threshold-low=<0.0..100.0>``, ``--hdr-scene-threshold-high=<0.0..100.0>``
     The lower and upper thresholds (in dB) for a brightness difference
-    to be considered a scene change (default: 5.5 low, 10.0 high). This is only
+    to be considered a scene change (default: 1.0 low, 3.0 high). This is only
     relevant when ``--hdr-compute-peak`` is enabled. Normally, small
     fluctuations in the frame brightness are compensated for by the peak
     averaging mechanism, but for large jumps in the brightness this can result
@@ -7150,12 +7126,20 @@ Miscellaneous
 
     This is a key/value list option. See `List Options`_ for details.
 
+``--window-affinity=<default|excludefromcmcapture|monitor>``
+    (Windows only)
+    Controls the window affinity behavior of mpv.
+
+    :default: Default Windows behavior
+    :excludefromcapture: mpv's window will be completely excluded from capture by external applications or screen recording software. 
+    :monitor: Blacks out the mpv window
+
 ``--vo-mmcss-profile=<name>``
-    (Windows only.)
+    (Windows only)
     Set the MMCSS profile for the video renderer thread (default: ``Playback``).
 
 ``--priority=<prio>``
-    (Windows only.)
+    (Windows only)
     Set process priority for mpv according to the predefined priorities
     available under Windows.
 
@@ -7243,16 +7227,6 @@ Miscellaneous
     This does not affect playlist expansion, redirection, or other loading of
     referenced files like with ordered chapters.
 
-``--record-file=<file>``
-    Deprecated, use ``--stream-record``, or the ``dump-cache`` command.
-
-    Record the current stream to the given target file. The target file will
-    always be overwritten without asking.
-
-    This was deprecated because it isn't very nice to use. For one, seeking
-    while this is enabled will be directly reflected in the output, which was
-    not useful and annoying.
-
 ``--stream-record=<file>``
     Write received/read data from the demuxer to the given output file. The
     output file will always be overwritten without asking. The output format
@@ -7282,10 +7256,6 @@ Miscellaneous
     it works with the ``ffmpeg`` tool. One reason for this is that ``ffmpeg``
     and its libraries contain certain hacks and workarounds for these issues,
     that are unavailable to outside users.
-
-    This replaces ``--record-file``. It is similar to the ancient/removed
-    ``--stream-capture``/``--capture`` options, and provides better behavior in
-    most cases (i.e. actually works).
 
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can

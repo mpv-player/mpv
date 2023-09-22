@@ -337,6 +337,7 @@ static const struct {
     { "qoi",            "qoi" },
     { "xface",          "xface" },
     { "xwd",            "xwd" },
+    { "svg",            "svg" },
     {0}
 };
 
@@ -381,15 +382,9 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     if (!mf || mf->nr_of_files < 1)
         goto error;
 
-    double mf_fps;
-    char *mf_type;
-    mp_read_option_raw(demuxer->global, "mf-fps", &m_option_type_double, &mf_fps);
-    mp_read_option_raw(demuxer->global, "mf-type", &m_option_type_string, &mf_type);
-
     const char *codec = mp_map_mimetype_to_video_codec(demuxer->stream->mime_type);
-    if (!codec || (mf_type && mf_type[0]))
-        codec = probe_format(mf, mf_type, check);
-    talloc_free(mf_type);
+    if (!codec || (demuxer->opts->mf_type && demuxer->opts->mf_type[0]))
+        codec = probe_format(mf, demuxer->opts->mf_type, check);
     if (!codec)
         goto error;
 
@@ -406,7 +401,7 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     c->codec = codec;
     c->disp_w = 0;
     c->disp_h = 0;
-    c->fps = mf_fps;
+    c->fps = demuxer->opts->mf_fps;
     c->reliable_fps = true;
 
     demux_add_sh_stream(demuxer, sh);

@@ -30,6 +30,7 @@
 
 #include "common/common.h"
 #include "common/global.h"
+#include "demux/demux.h"
 #include "misc/bstr.h"
 #include "misc/thread_tools.h"
 #include "common/msg.h"
@@ -353,9 +354,9 @@ static int stream_create_instance(const stream_info_t *sinfo,
     if (flags & STREAM_LESS_NOISE)
         mp_msg_set_max_level(s->log, MSGL_WARN);
 
-    bool opt;
-    mp_read_option_raw(s->global, "access-references", &m_option_type_bool, &opt);
-    s->access_references = opt;
+    struct demux_opts *demux_opts = mp_get_config_group(s, s->global, &demux_conf);
+    s->access_references = demux_opts->access_references;
+    talloc_free(demux_opts);
 
     MP_VERBOSE(s, "Opening %s\n", url);
 

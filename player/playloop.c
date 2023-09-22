@@ -32,7 +32,6 @@
 #include "common/encode.h"
 #include "common/msg.h"
 #include "common/playlist.h"
-#include "common/recorder.h"
 #include "common/stats.h"
 #include "demux/demux.h"
 #include "filters/f_decoder_wrapper.h"
@@ -373,8 +372,6 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         clear_audio_output_buffers(mpctx);
 
     reset_playback_state(mpctx);
-    if (mpctx->recorder)
-        mp_recorder_mark_discontinuity(mpctx->recorder);
 
     demux_block_reading(mpctx->demuxer, false);
     for (int t = 0; t < mpctx->num_tracks; t++) {
@@ -1034,6 +1031,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
             .imgfmt = config_format,
             .w = w,   .h = h,
             .p_w = 1, .p_h = 1,
+            .force_window = true,
         };
         if (vo_reconfig(vo, &p) < 0)
             goto err;

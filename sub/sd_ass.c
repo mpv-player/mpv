@@ -85,8 +85,8 @@ static void mp_ass_add_default_styles(ASS_Track *track, struct mp_subtitle_opts 
 
     if (track->n_styles == 0) {
         if (!track->PlayResY) {
+            track->PlayResX = MP_ASS_FONT_PLAYRESX;
             track->PlayResY = MP_ASS_FONT_PLAYRESY;
-            track->PlayResX = track->PlayResY * 4 / 3;
         }
         track->Kerning = true;
         int sid = ass_alloc_style(track);
@@ -220,8 +220,8 @@ static void assobjects_init(struct sd *sd)
     ctx->ass_track->track_type = TRACK_TYPE_ASS;
 
     ctx->shadow_track = ass_new_track(ctx->ass_library);
-    ctx->shadow_track->PlayResX = 384;
-    ctx->shadow_track->PlayResY = 288;
+    ctx->shadow_track->PlayResX = MP_ASS_FONT_PLAYRESX;
+    ctx->shadow_track->PlayResY = MP_ASS_FONT_PLAYRESY;
     mp_ass_add_default_styles(ctx->shadow_track, opts);
 
     char *extradata = sd->codec->extradata;
@@ -436,7 +436,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
 #endif
     ass_set_selective_style_override_enabled(priv, set_force_flags);
     ASS_Style style = {0};
-    mp_ass_set_style(&style, 288, opts->sub_style);
+    mp_ass_set_style(&style, MP_ASS_FONT_PLAYRESY, opts->sub_style);
     ass_set_selective_style_override(priv, &style);
     free(style.FontName);
     if (converted && track->default_style < track->n_styles) {
@@ -473,7 +473,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
             track->PlayResX = track->PlayResY * (double)vidw / MPMAX(vidh, 1);
             // ffmpeg and mpv use a default PlayResX of 384 when it is not known,
             // this comes from VSFilter.
-            double fix_margins = track->PlayResX / 384.0;
+            double fix_margins = track->PlayResX / (double)MP_ASS_FONT_PLAYRESX;
             track->styles->MarginL = round(track->styles->MarginL * fix_margins);
             track->styles->MarginR = round(track->styles->MarginR * fix_margins);
         }

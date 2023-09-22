@@ -102,6 +102,7 @@ struct priv {
     struct mp_osd_res screen_osd_res;
 
     bool destroy_buffers;
+    bool force_window;
     enum hwdec_type hwdec_type;
     uint32_t drm_format;
     uint64_t drm_modifier;
@@ -586,32 +587,35 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct osd_buffer *osd_buf;
     double pts;
 
-    if (!vo_wayland_check_visible(vo) || !frame->current)
+    if (!vo_wayland_check_visible(vo) && !p->force_window)
         return;
 
     if (p->destroy_buffers)
         destroy_buffers(vo);
 
-    pts = frame->current->pts;
-    struct mp_image *src = mp_image_new_ref(frame->current);
-    buf = buffer_get(vo, src);
+    pts = frame->current ? frame->current->pts : 0;
+    if (frame->current) {
+        struct mp_image *src = mp_image_new_ref(frame->current);
+        buf = buffer_get(vo, src);
+
+        if (buf && buf->image) {
+            wl_surface_attach(wl->video_surface, buf->buffer, 0, 0);
+            wl_surface_damage_buffer(wl->video_surface, 0, 0, buf->image->w,
+                                     buf->image->h);
+
+        }
+    }
+
     osd_buf = osd_buffer_get(vo);
-
-    if (buf && buf->image) {
-        wl_surface_attach(wl->video_surface, buf->buffer, 0, 0);
-        wl_surface_damage_buffer(wl->video_surface, 0, 0, buf->image->w,
-                                 buf->image->h);
-
-        if (osd_buf && osd_buf->buffer) {
-            if (draw_osd(vo, &osd_buf->image, pts) && p->osd_surface_has_contents) {
-                wl_surface_attach(wl->osd_surface, osd_buf->buffer, 0, 0);
-                wl_surface_damage_buffer(wl->osd_surface, 0, 0, osd_buf->image.w,
-                                         osd_buf->image.h);
-                p->osd_surface_is_mapped = true;
-            } else if (!p->osd_surface_has_contents && p->osd_surface_is_mapped) {
-                wl_surface_attach(wl->osd_surface, NULL, 0, 0);
-                p->osd_surface_is_mapped = false;
-            }
+    if (osd_buf && osd_buf->buffer) {
+        if (draw_osd(vo, &osd_buf->image, pts) && p->osd_surface_has_contents) {
+            wl_surface_attach(wl->osd_surface, osd_buf->buffer, 0, 0);
+            wl_surface_damage_buffer(wl->osd_surface, 0, 0, osd_buf->image.w,
+                                     osd_buf->image.h);
+            p->osd_surface_is_mapped = true;
+        } else if (!p->osd_surface_has_contents && p->osd_surface_is_mapped) {
+            wl_surface_attach(wl->osd_surface, NULL, 0, 0);
+            p->osd_surface_is_mapped = false;
         }
     }
 }
@@ -652,10 +656,10 @@ static int reconfig(struct vo *vo, struct mp_image *img)
 {
     struct priv *p = vo->priv;
 
-    // If we have a supported format but no hw_subfmt, this
-    // is probably handle_force_window. Consider it valid.
-    if (is_supported_fmt(img->params.imgfmt) && img->params.hw_subfmt == IMGFMT_NONE)
+    if (img->params.force_window) {
+        p->force_window = true;
         goto done;
+    }
 
     if (!drm_format_check(vo, img)) {
         MP_ERR(vo, "Unable to get drm format from hardware decoding!\n");
@@ -668,6 +672,7 @@ static int reconfig(struct vo *vo, struct mp_image *img)
         return VO_ERROR;
     }
 
+    p->force_window = false;
 done:
     if (!vo_wayland_reconfig(vo))
         return VO_ERROR;

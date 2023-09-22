@@ -70,8 +70,6 @@ const struct m_sub_options macos_conf = {
         {"cocoa-cb-sw-renderer", OPT_CHOICE(cocoa_cb_sw_renderer,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"cocoa-cb-10bit-context", OPT_BOOL(cocoa_cb_10bit_context)},
-        {"macos-title-bar-style", OPT_REMOVED("Split into --macos-title-bar-appearance "
-                     "and --macos-title-bar-material")},
         {0}
     },
     .size = sizeof(struct macos_opts),

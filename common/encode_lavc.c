@@ -83,25 +83,10 @@ const struct m_sub_options encode_config = {
         {"ovcopts", OPT_KEYVALUELIST(vopts), .flags = M_OPT_HAVE_HELP},
         {"oac", OPT_STRING(acodec)},
         {"oacopts", OPT_KEYVALUELIST(aopts), .flags = M_OPT_HAVE_HELP},
-        {"ovoffset", OPT_FLOAT(voffset), M_RANGE(-1000000.0, 1000000.0),
-            .deprecation_message = "--audio-delay (once unbroken)"},
-        {"oaoffset", OPT_FLOAT(aoffset), M_RANGE(-1000000.0, 1000000.0),
-            .deprecation_message = "--audio-delay (once unbroken)"},
         {"orawts", OPT_BOOL(rawts)},
-        {"ovfirst", OPT_BOOL(video_first),
-            .deprecation_message = "no replacement"},
-        {"oafirst", OPT_BOOL(audio_first),
-            .deprecation_message = "no replacement"},
         {"ocopy-metadata", OPT_BOOL(copy_metadata)},
         {"oset-metadata", OPT_KEYVALUELIST(set_metadata)},
         {"oremove-metadata", OPT_STRINGLIST(remove_metadata)},
-
-        {"ocopyts", OPT_REMOVED("ocopyts is now the default")},
-        {"oneverdrop", OPT_REMOVED("no replacement")},
-        {"oharddup", OPT_REMOVED("use --vf-add=fps=VALUE")},
-        {"ofps", OPT_REMOVED("no replacement (use --vf-add=fps=VALUE for CFR)")},
-        {"oautofps", OPT_REMOVED("no replacement")},
-        {"omaxfps", OPT_REMOVED("no replacement")},
         {0}
     },
     .size = sizeof(struct encode_opts),
@@ -959,15 +944,6 @@ fail:
     MP_ERR(p, "error encoding at %s\n",
            frame ? av_ts2timestr(frame->pts, &p->encoder->time_base) : "EOF");
     return false;
-}
-
-double encoder_get_offset(struct encoder_context *p)
-{
-    switch (p->encoder->codec_type) {
-    case AVMEDIA_TYPE_VIDEO: return p->options->voffset;
-    case AVMEDIA_TYPE_AUDIO: return p->options->aoffset;
-    default:                 return 0;
-    }
 }
 
 // vim: ts=4 sw=4 et

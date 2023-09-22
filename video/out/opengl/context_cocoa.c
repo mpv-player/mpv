@@ -22,25 +22,12 @@
 #include "context.h"
 #include "osdep/macosx_application.h"
 
-struct cocoa_opts {
-};
-
-#define OPT_BASE_STRUCT struct cocoa_opts
-const struct m_sub_options cocoa_conf = {
-    .opts = (const struct m_option[]) {
-        {"cocoa-force-dedicated-gpu", OPT_REPLACED("macos-force-dedicated-gpu")},
-        {0}
-    },
-    .size = sizeof(struct cocoa_opts),
-};
-
 struct priv {
     GL gl;
     void (GLAPIENTRY *Flush)(void);
     CGLPixelFormatObj pix;
     CGLContextObj ctx;
 
-    struct cocoa_opts *opts;
     struct macos_opts *macos_opts;
 };
 
@@ -169,7 +156,6 @@ static bool cocoa_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     GL *gl = &p->gl;
-    p->opts = mp_get_config_group(ctx, ctx->global, &cocoa_conf);
     p->macos_opts = mp_get_config_group(ctx, ctx->global, &macos_conf);
     vo_cocoa_init(ctx->vo);
 

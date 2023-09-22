@@ -98,10 +98,6 @@ const struct m_sub_options drm_conf = {
         {"drm-draw-surface-size", OPT_SIZE_BOX(draw_surface_size)},
         {"drm-vrr-enabled", OPT_CHOICE(vrr_enabled,
             {"no", 0}, {"yes", 1}, {"auto", -1})},
-
-        {"drm-osd-plane-id", OPT_REPLACED("drm-draw-plane")},
-        {"drm-video-plane-id", OPT_REPLACED("drm-drmprime-video-plane")},
-        {"drm-osd-size", OPT_REPLACED("drm-draw-surface-size")},
         {0},
     },
     .defaults = &(const struct drm_opts) {
@@ -910,22 +906,6 @@ err:
     drmFreeDevices(devices, card_count);
 }
 
-
-static char *parse_connector_spec(struct vo_drm_state *drm)
-{
-    if (!drm->opts->connector_spec)
-        return NULL;
-    char *dot_ptr = strchr(drm->opts->connector_spec, '.');
-    if (dot_ptr) {
-        MP_WARN(drm, "Warning: Selecting a connector by index with drm-connector "
-                     "is deprecated. Use the drm-device option instead.\n");
-        drm->card_no = strtoul(drm->opts->connector_spec, NULL, 10);
-        return talloc_strdup(drm, dot_ptr + 1);
-    } else {
-        return talloc_strdup(drm, drm->opts->connector_spec);
-    }
-}
-
 static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
                          unsigned int usec, void *data)
 {
@@ -1035,7 +1015,6 @@ bool vo_drm_init(struct vo *vo)
     drm->opts = mp_get_config_group(drm, drm->vo->global, &drm_conf);
 
     drmModeRes *res = NULL;
-    char *connector_name = parse_connector_spec(drm);
     get_primary_device_path(drm);
 
     if (!drm->card_path) {
@@ -1062,7 +1041,7 @@ bool vo_drm_init(struct vo *vo)
         goto err;
     }
 
-    if (!setup_connector(drm, res, connector_name))
+    if (!setup_connector(drm, res, drm->opts->connector_spec))
         goto err;
     if (!setup_crtc(drm, res))
         goto err;

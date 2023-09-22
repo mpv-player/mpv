@@ -280,9 +280,6 @@ static bool audio_write(struct ao *ao, void **data, int samples)
         outpts = pts + ectx->discontinuity_pts_offset;
     }
 
-    // Shift pts by the pts offset first.
-    outpts += encoder_get_offset(ac->enc);
-
     // Calculate expected pts of next audio frame (input side).
     ac->expected_next_pts = pts + mp_aframe_get_size(af) / (double) ao->samplerate;
 

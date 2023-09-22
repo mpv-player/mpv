@@ -731,6 +731,27 @@ MPV_EXPORT void mpv_render_context_report_swap(mpv_render_context *ctx);
  */
 MPV_EXPORT void mpv_render_context_free(mpv_render_context *ctx);
 
+#ifdef MPV_CPLUGIN_DYNAMIC_SYM
+
+MPV_DEFINE_SYM_PTR(mpv_render_context_create)
+#define mpv_render_context_create pfn_mpv_render_context_create
+MPV_DEFINE_SYM_PTR(mpv_render_context_set_parameter)
+#define mpv_render_context_set_parameter pfn_mpv_render_context_set_parameter
+MPV_DEFINE_SYM_PTR(mpv_render_context_get_info)
+#define mpv_render_context_get_info pfn_mpv_render_context_get_info
+MPV_DEFINE_SYM_PTR(mpv_render_context_set_update_callback)
+#define mpv_render_context_set_update_callback pfn_mpv_render_context_set_update_callback
+MPV_DEFINE_SYM_PTR(mpv_render_context_update)
+#define mpv_render_context_update pfn_mpv_render_context_update
+MPV_DEFINE_SYM_PTR(mpv_render_context_render)
+#define mpv_render_context_render pfn_mpv_render_context_render
+MPV_DEFINE_SYM_PTR(mpv_render_context_report_swap)
+#define mpv_render_context_report_swap pfn_mpv_render_context_report_swap
+MPV_DEFINE_SYM_PTR(mpv_render_context_free)
+#define mpv_render_context_free pfn_mpv_render_context_free
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif

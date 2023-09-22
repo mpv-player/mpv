@@ -942,15 +942,15 @@ static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
 
 const struct deband_opts deband_opts_def = {
     .iterations = 1,
-    .threshold = 32.0,
+    .threshold = 48.0,
     .range = 16.0,
-    .grain = 48.0,
+    .grain = 32.0,
 };
 
 #define OPT_BASE_STRUCT struct deband_opts
 const struct m_sub_options deband_conf = {
     .opts = (const m_option_t[]) {
-        {"iterations", OPT_INT(iterations), M_RANGE(1, 16)},
+        {"iterations", OPT_INT(iterations), M_RANGE(0, 16)},
         {"threshold", OPT_FLOAT(threshold), M_RANGE(0.0, 4096.0)},
         {"range", OPT_FLOAT(range), M_RANGE(1.0, 64.0)},
         {"grain", OPT_FLOAT(grain), M_RANGE(0.0, 4096.0)},
