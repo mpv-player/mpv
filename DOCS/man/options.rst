@@ -6089,7 +6089,7 @@ them.
     X11/GLX only.
 
 ``--opengl-dwmflush=<no|windowed|yes|auto>``
-	(Windows only)
+    (Windows only)
     Calls ``DwmFlush`` after swapping buffers on Windows (default: auto). It
     also sets ``SwapInterval(0)`` to ignore the OpenGL timing. Values are: no
     (disabled), windowed (only in windowed mode), yes (also in full screen).
@@ -7128,7 +7128,7 @@ Miscellaneous
 
 ``--window-affinity=<default|excludefromcmcapture|monitor>``
     (Windows only)
-	Controls the window affinity behavior of mpv.
+    Controls the window affinity behavior of mpv.
 
     :default: Default Windows behavior
     :excludefromcapture: mpv's window will be completely excluded from capture by external applications or screen recording software. 
