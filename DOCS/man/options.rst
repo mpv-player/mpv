@@ -7302,6 +7302,9 @@ Miscellaneous
         - ``--lavfi-complex='[aid1] asplit [t1] [ao] ; [t1] showvolume [t2] ; [vid1] [t2] overlay [vo]'``
           Play audio track 1, and overlay the measured volume for each speaker
           over video track 1.
+        - ``--external-file=logo.png --lavfi-complex="[0:v:0][1:0]overlay=main_w-270:50[vo]"``
+          Play the first video stream in the input file, and overlay the logo,
+          being the first stream of the second file.
         - ``null:// --lavfi-complex='life [vo]'``
           A libavfilter source-only filter (Conways' Life Game).
 

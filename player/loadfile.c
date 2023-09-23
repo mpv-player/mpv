@@ -308,7 +308,7 @@ void print_track_list(struct MPContext *mpctx, const char *msg)
     }
 }
 
-void update_demuxer_properties(struct MPContext *mpctx)
+void update_demuxer_properties(struct MPContext *mpctx, int input_id)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
@@ -331,7 +331,7 @@ void update_demuxer_properties(struct MPContext *mpctx)
     }
     struct demuxer *tracks = mpctx->demuxer;
     if (tracks->events & DEMUX_EVENT_STREAMS) {
-        add_demuxer_tracks(mpctx, tracks);
+        add_demuxer_tracks(mpctx, tracks, input_id);
         print_track_list(mpctx, NULL);
         tracks->events &= ~DEMUX_EVENT_STREAMS;
     }
@@ -405,9 +405,22 @@ static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
     return new_id + 1;
 }
 
+static int find_new_input_id(struct MPContext *mpctx)
+{
+    int new_id = 0;
+    if (mpctx->num_tracks > 0) {
+       struct track *track = mpctx->tracks[mpctx->num_tracks - 1];
+       new_id = track->input_id + 1;
+    }
+
+    return new_id;
+}
+
 static struct track *add_stream_track(struct MPContext *mpctx,
                                       struct demuxer *demuxer,
-                                      struct sh_stream *stream)
+                                      struct sh_stream *stream,
+                                      int input_id,
+                                      struct indices *indices)
 {
     for (int i = 0; i < mpctx->num_tracks; i++) {
         struct track *track = mpctx->tracks[i];
@@ -415,11 +428,26 @@ static struct track *add_stream_track(struct MPContext *mpctx,
             return track;
     }
 
+    int type_index = 0;
+    switch (stream->type) {
+    case STREAM_SUB:
+        type_index = indices->s_idx++;
+        break;
+    case STREAM_AUDIO:
+        type_index = indices->a_idx++;
+        break;
+    case STREAM_VIDEO:
+        type_index = indices->v_idx++;
+        break;
+    }
+
     struct track *track = talloc_ptrtype(NULL, track);
     *track = (struct track) {
         .type = stream->type,
         .user_tid = find_new_tid(mpctx, stream->type),
         .demuxer_id = stream->demuxer_id,
+        .input_id = input_id,
+        .type_index = type_index,
         .ff_index = stream->ff_index,
         .hls_bitrate = stream->hls_bitrate,
         .program_id = stream->program_id,
@@ -442,10 +470,11 @@ static struct track *add_stream_track(struct MPContext *mpctx,
     return track;
 }
 
-void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
+void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer, int input_id)
 {
+    struct indices indices = {0, 0, 0};
     for (int n = 0; n < demux_get_num_stream(demuxer); n++)
-        add_stream_track(mpctx, demuxer, demux_get_stream(demuxer, n));
+        add_stream_track(mpctx, demuxer, demux_get_stream(demuxer, n), input_id, &indices);
 }
 
 // Result numerically higher => better match. 0 == no match.
@@ -953,10 +982,13 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         goto err_out;
     }
 
+    int input_id = find_new_input_id(mpctx);
+    struct indices indices = { 0, 0, 0 };
+
     int first_num = -1;
     for (int n = 0; n < demux_get_num_stream(demuxer); n++) {
         struct sh_stream *sh = demux_get_stream(demuxer, n);
-        struct track *t = add_stream_track(mpctx, demuxer, sh);
+        struct track *t = add_stream_track(mpctx, demuxer, sh, input_id, &indices);
         t->is_external = true;
         if (sh->title && sh->title[0]) {
             t->title = talloc_strdup(t, sh->title);
@@ -1456,11 +1488,21 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
         case STREAM_AUDIO: prefix = 'a'; break;
         default: continue;
         }
+
         snprintf(label, sizeof(label), "%cid%d", prefix, track->user_tid);
 
         pad = mp_filter_get_named_pin(mpctx->lavfi, label);
-        if (!pad)
-            continue;
+        if (!pad) {
+            /* Predictable mapping */
+            snprintf(label, sizeof(label), "%d:%d", track->input_id, track->ff_index);
+            pad = mp_filter_get_named_pin(mpctx->lavfi, label);
+            if (!pad) {
+                snprintf(label, sizeof(label), "%d:%c:%d", track->input_id, prefix, track->type_index);
+                pad = mp_filter_get_named_pin(mpctx->lavfi, label);
+                if (!pad)
+                    continue;
+            }
+        }
         if (mp_pin_get_dir(pad) != MP_PIN_IN)
             continue;
         assert(!mp_pin_is_connected(pad));
@@ -1694,7 +1736,8 @@ static void play_current_file(struct MPContext *mpctx)
         demux_set_ts_offset(mpctx->demuxer, -mpctx->demuxer->start_time);
     enable_demux_thread(mpctx, mpctx->demuxer);
 
-    add_demuxer_tracks(mpctx, mpctx->demuxer);
+    int input_id = find_new_input_id(mpctx);
+    add_demuxer_tracks(mpctx, mpctx->demuxer, input_id);
 
     load_external_opts(mpctx);
     if (mpctx->stop_play)
@@ -1753,7 +1796,7 @@ static void play_current_file(struct MPContext *mpctx)
     for (int n = 0; n < mpctx->num_tracks; n++)
         reselect_demux_stream(mpctx, mpctx->tracks[n], false);
 
-    update_demuxer_properties(mpctx);
+    update_demuxer_properties(mpctx, input_id);
 
     update_playback_speed(mpctx);
 
@@ -1832,7 +1875,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->error_playing = 0;
     mpctx->in_playloop = true;
     while (!mpctx->stop_play)
-        run_playloop(mpctx);
+        run_playloop(mpctx, input_id);
     mpctx->in_playloop = false;
 
     MP_VERBOSE(mpctx, "EOF code: %d  \n", mpctx->stop_play);

@@ -112,6 +112,10 @@ struct track {
     // IDs coming from demuxers or container files.
     int user_tid;
 
+    // The unique identifer for a specified input file.
+    int input_id;
+    int type_index;
+
     int demuxer_id; // same as stream->demuxer_id. -1 if not set.
     int ff_index; // same as stream->ff_index, or 0.
     int hls_bitrate; // same as stream->hls_bitrate. 0 if not set.
@@ -145,6 +149,13 @@ struct track {
     struct vo_chain *vo_c;
     struct ao_chain *ao_c;
     struct mp_pin *sink;
+};
+
+// Computes the order of the stream type.
+struct indices {
+    int a_idx;
+    int v_idx;
+    int s_idx;
 };
 
 // Summarizes video filtering and output.
@@ -519,13 +530,13 @@ void mp_switch_track_n(struct MPContext *mpctx, int order,
 void mp_deselect_track(struct MPContext *mpctx, struct track *track);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
-void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
+void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer, int input_id);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
                                     bool force, bool mutate);
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
-void update_demuxer_properties(struct MPContext *mpctx);
+void update_demuxer_properties(struct MPContext *mpctx, int input_id);
 void print_track_list(struct MPContext *mpctx, const char *msg);
 void reselect_demux_stream(struct MPContext *mpctx, struct track *track,
                            bool refresh_only);
@@ -595,7 +606,7 @@ double chapter_start_time(struct MPContext *mpctx, int chapter);
 int get_chapter_count(struct MPContext *mpctx);
 int get_cache_buffering_percentage(struct MPContext *mpctx);
 void execute_queued_seek(struct MPContext *mpctx);
-void run_playloop(struct MPContext *mpctx);
+void run_playloop(struct MPContext *mpctx, int input_id);
 void mp_idle(struct MPContext *mpctx);
 void idle_loop(struct MPContext *mpctx);
 int handle_force_window(struct MPContext *mpctx, bool force);

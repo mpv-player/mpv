@@ -1193,14 +1193,14 @@ static void handle_eof(struct MPContext *mpctx)
     }
 }
 
-void run_playloop(struct MPContext *mpctx)
+void run_playloop(struct MPContext *mpctx, int input_id)
 {
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
         mpctx->stop_play = PT_ERROR;
         return;
     }
 
-    update_demuxer_properties(mpctx);
+    update_demuxer_properties(mpctx, input_id);
 
     handle_cursor_autohide(mpctx);
     handle_vo_events(mpctx);
