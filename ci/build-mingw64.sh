@@ -174,10 +174,9 @@ _vulkan_loader () {
     [ -d Vulkan-Loader ] || $gitclone https://github.com/KhronosGroup/Vulkan-Loader
     builddir Vulkan-Loader
     cmake .. "${cmake_args[@]}" \
-        -DENABLE_WERROR=OFF -DUSE_MASM=OFF
+        -DENABLE_WERROR=OFF
     makeplusinstall
     popd
-    sed -re '/libdir=/s|Lib(32)?|lib|' -i "$prefix_dir/lib/pkgconfig/vulkan.pc" # wat?
 }
 _vulkan_loader_mark=lib/libvulkan-1.dll.a
 
