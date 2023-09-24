@@ -1,7 +1,7 @@
 --makes mpv disable ontop when pausing and re-enable it again when resuming playback
 --please note that this won't do anything if ontop was not enabled before pausing
 
-was_ontop = mp.get_property_native("ontop")
+local was_ontop = mp.get_property_native("ontop")
 
 function f_load(event)
     if was_ontop then
