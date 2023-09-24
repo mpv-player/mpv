@@ -14,11 +14,11 @@ on:
       - 'DOCS/**'
 
 jobs:
-  commit-msg:
+  check-docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: docs
+      - name: Docs
         run: |
           sudo apt-get install python3-docutils
           rst2man --strip-elements-with-class=contents --halt=2 ./DOCS/man/mpv.rst mpv.1
