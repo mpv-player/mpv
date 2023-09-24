@@ -17,11 +17,11 @@ local ontop = mp.get_property_native("ontop")
 local is_idle = mp.get_property_native("playback-abort")
     if value then
         mp.set_property_native("ontop", false)
-        was_ontop = true
+        was_ontop = ontop
     else
         if is_idle then
             mp.set_property_native("ontop", false)
-            was_ontop = true
+            was_ontop = ontop
         else
             if was_ontop then
                 mp.set_property_native("ontop", true)
