@@ -12,9 +12,10 @@ end
 mp.register_event("file-loaded", f_load)
 
 mp.observe_property("pause", "bool", function(name, value)
-
-local ontop = mp.get_property_native("ontop")
-local is_idle = mp.get_property_native("playback-abort")
+        
+    local ontop = mp.get_property_native("ontop")
+    local is_idle = mp.get_property_native("playback-abort")
+        
     if value then
         mp.set_property_native("ontop", false)
         was_ontop = ontop
