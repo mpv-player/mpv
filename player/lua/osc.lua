@@ -818,7 +818,7 @@ function render_elements(master_ass)
                             elseif (sliderpos > (s_max - 3)) then
                                 an = an + 1
                             end
-                        elseif (sliderpos > (s_max-s_min)/2) then
+                        elseif (sliderpos > (s_max+s_min)/2) then
                             an = an + 1
                             tx = tx - 5
                         else
