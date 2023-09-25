@@ -1848,8 +1848,22 @@ Audio
 
 ``--audio-pitch-correction=<yes|no>``
     If this is enabled (default), playing with a speed different from normal
-    automatically inserts the ``scaletempo2`` audio filter. For details, see
-    audio filter section.
+    automatically inserts the ``scaletempo2`` audio filter. You can insert
+    filters besides ``scaletempo2`` and modify their params using
+    `Conditional auto profiles`:
+
+    ::
+
+        [af_insert]
+        profile-cond=speed ~= 1
+        profile-restore=copy
+        af-add=scaletempo2=search-interval=50 # Insert filter and params here.
+
+    Filters set this way replace the ``scaletempo2`` default, instead of
+    overlapping with it. If there are multiple audio filters inserted that can do
+    pitch correction, then only the last one in the filter chain is used.
+    For details on the specifics of each available filter, see the audio filter
+    section.
 
 ``--audio-device=<name>``
     Use the given audio device. This consists of the audio output name, e.g.
