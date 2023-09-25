@@ -478,8 +478,21 @@ static void set_speed_any(struct mp_user_filter **filters, int num_filters,
     }
 }
 
+static void set_speed_params_any(struct mp_user_filter **filters, int num_filters,
+                          int command, const char *name)
+{
+    for (int n = num_filters - 1; n >= 0; n--) {
+        struct mp_filter_command cmd = {
+            .type = command,
+            .cmd = name,
+        };
+        mp_filter_command(filters[n]->f, &cmd);
+    }
+}
+
 void mp_output_chain_set_audio_speed(struct mp_output_chain *c,
-                                     double speed, double resample, double drop)
+                                     double speed, double resample, double drop,
+                                     const char *name)
 {
     struct chain *p = c->f->priv;
 
@@ -491,6 +504,8 @@ void mp_output_chain_set_audio_speed(struct mp_output_chain *c,
     // otherwise use the builtin ones.
     set_speed_any(p->user_filters, p->num_user_filters,
                   MP_FILTER_COMMAND_SET_SPEED, &speed);
+    set_speed_params_any(p->post_filters, p->num_post_filters,
+                         MP_FILTER_COMMAND_TEXT, name);
     set_speed_any(p->post_filters, p->num_post_filters,
                   MP_FILTER_COMMAND_SET_SPEED, &speed);
     set_speed_any(p->user_filters, p->num_user_filters,

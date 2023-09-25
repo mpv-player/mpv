@@ -57,6 +57,12 @@ static void update_speed_filters(struct MPContext *mpctx)
     double speed = mpctx->opts->playback_speed;
     double resample = mpctx->speed_factor_a;
     double drop = 1.0;
+    char *pitch_correction_filters[] = {NULL,
+        "scaletempo2",
+        "rubberband",
+        "scaletempo",
+    };
+    char *name = pitch_correction_filters[mpctx->opts->pitch_correction];
 
     if (!mpctx->opts->pitch_correction) {
         resample *= speed;
@@ -76,7 +82,7 @@ static void update_speed_filters(struct MPContext *mpctx)
         }
     }
 
-    mp_output_chain_set_audio_speed(ao_c->filter, speed, resample, drop);
+    mp_output_chain_set_audio_speed(ao_c->filter, speed, resample, drop, name);
 }
 
 static int recreate_audio_filters(struct MPContext *mpctx)

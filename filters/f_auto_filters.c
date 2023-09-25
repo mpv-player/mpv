@@ -310,6 +310,7 @@ struct aspeed_priv {
     struct mp_subfilter sub;
     double cur_speed, cur_speed_drop;
     int current_filter;
+    const char *name;
 };
 
 static void aspeed_process(struct mp_filter *f)
@@ -340,9 +341,9 @@ static void aspeed_process(struct mp_filter *f)
 
         if (req_filter) {
             if (req_filter == 1) {
-                MP_VERBOSE(f, "adding scaletempo2\n");
+                MP_VERBOSE(f, "adding %s\n", p->name);
                 p->sub.filter = mp_create_user_filter(f, MP_OUTPUT_CHAIN_AUDIO,
-                                                      "scaletempo2", NULL);
+                                                      p->name, NULL);
             } else if (req_filter == 2) {
                 MP_VERBOSE(f, "adding drop\n");
                 p->sub.filter = mp_create_user_filter(f, MP_OUTPUT_CHAIN_AUDIO,
@@ -371,6 +372,11 @@ static void aspeed_process(struct mp_filter *f)
 static bool aspeed_command(struct mp_filter *f, struct mp_filter_command *cmd)
 {
     struct aspeed_priv *p = f->priv;
+
+    if (cmd->type == MP_FILTER_COMMAND_TEXT) {
+        p->name = cmd->cmd;
+        return true;
+    }
 
     if (cmd->type == MP_FILTER_COMMAND_SET_SPEED) {
         p->cur_speed = cmd->speed;

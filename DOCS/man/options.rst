@@ -1846,10 +1846,20 @@ Video
 Audio
 -----
 
-``--audio-pitch-correction=<yes|no>``
-    If this is enabled (default), playing with a speed different from normal
-    automatically inserts the ``scaletempo2`` audio filter. For details, see
-    audio filter section.
+``--audio-pitch-correction=<no|<filter>|yes>``
+    If this is set to "yes" (default), playing with a speed different from
+    normal automatically inserts the ``scaletempo2`` audio filter. Aditionally,
+    a ``<filter>`` can be one of the following:
+
+    :scaletempo:  The original pitch correction filter used in mpv, similar to
+                  and generally worse than scaletempo2 in every use case.
+    :scaletempo2: This algorithm is ported from chromium. Also aliased to "yes"
+                  (Default)
+    :rubberband:  High quality pitch correction with librubberband. Uses more
+                  CPU cycles than the others, but often achieves higher quality
+                  with its R3 engine.
+
+    For details, see audio filter section.
 
 ``--audio-device=<name>``
     Use the given audio device. This consists of the audio output name, e.g.

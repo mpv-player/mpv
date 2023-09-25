@@ -595,7 +595,9 @@ static const m_option_t mp_opts[] = {
     {"audio-format", OPT_AUDIOFORMAT(audio_output_format), .flags = UPDATE_AUDIO},
     {"speed", OPT_DOUBLE(playback_speed), M_RANGE(0.01, 100.0)},
 
-    {"audio-pitch-correction", OPT_BOOL(pitch_correction)},
+    {"audio-pitch-correction", OPT_CHOICE(pitch_correction,
+            {"no", 0}, {"yes", 1},
+            {"scaletempo2", 1}, {"rubberband", 2}, {"scaletempo", 3})},
 
     // set a-v distance
     {"audio-delay", OPT_FLOAT(audio_delay)},
@@ -948,7 +950,7 @@ static const struct MPOpts mp_default_opts = {
     .audio_display = 1,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,
-    .pitch_correction = true,
+    .pitch_correction = 1,
     .audiofile_auto = -1,
     .coverart_whitelist = true,
     .osd_bar_visible = true,
