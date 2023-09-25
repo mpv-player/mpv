@@ -3145,7 +3145,7 @@ Property list
     `Flat command syntax`_ for details.
 
     A list of tags can be found here:
-    https://aeg-dev.github.io/AegiSite/docs/3.2/ass_tags/
+    https://aegisub.org/docs/latest/ass_tags/
 
 ``vo-configured``
     Whether the VO is configured right now. Usually this corresponds to whether
