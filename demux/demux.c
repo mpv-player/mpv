@@ -2767,7 +2767,7 @@ static int dequeue_packet(struct demux_stream *ds, double min_pts,
 // minutes away). In this situation, this function will just return -1.
 int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
 {
-    return demux_read_packet_async_until(sh, MP_NOPTS_VALUE, out_pkt);
+    return demux_read_packet_async_until(sh, MP_NOPTS_VALUE, out_pkt, false);
 }
 
 // Like demux_read_packet_async(). They are the same for min_pts==MP_NOPTS_VALUE.
@@ -2775,20 +2775,25 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
 // subtitles), then return 0 until demuxing has reached min_pts, or the queue
 // overflowed, or EOF was reached, or a packet was read for this stream.
 int demux_read_packet_async_until(struct sh_stream *sh, double min_pts,
-                                  struct demux_packet **out_pkt)
+                                  struct demux_packet **out_pkt, bool force_eager)
 {
     struct demux_stream *ds = sh ? sh->ds : NULL;
     *out_pkt = NULL;
     if (!ds)
         return -1;
+    if (force_eager)
+        ds->eager = true;
     struct demux_internal *in = ds->in;
 
     pthread_mutex_lock(&in->lock);
     int r = -1;
     while (1) {
         r = dequeue_packet(ds, min_pts, out_pkt);
-        if (in->threading || in->blocked || r != 0)
+        if (in->threading || in->blocked || r != 0) {
+            if (force_eager)
+                ds->eager = false;
             break;
+        }
         // Needs to actually read packets until we got a packet or EOF.
         thread_work(in);
     }
