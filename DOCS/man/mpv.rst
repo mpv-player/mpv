@@ -299,10 +299,10 @@ Forward/Back button
     Skip to next/previous entry in playlist.
 
 Wheel up/down
-    Seek forward/backward 10 seconds.
+    Decrease/increase volume.
 
 Wheel left/right
-    Decrease/increase volume.
+    Seek forward/backward 10 seconds.
 
 
 USAGE
