@@ -869,7 +869,7 @@ static int query_format(struct vo *vo, int format)
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *vc = vo->priv;
 
@@ -879,20 +879,16 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     SDL_SetTextureBlendMode(vc->tex, SDL_BLENDMODE_NONE);
 
-    if (mpi) {
-        vc->osd_pts = mpi->pts;
+    if (frame->current) {
+        vc->osd_pts = frame->current->pts;
 
         mp_image_t texmpi;
-        if (!lock_texture(vo, &texmpi)) {
-            talloc_free(mpi);
+        if (!lock_texture(vo, &texmpi))
             return;
-        }
 
-        mp_image_copy(&texmpi, mpi);
+        mp_image_copy(&texmpi, frame->current);
 
         SDL_UnlockTexture(vc->tex);
-
-        talloc_free(mpi);
     }
 
     SDL_Rect src, dst;
@@ -940,9 +936,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         }
         return 1;
     }
-    case VOCTRL_REDRAW_FRAME:
-        draw_image(vo, NULL);
-        return 1;
     case VOCTRL_SET_PANSCAN:
         force_resize(vo);
         return VO_TRUE;
@@ -987,7 +980,7 @@ const struct vo_driver video_out_sdl = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .uninit = uninit,
     .flip_page = flip_page,
     .wait_events = wait_events,
