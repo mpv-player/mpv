@@ -29,7 +29,6 @@ struct filter_kernel {
     struct filter_window f; // the kernel itself
     struct filter_window w; // window storage
     double clamp; // clamping factor, affects negative weights
-    double value_cutoff; // discard all contributions below this value (polar)
     // Constant values
     const char *window; // default window
     bool polar;         // whether or not the filter uses polar coordinates

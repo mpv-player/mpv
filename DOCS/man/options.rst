@@ -5347,14 +5347,6 @@ them.
     moving edges) in exchange for potentially adding more blur. The default for
     ``--tscale-clamp`` is 1.0, the others default to 0.0.
 
-``--scale-cutoff=<value>``, ``--cscale-cutoff=<value>``, ``--dscale-cutoff=<value>``
-    Cut off the filter kernel prematurely once the value range drops below
-    this threshold. Doing so allows more aggressive pruning of skippable
-    coefficients by disregarding parts of the LUT which are effectively zeroed
-    out by the window function. Only affects polar (EWA) filters. The default
-    is 0.001 for each, which is perceptually transparent but provides a 10%-20%
-    speedup, depending on the exact radius and filter kernel chosen.
-
 ``--scale-taper=<value>``, ``--scale-wtaper=<value>``, ``--dscale-taper=<value>``, ``--dscale-wtaper=<value>``, ``--cscale-taper=<value>``, ``--cscale-wtaper=<value>``, ``--tscale-taper=<value>``, ``--tscale-wtaper=<value>``
     Kernel/window taper factor. Increasing this flattens the filter function.
     Value range is 0 to 1. A value of 0 (the default) means no flattening, a
@@ -5398,14 +5390,6 @@ them.
     gaussian
         Scale parameter (t). Increasing this makes the window wider. Defaults
         to 1.
-
-``--scaler-lut-size=<4..10>``
-    Set the size of the lookup texture for scaler kernels (default: 6). The
-    actual size of the texture is ``2^N`` for an option value of ``N``. So the
-    lookup texture with the default setting uses 64 samples.
-
-    All weights are linearly interpolated from those samples, so increasing
-    the size of lookup table might improve the accuracy of scaler.
 
 ``--scaler-resizes-only``
     Disable the scaler if the video image is not resized. In that case,
@@ -6936,7 +6920,7 @@ them.
     the normal options system. Requires libplacebo v6.309 or higher. Included
     for debugging purposes only. For more information, see:
 
-    https://code.videolan.org/videolan/libplacebo/-/blob/master/src/options.c#L877
+    https://libplacebo.org/options/
 
 Miscellaneous
 -------------

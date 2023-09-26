@@ -173,9 +173,9 @@ Shift+g and Shift+f
     Adjust subtitle font size by +/- 10%.
 
 u
-    Switch between applying no style overrides to SSA/ASS subtitles, and
-    overriding them almost completely with the normal subtitle style. See
-    ``--sub-ass-override`` for more info.
+    Switch between applying only ``--sub-ass-*`` overrides (default) to SSA/ASS
+    subtitles, and overriding them almost completely with the normal subtitle
+    style. See ``--sub-ass-override`` for more info.
 
 V
     Toggle subtitle VSFilter aspect compatibility mode. See
@@ -1371,9 +1371,6 @@ a VO using the OS GUI API is active). ``--stop-screensaver=no`` disables this.
 A common problem is that Linux desktop environments ignore the standard
 screensaver APIs on which mpv relies. In particular, mpv uses the Screen Saver
 extension (XSS) on X11, and the idle-inhibit protocol on Wayland.
-
-GNOME in particular still ignores the idle-inhibit protocol, and has its own
-D-Bus interfaces for display power management, which mpv does not support.
 
 Before mpv 0.33.0, the X11 backend ran ``xdg-screensaver reset`` in 10 second
 intervals when not paused in order to support screensaver inhibition in these

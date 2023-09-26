@@ -1,0 +1,24 @@
+name: docs
+
+on:
+  push:
+    branches:
+      - master
+      - ci
+      - 'release/**'
+    paths:
+      - 'DOCS/**'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'DOCS/**'
+
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Docs
+        run: |
+          sudo apt-get install python3-docutils
+          rst2man --strip-elements-with-class=contents --halt=2 ./DOCS/man/mpv.rst mpv.1
