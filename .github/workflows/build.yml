@@ -189,6 +189,7 @@ jobs:
             pkg update
             # Requested in ci/build-freebsd.sh
             pkg install -y \
+                git \
                 cmake \
                 evdev-proto \
                 ffmpeg \
