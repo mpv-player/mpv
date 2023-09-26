@@ -6312,6 +6312,8 @@ them.
         X11/EGL
     android
         Android/EGL. Requires ``--wid`` be set to an ``android.view.Surface``.
+    macosvk
+        macOS/Vulkan/MoltenVK (``--vo=gpu-next`` only).
 
 ``--gpu-api=<type>``
     Controls which type of graphics APIs will be accepted:
