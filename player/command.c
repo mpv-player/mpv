@@ -3617,6 +3617,8 @@ static int mp_property_script_props(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct command_ctx *cmd = mpctx->command_ctx;
+    MP_WARN(mpctx, "The shared-script-properties property is deprecated and will "
+            "be removed in the future. Use the user-data property instead.\n");
     switch (action) {
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = script_props_type;
