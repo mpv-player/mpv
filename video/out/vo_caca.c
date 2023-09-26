@@ -111,13 +111,15 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return resize(vo);
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *priv = vo->priv;
+    struct mp_image *mpi = frame->current;
+    if (!mpi)
+        return;
     memcpy_pic(priv->dither_buffer, mpi->planes[0], priv->image_width * depth, priv->image_height,
                priv->image_width * depth, mpi->stride[0]);
     caca_dither_bitmap(priv->canvas, 0, 0, priv->screen_w, priv->screen_h, priv->dither, priv->dither_buffer);
-    talloc_free(mpi);
 }
 
 static void flip_page(struct vo *vo)
@@ -305,7 +307,7 @@ const struct vo_driver video_out_caca = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),

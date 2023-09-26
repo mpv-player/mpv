@@ -78,11 +78,6 @@ enum mp_voctrl {
     /* private to vo_gpu */
     VOCTRL_LOAD_HWDEC_API,
 
-    // Redraw the image previously passed to draw_image() (basically, repeat
-    // the previous draw_image call). If this is handled, the OSD should also
-    // be updated and redrawn. Optional; emulated if not available.
-    VOCTRL_REDRAW_FRAME,
-
     // Only used internally in vo_libmpv
     VOCTRL_PREINIT,
     VOCTRL_UNINIT,
@@ -382,17 +377,6 @@ struct vo_driver {
      */
     struct mp_image *(*get_image_ts)(struct vo *vo, int imgfmt, int w, int h,
                                      int stride_align, int flags);
-
-    /*
-     * Render the given frame to the VO's backbuffer. This operation will be
-     * followed by a draw_osd and a flip_page[_timed] call.
-     * mpi belongs to the VO; the VO must free it eventually.
-     *
-     * This also should draw the OSD.
-     *
-     * Deprecated for draw_frame. A VO should have only either callback set.
-     */
-    void (*draw_image)(struct vo *vo, struct mp_image *mpi);
 
     /* Render the given frame. Note that this is also called when repeating
      * or redrawing frames.
