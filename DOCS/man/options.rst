@@ -6920,7 +6920,7 @@ them.
     the normal options system. Requires libplacebo v6.309 or higher. Included
     for debugging purposes only. For more information, see:
 
-    https://code.videolan.org/videolan/libplacebo/-/blob/master/src/options.c#L877
+    https://libplacebo.org/options/
 
 Miscellaneous
 -------------
