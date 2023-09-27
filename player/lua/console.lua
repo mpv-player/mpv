@@ -507,6 +507,8 @@ function build_completers()
         { pattern = '^%s*add%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
         { pattern = '^%s*cycle%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
         { pattern = '^%s*cycle%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
+        { pattern = '^%s*cycle%-values%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
+        { pattern = '^%s*cycle%-values%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
         { pattern = '^%s*multiply%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
         { pattern = '^%s*multiply%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
         { pattern = '${()[%w_/-]+()$', list = prop_list, append = '}' },
