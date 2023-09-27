@@ -2539,10 +2539,8 @@ void vo_wayland_uninit(struct vo *vo)
     wl_list_for_each_safe(output, tmp, &wl->output_list, link)
         remove_output(output);
 
-    if (wl->display) {
-        close(wl_display_get_fd(wl->display));
+    if (wl->display)
         wl_display_disconnect(wl->display);
-    }
 
     munmap(wl->format_map, wl->format_size);
 
