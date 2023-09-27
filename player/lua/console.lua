@@ -166,29 +166,41 @@ function format_table(list, width_max, rows_max)
     end
 
     -- use as many columns as possible
-    for rows = 1, list_size do
-        local columns = math.ceil(list_size / rows)
-        column_widths = {}
-        width_total = 0
+    for columns = 2, list_size do
+        local old_row_count = row_count
+        local rows_lower_bound = math.ceil(list_size / columns)
+        local rows_upper_bound = math.min(list_size, math.ceil(list_size / (columns - 1) - 1))
+        for rows = rows_upper_bound, rows_lower_bound, -1 do
+            cw = {}
+            width_total = 0
 
-        -- find out width of each column
-        for column = 1, columns do
-            local width = 0
-            for row = 1, rows do
-                local i = row + (column - 1) * rows
-                if i > #list then break end
-                local item_width = list_widths[i]
-                if width < item_width then
-                    width = item_width
+            -- find out width of each column
+            for column = 1, columns do
+                local width = 0
+                for row = 1, rows do
+                    local i = row + (column - 1) * rows
+                    local item_width = list_widths[i]
+                    if not item_width then break end
+                    if width < item_width then
+                        width = item_width
+                    end
+                end
+                cw[column] = width
+                width_total = width_total + width
+                if width_total + (columns - 1) * spaces_min > width_max then
+                    break
                 end
             end
-            column_widths[column] = width
-            width_total = width_total + width
-        end
 
-        if width_total + columns * spaces_min <= width_max then
-            row_count = rows
-            column_count = columns
+            if width_total + (columns - 1) * spaces_min <= width_max then
+                row_count = rows
+                column_count = columns
+                column_widths = cw
+            else
+                break
+            end
+        end
+        if row_count == old_row_count then
             break
         end
     end
