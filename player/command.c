@@ -907,8 +907,8 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
         } else // Absolute set
             step_all = *(int *)arg - chapter;
         chapter += step_all;
-        if (chapter < -1)
-            chapter = -1;
+        if (chapter < 0) // avoid using -1 if first chapter starts at 0
+            chapter = (chapter_start_time(mpctx, 0) <= 0) ? 0 : -1;
         if (chapter >= num && step_all > 0) {
             if (mpctx->opts->keep_open) {
                 seek_to_last_frame(mpctx);
@@ -923,9 +923,9 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
         } else {
             double pts = chapter_start_time(mpctx, chapter);
             if (pts != MP_NOPTS_VALUE) {
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, MPSEEK_DEFAULT, 0);
+                queue_seek(mpctx, MPSEEK_CHAPTER, pts, MPSEEK_DEFAULT, 0);
                 mpctx->last_chapter_seek = chapter;
-                mpctx->last_chapter_pts = pts;
+                mpctx->last_chapter_flag = true;
             }
         }
         return M_PROPERTY_OK;

@@ -70,6 +70,7 @@ enum seek_type {
     MPSEEK_ABSOLUTE,
     MPSEEK_FACTOR,
     MPSEEK_BACKSTEP,
+    MPSEEK_CHAPTER,
 };
 
 enum seek_precision {
@@ -400,7 +401,7 @@ typedef struct MPContext {
      * the user wanted to go to, even if we aren't exactly within the
      * boundaries of that chapter due to an inaccurate seek. */
     int last_chapter_seek;
-    double last_chapter_pts;
+    bool last_chapter_flag;
 
     bool paused;            // internal pause state
     bool playback_active;   // not paused, restarting, loading, unloading

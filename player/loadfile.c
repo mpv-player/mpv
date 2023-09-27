@@ -1592,7 +1592,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->shown_aframes = 0;
     mpctx->shown_vframes = 0;
     mpctx->last_chapter_seek = -2;
-    mpctx->last_chapter_pts = MP_NOPTS_VALUE;
+    mpctx->last_chapter_flag = false;
     mpctx->last_chapter = -2;
     mpctx->paused = false;
     mpctx->playing_msg_shown = false;
