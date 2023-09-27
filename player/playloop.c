@@ -274,6 +274,13 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     if (!mpctx->demuxer || !seek.type || seek.amount == MP_NOPTS_VALUE)
         return;
 
+    if (seek.type == MPSEEK_CHAPTER) {
+        mpctx->last_chapter_flag = false;
+        seek.type = MPSEEK_ABSOLUTE;
+    } else {
+        mpctx->last_chapter_seek = -2;
+    }
+
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
     double current_time = get_playback_time(mpctx);
     if (current_time == MP_NOPTS_VALUE && seek.type == MPSEEK_RELATIVE)
@@ -309,10 +316,6 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         (seek.exact >= MPSEEK_EXACT || opts->hr_seek == 1 ||
          (opts->hr_seek >= 0 && seek.type == MPSEEK_ABSOLUTE) ||
          (opts->hr_seek == 2 && (!mpctx->vo_chain || mpctx->vo_chain->is_sparse)));
-
-    if (seek.type == MPSEEK_FACTOR || seek.amount < 0 ||
-        (seek.type == MPSEEK_ABSOLUTE && seek.amount < mpctx->last_chapter_pts))
-        mpctx->last_chapter_seek = -2;
 
     // Under certain circumstances, prefer SEEK_FACTOR.
     if (seek.type == MPSEEK_FACTOR && !hr_seek &&
@@ -454,6 +457,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
     case MPSEEK_ABSOLUTE:
     case MPSEEK_FACTOR:
     case MPSEEK_BACKSTEP:
+    case MPSEEK_CHAPTER:
         *seek = (struct seek_params) {
             .type = type,
             .amount = amount,
@@ -591,7 +595,8 @@ int get_current_chapter(struct MPContext *mpctx)
     for (i = 0; i < mpctx->num_chapters; i++)
         if (current_pts < mpctx->chapters[i].pts)
             break;
-    return MPMAX(mpctx->last_chapter_seek, i - 1);
+    return mpctx->last_chapter_flag ?
+        mpctx->last_chapter_seek : MPMAX(mpctx->last_chapter_seek, i - 1);
 }
 
 char *chapter_display_name(struct MPContext *mpctx, int chapter)
