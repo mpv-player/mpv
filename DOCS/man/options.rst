@@ -7307,11 +7307,11 @@ Miscellaneous
           to fix the size).
           To load a video track from another file, you can use
           ``--external-file=other.mkv``.
+        - ``--lavfi-complex='[vid1] [vid2] [vid3] hstack=inputs=3 [vo]'``
+          Use the inputs option to stack more than 2 tracks.
         - ``--lavfi-complex='[aid1] asplit [t1] [ao] ; [t1] showvolume [t2] ; [vid1] [t2] overlay [vo]'``
           Play audio track 1, and overlay the measured volume for each speaker
           over video track 1.
-        - ``null:// --lavfi-complex='life [vo]'``
-          A libavfilter source-only filter (Conways' Life Game).
 
     See the FFmpeg libavfilter documentation for details on the available
     filters.
