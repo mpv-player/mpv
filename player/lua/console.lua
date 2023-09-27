@@ -756,7 +756,7 @@ end
 --           match.
 function build_completers()
     local completers = {
-        { pattern = '^%s*()[%w_-]+$', list = command_list_and_help, append = ' ' },
+        { pattern = '^%s*()[%w_-]*$', list = command_list_and_help, append = ' ' },
         { pattern = '^%s*help%s+()[%w_-]*$', list = command_list },
         { pattern = '^%s*set%s+"?([%w_-]+)"?%s+()%S*$', list = choice_list },
         { pattern = '^%s*set%s+"?([%w_-]+)"?%s+"()%S*$', list = choice_list, append = '"' },
@@ -770,17 +770,17 @@ function build_completers()
         { pattern = '^%s*change[-_]list%s+"?([%w_-]+)"?%s+"()%a*$', list = list_option_verb_list, append = '" ' },
         { pattern = '^%s*([av]f)%s+()%a*$', list = list_option_verb_list, append = ' ' },
         { pattern = '^%s*([av]f)%s+"()%a*$', list = list_option_verb_list, append = '" ' },
-        { pattern = '${=?()[%w_/-]+$', list = property_list, append = '}' },
+        { pattern = '${=?()[%w_/-]*$', list = property_list, append = '}' },
     }
 
     for _, command in pairs({'set', 'add', 'cycle', 'cycle[-_]values', 'multiply'}) do
         completers[#completers + 1] = {
-            pattern = '^%s*' .. command .. '%s+()[%w_/-]+$',
+            pattern = '^%s*' .. command .. '%s+()[%w_/-]*$',
             list = property_list,
             append = ' ',
         }
         completers[#completers + 1] = {
-            pattern = '^%s*' .. command .. '%s+"()[%w_/-]+$',
+            pattern = '^%s*' .. command .. '%s+"()[%w_/-]*$',
             list = property_list,
             append = '" ',
         }
