@@ -319,9 +319,9 @@ void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *
 void demux_block_reading(struct demuxer *demuxer, bool block);
 
 void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
-                          double ref_pts, bool selected);
+                          double ref_pts, bool selected, bool paused);
 void demuxer_refresh_track(struct demuxer *demuxer, struct sh_stream *stream,
-                           double ref_pts);
+                           double ref_pts, bool paused);
 
 int demuxer_help(struct mp_log *log, const m_option_t *opt, struct bstr name);
 
