@@ -683,7 +683,6 @@ void vo_control_async(struct vo *vo, int request, void *data)
         break;
     case VOCTRL_KILL_SCREENSAVER:
     case VOCTRL_RESTORE_SCREENSAVER:
-    case VOCTRL_OSD_CHANGED:
         break;
     default:
         abort(); // requires explicit support

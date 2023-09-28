@@ -72,9 +72,6 @@ enum mp_voctrl {
     // you could install your own listener.
     VOCTRL_VO_OPTS_CHANGED,
 
-    // Triggered by any change to the OSD (e.g. OSD style changes)
-    VOCTRL_OSD_CHANGED,
-
     /* private to vo_gpu */
     VOCTRL_LOAD_HWDEC_API,
 
