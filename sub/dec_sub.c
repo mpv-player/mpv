@@ -294,7 +294,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
         double min_pts = sub->opts->sub_delay < 0 || force ? video_pts : MP_NOPTS_VALUE;
 
         struct demux_packet *pkt;
-        int st = demux_read_packet_async_until(sub->sh, min_pts, &pkt, force);
+        int st = demux_read_packet_async_until(sub->sh, min_pts, &pkt);
         // Note: "wait" (st==0) happens with non-interleaved streams only, and
         // then we should stop the playloop until a new enough packet has been
         // seen (or the subtitle decoder's queue is full). This usually does not
