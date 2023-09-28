@@ -29,6 +29,7 @@
 
 #include "libmpv/render_gl.h"
 #include "options/m_config.h"
+#include "video/fmt-conversion.h"
 #include "video/out/drm_common.h"
 #include "video/out/gpu/hwdec.h"
 #include "video/out/hwdec/dmabuf_interop.h"
@@ -117,6 +118,7 @@ static int init(struct ra_hwdec *hw)
     int num_formats = 0;
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_NV12);
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_420P);
+    MP_TARRAY_APPEND(p, p->formats, num_formats, pixfmt2imgfmt(AV_PIX_FMT_NV16));
     MP_TARRAY_APPEND(p, p->formats, num_formats, 0); // terminate it
 
     p->hwctx.hw_imgfmt = IMGFMT_DRMPRIME;
