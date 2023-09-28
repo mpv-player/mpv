@@ -6930,8 +6930,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             }
         }
         osd_changed(mpctx->osd);
-        if (mpctx->video_out)
-            vo_control_async(mpctx->video_out, VOCTRL_OSD_CHANGED, NULL);
         if (flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD))
             mp_force_video_refresh(mpctx);
         mp_wakeup_core(mpctx);
