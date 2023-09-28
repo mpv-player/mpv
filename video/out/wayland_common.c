@@ -1971,8 +1971,7 @@ static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int t
     }
 
     if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-        MP_FATAL(wl, "Error occurred on the display fd, closing\n");
-        close(wl->display_fd);
+        MP_FATAL(wl, "Error occurred on the display fd\n");
         wl->display_fd = -1;
         mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
     }
@@ -2539,10 +2538,8 @@ void vo_wayland_uninit(struct vo *vo)
     wl_list_for_each_safe(output, tmp, &wl->output_list, link)
         remove_output(output);
 
-    if (wl->display) {
-        close(wl_display_get_fd(wl->display));
+    if (wl->display)
         wl_display_disconnect(wl->display);
-    }
 
     munmap(wl->format_map, wl->format_size);
 

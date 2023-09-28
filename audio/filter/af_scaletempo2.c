@@ -234,7 +234,7 @@ const struct mp_user_filter_entry af_scaletempo2 = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
             .min_playback_rate = 0.25,
-            .max_playback_rate = 4.0,
+            .max_playback_rate = 8.0,
             .ola_window_size_ms = 20,
             .wsola_search_interval_ms = 30,
         },

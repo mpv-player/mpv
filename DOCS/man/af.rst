@@ -179,7 +179,7 @@ Available filters are:
 
     ``max-speed=<speed>``
         Mute audio if the playback speed is above ``<speed>``
-        and ``<speed> != 0``. (default: 4.0)
+        and ``<speed> != 0``. (default: 8.0)
 
     ``search-interval=<amount>``
         Length in milliseconds to search for best overlap position. (default: 30)

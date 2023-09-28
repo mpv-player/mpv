@@ -1482,11 +1482,15 @@ endif
 
 
 # macOS features
-macos_sdk_version_py = find_program(join_paths(source_root, 'TOOLS', 'macos-sdk-version.py'),
-                                    required: get_option('swift-build').require(darwin))
+macos_sdk_version_py = ''
+if darwin
+    macos_sdk_version_py = find_program(join_paths(source_root, 'TOOLS', 'macos-sdk-version.py'),
+                                                   required: true)
+endif
+
 macos_sdk_path = ''
 macos_sdk_version = '0.0'
-if macos_sdk_version_py.found()
+if darwin and macos_sdk_version_py.found()
     macos_sdk_info = run_command(macos_sdk_version_py, check: true).stdout().split(',')
     macos_sdk_path = macos_sdk_info[0].strip()
     macos_sdk_version = macos_sdk_info[1]
@@ -1572,7 +1576,7 @@ if features['macos-media-player']
     swift_sources += files('osdep/macos/remote_command_center.swift')
 endif
 
-if swift.allowed()
+if swift.allowed() and swift_sources.length() > 0
     subdir('osdep')
 endif
 

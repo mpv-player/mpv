@@ -1848,8 +1848,22 @@ Audio
 
 ``--audio-pitch-correction=<yes|no>``
     If this is enabled (default), playing with a speed different from normal
-    automatically inserts the ``scaletempo2`` audio filter. For details, see
-    audio filter section.
+    automatically inserts the ``scaletempo2`` audio filter. You can insert
+    filters besides ``scaletempo2`` and modify their params using
+    `Conditional auto profiles`:
+
+    ::
+
+        [af_insert]
+        profile-cond=speed ~= 1
+        profile-restore=copy
+        af-add=scaletempo2=search-interval=50 # Insert filter and params here.
+
+    Filters set this way replace the ``scaletempo2`` default, instead of
+    overlapping with it. If there are multiple audio filters inserted that can do
+    pitch correction, then only the last one in the filter chain is used.
+    For details on the specifics of each available filter, see the audio filter
+    section.
 
 ``--audio-device=<name>``
     Use the given audio device. This consists of the audio output name, e.g.
@@ -7110,6 +7124,16 @@ Miscellaneous
 
     This is a key/value list option. See `List Options`_ for details.
 
+``--backdrop-type=<auto|none|mica|acrylic|mica-alt>``
+    (Windows only)
+    Controls the backdrop/border style.
+
+    :auto: Default Windows behavior
+    :none: The backdrop will be black or white depending on the system's theme settings.
+    :mica: Enables the Mica style, which is the default on Windows 11.
+    :acrylic: Enables the Acrylic style (frosted glass look).
+    :mica-alt: Same as Mica, except reversed.
+
 ``--window-affinity=<default|excludefromcmcapture|monitor>``
     (Windows only)
     Controls the window affinity behavior of mpv.
@@ -7283,11 +7307,11 @@ Miscellaneous
           to fix the size).
           To load a video track from another file, you can use
           ``--external-file=other.mkv``.
+        - ``--lavfi-complex='[vid1] [vid2] [vid3] hstack=inputs=3 [vo]'``
+          Use the inputs option to stack more than 2 tracks.
         - ``--lavfi-complex='[aid1] asplit [t1] [ao] ; [t1] showvolume [t2] ; [vid1] [t2] overlay [vo]'``
           Play audio track 1, and overlay the measured volume for each speaker
           over video track 1.
-        - ``null:// --lavfi-complex='life [vo]'``
-          A libavfilter source-only filter (Conways' Life Game).
 
     See the FFmpeg libavfilter documentation for details on the available
     filters.
