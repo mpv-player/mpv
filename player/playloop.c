@@ -185,7 +185,7 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
             double pts = get_current_time(mpctx);
             for (int n = 0; n < num_ptracks[STREAM_SUB]; n++) {
                 struct track *track = mpctx->current_track[n][STREAM_SUB];
-                if (track)
+                if (track && !track->is_external)
                     demuxer_refresh_track(mpctx->demuxer, track->stream, pts, mpctx->paused);
             }
         }
