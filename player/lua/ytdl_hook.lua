@@ -866,7 +866,7 @@ function run_ytdl_hook(url)
     local json = result.stdout
     local parse_err = nil
 
-    if result.status ~= 0 or json == "" then
+    if json == "" then
         json = nil
     elseif json then
         json, parse_err = utils.parse_json(json)
