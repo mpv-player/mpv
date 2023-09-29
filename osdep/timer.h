@@ -48,7 +48,7 @@ int mp_start_hires_timers(int wait_ms);
 void mp_end_hires_timers(int resolution_ms);
 #endif  /* _WIN32 */
 
-#define MP_START_TIME 10000000
+#define MP_START_TIME 10 * INT64_C(1000000000)
 
 // Duration of a second in mpv time.
 #define MP_SECOND_US (1000 * 1000)
