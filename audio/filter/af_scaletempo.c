@@ -35,6 +35,7 @@
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
+#include <math.h>
 
 #include "audio/aframe.h"
 #include "audio/format.h"
@@ -422,18 +423,20 @@ static bool reinit(struct mp_filter *f)
         memset(s->buf_overlap, 0, s->bytes_overlap);
         if (use_int) {
             int32_t *pb = s->table_blend;
-            int64_t blend = 0;
+            const float scale = M_PI / frames_overlap;
             for (int i = 0; i < frames_overlap; i++) {
-                int32_t v = blend / frames_overlap;
+                // Hann function
+                const int32_t v = 0.5f * (1.0f - cosf(i * scale)) * 65536 + 0.5;
                 for (int j = 0; j < nch; j++)
                     *pb++ = v;
-                blend += 65536; // 2^16
             }
             s->output_overlap = output_overlap_s16;
         } else {
             float *pb = s->table_blend;
+            const float scale = M_PI / frames_overlap;
             for (int i = 0; i < frames_overlap; i++) {
-                float v = i / (float)frames_overlap;
+                // Hann function
+                const float v = 0.5f * (1.0f - cosf(i * scale));
                 for (int j = 0; j < nch; j++)
                     *pb++ = v;
             }
