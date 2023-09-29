@@ -40,14 +40,14 @@ static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
     if (p->cfg_fps) {
-        int64_t ft = 1e6 / p->cfg_fps;
-        int64_t prev_vsync = mp_time_us() / ft;
+        int64_t ft = 1e9 / p->cfg_fps;
+        int64_t prev_vsync = mp_time_ns() / ft;
         int64_t target_time = (prev_vsync + 1) * ft;
         for (;;) {
-            int64_t now = mp_time_us();
+            int64_t now = mp_time_ns();
             if (now >= target_time)
                 break;
-            mp_sleep_us(target_time - now);
+            mp_sleep_ns(target_time - now);
         }
     }
 }
