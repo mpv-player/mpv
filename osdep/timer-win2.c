@@ -52,17 +52,17 @@ void mp_end_hires_timers(int res_ms)
 #endif
 }
 
-void mp_sleep_us(int64_t us)
+void mp_sleep_ns(int64_t ns)
 {
-    if (us < 0)
+    if (ns < 0)
         return;
     // Sleep(0) won't sleep for one clocktick as the unix usleep
     // instead it will only make the thread ready
     // it may take some time until it actually starts to run again
-    if (us < 1000)
-        us = 1000;
-    int hrt = mp_start_hires_timers(us / 1000);
-    Sleep(us / 1000);
+    if (ns < 1e6)
+        ns = 1e6;
+    int hrt = mp_start_hires_timers(ns / 1e6);
+    Sleep(ns / 1e6);
     mp_end_hires_timers(hrt);
 }
 

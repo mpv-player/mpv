@@ -22,13 +22,13 @@
 #include <time.h>
 #include "timer.h"
 
-void mp_sleep_us(int64_t us)
+void mp_sleep_ns(int64_t ns)
 {
-    if (us < 0)
+    if (ns < 0)
         return;
     struct timespec ts;
-    ts.tv_sec  =  us / 1000000;
-    ts.tv_nsec = (us % 1000000) * 1000;
+    ts.tv_sec  =  ns / UINT64_C(1000000000);
+    ts.tv_nsec =  ns % UINT64_C(1000000000);
     nanosleep(&ts, NULL);
 }
 

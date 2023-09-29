@@ -29,7 +29,7 @@ int64_t mp_time_us(void);
 // Return time in nanoseconds. Never wraps. Never returns 0 or negative values.
 int64_t mp_time_ns(void);
 
-// Return time in seconds. Can have down to 1 microsecond resolution, but will
+// Return time in seconds. Can have down to 1 nanosecond resolution, but will
 // be much worse when casted to float.
 double mp_time_sec(void);
 
@@ -37,8 +37,8 @@ double mp_time_sec(void);
 void mp_raw_time_init(void);
 uint64_t mp_raw_time_ns(void);
 
-// Sleep in microseconds.
-void mp_sleep_us(int64_t us);
+// Sleep in nanoseconds.
+void mp_sleep_ns(int64_t ns);
 
 #ifdef _WIN32
 // returns: timer resolution in ms if needed and started successfully, else 0

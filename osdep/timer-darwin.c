@@ -28,10 +28,9 @@
 
 static double timebase_ratio_ns;
 
-void mp_sleep_us(int64_t us)
+void mp_sleep_ns(int64_t ns)
 {
-    uint64_t deadline = us * 1e3 / timebase_ratio_ns + mach_absolute_time();
-
+    uint64_t deadline = ns / timebase_ratio_ns + mach_absolute_time();
     mach_wait_until(deadline);
 }
 
