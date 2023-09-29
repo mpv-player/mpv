@@ -134,50 +134,144 @@ static bool fill_queue(struct priv *s)
     return bytes_needed == 0;
 }
 
+// Fit the curve f(x) = a * x^2 + b * x + c such that
+//   f(-1) = y[0]
+//   f(0) = y[1]
+//   f(1) = y[2]
+// and return the extremum position and value
+// assuming y[0] <= y[1] >= y[2] || y[0] >= y[1] <= y[2]
+static void quadratic_interpolation_float(
+    const float* y_values, float* x, float* value)
+{
+    const float b = (y_values[2] - y_values[0]) * 0.5f;
+    const float c = y_values[1];
+    const float a = y_values[0] + b - c;
+
+    if (a == 0.f) {
+        // it's a flat line
+        *x = 0;
+        *value = c;
+    } else {
+        const float pos = -b / (2.f * a);
+        *x = pos;
+        *value = a * pos * pos + b * pos + c;
+    }
+}
+
+static void quadratic_interpolation_s16(
+    const int32_t* y_values, float* x, int32_t* value)
+{
+    const float b = (y_values[2] - y_values[0]) * 0.5f;
+    const float c = y_values[1];
+    const float a = y_values[0] + b - c;
+
+    if (a == 0.f) {
+        // it's a flat line
+        *x = 0;
+        *value = c;
+    } else {
+        const float pos = -b / (2.f * a);
+        *x = pos;
+        *value = a * pos * pos + b * pos + c;
+    }
+}
+
 static int best_overlap_offset_float(struct priv *s)
 {
-    float best_distance = FLT_MAX;
-    int best_off = 0;
+    int num_channels = s->num_channels, frames_search = s->frames_search;
+    float *source = (float *)s->buf_queue + num_channels;
+    float *target = (float *)s->buf_overlap + num_channels;
+    int num_samples = s->samples_overlap - num_channels;
+    int step_size = 3;
+    float history[3] = {};
 
-    float *search_start = (float *)s->buf_queue + s->num_channels;
-    for (int off = 0; off < s->frames_search; off++) {
+    float best_distance = FLT_MAX;
+    int best_offset_approx = 0;
+    for (int offset = 0; offset < frames_search; offset += step_size) {
         float distance = 0;
-        float *ps = search_start;
-        float *po = s->buf_overlap;
-        po += s->num_channels;
-        for (int i = s->num_channels; i < s->samples_overlap; i++)
-            distance += fabsf(*po++ - *ps++);
+        for (int i = 0; i < num_samples; i++)
+            distance += fabsf(target[i] - source[offset * num_channels + i]);
+
+        int offset_approx = offset;
+        history[0] = history[1];
+        history[1] = history[2];
+        history[2] = distance;
+        if(offset >= 2 && history[0] >= history[1] && history[1] <= history[2]) {
+            float extremum;
+            quadratic_interpolation_float(history, &extremum, &distance);
+            offset_approx = offset - step_size + (int)(extremum * step_size + 0.5f);
+        }
+
         if (distance < best_distance) {
             best_distance = distance;
-            best_off  = off;
+            best_offset_approx  = offset_approx;
         }
-        search_start += s->num_channels;
     }
 
-    return best_off * 4 * s->num_channels;
+    best_distance = FLT_MAX;
+    int best_offset = 0;
+    int min_offset = MPMAX(0, best_offset_approx - step_size + 1);
+    int max_offset = MPMIN(frames_search, best_offset_approx + step_size);
+    for (int offset = min_offset; offset < max_offset; offset++) {
+        float distance = 0;
+        for (int i = 0; i < num_samples; i++)
+            distance += fabsf(target[i] - source[offset * num_channels + i]);
+        if (distance < best_distance) {
+            best_distance = distance;
+            best_offset  = offset;
+        }
+    }
+
+    return best_offset * 4 * num_channels;
 }
 
 static int best_overlap_offset_s16(struct priv *s)
 {
-    int32_t best_distance = INT32_MAX;
-    int best_off = 0;
+    int num_channels = s->num_channels, frames_search = s->frames_search;
+    int16_t *source = (int16_t *)s->buf_queue + num_channels;
+    int16_t *target = (int16_t *)s->buf_overlap + num_channels;
+    int num_samples = s->samples_overlap - num_channels;
+    int step_size = 3;
+    int32_t history[3] = {};
 
-    int16_t *search_start = (int16_t *)s->buf_queue + s->num_channels;
-    for (int off = 0; off < s->frames_search; off++) {
+    int32_t best_distance = INT32_MAX;
+    int best_offset_approx = 0;
+    for (int offset = 0; offset < frames_search; offset += step_size) {
         int32_t distance = 0;
-        int16_t *ps = search_start;
-        int16_t *po = s->buf_overlap;
-        po += s->num_channels;
-        for (int i = s->num_channels; i < s->samples_overlap; i++)
-            distance += abs((int32_t)*po++ - (int32_t)*ps++);
+        for (int i = 0; i < num_samples; i++)
+            distance += abs((int32_t)target[i] - source[offset * num_channels + i]);
+
+        int offset_approx = offset;
+        history[0] = history[1];
+        history[1] = history[2];
+        history[2] = distance;
+        if(offset >= 2 && history[0] >= history[1] && history[1] <= history[2]) {
+            float extremum;
+            quadratic_interpolation_s16(history, &extremum, &distance);
+            offset_approx = offset - step_size + (int)(extremum * step_size + 0.5f);
+        }
+
         if (distance < best_distance) {
             best_distance = distance;
-            best_off  = off;
+            best_offset_approx  = offset_approx;
         }
-        search_start += s->num_channels;
     }
 
-    return best_off * 2 * s->num_channels;
+    best_distance = INT32_MAX;
+    int best_offset = 0;
+    int min_offset = MPMAX(0, best_offset_approx - step_size + 1);
+    int max_offset = MPMIN(frames_search, best_offset_approx + step_size);
+    for (int offset = min_offset; offset < max_offset; offset++) {
+        int32_t distance = 0;
+        for (int i = 0; i < num_samples; i++)
+            distance += abs((int32_t)target[i] - source[offset * num_channels + i]);
+        if (distance < best_distance) {
+            best_distance = distance;
+            best_offset  = offset;
+        }
+    }
+
+    return best_offset * 2 * s->num_channels;
 }
 
 static void output_overlap_float(struct priv *s, void *buf_out,
