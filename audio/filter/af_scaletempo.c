@@ -211,8 +211,9 @@ static void output_overlap_float(struct priv *s, void *buf_out,
     float *po   = s->buf_overlap;
     float *pin  = (float *)(s->buf_queue + bytes_off);
     for (int i = 0; i < s->samples_overlap; i++) {
-        *pout++ = *po - *pb++ *(*po - *pin++);
-        po++;
+        // the math is equal to *po * (1 - *pb) + *pin * *pb
+        float o = *po++;
+        *pout++ = o - *pb++ * (o - *pin++);
     }
 }
 
@@ -224,8 +225,9 @@ static void output_overlap_s16(struct priv *s, void *buf_out,
     int16_t *po   = s->buf_overlap;
     int16_t *pin  = (int16_t *)(s->buf_queue + bytes_off);
     for (int i = 0; i < s->samples_overlap; i++) {
-        *pout++ = *po - ((*pb++ *(*po - *pin++)) >> 16);
-        po++;
+        // the math is equal to *po * (1 - *pb) + *pin * *pb
+        int32_t o = *po++;
+        *pout++ = o - ((*pb++ *(o - *pin++)) >> 16);
     }
 }
 
