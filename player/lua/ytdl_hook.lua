@@ -872,8 +872,9 @@ function run_ytdl_hook(url)
         json, parse_err = utils.parse_json(json)
     end
     
-    if result.status ~= 0 then
-        msg.error("result.status != 0 but JSON parsed successfully")
+    if result.status ~= 0 and json then
+        msg.warn("exit status isn't zero but the JSON still parsed successfully")
+        msg.warn(result.stderr:match("^%s*(.*)%s*$"))
         msg.verbose("status:", result.status)
         msg.verbose("reason:", result.error_string)
         msg.verbose("stdout:", result.stdout)
