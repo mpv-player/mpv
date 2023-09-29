@@ -23,6 +23,7 @@
 #ifndef MPV_CLIENT_API_H_
 #define MPV_CLIENT_API_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -248,7 +249,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 1)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 2)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -675,6 +676,7 @@ typedef enum mpv_format {
      * Only valid when doing read access. The rest works like MPV_FORMAT_STRING.
      */
     MPV_FORMAT_OSD_STRING       = 2,
+#if MPV_ENABLE_DEPRECATED
     /**
      * The basic type is int. The only allowed values are 0 ("no")
      * and 1 ("yes").
@@ -690,8 +692,14 @@ typedef enum mpv_format {
      *
      *     int flag = 1;
      *     mpv_set_property(ctx, "property", MPV_FORMAT_FLAG, &flag);
+     *
+     * @deprecated Use MPV_FORMAT_BOOL instead as a replacement. When querying
+     *             the format returned by a node, it will still be MPV_FORMAT_FLAG,
+     *             for compatibility reasons, but in the future this will be changed
+     *             to MPV_FORMAT_BOOL.
      */
     MPV_FORMAT_FLAG             = 3,
+#endif
     /**
      * The basic type is int64_t.
      */
@@ -745,7 +753,13 @@ typedef enum mpv_format {
      * A raw, untyped byte array. Only used only with mpv_node, and only in
      * some very specific situations. (Some commands use it.)
      */
-    MPV_FORMAT_BYTE_ARRAY       = 9
+    MPV_FORMAT_BYTE_ARRAY       = 9,
+    /**
+     * The basic type is bool and can be used instead of MPV_FORMAT_FLAG.
+     * In the future this will replace it completely. It is recommended to
+     * use MPV_FORMAT_BOOL when possible.
+     */
+    MPV_FORMAT_BOOL             = 10,
 } mpv_format;
 
 /**
@@ -759,6 +773,7 @@ typedef enum mpv_format {
 typedef struct mpv_node {
     union {
         char *string;   /** valid if format==MPV_FORMAT_STRING */
+        bool bool_;     /** strictly for internal use; do not access **/
         int flag;       /** valid if format==MPV_FORMAT_FLAG   */
         int64_t int64;  /** valid if format==MPV_FORMAT_INT64  */
         double double_; /** valid if format==MPV_FORMAT_DOUBLE */
@@ -787,7 +802,8 @@ typedef struct mpv_node {
      *  MPV_FORMAT_NONE         (no member)
      *
      * If you encounter a value you don't know, you must not make any
-     * assumptions about the contents of union u.
+     * assumptions about the contents of union u. The u.bool_ member also
+     * exists, but you should not attempt to access it.
      */
     mpv_format format;
 } mpv_node;
@@ -1389,9 +1405,11 @@ typedef struct mpv_event_property {
     const char *name;
     /**
      * Format of the data field in the same struct. See enum mpv_format.
-     * This is always the same format as the requested format, except when
-     * the property could not be retrieved (unavailable, or an error happened),
-     * in which case the format is MPV_FORMAT_NONE.
+     * This is always the same format as the requested format, except in
+     * two cases. If the property could not be retrieved (unavailable,
+     * or an error happened), the format is MPV_FORMAT_NONE. The other
+     * case is if the requested format is MPV_FORMAT_BOOL. It will return
+     * MPV_FORMAT_FLAG for compatibility reasons.
      */
     mpv_format format;
     /**

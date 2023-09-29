@@ -201,6 +201,7 @@ int json_parse(void *ta_parent, struct mpv_node *dst, char **src, int max_depth)
         return 0;
     } else if (c == 't' && strncmp(*src, "true", 4) == 0) {
         *src += 4;
+        // Used to push to clients; must remain flag.
         dst->format = MPV_FORMAT_FLAG;
         dst->u.flag = 1;
         return 0;
@@ -292,6 +293,9 @@ static int json_append(bstr *b, const struct mpv_node *src, int indent)
     switch (src->format) {
     case MPV_FORMAT_NONE:
         APPEND(b, "null");
+        return 0;
+    case MPV_FORMAT_BOOL:
+        APPEND(b, src->u.bool_ ? "true" : "false");
         return 0;
     case MPV_FORMAT_FLAG:
         APPEND(b, src->u.flag ? "true" : "false");

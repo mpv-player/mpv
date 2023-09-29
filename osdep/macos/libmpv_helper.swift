@@ -199,9 +199,9 @@ class LibmpvHelper {
 
     func getBoolProperty(_ name: String) -> Bool {
         if mpvHandle == nil { return false }
-        var value = Int32()
-        mpv_get_property(mpvHandle, name, MPV_FORMAT_FLAG, &value)
-        return value > 0
+        var value = Bool()
+        mpv_get_property(mpvHandle, name, MPV_FORMAT_BOOL, &value)
+        return value
     }
 
     func getIntProperty(_ name: String) -> Int {

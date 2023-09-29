@@ -39,6 +39,7 @@
 
 // Dummy values for test_options_and_properties
 static const char *str = "string";
+static bool bool_ = true;
 static int flag = 1;
 static int64_t int_ = 20;
 static double double_ = 1.5;
@@ -64,6 +65,14 @@ static void check_api_error(int status)
 {
     if (status < 0)
         fail("mpv API error: %s\n", mpv_error_string(status));
+}
+
+static void check_bool(const char *property, bool expect)
+{
+    bool result_bool;
+    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_BOOL, &result_bool));
+    if (expect != result_bool)
+        fail("Bool: expected '%d' but got '%d'!\n", expect, result_bool);
 }
 
 static void check_double(const char *property, double expect)
@@ -106,6 +115,9 @@ static void check_results(const char *properties[], enum mpv_format formats[])
         case MPV_FORMAT_STRING:
             check_string(properties[i], str);
             break;
+        case MPV_FORMAT_BOOL:
+            check_bool(properties[i], bool_);
+            break;
         case MPV_FORMAT_FLAG:
             check_flag(properties[i], flag);
             break;
@@ -127,6 +139,10 @@ static void set_options_and_properties(const char *options[], const char *proper
         case MPV_FORMAT_STRING:
             check_api_error(mpv_set_option(ctx, options[i], formats[i], &str));
             check_api_error(mpv_set_property(ctx, properties[i], formats[i], &str));
+            break;
+        case MPV_FORMAT_BOOL:
+            check_api_error(mpv_set_option(ctx, options[i], formats[i], &bool_));
+            check_api_error(mpv_set_property(ctx, properties[i], formats[i], &bool_));
             break;
         case MPV_FORMAT_FLAG:
             check_api_error(mpv_set_option(ctx, options[i], formats[i], &flag));
@@ -200,10 +216,11 @@ static void test_lavfi_complex(char *file)
 // have the expected values.
 static void test_options_and_properties(void)
 {
-    // Order matters. string -> flag -> int -> double (repeat)
+    // Order matters. string -> bool -> flag -> int -> double (repeat)
     // One for set_option the other for set_property
     const char *options[] = {
         "screen-name",
+        "ontop",
         "save-position-on-quit",
         "cursor-autohide",
         "speed",
@@ -212,6 +229,7 @@ static void test_options_and_properties(void)
 
     const char *properties[] = {
         "fs-screen-name",
+        "window-maximized",
         "shuffle",
         "sub-pos",
         "window-scale",
@@ -221,6 +239,7 @@ static void test_options_and_properties(void)
     // Must match above ordering.
     enum mpv_format formats[] = {
         MPV_FORMAT_STRING,
+        MPV_FORMAT_BOOL,
         MPV_FORMAT_FLAG,
         MPV_FORMAT_INT64,
         MPV_FORMAT_DOUBLE,

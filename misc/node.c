@@ -10,9 +10,9 @@ void node_init(struct mpv_node *dst, int format, struct mpv_node *parent)
 {
     // Other formats need to be initialized manually.
     assert(format == MPV_FORMAT_NODE_MAP || format == MPV_FORMAT_NODE_ARRAY ||
-           format == MPV_FORMAT_FLAG || format == MPV_FORMAT_INT64 ||
-           format == MPV_FORMAT_DOUBLE || format == MPV_FORMAT_BYTE_ARRAY ||
-           format == MPV_FORMAT_NONE);
+           format == MPV_FORMAT_BOOL || format == MPV_FORMAT_FLAG ||
+           format == MPV_FORMAT_INT64 || format == MPV_FORMAT_DOUBLE ||
+           format == MPV_FORMAT_BYTE_ARRAY || format == MPV_FORMAT_NONE);
 
     void *ta_parent = NULL;
     if (parent) {
@@ -83,6 +83,11 @@ void node_map_add_double(struct mpv_node *dst, const char *key, double v)
     node_map_add(dst, key, MPV_FORMAT_DOUBLE)->u.double_ = v;
 }
 
+void node_map_add_bool(struct mpv_node *dst, const char *key, bool v)
+{
+    node_map_add(dst, key, MPV_FORMAT_BOOL)->u.bool_ = v;
+}
+
 void node_map_add_flag(struct mpv_node *dst, const char *key, bool v)
 {
     node_map_add(dst, key, MPV_FORMAT_FLAG)->u.flag = v;
@@ -116,6 +121,8 @@ bool equal_mpv_value(const void *a, const void *b, mpv_format format)
     case MPV_FORMAT_STRING:
     case MPV_FORMAT_OSD_STRING:
         return strcmp(*(char **)a, *(char **)b) == 0;
+    case MPV_FORMAT_BOOL:
+        return *(bool *)a == *(bool *)b;
     case MPV_FORMAT_FLAG:
         return *(int *)a == *(int *)b;
     case MPV_FORMAT_INT64:

@@ -32,6 +32,9 @@ API changes
 
 ::
 
+ --- mpv 0.37.0 ---
+ 2.2    - add MPV_FORMAT_BOOL
+        - deprecate MPV_FORMAT_FLAG in favor of MPV_FORMAT_BOOL
  --- mpv 0.36.0 ---
  2.1    - add mpv_del_property()
  --- mpv 0.35.0 ---
