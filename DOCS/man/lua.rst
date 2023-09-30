@@ -199,7 +199,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Whether this works and how long it takes depends on the command and the
     situation. The abort call itself is asynchronous. Does not return anything.
 
-``mp.del_property(name [,def])``
+``mp.del_property(name)``
     Delete the given property. See ``mp.get_property`` and `Properties`_ for more
     information about properties. Most properties cannot be deleted.
 
