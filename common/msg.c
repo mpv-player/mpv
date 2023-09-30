@@ -316,7 +316,7 @@ static void print_terminal_line(struct mp_log *log, int lev,
         set_msg_color(stream, lev);
 
     if (root->show_time)
-        fprintf(stream, "[%10.6f] ", (mp_time_us() - MP_START_TIME) / 1e6);
+        fprintf(stream, "[%10.6f] ", (mp_time_ns() - MP_START_TIME) / 1e9);
 
     const char *prefix = log->prefix;
     if ((lev >= MSGL_V) || root->verbose || root->module)
@@ -405,7 +405,7 @@ static void dump_stats(struct mp_log *log, int lev, char *text)
 {
     struct mp_log_root *root = log->root;
     if (lev == MSGL_STATS && root->stats_file)
-        fprintf(root->stats_file, "%"PRId64" %s\n", mp_time_us(), text);
+        fprintf(root->stats_file, "%"PRId64" %s\n", mp_time_ns(), text);
 }
 
 void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
@@ -551,7 +551,7 @@ static void *log_file_thread(void *p)
         if (e) {
             pthread_mutex_unlock(&root->log_file_lock);
             fprintf(root->log_file, "[%8.3f][%c][%s] %s",
-                    (mp_time_us() - MP_START_TIME) / 1e6,
+                    (mp_time_ns() - MP_START_TIME) / 1e9,
                     mp_log_levels[e->level][0], e->prefix, e->text);
             fflush(root->log_file);
             pthread_mutex_lock(&root->log_file_lock);

@@ -372,26 +372,26 @@ static uint32_t AudioTrack_getPlaybackHeadPosition(struct ao *ao)
         return 0;
     JNIEnv *env = MP_JNI_GET_ENV(ao);
     uint32_t pos = 0;
-    int64_t now = mp_raw_time_us();
+    int64_t now = mp_raw_time_ns();
     int state = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.getPlayState);
 
     int stable_count = 20;
-    int64_t wait = p->timestamp_stable < stable_count ? 50000 : 3000000;
+    int64_t wait = p->timestamp_stable < stable_count ? 50000000 : 3000000000;
 
     if (state == AudioTrack.PLAYSTATE_PLAYING && p->format != AudioFormat.ENCODING_IEC61937 &&
         (p->timestamp_fetched == 0 || now - p->timestamp_fetched >= wait)) {
         if (!p->timestamp_fetched)
             p->timestamp_stable = 0;
 
-        int64_t utime1 = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime) / 1000;
+        int64_t time1 = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime);
         if (MP_JNI_CALL_BOOL(p->audiotrack, AudioTrack.getTimestamp, p->timestamp)) {
             p->timestamp_set = true;
             p->timestamp_fetched = now;
             if (p->timestamp_stable < stable_count) {
                 uint32_t fpos = 0xFFFFFFFFL & MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.framePosition);
-                int64_t utime2 = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime) / 1000;
-                //MP_VERBOSE(ao, "getTimestamp: fpos= %u / time= %"PRId64" / now= %"PRId64" / stable= %d\n", fpos, utime2, now, p->timestamp_stable);
-                if (utime1 != utime2 && utime2 != 0 && fpos != 0) {
+                int64_t time2 = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime);
+                //MP_VERBOSE(ao, "getTimestamp: fpos= %u / time= %"PRId64" / now= %"PRId64" / stable= %d\n", fpos, time2, now, p->timestamp_stable);
+                if (time1 != time2 && time2 != 0 && fpos != 0) {
                     p->timestamp_stable++;
                 }
             }
@@ -404,19 +404,19 @@ static uint32_t AudioTrack_getPlaybackHeadPosition(struct ao *ao)
     if (p->timestamp_set) {
         pos = 0xFFFFFFFFL & MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.framePosition);
         uint32_t fpos = pos;
-        int64_t utime = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime) / 1000;
-        if (utime == 0)
+        int64_t time = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime);
+        if (time == 0)
             fpos = pos = 0;
         if (p->needs_timestamp_offset) {
-            if (utime != 0 && !p->timestamp_offset)
-                p->timestamp_offset = now - utime;
-            utime += p->timestamp_offset;
+            if (time != 0 && !p->timestamp_offset)
+                p->timestamp_offset = now - time;
+            time += p->timestamp_offset;
         }
-        if (fpos != 0 && utime != 0 && state == AudioTrack.PLAYSTATE_PLAYING) {
-            double diff = (double)(now - utime) / 1e6;
+        if (fpos != 0 && time != 0 && state == AudioTrack.PLAYSTATE_PLAYING) {
+            double diff = (double)(now - time) / 1e9;
             pos += diff * ao->samplerate;
         }
-        //MP_VERBOSE(ao, "position = %u via getTimestamp (state = %d / fpos= %u / time= %"PRId64")\n", pos, state, fpos, utime);
+        //MP_VERBOSE(ao, "position = %u via getTimestamp (state = %d / fpos= %u / time= %"PRId64")\n", pos, state, fpos, time);
     } else {
         pos = 0xFFFFFFFFL & MP_JNI_CALL_INT(p->audiotrack, AudioTrack.getPlaybackHeadPosition);
         //MP_VERBOSE(ao, "playbackHeadPosition = %u (reset_pending=%d)\n", pos, p->reset_pending);

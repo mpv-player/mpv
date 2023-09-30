@@ -237,22 +237,22 @@ static bool d3d11_submit_frame(struct ra_swapchain *sw,
     return true;
 }
 
-static int64_t qpc_to_us(struct ra_swapchain *sw, int64_t qpc)
+static int64_t qpc_to_ns(struct ra_swapchain *sw, int64_t qpc)
 {
     struct priv *p = sw->priv;
 
-    // Convert QPC units (1/perf_freq seconds) to microseconds. This will work
+    // Convert QPC units (1/perf_freq seconds) to nanoseconds. This will work
     // without overflow because the QPC value is guaranteed not to roll-over
     // within 100 years, so perf_freq must be less than 2.9*10^9.
-    return qpc / p->perf_freq * 1000000 +
-        qpc % p->perf_freq * 1000000 / p->perf_freq;
+    return qpc / p->perf_freq * INT64_C(1000000000) +
+        qpc % p->perf_freq * INT64_C(1000000000) / p->perf_freq;
 }
 
-static int64_t qpc_us_now(struct ra_swapchain *sw)
+static int64_t qpc_ns_now(struct ra_swapchain *sw)
 {
     LARGE_INTEGER perf_count;
     QueryPerformanceCounter(&perf_count);
-    return qpc_to_us(sw, perf_count.QuadPart);
+    return qpc_to_ns(sw, perf_count.QuadPart);
 }
 
 static void d3d11_swap_buffers(struct ra_swapchain *sw)
@@ -330,7 +330,7 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
     if (src_passed && sqt_passed)
         p->vsync_duration_qpc = sqt_passed / src_passed;
     if (p->vsync_duration_qpc)
-        info->vsync_duration = qpc_to_us(sw, p->vsync_duration_qpc);
+        info->vsync_duration = qpc_to_ns(sw, p->vsync_duration_qpc);
 
     // If the physical frame rate is known and the other members of
     // DXGI_FRAME_STATISTICS are non-0, estimate the timing of the next frame
@@ -353,8 +353,8 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
         // Only set the estimated display time if it's after the last submission
         // time. It could be before if mpv skips a lot of frames.
         if (last_queue_display_time_qpc >= p->last_submit_qpc) {
-            info->last_queue_display_time = mp_time_us() +
-                (qpc_to_us(sw, last_queue_display_time_qpc) - qpc_us_now(sw));
+            info->last_queue_display_time = mp_time_ns() +
+                (qpc_to_ns(sw, last_queue_display_time_qpc) - qpc_ns_now(sw));
         }
     }
 }

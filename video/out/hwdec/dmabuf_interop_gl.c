@@ -176,6 +176,7 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
         if (p_mapper->desc.layers[i].nb_planes > 1) {
             switch (p_mapper->desc.layers[i].format) {
             case DRM_FORMAT_NV12:
+            case DRM_FORMAT_NV16:
                 format[0] = DRM_FORMAT_R8;
                 format[1] = DRM_FORMAT_GR88;
                 break;

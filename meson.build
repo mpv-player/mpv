@@ -24,7 +24,6 @@ libswresample = dependency('libswresample', version: '>= 3.9.100')
 libswscale = dependency('libswscale', version: '>= 5.9.100')
 
 libass = dependency('libass', version: '>= 0.12.2')
-pthreads = dependency('threads')
 
 # the dependency order of libass -> ffmpeg is necessary due to
 # static linking symbol resolution between fontconfig and MinGW
@@ -34,8 +33,7 @@ dependencies = [libass,
                 libavformat,
                 libavutil,
                 libswresample,
-                libswscale,
-                pthreads]
+                libswscale]
 
 # Keeps track of all enabled/disabled features
 features = {
@@ -359,11 +357,13 @@ win32_pthreads = get_option('win32-internal-pthreads').require(
 features += {'win32-internal-pthreads': win32_pthreads.allowed()}
 if features['win32-internal-pthreads']
     flags += ['-isystem', '-I', '-DIN_WINPTHREAD']
-    # Note: Adding this include causes POSIX_TIMERS to be defined for
-    # unclear reasons (some confusion with <pthread.h> probably).
-    # Hack around it by using HAVE_WIN32_INTERNAL_PTHREADS.
     includedir += include_directories('osdep/win32/include')
     sources += files('osdep/win32/pthread.c')
+else
+    # pthreads is intentionally left undefined in win32 branch to find incorrect
+    # uses of it immediately
+    pthreads = dependency('threads')
+    dependencies += pthreads
 endif
 
 pthread_debug = get_option('pthread-debug').require(
