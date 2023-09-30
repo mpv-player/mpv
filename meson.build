@@ -1543,12 +1543,14 @@ swift = get_option('swift-build').require(
     darwin and macos_sdk_version.version_compare('>=10.10') and swift_ver.version_compare('>=4.1'),
     error_message: 'A suitable macos sdk version or swift version could not be found!',
 )
+features += {'swift': swift.allowed()}
 
 swift_sources = []
-if cocoa.found() and swift.allowed()
+if features['cocoa'] and features['swift']
     swift_sources += files('osdep/macos/libmpv_helper.swift',
                            'osdep/macos/log_helper.swift',
                            'osdep/macos/mpv_helper.swift',
+                           'osdep/macos/precise_timer.swift',
                            'osdep/macos/swift_compat.swift',
                            'osdep/macos/swift_extensions.swift',
                            'video/out/mac/common.swift',
@@ -1558,7 +1560,7 @@ if cocoa.found() and swift.allowed()
 endif
 
 macos_cocoa_cb = get_option('macos-cocoa-cb').require(
-    features['cocoa'] and swift.allowed(),
+    features['cocoa'] and features['swift'],
     error_message: 'Either cocoa or swift could not be found!',
 )
 features += {'macos-cocoa-cb': macos_cocoa_cb.allowed()}
@@ -1566,9 +1568,14 @@ if features['macos-cocoa-cb']
     swift_sources += files('video/out/cocoa_cb_common.swift',
                            'video/out/mac/gl_layer.swift')
 endif
+if features['cocoa'] and features['vulkan'] and features['swift']
+    swift_sources += files('video/out/mac_common.swift',
+                           'video/out/mac/metal_layer.swift')
+    sources += files('video/out/vulkan/context_mac.m')
+endif
 
 macos_media_player = get_option('macos-media-player').require(
-    macos_10_12_2_features.allowed() and swift.allowed(),
+    macos_10_12_2_features.allowed() and features['swift'],
     error_message: 'Either the macos sdk version is not at least 10.12.2 or swift was not found!',
 )
 features += {'macos-media-player': macos_media_player.allowed()}
@@ -1576,7 +1583,7 @@ if features['macos-media-player']
     swift_sources += files('osdep/macos/remote_command_center.swift')
 endif
 
-if swift.allowed() and swift_sources.length() > 0
+if features['swift'] and swift_sources.length() > 0
     subdir('osdep')
 endif
 
