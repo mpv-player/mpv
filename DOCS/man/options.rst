@@ -6273,6 +6273,18 @@ them.
 
     macOS only.
 
+``--macos-render-timer=<timer>``
+    Sets the mode (default: callback) for syncing the rendering of frames to the display's
+    vertical refresh rate.
+    macOS and Vulkan (macvk) only.
+
+    ``<timer>`` can be one of the following:
+
+    :callback: Syncs to the CVDisplayLink callback
+    :precise:  Syncs to the time of the next vertical display refresh reported by the
+               CVDisplayLink callback provided information
+    :system:   No manual syncing, depend on the layer mechanic and the next drawable
+
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during
@@ -6324,6 +6336,8 @@ them.
         X11/EGL
     android
         Android/EGL. Requires ``--wid`` be set to an ``android.view.Surface``.
+    macvk
+        Vulkan on macOS with a metal surface through a translation layer (experimental)
 
 ``--gpu-api=<type>``
     Controls which type of graphics APIs will be accepted:
