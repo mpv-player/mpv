@@ -381,9 +381,9 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track,
             pts -= 10.0;
     }
     if (refresh_only)
-        demuxer_refresh_track(track->demuxer, track->stream, pts, mpctx->paused);
+        demuxer_refresh_track(track->demuxer, track->stream, pts);
     else
-        demuxer_select_track(track->demuxer, track->stream, pts, track->selected, mpctx->paused);
+        demuxer_select_track(track->demuxer, track->stream, pts, track->selected);
 }
 
 static void enable_demux_thread(struct MPContext *mpctx, struct demuxer *demux)
@@ -1178,7 +1178,7 @@ static void *open_demux_thread(void *ctx)
             int num_streams = demux_get_num_stream(demux);
             for (int n = 0; n < num_streams; n++) {
                 struct sh_stream *sh = demux_get_stream(demux, n);
-                demuxer_select_track(demux, sh, MP_NOPTS_VALUE, true, mpctx->paused);
+                demuxer_select_track(demux, sh, MP_NOPTS_VALUE, true);
             }
 
             demux_set_wakeup_cb(demux, wakeup_demux, mpctx);

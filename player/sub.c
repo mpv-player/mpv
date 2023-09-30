@@ -100,7 +100,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
         sub_preload(dec_sub);
     }
 
-    if (!sub_read_packets(dec_sub, video_pts))
+    if (!sub_read_packets(dec_sub, video_pts, mpctx->paused))
         return false;
 
     // Handle displaying subtitles on terminal; never done for secondary subs

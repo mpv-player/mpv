@@ -170,7 +170,7 @@ static void reselect_streams(struct demuxer *demuxer)
                 if (!src->current || seg->d != src->current->d)
                     selected = false;
                 struct sh_stream *sh = demux_get_stream(seg->d, i);
-                demuxer_select_track(seg->d, sh, MP_NOPTS_VALUE, selected, false);
+                demuxer_select_track(seg->d, sh, MP_NOPTS_VALUE, selected);
 
                 update_slave_stats(demuxer, seg->d);
             }
