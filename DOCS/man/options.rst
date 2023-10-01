@@ -3792,9 +3792,6 @@ Demuxer
 ``--demuxer-rawvideo-size=<value>``
     Frame size in bytes when using ``--demuxer=rawvideo``.
 
-``--demuxer-cue-codepage=<codepage>``
-    Specify the CUE sheet codepage. (See ``--sub-codepage`` for details.)
-
 ``--demuxer-max-bytes=<bytesize>``
     This controls how much the demuxer is allowed to buffer ahead. The demuxer
     will normally try to read ahead as much as necessary, or as much is
