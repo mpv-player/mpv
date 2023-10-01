@@ -120,6 +120,7 @@ Interface changes
     - remove OpenGL cocoa backend that was deprecated in 0.29
     - remove `--border`, `--fullscreen`, `--ontop`, `--osd-level` and `--pause`
       from default `--watch-later-options`
+    - add `--video-*` and `--secondary-sub-visibility` to default `--watch-later-options`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
