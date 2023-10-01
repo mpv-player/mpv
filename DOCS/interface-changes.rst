@@ -93,6 +93,7 @@ Interface changes
     - remove `--scale-cutoff`, `--cscale-cutoff`, `--dscale-cutoff`, `--tscale-cutoff`
     - remove `--scaler-lut-size`
     - deprecate shared-script-properties (user-data is a replacement)
+    - add `--backdrop-type` option
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
