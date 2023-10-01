@@ -2153,7 +2153,7 @@ static bool lazy_stream_needs_wait(struct demux_stream *ds)
     struct demux_internal *in = ds->in;
     // Attempt to read until force_read_until was reached, or reading has
     // stopped for some reason (true EOF, queue overflow).
-    return !ds->eager && !ds->reader_head && !in->back_demuxing &&
+    return !ds->eager && !in->back_demuxing &&
            !in->eof && ds->force_read_until != MP_NOPTS_VALUE &&
            (in->demux_ts == MP_NOPTS_VALUE ||
             in->demux_ts <= ds->force_read_until);
