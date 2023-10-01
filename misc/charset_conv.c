@@ -101,18 +101,6 @@ static const char *mp_uchardet(void *talloc_ctx, struct mp_log *log, bstr buf)
 const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
                              const char *user_cp, int flags)
 {
-    if (strcasecmp(user_cp, "enca") == 0 || strcasecmp(user_cp, "guess") == 0 ||
-        strcasecmp(user_cp, "uchardet") == 0 || strchr(user_cp, ':'))
-    {
-        mp_err(log, "This syntax for the --sub-codepage option was deprecated "
-                    "and has been removed.\n");
-        if (strncasecmp(user_cp, "utf8:", 5) == 0) {
-            user_cp = user_cp + 5;
-        } else {
-            user_cp = "";
-        }
-    }
-
     if (user_cp[0] == '+') {
         mp_verbose(log, "Forcing charset '%s'.\n", user_cp + 1);
         return user_cp + 1;
