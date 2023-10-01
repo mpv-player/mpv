@@ -813,8 +813,9 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
     const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX;
     const DWORD FRAME = WS_OVERLAPPEDWINDOW;
-    const DWORD FULLSCREEN = NO_FRAME | WS_SYSMENU;
+    const DWORD FULLSCREEN = NO_FRAME;
     style &= ~(NO_FRAME | FRAME | FULLSCREEN);
+    style |= WS_SYSMENU;
     if (w32->current_fs) {
         style |= FULLSCREEN;
     } else {
