@@ -3245,7 +3245,7 @@ struct parent_stream_info {
     bool is_streaming;
     int stream_origin;
     struct mp_cancel *cancel;
-    const char *filename;
+    char *filename;
 };
 
 static struct demuxer *open_given_type(struct mpv_global *global,
@@ -3415,7 +3415,7 @@ static struct demuxer *demux_open(struct stream *stream,
         .is_streaming = stream->streaming,
         .stream_origin = stream->stream_origin,
         .cancel = cancel,
-        .filename = stream->url,
+        .filename = talloc_strdup(NULL, stream->url),
     };
 
     // Test demuxers from first to last, one pass for each check_levels[] entry
@@ -3437,6 +3437,7 @@ static struct demuxer *demux_open(struct stream *stream,
     }
 
 done:
+    talloc_free(sinfo.filename);
     talloc_free(log);
     return demuxer;
 }
