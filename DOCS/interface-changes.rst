@@ -94,6 +94,7 @@ Interface changes
     - remove `--scaler-lut-size`
     - deprecate shared-script-properties (user-data is a replacement)
     - add `--backdrop-type` option
+    - add `--window-affinity` option
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
