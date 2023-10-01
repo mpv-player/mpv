@@ -35,46 +35,15 @@
 // Stolen from: vlc/-/blob/master/modules/meta_engine/folder.c#L40
 // sorted by priority (descending)
 static const char *const cover_files[] = {
-    "AlbumArt.jpg",
-    "AlbumArt.webp",
-    "AlbumArt.jxl",
-    "AlbumArt.avif",
-    "Album.jpg",
-    "Album.webp",
-    "Album.jxl",
-    "Album.avif",
-    "cover.jpg",
-    "cover.png",
-    "cover.webp",
-    "cover.jxl",
-    "cover.avif",
-    "front.jpg",
-    "front.png",
-    "front.webp",
-    "front.jxl",
-    "front.avif",
-
-    "AlbumArtSmall.jpg",
-    "AlbumArtSmall.webp",
-    "AlbumArtSmall.jxl",
-    "AlbumArtSmall.avif",
-    "Folder.jpg",
-    "Folder.png",
-    "Folder.webp",
-    "Folder.jxl",
-    "Folder.avif",
-    ".folder.png",
-    ".folder.webp",
-    ".folder.jxl",
-    ".folder.avif",
-    "thumb.jpg",
-    "thumb.webp",
-    "thumb.jxl",
-    "thumb.avif",
-
-    "front.bmp",
-    "front.gif",
-    "cover.gif",
+    "AlbumArt",
+    "Album",
+    "cover",
+    "front",
+    "AlbumArtSmall",
+    "Folder",
+    ".folder",
+    "thumb",
+    "front",
     NULL
 };
 
@@ -267,7 +236,7 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
             prio |= 2; // contains the movie name
 
         if (type == STREAM_VIDEO && opts->coverart_whitelist && prio == 0)
-            prio = test_cover_filename(dename);
+            prio = test_cover_filename(tmp_fname_trim);
 
         // doesn't contain the movie name
         // don't try in the mplayer subtitle directory
