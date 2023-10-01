@@ -1038,6 +1038,10 @@ Watch Later
     named "watch_later" underneath the local state directory
     (usually ``~/.local/state/mpv/``).
 
+``--watch-later-key=<key>``
+    Use the specified key instead of the current file name to determine the file
+    name to save/resume from.
+
 ``--no-resume-playback``
     Do not restore playback position from the ``watch_later`` configuration
     subdirectory (usually ``~/.config/mpv/watch_later/``).

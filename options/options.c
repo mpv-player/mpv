@@ -754,6 +754,7 @@ static const m_option_t mp_opts[] = {
         OPT_BOOL(ignore_path_in_watch_later_config)},
     {"watch-later-directory", OPT_STRING(watch_later_directory),
         .flags = M_OPT_FILE},
+    {"watch-later-key", OPT_STRING(watch_later_key)},
     {"watch-later-options", OPT_STRINGLIST(watch_later_options)},
 
     {"ordered-chapters", OPT_BOOL(ordered_chapters)},
