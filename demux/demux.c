@@ -142,7 +142,7 @@ const struct m_sub_options demux_conf = {
             [STREAM_VIDEO] = 1,
             [STREAM_AUDIO] = 10,
         },
-        .meta_cp = "utf-8",
+        .meta_cp = "auto",
     },
     .get_sub_options = get_demux_sub_opts,
 };

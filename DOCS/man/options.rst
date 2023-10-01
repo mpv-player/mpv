@@ -7315,10 +7315,9 @@ Miscellaneous
     filters.
 
 ``--metadata-codepage=<codepage>``
-    Codepage for various input metadata (default: ``utf-8``). This affects how
-    file tags, chapter titles, etc. are interpreted. You can for example set
-    this to ``auto`` to enable autodetection of the codepage. (This is not the
-    default because non-UTF-8 codepages are an obscure fringe use-case.)
+    Codepage for various input metadata (default: ``auto``). This affects how
+    file tags, chapter titles, etc. are interpreted. In most cases, this merely
+    evaluates to UTF-8 as non-UTF-8 codepages are obscure.
 
     See ``--sub-codepage`` option on how codepages are specified and further
     details regarding autodetection and codepage conversion. (The underlying

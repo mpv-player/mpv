@@ -114,7 +114,8 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
 
     int r = bstr_validate_utf8(buf);
     if (r >= 0 || (r > -8 && (flags & MP_ICONV_ALLOW_CUTOFF))) {
-        mp_verbose(log, "Data looks like UTF-8, ignoring user-provided charset.\n");
+        if (strcmp(user_cp, "auto") != 0 && !mp_charset_is_utf8(user_cp))
+            mp_verbose(log, "Data looks like UTF-8, ignoring user-provided charset.\n");
         return "utf-8";
     }
 
