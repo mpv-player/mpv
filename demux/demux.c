@@ -3388,6 +3388,15 @@ static struct demuxer *demux_open(struct stream *stream,
     struct demuxer *demuxer = NULL;
     char *force_format = params ? params->force_format : NULL;
 
+    struct parent_stream_info sinfo = {
+        .seekable = stream->seekable,
+        .is_network = stream->is_network,
+        .is_streaming = stream->streaming,
+        .stream_origin = stream->stream_origin,
+        .cancel = cancel,
+        .filename = talloc_strdup(NULL, stream->url),
+    };
+
     if (!force_format)
         force_format = stream->demuxer;
 
@@ -3408,15 +3417,6 @@ static struct demuxer *demux_open(struct stream *stream,
             goto done;
         }
     }
-
-    struct parent_stream_info sinfo = {
-        .seekable = stream->seekable,
-        .is_network = stream->is_network,
-        .is_streaming = stream->streaming,
-        .stream_origin = stream->stream_origin,
-        .cancel = cancel,
-        .filename = talloc_strdup(NULL, stream->url),
-    };
 
     // Test demuxers from first to last, one pass for each check_levels[] entry
     for (int pass = 0; check_levels[pass] != -1; pass++) {
