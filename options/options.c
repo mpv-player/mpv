@@ -1043,16 +1043,11 @@ static const struct MPOpts mp_default_opts = {
 
     .watch_later_options = (char *[]){
         "start",
-        "osd-level",
         "speed",
         "edition",
-        "pause",
         "volume",
         "mute",
         "audio-delay",
-        "fullscreen",
-        "ontop",
-        "border",
         "gamma",
         "brightness",
         "contrast",
