@@ -816,7 +816,7 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
     const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX | WS_THICKFRAME;
     const DWORD FRAME = WS_OVERLAPPEDWINDOW;
-    const DWORD FULLSCREEN = NO_FRAME;
+    const DWORD FULLSCREEN = NO_FRAME & ~WS_THICKFRAME;
     style &= ~(NO_FRAME | FRAME | FULLSCREEN);
     style |= WS_SYSMENU;
     if (w32->current_fs) {
@@ -1287,7 +1287,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_NCACTIVATE:
         // Cosmetic to remove blinking window border when initializing window
-        return 1;
+        if (!w32->opts->border)
+            lParam = -1;
+        break;
     case WM_NCHITTEST:
         // Provide sizing handles for borderless windows
         if ((!w32->opts->border || !w32->opts->title_bar) && !w32->current_fs) {
