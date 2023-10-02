@@ -95,6 +95,7 @@ Interface changes
     - deprecate shared-script-properties (user-data is a replacement)
     - add `--backdrop-type` option
     - add `--window-affinity` option
+    - `--config-dir` no longer forces cache and state files to also reside in there
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

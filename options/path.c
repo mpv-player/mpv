@@ -64,12 +64,6 @@ static const char *const config_dirs[] = {
     "exe_dir",
     "global",
 };
-// types that configdir replaces (if set)
-// These are not part of any fallback order so need to be overriden separately.
-static const char *const config_dir_replaces[] = {
-    "state",
-    "cache",
-};
 
 // Return a platform specific path using a path type as defined in osdep/path.h.
 // Keep in mind that the only way to free the return value is freeing talloc_ctx
@@ -85,10 +79,6 @@ static const char *mp_get_platform_path(void *talloc_ctx,
         for (int n = 0; n < MP_ARRAY_SIZE(config_dirs); n++) {
             if (strcmp(config_dirs[n], type) == 0)
                 return (n == 0 && global->configdir[0]) ? global->configdir : NULL;
-        }
-        for (int n = 0; n < MP_ARRAY_SIZE(config_dir_replaces); n++) {
-            if (strcmp(config_dir_replaces[n], type) == 0)
-                return global->configdir[0] ? global->configdir : NULL;
         }
     }
 
