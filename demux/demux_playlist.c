@@ -27,6 +27,7 @@
 #include "options/m_config.h"
 #include "common/msg.h"
 #include "common/playlist.h"
+#include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "options/path.h"
 #include "stream/stream.h"
@@ -85,9 +86,11 @@ struct pl_parser {
     bool probing;
     bool force;
     bool add_base;
+    bool line_allocated;
     enum demux_check check_level;
     struct stream *real_stream;
     char *format;
+    char *codepage;
     struct demux_playlist_opts *opts;
 };
 
@@ -175,7 +178,25 @@ static char *pl_get_line0(struct pl_parser *p)
 
 static bstr pl_get_line(struct pl_parser *p)
 {
-    return bstr0(pl_get_line0(p));
+    bstr line = bstr_strip(bstr0(pl_get_line0(p)));
+    const char *charset = mp_charset_guess(p, p->log, line, p->codepage, 0);
+    if (charset && !mp_charset_is_utf8(charset)) {
+        bstr utf8 = mp_iconv_to_utf8(p->log, line, charset, 0);
+        if (utf8.start && utf8.start != line.start) {
+            line = utf8;
+            p->line_allocated = true;
+        }
+    }
+    return line;
+}
+
+// Helper in case mp_iconv_to_utf8 allocates memory
+static void pl_free_line(struct pl_parser *p, bstr line)
+{
+    if (p->line_allocated) {
+        talloc_free(line.start);
+        p->line_allocated = false;
+    }
 }
 
 static void pl_add(struct pl_parser *p, bstr entry)
@@ -202,7 +223,7 @@ static bool maybe_text(bstr d)
 
 static int parse_m3u(struct pl_parser *p)
 {
-    bstr line = bstr_strip(pl_get_line(p));
+    bstr line = pl_get_line(p);
     if (p->probing && !bstr_equals0(line, "#EXTM3U")) {
         // Last resort: if the file extension is m3u, it might be headerless.
         if (p->check_level == DEMUX_CHECK_UNSAFE) {
@@ -218,42 +239,50 @@ static int parse_m3u(struct pl_parser *p)
                 }
             }
         }
+        pl_free_line(p, line);
         return -1;
     }
 
 ok:
-    if (p->probing)
+    if (p->probing) {
+        pl_free_line(p, line);
         return 0;
+    }
 
     char *title = NULL;
     while (line.len || !pl_eof(p)) {
-        if (bstr_eatstart0(&line, "#EXTINF:")) {
+        bstr line_dup = line;
+        if (bstr_eatstart0(&line_dup, "#EXTINF:")) {
             bstr duration, btitle;
-            if (bstr_split_tok(line, ",", &duration, &btitle) && btitle.len) {
+            if (bstr_split_tok(line_dup, ",", &duration, &btitle) && btitle.len) {
                 talloc_free(title);
                 title = bstrto0(NULL, btitle);
             }
-        } else if (bstr_startswith0(line, "#EXT-X-")) {
+        } else if (bstr_startswith0(line_dup, "#EXT-X-")) {
             p->format = "hls";
-        } else if (line.len > 0 && !bstr_startswith0(line, "#")) {
-            char *fn = bstrto0(NULL, line);
+        } else if (line_dup.len > 0 && !bstr_startswith0(line_dup, "#")) {
+            char *fn = bstrto0(NULL, line_dup);
             struct playlist_entry *e = playlist_entry_new(fn);
             talloc_free(fn);
             e->title = talloc_steal(e, title);
             title = NULL;
             playlist_add(p->pl, e);
         }
-        line = bstr_strip(pl_get_line(p));
+        pl_free_line(p, line);
+        line = pl_get_line(p);
     }
+    pl_free_line(p, line);
     talloc_free(title);
     return 0;
 }
 
 static int parse_ref_init(struct pl_parser *p)
 {
-    bstr line = bstr_strip(pl_get_line(p));
-    if (!bstr_equals0(line, "[Reference]"))
+    bstr line = pl_get_line(p);
+    if (!bstr_equals0(line, "[Reference]")) {
+        pl_free_line(p, line);
         return -1;
+    }
 
     // ASF http streaming redirection - this is needed because ffmpeg http://
     // and mmsh:// can not automatically switch automatically between each
@@ -271,12 +300,14 @@ static int parse_ref_init(struct pl_parser *p)
     }
 
     while (!pl_eof(p)) {
-        line = bstr_strip(pl_get_line(p));
-        if (bstr_case_startswith(line, bstr0("Ref"))) {
-            bstr_split_tok(line, "=", &(bstr){0}, &line);
-            if (line.len)
-                pl_add(p, line);
+        line = pl_get_line(p);
+        bstr line_dup = line;
+        if (bstr_case_startswith(line_dup, bstr0("Ref"))) {
+            bstr_split_tok(line, "=", &(bstr){0}, &line_dup);
+            if (line_dup.len)
+                pl_add(p, line_dup);
         }
+        pl_free_line(p, line);
     }
     return 0;
 }
@@ -286,15 +317,20 @@ static int parse_ini_thing(struct pl_parser *p, const char *header,
 {
     bstr line = {0};
     while (!line.len && !pl_eof(p))
-        line = bstr_strip(pl_get_line(p));
-    if (bstrcasecmp0(line, header) != 0)
+        line = pl_get_line(p);
+    if (bstrcasecmp0(line, header) != 0) {
+        pl_free_line(p, line);
         return -1;
-    if (p->probing)
+    }
+    if (p->probing) {
+        pl_free_line(p, line);
         return 0;
+    }
     while (!pl_eof(p)) {
-        line = bstr_strip(pl_get_line(p));
+        line = pl_get_line(p);
+        bstr line_dup = line;
         bstr key, value;
-        if (bstr_split_tok(line, "=", &key, &value) &&
+        if (bstr_split_tok(line_dup, "=", &key, &value) &&
             bstr_case_startswith(key, bstr0(entry)))
         {
             value = bstr_strip(value);
@@ -302,6 +338,7 @@ static int parse_ini_thing(struct pl_parser *p, const char *header,
                 value = bstr_splice(value, 1, -1);
             pl_add(p, value);
         }
+        pl_free_line(p, line);
     }
     return 0;
 }
@@ -324,10 +361,11 @@ static int parse_txt(struct pl_parser *p)
         return 0;
     MP_WARN(p, "Reading plaintext playlist.\n");
     while (!pl_eof(p)) {
-        bstr line = bstr_strip(pl_get_line(p));
+        bstr line = pl_get_line(p);
         if (line.len == 0)
             continue;
         pl_add(p, line);
+        pl_free_line(p, line);
     }
     return 0;
 }
@@ -500,6 +538,9 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->pl = talloc_zero(p, struct playlist);
     p->real_stream = demuxer->stream;
     p->add_base = true;
+
+    struct demux_opts *opts = mp_get_config_group(p, p->global, &demux_conf);
+    p->codepage = opts->meta_cp;
 
     char probe[PROBE_SIZE];
     int probe_len = stream_read_peek(p->real_stream, probe, sizeof(probe));
