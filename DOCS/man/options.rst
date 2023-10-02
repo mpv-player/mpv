@@ -763,6 +763,9 @@ Program Behavior
     as well as per-user directories are ignored, and overrides through
     environment variables (``MPV_HOME``) are also ignored.
 
+    Note that the cache and state paths (``~~/cache``, ``~~/state``) are not
+    considered "configuration" and keep their auto-detection logic.
+
     Note that the ``--no-config`` option takes precedence over this option.
 
 ``--dump-stats=<filename>``
