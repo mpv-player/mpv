@@ -1740,6 +1740,10 @@ if get_option('libmpv')
     headers = ['libmpv/client.h', 'libmpv/render.h',
                'libmpv/render_gl.h', 'libmpv/stream_cb.h']
     install_headers(headers, subdir: 'mpv')
+
+    # Allow projects to build with libmpv by cloning into ./subprojects/mpv
+    libmpv_dep = declare_dependency(link_with: libmpv)
+    meson.override_dependency('mpv', libmpv_dep)
 endif
 
 if get_option('cplayer')
