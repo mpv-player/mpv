@@ -2,7 +2,7 @@
  * scaletempo audio filter
  *
  * scale tempo while maintaining pitch
- * (WSOLA technique with cross correlation)
+ * (WSOLA technique with taxicab distance)
  * inspired by SoundTouch library by Olli Parviainen
  *
  * basic algorithm
@@ -136,19 +136,19 @@ static bool fill_queue(struct priv *s)
 
 static int best_overlap_offset_float(struct priv *s)
 {
-    float best_corr = INT_MIN;
+    float best_distance = FLT_MAX;
     int best_off = 0;
 
     float *search_start = (float *)s->buf_queue + s->num_channels;
     for (int off = 0; off < s->frames_search; off++) {
-        float corr = 0;
+        float distance = 0;
         float *ps = search_start;
         float *po = s->buf_overlap;
         po += s->num_channels;
         for (int i = s->num_channels; i < s->samples_overlap; i++)
-            corr += *po++ * *ps++;
-        if (corr > best_corr) {
-            best_corr = corr;
+            distance += fabsf(*po++ - *ps++);
+        if (distance < best_distance) {
+            best_distance = distance;
             best_off  = off;
         }
         search_start += s->num_channels;
@@ -159,19 +159,19 @@ static int best_overlap_offset_float(struct priv *s)
 
 static int best_overlap_offset_s16(struct priv *s)
 {
-    int64_t best_corr = INT64_MIN;
+    int32_t best_distance = INT32_MAX;
     int best_off = 0;
 
     int16_t *search_start = (int16_t *)s->buf_queue + s->num_channels;
     for (int off = 0; off < s->frames_search; off++) {
-        int64_t corr = 0;
+        int32_t distance = 0;
         int16_t *ps = search_start;
         int16_t *po = s->buf_overlap;
         po += s->num_channels;
         for (int i = s->num_channels; i < s->samples_overlap; i++)
-            corr += *po++ * (int32_t)*ps++;
-        if (corr > best_corr) {
-            best_corr = corr;
+            distance += abs((int32_t)*po++ - (int32_t)*ps++);
+        if (distance < best_distance) {
+            best_distance = distance;
             best_off  = off;
         }
         search_start += s->num_channels;
