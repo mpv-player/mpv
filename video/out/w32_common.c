@@ -376,6 +376,14 @@ static int decode_key(struct vo_w32_state *w32, UINT vkey, UINT scancode)
     }
 
     int c = to_unicode(vkey, scancode, keys);
+    // Find utf-16 key value despite user's layout (only for english letters)
+    if ((vkey >= 65 && vkey <= 90) || (vkey >= 97 && vkey <= 122))
+    {
+        if ((keys[VK_SHIFT] & 0x80) || ((keys[VK_CAPITAL] & 0x01) && !(keys[VK_SHIFT] & 0x80)))
+            c = vkey;
+        else
+            c = vkey + 32;
+    }
 
     // Some shift states prevent ToUnicode from working or cause it to produce
     // control characters. If this is detected, remove modifiers until it
