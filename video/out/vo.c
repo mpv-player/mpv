@@ -968,11 +968,7 @@ static bool render_frame(struct vo *vo)
 
         stats_time_start(in->stats, "video-draw");
 
-        if (vo->driver->draw_frame) {
-            vo->driver->draw_frame(vo, frame);
-        } else {
-            vo->driver->draw_image(vo, mp_image_new_ref(frame->current));
-        }
+        vo->driver->draw_frame(vo, frame);
 
         stats_time_end(in->stats, "video-draw");
 
@@ -1065,14 +1061,7 @@ static void do_redraw(struct vo *vo)
     frame->duration = -1;
     pthread_mutex_unlock(&in->lock);
 
-    if (vo->driver->draw_frame) {
-        vo->driver->draw_frame(vo, frame);
-    } else if ((full_redraw || vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1)
-               && frame->current)
-    {
-        vo->driver->draw_image(vo, mp_image_new_ref(frame->current));
-    }
-
+    vo->driver->draw_frame(vo, frame);
     vo->driver->flip_page(vo);
 
     if (frame != &dummy)

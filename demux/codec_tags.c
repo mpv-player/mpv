@@ -181,8 +181,15 @@ void mp_set_pcm_codec(struct mp_codec_params *c, bool sign, bool is_float,
 }
 
 static const char *const mimetype_to_codec[][2] = {
+    {"image/apng",      "apng"},
+    {"image/avif",      "av1"},
+    {"image/bmp",       "bmp"},
+    {"image/gif",       "gif"},
     {"image/jpeg",      "mjpeg"},
+    {"image/jxl",       "jpegxl"},
     {"image/png",       "png"},
+    {"image/tiff",      "tiff"},
+    {"image/webp",      "webp"},
     {0}
 };
 

@@ -763,6 +763,9 @@ Program Behavior
     as well as per-user directories are ignored, and overrides through
     environment variables (``MPV_HOME``) are also ignored.
 
+    Note that the cache and state paths (``~~/cache``, ``~~/state``) are not
+    considered "configuration" and keep their auto-detection logic.
+
     Note that the ``--no-config`` option takes precedence over this option.
 
 ``--dump-stats=<filename>``
@@ -7218,9 +7221,10 @@ Miscellaneous
     This is a string list option. See `List Options`_ for details.
 
 ``--cover-art-whitelist=<no|yes>``
-    Whether to load filenames in an internal whitelist, such as ``cover.jpg``,
-    as cover art. If ``cover-art-auto`` is set to ``no``, the whitelisted
-    filenames are never loaded even if this option is set to ``yes``.
+    Whether to load files with a filename among "AlbumArt", "Album", "cover",
+    "front", "AlbumArtSmall", "Folder", ".folder", "thumb", "front", and an
+    extension in ``--cover-art-auto-exts``, as cover art. This has no effect is
+    ``cover-art-auto`` is ``no``.
 
     Default: ``yes``.
 

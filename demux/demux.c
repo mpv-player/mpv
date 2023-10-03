@@ -2153,7 +2153,7 @@ static bool lazy_stream_needs_wait(struct demux_stream *ds)
     struct demux_internal *in = ds->in;
     // Attempt to read until force_read_until was reached, or reading has
     // stopped for some reason (true EOF, queue overflow).
-    return !ds->eager && !ds->reader_head && !in->back_demuxing &&
+    return !ds->eager && !in->back_demuxing &&
            !in->eof && ds->force_read_until != MP_NOPTS_VALUE &&
            (in->demux_ts == MP_NOPTS_VALUE ||
             in->demux_ts <= ds->force_read_until);
@@ -3245,7 +3245,7 @@ struct parent_stream_info {
     bool is_streaming;
     int stream_origin;
     struct mp_cancel *cancel;
-    const char *filename;
+    char *filename;
 };
 
 static struct demuxer *open_given_type(struct mpv_global *global,
@@ -3388,6 +3388,15 @@ static struct demuxer *demux_open(struct stream *stream,
     struct demuxer *demuxer = NULL;
     char *force_format = params ? params->force_format : NULL;
 
+    struct parent_stream_info sinfo = {
+        .seekable = stream->seekable,
+        .is_network = stream->is_network,
+        .is_streaming = stream->streaming,
+        .stream_origin = stream->stream_origin,
+        .cancel = cancel,
+        .filename = talloc_strdup(NULL, stream->url),
+    };
+
     if (!force_format)
         force_format = stream->demuxer;
 
@@ -3409,15 +3418,6 @@ static struct demuxer *demux_open(struct stream *stream,
         }
     }
 
-    struct parent_stream_info sinfo = {
-        .seekable = stream->seekable,
-        .is_network = stream->is_network,
-        .is_streaming = stream->streaming,
-        .stream_origin = stream->stream_origin,
-        .cancel = cancel,
-        .filename = stream->url,
-    };
-
     // Test demuxers from first to last, one pass for each check_levels[] entry
     for (int pass = 0; check_levels[pass] != -1; pass++) {
         enum demux_check level = check_levels[pass];
@@ -3437,6 +3437,7 @@ static struct demuxer *demux_open(struct stream *stream,
     }
 
 done:
+    talloc_free(sinfo.filename);
     talloc_free(log);
     return demuxer;
 }

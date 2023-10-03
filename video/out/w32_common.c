@@ -174,6 +174,9 @@ struct vo_w32_state {
 
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
+    if (!w32->opts->border)
+        return;
+
     if (w32->api.pAdjustWindowRectExForDpi) {
         w32->api.pAdjustWindowRectExForDpi(rc,
             GetWindowLongPtrW(hwnd, GWL_STYLE), 0,
@@ -811,10 +814,11 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
-    const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX;
+    const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX | WS_THICKFRAME;
     const DWORD FRAME = WS_OVERLAPPEDWINDOW;
-    const DWORD FULLSCREEN = NO_FRAME | WS_SYSMENU;
+    const DWORD FULLSCREEN = NO_FRAME & ~WS_THICKFRAME;
     style &= ~(NO_FRAME | FRAME | FULLSCREEN);
+    style |= WS_SYSMENU;
     if (w32->current_fs) {
         style |= FULLSCREEN;
     } else {
@@ -1281,6 +1285,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         }
         break;
+    case WM_NCACTIVATE:
+        // Cosmetic to remove blinking window border when initializing window
+        if (!w32->opts->border)
+            lParam = -1;
+        break;
     case WM_NCHITTEST:
         // Provide sizing handles for borderless windows
         if ((!w32->opts->border || !w32->opts->title_bar) && !w32->current_fs) {
@@ -1405,6 +1414,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         update_dark_mode(w32);
         break;
     case WM_NCCALCSIZE:
+        if (!w32->opts->border)
+            return 0;
         // Apparently removing WS_CAPTION disables some window animation, instead
         // just reduce non-client size to remove title bar.
         if (wParam && lParam && w32->opts->border && !w32->opts->title_bar &&

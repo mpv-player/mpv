@@ -489,6 +489,9 @@ static void set_viewport_source(struct vo *vo, struct mp_rect src)
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
 
+    if (p->force_window)
+        return;
+
     if (wl->video_viewport && !mp_rect_equals(&p->src, &src)) {
         wp_viewport_set_source(wl->video_viewport, src.x0 << 8,
                                src.y0 << 8, mp_rect_w(src) << 8,
@@ -587,11 +590,17 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct osd_buffer *osd_buf;
     double pts;
 
-    if (!vo_wayland_check_visible(vo) && !p->force_window)
+    if (!vo_wayland_check_visible(vo))
         return;
 
     if (p->destroy_buffers)
         destroy_buffers(vo);
+
+    // Reuse the solid buffer so the osd can be visible
+    if (p->force_window) {
+        wl_surface_attach(wl->video_surface, p->solid_buffer, 0, 0);
+        wl_surface_damage_buffer(wl->video_surface, 0, 0, 1, 1);
+    }
 
     pts = frame->current ? frame->current->pts : 0;
     if (frame->current) {
