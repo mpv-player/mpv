@@ -43,11 +43,12 @@ struct playlist_entry {
     // Used for unshuffling: the pl_index before it was shuffled. -1 => unknown.
     int original_index;
 
-    // Set to true if playback didn't seem to work, or if the file could be
-    // played only for a very short time. This is used to make playlist
-    // navigation just work in case the user has unplayable files in the
-    // playlist.
-    bool playback_short : 1;
+    // Set to true if this playlist entry was selected while trying to go backwards
+    // in the playlist. If this is true and the playlist entry fails to play later,
+    // then mpv tries to go to the next previous entry. This flag is always cleared
+    // regardless if the attempt was successful or not.
+    bool playlist_prev_attempt : 1;
+
     // Set to true if not at least 1 frame (audio or video) could be played.
     bool init_failed : 1;
     // Entry was removed with playlist_remove (etc.), but not deallocated.
