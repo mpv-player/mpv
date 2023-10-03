@@ -5310,7 +5310,7 @@ static void cmd_playlist_next_prev(void *p)
     int dir = *(int *)cmd->priv;
     int force = cmd->args[0].v.i;
 
-    struct playlist_entry *e = mp_next_file(mpctx, dir, force, true);
+    struct playlist_entry *e = mp_next_file(mpctx, dir, force);
     if (!e && !force) {
         cmd->success = false;
         return;
