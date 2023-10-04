@@ -1141,8 +1141,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     }
 
     switch (message) {
-    case WM_ERASEBKGND: // no need to erase background separately
-        return 1;
+    case WM_ERASEBKGND:
+        if (!w32->parent && (!w32->opts->border || w32->current_fs))
+            return TRUE;
+        break;
     case WM_PAINT:
         signal_events(w32, VO_EVENT_EXPOSE);
         break;
@@ -1446,6 +1448,7 @@ static void register_window_class(void)
         .hInstance = HINST_THISCOMPONENT,
         .hIcon = LoadIconW(HINST_THISCOMPONENT, L"IDI_ICON1"),
         .hCursor = LoadCursor(NULL, IDC_ARROW),
+        .hbrBackground = (HBRUSH) GetStockObject(BLACK_BRUSH),
         .lpszClassName = L"mpv",
     });
 }
