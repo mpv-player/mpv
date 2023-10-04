@@ -7222,8 +7222,8 @@ Miscellaneous
 
 ``--cover-art-whitelist=<no|yes>``
     Whether to load files with a filename among "AlbumArt", "Album", "cover",
-    "front", "AlbumArtSmall", "Folder", ".folder", "thumb", "front", and an
-    extension in ``--cover-art-auto-exts``, as cover art. This has no effect is
+    "front", "AlbumArtSmall", "Folder", ".folder", "thumb", and an extension in
+    ``--cover-art-auto-exts``, as cover art. This has no effect if
     ``cover-art-auto`` is ``no``.
 
     Default: ``yes``.
