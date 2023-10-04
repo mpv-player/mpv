@@ -165,7 +165,16 @@ struct vo_w32_state {
     double display_fps;
 
     bool moving;
-    bool snapped;
+
+    union {
+        uint8_t snapped;
+        struct {
+            uint8_t snapped_left : 1;
+            uint8_t snapped_right : 1;
+            uint8_t snapped_top : 1;
+            uint8_t snapped_bottom : 1;
+        };
+    };
     int snap_dx;
     int snap_dy;
 
@@ -248,14 +257,17 @@ static LRESULT borderless_nchittest(struct vo_w32_state *w32, int x, int y)
 }
 
 // turn a WMSZ_* input value in v into the border that should be resized
+// take into consideration which borders are snapped to avoid detaching
 // returns: 0=left, 1=top, 2=right, 3=bottom, -1=undefined
-static int get_resize_border(int v)
+static int get_resize_border(struct vo_w32_state *w32, int v)
 {
     switch (v) {
-    case WMSZ_LEFT: return 3;
-    case WMSZ_TOP: return 2;
-    case WMSZ_RIGHT: return 3;
-    case WMSZ_BOTTOM: return 2;
+    case WMSZ_LEFT:
+    case WMSZ_RIGHT:
+        return w32->snapped_bottom ? 1 : 3;
+    case WMSZ_TOP:
+    case WMSZ_BOTTOM:
+        return w32->snapped_right ? 0 : 2;
     case WMSZ_TOPLEFT: return 1;
     case WMSZ_TOPRIGHT: return 1;
     case WMSZ_BOTTOMLEFT: return 3;
@@ -735,13 +747,27 @@ static RECT get_working_area(struct vo_w32_state *w32)
                              get_monitor_info(w32).rcWork;
 }
 
+// Adjust working area boundaries to compensate for invisible borders.
+static void adjust_working_area_for_extended_frame(RECT *wa_rect, RECT *wnd_rect, HWND wnd)
+{
+    RECT frame = {0};
+
+    if (DwmGetWindowAttribute(wnd, DWMWA_EXTENDED_FRAME_BOUNDS,
+                              &frame, sizeof(RECT)) == S_OK) {
+        wa_rect->left -= frame.left - wnd_rect->left;
+        wa_rect->top -= frame.top - wnd_rect->top;
+        wa_rect->right += wnd_rect->right - frame.right;
+        wa_rect->bottom += wnd_rect->bottom - frame.bottom;
+    }
+}
+
 static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
 {
     if (w32->parent || w32->current_fs || IsMaximized(w32->window))
         return false;
 
     if (!w32->opts->snap_window) {
-        w32->snapped = false;
+        w32->snapped = 0;
         return false;
     }
 
@@ -765,15 +791,7 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     // Get the work area to let the window snap to taskbar
     wr = get_working_area(w32);
 
-    // Check for invisible borders and adjust the work area size
-    RECT frame = {0};
-    if (DwmGetWindowAttribute(w32->window, DWMWA_EXTENDED_FRAME_BOUNDS,
-                              &frame, sizeof(RECT)) == S_OK) {
-        wr.left -= frame.left - rect.left;
-        wr.top -= frame.top - rect.top;
-        wr.right += rect.right - frame.right;
-        wr.bottom += rect.bottom - frame.bottom;
-    }
+    adjust_working_area_for_extended_frame(&wr, &rect, w32->window);
 
     // Let the window to unsnap by changing its position,
     // otherwise it will stick to the screen edges forever
@@ -784,30 +802,32 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     }
 
     int threshold = (w32->dpi * 16) / 96;
-    bool snapped = false;
+    bool was_snapped = !!w32->snapped;
+    w32->snapped = 0;
     // Adjust X position
+    // snapped_left & snapped_right are mutually exclusive
     if (abs(rect.left - wr.left) < threshold) {
-        snapped = true;
+        w32->snapped_left = 1;
         OffsetRect(&rect, wr.left - rect.left, 0);
     } else if (abs(rect.right - wr.right) < threshold) {
-        snapped = true;
+        w32->snapped_right = 1;
         OffsetRect(&rect, wr.right - rect.right, 0);
     }
     // Adjust Y position
+    // snapped_top & snapped_bottom are mutually exclusive
     if (abs(rect.top - wr.top) < threshold) {
-        snapped = true;
+        w32->snapped_top = 1;
         OffsetRect(&rect, 0, wr.top - rect.top);
     } else if (abs(rect.bottom - wr.bottom) < threshold) {
-        snapped = true;
+        w32->snapped_bottom = 1;
         OffsetRect(&rect, 0, wr.bottom - rect.bottom);
     }
 
-    if (!w32->snapped && snapped) {
+    if (!was_snapped && w32->snapped != 0) {
         w32->snap_dx = cursor.x - rc->left;
         w32->snap_dy = cursor.y - rc->top;
     }
 
-    w32->snapped = snapped;
     *rc = rect;
     return true;
 }
@@ -847,9 +867,32 @@ static void update_window_style(struct vo_w32_state *w32)
     w32->windowrc = wr;
 }
 
+// Resize window rect to width = w and height = h. If window is snapped,
+// don't let it detach from snapped borders. Otherwise resize around the center.
+static void resize_and_move_rect(struct vo_w32_state *w32, RECT *rc, int w, int h)
+{
+    int x, y;
+
+    if (w32->snapped_left)
+        x = rc->left;
+    else if (w32->snapped_right)
+        x = rc->right - w;
+    else
+        x = rc->left + rect_w(*rc) / 2 - w / 2;
+
+    if (w32->snapped_top)
+        y = rc->top;
+    else if (w32->snapped_bottom)
+        y = rc->bottom - h;
+    else
+        y = rc->top + rect_h(*rc) / 2 - h / 2;
+
+    SetRect(rc, x, y, x + w, y + h);
+}
+
 // If rc is wider/taller than n_w/n_h, shrink rc size while keeping the center.
 // returns true if the rectangle was modified.
-static bool fit_rect_size(RECT *rc, long n_w, long n_h)
+static bool fit_rect_size(struct vo_w32_state *w32, RECT *rc, long n_w, long n_h)
 {
     // nothing to do if we already fit.
     int o_w = rect_w(*rc), o_h = rect_h(*rc);
@@ -865,10 +908,8 @@ static bool fit_rect_size(RECT *rc, long n_w, long n_h)
         n_w = n_h * o_asp;
     }
 
-    // Calculate new position and save the rect
-    const int x = rc->left + o_w / 2 - n_w / 2;
-    const int y = rc->top + o_h / 2 - n_h / 2;
-    SetRect(rc, x, y, x + n_w, y + n_h);
+    resize_and_move_rect(w32, rc, n_w, n_h);
+
     return true;
 }
 
@@ -880,19 +921,11 @@ static void fit_window_on_screen(struct vo_w32_state *w32)
     if (w32->opts->border)
         subtract_window_borders(w32, w32->window, &screen);
 
-    // Check for invisible borders and adjust the work area size
-    RECT frame, window;
-    if (GetWindowRect(w32->window, &window) &&
-        SUCCEEDED(DwmGetWindowAttribute(w32->window, DWMWA_EXTENDED_FRAME_BOUNDS,
-                                        &frame, sizeof(RECT))))
-    {
-        screen.left -= frame.left - window.left;
-        screen.top -= frame.top - window.top;
-        screen.right += window.right - frame.right;
-        screen.bottom += window.bottom - frame.bottom;
-    }
+    RECT window_rect;
+    if (GetWindowRect(w32->window, &window_rect))
+        adjust_working_area_for_extended_frame(&screen, &window_rect, w32->window);
 
-    bool adjusted = fit_rect_size(&w32->windowrc, rect_w(screen), rect_h(screen));
+    bool adjusted = fit_rect_size(w32, &w32->windowrc, rect_w(screen), rect_h(screen));
 
     if (w32->windowrc.top < screen.top) {
         // if the top-edge of client area is above the target area (mainly
@@ -1041,6 +1074,40 @@ static void update_window_state(struct vo_w32_state *w32)
                                            w32->window, w32->current_fs);
     }
 
+    // Update snapping status if needed
+    if (w32->opts->snap_window && !w32->parent &&
+        !w32->current_fs && !IsMaximized(w32->window)) {
+        RECT wa = get_working_area(w32);
+
+        adjust_working_area_for_extended_frame(&wa, &wr, w32->window);
+
+        // snapped_left & snapped_right are mutually exclusive
+        if (wa.left == wr.left && wa.right == wr.right) {
+            // Leave as is.
+        } else if (wa.left == wr.left) {
+            w32->snapped_left = 1;
+            w32->snapped_right = 0;
+        } else if (wa.right == wr.right) {
+            w32->snapped_right = 1;
+            w32->snapped_left = 0;
+        } else {
+            w32->snapped_left = w32->snapped_right = 0;
+        }
+
+        // snapped_top & snapped_bottom are mutually exclusive
+        if (wa.top == wr.top && wa.bottom == wr.bottom) {
+            // Leave as is.
+        } else if (wa.top == wr.top) {
+            w32->snapped_top = 1;
+            w32->snapped_bottom = 0;
+        } else if (wa.bottom == wr.bottom) {
+            w32->snapped_bottom = 1;
+            w32->snapped_top = 0;
+        } else {
+            w32->snapped_top = w32->snapped_bottom = 0;
+        }
+    }
+
     signal_events(w32, VO_EVENT_RESIZE);
 }
 
@@ -1149,6 +1216,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         signal_events(w32, VO_EVENT_EXPOSE);
         break;
     case WM_MOVE: {
+        w32->moving = false;
         const int x = GET_X_LPARAM(lParam), y = GET_Y_LPARAM(lParam);
         OffsetRect(&w32->windowrc, x - w32->windowrc.left,
                                    y - w32->windowrc.top);
@@ -1168,7 +1236,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     }
     case WM_ENTERSIZEMOVE:
         w32->moving = true;
-        if (w32->snapped) {
+        if (w32->snapped != 0) {
             // Save the cursor offset from the window borders,
             // so the player window can be unsnapped later
             RECT rc;
@@ -1183,9 +1251,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         w32->moving = false;
         break;
     case WM_SIZE: {
-        if (w32->moving)
-            w32->snapped = false;
-
         const int w = LOWORD(lParam), h = HIWORD(lParam);
         if (w > 0 && h > 0) {
             w32->windowrc.right = w32->windowrc.left + w;
@@ -1236,7 +1301,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             int d_h = c_w / aspect - c_h;
             int d_corners[4] = { d_w, d_h, -d_w, -d_h };
             int corners[4] = { rc->left, rc->top, rc->right, rc->bottom };
-            int corner = get_resize_border(wParam);
+            int corner = get_resize_border(w32, wParam);
             if (corner >= 0)
                 corners[corner] -= d_corners[corner];
             *rc = (RECT) { corners[0], corners[1], corners[2], corners[3] };
@@ -1604,10 +1669,7 @@ static void gui_thread_reconfig(void *ptr)
         w32->fit_on_screen = true;
     }
 
-    // Save new window size and position.
-    const int x = rc->left + rect_w(*rc) / 2 - vo->dwidth / 2;
-    const int y = rc->top + rect_h(*rc) / 2 - vo->dheight / 2;
-    SetRect(rc, x, y, x + vo->dwidth, y + vo->dheight);
+    resize_and_move_rect(w32, rc, vo->dwidth, vo->dheight);
 
 finish:
     reinit_window_state(w32);
@@ -1751,7 +1813,7 @@ static void *gui_thread(void *ptr)
 
     w32->cursor_visible = true;
     w32->moving = false;
-    w32->snapped = false;
+    w32->snapped = 0;
     w32->snap_dx = w32->snap_dy = 0;
 
     mp_dispatch_set_wakeup_fn(w32->dispatch, wakeup_gui_thread, w32);
@@ -1930,9 +1992,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         s[1] *= w32->dpi_scale;
 
         RECT *rc = w32->current_fs ? &w32->prev_windowrc : &w32->windowrc;
-        const int x = rc->left + rect_w(*rc) / 2 - s[0] / 2;
-        const int y = rc->top + rect_h(*rc) / 2 - s[1] / 2;
-        SetRect(rc, x, y, x + s[0], y + s[1]);
+        resize_and_move_rect(w32, rc, s[0], s[1]);
 
         w32->fit_on_screen = true;
         reinit_window_state(w32);
