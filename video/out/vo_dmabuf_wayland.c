@@ -591,8 +591,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct osd_buffer *osd_buf;
     double pts;
 
-    if (!vo_wayland_check_visible(vo))
+    if (!vo_wayland_check_visible(vo)) {
+        if (frame->current)
+            talloc_free(frame);
         return;
+    }
 
     if (p->destroy_buffers)
         destroy_buffers(vo);
