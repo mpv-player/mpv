@@ -248,7 +248,15 @@ function apply_crop(meta)
                          (meta.x > 0 or meta.y > 0
                          or meta.w < meta.max_w or meta.h < meta.max_h)
 
-    if not is_effective then
+    -- Verify it is not over cropped.
+    local is_excessive = false
+    if is_effective and (meta.w < meta.min_w or meta.h < meta.min_h) then
+        mp.msg.info("The area to be cropped is too large.")
+        mp.msg.info("You might need to decrease detect_min_ratio.")
+        is_excessive = true
+    end
+
+    if not is_effective or is_excessive then
         -- Clear any existing crop.
         mp.command(string.format("%s set file-local-options/video-crop ''", command_prefix))
         return
