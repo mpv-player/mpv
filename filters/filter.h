@@ -312,6 +312,7 @@ struct mp_filter {
 
     struct mpv_global *global;
     struct mp_log *log;
+    struct demux_packet_pool *packet_pool;
 
     // Array of public pins. API users can read this, but are not allowed to
     // modify the array. Filter implementations use mp_filter_add_pin() to add

@@ -106,6 +106,7 @@ sources = files(
     'demux/demux_timeline.c',
     'demux/ebml.c',
     'demux/packet.c',
+    'demux/packet_pool.c',
     'demux/timeline.c',
 
     ## Filters

@@ -57,6 +57,7 @@
 #include "options/options.h"
 #include "options/path.h"
 #include "input/input.h"
+#include "demux/packet_pool.h"
 
 #include "audio/out/ao.h"
 #include "misc/thread_tools.h"
@@ -284,6 +285,7 @@ struct MPContext *mp_create(void)
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
 
+    demux_packet_pool_init(mpctx->global);
     stats_global_init(mpctx->global);
 
     // Nothing must call mp_msg*() and related before this

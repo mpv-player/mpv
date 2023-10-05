@@ -32,6 +32,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "demux/demux.h"
+#include "demux/packet_pool.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "dec_sub.h"
@@ -205,6 +206,7 @@ static void filters_init(struct sd *sd)
         *ft = (struct sd_filter){
             .global = sd->global,
             .log = sd->log,
+            .packet_pool = demux_packet_pool_get(sd->global),
             .opts = mp_get_config_group(ft, sd->global, &mp_sub_filter_opts),
             .driver = filters[n],
             .codec = "ass",

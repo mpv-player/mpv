@@ -44,6 +44,7 @@
 
 #include "stream/stream.h"
 #include "demux.h"
+#include "packet_pool.h"
 #include "timeline.h"
 #include "stheader.h"
 #include "cue.h"
@@ -150,6 +151,7 @@ const struct m_sub_options demux_conf = {
 struct demux_internal {
     struct mp_log *log;
     struct mpv_global *global;
+    struct demux_packet_pool *packet_pool;
     struct stats_ctx *stats;
 
     bool can_cache;             // not a slave demuxer; caching makes sense
@@ -701,7 +703,7 @@ static void remove_head_packet(struct demux_queue *queue)
     if (!queue->head)
         queue->tail = NULL;
 
-    talloc_free(dp);
+    demux_packet_pool_push(queue->ds->in->packet_pool, dp);
 }
 
 static void free_index(struct demux_queue *queue)
@@ -726,13 +728,7 @@ static void clear_queue(struct demux_queue *queue)
 
     free_index(queue);
 
-    struct demux_packet *dp = queue->head;
-    while (dp) {
-        struct demux_packet *dn = dp->next;
-        assert(ds->reader_head != dp);
-        talloc_free(dp);
-        dp = dn;
-    }
+    demux_packet_pool_prepend(in->packet_pool, queue->head, queue->tail);
     queue->head = queue->tail = NULL;
     queue->keyframe_first = NULL;
     queue->keyframe_latest = NULL;
@@ -2043,7 +2039,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     }
 
     if (drop) {
-        talloc_free(dp);
+        demux_packet_pool_push(in->packet_pool, dp);
         return;
     }
 
@@ -2613,7 +2609,7 @@ static struct demux_packet *read_packet_from_cache(struct demux_internal *in,
         }
     } else {
         // The returned packet is mutated etc. and will be owned by the user.
-        pkt = demux_copy_packet(pkt);
+        pkt = demux_copy_packet(in->packet_pool, pkt);
     }
 
     return pkt;
@@ -2638,7 +2634,8 @@ static int dequeue_packet(struct demux_stream *ds, double min_pts,
         if (ds->attached_picture_added)
             return -1;
         ds->attached_picture_added = true;
-        struct demux_packet *pkt = demux_copy_packet(ds->sh->attached_picture);
+        struct demux_packet *pkt = demux_copy_packet(in->packet_pool,
+                                                     ds->sh->attached_picture);
         MP_HANDLE_OOM(pkt);
         pkt->stream = ds->sh->index;
         *res = pkt;
@@ -3281,6 +3278,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .filepos = -1,
         .global = global,
         .log = mp_log_new(demuxer, log, desc->name),
+        .packet_pool = demux_packet_pool_get(global),
         .glog = log,
         .filename = talloc_strdup(demuxer, sinfo->filename),
         .is_network = sinfo->is_network,
@@ -3297,6 +3295,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     *in = (struct demux_internal){
         .global = global,
         .log = demuxer->log,
+        .packet_pool = demux_packet_pool_get(global),
         .stats = stats_ctx_create(in, global, "demuxer"),
         .can_cache = params && params->is_top_level,
         .can_record = params && params->stream_record,
