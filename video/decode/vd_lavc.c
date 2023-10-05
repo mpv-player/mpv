@@ -49,6 +49,7 @@
 #include "demux/demux.h"
 #include "demux/stheader.h"
 #include "demux/packet.h"
+#include "demux/packet_pool.h"
 #include "video/csputils.h"
 #include "video/sws_utils.h"
 #include "video/out/vo.h"
@@ -1175,7 +1176,7 @@ static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
     if (ctx->hw_probing && ctx->num_sent_packets < 32 &&
         ctx->hwdec_opts->software_fallback <= 32)
     {
-        pkt = pkt ? demux_copy_packet(pkt) : NULL;
+        pkt = pkt ? demux_copy_packet(vd->packet_pool, pkt) : NULL;
         MP_TARRAY_APPEND(ctx, ctx->sent_packets, ctx->num_sent_packets, pkt);
     }
 
@@ -1332,7 +1333,7 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
 
     if (ctx->hw_probing) {
         for (int n = 0; n < ctx->num_sent_packets; n++)
-            talloc_free(ctx->sent_packets[n]);
+            demux_packet_pool_push(vd->packet_pool, ctx->sent_packets[n]);
         ctx->num_sent_packets = 0;
         ctx->hw_probing = false;
     }

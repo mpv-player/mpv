@@ -25,6 +25,7 @@
 #include "common/msg.h"
 #include "common/av_common.h"
 #include "demux.h"
+#include "demux/packet_pool.h"
 #include "misc/io_utils.h"
 #include "options/path.h"
 #include "options/m_config.h"
@@ -55,6 +56,7 @@ const struct m_sub_options demux_cache_conf = {
 
 struct demux_cache {
     struct mp_log *log;
+    struct demux_packet_pool *packet_pool;
     struct demux_cache_opts *opts;
 
     char *filename;
@@ -98,6 +100,7 @@ struct demux_cache *demux_cache_create(struct mpv_global *global,
     talloc_set_destructor(cache, cache_destroy);
     cache->opts = mp_get_config_group(cache, global, &demux_cache_conf);
     cache->log = log;
+    cache->packet_pool = demux_packet_pool_get(global);
     cache->fd = -1;
 
     char *cache_dir = cache->opts->cache_dir;
@@ -292,7 +295,7 @@ struct demux_packet *demux_cache_read(struct demux_cache *cache, uint64_t pos)
     if (!read_raw(cache, &hd, sizeof(hd)))
         return NULL;
 
-    struct demux_packet *dp = new_demux_packet(hd.data_len);
+    struct demux_packet *dp = new_demux_packet(cache->packet_pool, hd.data_len);
     if (!dp)
         goto fail;
 

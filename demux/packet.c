@@ -28,6 +28,7 @@
 #include "common/common.h"
 #include "demux.h"
 #include "demux/ebml.h"
+#include "packet_pool.h"
 
 #include "packet.h"
 
@@ -51,9 +52,12 @@ static void packet_destroy(void *ptr)
     demux_packet_unref_contents(dp);
 }
 
-static struct demux_packet *packet_create(void)
+static struct demux_packet *packet_create(struct demux_packet_pool *pool)
 {
-    struct demux_packet *dp = talloc(NULL, struct demux_packet);
+    struct demux_packet *dp = pool ? demux_packet_pool_pop(pool) : NULL;
+    struct AVPacket *avpkt = dp ? dp->avpacket : NULL;
+    if (!dp)
+        dp = talloc(NULL, struct demux_packet);
     talloc_set_destructor(dp, packet_destroy);
     *dp = (struct demux_packet) {
         .pts = MP_NOPTS_VALUE,
@@ -63,9 +67,9 @@ static struct demux_packet *packet_create(void)
         .start = MP_NOPTS_VALUE,
         .end = MP_NOPTS_VALUE,
         .stream = -1,
-        .avpacket = av_packet_alloc(),
         .animated = -1,
     };
+    dp->avpacket = avpkt ? avpkt : av_packet_alloc();
     MP_HANDLE_OOM(dp->avpacket);
     return dp;
 }
@@ -73,11 +77,12 @@ static struct demux_packet *packet_create(void)
 // This actually preserves only data and side data, not PTS/DTS/pos/etc.
 // It also allows avpkt->data==NULL with avpkt->size!=0 - the libavcodec API
 // does not allow it, but we do it to simplify new_demux_packet().
-struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
+struct demux_packet *new_demux_packet_from_avpacket(struct demux_packet_pool *pool,
+                                                    struct AVPacket *avpkt)
 {
     if (avpkt->size > 1000000000)
         return NULL;
-    struct demux_packet *dp = packet_create();
+    struct demux_packet *dp = packet_create(pool);
     int r = -1;
     if (avpkt->data) {
         // We hope that this function won't need/access AVPacket input padding,
@@ -96,14 +101,15 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
 }
 
 // (buf must include proper padding)
-struct demux_packet *new_demux_packet_from_buf(struct AVBufferRef *buf)
+struct demux_packet *new_demux_packet_from_buf(struct demux_packet_pool *pool,
+                                               struct AVBufferRef *buf)
 {
     if (!buf)
         return NULL;
     if (buf->size > 1000000000)
         return NULL;
 
-    struct demux_packet *dp = packet_create();
+    struct demux_packet *dp = packet_create(pool);
     dp->avpacket->buf = av_buffer_ref(buf);
     if (!dp->avpacket->buf) {
         talloc_free(dp);
@@ -115,21 +121,21 @@ struct demux_packet *new_demux_packet_from_buf(struct AVBufferRef *buf)
 }
 
 // Input data doesn't need to be padded.
-struct demux_packet *new_demux_packet_from(void *data, size_t len)
+struct demux_packet *new_demux_packet_from(struct demux_packet_pool *pool, void *data, size_t len)
 {
-    struct demux_packet *dp = new_demux_packet(len);
+    struct demux_packet *dp = new_demux_packet(pool, len);
     if (!dp)
         return NULL;
     memcpy(dp->avpacket->data, data, len);
     return dp;
 }
 
-struct demux_packet *new_demux_packet(size_t len)
+struct demux_packet *new_demux_packet(struct demux_packet_pool *pool, size_t len)
 {
     if (len > INT_MAX)
         return NULL;
 
-    struct demux_packet *dp = packet_create();
+    struct demux_packet *dp = packet_create(pool);
     int r = av_new_packet(dp->avpacket, len);
     if (r < 0) {
         talloc_free(dp);
@@ -170,14 +176,14 @@ void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *sr
     dst->stream = src->stream;
 }
 
-struct demux_packet *demux_copy_packet(struct demux_packet *dp)
+struct demux_packet *demux_copy_packet(struct demux_packet_pool *pool, struct demux_packet *dp)
 {
     struct demux_packet *new = NULL;
     if (dp->avpacket) {
-        new = new_demux_packet_from_avpacket(dp->avpacket);
+        new = new_demux_packet_from_avpacket(pool, dp->avpacket);
     } else {
         // Some packets might be not created by new_demux_packet*().
-        new = new_demux_packet_from(dp->buffer, dp->len);
+        new = new_demux_packet_from(pool, dp->buffer, dp->len);
     }
     if (!new)
         return NULL;

@@ -23,6 +23,7 @@
 #include <limits.h>
 
 #include "demux/demux.h"
+#include "demux/packet_pool.h"
 #include "sd.h"
 #include "dec_sub.h"
 #include "options/m_config.h"
@@ -47,6 +48,7 @@ struct dec_sub {
 
     struct mp_log *log;
     struct mpv_global *global;
+    struct demux_packet_pool *packet_pool;
     struct mp_subtitle_opts *opts;
     struct mp_subtitle_shared_opts *shared_opts;
     struct m_config_cache *opts_cache;
@@ -127,7 +129,8 @@ static void destroy_cached_pkts(struct dec_sub *sub)
 {
     int index = 0;
     while (index < sub->num_cached_pkts) {
-        TA_FREEP(&sub->cached_pkts[index]);
+        demux_packet_pool_push(sub->packet_pool, sub->cached_pkts[index]);
+        sub->cached_pkts[index] = NULL;
         ++index;
     }
     sub->cached_pkt_pos = 0;
@@ -190,6 +193,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
     *sub = (struct dec_sub){
         .log = mp_log_new(sub, global->log, "sub"),
         .global = global,
+        .packet_pool = demux_packet_pool_get(global),
         .opts_cache = m_config_cache_alloc(sub, global, &mp_subtitle_sub_opts),
         .shared_opts_cache = m_config_cache_alloc(sub, global, &mp_subtitle_shared_sub_opts),
         .sh = track->stream,
@@ -375,7 +379,7 @@ void sub_read_packets(struct dec_sub *sub, double video_pts, bool force,
         MP_TARRAY_APPEND(sub, sub->cached_pkts, sub->num_cached_pkts, pkt);
 
         if (is_new_segment(sub, pkt)) {
-            sub->new_segment = demux_copy_packet(pkt);
+            sub->new_segment = demux_copy_packet(sub->packet_pool, pkt);
             // Note that this can be delayed to a much later point in time.
             update_segment(sub);
             break;
@@ -482,7 +486,8 @@ void sub_reset(struct dec_sub *sub)
     sub->last_pkt_pts = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
     destroy_cached_pkts(sub);
-    TA_FREEP(&sub->new_segment);
+    demux_packet_pool_push(sub->packet_pool, sub->new_segment);
+    sub->new_segment = NULL;
     mp_mutex_unlock(&sub->lock);
 }
 
