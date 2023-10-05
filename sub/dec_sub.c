@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include "demux/demux.h"
+#include "demux/packet_pool.h"
 #include "sd.h"
 #include "dec_sub.h"
 #include "options/m_config.h"
@@ -316,7 +317,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
         // Update cached packets
         if (sub->cached_pkts[0]) {
             if (sub->cached_pkts[1])
-                talloc_free(sub->cached_pkts[1]);
+                demux_packet_pool_push(sub->global->packet_pool, sub->cached_pkts[1]);
             sub->cached_pkts[1] = sub->cached_pkts[0];
         }
         sub->cached_pkts[0] = pkt;
@@ -324,7 +325,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
         sub->last_pkt_pts = pkt->pts;
 
         if (is_new_segment(sub, pkt)) {
-            sub->new_segment = demux_copy_packet(pkt);
+            sub->new_segment = demux_copy_packet(sub->global->packet_pool, pkt);
             // Note that this can be delayed to a much later point in time.
             update_segment(sub);
             break;
@@ -420,9 +421,12 @@ void sub_reset(struct dec_sub *sub)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
-    TA_FREEP(&sub->cached_pkts[0]);
-    TA_FREEP(&sub->cached_pkts[1]);
-    TA_FREEP(&sub->new_segment);
+    demux_packet_pool_push(sub->global->packet_pool, sub->cached_pkts[0]);
+    sub->cached_pkts[0] = NULL;
+    demux_packet_pool_push(sub->global->packet_pool, sub->cached_pkts[1]);
+    sub->cached_pkts[1] = NULL;
+    demux_packet_pool_push(sub->global->packet_pool, sub->new_segment);
+    sub->new_segment = NULL;
     mp_mutex_unlock(&sub->lock);
 }
 
