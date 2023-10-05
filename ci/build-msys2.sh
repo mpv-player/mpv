@@ -35,5 +35,4 @@ meson setup build            \
   -D uchardet=enabled        \
   -D vapoursynth=enabled
 meson compile -C build
-cp ./build/player/mpv.com ./build
 ./build/mpv.com -v --no-config

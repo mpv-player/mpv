@@ -280,7 +280,7 @@ meson compile -C $build
 if [ "$2" = pack ]; then
     mkdir -p artifact/tmp
     echo "Copying:"
-    cp -pv $build/player/mpv.com $build/mpv.exe artifact/
+    cp -pv $build/mpv.com $build/mpv.exe artifact/
     # copy everything we can get our hands on
     cp -p "$prefix_dir/bin/"*.dll artifact/tmp/
     shopt -s nullglob
