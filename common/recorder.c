@@ -412,7 +412,7 @@ void mp_recorder_feed_packet(struct mp_recorder_sink *rst,
         return;
     }
 
-    pkt = demux_copy_packet(pkt);
+    pkt = demux_copy_packet(rst->owner->global->packet_pool, pkt);
     if (!pkt)
         return;
     MP_TARRAY_APPEND(rst, rst->packets, rst->num_packets, pkt);
