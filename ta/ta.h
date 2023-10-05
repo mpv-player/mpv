@@ -177,7 +177,6 @@ static inline char *ta_oom_s(char *s)
 // Generic pointer
 #define ta_oom_g(ptr) (TA_TYPEOF(ptr))ta_oom_p(ptr)
 
-void ta_enable_leak_report(void);
 void *ta_dbg_set_loc(void *ptr, const char *name);
 void *ta_dbg_mark_as_string(void *ptr);
 

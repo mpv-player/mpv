@@ -351,8 +351,6 @@ if not features['build-date']
     flags += '-DNO_BUILD_TIMESTAMPS'
 endif
 
-features += {'ta-leak-report': get_option('ta-leak-report')}
-
 libdl = dependency('dl', required: false)
 features += {'libdl': libdl.found()}
 if features['libdl']
