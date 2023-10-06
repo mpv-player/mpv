@@ -495,7 +495,6 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts);
 void vo_queue_frame(struct vo *vo, struct vo_frame *frame);
 void vo_wait_frame(struct vo *vo);
 bool vo_still_displaying(struct vo *vo);
-void vo_request_wakeup_on_done(struct vo *vo);
 bool vo_has_frame(struct vo *vo);
 void vo_redraw(struct vo *vo);
 bool vo_want_redraw(struct vo *vo);
