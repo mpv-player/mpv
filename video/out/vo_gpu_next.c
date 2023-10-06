@@ -2217,7 +2217,6 @@ const struct vo_driver video_out_gpu_next = {
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
-        .delayed_peak = true,
         .inter_preserve = true,
     },
 

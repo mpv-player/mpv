@@ -6698,7 +6698,7 @@ them.
     frame when beneficial for performance. In particular, this is required to
     avoid an unnecessary FBO indirection when no advanced rendering is required
     otherwise. Has no effect if there already is an indirect pass, such as when
-    advanced scaling is enabled. Defaults to on. (Only affects
+    advanced scaling is enabled. Defaults to no. (Only affects
     ``--vo=gpu-next``, note that ``--vo=gpu`` always delays the peak.)
 
 ``--hdr-peak-percentile=<0.0..100.0>``
