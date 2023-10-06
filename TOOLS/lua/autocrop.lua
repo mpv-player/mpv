@@ -55,10 +55,7 @@ local options = {
 
 require "mp.options".read_options(options)
 
-local label_prefix = mp.get_script_name()
-local labels = {
-    cropdetect = string.format("%s-cropdetect", label_prefix)
-}
+local cropdetect_label = mp.get_script_name() .. "-cropdetect"
 
 timers = {
     auto_delay = nil,
@@ -68,16 +65,6 @@ timers = {
 local hwdec_backup
 
 local command_prefix = options.suppress_osd and 'no-osd' or ''
-
-function is_filter_present(label)
-    local filters = mp.get_property_native("vf")
-    for index, filter in pairs(filters) do
-        if filter["label"] == label then
-            return true
-        end
-    end
-    return false
-end
 
 function is_enough_time(seconds)
 
@@ -102,12 +89,15 @@ function is_cropable(time_needed)
     return true
 end
 
-function remove_filter(label)
-    if is_filter_present(label) then
-        mp.command(string.format('%s vf remove @%s', command_prefix, label))
-        return true
+function remove_cropdetect()
+    for _, filter in pairs(mp.get_property_native("vf")) do
+        if filter.label == cropdetect_label then
+            mp.command(
+                string.format("%s vf remove @%s", command_prefix, filter.label))
+
+            return
+        end
     end
-    return false
 end
 
 function restore_hwdec()
@@ -118,9 +108,7 @@ function restore_hwdec()
 end
 
 function cleanup()
-
-    -- Remove existing filter.
-    remove_filter(labels.cropdetect)
+    remove_cropdetect()
 
     -- Kill all timers.
     for index, timer in pairs(timers) do
@@ -154,7 +142,7 @@ function detect_crop()
     mp.command(
         string.format(
             '%s vf pre @%s:cropdetect=limit=%s:round=%d:reset=0',
-            command_prefix, labels.cropdetect, limit, round
+            command_prefix, cropdetect_label, limit, round
         )
     )
 
@@ -165,13 +153,9 @@ end
 function detect_end()
 
     -- Get the metadata and remove the cropdetect filter.
-    local cropdetect_metadata =
-        mp.get_property_native(
-            string.format("vf-metadata/%s",
-            labels.cropdetect
-        )
-    )
-    remove_filter(labels.cropdetect)
+    local cropdetect_metadata = mp.get_property_native(
+        "vf-metadata/" .. cropdetect_label)
+    remove_cropdetect()
 
     -- Remove the timer of detect crop.
     if timers.detect_crop then
