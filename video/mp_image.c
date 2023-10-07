@@ -1049,7 +1049,6 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         // Might be incorrect if colorspace changes.
         dst->params.color.light = p->color.light;
         dst->params.alpha = p->alpha;
-        dst->params.crop = p->crop;
     }
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_DISPLAYMATRIX);
