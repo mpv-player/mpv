@@ -362,7 +362,9 @@ static void getch2_poll(void)
 
 static void stop_sighandler(int signum)
 {
+    int saved_errno = errno;
     do_deactivate_getch2();
+    errno = saved_errno;
 
     // note: for this signal, we use SA_RESETHAND but do NOT mask signals
     // so this will invoke the default handler
@@ -371,10 +373,12 @@ static void stop_sighandler(int signum)
 
 static void continue_sighandler(int signum)
 {
+    int saved_errno = errno;
     // SA_RESETHAND has reset SIGTSTP, so we need to restore it here
     setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
 
     getch2_poll();
+    errno = saved_errno;
 }
 
 static pthread_t input_thread;
@@ -400,9 +404,10 @@ static void close_tty(void)
 
 static void quit_request_sighandler(int signum)
 {
+    int saved_errno = errno;
     do_deactivate_getch2();
-
     (void)write(death_pipe[1], &(char){1}, 1);
+    errno = saved_errno;
 }
 
 static void *terminal_thread(void *ptr)
