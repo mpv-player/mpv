@@ -405,7 +405,6 @@ static void close_tty(void)
 static void quit_request_sighandler(int signum)
 {
     int saved_errno = errno;
-    do_deactivate_getch2();
     (void)write(death_pipe[1], &(char){1}, 1);
     errno = saved_errno;
 }
@@ -432,8 +431,10 @@ static void *terminal_thread(void *ptr)
          */
         bool is_fg = tcgetpgrp(tty_in) == getpgrp();
         int r = polldev(fds, stdin_ok && is_fg ? 2 : 1, buf.len ? ESC_TIMEOUT : INPUT_TIMEOUT);
-        if (fds[0].revents)
+        if (fds[0].revents) {
+            do_deactivate_getch2();
             break;
+        }
         if (fds[1].revents) {
             int retval = read(tty_in, &buf.b[buf.len], BUF_LEN - buf.len);
             if (!retval || (retval == -1 && errno != EINTR && errno != EAGAIN && errno != EIO))
