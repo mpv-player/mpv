@@ -28,6 +28,7 @@
 
 #include <libavutil/rational.h>
 #include <libavutil/cpu.h>
+#include <libavutil/buffer.h>
 
 #include "common/msg.h"
 #include "options/m_option.h"
@@ -218,6 +219,8 @@ static int set_vs_frame_props(struct priv *p, VSFrameRef *frame,
     p->vsapi->propSetInt(map, "_DurationNum", dur_num, 0);
     p->vsapi->propSetInt(map, "_DurationDen", dur_den, 0);
     p->vsapi->propSetInt(map, "__frameno", frameno, 0);
+    if(img->dovi && img->dovi->size)
+        p->vsapi->propSetData(map,"_DoVi", img->dovi->data, img->dovi->size, 0);
     copy_mp_to_vs_frame_props_map(p, map, img);
     return 0;
 }
