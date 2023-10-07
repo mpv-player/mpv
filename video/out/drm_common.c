@@ -149,8 +149,10 @@ struct drm_mode_spec {
 /* VT Switcher */
 static void vt_switcher_sighandler(int sig)
 {
+    int saved_errno = errno;
     unsigned char event = sig == RELEASE_SIGNAL ? EVT_RELEASE : EVT_ACQUIRE;
     (void)write(vt_switcher_pipe[1], &event, sizeof(event));
+    errno = saved_errno;
 }
 
 static bool has_signal_installed(int signo)
