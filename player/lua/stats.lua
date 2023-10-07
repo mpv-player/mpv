@@ -602,8 +602,8 @@ local function append_filters(s, prop, prefix)
         end
 
         local p = {}
-        for key,value in pairs(f.params) do
-            p[#p+1] = key .. "=" .. value
+        for _,key in ipairs(sorted_keys(f.params)) do
+            p[#p+1] = key .. "=" .. f.params[key]
         end
         if #p > 0 then
             p = " [" .. table.concat(p, " ") .. "]"
