@@ -96,6 +96,8 @@ Interface changes
     - add `--backdrop-type` option
     - add `--window-affinity` option
     - `--config-dir` no longer forces cache and state files to also reside in there
+    - deprecate `--demuxer-cue-codepage` in favor of `--metadata-codepage`
+    - change the default of `metadata-codepage` to `auto`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

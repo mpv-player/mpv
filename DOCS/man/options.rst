@@ -2629,9 +2629,6 @@ Subtitles
     subtitles are interpreted as UTF-8 with "Latin 1" as fallback for bytes
     which are not valid UTF-8 sequences. iconv is never involved in this mode.
 
-    This option changed in mpv 0.23.0. Support for the old syntax was fully
-    removed in mpv 0.24.0.
-
     .. note::
 
         This works for text subtitle files only. Other types of subtitles (in
@@ -3794,9 +3791,6 @@ Demuxer
 
 ``--demuxer-rawvideo-size=<value>``
     Frame size in bytes when using ``--demuxer=rawvideo``.
-
-``--demuxer-cue-codepage=<codepage>``
-    Specify the CUE sheet codepage. (See ``--sub-codepage`` for details.)
 
 ``--demuxer-max-bytes=<bytesize>``
     This controls how much the demuxer is allowed to buffer ahead. The demuxer
@@ -7222,8 +7216,8 @@ Miscellaneous
 
 ``--cover-art-whitelist=<no|yes>``
     Whether to load files with a filename among "AlbumArt", "Album", "cover",
-    "front", "AlbumArtSmall", "Folder", ".folder", "thumb", "front", and an
-    extension in ``--cover-art-auto-exts``, as cover art. This has no effect is
+    "front", "AlbumArtSmall", "Folder", ".folder", "thumb", and an extension in
+    ``--cover-art-auto-exts``, as cover art. This has no effect if
     ``cover-art-auto`` is ``no``.
 
     Default: ``yes``.
@@ -7321,10 +7315,9 @@ Miscellaneous
     filters.
 
 ``--metadata-codepage=<codepage>``
-    Codepage for various input metadata (default: ``utf-8``). This affects how
-    file tags, chapter titles, etc. are interpreted. You can for example set
-    this to ``auto`` to enable autodetection of the codepage. (This is not the
-    default because non-UTF-8 codepages are an obscure fringe use-case.)
+    Codepage for various input metadata (default: ``auto``). This affects how
+    file tags, chapter titles, etc. are interpreted. In most cases, this merely
+    evaluates to UTF-8 as non-UTF-8 codepages are obscure.
 
     See ``--sub-codepage`` option on how codepages are specified and further
     details regarding autodetection and codepage conversion. (The underlying

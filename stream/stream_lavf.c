@@ -26,6 +26,8 @@
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
+#include "demux/demux.h"
+#include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "stream.h"
 #include "options/m_config.h"
@@ -403,7 +405,21 @@ static struct mp_tags *read_icy(stream_t *s)
         packet = bstr_cut(packet, i + head.len);
         int end = bstr_find(packet, bstr0("\';"));
         packet = bstr_splice(packet, 0, end);
+
+        bool allocated = false;
+        struct demux_opts *opts = mp_get_config_group(NULL, s->global, &demux_conf);
+        const char *charset = mp_charset_guess(s, s->log, packet, opts->meta_cp, 0);
+        if (charset && !mp_charset_is_utf8(charset)) {
+            bstr conv = mp_iconv_to_utf8(s->log, packet, charset, 0);
+            if (conv.start && conv.start != packet.start) {
+                allocated = true;
+                packet = conv;
+            }
+        }
         mp_tags_set_bstr(res, bstr0("icy-title"), packet);
+        talloc_free(opts);
+        if (allocated)
+            talloc_free(packet.start);
     }
 
     av_opt_set(avio, "icy_metadata_packet", "-", AV_OPT_SEARCH_CHILDREN);

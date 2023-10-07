@@ -43,7 +43,6 @@ static const char *const cover_files[] = {
     "Folder",
     ".folder",
     "thumb",
-    "front",
     NULL
 };
 

@@ -158,6 +158,7 @@ struct priv {
     bool is_interpolated;
     bool want_reset;
     bool frame_pending;
+    bool paused;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -286,6 +287,9 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
 
     double pts = src ? src->pts : 0;
     struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, subfmt_all);
+    if (subs->num_items)
+        p->osd_sync++;
+
     frame->overlays = state->overlays;
     frame->num_overlays = 0;
 
@@ -1081,10 +1085,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             struct mp_image *mpi = image->user_data;
             struct frame_priv *fp = mpi->priv;
             apply_crop(image, p->src, vo->params->w, vo->params->h);
-
             if (opts->blend_subs) {
-                if (fp->osd_sync < p->osd_sync) {
-                    // Only update the overlays if the state has changed
+                if (p->paused || fp->osd_sync < p->osd_sync) {
                     float rx = pl_rect_w(p->dst) / pl_rect_w(image->crop);
                     float ry = pl_rect_h(p->dst) / pl_rect_h(image->crop);
                     struct mp_osd_res res = {
@@ -1403,21 +1405,20 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     const struct gl_video_opts *opts = p->opts_cache->opts;
     struct frame_priv *fp = mpi->priv;
     if (opts->blend_subs) {
-            // Only update the overlays if the state has changed
-            float rx = pl_rect_w(dst) / pl_rect_w(image.crop);
-            float ry = pl_rect_h(dst) / pl_rect_h(image.crop);
-            struct mp_osd_res res = {
-                .w = pl_rect_w(dst),
-                .h = pl_rect_h(dst),
-                .ml = -image.crop.x0 * rx,
-                .mr = (image.crop.x1 - vo->params->w) * rx,
-                .mt = -image.crop.y0 * ry,
-                .mb = (image.crop.y1 - vo->params->h) * ry,
-                .display_par = 1.0,
-            };
-            update_overlays(vo, res, osd_flags,
-                            PL_OVERLAY_COORDS_DST_CROP,
-                            &fp->subs, &image, mpi);
+        float rx = pl_rect_w(dst) / pl_rect_w(image.crop);
+        float ry = pl_rect_h(dst) / pl_rect_h(image.crop);
+        struct mp_osd_res res = {
+            .w = pl_rect_w(dst),
+            .h = pl_rect_h(dst),
+            .ml = -image.crop.x0 * rx,
+            .mr = (image.crop.x1 - vo->params->w) * rx,
+            .mt = -image.crop.y0 * ry,
+            .mb = (image.crop.y1 - vo->params->h) * ry,
+            .display_par = 1.0,
+        };
+        update_overlays(vo, res, osd_flags,
+                        PL_OVERLAY_COORDS_DST_CROP,
+                        &fp->subs, &image, mpi);
     } else {
         // Disable overlays when blend_subs is disabled
         update_overlays(vo, osd, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
@@ -1489,12 +1490,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER:
     case VOCTRL_PAUSE:
+        p->paused = true;
         if (p->is_interpolated)
             vo->want_redraw = true;
         return VO_TRUE;
-
-    case VOCTRL_OSD_CHANGED:
-        p->osd_sync++;
+    case VOCTRL_RESUME:
+        p->paused = false;
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {

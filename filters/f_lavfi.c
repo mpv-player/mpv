@@ -814,7 +814,8 @@ static bool lavfi_command(struct mp_filter *f, struct mp_filter_command *cmd)
 
     switch (cmd->type) {
     case MP_FILTER_COMMAND_TEXT: {
-        return avfilter_graph_send_command(c->graph, "all", cmd->cmd, cmd->arg,
+        return avfilter_graph_send_command(c->graph, cmd->target,
+                                           cmd->cmd, cmd->arg,
                                            &(char){0}, 0, 0) >= 0;
     }
     case MP_FILTER_COMMAND_GET_META: {

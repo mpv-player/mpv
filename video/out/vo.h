@@ -72,9 +72,6 @@ enum mp_voctrl {
     // you could install your own listener.
     VOCTRL_VO_OPTS_CHANGED,
 
-    // Triggered by any change to the OSD (e.g. OSD style changes)
-    VOCTRL_OSD_CHANGED,
-
     /* private to vo_gpu */
     VOCTRL_LOAD_HWDEC_API,
 
@@ -305,6 +302,9 @@ struct vo_driver {
     // Disable video timing, push frames as quickly as possible, never redraw.
     bool untimed;
 
+    // The VO is responsible for freeing frames.
+    bool frame_owner;
+
     const char *name;
     const char *description;
 
@@ -381,7 +381,8 @@ struct vo_driver {
     /* Render the given frame. Note that this is also called when repeating
      * or redrawing frames.
      *
-     * frame is freed by the caller, but the callee can still modify the
+     * frame is freed by the caller if the callee did not assume ownership
+     * of the frames, but in any case the callee can still modify the
      * contained data and references.
      */
     void (*draw_frame)(struct vo *vo, struct vo_frame *frame);

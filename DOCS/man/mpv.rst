@@ -629,30 +629,34 @@ user-specific one is ``~/.config/mpv/mpv.conf``. For details and platform
 specifics (in particular Windows paths) see the `FILES`_ section.
 
 User-specific options override system-wide options and options given on the
-command line override either. The syntax of the configuration files is
-``option=value``. Everything after a *#* is considered a comment. Options
-that work without values can be enabled by setting them to *yes* and disabled by
-setting them to *no*. Even suboptions can be specified in this way.
+command line override both. The syntax of the configuration files is
+``option=value``. Everything after a *#* is considered a comment. Options that
+work without values can be enabled by setting them to *yes* and disabled by
+setting them to *no*, and if the value is omitted, *yes* is implied. Even
+suboptions can be specified in this way.
 
 .. admonition:: Example configuration file
 
     ::
 
-        # Use GPU-accelerated video output by default.
-        vo=gpu
-        # Use quotes for text that can contain spaces:
-        term-status-msg="Time: ${time-pos}"
+        # Don't allow new windows to be larger than the screen.
+        autofit-larger=100%x100%
+        # Enable hardware decoding if available, =yes is implied.
+        hwdec
+        # Spaces don't have to be escaped.
+        osd-playing-msg=File: ${filename}
 
-Escaping spaces and special characters
+Escaping special characters
 --------------------------------------
 
-This is done like with command line options. The shell is not involved here,
-but option values still need to be quoted as a whole if it contains certain
-characters like spaces. A config entry can be quoted with ``"``,
-as well as with the fixed-length syntax (``%n%``) mentioned before. This is like
-passing the exact contents of the quoted string as command line option. C-style
-escapes are currently _not_ interpreted on this level, although some options do
-this manually. (This is a mess and should probably be changed at some point.)
+This is done like with command line options. A config entry can be quoted with
+``"``, ``'``, as well as with the fixed-length syntax (``%n%``) mentioned
+before. This is like passing the exact contents of the quoted string as a
+command line option. C-style escapes are currently _not_ interpreted on this
+level, although some options do this manually (this is a mess and should
+probably be changed at some point). The shell is not involved here, so option
+values only need to be quoted to escape ``#`` and ``\``, ``"``, ``'`` or ``%``
+at the beginning of the value, and leading and trailing whitespace.
 
 Putting Command Line Options into the Configuration File
 --------------------------------------------------------
@@ -666,7 +670,7 @@ Option                  Configuration file entry
 ``--flag``              ``flag``
 ``-opt val``            ``opt=val``
 ``--opt=val``           ``opt=val``
-``-opt "has spaces"``   ``opt="has spaces"``
+``-opt "has spaces"``   ``opt=has spaces``
 ======================= ========================
 
 File-specific Configuration Files

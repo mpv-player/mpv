@@ -5318,7 +5318,7 @@ static void cmd_playlist_next_prev(void *p)
     int dir = *(int *)cmd->priv;
     int force = cmd->args[0].v.i;
 
-    struct playlist_entry *e = mp_next_file(mpctx, dir, force, true);
+    struct playlist_entry *e = mp_next_file(mpctx, dir, force);
     if (!e && !force) {
         cmd->success = false;
         return;
@@ -6007,6 +6007,7 @@ static void cmd_filter_command(void *p)
     }
     struct mp_filter_command filter_cmd = {
         .type = MP_FILTER_COMMAND_TEXT,
+        .target = cmd->args[3].v.s,
         .cmd = cmd->args[1].v.s,
         .arg = cmd->args[2].v.s,
     };
@@ -6651,13 +6652,23 @@ const struct mp_cmd_def mp_cmds[] = {
                           {"value", OPT_STRING(v.s)}, },
         .priv = &(const int){STREAM_VIDEO} },
 
-    { "af-command", cmd_filter_command, { {"label", OPT_STRING(v.s)},
-                                          {"command", OPT_STRING(v.s)},
-                                          {"argument", OPT_STRING(v.s)}, },
+    { "af-command", cmd_filter_command,
+        {
+            {"label", OPT_STRING(v.s)},
+            {"command", OPT_STRING(v.s)},
+            {"argument", OPT_STRING(v.s)},
+            {"target", OPT_STRING(v.s), OPTDEF_STR("all"),
+                .flags = MP_CMD_OPT_ARG},
+        },
         .priv = &(const int){STREAM_AUDIO} },
-    { "vf-command", cmd_filter_command, { {"label", OPT_STRING(v.s)},
-                                          {"command", OPT_STRING(v.s)},
-                                          {"argument", OPT_STRING(v.s)}, },
+    { "vf-command", cmd_filter_command,
+        {
+            {"label", OPT_STRING(v.s)},
+            {"command", OPT_STRING(v.s)},
+            {"argument", OPT_STRING(v.s)},
+            {"target", OPT_STRING(v.s), OPTDEF_STR("all"),
+                .flags = MP_CMD_OPT_ARG},
+        },
         .priv = &(const int){STREAM_VIDEO} },
 
     { "ao-reload", cmd_ao_reload },
@@ -6929,8 +6940,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             }
         }
         osd_changed(mpctx->osd);
-        if (mpctx->video_out)
-            vo_control_async(mpctx->video_out, VOCTRL_OSD_CHANGED, NULL);
         if (flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD))
             mp_force_video_refresh(mpctx);
         mp_wakeup_core(mpctx);

@@ -62,7 +62,7 @@ struct buffer {
     struct vo *vo;
     struct wl_buffer *buffer;
     struct wl_list link;
-    struct mp_image *image;
+    struct vo_frame *frame;
 
     uint32_t drm_format;
     uintptr_t id;
@@ -111,9 +111,9 @@ struct priv {
 static void buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
 {
     struct buffer *buf = data;
-    if (buf->image) {
-        mp_image_unrefp(&buf->image);
-        buf->image = NULL;
+    if (buf->frame) {
+        talloc_free(buf->frame);
+        buf->frame = NULL;
     }
 }
 
@@ -296,7 +296,7 @@ static bool drm_format_check(struct vo *vo, struct mp_image *src)
     return false;
 }
 
-static struct buffer *buffer_check(struct vo *vo, struct mp_image *src)
+static struct buffer *buffer_check(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
 
@@ -304,13 +304,13 @@ static struct buffer *buffer_check(struct vo *vo, struct mp_image *src)
     if (wl_list_length(&p->buffer_list) < WL_BUFFERS_WANTED)
         goto done;
 
-    uintptr_t id = surface_id(vo, src);
+    uintptr_t id = surface_id(vo, frame->current);
     struct buffer *buf;
     wl_list_for_each(buf, &p->buffer_list, link) {
         if (buf->id == id) {
-            if (buf->image)
-                mp_image_unrefp(&buf->image);
-            buf->image = src;
+            if (buf->frame)
+                talloc_free(buf->frame);
+            buf->frame = frame;
             return buf;
         }
     }
@@ -319,34 +319,35 @@ done:
     return NULL;
 }
 
-static struct buffer *buffer_create(struct vo *vo, struct mp_image *src)
+static struct buffer *buffer_create(struct vo *vo, struct vo_frame *frame)
 {
     struct vo_wayland_state *wl = vo->wl;
     struct priv *p = vo->priv;
 
     struct buffer *buf = talloc_zero(vo, struct buffer);
     buf->vo = vo;
-    buf->image = src;
+    buf->frame = frame;
 
+    struct mp_image *image = buf->frame->current;
     struct zwp_linux_buffer_params_v1 *params = zwp_linux_dmabuf_v1_create_params(wl->dmabuf);
 
     switch(p->hwdec_type) {
     case HWDEC_VAAPI:
-        vaapi_dmabuf_importer(buf, src, params);
+        vaapi_dmabuf_importer(buf, image, params);
         break;
     case HWDEC_DRMPRIME:
-        drmprime_dmabuf_importer(buf, src, params);
+        drmprime_dmabuf_importer(buf, image, params);
         break;
     }
 
     if (!buf->drm_format) {
-        mp_image_unrefp(&buf->image);
+        talloc_free(buf->frame);
         talloc_free(buf);
         zwp_linux_buffer_params_v1_destroy(params);
         return NULL;
     }
 
-    buf->buffer = zwp_linux_buffer_params_v1_create_immed(params, src->params.w, src->params.h,
+    buf->buffer = zwp_linux_buffer_params_v1_create_immed(params, image->params.w, image->params.h,
                                                           buf->drm_format, 0);
     zwp_linux_buffer_params_v1_destroy(params);
     wl_buffer_add_listener(buf->buffer, &buffer_listener, buf);
@@ -354,14 +355,14 @@ static struct buffer *buffer_create(struct vo *vo, struct mp_image *src)
     return buf;
 }
 
-static struct buffer *buffer_get(struct vo *vo, struct mp_image *src)
+static struct buffer *buffer_get(struct vo *vo, struct vo_frame *frame)
 {
     /* Reuse existing buffer if possible. */
-    struct buffer *buf = buffer_check(vo, src);
+    struct buffer *buf = buffer_check(vo, frame);
     if (buf) {
         return buf;
     } else {
-        return buffer_create(vo, src);
+        return buffer_create(vo, frame);
     }
 }
 
@@ -372,9 +373,9 @@ static void destroy_buffers(struct vo *vo)
     p->destroy_buffers = false;
     wl_list_for_each_safe(buf, tmp, &p->buffer_list, link) {
         wl_list_remove(&buf->link);
-        if (buf->image) {
-            mp_image_unrefp(&buf->image);
-            buf->image = NULL;
+        if (buf->frame) {
+            talloc_free(buf->frame);
+            buf->frame = NULL;
         }
         if (buf->buffer) {
             wl_buffer_destroy(buf->buffer);
@@ -525,7 +526,9 @@ static void resize(struct vo *vo)
     vo->opts->pan_x = 0;
     vo->opts->pan_y = 0;
     vo_get_src_dst_rects(vo, &src, &dst, &p->screen_osd_res);
-    wp_viewport_set_destination(wl->viewport, 2 * dst.x0 + mp_rect_w(dst), 2 * dst.y0 + mp_rect_h(dst));
+    int window_w = p->screen_osd_res.ml + p->screen_osd_res.mr + mp_rect_w(dst);
+    int window_h = p->screen_osd_res.mt + p->screen_osd_res.mb + mp_rect_h(dst);
+    wp_viewport_set_destination(wl->viewport, window_w, window_h);
 
     //now we restore pan for video viewport calculation
     vo->opts->pan_x = vo_opts->pan_x;
@@ -590,8 +593,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct osd_buffer *osd_buf;
     double pts;
 
-    if (!vo_wayland_check_visible(vo))
+    if (!vo_wayland_check_visible(vo)) {
+        if (frame->current)
+            talloc_free(frame);
         return;
+    }
 
     if (p->destroy_buffers)
         destroy_buffers(vo);
@@ -604,13 +610,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     pts = frame->current ? frame->current->pts : 0;
     if (frame->current) {
-        struct mp_image *src = mp_image_new_ref(frame->current);
-        buf = buffer_get(vo, src);
+        buf = buffer_get(vo, frame);
 
-        if (buf && buf->image) {
+        if (buf && buf->frame) {
+            struct mp_image *image = buf->frame->current;
             wl_surface_attach(wl->video_surface, buf->buffer, 0, 0);
-            wl_surface_damage_buffer(wl->video_surface, 0, 0, buf->image->w,
-                                     buf->image->h);
+            wl_surface_damage_buffer(wl->video_surface, 0, 0, image->w,
+                                     image->h);
 
         }
     }
@@ -851,6 +857,7 @@ const struct vo_driver video_out_dmabuf_wayland = {
     .description = "Wayland dmabuf video output",
     .name = "dmabuf-wayland",
     .caps = VO_CAP_ROTATE90,
+    .frame_owner = true,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig2 = reconfig,

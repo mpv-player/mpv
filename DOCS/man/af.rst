@@ -116,8 +116,8 @@ Available filters are:
         cause noticeable skips at high scale amounts and an echo at low scale
         amounts. Very low values will alter pitch. Increasing improves
         performance. (default: 60)
-    ``overlap=<percent>``
-        Percentage of stride to overlap. Decreasing improves performance.
+    ``overlap=<factor>``
+        Factor of stride to overlap. Decreasing improves performance.
         (default: .20)
     ``search=<amount>``
         Length in milliseconds to search for best overlap position. Decreasing

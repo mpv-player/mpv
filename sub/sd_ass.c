@@ -748,7 +748,7 @@ static struct sd_times get_times(struct sd *sd, double pts)
     ASS_Track *track = ctx->ass_track;
     struct sd_times res = { .start = MP_NOPTS_VALUE, .end = MP_NOPTS_VALUE };
 
-    if (pts == MP_NOPTS_VALUE || ctx->duration_unknown)
+    if (pts == MP_NOPTS_VALUE)
         return res;
 
     long long ipts = find_timestamp(sd, pts);
