@@ -51,8 +51,7 @@
 // buffer all keypresses until ENTER is pressed.
 #define INPUT_TIMEOUT 1000
 
-static volatile struct termios tio_orig;
-static volatile int tio_orig_set;
+static struct termios tio_orig;
 
 static int tty_in = -1, tty_out = -1;
 
@@ -300,11 +299,6 @@ static void do_activate_getch2(void)
     struct termios tio_new;
     tcgetattr(tty_in,&tio_new);
 
-    if (!tio_orig_set) {
-        tio_orig = tio_new;
-        tio_orig_set = 1;
-    }
-
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
@@ -319,12 +313,7 @@ static void do_deactivate_getch2(void)
         return;
 
     enable_kx(false);
-
-    if (tio_orig_set) {
-        // once set, it will never be set again
-        // so we can cast away volatile here
-        tcsetattr(tty_in, TCSANOW, (const struct termios *) &tio_orig);
-    }
+    tcsetattr(tty_in, TCSANOW, &tio_orig);
 
     getch2_active = 0;
 }
@@ -551,6 +540,8 @@ void terminal_init(void)
         tty_in = STDIN_FILENO;
         tty_out = STDOUT_FILENO;
     }
+
+    tcgetattr(tty_in, &tio_orig);
 
     // handlers to fix terminal settings
     setsigaction(SIGCONT, continue_sighandler, 0, true);
