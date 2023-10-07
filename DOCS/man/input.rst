@@ -422,6 +422,13 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     force
         Terminate playback if the first file is being played.
 
+``playlist-next-playlist``
+    Go to the next entry on the playlist with a different ``playlist-path``.
+
+``playlist-prev-playlist``
+    Go to the first of the previous entries on the playlist with a different
+    ``playlist-path``.
+
 ``playlist-play-index <integer|current|none>``
     Start (or restart) playback of the given playlist index. In addition to the
     0-based playlist entry index, it supports the following values:

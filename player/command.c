@@ -5321,6 +5321,45 @@ static void cmd_playlist_next_prev(void *p)
         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_CURRENT_FILE;
 }
 
+static void cmd_playlist_next_prev_playlist(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    int direction = *(int *)cmd->priv;
+
+    struct playlist_entry *entry =
+        playlist_get_first_in_next_playlist(mpctx->playlist, direction);
+
+    if (!entry && mpctx->opts->loop_times != 1 && mpctx->playlist->current) {
+        entry = direction > 0 ? playlist_get_first(mpctx->playlist)
+                              : playlist_get_last(mpctx->playlist);
+
+        if (entry && entry->playlist_path &&
+            strcmp(entry->playlist_path,
+                   mpctx->playlist->current->playlist_path) == 0)
+            entry = NULL;
+
+        if (direction > 0 && entry && mpctx->opts->loop_times > 1) {
+            mpctx->opts->loop_times--;
+            m_config_notify_change_opt_ptr(mpctx->mconfig,
+                                           &mpctx->opts->loop_times);
+        }
+
+        if (direction < 0)
+            entry = playlist_get_first_in_same_playlist(
+                        entry, mpctx->playlist->current->playlist_path);
+    }
+
+    if (!entry) {
+        cmd->success = false;
+        return;
+    }
+
+    mp_set_playlist_entry(mpctx, entry);
+    if (cmd->on_osd & MP_ON_OSD_MSG)
+        mpctx->add_osd_seek_info |= OSD_SEEK_INFO_CURRENT_FILE;
+}
+
 static void cmd_playlist_play_index(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -6373,6 +6412,10 @@ const struct mp_cmd_def mp_cmds[] = {
         },
         .priv = &(const int){-1},
     },
+    { "playlist-next-playlist", cmd_playlist_next_prev_playlist,
+        .priv = &(const int){1} },
+    { "playlist-prev-playlist", cmd_playlist_next_prev_playlist,
+        .priv = &(const int){-1} },
     { "playlist-play-index", cmd_playlist_play_index,
         {
             {"index", OPT_CHOICE(v.i, {"current", -2}, {"none", -1}),
