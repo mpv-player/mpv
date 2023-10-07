@@ -30,8 +30,6 @@
 #include <libavutil/cpu.h>
 #include <libavutil/buffer.h>
 
-#include "config.h"
-
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "options/path.h"
@@ -685,12 +683,20 @@ static int reinit_vs(struct priv *p, struct mp_image *input)
     struct mp_stream_info *info = mp_filter_find_stream_info(p->f);
     double container_fps = input->nominal_fps;
     double display_fps = 0;
+    int64_t display_res[2] = {0};
     if (info) {
         if (info->get_display_fps)
             display_fps = info->get_display_fps(info);
+        if (info->get_display_res) {
+            int tmp[2] = {0};
+            info->get_display_res(info, tmp);
+            display_res[0] = tmp[0];
+            display_res[1] = tmp[1];
+        }
     }
     p->vsapi->propSetFloat(vars, "container_fps", container_fps, 0);
     p->vsapi->propSetFloat(vars, "display_fps", display_fps, 0);
+    p->vsapi->propSetIntArray(vars, "display_res", display_res, 2);
 
     if (p->drv->load(p, vars) < 0)
         goto error;

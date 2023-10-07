@@ -114,19 +114,17 @@ static bool resize(struct ra_ctx *ctx)
 
     MP_VERBOSE(wl, "Handling resize on the vk side\n");
 
-    const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
-    const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
+    const int32_t width = mp_rect_w(wl->geometry);
+    const int32_t height = mp_rect_h(wl->geometry);
 
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
+    vo_wayland_handle_fractional_scale(wl);
     return ra_vk_ctx_resize(ctx, width, height);
 }
 
 static bool wayland_vk_reconfig(struct ra_ctx *ctx)
 {
-    if (!vo_wayland_reconfig(ctx->vo))
-        return false;
-
-    return true;
+    return vo_wayland_reconfig(ctx->vo);
 }
 
 static int wayland_vk_control(struct ra_ctx *ctx, int *events, int request, void *arg)

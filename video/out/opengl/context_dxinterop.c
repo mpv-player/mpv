@@ -555,10 +555,10 @@ static bool dxgl_init(struct ra_ctx *ctx)
     static const struct ra_swapchain_fns empty_swapchain_fns = {0};
     struct ra_gl_ctx_params params = {
         .swap_buffers = dxgl_swap_buffers,
-        .flipped = true,
         .external_swapchain = &empty_swapchain_fns,
     };
 
+    gl->flipped = true;
     if (!ra_gl_ctx_init(ctx, gl, params))
         goto fail;
 

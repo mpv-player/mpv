@@ -56,7 +56,7 @@ const static uint16_t ac3_bitrate_tab[19] = {
 };
 
 struct f_opts {
-    int add_iec61937_header;
+    bool add_iec61937_header;
     int bit_rate;
     int min_channel_num;
     char *encoder;
@@ -418,13 +418,13 @@ const struct mp_user_filter_entry af_lavcac3enc = {
         .name = "lavcac3enc",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
-            .add_iec61937_header = 1,
+            .add_iec61937_header = true,
             .bit_rate = 640,
             .min_channel_num = 3,
             .encoder = "ac3",
         },
         .options = (const struct m_option[]) {
-            {"tospdif", OPT_FLAG(add_iec61937_header)},
+            {"tospdif", OPT_BOOL(add_iec61937_header)},
             {"bitrate", OPT_CHOICE(bit_rate,
                 {"auto", 0}, {"default", 0}), M_RANGE(32, 640)},
             {"minch", OPT_INT(min_channel_num), M_RANGE(2, 6)},

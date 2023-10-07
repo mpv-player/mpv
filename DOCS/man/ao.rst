@@ -128,7 +128,7 @@ Available audio output drivers are:
         Set the audio buffer size in milliseconds. A higher value buffers
         more data, and has a lower probability of buffer underruns. A smaller
         value makes the audio stream react faster, e.g. to playback speed
-        changes.
+        changes. "native" lets the sound server determine buffers.
 
     ``--pulse-latency-hacks=<yes|no>``
         Enable hacks to workaround PulseAudio timing bugs (default: no). If
@@ -154,12 +154,17 @@ Available audio output drivers are:
         Set the audio buffer size in milliseconds. A higher value buffers
         more data, and has a lower probability of buffer underruns. A smaller
         value makes the audio stream react faster, e.g. to playback speed
-        changes.
+        changes. "native" lets the sound server determine buffers.
 
     ``--pipewire-remote=<remote>``
         Specify the PipeWire remote daemon name to connect to via local UNIX
         sockets.
         An empty <remote> string uses the default remote named ``pipewire-0``.
+
+    ``--pipewire-volume-mode=<channel|global>``
+        Specify if the ``ao-volume`` property should apply to the channel
+        volumes or the global volume.
+        By default the channel volumes are used.
 
 ``sdl``
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL

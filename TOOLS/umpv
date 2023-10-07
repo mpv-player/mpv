@@ -32,6 +32,7 @@ import socket
 import errno
 import subprocess
 import string
+import shlex
 
 files = sys.argv[1:]
 
@@ -52,7 +53,7 @@ def make_abs(filename):
     return filename
 files = (make_abs(f) for f in files)
 
-SOCK = os.path.join(os.getenv("HOME"), ".umpv_socket")
+SOCK = os.path.join(os.getenv("XDG_RUNTIME_DIR", os.getenv("HOME")), ".umpv_socket")
 
 sock = None
 try:
@@ -78,7 +79,7 @@ if sock:
 else:
     # Let mpv recreate socket if it doesn't already exist.
 
-    opts = (os.getenv("MPV") or "mpv").split()
+    opts = shlex.split(os.getenv("MPV") or "mpv")
     opts.extend(["--no-terminal", "--force-window", "--input-ipc-server=" + SOCK,
                  "--"])
     opts.extend(files)

@@ -22,7 +22,6 @@
 #include <assert.h>
 #include <pthread.h>
 
-#include "config.h"
 #include "demux/demux.h"
 #include "sd.h"
 #include "dec_sub.h"
@@ -161,18 +160,18 @@ static struct sd *init_decoder(struct dec_sub *sub)
 // do not need to acquire locks.
 // Ownership of attachments goes to the callee, and is released with
 // talloc_free() (even on failure).
-struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
+struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
                            struct attachment_list *attachments, int order)
 {
-    assert(sh && sh->type == STREAM_SUB);
+    assert(track->stream && track->stream->type == STREAM_SUB);
 
     struct dec_sub *sub = talloc(NULL, struct dec_sub);
     *sub = (struct dec_sub){
         .log = mp_log_new(sub, global->log, "sub"),
         .global = global,
         .opts_cache = m_config_cache_alloc(sub, global, &mp_subtitle_sub_opts),
-        .sh = sh,
-        .codec = sh->codec,
+        .sh = track->stream,
+        .codec = track->stream->codec,
         .attachments = talloc_steal(sub, attachments),
         .play_dir = 1,
         .order = order,
@@ -270,7 +269,7 @@ static bool is_new_segment(struct dec_sub *sub, struct demux_packet *p)
 // Read packets from the demuxer stream passed to sub_create(). Return true if
 // enough packets were read, false if the player should wait until the demuxer
 // signals new packets available (and then should retry).
-bool sub_read_packets(struct dec_sub *sub, double video_pts)
+bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
 {
     bool r = true;
     pthread_mutex_lock(&sub->lock);
@@ -292,7 +291,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
             break;
 
         // (Use this mechanism only if sub_delay matters to avoid corner cases.)
-        double min_pts = sub->opts->sub_delay < 0 ? video_pts : MP_NOPTS_VALUE;
+        double min_pts = sub->opts->sub_delay < 0 || force ? video_pts : MP_NOPTS_VALUE;
 
         struct demux_packet *pkt;
         int st = demux_read_packet_async_until(sub->sh, min_pts, &pkt);
@@ -366,6 +365,15 @@ char *sub_get_text(struct dec_sub *sub, double pts, enum sd_text_type type)
     return text;
 }
 
+char *sub_ass_get_extradata(struct dec_sub *sub)
+{
+    if (strcmp(sub->sd->codec->codec, "ass") != 0)
+        return NULL;
+    char *extradata = sub->sd->codec->extradata;
+    int extradata_size = sub->sd->codec->extradata_size;
+    return talloc_strndup(NULL, extradata, extradata_size);
+}
+
 struct sd_times sub_get_times(struct dec_sub *sub, double pts)
 {
     pthread_mutex_lock(&sub->lock);
@@ -422,10 +430,18 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
         if (r == CONTROL_OK)
             a[0] = pts_from_subtitle(sub, arg2[0]);
         break;
-    case SD_CTRL_UPDATE_OPTS:
+    }
+    case SD_CTRL_UPDATE_OPTS: {
+        int flags = (uintptr_t)arg;
         if (m_config_cache_update(sub->opts_cache))
             update_subtitle_speed(sub);
         propagate = true;
+        if (flags & UPDATE_SUB_HARD) {
+            // forget about the previous preload because
+            // UPDATE_SUB_HARD will cause a sub reinit
+            // that clears all preloaded sub packets
+            sub->preload_attempted = false;
+        }
         break;
     }
     default:

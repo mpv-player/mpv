@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include "common/msg.h"
 #include "input/input.h"
 #include "misc/json.h"
@@ -128,7 +126,7 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
     bool async = false;
     bool send_reply = true;
 
-    rc = json_parse(ta_parent, &msg_node, &src, 50);
+    rc = json_parse(ta_parent, &msg_node, &src, MAX_JSON_DEPTH);
     if (rc < 0) {
         mp_err(log, "malformed JSON received: '%s'\n", src);
         rc = MPV_ERROR_INVALID_PARAMETER;

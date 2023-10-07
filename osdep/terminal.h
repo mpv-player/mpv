@@ -23,6 +23,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#define TERM_ESC_GOTO_YX            "\033[%d;%df"
+#define TERM_ESC_HIDE_CURSOR        "\033[?25l"
+#define TERM_ESC_RESTORE_CURSOR     "\033[?25h"
+
+#define TERM_ESC_CLEAR_SCREEN       "\033[2J"
+#define TERM_ESC_ALT_SCREEN         "\033[?1049h"
+#define TERM_ESC_NORMAL_SCREEN      "\033[?1049l"
+
 struct input_ctx;
 
 /* Global initialization for terminal output. */

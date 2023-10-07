@@ -206,10 +206,8 @@ static bool glx_check_visible(struct ra_ctx *ctx)
 static void glx_swap_buffers(struct ra_ctx *ctx)
 {
     glXSwapBuffers(ctx->vo->x11->display, ctx->vo->x11->window);
-    if (ctx->vo->x11->use_present) {
-        vo_x11_present(ctx->vo);
+    if (ctx->vo->x11->use_present)
         present_sync_swap(ctx->vo->x11->present);
-    }
 }
 
 static void glx_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)

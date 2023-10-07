@@ -21,6 +21,9 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/bswap.h>
 #include <libavutil/opt.h>
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 37, 100)
+#include <libavutil/pixdesc.h>
+#endif
 
 #include "config.h"
 
@@ -49,9 +52,9 @@ struct sws_opts {
     int chr_hshift;
     float chr_sharpen;
     float lum_sharpen;
-    int fast;
-    int bitexact;
-    int zimg;
+    bool fast;
+    bool bitexact;
+    bool zimg;
 };
 
 #define OPT_BASE_STRUCT struct sws_opts
@@ -75,15 +78,15 @@ const struct m_sub_options sws_conf = {
         {"chs", OPT_INT(chr_hshift)},
         {"ls", OPT_FLOAT(lum_sharpen), M_RANGE(-100.0, 100.0)},
         {"cs", OPT_FLOAT(chr_sharpen), M_RANGE(-100.0, 100.0)},
-        {"fast", OPT_FLAG(fast)},
-        {"bitexact", OPT_FLAG(bitexact)},
-        {"allow-zimg", OPT_FLAG(zimg)},
+        {"fast", OPT_BOOL(fast)},
+        {"bitexact", OPT_BOOL(bitexact)},
+        {"allow-zimg", OPT_BOOL(zimg)},
         {0}
     },
     .size = sizeof(struct sws_opts),
     .defaults = &(const struct sws_opts){
         .scaler = SWS_LANCZOS,
-        .zimg = 1,
+        .zimg = true,
     },
 };
 
@@ -124,11 +127,13 @@ bool mp_sws_supported_format(int imgfmt)
         && sws_isSupportedOutput(av_format);
 }
 
+#if HAVE_ZIMG
 static bool allow_zimg(struct mp_sws_context *ctx)
 {
     return ctx->force_scaler == MP_SWS_ZIMG ||
            (ctx->force_scaler == MP_SWS_AUTO && ctx->allow_zimg);
 }
+#endif
 
 static bool allow_sws(struct mp_sws_context *ctx)
 {
@@ -208,6 +213,9 @@ struct mp_sws_context *mp_sws_alloc(void *talloc_ctx)
 // if the user changes any options.
 void mp_sws_enable_cmdline_opts(struct mp_sws_context *ctx, struct mpv_global *g)
 {
+    // Should only ever be NULL for tests.
+    if (!g)
+        return;
     if (ctx->opts_cache)
         return;
 
@@ -303,6 +311,16 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     int cr_src = mp_chroma_location_to_av(src.chroma_location);
     int cr_dst = mp_chroma_location_to_av(dst.chroma_location);
     int cr_xpos, cr_ypos;
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 37, 100)
+    if (av_chroma_location_enum_to_pos(&cr_xpos, &cr_ypos, cr_src) >= 0) {
+        av_opt_set_int(ctx->sws, "src_h_chr_pos", cr_xpos, 0);
+        av_opt_set_int(ctx->sws, "src_v_chr_pos", cr_ypos, 0);
+    }
+    if (av_chroma_location_enum_to_pos(&cr_xpos, &cr_ypos, cr_dst) >= 0) {
+        av_opt_set_int(ctx->sws, "dst_h_chr_pos", cr_xpos, 0);
+        av_opt_set_int(ctx->sws, "dst_v_chr_pos", cr_ypos, 0);
+    }
+#else
     if (avcodec_enum_to_chroma_pos(&cr_xpos, &cr_ypos, cr_src) >= 0) {
         av_opt_set_int(ctx->sws, "src_h_chr_pos", cr_xpos, 0);
         av_opt_set_int(ctx->sws, "src_v_chr_pos", cr_ypos, 0);
@@ -311,6 +329,7 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         av_opt_set_int(ctx->sws, "dst_h_chr_pos", cr_xpos, 0);
         av_opt_set_int(ctx->sws, "dst_v_chr_pos", cr_ypos, 0);
     }
+#endif
 
     // This can fail even with normal operation, e.g. if a conversion path
     // simply does not support these settings.
@@ -323,7 +342,10 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     if (sws_init_context(ctx->sws, ctx->src_filter, ctx->dst_filter) < 0)
         return -1;
 
+#if HAVE_ZIMG
 success:
+#endif
+
     ctx->force_reload = false;
     *ctx->cached = *ctx;
     return 1;
@@ -384,6 +406,16 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
     if (ctx->zimg_ok)
         return mp_zimg_convert(ctx->zimg, dst, src) ? 0 : -1;
 #endif
+
+    if (src->params.color.space == MP_CSP_XYZ && dst->params.color.space != MP_CSP_XYZ) {
+        // swsscale has hardcoded gamma 2.2 internally and 2.6 for XYZ
+        dst->params.color.gamma = MP_CSP_TRC_GAMMA22;
+        // and sRGB primaries...
+        dst->params.color.primaries = MP_CSP_PRIM_BT_709;
+        // it doesn't adjust white point though, but it is not worth to support
+        // this case. It would require custom prim with equal energy white point
+        // and sRGB primaries.
+    }
 
     struct mp_image *a_src = check_alignment(ctx->log, &ctx->aligned_src, src);
     struct mp_image *a_dst = check_alignment(ctx->log, &ctx->aligned_dst, dst);

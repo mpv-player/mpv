@@ -31,7 +31,7 @@ will be replaced with TA calls, and the talloc wrapper will be removed.
 
 Documentation for the talloc API is here:
 
-    http://talloc.samba.org/talloc/doc/html/modules.html
+    https://talloc.samba.org/talloc/doc/html/group__talloc.html
 
 There are some minor differences with mpv's talloc bridge. mpv calls abort()
 on allocation failures, and the talloc_set_destructor() signature is slightly

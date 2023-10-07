@@ -41,7 +41,8 @@ struct xrandr_display {
     double fps;
     char *name;
     bool overlaps;
-    int atom_id;
+    int atom_id; // offset by location of primary
+    int screen;
 };
 
 struct vo_x11_state {
@@ -65,7 +66,7 @@ struct vo_x11_state {
 
     struct xrandr_display displays[MAX_DISPLAYS];
     int num_displays;
-    int current_icc_screen;
+    int current_screen;
 
     int xrandr_event;
     bool has_mesa;
@@ -118,9 +119,8 @@ struct vo_x11_state {
     bool size_changed_during_fs;
     bool pos_changed_during_fs;
 
-    /* The geometry/autofit option was changed while the window was maximized.
-     * Wait until the state changes to resize. */
-    bool pending_geometry_change;
+    /* One of the autofit/geometry options changed at runtime. */
+    bool geometry_change;
 
     XComposeStatus compose_status;
 
@@ -142,7 +142,7 @@ struct vo_x11_state {
     Atom icc_profile_property;
 };
 
-int vo_x11_init(struct vo *vo);
+bool vo_x11_init(struct vo *vo);
 void vo_x11_uninit(struct vo *vo);
 void vo_x11_check_events(struct vo *vo);
 bool vo_x11_screen_is_composited(struct vo *vo);

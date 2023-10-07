@@ -17,7 +17,6 @@
 
 #include <CoreAudio/HostTime.h>
 
-#include "config.h"
 #include "ao.h"
 #include "internal.h"
 #include "audio/format.h"
@@ -37,7 +36,7 @@ struct priv {
     AudioStreamBasicDescription original_asbd;
     AudioStreamID original_asbd_stream;
 
-    int change_physical_format;
+    bool change_physical_format;
 };
 
 static int64_t ca_get_hardware_latency(struct ao *ao) {
@@ -83,7 +82,7 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     return noErr;
 }
 
-static int get_volume(struct ao *ao, struct ao_control_vol *vol) {
+static int get_volume(struct ao *ao, float *vol) {
     struct priv *p = ao->priv;
     float auvol;
     OSStatus err =
@@ -91,15 +90,15 @@ static int get_volume(struct ao *ao, struct ao_control_vol *vol) {
                               kAudioUnitScope_Global, 0, &auvol);
 
     CHECK_CA_ERROR("could not get HAL output volume");
-    vol->left = vol->right = auvol * 100.0;
+    *vol = auvol * 100.0;
     return CONTROL_TRUE;
 coreaudio_error:
     return CONTROL_ERROR;
 }
 
-static int set_volume(struct ao *ao, struct ao_control_vol *vol) {
+static int set_volume(struct ao *ao, float *vol) {
     struct priv *p = ao->priv;
-    float auvol = (vol->left + vol->right) / 200.0;
+    float auvol = *vol / 100.0;
     OSStatus err =
         AudioUnitSetParameter(p->audio_unit, kHALOutputParam_Volume,
                               kAudioUnitScope_Global, 0, auvol, 0);
@@ -314,11 +313,11 @@ coreaudio_error:
     return false;
 }
 
-static void stop(struct ao *ao)
+static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    OSStatus err = AudioOutputUnitStop(p->audio_unit);
-    CHECK_CA_WARN("can't stop audio unit");
+    OSStatus err = AudioUnitReset(p->audio_unit, kAudioUnitScope_Global, 0);
+    CHECK_CA_WARN("can't reset audio unit");
 }
 
 static void start(struct ao *ao)
@@ -415,14 +414,14 @@ const struct ao_driver audio_out_coreaudio = {
     .uninit         = uninit,
     .init           = init,
     .control        = control,
-    .reset          = stop,
+    .reset          = reset,
     .start          = start,
     .hotplug_init   = hotplug_init,
     .hotplug_uninit = hotplug_uninit,
     .list_devs      = ca_get_device_list,
     .priv_size      = sizeof(struct priv),
     .options = (const struct m_option[]){
-        {"change-physical-format", OPT_FLAG(change_physical_format)},
+        {"change-physical-format", OPT_BOOL(change_physical_format)},
         {0}
     },
     .options_prefix = "coreaudio",

@@ -260,8 +260,7 @@ static void precreate_graph(struct lavfi *c, bool first_init)
     c->failed = false;
 
     c->graph = avfilter_graph_alloc();
-    if (!c->graph)
-        abort();
+    MP_HANDLE_OOM(c->graph);
 
     if (mp_set_avopts(c->log, c->graph, c->graph_opts) < 0)
         goto error;
@@ -815,7 +814,8 @@ static bool lavfi_command(struct mp_filter *f, struct mp_filter_command *cmd)
 
     switch (cmd->type) {
     case MP_FILTER_COMMAND_TEXT: {
-        return avfilter_graph_send_command(c->graph, "all", cmd->cmd, cmd->arg,
+        return avfilter_graph_send_command(c->graph, cmd->target,
+                                           cmd->cmd, cmd->arg,
                                            &(char){0}, 0, 0) >= 0;
     }
     case MP_FILTER_COMMAND_GET_META: {
@@ -852,8 +852,7 @@ static struct lavfi *lavfi_alloc(struct mp_filter *parent)
     c->log = f->log;
     c->public.f = f;
     c->tmp_frame = av_frame_alloc();
-    if (!c->tmp_frame)
-        abort();
+    MP_HANDLE_OOM(c->tmp_frame);
 
     return c;
 }
@@ -948,7 +947,7 @@ struct lavfi_user_opts {
     char *filter_name;
     char **filter_opts;
 
-    int fix_pts;
+    bool fix_pts;
 
     char *hwdec_interop;
 };
@@ -983,9 +982,13 @@ static bool is_usable(const AVFilter *filter, int media_type)
     int nb_inputs  = avfilter_pad_count(filter->inputs),
         nb_outputs = avfilter_pad_count(filter->outputs);
 #endif
-    return nb_inputs == 1 && nb_outputs == 1 &&
-           avfilter_pad_get_type(filter->inputs, 0) == media_type &&
-           avfilter_pad_get_type(filter->outputs, 0) == media_type;
+    bool input_ok = filter->flags & AVFILTER_FLAG_DYNAMIC_INPUTS;
+    bool output_ok = filter->flags & AVFILTER_FLAG_DYNAMIC_OUTPUTS;
+    if (nb_inputs == 1)
+        input_ok = avfilter_pad_get_type(filter->inputs, 0) == media_type;
+    if (nb_outputs == 1)
+        output_ok = avfilter_pad_get_type(filter->outputs, 0) == media_type;
+    return input_ok && output_ok;
 }
 
 bool mp_lavfi_is_usable(const char *name, int media_type)
@@ -1121,7 +1124,7 @@ const struct mp_user_filter_entry af_lavfi = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .options = (const m_option_t[]){
             {"graph", OPT_STRING(graph)},
-            {"fix-pts", OPT_FLAG(fix_pts)},
+            {"fix-pts", OPT_BOOL(fix_pts)},
             {"o", OPT_KEYVALUELIST(avopts)},
             {"hwdec_interop",
              OPT_STRING_VALIDATE(hwdec_interop,

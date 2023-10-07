@@ -1,6 +1,6 @@
 #include "common/common.h"
 #include "misc/linked_list.h"
-#include "tests.h"
+#include "test_utils.h"
 
 struct list_item {
     int v;
@@ -55,7 +55,7 @@ static bool do_check_list(struct the_list *lst, int *c, int num_c)
     return true;
 }
 
-static void run(struct test_ctx *ctx)
+int main(void)
 {
     struct the_list lst = {0};
     struct list_item e1 = {1};
@@ -156,9 +156,5 @@ static void run(struct test_ctx *ctx)
     LL_INSERT_AFTER(list_node, &lst, STUPID_SHIT(&e1), &e6);
 
     check_list(3, 4, 5, 2, 1, 6);
+    return 0;
 }
-
-const struct unittest test_linked_list = {
-    .name = "linked_list",
-    .run = run,
-};

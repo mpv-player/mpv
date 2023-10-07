@@ -22,8 +22,6 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "config.h"
-
 #include "osdep/io.h"
 #include "common/global.h"
 #include "common/msg.h"
@@ -196,13 +194,15 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 // append the playlist to the local args
                 char *param0 = bstrdup0(NULL, p.param);
                 struct playlist *pl = playlist_parse_file(param0, NULL, global);
-                talloc_free(param0);
                 if (!pl) {
                     MP_FATAL(config, "Error reading playlist '%.*s'\n",
                              BSTR_P(p.param));
+                    talloc_free(param0);
                     goto err_out;
                 }
                 playlist_transfer_entries(files, pl);
+                playlist_populate_playlist_path(files, param0);
+                talloc_free(param0);
                 talloc_free(pl);
                 continue;
             }

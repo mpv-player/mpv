@@ -29,7 +29,7 @@ struct vo_android_state {
     ANativeWindow *native_window;
 };
 
-int vo_android_init(struct vo *vo)
+bool vo_android_init(struct vo *vo)
 {
     vo->android = talloc_zero(vo, struct vo_android_state);
     struct vo_android_state *ctx = vo->android;
@@ -44,6 +44,7 @@ int vo_android_init(struct vo *vo)
         goto fail;
     }
 
+    assert(vo->opts->WinID != 0 && vo->opts->WinID != -1);
     jobject surface = (jobject)(intptr_t)vo->opts->WinID;
     ctx->native_window = ANativeWindow_fromSurface(env, surface);
     if (!ctx->native_window) {
@@ -51,11 +52,11 @@ int vo_android_init(struct vo *vo)
         goto fail;
     }
 
-    return 1;
+    return true;
 fail:
     talloc_free(ctx);
     vo->android = NULL;
-    return 0;
+    return false;
 }
 
 void vo_android_uninit(struct vo *vo)

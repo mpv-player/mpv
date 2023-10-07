@@ -38,15 +38,13 @@
 
 #define ALGO_PLAIN 1
 #define ALGO_HALF_BLOCKS 2
-#define ESC_HIDE_CURSOR "\033[?25l"
-#define ESC_RESTORE_CURSOR "\033[?25h"
-#define ESC_CLEAR_SCREEN "\033[2J"
-#define ESC_CLEAR_COLORS "\033[0m"
-#define ESC_GOTOXY "\033[%d;%df"
-#define ESC_COLOR_BG "\033[48;2"
-#define ESC_COLOR_FG "\033[38;2"
-#define ESC_COLOR256_BG "\033[48;5"
-#define ESC_COLOR256_FG "\033[38;5"
+
+#define TERM_ESC_CLEAR_COLORS           "\033[0m"
+#define TERM_ESC_COLOR256_BG            "\033[48;5"
+#define TERM_ESC_COLOR256_FG            "\033[38;5"
+#define TERM_ESC_COLOR24BIT_BG          "\033[48;2"
+#define TERM_ESC_COLOR24BIT_FG          "\033[38;2"
+
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
@@ -54,24 +52,7 @@ struct vo_tct_opts {
     int algo;
     int width;   // 0 -> default
     int height;  // 0 -> default
-    int term256;  // 0 -> true color
-};
-
-#define OPT_BASE_STRUCT struct vo_tct_opts
-static const struct m_sub_options vo_tct_conf = {
-    .opts = (const m_option_t[]) {
-        {"vo-tct-algo", OPT_CHOICE(algo,
-            {"plain", ALGO_PLAIN},
-            {"half-blocks", ALGO_HALF_BLOCKS})},
-        {"vo-tct-width", OPT_INT(width)},
-        {"vo-tct-height", OPT_INT(height)},
-        {"vo-tct-256", OPT_FLAG(term256)},
-        {0}
-    },
-    .defaults = &(const struct vo_tct_opts) {
-        .algo = ALGO_HALF_BLOCKS,
-    },
-    .size = sizeof(struct vo_tct_opts),
+    bool term256;  // 0 -> true color
 };
 
 struct lut_item {
@@ -80,7 +61,7 @@ struct lut_item {
 };
 
 struct priv {
-    struct vo_tct_opts *opts;
+    struct vo_tct_opts opts;
     size_t buffer_size;
     int swidth;
     int sheight;
@@ -161,19 +142,19 @@ static void write_plain(
     const int ty = (dheight - sheight) / 2;
     for (int y = 0; y < sheight; y++) {
         const unsigned char *row = source + y * source_stride;
-        printf(ESC_GOTOXY, ty + y, tx);
+        printf(TERM_ESC_GOTO_YX, ty + y, tx);
         for (int x = 0; x < swidth; x++) {
             unsigned char b = *row++;
             unsigned char g = *row++;
             unsigned char r = *row++;
             if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r, g, b));
+                print_seq1(lut, TERM_ESC_COLOR256_BG, rgb_to_x256(r, g, b));
             } else {
-                print_seq3(lut, ESC_COLOR_BG, r, g, b);
+                print_seq3(lut, TERM_ESC_COLOR24BIT_BG, r, g, b);
             }
             printf(" ");
         }
-        printf(ESC_CLEAR_COLORS);
+        printf(TERM_ESC_CLEAR_COLORS);
     }
     printf("\n");
 }
@@ -190,7 +171,7 @@ static void write_half_blocks(
     for (int y = 0; y < sheight * 2; y += 2) {
         const unsigned char *row_up = source + y * source_stride;
         const unsigned char *row_down = source + (y + 1) * source_stride;
-        printf(ESC_GOTOXY, ty + y / 2, tx);
+        printf(TERM_ESC_GOTO_YX, ty + y / 2, tx);
         for (int x = 0; x < swidth; x++) {
             unsigned char b_up = *row_up++;
             unsigned char g_up = *row_up++;
@@ -199,15 +180,15 @@ static void write_half_blocks(
             unsigned char g_down = *row_down++;
             unsigned char r_down = *row_down++;
             if (term256) {
-                print_seq1(lut, ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
-                print_seq1(lut, ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
+                print_seq1(lut, TERM_ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
+                print_seq1(lut, TERM_ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
             } else {
-                print_seq3(lut, ESC_COLOR_BG, r_up, g_up, b_up);
-                print_seq3(lut, ESC_COLOR_FG, r_down, g_down, b_down);
+                print_seq3(lut, TERM_ESC_COLOR24BIT_BG, r_up, g_up, b_up);
+                print_seq3(lut, TERM_ESC_COLOR24BIT_FG, r_down, g_down, b_down);
             }
             printf("\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
         }
-        printf(ESC_CLEAR_COLORS);
+        printf(TERM_ESC_CLEAR_COLORS);
     }
     printf("\n");
 }
@@ -219,10 +200,10 @@ static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
 
     terminal_get_size(out_width, out_height);
 
-    if (p->opts->width > 0)
-        *out_width = p->opts->width;
-    if (p->opts->height > 0)
-        *out_height = p->opts->height;
+    if (p->opts.width > 0)
+        *out_width = p->opts.width;
+    if (p->opts.height > 0)
+        *out_height = p->opts.height;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -245,7 +226,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         .p_h = 1,
     };
 
-    const int mul = (p->opts->algo == ALGO_PLAIN ? 1 : 2);
+    const int mul = (p->opts.algo == ALGO_PLAIN ? 1 : 2);
     if (p->frame)
         talloc_free(p->frame);
     p->frame = mp_image_alloc(IMGFMT, p->swidth, p->sheight * mul);
@@ -255,19 +236,20 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    printf(ESC_HIDE_CURSOR);
-    printf(ESC_CLEAR_SCREEN);
+    printf(TERM_ESC_CLEAR_SCREEN);
+
     vo->want_redraw = true;
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
-    struct mp_image src = *mpi;
+    struct mp_image *src = frame->current;
+    if (!src)
+        return;
     // XXX: pan, crop etc.
-    mp_sws_scale(p->sws, p->frame, &src);
-    talloc_free(mpi);
+    mp_sws_scale(p->sws, p->frame, src);
 }
 
 static void flip_page(struct vo *vo)
@@ -280,25 +262,24 @@ static void flip_page(struct vo *vo)
     if (vo->dwidth != width || vo->dheight != height)
         reconfig(vo, vo->params);
 
-    if (p->opts->algo == ALGO_PLAIN) {
+    if (p->opts.algo == ALGO_PLAIN) {
         write_plain(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256, p->lut);
+            p->opts.term256, p->lut);
     } else {
         write_half_blocks(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts->term256, p->lut);
+            p->opts.term256, p->lut);
     }
     fflush(stdout);
 }
 
 static void uninit(struct vo *vo)
 {
-    printf(ESC_RESTORE_CURSOR);
-    printf(ESC_CLEAR_SCREEN);
-    printf(ESC_GOTOXY, 0, 0);
+    printf(TERM_ESC_RESTORE_CURSOR);
+    printf(TERM_ESC_NORMAL_SCREEN);
     struct priv *p = vo->priv;
     if (p->frame)
         talloc_free(p->frame);
@@ -311,16 +292,18 @@ static int preinit(struct vo *vo)
     vo->monitor_par = vo->opts->monitor_pixel_aspect * 2;
 
     struct priv *p = vo->priv;
-    p->opts = mp_get_config_group(vo, vo->global, &vo_tct_conf);
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
 
     for (int i = 0; i < 256; ++i) {
         char buff[8];
-        p->lut[i].width = sprintf(buff, ";%d", i);
+        p->lut[i].width = snprintf(buff, sizeof(buff), ";%d", i);
         memcpy(p->lut[i].str, buff, 4); // some strings may not end on a null byte, but that's ok.
     }
+
+    printf(TERM_ESC_HIDE_CURSOR);
+    printf(TERM_ESC_ALT_SCREEN);
 
     return 0;
 }
@@ -335,6 +318,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct vo_driver video_out_tct = {
     .name = "tct",
     .description = "true-color terminals",
@@ -342,9 +327,21 @@ const struct vo_driver video_out_tct = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
-    .global_opts = &vo_tct_conf,
+    .priv_defaults = &(const struct priv) {
+        .opts.algo = ALGO_HALF_BLOCKS,
+    },
+    .options = (const m_option_t[]) {
+        {"algo", OPT_CHOICE(opts.algo,
+            {"plain", ALGO_PLAIN},
+            {"half-blocks", ALGO_HALF_BLOCKS})},
+        {"width", OPT_INT(opts.width)},
+        {"height", OPT_INT(opts.height)},
+        {"256", OPT_BOOL(opts.term256)},
+        {0}
+    },
+    .options_prefix = "vo-tct",
 };

@@ -20,8 +20,9 @@
 
 #include "m_config_frontend.h"
 
-int m_config_parse_config_file(m_config_t* config, const char *conffile,
-                               char *initial_section, int flags);
+int m_config_parse_config_file(m_config_t* config, struct mpv_global *global,
+                               const char *conffile, char *initial_section,
+                               int flags);
 
 int m_config_parse(m_config_t *config, const char *location, bstr data,
                    char *initial_section, int flags);

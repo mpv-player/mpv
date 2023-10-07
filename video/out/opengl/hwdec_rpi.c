@@ -130,7 +130,7 @@ static void update_overlay(struct ra_hwdec *hw, bool check_window_only)
     struct mp_rect dst = p->dst;
 
     int defs[4] = {0, 0, 0, 0};
-    int *z = ra_get_native_resource(hw->ra, "MPV_RPI_WINDOW");
+    int *z = ra_get_native_resource(hw->ra_ctx->ra, "MPV_RPI_WINDOW");
     if (!z)
         z = defs;
 

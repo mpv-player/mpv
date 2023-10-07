@@ -31,11 +31,10 @@ struct mp_codec_params;
 struct AVDictionary;
 struct mp_log;
 
-int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size);
 enum AVMediaType mp_to_av_stream_type(int type);
-AVCodecParameters *mp_codec_params_to_av(struct mp_codec_params *c);
-int mp_set_avctx_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c);
-AVRational mp_get_codec_timebase(struct mp_codec_params *c);
+AVCodecParameters *mp_codec_params_to_av(const struct mp_codec_params *c);
+int mp_set_avctx_codec_headers(AVCodecContext *avctx, const struct mp_codec_params *c);
+AVRational mp_get_codec_timebase(const struct mp_codec_params *c);
 void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb);
 int64_t mp_pts_to_av(double mp_pts, AVRational *tb);
 double mp_pts_from_av(int64_t av_pts, AVRational *tb);
@@ -50,5 +49,6 @@ void mp_set_avdict(struct AVDictionary **dict, char **kv);
 void mp_avdict_print_unset(struct mp_log *log, int msgl, struct AVDictionary *d);
 int mp_set_avopts(struct mp_log *log, void *avobj, char **kv);
 int mp_set_avopts_pos(struct mp_log *log, void *avobj, void *posargs, char **kv);
+void mp_free_av_packet(AVPacket **pkt);
 
 #endif

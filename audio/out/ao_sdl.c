@@ -18,7 +18,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
 #include "audio/format.h"
 #include "mpv_talloc.h"
 #include "ao.h"

@@ -28,7 +28,6 @@
 
 #include <pulse/pulseaudio.h>
 
-#include "config.h"
 #include "audio/format.h"
 #include "common/msg.h"
 #include "options/m_option.h"
@@ -57,8 +56,8 @@ struct priv {
 
     char *cfg_host;
     int cfg_buffer;
-    int cfg_latency_hacks;
-    int cfg_allow_suspended;
+    bool cfg_latency_hacks;
+    bool cfg_allow_suspended;
 };
 
 #define GENERIC_ERR_MSG(str) \
@@ -680,14 +679,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         // we naively copied the struct, without updating pointers etc.
         // Pointers might point to invalid data, accessors might fail.
         if (cmd == AOCONTROL_GET_VOLUME) {
-            ao_control_vol_t *vol = arg;
-            if (priv->pi.volume.channels != 2)
-                vol->left = vol->right =
-                    VOL_PA2MP(pa_cvolume_avg(&priv->pi.volume));
-            else {
-                vol->left = VOL_PA2MP(priv->pi.volume.values[0]);
-                vol->right = VOL_PA2MP(priv->pi.volume.values[1]);
-            }
+            float *vol = arg;
+            *vol = VOL_PA2MP(pa_cvolume_avg(&priv->pi.volume));
         } else if (cmd == AOCONTROL_GET_MUTE) {
             bool *mute = arg;
             *mute = priv->pi.mute;
@@ -701,16 +694,11 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         priv->retval = 0;
         uint32_t stream_index = pa_stream_get_index(priv->stream);
         if (cmd == AOCONTROL_SET_VOLUME) {
-            const ao_control_vol_t *vol = arg;
+            const float *vol = arg;
             struct pa_cvolume volume;
 
             pa_cvolume_reset(&volume, ao->channels.num);
-            if (volume.channels != 2)
-                pa_cvolume_set(&volume, volume.channels, VOL_MP2PA(vol->left));
-            else {
-                volume.values[0] = VOL_MP2PA(vol->left);
-                volume.values[1] = VOL_MP2PA(vol->right);
-            }
+            pa_cvolume_set(&volume, volume.channels, VOL_MP2PA(*vol));
             if (!waitop(priv, pa_context_set_sink_input_volume(priv->context,
                                                                stream_index,
                                                                &volume,
@@ -729,8 +717,9 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
                 GENERIC_ERR_MSG("pa_context_set_sink_input_mute() failed");
                 return CONTROL_ERROR;
             }
-        } else
-            abort();
+        } else {
+            MP_ASSERT_UNREACHABLE();
+        }
         return CONTROL_OK;
     }
 
@@ -821,8 +810,8 @@ const struct ao_driver audio_out_pulse = {
         {"host", OPT_STRING(cfg_host)},
         {"buffer", OPT_CHOICE(cfg_buffer, {"native", 0}),
             M_RANGE(1, 2000)},
-        {"latency-hacks", OPT_FLAG(cfg_latency_hacks)},
-        {"allow-suspended", OPT_FLAG(cfg_allow_suspended)},
+        {"latency-hacks", OPT_BOOL(cfg_latency_hacks)},
+        {"allow-suspended", OPT_BOOL(cfg_allow_suspended)},
         {0}
     },
     .options_prefix = "pulse",

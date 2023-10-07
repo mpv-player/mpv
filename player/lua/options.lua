@@ -110,7 +110,7 @@ local function read_options(options, identifier, on_update)
 
     local function parse_opts(full, options)
         for key, val in pairs(full) do
-            if not (string.find(key, prefix, 1, true) == nil) then
+            if string.find(key, prefix, 1, true) == 1 then
                 key = string.sub(key, string.len(prefix)+1)
 
                 -- match found values with defaults

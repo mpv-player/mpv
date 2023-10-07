@@ -85,6 +85,7 @@ enum mp_cmd_flags {
 struct mp_cmd_arg {
     const struct m_option *type;
     union {
+        bool b;
         int i;
         int64_t i64;
         float f;

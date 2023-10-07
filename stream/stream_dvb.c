@@ -77,7 +77,7 @@ const struct m_sub_options stream_dvb_conf = {
         {"card", OPT_INT(cfg_devno), M_RANGE(0, MAX_ADAPTERS-1)},
         {"timeout", OPT_INT(cfg_timeout), M_RANGE(1, 30)},
         {"file", OPT_STRING(cfg_file), .flags = M_OPT_FILE},
-        {"full-transponder", OPT_FLAG(cfg_full_transponder)},
+        {"full-transponder", OPT_BOOL(cfg_full_transponder)},
         {"channel-switch-offset", OPT_INT(cfg_channel_switch_offset),
             .flags = UPDATE_DVB_PROG},
         {0}
@@ -85,7 +85,6 @@ const struct m_sub_options stream_dvb_conf = {
     .size = sizeof(dvb_opts_t),
     .defaults = &(const dvb_opts_t){
         .cfg_prog = NULL,
-        .cfg_devno = 0,
         .cfg_timeout = 30,
     },
 };
@@ -263,7 +262,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
     char line[CHANNEL_LINE_LEN], *colon;
 
     if (!filename)
-        return NULL;
+        return list;
 
     int fields, cnt, k;
     int has8192, has0;
@@ -276,9 +275,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
     const char *sat_conf = "%d:%c:%d:%d:%255[^:]:%255[^:]\n";
     const char *ter_conf =
         "%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
-#ifdef DVB_ATSC
     const char *atsc_conf = "%d:%255[^:]:%255[^:]:%255[^:]\n";
-#endif
     const char *vdr_conf =
         "%d:%255[^:]:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%*255[^:]:%d:%*d:%*d:%*d\n%n";
 
@@ -286,7 +283,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                filename, get_dvb_delsys(delsys));
     if ((f = fopen(filename, "r")) == NULL) {
         mp_fatal(log, "CAN'T READ CONFIG FILE %s\n", filename);
-        return NULL;
+        return list;
     }
 
     if (list == NULL) {
@@ -354,7 +351,16 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                         vpid_str, apid_str, tpid_str, &ptr->service_id,
                         &num_chars);
 
-        if (num_chars == strlen(&line[k])) {
+        bool is_vdr_conf = (num_chars == strlen(&line[k]));
+
+        // Special case: DVB-T style ZAP config also has 13 columns.
+        // Most columns should have non-numeric content, but some channel list generators insert 0
+        // if a value is not used. However, INVERSION_* should always set after frequency.
+        if (is_vdr_conf && !strncmp(vdr_par_str, "INVERSION_", 10)) {
+            is_vdr_conf = false;
+        }
+
+        if (is_vdr_conf) {
             // Modulation parsed here, not via old xine-parsing path.
             mod[0] = '\0';
             // It's a VDR-style config line.
@@ -389,6 +395,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             case SYS_DVBC_ANNEX_C:
             case SYS_ATSC:
             case SYS_DVBC_ANNEX_B:
+            case SYS_ISDBT:
                 mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
                            "FREQ: %d, SRATE: %d",
                            get_dvb_delsys(delsys),
@@ -437,9 +444,11 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 break;
             }
         } else {
+            // ZAP style channel config file.
             switch (delsys) {
             case SYS_DVBT:
             case SYS_DVBT2:
+            case SYS_ISDBT:
                 fields = sscanf(&line[k], ter_conf,
                                 &ptr->freq, inv, bw, cr, tmp_lcr, mod,
                                 transm, gi, tmp_hier, vpid_str, apid_str);
@@ -458,7 +467,6 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                            list->NUM_CHANNELS, fields, ptr->name,
                            ptr->freq, ptr->srate);
                 break;
-#ifdef DVB_ATSC
             case SYS_ATSC:
             case SYS_DVBC_ANNEX_B:
                 fields = sscanf(&line[k], atsc_conf,
@@ -467,7 +475,6 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                            get_dvb_delsys(delsys), list->NUM_CHANNELS,
                            fields, ptr->name, ptr->freq);
                 break;
-#endif
             case SYS_DVBS:
             case SYS_DVBS2:
                 fields = sscanf(&line[k], sat_conf,
@@ -558,6 +565,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
+        case SYS_ISDBT:
         case SYS_DVBC_ANNEX_A:
         case SYS_DVBC_ANNEX_C:
             if (!strcmp(inv, "INVERSION_ON")) {
@@ -591,6 +599,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
+        case SYS_ISDBT:
         case SYS_DVBC_ANNEX_A:
         case SYS_DVBC_ANNEX_C:
         case SYS_ATSC:
@@ -605,15 +614,13 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 ptr->mod = QAM_32;
             } else if (!strcmp(mod, "QAM_16")) {
                 ptr->mod = QAM_16;
-#ifdef DVB_ATSC
             } else if (!strcmp(mod, "VSB_8") || !strcmp(mod, "8VSB")) {
                 ptr->mod = VSB_8;
             } else if (!strcmp(mod, "VSB_16") || !strcmp(mod, "16VSB")) {
                 ptr->mod = VSB_16;
-#endif
             }
         }
-#ifdef DVB_ATSC
+
         /* Modulation defines real delsys for ATSC:
            Terrestrial (VSB) is SYS_ATSC, Cable (QAM) is SYS_DVBC_ANNEX_B. */
         if (delsys == SYS_ATSC || delsys == SYS_DVBC_ANNEX_B) {
@@ -627,11 +634,11 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             mp_verbose(log, "Switched to delivery system for ATSC: %s (guessed from modulation).\n",
                        get_dvb_delsys(delsys));
         }
-#endif
 
         switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
+        case SYS_ISDBT:
             if (!strcmp(bw, "BANDWIDTH_5_MHZ")) {
                 ptr->bw = BANDWIDTH_5_MHZ;
             } else if (!strcmp(bw, "BANDWIDTH_6_MHZ")) {
@@ -1191,6 +1198,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                 if (!DELSYS_IS_SET(delsys_mask[f], delsys))
                     continue; /* Skip unsupported. */
 
+                mp_verbose(log, "Searching channel list for delivery system %s\n", get_dvb_delsys(delsys));
                 switch (delsys) {
                 case SYS_DVBC_ANNEX_A:
                 case SYS_DVBC_ANNEX_C:
@@ -1206,6 +1214,9 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                     break;
                 case SYS_DVBT2:
                     conf_file_name = "channels.conf.ter";
+                    break;
+                case SYS_ISDBT:
+                    conf_file_name = "channels.conf.isdbt";
                     break;
                 case SYS_DVBS:
                     if (DELSYS_IS_SET(delsys_mask[f], SYS_DVBS2))
@@ -1259,6 +1270,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
             &delsys_mask, (sizeof(unsigned int) * MAX_FRONTENDS));
         state->adapters[state->adapters_count].list = list;
         state->adapters_count++;
+        mp_verbose(log, "Added adapter with channels to state list, contains %d adapters.\n", state->adapters_count);
     }
 
     if (state->adapters_count == 0) {

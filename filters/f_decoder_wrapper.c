@@ -27,7 +27,6 @@
 #include <libavutil/common.h>
 #include <libavutil/rational.h>
 
-#include "config.h"
 #include "options/options.h"
 #include "common/msg.h"
 #include "options/m_config.h"
@@ -54,7 +53,7 @@
 #include "filter_internal.h"
 
 struct dec_queue_opts {
-    int use_queue;
+    bool use_queue;
     int64_t max_bytes;
     int64_t max_samples;
     double max_duration;
@@ -63,7 +62,7 @@ struct dec_queue_opts {
 #define OPT_BASE_STRUCT struct dec_queue_opts
 
 static const struct m_option dec_queue_opts_list[] = {
-    {"enable", OPT_FLAG(use_queue)},
+    {"enable", OPT_BOOL(use_queue)},
     {"max-secs", OPT_DOUBLE(max_duration), M_RANGE(0, DBL_MAX)},
     {"max-bytes", OPT_BYTE_SIZE(max_bytes), M_RANGE(0, M_MAX_MEM_BYTES)},
     {"max-samples", OPT_INT64(max_samples), M_RANGE(0, DBL_MAX)},
@@ -74,7 +73,6 @@ static const struct m_sub_options vdec_queue_conf = {
     .opts = dec_queue_opts_list,
     .size = sizeof(struct dec_queue_opts),
     .defaults = &(const struct dec_queue_opts){
-        .use_queue = 0,
         .max_bytes = 512 * 1024 * 1024,
         .max_samples = 50,
         .max_duration = 2,
@@ -85,7 +83,6 @@ static const struct m_sub_options adec_queue_conf = {
     .opts = dec_queue_opts_list,
     .size = sizeof(struct dec_queue_opts),
     .defaults = &(const struct dec_queue_opts){
-        .use_queue = 0,
         .max_bytes = 1 * 1024 * 1024,
         .max_samples = 48000,
         .max_duration = 1,
@@ -96,10 +93,10 @@ static const struct m_sub_options adec_queue_conf = {
 #define OPT_BASE_STRUCT struct dec_wrapper_opts
 
 struct dec_wrapper_opts {
-    float movie_aspect;
+    double movie_aspect;
     int aspect_method;
     double force_fps;
-    int correct_pts;
+    bool correct_pts;
     int video_rotate;
     char *audio_decoders;
     char *video_decoders;
@@ -115,7 +112,7 @@ static int decoder_list_help(struct mp_log *log, const m_option_t *opt,
 
 const struct m_sub_options dec_wrapper_conf = {
     .opts = (const struct m_option[]){
-        {"correct-pts", OPT_FLAG(correct_pts)},
+        {"correct-pts", OPT_BOOL(correct_pts)},
         {"fps", OPT_DOUBLE(force_fps), M_RANGE(0, DBL_MAX)},
         {"ad", OPT_STRING(audio_decoders),
             .help = decoder_list_help},
@@ -140,7 +137,7 @@ const struct m_sub_options dec_wrapper_conf = {
     },
     .size = sizeof(struct dec_wrapper_opts),
     .defaults = &(const struct dec_wrapper_opts){
-        .correct_pts = 1,
+        .correct_pts = true,
         .movie_aspect = -1.,
         .aspect_method = 2,
         .video_reverse_size = 1 * 1024 * 1024 * 1024,
@@ -595,6 +592,25 @@ static void fix_image_params(struct priv *p,
         m.p_w = m.p_h = 1;
 
     m.stereo3d = p->codec->stereo_mode;
+
+    if (!mp_rect_equals(&p->codec->crop, &(struct mp_rect){0})) {
+        struct mp_rect crop = p->codec->crop;
+        // Offset to respect existing decoder crop.
+        crop.x0 += m.crop.x0;
+        crop.x1 += m.crop.x0;
+        crop.y0 += m.crop.y0;
+        crop.y1 += m.crop.y0;
+        // Crop has to be inside existing image bounds.
+        if (mp_image_crop_valid(&(struct mp_image_params) {
+            .w = mp_rect_w(m.crop), .h = mp_rect_h(m.crop), .crop = crop }))
+        {
+            m.crop = crop;
+        } else {
+            MP_WARN(p, "Invalid container crop %dx%d+%d+%d for %dx%d image\n",
+            mp_rect_w(crop), mp_rect_h(crop), crop.x0, crop.y0,
+            mp_rect_w(m.crop), mp_rect_h(m.crop));
+        }
+    }
 
     if (opts->video_rotate < 0) {
         m.rotate = 0;

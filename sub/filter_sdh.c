@@ -238,7 +238,7 @@ static bool skip_bracketed(struct sd_filter *sd, char **rpp, struct buffer *buf)
 // return true if parenthesized text was removed.
 // if not valid SDH read pointer and write buffer position will be unchanged
 // otherwise they point to next position after text and next write position
-static bool skip_parenthesed(struct sd_filter *sd, char **rpp, struct buffer *buf)
+static bool skip_parenthesized(struct sd_filter *sd, char **rpp, struct buffer *buf)
 {
     int filter_harder = sd->opts->sub_filter_SDH_harder;
     char *rp = *rpp;
@@ -378,7 +378,7 @@ static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t 
                     line_with_text =  true;
                 }
             } else if (rp[0] == '(') {
-                if (!skip_parenthesed(sd, &rp, buf)) {
+                if (!skip_parenthesized(sd, &rp, buf)) {
                     append(sd, buf, rp[0]);
                     rp++;
                     line_with_text =  true;

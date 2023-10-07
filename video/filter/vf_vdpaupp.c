@@ -41,8 +41,8 @@
 //       processing on the final rendering process in the VO.
 
 struct opts {
-    int deint_enabled;
-    int interlaced_only;
+    bool deint_enabled;
+    bool interlaced_only;
     struct mp_vdpau_mixer_opts opts;
 };
 
@@ -174,13 +174,13 @@ static const m_option_t vf_opts_fields[] = {
         {"temporal", 3},
         {"temporal-spatial", 4}),
         OPTDEF_INT(3)},
-    {"deint", OPT_FLAG(deint_enabled)},
-    {"chroma-deint", OPT_FLAG(opts.chroma_deint), OPTDEF_INT(1)},
-    {"pullup", OPT_FLAG(opts.pullup)},
+    {"deint", OPT_BOOL(deint_enabled)},
+    {"chroma-deint", OPT_BOOL(opts.chroma_deint), OPTDEF_INT(1)},
+    {"pullup", OPT_BOOL(opts.pullup)},
     {"denoise", OPT_FLOAT(opts.denoise), M_RANGE(0, 1)},
     {"sharpen", OPT_FLOAT(opts.sharpen), M_RANGE(-1, 1)},
     {"hqscaling", OPT_INT(opts.hqscaling), M_RANGE(0, 9)},
-    {"interlaced-only", OPT_FLAG(interlaced_only)},
+    {"interlaced-only", OPT_BOOL(interlaced_only)},
     {0}
 };
 

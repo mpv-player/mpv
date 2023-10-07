@@ -54,7 +54,7 @@ struct priv {
     jfloatArray floatarray;
     jobject bbuf;
 
-    int cfg_pcm_float;
+    bool cfg_pcm_float;
     int cfg_session_id;
 
     bool needs_timestamp_offset;
@@ -92,7 +92,6 @@ struct JNIAudioTrack {
     jmethodID pause;
     jmethodID write;
     jmethodID writeFloat;
-    jmethodID writeV23;
     jmethodID writeShortV23;
     jmethodID writeBufferV21;
     jmethodID getBufferSizeInFramesV23;
@@ -126,7 +125,6 @@ struct JNIAudioTrack {
     {"android/media/AudioTrack", "pause", "()V", MP_JNI_METHOD, OFFSET(pause), 1},
     {"android/media/AudioTrack", "write", "([BII)I", MP_JNI_METHOD, OFFSET(write), 1},
     {"android/media/AudioTrack", "write", "([FIII)I", MP_JNI_METHOD, OFFSET(writeFloat), 1},
-    {"android/media/AudioTrack", "write", "([BIII)I", MP_JNI_METHOD, OFFSET(writeV23), 0},
     {"android/media/AudioTrack", "write", "([SIII)I", MP_JNI_METHOD, OFFSET(writeShortV23), 0},
     {"android/media/AudioTrack", "write", "(Ljava/nio/ByteBuffer;II)I", MP_JNI_METHOD, OFFSET(writeBufferV21), 1},
     {"android/media/AudioTrack", "getBufferSizeInFrames", "()I", MP_JNI_METHOD, OFFSET(getBufferSizeInFramesV23), 0},
@@ -152,12 +150,14 @@ struct JNIAudioTrack {
 struct JNIAudioAttributes {
     jclass clazz;
     jint CONTENT_TYPE_MOVIE;
+    jint CONTENT_TYPE_MUSIC;
     jint USAGE_MEDIA;
     struct MPJniField mapping[];
 } AudioAttributes = {.mapping = {
     #define OFFSET(member) offsetof(struct JNIAudioAttributes, member)
     {"android/media/AudioAttributes", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
     {"android/media/AudioAttributes", "CONTENT_TYPE_MOVIE", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MOVIE), 0},
+    {"android/media/AudioAttributes", "CONTENT_TYPE_MUSIC", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MUSIC), 0},
     {"android/media/AudioAttributes", "USAGE_MEDIA", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(USAGE_MEDIA), 0},
     {0}
     #undef OFFSET
@@ -187,19 +187,13 @@ struct JNIAudioFormat {
     jint ENCODING_PCM_16BIT;
     jint ENCODING_PCM_FLOAT;
     jint ENCODING_IEC61937;
-    jint ENCODING_AC3;
     jint CHANNEL_OUT_MONO;
     jint CHANNEL_OUT_STEREO;
-    jint CHANNEL_OUT_FRONT_LEFT;
-    jint CHANNEL_OUT_FRONT_RIGHT;
-    jint CHANNEL_OUT_BACK_LEFT;
-    jint CHANNEL_OUT_BACK_RIGHT;
     jint CHANNEL_OUT_FRONT_CENTER;
-    jint CHANNEL_OUT_LOW_FREQUENCY;
-    jint CHANNEL_OUT_BACK_CENTER;
+    jint CHANNEL_OUT_QUAD;
     jint CHANNEL_OUT_5POINT1;
-    jint CHANNEL_OUT_SIDE_LEFT;
-    jint CHANNEL_OUT_SIDE_RIGHT;
+    jint CHANNEL_OUT_BACK_CENTER;
+    jint CHANNEL_OUT_7POINT1_SURROUND;
     struct MPJniField mapping[];
 } AudioFormat = {.mapping = {
     #define OFFSET(member) offsetof(struct JNIAudioFormat, member)
@@ -207,20 +201,14 @@ struct JNIAudioFormat {
     {"android/media/AudioFormat", "ENCODING_PCM_8BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_8BIT), 1},
     {"android/media/AudioFormat", "ENCODING_PCM_16BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_16BIT), 1},
     {"android/media/AudioFormat", "ENCODING_PCM_FLOAT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_FLOAT), 1},
-    {"android/media/AudioFormat", "ENCODING_AC3", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_AC3), 0},
     {"android/media/AudioFormat", "ENCODING_IEC61937", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_IEC61937), 0},
     {"android/media/AudioFormat", "CHANNEL_OUT_MONO", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_MONO), 1},
     {"android/media/AudioFormat", "CHANNEL_OUT_STEREO", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_STEREO), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_5POINT1", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_5POINT1), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_FRONT_LEFT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_FRONT_LEFT), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_FRONT_RIGHT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_FRONT_RIGHT), 1},
     {"android/media/AudioFormat", "CHANNEL_OUT_FRONT_CENTER", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_FRONT_CENTER), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_LOW_FREQUENCY", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_LOW_FREQUENCY), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_BACK_LEFT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_BACK_LEFT), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_BACK_RIGHT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_BACK_RIGHT), 1},
+    {"android/media/AudioFormat", "CHANNEL_OUT_QUAD", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_QUAD), 1},
+    {"android/media/AudioFormat", "CHANNEL_OUT_5POINT1", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_5POINT1), 1},
     {"android/media/AudioFormat", "CHANNEL_OUT_BACK_CENTER", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_BACK_CENTER), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_SIDE_LEFT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_SIDE_LEFT), 0},
-    {"android/media/AudioFormat", "CHANNEL_OUT_SIDE_RIGHT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_SIDE_RIGHT), 0},
+    {"android/media/AudioFormat", "CHANNEL_OUT_7POINT1_SURROUND", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_7POINT1_SURROUND), 0},
     {0}
     #undef OFFSET
 }};
@@ -303,7 +291,9 @@ static int AudioTrack_New(struct ao *ao)
         MP_JNI_EXCEPTION_LOG(ao);
         tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setUsage, AudioAttributes.USAGE_MEDIA);
         MP_JNI_DELETELOCAL(tmp);
-        tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setContentType, AudioAttributes.CONTENT_TYPE_MOVIE);
+        jint content_type = (ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC) ?
+            AudioAttributes.CONTENT_TYPE_MUSIC : AudioAttributes.CONTENT_TYPE_MOVIE;
+        tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setContentType, content_type);
         MP_JNI_DELETELOCAL(tmp);
         jobject attr = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.build);
         MP_JNI_DELETELOCAL(attr_builder);
@@ -334,7 +324,7 @@ static int AudioTrack_New(struct ao *ao)
             p->cfg_session_id
         );
     }
-    if (!audiotrack || MP_JNI_EXCEPTION_LOG(ao) < 0) {
+    if (MP_JNI_EXCEPTION_LOG(ao) < 0 || !audiotrack) {
         MP_FATAL(ao, "AudioTrack Init failed\n");
         return -1;
     }
@@ -382,26 +372,26 @@ static uint32_t AudioTrack_getPlaybackHeadPosition(struct ao *ao)
         return 0;
     JNIEnv *env = MP_JNI_GET_ENV(ao);
     uint32_t pos = 0;
-    int64_t now = mp_raw_time_us();
+    int64_t now = mp_raw_time_ns();
     int state = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.getPlayState);
 
     int stable_count = 20;
-    int64_t wait = p->timestamp_stable < stable_count ? 50000 : 3000000;
+    int64_t wait = p->timestamp_stable < stable_count ? 50000000 : 3000000000;
 
     if (state == AudioTrack.PLAYSTATE_PLAYING && p->format != AudioFormat.ENCODING_IEC61937 &&
         (p->timestamp_fetched == 0 || now - p->timestamp_fetched >= wait)) {
         if (!p->timestamp_fetched)
             p->timestamp_stable = 0;
 
-        int64_t utime1 = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime) / 1000;
+        int64_t time1 = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime);
         if (MP_JNI_CALL_BOOL(p->audiotrack, AudioTrack.getTimestamp, p->timestamp)) {
             p->timestamp_set = true;
             p->timestamp_fetched = now;
             if (p->timestamp_stable < stable_count) {
                 uint32_t fpos = 0xFFFFFFFFL & MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.framePosition);
-                int64_t utime2 = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime) / 1000;
-                //MP_VERBOSE(ao, "getTimestamp: fpos= %u / time= %"PRId64" / now= %"PRId64" / stable= %d\n", fpos, utime2, now, p->timestamp_stable);
-                if (utime1 != utime2 && utime2 != 0 && fpos != 0) {
+                int64_t time2 = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime);
+                //MP_VERBOSE(ao, "getTimestamp: fpos= %u / time= %"PRId64" / now= %"PRId64" / stable= %d\n", fpos, time2, now, p->timestamp_stable);
+                if (time1 != time2 && time2 != 0 && fpos != 0) {
                     p->timestamp_stable++;
                 }
             }
@@ -414,19 +404,19 @@ static uint32_t AudioTrack_getPlaybackHeadPosition(struct ao *ao)
     if (p->timestamp_set) {
         pos = 0xFFFFFFFFL & MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.framePosition);
         uint32_t fpos = pos;
-        int64_t utime = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime) / 1000;
-        if (utime == 0)
+        int64_t time = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime);
+        if (time == 0)
             fpos = pos = 0;
         if (p->needs_timestamp_offset) {
-            if (utime != 0 && !p->timestamp_offset)
-                p->timestamp_offset = now - utime;
-            utime += p->timestamp_offset;
+            if (time != 0 && !p->timestamp_offset)
+                p->timestamp_offset = now - time;
+            time += p->timestamp_offset;
         }
-        if (fpos != 0 && utime != 0 && state == AudioTrack.PLAYSTATE_PLAYING) {
-            double diff = (double)(now - utime) / 1e6;
+        if (fpos != 0 && time != 0 && state == AudioTrack.PLAYSTATE_PLAYING) {
+            double diff = (double)(now - time) / 1e9;
             pos += diff * ao->samplerate;
         }
-        //MP_VERBOSE(ao, "position = %u via getTimestamp (state = %d / fpos= %u / time= %"PRId64")\n", pos, state, fpos, utime);
+        //MP_VERBOSE(ao, "position = %u via getTimestamp (state = %d / fpos= %u / time= %"PRId64")\n", pos, state, fpos, time);
     } else {
         pos = 0xFFFFFFFFL & MP_JNI_CALL_INT(p->audiotrack, AudioTrack.getPlaybackHeadPosition);
         //MP_VERBOSE(ao, "playbackHeadPosition = %u (reset_pending=%d)\n", pos, p->reset_pending);
@@ -503,19 +493,20 @@ static int AudioTrack_write(struct ao *ao, int len)
         if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
         if (ret > 0) ret *= 2;
 
+    } else if (AudioTrack.writeBufferV21) {
+        // reset positions for reading
+        jobject bbuf = MP_JNI_CALL_OBJECT(p->bbuf, ByteBuffer.clear);
+        if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
+        (*env)->DeleteLocalRef(env, bbuf);
+        ret = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.writeBufferV21, p->bbuf, len, AudioTrack.WRITE_BLOCKING);
+        if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
+
     } else if (p->format == AudioFormat.ENCODING_PCM_FLOAT) {
         (*env)->SetFloatArrayRegion(env, p->floatarray, 0, len / sizeof(float), buf);
         if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
         ret = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.writeFloat, p->floatarray, 0, len / sizeof(float), AudioTrack.WRITE_BLOCKING);
         if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
         if (ret > 0) ret *= sizeof(float);
-
-    } else if (AudioTrack.writeBufferV21) {
-        jobject bbuf = MP_JNI_CALL_OBJECT(p->bbuf, ByteBuffer.clear);
-        if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
-        (*env)->DeleteLocalRef(env, bbuf);
-        ret = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.writeBufferV21, p->bbuf, len, AudioTrack.WRITE_BLOCKING);
-        if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
 
     } else {
         (*env)->SetByteArrayRegion(env, p->bytearray, 0, len, buf);
@@ -576,8 +567,7 @@ static void *playthread(void *arg)
             ts += (read_samples / (double)(ao->samplerate)) * 1e6;
             ts += AudioTrack_getLatency(ao) * 1e6;
             int samples = ao_read_data(ao, &p->chunk, read_samples, ts);
-            int write_samples = read_samples;
-            int ret = AudioTrack_write(ao, write_samples * ao->sstride);
+            int ret = AudioTrack_write(ao, samples * ao->sstride);
             if (ret >= 0) {
                 p->written_frames += ret / ao->sstride;
             } else if (ret == AudioManager.ERROR_DEAD_OBJECT) {
@@ -648,11 +638,6 @@ static void uninit(struct ao *ao)
         p->timestamp = NULL;
     }
 
-    if (p->chunk) {
-        free(p->chunk);
-        p->chunk = NULL;
-    }
-
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);
 
@@ -676,7 +661,7 @@ static int init(struct ao *ao)
         p->format = AudioFormat.ENCODING_IEC61937;
     } else if (ao->format == AF_FORMAT_U8) {
         p->format = AudioFormat.ENCODING_PCM_8BIT;
-    } else if (p->cfg_pcm_float && (ao->format == AF_FORMAT_FLOAT || ao->format == AF_FORMAT_FLOATP)) {
+    } else if (p->cfg_pcm_float && af_fmt_is_float(ao->format)) {
         ao->format = AF_FORMAT_FLOAT;
         p->format = AudioFormat.ENCODING_PCM_FLOAT;
     } else {
@@ -691,22 +676,48 @@ static int init(struct ao *ao)
             AudioManager.STREAM_MUSIC
         );
         if (MP_JNI_EXCEPTION_LOG(ao) == 0) {
-            ao->samplerate = samplerate;
             MP_VERBOSE(ao, "AudioTrack.nativeOutputSampleRate = %d\n", samplerate);
+            ao->samplerate = MPMIN(samplerate, ao->samplerate);
         }
     }
     p->samplerate = ao->samplerate;
 
+    /* https://developer.android.com/reference/android/media/AudioFormat#channelPositionMask */
+    static const struct mp_chmap layouts[] = {
+        {0},                                        // empty
+        MP_CHMAP_INIT_MONO,                         // mono
+        MP_CHMAP_INIT_STEREO,                       // stereo
+        MP_CHMAP3(FL, FR, FC),                      // 3.0
+        MP_CHMAP4(FL, FR, BL, BR),                  // quad
+        MP_CHMAP5(FL, FR, FC, BL, BR),              // 5.0
+        MP_CHMAP6(FL, FR, FC, LFE, BL, BR),         // 5.1
+        MP_CHMAP7(FL, FR, FC, LFE, BL, BR, BC),     // 6.1
+        MP_CHMAP8(FL, FR, FC, LFE, BL, BR, SL, SR), // 7.1
+    };
+    const jint layout_map[] = {
+        0,
+        AudioFormat.CHANNEL_OUT_MONO,
+        AudioFormat.CHANNEL_OUT_STEREO,
+        AudioFormat.CHANNEL_OUT_STEREO | AudioFormat.CHANNEL_OUT_FRONT_CENTER,
+        AudioFormat.CHANNEL_OUT_QUAD,
+        AudioFormat.CHANNEL_OUT_QUAD | AudioFormat.CHANNEL_OUT_FRONT_CENTER,
+        AudioFormat.CHANNEL_OUT_5POINT1,
+        AudioFormat.CHANNEL_OUT_5POINT1 | AudioFormat.CHANNEL_OUT_BACK_CENTER,
+        AudioFormat.CHANNEL_OUT_7POINT1_SURROUND,
+    };
+    static_assert(MP_ARRAY_SIZE(layout_map) == MP_ARRAY_SIZE(layouts), "");
     if (p->format == AudioFormat.ENCODING_IEC61937) {
         p->channel_config = AudioFormat.CHANNEL_OUT_STEREO;
-    } else if (ao->channels.num == 1) {
-        p->channel_config = AudioFormat.CHANNEL_OUT_MONO;
-    } else if (ao->channels.num == 6) {
-        p->channel_config = AudioFormat.CHANNEL_OUT_5POINT1;
-        ao->channels = (struct mp_chmap)MP_CHMAP6(FL, FR, FC, LFE, BL, BR);
     } else {
-        p->channel_config = AudioFormat.CHANNEL_OUT_STEREO;
-        ao->channels = (struct mp_chmap)MP_CHMAP_INIT_STEREO;
+        struct mp_chmap_sel sel = {0};
+        for (int i = 0; i < MP_ARRAY_SIZE(layouts); i++) {
+            if (layout_map[i])
+                mp_chmap_sel_add_map(&sel, &layouts[i]);
+        }
+        if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+            goto error;
+        p->channel_config = layout_map[ao->channels.num];
+        assert(p->channel_config);
     }
 
     jint buffer_size = MP_JNI_CALL_STATIC_INT(
@@ -716,40 +727,48 @@ static int init(struct ao *ao)
         p->channel_config,
         p->format
     );
-    if (buffer_size <= 0 || MP_JNI_EXCEPTION_LOG(ao) < 0) {
+    if (MP_JNI_EXCEPTION_LOG(ao) < 0 || buffer_size <= 0) {
         MP_FATAL(ao, "AudioTrack.getMinBufferSize returned an invalid size: %d", buffer_size);
         return -1;
     }
 
-    int min = 0.075 * p->samplerate * af_fmt_to_bytes(ao->format) * ao->channels.num;
+    // Choose double of the minimum buffer size suggested by the driver, but not
+    // less than 75ms or more than 150ms.
+    const int bps = af_fmt_to_bytes(ao->format);
+    int min = 0.075 * p->samplerate * bps * ao->channels.num;
     int max = min * 2;
+    min = MP_ALIGN_UP(min, bps);
+    max = MP_ALIGN_UP(max, bps);
     p->size = MPCLAMP(buffer_size * 2, min, max);
     MP_VERBOSE(ao, "Setting bufferSize = %d (driver=%d, min=%d, max=%d)\n", p->size, buffer_size, min, max);
-    ao->device_buffer = p->size / af_fmt_to_bytes(ao->format);
+    assert(p->size % bps == 0);
+    ao->device_buffer = p->size / bps;
 
     p->chunksize = p->size;
-    p->chunk = malloc(p->size);
+    p->chunk = talloc_size(ao, p->size);
 
     jobject timestamp = MP_JNI_NEW(AudioTimestamp.clazz, AudioTimestamp.ctor);
-    if (!timestamp || MP_JNI_EXCEPTION_LOG(ao) < 0) {
+    if (MP_JNI_EXCEPTION_LOG(ao) < 0 || !timestamp) {
         MP_FATAL(ao, "AudioTimestamp could not be created\n");
         return -1;
     }
     p->timestamp = (*env)->NewGlobalRef(env, timestamp);
     (*env)->DeleteLocalRef(env, timestamp);
 
+    // decide and create buffer of right type
     if (p->format == AudioFormat.ENCODING_IEC61937) {
         jshortArray shortarray = (*env)->NewShortArray(env, p->chunksize / 2);
         p->shortarray = (*env)->NewGlobalRef(env, shortarray);
         (*env)->DeleteLocalRef(env, shortarray);
+    } else if (AudioTrack.writeBufferV21) {
+        MP_VERBOSE(ao, "Using NIO ByteBuffer\n");
+        jobject bbuf = (*env)->NewDirectByteBuffer(env, p->chunk, p->chunksize);
+        p->bbuf = (*env)->NewGlobalRef(env, bbuf);
+        (*env)->DeleteLocalRef(env, bbuf);
     } else if (p->format == AudioFormat.ENCODING_PCM_FLOAT) {
         jfloatArray floatarray = (*env)->NewFloatArray(env, p->chunksize / sizeof(float));
         p->floatarray = (*env)->NewGlobalRef(env, floatarray);
         (*env)->DeleteLocalRef(env, floatarray);
-    } else if (AudioTrack.writeBufferV21) {
-        jobject bbuf = (*env)->NewDirectByteBuffer(env, p->chunk, p->chunksize);
-        p->bbuf = (*env)->NewGlobalRef(env, bbuf);
-        (*env)->DeleteLocalRef(env, bbuf);
     } else {
         jbyteArray bytearray = (*env)->NewByteArray(env, p->chunksize);
         p->bytearray = (*env)->NewGlobalRef(env, bytearray);
@@ -822,8 +841,11 @@ const struct ao_driver audio_out_audiotrack = {
     .reset     = stop,
     .start     = start,
     .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const OPT_BASE_STRUCT) {
+        .cfg_pcm_float = 1,
+    },
     .options   = (const struct m_option[]) {
-        {"pcm-float", OPT_FLAG(cfg_pcm_float)},
+        {"pcm-float", OPT_BOOL(cfg_pcm_float)},
         {"session-id", OPT_INT(cfg_session_id)},
         {0}
     },

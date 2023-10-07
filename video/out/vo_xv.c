@@ -29,8 +29,6 @@
 
 #include <libavutil/common.h>
 
-#include "config.h"
-
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -467,8 +465,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     struct xvctx *ctx = vo->priv;
     int i;
 
-    mp_image_unrefp(&ctx->original_image);
-
     ctx->image_height = params->h;
     ctx->image_width  = params->w;
     ctx->image_format = params->imgfmt;
@@ -704,8 +700,7 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
         present_sync_get_info(x11->present, info);
 }
 
-// Note: REDRAW_FRAME can call this with NULL.
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct xvctx *ctx = vo->priv;
 
@@ -715,19 +710,17 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         return;
 
     struct mp_image xv_buffer = get_xv_buffer(vo, ctx->current_buf);
-    if (mpi) {
-        mp_image_copy(&xv_buffer, mpi);
+    if (frame->current) {
+        mp_image_copy(&xv_buffer, frame->current);
     } else {
         mp_image_clear(&xv_buffer, 0, 0, xv_buffer.w, xv_buffer.h);
     }
 
     struct mp_osd_res res = osd_res_from_image_params(vo->params);
-    osd_draw_on_image(vo->osd, res, mpi ? mpi->pts : 0, 0, &xv_buffer);
+    osd_draw_on_image(vo->osd, res, frame->current ? frame->current->pts : 0, 0, &xv_buffer);
 
-    if (mpi != ctx->original_image) {
-        talloc_free(ctx->original_image);
-        ctx->original_image = mpi;
-    }
+    if (frame->current != ctx->original_image)
+        ctx->original_image = frame->current;
 }
 
 static int query_format(struct vo *vo, int format)
@@ -749,8 +742,6 @@ static void uninit(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
     int i;
-
-    talloc_free(ctx->original_image);
 
     if (ctx->ai)
         XvFreeAdaptorInfo(ctx->ai);
@@ -874,14 +865,10 @@ static int preinit(struct vo *vo)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    struct xvctx *ctx = vo->priv;
     switch (request) {
     case VOCTRL_SET_PANSCAN:
         resize(vo);
         return VO_TRUE;
-    case VOCTRL_REDRAW_FRAME:
-        draw_image(vo, ctx->original_image);
-        return true;
     }
     int events = 0;
     int r = vo_x11_control(vo, &events, request, data);
@@ -900,7 +887,7 @@ const struct vo_driver video_out_xv = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .get_vsync = get_vsync,
     .wakeup = vo_x11_wakeup,
@@ -928,7 +915,6 @@ const struct vo_driver video_out_xv = {
             {"auto", CK_METHOD_AUTOPAINT})},
         {"colorkey", OPT_INT(colorkey)},
         {"buffers", OPT_INT(cfg_buffers), M_RANGE(1, MAX_BUFFERS)},
-        {"no-colorkey", OPT_REMOVED("use ck-method=none instead")},
         {0}
     },
     .options_prefix = "xv",

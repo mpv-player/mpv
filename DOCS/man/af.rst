@@ -19,8 +19,8 @@ syntax is:
     The ``--vf`` description describes how libavfilter can be used and how to
     workaround deprecated mpv filters.
 
-See ``--vf`` group of options for info on how ``--af-defaults``, ``--af-add``,
-``--af-pre``, ``--af-del``, ``--af-clr``, and possibly others work.
+See ``--vf`` group of options for info on how ``--af-add``, ``--af-pre``,
+``--af-del``, ``--af-clr``, and possibly others work.
 
 Available filters are:
 
@@ -100,7 +100,7 @@ Available filters are:
 
 ``scaletempo[=option1:option2:...]``
     Scales audio tempo without altering pitch, optionally synced to playback
-    speed (default).
+    speed.
 
     This works by playing 'stride' ms of audio at normal speed then consuming
     'stride*scale' ms of input audio. It pieces the strides together by
@@ -116,8 +116,8 @@ Available filters are:
         cause noticeable skips at high scale amounts and an echo at low scale
         amounts. Very low values will alter pitch. Increasing improves
         performance. (default: 60)
-    ``overlap=<percent>``
-        Percentage of stride to overlap. Decreasing improves performance.
+    ``overlap=<factor>``
+        Factor of stride to overlap. Decreasing improves performance.
         (default: .20)
     ``search=<amount>``
         Length in milliseconds to search for best overlap position. Decreasing
@@ -166,7 +166,10 @@ Available filters are:
     Scales audio tempo without altering pitch.
     The algorithm is ported from chromium and uses the
     Waveform Similarity Overlap-and-add (WSOLA) method.
-    It seems to achieve a higher audio quality than scaletempo and rubberband.
+    It seems to achieves higher audio quality than scaletempo, and rubberband R2
+    engine, or ``engine=faster``. This filter is inserted automatically if
+    ``audio-pitch-correction`` option is used (on by default) when the playback
+    speed is changed.
 
     By default, the ``search-interval`` and ``window-size`` parameters
     have the same values as in chromium.
@@ -176,7 +179,7 @@ Available filters are:
 
     ``max-speed=<speed>``
         Mute audio if the playback speed is above ``<speed>``
-        and ``<speed> != 0``. (default: 4.0)
+        and ``<speed> != 0``. (default: 8.0)
 
     ``search-interval=<amount>``
         Length in milliseconds to search for best overlap position. (default: 30)
@@ -186,12 +189,23 @@ Available filters are:
 
 ``rubberband``
     High quality pitch correction with librubberband. This can be used in place
-    of ``scaletempo``, and will be used to adjust audio pitch when playing
-    at speed different from normal. It can also be used to adjust audio pitch
-    without changing playback speed.
+    of ``scaletempo`` and ``scaletempo2``, and will be used to adjust audio pitch
+    when playing at speed different from normal. It can also be used to adjust
+    audio pitch without changing playback speed.
 
-    ``<pitch-scale>``
+    ``pitch-scale=<amount>``
         Sets the pitch scaling factor. Frequencies are multiplied by this value.
+        (default: 1.0)
+
+    ``engine=<faster|finer>``
+        Select the core Rubberband engine to be used. There are two available:
+
+        :Faster: This is the Rubberband R2 engine. It uses significantly less
+                 CPU than the Finer (R3) engine.
+        :Finer: This is the Rubberband R3 engine. This engine is only available
+                with librubberband version 3 or newer. This produces significantly 
+                higher quality output, at the cost of higher CPU usage. (Default
+                if available)
 
     This filter has a number of additional sub-options. You can list them with
     ``mpv --af=rubberband=help``. This will also show the default values
@@ -199,6 +213,8 @@ Available filters are:
     merely passed to librubberband. Look at the librubberband documentation
     to learn what each option does:
     https://breakfastquay.com/rubberband/code-doc/classRubberBand_1_1RubberBandStretcher.html
+    Do note that certain options are only applicable to one of R2 (faster) and
+    R3 (finer) engines.
     (The mapping of the mpv rubberband filter sub-option names and values to
     those of librubberband follows a simple pattern: ``"Option" + Name + Value``.)
 

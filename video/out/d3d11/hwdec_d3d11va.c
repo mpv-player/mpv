@@ -19,8 +19,6 @@
 #include <d3d11.h>
 #include <d3d11_1.h>
 
-#include "config.h"
-
 #include "common/common.h"
 #include "options/m_config.h"
 #include "osdep/windows_utils.h"
@@ -30,18 +28,16 @@
 #include "video/out/gpu/hwdec.h"
 
 struct d3d11va_opts {
-    int zero_copy;
+    bool zero_copy;
 };
 
 #define OPT_BASE_STRUCT struct d3d11va_opts
 const struct m_sub_options d3d11va_conf = {
     .opts = (const struct m_option[]) {
-        {"d3d11va-zero-copy", OPT_FLAG(zero_copy)},
+        {"d3d11va-zero-copy", OPT_BOOL(zero_copy)},
         {0}
     },
-    .defaults = &(const struct d3d11va_opts) {
-        .zero_copy = 0,
-    },
+    .defaults = &(const struct d3d11va_opts) {0},
     .size = sizeof(struct d3d11va_opts)
 };
 
@@ -67,6 +63,7 @@ static void uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
     hwdec_devices_remove(hw->devs, &p->hwctx);
+    av_buffer_unref(&p->hwctx.av_device_ref);
     SAFE_RELEASE(p->device);
     SAFE_RELEASE(p->device1);
 }
@@ -76,9 +73,9 @@ static int init(struct ra_hwdec *hw)
     struct priv_owner *p = hw->priv;
     HRESULT hr;
 
-    if (!ra_is_d3d11(hw->ra))
+    if (!ra_is_d3d11(hw->ra_ctx->ra))
         return -1;
-    p->device = ra_d3d11_get_device(hw->ra);
+    p->device = ra_d3d11_get_device(hw->ra_ctx->ra);
     if (!p->device)
         return -1;
 
@@ -111,6 +108,12 @@ static int init(struct ra_hwdec *hw)
         .supported_formats = subfmts,
         .hw_imgfmt = IMGFMT_D3D11,
     };
+
+    if (!p->hwctx.av_device_ref) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx\n");
+        return -1;
+    }
+
     hwdec_devices_add(hw->devs, &p->hwctx);
     return 0;
 }

@@ -850,38 +850,6 @@ void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
     return cache->opts;
 }
 
-void mp_read_option_raw(struct mpv_global *global, const char *name,
-                        const struct m_option_type *type, void *dst)
-{
-    struct m_config_shadow *shadow = global->config;
-
-    int32_t optid = -1;
-    while (m_config_shadow_get_next_opt(shadow, &optid)) {
-        char buf[M_CONFIG_MAX_OPT_NAME_LEN];
-        const char *opt_name =
-            m_config_shadow_get_opt_name(shadow, optid, buf, sizeof(buf));
-
-        if (strcmp(name, opt_name) == 0) {
-            const struct m_option *opt = m_config_shadow_get_opt(shadow, optid);
-
-            int group_index, opt_index;
-            get_opt_from_id(shadow, optid, &group_index, &opt_index);
-
-            struct m_group_data *gdata = m_config_gdata(shadow->data, group_index);
-            assert(gdata);
-
-            assert(opt->offset >= 0);
-            assert(opt->type == type);
-
-            memset(dst, 0, opt->type->size);
-            m_option_copy(opt, dst, gdata->udata + opt->offset);
-            return;
-        }
-    }
-
-    MP_ASSERT_UNREACHABLE(); // not found
-}
-
 static const struct m_config_group *find_group(struct mpv_global *global,
                                                const struct m_option *cfg)
 {

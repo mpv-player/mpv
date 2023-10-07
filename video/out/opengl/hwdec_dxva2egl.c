@@ -73,7 +73,7 @@ static int init(struct ra_hwdec *hw)
     struct priv_owner *p = hw->priv;
     HRESULT hr;
 
-    if (!ra_is_gl(hw->ra))
+    if (!ra_is_gl(hw->ra_ctx->ra))
         return -1;
     if (!angle_load())
         return -1;
@@ -183,6 +183,12 @@ static int init(struct ra_hwdec *hw)
         .av_device_ref = d3d9_wrap_device_ref((IDirect3DDevice9 *)p->device9ex),
         .hw_imgfmt = IMGFMT_DXVA2,
     };
+
+    if (!p->hwctx.av_device_ref) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx\n");
+        goto fail;
+    }
+
     hwdec_devices_add(hw->devs, &p->hwctx);
 
     return 0;

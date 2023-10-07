@@ -348,13 +348,10 @@ static int thread_control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg
     case AOCONTROL_GET_VOLUME:
         IAudioEndpointVolume_GetMasterVolumeLevelScalar(
             state->pEndpointVolume, &volume);
-        *(ao_control_vol_t *)arg = (ao_control_vol_t){
-            .left  = 100.0f * volume,
-            .right = 100.0f * volume,
-        };
+        *(float *)arg = volume;
         return CONTROL_OK;
     case AOCONTROL_SET_VOLUME:
-        volume = ((ao_control_vol_t *)arg)->left / 100.f;
+        volume = (*(float *)arg) / 100.f;
         IAudioEndpointVolume_SetMasterVolumeLevelScalar(
             state->pEndpointVolume, volume, NULL);
         return CONTROL_OK;
@@ -381,13 +378,10 @@ static int thread_control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
     switch(cmd) {
     case AOCONTROL_GET_VOLUME:
         ISimpleAudioVolume_GetMasterVolume(state->pAudioVolume, &volume);
-        *(ao_control_vol_t *)arg = (ao_control_vol_t){
-            .left  = 100.0f * volume,
-            .right = 100.0f * volume,
-        };
+        *(float *)arg = volume;
         return CONTROL_OK;
     case AOCONTROL_SET_VOLUME:
-        volume = ((ao_control_vol_t *)arg)->left / 100.f;
+        volume = (*(float *)arg) / 100.f;
         ISimpleAudioVolume_SetMasterVolume(state->pAudioVolume, volume, NULL);
         return CONTROL_OK;
     case AOCONTROL_GET_MUTE:
@@ -412,20 +406,28 @@ static int thread_control(struct ao *ao, enum aocontrol cmd, void *arg)
         if (!state->pSessionControl)
             return CONTROL_FALSE;
 
-        wchar_t *title = mp_from_utf8(NULL, (char*)arg);
-        wchar_t *tmp = NULL;
-        // There is a weird race condition in the IAudioSessionControl itself --
-        // it seems that *sometimes* the SetDisplayName does not take effect and
-        // it still shows the old title. Use this loop to insist until it works.
-        do {
-            IAudioSessionControl_SetDisplayName(state->pSessionControl, title, NULL);
-
-            SAFE_DESTROY(tmp, CoTaskMemFree(tmp));
-            IAudioSessionControl_GetDisplayName(state->pSessionControl, &tmp);
-        } while (wcscmp(title, tmp));
-        SAFE_DESTROY(tmp, CoTaskMemFree(tmp));
+        wchar_t *title = mp_from_utf8(NULL, (const char *)arg);
+        HRESULT hr = IAudioSessionControl_SetDisplayName(state->pSessionControl,
+                                                         title,NULL);
         talloc_free(title);
-        return CONTROL_OK;
+
+        if (SUCCEEDED(hr))
+            return CONTROL_OK;
+
+        MP_WARN(ao, "Error setting audio session name: %s\n",
+                mp_HRESULT_to_str(hr));
+
+        assert(ao->client_name);
+        if (!ao->client_name)
+            return CONTROL_ERROR;
+
+        // Fallback to client name
+        title = mp_from_utf8(NULL, ao->client_name);
+        IAudioSessionControl_SetDisplayName(state->pSessionControl,
+                                            title, NULL);
+        talloc_free(title);
+
+        return CONTROL_ERROR;
     }
 
     return state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ?

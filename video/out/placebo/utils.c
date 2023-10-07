@@ -1,6 +1,8 @@
 #include "common/common.h"
 #include "utils.h"
 
+#include <libplacebo/utils/dolbyvision.h>
+
 static const int pl_log_to_msg_lev[PL_LOG_ALL+1] = {
     [PL_LOG_FATAL] = MSGL_FATAL,
     [PL_LOG_ERR]   = MSGL_ERR,
@@ -81,7 +83,38 @@ enum pl_color_primaries mp_prim_to_pl(enum mp_csp_prim prim)
     case MP_CSP_PRIM_DISPLAY_P3:    return PL_COLOR_PRIM_DISPLAY_P3;
     case MP_CSP_PRIM_V_GAMUT:       return PL_COLOR_PRIM_V_GAMUT;
     case MP_CSP_PRIM_S_GAMUT:       return PL_COLOR_PRIM_S_GAMUT;
+    case MP_CSP_PRIM_EBU_3213:      return PL_COLOR_PRIM_EBU_3213;
+    case MP_CSP_PRIM_FILM_C:        return PL_COLOR_PRIM_FILM_C;
+    case MP_CSP_PRIM_ACES_AP0:      return PL_COLOR_PRIM_ACES_AP0;
+    case MP_CSP_PRIM_ACES_AP1:      return PL_COLOR_PRIM_ACES_AP1;
     case MP_CSP_PRIM_COUNT:         return PL_COLOR_PRIM_COUNT;
+    }
+
+    MP_ASSERT_UNREACHABLE();
+}
+
+enum mp_csp_prim mp_prim_from_pl(enum pl_color_primaries prim)
+{
+    switch (prim){
+    case PL_COLOR_PRIM_UNKNOWN:     return MP_CSP_PRIM_AUTO;
+    case PL_COLOR_PRIM_BT_601_525:  return MP_CSP_PRIM_BT_601_525;
+    case PL_COLOR_PRIM_BT_601_625:  return MP_CSP_PRIM_BT_601_625;
+    case PL_COLOR_PRIM_BT_709:      return MP_CSP_PRIM_BT_709;
+    case PL_COLOR_PRIM_BT_2020:     return MP_CSP_PRIM_BT_2020;
+    case PL_COLOR_PRIM_BT_470M:     return MP_CSP_PRIM_BT_470M;
+    case PL_COLOR_PRIM_APPLE:       return MP_CSP_PRIM_APPLE;
+    case PL_COLOR_PRIM_ADOBE:       return MP_CSP_PRIM_ADOBE;
+    case PL_COLOR_PRIM_PRO_PHOTO:   return MP_CSP_PRIM_PRO_PHOTO;
+    case PL_COLOR_PRIM_CIE_1931:    return MP_CSP_PRIM_CIE_1931;
+    case PL_COLOR_PRIM_DCI_P3:      return MP_CSP_PRIM_DCI_P3;
+    case PL_COLOR_PRIM_DISPLAY_P3:  return MP_CSP_PRIM_DISPLAY_P3;
+    case PL_COLOR_PRIM_V_GAMUT:     return MP_CSP_PRIM_V_GAMUT;
+    case PL_COLOR_PRIM_S_GAMUT:     return MP_CSP_PRIM_S_GAMUT;
+    case PL_COLOR_PRIM_EBU_3213:    return MP_CSP_PRIM_EBU_3213;
+    case PL_COLOR_PRIM_FILM_C:      return MP_CSP_PRIM_FILM_C;
+    case PL_COLOR_PRIM_ACES_AP0:    return MP_CSP_PRIM_ACES_AP0;
+    case PL_COLOR_PRIM_ACES_AP1:    return MP_CSP_PRIM_ACES_AP1;
+    case PL_COLOR_PRIM_COUNT:       return MP_CSP_PRIM_COUNT;
     }
 
     MP_ASSERT_UNREACHABLE();
@@ -106,7 +139,34 @@ enum pl_color_transfer mp_trc_to_pl(enum mp_csp_trc trc)
     case MP_CSP_TRC_V_LOG:          return PL_COLOR_TRC_V_LOG;
     case MP_CSP_TRC_S_LOG1:         return PL_COLOR_TRC_S_LOG1;
     case MP_CSP_TRC_S_LOG2:         return PL_COLOR_TRC_S_LOG2;
+    case MP_CSP_TRC_ST428:          return PL_COLOR_TRC_ST428;
     case MP_CSP_TRC_COUNT:          return PL_COLOR_TRC_COUNT;
+    }
+
+    MP_ASSERT_UNREACHABLE();
+}
+
+enum mp_csp_trc mp_trc_from_pl(enum pl_color_transfer trc)
+{
+    switch (trc){
+    case PL_COLOR_TRC_UNKNOWN: return MP_CSP_TRC_AUTO;
+    case PL_COLOR_TRC_BT_1886: return MP_CSP_TRC_BT_1886;
+    case PL_COLOR_TRC_SRGB: return MP_CSP_TRC_SRGB;
+    case PL_COLOR_TRC_LINEAR: return MP_CSP_TRC_LINEAR;
+    case PL_COLOR_TRC_GAMMA18: return MP_CSP_TRC_GAMMA18;
+    case PL_COLOR_TRC_GAMMA20: return MP_CSP_TRC_GAMMA20;
+    case PL_COLOR_TRC_GAMMA22: return MP_CSP_TRC_GAMMA22;
+    case PL_COLOR_TRC_GAMMA24: return MP_CSP_TRC_GAMMA24;
+    case PL_COLOR_TRC_GAMMA26: return MP_CSP_TRC_GAMMA26;
+    case PL_COLOR_TRC_GAMMA28: return MP_CSP_TRC_GAMMA28;
+    case PL_COLOR_TRC_PRO_PHOTO: return MP_CSP_TRC_PRO_PHOTO;
+    case PL_COLOR_TRC_PQ: return MP_CSP_TRC_PQ;
+    case PL_COLOR_TRC_HLG: return MP_CSP_TRC_HLG;
+    case PL_COLOR_TRC_V_LOG: return MP_CSP_TRC_V_LOG;
+    case PL_COLOR_TRC_S_LOG1: return MP_CSP_TRC_S_LOG1;
+    case PL_COLOR_TRC_S_LOG2: return MP_CSP_TRC_S_LOG2;
+    case PL_COLOR_TRC_ST428: return MP_CSP_TRC_ST428;
+    case PL_COLOR_TRC_COUNT: return MP_CSP_TRC_COUNT;
     }
 
     MP_ASSERT_UNREACHABLE();
@@ -142,6 +202,18 @@ enum pl_color_levels mp_levels_to_pl(enum mp_csp_levels levels)
     MP_ASSERT_UNREACHABLE();
 }
 
+enum mp_csp_levels mp_levels_from_pl(enum pl_color_levels levels)
+{
+    switch (levels){
+    case PL_COLOR_LEVELS_UNKNOWN:   return MP_CSP_LEVELS_AUTO;
+    case PL_COLOR_LEVELS_TV:        return MP_CSP_LEVELS_TV;
+    case PL_COLOR_LEVELS_PC:        return MP_CSP_LEVELS_PC;
+    case PL_COLOR_LEVELS_COUNT:     return MP_CSP_LEVELS_COUNT;
+    }
+
+    MP_ASSERT_UNREACHABLE();
+}
+
 enum pl_alpha_mode mp_alpha_to_pl(enum mp_alpha_type alpha)
 {
     switch (alpha) {
@@ -164,4 +236,28 @@ enum pl_chroma_location mp_chroma_to_pl(enum mp_chroma_location chroma)
     }
 
     MP_ASSERT_UNREACHABLE();
+}
+
+void mp_map_dovi_metadata_to_pl(struct mp_image *mpi,
+                                struct pl_frame *frame)
+{
+#ifdef PL_HAVE_LAV_DOLBY_VISION
+    if (mpi->dovi) {
+        const AVDOVIMetadata *metadata = (AVDOVIMetadata *) mpi->dovi->data;
+        const AVDOVIRpuDataHeader *header = av_dovi_get_header(metadata);
+
+        if (header->disable_residual_flag) {
+            // Only automatically map DoVi RPUs that don't require an EL
+            struct pl_dovi_metadata *dovi = talloc_ptrtype(mpi, dovi);
+            pl_frame_map_avdovi_metadata(frame, dovi, metadata);
+        }
+    }
+
+#if defined(PL_HAVE_LIBDOVI)
+    if (mpi->dovi_buf)
+        pl_hdr_metadata_from_dovi_rpu(&frame->color.hdr, mpi->dovi_buf->data,
+                                      mpi->dovi_buf->size);
+#endif
+
+#endif // PL_HAVE_LAV_DOLBY_VISION
 }

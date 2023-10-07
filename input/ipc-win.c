@@ -18,8 +18,6 @@
 #include <windows.h>
 #include <sddl.h>
 
-#include "config.h"
-
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/windows_utils.h"

@@ -35,6 +35,7 @@ local o = {
     plot_perfdata = true,
     plot_vsync_ratio = true,
     plot_vsync_jitter = true,
+    plot_tonemapping_lut = true,     -- also enable tone-mapping-visualize
     skip_frames = 5,
     global_max = true,
     flush_graph_data = true,         -- clear data buffers when toggling
@@ -43,7 +44,7 @@ local o = {
     plot_color = "FFFFFF",
 
     -- Text style
-    font = "sans",
+    font = "sans-serif",
     font_mono = "monospace",   -- monospaced digits are sufficient
     font_size = 8,
     font_color = "FFFFFF",
@@ -95,6 +96,7 @@ local cache_recorder_timer = nil
 local curr_page = o.key_page_1
 local pages = {}
 local scroll_bound = false
+local tm_viz_prev = nil
 -- Save these sequences locally as we'll need them a lot
 local ass_start = mp.get_property_osd("osd-ass-cc/0")
 local ass_stop = mp.get_property_osd("osd-ass-cc/1")
@@ -330,10 +332,11 @@ local function append_perfdata(s, dedicated_page)
 
     -- ensure that the fixed title is one element and every scrollable line is
     -- also one single element.
-    s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}",
+    s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s{\\fs%s}",
                      dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
-                     "(last/average/peak  μs)", o.font_size)
+                     "(last/average/peak μs)",
+                     dedicated_page and " (hint: scroll with ↑↓)" or "", o.font_size)
 
     for _,frame in ipairs(sorted_keys(vo_p)) do  -- ensure fixed display order
         local data = vo_p[frame]
@@ -431,7 +434,7 @@ local function keyname_cells(k)
 end
 
 local function get_kbinfo_lines(width)
-    -- active keys: only highest priotity of each key, and not our (stats) keys
+    -- active keys: only highest priority of each key, and not our (stats) keys
     local bindings = mp.get_property_native("input-bindings", {})
     local active = {}  -- map: key-name -> bind-info
     for _, bind in pairs(bindings) do
@@ -670,11 +673,115 @@ local function add_file(s)
 end
 
 
+local function crop_noop(w, h, r)
+    return r["crop-x"] == 0 and r["crop-y"] == 0 and
+           r["crop-w"] == w and r["crop-h"] == h
+end
+
+
+local function crop_equal(r, ro)
+    return r["crop-x"] == ro["crop-x"] and r["crop-y"] == ro["crop-y"] and
+           r["crop-w"] == ro["crop-w"] and r["crop-h"] == ro["crop-h"]
+end
+
+
+local function append_resolution(s, r, prefix, w_prop, h_prop, video_res)
+    if not r then
+        return
+    end
+    w_prop = w_prop or "w"
+    h_prop = h_prop or "h"
+    if append(s, r[w_prop], {prefix=prefix}) then
+        append(s, r[h_prop], {prefix="x", nl="", indent=" ", prefix_sep=" ",
+                           no_prefix_markup=true})
+        if r["aspect"] ~= nil then
+            append(s, format("%.2f:1", r["aspect"]), {prefix=", ", nl="", indent="",
+                                                      no_prefix_markup=true})
+            append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
+                                         prefix_sep="", no_prefix_markup=true})
+        end
+        if r['s'] then
+            append(s, format("%.2f", r["s"]), {prefix="(", suffix="x)", nl="",
+                                               indent=" ", prefix_sep="",
+                                               no_prefix_markup=true})
+        end
+        -- We can skip crop if it is the same as video decoded resolution
+        if r["crop-w"] and (not video_res or
+                            not crop_noop(r[w_prop], r[h_prop], r)) then
+            append(s, format("[x: %d, y: %d, w: %d, h: %d]",
+                            r["crop-x"], r["crop-y"], r["crop-w"], r["crop-h"]),
+                            {prefix=", ", nl="", indent="", no_prefix_markup=true})
+        end
+    end
+end
+
+
+local function pq_eotf(x)
+    if not x then
+        return x;
+    end
+
+    local PQ_M1 = 2610.0 / 4096 * 1.0 / 4
+    local PQ_M2 = 2523.0 / 4096 * 128
+    local PQ_C1 = 3424.0 / 4096
+    local PQ_C2 = 2413.0 / 4096 * 32
+    local PQ_C3 = 2392.0 / 4096 * 32
+
+    x = x ^ (1.0 / PQ_M2)
+    x = max(x - PQ_C1, 0.0) / (PQ_C2 - PQ_C3 * x)
+    x = x ^ (1.0 / PQ_M1)
+    x = x * 10000.0
+
+    return x
+end
+
+
+local function append_hdr(s, hdr)
+    if not hdr then
+        return
+    end
+
+    if (hdr["max-cll"] and hdr["max-cll"] > 203) or
+        hdr["max-luma"] and hdr["max-luma"] > 203 then
+        append(s, "", {prefix="HDR10:"})
+        if hdr["min-luma"] and hdr["max-luma"] and hdr["max-luma"] > 203 then
+            append(s, format("%.2g / %.0f", hdr["min-luma"], hdr["max-luma"]),
+                {prefix="Mastering display:", suffix=" cd/m²", nl=""})
+        end
+        if hdr["max-cll"] and hdr["max-cll"] > 203 then
+            append(s, hdr["max-cll"], {prefix="maxCLL:", suffix=" cd/m²", nl=""})
+        end
+        if hdr["max-fall"] and hdr["max-fall"] > 0 then
+            append(s, hdr["max-fall"], {prefix="maxFALL:", suffix=" cd/m²", nl=""})
+        end
+    end
+
+    if hdr["scene-max-r"] or hdr["scene-max-g"] or
+       hdr["scene-max-b"] or hdr["scene-avg"] then
+        append(s, "", {prefix="HDR10+:"})
+        append(s, format("%.1f / %.1f / %.1f", hdr["scene-max-r"] or 0,
+                         hdr["scene-max-g"] or 0, hdr["scene-max-b"] or 0),
+               {prefix="MaxRGB:", suffix=" cd/m²", nl=""})
+        append(s, format("%.1f", hdr["scene-avg"] or 0),
+               {prefix="Avg:", suffix=" cd/m²", nl=""})
+    end
+
+    if hdr["max-pq-y"] and hdr["avg-pq-y"] then
+        append(s, "", {prefix="PQ(Y):"})
+        append(s, format("%.2f cd/m² (%.2f%% PQ)", pq_eotf(hdr["max-pq-y"]),
+                         hdr["max-pq-y"] * 100), {prefix="Max:", nl=""})
+        append(s, format("%.2f cd/m² (%.2f%% PQ)", pq_eotf(hdr["avg-pq-y"]),
+                         hdr["avg-pq-y"] * 100), {prefix="Avg:", nl=""})
+    end
+end
+
+
 local function add_video(s)
     local r = mp.get_property_native("video-params")
+    local ro = mp.get_property_native("video-out-params")
     -- in case of e.g. lavfi-complex there can be no input video, only output
     if not r then
-        r = mp.get_property_native("video-out-params")
+        r = ro
     end
     if not r then
         return
@@ -712,35 +819,42 @@ local function add_video(s)
     append_display_sync(s)
     append_perfdata(s, o.print_perfdata_passes)
 
-    if append(s, r["w"], {prefix="Native Resolution:"}) then
-        append(s, r["h"], {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    append_resolution(s, r, "Native Resolution:", "w", "h", true)
+    if ro and (r["w"] ~= ro["dw"] or r["h"] ~= ro["dh"]) then
+        if ro["crop-w"] and (crop_noop(r["w"], r["h"], ro) or crop_equal(r, ro)) then
+            ro["crop-w"] = nil
+        end
+        append_resolution(s, ro, "Output Resolution:", "dw", "dh")
     end
-    if append(s, scaled_width, {prefix="Scaled Resolution:"}) then
-        append(s, scaled_height, {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    local scale = nil
+    if not mp.get_property_native("fullscreen") then
+        scale = mp.get_property_native("current-window-scale")
     end
-    append_property(s, "current-window-scale", {prefix="Window Scale:"})
-    if r["aspect"] ~= nil then
-        append(s, format("%.2f", r["aspect"]), {prefix="Aspect Ratio:"})
+    append_resolution(s, {w=scaled_width, h=scaled_height, s=scale}, "Scaled Resolution:")
+
+    if mp.get_property_native("deinterlace") then
+        append_property(s, "deinterlace", {prefix="Deinterlacing:"})
     end
+
     append(s, r["pixelformat"], {prefix="Pixel Format:"})
     if r["hw-pixelformat"] ~= nil then
         append(s, r["hw-pixelformat"], {prefix_sep="[", nl="", indent=" ",
                 suffix="]"})
     end
+    append(s, r["colorlevels"], {prefix="Levels:", nl=""})
 
     -- Group these together to save vertical space
-    local prim = append(s, r["primaries"], {prefix="Primaries:"})
-    local cmat = append(s, r["colormatrix"], {prefix="Colormatrix:", nl=prim and "" or o.nl})
-    append(s, r["colorlevels"], {prefix="Levels:", nl=cmat and "" or o.nl})
+    append(s, r["colormatrix"], {prefix="Colormatrix:"})
+    append(s, r["primaries"], {prefix="Primaries:", nl=""})
+    append(s, r["gamma"], {prefix="Transfer:", nl=""})
 
-    -- Append HDR metadata conditionally (only when present and interesting)
-    local hdrpeak = r["sig-peak"] or 0
-    local hdrinfo = ""
-    if hdrpeak > 1 then
-        hdrinfo = " (HDR peak: " .. format("%.2f", hdrpeak) .. ")"
+    local hdr = mp.get_property_native("hdr-metadata")
+    if not hdr then
+        local hdrpeak = r["sig-peak"] or 0
+        hdr = {["max-cll"]=math.floor(hdrpeak * 203)}
     end
 
-    append(s, r["gamma"], {prefix="Gamma:", suffix=hdrinfo})
+    append_hdr(s, hdr)
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "vf", "Filters:")
 end
@@ -834,7 +948,9 @@ local function keybinding_info(after_scroll)
     local page = pages[o.key_page_4]
     eval_ass_formatting()
     add_header(header)
-    append(header, "", {prefix=o.nl .. page.desc .. ":", nl="", indent=""})
+    append(header, "", {prefix=format("%s: {\\fs%s}%s{\\fs%s}", page.desc,
+           o.font_size * 0.66, "(hint: scroll with ↑↓)", o.font_size), nl="",
+           indent=""})
 
     if not kbinfo_lines or not after_scroll then
         kbinfo_lines = get_kbinfo_lines()
@@ -856,7 +972,7 @@ local function perf_stats()
     eval_ass_formatting()
     add_header(stats)
     local page = pages[o.key_page_0]
-    append(stats, "", {prefix=o.nl .. o.nl .. page.desc .. ":", nl="", indent=""})
+    append(stats, "", {prefix=page.desc .. ":", nl="", indent=""})
     page.offset = append_general_perfdata(stats, page.offset)
     return table.concat(stats)
 end
@@ -874,7 +990,7 @@ local function cache_stats()
 
     eval_ass_formatting()
     add_header(stats)
-    append(stats, "", {prefix=o.nl .. o.nl .. "Cache info:", nl="", indent=""})
+    append(stats, "", {prefix="Cache info:", nl="", indent=""})
 
     local info = mp.get_property_native("demuxer-cache-state")
     if info == nil then
@@ -1117,6 +1233,10 @@ local function process_key_binding(oneshot)
         elseif not display_timer.oneshot and not oneshot then
             display_timer:kill()
             cache_recorder_timer:stop()
+            if tm_viz_prev ~= nil then
+                mp.set_property_native("tone-mapping-visualize", tm_viz_prev)
+                tm_viz_prev = nil
+            end
             clear_screen()
             remove_page_bindings()
             if recorder then
@@ -1133,6 +1253,10 @@ local function process_key_binding(oneshot)
             -- Will stop working if "vsync-jitter" property change notification
             -- changes, but it's fine for an internal script.
             mp.observe_property("vsync-jitter", "none", recorder)
+        end
+        if not oneshot and o.plot_tonemapping_lut then
+            tm_viz_prev = mp.get_property_native("tone-mapping-visualize")
+            mp.set_property_native("tone-mapping-visualize", true)
         end
         if not oneshot then
             cache_ahead_buf = {0, pos = 1, len = 50, max = 0}

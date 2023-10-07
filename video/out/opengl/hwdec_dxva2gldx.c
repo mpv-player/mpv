@@ -58,21 +58,22 @@ static void uninit(struct ra_hwdec *hw)
 static int init(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
+    struct ra *ra = hw->ra_ctx->ra;
 
-    if (!ra_is_gl(hw->ra))
+    if (!ra_is_gl(ra))
         return -1;
-    GL *gl = ra_gl_get(hw->ra);
+    GL *gl = ra_gl_get(ra);
     if (!(gl->mpgl_caps & MPGL_CAP_DXINTEROP))
         return -1;
 
     // AMD drivers won't open multiple dxinterop HANDLES on the same D3D device,
     // so we request the one already in use by context_dxinterop
-    p->device_h = ra_get_native_resource(hw->ra, "dxinterop_device_HANDLE");
+    p->device_h = ra_get_native_resource(ra, "dxinterop_device_HANDLE");
     if (!p->device_h)
         return -1;
 
     // But we also still need the actual D3D device
-    p->device = ra_get_native_resource(hw->ra, "IDirect3DDevice9Ex");
+    p->device = ra_get_native_resource(ra, "IDirect3DDevice9Ex");
     if (!p->device)
         return -1;
     IDirect3DDevice9Ex_AddRef(p->device);
@@ -82,6 +83,12 @@ static int init(struct ra_hwdec *hw)
         .av_device_ref = d3d9_wrap_device_ref((IDirect3DDevice9 *)p->device),
         .hw_imgfmt = IMGFMT_DXVA2,
     };
+
+    if (!p->hwctx.av_device_ref) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx\n");
+        return -1;
+    }
+
     hwdec_devices_add(hw->devs, &p->hwctx);
     return 0;
 }

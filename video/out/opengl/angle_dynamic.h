@@ -8,6 +8,8 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include "config.h"
+
 #define ANGLE_FNS(FN) \
     FN(eglBindAPI, EGLBoolean (*EGLAPIENTRY PFN_eglBindAPI)(EGLenum)) \
     FN(eglBindTexImage, EGLBoolean (*EGLAPIENTRY PFN_eglBindTexImage) \
@@ -59,7 +61,7 @@ ANGLE_FNS(ANGLE_EXT_DECL)
 bool angle_load(void);
 
 // Source compatibility to statically linked ANGLE.
-#ifndef ANGLE_NO_ALIASES
+#if !HAVE_EGL_ANGLE_LIB
 #define eglBindAPI                      PFN_eglBindAPI
 #define eglBindTexImage                 PFN_eglBindTexImage
 #define eglChooseConfig                 PFN_eglChooseConfig

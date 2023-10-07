@@ -28,7 +28,6 @@
 #include <X11/Xutil.h>
 #include <va/va_x11.h>
 
-#include "config.h"
 #include "common/msg.h"
 #include "video/out/vo.h"
 #include "video/mp_image_pool.h"
@@ -82,7 +81,7 @@ struct priv {
     int                      output_surface;
     int                      visible_surface;
     int                      scaling;
-    int                      force_scaled_osd;
+    bool                     force_scaled_osd;
 
     VAImageFormat            osd_format; // corresponds to OSD_VA_FORMAT
     struct vaapi_osd_part    osd_part;
@@ -564,11 +563,12 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
     present_sync_get_info(x11->present, info);
 }
 
-static void draw_image(struct vo *vo, struct mp_image *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
+    struct mp_image *mpi = frame->current;
 
-    if (mpi->imgfmt != IMGFMT_VAAPI) {
+    if (mpi && mpi->imgfmt != IMGFMT_VAAPI) {
         struct mp_image *dst = p->swdec_surfaces[p->output_surface];
         if (!dst || va_surface_upload(p, dst, mpi) < 0) {
             MP_WARN(vo, "Could not upload surface.\n");
@@ -576,7 +576,6 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
             return;
         }
         mp_image_copy_attributes(dst, mpi);
-        talloc_free(mpi);
         mpi = mp_image_new_ref(dst);
     }
 
@@ -716,10 +715,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_REDRAW_FRAME:
-        p->output_surface = p->visible_surface;
-        draw_osd(vo);
-        return true;
     case VOCTRL_SET_PANSCAN:
         resize(p);
         return VO_TRUE;
@@ -789,6 +784,7 @@ static int preinit(struct vo *vo)
     if (!p->image_formats)
         goto fail;
 
+    p->mpvaapi->hwctx.hw_imgfmt = IMGFMT_VAAPI;
     p->pool = mp_image_pool_new(p);
     va_pool_set_allocator(p->pool, p->mpvaapi, VA_RT_FORMAT_YUV420);
 
@@ -858,7 +854,7 @@ const struct vo_driver video_out_vaapi = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .get_vsync = get_vsync,
     .wakeup = vo_x11_wakeup,
@@ -874,7 +870,7 @@ const struct vo_driver video_out_vaapi = {
             {"fast", VA_FILTER_SCALING_FAST},
             {"hq", VA_FILTER_SCALING_HQ},
             {"nla", VA_FILTER_SCALING_NL_ANAMORPHIC})},
-        {"scaled-osd", OPT_FLAG(force_scaled_osd)},
+        {"scaled-osd", OPT_BOOL(force_scaled_osd)},
         {0}
     },
     .options_prefix = "vo-vaapi",

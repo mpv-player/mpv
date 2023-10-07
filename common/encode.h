@@ -38,12 +38,8 @@ struct encode_opts {
     char **vopts;
     char *acodec;
     char **aopts;
-    float voffset;
-    float aoffset;
-    int rawts;
-    int video_first;
-    int audio_first;
-    int copy_metadata;
+    bool rawts;
+    bool copy_metadata;
     char **set_metadata;
     char **remove_metadata;
 };

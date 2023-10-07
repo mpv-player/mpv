@@ -54,6 +54,15 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define WM_DPICHANGED (0x02E0)
 #endif
 
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
+
+
+//Older MinGW compatibility
+#define DWMWA_WINDOW_CORNER_PREFERENCE 33
+#define DWMWA_SYSTEMBACKDROP_TYPE 38
+
 #ifndef DPI_ENUMS_DECLARED
 typedef enum MONITOR_DPI_TYPE {
     MDT_EFFECTIVE_DPI = 0,
@@ -70,6 +79,8 @@ struct w32_api {
     HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
     BOOL (WINAPI *pImmDisableIME)(DWORD);
     BOOL (WINAPI *pAdjustWindowRectExForDpi)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
+    BOOLEAN (WINAPI *pShouldAppsUseDarkMode)(void);
+    DWORD (WINAPI *pSetPreferredAppMode)(DWORD mode);
 };
 
 struct vo_w32_state {
@@ -141,6 +152,8 @@ struct vo_w32_state {
     // entire virtual desktop area - but we still limit to one monitor size.
     bool fit_on_screen;
 
+    bool win_force_pos;
+
     ITaskbarList2 *taskbar_list;
     ITaskbarList3 *taskbar_list3;
     UINT tbtnCreatedMsg;
@@ -159,8 +172,11 @@ struct vo_w32_state {
     HANDLE avrt_handle;
 };
 
-static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
+static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
+    if (!w32->opts->border)
+        return;
+
     if (w32->api.pAdjustWindowRectExForDpi) {
         w32->api.pAdjustWindowRectExForDpi(rc,
             GetWindowLongPtrW(hwnd, GWL_STYLE), 0,
@@ -168,6 +184,15 @@ static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
     } else {
         AdjustWindowRect(rc, GetWindowLongPtrW(hwnd, GWL_STYLE), 0);
     }
+}
+
+static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
+{
+    RECT win = *rc;
+    adjust_window_rect(w32, hwnd, rc);
+    // Adjust for title bar height that will be hidden in WM_NCCALCSIZE
+    if (w32->opts->border && !w32->opts->title_bar && !w32->current_fs)
+        rc->top -= rc->top - win.top;
 }
 
 // basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
@@ -557,6 +582,7 @@ static void update_dpi(struct vo_w32_state *w32)
 
     w32->dpi = dpi;
     w32->dpi_scale = w32->opts->hidpi_window_scale ? w32->dpi / 96.0 : 1.0;
+    signal_events(w32, VO_EVENT_DPI);
 }
 
 static void update_display_info(struct vo_w32_state *w32)
@@ -659,8 +685,15 @@ static HMONITOR get_default_monitor(struct vo_w32_state *w32)
                                      w32->opts->screen_id;
 
     // Handle --fs-screen=<all|default> and --screen=default
-    if (id < 0)
-        return MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+    if (id < 0) {
+        if (w32->win_force_pos && !w32->current_fs) {
+            // Get window from forced position
+            return MonitorFromRect(&w32->windowrc, MONITOR_DEFAULTTOPRIMARY);
+        } else {
+            // Let compositor decide
+            return MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+        }
+    }
 
     HMONITOR mon = get_monitor(id);
     if (mon)
@@ -781,16 +814,24 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
-    const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX;
+    const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX | WS_THICKFRAME;
     const DWORD FRAME = WS_OVERLAPPEDWINDOW;
-    const DWORD FULLSCREEN = NO_FRAME | WS_SYSMENU;
+    const DWORD FULLSCREEN = NO_FRAME & ~WS_THICKFRAME;
     style &= ~(NO_FRAME | FRAME | FULLSCREEN);
+    style |= WS_SYSMENU;
     if (w32->current_fs) {
         style |= FULLSCREEN;
     } else {
         style |= w32->opts->border ? FRAME : NO_FRAME;
     }
     return style;
+}
+
+static LONG get_title_bar_height(struct vo_w32_state *w32)
+{
+    RECT rc = {0};
+    adjust_window_rect(w32, w32->window, &rc);
+    return -rc.top;
 }
 
 static void update_window_style(struct vo_w32_state *w32)
@@ -838,6 +879,18 @@ static void fit_window_on_screen(struct vo_w32_state *w32)
     RECT screen = get_working_area(w32);
     if (w32->opts->border)
         subtract_window_borders(w32, w32->window, &screen);
+
+    // Check for invisible borders and adjust the work area size
+    RECT frame, window;
+    if (GetWindowRect(w32->window, &window) &&
+        SUCCEEDED(DwmGetWindowAttribute(w32->window, DWMWA_EXTENDED_FRAME_BOUNDS,
+                                        &frame, sizeof(RECT))))
+    {
+        screen.left -= frame.left - window.left;
+        screen.top -= frame.top - window.top;
+        screen.right += window.right - frame.right;
+        screen.bottom += window.bottom - frame.bottom;
+    }
 
     bool adjusted = fit_rect_size(&w32->windowrc, rect_w(screen), rect_h(screen));
 
@@ -947,6 +1000,16 @@ static bool is_visible(HWND window)
     return GetWindowLongPtrW(window, GWL_STYLE) & WS_VISIBLE;
 }
 
+//Set the mpv window's affinity.
+//This will affect how it's displayed on the desktop and in system-level operations like taking screenshots.
+static void update_affinity(struct vo_w32_state *w32)
+{
+    if (!w32 || w32->parent) {
+        return;
+    }
+    SetWindowDisplayAffinity(w32->window, w32->opts->window_affinity);
+}
+
 static void update_window_state(struct vo_w32_state *w32)
 {
     if (w32->parent)
@@ -962,7 +1025,7 @@ static void update_window_state(struct vo_w32_state *w32)
     // Show the window if it's not yet visible
     if (!is_visible(w32->window)) {
         if (w32->opts->window_minimized) {
-            ShowWindow(w32->window, SW_SHOWMINIMIZED);
+            ShowWindow(w32->window, SW_SHOWMINNOACTIVE);
             update_maximized_state(w32); // Set the WPF_RESTORETOMAXIMIZED flag
         } else if (w32->opts->window_maximized) {
             ShowWindow(w32->window, SW_SHOWMAXIMIZED);
@@ -981,6 +1044,15 @@ static void update_window_state(struct vo_w32_state *w32)
     signal_events(w32, VO_EVENT_RESIZE);
 }
 
+static void update_corners_pref(const struct vo_w32_state *w32) {
+    if (w32->parent)
+        return;
+
+    int pref = w32->current_fs ? 0 : w32->opts->window_corners;
+    DwmSetWindowAttribute(w32->window, DWMWA_WINDOW_CORNER_PREFERENCE,
+                          &pref, sizeof(pref));
+}
+
 static void reinit_window_state(struct vo_w32_state *w32)
 {
     if (w32->parent)
@@ -988,6 +1060,7 @@ static void reinit_window_state(struct vo_w32_state *w32)
 
     // The order matters: fs state should be updated prior to changing styles
     update_fullscreen_state(w32);
+    update_corners_pref(w32);
     update_window_style(w32);
 
     // fit_on_screen is applied at most once when/if applicable (normal win).
@@ -998,6 +1071,46 @@ static void reinit_window_state(struct vo_w32_state *w32)
 
     // Show and activate the window after all window state parameters were set
     update_window_state(w32);
+}
+
+// Follow Windows settings and update dark mode state
+// Microsoft documented how to enable dark mode for title bar:
+// https://learn.microsoft.com/windows/apps/desktop/modernize/apply-windows-themes
+// https://learn.microsoft.com/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+// Documentation says to set the DWMWA_USE_IMMERSIVE_DARK_MODE attribute to
+// TRUE to honor dark mode for the window, FALSE to always use light mode. While
+// in fact setting it to TRUE causes dark mode to be always enabled, regardless
+// of the settings. Since it is quite unlikely that it will be fixed, just use
+// UxTheme API to check if dark mode should be applied and while at it enable it
+// fully. Ideally this function should only call the DwmSetWindowAttribute(),
+// but it just doesn't work as documented.
+static void update_dark_mode(const struct vo_w32_state *w32)
+{
+    if (w32->api.pSetPreferredAppMode)
+        w32->api.pSetPreferredAppMode(1); // allow dark mode
+
+    HIGHCONTRAST hc = {sizeof(hc)};
+    SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0);
+    bool high_contrast = hc.dwFlags & HCF_HIGHCONTRASTON;
+
+    // if pShouldAppsUseDarkMode is not available, just assume it to be true
+    const BOOL use_dark_mode = !high_contrast && (!w32->api.pShouldAppsUseDarkMode ||
+                                                  w32->api.pShouldAppsUseDarkMode());
+
+    SetWindowTheme(w32->window, use_dark_mode ? L"DarkMode_Explorer" : L"", NULL);
+
+    DwmSetWindowAttribute(w32->window, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                          &use_dark_mode, sizeof(use_dark_mode));
+}
+
+static void update_backdrop(const struct vo_w32_state *w32)
+{
+    if (w32->parent)
+        return;
+
+    int backdropType = w32->opts->backdrop_type;
+    DwmSetWindowAttribute(w32->window, DWMWA_SYSTEMBACKDROP_TYPE,
+                          &backdropType, sizeof(backdropType));
 }
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
@@ -1028,8 +1141,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     }
 
     switch (message) {
-    case WM_ERASEBKGND: // no need to erase background separately
-        return 1;
+    case WM_ERASEBKGND:
+        if (!w32->parent && (!w32->opts->border || w32->current_fs))
+            return TRUE;
+        break;
     case WM_PAINT:
         signal_events(w32, VO_EVENT_EXPOSE);
         break;
@@ -1042,7 +1157,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         signal_events(w32, VO_EVENT_WIN_STATE);
 
         update_display_info(w32);  // if we moved between monitors
-        MP_DBG(w32, "move window: %d:%d\n", x, y);
         break;
     }
     case WM_MOVING: {
@@ -1173,9 +1287,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         }
         break;
+    case WM_NCACTIVATE:
+        // Cosmetic to remove blinking window border when initializing window
+        if (!w32->opts->border)
+            lParam = -1;
+        break;
     case WM_NCHITTEST:
         // Provide sizing handles for borderless windows
-        if (!w32->opts->border && !w32->current_fs) {
+        if ((!w32->opts->border || !w32->opts->title_bar) && !w32->current_fs) {
             return borderless_nchittest(w32, GET_X_LPARAM(lParam),
                                         GET_Y_LPARAM(lParam));
         }
@@ -1293,6 +1412,20 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_DISPLAYCHANGE:
         force_update_display_info(w32);
         break;
+    case WM_SETTINGCHANGE:
+        update_dark_mode(w32);
+        break;
+    case WM_NCCALCSIZE:
+        if (!w32->opts->border)
+            return 0;
+        // Apparently removing WS_CAPTION disables some window animation, instead
+        // just reduce non-client size to remove title bar.
+        if (wParam && lParam && w32->opts->border && !w32->opts->title_bar &&
+            !w32->current_fs && !w32->parent)
+        {
+            ((LPNCCALCSIZE_PARAMS) lParam)->rgrc[0].top -= get_title_bar_height(w32);
+        }
+        break;
     }
 
     if (message == w32->tbtnCreatedMsg) {
@@ -1315,6 +1448,7 @@ static void register_window_class(void)
         .hInstance = HINST_THISCOMPONENT,
         .hIcon = LoadIconW(HINST_THISCOMPONENT, L"IDI_ICON1"),
         .hCursor = LoadCursor(NULL, IDC_ARROW),
+        .hbrBackground = (HBRUSH) GetStockObject(BLACK_BRUSH),
         .lpszClassName = L"mpv",
     });
 }
@@ -1438,8 +1572,9 @@ static void gui_thread_reconfig(void *ptr)
     vo_calc_window_geometry3(vo, &screen, &mon, w32->dpi_scale, &geo);
     vo_apply_window_geometry(vo, &geo);
 
-    bool reset_size = w32->o_dwidth != vo->dwidth ||
-                      w32->o_dheight != vo->dheight;
+    bool reset_size = (w32->o_dwidth != vo->dwidth ||
+                       w32->o_dheight != vo->dheight) &&
+                       w32->opts->auto_window_resize;
 
     w32->o_dwidth = vo->dwidth;
     w32->o_dheight = vo->dheight;
@@ -1449,7 +1584,8 @@ static void gui_thread_reconfig(void *ptr)
                 geo.win.x0 + vo->dwidth, geo.win.y0 + vo->dheight);
         w32->prev_windowrc = w32->windowrc;
         w32->window_bounds_initialized = true;
-        w32->fit_on_screen = true;
+        w32->win_force_pos = geo.flags & VO_WIN_FORCE_POS;
+        w32->fit_on_screen = !w32->win_force_pos;
         goto finish;
     }
 
@@ -1501,6 +1637,25 @@ static void w32_api_load(struct vo_w32_state *w32)
     HMODULE imm32_dll = LoadLibraryW(L"imm32.dll");
     w32->api.pImmDisableIME = !imm32_dll ? NULL :
                 (void *)GetProcAddress(imm32_dll, "ImmDisableIME");
+
+    // Dark mode related functions, available since the 1809 Windows 10 update
+    // Check the Windows build version as on previous versions used ordinals
+    // may point to unexpected code/data. Alternatively could check uxtheme.dll
+    // version directly, but it is little bit more boilerplate code, and build
+    // number is good enough check.
+    void (WINAPI *pRtlGetNtVersionNumbers)(LPDWORD, LPDWORD, LPDWORD) =
+        (void *)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlGetNtVersionNumbers");
+
+    DWORD major, build;
+    pRtlGetNtVersionNumbers(&major, NULL, &build);
+    build &= ~0xF0000000;
+
+    HMODULE uxtheme_dll = (major < 10 || build < 17763) ? NULL :
+                GetModuleHandle(L"uxtheme.dll");
+    w32->api.pShouldAppsUseDarkMode = !uxtheme_dll ? NULL :
+                (void *)GetProcAddress(uxtheme_dll, MAKEINTRESOURCEA(132));
+    w32->api.pSetPreferredAppMode = !uxtheme_dll ? NULL :
+                (void *)GetProcAddress(uxtheme_dll, MAKEINTRESOURCEA(135));
 }
 
 static void *gui_thread(void *ptr)
@@ -1542,10 +1697,17 @@ static void *gui_thread(void *ptr)
         goto done;
     }
 
+    update_dark_mode(w32);
+    update_corners_pref(w32);
+    if (w32->opts->window_affinity)
+        update_affinity(w32);
+    if (w32->opts->backdrop_type)
+        update_backdrop(w32);
+
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
 
-        IDropTarget *dt = mp_w32_droptarget_create(w32->log, w32->input_ctx);
+        IDropTarget *dt = mp_w32_droptarget_create(w32->log, w32->opts, w32->input_ctx);
         RegisterDragDrop(w32->window, dt);
 
         // ITaskbarList2 has the MarkFullscreenWindow method, which is used to
@@ -1618,8 +1780,7 @@ done:
     return NULL;
 }
 
-// Returns: 1 = Success, 0 = Failure
-int vo_w32_init(struct vo *vo)
+bool vo_w32_init(struct vo *vo)
 {
     assert(!vo->w32);
 
@@ -1651,11 +1812,11 @@ int vo_w32_init(struct vo *vo)
         talloc_free(profile);
     }
 
-    return 1;
+    return true;
 fail:
     talloc_free(w32);
     vo->w32 = NULL;
-    return 0;
+    return false;
 }
 
 struct disp_names_data {
@@ -1716,18 +1877,32 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 
             if (changed_option == &vo_opts->fullscreen) {
                 reinit_window_state(w32);
+            } else if (changed_option == &vo_opts->window_affinity) {
+                update_affinity(w32);
             } else if (changed_option == &vo_opts->ontop) {
                 update_window_state(w32);
-            } else if (changed_option == &vo_opts->border) {
+            } else if (changed_option == &vo_opts->backdrop_type) {
+                update_backdrop(w32);
+            } else if (changed_option == &vo_opts->border ||
+                       changed_option == &vo_opts->title_bar)
+            {
                 update_window_style(w32);
                 update_window_state(w32);
             } else if (changed_option == &vo_opts->window_minimized) {
                 update_minimized_state(w32);
             } else if (changed_option == &vo_opts->window_maximized) {
                 update_maximized_state(w32);
+            } else if (changed_option == &vo_opts->window_corners) {
+                update_corners_pref(w32);
             }
         }
 
+        return VO_TRUE;
+    }
+    case VOCTRL_GET_WINDOW_ID: {
+        if (!w32->window)
+            return VO_NOTAVAIL;
+        *(int64_t *)arg = (int64_t)w32->window;
         return VO_TRUE;
     }
     case VOCTRL_GET_HIDPI_SCALE: {
@@ -1799,9 +1974,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         *(double*) arg = w32->display_fps;
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_RES: ;
-        RECT r = get_screen_area(w32);
-        ((int *)arg)[0] = r.right;
-        ((int *)arg)[1] = r.bottom;
+        RECT monrc = get_monitor_info(w32).rcMonitor;
+        ((int *)arg)[0] = monrc.right - monrc.left;
+        ((int *)arg)[1] = monrc.bottom - monrc.top;
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_NAMES:
         *(char ***)arg = get_disp_names(w32);

@@ -53,18 +53,19 @@ struct mp_scaletempo2 {
     int samples_per_second;
     // If muted, keep track of partial frames that should have been skipped over.
     double muted_partial_frame;
-    // Book keeping of the current time of generated audio, in frames. This
-    // should be appropriately updated when out samples are generated, regardless
-    // of whether we push samples out when fill_buffer() is called or we store
-    // audio in |wsola_output| for the subsequent calls to fill_buffer().
-    // Furthermore, if samples from |audio_buffer| are evicted then this
-    // member variable should be updated based on |playback_rate|.
-    // Note that this member should be updated ONLY by calling update_output_time(),
-    // so that |search_block_index| is update accordingly.
+    // Book keeping of the current time of generated audio, in frames.
+    // Corresponds to the center of |search_block|. This is increased in
+    // intervals of |ola_hop_size| multiplied by the current playback_rate,
+    // for every WSOLA iteration. This tracks the number of advanced frames as
+    // a double to achieve accurate playback rates beyond the integer precision
+    // of |search_block_index|.
+    // Needs to be adjusted like any other index when frames are evicted from
+    // |input_buffer|.
     double output_time;
     // The offset of the center frame of |search_block| w.r.t. its first frame.
     int search_block_center_offset;
-    // Index of the beginning of the |search_block|, in frames.
+    // Index of the beginning of the |search_block|, in frames. This may be
+    // negative, which is handled by |peek_audio_with_zero_prepend|.
     int search_block_index;
     // Number of Blocks to search to find the most similar one to the target
     // frame.
@@ -80,6 +81,9 @@ struct mp_scaletempo2 {
     // them and can be copied to output if fill_buffer() is called. It also
     // specifies the index where the next WSOLA window has to overlap-and-add.
     int num_complete_frames;
+    // Whether |wsola_output| contains an additional |ola_hop_size| of overlap
+    // frames for the next iteration.
+    bool wsola_output_started;
     // Overlap-and-add window.
     float *ola_window;
     // Transition window, used to update |optimal_block| by a weighted sum of
@@ -108,14 +112,23 @@ struct mp_scaletempo2 {
     float **input_buffer;
     int input_buffer_size;
     int input_buffer_frames;
+    // How many frames in |input_buffer| need to be flushed by padding with
+    // silence to process the final packet. While this is nonzero, the filter
+    // appends silence to |input_buffer| until these frames are processed.
+    int input_buffer_final_frames;
+    // How many additional frames of silence have been added to |input_buffer|
+    // for padding after the final packet.
+    int input_buffer_added_silence;
     float *energy_candidate_blocks;
 };
 
 void mp_scaletempo2_destroy(struct mp_scaletempo2 *p);
 void mp_scaletempo2_reset(struct mp_scaletempo2 *p);
 void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate);
+double mp_scaletempo2_get_latency(struct mp_scaletempo2 *p, double playback_rate);
 int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
-    uint8_t **planes, int frame_size, bool final);
+    uint8_t **planes, int frame_size, double playback_rate);
+void mp_scaletempo2_set_final(struct mp_scaletempo2 *p);
 int mp_scaletempo2_fill_buffer(struct mp_scaletempo2 *p,
-    float **dest, int dest_size, float playback_rate);
-bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p);
+    float **dest, int dest_size, double playback_rate);
+bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p, double playback_rate);

@@ -43,6 +43,7 @@ struct sd_ass_priv {
     struct ass_renderer *ass_renderer;
     struct ass_track *ass_track;
     struct ass_track *shadow_track; // for --sub-ass=no rendering
+    bool ass_configured;
     bool is_converted;
     struct lavc_conv *converter;
     struct sd_filter **filters;
@@ -54,6 +55,7 @@ struct sd_ass_priv {
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
+    struct mp_osd_res osd;
     int64_t *seen_packets;
     int num_seen_packets;
     bool duration_unknown;
@@ -83,8 +85,8 @@ static void mp_ass_add_default_styles(ASS_Track *track, struct mp_subtitle_opts 
 
     if (track->n_styles == 0) {
         if (!track->PlayResY) {
+            track->PlayResX = MP_ASS_FONT_PLAYRESX;
             track->PlayResY = MP_ASS_FONT_PLAYRESY;
-            track->PlayResX = track->PlayResY * 4 / 3;
         }
         track->Kerning = true;
         int sid = ass_alloc_style(track);
@@ -206,7 +208,7 @@ static void assobjects_init(struct sd *sd)
     struct sd_ass_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
 
-    ctx->ass_library = mp_ass_init(sd->global, sd->log);
+    ctx->ass_library = mp_ass_init(sd->global, sd->opts->sub_style, sd->log);
     ass_set_extract_fonts(ctx->ass_library, opts->use_embedded_fonts);
 
     add_subtitle_fonts(sd);
@@ -218,8 +220,8 @@ static void assobjects_init(struct sd *sd)
     ctx->ass_track->track_type = TRACK_TYPE_ASS;
 
     ctx->shadow_track = ass_new_track(ctx->ass_library);
-    ctx->shadow_track->PlayResX = 384;
-    ctx->shadow_track->PlayResY = 288;
+    ctx->shadow_track->PlayResX = MP_ASS_FONT_PLAYRESX;
+    ctx->shadow_track->PlayResY = MP_ASS_FONT_PLAYRESY;
     mp_ass_add_default_styles(ctx->shadow_track, opts);
 
     char *extradata = sd->codec->extradata;
@@ -261,9 +263,7 @@ static int init(struct sd *sd)
         strcmp(sd->codec->codec, "null") != 0)
     {
         ctx->is_converted = true;
-        ctx->converter = lavc_conv_create(sd->log, sd->codec->codec,
-                                          sd->codec->extradata,
-                                          sd->codec->extradata_size);
+        ctx->converter = lavc_conv_create(sd->log, sd->codec);
         if (!ctx->converter)
             return -1;
 
@@ -388,7 +388,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
 
     bool set_use_margins = false;
-    int set_sub_pos = 0;
+    float set_sub_pos = 0.0f;
     float set_line_spacing = 0;
     float set_font_scale = 1;
     int set_hinting = 0;
@@ -406,7 +406,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_use_margins = opts->ass_use_margins;
     }
     if (converted || opts->ass_style_override) {
-        set_sub_pos = 100 - opts->sub_pos;
+        set_sub_pos = 100.0f - opts->sub_pos;
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
         set_font_scale = opts->sub_scale;
@@ -436,7 +436,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
 #endif
     ass_set_selective_style_override_enabled(priv, set_force_flags);
     ASS_Style style = {0};
-    mp_ass_set_style(&style, 288, opts->sub_style);
+    mp_ass_set_style(&style, MP_ASS_FONT_PLAYRESY, opts->sub_style);
     ass_set_selective_style_override(priv, &style);
     free(style.FontName);
     if (converted && track->default_style < track->n_styles) {
@@ -450,6 +450,34 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     if (converted)
         ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
 #endif
+    if (converted) {
+        bool override_playres = true;
+        char **ass_force_style_list = opts->ass_force_style_list;
+        for (int i = 0; ass_force_style_list && ass_force_style_list[i]; i++) {
+            if (bstr_find0(bstr0(ass_force_style_list[i]), "PlayResX") >= 0)
+                override_playres = false;
+        }
+
+        // srt to ass conversion from ffmpeg has fixed PlayResX of 384 with an
+        // aspect of 4:3. Starting with libass f08f8ea5 (pre 0.17) PlayResX
+        // affects shadow and border widths, among others, so to render borders
+        // and shadows correctly, we adjust PlayResX according to the DAR.
+        // But PlayResX also affects margins, so we adjust those too.
+        // This should ensure basic srt-to-ass ffmpeg conversion has correct
+        // borders, but there could be other issues with some srt extensions
+        // and/or different source formats which would be exposed over time.
+        // Make these adjustments only if the user didn't set PlayResX.
+        if (override_playres) {
+            int vidw = dim->w - (dim->ml + dim->mr);
+            int vidh = dim->h - (dim->mt + dim->mb);
+            track->PlayResX = track->PlayResY * (double)vidw / MPMAX(vidh, 1);
+            // ffmpeg and mpv use a default PlayResX of 384 when it is not known,
+            // this comes from VSFilter.
+            double fix_margins = track->PlayResX / (double)MP_ASS_FONT_PLAYRESX;
+            track->styles->MarginL = round(track->styles->MarginL * fix_margins);
+            track->styles->MarginR = round(track->styles->MarginR * fix_margins);
+        }
+    }
 }
 
 static bool has_overrides(char *s)
@@ -539,13 +567,17 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     ASS_Renderer *renderer = ctx->ass_renderer;
     struct sub_bitmaps *res = &(struct sub_bitmaps){0};
 
+    // Always update the osd_res
+    struct mp_osd_res old_osd = ctx->osd;
+    ctx->osd = dim;
+
     if (pts == MP_NOPTS_VALUE || !renderer)
         goto done;
 
     // Currently no supported text sub formats support a distinction between forced
     // and unforced lines, so we just assume everything's unforced and discard everything.
     // If we ever see a format that makes this distinction, we can add support here.
-    if (opts->forced_subs_only_current)
+    if (opts->sub_forced_events_only)
         goto done;
 
     double scale = dim.display_par;
@@ -557,7 +589,10 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
         if (isnormal(par))
             scale *= par;
     }
-    configure_ass(sd, &dim, converted, track);
+    if (!ctx->ass_configured || !osd_res_equals(old_osd, ctx->osd)) {
+        configure_ass(sd, &dim, converted, track);
+        ctx->ass_configured = true;
+    }
     ass_set_pixel_aspect(renderer, scale);
     if (!converted && (!opts->ass_style_override ||
                        opts->ass_vsfilter_blur_compat))
@@ -713,7 +748,7 @@ static struct sd_times get_times(struct sd *sd, double pts)
     ASS_Track *track = ctx->ass_track;
     struct sd_times res = { .start = MP_NOPTS_VALUE, .end = MP_NOPTS_VALUE };
 
-    if (pts == MP_NOPTS_VALUE || ctx->duration_unknown)
+    if (pts == MP_NOPTS_VALUE)
         return res;
 
     long long ipts = find_timestamp(sd, pts);
@@ -826,9 +861,14 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
             ctx->clear_once = true; // allow reloading on seeks
         }
         if (flags & UPDATE_SUB_HARD) {
+            // ass_track will be recreated, so clear duplicate cache
+            ctx->clear_once = true;
+            reset(sd);
+
             assobjects_destroy(sd);
             assobjects_init(sd);
         }
+        ctx->ass_configured = false; // ass always needs to be reconfigured
         return CONTROL_OK;
     }
     default:

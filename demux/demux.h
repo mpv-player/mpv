@@ -56,6 +56,33 @@ struct demux_reader_state {
     struct demux_seek_range seek_ranges[MAX_SEEK_RANGES];
 };
 
+extern const struct m_sub_options demux_conf;
+
+struct demux_opts {
+    int enable_cache;
+    bool disk_cache;
+    int64_t max_bytes;
+    int64_t max_bytes_bw;
+    bool donate_fw;
+    double min_secs;
+    double hyst_secs;
+    bool force_seekable;
+    double min_secs_cache;
+    bool access_references;
+    int seekable_cache;
+    int index_mode;
+    double mf_fps;
+    char *mf_type;
+    bool create_ccs;
+    char *record_file;
+    int video_back_preroll;
+    int audio_back_preroll;
+    int back_batch[STREAM_TYPE_COUNT];
+    double back_seek_size;
+    char *meta_cp;
+    bool force_retry_eof;
+};
+
 #define SEEK_FACTOR   (1 << 1)      // argument is in range [0,1]
 #define SEEK_FORWARD  (1 << 2)      // prefer later time if not exact
                                     // (if unset, prefer earlier time)
@@ -204,6 +231,9 @@ typedef struct demuxer {
     bool is_streaming; // implies a "slow" input, such as network or FUSE
     int stream_origin; // any STREAM_ORIGIN_* (set from source stream)
     bool access_references; // allow opening other files/URLs
+
+    struct demux_opts *opts;
+    struct m_config_cache *opts_cache;
 
     // Bitmask of DEMUX_EVENT_*
     int events;

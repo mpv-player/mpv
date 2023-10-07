@@ -61,12 +61,14 @@ static const m_option_t style_opts[] = {
     {"align-y", OPT_CHOICE(align_y,
         {"top", -1}, {"center", 0}, {"bottom", +1})},
     {"blur", OPT_FLOAT(blur), M_RANGE(0, 20)},
-    {"bold", OPT_FLAG(bold)},
-    {"italic", OPT_FLAG(italic)},
+    {"bold", OPT_BOOL(bold)},
+    {"italic", OPT_BOOL(italic)},
     {"justify", OPT_CHOICE(justify,
         {"auto", 0}, {"left", 1}, {"center", 2}, {"right", 3})},
     {"font-provider", OPT_CHOICE(font_provider,
         {"auto", 0}, {"none", 1}, {"fontconfig", 2}), .flags = UPDATE_SUB_HARD},
+    {"fonts-dir", OPT_STRING(fonts_dir),
+        .flags = M_OPT_FILE | UPDATE_SUB_HARD},
     {0}
 };
 
@@ -251,6 +253,7 @@ static void check_obj_resize(struct osd_state *osd, struct mp_osd_res res,
 {
     if (!osd_res_equals(res, obj->vo_res)) {
         obj->vo_res = res;
+        obj->osd_changed = true;
         mp_client_broadcast_event_external(osd->global->client_api,
                                            MP_EVENT_WIN_RESIZE, NULL);
     }
@@ -546,7 +549,6 @@ struct sub_bitmaps *sub_bitmaps_copy(struct sub_bitmap_copy_cache **p_cache,
     assert(in->packed && in->packed->bufs[0]);
 
     res->packed = mp_image_new_ref(res->packed);
-    MP_HANDLE_OOM(res->packed);
     talloc_steal(res, res->packed);
 
     res->parts = NULL;

@@ -44,6 +44,9 @@ If necessary (to e.g. exclude commits already on master), the release can
 be done on a branch with different commit history. The release branch **must**
 then be merged to master so `git describe` will pick up the tag.
 
+This does not apply to patch releases, which are tagged directly on the
+`release/0.X` branch. The master branch always remains at v0.X.0.
+
 Release notes template
 ----------------------
 
@@ -67,13 +70,13 @@ New
 Changed
 ~~~~~~~
 
-- List of removed features
+- List of changed features
 
 
 Removed
-~~~~~~~~~~
+~~~~~~~
 
-- List of deprecated features
+- List of removed features
 
 
 Options and Commands
@@ -117,10 +120,19 @@ A complete changelog can be seen by running `git log <start>..<end>`
 in the git repository.
 ```
 
-Note that the "Release 0.X.Y" title should be removed when creating a new GitHub
-release.
-
 When creating a new point release its changes should be added on top of the
 `RELEASE_NOTES` file (with the appropriate title) so that all the changes in
 the current 0.X branch will be included. This way the `RELEASE_NOTES` file
 can be used by distributors as changelog for point releases too.
+
+The changelog of lists all changes since the last release, including those
+that have been backported to patch releases already.
+
+Some additional advice:
+- Especially for features, try to reword the messages so that the user-visible
+  change is clear to the reader. But don't simplify too much or be too verbose.
+- It often makes sense to merge multiple related changes into one line
+- Changes that have been made and reverted within the same release must not
+  appear in the changelog
+- Limit the "Options and Commands" section to relevant changes
+- When filling in the GitHub release, remove the "Release 0.X.Y" heading

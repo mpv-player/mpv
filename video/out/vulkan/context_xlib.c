@@ -34,10 +34,8 @@ static bool xlib_check_visible(struct ra_ctx *ctx)
 
 static void xlib_vk_swap_buffers(struct ra_ctx *ctx)
 {
-    if (ctx->vo->x11->use_present) {
-        vo_x11_present(ctx->vo);
+    if (ctx->vo->x11->use_present)
         present_sync_swap(ctx->vo->x11->present);
-    }
 }
 
 static void xlib_vk_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)

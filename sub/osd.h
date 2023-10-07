@@ -153,10 +153,11 @@ struct osd_style_opts {
     int align_x;
     int align_y;
     float blur;
-    int bold;
-    int italic;
+    bool bold;
+    bool italic;
     int justify;
     int font_provider;
+    char *fonts_dir;
 };
 
 extern const struct m_sub_options osd_style_conf;

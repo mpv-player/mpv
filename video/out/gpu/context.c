@@ -82,7 +82,7 @@ static const struct ra_ctx_fns *contexts[] = {
 #if HAVE_GL_DXINTEROP
     &ra_ctx_dxgl,
 #endif
-#if HAVE_GL_WAYLAND
+#if HAVE_EGL_WAYLAND
     &ra_ctx_wayland_egl,
 #endif
 #if HAVE_EGL_X11
@@ -110,7 +110,9 @@ static const struct ra_ctx_fns *contexts[] = {
 #if HAVE_X11
     &ra_ctx_vulkan_xlib,
 #endif
+#if HAVE_VK_KHR_DISPLAY
     &ra_ctx_vulkan_display,
+#endif
 #endif
 
 /* No API contexts: */
@@ -267,8 +269,8 @@ const struct m_sub_options ra_ctx_conf = {
         {"gpu-api",
             OPT_STRING_VALIDATE(context_type, ra_ctx_validate_api),
             .help = ra_ctx_api_help},
-        {"gpu-debug", OPT_FLAG(debug)},
-        {"gpu-sw", OPT_FLAG(allow_sw)},
+        {"gpu-debug", OPT_BOOL(debug)},
+        {"gpu-sw", OPT_BOOL(allow_sw)},
         {0}
     },
     .size = sizeof(struct ra_ctx_opts),

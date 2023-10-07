@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +29,7 @@
 #include "misc/ctype.h"
 #include "m_option.h"
 #include "m_config.h"
+#include "stream/stream.h"
 
 // Skip whitespace and comments (assuming there are no line breaks)
 static bool skip_ws(bstr *s)
@@ -71,7 +70,7 @@ int m_config_parse(m_config_t *config, const char *location, bstr data,
                 goto error;
             }
             if (skip_ws(&line)) {
-                MP_ERR(config, "%s unparseable extra characters: '%.*s'\n",
+                MP_ERR(config, "%s unparsable extra characters: '%.*s'\n",
                        loc, BSTR_P(line));
                 goto error;
             }
@@ -122,7 +121,7 @@ int m_config_parse(m_config_t *config, const char *location, bstr data,
             }
         }
         if (skip_ws(&line)) {
-            MP_ERR(config, "%s unparseable extra characters: '%.*s'\n",
+            MP_ERR(config, "%s unparsable extra characters: '%.*s'\n",
                    loc, BSTR_P(line));
             goto error;
         }
@@ -151,51 +150,29 @@ int m_config_parse(m_config_t *config, const char *location, bstr data,
     return 1;
 }
 
-static bstr read_file(struct mp_log *log, const char *filename)
-{
-    FILE *f = fopen(filename, "rb");
-    if (!f) {
-        mp_verbose(log, "Can't open config file: %s\n", mp_strerror(errno));
-        return (bstr){0};
-    }
-    char *data = talloc_array(NULL, char, 0);
-    size_t size = 0;
-    while (1) {
-        size_t left = talloc_get_size(data) - size;
-        if (!left) {
-            MP_TARRAY_GROW(NULL, data, size + 1);
-            continue;
-        }
-        size_t s = fread(data + size, 1, left, f);
-        if (!s) {
-            if (ferror(f))
-                mp_err(log, "Error reading config file.\n");
-            fclose(f);
-            MP_TARRAY_APPEND(NULL, data, size, 0);
-            return (bstr){data, size - 1};
-        }
-        size += s;
-    }
-    MP_ASSERT_UNREACHABLE();
-}
-
 // Load options and profiles from a config file.
 //  conffile: path to the config file
 //  initial_section: default section where to add normal options
 //  flags: M_SETOPT_* bits
 //  returns: 1 on success, -1 on error, 0 if file not accessible.
-int m_config_parse_config_file(m_config_t *config, const char *conffile,
-                               char *initial_section, int flags)
+int m_config_parse_config_file(m_config_t *config, struct mpv_global *global,
+                               const char *conffile, char *initial_section,
+                               int flags)
 {
     flags = flags | M_SETOPT_FROM_CONFIG_FILE;
 
     MP_VERBOSE(config, "Reading config file %s\n", conffile);
 
-    bstr data = read_file(config->log, conffile);
+    struct stream *s = stream_create(conffile, STREAM_READ | STREAM_ORIGIN_DIRECT,
+                                     NULL, global);
+    if (!s)
+        return 0;
+    bstr data = stream_read_complete(s, s, 1000000000);
     if (!data.start)
         return 0;
 
     int r = m_config_parse(config, conffile, data, initial_section, flags);
     talloc_free(data.start);
+    free_stream(s);
     return r;
 }

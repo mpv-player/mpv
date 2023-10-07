@@ -71,6 +71,11 @@ static char *mp_get_win_app_dir(void *talloc_ctx)
     return path ? mp_path_join(talloc_ctx, path, "mpv") : NULL;
 }
 
+static char *mp_get_win_local_app_dir(void *talloc_ctx)
+{
+    char *path = mp_get_win_shell_dir(talloc_ctx, &FOLDERID_LocalAppData);
+    return path ? mp_path_join(talloc_ctx, path, "mpv") : NULL;
+}
 
 static void path_init(void)
 {
@@ -87,9 +92,15 @@ const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
     if (portable_path) {
         if (strcmp(type, "home") == 0)
             return portable_path;
+        if (strcmp(type, "cache") == 0)
+            return mp_path_join(talloc_ctx, portable_path, "cache");
     } else {
         if (strcmp(type, "home") == 0)
             return mp_get_win_app_dir(talloc_ctx);
+        if (strcmp(type, "cache") == 0)
+            return mp_path_join(talloc_ctx, mp_get_win_local_app_dir(talloc_ctx), "cache");
+        if (strcmp(type, "state") == 0)
+            return mp_get_win_local_app_dir(talloc_ctx);
         if (strcmp(type, "exe_dir") == 0)
             return mp_get_win_exe_dir(talloc_ctx);
         // Not really true, but serves as a way to return a lowest-priority dir.

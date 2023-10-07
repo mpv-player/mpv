@@ -34,8 +34,6 @@
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_events_objc.h"
 
-#include "config.h"
-
 #include "osdep/timer.h"
 #include "osdep/macosx_application.h"
 #include "osdep/macosx_application_objc.h"
@@ -163,7 +161,7 @@ static void disable_power_management(struct vo_cocoa_state *s)
 }
 
 static const char macosx_icon[] =
-#include "generated/TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns.inc"
+#include "TOOLS/osxbundle/icon.icns.inc"
 ;
 
 static void set_application_icon(NSApplication *app)
@@ -788,7 +786,7 @@ static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
 
     // Wait until a new frame with the new size was rendered. For some reason,
     // Cocoa requires this to be done before drawRect() returns.
-    struct timespec e = mp_time_us_to_timespec(mp_add_timeout(mp_time_us(), 0.1));
+    struct timespec e = mp_time_us_to_realtime(mp_time_us_add(mp_time_us(), 0.1));
     while (s->frame_w != width && s->frame_h != height && s->vo_ready) {
         if (pthread_cond_timedwait(&s->wakeup, &s->lock, &e))
             break;

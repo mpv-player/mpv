@@ -182,18 +182,8 @@ fail:
 static void uninit(struct ao *ao)
 {
     struct priv *ac = ao->priv;
-    struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
 
     if (!ac->shutdown) {
-        double outpts = ac->expected_next_pts;
-
-        pthread_mutex_lock(&ectx->lock);
-        if (!ac->enc->options->rawts)
-            outpts += ectx->discontinuity_pts_offset;
-        pthread_mutex_unlock(&ectx->lock);
-
-        outpts += encoder_get_offset(ac->enc);
-
         if (!write_frame(ao, MP_EOF_FRAME))
             MP_WARN(ao, "could not flush last frame\n");
         encoder_encode(ac->enc, NULL);
@@ -210,8 +200,7 @@ static void encode(struct ao *ao, struct mp_aframe *af)
     double outpts = mp_aframe_get_pts(af);
 
     AVFrame *frame = mp_aframe_to_avframe(af);
-    if (!frame)
-        abort();
+    MP_HANDLE_OOM(frame);
 
     frame->pts = rint(outpts * av_q2d(av_inv_q(encoder->time_base)));
 
@@ -290,9 +279,6 @@ static bool audio_write(struct ao *ao, void **data, int samples)
 
         outpts = pts + ectx->discontinuity_pts_offset;
     }
-
-    // Shift pts by the pts offset first.
-    outpts += encoder_get_offset(ac->enc);
 
     // Calculate expected pts of next audio frame (input side).
     ac->expected_next_pts = pts + mp_aframe_get_size(af) / (double) ao->samplerate;

@@ -20,7 +20,7 @@ struct dr_helper {
     atomic_ullong dr_in_flight;
 
     struct mp_image *(*get_image)(void *ctx, int imgfmt, int w, int h,
-                                  int stride_align);
+                                  int stride_align, int flags);
     void *get_image_ctx;
 };
 
@@ -37,7 +37,7 @@ static void dr_helper_destroy(void *ptr)
 
 struct dr_helper *dr_helper_create(struct mp_dispatch_queue *dispatch,
             struct mp_image *(*get_image)(void *ctx, int imgfmt, int w, int h,
-                                          int stride_align),
+                                          int stride_align, int flags),
             void *get_image_ctx)
 {
     struct dr_helper *dr = talloc_ptrtype(NULL, dr);
@@ -108,7 +108,7 @@ static void free_dr_buffer_on_dr_thread(void *opaque, uint8_t *data)
 
 struct get_image_cmd {
     struct dr_helper *dr;
-    int imgfmt, w, h, stride_align;
+    int imgfmt, w, h, stride_align, flags;
     struct mp_image *res;
 };
 
@@ -118,7 +118,7 @@ static void sync_get_image(void *ptr)
     struct dr_helper *dr = cmd->dr;
 
     cmd->res = dr->get_image(dr->get_image_ctx, cmd->imgfmt, cmd->w, cmd->h,
-                             cmd->stride_align);
+                             cmd->stride_align, cmd->flags);
     if (!cmd->res)
         return;
 
@@ -140,8 +140,7 @@ static void sync_get_image(void *ptr)
 
     AVBufferRef *new_ref = av_buffer_create(ctx->ref->data, ctx->ref->size,
                                             free_dr_buffer_on_dr_thread, ctx, 0);
-    if (!new_ref)
-        abort(); // tiny malloc OOM
+    MP_HANDLE_OOM(new_ref);
 
     cmd->res->bufs[0] = new_ref;
 
@@ -149,11 +148,14 @@ static void sync_get_image(void *ptr)
 }
 
 struct mp_image *dr_helper_get_image(struct dr_helper *dr, int imgfmt,
-                                     int w, int h, int stride_align)
+                                     int w, int h, int stride_align, int flags)
 {
     struct get_image_cmd cmd = {
         .dr = dr,
-        .imgfmt = imgfmt, .w = w, .h = h, .stride_align = stride_align,
+        .imgfmt = imgfmt,
+        .w = w, .h = h,
+        .stride_align = stride_align,
+        .flags = flags,
     };
     mp_dispatch_run(dr->dispatch, sync_get_image, &cmd);
     return cmd.res;

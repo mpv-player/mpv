@@ -1,55 +1,16 @@
 #include <libavutil/frame.h>
 #include <libavutil/pixdesc.h>
 
-#include "tests.h"
+#include "img_utils.h"
+#include "options/path.h"
+#include "test_utils.h"
 #include "video/fmt-conversion.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
 
-int imgfmts[IMGFMT_AVPIXFMT_END - IMGFMT_AVPIXFMT_START + 100];
-int num_imgfmts;
-
 static enum AVPixelFormat pixfmt_unsup[100];
 static int num_pixfmt_unsup;
-static bool imgfmts_initialized;
-
-static int cmp_imgfmt_name(const void *a, const void *b)
-{
-    char *name_a = mp_imgfmt_to_name(*(int *)a);
-    char *name_b = mp_imgfmt_to_name(*(int *)b);
-
-    return strcmp(name_a, name_b);
-}
-
-void init_imgfmts_list(void)
-{
-    if (imgfmts_initialized)
-        return;
-
-    const AVPixFmtDescriptor *avd = av_pix_fmt_desc_next(NULL);
-    for (; avd; avd = av_pix_fmt_desc_next(avd)) {
-        enum AVPixelFormat fmt = av_pix_fmt_desc_get_id(avd);
-        int mpfmt = pixfmt2imgfmt(fmt);
-        if (!mpfmt) {
-            assert(num_pixfmt_unsup < MP_ARRAY_SIZE(pixfmt_unsup));
-            pixfmt_unsup[num_pixfmt_unsup++] = fmt;
-        }
-    }
-
-    for (int fmt = IMGFMT_START; fmt <= IMGFMT_END; fmt++) {
-        struct mp_imgfmt_desc d = mp_imgfmt_get_desc(fmt);
-        enum AVPixelFormat pixfmt = imgfmt2pixfmt(fmt);
-        if (d.id || pixfmt != AV_PIX_FMT_NONE) {
-            assert(num_imgfmts < MP_ARRAY_SIZE(imgfmts)); // enlarge that array
-            imgfmts[num_imgfmts++] = fmt;
-        }
-    }
-
-    qsort(imgfmts, num_imgfmts, sizeof(imgfmts[0]), cmp_imgfmt_name);
-
-    imgfmts_initialized = true;
-}
 
 static const char *comp_type(enum mp_component_type type)
 {
@@ -60,11 +21,13 @@ static const char *comp_type(enum mp_component_type type)
     }
 }
 
-static void run(struct test_ctx *ctx)
+int main(int argc, char *argv[])
 {
     init_imgfmts_list();
+    const char *refdir = argv[1];
+    const char *outdir = argv[2];
 
-    FILE *f = test_open_out(ctx, "img_formats.txt");
+    FILE *f = test_open_out(outdir, "img_formats.txt");
 
     for (int z = 0; z < num_imgfmts; z++) {
         int mpfmt = imgfmts[z];
@@ -248,11 +211,7 @@ static void run(struct test_ctx *ctx)
 
     fclose(f);
 
-    assert_text_files_equal(ctx, "img_formats.txt", "img_formats.txt",
+    assert_text_files_equal(refdir, outdir, "img_formats.txt",
                             "This can fail if FFmpeg adds new formats or flags.");
+    return 0;
 }
-
-const struct unittest test_img_format = {
-    .name = "img_format",
-    .run = run,
-};

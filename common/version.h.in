@@ -1,0 +1,7 @@
+#define VERSION "@VERSION@"
+#define MPVCOPYRIGHT "Copyright © 2000-2023 mpv/MPlayer/mplayer2 projects"
+#ifndef NO_BUILD_TIMESTAMPS
+#define BUILDDATE __DATE__ " " __TIME__
+#else
+#define BUILDDATE "UNKNOWN"
+#endif

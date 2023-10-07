@@ -25,29 +25,59 @@
 
 static pthread_once_t path_init_once = PTHREAD_ONCE_INIT;
 
-static char mpv_home[512];
-static char old_home[512];
+#define CONF_MAX 512
+static char mpv_home[CONF_MAX];
+static char old_home[CONF_MAX];
+static char mpv_cache[CONF_MAX];
+static char old_cache[CONF_MAX];
+static char mpv_state[CONF_MAX];
+#define MKPATH(BUF, ...) (snprintf((BUF), CONF_MAX, __VA_ARGS__) >= CONF_MAX)
 
 static void path_init(void)
 {
     char *home = getenv("HOME");
-    char *xdg_dir = getenv("XDG_CONFIG_HOME");
+    char *xdg_cache = getenv("XDG_CACHE_HOME");
+    char *xdg_config = getenv("XDG_CONFIG_HOME");
+    char *xdg_state = getenv("XDG_STATE_HOME");
 
-    if (xdg_dir && xdg_dir[0]) {
-        snprintf(mpv_home, sizeof(mpv_home), "%s/mpv", xdg_dir);
+    bool err = false;
+    if (xdg_config && xdg_config[0]) {
+        err = err || MKPATH(mpv_home, "%s/mpv", xdg_config);
     } else if (home && home[0]) {
-        snprintf(mpv_home, sizeof(mpv_home), "%s/.config/mpv", home);
+        err = err || MKPATH(mpv_home, "%s/.config/mpv", home);
     }
 
     // Maintain compatibility with old ~/.mpv
-    if (home && home[0])
-        snprintf(old_home, sizeof(old_home), "%s/.mpv", home);
+    if (home && home[0]) {
+        err = err || MKPATH(old_home, "%s/.mpv", home);
+        err = err || MKPATH(old_cache, "%s/.mpv/cache", home);
+    }
+
+    if (xdg_cache && xdg_cache[0]) {
+        err = err || MKPATH(mpv_cache, "%s/mpv", xdg_cache);
+    } else if (home && home[0]) {
+        err = err || MKPATH(mpv_cache, "%s/.cache/mpv", home);
+    }
+
+    if (xdg_state && xdg_state[0]) {
+        err = err || MKPATH(mpv_state, "%s/mpv", xdg_state);
+    } else if (home && home[0]) {
+        err = err || MKPATH(mpv_state, "%s/.local/state/mpv", home);
+    }
 
     // If the old ~/.mpv exists, and the XDG config dir doesn't, use the old
-    // config dir only.
+    // config dir only. Also do not use any other XDG directories.
     if (mp_path_exists(old_home) && !mp_path_exists(mpv_home)) {
-        snprintf(mpv_home, sizeof(mpv_home), "%s", old_home);
+        err = err || MKPATH(mpv_home, "%s", old_home);
+        err = err || MKPATH(mpv_cache, "%s", old_cache);
+        err = err || MKPATH(mpv_state, "%s", old_home);
         old_home[0] = '\0';
+        old_cache[0] = '\0';
+    }
+
+    if (err) {
+        fprintf(stderr, "Config dir exceeds %d bytes\n", CONF_MAX);
+        abort();
     }
 }
 
@@ -58,6 +88,10 @@ const char *mp_get_platform_path_unix(void *talloc_ctx, const char *type)
         return mpv_home;
     if (strcmp(type, "old_home") == 0)
         return old_home;
+    if (strcmp(type, "cache") == 0)
+        return mpv_cache;
+    if (strcmp(type, "state") == 0)
+        return mpv_state;
     if (strcmp(type, "global") == 0)
         return MPV_CONFDIR;
     if (strcmp(type, "desktop") == 0)

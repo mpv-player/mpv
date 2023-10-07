@@ -36,7 +36,6 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
     p->ra_ctx->log = ctx->log;
     p->ra_ctx->global = ctx->global;
     p->ra_ctx->opts = (struct ra_ctx_opts) {
-        .probing = false,
         .allow_sw = true,
     };
 
@@ -55,13 +54,13 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
     if (!ra_gl_ctx_init(p->ra_ctx, p->gl, gl_params))
         return MPV_ERROR_UNSUPPORTED;
 
-    int debug;
-    mp_read_option_raw(ctx->global, "gpu-debug", &m_option_type_flag, &debug);
-    p->ra_ctx->opts.debug = debug;
-    p->gl->debug_context = debug;
-    ra_gl_set_debug(p->ra_ctx->ra, debug);
+    struct ra_ctx_opts *ctx_opts = mp_get_config_group(ctx, ctx->global, &ra_ctx_conf);
+    p->ra_ctx->opts.debug = ctx_opts->debug;
+    p->gl->debug_context = ctx_opts->debug;
+    ra_gl_set_debug(p->ra_ctx->ra, ctx_opts->debug);
+    talloc_free(ctx_opts);
 
-    ctx->ra = p->ra_ctx->ra;
+    ctx->ra_ctx = p->ra_ctx;
 
     return 0;
 }

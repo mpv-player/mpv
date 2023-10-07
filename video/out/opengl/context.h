@@ -34,11 +34,6 @@ struct ra_gl_ctx_params {
     // See ra_swapchain_fns.get_vsync.
     void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
 
-    // Set to false if the implementation follows normal GL semantics, which is
-    // upside down. Set to true if it does *not*, i.e. if rendering is right
-    // side up
-    bool flipped;
-
     // If this is set to non-NULL, then the ra_gl_ctx will consider the GL
     // implementation to be using an external swapchain, which disables the
     // software simulation of --swapchain-depth. Any functions defined by this

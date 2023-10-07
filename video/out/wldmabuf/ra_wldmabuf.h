@@ -18,5 +18,6 @@
 #pragma once
 #include "video/out/wayland_common.h"
 
-struct ra *ra_create_wayland(struct mp_log *log, struct wl_display *display);
+struct ra *ra_create_wayland(struct mp_log *log, struct vo *vo);
+bool ra_compatible_format(struct ra* ra, uint32_t drm_format, uint64_t modifier);
 bool ra_is_wldmabuf(struct ra *ra);

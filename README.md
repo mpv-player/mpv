@@ -36,7 +36,7 @@ Releases can be found on the [release list][releases].
 
 ## System requirements
 
-- A not too ancient Linux, Windows 7 or later, or OSX 10.8 or later.
+- A not too ancient Linux, Windows 10 or later, or macOS 10.8 or later.
 - A somewhat capable CPU. Hardware decoding might help if the CPU is too slow to
   decode video in realtime, but must be explicitly enabled with the `--hwdec`
   option.
@@ -48,6 +48,11 @@ Releases can be found on the [release list][releases].
   sure the graphics drivers are current. In some cases, ancient fallback video
   output methods can help (such as `--vo=xv` on Linux), but this use is not
   recommended or supported.
+
+mpv does not go out of its way to break on older hardware or old, unsupported
+operating systems, but development is not done with them in mind. Keeping
+compatibility with such setups is not guaranteed. If things work, consider it
+a happy accident.
 
 ## Downloads
 
@@ -73,14 +78,8 @@ Changes to the default key bindings are indicated in
 
 
 Compiling with full features requires development files for several
-external libraries. One of the two build systems supported by mpv is required:
-[meson](https://mesonbuild.com/index.html) or [waf](https://waf.io/). Meson
-can be obtained from your distro or PyPI. Waf can be downloaded by using the
-`./bootstrap.py` script. It will get the latest version of waf that was tested
-with mpv. Some documentation about the differences between the build systems are
-located in [build-system-differences][build-system-differences].
-
-### Meson
+external libraries. Mpv requires [meson](https://mesonbuild.com/index.html)
+to build. Meson can be obtained from your distro or PyPI.
 
 After creating your build directory (e.g. `meson setup build`), you can view a list
 of all the build options via `meson configure build`. You could also just simply
@@ -93,34 +92,10 @@ Example:
     meson compile -C build
     meson install -C build
 
-### Waf
-
-For a list of the available build options use `./waf configure --help`. If
-you think you have support for some feature installed but configure fails to
-detect it, the file `build/config.log` may contain information about the
-reasons for the failure.
-
-NOTE: To avoid cluttering the output with unreadable spam, `--help` only shows
-one of the two switches for each option. If the option is autodetected or
-enabled by default, the `--disable-***` switch is printed; if the option is
-disabled by default, the `--enable-***` switch is printed. Either way, you can
-use `--enable-***` or `--disable-**` regardless of what is printed by `--help`.
-
-To build the software you can use `./waf build`: the result of the compilation
-will be located in `build/mpv`. You can use `./waf install` to install mpv
-to the *prefix* after it is compiled.
-
-Example:
-
-    ./bootstrap.py
-    ./waf configure
-    ./waf
-    ./waf install
-
 Essential dependencies (incomplete list):
 
 - gcc or clang
-- X development headers (xlib, xrandr, xext, xscrnsaver, xinerama, libvdpau,
+- X development headers (xlib, xrandr, xext, xscrnsaver, xpresent, libvdpau,
   libGL, GLX, EGL, xv, ...)
 - Audio output development headers (libasound/ALSA, pulseaudio)
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
@@ -202,7 +177,7 @@ for ideas on what you could contribute with.
 
 ## License
 
-GPLv2 "or later" by default, LGPLv2.1 "or later" with `--enable-lgpl`.
+GPLv2 "or later" by default, LGPLv2.1 "or later" with `-Dgpl=false`.
 See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
 
 ## History
@@ -230,4 +205,3 @@ Most activity happens on the IRC channel and the github issue tracker.
 [api-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/client-api-changes.rst
 [restore-old-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-old-bindings.conf
 [contribute.md]: https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md
-[build-system-differences]: https://github.com/mpv-player/mpv/blob/master/DOCS/build-system-differences.md

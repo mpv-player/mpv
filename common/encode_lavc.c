@@ -23,7 +23,6 @@
 #include <libavutil/avutil.h>
 #include <libavutil/timestamp.h>
 
-#include "config.h"
 #include "encode_lavc.h"
 #include "common/av_common.h"
 #include "common/global.h"
@@ -84,30 +83,15 @@ const struct m_sub_options encode_config = {
         {"ovcopts", OPT_KEYVALUELIST(vopts), .flags = M_OPT_HAVE_HELP},
         {"oac", OPT_STRING(acodec)},
         {"oacopts", OPT_KEYVALUELIST(aopts), .flags = M_OPT_HAVE_HELP},
-        {"ovoffset", OPT_FLOAT(voffset), M_RANGE(-1000000.0, 1000000.0),
-            .deprecation_message = "--audio-delay (once unbroken)"},
-        {"oaoffset", OPT_FLOAT(aoffset), M_RANGE(-1000000.0, 1000000.0),
-            .deprecation_message = "--audio-delay (once unbroken)"},
-        {"orawts", OPT_FLAG(rawts)},
-        {"ovfirst", OPT_FLAG(video_first),
-            .deprecation_message = "no replacement"},
-        {"oafirst", OPT_FLAG(audio_first),
-            .deprecation_message = "no replacement"},
-        {"ocopy-metadata", OPT_FLAG(copy_metadata)},
+        {"orawts", OPT_BOOL(rawts)},
+        {"ocopy-metadata", OPT_BOOL(copy_metadata)},
         {"oset-metadata", OPT_KEYVALUELIST(set_metadata)},
         {"oremove-metadata", OPT_STRINGLIST(remove_metadata)},
-
-        {"ocopyts", OPT_REMOVED("ocopyts is now the default")},
-        {"oneverdrop", OPT_REMOVED("no replacement")},
-        {"oharddup", OPT_REMOVED("use --vf-add=fps=VALUE")},
-        {"ofps", OPT_REMOVED("no replacement (use --vf-add=fps=VALUE for CFR)")},
-        {"oautofps", OPT_REMOVED("no replacement")},
-        {"omaxfps", OPT_REMOVED("no replacement")},
         {0}
     },
     .size = sizeof(struct encode_opts),
     .defaults = &(const struct encode_opts){
-        .copy_metadata = 1,
+        .copy_metadata = true,
     },
 };
 
@@ -732,6 +716,7 @@ static void encoder_destroy(void *ptr)
     struct encoder_context *p = ptr;
 
     av_packet_free(&p->pkt);
+    avcodec_parameters_free(&p->info.codecpar);
     avcodec_free_context(&p->encoder);
     free_stream(p->twopass_bytebuffer);
 }
@@ -959,15 +944,6 @@ fail:
     MP_ERR(p, "error encoding at %s\n",
            frame ? av_ts2timestr(frame->pts, &p->encoder->time_base) : "EOF");
     return false;
-}
-
-double encoder_get_offset(struct encoder_context *p)
-{
-    switch (p->encoder->codec_type) {
-    case AVMEDIA_TYPE_VIDEO: return p->options->voffset;
-    case AVMEDIA_TYPE_AUDIO: return p->options->aoffset;
-    default:                 return 0;
-    }
 }
 
 // vim: ts=4 sw=4 et

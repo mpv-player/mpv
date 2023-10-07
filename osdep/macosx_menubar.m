@@ -266,35 +266,35 @@
                         @"action"     : @"cmd:",
                         @"key"        : @"",
                         @"target"     : self,
-                        @"cmd"        : @"set video-aspect \"4:3\""
+                        @"cmd"        : @"set video-aspect-override \"4:3\""
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Aspect Ratio 16:9",
                         @"action"     : @"cmd:",
                         @"key"        : @"",
                         @"target"     : self,
-                        @"cmd"        : @"set video-aspect \"16:9\""
+                        @"cmd"        : @"set video-aspect-override \"16:9\""
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Aspect Ratio 1.85:1",
                         @"action"     : @"cmd:",
                         @"key"        : @"",
                         @"target"     : self,
-                        @"cmd"        : @"set video-aspect \"1.85:1\""
+                        @"cmd"        : @"set video-aspect-override \"1.85:1\""
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Aspect Ratio 2.35:1",
                         @"action"     : @"cmd:",
                         @"key"        : @"",
                         @"target"     : self,
-                        @"cmd"        : @"set video-aspect \"2.35:1\""
+                        @"cmd"        : @"set video-aspect-override \"2.35:1\""
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Reset Aspect Ratio",
                         @"action"     : @"cmd:",
                         @"key"        : @"",
                         @"target"     : self,
-                        @"cmd"        : @"set video-aspect \"-1\""
+                        @"cmd"        : @"set video-aspect-override \"-1\""
                     }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{

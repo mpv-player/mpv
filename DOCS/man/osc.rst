@@ -85,6 +85,7 @@ seekbar
 
     =============   ================================================
     left-click      seek to position
+    mouse wheel     seek forward/backward
     =============   ================================================
 
 time left
@@ -101,6 +102,7 @@ audio and sub
     left-click      cycle audio/sub tracks forward
     right-click     cycle audio/sub tracks backwards
     shift+L-click   show available audio/sub tracks
+    mouse wheel     cycle audio/sub tracks forward/backwards
     =============   ================================================
 
 vol
@@ -174,7 +176,7 @@ Configurable Options
 ``seekbarhandlesize``
     Default: 0.6
 
-    Size ratio of the seek handle if ``seekbarstyle`` is set to ``dimaond``
+    Size ratio of the seek handle if ``seekbarstyle`` is set to ``diamond``
     or ``knob``. This is relative to the full height of the seekbar.
 
 ``seekbarkeyframes``
@@ -309,6 +311,13 @@ Configurable Options
     Default: no
 
     Show total time instead of time remaining
+
+``remaining_playtime``
+    Default: yes
+
+    Whether the time-remaining display takes speed into account.
+    ``yes`` - how much playback time remains at the current speed.
+    ``no`` - how much video-time remains.
 
 ``timems``
     Default: no

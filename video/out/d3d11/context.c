@@ -34,12 +34,12 @@ static int d3d11_validate_adapter(struct mp_log *log,
 struct d3d11_opts {
     int feature_level;
     int warp;
-    int flip;
+    bool flip;
     int sync_interval;
     char *adapter_name;
     int output_format;
     int color_space;
-    int exclusive_fs;
+    bool exclusive_fs;
 };
 
 #define OPT_BASE_STRUCT struct d3d11_opts
@@ -59,7 +59,7 @@ const struct m_sub_options d3d11_conf = {
             {"9_3", D3D_FEATURE_LEVEL_9_3},
             {"9_2", D3D_FEATURE_LEVEL_9_2},
             {"9_1", D3D_FEATURE_LEVEL_9_1})},
-        {"d3d11-flip", OPT_FLAG(flip)},
+        {"d3d11-flip", OPT_BOOL(flip)},
         {"d3d11-sync-interval", OPT_INT(sync_interval), M_RANGE(0, 4)},
         {"d3d11-adapter", OPT_STRING_VALIDATE(adapter_name,
                                               d3d11_validate_adapter)},
@@ -75,18 +75,17 @@ const struct m_sub_options d3d11_conf = {
             {"linear",  DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709},
             {"pq",      DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020},
             {"bt.2020", DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P2020})},
-        {"d3d11-exclusive-fs", OPT_FLAG(exclusive_fs)},
+        {"d3d11-exclusive-fs", OPT_BOOL(exclusive_fs)},
         {0}
     },
     .defaults = &(const struct d3d11_opts) {
         .feature_level = D3D_FEATURE_LEVEL_12_1,
         .warp = -1,
-        .flip = 1,
+        .flip = true,
         .sync_interval = 1,
         .adapter_name = NULL,
         .output_format = DXGI_FORMAT_UNKNOWN,
         .color_space = -1,
-        .exclusive_fs = 0,
     },
     .size = sizeof(struct d3d11_opts)
 };
@@ -238,22 +237,22 @@ static bool d3d11_submit_frame(struct ra_swapchain *sw,
     return true;
 }
 
-static int64_t qpc_to_us(struct ra_swapchain *sw, int64_t qpc)
+static int64_t qpc_to_ns(struct ra_swapchain *sw, int64_t qpc)
 {
     struct priv *p = sw->priv;
 
-    // Convert QPC units (1/perf_freq seconds) to microseconds. This will work
+    // Convert QPC units (1/perf_freq seconds) to nanoseconds. This will work
     // without overflow because the QPC value is guaranteed not to roll-over
     // within 100 years, so perf_freq must be less than 2.9*10^9.
-    return qpc / p->perf_freq * 1000000 +
-        qpc % p->perf_freq * 1000000 / p->perf_freq;
+    return qpc / p->perf_freq * INT64_C(1000000000) +
+        qpc % p->perf_freq * INT64_C(1000000000) / p->perf_freq;
 }
 
-static int64_t qpc_us_now(struct ra_swapchain *sw)
+static int64_t qpc_ns_now(struct ra_swapchain *sw)
 {
     LARGE_INTEGER perf_count;
     QueryPerformanceCounter(&perf_count);
-    return qpc_to_us(sw, perf_count.QuadPart);
+    return qpc_to_ns(sw, perf_count.QuadPart);
 }
 
 static void d3d11_swap_buffers(struct ra_swapchain *sw)
@@ -331,7 +330,7 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
     if (src_passed && sqt_passed)
         p->vsync_duration_qpc = sqt_passed / src_passed;
     if (p->vsync_duration_qpc)
-        info->vsync_duration = qpc_to_us(sw, p->vsync_duration_qpc);
+        info->vsync_duration = qpc_to_ns(sw, p->vsync_duration_qpc);
 
     // If the physical frame rate is known and the other members of
     // DXGI_FRAME_STATISTICS are non-0, estimate the timing of the next frame
@@ -354,8 +353,8 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
         // Only set the estimated display time if it's after the last submission
         // time. It could be before if mpv skips a lot of frames.
         if (last_queue_display_time_qpc >= p->last_submit_qpc) {
-            info->last_queue_display_time = mp_time_us() +
-                (qpc_to_us(sw, last_queue_display_time_qpc) - qpc_us_now(sw));
+            info->last_queue_display_time = mp_time_ns() +
+                (qpc_to_ns(sw, last_queue_display_time_qpc) - qpc_ns_now(sw));
         }
     }
 }

@@ -62,15 +62,15 @@ that uses the ``.foo`` file extension.
 mpv also appends the top level directory of the script to the start of Lua's
 package path so you can import scripts from there too. Be aware that this will
 shadow Lua libraries that use the same package path. (Single file scripts do not
-include mpv specific directory the Lua package path. This was silently changed
-in mpv 0.32.0.)
+include mpv specific directories in the Lua package path. This was silently
+changed in mpv 0.32.0.)
 
 Using a script directory is the recommended way to package a script that
 consists of multiple source files, or requires other files (you can use
 ``mp.get_script_directory()`` to get the location and e.g. load data files).
 
 Making a script a git repository, basically a repository which contains a
-``main.lua``` file in the root directory, makes scripts easily updateable
+``main.lua`` file in the root directory, makes scripts easily updateable
 (without the dangers of auto-updates). Another suggestion is to use git
 submodules to share common files or libraries.
 
@@ -198,6 +198,12 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     of that command (which starts asynchronous execution of the command).
     Whether this works and how long it takes depends on the command and the
     situation. The abort call itself is asynchronous. Does not return anything.
+
+``mp.del_property(name)``
+    Delete the given property. See ``mp.get_property`` and `Properties`_ for more
+    information about properties. Most properties cannot be deleted.
+
+    Returns true on success, or ``nil, error`` on error.
 
 ``mp.get_property(name [,def])``
     Return the value of the given property as string. These are the same

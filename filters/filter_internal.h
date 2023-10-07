@@ -98,7 +98,7 @@ struct mp_filter_info {
     bool (*command)(struct mp_filter *f, struct mp_filter_command *cmd);
 };
 
-// Return the mp_filter_info this filter was crated with.
+// Return the mp_filter_info this filter was created with.
 const struct mp_filter_info *mp_filter_get_info(struct mp_filter *f);
 
 // Create a filter instance. Returns NULL on failure.

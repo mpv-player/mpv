@@ -28,10 +28,6 @@ You can encode files from one format/codec to another using this facility.
     Specifies the output audio codec. See ``--oac=help`` for a full list of
     supported codecs.
 
-``--oaoffset=<value>``
-    Shifts audio data by the given time (in seconds) by adding/removing
-    samples at the start. Deprecated.
-
 ``--oacopts=<options>``
     Specifies the output audio codec options for libavcodec.
     See ``--oacopts=help`` for a full list of supported options.
@@ -50,17 +46,9 @@ You can encode files from one format/codec to another using this facility.
     ``--oacopts=""``
         Completely empties the options list.
 
-``--oafirst``
-    Force the audio stream to become the first stream in the output.
-    By default, the order is unspecified. Deprecated.
-
 ``--ovc=<codec>``
     Specifies the output video codec. See ``--ovc=help`` for a full list of
     supported codecs.
-
-``--ovoffset=<value>``
-    Shifts video data by the given time (in seconds) by shifting the pts
-    values. Deprecated.
 
 ``--ovcopts=<options>``
     Specifies the output video codec options for libavcodec.
@@ -82,10 +70,6 @@ You can encode files from one format/codec to another using this facility.
 
     ``--ovcopts=""``
         Completely empties the options list.
-
-``--ovfirst``
-    Force the video stream to become the first stream in the output.
-    By default, the order is unspecified. Deprecated.
 
 ``--orawts``
     Copies input pts to the output video (not supported by some output

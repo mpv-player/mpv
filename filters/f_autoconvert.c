@@ -1,5 +1,3 @@
-#include "config.h"
-
 #include "audio/aframe.h"
 #include "audio/chmap_sel.h"
 #include "audio/format.h"
@@ -152,7 +150,12 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
     for (int n = 0; n < p->num_imgfmts; n++) {
         bool samefmt = img->params.imgfmt == p->imgfmts[n];
         bool samesubffmt = img->params.hw_subfmt == p->subfmts[n];
-        if (samefmt && (samesubffmt || !p->subfmts[n])) {
+        /*
+         * In practice, `p->subfmts` is not usually populated today, in which
+         * case we must actively probe formats below to establish if the VO can
+         * accept the subfmt being used by the hwdec.
+         */
+        if (samefmt && samesubffmt) {
             if (p->imgparams_set) {
                 if (!mp_image_params_equal(&p->imgparams, &img->params))
                     break;
@@ -185,26 +188,57 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
 
     bool dst_all_hw = true;
     bool dst_have_sw = false;
+    bool has_src_hw_fmt = false;
     for (int n = 0; n < num_fmts; n++) {
         bool is_hw = IMGFMT_IS_HWACCEL(fmts[n]);
         dst_all_hw &= is_hw;
         dst_have_sw |= !is_hw;
+        has_src_hw_fmt |= is_hw && fmts[n] == imgpar.imgfmt;
     }
 
     // Source is hw, some targets are sw -> try to download.
     bool hw_to_sw = !imgfmt_is_sw && dst_have_sw;
 
-    if (dst_all_hw && num_fmts > 0) {
+    if (has_src_hw_fmt) {
+        int src_fmt = img->params.hw_subfmt;
+        /*
+         * If the source format is a hardware format, and our output supports
+         * that hardware format, we prioritize preserving the use of that
+         * hardware format. In most cases, the sub format will also be supported
+         * and no conversion will be required, but in some cases, the hwdec
+         * may be able to output formats that the VO cannot display, and
+         * hardware format conversion becomes necessary.
+         */
+        struct mp_hwupload upload = mp_hwupload_create(conv, imgpar.imgfmt,
+                                                       src_fmt,
+                                                       true);
+        if (upload.successful_init) {
+            if (upload.f) {
+                mp_info(log, "Converting %s[%s] -> %s[%s]\n",
+                        mp_imgfmt_to_name(imgpar.imgfmt),
+                        mp_imgfmt_to_name(src_fmt),
+                        mp_imgfmt_to_name(imgpar.imgfmt),
+                        mp_imgfmt_to_name(upload.selected_sw_imgfmt));
+                filters[2] = upload.f;
+            }
+            hw_to_sw = false;
+            need_sws = false;
+        } else {
+            mp_err(log, "Failed to create HW uploader for format %s\n",
+                   mp_imgfmt_to_name(src_fmt));
+        }
+    } else if (dst_all_hw && num_fmts > 0) {
         bool upload_created = false;
         int sw_fmt = imgfmt_is_sw ? img->imgfmt : img->params.hw_subfmt;
 
         for (int i = 0; i < num_fmts; i++) {
             // We can probably use this! Very lazy and very approximate.
-            struct mp_hwupload *upload = mp_hwupload_create(conv, fmts[i]);
-            if (upload) {
+            struct mp_hwupload upload = mp_hwupload_create(conv, fmts[i],
+                                                           sw_fmt, false);
+            if (upload.successful_init) {
                 mp_info(log, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[i]));
-                filters[2] = upload->f;
-                hwupload_fmt = mp_hwupload_find_upload_format(upload, sw_fmt);
+                filters[2] = upload.f;
+                hwupload_fmt = upload.selected_sw_imgfmt;
                 fmts = &hwupload_fmt;
                 num_fmts = hwupload_fmt ? 1 : 0;
                 hw_to_sw = false;
@@ -324,8 +358,8 @@ static void handle_video_frame(struct mp_filter *f)
     }
 
     if (!mp_subfilter_drain_destroy(&p->sub)) {
-        p->in_imgfmt = p->in_subfmt = 0;
-        return;
+        MP_VERBOSE(f, "Sub-filter requires draining but we must destroy it now.\n");
+        mp_subfilter_destroy(&p->sub);
     }
 
     p->in_imgfmt = img->params.imgfmt;

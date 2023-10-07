@@ -30,6 +30,7 @@
 #include "video/fmt-conversion.h"
 #include "video/img_format.h"
 #include "zimg.h"
+#include "config.h"
 
 static_assert(MP_IMAGE_BYTE_ALIGN >= ZIMG_ALIGN, "");
 
@@ -51,7 +52,7 @@ const struct zimg_opts zimg_opts_defaults = {
     .scaler_chroma_params = {NAN, NAN},
     .scaler_chroma = ZIMG_RESIZE_BILINEAR,
     .dither = ZIMG_DITHER_RANDOM,
-    .fast = 1,
+    .fast = true,
 };
 
 #define OPT_PARAM(var) OPT_DOUBLE(var), .flags = M_OPT_DEFAULT_NAN
@@ -70,7 +71,7 @@ const struct m_sub_options zimg_conf = {
             {"ordered",         ZIMG_DITHER_ORDERED},
             {"random",          ZIMG_DITHER_RANDOM},
             {"error-diffusion", ZIMG_DITHER_ERROR_DIFFUSION})},
-        {"fast", OPT_FLAG(fast)},
+        {"fast", OPT_BOOL(fast)},
         {"threads", OPT_CHOICE(threads, {"auto", 0}), M_RANGE(1, 64)},
         {0}
     },
@@ -155,6 +156,9 @@ static zimg_transfer_characteristics_e mp_to_z_trc(enum mp_csp_trc trc)
     case MP_CSP_TRC_GAMMA28:    return ZIMG_TRANSFER_BT470_BG;
     case MP_CSP_TRC_PQ:         return ZIMG_TRANSFER_ST2084;
     case MP_CSP_TRC_HLG:        return ZIMG_TRANSFER_ARIB_B67;
+#if HAVE_ZIMG_ST428
+    case MP_CSP_TRC_ST428:      return ZIMG_TRANSFER_ST428;
+#endif
     case MP_CSP_TRC_GAMMA18:    // ?
     case MP_CSP_TRC_GAMMA20:
     case MP_CSP_TRC_GAMMA24:
@@ -175,14 +179,18 @@ static zimg_color_primaries_e mp_to_z_prim(enum mp_csp_prim prim)
     case MP_CSP_PRIM_BT_709:    return ZIMG_PRIMARIES_BT709;
     case MP_CSP_PRIM_BT_2020:   return ZIMG_PRIMARIES_BT2020;
     case MP_CSP_PRIM_BT_470M:   return ZIMG_PRIMARIES_BT470_M;
-    case MP_CSP_PRIM_CIE_1931:  return ZIMG_PRIMARIES_ST428;
     case MP_CSP_PRIM_DCI_P3:    return ZIMG_PRIMARIES_ST431_2;
     case MP_CSP_PRIM_DISPLAY_P3:return ZIMG_PRIMARIES_ST432_1;
+    case MP_CSP_PRIM_EBU_3213:  return ZIMG_PRIMARIES_EBU3213_E;
+    case MP_CSP_PRIM_FILM_C:    return ZIMG_PRIMARIES_FILM;
+    case MP_CSP_PRIM_CIE_1931:
     case MP_CSP_PRIM_APPLE:     // ?
     case MP_CSP_PRIM_ADOBE:
     case MP_CSP_PRIM_PRO_PHOTO:
     case MP_CSP_PRIM_V_GAMUT:
     case MP_CSP_PRIM_S_GAMUT:   // ?
+    case MP_CSP_PRIM_ACES_AP0:
+    case MP_CSP_PRIM_ACES_AP1:
     default:                    return ZIMG_PRIMARIES_BT709;
     }
 }
@@ -260,7 +268,14 @@ static bool wrap_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r,
     if (r->pack) {
         mpi = &r->cropped_tmp;
         *mpi = *a_mpi;
-        mp_image_crop(mpi, 0, st->slice_y, mpi->w, st->slice_y + st->slice_h);
+        int y1 = st->slice_y + st->slice_h;
+        // Due to subsampling we may assume the image to be bigger than it
+        // actually is (see real_h in setup_format).
+        if (mpi->h < y1) {
+            assert(y1 - mpi->h < 4);
+            mp_image_set_size(mpi, mpi->w, y1);
+        }
+        mp_image_crop(mpi, 0, st->slice_y, mpi->w, y1);
     }
 
     bool direct[MP_MAX_PLANES] = {0};
@@ -431,7 +446,10 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
 
     zfmt->matrix_coefficients = mp_to_z_matrix(fmt.color.space);
     zfmt->transfer_characteristics = mp_to_z_trc(fmt.color.gamma);
-    zfmt->color_primaries = mp_to_z_prim(fmt.color.primaries);
+    // For MP_CSP_XYZ only valid primaries are defined in ST 428-1
+    zfmt->color_primaries = fmt.color.space == MP_CSP_XYZ
+                                ? ZIMG_PRIMARIES_ST428
+                                : mp_to_z_prim(fmt.color.primaries);
     zfmt->chroma_location = mp_to_z_chroma(fmt.chroma_location);
 
     if (ctx && ctx->opts.fast) {
@@ -529,8 +547,9 @@ static bool mp_zimg_state_init(struct mp_zimg_context *ctx,
     if (opts->fast)
         params.allow_approximate_gamma = 1;
 
-    if (ctx->src.color.sig_peak > 0)
-        params.nominal_peak_luminance = ctx->src.color.sig_peak;
+    // leave at default for SDR, which means 100 cd/m^2 for zimg
+    if (ctx->dst.color.sig_peak > 0 && mp_trc_is_hdr(ctx->dst.color.gamma))
+        params.nominal_peak_luminance = ctx->dst.color.sig_peak * MP_REF_WHITE;
 
     st->graph = zimg_filter_graph_build(&src_fmt, &dst_fmt, &params);
     if (!st->graph) {

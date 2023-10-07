@@ -134,16 +134,13 @@ struct mp_filter *mp_create_user_filter(struct mp_filter *parent,
                                         const char *name, char **args)
 {
     const struct m_obj_list *obj_list = NULL;
-    const char *defs_name = NULL;
     enum mp_frame_type frame_type = 0;
     if (type == MP_OUTPUT_CHAIN_VIDEO) {
         frame_type = MP_FRAME_VIDEO;
         obj_list = &vf_obj_list;
-        defs_name = "vf-defaults";
     } else if (type == MP_OUTPUT_CHAIN_AUDIO) {
         frame_type = MP_FRAME_AUDIO;
         obj_list = &af_obj_list;
-        defs_name = "af-defaults";
     }
     assert(frame_type && obj_list);
 
@@ -163,18 +160,9 @@ struct mp_filter *mp_create_user_filter(struct mp_filter *parent,
 
     void *options = NULL;
     if (desc.options) {
-        struct m_obj_settings *defs = NULL;
-        if (defs_name) {
-            mp_read_option_raw(parent->global, defs_name,
-                                &m_option_type_obj_settings_list, &defs);
-        }
-
         struct m_config *config =
             m_config_from_obj_desc_and_args(NULL, parent->log, parent->global,
-                                            &desc, name, defs, args);
-
-        struct m_option dummy = {.type = &m_option_type_obj_settings_list};
-        m_option_free(&dummy, &defs);
+                                            &desc, args);
 
         if (!config)
             goto done;

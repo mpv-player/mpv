@@ -28,7 +28,6 @@
 
 #include "mpv_talloc.h"
 
-#include "config.h"
 #include "osdep/timer.h"
 #include "options/m_option.h"
 #include "common/common.h"
@@ -44,13 +43,13 @@ struct priv {
     int buffersize;     // samples
     bool playing;
 
-    int untimed;
+    bool untimed;
     float bufferlen;    // seconds
     float speed;        // multiplier
     float latency_sec;  // seconds
     float latency;      // samples
-    int broken_eof;
-    int broken_delay;
+    bool broken_eof;
+    bool broken_delay;
 
     // Minimal unit of audio samples that can be written at once. If play() is
     // called with sizes not aligned to this, a rounded size will be returned.
@@ -216,13 +215,13 @@ const struct ao_driver audio_out_null = {
         .speed = 1,
     },
     .options = (const struct m_option[]) {
-        {"untimed", OPT_FLAG(untimed)},
+        {"untimed", OPT_BOOL(untimed)},
         {"buffer", OPT_FLOAT(bufferlen), M_RANGE(0, 100)},
         {"outburst", OPT_INT(outburst), M_RANGE(1, 100000)},
         {"speed", OPT_FLOAT(speed), M_RANGE(0, 10000)},
         {"latency", OPT_FLOAT(latency_sec), M_RANGE(0, 100)},
-        {"broken-eof", OPT_FLAG(broken_eof)},
-        {"broken-delay", OPT_FLAG(broken_delay)},
+        {"broken-eof", OPT_BOOL(broken_eof)},
+        {"broken-delay", OPT_BOOL(broken_delay)},
         {"channel-layouts", OPT_CHANNELS(channel_layouts)},
         {"format", OPT_AUDIOFORMAT(format)},
         {0}

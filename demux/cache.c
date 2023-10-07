@@ -40,10 +40,12 @@ struct demux_cache_opts {
 
 const struct m_sub_options demux_cache_conf = {
     .opts = (const struct m_option[]){
-        {"cache-dir", OPT_STRING(cache_dir), .flags = M_OPT_FILE},
-        {"cache-unlink-files", OPT_CHOICE(unlink_files,
+        {"demuxer-cache-dir", OPT_STRING(cache_dir), .flags = M_OPT_FILE},
+        {"demuxer-cache-unlink-files", OPT_CHOICE(unlink_files,
             {"immediate", 2}, {"whendone", 1}, {"no", 0}),
         },
+        {"cache-dir", OPT_REPLACED("demuxer-cache-dir")},
+        {"cache-unlink-files", OPT_REPLACED("demuxer-cache-unlink-files")},
         {0}
     },
     .size = sizeof(struct demux_cache_opts),
@@ -100,11 +102,16 @@ struct demux_cache *demux_cache_create(struct mpv_global *global,
     cache->fd = -1;
 
     char *cache_dir = cache->opts->cache_dir;
-    if (!(cache_dir && cache_dir[0])) {
-        MP_ERR(cache, "No cache data directory supplied.\n");
-        goto fail;
+    if (cache_dir && cache_dir[0]) {
+        cache_dir = mp_get_user_path(NULL, global, cache_dir);
+    } else {
+        cache_dir = mp_find_user_file(NULL, global, "cache", "");
     }
 
+    if (!cache_dir || !cache_dir[0])
+        goto fail;
+
+    mp_mkdirp(cache_dir);
     cache->filename = mp_path_join(cache, cache_dir, "mpv-cache-XXXXXX.dat");
     cache->fd = mp_mkostemps(cache->filename, 4, O_CLOEXEC);
     if (cache->fd < 0) {

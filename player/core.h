@@ -18,8 +18,8 @@
 #ifndef MPLAYER_MP_CORE_H
 #define MPLAYER_MP_CORE_H
 
-#include <stdbool.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #include "osdep/atomic.h"
 
@@ -70,6 +70,7 @@ enum seek_type {
     MPSEEK_ABSOLUTE,
     MPSEEK_FACTOR,
     MPSEEK_BACKSTEP,
+    MPSEEK_CHAPTER,
 };
 
 enum seek_precision {
@@ -114,6 +115,8 @@ struct track {
 
     int demuxer_id; // same as stream->demuxer_id. -1 if not set.
     int ff_index; // same as stream->ff_index, or 0.
+    int hls_bitrate; // same as stream->hls_bitrate. 0 if not set.
+    int program_id; // same as stream->program_id. -1 if not set.
 
     char *title;
     bool default_track, forced_track, dependent_track;
@@ -143,9 +146,6 @@ struct track {
     struct vo_chain *vo_c;
     struct ao_chain *ao_c;
     struct mp_pin *sink;
-
-    // For stream recording (remuxing mode).
-    struct mp_recorder_sink *remux_sink;
 };
 
 // Summarizes video filtering and output.
@@ -165,6 +165,7 @@ struct vo_chain {
     bool is_coverart;
     // - video consists of sparse still images
     bool is_sparse;
+    bool sparse_eof_signalled;
 
     bool underrun;
     bool underrun_signaled;
@@ -271,6 +272,8 @@ typedef struct MPContext {
     struct playlist_entry *playing; // currently playing file
     char *filename; // immutable copy of playing->filename (or NULL)
     char *stream_open_filename;
+    char **playlist_paths; // used strictly for playlist validation
+    int playlist_paths_len;
     enum stop_play_reason stop_play;
     bool playback_initialized; // playloop can be run/is running
     int error_playing;
@@ -398,7 +401,7 @@ typedef struct MPContext {
      * the user wanted to go to, even if we aren't exactly within the
      * boundaries of that chapter due to an inaccurate seek. */
     int last_chapter_seek;
-    double last_chapter_pts;
+    bool last_chapter_flag;
 
     bool paused;            // internal pause state
     bool playback_active;   // not paused, restarting, loading, unloading
@@ -419,10 +422,6 @@ typedef struct MPContext {
     // Set after showing warning about decoding being too slow for realtime
     // playback rate. Used to avoid showing it multiple times.
     bool drop_message_shown;
-
-    struct mp_recorder *recorder;
-
-    char *cached_watch_later_configdir;
 
     struct screenshot_ctx *screenshot_ctx;
     struct command_ctx *command_ctx;
@@ -487,14 +486,13 @@ int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track);
 void audio_update_volume(struct MPContext *mpctx);
 void audio_update_balance(struct MPContext *mpctx);
-void audio_update_media_role(struct MPContext *mpctx);
 void reload_audio_output(struct MPContext *mpctx);
 void audio_start_ao(struct MPContext *mpctx);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);
 void mp_load_auto_profiles(struct MPContext *mpctx);
-void mp_load_playback_resume(struct MPContext *mpctx, const char *file);
+bool mp_load_playback_resume(struct MPContext *mpctx, const char *file);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
 void mp_delete_watch_later_conf(struct MPContext *mpctx, const char *file);
 struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
@@ -525,7 +523,7 @@ struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
-                                    bool force, bool mutate);
+                                    bool force);
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 void update_demuxer_properties(struct MPContext *mpctx);
@@ -537,9 +535,6 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel);
 struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type);
 void prefetch_next(struct MPContext *mpctx);
-void close_recorder(struct MPContext *mpctx);
-void close_recorder_and_error(struct MPContext *mpctx);
-void open_recorder(struct MPContext *mpctx, bool on_init);
 void update_lavfi_complex(struct MPContext *mpctx);
 
 // main.c

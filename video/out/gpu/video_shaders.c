@@ -41,7 +41,7 @@ static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
                                               struct scaler *scaler)
 {
     gl_sc_uniform_texture(sc, "lut", scaler->lut);
-    GLSLF("float ypos = LUT_POS(fcoord, %d.0);\n", scaler->lut_size);
+    GLSLF("float ypos = LUT_POS(fcoord, %d.0);\n", scaler->lut->params.h);
 
     int N = scaler->kernel->size;
     int width = (N + 3) / 4; // round up
@@ -103,7 +103,7 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
 static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
                          int x, int y, int components, bool planar)
 {
-    double radius = scaler->kernel->f.radius * scaler->kernel->filter_scale;
+    double radius = scaler->kernel->radius * scaler->kernel->filter_scale;
     double radius_cutoff = scaler->kernel->radius_cutoff;
 
     // Since we can't know the subpixel position in advance, assume a
@@ -123,10 +123,10 @@ static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
     // get the weight for this pixel
     if (scaler->lut->params.dimensions == 1) {
         GLSLF("w = tex1D(lut, LUT_POS(d * 1.0/%f, %d.0)).r;\n",
-              radius, scaler->lut_size);
+              radius, scaler->lut->params.w);
     } else {
         GLSLF("w = texture(lut, vec2(0.5, LUT_POS(d * 1.0/%f, %d.0))).r;\n",
-              radius, scaler->lut_size);
+              radius, scaler->lut->params.h);
     }
     GLSL(wsum += w;)
 
@@ -422,6 +422,9 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "    %s(lessThanEqual(vec3(%f), color.rgb)));                \n",
               SLOG_Q, SLOG_P, SLOG_C, SLOG_A, SLOG_B, SLOG_K2, gl_sc_bvec(sc, 3), SLOG_Q);
         break;
+    case MP_CSP_TRC_ST428:
+        GLSL(color.rgb = vec3(52.37/48.0) * pow(color.rgb, vec3(2.6)););
+        break;
     default:
         abort();
     }
@@ -511,6 +514,9 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "                    + vec3(%f),                                 \n"
               "                %s(lessThanEqual(vec3(0.0), color.rgb)));       \n",
               SLOG_P, SLOG_Q, SLOG_A / M_LN10, SLOG_K2, SLOG_B, SLOG_C, gl_sc_bvec(sc, 3));
+        break;
+    case MP_CSP_TRC_ST428:
+        GLSL(color.rgb = pow(color.rgb * vec3(48.0/52.37), vec3(1.0/2.6)););
         break;
     default:
         abort();
@@ -638,9 +644,12 @@ static void hdr_update_peak(struct gl_shader_cache *sc,
 
     // Use an IIR low-pass filter to smooth out the detected values, with a
     // configurable decay rate based on the desired time constant (tau)
-    float a = 1.0 - cos(1.0 / opts->decay_rate);
-    float decay = sqrt(a*a + 2*a) - a;
-    GLSLF("  average += %f * (cur - average);\n", decay);
+    if (opts->decay_rate) {
+        float decay = 1.0f - expf(-1.0f / opts->decay_rate);
+        GLSLF("  average += %f * (cur - average);\n", decay);
+    } else {
+        GLSLF("  average = cur;\n");
+    }
 
     // Scene change hysteresis
     float log_db = 10.0 / log(10.0);
@@ -809,25 +818,12 @@ static void pass_tone_map(struct gl_shader_cache *sc,
         abort();
     }
 
-    switch (opts->mode) {
-    case TONE_MAP_MODE_RGB:
-        GLSL(color.rgb = sig;)
-        break;
-    case TONE_MAP_MODE_MAX:
-        GLSL(color.rgb *= sig[sig_idx] / sig_orig;)
-        break;
-    case TONE_MAP_MODE_AUTO:
-    case TONE_MAP_MODE_HYBRID:
-        GLSLF("float coeff = max(sig[sig_idx] - %f, 1e-6) / \n"
-              "              max(sig[sig_idx], 1.0);        \n"
-              "coeff = %f * pow(coeff / %f, %f);            \n"
-              "color.rgb *= sig[sig_idx] / sig_orig;        \n"
-              "color.rgb = mix(color.rgb, %f * sig, coeff); \n",
-              0.18 / dst_scale, 0.90, dst_scale, 0.20, dst_scale);
-        break;
-    default:
-        abort();
-    }
+    GLSLF("float coeff = max(sig[sig_idx] - %f, 1e-6) / \n"
+          "              max(sig[sig_idx], 1.0);        \n"
+          "coeff = %f * pow(coeff / %f, %f);            \n"
+          "color.rgb *= sig[sig_idx] / sig_orig;        \n"
+          "color.rgb = mix(color.rgb, %f * sig, coeff); \n",
+          0.18 / dst_scale, 0.90, dst_scale, 0.20, dst_scale);
 }
 
 // Map colors from one source space to another. These source spaces must be
@@ -946,15 +942,15 @@ static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
 
 const struct deband_opts deband_opts_def = {
     .iterations = 1,
-    .threshold = 32.0,
+    .threshold = 48.0,
     .range = 16.0,
-    .grain = 48.0,
+    .grain = 32.0,
 };
 
 #define OPT_BASE_STRUCT struct deband_opts
 const struct m_sub_options deband_conf = {
     .opts = (const m_option_t[]) {
-        {"iterations", OPT_INT(iterations), M_RANGE(1, 16)},
+        {"iterations", OPT_INT(iterations), M_RANGE(0, 16)},
         {"threshold", OPT_FLOAT(threshold), M_RANGE(0.0, 4096.0)},
         {"range", OPT_FLOAT(range), M_RANGE(1.0, 64.0)},
         {"grain", OPT_FLOAT(grain), M_RANGE(0.0, 4096.0)},

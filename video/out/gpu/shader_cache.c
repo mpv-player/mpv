@@ -486,7 +486,7 @@ static const char *vao_glsl_type(const struct ra_renderpass_input *e)
     case 2: return "vec2";
     case 3: return "vec3";
     case 4: return "vec4";
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
 }
 
@@ -553,14 +553,20 @@ static void update_uniform(struct gl_shader_cache *sc, struct sc_entry *e,
         assert(e->pushc);
         update_pushc(sc->ra, e->pushc, u);
         break;
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
 }
 
-void gl_sc_set_cache_dir(struct gl_shader_cache *sc, const char *dir)
+void gl_sc_set_cache_dir(struct gl_shader_cache *sc, char *dir)
 {
     talloc_free(sc->cache_dir);
+    if (dir && dir[0]) {
+        dir = mp_get_user_path(NULL, sc->global, dir);
+    } else {
+        dir = mp_find_user_file(NULL, sc->global, "cache", "");
+    }
     sc->cache_dir = talloc_strdup(sc, dir);
+    talloc_free(dir);
 }
 
 static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
@@ -579,8 +585,7 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
         cache_dir = mp_get_user_path(tmp, sc->global, sc->cache_dir);
 
         struct AVSHA *sha = av_sha_alloc();
-        if (!sha)
-            abort();
+        MP_HANDLE_OOM(sha);
         av_sha_init(sha, 256);
         av_sha_update(sha, entry->total.start, entry->total.len);
 
@@ -700,7 +705,7 @@ static void add_uniforms(struct gl_shader_cache *sc, bstr *dst)
         case RA_VARTYPE_INT:
         case RA_VARTYPE_FLOAT:
             assert(sc->ra->caps & RA_CAP_GLOBAL_UNIFORM);
-            // fall through
+            MP_FALLTHROUGH;
         case RA_VARTYPE_TEX:
             // Vulkan requires explicitly assigning the bindings in the shader
             // source. For OpenGL it's optional, but requires higher GL version

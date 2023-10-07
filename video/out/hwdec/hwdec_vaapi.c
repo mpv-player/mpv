@@ -113,8 +113,14 @@ struct priv_owner {
 static void uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
-    if (p->ctx)
+    if (p->ctx) {
         hwdec_devices_remove(hw->devs, &p->ctx->hwctx);
+        if (p->ctx->hwctx.conversion_config) {
+            AVVAAPIHWConfig *hwconfig = p->ctx->hwctx.conversion_config;
+            vaDestroyConfig(p->ctx->display, hwconfig->config_id);
+            av_freep(&p->ctx->hwctx.conversion_config);
+        }
+    }
     va_destroy(p->ctx);
 }
 
@@ -134,6 +140,7 @@ const static dmabuf_interop_init interop_inits[] = {
 static int init(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
+    VAStatus vas;
 
     for (int i = 0; interop_inits[i]; i++) {
         if (interop_inits[i](hw, &p->dmabuf_interop)) {
@@ -146,7 +153,7 @@ static int init(struct ra_hwdec *hw)
         return -1;
     }
 
-    p->display = create_native_va_display(hw->ra, hw->log);
+    p->display = create_native_va_display(hw->ra_ctx->ra, hw->log);
     if (!p->display) {
         MP_VERBOSE(hw, "Could not create a VA display.\n");
         return -1;
@@ -171,12 +178,23 @@ static int init(struct ra_hwdec *hw)
         return -1;
     }
 
+    VAConfigID config_id;
+    AVVAAPIHWConfig *hwconfig = NULL;
+    vas = vaCreateConfig(p->display, VAProfileNone, VAEntrypointVideoProc, NULL,
+                         0, &config_id);
+    if (vas == VA_STATUS_SUCCESS) {
+        hwconfig = av_hwdevice_hwconfig_alloc(p->ctx->av_device_ref);
+        hwconfig->config_id = config_id;
+    }
+
     // it's now safe to set the display resource
-    ra_add_native_resource(hw->ra, "VADisplay", p->display);
+    ra_add_native_resource(hw->ra_ctx->ra, "VADisplay", p->display);
 
     p->ctx->hwctx.hw_imgfmt = IMGFMT_VAAPI;
     p->ctx->hwctx.supported_formats = p->formats;
     p->ctx->hwctx.driver_name = hw->driver->name;
+    p->ctx->hwctx.conversion_filter_name = "scale_vaapi";
+    p->ctx->hwctx.conversion_config = hwconfig;
     hwdec_devices_add(hw->devs, &p->ctx->hwctx);
     return 0;
 }
@@ -245,22 +263,31 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     return 0;
 }
 
+static void close_file_descriptors(VADRMPRIMESurfaceDescriptor desc)
+{
+    for (int i = 0; i < desc.num_objects; i++)
+        close(desc.objects[i].fd);
+}
+
 static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
     struct priv_owner *p_owner = mapper->owner->priv;
     struct dmabuf_interop_priv *p = mapper->priv;
     VAStatus status;
     VADisplay *display = p_owner->display;
-    VADRMPRIMESurfaceDescriptor desc;
+    VADRMPRIMESurfaceDescriptor desc = {0};
 
+    uint32_t flags = p_owner->dmabuf_interop.composed_layers ?
+        VA_EXPORT_SURFACE_COMPOSED_LAYERS : VA_EXPORT_SURFACE_SEPARATE_LAYERS;
     status = vaExportSurfaceHandle(display, va_surface_id(mapper->src),
                                    VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
                                    VA_EXPORT_SURFACE_READ_ONLY |
-                                   VA_EXPORT_SURFACE_SEPARATE_LAYERS,
+                                   flags,
                                    &desc);
     if (!CHECK_VA_STATUS_LEVEL(mapper, "vaExportSurfaceHandle()",
                                p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR))
     {
+        close_file_descriptors(desc);
         goto err;
     }
     vaSyncSurface(display, va_surface_id(mapper->src));
@@ -292,9 +319,9 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     }
 
     // We can handle composed formats if the total number of planes is still
-    // equal the number of planes we expect. Complex formats with auxilliary
+    // equal the number of planes we expect. Complex formats with auxiliary
     // planes cannot be supported.
-    if (p->num_planes != num_returned_planes) {
+    if (p->num_planes != 0 && p->num_planes != num_returned_planes) {
         mp_msg(mapper->log, p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR,
                "Mapped surface with format '%s' has unexpected number of planes. "
                "(%d layers and %d planes, but expected %d planes)\n",

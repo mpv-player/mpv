@@ -31,8 +31,6 @@
 #include "osdep/strnlen.h"
 #include "ao_wasapi.h"
 
-#define MIXER_DEFAULT_LABEL L"mpv - video player"
-
 DEFINE_PROPERTYKEY(mp_PKEY_Device_FriendlyName,
                    0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
                    0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14);
@@ -145,7 +143,19 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
 
     wformat->SubFormat                   = *format_to_subtype(format->mp_format);
     wformat->Samples.wValidBitsPerSample = format->used_msb;
-    wformat->dwChannelMask               = mp_chmap_to_waveext(channels);
+
+    uint64_t chans = mp_chmap_to_waveext(channels);
+    wformat->dwChannelMask = chans;
+
+    if (wformat->Format.nChannels > 8 || wformat->dwChannelMask != chans) {
+        // IAudioClient::IsFormatSupported tend to fallback to stereo for closest
+        // format match when there are more channels. Remix to standard layout.
+        // Also if input channel mask has channels outside 32-bits override it
+        // and hope for the best...
+        wformat->dwChannelMask = KSAUDIO_SPEAKER_7POINT1_SURROUND;
+        wformat->Format.nChannels = 8;
+    }
+
     update_waveformat_datarate(wformat);
 }
 
@@ -238,7 +248,8 @@ static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
              (unsigned) wf->nSamplesPerSec);
     return buf;
 }
-#define waveformat_to_str(wf) waveformat_to_str_buf((char[64]){0}, 64, (wf))
+#define waveformat_to_str_(wf, sz) waveformat_to_str_buf((char[sz]){0}, sz, (wf))
+#define waveformat_to_str(wf) waveformat_to_str_(wf, MP_NUM_CHANNELS * 4 + 42)
 
 static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
 {
@@ -545,7 +556,7 @@ exit_label:
     return hr;
 }
 
-static void init_session_display(struct wasapi_state *state) {
+static void init_session_display(struct wasapi_state *state, const char *name) {
     HRESULT hr = IAudioClient_GetService(state->pAudioClient,
                                          &IID_IAudioSessionControl,
                                          (void **)&state->pSessionControl);
@@ -560,14 +571,20 @@ static void init_session_display(struct wasapi_state *state) {
                 mp_HRESULT_to_str(hr));
     }
 
-    hr = IAudioSessionControl_SetDisplayName(state->pSessionControl,
-                                             MIXER_DEFAULT_LABEL, NULL);
+    assert(name);
+    if (!name)
+        return;
+
+    wchar_t *title = mp_from_utf8(NULL, name);
+    hr = IAudioSessionControl_SetDisplayName(state->pSessionControl, title, NULL);
+    talloc_free(title);
+
     EXIT_ON_ERROR(hr);
     return;
 exit_label:
     // if we got here then the session control is useless - release it
     SAFE_RELEASE(state->pSessionControl);
-    MP_WARN(state, "Error setting audio session display name: %s\n",
+    MP_WARN(state, "Error setting audio session name: %s\n",
             mp_HRESULT_to_str(hr));
     return;
 }
@@ -668,7 +685,7 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
     hr = init_clock(state);
     EXIT_ON_ERROR(hr);
 
-    init_session_display(state);
+    init_session_display(state, ao->client_name);
     init_volume_control(state);
 
 #if !HAVE_UWP

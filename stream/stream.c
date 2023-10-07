@@ -30,6 +30,7 @@
 
 #include "common/common.h"
 #include "common/global.h"
+#include "demux/demux.h"
 #include "misc/bstr.h"
 #include "misc/thread_tools.h"
 #include "common/msg.h"
@@ -92,7 +93,6 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_slice,
     &stream_info_fd,
     &stream_info_cb,
-    NULL
 };
 
 // Because of guarantees documented on STREAM_BUFFER_SIZE.
@@ -104,7 +104,7 @@ static const stream_info_t *const stream_list[] = {
 
 struct stream_opts {
     int64_t buffer_size;
-    int load_unsafe_playlists;
+    bool load_unsafe_playlists;
 };
 
 #define OPT_BASE_STRUCT struct stream_opts
@@ -113,7 +113,7 @@ const struct m_sub_options stream_conf = {
     .opts = (const struct m_option[]){
         {"stream-buffer-size", OPT_BYTE_SIZE(buffer_size),
             M_RANGE(STREAM_MIN_BUFFER_SIZE, STREAM_MAX_BUFFER_SIZE)},
-        {"load-unsafe-playlists", OPT_FLAG(load_unsafe_playlists)},
+        {"load-unsafe-playlists", OPT_BOOL(load_unsafe_playlists)},
         {0}
     },
     .size = sizeof(struct stream_opts),
@@ -354,9 +354,9 @@ static int stream_create_instance(const stream_info_t *sinfo,
     if (flags & STREAM_LESS_NOISE)
         mp_msg_set_max_level(s->log, MSGL_WARN);
 
-    int opt;
-    mp_read_option_raw(s->global, "access-references", &m_option_type_flag, &opt);
-    s->access_references = opt;
+    struct demux_opts *demux_opts = mp_get_config_group(s, s->global, &demux_conf);
+    s->access_references = demux_opts->access_references;
+    talloc_free(demux_opts);
 
     MP_VERBOSE(s, "Opening %s\n", url);
 
@@ -423,7 +423,7 @@ int stream_create_with_args(struct stream_open_args *args, struct stream **ret)
     if (args->sinfo) {
         r = stream_create_instance(args->sinfo, args, ret);
     } else {
-        for (int i = 0; stream_list[i]; i++) {
+        for (int i = 0; i < MP_ARRAY_SIZE(stream_list); i++) {
             r = stream_create_instance(stream_list[i], args, ret);
             if (r == STREAM_OK)
                 break;
@@ -852,7 +852,7 @@ char **stream_get_proto_list(void)
 {
     char **list = NULL;
     int num = 0;
-    for (int i = 0; stream_list[i]; i++) {
+    for (int i = 0; i < MP_ARRAY_SIZE(stream_list); i++) {
         const stream_info_t *stream_info = stream_list[i];
 
         if (!stream_info->protocols)
@@ -887,7 +887,7 @@ void stream_print_proto_list(struct mp_log *log)
 
 bool stream_has_proto(const char *proto)
 {
-    for (int i = 0; stream_list[i]; i++) {
+    for (int i = 0; i < MP_ARRAY_SIZE(stream_list); i++) {
         const stream_info_t *stream_info = stream_list[i];
 
         for (int j = 0; stream_info->protocols && stream_info->protocols[j]; j++) {

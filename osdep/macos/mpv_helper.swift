@@ -92,14 +92,14 @@ class MPVHelper {
     }
 
     func setOption(minimized: Bool) {
-        optsPtr.pointee.window_minimized = Int32(minimized)
+        optsPtr.pointee.window_minimized = minimized
         _ = withUnsafeMutableBytes(of: &optsPtr.pointee.window_minimized) { (ptr: UnsafeMutableRawBufferPointer) in
             m_config_cache_write_opt(optsCachePtr, ptr.baseAddress)
         }
     }
 
     func setOption(maximized: Bool) {
-        optsPtr.pointee.window_maximized = Int32(maximized)
+        optsPtr.pointee.window_maximized = maximized
         _ = withUnsafeMutableBytes(of: &optsPtr.pointee.window_maximized) { (ptr: UnsafeMutableRawBufferPointer) in
             m_config_cache_write_opt(optsCachePtr, ptr.baseAddress)
         }

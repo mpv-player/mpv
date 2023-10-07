@@ -84,7 +84,7 @@
           monob    Zin   Zout  SWSin  SWSout |
           monow    Zin   Zout  SWSin  SWSout |
            nv12    Zin   Zout  SWSin  SWSout |
-           nv16    Zin   Zout                |
+           nv16    Zin   Zout  SWSin  SWSout |
            nv20    Zin   Zout                |
          nv20be    Zin   Zout                |
            nv21    Zin   Zout  SWSin  SWSout |
@@ -93,8 +93,18 @@
          opencl                              |
            p010    Zin   Zout  SWSin  SWSout |
          p010be    Zin   Zout  SWSin  SWSout |
+           p012    Zin   Zout  SWSin  SWSout |
+         p012be    Zin   Zout  SWSin  SWSout |
            p016    Zin   Zout  SWSin  SWSout |
          p016be    Zin   Zout  SWSin  SWSout |
+           p210    Zin   Zout  SWSin  SWSout |
+         p210be    Zin   Zout  SWSin  SWSout |
+           p216    Zin   Zout  SWSin  SWSout |
+         p216be    Zin   Zout  SWSin  SWSout |
+           p410    Zin   Zout  SWSin  SWSout |
+         p410be    Zin   Zout  SWSin  SWSout |
+           p416    Zin   Zout  SWSin  SWSout |
+         p416be    Zin   Zout  SWSin  SWSout |
            pal8    Zin         SWSin         |
             qsv                              |
            rgb0    Zin   Zout  SWSin  SWSout |
@@ -114,22 +124,36 @@
            rgba    Zin   Zout  SWSin  SWSout |
          rgba64    Zin   Zout  SWSin  SWSout |
        rgba64be    Zin   Zout  SWSin  SWSout |
+        rgbaf16                SWSin         |
+      rgbaf16be                SWSin         |
+        rgbaf32                              |
+      rgbaf32be                              |
+         rgbf32                              |
+       rgbf32be                              |
         uyvy422    Zin   Zout  SWSin  SWSout |
       uyyvyy411    Zin   Zout                |
           vaapi                              |
-     vaapi_idct                              |
-     vaapi_moco                              |
           vdpau                              |
    vdpau_output                              |
    videotoolbox                              |
          vulkan                              |
+           vuya    Zin   Zout  SWSin  SWSout |
+           vuyx    Zin   Zout  SWSin  SWSout |
+        x2bgr10    Zin   Zout  SWSin  SWSout |
+      x2bgr10be    Zin   Zout                |
       x2rgb10be    Zin   Zout                |
+           xv30    Zin   Zout  SWSin  SWSout |
+         xv30be    Zin   Zout                |
+           xv36    Zin   Zout  SWSin  SWSout |
+         xv36be    Zin   Zout                |
            xvmc                              |
           xyz12    Zin   Zout  SWSin  SWSout |
         xyz12be    Zin   Zout  SWSin  SWSout |
              y1    Zin   Zout                |
-           y210    Zin   Zout  SWSin         |
+           y210    Zin   Zout  SWSin  SWSout |
          y210be    Zin   Zout                |
+           y212    Zin   Zout  SWSin  SWSout |
+         y212be    Zin   Zout                |
            ya16    Zin   Zout  SWSin  SWSout |
          ya16be    Zin   Zout  SWSin  SWSout |
             ya8    Zin   Zout  SWSin  SWSout |

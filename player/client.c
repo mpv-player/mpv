@@ -363,7 +363,7 @@ static int wait_wakeup(struct mpv_handle *ctx, int64_t end)
     pthread_mutex_unlock(&ctx->lock);
     pthread_mutex_lock(&ctx->wakeup_lock);
     if (!ctx->need_wakeup) {
-        struct timespec ts = mp_time_us_to_timespec(end);
+        struct timespec ts = mp_time_us_to_realtime(end);
         r = pthread_cond_timedwait(&ctx->wakeup, &ctx->wakeup_lock, &ts);
     }
     if (r == 0)
@@ -763,7 +763,7 @@ static void send_reply(struct mpv_handle *ctx, uint64_t userdata,
     assert(ctx->reserved_events > 0);
     ctx->reserved_events--;
     if (append_event(ctx, *event, false) < 0)
-        abort(); // not reached
+        MP_ASSERT_UNREACHABLE();
     pthread_mutex_unlock(&ctx->lock);
 }
 
@@ -905,7 +905,7 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
     if (timeout < 0)
         timeout = 1e20;
 
-    int64_t deadline = mp_add_timeout(mp_time_us(), timeout);
+    int64_t deadline = mp_time_us_add(mp_time_us(), timeout);
 
     *event = (mpv_event){0};
     talloc_free_children(event);
@@ -1337,6 +1337,12 @@ int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
     return req.status;
 }
 
+int mpv_del_property(mpv_handle *ctx, const char *name)
+{
+    const char* args[] = { "del", name, NULL };
+    return mpv_command(ctx, args);
+}
+
 int mpv_set_property_string(mpv_handle *ctx, const char *name, const char *data)
 {
     return mpv_set_property(ctx, name, MPV_FORMAT_STRING, &data);
@@ -1586,6 +1592,30 @@ int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
     return count;
 }
 
+static bool property_shared_prefix(const char *a0, const char *b0)
+{
+    bstr a = bstr0(a0);
+    bstr b = bstr0(b0);
+
+    // Treat options and properties as equivalent.
+    bstr_eatstart0(&a, "options/");
+    bstr_eatstart0(&b, "options/");
+
+    // Compare the potentially-common portion
+    if (memcmp(a.start, b.start, MPMIN(a.len, b.len)))
+        return false;
+
+    // If lengths were equal, we're done
+    if (a.len == b.len)
+        return true;
+
+    // Check for a slash in the first non-common byte of the longer string
+    if (a.len > b.len)
+        return a.start[b.len] == '/';
+    else
+        return b.start[a.len] == '/';
+}
+
 // Broadcast that a property has changed.
 void mp_client_property_change(struct MPContext *mpctx, const char *name)
 {
@@ -1599,7 +1629,8 @@ void mp_client_property_change(struct MPContext *mpctx, const char *name)
         struct mpv_handle *client = clients->clients[n];
         pthread_mutex_lock(&client->lock);
         for (int i = 0; i < client->num_properties; i++) {
-            if (client->properties[i]->id == id) {
+            if (client->properties[i]->id == id &&
+                property_shared_prefix(name, client->properties[i]->name)) {
                 client->properties[i]->change_ts += 1;
                 client->has_pending_properties = true;
                 any_pending = true;
@@ -1817,7 +1848,7 @@ int mpv_hook_continue(mpv_handle *ctx, uint64_t id)
 int mpv_load_config_file(mpv_handle *ctx, const char *filename)
 {
     lock_core(ctx);
-    int r = m_config_parse_config_file(ctx->mpctx->mconfig, filename, NULL, 0);
+    int r = m_config_parse_config_file(ctx->mpctx->mconfig, ctx->mpctx->global, filename, NULL, 0);
     unlock_core(ctx);
     if (r == 0)
         return MPV_ERROR_INVALID_PARAMETER;

@@ -44,7 +44,6 @@
 #include "video/mp_image.h"
 
 #include "win_state.h"
-#include "config.h"
 #include "vo.h"
 
 struct formatmap_entry {
@@ -193,9 +192,9 @@ struct priv {
     struct m_config_cache *opts_cache;
 
     // options
-    int allow_sw;
-    int switch_mode;
-    int vsync;
+    bool allow_sw;
+    bool switch_mode;
+    bool vsync;
 };
 
 static bool lock_texture(struct vo *vo, struct mp_image *texmpi)
@@ -241,7 +240,7 @@ static bool lock_texture(struct vo *vo, struct mp_image *texmpi)
 }
 
 static bool is_good_renderer(SDL_RendererInfo *ri,
-                             const char *driver_name_wanted, int allow_sw,
+                             const char *driver_name_wanted, bool allow_sw,
                              struct formatmap_entry *osd_format)
 {
     if (driver_name_wanted && driver_name_wanted[0])
@@ -870,7 +869,7 @@ static int query_format(struct vo *vo, int format)
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *vc = vo->priv;
 
@@ -880,20 +879,16 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     SDL_SetTextureBlendMode(vc->tex, SDL_BLENDMODE_NONE);
 
-    if (mpi) {
-        vc->osd_pts = mpi->pts;
+    if (frame->current) {
+        vc->osd_pts = frame->current->pts;
 
         mp_image_t texmpi;
-        if (!lock_texture(vo, &texmpi)) {
-            talloc_free(mpi);
+        if (!lock_texture(vo, &texmpi))
             return;
-        }
 
-        mp_image_copy(&texmpi, mpi);
+        mp_image_copy(&texmpi, frame->current);
 
         SDL_UnlockTexture(vc->tex);
-
-        talloc_free(mpi);
     }
 
     SDL_Rect src, dst;
@@ -941,9 +936,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         }
         return 1;
     }
-    case VOCTRL_REDRAW_FRAME:
-        draw_image(vo, NULL);
-        return 1;
     case VOCTRL_SET_PANSCAN:
         force_resize(vo);
         return VO_TRUE;
@@ -976,20 +968,19 @@ const struct vo_driver video_out_sdl = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .renderer_index = -1,
-        .vsync = 1,
-        .screensaver_enabled = false,
+        .vsync = true,
     },
     .options = (const struct m_option []){
-        {"sw", OPT_FLAG(allow_sw)},
-        {"switch-mode", OPT_FLAG(switch_mode)},
-        {"vsync", OPT_FLAG(vsync)},
+        {"sw", OPT_BOOL(allow_sw)},
+        {"switch-mode", OPT_BOOL(switch_mode)},
+        {"vsync", OPT_BOOL(vsync)},
         {NULL}
     },
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .uninit = uninit,
     .flip_page = flip_page,
     .wait_events = wait_events,

@@ -15,15 +15,11 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "video/out/wldmabuf/ra_wldmabuf.h"
-#include "config.h"
 #include "dmabuf_interop.h"
 
 static bool mapper_init(struct ra_hwdec_mapper *mapper,
                         const struct ra_imgfmt_desc *desc)
 {
-    struct dmabuf_interop_priv *p = mapper->priv;
-
-    p->num_planes = 1;
     return true;
 }
 
@@ -35,6 +31,33 @@ static bool map(struct ra_hwdec_mapper *mapper,
                 struct dmabuf_interop *dmabuf_interop,
                 bool probing)
 {
+    // 1. only validate format when composed layers is enabled (i.e. vaapi)
+    // 2. for drmprime, just return true for now, as this use case
+    // has not been tested.
+    if (!dmabuf_interop->composed_layers)
+        return true;
+
+    int layer_no = 0;
+    struct dmabuf_interop_priv *mapper_p = mapper->priv;
+    uint32_t drm_format = mapper_p->desc.layers[layer_no].format;
+
+    if (mapper_p->desc.nb_layers != 1) {
+        MP_VERBOSE(mapper, "Mapped surface has separate layers - expected composed layers.\n");
+        return false;
+    } else if (!ra_compatible_format(mapper->ra, drm_format,
+        mapper_p->desc.objects[0].format_modifier)) {
+        MP_VERBOSE(mapper, "Mapped surface with format %s; drm format '%s(%016lx)' "
+                   "is not supported by compositor.\n",
+                   mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
+                   mp_tag_str(drm_format),
+                   mapper_p->desc.objects[0].format_modifier);
+        return false;
+    }
+
+    MP_VERBOSE(mapper, "Supported Wayland display format %s: '%s(%016lx)'\n",
+               mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
+               mp_tag_str(drm_format), mapper_p->desc.objects[0].format_modifier);
+
     return true;
 }
 
@@ -45,8 +68,11 @@ static void unmap(struct ra_hwdec_mapper *mapper)
 bool dmabuf_interop_wl_init(const struct ra_hwdec *hw,
                             struct dmabuf_interop *dmabuf_interop)
 {
-    if (!ra_is_wldmabuf(hw->ra))
+    if (!ra_is_wldmabuf(hw->ra_ctx->ra))
         return false;
+
+    if (strstr(hw->driver->name, "vaapi") != NULL)
+        dmabuf_interop->composed_layers = true;
 
     dmabuf_interop->interop_init = mapper_init;
     dmabuf_interop->interop_uninit = mapper_uninit;

@@ -15,29 +15,26 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include "hwdec.h"
 #include "options/m_config.h"
+#include "options/options.h"
 
 #include <libavutil/hwcontext.h>
 
 static struct AVBufferRef *cuda_create_standalone(struct mpv_global *global,
         struct mp_log *log, struct hwcontext_create_dev_params *params)
 {
-    int decode_dev_idx;
-    mp_read_option_raw(global, "cuda-decode-device", &m_option_type_choice,
-                       &decode_dev_idx);
+    struct cuda_opts *opts = mp_get_config_group(NULL, global, &cuda_conf);
 
     char *decode_dev = NULL;
-    if (decode_dev_idx != -1) {
-        decode_dev = talloc_asprintf(NULL, "%d", decode_dev_idx);
-    }
+    if (opts->cuda_device != -1)
+        decode_dev = talloc_asprintf(NULL, "%d", opts->cuda_device);
 
     AVBufferRef* ref = NULL;
     av_hwdevice_ctx_create(&ref, AV_HWDEVICE_TYPE_CUDA, decode_dev, NULL, 0);
 
-    ta_free(decode_dev);
+    talloc_free(decode_dev);
+    talloc_free(opts);
     return ref;
 }
 

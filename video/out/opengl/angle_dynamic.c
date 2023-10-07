@@ -1,13 +1,8 @@
 #include <pthread.h>
 #include <windows.h>
 
-#ifndef ANGLE_NO_ALIASES
-#define ANGLE_NO_ALIASES
-#endif
-
 #include "angle_dynamic.h"
 
-#include "config.h"
 #include "common/common.h"
 
 #if HAVE_EGL_ANGLE_LIB
@@ -30,8 +25,8 @@ static void angle_do_load(void)
     if (!angle_dll)
         return;
 #define ANGLE_LOAD_ENTRY(NAME, VAR) \
-    MP_CONCAT(PFN_, NAME) = (void *)GetProcAddress(angle_dll, #NAME); \
-    if (!MP_CONCAT(PFN_, NAME)) return;
+    NAME = (void *)GetProcAddress(angle_dll, #NAME); \
+    if (!NAME) return;
     ANGLE_FNS(ANGLE_LOAD_ENTRY)
     angle_loaded = true;
 }

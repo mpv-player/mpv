@@ -37,6 +37,7 @@ static AVBufferRef *create_mediacodec_device_ref(struct vo *vo)
 
     AVHWDeviceContext *ctx = (void *)device_ref->data;
     AVMediaCodecDeviceContext *hwctx = ctx->hwctx;
+    assert(vo->opts->WinID != 0 && vo->opts->WinID != -1);
     hwctx->surface = (void *)(intptr_t)(vo->opts->WinID);
 
     if (av_hwdevice_ctx_init(device_ref) < 0)
@@ -54,6 +55,12 @@ static int preinit(struct vo *vo)
         .av_device_ref = create_mediacodec_device_ref(vo),
         .hw_imgfmt = IMGFMT_MEDIACODEC,
     };
+
+    if (!p->hwctx.av_device_ref) {
+        MP_VERBOSE(vo, "Failed to create hwdevice_ctx\n");
+        return -1;
+    }
+
     hwdec_devices_add(vo->hwdec_devs, &p->hwctx);
     return 0;
 }

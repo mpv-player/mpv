@@ -44,7 +44,9 @@ static const mp_get_platform_path_cb path_resolvers[] = {
 #if HAVE_COCOA
     mp_get_platform_path_osx,
 #endif
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#if HAVE_DARWIN
+    mp_get_platform_path_darwin,
+#elif !defined(_WIN32) || defined(__CYGWIN__)
     mp_get_platform_path_unix,
 #endif
 #if HAVE_UWP
@@ -63,6 +65,42 @@ static const char *const config_dirs[] = {
     "global",
 };
 
+// Return a platform specific path using a path type as defined in osdep/path.h.
+// Keep in mind that the only way to free the return value is freeing talloc_ctx
+// (or its children), as this function can return a statically allocated string.
+static const char *mp_get_platform_path(void *talloc_ctx,
+                                        struct mpv_global *global,
+                                        const char *type)
+{
+    assert(talloc_ctx);
+
+    if (global->configdir) {
+        // force all others to NULL, only first returns the path
+        for (int n = 0; n < MP_ARRAY_SIZE(config_dirs); n++) {
+            if (strcmp(config_dirs[n], type) == 0)
+                return (n == 0 && global->configdir[0]) ? global->configdir : NULL;
+        }
+    }
+
+    // Return the native config path if the platform doesn't support the
+    // type we are trying to fetch.
+    const char *fallback_type = NULL;
+    if (!strcmp(type, "cache") || !strcmp(type, "state"))
+        fallback_type = "home";
+
+    for (int n = 0; n < MP_ARRAY_SIZE(path_resolvers); n++) {
+        const char *path = path_resolvers[n](talloc_ctx, type);
+        if (path && path[0])
+            return path;
+    }
+
+    if (fallback_type) {
+        assert(strcmp(fallback_type, type) != 0);
+        return mp_get_platform_path(talloc_ctx, global, fallback_type);
+    }
+    return NULL;
+}
+
 void mp_init_paths(struct mpv_global *global, struct MPOpts *opts)
 {
     TA_FREEP(&global->configdir);
@@ -76,39 +114,15 @@ void mp_init_paths(struct mpv_global *global, struct MPOpts *opts)
     global->configdir = talloc_strdup(global, force_configdir);
 }
 
-// Return a platform specific path using a path type as defined in osdep/path.h.
-// Keep in mind that the only way to free the return value is freeing talloc_ctx
-// (or its children), as this function can return a statically allocated string.
-static const char *mp_get_platform_path(void *talloc_ctx,
-                                        struct mpv_global *global,
-                                        const char *type)
-{
-    assert(talloc_ctx);
-
-    if (global->configdir) {
-        for (int n = 0; n < MP_ARRAY_SIZE(config_dirs); n++) {
-            if (strcmp(config_dirs[n], type) == 0)
-                return (n == 0 && global->configdir[0]) ? global->configdir : NULL;
-        }
-    }
-
-    for (int n = 0; n < MP_ARRAY_SIZE(path_resolvers); n++) {
-        const char *path = path_resolvers[n](talloc_ctx, type);
-        if (path && path[0])
-            return path;
-    }
-    return NULL;
-}
-
-char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
-                               const char *filename)
+char *mp_find_user_file(void *talloc_ctx, struct mpv_global *global,
+                        const char *type, const char *filename)
 {
     void *tmp = talloc_new(NULL);
-    char *res = (char *)mp_get_platform_path(tmp, global, config_dirs[0]);
+    char *res = (char *)mp_get_platform_path(tmp, global, type);
     if (res)
         res = mp_path_join(talloc_ctx, res, filename);
     talloc_free(tmp);
-    MP_DBG(global, "config path: '%s' -> '%s'\n", filename, res ? res : "-");
+    MP_DBG(global, "%s path: '%s' -> '%s'\n", type, filename, res ? res : "-");
     return res;
 }
 
@@ -208,12 +222,14 @@ char *mp_basename(const char *path)
     char *s;
 
 #if HAVE_DOS_PATHS
-    s = strrchr(path, '\\');
-    if (s)
-        path = s + 1;
-    s = strrchr(path, ':');
-    if (s)
-        path = s + 1;
+    if (!mp_is_url(bstr0(path))) {
+        s = strrchr(path, '\\');
+        if (s)
+            path = s + 1;
+        s = strrchr(path, ':');
+        if (s)
+            path = s + 1;
+    }
 #endif
     s = strrchr(path, '/');
     return s ? s + 1 : (char *)path;
@@ -315,6 +331,14 @@ char *mp_getcwd(void *talloc_ctx)
     return wd;
 }
 
+char *mp_normalize_path(void *talloc_ctx, const char *path)
+{
+    if (mp_is_url(bstr0(path)))
+        return talloc_strdup(talloc_ctx, path);
+
+    return mp_path_join(talloc_ctx, mp_getcwd(talloc_ctx), path);
+}
+
 bool mp_path_exists(const char *path)
 {
     struct stat st;
@@ -376,9 +400,9 @@ void mp_mkdirp(const char *dir)
     talloc_free(path);
 }
 
-void mp_mk_config_dir(struct mpv_global *global, char *subdir)
+void mp_mk_user_dir(struct mpv_global *global, const char *type, char *subdir)
 {
-    char *dir = mp_find_user_config_file(NULL, global, subdir);
+    char *dir = mp_find_user_file(NULL, global, type, subdir);
     if (dir)
         mp_mkdirp(dir);
     talloc_free(dir);

@@ -33,25 +33,22 @@ struct playlist_entry {
     uint64_t id;
 
     char *filename;
+    char *playlist_path;
 
     struct playlist_param *params;
     int num_params;
 
     char *title;
 
-    // If the user plays a playlist, then the playlist's URL will be appended
-    // as redirect to each entry. (Same for directories etc.)
-    char **redirects;
-    int num_redirects;
-
     // Used for unshuffling: the pl_index before it was shuffled. -1 => unknown.
     int original_index;
 
-    // Set to true if playback didn't seem to work, or if the file could be
-    // played only for a very short time. This is used to make playlist
-    // navigation just work in case the user has unplayable files in the
-    // playlist.
-    bool playback_short : 1;
+    // Set to true if this playlist entry was selected while trying to go backwards
+    // in the playlist. If this is true and the playlist entry fails to play later,
+    // then mpv tries to go to the next previous entry. This flag is always cleared
+    // regardless if the attempt was successful or not.
+    bool playlist_prev_attempt : 1;
+
     // Set to true if not at least 1 frame (audio or video) could be played.
     bool init_failed : 1;
     // Entry was removed with playlist_remove (etc.), but not deallocated.
@@ -93,6 +90,7 @@ void playlist_move(struct playlist *pl, struct playlist_entry *entry,
                    struct playlist_entry *at);
 
 void playlist_add_file(struct playlist *pl, const char *filename);
+void playlist_populate_playlist_path(struct playlist *pl, const char *path);
 void playlist_shuffle(struct playlist *pl);
 void playlist_unshuffle(struct playlist *pl);
 struct playlist_entry *playlist_get_first(struct playlist *pl);
@@ -101,7 +99,6 @@ struct playlist_entry *playlist_get_next(struct playlist *pl, int direction);
 struct playlist_entry *playlist_entry_get_rel(struct playlist_entry *e,
                                               int direction);
 void playlist_add_base_path(struct playlist *pl, bstr base_path);
-void playlist_add_redirect(struct playlist *pl, const char *redirected_from);
 void playlist_set_stream_flags(struct playlist *pl, int flags);
 int64_t playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl);
 int64_t playlist_append_entries(struct playlist *pl, struct playlist *source_pl);

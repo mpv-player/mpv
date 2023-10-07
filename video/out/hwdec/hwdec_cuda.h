@@ -29,9 +29,6 @@ struct cuda_hw_priv {
     CUcontext display_ctx;
     CUcontext decode_ctx;
 
-    // Stored as int to avoid depending on libplacebo enum
-    int handle_type;
-
     // Do we need to do a full CPU sync after copying
     bool do_full_sync;
 

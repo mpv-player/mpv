@@ -15,7 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
 #include "dmabuf_interop.h"
 
 #include <drm_fourcc.h>
@@ -177,10 +176,19 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
         if (p_mapper->desc.layers[i].nb_planes > 1) {
             switch (p_mapper->desc.layers[i].format) {
             case DRM_FORMAT_NV12:
+            case DRM_FORMAT_NV16:
                 format[0] = DRM_FORMAT_R8;
                 format[1] = DRM_FORMAT_GR88;
                 break;
+            case DRM_FORMAT_YUV420:
+                format[0] = DRM_FORMAT_R8;
+                format[1] = DRM_FORMAT_R8;
+                format[2] = DRM_FORMAT_R8;
+                break;
             case DRM_FORMAT_P010:
+#ifdef DRM_FORMAT_P030 /* Format added in a newer libdrm version than minimum */
+            case DRM_FORMAT_P030:
+#endif
                 format[0] = DRM_FORMAT_R16;
                 format[1] = DRM_FORMAT_GR1616;
                 break;
@@ -270,7 +278,7 @@ static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
 bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
                             struct dmabuf_interop *dmabuf_interop)
 {
-    if (!ra_is_gl(hw->ra)) {
+    if (!ra_is_gl(hw->ra_ctx->ra)) {
         // This is not an OpenGL RA.
         return false;
     }
@@ -282,7 +290,7 @@ bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
     if (!exts)
         return false;
 
-    GL *gl = ra_gl_get(hw->ra);
+    GL *gl = ra_gl_get(hw->ra_ctx->ra);
     if (!gl_check_extension(exts, "EGL_EXT_image_dma_buf_import") ||
         !gl_check_extension(exts, "EGL_KHR_image_base") ||
         !gl_check_extension(gl->extensions, "GL_OES_EGL_image") ||

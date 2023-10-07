@@ -28,10 +28,11 @@ Available video output drivers are:
 
     See `GPU renderer options`_ for options specific to this VO.
 
-    By default, it tries to use fast and fail-safe settings. Use the
-    ``gpu-hq`` profile to use this driver with defaults set to high quality
-    rendering. The profile can be applied with ``--profile=gpu-hq`` and its
-    contents can be viewed with ``--show-profile=gpu-hq``.
+    By default, mpv utilizes settings that balance quality and performance.
+    Additionally, two predefined profiles are available: ``fast`` for maximum
+    performance and ``high-quality`` for superior rendering quality. You can
+    apply a specific profile using the ``--profile=<name>`` option and inspect
+    its contents using ``--show-profile=<name>``.
 
     This VO abstracts over several possible graphics APIs and windowing
     contexts, which can be influenced using the ``--gpu-api`` and
@@ -291,9 +292,12 @@ Available video output drivers are:
     or VA API hardware decoding. The driver is designed to avoid any GPU to CPU copies,
     and to perform scaling and color space conversion using fixed-function hardware,
     if available, rather than GPU shaders. This frees up GPU resources for other tasks.
-    Currently this driver is experimental and only works with the ``--hwdec=vaapi``
-    or ``hwdec=drm`` drivers;
-    OSD is also not supported. Supported compositors : Weston and Sway.
+    It is highly recommended to use this VO with the appropriate ``--hwdec`` option such
+    as ``auto-safe``. It can still work in some circumstances without ``--hwdec`` due to
+    mpv's internal conversion filters, but this is not recommended as it's a needless
+    extra step. Correct output depends on support from your GPU, drivers, and compositor.
+    Weston and wlroots-based compositors like Sway and Intel GPUs are known to generally
+    work.
 
 ``vaapi``
     Intel VA API video output driver with support for hardware decoding. Note
@@ -312,25 +316,6 @@ Available video output drivers are:
             Unspecified driver dependent high-quality scaling, slow.
         nla
             ``non-linear anamorphic scaling``
-
-    ``--vo-vaapi-deint-mode=<mode>``
-        Select deinterlacing algorithm. Note that by default deinterlacing is
-        initially always off, and needs to be enabled with the ``d`` key
-        (default key binding for ``cycle deinterlace``).
-
-        This option doesn't apply if libva supports video post processing (vpp).
-        In this case, the default for ``deint-mode`` is ``no``, and enabling
-        deinterlacing via user interaction using the methods mentioned above
-        actually inserts the ``vavpp`` video filter. If vpp is not actually
-        supported with the libva backend in use, you can use this option to
-        forcibly enable VO based deinterlacing.
-
-        no
-            Don't allow deinterlacing (default for newer libva).
-        first-field
-            Show only first field.
-        bob
-            bob deinterlacing (default for older libva).
 
     ``--vo-vaapi-scaled-osd=<yes|no>``
         If enabled, then the OSD is rendered at video resolution and scaled to
@@ -383,13 +368,54 @@ Available video output drivers are:
     ``--vo-tct-256=<yes|no>`` (default: no)
         Use 256 colors - for terminals which don't support true color.
 
+``kitty``
+    Graphical output for the terminal, using the kitty graphics protocol.
+    Tested with kitty and Konsole.
+
+    You may need to use ``--profile=sw-fast`` to get decent performance.
+
+    Kitty size and alignment options:
+
+    ``--vo-kitty-cols=<columns>``, ``--vo-kitty-rows=<rows>`` (default: 0)
+        Specify the terminal size in character cells, otherwise (0) read it
+        from the terminal, or fall back to 80x25.
+
+    ``--vo-kitty-width=<width>``, ``--vo-kitty-height=<height>`` (default: 0)
+        Specify the available size in pixels, otherwise (0) read it from the
+        terminal, or fall back to 320x240.
+
+    ``--vo-kitty-left=<col>``, ``--vo-kitty-top=<row>`` (default: 0)
+        Specify the position in character cells where the image starts (1 is
+        the first column or row). If 0 (default) then try to automatically
+        determine it according to the other values and the image aspect ratio
+        and zoom.
+
+    ``--vo-kitty-config-clear=<yes|no>`` (default: yes)
+        Whether or not to clear the terminal whenever the output is
+        reconfigured (e.g. when video size changes).
+
+    ``--vo-kitty-alt-screen=<yes|no>`` (default: yes)
+        Whether or not to use the alternate screen buffer and return the
+        terminal to its previous state on exit. When set to no, the last
+        kitty image stays on screen after quit, with the cursor following it.
+
+    ``--vo-kitty-use-shm=<yes|no>`` (default: no)
+        Use shared memory objects to transfer image data to the terminal.
+        This is much faster than sending the data as escape codes, but is not
+        supported by as many terminals. It also only works on the local machine
+        and not via e.g. SSH connections.
+
+        This option is not implemented on Windows.
+
 ``sixel``
     Graphical output for the terminal, using sixels. Tested with ``mlterm`` and
     ``xterm``.
 
-    Note: the Sixel image output is not synchronized with other terminal output
-    from mpv, which can lead to broken images. The option ``--really-quiet``
-    can help with that, and is recommended.
+    Note: the Sixel image output is not synchronized with other terminal
+    output from mpv, which can lead to broken images.
+    The option ``--really-quiet`` can help with that, and is recommended.
+    On some platforms, using the ``--vo-sixel-buffered`` option may work as
+    well.
 
     You may need to use ``--profile=sw-fast`` to get decent performance.
 
@@ -433,9 +459,24 @@ Available video output drivers are:
         to take into account padding at the report - this only works correctly
         when the overall padding per axis is smaller than the number of cells.
 
-    ``--vo-sixel-exit-clear=<yes|no>`` (default: yes)
-        Whether or not to clear the terminal on quit. When set to no - the last
+    ``--vo-sixel-config-clear=<yes|no>`` (default: yes)
+        Whether or not to clear the terminal whenever the output is
+        reconfigured (e.g. when video size changes).
+
+    ``--vo-sixel-alt-screen=<yes|no>`` (default: yes)
+        Whether or not to use the alternate screen buffer and return the
+        terminal to its previous state on exit. When set to no, the last
         sixel image stays on screen after quit, with the cursor following it.
+
+        ``--vo-sixel-exit-clear`` is a deprecated alias for this option and
+        may be removed in the future.
+
+    ``--vo-sixel-buffered=<yes|no>`` (default: no)
+        Buffers the full output sequence before writing it to the terminal.
+        On POSIX platforms, this can help prevent interruption (including from
+        other applications) and thus broken images, but may come at a
+        performance cost with some terminals and is subject to implementation
+        details.
 
     Sixel image quality options:
 
@@ -529,14 +570,7 @@ Available video output drivers are:
 ``rpi`` (Raspberry Pi)
     Native video output on the Raspberry Pi using the MMAL API.
 
-    This is deprecated. Use ``--vo=gpu`` instead, which is the default and
-    provides the same functionality. The ``rpi`` VO will be removed in
-    mpv 0.23.0. Its functionality was folded into --vo=gpu, which now uses
-    RPI hardware decoding by treating it as a hardware overlay (without applying
-    GL filtering). Also to be changed in 0.23.0: the --fs flag will be reset to
-    "no" by default (like on the other platforms).
-
-    The following deprecated global options are supported by this video output:
+    The following global options are supported by this video output:
 
     ``--rpi-display=<number>``
         Select the display number on which the video overlay should be shown
@@ -568,18 +602,15 @@ Available video output drivers are:
 
     The following global options are supported by this video output:
 
-    ``--drm-connector=[<gpu_number>.]<name>``
+    ``--drm-connector=<name>``
         Select the connector to use (usually this is a monitor.) If ``<name>``
         is empty or ``auto``, mpv renders the output on the first available
         connector. Use ``--drm-connector=help`` to get a list of available
-        connectors. The ``<gpu_number>`` argument can be used to disambiguate
-        multiple graphic cards, but is deprecated in favor of ``--drm-device``.
-        (default: empty)
+        connectors. (default: empty)
 
     ``--drm-device=<path>``
         Select the DRM device file to use. If specified this overrides automatic
-        card selection and any card number specified ``--drm-connector``.
-        (default: empty)
+        card selection. (default: empty)
 
     ``--drm-mode=<preferred|highest|N|WxH[@R]>``
         Mode to use (resolution and frame rate).

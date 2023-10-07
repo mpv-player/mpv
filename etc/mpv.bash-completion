@@ -18,7 +18,7 @@
 #
 
 # Cache all the mpv options
-_mpv_options=$(mpv --list-options)
+_mpv_options=$(mpv --no-config --list-options)
 
 _mpv_get_args()
 {
@@ -26,8 +26,10 @@ _mpv_get_args()
   local partial="$2"
   local type=$(echo "$doc" | awk '{print $2;}')
 
+  # We special-case profiles to ensure we read the config
   if [ "$1" = "--show-profile" ]; then
-    # This is a special case
+    type="ShowProfile"
+  elif [ "$1" = "--profile" ]; then
     type="Profile"
   fi
 
@@ -42,7 +44,7 @@ _mpv_get_args()
         _filedir 2>/dev/null || COMPREPLY=($(compgen -f))
         return 0
       else
-        candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
+        candidates=($(mpv --no-config $1=help | grep -v ':' | awk '{print $1;}'))
         candidates+=("help")
       fi
       ;;
@@ -50,15 +52,19 @@ _mpv_get_args()
       candidates=("yes" "no" "help")
       ;;
     Choices:|Object)
-      candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
+      candidates=($(mpv --no-config $1=help | grep -v ':' | awk '{print $1;}'))
       candidates+=("help")
       ;;
     Image)
-      candidates=($(mpv $1=help))
+      candidates=($(mpv --no-config $1=help))
       candidates=("${candidates[@]:2}")
       candidates+=("help")
       ;;
     Profile)
+      candidates=($(mpv $1=help | grep -v ':' | awk '{print $1;}'))
+      candidates+=("help")
+      ;;
+    ShowProfile)
       candidates=($(mpv $1= | grep -v ':' | awk '{print $1;}'))
       ;;
     *)
@@ -73,9 +79,12 @@ _mpv_get_args()
 }
 
 # This regex detects special options where we don't want an '=' appended
-_mpv_special_regex='Flag.*\[not in config files\]|Print'
-_mpv_regular_options=($(echo "$_mpv_options" | grep -v -E "$_mpv_special_regex" |awk '{print "\\"$1;}' | grep '\--'))
-_mpv_special_options=($(echo "$_mpv_options" | grep -E "$_mpv_special_regex" |awk '{print "\\"$1;}' | grep '\--'))
+_mpv_special_regex='\s(Flag.*\[not in config files\]|Print)'
+_mpv_skip_regex='\sremoved \[deprecated\]'
+_mpv_regular_options=($(echo "$_mpv_options" | grep -vE "$_mpv_skip_regex" | \
+  grep -vE "$_mpv_special_regex" | awk '{print "\\"$1;}' | grep '\--'))
+_mpv_special_options=($(echo "$_mpv_options" | grep -vE "$_mpv_skip_regex" | \
+  grep -E "$_mpv_special_regex" | awk '{print "\\"$1;}' | grep '\--'))
 
 _mpv()
 {

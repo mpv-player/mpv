@@ -27,10 +27,9 @@
 int polldev(struct pollfd fds[], nfds_t nfds, int timeout) {
 #ifdef __APPLE__
     int maxfd = 0;
-    fd_set readfds, writefds, errorfds;
+    fd_set readfds, writefds;
     FD_ZERO(&readfds);
     FD_ZERO(&writefds);
-    FD_ZERO(&errorfds);
     for (size_t i = 0; i < nfds; ++i) {
         struct pollfd *fd = &fds[i];
         if (fd->fd > maxfd) {
@@ -42,15 +41,12 @@ int polldev(struct pollfd fds[], nfds_t nfds, int timeout) {
         if ((fd->events & POLLOUT)) {
             FD_SET(fd->fd, &writefds);
         }
-        if ((fd->events & POLLERR)) {
-            FD_SET(fd->fd, &errorfds);
-        }
     }
     struct timeval _timeout = {
         .tv_sec = timeout / 1000,
         .tv_usec = (timeout % 1000) * 1000
     };
-    int n = select(maxfd + 1, &readfds, &writefds, &errorfds,
+    int n = select(maxfd + 1, &readfds, &writefds, NULL,
         timeout != -1 ? &_timeout : NULL);
     if (n < 0) {
         return n;
@@ -63,9 +59,6 @@ int polldev(struct pollfd fds[], nfds_t nfds, int timeout) {
         }
         if (FD_ISSET(fd->fd, &writefds)) {
             fd->revents |= POLLOUT;
-        }
-        if (FD_ISSET(fd->fd, &errorfds)) {
-            fd->revents |= POLLERR;
         }
     }
     return n;

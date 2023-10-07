@@ -20,7 +20,6 @@
 
 #include "video/img_format.h"
 #include "fmt-conversion.h"
-#include "config.h"
 
 static const struct {
     int fmt;
@@ -67,6 +66,9 @@ static const struct {
     {IMGFMT_CUDA, AV_PIX_FMT_CUDA},
     {IMGFMT_P010, AV_PIX_FMT_P010},
     {IMGFMT_DRMPRIME, AV_PIX_FMT_DRM_PRIME},
+#if HAVE_VULKAN_INTEROP
+    {IMGFMT_VULKAN, AV_PIX_FMT_VULKAN},
+#endif
 
     {0, AV_PIX_FMT_NONE}
 };

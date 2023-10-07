@@ -23,7 +23,7 @@ static const struct scale_test_fns fns = {
     .supports_fmts = supports_fmts,
 };
 
-static void run(struct test_ctx *ctx)
+int main(int argc, char *argv[])
 {
     struct mp_sws_context *sws = mp_sws_alloc(NULL);
 
@@ -31,15 +31,12 @@ static void run(struct test_ctx *ctx)
     stest->fns = &fns;
     stest->fns_priv = sws;
     stest->test_name = "repack_sws";
-    stest->ctx = ctx;
+    stest->refdir = talloc_strdup(stest, argv[1]);
+    stest->outdir = talloc_strdup(stest, argv[2]);
 
     repack_test_run(stest);
 
     talloc_free(stest);
     talloc_free(sws);
+    return 0;
 }
-
-const struct unittest test_repack_sws = {
-    .name = "repack_sws",
-    .run = run,
-};

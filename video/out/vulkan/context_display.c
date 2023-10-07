@@ -274,11 +274,7 @@ const struct m_sub_options vulkan_display_conf = {
         {0}
     },
     .size = sizeof(struct vulkan_display_opts),
-    .defaults = &(struct vulkan_display_opts) {
-        .display = 0,
-        .mode = 0,
-        .plane = 0,
-    },
+    .defaults = &(struct vulkan_display_opts) {0},
 };
 
 struct priv {

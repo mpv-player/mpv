@@ -22,10 +22,16 @@
 #include "input/event.h"
 #include "vo.h"
 
+typedef struct {
+    uint32_t format;
+    uint32_t padding;
+    uint64_t modifier;
+} wayland_format;
+
 struct wayland_opts {
     int configure_bounds;
     int content_type;
-    int disable_vsync;
+    bool disable_vsync;
     int edge_pixels_pointer;
     int edge_pixels_touch;
 };
@@ -43,18 +49,19 @@ struct vo_wayland_state {
     struct wl_registry      *registry;
     struct wl_shm           *shm;
     struct wl_surface       *surface;
+    struct wl_surface       *osd_surface;
+    struct wl_subsurface    *osd_subsurface;
     struct wl_surface       *video_surface;
+    struct wl_surface       *callback_surface;
     struct wl_subsurface    *video_subsurface;
 
     /* Geometry */
     struct mp_rect geometry;
-    struct mp_rect vdparams;
     struct mp_rect window_size;
     struct wl_list output_list;
     struct vo_wayland_output *current_output;
     int bounded_height;
     int bounded_width;
-    int gcd;
     int reduced_height;
     int reduced_width;
     int toplevel_width;
@@ -66,15 +73,15 @@ struct vo_wayland_state {
     bool focused;
     bool frame_wait;
     bool hidden;
+    bool locked_size;
     bool state_change;
+    bool tiled;
     bool toplevel_configured;
     int display_fd;
-    int mouse_unscaled_x;
-    int mouse_unscaled_y;
     int mouse_x;
     int mouse_y;
     int pending_vo_events;
-    int scaling;
+    double scaling;
     int timeout_count;
     int wakeup_pipe[2];
 
@@ -84,27 +91,37 @@ struct vo_wayland_state {
     void *content_type;
     int current_content_type;
 
+    /* cursor-shape */
+    /* TODO: unvoid these if required wayland protocols is bumped to 1.32+ */
+    void *cursor_shape_manager;
+    void *cursor_shape_device;
+
+    /* fractional-scale */
+    /* TODO: unvoid these if required wayland protocols is bumped to 1.31+ */
+    void *fractional_scale_manager;
+    void *fractional_scale;
+
     /* idle-inhibit */
     struct zwp_idle_inhibit_manager_v1 *idle_inhibit_manager;
     struct zwp_idle_inhibitor_v1 *idle_inhibitor;
 
     /* linux-dmabuf */
     struct zwp_linux_dmabuf_v1 *dmabuf;
-    /* TODO: unvoid this if required wayland protocols is bumped to 1.24+ */
-    void *dmabuf_feedback;
-    void *format_map;
+    struct zwp_linux_dmabuf_feedback_v1 *dmabuf_feedback;
+    wayland_format *format_map;
     uint32_t format_size;
-    /* TODO: remove these once zwp_linux_dmabuf_v1 version 2 support is removed. */
-    int *drm_formats;
-    int drm_format_ct;
-    int drm_format_ct_max;
+    bool using_dmabuf_wayland;
 
     /* presentation-time */
     struct wp_presentation  *presentation;
-    struct wp_presentation_feedback *feedback;
+    struct vo_wayland_feedback_pool *fback_pool;
     struct mp_present *present;
     int64_t refresh_interval;
     bool use_present;
+
+    /* single-pixel-buffer */
+    /* TODO: unvoid this if required wayland-protocols is bumped to 1.27+ */
+    void *single_pixel_manager;
 
     /* xdg-decoration */
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
@@ -119,6 +136,7 @@ struct vo_wayland_state {
     /* viewporter */
     struct wp_viewporter *viewporter;
     struct wp_viewport   *viewport;
+    struct wp_viewport   *osd_viewport;
     struct wp_viewport   *video_viewport;
 
     /* Input */
@@ -130,6 +148,8 @@ struct vo_wayland_state {
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
     uint32_t keyboard_code;
+    int mpkey;
+    int mpmod;
 
     /* DND */
     struct wl_data_device *dnd_ddev;
@@ -150,14 +170,14 @@ struct vo_wayland_state {
 };
 
 bool vo_wayland_check_visible(struct vo *vo);
-bool vo_wayland_supported_format(struct vo *vo, uint32_t format, uint64_t modifier);
+bool vo_wayland_init(struct vo *vo);
+bool vo_wayland_reconfig(struct vo *vo);
 
 int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
-int vo_wayland_init(struct vo *vo);
-int vo_wayland_reconfig(struct vo *vo);
 
-void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, int alpha);
+void vo_wayland_handle_fractional_scale(struct vo_wayland_state *wl);
+void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha);
 void vo_wayland_sync_swap(struct vo_wayland_state *wl);
 void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us);

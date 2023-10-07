@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -247,8 +245,7 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     c->disp_h = height;
     if (mp_imgfmt) {
         c->lav_codecpar = avcodec_parameters_alloc();
-        if (!c->lav_codecpar)
-            abort();
+        MP_HANDLE_OOM(c->lav_codecpar);
         c->lav_codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
         c->lav_codecpar->codec_id = mp_codec_to_av_codec_id(decoder);
         c->lav_codecpar->format = imgfmt2pixfmt(mp_imgfmt);

@@ -22,22 +22,20 @@ struct mp_log;
 
 struct image_writer_opts {
     int format;
-    int high_bit_depth;
+    bool high_bit_depth;
     int png_compression;
     int png_filter;
     int jpeg_quality;
-    int jpeg_optimize;
-    int jpeg_smooth;
-    int jpeg_dpi;
-    int jpeg_progressive;
-    int jpeg_baseline;
-    int jpeg_source_chroma;
-    int webp_lossless;
+    bool jpeg_source_chroma;
+    bool webp_lossless;
     int webp_quality;
     int webp_compression;
     double jxl_distance;
     int jxl_effort;
-    int tag_csp;
+    char *avif_encoder;
+    char *avif_pixfmt;
+    char **avif_opts;
+    bool tag_csp;
 };
 
 extern const struct image_writer_opts image_writer_opts_defaults;
@@ -49,6 +47,9 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts);
 
 // Return whether the selected format likely supports >8 bit per component.
 bool image_writer_high_depth(const struct image_writer_opts *opts);
+
+// Return whether the selected format likely supports non-sRGB colorspaces
+bool image_writer_flexible_csp(const struct image_writer_opts *opts);
 
 // Map file extension to format ID - return 0 (which is invalid) if unknown.
 int image_writer_format_from_ext(const char *ext);

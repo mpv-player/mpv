@@ -30,6 +30,7 @@
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "libmpv/render_gl.h"
+#include "video/out/drm_atomic.h"
 #include "video/out/drm_common.h"
 #include "video/out/drm_prime.h"
 #include "video/out/gpu/hwdec.h"
@@ -147,10 +148,12 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
     struct drm_frame next_frame = {0};
     int ret;
 
+    struct ra *ra = hw->ra_ctx->ra;
+
     // grab atomic request from native resources
     if (p->ctx) {
         struct mpv_opengl_drm_params_v2 *drm_params;
-        drm_params = (mpv_opengl_drm_params_v2 *)ra_get_native_resource(hw->ra, "drm_params_v2");
+        drm_params = (mpv_opengl_drm_params_v2 *)ra_get_native_resource(ra, "drm_params_v2");
         if (!drm_params) {
             MP_ERR(hw, "Failed to retrieve drm params from native resources\n");
             return -1;
@@ -167,7 +170,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
 
         // grab draw plane windowing info to eventually upscale the overlay
         // as egl windows could be upscaled to draw plane.
-        struct mpv_opengl_drm_draw_surface_size *draw_surface_size = ra_get_native_resource(hw->ra, "drm_draw_surface_size");
+        struct mpv_opengl_drm_draw_surface_size *draw_surface_size = ra_get_native_resource(ra, "drm_draw_surface_size");
         if (draw_surface_size) {
             scale_dst_rect(hw, draw_surface_size->width, draw_surface_size->height, dst, &p->dst);
         } else {
@@ -252,13 +255,13 @@ static int init(struct ra_hwdec *hw)
 
     void *tmp = talloc_new(NULL);
     struct drm_opts *opts = mp_get_config_group(tmp, hw->global, &drm_conf);
-    draw_plane = opts->drm_draw_plane;
-    drmprime_video_plane = opts->drm_drmprime_video_plane;
+    draw_plane = opts->draw_plane;
+    drmprime_video_plane = opts->drmprime_video_plane;
     talloc_free(tmp);
 
     struct mpv_opengl_drm_params_v2 *drm_params;
 
-    drm_params = ra_get_native_resource(hw->ra, "drm_params_v2");
+    drm_params = ra_get_native_resource(hw->ra_ctx->ra, "drm_params_v2");
     if (drm_params) {
         p->ctx = drm_atomic_create_context(p->log, drm_params->fd, drm_params->crtc_id,
                                            drm_params->connector_id, draw_plane, drmprime_video_plane);
@@ -299,10 +302,20 @@ static int init(struct ra_hwdec *hw)
         .driver_name = hw->driver->name,
         .hw_imgfmt = IMGFMT_DRMPRIME,
     };
-    if (!av_hwdevice_ctx_create(&p->hwctx.av_device_ref, AV_HWDEVICE_TYPE_DRM,
-                                drmGetDeviceNameFromFd2(p->ctx->fd), NULL, 0)) {
-        hwdec_devices_add(hw->devs, &p->hwctx);
+
+    char *device = drmGetDeviceNameFromFd2(p->ctx->fd);
+    int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
+                                     AV_HWDEVICE_TYPE_DRM, device, NULL, 0);
+
+    if (device)
+        free(device);
+
+    if (ret != 0) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
+        goto err;
     }
+
+    hwdec_devices_add(hw->devs, &p->hwctx);
 
     return 0;
 

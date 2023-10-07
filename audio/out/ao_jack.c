@@ -47,8 +47,8 @@
 struct jack_opts {
     char *port;
     char *client_name;
-    int connect;
-    int autostart;
+    bool connect;
+    bool autostart;
     int stdlayout;
 };
 
@@ -57,15 +57,15 @@ static const struct m_sub_options ao_jack_conf = {
     .opts = (const struct m_option[]){
         {"jack-port", OPT_STRING(port)},
         {"jack-name", OPT_STRING(client_name)},
-        {"jack-autostart", OPT_FLAG(autostart)},
-        {"jack-connect", OPT_FLAG(connect)},
+        {"jack-autostart", OPT_BOOL(autostart)},
+        {"jack-connect", OPT_BOOL(connect)},
         {"jack-std-channel-layout", OPT_CHOICE(stdlayout,
             {"waveext", 0}, {"any", 1})},
         {0}
     },
     .defaults = &(const struct jack_opts) {
         .client_name = "mpv",
-        .connect = 1,
+        .connect = true,
     },
     .size = sizeof(struct jack_opts),
 };
@@ -246,6 +246,8 @@ static int init(struct ao *ao)
     jack_set_process_callback(p->client, process, ao);
 
     ao->samplerate = jack_get_sample_rate(p->client);
+    // The actual device buffer can change, but this is enough for pre-buffer
+    ao->device_buffer = jack_get_buffer_size(p->client);
 
     jack_set_buffer_size_callback(p->client, buffer_size_cb, ao);
     jack_set_graph_order_callback(p->client, graph_order_cb, ao);

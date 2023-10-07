@@ -24,7 +24,11 @@
 
 #include <libavutil/buffer.h>
 #include <libavutil/hwcontext.h>
+#if HAVE_VULKAN_INTEROP
+#include <libavutil/hwcontext_vulkan.h>
+#endif
 #include <libavutil/mem.h>
+#include <libavutil/pixdesc.h>
 
 #include "mpv_talloc.h"
 
@@ -276,7 +280,7 @@ int mp_image_hw_download_get_sw_format(struct mp_image *src)
     return imgfmt;
 }
 
-// Copies the contents of the HW surface src to system memory and retuns it.
+// Copies the contents of the HW surface src to system memory and returns it.
 // If swpool is not NULL, it's used to allocate the target image.
 // src must be a hw surface with a AVHWFramesContext attached.
 // The returned image is cropped as needed.
@@ -346,8 +350,8 @@ bool mp_image_hw_upload(struct mp_image *hw_img, struct mp_image *src)
     ok = av_hwframe_transfer_data(dstav, srcav, 0) >= 0;
 
 done:
-    av_frame_unref(srcav);
-    av_frame_unref(dstav);
+    av_frame_free(&srcav);
+    av_frame_free(&dstav);
 
     if (ok)
         mp_image_copy_attributes(hw_img, src);
@@ -356,7 +360,8 @@ done:
 
 bool mp_update_av_hw_frames_pool(struct AVBufferRef **hw_frames_ctx,
                                  struct AVBufferRef *hw_device_ctx,
-                                 int imgfmt, int sw_imgfmt, int w, int h)
+                                 int imgfmt, int sw_imgfmt, int w, int h,
+                                 bool disable_multiplane)
 {
     enum AVPixelFormat format = imgfmt2pixfmt(imgfmt);
     enum AVPixelFormat sw_format = imgfmt2pixfmt(sw_imgfmt);
@@ -387,6 +392,18 @@ bool mp_update_av_hw_frames_pool(struct AVBufferRef **hw_frames_ctx,
         hw_frames->sw_format = sw_format;
         hw_frames->width = w;
         hw_frames->height = h;
+
+#if HAVE_VULKAN_INTEROP
+        if (format == AV_PIX_FMT_VULKAN && disable_multiplane) {
+            const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(sw_format);
+            if ((desc->flags & AV_PIX_FMT_FLAG_PLANAR) &&
+                !(desc->flags & AV_PIX_FMT_FLAG_RGB)) {
+                AVVulkanFramesContext *vk_frames = hw_frames->hwctx;
+                vk_frames->flags = AV_VK_FRAME_FLAG_DISABLE_MULTIPLANE;
+            }
+        }
+#endif
+
         if (av_hwframe_ctx_init(*hw_frames_ctx) < 0) {
             av_buffer_unref(hw_frames_ctx);
             return false;

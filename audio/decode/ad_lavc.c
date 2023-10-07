@@ -46,6 +46,7 @@
 struct priv {
     AVCodecContext *avctx;
     AVFrame *avframe;
+    AVPacket *avpkt;
     struct mp_chmap force_channel_map;
     uint32_t skip_samples, trim_samples;
     bool preroll_done;
@@ -59,7 +60,7 @@ struct priv {
 #define OPT_BASE_STRUCT struct ad_lavc_params
 struct ad_lavc_params {
     float ac3drc;
-    int downmix;
+    bool downmix;
     int threads;
     char **avopts;
 };
@@ -67,7 +68,7 @@ struct ad_lavc_params {
 const struct m_sub_options ad_lavc_conf = {
     .opts = (const m_option_t[]) {
         {"ac3drc", OPT_FLOAT(ac3drc), M_RANGE(0, 6)},
-        {"downmix", OPT_FLAG(downmix)},
+        {"downmix", OPT_BOOL(downmix)},
         {"threads", OPT_INT(threads), M_RANGE(0, 16)},
         {"o", OPT_KEYVALUELIST(avopts)},
         {0}
@@ -75,7 +76,6 @@ const struct m_sub_options ad_lavc_conf = {
     .size = sizeof(struct ad_lavc_params),
     .defaults = &(const struct ad_lavc_params){
         .ac3drc = 0,
-        .downmix = 0,
         .threads = 1,
     },
 };
@@ -104,6 +104,8 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
     lavc_context = avcodec_alloc_context3(lavc_codec);
     ctx->avctx = lavc_context;
     ctx->avframe = av_frame_alloc();
+    ctx->avpkt = av_packet_alloc();
+    MP_HANDLE_OOM(ctx->avctx && ctx->avframe && ctx->avpkt);
     lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id;
     lavc_context->pkt_timebase = ctx->codec_timebase;
@@ -160,6 +162,7 @@ static void destroy(struct mp_filter *da)
 
     avcodec_free_context(&ctx->avctx);
     av_frame_free(&ctx->avframe);
+    mp_free_av_packet(&ctx->avpkt);
 }
 
 static void reset(struct mp_filter *da)
@@ -185,10 +188,9 @@ static int send_packet(struct mp_filter *da, struct demux_packet *mpkt)
     if (mpkt && priv->next_pts == MP_NOPTS_VALUE)
         priv->next_pts = mpkt->pts;
 
-    AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt, &priv->codec_timebase);
+    mp_set_av_packet(priv->avpkt, mpkt, &priv->codec_timebase);
 
-    int ret = avcodec_send_packet(avctx, mpkt ? &pkt : NULL);
+    int ret = avcodec_send_packet(avctx, mpkt ? priv->avpkt : NULL);
     if (ret < 0)
         MP_ERR(da, "Error decoding audio.\n");
     return ret;

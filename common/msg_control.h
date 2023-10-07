@@ -2,6 +2,7 @@
 #define MP_MSG_CONTROL_H
 
 #include <stdbool.h>
+#include "common/msg.h"
 
 struct mpv_global;
 struct MPOpts;

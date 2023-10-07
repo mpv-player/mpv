@@ -68,8 +68,7 @@ struct mp_refqueue *mp_refqueue_alloc(struct mp_filter *f)
     q->filter = f;
 
     q->conv = mp_autoconvert_create(f);
-    if (!q->conv)
-        abort();
+    MP_HANDLE_OOM(q->conv);
 
     q->in = q->conv->f->pins[1];
     mp_pin_connect(q->conv->f->pins[0], f->ppins[0]);
@@ -267,8 +266,6 @@ struct mp_image *mp_refqueue_execute_reinit(struct mp_refqueue *q)
     mp_refqueue_flush(q);
 
     q->in_format = mp_image_new_ref(cur);
-    if (!q->in_format)
-        abort();
     mp_image_unref_data(q->in_format);
 
     mp_refqueue_add_input(q, cur);

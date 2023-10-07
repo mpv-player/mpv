@@ -25,11 +25,7 @@
 #include "common/msg.h"
 #include "audio/out/ao.h"
 #include "internal.h"
-
-#define CA_CFSTR_ENCODING kCFStringEncodingUTF8
-
-CFStringRef cfstr_from_cstr(char *str);
-char *cfstr_get_cstr(CFStringRef cfstr);
+#include "osdep/apple_utils.h"
 
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
 

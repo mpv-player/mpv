@@ -32,9 +32,8 @@ struct priv {
     double cfg_fps;
 };
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
-    talloc_free(mpi);
 }
 
 static void flip_page(struct vo *vo)
@@ -93,7 +92,7 @@ const struct vo_driver video_out_null = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),

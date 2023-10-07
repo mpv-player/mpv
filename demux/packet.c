@@ -23,8 +23,6 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/intreadwrite.h>
 
-#include "config.h"
-
 #include "common/av_common.h"
 #include "common/common.h"
 #include "demux.h"
@@ -51,13 +49,8 @@ static void packet_destroy(void *ptr)
     demux_packet_unref_contents(dp);
 }
 
-// This actually preserves only data and side data, not PTS/DTS/pos/etc.
-// It also allows avpkt->data==NULL with avpkt->size!=0 - the libavcodec API
-// does not allow it, but we do it to simplify new_demux_packet().
-struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
+static struct demux_packet *packet_create(void)
 {
-    if (avpkt->size > 1000000000)
-        return NULL;
     struct demux_packet *dp = talloc(NULL, struct demux_packet);
     talloc_set_destructor(dp, packet_destroy);
     *dp = (struct demux_packet) {
@@ -70,10 +63,20 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
         .stream = -1,
         .avpacket = av_packet_alloc(),
     };
+    MP_HANDLE_OOM(dp->avpacket);
+    return dp;
+}
+
+// This actually preserves only data and side data, not PTS/DTS/pos/etc.
+// It also allows avpkt->data==NULL with avpkt->size!=0 - the libavcodec API
+// does not allow it, but we do it to simplify new_demux_packet().
+struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
+{
+    if (avpkt->size > 1000000000)
+        return NULL;
+    struct demux_packet *dp = packet_create();
     int r = -1;
-    if (!dp->avpacket) {
-        // error
-    } else if (avpkt->data) {
+    if (avpkt->data) {
         // We hope that this function won't need/access AVPacket input padding,
         // because otherwise new_demux_packet_from() wouldn't work.
         r = av_packet_ref(dp->avpacket, avpkt);
@@ -94,29 +97,44 @@ struct demux_packet *new_demux_packet_from_buf(struct AVBufferRef *buf)
 {
     if (!buf)
         return NULL;
-    AVPacket pkt = {
-        .size = buf->size,
-        .data = buf->data,
-        .buf = buf,
-    };
-    return new_demux_packet_from_avpacket(&pkt);
+    if (buf->size > 1000000000)
+        return NULL;
+
+    struct demux_packet *dp = packet_create();
+    dp->avpacket->buf = av_buffer_ref(buf);
+    if (!dp->avpacket->buf) {
+        talloc_free(dp);
+        return NULL;
+    }
+    dp->avpacket->data = dp->buffer = buf->data;
+    dp->avpacket->size = dp->len = buf->size;
+    return dp;
 }
 
 // Input data doesn't need to be padded.
 struct demux_packet *new_demux_packet_from(void *data, size_t len)
 {
-    if (len > INT_MAX)
+    struct demux_packet *dp = new_demux_packet(len);
+    if (!dp)
         return NULL;
-    AVPacket pkt = { .data = data, .size = len };
-    return new_demux_packet_from_avpacket(&pkt);
+    memcpy(dp->avpacket->data, data, len);
+    return dp;
 }
 
 struct demux_packet *new_demux_packet(size_t len)
 {
     if (len > INT_MAX)
         return NULL;
-    AVPacket pkt = { .data = NULL, .size = len };
-    return new_demux_packet_from_avpacket(&pkt);
+
+    struct demux_packet *dp = packet_create();
+    int r = av_new_packet(dp->avpacket, len);
+    if (r < 0) {
+        talloc_free(dp);
+        return NULL;
+    }
+    dp->buffer = dp->avpacket->data;
+    dp->len = len;
+    return dp;
 }
 
 void demux_packet_shorten(struct demux_packet *dp, size_t len)

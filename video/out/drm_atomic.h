@@ -24,14 +24,10 @@
 #include <xf86drmMode.h>
 
 #include "common/msg.h"
+#include "drm_common.h"
 
 #define DRM_OPTS_PRIMARY_PLANE -1
 #define DRM_OPTS_OVERLAY_PLANE -2
-
-struct drm_mode {
-    drmModeModeInfo mode;
-    uint32_t blob_id;
-};
 
 struct drm_atomic_plane_state {
     uint64_t fb_id;
@@ -83,13 +79,12 @@ struct drm_atomic_context {
     struct drm_atomic_state old_state;
 };
 
-
 int drm_object_create_properties(struct mp_log *log, int fd, struct drm_object *object);
 void drm_object_free_properties(struct drm_object *object);
 int drm_object_get_property(struct drm_object *object, char *name, uint64_t *value);
 int drm_object_set_property(drmModeAtomicReq *request, struct drm_object *object, char *name, uint64_t value);
 drmModePropertyBlobPtr drm_object_get_property_blob(struct drm_object *object, char *name);
-struct drm_object * drm_object_create(struct mp_log *log, int fd, uint32_t object_id, uint32_t type);
+struct drm_object *drm_object_create(struct mp_log *log, int fd, uint32_t object_id, uint32_t type);
 void drm_object_free(struct drm_object *object);
 void drm_object_print_info(struct mp_log *log, struct drm_object *object);
 struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd, int crtc_id, int connector_id,

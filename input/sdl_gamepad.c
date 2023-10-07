@@ -198,6 +198,8 @@ static void remove_gamepad(struct mp_input_src *src, int id)
 
 static void read_gamepad_thread(struct mp_input_src *src, void *param)
 {
+    SDL_SetHint(SDL_HINT_JOYSTICK_THREAD, "1");
+
     if (SDL_WasInit(SDL_INIT_EVENTS)) {
         MP_ERR(src, "Another component is using SDL already.\n");
         mp_input_src_init_done(src);

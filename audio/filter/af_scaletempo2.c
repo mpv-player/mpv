@@ -15,7 +15,6 @@ struct priv {
     bool sent_final;
     struct mp_aframe *pending;
     bool initialized;
-    double frame_delay;
     float speed;
 };
 
@@ -30,7 +29,7 @@ static void process(struct mp_filter *f)
         return;
 
     while (!p->initialized || !p->pending ||
-           !mp_scaletempo2_frames_available(&p->data))
+           !mp_scaletempo2_frames_available(&p->data, p->speed))
     {
         bool eof = false;
         if (!p->pending || !mp_aframe_get_size(p->pending)) {
@@ -66,13 +65,15 @@ static void process(struct mp_filter *f)
             int frame_size = mp_aframe_get_size(p->pending);
             uint8_t **planes = mp_aframe_get_data_ro(p->pending);
             int read = mp_scaletempo2_fill_input_buffer(&p->data,
-                planes, frame_size, final);
-            p->frame_delay += read;
+                planes, frame_size, p->speed);
             mp_aframe_skip_samples(p->pending, read);
         }
-        p->sent_final |= final;
+        if (final && p->pending && !p->sent_final) {
+            mp_scaletempo2_set_final(&p->data);
+            p->sent_final = true;
+        }
 
-        if (mp_scaletempo2_frames_available(&p->data)) {
+        if (mp_scaletempo2_frames_available(&p->data, p->speed)) {
             if (eof) {
                 mp_pin_out_repeat_eof(p->in_pin); // drain more next time
             }
@@ -82,16 +83,13 @@ static void process(struct mp_filter *f)
             if (eof) {
                 mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
                 return;
-            } else if (format_change) {
-                // go on with proper reinit on the next iteration
-                p->initialized = false;
-                p->sent_final = false;
             }
+            // for format change go on with proper reinit on the next iteration
         }
     }
 
     assert(p->pending);
-    if (mp_scaletempo2_frames_available(&p->data)) {
+    if (mp_scaletempo2_frames_available(&p->data, p->speed)) {
         struct mp_aframe *out = mp_aframe_new_ref(p->cur_format);
         int out_samples = p->data.ola_hop_size;
         if (mp_aframe_pool_allocate(p->out_pool, out, out_samples) < 0) {
@@ -109,11 +107,24 @@ static void process(struct mp_filter *f)
             (float**)planes, out_samples, p->speed);
 
         double pts = mp_aframe_get_pts(p->pending);
-        p->frame_delay -= out_samples * p->speed;
-
         if (pts != MP_NOPTS_VALUE) {
-            double delay = p->frame_delay / mp_aframe_get_effective_rate(out);
-            mp_aframe_set_pts(out, pts - delay);
+            double frame_delay = mp_scaletempo2_get_latency(&p->data, p->speed)
+                + out_samples * p->speed;
+            mp_aframe_set_pts(out, pts - frame_delay / mp_aframe_get_effective_rate(out));
+
+            if (p->sent_final) {
+                double remain_pts = pts - mp_aframe_get_pts(out);
+                double rate = mp_aframe_get_effective_rate(out) / p->speed;
+                int max_samples = MPMAX(0, (int) (remain_pts * rate));
+                // truncate final packet to expected length
+                if (out_samples >= max_samples) {
+                    out_samples = max_samples;
+
+                    // reset the filter to ensure it stops generating audio
+                    // and mp_scaletempo2_frames_available returns false
+                    mp_scaletempo2_reset(&p->data);
+                }
+            }
         }
 
         mp_aframe_set_size(out, out_samples);
@@ -137,7 +148,6 @@ static bool init_scaletempo2(struct mp_filter *f)
     mp_aframe_reset(p->cur_format);
     p->initialized = true;
     p->sent_final = false;
-    p->frame_delay = 0;
     mp_aframe_config_copy(p->cur_format, p->pending);
 
     mp_scaletempo2_init(&p->data, mp_aframe_get_channels(p->pending),
@@ -163,7 +173,6 @@ static void reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
     mp_scaletempo2_reset(&p->data);
-    p->frame_delay = 0;
     p->initialized = false;
     TA_FREEP(&p->pending);
 }
@@ -225,7 +234,7 @@ const struct mp_user_filter_entry af_scaletempo2 = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
             .min_playback_rate = 0.25,
-            .max_playback_rate = 4.0,
+            .max_playback_rate = 8.0,
             .ola_window_size_ms = 20,
             .wsola_search_interval_ms = 30,
         },

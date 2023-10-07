@@ -25,8 +25,6 @@
 
 #include <libavutil/hwcontext.h>
 
-#include "config.h"
-
 #include "video/out/gpu/hwdec.h"
 #include "video/mp_image_pool.h"
 #include "ra_gl.h"
@@ -44,10 +42,10 @@ struct priv {
 
 static bool check_hwdec(struct ra_hwdec *hw)
 {
-    if (!ra_is_gl(hw->ra))
+    if (!ra_is_gl(hw->ra_ctx->ra))
         return false;
 
-    GL *gl = ra_gl_get(hw->ra);
+    GL *gl = ra_gl_get(hw->ra_ctx->ra);
     if (gl->es < 200) {
         MP_ERR(hw, "need OpenGLES 2.0 for CVOpenGLESTextureCacheCreateTextureFromImage()\n");
         return false;
@@ -73,8 +71,12 @@ static int init(struct ra_hwdec *hw)
         .hw_imgfmt = IMGFMT_VIDEOTOOLBOX,
     };
 
-    av_hwdevice_ctx_create(&p->hwctx.av_device_ref, AV_HWDEVICE_TYPE_VIDEOTOOLBOX,
-                           NULL, NULL, 0);
+    int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
+                                     AV_HWDEVICE_TYPE_VIDEOTOOLBOX, NULL, NULL, 0);
+    if (ret != 0) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
+        return -1;
+    }
 
     hwdec_devices_add(hw->devs, &p->hwctx);
 

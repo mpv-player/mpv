@@ -23,7 +23,6 @@
 
 #include "client.h"
 #include "command.h"
-#include "config.h"
 #include "core.h"
 #include "mpv_talloc.h"
 #include "screenshot.h"
@@ -33,7 +32,6 @@
 #include "common/encode.h"
 #include "common/msg.h"
 #include "common/playlist.h"
-#include "common/recorder.h"
 #include "common/stats.h"
 #include "demux/demux.h"
 #include "filters/f_decoder_wrapper.h"
@@ -77,7 +75,7 @@ void mp_set_timeout(struct MPContext *mpctx, double sleeptime)
 {
     if (mpctx->sleeptime > sleeptime) {
         mpctx->sleeptime = sleeptime;
-        int64_t abstime = mp_add_timeout(mp_time_us(), sleeptime);
+        int64_t abstime = mp_time_us_add(mp_time_us(), sleeptime);
         mp_dispatch_adjust_timeout(mpctx->dispatch, abstime);
     }
 }
@@ -163,8 +161,10 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
     if (internal_paused != mpctx->paused) {
         mpctx->paused = internal_paused;
 
-        if (mpctx->ao)
-            ao_set_paused(mpctx->ao, internal_paused);
+        if (mpctx->ao) {
+            bool eof = mpctx->audio_status == STATUS_EOF;
+            ao_set_paused(mpctx->ao, internal_paused, eof);
+        }
 
         if (mpctx->video_out)
             vo_set_paused(mpctx->video_out, internal_paused);
@@ -265,6 +265,13 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     if (!mpctx->demuxer || !seek.type || seek.amount == MP_NOPTS_VALUE)
         return;
 
+    if (seek.type == MPSEEK_CHAPTER) {
+        mpctx->last_chapter_flag = false;
+        seek.type = MPSEEK_ABSOLUTE;
+    } else {
+        mpctx->last_chapter_seek = -2;
+    }
+
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
     double current_time = get_playback_time(mpctx);
     if (current_time == MP_NOPTS_VALUE && seek.type == MPSEEK_RELATIVE)
@@ -291,7 +298,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         if (len >= 0)
             seek_pts = seek.amount * len;
         break;
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
 
     double demux_pts = seek_pts;
@@ -300,10 +307,6 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         (seek.exact >= MPSEEK_EXACT || opts->hr_seek == 1 ||
          (opts->hr_seek >= 0 && seek.type == MPSEEK_ABSOLUTE) ||
          (opts->hr_seek == 2 && (!mpctx->vo_chain || mpctx->vo_chain->is_sparse)));
-
-    if (seek.type == MPSEEK_FACTOR || seek.amount < 0 ||
-        (seek.type == MPSEEK_ABSOLUTE && seek.amount < mpctx->last_chapter_pts))
-        mpctx->last_chapter_seek = -2;
 
     // Under certain circumstances, prefer SEEK_FACTOR.
     if (seek.type == MPSEEK_FACTOR && !hr_seek &&
@@ -372,8 +375,6 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         clear_audio_output_buffers(mpctx);
 
     reset_playback_state(mpctx);
-    if (mpctx->recorder)
-        mp_recorder_mark_discontinuity(mpctx->recorder);
 
     demux_block_reading(mpctx->demuxer, false);
     for (int t = 0; t < mpctx->num_tracks; t++) {
@@ -447,6 +448,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
     case MPSEEK_ABSOLUTE:
     case MPSEEK_FACTOR:
     case MPSEEK_BACKSTEP:
+    case MPSEEK_CHAPTER:
         *seek = (struct seek_params) {
             .type = type,
             .amount = amount,
@@ -458,7 +460,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
         *seek = (struct seek_params){ 0 };
         return;
     }
-    abort();
+    MP_ASSERT_UNREACHABLE();
 }
 
 void execute_queued_seek(struct MPContext *mpctx)
@@ -584,7 +586,8 @@ int get_current_chapter(struct MPContext *mpctx)
     for (i = 0; i < mpctx->num_chapters; i++)
         if (current_pts < mpctx->chapters[i].pts)
             break;
-    return MPMAX(mpctx->last_chapter_seek, i - 1);
+    return mpctx->last_chapter_flag ?
+        mpctx->last_chapter_seek : MPMAX(mpctx->last_chapter_seek, i - 1);
 }
 
 char *chapter_display_name(struct MPContext *mpctx, int chapter)
@@ -1033,6 +1036,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
             .imgfmt = config_format,
             .w = w,   .h = h,
             .p_w = 1, .p_h = 1,
+            .force_window = true,
         };
         if (vo_reconfig(vo, &p) < 0)
             goto err;
@@ -1084,8 +1088,7 @@ static void handle_playback_time(struct MPContext *mpctx)
     } else if (mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF)
     {
-        double apts =
-            mpctx->ao_chain ? mpctx->ao_chain->last_out_pts : MP_NOPTS_VALUE;
+        double apts = playing_audio_pts(mpctx);
         double vpts = mpctx->video_pts;
         double mpts = MP_PTS_MAX(apts, vpts);
         if (mpts != MP_NOPTS_VALUE)

@@ -29,6 +29,7 @@
 
 #include "libmpv/render_gl.h"
 #include "options/m_config.h"
+#include "video/fmt-conversion.h"
 #include "video/out/drm_common.h"
 #include "video/out/gpu/hwdec.h"
 #include "video/out/hwdec/dmabuf_interop.h"
@@ -47,6 +48,7 @@ static void uninit(struct ra_hwdec *hw)
     struct priv_owner *p = hw->priv;
     if (p->hwctx.driver_name)
         hwdec_devices_remove(hw->devs, &p->hwctx);
+    av_buffer_unref(&p->hwctx.av_device_ref);
 }
 
 const static dmabuf_interop_init interop_inits[] = {
@@ -82,7 +84,7 @@ static int init(struct ra_hwdec *hw)
      * there are extensions that supposedly provide this information from the
      * drivers. Not properly documented. Of course.
      */
-    mpv_opengl_drm_params_v2 *params = ra_get_native_resource(hw->ra,
+    mpv_opengl_drm_params_v2 *params = ra_get_native_resource(hw->ra_ctx->ra,
                                                               "drm_params_v2");
 
     /*
@@ -92,7 +94,7 @@ static int init(struct ra_hwdec *hw)
      */
     void *tmp = talloc_new(NULL);
     struct drm_opts *drm_opts = mp_get_config_group(tmp, hw->global, &drm_conf);
-    const char *opt_path = drm_opts->drm_device_path;
+    const char *opt_path = drm_opts->device_path;
 
     const char *device_path = params && params->render_fd > -1 ?
                               drmGetRenderDeviceNameFromFd(params->render_fd) :
@@ -115,6 +117,8 @@ static int init(struct ra_hwdec *hw)
      */
     int num_formats = 0;
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_NV12);
+    MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_420P);
+    MP_TARRAY_APPEND(p, p->formats, num_formats, pixfmt2imgfmt(AV_PIX_FMT_NV16));
     MP_TARRAY_APPEND(p, p->formats, num_formats, 0); // terminate it
 
     p->hwctx.hw_imgfmt = IMGFMT_DRMPRIME;
@@ -165,7 +169,17 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     struct dmabuf_interop_priv *p = mapper->priv;
 
     mapper->dst_params = mapper->src_params;
-    mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
+
+    /*
+     * rpi4_8 and rpi4_10 function identically to NV12. These two pixel
+     * formats however are not defined in upstream ffmpeg so a string
+     * comparison is used to identify them instead of a mpv IMGFMT.
+     */
+    const char* fmt_name = mp_imgfmt_to_name(mapper->src_params.hw_subfmt);
+    if (strcmp(fmt_name, "rpi4_8") == 0 || strcmp(fmt_name, "rpi4_10") == 0)
+        mapper->dst_params.imgfmt = IMGFMT_NV12;
+    else
+        mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
     mapper->dst_params.hw_subfmt = 0;
 
     struct ra_imgfmt_desc desc = {0};
@@ -234,7 +248,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     }
 
     // We can handle composed formats if the total number of planes is still
-    // equal the number of planes we expect. Complex formats with auxilliary
+    // equal the number of planes we expect. Complex formats with auxiliary
     // planes cannot be supported.
 
     int num_returned_planes = 0;
@@ -242,7 +256,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         num_returned_planes += p->desc.layers[i].nb_planes;
     }
 
-    if (p->num_planes != num_returned_planes) {
+    if (p->num_planes != 0 && p->num_planes != num_returned_planes) {
         MP_ERR(mapper,
                "Mapped surface with format '%s' has unexpected number of planes. "
                "(%d layers and %d planes, but expected %d planes)\n",

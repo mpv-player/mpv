@@ -1,4 +1,3 @@
-#include "config.h"
 #include "libmpv/render_gl.h"
 #include "libmpv.h"
 #include "sub/osd.h"

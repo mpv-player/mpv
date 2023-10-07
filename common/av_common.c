@@ -40,20 +40,6 @@
 #include "av_common.h"
 #include "codecs.h"
 
-int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size)
-{
-    if (size) {
-        av_free(avctx->extradata);
-        avctx->extradata_size = 0;
-        avctx->extradata = av_mallocz(size + AV_INPUT_BUFFER_PADDING_SIZE);
-        if (!avctx->extradata)
-            return -1;
-        avctx->extradata_size = size;
-        memcpy(avctx->extradata, ptr, size);
-    }
-    return 0;
-}
-
 enum AVMediaType mp_to_av_stream_type(int type)
 {
     switch (type) {
@@ -64,7 +50,7 @@ enum AVMediaType mp_to_av_stream_type(int type)
     }
 }
 
-AVCodecParameters *mp_codec_params_to_av(struct mp_codec_params *c)
+AVCodecParameters *mp_codec_params_to_av(const struct mp_codec_params *c)
 {
     AVCodecParameters *avp = avcodec_parameters_alloc();
     if (!avp)
@@ -125,7 +111,7 @@ error:
 }
 
 // Set avctx codec headers for decoding. Returns <0 on failure.
-int mp_set_avctx_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
+int mp_set_avctx_codec_headers(AVCodecContext *avctx, const struct mp_codec_params *c)
 {
     enum AVMediaType codec_type = avctx->codec_type;
     enum AVCodecID codec_id = avctx->codec_id;
@@ -145,7 +131,7 @@ int mp_set_avctx_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
 
 // Pick a "good" timebase, which will be used to convert double timestamps
 // back to fractions for passing them through libavcodec.
-AVRational mp_get_codec_timebase(struct mp_codec_params *c)
+AVRational mp_get_codec_timebase(const struct mp_codec_params *c)
 {
     AVRational tb = {c->native_tb_num, c->native_tb_den};
     if (tb.num < 1 || tb.den < 1) {
@@ -196,7 +182,11 @@ double mp_pts_from_av(int64_t av_pts, AVRational *tb)
 // Set duration field only if tb is set.
 void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
 {
-    av_init_packet(dst);
+    dst->side_data = NULL;
+    dst->side_data_elems = 0;
+    dst->buf = NULL;
+    av_packet_unref(dst);
+
     dst->data = mpkt ? mpkt->buffer : NULL;
     dst->size = mpkt ? mpkt->len : 0;
     /* Some codecs (ZeroCodec, some cases of PNG) may want keyframe info
@@ -393,4 +383,22 @@ int mp_set_avopts_pos(struct mp_log *log, void *avobj, void *posargs, char **kv)
         }
     }
     return success;
+}
+
+/**
+ * Must be used to free an AVPacket that was used with mp_set_av_packet().
+ *
+ * We have a particular pattern where we "borrow" buffers and set them
+ * into an AVPacket to pass data to ffmpeg without extra copies.
+ * This applies to buf and side_data, so this function clears them before
+ * freeing.
+ */
+void mp_free_av_packet(AVPacket **pkt)
+{
+    if (*pkt) {
+        (*pkt)->side_data = NULL;
+        (*pkt)->side_data_elems = 0;
+        (*pkt)->buf = NULL;
+    }
+    av_packet_free(pkt);
 }

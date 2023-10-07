@@ -22,7 +22,6 @@
 #include <math.h>
 #include <assert.h>
 
-#include "config.h"
 #include "mpv_talloc.h"
 
 #include "common/msg.h"
@@ -64,9 +63,17 @@ static void update_speed_filters(struct MPContext *mpctx)
         speed = 1.0;
     }
 
-    if (mpctx->display_sync_active && mpctx->video_out->opts->video_sync == VS_DISP_ADROP) {
-        drop *= speed * resample;
-        resample = speed = 1.0;
+    if (mpctx->display_sync_active) {
+        switch (mpctx->video_out->opts->video_sync) {
+            case VS_DISP_ADROP:
+                drop *= speed * resample;
+                resample = speed = 1.0;
+                break;
+            case VS_DISP_TEMPO:
+                speed = mpctx->audio_speed;
+                resample = 1.0;
+                break;
+        }
     }
 
     mp_output_chain_set_audio_speed(ao_c->filter, speed, resample, drop);
@@ -197,21 +204,10 @@ static bool has_video_track(struct MPContext *mpctx)
     return false;
 }
 
-void audio_update_media_role(struct MPContext *mpctx)
-{
-    if (!mpctx->ao)
-        return;
-
-    enum aocontrol_media_role role = has_video_track(mpctx) ?
-        AOCONTROL_MEDIA_ROLE_MOVIE : AOCONTROL_MEDIA_ROLE_MUSIC;
-    ao_control(mpctx->ao, AOCONTROL_UPDATE_MEDIA_ROLE, &role);
-}
-
 static void ao_chain_reset_state(struct ao_chain *ao_c)
 {
     ao_c->last_out_pts = MP_NOPTS_VALUE;
     ao_c->out_eof = false;
-    ao_c->underrun = false;
     ao_c->start_pts_known = false;
     ao_c->start_pts = MP_NOPTS_VALUE;
     ao_c->untimed_throttle = false;
@@ -305,8 +301,7 @@ static bool keep_weak_gapless_format(struct mp_aframe *old, struct mp_aframe* ne
 {
     bool res = false;
     struct mp_aframe *new_mod = mp_aframe_new_ref(new);
-    if (!new_mod)
-        abort();
+    MP_HANDLE_OOM(new_mod);
 
     // If the sample formats are compatible (== libswresample generally can
     // convert them), keep the AO. On other changes, recreate it.
@@ -358,8 +353,7 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
 
     // The "ideal" filter output format
     struct mp_aframe *out_fmt = mp_aframe_new_ref(ao_c->filter->output_aformat);
-    if (!out_fmt)
-        abort();
+    MP_HANDLE_OOM(out_fmt);
 
     if (!mp_aframe_config_is_valid(out_fmt)) {
         talloc_free(out_fmt);
@@ -436,6 +430,9 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
                           opts->audio_output_channels.num_chmaps);
     }
 
+    if (!has_video_track(mpctx))
+        ao_flags |= AO_INIT_MEDIA_ROLE_MUSIC;
+
     mpctx->ao_filter_fmt = out_fmt;
 
     mpctx->ao = ao_init_best(mpctx->global, ao_flags, mp_wakeup_core_cb,
@@ -489,13 +486,12 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
     ao_c->ao_resume_time =
         opts->audio_wait_open > 0 ? mp_time_sec() + opts->audio_wait_open : 0;
 
-    ao_set_paused(mpctx->ao, get_internal_paused(mpctx));
+    bool eof = mpctx->audio_status == STATUS_EOF;
+    ao_set_paused(mpctx->ao, get_internal_paused(mpctx), eof);
 
     ao_chain_set_ao(ao_c, mpctx->ao);
 
     audio_update_volume(mpctx);
-
-    audio_update_media_role(mpctx);
 
     // Almost nonsensical hack to deal with certain format change scenarios.
     if (mpctx->audio_status == STATUS_PLAYING)

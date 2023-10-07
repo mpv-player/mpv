@@ -34,11 +34,12 @@ void mp_init_paths(struct mpv_global *global, struct MPOpts *opts);
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename);
 
-// Like mp_find_config_file(), but search only the local writable user config
-// dir. Also, this returns a result even if the file does not exist. Calling
-// it with filename="" is equivalent to retrieving the user config dir.
-char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
-                               const char *filename);
+// Search for local writable user files within a specific kind of user dir
+// as documented in osdep/path.h. This returns a result even if the file does
+// not exist. Calling it with filename="" is equivalent to retrieving the path
+// to the dir.
+char *mp_find_user_file(void *talloc_ctx, struct mpv_global *global,
+                        const char *type, const char *filename);
 
 // Find all instances of the given config file. Paths are returned in order
 // from lowest to highest priority. filename can contain multiple names
@@ -82,6 +83,8 @@ bool mp_path_is_absolute(struct bstr path);
 
 char *mp_getcwd(void *talloc_ctx);
 
+char *mp_normalize_path(void *talloc_ctx, const char *path);
+
 bool mp_path_exists(const char *path);
 bool mp_path_isdir(const char *path);
 
@@ -90,6 +93,6 @@ bool mp_is_url(bstr path);
 bstr mp_split_proto(bstr path, bstr *out_url);
 
 void mp_mkdirp(const char *dir);
-void mp_mk_config_dir(struct mpv_global *global, char *subdir);
+void mp_mk_user_dir(struct mpv_global *global, const char *type, char *subdir);
 
 #endif /* MPLAYER_PATH_H */

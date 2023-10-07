@@ -114,7 +114,11 @@ static void check_in_format_change(struct mp_user_filter *u,
             // But a common case is enabling HW decoding, which
             // might init some support of them in the VO, and update
             // the VO's format list.
-            update_output_caps(p);
+            //
+            // But as this is only relevant to the "convert" filter, don't
+            // do this for the other filters as it is wasted work.
+            if (strcmp(u->name, "convert") == 0)
+                update_output_caps(p);
 
             p->public.reconfig_happened = true;
         }
@@ -355,6 +359,13 @@ static double get_display_fps(struct mp_stream_info *i)
     if (p->vo)
         vo_control(p->vo, VOCTRL_GET_DISPLAY_FPS, &res);
     return res;
+}
+
+static void get_display_res(struct mp_stream_info *i, int *res)
+{
+    struct chain *p = i->priv;
+    if (p->vo)
+        vo_control(p->vo, VOCTRL_GET_DISPLAY_RES, res);
 }
 
 void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo)
@@ -617,6 +628,7 @@ static void create_video_things(struct chain *p)
 
     p->stream_info.priv = p;
     p->stream_info.get_display_fps = get_display_fps;
+    p->stream_info.get_display_res = get_display_res;
 
     p->f->stream_info = &p->stream_info;
 

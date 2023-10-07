@@ -22,8 +22,6 @@
 #include <libavutil/mathematics.h>
 #include <libswresample/swresample.h>
 
-#include "config.h"
-
 #include "audio/aframe.h"
 #include "audio/fmt-conversion.h"
 #include "audio/format.h"
@@ -73,9 +71,9 @@ const struct m_sub_options resample_conf = {
     .opts = (const m_option_t[]) {
         {"audio-resample-filter-size", OPT_INT(filter_size), M_RANGE(0, 32)},
         {"audio-resample-phase-shift", OPT_INT(phase_shift), M_RANGE(0, 30)},
-        {"audio-resample-linear", OPT_FLAG(linear)},
+        {"audio-resample-linear", OPT_BOOL(linear)},
         {"audio-resample-cutoff", OPT_DOUBLE(cutoff), M_RANGE(0, 1)},
-        {"audio-normalize-downmix", OPT_FLAG(normalize)},
+        {"audio-normalize-downmix", OPT_BOOL(normalize)},
         {"audio-resample-max-output-size", OPT_DOUBLE(max_output_frame_size)},
         {"audio-swresample-o", OPT_KEYVALUELIST(avopts)},
         {0}

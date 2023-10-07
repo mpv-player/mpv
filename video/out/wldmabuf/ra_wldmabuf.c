@@ -19,21 +19,43 @@
 #include "video/out/gpu/ra.h"
 #include "ra_wldmabuf.h"
 
+struct priv {
+    struct vo *vo;
+};
+
 static void destroy(struct ra *ra)
 {
+    talloc_free(ra->priv);
+}
+
+bool ra_compatible_format(struct ra* ra, uint32_t drm_format, uint64_t modifier)
+{
+    struct priv* p = ra->priv;
+    struct vo_wayland_state *wl = p->vo->wl;
+    const wayland_format *formats = wl->format_map;
+
+    for (int i = 0; i < wl->format_size / sizeof(wayland_format); i++) {
+        if (drm_format == formats[i].format && modifier == formats[i].modifier)
+            return true;
+    }
+
+    return false;
 }
 
 static struct ra_fns ra_fns_wldmabuf = {
     .destroy                = destroy,
 };
 
-struct ra *ra_create_wayland(struct mp_log *log, struct wl_display *display)
+struct ra *ra_create_wayland(struct mp_log *log, struct vo* vo)
 {
     struct ra *ra =  talloc_zero(NULL, struct ra);
 
     ra->fns = &ra_fns_wldmabuf;
     ra->log = log;
-    ra_add_native_resource(ra, "wl", display);
+    ra_add_native_resource(ra, "wl", vo->wl->display);
+    ra->priv = talloc_zero(NULL, struct priv);
+    struct priv *p = ra->priv;
+    p->vo = vo;
 
     return ra;
 }

@@ -41,6 +41,7 @@ struct spdifContext {
     struct mp_log   *log;
     enum AVCodecID   codec_id;
     AVFormatContext *lavf_ctx;
+    AVPacket        *avpkt;
     int              out_buffer_len;
     uint8_t          out_buffer[OUTBUF_SIZE];
     bool             need_close;
@@ -82,6 +83,7 @@ static void destroy(struct mp_filter *da)
         avformat_free_context(lavf_ctx);
         spdif_ctx->lavf_ctx = NULL;
     }
+    mp_free_av_packet(&spdif_ctx->avpkt);
 }
 
 static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
@@ -147,9 +149,11 @@ done:
         MP_WARN(da, "Failed to parse codec profile.\n");
 }
 
-static int init_filter(struct mp_filter *da, AVPacket *pkt)
+static int init_filter(struct mp_filter *da)
 {
     struct spdifContext *spdif_ctx = da->priv;
+
+    AVPacket *pkt = spdif_ctx->avpkt;
 
     int profile = FF_PROFILE_UNKNOWN;
     int c_rate = 0;
@@ -167,8 +171,7 @@ static int init_filter(struct mp_filter *da, AVPacket *pkt)
         goto fail;
 
     void *buffer = av_mallocz(OUTBUF_SIZE);
-    if (!buffer)
-        abort();
+   MP_HANDLE_OOM(buffer);
     lavf_ctx->pb = avio_alloc_context(buffer, OUTBUF_SIZE, 1, spdif_ctx, NULL,
                                       write_packet, NULL);
     if (!lavf_ctx->pb) {
@@ -295,15 +298,20 @@ static void process(struct mp_filter *da)
     struct mp_aframe *out = NULL;
     double pts = mpkt->pts;
 
-    AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt, NULL);
-    pkt.pts = pkt.dts = 0;
-    if (!spdif_ctx->lavf_ctx) {
-        if (init_filter(da, &pkt) < 0)
-            goto done;
+    if (!spdif_ctx->avpkt) {
+        spdif_ctx->avpkt = av_packet_alloc();
+        MP_HANDLE_OOM(spdif_ctx->avpkt);
     }
+    mp_set_av_packet(spdif_ctx->avpkt, mpkt, NULL);
+    spdif_ctx->avpkt->pts = spdif_ctx->avpkt->dts = 0;
+    if (!spdif_ctx->lavf_ctx) {
+        if (init_filter(da) < 0)
+            goto done;
+        assert(spdif_ctx->avpkt);
+    }
+
     spdif_ctx->out_buffer_len  = 0;
-    int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
+    int ret = av_write_frame(spdif_ctx->lavf_ctx, spdif_ctx->avpkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
     if (ret < 0) {
         MP_ERR(da, "spdif mux error: '%s'\n", mp_strerror(AVUNERROR(ret)));
@@ -424,6 +432,7 @@ static struct mp_decoder *create(struct mp_filter *parent,
         talloc_free(da);
         return NULL;
     }
+
     return &spdif_ctx->public;
 }
 

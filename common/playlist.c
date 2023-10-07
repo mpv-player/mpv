@@ -16,7 +16,6 @@
  */
 
 #include <assert.h>
-#include "config.h"
 #include "playlist.h"
 #include "common/common.h"
 #include "common/global.h"
@@ -143,6 +142,14 @@ void playlist_add_file(struct playlist *pl, const char *filename)
     playlist_add(pl, playlist_entry_new(filename));
 }
 
+void playlist_populate_playlist_path(struct playlist *pl, const char *path)
+{
+    for (int n = 0; n < pl->num_entries; n++) {
+        struct playlist_entry *e = pl->entries[n];
+        e->playlist_path = talloc_strdup(e, path);
+    }
+}
+
 void playlist_shuffle(struct playlist *pl)
 {
     for (int n = 0; n < pl->num_entries; n++)
@@ -218,19 +225,6 @@ void playlist_add_base_path(struct playlist *pl, bstr base_path)
             talloc_free(e->filename);
             e->filename = new_file;
         }
-    }
-}
-
-// Add redirected_from as new redirect entry to each item in pl.
-void playlist_add_redirect(struct playlist *pl, const char *redirected_from)
-{
-    for (int n = 0; n < pl->num_entries; n++) {
-        struct playlist_entry *e = pl->entries[n];
-        if (e->num_redirects >= 10) // arbitrary limit for sanity
-            continue;
-        char *s = talloc_strdup(e, redirected_from);
-        if (s)
-            MP_TARRAY_APPEND(e, e->redirects, e->num_redirects, s);
     }
 }
 

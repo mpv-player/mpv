@@ -20,7 +20,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "config.h"
 #include "mpv_talloc.h"
 
 #include "osdep/io.h"
@@ -180,7 +179,7 @@ void update_content_type(struct MPContext *mpctx, struct track *track)
         content_type = MP_CONTENT_VIDEO;
     }
     if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_CONTENT_TYPE, (void *)content_type);
+        vo_control(mpctx->video_out, VOCTRL_CONTENT_TYPE, &content_type);
 }
 
 void update_vo_playback_state(struct MPContext *mpctx)

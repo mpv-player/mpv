@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <stdbool.h>
 #include <math.h>
 #include <assert.h>
@@ -37,14 +38,26 @@
 static bool is_software_gl(GL *gl)
 {
     const char *renderer = gl->GetString(GL_RENDERER);
-    const char *vendor = gl->GetString(GL_VENDOR);
-    return !(renderer && vendor) ||
+    // Note we don't attempt to blacklist Microsoft's fallback implementation.
+    // It only provides OpenGL 1.1 and will be skipped anyway.
+    return !renderer ||
            strcmp(renderer, "Software Rasterizer") == 0 ||
            strstr(renderer, "llvmpipe") ||
            strstr(renderer, "softpipe") ||
-           strcmp(vendor, "Microsoft Corporation") == 0 ||
            strcmp(renderer, "Mesa X11") == 0 ||
            strcmp(renderer, "Apple Software Renderer") == 0;
+}
+
+// This guesses whether our DR path is fast or slow
+static bool is_fast_dr(GL *gl)
+{
+    const char *vendor = gl->GetString(GL_VENDOR);
+    if (!vendor)
+        return false;
+
+    return strcasecmp(vendor, "AMD") == 0 ||
+           strcasecmp(vendor, "NVIDIA Corporation") == 0 ||
+           strcasecmp(vendor, "ATI Technologies Inc.") == 0;    // AMD on Windows
 }
 
 static void GLAPIENTRY dummy_glBindFramebuffer(GLenum target, GLuint framebuffer)
@@ -649,6 +662,9 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         gl->mpgl_caps |= MPGL_CAP_SW;
         mp_verbose(log, "Detected suspected software renderer.\n");
     }
+
+    if (!is_fast_dr(gl))
+        gl->mpgl_caps |= MPGL_CAP_SLOW_DR;
 
     // GL_ARB_compute_shader & GL_ARB_shader_image_load_store
     if (gl->DispatchCompute && gl->BindImageTexture)

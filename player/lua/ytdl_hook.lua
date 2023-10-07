@@ -47,6 +47,7 @@ local tag_list = {
     -- (default --display-tags does not include this name)
     ["description"]     = "ytdl_description",
     -- "title" is handled by force-media-title
+    -- tags don't work with all_formats=yes
 }
 
 local safe_protos = Set {
@@ -90,17 +91,18 @@ local function map_codec_to_mpv(codec)
 end
 
 local function platform_is_windows()
-    return package.config:sub(1,1) == "\\"
+    return mp.get_property_native("platform") == "windows"
 end
 
 local function exec(args)
     msg.debug("Running: " .. table.concat(args, " "))
 
-    local ret = mp.command_native({name = "subprocess",
-                                   args = args,
-                                   capture_stdout = true,
-                                   capture_stderr = true})
-    return ret.status, ret.stdout, ret, ret.killed_by_us
+    return mp.command_native({
+        name = "subprocess",
+        args = args,
+        capture_stdout = true,
+        capture_stderr = true,
+    })
 end
 
 -- return true if it was explicitly set on the command line
@@ -295,7 +297,7 @@ local function edl_track_joined(fragments, protocol, is_live, base)
         local args = ""
 
         -- assume MP4 DASH initialization segment
-        if not fragments[1].duration then
+        if not fragments[1].duration and #fragments > 1 then
             msg.debug("Using init segment")
             args = args .. ",init=" .. edl_escape(join_url(base, fragments[1]))
             offset = 2
@@ -307,7 +309,7 @@ local function edl_track_joined(fragments, protocol, is_live, base)
         -- if not available in all, give up.
         for i = offset, #fragments do
             if not fragments[i].duration then
-                msg.error("EDL doesn't support fragments" ..
+                msg.verbose("EDL doesn't support fragments " ..
                          "without duration with MP4 DASH")
                 return nil
             end
@@ -421,6 +423,7 @@ local function formats_to_edl(json, formats, use_all_formats)
             track.protocol, json.is_live,
             track.fragment_base_url)
         if not edl_track and not url_is_safe(track.url) then
+            msg.error("No safe URL or supported fragmented stream available")
             return nil
         end
 
@@ -628,7 +631,9 @@ local function add_single_video(json)
 
     mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
 
-    mp.set_property("file-local-options/force-media-title", json.title)
+    if mp.get_property("force-media-title", "") == "" then
+        mp.set_property("file-local-options/force-media-title", json.title)
+    end
 
     -- set hls-bitrate for dash track selection
     if max_bitrate > 0 and
@@ -688,11 +693,21 @@ local function add_single_video(json)
     end
 
     -- set start time
-    if not (json.start_time == nil) and
+    if (json.start_time or json.section_start) and
         not option_was_set("start") and
         not option_was_set_locally("start") then
-        msg.debug("Setting start to: " .. json.start_time .. " secs")
-        mp.set_property("file-local-options/start", json.start_time)
+        local start_time = json.start_time or json.section_start
+        msg.debug("Setting start to: " .. start_time .. " secs")
+        mp.set_property("file-local-options/start", start_time)
+    end
+
+    -- set end time
+    if (json.end_time or json.section_end) and
+        not option_was_set("end") and
+        not option_was_set_locally("end") then
+        local end_time = json.end_time or json.section_end
+        msg.debug("Setting end to: " .. end_time .. " secs")
+        mp.set_property("file-local-options/end", end_time)
     end
 
     -- set aspect ratio for anamorphic video
@@ -805,9 +820,9 @@ function run_ytdl_hook(url)
     table.insert(command, "--")
     table.insert(command, url)
 
-    local es, json, result, aborted
+    local result
     if ytdl.searched then
-        es, json, result, aborted = exec(command)
+        result = exec(command)
     else
         local separator = platform_is_windows() and ";" or ":"
         if o.ytdl_path:match("[^" .. separator .. "]") then
@@ -819,22 +834,22 @@ function run_ytdl_hook(url)
 
         for _, path in pairs(ytdl.paths_to_search) do
             -- search for youtube-dl in mpv's config dir
-            local exesuf = platform_is_windows() and ".exe" or ""
+            local exesuf = platform_is_windows() and not path:lower():match("%.exe$") and ".exe" or ""
             local ytdl_cmd = mp.find_config_file(path .. exesuf)
             if ytdl_cmd then
                 msg.verbose("Found youtube-dl at: " .. ytdl_cmd)
                 ytdl.path = ytdl_cmd
                 command[1] = ytdl.path
-                es, json, result, aborted = exec(command)
+                result = exec(command)
                 break
             else
                 msg.verbose("No youtube-dl found with path " .. path .. exesuf .. " in config directories")
                 command[1] = path
-                es, json, result, aborted = exec(command)
+                result = exec(command)
                 if result.error_string == "init" then
-                    msg.verbose("youtube-dl with path " .. path .. exesuf .. " not found in PATH or not enough permissions")
+                    msg.verbose("youtube-dl with path " .. path .. " not found in PATH or not enough permissions")
                 else
-                    msg.verbose("Found youtube-dl with path " .. path .. exesuf .. " in PATH")
+                    msg.verbose("Found youtube-dl with path " .. path .. " in PATH")
                     ytdl.path = path
                     break
                 end
@@ -844,20 +859,21 @@ function run_ytdl_hook(url)
         ytdl.searched = true
     end
 
-    if aborted then
+    if result.killed_by_us then
         return
     end
 
+    local json = result.stdout
     local parse_err = nil
 
-    if (es ~= 0) or (json == "") then
+    if result.status ~= 0 or json == "" then
         json = nil
     elseif json then
         json, parse_err = utils.parse_json(json)
     end
 
     if (json == nil) then
-        msg.verbose("status:", es)
+        msg.verbose("status:", result.status)
         msg.verbose("reason:", result.error_string)
         msg.verbose("stdout:", result.stdout)
         msg.verbose("stderr:", result.stderr)
@@ -870,10 +886,8 @@ function run_ytdl_hook(url)
             err = err .. "not found or not enough permissions"
         elseif parse_err then
             err = err .. "failed to parse JSON data: " .. parse_err
-        elseif not result.killed_by_us then
-            err = err .. "unexpected error occurred"
         else
-            err = string.format("%s returned '%d'", err, es)
+            err = err .. "unexpected error occurred"
         end
         msg.error(err)
         if parse_err or string.find(ytdl_err, "yt%-dl%.org/bug") then
@@ -925,7 +939,7 @@ function run_ytdl_hook(url)
             set_http_headers(json.entries[1].http_headers)
 
             mp.set_property("stream-open-filename", playlist)
-            if not (json.title == nil) then
+            if json.title and mp.get_property("force-media-title", "") == "" then
                 mp.set_property("file-local-options/force-media-title",
                     json.title)
             end

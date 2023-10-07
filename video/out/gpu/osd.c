@@ -225,7 +225,7 @@ bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
         break;
     }
     default:
-        abort();
+        MP_ASSERT_UNREACHABLE();
     }
 
     return true;

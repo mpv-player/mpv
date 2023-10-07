@@ -18,8 +18,6 @@
  */
 
 
-#include "config.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,7 +25,6 @@
 #include <assert.h>
 #include <libavutil/common.h>
 
-#include "config.h"
 #include "common/msg.h"
 #include "filters/filter.h"
 #include "filters/filter_internal.h"
@@ -138,8 +135,6 @@ static struct mp_filter *vf_sub_create(struct mp_filter *parent, void *options)
         talloc_free(options);
         return NULL;
     }
-
-    MP_WARN(f, "This filter is deprecated and will be removed (no replacement)\n");
 
     mp_filter_add_pin(f, MP_PIN_IN, "in");
     mp_filter_add_pin(f, MP_PIN_OUT, "out");

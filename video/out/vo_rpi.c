@@ -95,8 +95,8 @@ struct priv {
 
     int display_nr;
     int layer;
-    int background;
-    int enable_osd;
+    bool background;
+    bool enable_osd;
 };
 
 // Magic alignments (in pixels) expected by the MMAL internals.
@@ -916,8 +916,8 @@ fail:
 static const struct m_option options[] = {
     {"display", OPT_INT(display_nr)},
     {"layer", OPT_INT(layer), OPTDEF_INT(-10)},
-    {"background", OPT_FLAG(background)},
-    {"osd", OPT_FLAG(enable_osd), OPTDEF_INT(1)},
+    {"background", OPT_BOOL(background)},
+    {"osd", OPT_BOOL(enable_osd), OPTDEF_INT(1)},
     {0},
 };
 

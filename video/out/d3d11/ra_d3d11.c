@@ -510,7 +510,7 @@ static struct ra_tex *tex_create(struct ra *ra,
         tex_p->res = (ID3D11Resource *)tex_p->tex3d;
         break;
     default:
-        abort();
+        MP_ASSERT_UNREACHABLE();
     }
 
     tex_p->array_slice = -1;
@@ -1597,8 +1597,8 @@ static void save_cached_program(struct ra *ra, struct ra_renderpass *pass,
         .frag_bytecode_len = frag_bc.len,
         .comp_bytecode_len = comp_bc.len,
     };
-    strncpy(header.magic, cache_magic, sizeof(header.magic));
-    strncpy(header.compiler, spirv->name, sizeof(header.compiler));
+    memcpy(header.magic, cache_magic, sizeof(header.magic));
+    strncpy(header.compiler, spirv->name, sizeof(header.compiler) - 1);
 
     struct bstr *prog = &pass->params.cached_program;
     bstr_xappend(pass, prog, (bstr){ (char *) &header, sizeof(header) });
@@ -2021,7 +2021,7 @@ static ra_timer *timer_create(struct ra *ra)
 
     // Measuring duration in D3D11 requires three queries: start and end
     // timestamps, and a disjoint query containing a flag which says whether
-    // the timestamps are usable or if a discontinuity occured between them,
+    // the timestamps are usable or if a discontinuity occurred between them,
     // like a change in power state or clock speed. The disjoint query also
     // contains the timer frequency, so the timestamps are useless without it.
     hr = ID3D11Device_CreateQuery(p->dev,
@@ -2182,7 +2182,7 @@ static void debug_marker(struct ra *ra, const char *msg)
     bool printed_header = false;
     uint64_t messages = ID3D11InfoQueue_GetNumStoredMessages(p->iqueue);
     for (uint64_t i = 0; i < messages; i++) {
-        size_t len;
+        SIZE_T len;
         hr = ID3D11InfoQueue_GetMessage(p->iqueue, i, NULL, &len);
         if (FAILED(hr) || !len)
             goto done;
@@ -2303,19 +2303,8 @@ static void init_debug_layer(struct ra *ra)
     // because we flush stored messages regularly (in debug_marker.)
     ID3D11InfoQueue_SetMessageCountLimit(p->iqueue, -1);
 
-    // Filter some annoying messages
-    D3D11_MESSAGE_ID deny_ids[] = {
-        // This error occurs during context creation when we try to figure out
-        // the real maximum texture size by attempting to create a texture
-        // larger than the current feature level allows.
-        D3D11_MESSAGE_ID_CREATETEXTURE2D_INVALIDDIMENSIONS,
-    };
-    D3D11_INFO_QUEUE_FILTER filter = {
-        .DenyList = {
-            .NumIDs = MP_ARRAY_SIZE(deny_ids),
-            .pIDList = deny_ids,
-        },
-    };
+    // Push empty filter to get everything
+    D3D11_INFO_QUEUE_FILTER filter = {0};
     ID3D11InfoQueue_PushStorageFilter(p->iqueue, &filter);
 }
 
@@ -2325,7 +2314,7 @@ static struct dll_version get_dll_version(HMODULE dll)
     struct dll_version ret = { 0 };
 
     HRSRC rsrc = FindResourceW(dll, MAKEINTRESOURCEW(VS_VERSION_INFO),
-                               MAKEINTRESOURCEW(VS_FILE_INFO));
+                               VS_FILE_INFO);
     if (!rsrc)
         goto done;
     DWORD size = SizeofResource(dll, rsrc);
@@ -2485,10 +2474,17 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
         &(D3D11_QUERY_DESC) { D3D11_QUERY_TIMESTAMP }, NULL);
     p->has_timestamp_queries = SUCCEEDED(hr);
 
+    debug_marker(ra, "before maximum Texture2D size lookup");
+
     // According to MSDN, the above texture sizes are just minimums and drivers
     // may support larger textures. See:
     // https://msdn.microsoft.com/en-us/library/windows/desktop/ff476874.aspx
     find_max_texture_dimension(ra);
+
+    // Ignore any messages during find_max_texture_dimension
+    if (p->iqueue)
+        ID3D11InfoQueue_ClearStoredMessages(p->iqueue);
+
     MP_VERBOSE(ra, "Maximum Texture2D size: %dx%d\n", ra->max_texture_wh,
                ra->max_texture_wh);
 

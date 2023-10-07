@@ -214,7 +214,7 @@ Command Line Switches
     ``-af volnorm``             (removed; use acompressor ffmpeg filter instead)
     ``-afm hwac3``              ``--ad=spdif:ac3,spdif:dts``
     ``-ao alsa:device=hw=0.3``  ``--ao=alsa:device=[hw:0,3]``
-    ``-aspect``                 ``--video-aspect``
+    ``-aspect``                 ``--video-aspect-override``
     ``-ass-bottom-margin``      ``--vf=sub=bottom:top``
     ``-ass``                    ``--sub-ass``
     ``-audiofile-cache``        (removed; the main cache settings are used)
@@ -229,7 +229,7 @@ Command Line Switches
     ``-endpos``                 ``--length``
     ``-fixed-vo``               (removed; always the default)
     ``-font``                   ``--osd-font``
-    ``-forcedsubsonly``         ``--sub-forced-only``
+    ``-forcedsubsonly``         ``--sub-forced-events-only``
     ``-forceidx``               ``--index``
     ``-format``                 ``--audio-format``
     ``-fsmode-dontuse``         (removed)
@@ -321,9 +321,9 @@ input.conf and Slave Commands
     +--------------------------------+----------------------------------------+
     | ``pt_step -1 [0|1]``           | ``playlist-prev [weak|force] (same)``  |
     +--------------------------------+----------------------------------------+
-    | ``switch_ratio [<ratio>]``     | ``set video-aspect <ratio>``           |
+    | ``switch_ratio [<ratio>]``     | ``set video-aspect-override <ratio>``  |
     |                                |                                        |
-    |                                | ``set video-aspect 0`` (reset aspect)  |
+    |                                | ``set video-aspect-override 0`` (reset)|
     +--------------------------------+----------------------------------------+
     | ``step_property_osd <prop>``   | ``cycle <prop> <step>`` (wraps),       |
     | ``<step> <dir>``               | ``add <prop> <step>`` (clamps).        |

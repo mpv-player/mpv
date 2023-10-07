@@ -349,15 +349,20 @@ void ao_start(struct ao *ao)
     ao_wakeup_playthread(ao);
 }
 
-void ao_set_paused(struct ao *ao, bool paused)
+void ao_set_paused(struct ao *ao, bool paused, bool eof)
 {
     struct buffer_state *p = ao->buffer_state;
     bool wakeup = false;
     bool do_reset = false, do_start = false;
 
+    // If we are going to pause on eof and ao is still playing,
+    // be sure to drain the ao first for gapless.
+    if (eof && paused && ao_is_playing(ao))
+        ao_drain(ao);
+
     pthread_mutex_lock(&p->lock);
 
-    if (p->playing && !p->paused && paused) {
+    if ((p->playing || !ao->driver->write) && !p->paused && paused) {
         if (p->streaming && !ao->stream_silence) {
             if (ao->driver->write) {
                 if (!p->recover_pause)
@@ -459,7 +464,7 @@ void ao_uninit(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
 
-    if (p->thread_valid) {
+    if (p && p->thread_valid) {
         pthread_mutex_lock(&p->pt_lock);
         p->terminate = true;
         pthread_cond_broadcast(&p->pt_wakeup);
@@ -472,17 +477,19 @@ void ao_uninit(struct ao *ao)
     if (ao->driver_initialized)
         ao->driver->uninit(ao);
 
-    talloc_free(p->filter_root);
-    talloc_free(p->queue);
-    talloc_free(p->pending);
-    talloc_free(p->convert_buffer);
-    talloc_free(p->temp_buf);
+    if (p) {
+        talloc_free(p->filter_root);
+        talloc_free(p->queue);
+        talloc_free(p->pending);
+        talloc_free(p->convert_buffer);
+        talloc_free(p->temp_buf);
 
-    pthread_cond_destroy(&p->wakeup);
-    pthread_mutex_destroy(&p->lock);
+        pthread_cond_destroy(&p->wakeup);
+        pthread_mutex_destroy(&p->lock);
 
-    pthread_cond_destroy(&p->pt_wakeup);
-    pthread_mutex_destroy(&p->pt_lock);
+        pthread_cond_destroy(&p->pt_wakeup);
+        pthread_mutex_destroy(&p->pt_lock);
+    }
 
     talloc_free(ao);
 }

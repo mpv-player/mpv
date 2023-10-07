@@ -18,6 +18,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "filter.h"
 
@@ -77,6 +78,7 @@ enum dec_ctrl {
     VDCTRL_GET_BFRAMES,
     // framedrop mode: 0=none, 1=standard, 2=hrseek
     VDCTRL_SET_FRAMEDROP,
+    VDCTRL_CHECK_FORCED_EOF,
 };
 
 int mp_decoder_wrapper_control(struct mp_decoder_wrapper *d,

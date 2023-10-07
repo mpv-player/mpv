@@ -74,9 +74,9 @@ static int init(struct ra_hwdec *hw)
     int ret = -1;
     HRESULT hr;
 
-    if (!ra_is_d3d11(hw->ra))
+    if (!ra_is_d3d11(hw->ra_ctx->ra))
         goto done;
-    p->dev11 = ra_d3d11_get_device(hw->ra);
+    p->dev11 = ra_d3d11_get_device(hw->ra_ctx->ra);
     if (!p->dev11)
         goto done;
 
@@ -136,6 +136,12 @@ static int init(struct ra_hwdec *hw)
         .av_device_ref = d3d9_wrap_device_ref((IDirect3DDevice9 *)p->dev9),
         .hw_imgfmt = IMGFMT_DXVA2,
     };
+
+    if (!p->hwctx.av_device_ref) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx\n");
+        goto done;
+    }
+
     hwdec_devices_add(hw->devs, &p->hwctx);
 
     ret = 0;

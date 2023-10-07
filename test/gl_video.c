@@ -1,7 +1,7 @@
-#include "tests.h"
-#include "video/out/gpu/video.h"
+#include "test_utils.h"
+#include "video/out/gpu/utils.h"
 
-static void run(struct test_ctx *ctx)
+int main(void)
 {
     float x;
 
@@ -21,9 +21,5 @@ static void run(struct test_ctx *ctx)
     x = gl_video_scale_ambient_lux(16.0, 64.0, 2.40, 1.961, 32.0);
     float mid_gamma = (2.40 - 1.961) / 2 + 1.961;
     assert_float_equal(x, mid_gamma, FLT_EPSILON);
+    return 0;
 }
-
-const struct unittest test_gl_video = {
-    .name = "gl_video",
-    .run = run,
-};

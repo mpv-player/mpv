@@ -128,22 +128,38 @@ error0:
     return NULL;
 }
 
+static void uninit(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct buffer *buf;
+
+    while (p->free_buffers) {
+        buf = p->free_buffers;
+        p->free_buffers = buf->next;
+        talloc_free(buf);
+    }
+    vo_wayland_uninit(vo);
+}
+
 static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
     if (!vo_wayland_init(vo))
-        return -1;
+        goto err;
     if (!vo->wl->shm) {
         MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
                  wl_shm_interface.name);
-        return -1;
+        goto err;
     }
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
 
     return 0;
+err:
+    uninit(vo);
+    return -1;
 }
 
 static int query_format(struct vo *vo, int format)
@@ -166,11 +182,15 @@ static int resize(struct vo *vo)
 {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
-    const int32_t width = wl->scaling * mp_rect_w(wl->geometry);
-    const int32_t height = wl->scaling * mp_rect_h(wl->geometry);
+    const int32_t width = mp_rect_w(wl->geometry);
+    const int32_t height = mp_rect_h(wl->geometry);
+
+    if (width == 0 || height == 0)
+        return 1;
+
     struct buffer *buf;
 
-    vo_wayland_set_opaque_region(wl, 0);
+    vo_wayland_set_opaque_region(wl, false);
     vo->want_redraw = true;
     vo->dwidth = width;
     vo->dheight = height;
@@ -188,11 +208,20 @@ static int resize(struct vo *vo)
         p->free_buffers = buf->next;
         talloc_free(buf);
     }
+
+    vo_wayland_handle_fractional_scale(wl);
+
     return mp_sws_reinit(p->sws);
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    switch (request) {
+    case VOCTRL_SET_PANSCAN:
+        resize(vo);
+        return VO_TRUE;
+    }
+
     int events = 0;
     int ret = vo_wayland_control(vo, &events, request, data);
 
@@ -276,19 +305,6 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
     struct vo_wayland_state *wl = vo->wl;
     if (wl->use_present)
         present_sync_get_info(wl->present, info);
-}
-
-static void uninit(struct vo *vo)
-{
-    struct priv *p = vo->priv;
-    struct buffer *buf;
-
-    while (p->free_buffers) {
-        buf = p->free_buffers;
-        p->free_buffers = buf->next;
-        talloc_free(buf);
-    }
-    vo_wayland_uninit(vo);
 }
 
 const struct vo_driver video_out_wlshm = {

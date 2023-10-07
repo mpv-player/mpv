@@ -51,7 +51,7 @@
 // All these are generated from player/javascript/*.js
 static const char *const builtin_files[][3] = {
     {"@/defaults.js",
-#   include "generated/player/javascript/defaults.js.inc"
+#   include "player/javascript/defaults.js.inc"
     },
     {0}
 };
@@ -698,6 +698,13 @@ static void script_get_property(js_State *J, void *af)
         js_pushstring(J, res);
 }
 
+// args: name
+static void script_del_property(js_State *J)
+{
+    int e = mpv_del_property(jclient(J), js_tostring(J, 1));
+    push_status(J, e);
+}
+
 // args: name [,def]
 static void script_get_property_bool(js_State *J)
 {
@@ -1064,7 +1071,7 @@ static int get_obj_properties(void *ta_ctx, char ***keys, js_State *J, int idx)
 static bool same_as_int64(double d)
 {
     // The range checks also validly filter inf and nan, so behavior is defined
-    return d >= INT64_MIN && d <= INT64_MAX && d == (int64_t)d;
+    return d >= INT64_MIN && d <= (double) INT64_MAX && d == (int64_t)d;
 }
 
 static int jsL_checkint(js_State *J, int idx)
@@ -1078,7 +1085,7 @@ static int jsL_checkint(js_State *J, int idx)
 static uint64_t jsL_checkuint64(js_State *J, int idx)
 {
     double d = js_tonumber(J, idx);
-    if (!(d >= 0 && d <= UINT64_MAX))
+    if (!(d >= 0 && d <= (double) UINT64_MAX))
         js_error(J, "uint64 out of range at index %d", idx);
     return d;
 }
@@ -1171,6 +1178,7 @@ static const struct fn_entry main_fns[] = {
     AF_ENTRY(command_native, 2),
     AF_ENTRY(_command_native_async, 2),
     FN_ENTRY(_abort_async_command, 1),
+    FN_ENTRY(del_property, 1),
     FN_ENTRY(get_property_bool, 2),
     FN_ENTRY(get_property_number, 2),
     AF_ENTRY(get_property_native, 2),

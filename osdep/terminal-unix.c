@@ -17,8 +17,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -417,12 +415,23 @@ static void *terminal_thread(void *ptr)
             { .events = POLLIN, .fd = death_pipe[0] },
             { .events = POLLIN, .fd = tty_in }
         };
-        int r = polldev(fds, stdin_ok ? 2 : 1, buf.len ? ESC_TIMEOUT : INPUT_TIMEOUT);
+        /*
+         * if the process isn't in foreground process group, then on macos
+         * polldev() doesn't rest and gets into 100% cpu usage (see issue #11795)
+         * with read() returning EIO. but we shouldn't quit on EIO either since
+         * the process might be foregrounded later.
+         *
+         * so just avoid poll-ing tty_in when we know the process is not in the
+         * foreground. there's a small race window, but the timeout will take
+         * care of it so it's fine.
+         */
+        bool is_fg = tcgetpgrp(tty_in) == getpgrp();
+        int r = polldev(fds, stdin_ok && is_fg ? 2 : 1, buf.len ? ESC_TIMEOUT : INPUT_TIMEOUT);
         if (fds[0].revents)
             break;
         if (fds[1].revents) {
             int retval = read(tty_in, &buf.b[buf.len], BUF_LEN - buf.len);
-            if (!retval || (retval == -1 && (errno == EBADF || errno == EINVAL)))
+            if (!retval || (retval == -1 && errno != EINTR && errno != EAGAIN && errno != EIO))
                 break; // EOF/closed
             if (retval > 0) {
                 buf.len += retval;

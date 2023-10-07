@@ -18,6 +18,7 @@
 #include <windows.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <EGL/eglext_angle.h>
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <dwmapi.h>
@@ -53,7 +54,7 @@ struct angle_opts {
     int d3d11_warp;
     int d3d11_feature_level;
     int egl_windowing;
-    int flip;
+    bool flip;
 };
 
 #define OPT_BASE_STRUCT struct angle_opts
@@ -76,9 +77,7 @@ const struct m_sub_options angle_conf = {
             {"auto", -1},
             {"no", 0},
             {"yes", 1})},
-        {"angle-flip", OPT_FLAG(flip)},
-        {"angle-max-frame-latency", OPT_REPLACED("swapchain-depth")},
-        {"angle-swapchain-length", OPT_REMOVED("controlled by --swapchain-depth")},
+        {"angle-flip", OPT_BOOL(flip)},
         {0}
     },
     .defaults = &(const struct angle_opts) {
@@ -86,7 +85,7 @@ const struct m_sub_options angle_conf = {
         .d3d11_warp = -1,
         .d3d11_feature_level = D3D_FEATURE_LEVEL_11_0,
         .egl_windowing = -1,
-        .flip = 1,
+        .flip = true,
     },
     .size = sizeof(struct angle_opts),
 };
@@ -604,10 +603,10 @@ static bool angle_init(struct ra_ctx *ctx)
     };
     struct ra_gl_ctx_params params = {
         .swap_buffers = angle_swap_buffers,
-        .flipped = p->flipped,
         .external_swapchain = p->dxgi_swapchain ? &dxgi_swapchain_fns : NULL,
     };
 
+    gl->flipped = p->flipped;
     if (!ra_gl_ctx_init(ctx, gl, params))
         goto fail;
 

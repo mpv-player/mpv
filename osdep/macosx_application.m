@@ -62,16 +62,14 @@ const struct m_sub_options macos_conf = {
         {"macos-fs-animation-duration",
             OPT_CHOICE(macos_fs_animation_duration, {"default", -1}),
             M_RANGE(0, 1000)},
-        {"macos-force-dedicated-gpu", OPT_FLAG(macos_force_dedicated_gpu)},
+        {"macos-force-dedicated-gpu", OPT_BOOL(macos_force_dedicated_gpu)},
         {"macos-app-activation-policy", OPT_CHOICE(macos_app_activation_policy,
             {"regular", 0}, {"accessory", 1}, {"prohibited", 2})},
         {"macos-geometry-calculation", OPT_CHOICE(macos_geometry_calculation,
             {"visible", FRAME_VISIBLE}, {"whole", FRAME_WHOLE})},
         {"cocoa-cb-sw-renderer", OPT_CHOICE(cocoa_cb_sw_renderer,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
-        {"cocoa-cb-10bit-context", OPT_FLAG(cocoa_cb_10bit_context)},
-        {"macos-title-bar-style", OPT_REMOVED("Split into --macos-title-bar-appearance "
-                     "and --macos-title-bar-material")},
+        {"cocoa-cb-10bit-context", OPT_BOOL(cocoa_cb_10bit_context)},
         {0}
     },
     .size = sizeof(struct macos_opts),
@@ -79,7 +77,7 @@ const struct m_sub_options macos_conf = {
         .macos_title_bar_color = {0, 0, 0, 0},
         .macos_fs_animation_duration = -1,
         .cocoa_cb_sw_renderer = -1,
-        .cocoa_cb_10bit_context = 1
+        .cocoa_cb_10bit_context = true
     },
 };
 
@@ -147,7 +145,7 @@ static void terminate_cocoa_application(void)
 }
 
 static const char macosx_icon[] =
-#include "generated/TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns.inc"
+#include "TOOLS/osxbundle/icon.icns.inc"
 ;
 
 - (NSImage *)getMPVIcon

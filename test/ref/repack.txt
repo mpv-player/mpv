@@ -146,10 +146,30 @@ p010            => [pa] [un] yuv420p16       | a=2:2
 p010            => [pa] [un] yuv420pf        | a=2:2 [planar-f32]
 p010be          => [pa] [un] yuv420p16       | a=2:2
 p010be          => [pa] [un] yuv420pf        | a=2:2 [planar-f32]
+p012            => [pa] [un] yuv420p16       | a=2:2
+p012            => [pa] [un] yuv420pf        | a=2:2 [planar-f32]
+p012be          => [pa] [un] yuv420p16       | a=2:2
+p012be          => [pa] [un] yuv420pf        | a=2:2 [planar-f32]
 p016            => [pa] [un] yuv420p16       | a=2:2
 p016            => [pa] [un] yuv420pf        | a=2:2 [planar-f32]
 p016be          => [pa] [un] yuv420p16       | a=2:2
 p016be          => [pa] [un] yuv420pf        | a=2:2 [planar-f32]
+p210            => [pa] [un] yuv422p16       | a=2:1
+p210            => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+p210be          => [pa] [un] yuv422p16       | a=2:1
+p210be          => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+p216            => [pa] [un] yuv422p16       | a=2:1
+p216            => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+p216be          => [pa] [un] yuv422p16       | a=2:1
+p216be          => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+p410            => [pa] [un] yuv444p16       | a=1:1
+p410            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+p410be          => [pa] [un] yuv444p16       | a=1:1
+p410be          => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+p416            => [pa] [un] yuv444p16       | a=1:1
+p416            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+p416be          => [pa] [un] yuv444p16       | a=1:1
+p416be          => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
 pal8            =>      [un] gbrap           | a=1:1
 pal8            =>      [un] gbrapf32        | a=1:1 [planar-f32]
 qsv             => no
@@ -198,19 +218,39 @@ rgba64          => [pa] [un] gbrap16         | a=1:1 [tu] [tp]
 rgba64          => [pa] [un] gbrapf32        | a=1:1 [planar-f32]
 rgba64be        => [pa] [un] gbrap16         | a=1:1 [tu] [tp]
 rgba64be        => [pa] [un] gbrapf32        | a=1:1 [planar-f32]
+rgbaf16         => no
+rgbaf16be       => no
+rgbaf32         => no
+rgbaf32be       => no
+rgbf32          => no
+rgbf32be        => no
 uyvy422         => [pa] [un] yuv422p         | a=2:1 [tu] [tp]
 uyvy422         => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
 uyyvyy411       => [pa] [un] yuv411p         | a=4:1 [tu] [tp]
 uyyvyy411       => [pa] [un] yuv411pf        | a=4:1 [planar-f32]
 vaapi           => no
-vaapi_idct      => no
-vaapi_moco      => no
 vdpau           => no
 vdpau_output    => no
 videotoolbox    => no
 vulkan          => no
+vuya            => [pa] [un] yuva444p        | a=1:1
+vuya            => [pa] [un] yuva444pf       | a=1:1 [planar-f32]
+vuyx            => [pa] [un] yuv444p         | a=1:1
+vuyx            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+x2bgr10         => [pa] [un] gbrp10          | a=1:1
+x2bgr10         => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
+x2bgr10be       => [pa] [un] gbrp10          | a=1:1
+x2bgr10be       => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 x2rgb10be       => [pa] [un] gbrp10          | a=1:1 [tu] [tp]
 x2rgb10be       => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
+xv30            => [pa] [un] yuv444p10       | a=1:1
+xv30            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+xv30be          => [pa] [un] yuv444p10       | a=1:1
+xv30be          => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+xv36            => [pa] [un] yuv444p16       | a=1:1
+xv36            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
+xv36be          => [pa] [un] yuv444p16       | a=1:1
+xv36be          => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
 xvmc            => no
 xyz12           => [pa] [un] gbrp16          | a=1:1 [tu] [tp]
 xyz12           => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
@@ -220,6 +260,10 @@ y210            => [pa] [un] yuv422p16       | a=2:1 [tu] [tp]
 y210            => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
 y210be          => [pa] [un] yuv422p16       | a=2:1 [tu] [tp]
 y210be          => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+y212            => [pa] [un] yuv422p16       | a=2:1
+y212            => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
+y212be          => [pa] [un] yuv422p16       | a=2:1
+y212be          => [pa] [un] yuv422pf        | a=2:1 [planar-f32]
 ya16            => [pa] [un] yap16           | a=1:1 [tu] [tp]
 ya16            => [pa] [un] grayaf32        | a=1:1 [planar-f32]
 ya16be          => [pa] [un] yap16           | a=1:1

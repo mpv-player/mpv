@@ -43,7 +43,15 @@
 #include "msg.h"
 #include "msg_control.h"
 
+// log buffer size (lines) for terminal level and logfile level
 #define TERM_BUF 100
+#define FILE_BUF 100
+
+// logfile lines to accumulate during init before we know the log file name.
+// thousands of logfile lines during init can happen (especially with many
+// scripts, big config, etc), so we set 5000. If it cycles and messages are
+// overwritten, then the first (virtual) log line indicates how many were lost.
+#define EARLY_FILE_BUF 5000
 
 struct mp_log_root {
     struct mpv_global *global;
@@ -64,6 +72,7 @@ struct mp_log_root {
     struct mp_log_buffer **buffers;
     int num_buffers;
     struct mp_log_buffer *early_buffer;
+    struct mp_log_buffer *early_filebuffer;
     FILE *stats_file;
     bstr buffer;
     // --- must be accessed atomically
@@ -297,7 +306,8 @@ static void print_terminal_line(struct mp_log *log, int lev,
         return;
 
     struct mp_log_root *root = log->root;
-    FILE *stream = (root->force_stderr || lev == MSGL_STATUS) ? stderr : stdout;
+    FILE *stream = (root->force_stderr || lev == MSGL_STATUS || lev == MSGL_FATAL ||
+                    lev == MSGL_ERR || lev == MSGL_WARN) ? stderr : stdout;
 
     if (lev != MSGL_STATUS)
         flush_status_line(root);
@@ -306,7 +316,7 @@ static void print_terminal_line(struct mp_log *log, int lev,
         set_msg_color(stream, lev);
 
     if (root->show_time)
-        fprintf(stream, "[%10.6f] ", (mp_time_us() - MP_START_TIME) / 1e6);
+        fprintf(stream, "[%10.6f] ", (mp_time_ns() - MP_START_TIME) / 1e9);
 
     const char *prefix = log->prefix;
     if ((lev >= MSGL_V) || root->verbose || root->module)
@@ -350,7 +360,8 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
             buffer_level = MPMAX(log->terminal_level, MSGL_DEBUG);
         if (lev <= buffer_level && lev != MSGL_STATUS) {
             if (buffer->level == MP_LOG_BUFFER_MSGL_LOGFILE) {
-                // If the buffer is full, block until we can write again.
+                // If the buffer is full, block until we can write again,
+                // unless there's no write thread (died, or early filebuffer)
                 bool dead = false;
                 while (buffer->num_entries == buffer->capacity && !dead) {
                     // Temporary unlock is OK; buffer->level is immutable, and
@@ -394,7 +405,7 @@ static void dump_stats(struct mp_log *log, int lev, char *text)
 {
     struct mp_log_root *root = log->root;
     if (lev == MSGL_STATS && root->stats_file)
-        fprintf(root->stats_file, "%"PRId64" %s\n", mp_time_us(), text);
+        fprintf(root->stats_file, "%"PRId64" %s\n", mp_time_ns(), text);
 }
 
 void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
@@ -540,7 +551,7 @@ static void *log_file_thread(void *p)
         if (e) {
             pthread_mutex_unlock(&root->log_file_lock);
             fprintf(root->log_file, "[%8.3f][%c][%s] %s",
-                    (mp_time_us() - MP_START_TIME) / 1e6,
+                    (mp_time_ns() - MP_START_TIME) / 1e9,
                     mp_log_levels[e->level][0], e->prefix, e->text);
             fflush(root->log_file);
             pthread_mutex_lock(&root->log_file_lock);
@@ -641,8 +652,33 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
         if (root->log_path) {
             root->log_file = fopen(root->log_path, "wb");
             if (root->log_file) {
+
+                // if a logfile is created and the early filebuf still exists,
+                // flush and destroy the early buffer
+                pthread_mutex_lock(&root->lock);
+                struct mp_log_buffer *earlybuf = root->early_filebuffer;
+                if (earlybuf)
+                    root->early_filebuffer = NULL;  // but it still logs msgs
+                pthread_mutex_unlock(&root->lock);
+
+                if (earlybuf) {
+                    // flush, destroy before creating the normal logfile buf,
+                    // as once the new one is created (specifically, its write
+                    // thread), then MSGL_LOGFILE messages become blocking, but
+                    // the early logfile buf is without dequeue - can deadlock.
+                    // note: timestamp is unknown, we use 0.000 as indication.
+                    // note: new messages while iterating are still flushed.
+                    struct mp_log_buffer_entry *e;
+                    while ((e = mp_msg_log_buffer_read(earlybuf))) {
+                        fprintf(root->log_file, "[%8.3f][%c][%s] %s", 0.0,
+                                mp_log_levels[e->level][0], e->prefix, e->text);
+                        talloc_free(e);
+                    }
+                    mp_msg_log_buffer_destroy(earlybuf);  // + remove from root
+                }
+
                 root->log_file_buffer =
-                    mp_msg_log_buffer_new(global, 100, MP_LOG_BUFFER_MSGL_LOGFILE,
+                    mp_msg_log_buffer_new(global, FILE_BUF, MP_LOG_BUFFER_MSGL_LOGFILE,
                                           wakeup_log_file, root);
                 root->log_file_thread_active = true;
                 if (pthread_create(&root->log_file_thread, NULL, log_file_thread,
@@ -700,6 +736,7 @@ void mp_msg_uninit(struct mpv_global *global)
     struct mp_log_root *root = global->log->root;
     terminate_log_file_thread(root);
     mp_msg_log_buffer_destroy(root->early_buffer);
+    mp_msg_log_buffer_destroy(root->early_filebuffer);
     assert(root->num_buffers == 0);
     if (root->stats_file)
         fclose(root->stats_file);
@@ -713,23 +750,42 @@ void mp_msg_uninit(struct mpv_global *global)
     global->log = NULL;
 }
 
-void mp_msg_set_early_logging(struct mpv_global *global, bool enable)
+// early logging store log messages before they have a known destination.
+// there are two early log buffers which are similar logically, and both cease
+// function (if still exist, independently) once the log destination is known,
+// or mpv init is complete (typically, after all clients/scripts init is done).
+//
+// - "normal" early_buffer, holds early terminal-level logs, and is handed over
+//   to the first client which requests such log buffer, so that it sees older
+//   messages too. further clients which request a log buffer get a new one
+//   which accumulates messages starting at this point in time.
+//
+// - early_filebuffer - early log-file messages until a log file name is known.
+//   main cases where meaningful messages are accumulated before the filename
+//   is known are when log-file is set at mpv.conf, or from script/client init.
+//   once a file name is known, the early buffer is flushed and destroyed.
+//   unlike the "proper" log-file buffer, the early filebuffer is not backed by
+//   a write thread, and hence non-blocking (can overwrite old messages).
+//   it's also bigger than the actual file buffer (early: 5000, actual: 100).
+
+static void mp_msg_set_early_logging_raw(struct mpv_global *global, bool enable,
+                                         struct mp_log_buffer **root_logbuf,
+                                         int size, int level)
 {
     struct mp_log_root *root = global->log->root;
     pthread_mutex_lock(&root->lock);
 
-    if (enable != !!root->early_buffer) {
+    if (enable != !!*root_logbuf) {
         if (enable) {
             pthread_mutex_unlock(&root->lock);
             struct mp_log_buffer *buf =
-                mp_msg_log_buffer_new(global, TERM_BUF, MP_LOG_BUFFER_MSGL_TERM,
-                                      NULL, NULL);
+                mp_msg_log_buffer_new(global, size, level, NULL, NULL);
             pthread_mutex_lock(&root->lock);
-            assert(!root->early_buffer); // no concurrent calls to this function
-            root->early_buffer = buf;
+            assert(!*root_logbuf); // no concurrent calls to this function
+            *root_logbuf = buf;
         } else {
-            struct mp_log_buffer *buf = root->early_buffer;
-            root->early_buffer = NULL;
+            struct mp_log_buffer *buf = *root_logbuf;
+            *root_logbuf = NULL;
             pthread_mutex_unlock(&root->lock);
             mp_msg_log_buffer_destroy(buf);
             return;
@@ -737,6 +793,18 @@ void mp_msg_set_early_logging(struct mpv_global *global, bool enable)
     }
 
     pthread_mutex_unlock(&root->lock);
+}
+
+void mp_msg_set_early_logging(struct mpv_global *global, bool enable)
+{
+    struct mp_log_root *root = global->log->root;
+
+    mp_msg_set_early_logging_raw(global, enable, &root->early_buffer,
+                                 TERM_BUF, MP_LOG_BUFFER_MSGL_TERM);
+
+    // normally MSGL_LOGFILE buffer gets a write thread, but not the early buf
+    mp_msg_set_early_logging_raw(global, enable, &root->early_filebuffer,
+                                 EARLY_FILE_BUF, MP_LOG_BUFFER_MSGL_LOGFILE);
 }
 
 struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
@@ -810,7 +878,7 @@ void mp_msg_log_buffer_destroy(struct mp_log_buffer *buffer)
         }
     }
 
-    abort();
+    MP_ASSERT_UNREACHABLE();
 
 found:
 

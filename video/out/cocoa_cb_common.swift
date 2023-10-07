@@ -202,7 +202,7 @@ class CocoaCB: Common {
 
     func shutdown(_ destroy: Bool = false) {
         isShuttingDown = window?.isAnimating ?? false ||
-                         window?.isInFullscreen ?? false && Bool(mpv?.opts.native_fs ?? 1)
+                         window?.isInFullscreen ?? false && mpv?.opts.native_fs ?? true
         if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
             window?.close()
         }

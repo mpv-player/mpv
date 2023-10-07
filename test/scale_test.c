@@ -55,13 +55,13 @@ static struct mp_image *gen_repack_test_img(int w, int h, int bytes, bool rgb,
 static void dump_image(struct scale_test *stest, const char *name,
                        struct mp_image *img)
 {
-    char *path = mp_tprintf(4096, "%s/%s.png", stest->ctx->out_path, name);
+    char *path = mp_tprintf(4096, "%s/%s.png", stest->outdir, name);
 
     struct image_writer_opts opts = image_writer_opts_defaults;
     opts.format = AV_CODEC_ID_PNG;
 
-    if (!write_image(img, &opts, path, stest->ctx->global, stest->ctx->log)) {
-        MP_FATAL(stest->ctx, "Failed to write '%s'.\n", path);
+    if (!write_image(img, &opts, path, NULL, NULL)) {
+        printf("Failed to write '%s'.\n", path);
         abort();
     }
 }
@@ -102,7 +102,7 @@ static void assert_imgs_equal(struct scale_test *stest, FILE *f,
 void repack_test_run(struct scale_test *stest)
 {
     char *logname = mp_tprintf(80, "%s.log", stest->test_name);
-    FILE *f = test_open_out(stest->ctx, logname);
+    FILE *f = test_open_out(stest->outdir, logname);
 
     if (!stest->sws) {
         init_imgfmts_list();
@@ -187,6 +187,6 @@ void repack_test_run(struct scale_test *stest)
 
     fclose(f);
 
-    assert_text_files_equal(stest->ctx, logname, logname,
+    assert_text_files_equal(stest->refdir, stest->outdir, logname,
                             "This can fail if FFmpeg adds or removes pixfmts.");
 }

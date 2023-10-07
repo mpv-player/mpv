@@ -21,15 +21,15 @@ C PLUGINS
 You can write C plugins for mpv. These use the libmpv API, although they do not
 use the libmpv library itself.
 
-They are available on Linux/BSD platforms only and enabled by default if the
-compiler supports linking with the ``-rdynamic`` flag.
+They are enabled by default if compiler supports linking with the ``-rdynamic``
+flag on Linux/BSD platforms. On Windows the are always enabled.
 
 C plugins location
 ------------------
 
 C plugins are put into the mpv scripts directory in its config directory
-(see the `FILES`_ section for details). They must have a ``.so`` file extension.
-They can also be explicitly loaded with the ``--script`` option.
+(see the `FILES`_ section for details). They must have a ``.so`` or ``.dll``
+file extension. They can also be explicitly loaded with the ``--script`` option.
 
 API
 ---
@@ -66,6 +66,10 @@ Linkage to libmpv
 The current implementation requires that your plugins are **not** linked against
 libmpv. What your plugins use are not symbols from a libmpv binary, but
 symbols from the mpv host binary.
+
+On Windows to make symbols from the host binary available, you have to define
+MPV_CPLUGIN_DYNAMIC_SYM when compiling cplugin. This will load symbols
+dynamically, before calling ``mpv_open_cplugin()``.
 
 Examples
 --------

@@ -48,7 +48,7 @@ struct f_opts {
     float scale_nominal;
     float ms_stride;
     float ms_search;
-    float percent_overlap;
+    float factor_overlap;
 #define SCALE_TEMPO 1
 #define SCALE_PITCH 2
     int speed_opt;
@@ -400,7 +400,7 @@ static bool reinit(struct mp_filter *f)
 
     update_speed(s, s->speed);
 
-    int frames_overlap = s->frames_stride * s->opts->percent_overlap;
+    int frames_overlap = s->frames_stride * s->opts->factor_overlap;
     if (frames_overlap <= 0) {
         s->bytes_standing   = s->bytes_stride;
         s->samples_standing = s->bytes_standing / bps;
@@ -604,7 +604,7 @@ const struct mp_user_filter_entry af_scaletempo = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
             .ms_stride = 60,
-            .percent_overlap = .20,
+            .factor_overlap = .20,
             .ms_search = 14,
             .speed_opt = SCALE_TEMPO,
             .scale_nominal = 1.0,
@@ -612,7 +612,7 @@ const struct mp_user_filter_entry af_scaletempo = {
         .options = (const struct m_option[]) {
             {"scale", OPT_FLOAT(scale_nominal), M_RANGE(0.01, DBL_MAX)},
             {"stride", OPT_FLOAT(ms_stride), M_RANGE(0.01, DBL_MAX)},
-            {"overlap", OPT_FLOAT(percent_overlap), M_RANGE(0, 1)},
+            {"overlap", OPT_FLOAT(factor_overlap), M_RANGE(0, 1)},
             {"search", OPT_FLOAT(ms_search), M_RANGE(0, DBL_MAX)},
             {"speed", OPT_CHOICE(speed_opt,
                 {"pitch", SCALE_PITCH},

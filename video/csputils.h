@@ -67,6 +67,10 @@ enum mp_csp_prim {
     MP_CSP_PRIM_DISPLAY_P3,
     MP_CSP_PRIM_V_GAMUT,
     MP_CSP_PRIM_S_GAMUT,
+    MP_CSP_PRIM_EBU_3213,
+    MP_CSP_PRIM_FILM_C,
+    MP_CSP_PRIM_ACES_AP0,
+    MP_CSP_PRIM_ACES_AP1,
     MP_CSP_PRIM_COUNT
 };
 
@@ -89,6 +93,7 @@ enum mp_csp_trc {
     MP_CSP_TRC_V_LOG,
     MP_CSP_TRC_S_LOG1,
     MP_CSP_TRC_S_LOG2,
+    MP_CSP_TRC_ST428,
     MP_CSP_TRC_COUNT
 };
 
@@ -133,6 +138,24 @@ extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
 
 #define MP_STEREO3D_NAME_DEF(x, def) \
     (MP_STEREO3D_NAME(x) ? MP_STEREO3D_NAME(x) : (def))
+
+struct mp_hdr_metadata {
+    // HDR10
+    // Mastering display metadata
+    float min_luma, max_luma;       // min/max luminance (in cd/m²)
+
+    // Content light level
+    float max_cll;                  // max content light level (in cd/m²)
+    float max_fall;                 // max frame average light level (in cd/m²)
+
+    // HDR10+
+    float scene_max[3];             // maxRGB in cd/m² per component (RGB)
+    float scene_avg;                // average of maxRGB in cd/m²
+
+    // CIE Y
+    float max_pq_y;                 // maximum PQ luminance (in PQ, 0-1)
+    float avg_pq_y;                 // averaged PQ luminance (in PQ, 0-1)
+};
 
 struct mp_colorspace {
     enum mp_csp space;
@@ -203,26 +226,6 @@ enum mp_alpha_type {
 extern const struct m_opt_choice_alternatives mp_alpha_names[];
 
 extern const struct m_sub_options mp_csp_equalizer_conf;
-
-enum mp_csp_equalizer_param {
-    MP_CSP_EQ_BRIGHTNESS,
-    MP_CSP_EQ_CONTRAST,
-    MP_CSP_EQ_HUE,
-    MP_CSP_EQ_SATURATION,
-    MP_CSP_EQ_GAMMA,
-    MP_CSP_EQ_OUTPUT_LEVELS,
-    MP_CSP_EQ_COUNT,
-};
-
-// Default initialization with 0 is enough, except for the capabilities field
-struct mp_csp_equalizer_opts {
-    // Value for each property is in the range [-100, 100].
-    // 0 is default, meaning neutral or no change.
-    int values[MP_CSP_EQ_COUNT];
-};
-
-void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
-                                  const struct mp_csp_equalizer_opts *eq);
 
 struct mpv_global;
 struct mp_csp_equalizer_state *mp_csp_equalizer_create(void *ta_parent,

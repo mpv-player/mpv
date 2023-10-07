@@ -83,10 +83,9 @@ static void src_dst_split_scaling(int src_size, int dst_size,
                                   int *osd_margin_a, int *osd_margin_b)
 {
     scaled_src_size *= powf(2, zoom) * scale;
+    scaled_src_size = MPMAX(scaled_src_size, 1);
     align = (align + 1) / 2;
 
-    *src_start = 0;
-    *src_end = src_size;
     *dst_start = (dst_size - scaled_src_size) * align + pan * scaled_src_size;
     *dst_end = *dst_start + scaled_src_size;
 
@@ -137,10 +136,6 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
     int src_dw, src_dh;
 
     mp_image_params_get_dsize(video, &src_dw, &src_dh);
-    if (video->rotate % 180 == 90 && (vo_caps & VO_CAP_ROTATE90)) {
-        MPSWAP(int, src_w, src_h);
-        MPSWAP(int, src_dw, src_dh);
-    }
     window_w = MPMAX(1, window_w);
     window_h = MPMAX(1, window_h);
 
@@ -156,6 +151,17 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
 
     struct mp_rect dst = {0, 0, window_w, window_h};
     struct mp_rect src = {0, 0, src_w,    src_h};
+    if (mp_image_crop_valid(video))
+        src = video->crop;
+
+    if (vo_caps & VO_CAP_ROTATE90) {
+        if (video->rotate % 180 == 90) {
+            MPSWAP(int, src_w, src_h);
+            MPSWAP(int, src_dw, src_dh);
+        }
+        mp_rect_rotate(&src, src_w, src_h, video->rotate);
+    }
+
     struct mp_osd_res osd = {
         .w = window_w,
         .h = window_h,

@@ -45,12 +45,18 @@ struct mpv_node *node_array_add(struct mpv_node *dst, int format)
 struct mpv_node *node_map_add(struct mpv_node *dst, const char *key, int format)
 {
     assert(key);
+    return node_map_badd(dst, bstr0(key), format);
+}
+
+struct mpv_node *node_map_badd(struct mpv_node *dst, struct bstr key, int format)
+{
+    assert(key.start);
 
     struct mpv_node_list *list = dst->u.list;
     assert(dst->format == MPV_FORMAT_NODE_MAP && dst->u.list);
     MP_TARRAY_GROW(list, list->values, list->num);
     MP_TARRAY_GROW(list, list->keys, list->num);
-    list->keys[list->num] = talloc_strdup(list, key);
+    list->keys[list->num] = bstrdup0(list, key);
     node_init(&list->values[list->num], format, dst);
     return &list->values[list->num++];
 }
@@ -84,11 +90,16 @@ void node_map_add_flag(struct mpv_node *dst, const char *key, bool v)
 
 mpv_node *node_map_get(mpv_node *src, const char *key)
 {
+    return node_map_bget(src, bstr0(key));
+}
+
+mpv_node *node_map_bget(mpv_node *src, struct bstr key)
+{
     if (src->format != MPV_FORMAT_NODE_MAP)
         return NULL;
 
     for (int i = 0; i < src->u.list->num; i++) {
-        if (strcmp(key, src->u.list->keys[i]) == 0)
+        if (bstr_equals0(key, src->u.list->keys[i]))
             return &src->u.list->values[i];
     }
 
@@ -136,7 +147,7 @@ bool equal_mpv_value(const void *a, const void *b, mpv_format format)
         return true;
     }
     }
-    abort(); // supposed to be able to handle all defined types
+    MP_ASSERT_UNREACHABLE(); // supposed to be able to handle all defined types
 }
 
 // Remarks see equal_mpv_value().

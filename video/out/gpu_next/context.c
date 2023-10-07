@@ -144,14 +144,13 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
 
 #if HAVE_GL && defined(PL_HAVE_OPENGL)
     if (ra_is_gl(ctx->ra_ctx->ra)) {
+        struct GL *gl = ra_gl_get(ctx->ra_ctx->ra);
         pl_opengl opengl = pl_opengl_create(ctx->pllog,
             pl_opengl_params(
                 .debug = ctx_opts->debug,
                 .allow_software = ctx_opts->allow_sw,
-# if PL_API_VER >= 215
-                .get_proc_addr_ex = (void *) ra_gl_get(ctx->ra_ctx->ra)->get_fn,
-                .proc_ctx = ra_gl_get(ctx->ra_ctx->ra)->fn_ctx,
-# endif
+                .get_proc_addr_ex = (void *) gl->get_fn,
+                .proc_ctx = gl->fn_ctx,
 # if HAVE_EGL
                 .egl_display = eglGetCurrentDisplay(),
                 .egl_context = eglGetCurrentContext(),
@@ -166,6 +165,7 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
 
         ctx->swapchain = pl_opengl_create_swapchain(opengl, pl_opengl_swapchain_params(
             .max_swapchain_depth = vo->opts->swapchain_depth,
+            .framebuffer.flipped = gl->flipped,
         ));
         if (!ctx->swapchain)
             goto err_out;

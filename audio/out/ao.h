@@ -26,8 +26,7 @@
 #include "audio/chmap_sel.h"
 
 enum aocontrol {
-    // _VOLUME commands take struct ao_control_vol pointer for input/output.
-    // If there's only one volume, SET should use average of left/right.
+    // _VOLUME commands take a pointer to float for input/output.
     AOCONTROL_GET_VOLUME,
     AOCONTROL_SET_VOLUME,
     // _MUTE commands take a pointer to bool
@@ -35,8 +34,6 @@ enum aocontrol {
     AOCONTROL_SET_MUTE,
     // Has char* as argument, which contains the desired stream title.
     AOCONTROL_UPDATE_STREAM_TITLE,
-    // Has enum aocontrol_media_role* argument, which contains the current media role
-    AOCONTROL_UPDATE_MEDIA_ROLE,
 };
 
 // If set, then the queued audio data is the last. Note that after a while, new
@@ -59,16 +56,8 @@ enum {
     AO_INIT_STREAM_SILENCE = 1 << 2,
     // Force exclusive mode, i.e. lock out the system mixer.
     AO_INIT_EXCLUSIVE = 1 << 3,
-};
-
-typedef struct ao_control_vol {
-    float left;
-    float right;
-} ao_control_vol_t;
-
-enum aocontrol_media_role {
-    AOCONTROL_MEDIA_ROLE_MUSIC,
-    AOCONTROL_MEDIA_ROLE_MOVIE,
+    // Initialize with music role.
+    AO_INIT_MEDIA_ROLE_MUSIC = 1 << 4,
 };
 
 struct ao_device_desc {
@@ -109,7 +98,7 @@ void ao_set_gain(struct ao *ao, float gain);
 double ao_get_delay(struct ao *ao);
 void ao_reset(struct ao *ao);
 void ao_start(struct ao *ao);
-void ao_set_paused(struct ao *ao, bool paused);
+void ao_set_paused(struct ao *ao, bool paused, bool eof);
 void ao_drain(struct ao *ao);
 bool ao_is_playing(struct ao *ao);
 struct mp_async_queue;

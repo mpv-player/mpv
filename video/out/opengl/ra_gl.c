@@ -103,6 +103,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
         {RA_CAP_COMPUTE,            MPGL_CAP_COMPUTE_SHADER},
         {RA_CAP_NUM_GROUPS,         MPGL_CAP_COMPUTE_SHADER},
         {RA_CAP_NESTED_ARRAY,       MPGL_CAP_NESTED_ARRAY},
+        {RA_CAP_SLOW_DR,            MPGL_CAP_SLOW_DR},
     };
 
     for (int i = 0; i < MP_ARRAY_SIZE(caps_map); i++) {
@@ -295,7 +296,7 @@ static struct ra_tex *gl_tex_create_blank(struct ra *ra,
     case 1: tex_gl->target = GL_TEXTURE_1D; break;
     case 2: tex_gl->target = GL_TEXTURE_2D; break;
     case 3: tex_gl->target = GL_TEXTURE_3D; break;
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
     if (params->non_normalized) {
         assert(params->dimensions == 2);
@@ -631,7 +632,7 @@ static struct ra_buf *gl_buf_create(struct ra *ra,
         case RA_BUF_TYPE_TEX_UPLOAD:     hint = GL_STREAM_DRAW; break;
         case RA_BUF_TYPE_SHADER_STORAGE: hint = GL_STREAM_COPY; break;
         case RA_BUF_TYPE_UNIFORM:        hint = GL_STATIC_DRAW; break;
-        default: abort();
+        default: MP_ASSERT_UNREACHABLE();
         }
 
         gl->BufferData(buf_gl->target, params->size, params->initial_data, hint);
@@ -738,7 +739,7 @@ static const char *shader_typestr(GLenum type)
     case GL_VERTEX_SHADER:   return "vertex";
     case GL_FRAGMENT_SHADER: return "fragment";
     case GL_COMPUTE_SHADER:  return "compute";
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
 }
 
@@ -964,14 +965,14 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
             case 2: gl->Uniform2f(loc, f[0], f[1]); break;
             case 3: gl->Uniform3f(loc, f[0], f[1], f[2]); break;
             case 4: gl->Uniform4f(loc, f[0], f[1], f[2], f[3]); break;
-            default: abort();
+            default: MP_ASSERT_UNREACHABLE();
             }
         } else if (input->dim_v == 2 && input->dim_m == 2) {
             gl->UniformMatrix2fv(loc, 1, GL_FALSE, f);
         } else if (input->dim_v == 3 && input->dim_m == 3) {
             gl->UniformMatrix3fv(loc, 1, GL_FALSE, f);
         } else {
-            abort();
+            MP_ASSERT_UNREACHABLE();
         }
         break;
     }
@@ -1002,7 +1003,7 @@ static void update_uniform(struct ra *ra, struct ra_renderpass *pass,
         break;
     }
     default:
-        abort();
+        MP_ASSERT_UNREACHABLE();
     }
 }
 
@@ -1086,7 +1087,7 @@ static void gl_renderpass_run(struct ra *ra,
         gl->MemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
         break;
     }
-    default: abort();
+    default: MP_ASSERT_UNREACHABLE();
     }
 
     for (int n = 0; n < params->num_values; n++)

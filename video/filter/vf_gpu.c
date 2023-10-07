@@ -196,6 +196,7 @@ static struct mp_image *gpu_render_frame(struct mp_filter *f, struct mp_image *i
             .downloadable = true,
             .w = w,
             .h = h,
+            .d = 1,
             .render_dst = true,
         };
 

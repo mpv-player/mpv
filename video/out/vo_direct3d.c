@@ -80,12 +80,12 @@ struct d3dtex {
 typedef struct d3d_priv {
     struct mp_log *log;
 
-    int opt_disable_texture_align;
+    bool opt_disable_texture_align;
     // debugging
-    int opt_force_power_of_2;
+    bool opt_force_power_of_2;
     int opt_texture_memory;
-    int opt_swap_discard;
-    int opt_exact_backbuffer;
+    bool opt_swap_discard;
+    bool opt_exact_backbuffer;
 
     struct vo *vo;
 
@@ -570,7 +570,7 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
         }
     } else {
         if (FAILED(IDirect3DDevice9_Reset(priv->d3d_device, &present_params))) {
-            MP_ERR(priv, "Reseting Direct3D device failed.\n");
+            MP_ERR(priv, "Resetting Direct3D device failed.\n");
             return 0;
         }
     }
@@ -850,9 +850,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     d3d_priv *priv = vo->priv;
 
     switch (request) {
-    case VOCTRL_REDRAW_FRAME:
-        d3d_draw_frame(priv);
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         calc_fs_rect(priv);
         priv->vo->want_redraw = true;
@@ -993,27 +990,27 @@ static bool get_video_buffer(d3d_priv *priv, struct mp_image *out)
     return true;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     d3d_priv *priv = vo->priv;
     if (!priv->d3d_device)
-        goto done;
+        return;
 
     struct mp_image buffer;
     if (!get_video_buffer(priv, &buffer))
-        goto done;
+        return;
 
-    mp_image_copy(&buffer, mpi);
+    if (!frame->current)
+        return;
+
+    mp_image_copy(&buffer, frame->current);
 
     d3d_unlock_video_objects(priv);
 
     priv->have_image = true;
-    priv->osd_pts = mpi->pts;
+    priv->osd_pts = frame->current->pts;
 
     d3d_draw_frame(priv);
-
-done:
-    talloc_free(mpi);
 }
 
 static mp_image_t *get_window_screenshot(d3d_priv *priv)
@@ -1222,16 +1219,16 @@ static void draw_osd(struct vo *vo)
 #define OPT_BASE_STRUCT d3d_priv
 
 static const struct m_option opts[] = {
-    {"force-power-of-2", OPT_FLAG(opt_force_power_of_2)},
-    {"disable-texture-align", OPT_FLAG(opt_disable_texture_align)},
+    {"force-power-of-2", OPT_BOOL(opt_force_power_of_2)},
+    {"disable-texture-align", OPT_BOOL(opt_disable_texture_align)},
     {"texture-memory", OPT_CHOICE(opt_texture_memory,
         {"default", 0},
         {"managed", 1},
         {"default-pool", 2},
         {"default-pool-shadow", 3},
         {"scratch", 4})},
-    {"swap-discard", OPT_FLAG(opt_swap_discard)},
-    {"exact-backbuffer", OPT_FLAG(opt_exact_backbuffer)},
+    {"swap-discard", OPT_BOOL(opt_swap_discard)},
+    {"exact-backbuffer", OPT_BOOL(opt_exact_backbuffer)},
     {0}
 };
 
@@ -1242,7 +1239,7 @@ const struct vo_driver video_out_direct3d = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(d3d_priv),

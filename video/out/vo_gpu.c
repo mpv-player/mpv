@@ -26,8 +26,6 @@
 
 #include <libavutil/common.h>
 
-#include "config.h"
-
 #include "mpv_talloc.h"
 #include "common/common.h"
 #include "misc/bstr.h"
@@ -265,11 +263,11 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
 }
 
 static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
-                                  int stride_align)
+                                  int stride_align, int flags)
 {
     struct gpu_priv *p = vo->priv;
 
-    return gl_video_get_image(p->renderer, imgfmt, w, h, stride_align);
+    return gl_video_get_image(p->renderer, imgfmt, w, h, stride_align, flags);
 }
 
 static void uninit(struct vo *vo)
@@ -310,7 +308,7 @@ static int preinit(struct vo *vo)
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
 
-    gl_video_init_hwdecs(p->renderer, vo->hwdec_devs, false);
+    gl_video_init_hwdecs(p->renderer, p->ctx, vo->hwdec_devs, false);
 
     return 0;
 

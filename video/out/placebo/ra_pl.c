@@ -45,13 +45,10 @@ struct ra *ra_create_pl(pl_gpu gpu, struct mp_log *log)
         ra->caps |= RA_CAP_COMPUTE | RA_CAP_NUM_GROUPS;
     if (gpu->limits.compute_queues > gpu->limits.fragment_queues)
         ra->caps |= RA_CAP_PARALLEL_COMPUTE;
-#if PL_API_VER >= 180
     if (gpu->limits.max_variable_comps)
         ra->caps |= RA_CAP_GLOBAL_UNIFORM;
-#else
-    if (gpu->limits.max_variables)
-        ra->caps |= RA_CAP_GLOBAL_UNIFORM;
-#endif
+    if (!gpu->limits.host_cached)
+        ra->caps |= RA_CAP_SLOW_DR;
 
     if (gpu->limits.max_tex_1d_dim)
         ra->caps |= RA_CAP_TEX_1D;
@@ -220,36 +217,7 @@ static bool tex_upload_pl(struct ra *ra, const struct ra_tex_upload_params *para
             };
         }
 
-#if PL_API_VER >= 168
         pl_params.row_pitch = params->stride;
-#else
-        // Older libplacebo uses texel-sized strides, so we have to manually
-        // compensate for possibly misaligned sources (typically rgb24).
-        size_t texel_size = tex->params.format->texel_size;
-        pl_params.stride_w = params->stride / texel_size;
-        size_t stride = pl_params.stride_w * texel_size;
-
-        if (stride != params->stride) {
-            // Fall back to uploading via a staging buffer prepared in CPU
-            int lines = params->rc ? pl_rect_h(pl_params.rc) : tex->params.h;
-            staging = pl_buf_create(gpu, &(struct pl_buf_params) {
-                .size = lines * stride,
-                .memory_type = PL_BUF_MEM_HOST,
-                .host_mapped = true,
-            });
-            if (!staging)
-                return false;
-
-            const uint8_t *src = params->buf ? params->buf->data : params->src;
-            assert(src);
-            for (int y = 0; y < lines; y++)
-                memcpy(staging->data + y * stride, src + y * params->stride, stride);
-
-            pl_params.ptr = NULL;
-            pl_params.buf = staging;
-            pl_params.buf_offset = 0;
-        }
-#endif
     }
 
     bool ok = pl_tex_upload(gpu, &pl_params);
@@ -264,33 +232,10 @@ static bool tex_download_pl(struct ra *ra, struct ra_tex_download_params *params
         .tex = tex,
         .ptr = params->dst,
         .timer = get_active_timer(ra),
+        .row_pitch = params->stride,
     };
 
-#if PL_API_VER >= 168
-    pl_params.row_pitch = params->stride;
     return pl_tex_download(get_gpu(ra), &pl_params);
-#else
-    size_t texel_size = tex->params.format->texel_size;
-    pl_params.stride_w = params->stride / texel_size;
-    size_t stride = pl_params.stride_w * texel_size;
-    uint8_t *staging = NULL;
-    if (stride != params->stride) {
-        staging = talloc_size(NULL, tex->params.h * stride);
-        pl_params.ptr = staging;
-    }
-
-    bool ok = pl_tex_download(get_gpu(ra), &pl_params);
-    if (ok && staging) {
-        for (int y = 0; y < tex->params.h; y++) {
-            memcpy((uint8_t *) params->dst + y * params->stride,
-                   staging + y * stride,
-                   stride);
-        }
-    }
-
-    talloc_free(staging);
-    return ok;
-#endif
 }
 
 static struct ra_buf *buf_create_pl(struct ra *ra,
@@ -516,21 +461,16 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
         pl_params.vertex_type = PL_PRIM_TRIANGLE_LIST;
         pl_params.vertex_stride = params->vertex_stride;
         pl_params.load_target = !params->invalidate_target;
-
-#if PL_API_VER >= 169
         pl_params.target_format = params->target_format->priv;
-#else
-        pl_params.target_dummy.params.format = params->target_format->priv;
-#endif
 
         if (params->enable_blend) {
             pl_params.blend_params = &blend_params;
             blend_params = (struct pl_blend_params) {
                 // Same enum order as ra_blend
-                .src_rgb = (enum ra_blend) params->blend_src_rgb,
-                .dst_rgb = (enum ra_blend) params->blend_dst_rgb,
-                .src_alpha = (enum ra_blend) params->blend_src_alpha,
-                .dst_alpha = (enum ra_blend) params->blend_dst_alpha,
+                .src_rgb = (enum pl_blend_mode) params->blend_src_rgb,
+                .dst_rgb = (enum pl_blend_mode) params->blend_dst_rgb,
+                .src_alpha = (enum pl_blend_mode) params->blend_src_alpha,
+                .dst_alpha = (enum pl_blend_mode) params->blend_dst_alpha,
             };
         }
 
@@ -617,7 +557,7 @@ static void renderpass_run_pl(struct ra *ra,
             case RA_VARTYPE_BUF_RW:
                 bind.object = (* (struct ra_buf **) val->data)->priv;
                 break;
-            default: abort();
+            default: MP_ASSERT_UNREACHABLE();
             };
 
             p->binds[p->inp_index[val->index]] = bind;

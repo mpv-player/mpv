@@ -9,7 +9,7 @@ struct libmpv_gpu_context {
     struct mp_log *log;
     const struct libmpv_gpu_context_fns *fns;
 
-    struct ra *ra;
+    struct ra_ctx *ra_ctx;
     void *priv;
 };
 

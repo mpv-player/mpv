@@ -54,40 +54,6 @@ struct gl_lcms {
     struct mp_icc_opts *opts;
 };
 
-static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
-                                   struct bstr name, const char **value)
-{
-    struct bstr param = bstr0(*value);
-    int p1, p2, p3;
-    char s[20];
-    snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
-    return gl_parse_3dlut_size(s, &p1, &p2, &p3);
-}
-
-#define OPT_BASE_STRUCT struct mp_icc_opts
-const struct m_sub_options mp_icc_conf = {
-    .opts = (const m_option_t[]) {
-        {"use-embedded-icc-profile", OPT_FLAG(use_embedded)},
-        {"icc-profile", OPT_STRING(profile), .flags = M_OPT_FILE},
-        {"icc-profile-auto", OPT_FLAG(profile_auto)},
-        {"icc-cache-dir", OPT_STRING(cache_dir), .flags = M_OPT_FILE},
-        {"icc-intent", OPT_INT(intent)},
-        {"icc-force-contrast", OPT_CHOICE(contrast, {"no", 0}, {"inf", -1}),
-            M_RANGE(0, 1000000)},
-        {"icc-3dlut-size", OPT_STRING_VALIDATE(size_str, validate_3dlut_size_opt)},
-        {"3dlut-size", OPT_REPLACED("icc-3dlut-size")},
-        {"icc-cache", OPT_REMOVED("see icc-cache-dir")},
-        {"icc-contrast", OPT_REMOVED("see icc-force-contrast")},
-        {0}
-    },
-    .size = sizeof(struct mp_icc_opts),
-    .defaults = &(const struct mp_icc_opts) {
-        .size_str = "64x64x64",
-        .intent = INTENT_RELATIVE_COLORIMETRIC,
-        .use_embedded = true,
-    },
-};
-
 static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
                                 const char *msg)
 {
@@ -351,8 +317,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     if (vid_profile) {
         MP_VERBOSE(p, "Got an embedded ICC profile.\n");
         p->vid_profile = av_buffer_ref(vid_profile);
-        if (!p->vid_profile)
-            abort();
+        MP_HANDLE_OOM(p->vid_profile);
     }
 
     if (!gl_parse_3dlut_size(p->opts->size_str, &s_r, &s_g, &s_b))
@@ -361,13 +326,19 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     if (!gl_lcms_has_profile(p))
         return false;
 
+    // For simplicity, default to 65x65x65, which is large enough to cover
+    // typical profiles with good accuracy while not being too wasteful
+    s_r = s_r ? s_r : 65;
+    s_g = s_g ? s_g : 65;
+    s_b = s_b ? s_b : 65;
+
     void *tmp = talloc_new(NULL);
     uint16_t *output = talloc_array(tmp, uint16_t, s_r * s_g * s_b * 4);
     struct lut3d *lut = NULL;
     cmsContext cms = NULL;
 
     char *cache_file = NULL;
-    if (p->opts->cache_dir && p->opts->cache_dir[0]) {
+    if (p->opts->cache) {
         // Gamma is included in the header to help uniquely identify it,
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
@@ -378,8 +349,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 
         uint8_t hash[32];
         struct AVSHA *sha = av_sha_alloc();
-        if (!sha)
-            abort();
+        MP_HANDLE_OOM(sha);
         av_sha_init(sha, 256);
         av_sha_update(sha, cache_info, strlen(cache_info));
         if (vid_profile)
@@ -388,13 +358,20 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         av_sha_final(sha, hash);
         av_free(sha);
 
-        char *cache_dir = mp_get_user_path(tmp, p->global, p->opts->cache_dir);
-        cache_file = talloc_strdup(tmp, "");
-        for (int i = 0; i < sizeof(hash); i++)
-            cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
-        cache_file = mp_path_join(tmp, cache_dir, cache_file);
+        char *cache_dir = p->opts->cache_dir;
+        if (cache_dir && cache_dir[0]) {
+            cache_dir = mp_get_user_path(tmp, p->global, cache_dir);
+        } else {
+            cache_dir = mp_find_user_file(tmp, p->global, "cache", "");
+        }
 
-        mp_mkdirp(cache_dir);
+        if (cache_dir && cache_dir[0]) {
+            cache_file = talloc_strdup(tmp, "");
+            for (int i = 0; i < sizeof(hash); i++)
+                cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
+            cache_file = mp_path_join(tmp, cache_dir, cache_file);
+            mp_mkdirp(cache_dir);
+        }
     }
 
     // check cache
@@ -487,12 +464,6 @@ error_exit:
 
 #else /* HAVE_LCMS2 */
 
-const struct m_sub_options mp_icc_conf = {
-    .opts = (const m_option_t[]) { {0} },
-    .size = sizeof(struct mp_icc_opts),
-    .defaults = &(const struct mp_icc_opts) {0},
-};
-
 struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
                              struct mpv_global *global,
                              struct mp_icc_opts *opts)
@@ -522,3 +493,34 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 }
 
 #endif
+
+static int validate_3dlut_size_opt(struct mp_log *log, const m_option_t *opt,
+                                   struct bstr name, const char **value)
+{
+    int p1, p2, p3;
+    return gl_parse_3dlut_size(*value, &p1, &p2, &p3) ? 0 : M_OPT_INVALID;
+}
+
+#define OPT_BASE_STRUCT struct mp_icc_opts
+const struct m_sub_options mp_icc_conf = {
+    .opts = (const m_option_t[]) {
+        {"use-embedded-icc-profile", OPT_BOOL(use_embedded)},
+        {"icc-profile", OPT_STRING(profile), .flags = M_OPT_FILE},
+        {"icc-profile-auto", OPT_BOOL(profile_auto)},
+        {"icc-cache", OPT_BOOL(cache)},
+        {"icc-cache-dir", OPT_STRING(cache_dir), .flags = M_OPT_FILE},
+        {"icc-intent", OPT_INT(intent)},
+        {"icc-force-contrast", OPT_CHOICE(contrast, {"no", 0}, {"inf", -1}),
+            M_RANGE(0, 1000000)},
+        {"icc-3dlut-size", OPT_STRING_VALIDATE(size_str, validate_3dlut_size_opt)},
+        {"icc-use-luma", OPT_BOOL(icc_use_luma)},
+        {0}
+    },
+    .size = sizeof(struct mp_icc_opts),
+    .defaults = &(const struct mp_icc_opts) {
+        .size_str = "auto",
+        .intent = MP_INTENT_RELATIVE_COLORIMETRIC,
+        .use_embedded = true,
+        .cache = true,
+    },
+};

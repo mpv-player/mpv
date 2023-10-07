@@ -93,8 +93,18 @@ nv42        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca
 opencl      = no
 p010        = align=2:2 ov=yuva420p, ov_f=yuva420pf, v_f=yuv420pf, a=gray, ca=gray, ca_f=grayf32
 p010be      = align=2:2 ov=yuva420p, ov_f=yuva420pf, v_f=yuv420pf, a=gray, ca=gray, ca_f=grayf32
+p012        = align=2:2 ov=yuva420p, ov_f=yuva420pf, v_f=yuv420pf, a=gray, ca=gray, ca_f=grayf32
+p012be      = align=2:2 ov=yuva420p, ov_f=yuva420pf, v_f=yuv420pf, a=gray, ca=gray, ca_f=grayf32
 p016        = align=2:2 ov=yuva420p, ov_f=yuva420pf, v_f=yuv420pf, a=gray, ca=gray, ca_f=grayf32
 p016be      = align=2:2 ov=yuva420p, ov_f=yuva420pf, v_f=yuv420pf, a=gray, ca=gray, ca_f=grayf32
+p210        = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
+p210be      = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
+p216        = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
+p216be      = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
+p410        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
+p410be      = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
+p416        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
+p416be      = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
 pal8        = no
 qsv         = no
 rgb0        = align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrp, a=unknown, ca=unknown, ca_f=unknown
@@ -114,22 +124,36 @@ rgb8        = align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrp, a=unknown, ca=unknown,
 rgba        = align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrap, a=unknown, ca=unknown, ca_f=unknown
 rgba64      = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
 rgba64be    = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
+rgbaf16     = no
+rgbaf16be   = no
+rgbaf32     = no
+rgbaf32be   = no
+rgbf32      = no
+rgbf32be    = no
 uyvy422     = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
 uyyvyy411   = no
 vaapi       = no
-vaapi_idct  = no
-vaapi_moco  = no
 vdpau       = no
 vdpau_output= no
 videotoolbox= no
 vulkan      = no
+vuya        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuva444pf, a=unknown, ca=unknown, ca_f=unknown
+vuyx        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
+x2bgr10     = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown
+x2bgr10be   = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown
 x2rgb10be   = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown
+xv30        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
+xv30be      = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
+xv36        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
+xv36be      = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
 xvmc        = no
 xyz12       = align=1:1 ov=gbrap  , ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown
 xyz12be     = align=1:1 ov=gbrap  , ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown
 y1          = no
 y210        = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
 y210be      = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
+y212        = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
+y212be      = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
 ya16        = align=1:1 ov=yap8   , ov_f=grayaf32, v_f=grayaf32, a=unknown, ca=unknown, ca_f=unknown
 ya16be      = align=1:1 ov=yap8   , ov_f=grayaf32, v_f=grayaf32, a=unknown, ca=unknown, ca_f=unknown
 ya8         = align=1:1 ov=yap8   , ov_f=grayaf32, v_f=grayaf32, a=unknown, ca=unknown, ca_f=unknown

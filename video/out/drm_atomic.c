@@ -107,14 +107,14 @@ int drm_object_set_property(drmModeAtomicReq *request, struct drm_object *object
    return -EINVAL;
 }
 
-struct drm_object * drm_object_create(struct mp_log *log, int fd,
-                                      uint32_t object_id, uint32_t type)
+struct drm_object *drm_object_create(struct mp_log *log, int fd,
+                                     uint32_t object_id, uint32_t type)
 {
     struct drm_object *obj = NULL;
     obj = talloc_zero(NULL, struct drm_object);
+    obj->fd = fd;
     obj->id = object_id;
     obj->type = type;
-    obj->fd = fd;
 
     if (drm_object_create_properties(log, fd, obj)) {
         talloc_free(obj);
@@ -195,7 +195,6 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
             if (connector->connector_id == connector_id)
                 ctx->connector =  drm_object_create(log, ctx->fd, connector->connector_id,
                                                     DRM_MODE_OBJECT_CONNECTOR);
-
             drmModeFreeConnector(connector);
             if (ctx->connector)
                 break;
@@ -211,8 +210,7 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
         drmplane = NULL;
 
         if (possible_crtcs & (1 << crtc_index)) {
-            plane = drm_object_create(log, ctx->fd, plane_id,
-                                      DRM_MODE_OBJECT_PLANE);
+            plane = drm_object_create(log, ctx->fd, plane_id, DRM_MODE_OBJECT_PLANE);
 
             if (!plane) {
                 mp_err(log, "Failed to create Plane object from plane ID %d\n",

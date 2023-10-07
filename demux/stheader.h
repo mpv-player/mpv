@@ -51,6 +51,7 @@ struct sh_stream {
     bool image;                 // video stream is an image
     bool still_image;           // video stream contains still images
     int hls_bitrate;
+    int program_id;
 
     struct mp_tags *tags;
 
@@ -105,6 +106,7 @@ struct mp_codec_params {
     int rotate;           // intended display rotation, in degrees, [0, 359]
     int stereo_mode;      // mp_stereo3d_mode (0 if none/unknown)
     struct mp_colorspace color; // colorspace info where available
+    struct mp_rect crop;        // crop to be applied
 
     // STREAM_VIDEO + STREAM_AUDIO
     int bits_per_coded_sample;

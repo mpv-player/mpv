@@ -44,18 +44,16 @@ The exact syntax is:
     the ``lavfi`` filter, which uses a very similar syntax as mpv (MPlayer
     historically) to specify filters and their parameters.
 
+.. note::
+
+    ``--vf`` can only take a single track as input, even if the filter supports
+    dynamic input. Filters that require multiple inputs can't be used.
+    Use ``--lavfi-complex`` for such a use case. This also applies for ``--af``.
+
 Filters can be manipulated at run time. You can use ``@`` labels as described
 above in combination with the ``vf`` command (see `COMMAND INTERFACE`_) to get
 more control over this. Initially disabled filters with ``!`` are useful for
 this as well.
-
-You can also set defaults for each filter. The defaults are applied before the
-normal filter parameters. This is deprecated and never worked for the
-libavfilter bridge.
-
-``--vf-defaults=<filter1[=parameter1:parameter2:...],filter2,...>``
-    Set defaults for each filter. (Deprecated. ``--af-defaults`` is deprecated
-    as well.)
 
 .. note::
 
@@ -141,6 +139,11 @@ Available mpv-only filters are:
 
             For a list of available formats, use ``--vf=format=fmt=help``.
 
+        .. note::
+
+            Conversion between hardware formats is supported in some cases.
+            eg: ``cuda`` to ``vulkan``, or ``vaapi`` to ``vulkan``.
+
     ``<convert=yes|no>``
         Force conversion of color parameters (default: no).
 
@@ -163,6 +166,9 @@ Available mpv-only filters are:
 
         If input and output video parameters are the same, conversion is always
         skipped.
+
+        When converting between hardware formats, this parameter has no effect,
+        and the only conversion that is done is the format conversion.
 
         .. admonition:: Examples
 
@@ -574,6 +580,12 @@ Available mpv-only filters are:
 
     ``display_fps``
         Refresh rate of the current display. Note that this value can be 0.
+
+    ``display_res``
+        Resolution of the current display. This is an integer array with the
+        first entry corresponding to the width and the second entry coresponding
+        to the height. These values can be 0. Note that this will not respond to
+        monitor changes and may not work on all platforms.
 
 ``vavpp``
     VA-API video post processing. Requires the system to support VA-API,

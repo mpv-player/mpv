@@ -27,17 +27,15 @@ local opts = {
     -- Set the font size used for the REPL and the console. This will be
     -- multiplied by "scale".
     font_size = 16,
+    border_size = 1,
     -- Remove duplicate entries in history as to only keep the latest one.
     history_dedup = true,
 }
 
 function detect_platform()
-    local o = {}
-    -- Kind of a dumb way of detecting the platform but whatever
-    if mp.get_property_native('options/vo-mmcss-profile', o) ~= o then
-        return 'windows'
-    elseif mp.get_property_native('options/macos-force-dedicated-gpu', o) ~= o then
-        return 'macos'
+    local platform = mp.get_property_native('platform')
+    if platform == 'darwin' or platform == 'windows' then
+        return platform
     elseif os.getenv('WAYLAND_DISPLAY') then
         return 'wayland'
     end
@@ -48,7 +46,7 @@ end
 local platform = detect_platform()
 if platform == 'windows' then
     opts.font = 'Consolas'
-elseif platform == 'macos' then
+elseif platform == 'darwin' then
     opts.font = 'Menlo'
 else
     opts.font = 'monospace'
@@ -66,8 +64,7 @@ local history = {}
 local history_pos = 1
 local log_buffer = {}
 local key_bindings = {}
-local global_margin_top = 0
-local global_margin_bottom = 0
+local global_margins = { t = 0, b = 0 }
 
 local update_timer = nil
 update_timer = mp.add_periodic_timer(0.05, function()
@@ -79,19 +76,11 @@ update_timer = mp.add_periodic_timer(0.05, function()
 end)
 update_timer:kill()
 
-utils.shared_script_property_observe("osc-margins", function(_, val)
+mp.observe_property("user-data/osc/margins", "native", function(_, val)
     if val then
-        -- formatted as "%f,%f,%f,%f" with left, right, top, bottom, each
-        -- value being the border size as ratio of the window size (0.0-1.0)
-        local vals = {}
-        for v in string.gmatch(val, "[^,]+") do
-            vals[#vals + 1] = tonumber(v)
-        end
-        global_margin_top = vals[3] -- top
-        global_margin_bottom = vals[4] -- bottom
+        global_margins = val
     else
-        global_margin_top = 0
-        global_margin_bottom = 0
+        global_margins = { t = 0, b = 0 }
     end
     update()
 end)
@@ -148,7 +137,7 @@ function update()
         return
     end
 
-    local coordinate_top = math.floor(global_margin_top * screeny + 0.5)
+    local coordinate_top = math.floor(global_margins.t * screeny + 0.5)
     local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
                                  screenx .. ',' .. screeny
     local ass = assdraw.ass_new()
@@ -156,7 +145,7 @@ function update()
                   '\\1a&H00&\\3a&H00&\\4a&H99&' ..
                   '\\1c&Heeeeee&\\3c&H111111&\\4c&H000000&' ..
                   '\\fn' .. opts.font .. '\\fs' .. opts.font_size ..
-                  '\\bord1\\xshad0\\yshad1\\fsp0\\q1' ..
+                  '\\bord' .. opts.border_size .. '\\xshad0\\yshad1\\fsp0\\q1' ..
                   '\\clip(' .. clipping_coordinates .. ')}'
     -- Create the cursor glyph as an ASS drawing. ASS will draw the cursor
     -- inline with the surrounding text, but it sets the advance to the width
@@ -177,7 +166,7 @@ function update()
     -- messages.
     local log_ass = ''
     local log_messages = #log_buffer
-    local screeny_factor = (1 - global_margin_top - global_margin_bottom)
+    local screeny_factor = (1 - global_margins.t - global_margins.b)
     -- subtract 1.5 to account for the input line
     local log_max_lines = screeny * screeny_factor / opts.font_size - 1.5
     log_max_lines = math.ceil(log_max_lines)
@@ -190,7 +179,7 @@ function update()
 
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2 - global_margin_bottom * screeny)
+    ass:pos(2, screeny - 2 - global_margins.b * screeny)
     ass:append(log_ass .. '\\N')
     ass:append(style .. '> ' .. before_cur)
     ass:append(cglyph)
@@ -200,7 +189,7 @@ function update()
     -- cursor appear in front of the text.
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2 - global_margin_bottom * screeny)
+    ass:pos(2, screeny - 2 - global_margins.b * screeny)
     ass:append(style .. '{\\alpha&HFF&}> ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
@@ -337,6 +326,9 @@ end
 
 function help_command(param)
     local cmdlist = mp.get_property_native('command-list')
+    table.sort(cmdlist, function(c1, c2)
+        return c1.name < c2.name
+    end)
     local error_style = '{\\1c&H7a77f2&}'
     local output = ''
     if param == '' then
@@ -515,6 +507,8 @@ function build_completers()
         { pattern = '^%s*add%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
         { pattern = '^%s*cycle%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
         { pattern = '^%s*cycle%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
+        { pattern = '^%s*cycle%-values%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
+        { pattern = '^%s*cycle%-values%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
         { pattern = '^%s*multiply%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
         { pattern = '^%s*multiply%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
         { pattern = '${()[%w_/-]+()$', list = prop_list, append = '}' },
@@ -686,7 +680,7 @@ function get_clipboard(clip)
         if not res.error then
             return res.stdout
         end
-    elseif platform == 'macos' then
+    elseif platform == 'darwin' then
         local res = utils.subprocess({
             args = { 'pbpaste' },
             playback_only = false,

@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include <libavutil/hwcontext.h>
 
 #include "hwdec.h"
@@ -29,7 +27,7 @@ static struct AVBufferRef *drm_create_standalone(struct mpv_global *global,
 {
     void *tmp = talloc_new(NULL);
     struct drm_opts *drm_opts = mp_get_config_group(tmp, global, &drm_conf);
-    const char *opt_path = drm_opts->drm_device_path;
+    const char *opt_path = drm_opts->device_path;
 
     const char *device_path = opt_path ? opt_path : "/dev/dri/renderD128";
     AVBufferRef* ref = NULL;

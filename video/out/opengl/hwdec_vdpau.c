@@ -46,10 +46,11 @@ struct priv {
 
 static int init(struct ra_hwdec *hw)
 {
-    Display *x11disp = ra_get_native_resource(hw->ra, "x11");
-    if (!x11disp || !ra_is_gl(hw->ra))
+    struct ra *ra = hw->ra_ctx->ra;
+    Display *x11disp = ra_get_native_resource(ra, "x11");
+    if (!x11disp || !ra_is_gl(ra))
         return -1;
-    GL *gl = ra_gl_get(hw->ra);
+    GL *gl = ra_gl_get(ra);
     if (!(gl->mpgl_caps & MPGL_CAP_VDPAU))
         return -1;
     struct priv_owner *p = hw->priv;

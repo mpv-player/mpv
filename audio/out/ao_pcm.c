@@ -19,8 +19,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,8 +42,8 @@
 
 struct priv {
     char *outputfilename;
-    int waveheader;
-    int append;
+    bool waveheader;
+    bool append;
     uint64_t data_length;
     FILE *fp;
 };
@@ -239,11 +237,11 @@ const struct ao_driver audio_out_pcm = {
     .start     = start,
     .reset     = reset,
     .priv_size = sizeof(struct priv),
-    .priv_defaults = &(const struct priv) { .waveheader = 1 },
+    .priv_defaults = &(const struct priv) { .waveheader = true },
     .options = (const struct m_option[]) {
         {"file", OPT_STRING(outputfilename), .flags = M_OPT_FILE},
-        {"waveheader", OPT_FLAG(waveheader)},
-        {"append", OPT_FLAG(append)},
+        {"waveheader", OPT_BOOL(waveheader)},
+        {"append", OPT_BOOL(append)},
         {0}
     },
     .options_prefix = "ao-pcm",

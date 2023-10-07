@@ -23,7 +23,7 @@
 
 struct vo;
 
-int vo_android_init(struct vo *vo);
+bool vo_android_init(struct vo *vo);
 void vo_android_uninit(struct vo *vo);
 ANativeWindow *vo_android_native_window(struct vo *vo);
 bool vo_android_surface_size(struct vo *vo, int *w, int *h);

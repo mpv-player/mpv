@@ -4,28 +4,43 @@ Compiling for Windows
 Compiling for Windows is supported with MinGW-w64. This can be used to produce
 both 32-bit and 64-bit executables, and it works for building on Windows and
 cross-compiling from Linux and Cygwin. MinGW-w64 is available from:
-http://mingw-w64.sourceforge.net.
+https://www.mingw-w64.org/
 
 While building a complete MinGW-w64 toolchain yourself is possible, there are a
 few build environments and scripts to help ease the process, such as MSYS2 and
 MXE. Note that MinGW environments included in Linux distributions are often
 broken, outdated and useless, and usually don't use MinGW-w64.
 
-**Warning**: the original MinGW (http://www.mingw.org) is unsupported.
+**Warning**: the original MinGW (https://osdn.net/projects/mingw/) is unsupported.
 
 Cross-compilation
 =================
 
-When cross-compiling, you have to run mpv's configure with these arguments:
+When cross-compiling, it is recommended to use a meson crossfile to setup
+the cross compiling environment. A minimal example is included below:
 
-```bash
-DEST_OS=win32 TARGET=i686-w64-mingw32 ./waf configure
+```ini
+[binaries]
+c = 'x86_64-w64-mingw32-gcc'
+cpp = 'x86_64-w64-mingw32-g++'
+ar = 'x86_64-w64-mingw32-ar'
+strip = 'x86_64-w64-mingw32-strip'
+exe_wrapper = 'wine64'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
 ```
+
+See [meson's documentation](https://mesonbuild.com/Cross-compilation.html) for
+more information.
 
 [MXE](https://mxe.cc) makes it very easy to bootstrap a complete MingGW-w64
 environment from a Linux machine. See a working example below.
 
-Alternatively, you can try [mingw-w64-cmake](https://github.com/lachs0r/mingw-w64-cmake),
+Alternatively, you can try [mpv-winbuild-cmake](https://github.com/shinchiro/mpv-winbuild-cmake),
 which bootstraps a MinGW-w64 environment and builds mpv and dependencies.
 
 Example with MXE
@@ -79,11 +94,8 @@ export PATH=/opt/mxe/usr/bin/:$PATH
 cd ..
 git clone https://github.com/mpv-player/mpv.git
 cd mpv
-python ./bootstrap.py
-DEST_OS=win32 TARGET=i686-w64-mingw32.static ./waf configure
-# Or, if 64 bit version,
-# DEST_OS=win32 TARGET=x86_64-w64-mingw32.static ./waf configure
-./waf build
+meson setup build --crossfile crossfile
+meson compile -C build
 ```
 
 Native compilation with MSYS2
@@ -99,7 +111,7 @@ To build 64-bit mpv on Windows:
 Installing MSYS2
 ----------------
 
-1. Download an installer from https://msys2.github.io/
+1. Download an installer from https://www.msys2.org/
 
    Both the i686 and the x86_64 version of MSYS2 can build 32-bit and 64-bit
    mpv binaries when running on a 64-bit version of Windows, but the x86_64
@@ -132,37 +144,30 @@ Installing mpv dependencies
 
 ```bash
 # Install MSYS2 build dependencies and a MinGW-w64 compiler
-pacman -S git python $MINGW_PACKAGE_PREFIX-{pkg-config,gcc}
+pacman -S git $MINGW_PACKAGE_PREFIX-{python,pkgconf,gcc,meson}
 
 # Install the most important MinGW-w64 dependencies. libass and lcms2 are also
 # pulled in as dependencies of ffmpeg.
-pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,lua51}
+pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,luajit}
 ```
 
 Building mpv
 ------------
 
-Clone the latest mpv from git and install waf. **Note:** ``/usr/bin/python3``
-is invoked directly here, since an MSYS2 version of Python is required.
-
-```bash
-git clone https://github.com/mpv-player/mpv.git && cd mpv
-/usr/bin/python3 bootstrap.py
-```
-
 Finally, compile and install mpv. Binaries will be installed to
 ``/mingw64/bin`` or ``/mingw32/bin``.
 
 ```bash
-/usr/bin/python3 waf configure CC=gcc.exe --check-c-compiler=gcc --prefix=$MSYSTEM_PREFIX
-/usr/bin/python3 waf install
+meson setup build --prefix=$MSYSTEM_PREFIX
+meson compile -C build
 ```
 
 Or, compile and install both libmpv and mpv:
 
 ```bash
-/usr/bin/python3 waf configure CC=gcc.exe --check-c-compiler=gcc --enable-libmpv-shared --prefix=$MSYSTEM_PREFIX
-/usr/bin/python3 waf install
+meson setup build -Dlibmpv=true --prefix=$MSYSTEM_PREFIX
+meson compile -C build
+meson install -C build
 ```
 
 Linking libmpv with MSVC programs
@@ -177,13 +182,11 @@ To do this, you need a Visual Studio which supports ``stdint.h`` (recent ones do
 and you need to create a import library for the mpv DLL:
 
 ```bash
-lib /def:mpv.def /name:mpv-1.dll /out:mpv.lib /MACHINE:X64
+lib /name:mpv-1.dll /out:mpv.lib /MACHINE:X64
 ```
 
 The string in the ``/name:`` parameter must match the filename of the DLL (this
-is simply the filename the MSVC linker will use). The ``mpv.def`` can be
-retrieved from the mpv build directory, or can be produced by MingGW's
-gendef.exe helper from the mpv DLL.
+is simply the filename the MSVC linker will use).
 
 Static linking is not possible.
 
@@ -208,6 +211,4 @@ Use of the ANGLE OpenGL backend requires a copy of the D3D compiler DLL that
 matches the version of the D3D SDK that ANGLE was built with
 (``d3dcompiler_43.dll`` in case of MinGW-built ANGLE) in the path or in the
 same folder as mpv. It must be of the same architecture (x86_64 / i686) as the
-mpv you compiled. You can find copies here:
-
-https://mpv.srsfckn.biz/d3dcompiler.7z
+mpv you compiled.
