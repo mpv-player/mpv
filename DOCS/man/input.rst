@@ -1930,6 +1930,11 @@ Property list
     This replaces the ``length`` property, which was deprecated after the
     mpv 0.9 release. (The semantics are the same.)
 
+    This has a sub-property:
+
+    ``duration/full``
+        ``duration`` with milliseconds.
+
 ``avsync``
     Last A/V synchronization difference. Unavailable if audio or video is
     disabled.
@@ -1976,6 +1981,11 @@ Property list
 ``time-pos`` (RW)
     Position in current file in seconds.
 
+    This has a sub-property:
+
+    ``time-pos/full``
+        ``time-pos`` with milliseconds.
+
 ``time-start``
     Deprecated. Always returns 0. Before mpv 0.14, this used to return the start
     time of the file (could affect e.g. transport streams). See
@@ -1985,20 +1995,40 @@ Property list
     Remaining length of the file in seconds. Note that the file duration is not
     always exactly known, so this is an estimate.
 
+    This has a sub-property:
+
+    ``time-remaining/full``
+        ``time-remaining`` with milliseconds.
+
 ``audio-pts``
     Current audio playback position in current file in seconds. Unlike time-pos,
     this updates more often than once per frame. For audio-only files, it is
     mostly equivalent to time-pos, while for video-only files this property is
     not available.
 
+    This has a sub-property:
+
+    ``audio-pts/full``
+        ``audio-pts`` with milliseconds.
+
 ``playtime-remaining``
     ``time-remaining`` scaled by the current ``speed``.
+
+    This has a sub-property:
+
+    ``playtime-remaining/full``
+        ``playtime-remaining`` with milliseconds.
 
 ``playback-time`` (RW)
     Position in current file in seconds. Unlike ``time-pos``, the time is
     clamped to the range of the file. (Inaccurate file durations etc. could
     make it go out of range. Useful on attempts to seek outside of the file,
     as the seek target time is considered the current position during seeking.)
+
+    This has a sub-property:
+
+    ``playback-time/full``
+        ``playback-time`` with milliseconds.
 
 ``chapter`` (RW)
     Current chapter number. The number of the first chapter is 0.
