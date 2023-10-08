@@ -272,8 +272,8 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
 read_more: ;  /* need more bytes */
 }
 
-static volatile int getch2_active  = 0;
-static volatile int getch2_enabled = 0;
+static int getch2_active  = 0;
+static int getch2_enabled = 0;
 static bool read_terminal;
 
 static void enable_kx(bool enable)
@@ -349,10 +349,16 @@ static void getch2_poll(void)
         do_deactivate_getch2();
 }
 
+static pthread_t input_thread;
+static struct input_ctx *input_ctx;
+static int death_pipe[2] = {-1, -1};
+enum { PIPE_STOP, PIPE_CONT };
+static int stop_cont_pipe[2] = {-1, -1};
+
 static void stop_sighandler(int signum)
 {
     int saved_errno = errno;
-    do_deactivate_getch2();
+    (void)write(stop_cont_pipe[1], &(char){PIPE_STOP}, 1);
     errno = saved_errno;
 
     // note: for this signal, we use SA_RESETHAND but do NOT mask signals
@@ -366,20 +372,22 @@ static void continue_sighandler(int signum)
     // SA_RESETHAND has reset SIGTSTP, so we need to restore it here
     setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
 
-    getch2_poll();
+    (void)write(stop_cont_pipe[1], &(char){PIPE_CONT}, 1);
     errno = saved_errno;
 }
 
-static pthread_t input_thread;
-static struct input_ctx *input_ctx;
-static int death_pipe[2] = {-1, -1};
+static void safe_close(int *p)
+{
+    if (*p >= 0)
+        close(*p);
+    *p = -1;
+}
 
-static void close_death_pipe(void)
+static void close_sig_pipes(void)
 {
     for (int n = 0; n < 2; n++) {
-        if (death_pipe[n] >= 0)
-            close(death_pipe[n]);
-        death_pipe[n] = -1;
+        safe_close(&death_pipe[n]);
+        safe_close(&stop_cont_pipe[n]);
     }
 }
 
@@ -404,8 +412,9 @@ static void *terminal_thread(void *ptr)
     bool stdin_ok = read_terminal; // if false, we still wait for SIGTERM
     while (1) {
         getch2_poll();
-        struct pollfd fds[2] = {
+        struct pollfd fds[3] = {
             { .events = POLLIN, .fd = death_pipe[0] },
+            { .events = POLLIN, .fd = stop_cont_pipe[0] },
             { .events = POLLIN, .fd = tty_in }
         };
         /*
@@ -419,12 +428,20 @@ static void *terminal_thread(void *ptr)
          * care of it so it's fine.
          */
         bool is_fg = tcgetpgrp(tty_in) == getpgrp();
-        int r = polldev(fds, stdin_ok && is_fg ? 2 : 1, buf.len ? ESC_TIMEOUT : INPUT_TIMEOUT);
+        int r = polldev(fds, stdin_ok && is_fg ? 3 : 2, buf.len ? ESC_TIMEOUT : INPUT_TIMEOUT);
         if (fds[0].revents) {
             do_deactivate_getch2();
             break;
         }
-        if (fds[1].revents) {
+        if (fds[1].revents & POLLIN) {
+            int8_t c = -1;
+            read(stop_cont_pipe[0], &c, 1);
+            if (c == PIPE_STOP)
+                do_deactivate_getch2();
+            else if (c == PIPE_CONT)
+                getch2_poll();
+        }
+        if (fds[2].revents) {
             int retval = read(tty_in, &buf.b[buf.len], BUF_LEN - buf.len);
             if (!retval || (retval == -1 && errno != EINTR && errno != EAGAIN && errno != EIO))
                 break; // EOF/closed
@@ -454,6 +471,10 @@ void terminal_setup_getch(struct input_ctx *ictx)
 
     if (mp_make_wakeup_pipe(death_pipe) < 0)
         return;
+    if (mp_make_wakeup_pipe(stop_cont_pipe) < 0) {
+        close_sig_pipes();
+        return;
+    }
 
     // Disable reading from the terminal even if stdout is not a tty, to make
     //   mpv ... | less
@@ -464,7 +485,7 @@ void terminal_setup_getch(struct input_ctx *ictx)
 
     if (pthread_create(&input_thread, NULL, terminal_thread, NULL)) {
         input_ctx = NULL;
-        close_death_pipe();
+        close_sig_pipes();
         close_tty();
         return;
     }
@@ -491,7 +512,7 @@ void terminal_uninit(void)
     if (input_ctx) {
         (void)write(death_pipe[1], &(char){0}, 1);
         pthread_join(input_thread, NULL);
-        close_death_pipe();
+        close_sig_pipes();
         input_ctx = NULL;
     }
 
