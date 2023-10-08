@@ -452,10 +452,10 @@ static void check_estimated_display_fps(struct vo *vo)
     }
     if (use_estimated == (fabs(in->vsync_interval - in->nominal_vsync_interval) < 1e9)) {
         if (use_estimated) {
-            MP_VERBOSE(vo, "adjusting display FPS to a value closer to %.3f Hz\n",
+            MP_TRACE(vo, "adjusting display FPS to a value closer to %.3f Hz\n",
                        1e9 / in->estimated_vsync_interval);
         } else {
-            MP_VERBOSE(vo, "switching back to assuming display fps = %.3f Hz\n",
+            MP_TRACE(vo, "switching back to assuming display fps = %.3f Hz\n",
                        1e9 / in->nominal_vsync_interval);
         }
     }
