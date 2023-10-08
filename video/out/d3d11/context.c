@@ -103,8 +103,8 @@ struct priv {
     struct mp_colorspace swapchain_csp;
 
     int64_t perf_freq;
-    unsigned last_sync_refresh_count;
-    int64_t last_sync_qpc_time;
+    unsigned sync_refresh_count;
+    int64_t sync_qpc_time;
     int64_t vsync_duration_qpc;
     int64_t last_submit_qpc;
 };
@@ -303,28 +303,33 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
     DXGI_FRAME_STATISTICS stats;
     hr = IDXGISwapChain_GetFrameStatistics(p->swapchain, &stats);
     if (hr == DXGI_ERROR_FRAME_STATISTICS_DISJOINT) {
-        p->last_sync_refresh_count = 0;
-        p->last_sync_qpc_time = 0;
+        p->sync_refresh_count = 0;
+        p->sync_qpc_time = 0;
     }
     if (FAILED(hr))
         return;
 
+    info->last_queue_display_time = 0;
+    info->vsync_duration = 0;
     // Detecting skipped vsyncs is possible but not supported yet
-    info->skipped_vsyncs = 0;
+    info->skipped_vsyncs = -1;
 
-    // Get the number of physical vsyncs that have passed since the last call.
+    // Get the number of physical vsyncs that have passed since the start of the
+    // playback or disjoint event.
     // Check for 0 here, since sometimes GetFrameStatistics returns S_OK but
     // with 0s in some (all?) members of DXGI_FRAME_STATISTICS.
     unsigned src_passed = 0;
-    if (stats.SyncRefreshCount && p->last_sync_refresh_count)
-        src_passed = stats.SyncRefreshCount - p->last_sync_refresh_count;
-    p->last_sync_refresh_count = stats.SyncRefreshCount;
+    if (stats.SyncRefreshCount && p->sync_refresh_count)
+        src_passed = stats.SyncRefreshCount - p->sync_refresh_count;
+    if (p->sync_refresh_count == 0)
+        p->sync_refresh_count = stats.SyncRefreshCount;
 
     // Get the elapsed time passed between the above vsyncs
     unsigned sqt_passed = 0;
-    if (stats.SyncQPCTime.QuadPart && p->last_sync_qpc_time)
-        sqt_passed = stats.SyncQPCTime.QuadPart - p->last_sync_qpc_time;
-    p->last_sync_qpc_time = stats.SyncQPCTime.QuadPart;
+    if (stats.SyncQPCTime.QuadPart && p->sync_qpc_time)
+        sqt_passed = stats.SyncQPCTime.QuadPart - p->sync_qpc_time;
+    if (p->sync_qpc_time == 0)
+        p->sync_qpc_time = stats.SyncQPCTime.QuadPart;
 
     // If any vsyncs have passed, estimate the physical frame rate
     if (src_passed && sqt_passed)
