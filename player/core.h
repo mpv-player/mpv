@@ -485,7 +485,6 @@ void uninit_audio_chain(struct MPContext *mpctx);
 int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track);
 void audio_update_volume(struct MPContext *mpctx);
-void audio_update_balance(struct MPContext *mpctx);
 void reload_audio_output(struct MPContext *mpctx);
 void audio_start_ao(struct MPContext *mpctx);
 
@@ -506,7 +505,6 @@ void mp_abort_recheck_locked(struct MPContext *mpctx,
                              struct mp_abort_entry *abort);
 void mp_abort_trigger_locked(struct MPContext *mpctx,
                              struct mp_abort_entry *abort);
-void uninit_player(struct MPContext *mpctx, unsigned int mask);
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
                          enum stream_type filter, struct mp_cancel *cancel,
                          bool cover_art);
@@ -634,8 +632,6 @@ void update_osd_msg(struct MPContext *mpctx);
 bool update_subtitles(struct MPContext *mpctx, double video_pts);
 
 // video.c
-int video_get_colors(struct vo_chain *vo_c, const char *item, int *value);
-int video_set_colors(struct vo_chain *vo_c, const char *item, int value);
 void reset_video_state(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_video_chain(struct MPContext *mpctx);
