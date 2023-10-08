@@ -482,7 +482,6 @@ void clear_audio_output_buffers(struct MPContext *mpctx);
 void update_playback_speed(struct MPContext *mpctx);
 void uninit_audio_out(struct MPContext *mpctx);
 void uninit_audio_chain(struct MPContext *mpctx);
-int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track);
 void audio_update_volume(struct MPContext *mpctx);
 void reload_audio_output(struct MPContext *mpctx);
@@ -642,6 +641,5 @@ void mp_force_video_refresh(struct MPContext *mpctx);
 void uninit_video_out(struct MPContext *mpctx);
 void uninit_video_chain(struct MPContext *mpctx);
 double calc_average_frame_duration(struct MPContext *mpctx);
-int init_video_decoder(struct MPContext *mpctx, struct track *track);
 
 #endif /* MPLAYER_MP_CORE_H */
