@@ -680,13 +680,13 @@ with values found in the config-file and the command-line (in that order).
 
 Example implementation::
 
-    require 'mp.options'
     local options = {
         optionA = "defaultvalueA",
         optionB = -0.5,
         optionC = true,
     }
-    read_options(options, "myscript")
+
+    require "mp.options".read_options(options, "myscript")
     print(options.optionA)
 
 
