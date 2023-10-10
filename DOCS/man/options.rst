@@ -1290,7 +1290,8 @@ Video
                 ``--gpu-context=angle`` or ``--gpu-context=dxinterop``
                 (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
-    :vdpau:     requires ``--vo=gpu`` with X11, or ``--vo=vdpau`` (Linux only)
+    :vdpau:     requires ``--vo=gpu`` with ``--gpu-context=x11``, or
+                ``--vo=vdpau`` (Linux only)
     :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
     :mediacodec: requires ``--vo=gpu --gpu-context=android``
                  or ``--vo=mediacodec_embed`` (Android only)
