@@ -517,12 +517,13 @@ local function formats_to_edl(json, formats, use_all_formats)
         end
     end
 
+    local tags = tags_to_edl(json)
+
     -- Merge all tracks into a single virtual file, but avoid EDL if it's
-    -- only a single track (i.e. redundant).
-    if #streams == 1 and single_url then
+    -- only a single track without metadata (i.e. redundant).
+    if #streams == 1 and single_url and not tags then
         res.url = single_url
     elseif #streams > 0 then
-        local tags = tags_to_edl(json)
         if tags then
             -- not a stream; just for the sake of concatenating the EDL string
             streams[#streams + 1] = tags
