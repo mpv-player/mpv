@@ -830,6 +830,7 @@ end
 function get_bindings()
     local bindings = {
         { 'esc',         function() set_active(false) end       },
+        { 'ctrl+[',      function() set_active(false) end       },
         { 'enter',       handle_enter                           },
         { 'kp_enter',    handle_enter                           },
         { 'shift+enter', function() handle_char_input('\n') end },
