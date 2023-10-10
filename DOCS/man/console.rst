@@ -11,7 +11,7 @@ Keybindings
 \`
     Show the console.
 
-ESC
+ESC and Ctrl+[
     Hide the console.
 
 ENTER, Ctrl+J and Ctrl+M
