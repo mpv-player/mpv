@@ -2537,7 +2537,7 @@ static bool thread_work(struct demux_internal *in)
     }
     if (read_packet(in))
         return true; // read_packet unlocked, so recheck conditions
-    if (mp_time_us() >= in->next_cache_update) {
+    if (mp_time_ns() >= in->next_cache_update) {
         update_cache(in);
         return true;
     }
@@ -2556,7 +2556,7 @@ static void *demux_thread(void *pctx)
         if (thread_work(in))
             continue;
         pthread_cond_signal(&in->wakeup);
-        struct timespec until = mp_time_us_to_realtime(in->next_cache_update);
+        struct timespec until = mp_time_ns_to_realtime(in->next_cache_update);
         pthread_cond_timedwait(&in->wakeup, &in->lock, &until);
     }
 
@@ -4130,9 +4130,9 @@ static void update_cache(struct demux_internal *in)
     struct demuxer *demuxer = in->d_thread;
     struct stream *stream = demuxer->stream;
 
-    int64_t now = mp_time_us();
+    int64_t now = mp_time_ns();
     int64_t diff = now - in->last_speed_query;
-    bool do_update = diff >= MP_SECOND_US;
+    bool do_update = diff >= MP_TIME_S_TO_NS(1);
 
     // Don't lock while querying the stream.
     pthread_mutex_unlock(&in->lock);
@@ -4162,14 +4162,14 @@ static void update_cache(struct demux_internal *in)
         uint64_t bytes = in->cache_unbuffered_read_bytes;
         in->cache_unbuffered_read_bytes = 0;
         in->last_speed_query = now;
-        double speed = bytes / (diff / (double)MP_SECOND_US);
+        double speed = bytes / (diff / (double)MP_TIME_S_TO_NS(1));
         in->bytes_per_second = 0.5 * in->speed_query_prev_sample +
                                0.5 * speed;
         in->speed_query_prev_sample = speed;
     }
     // The idea is to update as long as there is "activity".
     if (in->bytes_per_second)
-        in->next_cache_update = now + MP_SECOND_US + 1;
+        in->next_cache_update = now + MP_TIME_S_TO_NS(1) + MP_TIME_US_TO_NS(1);
 }
 
 static void dumper_close(struct demux_internal *in)
