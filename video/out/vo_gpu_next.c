@@ -1578,13 +1578,13 @@ static void wakeup(struct vo *vo)
         p->ra_ctx->fns->wakeup(p->ra_ctx);
 }
 
-static void wait_events(struct vo *vo, int64_t until_time_us)
+static void wait_events(struct vo *vo, int64_t until_time_ns)
 {
     struct priv *p = vo->priv;
     if (p->ra_ctx && p->ra_ctx->fns->wait_events) {
-        p->ra_ctx->fns->wait_events(p->ra_ctx, until_time_us);
+        p->ra_ctx->fns->wait_events(p->ra_ctx, until_time_ns);
     } else {
-        vo_wait_default(vo, until_time_us);
+        vo_wait_default(vo, until_time_ns);
     }
 }
 

@@ -31,7 +31,7 @@
 
 #include "osdep/io.h"
 #include "osdep/threads.h"
-#include "osdep/polldev.h"
+#include "osdep/poll_wrapper.h"
 
 #include "common/common.h"
 #include "misc/bstr.h"

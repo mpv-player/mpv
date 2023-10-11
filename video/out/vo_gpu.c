@@ -252,13 +252,13 @@ static void wakeup(struct vo *vo)
         p->ctx->fns->wakeup(p->ctx);
 }
 
-static void wait_events(struct vo *vo, int64_t until_time_us)
+static void wait_events(struct vo *vo, int64_t until_time_ns)
 {
     struct gpu_priv *p = vo->priv;
     if (p->ctx && p->ctx->fns->wait_events) {
-        p->ctx->fns->wait_events(p->ctx, until_time_us);
+        p->ctx->fns->wait_events(p->ctx, until_time_ns);
     } else {
-        vo_wait_default(vo, until_time_us);
+        vo_wait_default(vo, until_time_ns);
     }
 }
 

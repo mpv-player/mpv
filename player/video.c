@@ -59,6 +59,7 @@ static const char av_desync_help_text[] =
 "Audio/Video desynchronisation detected! Possible reasons include too slow\n"
 "hardware, temporary CPU spikes, broken drivers, and broken files. Audio\n"
 "position will not match to the video (see A-V status field).\n"
+"Consider trying `--profile=fast` and/or `--hwdec=auto-safe` as they may help.\n"
 "\n";
 
 static bool recreate_video_filters(struct MPContext *mpctx)
@@ -1160,10 +1161,8 @@ void write_video(struct MPContext *mpctx)
     struct mp_image_params *p = &mpctx->next_frames[0]->params;
     if (!vo->params || !mp_image_params_equal(p, vo->params)) {
         // Changing config deletes the current frame; wait until it's finished.
-        if (vo_still_displaying(vo)) {
-            vo_request_wakeup_on_done(vo);
+        if (vo_still_displaying(vo))
             return;
-        }
 
         const struct vo_driver *info = mpctx->video_out->driver;
         char extra[20] = {0};
@@ -1199,7 +1198,7 @@ void write_video(struct MPContext *mpctx)
     }
 
     double time_frame = MPMAX(mpctx->time_frame, -1);
-    int64_t pts = mp_time_us() + (int64_t)(time_frame * 1e6);
+    int64_t pts = mp_time_ns() + (int64_t)(time_frame * 1e9);
 
     // wait until VO wakes us up to get more frames
     // (NB: in theory, the 1st frame after display sync mode change uses the
@@ -1241,7 +1240,7 @@ void write_video(struct MPContext *mpctx)
         diff /= mpctx->video_speed;
         if (mpctx->time_frame < 0)
             diff += mpctx->time_frame;
-        frame->duration = MPCLAMP(diff, 0, 10) * 1e6;
+        frame->duration = MPCLAMP(diff, 0, 10) * 1e9;
     }
 
     mpctx->video_pts = mpctx->next_frames[0]->pts;

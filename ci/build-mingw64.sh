@@ -162,7 +162,7 @@ _spirv_cross () {
 _spirv_cross_mark=lib/libspirv-cross-c-shared.dll.a
 
 _vulkan_headers () {
-    [ -d Vulkan-Headers ] || $gitclone https://github.com/KhronosGroup/Vulkan-Headers
+    [ -d Vulkan-Headers ] || $gitclone https://github.com/KhronosGroup/Vulkan-Headers -b v1.3.266
     builddir Vulkan-Headers
     cmake .. "${cmake_args[@]}"
     makeplusinstall
@@ -171,7 +171,7 @@ _vulkan_headers () {
 _vulkan_headers_mark=include/vulkan/vulkan.h
 
 _vulkan_loader () {
-    [ -d Vulkan-Loader ] || $gitclone https://github.com/KhronosGroup/Vulkan-Loader
+    [ -d Vulkan-Loader ] || $gitclone https://github.com/KhronosGroup/Vulkan-Loader -b v1.3.266
     builddir Vulkan-Loader
     cmake .. "${cmake_args[@]}" \
         -DENABLE_WERROR=OFF

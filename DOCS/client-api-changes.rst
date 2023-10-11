@@ -32,6 +32,8 @@ API changes
 
 ::
 
+ --- mpv 0.37.0 ---
+ 2.2    - add mpv_time_ns()
  --- mpv 0.36.0 ---
  2.1    - add mpv_del_property()
  --- mpv 0.35.0 ---

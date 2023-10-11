@@ -403,7 +403,7 @@ if posix
     subprocess_source = files('osdep/subprocess-posix.c')
     sources += path_source + subprocess_source + \
                files('input/ipc-unix.c',
-                     'osdep/polldev.c',
+                     'osdep/poll_wrapper.c',
                      'osdep/terminal-unix.c',
                      'sub/filter_regex.c')
 endif
@@ -423,6 +423,9 @@ if posix and not darwin
     sources += files('osdep/path-unix.c',
                      'osdep/timer-linux.c')
 endif
+
+features += {'ppoll': cc.has_function('ppoll', args: '-D_GNU_SOURCE',
+                                      prefix: '#include <poll.h>')}
 
 cd_devices = {
     'windows': 'D:',

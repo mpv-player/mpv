@@ -52,17 +52,41 @@ void mp_end_hires_timers(int res_ms)
 #endif
 }
 
-void mp_sleep_us(int64_t us)
+void mp_sleep_ns(int64_t ns)
 {
-    if (us < 0)
+    if (ns < 0)
         return;
-    // Sleep(0) won't sleep for one clocktick as the unix usleep
-    // instead it will only make the thread ready
-    // it may take some time until it actually starts to run again
-    if (us < 1000)
-        us = 1000;
-    int hrt = mp_start_hires_timers(us / 1000);
-    Sleep(us / 1000);
+
+    int hrt = mp_start_hires_timers(ns < 1e6 ? 1 : ns / 1e6);
+
+#ifndef CREATE_WAITABLE_TIMER_HIGH_RESOLUTION
+#define CREATE_WAITABLE_TIMER_HIGH_RESOLUTION 0x2
+#endif
+
+    HANDLE timer = CreateWaitableTimerEx(NULL, NULL,
+                                         CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
+                                         TIMER_ALL_ACCESS);
+
+    // CREATE_WAITABLE_TIMER_HIGH_RESOLUTION is supported in Windows 10 1803+,
+    // retry without it.
+    if (!timer)
+        timer = CreateWaitableTimerEx(NULL, NULL, 0, TIMER_ALL_ACCESS);
+
+    if (!timer)
+        goto end;
+
+    // Time is expected in 100 nanosecond intervals.
+    // Negative values indicate relative time.
+    LARGE_INTEGER time = (LARGE_INTEGER){ .QuadPart = -(ns / 100) };
+    if (!SetWaitableTimer(timer, &time, 0, NULL, NULL, 0))
+        goto end;
+
+    if (WaitForSingleObject(timer, INFINITE) != WAIT_OBJECT_0)
+        goto end;
+
+end:
+    if (timer)
+        CloseHandle(timer);
     mp_end_hires_timers(hrt);
 }
 

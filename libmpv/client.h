@@ -248,7 +248,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 1)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 2)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -602,7 +602,7 @@ MPV_EXPORT mpv_handle *mpv_create_weak_client(mpv_handle *ctx, const char *name)
 MPV_EXPORT int mpv_load_config_file(mpv_handle *ctx, const char *filename);
 
 /**
- * Return the internal time in microseconds. This has an arbitrary start offset,
+ * Return the internal time in nanoseconds. This has an arbitrary start offset,
  * but will never wrap or go backwards.
  *
  * Note that this is always the real time, and doesn't necessarily have to do
@@ -614,6 +614,11 @@ MPV_EXPORT int mpv_load_config_file(mpv_handle *ctx, const char *filename);
  * within wakeup callbacks), as long as the context is valid.
  *
  * Safe to be called from mpv render API threads.
+ */
+MPV_EXPORT int64_t mpv_get_time_ns(mpv_handle *ctx);
+
+/**
+ * Same as mpv_get_time_ns but in microseconds.
  */
 MPV_EXPORT int64_t mpv_get_time_us(mpv_handle *ctx);
 
@@ -1951,6 +1956,8 @@ MPV_DEFINE_SYM_PTR(mpv_create_weak_client)
 #define mpv_create_weak_client pfn_mpv_create_weak_client
 MPV_DEFINE_SYM_PTR(mpv_load_config_file)
 #define mpv_load_config_file pfn_mpv_load_config_file
+MPV_DEFINE_SYM_PTR(mpv_get_time_ns)
+#define mpv_get_time_ns pfn_mpv_get_time_ns
 MPV_DEFINE_SYM_PTR(mpv_get_time_us)
 #define mpv_get_time_us pfn_mpv_get_time_us
 MPV_DEFINE_SYM_PTR(mpv_free_node_contents)

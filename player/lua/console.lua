@@ -21,8 +21,8 @@ local opts = {
     -- All drawing is scaled by this value, including the text borders and the
     -- cursor. Change it if you have a high-DPI display.
     scale = 1,
-    -- Set the font used for the REPL and the console. This probably doesn't
-    -- have to be a monospaced font.
+    -- Set the font used for the REPL and the console.
+    -- This has to be a monospaced font.
     font = "",
     -- Set the font size used for the REPL and the console. This will be
     -- multiplied by "scale".
@@ -30,6 +30,9 @@ local opts = {
     border_size = 1,
     -- Remove duplicate entries in history as to only keep the latest one.
     history_dedup = true,
+    -- The ratio of font height to font width.
+    -- Adjusts table width of completion suggestions.
+    font_hw_ratio = 2.0,
 }
 
 function detect_platform()
@@ -55,6 +58,22 @@ end
 -- Apply user-set options
 options.read_options(opts)
 
+local styles = {
+    -- Colors are stolen from base16 Eighties by Chris Kempson
+    -- and converted to BGR as is required by ASS.
+    -- 2d2d2d 393939 515151 697374
+    -- 939fa0 c8d0d3 dfe6e8 ecf0f2
+    -- 7a77f2 5791f9 66ccff 99cc99
+    -- cccc66 cc9966 cc99cc 537bd2
+
+    debug = '{\\1c&Ha09f93&}',
+    verbose = '{\\1c&H99cc99&}',
+    warn = '{\\1c&H66ccff&}',
+    error = '{\\1c&H7a77f2&}',
+    fatal = '{\\1c&H5791f9&\\b1}',
+    suggestion = '{\\1c&Hcc99cc&}',
+}
+
 local repl_active = false
 local insert_mode = false
 local pending_update = false
@@ -63,6 +82,7 @@ local cursor = 1
 local history = {}
 local history_pos = 1
 local log_buffer = {}
+local suggestion_buffer = {}
 local key_bindings = {}
 local global_margins = { t = 0, b = 0 }
 
@@ -119,6 +139,79 @@ function ass_escape(str)
     return str
 end
 
+-- Takes a list of strings, a max width in characters and
+-- optionally a max row count.
+-- The result contains at least one column.
+-- Rows are cut off from the top if rows_max is specified.
+-- returns a string containing the formatted table and the row count
+function format_table(list, width_max, rows_max)
+    if #list == 0 then
+        return '', 0
+    end
+
+    local spaces_min = 2
+    local spaces_max = 8
+    local list_size = #list
+    local column_count = 1
+    local row_count = list_size
+    local column_widths
+    -- total width without spacing
+    local width_total = 0
+
+    local list_widths = {}
+    for i, item in ipairs(list) do
+        list_widths[i] = len_utf8(item)
+    end
+
+    -- use as many columns as possible
+    for rows = 1, list_size do
+        local columns = math.ceil(list_size / rows)
+        column_widths = {}
+        width_total = 0
+
+        -- find out width of each column
+        for column = 1, columns do
+            local width = 0
+            for row = 1, rows do
+                local i = row + (column - 1) * rows
+                if i > #list then break end
+                local item_width = list_widths[i]
+                if width < item_width then
+                    width = item_width
+                end
+            end
+            column_widths[column] = width
+            width_total = width_total + width
+        end
+
+        if width_total + columns * spaces_min <= width_max then
+            row_count = rows
+            column_count = columns
+            break
+        end
+    end
+
+    local spaces = math.floor((width_max - width_total) / (column_count - 1))
+    spaces = math.max(spaces_min, math.min(spaces_max, spaces))
+    local spacing = column_count > 1 and string.format('%' .. spaces .. 's', ' ') or ''
+
+    local rows = {}
+    local rows_truncated = math.min(row_count, rows_max)
+    for row = 1, rows_truncated do
+        local columns = {}
+        for column = 1, column_count do
+            local i = row + (column - 1) * row_count
+            if i > #list then break end
+            local format_string = column == column_count and '%s'
+                                  or '%-' .. column_widths[column] .. 's'
+            columns[column] = string.format(format_string, list[i])
+        end
+        -- first row is at the bottom
+        rows[rows_truncated - row + 1] = table.concat(columns, spacing)
+    end
+    return table.concat(rows, '\n'), rows_truncated
+end
+
 -- Render the REPL and console as an ASS OSD
 function update()
     pending_update = false
@@ -162,14 +255,22 @@ function update()
     local before_cur = ass_escape(line:sub(1, cursor - 1))
     local after_cur = ass_escape(line:sub(cursor))
 
-    -- Render log messages as ASS. This will render at most screeny / font_size
-    -- messages.
+    -- Render log messages as ASS.
+    -- This will render at most screeny / font_size - 1 messages.
+
+    -- lines above the prompt
+    -- subtract 1.5 to account for the input line
+    local screeny_factor = (1 - global_margins.t - global_margins.b)
+    local lines_max = math.ceil(screeny * screeny_factor / opts.font_size - 1.5)
+    -- Estimate how many characters fit in one line
+    local width_max = math.ceil(screenx / opts.font_size * opts.font_hw_ratio)
+
+    local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
+    local suggestion_ass = style .. styles.suggestion .. ass_escape(suggestions)
+
     local log_ass = ''
     local log_messages = #log_buffer
-    local screeny_factor = (1 - global_margins.t - global_margins.b)
-    -- subtract 1.5 to account for the input line
-    local log_max_lines = screeny * screeny_factor / opts.font_size - 1.5
-    log_max_lines = math.ceil(log_max_lines)
+    local log_max_lines = math.max(0, lines_max - rows)
     if log_max_lines < log_messages then
         log_messages = log_max_lines
     end
@@ -181,6 +282,9 @@ function update()
     ass:an(1)
     ass:pos(2, screeny - 2 - global_margins.b * screeny)
     ass:append(log_ass .. '\\N')
+    if #suggestions > 0 then
+        ass:append(suggestion_ass .. '\\N')
+    end
     ass:append(style .. '> ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. after_cur)
@@ -261,6 +365,16 @@ function prev_utf8(str, pos)
     return pos
 end
 
+function len_utf8(str)
+    local len = 0
+    local pos = 1
+    while pos <= str:len() do
+        pos = next_utf8(str, pos)
+        len = len + 1
+    end
+    return len
+end
+
 -- Insert a character at the current cursor position (any_unicode)
 function handle_char_input(c)
     if insert_mode then
@@ -269,6 +383,7 @@ function handle_char_input(c)
         line = line:sub(1, cursor - 1) .. c .. line:sub(cursor)
     end
     cursor = cursor + #c
+    suggestion_buffer = {}
     update()
 end
 
@@ -278,6 +393,7 @@ function handle_backspace()
     local prev = prev_utf8(line, cursor)
     line = line:sub(1, prev - 1) .. line:sub(cursor)
     cursor = prev
+    suggestion_buffer = {}
     update()
 end
 
@@ -285,6 +401,7 @@ end
 function handle_del()
     if cursor > line:len() then return end
     line = line:sub(1, cursor - 1) .. line:sub(next_utf8(line, cursor))
+    suggestion_buffer = {}
     update()
 end
 
@@ -311,6 +428,7 @@ function clear()
     cursor = 1
     insert_mode = false
     history_pos = #history + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -329,7 +447,6 @@ function help_command(param)
     table.sort(cmdlist, function(c1, c2)
         return c1.name < c2.name
     end)
-    local error_style = '{\\1c&H7a77f2&}'
     local output = ''
     if param == '' then
         output = 'Available commands:\n'
@@ -350,7 +467,7 @@ function help_command(param)
             end
         end
         if not cmd then
-            log_add(error_style, 'No command matches "' .. param .. '"!')
+            log_add(styles.error, 'No command matches "' .. param .. '"!')
             return
         end
         output = output .. 'Command "' .. cmd.name .. '"\n'
@@ -515,31 +632,30 @@ function build_completers()
     }
 end
 
--- Use 'list' to find possible tab-completions for 'part.' Returns the longest
--- common prefix of all the matching list items and a flag that indicates
--- whether the match was unique or not.
+-- Use 'list' to find possible tab-completions for 'part.'
+-- Returns a list of all potential completions and the longest
+-- common prefix of all the matching list items.
 function complete_match(part, list)
-    local completion = nil
-    local full_match = false
+    local completions = {}
+    local prefix = nil
 
     for _, candidate in ipairs(list) do
         if candidate:sub(1, part:len()) == part then
-            if completion and completion ~= candidate then
+            if prefix and prefix ~= candidate then
                 local prefix_len = part:len()
-                while completion:sub(1, prefix_len + 1)
+                while prefix:sub(1, prefix_len + 1)
                        == candidate:sub(1, prefix_len + 1) do
                     prefix_len = prefix_len + 1
                 end
-                completion = candidate:sub(1, prefix_len)
-                full_match = false
+                prefix = candidate:sub(1, prefix_len)
             else
-                completion = candidate
-                full_match = true
+                prefix = candidate
             end
+            completions[#completions + 1] = candidate
         end
     end
 
-    return completion, full_match
+    return completions, prefix
 end
 
 -- Complete the option or property at the cursor (TAB)
@@ -563,17 +679,23 @@ function complete()
             -- If the completer's pattern found a word, check the completer's
             -- list for possible completions
             local part = before_cur:sub(s, e)
-            local c, full = complete_match(part, completer.list)
-            if c then
+            local completions, prefix = complete_match(part, completer.list)
+            if #completions > 0 then
                 -- If there was only one full match from the list, add
                 -- completer.append to the final string. This is normally a
                 -- space or a quotation mark followed by a space.
-                if full and completer.append then
-                    c = c .. completer.append
+                if #completions == 1 then
+                    prefix = prefix .. (completer.append or '')
+                else
+                    table.sort(completions)
+                    suggestion_buffer = {}
+                    for i, completion in ipairs(completions) do
+                        suggestion_buffer[i] = completion
+                    end
                 end
 
                 -- Insert the completion and update
-                before_cur = before_cur:sub(1, s - 1) .. c
+                before_cur = before_cur:sub(1, s - 1) .. prefix
                 cursor = before_cur:len() + 1
                 line = before_cur .. after_cur
                 update()
@@ -708,6 +830,7 @@ end
 function get_bindings()
     local bindings = {
         { 'esc',         function() set_active(false) end       },
+        { 'ctrl+[',      function() set_active(false) end       },
         { 'enter',       handle_enter                           },
         { 'kp_enter',    handle_enter                           },
         { 'shift+enter', function() handle_char_input('\n') end },
@@ -836,19 +959,18 @@ mp.register_event('log-message', function(e)
     -- OSD display itself.
     if e.level == 'trace' then return end
 
-    -- Use color for debug/v/warn/error/fatal messages. Colors are stolen from
-    -- base16 Eighties by Chris Kempson.
+    -- Use color for debug/v/warn/error/fatal messages.
     local style = ''
     if e.level == 'debug' then
-        style = '{\\1c&Ha09f93&}'
+        style = styles.debug
     elseif e.level == 'v' then
-        style = '{\\1c&H99cc99&}'
+        style = styles.verbose
     elseif e.level == 'warn' then
-        style = '{\\1c&H66ccff&}'
+        style = styles.warn
     elseif e.level == 'error' then
-        style = '{\\1c&H7a77f2&}'
+        style = styles.error
     elseif e.level == 'fatal' then
-        style = '{\\1c&H5791f9&\\b1}'
+        style = styles.fatal
     end
 
     log_add(style, '[' .. e.prefix .. '] ' .. e.text)

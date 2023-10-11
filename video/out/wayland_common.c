@@ -2604,12 +2604,12 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
     wl->timeout_count = 0;
 }
 
-void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
+void vo_wayland_wait_events(struct vo *vo, int64_t until_time_ns)
 {
     struct vo_wayland_state *wl = vo->wl;
 
-    int64_t wait_us = until_time_us - mp_time_us();
-    int timeout_ms = MPCLAMP((wait_us + 999) / 1000, 0, 10000);
+    int64_t wait_ns = until_time_ns - mp_time_ns();
+    int timeout_ms = MPCLAMP(wait_ns / 1e6, 1, 10000);
 
     wayland_dispatch_events(wl, 2, timeout_ms);
 }

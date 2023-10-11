@@ -2129,6 +2129,11 @@ void mpv_free(void *data)
     talloc_free(data);
 }
 
+int64_t mpv_get_time_ns(mpv_handle *ctx)
+{
+    return mp_time_ns();
+}
+
 int64_t mpv_get_time_us(mpv_handle *ctx)
 {
     return mp_time_us();

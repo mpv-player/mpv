@@ -1,6 +1,4 @@
 /*
- * poll shim that supports device files on macOS.
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -22,9 +20,23 @@
 #include <sys/select.h>
 #include <stdio.h>
 
-#include "osdep/polldev.h"
+#include "config.h"
+#include "poll_wrapper.h"
+#include "timer.h"
 
-int polldev(struct pollfd fds[], nfds_t nfds, int timeout) {
+
+int mp_poll(struct pollfd *fds, int nfds, int64_t timeout_ns)
+{
+#if HAVE_PPOLL
+    struct timespec ts = mp_time_ns_to_realtime(timeout_ns);
+    return ppoll(fds, nfds, &ts, NULL);
+#endif
+    return poll(fds, nfds, timeout_ns / 1e6);
+}
+
+// poll shim that supports device files on macOS.
+int polldev(struct pollfd fds[], nfds_t nfds, int timeout)
+{
 #ifdef __APPLE__
     int maxfd = 0;
     fd_set readfds, writefds;
