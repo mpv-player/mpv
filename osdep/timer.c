@@ -48,11 +48,6 @@ void mp_time_init(void)
     pthread_once(&timer_init_once, do_timer_init);
 }
 
-int64_t mp_time_us(void)
-{
-    return mp_time_ns() / 1000;
-}
-
 int64_t mp_time_ns(void)
 {
     uint64_t r = mp_raw_time_ns() - raw_time_offset;
@@ -64,18 +59,6 @@ int64_t mp_time_ns(void)
 double mp_time_sec(void)
 {
     return mp_time_ns() / 1e9;
-}
-
-int64_t mp_time_us_add(int64_t time_us, double timeout_sec)
-{
-    assert(time_us > 0); // mp_time_us() returns strictly positive values
-    double t = MPCLAMP(timeout_sec * 1e6, -0x1p63, 0x1p63);
-    int64_t ti = t == 0x1p63 ? INT64_MAX : (int64_t)t;
-    if (ti > INT64_MAX - time_us)
-        return INT64_MAX;
-    if (ti <= -time_us)
-        return 1;
-    return time_us + ti;
 }
 
 int64_t mp_time_ns_add(int64_t time_ns, double timeout_sec)
@@ -105,11 +88,6 @@ static int get_realtime(struct timespec *out_ts)
 #endif
 }
 #endif
-
-struct timespec mp_time_us_to_realtime(int64_t time_us)
-{
-    return mp_time_ns_to_realtime(MPMIN(INT64_MAX / 1000, time_us) * 1000);
-}
 
 struct timespec mp_time_ns_to_realtime(int64_t time_ns)
 {
