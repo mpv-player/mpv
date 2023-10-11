@@ -25,5 +25,7 @@ void mp_tags_merge(struct mp_tags *tags, struct mp_tags *src);
 struct AVDictionary;
 void mp_tags_copy_from_av_dictionary(struct mp_tags *tags,
                                      struct AVDictionary *av_dict);
+void mp_tags_move_from_av_dictionary(struct mp_tags *tags,
+                                     struct AVDictionary **av_dict_ptr);
 
 #endif
