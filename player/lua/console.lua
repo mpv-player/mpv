@@ -212,9 +212,42 @@ function format_table(list, width_max, rows_max)
     return table.concat(rows, '\n'), rows_truncated
 end
 
+local function print_to_terminal()
+    -- Clear the log after closing the console.
+    if not repl_active then
+        mp.osd_message('')
+        return
+    end
+
+    local log = ''
+    for _, log_line in ipairs(log_buffer) do
+        log = log .. log_line.text
+    end
+
+    local suggestions = table.concat(suggestion_buffer, '\t')
+    if suggestions ~= '' then
+        suggestions = suggestions .. '\n'
+    end
+
+    local before_cur = line:sub(1, cursor - 1)
+    local after_cur = line:sub(cursor)
+    -- Ensure there is a character with inverted colors to print.
+    if after_cur == '' then
+        after_cur = ' '
+    end
+
+    mp.osd_message(log .. suggestions .. '> ' .. before_cur .. '\027[7m' ..
+                   after_cur:sub(1, 1) .. '\027[0m' .. after_cur:sub(2), 999)
+end
+
 -- Render the REPL and console as an ASS OSD
 function update()
     pending_update = false
+
+    if not mp.get_property_native('vo-configured') then
+        print_to_terminal()
+        return
+    end
 
     local dpi_scale = mp.get_property_native("display-hidpi-scale", 1.0)
 
