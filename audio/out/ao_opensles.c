@@ -82,7 +82,7 @@ static void buffer_callback(SLBufferQueueItf buffer_queue, void *context)
     delay = p->frames_per_enqueue / (double)ao->samplerate;
     delay += p->audio_latency;
     ao_read_data(ao, &p->buf, p->frames_per_enqueue,
-        mp_time_us() + 1000000LL * delay);
+        mp_time_ns() + MP_TIME_S_TO_NS(delay));
 
     res = (*buffer_queue)->Enqueue(buffer_queue, p->buf, p->bytes_per_enqueue);
     if (res != SL_RESULT_SUCCESS)

@@ -36,7 +36,8 @@ static UINT64 uint64_scale(UINT64 x, UINT64 num, UINT64 den)
         + ((x % den) * (num % den)) / den;
 }
 
-static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
+static HRESULT get_device_delay(struct wasapi_state *state, double *delay_ns)
+{
     UINT64 sample_count = atomic_load(&state->sample_count);
     UINT64 position, qpc_position;
     HRESULT hr;
@@ -54,7 +55,7 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
                                           state->format.Format.nSamplesPerSec,
                                           state->clock_frequency);
     INT64 diff = sample_count - sample_position;
-    *delay_us = diff * 1e6 / state->format.Format.nSamplesPerSec;
+    *delay_ns = diff * 1e9 / state->format.Format.nSamplesPerSec;
 
     // Correct for any delay in IAudioClock_GetPosition above.
     // This should normally be very small (<1 us), but just in case. . .
@@ -65,16 +66,16 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
     // ignore the above calculation if it yields more than 10 seconds (due to
     // possible overflow inside IAudioClock_GetPosition)
     if (qpc_diff < 10 * 10000000) {
-        *delay_us -= qpc_diff / 10.0; // convert to us
+        *delay_ns -= qpc_diff * 100.0; // convert to ns
     } else {
         MP_VERBOSE(state, "Insane qpc delay correction of %g seconds. "
                    "Ignoring it.\n", qpc_diff / 10000000.0);
     }
 
-    if (sample_count > 0 && *delay_us <= 0) {
-        MP_WARN(state, "Under-run: Device delay: %g us\n", *delay_us);
+    if (sample_count > 0 && *delay_ns <= 0) {
+        MP_WARN(state, "Under-run: Device delay: %g ns\n", *delay_ns);
     } else {
-        MP_TRACE(state, "Device delay: %g us\n", *delay_us);
+        MP_TRACE(state, "Device delay: %g ns\n", *delay_ns);
     }
 
     return S_OK;
@@ -116,11 +117,11 @@ static bool thread_feed(struct ao *ao)
     MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n",
              frame_count, padding);
 
-    double delay_us;
-    hr = get_device_delay(state, &delay_us);
+    double delay_ns;
+    hr = get_device_delay(state, &delay_ns);
     EXIT_ON_ERROR(hr);
     // add the buffer delay
-    delay_us += frame_count * 1e6 / state->format.Format.nSamplesPerSec;
+    delay_ns += frame_count * 1e9 / state->format.Format.nSamplesPerSec;
 
     BYTE *pData;
     hr = IAudioRenderClient_GetBuffer(state->pRenderClient,
@@ -131,7 +132,7 @@ static bool thread_feed(struct ao *ao)
 
     ao_read_data_converted(ao, &state->convert_format,
                            (void **)data, frame_count,
-                           mp_time_us() + (int64_t)llrint(delay_us));
+                           mp_time_ns() + (int64_t)llrint(delay_ns));
 
     // note, we can't use ao_read_data return value here since we already
     // committed to frame_count above in the GetBuffer call
