@@ -563,9 +563,9 @@ static void *playthread(void *arg)
         }
         if (state == AudioTrack.PLAYSTATE_PLAYING) {
             int read_samples = p->chunksize / ao->sstride;
-            int64_t ts = mp_time_us();
-            ts += (read_samples / (double)(ao->samplerate)) * 1e6;
-            ts += AudioTrack_getLatency(ao) * 1e6;
+            int64_t ts = mp_time_ns();
+            ts += MP_TIME_S_TO_NS(read_samples / (double)(ao->samplerate));
+            ts += MP_TIME_S_TO_NS(AudioTrack_getLatency(ao));
             int samples = ao_read_data(ao, &p->chunk, read_samples, ts);
             int ret = AudioTrack_write(ao, samples * ao->sstride);
             if (ret >= 0) {
