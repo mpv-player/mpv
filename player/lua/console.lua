@@ -653,7 +653,7 @@ local function property_list()
 end
 
 -- List of tab-completions:
---   pattern: A Lua pattern used in string:find. Should return the start and
+--   pattern: A Lua pattern used in string:match. Should return the start and
 --            end positions of the word to be completed in the first and second
 --            capture groups (using the empty parenthesis notation "()")
 --   list: A function that returns a list of candidate completion values.
@@ -717,13 +717,13 @@ function complete()
     for _, completer in ipairs(build_completers()) do
         -- Completer patterns should return the start and end of the word to be
         -- completed as the first and second capture groups
-        local _, _, s, e = before_cur:find(completer.pattern)
+        local s, e = before_cur:match(completer.pattern)
         if not s then
             -- Multiple input commands can be separated by semicolons, so all
             -- completions that are anchored at the start of the string with
             -- '^' can start from a semicolon as well. Replace ^ with ; and try
             -- to match again.
-            _, _, s, e = before_cur:find(completer.pattern:gsub('^^', ';'))
+            s, e = before_cur:match(completer.pattern:gsub('^^', ';'))
         end
         if s then
             -- If the completer's pattern found a word, check the completer's
