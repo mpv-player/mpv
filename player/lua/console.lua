@@ -721,10 +721,7 @@ function complete()
                     prefix = prefix .. (completer.append or '')
                 else
                     table.sort(completions)
-                    suggestion_buffer = {}
-                    for i, completion in ipairs(completions) do
-                        suggestion_buffer[i] = completion
-                    end
+                    suggestion_buffer = completions
                 end
 
                 -- Insert the completion and update
