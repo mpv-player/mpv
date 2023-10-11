@@ -621,48 +621,60 @@ function next_word()
     update()
 end
 
--- List of tab-completions:
---   pattern: A Lua pattern used in string:find. Should return the start and
---            end positions of the word to be completed in the first and second
---            capture groups (using the empty parenthesis notation "()")
---   list: A list of candidate completion values.
---   append: An extra string to be appended to the end of a successful
---           completion. It is only appended if 'list' contains exactly one
---           match.
-function build_completers()
-    -- Build a list of commands, properties and options for tab-completion
+local function command_list()
+    local commands = {}
+    for i, command in ipairs(mp.get_property_native('command-list')) do
+        commands[i] = command.name
+    end
+
+    return commands
+end
+
+local function property_list()
     local option_info = {
         'name', 'type', 'set-from-commandline', 'set-locally', 'default-value',
         'min', 'max', 'choices',
     }
-    local cmd_list = {}
-    for i, cmd in ipairs(mp.get_property_native('command-list')) do
-        cmd_list[i] = cmd.name
-    end
-    local prop_list = mp.get_property_native('property-list')
-    for _, opt in ipairs(mp.get_property_native('options')) do
-        prop_list[#prop_list + 1] = 'options/' .. opt
-        prop_list[#prop_list + 1] = 'file-local-options/' .. opt
-        prop_list[#prop_list + 1] = 'option-info/' .. opt
-        for _, p in ipairs(option_info) do
-            prop_list[#prop_list + 1] = 'option-info/' .. opt .. '/' .. p
+
+    local properties = mp.get_property_native('property-list')
+
+    for _, option in ipairs(mp.get_property_native('options')) do
+        properties[#properties + 1] = 'options/' .. option
+        properties[#properties + 1] = 'file-local-options/' .. option
+        properties[#properties + 1] = 'option-info/' .. option
+
+        for _, sub_property in ipairs(option_info) do
+            properties[#properties + 1] = 'option-info/' .. option .. '/' ..
+                                          sub_property
         end
     end
 
+    return properties
+end
+
+-- List of tab-completions:
+--   pattern: A Lua pattern used in string:find. Should return the start and
+--            end positions of the word to be completed in the first and second
+--            capture groups (using the empty parenthesis notation "()")
+--   list: A function that returns a list of candidate completion values.
+--   append: An extra string to be appended to the end of a successful
+--           completion. It is only appended if 'list' contains exactly one
+--           match.
+function build_completers()
     local completers = {
-        { pattern = '^%s*()[%w_-]+()$', list = cmd_list, append = ' ' },
-        { pattern = '${()[%w_/-]+()$', list = prop_list, append = '}' },
+        { pattern = '^%s*()[%w_-]+()$', list = command_list, append = ' ' },
+        { pattern = '${()[%w_/-]+()$', list = property_list, append = '}' },
     }
 
     for _, command in pairs({'set', 'add', 'cycle', 'cycle[-_]values', 'multiply'}) do
         completers[#completers + 1] = {
             pattern = '^%s*' .. command .. '%s+()[%w_/-]+()$',
-            list = prop_list,
+            list = property_list,
             append = ' ',
         }
         completers[#completers + 1] = {
             pattern = '^%s*' .. command .. '%s+"()[%w_/-]+()$',
-            list = prop_list,
+            list = property_list,
             append = '" ',
         }
     end
@@ -717,7 +729,7 @@ function complete()
             -- If the completer's pattern found a word, check the completer's
             -- list for possible completions
             local part = before_cur:sub(s, e)
-            local completions, prefix = complete_match(part, completer.list)
+            local completions, prefix = complete_match(part, completer.list())
             if #completions > 0 then
                 -- If there was only one full match from the list, add
                 -- completer.append to the final string. This is normally a
