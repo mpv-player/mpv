@@ -421,6 +421,10 @@ typedef enum mpv_render_param_type {
      * See MPV_RENDER_PARAM_SW_STRIDE for alignment requirements.
      */
     MPV_RENDER_PARAM_SW_POINTER = 20,
+    /*
+     * MPV_RENDER_API_TYPE_DXGI only
+     */
+    MPV_RENDER_PARAM_DXGI_INIT_PARAMS = 21,
 } mpv_render_param_type;
 
 /**
@@ -467,6 +471,8 @@ typedef struct mpv_render_param {
 #define MPV_RENDER_API_TYPE_OPENGL "opengl"
 // See section "Software renderer"
 #define MPV_RENDER_API_TYPE_SW "sw"
+// See render_dxgi.h
+#define MPV_RENDER_API_TYPE_DXGI "dxgi"
 
 /**
  * Flags used in mpv_render_frame_info.flags. Each value represents a bit in it.
