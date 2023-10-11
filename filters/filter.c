@@ -214,7 +214,7 @@ bool mp_filter_graph_run(struct mp_filter *filter)
 
     int64_t end_time = 0;
     if (isfinite(r->max_run_time))
-        end_time = mp_time_us_add(mp_time_us(), MPMAX(r->max_run_time, 0));
+        end_time = mp_time_ns_add(mp_time_ns(), MPMAX(r->max_run_time, 0));
 
     // (could happen with separate filter graphs calling each other, for now
     // ignore this issue as we don't use such a setup anywhere)
@@ -261,7 +261,7 @@ bool mp_filter_graph_run(struct mp_filter *filter)
         if (next->in->info->process)
             next->in->info->process(next);
 
-        if (end_time && mp_time_us() >= end_time)
+        if (end_time && mp_time_ns() >= end_time)
             mp_filter_graph_interrupt(r->root_filter);
     }
 
