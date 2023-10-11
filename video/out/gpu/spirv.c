@@ -58,6 +58,7 @@ bool spirv_compiler_init(struct ra_ctx *ctx)
 
         const char *name = m_opt_choice_str(compiler_choices, i);
         strncpy(ctx->spirv->name, name, sizeof(ctx->spirv->name) - 1);
+        ctx->spirv->name[sizeof(ctx->spirv->name) - 1] = '\0';
         MP_VERBOSE(ctx, "Initializing SPIR-V compiler '%s'\n", name);
         if (ctx->spirv->fns->init(ctx))
             return true;

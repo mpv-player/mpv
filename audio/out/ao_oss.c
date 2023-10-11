@@ -115,6 +115,7 @@ static void device_descr_get(size_t dev_idx, char *buf, size_t buf_size)
     int fd = open(dev_path, O_RDONLY);
     if (ioctl(fd, SOUND_MIXER_INFO, &mi) == 0) {
         strncpy(buf, mi.name, buf_size - 1);
+        buf[buf_size - 1] = '\0';
         tmp = (buf_size - 1);
     }
     close(fd);

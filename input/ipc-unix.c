@@ -322,6 +322,7 @@ static void *ipc_thread(void *p)
 
     ipc_un.sun_family = AF_UNIX,
     strncpy(ipc_un.sun_path, arg->path, sizeof(ipc_un.sun_path) - 1);
+    ipc_un.sun_path[sizeof(ipc_un.sun_path) - 1] = '\0';
 
     unlink(ipc_un.sun_path);
 
