@@ -50,6 +50,16 @@ void mp_end_hires_timers(int resolution_ms);
 
 #define MP_START_TIME 10 * INT64_C(1000000000)
 
+// Converts time units to nanoseconds (int64_t)
+#define MP_TIME_S_TO_NS(s) ((s) * INT64_C(1000000000))
+#define MP_TIME_MS_TO_NS(ms) ((ms) * INT64_C(1000000))
+#define MP_TIME_US_TO_NS(us) ((us) * INT64_C(1000))
+
+// Converts nanoseconds to specified time unit (double)
+#define MP_TIME_NS_TO_S(ns) ((ns) / (double)1000000000)
+#define MP_TIME_NS_TO_MS(ns) ((ns) / (double)1000000)
+#define MP_TIME_NS_TO_US(ns) ((ns) / (double)1000)
+
 // Duration of a second in mpv time.
 #define MP_SECOND_US (1000 * 1000)
 

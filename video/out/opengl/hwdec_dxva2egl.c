@@ -343,7 +343,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     // of the above StretchRect. Timeout of 8ms is required to reliably
     // render 4k on Intel Haswell, Ivybridge and Cherry Trail Atom.
     const int max_retries = 8;
-    const int64_t wait_ns = 1e6;
+    const int64_t wait_ns = MP_TIME_MS_TO_NS(1);
     int retries = 0;
     while (true) {
         hr = IDirect3DQuery9_GetData(p->query9, NULL, 0, D3DGETDATA_FLUSH);
@@ -353,7 +353,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         } else if (hr == S_FALSE) {
             if (++retries > max_retries) {
                 MP_VERBOSE(mapper, "Failed to flush frame after %lld ms\n",
-                           (long long)(wait_ns * max_retries) / 1000000);
+                           (long long)MP_TIME_MS_TO_NS(wait_ns * max_retries));
                 break;
             }
             mp_sleep_ns(wait_ns);
