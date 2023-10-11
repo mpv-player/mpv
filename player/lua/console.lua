@@ -649,20 +649,25 @@ function build_completers()
         end
     end
 
-    return {
+    local completers = {
         { pattern = '^%s*()[%w_-]+()$', list = cmd_list, append = ' ' },
-        { pattern = '^%s*set%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*set%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-        { pattern = '^%s*add%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*add%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-        { pattern = '^%s*cycle%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*cycle%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-        { pattern = '^%s*cycle%-values%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*cycle%-values%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-        { pattern = '^%s*multiply%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*multiply%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
         { pattern = '${()[%w_/-]+()$', list = prop_list, append = '}' },
     }
+
+    for _, command in pairs({'set', 'add', 'cycle', 'cycle[-_]values', 'multiply'}) do
+        completers[#completers + 1] = {
+            pattern = '^%s*' .. command .. '%s+()[%w_/-]+()$',
+            list = prop_list,
+            append = ' ',
+        }
+        completers[#completers + 1] = {
+            pattern = '^%s*' .. command .. '%s+"()[%w_/-]+()$',
+            list = prop_list,
+            append = '" ',
+        }
+    end
+
+    return completers
 end
 
 -- Use 'list' to find possible tab-completions for 'part.'
