@@ -2136,7 +2136,7 @@ int64_t mpv_get_time_ns(mpv_handle *ctx)
 
 int64_t mpv_get_time_us(mpv_handle *ctx)
 {
-    return mp_time_us();
+    return mp_time_ns() / 1000;
 }
 
 #include "video/out/libmpv.h"

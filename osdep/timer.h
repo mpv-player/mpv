@@ -23,9 +23,6 @@
 // Initialize timer, must be called at least once at start.
 void mp_time_init(void);
 
-// Return time in microseconds. Never wraps. Never returns 0 or negative values.
-int64_t mp_time_us(void);
-
 // Return time in nanoseconds. Never wraps. Never returns 0 or negative values.
 int64_t mp_time_ns(void);
 
@@ -60,16 +57,9 @@ void mp_end_hires_timers(int resolution_ms);
 #define MP_TIME_NS_TO_MS(ns) ((ns) / (double)1000000)
 #define MP_TIME_NS_TO_US(ns) ((ns) / (double)1000)
 
-// Add a time in seconds to the given time in microseconds, and return it.
-// Takes care of possible overflows. Never returns a negative or 0 time.
-int64_t mp_time_us_add(int64_t time_us, double timeout_sec);
-
 // Add a time in seconds to the given time in nanoseconds, and return it.
 // Takes care of possible overflows. Never returns a negative or 0 time.
 int64_t mp_time_ns_add(int64_t time_ns, double timeout_sec);
-
-// Convert the mp time in microseconds to a timespec using CLOCK_REALTIME.
-struct timespec mp_time_us_to_realtime(int64_t time_us);
 
 // Convert the mp time in nanoseconds to a timespec using CLOCK_REALTIME.
 struct timespec mp_time_ns_to_realtime(int64_t time_ns);
