@@ -60,9 +60,6 @@ void mp_end_hires_timers(int resolution_ms);
 #define MP_TIME_NS_TO_MS(ns) ((ns) / (double)1000000)
 #define MP_TIME_NS_TO_US(ns) ((ns) / (double)1000)
 
-// Duration of a second in mpv time.
-#define MP_SECOND_US (1000 * 1000)
-
 // Add a time in seconds to the given time in microseconds, and return it.
 // Takes care of possible overflows. Never returns a negative or 0 time.
 int64_t mp_time_us_add(int64_t time_us, double timeout_sec);
