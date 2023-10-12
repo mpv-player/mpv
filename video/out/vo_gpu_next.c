@@ -287,7 +287,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
 
     double pts = src ? src->pts : 0;
     struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, subfmt_all);
-    if (subs->num_items)
+    if (subs->num_items && p->paused)
         p->osd_sync++;
 
     frame->overlays = state->overlays;
