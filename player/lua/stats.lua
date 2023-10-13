@@ -819,6 +819,9 @@ local function append_img_params(s, r, ro)
     local pixel_format = r["hw-pixelformat"] or r["pixelformat"]
     append(s, pixel_format, {prefix="Format:"})
     append(s, r["colorlevels"], {prefix="Levels:", nl="", indent=indent})
+    if r["chroma-location"] and r["chroma-location"] ~= "unknown" then
+        append(s, r["chroma-location"], {prefix="Chroma Loc:", nl="", indent=indent})
+    end
 
     -- Group these together to save vertical space
     append(s, r["colormatrix"], {prefix="Colormatrix:"})
