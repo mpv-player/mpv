@@ -221,7 +221,7 @@ struct playlist_entry *playlist_get_first_in_next_playlist(struct playlist *pl,
     if (!entry)
         return NULL;
 
-    while (entry && entry->playlist_path &&
+    while (entry && entry->playlist_path && pl->current->playlist_path &&
            strcmp(entry->playlist_path, pl->current->playlist_path) == 0)
         entry = playlist_entry_get_rel(entry, direction);
 
