@@ -292,7 +292,7 @@ local function sorted_keys(t, comp_fn)
     return keys
 end
 
-local function append_perfdata(s, dedicated_page)
+local function append_perfdata(s, dedicated_page, print_passes)
     local vo_p = mp.get_property_native("vo-passes")
     if not vo_p then
         return
@@ -343,7 +343,7 @@ local function append_perfdata(s, dedicated_page)
         local data = vo_p[frame]
         local f = "%s%s%s{\\fn%s}%s / %s / %s %s%s{\\fn%s}%s%s%s"
 
-        if dedicated_page then
+        if print_passes then
             s[#s+1] = format("%s%s%s:", o.nl, o.indent,
                              b(frame:gsub("^%l", string.upper)))
 
@@ -868,7 +868,7 @@ local function add_video_out(s)
         append_property(s, compat("frame-drop-count"), {suffix=" (output)", nl="", indent=""})
     end
     append_display_sync(s)
-    append_perfdata(s, o.print_perfdata_passes)
+    append_perfdata(s, false, o.print_perfdata_passes)
 
     if mp.get_property_native("deinterlace") then
         append_property(s, "deinterlace", {prefix="Deinterlacing:"})
@@ -1032,7 +1032,7 @@ local function vo_stats()
 
     -- first line (title) added next is considered fixed
     local fixed_items = #stats + 1
-    append_perfdata(stats, true)
+    append_perfdata(stats, true, true)
 
     local page = pages[o.key_page_2]
     stats, page.offset = scroll_vo_stats(stats, fixed_items, page.offset)
