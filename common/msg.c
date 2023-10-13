@@ -98,7 +98,7 @@ struct mp_log {
     int level;                  // minimum log level for any outputs
     int terminal_level;         // minimum log level for terminal output
     atomic_ulong reload_counter;
-    char *partial;
+    char *partial[MSGL_MAX + 1];
 };
 
 struct mp_log_buffer {
@@ -418,9 +418,9 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     root->buffer.len = 0;
 
-    if (log->partial[0])
-        bstr_xappend_asprintf(root, &root->buffer, "%s", log->partial);
-    log->partial[0] = '\0';
+    if (log->partial[lev][0])
+        bstr_xappend_asprintf(root, &root->buffer, "%s", log->partial[lev]);
+    log->partial[lev][0] = '\0';
 
     bstr_xappend_vasprintf(root, &root->buffer, format, va);
 
@@ -454,9 +454,9 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
                 print_terminal_line(log, lev, text, "\r");
         } else if (text[0]) {
             int size = strlen(text) + 1;
-            if (talloc_get_size(log->partial) < size)
-                log->partial = talloc_realloc(NULL, log->partial, char, size);
-            memcpy(log->partial, text, size);
+            if (talloc_get_size(log->partial[lev]) < size)
+                log->partial[lev] = talloc_realloc(NULL, log->partial[lev], char, size);
+            memcpy(log->partial[lev], text, size);
         }
     }
 
@@ -468,7 +468,8 @@ static void destroy_log(void *ptr)
     struct mp_log *log = ptr;
     // This is not managed via talloc itself, because mp_msg calls must be
     // thread-safe, while talloc is not thread-safe.
-    talloc_free(log->partial);
+    for (int lvl = 0; lvl <= MSGL_MAX; ++lvl)
+        talloc_free(log->partial[lvl]);
 }
 
 // Create a new log context, which uses talloc_ctx as talloc parent, and parent
@@ -489,7 +490,8 @@ struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
         return log; // same as null_log
     talloc_set_destructor(log, destroy_log);
     log->root = parent->root;
-    log->partial = talloc_strdup(NULL, "");
+    for (int lvl = 0; lvl <= MSGL_MAX; ++lvl)
+        log->partial[lvl] = talloc_strdup(NULL, "");
     log->max_level = MSGL_MAX;
     if (name) {
         if (name[0] == '!') {
