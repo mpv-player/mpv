@@ -5335,6 +5335,7 @@ static void cmd_playlist_next_prev_playlist(void *p)
                               : playlist_get_last(mpctx->playlist);
 
         if (entry && entry->playlist_path &&
+            mpctx->playlist->current->playlist_path &&
             strcmp(entry->playlist_path,
                    mpctx->playlist->current->playlist_path) == 0)
             entry = NULL;
