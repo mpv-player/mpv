@@ -353,7 +353,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         } else if (hr == S_FALSE) {
             if (++retries > max_retries) {
                 MP_VERBOSE(mapper, "Failed to flush frame after %lld ms\n",
-                           (long long)(wait_ns * max_retries) / 1e6);
+                           (long long)(wait_ns * max_retries) / 1000000);
                 break;
             }
             mp_sleep_ns(wait_ns);
