@@ -350,7 +350,7 @@ local function append_perfdata(s, dedicated_page)
                 s[#s+1] = format(f, o.nl, o.indent, o.indent,
                                  o.font_mono, pp(pass["last"]),
                                  pp(pass["avg"]), pp(pass["peak"]),
-                                 o.prefix_sep .. o.prefix_sep, p(pass["last"], last_s[frame]),
+                                 o.prefix_sep .. "\\h\\h", p(pass["last"], last_s[frame]),
                                  o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
 
                 if o.plot_perfdata and o.use_ass then
@@ -365,8 +365,8 @@ local function append_perfdata(s, dedicated_page)
             -- Print sum of timing values as "Total"
             s[#s+1] = format(f, o.nl, o.indent, o.indent,
                              o.font_mono, pp(last_s[frame]),
-                             pp(avg_s[frame]), pp(peak_s[frame]), "", "", o.font,
-                             o.prefix_sep, o.prefix_sep, b("Total"))
+                             pp(avg_s[frame]), pp(peak_s[frame]),
+                             o.prefix_sep, b("Total"), o.font, "", "", "")
         else
             -- for the simplified view, we just print the sum of each pass
             s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
