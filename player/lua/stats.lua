@@ -114,25 +114,11 @@ local perf_buffers = {}
 -- Save all properties known to this version of mpv
 local property_list = {}
 for p in string.gmatch(mp.get_property("property-list"), "([^,]+)") do property_list[p] = true end
--- Mapping of properties to their deprecated names
-local property_aliases = {
-    ["decoder-frame-drop-count"] = "drop-frame-count",
-    ["frame-drop-count"] = "vo-drop-frame-count",
-    ["container-fps"] = "fps",
-}
 
 local function graph_add_value(graph, value)
     graph.pos = (graph.pos % graph.len) + 1
     graph[graph.pos] = value
     graph.max = max(graph.max, value)
-end
-
--- Return deprecated name for the given property
-local function compat(p)
-    while not property_list[p] and property_aliases[p] do
-        p = property_aliases[p]
-    end
-    return p
 end
 
 -- "\\<U+2060>" in UTF-8 (U+2060 is WORD-JOINER)
@@ -300,7 +286,7 @@ local function append_perfdata(s, dedicated_page, print_passes)
 
     local ds = mp.get_property_bool("display-sync-active", false)
     local target_fps = ds and mp.get_property_number("display-fps", 0)
-                       or mp.get_property_number(compat("container-fps"), 0)
+                       or mp.get_property_number("container-fps", 0)
     if target_fps > 0 then target_fps = 1 / target_fps * 1e9 end
 
     -- Sums of all last/avg/peak values
@@ -866,9 +852,9 @@ local function add_video_out(s)
                                          no_prefix_markup=true, nl="", indent=" "})
     append_property(s, "avsync", {prefix="A-V:"})
     append_fps(s, "display-fps", "estimated-display-fps")
-    if append_property(s, compat("decoder-frame-drop-count"),
+    if append_property(s, "decoder-frame-drop-count",
                        {prefix="Dropped Frames:", suffix=" (decoder)"}) then
-        append_property(s, compat("frame-drop-count"), {suffix=" (output)", nl="", indent=""})
+        append_property(s, "frame-drop-count", {suffix=" (output)", nl="", indent=""})
     end
     append_display_sync(s)
     append_perfdata(s, false, o.print_perfdata_passes)
