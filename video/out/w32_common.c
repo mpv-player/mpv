@@ -1964,7 +1964,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
     case VOCTRL_GET_WINDOW_ID: {
         if (!w32->window)
             return VO_NOTAVAIL;
-        *(int64_t *)arg = (int64_t)w32->window;
+        *(int64_t *)arg = (intptr_t)w32->window;
         return VO_TRUE;
     }
     case VOCTRL_GET_HIDPI_SCALE: {
