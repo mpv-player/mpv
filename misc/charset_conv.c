@@ -223,9 +223,10 @@ bstr mp_iconv_to_utf8(struct mp_log *log, bstr buf, const char *cp, int flags)
 
     outbuf[osize - oleft - 1] = 0;
     return (bstr){outbuf, osize - oleft - 1};
-#endif
 
 failure:
+#endif
+
     if (flags & MP_NO_LATIN1_FALLBACK) {
         return buf;
     } else {
