@@ -25,6 +25,8 @@
 #define OLD_API
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
 #ifdef OLD_API
 #include <cdio/cdda.h>
 #include <cdio/paranoia.h>
@@ -32,6 +34,7 @@
 #include <cdio/paranoia/cdda.h>
 #include <cdio/paranoia/paranoia.h>
 #endif
+#pragma GCC diagnostic pop
 
 #include <stdio.h>
 #include <stdlib.h>
