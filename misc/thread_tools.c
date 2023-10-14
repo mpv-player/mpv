@@ -245,7 +245,14 @@ int mp_cancel_get_fd(struct mp_cancel *c)
 {
     pthread_mutex_lock(&c->lock);
     if (c->wakeup_pipe[0] < 0) {
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-overflow="
+#endif
         mp_make_wakeup_pipe(c->wakeup_pipe);
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic pop
+#endif
         retrigger_locked(c);
     }
     pthread_mutex_unlock(&c->lock);
