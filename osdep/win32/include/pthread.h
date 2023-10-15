@@ -27,6 +27,7 @@
 #define pthread_mutex_destroy m_pthread_mutex_destroy
 #define pthread_mutex_init m_pthread_mutex_init
 #define pthread_mutex_lock m_pthread_mutex_lock
+#define pthread_mutex_trylock m_pthread_mutex_trylock
 #define pthread_mutex_unlock m_pthread_mutex_unlock
 #define pthread_cond_timedwait m_pthread_cond_timedwait
 #define pthread_cond_wait m_pthread_cond_wait
@@ -64,6 +65,7 @@ int pthread_mutex_init(pthread_mutex_t *restrict mutex,
                        const pthread_mutexattr_t *restrict attr);
 
 int pthread_mutex_lock(pthread_mutex_t *mutex);
+int pthread_mutex_trylock(pthread_mutex_t *mutex);
 int pthread_mutex_unlock(pthread_mutex_t *mutex);
 
 #define pthread_cond_t CONDITION_VARIABLE
