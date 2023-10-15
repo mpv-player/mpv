@@ -1174,7 +1174,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                 "This format is marked by FFmpeg as having no timestamps!\n"
                 "FFmpeg will likely make up its own broken timestamps. For\n"
                 "video streams you can correct this with:\n"
-                "    --no-correct-pts --fps=VALUE\n"
+                "    --no-correct-pts --container-fps-override=VALUE\n"
                 "with VALUE being the real framerate of the stream. You can\n"
                 "expect seeking and buffering estimation to be generally\n"
                 "broken as well.\n");
