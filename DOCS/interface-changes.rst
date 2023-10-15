@@ -106,6 +106,7 @@ Interface changes
     - rename `--sub-ass-force-style` to `--sub-ass-style-overrides`
     - rename `--screenshot-directory` to `--screenshot-dir`
     - rename `--watch-later-directory` to `--watch-later-dir`
+    - rename `--play-dir` to `--play-direction`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
