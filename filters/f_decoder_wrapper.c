@@ -95,7 +95,7 @@ static const struct m_sub_options adec_queue_conf = {
 struct dec_wrapper_opts {
     double movie_aspect;
     int aspect_method;
-    double force_fps;
+    double fps_override;
     bool correct_pts;
     int video_rotate;
     char *audio_decoders;
@@ -113,7 +113,7 @@ static int decoder_list_help(struct mp_log *log, const m_option_t *opt,
 const struct m_sub_options dec_wrapper_conf = {
     .opts = (const struct m_option[]){
         {"correct-pts", OPT_BOOL(correct_pts)},
-        {"fps", OPT_DOUBLE(force_fps), M_RANGE(0, DBL_MAX)},
+        {"container-fps-override", OPT_DOUBLE(fps_override), M_RANGE(0, DBL_MAX)},
         {"ad", OPT_STRING(audio_decoders),
             .help = decoder_list_help},
         {"vd", OPT_STRING(video_decoders),
@@ -132,7 +132,8 @@ const struct m_sub_options dec_wrapper_conf = {
         {"video-reversal-buffer", OPT_BYTE_SIZE(video_reverse_size),
             M_RANGE(0, M_MAX_MEM_BYTES)},
         {"audio-reversal-buffer", OPT_BYTE_SIZE(audio_reverse_size),
-            M_RANGE(0, M_MAX_MEM_BYTES)} ,
+            M_RANGE(0, M_MAX_MEM_BYTES)},
+        {"fps", OPT_REPLACED("container-fps-override")},
         {0}
     },
     .size = sizeof(struct dec_wrapper_opts),
@@ -1208,9 +1209,9 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
 
         MP_VERBOSE(p, "Container reported FPS: %f\n", p->fps);
 
-        if (p->opts->force_fps) {
-            p->fps = p->opts->force_fps;
-            MP_INFO(p, "FPS forced to %5.3f.\n", p->fps);
+        if (p->opts->fps_override) {
+            p->fps = p->opts->fps_override;
+            MP_INFO(p, "Container FPS forced to %5.3f.\n", p->fps);
             MP_INFO(p, "Use --no-correct-pts to force FPS based timing.\n");
         }
 

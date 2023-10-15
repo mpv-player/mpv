@@ -1094,7 +1094,8 @@ this with ``--untimed``, but it will likely break, unless the stream has no
 audio, and the input feeds data to the player at a constant rate.
 
 Another common problem is with MJPEG streams. These do not signal the correct
-framerate. Using ``--untimed`` or ``--no-correct-pts --fps=60`` might help.
+framerate. Using ``--untimed`` or ``--no-correct-pts --container-fps-override=60``
+might help.
 
 For livestreams, data can build up due to pausing the stream, due to slightly
 lower playback rate, or "buffering" pauses. If the demuxer cache is enabled,
