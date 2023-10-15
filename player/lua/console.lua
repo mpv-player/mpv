@@ -13,7 +13,6 @@
 -- CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 local utils = require 'mp.utils'
-local options = require 'mp.options'
 local assdraw = require 'mp.assdraw'
 
 -- Default options
@@ -56,7 +55,7 @@ else
 end
 
 -- Apply user-set options
-options.read_options(opts)
+require 'mp.options'.read_options(opts)
 
 local styles = {
     -- Colors are stolen from base16 Eighties by Chris Kempson
