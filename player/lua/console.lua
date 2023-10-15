@@ -669,6 +669,26 @@ local function profile_list()
     return profiles
 end
 
+local function list_option_list()
+    local options = {}
+
+    -- Don't log errors for renamed and removed properties.
+    -- (Just mp.enable_messages('fatal') still logs them to the terminal.)
+    local msg_level_backup = mp.get_property('msg-level')
+    mp.set_property('msg-level', msg_level_backup == '' and 'cplayer=no'
+                                 or msg_level_backup .. ',cplayer=no')
+
+    for _, option in pairs(mp.get_property_native('options')) do
+        if mp.get_property('option-info/' .. option .. '/type', ''):find(' list$') then
+            options[#options + 1] = option
+        end
+    end
+
+    mp.set_property('msg-level', msg_level_backup)
+
+    return options
+end
+
 local function choice_list(option)
     local info = mp.get_property_native('option-info/' .. option, {})
 
@@ -699,6 +719,8 @@ function build_completers()
         { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+"()%S*$', list = choice_list, append = '" ' },
         { pattern = '^%s*apply[-_]profile%s+"()%S*$', list = profile_list, append = '"' },
         { pattern = '^%s*apply[-_]profile%s+()%S*$', list = profile_list },
+        { pattern = '^%s*change[-_]list%s+()[%w_-]*$', list = list_option_list, append = ' ' },
+        { pattern = '^%s*change[-_]list%s+()"[%w_-]*$', list = list_option_list, append = '" ' },
         { pattern = '${()[%w_/-]+$', list = property_list, append = '}' },
     }
 
