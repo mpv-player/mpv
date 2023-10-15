@@ -305,7 +305,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
             {"no", 0}, {"basic", 1}, {"full", 2}, {"force-601", 3})},
         {"sub-ass-vsfilter-blur-compat", OPT_BOOL(ass_vsfilter_blur_compat)},
         {"embeddedfonts", OPT_BOOL(use_embedded_fonts), .flags = UPDATE_SUB_HARD},
-        {"sub-ass-force-style", OPT_STRINGLIST(ass_force_style_list),
+        {"sub-ass-style-overrides", OPT_STRINGLIST(ass_style_override_list),
             .flags = UPDATE_SUB_HARD},
         {"sub-ass-styles", OPT_STRING(ass_styles_file),
             .flags = M_OPT_FILE | UPDATE_SUB_HARD},
@@ -323,6 +323,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-clear-on-seek", OPT_BOOL(sub_clear_on_seek)},
         {"teletext-page", OPT_INT(teletext_page), M_RANGE(1, 999)},
         {"sub-past-video-end", OPT_BOOL(sub_past_video_end)},
+        {"sub-ass-force-style", OPT_REPLACED("sub-ass-style-overrides")},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
