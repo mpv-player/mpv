@@ -164,7 +164,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"keepaspect-window", OPT_BOOL(keepaspect_window)},
     {"hidpi-window-scale", OPT_BOOL(hidpi_window_scale)},
     {"native-fs", OPT_BOOL(native_fs)},
-    {"override-display-fps", OPT_DOUBLE(override_display_fps),
+    {"display-fps-override", OPT_DOUBLE(display_fps_override),
         M_RANGE(0, DBL_MAX)},
     {"video-timing-offset", OPT_DOUBLE(timing_offset), M_RANGE(0.0, 1.0)},
     {"video-sync", OPT_CHOICE(video_sync,
@@ -217,6 +217,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"android-surface-size", OPT_SIZE_BOX(android_surface_size)},
 #endif
     {"swapchain-depth", OPT_INT(swapchain_depth), M_RANGE(1, 8)},
+    {"override-display-fps", OPT_REPLACED("display-fps-override")},
     {0}
 };
 
