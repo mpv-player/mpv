@@ -66,6 +66,15 @@ int pthread_mutex_lock(pthread_mutex_t *mutex)
     return 0;
 }
 
+int pthread_mutex_trylock(pthread_mutex_t *mutex)
+{
+    if (mutex->use_cs) {
+        return !TryEnterCriticalSection(&mutex->lock.cs);
+    } else {
+        return !TryAcquireSRWLockExclusive(&mutex->lock.srw);
+    }
+}
+
 int pthread_mutex_unlock(pthread_mutex_t *mutex)
 {
     if (mutex->use_cs) {
