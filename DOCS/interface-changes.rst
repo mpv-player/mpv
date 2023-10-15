@@ -99,6 +99,7 @@ Interface changes
     - deprecate `--demuxer-cue-codepage` in favor of `--metadata-codepage`
     - change the default of `metadata-codepage` to `auto`
     - add `playlist-next-playlist` and `playlist-prev-playlist` commands
+    - change `video-codec` to show description or name, not both
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

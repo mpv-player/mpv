@@ -432,6 +432,23 @@ int m_property_strdup_ro(int action, void* arg, const char *var)
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+int m_property_read_sub_validate(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    m_property_unkey(&action, &arg);
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_PRINT:
+    case M_PROPERTY_KEY_ACTION:
+        return M_PROPERTY_VALID;
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    };
+}
+
 // This allows you to make a list of values (like from a struct) available
 // as a number of sub-properties. The property list is set up with the current
 // property values on the stack before calling this function.

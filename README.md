@@ -141,12 +141,12 @@ or cross-compile from Linux with MinGW. See
 
 ## Release cycle
 
-Every other month, an arbitrary git snapshot is made, and is assigned
-a 0.X.0 version number. No further maintenance is done.
+Once or twice a year, a release is cut off from the current development state
+and is assigned a 0.X.0 version number. No further maintenance is done, except
+in the event of security issues.
 
 The goal of releases is to make Linux distributions happy. Linux distributions
-are also expected to apply their own patches in case of bugs and security
-issues.
+are also expected to apply their own patches in case of bugs.
 
 Releases other than the latest release are unsupported and unmaintained.
 

@@ -107,6 +107,9 @@ struct m_property_action_arg {
 };
 
 enum mp_property_return {
+    // Returned from validator if action should be executed.
+    M_PROPERTY_VALID = 2,
+
     // Returned on success.
     M_PROPERTY_OK = 1,
 
@@ -212,6 +215,8 @@ struct m_sub_property {
 #define SUB_PROP_PTS(f) \
     .type = {.type = &m_option_type_time}, .value = {.double_ = (f)}
 
+int m_property_read_sub_validate(void *ctx, struct m_property *prop,
+                                 int action, void *arg);
 int m_property_read_sub(const struct m_sub_property *props, int action, void *arg);
 
 

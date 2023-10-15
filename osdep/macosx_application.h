@@ -26,6 +26,12 @@ enum {
     FRAME_WHOLE,
 };
 
+enum {
+    RENDER_TIMER_CALLBACK = 0,
+    RENDER_TIMER_PRECISE,
+    RENDER_TIMER_SYSTEM,
+};
+
 struct macos_opts {
     int macos_title_bar_style;
     int macos_title_bar_appearance;
@@ -35,6 +41,7 @@ struct macos_opts {
     bool macos_force_dedicated_gpu;
     int macos_app_activation_policy;
     int macos_geometry_calculation;
+    int macos_render_timer;
     int cocoa_cb_sw_renderer;
     bool cocoa_cb_10bit_context;
 };

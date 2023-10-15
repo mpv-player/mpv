@@ -265,20 +265,22 @@ local timers = {}
 local timer_mt = {}
 timer_mt.__index = timer_mt
 
-function mp.add_timeout(seconds, cb)
-    local t = mp.add_periodic_timer(seconds, cb)
+function mp.add_timeout(seconds, cb, disabled)
+    local t = mp.add_periodic_timer(seconds, cb, disabled)
     t.oneshot = true
     return t
 end
 
-function mp.add_periodic_timer(seconds, cb)
+function mp.add_periodic_timer(seconds, cb, disabled)
     local t = {
         timeout = seconds,
         cb = cb,
         oneshot = false,
     }
     setmetatable(t, timer_mt)
-    t:resume()
+    if not disabled then
+        t:resume()
+    end
     return t
 end
 
