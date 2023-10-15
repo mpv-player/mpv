@@ -293,7 +293,7 @@ typedef struct MPOpts {
 
     struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;
-    char *screenshot_directory;
+    char *screenshot_dir;
     bool screenshot_sw;
 
     struct m_channels audio_output_channels;

@@ -295,7 +295,7 @@ static char *gen_fname(struct mp_cmd_ctx *cmd, const char *file_ext)
             return NULL;
         }
 
-        char *dir = ctx->mpctx->opts->screenshot_directory;
+        char *dir = ctx->mpctx->opts->screenshot_dir;
         if (dir && dir[0]) {
             void *t = fname;
             dir = mp_get_user_path(t, ctx->mpctx->global, dir);
