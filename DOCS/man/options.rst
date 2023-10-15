@@ -2399,15 +2399,15 @@ Subtitles
         ``--sub-speed=25/23.976`` plays frame based subtitles which have been
         loaded assuming a framerate of 23.976 at 25 FPS.
 
-``--sub-ass-force-style=<[Style.]Param=Value[,...]>``
+``--sub-ass-style-overrides=<[Style.]Param=Value[,...]>``
     Override some style or script info parameters.
 
     This is a string list option. See `List Options`_ for details.
 
     .. admonition:: Examples
 
-        - ``--sub-ass-force-style=FontName=Arial,Default.Bold=1``
-        - ``--sub-ass-force-style=PlayResY=768``
+        - ``--sub-ass-style-overrides=FontName=Arial,Default.Bold=1``
+        - ``--sub-ass-style-overrides=PlayResY=768``
 
     .. note::
 

@@ -108,7 +108,7 @@ struct mp_subtitle_opts {
     int ass_vsfilter_color_compat;
     bool ass_vsfilter_blur_compat;
     bool use_embedded_fonts;
-    char **ass_force_style_list;
+    char **ass_style_override_list;
     char *ass_styles_file;
     int ass_style_override;
     int ass_hinting;
