@@ -260,6 +260,48 @@ static bool vo_supports(struct mp_hwdec_ctx *ctx, int hw_fmt, int sw_fmt)
     return false;
 }
 
+/**
+ * Some hwcontexts do not implement constraints, and so cannot
+ * report supported formats, so cobble something together from our
+ * static metadata.
+ */
+static AVHWFramesConstraints *build_static_constraints(struct mp_hwdec_ctx *ctx)
+{
+    AVHWFramesConstraints *cstr = NULL;
+    cstr = av_malloc(sizeof(AVHWFramesConstraints));
+    if (!cstr)
+        return NULL;
+
+    cstr->valid_hw_formats =
+        av_malloc_array(2, sizeof(*cstr->valid_hw_formats));
+    if (!cstr->valid_hw_formats)
+        goto fail;
+    cstr->valid_hw_formats[0] = imgfmt2pixfmt(ctx->hw_imgfmt);
+    cstr->valid_hw_formats[1] = AV_PIX_FMT_NONE;
+
+    int num_sw_formats;
+    for (num_sw_formats = 0;
+            ctx->supported_formats[num_sw_formats] != 0;
+            num_sw_formats++);
+
+    cstr->valid_sw_formats =
+        av_malloc_array(num_sw_formats + 1,
+                        sizeof(*cstr->valid_sw_formats));
+    if (!cstr->valid_sw_formats)
+        goto fail;
+    for (int i = 0; i < num_sw_formats; i++) {
+        cstr->valid_sw_formats[i] = imgfmt2pixfmt(ctx->supported_formats[i]);
+    }
+    cstr->valid_sw_formats[num_sw_formats] = AV_PIX_FMT_NONE;
+
+    return cstr;
+
+ fail:
+    av_freep(&cstr->valid_hw_formats);
+    av_freep(&cstr->valid_sw_formats);
+    return NULL;
+}
+
 static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversion_filter)
 {
     struct priv *p = f->priv;
@@ -291,8 +333,11 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
         if (!cur->av_device_ref)
             continue;
         cstr = av_hwdevice_get_hwframe_constraints(cur->av_device_ref, NULL);
-        if (!cstr)
-            continue;
+        if (!cstr) {
+            MP_VERBOSE(f, "hwdec '%s' does not report hwframe constraints. "
+                          "Using static metadata.\n", cur->driver_name);
+            cstr = build_static_constraints(cur);
+        }
         bool found = false;
         for (int i = 0; cstr->valid_hw_formats &&
                         cstr->valid_hw_formats[i] != AV_PIX_FMT_NONE; i++)
@@ -395,7 +440,8 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
                 }
             }
 
-            enum AVPixelFormat *fmts = conversion_cstr->valid_sw_formats;
+            enum AVPixelFormat *fmts = conversion_cstr ?
+                                       conversion_cstr->valid_sw_formats : NULL;
             MP_DBG(f, "  supports:");
             for (int i = 0; fmts && fmts[i] != AV_PIX_FMT_NONE; i++) {
                 int fmt = pixfmt2imgfmt(fmts[i]);
