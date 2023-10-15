@@ -754,7 +754,7 @@ static const m_option_t mp_opts[] = {
         OPT_BOOL(write_filename_in_watch_later_config)},
     {"ignore-path-in-watch-later-config",
         OPT_BOOL(ignore_path_in_watch_later_config)},
-    {"watch-later-directory", OPT_STRING(watch_later_directory),
+    {"watch-later-dir", OPT_STRING(watch_later_dir),
         .flags = M_OPT_FILE},
     {"watch-later-options", OPT_STRINGLIST(watch_later_options)},
 
@@ -888,6 +888,7 @@ static const m_option_t mp_opts[] = {
 
     {"screenshot-directory", OPT_REPLACED("screenshot-dir")},
     {"sub-forced-only", OPT_REPLACED("sub-forced-events-only")},
+    {"watch-later-directory", OPT_REPLACED("watch-later-dir")},
     {0}
 };
 
