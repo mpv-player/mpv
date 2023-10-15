@@ -1030,7 +1030,7 @@ Watch Later
 
     See `RESUMING PLAYBACK`_.
 
-``--watch-later-directory=<path>``
+``--watch-later-dir=<path>``
     The directory in which to store the "watch later" temporary files.
 
     If this option is unset, the files will be stored in a subdirectory
