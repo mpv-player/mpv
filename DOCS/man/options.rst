@@ -484,7 +484,7 @@ Playback Control
     of them fails. This doesn't affect playback of audio-only or video-only
     files.
 
-``--play-dir=<forward|+|backward|->``
+``--play-direction=<forward|+|backward|->``
     Control the playback direction (default: forward). Setting ``backward``
     will attempt to play the file in reverse direction, with decreasing
     playback time. If this is set on playback starts, playback will start from
@@ -701,7 +701,7 @@ Playback Control
 ``--demuxer-backward-playback-step=<seconds>``
     Number of seconds the demuxer should seek back to get new packets during
     backward playback (default: 60). This is useful for tuning backward
-    playback, see ``--play-dir`` for details.
+    playback, see ``--play-direction`` for details.
 
     Setting this to a very low value or 0 may make the player think seeking is
     broken, or may make it perform multiple seeks.

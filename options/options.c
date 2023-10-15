@@ -522,7 +522,7 @@ static const m_option_t mp_opts[] = {
     {"end", OPT_REL_TIME(play_end)},
     {"length", OPT_REL_TIME(play_length)},
 
-    {"play-dir", OPT_CHOICE(play_dir,
+    {"play-direction", OPT_CHOICE(play_dir,
         {"forward", 1}, {"+", 1}, {"backward", -1}, {"-", -1})},
 
     {"rebase-start-time", OPT_BOOL(rebase_start_time)},
@@ -886,6 +886,7 @@ static const m_option_t mp_opts[] = {
 
     {"", OPT_SUBSTRUCT(encode_opts, encode_config)},
 
+    {"play-dir", OPT_REPLACED("play-direction")},
     {"screenshot-directory", OPT_REPLACED("screenshot-dir")},
     {"sub-forced-only", OPT_REPLACED("sub-forced-events-only")},
     {"watch-later-directory", OPT_REPLACED("watch-later-dir")},
