@@ -630,6 +630,13 @@ local function command_list()
     return commands
 end
 
+local function command_list_and_help()
+    local commands = command_list()
+    commands[#commands + 1] = 'help'
+
+    return commands
+end
+
 local function property_list()
     local option_info = {
         'name', 'type', 'set-from-commandline', 'set-locally', 'default-value',
@@ -674,7 +681,8 @@ end
 --           match.
 function build_completers()
     local completers = {
-        { pattern = '^%s*()[%w_-]+$', list = command_list, append = ' ' },
+        { pattern = '^%s*()[%w_-]+$', list = command_list_and_help, append = ' ' },
+        { pattern = '^%s*help%s+()[%w_-]*$', list = command_list },
         { pattern = '^%s*set%s+"?([%w_-]+)"?%s+()%S*$', list = choice_list },
         { pattern = '^%s*set%s+"?([%w_-]+)"?%s+"()%S*$', list = choice_list, append = '"' },
         { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+()%S*$', list = choice_list, append = " " },
