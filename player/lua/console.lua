@@ -659,6 +659,16 @@ local function property_list()
     return properties
 end
 
+local function profile_list()
+    local profiles = {}
+
+    for i, profile in ipairs(mp.get_property_native('profile-list')) do
+        profiles[i] = profile.name
+    end
+
+    return profiles
+end
+
 local function choice_list(option)
     local info = mp.get_property_native('option-info/' .. option, {})
 
@@ -687,6 +697,8 @@ function build_completers()
         { pattern = '^%s*set%s+"?([%w_-]+)"?%s+"()%S*$', list = choice_list, append = '"' },
         { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+()%S*$', list = choice_list, append = " " },
         { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+"()%S*$', list = choice_list, append = '" ' },
+        { pattern = '^%s*apply[-_]profile%s+"()%S*$', list = profile_list, append = '"' },
+        { pattern = '^%s*apply[-_]profile%s+()%S*$', list = profile_list },
         { pattern = '${()[%w_/-]+$', list = property_list, append = '}' },
     }
 
