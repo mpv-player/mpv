@@ -102,6 +102,7 @@ Interface changes
     - deprecate `--cdda-toc-bias` option, offsets are always checked now
     - disable `--allow-delayed-peak-detect` by default
     - rename `--fps` to `--container-fps-override`
+    - rename `--override-display-fps` to `--display-fps-override`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
