@@ -815,7 +815,7 @@ static const m_option_t mp_opts[] = {
 
     {"screenshot", OPT_SUBSTRUCT(screenshot_image_opts, screenshot_conf)},
     {"screenshot-template", OPT_STRING(screenshot_template)},
-    {"screenshot-directory", OPT_STRING(screenshot_directory),
+    {"screenshot-dir", OPT_STRING(screenshot_dir),
         .flags = M_OPT_FILE},
     {"screenshot-sw", OPT_BOOL(screenshot_sw)},
 
@@ -886,6 +886,7 @@ static const m_option_t mp_opts[] = {
 
     {"", OPT_SUBSTRUCT(encode_opts, encode_config)},
 
+    {"screenshot-directory", OPT_REPLACED("screenshot-dir")},
     {"sub-forced-only", OPT_REPLACED("sub-forced-events-only")},
     {0}
 };
