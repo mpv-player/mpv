@@ -826,10 +826,6 @@ Program Behavior
     value. The initial value is either the default value, or as set by the
     config file or command line.
 
-    In some cases, this might not work as expected. For example, ``--volume``
-    will only be reset if it is explicitly set in the config file or the
-    command line.
-
     The special name ``all`` resets as many options as possible.
 
     This is a string list option. See `List Options`_ for details.
