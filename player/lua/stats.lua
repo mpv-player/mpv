@@ -171,7 +171,7 @@ end
 
 
 local function has_vo_window()
-    return mp.get_property("vo-configured") == "yes"
+    return mp.get_property_native("vo-configured") and mp.get_property_native("video-osd")
 end
 
 
