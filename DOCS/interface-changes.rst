@@ -51,7 +51,6 @@ Interface changes
     - rename `--sub-forced-only` to `--sub-forced-events-only`
     - remove `sub-forced-only-cur` property (`--sub-forced-events-only` is a replacement)
     - add `hdr-metadata` property
-    - change `--directory-mode` default to `lazy`
     - remove deprecated `video-aspect` property
     - add `--video-crop`
     - add `video-params/crop-[w,h,x,y]`
