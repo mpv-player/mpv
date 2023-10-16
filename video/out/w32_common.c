@@ -179,6 +179,8 @@ struct vo_w32_state {
     int snap_dy;
 
     HANDLE avrt_handle;
+
+    bool cleared;
 };
 
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
@@ -1209,10 +1211,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 
     switch (message) {
     case WM_ERASEBKGND:
-        if (!w32->parent && (!w32->opts->border || w32->current_fs))
+        if (w32->cleared || !w32->opts->border || w32->current_fs)
             return TRUE;
         break;
     case WM_PAINT:
+        w32->cleared = true;
         signal_events(w32, VO_EVENT_EXPOSE);
         break;
     case WM_MOVE: {
