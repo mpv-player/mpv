@@ -525,10 +525,8 @@ String list and path list options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 String lists are separated by ``,``. The strings are not parsed or interpreted
-by the option system itself. However, most
-
-Path or file list options use ``:`` (Unix) or ``;`` (Windows) as separator,
-instead of ``,``.
+by the option system itself. However, most path or file list options use ``:``
+(Unix) or ``;`` (Windows) as separator, instead of ``,``.
 
 They support the following operations:
 
@@ -570,7 +568,7 @@ Keys are unique within the list. If an already present key is set, the existing
 key is removed before the new value is appended.
 
 If you want to pass a value without interpreting it for escapes or ``,``, it is
-recommended to use the ``-add`` variant. When using libmpv, prefer using
+recommended to use the ``-append`` variant. When using libmpv, prefer using
 ``MPV_FORMAT_NODE_MAP``; when using a scripting backend or the JSON IPC, use an
 appropriate structured data type.
 
