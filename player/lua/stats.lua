@@ -114,25 +114,11 @@ local perf_buffers = {}
 -- Save all properties known to this version of mpv
 local property_list = {}
 for p in string.gmatch(mp.get_property("property-list"), "([^,]+)") do property_list[p] = true end
--- Mapping of properties to their deprecated names
-local property_aliases = {
-    ["decoder-frame-drop-count"] = "drop-frame-count",
-    ["frame-drop-count"] = "vo-drop-frame-count",
-    ["container-fps"] = "fps",
-}
 
 local function graph_add_value(graph, value)
     graph.pos = (graph.pos % graph.len) + 1
     graph[graph.pos] = value
     graph.max = max(graph.max, value)
-end
-
--- Return deprecated name for the given property
-local function compat(p)
-    while not property_list[p] and property_aliases[p] do
-        p = property_aliases[p]
-    end
-    return p
 end
 
 -- "\\<U+2060>" in UTF-8 (U+2060 is WORD-JOINER)
@@ -300,7 +286,7 @@ local function append_perfdata(s, dedicated_page, print_passes)
 
     local ds = mp.get_property_bool("display-sync-active", false)
     local target_fps = ds and mp.get_property_number("display-fps", 0)
-                       or mp.get_property_number(compat("container-fps"), 0)
+                       or mp.get_property_number("container-fps", 0)
     if target_fps > 0 then target_fps = 1 / target_fps * 1e9 end
 
     -- Sums of all last/avg/peak values
@@ -351,7 +337,7 @@ local function append_perfdata(s, dedicated_page, print_passes)
                 s[#s+1] = format(f, o.nl, o.indent, o.indent,
                                  o.font_mono, pp(pass["last"]),
                                  pp(pass["avg"]), pp(pass["peak"]),
-                                 o.prefix_sep .. o.prefix_sep, p(pass["last"], last_s[frame]),
+                                 o.prefix_sep .. "\\h\\h", p(pass["last"], last_s[frame]),
                                  o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
 
                 if o.plot_perfdata and o.use_ass then
@@ -366,8 +352,8 @@ local function append_perfdata(s, dedicated_page, print_passes)
             -- Print sum of timing values as "Total"
             s[#s+1] = format(f, o.nl, o.indent, o.indent,
                              o.font_mono, pp(last_s[frame]),
-                             pp(avg_s[frame]), pp(peak_s[frame]), "", "", o.font,
-                             o.prefix_sep, o.prefix_sep, b("Total"))
+                             pp(avg_s[frame]), pp(peak_s[frame]),
+                             o.prefix_sep, b("Total"), o.font, "", "", "")
         else
             -- for the simplified view, we just print the sum of each pass
             s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
@@ -866,9 +852,9 @@ local function add_video_out(s)
                                          no_prefix_markup=true, nl="", indent=" "})
     append_property(s, "avsync", {prefix="A-V:"})
     append_fps(s, "display-fps", "estimated-display-fps")
-    if append_property(s, compat("decoder-frame-drop-count"),
+    if append_property(s, "decoder-frame-drop-count",
                        {prefix="Dropped Frames:", suffix=" (decoder)"}) then
-        append_property(s, compat("frame-drop-count"), {suffix=" (output)", nl="", indent=""})
+        append_property(s, "frame-drop-count", {suffix=" (output)", nl="", indent=""})
     end
     append_display_sync(s)
     append_perfdata(s, false, o.print_perfdata_passes)

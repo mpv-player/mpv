@@ -182,10 +182,10 @@ Available filters are:
         and ``<speed> != 0``. (default: 8.0)
 
     ``search-interval=<amount>``
-        Length in milliseconds to search for best overlap position. (default: 30)
+        Length in milliseconds to search for best overlap position. (default: 40)
 
     ``window-size=<amount>``
-        Length in milliseconds of the overlap-and-add window. (default: 20)
+        Length in milliseconds of the overlap-and-add window. (default: 12)
 
 ``rubberband``
     High quality pitch correction with librubberband. This can be used in place

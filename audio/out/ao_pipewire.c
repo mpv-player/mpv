@@ -176,10 +176,10 @@ static void on_process(void *userdata)
     if (time.rate.num == 0)
         time.rate.num = 1;
 
-    int64_t end_time = mp_time_us();
+    int64_t end_time = mp_time_ns();
     /* time.queued is always going to be 0, so we don't need to care */
-    end_time += (nframes * 1e6 / ao->samplerate) +
-                ((float) time.delay * SPA_USEC_PER_SEC * time.rate.num / time.rate.denom);
+    end_time += (nframes * 1e9 / ao->samplerate) +
+                ((double) time.delay * SPA_NSEC_PER_SEC * time.rate.num / time.rate.denom);
 
     int samples = ao_read_data(ao, data, nframes, end_time);
     b->size = samples;

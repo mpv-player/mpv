@@ -590,7 +590,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale,
             ictx->current_down_cmd = mp_cmd_clone(cmd);
         }
         ictx->last_key_down = code;
-        ictx->last_key_down_time = mp_time_us();
+        ictx->last_key_down_time = mp_time_ns();
         ictx->ar_state = 0;
         mp_input_wakeup(ictx); // possibly start timer for autorepeat
     } else if (state == MP_KEY_STATE_UP) {
@@ -915,19 +915,19 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
         ictx->ar_state = -1; // disable
 
     if (ictx->ar_state >= 0) {
-        int64_t t = mp_time_us();
-        if (ictx->last_ar + 2000000 < t)
+        int64_t t = mp_time_ns();
+        if (ictx->last_ar + MP_TIME_S_TO_NS(2) < t)
             ictx->last_ar = t;
         // First time : wait delay
         if (ictx->ar_state == 0
-            && (t - ictx->last_key_down_time) >= opts->ar_delay * 1000)
+            && (t - ictx->last_key_down_time) >= MP_TIME_MS_TO_NS(opts->ar_delay))
         {
             ictx->ar_state = 1;
-            ictx->last_ar = ictx->last_key_down_time + opts->ar_delay * 1000;
+            ictx->last_ar = ictx->last_key_down_time + MP_TIME_MS_TO_NS(opts->ar_delay);
             // Then send rate / sec event
         } else if (ictx->ar_state == 1
-                   && (t - ictx->last_ar) >= 1000000 / opts->ar_rate) {
-            ictx->last_ar += 1000000 / opts->ar_rate;
+                   && (t - ictx->last_ar) >= 1e9 / opts->ar_rate) {
+            ictx->last_ar += 1e9 / opts->ar_rate;
         } else {
             return NULL;
         }

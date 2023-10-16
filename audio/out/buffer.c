@@ -62,7 +62,7 @@ struct buffer_state {
     bool playing;               // logically playing audio from buffer
     bool paused;                // logically paused
 
-    int64_t end_time_us;        // absolute output time of last played sample
+    int64_t end_time_ns;        // absolute output time of last played sample
 
     bool initial_unblocked;
 
@@ -177,9 +177,9 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof)
 // rest of the user-provided buffer with silence.
 // This basically assumes that the audio device doesn't care about underruns.
 // If this is called in paused mode, it will always return 0.
-// The caller should set out_time_us to the expected delay until the last sample
-// reaches the speakers, in microseconds, using mp_time_us() as reference.
-int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
+// The caller should set out_time_ns to the expected delay until the last sample
+// reaches the speakers, in nanoseconds, using mp_time_ns() as reference.
+int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns)
 {
     struct buffer_state *p = ao->buffer_state;
     assert(!ao->driver->write);
@@ -189,7 +189,7 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
     int pos = read_buffer(ao, data, samples, &(bool){0});
 
     if (pos > 0)
-        p->end_time_us = out_time_us;
+        p->end_time_ns = out_time_ns;
 
     if (pos < samples && p->playing && !p->paused) {
         p->playing = false;
@@ -206,13 +206,13 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
 // Same as ao_read_data(), but convert data according to *fmt.
 // fmt->src_fmt and fmt->channels must be the same as the AO parameters.
 int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
-                           void **data, int samples, int64_t out_time_us)
+                           void **data, int samples, int64_t out_time_ns)
 {
     struct buffer_state *p = ao->buffer_state;
     void *ndata[MP_NUM_CHANNELS] = {0};
 
     if (!ao_need_conversion(fmt))
-        return ao_read_data(ao, data, samples, out_time_us);
+        return ao_read_data(ao, data, samples, out_time_ns);
 
     assert(ao->format == fmt->src_fmt);
     assert(ao->channels.num == fmt->channels);
@@ -232,7 +232,7 @@ int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
     for (int n = 0; n < planes; n++)
         ndata[n] = p->convert_buffer + n * src_plane_size;
 
-    int res = ao_read_data(ao, ndata, samples, out_time_us);
+    int res = ao_read_data(ao, ndata, samples, out_time_ns);
 
     ao_convert_inplace(fmt, ndata, samples);
     for (int n = 0; n < planes; n++)
@@ -270,9 +270,9 @@ double ao_get_delay(struct ao *ao)
         get_dev_state(ao, &state);
         driver_delay = state.delay;
     } else {
-        int64_t end = p->end_time_us;
-        int64_t now = mp_time_us();
-        driver_delay = MPMAX(0, (end - now) / (1000.0 * 1000.0));
+        int64_t end = p->end_time_ns;
+        int64_t now = mp_time_ns();
+        driver_delay = MPMAX(0, MP_TIME_NS_TO_S(end - now));
     }
 
     int pending = mp_async_queue_get_samples(p->queue);
@@ -311,7 +311,7 @@ void ao_reset(struct ao *ao)
     p->playing = false;
     p->recover_pause = false;
     p->hw_paused = false;
-    p->end_time_us = 0;
+    p->end_time_ns = 0;
 
     pthread_mutex_unlock(&p->lock);
 

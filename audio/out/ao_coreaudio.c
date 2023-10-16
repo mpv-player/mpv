@@ -31,7 +31,7 @@ struct priv {
     AudioDeviceID device;
     AudioUnit audio_unit;
 
-    uint64_t hw_latency_us;
+    uint64_t hw_latency_ns;
 
     AudioStreamBasicDescription original_asbd;
     AudioStreamID original_asbd_stream;
@@ -53,13 +53,13 @@ static int64_t ca_get_hardware_latency(struct ao *ao) {
             &size);
     CHECK_CA_ERROR("cannot get audio unit latency");
 
-    uint64_t audiounit_latency_us = audiounit_latency_sec * 1e6;
-    uint64_t device_latency_us    = ca_get_device_latency_us(ao, p->device);
+    uint64_t audiounit_latency_ns = MP_TIME_S_TO_NS(audiounit_latency_sec);
+    uint64_t device_latency_ns    = ca_get_device_latency_ns(ao, p->device);
 
-    MP_VERBOSE(ao, "audiounit latency [us]: %lld\n", audiounit_latency_us);
-    MP_VERBOSE(ao, "device latency [us]: %lld\n", device_latency_us);
+    MP_VERBOSE(ao, "audiounit latency [ns]: %lld\n", audiounit_latency_ns);
+    MP_VERBOSE(ao, "device latency [ns]: %lld\n", device_latency_ns);
 
-    return audiounit_latency_us + device_latency_us;
+    return audiounit_latency_ns + device_latency_ns;
 
 coreaudio_error:
     return 0;
@@ -76,8 +76,8 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     for (int n = 0; n < ao->num_planes; n++)
         planes[n] = buffer_list->mBuffers[n].mData;
 
-    int64_t end = mp_time_us();
-    end += p->hw_latency_us + ca_get_latency(ts) + ca_frames_to_us(ao, frames);
+    int64_t end = mp_time_ns();
+    end += p->hw_latency_ns + ca_get_latency(ts) + ca_frames_to_ns(ao, frames);
     ao_read_data(ao, planes, frames, end);
     return noErr;
 }
@@ -288,7 +288,7 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "can't link audio unit to selected device");
 
-    p->hw_latency_us = ca_get_hardware_latency(ao);
+    p->hw_latency_ns = ca_get_hardware_latency(ao);
 
     AURenderCallbackStruct render_cb = (AURenderCallbackStruct) {
         .inputProc       = render_cb_lpcm,

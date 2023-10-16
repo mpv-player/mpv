@@ -78,7 +78,7 @@ struct priv {
 
     atomic_bool reload_requested;
 
-    uint32_t hw_latency_us;
+    uint64_t hw_latency_ns;
 };
 
 static OSStatus property_listener_cb(
@@ -176,9 +176,9 @@ static OSStatus render_cb_compressed(
         return kAudioHardwareUnspecifiedError;
     }
 
-    int64_t end = mp_time_us();
-    end += p->hw_latency_us + ca_get_latency(ts)
-        + ca_frames_to_us(ao, pseudo_frames);
+    int64_t end = mp_time_ns();
+    end += p->hw_latency_ns + ca_get_latency(ts)
+        + ca_frames_to_ns(ao, pseudo_frames);
 
     ao_read_data(ao, &buf.mData, pseudo_frames, end);
 
@@ -383,8 +383,8 @@ static int init(struct ao *ao)
         MP_WARN(ao, "Using spdif passthrough hack. This could produce noise.\n");
     }
 
-    p->hw_latency_us = ca_get_device_latency_us(ao, p->device);
-    MP_VERBOSE(ao, "base latency: %d microseconds\n", (int)p->hw_latency_us);
+    p->hw_latency_ns = ca_get_device_latency_ns(ao, p->device);
+    MP_VERBOSE(ao, "base latency: %lld nanoseconds\n", p->hw_latency_ns);
 
     err = enable_property_listener(ao, true);
     CHECK_CA_ERROR("cannot install format change listener during init");

@@ -363,7 +363,7 @@ static int wait_wakeup(struct mpv_handle *ctx, int64_t end)
     pthread_mutex_unlock(&ctx->lock);
     pthread_mutex_lock(&ctx->wakeup_lock);
     if (!ctx->need_wakeup) {
-        struct timespec ts = mp_time_us_to_realtime(end);
+        struct timespec ts = mp_time_ns_to_realtime(end);
         r = pthread_cond_timedwait(&ctx->wakeup, &ctx->wakeup_lock, &ts);
     }
     if (r == 0)
@@ -905,7 +905,7 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
     if (timeout < 0)
         timeout = 1e20;
 
-    int64_t deadline = mp_time_us_add(mp_time_us(), timeout);
+    int64_t deadline = mp_time_ns_add(mp_time_ns(), timeout);
 
     *event = (mpv_event){0};
     talloc_free_children(event);
@@ -2136,7 +2136,7 @@ int64_t mpv_get_time_ns(mpv_handle *ctx)
 
 int64_t mpv_get_time_us(mpv_handle *ctx)
 {
-    return mp_time_us();
+    return mp_time_ns() / 1000;
 }
 
 #include "video/out/libmpv.h"

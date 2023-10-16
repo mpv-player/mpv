@@ -292,9 +292,9 @@ bool ca_asbd_is_better(AudioStreamBasicDescription *req,
     return true;
 }
 
-int64_t ca_frames_to_us(struct ao *ao, uint32_t frames)
+int64_t ca_frames_to_ns(struct ao *ao, uint32_t frames)
 {
-    return frames / (float) ao->samplerate * 1e6;
+    return MP_TIME_S_TO_NS(frames / (double)ao->samplerate);
 }
 
 int64_t ca_get_latency(const AudioTimeStamp *ts)
@@ -306,7 +306,7 @@ int64_t ca_get_latency(const AudioTimeStamp *ts)
     if (now > out)
         return 0;
 
-    return (out - now) * 1e-3;
+    return out - now;
 #else
     static mach_timebase_info_data_t timebase;
     if (timebase.denom == 0)
@@ -318,7 +318,7 @@ int64_t ca_get_latency(const AudioTimeStamp *ts)
     if (now > out)
         return 0;
 
-    return (out - now) * timebase.numer / timebase.denom / 1e3;
+    return (out - now) * timebase.numer / timebase.denom;
 #endif
 }
 
@@ -422,7 +422,7 @@ OSStatus ca_enable_mixing(struct ao *ao, AudioDeviceID device, bool changed)
     return noErr;
 }
 
-int64_t ca_get_device_latency_us(struct ao *ao, AudioDeviceID device)
+int64_t ca_get_device_latency_ns(struct ao *ao, AudioDeviceID device)
 {
     uint32_t latency_frames = 0;
     uint32_t latency_properties[] = {
@@ -449,7 +449,7 @@ int64_t ca_get_device_latency_us(struct ao *ao, AudioDeviceID device)
         MP_VERBOSE(ao, "Device sample rate: %f\n", sample_rate);
     }
 
-    return latency_frames / sample_rate * 1e6;
+    return MP_TIME_S_TO_NS(latency_frames / sample_rate);
 }
 
 static OSStatus ca_change_format_listener(
