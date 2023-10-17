@@ -23,7 +23,6 @@
 #include <assert.h>
 #include <windows.h>
 
-#include "common/common.h"
 #include "osdep/timer.h"  // mp_{start,end}_hires_timers
 
 int pthread_once(pthread_once_t *once_control, void (*init_routine)(void))
@@ -96,11 +95,22 @@ int pthread_cond_timedwait(pthread_cond_t *restrict cond,
                            pthread_mutex_t *restrict mutex,
                            const struct timespec *restrict abstime)
 {
-    // mp time is not converted to realtime if internal pthread impl is used
-    int64_t now = mp_time_ns();
-    int64_t time_ns = abstime->tv_sec * UINT64_C(1000000000) + abstime->tv_nsec;
-    int64_t timeout_ms = (time_ns - now) / INT64_C(1000000);
-    return cond_wait(cond, mutex, MPCLAMP(timeout_ms, 0, INFINITE));
+    // mpv uses mingw's gettimeofday() as time source too.
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    DWORD timeout_ms = 0;
+    if (abstime->tv_sec >= INT64_MAX / 10000) {
+        timeout_ms = INFINITE;
+    } else if (abstime->tv_sec >= tv.tv_sec) {
+        long long msec = (abstime->tv_sec - tv.tv_sec) * 1000LL +
+            abstime->tv_nsec / 1000LL / 1000LL - tv.tv_usec / 1000LL;
+        if (msec > INT_MAX) {
+            timeout_ms = INFINITE;
+        } else if (msec > 0) {
+            timeout_ms = msec;
+        }
+    }
+    return cond_wait(cond, mutex, timeout_ms);
 }
 
 int pthread_cond_wait(pthread_cond_t *restrict cond,
