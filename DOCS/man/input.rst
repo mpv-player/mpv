@@ -1861,11 +1861,15 @@ Property list
     looks better for display purposes. Use the ``path`` property to get an
     unmodified filename.)
 
-    This has a sub-property:
+    This has two sub-properties:
 
     ``filename/no-ext``
         Like the ``filename`` property, but if the text contains a ``.``, strip
         all text after the last ``.``. Usually this removes the file extension.
+
+    ``filename/ext``
+        Returns the text after the final ``.``, if the text contains any.
+        Otherwise, returns an empty string.
 
 ``file-size``
     Length in bytes of the source file/stream. (This is the same as

@@ -464,13 +464,21 @@ static int mp_property_filename(void *ctx, struct m_property *prop,
         f = filename;
     if (action == M_PROPERTY_KEY_ACTION) {
         struct m_property_action_arg *ka = arg;
-        if (strcmp(ka->key, "no-ext") == 0) {
+        bstr key = bstr0(ka->key);
+        if (bstr_equals0(key, "no-ext")) {
             action = ka->action;
             arg = ka->arg;
             bstr root;
             if (mp_splitext(f, &root))
                 f = bstrto0(filename, root);
+        } else if (bstr_equals0(key, "ext")) {
+            action = ka->action;
+            arg = ka->arg;
+            f = mp_splitext(f, NULL);
+            if (!f)
+                f = talloc_strdup(NULL, "");;
         }
+
     }
     int r = m_property_strdup_ro(action, arg, f);
     talloc_free(filename);
