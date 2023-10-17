@@ -688,6 +688,20 @@ local function list_option_list()
     return options
 end
 
+local function list_option_verb_list(option)
+    local type = mp.get_property('option-info/' .. option .. '/type')
+
+    if type == 'Key/value list' then
+        return {'add', 'append', 'set', 'remove'}
+    end
+
+    if type == 'String list' or type == 'Object settings list' then
+        return {'add', 'append', 'clr', 'pre', 'set', 'remove', 'toggle'}
+    end
+
+    return {}
+end
+
 local function choice_list(option)
     local info = mp.get_property_native('option-info/' .. option, {})
 
@@ -720,6 +734,10 @@ function build_completers()
         { pattern = '^%s*apply[-_]profile%s+()%S*$', list = profile_list },
         { pattern = '^%s*change[-_]list%s+()[%w_-]*$', list = list_option_list, append = ' ' },
         { pattern = '^%s*change[-_]list%s+()"[%w_-]*$', list = list_option_list, append = '" ' },
+        { pattern = '^%s*change[-_]list%s+"?([%w_-]+)"?%s+()%a*$', list = list_option_verb_list, append = ' ' },
+        { pattern = '^%s*change[-_]list%s+"?([%w_-]+)"?%s+"()%a*$', list = list_option_verb_list, append = '" ' },
+        { pattern = '^%s*([av]f)%s+()%a*$', list = list_option_verb_list, append = ' ' },
+        { pattern = '^%s*([av]f)%s+"()%a*$', list = list_option_verb_list, append = '" ' },
         { pattern = '${()[%w_/-]+$', list = property_list, append = '}' },
     }
 
