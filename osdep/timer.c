@@ -94,7 +94,7 @@ struct timespec mp_time_ns_to_realtime(int64_t time_ns)
     struct timespec ts = {0};
 
 #if !HAVE_WIN32_INTERNAL_PTHREADS
-    if (get_realtime(&ts) != 0)
+    if (get_realtime(&ts) == 0)
         return ts;
     int64_t time_rel = time_ns - mp_time_ns();
 #else
