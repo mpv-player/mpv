@@ -28,7 +28,9 @@
 int mp_poll(struct pollfd *fds, int nfds, int64_t timeout_ns)
 {
 #if HAVE_PPOLL
-    struct timespec ts = mp_time_ns_to_realtime(timeout_ns);
+    struct timespec ts;
+    ts.tv_sec  =  timeout_ns / UINT64_C(1000000000);
+    ts.tv_nsec =  timeout_ns % UINT64_C(1000000000);
     return ppoll(fds, nfds, &ts, NULL);
 #endif
     return poll(fds, nfds, timeout_ns / 1e6);
