@@ -20,7 +20,7 @@
 
 #include <sys/types.h>
 
-#define _POSIX_TIMERS 0
+#define _POSIX_TIMERS 200809L
 
 // Note: all pthread functions are mangled to make static linking easier.
 #define pthread_once m_pthread_once
@@ -35,6 +35,7 @@
 #define pthread_detach m_pthread_detach
 #define pthread_create m_pthread_create
 #define pthread_set_name_np m_pthread_set_name_np
+#define clock_gettime m_clock_gettime
 
 #define pthread_once_t INIT_ONCE
 #define PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
@@ -75,6 +76,11 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex);
 #define pthread_cond_destroy(c) (void)0
 #define pthread_cond_broadcast(cond) WakeAllConditionVariable(cond)
 #define pthread_cond_signal(cond) WakeConditionVariable(cond)
+
+#define clockid_t int
+#define CLOCK_REALTIME 1
+
+int clock_gettime(clockid_t clockid, struct timespec *tp);
 
 int pthread_cond_timedwait(pthread_cond_t *restrict cond,
                            pthread_mutex_t *restrict mutex,
