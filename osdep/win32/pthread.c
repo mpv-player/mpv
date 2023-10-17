@@ -76,6 +76,23 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex)
     return 0;
 }
 
+int clock_gettime(clockid_t clockid, struct timespec *tp)
+{
+    if (clockid != CLOCK_REALTIME) {
+        errno = EINVAL;
+        return -1;
+    }
+    union {
+        FILETIME ft;
+        ULARGE_INTEGER i;
+    } r;
+    GetSystemTimePreciseAsFileTime(&r.ft);
+    r.i.QuadPart -= UINT64_C(116444736000000000); // MS epoch -> Unix epoch
+    tp->tv_sec = r.i.QuadPart / UINT64_C(10000000);
+    tp->tv_nsec = (r.i.QuadPart % UINT64_C(10000000)) * 100;
+    return 0;
+}
+
 static int cond_wait(pthread_cond_t *restrict cond,
                      pthread_mutex_t *restrict mutex,
                      DWORD ms)
@@ -95,16 +112,15 @@ int pthread_cond_timedwait(pthread_cond_t *restrict cond,
                            pthread_mutex_t *restrict mutex,
                            const struct timespec *restrict abstime)
 {
-    // mpv uses mingw's gettimeofday() as time source too.
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
     DWORD timeout_ms = 0;
-    if (abstime->tv_sec >= INT64_MAX / 10000) {
+    if (abstime->tv_sec >= INT64_MAX / 1000) { // overflow
         timeout_ms = INFINITE;
-    } else if (abstime->tv_sec >= tv.tv_sec) {
-        long long msec = (abstime->tv_sec - tv.tv_sec) * 1000LL +
-            abstime->tv_nsec / 1000LL / 1000LL - tv.tv_usec / 1000LL;
-        if (msec > INT_MAX) {
+    } else if (abstime->tv_sec >= ts.tv_sec) {
+        int64_t msec = (abstime->tv_sec - ts.tv_sec) * INT64_C(1000) +
+            (abstime->tv_nsec - ts.tv_nsec) / INT64_C(10000000);
+        if (msec > ULONG_MAX) {
             timeout_ms = INFINITE;
         } else if (msec > 0) {
             timeout_ms = msec;
