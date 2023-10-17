@@ -93,23 +93,34 @@ struct timespec mp_time_ns_to_realtime(int64_t time_ns)
 {
     struct timespec ts = {0};
 
+    // mp_time has to be positive
+    assert(time_ns >= 0);
+
 #if !HAVE_WIN32_INTERNAL_PTHREADS
     if (get_realtime(&ts) != 0)
         return ts;
     int64_t time_rel = time_ns - mp_time_ns();
+
+    // clamp to 1000 days in the past/future for OSX compatibility
+    int64_t ns_1000_days = 1000 * 24 * 60 * 60 * INT64_C(1000000000);
+    time_rel = MPCLAMP(time_rel, -ns_1000_days, ns_1000_days);
 #else
     int64_t time_rel = time_ns;
 #endif
 
-    // clamp to 1000 days in the future
-    time_rel = MPMIN(time_rel, 1000 * 24 * 60 * 60 * INT64_C(1000000000));
     ts.tv_sec += time_rel / INT64_C(1000000000);
     ts.tv_nsec += time_rel % INT64_C(1000000000);
 
-    if (ts.tv_nsec >= INT64_C(1000000000)) {
+    if (ts.tv_nsec < 0) {
+        ts.tv_sec--;
+        ts.tv_nsec += INT64_C(1000000000);
+    } else if (ts.tv_nsec >= INT64_C(1000000000)) {
         ts.tv_sec++;
         ts.tv_nsec -= INT64_C(1000000000);
     }
+
+    if (ts.tv_sec < 0)
+        return (struct timespec){0};
 
     return ts;
 }
