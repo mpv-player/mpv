@@ -652,8 +652,8 @@ static int mp_property_avsync(void *ctx, struct m_property *prop,
     if (!mpctx->ao_chain || !mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
-        // Don't print small values resulting from calculation inaccuracies
-        if (fabs(mpctx->last_av_difference) < 1e-5) {
+        // Truncate anything < 1e-4 to avoid switching to scientific notation
+        if (fabs(mpctx->last_av_difference) < 1e-4) {
             *(char **)arg = talloc_strdup(NULL, "0");
         } else {
             *(char **)arg = talloc_asprintf(NULL, "%+.2g", mpctx->last_av_difference);
