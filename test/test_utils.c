@@ -106,10 +106,3 @@ int mp_msg_find_level(const char *s) {return 0;};
 int mp_msg_level(struct mp_log *log) {return 0;};
 void mp_write_console_ansi(void) {};
 void mp_set_avdict(AVDictionary **dict, char **kv) {};
-
-#ifndef WIN32_TESTS
-void mp_rel_time_to_timespec(void) {};
-void mp_time_ns(void) {};
-void mp_time_ns_add(void) {};
-void mp_time_ns_to_realtime(void) {};
-#endif

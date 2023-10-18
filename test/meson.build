@@ -25,6 +25,8 @@ test_utils_files = [
     'options/path.c',
     'osdep/io.c',
     'osdep/subprocess.c',
+    'osdep/timer.c',
+    timer_source,
     path_source,
     subprocess_source,
     'ta/ta.c',
@@ -34,13 +36,10 @@ test_utils_files = [
 
 test_utils_deps = [libavutil, libm]
 
-# The zimg code requires using threads. On windows, threads
-# also requires timer code so this is added.
+# The zimg code requires using threads.
 if features['win32-internal-pthreads']
     test_utils_args += '-DWIN32_TESTS'
-    test_utils_files += ['osdep/timer.c',
-                         'osdep/timer-win2.c',
-                         'osdep/win32/pthread.c',
+    test_utils_files += ['osdep/win32/pthread.c',
                          'osdep/windows_utils.c']
 else
     test_utils_deps += pthreads
@@ -97,6 +96,9 @@ test('json', json)
 
 linked_list = executable('linked-list', files('linked_list.c'), include_directories: incdir)
 test('linked-list', linked_list)
+
+timer = executable('timer', files('timer.c'), include_directories: incdir, link_with: test_utils)
+test('timer', timer)
 
 paths_objects = libmpv.extract_objects('options/path.c', path_source)
 paths = executable('paths', 'paths.c', include_directories: incdir,
