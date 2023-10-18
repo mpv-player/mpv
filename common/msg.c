@@ -442,11 +442,11 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, bstr text)
     }
 }
 
-static void dump_stats(struct mp_log *log, int lev, char *text)
+static void dump_stats(struct mp_log *log, int lev, bstr text)
 {
     struct mp_log_root *root = log->root;
     if (lev == MSGL_STATS && root->stats_file)
-        fprintf(root->stats_file, "%"PRId64" %s\n", mp_time_ns(), text);
+        fprintf(root->stats_file, "%"PRId64" %.*s\n", mp_time_ns(), BSTR_P(text));
 }
 
 void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
@@ -466,10 +466,8 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     bstr_xappend_vasprintf(root, &root->buffer, format, va);
 
-    char *text = root->buffer.start;
-
     if (lev == MSGL_STATS) {
-        dump_stats(log, lev, text);
+        dump_stats(log, lev, root->buffer);
     } else if (lev == MSGL_STATUS && !test_terminal_level(log, lev)) {
         /* discard */
     } else {
