@@ -74,7 +74,8 @@ const struct m_sub_options stream_cdda_conf = {
         {"paranoia", OPT_INT(paranoia_mode), M_RANGE(0, 2)},
         {"sector-size", OPT_INT(sector_size), M_RANGE(1, 100)},
         {"overlap", OPT_INT(search_overlap), M_RANGE(0, 75)},
-        {"toc-bias", OPT_INT(toc_bias)},
+        {"toc-bias", OPT_INT(toc_bias),
+            .deprecation_message = "toc-bias is no longer used"},
         {"toc-offset", OPT_INT(toc_offset)},
         {"skip", OPT_BOOL(skip)},
         {"span-a", OPT_INT(span[0])},
@@ -284,9 +285,7 @@ static int open_cdda(stream_t *st)
 
     priv->cd = cdd;
 
-    if (p->toc_bias)
-        offset -= cdda_track_firstsector(cdd, 1);
-
+    offset -= cdda_track_firstsector(cdd, 1);
     if (offset) {
         for (int n = 0; n < cdd->tracks + 1; n++)
             cdd->disc_toc[n].dwStartSector += offset;

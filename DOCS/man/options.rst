@@ -3524,11 +3524,6 @@ Disc Devices
 ``--cdda-overlap=<value>``
     Force minimum overlap search during verification to <value> sectors.
 
-``--cdda-toc-bias``
-    Assume that the beginning offset of track 1 as reported in the TOC
-    will be addressed as LBA 0. Some discs need this for getting track
-    boundaries correctly.
-
 ``--cdda-toc-offset=<value>``
     Add ``<value>`` sectors to the values reported when addressing tracks.
     May be negative.
