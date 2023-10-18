@@ -64,7 +64,8 @@ struct mp_log_root {
     bool show_time;
     int blank_lines;    // number of lines usable by status
     int status_lines;   // number of current status lines
-    bool color;
+    bool color[STDERR_FILENO + 1];
+    bool isatty[STDERR_FILENO + 1];
     int verbose;
     bool really_quiet;
     bool force_stderr;
@@ -187,6 +188,12 @@ int mp_msg_level(struct mp_log *log)
     return log->level;
 }
 
+static inline int term_msg_fileno(struct mp_log_root *root, int lev)
+{
+    return (root->force_stderr || lev == MSGL_STATUS || lev == MSGL_FATAL ||
+            lev == MSGL_ERR || lev == MSGL_WARN) ? STDERR_FILENO : STDOUT_FILENO;
+}
+
 // Reposition cursor and clear lines for outputting the status line. In certain
 // cases, like term OSD and subtitle display, the status can consist of
 // multiple lines.
@@ -194,6 +201,13 @@ static void prepare_prefix(struct mp_log_root *root, bstr *out, int lev, int ter
 {
     int new_lines = lev == MSGL_STATUS ? term_lines : 0;
     out->len = 0;
+
+    if (!root->isatty[term_msg_fileno(root, lev)]) {
+        if (root->status_lines)
+            bstr_xappend(root, out, bstr0("\n"));
+        root->status_lines = new_lines;
+        return;
+    }
 
     // Set cursor state
     if (new_lines && !root->status_lines) {
@@ -283,9 +297,10 @@ static void pretty_print_module(struct mp_log_root *root, bstr *text,
 {
     size_t prefix_len = strlen(prefix);
     root->module_indent = MPMAX(10, MPMAX(root->module_indent, prefix_len));
+    bool color = root->color[term_msg_fileno(root, lev)];
 
     // Use random color based on the name of the module
-    if (root->color) {
+    if (color) {
         unsigned int mod = 0;
         for (int i = 0; i < prefix_len; ++i)
             mod = mod * 33 + prefix[i];
@@ -293,10 +308,10 @@ static void pretty_print_module(struct mp_log_root *root, bstr *text,
     }
 
     bstr_xappend_asprintf(root, text, "%*s", root->module_indent, prefix);
-    if (root->color)
+    if (color)
         set_term_color(root, text, -1);
     bstr_xappend(root, text, bstr0(": "));
-    if (root->color)
+    if (color)
         set_msg_color(root, text, lev);
 }
 
@@ -359,7 +374,8 @@ static void append_terminal_line(struct mp_log *log, int lev,
     }
 
     bstr_xappend(root, term_msg, text);
-    *line_w = term_disp_width(*term_msg, start, term_msg->len);
+    *line_w = root->isatty[term_msg_fileno(root, lev)]
+                ? term_disp_width(*term_msg, start, term_msg->len) : 0;
 }
 
 static struct mp_log_buffer_entry *log_buffer_read(struct mp_log_buffer *buffer)
@@ -458,8 +474,9 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         /* discard */
     } else {
         bool print_term = test_terminal_level(log, lev);
+        int fileno = term_msg_fileno(root, lev);
         int term_w = 0, term_h = 0;
-        if (print_term)
+        if (print_term && root->isatty[fileno])
             terminal_get_size(&term_w, &term_h);
 
         // Split away each line. Normally we require full lines; buffer partial
@@ -500,14 +517,12 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
         if (print_term && (root->term_msg.len || lev == MSGL_STATUS)) {
             prepare_prefix(root, &root->term_msg_prefix, lev, term_msg_lines);
-            if (root->color && root->term_msg.len) {
+            if (root->color[fileno] && root->term_msg.len) {
                 set_msg_color(root, &root->term_msg_prefix, lev);
                 set_term_color(root, &root->term_msg, -1);
             }
 
-            FILE *stream = (root->force_stderr || lev == MSGL_STATUS ||
-                            lev == MSGL_FATAL || lev == MSGL_ERR ||
-                            lev == MSGL_WARN) ? stderr : stdout;
+            FILE *stream = fileno == STDERR_FILENO ? stderr : stdout;
             if (root->term_msg_prefix.len || root->term_msg.len) {
                 fprintf(stream, "%.*s%.*s", BSTR_P(root->term_msg_prefix),
                         BSTR_P(root->term_msg));
@@ -695,8 +710,10 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
     root->module = opts->msg_module;
     root->use_terminal = opts->use_terminal;
     root->show_time = opts->msg_time;
-    if (root->use_terminal)
-        root->color = opts->msg_color && isatty(STDOUT_FILENO);
+    for (int i = STDOUT_FILENO; i <= STDERR_FILENO && root->use_terminal; ++i) {
+        root->isatty[i] = isatty(i);
+        root->color[i] = opts->msg_color && root->isatty[i];
+    }
 
     m_option_type_msglevels.free(&root->msg_levels);
     m_option_type_msglevels.copy(NULL, &root->msg_levels, &opts->msg_levels);
