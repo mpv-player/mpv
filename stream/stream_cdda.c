@@ -134,7 +134,6 @@ static void cdparanoia_callback(long int inpos, paranoia_cb_mode_t function)
 static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     cdda_priv *p = (cdda_priv *)s->priv;
-    int i;
 
     if (!p->data || p->data_pos >= CDIO_CD_FRAMESIZE_RAW) {
         if ((p->sector < p->start_sector) || (p->sector > p->end_sector))
@@ -151,14 +150,6 @@ static int fill_buffer(stream_t *s, void *buffer, int max_len)
     size_t copy = MPMIN(CDIO_CD_FRAMESIZE_RAW - p->data_pos, max_len);
     memcpy(buffer, p->data + p->data_pos, copy);
     p->data_pos += copy;
-
-    for (i = 0; i < p->cd->tracks; i++) {
-        if (p->cd->disc_toc[i].dwStartSector == p->sector - 1) {
-            print_track_info(s, i + 1);
-            break;
-        }
-    }
-
     return copy;
 }
 
