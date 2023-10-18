@@ -16,6 +16,12 @@
 #ifndef MP_WRAP_PTHREAD_H_
 #define MP_WRAP_PTHREAD_H_
 
+// this is MinGW specific and sort of a hack but we really need to prevent
+// system pthread headers from being included, which can happen through <time.h>
+// and <unistd.h>:
+#define WIN_PTHREADS_TIME_H
+#define WIN_PTHREADS_UNISTD_H
+
 #include <windows.h>
 
 #include <sys/types.h>
