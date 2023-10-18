@@ -590,10 +590,11 @@ cdda_opt = get_option('cdda').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
 )
+cdio = dependency('libcdio', version: '>= 0.90', required: cdda_opt)
 cdda = dependency('libcdio_paranoia', required: cdda_opt)
-features += {'cdda': cdda.found()}
+features += {'cdda': cdda.found() and cdio.found()}
 if features['cdda']
-    dependencies += cdda
+    dependencies += [cdda, cdio]
     sources += files('stream/stream_cdda.c')
 endif
 
