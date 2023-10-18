@@ -333,6 +333,9 @@ if features['libdl']
     dependencies += libdl
 endif
 
+# C11 atomics are mandatory but linking to the library is not always required.
+dependencies += cc.find_library('atomic', required: false)
+
 cplugins = get_option('cplugins').require(
     win32 or (features['libdl'] and cc.has_link_argument('-rdynamic')),
     error_message: 'cplugins not supported by the os or compiler!',
@@ -729,13 +732,6 @@ sdl2_gamepad = get_option('sdl2-gamepad').require(
 features += {'sdl2-gamepad': sdl2_gamepad.allowed()}
 if features['sdl2-gamepad']
     sources += files('input/sdl_gamepad.c')
-endif
-
-stdatomic_dep = cc.find_library('atomic', required: false)
-features += {'stdatomic': cc.has_header_symbol('stdatomic.h', 'atomic_int', dependencies: stdatomic_dep,
-                                               required: get_option('stdatomic'))}
-if features['stdatomic']
-    dependencies += stdatomic_dep
 endif
 
 uchardet_opt = get_option('uchardet').require(
