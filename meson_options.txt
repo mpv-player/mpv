@@ -30,7 +30,6 @@ option('pthread-debug', type: 'feature', value: 'disabled', description: 'pthrea
 option('rubberband', type: 'feature', value: 'auto', description: 'librubberband support')
 option('sdl2', type: 'feature', value: 'disabled', description: 'SDL2')
 option('sdl2-gamepad', type: 'feature', value: 'auto', description: 'SDL2 gamepad input')
-option('stdatomic', type: 'feature', value: 'auto', description: 'C11 stdatomic.h')
 option('uchardet', type: 'feature', value: 'auto', description: 'uchardet support')
 option('uwp', type: 'feature', value: 'disabled', description: 'Universal Windows Platform')
 option('vapoursynth', type: 'feature', value: 'auto', description: 'VapourSynth filter bridge')
