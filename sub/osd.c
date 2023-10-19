@@ -126,7 +126,7 @@ struct osd_state *osd_create(struct mpv_global *global)
         .opts_cache = m_config_cache_alloc(osd, global, &mp_osd_render_sub_opts),
         .global = global,
         .log = mp_log_new(osd, global->log, "osd"),
-        .force_video_pts = ATOMIC_VAR_INIT(MP_NOPTS_VALUE),
+        .force_video_pts = MP_NOPTS_VALUE,
         .stats = stats_ctx_create(osd, global, "osd"),
     };
     pthread_mutex_init(&osd->lock, NULL);

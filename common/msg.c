@@ -524,7 +524,7 @@ void mp_msg_init(struct mpv_global *global)
     struct mp_log_root *root = talloc_zero(NULL, struct mp_log_root);
     *root = (struct mp_log_root){
         .global = global,
-        .reload_counter = ATOMIC_VAR_INIT(1),
+        .reload_counter = 1,
     };
 
     pthread_mutex_init(&root->lock, NULL);

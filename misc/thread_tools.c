@@ -126,7 +126,7 @@ struct mp_cancel *mp_cancel_new(void *talloc_ctx)
     struct mp_cancel *c = talloc_ptrtype(talloc_ctx, c);
     talloc_set_destructor(c, cancel_destroy);
     *c = (struct mp_cancel){
-        .triggered = ATOMIC_VAR_INIT(false),
+        .triggered = false,
         .wakeup_pipe = {-1, -1},
     };
     pthread_mutex_init(&c->lock, NULL);
