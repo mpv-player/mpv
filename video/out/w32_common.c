@@ -15,10 +15,12 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
+#include <assert.h>
 #include <limits.h>
 #include <pthread.h>
-#include <assert.h>
+#include <stdatomic.h>
+#include <stdio.h>
+
 #include <windows.h>
 #include <windowsx.h>
 #include <dwmapi.h>
@@ -42,7 +44,6 @@
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
-#include <stdatomic.h>
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
 #include "mpv_talloc.h"

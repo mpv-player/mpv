@@ -1,12 +1,12 @@
-#include <stdlib.h>
 #include <assert.h>
 #include <pthread.h>
+#include <stdatomic.h>
+#include <stdlib.h>
 
 #include <libavutil/buffer.h>
 
 #include "mpv_talloc.h"
 #include "misc/dispatch.h"
-#include <stdatomic.h>
 #include "video/mp_image.h"
 
 #include "dr_helper.h"

@@ -18,10 +18,10 @@
 #ifndef MP_AO_INTERNAL_H_
 #define MP_AO_INTERNAL_H_
 
-#include <stdbool.h>
 #include <pthread.h>
-
 #include <stdatomic.h>
+#include <stdbool.h>
+
 #include "audio/out/ao.h"
 
 /* global data used by ao.c and ao drivers */

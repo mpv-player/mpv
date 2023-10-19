@@ -1,12 +1,12 @@
 #include <math.h>
 #include <pthread.h>
+#include <stdatomic.h>
 
 #include <libavutil/hwcontext.h>
 
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
-#include <stdatomic.h>
 #include "osdep/timer.h"
 #include "video/hwdec.h"
 #include "video/img_format.h"

@@ -15,18 +15,18 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
+#include <math.h>
+#include <pthread.h>
+#include <stdatomic.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <stdbool.h>
-#include <pthread.h>
-#include <math.h>
 
 #include "mpv_talloc.h"
 
 #include "config.h"
-#include <stdatomic.h>
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 #include "misc/dispatch.h"

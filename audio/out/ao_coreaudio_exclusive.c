@@ -34,6 +34,8 @@
  * when you are wanting to do good buffering of audio).
  */
 
+#include <stdatomic.h>
+
 #include <CoreAudio/HostTime.h>
 
 #include <libavutil/intreadwrite.h>
@@ -43,7 +45,6 @@
 #include "internal.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
-#include <stdatomic.h>
 #include "options/m_option.h"
 #include "common/msg.h"
 #include "audio/out/ao_coreaudio_chmap.h"

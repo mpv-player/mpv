@@ -14,10 +14,11 @@
  */
 
 #include <assert.h>
+#include <errno.h>
+#include <stdatomic.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <errno.h>
 
 #ifdef __MINGW32__
 #include <windows.h>
@@ -27,7 +28,6 @@
 
 #include "common/common.h"
 #include "misc/linked_list.h"
-#include <stdatomic.h>
 #include "osdep/io.h"
 #include "osdep/timer.h"
 

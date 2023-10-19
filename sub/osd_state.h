@@ -2,8 +2,8 @@
 #define MP_OSD_STATE_H_
 
 #include <pthread.h>
-
 #include <stdatomic.h>
+
 #include "osd.h"
 
 enum mp_osdtype {

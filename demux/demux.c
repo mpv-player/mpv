@@ -15,15 +15,16 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <float.h>
+#include <limits.h>
+#include <pthread.h>
+#include <stdatomic.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <unistd.h>
-#include <limits.h>
-#include <pthread.h>
-#include <stdint.h>
 
 #include <math.h>
 
@@ -42,7 +43,6 @@
 #include "common/stats.h"
 #include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
-#include <stdatomic.h>
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 

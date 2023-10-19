@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <stdatomic.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -8,7 +9,6 @@
 #include "misc/node.h"
 #include "msg.h"
 #include "options/m_option.h"
-#include <stdatomic.h>
 #include "osdep/timer.h"
 #include "stats.h"
 
