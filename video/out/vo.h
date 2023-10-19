@@ -356,8 +356,8 @@ struct vo_driver {
      * allocated image. It's even possible that only 1 plane uses the buffer
      * allocated by the get_image function. The VO has to check for this.
      *
-     * stride_align is always a value >=1 that is a power of 2. The stride
-     * values of the returned image must be divisible by this value.
+     * stride_align is always a value >=1. The stride values of the returned
+     * image must be divisible by this value. This may be a non power of two.
      *
      * flags is a combination of VO_DR_FLAG_* flags.
      *
