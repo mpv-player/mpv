@@ -31,8 +31,6 @@ static void aspect_calc_panscan(struct mp_vo_opts *opts,
                                 int window_w, int window_h, double monitor_par,
                                 int *out_w, int *out_h)
 {
-    w *= monitor_par;
-
     int fwidth = window_w;
     int fheight = (float)window_w / d_w * d_h / monitor_par;
     if (fheight > window_h || fheight < h) {
