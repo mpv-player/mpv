@@ -244,6 +244,8 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     if ((flags & VO_DR_FLAG_HOST_CACHED) && !gpu->limits.host_cached)
         return NULL;
 
+    stride_align = mp_lcm(stride_align, gpu->limits.align_tex_xfer_pitch);
+    stride_align = mp_lcm(stride_align, gpu->limits.align_tex_xfer_offset);
     int size = mp_image_get_alloc_size(imgfmt, w, h, stride_align);
     if (size < 0)
         return NULL;
