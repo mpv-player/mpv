@@ -39,12 +39,16 @@
 #define MPSWAP(type, a, b) \
     do { type SWAP_tmp = b; b = a; a = SWAP_tmp; } while (0)
 #define MP_ARRAY_SIZE(s) (sizeof(s) / sizeof((s)[0]))
+#define MP_DIV_UP(x, y) (((x) + (y) - 1) / (y))
 
 // align must be a power of two (align >= 1), x >= 0
 #define MP_ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
 #define MP_ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
 #define MP_IS_ALIGNED(x, align) (!((x) & ((align) - 1)))
 #define MP_IS_POWER_OF_2(x) ((x) > 0 && !((x) & ((x) - 1)))
+
+// align to non power of two
+#define MP_ALIGN_NPOT(x, align) ((align) ? MP_DIV_UP(x, align) * (align) : (x))
 
 // Return "a", or if that is NOPTS, return "def".
 #define MP_PTS_OR_DEF(a, def) ((a) == MP_NOPTS_VALUE ? (def) : (a))
