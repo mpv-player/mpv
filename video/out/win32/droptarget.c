@@ -23,7 +23,7 @@
 #include "common/common.h"
 #include "input/input.h"
 #include "input/event.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "osdep/io.h"
 #include "osdep/windows_utils.h"
 #include "mpv_talloc.h"

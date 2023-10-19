@@ -42,7 +42,7 @@
 #include "common/stats.h"
 #include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 

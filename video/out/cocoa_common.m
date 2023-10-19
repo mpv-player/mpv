@@ -30,7 +30,7 @@
 #import "video/out/cocoa/mpvadapter.h"
 
 #include "osdep/threads.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_events_objc.h"
 

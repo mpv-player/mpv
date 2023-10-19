@@ -24,7 +24,7 @@
 #include <EGL/eglext.h>
 
 #include "common/common.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "video/out/win_state.h"
 #include "context.h"
 #include "egl_helpers.h"

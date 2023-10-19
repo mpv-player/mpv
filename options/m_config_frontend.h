@@ -29,7 +29,7 @@
 #include "misc/bstr.h"
 #include "misc/dispatch.h"
 #include "options/m_option.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 
 // m_config provides an API to manipulate the config variables in MPlayer.
 // It makes use of the Options API to provide a context stack that

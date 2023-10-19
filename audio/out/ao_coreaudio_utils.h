@@ -22,6 +22,8 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <inttypes.h>
 #include <stdbool.h>
+
+#include "config.h"
 #include "common/msg.h"
 #include "audio/out/ao.h"
 #include "internal.h"

@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "audio/out/ao.h"
 
 /* global data used by ao.c and ao drivers */
@@ -63,7 +63,7 @@ struct ao {
     atomic_uint events_;
 
     // Float gain multiplicator
-    mp_atomic_float gain;
+    _Atomic float gain;
 
     int buffer;
     double def_buffer;

@@ -29,7 +29,7 @@
 #include <endpointvolume.h>
 
 #include "common/msg.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "osdep/windows_utils.h"
 #include "internal.h"
 #include "ao.h"

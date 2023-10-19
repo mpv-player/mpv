@@ -36,7 +36,7 @@
 #include "common/msg_control.h"
 #include "misc/dispatch.h"
 #include "misc/node.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 
 extern const char mp_help_text[];
 

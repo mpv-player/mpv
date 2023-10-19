@@ -27,7 +27,7 @@
 
 #include "common/common.h"
 #include "misc/linked_list.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "osdep/io.h"
 #include "osdep/timer.h"
 

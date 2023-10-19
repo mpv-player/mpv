@@ -6,7 +6,7 @@
 
 #include "mpv_talloc.h"
 #include "misc/dispatch.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "video/mp_image.h"
 
 #include "dr_helper.h"
