@@ -24,6 +24,7 @@ options.read_options(o, nil, function()
 end)
 
 local chapter_list = {}
+local playlist_cookies = {}
 
 function Set (t)
     local set = {}
@@ -136,6 +137,78 @@ local function set_http_headers(http_headers)
     if #headers > 0 and not option_was_set("http-header-fields") then
         mp.set_property_native("file-local-options/http-header-fields", headers)
     end
+end
+
+local special_cookie_field_names = Set {
+    "expires", "max-age", "domain", "path"
+}
+
+-- parse single-line Set-Cookie syntax
+local function parse_cookies(cookies_line)
+    if not cookies_line then
+        return {}
+    end
+    local cookies = {}
+    local cookie = {}
+    for stem in cookies_line:gmatch('[^;]+') do
+        stem = stem:gsub("^%s*(.-)%s*$", "%1")
+        local name, value = stem:match('^(.-)=(.+)$')
+        if name and name ~= "" and value then
+            local cmp_name = name:lower()
+            if special_cookie_field_names[cmp_name] then
+                cookie[cmp_name] = value
+            else
+                if cookie.name and cookie.value then
+                    table.insert(cookies, cookie)
+                end
+                cookie = {
+                    name = name,
+                    value = value,
+                }
+            end
+        end
+    end
+    if cookie.name and cookie.value then
+        local cookie_key = cookie.domain .. ":" .. cookie.name
+        cookies[cookie_key] = cookie
+    end
+    return cookies
+end
+
+-- serialize cookies for avformat
+local function serialize_cookies_for_avformat(cookies)
+    local result = ''
+    for _, cookie in pairs(cookies) do
+        local cookie_str = ('%s=%s; '):format(cookie.name, cookie.value)
+        for k, v in pairs(cookie) do
+            if k ~= "name" and k ~= "value" then
+                cookie_str = cookie_str .. ('%s=%s; '):format(k, v)
+            end
+        end
+        result = result .. cookie_str .. '\r\n'
+    end
+    return result
+end
+
+-- set file-local cookies, preserving existing ones
+local function set_cookies(cookies)
+    if not cookies or cookies == "" then
+        return
+    end
+
+    local option_key = "file-local-options/stream-lavf-o"
+    local stream_opts = mp.get_property_native(option_key, {})
+    local existing_cookies = parse_cookies(stream_opts["cookies"])
+
+    local new_cookies = parse_cookies(cookies)
+    for cookie_key, cookie in pairs(new_cookies) do
+        if not existing_cookies[cookie_key] then
+            existing_cookies[cookie_key] = cookie
+        end
+    end
+
+    stream_opts["cookies"] = serialize_cookies_for_avformat(existing_cookies)
+    mp.set_property_native(option_key, stream_opts)
 end
 
 local function append_libav_opt(props, name, value)
@@ -553,6 +626,9 @@ local function add_single_video(json)
     local http_headers = has_requested_formats
                          and requested_formats[1].http_headers
                          or json.http_headers
+    local cookies = has_requested_formats
+                    and requested_formats[1].cookies
+                    or json.cookies
 
     if o.use_manifests and valid_manifest(json) then
         -- prefer manifest_url if present
@@ -738,6 +814,15 @@ local function add_single_video(json)
     if json.proxy and json.proxy ~= "" then
         stream_opts = append_libav_opt(stream_opts,
             "http_proxy", json.proxy)
+    end
+
+    if cookies and cookies ~= "" then
+        local existing_cookies = parse_cookies(stream_opts["cookies"])
+        local new_cookies = parse_cookies(cookies)
+        for cookie_key, cookie in pairs(new_cookies) do
+            existing_cookies[cookie_key] = cookie
+        end
+        stream_opts["cookies"] = serialize_cookies_for_avformat(existing_cookies)
     end
 
     mp.set_property_native("file-local-options/stream-lavf-o", stream_opts)
@@ -938,6 +1023,7 @@ function run_ytdl_hook(url)
 
             -- can't change the http headers for each entry, so use the 1st
             set_http_headers(json.entries[1].http_headers)
+            set_cookies(json.entries[1].cookies or json.cookies)
 
             mp.set_property("stream-open-filename", playlist)
             if json.title and mp.get_property("force-media-title", "") == "" then
@@ -999,15 +1085,24 @@ function run_ytdl_hook(url)
                     site = entry["webpage_url"]
                 end
 
+                local playlist_url = nil
+
                 -- links without protocol as returned by --flat-playlist
                 if not site:find("://") then
                     -- youtube extractor provides only IDs,
                     -- others come prefixed with the extractor name and ":"
                     local prefix = site:find(":") and "ytdl://" or
                         "https://youtu.be/"
+                    playlist_url = prefix .. site
                     table.insert(playlist, prefix .. site)
                 elseif url_is_safe(site) then
-                    table.insert(playlist, site)
+                    playlist_url = site
+                end
+
+                if playlist_url then
+                    table.insert(playlist, playlist_url)
+                    -- save the cookies in a table for the playlist hook
+                    playlist_cookies[playlist_url] = entry.cookies or json.cookies
                 end
 
             end
@@ -1037,6 +1132,14 @@ if (not o.try_ytdl_first) then
         run_ytdl_hook(url)
     end)
 end
+
+mp.add_hook("on_load", 20, function ()
+    msg.verbose('playlist hook')
+    local url = mp.get_property("stream-open-filename", "")
+    if playlist_cookies[url] then
+        set_cookies(playlist_cookies[url])
+    end
+end)
 
 mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function()
     msg.verbose('full hook')
