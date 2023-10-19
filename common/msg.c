@@ -77,6 +77,9 @@ struct mp_log_root {
     bstr buffer;
     bstr term_msg;
     bstr term_msg_tmp;
+    bstr status_line;
+    struct mp_log *status_log;
+    bstr term_status_msg;
     // --- must be accessed atomically
     /* This is incremented every time the msglevels must be reloaded.
      * (This is perhaps better than maintaining a globally accessible and
@@ -520,6 +523,16 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     bstr_xappend_vasprintf(root, &root->buffer, format, va);
 
+    // Remember last status message and restore it to ensure that it is
+    // always displayed
+    if (lev == MSGL_STATUS) {
+        root->status_log = log;
+        root->status_line.len = 0;
+        // Use bstr_xappend instead bstrdup to reuse allocated memory
+        if (root->buffer.len)
+            bstr_xappend(root, &root->status_line, root->buffer);
+    }
+
     if (lev == MSGL_STATS) {
         dump_stats(log, lev, root->buffer);
     } else if (lev == MSGL_STATUS && !test_terminal_level(log, lev)) {
@@ -527,10 +540,23 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     } else {
         write_term_msg(log, lev, root->buffer, &root->term_msg);
 
+        root->term_status_msg.len = 0;
+        if (lev != MSGL_STATUS && root->status_line.len && root->status_log &&
+            test_terminal_level(root->status_log, MSGL_STATUS))
+        {
+            write_term_msg(root->status_log, MSGL_STATUS, root->status_line,
+                           &root->term_status_msg);
+        }
+
         int fileno = term_msg_fileno(root, lev);
         FILE *stream = fileno == STDERR_FILENO ? stderr : stdout;
         if (root->term_msg.len) {
-            fprintf(stream, "%.*s", BSTR_P(root->term_msg));
+            if (root->term_status_msg.len) {
+                fprintf(stream, "%.*s%.*s", BSTR_P(root->term_msg),
+                        BSTR_P(root->term_status_msg));
+            } else {
+                fprintf(stream, "%.*s", BSTR_P(root->term_msg));
+            }
             fflush(stream);
         }
     }
