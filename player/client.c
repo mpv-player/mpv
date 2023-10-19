@@ -13,14 +13,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <math.h>
+#include <stdatomic.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <math.h>
-#include <assert.h>
 
 #include "common/common.h"
 #include "common/global.h"
@@ -39,7 +40,6 @@
 #include "options/m_property.h"
 #include "options/path.h"
 #include "options/parse_configfile.h"
-#include <stdatomic.h>
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"

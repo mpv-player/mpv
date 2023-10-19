@@ -1,11 +1,12 @@
+#include <assert.h>
+#include <limits.h>
+#include <math.h>
+#include <pthread.h>
+#include <stdatomic.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <stdbool.h>
-#include <limits.h>
-#include <pthread.h>
-#include <assert.h>
 
 #include "mpv_talloc.h"
 #include "common/common.h"
@@ -19,7 +20,6 @@
 #include "vo.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
-#include <stdatomic.h>
 #include "osdep/timer.h"
 
 #include "common/global.h"

@@ -20,8 +20,10 @@
 #ifndef MP_AO_WASAPI_H_
 #define MP_AO_WASAPI_H_
 
+#include <stdatomic.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
 #include <windows.h>
 #include <mmdeviceapi.h>
 #include <audioclient.h>
@@ -29,7 +31,6 @@
 #include <endpointvolume.h>
 
 #include "common/msg.h"
-#include <stdatomic.h>
 #include "osdep/windows_utils.h"
 #include "internal.h"
 #include "ao.h"

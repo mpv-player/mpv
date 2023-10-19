@@ -22,6 +22,7 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,7 +34,6 @@
 #include "ao.h"
 #include "internal.h"
 #include "audio/format.h"
-#include <stdatomic.h>
 #include "osdep/timer.h"
 #include "options/m_config.h"
 #include "options/m_option.h"

@@ -1,10 +1,10 @@
 #include <limits.h>
 #include <pthread.h>
+#include <stdatomic.h>
 
 #include "audio/aframe.h"
 #include "common/common.h"
 #include "common/msg.h"
-#include <stdatomic.h>
 
 #include "f_async_queue.h"
 #include "filter_internal.h"
