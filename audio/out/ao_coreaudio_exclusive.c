@@ -43,7 +43,7 @@
 #include "internal.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "options/m_option.h"
 #include "common/msg.h"
 #include "audio/out/ao_coreaudio_chmap.h"

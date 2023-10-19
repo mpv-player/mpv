@@ -27,7 +27,7 @@
 #include "mpv_talloc.h"
 
 #include "misc/bstr.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "common/common.h"
 #include "common/global.h"
 #include "misc/bstr.h"

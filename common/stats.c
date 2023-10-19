@@ -8,7 +8,7 @@
 #include "misc/node.h"
 #include "msg.h"
 #include "options/m_option.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "osdep/timer.h"
 #include "stats.h"
 

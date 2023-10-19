@@ -20,6 +20,8 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 
+#include "config.h"
+
 struct mp_chmap;
 
 int ca_label_to_mp_speaker_id(AudioChannelLabel label);

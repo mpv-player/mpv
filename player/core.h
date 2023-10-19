@@ -21,7 +21,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 
 #include "libmpv/client.h"
 

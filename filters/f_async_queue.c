@@ -4,7 +4,7 @@
 #include "audio/aframe.h"
 #include "common/common.h"
 #include "common/msg.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 
 #include "f_async_queue.h"
 #include "filter_internal.h"
@@ -16,7 +16,7 @@ struct mp_async_queue {
 };
 
 struct async_queue {
-    mp_atomic_uint64 refcount;
+    _Atomic uint64_t refcount;
 
     pthread_mutex_t lock;
 

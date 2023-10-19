@@ -19,7 +19,7 @@
 #include "vo.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
-#include "osdep/atomic.h"
+#include <stdatomic.h>
 #include "osdep/timer.h"
 
 #include "common/global.h"
