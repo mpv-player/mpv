@@ -73,7 +73,7 @@ struct mp_async_queue *mp_async_queue_create(void)
     struct mp_async_queue *r = talloc_zero(NULL, struct mp_async_queue);
     r->q = talloc_zero(NULL, struct async_queue);
     *r->q = (struct async_queue){
-        .refcount = ATOMIC_VAR_INIT(1),
+        .refcount = 1,
     };
     pthread_mutex_init(&r->q->lock, NULL);
     talloc_set_destructor(r, on_free_queue);

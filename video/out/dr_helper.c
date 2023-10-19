@@ -44,7 +44,7 @@ struct dr_helper *dr_helper_create(struct mp_dispatch_queue *dispatch,
     talloc_set_destructor(dr, dr_helper_destroy);
     *dr = (struct dr_helper){
         .dispatch = dispatch,
-        .dr_in_flight = ATOMIC_VAR_INIT(0),
+        .dr_in_flight = 0,
         .get_image = get_image,
         .get_image_ctx = get_image_ctx,
     };

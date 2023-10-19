@@ -164,7 +164,7 @@ char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
 bool mp_w32_create_anon_pipe(HANDLE *server, HANDLE *client,
                              struct w32_create_anon_pipe_opts *opts)
 {
-    static atomic_ulong counter = ATOMIC_VAR_INIT(0);
+    static atomic_ulong counter = 0;
 
     // Generate pipe name
     unsigned long id = atomic_fetch_add(&counter, 1);
