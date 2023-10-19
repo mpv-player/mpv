@@ -110,7 +110,6 @@ typedef struct mkv_track {
     int stereo_mode;
     struct mp_colorspace color;
     uint32_t v_crop_top, v_crop_left, v_crop_right, v_crop_bottom;
-    bool v_crop_top_set, v_crop_left_set, v_crop_right_set, v_crop_bottom_set;
     float v_projection_pose_roll;
     bool v_projection_pose_roll_set;
 
@@ -663,22 +662,18 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
     }
     if (video->n_pixel_crop_top) {
         track->v_crop_top = video->pixel_crop_top;
-        track->v_crop_top_set = true;
         MP_DBG(demuxer, "|   + Crop top: %"PRIu32"\n", track->v_crop_top);
     }
     if (video->n_pixel_crop_left) {
         track->v_crop_left = video->pixel_crop_left;
-        track->v_crop_left_set = true;
         MP_DBG(demuxer, "|   + Crop left: %"PRIu32"\n", track->v_crop_left);
     }
     if (video->n_pixel_crop_right) {
         track->v_crop_right = video->pixel_crop_right;
-        track->v_crop_right_set = true;
         MP_DBG(demuxer, "|   + Crop right: %"PRIu32"\n", track->v_crop_right);
     }
     if (video->n_pixel_crop_bottom) {
         track->v_crop_bottom = video->pixel_crop_bottom;
-        track->v_crop_bottom_set = true;
         MP_DBG(demuxer, "|   + Crop bottom: %"PRIu32"\n", track->v_crop_bottom);
     }
     if (video->n_colour)
@@ -1510,16 +1505,23 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->disp_w = track->v_width;
     sh_v->disp_h = track->v_height;
 
-    sh_v->crop.x0 = track->v_crop_left_set ? track->v_crop_left : 0;
-    sh_v->crop.y0 = track->v_crop_top_set ? track->v_crop_top : 0;
-    sh_v->crop.x1 = track->v_width -
-                        (track->v_crop_right_set ? track->v_crop_right : 0);
-    sh_v->crop.y1 = track->v_height -
-                        (track->v_crop_bottom_set ? track->v_crop_bottom : 0);
+    struct mp_rect crop;
+    crop.x0 = track->v_crop_left;
+    crop.y0 = track->v_crop_top;
+    crop.x1 = track->v_width - track->v_crop_right;
+    crop.y1 = track->v_height - track->v_crop_bottom;
 
-    int dw = track->v_dwidth_set ? track->v_dwidth : mp_rect_w(sh_v->crop);
-    int dh = track->v_dheight_set ? track->v_dheight : mp_rect_h(sh_v->crop);
-    struct mp_image_params p = {.w = mp_rect_w(sh_v->crop), .h = mp_rect_h(sh_v->crop)};
+    // Keep the codec crop rect as 0s if we have no cropping since the
+    // file may have broken width/height tags.
+    if (track->v_crop_left || track->v_crop_top ||
+        track->v_crop_right || track->v_crop_bottom)
+    {
+        sh_v->crop = crop;
+    }
+
+    int dw = track->v_dwidth_set ? track->v_dwidth : mp_rect_w(crop);
+    int dh = track->v_dheight_set ? track->v_dheight : mp_rect_h(crop);
+    struct mp_image_params p = {.w = mp_rect_w(crop), .h = mp_rect_h(crop)};
     mp_image_params_set_dsize(&p, dw, dh);
     sh_v->par_w = p.p_w;
     sh_v->par_h = p.p_h;
