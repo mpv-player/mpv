@@ -21,6 +21,7 @@
 
 #include <libavutil/common.h>
 #include <libavutil/error.h>
+#include <libavutil/mathematics.h>
 
 #include "mpv_talloc.h"
 #include "misc/bstr.h"
@@ -403,4 +404,10 @@ uint32_t mp_round_next_power_of_2(uint32_t v)
         return v;
     int l = mp_log2(v) + 1;
     return l == 32 ? 0 : (uint32_t)1 << l;
+}
+
+int mp_lcm(int x, int y)
+{
+    assert(x && y);
+    return x * (y / av_gcd(x, y));
 }
