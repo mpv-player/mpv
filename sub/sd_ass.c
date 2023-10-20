@@ -859,12 +859,12 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
             filters_destroy(sd);
             filters_init(sd);
             ctx->clear_once = true; // allow reloading on seeks
+            reset(sd);
         }
         if (flags & UPDATE_SUB_HARD) {
             // ass_track will be recreated, so clear duplicate cache
             ctx->clear_once = true;
             reset(sd);
-
             assobjects_destroy(sd);
             assobjects_init(sd);
         }
