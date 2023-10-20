@@ -74,6 +74,9 @@ def subsystem_prefix(body):
 def description_lowercase(body):
 	if re.search(NO_PREFIX_WHITELIST, body[0]):
 		return True
+	# Allow all caps for acronyms and such
+	if re.search(r":\s[A-Z]{2,}\s", body[0]):
+		return True
 	return re.search(r":\s+[a-z0-9]", body[0])
 
 @lint_rule("Subject line must not end with a full stop")
