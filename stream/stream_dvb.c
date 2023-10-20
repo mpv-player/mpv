@@ -385,7 +385,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 if (!DELSYS_IS_SET(delsys_mask, delsys))
                     continue; /* Skip channel. */
                 mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
-                           "FREQ: %d, SRATE: %d, T2: %s",
+                           "FREQ: %d, SRATE: %d, T2: %s\n",
                            get_dvb_delsys(delsys),
                            list->NUM_CHANNELS, fields,
                            ptr->name, ptr->freq, ptr->srate,
@@ -397,7 +397,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             case SYS_DVBC_ANNEX_B:
             case SYS_ISDBT:
                 mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
-                           "FREQ: %d, SRATE: %d",
+                           "FREQ: %d, SRATE: %d\n",
                            get_dvb_delsys(delsys),
                            list->NUM_CHANNELS, fields,
                            ptr->name, ptr->freq, ptr->srate);
@@ -433,7 +433,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
 
                 mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
                            "FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, S2: %s, "
-                           "StreamID: %d, SID: %d",
+                           "StreamID: %d, SID: %d\n",
                            get_dvb_delsys(delsys),
                            list->NUM_CHANNELS,
                            fields, ptr->name, ptr->freq, ptr->srate, ptr->pol,
@@ -452,7 +452,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 fields = sscanf(&line[k], ter_conf,
                                 &ptr->freq, inv, bw, cr, tmp_lcr, mod,
                                 transm, gi, tmp_hier, vpid_str, apid_str);
-                mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d",
+                mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d\n",
                            get_dvb_delsys(delsys), list->NUM_CHANNELS,
                            fields, ptr->name, ptr->freq);
                 break;
@@ -462,7 +462,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                                 &ptr->freq, inv, &ptr->srate,
                                 cr, mod, vpid_str, apid_str);
                 mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, "
-                           "SRATE: %d",
+                           "SRATE: %d\n",
                            get_dvb_delsys(delsys),
                            list->NUM_CHANNELS, fields, ptr->name,
                            ptr->freq, ptr->srate);
@@ -489,7 +489,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 if (ptr->diseqc > 0)
                     ptr->diseqc--;
                 mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, "
-                           "SRATE: %d, POL: %c, DISEQC: %d",
+                           "SRATE: %d, POL: %c, DISEQC: %d\n",
                            get_dvb_delsys(delsys),
                            list->NUM_CHANNELS, fields, ptr->name, ptr->freq,
                            ptr->srate, ptr->pol, ptr->diseqc);
