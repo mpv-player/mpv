@@ -82,13 +82,13 @@ unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
         mp_err(log, "DVBv5: FE_GET_PROPERTY(DTV_ENUM_DELSYS) error: %d\n", errno);
         return ret_mask;
     }
-    unsigned int i, delsys_count = prop[0].u.buffer.len;
+    unsigned int delsys_count = prop[0].u.buffer.len;
     if (delsys_count == 0) {
         mp_err(log, "DVBv5: Frontend returned no delivery systems!\n");
         return ret_mask;
     }
     mp_verbose(log, "DVBv5: Number of supported delivery systems: %d\n", delsys_count);
-    for (i = 0; i < delsys_count; i++) {
+    for (unsigned int i = 0; i < delsys_count; i++) {
         delsys = (unsigned int)prop[0].u.buffer.data[i];
         DELSYS_SET(ret_mask, delsys);
         mp_verbose(log, " %s\n", get_dvb_delsys(delsys));
@@ -100,29 +100,29 @@ unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
 int dvb_open_devices(dvb_priv_t *priv, unsigned int adapter,
     unsigned int frontend, unsigned int demux_cnt)
 {
-    unsigned int i;
-    char frontend_dev[PATH_MAX], dvr_dev[PATH_MAX], demux_dev[PATH_MAX];
-    dvb_state_t* state = priv->state;
+    dvb_state_t *state = priv->state;
 
+    char frontend_dev[100], dvr_dev[100], demux_dev[100];
     snprintf(frontend_dev, sizeof(frontend_dev), "/dev/dvb/adapter%u/frontend%u", adapter, frontend);
     snprintf(dvr_dev, sizeof(dvr_dev), "/dev/dvb/adapter%u/dvr0", adapter);
     snprintf(demux_dev, sizeof(demux_dev), "/dev/dvb/adapter%u/demux0", adapter);
+
     MP_VERBOSE(priv, "Opening frontend device %s\n", frontend_dev);
     state->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
     if (state->fe_fd < 0) {
         MP_ERR(priv, "Error opening frontend device: %d\n", errno);
         return 0;
     }
+
     state->demux_fds_cnt = 0;
     MP_VERBOSE(priv, "Opening %d demuxers\n", demux_cnt);
-    for (i = 0; i < demux_cnt; i++) {
+    for (unsigned int i = 0; i < demux_cnt; i++) {
         state->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
         if (state->demux_fds[i] < 0) {
             MP_ERR(priv, "Error opening demux0: %d\n", errno);
             return 0;
-        } else {
-            state->demux_fds_cnt++;
         }
+        state->demux_fds_cnt++;
     }
 
     state->dvr_fd = open(dvr_dev, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
@@ -134,31 +134,29 @@ int dvb_open_devices(dvb_priv_t *priv, unsigned int adapter,
     return 1;
 }
 
-
 int dvb_fix_demuxes(dvb_priv_t *priv, unsigned int cnt)
 {
-    int i;
-    char demux_dev[PATH_MAX];
+    dvb_state_t *state = priv->state;
 
-    dvb_state_t* state = priv->state;
-
+    char demux_dev[100];
     snprintf(demux_dev, sizeof(demux_dev), "/dev/dvb/adapter%d/demux0",
             state->adapters[state->cur_adapter].devno);
+
     MP_VERBOSE(priv, "Changing demuxer count %d -> %d\n", state->demux_fds_cnt, cnt);
     if (state->demux_fds_cnt >= cnt) {
-        for (i = state->demux_fds_cnt - 1; i >= (int)cnt; i--) {
+        for (int i = state->demux_fds_cnt - 1; i >= (int)cnt; i--) {
             close(state->demux_fds[i]);
         }
         state->demux_fds_cnt = cnt;
     } else {
-        for (i = state->demux_fds_cnt; i < cnt; i++) {
+        for (int i = state->demux_fds_cnt; i < cnt; i++) {
             state->demux_fds[i] = open(demux_dev,
                                       O_RDWR | O_NONBLOCK | O_CLOEXEC);
             if (state->demux_fds[i] < 0) {
                 MP_ERR(priv, "Error opening demux0: %d\n", errno);
                 return 0;
-            } else
-                state->demux_fds_cnt++;
+            }
+            state->demux_fds_cnt++;
         }
     }
 
@@ -198,12 +196,10 @@ int dvb_get_pmt_pid(dvb_priv_t *priv, int devno, int service_id)
 {
     /* We need special filters on the demux,
        so open one locally, and close also here. */
-    char demux_dev[PATH_MAX];
+    char demux_dev[100];
     snprintf(demux_dev, sizeof(demux_dev), "/dev/dvb/adapter%d/demux0", devno);
 
-    struct dmx_sct_filter_params fparams;
-
-    memset(&fparams, 0x00, sizeof(fparams));
+    struct dmx_sct_filter_params fparams = {0};
     fparams.pid = 0;
     fparams.filter.filter[0] = 0x00;
     fparams.filter.mask[0] = 0xff;
@@ -223,7 +219,6 @@ int dvb_get_pmt_pid(dvb_priv_t *priv, int devno, int service_id)
     }
 
     int bytes_read;
-    int section_length;
     unsigned char buft[4096];
     unsigned char *bufptr = buft;
 
@@ -231,9 +226,8 @@ int dvb_get_pmt_pid(dvb_priv_t *priv, int devno, int service_id)
 
     bool pat_read = false;
     while (!pat_read) {
-        if (((bytes_read =
-                  read(pat_fd, bufptr,
-                       sizeof(buft))) < 0) && errno == EOVERFLOW)
+        bytes_read = read(pat_fd, bufptr, sizeof(buft));
+        if (bytes_read < 0 && errno == EOVERFLOW)
             bytes_read = read(pat_fd, bufptr, sizeof(buft));
         if (bytes_read < 0) {
             MP_ERR(priv, "PAT: read error: %d", errno);
@@ -241,7 +235,7 @@ int dvb_get_pmt_pid(dvb_priv_t *priv, int devno, int service_id)
             return -1;
         }
 
-        section_length = ((bufptr[1] & 0x0f) << 8) | bufptr[2];
+        int section_length = ((bufptr[1] & 0x0f) << 8) | bufptr[2];
         if (bytes_read != section_length + 3)
             continue;
 
@@ -285,17 +279,16 @@ static void print_status(dvb_priv_t *priv, fe_status_t festatus)
 
 static int check_status(dvb_priv_t *priv, int fd_frontend, int tmout)
 {
-    int32_t strength;
     fe_status_t festatus;
-    struct pollfd pfd[1];
-    int ok = 0, locks = 0;
-    int tm1, tm2;
+    bool ok = false;
+    int locks = 0;
 
+    struct pollfd pfd[1];
     pfd[0].fd = fd_frontend;
     pfd[0].events = POLLPRI;
 
     MP_VERBOSE(priv, "Getting frontend status\n");
-    tm1 = tm2 = (int)mp_time_sec();
+    int tm1 = (int)mp_time_sec();
     while (!ok) {
         festatus = 0;
         if (poll(pfd, 1, tmout * 1000) > 0) {
@@ -307,34 +300,35 @@ static int check_status(dvb_priv_t *priv, int fd_frontend, int tmout)
             }
         }
         usleep(10000);
-        tm2 = (int)mp_time_sec();
+        int tm2 = (int)mp_time_sec();
         if ((festatus & FE_TIMEDOUT) || (locks >= 2) || (tm2 - tm1 >= tmout))
-            ok = 1;
+            ok = true;
     }
 
-    if (festatus & FE_HAS_LOCK) {
-        strength = 0;
-        if (ioctl(fd_frontend, FE_READ_BER, &strength) >= 0)
-            MP_VERBOSE(priv, "Bit error rate: %d\n", strength);
-
-        strength = 0;
-        if (ioctl(fd_frontend, FE_READ_SIGNAL_STRENGTH, &strength) >= 0)
-            MP_VERBOSE(priv, "Signal strength: %d\n", strength);
-
-        strength = 0;
-        if (ioctl(fd_frontend, FE_READ_SNR, &strength) >= 0)
-            MP_VERBOSE(priv, "SNR: %d\n", strength);
-
-        strength = 0;
-        if (ioctl(fd_frontend, FE_READ_UNCORRECTED_BLOCKS, &strength) >= 0)
-            MP_VERBOSE(priv, "UNC: %d\n", strength);
-
-        print_status(priv, festatus);
-    } else {
+    if (!(festatus & FE_HAS_LOCK)) {
         MP_ERR(priv, "Not able to lock to the signal on the given frequency, "
                "timeout: %d\n", tmout);
         return -1;
     }
+
+    int32_t strength = 0;
+    if (ioctl(fd_frontend, FE_READ_BER, &strength) >= 0)
+        MP_VERBOSE(priv, "Bit error rate: %d\n", strength);
+
+    strength = 0;
+    if (ioctl(fd_frontend, FE_READ_SIGNAL_STRENGTH, &strength) >= 0)
+        MP_VERBOSE(priv, "Signal strength: %d\n", strength);
+
+    strength = 0;
+    if (ioctl(fd_frontend, FE_READ_SNR, &strength) >= 0)
+        MP_VERBOSE(priv, "SNR: %d\n", strength);
+
+    strength = 0;
+    if (ioctl(fd_frontend, FE_READ_UNCORRECTED_BLOCKS, &strength) >= 0)
+        MP_VERBOSE(priv, "UNC: %d\n", strength);
+
+    print_status(priv, festatus);
+
     return 0;
 }
 
@@ -410,8 +404,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                    fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier,
                    int timeout)
 {
-    int hi_lo = 0, bandwidth_hz = 0;
-    dvb_state_t* state = priv->state;
+    dvb_state_t *state = priv->state;
 
     MP_VERBOSE(priv, "tune_it: fd_frontend %d, %s freq %lu, srate %lu, "
                "pol %c, diseqc %u\n", fd_frontend,
@@ -432,7 +425,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
         }
     }
 
-   /* Prepare params, be verbose. */
+    /* Prepare params, be verbose. */
+    int hi_lo = 0, bandwidth_hz = 0;
     switch (delsys) {
     case SYS_DVBT2:
     case SYS_DVBT:
@@ -644,7 +638,7 @@ int dvb_tune(dvb_priv_t *priv, unsigned int delsys,
     MP_INFO(priv, "Tuning to %s frequency %lu Hz\n",
             get_dvb_delsys(delsys), (long unsigned int) freq);
 
-    dvb_state_t* state = priv->state;
+    dvb_state_t *state = priv->state;
 
     int ris = tune_it(priv, state->fe_fd, delsys, freq, srate, pol,
                       stream_id, specInv, diseqc, modulation,
