@@ -933,13 +933,12 @@ static int dvb_streaming_start(stream_t *stream, char *progname)
 
 void dvb_update_config(stream_t *stream)
 {
-    static int last_check = 0;
+    dvb_priv_t *priv = stream->priv;
     int now = (int)(mp_time_sec()*10);
 
     // Throttle the check to at maximum once every 0.1 s.
-    if (now != last_check) {
-        last_check = now;
-        dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
+    if (now != priv->opts_check_time) {
+        priv->opts_check_time = now;
         if (m_config_cache_update(priv->opts_cache)) {
             dvb_state_t *state = priv->state;
 

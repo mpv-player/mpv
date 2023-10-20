@@ -103,6 +103,7 @@ typedef struct {
     char *prog;
     int devno;
 
+    int opts_check_time;
     dvb_opts_t *opts;
     struct m_config_cache *opts_cache;
 } dvb_priv_t;
