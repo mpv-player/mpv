@@ -83,7 +83,6 @@ jobs:
         cc:
           - "clang"
         os:
-          - "macos-11"
           - "macos-12"
           - "macos-13"
     steps:
@@ -163,6 +162,7 @@ jobs:
 
   freebsd:
     runs-on: macos-12 # until https://github.com/actions/runner/issues/385
+    timeout-minutes: 20 # randomly bootloops https://github.com/vmactions/freebsd-vm/issues/74
     steps:
     - uses: actions/checkout@v3
     - name: Test in FreeBSD VM

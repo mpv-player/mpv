@@ -929,7 +929,9 @@ local function add_video(s)
         end
     end
 
-    append_fps(s, "container-fps", "estimated-vf-fps")
+    if mp.get_property_native("current-tracks/video/image") == false then
+        append_fps(s, "container-fps", "estimated-vf-fps")
+    end
     append_img_params(s, r, ro)
 
     local hdr = mp.get_property_native("hdr-metadata")

@@ -51,7 +51,6 @@ Interface changes
     - rename `--sub-forced-only` to `--sub-forced-events-only`
     - remove `sub-forced-only-cur` property (`--sub-forced-events-only` is a replacement)
     - add `hdr-metadata` property
-    - change `--directory-mode` default to `lazy`
     - remove deprecated `video-aspect` property
     - add `--video-crop`
     - add `video-params/crop-[w,h,x,y]`
@@ -100,6 +99,7 @@ Interface changes
     - change the default of `metadata-codepage` to `auto`
     - add `playlist-next-playlist` and `playlist-prev-playlist` commands
     - change `video-codec` to show description or name, not both
+    - deprecate `--cdda-toc-bias` option, offsets are always checked now
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

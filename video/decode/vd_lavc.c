@@ -1022,6 +1022,13 @@ static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags)
     for (int n = 0; n < AV_NUM_DATA_POINTERS; n++)
         stride_align = MPMAX(stride_align, linesize_align[n]);
 
+    // Note: texel sizes may be NPOT, so use full lcm instead of max
+    const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(pic->format);
+    if (!(desc->flags & AV_PIX_FMT_FLAG_BITSTREAM)) {
+        for (int n = 0; n < desc->nb_components; n++)
+            stride_align = mp_lcm(stride_align, desc->comp[n].step);
+    }
+
     int imgfmt = pixfmt2imgfmt(pic->format);
     if (!imgfmt)
         goto fallback;

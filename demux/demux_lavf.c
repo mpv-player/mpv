@@ -851,7 +851,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         if (prog)
             sh->program_id = prog->id;
         sh->missing_timestamps = !!(priv->avif_flags & AVFMT_NOTIMESTAMPS);
-        mp_tags_copy_from_av_dictionary(sh->tags, st->metadata);
+        mp_tags_move_from_av_dictionary(sh->tags, &st->metadata);
         demux_add_sh_stream(demuxer, sh);
 
         // Unfortunately, there is no better way to detect PCM codecs, other
@@ -889,7 +889,7 @@ static void update_metadata(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
     if (priv->avfc->event_flags & AVFMT_EVENT_FLAG_METADATA_UPDATED) {
-        mp_tags_copy_from_av_dictionary(demuxer->metadata, priv->avfc->metadata);
+        mp_tags_move_from_av_dictionary(demuxer->metadata, &priv->avfc->metadata);
         priv->avfc->event_flags = 0;
         demux_metadata_changed(demuxer);
     }
@@ -1121,12 +1121,12 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         t = av_dict_get(c->metadata, "title", NULL, 0);
         int index = demuxer_add_chapter(demuxer, t ? t->value : "",
                                         c->start * av_q2d(c->time_base), i);
-        mp_tags_copy_from_av_dictionary(demuxer->chapters[index].metadata, c->metadata);
+        mp_tags_move_from_av_dictionary(demuxer->chapters[index].metadata, &c->metadata);
     }
 
     add_new_streams(demuxer);
 
-    mp_tags_copy_from_av_dictionary(demuxer->metadata, avfc->metadata);
+    mp_tags_move_from_av_dictionary(demuxer->metadata, &avfc->metadata);
 
     demuxer->ts_resets_possible =
         priv->avif_flags & (AVFMT_TS_DISCONT | AVFMT_NOTIMESTAMPS);
@@ -1283,7 +1283,7 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     if (st->event_flags & AVSTREAM_EVENT_FLAG_METADATA_UPDATED) {
         st->event_flags = 0;
         struct mp_tags *tags = talloc_zero(NULL, struct mp_tags);
-        mp_tags_copy_from_av_dictionary(tags, st->metadata);
+        mp_tags_move_from_av_dictionary(tags, &st->metadata);
         double pts = MP_PTS_OR_DEF(dp->pts, dp->dts);
         demux_stream_tags_changed(demux, stream, tags, pts);
     }

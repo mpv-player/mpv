@@ -1028,7 +1028,12 @@ static char *print_double_7g(const m_option_t *opt, const void *val)
     double f = VAL(val);
     if (isnan(f))
         return print_double(opt, val);
-    return talloc_asprintf(NULL, "%.7g", f);
+    // Truncate anything < 1e-4 to avoid switching to scientific notation
+    if (fabs(f) < 1e-4) {
+        return talloc_strdup(NULL, "0");
+    } else {
+        return talloc_asprintf(NULL, "%.7g", f);
+    }
 }
 
 static void add_double(const m_option_t *opt, void *val, double add, bool wrap)

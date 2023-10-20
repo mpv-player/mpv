@@ -1598,7 +1598,7 @@ static void save_cached_program(struct ra *ra, struct ra_renderpass *pass,
         .comp_bytecode_len = comp_bc.len,
     };
     memcpy(header.magic, cache_magic, sizeof(header.magic));
-    strncpy(header.compiler, spirv->name, sizeof(header.compiler) - 1);
+    strncpy(header.compiler, spirv->name, sizeof(header.compiler));
 
     struct bstr *prog = &pass->params.cached_program;
     bstr_xappend(pass, prog, (bstr){ (char *) &header, sizeof(header) });

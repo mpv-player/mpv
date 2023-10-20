@@ -17,26 +17,21 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <cdio/cdio.h>
 
-#if CDIO_API_VERSION < 6
-#define OLD_API
-#endif
-
-#ifdef OLD_API
-#include <cdio/cdda.h>
-#include <cdio/paranoia.h>
-#else
+// For cdio_cddap_version
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
 #include <cdio/paranoia/cdda.h>
 #include <cdio/paranoia/paranoia.h>
-#endif
+#pragma GCC diagnostic pop
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
+#include "common/msg.h"
+#include "config.h"
 #include "mpv_talloc.h"
 
 #include "stream.h"
@@ -44,9 +39,6 @@
 #include "options/m_config.h"
 #include "options/options.h"
 
-#include "common/msg.h"
-
-#include "config.h"
 #if !HAVE_GPL
 #error GPL only
 #endif
@@ -82,7 +74,8 @@ const struct m_sub_options stream_cdda_conf = {
         {"paranoia", OPT_INT(paranoia_mode), M_RANGE(0, 2)},
         {"sector-size", OPT_INT(sector_size), M_RANGE(1, 100)},
         {"overlap", OPT_INT(search_overlap), M_RANGE(0, 75)},
-        {"toc-bias", OPT_INT(toc_bias)},
+        {"toc-bias", OPT_INT(toc_bias),
+            .deprecation_message = "toc-bias is no longer used"},
         {"toc-offset", OPT_INT(toc_offset)},
         {"skip", OPT_BOOL(skip)},
         {"span-a", OPT_INT(span[0])},
@@ -98,16 +91,6 @@ const struct m_sub_options stream_cdda_conf = {
 };
 
 static const char *const cdtext_name[] = {
-#ifdef OLD_API
-    [CDTEXT_ARRANGER] = "Arranger",
-    [CDTEXT_COMPOSER] = "Composer",
-    [CDTEXT_MESSAGE]  =  "Message",
-    [CDTEXT_ISRC] =  "ISRC",
-    [CDTEXT_PERFORMER] = "Performer",
-    [CDTEXT_SONGWRITER] =  "Songwriter",
-    [CDTEXT_TITLE] =  "Title",
-    [CDTEXT_UPC_EAN] = "UPC_EAN",
-#else
     [CDTEXT_FIELD_ARRANGER] = "Arranger",
     [CDTEXT_FIELD_COMPOSER] = "Composer",
     [CDTEXT_FIELD_MESSAGE]  =  "Message",
@@ -116,7 +99,6 @@ static const char *const cdtext_name[] = {
     [CDTEXT_FIELD_SONGWRITER] =  "Songwriter",
     [CDTEXT_FIELD_TITLE] =  "Title",
     [CDTEXT_FIELD_UPC_EAN] = "UPC_EAN",
-#endif
 };
 
 static void print_cdtext(stream_t *s, int track)
@@ -124,20 +106,12 @@ static void print_cdtext(stream_t *s, int track)
     cdda_priv* p = (cdda_priv*)s->priv;
     if (!p->cdtext)
         return;
-#ifdef OLD_API
-    cdtext_t *text = cdio_get_cdtext(p->cd->p_cdio, track);
-#else
     cdtext_t *text = cdio_get_cdtext(p->cd->p_cdio);
-#endif
     int header = 0;
     if (text) {
         for (int i = 0; i < sizeof(cdtext_name) / sizeof(cdtext_name[0]); i++) {
             const char *name = cdtext_name[i];
-#ifdef OLD_API
-            const char *value = cdtext_get_const(i, text);
-#else
             const char *value = cdtext_get_const(text, i, track);
-#endif
             if (name && value) {
                 if (!header)
                     MP_INFO(s, "CD-Text (%s):\n", track ? "track" : "CD");
@@ -161,7 +135,6 @@ static void cdparanoia_callback(long int inpos, paranoia_cb_mode_t function)
 static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     cdda_priv *p = (cdda_priv *)s->priv;
-    int i;
 
     if (!p->data || p->data_pos >= CDIO_CD_FRAMESIZE_RAW) {
         if ((p->sector < p->start_sector) || (p->sector > p->end_sector))
@@ -178,14 +151,6 @@ static int fill_buffer(stream_t *s, void *buffer, int max_len)
     size_t copy = MPMIN(CDIO_CD_FRAMESIZE_RAW - p->data_pos, max_len);
     memcpy(buffer, p->data + p->data_pos, copy);
     p->data_pos += copy;
-
-    for (i = 0; i < p->cd->tracks; i++) {
-        if (p->cd->disc_toc[i].dwStartSector == p->sector - 1) {
-            print_track_info(s, i + 1);
-            break;
-        }
-    }
-
     return copy;
 }
 
@@ -320,9 +285,7 @@ static int open_cdda(stream_t *st)
 
     priv->cd = cdd;
 
-    if (p->toc_bias)
-        offset -= cdda_track_firstsector(cdd, 1);
-
+    offset -= cdda_track_firstsector(cdd, 1);
     if (offset) {
         for (int n = 0; n < cdd->tracks + 1; n++)
             cdd->disc_toc[n].dwStartSector += offset;

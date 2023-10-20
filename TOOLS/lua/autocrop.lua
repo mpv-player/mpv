@@ -17,9 +17,8 @@ inserting the cropdetect filter and setting video-crop, the "C" key should be
 pressed at a position in the video where the crop region is unambiguous (i.e.,
 not a black frame, black background title card, or dark scene).
 
-If non-copy-back hardware decoding is in use, hwdec is temporarily set to
-auto-copy-safe for the duration of cropdetect as the filter would fail
-otherwise.
+If non-copy-back hardware decoding is in use, hwdec is temporarily disabled for
+the duration of cropdetect as the filter would fail otherwise.
 
 These are the default options. They can be overridden by adding
 script-opts-append=autocrop-<parameter>=<value> to mpv.conf.
@@ -132,7 +131,7 @@ function detect_crop()
     if hwdec_current:find("-copy$") == nil and hwdec_current ~= "no" and
        hwdec_current ~= "crystalhd" and hwdec_current ~= "rkmpp" then
         hwdec_backup = mp.get_property("hwdec")
-        mp.set_property("hwdec", "auto-copy-safe")
+        mp.set_property("hwdec", "no")
     end
 
     -- Insert the cropdetect filter.

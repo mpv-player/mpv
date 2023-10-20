@@ -29,6 +29,7 @@
 #include "input/keycodes.h"
 #include "options/m_config.h"
 #include "osdep/io.h"
+#include "osdep/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "present_sync.h"
 #include "wayland_common.h"
@@ -1948,7 +1949,7 @@ static void window_move(struct vo_wayland_state *wl, uint32_t serial)
         xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
 }
 
-static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int timeout)
+static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int64_t timeout_ns)
 {
     if (wl->display_fd == -1)
         return;
@@ -1962,7 +1963,7 @@ static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int t
         wl_display_dispatch_pending(wl->display);
     wl_display_flush(wl->display);
 
-    poll(fds, nfds, timeout);
+    mp_poll(fds, nfds, timeout_ns);
 
     if (fds[0].revents & POLLIN) {
         wl_display_read_events(wl->display);
@@ -2577,7 +2578,7 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
     int64_t finish_time = mp_time_ns() + vblank_time;
 
     while (wl->frame_wait && finish_time > mp_time_ns()) {
-        int poll_time = ceil((finish_time - mp_time_ns()) / 1e6);
+        int64_t poll_time = finish_time - mp_time_ns();
         if (poll_time < 0) {
             poll_time = 0;
         }
@@ -2609,9 +2610,9 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_ns)
     struct vo_wayland_state *wl = vo->wl;
 
     int64_t wait_ns = until_time_ns - mp_time_ns();
-    int timeout_ms = MPCLAMP(wait_ns / 1e6, 1, 10000);
+    int64_t timeout_ns = MPCLAMP(wait_ns, 1e6, 1e10);
 
-    wayland_dispatch_events(wl, 2, timeout_ms);
+    wayland_dispatch_events(wl, 2, timeout_ns);
 }
 
 void vo_wayland_wakeup(struct vo *vo)

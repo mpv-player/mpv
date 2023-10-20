@@ -826,10 +826,6 @@ Program Behavior
     value. The initial value is either the default value, or as set by the
     config file or command line.
 
-    In some cases, this might not work as expected. For example, ``--volume``
-    will only be reset if it is explicitly set in the config file or the
-    command line.
-
     The special name ``all`` resets as many options as possible.
 
     This is a string list option. See `List Options`_ for details.
@@ -3527,11 +3523,6 @@ Disc Devices
 
 ``--cdda-overlap=<value>``
     Force minimum overlap search during verification to <value> sectors.
-
-``--cdda-toc-bias``
-    Assume that the beginning offset of track 1 as reported in the TOC
-    will be addressed as LBA 0. Some discs need this for getting track
-    boundaries correctly.
 
 ``--cdda-toc-offset=<value>``
     Add ``<value>`` sectors to the values reported when addressing tracks.
