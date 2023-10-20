@@ -43,8 +43,6 @@
 #include <errno.h>
 #include <pthread.h>
 
-#include <libavutil/avstring.h>
-
 #include "osdep/io.h"
 #include "misc/ctype.h"
 #include "osdep/timer.h"
@@ -266,7 +264,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
 
     int fields, cnt, k;
     int has8192, has0;
-    dvb_channel_t *ptr, *tmp, chn;
+    dvb_channel_t *ptr, chn;
     char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256],
          transm[256], gi[256], vpid_str[256], apid_str[256], tpid_str[256],
          vdr_par_str[256], vdr_loc_str[256];
@@ -286,15 +284,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         return list;
     }
 
-    if (list == NULL) {
-        list = malloc(sizeof(dvb_channels_list_t));
-        if (list == NULL) {
-            fclose(f);
-            mp_verbose(log, "DVB_GET_CHANNELS: couldn't malloc enough memory\n");
-            return NULL;
-        }
-        memset(list, 0x00, sizeof(dvb_channels_list_t));
-    }
+    if (!list)
+        list = talloc_zero(NULL, dvb_channels_list_t);
 
     ptr = &chn;
     while (!feof(f)) {
@@ -319,10 +310,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             int channel_name_length = k;
             if (bouquet_sep && bouquet_sep < colon)
                 channel_name_length = (bouquet_sep - line);
-            ptr->name = malloc((channel_name_length + 1));
-            if (!ptr->name)
-                continue;
-            av_strlcpy(ptr->name, line, (channel_name_length + 1));
+            ptr->name = talloc_strndup(list, line, channel_name_length);
         } else {
             continue;
         }
@@ -702,46 +690,14 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             }
         }
 
-        tmp = realloc(list->channels, sizeof(dvb_channel_t) *
-                      (list->NUM_CHANNELS + 1));
-        if (tmp == NULL)
-            break;
-
-        list->channels = tmp;
-        memcpy(&(list->channels[list->NUM_CHANNELS]), ptr, sizeof(dvb_channel_t));
-        list->NUM_CHANNELS++;
-        if (sizeof(dvb_channel_t) * list->NUM_CHANNELS >= 1024 * 1024) {
-            mp_verbose(log, "dvbin.c, > 1MB allocated for channels struct, "
-                            "dropping the rest of the file\n");
-            break;
-        }
+        MP_TARRAY_APPEND(list, list->channels, list->NUM_CHANNELS, *ptr);
     }
 
     fclose(f);
-    if (list->NUM_CHANNELS == 0) {
-        free(list->channels);
-        free(list);
-        return NULL;
-    }
+    if (list->NUM_CHANNELS == 0)
+        TA_FREEP(&list);
 
     return list;
-}
-
-void dvb_free_state(dvb_state_t *state)
-{
-    int i, j;
-
-    for (i = 0; i < state->adapters_count; i++) {
-        if (!state->adapters[i].list)
-            continue;
-        if (state->adapters[i].list->channels) {
-            for (j = 0; j < state->adapters[i].list->NUM_CHANNELS; j++)
-                free(state->adapters[i].list->channels[j].name);
-            free(state->adapters[i].list->channels);
-        }
-        free(state->adapters[i].list);
-    }
-    free(state);
 }
 
 static int dvb_streaming_read(stream_t *stream, void *buffer, int size)
@@ -941,8 +897,7 @@ void dvbin_close(stream_t *stream)
     state->cur_frontend = -1;
 
     pthread_mutex_lock(&global_dvb_state_lock);
-    dvb_free_state(state);
-    global_dvb_state = NULL;
+    TA_FREEP(&global_dvb_state);
     pthread_mutex_unlock(&global_dvb_state_lock);
 }
 
@@ -1158,18 +1113,14 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     struct mp_log *log = stream->log;
     struct mpv_global *global = stream->global;
     dvb_priv_t *priv = stream->priv;
-    unsigned int delsys, delsys_mask[MAX_FRONTENDS], size;
+    unsigned int delsys, delsys_mask[MAX_FRONTENDS];
     char filename[PATH_MAX], *conf_file;
     const char *conf_file_name;
     void *talloc_ctx;
     dvb_channels_list_t *list;
-    dvb_adapter_config_t *adapters = NULL, *tmp;
     dvb_state_t *state = NULL;
 
-    state = malloc(sizeof(dvb_state_t));
-    if (state == NULL)
-        return NULL;
-    memset(state, 0x00, sizeof(dvb_state_t));
+    state = talloc_zero(NULL, dvb_state_t);
     state->switching_channel = false;
     state->is_on = 0;
     state->stream_used = true;
@@ -1253,30 +1204,19 @@ dvb_state_t *dvb_get_state(stream_t *stream)
         if (list == NULL)
             continue;
 
-        size = sizeof(dvb_adapter_config_t) * (state->adapters_count + 1);
-        tmp = realloc(state->adapters, size);
+        dvb_adapter_config_t tmp = {
+            .devno = i,
+            .list = talloc_steal(state, list),
+        };
+        memcpy(&tmp.delsys_mask, delsys_mask, sizeof(delsys_mask));
 
-        if (tmp == NULL) {
-            mp_err(log, "DVB_CONFIG, can't realloc %d bytes, skipping\n",
-                   size);
-            free(list);
-            continue;
-        }
-        adapters = tmp;
+        MP_TARRAY_APPEND(state, state->adapters, state->adapters_count, tmp);
 
-        state->adapters = adapters;
-        state->adapters[state->adapters_count].devno = i;
-        memcpy(&state->adapters[state->adapters_count].delsys_mask,
-            &delsys_mask, (sizeof(unsigned int) * MAX_FRONTENDS));
-        state->adapters[state->adapters_count].list = list;
-        state->adapters_count++;
         mp_verbose(log, "Added adapter with channels to state list, contains %d adapters.\n", state->adapters_count);
     }
 
-    if (state->adapters_count == 0) {
-        free(state);
-        state = NULL;
-    }
+    if (state->adapters_count == 0)
+        TA_FREEP(&state);
 
     global_dvb_state = state;
     return state;
