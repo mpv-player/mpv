@@ -251,8 +251,7 @@ sources = files(
 # compiler stuff
 cc = meson.get_compiler('c')
 
-flags = ['-D_ISOC99_SOURCE', '-D_GNU_SOURCE',
-         '-D_FILE_OFFSET_BITS=64']
+flags = ['-D_GNU_SOURCE', '-D_FILE_OFFSET_BITS=64']
 link_flags = []
 
 test_flags = ['-Werror=implicit-function-declaration',
