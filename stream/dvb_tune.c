@@ -30,12 +30,12 @@
 #include <poll.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <time.h>
 #include <errno.h>
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/frontend.h>
 
 #include "osdep/io.h"
+#include "osdep/timer.h"
 #include "dvbin.h"
 #include "dvb_tune.h"
 #include "common/msg.h"
@@ -289,13 +289,13 @@ static int check_status(dvb_priv_t *priv, int fd_frontend, int tmout)
     fe_status_t festatus;
     struct pollfd pfd[1];
     int ok = 0, locks = 0;
-    time_t tm1, tm2;
+    int tm1, tm2;
 
     pfd[0].fd = fd_frontend;
     pfd[0].events = POLLPRI;
 
     MP_VERBOSE(priv, "Getting frontend status\n");
-    tm1 = tm2 = time((time_t *) NULL);
+    tm1 = tm2 = (int)mp_time_sec();
     while (!ok) {
         festatus = 0;
         if (poll(pfd, 1, tmout * 1000) > 0) {
@@ -307,7 +307,7 @@ static int check_status(dvb_priv_t *priv, int fd_frontend, int tmout)
             }
         }
         usleep(10000);
-        tm2 = time((time_t *) NULL);
+        tm2 = (int)mp_time_sec();
         if ((festatus & FE_TIMEDOUT) || (locks >= 2) || (tm2 - tm1 >= tmout))
             ok = 1;
     }
