@@ -277,10 +277,10 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
     const char *vdr_conf =
         "%d:%255[^:]:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%*255[^:]:%d:%*d:%*d:%*d\n%n";
 
-    mp_verbose(log, "CONFIG_READ FILE: %s, type: %s\n",
+    mp_verbose(log, "Reading config file %s for type %s\n",
                filename, get_dvb_delsys(delsys));
     if ((f = fopen(filename, "r")) == NULL) {
-        mp_fatal(log, "CAN'T READ CONFIG FILE %s\n", filename);
+        mp_fatal(log, "Can't open file %s\n", filename);
         return list;
     }
 
@@ -619,7 +619,7 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             }
             if (!DELSYS_IS_SET(delsys_mask, delsys))
                 continue; /* Skip channel. */
-            mp_verbose(log, "Switched to delivery system for ATSC: %s (guessed from modulation).\n",
+            mp_verbose(log, "Switched to delivery system for ATSC: %s (guessed from modulation)\n",
                        get_dvb_delsys(delsys));
         }
 
@@ -720,7 +720,7 @@ static int dvb_streaming_read(stream_t *stream, void *buffer, int size)
             pfds[0].fd = fd;
             pfds[0].events = POLLIN | POLLPRI;
             if (poll(pfds, 1, 2000) <= 0) {
-                MP_ERR(stream, "dvb_streaming_read, failed with "
+                MP_ERR(stream, "dvb_streaming_read: failed with "
                         "errno %d when reading %d bytes\n", errno, size - pos);
                 errno = 0;
                 break;
@@ -728,11 +728,11 @@ static int dvb_streaming_read(stream_t *stream, void *buffer, int size)
             continue;
         }
         pos += rk;
-        MP_TRACE(stream, "ret (%d) bytes\n", pos);
+        MP_TRACE(stream, "got %d bytes\n", pos);
     }
 
     if (!pos)
-        MP_ERR(stream, "dvb_streaming_read, return 0 bytes\n");
+        MP_ERR(stream, "dvb_streaming_read: returning 0 bytes\n");
 
     // Check if config parameters have been updated.
     dvb_update_config(stream);
@@ -750,19 +750,10 @@ int dvb_set_channel(stream_t *stream, unsigned int adapter, unsigned int n)
     int devno;
     int i;
 
-    if (adapter >= state->adapters_count) {
-        MP_ERR(stream, "dvb_set_channel: INVALID internal ADAPTER NUMBER: %d vs %d, abort\n",
-               adapter, state->adapters_count);
-        return 0;
-    }
-
+    assert(adapter < state->adapters_count);
     devno = state->adapters[adapter].devno;
     new_list = state->adapters[adapter].list;
-    if (n > new_list->NUM_CHANNELS) {
-        MP_ERR(stream, "dvb_set_channel: INVALID CHANNEL NUMBER: %d, for "
-               "adapter %d, abort\n", n, devno);
-        return 0;
-    }
+    assert(n < new_list->NUM_CHANNELS);
     channel = &(new_list->channels[n]);
 
     if (state->is_on) {  //the fds are already open and we have to stop the demuxers
@@ -776,8 +767,8 @@ int dvb_set_channel(stream_t *stream, unsigned int adapter, unsigned int n)
             state->cur_frontend != channel->frontend) {
             dvbin_close(stream);
             if (!dvb_open_devices(priv, devno, channel->frontend, channel->pids_cnt)) {
-                MP_ERR(stream, "DVB_SET_CHANNEL, COULDN'T OPEN DEVICES OF "
-                       "ADAPTER: %d, EXIT\n", devno);
+                MP_ERR(stream, "dvb_set_channel: couldn't open devices of adapter "
+                    "%d\n", devno);
                 return 0;
             }
         } else {
@@ -788,16 +779,16 @@ int dvb_set_channel(stream_t *stream, unsigned int adapter, unsigned int n)
         }
     } else {
         if (!dvb_open_devices(priv, devno, channel->frontend, channel->pids_cnt)) {
-            MP_ERR(stream, "DVB_SET_CHANNEL2, COULDN'T OPEN DEVICES OF "
-                   "ADAPTER: %d, EXIT\n", devno);
+            MP_ERR(stream, "dvb_set_channel: couldn't open devices of adapter "
+                    "%d\n", devno);
             return 0;
         }
     }
 
     state->retry = 5;
     new_list->current = n;
-    MP_VERBOSE(stream, "DVB_SET_CHANNEL: new channel name=%s, adapter: %d, "
-               "channel %d\n", channel->name, devno, n);
+    MP_VERBOSE(stream, "dvb_set_channel: new channel name=\"%s\", adapter: %d, "
+               "channel: %d\n", channel->name, devno, n);
 
     if (channel->freq != state->last_freq) {
         if (!dvb_tune(priv, channel->delsys, channel->freq,
@@ -819,12 +810,11 @@ int dvb_set_channel(stream_t *stream, unsigned int adapter, unsigned int n)
            If it has not yet beem resolved, do it now. */
         for (i = 0; i < channel->pids_cnt; i++) {
             if (channel->pids[i] == -1) {
-                MP_VERBOSE(stream, "DVB_SET_CHANNEL: PMT-PID for service %d "
+                MP_VERBOSE(stream, "dvb_set_channel: PMT-PID for service %d "
                            "not resolved yet, parsing PAT...\n",
                            channel->service_id);
                 int pmt_pid = dvb_get_pmt_pid(priv, adapter, channel->service_id);
-                MP_VERBOSE(stream, "DVB_SET_CHANNEL: Found PMT-PID: %d\n",
-                           pmt_pid);
+                MP_VERBOSE(stream, "found PMT-PID: %d\n", pmt_pid);
                 channel->pids[i] = pmt_pid;
             }
         }
@@ -834,8 +824,8 @@ int dvb_set_channel(stream_t *stream, unsigned int adapter, unsigned int n)
     for (i = 0; i < channel->pids_cnt; i++) {
         if (channel->pids[i] == -1) {
             // In case PMT was not resolved, skip it here.
-            MP_ERR(stream, "DVB_SET_CHANNEL: PMT-PID not found, "
-                           "teletext-decoding may fail.\n");
+            MP_ERR(stream, "dvb_set_channel: PMT-PID not found, "
+                           "teletext decoding may fail.\n");
         } else {
             if (!dvb_set_ts_filt(priv, state->demux_fds[i], channel->pids[i],
                                  DMX_PES_OTHER))
@@ -884,8 +874,6 @@ void dvbin_close(stream_t *stream)
 
     for (int i = state->demux_fds_cnt - 1; i >= 0; i--) {
         state->demux_fds_cnt--;
-        MP_VERBOSE(stream, "DVBIN_CLOSE, close(%d), fd=%d, COUNT=%d\n", i,
-                   state->demux_fds[i], state->demux_fds_cnt);
         close(state->demux_fds[i]);
     }
     close(state->dvr_fd);
@@ -911,8 +899,6 @@ static int dvb_streaming_start(stream_t *stream, char *progname)
 
     if (progname == NULL)
         return 0;
-    MP_VERBOSE(stream, "\r\ndvb_streaming_start(PROG: %s, ADAPTER: %d)\n",
-               progname, priv->devno);
 
     list = state->adapters[state->cur_adapter].list;
     for (i = 0; i < list->NUM_CHANNELS; i ++) {
@@ -923,7 +909,7 @@ static int dvb_streaming_start(stream_t *stream, char *progname)
     }
 
     if (channel == NULL) {
-        MP_ERR(stream, "\n\nDVBIN: no such channel \"%s\"\n\n", progname);
+        MP_ERR(stream, "no such channel \"%s\"\n", progname);
         return 0;
     }
 
@@ -934,16 +920,13 @@ static int dvb_streaming_start(stream_t *stream, char *progname)
     list->current = (list->NUM_CHANNELS + list->current + priv->opts->cfg_channel_switch_offset) % list->NUM_CHANNELS;
     channel = &(list->channels[list->current]);
     MP_INFO(stream, "Tuning to channel \"%s\"...\n", channel->name);
-    MP_VERBOSE(stream, "PROGRAM NUMBER %d: name=%s, freq=%u\n", i,
+    MP_VERBOSE(stream, "Program number %d: name=\"%s\", freq=%u\n", i,
                channel->name, channel->freq);
 
     if (!dvb_set_channel(stream, state->cur_adapter, list->current)) {
-        MP_ERR(stream, "ERROR, COULDN'T SET CHANNEL  %i: \"%s\"\n", list->current, progname);
         dvbin_close(stream);
         return 0;
     }
-
-    MP_VERBOSE(stream, "SUCCESSFUL EXIT from dvb_streaming_start\n");
 
     return 1;
 }
@@ -979,8 +962,6 @@ void dvb_update_config(stream_t *stream)
 
 static int dvb_open(stream_t *stream)
 {
-    // I don't force  the file format because, although it's almost always TS,
-    // there are some providers that stream an IP multicast with M$ Mpeg4 inside
     dvb_priv_t *priv = NULL;
 
     pthread_mutex_lock(&global_dvb_state_lock);
@@ -1001,7 +982,7 @@ static int dvb_open(stream_t *stream)
     priv->state = state;
     priv->log = stream->log;
     if (state == NULL) {
-        MP_ERR(stream, "DVB CONFIGURATION IS EMPTY, exit\n");
+        MP_ERR(stream, "DVB configuration is empty\n");
         pthread_mutex_unlock(&global_dvb_state_lock);
         goto err_out;
     }
@@ -1019,9 +1000,6 @@ static int dvb_open(stream_t *stream)
       // The following setup only has to be done once.
 
       state->cur_frontend = -1;
-
-      MP_VERBOSE(stream, "OPEN_DVB: prog=%s, devno=%d\n",
-                 priv->prog, state->adapters[state->cur_adapter].devno);
 
       if (!dvb_streaming_start(stream, priv->prog))
           goto err_out;
@@ -1079,7 +1057,7 @@ int dvb_parse_path(stream_t *stream)
     }
 
     if (state->cur_adapter == -1) {
-        MP_ERR(stream, "NO CONFIGURATION FOUND FOR ADAPTER N. %d!\n",
+        MP_ERR(stream, "No configuration found for adapter %d!\n",
                priv->devno);
         return 0;
     }
@@ -1100,7 +1078,7 @@ int dvb_parse_path(stream_t *stream)
         priv->prog = talloc_strdup(priv, state->adapters[state->cur_adapter].list->channels[0].name);
     }
 
-    MP_VERBOSE(stream, "DVB_CONFIG: prog=%s, devno=%d\n",
+    MP_VERBOSE(stream, "dvb_config: prog=\"%s\", devno=%d\n",
                priv->prog, priv->devno);
     return 1;
 }
@@ -1133,7 +1111,6 @@ dvb_state_t *dvb_get_state(stream_t *stream)
             if (fd < 0)
                 continue;
 
-            mp_verbose(log, "Opened device %s, FD: %d\n", filename, fd);
             delsys_mask[f] = dvb_get_tuner_delsys_mask(fd, log);
             delsys_mask[f] &= DELSYS_SUPP_MASK; /* Filter unsupported delivery systems. */
             close(fd);
@@ -1142,8 +1119,6 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                        filename);
                 continue; /* Skip tuner. */
             }
-            mp_verbose(log, "Frontend device %s offers some supported delivery systems.\n",
-                   filename);
             /* Create channel list for adapter. */
             for (delsys = 0; delsys < SYS_DVB__COUNT__; delsys++) {
                 if (!DELSYS_IS_SET(delsys_mask[f], delsys))

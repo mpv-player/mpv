@@ -77,23 +77,21 @@ unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
     struct dtv_property prop[1];
     struct dtv_properties cmdseq = {.num = 1, .props = prop};
 
-    mp_verbose(log, "Querying tuner frontend type via DVBv5 API for frontend FD %d\n",
-               fe_fd);
     prop[0].cmd = DTV_ENUM_DELSYS;
     if (ioctl(fe_fd, FE_GET_PROPERTY, &cmdseq) < 0) {
-        mp_err(log, "DVBv5: FE_GET_PROPERTY(DTV_ENUM_DELSYS) error: %d, FD: %d\n\n", errno, fe_fd);
+        mp_err(log, "DVBv5: FE_GET_PROPERTY(DTV_ENUM_DELSYS) error: %d\n", errno);
         return ret_mask;
     }
     unsigned int i, delsys_count = prop[0].u.buffer.len;
-    mp_verbose(log, "DVBv5: Number of supported delivery systems: %d\n", delsys_count);
     if (delsys_count == 0) {
-        mp_err(log, "DVBv5: Frontend FD %d returned no delivery systems!\n", fe_fd);
+        mp_err(log, "DVBv5: Frontend returned no delivery systems!\n");
         return ret_mask;
     }
+    mp_verbose(log, "DVBv5: Number of supported delivery systems: %d\n", delsys_count);
     for (i = 0; i < delsys_count; i++) {
         delsys = (unsigned int)prop[0].u.buffer.data[i];
         DELSYS_SET(ret_mask, delsys);
-        mp_verbose(log, "DVBv5: Tuner frontend type seems to be %s\n", get_dvb_delsys(delsys));
+        mp_verbose(log, " %s\n", get_dvb_delsys(delsys));
     }
 
     return ret_mask;
@@ -109,30 +107,27 @@ int dvb_open_devices(dvb_priv_t *priv, unsigned int adapter,
     snprintf(frontend_dev, sizeof(frontend_dev), "/dev/dvb/adapter%u/frontend%u", adapter, frontend);
     snprintf(dvr_dev, sizeof(dvr_dev), "/dev/dvb/adapter%u/dvr0", adapter);
     snprintf(demux_dev, sizeof(demux_dev), "/dev/dvb/adapter%u/demux0", adapter);
-    MP_VERBOSE(priv, "DVB_OPEN_DEVICES: frontend: %s\n", frontend_dev);
+    MP_VERBOSE(priv, "Opening frontend device %s\n", frontend_dev);
     state->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
     if (state->fe_fd < 0) {
-        MP_ERR(priv, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n",
-               frontend_dev, errno);
+        MP_ERR(priv, "Error opening frontend device: %d\n", errno);
         return 0;
     }
     state->demux_fds_cnt = 0;
-    MP_VERBOSE(priv, "DVB_OPEN_DEVICES(%d)\n", demux_cnt);
+    MP_VERBOSE(priv, "Opening %d demuxers\n", demux_cnt);
     for (i = 0; i < demux_cnt; i++) {
         state->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
         if (state->demux_fds[i] < 0) {
-            MP_ERR(priv, "ERROR OPENING DEMUX 0: %d\n", errno);
+            MP_ERR(priv, "Error opening demux0: %d\n", errno);
             return 0;
         } else {
-            MP_VERBOSE(priv, "OPEN(%d), file %s: FD=%d, CNT=%d\n", i, demux_dev,
-                       state->demux_fds[i], state->demux_fds_cnt);
             state->demux_fds_cnt++;
         }
     }
 
     state->dvr_fd = open(dvr_dev, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
     if (state->dvr_fd < 0) {
-        MP_ERR(priv, "ERROR OPENING DVR DEVICE %s: %d\n", dvr_dev, errno);
+        MP_ERR(priv, "Error opening dvr device %s: %d\n", dvr_dev, errno);
         return 0;
     }
 
@@ -149,10 +144,9 @@ int dvb_fix_demuxes(dvb_priv_t *priv, unsigned int cnt)
 
     snprintf(demux_dev, sizeof(demux_dev), "/dev/dvb/adapter%d/demux0",
             state->adapters[state->cur_adapter].devno);
-    MP_VERBOSE(priv, "FIX %d -> %d\n", state->demux_fds_cnt, cnt);
+    MP_VERBOSE(priv, "Changing demuxer count %d -> %d\n", state->demux_fds_cnt, cnt);
     if (state->demux_fds_cnt >= cnt) {
         for (i = state->demux_fds_cnt - 1; i >= (int)cnt; i--) {
-            MP_VERBOSE(priv, "FIX, CLOSE fd(%d): %d\n", i, state->demux_fds[i]);
             close(state->demux_fds[i]);
         }
         state->demux_fds_cnt = cnt;
@@ -160,9 +154,8 @@ int dvb_fix_demuxes(dvb_priv_t *priv, unsigned int cnt)
         for (i = state->demux_fds_cnt; i < cnt; i++) {
             state->demux_fds[i] = open(demux_dev,
                                       O_RDWR | O_NONBLOCK | O_CLOEXEC);
-            MP_VERBOSE(priv, "FIX, OPEN fd(%d): %d\n", i, state->demux_fds[i]);
             if (state->demux_fds[i] < 0) {
-                MP_ERR(priv, "ERROR OPENING DEMUX 0: %d\n", errno);
+                MP_ERR(priv, "Error opening demux0: %d\n", errno);
                 return 0;
             } else
                 state->demux_fds_cnt++;
@@ -187,19 +180,17 @@ int dvb_set_ts_filt(dvb_priv_t *priv, int fd, uint16_t pid,
     {
         int buffersize = 256 * 1024;
         if (ioctl(fd, DMX_SET_BUFFER_SIZE, buffersize) < 0)
-            MP_ERR(priv, "ERROR IN DMX_SET_BUFFER_SIZE %i for fd %d: ERRNO: %d\n",
-                   pid, fd, errno);
+            MP_ERR(priv, "Error in DMX_SET_BUFFER_SIZE %i: errno=%d\n",
+                   pid, errno);
     }
 
     errno = 0;
     if ((i = ioctl(fd, DMX_SET_PES_FILTER, &pesFilterParams)) < 0) {
-        MP_ERR(priv, "ERROR IN SETTING DMX_FILTER %i for fd %d: ERRNO: %d\n",
-               pid, fd, errno);
+        MP_ERR(priv, "Error in DMX_SET_PES_FILTER %i: errno=%d\n",
+               pid, errno);
         return 0;
     }
 
-    MP_VERBOSE(priv, "SET PES FILTER ON PID %d to fd %d, RESULT: %d, ERRNO: %d\n",
-               pid, fd, i, errno);
     return 1;
 }
 
@@ -221,12 +212,12 @@ int dvb_get_pmt_pid(dvb_priv_t *priv, int devno, int service_id)
 
     int pat_fd;
     if ((pat_fd = open(demux_dev, O_RDWR)) < 0) {
-        MP_ERR(priv, "Opening PAT DEMUX failed, error: %d", errno);
+        MP_ERR(priv, "Opening PAT demux failed: %d", errno);
         return -1;
     }
 
     if (ioctl(pat_fd, DMX_SET_FILTER, &fparams) < 0) {
-        MP_ERR(priv, "ioctl DMX_SET_FILTER failed, error: %d", errno);
+        MP_ERR(priv, "ioctl DMX_SET_FILTER failed: %d", errno);
         close(pat_fd);
         return -1;
     }
@@ -245,7 +236,7 @@ int dvb_get_pmt_pid(dvb_priv_t *priv, int devno, int service_id)
                        sizeof(buft))) < 0) && errno == EOVERFLOW)
             bytes_read = read(pat_fd, bufptr, sizeof(buft));
         if (bytes_read < 0) {
-            MP_ERR(priv, "PAT: read_sections: read error: %d", errno);
+            MP_ERR(priv, "PAT: read error: %d", errno);
             close(pat_fd);
             return -1;
         }
@@ -394,16 +385,14 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 static int dvbv5_tune(dvb_priv_t *priv, int fd_frontend,
                        unsigned int delsys, struct dtv_properties* cmdseq)
 {
-    MP_VERBOSE(priv, "Tuning via S2API, channel is %s.\n",
-               get_dvb_delsys(delsys));
     MP_VERBOSE(priv, "Dumping raw tuning commands and values:\n");
     for (int i = 0; i < cmdseq->num; ++i) {
-        MP_VERBOSE(priv, "%02d: 0x%x(%d) => 0x%x(%d)\n",
+        MP_VERBOSE(priv, " %02d: 0x%x(%d) => 0x%x(%d)\n",
                    i, cmdseq->props[i].cmd, cmdseq->props[i].cmd,
                    cmdseq->props[i].u.data, cmdseq->props[i].u.data);
     }
     if (ioctl(fd_frontend, FE_SET_PROPERTY, cmdseq) < 0) {
-        MP_ERR(priv, "ERROR tuning channel\n");
+        MP_ERR(priv, "Error tuning channel\n");
         return -1;
     }
     return 0;
@@ -424,7 +413,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
     int hi_lo = 0, bandwidth_hz = 0;
     dvb_state_t* state = priv->state;
 
-    MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, %s freq %lu, srate %lu, "
+    MP_VERBOSE(priv, "tune_it: fd_frontend %d, %s freq %lu, srate %lu, "
                "pol %c, diseqc %u\n", fd_frontend,
                get_dvb_delsys(delsys),
                (long unsigned int)freq, (long unsigned int)srate,
@@ -516,7 +505,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                    get_dvb_delsys(delsys), freq, modulation);
         break;
     default:
-        MP_VERBOSE(priv, "Unknown FE type. Aborting\n");
+        MP_VERBOSE(priv, "Unknown FE type, aborting.\n");
         return 0;
     }
 
@@ -534,7 +523,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
         .props = p_clear
     };
     if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq_clear) < 0) {
-        MP_ERR(priv, "FE_SET_PROPERTY DTV_CLEAR failed\n");
+        MP_ERR(priv, "DTV_CLEAR failed\n");
     }
 
     /* Tune. */
@@ -634,12 +623,12 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
 
     int tune_status = check_status(priv, fd_frontend, timeout);
     if (tune_status != 0) {
-        MP_ERR(priv, "ERROR locking to channel\n");
+        MP_ERR(priv, "Error locking to channel\n");
     }
     return tune_status;
 
 error_tune:
-    MP_ERR(priv, "ERROR tuning channel\n");
+    MP_ERR(priv, "Error tuning channel\n");
     return -1;
 }
 
@@ -652,7 +641,7 @@ int dvb_tune(dvb_priv_t *priv, unsigned int delsys,
              fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier,
              int timeout)
 {
-    MP_INFO(priv, "dvb_tune %s Freq: %lu\n",
+    MP_INFO(priv, "Tuning to %s frequency %lu Hz\n",
             get_dvb_delsys(delsys), (long unsigned int) freq);
 
     dvb_state_t* state = priv->state;
@@ -663,7 +652,7 @@ int dvb_tune(dvb_priv_t *priv, unsigned int delsys,
                       bandWidth, LP_CodeRate, hier, timeout);
 
     if (ris != 0)
-        MP_INFO(priv, "dvb_tune, TUNING FAILED\n");
+        MP_INFO(priv, "Tuning failed\n");
 
     return ris == 0;
 }
