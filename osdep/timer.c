@@ -72,24 +72,10 @@ int64_t mp_time_ns_add(int64_t time_ns, double timeout_sec)
     return time_ns + ti;
 }
 
-static int get_realtime(struct timespec *out_ts)
-{
-#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
-    return clock_gettime(CLOCK_REALTIME, out_ts);
-#else
-    // OSX
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    out_ts->tv_sec = tv.tv_sec;
-    out_ts->tv_nsec = tv.tv_usec * 1000UL;
-    return 0;
-#endif
-}
-
 struct timespec mp_time_ns_to_realtime(int64_t time_ns)
 {
     struct timespec ts = {0};
-    if (get_realtime(&ts) != 0)
+    if (clock_gettime(CLOCK_REALTIME, &ts) != 0)
         return ts;
     int64_t time_rel = time_ns - mp_time_ns();
 
