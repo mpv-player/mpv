@@ -1141,6 +1141,11 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
     dst->width = src->w;
     dst->height = src->h;
 
+    dst->crop_left = src->params.crop.x0;
+    dst->crop_top = src->params.crop.y0;
+    dst->crop_right = dst->width - src->params.crop.x1;
+    dst->crop_bottom = dst->height - src->params.crop.y1;
+
     dst->sample_aspect_ratio.num = src->params.p_w;
     dst->sample_aspect_ratio.den = src->params.p_h;
 
