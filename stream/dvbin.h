@@ -79,7 +79,7 @@ typedef struct {
     int dvr_fd;
     int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
 
-    int is_on;
+    bool is_on;
     int retry;
     unsigned int last_freq;
     bool switching_channel;
