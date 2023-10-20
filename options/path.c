@@ -263,7 +263,8 @@ void mp_path_strip_trailing_separator(char *path)
 char *mp_splitext(const char *path, bstr *root)
 {
     assert(path);
-    const char *split = strrchr(path, '.');
+    int skip = (*path == '.'); // skip leading dot for "hidden" unix files
+    const char *split = strrchr(path + skip, '.');
     if (!split || !split[1] || strchr(split, '/'))
         return NULL;
     if (root)
