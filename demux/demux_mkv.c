@@ -1505,23 +1505,20 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->disp_w = track->v_width;
     sh_v->disp_h = track->v_height;
 
-    struct mp_rect crop;
-    crop.x0 = track->v_crop_left;
-    crop.y0 = track->v_crop_top;
-    crop.x1 = track->v_width - track->v_crop_right;
-    crop.y1 = track->v_height - track->v_crop_bottom;
-
     // Keep the codec crop rect as 0s if we have no cropping since the
     // file may have broken width/height tags.
     if (track->v_crop_left || track->v_crop_top ||
         track->v_crop_right || track->v_crop_bottom)
     {
-        sh_v->crop = crop;
+        sh_v->crop.x0 = track->v_crop_left;
+        sh_v->crop.y0 = track->v_crop_top;
+        sh_v->crop.x1 = track->v_width - track->v_crop_right;
+        sh_v->crop.y1 = track->v_height - track->v_crop_bottom;
     }
 
-    int dw = track->v_dwidth_set ? track->v_dwidth : mp_rect_w(crop);
-    int dh = track->v_dheight_set ? track->v_dheight : mp_rect_h(crop);
-    struct mp_image_params p = {.w = mp_rect_w(crop), .h = mp_rect_h(crop)};
+    int dw = track->v_dwidth_set ? track->v_dwidth : track->v_width;
+    int dh = track->v_dheight_set ? track->v_dheight : track->v_height;
+    struct mp_image_params p = {.w = track->v_width, .h = track->v_height};
     mp_image_params_set_dsize(&p, dw, dh);
     sh_v->par_w = p.p_w;
     sh_v->par_h = p.p_h;
