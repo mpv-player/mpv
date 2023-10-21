@@ -280,8 +280,11 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
             if (!err1 && !err2)
                 img.pkt_duration = num / (double)den;
         }
-        if (img.pkt_duration < 0)
+        if (img.pkt_duration < 0) {
             MP_ERR(p, "No PTS after filter at frame %d!\n", n);
+        } else {
+            img.nominal_fps = 1.0 / img.pkt_duration;
+        }
         res = mp_image_new_copy(&img);
         p->vsapi->freeFrame(f);
     }
