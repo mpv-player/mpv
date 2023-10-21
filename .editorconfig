@@ -8,3 +8,8 @@ charset = utf-8
 insert_final_newline = true
 indent_style = space
 indent_size = 4
+max_line_length = 80
+trim_trailing_whitespace = true
+
+[.git/COMMIT*]
+max_line_length = 72
