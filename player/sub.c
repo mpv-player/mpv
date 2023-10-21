@@ -116,7 +116,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
     if (mpctx->video_out && mpctx->video_status == STATUS_EOF &&
         (mpctx->opts->subs_rend->sub_past_video_end ||
          !mpctx->current_track[0][STREAM_VIDEO] ||
-         mpctx->current_track[0][STREAM_VIDEO]->attached_picture)) {
+         mpctx->current_track[0][STREAM_VIDEO]->image)) {
         if (osd_get_force_video_pts(mpctx->osd) != video_pts) {
             osd_set_force_video_pts(mpctx->osd, video_pts);
             osd_query_and_reset_want_redraw(mpctx->osd);
