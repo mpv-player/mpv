@@ -153,9 +153,9 @@ mpv uses C11 with K&R formatting, with some exceptions.
         some_function(a, b, c);
     }
     ```
-- Break lines on 80 columns. There is a hard limit of 85 columns. You may ignore
+- Break lines on 80 columns. There is a hard limit of 100 columns. You may ignore
   this limit if there's a strong case that not breaking the line will increase
-  readability. Going over 85 columns might provoke endless discussions about
+  readability. Going over 100 columns might provoke endless discussions about
   whether such a limit is needed or not, so avoid it.
 - If the body of an if/for/while statement has more than 1 physical lines, then
   always add braces, even if they're technically redundant.
