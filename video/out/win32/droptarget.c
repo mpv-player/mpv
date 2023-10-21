@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdatomic.h>
 
 #include <windows.h>
 #include <ole2.h>
@@ -23,7 +24,6 @@
 #include "common/common.h"
 #include "input/input.h"
 #include "input/event.h"
-#include "osdep/atomic.h"
 #include "osdep/io.h"
 #include "osdep/windows_utils.h"
 #include "mpv_talloc.h"

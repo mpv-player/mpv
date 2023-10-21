@@ -17,6 +17,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdatomic.h>
+
 #import <Cocoa/Cocoa.h>
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #import <IOKit/IOKitLib.h>
@@ -30,7 +32,6 @@
 #import "video/out/cocoa/mpvadapter.h"
 
 #include "osdep/threads.h"
-#include "osdep/atomic.h"
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_events_objc.h"
 

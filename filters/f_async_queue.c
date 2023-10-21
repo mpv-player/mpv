@@ -1,10 +1,10 @@
 #include <limits.h>
 #include <pthread.h>
+#include <stdatomic.h>
 
 #include "audio/aframe.h"
 #include "common/common.h"
 #include "common/msg.h"
-#include "osdep/atomic.h"
 
 #include "f_async_queue.h"
 #include "filter_internal.h"
@@ -16,7 +16,7 @@ struct mp_async_queue {
 };
 
 struct async_queue {
-    mp_atomic_uint64 refcount;
+    _Atomic uint64_t refcount;
 
     pthread_mutex_t lock;
 
@@ -73,7 +73,7 @@ struct mp_async_queue *mp_async_queue_create(void)
     struct mp_async_queue *r = talloc_zero(NULL, struct mp_async_queue);
     r->q = talloc_zero(NULL, struct async_queue);
     *r->q = (struct async_queue){
-        .refcount = ATOMIC_VAR_INIT(1),
+        .refcount = 1,
     };
     pthread_mutex_init(&r->q->lock, NULL);
     talloc_set_destructor(r, on_free_queue);

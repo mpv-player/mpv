@@ -79,3 +79,13 @@ int mp_ptwrap_mutex_init(const char *file, int line, pthread_mutex_t *m,
         pthread_mutexattr_destroy(&m_attr);
     return res;
 }
+
+int mp_ptwrap_mutex_trylock(const char *file, int line, pthread_mutex_t *m)
+{
+    int res = (pthread_mutex_trylock)(m);
+
+    if (res != EBUSY)
+        mp_ptwrap_check(file, line, res);
+
+    return res;
+}

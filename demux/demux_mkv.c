@@ -1510,22 +1510,22 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->disp_w = track->v_width;
     sh_v->disp_h = track->v_height;
 
-    int dw = track->v_dwidth_set ? track->v_dwidth : track->v_width;
-    int dh = track->v_dheight_set ? track->v_dheight : track->v_height;
-    struct mp_image_params p = {.w = track->v_width, .h = track->v_height};
-    mp_image_params_set_dsize(&p, dw, dh);
-    sh_v->par_w = p.p_w;
-    sh_v->par_h = p.p_h;
-
-    sh_v->stereo_mode = track->stereo_mode;
-    sh_v->color = track->color;
-
     sh_v->crop.x0 = track->v_crop_left_set ? track->v_crop_left : 0;
     sh_v->crop.y0 = track->v_crop_top_set ? track->v_crop_top : 0;
     sh_v->crop.x1 = track->v_width -
                         (track->v_crop_right_set ? track->v_crop_right : 0);
     sh_v->crop.y1 = track->v_height -
                         (track->v_crop_bottom_set ? track->v_crop_bottom : 0);
+
+    int dw = track->v_dwidth_set ? track->v_dwidth : mp_rect_w(sh_v->crop);
+    int dh = track->v_dheight_set ? track->v_dheight : mp_rect_h(sh_v->crop);
+    struct mp_image_params p = {.w = mp_rect_w(sh_v->crop), .h = mp_rect_h(sh_v->crop)};
+    mp_image_params_set_dsize(&p, dw, dh);
+    sh_v->par_w = p.p_w;
+    sh_v->par_h = p.p_h;
+
+    sh_v->stereo_mode = track->stereo_mode;
+    sh_v->color = track->color;
 
     if (track->v_projection_pose_roll_set) {
         int rotate = lrintf(fmodf(fmodf(track->v_projection_pose_roll, 360) + 360, 360));

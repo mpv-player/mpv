@@ -434,8 +434,7 @@ See generally available literature. In mpv, we use pthread for this.
 
 Always keep locking clean. Don't skip locking just because it will work "in
 practice". (See undefined behavior section.) If your use case is simple, you may
-use C11 atomics (osdep/atomic.h for partial C99 support), but most likely you
-will only hurt yourself and others.
+use C11 atomics, but most likely you will only hurt yourself and others.
 
 Always make clear which fields in a struct are protected by which lock. If a
 field is immutable, or simply not thread-safe (e.g. state for a single worker

@@ -17,9 +17,10 @@
 
 #pragma once
 
+#include <stdatomic.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "common/common.h"
 #include "common/global.h"
@@ -29,7 +30,6 @@
 #include "misc/bstr.h"
 #include "misc/dispatch.h"
 #include "options/m_option.h"
-#include "osdep/atomic.h"
 
 // m_config provides an API to manipulate the config variables in MPlayer.
 // It makes use of the Options API to provide a context stack that

@@ -15,8 +15,9 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
 #include <assert.h>
+#include <stdatomic.h>
+#include <stddef.h>
 
 #include <bcm_host.h>
 
@@ -24,7 +25,6 @@
 #include <EGL/eglext.h>
 
 #include "common/common.h"
-#include "osdep/atomic.h"
 #include "video/out/win_state.h"
 #include "context.h"
 #include "egl_helpers.h"

@@ -18,13 +18,14 @@
 #ifndef MPLAYER_X11_COMMON_H
 #define MPLAYER_X11_COMMON_H
 
-#include <stdint.h>
+#include <stdatomic.h>
 #include <stdbool.h>
+#include <stdint.h>
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
 #include "common/common.h"
-#include "osdep/atomic.h"
 
 #include "config.h"
 #if !HAVE_GPL

@@ -14,10 +14,11 @@
  */
 
 #include <assert.h>
+#include <errno.h>
+#include <stdatomic.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <errno.h>
 
 #ifdef __MINGW32__
 #include <windows.h>
@@ -27,7 +28,6 @@
 
 #include "common/common.h"
 #include "misc/linked_list.h"
-#include "osdep/atomic.h"
 #include "osdep/io.h"
 #include "osdep/timer.h"
 
@@ -126,7 +126,7 @@ struct mp_cancel *mp_cancel_new(void *talloc_ctx)
     struct mp_cancel *c = talloc_ptrtype(talloc_ctx, c);
     talloc_set_destructor(c, cancel_destroy);
     *c = (struct mp_cancel){
-        .triggered = ATOMIC_VAR_INIT(false),
+        .triggered = false,
         .wakeup_pipe = {-1, -1},
     };
     pthread_mutex_init(&c->lock, NULL);

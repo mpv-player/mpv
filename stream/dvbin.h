@@ -79,7 +79,7 @@ typedef struct {
     int dvr_fd;
     int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
 
-    int is_on;
+    bool is_on;
     int retry;
     unsigned int last_freq;
     bool switching_channel;
@@ -103,6 +103,7 @@ typedef struct {
     char *prog;
     int devno;
 
+    int opts_check_time;
     dvb_opts_t *opts;
     struct m_config_cache *opts_cache;
 } dvb_priv_t;
@@ -138,6 +139,5 @@ void dvb_update_config(stream_t *);
 int dvb_parse_path(stream_t *);
 int dvb_set_channel(stream_t *, unsigned int, unsigned int);
 dvb_state_t *dvb_get_state(stream_t *);
-void dvb_free_state(dvb_state_t *);
 
 #endif /* MPLAYER_DVBIN_H */

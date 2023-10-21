@@ -15,19 +15,19 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
 #include <assert.h>
 #include <pthread.h>
+#include <stdarg.h>
+#include <stdatomic.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "mpv_talloc.h"
 
 #include "misc/bstr.h"
-#include "osdep/atomic.h"
 #include "common/common.h"
 #include "common/global.h"
 #include "misc/bstr.h"
@@ -524,7 +524,7 @@ void mp_msg_init(struct mpv_global *global)
     struct mp_log_root *root = talloc_zero(NULL, struct mp_log_root);
     *root = (struct mp_log_root){
         .global = global,
-        .reload_counter = ATOMIC_VAR_INIT(1),
+        .reload_counter = 1,
     };
 
     pthread_mutex_init(&root->lock, NULL);

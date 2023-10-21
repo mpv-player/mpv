@@ -23,7 +23,6 @@
 #include <assert.h>
 #include <windows.h>
 
-#include "common/common.h"
 #include "osdep/timer.h"  // mp_{start,end}_hires_timers
 
 int pthread_once(pthread_once_t *once_control, void (*init_routine)(void))
@@ -67,6 +66,15 @@ int pthread_mutex_lock(pthread_mutex_t *mutex)
     return 0;
 }
 
+int pthread_mutex_trylock(pthread_mutex_t *mutex)
+{
+    if (mutex->use_cs) {
+        return !TryEnterCriticalSection(&mutex->lock.cs);
+    } else {
+        return !TryAcquireSRWLockExclusive(&mutex->lock.srw);
+    }
+}
+
 int pthread_mutex_unlock(pthread_mutex_t *mutex)
 {
     if (mutex->use_cs) {
@@ -74,6 +82,23 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex)
     } else {
         ReleaseSRWLockExclusive(&mutex->lock.srw);
     }
+    return 0;
+}
+
+int clock_gettime(clockid_t clockid, struct timespec *tp)
+{
+    if (clockid != CLOCK_REALTIME) {
+        errno = EINVAL;
+        return -1;
+    }
+    union {
+        FILETIME ft;
+        ULARGE_INTEGER i;
+    } r;
+    GetSystemTimePreciseAsFileTime(&r.ft);
+    r.i.QuadPart -= UINT64_C(116444736000000000); // MS epoch -> Unix epoch
+    tp->tv_sec = r.i.QuadPart / UINT64_C(10000000);
+    tp->tv_nsec = (r.i.QuadPart % UINT64_C(10000000)) * 100;
     return 0;
 }
 
@@ -96,11 +121,21 @@ int pthread_cond_timedwait(pthread_cond_t *restrict cond,
                            pthread_mutex_t *restrict mutex,
                            const struct timespec *restrict abstime)
 {
-    // mp time is not converted to realtime if internal pthread impl is used
-    int64_t now = mp_time_ns();
-    int64_t time_ns = abstime->tv_sec * UINT64_C(1000000000) + abstime->tv_nsec;
-    int64_t timeout_ms = (time_ns - now) / INT64_C(1000000);
-    return cond_wait(cond, mutex, MPCLAMP(timeout_ms, 0, INFINITE));
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    DWORD timeout_ms = 0;
+    if (abstime->tv_sec >= INT64_MAX / 1000) { // overflow
+        timeout_ms = INFINITE;
+    } else if (abstime->tv_sec >= ts.tv_sec) {
+        int64_t msec = (abstime->tv_sec - ts.tv_sec) * INT64_C(1000) +
+            (abstime->tv_nsec - ts.tv_nsec) / INT64_C(1000000);
+        if (msec > ULONG_MAX) {
+            timeout_ms = INFINITE;
+        } else if (msec > 0) {
+            timeout_ms = msec;
+        }
+    }
+    return cond_wait(cond, mutex, timeout_ms);
 }
 
 int pthread_cond_wait(pthread_cond_t *restrict cond,

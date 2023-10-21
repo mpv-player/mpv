@@ -18,10 +18,10 @@
 #ifndef MP_AO_INTERNAL_H_
 #define MP_AO_INTERNAL_H_
 
-#include <stdbool.h>
 #include <pthread.h>
+#include <stdatomic.h>
+#include <stdbool.h>
 
-#include "osdep/atomic.h"
 #include "audio/out/ao.h"
 
 /* global data used by ao.c and ao drivers */
@@ -63,7 +63,7 @@ struct ao {
     atomic_uint events_;
 
     // Float gain multiplicator
-    mp_atomic_float gain;
+    _Atomic float gain;
 
     int buffer;
     double def_buffer;

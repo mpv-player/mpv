@@ -15,14 +15,15 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <assert.h>
 #include <errno.h>
+#include <pthread.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-#include <assert.h>
-#include <stdbool.h>
-#include <pthread.h>
 
 #include "m_config_core.h"
 #include "options/m_option.h"
@@ -31,13 +32,12 @@
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "misc/dispatch.h"
-#include "osdep/atomic.h"
 
 // For use with m_config_cache.
 struct m_config_shadow {
     pthread_mutex_t lock;
     // Incremented on every option change.
-    mp_atomic_uint64 ts;
+    _Atomic uint64_t ts;
     // -- immutable after init
     // List of m_sub_options instances.
     // Index 0 is the top-level and is always present.

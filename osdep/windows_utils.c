@@ -15,8 +15,9 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
 #include <inttypes.h>
+#include <stdatomic.h>
+#include <stdio.h>
 
 #include <windows.h>
 #include <errors.h>
@@ -25,7 +26,6 @@
 #include <dxgi1_2.h>
 
 #include "common/common.h"
-#include "osdep/atomic.h"
 #include "windows_utils.h"
 
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
@@ -164,7 +164,7 @@ char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
 bool mp_w32_create_anon_pipe(HANDLE *server, HANDLE *client,
                              struct w32_create_anon_pipe_opts *opts)
 {
-    static atomic_ulong counter = ATOMIC_VAR_INIT(0);
+    static atomic_ulong counter = 0;
 
     // Generate pipe name
     unsigned long id = atomic_fetch_add(&counter, 1);

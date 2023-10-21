@@ -13,6 +13,7 @@ void mpthread_set_name(const char *name);
 int mp_ptwrap_check(const char *file, int line, int res);
 int mp_ptwrap_mutex_init(const char *file, int line, pthread_mutex_t *m,
                          const pthread_mutexattr_t *attr);
+int mp_ptwrap_mutex_trylock(const char *file, int line, pthread_mutex_t *m);
 
 #ifdef MP_PTHREAD_DEBUG
 
@@ -46,6 +47,7 @@ int mp_ptwrap_mutex_init(const char *file, int line, pthread_mutex_t *m,
 #undef pthread_join
 #undef pthread_mutex_destroy
 #undef pthread_mutex_lock
+#undef pthread_mutex_trylock
 #undef pthread_mutex_unlock
 
 #define pthread_cond_init(...)      MP_PTWRAP(pthread_cond_init, __VA_ARGS__)
@@ -62,6 +64,9 @@ int mp_ptwrap_mutex_init(const char *file, int line, pthread_mutex_t *m,
 
 #define pthread_mutex_init(...) \
     mp_ptwrap_mutex_init(__FILE__, __LINE__, __VA_ARGS__)
+
+#define pthread_mutex_trylock(...) \
+    mp_ptwrap_mutex_trylock(__FILE__, __LINE__, __VA_ARGS__)
 
 #endif
 

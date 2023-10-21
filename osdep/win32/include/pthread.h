@@ -16,17 +16,24 @@
 #ifndef MP_WRAP_PTHREAD_H_
 #define MP_WRAP_PTHREAD_H_
 
+// this is MinGW specific and sort of a hack but we really need to prevent
+// system pthread headers from being included, which can happen through <time.h>
+// and <unistd.h>:
+#define WIN_PTHREADS_TIME_H
+#define WIN_PTHREADS_UNISTD_H
+
 #include <windows.h>
 
 #include <sys/types.h>
 
-#define _POSIX_TIMERS 0
+#define _POSIX_TIMERS 200809L
 
 // Note: all pthread functions are mangled to make static linking easier.
 #define pthread_once m_pthread_once
 #define pthread_mutex_destroy m_pthread_mutex_destroy
 #define pthread_mutex_init m_pthread_mutex_init
 #define pthread_mutex_lock m_pthread_mutex_lock
+#define pthread_mutex_trylock m_pthread_mutex_trylock
 #define pthread_mutex_unlock m_pthread_mutex_unlock
 #define pthread_cond_timedwait m_pthread_cond_timedwait
 #define pthread_cond_wait m_pthread_cond_wait
@@ -35,6 +42,7 @@
 #define pthread_detach m_pthread_detach
 #define pthread_create m_pthread_create
 #define pthread_set_name_np m_pthread_set_name_np
+#define clock_gettime m_clock_gettime
 
 #define pthread_once_t INIT_ONCE
 #define PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
@@ -64,6 +72,7 @@ int pthread_mutex_init(pthread_mutex_t *restrict mutex,
                        const pthread_mutexattr_t *restrict attr);
 
 int pthread_mutex_lock(pthread_mutex_t *mutex);
+int pthread_mutex_trylock(pthread_mutex_t *mutex);
 int pthread_mutex_unlock(pthread_mutex_t *mutex);
 
 #define pthread_cond_t CONDITION_VARIABLE
@@ -75,6 +84,11 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex);
 #define pthread_cond_destroy(c) (void)0
 #define pthread_cond_broadcast(cond) WakeAllConditionVariable(cond)
 #define pthread_cond_signal(cond) WakeConditionVariable(cond)
+
+#define clockid_t int
+#define CLOCK_REALTIME 1
+
+int clock_gettime(clockid_t clockid, struct timespec *tp);
 
 int pthread_cond_timedwait(pthread_cond_t *restrict cond,
                            pthread_mutex_t *restrict mutex,

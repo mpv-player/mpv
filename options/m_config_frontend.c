@@ -15,15 +15,16 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <float.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <assert.h>
 #include <errno.h>
+#include <float.h>
+#include <pthread.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-#include <assert.h>
-#include <stdbool.h>
-#include <pthread.h>
 
 #include "libmpv/client.h"
 
@@ -36,7 +37,6 @@
 #include "common/msg_control.h"
 #include "misc/dispatch.h"
 #include "misc/node.h"
-#include "osdep/atomic.h"
 
 extern const char mp_help_text[];
 
