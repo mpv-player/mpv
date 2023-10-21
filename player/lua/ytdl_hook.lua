@@ -1094,7 +1094,6 @@ function run_ytdl_hook(url)
                     local prefix = site:find(":") and "ytdl://" or
                         "https://youtu.be/"
                     playlist_url = prefix .. site
-                    table.insert(playlist, prefix .. site)
                 elseif url_is_safe(site) then
                     playlist_url = site
                 end
