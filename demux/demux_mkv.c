@@ -1484,6 +1484,10 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     }
 
     const char *codec = sh_v->codec ? sh_v->codec : "";
+    if (mp_codec_is_image(codec)) {
+        sh->still_image = true;
+        sh->image = true;
+    }
     if (!strcmp(codec, "mjpeg")) {
         sh_v->codec_tag = MKTAG('m', 'j', 'p', 'g');
         track->require_keyframes = true;

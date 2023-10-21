@@ -233,6 +233,17 @@ static const char *const type_to_codec[][2] = {
     {0}
 };
 
+bool mp_codec_is_image(const char *codec)
+{
+    if (codec) {
+        for (int n = 0; type_to_codec[n][0]; n++) {
+            if (strcasecmp(type_to_codec[n][1], codec) == 0)
+                return true;
+        }
+    }
+    return false;
+}
+
 const char *mp_map_type_to_image_codec(const char *type)
 {
     if (type) {
