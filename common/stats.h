@@ -30,5 +30,5 @@ void stats_event(struct stats_ctx *ctx, const char *name);
 // or stats_unregister_thread() is called, otherwise UB will occur.
 void stats_register_thread_cputime(struct stats_ctx *ctx, const char *name);
 
-// Remove reference to pthread_self().
+// Remove reference to mp_thread_self().
 void stats_unregister_thread(struct stats_ctx *ctx, const char *name);

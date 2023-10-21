@@ -18,7 +18,6 @@
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <assert.h>
 #include <stdbool.h>
 
@@ -35,6 +34,7 @@
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "options/options.h"
+#include "osdep/threads.h"
 #include "misc/bstr.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
@@ -217,7 +217,7 @@ typedef struct lavc_ctx {
     AVBufferRef *cached_hw_frames_ctx;
 
     // --- The following fields are protected by dr_lock.
-    pthread_mutex_t dr_lock;
+    mp_mutex dr_lock;
     bool dr_failed;
     struct mp_image_pool *dr_pool;
     int dr_imgfmt, dr_w, dr_h, dr_stride_align;
@@ -1009,7 +1009,7 @@ static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags)
     struct mp_filter *vd = avctx->opaque;
     vd_ffmpeg_ctx *p = vd->priv;
 
-    pthread_mutex_lock(&p->dr_lock);
+    mp_mutex_lock(&p->dr_lock);
 
     int w = pic->width;
     int h = pic->height;
@@ -1081,7 +1081,7 @@ static int get_buffer2_direct(AVCodecContext *avctx, AVFrame *pic, int flags)
     }
     talloc_free(img);
 
-    pthread_mutex_unlock(&p->dr_lock);
+    mp_mutex_unlock(&p->dr_lock);
 
     return 0;
 
@@ -1089,7 +1089,7 @@ fallback:
     if (!p->dr_failed)
         MP_VERBOSE(p, "DR failed - disabling.\n");
     p->dr_failed = true;
-    pthread_mutex_unlock(&p->dr_lock);
+    mp_mutex_unlock(&p->dr_lock);
 
     return avcodec_default_get_buffer2(avctx, pic, flags);
 }
@@ -1392,7 +1392,7 @@ static void destroy(struct mp_filter *vd)
 
     uninit_avctx(vd);
 
-    pthread_mutex_destroy(&ctx->dr_lock);
+    mp_mutex_destroy(&ctx->dr_lock);
 }
 
 static const struct mp_filter_info vd_lavc_filter = {
@@ -1428,7 +1428,7 @@ static struct mp_decoder *create(struct mp_filter *parent,
     ctx->public.f = vd;
     ctx->public.control = control;
 
-    pthread_mutex_init(&ctx->dr_lock, NULL);
+    mp_mutex_init(&ctx->dr_lock);
 
     // hwdec/DR
     struct mp_stream_info *info = mp_filter_find_stream_info(vd);

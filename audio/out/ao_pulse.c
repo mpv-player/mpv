@@ -24,7 +24,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
-#include <pthread.h>
 
 #include <pulse/pulseaudio.h>
 

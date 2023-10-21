@@ -20,7 +20,6 @@
 
 #include <stdbool.h>
 #include <inttypes.h>
-#include <pthread.h>
 #include <va/va.h>
 
 #include "mp_image.h"

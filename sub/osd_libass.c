@@ -268,12 +268,12 @@ static void update_osd_text(struct osd_state *osd, struct osd_object *obj)
 
 void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h)
 {
-    pthread_mutex_lock(&osd->lock);
+    mp_mutex_lock(&osd->lock);
     struct osd_object *obj = osd->objs[OSDTYPE_OSD];
     ASS_Style *style = prepare_osd_ass(osd, obj);
     *out_screen_h = obj->ass.track->PlayResY - style->MarginV;
     *out_font_h = style->FontSize;
-    pthread_mutex_unlock(&osd->lock);
+    mp_mutex_unlock(&osd->lock);
 }
 
 // align: -1 .. +1
@@ -534,7 +534,7 @@ static int cmp_zorder(const void *pa, const void *pb)
 
 void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
 {
-    pthread_mutex_lock(&osd->lock);
+    mp_mutex_lock(&osd->lock);
     struct osd_object *obj = osd->objs[OSDTYPE_EXTERNAL];
     bool zorder_changed = false;
     int index = -1;
@@ -616,12 +616,12 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     }
 
 done:
-    pthread_mutex_unlock(&osd->lock);
+    mp_mutex_unlock(&osd->lock);
 }
 
 void osd_set_external_remove_owner(struct osd_state *osd, void *owner)
 {
-    pthread_mutex_lock(&osd->lock);
+    mp_mutex_lock(&osd->lock);
     struct osd_object *obj = osd->objs[OSDTYPE_EXTERNAL];
     for (int n = obj->num_externals - 1; n >= 0; n--) {
         struct osd_external *e = obj->externals[n];
@@ -632,7 +632,7 @@ void osd_set_external_remove_owner(struct osd_state *osd, void *owner)
             osd->want_redraw_notification = true;
         }
     }
-    pthread_mutex_unlock(&osd->lock);
+    mp_mutex_unlock(&osd->lock);
 }
 
 static void append_ass(struct ass_state *ass, struct mp_osd_res *res,

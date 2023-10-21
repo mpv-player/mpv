@@ -1,10 +1,10 @@
 #ifndef MP_OSD_STATE_H_
 #define MP_OSD_STATE_H_
 
-#include <pthread.h>
 #include <stdatomic.h>
 
 #include "osd.h"
+#include "osdep/threads.h"
 
 enum mp_osdtype {
     OSDTYPE_SUB,
@@ -66,7 +66,7 @@ struct osd_external {
 };
 
 struct osd_state {
-    pthread_mutex_t lock;
+    mp_mutex lock;
 
     struct osd_object *objs[MAX_OSD_PARTS];
 

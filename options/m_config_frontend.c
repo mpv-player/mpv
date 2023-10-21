@@ -18,7 +18,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <float.h>
-#include <pthread.h>
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -28,15 +27,16 @@
 
 #include "libmpv/client.h"
 
-#include "m_config.h"
-#include "m_config_frontend.h"
-#include "options/m_option.h"
 #include "common/common.h"
 #include "common/global.h"
-#include "common/msg.h"
 #include "common/msg_control.h"
+#include "common/msg.h"
+#include "m_config_frontend.h"
+#include "m_config.h"
 #include "misc/dispatch.h"
 #include "misc/node.h"
+#include "options/m_option.h"
+#include "osdep/threads.h"
 
 extern const char mp_help_text[];
 

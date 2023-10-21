@@ -16,7 +16,7 @@
 #ifndef MP_WRAP_SEMAPHORE_H_
 #define MP_WRAP_SEMAPHORE_H_
 
-#include <pthread.h>
+#include "osdep/threads.h"
 
 // See pthread.h for rationale.
 #define sem_init m_sem_init
@@ -29,8 +29,8 @@
 #define SEM_VALUE_MAX 100
 
 typedef struct {
-    pthread_mutex_t lock;
-    pthread_cond_t wakeup;
+    mp_mutex lock;
+    mp_cond wakeup;
     unsigned int value;
 } sem_t;
 

@@ -17,7 +17,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <pthread.h>
 #include <libplacebo/colorspace.h>
 #include <libplacebo/options.h>
 #include <libplacebo/renderer.h>
@@ -31,6 +30,7 @@
 #include "options/m_config.h"
 #include "options/path.h"
 #include "osdep/io.h"
+#include "osdep/threads.h"
 #include "stream/stream.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
@@ -96,7 +96,7 @@ struct priv {
     struct ra_hwdec_mapper *hwdec_mapper;
 
     // Allocated DR buffers
-    pthread_mutex_t dr_lock;
+    mp_mutex dr_lock;
     pl_buf *dr_buffers;
     int num_dr_buffers;
 
@@ -162,30 +162,30 @@ static void update_lut(struct priv *p, struct user_lut *lut);
 
 static pl_buf get_dr_buf(struct priv *p, const uint8_t *ptr)
 {
-    pthread_mutex_lock(&p->dr_lock);
+    mp_mutex_lock(&p->dr_lock);
 
     for (int i = 0; i < p->num_dr_buffers; i++) {
         pl_buf buf = p->dr_buffers[i];
         if (ptr >= buf->data && ptr < buf->data + buf->params.size) {
-            pthread_mutex_unlock(&p->dr_lock);
+            mp_mutex_unlock(&p->dr_lock);
             return buf;
         }
     }
 
-    pthread_mutex_unlock(&p->dr_lock);
+    mp_mutex_unlock(&p->dr_lock);
     return NULL;
 }
 
 static void free_dr_buf(void *opaque, uint8_t *data)
 {
     struct priv *p = opaque;
-    pthread_mutex_lock(&p->dr_lock);
+    mp_mutex_lock(&p->dr_lock);
 
     for (int i = 0; i < p->num_dr_buffers; i++) {
         if (p->dr_buffers[i]->data == data) {
             pl_buf_destroy(p->gpu, &p->dr_buffers[i]);
             MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, i);
-            pthread_mutex_unlock(&p->dr_lock);
+            mp_mutex_unlock(&p->dr_lock);
             return;
         }
     }
@@ -227,9 +227,9 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
         return NULL;
     }
 
-    pthread_mutex_lock(&p->dr_lock);
+    mp_mutex_lock(&p->dr_lock);
     MP_TARRAY_APPEND(p, p->dr_buffers, p->num_dr_buffers, buf);
-    pthread_mutex_unlock(&p->dr_lock);
+    mp_mutex_unlock(&p->dr_lock);
 
     return mpi;
 }
@@ -1614,7 +1614,7 @@ static void uninit(struct vo *vo)
     }
 
     assert(p->num_dr_buffers == 0);
-    pthread_mutex_destroy(&p->dr_lock);
+    mp_mutex_destroy(&p->dr_lock);
 
     save_cache_files(p);
     pl_cache_destroy(&p->shader_cache);
@@ -1668,7 +1668,7 @@ static int preinit(struct vo *vo)
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
-    pthread_mutex_init(&p->dr_lock, NULL);
+    mp_mutex_init(&p->dr_lock);
 
     p->shader_cache = pl_cache_create(pl_cache_params(
         .log = p->pllog,

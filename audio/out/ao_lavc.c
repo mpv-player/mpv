@@ -173,7 +173,7 @@ static int init(struct ao *ao)
     return 0;
 
 fail:
-    pthread_mutex_unlock(&ao->encode_lavc_ctx->lock);
+    mp_mutex_unlock(&ao->encode_lavc_ctx->lock);
     ac->shutdown = true;
     return -1;
 }
@@ -261,7 +261,7 @@ static bool audio_write(struct ao *ao, void **data, int samples)
     double outpts = pts;
 
     // for ectx PTS fields
-    pthread_mutex_lock(&ectx->lock);
+    mp_mutex_lock(&ectx->lock);
 
     if (!ectx->options->rawts) {
         // Fix and apply the discontinuity pts offset.
@@ -290,7 +290,7 @@ static bool audio_write(struct ao *ao, void **data, int samples)
             ectx->next_in_pts = nextpts;
     }
 
-    pthread_mutex_unlock(&ectx->lock);
+    mp_mutex_unlock(&ectx->lock);
 
     mp_aframe_set_pts(af, outpts);
 

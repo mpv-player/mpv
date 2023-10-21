@@ -15,13 +15,15 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <SDL.h>
 #include <stdbool.h>
-#include <pthread.h>
+
+#include <SDL.h>
+
 #include "common/common.h"
 #include "common/msg.h"
 #include "input.h"
 #include "input/keycodes.h"
+#include "osdep/threads.h"
 
 struct gamepad_priv {
     SDL_GameController *controller;
@@ -34,7 +36,7 @@ static void initialize_events(void)
     gamepad_cancel_wakeup = SDL_RegisterEvents(1);
 }
 
-static pthread_once_t events_initialized = PTHREAD_ONCE_INIT;
+static mp_once events_initialized = MP_STATIC_ONCE_INITIALIZER;
 
 #define INVALID_KEY -1
 
@@ -212,7 +214,7 @@ static void read_gamepad_thread(struct mp_input_src *src, void *param)
         return;
     }
 
-    pthread_once(&events_initialized, initialize_events);
+    mp_exec_once(&events_initialized, initialize_events);
 
     if (gamepad_cancel_wakeup == (Uint32)-1) {
         MP_ERR(src, "Can't register SDL custom events\n");

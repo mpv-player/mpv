@@ -26,10 +26,11 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "misc/random.h"
+#include "threads.h"
 #include "timer.h"
 
 static uint64_t raw_time_offset;
-static pthread_once_t timer_init_once = PTHREAD_ONCE_INIT;
+static mp_once timer_init_once = MP_STATIC_ONCE_INITIALIZER;
 
 static void do_timer_init(void)
 {
@@ -41,7 +42,7 @@ static void do_timer_init(void)
 
 void mp_time_init(void)
 {
-    pthread_once(&timer_init_once, do_timer_init);
+    mp_exec_once(&timer_init_once, do_timer_init);
 }
 
 int64_t mp_time_ns(void)
