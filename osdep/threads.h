@@ -70,4 +70,17 @@ int mp_ptwrap_mutex_trylock(const char *file, int line, pthread_mutex_t *m);
 
 #endif
 
+enum mp_mutex_type {
+    MP_MUTEX_NORMAL = 0,
+    MP_MUTEX_RECURSIVE,
+};
+
+#define mp_mutex_init(mutex) \
+    mp_mutex_init_type(mutex, MP_MUTEX_NORMAL)
+
+#define mp_mutex_init_type(mutex, mtype) \
+    assert(!mp_mutex_init_type_internal(mutex, mtype))
+
+#include "threads-posix.h"
+
 #endif
