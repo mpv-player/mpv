@@ -110,6 +110,8 @@ Interface changes
     - `--js-memory-report` is now used for enabling memory reporting for javascript
       scripts
     - drop support for `-del` syntax for list options
+    - `--demuxer-hysteresis-secs` now respects `--cache-secs` and/or
+      `--demuxer-readahead-secs` as well
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

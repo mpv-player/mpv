@@ -3908,18 +3908,16 @@ Demuxer
     timestamps.)
 
 ``--demuxer-hysteresis-secs=<seconds>``
-    Once the ``--demuxer-max-bytes`` limit is reached, this value can be used
+    Once the demuxer limit is reached (``--demuxer-max-bytes``,
+    ``--demuxer-readahead-secs`` or ``--cache-secs``), this value can be used
     to specify a hysteresis before the demuxer will buffer ahead again. This
     specifies the maximum number of seconds from the current playback position
     that needs to be remaining in the cache before the demuxer will continue
     buffering ahead.
 
     For example, with a value of 10 seconds specified, the demuxer will buffer
-    ahead up to ``--demuxer-max-bytes`` and won't start buffering ahead again
-    until there is only 10 seconds of content left in the cache. When the
-    demuxer starts buffering ahead again, it will buffer ahead up to
-    ``--demuxer-max-bytes`` and stop until there's only 10 seconds of content
-    remaining in the cache, and so on.
+    ahead up to the demuxer limit and won't start buffering ahead again until
+    there is only 10 seconds of content left in the cache.
 
     This can provide significant power savings and reduce load by making the
     demuxer only buffer ahead in chunks at a time rather than buffering ahead

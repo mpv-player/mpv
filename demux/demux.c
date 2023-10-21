@@ -2235,8 +2235,10 @@ static bool read_packet(struct demux_internal *in)
         return false;
     }
 
-    if (!read_more && !prefetch_more && !refresh_more)
+    if (!read_more && !prefetch_more && !refresh_more) {
+        in->hyst_active = !!in->hyst_secs;
         return false;
+    }
 
     if (in->after_seek_to_start) {
         for (int n = 0; n < in->num_streams; n++) {
