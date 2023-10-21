@@ -22,13 +22,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <pthread.h>
 
 #include "av_log.h"
-#include "config.h"
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "config.h"
+#include "osdep/threads.h"
 
 #include <libavutil/avutil.h>
 #include <libavutil/log.h>
@@ -51,7 +51,7 @@
 
 // Needed because the av_log callback does not provide a library-safe message
 // callback.
-static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
+static mp_static_mutex log_lock = MP_STATIC_MUTEX_INITIALIZER;
 static struct mpv_global *log_mpv_instance;
 static struct mp_log *log_root, *log_decaudio, *log_decvideo, *log_demuxer;
 static bool log_print_prefix = true;
@@ -113,10 +113,10 @@ static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
     int mp_level = av_log_level_to_mp_level(level);
 
     // Note: mp_log is thread-safe, but destruction of the log instances is not.
-    pthread_mutex_lock(&log_lock);
+    mp_mutex_lock(&log_lock);
 
     if (!log_mpv_instance) {
-        pthread_mutex_unlock(&log_lock);
+        mp_mutex_unlock(&log_lock);
         // Fallback to stderr
         vfprintf(stderr, fmt, vl);
         return;
@@ -138,12 +138,12 @@ static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
         mp_msg(log, mp_level, "%s", buffer);
     }
 
-    pthread_mutex_unlock(&log_lock);
+    mp_mutex_unlock(&log_lock);
 }
 
 void init_libav(struct mpv_global *global)
 {
-    pthread_mutex_lock(&log_lock);
+    mp_mutex_lock(&log_lock);
     if (!log_mpv_instance) {
         log_mpv_instance = global;
         log_root = mp_log_new(NULL, global->log, "ffmpeg");
@@ -152,7 +152,7 @@ void init_libav(struct mpv_global *global)
         log_demuxer = mp_log_new(log_root, log_root, "demuxer");
         av_log_set_callback(mp_msg_av_log_callback);
     }
-    pthread_mutex_unlock(&log_lock);
+    mp_mutex_unlock(&log_lock);
 
     avformat_network_init();
 
@@ -163,13 +163,13 @@ void init_libav(struct mpv_global *global)
 
 void uninit_libav(struct mpv_global *global)
 {
-    pthread_mutex_lock(&log_lock);
+    mp_mutex_lock(&log_lock);
     if (log_mpv_instance == global) {
         av_log_set_callback(av_log_default_callback);
         log_mpv_instance = NULL;
         talloc_free(log_root);
     }
-    pthread_mutex_unlock(&log_lock);
+    mp_mutex_unlock(&log_lock);
 }
 
 #define V(x) AV_VERSION_MAJOR(x), \

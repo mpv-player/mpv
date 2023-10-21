@@ -430,7 +430,7 @@ like a log file or the internal console.lua script.
 Locking
 -------
 
-See generally available literature. In mpv, we use pthread for this.
+See generally available literature. In mpv, we use mp_thread for this.
 
 Always keep locking clean. Don't skip locking just because it will work "in
 practice". (See undefined behavior section.) If your use case is simple, you may
@@ -555,13 +555,13 @@ Condition variables
 -------------------
 
 They're used whenever a thread needs to wait for something, without nonsense
-like sleep calls or busy waiting. mpv uses the standard pthread API for this.
-There's a lot of literature on it. Read it.
+like sleep calls or busy waiting. mpv uses the mp_thread API for this.
+There's a lot of literature on condition variables, threading in general. Read it.
 
 For initial understanding, it may be helpful to know that condition variables
-are not variables that signal a condition. pthread_cond_t does not have any
-state per-se. Maybe pthread_cond_t would better be named pthread_interrupt_t,
-because its sole purpose is to interrupt a thread waiting via pthread_cond_wait()
+are not variables that signal a condition. mp_cond does not have any
+state per-se. Maybe mp_cond would better be named mp_interrupt,
+because its sole purpose is to interrupt a thread waiting via mp_cond_wait()
 (or similar). The "something" in "waiting for something" can be called
 predicate (to avoid confusing it with "condition"). Consult literature for the
 proper terms.
@@ -570,24 +570,24 @@ The very short version is...
 
 Shared declarations:
 
-    pthread_mutex_t lock;
-    pthread_cond_t cond_var;
+    mp_mutex lock;
+    mp_cond cond_var;
     struct something state_var; // protected by lock, changes signaled by cond_var
 
 Waiter thread:
 
-    pthread_mutex_lock(&lock);
+    mp_mutex_lock(&lock);
 
     // Wait for a change in state_var. We want to wait until predicate_fulfilled()
     // returns true.
     // Must be a loop for 2 reasons:
     //  1. cond_var may be associated with other conditions too
-    //  2. pthread_cond_wait() can have sporadic wakeups
+    //  2. mp_cond_wait() can have sporadic wakeups
     while (!predicate_fulfilled(&state_var)) {
         // This unlocks, waits for cond_var to be signaled, and then locks again.
         // The _whole_ point of cond_var is that unlocking and waiting for the
         // signal happens atomically.
-        pthread_cond_wait(&cond_var, &lock);
+        mp_cond_wait(&cond_var, &lock);
     }
 
     // Here you may react to the state change. The state cannot change
@@ -595,43 +595,43 @@ Waiter thread:
     // and reacquire it).
     // ...
 
-    pthread_mutex_unlock(&lock);
+    mp_mutex_unlock(&lock);
 
 Signaler thread:
 
-    pthread_mutex_lock(&lock);
+    mp_mutex_lock(&lock);
 
     // Something changed. Update the shared variable with the new state.
     update_state(&state_var);
 
     // Notify that something changed. This will wake up the waiter thread if
-    // it's blocked in pthread_cond_wait(). If not, nothing happens.
-    pthread_cond_broadcast(&cond_var);
+    // it's blocked in mp_cond_wait(). If not, nothing happens.
+    mp_cond_broadcast(&cond_var);
 
     // Fun fact: good implementations wake up the waiter only when the lock is
     // released, to reduce kernel scheduling overhead.
-    pthread_mutex_unlock(&lock);
+    mp_mutex_unlock(&lock);
 
 Some basic rules:
     1. Always access your state under proper locking
-    2. Always check your predicate before every call to pthread_cond_wait()
-       (And don't call pthread_cond_wait() if the predicate is fulfilled.)
-    3. Always call pthread_cond_wait() in a loop
+    2. Always check your predicate before every call to mp_cond_wait()
+       (And don't call mp_cond_wait() if the predicate is fulfilled.)
+    3. Always call mp_cond_wait() in a loop
        (And only if your predicate failed without releasing the lock..)
-    4. Always call pthread_cond_broadcast()/_signal() inside of its associated
+    4. Always call mp_cond_broadcast()/_signal() inside of its associated
        lock
 
 mpv sometimes violates rule 3, and leaves "retrying" (i.e. looping) to the
 caller.
 
 Common pitfalls:
-    - Thinking that pthread_cond_t is some kind of semaphore, or holds any
+    - Thinking that mp_cond is some kind of semaphore, or holds any
        application state or the user predicate (it _only_ wakes up threads
-       that are at the same time blocking on pthread_cond_wait() and friends,
+       that are at the same time blocking on mp_cond_wait() and friends,
        nothing else)
-    - Changing the predicate, but not updating all pthread_cond_broadcast()/
+    - Changing the predicate, but not updating all mp_cond_broadcast()/
       _signal() calls correctly
-    - Forgetting that pthread_cond_wait() unlocks the lock (other threads can
+    - Forgetting that mp_cond_wait() unlocks the lock (other threads can
       and must acquire the lock)
     - Holding multiple nested locks while trying to wait (=> deadlock, violates
       the lock order anyway)

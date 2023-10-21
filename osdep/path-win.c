@@ -18,15 +18,15 @@
 #include <windows.h>
 #include <shlobj.h>
 #include <knownfolders.h>
-#include <pthread.h>
 
-#include "osdep/path.h"
-#include "osdep/io.h"
 #include "options/path.h"
+#include "osdep/io.h"
+#include "osdep/path.h"
+#include "osdep/threads.h"
 
 // Warning: do not use PATH_MAX. Cygwin messed it up.
 
-static pthread_once_t path_init_once = PTHREAD_ONCE_INIT;
+static mp_once path_init_once = MP_STATIC_ONCE_INITIALIZER;
 
 static char *portable_path;
 
@@ -88,7 +88,7 @@ static void path_init(void)
 
 const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
 {
-    pthread_once(&path_init_once, path_init);
+    mp_exec_once(&path_init_once, path_init);
     if (portable_path) {
         if (strcmp(type, "home") == 0)
             return portable_path;

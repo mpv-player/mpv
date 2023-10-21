@@ -192,7 +192,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
         return;
 
     // Lock for shared timestamp fields.
-    pthread_mutex_lock(&ectx->lock);
+    mp_mutex_lock(&ectx->lock);
 
     double pts = mpi->pts;
     double outpts = pts;
@@ -222,7 +222,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
             ectx->next_in_pts = nextpts;
     }
 
-    pthread_mutex_unlock(&ectx->lock);
+    mp_mutex_unlock(&ectx->lock);
 
     AVFrame *frame = mp_image_to_av_frame(mpi);
     MP_HANDLE_OOM(frame);

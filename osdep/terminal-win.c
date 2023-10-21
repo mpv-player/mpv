@@ -24,7 +24,6 @@
 #include <string.h>
 #include <windows.h>
 #include <io.h>
-#include <pthread.h>
 #include <assert.h>
 #include "common/common.h"
 #include "input/keycodes.h"
@@ -92,7 +91,7 @@ static const unsigned char ansi2win32bg[8] = {
 
 static bool running;
 static HANDLE death;
-static pthread_t input_thread;
+static mp_thread input_thread;
 static struct input_ctx *input_ctx;
 
 void terminal_get_size(int *w, int *h)
@@ -159,9 +158,9 @@ static void read_input(HANDLE in)
     }
 }
 
-static void *input_thread_fn(void *ptr)
+static MP_THREAD_VOID input_thread_fn(void *ptr)
 {
-    mpthread_set_name("terminal/input");
+    mp_thread_set_name("terminal/input");
     HANDLE in = ptr;
     HANDLE stuff[2] = {in, death};
     while (1) {
@@ -170,7 +169,7 @@ static void *input_thread_fn(void *ptr)
             break;
         read_input(in);
     }
-    return NULL;
+    MP_THREAD_RETURN();
 }
 
 void terminal_setup_getch(struct input_ctx *ictx)
@@ -184,7 +183,7 @@ void terminal_setup_getch(struct input_ctx *ictx)
         death = CreateEventW(NULL, TRUE, FALSE, NULL);
         if (!death)
             return;
-        if (pthread_create(&input_thread, NULL, input_thread_fn, in)) {
+        if (mp_thread_create(&input_thread, input_thread_fn, in)) {
             CloseHandle(death);
             return;
         }
@@ -196,7 +195,7 @@ void terminal_uninit(void)
 {
     if (running) {
         SetEvent(death);
-        pthread_join(input_thread, NULL);
+        mp_thread_join(input_thread);
         input_ctx = NULL;
         running = false;
     }

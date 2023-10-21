@@ -19,7 +19,6 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include <pthread.h>
 #include <assert.h>
 
 #include <libavutil/buffer.h>
@@ -35,12 +34,13 @@
 #include "common/common.h"
 
 #include "fmt-conversion.h"
-#include "mp_image.h"
 #include "mp_image_pool.h"
+#include "mp_image.h"
+#include "osdep/threads.h"
 
-static pthread_mutex_t pool_mutex = PTHREAD_MUTEX_INITIALIZER;
-#define pool_lock() pthread_mutex_lock(&pool_mutex)
-#define pool_unlock() pthread_mutex_unlock(&pool_mutex)
+static mp_static_mutex pool_mutex = MP_STATIC_MUTEX_INITIALIZER;
+#define pool_lock() mp_mutex_lock(&pool_mutex)
+#define pool_unlock() mp_mutex_unlock(&pool_mutex)
 
 // Thread-safety: the pool itself is not thread-safe, but pool-allocated images
 // can be referenced and unreferenced from other threads. (As long as the image

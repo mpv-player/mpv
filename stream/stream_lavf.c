@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <pthread.h>
-
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
 #include <libavutil/opt.h>
@@ -457,4 +455,3 @@ const stream_info_t stream_info_ffmpeg_unsafe = {
   .stream_origin = STREAM_ORIGIN_UNSAFE,
   .can_write = true,
 };
-

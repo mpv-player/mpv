@@ -19,12 +19,12 @@
  */
 
 #include <stdint.h>
-#include <pthread.h>
 
+#include "osdep/threads.h"
 #include "random.h"
 
 static uint64_t state[4];
-static pthread_mutex_t state_mutex = PTHREAD_MUTEX_INITIALIZER;
+static mp_static_mutex state_mutex = MP_STATIC_MUTEX_INITIALIZER;
 
 static inline uint64_t rotl_u64(const uint64_t x, const int k)
 {
@@ -41,18 +41,18 @@ static inline uint64_t splitmix64(uint64_t *const x)
 
 void mp_rand_seed(uint64_t seed)
 {
-    pthread_mutex_lock(&state_mutex);
+    mp_mutex_lock(&state_mutex);
     state[0] = seed;
     for (int i = 1; i < 4; i++)
         state[i] = splitmix64(&seed);
-    pthread_mutex_unlock(&state_mutex);
+    mp_mutex_unlock(&state_mutex);
 }
 
 uint64_t mp_rand_next(void)
 {
     uint64_t result, t;
 
-    pthread_mutex_lock(&state_mutex);
+    mp_mutex_lock(&state_mutex);
 
     result = rotl_u64(state[1] * 5, 7) * 9;
     t = state[1] << 17;
@@ -64,7 +64,7 @@ uint64_t mp_rand_next(void)
     state[2] ^= t;
     state[3] = rotl_u64(state[3], 45);
 
-    pthread_mutex_unlock(&state_mutex);
+    mp_mutex_unlock(&state_mutex);
 
     return result;
 }

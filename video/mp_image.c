@@ -16,7 +16,6 @@
  */
 
 #include <limits.h>
-#include <pthread.h>
 #include <assert.h>
 
 #include <libavutil/mem.h>
@@ -37,10 +36,11 @@
 
 #include "common/av_common.h"
 #include "common/common.h"
+#include "fmt-conversion.h"
 #include "hwdec.h"
 #include "mp_image.h"
+#include "osdep/threads.h"
 #include "sws_utils.h"
-#include "fmt-conversion.h"
 
 // Determine strides, plane sizes, and total required size for an image
 // allocation. Returns total size on success, <0 on error. Unused planes

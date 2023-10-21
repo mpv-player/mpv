@@ -21,7 +21,6 @@
 #include <math.h>
 #include <assert.h>
 #include <string.h>
-#include <pthread.h>
 #include <locale.h>
 
 #include "config.h"
@@ -100,16 +99,16 @@ const char mp_help_text[] =
 " --h=<string>      print options which contain the given string in their name\n"
 "\n";
 
-static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;
+static mp_static_mutex terminal_owner_lock = MP_STATIC_MUTEX_INITIALIZER;
 static struct MPContext *terminal_owner;
 
 static bool cas_terminal_owner(struct MPContext *old, struct MPContext *new)
 {
-    pthread_mutex_lock(&terminal_owner_lock);
+    mp_mutex_lock(&terminal_owner_lock);
     bool r = terminal_owner == old;
     if (r)
         terminal_owner = new;
-    pthread_mutex_unlock(&terminal_owner_lock);
+    mp_mutex_unlock(&terminal_owner_lock);
     return r;
 }
 
@@ -197,7 +196,7 @@ void mp_destroy(struct MPContext *mpctx)
     mp_msg_uninit(mpctx->global);
     assert(!mpctx->num_abort_list);
     talloc_free(mpctx->abort_list);
-    pthread_mutex_destroy(&mpctx->abort_lock);
+    mp_mutex_destroy(&mpctx->abort_lock);
     talloc_free(mpctx->mconfig); // destroy before dispatch
     talloc_free(mpctx);
 }
@@ -269,7 +268,7 @@ struct MPContext *mp_create(void)
         .play_dir = 1,
     };
 
-    pthread_mutex_init(&mpctx->abort_lock, NULL);
+    mp_mutex_init(&mpctx->abort_lock);
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
 
@@ -420,7 +419,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
 int mpv_main(int argc, char *argv[])
 {
-    mpthread_set_name("mpv");
+    mp_thread_set_name("mpv");
     struct MPContext *mpctx = mp_create();
     if (!mpctx)
         return 1;

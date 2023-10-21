@@ -19,12 +19,12 @@
 #include <d3d11.h>
 #include <dxgi1_6.h>
 #include <versionhelpers.h>
-#include <pthread.h>
 
 #include "common/common.h"
 #include "common/msg.h"
 #include "misc/bstr.h"
 #include "osdep/io.h"
+#include "osdep/threads.h"
 #include "osdep/windows_utils.h"
 
 #include "d3d11_helpers.h"
@@ -33,7 +33,7 @@
 #define DXGI_ADAPTER_FLAG_SOFTWARE (2)
 typedef HRESULT(WINAPI *PFN_CREATE_DXGI_FACTORY)(REFIID riid, void **ppFactory);
 
-static pthread_once_t d3d11_once = PTHREAD_ONCE_INIT;
+static mp_once d3d11_once = MP_STATIC_ONCE_INITIALIZER;
 static PFN_D3D11_CREATE_DEVICE pD3D11CreateDevice = NULL;
 static PFN_CREATE_DXGI_FACTORY pCreateDXGIFactory1 = NULL;
 static void d3d11_load(void)
@@ -51,7 +51,7 @@ static void d3d11_load(void)
 
 static bool load_d3d11_functions(struct mp_log *log)
 {
-    pthread_once(&d3d11_once, d3d11_load);
+    mp_exec_once(&d3d11_once, d3d11_load);
     if (!pD3D11CreateDevice || !pCreateDXGIFactory1) {
         mp_fatal(log, "Failed to load base d3d11 functionality: "
                       "CreateDevice: %s, CreateDXGIFactory1: %s\n",

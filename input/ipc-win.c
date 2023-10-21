@@ -36,7 +36,7 @@ struct mp_ipc_ctx {
     struct mp_client_api *client_api;
     const wchar_t *path;
 
-    pthread_t thread;
+    mp_thread thread;
     HANDLE death_event;
 };
 
@@ -198,9 +198,9 @@ static void report_read_error(struct client_arg *arg, DWORD error)
     }
 }
 
-static void *client_thread(void *p)
+static MP_THREAD_VOID client_thread(void *p)
 {
-    pthread_detach(pthread_self());
+    pthread_detach(mp_thread_self());
 
     struct client_arg *arg = p;
     char buf[4096];
@@ -211,7 +211,7 @@ static void *client_thread(void *p)
     DWORD r;
 
     char *tname = talloc_asprintf(NULL, "ipc/%s", arg->client_name);
-    mpthread_set_name(tname);
+    mp_thread_set_name(tname);
     talloc_free(tname);
 
     arg->write_ol.hEvent = CreateEventW(NULL, TRUE, TRUE, NULL);
@@ -307,7 +307,7 @@ done:
     CloseHandle(arg->client_h);
     mpv_destroy(arg->client);
     talloc_free(arg);
-    return NULL;
+    MP_THREAD_RETURN();
 }
 
 static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
@@ -315,8 +315,8 @@ static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
     client->client = mp_new_client(ctx->client_api, client->client_name),
     client->log    = mp_client_get_log(client->client);
 
-    pthread_t client_thr;
-    if (pthread_create(&client_thr, NULL, client_thread, client)) {
+    mp_thread client_thr;
+    if (mp_thread_create(&client_thr, client_thread, client)) {
         mpv_destroy(client->client);
         CloseHandle(client->client_h);
         talloc_free(client);
@@ -341,7 +341,7 @@ bool mp_ipc_start_anon_client(struct mp_ipc_ctx *ctx, struct mpv_handle *h,
     return false;
 }
 
-static void *ipc_thread(void *p)
+static MP_THREAD_VOID ipc_thread(void *p)
 {
     // Use PIPE_TYPE_MESSAGE | PIPE_READMODE_BYTE so message framing is
     // maintained for message-mode clients, but byte-mode clients can still
@@ -358,7 +358,7 @@ static void *ipc_thread(void *p)
     HANDLE client = INVALID_HANDLE_VALUE;
     int client_num = 0;
 
-    mpthread_set_name("ipc/named-pipe");
+    mp_thread_set_name("ipc/named-pipe");
     MP_VERBOSE(arg, "Starting IPC master\n");
 
     SECURITY_ATTRIBUTES sa = {
@@ -450,7 +450,7 @@ done:
         CloseHandle(server);
     if (ol.hEvent)
         CloseHandle(ol.hEvent);
-    return NULL;
+    MP_THREAD_RETURN();
 }
 
 struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
@@ -482,7 +482,7 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
     if (!(arg->death_event = CreateEventW(NULL, TRUE, FALSE, NULL)))
         goto out;
 
-    if (pthread_create(&arg->thread, NULL, ipc_thread, arg))
+    if (mp_thread_create(&arg->thread, ipc_thread, arg))
         goto out;
 
     talloc_free(opts);
@@ -502,7 +502,7 @@ void mp_uninit_ipc(struct mp_ipc_ctx *arg)
         return;
 
     SetEvent(arg->death_event);
-    pthread_join(arg->thread, NULL);
+    mp_thread_join(arg->thread);
 
     CloseHandle(arg->death_event);
     talloc_free(arg);

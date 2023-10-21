@@ -41,6 +41,7 @@
 #include "common/stats.h"
 #include "filters/f_decoder_wrapper.h"
 #include "command.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "common/common.h"
 #include "input/input.h"
@@ -4847,7 +4848,7 @@ struct cmd_list_ctx {
     struct mp_cmd_ctx *parent;
 
     bool current_valid;
-    pthread_t current;
+    mp_thread current;
     bool completed_recursive;
 
     // list of sub commands yet to run
@@ -4861,7 +4862,7 @@ static void on_cmd_list_sub_completion(struct mp_cmd_ctx *cmd)
 {
     struct cmd_list_ctx *list = cmd->on_completion_priv;
 
-    if (list->current_valid && pthread_equal(list->current, pthread_self())) {
+    if (list->current_valid && mp_thread_equal(list->current, mp_thread_self())) {
         list->completed_recursive = true;
     } else {
         continue_cmd_list(list);
@@ -4884,7 +4885,7 @@ static void continue_cmd_list(struct cmd_list_ctx *list)
 
             list->completed_recursive = false;
             list->current_valid = true;
-            list->current = pthread_self();
+            list->current = mp_thread_self();
 
             run_command(list->mpctx, sub, NULL, on_cmd_list_sub_completion, list);
 
@@ -5882,10 +5883,10 @@ static void cmd_subprocess(void *p)
     fdctx[1].capture = cmd->args[3].v.b;
     fdctx[2].capture = cmd->args[4].v.b;
 
-    pthread_mutex_lock(&mpctx->abort_lock);
+    mp_mutex_lock(&mpctx->abort_lock);
     cmd->abort->coupled_to_playback = playback_only;
     mp_abort_recheck_locked(mpctx, cmd->abort);
-    pthread_mutex_unlock(&mpctx->abort_lock);
+    mp_mutex_unlock(&mpctx->abort_lock);
 
     mp_core_unlock(mpctx);
 

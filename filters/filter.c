@@ -1,5 +1,4 @@
 #include <math.h>
-#include <pthread.h>
 #include <stdatomic.h>
 
 #include <libavutil/hwcontext.h>
@@ -7,6 +6,7 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "video/hwdec.h"
 #include "video/img_format.h"
@@ -90,7 +90,7 @@ struct filter_runner {
 
     // For async notifications only. We don't bother making this fine grained
     // across filters.
-    pthread_mutex_t async_lock;
+    mp_mutex async_lock;
 
     // Wakeup is pending. Protected by async_lock.
     bool async_wakeup_sent;
@@ -196,7 +196,7 @@ void mp_filter_internal_mark_progress(struct mp_filter *f)
 // sync notifications don't need any locking.
 static void flush_async_notifications(struct filter_runner *r)
 {
-    pthread_mutex_lock(&r->async_lock);
+    mp_mutex_lock(&r->async_lock);
     for (int n = 0; n < r->num_async_pending; n++) {
         struct mp_filter *f = r->async_pending[n];
         add_pending(f);
@@ -204,7 +204,7 @@ static void flush_async_notifications(struct filter_runner *r)
     }
     r->num_async_pending = 0;
     r->async_wakeup_sent = false;
-    pthread_mutex_unlock(&r->async_lock);
+    mp_mutex_unlock(&r->async_lock);
 }
 
 bool mp_filter_graph_run(struct mp_filter *filter)
@@ -230,11 +230,11 @@ bool mp_filter_graph_run(struct mp_filter *filter)
         if (atomic_exchange_explicit(&r->interrupt_flag, false,
                                      memory_order_acq_rel))
         {
-            pthread_mutex_lock(&r->async_lock);
+            mp_mutex_lock(&r->async_lock);
             if (!r->async_wakeup_sent && r->wakeup_cb)
                 r->wakeup_cb(r->wakeup_ctx);
             r->async_wakeup_sent = true;
-            pthread_mutex_unlock(&r->async_lock);
+            mp_mutex_unlock(&r->async_lock);
             exit_req = true;
         }
 
@@ -703,7 +703,7 @@ struct mp_hwdec_ctx *mp_filter_load_hwdec_device(struct mp_filter *f, int imgfmt
 static void filter_wakeup(struct mp_filter *f, bool mark_only)
 {
     struct filter_runner *r = f->in->runner;
-    pthread_mutex_lock(&r->async_lock);
+    mp_mutex_lock(&r->async_lock);
     if (!f->in->async_pending) {
         f->in->async_pending = true;
         // (not using a talloc parent for thread safety reasons)
@@ -714,7 +714,7 @@ static void filter_wakeup(struct mp_filter *f, bool mark_only)
             r->wakeup_cb(r->wakeup_ctx);
         r->async_wakeup_sent = true;
     }
-    pthread_mutex_unlock(&r->async_lock);
+    mp_mutex_unlock(&r->async_lock);
 }
 
 void mp_filter_wakeup(struct mp_filter *f)
@@ -784,7 +784,7 @@ static void filter_destructor(void *p)
 
     if (r->root_filter == f) {
         assert(!f->in->parent);
-        pthread_mutex_destroy(&r->async_lock);
+        mp_mutex_destroy(&r->async_lock);
         talloc_free(r->async_pending);
         talloc_free(r);
     }
@@ -816,7 +816,7 @@ struct mp_filter *mp_filter_create_with_params(struct mp_filter_params *params)
             .root_filter = f,
             .max_run_time = INFINITY,
         };
-        pthread_mutex_init(&f->in->runner->async_lock, NULL);
+        mp_mutex_init(&f->in->runner->async_lock);
     }
 
     if (!f->global)
@@ -872,10 +872,10 @@ void mp_filter_graph_set_wakeup_cb(struct mp_filter *root,
 {
     struct filter_runner *r = root->in->runner;
     assert(root == r->root_filter); // user is supposed to call this on root only
-    pthread_mutex_lock(&r->async_lock);
+    mp_mutex_lock(&r->async_lock);
     r->wakeup_cb = wakeup_cb;
     r->wakeup_ctx = ctx;
-    pthread_mutex_unlock(&r->async_lock);
+    mp_mutex_unlock(&r->async_lock);
 }
 
 static const char *filt_name(struct mp_filter *f)

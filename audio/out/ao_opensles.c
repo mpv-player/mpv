@@ -23,12 +23,11 @@
 #include "common/msg.h"
 #include "audio/format.h"
 #include "options/m_option.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
-
-#include <pthread.h>
 
 struct priv {
     SLObjectItf sl, output_mix, player;
@@ -37,7 +36,7 @@ struct priv {
     SLPlayItf play;
     void *buf;
     int bytes_per_enqueue;
-    pthread_mutex_t buffer_lock;
+    mp_mutex buffer_lock;
     double audio_latency;
 
     int frames_per_enqueue;
@@ -62,7 +61,7 @@ static void uninit(struct ao *ao)
     p->engine = NULL;
     p->play = NULL;
 
-    pthread_mutex_destroy(&p->buffer_lock);
+    mp_mutex_destroy(&p->buffer_lock);
 
     free(p->buf);
     p->buf = NULL;
@@ -77,7 +76,7 @@ static void buffer_callback(SLBufferQueueItf buffer_queue, void *context)
     SLresult res;
     double delay;
 
-    pthread_mutex_lock(&p->buffer_lock);
+    mp_mutex_lock(&p->buffer_lock);
 
     delay = p->frames_per_enqueue / (double)ao->samplerate;
     delay += p->audio_latency;
@@ -88,7 +87,7 @@ static void buffer_callback(SLBufferQueueItf buffer_queue, void *context)
     if (res != SL_RESULT_SUCCESS)
         MP_ERR(ao, "Failed to Enqueue: %d\n", res);
 
-    pthread_mutex_unlock(&p->buffer_lock);
+    mp_mutex_unlock(&p->buffer_lock);
 }
 
 #define CHK(stmt) \
@@ -170,7 +169,7 @@ static int init(struct ao *ao)
         goto error;
     }
 
-    int r = pthread_mutex_init(&p->buffer_lock, NULL);
+    int r = mp_mutex_init(&p->buffer_lock);
     if (r) {
         MP_ERR(ao, "Failed to initialize the mutex: %d\n", r);
         goto error;

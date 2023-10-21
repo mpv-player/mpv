@@ -46,9 +46,9 @@ static void preemption_callback(VdpDevice device, void *context)
 {
     struct mp_vdpau_ctx *ctx = context;
 
-    pthread_mutex_lock(&ctx->preempt_lock);
+    mp_mutex_lock(&ctx->preempt_lock);
     ctx->is_preempted = true;
-    pthread_mutex_unlock(&ctx->preempt_lock);
+    mp_mutex_unlock(&ctx->preempt_lock);
 }
 
 static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing)
@@ -163,7 +163,7 @@ static int handle_preemption(struct mp_vdpau_ctx *ctx)
 int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter)
 {
     int r = 1;
-    pthread_mutex_lock(&ctx->preempt_lock);
+    mp_mutex_lock(&ctx->preempt_lock);
 
     const void *p[4] = {&(uint32_t){0}};
     uint32_t stride[4] = {4};
@@ -182,7 +182,7 @@ int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter)
         r = 0; // signal recovery after preemption
     }
 
-    pthread_mutex_unlock(&ctx->preempt_lock);
+    mp_mutex_unlock(&ctx->preempt_lock);
     return r;
 }
 
@@ -196,10 +196,10 @@ static void release_decoder_surface(void *ptr)
     struct surface_ref *r = ptr;
     struct mp_vdpau_ctx *ctx = r->ctx;
 
-    pthread_mutex_lock(&ctx->pool_lock);
+    mp_mutex_lock(&ctx->pool_lock);
     assert(ctx->video_surfaces[r->index].in_use);
     ctx->video_surfaces[r->index].in_use = false;
-    pthread_mutex_unlock(&ctx->pool_lock);
+    mp_mutex_unlock(&ctx->pool_lock);
 
     talloc_free(r);
 }
@@ -238,7 +238,7 @@ static struct mp_image *mp_vdpau_get_surface(struct mp_vdpau_ctx *ctx,
         rgb_format = (VdpChromaType)-1;
     }
 
-    pthread_mutex_lock(&ctx->pool_lock);
+    mp_mutex_lock(&ctx->pool_lock);
 
     // Destroy all unused surfaces that don't have matching parameters
     for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {
@@ -317,7 +317,7 @@ done: ;
     if (surface_index >= 0)
         mpi = create_ref(ctx, surface_index);
 
-    pthread_mutex_unlock(&ctx->pool_lock);
+    mp_mutex_unlock(&ctx->pool_lock);
 
     if (!mpi)
         MP_ERR(ctx, "no surfaces available in mp_vdpau_get_video_surface\n");
@@ -363,8 +363,8 @@ static void free_device_ref(struct AVHWDeviceContext *hwctx)
     if (ctx->close_display)
         XCloseDisplay(ctx->x11);
 
-    pthread_mutex_destroy(&ctx->pool_lock);
-    pthread_mutex_destroy(&ctx->preempt_lock);
+    mp_mutex_destroy(&ctx->pool_lock);
+    mp_mutex_destroy(&ctx->preempt_lock);
     talloc_free(ctx);
 }
 
@@ -388,8 +388,8 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
             .av_device_ref = avref,
         },
     };
-    mpthread_mutex_init_recursive(&ctx->preempt_lock);
-    pthread_mutex_init(&ctx->pool_lock, NULL);
+    mp_mutex_init_type(&ctx->preempt_lock, MP_MUTEX_RECURSIVE);
+    mp_mutex_init(&ctx->pool_lock);
 
     hwctx->free = free_device_ref;
     hwctx->user_opaque = ctx;

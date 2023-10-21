@@ -199,7 +199,7 @@ static DWORD __stdcall AudioThread(void *lpParameter)
 {
     struct ao *ao = lpParameter;
     struct wasapi_state *state = ao->priv;
-    mpthread_set_name("ao/wasapi");
+    mp_thread_set_name("ao/wasapi");
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     state->init_ok = wasapi_thread_init(ao);

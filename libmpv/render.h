@@ -103,7 +103,7 @@ extern "C" {
  *      In addition, you were required to call all mpv_render*() API functions
  *      from the same thread on which mpv_render_context_create() was originally
  *      run (for the same the mpv_render_context). Not honoring it led to UB
- *      (deadlocks, use of invalid pthread_t handles), even if you moved your GL
+ *      (deadlocks, use of invalid mp_thread handles), even if you moved your GL
  *      context to a different thread correctly.
  *      These problems were addressed in API version 1.105 (mpv 0.30.0).
  *

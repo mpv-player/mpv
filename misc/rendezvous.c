@@ -1,9 +1,10 @@
-#include <pthread.h>
 
 #include "rendezvous.h"
 
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t wakeup = PTHREAD_COND_INITIALIZER;
+#include "osdep/threads.h"
+
+static mp_static_mutex lock = MP_STATIC_MUTEX_INITIALIZER;
+static mp_cond wakeup = MP_STATIC_COND_INITIALIZER;
 
 static struct waiter *waiters;
 
@@ -31,7 +32,7 @@ struct waiter {
 intptr_t mp_rendezvous(void *tag, intptr_t value)
 {
     struct waiter wait = { .tag = tag, .value = &value };
-    pthread_mutex_lock(&lock);
+    mp_mutex_lock(&lock);
     struct waiter **prev = &waiters;
     while (*prev) {
         if ((*prev)->tag == tag) {
@@ -40,15 +41,15 @@ intptr_t mp_rendezvous(void *tag, intptr_t value)
             value = tmp;
             (*prev)->value = NULL; // signals completion
             *prev = (*prev)->next; // unlink
-            pthread_cond_broadcast(&wakeup);
+            mp_cond_broadcast(&wakeup);
             goto done;
         }
         prev = &(*prev)->next;
     }
     *prev = &wait;
     while (wait.value)
-        pthread_cond_wait(&wakeup, &lock);
+        mp_cond_wait(&wakeup, &lock);
 done:
-    pthread_mutex_unlock(&lock);
+    mp_mutex_unlock(&lock);
     return value;
 }

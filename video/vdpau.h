@@ -4,13 +4,12 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-#include <pthread.h>
-
 #include <vdpau/vdpau.h>
 #include <vdpau/vdpau_x11.h>
 
 #include "common/msg.h"
 #include "hwdec.h"
+#include "osdep/threads.h"
 
 #include "config.h"
 #if !HAVE_GPL
@@ -64,7 +63,7 @@ struct mp_vdpau_ctx {
     VdpGetProcAddress *get_proc_address;
     VdpDevice vdp_device;
 
-    pthread_mutex_t preempt_lock;
+    mp_mutex preempt_lock;
     bool is_preempted;                  // set to true during unavailability
     uint64_t preemption_counter;        // incremented after _restoring_
     bool preemption_user_notified;
@@ -72,7 +71,7 @@ struct mp_vdpau_ctx {
     VdpOutputSurface preemption_obj;    // dummy for reliable preempt. check
 
     // Surface pool
-    pthread_mutex_t pool_lock;
+    mp_mutex pool_lock;
     int64_t age_counter;
     struct surface_entry {
         VdpVideoSurface surface;

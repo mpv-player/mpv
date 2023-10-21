@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include <pthread.h>
 #include <limits.h>
 #include <assert.h>
 
@@ -30,13 +29,14 @@
 #include <libavutil/cpu.h>
 
 #include "common/msg.h"
-#include "options/m_option.h"
-#include "options/path.h"
 #include "filters/f_autoconvert.h"
 #include "filters/f_utils.h"
-#include "filters/filter.h"
 #include "filters/filter_internal.h"
+#include "filters/filter.h"
 #include "filters/user_filters.h"
+#include "options/m_option.h"
+#include "options/path.h"
+#include "osdep/threads.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
@@ -70,8 +70,8 @@ struct priv {
     // Format for which VS is currently configured.
     struct mp_image_params fmt_in;
 
-    pthread_mutex_t lock;
-    pthread_cond_t wakeup;
+    mp_mutex lock;
+    mp_cond wakeup;
 
     // --- the following members are all protected by lock
     struct mp_image **buffered; // oldest image first
@@ -291,7 +291,7 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
         p->vsapi->freeFrame(f);
     }
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
 
     // If these assertions fail, n is an unrequested frame (or filtered twice).
     assert(n >= p->out_frameno && n < p->out_frameno + p->max_requests);
@@ -308,8 +308,8 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
         }
     }
     p->requested[index] = res;
-    pthread_cond_broadcast(&p->wakeup);
-    pthread_mutex_unlock(&p->lock);
+    mp_cond_broadcast(&p->wakeup);
+    mp_mutex_unlock(&p->lock);
     mp_filter_wakeup(p->f);
 }
 
@@ -317,7 +317,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
 
     if (p->failed) {
         // Not sure what we do on errors, but at least don't deadlock.
@@ -336,7 +336,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
             if (p->out_node && !p->eof) {
                 MP_VERBOSE(p, "initiate EOF\n");
                 p->eof = true;
-                pthread_cond_broadcast(&p->wakeup);
+                mp_cond_broadcast(&p->wakeup);
             }
             if (!p->out_node && mp_pin_in_needs_data(f->ppins[1])) {
                 MP_VERBOSE(p, "return EOF\n");
@@ -360,11 +360,11 @@ static void vf_vapoursynth_process(struct mp_filter *f)
                     MP_VERBOSE(p, "draining VS for format change\n");
                     mp_pin_out_unread(p->in_pin, frame);
                     p->eof = true;
-                    pthread_cond_broadcast(&p->wakeup);
+                    mp_cond_broadcast(&p->wakeup);
                     mp_filter_internal_mark_progress(f);
                     goto done;
                 }
-                pthread_mutex_unlock(&p->lock);
+                mp_mutex_unlock(&p->lock);
                 if (p->out_node)
                     destroy_vs(p);
                 p->fmt_in = mpi->params;
@@ -374,13 +374,13 @@ static void vf_vapoursynth_process(struct mp_filter *f)
                     mp_filter_internal_mark_failed(f);
                     return;
                 }
-                pthread_mutex_lock(&p->lock);
+                mp_mutex_lock(&p->lock);
             }
             if (p->out_pts == MP_NOPTS_VALUE)
                 p->out_pts = mpi->pts;
             p->frames_sent++;
             p->buffered[p->num_buffered++] = mpi;
-            pthread_cond_broadcast(&p->wakeup);
+            mp_cond_broadcast(&p->wakeup);
         } else if (frame.type != MP_FRAME_NONE) {
             MP_ERR(p, "discarding unknown frame type\n");
             mp_frame_unref(&frame);
@@ -413,7 +413,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
     if (p->requested[0] == &dummy_img_eof) {
         MP_VERBOSE(p, "finishing up\n");
         assert(p->eof);
-        pthread_mutex_unlock(&p->lock);
+        mp_mutex_unlock(&p->lock);
         destroy_vs(p);
         mp_filter_internal_mark_progress(f);
         return;
@@ -436,7 +436,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
     }
 
 done:
-    pthread_mutex_unlock(&p->lock);
+    mp_mutex_unlock(&p->lock);
 }
 
 static void VS_CC infiltInit(VSMap *in, VSMap *out, void **instanceData,
@@ -473,7 +473,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
     struct priv *p = *instanceData;
     VSFrameRef *ret = NULL;
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     MP_TRACE(p, "VS asking for frame %d (at %d)\n", frameno, p->in_frameno);
     while (1) {
         if (p->shutdown) {
@@ -511,7 +511,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             // queue new frames.
             if (p->num_buffered) {
                 drain_oldest_buffered_frame(p);
-                pthread_cond_broadcast(&p->wakeup);
+                mp_cond_broadcast(&p->wakeup);
                 mp_filter_wakeup(p->f);
                 continue;
             }
@@ -536,19 +536,19 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
                 break;
             }
 
-            pthread_mutex_unlock(&p->lock);
+            mp_mutex_unlock(&p->lock);
             struct mp_image vsframe = map_vs_frame(p, ret, true);
             mp_image_copy(&vsframe, img);
             int res = 1e6;
             int dur = img->pkt_duration * res + 0.5;
             set_vs_frame_props(p, ret, img, dur, res);
-            pthread_mutex_lock(&p->lock);
+            mp_mutex_lock(&p->lock);
             break;
         }
-        pthread_cond_wait(&p->wakeup, &p->lock);
+        mp_cond_wait(&p->wakeup, &p->lock);
     }
-    pthread_cond_broadcast(&p->wakeup);
-    pthread_mutex_unlock(&p->lock);
+    mp_cond_broadcast(&p->wakeup);
+    mp_mutex_unlock(&p->lock);
     return ret;
 }
 
@@ -556,10 +556,10 @@ static void VS_CC infiltFree(void *instanceData, VSCore *core, const VSAPI *vsap
 {
     struct priv *p = instanceData;
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     p->in_node_active = false;
-    pthread_cond_broadcast(&p->wakeup);
-    pthread_mutex_unlock(&p->lock);
+    mp_cond_broadcast(&p->wakeup);
+    mp_mutex_unlock(&p->lock);
 }
 
 // number of getAsyncFrame calls in progress
@@ -580,13 +580,13 @@ static void destroy_vs(struct priv *p)
     MP_DBG(p, "destroying VS filters\n");
 
     // Wait until our frame callbacks return.
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     p->initializing = false;
     p->shutdown = true;
-    pthread_cond_broadcast(&p->wakeup);
+    mp_cond_broadcast(&p->wakeup);
     while (num_requested(p))
-        pthread_cond_wait(&p->wakeup, &p->lock);
-    pthread_mutex_unlock(&p->lock);
+        mp_cond_wait(&p->wakeup, &p->lock);
+    mp_mutex_unlock(&p->lock);
 
     MP_DBG(p, "all requests terminated\n");
 
@@ -699,9 +699,9 @@ static int reinit_vs(struct priv *p, struct mp_image *input)
         goto error;
     }
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     p->initializing = false;
-    pthread_mutex_unlock(&p->lock);
+    mp_mutex_unlock(&p->lock);
     MP_DBG(p, "initialized.\n");
     res = 0;
 error:
@@ -729,8 +729,8 @@ static void vf_vapoursynth_destroy(struct mp_filter *f)
     destroy_vs(p);
     p->drv->uninit(p);
 
-    pthread_cond_destroy(&p->wakeup);
-    pthread_mutex_destroy(&p->lock);
+    mp_cond_destroy(&p->wakeup);
+    mp_mutex_destroy(&p->lock);
 
     mp_filter_free_children(f);
 }
@@ -763,8 +763,8 @@ static struct mp_filter *vf_vapoursynth_create(struct mp_filter *parent,
     p->drv = p->opts->drv;
     p->f = f;
 
-    pthread_mutex_init(&p->lock, NULL);
-    pthread_cond_init(&p->wakeup, NULL);
+    mp_mutex_init(&p->lock);
+    mp_cond_init(&p->wakeup);
 
     if (!p->opts->file || !p->opts->file[0]) {
         MP_FATAL(p, "'file' parameter must be set.\n");

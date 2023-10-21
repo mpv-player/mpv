@@ -19,7 +19,7 @@ struct dr_helper *dr_helper_create(struct mp_dispatch_queue *dispatch,
             void *get_image_ctx);
 
 // Make DR release calls (freeing images) reentrant if they are called on this
-// (pthread_self()) thread. That means any free call will directly release the
+// (mp_thread_self()) thread. That means any free call will directly release the
 // image as allocated with get_image().
 // Only 1 thread can use this at a time. Note that it would make no sense to
 // call this on more than 1 thread, as get_image is assumed not thread-safe.

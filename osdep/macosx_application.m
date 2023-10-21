@@ -16,7 +16,6 @@
  */
 
 #include <stdio.h>
-#include <pthread.h>
 #include "config.h"
 #include "mpv_talloc.h"
 
@@ -88,7 +87,7 @@ const struct m_sub_options macos_conf = {
 // running in libmpv mode, and cocoa_main() was never called.
 static bool application_instantiated;
 
-static pthread_t playback_thread_id;
+static mp_thread playback_thread_id;
 
 @interface Application ()
 {
@@ -273,9 +272,9 @@ static void cocoa_run_runloop(void)
     [pool drain];
 }
 
-static void *playback_thread(void *ctx_obj)
+static MP_THREAD_VOID playback_thread(void *ctx_obj)
 {
-    mpthread_set_name("core/playback");
+    mp_thread_set_name("core/playback");
     @autoreleasepool {
         struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
         int r = mpv_main(*ctx->argc, *ctx->argv);
@@ -364,7 +363,7 @@ int cocoa_main(int argc, char *argv[])
             init_cocoa_application(false);
         }
 
-        pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
+        mp_thread_create(&playback_thread_id, playback_thread, &ctx);
         [[EventsResponder sharedInstance] waitForInputContext];
         cocoa_run_runloop();
 
@@ -373,7 +372,7 @@ int cocoa_main(int argc, char *argv[])
         fprintf(stderr, "There was either a problem "
                 "initializing Cocoa or the Runloop was stopped unexpectedly. "
                 "Please report this issues to a developer.\n");
-        pthread_join(playback_thread_id, NULL);
+        mp_thread_join(playback_thread_id);
         return 1;
     }
 }

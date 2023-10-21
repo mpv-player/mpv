@@ -62,9 +62,9 @@ struct priv {
 
     bool thread_terminate;
     bool thread_created;
-    pthread_t thread;
-    pthread_mutex_t lock;
-    pthread_cond_t wakeup;
+    mp_thread thread;
+    mp_mutex lock;
+    mp_cond wakeup;
 };
 
 struct JNIByteBuffer {
@@ -549,13 +549,13 @@ static int init_jni(struct ao *ao)
     return 0;
 }
 
-static void *playthread(void *arg)
+static MP_THREAD_VOID playthread(void *arg)
 {
     struct ao *ao = arg;
     struct priv *p = ao->priv;
     JNIEnv *env = MP_JNI_GET_ENV(ao);
-    mpthread_set_name("ao/audiotrack");
-    pthread_mutex_lock(&p->lock);
+    mp_thread_set_name("ao/audiotrack");
+    mp_mutex_lock(&p->lock);
     while (!p->thread_terminate) {
         int state = AudioTrack.PLAYSTATE_PAUSED;
         if (p->audiotrack) {
@@ -579,12 +579,11 @@ static void *playthread(void *arg)
                 MP_ERR(ao, "AudioTrack.write failed with %d\n", ret);
             }
         } else {
-            struct timespec wait = mp_rel_time_to_timespec(0.300);
-            pthread_cond_timedwait(&p->wakeup, &p->lock, &wait);
+            mp_cond_timedwait(&p->wakeup, &p->lock, MP_TIME_MS_TO_NS(300));
         }
     }
-    pthread_mutex_unlock(&p->lock);
-    return NULL;
+    mp_mutex_unlock(&p->lock);
+    MP_THREAD_RETURN();
 }
 
 static void uninit(struct ao *ao)
@@ -598,13 +597,13 @@ static void uninit(struct ao *ao)
         MP_JNI_EXCEPTION_LOG(ao);
     }
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     p->thread_terminate = true;
-    pthread_cond_signal(&p->wakeup);
-    pthread_mutex_unlock(&p->lock);
+    mp_cond_signal(&p->wakeup);
+    mp_mutex_unlock(&p->lock);
 
     if (p->thread_created)
-        pthread_join(p->thread, NULL);
+        mp_thread_join(p->thread);
 
     if (p->audiotrack) {
         MP_JNI_CALL_VOID(p->audiotrack, AudioTrack.release);
@@ -638,8 +637,8 @@ static void uninit(struct ao *ao)
         p->timestamp = NULL;
     }
 
-    pthread_cond_destroy(&p->wakeup);
-    pthread_mutex_destroy(&p->lock);
+    mp_cond_destroy(&p->wakeup);
+    mp_mutex_destroy(&p->lock);
 
     uninit_jni(ao);
 }
@@ -651,8 +650,8 @@ static int init(struct ao *ao)
     if (!env)
         return -1;
 
-    pthread_mutex_init(&p->lock, NULL);
-    pthread_cond_init(&p->wakeup, NULL);
+    mp_mutex_init(&p->lock);
+    mp_cond_init(&p->wakeup);
 
     if (init_jni(ao) < 0)
         return -1;
@@ -781,7 +780,7 @@ static int init(struct ao *ao)
         goto error;
     }
 
-    if (pthread_create(&p->thread, NULL, playthread, ao)) {
+    if (mp_thread_create(&p->thread, playthread, ao)) {
         MP_ERR(ao, "pthread creation failed\n");
         goto error;
     }
@@ -828,7 +827,7 @@ static void start(struct ao *ao)
     MP_JNI_CALL_VOID(p->audiotrack, AudioTrack.play);
     MP_JNI_EXCEPTION_LOG(ao);
 
-    pthread_cond_signal(&p->wakeup);
+    mp_cond_signal(&p->wakeup);
 }
 
 #define OPT_BASE_STRUCT struct priv
