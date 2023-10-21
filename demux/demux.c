@@ -18,18 +18,16 @@
 #include <assert.h>
 #include <float.h>
 #include <limits.h>
+#include <math.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-
-#include <math.h>
-
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "cache.h"
 #include "config.h"
@@ -2190,7 +2188,8 @@ static bool read_packet(struct demux_internal *in)
         if (ds->eager && ds->queue->last_ts != MP_NOPTS_VALUE &&
             in->min_secs > 0 && ds->base_ts != MP_NOPTS_VALUE &&
             ds->queue->last_ts >= ds->base_ts &&
-            !in->back_demuxing) {
+            !in->back_demuxing)
+        {
             if (ds->queue->last_ts - ds->base_ts <= in->hyst_secs)
                 in->hyst_active = false;
             if (!in->hyst_active)
