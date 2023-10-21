@@ -36,7 +36,11 @@
 #import "osdep/macosx_touchbar.h"
 #endif
 #if HAVE_MACOS_COCOA_CB
+#if XCODE_BACKEND
+#import <mpv_2-Swift.h>
+#else
 #include "osdep/macOS_swift.h"
+#endif
 #endif
 
 #define MPV_PROTOCOL @"mpv://"
