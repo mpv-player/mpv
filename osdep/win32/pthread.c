@@ -128,7 +128,7 @@ int pthread_cond_timedwait(pthread_cond_t *restrict cond,
         timeout_ms = INFINITE;
     } else if (abstime->tv_sec >= ts.tv_sec) {
         int64_t msec = (abstime->tv_sec - ts.tv_sec) * INT64_C(1000) +
-            (abstime->tv_nsec - ts.tv_nsec) / INT64_C(10000000);
+            (abstime->tv_nsec - ts.tv_nsec) / INT64_C(1000000);
         if (msec > ULONG_MAX) {
             timeout_ms = INFINITE;
         } else if (msec > 0) {
