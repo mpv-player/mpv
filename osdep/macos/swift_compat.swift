@@ -15,23 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !HAVE_MACOS_10_14_FEATURES
-extension NSAppearance.Name {
-    static let darkAqua: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameDarkAqua")
-    static let accessibilityHighContrastAqua: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityAqua")
-    static let accessibilityHighContrastDarkAqua: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityDarkAqua")
-    static let accessibilityHighContrastVibrantLight: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityVibrantLight")
-    static let accessibilityHighContrastVibrantDark: NSAppearance.Name = NSAppearance.Name(rawValue: "NSAppearanceNameAccessibilityVibrantDark")
-}
-
-@available(OSX 10.12, *)
-extension String {
-    static let RGBA16Float: String = kCAContentsFormatRGBA16Float
-    static let RGBA8Uint: String = kCAContentsFormatRGBA8Uint
-    static let gray8Uint: String = kCAContentsFormatGray8Uint
-}
-#endif
-
 extension NSPasteboard.PasteboardType {
     static let fileURLCompat: NSPasteboard.PasteboardType = {
         if #available(OSX 10.13, *) {
