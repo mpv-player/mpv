@@ -1509,23 +1509,8 @@ sys.stdout.write(swift_ver)
     message('Detected Swift version: ' + swift_ver)
 endif
 
-macos_10_11_features = get_option('macos-10-11-features').require(
-    macos_sdk_version.version_compare('>=10.11'),
-    error_message: 'a suitable macos sdk version could not be found!',
-)
-
-macos_10_12_2_features = get_option('macos-10-12-2-features').require(
-    macos_sdk_version.version_compare('>=10.12.2'),
-    error_message: 'a suitable macos sdk version could not be found!',
-)
-
-macos_10_14_features = get_option('macos-10-14-features').require(
-    macos_sdk_version.version_compare('>=10.14'),
-    error_message: 'a suitable macos sdk version could not be found!',
-)
-
 swift = get_option('swift-build').require(
-    darwin and macos_sdk_version.version_compare('>=10.10') and swift_ver.version_compare('>=4.1'),
+    darwin and macos_sdk_version.version_compare('>= 10.15') and swift_ver.version_compare('>= 4.1'),
     error_message: 'A suitable macos sdk version or swift version could not be found!',
 )
 features += {'swift': swift.allowed()}
@@ -1560,8 +1545,8 @@ if features['cocoa'] and features['vulkan'] and features['swift']
 endif
 
 macos_media_player = get_option('macos-media-player').require(
-    macos_10_12_2_features.allowed() and features['swift'],
-    error_message: 'Either the macos sdk version is not at least 10.12.2 or swift was not found!',
+    features['swift'],
+    error_message: 'Swift was not found!',
 )
 features += {'macos-media-player': macos_media_player.allowed()}
 if features['macos-media-player']

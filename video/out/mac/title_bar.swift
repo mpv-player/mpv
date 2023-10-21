@@ -200,11 +200,7 @@ class TitleBar: NSVisualEffectView {
                 return NSAppearance(named: .accessibilityHighContrastVibrantDark)
             case "0", "auto": fallthrough
             default:
-#if HAVE_MACOS_10_14_FEATURES
                 return nil
-#else
-                break
-#endif
             }
         }
 
@@ -221,7 +217,6 @@ class TitleBar: NSVisualEffectView {
         default:                break
         }
 
-#if HAVE_MACOS_10_11_FEATURES
         if #available(macOS 10.11, *) {
             switch string {
             case "2,", "menu":          return .menu
@@ -232,8 +227,7 @@ class TitleBar: NSVisualEffectView {
             default:                    break
             }
         }
-#endif
-#if HAVE_MACOS_10_14_FEATURES
+
         if #available(macOS 10.14, *) {
             switch string {
             case "5,", "headerView":            return .headerView
@@ -248,7 +242,6 @@ class TitleBar: NSVisualEffectView {
             default:                            break
             }
         }
-#endif
 
         return .titlebar
     }

@@ -104,9 +104,6 @@ option('videotoolbox-gl', type: 'feature', value: 'auto', description: 'Videotoo
 option('vulkan-interop', type: 'feature', value: 'auto', description: 'Vulkan graphics interop')
 
 # macOS features
-option('macos-10-11-features', type: 'feature', value: 'auto', description: 'macOS 10.11 SDK Features')
-option('macos-10-12-2-features', type: 'feature', value: 'auto', description: 'macOS 10.12.2 SDK Features')
-option('macos-10-14-features', type: 'feature', value: 'auto', description: 'macOS 10.14 SDK Features')
 option('macos-cocoa-cb', type: 'feature', value: 'auto', description: 'macOS libmpv backend')
 option('macos-media-player', type: 'feature', value: 'auto', description: 'macOS Media Player support')
 option('macos-touchbar', type: 'feature', value: 'auto', description: 'macOS Touch Bar support')
