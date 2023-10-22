@@ -358,7 +358,7 @@ win32_threads = get_option('win32-threads').require(win32)
 features += {'win32-threads': win32_threads.allowed()}
 if not features['win32-threads']
     pthreads = dependency('threads')
-    sources += files('osdep/threads.c')
+    sources += files('osdep/threads-posix.c')
     dependencies += pthreads
 endif
 

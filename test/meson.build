@@ -41,7 +41,7 @@ if win32
 endif
 
 if features['pthread-debug']
-    test_utils_files += 'osdep/threads.c'
+    test_utils_files += 'osdep/threads-posix.c'
 endif
 
 # The zimg code requires using threads.
