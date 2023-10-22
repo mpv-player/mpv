@@ -1157,7 +1157,7 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     //  - these values are updated every time the compositor receives feedback.
 
     int64_t sec = (uint64_t) tv_sec_lo + ((uint64_t) tv_sec_hi << 32);
-    int64_t ust = sec * UINT64_C(1000000000) + (uint64_t) tv_nsec;
+    int64_t ust = MP_TIME_S_TO_NS(sec) + (uint64_t) tv_nsec;
     int64_t msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
     present_update_sync_values(wl->present, ust, msc);
 }

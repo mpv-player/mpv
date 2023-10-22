@@ -70,7 +70,7 @@ void present_sync_swap(struct mp_present *present)
     if (clock_gettime(CLOCK_MONOTONIC, &ts))
         return;
 
-    int64_t now_monotonic = ts.tv_sec * UINT64_C(1000000000) + ts.tv_nsec;
+    int64_t now_monotonic = MP_TIME_S_TO_NS(ts.tv_sec) + ts.tv_nsec;
     int64_t ust_mp_time = mp_time_ns() - (now_monotonic - ust);
 
     present->last_queue_display_time = ust_mp_time;

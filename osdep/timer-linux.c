@@ -27,8 +27,8 @@ void mp_sleep_ns(int64_t ns)
     if (ns < 0)
         return;
     struct timespec ts;
-    ts.tv_sec  =  ns / UINT64_C(1000000000);
-    ts.tv_nsec =  ns % UINT64_C(1000000000);
+    ts.tv_sec  = ns / MP_TIME_S_TO_NS(1);
+    ts.tv_nsec = ns % MP_TIME_S_TO_NS(1);
     nanosleep(&ts, NULL);
 }
 
@@ -40,7 +40,7 @@ uint64_t mp_raw_time_ns(void)
 #else
     timespec_get(&tp, TIME_UTC);
 #endif
-    return tp.tv_sec * UINT64_C(1000000000) + tp.tv_nsec;
+    return MP_TIME_S_TO_NS(tp.tv_sec) + tp.tv_nsec;
 }
 
 void mp_raw_time_init(void)
