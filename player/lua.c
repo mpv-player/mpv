@@ -1335,7 +1335,7 @@ static void add_functions(struct script_ctx *ctx)
 }
 
 const struct mp_scripting mp_scripting_lua = {
-    .name = "lua script",
+    .name = "lua",
     .file_ext = "lua",
     .load = load_lua,
 };
