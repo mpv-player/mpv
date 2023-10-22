@@ -200,8 +200,6 @@ static void report_read_error(struct client_arg *arg, DWORD error)
 
 static MP_THREAD_VOID client_thread(void *p)
 {
-    pthread_detach(mp_thread_self());
-
     struct client_arg *arg = p;
     char buf[4096];
     HANDLE wakeup_event = CreateEventW(NULL, TRUE, FALSE, NULL);
@@ -321,6 +319,7 @@ static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
         CloseHandle(client->client_h);
         talloc_free(client);
     }
+    mp_thread_detach(client_thr);
 }
 
 static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, HANDLE h)

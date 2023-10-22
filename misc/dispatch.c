@@ -39,7 +39,7 @@ struct mp_dispatch_queue {
     // The target thread is in mp_dispatch_queue_process() (and either idling,
     // locked, or running a dispatch callback).
     bool in_process;
-    mp_thread in_process_thread;
+    mp_thread_id in_process_thread_id;
     // The target thread is in mp_dispatch_queue_process(), and currently
     // something has exclusive access to it (e.g. running a dispatch callback,
     // or a different thread got it with mp_dispatch_lock()).
@@ -48,7 +48,7 @@ struct mp_dispatch_queue {
     size_t lock_requests;
     // locked==true is due to a mp_dispatch_lock() call (for debugging).
     bool locked_explicit;
-    mp_thread locked_explicit_thread;
+    mp_thread_id locked_explicit_thread_id;
 };
 
 struct mp_dispatch_item {
@@ -275,7 +275,7 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
     queue->wait = timeout > 0 ? mp_time_ns_add(mp_time_ns(), timeout) : 0;
     assert(!queue->in_process); // recursion not allowed
     queue->in_process = true;
-    queue->in_process_thread = mp_thread_self();
+    queue->in_process_thread_id = mp_thread_current_id();
     // Wake up thread which called mp_dispatch_lock().
     if (queue->lock_requests)
         mp_cond_broadcast(&queue->cond);
@@ -366,10 +366,10 @@ void mp_dispatch_lock(struct mp_dispatch_queue *queue)
     mp_mutex_lock(&queue->lock);
     // Must not be called recursively from dispatched callbacks.
     if (queue->in_process)
-        assert(!mp_thread_equal(queue->in_process_thread, mp_thread_self()));
+        assert(!mp_thread_id_equal(queue->in_process_thread_id, mp_thread_current_id()));
     // Must not be called recursively at all.
     if (queue->locked_explicit)
-        assert(!mp_thread_equal(queue->locked_explicit_thread, mp_thread_self()));
+        assert(!mp_thread_id_equal(queue->locked_explicit_thread_id, mp_thread_current_id()));
     queue->lock_requests += 1;
     // And now wait until the target thread gets "trapped" within the
     // mp_dispatch_queue_process() call, which will mean we get exclusive
@@ -394,7 +394,7 @@ void mp_dispatch_lock(struct mp_dispatch_queue *queue)
     assert(!queue->locked_explicit);
     queue->locked = true;
     queue->locked_explicit = true;
-    queue->locked_explicit_thread = mp_thread_self();
+    queue->locked_explicit_thread_id = mp_thread_current_id();
     mp_mutex_unlock(&queue->lock);
 }
 
@@ -405,7 +405,7 @@ void mp_dispatch_unlock(struct mp_dispatch_queue *queue)
     assert(queue->locked);
     // Must be called after a mp_dispatch_lock(), from the same thread.
     assert(queue->locked_explicit);
-    assert(mp_thread_equal(queue->locked_explicit_thread, mp_thread_self()));
+    assert(mp_thread_id_equal(queue->locked_explicit_thread_id, mp_thread_current_id()));
     // "Unlock".
     queue->locked = false;
     queue->locked_explicit = false;

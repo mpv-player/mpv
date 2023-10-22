@@ -61,7 +61,7 @@ struct stat_entry {
     int64_t val_th;
     int64_t time_start_ns;
     int64_t cpu_start_ns;
-    mp_thread thread;
+    mp_thread_id thread_id;
 };
 
 #define IS_ACTIVE(ctx) \
@@ -181,7 +181,7 @@ void stats_global_query(struct mpv_global *global, struct mpv_node *out)
             break;
         }
         case VAL_THREAD_CPU_TIME: {
-            int64_t t = mp_thread_cpu_time_ns(e->thread);
+            int64_t t = mp_thread_cpu_time_ns(e->thread_id);
             if (!e->cpu_start_ns)
                 e->cpu_start_ns = t;
             double t_msec = MP_TIME_NS_TO_MS(t - e->cpu_start_ns);
@@ -273,7 +273,7 @@ void stats_time_start(struct stats_ctx *ctx, const char *name)
         return;
     mp_mutex_lock(&ctx->base->lock);
     struct stat_entry *e = find_entry(ctx, name);
-    e->cpu_start_ns = mp_thread_cpu_time_ns(mp_thread_self());
+    e->cpu_start_ns = mp_thread_cpu_time_ns(mp_thread_current_id());
     e->time_start_ns = mp_time_ns();
     mp_mutex_unlock(&ctx->base->lock);
 }
@@ -288,7 +288,7 @@ void stats_time_end(struct stats_ctx *ctx, const char *name)
     if (e->time_start_ns) {
         e->type = VAL_TIME;
         e->val_rt += mp_time_ns() - e->time_start_ns;
-        e->val_th += mp_thread_cpu_time_ns(mp_thread_self()) - e->cpu_start_ns;
+        e->val_th += mp_thread_cpu_time_ns(mp_thread_current_id()) - e->cpu_start_ns;
         e->time_start_ns = 0;
     }
     mp_mutex_unlock(&ctx->base->lock);
@@ -311,7 +311,7 @@ static void register_thread(struct stats_ctx *ctx, const char *name,
     mp_mutex_lock(&ctx->base->lock);
     struct stat_entry *e = find_entry(ctx, name);
     e->type = type;
-    e->thread = mp_thread_self();
+    e->thread_id = mp_thread_current_id();
     mp_mutex_unlock(&ctx->base->lock);
 }
 

@@ -98,8 +98,6 @@ static void run_script(struct mp_script_args *arg)
 
 static MP_THREAD_VOID script_thread(void *p)
 {
-    pthread_detach(mp_thread_self());
-
     struct mp_script_args *arg = p;
     run_script(arg);
 
@@ -198,6 +196,7 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
             talloc_free(arg);
             return -1;
         }
+        mp_thread_detach(thread);
     }
 
     return id;

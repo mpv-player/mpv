@@ -96,8 +96,10 @@ static MP_THREAD_VOID worker_thread(void *arg)
     // timeout, and nobody is waiting for us. We have to remove ourselves.
     if (!pool->terminate) {
         for (int n = 0; n < pool->num_threads; n++) {
-            if (mp_thread_equal(pool->threads[n], mp_thread_self())) {
-                pthread_detach(mp_thread_self());
+            if (mp_thread_id_equal(mp_thread_get_id(pool->threads[n]),
+                                   mp_thread_current_id()))
+            {
+                mp_thread_detach(pool->threads[n]);
                 MP_TARRAY_REMOVE_AT(pool->threads, pool->num_threads, n);
                 mp_mutex_unlock(&pool->lock);
                 MP_THREAD_RETURN();

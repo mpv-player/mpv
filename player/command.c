@@ -4848,7 +4848,7 @@ struct cmd_list_ctx {
     struct mp_cmd_ctx *parent;
 
     bool current_valid;
-    mp_thread current;
+    mp_thread_id current_tid;
     bool completed_recursive;
 
     // list of sub commands yet to run
@@ -4862,7 +4862,7 @@ static void on_cmd_list_sub_completion(struct mp_cmd_ctx *cmd)
 {
     struct cmd_list_ctx *list = cmd->on_completion_priv;
 
-    if (list->current_valid && mp_thread_equal(list->current, mp_thread_self())) {
+    if (list->current_valid && mp_thread_id_equal(list->current_tid, mp_thread_current_id())) {
         list->completed_recursive = true;
     } else {
         continue_cmd_list(list);
@@ -4885,7 +4885,7 @@ static void continue_cmd_list(struct cmd_list_ctx *list)
 
             list->completed_recursive = false;
             list->current_valid = true;
-            list->current = mp_thread_self();
+            list->current_tid = mp_thread_current_id();
 
             run_command(list->mpctx, sub, NULL, on_cmd_list_sub_completion, list);
 

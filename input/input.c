@@ -1610,7 +1610,7 @@ void mp_input_src_init_done(struct mp_input_src *src)
 {
     assert(!src->in->init_done);
     assert(src->in->thread_running);
-    assert(mp_thread_equal(src->in->thread, mp_thread_self()));
+    assert(mp_thread_id_equal(mp_thread_get_id(src->in->thread), mp_thread_current_id()));
     src->in->init_done = true;
     mp_rendezvous(&src->in->init_done, 0);
 }
