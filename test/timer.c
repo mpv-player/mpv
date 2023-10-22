@@ -1,6 +1,7 @@
 #include "common/common.h"
 #include "osdep/timer.h"
 #include "test_utils.h"
+#include "config.h"
 
 #include <time.h>
 #include <sys/time.h>
@@ -37,6 +38,7 @@ int main(void)
         assert_int_equal(mp_time_ns_add(test2, 20.44), INT64_MAX);
     }
 
+#if !HAVE_WIN32_THREADS
     /* conversion */
     {
         struct timeval tv;
@@ -49,6 +51,7 @@ int main(void)
         ts = mp_rel_time_to_timespec(0.0);
         assert_true(llabs(tv.tv_sec - ts.tv_sec) <= 1);
     }
+#endif
 
     return 0;
 }

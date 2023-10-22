@@ -248,7 +248,6 @@ sources = files(
     'osdep/io.c',
     'osdep/semaphore_osx.c',
     'osdep/subprocess.c',
-    'osdep/threads.c',
     'osdep/timer.c',
 
     ## tree_allocator
@@ -354,31 +353,18 @@ if features['cplugins'] and not win32
     link_flags += '-rdynamic'
 endif
 
-# Note: this include is only used for windows pthreads and
-# must be accompanied immediately by the following flags.
-# This currently works because these are the last flags set
-# in the build for windows. Adding any new flags after this
-# will probably break something.
-includedir = []
-win32_pthreads = get_option('win32-internal-pthreads').require(
-    win32 and not posix,
-    error_message: 'the os is not win32!',
-)
-features += {'win32-internal-pthreads': win32_pthreads.allowed()}
-if features['win32-internal-pthreads']
-    flags += ['-isystem', '-I', '-DIN_WINPTHREAD']
-    includedir += include_directories('osdep/win32/include')
-    sources += files('osdep/win32/pthread.c')
-else
-    # pthreads is intentionally left undefined in win32 branch to find incorrect
-    # uses of it immediately
+win32_threads = get_option('win32-threads').require(win32)
+
+features += {'win32-threads': win32_threads.allowed()}
+if not features['win32-threads']
     pthreads = dependency('threads')
+    sources += files('osdep/threads.c')
     dependencies += pthreads
 endif
 
 pthread_debug = get_option('pthread-debug').require(
-    win32_pthreads.disabled(),
-    error_message: 'win32-internal-pthreads was found!',
+    win32_threads.disabled(),
+    error_message: 'win32-threads was found!',
 )
 features += {'pthread-debug': pthread_debug.allowed()}
 if features['pthread-debug']
@@ -1721,8 +1707,8 @@ client_api_version = major + '.' + minor + '.0'
 
 libmpv = library('mpv', sources, dependencies: dependencies, gnu_symbol_visibility: 'hidden',
                  link_args: cc.get_supported_link_arguments(['-Wl,-Bsymbolic']),
-                 version: client_api_version, include_directories: includedir,
-                 install: get_option('libmpv'), build_by_default: get_option('libmpv'))
+                 version: client_api_version, install: get_option('libmpv'),
+                 build_by_default: get_option('libmpv'))
 
 
 if get_option('libmpv')
@@ -1768,7 +1754,7 @@ if get_option('cplayer')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
     mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
-                     win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
+                     win_subsystem: 'windows,6.0', install: true)
 endif
 
 if get_option('tests')

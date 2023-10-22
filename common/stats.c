@@ -1,4 +1,3 @@
-#include <pthread.h>
 #include <stdatomic.h>
 #include <time.h>
 #include <unistd.h>

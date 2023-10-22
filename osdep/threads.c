@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <pthread.h>
 
 #include "common/common.h"
 #include "config.h"
@@ -46,7 +45,7 @@ void mpthread_set_name(const char *name)
         strncpy(tname, name, sizeof(tname) - 1);
         pthread_setname_np(pthread_self(), tname);
     }
-#elif HAVE_WIN32_INTERNAL_PTHREADS || HAVE_BSD_THREAD_NAME
+#elif HAVE_BSD_THREAD_NAME
     pthread_set_name_np(pthread_self(), name);
 #elif HAVE_OSX_THREAD_NAME
     pthread_setname_np(name);
