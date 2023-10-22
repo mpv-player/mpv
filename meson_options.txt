@@ -34,7 +34,7 @@ option('uchardet', type: 'feature', value: 'auto', description: 'uchardet suppor
 option('uwp', type: 'feature', value: 'disabled', description: 'Universal Windows Platform')
 option('vapoursynth', type: 'feature', value: 'auto', description: 'VapourSynth filter bridge')
 option('vector', type: 'feature', value: 'auto', description: 'GCC vector instructions')
-option('win32-internal-pthreads', type: 'feature', value: 'auto', description: 'internal pthread wrapper for win32 (Vista+)')
+option('win32-threads', type: 'feature', value: 'auto', description: 'win32 threads')
 option('zimg', type: 'feature', value: 'auto', description: 'libzimg support (high quality software scaler)')
 option('zlib', type: 'feature', value: 'auto', description: 'zlib')
 

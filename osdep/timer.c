@@ -67,6 +67,8 @@ int64_t mp_time_ns_add(int64_t time_ns, double timeout_sec)
     return time_ns + ti;
 }
 
+#if !HAVE_WIN32_THREADS
+
 struct timespec mp_time_ns_to_realtime(int64_t time_ns)
 {
     struct timespec ts = {0};
@@ -91,3 +93,5 @@ struct timespec mp_rel_time_to_timespec(double timeout_sec)
 {
     return mp_time_ns_to_realtime(mp_time_ns_add(mp_time_ns(), timeout_sec));
 }
+
+#endif
