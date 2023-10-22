@@ -98,7 +98,7 @@ Configurable Options
     Show graphs for vsync and jitter values (page 1). Only when toggled.
 
 ``plot_tonemapping_lut``
-    Default: yes
+    Default: no
 
     Enable tone-mapping LUT visualization automatically. Only when toggled.
 
