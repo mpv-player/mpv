@@ -396,11 +396,10 @@ error: ;
 }
 
 const struct mp_scripting mp_scripting_cplugin = {
+    .name = "cplugin",
     #if HAVE_WIN32
-    .name = "DLL plugin",
     .file_ext = "dll",
     #else
-    .name = "SO plugin",
     .file_ext = "so",
     #endif
     .load = load_cplugin,
@@ -458,7 +457,7 @@ static int load_run(struct mp_script_args *args)
 }
 
 const struct mp_scripting mp_scripting_run = {
-    .name = "spawned IPC process",
+    .name = "ipc",
     .file_ext = "run",
     .no_thread = true,
     .load = load_run,

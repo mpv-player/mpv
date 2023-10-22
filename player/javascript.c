@@ -1256,7 +1256,7 @@ static void add_functions(js_State *J, struct script_ctx *ctx)
 
 // main export of this file, used by cplayer to load js scripts
 const struct mp_scripting mp_scripting_js = {
-    .name = "javascript",
+    .name = "js",
     .file_ext = "js",
     .load = s_load_javascript,
 };
