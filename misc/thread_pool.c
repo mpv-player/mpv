@@ -71,7 +71,7 @@ static MP_THREAD_VOID worker_thread(void *arg)
 
             if (pool->num_threads > pool->min_threads) {
                 if (!destroy_deadline)
-                    destroy_deadline = mp_time_ns_add(mp_time_ns(), DESTROY_TIMEOUT);
+                    destroy_deadline = mp_time_ns() + MP_TIME_S_TO_NS(DESTROY_TIMEOUT);
                 if (mp_cond_timedwait_until(&pool->wakeup, &pool->lock, destroy_deadline))
                     got_timeout = pool->num_threads > pool->min_threads;
             } else {
