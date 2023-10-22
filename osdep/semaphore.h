@@ -28,7 +28,7 @@ typedef struct {
 int mp_sem_init(mp_sem_t *sem, int pshared, unsigned int value);
 int mp_sem_wait(mp_sem_t *sem);
 int mp_sem_trywait(mp_sem_t *sem);
-int mp_sem_timedwait(mp_sem_t *sem, const struct timespec *abs_timeout);
+int mp_sem_timedwait(mp_sem_t *sem, int64_t until);
 int mp_sem_post(mp_sem_t *sem);
 int mp_sem_destroy(mp_sem_t *sem);
 
