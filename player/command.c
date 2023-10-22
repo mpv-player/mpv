@@ -3490,7 +3490,7 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
             return M_PROPERTY_UNKNOWN;
         const struct m_option *opt = co->opt;
 
-        union m_option_value def = {0};
+        union m_option_value def = m_option_value_default;
         const void *def_ptr = m_config_get_co_default(mpctx->mconfig, co);
         if (def_ptr && opt->type->size > 0)
             memcpy(&def, def_ptr, opt->type->size);
@@ -4801,7 +4801,7 @@ static void cmd_cycle_values(void *p)
         return;
     }
 
-    union m_option_value curval = {0};
+    union m_option_value curval = m_option_value_default;
     r = mp_property_do(name, M_PROPERTY_GET, &curval, mpctx);
     if (r <= 0) {
         show_property_status(cmd, name, r);
@@ -4810,7 +4810,7 @@ static void cmd_cycle_values(void *p)
 
     int current = -1;
     for (int n = first; n < cmd->num_args; n++) {
-        union m_option_value val = {0};
+        union m_option_value val = m_option_value_default;
         if (m_option_parse(mpctx->log, &prop, bstr0(name),
                            bstr0(cmd->args[n].v.s), &val) < 0)
             continue;
@@ -5214,7 +5214,7 @@ static void cmd_change_list(void *p)
         return;
     }
 
-    union m_option_value val = {0};
+    union m_option_value val = m_option_value_default;
     if (mp_property_do(name, M_PROPERTY_GET, &val, mpctx) <= 0) {
         set_osd_msg(mpctx, osdl, osd_duration, "Could not read: '%s'", name);
         cmd->success = false;

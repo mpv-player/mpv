@@ -38,7 +38,7 @@ static int m_property_multiply(struct mp_log *log,
                                const struct m_property *prop_list,
                                const char *property, double f, void *ctx)
 {
-    union m_option_value val = {0};
+    union m_option_value val = m_option_value_default;
     struct m_option opt = {0};
     int r;
 
@@ -98,7 +98,7 @@ static int do_action(const struct m_property *prop_list, const char *name,
 int m_property_do(struct mp_log *log, const struct m_property *prop_list,
                   const char *name, int action, void *arg, void *ctx)
 {
-    union m_option_value val = {0};
+    union m_option_value val = m_option_value_default;
     int r;
 
     struct m_option opt = {0};
@@ -562,7 +562,7 @@ int m_property_read_list(int action, void *arg, int count,
                 r = get_item(n, M_PROPERTY_GET_TYPE, &opt, ctx);
                 if (r != M_PROPERTY_OK)
                     goto err;
-                union m_option_value val = {0};
+                union m_option_value val = m_option_value_default;
                 r = get_item(n, M_PROPERTY_GET, &val, ctx);
                 if (r != M_PROPERTY_OK)
                     goto err;
