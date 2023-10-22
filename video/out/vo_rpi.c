@@ -477,7 +477,7 @@ static void wait_next_vsync(struct vo *vo)
 {
     struct priv *p = vo->priv;
     mp_mutex_lock(&p->display_mutex);
-    int64_t end = mp_time_ns_add(mp_time_ns(), 0.050);
+    int64_t end = mp_time_ns() + MP_TIME_MS_TO_NS(50);
     int64_t old = p->vsync_counter;
     while (old == p->vsync_counter && !p->reload_display) {
         if (mp_cond_timedwait_until(&p->display_cond, &p->display_mutex, end))

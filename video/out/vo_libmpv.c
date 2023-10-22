@@ -500,7 +500,7 @@ static void flip_page(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
     struct mpv_render_context *ctx = p->ctx;
-    int64_t until = mp_time_ns_add(mp_time_ns(), 0.2);
+    int64_t until = mp_time_ns() + MP_TIME_MS_TO_NS(200);
 
     mp_mutex_lock(&ctx->lock);
 

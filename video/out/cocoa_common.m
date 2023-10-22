@@ -787,7 +787,7 @@ static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
 
     // Wait until a new frame with the new size was rendered. For some reason,
     // Cocoa requires this to be done before drawRect() returns.
-    int64_t e = mp_time_ns_add(mp_time_ns(), 0.1);
+    int64_t e = mp_time_ns() + MP_TIME_MS_TO_NS(100);
     while (s->frame_w != width && s->frame_h != height && s->vo_ready) {
         if (mp_cond_timedwait_until(&s->wakeup, &s->lock, e))
             break;
