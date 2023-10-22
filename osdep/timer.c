@@ -16,7 +16,6 @@
  */
 
 #include <stdlib.h>
-#include <pthread.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/time.h>
@@ -66,32 +65,3 @@ int64_t mp_time_ns_add(int64_t time_ns, double timeout_sec)
         return 1;
     return time_ns + ti;
 }
-
-#if !HAVE_WIN32_THREADS
-
-struct timespec mp_time_ns_to_realtime(int64_t time_ns)
-{
-    struct timespec ts = {0};
-    if (clock_gettime(CLOCK_REALTIME, &ts) != 0)
-        return ts;
-    int64_t time_rel = time_ns - mp_time_ns();
-
-    // clamp to 1000 days in the future
-    time_rel = MPMIN(time_rel, 1000 * 24 * 60 * 60 * INT64_C(1000000000));
-    ts.tv_sec += time_rel / INT64_C(1000000000);
-    ts.tv_nsec += time_rel % INT64_C(1000000000);
-
-    if (ts.tv_nsec >= INT64_C(1000000000)) {
-        ts.tv_sec++;
-        ts.tv_nsec -= INT64_C(1000000000);
-    }
-
-    return ts;
-}
-
-struct timespec mp_rel_time_to_timespec(double timeout_sec)
-{
-    return mp_time_ns_to_realtime(mp_time_ns_add(mp_time_ns(), timeout_sec));
-}
-
-#endif

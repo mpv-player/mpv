@@ -1,7 +1,6 @@
 #include "common/common.h"
 #include "osdep/timer.h"
 #include "test_utils.h"
-#include "config.h"
 
 #include <time.h>
 #include <sys/time.h>
@@ -37,21 +36,6 @@ int main(void)
         const int64_t test2 = INT64_MAX - MP_TIME_S_TO_NS(20);
         assert_int_equal(mp_time_ns_add(test2, 20.44), INT64_MAX);
     }
-
-#if !HAVE_WIN32_THREADS
-    /* conversion */
-    {
-        struct timeval tv;
-        struct timespec ts;
-        gettimeofday(&tv, NULL);
-        ts = mp_time_ns_to_realtime(mp_time_ns());
-        assert_true(llabs(tv.tv_sec - ts.tv_sec) <= 1);
-
-        gettimeofday(&tv, NULL);
-        ts = mp_rel_time_to_timespec(0.0);
-        assert_true(llabs(tv.tv_sec - ts.tv_sec) <= 1);
-    }
-#endif
 
     return 0;
 }
