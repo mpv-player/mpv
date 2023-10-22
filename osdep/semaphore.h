@@ -32,28 +32,6 @@ int mp_sem_timedwait(mp_sem_t *sem, const struct timespec *abs_timeout);
 int mp_sem_post(mp_sem_t *sem);
 int mp_sem_destroy(mp_sem_t *sem);
 
-#undef sem_init
-#undef sem_wait
-#undef sem_trywait
-#undef sem_timedwait
-#undef sem_post
-#undef sem_getvalue
-#undef sem_destroy
-#undef sem_getvalue
-#undef sem_t
-#undef SEM_VALUE_MAX
-
-#define sem_init        mp_sem_init
-#define sem_wait        mp_sem_wait
-#define sem_trywait     mp_sem_trywait
-#define sem_timedwait   mp_sem_timedwait
-#define sem_post        mp_sem_post
-#define sem_destroy     mp_sem_destroy
-#define sem_t           mp_sem_t
-#define SEM_VALUE_MAX   MP_SEM_VALUE_MAX
-
-#define sem_getvalue    (void)
-
 #endif
 
 #endif
