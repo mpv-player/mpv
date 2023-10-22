@@ -13,7 +13,7 @@
 
 struct dr_helper {
     mp_mutex thread_lock;
-    mp_thread thread;
+    mp_thread_id thread_id;
     bool thread_valid; // (POSIX defines no "unset" mp_thread value yet)
 
     struct mp_dispatch_queue *dispatch;
@@ -57,7 +57,7 @@ void dr_helper_acquire_thread(struct dr_helper *dr)
     mp_mutex_lock(&dr->thread_lock);
     assert(!dr->thread_valid); // fails on API user errors
     dr->thread_valid = true;
-    dr->thread = mp_thread_self();
+    dr->thread_id = mp_thread_current_id();
     mp_mutex_unlock(&dr->thread_lock);
 }
 
@@ -66,7 +66,7 @@ void dr_helper_release_thread(struct dr_helper *dr)
     mp_mutex_lock(&dr->thread_lock);
     // Fails on API user errors.
     assert(dr->thread_valid);
-    assert(mp_thread_equal(dr->thread, mp_thread_self()));
+    assert(mp_thread_id_equal(dr->thread_id, mp_thread_current_id()));
     dr->thread_valid = false;
     mp_mutex_unlock(&dr->thread_lock);
 }
@@ -94,7 +94,7 @@ static void free_dr_buffer_on_dr_thread(void *opaque, uint8_t *data)
 
     mp_mutex_lock(&dr->thread_lock);
     bool on_this_thread =
-        dr->thread_valid && mp_thread_equal(ctx->dr->thread, mp_thread_self());
+        dr->thread_valid && mp_thread_id_equal(ctx->dr->thread_id, mp_thread_current_id());
     mp_mutex_unlock(&dr->thread_lock);
 
     // The image could be unreffed even on the DR thread. In practice, this

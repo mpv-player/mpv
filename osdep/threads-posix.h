@@ -28,6 +28,7 @@ typedef pthread_cond_t  mp_cond;
 typedef pthread_mutex_t mp_mutex;
 typedef pthread_mutex_t mp_static_mutex;
 typedef pthread_once_t  mp_once;
+typedef pthread_t       mp_thread_id;
 typedef pthread_t       mp_thread;
 
 #define MP_STATIC_COND_INITIALIZER PTHREAD_COND_INITIALIZER
@@ -105,8 +106,11 @@ static inline int mp_cond_timedwait_until(mp_cond *cond, mp_mutex *mutex, int64_
 
 #define mp_thread_create(t, f, a) pthread_create(t, NULL, f, a)
 #define mp_thread_join(t)         pthread_join(t, NULL)
-#define mp_thread_self            pthread_self
-#define mp_thread_equal           pthread_equal
+#define mp_thread_join_id(t)      pthread_join(t, NULL)
+#define mp_thread_detach          pthread_detach
+#define mp_thread_current_id      pthread_self
+#define mp_thread_id_equal(a, b)  ((a) == (b))
+#define mp_thread_get_id(thread)  (thread)
 
 static inline void mp_thread_set_name(const char *name)
 {
@@ -123,7 +127,7 @@ static inline void mp_thread_set_name(const char *name)
 #endif
 }
 
-static inline int64_t mp_thread_cpu_time_ns(mp_thread thread)
+static inline int64_t mp_thread_cpu_time_ns(mp_thread_id thread)
 {
 #if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0 && defined(_POSIX_THREAD_CPUTIME)
     clockid_t id;

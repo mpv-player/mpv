@@ -92,8 +92,6 @@ static int ipc_write_str(struct client_arg *client, const char *buf)
 
 static MP_THREAD_VOID client_thread(void *p)
 {
-    pthread_detach(mp_thread_self());
-
     // We don't use MSG_NOSIGNAL because the moldy fruit OS doesn't support it.
     struct sigaction sa = { .sa_handler = SIG_IGN, .sa_flags = SA_RESTART };
     sigfillset(&sa.sa_mask);
@@ -234,6 +232,7 @@ static bool ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client,
     mp_thread client_thr;
     if (mp_thread_create(&client_thr, client_thread, client))
         goto err;
+    mp_thread_detach(client_thr);
 
     return true;
 
