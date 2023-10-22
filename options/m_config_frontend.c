@@ -749,7 +749,7 @@ int m_config_set_option_cli(struct m_config *config, struct bstr name,
                    BSTR_P(name), BSTR_P(param), flags);
     }
 
-    union m_option_value val = {0};
+    union m_option_value val = m_option_value_default;
 
     // Some option types are "impure" and work on the existing data.
     // (Prime examples: --vf-add, --sub-file)
@@ -783,7 +783,7 @@ int m_config_set_option_node(struct m_config *config, bstr name,
 
     // Do this on an "empty" type to make setting the option strictly overwrite
     // the old value, as opposed to e.g. appending to lists.
-    union m_option_value val = {0};
+    union m_option_value val = m_option_value_default;
 
     if (data->format == MPV_FORMAT_STRING) {
         bstr param = bstr0(data->u.string);
@@ -868,9 +868,8 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
         }
         char *def = NULL;
         const void *defptr = m_config_get_co_default(config, co);
-        const union m_option_value default_value = {0};
         if (!defptr)
-            defptr = &default_value;
+            defptr = &m_option_value_default;
         if (defptr)
             def = m_option_pretty_print(opt, defptr);
         if (def) {
