@@ -602,7 +602,7 @@ static void *core_thread(void *p)
 {
     struct MPContext *mpctx = p;
 
-    mpthread_set_name("mpv core");
+    mpthread_set_name("core");
 
     while (!mpctx->initialized && mpctx->stop_play != PT_QUIT)
         mp_idle(mpctx);

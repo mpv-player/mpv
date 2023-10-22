@@ -1102,10 +1102,10 @@ static void *dec_thread(void *ptr)
 {
     struct priv *p = ptr;
 
-    char *t_name = "?";
+    char *t_name = "dec/?";
     switch (p->header->type) {
-    case STREAM_VIDEO: t_name = "vdec"; break;
-    case STREAM_AUDIO: t_name = "adec"; break;
+    case STREAM_VIDEO: t_name = "dec/video"; break;
+    case STREAM_AUDIO: t_name = "dec/audio"; break;
     }
     mpthread_set_name(t_name);
 

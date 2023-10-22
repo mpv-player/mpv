@@ -408,7 +408,7 @@ static void quit_request_sighandler(int signum)
 
 static void *terminal_thread(void *ptr)
 {
-    mpthread_set_name("terminal");
+    mpthread_set_name("terminal/input");
     bool stdin_ok = read_terminal; // if false, we still wait for SIGTERM
     while (1) {
         getch2_poll();
