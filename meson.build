@@ -367,9 +367,6 @@ pthread_debug = get_option('pthread-debug').require(
     error_message: 'win32-threads was found!',
 )
 features += {'pthread-debug': pthread_debug.allowed()}
-if features['pthread-debug']
-    flags += '-DMP_PTHREAD_DEBUG'
-endif
 
 add_project_arguments(flags, language: 'c')
 add_project_link_arguments(link_flags, language: ['c', 'objc'])
