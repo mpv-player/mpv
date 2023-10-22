@@ -85,10 +85,10 @@ static char *script_name_from_filename(void *talloc_ctx, const char *fname)
 
 static void run_script(struct mp_script_args *arg)
 {
-    char name[90];
-    snprintf(name, sizeof(name), "%s (%s)", arg->backend->name,
-             mpv_client_name(arg->client));
+    char *name = talloc_asprintf(NULL, "%s/%s", arg->backend->name,
+                                 mpv_client_name(arg->client));
     mpthread_set_name(name);
+    talloc_free(name);
 
     if (arg->backend->load(arg) < 0)
         MP_ERR(arg, "Could not load %s %s\n", arg->backend->name, arg->filename);

@@ -40,17 +40,16 @@ int mpthread_mutex_init_recursive(pthread_mutex_t *mutex)
 
 void mpthread_set_name(const char *name)
 {
-    char tname[80];
-    snprintf(tname, sizeof(tname), "mpv/%s", name);
 #if HAVE_GLIBC_THREAD_NAME
-    if (pthread_setname_np(pthread_self(), tname) == ERANGE) {
-        tname[15] = '\0'; // glibc-checked kernel limit
+    if (pthread_setname_np(pthread_self(), name) == ERANGE) {
+        char tname[16] = {0}; // glibc-checked kernel limit
+        strncpy(tname, name, sizeof(tname) - 1);
         pthread_setname_np(pthread_self(), tname);
     }
 #elif HAVE_WIN32_INTERNAL_PTHREADS || HAVE_BSD_THREAD_NAME
-    pthread_set_name_np(pthread_self(), tname);
+    pthread_set_name_np(pthread_self(), name);
 #elif HAVE_OSX_THREAD_NAME
-    pthread_setname_np(tname);
+    pthread_setname_np(name);
 #endif
 }
 

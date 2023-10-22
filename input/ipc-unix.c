@@ -105,7 +105,9 @@ static void *client_thread(void *p)
     struct client_arg *arg = p;
     bstr client_msg = { talloc_strdup(NULL, ""), 0 };
 
-    mpthread_set_name(arg->client_name);
+    char *tname = talloc_asprintf(NULL, "ipc/%s", arg->client_name);
+    mpthread_set_name(tname);
+    talloc_free(tname);
 
     int pipe_fd = mpv_get_wakeup_pipe(arg->client);
     if (pipe_fd < 0) {
@@ -302,7 +304,7 @@ static void *ipc_thread(void *p)
 
     struct mp_ipc_ctx *arg = p;
 
-    mpthread_set_name("ipc socket listener");
+    mpthread_set_name("ipc/socket");
 
     MP_VERBOSE(arg, "Starting IPC master\n");
 

@@ -210,7 +210,9 @@ static void *client_thread(void *p)
     DWORD ioerr = 0;
     DWORD r;
 
-    mpthread_set_name(arg->client_name);
+    char *tname = talloc_asprintf(NULL, "ipc/%s", arg->client_name);
+    mpthread_set_name(tname);
+    talloc_free(tname);
 
     arg->write_ol.hEvent = CreateEventW(NULL, TRUE, TRUE, NULL);
     if (!wakeup_event || !ol.hEvent || !arg->write_ol.hEvent) {
@@ -356,7 +358,7 @@ static void *ipc_thread(void *p)
     HANDLE client = INVALID_HANDLE_VALUE;
     int client_num = 0;
 
-    mpthread_set_name("ipc named pipe listener");
+    mpthread_set_name("ipc/named-pipe");
     MP_VERBOSE(arg, "Starting IPC master\n");
 
     SECURITY_ATTRIBUTES sa = {

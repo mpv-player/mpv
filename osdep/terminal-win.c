@@ -161,7 +161,7 @@ static void read_input(HANDLE in)
 
 static void *input_thread_fn(void *ptr)
 {
-    mpthread_set_name("terminal");
+    mpthread_set_name("terminal/input");
     HANDLE in = ptr;
     HANDLE stuff[2] = {in, death};
     while (1) {

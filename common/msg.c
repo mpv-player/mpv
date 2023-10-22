@@ -541,7 +541,7 @@ static void *log_file_thread(void *p)
 {
     struct mp_log_root *root = p;
 
-    mpthread_set_name("log-file");
+    mpthread_set_name("log");
 
     pthread_mutex_lock(&root->log_file_lock);
 
