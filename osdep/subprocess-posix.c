@@ -134,7 +134,7 @@ static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
         as_execvpe(path, opts->exe, opts->args, opts->env ? opts->env : environ);
 
     child_failed:
-        write(p[1], &(char){1}, 1); // shouldn't be able to fail
+        (void)write(p[1], &(char){1}, 1); // shouldn't be able to fail
         _exit(1);
     }
 
