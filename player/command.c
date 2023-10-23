@@ -2710,11 +2710,9 @@ static int mp_property_hdr_metadata(void *ctx, struct m_property *prop,
     if (vo_control(mpctx->video_out, VOCTRL_HDR_METADATA, &data) != VO_TRUE)
         return M_PROPERTY_UNAVAILABLE;
 
-    bool has_hdr10 = data.max_luma;
-    bool has_hdr10plus = data.scene_avg && (data.scene_max[0] ||
-                                            data.scene_max[1] ||
-                                            data.scene_max[2]);
-    bool has_cie_y = data.max_pq_y && data.avg_pq_y;
+    bool has_cie_y     = pl_hdr_metadata_contains(&data, PL_HDR_METADATA_CIE_Y);
+    bool has_hdr10     = pl_hdr_metadata_contains(&data, PL_HDR_METADATA_HDR10);
+    bool has_hdr10plus = pl_hdr_metadata_contains(&data, PL_HDR_METADATA_HDR10PLUS);
 
     struct m_sub_property props[] = {
         {"min-luma",    SUB_PROP_FLOAT(data.min_luma),     .unavailable = !has_hdr10},
