@@ -943,6 +943,13 @@ Program Behavior
         ``all_formats`` is set to 'no', and the stream selection as done by
         youtube-dl (via ``--ytdl-format``) is used.
 
+    ``thumbnails=<all|best|none>``
+        Add thumbnails as video tracks (default: none).
+
+        Thumbnails get downloaded when they are added as tracks, so 'all' can
+        have a noticable impact on how long it takes to open the video when
+        there are a lot of thumbnails.
+
     ``use_manifests=<yes|no>``
         Make mpv use the master manifest URL for formats like HLS and DASH,
         if available, allowing for video/audio selection in runtime (default:

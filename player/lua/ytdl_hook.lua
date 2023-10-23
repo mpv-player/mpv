@@ -8,6 +8,7 @@ local o = {
     use_manifests = false,
     all_formats = false,
     force_all_formats = true,
+    thumbnails = "none",
     ytdl_path = "",
 }
 
@@ -616,7 +617,7 @@ local function formats_to_edl(json, formats, use_all_formats)
     return res
 end
 
-local function add_single_video(json, thumbnail, allthumbs)
+local function add_single_video(json)
     local streamurl = ""
     local format_info = ""
     local max_bitrate = 0
@@ -755,13 +756,13 @@ local function add_single_video(json, thumbnail, allthumbs)
     end
 
     -- add thumbnails
-    if (thumbnail == true) and not (json.thumbnails == nil) then
+    if (o.thumbnails == 'all' or o.thumbnails == 'best') and not (json.thumbnails == nil) then
         local thumb = nil
         local thumb_height = -1
 
         for _, thumb_info in ipairs(json.thumbnails) do
             if not (thumb_info.url == nil) then
-                if (allthumbs == true) then
+                if (o.thumbnails == 'all') then
                     msg.verbose("adding thumbnail")
                     mp.commandv("video-add", thumb_info.url, "auto")
                     thumb_height = 0
@@ -885,8 +886,6 @@ function run_ytdl_hook(url)
     local format = mp.get_property("options/ytdl-format")
     local raw_options = mp.get_property_native("options/ytdl-raw-options")
     local allsubs = true
-    local thumbnail = false
-    local allthumbs = false
     local proxy = nil
     local use_playlist = false
 
@@ -918,11 +917,6 @@ function run_ytdl_hook(url)
         end
         if (param == "sub-lang" or param == "sub-langs" or param == "srt-lang") and (arg ~= "") then
             allsubs = false
-        elseif (param == "write-thumbnail") then
-            thumbnail = true
-        elseif (param == "write-all-thumbnails") then
-            thumbnail = true
-            allthumbs = true
         elseif (param == "proxy") and (arg ~= "") then
             proxy = arg
         elseif (param == "yes-playlist") then
@@ -1094,7 +1088,7 @@ function run_ytdl_hook(url)
 
         elseif self_redirecting_url and #json.entries == 1 then
             msg.verbose("Playlist with single entry detected.")
-            add_single_video(json.entries[1], thumbnail, allthumbs)
+            add_single_video(json.entries[1])
         else
             local playlist_index = parse_yt_playlist(url, json)
             local playlist = {"#EXTM3U"}
@@ -1148,7 +1142,7 @@ function run_ytdl_hook(url)
         end
 
     else -- probably a video
-        add_single_video(json, thumbnail, allthumbs)
+        add_single_video(json)
     end
     msg.debug('script running time: '..os.clock()-start_time..' seconds')
 end
