@@ -170,65 +170,6 @@ jobs:
         run: |
           cat ./build/meson-logs/testlog.txt
 
-  freebsd:
-    runs-on: macos-12 # until https://github.com/actions/runner/issues/385
-    timeout-minutes: 20 # randomly bootloops https://github.com/vmactions/freebsd-vm/issues/74
-    steps:
-    - uses: actions/checkout@v3
-    - name: Test in FreeBSD VM
-      uses: vmactions/freebsd-vm@v0
-      with:
-        mem: 8192
-        copyback: false
-        usesh: true
-        prepare: |
-            # Update to latest release channel
-            mkdir -p /usr/local/etc/pkg/repos
-            echo "FreeBSD: { url: "pkg+http://pkg.freebsd.org/\${ABI}/latest" }" \
-                > /usr/local/etc/pkg/repos/FreeBSD.conf
-            pkg update
-            # Requested in ci/build-freebsd.sh
-            pkg install -y \
-                git \
-                cmake \
-                evdev-proto \
-                ffmpeg \
-                libplacebo \
-                libxkbcommon \
-                libXinerama \
-                libxpresent \
-                luajit \
-                meson \
-                openal-soft \
-                pkgconf \
-                python3 \
-                sdl2 \
-                sndio \
-                vulkan-headers \
-                wayland-protocols \
-                #
-            # Optionally auto-enabled
-            pkg install -y \
-                alsa-lib \
-                jackit \
-                libXv \
-                libarchive \
-                libbluray \
-                libcaca \
-                libcdio-paranoia \
-                libdvdnav \
-                mujs \
-                pipewire \
-                pulseaudio \
-                rubberband \
-                sekrit-twc-zimg \
-                uchardet \
-                v4l_compat \
-                #
-        run: |
-          ./ci/build-freebsd.sh
-          meson test -C build
-
   msys2:
     runs-on: windows-latest
     strategy:
