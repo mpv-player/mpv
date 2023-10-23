@@ -9,11 +9,11 @@ meson setup build \
     --werror      \
     -Dlibplacebo:werror=false \
     -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
+    -Diconv=disabled \
     -Dlibmpv=true \
     -Dlua=enabled \
     -Degl-drm=enabled \
     -Dopenal=enabled \
-    -Dsdl2=enabled \
     -Dsndio=enabled \
     -Dtests=true \
     -Dvdpau=enabled \
