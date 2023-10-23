@@ -759,6 +759,7 @@ local function add_single_video(json)
     if (o.thumbnails == 'all' or o.thumbnails == 'best') and not (json.thumbnails == nil) then
         local thumb = nil
         local thumb_height = -1
+        local thumb_preference = nil
 
         for _, thumb_info in ipairs(json.thumbnails) do
             if not (thumb_info.url == nil) then
@@ -766,9 +767,11 @@ local function add_single_video(json)
                     msg.verbose("adding thumbnail")
                     mp.commandv("video-add", thumb_info.url, "auto")
                     thumb_height = 0
-                elseif ((thumb_info.height or 0) > thumb_height) then
+                elseif (thumb_preference ~= nil and thumb_info.preference > thumb_preference) or
+                    (thumb_preference == nil and ((thumb_info.height or 0) > thumb_height)) then
                     thumb = thumb_info.url
                     thumb_height = thumb_info.height or 0
+                    thumb_preference = thumb_info.preference
                 end
             end
         end
