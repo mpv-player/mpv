@@ -55,7 +55,7 @@ const static dmabuf_interop_init interop_inits[] = {
 #if HAVE_DMABUF_INTEROP_GL
     dmabuf_interop_gl_init,
 #endif
-#if HAVE_DMABUF_INTEROP_PL
+#if HAVE_VAAPI
     dmabuf_interop_pl_init,
 #endif
 #if HAVE_DMABUF_WAYLAND

@@ -262,7 +262,7 @@ struct vo_frame {
 struct vo_vsync_info {
     // mp_time_ns() timestamp at which the last queued frame will likely be
     // displayed (this is in the future, unless the frame is instantly output).
-    // -1 if unset or unsupported.
+    // 0 or lower if unset or unsupported.
     // This implies the latency of the output.
     int64_t last_queue_display_time;
 

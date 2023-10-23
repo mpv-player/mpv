@@ -25,12 +25,6 @@
 #include "misc/bstr.h"
 #include "video/csputils.h"
 
-#if BYTE_ORDER == BIG_ENDIAN
-#define MP_SELECT_LE_BE(LE, BE) BE
-#else
-#define MP_SELECT_LE_BE(LE, BE) LE
-#endif
-
 #define MP_MAX_PLANES 4
 #define MP_NUM_COMPONENTS 4
 

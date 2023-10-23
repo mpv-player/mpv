@@ -1,1 +1,2 @@
-/subprojects
+/subprojects/*
+!/subprojects/libplacebo.wrap

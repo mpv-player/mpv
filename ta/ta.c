@@ -13,17 +13,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <assert.h>
 
 #define TA_NO_WRAPPERS
 #include "ta.h"
-
-// Note: the actual minimum alignment is dictated by malloc(). It doesn't
-//       make sense to set this value higher than malloc's alignment.
-#define MIN_ALIGN 16
 
 #if !defined(TA_MEMORY_DEBUGGING)
     #if !defined(NDEBUG)
@@ -52,6 +49,7 @@ struct ta_header {
 
 #define CANARY 0xD3ADB3EF
 
+#define MIN_ALIGN _Alignof(max_align_t)
 union aligned_header {
     struct ta_header ta;
     // Make sure to satisfy typical alignment requirements

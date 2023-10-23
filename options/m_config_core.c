@@ -105,8 +105,6 @@ struct m_group_data {
     uint64_t ts;        // timestamp of the data copy
 };
 
-static const union m_option_value default_value = {0};
-
 static void add_sub_group(struct m_config_shadow *shadow, const char *name_prefix,
                           int parent_group_index, int parent_ptr,
                           const struct m_sub_options *subopts);
@@ -241,7 +239,7 @@ const void *m_config_shadow_get_opt_default(struct m_config_shadow *shadow,
     if (subopt->defaults)
         return (char *)subopt->defaults + opt->offset;
 
-    return &default_value;
+    return &m_option_value_default;
 }
 
 void *m_config_cache_get_opt_data(struct m_config_cache *cache, int32_t id)

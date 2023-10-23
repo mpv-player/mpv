@@ -76,9 +76,7 @@ static const struct vo_driver *const video_out_drivers[] =
     &video_out_mediacodec_embed,
 #endif
     &video_out_gpu,
-#if HAVE_LIBPLACEBO
     &video_out_gpu_next,
-#endif
 #if HAVE_VDPAU
     &video_out_vdpau,
 #endif
@@ -425,7 +423,7 @@ static double vsync_stddef(struct vo *vo, double ref_vsync)
     return sqrt(jitter / in->num_vsync_samples);
 }
 
-#define MAX_VSYNC_SAMPLES 200
+#define MAX_VSYNC_SAMPLES 1000
 
 // Check if we should switch to measured average display FPS if it seems
 // "better" then the system-reported one. (Note that small differences are
@@ -452,10 +450,10 @@ static void check_estimated_display_fps(struct vo *vo)
     }
     if (use_estimated == (fabs(in->vsync_interval - in->nominal_vsync_interval) < 1e9)) {
         if (use_estimated) {
-            MP_VERBOSE(vo, "adjusting display FPS to a value closer to %.3f Hz\n",
+            MP_TRACE(vo, "adjusting display FPS to a value closer to %.3f Hz\n",
                        1e9 / in->estimated_vsync_interval);
         } else {
-            MP_VERBOSE(vo, "switching back to assuming display fps = %.3f Hz\n",
+            MP_TRACE(vo, "switching back to assuming display fps = %.3f Hz\n",
                        1e9 / in->nominal_vsync_interval);
         }
     }
@@ -513,6 +511,14 @@ static void update_vsync_timing_after_swap(struct vo *vo,
     if (in->num_successive_vsyncs <= 2)
         return;
 
+    if (vsync_time <= 0 || vsync_time <= prev_vsync) {
+        in->prev_vsync = 0;
+        return;
+    }
+
+    if (prev_vsync <= 0)
+        return;
+
     if (in->num_vsync_samples >= MAX_VSYNC_SAMPLES)
         in->num_vsync_samples -= 1;
     MP_TARRAY_INSERT_AT(in, in->vsync_samples, in->num_vsync_samples, 0,
@@ -526,8 +532,10 @@ static void update_vsync_timing_after_swap(struct vo *vo,
     }
 
     double avg = 0;
-    for (int n = 0; n < in->num_vsync_samples; n++)
+    for (int n = 0; n < in->num_vsync_samples; n++) {
+        assert(in->vsync_samples[n] > 0);
         avg += in->vsync_samples[n];
+    }
     in->estimated_vsync_interval = avg / in->num_vsync_samples;
     in->estimated_vsync_jitter =
         vsync_stddef(vo, in->vsync_interval) / in->vsync_interval;
@@ -948,7 +956,7 @@ static bool render_frame(struct vo *vo)
             vo->driver->get_vsync(vo, &vsync);
 
         // Make up some crap if presentation feedback is missing.
-        if (vsync.last_queue_display_time < 0)
+        if (vsync.last_queue_display_time <= 0)
             vsync.last_queue_display_time = mp_time_ns();
 
         stats_time_end(in->stats, "video-flip");

@@ -82,6 +82,8 @@ jobs:
       matrix:
         cc:
           - "clang"
+        cxx:
+          - "clang++"
         os:
           - "macos-12"
           - "macos-13"
@@ -104,6 +106,7 @@ jobs:
           ./ci/build-macos.sh
         env:
           CC: "${{ matrix.cc }}"
+          CXX: "${{ matrix.cxx }}"
           TRAVIS_OS_NAME: "${{ matrix.os }}"
 
       - name: Print meson log
@@ -126,12 +129,19 @@ jobs:
     container:
       image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
       env:
-        CC: "${{ matrix.cc }}"
+        CC: "${{ matrix.config.cc }}"
+        CXX: "${{ matrix.config.cxx }}"
     strategy:
       matrix:
-        cc:
-          - "gcc"
-          - "clang"
+        config:
+        - {
+            cc: "gcc",
+            cxx: "g++",
+          }
+        - {
+            cc: "clang",
+            cxx: "clang++",
+          }
     steps:
       - uses: actions/checkout@v3
 
@@ -179,6 +189,7 @@ jobs:
             pkg update
             # Requested in ci/build-freebsd.sh
             pkg install -y \
+                git \
                 cmake \
                 evdev-proto \
                 ffmpeg \

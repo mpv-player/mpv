@@ -100,6 +100,16 @@ static bool select_format(struct priv *p, int input_fmt,
         return false;
     }
 
+    // If there is no capability to do uploads or conversions during uploads,
+    // assume that directly displaying the input format works. Maybe it does,
+    // maybe it doesn't but at this point, it's clear that we simply don't know
+    // and should assume it works, rather than blocking unnecessarily.
+    if (p->num_fmts == 0 && p->num_upload_fmts == 0) {
+        *out_hw_input_fmt = input_fmt;
+        *out_hw_output_fmt = input_fmt;
+        return true;
+    }
+
     // First find the closest hw input fmt. Some hwdec APIs return crazy lists of
     // "supported" formats, which then are not supported or crash (???), so
     // the this is a good way to avoid problems.
@@ -281,8 +291,8 @@ static AVHWFramesConstraints *build_static_constraints(struct mp_hwdec_ctx *ctx)
 
     int num_sw_formats;
     for (num_sw_formats = 0;
-            ctx->supported_formats[num_sw_formats] != 0;
-            num_sw_formats++);
+         ctx->supported_formats && ctx->supported_formats[num_sw_formats] != 0;
+         num_sw_formats++);
 
     cstr->valid_sw_formats =
         av_malloc_array(num_sw_formats + 1,
@@ -523,7 +533,15 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
         return false;
     p->conversion_filter_name = ctx->conversion_filter_name;
 
-    return p->num_upload_fmts > 0;
+    /*
+     * In the case of needing to do hardware conversion vs uploading, we will
+     * still consider ourselves to be successful if we see no available upload
+     * formats for a conversion and there is no conversion filter. This means
+     * that we cannot do conversions at all, and should just assume we can pass
+     * through whatever format we are given.
+     */
+    return p->num_upload_fmts > 0 ||
+           (use_conversion_filter && !p->conversion_filter_name);
 }
 
 struct mp_hwupload mp_hwupload_create(struct mp_filter *parent, int hw_imgfmt,
