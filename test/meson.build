@@ -118,26 +118,26 @@ if libavutil.version().version_compare('>= 57.39.101')
 
 # The CI can randomly fail if libavutil isn't explicitly linked again here.
     img_format = executable('img-format', 'img_format.c', include_directories: incdir,
-                            dependencies: libavutil, link_with: [img_utils, test_utils])
+                            dependencies: [libavutil, libplacebo], link_with: [img_utils, test_utils])
     test('img-format', img_format, args: [refdir, outdir], suite: 'ffmpeg')
 
 
     scale_sws_objects = libmpv.extract_objects('video/image_writer.c',
                                                'video/repack.c')
     scale_sws = executable('scale-sws', ['scale_sws.c', 'scale_test.c'], include_directories: incdir,
-                           objects: scale_sws_objects, dependencies: [libavutil, libavformat, libswscale, jpeg, zimg],
+                           objects: scale_sws_objects, dependencies: [libavutil, libavformat, libswscale, jpeg, zimg, libplacebo],
                            link_with: [img_utils, test_utils])
     test('scale-sws', scale_sws, args: [refdir, outdir], suite: 'ffmpeg')
 
     if features['zimg']
         repack_objects = libmpv.extract_objects('sub/draw_bmp.c')
         repack = executable('repack', 'repack.c', include_directories: incdir, objects: repack_objects,
-                            dependencies: [libavutil, libswscale, zimg], link_with: [img_utils, test_utils])
+                            dependencies: [libavutil, libswscale, zimg, libplacebo], link_with: [img_utils, test_utils])
         test('repack', repack, args: [refdir, outdir], suite: 'ffmpeg')
 
         scale_zimg_objects = libmpv.extract_objects('video/image_writer.c')
         scale_zimg = executable('scale-zimg', ['scale_test.c', 'scale_zimg.c'], include_directories: incdir,
-                                objects: scale_zimg_objects, dependencies:[libavutil, libavformat, libswscale, jpeg, zimg],
+                                objects: scale_zimg_objects, dependencies:[libavutil, libavformat, libswscale, jpeg, zimg, libplacebo],
                                 link_with: [img_utils, test_utils])
         test('scale-zimg', scale_zimg, args: [refdir, outdir], suite: 'ffmpeg')
     endif
