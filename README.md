@@ -92,6 +92,15 @@ Example:
     meson compile -C build
     meson install -C build
 
+A libplacebo meson wrap is also present for building mpv without having
+libplacebo available during build time. When the meson wrap is executed,
+libplacebo will be recursively cloned with all its dependencies and statically
+linked with mpv.
+
+Users can also force mpv to fallback to the wrap file:
+
+    meson setup build --force-fallback-for=libplacebo
+
 Essential dependencies (incomplete list):
 
 - gcc or clang
@@ -100,6 +109,7 @@ Essential dependencies (incomplete list):
 - Audio output development headers (libasound/ALSA, pulseaudio)
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libavfilter
   and either libswresample or libavresample)
+- libplacebo
 - zlib
 - iconv (normally provided by the system libc)
 - libass (OSD, OSC, text subtitles)
