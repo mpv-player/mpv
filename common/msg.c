@@ -959,7 +959,7 @@ const int mp_mpv_log_levels[MSGL_MAX + 1] = {
 int mp_msg_find_level(const char *s)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(mp_log_levels); n++) {
-        if (mp_log_levels[n] && !strcmp(s, mp_log_levels[n]))
+        if (mp_log_levels[n] && !strcasecmp(s, mp_log_levels[n]))
             return n;
     }
     return -1;
