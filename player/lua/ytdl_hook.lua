@@ -761,7 +761,8 @@ local function add_single_video(json)
         local thumb_height = -1
         local thumb_preference = nil
 
-        for _, thumb_info in ipairs(json.thumbnails) do
+        for i = #json.thumbnails, 1, -1 do
+            local thumb_info = json.thumbnails[i]
             if not (thumb_info.url == nil) then
                 if (o.thumbnails == 'all') then
                     msg.verbose("adding thumbnail")
