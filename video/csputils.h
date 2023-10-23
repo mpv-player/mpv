@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <libplacebo/colorspace.h>
+
 #include "options/m_option.h"
 
 /* NOTE: the csp and levels AUTO values are converted to specific ones
@@ -138,24 +140,6 @@ extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
 
 #define MP_STEREO3D_NAME_DEF(x, def) \
     (MP_STEREO3D_NAME(x) ? MP_STEREO3D_NAME(x) : (def))
-
-struct mp_hdr_metadata {
-    // HDR10
-    // Mastering display metadata
-    float min_luma, max_luma;       // min/max luminance (in cd/m²)
-
-    // Content light level
-    float max_cll;                  // max content light level (in cd/m²)
-    float max_fall;                 // max frame average light level (in cd/m²)
-
-    // HDR10+
-    float scene_max[3];             // maxRGB in cd/m² per component (RGB)
-    float scene_avg;                // average of maxRGB in cd/m²
-
-    // CIE Y
-    float max_pq_y;                 // maximum PQ luminance (in PQ, 0-1)
-    float avg_pq_y;                 // averaged PQ luminance (in PQ, 0-1)
-};
 
 struct mp_colorspace {
     enum mp_csp space;

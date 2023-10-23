@@ -1436,20 +1436,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
 
-    case VOCTRL_HDR_METADATA: {
-        struct mp_hdr_metadata *hdr = data;
-        hdr->min_luma = p->last_hdr_metadata.min_luma;
-        hdr->max_luma = p->last_hdr_metadata.max_luma;
-        hdr->max_cll = p->last_hdr_metadata.max_cll;
-        hdr->max_fall = p->last_hdr_metadata.max_fall;
-        hdr->scene_max[0] = p->last_hdr_metadata.scene_max[0];
-        hdr->scene_max[1] = p->last_hdr_metadata.scene_max[1];
-        hdr->scene_max[2] = p->last_hdr_metadata.scene_max[2];
-        hdr->scene_avg = p->last_hdr_metadata.scene_avg;
-        hdr->max_pq_y = p->last_hdr_metadata.max_pq_y;
-        hdr->avg_pq_y = p->last_hdr_metadata.avg_pq_y;
+    case VOCTRL_HDR_METADATA:
+        *(struct pl_hdr_metadata *) data = p->last_hdr_metadata;
         return true;
-    }
 
     case VOCTRL_SCREENSHOT:
         video_screenshot(vo, data);
