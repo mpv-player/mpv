@@ -2,6 +2,7 @@
 
 meson setup build            \
   --werror                   \
+  -Dlibplacebo:werror=false  \
   -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
   -D cdda=enabled            \
   -D d3d-hwaccel=enabled     \

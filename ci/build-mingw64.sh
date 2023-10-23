@@ -269,6 +269,7 @@ rm -rf $build
 
 meson setup $build --cross-file "$prefix_dir/crossfile" \
     --werror                   \
+    -Dlibplacebo:werror=false  \
     -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
     --buildtype debugoptimized \
     -Dlibmpv=true -Dlua=luajit \
