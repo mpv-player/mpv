@@ -487,10 +487,9 @@ error_out:
 static int check_loglevel(lua_State *L, int arg)
 {
     const char *level = luaL_checkstring(L, arg);
-    for (int n = 0; n < MSGL_MAX; n++) {
-        if (mp_log_levels[n] && strcasecmp(mp_log_levels[n], level) == 0)
-            return n;
-    }
+    int n = mp_msg_find_level(level);
+    if (n >= 0)
+        return n;
     luaL_error(L, "Invalid log level '%s'", level);
     abort();
 }
