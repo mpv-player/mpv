@@ -2706,7 +2706,7 @@ static int mp_property_hdr_metadata(void *ctx, struct m_property *prop,
     if (valid != M_PROPERTY_VALID)
         return valid;
 
-    struct mp_hdr_metadata data;
+    struct pl_hdr_metadata data;
     if (vo_control(mpctx->video_out, VOCTRL_HDR_METADATA, &data) != VO_TRUE)
         return M_PROPERTY_UNAVAILABLE;
 
