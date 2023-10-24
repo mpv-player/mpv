@@ -171,8 +171,8 @@ jobs:
           cat ./build/meson-logs/testlog.txt
 
   freebsd:
-    runs-on: macos-13 # until https://github.com/actions/runner/issues/385
-    timeout-minutes: 20 # avoid any weirdness with the VM
+    runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
+    timeout-minutes: 30 # avoid any weirdness with the VM
     steps:
     - uses: actions/checkout@v3
     - name: Test in FreeBSD VM
