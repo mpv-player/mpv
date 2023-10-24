@@ -352,6 +352,7 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
     if (mpctx->audio_status != STATUS_PLAYING)
         return;
 
+    mpctx->delay -= frame_time;
     double a_pts = written_audio_pts(mpctx) + opts->audio_delay - mpctx->delay;
     double av_delay = a_pts - v_pts;
 
@@ -392,7 +393,6 @@ static void handle_new_frame(struct MPContext *mpctx)
             frame_time = 0;
         }
     }
-    mpctx->delay -= frame_time;
     mpctx->time_frame += frame_time / mpctx->video_speed;
     if (mpctx->video_status >= STATUS_PLAYING)
         adjust_sync(mpctx, pts, frame_time);
