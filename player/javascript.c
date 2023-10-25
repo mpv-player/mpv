@@ -535,8 +535,7 @@ static int s_load_javascript(struct mp_script_args *args)
     js_Alloc alloc_fn = NULL;
     void *actx = NULL;
 
-    char *mem_report = getenv("MPV_LEAK_REPORT");
-    if (mem_report && strcmp(mem_report, "1") == 0) {
+    if (args->mpctx->opts->js_memory_report) {
         alloc_fn = mp_js_alloc;
         actx = ctx;
     }

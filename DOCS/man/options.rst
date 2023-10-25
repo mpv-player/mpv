@@ -993,6 +993,12 @@ Program Behavior
         - ``--ytdl-raw-options=proxy=[http://127.0.0.1:3128]``
         - ``--ytdl-raw-options-append=proxy=http://127.0.0.1:3128``
 
+``--js-memory-report=<yes|no>``
+    Enable memory reporting for javascript scripts in the stats overlay.
+    This is disabled by default because it has an overhead and increases
+    memory usage. This option will only work if it is enabled before mpv is
+    started.
+
 ``--load-stats-overlay=<yes|no>``
     Enable the builtin script that shows useful playback information on a key
     binding (default: yes). By default, the ``i`` key is used (``I`` to make

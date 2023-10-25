@@ -490,6 +490,9 @@ static const m_option_t mp_opts[] = {
     {"script-opts", OPT_KEYVALUELIST(script_opts)},
     {"load-scripts", OPT_BOOL(auto_load_scripts)},
 #endif
+#if HAVE_JAVASCRIPT
+    {"js-memory-report", OPT_BOOL(js_memory_report)},
+#endif
 #if HAVE_LUA
     {"osc", OPT_BOOL(lua_load_osc), .flags = UPDATE_BUILTIN_SCRIPTS},
     {"ytdl", OPT_BOOL(lua_load_ytdl), .flags = UPDATE_BUILTIN_SCRIPTS},
