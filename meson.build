@@ -23,8 +23,7 @@ libavutil = dependency('libavutil', version: '>= 56.70.100')
 libswresample = dependency('libswresample', version: '>= 3.9.100')
 libswscale = dependency('libswscale', version: '>= 5.9.100')
 
-libplacebo = dependency('libplacebo', version: '>=6.338.0', fallback: ['libplacebo', 'libplacebo'],
-    default_options: ['default_library=static', 'demos=false'])
+libplacebo = dependency('libplacebo', version: '>=6.338.0')
 
 libass = dependency('libass', version: '>= 0.12.2')
 
