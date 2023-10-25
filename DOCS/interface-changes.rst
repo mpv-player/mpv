@@ -100,6 +100,13 @@ Interface changes
     - add `playlist-next-playlist` and `playlist-prev-playlist` commands
     - change `video-codec` to show description or name, not both
     - deprecate `--cdda-toc-bias` option, offsets are always checked now
+    - disable `--allow-delayed-peak-detect` by default
+    - rename `--fps` to `--container-fps-override`
+    - rename `--override-display-fps` to `--display-fps-override`
+    - rename `--sub-ass-force-style` to `--sub-ass-style-overrides`
+    - rename `--screenshot-directory` to `--screenshot-dir`
+    - rename `--watch-later-directory` to `--watch-later-dir`
+    - rename `--play-dir` to `--play-direction`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

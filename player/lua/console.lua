@@ -621,48 +621,101 @@ function next_word()
     update()
 end
 
--- List of tab-completions:
---   pattern: A Lua pattern used in string:find. Should return the start and
---            end positions of the word to be completed in the first and second
---            capture groups (using the empty parenthesis notation "()")
---   list: A list of candidate completion values.
---   append: An extra string to be appended to the end of a successful
---           completion. It is only appended if 'list' contains exactly one
---           match.
-function build_completers()
-    -- Build a list of commands, properties and options for tab-completion
+local function command_list()
+    local commands = {}
+    for i, command in ipairs(mp.get_property_native('command-list')) do
+        commands[i] = command.name
+    end
+
+    return commands
+end
+
+local function property_list()
     local option_info = {
         'name', 'type', 'set-from-commandline', 'set-locally', 'default-value',
         'min', 'max', 'choices',
     }
-    local cmd_list = {}
-    for i, cmd in ipairs(mp.get_property_native('command-list')) do
-        cmd_list[i] = cmd.name
-    end
-    local prop_list = mp.get_property_native('property-list')
-    for _, opt in ipairs(mp.get_property_native('options')) do
-        prop_list[#prop_list + 1] = 'options/' .. opt
-        prop_list[#prop_list + 1] = 'file-local-options/' .. opt
-        prop_list[#prop_list + 1] = 'option-info/' .. opt
-        for _, p in ipairs(option_info) do
-            prop_list[#prop_list + 1] = 'option-info/' .. opt .. '/' .. p
+
+    local properties = mp.get_property_native('property-list')
+
+    for _, option in ipairs(mp.get_property_native('options')) do
+        properties[#properties + 1] = 'options/' .. option
+        properties[#properties + 1] = 'file-local-options/' .. option
+        properties[#properties + 1] = 'option-info/' .. option
+
+        for _, sub_property in ipairs(option_info) do
+            properties[#properties + 1] = 'option-info/' .. option .. '/' ..
+                                          sub_property
         end
     end
 
-    return {
-        { pattern = '^%s*()[%w_-]+()$', list = cmd_list, append = ' ' },
-        { pattern = '^%s*set%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*set%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-        { pattern = '^%s*add%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*add%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-        { pattern = '^%s*cycle%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*cycle%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-        { pattern = '^%s*cycle%-values%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*cycle%-values%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-        { pattern = '^%s*multiply%s+()[%w_/-]+()$', list = prop_list, append = ' ' },
-        { pattern = '^%s*multiply%s+"()[%w_/-]+()$', list = prop_list, append = '" ' },
-        { pattern = '${()[%w_/-]+()$', list = prop_list, append = '}' },
+    return properties
+end
+
+local function choice_list(option)
+    local info = mp.get_property_native('option-info/' .. option, {})
+
+    if info.type == 'Flag' then
+        return { 'no', 'yes' }
+    end
+
+    return info.choices or {}
+end
+
+-- List of tab-completions:
+--   pattern: A Lua pattern used in string:match. It should return the start
+--            position of the word to be completed in the first capture (using
+--            the empty parenthesis notation "()"). In patterns with 2
+--            captures, the first determines the completions, and the second is
+--            the start of the word to be completed.
+--   list: A function that returns a list of candidate completion values.
+--   append: An extra string to be appended to the end of a successful
+--           completion. It is only appended if 'list' contains exactly one
+--           match.
+function build_completers()
+    local completers = {
+        { pattern = '^%s*()[%w_-]+$', list = command_list, append = ' ' },
+        { pattern = '${()[%w_/-]+$', list = property_list, append = '}' },
     }
+
+    for _, command in pairs({'set', 'add', 'cycle', 'cycle[-_]values', 'multiply'}) do
+        completers[#completers + 1] = {
+            pattern = '^%s*' .. command .. '%s+()[%w_/-]+$',
+            list = property_list,
+            append = ' ',
+        }
+        completers[#completers + 1] = {
+            pattern = '^%s*' .. command .. '%s+"()[%w_/-]+$',
+            list = property_list,
+            append = '" ',
+        }
+    end
+
+    for _, command in pairs({'set', 'cycle[-_]values'}) do
+        completers[#completers + 1] = {
+            pattern = '^%s*' .. command .. '%s+"?([%w_-]+)"?%s+"()%S*$',
+            list = choice_list,
+            append = command == 'cycle[-_]values' and '" ' or '"',
+        }
+        completers[#completers + 1] = {
+            pattern = '^%s*' .. command .. '%s+"?([%w_-]+)"?%s+()%S*$',
+            list = choice_list,
+            append = command == 'cycle[-_]values' and ' ' or nil,
+        }
+    end
+
+    completers[#completers + 1] = {
+        pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?%s+%S+%s+"()%S*$',
+        list = choice_list,
+        append = '"',
+    }
+    completers[#completers + 1] = {
+        pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?%s+%S+%s+()%S*$',
+        list = choice_list,
+        append = nil,
+    }
+
+    return completers
 end
 
 -- Use 'list' to find possible tab-completions for 'part.'
@@ -698,21 +751,27 @@ function complete()
 
     -- Try the first completer that works
     for _, completer in ipairs(build_completers()) do
-        -- Completer patterns should return the start and end of the word to be
-        -- completed as the first and second capture groups
-        local _, _, s, e = before_cur:find(completer.pattern)
+        -- Completer patterns should return the start of the word to be
+        -- completed as the first capture.
+        local s, s2 = before_cur:match(completer.pattern)
         if not s then
             -- Multiple input commands can be separated by semicolons, so all
             -- completions that are anchored at the start of the string with
             -- '^' can start from a semicolon as well. Replace ^ with ; and try
             -- to match again.
-            _, _, s, e = before_cur:find(completer.pattern:gsub('^^', ';'))
+            s, s2 = before_cur:match(completer.pattern:gsub('^^', ';'))
         end
         if s then
+            local hint
+            if s2 then
+                hint = s
+                s = s2
+            end
+
             -- If the completer's pattern found a word, check the completer's
             -- list for possible completions
-            local part = before_cur:sub(s, e)
-            local completions, prefix = complete_match(part, completer.list)
+            local part = before_cur:sub(s)
+            local completions, prefix = complete_match(part, completer.list(hint))
             if #completions > 0 then
                 -- If there was only one full match from the list, add
                 -- completer.append to the final string. This is normally a
@@ -721,10 +780,7 @@ function complete()
                     prefix = prefix .. (completer.append or '')
                 else
                     table.sort(completions)
-                    suggestion_buffer = {}
-                    for i, completion in ipairs(completions) do
-                        suggestion_buffer[i] = completion
-                    end
+                    suggestion_buffer = completions
                 end
 
                 -- Insert the completion and update

@@ -194,7 +194,7 @@ static bool copy_mtime(const char *f1, const char *f2)
 
 static char *mp_get_playback_resume_dir(struct MPContext *mpctx)
 {
-    char *wl_dir = mpctx->opts->watch_later_directory;
+    char *wl_dir = mpctx->opts->watch_later_dir;
     if (wl_dir && wl_dir[0]) {
         wl_dir = mp_get_user_path(mpctx, mpctx->global, wl_dir);
     } else {

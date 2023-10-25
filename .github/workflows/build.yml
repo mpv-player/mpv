@@ -171,63 +171,53 @@ jobs:
           cat ./build/meson-logs/testlog.txt
 
   freebsd:
-    runs-on: macos-12 # until https://github.com/actions/runner/issues/385
-    timeout-minutes: 20 # randomly bootloops https://github.com/vmactions/freebsd-vm/issues/74
+    runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
+    timeout-minutes: 30 # avoid any weirdness with the VM
     steps:
     - uses: actions/checkout@v3
     - name: Test in FreeBSD VM
-      uses: vmactions/freebsd-vm@v0
+      uses: cross-platform-actions/action@v0.19.1
       with:
-        mem: 8192
-        copyback: false
-        usesh: true
-        prepare: |
-            # Update to latest release channel
-            mkdir -p /usr/local/etc/pkg/repos
-            echo "FreeBSD: { url: "pkg+http://pkg.freebsd.org/\${ABI}/latest" }" \
-                > /usr/local/etc/pkg/repos/FreeBSD.conf
-            pkg update
-            # Requested in ci/build-freebsd.sh
-            pkg install -y \
-                git \
+        operating_system: freebsd
+        version: '13.2'
+        run: |
+            sudo pkg update
+            sudo pkg install -y \
+                alsa-lib \
                 cmake \
                 evdev-proto \
                 ffmpeg \
-                libplacebo \
-                libxkbcommon \
-                libXinerama \
-                libxpresent \
-                luajit \
-                meson \
-                openal-soft \
-                pkgconf \
-                python3 \
-                sdl2 \
-                sndio \
-                vulkan-headers \
-                wayland-protocols \
-                #
-            # Optionally auto-enabled
-            pkg install -y \
-                alsa-lib \
+                git \
+                iconv \
                 jackit \
-                libXv \
                 libarchive \
                 libbluray \
                 libcaca \
                 libcdio-paranoia \
                 libdvdnav \
+                libplacebo \
+                libXinerama \
+                libxkbcommon \
+                libxpresent \
+                libXv \
+                luajit \
+                meson \
                 mujs \
+                openal-soft \
                 pipewire \
+                pkgconf \
                 pulseaudio \
+                python3 \
                 rubberband \
                 sekrit-twc-zimg \
+                sdl2 \
+                sndio \
                 uchardet \
                 v4l_compat \
-                #
-        run: |
-          ./ci/build-freebsd.sh
-          meson test -C build
+                vulkan-headers \
+                wayland-protocols
+            ./ci/build-freebsd.sh
+            meson test -C build
 
   msys2:
     runs-on: windows-latest

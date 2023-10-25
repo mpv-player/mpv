@@ -723,7 +723,8 @@ static void ao_process(struct mp_filter *f)
 
         mpctx->shown_aframes += samples;
         double real_samplerate = mp_aframe_get_rate(af) / mpctx->audio_speed;
-        mpctx->delay += samples / real_samplerate;
+        if (mpctx->video_status == STATUS_PLAYING)
+            mpctx->delay += samples / real_samplerate;
         ao_c->last_out_pts = mp_aframe_end_pts(af);
         update_throttle(mpctx);
 

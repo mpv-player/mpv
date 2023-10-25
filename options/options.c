@@ -164,7 +164,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"keepaspect-window", OPT_BOOL(keepaspect_window)},
     {"hidpi-window-scale", OPT_BOOL(hidpi_window_scale)},
     {"native-fs", OPT_BOOL(native_fs)},
-    {"override-display-fps", OPT_DOUBLE(override_display_fps),
+    {"display-fps-override", OPT_DOUBLE(display_fps_override),
         M_RANGE(0, DBL_MAX)},
     {"video-timing-offset", OPT_DOUBLE(timing_offset), M_RANGE(0.0, 1.0)},
     {"video-sync", OPT_CHOICE(video_sync,
@@ -217,6 +217,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"android-surface-size", OPT_SIZE_BOX(android_surface_size)},
 #endif
     {"swapchain-depth", OPT_INT(swapchain_depth), M_RANGE(1, 8)},
+    {"override-display-fps", OPT_REPLACED("display-fps-override")},
     {0}
 };
 
@@ -304,7 +305,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
             {"no", 0}, {"basic", 1}, {"full", 2}, {"force-601", 3})},
         {"sub-ass-vsfilter-blur-compat", OPT_BOOL(ass_vsfilter_blur_compat)},
         {"embeddedfonts", OPT_BOOL(use_embedded_fonts), .flags = UPDATE_SUB_HARD},
-        {"sub-ass-force-style", OPT_STRINGLIST(ass_force_style_list),
+        {"sub-ass-style-overrides", OPT_STRINGLIST(ass_style_override_list),
             .flags = UPDATE_SUB_HARD},
         {"sub-ass-styles", OPT_STRING(ass_styles_file),
             .flags = M_OPT_FILE | UPDATE_SUB_HARD},
@@ -322,6 +323,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-clear-on-seek", OPT_BOOL(sub_clear_on_seek)},
         {"teletext-page", OPT_INT(teletext_page), M_RANGE(1, 999)},
         {"sub-past-video-end", OPT_BOOL(sub_past_video_end)},
+        {"sub-ass-force-style", OPT_REPLACED("sub-ass-style-overrides")},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
@@ -520,7 +522,7 @@ static const m_option_t mp_opts[] = {
     {"end", OPT_REL_TIME(play_end)},
     {"length", OPT_REL_TIME(play_length)},
 
-    {"play-dir", OPT_CHOICE(play_dir,
+    {"play-direction", OPT_CHOICE(play_dir,
         {"forward", 1}, {"+", 1}, {"backward", -1}, {"-", -1})},
 
     {"rebase-start-time", OPT_BOOL(rebase_start_time)},
@@ -752,7 +754,7 @@ static const m_option_t mp_opts[] = {
         OPT_BOOL(write_filename_in_watch_later_config)},
     {"ignore-path-in-watch-later-config",
         OPT_BOOL(ignore_path_in_watch_later_config)},
-    {"watch-later-directory", OPT_STRING(watch_later_directory),
+    {"watch-later-dir", OPT_STRING(watch_later_dir),
         .flags = M_OPT_FILE},
     {"watch-later-options", OPT_STRINGLIST(watch_later_options)},
 
@@ -813,7 +815,7 @@ static const m_option_t mp_opts[] = {
 
     {"screenshot", OPT_SUBSTRUCT(screenshot_image_opts, screenshot_conf)},
     {"screenshot-template", OPT_STRING(screenshot_template)},
-    {"screenshot-directory", OPT_STRING(screenshot_directory),
+    {"screenshot-dir", OPT_STRING(screenshot_dir),
         .flags = M_OPT_FILE},
     {"screenshot-sw", OPT_BOOL(screenshot_sw)},
 
@@ -884,7 +886,10 @@ static const m_option_t mp_opts[] = {
 
     {"", OPT_SUBSTRUCT(encode_opts, encode_config)},
 
+    {"play-dir", OPT_REPLACED("play-direction")},
+    {"screenshot-directory", OPT_REPLACED("screenshot-dir")},
     {"sub-forced-only", OPT_REPLACED("sub-forced-events-only")},
+    {"watch-later-directory", OPT_REPLACED("watch-later-dir")},
     {0}
 };
 

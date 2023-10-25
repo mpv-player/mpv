@@ -565,7 +565,7 @@ static void update_display_fps(struct vo *vo)
         in->reported_display_fps = fps;
     }
 
-    double display_fps = vo->opts->override_display_fps;
+    double display_fps = vo->opts->display_fps_override;
     if (display_fps <= 0)
         display_fps = in->reported_display_fps;
 

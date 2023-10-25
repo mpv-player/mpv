@@ -284,63 +284,6 @@ static bool demux_mf_read_packet(struct demuxer *demuxer,
     return true;
 }
 
-// map file extension/type to a codec name
-
-static const struct {
-    const char *type;
-    const char *codec;
-} type2format[] = {
-    { "bmp",            "bmp" },
-    { "dpx",            "dpx" },
-    { "j2c",            "jpeg2000" },
-    { "j2k",            "jpeg2000" },
-    { "jp2",            "jpeg2000" },
-    { "jpc",            "jpeg2000" },
-    { "jpeg",           "mjpeg" },
-    { "jpg",            "mjpeg" },
-    { "jps",            "mjpeg" },
-    { "jls",            "ljpeg" },
-    { "thm",            "mjpeg" },
-    { "db",             "mjpeg" },
-    { "pcd",            "photocd" },
-    { "pfm",            "pfm" },
-    { "phm",            "phm" },
-    { "hdr",            "hdr" },
-    { "pcx",            "pcx" },
-    { "png",            "png" },
-    { "pns",            "png" },
-    { "ptx",            "ptx" },
-    { "tga",            "targa" },
-    { "tif",            "tiff" },
-    { "tiff",           "tiff" },
-    { "sgi",            "sgi" },
-    { "sun",            "sunrast" },
-    { "ras",            "sunrast" },
-    { "rs",             "sunrast" },
-    { "ra",             "sunrast" },
-    { "im1",            "sunrast" },
-    { "im8",            "sunrast" },
-    { "im24",           "sunrast" },
-    { "im32",           "sunrast" },
-    { "sunras",         "sunrast" },
-    { "xbm",            "xbm" },
-    { "pam",            "pam" },
-    { "pbm",            "pbm" },
-    { "pgm",            "pgm" },
-    { "pgmyuv",         "pgmyuv" },
-    { "ppm",            "ppm" },
-    { "pnm",            "ppm" },
-    { "gif",            "gif" }, // usually handled by demux_lavf
-    { "pix",            "brender_pix" },
-    { "exr",            "exr" },
-    { "pic",            "pictor" },
-    { "qoi",            "qoi" },
-    { "xface",          "xface" },
-    { "xwd",            "xwd" },
-    { "svg",            "svg" },
-    {0}
-};
-
 static const char *probe_format(mf_t *mf, char *type, enum demux_check check)
 {
     if (check > DEMUX_CHECK_REQUEST)
@@ -351,10 +294,9 @@ static const char *probe_format(mf_t *mf, char *type, enum demux_check check)
         if (p)
             type = p + 1;
     }
-    for (int i = 0; type2format[i].type; i++) {
-        if (type && strcasecmp(type, type2format[i].type) == 0)
-            return type2format[i].codec;
-    }
+    const char *codec = mp_map_type_to_image_codec(type);
+    if (codec)
+        return codec;
     if (check == DEMUX_CHECK_REQUEST) {
         if (!org_type) {
             MP_ERR(mf, "file type was not set! (try --mf-type=ext)\n");

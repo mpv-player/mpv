@@ -69,7 +69,7 @@ typedef struct mp_vo_opts {
     char *mmcss_profile;
     int window_corners;
 
-    double override_display_fps;
+    double display_fps_override;
     double timing_offset;
     int video_sync;
 
@@ -108,7 +108,7 @@ struct mp_subtitle_opts {
     int ass_vsfilter_color_compat;
     bool ass_vsfilter_blur_compat;
     bool use_embedded_fonts;
-    char **ass_force_style_list;
+    char **ass_style_override_list;
     char *ass_styles_file;
     int ass_style_override;
     int ass_hinting;
@@ -261,7 +261,7 @@ typedef struct MPOpts {
     bool position_save_on_quit;
     bool write_filename_in_watch_later_config;
     bool ignore_path_in_watch_later_config;
-    char *watch_later_directory;
+    char *watch_later_dir;
     char **watch_later_options;
     bool pause;
     int keep_open;
@@ -293,7 +293,7 @@ typedef struct MPOpts {
 
     struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;
-    char *screenshot_directory;
+    char *screenshot_dir;
     bool screenshot_sw;
 
     struct m_channels audio_output_channels;

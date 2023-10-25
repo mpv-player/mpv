@@ -214,7 +214,7 @@ static void assobjects_init(struct sd *sd)
     add_subtitle_fonts(sd);
 
     if (opts->ass_style_override)
-        ass_set_style_overrides(ctx->ass_library, opts->ass_force_style_list);
+        ass_set_style_overrides(ctx->ass_library, opts->ass_style_override_list);
 
     ctx->ass_track = ass_new_track(ctx->ass_library);
     ctx->ass_track->track_type = TRACK_TYPE_ASS;
@@ -452,9 +452,9 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
 #endif
     if (converted) {
         bool override_playres = true;
-        char **ass_force_style_list = opts->ass_force_style_list;
-        for (int i = 0; ass_force_style_list && ass_force_style_list[i]; i++) {
-            if (bstr_find0(bstr0(ass_force_style_list[i]), "PlayResX") >= 0)
+        char **ass_style_override_list = opts->ass_style_override_list;
+        for (int i = 0; ass_style_override_list && ass_style_override_list[i]; i++) {
+            if (bstr_find0(bstr0(ass_style_override_list[i]), "PlayResX") >= 0)
                 override_playres = false;
         }
 

@@ -574,7 +574,7 @@ Available mpv-only filters are:
         completely broken (e.g. 0 or NaN). Even if the value is correct,
         if another filter changes the real FPS (by dropping or inserting
         frames), the value of this variable will not be useful. Note that
-        the ``--fps`` command line option overrides this value.
+        the ``--container-fps-override`` command line option overrides this value.
 
         Useful for some filters which insist on having a FPS.
 
