@@ -27,7 +27,6 @@
 #include "misc/bstr.h"
 #include "misc/ctype.h"
 #include "common/common.h"
-#include "osdep/strnlen.h"
 
 #define appendf(ptr, ...) \
     do {(*(ptr)) = talloc_asprintf_append_buffer(*(ptr), __VA_ARGS__);} while(0)

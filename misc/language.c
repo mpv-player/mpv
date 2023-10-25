@@ -20,7 +20,6 @@
 #include "language.h"
 
 #include "common/common.h"
-#include "osdep/strnlen.h"
 
 #include <stdbool.h>
 #include <stddef.h>

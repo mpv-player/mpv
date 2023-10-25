@@ -28,7 +28,6 @@
 #include "audio/format.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
-#include "osdep/strnlen.h"
 #include "ao_wasapi.h"
 
 DEFINE_PROPERTYKEY(mp_PKEY_Device_FriendlyName,

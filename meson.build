@@ -467,7 +467,6 @@ if features['android']
     dependencies += cc.find_library('android')
     sources += files('audio/out/ao_audiotrack.c',
                      'misc/jni.c',
-                     'osdep/android/strnlen.c',
                      'video/out/android_common.c',
                      'video/out/vo_mediacodec_embed.c')
 endif
