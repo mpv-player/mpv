@@ -225,8 +225,8 @@ are missing.
 Memory usage is approximate and does not reflect internal fragmentation.
 
 JS scripts memory reporting is disabled by default because collecting the data
-at the JS side has an overhead. It can be enabled by exporting the env var
-``MPV_LEAK_REPORT=1`` before starting mpv, and will increase JS memory usage.
+at the JS side has an overhead and will increase memory usage. It can be
+enabled by setting the ``--js-memory-report`` option before starting mpv.
 
 If entries have ``/time`` and ``/cpu`` variants, the former gives the real time
 (monotonic clock), while the latter the thread CPU time (only if the
