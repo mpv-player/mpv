@@ -173,13 +173,17 @@ jobs:
   freebsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 30 # avoid any weirdness with the VM
+    env:
+        BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        REPO_URL: ${{ github.repositoryUrl }}
     steps:
     - uses: actions/checkout@v3
     - name: Test in FreeBSD VM
       uses: cross-platform-actions/action@v0.20.0
       with:
+        environment_variables: BRANCH_NAME REPO_URL
         operating_system: freebsd
-        sync_files: runner-to-vm
+        sync_files: false
         version: '13.2'
         run: |
             sudo pkg update
@@ -217,6 +221,8 @@ jobs:
                 v4l_compat \
                 vulkan-headers \
                 wayland-protocols
+            git clone --single-branch --branch ${BRANCH_NAME} ${REPO_URL}
+            cd mpv
             ./ci/build-freebsd.sh
             meson test -C build
 
