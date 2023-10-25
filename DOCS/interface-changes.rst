@@ -109,6 +109,7 @@ Interface changes
     - rename `--play-dir` to `--play-direction`
     - `--js-memory-report` is now used for enabling memory reporting for javascript
       scripts
+    - drop support for `-del` syntax for list options
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
