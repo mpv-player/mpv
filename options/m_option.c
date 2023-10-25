@@ -1456,14 +1456,20 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
     if (op == OP_TOGGLE || op == OP_REMOVE) {
         if (dst) {
             char **list = VAL(dst);
-            int index = find_list_bstr(list, param);
-            if (index >= 0) {
-                char *old = list[index];
-                for (int n = index; list[n]; n++)
-                    list[n] = list[n + 1];
-                talloc_free(old);
+            bool found = false;
+            int index = 0;
+            do {
+                index = find_list_bstr(list, param);
+                if (index >= 0) {
+                    found = true;
+                    char *old = list[index];
+                    for (int n = index; list[n]; n++)
+                        list[n] = list[n + 1];
+                    talloc_free(old);
+                }
+            } while (index >= 0);
+            if (found)
                 return 1;
-            }
         }
         if (op == OP_REMOVE)
             return 1; // ignore if not found
@@ -3344,12 +3350,15 @@ static int parse_obj_settings_del(struct mp_log *log, struct bstr opt_name,
         if (bstr_startswith0(s, ":"))
             return 0;
         if (dst) {
-            int label_index = obj_settings_list_find_by_label(VAL(dst), label);
-            if (label_index >= 0) {
-                mark_del[label_index] = true;
-            } else {
-                mp_warn(log, "Option %.*s: item label @%.*s not found.\n",
-                        BSTR_P(opt_name), BSTR_P(label));
+            int label_index = 0;
+            while (label_index >= 0) {
+                label_index = obj_settings_list_find_by_label(VAL(dst), label);
+                if (label_index >= 0) {
+                    mark_del[label_index] = true;
+                } else {
+                    mp_warn(log, "Option %.*s: item label @%.*s not found.\n",
+                            BSTR_P(opt_name), BSTR_P(label));
+                }
             }
         }
         *param = s;
