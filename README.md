@@ -101,6 +101,10 @@ Users can also force mpv to fallback to the wrap file:
 
     meson setup build --force-fallback-for=libplacebo
 
+Users should also use the `--skip-subprojects` meson flag when installing mpv
+built with the libplacebo wrap to avoid installing libplacebo files being
+installed together with mpv.
+
 Essential dependencies (incomplete list):
 
 - gcc or clang
