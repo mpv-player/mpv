@@ -1119,9 +1119,9 @@ Video
 ``--vf=<filter1[=parameter1:parameter2:...],filter2,...>``
     Specify a list of video filters to apply to the video stream. See
     `VIDEO FILTERS`_ for details and descriptions of the available filters.
-    The option variants ``--vf-add``, ``--vf-pre``, ``--vf-del`` and
-    ``--vf-clr`` exist to modify a previously specified list, but you
-    should not need these for typical use.
+    The option variants ``--vf-add``, ``--vf-pre``, and ``--vf-clr`` exist
+    to modify a previously specified list, but you should not need these for
+    typical use.
 
 ``--untimed``
     Do not sleep when outputting video frames. Useful for benchmarks when used
@@ -1936,9 +1936,9 @@ Audio
 ``--af=<filter1[=parameter1:parameter2:...],filter2,...>``
     Specify a list of audio filters to apply to the audio stream. See
     `AUDIO FILTERS`_ for details and descriptions of the available filters.
-    The option variants ``--af-add``, ``--af-pre``, ``--af-del`` and
-    ``--af-clr`` exist to modify a previously specified list, but you
-    should not need these for typical use.
+    The option variants ``--af-add``, ``--af-pre``, and ``--af-clr`` exist
+    to modify a previously specified list, but you should not need these for
+    typical use.
 
 ``--audio-spdif=<codecs>``
     List of codecs for which compressed audio passthrough should be used. This

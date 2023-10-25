@@ -20,7 +20,7 @@ syntax is:
     workaround deprecated mpv filters.
 
 See ``--vf`` group of options for info on how ``--af-add``, ``--af-pre``,
-``--af-del``, ``--af-clr``, and possibly others work.
+``--af-clr``, and possibly others work.
 
 Available filters are:
 

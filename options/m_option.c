@@ -1297,11 +1297,10 @@ const m_option_type_t m_option_type_string = {
 #define OP_NONE 0
 #define OP_ADD 1
 #define OP_PRE 2
-#define OP_DEL 3
-#define OP_CLR 4
-#define OP_TOGGLE 5
-#define OP_APPEND 6
-#define OP_REMOVE 7
+#define OP_CLR 3
+#define OP_TOGGLE 4
+#define OP_APPEND 5
+#define OP_REMOVE 6
 
 static void free_str_list(void *dst)
 {
@@ -1339,55 +1338,6 @@ static int str_list_add(char **add, int n, void *dst, int pre)
     talloc_free(add);
 
     VAL(dst) = lst;
-
-    return 1;
-}
-
-static int str_list_del(struct mp_log *log, char **del, int n, void *dst)
-{
-    char **lst, *ep;
-    int i, ln, s;
-    long idx;
-
-    lst = VAL(dst);
-
-    for (ln = 0; lst && lst[ln]; ln++)
-        /**/;
-    s = ln;
-
-    for (i = 0; del[i] != NULL; i++) {
-        idx = strtol(del[i], &ep, 0);
-        if (*ep) {
-            mp_err(log, "Invalid index: %s\n", del[i]);
-            talloc_free(del[i]);
-            continue;
-        }
-        talloc_free(del[i]);
-        if (idx < 0 || idx >= ln) {
-            mp_err(log, "Index %ld is out of range.\n", idx);
-            continue;
-        } else if (!lst[idx])
-            continue;
-        talloc_free(lst[idx]);
-        lst[idx] = NULL;
-        s--;
-    }
-    talloc_free(del);
-
-    if (s == 0) {
-        talloc_free(lst);
-        VAL(dst) = NULL;
-        return 1;
-    }
-
-    // Don't bother shrinking the list allocation
-    for (i = 0, n = 0; i < ln; i++) {
-        if (!lst[i])
-            continue;
-        lst[n] = lst[i];
-        n++;
-    }
-    lst[s] = NULL;
 
     return 1;
 }
@@ -1438,11 +1388,6 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
         multi = false;
     } else if (bstr_endswith0(name, "-pre")) {
         op = OP_PRE;
-    } else if (bstr_endswith0(name, "-del")) {
-        op = OP_DEL;
-        mp_warn(log, "Option %.*s: -del is deprecated! "
-                "Use -remove (removes by content instead of by index).\n",
-                BSTR_P(name));
     } else if (bstr_endswith0(name, "-clr")) {
         op = OP_CLR;
     } else if (bstr_endswith0(name, "-set")) {
@@ -1530,8 +1475,6 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
         return str_list_add(res, n, dst, 0);
     case OP_PRE:
         return str_list_add(res, n, dst, 1);
-    case OP_DEL:
-        return str_list_del(log, res, n, dst);
     }
 
     if (VAL(dst))
@@ -3337,8 +3280,7 @@ done: ;
 // Parse a single entry for -vf-del (return 0 if not applicable)
 // mark_del is bounded by the number of items in dst
 static int parse_obj_settings_del(struct mp_log *log, struct bstr opt_name,
-                                  struct bstr *param, int op,
-                                  void *dst, bool *mark_del)
+                                  struct bstr *param, void *dst, bool *mark_del)
 {
     bstr s = *param;
     if (bstr_eatstart0(&s, "@")) {
@@ -3364,30 +3306,7 @@ static int parse_obj_settings_del(struct mp_log *log, struct bstr opt_name,
         *param = s;
         return 1;
     }
-
-    if (op == OP_REMOVE)
-        return 0;
-
-    bstr rest;
-    long long id = bstrtoll(s, &rest, 0);
-    if (rest.len == s.len)
-        return 0;
-
-    if (dst) {
-        int num = obj_settings_list_num_items(VAL(dst));
-        if (id < 0)
-            id = num + id;
-
-        if (id >= 0 && id < num) {
-            mark_del[id] = true;
-        } else {
-            mp_warn(log, "Option %.*s: Index %lld is out of range.\n",
-                    BSTR_P(opt_name), id);
-        }
-    }
-
-    *param = rest;
-    return 1;
+    return 0;
 }
 
 static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
@@ -3409,11 +3328,6 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
         op = OP_NONE;
     } else if (bstr_endswith0(name, "-pre")) {
         op = OP_PRE;
-    } else if (bstr_endswith0(name, "-del")) {
-        op = OP_DEL;
-        mp_warn(log, "Option %.*s: -del is deprecated! "
-                "Use -remove (removes by content instead of by index).\n",
-                BSTR_P(name));
     } else if (bstr_endswith0(name, "-remove")) {
         op = OP_REMOVE;
     } else if (bstr_endswith0(name, "-clr")) {
@@ -3477,7 +3391,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
         if (dst)
             free_obj_settings_list(dst);
         return 0;
-    } else if (op == OP_DEL || op == OP_REMOVE) {
+    } else if (op == OP_REMOVE) {
         mark_del = talloc_zero_array(NULL, bool, num_items + 1);
     }
 
@@ -3486,8 +3400,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
 
     while (param.len > 0) {
         int r = 0;
-        if (op == OP_DEL || op == OP_REMOVE)
-            r = parse_obj_settings_del(log, name, &param, op, dst, mark_del);
+        if (op == OP_REMOVE)
+            r = parse_obj_settings_del(log, name, &param, dst, mark_del);
         if (r == 0) {
             r = parse_obj_settings(log, name, op, &param, ol, dst ? &res : NULL);
         }
@@ -3574,19 +3488,15 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 }
             }
             talloc_free(res);
-        } else if (op == OP_DEL || op == OP_REMOVE) {
+        } else if (op == OP_REMOVE) {
             for (int n = num_items - 1; n >= 0; n--) {
                 if (mark_del[n])
                     obj_settings_list_del_at(&list, n);
             }
             for (int n = 0; res && res[n].name; n++) {
                 int found = obj_settings_find_by_content(list, &res[n]);
-                if (found < 0) {
-                    if (op == OP_DEL)
-                        mp_warn(log, "Option %.*s: Item not found\n", BSTR_P(name));
-                } else {
+                if (found >= 0)
                     obj_settings_list_del_at(&list, found);
-                }
             }
             free_obj_settings_list(&res);
         } else {
