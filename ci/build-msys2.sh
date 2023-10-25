@@ -1,6 +1,7 @@
 #!/bin/sh -e
 
 meson setup build            \
+  --wrap-mode=default        \
   --werror                   \
   -Dlibplacebo:werror=false  \
   -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \

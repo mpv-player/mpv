@@ -6,6 +6,7 @@ export CXXFLAGS="$CXXFLAGS -isystem/usr/local/include"
 export LDFLAGS="$LDFLAGS -L/usr/local/lib"
 
 meson setup build \
+    --wrap-mode=default \
     --werror      \
     -Dlibplacebo:werror=false \
     -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \

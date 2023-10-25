@@ -267,7 +267,7 @@ export CFLAGS LDFLAGS
 build=mingw_build
 rm -rf $build
 
-meson setup $build --cross-file "$prefix_dir/crossfile" \
+meson setup $build --cross-file "$prefix_dir/crossfile" --wrap-mode=default \
     --werror                   \
     -Dlibplacebo:werror=false  \
     -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \

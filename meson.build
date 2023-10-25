@@ -8,6 +8,7 @@ project('mpv',
             'b_lundef=false',
             'c_std=c11',
             'warning_level=1',
+            'wrap_mode=nodownload',
         ]
 )
 
@@ -23,8 +24,18 @@ libavutil = dependency('libavutil', version: '>= 56.70.100')
 libswresample = dependency('libswresample', version: '>= 3.9.100')
 libswscale = dependency('libswscale', version: '>= 5.9.100')
 
-libplacebo = dependency('libplacebo', version: '>=6.338.0', fallback: ['libplacebo', 'libplacebo'],
-    default_options: ['default_library=static', 'demos=false'])
+libplacebo_ver = '>=6.338.0'
+libplacebo = dependency('libplacebo', version: libplacebo_ver, required: false)
+if not libplacebo.found()
+    if get_option('wrap_mode') != 'nodownload'
+        libplacebo = subproject('libplacebo', version: libplacebo_ver,
+            default_options: ['default_library=static',
+                'demos=false']).get_variable('libplacebo')
+    else
+        error('install libplacebo ' + libplacebo_ver,
+            'or set the --wrap-mode=default meson flag to download it via wrap')
+    endif
+endif
 
 libass = dependency('libass', version: '>= 0.12.2')
 

@@ -12,6 +12,7 @@ fi
 
 PKG_CONFIG_PATH="${FFMPEG_SYSROOT}/lib/pkgconfig/" CC="${CC}" CXX="${CXX}" \
 meson setup build \
+    --wrap-mode=default \
     -Dprefix="${MPV_INSTALL_PREFIX}" \
     -D{libmpv,tests}=true \
     -D{gl,iconv,lcms2,lua,jpeg,plain-gl,zlib}=enabled \
