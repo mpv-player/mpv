@@ -13,7 +13,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "osdep/semaphore.h"
+#include "semaphore.h"
 
 #ifdef MP_SEMAPHORE_EMULATION
 

@@ -26,7 +26,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "misc/random.h"
-#include "timer.h"
+#include <osdep/timer.h>
 
 static uint64_t raw_time_offset;
 static pthread_once_t timer_init_once = PTHREAD_ONCE_INIT;

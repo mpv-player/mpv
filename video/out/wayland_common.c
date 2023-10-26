@@ -29,7 +29,7 @@
 #include "input/keycodes.h"
 #include "options/m_config.h"
 #include "osdep/io.h"
-#include "osdep/poll_wrapper.h"
+#include "osdep/unix/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "present_sync.h"
 #include "wayland_common.h"

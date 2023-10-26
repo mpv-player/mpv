@@ -21,7 +21,7 @@
 #include "osdep/subprocess.h"
 
 #include "osdep/io.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 
 #include "mpv_talloc.h"
 #include "common/common.h"

@@ -1,6 +1,5 @@
 /*
- * precise timer routines for Linux/UNIX
- * copyright (C) LGB & A'rpi/ASTRAL
+ * Cocoa Application Event Handling
  *
  * This file is part of mpv.
  *
@@ -18,31 +17,29 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <time.h>
-#include "timer.h"
+#import <Cocoa/Cocoa.h>
+#include "events.h"
 
-void mp_sleep_ns(int64_t ns)
-{
-    if (ns < 0)
-        return;
-    struct timespec ts;
-    ts.tv_sec  = ns / MP_TIME_S_TO_NS(1);
-    ts.tv_nsec = ns % MP_TIME_S_TO_NS(1);
-    nanosleep(&ts, NULL);
-}
+@class RemoteCommandCenter;
+struct input_ctx;
 
-uint64_t mp_raw_time_ns(void)
-{
-    struct timespec tp = {0};
-#if defined(CLOCK_MONOTONIC_RAW)
-    clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
-#else
-    timespec_get(&tp, TIME_UTC);
-#endif
-    return MP_TIME_S_TO_NS(tp.tv_sec) + tp.tv_nsec;
-}
+@interface EventsResponder : NSObject
 
-void mp_raw_time_init(void)
-{
-}
++ (EventsResponder *)sharedInstance;
+- (void)setInputContext:(struct input_ctx *)ctx;
+- (void)setIsApplication:(BOOL)isApplication;
+
+/// Blocks until inputContext is present.
+- (void)waitForInputContext;
+- (void)wakeup;
+- (void)putKey:(int)keycode;
+- (void)handleFilesArray:(NSArray *)files;
+
+- (bool)queueCommand:(char *)cmd;
+- (bool)processKeyEvent:(NSEvent *)event;
+
+- (BOOL)handleMPKey:(int)key withMask:(int)mask;
+
+@property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
+
+@end

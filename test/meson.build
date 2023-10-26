@@ -36,10 +36,6 @@ test_utils_files = [
 
 test_utils_deps = [libavutil, libm]
 
-if win32
-    test_utils_files += 'osdep/windows_utils.c'
-endif
-
 # The zimg code requires using threads.
 if features['win32-internal-pthreads']
     test_utils_args += '-DWIN32_TESTS'

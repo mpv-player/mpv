@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <versionhelpers.h>
 
-#include "timer.h"
+#include <osdep/timer.h>
 
 #include "config.h"
 

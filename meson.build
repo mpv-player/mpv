@@ -246,7 +246,7 @@ sources = files(
 
     ## osdep
     'osdep/io.c',
-    'osdep/semaphore_osx.c',
+    'osdep/darwin/semaphore.c',
     'osdep/subprocess.c',
     'osdep/threads.c',
     'osdep/timer.c',
@@ -395,13 +395,13 @@ cocoa = dependency('appleframeworks', modules: ['Cocoa', 'IOKit', 'QuartzCore'],
 features += {'cocoa': cocoa.found()}
 if features['cocoa']
     dependencies += cocoa
-    sources += files('osdep/apple_utils.c',
-                     'osdep/language-apple.c',
-                     'osdep/macosx_application.m',
-                     'osdep/macosx_events.m',
-                     'osdep/macosx_menubar.m',
-                     'osdep/main-fn-cocoa.c',
-                     'osdep/path-macosx.m',
+    sources += files('osdep/darwin/utils.c',
+                     'osdep/darwin/language.c',
+                     'osdep/darwin/application.m',
+                     'osdep/darwin/events.m',
+                     'osdep/darwin/menubar.m',
+                     'osdep/darwin/main-fn.c',
+                     'osdep/darwin/path.m',
                      'video/out/cocoa_common.m',
                      'video/out/cocoa/events_view.m',
                      'video/out/cocoa/video_view.m',
@@ -409,26 +409,26 @@ if features['cocoa']
 endif
 
 if posix
-    path_source = files('osdep/path-unix.c')
-    subprocess_source = files('osdep/subprocess-posix.c')
+    path_source = files('osdep/unix/path.c')
+    subprocess_source = files('osdep/unix/subprocess.c')
     sources += files('input/ipc-unix.c',
-                     'osdep/poll_wrapper.c',
-                     'osdep/terminal-unix.c',
+                     'osdep/unix/poll_wrapper.c',
+                     'osdep/unix/terminal.c',
                      'sub/filter_regex.c')
 endif
 
 if posix and not features['cocoa']
-    sources += files('osdep/main-fn-unix.c',
-                     'osdep/language-posix.c')
+    sources += files('osdep/unix/main-fn.c',
+                     'osdep/unix/language.c')
 endif
 
 if darwin
-    path_source = files('osdep/path-darwin.c')
-    timer_source = files('osdep/timer-darwin.c')
+    path_source = files('osdep/darwin/path.c')
+    timer_source = files('osdep/darwin/timer.c')
 endif
 
 if posix and not darwin
-    timer_source = files('osdep/timer-linux.c')
+    timer_source = files('osdep/unix/timer.c')
 endif
 
 features += {'ppoll': cc.has_function('ppoll', args: '-D_GNU_SOURCE',
@@ -479,15 +479,15 @@ uwp = cc.find_library('windowsapp', required: uwp_opt)
 features += {'uwp': uwp.found()}
 if features['uwp']
     dependencies += uwp
-    path_source = files('osdep/path-uwp.c')
+    path_source = files('osdep/uwp/path.c')
     subprocess_source = []
 endif
 
 features += {'win32-executable': win32 and get_option('cplayer')}
 if win32
-    timer_source = files('osdep/timer-win32.c')
-    sources += files('osdep/w32_keyboard.c',
-                     'osdep/windows_utils.c')
+    timer_source = files('osdep/win32/timer.c')
+    sources += files('osdep/win32/keyboard.c',
+                     'osdep/win32/utils.c')
 endif
 
 features += {'win32-desktop': win32 and not uwp.found()}
@@ -501,12 +501,12 @@ if features['win32-desktop']
                           cc.find_library('version'),
                           cc.find_library('winmm')]
     dependencies += win32_desktop_libs
-    path_source = files('osdep/path-win.c')
-    subprocess_source = files('osdep/subprocess-win.c')
+    path_source = files('osdep/win32/path.c')
+    subprocess_source = files('osdep/win32/subprocess.c')
     sources += files('input/ipc-win.c',
-                     'osdep/language-win.c',
-                     'osdep/main-fn-win.c',
-                     'osdep/terminal-win.c',
+                     'osdep/win32/language.c',
+                     'osdep/win32/main-fn.c',
+                     'osdep/win32/terminal.c',
                      'video/out/w32_common.c',
                      'video/out/win32/displayconfig.c',
                      'video/out/win32/droptarget.c')
@@ -519,12 +519,12 @@ endif
 
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
 
-features += {'glob-win32': win32 and not posix}
+features += {'glob-win32': win32 and not features['glob-posix']}
 if features['glob-win32']
-    sources += files('osdep/glob-win.c')
+    sources += files('osdep/win32/glob.c')
 endif
 
-features += {'glob': features['glob-posix'] or features['glob-win32']}
+features += {'glob': features['glob-posix']}
 
 features += {'vt.h': cc.has_header_symbol('sys/vt.h', 'VT_GETMODE')}
 
@@ -588,7 +588,6 @@ subdir('sub')
 if darwin
     subdir(join_paths('TOOLS', 'osxbundle'))
 endif
-
 
 # misc dependencies
 features += {'av-channel-layout': libavutil.version().version_compare('>= 57.24.100')}
@@ -1530,12 +1529,12 @@ features += {'swift': swift.allowed()}
 
 swift_sources = []
 if features['cocoa'] and features['swift']
-    swift_sources += files('osdep/macos/libmpv_helper.swift',
-                           'osdep/macos/log_helper.swift',
-                           'osdep/macos/mpv_helper.swift',
-                           'osdep/macos/precise_timer.swift',
-                           'osdep/macos/swift_compat.swift',
-                           'osdep/macos/swift_extensions.swift',
+    swift_sources += files('osdep/darwin/libmpv_helper.swift',
+                           'osdep/darwin/log_helper.swift',
+                           'osdep/darwin/mpv_helper.swift',
+                           'osdep/darwin/precise_timer.swift',
+                           'osdep/darwin/swift_compat.swift',
+                           'osdep/darwin/swift_extensions.swift',
                            'video/out/mac/common.swift',
                            'video/out/mac/title_bar.swift',
                            'video/out/mac/view.swift',
@@ -1563,7 +1562,7 @@ macos_media_player = get_option('macos-media-player').require(
 )
 features += {'macos-media-player': macos_media_player.allowed()}
 if features['macos-media-player']
-    swift_sources += files('osdep/macos/remote_command_center.swift')
+    swift_sources += files('osdep/darwin/remote_command_center.swift')
 endif
 
 if features['swift'] and swift_sources.length() > 0
@@ -1576,7 +1575,7 @@ macos_touchbar = get_option('macos-touchbar').require(
 )
 features += {'macos-touchbar': macos_touchbar.allowed()}
 if features['macos-touchbar']
-    sources += files('osdep/macosx_touchbar.m')
+    sources += files('osdep/darwin/touchbar.m')
 endif
 
 
@@ -1703,9 +1702,9 @@ if win32
                  'etc/mpv-icon-8bit-64x64.png',
                  'etc/mpv-icon-8bit-128x128.png',
                  'etc/mpv-icon.ico',
-                 'osdep/mpv.exe.manifest']
+                 'osdep/win32/mpv.exe.manifest']
 
-    sources += windows.compile_resources('osdep/mpv.rc', args: res_flags, depend_files: resources,
+    sources += windows.compile_resources('osdep/win32/mpv.rc', args: res_flags, depend_files: resources,
                                          depends: version_h, include_directories: res_includes)
 endif
 

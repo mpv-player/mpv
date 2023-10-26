@@ -22,7 +22,7 @@
 #include "common/common.h"
 #include "config.h"
 #include "threads.h"
-#include "timer.h"
+#include <osdep/timer.h>
 
 #if HAVE_BSD_THREAD_NAME
 #include <pthread_np.h>

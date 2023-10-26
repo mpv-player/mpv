@@ -43,7 +43,7 @@
 #include "win32/droptarget.h"
 #include "osdep/io.h"
 #include "osdep/threads.h"
-#include "osdep/w32_keyboard.h"
+#include <osdep/win32/keyboard.h>
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
 #include "mpv_talloc.h"

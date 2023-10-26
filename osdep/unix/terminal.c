@@ -31,14 +31,14 @@
 
 #include "osdep/io.h"
 #include "osdep/threads.h"
-#include "osdep/poll_wrapper.h"
+#include "osdep/unix/poll_wrapper.h"
+#include <osdep/terminal.h>
 
 #include "common/common.h"
 #include "misc/bstr.h"
 #include "input/input.h"
 #include "input/keycodes.h"
 #include "misc/ctype.h"
-#include "terminal.h"
 
 // Timeout in ms after which the (normally ambiguous) ESC key is detected.
 #define ESC_TIMEOUT 100

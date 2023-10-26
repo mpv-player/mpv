@@ -55,7 +55,7 @@
 #include "vo.h"
 #include "win_state.h"
 #include "osdep/io.h"
-#include "osdep/poll_wrapper.h"
+#include "osdep/unix/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "osdep/subprocess.h"
 

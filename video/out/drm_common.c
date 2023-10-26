@@ -42,7 +42,7 @@
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "osdep/io.h"
-#include "osdep/poll_wrapper.h"
+#include "osdep/unix/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "misc/ctype.h"
 #include "video/out/vo.h"
@@ -431,7 +431,7 @@ void vo_drm_release_crtc(struct vo_drm_state *drm)
 
     if (request)
         drmModeAtomicFree(request);
-    
+
     if (!success)
         MP_ERR(drm, "Failed to restore previous mode\n");
 

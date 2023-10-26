@@ -29,8 +29,8 @@
 #include "input/input.h"
 #include "video/out/win_state.h"
 
-#include "osdep/macosx_application_objc.h"
-#include "osdep/macosx_events_objc.h"
+#include "application_objc.h"
+#include "events_objc.h"
 
 
 // complex macros won't get imported to Swift so we have to reassign them

@@ -24,7 +24,7 @@
 
 #include "common/common.h"
 #include "osdep/timer.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 #include "filters/f_autoconvert.h"
 #include "filters/filter.h"
 #include "filters/filter_internal.h"

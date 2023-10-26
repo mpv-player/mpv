@@ -50,7 +50,7 @@
 #if HAVE_D3D11 && defined(PL_HAVE_D3D11)
 #include <libplacebo/d3d11.h>
 #include "video/out/d3d11/ra_d3d11.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 #endif
 
 #if PL_API_VER >= 309

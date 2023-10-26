@@ -34,7 +34,7 @@
 #include "video/hwdec.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 
 #include "d3d.h"
 

@@ -1,4 +1,7 @@
 /*
+ * precise timer routines for Linux/UNIX
+ * copyright (C) LGB & A'rpi/ASTRAL
+ *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -15,11 +18,32 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#import <Cocoa/Cocoa.h>
-#include "osdep/macosx_menubar.h"
+#include <stdlib.h>
+#include <time.h>
 
-@interface MenuBar : NSObject
+#include <osdep/timer.h>
 
-- (void)registerSelector:(SEL)action forKey:(MPMenuKey)key;
+void mp_sleep_ns(int64_t ns)
+{
+    if (ns < 0)
+        return;
+    struct timespec ts;
+    ts.tv_sec  = ns / MP_TIME_S_TO_NS(1);
+    ts.tv_nsec = ns % MP_TIME_S_TO_NS(1);
+    nanosleep(&ts, NULL);
+}
 
-@end
+uint64_t mp_raw_time_ns(void)
+{
+    struct timespec tp = {0};
+#if defined(CLOCK_MONOTONIC_RAW)
+    clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
+#else
+    timespec_get(&tp, TIME_UTC);
+#endif
+    return MP_TIME_S_TO_NS(tp.tv_sec) + tp.tv_nsec;
+}
+
+void mp_raw_time_init(void)
+{
+}

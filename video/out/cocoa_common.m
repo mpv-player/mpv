@@ -32,12 +32,12 @@
 #import "video/out/cocoa/mpvadapter.h"
 
 #include "osdep/threads.h"
-#include "osdep/macosx_compat.h"
-#include "osdep/macosx_events_objc.h"
+#include <osdep/darwin/compat.h>
+#include <osdep/darwin/events_objc.h>
 
 #include "osdep/timer.h"
-#include "osdep/macosx_application.h"
-#include "osdep/macosx_application_objc.h"
+#include <osdep/darwin/application.h>
+#include <osdep/darwin/application_objc.h>
 
 #include "options/options.h"
 #include "video/out/vo.h"

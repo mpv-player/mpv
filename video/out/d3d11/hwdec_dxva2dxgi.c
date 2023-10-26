@@ -21,7 +21,7 @@
 #include <dxva2api.h>
 
 #include "common/common.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 #include "video/hwdec.h"
 #include "video/d3d.h"
 #include "video/out/d3d11/ra_d3d11.h"

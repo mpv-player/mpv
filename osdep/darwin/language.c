@@ -1,5 +1,5 @@
 /*
- * Cocoa Application Event Handling
+ * User language lookup for Apple platforms
  *
  * This file is part of mpv.
  *
@@ -17,29 +17,29 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#import <Cocoa/Cocoa.h>
-#include "osdep/macosx_events.h"
+#include "misc/language.h"
 
-@class RemoteCommandCenter;
-struct input_ctx;
+#include "utils.h"
+#include "mpv_talloc.h"
 
-@interface EventsResponder : NSObject
+char **mp_get_user_langs(void)
+{
+    CFArrayRef arr = CFLocaleCopyPreferredLanguages();
+    if (!arr)
+        return NULL;
+    CFIndex count = CFArrayGetCount(arr);
+    if (!count)
+        return NULL;
 
-+ (EventsResponder *)sharedInstance;
-- (void)setInputContext:(struct input_ctx *)ctx;
-- (void)setIsApplication:(BOOL)isApplication;
+    char **ret = talloc_array_ptrtype(NULL, ret, count + 1);
 
-/// Blocks until inputContext is present.
-- (void)waitForInputContext;
-- (void)wakeup;
-- (void)putKey:(int)keycode;
-- (void)handleFilesArray:(NSArray *)files;
+    for (CFIndex i = 0; i < count; i++) {
+        CFStringRef cfstr = CFArrayGetValueAtIndex(arr, i);
+        ret[i] = talloc_steal(ret, cfstr_get_cstr(cfstr));
+    }
 
-- (bool)queueCommand:(char *)cmd;
-- (bool)processKeyEvent:(NSEvent *)event;
+    ret[count] = NULL;
 
-- (BOOL)handleMPKey:(int)key withMask:(int)mask;
-
-@property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
-
-@end
+    CFRelease(arr);
+    return ret;
+}

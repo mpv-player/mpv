@@ -26,7 +26,7 @@
 
 #include "common/common.h"
 #include "osdep/timer.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 #include "video/out/gpu/hwdec.h"
 #include "ra_gl.h"
 #include "video/hwdec.h"

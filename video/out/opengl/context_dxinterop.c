@@ -19,7 +19,7 @@
 #include <versionhelpers.h>
 #include <d3d9.h>
 #include <dwmapi.h>
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 #include "video/out/w32_common.h"
 #include "context.h"
 #include "utils.h"

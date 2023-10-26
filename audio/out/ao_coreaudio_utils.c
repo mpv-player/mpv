@@ -25,7 +25,7 @@
 #include "audio/out/ao_coreaudio_utils.h"
 #include "osdep/timer.h"
 #include "osdep/endian.h"
-#include "osdep/semaphore.h"
+#include <osdep/darwin/semaphore.h>
 #include "audio/format.h"
 
 #if HAVE_COREAUDIO

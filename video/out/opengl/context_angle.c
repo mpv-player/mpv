@@ -30,7 +30,7 @@
 #include "common/common.h"
 #include "options/m_config.h"
 #include "video/out/w32_common.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 #include "context.h"
 #include "utils.h"
 

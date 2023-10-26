@@ -29,10 +29,10 @@
 #include "common/common.h"
 #include "input/keycodes.h"
 #include "input/input.h"
-#include "terminal.h"
+#include "osdep/terminal.h"
 #include "osdep/io.h"
 #include "osdep/threads.h"
-#include "osdep/w32_keyboard.h"
+#include <osdep/win32/keyboard.h>
 
 // https://docs.microsoft.com/en-us/windows/console/setconsolemode
 // These values are effective on Windows 10 build 16257 (August 2017) or later

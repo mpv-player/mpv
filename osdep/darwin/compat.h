@@ -22,7 +22,7 @@
 #define MPV_MACOSX_COMPAT
 
 #import <Cocoa/Cocoa.h>
-#include "osdep/macosx_versions.h"
+#include "versions.h"
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
 

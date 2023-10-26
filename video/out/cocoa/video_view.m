@@ -15,7 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "osdep/macosx_compat.h"
+#include <osdep/darwin/compat.h>
 #include "video/out/cocoa_common.h"
 #include "video_view.h"
 

@@ -20,7 +20,7 @@
 
 #include "osdep/io.h"
 #include "osdep/threads.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 
 #include "common/common.h"
 #include "common/global.h"

@@ -19,8 +19,8 @@
 
 #include "input/keycodes.h"
 
-#include "osdep/macosx_events.h"
-#include "osdep/macosx_compat.h"
+#include <osdep/darwin/events.h>
+#include <osdep/darwin/compat.h>
 #include "video/out/cocoa_common.h"
 
 #include "window.h"

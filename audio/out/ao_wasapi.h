@@ -31,7 +31,7 @@
 #include <endpointvolume.h>
 
 #include "common/msg.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 #include "internal.h"
 #include "ao.h"
 

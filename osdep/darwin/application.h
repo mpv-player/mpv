@@ -18,7 +18,7 @@
 #ifndef MPV_MACOSX_APPLICATION
 #define MPV_MACOSX_APPLICATION
 
-#include "osdep/macosx_menubar.h"
+#include "menubar.h"
 #include "options/m_option.h"
 
 enum {

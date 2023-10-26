@@ -20,7 +20,7 @@
 #include "options/m_config.h"
 #include "video/out/cocoa_common.h"
 #include "context.h"
-#include "osdep/macosx_application.h"
+#include <osdep/darwin/application.h>
 
 struct priv {
     GL gl;

@@ -24,7 +24,7 @@
 #include <mach/mach_time.h>
 
 #include "common/msg.h"
-#include "timer.h"
+#include <osdep/timer.h>
 
 static double timebase_ratio_ns;
 

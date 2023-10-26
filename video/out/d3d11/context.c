@@ -18,7 +18,7 @@
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "osdep/timer.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 
 #include "video/out/gpu/context.h"
 #include "video/out/gpu/d3d11_helpers.h"

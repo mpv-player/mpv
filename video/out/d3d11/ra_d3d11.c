@@ -10,7 +10,7 @@
 #include "osdep/io.h"
 #include "osdep/subprocess.h"
 #include "osdep/timer.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 #include "video/out/gpu/spirv.h"
 #include "video/out/gpu/utils.h"
 

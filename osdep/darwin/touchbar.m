@@ -16,7 +16,7 @@
  */
 
 #include "player/client.h"
-#import "macosx_touchbar.h"
+#import "touchbar.h"
 
 @implementation TouchBar
 

@@ -16,7 +16,7 @@
  */
 
 #include <windows.h>
-#include "osdep/w32_keyboard.h"
+#include "keyboard.h"
 #include "input/keycodes.h"
 
 struct keymap {

@@ -26,7 +26,7 @@
 #include <dxgi1_2.h>
 
 #include "common/common.h"
-#include "windows_utils.h"
+#include "utils.h"
 
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
 {

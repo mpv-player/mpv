@@ -1,6 +1,4 @@
 /*
- * Apple-specific utility functions
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -17,23 +15,26 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "apple_utils.h"
+#import <Cocoa/Cocoa.h>
+#include "application.h"
+#import "menubar_objc.h"
 
-#include "mpv_talloc.h"
+@class CocoaCB;
+struct mpv_event;
+struct mpv_handle;
 
-CFStringRef cfstr_from_cstr(const char *str)
-{
-    return CFStringCreateWithCString(NULL, str, kCFStringEncodingUTF8);
-}
+@interface Application : NSApplication
 
-char *cfstr_get_cstr(const CFStringRef cfstr)
-{
-    if (!cfstr)
-        return NULL;
-    CFIndex size =
-        CFStringGetMaximumSizeForEncoding(
-            CFStringGetLength(cfstr), kCFStringEncodingUTF8) + 1;
-    char *buffer = talloc_zero_size(NULL, size);
-    CFStringGetCString(cfstr, buffer, size, kCFStringEncodingUTF8);
-    return buffer;
-}
+- (NSImage *)getMPVIcon;
+- (void)processEvent:(struct mpv_event *)event;
+- (void)queueCommand:(char *)cmd;
+- (void)stopMPV:(char *)cmd;
+- (void)openFiles:(NSArray *)filenames;
+- (void)setMpvHandle:(struct mpv_handle *)ctx;
+- (const struct m_sub_options *)getMacOSConf;
+- (const struct m_sub_options *)getVoSubConf;
+
+@property(nonatomic, retain) MenuBar *menuBar;
+@property(nonatomic, assign) size_t openCount;
+@property(nonatomic, retain) CocoaCB *cocoaCB;
+@end

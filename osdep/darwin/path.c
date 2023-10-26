@@ -19,7 +19,7 @@
 #include <pthread.h>
 
 #include "options/path.h"
-#include "path.h"
+#include <osdep/path.h>
 
 #include "config.h"
 

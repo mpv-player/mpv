@@ -1,4 +1,4 @@
-#include "main-fn.h"
+#include <osdep/main-fn.h>
 
 int main(int argc, char *argv[])
 {

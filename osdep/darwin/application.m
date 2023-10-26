@@ -26,17 +26,17 @@
 #include "options/m_config.h"
 #include "options/options.h"
 
-#import "osdep/macosx_application_objc.h"
-#include "osdep/macosx_compat.h"
-#import "osdep/macosx_events_objc.h"
+#import "application_objc.h"
+#include "compat.h"
+#import "events_objc.h"
 #include "osdep/threads.h"
 #include "osdep/main-fn.h"
 
 #if HAVE_MACOS_TOUCHBAR
-#import "osdep/macosx_touchbar.h"
+#import "touchbar.h"
 #endif
 #if HAVE_MACOS_COCOA_CB
-#include "osdep/macOS_swift.h"
+#include "swift.h"
 #endif
 
 #define MPV_PROTOCOL @"mpv://"
@@ -377,4 +377,3 @@ int cocoa_main(int argc, char *argv[])
         return 1;
     }
 }
-

@@ -22,7 +22,7 @@
 
 #include "config.h"
 #include "poll_wrapper.h"
-#include "timer.h"
+#include <osdep/timer.h>
 
 
 int mp_poll(struct pollfd *fds, int nfds, int64_t timeout_ns)

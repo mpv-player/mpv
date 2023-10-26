@@ -33,7 +33,7 @@
 #include "video/out/gpu/video.h"
 
 #if HAVE_D3D11
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 #include "video/out/d3d11/ra_d3d11.h"
 #include "video/out/d3d11/context.h"
 #endif

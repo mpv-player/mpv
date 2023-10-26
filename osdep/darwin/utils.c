@@ -1,5 +1,5 @@
 /*
- * User language lookup for Apple platforms
+ * Apple-specific utility functions
  *
  * This file is part of mpv.
  *
@@ -17,29 +17,23 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "misc/language.h"
+#include "utils.h"
 
-#include "apple_utils.h"
 #include "mpv_talloc.h"
 
-char **mp_get_user_langs(void)
+CFStringRef cfstr_from_cstr(const char *str)
 {
-    CFArrayRef arr = CFLocaleCopyPreferredLanguages();
-    if (!arr)
+    return CFStringCreateWithCString(NULL, str, kCFStringEncodingUTF8);
+}
+
+char *cfstr_get_cstr(const CFStringRef cfstr)
+{
+    if (!cfstr)
         return NULL;
-    CFIndex count = CFArrayGetCount(arr);
-    if (!count)
-        return NULL;
-
-    char **ret = talloc_array_ptrtype(NULL, ret, count + 1);
-
-    for (CFIndex i = 0; i < count; i++) {
-        CFStringRef cfstr = CFArrayGetValueAtIndex(arr, i);
-        ret[i] = talloc_steal(ret, cfstr_get_cstr(cfstr));
-    }
-
-    ret[count] = NULL;
-
-    CFRelease(arr);
-    return ret;
+    CFIndex size =
+        CFStringGetMaximumSizeForEncoding(
+            CFStringGetLength(cfstr), kCFStringEncodingUTF8) + 1;
+    char *buffer = talloc_zero_size(NULL, size);
+    CFStringGetCString(cfstr, buffer, size, kCFStringEncodingUTF8);
+    return buffer;
 }

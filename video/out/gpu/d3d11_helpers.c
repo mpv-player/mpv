@@ -25,7 +25,7 @@
 #include "common/msg.h"
 #include "misc/bstr.h"
 #include "osdep/io.h"
-#include "osdep/windows_utils.h"
+#include <osdep/win32/utils.h>
 
 #include "d3d11_helpers.h"
 
