@@ -730,6 +730,7 @@ Program Behavior
     Do not load default configuration or any user files. This prevents loading of
     both the user-level and system-wide ``mpv.conf`` and ``input.conf`` files. Other
     user files are blocked as well, such as resume playback files and cache files.
+    This option only takes effect when used as a command line flag.
 
     .. note::
 
