@@ -36,10 +36,7 @@ static void do_timer_init(void)
     mp_raw_time_init();
     mp_rand_seed(mp_raw_time_ns());
     raw_time_offset = mp_raw_time_ns();
-    // Arbitrary additional offset to avoid confusing relative/absolute times.
-    // Also,we rule that the timer never returns 0 (so default-initialized
-    // time values will be always in the past).
-    raw_time_offset -= MP_START_TIME;
+    assert(raw_time_offset > 0);
 }
 
 void mp_time_init(void)
@@ -49,10 +46,7 @@ void mp_time_init(void)
 
 int64_t mp_time_ns(void)
 {
-    uint64_t r = mp_raw_time_ns() - raw_time_offset;
-    if (r < MP_START_TIME)
-        r = MP_START_TIME;
-    return r;
+    return mp_raw_time_ns() - raw_time_offset;
 }
 
 double mp_time_sec(void)
