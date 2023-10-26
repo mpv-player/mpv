@@ -32,6 +32,7 @@ double mp_time_sec(void);
 
 // Provided by OS specific functions (timer-linux.c)
 void mp_raw_time_init(void);
+// ensure this doesn't return 0
 uint64_t mp_raw_time_ns(void);
 
 // Sleep in nanoseconds.
@@ -44,8 +45,6 @@ int mp_start_hires_timers(int wait_ms);
 // call unconditionally with the return value of mp_start_hires_timers
 void mp_end_hires_timers(int resolution_ms);
 #endif  /* _WIN32 */
-
-#define MP_START_TIME 10 * INT64_C(1000000000)
 
 // Converts time units to nanoseconds (int64_t)
 #define MP_TIME_S_TO_NS(s) ((s) * INT64_C(1000000000))
