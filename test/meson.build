@@ -8,49 +8,19 @@ refdir = join_paths(source_root, 'test', 'ref')
 # are required in order to run a diff command when comparing
 # different files. Stuff will probably break if core things are
 # carelessly moved around.
-test_utils_args = []
-test_utils_files = [
-    'audio/chmap.c',
-    'audio/format.c',
-    'common/common.c',
-    'misc/bstr.c',
-    'misc/dispatch.c',
-    'misc/json.c',
-    'misc/node.c',
-    'misc/random.c',
-    'misc/thread_tools.c',
-    'options/m_config_core.c',
-    'options/m_config_frontend.c',
-    'options/m_option.c',
-    'options/path.c',
-    'osdep/io.c',
-    'osdep/subprocess.c',
-    'osdep/timer.c',
-    timer_source,
-    path_source,
-    subprocess_source,
-    'ta/ta.c',
-    'ta/ta_talloc.c',
-    'ta/ta_utils.c'
-]
-
 test_utils_deps = [libavutil, libm]
 
 # The zimg code requires using threads.
-if features['win32-internal-pthreads']
-    test_utils_args += '-DWIN32_TESTS'
-    test_utils_files += ['osdep/win32/pthread.c']
-else
+if not features['win32-internal-pthreads']
     test_utils_deps += pthreads
 endif
 
 if features['win32-desktop']
     test_utils_deps += cc.find_library('winmm')
 endif
-test_utils_objects = libmpv.extract_objects(test_utils_files)
+test_utils_objects = libmpv.extract_all_objects(recursive: true)
 test_utils = static_library('test-utils', 'test_utils.c', include_directories: incdir,
-                            c_args: test_utils_args, objects: test_utils_objects,
-                            dependencies: test_utils_deps)
+                            objects: test_utils_objects, dependencies: test_utils_deps)
 
 # For getting imgfmts and stuff.
 img_utils_files = [
@@ -99,9 +69,8 @@ test('linked-list', linked_list)
 timer = executable('timer', files('timer.c'), include_directories: incdir, link_with: test_utils)
 test('timer', timer)
 
-paths_objects = libmpv.extract_objects('options/path.c', path_source)
 paths = executable('paths', 'paths.c', include_directories: incdir,
-                   objects: paths_objects, link_with: test_utils)
+                   objects: libmpv.extract_objects(), link_with: test_utils)
 test('paths', paths)
 
 if get_option('libmpv')

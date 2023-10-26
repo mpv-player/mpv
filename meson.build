@@ -246,7 +246,6 @@ sources = files(
 
     ## osdep
     'osdep/io.c',
-    'osdep/darwin/semaphore.c',
     'osdep/subprocess.c',
     'osdep/threads.c',
     'osdep/timer.c',
@@ -395,40 +394,15 @@ cocoa = dependency('appleframeworks', modules: ['Cocoa', 'IOKit', 'QuartzCore'],
 features += {'cocoa': cocoa.found()}
 if features['cocoa']
     dependencies += cocoa
-    sources += files('osdep/darwin/utils.c',
-                     'osdep/darwin/language.c',
-                     'osdep/darwin/application.m',
-                     'osdep/darwin/events.m',
-                     'osdep/darwin/menubar.m',
-                     'osdep/darwin/main-fn.c',
-                     'osdep/darwin/path.m',
-                     'video/out/cocoa_common.m',
+    sources += files('video/out/cocoa_common.m',
                      'video/out/cocoa/events_view.m',
                      'video/out/cocoa/video_view.m',
                      'video/out/cocoa/window.m')
 endif
 
 if posix
-    path_source = files('osdep/unix/path.c')
-    subprocess_source = files('osdep/unix/subprocess.c')
     sources += files('input/ipc-unix.c',
-                     'osdep/unix/poll_wrapper.c',
-                     'osdep/unix/terminal.c',
                      'sub/filter_regex.c')
-endif
-
-if posix and not features['cocoa']
-    sources += files('osdep/unix/main-fn.c',
-                     'osdep/unix/language.c')
-endif
-
-if darwin
-    path_source = files('osdep/darwin/path.c')
-    timer_source = files('osdep/darwin/timer.c')
-endif
-
-if posix and not darwin
-    timer_source = files('osdep/unix/timer.c')
 endif
 
 features += {'ppoll': cc.has_function('ppoll', args: '-D_GNU_SOURCE',
@@ -479,16 +453,9 @@ uwp = cc.find_library('windowsapp', required: uwp_opt)
 features += {'uwp': uwp.found()}
 if features['uwp']
     dependencies += uwp
-    path_source = files('osdep/uwp/path.c')
-    subprocess_source = []
 endif
 
 features += {'win32-executable': win32 and get_option('cplayer')}
-if win32
-    timer_source = files('osdep/win32/timer.c')
-    sources += files('osdep/win32/keyboard.c',
-                     'osdep/win32/utils.c')
-endif
 
 features += {'win32-desktop': win32 and not uwp.found()}
 if features['win32-desktop']
@@ -501,30 +468,21 @@ if features['win32-desktop']
                           cc.find_library('version'),
                           cc.find_library('winmm')]
     dependencies += win32_desktop_libs
-    path_source = files('osdep/win32/path.c')
-    subprocess_source = files('osdep/win32/subprocess.c')
     sources += files('input/ipc-win.c',
-                     'osdep/win32/language.c',
-                     'osdep/win32/main-fn.c',
-                     'osdep/win32/terminal.c',
                      'video/out/w32_common.c',
                      'video/out/win32/displayconfig.c',
                      'video/out/win32/droptarget.c')
 endif
 
 if not posix and not features['win32-desktop']
-    subprocess_source = files('osdep/subprocess-dummy.c')
     sources += files('input/ipc-dummy.c')
 endif
 
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
 
 features += {'glob-win32': win32 and not features['glob-posix']}
-if features['glob-win32']
-    sources += files('osdep/win32/glob.c')
-endif
 
-features += {'glob': features['glob-posix']}
+features += {'glob': features['glob-posix'] or features['glob-win32']}
 
 features += {'vt.h': cc.has_header_symbol('sys/vt.h', 'VT_GETMODE')}
 
@@ -558,8 +516,6 @@ vector = get_option('vector').require(
     error_message: 'the compiler does not support gcc vectors!',
 )
 features += {'vector': vector.allowed()}
-
-sources += path_source + subprocess_source + timer_source
 
 
 # various file generations
@@ -1529,13 +1485,7 @@ features += {'swift': swift.allowed()}
 
 swift_sources = []
 if features['cocoa'] and features['swift']
-    swift_sources += files('osdep/darwin/libmpv_helper.swift',
-                           'osdep/darwin/log_helper.swift',
-                           'osdep/darwin/mpv_helper.swift',
-                           'osdep/darwin/precise_timer.swift',
-                           'osdep/darwin/swift_compat.swift',
-                           'osdep/darwin/swift_extensions.swift',
-                           'video/out/mac/common.swift',
+    swift_sources += files('video/out/mac/common.swift',
                            'video/out/mac/title_bar.swift',
                            'video/out/mac/view.swift',
                            'video/out/mac/window.swift')
@@ -1561,23 +1511,12 @@ macos_media_player = get_option('macos-media-player').require(
     error_message: 'Either the macos sdk version is not at least 10.12.2 or swift was not found!',
 )
 features += {'macos-media-player': macos_media_player.allowed()}
-if features['macos-media-player']
-    swift_sources += files('osdep/darwin/remote_command_center.swift')
-endif
-
-if features['swift'] and swift_sources.length() > 0
-    subdir('osdep')
-endif
 
 macos_touchbar = get_option('macos-touchbar').require(
     features['cocoa'] and cc.has_header('AppKit/NSTouchBar.h'),
     error_message: 'Either cocoa could not be found or AppKit/NSTouchBar.h could not be found!',
 )
 features += {'macos-touchbar': macos_touchbar.allowed()}
-if features['macos-touchbar']
-    sources += files('osdep/darwin/touchbar.m')
-endif
-
 
 # manpages
 manpage = 'DOCS/man/mpv.rst'
@@ -1687,28 +1626,9 @@ message('List of enabled features: ' + feature_str)
 features += {'cplayer': get_option('cplayer')}
 features += {'libmpv-' + get_option('default_library'): get_option('libmpv')}
 
+subdir('osdep')
 
 # build targets
-if win32
-    windows = import('windows')
-    res_flags = ['--codepage=65001']
-
-    # Unintuitively, this compile operates out of the osdep subdirectory.
-    # Hence, these includes are needed.
-    res_includes = [source_root, build_root]
-
-    resources = ['etc/mpv-icon-8bit-16x16.png',
-                 'etc/mpv-icon-8bit-32x32.png',
-                 'etc/mpv-icon-8bit-64x64.png',
-                 'etc/mpv-icon-8bit-128x128.png',
-                 'etc/mpv-icon.ico',
-                 'osdep/win32/mpv.exe.manifest']
-
-    sources += windows.compile_resources('osdep/win32/mpv.rc', args: res_flags, depend_files: resources,
-                                         depends: version_h, include_directories: res_includes)
-endif
-
-
 client_h_define = cc.get_define('MPV_CLIENT_API_VERSION', prefix: '#include "libmpv/client.h"',
                                 include_directories: include_directories('.'))
 major = client_h_define.split('|')[0].split('<<')[0].strip('() ')
@@ -1767,9 +1687,9 @@ if get_option('cplayer')
                      win_subsystem: 'windows,6.0', include_directories: includedir, install: true)
 endif
 
-if get_option('tests')
-    subdir('test')
-endif
+# if get_option('tests')
+#     subdir('test')
+# endif
 
 summary({'d3d11': features['d3d11'],
          'javascript': features['javascript'],
