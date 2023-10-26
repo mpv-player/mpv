@@ -115,7 +115,7 @@ static inline int mp_cond_timedwait(mp_cond *cond, mp_mutex *mutex, int64_t time
     timeout = MPCLAMP(timeout, 0, MP_TIME_MS_TO_NS(INFINITE)) / MP_TIME_MS_TO_NS(1);
 
     int ret = 0;
-    int hrt = mp_start_hires_timers(timeout);
+    int64_t hrt = mp_start_hires_timers(MP_TIME_MS_TO_NS(timeout));
     BOOL bRet;
 
     if (mutex->use_cs) {

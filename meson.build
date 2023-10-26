@@ -490,6 +490,7 @@ if features['win32-desktop']
                           cc.find_library('dwmapi'),
                           cc.find_library('gdi32'),
                           cc.find_library('imm32'),
+                          cc.find_library('ntdll'),
                           cc.find_library('ole32'),
                           cc.find_library('uuid'),
                           cc.find_library('uxtheme'),
