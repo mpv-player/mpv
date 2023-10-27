@@ -2236,6 +2236,10 @@ Property list
     .. note:: This is only an estimate. (It's computed from two unreliable
               quantities: fps and possibly rounded timestamps.)
 
+``env``
+    Read-only table of all the environment variables. A specific variable can be
+    accessed as a sub-property, e.g. ``${env/HOME}`` returns ``$HOME`` if set.
+
 ``pid``
     Process-id of mpv.
 

@@ -544,6 +544,38 @@ static int mp_property_filename(void *ctx, struct m_property *prop,
     return r;
 }
 
+static int mp_property_env(void *ctx, struct m_property *prop,
+                           int action, void *arg)
+{
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE: {
+        struct mpv_node node;
+        node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
+        for (char **env = environ; env && *env; env++) {
+            char *sep = strchr(*env, '=');
+            if (!sep)
+                continue;
+            bstr key = { .start = *env, .len = sep - *env };
+            struct mpv_node *np = node_map_badd(&node, key, MPV_FORMAT_NONE);
+            np->format = MPV_FORMAT_STRING;
+            np->u.string = talloc_strdup(node.u.list, sep + 1);
+        }
+        *(struct mpv_node *)arg = node;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_KEY_ACTION: {
+        struct m_property_action_arg *ka = arg;
+        char *val = getenv(ka->key);
+        return m_property_strdup_ro(ka->action, ka->arg, val);
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_stream_open_filename(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
@@ -4380,6 +4412,7 @@ static const struct m_property mp_properties_base[] = {
     {"video-speed-correction", mp_property_av_speed_correction, .priv = "v"},
     {"display-sync-active", mp_property_display_sync_active},
     {"filename", mp_property_filename},
+    {"env", mp_property_env},
     {"stream-open-filename", mp_property_stream_open_filename},
     {"file-size", mp_property_file_size},
     {"path", mp_property_path},
