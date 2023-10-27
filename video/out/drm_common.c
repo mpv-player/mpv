@@ -946,7 +946,7 @@ static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
         struct timespec ts;
         if (clock_gettime(CLOCK_MONOTONIC, &ts))
             goto fail;
-        int64_t now_monotonic = ts.tv_sec * UINT64_C(1000000000) + ts.tv_nsec;
+        int64_t now_monotonic = MP_TIME_S_TO_NS(ts.tv_sec) + ts.tv_nsec;
         int64_t ust_mp_time = mp_time_ns() - (now_monotonic - vsync->ust * 1000);
 
         const uint64_t     ust_since_enqueue = vsync->ust - frame_vsync->ust;

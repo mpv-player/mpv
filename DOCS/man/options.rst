@@ -730,6 +730,7 @@ Program Behavior
     Do not load default configuration or any user files. This prevents loading of
     both the user-level and system-wide ``mpv.conf`` and ``input.conf`` files. Other
     user files are blocked as well, such as resume playback files and cache files.
+    This option only takes effect when used as a command line flag.
 
     .. note::
 
@@ -992,6 +993,12 @@ Program Behavior
         - ``--ytdl-raw-options=force-ipv6=``
         - ``--ytdl-raw-options=proxy=[http://127.0.0.1:3128]``
         - ``--ytdl-raw-options-append=proxy=http://127.0.0.1:3128``
+
+``--js-memory-report=<yes|no>``
+    Enable memory reporting for javascript scripts in the stats overlay.
+    This is disabled by default because it has an overhead and increases
+    memory usage. This option will only work if it is enabled before mpv is
+    started.
 
 ``--load-stats-overlay=<yes|no>``
     Enable the builtin script that shows useful playback information on a key

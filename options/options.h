@@ -157,6 +157,7 @@ typedef struct MPOpts {
     char **reset_options;
     char **script_files;
     char **script_opts;
+    bool js_memory_report;
     bool lua_load_osc;
     bool lua_load_ytdl;
     char *lua_ytdl_format;

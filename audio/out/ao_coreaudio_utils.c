@@ -457,8 +457,8 @@ static OSStatus ca_change_format_listener(
     const AudioObjectPropertyAddress addresses[],
     void *data)
 {
-    sem_t *sem = data;
-    sem_post(sem);
+    mp_sem_t *sem = data;
+    mp_sem_post(sem);
     return noErr;
 }
 
@@ -471,7 +471,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
     ca_print_asbd(ao, "setting stream physical format:", &change_format);
 
     sem_t wakeup;
-    if (sem_init(&wakeup, 0, 0)) {
+    if (mp_sem_init(&wakeup, 0, 0)) {
         MP_WARN(ao, "OOM\n");
         return false;
     }
@@ -500,7 +500,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
 
     /* The AudioStreamSetProperty is not only asynchronous,
      * it is also not Atomic, in its behaviour. */
-    struct timespec timeout = mp_rel_time_to_timespec(2.0);
+    int64_t wait_until = mp_time_ns() + MP_TIME_S_TO_NS(2);
     AudioStreamBasicDescription actual_format = {0};
     while (1) {
         err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &actual_format);
@@ -511,7 +511,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
         if (format_set)
             break;
 
-        if (sem_timedwait(&wakeup, &timeout)) {
+        if (mp_sem_timedwait(&wakeup, wait_until)) {
             MP_VERBOSE(ao, "reached timeout\n");
             break;
         }
@@ -533,7 +533,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
     CHECK_CA_ERROR("can't remove property listener");
 
 coreaudio_error:
-    sem_destroy(&wakeup);
+    mp_sem_destroy(&wakeup);
     return format_set;
 }
 #endif

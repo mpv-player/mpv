@@ -23,8 +23,7 @@ libavutil = dependency('libavutil', version: '>= 56.70.100')
 libswresample = dependency('libswresample', version: '>= 3.9.100')
 libswscale = dependency('libswscale', version: '>= 5.9.100')
 
-libplacebo = dependency('libplacebo', version: '>=6.338.0', fallback: ['libplacebo', 'libplacebo'],
-    default_options: ['default_library=static', 'demos=false'])
+libplacebo = dependency('libplacebo', version: '>=6.338.0')
 
 libass = dependency('libass', version: '>= 0.12.2')
 
@@ -487,7 +486,7 @@ endif
 
 features += {'win32-executable': win32 and get_option('cplayer')}
 if win32
-    timer_source = files('osdep/timer-win2.c')
+    timer_source = files('osdep/timer-win32.c')
     sources += files('osdep/w32_keyboard.c',
                      'osdep/windows_utils.c')
 endif
