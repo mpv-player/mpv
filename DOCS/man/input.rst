@@ -2230,6 +2230,11 @@ Property list
     .. note:: This is only an estimate. (It's computed from two unreliable
               quantities: fps and possibly rounded timestamps.)
 
+``env/...``
+    Read-only property that can be used for retrieving environment variables.
+    The variable to retrieve should be set as the sub-property. E.g
+    ``${env/HOME}`` will return ``$HOME`` if set.
+
 ``pid``
     Process-id of mpv.
 
