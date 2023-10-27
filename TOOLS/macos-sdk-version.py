@@ -8,7 +8,7 @@ import re
 import os
 import string
 import sys
-from distutils.version import StrictVersion
+from packaging import version
 from shutil import which
 from subprocess import check_output
 
@@ -56,7 +56,7 @@ def find_macos_sdk():
         sdk_version = '10.10.0'
 
     # pick the higher version, always pick sdk over build if newer
-    if StrictVersion(build_version) > StrictVersion(sdk_version):
+    if version.parse(build_version) > version.parse(sdk_version):
         return sdk,build_version
     else:
         return sdk,sdk_version
