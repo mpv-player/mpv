@@ -91,7 +91,7 @@ static void run_script(struct mp_script_args *arg)
     talloc_free(name);
 
     if (arg->backend->load(arg) < 0)
-        MP_ERR(arg, "Could not load %s %s\n", arg->backend->name, arg->filename);
+        MP_ERR(arg, "Could not load %s script %s\n", arg->backend->name, arg->filename);
 
     mpv_destroy(arg->client);
     talloc_free(arg);
@@ -188,7 +188,7 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
     arg->log = mp_client_get_log(arg->client);
     int64_t id = mpv_client_id(arg->client);
 
-    MP_DBG(arg, "Loading %s %s...\n", backend->name, arg->filename);
+    MP_DBG(arg, "Loading %s script %s...\n", backend->name, arg->filename);
 
     if (backend->no_thread) {
         run_script(arg);
