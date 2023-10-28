@@ -2000,12 +2000,16 @@ function osc_init()
         function () return mp.get_property_number("percent-pos", nil) end
     ne.slider.tooltipF = function (pos)
         local duration = mp.get_property_number("duration", nil)
+        local tt_str = ""
         if not ((duration == nil) or (pos == nil)) then
             possec = duration * (pos / 100)
-            return mp.format_time(possec)
-        else
-            return ""
+            tt_str = mp.format_time(possec)
+            if (state.rightTC_trem) then
+                local remaining = (possec - mp.get_property_number("time-pos")) / mp.get_property_number("speed")
+                tt_str = tt_str .. "/" .. mp.format_time(remaining * -1)
+            end
         end
+        return tt_str
     end
     ne.slider.seekRangesF = function()
         if user_opts.seekrangestyle == "none" then
