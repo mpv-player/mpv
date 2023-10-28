@@ -36,7 +36,11 @@ uint64_t mp_raw_time_ns(void)
 {
     struct timespec tp = {0};
     int ret = -1;
-#if defined(CLOCK_MONOTONIC_RAW)
+#if defined(CLOCK_BOOTTIME)
+    // avoid linux's CLOCK_MONOTONIC{_RAW} issue of not counting
+    // system suspension time
+    ret = clock_gettime(CLOCK_BOOTTIME, &tp);
+#elif defined(CLOCK_MONOTONIC_RAW)
     ret = clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
 #endif
     if (ret)
