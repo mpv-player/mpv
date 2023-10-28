@@ -359,6 +359,10 @@ features += {'win32-threads': win32_threads.allowed()}
 if not features['win32-threads']
     pthreads = dependency('threads')
     sources += files('osdep/threads-posix.c')
+    features += {'pthread-condattr-setclock':
+                    cc.has_header_symbol('pthread.h',
+                                         'pthread_condattr_setclock',
+                                         dependencies: pthreads)}
     dependencies += pthreads
 endif
 
