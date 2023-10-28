@@ -2639,6 +2639,14 @@ Subtitles
         particular subtitles in mkv files) are always assumed to be UTF-8.
 
 
+``--sub-stretch-durations=<yes|no>``
+    Stretch a subtitle duration so it ends when the next one starts.
+    Should help with subtitles which erroneously have zero durations.
+
+    .. note::
+
+        Only applies to text subtitles.
+
 ``--sub-fix-timing=<yes|no>``
     Adjust subtitle timing is to remove minor gaps or overlaps between
     subtitles (if the difference is smaller than 210 ms, the gap or overlap
