@@ -111,6 +111,7 @@ struct mp_codec_params {
 
     // STREAM_VIDEO + STREAM_AUDIO
     int bits_per_coded_sample;
+    char *format_name;    // pixel format (video) or sample format (audio)
 
     // STREAM_SUB
     double frame_based;   // timestamps are frame-based (and this is the

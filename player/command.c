@@ -2063,6 +2063,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"demux-bitrate",  SUB_PROP_INT(p.bitrate), .unavailable = p.bitrate <= 0},
         {"demux-rotation", SUB_PROP_INT(p.rotate),  .unavailable = p.rotate <= 0},
         {"demux-par",      SUB_PROP_DOUBLE(par),    .unavailable = par <= 0},
+        {"format-name", SUB_PROP_STR(p.format_name), .unavailable = !p.format_name},
         {"replaygain-track-peak", SUB_PROP_FLOAT(rg.track_peak),
                         .unavailable = !has_rg},
         {"replaygain-track-gain", SUB_PROP_FLOAT(rg.track_gain),

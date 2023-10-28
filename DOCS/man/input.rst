@@ -3089,6 +3089,11 @@ Property list
     ``track-list/N/demux-par``
         Pixel aspect ratio.
 
+    ``track-list/N/format-name``
+        Short name for format from ffmpeg. If the track is audio, this will be
+        the name of the sample format. If the track is video, this will be the
+        name of the pixel format.
+
     ``track-list/N/audio-channels`` (deprecated)
         Deprecated alias for ``track-list/N/demux-channel-count``.
 

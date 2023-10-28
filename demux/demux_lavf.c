@@ -29,14 +29,15 @@
 
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
+
 #include <libavutil/avutil.h>
 #include <libavutil/avstring.h>
-#include <libavutil/mathematics.h>
-#include <libavutil/replaygain.h>
 #include <libavutil/display.h>
-#include <libavutil/opt.h>
-
 #include <libavutil/dovi_meta.h>
+#include <libavutil/mathematics.h>
+#include <libavutil/opt.h>
+#include <libavutil/pixdesc.h>
+#include <libavutil/replaygain.h>
 
 #include "audio/chmap_avchannel.h"
 
@@ -726,6 +727,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         sh->codec->samplerate = codec->sample_rate;
         sh->codec->bitrate = codec->bit_rate;
+        sh->codec->format_name = talloc_strdup(sh, av_get_sample_fmt_name(codec->format));
 
         double delay = 0;
         if (codec->sample_rate > 0)
@@ -764,6 +766,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         sh->codec->disp_w = codec->width;
         sh->codec->disp_h = codec->height;
+        sh->codec->format_name = talloc_strdup(sh, av_get_pix_fmt_name(codec->format));
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
         if (is_image(st, sh->attached_picture, priv->avif)) {
