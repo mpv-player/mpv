@@ -53,7 +53,6 @@ endif
 if features['win32-desktop']
     test_utils_deps += cc.find_library('imm32')
     test_utils_deps += cc.find_library('ntdll')
-    test_utils_deps += cc.find_library('winmm')
 endif
 test_utils_objects = libmpv.extract_objects(test_utils_files)
 test_utils = static_library('test-utils', 'test_utils.c', include_directories: incdir,
