@@ -431,7 +431,7 @@ void vo_drm_release_crtc(struct vo_drm_state *drm)
 
     if (request)
         drmModeAtomicFree(request);
-    
+
     if (!success)
         MP_ERR(drm, "Failed to restore previous mode\n");
 

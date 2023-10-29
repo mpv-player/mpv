@@ -203,7 +203,7 @@ Available filters are:
         :Faster: This is the Rubberband R2 engine. It uses significantly less
                  CPU than the Finer (R3) engine.
         :Finer: This is the Rubberband R3 engine. This engine is only available
-                with librubberband version 3 or newer. This produces significantly 
+                with librubberband version 3 or newer. This produces significantly
                 higher quality output, at the cost of higher CPU usage. (Default
                 if available)
 

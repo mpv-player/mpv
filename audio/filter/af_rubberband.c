@@ -80,7 +80,7 @@ static bool init_rubberband(struct mp_filter *f)
 
     int opts = p->opts->transients | p->opts->detector | p->opts->phase |
                p->opts->window | p->opts->smoothing | p->opts->formant |
-               p->opts->pitch | p->opts->channels | 
+               p->opts->pitch | p->opts->channels |
 #if HAVE_RUBBERBAND_3
                p->opts->engine |
 #endif
