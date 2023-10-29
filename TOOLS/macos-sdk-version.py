@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 
-# Logic copied from compiler_swift.py in the waf build. This checks for the sdk
-# path, the sdk version, and the sdk build version. The sdk path is returned
-# along with what is selected as the sdk version.
+# This checks for the sdk path, the sdk version, and
+# the sdk build version.
 
 import re
 import os
 import string
 import sys
-from packaging import version
 from shutil import which
 from subprocess import check_output
 
 def find_macos_sdk():
     sdk = os.environ.get('MACOS_SDK', '')
     sdk_version = os.environ.get('MACOS_SDK_VERSION', '0.0')
+    build_version = '0.0'
     xcrun = which('xcrun')
 
     if not xcrun:
-        return sdk,sdk_version
+        return sdk,sdk_version,build_version
 
     if not sdk:
         sdk = check_output([xcrun, '--sdk', 'macosx', '--show-sdk-path'],
@@ -55,13 +54,7 @@ def find_macos_sdk():
     if not isinstance(sdk_version, str):
         sdk_version = '10.10.0'
 
-    # pick the higher version, always pick sdk over build if newer
-    if version.parse(build_version) > version.parse(sdk_version):
-        return sdk,build_version
-    else:
-        return sdk,sdk_version
-
-    return sdk,sdk_version
+    return sdk,sdk_version,build_version
 
 if __name__ == "__main__":
     sdk_info = find_macos_sdk()
