@@ -13,7 +13,7 @@ project('mpv',
 
 build_root = meson.project_build_root()
 source_root = meson.project_source_root()
-python = import('python').find_installation()
+python = find_program('python3')
 
 # ffmpeg
 libavcodec = dependency('libavcodec', version: '>= 58.134.100')
@@ -1475,10 +1475,7 @@ endif
 macos_sdk_path = ''
 macos_sdk_version = '0.0'
 if darwin and macos_sdk_version_py.found()
-    # Execute macos-sdk-version.py with Python provided by meson.
-    # In some cases, Python executable with the necessary modules might not refer to python3
-    # (e.g. python@3.12 and python-packaging Homebrew packages).
-    macos_sdk_info = run_command(python, macos_sdk_version_py, check: true).stdout().split(',')
+    macos_sdk_info = run_command(macos_sdk_version_py, check: true).stdout().split(',')
     macos_sdk_path = macos_sdk_info[0].strip()
     macos_sdk_version = macos_sdk_info[1]
 endif
