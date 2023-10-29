@@ -7149,7 +7149,7 @@ Miscellaneous
     Controls the window affinity behavior of mpv.
 
     :default: Default Windows behavior
-    :excludefromcapture: mpv's window will be completely excluded from capture by external applications or screen recording software. 
+    :excludefromcapture: mpv's window will be completely excluded from capture by external applications or screen recording software.
     :monitor: Blacks out the mpv window
 
 ``--vo-mmcss-profile=<name>``
