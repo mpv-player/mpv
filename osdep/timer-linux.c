@@ -35,11 +35,12 @@ void mp_sleep_ns(int64_t ns)
 uint64_t mp_raw_time_ns(void)
 {
     struct timespec tp = {0};
+    int ret = -1;
 #if defined(CLOCK_MONOTONIC_RAW)
-    clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
-#else
-    timespec_get(&tp, TIME_UTC);
+    ret = clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
 #endif
+    if (ret)
+        clock_gettime(CLOCK_MONOTONIC, &tp);
     return MP_TIME_S_TO_NS(tp.tv_sec) + tp.tv_nsec;
 }
 

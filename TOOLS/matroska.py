@@ -463,15 +463,10 @@ if __name__ == "__main__":
     def parse_toplevel(s):
         parse_one(s, 0, None, 1 << 63)
 
-    if len(sys.argv) < 3:
-        outfile = sys.stdout
-    else:
-        outfile = open(sys.argv[2], "w")
-
     if sys.argv[1] == '--generate-header':
-        generate_C_header(outfile)
+        generate_C_header(open(sys.argv[2], "w"))
     elif sys.argv[1] == '--generate-definitions':
-        generate_C_definitions(outfile)
+        generate_C_definitions(open(sys.argv[2], "w"))
     else:
         s = open(sys.argv[1], "rb")
         while 1:

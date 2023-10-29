@@ -85,13 +85,13 @@ static char *script_name_from_filename(void *talloc_ctx, const char *fname)
 
 static void run_script(struct mp_script_args *arg)
 {
-    char name[90];
-    snprintf(name, sizeof(name), "%s (%s)", arg->backend->name,
-             mpv_client_name(arg->client));
+    char *name = talloc_asprintf(NULL, "%s/%s", arg->backend->name,
+                                 mpv_client_name(arg->client));
     mpthread_set_name(name);
+    talloc_free(name);
 
     if (arg->backend->load(arg) < 0)
-        MP_ERR(arg, "Could not load %s %s\n", arg->backend->name, arg->filename);
+        MP_ERR(arg, "Could not load %s script %s\n", arg->backend->name, arg->filename);
 
     mpv_destroy(arg->client);
     talloc_free(arg);
@@ -188,7 +188,7 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
     arg->log = mp_client_get_log(arg->client);
     int64_t id = mpv_client_id(arg->client);
 
-    MP_DBG(arg, "Loading %s %s...\n", backend->name, arg->filename);
+    MP_DBG(arg, "Loading %s script %s...\n", backend->name, arg->filename);
 
     if (backend->no_thread) {
         run_script(arg);
@@ -396,11 +396,10 @@ error: ;
 }
 
 const struct mp_scripting mp_scripting_cplugin = {
+    .name = "cplugin",
     #if HAVE_WIN32
-    .name = "DLL plugin",
     .file_ext = "dll",
     #else
-    .name = "SO plugin",
     .file_ext = "so",
     #endif
     .load = load_cplugin,
@@ -458,7 +457,7 @@ static int load_run(struct mp_script_args *args)
 }
 
 const struct mp_scripting mp_scripting_run = {
-    .name = "spawned IPC process",
+    .name = "ipc",
     .file_ext = "run",
     .no_thread = true,
     .load = load_run,

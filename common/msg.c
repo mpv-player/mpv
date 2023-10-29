@@ -316,7 +316,7 @@ static void print_terminal_line(struct mp_log *log, int lev,
         set_msg_color(stream, lev);
 
     if (root->show_time)
-        fprintf(stream, "[%10.6f] ", (mp_time_ns() - MP_START_TIME) / 1e9);
+        fprintf(stream, "[%10.6f] ", mp_time_sec());
 
     const char *prefix = log->prefix;
     if ((lev >= MSGL_V) || root->verbose || root->module)
@@ -541,7 +541,7 @@ static void *log_file_thread(void *p)
 {
     struct mp_log_root *root = p;
 
-    mpthread_set_name("log-file");
+    mpthread_set_name("log");
 
     pthread_mutex_lock(&root->log_file_lock);
 
@@ -551,7 +551,7 @@ static void *log_file_thread(void *p)
         if (e) {
             pthread_mutex_unlock(&root->log_file_lock);
             fprintf(root->log_file, "[%8.3f][%c][%s] %s",
-                    (mp_time_ns() - MP_START_TIME) / 1e9,
+                    mp_time_sec(),
                     mp_log_levels[e->level][0], e->prefix, e->text);
             fflush(root->log_file);
             pthread_mutex_lock(&root->log_file_lock);
@@ -959,7 +959,7 @@ const int mp_mpv_log_levels[MSGL_MAX + 1] = {
 int mp_msg_find_level(const char *s)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(mp_log_levels); n++) {
-        if (mp_log_levels[n] && !strcmp(s, mp_log_levels[n]))
+        if (mp_log_levels[n] && !strcasecmp(s, mp_log_levels[n]))
             return n;
     }
     return -1;

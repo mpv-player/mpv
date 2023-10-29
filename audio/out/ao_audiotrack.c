@@ -554,7 +554,7 @@ static void *playthread(void *arg)
     struct ao *ao = arg;
     struct priv *p = ao->priv;
     JNIEnv *env = MP_JNI_GET_ENV(ao);
-    mpthread_set_name("audiotrack");
+    mpthread_set_name("ao/audiotrack");
     pthread_mutex_lock(&p->lock);
     while (!p->thread_terminate) {
         int state = AudioTrack.PLAYSTATE_PAUSED;

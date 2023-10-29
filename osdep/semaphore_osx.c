@@ -46,7 +46,7 @@ int mp_sem_init(mp_sem_t *sem, int pshared, unsigned int value)
 
 int mp_sem_wait(mp_sem_t *sem)
 {
-    return mp_sem_timedwait(sem, MP_START_TIME - 1);
+    return mp_sem_timedwait(sem, -1);
 }
 
 int mp_sem_trywait(mp_sem_t *sem)
@@ -76,9 +76,9 @@ int mp_sem_timedwait(mp_sem_t *sem, int64_t until)
             return 0;
 
         int timeout = 0;
-        if (until == MP_START_TIME - 1) {
+        if (until == -1) {
             timeout = -1;
-        } else if (until >= MP_START_TIME) {
+        } else if (until >= 0) {
             timeout = (until - mp_time_ns()) / MP_TIME_MS_TO_NS(1);
             timeout = MPCLAMP(timeout, 0, INT_MAX);
         } else {

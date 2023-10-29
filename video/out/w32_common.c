@@ -1730,7 +1730,7 @@ static void *gui_thread(void *ptr)
     bool ole_ok = false;
     int res = 0;
 
-    mpthread_set_name("win32 window");
+    mpthread_set_name("window");
 
     w32_api_load(w32);
 

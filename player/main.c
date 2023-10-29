@@ -34,6 +34,7 @@
 #include "misc/thread_pool.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "osdep/main-fn.h"
 
@@ -419,6 +420,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
 int mpv_main(int argc, char *argv[])
 {
+    mpthread_set_name("main");
     struct MPContext *mpctx = mp_create();
     if (!mpctx)
         return 1;
