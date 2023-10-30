@@ -31,9 +31,7 @@
 #include "misc/dispatch.h"
 #include "options/m_option.h"
 
-// m_config provides an API to manipulate the config variables in MPlayer.
-// It makes use of the Options API to provide a context stack that
-// allows saving and later restoring the state of all variables.
+// Improved and commented m_config.h file
 
 typedef struct m_profile m_profile_t;
 struct m_option;
@@ -44,14 +42,14 @@ struct m_obj_settings;
 struct mp_log;
 struct mp_dispatch_queue;
 
-// Config option
+// Config option structure
 struct m_config_option {
     bool is_set_from_cmdline : 1;   // Set by user from command line
     bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
     int32_t opt_id;                 // For some m_config APIs
-    const char *name;               // Full name (ie option-subopt)
+    const char *name;               // Full name (option-subopt)
     const struct m_option *opt;     // Option description
     void *data;                     // Raw value of the option
 };
@@ -146,6 +144,7 @@ void m_config_restore_backups(struct m_config *config);
 bool m_config_watch_later_backup_opt_changed(struct m_config *config,
                                              char *opt_name);
 
+// Enum for set_option flags
 enum {
     M_SETOPT_PRE_PARSE_ONLY = 1,    // Silently ignore non-M_OPT_PRE_PARSE opt.
     M_SETOPT_CHECK_ONLY = 2,        // Don't set, just check name/value
@@ -213,7 +212,6 @@ void m_config_notify_change_opt_ptr_notify(struct m_config *config, void *ptr);
 char **m_config_list_options(void *ta_parent, const struct m_config *config);
 
 void m_config_print_option_list(const struct m_config *config, const char *name);
-
 
 /*  Find the profile with the given name.
  *  \param config The config object.
