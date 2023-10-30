@@ -28,6 +28,7 @@
 
 #include <libavutil/rational.h>
 #include <libavutil/cpu.h>
+#include <libavutil/buffer.h>
 
 #include "common/msg.h"
 #include "options/m_option.h"
@@ -210,13 +211,16 @@ static void copy_mp_to_vs_frame_props_map(struct priv *p, VSMap *map,
 }
 
 static int set_vs_frame_props(struct priv *p, VSFrameRef *frame,
-                              struct mp_image *img, int dur_num, int dur_den)
+                              struct mp_image *img, int dur_num, int dur_den, int frameno)
 {
     VSMap *map = p->vsapi->getFramePropsRW(frame);
     if (!map)
         return -1;
     p->vsapi->propSetInt(map, "_DurationNum", dur_num, 0);
     p->vsapi->propSetInt(map, "_DurationDen", dur_den, 0);
+    p->vsapi->propSetInt(map, "__frameno", frameno, 0);
+    if(img->dovi && img->dovi->size)
+        p->vsapi->propSetData(map,"_DoVi", img->dovi->data, img->dovi->size, 0);
     copy_mp_to_vs_frame_props_map(p, map, img);
     return 0;
 }
@@ -269,10 +273,17 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
     struct mp_image *res = NULL;
     if (f) {
         struct mp_image img = map_vs_frame(p, f, false);
-        struct mp_image dummy = {.params = p->fmt_in};
-        mp_image_copy_attributes(&img, &dummy);
-        img.pkt_duration = -1;
         const VSMap *map = p->vsapi->getFramePropsRO(f);
+        int err;
+        int frm = map ? p->vsapi->propGetInt(map, "__frameno", 0, &err) : -1;
+        int idx = frm - p->in_frameno;
+        if (err || idx < 0 || idx >= p->num_buffered) {
+            struct mp_image dummy = {.params = p->fmt_in};
+            mp_image_copy_attributes(&img, &dummy);
+        } else {
+            mp_image_copy_attributes(&img, p->buffered[idx]);
+        }
+        img.pkt_duration = -1;
         if (map) {
             int err1, err2;
             int num = p->vsapi->propGetInt(map, "_DurationNum", 0, &err1);
@@ -491,7 +502,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             mp_image_clear(&vsframe, 0, 0, p->fmt_in.w, p->fmt_in.h);
             struct mp_image dummy = {0};
             mp_image_set_params(&dummy, &p->fmt_in);
-            set_vs_frame_props(p, ret, &dummy, 0, 1);
+            set_vs_frame_props(p, ret, &dummy, 0, 1, 0);
             break;
         }
         if (frameno < p->in_frameno) {
@@ -539,7 +550,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             mp_image_copy(&vsframe, img);
             int res = 1e6;
             int dur = img->pkt_duration * res + 0.5;
-            set_vs_frame_props(p, ret, img, dur, res);
+            set_vs_frame_props(p, ret, img, dur, res, frameno);
             pthread_mutex_lock(&p->lock);
             break;
         }
