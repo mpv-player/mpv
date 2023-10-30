@@ -8,6 +8,7 @@ local o = {
     use_manifests = false,
     all_formats = false,
     force_all_formats = true,
+    thumbnails = "none",
     ytdl_path = "",
 }
 
@@ -751,6 +752,36 @@ local function add_single_video(json)
             else
                 msg.verbose("No subtitle data/url for ["..lang.."]")
             end
+        end
+    end
+
+    -- add thumbnails
+    if (o.thumbnails == 'all' or o.thumbnails == 'best') and not (json.thumbnails == nil) then
+        local thumb = nil
+        local thumb_height = -1
+        local thumb_preference = nil
+
+        for i = #json.thumbnails, 1, -1 do
+            local thumb_info = json.thumbnails[i]
+            if not (thumb_info.url == nil) then
+                if (o.thumbnails == 'all') then
+                    msg.verbose("adding thumbnail")
+                    mp.commandv("video-add", thumb_info.url, "auto")
+                    thumb_height = 0
+                elseif (thumb_preference ~= nil and thumb_info.preference > thumb_preference) or
+                    (thumb_preference == nil and ((thumb_info.height or 0) > thumb_height)) then
+                    thumb = thumb_info.url
+                    thumb_height = thumb_info.height or 0
+                    thumb_preference = thumb_info.preference
+                end
+            end
+        end
+
+        if not (thumb == nil) then
+            msg.verbose("adding thumbnail")
+            mp.commandv("video-add", thumb, "auto")
+        elseif (thumb_height == -1) then
+            msg.verbose("No thumbnail url")
         end
     end
 

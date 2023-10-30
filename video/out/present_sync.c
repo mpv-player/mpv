@@ -27,7 +27,7 @@
  * (ust, msc): clock time and incrementing counter of last vsync (this is
  *             increased continuously, even if we don't swap)
  *
- * Note that this concept originates from the GLX_OML_sync_control extension 
+ * Note that this concept originates from the GLX_OML_sync_control extension
  * which includes another parameter: sbc (swap counter of frame that was
  * last displayed). Both the xorg present extension and wayland's
  * presentation-time protocol do not include sbc values so they are omitted

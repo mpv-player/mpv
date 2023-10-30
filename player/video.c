@@ -281,13 +281,6 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
 
     vo_set_paused(vo_c->vo, get_internal_paused(mpctx));
 
-    // If we switch on video again, ensure audio position matches up.
-    if (mpctx->ao_chain && mpctx->ao_chain->ao && !(track && track->image)) {
-        ao_reset(mpctx->ao_chain->ao);
-        mpctx->ao_chain->start_pts_known = false;
-        mpctx->audio_status = STATUS_SYNCING;
-    }
-
     reset_video_state(mpctx);
     term_osd_set_subs(mpctx, NULL);
 
@@ -349,7 +342,7 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
 {
     struct MPOpts *opts = mpctx->opts;
 
-    if (mpctx->audio_status != STATUS_PLAYING)
+    if (mpctx->audio_status == STATUS_EOF)
         return;
 
     mpctx->delay -= frame_time;
@@ -394,7 +387,7 @@ static void handle_new_frame(struct MPContext *mpctx)
         }
     }
     mpctx->time_frame += frame_time / mpctx->video_speed;
-    if (mpctx->video_status >= STATUS_PLAYING)
+    if (frame_time)
         adjust_sync(mpctx, pts, frame_time);
     MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 }
@@ -929,7 +922,10 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     frame->display_synced = true;
 
     mpctx->display_sync_active = true;
-    update_playback_speed(mpctx);
+    // Try to avoid audio underruns that may occur if we update
+    // the playback speed while in the STATUS_SYNCING state.
+    if (mpctx->video_status != STATUS_SYNCING)
+        update_playback_speed(mpctx);
 
     MP_STATS(mpctx, "value %f aspeed", mpctx->speed_factor_a - 1);
     MP_STATS(mpctx, "value %f vspeed", mpctx->speed_factor_v - 1);

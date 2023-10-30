@@ -722,7 +722,7 @@ static void mp_dl_init(void)
 
 void *mp_dlopen(const char *filename, int flag)
 {
-    wchar_t *wfilename = mp_from_utf8(NULL, filename);    
+    wchar_t *wfilename = mp_from_utf8(NULL, filename);
     HMODULE lib = LoadLibraryW(wfilename);
     talloc_free(wfilename);
     mp_dl_result.errcode = GetLastError();
@@ -744,7 +744,7 @@ char *mp_dlerror(void)
 
     if (mp_dl_result.errcode == 0)
         return NULL;
-    
+
     // convert error code to a string message
     LPWSTR werrstring = NULL;
     FormatMessageW(
@@ -758,12 +758,12 @@ char *mp_dlerror(void)
         0,
         NULL);
     mp_dl_result.errcode = 0;
-    
+
     if (werrstring) {
         mp_dl_result.errstring = mp_to_utf8(NULL, werrstring);
         LocalFree(werrstring);
     }
-    
+
     return mp_dl_result.errstring == NULL
         ? "unknown error"
         : mp_dl_result.errstring;

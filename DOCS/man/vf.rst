@@ -108,11 +108,6 @@ filter list.
     from the list if it was present. Matching of filters works as described in
     ``--vf-remove``.
 
-``--vf-del=filter``
-    Sort of like ``--vf-remove``, but also accepts an index number. Index
-    numbers start at 0, negative numbers address the end of the list (-1 is the
-    last). Deprecated.
-
 ``--vf-clr``
     Completely empties the filter list.
 

@@ -759,6 +759,7 @@ static const m_option_t mp_opts[] = {
         OPT_BOOL(ignore_path_in_watch_later_config)},
     {"watch-later-dir", OPT_STRING(watch_later_dir),
         .flags = M_OPT_FILE},
+    {"watch-later-directory", OPT_ALIAS("watch-later-dir")},
     {"watch-later-options", OPT_STRINGLIST(watch_later_options)},
 
     {"ordered-chapters", OPT_BOOL(ordered_chapters)},
@@ -820,6 +821,7 @@ static const m_option_t mp_opts[] = {
     {"screenshot-template", OPT_STRING(screenshot_template)},
     {"screenshot-dir", OPT_STRING(screenshot_dir),
         .flags = M_OPT_FILE},
+    {"screenshot-directory", OPT_ALIAS("screenshot-dir")},
     {"screenshot-sw", OPT_BOOL(screenshot_sw)},
 
     {"", OPT_SUBSTRUCT(resample_opts, resample_conf)},
@@ -890,9 +892,7 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(encode_opts, encode_config)},
 
     {"play-dir", OPT_REPLACED("play-direction")},
-    {"screenshot-directory", OPT_REPLACED("screenshot-dir")},
     {"sub-forced-only", OPT_REPLACED("sub-forced-events-only")},
-    {"watch-later-directory", OPT_REPLACED("watch-later-dir")},
     {0}
 };
 
