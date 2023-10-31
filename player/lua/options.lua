@@ -12,7 +12,7 @@ local function typeconv(desttypeval, val)
             val = nil
         end
     elseif type(desttypeval) == "number" then
-        if not (tonumber(val) == nil) then
+        if tonumber(val) ~= nil then
             val = tonumber(val)
         else
             msg.error("Error: Can't convert '" .. val .. "' to number!")

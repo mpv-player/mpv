@@ -175,7 +175,7 @@ function mp.flush_keybindings()
 end
 
 local function add_binding(attrs, key, name, fn, rp)
-    if (type(name) ~= "string") and (name ~= nil) then
+    if type(name) ~= "string" and name ~= nil then
         rp = fn
         fn = name
         name = nil
@@ -226,7 +226,7 @@ local function add_binding(attrs, key, name, fn, rp)
             end
             if is_mouse and (event == "u" or event == "p") then
                 fn()
-            elseif (not is_mouse) and (event == "d" or event == "r" or event == "p") then
+            elseif not is_mouse and (event == "d" or event == "r" or event == "p") then
                 fn()
             end
         end
@@ -316,7 +316,7 @@ end
 local function get_next_timer()
     local best = nil
     for t, _ in pairs(timers) do
-        if (best == nil) or (t.next_deadline < best.next_deadline) then
+        if best == nil or t.next_deadline < best.next_deadline then
             best = t
         end
     end
@@ -598,7 +598,7 @@ mp.register_event("hook", function(ev)
     if fn then
         fn(hookobj)
     end
-    if (not hookobj._defer) and hookobj._id ~= nil then
+    if not hookobj._defer and hookobj._id ~= nil then
         hookobj:cont()
     end
 end)
