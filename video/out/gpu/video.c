@@ -374,6 +374,7 @@ const struct m_sub_options gl_video_conf = {
             M_RANGE(10, 10000)},
         {"target-contrast", OPT_CHOICE(target_contrast, {"auto", 0}, {"inf", -1}),
             M_RANGE(10, 1000000)},
+        {"target-gamut", OPT_CHOICE_C(target_gamut, mp_csp_prim_names)},
         {"tone-mapping", OPT_CHOICE(tone_map.curve,
             {"auto",     TONE_MAPPING_AUTO},
             {"clip",     TONE_MAPPING_CLIP},

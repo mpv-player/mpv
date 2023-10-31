@@ -791,6 +791,13 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
         target->color.hdr.max_luma = opts->target_peak;
     if (!target->color.hdr.min_luma)
         apply_target_contrast(p, &target->color);
+    if (opts->target_gamut) {
+        // Ensure resulting gamut still fits inside container
+        const struct pl_raw_primaries *gamut, *container;
+        gamut = pl_raw_primaries_get(mp_prim_to_pl(opts->target_gamut));
+        container = pl_raw_primaries_get(target->color.primaries);
+        target->color.hdr.prim = pl_primaries_clip(gamut, container);
+    }
     if (opts->dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
         tbits->color_depth += opts->dither_depth - tbits->sample_depth;
