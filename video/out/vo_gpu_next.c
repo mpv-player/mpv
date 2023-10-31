@@ -1051,12 +1051,12 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_frame_mix mix = {0};
     if (frame->current) {
         // Update queue state
-        struct pl_queue_params qparams = {
+        struct pl_queue_params qparams = *pl_queue_params(
             .pts = frame->current->pts + vsync_offset,
             .radius = pl_frame_mix_radius(&params),
             .vsync_duration = frame->vsync_interval,
             .interpolation_threshold = opts->interpolation_threshold,
-        };
+        );
 
         // mpv likes to generate sporadically jumping PTS shortly after
         // initialization, but pl_queue does not like these. Hard-clamp as
