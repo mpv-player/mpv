@@ -675,6 +675,10 @@ end
 function build_completers()
     local completers = {
         { pattern = '^%s*()[%w_-]+$', list = command_list, append = ' ' },
+        { pattern = '^%s*set%s+"?([%w_-]+)"?%s+()%S*$', list = choice_list },
+        { pattern = '^%s*set%s+"?([%w_-]+)"?%s+"()%S*$', list = choice_list, append = '"' },
+        { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+()%S*$', list = choice_list, append = " " },
+        { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+"()%S*$', list = choice_list, append = '" ' },
         { pattern = '${()[%w_/-]+$', list = property_list, append = '}' },
     }
 
@@ -690,30 +694,6 @@ function build_completers()
             append = '" ',
         }
     end
-
-    for _, command in pairs({'set', 'cycle[-_]values'}) do
-        completers[#completers + 1] = {
-            pattern = '^%s*' .. command .. '%s+"?([%w_-]+)"?%s+"()%S*$',
-            list = choice_list,
-            append = command == 'cycle[-_]values' and '" ' or '"',
-        }
-        completers[#completers + 1] = {
-            pattern = '^%s*' .. command .. '%s+"?([%w_-]+)"?%s+()%S*$',
-            list = choice_list,
-            append = command == 'cycle[-_]values' and ' ' or nil,
-        }
-    end
-
-    completers[#completers + 1] = {
-        pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?%s+%S+%s+"()%S*$',
-        list = choice_list,
-        append = '"',
-    }
-    completers[#completers + 1] = {
-        pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?%s+%S+%s+()%S*$',
-        list = choice_list,
-        append = nil,
-    }
 
     return completers
 end
