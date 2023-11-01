@@ -85,6 +85,9 @@ local suggestion_buffer = {}
 local key_bindings = {}
 local global_margins = { t = 0, b = 0 }
 
+local file_commands = {}
+local path_separator = platform == 'windows' and '\\' or '/'
+
 local update_timer = nil
 update_timer = mp.add_periodic_timer(0.05, function()
     if pending_update then
@@ -712,6 +715,35 @@ local function choice_list(option)
     return info.choices or {}
 end
 
+local function find_commands_with_file_argument()
+    if #file_commands > 0 then
+        return file_commands
+    end
+
+    for _, command in pairs(mp.get_property_native('command-list')) do
+        if command.args[1] and
+           (command.args[1].name == 'filename' or command.args[1].name == 'url') then
+            file_commands[#file_commands + 1] = command.name
+        end
+    end
+
+    return file_commands
+end
+
+local function file_list(directory)
+    if directory == '' then
+        directory = '.'
+    end
+
+    local files = utils.readdir(directory, 'files') or {}
+
+    for _, dir in pairs(utils.readdir(directory, 'dirs') or {}) do
+        files[#files + 1] = dir .. path_separator
+    end
+
+    return files
+end
+
 -- List of tab-completions:
 --   pattern: A Lua pattern used in string:match. It should return the start
 --            position of the word to be completed in the first capture (using
@@ -751,6 +783,18 @@ function build_completers()
             pattern = '^%s*' .. command .. '%s+"()[%w_/-]+$',
             list = property_list,
             append = '" ',
+        }
+    end
+
+
+    for _, command in pairs(find_commands_with_file_argument()) do
+        completers[#completers + 1] = {
+            pattern = '^%s*' .. command:gsub('-', '[-_]') ..
+                      '%s+["\']?(.-)()[^' .. path_separator ..']*$',
+            list = file_list,
+            -- Unfortunately appending " here would append it everytime a
+            -- directory is fully completed, even if you intend to browse it
+            -- afterwards.
         }
     end
 
