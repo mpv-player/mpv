@@ -1044,7 +1044,6 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 
     if (src->opaque_ref) {
         struct mp_image_params *p = (void *)src->opaque_ref->data;
-        dst->params.rotate = p->rotate;
         dst->params.stereo3d = p->stereo3d;
         // Might be incorrect if colorspace changes.
         dst->params.color.light = p->color.light;
@@ -1195,6 +1194,14 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
             av_content_light_metadata_create_side_data(dst);
         MP_HANDLE_OOM(clm);
         clm->MaxCLL = src->params.color.sig_peak * MP_REF_WHITE;
+    }
+
+    {
+        AVFrameSideData *sd = av_frame_new_side_data(dst,
+                                                     AV_FRAME_DATA_DISPLAYMATRIX,
+                                                     sizeof(int32_t) * 9);
+        MP_HANDLE_OOM(sd);
+        av_display_rotation_set((int32_t *)sd->data, src->params.rotate);
     }
 
     // Add back side data, but only for types which are not specially handled
