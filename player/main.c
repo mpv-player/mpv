@@ -420,7 +420,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
 int mpv_main(int argc, char *argv[])
 {
-    mpthread_set_name("main");
+    mpthread_set_name("mpv");
     struct MPContext *mpctx = mp_create();
     if (!mpctx)
         return 1;
