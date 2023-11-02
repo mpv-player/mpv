@@ -99,9 +99,13 @@ Commands
     specifying the initial cursor position as a positive integer starting from
     1.
 
-    .. admonition:: Example for input.conf
+    .. admonition:: Examples for input.conf
 
-        ``% script-message-to console type "seek  absolute-percent" 6``
+        ``% script-message-to console type "seek  absolute-percent; keypress ESC" 6``
+            Enter a percent position to seek to and close the console.
+
+        ``Ctrl+o script-message-to console type "loadfile ''; keypress ESC" 11``
+            Enter a file or URL to play. Tab completes paths in the filesystem.
 
 Known issues
 ------------
