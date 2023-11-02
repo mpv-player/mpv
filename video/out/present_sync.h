@@ -50,7 +50,7 @@ void present_sync_get_info(struct mp_present *present, struct vo_vsync_info *inf
 void present_sync_swap(struct mp_present *present);
 
 // Called anytime the backend delivers new ust/msc values.
-void present_update_sync_values(struct mp_present *present, int64_t ust,
+void present_sync_update_values(struct mp_present *present, int64_t ust,
                                 int64_t msc);
 
 #endif /* MP_PRESENT_SYNC_H */

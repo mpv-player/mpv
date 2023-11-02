@@ -107,7 +107,7 @@ void present_sync_swap(struct mp_present *present)
     cur->queue_display_time = ust_mp_time;
 }
 
-void present_update_sync_values(struct mp_present *present, int64_t ust,
+void present_sync_update_values(struct mp_present *present, int64_t ust,
                                 int64_t msc)
 {
     struct mp_present_entry *cur = present->head;
