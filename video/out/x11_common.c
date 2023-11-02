@@ -626,7 +626,7 @@ bool vo_x11_init(struct vo *vo)
 
     x11_error_output = x11->log;
     XSetErrorHandler(x11_errorhandler);
-    x11->present = talloc_zero(x11, struct mp_present);
+    x11->present = mp_present_initialize(x11, 8); // max swapchain depth allowed
 
     dispName = XDisplayName(NULL);
 

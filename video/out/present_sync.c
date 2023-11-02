@@ -17,6 +17,7 @@
 
 #include <time.h>
 
+#include "misc/linked_list.h"
 #include "mpv_talloc.h"
 #include "osdep/timer.h"
 #include "present_sync.h"
@@ -37,34 +38,65 @@
 
 void present_sync_get_info(struct mp_present *present, struct vo_vsync_info *info)
 {
-    info->vsync_duration = present->vsync_duration;
-    info->skipped_vsyncs = present->last_skipped_vsyncs;
-    info->last_queue_display_time = present->last_queue_display_time;
+    struct mp_present_entry *cur = present->head;
+    while (cur) {
+        if (cur->queue_display_time)
+            break;
+        cur = cur->list_node.next;
+    }
+    if (!cur)
+        return;
+
+    info->vsync_duration = cur->vsync_duration;
+    info->skipped_vsyncs = cur->skipped_vsyncs;
+    info->last_queue_display_time = cur->queue_display_time;
+
+    // Remove from the list, zero out everything, and append at the end
+    LL_REMOVE(list_node, present, cur);
+    *cur = (struct mp_present_entry){0};
+    LL_APPEND(list_node, present, cur);
+}
+
+struct mp_present *mp_present_initialize(void *talloc_ctx, int entries)
+{
+    struct mp_present *present = talloc_zero(talloc_ctx, struct mp_present);
+    for (int i = 0; i < entries; i++) {
+        struct mp_present_entry *entry = talloc_zero(present, struct mp_present_entry);
+        LL_APPEND(list_node, present, entry);
+    }
+    return present;
 }
 
 void present_sync_swap(struct mp_present *present)
 {
-    int64_t ust = present->current_ust;
-    int64_t msc = present->current_msc;
+    struct mp_present_entry *cur = present->head;
+    while (cur) {
+        if (!cur->queue_display_time)
+            break;
+        cur = cur->list_node.next;
+    }
+    if (!cur)
+        return;
+
+    int64_t ust = cur->ust;
+    int64_t msc = cur->msc;
+    int64_t last_ust = cur->list_node.prev ? cur->list_node.prev->ust : 0;
+    int64_t last_msc = cur->list_node.prev ? cur->list_node.prev->msc : 0;
 
     // Avoid attempting to use any presentation statistics if the ust is 0 or has
-    // not actually updated (i.e. the last_ust is equal to current_ust).
-    if (!ust || ust == present->last_ust) {
-        present->last_skipped_vsyncs = -1;
-        present->vsync_duration = -1;
-        present->last_queue_display_time = -1;
+    // not actually updated (i.e. the last_ust is equal to ust).
+    if (!ust || ust == last_ust) {
+        cur->skipped_vsyncs = -1;
+        cur->vsync_duration = -1;
+        cur->queue_display_time = -1;
         return;
     }
 
-    present->last_skipped_vsyncs = 0;
-
-    int64_t ust_passed = ust ? ust - present->last_ust: 0;
-    present->last_ust = ust;
-    int64_t msc_passed = msc ? msc - present->last_msc: 0;
-    present->last_msc = msc;
-
+    cur->skipped_vsyncs = 0;
+    int64_t ust_passed = ust ? ust - last_ust: 0;
+    int64_t msc_passed = msc ? msc - last_msc: 0;
     if (msc_passed && ust_passed)
-        present->vsync_duration = ust_passed / msc_passed;
+        cur->vsync_duration = ust_passed / msc_passed;
 
     struct timespec ts;
     if (clock_gettime(CLOCK_MONOTONIC, &ts))
@@ -72,13 +104,21 @@ void present_sync_swap(struct mp_present *present)
 
     int64_t now_monotonic = MP_TIME_S_TO_NS(ts.tv_sec) + ts.tv_nsec;
     int64_t ust_mp_time = mp_time_ns() - (now_monotonic - ust);
-
-    present->last_queue_display_time = ust_mp_time;
+    cur->queue_display_time = ust_mp_time;
 }
 
 void present_update_sync_values(struct mp_present *present, int64_t ust,
                                 int64_t msc)
 {
-    present->current_ust = ust;
-    present->current_msc = msc;
+    struct mp_present_entry *cur = present->head;
+    while (cur) {
+        if (!cur->ust)
+            break;
+        cur = cur->list_node.next;
+    }
+    if (!cur)
+        return;
+
+    cur->ust = ust;
+    cur->msc = msc;
 }
