@@ -33,6 +33,7 @@
 #include "sub/osd.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
+#include "video/out/present_sync.h"
 #include "video/sws_utils.h"
 #include "vo.h"
 
@@ -48,7 +49,6 @@
 
 struct drm_frame {
     struct framebuffer *fb;
-    struct drm_vsync_tuple vsync;
 };
 
 struct priv {
@@ -200,10 +200,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    drm->vsync_info.vsync_duration = 0;
-    drm->vsync_info.skipped_vsyncs = -1;
-    drm->vsync_info.last_queue_display_time = -1;
-
     vo->want_redraw = true;
     return 0;
 }
@@ -283,12 +279,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, struct framebuffer *buf)
 static void enqueue_frame(struct vo *vo, struct framebuffer *fb)
 {
     struct priv *p = vo->priv;
-    struct vo_drm_state *drm = vo->drm;
 
-    drm->vsync.sbc++;
     struct drm_frame *new_frame = talloc(p, struct drm_frame);
     new_frame->fb = fb;
-    new_frame->vsync = drm->vsync;
     MP_TARRAY_APPEND(p, p->fb_queue, p->fb_queue_len, new_frame);
 }
 
@@ -332,25 +325,14 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
 static void queue_flip(struct vo *vo, struct drm_frame *frame)
 {
-    struct priv *p = vo->priv;
     struct vo_drm_state *drm = vo->drm;
 
     drm->fb = frame->fb;
 
-    // Alloc and fill the data struct for the page flip callback
-    struct drm_pflip_cb_closure *data = talloc(p, struct drm_pflip_cb_closure);
-    data->frame_vsync = &frame->vsync;
-    data->vsync = &drm->vsync;
-    data->vsync_info = &drm->vsync_info;
-    data->waiting_for_flip = &drm->waiting_for_flip;
-    data->log = vo->log;
-
     int ret = drmModePageFlip(drm->fd, drm->crtc_id,
-                              drm->fb->id, DRM_MODE_PAGE_FLIP_EVENT, data);
-    if (ret) {
+                              drm->fb->id, DRM_MODE_PAGE_FLIP_EVENT, drm);
+    if (ret)
         MP_WARN(vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
-        talloc_free(data);
-    }
     drm->waiting_for_flip = !ret;
 }
 
@@ -377,6 +359,12 @@ static void flip_page(struct vo *vo)
         }
         queue_flip(vo, p->fb_queue[1]);
     }
+}
+
+static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
+{
+    struct vo_drm_state *drm = vo->drm;
+    present_sync_get_info(drm->present, info);
 }
 
 static void uninit(struct vo *vo)
@@ -462,7 +450,7 @@ const struct vo_driver video_out_drm = {
     .control = control,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
-    .get_vsync = vo_drm_get_vsync,
+    .get_vsync = get_vsync,
     .uninit = uninit,
     .wait_events = vo_drm_wait_events,
     .wakeup = vo_drm_wakeup,
