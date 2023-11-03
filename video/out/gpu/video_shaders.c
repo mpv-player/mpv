@@ -848,7 +848,7 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
     gl_sc_uniform_vec3(sc, "dst_luma", rgb2xyz[1]);
 
     bool need_ootf = src.light != dst.light;
-    if (src.light == MP_CSP_LIGHT_SCENE_HLG && src.sig_peak != dst.sig_peak)
+    if (src.light == MP_CSP_LIGHT_SCENE_HLG && src.hdr.max_luma != dst.hdr.max_luma)
         need_ootf = true;
 
     // All operations from here on require linear light as a starting point,
@@ -856,7 +856,7 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
     // operations needs it
     bool need_linear = src.gamma != dst.gamma ||
                        src.primaries != dst.primaries ||
-                       src.sig_peak != dst.sig_peak ||
+                       src.hdr.max_luma != dst.hdr.max_luma ||
                        need_ootf;
 
     if (need_linear && !is_linear) {
@@ -869,11 +869,13 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
     GLSLF("color.rgb *= vec3(%f);\n", mp_trc_nom_peak(src.gamma));
 
     if (need_ootf)
-        pass_ootf(sc, src.light, src.sig_peak);
+        pass_ootf(sc, src.light, src.hdr.max_luma / MP_REF_WHITE);
 
     // Tone map to prevent clipping due to excessive brightness
-    if (src.sig_peak > dst.sig_peak)
-        pass_tone_map(sc, src.sig_peak, dst.sig_peak, opts);
+    if (src.hdr.max_luma > dst.hdr.max_luma) {
+        pass_tone_map(sc, src.hdr.max_luma / MP_REF_WHITE,
+                      dst.hdr.max_luma / MP_REF_WHITE, opts);
+    }
 
     // Adapt to the right colorspace if necessary
     if (src.primaries != dst.primaries) {
@@ -892,18 +894,18 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
                      color.rgb = mix(color.rgb, vec3(luma), coeff);
                  })
             GLSLF("float cmax = 1.0/%f * max(max(color.r, color.g), color.b);\n",
-                  dst.sig_peak);
+                  dst.hdr.max_luma / MP_REF_WHITE);
             GLSL(if (cmax > 1.0) color.rgb /= cmax;)
         }
     }
 
     if (need_ootf)
-        pass_inverse_ootf(sc, dst.light, dst.sig_peak);
+        pass_inverse_ootf(sc, dst.light, dst.hdr.max_luma / MP_REF_WHITE);
 
     // Post-scale the outgoing values from absolute scale to normalized.
     // For SDR, we normalize to the chosen signal peak. For HDR, we normalize
     // to the encoding range of the transfer function.
-    float dst_range = dst.sig_peak;
+    float dst_range = dst.hdr.max_luma / MP_REF_WHITE;
     if (mp_trc_is_hdr(dst.gamma))
         dst_range = mp_trc_nom_peak(dst.gamma);
 

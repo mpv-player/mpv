@@ -439,30 +439,13 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
-static inline void *get_side_data(const struct mp_image *mpi,
-                                  enum AVFrameSideDataType type)
-{
-    for (int i = 0; i <mpi->num_ff_side_data; i++) {
-        if (mpi->ff_side_data[i].type == type)
-            return (void *) mpi->ff_side_data[i].buf->data;
-    }
-
-    return NULL;
-}
-
 static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
 {
     struct pl_color_space csp = {
         .primaries = mp_prim_to_pl(mpi->params.color.primaries),
         .transfer = mp_trc_to_pl(mpi->params.color.gamma),
-        .hdr.max_luma = mpi->params.color.sig_peak * MP_REF_WHITE,
+        .hdr = mpi->params.color.hdr,
     };
-
-    pl_map_hdr_metadata(&csp.hdr, &(struct pl_av_hdr_metadata) {
-        .mdm = get_side_data(mpi, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA),
-        .clm = get_side_data(mpi, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
-        .dhp = get_side_data(mpi, AV_FRAME_DATA_DYNAMIC_HDR_PLUS),
-    });
     return csp;
 }
 
@@ -1346,7 +1329,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     args->res->params.color.primaries = mp_prim_from_pl(target.color.primaries);
     args->res->params.color.gamma = mp_trc_from_pl(target.color.transfer);
     args->res->params.color.levels = mp_levels_from_pl(target.repr.levels);
-    args->res->params.color.sig_peak = target.color.hdr.max_luma / MP_REF_WHITE;
+    args->res->params.color.hdr = target.color.hdr;
     if (args->scaled)
         args->res->params.p_w = args->res->params.p_h = 1;
 

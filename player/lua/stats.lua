@@ -933,11 +933,6 @@ local function add_video(s)
         append_fps(s, "container-fps", "estimated-vf-fps")
     end
     append_img_params(s, r, ro)
-
-    if not ro["max-cll"] then
-        ro["max-cll"] = math.floor((ro["sig-peak"] or 0) * 203)
-    end
-
     append_hdr(s, ro)
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "vf", "Filters:")

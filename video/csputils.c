@@ -129,8 +129,6 @@ void mp_colorspace_merge(struct mp_colorspace *orig, struct mp_colorspace *new)
         orig->primaries = new->primaries;
     if (!orig->gamma)
         orig->gamma = new->gamma;
-    if (!orig->sig_peak)
-        orig->sig_peak = new->sig_peak;
     if (!orig->light)
         orig->light = new->light;
     pl_hdr_metadata_merge(&orig->hdr, &new->hdr);
@@ -913,7 +911,6 @@ bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
            c1.primaries == c2.primaries &&
            c1.gamma == c2.gamma &&
            c1.light == c2.light &&
-           c1.sig_peak == c2.sig_peak &&
            pl_hdr_metadata_equal(&c1.hdr, &c2.hdr);
 }
 
