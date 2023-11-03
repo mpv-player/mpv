@@ -593,16 +593,58 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
                    m_opt_choice_str(mp_csp_levels_names, track->color.levels));
     }
     if (colour->n_max_cll) {
-        track->color.sig_peak = colour->max_cll / MP_REF_WHITE;
+        track->color.hdr.max_cll = colour->max_cll;
+        track->color.sig_peak = track->color.hdr.max_cll / MP_REF_WHITE;
         MP_DBG(demuxer, "|    + MaxCLL: %"PRIu64"\n", colour->max_cll);
     }
-    // if MaxCLL is unavailable, try falling back to the mastering metadata
-    if (!track->color.sig_peak && colour->n_mastering_metadata) {
+    if (colour->n_max_fall) {
+        track->color.hdr.max_fall = colour->max_fall;
+        MP_DBG(demuxer, "|    + MaxFALL: %"PRIu64"\n", colour->max_cll);
+    }
+    if (colour->n_mastering_metadata) {
         struct ebml_mastering_metadata *mastering = &colour->mastering_metadata;
 
+        if (mastering->n_primary_r_chromaticity_x) {
+            track->color.hdr.prim.red.x = mastering->primary_r_chromaticity_x;
+            MP_DBG(demuxer, "|    + PrimaryRChromaticityX: %f\n", track->color.hdr.prim.red.x);
+        }
+        if (mastering->n_primary_r_chromaticity_y) {
+            track->color.hdr.prim.red.y = mastering->primary_r_chromaticity_y;
+            MP_DBG(demuxer, "|    + PrimaryRChromaticityY: %f\n", track->color.hdr.prim.red.y);
+        }
+        if (mastering->n_primary_g_chromaticity_x) {
+            track->color.hdr.prim.green.x = mastering->primary_g_chromaticity_x;
+            MP_DBG(demuxer, "|    + PrimaryGChromaticityX: %f\n", track->color.hdr.prim.green.x);
+        }
+        if (mastering->n_primary_g_chromaticity_y) {
+            track->color.hdr.prim.green.y = mastering->primary_g_chromaticity_y;
+            MP_DBG(demuxer, "|    + PrimaryGChromaticityY: %f\n", track->color.hdr.prim.green.y);
+        }
+        if (mastering->n_primary_b_chromaticity_x) {
+            track->color.hdr.prim.blue.x = mastering->primary_b_chromaticity_x;
+            MP_DBG(demuxer, "|    + PrimaryBChromaticityX: %f\n", track->color.hdr.prim.blue.x);
+        }
+        if (mastering->n_primary_b_chromaticity_y) {
+            track->color.hdr.prim.blue.y = mastering->primary_b_chromaticity_y;
+            MP_DBG(demuxer, "|    + PrimaryBChromaticityY: %f\n", track->color.hdr.prim.blue.y);
+        }
+        if (mastering->n_white_point_chromaticity_x) {
+            track->color.hdr.prim.white.x = mastering->white_point_chromaticity_x;
+            MP_DBG(demuxer, "|    + WhitePointChromaticityX: %f\n", track->color.hdr.prim.white.x);
+        }
+        if (mastering->n_white_point_chromaticity_y) {
+            track->color.hdr.prim.white.y = mastering->white_point_chromaticity_y;
+            MP_DBG(demuxer, "|    + WhitePointChromaticityY: %f\n", track->color.hdr.prim.white.y);
+        }
+        if (mastering->n_luminance_min) {
+            track->color.hdr.min_luma = mastering->luminance_min;
+            MP_DBG(demuxer, "|    + LuminanceMin: %f\n", track->color.hdr.min_luma);
+        }
         if (mastering->n_luminance_max) {
-            track->color.sig_peak = mastering->luminance_max / MP_REF_WHITE;
-            MP_DBG(demuxer, "|    + HDR peak: %f\n", track->color.sig_peak);
+            track->color.hdr.max_luma = mastering->luminance_max;
+            if (!track->color.sig_peak)
+                track->color.sig_peak = track->color.hdr.max_luma / MP_REF_WHITE;
+            MP_DBG(demuxer, "|    + LuminanceMax: %f\n", track->color.hdr.max_luma);
         }
     }
 }
