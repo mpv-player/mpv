@@ -2323,7 +2323,7 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
             SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p.color.primaries))},
         {"gamma",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p.color.gamma))},
-        {"sig-peak", SUB_PROP_FLOAT(p.color.sig_peak)},
+        {"sig-peak", SUB_PROP_FLOAT(p.color.hdr.max_luma * MP_REF_WHITE)},
         {"light",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_light_names, p.color.light))},
         {"chroma-location",

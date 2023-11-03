@@ -147,7 +147,6 @@ struct mp_colorspace {
     enum mp_csp_prim primaries;
     enum mp_csp_trc gamma;
     enum mp_csp_light light;
-    float sig_peak; // highest relative value in signal. 0 = unknown/auto (deprecated)
     struct pl_hdr_metadata hdr;
 };
 

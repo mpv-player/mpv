@@ -64,6 +64,7 @@ img_utils_files = [
     'video/fmt-conversion.c',
     'video/img_format.c',
     'video/mp_image.c',
+    'video/out/placebo/utils.c',
     'video/sws_utils.c'
 ]
 if features['zimg']

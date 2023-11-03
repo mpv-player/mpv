@@ -594,7 +594,6 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
     }
     if (colour->n_max_cll) {
         track->color.hdr.max_cll = colour->max_cll;
-        track->color.sig_peak = track->color.hdr.max_cll / MP_REF_WHITE;
         MP_DBG(demuxer, "|    + MaxCLL: %"PRIu64"\n", colour->max_cll);
     }
     if (colour->n_max_fall) {
@@ -642,8 +641,6 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
         }
         if (mastering->n_luminance_max) {
             track->color.hdr.max_luma = mastering->luminance_max;
-            if (!track->color.sig_peak)
-                track->color.sig_peak = track->color.hdr.max_luma / MP_REF_WHITE;
             MP_DBG(demuxer, "|    + LuminanceMax: %f\n", track->color.hdr.max_luma);
         }
     }

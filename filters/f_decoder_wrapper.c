@@ -548,11 +548,6 @@ void mp_decoder_wrapper_set_play_dir(struct mp_decoder_wrapper *d, int dir)
     thread_unlock(p);
 }
 
-static bool is_valid_peak(float sig_peak)
-{
-    return !sig_peak || (sig_peak >= 1 && sig_peak <= 100);
-}
-
 static void fix_image_params(struct priv *p,
                              struct mp_image_params *params)
 {
@@ -622,12 +617,6 @@ static void fix_image_params(struct priv *p,
     }
 
     mp_colorspace_merge(&m.color, &c->color);
-
-    // Sanitize the HDR peak. Sadly necessary
-    if (!is_valid_peak(m.color.sig_peak)) {
-        MP_WARN(p, "Invalid HDR peak in stream: %f\n", m.color.sig_peak);
-        m.color.sig_peak = 0.0;
-    }
 
     // Guess missing colorspace fields from metadata. This guarantees all
     // fields are at least set to legal values afterwards.

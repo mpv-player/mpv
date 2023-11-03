@@ -609,7 +609,7 @@ struct mp_colorspace gl_video_get_output_colorspace(struct gl_video *p)
     return (struct mp_colorspace) {
         .primaries = p->opts.target_prim,
         .gamma = p->opts.target_trc,
-        .sig_peak = p->opts.target_peak / MP_REF_WHITE,
+        .hdr.max_luma = p->opts.target_peak,
     };
 }
 
@@ -2565,8 +2565,8 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
         .primaries = p->opts.target_prim == MP_CSP_PRIM_AUTO ?
                      fbo_csp.primaries : p->opts.target_prim,
         .light = MP_CSP_LIGHT_DISPLAY,
-        .sig_peak = !p->opts.target_peak ?
-                    fbo_csp.sig_peak : p->opts.target_peak / MP_REF_WHITE,
+        .hdr.max_luma = !p->opts.target_peak ?
+                        fbo_csp.hdr.max_luma : p->opts.target_peak,
     };
 
     if (!p->colorspace_override_warned &&
@@ -2643,10 +2643,10 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     // If there's no specific signal peak known for the output display, infer
     // it from the chosen transfer function. Also normalize the src peak, in
     // case it was unknown
-    if (!dst.sig_peak)
-        dst.sig_peak = mp_trc_nom_peak(dst.gamma);
-    if (!src.sig_peak)
-        src.sig_peak = mp_trc_nom_peak(src.gamma);
+    if (!dst.hdr.max_luma)
+        dst.hdr.max_luma = mp_trc_nom_peak(dst.gamma) * MP_REF_WHITE;
+    if (!src.hdr.max_luma)
+        src.hdr.max_luma = mp_trc_nom_peak(src.gamma) * MP_REF_WHITE;
 
     // Whitelist supported modes
     switch (p->opts.tone_map.curve) {
@@ -2679,7 +2679,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
 
     struct gl_tone_map_opts tone_map = p->opts.tone_map;
     bool detect_peak = tone_map.compute_peak >= 0 && mp_trc_is_hdr(src.gamma)
-                       && src.sig_peak > dst.sig_peak;
+                       && src.hdr.max_luma > dst.hdr.max_luma;
 
     if (detect_peak && !p->hdr_peak_ssbo) {
         struct {

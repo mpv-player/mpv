@@ -637,7 +637,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
         p.color.primaries = MP_CSP_PRIM_BT_709;
         p.color.gamma = MP_CSP_TRC_AUTO;
         p.color.light = MP_CSP_LIGHT_DISPLAY;
-        p.color.sig_peak = 0;
+        p.color.hdr = (struct pl_hdr_metadata){0};
         if (p.color.space != MP_CSP_RGB) {
             p.color.levels = yuv_levels;
             p.color.space = MP_CSP_BT_601;
