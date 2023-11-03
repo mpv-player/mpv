@@ -450,8 +450,6 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
         .glsl_shader = params->type == RA_RENDERPASS_TYPE_COMPUTE
                             ? params->compute_shader
                             : params->frag_shader,
-        .cached_program = params->cached_program.start,
-        .cached_program_len = params->cached_program.len,
     };
 
     struct pl_blend_params blend_params;
@@ -503,11 +501,6 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
     *pass = (struct ra_renderpass) {
         .params = *ra_renderpass_params_copy(pass, params),
         .priv = talloc_steal(pass, priv),
-    };
-
-    pass->params.cached_program = (struct bstr) {
-        .start = (void *) priv->pass->params.cached_program,
-        .len = priv->pass->params.cached_program_len,
     };
 
     // fall through
