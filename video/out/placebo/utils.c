@@ -72,17 +72,6 @@ void mppl_log_set_probing(pl_log log, bool probing)
     pl_log_update(log, &params);
 }
 
-enum pl_alpha_mode mp_alpha_to_pl(enum mp_alpha_type alpha)
-{
-    switch (alpha) {
-    case MP_ALPHA_AUTO:             return PL_ALPHA_UNKNOWN;
-    case MP_ALPHA_STRAIGHT:         return PL_ALPHA_INDEPENDENT;
-    case MP_ALPHA_PREMUL:           return PL_ALPHA_PREMULTIPLIED;
-    }
-
-    MP_ASSERT_UNREACHABLE();
-}
-
 enum pl_chroma_location mp_chroma_to_pl(enum mp_chroma_location chroma)
 {
     switch (chroma) {

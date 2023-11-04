@@ -2397,7 +2397,7 @@ static void pass_convert_yuv(struct gl_video *p)
     p->components = 3;
     if (!p->has_alpha || p->opts.alpha_mode == ALPHA_NO) {
         GLSL(color.a = 1.0;)
-    } else if (p->image_params.alpha == MP_ALPHA_PREMUL) {
+    } else if (p->image_params.repr.alpha == PL_ALPHA_PREMULTIPLIED) {
         p->components = 4;
     } else {
         p->components = 4;

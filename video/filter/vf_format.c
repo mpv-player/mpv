@@ -92,7 +92,7 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
     if (p->rotate >= 0)
         out->rotate = p->rotate;
     if (p->alpha)
-        out->alpha = p->alpha;
+        out->repr.alpha = p->alpha;
 
     if (p->w > 0 && set_size)
         out->w = p->w;
@@ -213,7 +213,7 @@ static const m_option_t vf_opts_fields[] = {
     {"chroma-location", OPT_CHOICE_C(chroma_location, mp_chroma_names)},
     {"stereo-in", OPT_CHOICE_C(stereo_in, mp_stereo3d_names)},
     {"rotate", OPT_INT(rotate), M_RANGE(-1, 359)},
-    {"alpha", OPT_CHOICE_C(alpha, mp_alpha_names)},
+    {"alpha", OPT_CHOICE_C(alpha, pl_alpha_names)},
     {"w", OPT_INT(w)},
     {"h", OPT_INT(h)},
     {"dw", OPT_INT(dw)},

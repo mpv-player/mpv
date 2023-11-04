@@ -575,7 +575,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         .repr = {
             .sys = par->repr.sys,
             .levels = par->repr.levels,
-            .alpha = mp_alpha_to_pl(par->alpha),
+            .alpha = par->repr.alpha,
         },
         .profile = {
             .data = mpi->icc_profile ? mpi->icc_profile->data : NULL,

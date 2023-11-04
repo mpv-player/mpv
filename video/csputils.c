@@ -112,10 +112,10 @@ const struct m_opt_choice_alternatives mp_chroma_names[] = {
     {0}
 };
 
-const struct m_opt_choice_alternatives mp_alpha_names[] = {
-    {"auto",        MP_ALPHA_AUTO},
-    {"straight",    MP_ALPHA_STRAIGHT},
-    {"premul",      MP_ALPHA_PREMUL},
+const struct m_opt_choice_alternatives pl_alpha_names[] = {
+    {"auto",        PL_ALPHA_UNKNOWN},
+    {"straight",    PL_ALPHA_INDEPENDENT},
+    {"premul",      PL_ALPHA_PREMULTIPLIED},
     {0}
 };
 
