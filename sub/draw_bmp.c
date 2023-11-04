@@ -431,7 +431,7 @@ static bool render_rgba(struct mp_draw_sub_cache *p, struct part *part,
                 mp_image_set_size(&src_img, sw, sh);
                 src_img.planes[0] = s_ptr;
                 src_img.stride[0] = s_stride;
-                src_img.params.alpha = MP_ALPHA_PREMUL;
+                src_img.params.repr.alpha = PL_ALPHA_PREMULTIPLIED;
 
                 scaled = mp_image_alloc(IMGFMT_BGRA, dw, dh);
                 if (!scaled)
@@ -525,7 +525,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
     struct mp_image_params *params = &p->params;
     mp_image_params_guess_csp(params);
 
-    bool need_premul = params->alpha != MP_ALPHA_PREMUL &&
+    bool need_premul = params->repr.alpha != PL_ALPHA_PREMULTIPLIED &&
         (mp_imgfmt_get_desc(params->imgfmt).flags & MP_IMGFLAG_ALPHA);
 
     // Intermediate format for video_overlay. Requirements:
@@ -660,7 +660,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
         return false;
 
     mp_image_params_guess_csp(&p->rgba_overlay->params);
-    p->rgba_overlay->params.alpha = MP_ALPHA_PREMUL;
+    p->rgba_overlay->params.repr.alpha = PL_ALPHA_PREMULTIPLIED;
 
     p->overlay_tmp->params.color = params->color;
     p->video_tmp->params.color = params->color;
@@ -677,7 +677,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
 
         p->video_overlay->params.color = params->color;
         p->video_overlay->params.chroma_location = params->chroma_location;
-        p->video_overlay->params.alpha = MP_ALPHA_PREMUL;
+        p->video_overlay->params.repr.alpha = PL_ALPHA_PREMULTIPLIED;
 
         if (p->scale_in_tiles)
             p->video_overlay->params.chroma_location = MP_CHROMA_CENTER;
@@ -762,7 +762,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
         if (!p->premul_tmp)
             return false;
         mp_image_set_params(p->premul_tmp, params);
-        p->premul_tmp->params.alpha = MP_ALPHA_PREMUL;
+        p->premul_tmp->params.repr.alpha = PL_ALPHA_PREMULTIPLIED;
 
         // Only zimg supports this.
         p->premul->force_scaler = MP_SWS_ZIMG;
@@ -787,7 +787,7 @@ static bool reinit_to_overlay(struct mp_draw_sub_cache *p)
         return false;
 
     mp_image_params_guess_csp(&p->rgba_overlay->params);
-    p->rgba_overlay->params.alpha = MP_ALPHA_PREMUL;
+    p->rgba_overlay->params.repr.alpha = PL_ALPHA_PREMULTIPLIED;
 
     // Some non-sense with the intention to somewhat isolate the returned image.
     mp_image_setfmt(&p->res_overlay, p->rgba_overlay->imgfmt);

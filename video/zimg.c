@@ -375,7 +375,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
             r->z_planes[3] = n; // alpha, always plane 4 in zimg
 
 #if HAVE_ZIMG_ALPHA
-            zfmt->alpha = fmt.alpha == MP_ALPHA_PREMUL
+            zfmt->alpha = fmt.repr.alpha == PL_ALPHA_PREMULTIPLIED
                 ? ZIMG_ALPHA_PREMULTIPLIED : ZIMG_ALPHA_STRAIGHT;
 #else
             return false;

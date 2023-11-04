@@ -54,7 +54,6 @@ struct mp_image_params {
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;
     enum mp_stereo3d_mode stereo3d; // image is encoded with this mode
-    enum mp_alpha_type alpha;   // usually auto; only set if explicitly known
     struct mp_rect crop;        // crop applied on image
 };
 

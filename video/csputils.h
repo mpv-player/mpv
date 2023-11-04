@@ -120,14 +120,7 @@ enum mp_chroma_location {
 };
 
 extern const struct m_opt_choice_alternatives mp_chroma_names[];
-
-enum mp_alpha_type {
-    MP_ALPHA_AUTO,
-    MP_ALPHA_STRAIGHT,
-    MP_ALPHA_PREMUL,
-};
-
-extern const struct m_opt_choice_alternatives mp_alpha_names[];
+extern const struct m_opt_choice_alternatives pl_alpha_names[];
 
 extern const struct m_sub_options mp_csp_equalizer_conf;
 
