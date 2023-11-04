@@ -72,7 +72,7 @@ struct ra_fbo {
 
     // Host system's colorspace that it will be interpreting
     // the frame buffer as.
-    struct mp_colorspace color_space;
+    struct pl_color_space color_space;
 };
 
 struct ra_swapchain_fns {

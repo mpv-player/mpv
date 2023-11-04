@@ -24,6 +24,7 @@
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 37, 100)
 #include <libavutil/pixdesc.h>
 #endif
+#include <libplacebo/utils/libav.h>
 
 #include "config.h"
 
@@ -156,11 +157,11 @@ bool mp_sws_supports_formats(struct mp_sws_context *ctx,
            sws_isSupportedOutput(imgfmt2pixfmt(imgfmt_out));
 }
 
-static int mp_csp_to_sws_colorspace(enum mp_csp csp)
+static int pl_csp_to_sws_colorspace(enum pl_color_system csp)
 {
     // The SWS_CS_* macros are just convenience redefinitions of the
     // AVCOL_SPC_* macros, inside swscale.h.
-    return mp_csp_to_avcol_spc(csp);
+    return pl_system_to_av(csp);
 }
 
 static bool cache_valid(struct mp_sws_context *ctx)
@@ -289,11 +290,11 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         return -1;
     }
 
-    int s_csp = mp_csp_to_sws_colorspace(src.color.space);
-    int s_range = src.color.levels == MP_CSP_LEVELS_PC;
+    int s_csp = pl_csp_to_sws_colorspace(src.repr.sys);
+    int s_range = src.repr.levels == PL_COLOR_LEVELS_FULL;
 
-    int d_csp = mp_csp_to_sws_colorspace(dst.color.space);
-    int d_range = dst.color.levels == MP_CSP_LEVELS_PC;
+    int d_csp = pl_csp_to_sws_colorspace(src.repr.sys);
+    int d_range = dst.repr.levels == PL_COLOR_LEVELS_FULL;
 
     av_opt_set_int(ctx->sws, "sws_flags", ctx->flags, 0);
 
@@ -407,11 +408,11 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
         return mp_zimg_convert(ctx->zimg, dst, src) ? 0 : -1;
 #endif
 
-    if (src->params.color.space == MP_CSP_XYZ && dst->params.color.space != MP_CSP_XYZ) {
+    if (src->params.repr.sys == PL_COLOR_SYSTEM_XYZ && dst->params.repr.sys != PL_COLOR_SYSTEM_XYZ) {
         // swsscale has hardcoded gamma 2.2 internally and 2.6 for XYZ
-        dst->params.color.gamma = MP_CSP_TRC_GAMMA22;
+        dst->params.color.transfer = PL_COLOR_TRC_GAMMA22;
         // and sRGB primaries...
-        dst->params.color.primaries = MP_CSP_PRIM_BT_709;
+        dst->params.color.primaries = PL_COLOR_PRIM_BT_709;
         // it doesn't adjust white point though, but it is not worth to support
         // this case. It would require custom prim with equal energy white point
         // and sRGB primaries.

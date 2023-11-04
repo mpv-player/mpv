@@ -546,7 +546,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
     mp_get_regular_imgfmt(&vfdesc, mp_repack_get_format_dst(p->video_to_f32));
     assert(vfdesc.num_planes); // must have succeeded
 
-    if (params->color.space == MP_CSP_RGB && vfdesc.num_planes >= 3) {
+    if (params->repr.sys == PL_COLOR_SYSTEM_RGB && vfdesc.num_planes >= 3) {
         use_shortcut = true;
 
         if (vfdesc.component_type == MP_COMPONENT_TYPE_UINT &&
@@ -724,7 +724,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
             p->alpha_overlay->stride[0] = p->video_overlay->stride[aplane];
 
             // Full range gray always has the same range as alpha.
-            p->alpha_overlay->params.color.levels = MP_CSP_LEVELS_PC;
+            p->alpha_overlay->params.repr.levels = PL_COLOR_LEVELS_FULL;
             mp_image_params_guess_csp(&p->alpha_overlay->params);
 
             p->calpha_overlay =

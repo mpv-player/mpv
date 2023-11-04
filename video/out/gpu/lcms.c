@@ -46,8 +46,8 @@ struct gl_lcms {
     char *current_profile;
     bool using_memory_profile;
     bool changed;
-    enum mp_csp_prim current_prim;
-    enum mp_csp_trc current_trc;
+    enum pl_color_primaries current_prim;
+    enum pl_color_transfer current_trc;
 
     struct mp_log *log;
     struct mpv_global *global;
@@ -162,8 +162,8 @@ static bool vid_profile_eq(struct AVBufferRef *a, struct AVBufferRef *b)
 
 // Return whether the profile or config has changed since the last time it was
 // retrieved. If it has changed, gl_lcms_get_lut3d() should be called.
-bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
-                         enum mp_csp_trc trc, struct AVBufferRef *vid_profile)
+bool gl_lcms_has_changed(struct gl_lcms *p, enum pl_color_primaries prim,
+                         enum pl_color_transfer trc, struct AVBufferRef *vid_profile)
 {
     if (p->changed || p->current_prim != prim || p->current_trc != trc)
         return true;
@@ -180,7 +180,7 @@ bool gl_lcms_has_profile(struct gl_lcms *p)
 
 static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
                                    cmsHPROFILE disp_profile,
-                                   enum mp_csp_prim prim, enum mp_csp_trc trc)
+                                   enum pl_color_primaries prim, enum pl_color_transfer trc)
 {
     if (p->opts->use_embedded && p->vid_profile) {
         // Try using the embedded ICC profile
@@ -207,26 +207,26 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
 
     cmsToneCurve *tonecurve[3] = {0};
     switch (trc) {
-    case MP_CSP_TRC_LINEAR:  tonecurve[0] = cmsBuildGamma(cms, 1.0); break;
-    case MP_CSP_TRC_GAMMA18: tonecurve[0] = cmsBuildGamma(cms, 1.8); break;
-    case MP_CSP_TRC_GAMMA20: tonecurve[0] = cmsBuildGamma(cms, 2.0); break;
-    case MP_CSP_TRC_GAMMA22: tonecurve[0] = cmsBuildGamma(cms, 2.2); break;
-    case MP_CSP_TRC_GAMMA24: tonecurve[0] = cmsBuildGamma(cms, 2.4); break;
-    case MP_CSP_TRC_GAMMA26: tonecurve[0] = cmsBuildGamma(cms, 2.6); break;
-    case MP_CSP_TRC_GAMMA28: tonecurve[0] = cmsBuildGamma(cms, 2.8); break;
+    case PL_COLOR_TRC_LINEAR:  tonecurve[0] = cmsBuildGamma(cms, 1.0); break;
+    case PL_COLOR_TRC_GAMMA18: tonecurve[0] = cmsBuildGamma(cms, 1.8); break;
+    case PL_COLOR_TRC_GAMMA20: tonecurve[0] = cmsBuildGamma(cms, 2.0); break;
+    case PL_COLOR_TRC_GAMMA22: tonecurve[0] = cmsBuildGamma(cms, 2.2); break;
+    case PL_COLOR_TRC_GAMMA24: tonecurve[0] = cmsBuildGamma(cms, 2.4); break;
+    case PL_COLOR_TRC_GAMMA26: tonecurve[0] = cmsBuildGamma(cms, 2.6); break;
+    case PL_COLOR_TRC_GAMMA28: tonecurve[0] = cmsBuildGamma(cms, 2.8); break;
 
-    case MP_CSP_TRC_SRGB:
+    case PL_COLOR_TRC_SRGB:
         // Values copied from Little-CMS
         tonecurve[0] = cmsBuildParametricToneCurve(cms, 4,
                 (double[5]){2.40, 1/1.055, 0.055/1.055, 1/12.92, 0.04045});
         break;
 
-    case MP_CSP_TRC_PRO_PHOTO:
+    case PL_COLOR_TRC_PRO_PHOTO:
         tonecurve[0] = cmsBuildParametricToneCurve(cms, 4,
                 (double[5]){1.8, 1.0, 0.0, 1/16.0, 0.03125});
         break;
 
-    case MP_CSP_TRC_BT_1886: {
+    case PL_COLOR_TRC_BT_1886: {
         double src_black[3];
         if (p->opts->contrast < 0) {
             // User requested infinite contrast, return 2.4 profile
@@ -300,7 +300,7 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
 }
 
 bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
-                       enum mp_csp_prim prim, enum mp_csp_trc trc,
+                       enum pl_color_primaries prim, enum pl_color_transfer trc,
                        struct AVBufferRef *vid_profile)
 {
     int s_r, s_g, s_b;
@@ -474,8 +474,8 @@ struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
 void gl_lcms_update_options(struct gl_lcms *p) { }
 bool gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile) {return false;}
 
-bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
-                         enum mp_csp_trc trc, struct AVBufferRef *vid_profile)
+bool gl_lcms_has_changed(struct gl_lcms *p, enum pl_color_primaries prim,
+                         enum pl_color_transfer trc, struct AVBufferRef *vid_profile)
 {
     return false;
 }
@@ -486,7 +486,7 @@ bool gl_lcms_has_profile(struct gl_lcms *p)
 }
 
 bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
-                       enum mp_csp_prim prim, enum mp_csp_trc trc,
+                       enum pl_color_primaries prim, enum pl_color_transfer trc,
                        struct AVBufferRef *vid_profile)
 {
     return false;

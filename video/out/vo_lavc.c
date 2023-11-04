@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <libplacebo/utils/libav.h>
+
 #include "common/common.h"
 #include "options/options.h"
 #include "video/fmt-conversion.h"
@@ -112,8 +114,8 @@ static int reconfig2(struct vo *vo, struct mp_image *img)
     encoder->width = width;
     encoder->height = height;
     encoder->pix_fmt = pix_fmt;
-    encoder->colorspace = mp_csp_to_avcol_spc(params->color.space);
-    encoder->color_range = mp_csp_levels_to_avcol_range(params->color.levels);
+    encoder->colorspace = pl_system_to_av(params->repr.sys);
+    encoder->color_range = pl_levels_to_av(params->repr.levels);
 
     AVRational tb;
 

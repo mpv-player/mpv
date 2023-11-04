@@ -210,8 +210,8 @@ static int recreate_video_proc(struct mp_filter *vf)
                                                          FALSE, 0);
 
     D3D11_VIDEO_PROCESSOR_COLOR_SPACE csp = {
-        .YCbCr_Matrix = p->params.color.space != MP_CSP_BT_601,
-        .Nominal_Range = p->params.color.levels == MP_CSP_LEVELS_TV ? 1 : 2,
+        .YCbCr_Matrix = p->params.repr.sys != PL_COLOR_SYSTEM_BT_601,
+        .Nominal_Range = p->params.repr.levels == PL_COLOR_LEVELS_LIMITED ? 1 : 2,
     };
     ID3D11VideoContext_VideoProcessorSetStreamColorSpace(p->video_ctx,
                                                          p->video_proc,

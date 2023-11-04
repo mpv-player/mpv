@@ -618,7 +618,8 @@ static void fix_image_params(struct priv *p,
         m.rotate = (m.rotate + opts->video_rotate) % 360;
     }
 
-    mp_colorspace_merge(&m.color, &c->color);
+    pl_color_space_merge(&m.color, &c->color);
+    pl_color_repr_merge(&m.repr, &c->repr);
 
     // Guess missing colorspace fields from metadata. This guarantees all
     // fields are at least set to legal values afterwards.
