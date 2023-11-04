@@ -762,16 +762,16 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
 
     struct gl_transform chroma = {{{ls_w, 0.0}, {0.0, ls_h}}};
 
-    if (p->image_params.chroma_location != MP_CHROMA_CENTER) {
-        int cx, cy;
-        mp_get_chroma_location(p->image_params.chroma_location, &cx, &cy);
+    if (p->image_params.chroma_location != PL_CHROMA_CENTER) {
+        float cx, cy;
+        pl_chroma_location_offset(p->image_params.chroma_location, &cx, &cy);
         // By default texture coordinates are such that chroma is centered with
         // any chroma subsampling. If a specific direction is given, make it
         // so that the luma and chroma sample line up exactly.
         // For 4:4:4, setting chroma location should have no effect at all.
         // luma sample size (in chroma coord. space)
-        chroma.t[0] = ls_w < 1 ? ls_w * -cx / 2 : 0;
-        chroma.t[1] = ls_h < 1 ? ls_h * -cy / 2 : 0;
+        chroma.t[0] = ls_w < 1 ? ls_w * -cx : 0;
+        chroma.t[1] = ls_h < 1 ? ls_h * -cy : 0;
     }
 
     memset(img, 0, 4 * sizeof(img[0]));

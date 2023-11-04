@@ -778,7 +778,7 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
                         m_opt_choice_str(pl_csp_levels_names, p->repr.levels),
                         m_opt_choice_str(mp_csp_light_names, p->light));
         mp_snprintf_cat(b, bs, " CL=%s",
-                        m_opt_choice_str(mp_chroma_names, p->chroma_location));
+                        m_opt_choice_str(pl_chroma_names, p->chroma_location));
         if (mp_image_crop_valid(p)) {
             mp_snprintf_cat(b, bs, " crop=%dx%d+%d+%d", mp_rect_w(p->crop),
                             mp_rect_h(p->crop), p->crop.x0, p->crop.y0);
@@ -971,11 +971,11 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->color.hdr = pl_hdr_metadata_empty;
     }
 
-    if (params->chroma_location == MP_CHROMA_AUTO) {
+    if (params->chroma_location == PL_CHROMA_UNKNOWN) {
         if (params->repr.levels == PL_COLOR_LEVELS_LIMITED)
-            params->chroma_location = MP_CHROMA_LEFT;
+            params->chroma_location = PL_CHROMA_LEFT;
         if (params->repr.levels == PL_COLOR_LEVELS_FULL)
-            params->chroma_location = MP_CHROMA_CENTER;
+            params->chroma_location = PL_CHROMA_CENTER;
     }
 
     if (params->light == MP_CSP_LIGHT_AUTO) {
@@ -1043,7 +1043,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         .transfer = pl_transfer_from_av(src->color_trc),
     };
 
-    dst->params.chroma_location = avchroma_location_to_mp(src->chroma_location);
+    dst->params.chroma_location = pl_chroma_from_av(src->chroma_location);
 
     if (src->opaque_ref) {
         struct mp_image_params *p = (void *)src->opaque_ref->data;
@@ -1172,7 +1172,7 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
         pl_primaries_to_av(src->params.color.primaries);
     dst->color_trc = pl_transfer_to_av(src->params.color.transfer);
 
-    dst->chroma_location = mp_chroma_location_to_av(src->params.chroma_location);
+    dst->chroma_location = pl_chroma_to_av(src->params.chroma_location);
 
     dst->opaque_ref = av_buffer_alloc(sizeof(struct mp_image_params));
     MP_HANDLE_OOM(dst->opaque_ref);

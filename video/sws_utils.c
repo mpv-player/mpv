@@ -309,8 +309,8 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     av_opt_set_double(ctx->sws, "param0", ctx->params[0], 0);
     av_opt_set_double(ctx->sws, "param1", ctx->params[1], 0);
 
-    int cr_src = mp_chroma_location_to_av(src.chroma_location);
-    int cr_dst = mp_chroma_location_to_av(dst.chroma_location);
+    int cr_src = pl_chroma_to_av(src.chroma_location);
+    int cr_dst = pl_chroma_to_av(dst.chroma_location);
     int cr_xpos, cr_ypos;
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 37, 100)
     if (av_chroma_location_enum_to_pos(&cr_xpos, &cr_ypos, cr_src) >= 0) {

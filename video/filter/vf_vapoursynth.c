@@ -194,7 +194,7 @@ static void copy_mp_to_vs_frame_props_map(struct priv *p, VSMap *map,
             pl_system_to_av(params->repr.sys), 0);
     if (params->chroma_location) {
         p->vsapi->propSetInt(map, "_ChromaLocation",
-                params->chroma_location == MP_CHROMA_CENTER, 0);
+                params->chroma_location == PL_CHROMA_CENTER, 0);
     }
     char pict_type = 0;
     switch (img->pict_type) {

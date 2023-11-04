@@ -121,13 +121,16 @@ static void mp_zimg_update_from_cmdline(struct mp_zimg_context *ctx)
     ctx->opts = *opts;
 }
 
-static zimg_chroma_location_e mp_to_z_chroma(enum mp_chroma_location cl)
+static zimg_chroma_location_e pl_to_z_chroma(enum pl_chroma_location cl)
 {
     switch (cl) {
-    case MP_CHROMA_TOPLEFT:     return ZIMG_CHROMA_TOP_LEFT;
-    case MP_CHROMA_LEFT:        return ZIMG_CHROMA_LEFT;
-    case MP_CHROMA_CENTER:      return ZIMG_CHROMA_CENTER;
-    default:                    return ZIMG_CHROMA_LEFT;
+    case PL_CHROMA_LEFT:          return ZIMG_CHROMA_LEFT;
+    case PL_CHROMA_CENTER:        return ZIMG_CHROMA_CENTER;
+    case PL_CHROMA_TOP_LEFT:      return ZIMG_CHROMA_TOP_LEFT;
+    case PL_CHROMA_TOP_CENTER:    return ZIMG_CHROMA_TOP;
+    case PL_CHROMA_BOTTOM_LEFT:   return ZIMG_CHROMA_BOTTOM_LEFT;
+    case PL_CHROMA_BOTTOM_CENTER: return ZIMG_CHROMA_BOTTOM;
+    default:                      return ZIMG_CHROMA_LEFT;
     }
 }
 
@@ -450,7 +453,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     zfmt->color_primaries = fmt.repr.sys == PL_COLOR_SYSTEM_XYZ
                                 ? ZIMG_PRIMARIES_ST428
                                 : mp_to_z_prim(fmt.color.primaries);
-    zfmt->chroma_location = mp_to_z_chroma(fmt.chroma_location);
+    zfmt->chroma_location = pl_to_z_chroma(fmt.chroma_location);
 
     if (ctx && ctx->opts.fast) {
         // mpv's default for RGB output slows down zimg significantly.
