@@ -4051,7 +4051,7 @@ static const char *const *const mp_event_property_change[] = {
       "secondary-sub-text", "audio-bitrate", "video-bitrate", "sub-bitrate",
       "decoder-frame-drop-count", "frame-drop-count", "video-frame-info",
       "vf-metadata", "af-metadata", "sub-start", "sub-end", "secondary-sub-start",
-      "secondary-sub-end"),
+      "secondary-sub-end", "video-out-params", "video-dec-params", "video-params"),
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
