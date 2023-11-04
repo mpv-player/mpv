@@ -2344,9 +2344,9 @@ static void pass_convert_yuv(struct gl_video *p)
 
     // Conversion to RGB. For RGB itself, this still applies e.g. brightness
     // and contrast controls, or expansion of e.g. LSB-packed 10 bit data.
-    struct mp_cmat m = {{{0}}};
+    struct pl_transform3x3 m = {0};
     mp_get_csp_matrix(&cparams, &m);
-    gl_sc_uniform_mat3(sc, "colormatrix", true, &m.m[0][0]);
+    gl_sc_uniform_mat3(sc, "colormatrix", true, &m.mat.m[0][0]);
     gl_sc_uniform_vec3(sc, "colormatrix_c", m.c);
 
     GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
@@ -2482,7 +2482,7 @@ static void pass_scale_main(struct gl_video *p)
         // Linear light downscaling results in nasty artifacts for HDR curves
         // due to the potentially extreme brightness differences severely
         // compounding any ringing. So just scale in gamma light instead.
-        if (mp_trc_is_hdr(p->image_params.color.transfer))
+        if (pl_color_space_is_hdr(&p->image_params.color))
             use_linear = false;
     } else if (upscaling) {
         use_linear = p->opts.linear_upscaling || p->opts.sigmoid_upscaling;
@@ -2592,7 +2592,7 @@ static void pass_colormanage(struct gl_video *p, struct pl_color_space src,
         // limitation reasons, so we use a gamma 2.2 input curve here instead.
         // We could pick any value we want here, the difference is just coding
         // efficiency.
-        if (mp_trc_is_hdr(trc_orig))
+        if (pl_color_space_is_hdr(&p->image_params.color))
             trc_orig = PL_COLOR_TRC_GAMMA22;
 
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
@@ -2629,7 +2629,7 @@ static void pass_colormanage(struct gl_video *p, struct pl_color_space src,
         // Avoid outputting linear light or HDR content "by default". For these
         // just pick gamma 2.2 as a default, since it's a good estimate for
         // the response of typical displays
-        if (dst.transfer == PL_COLOR_TRC_LINEAR || mp_trc_is_hdr(dst.transfer))
+        if (dst.transfer == PL_COLOR_TRC_LINEAR || pl_color_space_is_hdr(&dst))
             dst.transfer = PL_COLOR_TRC_GAMMA22;
     }
 
@@ -2637,9 +2637,9 @@ static void pass_colormanage(struct gl_video *p, struct pl_color_space src,
     // it from the chosen transfer function. Also normalize the src peak, in
     // case it was unknown
     if (!dst.hdr.max_luma)
-        dst.hdr.max_luma = mp_trc_nom_peak(dst.transfer) * MP_REF_WHITE;
+        dst.hdr.max_luma = pl_color_transfer_nominal_peak(dst.transfer) * MP_REF_WHITE;
     if (!src.hdr.max_luma)
-        src.hdr.max_luma = mp_trc_nom_peak(src.transfer) * MP_REF_WHITE;
+        src.hdr.max_luma = pl_color_transfer_nominal_peak(src.transfer) * MP_REF_WHITE;
 
     // Whitelist supported modes
     switch (p->opts.tone_map.curve) {
@@ -2671,7 +2671,7 @@ static void pass_colormanage(struct gl_video *p, struct pl_color_space src,
     }
 
     struct gl_tone_map_opts tone_map = p->opts.tone_map;
-    bool detect_peak = tone_map.compute_peak >= 0 && mp_trc_is_hdr(src.transfer)
+    bool detect_peak = tone_map.compute_peak >= 0 && pl_color_space_is_hdr(&src)
                        && src.hdr.max_luma > dst.hdr.max_luma;
 
     if (detect_peak && !p->hdr_peak_ssbo) {

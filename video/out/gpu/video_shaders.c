@@ -17,6 +17,8 @@
 
 #include <math.h>
 
+#include <libplacebo/colorspace.h>
+
 #include "video_shaders.h"
 #include "video.h"
 
@@ -337,7 +339,7 @@ static const float SLOG_A = 0.432699,
 //
 // These functions always output to a normalized scale of [0,1], for
 // convenience of the video.c code that calls it. To get the values in an
-// absolute scale, multiply the result by `mp_trc_nom_peak(trc)`
+// absolute scale, multiply the result by `pl_color_transfer_nominal_peak(trc)`
 void pass_linearize(struct gl_shader_cache *sc, enum pl_color_transfer trc)
 {
     if (trc == PL_COLOR_TRC_LINEAR)
@@ -430,7 +432,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum pl_color_transfer trc)
     }
 
     // Rescale to prevent clipping on non-float textures
-    GLSLF("color.rgb *= vec3(1.0/%f);\n", mp_trc_nom_peak(trc));
+    GLSLF("color.rgb *= vec3(1.0/%f);\n", pl_color_transfer_nominal_peak(trc));
 }
 
 // Delinearize (compress), given a TRC as output. This corresponds to the
@@ -445,7 +447,7 @@ void pass_delinearize(struct gl_shader_cache *sc, enum pl_color_transfer trc)
 
     GLSLF("// delinearize\n");
     GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-    GLSLF("color.rgb *= vec3(%f);\n", mp_trc_nom_peak(trc));
+    GLSLF("color.rgb *= vec3(%f);\n", pl_color_transfer_nominal_peak(trc));
 
     switch (trc) {
     case PL_COLOR_TRC_SRGB:
@@ -842,11 +844,10 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
 
     // Some operations need access to the video's luma coefficients, so make
     // them available
-    float rgb2xyz[3][3];
-    mp_get_rgb2xyz_matrix(mp_get_csp_primaries(src.primaries), rgb2xyz);
-    gl_sc_uniform_vec3(sc, "src_luma", rgb2xyz[1]);
-    mp_get_rgb2xyz_matrix(mp_get_csp_primaries(dst.primaries), rgb2xyz);
-    gl_sc_uniform_vec3(sc, "dst_luma", rgb2xyz[1]);
+    pl_matrix3x3 rgb2xyz = pl_get_rgb2xyz_matrix(pl_raw_primaries_get(src.primaries));
+    gl_sc_uniform_vec3(sc, "src_luma", rgb2xyz.m[1]);
+    rgb2xyz = pl_get_rgb2xyz_matrix(pl_raw_primaries_get(dst.primaries));
+    gl_sc_uniform_vec3(sc, "dst_luma", rgb2xyz.m[1]);
 
     bool need_ootf = src_light != dst_light;
     if (src_light == MP_CSP_LIGHT_SCENE_HLG && src.hdr.max_luma != dst.hdr.max_luma)
@@ -867,7 +868,7 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
     }
 
     // Pre-scale the incoming values into an absolute scale
-    GLSLF("color.rgb *= vec3(%f);\n", mp_trc_nom_peak(src.transfer));
+    GLSLF("color.rgb *= vec3(%f);\n", pl_color_transfer_nominal_peak(src.transfer));
 
     if (need_ootf)
         pass_ootf(sc, src_light, src.hdr.max_luma / MP_REF_WHITE);
@@ -880,11 +881,11 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
 
     // Adapt to the right colorspace if necessary
     if (src.primaries != dst.primaries) {
-        struct mp_csp_primaries csp_src = mp_get_csp_primaries(src.primaries),
-                                csp_dst = mp_get_csp_primaries(dst.primaries);
-        float m[3][3] = {{0}};
-        mp_get_cms_matrix(csp_src, csp_dst, MP_INTENT_RELATIVE_COLORIMETRIC, m);
-        gl_sc_uniform_mat3(sc, "cms_matrix", true, &m[0][0]);
+        const struct pl_raw_primaries *csp_src = pl_raw_primaries_get(src.primaries),
+                                      *csp_dst = pl_raw_primaries_get(dst.primaries);
+        pl_matrix3x3 m = pl_get_color_mapping_matrix(csp_src, csp_dst,
+                                                     PL_INTENT_RELATIVE_COLORIMETRIC);
+        gl_sc_uniform_mat3(sc, "cms_matrix", true, &m.m[0][0]);
         GLSL(color.rgb = cms_matrix * color.rgb;)
 
         if (!opts->gamut_mode || opts->gamut_mode == GAMUT_DESATURATE) {
@@ -907,8 +908,8 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
     // For SDR, we normalize to the chosen signal peak. For HDR, we normalize
     // to the encoding range of the transfer function.
     float dst_range = dst.hdr.max_luma / MP_REF_WHITE;
-    if (mp_trc_is_hdr(dst.transfer))
-        dst_range = mp_trc_nom_peak(dst.transfer);
+    if (pl_color_space_is_hdr(&dst))
+        dst_range = pl_color_transfer_nominal_peak(dst.transfer);
 
     GLSLF("color.rgb *= vec3(%f);\n", 1.0 / dst_range);
 
@@ -1009,7 +1010,7 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
     GLSL(noise.z = rand(h); h = permute(h);)
 
     // Noise is scaled to the signal level to prevent extreme noise for HDR
-    float gain = opts->grain/8192.0 / mp_trc_nom_peak(trc);
+    float gain = opts->grain/8192.0 / pl_color_transfer_nominal_peak(trc);
     GLSLF("color.xyz += %f * (noise - vec3(0.5));\n", gain);
     GLSLF("}\n");
 }

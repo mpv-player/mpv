@@ -961,11 +961,11 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         } else {
             // If the signal peak is unknown, we're forced to pick the TRC's
             // nominal range as the signal peak to prevent clipping
-            params->color.hdr.max_luma = mp_trc_nom_peak(params->color.transfer) * MP_REF_WHITE;
+            params->color.hdr.max_luma = pl_color_transfer_nominal_peak(params->color.transfer) * MP_REF_WHITE;
         }
     }
 
-    if (!mp_trc_is_hdr(params->color.transfer)) {
+    if (!pl_color_space_is_hdr(&params->color)) {
         // Some clips have leftover HDR metadata after conversion to SDR, so to
         // avoid blowing up the tone mapping code, strip/sanitize it
         params->color.hdr = pl_hdr_metadata_empty;

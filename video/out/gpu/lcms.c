@@ -197,12 +197,12 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
 
     // The input profile for the transformation is dependent on the video
     // primaries and transfer characteristics
-    struct mp_csp_primaries csp = mp_get_csp_primaries(prim);
-    cmsCIExyY wp_xyY = {csp.white.x, csp.white.y, 1.0};
+    const struct pl_raw_primaries *csp = pl_raw_primaries_get(prim);
+    cmsCIExyY wp_xyY = {csp->white.x, csp->white.y, 1.0};
     cmsCIExyYTRIPLE prim_xyY = {
-        .Red   = {csp.red.x,   csp.red.y,   1.0},
-        .Green = {csp.green.x, csp.green.y, 1.0},
-        .Blue  = {csp.blue.x,  csp.blue.y,  1.0},
+        .Red   = {csp->red.x,   csp->red.y,   1.0},
+        .Green = {csp->green.x, csp->green.y, 1.0},
+        .Blue  = {csp->blue.x,  csp->blue.y,  1.0},
     };
 
     cmsToneCurve *tonecurve[3] = {0};
@@ -242,7 +242,7 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
             // function. Relative colorimetric is used since we want to
             // approximate the BT.1886 to the target device's actual black
             // point even in e.g. perceptual mode
-            const int intent = MP_INTENT_RELATIVE_COLORIMETRIC;
+            const int intent = PL_INTENT_RELATIVE_COLORIMETRIC;
             cmsCIEXYZ bp_XYZ;
             if (!cmsDetectBlackPoint(&bp_XYZ, disp_profile, intent, 0))
                 return false;
@@ -519,7 +519,7 @@ const struct m_sub_options mp_icc_conf = {
     .size = sizeof(struct mp_icc_opts),
     .defaults = &(const struct mp_icc_opts) {
         .size_str = "auto",
-        .intent = MP_INTENT_RELATIVE_COLORIMETRIC,
+        .intent = PL_INTENT_RELATIVE_COLORIMETRIC,
         .use_embedded = true,
         .cache = true,
     },
