@@ -3,8 +3,6 @@
  *
  * Copyleft (C) 2009 Reimar Döffinger <Reimar.Doeffinger@gmx.de>
  *
- * mp_invert_cmat based on DarkPlaces engine (relicensed from GPL to LGPL)
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -170,260 +168,17 @@ enum pl_color_primaries mp_csp_guess_primaries(int width, int height)
     }
 }
 
-void mp_invert_matrix3x3(float m[3][3])
-{
-    float m00 = m[0][0], m01 = m[0][1], m02 = m[0][2],
-          m10 = m[1][0], m11 = m[1][1], m12 = m[1][2],
-          m20 = m[2][0], m21 = m[2][1], m22 = m[2][2];
-
-    // calculate the adjoint
-    m[0][0] =  (m11 * m22 - m21 * m12);
-    m[0][1] = -(m01 * m22 - m21 * m02);
-    m[0][2] =  (m01 * m12 - m11 * m02);
-    m[1][0] = -(m10 * m22 - m20 * m12);
-    m[1][1] =  (m00 * m22 - m20 * m02);
-    m[1][2] = -(m00 * m12 - m10 * m02);
-    m[2][0] =  (m10 * m21 - m20 * m11);
-    m[2][1] = -(m00 * m21 - m20 * m01);
-    m[2][2] =  (m00 * m11 - m10 * m01);
-
-    // calculate the determinant (as inverse == 1/det * adjoint,
-    // adjoint * m == identity * det, so this calculates the det)
-    float det = m00 * m[0][0] + m10 * m[0][1] + m20 * m[0][2];
-    det = 1.0f / det;
-
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++)
-            m[i][j] *= det;
-    }
-}
-
-// A := A * B
-static void mp_mul_matrix3x3(float a[3][3], float b[3][3])
-{
-    float a00 = a[0][0], a01 = a[0][1], a02 = a[0][2],
-          a10 = a[1][0], a11 = a[1][1], a12 = a[1][2],
-          a20 = a[2][0], a21 = a[2][1], a22 = a[2][2];
-
-    for (int i = 0; i < 3; i++) {
-        a[0][i] = a00 * b[0][i] + a01 * b[1][i] + a02 * b[2][i];
-        a[1][i] = a10 * b[0][i] + a11 * b[1][i] + a12 * b[2][i];
-        a[2][i] = a20 * b[0][i] + a21 * b[1][i] + a22 * b[2][i];
-    }
-}
-
-// return the primaries associated with a certain mp_csp_primaries val
-struct mp_csp_primaries mp_get_csp_primaries(enum pl_color_primaries spc)
-{
-    /*
-    Values from: ITU-R Recommendations BT.470-6, BT.601-7, BT.709-5, BT.2020-0
-
-    https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.470-6-199811-S!!PDF-E.pdf
-    https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.601-7-201103-I!!PDF-E.pdf
-    https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-5-200204-I!!PDF-E.pdf
-    https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2020-0-201208-I!!PDF-E.pdf
-
-    Other colorspaces from https://en.wikipedia.org/wiki/RGB_color_space#Specifications
-    */
-
-    // CIE standard illuminant series
-    static const struct mp_csp_col_xy
-        d50 = {0.34577, 0.35850},
-        d65 = {0.31271, 0.32902},
-        c   = {0.31006, 0.31616},
-        dci = {0.31400, 0.35100},
-        e   = {1.0/3.0, 1.0/3.0};
-
-    switch (spc) {
-    case PL_COLOR_PRIM_BT_470M:
-        return (struct mp_csp_primaries) {
-            .red   = {0.670, 0.330},
-            .green = {0.210, 0.710},
-            .blue  = {0.140, 0.080},
-            .white = c
-        };
-    case PL_COLOR_PRIM_BT_601_525:
-        return (struct mp_csp_primaries) {
-            .red   = {0.630, 0.340},
-            .green = {0.310, 0.595},
-            .blue  = {0.155, 0.070},
-            .white = d65
-        };
-    case PL_COLOR_PRIM_BT_601_625:
-        return (struct mp_csp_primaries) {
-            .red   = {0.640, 0.330},
-            .green = {0.290, 0.600},
-            .blue  = {0.150, 0.060},
-            .white = d65
-        };
-    // This is the default assumption if no colorspace information could
-    // be determined, eg. for files which have no video channel.
-    case PL_COLOR_PRIM_UNKNOWN:
-    case PL_COLOR_PRIM_BT_709:
-        return (struct mp_csp_primaries) {
-            .red   = {0.640, 0.330},
-            .green = {0.300, 0.600},
-            .blue  = {0.150, 0.060},
-            .white = d65
-        };
-    case PL_COLOR_PRIM_BT_2020:
-        return (struct mp_csp_primaries) {
-            .red   = {0.708, 0.292},
-            .green = {0.170, 0.797},
-            .blue  = {0.131, 0.046},
-            .white = d65
-        };
-    case PL_COLOR_PRIM_APPLE:
-        return (struct mp_csp_primaries) {
-            .red   = {0.625, 0.340},
-            .green = {0.280, 0.595},
-            .blue  = {0.115, 0.070},
-            .white = d65
-        };
-    case PL_COLOR_PRIM_ADOBE:
-        return (struct mp_csp_primaries) {
-            .red   = {0.640, 0.330},
-            .green = {0.210, 0.710},
-            .blue  = {0.150, 0.060},
-            .white = d65
-        };
-    case PL_COLOR_PRIM_PRO_PHOTO:
-        return (struct mp_csp_primaries) {
-            .red   = {0.7347, 0.2653},
-            .green = {0.1596, 0.8404},
-            .blue  = {0.0366, 0.0001},
-            .white = d50
-        };
-    case PL_COLOR_PRIM_CIE_1931:
-        return (struct mp_csp_primaries) {
-            .red   = {0.7347, 0.2653},
-            .green = {0.2738, 0.7174},
-            .blue  = {0.1666, 0.0089},
-            .white = e
-        };
-    // From SMPTE RP 431-2 and 432-1
-    case PL_COLOR_PRIM_DCI_P3:
-    case PL_COLOR_PRIM_DISPLAY_P3:
-        return (struct mp_csp_primaries) {
-            .red   = {0.680, 0.320},
-            .green = {0.265, 0.690},
-            .blue  = {0.150, 0.060},
-            .white = spc == PL_COLOR_PRIM_DCI_P3 ? dci : d65
-        };
-    // From Panasonic VARICAM reference manual
-    case PL_COLOR_PRIM_V_GAMUT:
-        return (struct mp_csp_primaries) {
-            .red   = {0.730, 0.280},
-            .green = {0.165, 0.840},
-            .blue  = {0.100, -0.03},
-            .white = d65
-        };
-    // From Sony S-Log reference manual
-    case PL_COLOR_PRIM_S_GAMUT:
-        return (struct mp_csp_primaries) {
-            .red   = {0.730, 0.280},
-            .green = {0.140, 0.855},
-            .blue  = {0.100, -0.05},
-            .white = d65
-        };
-    // from EBU Tech. 3213-E
-    case PL_COLOR_PRIM_EBU_3213:
-        return (struct mp_csp_primaries) {
-            .red   = {0.630, 0.340},
-            .green = {0.295, 0.605},
-            .blue  = {0.155, 0.077},
-            .white = d65
-        };
-    // From H.273, traditional film with Illuminant C
-    case PL_COLOR_PRIM_FILM_C:
-        return (struct mp_csp_primaries) {
-            .red   = {0.681, 0.319},
-            .green = {0.243, 0.692},
-            .blue  = {0.145, 0.049},
-            .white = c
-        };
-    // From libplacebo source code
-    case PL_COLOR_PRIM_ACES_AP0:
-        return (struct mp_csp_primaries) {
-            .red   = {0.7347, 0.2653},
-            .green = {0.0000, 1.0000},
-            .blue  = {0.0001, -0.0770},
-            .white = {0.32168, 0.33767},
-        };
-    // From libplacebo source code
-    case PL_COLOR_PRIM_ACES_AP1:
-        return (struct mp_csp_primaries) {
-            .red   = {0.713, 0.293},
-            .green = {0.165, 0.830},
-            .blue  = {0.128, 0.044},
-            .white = {0.32168, 0.33767},
-        };
-    default:
-        return (struct mp_csp_primaries) {{0}};
-    }
-}
-
-// Get the nominal peak for a given colorspace, relative to the reference white
-// level. In other words, this returns the brightest encodable value that can
-// be represented by a given transfer curve.
-float mp_trc_nom_peak(enum pl_color_transfer trc)
-{
-    switch (trc) {
-    case PL_COLOR_TRC_PQ:           return 10000.0 / MP_REF_WHITE;
-    case PL_COLOR_TRC_HLG:          return 12.0 / MP_REF_WHITE_HLG;
-    case PL_COLOR_TRC_V_LOG:        return 46.0855;
-    case PL_COLOR_TRC_S_LOG1:       return 6.52;
-    case PL_COLOR_TRC_S_LOG2:       return 9.212;
-    }
-
-    return 1.0;
-}
-
-bool mp_trc_is_hdr(enum pl_color_transfer trc)
-{
-    return mp_trc_nom_peak(trc) > 1.0;
-}
-
-// Compute the RGB/XYZ matrix as described here:
-// http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
-void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
-{
-    float S[3], X[4], Z[4];
-
-    // Convert from CIE xyY to XYZ. Note that Y=1 holds true for all primaries
-    X[0] = space.red.x   / space.red.y;
-    X[1] = space.green.x / space.green.y;
-    X[2] = space.blue.x  / space.blue.y;
-    X[3] = space.white.x / space.white.y;
-
-    Z[0] = (1 - space.red.x   - space.red.y)   / space.red.y;
-    Z[1] = (1 - space.green.x - space.green.y) / space.green.y;
-    Z[2] = (1 - space.blue.x  - space.blue.y)  / space.blue.y;
-    Z[3] = (1 - space.white.x - space.white.y) / space.white.y;
-
-    // S = XYZ^-1 * W
-    for (int i = 0; i < 3; i++) {
-        m[0][i] = X[i];
-        m[1][i] = 1;
-        m[2][i] = Z[i];
-    }
-
-    mp_invert_matrix3x3(m);
-
-    for (int i = 0; i < 3; i++)
-        S[i] = m[i][0] * X[3] + m[i][1] * 1 + m[i][2] * Z[3];
-
-    // M = [Sc * XYZc]
-    for (int i = 0; i < 3; i++) {
-        m[0][i] = S[i] * X[i];
-        m[1][i] = S[i] * 1;
-        m[2][i] = S[i] * Z[i];
-    }
-}
+// LMS<-XYZ revised matrix from CIECAM97, based on a linear transform and
+// normalized for equal energy on monochrome inputs
+static const pl_matrix3x3 m_cat97 = {{
+    {  0.8562,  0.3372, -0.1934 },
+    { -0.8360,  1.8327,  0.0033 },
+    {  0.0357, -0.0469,  1.0112 },
+}};
 
 // M := M * XYZd<-XYZs
-static void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src,
-                                          struct mp_csp_col_xy dest, float m[3][3])
+static void apply_chromatic_adaptation(struct pl_cie_xy src,
+                                       struct pl_cie_xy dest, pl_matrix3x3 *mat)
 {
     // If the white points are nearly identical, this is a wasteful identity
     // operation.
@@ -432,98 +187,33 @@ static void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src,
 
     // XYZd<-XYZs = Ma^-1 * (I*[Cd/Cs]) * Ma
     // http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
-    float C[3][2], tmp[3][3] = {{0}};
-
-    // Ma = Bradford matrix, arguably most popular method in use today.
-    // This is derived experimentally and thus hard-coded.
-    float bradford[3][3] = {
-        {  0.8951,  0.2664, -0.1614 },
-        { -0.7502,  1.7135,  0.0367 },
-        {  0.0389, -0.0685,  1.0296 },
-    };
+    // For Ma, we use the CIECAM97 revised (linear) matrix
+    float C[3][2];
 
     for (int i = 0; i < 3; i++) {
         // source cone
-        C[i][0] = bradford[i][0] * mp_xy_X(src)
-                + bradford[i][1] * 1
-                + bradford[i][2] * mp_xy_Z(src);
+        C[i][0] = m_cat97.m[i][0] * pl_cie_X(src)
+                + m_cat97.m[i][1] * 1
+                + m_cat97.m[i][2] * pl_cie_Z(src);
 
         // dest cone
-        C[i][1] = bradford[i][0] * mp_xy_X(dest)
-                + bradford[i][1] * 1
-                + bradford[i][2] * mp_xy_Z(dest);
+        C[i][1] = m_cat97.m[i][0] * pl_cie_X(dest)
+                + m_cat97.m[i][1] * 1
+                + m_cat97.m[i][2] * pl_cie_Z(dest);
     }
 
     // tmp := I * [Cd/Cs] * Ma
+    pl_matrix3x3 tmp = {0};
     for (int i = 0; i < 3; i++)
-        tmp[i][i] = C[i][1] / C[i][0];
+        tmp.m[i][i] = C[i][1] / C[i][0];
 
-    mp_mul_matrix3x3(tmp, bradford);
+    pl_matrix3x3_mul(&tmp, &m_cat97);
 
     // M := M * Ma^-1 * tmp
-    mp_invert_matrix3x3(bradford);
-    mp_mul_matrix3x3(m, bradford);
-    mp_mul_matrix3x3(m, tmp);
-}
-
-// get the coefficients of the source -> dest cms matrix
-void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest,
-                       enum mp_render_intent intent, float m[3][3])
-{
-    float tmp[3][3];
-
-    // In saturation mapping, we don't care about accuracy and just want
-    // primaries to map to primaries, making this an identity transformation.
-    if (intent == MP_INTENT_SATURATION) {
-        for (int i = 0; i < 3; i++)
-            m[i][i] = 1;
-        return;
-    }
-
-    // RGBd<-RGBs = RGBd<-XYZd * XYZd<-XYZs * XYZs<-RGBs
-    // Equations from: http://www.brucelindbloom.com/index.html?Math.html
-    // Note: Perceptual is treated like relative colorimetric. There's no
-    // definition for perceptual other than "make it look good".
-
-    // RGBd<-XYZd, inverted from XYZd<-RGBd
-    mp_get_rgb2xyz_matrix(dest, m);
-    mp_invert_matrix3x3(m);
-
-    // Chromatic adaptation, except in absolute colorimetric intent
-    if (intent != MP_INTENT_ABSOLUTE_COLORIMETRIC)
-        mp_apply_chromatic_adaptation(src.white, dest.white, m);
-
-    // XYZs<-RGBs
-    mp_get_rgb2xyz_matrix(src, tmp);
-    mp_mul_matrix3x3(m, tmp);
-}
-
-// get the coefficients of an ST 428-1 xyz -> rgb conversion matrix
-// intent = the rendering intent used to convert to the target primaries
-static void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params,
-                                  enum mp_render_intent intent, struct mp_cmat *m)
-{
-    // Convert to DCI-P3
-    struct mp_csp_primaries prim = mp_get_csp_primaries(PL_COLOR_PRIM_DCI_P3);
-    float brightness = params->brightness;
-    mp_get_rgb2xyz_matrix(prim, m->m);
-    mp_invert_matrix3x3(m->m);
-
-    // All non-absolute mappings want to map source white to target white
-    if (intent != MP_INTENT_ABSOLUTE_COLORIMETRIC) {
-        // SMPTE EG 432-1 Annex H defines the white point as equal energy
-        static const struct mp_csp_col_xy smpte432 = {1.0/3.0, 1.0/3.0};
-        mp_apply_chromatic_adaptation(smpte432, prim.white, m->m);
-    }
-
-    // Since this outputs linear RGB rather than companded RGB, we
-    // want to linearize any brightness additions. 2 is a reasonable
-    // approximation for any sort of gamma function that could be in use.
-    // As this is an aesthetic setting only, any exact values do not matter.
-    brightness *= fabs(brightness);
-
-    for (int i = 0; i < 3; i++)
-        m->c[i] = brightness;
+    pl_matrix3x3 ma_inv = m_cat97;
+    pl_matrix3x3_invert(&ma_inv);
+    pl_matrix3x3_mul(mat, &ma_inv);
+    pl_matrix3x3_mul(mat, &tmp);
 }
 
 // Get multiplication factor required if image data is fit within the LSBs of a
@@ -608,19 +298,19 @@ void mp_get_csp_uint_mul(enum pl_color_system csp, enum pl_color_levels levels,
  * Under these conditions the given parameters lr, lg, lb uniquely
  * determine the mapping of Y, U, V to R, G, B.
  */
-static void luma_coeffs(struct mp_cmat *mat, float lr, float lg, float lb)
+static void luma_coeffs(struct pl_transform3x3 *mat, float lr, float lg, float lb)
 {
     assert(fabs(lr+lg+lb - 1) < 1e-6);
-    *mat = (struct mp_cmat) {
-        { {1, 0,                    2 * (1-lr)          },
-          {1, -2 * (1-lb) * lb/lg, -2 * (1-lr) * lr/lg  },
-          {1,  2 * (1-lb),          0                   } },
+    *mat = (struct pl_transform3x3) {
+        { {{1, 0,                    2 * (1-lr)          },
+           {1, -2 * (1-lb) * lb/lg, -2 * (1-lr) * lr/lg  },
+           {1,  2 * (1-lb),          0                   }} },
         // Constant coefficients (mat->c) not set here
     };
 }
 
 // get the coefficients of the yuv -> rgb conversion matrix
-void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
+void mp_get_csp_matrix(struct mp_csp_params *params, struct pl_transform3x3 *m)
 {
     enum pl_color_system colorspace = params->repr.sys;
     if (colorspace <= PL_COLOR_SYSTEM_UNKNOWN || colorspace >= PL_COLOR_SYSTEM_COUNT)
@@ -639,29 +329,30 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
         // If this clips on any VO, a constant 0.5 coefficient can be added
         // to the chroma channels to normalize them into [0,1]. This is not
         // currently needed by anything, though.
-        *m = (struct mp_cmat){{{0, 0, 1}, {1, 0, 0}, {0, 1, 0}}};
+        *m = (struct pl_transform3x3){{{{0, 0, 1}, {1, 0, 0}, {0, 1, 0}}}};
         break;
     }
     case PL_COLOR_SYSTEM_RGB: {
-        *m = (struct mp_cmat){{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}};
+        *m = (struct pl_transform3x3){{{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}}};
         levels_in = -1;
         break;
     }
     case PL_COLOR_SYSTEM_XYZ: {
-        // The vo should probably not be using a matrix generated by this
-        // function for XYZ sources, but if it does, let's just convert it to
-        // an equivalent RGB space based on the colorimetry metadata it
-        // provided in mp_csp_params. (At the risk of clipping, if the
-        // chosen primaries are too small to fit the actual data)
-        mp_get_xyz2rgb_coeffs(params, MP_INTENT_RELATIVE_COLORIMETRIC, m);
+        // For lack of anything saner to do, just assume the caller wants
+        // DCI-P3 primaries, which is a reasonable assumption.
+        const struct pl_raw_primaries *dst = pl_raw_primaries_get(PL_COLOR_PRIM_DCI_P3);
+        pl_matrix3x3 mat = pl_get_xyz2rgb_matrix(dst);
+        // DCDM X'Y'Z' is expected to have equal energy white point (EG 432-1 Annex H)
+        apply_chromatic_adaptation((struct pl_cie_xy){1.0/3.0, 1.0/3.0}, dst->white, &mat);
+        *m = (struct pl_transform3x3) { .mat = mat };
         levels_in = -1;
         break;
     }
     case PL_COLOR_SYSTEM_YCGCO: {
-        *m = (struct mp_cmat) {
-            {{1,  -1,  1},
-             {1,   1,  0},
-             {1,  -1, -1}},
+        *m = (struct pl_transform3x3) {
+            {{{1,  -1,  1},
+              {1,   1,  0},
+              {1,  -1, -1}}},
         };
         break;
     }
@@ -680,9 +371,9 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
         float huecos = params->gray ? 0 : params->saturation * cos(params->hue);
         float huesin = params->gray ? 0 : params->saturation * sin(params->hue);
         for (int i = 0; i < 3; i++) {
-            float u = m->m[i][1], v = m->m[i][2];
-            m->m[i][1] = huecos * u - huesin * v;
-            m->m[i][2] = huesin * u + huecos * v;
+            float u = m->mat.m[i][1], v = m->mat.m[i][2];
+            m->mat.m[i][1] = huecos * u - huesin * v;
+            m->mat.m[i][2] = huesin * u + huecos * v;
         }
     }
 
@@ -728,13 +419,13 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
     cmul *= params->contrast;
 
     for (int i = 0; i < 3; i++) {
-        m->m[i][0] *= ymul;
-        m->m[i][1] *= cmul;
-        m->m[i][2] *= cmul;
+        m->mat.m[i][0] *= ymul;
+        m->mat.m[i][1] *= cmul;
+        m->mat.m[i][2] *= cmul;
         // Set c so that Y=umin,UV=cmid maps to RGB=min (black to black),
         // also add brightness offset (black lift)
-        m->c[i] = rgblev.min - m->m[i][0] * yuvlev.ymin
-                  - (m->m[i][1] + m->m[i][2]) * yuvlev.cmid
+        m->c[i] = rgblev.min - m->mat.m[i][0] * yuvlev.ymin
+                  - (m->mat.m[i][1] + m->mat.m[i][2]) * yuvlev.cmid
                   + params->brightness;
     }
 }
@@ -822,32 +513,17 @@ void mp_csp_equalizer_state_get(struct mp_csp_equalizer_state *state,
     mp_csp_copy_equalizer_values(params, opts);
 }
 
-void mp_invert_cmat(struct mp_cmat *out, struct mp_cmat *in)
-{
-    *out = *in;
-    mp_invert_matrix3x3(out->m);
-
-    // fix the constant coefficient
-    // rgb = M * yuv + C
-    // M^-1 * rgb = yuv + M^-1 * C
-    // yuv = M^-1 * rgb - M^-1 * C
-    //                  ^^^^^^^^^^
-    out->c[0] = -(out->m[0][0] * in->c[0] + out->m[0][1] * in->c[1] + out->m[0][2] * in->c[2]);
-    out->c[1] = -(out->m[1][0] * in->c[0] + out->m[1][1] * in->c[1] + out->m[1][2] * in->c[2]);
-    out->c[2] = -(out->m[2][0] * in->c[0] + out->m[2][1] * in->c[1] + out->m[2][2] * in->c[2]);
-}
-
 // Multiply the color in c with the given matrix.
 // i/o is {R, G, B} or {Y, U, V} (depending on input/output and matrix), using
 // a fixed point representation with the given number of bits (so for bits==8,
 // [0,255] maps to [0,1]). The output is clipped to the range as needed.
-void mp_map_fixp_color(struct mp_cmat *matrix, int ibits, int in[3],
+void mp_map_fixp_color(struct pl_transform3x3 *matrix, int ibits, int in[3],
                                                int obits, int out[3])
 {
     for (int i = 0; i < 3; i++) {
         double val = matrix->c[i];
         for (int x = 0; x < 3; x++)
-            val += matrix->m[i][x] * in[x] / ((1 << ibits) - 1);
+            val += matrix->mat.m[i][x] * in[x] / ((1 << ibits) - 1);
         int ival = lrint(val * ((1 << obits) - 1));
         out[i] = av_clip(ival, 0, (1 << obits) - 1);
     }
