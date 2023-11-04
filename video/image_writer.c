@@ -147,7 +147,7 @@ static void prepare_avframe(AVFrame *pic, AVCodecContext *avctx,
     avctx->colorspace = pic->colorspace =
         pl_system_to_av(image->params.repr.sys);
     avctx->chroma_sample_location = pic->chroma_location =
-        mp_chroma_location_to_av(image->params.chroma_location);
+        pl_chroma_to_av(image->params.chroma_location);
     mp_dbg(log, "mapped color params:\n"
         "  trc = %s\n"
         "  primaries = %s\n"
@@ -645,7 +645,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
         if (p.repr.sys != PL_COLOR_SYSTEM_RGB) {
             p.repr.levels = yuv_levels;
             p.repr.sys = PL_COLOR_SYSTEM_BT_601;
-            p.chroma_location = MP_CHROMA_CENTER;
+            p.chroma_location = PL_CHROMA_CENTER;
         }
         mp_image_params_guess_csp(&p);
     }

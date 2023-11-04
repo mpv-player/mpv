@@ -111,15 +111,7 @@ struct mp_image_params;
 void mp_csp_set_image_params(struct mp_csp_params *params,
                              const struct mp_image_params *imgparams);
 
-enum mp_chroma_location {
-    MP_CHROMA_AUTO,
-    MP_CHROMA_TOPLEFT,  // uhd
-    MP_CHROMA_LEFT,     // mpeg2/4, h264
-    MP_CHROMA_CENTER,   // mpeg1, jpeg
-    MP_CHROMA_COUNT,
-};
-
-extern const struct m_opt_choice_alternatives mp_chroma_names[];
+extern const struct m_opt_choice_alternatives pl_chroma_names[];
 extern const struct m_opt_choice_alternatives pl_alpha_names[];
 
 extern const struct m_sub_options mp_csp_equalizer_conf;
@@ -149,10 +141,6 @@ struct mp_csp_primaries {
 
 enum pl_color_system mp_csp_guess_colorspace(int width, int height);
 enum pl_color_primaries mp_csp_guess_primaries(int width, int height);
-
-enum mp_chroma_location avchroma_location_to_mp(int avloc);
-int mp_chroma_location_to_av(enum mp_chroma_location mploc);
-void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 
 struct mp_csp_primaries mp_get_csp_primaries(enum pl_color_primaries csp);
 float mp_trc_nom_peak(enum pl_color_transfer trc);

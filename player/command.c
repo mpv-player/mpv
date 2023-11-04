@@ -2329,7 +2329,7 @@ static int property_imgparams(const struct mp_image_params *p, int action, void 
         {"light",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_light_names, p->light))},
         {"chroma-location",
-            SUB_PROP_STR(m_opt_choice_str(mp_chroma_names, p->chroma_location))},
+            SUB_PROP_STR(m_opt_choice_str(pl_chroma_names, p->chroma_location))},
         {"stereo-in",
             SUB_PROP_STR(m_opt_choice_str(mp_stereo3d_names, p->stereo3d))},
         {"rotate",          SUB_PROP_INT(p->rotate)},

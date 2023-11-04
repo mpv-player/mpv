@@ -680,7 +680,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
         p->video_overlay->params.repr.alpha = PL_ALPHA_PREMULTIPLIED;
 
         if (p->scale_in_tiles)
-            p->video_overlay->params.chroma_location = MP_CHROMA_CENTER;
+            p->video_overlay->params.chroma_location = PL_CHROMA_CENTER;
 
         p->rgba_to_overlay = alloc_scaler(p);
         p->rgba_to_overlay->allow_zimg = true;

@@ -66,19 +66,6 @@ void mppl_log_set_probing(pl_log log, bool probing)
     pl_log_update(log, &params);
 }
 
-enum pl_chroma_location mp_chroma_to_pl(enum mp_chroma_location chroma)
-{
-    switch (chroma) {
-    case MP_CHROMA_AUTO:            return PL_CHROMA_UNKNOWN;
-    case MP_CHROMA_TOPLEFT:         return PL_CHROMA_TOP_LEFT;
-    case MP_CHROMA_LEFT:            return PL_CHROMA_LEFT;
-    case MP_CHROMA_CENTER:          return PL_CHROMA_CENTER;
-    case MP_CHROMA_COUNT:           return PL_CHROMA_COUNT;
-    }
-
-    MP_ASSERT_UNREACHABLE();
-}
-
 void mp_map_dovi_metadata_to_pl(struct mp_image *mpi,
                                 struct pl_frame *frame)
 {

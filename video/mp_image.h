@@ -50,7 +50,7 @@ struct mp_image_params {
     struct pl_color_space color;
     struct pl_color_repr repr;
     enum mp_csp_light light;
-    enum mp_chroma_location chroma_location;
+    enum pl_chroma_location chroma_location;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;
     enum mp_stereo3d_mode stereo3d; // image is encoded with this mode

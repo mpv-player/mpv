@@ -210,7 +210,7 @@ static const m_option_t vf_opts_fields[] = {
     {"gamma", OPT_CHOICE_C(gamma, pl_csp_trc_names)},
     {"sig-peak", OPT_FLOAT(sig_peak)},
     {"light", OPT_CHOICE_C(light, mp_csp_light_names)},
-    {"chroma-location", OPT_CHOICE_C(chroma_location, mp_chroma_names)},
+    {"chroma-location", OPT_CHOICE_C(chroma_location, pl_chroma_names)},
     {"stereo-in", OPT_CHOICE_C(stereo_in, mp_stereo3d_names)},
     {"rotate", OPT_INT(rotate), M_RANGE(-1, 359)},
     {"alpha", OPT_CHOICE_C(alpha, pl_alpha_names)},
