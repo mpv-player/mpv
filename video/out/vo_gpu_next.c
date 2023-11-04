@@ -238,8 +238,6 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     return mpi;
 }
 
-static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi);
-
 static void update_overlays(struct vo *vo, struct mp_osd_res res,
                             int flags, enum pl_overlay_coords coords,
                             struct osd_state *state, struct pl_frame *frame,
@@ -322,7 +320,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             ol->repr.alpha = PL_ALPHA_PREMULTIPLIED;
             // Infer bitmap colorspace from source
             if (src) {
-                ol->color = get_mpi_csp(vo, src);
+                ol->color = src->params.color;
                 // Seems like HDR subtitles are targeting SDR white
                 if (pl_color_transfer_is_hdr(ol->color.transfer)) {
                     ol->color.hdr = (struct pl_hdr_metadata) {
@@ -439,16 +437,6 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
         return 0; // can't handle padded components without `pl_bit_encoding`
 
     return desc.num_planes;
-}
-
-static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
-{
-    struct pl_color_space csp = {
-        .primaries = mpi->params.color.primaries,
-        .transfer = mpi->params.color.transfer,
-        .hdr = mpi->params.color.hdr,
-    };
-    return csp;
 }
 
 static bool hwdec_reconfig(struct priv *p, struct ra_hwdec *hwdec,
@@ -571,12 +559,8 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     }
 
     *frame = (struct pl_frame) {
-        .color = get_mpi_csp(vo, mpi),
-        .repr = {
-            .sys = par->repr.sys,
-            .levels = par->repr.levels,
-            .alpha = par->repr.alpha,
-        },
+        .color = par->color,
+        .repr = par->repr,
         .profile = {
             .data = mpi->icc_profile ? mpi->icc_profile->data : NULL,
             .len = mpi->icc_profile ? mpi->icc_profile->size : 0,
@@ -940,7 +924,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     }
 
     if (p->target_hint && frame->current) {
-        struct pl_color_space hint = get_mpi_csp(vo, frame->current);
+        struct pl_color_space hint = frame->current->params.color;
         if (opts->target_prim)
             hint.primaries = opts->target_prim;
         if (opts->target_trc)
