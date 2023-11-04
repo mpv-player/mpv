@@ -897,27 +897,27 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
 {
     struct mp_subtitle_opts *opts = sd->opts;
     struct sd_ass_priv *ctx = sd->priv;
-    enum mp_csp csp = 0;
-    enum mp_csp_levels levels = 0;
+    enum pl_color_system csp = 0;
+    enum pl_color_levels levels = 0;
     if (opts->ass_vsfilter_color_compat == 0) // "no"
         return;
     bool force_601 = opts->ass_vsfilter_color_compat == 3;
     ASS_Track *track = ctx->ass_track;
     static const int ass_csp[] = {
-        [YCBCR_BT601_TV]        = MP_CSP_BT_601,
-        [YCBCR_BT601_PC]        = MP_CSP_BT_601,
-        [YCBCR_BT709_TV]        = MP_CSP_BT_709,
-        [YCBCR_BT709_PC]        = MP_CSP_BT_709,
-        [YCBCR_SMPTE240M_TV]    = MP_CSP_SMPTE_240M,
-        [YCBCR_SMPTE240M_PC]    = MP_CSP_SMPTE_240M,
+        [YCBCR_BT601_TV]        = PL_COLOR_SYSTEM_BT_601,
+        [YCBCR_BT601_PC]        = PL_COLOR_SYSTEM_BT_601,
+        [YCBCR_BT709_TV]        = PL_COLOR_SYSTEM_BT_709,
+        [YCBCR_BT709_PC]        = PL_COLOR_SYSTEM_BT_709,
+        [YCBCR_SMPTE240M_TV]    = PL_COLOR_SYSTEM_SMPTE_240M,
+        [YCBCR_SMPTE240M_PC]    = PL_COLOR_SYSTEM_SMPTE_240M,
     };
     static const int ass_levels[] = {
-        [YCBCR_BT601_TV]        = MP_CSP_LEVELS_TV,
-        [YCBCR_BT601_PC]        = MP_CSP_LEVELS_PC,
-        [YCBCR_BT709_TV]        = MP_CSP_LEVELS_TV,
-        [YCBCR_BT709_PC]        = MP_CSP_LEVELS_PC,
-        [YCBCR_SMPTE240M_TV]    = MP_CSP_LEVELS_TV,
-        [YCBCR_SMPTE240M_PC]    = MP_CSP_LEVELS_PC,
+        [YCBCR_BT601_TV]        = PL_COLOR_LEVELS_LIMITED,
+        [YCBCR_BT601_PC]        = PL_COLOR_LEVELS_FULL,
+        [YCBCR_BT709_TV]        = PL_COLOR_LEVELS_LIMITED,
+        [YCBCR_BT709_PC]        = PL_COLOR_LEVELS_FULL,
+        [YCBCR_SMPTE240M_TV]    = PL_COLOR_LEVELS_LIMITED,
+        [YCBCR_SMPTE240M_PC]    = PL_COLOR_LEVELS_FULL,
     };
     int trackcsp = track->YCbCrMatrix;
     if (force_601)
@@ -930,8 +930,8 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     if (trackcsp < sizeof(ass_levels) / sizeof(ass_levels[0]))
         levels = ass_levels[trackcsp];
     if (trackcsp == YCBCR_DEFAULT) {
-        csp = MP_CSP_BT_601;
-        levels = MP_CSP_LEVELS_TV;
+        csp = PL_COLOR_SYSTEM_BT_601;
+        levels = PL_COLOR_LEVELS_LIMITED;
     }
     // Unknown colorspace (either YCBCR_UNKNOWN, or a valid value unknown to us)
     if (!csp || !levels)
@@ -940,42 +940,42 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     struct mp_image_params params = ctx->video_params;
 
     if (force_601) {
-        params.color = (struct mp_colorspace){
-            .space = MP_CSP_BT_709,
-            .levels = MP_CSP_LEVELS_TV,
+        params.repr = (struct pl_color_repr){
+            .sys = PL_COLOR_SYSTEM_BT_709,
+            .levels = PL_COLOR_LEVELS_LIMITED,
         };
     }
 
-    if ((csp == params.color.space && levels == params.color.levels) ||
-            params.color.space == MP_CSP_RGB) // Even VSFilter doesn't mangle on RGB video
+    if ((csp == params.repr.sys && levels == params.repr.levels) ||
+            params.repr.sys == PL_COLOR_SYSTEM_RGB) // Even VSFilter doesn't mangle on RGB video
         return;
 
-    bool basic_conv = params.color.space == MP_CSP_BT_709 &&
-                      params.color.levels == MP_CSP_LEVELS_TV &&
-                      csp == MP_CSP_BT_601 &&
-                      levels == MP_CSP_LEVELS_TV;
+    bool basic_conv = params.repr.sys == PL_COLOR_SYSTEM_BT_709 &&
+                      params.repr.levels == PL_COLOR_LEVELS_LIMITED &&
+                      csp == PL_COLOR_SYSTEM_BT_601 &&
+                      levels == PL_COLOR_LEVELS_LIMITED;
 
     // With "basic", only do as much as needed for basic compatibility.
     if (opts->ass_vsfilter_color_compat == 1 && !basic_conv)
         return;
 
-    if (params.color.space != ctx->last_params.color.space ||
-        params.color.levels != ctx->last_params.color.levels)
+    if (params.repr.sys != ctx->last_params.repr.sys ||
+        params.repr.levels != ctx->last_params.repr.levels)
     {
         int msgl = basic_conv ? MSGL_V : MSGL_WARN;
         ctx->last_params = params;
         MP_MSG(sd, msgl, "mangling colors like vsfilter: "
                "RGB -> %s %s -> %s %s -> RGB\n",
-               m_opt_choice_str(mp_csp_names, csp),
-               m_opt_choice_str(mp_csp_levels_names, levels),
-               m_opt_choice_str(mp_csp_names, params.color.space),
-               m_opt_choice_str(mp_csp_names, params.color.levels));
+               m_opt_choice_str(pl_csp_names, csp),
+               m_opt_choice_str(pl_csp_levels_names, levels),
+               m_opt_choice_str(pl_csp_names, params.repr.sys),
+               m_opt_choice_str(pl_csp_names, params.repr.levels));
     }
 
     // Conversion that VSFilter would use
     struct mp_csp_params vs_params = MP_CSP_PARAMS_DEFAULTS;
-    vs_params.color.space = csp;
-    vs_params.color.levels = levels;
+    vs_params.repr.sys = csp;
+    vs_params.repr.levels = levels;
     struct mp_cmat vs_yuv2rgb, vs_rgb2yuv;
     mp_get_csp_matrix(&vs_params, &vs_yuv2rgb);
     mp_invert_cmat(&vs_rgb2yuv, &vs_yuv2rgb);

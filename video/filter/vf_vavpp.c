@@ -208,7 +208,7 @@ static struct mp_image *render(struct mp_filter *vf)
 
     mp_image_copy_attributes(img, in);
 
-    unsigned int flags = va_get_colorspace_flag(p->params.color.space);
+    unsigned int flags = va_get_colorspace_flag(p->params.repr.sys);
     if (!mp_refqueue_should_deint(p->queue)) {
         flags |= VA_FRAME_PICTURE;
     } else if (mp_refqueue_is_top_field(p->queue)) {

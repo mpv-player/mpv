@@ -47,7 +47,9 @@ struct mp_image_params {
     int w, h;                   // image dimensions
     int p_w, p_h;               // define pixel aspect ratio (undefined: 0/0)
     bool force_window;          // fake image created by handle_force_window
-    struct mp_colorspace color;
+    struct pl_color_space color;
+    struct pl_color_repr repr;
+    enum mp_csp_light light;
     enum mp_chroma_location chroma_location;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;

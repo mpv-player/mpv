@@ -664,18 +664,18 @@ static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
     return true;
 }
 
-static enum mp_csp get_forced_csp_from_flags(int flags)
+static enum pl_color_system get_forced_csp_from_flags(int flags)
 {
     if (flags & MP_IMGFLAG_COLOR_XYZ)
-        return MP_CSP_XYZ;
+        return PL_COLOR_SYSTEM_XYZ;
 
     if (flags & MP_IMGFLAG_COLOR_RGB)
-        return MP_CSP_RGB;
+        return PL_COLOR_SYSTEM_RGB;
 
-    return MP_CSP_AUTO;
+    return PL_COLOR_SYSTEM_UNKNOWN;
 }
 
-enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
+enum pl_color_system mp_imgfmt_get_forced_csp(int imgfmt)
 {
     return get_forced_csp_from_flags(mp_imgfmt_get_desc(imgfmt).flags);
 }

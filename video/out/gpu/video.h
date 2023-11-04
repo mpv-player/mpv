@@ -215,7 +215,6 @@ void gl_video_set_ambient_lux(struct gl_video *p, int lux);
 void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data);
 bool gl_video_icc_auto_enabled(struct gl_video *p);
 bool gl_video_gamma_auto_enabled(struct gl_video *p);
-struct mp_colorspace gl_video_get_output_colorspace(struct gl_video *p);
 
 void gl_video_reset(struct gl_video *p);
 bool gl_video_showing_interpolated_frame(struct gl_video *p);

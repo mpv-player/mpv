@@ -32,66 +32,66 @@
 #include "options/m_config.h"
 #include "options/m_option.h"
 
-const struct m_opt_choice_alternatives mp_csp_names[] = {
-    {"auto",        MP_CSP_AUTO},
-    {"bt.601",      MP_CSP_BT_601},
-    {"bt.709",      MP_CSP_BT_709},
-    {"smpte-240m",  MP_CSP_SMPTE_240M},
-    {"bt.2020-ncl", MP_CSP_BT_2020_NC},
-    {"bt.2020-cl",  MP_CSP_BT_2020_C},
-    {"rgb",         MP_CSP_RGB},
-    {"xyz",         MP_CSP_XYZ},
-    {"ycgco",       MP_CSP_YCGCO},
+const struct m_opt_choice_alternatives pl_csp_names[] = {
+    {"auto",        PL_COLOR_SYSTEM_UNKNOWN},
+    {"bt.601",      PL_COLOR_SYSTEM_BT_601},
+    {"bt.709",      PL_COLOR_SYSTEM_BT_709},
+    {"smpte-240m",  PL_COLOR_SYSTEM_SMPTE_240M},
+    {"bt.2020-ncl", PL_COLOR_SYSTEM_BT_2020_NC},
+    {"bt.2020-cl",  PL_COLOR_SYSTEM_BT_2020_C},
+    {"rgb",         PL_COLOR_SYSTEM_RGB},
+    {"xyz",         PL_COLOR_SYSTEM_XYZ},
+    {"ycgco",       PL_COLOR_SYSTEM_YCGCO},
     {0}
 };
 
-const struct m_opt_choice_alternatives mp_csp_levels_names[] = {
-    {"auto",        MP_CSP_LEVELS_AUTO},
-    {"limited",     MP_CSP_LEVELS_TV},
-    {"full",        MP_CSP_LEVELS_PC},
+const struct m_opt_choice_alternatives pl_csp_levels_names[] = {
+    {"auto",        PL_COLOR_LEVELS_UNKNOWN},
+    {"limited",     PL_COLOR_LEVELS_LIMITED},
+    {"full",        PL_COLOR_LEVELS_FULL},
     {0}
 };
 
-const struct m_opt_choice_alternatives mp_csp_prim_names[] = {
-    {"auto",        MP_CSP_PRIM_AUTO},
-    {"bt.601-525",  MP_CSP_PRIM_BT_601_525},
-    {"bt.601-625",  MP_CSP_PRIM_BT_601_625},
-    {"bt.709",      MP_CSP_PRIM_BT_709},
-    {"bt.2020",     MP_CSP_PRIM_BT_2020},
-    {"bt.470m",     MP_CSP_PRIM_BT_470M},
-    {"apple",       MP_CSP_PRIM_APPLE},
-    {"adobe",       MP_CSP_PRIM_ADOBE},
-    {"prophoto",    MP_CSP_PRIM_PRO_PHOTO},
-    {"cie1931",     MP_CSP_PRIM_CIE_1931},
-    {"dci-p3",      MP_CSP_PRIM_DCI_P3},
-    {"display-p3",  MP_CSP_PRIM_DISPLAY_P3},
-    {"v-gamut",     MP_CSP_PRIM_V_GAMUT},
-    {"s-gamut",     MP_CSP_PRIM_S_GAMUT},
-    {"ebu3213",     MP_CSP_PRIM_EBU_3213},
-    {"film-c",      MP_CSP_PRIM_FILM_C},
-    {"aces-ap0",    MP_CSP_PRIM_ACES_AP0},
-    {"aces-ap1",    MP_CSP_PRIM_ACES_AP1},
+const struct m_opt_choice_alternatives pl_csp_prim_names[] = {
+    {"auto",        PL_COLOR_PRIM_UNKNOWN},
+    {"bt.601-525",  PL_COLOR_PRIM_BT_601_525},
+    {"bt.601-625",  PL_COLOR_PRIM_BT_601_625},
+    {"bt.709",      PL_COLOR_PRIM_BT_709},
+    {"bt.2020",     PL_COLOR_PRIM_BT_2020},
+    {"bt.470m",     PL_COLOR_PRIM_BT_470M},
+    {"apple",       PL_COLOR_PRIM_APPLE},
+    {"adobe",       PL_COLOR_PRIM_ADOBE},
+    {"prophoto",    PL_COLOR_PRIM_PRO_PHOTO},
+    {"cie1931",     PL_COLOR_PRIM_CIE_1931},
+    {"dci-p3",      PL_COLOR_PRIM_DCI_P3},
+    {"display-p3",  PL_COLOR_PRIM_DISPLAY_P3},
+    {"v-gamut",     PL_COLOR_PRIM_V_GAMUT},
+    {"s-gamut",     PL_COLOR_PRIM_S_GAMUT},
+    {"ebu3213",     PL_COLOR_PRIM_EBU_3213},
+    {"film-c",      PL_COLOR_PRIM_FILM_C},
+    {"aces-ap0",    PL_COLOR_PRIM_ACES_AP0},
+    {"aces-ap1",    PL_COLOR_PRIM_ACES_AP1},
     {0}
 };
 
-const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
-    {"auto",        MP_CSP_TRC_AUTO},
-    {"bt.1886",     MP_CSP_TRC_BT_1886},
-    {"srgb",        MP_CSP_TRC_SRGB},
-    {"linear",      MP_CSP_TRC_LINEAR},
-    {"gamma1.8",    MP_CSP_TRC_GAMMA18},
-    {"gamma2.0",    MP_CSP_TRC_GAMMA20},
-    {"gamma2.2",    MP_CSP_TRC_GAMMA22},
-    {"gamma2.4",    MP_CSP_TRC_GAMMA24},
-    {"gamma2.6",    MP_CSP_TRC_GAMMA26},
-    {"gamma2.8",    MP_CSP_TRC_GAMMA28},
-    {"prophoto",    MP_CSP_TRC_PRO_PHOTO},
-    {"pq",          MP_CSP_TRC_PQ},
-    {"hlg",         MP_CSP_TRC_HLG},
-    {"v-log",       MP_CSP_TRC_V_LOG},
-    {"s-log1",      MP_CSP_TRC_S_LOG1},
-    {"s-log2",      MP_CSP_TRC_S_LOG2},
-    {"st428",       MP_CSP_TRC_ST428},
+const struct m_opt_choice_alternatives pl_csp_trc_names[] = {
+    {"auto",        PL_COLOR_TRC_UNKNOWN},
+    {"bt.1886",     PL_COLOR_TRC_BT_1886},
+    {"srgb",        PL_COLOR_TRC_SRGB},
+    {"linear",      PL_COLOR_TRC_LINEAR},
+    {"gamma1.8",    PL_COLOR_TRC_GAMMA18},
+    {"gamma2.0",    PL_COLOR_TRC_GAMMA20},
+    {"gamma2.2",    PL_COLOR_TRC_GAMMA22},
+    {"gamma2.4",    PL_COLOR_TRC_GAMMA24},
+    {"gamma2.6",    PL_COLOR_TRC_GAMMA26},
+    {"gamma2.8",    PL_COLOR_TRC_GAMMA28},
+    {"prophoto",    PL_COLOR_TRC_PRO_PHOTO},
+    {"pq",          PL_COLOR_TRC_PQ},
+    {"hlg",         PL_COLOR_TRC_HLG},
+    {"v-log",       PL_COLOR_TRC_V_LOG},
+    {"s-log1",      PL_COLOR_TRC_S_LOG1},
+    {"s-log2",      PL_COLOR_TRC_S_LOG2},
+    {"st428",       PL_COLOR_TRC_ST428},
     {0}
 };
 
@@ -119,21 +119,6 @@ const struct m_opt_choice_alternatives mp_alpha_names[] = {
     {0}
 };
 
-void mp_colorspace_merge(struct mp_colorspace *orig, struct mp_colorspace *new)
-{
-    if (!orig->space)
-        orig->space = new->space;
-    if (!orig->levels)
-        orig->levels = new->levels;
-    if (!orig->primaries)
-        orig->primaries = new->primaries;
-    if (!orig->gamma)
-        orig->gamma = new->gamma;
-    if (!orig->light)
-        orig->light = new->light;
-    pl_hdr_metadata_merge(&orig->hdr, &new->hdr);
-}
-
 // The short name _must_ match with what vf_stereo3d accepts (if supported).
 // The long name in comments is closer to the Matroska spec (StereoMode element).
 // The numeric index matches the Matroska StereoMode value. If you add entries
@@ -158,139 +143,27 @@ const struct m_opt_choice_alternatives mp_stereo3d_names[] = {
     {0}
 };
 
-enum mp_csp avcol_spc_to_mp_csp(int avcolorspace)
+enum pl_color_system mp_csp_guess_colorspace(int width, int height)
 {
-    switch (avcolorspace) {
-    case AVCOL_SPC_BT709:       return MP_CSP_BT_709;
-    case AVCOL_SPC_BT470BG:     return MP_CSP_BT_601;
-    case AVCOL_SPC_BT2020_NCL:  return MP_CSP_BT_2020_NC;
-    case AVCOL_SPC_BT2020_CL:   return MP_CSP_BT_2020_C;
-    case AVCOL_SPC_SMPTE170M:   return MP_CSP_BT_601;
-    case AVCOL_SPC_SMPTE240M:   return MP_CSP_SMPTE_240M;
-    case AVCOL_SPC_RGB:         return MP_CSP_RGB;
-    case AVCOL_SPC_YCOCG:       return MP_CSP_YCGCO;
-    default:                    return MP_CSP_AUTO;
-    }
+    return width >= 1280 || height > 576 ? PL_COLOR_SYSTEM_BT_709 : PL_COLOR_SYSTEM_BT_601;
 }
 
-enum mp_csp_levels avcol_range_to_mp_csp_levels(int avrange)
-{
-    switch (avrange) {
-    case AVCOL_RANGE_MPEG:      return MP_CSP_LEVELS_TV;
-    case AVCOL_RANGE_JPEG:      return MP_CSP_LEVELS_PC;
-    default:                    return MP_CSP_LEVELS_AUTO;
-    }
-}
-
-enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri)
-{
-    switch (avpri) {
-    case AVCOL_PRI_SMPTE240M:   // Same as below
-    case AVCOL_PRI_SMPTE170M:   return MP_CSP_PRIM_BT_601_525;
-    case AVCOL_PRI_BT470BG:     return MP_CSP_PRIM_BT_601_625;
-    case AVCOL_PRI_BT709:       return MP_CSP_PRIM_BT_709;
-    case AVCOL_PRI_BT2020:      return MP_CSP_PRIM_BT_2020;
-    case AVCOL_PRI_BT470M:      return MP_CSP_PRIM_BT_470M;
-    case AVCOL_PRI_SMPTE431:    return MP_CSP_PRIM_DCI_P3;
-    case AVCOL_PRI_SMPTE432:    return MP_CSP_PRIM_DISPLAY_P3;
-    default:                    return MP_CSP_PRIM_AUTO;
-    }
-}
-
-enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
-{
-    switch (avtrc) {
-    case AVCOL_TRC_BT709:
-    case AVCOL_TRC_SMPTE170M:
-    case AVCOL_TRC_SMPTE240M:
-    case AVCOL_TRC_BT1361_ECG:
-    case AVCOL_TRC_BT2020_10:
-    case AVCOL_TRC_BT2020_12:    return MP_CSP_TRC_BT_1886;
-    case AVCOL_TRC_IEC61966_2_1: return MP_CSP_TRC_SRGB;
-    case AVCOL_TRC_LINEAR:       return MP_CSP_TRC_LINEAR;
-    case AVCOL_TRC_GAMMA22:      return MP_CSP_TRC_GAMMA22;
-    case AVCOL_TRC_GAMMA28:      return MP_CSP_TRC_GAMMA28;
-    case AVCOL_TRC_SMPTEST2084:  return MP_CSP_TRC_PQ;
-    case AVCOL_TRC_ARIB_STD_B67: return MP_CSP_TRC_HLG;
-    case AVCOL_TRC_SMPTE428:     return MP_CSP_TRC_ST428;
-    default:                     return MP_CSP_TRC_AUTO;
-    }
-}
-
-int mp_csp_to_avcol_spc(enum mp_csp colorspace)
-{
-    switch (colorspace) {
-    case MP_CSP_BT_709:         return AVCOL_SPC_BT709;
-    case MP_CSP_BT_601:         return AVCOL_SPC_BT470BG;
-    case MP_CSP_BT_2020_NC:     return AVCOL_SPC_BT2020_NCL;
-    case MP_CSP_BT_2020_C:      return AVCOL_SPC_BT2020_CL;
-    case MP_CSP_SMPTE_240M:     return AVCOL_SPC_SMPTE240M;
-    case MP_CSP_RGB:            return AVCOL_SPC_RGB;
-    case MP_CSP_YCGCO:          return AVCOL_SPC_YCOCG;
-    default:                    return AVCOL_SPC_UNSPECIFIED;
-    }
-}
-
-int mp_csp_levels_to_avcol_range(enum mp_csp_levels range)
-{
-    switch (range) {
-    case MP_CSP_LEVELS_TV:      return AVCOL_RANGE_MPEG;
-    case MP_CSP_LEVELS_PC:      return AVCOL_RANGE_JPEG;
-    default:                    return AVCOL_RANGE_UNSPECIFIED;
-    }
-}
-
-int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim)
-{
-    switch (prim) {
-    case MP_CSP_PRIM_BT_601_525: return AVCOL_PRI_SMPTE170M;
-    case MP_CSP_PRIM_BT_601_625: return AVCOL_PRI_BT470BG;
-    case MP_CSP_PRIM_BT_709:     return AVCOL_PRI_BT709;
-    case MP_CSP_PRIM_BT_2020:    return AVCOL_PRI_BT2020;
-    case MP_CSP_PRIM_BT_470M:    return AVCOL_PRI_BT470M;
-    case MP_CSP_PRIM_DCI_P3:     return AVCOL_PRI_SMPTE431;
-    case MP_CSP_PRIM_DISPLAY_P3: return AVCOL_PRI_SMPTE432;
-    default:                     return AVCOL_PRI_UNSPECIFIED;
-    }
-}
-
-int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
-{
-    switch (trc) {
-    // We just call it BT.1886 since we're decoding, but it's still BT.709
-    case MP_CSP_TRC_BT_1886:      return AVCOL_TRC_BT709;
-    case MP_CSP_TRC_SRGB:         return AVCOL_TRC_IEC61966_2_1;
-    case MP_CSP_TRC_LINEAR:       return AVCOL_TRC_LINEAR;
-    case MP_CSP_TRC_GAMMA22:      return AVCOL_TRC_GAMMA22;
-    case MP_CSP_TRC_GAMMA28:      return AVCOL_TRC_GAMMA28;
-    case MP_CSP_TRC_PQ:           return AVCOL_TRC_SMPTEST2084;
-    case MP_CSP_TRC_HLG:          return AVCOL_TRC_ARIB_STD_B67;
-    case MP_CSP_TRC_ST428:        return AVCOL_TRC_SMPTE428;
-    default:                      return AVCOL_TRC_UNSPECIFIED;
-    }
-}
-
-enum mp_csp mp_csp_guess_colorspace(int width, int height)
-{
-    return width >= 1280 || height > 576 ? MP_CSP_BT_709 : MP_CSP_BT_601;
-}
-
-enum mp_csp_prim mp_csp_guess_primaries(int width, int height)
+enum pl_color_primaries mp_csp_guess_primaries(int width, int height)
 {
     // HD content
     if (width >= 1280 || height > 576)
-        return MP_CSP_PRIM_BT_709;
+        return PL_COLOR_PRIM_BT_709;
 
     switch (height) {
     case 576: // Typical PAL content, including anamorphic/squared
-        return MP_CSP_PRIM_BT_601_625;
+        return PL_COLOR_PRIM_BT_601_625;
 
     case 480: // Typical NTSC content, including squared
     case 486: // NTSC Pro or anamorphic NTSC
-        return MP_CSP_PRIM_BT_601_525;
+        return PL_COLOR_PRIM_BT_601_525;
 
     default: // No good metric, just pick BT.709 to minimize damage
-        return MP_CSP_PRIM_BT_709;
+        return PL_COLOR_PRIM_BT_709;
     }
 }
 
@@ -369,7 +242,7 @@ static void mp_mul_matrix3x3(float a[3][3], float b[3][3])
 }
 
 // return the primaries associated with a certain mp_csp_primaries val
-struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
+struct mp_csp_primaries mp_get_csp_primaries(enum pl_color_primaries spc)
 {
     /*
     Values from: ITU-R Recommendations BT.470-6, BT.601-7, BT.709-5, BT.2020-0
@@ -391,21 +264,21 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
         e   = {1.0/3.0, 1.0/3.0};
 
     switch (spc) {
-    case MP_CSP_PRIM_BT_470M:
+    case PL_COLOR_PRIM_BT_470M:
         return (struct mp_csp_primaries) {
             .red   = {0.670, 0.330},
             .green = {0.210, 0.710},
             .blue  = {0.140, 0.080},
             .white = c
         };
-    case MP_CSP_PRIM_BT_601_525:
+    case PL_COLOR_PRIM_BT_601_525:
         return (struct mp_csp_primaries) {
             .red   = {0.630, 0.340},
             .green = {0.310, 0.595},
             .blue  = {0.155, 0.070},
             .white = d65
         };
-    case MP_CSP_PRIM_BT_601_625:
+    case PL_COLOR_PRIM_BT_601_625:
         return (struct mp_csp_primaries) {
             .red   = {0.640, 0.330},
             .green = {0.290, 0.600},
@@ -414,43 +287,43 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
         };
     // This is the default assumption if no colorspace information could
     // be determined, eg. for files which have no video channel.
-    case MP_CSP_PRIM_AUTO:
-    case MP_CSP_PRIM_BT_709:
+    case PL_COLOR_PRIM_UNKNOWN:
+    case PL_COLOR_PRIM_BT_709:
         return (struct mp_csp_primaries) {
             .red   = {0.640, 0.330},
             .green = {0.300, 0.600},
             .blue  = {0.150, 0.060},
             .white = d65
         };
-    case MP_CSP_PRIM_BT_2020:
+    case PL_COLOR_PRIM_BT_2020:
         return (struct mp_csp_primaries) {
             .red   = {0.708, 0.292},
             .green = {0.170, 0.797},
             .blue  = {0.131, 0.046},
             .white = d65
         };
-    case MP_CSP_PRIM_APPLE:
+    case PL_COLOR_PRIM_APPLE:
         return (struct mp_csp_primaries) {
             .red   = {0.625, 0.340},
             .green = {0.280, 0.595},
             .blue  = {0.115, 0.070},
             .white = d65
         };
-    case MP_CSP_PRIM_ADOBE:
+    case PL_COLOR_PRIM_ADOBE:
         return (struct mp_csp_primaries) {
             .red   = {0.640, 0.330},
             .green = {0.210, 0.710},
             .blue  = {0.150, 0.060},
             .white = d65
         };
-    case MP_CSP_PRIM_PRO_PHOTO:
+    case PL_COLOR_PRIM_PRO_PHOTO:
         return (struct mp_csp_primaries) {
             .red   = {0.7347, 0.2653},
             .green = {0.1596, 0.8404},
             .blue  = {0.0366, 0.0001},
             .white = d50
         };
-    case MP_CSP_PRIM_CIE_1931:
+    case PL_COLOR_PRIM_CIE_1931:
         return (struct mp_csp_primaries) {
             .red   = {0.7347, 0.2653},
             .green = {0.2738, 0.7174},
@@ -458,16 +331,16 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .white = e
         };
     // From SMPTE RP 431-2 and 432-1
-    case MP_CSP_PRIM_DCI_P3:
-    case MP_CSP_PRIM_DISPLAY_P3:
+    case PL_COLOR_PRIM_DCI_P3:
+    case PL_COLOR_PRIM_DISPLAY_P3:
         return (struct mp_csp_primaries) {
             .red   = {0.680, 0.320},
             .green = {0.265, 0.690},
             .blue  = {0.150, 0.060},
-            .white = spc == MP_CSP_PRIM_DCI_P3 ? dci : d65
+            .white = spc == PL_COLOR_PRIM_DCI_P3 ? dci : d65
         };
     // From Panasonic VARICAM reference manual
-    case MP_CSP_PRIM_V_GAMUT:
+    case PL_COLOR_PRIM_V_GAMUT:
         return (struct mp_csp_primaries) {
             .red   = {0.730, 0.280},
             .green = {0.165, 0.840},
@@ -475,7 +348,7 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .white = d65
         };
     // From Sony S-Log reference manual
-    case MP_CSP_PRIM_S_GAMUT:
+    case PL_COLOR_PRIM_S_GAMUT:
         return (struct mp_csp_primaries) {
             .red   = {0.730, 0.280},
             .green = {0.140, 0.855},
@@ -483,7 +356,7 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .white = d65
         };
     // from EBU Tech. 3213-E
-    case MP_CSP_PRIM_EBU_3213:
+    case PL_COLOR_PRIM_EBU_3213:
         return (struct mp_csp_primaries) {
             .red   = {0.630, 0.340},
             .green = {0.295, 0.605},
@@ -491,7 +364,7 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .white = d65
         };
     // From H.273, traditional film with Illuminant C
-    case MP_CSP_PRIM_FILM_C:
+    case PL_COLOR_PRIM_FILM_C:
         return (struct mp_csp_primaries) {
             .red   = {0.681, 0.319},
             .green = {0.243, 0.692},
@@ -499,7 +372,7 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .white = c
         };
     // From libplacebo source code
-    case MP_CSP_PRIM_ACES_AP0:
+    case PL_COLOR_PRIM_ACES_AP0:
         return (struct mp_csp_primaries) {
             .red   = {0.7347, 0.2653},
             .green = {0.0000, 1.0000},
@@ -507,7 +380,7 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .white = {0.32168, 0.33767},
         };
     // From libplacebo source code
-    case MP_CSP_PRIM_ACES_AP1:
+    case PL_COLOR_PRIM_ACES_AP1:
         return (struct mp_csp_primaries) {
             .red   = {0.713, 0.293},
             .green = {0.165, 0.830},
@@ -522,20 +395,20 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
 // Get the nominal peak for a given colorspace, relative to the reference white
 // level. In other words, this returns the brightest encodable value that can
 // be represented by a given transfer curve.
-float mp_trc_nom_peak(enum mp_csp_trc trc)
+float mp_trc_nom_peak(enum pl_color_transfer trc)
 {
     switch (trc) {
-    case MP_CSP_TRC_PQ:           return 10000.0 / MP_REF_WHITE;
-    case MP_CSP_TRC_HLG:          return 12.0 / MP_REF_WHITE_HLG;
-    case MP_CSP_TRC_V_LOG:        return 46.0855;
-    case MP_CSP_TRC_S_LOG1:       return 6.52;
-    case MP_CSP_TRC_S_LOG2:       return 9.212;
+    case PL_COLOR_TRC_PQ:           return 10000.0 / MP_REF_WHITE;
+    case PL_COLOR_TRC_HLG:          return 12.0 / MP_REF_WHITE_HLG;
+    case PL_COLOR_TRC_V_LOG:        return 46.0855;
+    case PL_COLOR_TRC_S_LOG1:       return 6.52;
+    case PL_COLOR_TRC_S_LOG2:       return 9.212;
     }
 
     return 1.0;
 }
 
-bool mp_trc_is_hdr(enum mp_csp_trc trc)
+bool mp_trc_is_hdr(enum pl_color_transfer trc)
 {
     return mp_trc_nom_peak(trc) > 1.0;
 }
@@ -660,7 +533,7 @@ static void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params,
                                   enum mp_render_intent intent, struct mp_cmat *m)
 {
     // Convert to DCI-P3
-    struct mp_csp_primaries prim = mp_get_csp_primaries(MP_CSP_PRIM_DCI_P3);
+    struct mp_csp_primaries prim = mp_get_csp_primaries(PL_COLOR_PRIM_DCI_P3);
     float brightness = params->brightness;
     mp_get_rgb2xyz_matrix(prim, m->m);
     mp_invert_matrix3x3(m->m);
@@ -685,7 +558,7 @@ static void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params,
 // Get multiplication factor required if image data is fit within the LSBs of a
 // higher smaller bit depth fixed-point texture data.
 // This is broken. Use mp_get_csp_uint_mul().
-double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits)
+double mp_get_csp_mul(enum pl_color_system csp, int input_bits, int texture_bits)
 {
     assert(texture_bits >= input_bits);
 
@@ -694,10 +567,10 @@ double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits)
         return 1;
 
     // RGB always uses the full range available.
-    if (csp == MP_CSP_RGB)
+    if (csp == PL_COLOR_SYSTEM_RGB)
         return ((1LL << input_bits) - 1.) / ((1LL << texture_bits) - 1.);
 
-    if (csp == MP_CSP_XYZ)
+    if (csp == PL_COLOR_SYSTEM_XYZ)
         return 1;
 
     // High bit depth YUV uses a range shifted from 8 bit.
@@ -716,24 +589,24 @@ double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits)
 //  bits: number of significant bits, e.g. 10 for yuv420p10, 16 for p010
 //  out_m: returns factor to multiply the uint number with
 //  out_o: returns offset to add after multiplication
-void mp_get_csp_uint_mul(enum mp_csp csp, enum mp_csp_levels levels,
+void mp_get_csp_uint_mul(enum pl_color_system csp, enum pl_color_levels levels,
                          int bits, int component, double *out_m, double *out_o)
 {
     uint16_t i_min = 0;
     uint16_t i_max = (1u << bits) - 1;
     double f_min = 0; // min. float value
 
-    if (csp != MP_CSP_RGB && component != 4) {
+    if (csp != PL_COLOR_SYSTEM_RGB && component != 4) {
         if (component == 2 || component == 3) {
             f_min = (1u << (bits - 1)) / -(double)i_max; // force center => 0
 
-            if (levels != MP_CSP_LEVELS_PC && bits >= 8) {
+            if (levels != PL_COLOR_LEVELS_FULL && bits >= 8) {
                 i_min = 16  << (bits - 8); // => -0.5
                 i_max = 240 << (bits - 8); // =>  0.5
                 f_min = -0.5;
             }
         } else {
-            if (levels != MP_CSP_LEVELS_PC && bits >= 8) {
+            if (levels != PL_COLOR_LEVELS_FULL && bits >= 8) {
                 i_min = 16  << (bits - 8); // => 0
                 i_max = 235 << (bits - 8); // => 1
             }
@@ -778,19 +651,19 @@ static void luma_coeffs(struct mp_cmat *mat, float lr, float lg, float lb)
 // get the coefficients of the yuv -> rgb conversion matrix
 void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
 {
-    enum mp_csp colorspace = params->color.space;
-    if (colorspace <= MP_CSP_AUTO || colorspace >= MP_CSP_COUNT)
-        colorspace = MP_CSP_BT_601;
-    enum mp_csp_levels levels_in = params->color.levels;
-    if (levels_in <= MP_CSP_LEVELS_AUTO || levels_in >= MP_CSP_LEVELS_COUNT)
-        levels_in = MP_CSP_LEVELS_TV;
+    enum pl_color_system colorspace = params->repr.sys;
+    if (colorspace <= PL_COLOR_SYSTEM_UNKNOWN || colorspace >= PL_COLOR_SYSTEM_COUNT)
+        colorspace = PL_COLOR_SYSTEM_BT_601;
+    enum pl_color_levels levels_in = params->repr.levels;
+    if (levels_in <= PL_COLOR_LEVELS_UNKNOWN || levels_in >= PL_COLOR_LEVELS_COUNT)
+        levels_in = PL_COLOR_LEVELS_LIMITED;
 
     switch (colorspace) {
-    case MP_CSP_BT_601:     luma_coeffs(m, 0.299,  0.587,  0.114 ); break;
-    case MP_CSP_BT_709:     luma_coeffs(m, 0.2126, 0.7152, 0.0722); break;
-    case MP_CSP_SMPTE_240M: luma_coeffs(m, 0.2122, 0.7013, 0.0865); break;
-    case MP_CSP_BT_2020_NC: luma_coeffs(m, 0.2627, 0.6780, 0.0593); break;
-    case MP_CSP_BT_2020_C: {
+    case PL_COLOR_SYSTEM_BT_601:     luma_coeffs(m, 0.299,  0.587,  0.114 ); break;
+    case PL_COLOR_SYSTEM_BT_709:     luma_coeffs(m, 0.2126, 0.7152, 0.0722); break;
+    case PL_COLOR_SYSTEM_SMPTE_240M: luma_coeffs(m, 0.2122, 0.7013, 0.0865); break;
+    case PL_COLOR_SYSTEM_BT_2020_NC: luma_coeffs(m, 0.2627, 0.6780, 0.0593); break;
+    case PL_COLOR_SYSTEM_BT_2020_C: {
         // Note: This outputs into the [-0.5,0.5] range for chroma information.
         // If this clips on any VO, a constant 0.5 coefficient can be added
         // to the chroma channels to normalize them into [0,1]. This is not
@@ -798,12 +671,12 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
         *m = (struct mp_cmat){{{0, 0, 1}, {1, 0, 0}, {0, 1, 0}}};
         break;
     }
-    case MP_CSP_RGB: {
+    case PL_COLOR_SYSTEM_RGB: {
         *m = (struct mp_cmat){{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}};
         levels_in = -1;
         break;
     }
-    case MP_CSP_XYZ: {
+    case PL_COLOR_SYSTEM_XYZ: {
         // The vo should probably not be using a matrix generated by this
         // function for XYZ sources, but if it does, let's just convert it to
         // an equivalent RGB space based on the colorimetry metadata it
@@ -813,7 +686,7 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
         levels_in = -1;
         break;
     }
-    case MP_CSP_YCGCO: {
+    case PL_COLOR_SYSTEM_YCGCO: {
         *m = (struct mp_cmat) {
             {{1,  -1,  1},
              {1,   1,  0},
@@ -828,8 +701,8 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
     if (params->is_float)
         levels_in = -1;
 
-    if ((colorspace == MP_CSP_BT_601 || colorspace == MP_CSP_BT_709 ||
-         colorspace == MP_CSP_SMPTE_240M || colorspace == MP_CSP_BT_2020_NC))
+    if ((colorspace == PL_COLOR_SYSTEM_BT_601 || colorspace == PL_COLOR_SYSTEM_BT_709 ||
+         colorspace == PL_COLOR_SYSTEM_SMPTE_240M || colorspace == PL_COLOR_SYSTEM_BT_2020_NC))
     {
         // Hue is equivalent to rotating input [U, V] subvector around the origin.
         // Saturation scales [U, V].
@@ -855,23 +728,23 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
         anyfull = {  0*s, 255*s, 255*s/2, 0 }, // cmax picked to make cmul=ymul
         yuvlev;
     switch (levels_in) {
-    case MP_CSP_LEVELS_TV: yuvlev = yuvlim; break;
-    case MP_CSP_LEVELS_PC: yuvlev = yuvfull; break;
+    case PL_COLOR_LEVELS_LIMITED: yuvlev = yuvlim; break;
+    case PL_COLOR_LEVELS_FULL: yuvlev = yuvfull; break;
     case -1: yuvlev = anyfull; break;
     default:
         MP_ASSERT_UNREACHABLE();
     }
 
     int levels_out = params->levels_out;
-    if (levels_out <= MP_CSP_LEVELS_AUTO || levels_out >= MP_CSP_LEVELS_COUNT)
-        levels_out = MP_CSP_LEVELS_PC;
+    if (levels_out <= PL_COLOR_LEVELS_UNKNOWN || levels_out >= PL_COLOR_LEVELS_COUNT)
+        levels_out = PL_COLOR_LEVELS_FULL;
     struct rgblevels { double min, max; }
         rgblim =  { 16/255., 235/255. },
         rgbfull = {      0,        1  },
         rgblev;
     switch (levels_out) {
-    case MP_CSP_LEVELS_TV: rgblev = rgblim; break;
-    case MP_CSP_LEVELS_PC: rgblev = rgbfull; break;
+    case PL_COLOR_LEVELS_LIMITED: rgblev = rgblim; break;
+    case PL_COLOR_LEVELS_FULL: rgblev = rgbfull; break;
     default:
         MP_ASSERT_UNREACHABLE();
     }
@@ -902,16 +775,6 @@ void mp_csp_set_image_params(struct mp_csp_params *params,
     struct mp_image_params p = *imgparams;
     mp_image_params_guess_csp(&p); // ensure consistency
     params->color = p.color;
-}
-
-bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
-{
-    return c1.space == c2.space &&
-           c1.levels == c2.levels &&
-           c1.primaries == c2.primaries &&
-           c1.gamma == c2.gamma &&
-           c1.light == c2.light &&
-           pl_hdr_metadata_equal(&c1.hdr, &c2.hdr);
 }
 
 enum mp_csp_equalizer_param {
@@ -946,7 +809,7 @@ const struct m_sub_options mp_csp_equalizer_conf = {
         {"gamma", OPT_FLOAT(values[MP_CSP_EQ_GAMMA]),
             M_RANGE(-100, 100)},
         {"video-output-levels",
-            OPT_CHOICE_C(output_levels, mp_csp_levels_names)},
+            OPT_CHOICE_C(output_levels, pl_csp_levels_names)},
         {0}
     },
     .size = sizeof(struct mp_csp_equalizer_opts),

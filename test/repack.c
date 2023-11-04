@@ -326,8 +326,8 @@ static int try_repack(FILE *f, int imgfmt, int flags, int not_if_fmt)
     return b;
 }
 
-static void check_float_repack(int imgfmt, enum mp_csp csp,
-                               enum mp_csp_levels levels)
+static void check_float_repack(int imgfmt, enum pl_color_system csp,
+                               enum pl_color_levels levels)
 {
     imgfmt = UNFUCK(imgfmt);
 
@@ -349,12 +349,12 @@ static void check_float_repack(int imgfmt, enum mp_csp csp,
     struct mp_image *src = mp_image_alloc(imgfmt, w, 1);
     assert(src);
 
-    src->params.color.space = csp;
-    src->params.color.levels = levels;
+    src->params.repr.sys = csp;
+    src->params.repr.levels = levels;
     mp_image_params_guess_csp(&src->params);
     // mpv may not allow all combinations
-    assert(src->params.color.space == csp);
-    assert(src->params.color.levels == levels);
+    assert(src->params.repr.sys == csp);
+    assert(src->params.repr.levels == levels);
 
     for (int p = 0; p < src->num_planes; p++) {
         int val = 0;
@@ -384,6 +384,8 @@ static void check_float_repack(int imgfmt, enum mp_csp csp,
 
     z_f->params.color = r_f->params.color = z_i->params.color =
         r_i->params.color = src->params.color;
+    z_f->params.repr = r_f->params.repr = z_i->params.repr =
+        r_i->params.repr = src->params.repr;
 
     // The idea is to use zimg to cross-check conversion.
     struct mp_sws_context *s = mp_sws_alloc(NULL);
@@ -503,15 +505,15 @@ int main(int argc, char *argv[])
     assert_text_files_equal(refdir, outdir, "repack.txt",
                             "This can fail if FFmpeg/libswscale adds or removes pixfmts.");
 
-    check_float_repack(-AV_PIX_FMT_GBRAP, MP_CSP_RGB, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_GBRAP10, MP_CSP_RGB, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_GBRAP16, MP_CSP_RGB, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_YUVA444P, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
-    check_float_repack(-AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_YUVA444P10, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
-    check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_PC);
-    check_float_repack(-AV_PIX_FMT_YUVA444P16, MP_CSP_BT_709, MP_CSP_LEVELS_TV);
+    check_float_repack(-AV_PIX_FMT_GBRAP, PL_COLOR_SYSTEM_RGB, PL_COLOR_LEVELS_FULL);
+    check_float_repack(-AV_PIX_FMT_GBRAP10, PL_COLOR_SYSTEM_RGB, PL_COLOR_LEVELS_FULL);
+    check_float_repack(-AV_PIX_FMT_GBRAP16, PL_COLOR_SYSTEM_RGB, PL_COLOR_LEVELS_FULL);
+    check_float_repack(-AV_PIX_FMT_YUVA444P, PL_COLOR_SYSTEM_BT_709, PL_COLOR_LEVELS_FULL);
+    check_float_repack(-AV_PIX_FMT_YUVA444P, PL_COLOR_SYSTEM_BT_709, PL_COLOR_LEVELS_LIMITED);
+    check_float_repack(-AV_PIX_FMT_YUVA444P10, PL_COLOR_SYSTEM_BT_709, PL_COLOR_LEVELS_FULL);
+    check_float_repack(-AV_PIX_FMT_YUVA444P10, PL_COLOR_SYSTEM_BT_709, PL_COLOR_LEVELS_LIMITED);
+    check_float_repack(-AV_PIX_FMT_YUVA444P16, PL_COLOR_SYSTEM_BT_709, PL_COLOR_LEVELS_FULL);
+    check_float_repack(-AV_PIX_FMT_YUVA444P16, PL_COLOR_SYSTEM_BT_709, PL_COLOR_LEVELS_LIMITED);
 
     // Determine the list of possible draw_bmp input formats. Do this here
     // because it mostly depends on repack and imgformat stuff.
