@@ -222,38 +222,42 @@ static LRESULT borderless_nchittest(struct vo_w32_state *w32, int x, int y)
     if (IsMaximized(w32->window))
         return HTCLIENT;
 
-    POINT mouse = { x, y };
-    ScreenToClient(w32->window, &mouse);
+    RECT rc;
+    if (!GetWindowRect(w32->window, &rc))
+        return HTNOWHERE;
 
-    // The horizontal frame should be the same size as the vertical frame,
-    // since the NONCLIENTMETRICS structure does not distinguish between them
-    int frame_size = GetSystemMetrics(SM_CXFRAME) +
-                     GetSystemMetrics(SM_CXPADDEDBORDER);
-    // The diagonal size handles are slightly wider than the side borders
-    int diagonal_width = frame_size * 2 + GetSystemMetrics(SM_CXBORDER);
+    POINT frame = {GetSystemMetrics(SM_CXSIZEFRAME),
+                   GetSystemMetrics(SM_CYSIZEFRAME)};
+    if (w32->opts->border) {
+        frame.x += GetSystemMetrics(SM_CXPADDEDBORDER);
+        frame.y += GetSystemMetrics(SM_CXPADDEDBORDER);
+        if (!w32->opts->title_bar)
+            rc.top -= GetSystemMetrics(SM_CXPADDEDBORDER);
+    }
+    InflateRect(&rc, -frame.x, -frame.y);
 
     // Hit-test top border
-    if (mouse.y < frame_size) {
-        if (mouse.x < diagonal_width)
+    if (y < rc.top) {
+        if (x < rc.left)
             return HTTOPLEFT;
-        if (mouse.x >= rect_w(w32->windowrc) - diagonal_width)
+        if (x > rc.right)
             return HTTOPRIGHT;
         return HTTOP;
     }
 
     // Hit-test bottom border
-    if (mouse.y >= rect_h(w32->windowrc) - frame_size) {
-        if (mouse.x < diagonal_width)
+    if (y > rc.bottom) {
+        if (x < rc.left)
             return HTBOTTOMLEFT;
-        if (mouse.x >= rect_w(w32->windowrc) - diagonal_width)
+        if (x > rc.right)
             return HTBOTTOMRIGHT;
         return HTBOTTOM;
     }
 
     // Hit-test side borders
-    if (mouse.x < frame_size)
+    if (x < rc.left)
         return HTLEFT;
-    if (mouse.x >= rect_w(w32->windowrc) - frame_size)
+    if (x > rc.right)
         return HTRIGHT;
     return HTCLIENT;
 }
