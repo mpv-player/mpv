@@ -768,7 +768,7 @@ local function add_single_video(json)
                     msg.verbose("adding thumbnail")
                     mp.commandv("video-add", thumb_info.url, "auto")
                     thumb_height = 0
-                elseif (thumb_preference ~= nil and thumb_info.preference > thumb_preference) or
+                elseif (thumb_preference ~= nil and (thumb_info.preference or -math.huge) > thumb_preference) or
                     (thumb_preference == nil and ((thumb_info.height or 0) > thumb_height)) then
                     thumb = thumb_info.url
                     thumb_height = thumb_info.height or 0
