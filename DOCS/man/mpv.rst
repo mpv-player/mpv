@@ -64,7 +64,7 @@ Ctrl+LEFT and Ctrl+RIGHT
     Seek to the previous/next subtitle. Subject to some restrictions and
     might not always work; see ``sub-seek`` command.
 
-Ctrl+Shift+Left and Ctrl+Shift+Right
+Ctrl+Shift+LEFT and Ctrl+Shift+RIGHT
     Adjust subtitle delay so that the next or previous subtitle is displayed
     now. This is especially useful to sync subtitles to audio.
 
@@ -94,7 +94,7 @@ Shift+Ctrl+BACKSPACE
 ENTER
     Go forward in the playlist.
 
-p / SPACE
+p and SPACE
     Pause (pressing again unpauses).
 
 \.
@@ -144,7 +144,7 @@ w and W
     Decrease/increase pan-and-scan range. The ``e`` key does the same as
     ``W`` currently, but use is discouraged.
 
-o (also P)
+o and P
     Show progression bar, elapsed time and total duration on the OSD.
 
 O
@@ -166,7 +166,7 @@ l
 L
     Toggle infinite looping.
 
-Ctrl + and Ctrl -
+Ctrl++ and Ctrl+-
     Adjust audio delay (A/V sync) by +/- 0.1 seconds.
 
 Shift+g and Shift+f
@@ -192,7 +192,7 @@ S
     Take a screenshot, without subtitles. (Whether this works depends on VO
     driver support.)
 
-Ctrl s
+Ctrl+s
     Take a screenshot, as the window shows it (with subtitles, OSD, and scaled
     video).
 
@@ -211,13 +211,13 @@ d
 A
     Cycle aspect ratio override.
 
-Ctrl h
+Ctrl+h
     Toggle hardware video decoding on/off.
 
 Alt+LEFT, Alt+RIGHT, Alt+UP, Alt+DOWN
     Move the video rectangle (panning).
 
-Alt + and Alt -
+Alt++ and Alt+-
     Combining ``Alt`` with the ``+`` or ``-`` keys changes video zoom.
 
 Alt+BACKSPACE
@@ -236,7 +236,7 @@ i and I
     file such as codec, framerate, number of dropped frames and so on. See
     `STATS`_ for more information.
 
-del
+DEL
     Cycle OSC visibility between never / auto (mouse-move) / always
 
 \`
@@ -257,16 +257,16 @@ corresponding adjustment.)
 7 and 8
     Adjust saturation.
 
-Alt+0 (and command+0 on macOS)
+Alt+0 (and Command+0 on macOS)
     Resize video window to half its original size.
 
-Alt+1 (and command+1 on macOS)
+Alt+1 (and Command+1 on macOS)
     Resize video window to its original size.
 
-Alt+2 (and command+2 on macOS)
+Alt+2 (and Command+2 on macOS)
     Resize video window to double its original size.
 
-command + f (macOS only)
+Command + f (macOS only)
     Toggle fullscreen (see also ``--fs``).
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
