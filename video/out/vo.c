@@ -878,9 +878,6 @@ static bool render_frame(struct vo *vo)
         frame->duration = -1;
     }
 
-    if (in->paused)
-        frame->vsync_offset = 0;
-
     int64_t now = mp_time_ns();
     int64_t pts = frame->pts;
     int64_t duration = frame->duration;
