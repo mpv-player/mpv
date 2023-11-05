@@ -550,6 +550,10 @@ static double get_refresh_rate_from_gdi(const wchar_t *device)
         case  95:
         case 119:
         case 143:
+        case 164:
+        case 239:
+        case 359:
+        case 479:
             rv = (rv + 1) / 1.001;
     }
 

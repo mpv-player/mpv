@@ -19,6 +19,7 @@
 
 #include <pthread.h>
 #include <libplacebo/colorspace.h>
+#include <libplacebo/options.h>
 #include <libplacebo/renderer.h>
 #include <libplacebo/shaders/lut.h>
 #include <libplacebo/shaders/icc.h>
@@ -53,38 +54,6 @@
 #include "osdep/windows_utils.h"
 #endif
 
-#if PL_API_VER >= 309
-#include <libplacebo/options.h>
-#else
-typedef struct pl_options_t {
-    // Backwards compatibility shim of this struct
-    struct pl_render_params params;
-    struct pl_deband_params deband_params;
-    struct pl_sigmoid_params sigmoid_params;
-    struct pl_color_adjustment color_adjustment;
-    struct pl_peak_detect_params peak_detect_params;
-    struct pl_color_map_params color_map_params;
-    struct pl_dither_params dither_params;
-} *pl_options;
-
-static inline pl_options pl_options_alloc(pl_log log)
-{
-    struct pl_options_t *opts = talloc_ptrtype(NULL, opts);
-    opts->params                  = pl_render_default_params;
-    opts->deband_params           = pl_deband_default_params;
-    opts->sigmoid_params          = pl_sigmoid_default_params;
-    opts->color_adjustment        = pl_color_adjustment_neutral;
-    opts->peak_detect_params      = pl_peak_detect_default_params;
-    opts->color_map_params        = pl_color_map_default_params;
-    opts->dither_params           = pl_dither_default_params;
-    // Redirect always-enabled params structs to shim
-    opts->params.color_adjustment = &opts->color_adjustment;
-    opts->params.color_map_params = &opts->color_map_params;
-    return opts;
-}
-
-#define pl_options_free TA_FREEP
-#endif
 
 struct osd_entry {
     pl_tex tex;
@@ -99,10 +68,6 @@ struct osd_state {
 
 struct scaler_params {
     struct pl_filter_config config;
-#if PL_API_VER < 303
-    struct pl_filter_function kernel;
-    struct pl_filter_function window;
-#endif
 };
 
 struct user_hook {
@@ -144,9 +109,8 @@ struct priv {
     pl_tex *sub_tex;
     int num_sub_tex;
 
-#if PL_API_VER >= 320
-    pl_cache cache;
-#endif
+    pl_cache shader_cache;
+    pl_cache icc_cache;
 
     struct mp_rect src, dst;
     struct mp_osd_res osd_res;
@@ -170,11 +134,7 @@ struct priv {
 
     struct pl_icc_params icc_params;
     char *icc_path;
-#if PL_API_VER >= 327
     pl_icc_object icc_profile;
-#else
-    struct pl_icc_profile icc_profile;
-#endif
 
     struct user_lut image_lut;
     struct user_lut target_lut;
@@ -479,7 +439,6 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
-#ifdef PL_HAVE_LAV_HDR
 static inline void *get_side_data(const struct mp_image *mpi,
                                   enum AVFrameSideDataType type)
 {
@@ -490,7 +449,6 @@ static inline void *get_side_data(const struct mp_image *mpi,
 
     return NULL;
 }
-#endif
 
 static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
 {
@@ -500,46 +458,11 @@ static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
         .hdr.max_luma = mpi->params.color.sig_peak * MP_REF_WHITE,
     };
 
-#ifdef PL_HAVE_LAV_HDR
     pl_map_hdr_metadata(&csp.hdr, &(struct pl_av_hdr_metadata) {
         .mdm = get_side_data(mpi, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA),
         .clm = get_side_data(mpi, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
         .dhp = get_side_data(mpi, AV_FRAME_DATA_DYNAMIC_HDR_PLUS),
     });
-#else // back-compat fallback for older libplacebo
-    for (int i = 0; i < mpi->num_ff_side_data; i++) {
-        void *data = mpi->ff_side_data[i].buf->data;
-        switch (mpi->ff_side_data[i].type) {
-        case AV_FRAME_DATA_CONTENT_LIGHT_LEVEL: {
-            const AVContentLightMetadata *clm = data;
-            csp.hdr.max_cll = clm->MaxCLL;
-            csp.hdr.max_fall = clm->MaxFALL;
-            break;
-        }
-        case AV_FRAME_DATA_MASTERING_DISPLAY_METADATA: {
-            const AVMasteringDisplayMetadata *mdm = data;
-            if (mdm->has_luminance) {
-                csp.hdr.min_luma = av_q2d(mdm->min_luminance);
-                csp.hdr.max_luma = av_q2d(mdm->max_luminance);
-            }
-
-            if (mdm->has_primaries) {
-                csp.hdr.prim.red.x   = av_q2d(mdm->display_primaries[0][0]);
-                csp.hdr.prim.red.y   = av_q2d(mdm->display_primaries[0][1]);
-                csp.hdr.prim.green.x = av_q2d(mdm->display_primaries[1][0]);
-                csp.hdr.prim.green.y = av_q2d(mdm->display_primaries[1][1]);
-                csp.hdr.prim.blue.x  = av_q2d(mdm->display_primaries[2][0]);
-                csp.hdr.prim.blue.y  = av_q2d(mdm->display_primaries[2][1]);
-                csp.hdr.prim.white.x = av_q2d(mdm->white_point[0]);
-                csp.hdr.prim.white.y = av_q2d(mdm->white_point[1]);
-            }
-            break;
-        }
-        default: break;
-        }
-    }
-#endif // PL_HAVE_LAV_HDR
-
     return csp;
 }
 
@@ -761,10 +684,8 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     // Set the frame DOVI metadata
     mp_map_dovi_metadata_to_pl(mpi, frame);
 
-#ifdef PL_HAVE_LAV_FILM_GRAIN
     if (mpi->film_grain)
         pl_film_grain_from_av(&frame->film_grain, (AVFilmGrainParams *) mpi->film_grain->data);
-#endif
 
     // Compute a unique signature for any attached ICC profile. Wasteful in
     // theory if the ICC profile is the same for multiple frames, but in
@@ -838,10 +759,8 @@ static void update_options(struct vo *vo)
     pars->color_adjustment.gamma = cparams.gamma;
     p->output_levels = cparams.levels_out;
 
-#if PL_API_VER >= 309
     for (char **kv = p->raw_opts; kv && kv[0]; kv += 2)
         pl_options_set_str(pars, kv[0], kv[1]);
-#endif
 }
 
 static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
@@ -906,12 +825,8 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
         ));
     }
 
-#if PL_API_VER >= 327
     pl_icc_update(p->pllog, &p->icc_profile, NULL, &p->icc_params);
     target->icc = p->icc_profile;
-#else
-    target->profile = p->icc_profile;
-#endif
 }
 
 static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
@@ -1051,12 +966,12 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_frame_mix mix = {0};
     if (frame->current) {
         // Update queue state
-        struct pl_queue_params qparams = {
+        struct pl_queue_params qparams = *pl_queue_params(
             .pts = frame->current->pts + vsync_offset,
             .radius = pl_frame_mix_radius(&params),
             .vsync_duration = frame->vsync_interval,
             .interpolation_threshold = opts->interpolation_threshold,
-        };
+        );
 
         // mpv likes to generate sporadically jumping PTS shortly after
         // initialization, but pl_queue does not like these. Hard-clamp as
@@ -1137,10 +1052,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     if (cur_frame) {
         p->last_hdr_metadata = cur_frame->color.hdr;
-#if PL_API_VER >= 314
         // Augment metadata with peak detection max_pq_y / avg_pq_y
         pl_renderer_get_hdr_metadata(p->rr, &p->last_hdr_metadata);
-#endif
     } else {
         p->last_hdr_metadata = (struct pl_hdr_metadata){0};
     }
@@ -1241,16 +1154,9 @@ static bool update_icc(struct priv *p, struct bstr icc)
 
     pl_icc_profile_compute_signature(&profile);
 
-#if PL_API_VER >= 327
     bool ok = pl_icc_update(p->pllog, &p->icc_profile, &profile, &p->icc_params);
     talloc_free(icc.start);
     return ok;
-#else
-    talloc_free((void *) p->icc_profile.data);
-    profile.data = talloc_steal(p, (void *) profile.data);
-    p->icc_profile = profile;
-    return true;
-#endif
 }
 
 // Returns whether the ICC profile was updated (even on failure)
@@ -1590,14 +1496,24 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
     }
 }
 
-static char *get_cache_file(struct priv *p)
+static char *get_cache_file(struct priv *p, char *type)
 {
     char *file = NULL;
+    char *dir = NULL;
     struct gl_video_opts *opts = p->opts_cache->opts;
-    if (!opts->shader_cache)
-        goto done;
 
-    char *dir = opts->shader_cache_dir;
+    if (strcmp(type, "shader") == 0) {
+        if (!opts->shader_cache)
+            goto done;
+        dir = opts->shader_cache_dir;
+    } else if (strcmp(type, "icc") == 0) {
+        if (!opts->icc_opts->cache)
+            goto done;
+        dir = opts->icc_opts->cache_dir;
+    } else {
+        goto done;
+    }
+
     if (dir && dir[0]) {
         dir = mp_get_user_path(NULL, p->global, dir);
     } else {
@@ -1611,6 +1527,73 @@ static char *get_cache_file(struct priv *p)
 done:
     return file;
 }
+
+static void load_cache_files(struct priv *p)
+{
+    char *icc_cache = get_cache_file(p, "icc");
+    char *shader_cache = get_cache_file(p, "shader");
+    bool same_cache = false;
+    if (icc_cache && shader_cache)
+        same_cache = strcmp(icc_cache, shader_cache) == 0;
+    if (shader_cache) {
+        FILE *cache = fopen(shader_cache, "rb");
+        if (cache) {
+            int ret = pl_cache_load_file(p->shader_cache, cache);
+            if (same_cache)
+                pl_cache_load_file(p->icc_cache, cache);
+            fclose(cache);
+            if (ret < 0)
+                MP_WARN(p, "Failed loading cache from %s\n", shader_cache);
+        }
+        talloc_free(shader_cache);
+    }
+    if (icc_cache) {
+        if (!same_cache) {
+            FILE *cache = fopen(icc_cache, "rb");
+            if (cache) {
+                int ret = pl_cache_load_file(p->icc_cache, cache);
+                fclose(cache);
+                if (ret < 0)
+                    MP_WARN(p, "Failed loading cache from %s\n", icc_cache);
+            }
+        }
+        talloc_free(icc_cache);
+    }
+}
+
+static void save_cache_files(struct priv *p)
+{
+    char *icc_cache = get_cache_file(p, "icc");
+    char *shader_cache = get_cache_file(p, "shader");
+    bool same_cache = false;
+    if (icc_cache && shader_cache)
+        same_cache = strcmp(icc_cache, shader_cache) == 0;
+    if (shader_cache) {
+        FILE *cache = fopen(shader_cache, "wb");
+        if (cache) {
+            int ret = pl_cache_save_file(p->shader_cache, cache);
+            if (same_cache)
+                pl_cache_save_file(p->icc_cache, cache);
+            fclose(cache);
+            if (ret < 0)
+                MP_WARN(p, "Failed saving cache to %s\n", shader_cache);
+        }
+        talloc_free(shader_cache);
+    }
+    if (icc_cache) {
+        if (!same_cache) {
+            FILE *cache = fopen(icc_cache, "wb");
+            if (cache) {
+                int ret = pl_cache_save_file(p->icc_cache, cache);
+                fclose(cache);
+                if (ret < 0)
+                    MP_WARN(p, "Failed saving cache to %s\n", icc_cache);
+            }
+        }
+        talloc_free(icc_cache);
+    }
+}
+
 
 static void uninit(struct vo *vo)
 {
@@ -1633,20 +1616,11 @@ static void uninit(struct vo *vo)
     assert(p->num_dr_buffers == 0);
     pthread_mutex_destroy(&p->dr_lock);
 
-    char *cache_file = get_cache_file(p);
-    if (cache_file && p->rr) {
-        FILE *cache = fopen(cache_file, "wb");
-        if (cache) {
-            size_t size = pl_renderer_save(p->rr, NULL);
-            uint8_t *buf = talloc_size(NULL, size);
-            pl_renderer_save(p->rr, buf);
-            fwrite(buf, size, 1, cache);
-            talloc_free(buf);
-            fclose(cache);
-        }
-        talloc_free(cache_file);
-    }
+    save_cache_files(p);
+    pl_cache_destroy(&p->shader_cache);
+    pl_cache_destroy(&p->icc_cache);
 
+    pl_icc_close(&p->icc_profile);
     pl_renderer_destroy(&p->rr);
 
     for (int i = 0; i < VO_PASS_PERF_MAX; ++i) {
@@ -1696,30 +1670,23 @@ static int preinit(struct vo *vo)
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
     pthread_mutex_init(&p->dr_lock, NULL);
 
-#if PL_API_VER >= 320
-    p->cache = pl_cache_create(pl_cache_params(
+    p->shader_cache = pl_cache_create(pl_cache_params(
         .log = p->pllog,
-        .max_object_size =  1 << 20, //  1 MB
-        .max_total_size  = 10 << 20, // 10 MB
+        .max_total_size  = 50 << 20, // 50 MiB
     ));
-    pl_gpu_set_cache(p->gpu, p->cache);
-#endif
+    p->icc_cache = pl_cache_create(pl_cache_params(
+        .log = p->pllog,
+        .max_total_size = (1 << 20) * 1024, // 1 GiB
+    ));
+    pl_gpu_set_cache(p->gpu, p->shader_cache);
+
+    load_cache_files(p);
 
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
     p->osd_fmt[SUBBITMAP_LIBASS] = pl_find_named_fmt(p->gpu, "r8");
     p->osd_fmt[SUBBITMAP_BGRA] = pl_find_named_fmt(p->gpu, "bgra8");
     p->osd_sync = 1;
-
-    char *cache_file = get_cache_file(p);
-    if (cache_file) {
-        if (stat(cache_file, &(struct stat){0}) == 0) {
-            bstr c = stream_read_file(cache_file, p, vo->global, 1000000000);
-            pl_renderer_load(p->rr, c.start);
-            talloc_free(c.start);
-        }
-        talloc_free(cache_file);
-    }
 
     p->pars = pl_options_alloc(p->pllog);
     update_render_options(vo);
@@ -1771,10 +1738,8 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
     } else if ((fpreset = pl_find_filter_function_preset(cfg->kernel.name))) {
         par->config = (struct pl_filter_config) {
             .kernel = fpreset->function,
-#if PL_API_VER >= 303
             .params[0] = fpreset->function->params[0],
             .params[1] = fpreset->function->params[1],
-#endif
         };
     } else {
         MP_ERR(p, "Failed mapping filter function '%s', no libplacebo analog?\n",
@@ -1785,33 +1750,15 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
     const struct pl_filter_function_preset *wpreset;
     if ((wpreset = pl_find_filter_function_preset(cfg->window.name))) {
         par->config.window = wpreset->function;
-#if PL_API_VER >= 303
         par->config.wparams[0] = wpreset->function->params[0];
         par->config.wparams[1] = wpreset->function->params[1];
-#endif
     }
-
-#if PL_API_VER < 303
-    par->kernel = *par->config.kernel;
-    par->config.kernel = &par->kernel;
-    if (par->config.window) {
-        par->window = *par->config.window;
-        par->config.window = &par->window;
-    }
-#endif
 
     for (int i = 0; i < 2; i++) {
-#if PL_API_VER >= 303
         if (!isnan(cfg->kernel.params[i]))
             par->config.params[i] = cfg->kernel.params[i];
         if (!isnan(cfg->window.params[i]))
             par->config.wparams[i] = cfg->window.params[i];
-#else
-        if (!isnan(cfg->kernel.params[i]))
-            par->kernel.params[i] = cfg->kernel.params[i];
-        if (!isnan(cfg->window.params[i]))
-            par->window.params[i] = cfg->window.params[i];
-#endif
     }
 
     par->config.clamp = cfg->clamp;
@@ -1821,11 +1768,7 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
         par->config.taper = cfg->kernel.taper;
     if (cfg->radius > 0.0) {
         if (par->config.kernel->resizable) {
-#if PL_API_VER >= 303
             par->config.radius = cfg->radius;
-#else
-            par->kernel.radius = cfg->radius;
-#endif
         } else {
             MP_WARN(p, "Filter radius specified but filter '%s' is not "
                     "resizable, ignoring\n", cfg->kernel.name);
@@ -1861,70 +1804,6 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
     return hook;
 }
 
-static stream_t *icc_open_cache(struct priv *p, uint64_t sig, int flags)
-{
-    const struct gl_video_opts *opts = p->opts_cache->opts;
-    if (!opts->icc_opts->cache)
-        return NULL;
-
-    char cache_name[16+1];
-    for (int i = 0; i < 16; i++) {
-        cache_name[i] = "0123456789ABCDEF"[sig & 0xF];
-        sig >>= 4;
-    }
-    cache_name[16] = '\0';
-
-    char *cache_dir = opts->icc_opts->cache_dir;
-    if (cache_dir && cache_dir[0]) {
-        cache_dir = mp_get_user_path(NULL, p->global, cache_dir);
-    } else {
-        cache_dir = mp_find_user_file(NULL, p->global, "cache", "");
-    }
-
-    if (!cache_dir || !cache_dir[0])
-        return NULL;
-
-    char *path = mp_path_join(NULL, cache_dir, cache_name);
-    stream_t *stream = NULL;
-    if (flags & STREAM_WRITE) {
-        mp_mkdirp(cache_dir);
-    } else {
-        // Exit silently if the file does not exist
-        if (stat(path, &(struct stat) {0}) < 0)
-            goto done;
-    }
-
-    flags |= STREAM_ORIGIN_DIRECT | STREAM_LOCAL_FS_ONLY | STREAM_LESS_NOISE;
-    stream = stream_create(path, flags, NULL, p->global);
-    // fall through
-done:
-    talloc_free(cache_dir);
-    talloc_free(path);
-    return stream;
-}
-
-static void icc_save(void *priv, uint64_t sig, const uint8_t *cache, size_t size)
-{
-    struct priv *p = priv;
-    stream_t *s = icc_open_cache(p, sig, STREAM_WRITE);
-    if (!s)
-        return;
-    stream_write_buffer(s, (void *) cache, size);
-    free_stream(s);
-}
-
-static bool icc_load(void *priv, uint64_t sig, uint8_t *cache, size_t size)
-{
-    struct priv *p = priv;
-    stream_t *s = icc_open_cache(p, sig, STREAM_READ);
-    if (!s)
-        return false;
-
-    int len = stream_read(s, cache, size);
-    free_stream(s);
-    return len == size;
-}
-
 static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 {
     if (!opts)
@@ -1942,12 +1821,7 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
     p->icc_params.size_r = s_r;
     p->icc_params.size_g = s_g;
     p->icc_params.size_b = s_b;
-    p->icc_params.cache_priv = p;
-    p->icc_params.cache_save = icc_save;
-    p->icc_params.cache_load = icc_load;
-#if PL_API_VER < 327
-    p->pars->params.icc_params = &p->icc_params;
-#endif
+    p->icc_params.cache = p->icc_cache;
 
     if (!opts->profile || !opts->profile[0]) {
         // No profile enabled, un-load any existing profiles
@@ -2024,7 +1898,6 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
                 .name = hp->name,
             };
 
-#if PL_API_VER >= 308
             if (hp->names) {
                 for (int j = hp->minimum.i; j <= hp->maximum.i; j++) {
                     if (bstr_equals0(v, hp->names[j])) {
@@ -2033,7 +1906,6 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
                     }
                 }
             }
-#endif
 
             switch (hp->type) {
             case PL_VAR_FLOAT:
@@ -2076,9 +1948,7 @@ static void update_render_options(struct vo *vo)
     pars->params.disable_fbos = opts->dumb_mode == 1;
     pars->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
     pars->params.corner_rounding = p->corner_rounding;
-#if PL_API_VER >= 324
     pars->params.correct_subpixel_offsets = !opts->scaler_resizes_only;
-#endif
 
     // Map scaler options as best we can
     pars->params.upscaler = map_scaler(p, SCALER_SCALE);
@@ -2200,9 +2070,7 @@ const struct vo_driver video_out_gpu_next = {
     .description = "Video output based on libplacebo",
     .name = "gpu-next",
     .caps = VO_CAP_ROTATE90 |
-#ifdef PL_HAVE_LAV_FILM_GRAIN
             VO_CAP_FILM_GRAIN |
-#endif
             0x0,
     .preinit = preinit,
     .query_format = query_format,

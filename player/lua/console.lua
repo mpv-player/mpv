@@ -13,7 +13,6 @@
 -- CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 local utils = require 'mp.utils'
-local options = require 'mp.options'
 local assdraw = require 'mp.assdraw'
 
 -- Default options
@@ -56,7 +55,7 @@ else
 end
 
 -- Apply user-set options
-options.read_options(opts)
+require 'mp.options'.read_options(opts)
 
 local styles = {
     -- Colors are stolen from base16 Eighties by Chris Kempson
@@ -85,6 +84,9 @@ local log_buffer = {}
 local suggestion_buffer = {}
 local key_bindings = {}
 local global_margins = { t = 0, b = 0 }
+
+local file_commands = {}
+local path_separator = platform == 'windows' and '\\' or '/'
 
 local update_timer = nil
 update_timer = mp.add_periodic_timer(0.05, function()
@@ -630,6 +632,13 @@ local function command_list()
     return commands
 end
 
+local function command_list_and_help()
+    local commands = command_list()
+    commands[#commands + 1] = 'help'
+
+    return commands
+end
+
 local function property_list()
     local option_info = {
         'name', 'type', 'set-from-commandline', 'set-locally', 'default-value',
@@ -652,6 +661,50 @@ local function property_list()
     return properties
 end
 
+local function profile_list()
+    local profiles = {}
+
+    for i, profile in ipairs(mp.get_property_native('profile-list')) do
+        profiles[i] = profile.name
+    end
+
+    return profiles
+end
+
+local function list_option_list()
+    local options = {}
+
+    -- Don't log errors for renamed and removed properties.
+    -- (Just mp.enable_messages('fatal') still logs them to the terminal.)
+    local msg_level_backup = mp.get_property('msg-level')
+    mp.set_property('msg-level', msg_level_backup == '' and 'cplayer=no'
+                                 or msg_level_backup .. ',cplayer=no')
+
+    for _, option in pairs(mp.get_property_native('options')) do
+        if mp.get_property('option-info/' .. option .. '/type', ''):find(' list$') then
+            options[#options + 1] = option
+        end
+    end
+
+    mp.set_property('msg-level', msg_level_backup)
+
+    return options
+end
+
+local function list_option_verb_list(option)
+    local type = mp.get_property('option-info/' .. option .. '/type')
+
+    if type == 'Key/value list' then
+        return {'add', 'append', 'set', 'remove'}
+    end
+
+    if type == 'String list' or type == 'Object settings list' then
+        return {'add', 'append', 'clr', 'pre', 'set', 'remove', 'toggle'}
+    end
+
+    return {}
+end
+
 local function choice_list(option)
     local info = mp.get_property_native('option-info/' .. option, {})
 
@@ -660,6 +713,35 @@ local function choice_list(option)
     end
 
     return info.choices or {}
+end
+
+local function find_commands_with_file_argument()
+    if #file_commands > 0 then
+        return file_commands
+    end
+
+    for _, command in pairs(mp.get_property_native('command-list')) do
+        if command.args[1] and
+           (command.args[1].name == 'filename' or command.args[1].name == 'url') then
+            file_commands[#file_commands + 1] = command.name
+        end
+    end
+
+    return file_commands
+end
+
+local function file_list(directory)
+    if directory == '' then
+        directory = '.'
+    end
+
+    local files = utils.readdir(directory, 'files') or {}
+
+    for _, dir in pairs(utils.readdir(directory, 'dirs') or {}) do
+        files[#files + 1] = dir .. path_separator
+    end
+
+    return files
 end
 
 -- List of tab-completions:
@@ -674,7 +756,20 @@ end
 --           match.
 function build_completers()
     local completers = {
-        { pattern = '^%s*()[%w_-]+$', list = command_list, append = ' ' },
+        { pattern = '^%s*()[%w_-]+$', list = command_list_and_help, append = ' ' },
+        { pattern = '^%s*help%s+()[%w_-]*$', list = command_list },
+        { pattern = '^%s*set%s+"?([%w_-]+)"?%s+()%S*$', list = choice_list },
+        { pattern = '^%s*set%s+"?([%w_-]+)"?%s+"()%S*$', list = choice_list, append = '"' },
+        { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+()%S*$', list = choice_list, append = " " },
+        { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+"()%S*$', list = choice_list, append = '" ' },
+        { pattern = '^%s*apply[-_]profile%s+"()%S*$', list = profile_list, append = '"' },
+        { pattern = '^%s*apply[-_]profile%s+()%S*$', list = profile_list },
+        { pattern = '^%s*change[-_]list%s+()[%w_-]*$', list = list_option_list, append = ' ' },
+        { pattern = '^%s*change[-_]list%s+()"[%w_-]*$', list = list_option_list, append = '" ' },
+        { pattern = '^%s*change[-_]list%s+"?([%w_-]+)"?%s+()%a*$', list = list_option_verb_list, append = ' ' },
+        { pattern = '^%s*change[-_]list%s+"?([%w_-]+)"?%s+"()%a*$', list = list_option_verb_list, append = '" ' },
+        { pattern = '^%s*([av]f)%s+()%a*$', list = list_option_verb_list, append = ' ' },
+        { pattern = '^%s*([av]f)%s+"()%a*$', list = list_option_verb_list, append = '" ' },
         { pattern = '${()[%w_/-]+$', list = property_list, append = '}' },
     }
 
@@ -691,29 +786,17 @@ function build_completers()
         }
     end
 
-    for _, command in pairs({'set', 'cycle[-_]values'}) do
+
+    for _, command in pairs(find_commands_with_file_argument()) do
         completers[#completers + 1] = {
-            pattern = '^%s*' .. command .. '%s+"?([%w_-]+)"?%s+"()%S*$',
-            list = choice_list,
-            append = command == 'cycle[-_]values' and '" ' or '"',
-        }
-        completers[#completers + 1] = {
-            pattern = '^%s*' .. command .. '%s+"?([%w_-]+)"?%s+()%S*$',
-            list = choice_list,
-            append = command == 'cycle[-_]values' and ' ' or nil,
+            pattern = '^%s*' .. command:gsub('-', '[-_]') ..
+                      '%s+["\']?(.-)()[^' .. path_separator ..']*$',
+            list = file_list,
+            -- Unfortunately appending " here would append it everytime a
+            -- directory is fully completed, even if you intend to browse it
+            -- afterwards.
         }
     end
-
-    completers[#completers + 1] = {
-        pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?%s+%S+%s+"()%S*$',
-        list = choice_list,
-        append = '"',
-    }
-    completers[#completers + 1] = {
-        pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?%s+%S+%s+()%S*$',
-        list = choice_list,
-        append = nil,
-    }
 
     return completers
 end

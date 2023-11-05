@@ -7005,14 +7005,13 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             struct track *track = mpctx->current_track[n][STREAM_SUB];
             struct dec_sub *sub = track ? track->d_sub : NULL;
             if (sub) {
-                sub_control(track->d_sub, SD_CTRL_UPDATE_OPTS,
-                            (void *)(uintptr_t)flags);
+                int ret = sub_control(sub, SD_CTRL_UPDATE_OPTS,
+                                      (void *)(uintptr_t)flags);
+                if (ret == CONTROL_OK && flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD))
+                    sub_redecode_cached_packets(sub);
             }
         }
         osd_changed(mpctx->osd);
-        if (flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD))
-            mp_force_video_refresh(mpctx);
-        mp_wakeup_core(mpctx);
     }
 
     if (flags & UPDATE_BUILTIN_SCRIPTS)

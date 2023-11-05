@@ -270,6 +270,8 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
     if (f) {
         struct mp_image img = map_vs_frame(p, f, false);
         struct mp_image dummy = {.params = p->fmt_in};
+        if (p->fmt_in.w != img.w || p->fmt_in.h != img.h)
+            dummy.params.crop = (struct mp_rect){0, 0, img.w, img.h};
         mp_image_copy_attributes(&img, &dummy);
         img.pkt_duration = -1;
         const VSMap *map = p->vsapi->getFramePropsRO(f);

@@ -1092,7 +1092,7 @@ local function cache_stats()
     append(stats, opt_time(a) .. " - " .. opt_time(b), {prefix = "Packet queue:"})
 
     local r = nil
-    if (a ~= nil) and (b ~= nil) then
+    if a ~= nil and b ~= nil then
         r = b - a
     end
 
@@ -1174,7 +1174,7 @@ local function record_cache_stats()
 
     local a = info["reader-pts"]
     local b = info["cache-end"]
-    if (a ~= nil) and (b ~= nil) then
+    if a ~= nil and b ~= nil then
         graph_add_value(cache_ahead_buf, b - a)
     end
 
@@ -1274,7 +1274,7 @@ local function unbind_scroll()
     end
 end
 local function update_scroll_bindings(k)
-    if (pages[k].scroll) then
+    if pages[k].scroll then
         bind_scroll()
     else
         unbind_scroll()

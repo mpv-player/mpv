@@ -69,6 +69,7 @@ struct dec_sub {
     struct sd *sd;
 
     struct demux_packet *new_segment;
+    struct demux_packet *cached_pkts[2];
 };
 
 static void update_subtitle_speed(struct dec_sub *sub)
@@ -309,6 +310,15 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
         if (sub->recorder_sink)
             mp_recorder_feed_packet(sub->recorder_sink, pkt);
 
+
+        // Update cached packets
+        if (sub->cached_pkts[0]) {
+            if (sub->cached_pkts[1])
+                talloc_free(sub->cached_pkts[1]);
+            sub->cached_pkts[1] = sub->cached_pkts[0];
+        }
+        sub->cached_pkts[0] = pkt;
+
         sub->last_pkt_pts = pkt->pts;
 
         if (is_new_segment(sub, pkt)) {
@@ -320,11 +330,21 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
 
         if (!(sub->preload_attempted && sub->sd->preload_ok))
             sub->sd->driver->decode(sub->sd, pkt);
-
-        talloc_free(pkt);
     }
     pthread_mutex_unlock(&sub->lock);
     return r;
+}
+
+// Redecode both cached packets if needed.
+// Used with UPDATE_SUB_HARD and UPDATE_SUB_FILT.
+void sub_redecode_cached_packets(struct dec_sub *sub)
+{
+    pthread_mutex_lock(&sub->lock);
+    if (sub->cached_pkts[0])
+        sub->sd->driver->decode(sub->sd, sub->cached_pkts[0]);
+    if (sub->cached_pkts[1])
+        sub->sd->driver->decode(sub->sd, sub->cached_pkts[1]);
+    pthread_mutex_unlock(&sub->lock);
 }
 
 // Unref sub_bitmaps.rc to free the result. May return NULL.
@@ -398,8 +418,9 @@ void sub_reset(struct dec_sub *sub)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
-    talloc_free(sub->new_segment);
-    sub->new_segment = NULL;
+    TA_FREEP(&sub->cached_pkts[0]);
+    TA_FREEP(&sub->cached_pkts[1]);
+    TA_FREEP(&sub->new_segment);
     pthread_mutex_unlock(&sub->lock);
 }
 

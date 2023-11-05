@@ -3293,14 +3293,12 @@ static int parse_obj_settings_del(struct mp_log *log, struct bstr opt_name,
             return 0;
         if (dst) {
             int label_index = 0;
-            while (label_index >= 0) {
-                label_index = obj_settings_list_find_by_label(VAL(dst), label);
-                if (label_index >= 0) {
-                    mark_del[label_index] = true;
-                } else {
-                    mp_warn(log, "Option %.*s: item label @%.*s not found.\n",
-                            BSTR_P(opt_name), BSTR_P(label));
-                }
+            label_index = obj_settings_list_find_by_label(VAL(dst), label);
+            if (label_index >= 0) {
+                mark_del[label_index] = true;
+            } else {
+                mp_warn(log, "Option %.*s: item label @%.*s not found.\n",
+                        BSTR_P(opt_name), BSTR_P(label));
             }
         }
         *param = s;
