@@ -770,7 +770,7 @@ function build_completers()
         { pattern = '^%s*change[-_]list%s+"?([%w_-]+)"?%s+"()%a*$', list = list_option_verb_list, append = '" ' },
         { pattern = '^%s*([av]f)%s+()%a*$', list = list_option_verb_list, append = ' ' },
         { pattern = '^%s*([av]f)%s+"()%a*$', list = list_option_verb_list, append = '" ' },
-        { pattern = '${()[%w_/-]+$', list = property_list, append = '}' },
+        { pattern = '${=?()[%w_/-]+$', list = property_list, append = '}' },
     }
 
     for _, command in pairs({'set', 'add', 'cycle', 'cycle[-_]values', 'multiply'}) do
