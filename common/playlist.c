@@ -27,14 +27,27 @@
 #include "demux/demux.h"
 #include "stream/stream.h"
 
-struct playlist_entry *playlist_entry_new(const char *filename)
+struct playlist_entry *playlist_entry_new_uninitialized()
 {
     struct playlist_entry *e = talloc_zero(NULL, struct playlist_entry);
-    char *local_filename = mp_file_url_to_filename(e, bstr0(filename));
-    e->filename = local_filename ? local_filename : talloc_strdup(e, filename);
+    e->filename = NULL;
     e->stream_flags = STREAM_ORIGIN_DIRECT;
     e->original_index = -1;
     return e;
+}
+
+struct playlist_entry *playlist_entry_init_filename(struct playlist_entry *e, const char *filename)
+{
+    assert(e->filename == NULL);
+    char *local_filename = mp_file_url_to_filename(e, bstr0(filename));
+    e->filename = local_filename ? local_filename : talloc_strdup(e, filename);
+    return e;
+}
+
+struct playlist_entry *playlist_entry_new(const char *filename)
+{
+    struct playlist_entry *e = playlist_entry_new_uninitialized();
+    return playlist_entry_init_filename(e, filename);
 }
 
 void playlist_entry_add_param(struct playlist_entry *e, bstr name, bstr value)

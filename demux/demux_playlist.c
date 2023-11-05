@@ -249,30 +249,37 @@ ok:
         return 0;
     }
 
-    char *title = NULL;
+    struct playlist_entry *e = playlist_entry_new_uninitialized();
     while (line.len || !pl_eof(p)) {
         bstr line_dup = line;
         if (bstr_eatstart0(&line_dup, "#EXTINF:")) {
             bstr duration, btitle;
             if (bstr_split_tok(line_dup, ",", &duration, &btitle) && btitle.len) {
-                talloc_free(title);
-                title = bstrto0(NULL, btitle);
+                e->title = talloc_steal(e, bstrto0(NULL, btitle));
             }
         } else if (bstr_startswith0(line_dup, "#EXT-X-")) {
             p->format = "hls";
+        } else if (bstr_eatstart0(&line_dup, "#EXT-MPV:")) {
+            bstr key, value;
+            if (bstr_split_tok(line_dup, "=", &key, &value) && value.len) {
+                playlist_entry_add_param(e, key, value);
+            }
         } else if (line_dup.len > 0 && !bstr_startswith0(line_dup, "#")) {
             char *fn = bstrto0(NULL, line_dup);
-            struct playlist_entry *e = playlist_entry_new(fn);
+            playlist_entry_init_filename(e, fn);
             talloc_free(fn);
-            e->title = talloc_steal(e, title);
-            title = NULL;
             playlist_add(p->pl, e);
+            e = playlist_entry_new_uninitialized();
         }
         pl_free_line(p, line);
         line = pl_get_line(p);
     }
     pl_free_line(p, line);
-    talloc_free(title);
+
+    if (e->filename == NULL) {
+        playlist_entry_unref(e);
+    }
+
     return 0;
 }
 
