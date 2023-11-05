@@ -566,7 +566,7 @@ static MP_THREAD_VOID playthread(void *arg)
             int64_t ts = mp_time_ns();
             ts += MP_TIME_S_TO_NS(read_samples / (double)(ao->samplerate));
             ts += MP_TIME_S_TO_NS(AudioTrack_getLatency(ao));
-            int samples = ao_read_data(ao, &p->chunk, read_samples, ts);
+            int samples = ao_read_data_nonblocking(ao, &p->chunk, read_samples, ts);
             int ret = AudioTrack_write(ao, samples * ao->sstride);
             if (ret >= 0) {
                 p->written_frames += ret / ao->sstride;
