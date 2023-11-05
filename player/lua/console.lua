@@ -827,6 +827,33 @@ function complete_match(part, list)
     return completions, prefix
 end
 
+function common_prefix_length(s1, s2)
+    local common_count = 0
+    for i = 1, #s1 do
+        if s1:byte(i) ~= s2:byte(i) then
+            break
+        end
+        common_count = common_count + 1
+    end
+    return common_count
+end
+
+function max_overlap_length(s1, s2)
+    for s1_offset = 0, #s1 - 1 do
+        local match = true
+        for i = 1, #s1 - s1_offset do
+            if s1:byte(s1_offset + i) ~= s2:byte(i) then
+                match = false
+                break
+            end
+        end
+        if match then
+            return #s1 - s1_offset
+        end
+    end
+    return 0
+end
+
 -- Complete the option or property at the cursor (TAB)
 function complete()
     local before_cur = line:sub(1, cursor - 1)
@@ -859,8 +886,15 @@ function complete()
                 -- If there was only one full match from the list, add
                 -- completer.append to the final string. This is normally a
                 -- space or a quotation mark followed by a space.
+                local after_cur_index = 1
                 if #completions == 1 then
-                    prefix = prefix .. (completer.append or '')
+                    local append = completer.append or ''
+                    prefix = prefix .. append
+
+                    -- calculate offset into after_cur
+                    local prefix_len = common_prefix_length(append, after_cur)
+                    local overlap_size = max_overlap_length(append, after_cur)
+                    after_cur_index = math.max(prefix_len, overlap_size) + 1
                 else
                     table.sort(completions)
                     suggestion_buffer = completions
@@ -869,7 +903,7 @@ function complete()
                 -- Insert the completion and update
                 before_cur = before_cur:sub(1, s - 1) .. prefix
                 cursor = before_cur:len() + 1
-                line = before_cur .. after_cur
+                line = before_cur .. after_cur:sub(after_cur_index)
                 update()
                 return
             end
