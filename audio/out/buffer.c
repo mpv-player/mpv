@@ -170,20 +170,11 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof)
     return pos;
 }
 
-// Read the given amount of samples in the user-provided data buffer. Returns
-// the number of samples copied. If there is not enough data (buffer underrun
-// or EOF), return the number of samples that could be copied, and fill the
-// rest of the user-provided buffer with silence.
-// This basically assumes that the audio device doesn't care about underruns.
-// If this is called in paused mode, it will always return 0.
-// The caller should set out_time_ns to the expected delay until the last sample
-// reaches the speakers, in nanoseconds, using mp_time_ns() as reference.
-int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns)
+static int ao_read_data_unlocked(struct ao *ao, void **data, int samples,
+                                 int64_t out_time_ns)
 {
     struct buffer_state *p = ao->buffer_state;
     assert(!ao->driver->write);
-
-    mp_mutex_lock(&p->lock);
 
     int pos = read_buffer(ao, data, samples, &(bool){0});
 
@@ -196,6 +187,41 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns)
         // For ao_drain().
         mp_cond_broadcast(&p->wakeup);
     }
+
+    return pos;
+}
+
+// Read the given amount of samples in the user-provided data buffer. Returns
+// the number of samples copied. If there is not enough data (buffer underrun
+// or EOF), return the number of samples that could be copied, and fill the
+// rest of the user-provided buffer with silence.
+// This basically assumes that the audio device doesn't care about underruns.
+// If this is called in paused mode, it will always return 0.
+// The caller should set out_time_ns to the expected delay until the last sample
+// reaches the speakers, in nanoseconds, using mp_time_ns() as reference.
+int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns)
+{
+    struct buffer_state *p = ao->buffer_state;
+
+    mp_mutex_lock(&p->lock);
+
+    int pos = ao_read_data_unlocked(ao, data, samples, out_time_ns);
+
+    mp_mutex_unlock(&p->lock);
+
+    return pos;
+}
+
+// Like ao_read_data() but does not block and also may return partial data.
+// Callers have to check the return value.
+int ao_read_data_nonblocking(struct ao *ao, void **data, int samples, int64_t out_time_ns)
+{
+    struct buffer_state *p = ao->buffer_state;
+
+    if (mp_mutex_trylock(&p->lock))
+            return 0;
+
+    int pos = ao_read_data_unlocked(ao, data, samples, out_time_ns);
 
     mp_mutex_unlock(&p->lock);
 
