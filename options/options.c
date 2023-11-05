@@ -262,6 +262,7 @@ const struct m_sub_options mp_sub_filter_opts = {
     .opts = (const struct m_option[]){
         {"sub-filter-sdh", OPT_BOOL(sub_filter_SDH)},
         {"sub-filter-sdh-harder", OPT_BOOL(sub_filter_SDH_harder)},
+        {"sub-filter-sdh-enclosures", OPT_STRING(sub_filter_SDH_enclosures)},
         {"sub-filter-regex-enable", OPT_BOOL(rf_enable)},
         {"sub-filter-regex-plain", OPT_BOOL(rf_plain)},
         {"sub-filter-regex", OPT_STRINGLIST(rf_items)},
@@ -271,6 +272,7 @@ const struct m_sub_options mp_sub_filter_opts = {
     },
     .size = sizeof(OPT_BASE_STRUCT),
     .defaults = &(OPT_BASE_STRUCT){
+        .sub_filter_SDH_enclosures = "([",
         .rf_enable = true,
     },
     .change_flags = UPDATE_SUB_FILT,

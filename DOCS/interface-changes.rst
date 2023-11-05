@@ -34,6 +34,7 @@ Interface changes
     - `--screenshot-avif-pixfmt` no longer defaults to yuv420p
     - `--screenshot-avif-opts` defaults to lossless screenshot
     - rename key `MP_KEY_BACK` to `MP_KEY_GO_BACK`
+    - add `--sub-filter-sdh-enclosures` option
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.
