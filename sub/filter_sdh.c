@@ -86,7 +86,8 @@ static void copy_ass(struct sd_filter *sd, char **rpp, struct buffer *buf)
     return;
 }
 
-static bool skip_bracketed(struct sd_filter *sd, char **rpp, struct buffer *buf);
+static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
+                          const char *left, const char *right);
 
 // check for speaker label, like MAN:
 // normal subtitles may include mixed case text with : after so
@@ -128,7 +129,7 @@ static void skip_speaker_label(struct sd_filter *sd, char **rpp, struct buffer *
             copy_ass(sd, &rp, buf);
         } else if (rp[0] == '[') {
             // not uncommon with [xxxx]: which should also be skipped
-            if (!skip_bracketed(sd, &rp, buf)) {
+            if (!skip_enclosed(sd, &rp, buf, "[", "]")) {
                 buf->pos = old_pos;
                 return;
             }
@@ -174,94 +175,54 @@ static void skip_speaker_label(struct sd_filter *sd, char **rpp, struct buffer *
     return;
 }
 
-// check for bracketed text, like [SOUND]
-// and skip it while preserving ass tags
-// any characters are allowed, brackets are seldom used in normal text
+// Check for text enclosed in symbols, like (SOUND)
+// and skip it while preserving ass tags.
+// Parentheses are a special case since normal subtitles may have
+// them so only upper case is accepted and lower case l which for
+// some looks like upper case I. If sub_filter_SDH_harder is used,
+// both upper and lower case is accepted.
+//
+// For other symbols, all text in between is removed.
 //
 // Parameters:
 //     rpp       read pointer pointer to source string, updated on return
 //     buf       write buffer
 //
 // scan in source string
-// the first character in source string must by the starting '['
+// the first character in source string must be the starting left symbol
 // and copy ass tags to destination string but
-// skipping bracketed text if it looks like SDH
+// skipping enclosed text if it looks like SDH
 //
-// return true if bracketed text was removed.
+// return true if enclosed text was removed.
 // if not valid SDH read pointer and write buffer position will be unchanged
 // otherwise they point to next position after text and next write position
-static bool skip_bracketed(struct sd_filter *sd, char **rpp, struct buffer *buf)
+static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
+                          const char *left, const char *right)
 {
+    bool filter_harder = sd->opts->sub_filter_SDH_harder;
     char *rp = *rpp;
     int old_pos = buf->pos;
 
-    rp++; // skip past '['
-    // skip past valid data searching for ]
-    while (*rp && rp[0] != ']') {
+    rp++; // skip past the left character
+    // skip past valid data searching for the right character
+    bool only_digits = strcmp(left, "(") == 0;
+    while (*rp && rp[0] != right[0]) {
         if (rp[0] == '{') {
             copy_ass(sd, &rp, buf);
-        } else {
-            rp++;
-        }
-    }
-    if (!*rp) {
-        // ] was not found
-        buf->pos = old_pos;
-        return false;
-    }
-    rp++; // skip ]
-    // skip trailing spaces
-    while (rp[0] == ' ') {
-        rp++;
-    }
-    *rpp = rp;
-
-    return true;
-}
-
-// check for parenthesized text, like (SOUND)
-// and skip it while preserving ass tags
-// normal subtitles may include mixed case text in parentheses so
-// only upper case is accepted and lower case l which for some
-// looks like upper case I but if requested harder filtering
-// both upper and lower case is accepted
-//
-// Parameters:
-//     rpp       read pointer pointer to source string, updated on return
-//     buf       write buffer
-//
-// scan in source string
-// the first character in source string must be the starting '('
-// and copy ass tags to destination string but
-// skipping parenthesized text if it looks like SDH
-//
-// return true if parenthesized text was removed.
-// if not valid SDH read pointer and write buffer position will be unchanged
-// otherwise they point to next position after text and next write position
-static bool skip_parenthesized(struct sd_filter *sd, char **rpp, struct buffer *buf)
-{
-    int filter_harder = sd->opts->sub_filter_SDH_harder;
-    char *rp = *rpp;
-    int old_pos = buf->pos;
-
-    rp++; // skip past '('
-    // skip past valid data searching for )
-    bool only_digits = true;
-    while (*rp && rp[0] != ')') {
-        if (rp[0] == '{') {
-            copy_ass(sd, &rp, buf);
-        } else if ((mp_isalpha(rp[0]) &&
+        } else if (strcmp(left, "(") == 0 && ((mp_isalpha(rp[0]) &&
                     (filter_harder || mp_isupper(rp[0]) || rp[0] == 'l')) ||
                    mp_isdigit(rp[0]) ||
                    rp[0] == ' ' || rp[0] == '\'' || rp[0] == '#' ||
                    rp[0] == '.' || rp[0] == ',' ||
-                   rp[0] == '-' || rp[0] == '"' || rp[0] == '\\') {
+                   rp[0] == '-' || rp[0] == '"' || rp[0] == '\\')) {
             if (!mp_isdigit(rp[0]))
                 only_digits = false;
             rp++;
-        } else {
+        } else if (strcmp(left, "(") == 0) {
             buf->pos = old_pos;
             return false;
+        } else {
+            rp++;
         }
     }
     if (!*rp) {
@@ -274,7 +235,7 @@ static bool skip_parenthesized(struct sd_filter *sd, char **rpp, struct buffer *
         buf->pos = old_pos;
         return false;
     }
-    rp++; // skip )
+    rp++; // skip right character
     // skip trailing spaces
     while (rp[0] == ' ') {
         rp++;
@@ -372,13 +333,13 @@ static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t 
         while (*rp && !(rp[0] == '\\' && rp[1] == 'N')) {
             copy_ass(sd, &rp, buf);
             if (rp[0] == '[') {
-                if (!skip_bracketed(sd, &rp, buf)) {
+                if (!skip_enclosed(sd, &rp, buf, "[", "]")) {
                     append(sd, buf, rp[0]);
                     rp++;
                     line_with_text =  true;
                 }
             } else if (rp[0] == '(') {
-                if (!skip_parenthesized(sd, &rp, buf)) {
+                if (!skip_enclosed(sd, &rp, buf, "(", ")")) {
                     append(sd, buf, rp[0]);
                     rp++;
                     line_with_text =  true;
