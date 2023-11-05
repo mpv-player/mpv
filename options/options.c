@@ -272,7 +272,7 @@ const struct m_sub_options mp_sub_filter_opts = {
     },
     .size = sizeof(OPT_BASE_STRUCT),
     .defaults = &(OPT_BASE_STRUCT){
-        .sub_filter_SDH_enclosures = "([",
+        .sub_filter_SDH_enclosures = "([\uFF08",
         .rf_enable = true,
     },
     .change_flags = UPDATE_SUB_FILT,

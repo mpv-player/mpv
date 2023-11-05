@@ -2901,8 +2901,9 @@ Subtitles
 
     It removes speaker labels (like MAN:) and any text enclosed within symbols like
     parentheses or brackets as specified by the ``--sub-filter-sdh-enclosures`` option.
-    Note that parenthesis are a special case and only upper case text is removed. For
-    more filtering, you can use the ``--sub-filter-sdh-harder`` option.
+    Note that parenthesis (full width parenthesis and the normal variant) are a special
+    case and only upper case text is removed. For more filtering, you can use the
+    ``--sub-filter-sdh-harder`` option.
 
     Default: ``no``.
 
@@ -2920,7 +2921,7 @@ Subtitles
     will be mapped internally to their matching right hand character, so you only need
     to specify left hand characters.
 
-    Default: ``([``.
+    Default: ``([（``.
 
 ``--sub-filter-regex-...=...``
     Set a list of regular expressions to match on text subtitles, and remove any

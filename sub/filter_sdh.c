@@ -34,8 +34,9 @@
 // It is for filtering ASS encoded subtitles
 
 static const char *const enclosure_pair[][2] = {
-    {"(", ")"},
-    {"[", "]"},
+    {"(",      ")"},
+    {"[",      "]"},
+    {"\uFF08", "\uFF09"},
     {0},
 };
 
@@ -249,15 +250,16 @@ static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
     bool filter_harder = sd->opts->sub_filter_SDH_harder;
     char *rp = *rpp;
     int old_pos = buf->pos;
+    bool parenthesis = strcmp(left, "(") == 0 || strcmp(left, "\uFF08") == 0;
 
     // skip past the left character
     rp += get_char_bytes(rp);
     // skip past valid data searching for the right character
-    bool only_digits = strcmp(left, "(") == 0;
+    bool only_digits = parenthesis;
     while (*rp && rp[0] != right[0]) {
         if (rp[0] == '{') {
             copy_ass(sd, &rp, buf);
-        } else if (strcmp(left, "(") == 0 && ((mp_isalpha(rp[0]) &&
+        } else if (parenthesis && ((mp_isalpha(rp[0]) &&
                     (filter_harder || mp_isupper(rp[0]) || rp[0] == 'l')) ||
                    mp_isdigit(rp[0]) ||
                    rp[0] == ' ' || rp[0] == '\'' || rp[0] == '#' ||
@@ -266,7 +268,7 @@ static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
             if (!mp_isdigit(rp[0]))
                 only_digits = false;
             rp++;
-        } else if (strcmp(left, "(") == 0) {
+        } else if (parenthesis) {
             buf->pos = old_pos;
             return false;
         } else {
