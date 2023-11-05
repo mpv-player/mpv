@@ -14,60 +14,60 @@ Keybindings
 ESC and Ctrl+[
     Hide the console.
 
-ENTER, Ctrl+J and Ctrl+M
+ENTER, Ctrl+j and Ctrl+m
     Run the typed command.
 
 Shift+ENTER
     Type a literal newline character.
 
-LEFT and Ctrl+B
+LEFT and Ctrl+b
     Move the cursor to the previous character.
 
-RIGHT and Ctrl+F
+RIGHT and Ctrl+f
     Move the cursor to the next character.
 
-Ctrl+LEFT and Alt+B
+Ctrl+LEFT and Alt+b
     Move the cursor to the beginning of the current word, or if between words,
     to the beginning of the previous word.
 
-Ctrl+RIGHT and Alt+F
+Ctrl+RIGHT and Alt+f
     Move the cursor to the end of the current word, or if between words, to the
     end of the next word.
 
-HOME and Ctrl+A
+HOME and Ctrl+a
     Move the cursor to the start of the current line.
 
-END and Ctrl+E
+END and Ctrl+e
     Move the cursor to the end of the current line.
 
-BACKSPACE and Ctrl+H
+BACKSPACE and Ctrl+h
     Delete the previous character.
 
-Ctrl+D
+Ctrl+d
     Hide the console if the current line is empty, otherwise delete the next
     character.
 
-Ctrl+BACKSPACE and Ctrl+W
+Ctrl+BACKSPACE and Ctrl+w
     Delete text from the cursor to the beginning of the current word, or if
     between words, to the beginning of the previous word.
 
-Ctrl+DEL and Alt+D
+Ctrl+DEL and Alt+d
     Delete text from the cursor to the end of the current word, or if between
     words, to the end of the next word.
 
-Ctrl+U
+Ctrl+u
     Delete text from the cursor to the beginning of the current line.
 
-Ctrl+K
+Ctrl+k
     Delete text from the cursor to the end of the current line.
 
-Ctrl+C
+Ctrl+c
     Clear the current line.
 
-UP and Ctrl+P
+UP and Ctrl+p
     Move back in the command history.
 
-DOWN and Ctrl+N
+DOWN and Ctrl+n
     Move forward in the command history.
 
 PGUP
@@ -79,16 +79,16 @@ PGDN
 INSERT
     Toggle insert mode.
 
-Ctrl+V
+Ctrl+v
     Paste text (uses the clipboard on X11 and Wayland).
 
 Shift+INSERT
     Paste text (uses the primary selection on X11 and Wayland).
 
-TAB and Ctrl+I
+TAB and Ctrl+i
     Complete the command or property name at the cursor.
 
-Ctrl+L
+Ctrl+l
     Clear all log messages from the console.
 
 Commands
