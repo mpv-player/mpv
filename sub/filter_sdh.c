@@ -33,6 +33,12 @@
 // all SDH parts.
 // It is for filtering ASS encoded subtitles
 
+static const char *const enclosure_pair[][2] = {
+    {"(", ")"},
+    {"[", "]"},
+    {0},
+};
+
 struct buffer {
     char *string;
     int length;
@@ -56,6 +62,47 @@ static inline int append(struct sd_filter *sd, struct buffer *buf, char c)
             buf->string[buf->length - 1] = c;
     }
     return c;
+}
+
+static int get_char_bytes(char *str)
+{
+    // In case the final character is non-ASCII.
+    // Will only work with UTF-8 but you shouldn't be
+    // using anything else anyway.
+    if (str && str[0]) {
+        if (!(str[0] >> 7 & 1)) {
+            return 1;
+        } else if (!(str[0] >> 5 & 1)) {
+            return 2;
+        } else if (!(str[0] >> 4 & 1)) {
+            return 3;
+        } else if (!(str[0] >> 3 & 1)) {
+            return 4;
+        }
+    }
+    return 0;
+}
+
+static const char *get_right_enclosure(char *left)
+{
+    // See if the right hand character is mapped. If not, just return the same thing.
+    for (int i = 0; enclosure_pair[i][0]; i++) {
+        if (strcmp(left, enclosure_pair[i][0]) == 0)
+            return enclosure_pair[i][1];
+    }
+    return left;
+}
+
+static bool valid_left_enclosure(struct sd_filter *sd, char *str)
+{
+    // All characters in this string are valid left hand enclosure characters.
+    char *enclosures = sd->opts->sub_filter_SDH_enclosures;
+    int len = strlen(enclosures);
+    for (int i = 0; i < len; i++) {
+        if (str && str[0] && str[0] == enclosures[i])
+            return true;
+    }
+    return false;
 }
 
 
@@ -203,7 +250,8 @@ static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
     char *rp = *rpp;
     int old_pos = buf->pos;
 
-    rp++; // skip past the left character
+    // skip past the left character
+    rp += get_char_bytes(rp);
     // skip past valid data searching for the right character
     bool only_digits = strcmp(left, "(") == 0;
     while (*rp && rp[0] != right[0]) {
@@ -235,7 +283,8 @@ static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
         buf->pos = old_pos;
         return false;
     }
-    rp++; // skip right character
+    // skip past the right character
+    rp += get_char_bytes(rp);
     // skip trailing spaces
     while (rp[0] == ' ') {
         rp++;
@@ -332,14 +381,17 @@ static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t 
         // go through the rest of the line looking for SDH in () or []
         while (*rp && !(rp[0] == '\\' && rp[1] == 'N')) {
             copy_ass(sd, &rp, buf);
-            if (rp[0] == '[') {
-                if (!skip_enclosed(sd, &rp, buf, "[", "]")) {
-                    append(sd, buf, rp[0]);
-                    rp++;
-                    line_with_text =  true;
-                }
-            } else if (rp[0] == '(') {
-                if (!skip_enclosed(sd, &rp, buf, "(", ")")) {
+            char left[5] = {0};
+            const char *right = NULL;
+            if (valid_left_enclosure(sd, rp)) {
+                int bytes = get_char_bytes(rp);
+                for (int i = 0; i < bytes; i++)
+                    left[i] = rp[i];
+                left[bytes + 1] = '\0';
+                right = get_right_enclosure(left);
+            }
+            if (left[0] && right && right[0]) {
+                if (!skip_enclosed(sd, &rp, buf, left, right)) {
                     append(sd, buf, rp[0]);
                     rp++;
                     line_with_text =  true;
