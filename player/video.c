@@ -119,6 +119,7 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->mistimed_frames_total = 0;
     mpctx->drop_message_shown = 0;
     mpctx->display_sync_drift_dir = 0;
+    mpctx->display_sync_error = 0;
 
     mpctx->video_status = mpctx->vo_chain ? STATUS_SYNCING : STATUS_EOF;
 }
