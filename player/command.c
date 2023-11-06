@@ -49,8 +49,9 @@
 #include "demux/demux.h"
 #include "demux/stheader.h"
 #include "common/playlist.h"
-#include "sub/osd.h"
 #include "sub/dec_sub.h"
+#include "sub/osd.h"
+#include "sub/sd.h"
 #include "options/m_option.h"
 #include "options/m_property.h"
 #include "options/m_config_frontend.h"
@@ -5410,11 +5411,10 @@ static void cmd_sub_step_seek(void *p)
                                                &mpctx->opts->subs_rend->sub_delay);
                 show_property_osd(mpctx, "sub-delay", cmd->on_osd);
             } else {
-                // We can easily get stuck by failing to seek to the video
-                // frame which actually shows the sub first (because video
-                // frame PTS and sub PTS rarely match exactly). Add some
-                // rounding for the mess of it.
-                a[0] += 0.01 * (a[1] >= 0 ? 1 : -1);
+                // We can easily seek/step to the wrong subtitle line (because
+                // video frame PTS and sub PTS rarely match exactly). Add an
+                // arbitrary forward offset as a workaround.
+                a[0] += SUB_SEEK_OFFSET;
                 mark_seek(mpctx);
                 queue_seek(mpctx, MPSEEK_ABSOLUTE, a[0], MPSEEK_EXACT,
                            MPSEEK_FLAG_DELAY);
