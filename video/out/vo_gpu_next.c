@@ -153,8 +153,6 @@ struct priv {
     bool target_hint;
 
     float corner_rounding;
-
-    struct pl_hdr_metadata last_hdr_metadata;
 };
 
 static void update_render_options(struct vo *vo);
@@ -1033,19 +1031,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         goto done;
     }
 
-    const struct pl_frame *cur_frame = NULL;
-    for (int i = 0; i < mix.num_frames; i++) {
-        if (mix.timestamps[i] > 0.0f)
-            break;
-        cur_frame = mix.frames[i];
-    }
-
-    if (cur_frame) {
-        p->last_hdr_metadata = cur_frame->color.hdr;
+    const struct pl_frame *cur_frame = pl_frame_mix_nearest(&mix);
+    if (cur_frame && vo->params) {
+        vo->params->color.hdr = cur_frame->color.hdr;
         // Augment metadata with peak detection max_pq_y / avg_pq_y
-        pl_renderer_get_hdr_metadata(p->rr, &p->last_hdr_metadata);
-    } else {
-        p->last_hdr_metadata = (struct pl_hdr_metadata){0};
+        pl_renderer_get_hdr_metadata(p->rr, &vo->params->color.hdr);
     }
 
     p->is_interpolated = mix.num_frames > 1;
@@ -1429,10 +1419,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw);
         return true;
     }
-
-    case VOCTRL_HDR_METADATA:
-        *(struct pl_hdr_metadata *) data = p->last_hdr_metadata;
-        return true;
 
     case VOCTRL_SCREENSHOT:
         video_screenshot(vo, data);

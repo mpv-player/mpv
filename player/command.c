@@ -2372,17 +2372,16 @@ static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
 static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+
     int valid = m_property_read_sub_validate(ctx, prop, action, arg);
     if (valid != M_PROPERTY_VALID)
         return valid;
 
-    struct mp_image_params p = get_video_out_params(ctx);
-
-    MPContext *mpctx = ctx;
-    if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_HDR_METADATA, &p.color.hdr);
-
-    return property_imgparams(p, action, arg);
+    return property_imgparams(vo_get_current_params(vo), action, arg);
 }
 
 static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
