@@ -1550,15 +1550,20 @@ static void save_cache_files(struct priv *p)
 
         if (!target_file)
             continue;
-        FILE *cache = fopen(target_file, "wb");
+        char *tmp = talloc_asprintf(ta_ctx, "%s~", target_file);
+        FILE *cache = fopen(tmp, "wb");
         if (!cache)
             continue;
         int ret = pl_cache_save_file(target_cache, cache);
         if (same_cache)
             ret += pl_cache_save_file(p->icc_cache, cache);
         fclose(cache);
-        if (ret < 0)
+        if (ret >= 0)
+            ret = rename(tmp, target_file);
+        if (ret < 0) {
             MP_WARN(p, "Failed saving cache to %s\n", target_file);
+            unlink(tmp);
+        }
 
         if (same_cache)
             break;
