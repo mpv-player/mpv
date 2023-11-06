@@ -844,7 +844,8 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         long long res = ass_step_sub(ctx->ass_track, ts, a[1]);
         if (!res)
             return false;
-        a[0] += res / 1000.0;
+        // Try to account for overlapping durations
+        a[0] += res / 1000.0 + SUB_SEEK_OFFSET;
         return true;
     }
     case SD_CTRL_SET_VIDEO_PARAMS:

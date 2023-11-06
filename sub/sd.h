@@ -9,6 +9,8 @@
 #define SUB_GAP_THRESHOLD 0.210
 // don't change timings if durations are smaller
 #define SUB_GAP_KEEP 0.4
+// slight offset when sub seeking or sub stepping
+#define SUB_SEEK_OFFSET 0.01
 
 struct sd {
     struct mpv_global *global;
