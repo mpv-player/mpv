@@ -1620,8 +1620,9 @@ static void guess_focus(struct vo_wayland_state *wl)
 static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
 {
     int index = 0;
-    int screen_id = wl->vo_opts->fsscreen_id;
-    char *screen_name = wl->vo_opts->fsscreen_name;
+    struct mp_vo_opts *opts = wl->vo_opts;
+    int screen_id = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
+    char *screen_name = opts->fullscreen ? opts->fsscreen_name : opts->screen_name;
     struct vo_wayland_output *output = NULL;
     struct vo_wayland_output *fallback_output = NULL;
     wl_list_for_each(output, &wl->output_list, link) {
@@ -1639,9 +1640,9 @@ static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
     if (!fallback_output) {
         MP_ERR(wl, "No screens could be found!\n");
         return NULL;
-    } else if (wl->vo_opts->fsscreen_id >= 0) {
+    } else if (screen_id >= 0) {
         MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", screen_id);
-    } else if (wl->vo_opts->fsscreen_name) {
+    } else if (screen_name && screen_name[0]) {
         MP_WARN(wl, "Screen name %s not found/unavailable! Falling back to screen 0!\n", screen_name);
     }
     return fallback_output;
