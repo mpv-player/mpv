@@ -122,6 +122,7 @@ static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_typ
     pthread_mutexattr_settype(&attr, mutex_type);
     ret = pthread_mutex_init(mutex, &attr);
     pthread_mutexattr_destroy(&attr);
+    assert(!ret);
     return ret;
 }
 

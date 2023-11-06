@@ -51,9 +51,6 @@ static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_typ
     return 0;
 }
 
-#define mp_mutex_init_type(mutex, mtype) \
-    assert(!mp_mutex_init_type_internal(mutex, mtype))
-
 static inline int mp_mutex_destroy(mp_mutex *mutex)
 {
     if (mutex->use_cs)
