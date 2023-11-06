@@ -626,7 +626,7 @@ bool vo_x11_init(struct vo *vo)
 
     x11_error_output = x11->log;
     XSetErrorHandler(x11_errorhandler);
-    x11->present = mp_present_initialize(x11, VO_MAX_SWAPCHAIN_DEPTH);
+    x11->present = mp_present_initialize(x11, x11->opts, VO_MAX_SWAPCHAIN_DEPTH);
 
     dispName = XDisplayName(NULL);
 
