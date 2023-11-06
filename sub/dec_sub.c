@@ -32,6 +32,8 @@
 #include "misc/dispatch.h"
 #include "osdep/threads.h"
 
+#define PKT_CACHE 10
+
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
 
@@ -68,7 +70,7 @@ struct dec_sub {
     struct sd *sd;
 
     struct demux_packet *new_segment;
-    struct demux_packet *cached_pkts[2];
+    struct demux_packet *cached_pkts[PKT_CACHE];
 };
 
 static void update_subtitle_speed(struct dec_sub *sub)
@@ -194,6 +196,30 @@ struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
 }
 
 // Called locked.
+static void update_cached_packets(struct dec_sub *sub, struct demux_packet *pkt,
+                                  double video_pts)
+{
+    // Unconditionally cleared.
+    if (sub->cached_pkts[PKT_CACHE - 1])
+        TA_FREEP(&sub->cached_pkts[PKT_CACHE - 1]);
+
+    // Always save at least 2 packets but allow up to PKT_CACHE
+    // for subs with overlapping durations.
+    int i = PKT_CACHE;
+    while (--i) {
+        struct demux_packet *prev_pkt = sub->cached_pkts[i - 1];
+        if (prev_pkt) {
+            double prev_pkt_end = prev_pkt->pts + prev_pkt->duration;
+            if (sub->cached_pkts[i] && prev_pkt_end < video_pts)
+                TA_FREEP(&sub->cached_pkts[i]);
+            sub->cached_pkts[i] = prev_pkt;
+            sub->cached_pkts[i - 1] = NULL;
+        }
+    }
+    sub->cached_pkts[0] = pkt;
+}
+
+// Called locked.
 static void update_segment(struct dec_sub *sub)
 {
     if (sub->new_segment && sub->last_vo_pts != MP_NOPTS_VALUE &&
@@ -309,15 +335,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
         if (sub->recorder_sink)
             mp_recorder_feed_packet(sub->recorder_sink, pkt);
 
-
-        // Update cached packets
-        if (sub->cached_pkts[0]) {
-            if (sub->cached_pkts[1])
-                talloc_free(sub->cached_pkts[1]);
-            sub->cached_pkts[1] = sub->cached_pkts[0];
-        }
-        sub->cached_pkts[0] = pkt;
-
+        update_cached_packets(sub, pkt, video_pts);
         sub->last_pkt_pts = pkt->pts;
 
         if (is_new_segment(sub, pkt)) {
@@ -339,10 +357,10 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
 void sub_redecode_cached_packets(struct dec_sub *sub)
 {
     mp_mutex_lock(&sub->lock);
-    if (sub->cached_pkts[0])
-        sub->sd->driver->decode(sub->sd, sub->cached_pkts[0]);
-    if (sub->cached_pkts[1])
-        sub->sd->driver->decode(sub->sd, sub->cached_pkts[1]);
+    for (int i = 0; i < PKT_CACHE; i++) {
+        if (sub->cached_pkts[i])
+            sub->sd->driver->decode(sub->sd, sub->cached_pkts[i]);
+    }
     mp_mutex_unlock(&sub->lock);
 }
 
@@ -417,8 +435,8 @@ void sub_reset(struct dec_sub *sub)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
-    TA_FREEP(&sub->cached_pkts[0]);
-    TA_FREEP(&sub->cached_pkts[1]);
+    for (int i = 0; i < PKT_CACHE; i++)
+        TA_FREEP(&sub->cached_pkts[i]);
     TA_FREEP(&sub->new_segment);
     mp_mutex_unlock(&sub->lock);
 }
