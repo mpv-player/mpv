@@ -17,6 +17,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+
 #include <libplacebo/colorspace.h>
 #include <libplacebo/options.h>
 #include <libplacebo/renderer.h>
@@ -1516,51 +1518,49 @@ static void load_cache_files(struct priv *p)
         }
         talloc_free(shader_cache);
     }
-    if (icc_cache) {
-        if (!same_cache) {
-            FILE *cache = fopen(icc_cache, "rb");
-            if (cache) {
-                int ret = pl_cache_load_file(p->icc_cache, cache);
-                fclose(cache);
-                if (ret < 0)
-                    MP_WARN(p, "Failed loading cache from %s\n", icc_cache);
-            }
+    if (icc_cache && !same_cache) {
+        FILE *cache = fopen(icc_cache, "rb");
+        if (cache) {
+            int ret = pl_cache_load_file(p->icc_cache, cache);
+            fclose(cache);
+            if (ret < 0)
+                MP_WARN(p, "Failed loading cache from %s\n", icc_cache);
         }
-        talloc_free(icc_cache);
     }
+    talloc_free(icc_cache);
 }
 
 static void save_cache_files(struct priv *p)
 {
+    void *ta_ctx = talloc_new(NULL);
     char *icc_cache = get_cache_file(p, "icc");
     char *shader_cache = get_cache_file(p, "shader");
+    talloc_steal(ta_ctx, icc_cache);
+    talloc_steal(ta_ctx, shader_cache);
+
     bool same_cache = false;
     if (icc_cache && shader_cache)
         same_cache = strcmp(icc_cache, shader_cache) == 0;
-    if (shader_cache) {
-        FILE *cache = fopen(shader_cache, "wb");
-        if (cache) {
-            int ret = pl_cache_save_file(p->shader_cache, cache);
-            if (same_cache)
-                pl_cache_save_file(p->icc_cache, cache);
-            fclose(cache);
-            if (ret < 0)
-                MP_WARN(p, "Failed saving cache to %s\n", shader_cache);
-        }
-        talloc_free(shader_cache);
+    for (int i = 0; i < 2; i++) {
+        const char *target_file = i == 0 ? shader_cache : icc_cache;
+        pl_cache target_cache = i == 0 ? p->shader_cache : p->icc_cache;
+
+        if (!target_file)
+            continue;
+        FILE *cache = fopen(target_file, "wb");
+        if (!cache)
+            continue;
+        int ret = pl_cache_save_file(target_cache, cache);
+        if (same_cache)
+            ret += pl_cache_save_file(p->icc_cache, cache);
+        fclose(cache);
+        if (ret < 0)
+            MP_WARN(p, "Failed saving cache to %s\n", target_file);
+
+        if (same_cache)
+            break;
     }
-    if (icc_cache) {
-        if (!same_cache) {
-            FILE *cache = fopen(icc_cache, "wb");
-            if (cache) {
-                int ret = pl_cache_save_file(p->icc_cache, cache);
-                fclose(cache);
-                if (ret < 0)
-                    MP_WARN(p, "Failed saving cache to %s\n", icc_cache);
-            }
-        }
-        talloc_free(icc_cache);
-    }
+    talloc_free(ta_ctx);
 }
 
 
