@@ -24,9 +24,12 @@
 #include <audioclient.h>
 #include <d3d9.h>
 #include <dxgi1_2.h>
+#include <ole2.h>
+#include <shobjidl.h>
 
 #include "common/common.h"
 #include "windows_utils.h"
+#include "mpv_talloc.h"
 
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
 {
@@ -226,4 +229,23 @@ bool mp_w32_create_anon_pipe(HANDLE *server, HANDLE *client,
 error:
     *server = *client = INVALID_HANDLE_VALUE;
     return false;
+}
+
+wchar_t *mp_w32_get_shell_link_target(wchar_t *path)
+{
+    IShellLink *psl = NULL;
+    IPersistFile *ppf = NULL;
+    wchar_t *buf = talloc_array(NULL, wchar_t, MAX_PATH + 1);
+
+    if (FAILED(CoCreateInstance(&CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, &IID_IShellLinkW, (void**)&psl)) ||
+        FAILED(IShellLinkW_QueryInterface(psl, &IID_IPersistFile, (void**)&ppf)) ||
+        FAILED(IPersistFile_Load(ppf, path, STGM_READ)) ||
+        FAILED(IShellLinkW_GetPath(psl, buf, MAX_PATH, NULL, 0)))
+    {
+        TA_FREEP(&buf);
+    }
+
+    SAFE_RELEASE(psl);
+    SAFE_RELEASE(ppf);
+    return buf;
 }
