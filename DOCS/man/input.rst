@@ -921,13 +921,6 @@ Input Commands that are Possibly Subject to Change
     <remove>
         Like ``toggle``, but always remove the given filter from the chain.
 
-    <del>
-        Remove the given filters from the video chain. Unlike in the other
-        cases, the second parameter is a comma separated list of filter names
-        or integer indexes. ``0`` would denote the first filter. Negative
-        indexes start from the last filter, and ``-1`` denotes the last
-        filter. Deprecated, use ``remove``.
-
     <clr>
         Remove all filters. Note that like the other sub-commands, this does
         not control automatically inserted filters.
