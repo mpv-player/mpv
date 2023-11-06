@@ -216,7 +216,7 @@ static const m_option_t mp_vo_opt_list[] = {
 #if HAVE_EGL_ANDROID
     {"android-surface-size", OPT_SIZE_BOX(android_surface_size)},
 #endif
-    {"swapchain-depth", OPT_INT(swapchain_depth), M_RANGE(1, 8)},
+    {"swapchain-depth", OPT_INT(swapchain_depth), M_RANGE(1, VO_MAX_SWAPCHAIN_DEPTH)},
     {"override-display-fps", OPT_REPLACED("display-fps-override")},
     {0}
 };

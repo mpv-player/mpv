@@ -192,6 +192,7 @@ enum {
 };
 
 #define VO_MAX_REQ_FRAMES 10
+#define VO_MAX_SWAPCHAIN_DEPTH 8
 
 struct vo;
 struct osd_state;
