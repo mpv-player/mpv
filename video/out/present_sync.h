@@ -50,9 +50,6 @@ void present_sync_get_info(struct mp_present *present, struct vo_vsync_info *inf
 // Called after every buffer swap to update presentation statistics.
 void present_sync_swap(struct mp_present *present);
 
-// Zero the entire list but keep the items.
-void present_sync_clear_values(struct mp_present *present);
-
 // Called anytime the backend delivers new ust/msc values.
 void present_sync_update_values(struct mp_present *present, int64_t ust,
                                 int64_t msc);
