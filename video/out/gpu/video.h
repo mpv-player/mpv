@@ -183,7 +183,8 @@ enum {
     RENDER_FRAME_SUBS = 1 << 0,
     RENDER_FRAME_OSD = 1 << 1,
     RENDER_FRAME_VF_SUBS = 1 << 2,
-    RENDER_FRAME_DEF = RENDER_FRAME_SUBS | RENDER_FRAME_OSD,
+    RENDER_SCREEN_COLOR = 1 << 3, // 3D LUT and dithering
+    RENDER_FRAME_DEF = RENDER_FRAME_SUBS | RENDER_FRAME_OSD | RENDER_SCREEN_COLOR,
 };
 
 struct gl_video *gl_video_init(struct ra *ra, struct mp_log *log,

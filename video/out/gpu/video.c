@@ -2551,7 +2551,7 @@ static void pass_scale_main(struct gl_video *p)
 // If OSD is true, ignore any changes that may have been made to the video
 // by previous passes (i.e. linear scaling)
 static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
-                             struct mp_colorspace fbo_csp, bool osd)
+                             struct mp_colorspace fbo_csp, int flags, bool osd)
 {
     struct ra *ra = p->ra;
 
@@ -2588,7 +2588,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     if (dst.gamma == MP_CSP_TRC_HLG)
         dst.light = MP_CSP_LIGHT_SCENE_HLG;
 
-    if (p->use_lut_3d) {
+    if (p->use_lut_3d && (flags & RENDER_SCREEN_COLOR)) {
         // The 3DLUT is always generated against the video's original source
         // space, *not* the reference space. (To avoid having to regenerate
         // the 3DLUT for the OSD on every frame)
@@ -2719,7 +2719,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     // Adapt from src to dst as necessary
     pass_color_map(p->sc, p->use_linear && !osd, src, dst, &tone_map);
 
-    if (p->use_lut_3d) {
+    if (p->use_lut_3d && (flags & RENDER_SCREEN_COLOR)) {
         gl_sc_uniform_texture(p->sc, "lut_3d", p->lut_3d_texture);
         GLSL(vec3 cpos;)
         for (int i = 0; i < 3; i++)
@@ -2914,7 +2914,7 @@ static void pass_draw_osd(struct gl_video *p, int osd_flags, int frame_flags,
                 .light = MP_CSP_LIGHT_DISPLAY,
             };
 
-            pass_colormanage(p, csp_srgb, fbo.color_space, true);
+            pass_colormanage(p, csp_srgb, fbo.color_space, frame_flags, true);
         }
         mpgl_osd_draw_finish(p->osd, n, p->sc, fbo);
     }
@@ -3053,7 +3053,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
     return true;
 }
 
-static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
+static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo, int flags)
 {
     if (p->dumb_mode)
         pass_render_frame_dumb(p);
@@ -3065,7 +3065,7 @@ static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
-    pass_colormanage(p, p->image_params.color, fbo.color_space, false);
+    pass_colormanage(p, p->image_params.color, fbo.color_space, flags, false);
 
     // Since finish_pass_fbo doesn't work with compute shaders, and neither
     // does the checkerboard/dither code, we may need an indirection via
@@ -3098,7 +3098,8 @@ static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo)
 
     pass_opt_hook_point(p, "OUTPUT", NULL);
 
-    pass_dither(p);
+    if (flags & RENDER_SCREEN_COLOR)
+        pass_dither(p);
     pass_describe(p, "output to screen");
     finish_pass_fbo(p, fbo, false, &p->dst_rect);
 }
@@ -3297,7 +3298,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
                  t->ideal_frame_duration, t->vsync_interval, mix);
         p->is_interpolated = true;
     }
-    pass_draw_to_screen(p, fbo);
+    pass_draw_to_screen(p, fbo, flags);
 
     p->frames_drawn += 1;
 }
@@ -3381,7 +3382,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                         p->output_tex_valid = true;
                     }
                 }
-                pass_draw_to_screen(p, dest_fbo);
+                pass_draw_to_screen(p, dest_fbo, flags);
             }
 
             // "output tex valid" and "output tex needed" are equivalent
@@ -3517,6 +3518,8 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
         flags |= RENDER_FRAME_SUBS;
     if (args->osd)
         flags |= RENDER_FRAME_OSD;
+    if (args->scaled)
+        flags |= RENDER_SCREEN_COLOR;
     gl_video_render_frame(p, nframe, (struct ra_fbo){target}, flags);
 
     res = mp_image_alloc(mpfmt, params.w, params.h);
