@@ -943,7 +943,6 @@ int vo_drm_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_RESUME:
         drm->paused = false;
-        present_sync_clear_values(drm->present);
         return VO_TRUE;
     }
     return VO_NOTIMPL;
