@@ -3005,6 +3005,13 @@ Window
         explicitly. It's also possible that the window manager provides native
         features to control which screens application windows should use.
 
+    .. admonition:: Note (Wayland)
+
+        This option does not actually work on wayland since window placement is
+        not allowed. However setting this option does influence mpv's initial
+        guess at finding an output which may be useful for options like
+        ``--geometry`` or ``--autofit`` which depend on the monitor resolution.
+
     See also ``--fs-screen``.
 
 ``--screen-name=<string>``
