@@ -1422,3 +1422,13 @@ int lookup_keymap_table(const struct mp_keymap *map, int key)
         map++;
     return map->to;
 }
+
+struct mp_image_params vo_get_current_params(struct vo *vo)
+{
+    struct mp_image_params p = {0};
+    mp_mutex_lock(&vo->in->lock);
+    if (vo->params)
+        p = *vo->params;
+    mp_mutex_unlock(&vo->in->lock);
+    return p;
+}
