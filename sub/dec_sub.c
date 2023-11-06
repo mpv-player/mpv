@@ -321,7 +321,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
         sub->last_pkt_pts = pkt->pts;
 
         if (is_new_segment(sub, pkt)) {
-            sub->new_segment = pkt;
+            sub->new_segment = demux_copy_packet(pkt);
             // Note that this can be delayed to a much later point in time.
             update_segment(sub);
             break;
