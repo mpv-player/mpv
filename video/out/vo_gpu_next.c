@@ -1240,7 +1240,11 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     // Create target FBO, try high bit depth first
     int mpfmt;
     for (int depth = args->high_bit_depth ? 16 : 8; depth; depth -= 8) {
-        mpfmt = depth == 16 ? IMGFMT_RGBA64 : IMGFMT_RGBA;
+        if (depth == 16) {
+            mpfmt = IMGFMT_RGBA64;
+        } else {
+            mpfmt = p->ra_ctx->opts.want_alpha ? IMGFMT_RGBA : IMGFMT_RGB0;
+        }
         pl_fmt fmt = pl_find_fmt(gpu, PL_FMT_UNORM, 4, depth, depth,
                                  PL_FMT_CAP_RENDERABLE | PL_FMT_CAP_HOST_READABLE);
         if (!fmt)
