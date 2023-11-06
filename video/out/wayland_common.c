@@ -2282,7 +2282,7 @@ bool vo_wayland_init(struct vo *vo)
         wl->fback_pool->len = VO_MAX_SWAPCHAIN_DEPTH;
         wl->fback_pool->fback = talloc_zero_array(wl->fback_pool, struct wp_presentation_feedback *,
                                                   wl->fback_pool->len);
-        wl->present = mp_present_initialize(wl, VO_MAX_SWAPCHAIN_DEPTH);
+        wl->present = mp_present_initialize(wl, wl->vo_opts, VO_MAX_SWAPCHAIN_DEPTH);
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_presentation_interface.name);

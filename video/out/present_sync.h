@@ -39,9 +39,10 @@ struct mp_present_entry {
 
 struct mp_present {
     struct mp_present_entry *head, *tail;
+    struct mp_vo_opts *opts;
 };
 
-struct mp_present *mp_present_initialize(void *talloc_ctx, int entries);
+struct mp_present *mp_present_initialize(void *talloc_ctx, struct mp_vo_opts *opts, int entries);
 
 // Used during the get_vsync call to deliver the presentation statistics to the VO.
 void present_sync_get_info(struct mp_present *present, struct vo_vsync_info *info);
