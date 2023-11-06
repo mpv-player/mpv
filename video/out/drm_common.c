@@ -1030,7 +1030,7 @@ bool vo_drm_init(struct vo *vo)
 
     drm->ev.version = DRM_EVENT_CONTEXT_VERSION;
     drm->ev.page_flip_handler = &drm_pflip_cb;
-    drm->present = mp_present_initialize(drm, 8); // max swapchain depth allowed
+    drm->present = mp_present_initialize(drm, VO_MAX_SWAPCHAIN_DEPTH);
 
     return true;
 
