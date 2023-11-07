@@ -27,10 +27,6 @@
 #include "context.h"
 #include "ra_d3d11.h"
 
-static int dxgi_validate_adapter(struct mp_log *log,
-                                 const struct m_option *opt,
-                                 struct bstr name, const char **value);
-
 struct d3d11_opts {
     int feature_level;
     int warp;
@@ -62,7 +58,7 @@ const struct m_sub_options d3d11_conf = {
         {"d3d11-flip", OPT_BOOL(flip)},
         {"d3d11-sync-interval", OPT_INT(sync_interval), M_RANGE(0, 4)},
         {"d3d11-adapter", OPT_STRING_VALIDATE(adapter_name,
-                                              dxgi_validate_adapter)},
+                                              mp_dxgi_validate_adapter)},
         {"d3d11-output-format", OPT_CHOICE(output_format,
             {"auto",     DXGI_FORMAT_UNKNOWN},
             {"rgba8",    DXGI_FORMAT_R8G8B8A8_UNORM},
@@ -108,37 +104,6 @@ struct priv {
     int64_t vsync_duration_qpc;
     int64_t last_submit_qpc;
 };
-
-static int dxgi_validate_adapter(struct mp_log *log,
-                                 const struct m_option *opt,
-                                 struct bstr name, const char **value)
-{
-    struct bstr param = bstr0(*value);
-    bool help = bstr_equals0(param, "help");
-    bool adapter_matched = false;
-    struct bstr listing = { 0 };
-
-    if (bstr_equals0(param, "")) {
-        return 0;
-    }
-
-    adapter_matched = mp_dxgi_list_or_verify_adapters(log,
-                                                      help ? bstr0(NULL) : param,
-                                                      help ? &listing : NULL);
-
-    if (help) {
-        mp_info(log, "Available DXGI adapters:\n%.*s",
-                BSTR_P(listing));
-        talloc_free(listing.start);
-        return M_OPT_EXIT;
-    }
-
-    if (!adapter_matched) {
-        mp_err(log, "No adapter matching '%.*s'!\n", BSTR_P(param));
-    }
-
-    return adapter_matched ? 0 : M_OPT_INVALID;
-}
 
 static struct ra_tex *get_backbuffer(struct ra_ctx *ctx)
 {

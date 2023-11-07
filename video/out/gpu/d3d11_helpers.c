@@ -371,9 +371,9 @@ static int get_feature_levels(int max_fl, int min_fl,
     return len;
 }
 
-static IDXGIAdapter1 *get_dxgi_adapter(struct mp_log *log,
-                                       struct bstr requested_adapter_name,
-                                       struct bstr *listing)
+IDXGIAdapter1 *mp_get_dxgi_adapter(struct mp_log *log,
+                                   bstr requested_adapter_name,
+                                   bstr *listing)
 {
     HRESULT hr = S_OK;
     IDXGIFactory1 *factory;
@@ -437,6 +437,37 @@ static IDXGIAdapter1 *get_dxgi_adapter(struct mp_log *log,
     return picked_adapter;
 }
 
+int mp_dxgi_validate_adapter(struct mp_log *log,
+                             const struct m_option *opt,
+                             struct bstr name, const char **value)
+{
+    struct bstr param = bstr0(*value);
+    bool help = bstr_equals0(param, "help");
+    bool adapter_matched = false;
+    struct bstr listing = { 0 };
+
+    if (bstr_equals0(param, "")) {
+        return 0;
+    }
+
+    adapter_matched = mp_dxgi_list_or_verify_adapters(log,
+                                                      help ? bstr0(NULL) : param,
+                                                      help ? &listing : NULL);
+
+    if (help) {
+        mp_info(log, "Available DXGI adapters:\n%.*s",
+                BSTR_P(listing));
+        talloc_free(listing.start);
+        return M_OPT_EXIT;
+    }
+
+    if (!adapter_matched) {
+        mp_err(log, "No adapter matching '%.*s'!\n", BSTR_P(param));
+    }
+
+    return adapter_matched ? 0 : M_OPT_INVALID;
+}
+
 static HRESULT create_device(struct mp_log *log, IDXGIAdapter1 *adapter,
                              bool warp, bool debug, int max_fl, int min_fl,
                              ID3D11Device **dev)
@@ -465,7 +496,7 @@ bool mp_dxgi_list_or_verify_adapters(struct mp_log *log,
         return false;
     }
 
-    if ((picked_adapter = get_dxgi_adapter(log, adapter_name, listing))) {
+    if ((picked_adapter = mp_get_dxgi_adapter(log, adapter_name, listing))) {
         SAFE_RELEASE(picked_adapter);
         return true;
     }
@@ -497,7 +528,7 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
         goto done;
     }
 
-    adapter = get_dxgi_adapter(log, bstr0(adapter_name), NULL);
+    adapter = mp_get_dxgi_adapter(log, bstr0(adapter_name), NULL);
 
     if (adapter_name && !adapter) {
         mp_warn(log, "Adapter matching '%s' was not found in the system! "
