@@ -21,6 +21,7 @@
 
 #include "vaapi.h"
 #include "common/common.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "osdep/threads.h"
 #include "mp_image.h"
@@ -166,8 +167,8 @@ bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx)
 }
 
 struct va_native_display {
-    void (*create)(VADisplay **out_display, void **out_native_ctx,
-                   const char *path);
+    void (*create)(struct mp_log *log, VADisplay **out_display,
+                   void **out_native_ctx, const char *path);
     void (*destroy)(void *native_ctx);
 };
 
@@ -180,8 +181,8 @@ static void x11_destroy(void *native_ctx)
     XCloseDisplay(native_ctx);
 }
 
-static void x11_create(VADisplay **out_display, void **out_native_ctx,
-                       const char *path)
+static void x11_create(struct mp_log *log, VADisplay **out_display,
+                       void **out_native_ctx, const char *path)
 {
     void *native_display = XOpenDisplay(NULL);
     if (!native_display)
@@ -216,8 +217,8 @@ static void drm_destroy(void *native_ctx)
     talloc_free(ctx);
 }
 
-static void drm_create(VADisplay **out_display, void **out_native_ctx,
-                       const char *path)
+static void drm_create(struct mp_log *log, VADisplay **out_display,
+                       void **out_native_ctx, const char *path)
 {
     int drm_fd = open(path, O_RDWR);
     if (drm_fd < 0)
@@ -260,7 +261,7 @@ static struct AVBufferRef *va_create_standalone(struct mpv_global *global,
     for (int n = 0; native_displays[n]; n++) {
         VADisplay *display = NULL;
         void *native_ctx = NULL;
-        native_displays[n]->create(&display, &native_ctx, opts->path);
+        native_displays[n]->create(global->log, &display, &native_ctx, opts->path);
         if (display) {
             struct mp_vaapi_ctx *ctx =
                 va_initialize(display, log, params->probing);
