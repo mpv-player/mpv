@@ -18,7 +18,6 @@
 #ifndef MP_AO_INTERNAL_H_
 #define MP_AO_INTERNAL_H_
 
-#include <pthread.h>
 #include <stdatomic.h>
 #include <stdbool.h>
 

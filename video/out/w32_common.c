@@ -17,7 +17,6 @@
 
 #include <assert.h>
 #include <limits.h>
-#include <pthread.h>
 #include <stdatomic.h>
 #include <stdio.h>
 
@@ -91,7 +90,7 @@ struct vo_w32_state {
     struct m_config_cache *opts_cache;
     struct input_ctx *input_ctx;
 
-    pthread_t thread;
+    mp_thread thread;
     bool terminate;
     struct mp_dispatch_queue *dispatch; // used to run stuff on the GUI thread
     bool in_dispatch;
@@ -223,38 +222,42 @@ static LRESULT borderless_nchittest(struct vo_w32_state *w32, int x, int y)
     if (IsMaximized(w32->window))
         return HTCLIENT;
 
-    POINT mouse = { x, y };
-    ScreenToClient(w32->window, &mouse);
+    RECT rc;
+    if (!GetWindowRect(w32->window, &rc))
+        return HTNOWHERE;
 
-    // The horizontal frame should be the same size as the vertical frame,
-    // since the NONCLIENTMETRICS structure does not distinguish between them
-    int frame_size = GetSystemMetrics(SM_CXFRAME) +
-                     GetSystemMetrics(SM_CXPADDEDBORDER);
-    // The diagonal size handles are slightly wider than the side borders
-    int diagonal_width = frame_size * 2 + GetSystemMetrics(SM_CXBORDER);
+    POINT frame = {GetSystemMetrics(SM_CXSIZEFRAME),
+                   GetSystemMetrics(SM_CYSIZEFRAME)};
+    if (w32->opts->border) {
+        frame.x += GetSystemMetrics(SM_CXPADDEDBORDER);
+        frame.y += GetSystemMetrics(SM_CXPADDEDBORDER);
+        if (!w32->opts->title_bar)
+            rc.top -= GetSystemMetrics(SM_CXPADDEDBORDER);
+    }
+    InflateRect(&rc, -frame.x, -frame.y);
 
     // Hit-test top border
-    if (mouse.y < frame_size) {
-        if (mouse.x < diagonal_width)
+    if (y < rc.top) {
+        if (x < rc.left)
             return HTTOPLEFT;
-        if (mouse.x >= rect_w(w32->windowrc) - diagonal_width)
+        if (x > rc.right)
             return HTTOPRIGHT;
         return HTTOP;
     }
 
     // Hit-test bottom border
-    if (mouse.y >= rect_h(w32->windowrc) - frame_size) {
-        if (mouse.x < diagonal_width)
+    if (y > rc.bottom) {
+        if (x < rc.left)
             return HTBOTTOMLEFT;
-        if (mouse.x >= rect_w(w32->windowrc) - diagonal_width)
+        if (x > rc.right)
             return HTBOTTOMRIGHT;
         return HTBOTTOM;
     }
 
     // Hit-test side borders
-    if (mouse.x < frame_size)
+    if (x < rc.left)
         return HTLEFT;
-    if (mouse.x >= rect_w(w32->windowrc) - frame_size)
+    if (x > rc.right)
         return HTRIGHT;
     return HTCLIENT;
 }
@@ -1510,7 +1513,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
-static pthread_once_t window_class_init_once = PTHREAD_ONCE_INIT;
+static mp_once window_class_init_once = MP_STATIC_ONCE_INITIALIZER;
 static ATOM window_class;
 static void register_window_class(void)
 {
@@ -1528,7 +1531,7 @@ static void register_window_class(void)
 
 static ATOM get_window_class(void)
 {
-    pthread_once(&window_class_init_once, register_window_class);
+    mp_exec_once(&window_class_init_once, register_window_class);
     return window_class;
 }
 
@@ -1728,13 +1731,13 @@ static void w32_api_load(struct vo_w32_state *w32)
                 (void *)GetProcAddress(uxtheme_dll, MAKEINTRESOURCEA(135));
 }
 
-static void *gui_thread(void *ptr)
+static MP_THREAD_VOID gui_thread(void *ptr)
 {
     struct vo_w32_state *w32 = ptr;
     bool ole_ok = false;
     int res = 0;
 
-    mpthread_set_name("window");
+    mp_thread_set_name("window");
 
     w32_api_load(w32);
 
@@ -1847,7 +1850,7 @@ done:
     if (ole_ok)
         OleUninitialize();
     SetThreadExecutionState(ES_CONTINUOUS);
-    return NULL;
+    MP_THREAD_RETURN();
 }
 
 bool vo_w32_init(struct vo *vo)
@@ -1865,11 +1868,11 @@ bool vo_w32_init(struct vo *vo)
     w32->opts = w32->opts_cache->opts;
     vo->w32 = w32;
 
-    if (pthread_create(&w32->thread, NULL, gui_thread, w32))
+    if (mp_thread_create(&w32->thread, gui_thread, w32))
         goto fail;
 
     if (!mp_rendezvous(w32, 0)) { // init barrier
-        pthread_join(w32->thread, NULL);
+        mp_thread_join(w32->thread);
         goto fail;
     }
 
@@ -2120,7 +2123,7 @@ void vo_w32_uninit(struct vo *vo)
         return;
 
     mp_dispatch_run(w32->dispatch, do_terminate, w32);
-    pthread_join(w32->thread, NULL);
+    mp_thread_join(w32->thread);
 
     AvRevertMmThreadCharacteristics(w32->avrt_handle);
 

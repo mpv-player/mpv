@@ -1159,7 +1159,7 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     int64_t sec = (uint64_t) tv_sec_lo + ((uint64_t) tv_sec_hi << 32);
     int64_t ust = MP_TIME_S_TO_NS(sec) + (uint64_t) tv_nsec;
     int64_t msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
-    present_update_sync_values(wl->present, ust, msc);
+    present_sync_update_values(wl->present, ust, msc);
 }
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
@@ -1620,8 +1620,9 @@ static void guess_focus(struct vo_wayland_state *wl)
 static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
 {
     int index = 0;
-    int screen_id = wl->vo_opts->fsscreen_id;
-    char *screen_name = wl->vo_opts->fsscreen_name;
+    struct mp_vo_opts *opts = wl->vo_opts;
+    int screen_id = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
+    char *screen_name = opts->fullscreen ? opts->fsscreen_name : opts->screen_name;
     struct vo_wayland_output *output = NULL;
     struct vo_wayland_output *fallback_output = NULL;
     wl_list_for_each(output, &wl->output_list, link) {
@@ -1639,9 +1640,9 @@ static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
     if (!fallback_output) {
         MP_ERR(wl, "No screens could be found!\n");
         return NULL;
-    } else if (wl->vo_opts->fsscreen_id >= 0) {
+    } else if (screen_id >= 0) {
         MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", screen_id);
-    } else if (wl->vo_opts->fsscreen_name) {
+    } else if (screen_name && screen_name[0]) {
         MP_WARN(wl, "Screen name %s not found/unavailable! Falling back to screen 0!\n", screen_name);
     }
     return fallback_output;
@@ -2279,10 +2280,10 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->presentation) {
         wl->fback_pool = talloc_zero(wl, struct vo_wayland_feedback_pool);
         wl->fback_pool->wl = wl;
-        wl->fback_pool->len = 8; // max swapchain depth allowed
+        wl->fback_pool->len = VO_MAX_SWAPCHAIN_DEPTH;
         wl->fback_pool->fback = talloc_zero_array(wl->fback_pool, struct wp_presentation_feedback *,
                                                   wl->fback_pool->len);
-        wl->present = talloc_zero(wl, struct mp_present);
+        wl->present = mp_present_initialize(wl, wl->vo_opts, VO_MAX_SWAPCHAIN_DEPTH);
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_presentation_interface.name);
@@ -2560,8 +2561,8 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
      * 3. refresh rate of the output reported by the compositor
      * 4. make up crap if vblank_time is still <= 0 (better than nothing) */
 
-    if (wl->use_present)
-        vblank_time = wl->present->vsync_duration;
+    if (wl->use_present && wl->present->head)
+        vblank_time = wl->present->head->vsync_duration;
 
     if (vblank_time <= 0 && wl->refresh_interval > 0)
         vblank_time = wl->refresh_interval;

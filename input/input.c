@@ -17,7 +17,6 @@
 
 #include "config.h"
 
-#include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -54,8 +53,8 @@
 #include "osdep/macosx_events.h"
 #endif
 
-#define input_lock(ictx)    pthread_mutex_lock(&ictx->mutex)
-#define input_unlock(ictx)  pthread_mutex_unlock(&ictx->mutex)
+#define input_lock(ictx)    mp_mutex_lock(&ictx->mutex)
+#define input_unlock(ictx)  mp_mutex_unlock(&ictx->mutex)
 
 #define MP_MAX_KEY_DOWN 4
 
@@ -97,7 +96,7 @@ struct wheel_state {
 };
 
 struct input_ctx {
-    pthread_mutex_t mutex;
+    mp_mutex mutex;
     struct mp_log *log;
     struct mpv_global *global;
     struct m_config_cache *opts_cache;
@@ -1322,7 +1321,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
 
     ictx->opts = ictx->opts_cache->opts;
 
-    mpthread_mutex_init_recursive(&ictx->mutex);
+    mp_mutex_init_type(&ictx->mutex, MP_MUTEX_RECURSIVE);
 
     // Setup default section, so that it does nothing.
     mp_input_enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |
@@ -1414,7 +1413,7 @@ void mp_input_uninit(struct input_ctx *ictx)
     close_input_sources(ictx);
     clear_queue(&ictx->cmd_queue);
     talloc_free(ictx->current_down_cmd);
-    pthread_mutex_destroy(&ictx->mutex);
+    mp_mutex_destroy(&ictx->mutex);
     talloc_free(ictx);
 }
 
@@ -1534,7 +1533,7 @@ struct mpv_node mp_input_get_bindings(struct input_ctx *ictx)
 }
 
 struct mp_input_src_internal {
-    pthread_t thread;
+    mp_thread thread;
     bool thread_running;
     bool init_done;
 
@@ -1596,7 +1595,7 @@ static void mp_input_src_kill(struct mp_input_src *src)
             if (src->cancel)
                 src->cancel(src);
             if (src->in->thread_running)
-                pthread_join(src->in->thread, NULL);
+                mp_thread_join(src->in->thread);
             if (src->uninit)
                 src->uninit(src);
             talloc_free(src);
@@ -1610,19 +1609,19 @@ void mp_input_src_init_done(struct mp_input_src *src)
 {
     assert(!src->in->init_done);
     assert(src->in->thread_running);
-    assert(pthread_equal(src->in->thread, pthread_self()));
+    assert(mp_thread_id_equal(mp_thread_get_id(src->in->thread), mp_thread_current_id()));
     src->in->init_done = true;
     mp_rendezvous(&src->in->init_done, 0);
 }
 
-static void *input_src_thread(void *ptr)
+static MP_THREAD_VOID input_src_thread(void *ptr)
 {
     void **args = ptr;
     struct mp_input_src *src = args[0];
     void (*loop_fn)(struct mp_input_src *src, void *ctx) = args[1];
     void *ctx = args[2];
 
-    mpthread_set_name("input");
+    mp_thread_set_name("input");
 
     src->in->thread_running = true;
 
@@ -1631,7 +1630,7 @@ static void *input_src_thread(void *ptr)
     if (!src->in->init_done)
         mp_rendezvous(&src->in->init_done, -1);
 
-    return NULL;
+    MP_THREAD_RETURN();
 }
 
 int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
@@ -1642,7 +1641,7 @@ int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
         return -1;
 
     void *args[] = {src, loop_fn, ctx};
-    if (pthread_create(&src->in->thread, NULL, input_src_thread, args)) {
+    if (mp_thread_create(&src->in->thread, input_src_thread, args)) {
         mp_input_src_kill(src);
         return -1;
     }

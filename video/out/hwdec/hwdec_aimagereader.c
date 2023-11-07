@@ -18,7 +18,6 @@
  */
 
 #include <assert.h>
-#include <pthread.h>
 #include <dlfcn.h>
 #include <EGL/egl.h>
 #include <media/NdkImageReader.h>
@@ -28,6 +27,7 @@
 #include <libavutil/hwcontext_mediacodec.h>
 
 #include "misc/jni.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "video/out/gpu/hwdec.h"
 #include "video/out/opengl/ra_gl.h"
@@ -63,8 +63,8 @@ struct priv {
     AImage *image;
     EGLImageKHR egl_image;
 
-    pthread_mutex_t lock;
-    pthread_cond_t cond;
+    mp_mutex lock;
+    mp_cond cond;
     bool image_available;
 
     EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(
@@ -218,10 +218,10 @@ static void image_callback(void *context, AImageReader *reader)
 {
     struct priv *p = context;
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     p->image_available = true;
-    pthread_cond_signal(&p->cond);
-    pthread_mutex_unlock(&p->lock);
+    mp_cond_signal(&p->cond);
+    mp_mutex_unlock(&p->lock);
 }
 
 static int mapper_init(struct ra_hwdec_mapper *mapper)
@@ -231,8 +231,8 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     GL *gl = ra_gl_get(mapper->ra);
 
     p->log = mapper->log;
-    pthread_mutex_init(&p->lock, NULL);
-    pthread_cond_init(&p->cond, NULL);
+    mp_mutex_init(&p->lock);
+    mp_cond_init(&p->cond);
 
     p->CreateImageKHR = (void *)eglGetProcAddress("eglCreateImageKHR");
     p->DestroyImageKHR = (void *)eglGetProcAddress("eglDestroyImageKHR");
@@ -298,8 +298,8 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 
     ra_tex_free(mapper->ra, &mapper->tex[0]);
 
-    pthread_mutex_destroy(&p->lock);
-    pthread_cond_destroy(&p->cond);
+    mp_mutex_destroy(&p->lock);
+    mp_cond_destroy(&p->cond);
 }
 
 static void mapper_unmap(struct ra_hwdec_mapper *mapper)
@@ -332,16 +332,15 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     }
 
     bool image_available = false;
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     if (!p->image_available) {
-        struct timespec ts = mp_rel_time_to_timespec(0.1);
-        pthread_cond_timedwait(&p->cond, &p->lock, &ts);
+        mp_cond_timedwait(&p->cond, &p->lock, MP_TIME_MS_TO_NS(100));
         if (!p->image_available)
             MP_WARN(mapper, "Waiting for frame timed out!\n");
     }
     image_available = p->image_available;
     p->image_available = false;
-    pthread_mutex_unlock(&p->lock);
+    mp_mutex_unlock(&p->lock);
 
     media_status_t ret = o->AImageReader_acquireLatestImage(o->reader, &p->image);
     if (ret != AMEDIA_OK) {

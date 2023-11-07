@@ -77,12 +77,12 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
             // When changing the gamma function explicitly, also reset stuff
             // related to the gamma function since that information will almost
             // surely be false now and have to be re-inferred
-            out->color.sig_peak = 0.0;
+            out->color.hdr = (struct pl_hdr_metadata){0};
             out->color.light = MP_CSP_LIGHT_AUTO;
         }
     }
     if (p->sig_peak)
-        out->color.sig_peak = p->sig_peak;
+        out->color.hdr = (struct pl_hdr_metadata){ .max_luma = p->sig_peak * MP_REF_WHITE };
     if (p->light)
         out->color.light = p->light;
     if (p->chroma_location)

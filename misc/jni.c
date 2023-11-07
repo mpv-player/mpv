@@ -22,15 +22,15 @@
 #include <libavcodec/jni.h>
 #include <libavutil/mem.h>
 #include <libavutil/bprint.h>
-#include <pthread.h>
 #include <stdlib.h>
 
 #include "jni.h"
+#include "osdep/threads.h"
 
 static JavaVM *java_vm;
 static pthread_key_t current_env;
-static pthread_once_t once = PTHREAD_ONCE_INIT;
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static mp_once once = MP_STATIC_ONCE_INITIALIZER;
+static mp_static_mutex lock = MP_STATIC_MUTEX_INITIALIZER;
 
 static void jni_detach_env(void *data)
 {
@@ -49,7 +49,7 @@ JNIEnv *mp_jni_get_env(struct mp_log *log)
     int ret = 0;
     JNIEnv *env = NULL;
 
-    pthread_mutex_lock(&lock);
+    mp_mutex_lock(&lock);
     if (java_vm == NULL) {
         java_vm = av_jni_get_java_vm(NULL);
     }
@@ -59,7 +59,7 @@ JNIEnv *mp_jni_get_env(struct mp_log *log)
         goto done;
     }
 
-    pthread_once(&once, jni_create_pthread_key);
+    mp_exec_once(&once, jni_create_pthread_key);
 
     if ((env = pthread_getspecific(current_env)) != NULL) {
         goto done;
@@ -86,7 +86,7 @@ JNIEnv *mp_jni_get_env(struct mp_log *log)
     }
 
 done:
-    pthread_mutex_unlock(&lock);
+    mp_mutex_unlock(&lock);
     return env;
 }
 

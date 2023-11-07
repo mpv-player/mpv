@@ -60,11 +60,4 @@ void mp_end_hires_timers(int resolution_ms);
 // Takes care of possible overflows. Never returns a negative or 0 time.
 int64_t mp_time_ns_add(int64_t time_ns, double timeout_sec);
 
-// Convert the mp time in nanoseconds to a timespec using CLOCK_REALTIME.
-struct timespec mp_time_ns_to_realtime(int64_t time_ns);
-
-// Convert the relative timeout in seconds to a timespec.
-// The timespec is absolute, using CLOCK_REALTIME.
-struct timespec mp_rel_time_to_timespec(double timeout_sec);
-
 #endif /* MPLAYER_TIMER_H */

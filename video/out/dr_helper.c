@@ -1,20 +1,20 @@
 #include <assert.h>
-#include <pthread.h>
 #include <stdatomic.h>
 #include <stdlib.h>
 
 #include <libavutil/buffer.h>
 
-#include "mpv_talloc.h"
 #include "misc/dispatch.h"
+#include "mpv_talloc.h"
+#include "osdep/threads.h"
 #include "video/mp_image.h"
 
 #include "dr_helper.h"
 
 struct dr_helper {
-    pthread_mutex_t thread_lock;
-    pthread_t thread;
-    bool thread_valid; // (POSIX defines no "unset" pthread_t value yet)
+    mp_mutex thread_lock;
+    mp_thread_id thread_id;
+    bool thread_valid; // (POSIX defines no "unset" mp_thread value yet)
 
     struct mp_dispatch_queue *dispatch;
     atomic_ullong dr_in_flight;
@@ -32,7 +32,7 @@ static void dr_helper_destroy(void *ptr)
     // dangling pointers.
     assert(atomic_load(&dr->dr_in_flight) == 0);
 
-    pthread_mutex_destroy(&dr->thread_lock);
+    mp_mutex_destroy(&dr->thread_lock);
 }
 
 struct dr_helper *dr_helper_create(struct mp_dispatch_queue *dispatch,
@@ -48,27 +48,27 @@ struct dr_helper *dr_helper_create(struct mp_dispatch_queue *dispatch,
         .get_image = get_image,
         .get_image_ctx = get_image_ctx,
     };
-    pthread_mutex_init(&dr->thread_lock, NULL);
+    mp_mutex_init(&dr->thread_lock);
     return dr;
 }
 
 void dr_helper_acquire_thread(struct dr_helper *dr)
 {
-    pthread_mutex_lock(&dr->thread_lock);
+    mp_mutex_lock(&dr->thread_lock);
     assert(!dr->thread_valid); // fails on API user errors
     dr->thread_valid = true;
-    dr->thread = pthread_self();
-    pthread_mutex_unlock(&dr->thread_lock);
+    dr->thread_id = mp_thread_current_id();
+    mp_mutex_unlock(&dr->thread_lock);
 }
 
 void dr_helper_release_thread(struct dr_helper *dr)
 {
-    pthread_mutex_lock(&dr->thread_lock);
+    mp_mutex_lock(&dr->thread_lock);
     // Fails on API user errors.
     assert(dr->thread_valid);
-    assert(pthread_equal(dr->thread, pthread_self()));
+    assert(mp_thread_id_equal(dr->thread_id, mp_thread_current_id()));
     dr->thread_valid = false;
-    pthread_mutex_unlock(&dr->thread_lock);
+    mp_mutex_unlock(&dr->thread_lock);
 }
 
 struct free_dr_context {
@@ -92,10 +92,10 @@ static void free_dr_buffer_on_dr_thread(void *opaque, uint8_t *data)
     struct free_dr_context *ctx = opaque;
     struct dr_helper *dr = ctx->dr;
 
-    pthread_mutex_lock(&dr->thread_lock);
+    mp_mutex_lock(&dr->thread_lock);
     bool on_this_thread =
-        dr->thread_valid && pthread_equal(ctx->dr->thread, pthread_self());
-    pthread_mutex_unlock(&dr->thread_lock);
+        dr->thread_valid && mp_thread_id_equal(ctx->dr->thread_id, mp_thread_current_id());
+    mp_mutex_unlock(&dr->thread_lock);
 
     // The image could be unreffed even on the DR thread. In practice, this
     // matters most on DR destruction.

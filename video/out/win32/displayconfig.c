@@ -18,7 +18,6 @@
 #include <windows.h>
 #include <stdbool.h>
 #include <string.h>
-#include <pthread.h>
 
 #include "displayconfig.h"
 

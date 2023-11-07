@@ -18,18 +18,18 @@
 #ifndef MPLAYER_MP_CORE_H
 #define MPLAYER_MP_CORE_H
 
-#include <pthread.h>
 #include <stdatomic.h>
 #include <stdbool.h>
 
 #include "libmpv/client.h"
 
-#include "common/common.h"
-#include "filters/filter.h"
-#include "filters/f_output_chain.h"
-#include "options/options.h"
-#include "sub/osd.h"
 #include "audio/aframe.h"
+#include "common/common.h"
+#include "filters/f_output_chain.h"
+#include "filters/filter.h"
+#include "options/options.h"
+#include "osdep/threads.h"
+#include "sub/osd.h"
 #include "video/mp_image.h"
 #include "video/out/vo.h"
 
@@ -430,7 +430,7 @@ typedef struct MPContext {
 
     int64_t builtin_script_ids[5];
 
-    pthread_mutex_t abort_lock;
+    mp_mutex abort_lock;
 
     // --- The following fields are protected by abort_lock
     struct mp_abort_entry **abort_list;
@@ -438,7 +438,7 @@ typedef struct MPContext {
     bool abort_all; // during final termination
 
     // --- Owned by MPContext
-    pthread_t open_thread;
+    mp_thread open_thread;
     bool open_active; // open_thread is a valid thread handle, all setup
     atomic_bool open_done;
     // --- All fields below are immutable while open_active is true.

@@ -16,7 +16,6 @@
  */
 
 #include <limits.h>
-#include <pthread.h>
 #include <assert.h>
 
 #include <libavutil/mem.h>
@@ -28,6 +27,7 @@
 #include <libavutil/rational.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/mastering_display_metadata.h>
+#include <libplacebo/utils/libav.h>
 
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 16, 100)
 # include <libavutil/dovi_meta.h>
@@ -37,10 +37,12 @@
 
 #include "common/av_common.h"
 #include "common/common.h"
+#include "fmt-conversion.h"
 #include "hwdec.h"
 #include "mp_image.h"
+#include "osdep/threads.h"
 #include "sws_utils.h"
-#include "fmt-conversion.h"
+#include "out/placebo/utils.h"
 
 // Determine strides, plane sizes, and total required size for an image
 // allocation. Returns total size on success, <0 on error. Unused planes
@@ -776,8 +778,6 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
                         m_opt_choice_str(mp_csp_trc_names, p->color.gamma),
                         m_opt_choice_str(mp_csp_levels_names, p->color.levels),
                         m_opt_choice_str(mp_csp_light_names, p->color.light));
-        if (p->color.sig_peak)
-            mp_snprintf_cat(b, bs, " SP=%f", p->color.sig_peak);
         mp_snprintf_cat(b, bs, " CL=%s",
                         m_opt_choice_str(mp_chroma_names, p->chroma_location));
         if (mp_image_crop_valid(p)) {
@@ -955,20 +955,20 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->color.gamma = MP_CSP_TRC_AUTO;
     }
 
-    if (!params->color.sig_peak) {
+    if (!params->color.hdr.max_luma) {
         if (params->color.gamma == MP_CSP_TRC_HLG) {
-            params->color.sig_peak = 1000 / MP_REF_WHITE; // reference display
+            params->color.hdr.max_luma = 1000; // reference display
         } else {
             // If the signal peak is unknown, we're forced to pick the TRC's
             // nominal range as the signal peak to prevent clipping
-            params->color.sig_peak = mp_trc_nom_peak(params->color.gamma);
+            params->color.hdr.max_luma = mp_trc_nom_peak(params->color.gamma) * MP_REF_WHITE;
         }
     }
 
     if (!mp_trc_is_hdr(params->color.gamma)) {
         // Some clips have leftover HDR metadata after conversion to SDR, so to
         // avoid blowing up the tone mapping code, strip/sanitize it
-        params->color.sig_peak = 1.0;
+        params->color.hdr = pl_hdr_metadata_empty;
     }
 
     if (params->chroma_location == MP_CHROMA_AUTO) {
@@ -1061,20 +1061,14 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     if (sd)
         dst->icc_profile = sd->buf;
 
-    // Get the content light metadata if available
-    sd = av_frame_get_side_data(src, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL);
-    if (sd) {
-        AVContentLightMetadata *clm = (AVContentLightMetadata *)sd->data;
-        dst->params.color.sig_peak = clm->MaxCLL / MP_REF_WHITE;
-    }
-
-    // Otherwise, try getting the mastering metadata if available
-    sd = av_frame_get_side_data(src, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA);
-    if (!dst->params.color.sig_peak && sd) {
-        AVMasteringDisplayMetadata *mdm = (AVMasteringDisplayMetadata *)sd->data;
-        if (mdm->has_luminance)
-            dst->params.color.sig_peak = av_q2d(mdm->max_luminance) / MP_REF_WHITE;
-    }
+    AVFrameSideData *mdm = av_frame_get_side_data(src, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA);
+    AVFrameSideData *clm = av_frame_get_side_data(src, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL);
+    AVFrameSideData *dhp = av_frame_get_side_data(src, AV_FRAME_DATA_DYNAMIC_HDR_PLUS);
+    pl_map_hdr_metadata(&dst->params.color.hdr, &(struct pl_av_hdr_metadata) {
+        .mdm = (void *)(mdm ? mdm->data : NULL),
+        .clm = (void *)(clm ? clm->data : NULL),
+        .dhp = (void *)(dhp ? dhp->data : NULL),
+    });
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_A53_CC);
     if (sd)
@@ -1189,12 +1183,11 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
         new_ref->icc_profile = NULL;
     }
 
-    if (src->params.color.sig_peak) {
-        AVContentLightMetadata *clm =
-            av_content_light_metadata_create_side_data(dst);
-        MP_HANDLE_OOM(clm);
-        clm->MaxCLL = src->params.color.sig_peak * MP_REF_WHITE;
-    }
+    pl_avframe_set_color(dst, (struct pl_color_space){
+        .primaries = mp_prim_to_pl(src->params.color.primaries),
+        .transfer = mp_trc_to_pl(src->params.color.gamma),
+        .hdr = src->params.color.hdr,
+    });
 
     {
         AVFrameSideData *sd = av_frame_new_side_data(dst,

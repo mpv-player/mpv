@@ -921,13 +921,6 @@ Input Commands that are Possibly Subject to Change
     <remove>
         Like ``toggle``, but always remove the given filter from the chain.
 
-    <del>
-        Remove the given filters from the video chain. Unlike in the other
-        cases, the second parameter is a comma separated list of filter names
-        or integer indexes. ``0`` would denote the first filter. Negative
-        indexes start from the last filter, and ``-1`` denotes the last
-        filter. Deprecated, use ``remove``.
-
     <clr>
         Remove all filters. Note that like the other sub-commands, this does
         not control automatically inserted filters.
@@ -2476,7 +2469,7 @@ Property list
     ``video-params/gamma``
         The gamma function in use as string. (Exact values subject to change.)
 
-    ``video-params/sig-peak``
+    ``video-params/sig-peak`` (deprecated)
         The video file's tagged signal peak as float.
 
     ``video-params/light``
@@ -2496,6 +2489,33 @@ Property list
         Alpha type. If the format has no alpha channel, this will be unavailable
         (but in future releases, it could change to ``no``). If alpha is
         present, this is set to ``straight`` or ``premul``.
+
+    ``video-params/min-luma``
+        Minimum luminance, as reported by HDR10 metadata (in cd/m²)
+
+    ``video-params/max-luma``
+        Maximum luminance, as reported by HDR10 metadata (in cd/m²)
+
+    ``video-params/max-cll``
+        Maximum content light level, as reported by HDR10 metadata (in cd/m²)
+
+    ``video-params/max-fall``
+        Maximum frame average light level, as reported by HDR10 metadata (in cd/m²)
+
+    ``video-params/scene-max-r``
+        MaxRGB of a scene for R component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``video-params/scene-max-g``
+        MaxRGB of a scene for G component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``video-params/scene-max-b``
+        MaxRGB of a scene for B component, as reported by HDR10+ metadata (in cd/m²)
+
+    ``video-params/max-pq-y``
+        Maximum PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
+
+    ``video-params/avg-pq-y``
+        Average PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
@@ -2523,54 +2543,15 @@ Property list
             "stereo-in"         MPV_FORMAT_STRING
             "average-bpp"       MPV_FORMAT_INT64
             "alpha"             MPV_FORMAT_STRING
-
-``hdr-metadata``
-    Video HDR metadata per frame, including peak detection result.
-    This has a number of sub-properties:
-
-    ``hdr-metadata/min-luma``
-        Minimum luminance, as reported by HDR10 metadata (in cd/m²)
-
-    ``hdr-metadata/max-luma``
-        Maximum luminance, as reported by HDR10 metadata (in cd/m²)
-
-    ``hdr-metadata/max-cll``
-        Maximum content light level, as reported by HDR10 metadata (in cd/m²)
-
-    ``hdr-metadata/max-fall``
-        Maximum frame average light level, as reported by HDR10 metadata (in cd/m²)
-
-    ``hdr-metadata/scene-max-r``
-        MaxRGB of a scene for R component, as reported by HDR10+ metadata (in cd/m²)
-
-    ``hdr-metadata/scene-max-g``
-        MaxRGB of a scene for G component, as reported by HDR10+ metadata (in cd/m²)
-
-    ``hdr-metadata/scene-max-b``
-        MaxRGB of a scene for B component, as reported by HDR10+ metadata (in cd/m²)
-
-    ``hdr-metadata/max-pq-y``
-        Maximum PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
-
-    ``hdr-metadata/avg-pq-y``
-        Average PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
-
-    When querying the property with the client API using ``MPV_FORMAT_NODE``,
-    or with Lua ``mp.get_property_native``, this will return a mpv_node with
-    the following contents:
-
-    ::
-
-        MPV_FORMAT_NODE_MAP
-            "min-luma"     MPV_FORMAT_DOUBLE
-            "max-luma"     MPV_FORMAT_DOUBLE
-            "max-cll"      MPV_FORMAT_DOUBLE
-            "max-fall"     MPV_FORMAT_DOUBLE
-            "scene-max-r"  MPV_FORMAT_DOUBLE
-            "scene-max-g"  MPV_FORMAT_DOUBLE
-            "scene-max-b"  MPV_FORMAT_DOUBLE
-            "max-pq-y"     MPV_FORMAT_DOUBLE
-            "avg-pq-y"     MPV_FORMAT_DOUBLE
+            "min-luma"          MPV_FORMAT_DOUBLE
+            "max-luma"          MPV_FORMAT_DOUBLE
+            "max-cll"           MPV_FORMAT_DOUBLE
+            "max-fall"          MPV_FORMAT_DOUBLE
+            "scene-max-r"       MPV_FORMAT_DOUBLE
+            "scene-max-g"       MPV_FORMAT_DOUBLE
+            "scene-max-b"       MPV_FORMAT_DOUBLE
+            "max-pq-y"          MPV_FORMAT_DOUBLE
+            "avg-pq-y"          MPV_FORMAT_DOUBLE
 
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling

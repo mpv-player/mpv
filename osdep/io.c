@@ -146,7 +146,7 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 
 #include <io.h>
 #include <fcntl.h>
-#include <pthread.h>
+#include "osdep/threads.h"
 
 static void set_errno_from_lasterror(void)
 {
@@ -670,8 +670,8 @@ static void init_getenv(void)
 
 char *mp_getenv(const char *name)
 {
-    static pthread_once_t once_init_getenv = PTHREAD_ONCE_INIT;
-    pthread_once(&once_init_getenv, init_getenv);
+    static mp_once once_init_getenv = MP_STATIC_ONCE_INITIALIZER;
+    mp_exec_once(&once_init_getenv, init_getenv);
     // Copied from musl, http://git.musl-libc.org/cgit/musl/tree/COPYRIGHT
     // Copyright © 2005-2013 Rich Felker, standard MIT license
     int i;
@@ -738,8 +738,8 @@ void *mp_dlsym(void *handle, const char *symbol)
 
 char *mp_dlerror(void)
 {
-    static pthread_once_t once_init_dlerror = PTHREAD_ONCE_INIT;
-    pthread_once(&once_init_dlerror, mp_dl_init);
+    static mp_once once_init_dlerror = MP_STATIC_ONCE_INITIALIZER;
+    mp_exec_once(&once_init_dlerror, mp_dl_init);
     mp_dl_free();
 
     if (mp_dl_result.errcode == 0)

@@ -40,11 +40,12 @@
 
 #include "common/common.h"
 #include "common/msg.h"
+#include "misc/ctype.h"
 #include "options/m_config.h"
 #include "osdep/io.h"
 #include "osdep/poll_wrapper.h"
 #include "osdep/timer.h"
-#include "misc/ctype.h"
+#include "present_sync.h"
 #include "video/out/vo.h"
 
 #define EVT_RELEASE 1
@@ -912,55 +913,12 @@ err:
 static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
                          unsigned int usec, void *data)
 {
-    struct drm_pflip_cb_closure *closure = data;
+    struct vo_drm_state *drm = data;
 
-    struct drm_vsync_tuple *vsync = closure->vsync;
-    // frame_vsync->ust is the timestamp of the pageflip that happened just before this flip was queued
-    // frame_vsync->msc is the sequence number of the pageflip that happened just before this flip was queued
-    // frame_vsync->sbc is the sequence number for the frame that was just flipped to screen
-    struct drm_vsync_tuple *frame_vsync = closure->frame_vsync;
-    struct vo_vsync_info *vsync_info = closure->vsync_info;
-
-    const bool ready =
-        (vsync->msc != 0) &&
-        (frame_vsync->ust != 0) && (frame_vsync->msc != 0);
-
-    const uint64_t ust = (sec * 1000000LL) + usec;
-
-    const unsigned int msc_since_last_flip = msc - vsync->msc;
-    if (ready && msc == vsync->msc) {
-        // Seems like some drivers only increment msc every other page flip when
-        // running in interlaced mode (I'm looking at you nouveau). Obviously we
-        // can't work with this, so shame the driver and bail.
-        mp_err(closure->log,
-               "Got the same msc value twice: (msc: %u, vsync->msc: %u). This shouldn't happen. Possibly broken driver/interlaced mode?\n",
-               msc, vsync->msc);
-        goto fail;
-    }
-
-    vsync->ust = ust;
-    vsync->msc = msc;
-
-    if (ready) {
-        // Convert to mp_time
-        struct timespec ts;
-        if (clock_gettime(CLOCK_MONOTONIC, &ts))
-            goto fail;
-        int64_t now_monotonic = MP_TIME_S_TO_NS(ts.tv_sec) + ts.tv_nsec;
-        int64_t ust_mp_time = mp_time_ns() - (now_monotonic - vsync->ust * 1000);
-
-        const uint64_t     ust_since_enqueue = vsync->ust - frame_vsync->ust;
-        const unsigned int msc_since_enqueue = vsync->msc - frame_vsync->msc;
-        const unsigned int sbc_since_enqueue = vsync->sbc - frame_vsync->sbc;
-
-        vsync_info->vsync_duration = ust_since_enqueue * 1000 / msc_since_enqueue;
-        vsync_info->skipped_vsyncs = msc_since_last_flip - 1; // Valid iff swap_buffers is called every vsync
-        vsync_info->last_queue_display_time = ust_mp_time + (sbc_since_enqueue * vsync_info->vsync_duration);
-    }
-
-fail:
-    *closure->waiting_for_flip = false;
-    talloc_free(closure);
+    int64_t ust = MP_TIME_S_TO_NS(sec) + MP_TIME_US_TO_NS(usec);
+    present_sync_update_values(drm->present, ust, msc);
+    present_sync_swap(drm->present);
+    drm->waiting_for_flip = false;
 }
 
 int vo_drm_control(struct vo *vo, int *events, int request, void *arg)
@@ -985,10 +943,6 @@ int vo_drm_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_RESUME:
         drm->paused = false;
-        drm->vsync_info.last_queue_display_time = -1;
-        drm->vsync_info.skipped_vsyncs = 0;
-        drm->vsync.ust = 0;
-        drm->vsync.msc = 0;
         return VO_TRUE;
     }
     return VO_NOTIMPL;
@@ -1075,10 +1029,7 @@ bool vo_drm_init(struct vo *vo)
 
     drm->ev.version = DRM_EVENT_CONTEXT_VERSION;
     drm->ev.page_flip_handler = &drm_pflip_cb;
-
-    drm->vsync_info.vsync_duration = 0;
-    drm->vsync_info.skipped_vsyncs = -1;
-    drm->vsync_info.last_queue_display_time = -1;
+    drm->present = mp_present_initialize(drm, drm->vo->opts, VO_MAX_SWAPCHAIN_DEPTH);
 
     return true;
 
@@ -1287,12 +1238,6 @@ static int drm_validate_mode_opt(struct mp_log *log, const struct m_option *opt,
 double vo_drm_get_display_fps(struct vo_drm_state *drm)
 {
     return mode_get_Hz(&drm->mode.mode);
-}
-
-void vo_drm_get_vsync(struct vo *vo, struct vo_vsync_info *info)
-{
-    struct vo_drm_state *drm = vo->drm;
-    *info = drm->vsync_info;
 }
 
 void vo_drm_set_monitor_par(struct vo *vo)

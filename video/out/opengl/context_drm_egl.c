@@ -29,10 +29,11 @@
 #include <drm_fourcc.h>
 
 #include "libmpv/render_gl.h"
-#include "video/out/drm_atomic.h"
-#include "video/out/drm_common.h"
 #include "common/common.h"
 #include "osdep/timer.h"
+#include "video/out/drm_atomic.h"
+#include "video/out/drm_common.h"
+#include "video/out/present_sync.h"
 
 #include "egl_helpers.h"
 #include "common.h"
@@ -48,7 +49,6 @@
 
 struct gbm_frame {
     struct gbm_bo *bo;
-    struct drm_vsync_tuple vsync;
 };
 
 struct gbm {
@@ -322,26 +322,16 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
 
     update_framebuffer_from_bo(ctx, frame->bo);
 
-    // Alloc and fill the data struct for the page flip callback
-    struct drm_pflip_cb_closure *data = talloc(ctx, struct drm_pflip_cb_closure);
-    data->frame_vsync = &frame->vsync;
-    data->vsync = &drm->vsync;
-    data->vsync_info = &drm->vsync_info;
-    data->waiting_for_flip = &drm->waiting_for_flip;
-    data->log = drm->log;
-
     struct drm_atomic_context *atomic_ctx = drm->atomic_context;
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", drm->fb->id);
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "CRTC_ID", atomic_ctx->crtc->id);
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
 
     int ret = drmModeAtomicCommit(drm->fd, atomic_ctx->request,
-                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, data);
+                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, drm);
 
-    if (ret) {
+    if (ret)
         MP_WARN(ctx->vo, "Failed to commit atomic request: %s\n", mp_strerror(ret));
-        talloc_free(data);
-    }
     drm->waiting_for_flip = !ret;
 
     drmModeAtomicFree(atomic_ctx->request);
@@ -351,12 +341,9 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
 static void enqueue_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
 {
     struct priv *p = ctx->priv;
-    struct vo_drm_state *drm = ctx->vo->drm;
 
-    drm->vsync.sbc++;
     struct gbm_frame *new_frame = talloc(p, struct gbm_frame);
     new_frame->bo = bo;
-    new_frame->vsync = drm->vsync;
     MP_TARRAY_APPEND(p, p->gbm.bo_queue, p->gbm.num_bos, new_frame);
 }
 
@@ -590,7 +577,8 @@ static bool probe_gbm_modifiers(struct ra_ctx *ctx)
 
 static void drm_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
 {
-    vo_drm_get_vsync(ctx->vo, info);
+    struct vo_drm_state *drm = ctx->vo->drm;
+    present_sync_get_info(drm->present, info);
 }
 
 static bool drm_egl_init(struct ra_ctx *ctx)

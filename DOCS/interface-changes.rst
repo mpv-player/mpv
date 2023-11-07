@@ -112,6 +112,8 @@ Interface changes
     - drop support for `-del` syntax for list options
     - `--demuxer-hysteresis-secs` now respects `--cache-secs` and/or
       `--demuxer-readahead-secs` as well
+    - add hdr metadata to `video-params` property
+    - remove `hdr-metadata` property
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

@@ -14,13 +14,13 @@
 
 #define MP_SEMAPHORE_EMULATION
 
-#include <pthread.h>
+#include "osdep/threads.h"
 
 #define MP_SEM_VALUE_MAX 4096
 
 typedef struct {
     int wakeup_pipe[2];
-    pthread_mutex_t lock;
+    mp_mutex lock;
     // protected by lock
     unsigned int count;
 } mp_sem_t;

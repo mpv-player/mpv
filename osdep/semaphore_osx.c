@@ -40,7 +40,7 @@ int mp_sem_init(mp_sem_t *sem, int pshared, unsigned int value)
     if (mp_make_wakeup_pipe(sem->wakeup_pipe) < 0)
         return -1;
     sem->count = 0;
-    pthread_mutex_init(&sem->lock, NULL);
+    mp_mutex_init(&sem->lock);
     return 0;
 }
 
@@ -52,7 +52,7 @@ int mp_sem_wait(mp_sem_t *sem)
 int mp_sem_trywait(mp_sem_t *sem)
 {
     int r = -1;
-    pthread_mutex_lock(&sem->lock);
+    mp_mutex_lock(&sem->lock);
     if (sem->count == 0) {
         char buf[1024];
         ssize_t s = read(sem->wakeup_pipe[0], buf, sizeof(buf));
@@ -63,7 +63,7 @@ int mp_sem_trywait(mp_sem_t *sem)
         sem->count -= 1;
         r = 0;
     }
-    pthread_mutex_unlock(&sem->lock);
+    mp_mutex_unlock(&sem->lock);
     if (r < 0)
         errno = EAGAIN;
     return r;
@@ -110,7 +110,7 @@ int mp_sem_destroy(mp_sem_t *sem)
 {
     close(sem->wakeup_pipe[0]);
     close(sem->wakeup_pipe[1]);
-    pthread_mutex_destroy(&sem->lock);
+    mp_mutex_destroy(&sem->lock);
     return 0;
 }
 

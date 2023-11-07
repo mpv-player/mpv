@@ -552,8 +552,10 @@ static int get_target_format(struct image_writer_ctx *ctx)
     int srcfmt = ctx->original_format.id;
 
     int target = get_encoder_format(codec, srcfmt, ctx->opts->high_bit_depth);
-    if (!target)
+    if (!target) {
+        mp_dbg(ctx->log, "Falling back to high-depth format.\n");
         target = get_encoder_format(codec, srcfmt, true);
+    }
 
     if (!target)
         goto unknown;
@@ -637,7 +639,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
         p.color.primaries = MP_CSP_PRIM_BT_709;
         p.color.gamma = MP_CSP_TRC_AUTO;
         p.color.light = MP_CSP_LIGHT_DISPLAY;
-        p.color.sig_peak = 0;
+        p.color.hdr = (struct pl_hdr_metadata){0};
         if (p.color.space != MP_CSP_RGB) {
             p.color.levels = yuv_levels;
             p.color.space = MP_CSP_BT_601;
@@ -649,7 +651,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
     if (mp_image_params_equal(&p, &image->params))
         return mp_image_new_ref(image);
 
-    mp_dbg(log, "Will convert image to %s\n", mp_imgfmt_to_name(p.imgfmt));
+    mp_dbg(log, "will convert image to %s\n", mp_imgfmt_to_name(p.imgfmt));
 
     struct mp_image *src = image;
     if (mp_image_crop_valid(&src->params) &&
@@ -699,6 +701,8 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     struct image_writer_opts defs = image_writer_opts_defaults;
     if (!opts)
         opts = &defs;
+
+    mp_dbg(log, "input: %s\n", mp_image_params_to_str(&image->params));
 
     struct image_writer_ctx ctx = { log, opts, image->fmt };
     bool (*write)(struct image_writer_ctx *, mp_image_t *, const char *) = write_lavc;

@@ -41,7 +41,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <pthread.h>
 
 #include "osdep/io.h"
 #include "misc/ctype.h"
@@ -53,6 +52,7 @@
 #include "options/m_option.h"
 #include "options/options.h"
 #include "options/path.h"
+#include "osdep/threads.h"
 
 #include "dvbin.h"
 #include "dvb_tune.h"
@@ -66,7 +66,7 @@
 #define OPT_BASE_STRUCT dvb_opts_t
 
 static dvb_state_t *global_dvb_state = NULL;
-static pthread_mutex_t global_dvb_state_lock = PTHREAD_MUTEX_INITIALIZER;
+static mp_static_mutex global_dvb_state_lock = MP_STATIC_MUTEX_INITIALIZER;
 
 const struct m_sub_options stream_dvb_conf = {
     .opts = (const m_option_t[]) {
@@ -821,9 +821,9 @@ void dvbin_close(stream_t *stream)
     if (state->switching_channel && state->is_on) {
         // Prevent state destruction, reset channel-switch.
         state->switching_channel = false;
-        pthread_mutex_lock(&global_dvb_state_lock);
+        mp_mutex_lock(&global_dvb_state_lock);
         global_dvb_state->stream_used = false;
-        pthread_mutex_unlock(&global_dvb_state_lock);
+        mp_mutex_unlock(&global_dvb_state_lock);
         return;
     }
 
@@ -839,9 +839,9 @@ void dvbin_close(stream_t *stream)
     state->cur_adapter = -1;
     state->cur_frontend = -1;
 
-    pthread_mutex_lock(&global_dvb_state_lock);
+    mp_mutex_lock(&global_dvb_state_lock);
     TA_FREEP(&global_dvb_state);
-    pthread_mutex_unlock(&global_dvb_state_lock);
+    mp_mutex_unlock(&global_dvb_state_lock);
 }
 
 static int dvb_streaming_start(stream_t *stream, char *progname)
@@ -918,10 +918,10 @@ static int dvb_open(stream_t *stream)
 {
     dvb_priv_t *priv = NULL;
 
-    pthread_mutex_lock(&global_dvb_state_lock);
+    mp_mutex_lock(&global_dvb_state_lock);
     if (global_dvb_state && global_dvb_state->stream_used) {
       MP_ERR(stream, "DVB stream already in use, only one DVB stream can exist at a time!\n");
-      pthread_mutex_unlock(&global_dvb_state_lock);
+      mp_mutex_unlock(&global_dvb_state_lock);
       goto err_out;
     }
 
@@ -937,17 +937,17 @@ static int dvb_open(stream_t *stream)
     priv->log = stream->log;
     if (!state) {
         MP_ERR(stream, "DVB configuration is empty\n");
-        pthread_mutex_unlock(&global_dvb_state_lock);
+        mp_mutex_unlock(&global_dvb_state_lock);
         goto err_out;
     }
 
     if (!dvb_parse_path(stream)) {
-        pthread_mutex_unlock(&global_dvb_state_lock);
+        mp_mutex_unlock(&global_dvb_state_lock);
         goto err_out;
     }
 
     state->stream_used = true;
-    pthread_mutex_unlock(&global_dvb_state_lock);
+    mp_mutex_unlock(&global_dvb_state_lock);
 
     if (!state->is_on) {
         // State could be already initialized, for example, we just did a channel switch.

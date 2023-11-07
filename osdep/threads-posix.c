@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <pthread.h>
 
 #include "common/common.h"
 #include "config.h"
@@ -27,31 +26,6 @@
 #if HAVE_BSD_THREAD_NAME
 #include <pthread_np.h>
 #endif
-
-int mpthread_mutex_init_recursive(pthread_mutex_t *mutex)
-{
-    pthread_mutexattr_t attr;
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-    int r = pthread_mutex_init(mutex, &attr);
-    pthread_mutexattr_destroy(&attr);
-    return r;
-}
-
-void mpthread_set_name(const char *name)
-{
-#if HAVE_GLIBC_THREAD_NAME
-    if (pthread_setname_np(pthread_self(), name) == ERANGE) {
-        char tname[16] = {0}; // glibc-checked kernel limit
-        strncpy(tname, name, sizeof(tname) - 1);
-        pthread_setname_np(pthread_self(), tname);
-    }
-#elif HAVE_WIN32_INTERNAL_PTHREADS || HAVE_BSD_THREAD_NAME
-    pthread_set_name_np(pthread_self(), name);
-#elif HAVE_OSX_THREAD_NAME
-    pthread_setname_np(name);
-#endif
-}
 
 int mp_ptwrap_check(const char *file, int line, int res)
 {

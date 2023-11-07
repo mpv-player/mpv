@@ -2,22 +2,23 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <pthread.h>
+
+#include "osdep/threads.h"
 
 // This is basically a single-shot semaphore, intended as light-weight solution
 // for just making a thread wait for another thread.
 struct mp_waiter {
     // All fields are considered private. Use MP_WAITER_INITIALIZER to init.
-    pthread_mutex_t lock;
-    pthread_cond_t wakeup;
+    mp_mutex lock;
+    mp_cond wakeup;
     bool done;
     uintptr_t value;
 };
 
 // Initialize a mp_waiter object for use with mp_waiter_*().
 #define MP_WAITER_INITIALIZER { \
-    .lock = PTHREAD_MUTEX_INITIALIZER, \
-    .wakeup = PTHREAD_COND_INITIALIZER, \
+    .lock = MP_STATIC_MUTEX_INITIALIZER, \
+    .wakeup = MP_STATIC_COND_INITIALIZER, \
     }
 
 // Block until some other thread calls mp_waiter_wakeup(). The function returns

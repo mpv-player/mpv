@@ -17,7 +17,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <pthread.h>
 #include <libplacebo/colorspace.h>
 #include <libplacebo/options.h>
 #include <libplacebo/renderer.h>
@@ -31,6 +30,7 @@
 #include "options/m_config.h"
 #include "options/path.h"
 #include "osdep/io.h"
+#include "osdep/threads.h"
 #include "stream/stream.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
@@ -96,7 +96,7 @@ struct priv {
     struct ra_hwdec_mapper *hwdec_mapper;
 
     // Allocated DR buffers
-    pthread_mutex_t dr_lock;
+    mp_mutex dr_lock;
     pl_buf *dr_buffers;
     int num_dr_buffers;
 
@@ -162,30 +162,30 @@ static void update_lut(struct priv *p, struct user_lut *lut);
 
 static pl_buf get_dr_buf(struct priv *p, const uint8_t *ptr)
 {
-    pthread_mutex_lock(&p->dr_lock);
+    mp_mutex_lock(&p->dr_lock);
 
     for (int i = 0; i < p->num_dr_buffers; i++) {
         pl_buf buf = p->dr_buffers[i];
         if (ptr >= buf->data && ptr < buf->data + buf->params.size) {
-            pthread_mutex_unlock(&p->dr_lock);
+            mp_mutex_unlock(&p->dr_lock);
             return buf;
         }
     }
 
-    pthread_mutex_unlock(&p->dr_lock);
+    mp_mutex_unlock(&p->dr_lock);
     return NULL;
 }
 
 static void free_dr_buf(void *opaque, uint8_t *data)
 {
     struct priv *p = opaque;
-    pthread_mutex_lock(&p->dr_lock);
+    mp_mutex_lock(&p->dr_lock);
 
     for (int i = 0; i < p->num_dr_buffers; i++) {
         if (p->dr_buffers[i]->data == data) {
             pl_buf_destroy(p->gpu, &p->dr_buffers[i]);
             MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, i);
-            pthread_mutex_unlock(&p->dr_lock);
+            mp_mutex_unlock(&p->dr_lock);
             return;
         }
     }
@@ -227,9 +227,9 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
         return NULL;
     }
 
-    pthread_mutex_lock(&p->dr_lock);
+    mp_mutex_lock(&p->dr_lock);
     MP_TARRAY_APPEND(p, p->dr_buffers, p->num_dr_buffers, buf);
-    pthread_mutex_unlock(&p->dr_lock);
+    mp_mutex_unlock(&p->dr_lock);
 
     return mpi;
 }
@@ -439,30 +439,13 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
-static inline void *get_side_data(const struct mp_image *mpi,
-                                  enum AVFrameSideDataType type)
-{
-    for (int i = 0; i <mpi->num_ff_side_data; i++) {
-        if (mpi->ff_side_data[i].type == type)
-            return (void *) mpi->ff_side_data[i].buf->data;
-    }
-
-    return NULL;
-}
-
 static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
 {
     struct pl_color_space csp = {
         .primaries = mp_prim_to_pl(mpi->params.color.primaries),
         .transfer = mp_trc_to_pl(mpi->params.color.gamma),
-        .hdr.max_luma = mpi->params.color.sig_peak * MP_REF_WHITE,
+        .hdr = mpi->params.color.hdr,
     };
-
-    pl_map_hdr_metadata(&csp.hdr, &(struct pl_av_hdr_metadata) {
-        .mdm = get_side_data(mpi, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA),
-        .clm = get_side_data(mpi, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
-        .dhp = get_side_data(mpi, AV_FRAME_DATA_DYNAMIC_HDR_PLUS),
-    });
     return csp;
 }
 
@@ -1257,7 +1240,11 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     // Create target FBO, try high bit depth first
     int mpfmt;
     for (int depth = args->high_bit_depth ? 16 : 8; depth; depth -= 8) {
-        mpfmt = depth == 16 ? IMGFMT_RGBA64 : IMGFMT_RGBA;
+        if (depth == 16) {
+            mpfmt = IMGFMT_RGBA64;
+        } else {
+            mpfmt = p->ra_ctx->opts.want_alpha ? IMGFMT_RGBA : IMGFMT_RGB0;
+        }
         pl_fmt fmt = pl_find_fmt(gpu, PL_FMT_UNORM, 4, depth, depth,
                                  PL_FMT_CAP_RENDERABLE | PL_FMT_CAP_HOST_READABLE);
         if (!fmt)
@@ -1346,7 +1333,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     args->res->params.color.primaries = mp_prim_from_pl(target.color.primaries);
     args->res->params.color.gamma = mp_trc_from_pl(target.color.transfer);
     args->res->params.color.levels = mp_levels_from_pl(target.repr.levels);
-    args->res->params.color.sig_peak = target.color.hdr.max_luma / MP_REF_WHITE;
+    args->res->params.color.hdr = target.color.hdr;
     if (args->scaled)
         args->res->params.p_w = args->res->params.p_h = 1;
 
@@ -1436,20 +1423,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
 
-    case VOCTRL_HDR_METADATA: {
-        struct mp_hdr_metadata *hdr = data;
-        hdr->min_luma = p->last_hdr_metadata.min_luma;
-        hdr->max_luma = p->last_hdr_metadata.max_luma;
-        hdr->max_cll = p->last_hdr_metadata.max_cll;
-        hdr->max_fall = p->last_hdr_metadata.max_fall;
-        hdr->scene_max[0] = p->last_hdr_metadata.scene_max[0];
-        hdr->scene_max[1] = p->last_hdr_metadata.scene_max[1];
-        hdr->scene_max[2] = p->last_hdr_metadata.scene_max[2];
-        hdr->scene_avg = p->last_hdr_metadata.scene_avg;
-        hdr->max_pq_y = p->last_hdr_metadata.max_pq_y;
-        hdr->avg_pq_y = p->last_hdr_metadata.avg_pq_y;
+    case VOCTRL_HDR_METADATA:
+        *(struct pl_hdr_metadata *) data = p->last_hdr_metadata;
         return true;
-    }
 
     case VOCTRL_SCREENSHOT:
         video_screenshot(vo, data);
@@ -1614,7 +1590,7 @@ static void uninit(struct vo *vo)
     }
 
     assert(p->num_dr_buffers == 0);
-    pthread_mutex_destroy(&p->dr_lock);
+    mp_mutex_destroy(&p->dr_lock);
 
     save_cache_files(p);
     pl_cache_destroy(&p->shader_cache);
@@ -1668,7 +1644,7 @@ static int preinit(struct vo *vo)
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
-    pthread_mutex_init(&p->dr_lock, NULL);
+    mp_mutex_init(&p->dr_lock);
 
     p->shader_cache = pl_cache_create(pl_cache_params(
         .log = p->pllog,

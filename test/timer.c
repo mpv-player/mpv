@@ -37,18 +37,5 @@ int main(void)
         assert_int_equal(mp_time_ns_add(test2, 20.44), INT64_MAX);
     }
 
-    /* conversion */
-    {
-        struct timeval tv;
-        struct timespec ts;
-        gettimeofday(&tv, NULL);
-        ts = mp_time_ns_to_realtime(mp_time_ns());
-        assert_true(llabs(tv.tv_sec - ts.tv_sec) <= 1);
-
-        gettimeofday(&tv, NULL);
-        ts = mp_rel_time_to_timespec(0.0);
-        assert_true(llabs(tv.tv_sec - ts.tv_sec) <= 1);
-    }
-
     return 0;
 }

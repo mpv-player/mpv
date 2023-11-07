@@ -40,11 +40,12 @@ if win32
     test_utils_files += 'osdep/windows_utils.c'
 endif
 
+if features['pthread-debug']
+    test_utils_files += 'osdep/threads-posix.c'
+endif
+
 # The zimg code requires using threads.
-if features['win32-internal-pthreads']
-    test_utils_args += '-DWIN32_TESTS'
-    test_utils_files += ['osdep/win32/pthread.c']
-else
+if not features['win32-threads']
     test_utils_deps += pthreads
 endif
 
@@ -59,11 +60,11 @@ test_utils = static_library('test-utils', 'test_utils.c', include_directories: i
 # For getting imgfmts and stuff.
 img_utils_files = [
     'misc/thread_pool.c',
-    'osdep/threads.c',
     'video/csputils.c',
     'video/fmt-conversion.c',
     'video/img_format.c',
     'video/mp_image.c',
+    'video/out/placebo/utils.c',
     'video/sws_utils.c'
 ]
 if features['zimg']

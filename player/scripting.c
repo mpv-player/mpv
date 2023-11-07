@@ -20,7 +20,6 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <math.h>
-#include <pthread.h>
 #include <assert.h>
 #include <unistd.h>
 
@@ -87,7 +86,7 @@ static void run_script(struct mp_script_args *arg)
 {
     char *name = talloc_asprintf(NULL, "%s/%s", arg->backend->name,
                                  mpv_client_name(arg->client));
-    mpthread_set_name(name);
+    mp_thread_set_name(name);
     talloc_free(name);
 
     if (arg->backend->load(arg) < 0)
@@ -97,14 +96,12 @@ static void run_script(struct mp_script_args *arg)
     talloc_free(arg);
 }
 
-static void *script_thread(void *p)
+static MP_THREAD_VOID script_thread(void *p)
 {
-    pthread_detach(pthread_self());
-
     struct mp_script_args *arg = p;
     run_script(arg);
 
-    return NULL;
+    MP_THREAD_RETURN();
 }
 
 static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
@@ -193,12 +190,13 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
     if (backend->no_thread) {
         run_script(arg);
     } else {
-        pthread_t thread;
-        if (pthread_create(&thread, NULL, script_thread, arg)) {
+        mp_thread thread;
+        if (mp_thread_create(&thread, script_thread, arg)) {
             mpv_destroy(arg->client);
             talloc_free(arg);
             return -1;
         }
+        mp_thread_detach(thread);
     }
 
     return id;

@@ -626,7 +626,7 @@ bool vo_x11_init(struct vo *vo)
 
     x11_error_output = x11->log;
     XSetErrorHandler(x11_errorhandler);
-    x11->present = talloc_zero(x11, struct mp_present);
+    x11->present = mp_present_initialize(x11, x11->opts, VO_MAX_SWAPCHAIN_DEPTH);
 
     dispName = XDisplayName(NULL);
 
@@ -1328,7 +1328,7 @@ void vo_x11_check_events(struct vo *vo)
                 if (cookie->evtype == PresentCompleteNotify) {
                     XPresentCompleteNotifyEvent *present_event;
                     present_event = (XPresentCompleteNotifyEvent *)cookie->data;
-                    present_update_sync_values(x11->present,
+                    present_sync_update_values(x11->present,
                                                present_event->ust * 1000,
                                                present_event->msc);
                 }

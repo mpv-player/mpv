@@ -123,7 +123,7 @@ enum mp_voctrl {
     /* private to vo_gpu and vo_gpu_next */
     VOCTRL_EXTERNAL_RESIZE,
 
-    VOCTRL_HDR_METADATA,            // struct mp_hdr_metadata*
+    VOCTRL_HDR_METADATA,            // struct pl_hdr_metadata*
 };
 
 // Helper to expose what kind of content is currently playing to the VO.
@@ -192,6 +192,7 @@ enum {
 };
 
 #define VO_MAX_REQ_FRAMES 10
+#define VO_MAX_SWAPCHAIN_DEPTH 8
 
 struct vo;
 struct osd_state;
