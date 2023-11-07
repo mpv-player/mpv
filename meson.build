@@ -1401,8 +1401,15 @@ if features['vaapi-x11']
     sources += files('video/out/vo_vaapi.c')
 endif
 
+vaapi_win32 = dependency('libva-win32', required: get_option('vaapi-win32').require(libva.found()))
+features += {'vaapi-win32': vaapi_win32.found()}
+if features['vaapi-win32']
+    dependencies += vaapi_win32
+endif
+
 vaapi = get_option('vaapi').require(libva.found() and (features['vaapi-drm'] or
-                                    features['vaapi-wayland'] or features['vaapi-x11']))
+                                    features['vaapi-wayland'] or features['vaapi-x11'] or
+                                    features['vaapi-win32']))
 features += {'vaapi': vaapi.allowed()}
 
 if features['vaapi']
