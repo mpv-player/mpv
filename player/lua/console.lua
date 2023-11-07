@@ -256,7 +256,14 @@ end
 function update()
     pending_update = false
 
-    if not mp.get_property_native('vo-configured') then
+    -- Print to the terminal when there is no VO. Check both vo-configured so
+    -- it works with --force-window --idle and no video tracks, and whether
+    -- there is a video track so that the condition doesn't become true while
+    -- switching VO at runtime, making mp.osd_message() print to the VO's OSD.
+    -- This issue does not happen when switching VO without any video track
+    -- regardless of the condition used.
+    if not mp.get_property_native('vo-configured')
+       and not mp.get_property('current-tracks/video') then
         print_to_terminal()
         return
     end
