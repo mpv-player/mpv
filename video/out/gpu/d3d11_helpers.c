@@ -371,9 +371,9 @@ static int get_feature_levels(int max_fl, int min_fl,
     return len;
 }
 
-static IDXGIAdapter1 *get_d3d11_adapter(struct mp_log *log,
-                                        struct bstr requested_adapter_name,
-                                        struct bstr *listing)
+static IDXGIAdapter1 *get_dxgi_adapter(struct mp_log *log,
+                                       struct bstr requested_adapter_name,
+                                       struct bstr *listing)
 {
     HRESULT hr = S_OK;
     IDXGIFactory1 *factory;
@@ -455,9 +455,9 @@ static HRESULT create_device(struct mp_log *log, IDXGIAdapter1 *adapter,
                               NULL, flags, levels, levels_len, D3D11_SDK_VERSION, dev, NULL, NULL);
 }
 
-bool mp_d3d11_list_or_verify_adapters(struct mp_log *log,
-                                      bstr adapter_name,
-                                      bstr *listing)
+bool mp_dxgi_list_or_verify_adapters(struct mp_log *log,
+                                     bstr adapter_name,
+                                     bstr *listing)
 {
     IDXGIAdapter1 *picked_adapter = NULL;
 
@@ -465,7 +465,7 @@ bool mp_d3d11_list_or_verify_adapters(struct mp_log *log,
         return false;
     }
 
-    if ((picked_adapter = get_d3d11_adapter(log, adapter_name, listing))) {
+    if ((picked_adapter = get_dxgi_adapter(log, adapter_name, listing))) {
         SAFE_RELEASE(picked_adapter);
         return true;
     }
@@ -497,7 +497,7 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
         goto done;
     }
 
-    adapter = get_d3d11_adapter(log, bstr0(adapter_name), NULL);
+    adapter = get_dxgi_adapter(log, bstr0(adapter_name), NULL);
 
     if (adapter_name && !adapter) {
         mp_warn(log, "Adapter matching '%s' was not found in the system! "
