@@ -31,7 +31,8 @@ local opts = {
     history_dedup = true,
     -- The ratio of font height to font width.
     -- Adjusts table width of completion suggestions.
-    font_hw_ratio = 2.0,
+    -- Values in the range 1.8..2.5 make sense for common monospace fonts.
+    font_hw_ratio = 'auto',
 }
 
 function detect_platform()
@@ -106,6 +107,80 @@ mp.observe_property("user-data/osc/margins", "native", function(_, val)
     end
     update()
 end)
+
+do
+    local width_length_ratio = 0.5
+    local osd_width, osd_height = 100, 100
+
+    ---Update osd resolution if valid
+    local function update_osd_resolution()
+        local dim = mp.get_property_native('osd-dimensions')
+        if not dim or dim.w == 0 or dim.h == 0 then
+            return
+        end
+        osd_width = dim.w
+        osd_height = dim.h
+    end
+
+    local text_osd = mp.create_osd_overlay('ass-events')
+    text_osd.compute_bounds, text_osd.hidden = true, true
+
+    local function measure_bounds(ass_text)
+        update_osd_resolution()
+        text_osd.res_x, text_osd.res_y = osd_width, osd_height
+        text_osd.data = ass_text
+        local res = text_osd:update()
+        return res.x0, res.y0, res.x1, res.y1
+    end
+
+    ---Measure text width and normalize to a font size of 1
+    ---text has to be ass safe
+    local function normalized_text_width(text, size, horizontal)
+        local align, rotation = horizontal and 7 or 1, horizontal and 0 or -90
+        local template = '{\\pos(0,0)\\rDefault\\blur0\\bord0\\shad0\\q2\\an%s\\fs%s\\fn%s\\frz%s}%s'
+        local x1, y1 = nil, nil
+        size = size / 0.8
+        -- prevent endless loop
+        local repetitions_left = 5
+        repeat
+            size = size * 0.8
+            local ass = assdraw.ass_new()
+            ass.text = template:format(align, size, opts.font, rotation, text)
+            _, _, x1, y1 = measure_bounds(ass.text)
+            repetitions_left = repetitions_left - 1
+            -- make sure nothing got clipped
+        until (x1 and x1 < osd_width and y1 < osd_height) or repetitions_left == 0
+        local width = (repetitions_left == 0 and not x1) and 0 or (horizontal and x1 or y1)
+        return width / size, horizontal and osd_width or osd_height
+    end
+
+    local function fit_on_osd(text)
+        local estimated_width = #text * width_length_ratio
+        if osd_width >= osd_height then
+            -- Fill the osd as much as possible, bigger is more accurate.
+            return math.min(osd_width / estimated_width, osd_height), true
+        else
+            return math.min(osd_height / estimated_width, osd_width), false
+        end
+    end
+
+    local measured_font_hw_ratio = nil
+    function get_font_hw_ratio()
+        local font_hw_ratio = tonumber(opts.font_hw_ratio)
+        if font_hw_ratio then
+            return font_hw_ratio
+        end
+        if not measured_font_hw_ratio then
+            local alphabet = 'abcdefghijklmnopqrstuvwxyz'
+            local text = alphabet:rep(3)
+            update_osd_resolution()
+            local size, horizontal = fit_on_osd(text)
+            local normalized_width = normalized_text_width(text, size * 0.9, horizontal)
+            measured_font_hw_ratio = #text / normalized_width * 0.95
+        end
+        return measured_font_hw_ratio
+    end
+end
 
 -- Add a line to the log buffer (which is limited to 100 lines)
 function log_add(style, text)
@@ -312,7 +387,7 @@ function update()
     local screeny_factor = (1 - global_margins.t - global_margins.b)
     local lines_max = math.ceil(screeny * screeny_factor / opts.font_size - 1.5)
     -- Estimate how many characters fit in one line
-    local width_max = math.ceil(screenx / opts.font_size * opts.font_hw_ratio)
+    local width_max = math.ceil(screenx / opts.font_size * get_font_hw_ratio())
 
     local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
     local suggestion_ass = style .. styles.suggestion .. ass_escape(suggestions)

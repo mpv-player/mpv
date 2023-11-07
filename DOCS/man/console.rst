@@ -161,7 +161,8 @@ Configurable Options
     multiplied by "scale."
 
 ``font_hw_ratio``
-    Default: 2.0
+    Default: auto
 
     The ratio of font height to font width.
     Adjusts table width of completion suggestions.
+    Values in the range 1.8..2.5 make sense for common monospace fonts.
