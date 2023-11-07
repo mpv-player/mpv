@@ -65,9 +65,9 @@ struct d3d11_device_opts {
     char *adapter_name;
 };
 
-bool mp_d3d11_list_or_verify_adapters(struct mp_log *log,
-                                      bstr adapter_name,
-                                      bstr *listing);
+bool mp_dxgi_list_or_verify_adapters(struct mp_log *log,
+                                     bstr adapter_name,
+                                     bstr *listing);
 
 bool mp_d3d11_create_present_device(struct mp_log *log,
                                     struct d3d11_device_opts *opts,
