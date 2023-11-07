@@ -1459,10 +1459,8 @@ macos_sdk_path = ''
 macos_sdk_version = '0.0'
 if darwin and macos_sdk_version_py.found()
     macos_sdk_info = run_command(macos_sdk_version_py, check: true).stdout().split(',')
-    macos_sdk_path = macos_sdk_info[0].strip()
-    # Always pick whichever version is higher.
-    macos_sdk_version = macos_sdk_info[1].version_compare('>' + macos_sdk_info[2]) ? \
-                        macos_sdk_info[1] : macos_sdk_info[2]
+    macos_sdk_path = macos_sdk_info[0]
+    macos_sdk_version = macos_sdk_info[1]
 endif
 
 if macos_sdk_path != ''
