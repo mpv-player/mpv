@@ -111,9 +111,6 @@ local function init_buffers()
 end
 local cache_ahead_buf, cache_speed_buf
 local perf_buffers = {}
--- Save all properties known to this version of mpv
-local property_list = {}
-for p in string.gmatch(mp.get_property("property-list"), "([^,]+)") do property_list[p] = true end
 
 local function graph_add_value(graph, value)
     graph.pos = (graph.pos % graph.len) + 1
