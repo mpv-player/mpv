@@ -7011,6 +7011,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (opt_ptr == &opts->vo->video_driver_list) {
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
         uninit_video_out(mpctx);
+        handle_force_window(mpctx, true);
         reinit_video_chain(mpctx);
         if (track)
             reselect_demux_stream(mpctx, track, true);
