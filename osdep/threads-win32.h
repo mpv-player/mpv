@@ -195,6 +195,7 @@ static inline int mp_thread_detach(mp_thread thread)
 #define mp_thread_id_equal(a, b) ((a) == (b))
 #define mp_thread_get_id(thread) GetThreadId(thread)
 
+// declared in io.h, which we don't want to pull in everywhere
 wchar_t *mp_from_utf8(void *talloc_ctx, const char *s);
 static inline void mp_thread_set_name(const char *name)
 {
