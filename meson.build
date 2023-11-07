@@ -502,7 +502,8 @@ endif
 
 if not posix and not features['win32-desktop']
     subprocess_source = files('osdep/subprocess-dummy.c')
-    sources += files('input/ipc-dummy.c')
+    sources += files('input/ipc-dummy.c',
+                     'osdep/terminal-dummy.c')
 endif
 
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
