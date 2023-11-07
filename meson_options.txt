@@ -85,6 +85,7 @@ option('vdpau-gl-x11', type: 'feature', value: 'auto', description: 'VDPAU with 
 option('vaapi', type: 'feature', value: 'auto', description: 'VAAPI acceleration')
 option('vaapi-drm', type: 'feature', value: 'auto', description: 'VAAPI (DRM support)')
 option('vaapi-wayland', type: 'feature', value: 'auto', description: 'VAAPI (Wayland support)')
+option('vaapi-win32', type: 'feature', value: 'auto', description: 'VAAPI (Windows support)')
 option('vaapi-x11', type: 'feature', value: 'auto', description: 'VAAPI (X11 support)')
 option('vulkan', type: 'feature', value: 'auto', description: 'Vulkan context support')
 option('wayland', type: 'feature', value: 'auto', description: 'Wayland')

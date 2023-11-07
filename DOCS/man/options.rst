@@ -1289,7 +1289,7 @@ Video
                    or ``--vo=libmpv`` (iOS 9.0 and up)
     :videotoolbox-copy: copies video back into system RAM (macOS 10.8 or iOS 9.0 and up)
     :vaapi:     requires ``--vo=gpu``, ``--vo=vaapi`` or ``--vo=dmabuf-wayland`` (Linux only)
-    :vaapi-copy: copies video back into system RAM (Linux with some GPUs only)
+    :vaapi-copy: copies video back into system RAM (Linux with some GPUs or Windows)
     :nvdec:     requires ``--vo=gpu`` (Any platform CUDA is available)
     :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
     :drm:       requires ``--vo=gpu`` (Linux only)
@@ -1493,9 +1493,12 @@ Video
     For the Vulkan GPU backend, decoding must always happen on the display
     device, and this option has no effect.
 
-``--vaapi-device=<device file>``
+``--vaapi-device=<device file|adapter name>``
     Choose the DRM device for ``vaapi-copy``. This should be the path to a
     DRM device file. (Default: ``/dev/dri/renderD128``)
+
+    On Windows this takes adapter name as an input. Will pick the default adapter
+    if unset. Alternatives are listed when the name "help" is given.
 
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
