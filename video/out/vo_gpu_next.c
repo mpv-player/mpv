@@ -871,8 +871,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     update_options(vo);
 
     struct pl_render_params params = pars->params;
+    const struct gl_video_opts *opts = p->opts_cache->opts;
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
     bool cache_frame = will_redraw || frame->still;
+    bool can_interpolate = opts->interpolation && frame->num_frames > 1;
     params.info_callback = info_callback;
     params.info_priv = vo;
     params.skip_caching_single_frame = !cache_frame;
@@ -887,6 +889,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             continue; // ignore already seen frames
 
         if (p->want_reset) {
+            can_interpolate = false;
             pl_renderer_flush_cache(p->rr);
             pl_queue_reset(p->queue);
             p->last_pts = 0.0;
@@ -910,7 +913,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         p->last_id = id;
     }
 
-    const struct gl_video_opts *opts = p->opts_cache->opts;
     if (p->target_hint && frame->current) {
         struct pl_color_space hint = get_mpi_csp(vo, frame->current);
         if (opts->target_prim)
@@ -927,7 +929,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     struct pl_swapchain_frame swframe;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
-    double vsync_offset = opts->interpolation ? frame->vsync_offset : 0;
+    double vsync_offset = can_interpolate ? frame->vsync_offset : 0;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         if (frame->current) {
@@ -1048,7 +1050,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         p->last_hdr_metadata = (struct pl_hdr_metadata){0};
     }
 
-    p->is_interpolated = mix.num_frames > 1;
+    p->is_interpolated = vsync_offset != 0 && mix.num_frames > 1;
     valid = true;
     // fall through
 
