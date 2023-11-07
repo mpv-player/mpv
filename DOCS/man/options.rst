@@ -1180,7 +1180,8 @@ Video
     Enable some things which tend to reduce video latency by 1 or 2 frames
     (default: no). Note that this option might be removed without notice once
     the player's timing code does not inherently need to do these things
-    anymore.
+    anymore. Using this option is known to break other options such as
+    interpolation, so it is not recommended to enable this.
 
     This does:
 
