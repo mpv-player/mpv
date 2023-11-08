@@ -1127,7 +1127,7 @@ course mpv is terminated abruptly and doesn't have the time to save (e.g. with
 the KILL Unix signal).
 
 mpv also stores options other than the playback position when they have been
-modified after playback began, for example the volume and the fullscreen state,
+modified after playback began, for example the volume and selected audio/subtitles,
 and restores their values the next time the file is played. Which options are
 saved can be configured with the ``--watch-later-options`` option.
 
