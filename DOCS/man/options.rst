@@ -1074,17 +1074,21 @@ Watch Later
     still be applied fully, but new watch later data won't contain these
     options.
 
+    See ``--help=watch-later-options`` for the list of the properties that are
+    restored by default.
+
     This is a string list option. See `List Options`_ for details.
 
     .. admonition:: Examples
 
-        - ``--watch-later-options-remove=fullscreen``
-          The fullscreen state won't be saved to watch later files.
+        - ``--watch-later-options-remove=sid``
+          The subtitle track selection will not be restored.
         - ``--watch-later-options-remove=volume``
           ``--watch-later-options-remove=mute``
           The volume and mute state won't be saved to watch later files.
-        - ``--watch-later-options-clr``
-          No option will be saved to watch later files.
+        - ``--watch-later-options=start``
+          No option will be saved to watch later files, except the playback
+          position.
 
 ``--write-filename-in-watch-later-config``
     Prepend the watch later config files with the name of the file they refer
