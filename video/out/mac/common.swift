@@ -411,7 +411,7 @@ class Common: NSObject {
 
     func getScreenBy(name screenName: String?) -> NSScreen? {
         for screen in NSScreen.screens {
-            if screen.displayName == screenName {
+            if screen.localizedName == screenName {
                 return screen
             }
         }
@@ -643,7 +643,7 @@ class Common: NSObject {
             let dnames = data!.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self)
             var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>? = nil
             var count: Int32 = 0
-            let displayName = getCurrentScreen()?.displayName ?? "Unknown"
+            let displayName = getCurrentScreen()?.localizedName ?? "Unknown"
 
             SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, ta_xstrdup(nil, displayName))
             SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, nil)
