@@ -5640,6 +5640,10 @@ static void cmd_show_progress(void *p)
     mpctx->add_osd_seek_info |=
             (cmd->msg_osd ? OSD_SEEK_INFO_TEXT : 0) |
             (cmd->bar_osd ? OSD_SEEK_INFO_BAR : 0);
+
+    // If we got neither (i.e. no-osd) force both like osd-auto.
+    if (!mpctx->add_osd_seek_info)
+        mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT | OSD_SEEK_INFO_BAR;
     mpctx->osd_force_update = true;
     mp_wakeup_core(mpctx);
 }
