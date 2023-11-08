@@ -966,9 +966,14 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         );
 
         // mpv likes to generate sporadically jumping PTS shortly after
-        // initialization, but pl_queue does not like these. Hard-clamp as
-        // a simple work-around.
-        qparams.pts = p->last_pts = MPMAX(qparams.pts, p->last_pts);
+        // initialization, but pl_queue does not like these. Hard-clamp to
+        // the first frame in the queue as a simple workaround.
+        struct pl_source_frame first;
+        if (pl_queue_peek(p->queue, 0, &first)) {
+            if (qparams.pts < first.pts)
+                MP_VERBOSE(vo, "Clamping first frame PTS from %f to %f\n", qparams.pts, first.pts);
+            qparams.pts = p->last_pts = MPMAX(qparams.pts, first.pts);
+        }
 
         switch (pl_queue_update(p->queue, &mix, &qparams)) {
         case PL_QUEUE_ERR:
