@@ -758,7 +758,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``show-text <text> [<duration>|-1 [<level>]]``
     Show text on the OSD. The string can contain properties, which are expanded
     as described in `Property Expansion`_. This can be used to show playback
-    time, filename, and so on.
+    time, filename, and so on. ``no-osd`` has no effect on this command.
 
     <duration>
         The time in ms to show the message for. By default, it uses the same
@@ -786,7 +786,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
 ``show-progress``
     Show the progress bar, the elapsed time and the total duration of the file
-    on the OSD.
+    on the OSD. ``no-osd`` has no effect on this command.
 
 ``write-watch-later-config``
     Write the resume config file that the ``quit-watch-later`` command writes,
