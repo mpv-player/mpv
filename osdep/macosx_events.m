@@ -33,7 +33,6 @@
 // doesn't make much sense, but needed to access keymap functionality
 #include "video/out/vo.h"
 
-#include "osdep/macosx_compat.h"
 #import "osdep/macosx_events_objc.h"
 #import "osdep/macosx_application_objc.h"
 
@@ -299,8 +298,7 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 - (void)startMediaKeys
 {
 #if HAVE_MACOS_MEDIA_PLAYER
-    // 10.12.2 runtime availability check
-    if (_remoteCommandCenter == nil && [NSApp respondsToSelector:@selector(touchBar)]) {
+    if (_remoteCommandCenter == nil) {
         _remoteCommandCenter = [[RemoteCommandCenter alloc] init];
     }
 #endif

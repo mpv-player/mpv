@@ -33,7 +33,7 @@ class View: NSView {
         super.init(frame: frame)
         autoresizingMask = [.width, .height]
         wantsBestResolutionOpenGLSurface = true
-        registerForDraggedTypes([ .fileURLCompat, .URLCompat, .string ])
+        registerForDraggedTypes([ .fileURL, .URL, .string ])
     }
 
     required init?(coder: NSCoder) {
@@ -58,7 +58,7 @@ class View: NSView {
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         guard let types = sender.draggingPasteboard.types else { return [] }
-        if types.contains(.fileURLCompat) || types.contains(.URLCompat) || types.contains(.string) {
+        if types.contains(.fileURL) || types.contains(.URL) || types.contains(.string) {
             return .copy
         }
         return []
@@ -78,7 +78,7 @@ class View: NSView {
         let pb = sender.draggingPasteboard
         guard let types = pb.types else { return false }
 
-        if types.contains(.fileURLCompat) || types.contains(.URLCompat) {
+        if types.contains(.fileURL) || types.contains(.URL) {
             if let urls = pb.readObjects(forClasses: [NSURL.self]) as? [URL] {
                 let files = urls.map { $0.absoluteString }
                 EventsResponder.sharedInstance().handleFilesArray(files)

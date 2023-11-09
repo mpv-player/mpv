@@ -15,23 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-extension NSPasteboard.PasteboardType {
-    static let fileURLCompat: NSPasteboard.PasteboardType = {
-        if #available(OSX 10.13, *) {
-            return .fileURL
-        } else {
-            return NSPasteboard.PasteboardType(kUTTypeURL as String)
-        }
-    } ()
-
-    static let URLCompat: NSPasteboard.PasteboardType = {
-        if #available(OSX 10.13, *) {
-            return .URL
-        } else {
-            return NSPasteboard.PasteboardType(kUTTypeFileURL as String)
-        }
-    } ()
-}
 
 #if !swift(>=5.0)
 extension Data {
