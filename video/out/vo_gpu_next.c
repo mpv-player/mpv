@@ -122,7 +122,13 @@ struct priv {
     bool is_interpolated;
     bool want_reset;
     bool frame_pending;
+
+    // For blend-subtitles
+    bool has_osd;
     bool paused;
+    bool redraw;
+    int subs_items;
+    int64_t subs_id;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -247,8 +253,27 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
 
     double pts = src ? src->pts : 0;
     struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, subfmt_all);
-    if (subs->num_items && p->paused)
-        p->osd_sync++;
+    struct gl_video_opts *opts = p->opts_cache->opts;
+
+    if (opts->blend_subs && p->redraw) {
+        // TODO: Remove this utterly ridiculous hack.
+        // sub_bitmap_list sucks and doesn't give a straightforward answer on
+        // whether or not the osd actually updated. Do a lot of weird hacky
+        // logic as a workaround (none of the fields act like you would expect).
+        bool update = false;
+        if (subs->num_items && (!p->has_osd || p->paused || p->subs_id < subs->change_id)) {
+            p->has_osd = true;
+            p->subs_id = subs->change_id;
+            update = true;
+        }
+        if (p->has_osd && (p->paused || (!p->subs_items && !subs->num_items))) {
+            p->has_osd = false;
+            update = true;
+        }
+        p->subs_items = subs->num_items;
+        if (update)
+            p->osd_sync++;
+    }
 
     frame->overlays = state->overlays;
     frame->num_overlays = 0;
@@ -940,6 +965,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     bool valid = false;
     p->is_interpolated = false;
+    p->redraw = frame->redraw;
 
     // Calculate target
     struct pl_frame target;
@@ -991,7 +1017,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             struct frame_priv *fp = mpi->priv;
             apply_crop(image, p->src, vo->params->w, vo->params->h);
             if (opts->blend_subs) {
-                if (p->paused || fp->osd_sync < p->osd_sync) {
+                if (p->redraw || fp->osd_sync < p->osd_sync) {
                     float rx = pl_rect_w(p->dst) / pl_rect_w(image->crop);
                     float ry = pl_rect_h(p->dst) / pl_rect_h(image->crop);
                     struct mp_osd_res res = {
