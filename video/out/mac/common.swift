@@ -164,17 +164,6 @@ class Common: NSObject {
         view?.removeFromSuperview()
     }
 
-    let linkCallback: CVDisplayLinkOutputCallback = {
-                    (displayLink: CVDisplayLink,
-                           inNow: UnsafePointer<CVTimeStamp>,
-                    inOutputTime: UnsafePointer<CVTimeStamp>,
-                         flagsIn: CVOptionFlags,
-                        flagsOut: UnsafeMutablePointer<CVOptionFlags>,
-              displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
-        let com = unsafeBitCast(displayLinkContext, to: Common.self)
-        return com.displayLinkCallback(displayLink, inNow, inOutputTime, flagsIn, flagsOut)
-    }
-
     func displayLinkCallback(_ displayLink: CVDisplayLink,
                                    _ inNow: UnsafePointer<CVTimeStamp>,
                             _ inOutputTime: UnsafePointer<CVTimeStamp>,
@@ -195,12 +184,8 @@ class Common: NSObject {
         }
 
         CVDisplayLinkSetCurrentCGDisplay(link, screen.displayID)
-        if #available(macOS 10.12, *) {
-            CVDisplayLinkSetOutputHandler(link) { link, now, out, inFlags, outFlags -> CVReturn in
-                return self.displayLinkCallback(link, now, out, inFlags, outFlags)
-            }
-        } else {
-            CVDisplayLinkSetOutputCallback(link, linkCallback, MPVHelper.bridge(obj: self))
+        CVDisplayLinkSetOutputHandler(link) { link, now, out, inFlags, outFlags -> CVReturn in
+            return self.displayLinkCallback(link, now, out, inFlags, outFlags)
         }
         CVDisplayLinkStart(link)
     }

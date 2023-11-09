@@ -20,7 +20,6 @@
 
 #import "macosx_menubar_objc.h"
 #import "osdep/macosx_application_objc.h"
-#include "osdep/macosx_compat.h"
 
 @implementation MenuBar
 {
@@ -34,9 +33,7 @@
         [userDefaults setBool:NO forKey:@"NSFullScreenMenuItemEverywhere"];
         [userDefaults setBool:YES forKey:@"NSDisabledDictationMenuItem"];
         [userDefaults setBool:YES forKey:@"NSDisabledCharacterPaletteMenuItem"];
-
-        if ([NSWindow respondsToSelector:@selector(setAllowsAutomaticWindowTabbing:)])
-            [NSWindow setAllowsAutomaticWindowTabbing: NO];
+        [NSWindow setAllowsAutomaticWindowTabbing: NO];
 
         menuTree = @[
             @{
@@ -640,8 +637,7 @@
 
 #if HAVE_MACOS_TOUCHBAR
             if ([action isEqual:@"toggleTouchBarCustomizationPalette:"]) {
-                if (![NSApp respondsToSelector:@selector(touchBar)])
-                    continue;
+                continue;
             }
 #endif
 

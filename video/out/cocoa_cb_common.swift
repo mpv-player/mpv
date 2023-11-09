@@ -121,9 +121,7 @@ class CocoaCB: Common {
         }
 
         libmpv.setRenderICCProfile(colorSpace)
-        if #available(macOS 10.11, *) {
-            layer?.colorspace = colorSpace.cgColorSpace
-        }
+        layer?.colorspace = colorSpace.cgColorSpace
     }
 
     override func windowDidEndAnimation() {

@@ -150,10 +150,7 @@ class MacCommon: Common {
             return
         }
 
-        if #available(macOS 10.11, *) {
-            layer?.colorspace = colorSpace.cgColorSpace
-        }
-
+        layer?.colorspace = colorSpace.cgColorSpace
         flagEvents(VO_EVENT_ICC_PROFILE_CHANGED)
     }
 
