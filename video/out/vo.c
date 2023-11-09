@@ -270,6 +270,7 @@ static void dealloc_vo(struct vo *vo)
     talloc_free(vo->opts_cache);
     talloc_free(vo->gl_opts_cache);
     talloc_free(vo->eq_opts_cache);
+    mp_mutex_destroy(&vo->params_mutex);
 
     mp_mutex_destroy(&vo->in->lock);
     mp_cond_destroy(&vo->in->wakeup);
@@ -301,6 +302,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
         .probing = probing,
         .in = talloc(vo, struct vo_internal),
     };
+    mp_mutex_init(&vo->params_mutex);
     talloc_steal(vo, log);
     *vo->in = (struct vo_internal) {
         .dispatch = mp_dispatch_create(vo),
@@ -612,8 +614,10 @@ static void run_reconfig(void *p)
 
     mp_image_params_get_dsize(params, &vo->dwidth, &vo->dheight);
 
+    mp_mutex_lock(&vo->params_mutex);
     talloc_free(vo->params);
     vo->params = talloc_dup(vo, params);
+    mp_mutex_unlock(&vo->params_mutex);
 
     if (vo->driver->reconfig2) {
         *ret = vo->driver->reconfig2(vo, img);
@@ -624,8 +628,10 @@ static void run_reconfig(void *p)
     if (vo->config_ok) {
         check_vo_caps(vo);
     } else {
+        mp_mutex_lock(&vo->params_mutex);
         talloc_free(vo->params);
         vo->params = NULL;
+        mp_mutex_unlock(&vo->params_mutex);
     }
 
     mp_mutex_lock(&in->lock);
@@ -1426,9 +1432,9 @@ int lookup_keymap_table(const struct mp_keymap *map, int key)
 struct mp_image_params vo_get_current_params(struct vo *vo)
 {
     struct mp_image_params p = {0};
-    mp_mutex_lock(&vo->in->lock);
+    mp_mutex_lock(&vo->params_mutex);
     if (vo->params)
         p = *vo->params;
-    mp_mutex_unlock(&vo->in->lock);
+    mp_mutex_unlock(&vo->params_mutex);
     return p;
 }

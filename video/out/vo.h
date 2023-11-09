@@ -29,6 +29,7 @@
 #include "video/img_format.h"
 #include "common/common.h"
 #include "options/options.h"
+#include "osdep/threads.h"
 
 enum {
     // VO needs to redraw
@@ -465,7 +466,14 @@ struct vo {
     //     be accessed unsynchronized (read-only).
 
     int config_ok;      // Last config call was successful?
-    struct mp_image_params *params; // Configured parameters (as in vo_reconfig)
+
+    // --- The following fields are synchronized by params_mutex, most of
+    //     the params are set only in the vo_reconfig and safe to read
+    //     unsynchronized. Some of the parameters are updated in draw_frame,
+    //     which are still safe to read in the play loop, but for correctness
+    //     generic getter is protected by params_mutex.
+    mp_mutex params_mutex;
+    struct mp_image_params *params; // Configured parameters (changed in vo_reconfig)
 
     // --- The following fields can be accessed only by the VO thread, or from
     //     anywhere _if_ the VO thread is suspended (use vo->dispatch).

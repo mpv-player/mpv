@@ -1032,11 +1032,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     }
 
     const struct pl_frame *cur_frame = pl_frame_mix_nearest(&mix);
+    mp_mutex_lock(&vo->params_mutex);
     if (cur_frame && vo->params) {
         vo->params->color.hdr = cur_frame->color.hdr;
         // Augment metadata with peak detection max_pq_y / avg_pq_y
         pl_renderer_get_hdr_metadata(p->rr, &vo->params->color.hdr);
     }
+    mp_mutex_unlock(&vo->params_mutex);
 
     p->is_interpolated = mix.num_frames > 1;
     valid = true;
