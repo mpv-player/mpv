@@ -20,6 +20,7 @@
 #include <sys/select.h>
 #include <stdio.h>
 
+#include "common/common.h"
 #include "config.h"
 #include "poll_wrapper.h"
 #include "timer.h"
@@ -31,9 +32,15 @@ int mp_poll(struct pollfd *fds, int nfds, int64_t timeout_ns)
     struct timespec ts;
     ts.tv_sec  = timeout_ns / MP_TIME_S_TO_NS(1);
     ts.tv_nsec = timeout_ns % MP_TIME_S_TO_NS(1);
-    return ppoll(fds, nfds, &ts, NULL);
+    struct timespec *tsp = timeout_ns >= 0 ? &ts : NULL;
+    return ppoll(fds, nfds, tsp, NULL);
 #endif
-    return poll(fds, nfds, timeout_ns / 1e6);
+    // Round-up to 1ms for short timeouts (100us, 1000us]
+    if (timeout_ns > MP_TIME_US_TO_NS(100))
+        timeout_ns = MPMAX(timeout_ns, MP_TIME_MS_TO_NS(1));
+    if (timeout_ns > 0)
+        timeout_ns /= MP_TIME_MS_TO_NS(1);
+    return poll(fds, nfds, timeout_ns);
 }
 
 // poll shim that supports device files on macOS.

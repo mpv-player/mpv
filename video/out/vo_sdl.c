@@ -523,7 +523,10 @@ static void wakeup(struct vo *vo)
 static void wait_events(struct vo *vo, int64_t until_time_ns)
 {
     int64_t wait_ns = until_time_ns - mp_time_ns();
-    int timeout_ms = MPCLAMP(wait_ns / 1e6, 1, 10000);
+    // Round-up to 1ms for short timeouts (100us, 1000us]
+    if (wait_ns > MP_TIME_US_TO_NS(100))
+        wait_ns = MPMAX(wait_ns, MP_TIME_MS_TO_NS(1));
+    int timeout_ms = MPCLAMP(wait_ns / MP_TIME_MS_TO_NS(1), 0, 10000);
     SDL_Event ev;
 
     while (SDL_WaitEventTimeout(&ev, timeout_ms)) {
