@@ -898,6 +898,7 @@ static bool render_frame(struct vo *vo)
     in->current_frame->repeat = true;
     if (frame->display_synced) {
         in->current_frame->vsync_offset += in->current_frame->vsync_interval;
+        in->current_frame->ideal_frame_vsync += in->current_frame->ideal_frame_vsync_duration;
         in->dropped_frame |= in->current_frame->num_vsyncs < 1;
     }
     if (in->current_frame->num_vsyncs > 0)
