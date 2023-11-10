@@ -124,7 +124,7 @@ struct priv {
     bool is_interpolated;
     bool want_reset;
     bool frame_pending;
-    bool paused;
+    bool redraw;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -249,8 +249,6 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
 
     double pts = src ? src->pts : 0;
     struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, subfmt_all);
-    if (subs->num_items && p->paused)
-        p->osd_sync++;
 
     frame->overlays = state->overlays;
     frame->num_overlays = 0;
@@ -999,7 +997,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             struct frame_priv *fp = mpi->priv;
             apply_crop(image, p->src, vo->params->w, vo->params->h);
             if (opts->blend_subs) {
-                if (p->paused || fp->osd_sync < p->osd_sync) {
+                if (frame->redraw || fp->osd_sync < p->osd_sync) {
                     float rx = pl_rect_w(p->dst) / pl_rect_w(image->crop);
                     float ry = pl_rect_h(p->dst) / pl_rect_h(image->crop);
                     struct mp_osd_res res = {
@@ -1011,6 +1009,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                         .mb = (image->crop.y1 - vo->params->h) * ry,
                         .display_par = 1.0,
                     };
+                    // TODO: fix this doing pointless updates
+                    if (frame->redraw)
+                        p->osd_sync++;
                     update_overlays(vo, res, OSD_DRAW_SUB_ONLY,
                                     PL_OVERLAY_COORDS_DST_CROP,
                                     &fp->subs, image, mpi);
@@ -1390,12 +1391,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER:
     case VOCTRL_PAUSE:
-        p->paused = true;
         if (p->is_interpolated)
             vo->want_redraw = true;
-        return VO_TRUE;
-    case VOCTRL_RESUME:
-        p->paused = false;
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
