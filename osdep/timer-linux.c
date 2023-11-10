@@ -18,9 +18,14 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include "common/common.h"
 #include "timer.h"
+
+static clockid_t clk_id;
 
 void mp_sleep_ns(int64_t ns)
 {
@@ -35,15 +40,25 @@ void mp_sleep_ns(int64_t ns)
 uint64_t mp_raw_time_ns(void)
 {
     struct timespec tp = {0};
-    int ret = -1;
-#if defined(CLOCK_MONOTONIC_RAW)
-    ret = clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
-#endif
-    if (ret)
-        clock_gettime(CLOCK_MONOTONIC, &tp);
+    clock_gettime(clk_id, &tp);
     return MP_TIME_S_TO_NS(tp.tv_sec) + tp.tv_nsec;
 }
 
 void mp_raw_time_init(void)
 {
+    static const clockid_t clock_ids[] = {
+#ifdef CLOCK_MONOTONIC_RAW
+        CLOCK_MONOTONIC_RAW,
+#endif
+        CLOCK_MONOTONIC,
+    };
+
+    struct timespec tp;
+    for (int i = 0; i < MP_ARRAY_SIZE(clock_ids); ++i) {
+        clk_id = clock_ids[i];
+        if (!clock_gettime(clk_id, &tp))
+            return;
+    }
+    fputs("No clock source available!\n", stderr);
+    abort();
 }

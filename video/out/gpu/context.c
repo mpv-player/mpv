@@ -37,7 +37,6 @@
 extern const struct ra_ctx_fns ra_ctx_glx;
 extern const struct ra_ctx_fns ra_ctx_x11_egl;
 extern const struct ra_ctx_fns ra_ctx_drm_egl;
-extern const struct ra_ctx_fns ra_ctx_cocoa;
 extern const struct ra_ctx_fns ra_ctx_wayland_egl;
 extern const struct ra_ctx_fns ra_ctx_wgl;
 extern const struct ra_ctx_fns ra_ctx_angle;
@@ -70,9 +69,6 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 #if HAVE_RPI
     &ra_ctx_rpi,
-#endif
-#if HAVE_GL_COCOA
-    &ra_ctx_cocoa,
 #endif
 #if HAVE_EGL_ANGLE_WIN32
     &ra_ctx_angle,

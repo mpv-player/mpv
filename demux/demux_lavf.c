@@ -604,10 +604,17 @@ static void select_tracks(struct demuxer *demuxer, int start)
 static void export_replaygain(demuxer_t *demuxer, struct sh_stream *sh,
                               AVStream *st)
 {
-    for (int i = 0; i < st->nb_side_data; i++) {
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 15, 100)
+    AVPacketSideData *side_data = st->codecpar->coded_side_data;
+    int nb_side_data = st->codecpar->nb_coded_side_data;
+#else
+    AVPacketSideData *side_data = st->side_data;
+    int nb_side_data = st->nb_side_data;
+#endif
+    for (int i = 0; i < nb_side_data; i++) {
         AVReplayGain *av_rgain;
         struct replaygain_data *rgain;
-        AVPacketSideData *src_sd = &st->side_data[i];
+        AVPacketSideData *src_sd = &side_data[i];
 
         if (src_sd->type != AV_PKT_DATA_REPLAYGAIN)
             continue;
@@ -670,6 +677,20 @@ static bool is_image(AVStream *st, bool attached_picture, const AVInputFormat *a
         (st->codecpar->codec_id == AV_CODEC_ID_AV1 && st->nb_frames == 1)
     );
 }
+
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 15, 100)
+static inline const uint8_t *mp_av_stream_get_side_data(const AVStream *st,
+                                                        enum AVPacketSideDataType type)
+{
+    const AVPacketSideData *sd;
+    sd = av_packet_side_data_get(st->codecpar->coded_side_data,
+                                 st->codecpar->nb_coded_side_data,
+                                 type);
+    return sd ? sd->data : NULL;
+}
+#else
+#define mp_av_stream_get_side_data(st, type) av_stream_get_side_data(st, type, NULL)
+#endif
 
 static void handle_new_stream(demuxer_t *demuxer, int i)
 {
@@ -750,14 +771,14 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->codec->par_w = st->sample_aspect_ratio.num;
         sh->codec->par_h = st->sample_aspect_ratio.den;
 
-        uint8_t *sd = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, NULL);
+        const uint8_t *sd = mp_av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX);
         if (sd) {
-            double r = av_display_rotation_get((uint32_t *)sd);
+            double r = av_display_rotation_get((int32_t *)sd);
             if (!isnan(r))
                 sh->codec->rotate = (((int)(-r) % 360) + 360) % 360;
         }
 
-        if ((sd = av_stream_get_side_data(st, AV_PKT_DATA_DOVI_CONF, NULL))) {
+        if ((sd = mp_av_stream_get_side_data(st, AV_PKT_DATA_DOVI_CONF))) {
             const AVDOVIDecoderConfigurationRecord *cfg = (void *) sd;
             MP_VERBOSE(demuxer, "Found Dolby Vision config record: profile "
                        "%d level %d\n", cfg->dv_profile, cfg->dv_level);

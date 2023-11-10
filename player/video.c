@@ -1034,6 +1034,19 @@ static void apply_video_crop(struct MPContext *mpctx, struct vo *vo)
     }
 }
 
+static bool video_reconfig_needed(const struct mp_image_params *p1,
+                                  const struct mp_image_params *p2)
+{
+    return p1->imgfmt != p2->imgfmt ||
+           p1->hw_subfmt != p2->hw_subfmt ||
+           p1->w != p2->w || p1->h != p2->h ||
+           p1->p_w != p2->p_w || p1->p_h != p2->p_h ||
+           p1->force_window != p2->force_window ||
+           p1->rotate != p2->rotate ||
+           p1->stereo3d != p2->stereo3d ||
+           !mp_rect_equals(&p1->crop, &p2->crop);
+}
+
 void write_video(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -1156,7 +1169,7 @@ void write_video(struct MPContext *mpctx)
 
     // Filter output is different from VO input?
     struct mp_image_params *p = &mpctx->next_frames[0]->params;
-    if (!vo->params || !mp_image_params_equal(p, vo->params)) {
+    if (!vo->params || video_reconfig_needed(p, vo->params)) {
         // Changing config deletes the current frame; wait until it's finished.
         if (vo_still_displaying(vo))
             return;

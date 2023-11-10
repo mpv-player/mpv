@@ -114,6 +114,10 @@ Interface changes
       `--demuxer-readahead-secs` as well
     - add hdr metadata to `video-params` property
     - remove `hdr-metadata` property
+    - add `--target-gamut`
+    - change the way display names are retrieved on macOS, usage of options and properties
+      `--fs-screen-name`, `--screen-name` and `display-names` needs to be adjusted
+    - remove OpenGL cocoa backend that was deprecated in 0.29
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.

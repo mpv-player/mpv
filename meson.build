@@ -359,6 +359,10 @@ features += {'win32-threads': win32_threads.allowed()}
 if not features['win32-threads']
     pthreads = dependency('threads')
     sources += files('osdep/threads-posix.c')
+    features += {'pthread-condattr-setclock':
+                    cc.has_header_symbol('pthread.h',
+                                         'pthread_condattr_setclock',
+                                         dependencies: pthreads)}
     dependencies += pthreads
 endif
 
@@ -384,11 +388,7 @@ if features['cocoa']
                      'osdep/macosx_events.m',
                      'osdep/macosx_menubar.m',
                      'osdep/main-fn-cocoa.c',
-                     'osdep/path-macosx.m',
-                     'video/out/cocoa_common.m',
-                     'video/out/cocoa/events_view.m',
-                     'video/out/cocoa/video_view.m',
-                     'video/out/cocoa/window.m')
+                     'osdep/path-macosx.m')
 endif
 
 if posix
@@ -498,7 +498,8 @@ endif
 
 if not posix and not features['win32-desktop']
     subprocess_source = files('osdep/subprocess-dummy.c')
-    sources += files('input/ipc-dummy.c')
+    sources += files('input/ipc-dummy.c',
+                     'osdep/terminal-dummy.c')
 endif
 
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
@@ -1074,7 +1075,6 @@ features += {'gl-cocoa': gl_cocoa.allowed()}
 if features['gl-cocoa']
     dependencies += GL
     features += {'gl': true}
-    sources += files('video/out/opengl/context_cocoa.c')
 endif
 
 gl_win32 = get_option('gl-win32').require(
@@ -1459,10 +1459,8 @@ macos_sdk_path = ''
 macos_sdk_version = '0.0'
 if darwin and macos_sdk_version_py.found()
     macos_sdk_info = run_command(macos_sdk_version_py, check: true).stdout().split(',')
-    macos_sdk_path = macos_sdk_info[0].strip()
-    # Always pick whichever version is higher.
-    macos_sdk_version = macos_sdk_info[1].version_compare('>' + macos_sdk_info[2]) ? \
-                        macos_sdk_info[1] : macos_sdk_info[2]
+    macos_sdk_path = macos_sdk_info[0]
+    macos_sdk_version = macos_sdk_info[1]
 endif
 
 if macos_sdk_path != ''
@@ -1493,23 +1491,8 @@ sys.stdout.write(swift_ver)
     message('Detected Swift version: ' + swift_ver)
 endif
 
-macos_10_11_features = get_option('macos-10-11-features').require(
-    macos_sdk_version.version_compare('>=10.11'),
-    error_message: 'a suitable macos sdk version could not be found!',
-)
-
-macos_10_12_2_features = get_option('macos-10-12-2-features').require(
-    macos_sdk_version.version_compare('>=10.12.2'),
-    error_message: 'a suitable macos sdk version could not be found!',
-)
-
-macos_10_14_features = get_option('macos-10-14-features').require(
-    macos_sdk_version.version_compare('>=10.14'),
-    error_message: 'a suitable macos sdk version could not be found!',
-)
-
 swift = get_option('swift-build').require(
-    darwin and macos_sdk_version.version_compare('>=10.10') and swift_ver.version_compare('>=4.1'),
+    darwin and macos_sdk_version.version_compare('>= 10.15') and swift_ver.version_compare('>= 4.1'),
     error_message: 'A suitable macos sdk version or swift version could not be found!',
 )
 features += {'swift': swift.allowed()}
@@ -1529,8 +1512,8 @@ if features['cocoa'] and features['swift']
 endif
 
 macos_cocoa_cb = get_option('macos-cocoa-cb').require(
-    features['cocoa'] and features['swift'],
-    error_message: 'Either cocoa or swift could not be found!',
+    features['cocoa'] and features['gl-cocoa'] and features['swift'],
+    error_message: 'Either cocoa, gl-cocoa or swift could not be found!',
 )
 features += {'macos-cocoa-cb': macos_cocoa_cb.allowed()}
 if features['macos-cocoa-cb']
@@ -1544,8 +1527,8 @@ if features['cocoa'] and features['vulkan'] and features['swift']
 endif
 
 macos_media_player = get_option('macos-media-player').require(
-    macos_10_12_2_features.allowed() and features['swift'],
-    error_message: 'Either the macos sdk version is not at least 10.12.2 or swift was not found!',
+    features['swift'],
+    error_message: 'Swift was not found!',
 )
 features += {'macos-media-player': macos_media_player.allowed()}
 if features['macos-media-player']

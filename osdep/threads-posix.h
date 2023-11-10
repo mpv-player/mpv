@@ -23,6 +23,7 @@
 
 #include "common/common.h"
 #include "config.h"
+#include "osdep/compiler.h"
 #include "timer.h"
 
 int mp_ptwrap_check(const char *file, int line, int res);
@@ -85,14 +86,18 @@ int mp_ptwrap_mutex_trylock(const char *file, int line, pthread_mutex_t *m);
 
 #endif
 
-typedef pthread_cond_t  mp_cond;
+typedef struct {
+    pthread_cond_t cond;
+    clockid_t clk_id;
+} mp_cond;
+
 typedef pthread_mutex_t mp_mutex;
 typedef pthread_mutex_t mp_static_mutex;
 typedef pthread_once_t  mp_once;
 typedef pthread_t       mp_thread_id;
 typedef pthread_t       mp_thread;
 
-#define MP_STATIC_COND_INITIALIZER PTHREAD_COND_INITIALIZER
+#define MP_STATIC_COND_INITIALIZER (mp_cond){ .cond = PTHREAD_COND_INITIALIZER, .clk_id = CLOCK_REALTIME }
 #define MP_STATIC_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 #define MP_STATIC_ONCE_INITIALIZER PTHREAD_ONCE_INIT
 
@@ -131,21 +136,62 @@ static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_typ
 #define mp_mutex_trylock    pthread_mutex_trylock
 #define mp_mutex_unlock     pthread_mutex_unlock
 
-#define mp_cond_init(cond)  pthread_cond_init(cond, NULL)
-#define mp_cond_destroy     pthread_cond_destroy
-#define mp_cond_broadcast   pthread_cond_broadcast
-#define mp_cond_signal      pthread_cond_signal
-#define mp_cond_wait        pthread_cond_wait
+static inline int mp_cond_init(mp_cond *cond)
+{
+    assert(cond);
+
+    int ret = 0;
+    pthread_condattr_t attr;
+    ret = pthread_condattr_init(&attr);
+    if (ret)
+        return ret;
+
+    cond->clk_id = CLOCK_REALTIME;
+#if HAVE_PTHREAD_CONDATTR_SETCLOCK
+    if (!pthread_condattr_setclock(&attr, CLOCK_MONOTONIC))
+        cond->clk_id = CLOCK_MONOTONIC;
+#endif
+
+    ret = pthread_cond_init(&cond->cond, &attr);
+    pthread_condattr_destroy(&attr);
+    return ret;
+}
+
+static inline int mp_cond_destroy(mp_cond *cond)
+{
+    assert(cond);
+    return pthread_cond_destroy(&cond->cond);
+}
+
+static inline int mp_cond_broadcast(mp_cond *cond)
+{
+    assert(cond);
+    return pthread_cond_broadcast(&cond->cond);
+}
+
+static inline int mp_cond_signal(mp_cond *cond)
+{
+    assert(cond);
+    return pthread_cond_signal(&cond->cond);
+}
+
+static inline int mp_cond_wait(mp_cond *cond, mp_mutex *mutex)
+{
+    assert(cond);
+    return pthread_cond_wait(&cond->cond, mutex);
+}
 
 static inline int mp_cond_timedwait(mp_cond *cond, mp_mutex *mutex, int64_t timeout)
 {
+    assert(cond);
+
     timeout = MPMAX(0, timeout);
     // consider anything above 1000 days as infinity
     if (timeout > MP_TIME_S_TO_NS(1000 * 24 * 60 * 60))
-        return pthread_cond_wait(cond, mutex);
+        return pthread_cond_wait(&cond->cond, mutex);
 
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
+    clock_gettime(cond->clk_id, &ts);
     ts.tv_sec  += timeout / MP_TIME_S_TO_NS(1);
     ts.tv_nsec += timeout % MP_TIME_S_TO_NS(1);
     if (ts.tv_nsec >= MP_TIME_S_TO_NS(1)) {
@@ -153,7 +199,7 @@ static inline int mp_cond_timedwait(mp_cond *cond, mp_mutex *mutex, int64_t time
         ts.tv_sec++;
     }
 
-    return pthread_cond_timedwait(cond, mutex, &ts);
+    return pthread_cond_timedwait(&cond->cond, mutex, &ts);
 }
 
 static inline int mp_cond_timedwait_until(mp_cond *cond, mp_mutex *mutex, int64_t until)

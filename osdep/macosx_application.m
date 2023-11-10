@@ -26,7 +26,6 @@
 #include "options/options.h"
 
 #import "osdep/macosx_application_objc.h"
-#include "osdep/macosx_compat.h"
 #import "osdep/macosx_events_objc.h"
 #include "osdep/threads.h"
 #include "osdep/main-fn.h"
@@ -177,8 +176,7 @@ static const char macosx_icon[] =
 - (void)processEvent:(struct mpv_event *)event
 {
 #if HAVE_MACOS_TOUCHBAR
-    if ([self respondsToSelector:@selector(touchBar)])
-        [(TouchBar *)self.touchBar processEvent:event];
+    [(TouchBar *)self.touchBar processEvent:event];
 #endif
     if (_cocoa_cb) {
         [_cocoa_cb processEvent:event];

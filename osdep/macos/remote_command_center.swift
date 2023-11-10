@@ -17,7 +17,6 @@
 
 import MediaPlayer
 
-@available(macOS 10.12.2, *)
 class RemoteCommandCenter: NSObject {
     enum KeyType {
         case normal
@@ -105,9 +104,7 @@ class RemoteCommandCenter: NSObject {
             }
         }
 
-        if let app = NSApp as? Application, let icon = app.getMPVIcon(),
-               #available(macOS 10.13.2, *)
-        {
+        if let app = NSApp as? Application, let icon = app.getMPVIcon() {
             let albumArt = MPMediaItemArtwork(boundsSize: icon.size) { _ in
                 return icon
             }

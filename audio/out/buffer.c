@@ -114,7 +114,8 @@ struct mp_async_queue *ao_get_queue(struct ao *ao)
 }
 
 // Special behavior with data==NULL: caller uses p->pending.
-static int read_buffer(struct ao *ao, void **data, int samples, bool *eof)
+static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
+                       bool pad_silence)
 {
     struct buffer_state *p = ao->buffer_state;
     int pos = 0;
@@ -160,13 +161,36 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof)
     }
 
     // pad with silence (underflow/paused/eof)
-    for (int n = 0; n < ao->num_planes; n++) {
-        af_fill_silence((char *)data[n] + pos * ao->sstride,
-                        (samples - pos) * ao->sstride,
-                        ao->format);
+    if (pad_silence) {
+        for (int n = 0; n < ao->num_planes; n++) {
+            af_fill_silence((char *)data[n] + pos * ao->sstride,
+                    (samples - pos) * ao->sstride,
+                    ao->format);
+        }
     }
 
     ao_post_process_data(ao, data, pos);
+    return pos;
+}
+
+static int ao_read_data_unlocked(struct ao *ao, void **data, int samples,
+                                 int64_t out_time_ns, bool pad_silence)
+{
+    struct buffer_state *p = ao->buffer_state;
+    assert(!ao->driver->write);
+
+    int pos = read_buffer(ao, data, samples, &(bool){0}, pad_silence);
+
+    if (pos > 0)
+        p->end_time_ns = out_time_ns;
+
+    if (pos < samples && p->playing && !p->paused) {
+        p->playing = false;
+        ao->wakeup_cb(ao->wakeup_ctx);
+        // For ao_drain().
+        mp_cond_broadcast(&p->wakeup);
+    }
+
     return pos;
 }
 
@@ -181,21 +205,26 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof)
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns)
 {
     struct buffer_state *p = ao->buffer_state;
-    assert(!ao->driver->write);
 
     mp_mutex_lock(&p->lock);
 
-    int pos = read_buffer(ao, data, samples, &(bool){0});
+    int pos = ao_read_data_unlocked(ao, data, samples, out_time_ns, true);
 
-    if (pos > 0)
-        p->end_time_ns = out_time_ns;
+    mp_mutex_unlock(&p->lock);
 
-    if (pos < samples && p->playing && !p->paused) {
-        p->playing = false;
-        ao->wakeup_cb(ao->wakeup_ctx);
-        // For ao_drain().
-        mp_cond_broadcast(&p->wakeup);
-    }
+    return pos;
+}
+
+// Like ao_read_data() but does not block and also may return partial data.
+// Callers have to check the return value.
+int ao_read_data_nonblocking(struct ao *ao, void **data, int samples, int64_t out_time_ns)
+{
+    struct buffer_state *p = ao->buffer_state;
+
+    if (mp_mutex_trylock(&p->lock))
+            return 0;
+
+    int pos = ao_read_data_unlocked(ao, data, samples, out_time_ns, false);
 
     mp_mutex_unlock(&p->lock);
 
@@ -597,7 +626,7 @@ static bool ao_play_data(struct ao *ao)
     bool got_eof = false;
     if (ao->driver->write_frames) {
         TA_FREEP(&p->pending);
-        samples = read_buffer(ao, NULL, 1, &got_eof);
+        samples = read_buffer(ao, NULL, 1, &got_eof, false);
         planes = (void **)&p->pending;
     } else {
         if (!realloc_buf(ao, space)) {
@@ -614,7 +643,7 @@ static bool ao_play_data(struct ao *ao)
         }
 
         if (!samples) {
-            samples = read_buffer(ao, planes, space, &got_eof);
+            samples = read_buffer(ao, planes, space, &got_eof, true);
             if (p->paused || (ao->stream_silence && !p->playing))
                 samples = space; // read_buffer() sets remainder to silent
         }

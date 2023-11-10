@@ -484,6 +484,20 @@ int mp_creat(const char *filename, int mode)
     return mp_open(filename, _O_CREAT | _O_WRONLY | _O_TRUNC, mode);
 }
 
+int mp_rename(const char *oldpath, const char *newpath)
+{
+    wchar_t *woldpath = mp_from_utf8(NULL, oldpath),
+        *wnewpath = mp_from_utf8(NULL, newpath);
+    BOOL ok = MoveFileExW(woldpath, wnewpath, MOVEFILE_REPLACE_EXISTING);
+    talloc_free(woldpath);
+    talloc_free(wnewpath);
+    if (!ok) {
+        set_errno_from_lasterror();
+        return -1;
+    }
+    return 0;
+}
+
 FILE *mp_fopen(const char *filename, const char *mode)
 {
     if (!mode[0]) {

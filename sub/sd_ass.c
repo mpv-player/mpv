@@ -341,7 +341,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         double sub_duration = 0;
         char **r = lavc_conv_decode(ctx->converter, packet, &sub_pts,
                                     &sub_duration);
-        if (packet->duration < 0 || sub_duration == UINT32_MAX) {
+        if (sd->opts->sub_stretch_durations ||
+            packet->duration < 0 || sub_duration == UINT32_MAX) {
             if (!ctx->duration_unknown) {
                 MP_WARN(sd, "Subtitle with unknown duration.\n");
                 ctx->duration_unknown = true;

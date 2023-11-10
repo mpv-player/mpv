@@ -17,6 +17,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+
 #include <libplacebo/colorspace.h>
 #include <libplacebo/options.h>
 #include <libplacebo/renderer.h>
@@ -153,8 +155,6 @@ struct priv {
     bool target_hint;
 
     float corner_rounding;
-
-    struct pl_hdr_metadata last_hdr_metadata;
 };
 
 static void update_render_options(struct vo *vo);
@@ -791,6 +791,13 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
         target->color.hdr.max_luma = opts->target_peak;
     if (!target->color.hdr.min_luma)
         apply_target_contrast(p, &target->color);
+    if (opts->target_gamut) {
+        // Ensure resulting gamut still fits inside container
+        const struct pl_raw_primaries *gamut, *container;
+        gamut = pl_raw_primaries_get(mp_prim_to_pl(opts->target_gamut));
+        container = pl_raw_primaries_get(target->color.primaries);
+        target->color.hdr.prim = pl_primaries_clip(gamut, container);
+    }
     if (opts->dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
         tbits->color_depth += opts->dither_depth - tbits->sample_depth;
@@ -1026,19 +1033,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         goto done;
     }
 
-    const struct pl_frame *cur_frame = NULL;
-    for (int i = 0; i < mix.num_frames; i++) {
-        if (mix.timestamps[i] > 0.0f)
-            break;
-        cur_frame = mix.frames[i];
-    }
-
-    if (cur_frame) {
-        p->last_hdr_metadata = cur_frame->color.hdr;
+    const struct pl_frame *cur_frame = pl_frame_mix_nearest(&mix);
+    if (cur_frame && vo->params) {
+        vo->params->color.hdr = cur_frame->color.hdr;
         // Augment metadata with peak detection max_pq_y / avg_pq_y
-        pl_renderer_get_hdr_metadata(p->rr, &p->last_hdr_metadata);
-    } else {
-        p->last_hdr_metadata = (struct pl_hdr_metadata){0};
+        pl_renderer_get_hdr_metadata(p->rr, &vo->params->color.hdr);
     }
 
     p->is_interpolated = mix.num_frames > 1;
@@ -1423,10 +1422,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
 
-    case VOCTRL_HDR_METADATA:
-        *(struct pl_hdr_metadata *) data = p->last_hdr_metadata;
-        return true;
-
     case VOCTRL_SCREENSHOT:
         video_screenshot(vo, data);
         return true;
@@ -1523,51 +1518,54 @@ static void load_cache_files(struct priv *p)
         }
         talloc_free(shader_cache);
     }
-    if (icc_cache) {
-        if (!same_cache) {
-            FILE *cache = fopen(icc_cache, "rb");
-            if (cache) {
-                int ret = pl_cache_load_file(p->icc_cache, cache);
-                fclose(cache);
-                if (ret < 0)
-                    MP_WARN(p, "Failed loading cache from %s\n", icc_cache);
-            }
+    if (icc_cache && !same_cache) {
+        FILE *cache = fopen(icc_cache, "rb");
+        if (cache) {
+            int ret = pl_cache_load_file(p->icc_cache, cache);
+            fclose(cache);
+            if (ret < 0)
+                MP_WARN(p, "Failed loading cache from %s\n", icc_cache);
         }
-        talloc_free(icc_cache);
     }
+    talloc_free(icc_cache);
 }
 
 static void save_cache_files(struct priv *p)
 {
+    void *ta_ctx = talloc_new(NULL);
     char *icc_cache = get_cache_file(p, "icc");
     char *shader_cache = get_cache_file(p, "shader");
+    talloc_steal(ta_ctx, icc_cache);
+    talloc_steal(ta_ctx, shader_cache);
+
     bool same_cache = false;
     if (icc_cache && shader_cache)
         same_cache = strcmp(icc_cache, shader_cache) == 0;
-    if (shader_cache) {
-        FILE *cache = fopen(shader_cache, "wb");
-        if (cache) {
-            int ret = pl_cache_save_file(p->shader_cache, cache);
-            if (same_cache)
-                pl_cache_save_file(p->icc_cache, cache);
-            fclose(cache);
-            if (ret < 0)
-                MP_WARN(p, "Failed saving cache to %s\n", shader_cache);
+    for (int i = 0; i < 2; i++) {
+        const char *target_file = i == 0 ? shader_cache : icc_cache;
+        pl_cache target_cache = i == 0 ? p->shader_cache : p->icc_cache;
+
+        if (!target_file)
+            continue;
+        char *tmp = talloc_asprintf(ta_ctx, "%s~", target_file);
+        FILE *cache = fopen(tmp, "wb");
+        if (!cache)
+            continue;
+        int ret = pl_cache_save_file(target_cache, cache);
+        if (same_cache)
+            ret += pl_cache_save_file(p->icc_cache, cache);
+        fclose(cache);
+        if (ret >= 0)
+            ret = rename(tmp, target_file);
+        if (ret < 0) {
+            MP_WARN(p, "Failed saving cache to %s\n", target_file);
+            unlink(tmp);
         }
-        talloc_free(shader_cache);
+
+        if (same_cache)
+            break;
     }
-    if (icc_cache) {
-        if (!same_cache) {
-            FILE *cache = fopen(icc_cache, "wb");
-            if (cache) {
-                int ret = pl_cache_save_file(p->icc_cache, cache);
-                fclose(cache);
-                if (ret < 0)
-                    MP_WARN(p, "Failed saving cache to %s\n", icc_cache);
-            }
-        }
-        talloc_free(icc_cache);
-    }
+    talloc_free(ta_ctx);
 }
 
 

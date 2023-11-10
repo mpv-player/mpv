@@ -111,11 +111,11 @@ class MacCommon: Common {
                                          _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn
     {
         let frameTimer = mpv?.macOpts.macos_render_timer ?? Int32(RENDER_TIMER_CALLBACK)
-        let signalSwap = { [self] in
-            swapLock.lock()
-            swapTime += 1
-            swapLock.signal()
-            swapLock.unlock()
+        let signalSwap = {
+            self.swapLock.lock()
+            self.swapTime += 1
+            self.swapLock.signal()
+            self.swapLock.unlock()
         }
 
         if frameTimer != RENDER_TIMER_SYSTEM {
@@ -150,10 +150,7 @@ class MacCommon: Common {
             return
         }
 
-        if #available(macOS 10.11, *) {
-            layer?.colorspace = colorSpace.cgColorSpace
-        }
-
+        layer?.colorspace = colorSpace.cgColorSpace
         flagEvents(VO_EVENT_ICC_PROFILE_CHANGED)
     }
 

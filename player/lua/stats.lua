@@ -111,9 +111,6 @@ local function init_buffers()
 end
 local cache_ahead_buf, cache_speed_buf
 local perf_buffers = {}
--- Save all properties known to this version of mpv
-local property_list = {}
-for p in string.gmatch(mp.get_property("property-list"), "([^,]+)") do property_list[p] = true end
 
 local function graph_add_value(graph, value)
     graph.pos = (graph.pos % graph.len) + 1
@@ -162,17 +159,19 @@ local function text_style()
     if o.custom_header and o.custom_header ~= "" then
         return o.custom_header
     else
-        return format("{\\r}{\\an7}{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}" ..
-                      "{\\1c&H%s&}{\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}",
+        local has_shadow = mp.get_property('osd-back-color'):sub(2, 3) == '00'
+        return format("{\\r\\an7\\fs%d\\fn%s\\bord%f\\3c&H%s&" ..
+                      "\\1c&H%s&\\1a&H%s&\\3a&H%s&" ..
+                      (has_shadow and "\\4a&H%s&\\xshad%f\\yshad%f\\4c&H%s&}" or "}"),
                       o.font_size, o.font, o.border_size,
-                      o.border_color, o.font_color, o.alpha, o.shadow_x_offset,
-                      o.shadow_y_offset, o.shadow_color)
+                      o.border_color, o.font_color, o.alpha, o.alpha, o.alpha,
+                      o.shadow_x_offset, o.shadow_y_offset, o.shadow_color)
     end
 end
 
 
 local function has_vo_window()
-    return mp.get_property("vo-configured") == "yes"
+    return mp.get_property_native("vo-configured") and mp.get_property_native("video-osd")
 end
 
 

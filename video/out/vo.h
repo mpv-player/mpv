@@ -122,8 +122,6 @@ enum mp_voctrl {
 
     /* private to vo_gpu and vo_gpu_next */
     VOCTRL_EXTERNAL_RESIZE,
-
-    VOCTRL_HDR_METADATA,            // struct pl_hdr_metadata*
 };
 
 // Helper to expose what kind of content is currently playing to the VO.
@@ -448,7 +446,6 @@ struct vo {
     struct mpv_global *global;
     struct vo_x11_state *x11;
     struct vo_w32_state *w32;
-    struct vo_cocoa_state *cocoa;
     struct vo_wayland_state *wl;
     struct vo_android_state *android;
     struct vo_drm_state *drm;
@@ -535,5 +532,7 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
                           struct mp_rect *out_dst, struct mp_osd_res *out_osd);
 
 struct vo_frame *vo_frame_ref(struct vo_frame *frame);
+
+struct mp_image_params vo_get_current_params(struct vo *vo);
 
 #endif /* MPLAYER_VIDEO_OUT_H */

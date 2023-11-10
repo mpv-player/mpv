@@ -164,17 +164,6 @@ class Common: NSObject {
         view?.removeFromSuperview()
     }
 
-    let linkCallback: CVDisplayLinkOutputCallback = {
-                    (displayLink: CVDisplayLink,
-                           inNow: UnsafePointer<CVTimeStamp>,
-                    inOutputTime: UnsafePointer<CVTimeStamp>,
-                         flagsIn: CVOptionFlags,
-                        flagsOut: UnsafeMutablePointer<CVOptionFlags>,
-              displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
-        let com = unsafeBitCast(displayLinkContext, to: Common.self)
-        return com.displayLinkCallback(displayLink, inNow, inOutputTime, flagsIn, flagsOut)
-    }
-
     func displayLinkCallback(_ displayLink: CVDisplayLink,
                                    _ inNow: UnsafePointer<CVTimeStamp>,
                             _ inOutputTime: UnsafePointer<CVTimeStamp>,
@@ -195,12 +184,8 @@ class Common: NSObject {
         }
 
         CVDisplayLinkSetCurrentCGDisplay(link, screen.displayID)
-        if #available(macOS 10.12, *) {
-            CVDisplayLinkSetOutputHandler(link) { link, now, out, inFlags, outFlags -> CVReturn in
-                return self.displayLinkCallback(link, now, out, inFlags, outFlags)
-            }
-        } else {
-            CVDisplayLinkSetOutputCallback(link, linkCallback, MPVHelper.bridge(obj: self))
+        CVDisplayLinkSetOutputHandler(link) { link, now, out, inFlags, outFlags -> CVReturn in
+            return self.displayLinkCallback(link, now, out, inFlags, outFlags)
         }
         CVDisplayLinkStart(link)
     }
@@ -411,7 +396,7 @@ class Common: NSObject {
 
     func getScreenBy(name screenName: String?) -> NSScreen? {
         for screen in NSScreen.screens {
-            if screen.displayName == screenName {
+            if screen.localizedName == screenName {
                 return screen
             }
         }
@@ -643,7 +628,7 @@ class Common: NSObject {
             let dnames = data!.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self)
             var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>? = nil
             var count: Int32 = 0
-            let displayName = getCurrentScreen()?.displayName ?? "Unknown"
+            let displayName = getCurrentScreen()?.localizedName ?? "Unknown"
 
             SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, ta_xstrdup(nil, displayName))
             SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, nil)

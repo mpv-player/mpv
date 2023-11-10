@@ -2325,7 +2325,7 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
             SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p.color.primaries))},
         {"gamma",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p.color.gamma))},
-        {"sig-peak", SUB_PROP_FLOAT(p.color.hdr.max_luma * MP_REF_WHITE)},
+        {"sig-peak", SUB_PROP_FLOAT(p.color.hdr.max_luma / MP_REF_WHITE)},
         {"light",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_light_names, p.color.light))},
         {"chroma-location",
@@ -2373,17 +2373,16 @@ static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
 static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+
     int valid = m_property_read_sub_validate(ctx, prop, action, arg);
     if (valid != M_PROPERTY_VALID)
         return valid;
 
-    struct mp_image_params p = get_video_out_params(ctx);
-
-    MPContext *mpctx = ctx;
-    if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_HDR_METADATA, &p.color.hdr);
-
-    return property_imgparams(p, action, arg);
+    return property_imgparams(vo_get_current_params(vo), action, arg);
 }
 
 static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
@@ -5648,6 +5647,10 @@ static void cmd_show_progress(void *p)
     mpctx->add_osd_seek_info |=
             (cmd->msg_osd ? OSD_SEEK_INFO_TEXT : 0) |
             (cmd->bar_osd ? OSD_SEEK_INFO_BAR : 0);
+
+    // If we got neither (i.e. no-osd) force both like osd-auto.
+    if (!mpctx->add_osd_seek_info)
+        mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT | OSD_SEEK_INFO_BAR;
     mpctx->osd_force_update = true;
     mp_wakeup_core(mpctx);
 }
@@ -7021,6 +7024,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (opt_ptr == &opts->vo->video_driver_list) {
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
         uninit_video_out(mpctx);
+        handle_force_window(mpctx, true);
         reinit_video_chain(mpctx);
         if (track)
             reselect_demux_stream(mpctx, track, true);

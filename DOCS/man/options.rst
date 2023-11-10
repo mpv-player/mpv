@@ -1180,7 +1180,8 @@ Video
     Enable some things which tend to reduce video latency by 1 or 2 frames
     (default: no). Note that this option might be removed without notice once
     the player's timing code does not inherently need to do these things
-    anymore.
+    anymore. Using this option is known to break other options such as
+    interpolation, so it is not recommended to enable this.
 
     This does:
 
@@ -2647,6 +2648,14 @@ Subtitles
         This works for text subtitle files only. Other types of subtitles (in
         particular subtitles in mkv files) are always assumed to be UTF-8.
 
+
+``--sub-stretch-durations=<yes|no>``
+    Stretch a subtitle duration so it ends when the next one starts.
+    Should help with subtitles which erroneously have zero durations.
+
+    .. note::
+
+        Only applies to text subtitles.
 
 ``--sub-fix-timing=<yes|no>``
     Adjust subtitle timing is to remove minor gaps or overlaps between
@@ -6552,6 +6561,13 @@ them.
     would have or an infinite contrast when HDR ``--target-trc`` is used.
     ``inf`` contrast specifies display with perfect black level, in practice OLED.
     (Only for ``--vo=gpu-next``)
+
+``--target-gamut=<value>``
+    Constrains the gamut of the display. You can use this option to output e.g.
+    DCIP3-in-BT.2020. Set ``--target-prim`` to the primaries of the containing
+    colorspace (into which values will be encoded), and ``--target-gamut`` to
+    the gamut you want to limit colors to. Takes the same values as
+    ``--target-prim``. (Only for ``--vo=gpu-next``)
 
 ``--target-lut=<file>``
     Specifies a custom LUT file (in Adobe .cube format) to apply to the colors

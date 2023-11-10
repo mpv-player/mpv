@@ -109,7 +109,7 @@ class GLLayer: CAOpenGLLayer {
         autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         backgroundColor = NSColor.black.cgColor
 
-        if #available(macOS 10.12, *), bufferDepth > 8 {
+        if bufferDepth > 8 {
             contentsFormat = .RGBA16Float
         }
 

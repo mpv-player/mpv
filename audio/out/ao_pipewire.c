@@ -181,7 +181,7 @@ static void on_process(void *userdata)
     end_time += (nframes * 1e9 / ao->samplerate) +
                 ((double) time.delay * SPA_NSEC_PER_SEC * time.rate.num / time.rate.denom);
 
-    int samples = ao_read_data(ao, data, nframes, end_time);
+    int samples = ao_read_data_nonblocking(ao, data, nframes, end_time);
     b->size = samples;
 
     for (int i = 0; i < buf->n_datas; i++) {

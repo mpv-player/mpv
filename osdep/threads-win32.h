@@ -195,21 +195,26 @@ static inline int mp_thread_detach(mp_thread thread)
 #define mp_thread_id_equal(a, b) ((a) == (b))
 #define mp_thread_get_id(thread) GetThreadId(thread)
 
+// declared in io.h, which we don't want to pull in everywhere
 wchar_t *mp_from_utf8(void *talloc_ctx, const char *s);
 static inline void mp_thread_set_name(const char *name)
 {
+    HRESULT (WINAPI *pSetThreadDescription)(HANDLE, PCWSTR);
 #if !HAVE_UWP
     HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
     if (!kernel32)
         return;
-    HRESULT (WINAPI *pSetThreadDescription)(HANDLE, PCWSTR) =
-        (void *) GetProcAddress(kernel32, "SetThreadDescription");
+    pSetThreadDescription = (void *) GetProcAddress(kernel32, "SetThreadDescription");
     if (!pSetThreadDescription)
         return;
+#else
+    WINBASEAPI HRESULT WINAPI
+    SetThreadDescription(HANDLE hThread, PCWSTR lpThreadDescription);
+    pSetThreadDescription = &SetThreadDescription;
+#endif
     wchar_t *wname = mp_from_utf8(NULL, name);
     pSetThreadDescription(GetCurrentThread(), wname);
     talloc_free(wname);
-#endif
 }
 
 static inline int64_t mp_thread_cpu_time_ns(mp_thread_id thread)
