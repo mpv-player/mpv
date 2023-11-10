@@ -903,7 +903,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
         pl_queue_push(p->queue, &(struct pl_source_frame) {
             .pts = mpi->pts,
-            .duration = frame->ideal_frame_duration,
             .frame_data = mpi,
             .map = map_frame,
             .unmap = unmap_frame,
@@ -929,13 +928,13 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     struct pl_swapchain_frame swframe;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
-    double vsync_offset = can_interpolate ? frame->vsync_offset : 0;
+    double pts_offset = can_interpolate ? frame->ideal_frame_vsync : 0;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         if (frame->current) {
             // Advance the queue state to the current PTS to discard unused frames
             pl_queue_update(p->queue, NULL, pl_queue_params(
-                .pts = frame->current->pts + vsync_offset,
+                .pts = frame->current->pts + pts_offset,
                 .radius = pl_frame_mix_radius(&params),
             ));
         }
@@ -959,9 +958,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (frame->current) {
         // Update queue state
         struct pl_queue_params qparams = *pl_queue_params(
-            .pts = frame->current->pts + vsync_offset,
+            .pts = frame->current->pts + pts_offset,
             .radius = pl_frame_mix_radius(&params),
-            .vsync_duration = frame->vsync_interval,
+            .vsync_duration = frame->ideal_frame_vsync_duration,
             .interpolation_threshold = opts->interpolation_threshold,
         );
 
@@ -1047,7 +1046,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         pl_renderer_get_hdr_metadata(p->rr, &vo->params->color.hdr);
     }
 
-    p->is_interpolated = vsync_offset != 0 && mix.num_frames > 1;
+    p->is_interpolated = pts_offset != 0 && mix.num_frames > 1;
     valid = true;
     // fall through
 
