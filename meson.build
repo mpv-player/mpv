@@ -388,11 +388,7 @@ if features['cocoa']
                      'osdep/macosx_events.m',
                      'osdep/macosx_menubar.m',
                      'osdep/main-fn-cocoa.c',
-                     'osdep/path-macosx.m',
-                     'video/out/cocoa_common.m',
-                     'video/out/cocoa/events_view.m',
-                     'video/out/cocoa/video_view.m',
-                     'video/out/cocoa/window.m')
+                     'osdep/path-macosx.m')
 endif
 
 if posix
@@ -1079,7 +1075,6 @@ features += {'gl-cocoa': gl_cocoa.allowed()}
 if features['gl-cocoa']
     dependencies += GL
     features += {'gl': true}
-    sources += files('video/out/opengl/context_cocoa.c')
 endif
 
 gl_win32 = get_option('gl-win32').require(
@@ -1517,8 +1512,8 @@ if features['cocoa'] and features['swift']
 endif
 
 macos_cocoa_cb = get_option('macos-cocoa-cb').require(
-    features['cocoa'] and features['swift'],
-    error_message: 'Either cocoa or swift could not be found!',
+    features['cocoa'] and features['gl-cocoa'] and features['swift'],
+    error_message: 'Either cocoa, gl-cocoa or swift could not be found!',
 )
 features += {'macos-cocoa-cb': macos_cocoa_cb.allowed()}
 if features['macos-cocoa-cb']

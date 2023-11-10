@@ -446,7 +446,6 @@ struct vo {
     struct mpv_global *global;
     struct vo_x11_state *x11;
     struct vo_w32_state *w32;
-    struct vo_cocoa_state *cocoa;
     struct vo_wayland_state *wl;
     struct vo_android_state *android;
     struct vo_drm_state *drm;
