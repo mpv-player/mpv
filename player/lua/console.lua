@@ -214,8 +214,9 @@ function format_table(list, width_max, rows_max)
         for column = 1, column_count do
             local i = row + (column - 1) * row_count
             if i > #list then break end
+            -- more then 99 leads to 'invalid format (width or precision too long)'
             local format_string = column == column_count and '%s'
-                                  or '%-' .. column_widths[column] .. 's'
+                                  or '%-' .. math.min(column_widths[column], 99) .. 's'
             columns[column] = string.format(format_string, list[i])
         end
         -- first row is at the bottom
