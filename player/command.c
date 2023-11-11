@@ -2299,6 +2299,7 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
 
     bool has_crop = mp_rect_w(p.crop) > 0 && mp_rect_h(p.crop) > 0;
     const char *aspect_name = get_aspect_ratio_name(d_w / (double)d_h);
+    const char *sar_name = get_aspect_ratio_name(p.w / (double)p.h);
     struct m_sub_property props[] = {
         {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p.imgfmt))},
         {"hw-pixelformat",  SUB_PROP_STR(mp_imgfmt_to_name(p.hw_subfmt)),
@@ -2316,6 +2317,8 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"aspect",          SUB_PROP_FLOAT(d_w / (double)d_h)},
         {"aspect-name",     SUB_PROP_STR(aspect_name), .unavailable = !aspect_name},
         {"par",             SUB_PROP_FLOAT(p.p_w / (double)p.p_h)},
+        {"sar",             SUB_PROP_FLOAT(p.w / (double)p.h)},
+        {"sar-name",        SUB_PROP_STR(sar_name), .unavailable = !sar_name},
         {"colormatrix",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p.color.space))},
         {"colorlevels",
