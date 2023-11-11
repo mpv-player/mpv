@@ -2457,6 +2457,12 @@ Property list
     ``video-params/par``
         Pixel aspect ratio.
 
+    ``video-params/sar``
+        Storage aspect ratio.
+
+    ``video-params/sar-name``
+        Storage aspect ratio name as string.
+
     ``video-params/colormatrix``
         The colormatrix in use as string. (Exact values subject to change.)
 
