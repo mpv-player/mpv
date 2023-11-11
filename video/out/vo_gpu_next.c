@@ -1557,10 +1557,15 @@ static void save_cache_files(struct priv *p)
 
         if (!target_file)
             continue;
-        char *tmp = talloc_asprintf(ta_ctx, "%s~", target_file);
-        FILE *cache = fopen(tmp, "wb");
-        if (!cache)
+        char *tmp = talloc_asprintf(ta_ctx, "%sXXXXXX", target_file);
+        int fd = mkstemp(tmp);
+        if (fd < 0)
             continue;
+        FILE *cache = fdopen(fd, "wb");
+        if (!cache) {
+            close(fd);
+            continue;
+        }
         int ret = pl_cache_save_file(target_cache, cache);
         if (same_cache)
             ret += pl_cache_save_file(p->icc_cache, cache);
