@@ -93,7 +93,6 @@ static const struct keymap appcmd_map[] = {
     {APPCOMMAND_LAUNCH_MAIL,         MP_KEY_MAIL},
     {APPCOMMAND_BROWSER_FAVORITES,   MP_KEY_FAVORITES},
     {APPCOMMAND_BROWSER_SEARCH,      MP_KEY_SEARCH},
-    {APPCOMMAND_BROWSER_BACKWARD,    MP_KEY_BACK},
     {0, 0}
 };
 
