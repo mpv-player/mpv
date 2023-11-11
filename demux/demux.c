@@ -4131,7 +4131,7 @@ static void update_cache(struct demux_internal *in)
 
     int64_t now = mp_time_ns();
     int64_t diff = now - in->last_speed_query;
-    bool do_update = diff >= MP_TIME_S_TO_NS(1);
+    bool do_update = diff >= MP_TIME_S_TO_NS(1) || !in->last_speed_query;
 
     // Don't lock while querying the stream.
     mp_mutex_unlock(&in->lock);
