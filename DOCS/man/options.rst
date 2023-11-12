@@ -4270,12 +4270,6 @@ OSD
 ``--osd-border-color=<color>``
     See ``--sub-color``. Color used for the OSD font border.
 
-    .. note::
-
-        ignored when ``--osd-back-color`` is
-        specified (or more exactly: when that option is not set to completely
-        transparent).
-
 ``--osd-border-size=<size>``
     Size of the OSD font border in scaled pixels (see ``--sub-font-size``
     for details). A value of 0 disables borders.
@@ -4334,6 +4328,11 @@ OSD
 
 ``--osd-shadow-color=<color>``
     See ``--sub-color``. Color used for OSD shadow.
+
+    .. note::
+
+        ignored when ``--osd-back-color`` is specified (or more exactly: when
+        that option is not set to completely transparent).
 
 ``--osd-shadow-offset=<size>``
     Displacement of the OSD shadow in scaled pixels (see
