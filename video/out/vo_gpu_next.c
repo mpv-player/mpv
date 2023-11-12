@@ -934,6 +934,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             pl_queue_update(p->queue, NULL, pl_queue_params(
                 .pts = frame->current->pts + pts_offset,
                 .radius = pl_frame_mix_radius(&params),
+                .vsync_duration = frame->ideal_frame_vsync_duration,
+#if PL_API_VER >= 340
+                .drift_compensation = 0,
+#endif
             ));
         }
         return;
@@ -960,6 +964,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             .radius = pl_frame_mix_radius(&params),
             .vsync_duration = frame->ideal_frame_vsync_duration,
             .interpolation_threshold = opts->interpolation_threshold,
+#if PL_API_VER >= 340
+            .drift_compensation = 0,
+#endif
         );
 
         // mpv likes to generate sporadically jumping PTS shortly after
