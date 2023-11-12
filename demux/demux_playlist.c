@@ -283,6 +283,7 @@ static int parse_ref_init(struct pl_parser *p)
         pl_free_line(p, line);
         return -1;
     }
+    pl_free_line(p, line);
 
     // ASF http streaming redirection - this is needed because ffmpeg http://
     // and mmsh:// can not automatically switch automatically between each
@@ -301,11 +302,11 @@ static int parse_ref_init(struct pl_parser *p)
 
     while (!pl_eof(p)) {
         line = pl_get_line(p);
-        bstr line_dup = line;
-        if (bstr_case_startswith(line_dup, bstr0("Ref"))) {
-            bstr_split_tok(line, "=", &(bstr){0}, &line_dup);
-            if (line_dup.len)
-                pl_add(p, line_dup);
+        bstr value;
+        if (bstr_case_startswith(line, bstr0("Ref"))) {
+            bstr_split_tok(line, "=", &(bstr){0}, &value);
+            if (value.len)
+                pl_add(p, value);
         }
         pl_free_line(p, line);
     }
@@ -326,11 +327,11 @@ static int parse_ini_thing(struct pl_parser *p, const char *header,
         pl_free_line(p, line);
         return 0;
     }
+    pl_free_line(p, line);
     while (!pl_eof(p)) {
         line = pl_get_line(p);
-        bstr line_dup = line;
         bstr key, value;
-        if (bstr_split_tok(line_dup, "=", &key, &value) &&
+        if (bstr_split_tok(line, "=", &key, &value) &&
             bstr_case_startswith(key, bstr0(entry)))
         {
             value = bstr_strip(value);
