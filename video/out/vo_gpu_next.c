@@ -937,6 +937,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                 .pts = frame->current->pts + pts_offset,
                 .radius = pl_frame_mix_radius(&params),
                 .vsync_duration = frame->ideal_frame_vsync_duration,
+#if PL_API_VER >= 342
+                .no_estimate = true,
+#endif
 #if PL_API_VER >= 340
                 .drift_compensation = 0,
 #endif
@@ -965,6 +968,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             .pts = frame->current->pts + pts_offset,
             .radius = pl_frame_mix_radius(&params),
             .vsync_duration = frame->ideal_frame_vsync_duration,
+#if PL_API_VER >= 342
+            .no_estimate = true,
+#endif
             .interpolation_threshold = opts->interpolation_threshold,
 #if PL_API_VER >= 340
             .drift_compensation = 0,
