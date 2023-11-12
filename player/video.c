@@ -920,7 +920,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     frame->vsync_offset = -prev_error;
     frame->ideal_frame_duration = frame_duration;
     frame->ideal_frame_vsync = (-prev_error / frame_duration) * approx_duration;
-    frame->ideal_frame_vsync_duration = approx_duration / num_vsyncs;
+    frame->ideal_frame_vsync_duration = (vsync / frame_duration) * approx_duration;
     frame->num_vsyncs = num_vsyncs;
     frame->display_synced = true;
 
