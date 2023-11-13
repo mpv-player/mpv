@@ -883,16 +883,18 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     // Push all incoming frames into the frame queue
     for (int n = 0; n < frame->num_frames; n++) {
         int id = frame->frame_id + n;
-        if (id <= p->last_id)
-            continue; // ignore already seen frames
 
         if (p->want_reset) {
             can_interpolate = false;
             pl_renderer_flush_cache(p->rr);
             pl_queue_reset(p->queue);
             p->last_pts = 0.0;
+            p->last_id = 0;
             p->want_reset = false;
         }
+
+        if (id <= p->last_id)
+            continue; // ignore already seen frames
 
         struct mp_image *mpi = mp_image_new_ref(frame->frames[n]);
         struct frame_priv *fp = talloc_zero(mpi, struct frame_priv);
