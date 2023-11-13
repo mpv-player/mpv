@@ -970,15 +970,18 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 #endif
         );
 
-        // mpv likes to generate sporadically jumping PTS shortly after
-        // initialization, but pl_queue does not like these. Hard-clamp to
-        // the first frame in the queue as a simple workaround.
+        // Depending on the vsync ratio, we may be up to half of the vsync
+        // duration before the current frame time. This works fine because
+        // pl_queue will have this frame, unless it's after a reset event. In
+        // this case, start from the first available frame.
         struct pl_source_frame first;
-        if (pl_queue_peek(p->queue, 0, &first)) {
-            if (qparams.pts < first.pts)
-                MP_VERBOSE(vo, "Clamping first frame PTS from %f to %f\n", qparams.pts, first.pts);
-            qparams.pts = p->last_pts = MPMAX(qparams.pts, first.pts);
+        if (pl_queue_peek(p->queue, 0, &first) && qparams.pts < first.pts) {
+            if (first.pts != frame->current->pts)
+                MP_VERBOSE(vo, "Current PTS(%f) != VPTS(%f)\n", frame->current->pts, first.pts);
+            MP_VERBOSE(vo, "Clamping first frame PTS from %f to %f\n", qparams.pts, first.pts);
+            qparams.pts = first.pts;
         }
+        p->last_pts = qparams.pts;
 
         switch (pl_queue_update(p->queue, &mix, &qparams)) {
         case PL_QUEUE_ERR:
