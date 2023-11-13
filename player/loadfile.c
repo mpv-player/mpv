@@ -835,6 +835,8 @@ void mp_deselect_track(struct MPContext *mpctx, struct track *track)
 {
     if (track && track->selected) {
         for (int t = 0; t < num_ptracks[track->type]; t++) {
+            if (mpctx->current_track[t][track->type] != track)
+                continue;
             mp_switch_track_n(mpctx, t, track->type, NULL, 0);
             mark_track_selection(mpctx, t, track->type, -1); // default
         }
