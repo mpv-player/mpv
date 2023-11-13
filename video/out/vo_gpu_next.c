@@ -885,7 +885,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         int id = frame->frame_id + n;
 
         if (p->want_reset) {
-            can_interpolate = false;
             pl_renderer_flush_cache(p->rr);
             pl_queue_reset(p->queue);
             p->last_pts = 0.0;
