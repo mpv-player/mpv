@@ -6968,6 +6968,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (co)
         mp_notify_property(mpctx, co->name);
+    if (opt_ptr == &opts->media_title)
+        mp_notify(mpctx, MP_EVENT_METADATA_UPDATE, NULL);
 
     if (self_update)
         return;
