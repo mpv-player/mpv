@@ -47,15 +47,15 @@ local o = {
     plot_color = "FFFFFF",
 
     -- Text style
-    font = "sans-serif",
+    font = "",
     font_mono = "monospace",   -- monospaced digits are sufficient
     font_size = 8,
-    font_color = "FFFFFF",
+    font_color = "",
     border_size = 0.8,
-    border_color = "262626",
+    border_color = "",
     shadow_x_offset = 0.0,
     shadow_y_offset = 0.0,
-    shadow_color = "000000",
+    shadow_color = "",
     alpha = "11",
 
     -- Custom header for ASS tags to style the text output.
@@ -158,13 +158,26 @@ local function text_style()
     if o.custom_header and o.custom_header ~= "" then
         return o.custom_header
     else
-        local has_shadow = mp.get_property('osd-back-color'):sub(2, 3) == '00'
-        return format("{\\r\\an7\\fs%d\\fn%s\\bord%f\\3c&H%s&" ..
-                      "\\1c&H%s&\\1a&H%s&\\3a&H%s&" ..
-                      (has_shadow and "\\4a&H%s&\\xshad%f\\yshad%f\\4c&H%s&}" or "}"),
-                      o.font_size, o.font, o.border_size,
-                      o.border_color, o.font_color, o.alpha, o.alpha, o.alpha,
-                      o.shadow_x_offset, o.shadow_y_offset, o.shadow_color)
+        local style = "{\\r\\an7\\fs" .. o.font_size .. "\\bord" .. o.border_size
+
+        if o.font ~= "" then
+            style = style .. "\\fn" .. o.font
+        end
+
+        if o.font_color ~= "" then
+            style = style .. "\\1c&H" .. o.font_color .. "&\\1a&H" .. o.alpha .. "&"
+        end
+
+        if o.border_color ~= "" then
+            style = style .. "\\3c&H" .. o.border_color .. "&\\3a&H" .. o.alpha .. "&"
+        end
+
+        if o.shadow_color ~= "" then
+            style = style .. "\\4c&H" .. o.shadow_color .. "&\\4a&H" .. o.alpha .. "&"
+        end
+
+        return style .. "\\xshad" .. o.shadow_x_offset ..
+               "\\yshad" .. o.shadow_y_offset .. "}"
     end
 end
 
