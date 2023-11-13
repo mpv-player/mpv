@@ -38,6 +38,9 @@ def apply_plist_template(plist_file, version):
     for line in fileinput.input(plist_file, inplace=1):
         print(line.rstrip().replace('${VERSION}', version))
 
+def sign_bundle(binary_name):
+    sh('codesign --force --deep -s - ' + bundle_path(binary_name))
+
 def bundle_version():
     if os.path.exists('VERSION'):
         x = open('VERSION')
@@ -74,6 +77,9 @@ def main():
     if options.deps:
         print("> bundling dependencies")
         print(sh(" ".join(["TOOLS/dylib-unhell.py", target_binary(binary_name)])))
+
+    print("> signing bundle with ad-hoc pseudo identity")
+    sign_bundle(binary_name)
 
     print("done.")
 
