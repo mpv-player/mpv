@@ -217,13 +217,43 @@ static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
     }
 }
 
+// Get adjusted title bar height, only relevant for --title-bar=no
+static int get_title_bar_height(struct vo_w32_state *w32)
+{
+    assert(!w32->opts->title_bar && w32->opts->border);
+    UINT visible_border = 0;
+    // Only available on Windows 11
+    DwmGetWindowAttribute(w32->window, DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
+                          &visible_border, sizeof(visible_border));
+    int top_bar = IsMaximized(w32->window)
+                      ? get_system_metrics(w32, SM_CYFRAME) +
+                        get_system_metrics(w32, SM_CXPADDEDBORDER)
+                      : visible_border;
+    return top_bar;
+}
+
 static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
     RECT win = *rc;
     adjust_window_rect(w32, hwnd, rc);
     // Adjust for title bar height that will be hidden in WM_NCCALCSIZE
-    if (w32->opts->border && !w32->opts->title_bar && !w32->current_fs)
-        rc->top -= rc->top - win.top;
+    // Keep the frame border. On Windows 10 the top border is not retained.
+    // It appears that DWM draws the title bar with its full height, extending
+    // outside the window area. Essentially, there is a bug in DWM, preventing
+    // the adjustment of the title bar height. This issue occurs when both the
+    // top and left client areas are non-zero in WM_NCCALCSIZE. If the left NC
+    // area is set to 0, the title bar is drawn correctly with the adjusted
+    // height. To mitigate this problem, set the top NC area to zero. The issue
+    // doesn't happen on Windows 11 or when DWM NC drawing is disabled with
+    // DWMWA_NCRENDERING_POLICY. We aim to avoid the manual drawing the border
+    // and want the DWM look and feel, so skip the top border on Windows 10.
+    // Also DWMWA_VISIBLE_FRAME_BORDER_THICKNESS is available only on Windows 11,
+    // so it would be hard to guess this size correctly on Windows 10 anyway.
+    if (w32->opts->border && !w32->opts->title_bar && !w32->current_fs &&
+       (GetWindowLongPtrW(w32->window, GWL_STYLE) & WS_CAPTION))
+    {
+        rc->top = win.top - get_title_bar_height(w32);
+    }
 }
 
 // basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
@@ -874,6 +904,13 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     return true;
 }
 
+static bool is_high_contrast(void)
+{
+    HIGHCONTRAST hc = {sizeof(hc)};
+    SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0);
+    return hc.dwFlags & HCF_HIGHCONTRASTON;
+}
+
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
     const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX | WS_THICKFRAME;
@@ -885,15 +922,10 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
         style |= FULLSCREEN;
     } else {
         style |= w32->opts->border ? FRAME : NO_FRAME;
+        if (!w32->opts->title_bar && is_high_contrast())
+            style &= ~WS_CAPTION;
     }
     return style;
-}
-
-static LONG get_title_bar_height(struct vo_w32_state *w32)
-{
-    RECT rc = {0};
-    adjust_window_rect(w32, w32->window, &rc);
-    return -rc.top;
 }
 
 static void update_window_style(struct vo_w32_state *w32)
@@ -1210,13 +1242,9 @@ static void update_dark_mode(const struct vo_w32_state *w32)
     if (w32->api.pSetPreferredAppMode)
         w32->api.pSetPreferredAppMode(1); // allow dark mode
 
-    HIGHCONTRAST hc = {sizeof(hc)};
-    SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0);
-    bool high_contrast = hc.dwFlags & HCF_HIGHCONTRASTON;
-
     // if pShouldAppsUseDarkMode is not available, just assume it to be true
-    const BOOL use_dark_mode = !high_contrast && (!w32->api.pShouldAppsUseDarkMode ||
-                                                  w32->api.pShouldAppsUseDarkMode());
+    const BOOL use_dark_mode = !is_high_contrast() && (!w32->api.pShouldAppsUseDarkMode ||
+                                                       w32->api.pShouldAppsUseDarkMode());
 
     SetWindowTheme(w32->window, use_dark_mode ? L"DarkMode_Explorer" : L"", NULL);
 
@@ -1591,6 +1619,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_SETTINGCHANGE:
         update_dark_mode(w32);
+        update_window_style(w32);
+        update_window_state(w32);
         break;
     case WM_NCCALCSIZE:
         if (!w32->opts->border)
@@ -1598,10 +1628,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         // Apparently removing WS_CAPTION disables some window animation, instead
         // just reduce non-client size to remove title bar.
         if (wParam && lParam && w32->opts->border && !w32->opts->title_bar &&
-            !w32->current_fs && !w32->parent)
+            !w32->current_fs && !w32->parent &&
+            (GetWindowLongPtrW(w32->window, GWL_STYLE) & WS_CAPTION))
         {
-            ((LPNCCALCSIZE_PARAMS) lParam)->rgrc[0].top -= get_title_bar_height(w32);
-        }
+            RECT r = {0};
+            adjust_window_rect(w32, w32->window, &r);
+            NCCALCSIZE_PARAMS *p = (LPNCCALCSIZE_PARAMS)lParam;
+            p->rgrc[0].top += r.top + get_title_bar_height(w32);
+       }
         break;
     case WM_IME_STARTCOMPOSITION: {
         HIMC imc = ImmGetContext(w32->window);
