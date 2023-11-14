@@ -1949,11 +1949,15 @@ static void update_render_options(struct vo *vo)
     pars->params.plane_upscaler = map_scaler(p, SCALER_CSCALE);
     pars->params.frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
 
-    // Request as many frames as required from the decoder
+    // Request as many frames as required from the decoder, depending on the
+    // speed VPS/FPS ratio libplacebo may need more frames. Request frames up to
+    // ratio of 1/4, but only if anti aliasing is enabled.
     int req_frames = 2;
-    if (pars->params.frame_mixer)
-        req_frames += ceilf(pars->params.frame_mixer->kernel->radius);
-    vo_set_queue_params(vo, 0, req_frames);
+    if (pars->params.frame_mixer) {
+        req_frames += ceilf(pars->params.frame_mixer->kernel->radius) *
+                      (pars->params.skip_anti_aliasing ? 1 : 4);
+    }
+    vo_set_queue_params(vo, 0, MPMIN(VO_MAX_REQ_FRAMES, req_frames));
 
     pars->params.deband_params = opts->deband ? &pars->deband_params : NULL;
     pars->deband_params.iterations = opts->deband_opts->iterations;
