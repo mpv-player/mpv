@@ -874,12 +874,34 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     bool cache_frame = will_redraw || frame->still;
     bool can_interpolate = opts->interpolation && frame->display_synced &&
                            !frame->still && frame->num_frames > 1;
+    double pts_offset = can_interpolate ? frame->ideal_frame_vsync : 0;
     params.info_callback = info_callback;
     params.info_priv = vo;
     params.skip_caching_single_frame = !cache_frame;
     params.preserve_mixing_cache = p->inter_preserve && !frame->still;
     if (frame->still)
         params.frame_mixer = NULL;
+
+    // pl_queue advances its internal virtual PTS and culls available frames
+    // based on this value and the VPS/FPS ratio. Requesting a non-monotonic PTS
+    // is an invalid use of pl_queue. Reset it if this happens in an attempt to
+    // recover as much as possible. Ideally, this should never occur, and if it
+    // does, it should be corrected. The ideal_frame_vsync may be negative if
+    // the last draw did not align perfectly with the vsync. In this case, we
+    // should have the previous frame available in pl_queue, or a reset is
+    // already requested. Clamp the check to 0, as we don't have the previous
+    // frame in vo_frame anyway.
+    struct pl_source_frame vpts;
+    if (frame->current && !p->want_reset) {
+        if (pl_queue_peek(p->queue, 0, &vpts) &&
+            frame->current->pts + MPMAX(0, pts_offset) < vpts.pts)
+        {
+            MP_VERBOSE(vo, "Forcing queue refill, PTS(%f + %f | %f) < VPTS(%f)\n",
+                       frame->current->pts, pts_offset,
+                       frame->ideal_frame_vsync_duration, vpts.pts);
+            p->want_reset = true;
+        }
+    }
 
     // Push all incoming frames into the frame queue
     for (int n = 0; n < frame->num_frames; n++) {
@@ -929,7 +951,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     struct pl_swapchain_frame swframe;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
-    double pts_offset = can_interpolate ? frame->ideal_frame_vsync : 0;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         if (frame->current) {
