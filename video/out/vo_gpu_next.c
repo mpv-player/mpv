@@ -903,6 +903,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
         pl_queue_push(p->queue, &(struct pl_source_frame) {
             .pts = mpi->pts,
+            .duration = can_interpolate ? frame->approx_duration : 0,
             .frame_data = mpi,
             .map = map_frame,
             .unmap = unmap_frame,
