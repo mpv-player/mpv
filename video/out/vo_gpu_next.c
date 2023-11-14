@@ -872,7 +872,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     const struct gl_video_opts *opts = p->opts_cache->opts;
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
     bool cache_frame = will_redraw || frame->still;
-    bool can_interpolate = opts->interpolation && frame->num_frames > 1;
+    bool can_interpolate = opts->interpolation && frame->display_synced &&
+                           !frame->still && frame->num_frames > 1;
     params.info_callback = info_callback;
     params.info_priv = vo;
     params.skip_caching_single_frame = !cache_frame;
@@ -935,7 +936,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             pl_queue_update(p->queue, NULL, pl_queue_params(
                 .pts = frame->current->pts + pts_offset,
                 .radius = pl_frame_mix_radius(&params),
-                .vsync_duration = frame->ideal_frame_vsync_duration,
+                .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
 #if PL_API_VER >= 340
                 .drift_compensation = 0,
 #endif
@@ -963,7 +964,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         struct pl_queue_params qparams = *pl_queue_params(
             .pts = frame->current->pts + pts_offset,
             .radius = pl_frame_mix_radius(&params),
-            .vsync_duration = frame->ideal_frame_vsync_duration,
+            .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
             .interpolation_threshold = opts->interpolation_threshold,
 #if PL_API_VER >= 340
             .drift_compensation = 0,
