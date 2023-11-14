@@ -78,6 +78,7 @@ typedef enum MONITOR_DPI_TYPE {
 struct w32_api {
     HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
     BOOL (WINAPI *pAdjustWindowRectExForDpi)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
+    int (WINAPI *pGetSystemMetricsForDpi)(int nIndex, UINT dpi);
     BOOLEAN (WINAPI *pShouldAppsUseDarkMode)(void);
     DWORD (WINAPI *pSetPreferredAppMode)(DWORD mode);
 };
@@ -188,6 +189,13 @@ struct vo_w32_state {
     bool unmaximize;
 };
 
+static inline int get_system_metrics(struct vo_w32_state *w32, int metric)
+{
+    return w32->api.pGetSystemMetricsForDpi
+               ? w32->api.pGetSystemMetricsForDpi(metric, w32->dpi)
+               : GetSystemMetrics(metric);
+}
+
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
     if (!w32->opts->border)
@@ -231,13 +239,13 @@ static LRESULT borderless_nchittest(struct vo_w32_state *w32, int x, int y)
     if (!GetWindowRect(w32->window, &rc))
         return HTNOWHERE;
 
-    POINT frame = {GetSystemMetrics(SM_CXSIZEFRAME),
-                   GetSystemMetrics(SM_CYSIZEFRAME)};
+    POINT frame = {get_system_metrics(w32, SM_CXSIZEFRAME),
+                   get_system_metrics(w32, SM_CYSIZEFRAME)};
     if (w32->opts->border) {
-        frame.x += GetSystemMetrics(SM_CXPADDEDBORDER);
-        frame.y += GetSystemMetrics(SM_CXPADDEDBORDER);
+        frame.x += get_system_metrics(w32, SM_CXPADDEDBORDER);
+        frame.y += get_system_metrics(w32, SM_CXPADDEDBORDER);
         if (!w32->opts->title_bar)
-            rc.top -= GetSystemMetrics(SM_CXPADDEDBORDER);
+            rc.top -= get_system_metrics(w32, SM_CXPADDEDBORDER);
     }
     InflateRect(&rc, -frame.x, -frame.y);
 
@@ -760,10 +768,10 @@ static RECT get_screen_area(struct vo_w32_state *w32)
 {
     // Handle --fs-screen=all
     if (w32->current_fs && w32->opts->fsscreen_id == -2) {
-        const int x = GetSystemMetrics(SM_XVIRTUALSCREEN);
-        const int y = GetSystemMetrics(SM_YVIRTUALSCREEN);
-        return (RECT) { x, y, x + GetSystemMetrics(SM_CXVIRTUALSCREEN),
-                              y + GetSystemMetrics(SM_CYVIRTUALSCREEN) };
+        const int x = get_system_metrics(w32, SM_XVIRTUALSCREEN);
+        const int y = get_system_metrics(w32, SM_YVIRTUALSCREEN);
+        return (RECT) { x, y, x + get_system_metrics(w32, SM_CXVIRTUALSCREEN),
+                              y + get_system_metrics(w32, SM_CYVIRTUALSCREEN) };
     }
     return get_monitor_info(w32).rcMonitor;
 }
@@ -1837,6 +1845,8 @@ static void w32_api_load(struct vo_w32_state *w32)
     // Available since Win10
     w32->api.pAdjustWindowRectExForDpi = !user32_dll ? NULL :
                 (void *)GetProcAddress(user32_dll, "AdjustWindowRectExForDpi");
+    w32->api.pGetSystemMetricsForDpi = !user32_dll ? NULL :
+                (void *)GetProcAddress(user32_dll, "GetSystemMetricsForDpi");
 
     // Dark mode related functions, available since the 1809 Windows 10 update
     // Check the Windows build version as on previous versions used ordinals
