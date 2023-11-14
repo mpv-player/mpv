@@ -898,8 +898,13 @@ static bool render_frame(struct vo *vo)
     // frame currently drawn, while in->current_frame is the potentially next.)
     in->current_frame->repeat = true;
     if (frame->display_synced) {
-        in->current_frame->vsync_offset += in->current_frame->vsync_interval;
-        in->current_frame->ideal_frame_vsync += in->current_frame->ideal_frame_vsync_duration;
+        // Increment the offset only if it's not the last vsync. The current_frame
+        // can still be reused. This is mostly important for redraws that might
+        // overshoot the target vsync point.
+        if (in->current_frame->num_vsyncs > 1) {
+            in->current_frame->vsync_offset += in->current_frame->vsync_interval;
+            in->current_frame->ideal_frame_vsync += in->current_frame->ideal_frame_vsync_duration;
+        }
         in->dropped_frame |= in->current_frame->num_vsyncs < 1;
     }
     if (in->current_frame->num_vsyncs > 0)
