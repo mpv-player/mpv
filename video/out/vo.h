@@ -251,6 +251,8 @@ struct vo_frame {
     // VO if frames are dropped.
     int num_frames;
     struct mp_image *frames[VO_MAX_REQ_FRAMES];
+    // Speed unadjusted, approximate frame duration inferred from past frames
+    double approx_duration;
     // ID for frames[0] (== current). If current==NULL, the number is
     // meaningless. Otherwise, it's an unique ID for the frame. The ID for
     // a frame is guaranteed not to change (instant redraws will use the same
