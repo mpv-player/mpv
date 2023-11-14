@@ -923,6 +923,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     frame->ideal_frame_vsync_duration = (vsync / frame_duration) * approx_duration;
     frame->num_vsyncs = num_vsyncs;
     frame->display_synced = true;
+    frame->approx_duration = approx_duration;
 
     // Adjust frame virtual vsyncs by the repeat count
     if (drop_repeat > 0)
