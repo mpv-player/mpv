@@ -698,12 +698,12 @@ static MP_THREAD_VOID playthread(void *arg)
 
         // Wait until the device wants us to write more data to it.
         // Fallback to guessing.
-        double timeout = INFINITY;
+        int64_t timeout = INT64_MAX;
         if (p->streaming && !retry && (!p->paused || ao->stream_silence)) {
             // Wake up again if half of the audio buffer has been played.
             // Since audio could play at a faster or slower pace, wake up twice
             // as often as ideally needed.
-            timeout = ao->device_buffer / (double)ao->samplerate * 0.25;
+            timeout = MP_TIME_S_TO_NS(ao->device_buffer / (double)ao->samplerate * 0.25);
         }
 
         mp_mutex_unlock(&p->lock);
@@ -715,7 +715,7 @@ static MP_THREAD_VOID playthread(void *arg)
         }
         if (!p->need_wakeup && !retry) {
             MP_STATS(ao, "start audio wait");
-            mp_cond_timedwait(&p->pt_wakeup, &p->pt_lock, MP_TIME_S_TO_NS(timeout));
+            mp_cond_timedwait(&p->pt_wakeup, &p->pt_lock, timeout);
             MP_STATS(ao, "end audio wait");
         }
         p->need_wakeup = false;
