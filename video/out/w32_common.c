@@ -212,6 +212,25 @@ static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
     }
 }
 
+static bool check_windows10_build(DWORD build)
+{
+    OSVERSIONINFOEXW osvi = {
+        .dwOSVersionInfoSize = sizeof(osvi),
+        .dwMajorVersion = HIBYTE(_WIN32_WINNT_WIN10),
+        .dwMinorVersion = LOBYTE(_WIN32_WINNT_WIN10),
+        .dwBuildNumber = build,
+    };
+
+    DWORD type = VER_MAJORVERSION | VER_MINORVERSION | VER_BUILDNUMBER;
+
+    ULONGLONG mask = 0;
+    mask = VerSetConditionMask(mask, VER_MAJORVERSION, VER_GREATER_EQUAL);
+    mask = VerSetConditionMask(mask, VER_MINORVERSION, VER_GREATER_EQUAL);
+    mask = VerSetConditionMask(mask, VER_BUILDNUMBER, VER_GREATER_EQUAL);
+
+    return VerifyVersionInfoW(&osvi, type, mask);
+}
+
 // Get adjusted title bar height, only relevant for --title-bar=no
 static int get_title_bar_height(struct vo_w32_state *w32)
 {
@@ -1767,14 +1786,7 @@ static void w32_api_load(struct vo_w32_state *w32)
     // may point to unexpected code/data. Alternatively could check uxtheme.dll
     // version directly, but it is little bit more boilerplate code, and build
     // number is good enough check.
-    void (WINAPI *pRtlGetNtVersionNumbers)(LPDWORD, LPDWORD, LPDWORD) =
-        (void *)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlGetNtVersionNumbers");
-
-    DWORD major, build;
-    pRtlGetNtVersionNumbers(&major, NULL, &build);
-    build &= ~0xF0000000;
-
-    HMODULE uxtheme_dll = (major < 10 || build < 17763) ? NULL :
+    HMODULE uxtheme_dll = !check_windows10_build(17763) ? NULL :
                 GetModuleHandle(L"uxtheme.dll");
     w32->api.pShouldAppsUseDarkMode = !uxtheme_dll ? NULL :
                 (void *)GetProcAddress(uxtheme_dll, MAKEINTRESOURCEA(132));
