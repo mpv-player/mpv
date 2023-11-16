@@ -1232,7 +1232,12 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     // Retrieve the current frame from the frame queue
     struct pl_frame_mix mix;
     enum pl_queue_status status;
-    status = pl_queue_update(p->queue, &mix, pl_queue_params(.pts = p->last_pts));
+    status = pl_queue_update(p->queue, &mix, pl_queue_params(
+        .pts = p->last_pts,
+#if PL_API_VER >= 340
+        .drift_compensation = 0,
+#endif
+    ));
     assert(status != PL_QUEUE_EOF);
     if (status == PL_QUEUE_ERR) {
         MP_ERR(vo, "Unknown error occurred while trying to take screenshot!\n");
