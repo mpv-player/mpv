@@ -173,7 +173,7 @@
       </dict>
     </array>
     <key>CFBundleExecutable</key>
-    <string>mpv-bundle</string>
+    <string>mpv</string>
     <key>CFBundleIconFile</key>
     <string>icon</string>
     <key>CFBundleIdentifier</key>
@@ -192,6 +192,8 @@
     <dict>
       <key>MallocNanoZone</key>
       <string>0</string>
+      <key>MPVBUNDLE</key>
+      <string>true</string>
     </dict>
     <key>CFBundleURLTypes</key>
     <array>

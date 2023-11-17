@@ -27,20 +27,10 @@
 
 #include "video/out/gpu/hwdec.h"
 #include "video/mp_image_pool.h"
-#include "ra_gl.h"
+#include "video/out/opengl/ra_gl.h"
+#include "hwdec_vt.h"
 
-struct priv_owner {
-    struct mp_hwdec_ctx hwctx;
-};
-
-struct priv {
-    CVPixelBufferRef pbuf;
-    CVOpenGLESTextureCacheRef gl_texture_cache;
-    CVOpenGLESTextureRef gl_planes[MP_MAX_PLANES];
-    struct ra_imgfmt_desc desc;
-};
-
-static bool check_hwdec(struct ra_hwdec *hw)
+static bool check_hwdec(const struct ra_hwdec *hw)
 {
     if (!ra_is_gl(hw->ra_ctx->ra))
         return false;
@@ -57,38 +47,6 @@ static bool check_hwdec(struct ra_hwdec *hw)
     }
 
     return true;
-}
-
-static int init(struct ra_hwdec *hw)
-{
-    struct priv_owner *p = hw->priv;
-
-    if (!check_hwdec(hw))
-        return -1;
-
-    p->hwctx = (struct mp_hwdec_ctx){
-        .driver_name = hw->driver->name,
-        .hw_imgfmt = IMGFMT_VIDEOTOOLBOX,
-    };
-
-    int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
-                                     AV_HWDEVICE_TYPE_VIDEOTOOLBOX, NULL, NULL, 0);
-    if (ret != 0) {
-        MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
-        return -1;
-    }
-
-    hwdec_devices_add(hw->devs, &p->hwctx);
-
-    return 0;
-}
-
-static void uninit(struct ra_hwdec *hw)
-{
-    struct priv_owner *p = hw->priv;
-
-    hwdec_devices_remove(hw->devs, &p->hwctx);
-    av_buffer_unref(&p->hwctx.av_device_ref);
 }
 
 // In GLES3 mode, CVOpenGLESTextureCacheCreateTextureFromImage()
@@ -129,20 +87,6 @@ static const struct ra_format *find_la_variant(struct ra *ra,
 static int mapper_init(struct ra_hwdec_mapper *mapper)
 {
     struct priv *p = mapper->priv;
-
-    mapper->dst_params = mapper->src_params;
-    mapper->dst_params.imgfmt = mapper->src_params.hw_subfmt;
-    mapper->dst_params.hw_subfmt = 0;
-
-    if (!mapper->dst_params.imgfmt) {
-        MP_ERR(mapper, "Unsupported CVPixelBuffer format.\n");
-        return -1;
-    }
-
-    if (!ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &p->desc)) {
-        MP_ERR(mapper, "Unsupported texture format.\n");
-        return -1;
-    }
 
     for (int n = 0; n < p->desc.num_planes; n++) {
         p->desc.planes[n] = find_la_variant(mapper->ra, p->desc.planes[n]);
@@ -262,17 +206,17 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
     }
 }
 
-const struct ra_hwdec_driver ra_hwdec_videotoolbox = {
-    .name = "videotoolbox",
-    .priv_size = sizeof(struct priv_owner),
-    .imgfmts = {IMGFMT_VIDEOTOOLBOX, 0},
-    .init = init,
-    .uninit = uninit,
-    .mapper = &(const struct ra_hwdec_mapper_driver){
-        .priv_size = sizeof(struct priv),
-        .init = mapper_init,
-        .uninit = mapper_uninit,
-        .map = mapper_map,
-        .unmap = mapper_unmap,
-    },
-};
+bool vt_gl_init(const struct ra_hwdec *hw)
+{
+    struct priv_owner *p = hw->priv;
+
+    if (!check_hwdec(hw))
+        return false;
+
+    p->interop_init   = mapper_init;
+    p->interop_uninit = mapper_uninit;
+    p->interop_map    = mapper_map;
+    p->interop_unmap  = mapper_unmap;
+
+    return true;
+}

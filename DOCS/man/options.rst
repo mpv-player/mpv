@@ -1074,17 +1074,21 @@ Watch Later
     still be applied fully, but new watch later data won't contain these
     options.
 
+    See ``--help=watch-later-options`` for the list of the properties that are
+    restored by default.
+
     This is a string list option. See `List Options`_ for details.
 
     .. admonition:: Examples
 
-        - ``--watch-later-options-remove=fullscreen``
-          The fullscreen state won't be saved to watch later files.
+        - ``--watch-later-options-remove=sid``
+          The subtitle track selection will not be restored.
         - ``--watch-later-options-remove=volume``
           ``--watch-later-options-remove=mute``
           The volume and mute state won't be saved to watch later files.
-        - ``--watch-later-options-clr``
-          No option will be saved to watch later files.
+        - ``--watch-later-options=start``
+          No option will be saved to watch later files, except the playback
+          position.
 
 ``--write-filename-in-watch-later-config``
     Prepend the watch later config files with the name of the file they refer
@@ -4270,12 +4274,6 @@ OSD
 ``--osd-border-color=<color>``
     See ``--sub-color``. Color used for the OSD font border.
 
-    .. note::
-
-        ignored when ``--osd-back-color`` is
-        specified (or more exactly: when that option is not set to completely
-        transparent).
-
 ``--osd-border-size=<size>``
     Size of the OSD font border in scaled pixels (see ``--sub-font-size``
     for details). A value of 0 disables borders.
@@ -4334,6 +4332,11 @@ OSD
 
 ``--osd-shadow-color=<color>``
     See ``--sub-color``. Color used for OSD shadow.
+
+    .. note::
+
+        ignored when ``--osd-back-color`` is specified (or more exactly: when
+        that option is not set to completely transparent).
 
 ``--osd-shadow-offset=<size>``
     Displacement of the OSD shadow in scaled pixels (see

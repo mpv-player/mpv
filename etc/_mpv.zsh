@@ -109,6 +109,10 @@ function _mpv_generate_arguments {
 
         entry+="->parse-help-profile"
 
+      elif [[ $name == h(|elp) ]]; then
+
+        entry+="->help-options"
+
       fi
 
       _mpv_completion_arguments+="$entry"
@@ -250,6 +254,10 @@ case $state in
       fi
       (( rc )) || return 0
     done
+  ;;
+
+  help-options)
+    compadd ${${${_mpv_completion_arguments%%=*}:#no-*}:#*-(add|append|clr|pre|set|remove|toggle)}
   ;;
 
 esac

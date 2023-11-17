@@ -38,9 +38,8 @@ def apply_plist_template(plist_file, version):
     for line in fileinput.input(plist_file, inplace=1):
         print(line.rstrip().replace('${VERSION}', version))
 
-def create_bundle_symlink(binary_name, symlink_name):
-    os.symlink(os.path.basename(binary_name),
-               os.path.join(target_directory(binary_name), symlink_name))
+def sign_bundle(binary_name):
+    sh('codesign --force --deep -s - ' + bundle_path(binary_name))
 
 def bundle_version():
     if os.path.exists('VERSION'):
@@ -72,14 +71,15 @@ def main():
     copy_bundle(binary_name)
     print("> copying binary")
     copy_binary(binary_name)
-    print("> create bundle symlink")
-    create_bundle_symlink(binary_name, "mpv-bundle")
     print("> generating Info.plist")
     apply_plist_template(target_plist(binary_name), version)
 
     if options.deps:
         print("> bundling dependencies")
         print(sh(" ".join(["TOOLS/dylib-unhell.py", target_binary(binary_name)])))
+
+    print("> signing bundle with ad-hoc pseudo identity")
+    sign_bundle(binary_name)
 
     print("done.")
 

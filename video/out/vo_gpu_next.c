@@ -124,7 +124,7 @@ struct priv {
     bool is_interpolated;
     bool want_reset;
     bool frame_pending;
-    bool paused;
+    bool redraw;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -249,8 +249,6 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
 
     double pts = src ? src->pts : 0;
     struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, subfmt_all);
-    if (subs->num_items && p->paused)
-        p->osd_sync++;
 
     frame->overlays = state->overlays;
     frame->num_overlays = 0;
@@ -871,8 +869,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     update_options(vo);
 
     struct pl_render_params params = pars->params;
+    const struct gl_video_opts *opts = p->opts_cache->opts;
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
     bool cache_frame = will_redraw || frame->still;
+    bool can_interpolate = opts->interpolation && frame->num_frames > 1;
     params.info_callback = info_callback;
     params.info_priv = vo;
     params.skip_caching_single_frame = !cache_frame;
@@ -887,6 +887,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             continue; // ignore already seen frames
 
         if (p->want_reset) {
+            can_interpolate = false;
             pl_renderer_flush_cache(p->rr);
             pl_queue_reset(p->queue);
             p->last_pts = 0.0;
@@ -900,7 +901,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
         pl_queue_push(p->queue, &(struct pl_source_frame) {
             .pts = mpi->pts,
-            .duration = frame->ideal_frame_duration,
             .frame_data = mpi,
             .map = map_frame,
             .unmap = unmap_frame,
@@ -910,7 +910,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         p->last_id = id;
     }
 
-    const struct gl_video_opts *opts = p->opts_cache->opts;
     if (p->target_hint && frame->current) {
         struct pl_color_space hint = get_mpi_csp(vo, frame->current);
         if (opts->target_prim)
@@ -927,14 +926,18 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     struct pl_swapchain_frame swframe;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
-    double vsync_offset = opts->interpolation ? frame->vsync_offset : 0;
+    double pts_offset = can_interpolate ? frame->ideal_frame_vsync : 0;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         if (frame->current) {
             // Advance the queue state to the current PTS to discard unused frames
             pl_queue_update(p->queue, NULL, pl_queue_params(
-                .pts = frame->current->pts + vsync_offset,
+                .pts = frame->current->pts + pts_offset,
                 .radius = pl_frame_mix_radius(&params),
+                .vsync_duration = frame->ideal_frame_vsync_duration,
+#if PL_API_VER >= 340
+                .drift_compensation = 0,
+#endif
             ));
         }
         return;
@@ -957,16 +960,24 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (frame->current) {
         // Update queue state
         struct pl_queue_params qparams = *pl_queue_params(
-            .pts = frame->current->pts + vsync_offset,
+            .pts = frame->current->pts + pts_offset,
             .radius = pl_frame_mix_radius(&params),
-            .vsync_duration = frame->vsync_interval,
+            .vsync_duration = frame->ideal_frame_vsync_duration,
             .interpolation_threshold = opts->interpolation_threshold,
+#if PL_API_VER >= 340
+            .drift_compensation = 0,
+#endif
         );
 
         // mpv likes to generate sporadically jumping PTS shortly after
-        // initialization, but pl_queue does not like these. Hard-clamp as
-        // a simple work-around.
-        qparams.pts = p->last_pts = MPMAX(qparams.pts, p->last_pts);
+        // initialization, but pl_queue does not like these. Hard-clamp to
+        // the first frame in the queue as a simple workaround.
+        struct pl_source_frame first;
+        if (pl_queue_peek(p->queue, 0, &first)) {
+            if (qparams.pts < first.pts)
+                MP_VERBOSE(vo, "Clamping first frame PTS from %f to %f\n", qparams.pts, first.pts);
+            qparams.pts = p->last_pts = MPMAX(qparams.pts, first.pts);
+        }
 
         switch (pl_queue_update(p->queue, &mix, &qparams)) {
         case PL_QUEUE_ERR:
@@ -993,7 +1004,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             struct frame_priv *fp = mpi->priv;
             apply_crop(image, p->src, vo->params->w, vo->params->h);
             if (opts->blend_subs) {
-                if (p->paused || fp->osd_sync < p->osd_sync) {
+                if (frame->redraw || fp->osd_sync < p->osd_sync) {
                     float rx = pl_rect_w(p->dst) / pl_rect_w(image->crop);
                     float ry = pl_rect_h(p->dst) / pl_rect_h(image->crop);
                     struct mp_osd_res res = {
@@ -1005,6 +1016,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                         .mb = (image->crop.y1 - vo->params->h) * ry,
                         .display_par = 1.0,
                     };
+                    // TODO: fix this doing pointless updates
+                    if (frame->redraw)
+                        p->osd_sync++;
                     update_overlays(vo, res, OSD_DRAW_SUB_ONLY,
                                     PL_OVERLAY_COORDS_DST_CROP,
                                     &fp->subs, image, mpi);
@@ -1040,7 +1054,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         pl_renderer_get_hdr_metadata(p->rr, &vo->params->color.hdr);
     }
 
-    p->is_interpolated = mix.num_frames > 1;
+    p->is_interpolated = pts_offset != 0 && mix.num_frames > 1;
     valid = true;
     // fall through
 
@@ -1384,12 +1398,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER:
     case VOCTRL_PAUSE:
-        p->paused = true;
         if (p->is_interpolated)
             vo->want_redraw = true;
-        return VO_TRUE;
-    case VOCTRL_RESUME:
-        p->paused = false;
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
@@ -1547,10 +1557,15 @@ static void save_cache_files(struct priv *p)
 
         if (!target_file)
             continue;
-        char *tmp = talloc_asprintf(ta_ctx, "%s~", target_file);
-        FILE *cache = fopen(tmp, "wb");
-        if (!cache)
+        char *tmp = talloc_asprintf(ta_ctx, "%sXXXXXX", target_file);
+        int fd = mkstemp(tmp);
+        if (fd < 0)
             continue;
+        FILE *cache = fdopen(fd, "wb");
+        if (!cache) {
+            close(fd);
+            continue;
+        }
         int ret = pl_cache_save_file(target_cache, cache);
         if (same_cache)
             ret += pl_cache_save_file(p->icc_cache, cache);

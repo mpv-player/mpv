@@ -69,10 +69,12 @@ struct vo_wayland_state {
 
     /* State */
     bool activated;
-    bool has_keyboard_input;
+    bool configured;
     bool focused;
     bool frame_wait;
+    bool has_keyboard_input;
     bool hidden;
+    bool initial_size_hint;
     bool locked_size;
     bool state_change;
     bool tiled;

@@ -686,10 +686,16 @@ local function append_resolution(s, r, prefix, w_prop, h_prop, video_res)
     if append(s, r[w_prop], {prefix=prefix}) then
         append(s, r[h_prop], {prefix="x", nl="", indent=" ", prefix_sep=" ",
                            no_prefix_markup=true})
-        if r["aspect"] ~= nil then
+        if r["aspect"] ~= nil and not video_res then
             append(s, format("%.2f:1", r["aspect"]), {prefix="", nl="", indent="",
                                                       no_prefix_markup=true})
             append(s, r["aspect-name"], {prefix="(", suffix=")", nl="", indent=" ",
+                                         prefix_sep="", no_prefix_markup=true})
+        end
+        if r["sar"] ~= nil and video_res then
+            append(s, format("%.2f:1", r["sar"]), {prefix="", nl="", indent="",
+                                                      no_prefix_markup=true})
+            append(s, r["sar-name"], {prefix="(", suffix=")", nl="", indent=" ",
                                          prefix_sep="", no_prefix_markup=true})
         end
         if r["s"] then

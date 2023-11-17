@@ -423,6 +423,7 @@ static double vsync_stddef(struct vo *vo, double ref_vsync)
 }
 
 #define MAX_VSYNC_SAMPLES 1000
+#define DELAY_VSYNC_SAMPLES 10
 
 // Check if we should switch to measured average display FPS if it seems
 // "better" then the system-reported one. (Note that small differences are
@@ -507,7 +508,7 @@ static void update_vsync_timing_after_swap(struct vo *vo,
     }
 
     in->num_successive_vsyncs++;
-    if (in->num_successive_vsyncs <= vo->opts->swapchain_depth)
+    if (in->num_successive_vsyncs <= DELAY_VSYNC_SAMPLES)
         return;
 
     if (vsync_time <= 0 || vsync_time <= prev_vsync) {
@@ -898,6 +899,7 @@ static bool render_frame(struct vo *vo)
     in->current_frame->repeat = true;
     if (frame->display_synced) {
         in->current_frame->vsync_offset += in->current_frame->vsync_interval;
+        in->current_frame->ideal_frame_vsync += in->current_frame->ideal_frame_vsync_duration;
         in->dropped_frame |= in->current_frame->num_vsyncs < 1;
     }
     if (in->current_frame->num_vsyncs > 0)

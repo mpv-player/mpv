@@ -1604,7 +1604,6 @@ const m_option_type_t m_option_type_string_list = {
         {"add"},
         {"append"},
         {"clr",         M_OPT_TYPE_OPTIONAL_PARAM},
-        {"del"},
         {"pre"},
         {"set"},
         {"toggle"},
@@ -3277,7 +3276,7 @@ done: ;
     return 1;
 }
 
-// Parse a single entry for -vf-del (return 0 if not applicable)
+// Parse a single entry for -vf-remove (return 0 if not applicable)
 // mark_del is bounded by the number of items in dst
 static int parse_obj_settings_del(struct mp_log *log, struct bstr opt_name,
                                   struct bstr *param, void *dst, bool *mark_del)
@@ -3345,16 +3344,12 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 " Prepend the given list to the current list\n\n"
                 "  %s-remove\n"
                 " Remove the given filter from the current list\n\n"
-                "  %s-del x,y,...\n"
-                " Remove the given elements. Take the list element index (starting from 0).\n"
-                " Negative index can be used (i.e. -1 is the last element).\n"
-                " Filter names work as well.\n\n"
                 "  %s-toggle\n"
                 " Add the filter to the list, or remove it if it's already added.\n\n"
                 "  %s-clr\n"
                 " Clear the current list.\n\n",
                 opt->name, opt->name, opt->name, opt->name, opt->name,
-                opt->name, opt->name, opt->name, opt->name);
+                opt->name, opt->name, opt->name);
 
         return M_OPT_EXIT;
     }
@@ -3700,7 +3695,6 @@ const m_option_type_t m_option_type_obj_settings_list = {
         {"add"},
         {"append"},
         {"clr",     M_OPT_TYPE_OPTIONAL_PARAM},
-        {"del"},
         {"help",    M_OPT_TYPE_OPTIONAL_PARAM},
         {"pre"},
         {"set"},

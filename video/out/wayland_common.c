@@ -71,10 +71,10 @@
 
 static const struct mp_keymap keymap[] = {
     /* Special keys */
-    {XKB_KEY_Pause,     MP_KEY_PAUSE}, {XKB_KEY_Escape, MP_KEY_ESC},
-    {XKB_KEY_BackSpace, MP_KEY_BS},    {XKB_KEY_Tab,    MP_KEY_TAB},
-    {XKB_KEY_Return,    MP_KEY_ENTER}, {XKB_KEY_Menu,   MP_KEY_MENU},
-    {XKB_KEY_Print,     MP_KEY_PRINT},
+    {XKB_KEY_Pause,     MP_KEY_PAUSE}, {XKB_KEY_Escape,       MP_KEY_ESC},
+    {XKB_KEY_BackSpace, MP_KEY_BS},    {XKB_KEY_Tab,          MP_KEY_TAB},
+    {XKB_KEY_Return,    MP_KEY_ENTER}, {XKB_KEY_Menu,         MP_KEY_MENU},
+    {XKB_KEY_Print,     MP_KEY_PRINT}, {XKB_KEY_ISO_Left_Tab, MP_KEY_TAB},
 
     /* Cursor keys */
     {XKB_KEY_Left, MP_KEY_LEFT}, {XKB_KEY_Right, MP_KEY_RIGHT},
@@ -894,9 +894,17 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     wl->toplevel_width = width;
     wl->toplevel_height = height;
 
-    /* Don't do anything here if we haven't finished setting geometry. */
-    if (mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0)
+    if (!wl->configured) {
+        /* Save initial window size if the compositor gives us a hint here. */
+        bool autofit_or_geometry = vo_opts->geometry.wh_valid || vo_opts->autofit.wh_valid ||
+                                   vo_opts->autofit_larger.wh_valid || vo_opts->autofit_smaller.wh_valid;
+        if (width && height && !autofit_or_geometry) {
+            wl->initial_size_hint = true;
+            wl->window_size = (struct mp_rect){0, 0, width, height};
+            wl->geometry = wl->window_size;
+        }
         return;
+    }
 
     bool is_maximized = false;
     bool is_fullscreen = false;
@@ -1790,7 +1798,9 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
     wl->reduced_width = vo->dwidth / gcd;
     wl->reduced_height = vo->dheight / gcd;
 
-    wl->window_size = (struct mp_rect){0, 0, vo->dwidth, vo->dheight};
+    if (!wl->initial_size_hint)
+        wl->window_size = (struct mp_rect){0, 0, vo->dwidth, vo->dheight};
+    wl->initial_size_hint = false;
 
     if (resize) {
         if (!wl->locked_size)
@@ -2345,19 +2355,15 @@ bool vo_wayland_reconfig(struct vo *vo)
         wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
-    if (wl->vo_opts->auto_window_resize || mp_rect_w(wl->geometry) == 0 ||
-        mp_rect_h(wl->geometry) == 0)
-    {
+    if (wl->vo_opts->auto_window_resize || !wl->configured)
         set_geometry(wl, false);
-    }
 
     if (wl->opts->configure_bounds)
         set_window_bounds(wl);
 
-    if (mp_rect_w(wl->geometry) == 0 || mp_rect_h(wl->geometry) == 0 ||
-        !wl->locked_size)
-    {
+    if (!wl->configured || !wl->locked_size) {
         wl->geometry = wl->window_size;
+        wl->configured = true;
     }
 
     if (wl->vo_opts->cursor_passthrough)
