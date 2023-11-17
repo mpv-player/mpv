@@ -6869,8 +6869,11 @@ them.
     files contain uncompressed LUTs. Their size depends on the
     ``--icc-3dlut-size``, and can be very big.
 
-    NOTE: On ``--vo=gpu``, this is not cleaned automatically, so old, unused
-    cache files may stick around indefinitely.
+    On `--vo=gpu-next`, files that have not been accessed in the last 24 hours
+    may be cleared if the cache limit (1.5 GiB) is exceeded.
+
+    On ``--vo=gpu``, this is not cleaned automatically, so old, unused cache
+    files may stick around indefinitely.
 
 ``--icc-cache-dir``
     The directory where icc cache is stored. Cache is stored in the system's
@@ -7018,11 +7021,14 @@ them.
 ``--gpu-shader-cache``
     Store and load compiled GLSL shaders in the cache directory (Default:
     ``yes``). Normally, shader compilation is very fast, so this is not usually
-    needed. It mostly matters for anything based on D3D11 (including ANGLE), as
-    well as on some other proprietary drivers. Enabling this can improve startup
-    performance on these platforms.
+    needed. It mostly matters for anything involving GLSL to SPIR-V conversion,
+    that is: D3D11, ANGLE or Vulkan, as well as on some other proprietary
+    drivers. Enabling this can improve startup performance on these platforms.
 
-    NOTE: On ``--vo=gpu``, is not cleaned automatically, so old, unused cache
+    On `--vo=gpu-next`, files that have not been accessed in the last 24 hours
+    may be cleared if the cache limit (128 MiB) is exceeded.
+
+    On ``--vo=gpu``, this is not cleaned automatically, so old, unused cache
     files may stick around indefinitely.
 
 ``--gpu-shader-cache-dir``
