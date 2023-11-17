@@ -1661,11 +1661,11 @@ static int preinit(struct vo *vo)
 
     p->shader_cache = pl_cache_create(pl_cache_params(
         .log = p->pllog,
-        .max_total_size  = 50 << 20, // 50 MiB
+        .max_total_size  = 10 << 20, // 10 MiB
     ));
     p->icc_cache = pl_cache_create(pl_cache_params(
         .log = p->pllog,
-        .max_total_size = (1 << 20) * 1024, // 1 GiB
+        .max_total_size = 10 << 20, // 10 MiB
     ));
     pl_gpu_set_cache(p->gpu, p->shader_cache);
 
