@@ -187,7 +187,7 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
     AVVkFrame *vkf = p->vkf;
 
     int num_images;
-    for (num_images = 0; (vkf->img[num_images] != NULL); num_images++);
+    for (num_images = 0; (vkf->img[num_images] != VK_NULL_HANDLE); num_images++);
 
     for (int i = 0; (p->tex[i] != NULL); i++) {
         pl_tex *tex = &p->tex[i];
@@ -247,7 +247,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     mp_image_set_size(&raw_layout, hwfc->width, hwfc->height);
 
     int num_images;
-    for (num_images = 0; (vkf->img[num_images] != NULL); num_images++);
+    for (num_images = 0; (vkf->img[num_images] != VK_NULL_HANDLE); num_images++);
     const VkFormat *vk_fmt = av_vkfmt_from_pixfmt(hwfc->sw_format);
 
     vkfc->lock_frame(hwfc, vkf);
