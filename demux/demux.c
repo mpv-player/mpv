@@ -1990,6 +1990,7 @@ static void record_packet(struct demux_internal *in, struct demux_packet *dp)
 static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
+    assert(ds && ds->in);
     if (!dp->len || demux_cancel_test(ds->in->d_thread)) {
         talloc_free(dp);
         return;
