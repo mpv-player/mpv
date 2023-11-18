@@ -1914,6 +1914,9 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
                 break;
             }
 
+            if (!opt.type)
+                goto next_hook;
+
             opt.type->parse(p->log, &opt, k, v, hp->data);
             goto next_hook;
         }
