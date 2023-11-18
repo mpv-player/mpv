@@ -1078,8 +1078,7 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
     return image;
 
 error_exit:
-    if (image)
-        talloc_free(image);
+    talloc_free(image);
     if (surface)
         IDirect3DSurface9_Release(surface);
     return NULL;
