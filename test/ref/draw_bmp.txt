@@ -42,6 +42,8 @@ gbrap10     = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=u
 gbrap10be   = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
 gbrap12     = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
 gbrap12be   = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
+gbrap14     = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
+gbrap14be   = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
 gbrap16     = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
 gbrap16be   = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
 gbrapf32    = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=unknown, ca_f=unknown
@@ -99,10 +101,14 @@ p016        = align=2:2 ov=yuva420p, ov_f=yuva420pf, v_f=yuv420pf, a=gray, ca=gr
 p016be      = align=2:2 ov=yuva420p, ov_f=yuva420pf, v_f=yuv420pf, a=gray, ca=gray, ca_f=grayf32
 p210        = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
 p210be      = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
+p212        = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
+p212be      = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
 p216        = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
 p216be      = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
 p410        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
 p410be      = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
+p412        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
+p412be      = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
 p416        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
 p416be      = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
 pal8        = no
