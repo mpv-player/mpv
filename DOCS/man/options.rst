@@ -3369,7 +3369,7 @@ Window
 ``--force-window-position``
     Forcefully move mpv's video output window to default location whenever
     there is a change in video parameters, video stream or file. This used to
-    be the default behavior. Currently only affects X11 VOs.
+    be the default behavior. Currently only affects X11 and SDL VOs.
 
 ``--auto-window-resize=<yes|no>``
     (Wayland, Win32, and X11)
