@@ -623,9 +623,9 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
         }
         case SDL_MOUSEWHEEL: {
 #if SDL_VERSION_ATLEAST(2, 0, 4)
-            double multiplier = ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -0.1 : 0.1;
+            double multiplier = ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -1 : 1;
 #else
-            double multiplier = 0.1;
+            double multiplier = 1;
 #endif
             int y_code = ev.wheel.y > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
             mp_input_put_wheel(vo->input_ctx, y_code, abs(ev.wheel.y) * multiplier);
