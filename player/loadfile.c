@@ -1958,11 +1958,8 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
                                     bool force)
 {
     struct playlist_entry *next = playlist_get_next(mpctx->playlist, direction);
-    if (next && direction < 0 && !force) {
-        if (!next && mpctx->opts->loop_times == 1)
-            next = playlist_get_first(mpctx->playlist);
+    if (next && direction < 0 && !force)
         next->playlist_prev_attempt = true;
-    }
     if (!next && mpctx->opts->loop_times != 1) {
         if (direction > 0) {
             if (mpctx->opts->shuffle)
