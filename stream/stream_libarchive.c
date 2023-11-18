@@ -583,6 +583,8 @@ static int archive_entry_open(stream_t *stream)
 
     char *base = talloc_strdup(p, stream->path);
     char *name = strchr(base, '|');
+    if (!name)
+        return STREAM_ERROR;
     *name++ = '\0';
     if (name[0] == '/')
         name += 1;

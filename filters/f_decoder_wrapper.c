@@ -430,10 +430,12 @@ static bool reinit_decoder(struct priv *p)
         }
     }
 
+    if (!driver)
+        return false;
+
     if (!list) {
         struct mp_decoder_list *full = talloc_zero(NULL, struct mp_decoder_list);
-        if (driver)
-            driver->add_decoders(full);
+        driver->add_decoders(full);
         const char *codec = p->codec->codec;
         if (codec && strcmp(codec, "null") == 0)
             codec = fallback;
@@ -1232,6 +1234,8 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
 
     p->decf = mp_filter_create(p->dec_root_filter ? p->dec_root_filter : public_f,
                                &decf_filter);
+    if (!p->decf)
+        goto error;
     p->decf->priv = p;
     p->decf->log = public_f->log = p->log;
     mp_filter_add_pin(p->decf, MP_PIN_OUT, "out");
