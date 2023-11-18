@@ -360,6 +360,7 @@ static MP_THREAD_VOID ipc_thread(void *p)
     mp_thread_set_name("ipc/named-pipe");
     MP_VERBOSE(arg, "Starting IPC master\n");
 
+    OVERLAPPED ol = {0};
     SECURITY_ATTRIBUTES sa = {
         .nLength = sizeof sa,
         .lpSecurityDescriptor = create_restricted_sd(),
@@ -369,7 +370,7 @@ static MP_THREAD_VOID ipc_thread(void *p)
         goto done;
     }
 
-    OVERLAPPED ol = { .hEvent = CreateEventW(NULL, TRUE, TRUE, NULL) };
+    ol = (OVERLAPPED){ .hEvent = CreateEventW(NULL, TRUE, TRUE, NULL) };
     if (!ol.hEvent) {
         MP_ERR(arg, "Couldn't create event");
         goto done;
