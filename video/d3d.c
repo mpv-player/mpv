@@ -186,7 +186,7 @@ AVBufferRef *d3d9_wrap_device_ref(IDirect3DDevice9 *device)
     if (FAILED(hr))
         goto fail;
 
-    IDirect3DDeviceManager9_ResetDevice(hwctx->devmgr, device, reset_token);
+    hr = IDirect3DDeviceManager9_ResetDevice(hwctx->devmgr, device, reset_token);
     if (FAILED(hr))
         goto fail;
 
