@@ -369,7 +369,6 @@ static void reopen_console_handle(DWORD std, int fd, FILE *stream)
         } else {
             freopen("CONOUT$", "wt", stream);
         }
-        setvbuf(stream, NULL, _IONBF, 0);
 
         // Set the low-level FD to the new handle value, since mp_subprocess2
         // callers might rely on low-level FDs being set. Note, with this
