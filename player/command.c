@@ -414,9 +414,9 @@ static int mp_property_playback_speed(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (action == M_PROPERTY_PRINT) {
-        double speed = mpctx->opts->playback_speed;
-        *(char **)arg = talloc_asprintf(NULL, "%.2f", speed);
+    if (action == M_PROPERTY_PRINT || action == M_PROPERTY_FIXED_LEN_PRINT) {
+        *(char **)arg = mp_format_double(NULL, mpctx->opts->playback_speed, 2,
+                                         false, false, action != M_PROPERTY_FIXED_LEN_PRINT);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -434,8 +434,9 @@ static int mp_property_av_speed_correction(void *ctx, struct m_property *prop,
     default: MP_ASSERT_UNREACHABLE();
     }
 
-    if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%+.3g%%", (val - 1) * 100);
+    if (action == M_PROPERTY_PRINT || action == M_PROPERTY_FIXED_LEN_PRINT) {
+        *(char **)arg = mp_format_double(NULL, (val - 1) * 100, 2, true,
+                                         true, action != M_PROPERTY_FIXED_LEN_PRINT);
         return M_PROPERTY_OK;
     }
 
@@ -667,13 +668,9 @@ static int mp_property_avsync(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->ao_chain || !mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_PRINT) {
-        // Truncate anything < 1e-4 to avoid switching to scientific notation
-        if (fabs(mpctx->last_av_difference) < 1e-4) {
-            *(char **)arg = talloc_strdup(NULL, "0");
-        } else {
-            *(char **)arg = talloc_asprintf(NULL, "%+.2g", mpctx->last_av_difference);
-        }
+    if (action == M_PROPERTY_PRINT || action == M_PROPERTY_FIXED_LEN_PRINT) {
+        *(char **)arg = mp_format_double(NULL, mpctx->last_av_difference, 4,
+                                         true, false, action != M_PROPERTY_FIXED_LEN_PRINT);
         return M_PROPERTY_OK;
     }
     return m_property_double_ro(action, arg, mpctx->last_av_difference);
@@ -3754,8 +3751,9 @@ static int do_op_udata(struct udata_ctx* ctx, int action, void *arg)
         assert(node);
         m_option_copy(&udata_type, arg, node);
         return M_PROPERTY_OK;
+    case M_PROPERTY_FIXED_LEN_PRINT:
     case M_PROPERTY_PRINT: {
-        char *str = m_option_pretty_print(&udata_type, node);
+        char *str = m_option_pretty_print(&udata_type, node, action == M_PROPERTY_FIXED_LEN_PRINT);
         *(char **)arg = str;
         return str != NULL;
     }
