@@ -89,6 +89,11 @@ struct frame_info {
     struct pl_dispatch_info info[VO_PASS_PERF_MAX];
 };
 
+struct cache {
+    char *path;
+    pl_cache cache;
+};
+
 struct priv {
     struct mp_log *log;
     struct mpv_global *global;
@@ -111,9 +116,6 @@ struct priv {
     pl_tex *sub_tex;
     int num_sub_tex;
 
-    pl_cache shader_cache;
-    pl_cache icc_cache;
-
     struct mp_rect src, dst;
     struct mp_osd_res osd_res;
     struct osd_state osd_state;
@@ -128,6 +130,7 @@ struct priv {
 
     pl_options pars;
     struct m_config_cache *opts_cache;
+    struct cache shader_cache, icc_cache;
     struct mp_csp_equalizer_state *video_eq;
     struct scaler_params scalers[SCALER_COUNT];
     const struct pl_hook **hooks; // storage for `params.hooks`
@@ -1509,112 +1512,69 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
     }
 }
 
-static char *get_cache_file(struct priv *p, char *type)
+static void cache_init(struct vo *vo, struct cache *cache, size_t max_size,
+                       const char *dir_opt)
 {
-    char *file = NULL;
-    char *dir = NULL;
-    struct gl_video_opts *opts = p->opts_cache->opts;
+    struct priv *p = vo->priv;
+    const char *name = cache == &p->shader_cache ? "shader.cache" : "icc.cache";
 
-    if (strcmp(type, "shader") == 0) {
-        if (!opts->shader_cache)
-            goto done;
-        dir = opts->shader_cache_dir;
-    } else if (strcmp(type, "icc") == 0) {
-        if (!opts->icc_opts->cache)
-            goto done;
-        dir = opts->icc_opts->cache_dir;
-    } else {
-        goto done;
-    }
-
-    if (dir && dir[0]) {
-        dir = mp_get_user_path(NULL, p->global, dir);
+    char *dir;
+    if (dir_opt && dir_opt[0]) {
+        dir = mp_get_user_path(NULL, p->global, dir_opt);
     } else {
         dir = mp_find_user_file(NULL, p->global, "cache", "");
     }
-    if (dir && dir[0]) {
-        file = mp_path_join(NULL, dir, "libplacebo.cache");
-        mp_mkdirp(dir);
+    if (!dir || !dir[0])
+        goto done;
+
+    mp_mkdirp(dir);
+    cache->path = mp_path_join(vo, dir, name);
+    cache->cache = pl_cache_create(pl_cache_params(
+        .log = p->pllog,
+        .max_total_size = max_size,
+    ));
+
+    FILE *file = fopen(cache->path, "rb");
+    if (file) {
+        int ret = pl_cache_load_file(cache->cache, file);
+        fclose(file);
+        if (ret < 0)
+            MP_WARN(p, "Failed loading cache from %s\n", cache->path);
     }
-    talloc_free(dir);
+
 done:
-    return file;
+    talloc_free(dir);
 }
 
-static void load_cache_files(struct priv *p)
+static void cache_uninit(struct priv *p, struct cache *cache)
 {
-    char *icc_cache = get_cache_file(p, "icc");
-    char *shader_cache = get_cache_file(p, "shader");
-    bool same_cache = false;
-    if (icc_cache && shader_cache)
-        same_cache = strcmp(icc_cache, shader_cache) == 0;
-    if (shader_cache) {
-        FILE *cache = fopen(shader_cache, "rb");
-        if (cache) {
-            int ret = pl_cache_load_file(p->shader_cache, cache);
-            if (same_cache)
-                pl_cache_load_file(p->icc_cache, cache);
-            fclose(cache);
-            if (ret < 0)
-                MP_WARN(p, "Failed loading cache from %s\n", shader_cache);
-        }
-        talloc_free(shader_cache);
+    if (!cache->cache)
+        goto done;
+
+    assert(cache->path);
+    char *tmp = talloc_asprintf(cache->path, "%sXXXXXX", cache->path);
+    int fd = mkstemp(tmp);
+    if (fd < 0)
+        goto done;
+    FILE *file = fdopen(fd, "wb");
+    if (!file) {
+        close(fd);
+        unlink(tmp);
+        goto done;
     }
-    if (icc_cache && !same_cache) {
-        FILE *cache = fopen(icc_cache, "rb");
-        if (cache) {
-            int ret = pl_cache_load_file(p->icc_cache, cache);
-            fclose(cache);
-            if (ret < 0)
-                MP_WARN(p, "Failed loading cache from %s\n", icc_cache);
-        }
+    int ret = pl_cache_save_file(cache->cache, file);
+    fclose(file);
+    if (ret >= 0)
+        ret = rename(tmp, cache->path);
+    if (ret < 0) {
+        MP_WARN(p, "Failed saving cache to %s\n", cache->path);
+        unlink(tmp);
     }
-    talloc_free(icc_cache);
+
+    // fall through
+done:
+    pl_cache_destroy(&cache->cache);
 }
-
-static void save_cache_files(struct priv *p)
-{
-    void *ta_ctx = talloc_new(NULL);
-    char *icc_cache = get_cache_file(p, "icc");
-    char *shader_cache = get_cache_file(p, "shader");
-    talloc_steal(ta_ctx, icc_cache);
-    talloc_steal(ta_ctx, shader_cache);
-
-    bool same_cache = false;
-    if (icc_cache && shader_cache)
-        same_cache = strcmp(icc_cache, shader_cache) == 0;
-    for (int i = 0; i < 2; i++) {
-        const char *target_file = i == 0 ? shader_cache : icc_cache;
-        pl_cache target_cache = i == 0 ? p->shader_cache : p->icc_cache;
-
-        if (!target_file)
-            continue;
-        char *tmp = talloc_asprintf(ta_ctx, "%sXXXXXX", target_file);
-        int fd = mkstemp(tmp);
-        if (fd < 0)
-            continue;
-        FILE *cache = fdopen(fd, "wb");
-        if (!cache) {
-            close(fd);
-            continue;
-        }
-        int ret = pl_cache_save_file(target_cache, cache);
-        if (same_cache)
-            ret += pl_cache_save_file(p->icc_cache, cache);
-        fclose(cache);
-        if (ret >= 0)
-            ret = rename(tmp, target_file);
-        if (ret < 0) {
-            MP_WARN(p, "Failed saving cache to %s\n", target_file);
-            unlink(tmp);
-        }
-
-        if (same_cache)
-            break;
-    }
-    talloc_free(ta_ctx);
-}
-
 
 static void uninit(struct vo *vo)
 {
@@ -1637,9 +1597,8 @@ static void uninit(struct vo *vo)
     assert(p->num_dr_buffers == 0);
     mp_mutex_destroy(&p->dr_lock);
 
-    save_cache_files(p);
-    pl_cache_destroy(&p->shader_cache);
-    pl_cache_destroy(&p->icc_cache);
+    cache_uninit(p, &p->shader_cache);
+    cache_uninit(p, &p->icc_cache);
 
     pl_icc_close(&p->icc_profile);
     pl_renderer_destroy(&p->rr);
@@ -1691,18 +1650,12 @@ static int preinit(struct vo *vo)
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
     mp_mutex_init(&p->dr_lock);
 
-    p->shader_cache = pl_cache_create(pl_cache_params(
-        .log = p->pllog,
-        .max_total_size  = 10 << 20, // 10 MiB
-    ));
-    p->icc_cache = pl_cache_create(pl_cache_params(
-        .log = p->pllog,
-        .max_total_size = 10 << 20, // 10 MiB
-    ));
-    pl_gpu_set_cache(p->gpu, p->shader_cache);
+    if (gl_opts->shader_cache)
+        cache_init(vo, &p->shader_cache, 10 << 20, gl_opts->shader_cache_dir);
+    if (gl_opts->icc_opts->cache)
+        cache_init(vo, &p->icc_cache, 10 << 20, gl_opts->icc_opts->cache_dir);
 
-    load_cache_files(p);
-
+    pl_gpu_set_cache(p->gpu, p->shader_cache.cache);
     p->rr = pl_renderer_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
     p->osd_fmt[SUBBITMAP_LIBASS] = pl_find_named_fmt(p->gpu, "r8");
@@ -1842,7 +1795,7 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
     p->icc_params.size_r = s_r;
     p->icc_params.size_g = s_g;
     p->icc_params.size_b = s_b;
-    p->icc_params.cache = p->icc_cache;
+    p->icc_params.cache = p->icc_cache.cache;
 
     if (!opts->profile || !opts->profile[0]) {
         // No profile enabled, un-load any existing profiles
