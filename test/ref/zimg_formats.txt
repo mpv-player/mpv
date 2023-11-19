@@ -42,6 +42,8 @@
       gbrap10be    Zin   Zout  SWSin  SWSout |
         gbrap12    Zin   Zout  SWSin  SWSout |
       gbrap12be    Zin   Zout  SWSin  SWSout |
+        gbrap14    Zin   Zout  SWSin  SWSout |
+      gbrap14be    Zin   Zout  SWSin  SWSout |
         gbrap16    Zin   Zout  SWSin  SWSout |
       gbrap16be    Zin   Zout  SWSin  SWSout |
        gbrapf32    Zin   Zout  SWSin  SWSout |
@@ -99,10 +101,14 @@
          p016be    Zin   Zout  SWSin  SWSout |
            p210    Zin   Zout  SWSin  SWSout |
          p210be    Zin   Zout  SWSin  SWSout |
+           p212    Zin   Zout  SWSin  SWSout |
+         p212be    Zin   Zout  SWSin  SWSout |
            p216    Zin   Zout  SWSin  SWSout |
          p216be    Zin   Zout  SWSin  SWSout |
            p410    Zin   Zout  SWSin  SWSout |
          p410be    Zin   Zout  SWSin  SWSout |
+           p412    Zin   Zout  SWSin  SWSout |
+         p412be    Zin   Zout  SWSin  SWSout |
            p416    Zin   Zout  SWSin  SWSout |
          p416be    Zin   Zout  SWSin  SWSout |
            pal8    Zin         SWSin         |

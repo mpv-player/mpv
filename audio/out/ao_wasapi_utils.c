@@ -385,7 +385,7 @@ static bool search_channels(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
          "3.0", "3.0(back)",
          "quad", "quad(side)", "3.1",
          "5.0(side)", "4.1",
-         "5.1(side)", "6.0", "6.0(front)", "hexagonal"
+         "5.1(side)", "6.0", "6.0(front)", "hexagonal",
          "6.1(back)", "6.1(front)", "7.0", "7.0(front)",
          "7.1(wide)", "7.1(wide-side)", "7.1(rear)", "octagonal", NULL};
 

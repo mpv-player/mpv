@@ -872,7 +872,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     const struct gl_video_opts *opts = p->opts_cache->opts;
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
     bool cache_frame = will_redraw || frame->still;
-    bool can_interpolate = opts->interpolation && frame->num_frames > 1;
+    bool can_interpolate = opts->interpolation && frame->display_synced &&
+                           !frame->still && frame->num_frames > 1;
+    double pts_offset = can_interpolate ? frame->ideal_frame_vsync : 0;
     params.info_callback = info_callback;
     params.info_priv = vo;
     params.skip_caching_single_frame = !cache_frame;
@@ -880,19 +882,41 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (frame->still)
         params.frame_mixer = NULL;
 
+    // pl_queue advances its internal virtual PTS and culls available frames
+    // based on this value and the VPS/FPS ratio. Requesting a non-monotonic PTS
+    // is an invalid use of pl_queue. Reset it if this happens in an attempt to
+    // recover as much as possible. Ideally, this should never occur, and if it
+    // does, it should be corrected. The ideal_frame_vsync may be negative if
+    // the last draw did not align perfectly with the vsync. In this case, we
+    // should have the previous frame available in pl_queue, or a reset is
+    // already requested. Clamp the check to 0, as we don't have the previous
+    // frame in vo_frame anyway.
+    struct pl_source_frame vpts;
+    if (frame->current && !p->want_reset) {
+        if (pl_queue_peek(p->queue, 0, &vpts) &&
+            frame->current->pts + MPMAX(0, pts_offset) < vpts.pts)
+        {
+            MP_VERBOSE(vo, "Forcing queue refill, PTS(%f + %f | %f) < VPTS(%f)\n",
+                       frame->current->pts, pts_offset,
+                       frame->ideal_frame_vsync_duration, vpts.pts);
+            p->want_reset = true;
+        }
+    }
+
     // Push all incoming frames into the frame queue
     for (int n = 0; n < frame->num_frames; n++) {
         int id = frame->frame_id + n;
-        if (id <= p->last_id)
-            continue; // ignore already seen frames
 
         if (p->want_reset) {
-            can_interpolate = false;
             pl_renderer_flush_cache(p->rr);
             pl_queue_reset(p->queue);
             p->last_pts = 0.0;
+            p->last_id = 0;
             p->want_reset = false;
         }
+
+        if (id <= p->last_id)
+            continue; // ignore already seen frames
 
         struct mp_image *mpi = mp_image_new_ref(frame->frames[n]);
         struct frame_priv *fp = talloc_zero(mpi, struct frame_priv);
@@ -901,6 +925,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
         pl_queue_push(p->queue, &(struct pl_source_frame) {
             .pts = mpi->pts,
+            .duration = can_interpolate ? frame->approx_duration : 0,
             .frame_data = mpi,
             .map = map_frame,
             .unmap = unmap_frame,
@@ -926,7 +951,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     struct pl_swapchain_frame swframe;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
-    double pts_offset = can_interpolate ? frame->ideal_frame_vsync : 0;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         if (frame->current) {
@@ -934,7 +958,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             pl_queue_update(p->queue, NULL, pl_queue_params(
                 .pts = frame->current->pts + pts_offset,
                 .radius = pl_frame_mix_radius(&params),
-                .vsync_duration = frame->ideal_frame_vsync_duration,
+                .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
 #if PL_API_VER >= 340
                 .drift_compensation = 0,
 #endif
@@ -962,22 +986,25 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         struct pl_queue_params qparams = *pl_queue_params(
             .pts = frame->current->pts + pts_offset,
             .radius = pl_frame_mix_radius(&params),
-            .vsync_duration = frame->ideal_frame_vsync_duration,
+            .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
             .interpolation_threshold = opts->interpolation_threshold,
 #if PL_API_VER >= 340
             .drift_compensation = 0,
 #endif
         );
 
-        // mpv likes to generate sporadically jumping PTS shortly after
-        // initialization, but pl_queue does not like these. Hard-clamp to
-        // the first frame in the queue as a simple workaround.
+        // Depending on the vsync ratio, we may be up to half of the vsync
+        // duration before the current frame time. This works fine because
+        // pl_queue will have this frame, unless it's after a reset event. In
+        // this case, start from the first available frame.
         struct pl_source_frame first;
-        if (pl_queue_peek(p->queue, 0, &first)) {
-            if (qparams.pts < first.pts)
-                MP_VERBOSE(vo, "Clamping first frame PTS from %f to %f\n", qparams.pts, first.pts);
-            qparams.pts = p->last_pts = MPMAX(qparams.pts, first.pts);
+        if (pl_queue_peek(p->queue, 0, &first) && qparams.pts < first.pts) {
+            if (first.pts != frame->current->pts)
+                MP_VERBOSE(vo, "Current PTS(%f) != VPTS(%f)\n", frame->current->pts, first.pts);
+            MP_VERBOSE(vo, "Clamping first frame PTS from %f to %f\n", qparams.pts, first.pts);
+            qparams.pts = first.pts;
         }
+        p->last_pts = qparams.pts;
 
         switch (pl_queue_update(p->queue, &mix, &qparams)) {
         case PL_QUEUE_ERR:
@@ -1205,7 +1232,12 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     // Retrieve the current frame from the frame queue
     struct pl_frame_mix mix;
     enum pl_queue_status status;
-    status = pl_queue_update(p->queue, &mix, pl_queue_params(.pts = p->last_pts));
+    status = pl_queue_update(p->queue, &mix, pl_queue_params(
+        .pts = p->last_pts,
+#if PL_API_VER >= 340
+        .drift_compensation = 0,
+#endif
+    ));
     assert(status != PL_QUEUE_EOF);
     if (status == PL_QUEUE_ERR) {
         MP_ERR(vo, "Unknown error occurred while trying to take screenshot!\n");
@@ -1661,11 +1693,11 @@ static int preinit(struct vo *vo)
 
     p->shader_cache = pl_cache_create(pl_cache_params(
         .log = p->pllog,
-        .max_total_size  = 50 << 20, // 50 MiB
+        .max_total_size  = 10 << 20, // 10 MiB
     ));
     p->icc_cache = pl_cache_create(pl_cache_params(
         .log = p->pllog,
-        .max_total_size = (1 << 20) * 1024, // 1 GiB
+        .max_total_size = 10 << 20, // 10 MiB
     ));
     pl_gpu_set_cache(p->gpu, p->shader_cache);
 
@@ -1914,6 +1946,9 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
                 break;
             }
 
+            if (!opt.type)
+                goto next_hook;
+
             opt.type->parse(p->log, &opt, k, v, hp->data);
             goto next_hook;
         }
@@ -1945,11 +1980,15 @@ static void update_render_options(struct vo *vo)
     pars->params.plane_upscaler = map_scaler(p, SCALER_CSCALE);
     pars->params.frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
 
-    // Request as many frames as required from the decoder
+    // Request as many frames as required from the decoder, depending on the
+    // speed VPS/FPS ratio libplacebo may need more frames. Request frames up to
+    // ratio of 1/4, but only if anti aliasing is enabled.
     int req_frames = 2;
-    if (pars->params.frame_mixer)
-        req_frames += ceilf(pars->params.frame_mixer->kernel->radius);
-    vo_set_queue_params(vo, 0, req_frames);
+    if (pars->params.frame_mixer) {
+        req_frames += ceilf(pars->params.frame_mixer->kernel->radius) *
+                      (pars->params.skip_anti_aliasing ? 1 : 4);
+    }
+    vo_set_queue_params(vo, 0, MPMIN(VO_MAX_REQ_FRAMES, req_frames));
 
     pars->params.deband_params = opts->deband ? &pars->deband_params : NULL;
     pars->deband_params.iterations = opts->deband_opts->iterations;

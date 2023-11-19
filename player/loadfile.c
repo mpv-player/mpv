@@ -290,7 +290,7 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
             APPEND(b, " %dHz", s->codec->samplerate);
     }
     APPEND(b, ")");
-    if (s->hls_bitrate > 0)
+    if (s && s->hls_bitrate > 0)
         APPEND(b, " (%d kbps)", (s->hls_bitrate + 500) / 1000);
     if (t->is_external)
         APPEND(b, " (external)");
@@ -1958,11 +1958,8 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
                                     bool force)
 {
     struct playlist_entry *next = playlist_get_next(mpctx->playlist, direction);
-    if (next && direction < 0 && !force) {
-        if (!next && mpctx->opts->loop_times == 1)
-            next = playlist_get_first(mpctx->playlist);
+    if (next && direction < 0 && !force)
         next->playlist_prev_attempt = true;
-    }
     if (!next && mpctx->opts->loop_times != 1) {
         if (direction > 0) {
             if (mpctx->opts->shuffle)

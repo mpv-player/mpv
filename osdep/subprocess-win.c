@@ -253,6 +253,8 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
         },
     };
 
+    PROCESS_INFORMATION pi = {0};
+
     for (int n = 0; n < opts->num_fds; n++) {
         if (opts->fds[n].fd >= crt_fd_max) {
             // Target FD is too big to fit in the CRT FD array
@@ -396,7 +398,6 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     }
 
     DWORD flags = CREATE_UNICODE_ENVIRONMENT | EXTENDED_STARTUPINFO_PRESENT;
-    PROCESS_INFORMATION pi = {0};
 
     // Specify which handles are inherited by the subprocess. If this isn't
     // specified, the subprocess inherits all inheritable handles, which could

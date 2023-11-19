@@ -165,6 +165,9 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
     }
 
     struct mp_filter *conv = mp_filter_create(f, &convert_filter);
+    if (!conv)
+        return false;
+
     mp_filter_add_pin(conv, MP_PIN_IN, "in");
     mp_filter_add_pin(conv, MP_PIN_OUT, "out");
 

@@ -1930,7 +1930,7 @@ static void renderpass_run(struct ra *ra,
         int binding = pass->params.inputs[val->index].binding;
         switch (pass->params.inputs[val->index].type) {
         case RA_VARTYPE_BUF_RO:
-            if (binding > MP_ARRAY_SIZE(ubos)) {
+            if (binding >= MP_ARRAY_SIZE(ubos)) {
                 MP_ERR(ra, "Too many constant buffers in pass\n");
                 return;
             }
@@ -1952,7 +1952,7 @@ static void renderpass_run(struct ra *ra,
             uavs_len = MPMAX(uavs_len, binding + 1);
             break;
         case RA_VARTYPE_TEX:
-            if (binding > MP_ARRAY_SIZE(samplers)) {
+            if (binding >= MP_ARRAY_SIZE(samplers)) {
                 MP_ERR(ra, "Too many textures in pass\n");
                 return;
             }

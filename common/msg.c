@@ -717,7 +717,7 @@ static bool check_new_path(struct mpv_global *global, char *opt,
     if (strcmp(old_path, new_path) != 0) {
         talloc_free(*current_path);
         *current_path = NULL;
-        if (new_path && new_path[0])
+        if (new_path[0])
             *current_path = talloc_strdup(NULL, new_path);
         res = true;
     }

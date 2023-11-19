@@ -222,15 +222,11 @@ bool ra_gl_ctx_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     bool visible = true;
     if (p->params.check_visible)
         visible = p->params.check_visible(sw->ctx);
-    if (!visible)
-        return false;
 
     // If out_fbo is NULL, this was called from vo_gpu_next. Bail out.
-    if (out_fbo == NULL || !visible)
+    if (!out_fbo || !visible)
         return visible;
 
-    if (!out_fbo)
-        return true;
     *out_fbo = (struct ra_fbo) {
          .tex = p->wrapped_fb,
          .flip = !p->gl->flipped, // OpenGL FBs are normally flipped
