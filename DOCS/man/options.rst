@@ -6838,8 +6838,11 @@ them.
 
 ``--icc-3dlut-size=<auto|RxGxB>``
     Size of the 3D LUT generated from the ICC profile in each dimension. The
-    default of ``auto`` means to pick the size automatically based on internal
-    heuristics. Sizes may range from 2 to 512.
+    default of ``auto`` means to pick the size automatically based on the
+    profile characteristics. Sizes may range from 2 to 512.
+
+    NOTE: Setting this option to anything other than ``auto`` is **strongly**
+    discouraged, except for testing.
 
 ``--icc-force-contrast=<no|0-1000000|inf>``
     Override the target device's detected contrast ratio by a specific value.
