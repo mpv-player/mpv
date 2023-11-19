@@ -92,6 +92,7 @@ struct frame_info {
 struct cache {
     char *path;
     pl_cache cache;
+    uint64_t sig;
 };
 
 struct priv {
@@ -1512,6 +1513,20 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
     }
 }
 
+#if PL_API_VER < 342
+static inline void xor_hash(void *hash, pl_cache_obj obj)
+{
+    *((uint64_t *) hash) ^= obj.key;
+}
+
+static inline uint64_t pl_cache_signature(pl_cache cache)
+{
+    uint64_t hash = 0;
+    pl_cache_iterate(cache, xor_hash, &hash);
+    return hash;
+}
+#endif
+
 static void cache_init(struct vo *vo, struct cache *cache, size_t max_size,
                        const char *dir_opt)
 {
@@ -1542,6 +1557,7 @@ static void cache_init(struct vo *vo, struct cache *cache, size_t max_size,
             MP_WARN(p, "Failed loading cache from %s\n", cache->path);
     }
 
+    cache->sig = pl_cache_signature(cache->cache);
 done:
     talloc_free(dir);
 }
@@ -1550,6 +1566,8 @@ static void cache_uninit(struct priv *p, struct cache *cache)
 {
     if (!cache->cache)
         goto done;
+    if (pl_cache_signature(cache->cache) == cache->sig)
+        goto done; // skip re-saving identical cache
 
     assert(cache->path);
     char *tmp = talloc_asprintf(cache->path, "%sXXXXXX", cache->path);
