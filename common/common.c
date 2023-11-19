@@ -94,6 +94,25 @@ char *mp_format_time(double time, bool fractions)
     return mp_format_time_fmt(fractions ? "%H:%M:%S.%T" : "%H:%M:%S", time);
 }
 
+char *mp_format_double(void *talloc_ctx, double val, int precision,
+                       bool plus_sign, bool percent_sign, bool trim)
+{
+    bstr str = {0};
+    const char *fmt = plus_sign ? "%+.*f" : "%.*f";
+    bstr_xappend_asprintf(talloc_ctx, &str, fmt, precision, val);
+    size_t pos = str.len;
+    if (trim) {
+        while (--pos && str.start[pos] == '0')
+            str.len--;
+        if (str.start[pos] == '.')
+            str.len--;
+    }
+    if (percent_sign)
+        bstr_xappend(talloc_ctx, &str, bstr0("%"));
+    str.start[str.len] = '\0';
+    return str.start;
+}
+
 // Set rc to the union of rc and rc2
 void mp_rect_union(struct mp_rect *rc, const struct mp_rect *rc2)
 {

@@ -99,6 +99,12 @@ extern const char mpv_copyright[];
 char *mp_format_time(double time, bool fractions);
 char *mp_format_time_fmt(const char *fmt, double time);
 
+// Formats a double value to a string with the specified precision.
+// Trailing zeros (and the dot) can be trimmed.
+// Optionally, a plus sign and a percent sign can be added.
+char *mp_format_double(void *talloc_ctx, double val, int precision,
+                       bool plus_sign, bool percent_sign, bool trim);
+
 struct mp_rect {
     int x0, y0;
     int x1, y1;

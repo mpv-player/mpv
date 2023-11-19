@@ -463,6 +463,9 @@ char *format_file_size(int64_t size);
 // type channels: disallow "auto" (still accept ""), limit list to at most 1 item.
 #define M_OPT_CHANNELS_LIMITED  (1 << 27)
 
+// type_float/type_double: controls if pretty print should trim trailing zeros
+#define M_OPT_FIXED_LEN_PRINT   (1 << 28)
+
 // Like M_OPT_TYPE_OPTIONAL_PARAM.
 #define M_OPT_OPTIONAL_PARAM    (1 << 30)
 
@@ -536,12 +539,16 @@ static inline char *m_option_print(const m_option_t *opt, const void *val_ptr)
 }
 
 static inline char *m_option_pretty_print(const m_option_t *opt,
-                                          const void *val_ptr)
+                                          const void *val_ptr,
+                                          bool fixed_len)
 {
+    m_option_t o = *opt;
+    if (fixed_len)
+        o.flags |= M_OPT_FIXED_LEN_PRINT;
     if (opt->type->pretty_print)
-        return opt->type->pretty_print(opt, val_ptr);
+        return opt->type->pretty_print(&o, val_ptr);
     else
-        return m_option_print(opt, val_ptr);
+        return m_option_print(&o, val_ptr);
 }
 
 // Helper around \ref m_option_type::copy.
