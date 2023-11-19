@@ -861,6 +861,40 @@ static void update_tm_viz(struct pl_color_map_params *params,
     params->visualize_hue = M_PI / 4.0;
 }
 
+static void rearrange_frame_mix(struct pl_frame_mix *mix) {
+    // Internal libplacebo frame mixing limit
+    // https://code.videolan.org/videolan/libplacebo/-/blob/426f346762180e6496e714a087be9561a9a1e236/src/renderer.c#L3254
+    static const int frame_mix_limit = 16;
+
+    if (mix->num_frames <= frame_mix_limit)
+        return;
+
+    int nearest = 0;
+    float best_dist = fabsf(mix->timestamps[nearest]);
+    for (int i = 1; i < mix->num_frames; i++) {
+        float dist = fabsf(mix->timestamps[i]);
+        if (dist >= best_dist)
+            break;
+        best_dist = dist;
+        nearest = i;
+    }
+
+    int count = frame_mix_limit / 2;
+    int start = nearest - count;
+    if (start < 0) {
+        count -= start;
+        start = 0;
+    }
+    int end = MPMIN(nearest + count, mix->num_frames);
+
+    for (int i = start, j = 0; i < end; i++, j++) {
+        ((struct pl_frame **)mix->frames)[j] = (struct pl_frame *)mix->frames[i];
+        ((uint64_t *)mix->signatures)[j] = mix->signatures[i];
+        ((float *)mix->timestamps)[j] = mix->timestamps[i];
+    }
+    mix->num_frames = end - start;
+}
+
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
@@ -1020,6 +1054,15 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         case PL_QUEUE_OK:
             break;
         }
+
+        // When `skip_anti_aliasing` is set to false, libplacebo stretches the
+        // mixing kernel. This behavior depends on the VPS/FPS ratio and the
+        // chosen mixing kernel. Consequently, `pl_queue` may return a mix with
+        // an unbounded size. Such behavior is not supported and is internally
+        // asserted in libplacebo (see https://code.videolan.org/videolan/libplacebo/-/blob/426f346762180e6496e714a087be9561a9a1e236/src/renderer.c#L3536).
+        // To properly handle this scenario, keep the 16 closest frames in
+        // `pl_frame_mix` to prevent exceeding the implementation limits.
+        rearrange_frame_mix(&mix);
 
         // Update source crop and overlays on all existing frames. We
         // technically own the `pl_frame` struct so this is kosher. This could
