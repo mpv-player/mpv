@@ -117,12 +117,6 @@ struct encode_lavc_context *encode_lavc_init(struct mpv_global *global)
     if (!strcmp(filename, "-"))
         filename = "pipe:1";
 
-    if (filename && (
-            !strcmp(filename, "/dev/stdout") ||
-            !strcmp(filename, "pipe:") ||
-            !strcmp(filename, "pipe:1")))
-        mp_msg_force_stderr(global, true);
-
     encode_lavc_discontinuity(ctx);
 
     p->muxer = avformat_alloc_context();
