@@ -1671,7 +1671,7 @@ static int preinit(struct vo *vo)
     if (gl_opts->shader_cache)
         cache_init(vo, &p->shader_cache, 10 << 20, gl_opts->shader_cache_dir);
     if (gl_opts->icc_opts->cache)
-        cache_init(vo, &p->icc_cache, 10 << 20, gl_opts->icc_opts->cache_dir);
+        cache_init(vo, &p->icc_cache, 20 << 20, gl_opts->icc_opts->cache_dir);
 
     pl_gpu_set_cache(p->gpu, p->shader_cache.cache);
     p->rr = pl_renderer_create(p->pllog, p->gpu);
