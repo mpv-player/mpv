@@ -295,6 +295,28 @@
                     }],
                     @{ @"name": @"separator" },
                     [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Rotate Left",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"cycle-values video-rotate 0 270 180 90"
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Rotate Right",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"cycle-values video-rotate 90 180 270 0"
+                    }],
+                    [NSMutableDictionary dictionaryWithDictionary:@{
+                        @"name"       : @"Reset Rotation",
+                        @"action"     : @"cmd:",
+                        @"key"        : @"",
+                        @"target"     : self,
+                        @"cmd"        : @"set video-rotate 0"
+                    }],
+                    @{ @"name": @"separator" },
+                    [NSMutableDictionary dictionaryWithDictionary:@{
                         @"name"       : @"Half Size",
                         @"key"        : @"0",
                         @"cmdSpecial" : [NSNumber numberWithInt:MPM_H_SIZE]
