@@ -49,7 +49,7 @@ class TitleBar: NSVisualEffectView {
 
     init(frame: NSRect, window: NSWindow, common com: Common) {
         let f = NSMakeRect(0, frame.size.height - TitleBar.height,
-                           frame.size.width, TitleBar.height)
+                           frame.size.width, TitleBar.height + 1)
         common = com
         super.init(frame: f)
         buttons.forEach { $0.isHidden = true }
