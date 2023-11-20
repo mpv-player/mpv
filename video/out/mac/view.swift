@@ -224,7 +224,7 @@ class View: NSView {
             cmd = delta > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
         } else {
             delta = Double(event.deltaX) * 0.1
-            cmd = delta > 0 ? SWIFT_WHEEL_RIGHT : SWIFT_WHEEL_LEFT
+            cmd = delta > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
         }
 
         mpv?.putAxis(cmd, delta: abs(delta))
@@ -246,7 +246,7 @@ class View: NSView {
             if abs(deltaY) >= abs(deltaX) {
                 mpkey = deltaY > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
             } else {
-                mpkey = deltaX > 0 ? SWIFT_WHEEL_RIGHT : SWIFT_WHEEL_LEFT
+                mpkey = deltaX > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
             }
 
             cocoa_put_key_with_modifiers(mpkey, Int32(modifiers.rawValue))
