@@ -15,6 +15,7 @@ void assert_int_equal_impl(const char *file, int line, int64_t a, int64_t b)
 {
     if (a != b) {
         printf("%s:%d: %"PRId64" != %"PRId64"\n", file, line, a, b);
+        fflush(stdout);
         abort();
     }
 }
@@ -24,6 +25,7 @@ void assert_string_equal_impl(const char *file, int line,
 {
     if (strcmp(a, b) != 0) {
         printf("%s:%d: '%s' != '%s'\n", file, line, a, b);
+        fflush(stdout);
         abort();
     }
 }
@@ -33,6 +35,7 @@ void assert_float_equal_impl(const char *file, int line,
 {
     if (fabs(a - b) > tolerance) {
         printf("%s:%d: %f != %f\n", file, line, a, b);
+        fflush(stdout);
         abort();
     }
 }
@@ -46,6 +49,7 @@ FILE *test_open_out(const char *outdir, const char *name)
     if (!f) {
         printf("Could not open '%s' for writing: %s\n", path,
                mp_strerror(errno));
+        fflush(stdout);
         abort();
     }
     return f;
@@ -73,6 +77,7 @@ void assert_text_files_equal_impl(const char *file, int line,
         if (res.error)
             printf("Note: %s\n", mp_subprocess_err_str(res.error));
         printf("Giving up.\n");
+        fflush(stdout);
         abort();
     }
 }
@@ -96,6 +101,7 @@ void assert_memcmp_impl(const char *file, int line,
     printf("%s:%d: mismatching data:\n", file, line);
     hexdump(a, size);
     hexdump(b, size);
+    fflush(stdout);
     abort();
 }
 
