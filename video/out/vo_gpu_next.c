@@ -1967,7 +1967,7 @@ static void update_render_options(struct vo *vo)
     pars->params.background_color[1] = opts->background.g / 255.0;
     pars->params.background_color[2] = opts->background.b / 255.0;
     pars->params.background_transparency = 1.0 - opts->background.a / 255.0;
-    pars->params.skip_anti_aliasing = !opts->correct_downscaling;
+    pars->params.skip_anti_aliasing = !opts->correct_downscaling || opts->interpolation;
     pars->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     pars->params.disable_fbos = opts->dumb_mode == 1;
     pars->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
