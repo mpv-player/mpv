@@ -498,9 +498,9 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
         write_msg_to_buffers(log, lev, line);
     }
 
-    if (lev == MSGL_STATUS && print_term) {
+    if (lev == MSGL_STATUS) {
         int line_w = 0;
-        if (str.len)
+        if (str.len && print_term)
             append_terminal_line(log, lev, str, &root->term_msg_tmp, &line_w);
         term_msg_lines += !term_w ? (str.len ? 1 : 0)
                                   : (line_w + term_w - 1) / term_w;
