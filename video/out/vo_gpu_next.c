@@ -1512,30 +1512,6 @@ static char *cache_filepath(void *ta_ctx, char *dir, const char *prefix, uint64_
     return mp_path_join_bstr(ta_ctx, bstr0(dir), filename);
 }
 
-static void cache_save_file(void *ta_ctx, char *filepath, void *data, size_t size)
-{
-    if (!data || !size)
-        return;
-
-    char *tmp = talloc_asprintf(ta_ctx, "%sXXXXXX", filepath);
-    int fd = mkstemp(tmp);
-    if (fd < 0)
-        return;
-    FILE *cache = fdopen(fd, "wb");
-    if (!cache) {
-        close(fd);
-        unlink(tmp);
-        return;
-    }
-    size_t written = fwrite(data, size, 1, cache);
-    int ret = fclose(cache);
-    if (written > 0 && !ret) {
-        ret = rename(tmp, filepath);
-    } else {
-        unlink(tmp);
-    }
-}
-
 static pl_cache_obj cache_load_obj(void *p, uint64_t key)
 {
     struct cache *c = p;
@@ -1573,6 +1549,9 @@ done:
 
 static void cache_save_obj(void *p, pl_cache_obj obj)
 {
+    if (!obj.data || !obj.size)
+        return;
+
     const struct cache *c = p;
     void *ta_ctx = talloc_new(NULL);
 
@@ -1590,7 +1569,7 @@ static void cache_save_obj(void *p, pl_cache_obj obj)
     }
 
     int64_t save_start = mp_time_ns();
-    cache_save_file(ta_ctx, filepath, obj.data, obj.size);
+    mp_save_to_file(filepath, obj.data, obj.size);
     int64_t save_end = mp_time_ns();
     MP_DBG(c, "%s: key(%" PRIx64 "), size(%zu), save time(%.3f ms)\n",
            __func__, obj.key, obj.size,

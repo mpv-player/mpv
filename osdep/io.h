@@ -240,5 +240,6 @@ extern char **environ;
 #endif /* __MINGW32__ */
 
 int mp_mkostemps(char *template, int suffixlen, int flags);
+bool mp_save_to_file(const char *filepath, const void *data, size_t size);
 
 #endif
