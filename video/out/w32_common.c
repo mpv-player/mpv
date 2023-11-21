@@ -181,6 +181,7 @@ struct vo_w32_state {
     HANDLE avrt_handle;
 
     bool cleared;
+    bool dragging;
 };
 
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
@@ -474,12 +475,19 @@ static bool handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
     btn |= mod_state(w32);
     mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_DOWN);
 
-    if (btn == MP_MBTN_LEFT && !w32->current_fs &&
-        !mp_input_test_dragging(w32->input_ctx, x, y))
-    {
+    if (btn == MP_MBTN_LEFT && !mp_input_test_dragging(w32->input_ctx, x, y)) {
         // Window dragging hack
         ReleaseCapture();
+        // The dragging model loop is entered at SendMessage() here.
+        // Unfortunately, the w32->current_fs value is stale because the
+        // input is handled in a different thread, and we cannot wait for
+        // an up-to-date value before entering the model loop if dragging
+        // needs to be kept resonsive.
+        // Workaround this by intercepting the loop in the WM_MOVING message,
+        // where the up-to-date value is available.
+        w32->dragging = true;
         SendMessage(w32->window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+        w32->dragging = false;
         mp_input_put_key(w32->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
 
         // Indicate the message was handled, so DefWindowProc won't be called
@@ -1241,6 +1249,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_MOVING: {
         w32->moving = true;
         RECT *rc = (RECT*)lParam;
+        // Prevent the window from being moved if the window dragging hack
+        // is active, and the window is currently in fullscreen.
+        if (w32->dragging && w32->current_fs) {
+            *rc = w32->windowrc;
+            return TRUE;
+        }
         if (snap_to_screen_edges(w32, rc))
             return TRUE;
         break;
