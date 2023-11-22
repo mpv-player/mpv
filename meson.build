@@ -1049,7 +1049,7 @@ if features['xv']
     sources += files('video/out/vo_xv.c')
 endif
 
-if features['wayland'] or features['x11']
+if features['wayland'] or features['x11'] or features['drm']
     sources += ('video/out/present_sync.c')
 endif
 
