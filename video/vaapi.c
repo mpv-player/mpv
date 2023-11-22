@@ -21,6 +21,7 @@
 
 #include "vaapi.h"
 #include "common/common.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "osdep/threads.h"
 #include "mp_image.h"
@@ -28,8 +29,29 @@
 #include "mp_image_pool.h"
 #include "options/m_config.h"
 
+#ifdef _WIN32
+#include "osdep/windows_utils.h"
+#include "out/d3d11/context.h"
+#include "out/gpu/d3d11_helpers.h"
+#endif
+
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
+
+#ifdef _WIN32
+#define DEV_PATH_DEFAULT NULL
+#define DEV_PATH_VALIDATE mp_dxgi_validate_adapter
+#else
+#define DEV_PATH_DEFAULT "/dev/dri/renderD128"
+#define DEV_PATH_VALIDATE validate_path
+
+static int validate_path(struct mp_log *log,
+                         const struct m_option *opt,
+                         struct bstr name, const char **value)
+{
+    return (*value && **value) ? 0 : M_OPT_INVALID;
+}
+#endif
 
 struct vaapi_opts {
     char *path;
@@ -38,11 +60,11 @@ struct vaapi_opts {
 #define OPT_BASE_STRUCT struct vaapi_opts
 const struct m_sub_options vaapi_conf = {
     .opts = (const struct m_option[]) {
-        {"device", OPT_STRING(path)},
+        {"device", OPT_STRING_VALIDATE(path, DEV_PATH_VALIDATE)},
         {0},
     },
     .defaults = &(const struct vaapi_opts) {
-        .path = "/dev/dri/renderD128",
+        .path = DEV_PATH_DEFAULT,
     },
     .size = sizeof(struct vaapi_opts),
 };
@@ -166,8 +188,8 @@ bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx)
 }
 
 struct va_native_display {
-    void (*create)(VADisplay **out_display, void **out_native_ctx,
-                   const char *path);
+    void (*create)(struct mp_log *log, VADisplay **out_display,
+                   void **out_native_ctx, const char *path);
     void (*destroy)(void *native_ctx);
 };
 
@@ -180,8 +202,8 @@ static void x11_destroy(void *native_ctx)
     XCloseDisplay(native_ctx);
 }
 
-static void x11_create(VADisplay **out_display, void **out_native_ctx,
-                       const char *path)
+static void x11_create(struct mp_log *log, VADisplay **out_display,
+                       void **out_native_ctx, const char *path)
 {
     void *native_display = XOpenDisplay(NULL);
     if (!native_display)
@@ -197,6 +219,31 @@ static void x11_create(VADisplay **out_display, void **out_native_ctx,
 static const struct va_native_display disp_x11 = {
     .create = x11_create,
     .destroy = x11_destroy,
+};
+#endif
+
+#if HAVE_VAAPI_WIN32
+#include <va/va_win32.h>
+
+static void win32_create(struct mp_log *log, VADisplay **out_display,
+                         void **out_native_ctx, const char *path)
+{
+    LUID *luid = NULL;
+    DXGI_ADAPTER_DESC1 desc = {0};
+    if (path && path[0]) {
+        IDXGIAdapter1 *adapter = mp_get_dxgi_adapter(log, bstr0(path), NULL);
+        if (!adapter || FAILED(IDXGIAdapter1_GetDesc1(adapter, &desc))) {
+            mp_err(log, "Failed to get adapter LUID for name: %s\n", path);
+        } else {
+            luid = &desc.AdapterLuid;
+        }
+        SAFE_RELEASE(adapter);
+    }
+    *out_display = vaGetDisplayWin32(luid);
+}
+
+static const struct va_native_display disp_win32 = {
+    .create = win32_create,
 };
 #endif
 
@@ -216,8 +263,8 @@ static void drm_destroy(void *native_ctx)
     talloc_free(ctx);
 }
 
-static void drm_create(VADisplay **out_display, void **out_native_ctx,
-                       const char *path)
+static void drm_create(struct mp_log *log, VADisplay **out_display,
+                       void **out_native_ctx, const char *path)
 {
     int drm_fd = open(path, O_RDWR);
     if (drm_fd < 0)
@@ -245,6 +292,9 @@ static const struct va_native_display *const native_displays[] = {
 #if HAVE_VAAPI_DRM
     &disp_drm,
 #endif
+#if HAVE_VAAPI_WIN32
+    &disp_win32,
+#endif
 #if HAVE_VAAPI_X11
     &disp_x11,
 #endif
@@ -260,7 +310,7 @@ static struct AVBufferRef *va_create_standalone(struct mpv_global *global,
     for (int n = 0; native_displays[n]; n++) {
         VADisplay *display = NULL;
         void *native_ctx = NULL;
-        native_displays[n]->create(&display, &native_ctx, opts->path);
+        native_displays[n]->create(global->log, &display, &native_ctx, opts->path);
         if (display) {
             struct mp_vaapi_ctx *ctx =
                 va_initialize(display, log, params->probing);
