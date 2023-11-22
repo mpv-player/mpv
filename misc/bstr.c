@@ -364,6 +364,7 @@ void bstr_xappend(void *talloc_ctx, bstr *s, bstr append)
 {
     if (!append.len)
         return;
+    assert(append.start);
     resize_append(talloc_ctx, s, append.len + 1);
     memcpy(s->start + s->len, append.start, append.len);
     s->len += append.len;
