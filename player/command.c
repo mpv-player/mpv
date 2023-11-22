@@ -6910,7 +6910,7 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
 
     if (event == MP_EVENT_METADATA_UPDATE) {
         struct playlist_entry *const pe = mpctx->playing;
-        if (!pe->title) {
+        if (pe && !pe->title) {
             const char *const name = find_non_filename_media_title(mpctx);
             if (name && name[0]) {
                 pe->title = talloc_strdup(pe, name);

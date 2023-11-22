@@ -6810,14 +6810,14 @@ them.
     profile via ``MPV_RENDER_PARAM_ICC_PROFILE``.
 
 ``--icc-cache``
-    Store and load 3D LUTs created from the ICC profile on disk in the
+    Store and load 3DLUTs created from the ICC profile on disk in the
     cache directory (Default: ``yes``). This can be used to speed up loading,
     since LittleCMS 2 can take a while to create a 3D LUT. Note that these
     files contain uncompressed LUTs. Their size depends on the
     ``--icc-3dlut-size``, and can be very big.
 
-    NOTE: This is not cleaned automatically, so old, unused cache files may
-    stick around indefinitely.
+    NOTE: On ``--vo=gpu``, this is not cleaned automatically, so old, unused
+    cache files may stick around indefinitely.
 
 ``--icc-cache-dir``
     The directory where icc cache is stored. Cache is stored in the system's
@@ -6838,8 +6838,11 @@ them.
 
 ``--icc-3dlut-size=<auto|RxGxB>``
     Size of the 3D LUT generated from the ICC profile in each dimension. The
-    default of ``auto`` means to pick the size automatically based on internal
-    heuristics. Sizes may range from 2 to 512.
+    default of ``auto`` means to pick the size automatically based on the
+    profile characteristics. Sizes may range from 2 to 512.
+
+    NOTE: Setting this option to anything other than ``auto`` is **strongly**
+    discouraged, except for testing.
 
 ``--icc-force-contrast=<no|0-1000000|inf>``
     Override the target device's detected contrast ratio by a specific value.
@@ -6960,14 +6963,14 @@ them.
     This option might be silently removed in the future.
 
 ``--gpu-shader-cache``
-    Store and load compiled GLSL shaders in the cache directory (Default: ``yes``).
-    Normally, shader compilation is very fast, so this is not usually needed.
-    It mostly matters for GPU APIs that require internally recompiling shaders to
-    other languages, for example anything based on ANGLE or Vulkan. Enabling this
-    can improve startup performance on these platforms.
+    Store and load compiled GLSL shaders in the cache directory (Default:
+    ``yes``). Normally, shader compilation is very fast, so this is not usually
+    needed. It mostly matters for anything based on D3D11 (including ANGLE), as
+    well as on some other proprietary drivers. Enabling this can improve startup
+    performance on these platforms.
 
-    NOTE: This is not cleaned automatically, so old, unused cache files may
-    stick around indefinitely.
+    NOTE: On ``--vo=gpu``, is not cleaned automatically, so old, unused cache
+    files may stick around indefinitely.
 
 ``--gpu-shader-cache-dir``
     The directory where gpu shader cache is stored. Cache is stored in the system's

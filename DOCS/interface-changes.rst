@@ -50,7 +50,6 @@ Interface changes
     - remove `auto-forced-only` property
     - rename `--sub-forced-only` to `--sub-forced-events-only`
     - remove `sub-forced-only-cur` property (`--sub-forced-events-only` is a replacement)
-    - add `hdr-metadata` property
     - remove deprecated `video-aspect` property
     - add `--video-crop`
     - add `video-params/crop-[w,h,x,y]`
@@ -113,14 +112,13 @@ Interface changes
     - `--demuxer-hysteresis-secs` now respects `--cache-secs` and/or
       `--demuxer-readahead-secs` as well
     - add hdr metadata to `video-params` property
-    - remove `hdr-metadata` property
     - add `--target-gamut`
     - change the way display names are retrieved on macOS, usage of options and properties
       `--fs-screen-name`, `--screen-name` and `display-names` needs to be adjusted
     - remove OpenGL cocoa backend that was deprecated in 0.29
-    - remove `--border`, `--fullscreen`, `--ontop`, `--osd-level` and `--pause`
+    - remove `border`, `fullscreen`, `ontop`, `osd-level` and `pause`
       from default `--watch-later-options`
-    - add `--video-*` and `--secondary-sub-visibility` to default `--watch-later-options`
+    - add `video-*` and `secondary-sub-visibility` to default `--watch-later-options`
  --- mpv 0.36.0 ---
     - add `--target-contrast`
     - Target luminance value is now also applied when ICC profile is used.
