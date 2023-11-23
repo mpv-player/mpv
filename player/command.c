@@ -2874,9 +2874,10 @@ static int mp_property_sub_delay(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
+    int track_ind = *(int *)prop->priv;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **)arg = format_delay(opts->subs_rend->sub_delay);
+        *(char **)arg = format_delay(opts->subs_rend->sub_delay[track_ind]);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -3929,7 +3930,9 @@ static const struct m_property mp_properties_base[] = {
     {"sid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_SUB}},
     {"secondary-sid", property_switch_track,
      .priv = (void *)(const int[]){1, STREAM_SUB}},
-    {"sub-delay", mp_property_sub_delay},
+    {"sub-delay", mp_property_sub_delay, .priv = (void *)&(const int){0}},
+    {"secondary-sub-delay", mp_property_sub_delay,
+        .priv = (void *)&(const int){1}},
     {"sub-speed", mp_property_sub_speed},
     {"sub-pos", mp_property_sub_pos},
     {"sub-ass-extradata", mp_property_sub_ass_extradata},
@@ -4246,6 +4249,7 @@ static const struct property_osd_display {
     {"secondary-sid", "Secondary subtitles"},
     {"sub-pos", "Sub position"},
     {"sub-delay", "Sub delay"},
+    {"secondary-sub-delay", "Secondary sub delay"},
     {"sub-speed", "Sub speed"},
     {"sub-visibility",
      .msg = "Subtitles ${!sub-visibility==yes:hidden}"
@@ -5380,10 +5384,13 @@ static void cmd_sub_step_seek(void *p)
         a[1] = cmd->args[0].v.i;
         if (sub_control(sub, SD_CTRL_SUB_STEP, a) > 0) {
             if (step) {
-                mpctx->opts->subs_rend->sub_delay -= a[0] - refpts;
+                mpctx->opts->subs_rend->sub_delay[track_ind] -= a[0] - refpts;
                 m_config_notify_change_opt_ptr_notify(mpctx->mconfig,
-                                               &mpctx->opts->subs_rend->sub_delay);
-                show_property_osd(mpctx, "sub-delay", cmd->on_osd);
+                                &mpctx->opts->subs_rend->sub_delay[track_ind]);
+                show_property_osd(
+                    mpctx,
+                    track_ind == 0 ? "sub-delay" : "secondary-sub-delay",
+                    cmd->on_osd);
             } else {
                 // We can easily seek/step to the wrong subtitle line (because
                 // video frame PTS and sub PTS rarely match exactly). Add an

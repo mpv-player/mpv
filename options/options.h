@@ -85,7 +85,7 @@ struct mp_subtitle_opts {
     bool sub_visibility;
     bool sec_sub_visibility;
     float sub_pos;
-    float sub_delay;
+    float sub_delay[2];
     float sub_fps;
     float sub_speed;
     bool sub_forced_events_only;

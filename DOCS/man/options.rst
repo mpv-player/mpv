@@ -2312,7 +2312,10 @@ Subtitles
     printed by ``--sub-demuxer=help``.
 
 ``--sub-delay=<sec>``
-    Delays subtitles by ``<sec>`` seconds. Can be negative.
+    Delays primary subtitles by ``<sec>`` seconds. Can be negative.
+
+``--secondary-sub-delay=<sec>``
+    Delays secondary subtitles by ``<sec>`` seconds. Can be negative.
 
 ``--sub-files=<file-list>``, ``--sub-file=<filename>``
     Add a subtitle file to the list of external subtitles.
