@@ -195,10 +195,6 @@ class TitleBar: NSVisualEffectView {
         default:
             return nil
         }
-
-
-        let style = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
-        return appearanceFrom(string: style == nil ? "aqua" : "vibrantDark")
     }
 
     func materialFrom(string: String) -> NSVisualEffectView.Material {
@@ -221,9 +217,7 @@ class TitleBar: NSVisualEffectView {
         case "15", "light":                 return .light
         case "16", "mediumLight":           return .mediumLight
         case "17", "ultraDark":             return .ultraDark
-        default:                            break
+        default:                            return .titlebar
         }
-
-        return .titlebar
     }
 }
