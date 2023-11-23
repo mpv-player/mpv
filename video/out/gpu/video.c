@@ -1065,13 +1065,13 @@ static void uninit_video(struct gl_video *p)
     ra_hwdec_mapper_free(&p->hwdec_mapper);
 }
 
-static void pass_record(struct gl_video *p, struct mp_pass_perf perf)
+static void pass_record(struct gl_video *p, const struct mp_pass_perf *perf)
 {
     if (!p->pass || p->pass_idx == VO_PASS_PERF_MAX)
         return;
 
     struct pass_info *pass = &p->pass[p->pass_idx];
-    pass->perf = perf;
+    pass->perf = *perf;
 
     if (pass->desc.len == 0)
         bstr_xappend(p, &pass->desc, bstr0("(unknown)"));
@@ -1211,7 +1211,8 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
     if (!(p->ra->caps & RA_CAP_NUM_GROUPS))
         PRELUDE("#define gl_NumWorkGroups uvec3(%d, %d, 1)\n", num_x, num_y);
 
-    pass_record(p, gl_sc_dispatch_compute(p->sc, num_x, num_y, 1));
+    struct mp_pass_perf perf = gl_sc_dispatch_compute(p->sc, num_x, num_y, 1);
+    pass_record(p, &perf);
     cleanup_binds(p);
 }
 
@@ -1282,7 +1283,8 @@ static void finish_pass_fbo(struct gl_video *p, const struct ra_fbo *fbo,
                             bool discard, const struct mp_rect *dst)
 {
     pass_prepare_src_tex(p);
-    pass_record(p, render_pass_quad(p, fbo, discard, dst));
+    struct mp_pass_perf perf = render_pass_quad(p, fbo, discard, dst);
+    pass_record(p, &perf);
     debug_check_gl(p, "after rendering");
     cleanup_binds(p);
 }
@@ -2923,7 +2925,8 @@ static void pass_draw_osd(struct gl_video *p, int osd_flags, int frame_flags,
 
     timer_pool_stop(p->osd_timer);
     pass_describe(p, "drawing osd");
-    pass_record(p, timer_pool_measure(p->osd_timer));
+    struct mp_pass_perf perf = timer_pool_measure(p->osd_timer);
+    pass_record(p, &perf);
 }
 
 static float chroma_realign(int size, int pixel)
@@ -3400,7 +3403,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                 timer_pool_start(p->blit_timer);
                 p->ra->fns->blit(p->ra, fbo->tex, p->output_tex, &dst, &src);
                 timer_pool_stop(p->blit_timer);
-                pass_record(p, timer_pool_measure(p->blit_timer));
+                struct mp_pass_perf perf = timer_pool_measure(p->blit_timer);
+                pass_record(p, &perf);
             }
         }
     }
@@ -3636,7 +3640,8 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
         timer_pool_start(p->upload_timer);
         bool ok = ra_hwdec_mapper_map(p->hwdec_mapper, vimg->mpi) >= 0;
         timer_pool_stop(p->upload_timer);
-        pass_record(p, timer_pool_measure(p->upload_timer));
+        struct mp_pass_perf perf = timer_pool_measure(p->upload_timer);
+        pass_record(p, &perf);
 
         vimg->hwdec_mapped = true;
         if (ok) {
@@ -3708,7 +3713,8 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
     bool using_pbo = p->ra->use_pbo || !(p->ra->caps & RA_CAP_DIRECT_UPLOAD);
     const char *mode = p->using_dr_path ? "DR" : using_pbo ? "PBO" : "naive";
     pass_describe(p, "upload frame (%s)", mode);
-    pass_record(p, timer_pool_measure(p->upload_timer));
+    struct mp_pass_perf perf = timer_pool_measure(p->upload_timer);
+    pass_record(p, &perf);
 
     return true;
 
