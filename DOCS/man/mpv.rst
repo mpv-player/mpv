@@ -651,8 +651,9 @@ before. This is like passing the exact contents of the quoted string as a
 command line option. C-style escapes are currently _not_ interpreted on this
 level, although some options do this manually (this is a mess and should
 probably be changed at some point). The shell is not involved here, so option
-values only need to be quoted to escape ``#`` and ``\``, ``"``, ``'`` or ``%``
-at the beginning of the value, and leading and trailing whitespace.
+values only need to be quoted to escape ``#`` anywhere in the value, ``"``,
+``'`` or ``%`` at the beginning of the value, and leading and trailing
+whitespace.
 
 Putting Command Line Options into the Configuration File
 --------------------------------------------------------
