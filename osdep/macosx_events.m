@@ -292,6 +292,8 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         _ctx = nil;
         break;
     }
+    default:
+        break;
     }
 }
 

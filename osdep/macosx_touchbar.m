@@ -307,6 +307,8 @@
         [self handlePropertyChange:(mpv_event_property *)event->data];
         break;
     }
+    default:
+        break;
     }
 }
 
