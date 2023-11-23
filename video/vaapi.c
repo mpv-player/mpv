@@ -316,7 +316,8 @@ static struct AVBufferRef *va_create_standalone(struct mpv_global *global,
                 va_initialize(display, log, params->probing);
             if (!ctx) {
                 vaTerminate(display);
-                native_displays[n]->destroy(native_ctx);
+                if (native_displays[n]->destroy)
+                    native_displays[n]->destroy(native_ctx);
                 goto end;
             }
             ctx->native_ctx = native_ctx;
