@@ -192,13 +192,11 @@ static bool mp_image_alloc_planes(struct mp_image *mpi)
 
 void mp_image_setfmt(struct mp_image *mpi, int out_fmt)
 {
-    struct mp_image_params params = mpi->params;
     struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(out_fmt);
-    params.imgfmt = fmt.id;
+    mpi->params.imgfmt = fmt.id;
     mpi->fmt = fmt;
     mpi->imgfmt = fmt.id;
     mpi->num_planes = fmt.num_planes;
-    mpi->params = params;
 }
 
 static void mp_image_destructor(void *ptr)
