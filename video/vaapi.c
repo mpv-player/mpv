@@ -92,7 +92,7 @@ static void va_error_callback(void *context, const char *msg)
 
 static void va_info_callback(void *context, const char *msg)
 {
-    va_message_callback(context, msg, MSGL_DEBUG);
+    va_message_callback(context, msg, MSGL_V);
 }
 
 static void free_device_ref(struct AVHWDeviceContext *hwctx)
