@@ -190,12 +190,12 @@ static const char macosx_icon[] =
 #endif
 }
 
-- (const struct m_sub_options *)getMacOSConf
++ (const struct m_sub_options *)getMacOSConf
 {
     return &macos_conf;
 }
 
-- (const struct m_sub_options *)getVoSubConf
++ (const struct m_sub_options *)getVoSubConf
 {
     return &vo_sub_opts;
 }
