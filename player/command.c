@@ -111,7 +111,6 @@ struct command_ctx {
     mpv_node udata;
 
     double cached_window_scale;
-    bool shared_script_warning;
 };
 
 static const struct m_option script_props_type = {
@@ -3625,32 +3624,6 @@ static int mp_property_bindings(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-
-static int mp_property_script_props(void *ctx, struct m_property *prop,
-                                    int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct command_ctx *cmd = mpctx->command_ctx;
-    if (!cmd->shared_script_warning) {
-        MP_WARN(mpctx, "The shared-script-properties property is deprecated and will "
-                "be removed in the future. Use the user-data property instead.\n");
-        cmd->shared_script_warning = true;
-    }
-    switch (action) {
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = script_props_type;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        m_option_copy(&script_props_type, arg, &cmd->script_props);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET:
-        m_option_copy(&script_props_type, &cmd->script_props, arg);
-        mp_notify_property(mpctx, prop->name);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
 static int do_list_udata(int item, int action, void *arg, void *ctx);
 
 struct udata_ctx {
@@ -4021,7 +3994,6 @@ static const struct m_property mp_properties_base[] = {
     {"command-list", mp_property_commands},
     {"input-bindings", mp_property_bindings},
 
-    {"shared-script-properties", mp_property_script_props},
     {"user-data", mp_property_udata},
 
     M_PROPERTY_ALIAS("video", "vid"),
