@@ -12,7 +12,9 @@ fi
 
 PKG_CONFIG_PATH="${FFMPEG_SYSROOT}/lib/pkgconfig/" CC="${CC}" CXX="${CXX}" \
 meson setup build \
+    --werror \
     -Dprefix="${MPV_INSTALL_PREFIX}" \
+    -D{c_args,objc_args}="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
     -D{libmpv,tests}=true \
     -D{gl,iconv,lcms2,lua,jpeg,plain-gl,zlib}=enabled \
     -D{cocoa,coreaudio,gl-cocoa,macos-cocoa-cb,macos-touchbar,videotoolbox-gl}=enabled
