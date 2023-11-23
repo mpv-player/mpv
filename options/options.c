@@ -281,7 +281,8 @@ const struct m_sub_options mp_sub_filter_opts = {
 
 const struct m_sub_options mp_subtitle_sub_opts = {
     .opts = (const struct m_option[]){
-        {"sub-delay", OPT_FLOAT(sub_delay)},
+        {"sub-delay", OPT_FLOAT(sub_delay[0])},
+        {"secondary-sub-delay", OPT_FLOAT(sub_delay[1])},
         {"sub-fps", OPT_FLOAT(sub_fps)},
         {"sub-speed", OPT_FLOAT(sub_speed)},
         {"sub-visibility", OPT_BOOL(sub_visibility)},
