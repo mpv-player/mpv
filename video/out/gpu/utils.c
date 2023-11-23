@@ -33,10 +33,10 @@ void gl_transform_trans(struct gl_transform t, struct gl_transform *x)
     gl_transform_vec(t, &x->t[0], &x->t[1]);
 }
 
-void gl_transform_ortho_fbo(struct gl_transform *t, struct ra_fbo fbo)
+void gl_transform_ortho_fbo(struct gl_transform *t, const struct ra_fbo *fbo)
 {
-    int y_dir = fbo.flip ? -1 : 1;
-    gl_transform_ortho(t, 0, fbo.tex->params.w, 0, fbo.tex->params.h * y_dir);
+    int y_dir = fbo->flip ? -1 : 1;
+    gl_transform_ortho(t, 0, fbo->tex->params.w, 0, fbo->tex->params.h * y_dir);
 }
 
 float gl_video_scale_ambient_lux(float lmin, float lmax,

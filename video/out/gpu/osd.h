@@ -18,7 +18,7 @@ void mpgl_osd_resize(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mod
 bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
                            struct gl_shader_cache *sc);
 void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
-                          struct gl_shader_cache *sc, struct ra_fbo fbo);
+                          struct gl_shader_cache *sc, const struct ra_fbo *fbo);
 bool mpgl_osd_check_change(struct mpgl_osd *ctx, struct mp_osd_res *res,
                            double pts);
 
