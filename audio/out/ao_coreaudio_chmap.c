@@ -241,8 +241,8 @@ static AudioChannelLayout* ca_query_stereo_layout(struct ao *ao,
                                                   void *talloc_ctx)
 {
     OSStatus err;
-    const int nch = 2;
-    uint32_t channels[nch];
+    uint32_t channels[2];
+    const int nch = MP_ARRAY_SIZE(channels);
     AudioChannelLayout *r = NULL;
 
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
