@@ -1372,8 +1372,7 @@ static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
                      override_pos;                  // for fullscreen and such
 
     XSizeHints *hint = XAllocSizeHints();
-    if (!hint)
-        return; // OOM
+    MP_HANDLE_OOM(hint);
 
     hint->flags |= PSize | (force_pos ? PPosition : 0);
     hint->x = rc.x0;

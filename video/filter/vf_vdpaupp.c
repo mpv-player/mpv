@@ -74,8 +74,7 @@ static void vf_vdpaupp_process(struct mp_filter *f)
 
     struct mp_image *mpi =
         mp_vdpau_mixed_frame_create(mp_refqueue_get_field(p->queue, 0));
-    if (!mpi)
-        return; // OOM
+    MP_HANDLE_OOM(mpi);
     struct mp_vdpau_mixer_frame *frame = mp_vdpau_mixed_frame_get(mpi);
 
     if (!mp_refqueue_should_deint(p->queue)) {
