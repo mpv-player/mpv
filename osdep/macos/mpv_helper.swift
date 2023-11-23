@@ -42,23 +42,14 @@ class MPVHelper {
         self.vo = vo
         self.log = log
 
-        guard let app = NSApp as? Application,
-              let cache = m_config_cache_alloc(vo, vo.pointee.global, app.getVoSubConf()) else
-        {
-            log.sendError("NSApp couldn't be retrieved")
-            exit(1)
-        }
-
-        optsCachePtr = cache
-        optsPtr = UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(cache.pointee.opts))
-
-        guard let macCache = m_config_cache_alloc(vo,
-                                                  vo.pointee.global,
-                                                  app.getMacOSConf()) else
+        guard let cache = m_config_cache_alloc(vo, vo.pointee.global, Application.getVoSubConf()),
+              let macCache = m_config_cache_alloc(vo, vo.pointee.global, Application.getMacOSConf()) else
         {
             // will never be hit, mp_get_config_group asserts for invalid groups
             exit(1)
         }
+        optsCachePtr = cache
+        optsPtr = UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(cache.pointee.opts))
         macOptsCachePtr = macCache
         macOptsPtr = UnsafeMutablePointer<macos_opts>(OpaquePointer(macCache.pointee.opts))
     }
