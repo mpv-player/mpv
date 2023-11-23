@@ -1216,7 +1216,7 @@ static void dispatch_compute(struct gl_video *p, int w, int h,
 }
 
 static struct mp_pass_perf render_pass_quad(struct gl_video *p,
-                                            struct ra_fbo fbo, bool discard,
+                                            const struct ra_fbo *fbo, bool discard,
                                             const struct mp_rect *dst)
 {
     // The first element is reserved for `vec2 position`
@@ -1274,11 +1274,11 @@ static struct mp_pass_perf render_pass_quad(struct gl_video *p,
             &p->tmp_vertex[num_vertex_attribs * 1],
             vertex_stride);
 
-    return gl_sc_dispatch_draw(p->sc, fbo.tex, discard, p->vao, num_vertex_attribs,
+    return gl_sc_dispatch_draw(p->sc, fbo->tex, discard, p->vao, num_vertex_attribs,
                                vertex_stride, p->tmp_vertex, num_vertices);
 }
 
-static void finish_pass_fbo(struct gl_video *p, struct ra_fbo fbo,
+static void finish_pass_fbo(struct gl_video *p, const struct ra_fbo *fbo,
                             bool discard, const struct mp_rect *dst)
 {
     pass_prepare_src_tex(p);
@@ -1319,7 +1319,7 @@ static void finish_pass_tex(struct gl_video *p, struct ra_tex **dst_tex,
         debug_check_gl(p, "after dispatching compute shader");
     } else {
         struct ra_fbo fbo = { .tex = *dst_tex, };
-        finish_pass_fbo(p, fbo, true, &(struct mp_rect){0, 0, w, h});
+        finish_pass_fbo(p, &fbo, true, &(struct mp_rect){0, 0, w, h});
     }
 }
 
@@ -2891,7 +2891,7 @@ static void pass_dither(struct gl_video *p)
 // Draws the OSD, in scene-referred colors.. If cms is true, subtitles are
 // instead adapted to the display's gamut.
 static void pass_draw_osd(struct gl_video *p, int osd_flags, int frame_flags,
-                          double pts, struct mp_osd_res rect, struct ra_fbo fbo,
+                          double pts, struct mp_osd_res rect, const struct ra_fbo *fbo,
                           bool cms)
 {
     if (frame_flags & RENDER_FRAME_VF_SUBS)
@@ -2916,7 +2916,7 @@ static void pass_draw_osd(struct gl_video *p, int osd_flags, int frame_flags,
                 .light = MP_CSP_LIGHT_DISPLAY,
             };
 
-            pass_colormanage(p, csp_srgb, fbo.color_space, frame_flags, true);
+            pass_colormanage(p, csp_srgb, fbo->color_space, frame_flags, true);
         }
         mpgl_osd_draw_finish(p->osd, n, p->sc, fbo);
     }
@@ -3013,7 +3013,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
         };
         finish_pass_tex(p, &p->blend_subs_tex, rect.w, rect.h);
         struct ra_fbo fbo = { p->blend_subs_tex };
-        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, flags, vpts, rect, fbo, false);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, flags, vpts, rect, &fbo, false);
         pass_read_tex(p, p->blend_subs_tex);
         pass_describe(p, "blend subs video");
     }
@@ -3045,7 +3045,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
         }
         finish_pass_tex(p, &p->blend_subs_tex, p->texture_w, p->texture_h);
         struct ra_fbo fbo = { p->blend_subs_tex };
-        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, flags, vpts, rect, fbo, false);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, flags, vpts, rect, &fbo, false);
         pass_read_tex(p, p->blend_subs_tex);
         pass_describe(p, "blend subs");
     }
@@ -3055,7 +3055,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
     return true;
 }
 
-static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo, int flags)
+static void pass_draw_to_screen(struct gl_video *p, const struct ra_fbo *fbo, int flags)
 {
     if (p->dumb_mode)
         pass_render_frame_dumb(p);
@@ -3067,7 +3067,7 @@ static void pass_draw_to_screen(struct gl_video *p, struct ra_fbo fbo, int flags
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
-    pass_colormanage(p, p->image_params.color, fbo.color_space, flags, false);
+    pass_colormanage(p, p->image_params.color, fbo->color_space, flags, false);
 
     // Since finish_pass_fbo doesn't work with compute shaders, and neither
     // does the checkerboard/dither code, we may need an indirection via
@@ -3134,7 +3134,7 @@ static bool update_surface(struct gl_video *p, struct mp_image *mpi,
 // Draws an interpolate frame to fbo, based on the frame timing in t
 // flags: bit set of RENDER_FRAME_* flags
 static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
-                                       struct ra_fbo fbo, int flags)
+                                       const struct ra_fbo *fbo, int flags)
 {
     bool is_new = false;
 
@@ -3306,11 +3306,11 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 }
 
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
-                           struct ra_fbo fbo, int flags)
+                           const struct ra_fbo *fbo, int flags)
 {
     gl_video_update_options(p);
 
-    struct mp_rect target_rc = {0, 0, fbo.tex->params.w, fbo.tex->params.h};
+    struct mp_rect target_rc = {0, 0, fbo->tex->params.w, fbo->tex->params.h};
 
     p->broken_frame = false;
 
@@ -3318,12 +3318,12 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
 
     struct m_color c = p->clear_color;
     float clear_color[4] = {c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0};
-    p->ra->fns->clear(p->ra, fbo.tex, clear_color, &target_rc);
+    p->ra->fns->clear(p->ra, fbo->tex, clear_color, &target_rc);
 
     if (p->hwdec_overlay) {
         if (has_frame) {
             float *color = p->hwdec_overlay->overlay_colorkey;
-            p->ra->fns->clear(p->ra, fbo.tex, color, &p->dst_rect);
+            p->ra->fns->clear(p->ra, fbo->tex, color, &p->dst_rect);
         }
 
         p->hwdec_overlay->driver->overlay_frame(p->hwdec_overlay, frame->current,
@@ -3364,23 +3364,23 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
 
                 // For the non-interpolation case, we draw to a single "cache"
                 // texture to speed up subsequent re-draws (if any exist)
-                struct ra_fbo dest_fbo = fbo;
+                const struct ra_fbo *dest_fbo = fbo;
                 bool repeats = frame->num_vsyncs > 1 && frame->display_synced;
                 if ((repeats || frame->still) && !p->dumb_mode &&
-                    (p->ra->caps & RA_CAP_BLIT) && fbo.tex->params.blit_dst)
+                    (p->ra->caps & RA_CAP_BLIT) && fbo->tex->params.blit_dst)
                 {
                     // Attempt to use the same format as the destination FBO
                     // if possible. Some RAs use a wrapped dummy format here,
                     // so fall back to the fbo_format in that case.
-                    const struct ra_format *fmt = fbo.tex->params.format;
+                    const struct ra_format *fmt = fbo->tex->params.format;
                     if (fmt->dummy_format)
                         fmt = p->fbo_format;
 
                     bool r = ra_tex_resize(p->ra, p->log, &p->output_tex,
-                                           fbo.tex->params.w, fbo.tex->params.h,
+                                           fbo->tex->params.w, fbo->tex->params.h,
                                            fmt);
                     if (r) {
-                        dest_fbo = (struct ra_fbo) { p->output_tex };
+                        dest_fbo = &(struct ra_fbo) { p->output_tex };
                         p->output_tex_valid = true;
                     }
                 }
@@ -3388,17 +3388,17 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
             }
 
             // "output tex valid" and "output tex needed" are equivalent
-            if (p->output_tex_valid && fbo.tex->params.blit_dst) {
+            if (p->output_tex_valid && fbo->tex->params.blit_dst) {
                 pass_info_reset(p, true);
                 pass_describe(p, "redraw cached frame");
                 struct mp_rect src = p->dst_rect;
                 struct mp_rect dst = src;
-                if (fbo.flip) {
-                    dst.y0 = fbo.tex->params.h - src.y0;
-                    dst.y1 = fbo.tex->params.h - src.y1;
+                if (fbo->flip) {
+                    dst.y0 = fbo->tex->params.h - src.y0;
+                    dst.y1 = fbo->tex->params.h - src.y1;
                 }
                 timer_pool_start(p->blit_timer);
-                p->ra->fns->blit(p->ra, fbo.tex, p->output_tex, &dst, &src);
+                p->ra->fns->blit(p->ra, fbo->tex, p->output_tex, &dst, &src);
                 timer_pool_stop(p->blit_timer);
                 pass_record(p, timer_pool_measure(p->blit_timer));
             }
@@ -3431,7 +3431,7 @@ done:
         // Make the screen solid blue to make it visually clear that an
         // error has occurred
         float color[4] = {0.0, 0.05, 0.5, 1.0};
-        p->ra->fns->clear(p->ra, fbo.tex, color, &target_rc);
+        p->ra->fns->clear(p->ra, fbo->tex, color, &target_rc);
     }
 
     p->frames_rendered++;
@@ -3522,7 +3522,7 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
         flags |= RENDER_FRAME_OSD;
     if (args->scaled)
         flags |= RENDER_SCREEN_COLOR;
-    gl_video_render_frame(p, nframe, (struct ra_fbo){target}, flags);
+    gl_video_render_frame(p, nframe, &(struct ra_fbo){target}, flags);
 
     res = mp_image_alloc(mpfmt, params.w, params.h);
     if (!res)
