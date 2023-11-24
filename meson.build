@@ -367,6 +367,7 @@ if not features['win32-threads']
     features += {'pthread-condattr-setclock':
                     cc.has_header_symbol('pthread.h',
                                          'pthread_condattr_setclock',
+                                         args: '-D_GNU_SOURCE',
                                          dependencies: pthreads)}
     dependencies += pthreads
 endif
