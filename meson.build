@@ -308,7 +308,7 @@ mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DUNICODE', '-DCOBJMACROS',
                '-DINITGUID', '-U__STRICT_ANSI__']
 
 if host_machine.system() == 'windows'
-    flags += [mswin_flags, '-D__USE_MINGW_ANSI_STDIO=1']
+    flags += [mswin_flags]
 endif
 
 if host_machine.system() == 'cygwin'
