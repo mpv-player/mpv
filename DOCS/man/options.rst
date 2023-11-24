@@ -4139,7 +4139,7 @@ Input
     implementation-defined.
 
 ``--input-right-alt-gr``, ``--no-input-right-alt-gr``
-    (Cocoa and Windows only)
+    (macOS and Windows only)
     Use the right Alt key as Alt Gr to produce special characters. If disabled,
     count the right Alt as an Alt modifier key. Enabled by default.
 
@@ -6192,21 +6192,21 @@ them.
     software renderer, and ``auto`` only falls back to the software renderer
     when the usual pixel format couldn't be created.
 
-    macOS only.
+    macOS and cocoa-cb only.
 
 ``--cocoa-cb-10bit-context=<yes|no>``
     Creates a 10bit capable pixel format for the context creation (default: yes).
     Instead of 8bit integer framebuffer a 16bit half-float framebuffer is
     requested.
 
-    macOS only.
+    macOS and cocoa-cb only.
 
 ``--macos-title-bar-appearance=<appearance>``
     Sets the appearance of the title bar (default: auto). Not all combinations
     of appearances and ``--macos-title-bar-material`` materials make sense or
     are unique. Appearances that are not supported by you current macOS version
     fall back to the default value.
-    macOS and cocoa-cb only
+    macOS only
 
     ``<appearance>`` can be one of the following:
 
@@ -6231,7 +6231,7 @@ them.
     ``--macos-title-bar-appearance`` appearances make sense or are unique.
     Materials that are not supported by you current macOS version fall back to
     the default value.
-    macOS and cocoa-cb only
+    macOS only
 
     ``<material>`` can be one of the following:
 
@@ -6280,7 +6280,7 @@ them.
     1000ms since it's possible that Apple or the user changes the system
     defaults. Anything higher than 1000ms though seems too long and shouldn't be
     set anyway.
-    (macOS and cocoa-cb only)
+    (macOS)
 
 
 ``--macos-app-activation-policy=<regular|accessory|prohibited>``
@@ -6328,8 +6328,6 @@ them.
 
     auto
         auto-select (default)
-    cocoa
-        Cocoa/macOS (deprecated, use --vo=libmpv instead)
     win
         Win32/WGL
     winvk
