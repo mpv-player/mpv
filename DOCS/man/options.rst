@@ -4265,6 +4265,12 @@ OSD
 ``--osd-bar-h=<0.1-50>``
     Height of the OSD bar, in percentage of the screen height (default: 3.125).
 
+``--osd-bar-border-size=<size>``
+    Size of the border of the OSD bar in scaled pixels (see ``--sub-font-size``
+    for details).
+
+    Default: 1.2.
+
 ``--osd-back-color=<color>``
     See ``--sub-color``. Color used for OSD text background.
 

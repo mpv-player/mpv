@@ -135,6 +135,7 @@ struct mp_osd_render_opts {
     float osd_bar_align_y;
     float osd_bar_w;
     float osd_bar_h;
+    float osd_bar_border_size;
     float osd_scale;
     bool osd_scale_by_window;
     struct osd_style_opts *osd_style;
