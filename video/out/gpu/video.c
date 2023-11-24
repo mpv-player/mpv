@@ -2048,25 +2048,23 @@ static void user_hook(struct gl_video *p, struct image img,
     gl_transform_trans(shader->offset, trans);
 }
 
-static bool add_user_hook(void *priv, struct gl_user_shader_hook hook)
+static bool add_user_hook(void *priv, const struct gl_user_shader_hook *hook)
 {
     struct gl_video *p = priv;
-    struct gl_user_shader_hook *copy = talloc_ptrtype(p, copy);
-    *copy = hook;
-
+    struct gl_user_shader_hook *copy = talloc_dup(p, (struct gl_user_shader_hook *)hook);
     struct tex_hook texhook = {
-        .save_tex = bstrdup0(copy, hook.save_tex),
-        .components = hook.components,
-        .align_offset = hook.align_offset,
+        .save_tex = bstrdup0(copy, copy->save_tex),
+        .components = copy->components,
+        .align_offset = copy->align_offset,
         .hook = user_hook,
         .cond = user_hook_cond,
         .priv = copy,
     };
 
     for (int h = 0; h < SHADER_MAX_HOOKS; h++)
-        texhook.hook_tex[h] = bstrdup0(copy, hook.hook_tex[h]);
+        texhook.hook_tex[h] = bstrdup0(copy, copy->hook_tex[h]);
     for (int h = 0; h < SHADER_MAX_BINDS; h++)
-        texhook.bind_tex[h] = bstrdup0(copy, hook.bind_tex[h]);
+        texhook.bind_tex[h] = bstrdup0(copy, copy->bind_tex[h]);
 
     MP_TARRAY_APPEND(p, p->tex_hooks, p->num_tex_hooks, texhook);
     return true;

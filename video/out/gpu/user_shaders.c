@@ -431,7 +431,7 @@ static bool parse_tex(struct mp_log *log, struct ra *ra, struct bstr *body,
 
 void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
                        void *priv,
-                       bool (*dohook)(void *p, struct gl_user_shader_hook hook),
+                       bool (*dohook)(void *p, const struct gl_user_shader_hook *hook),
                        bool (*dotex)(void *p, struct gl_user_shader_tex tex))
 {
     if (!dohook || !dotex || !shader.len)
@@ -457,7 +457,7 @@ void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
         }
 
         struct gl_user_shader_hook h;
-        if (!parse_hook(log, &shader, &h) || !dohook(priv, h))
+        if (!parse_hook(log, &shader, &h) || !dohook(priv, &h))
             return;
     }
 }
