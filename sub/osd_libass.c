@@ -378,12 +378,7 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
     *o_w = track->PlayResX * (opts->osd_bar_w / 100.0);
     *o_h = track->PlayResY * (opts->osd_bar_h / 100.0);
 
-    float base_size = 0.03125;
-    style->Outline *= *o_h / track->PlayResY / base_size;
-    // So that the chapter marks have space between them
-    style->Outline = MPMIN(style->Outline, *o_h / 5.2);
-    // So that the border is not 0
-    style->Outline = MPMAX(style->Outline, *o_h / 32.0);
+    style->Outline = opts->osd_bar_border_size;
     // Rendering with shadow is broken (because there's more than one shape)
     style->Shadow = 0;
 
