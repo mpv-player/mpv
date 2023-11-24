@@ -32,7 +32,7 @@ static void cr_perror(const wchar_t *prefix)
                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                    (LPWSTR)&error, 0, NULL);
 
-    fwprintf(stderr, L"%s: %s", prefix, error);
+    fwprintf(stderr, L"%ls: %ls", prefix, error);
     LocalFree(error);
 }
 
