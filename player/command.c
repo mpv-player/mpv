@@ -2271,73 +2271,72 @@ static const char *get_aspect_ratio_name(double ratio)
 #undef RATIO_CASE
 }
 
-static int property_imgparams(struct mp_image_params p, int action, void *arg)
+static int property_imgparams(const struct mp_image_params *p, int action, void *arg)
 {
-    if (!p.imgfmt)
+    if (!p->imgfmt)
         return M_PROPERTY_UNAVAILABLE;
 
     int d_w, d_h;
-    mp_image_params_get_dsize(&p, &d_w, &d_h);
+    mp_image_params_get_dsize(p, &d_w, &d_h);
 
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p.imgfmt);
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->imgfmt);
     int bpp = 0;
     for (int i = 0; i < desc.num_planes; i++)
         bpp += desc.bpp[i] >> (desc.xs[i] + desc.ys[i]);
 
+    enum mp_alpha_type alpha = p->alpha;
     // Alpha type is not supported by FFmpeg, so MP_ALPHA_AUTO may mean alpha
     // is of an unknown type, or simply not present. Normalize to AUTO=no alpha.
-    if (!!(desc.flags & MP_IMGFLAG_ALPHA) != (p.alpha != MP_ALPHA_AUTO)) {
-        p.alpha =
-            (desc.flags & MP_IMGFLAG_ALPHA) ? MP_ALPHA_STRAIGHT : MP_ALPHA_AUTO;
-    }
+    if (!!(desc.flags & MP_IMGFLAG_ALPHA) != (alpha != MP_ALPHA_AUTO))
+        alpha = (desc.flags & MP_IMGFLAG_ALPHA) ? MP_ALPHA_STRAIGHT : MP_ALPHA_AUTO;
 
-    const struct pl_hdr_metadata *hdr = &p.color.hdr;
+    const struct pl_hdr_metadata *hdr = &p->color.hdr;
     bool has_cie_y     = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_CIE_Y);
     bool has_hdr10     = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_HDR10);
     bool has_hdr10plus = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_HDR10PLUS);
 
-    bool has_crop = mp_rect_w(p.crop) > 0 && mp_rect_h(p.crop) > 0;
+    bool has_crop = mp_rect_w(p->crop) > 0 && mp_rect_h(p->crop) > 0;
     const char *aspect_name = get_aspect_ratio_name(d_w / (double)d_h);
-    const char *sar_name = get_aspect_ratio_name(p.w / (double)p.h);
+    const char *sar_name = get_aspect_ratio_name(p->w / (double)p->h);
     struct m_sub_property props[] = {
-        {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p.imgfmt))},
-        {"hw-pixelformat",  SUB_PROP_STR(mp_imgfmt_to_name(p.hw_subfmt)),
-                            .unavailable = !p.hw_subfmt},
+        {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p->imgfmt))},
+        {"hw-pixelformat",  SUB_PROP_STR(mp_imgfmt_to_name(p->hw_subfmt)),
+                            .unavailable = !p->hw_subfmt},
         {"average-bpp",     SUB_PROP_INT(bpp),
                             .unavailable = !bpp},
-        {"w",               SUB_PROP_INT(p.w)},
-        {"h",               SUB_PROP_INT(p.h)},
+        {"w",               SUB_PROP_INT(p->w)},
+        {"h",               SUB_PROP_INT(p->h)},
         {"dw",              SUB_PROP_INT(d_w)},
         {"dh",              SUB_PROP_INT(d_h)},
-        {"crop-x",          SUB_PROP_INT(p.crop.x0), .unavailable = !has_crop},
-        {"crop-y",          SUB_PROP_INT(p.crop.y0), .unavailable = !has_crop},
-        {"crop-w",          SUB_PROP_INT(mp_rect_w(p.crop)), .unavailable = !has_crop},
-        {"crop-h",          SUB_PROP_INT(mp_rect_h(p.crop)), .unavailable = !has_crop},
+        {"crop-x",          SUB_PROP_INT(p->crop.x0), .unavailable = !has_crop},
+        {"crop-y",          SUB_PROP_INT(p->crop.y0), .unavailable = !has_crop},
+        {"crop-w",          SUB_PROP_INT(mp_rect_w(p->crop)), .unavailable = !has_crop},
+        {"crop-h",          SUB_PROP_INT(mp_rect_h(p->crop)), .unavailable = !has_crop},
         {"aspect",          SUB_PROP_FLOAT(d_w / (double)d_h)},
         {"aspect-name",     SUB_PROP_STR(aspect_name), .unavailable = !aspect_name},
-        {"par",             SUB_PROP_FLOAT(p.p_w / (double)p.p_h)},
-        {"sar",             SUB_PROP_FLOAT(p.w / (double)p.h)},
+        {"par",             SUB_PROP_FLOAT(p->p_w / (double)p->p_h)},
+        {"sar",             SUB_PROP_FLOAT(p->w / (double)p->h)},
         {"sar-name",        SUB_PROP_STR(sar_name), .unavailable = !sar_name},
         {"colormatrix",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p.color.space))},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p->color.space))},
         {"colorlevels",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p.color.levels))},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p->color.levels))},
         {"primaries",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p.color.primaries))},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p->color.primaries))},
         {"gamma",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p.color.gamma))},
-        {"sig-peak", SUB_PROP_FLOAT(p.color.hdr.max_luma / MP_REF_WHITE)},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p->color.gamma))},
+        {"sig-peak", SUB_PROP_FLOAT(p->color.hdr.max_luma / MP_REF_WHITE)},
         {"light",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_light_names, p.color.light))},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_light_names, p->color.light))},
         {"chroma-location",
-            SUB_PROP_STR(m_opt_choice_str(mp_chroma_names, p.chroma_location))},
+            SUB_PROP_STR(m_opt_choice_str(mp_chroma_names, p->chroma_location))},
         {"stereo-in",
-            SUB_PROP_STR(m_opt_choice_str(mp_stereo3d_names, p.stereo3d))},
-        {"rotate",          SUB_PROP_INT(p.rotate)},
+            SUB_PROP_STR(m_opt_choice_str(mp_stereo3d_names, p->stereo3d))},
+        {"rotate",          SUB_PROP_INT(p->rotate)},
         {"alpha",
-            SUB_PROP_STR(m_opt_choice_str(mp_alpha_names, p.alpha)),
+            SUB_PROP_STR(m_opt_choice_str(mp_alpha_names, alpha)),
             // avoid using "auto" for "no", so just make it unavailable
-            .unavailable = p.alpha == MP_ALPHA_AUTO},
+            .unavailable = alpha == MP_ALPHA_AUTO},
         {"min-luma",    SUB_PROP_FLOAT(hdr->min_luma),     .unavailable = !has_hdr10},
         {"max-luma",    SUB_PROP_FLOAT(hdr->max_luma),     .unavailable = !has_hdr10},
         {"max-cll",     SUB_PROP_FLOAT(hdr->max_cll),      .unavailable = !has_hdr10},
@@ -2383,7 +2382,8 @@ static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
     if (valid != M_PROPERTY_VALID)
         return valid;
 
-    return property_imgparams(vo_get_current_params(vo), action, arg);
+    struct mp_image_params p = vo_get_current_params(vo);
+    return property_imgparams(&p, action, arg);
 }
 
 static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
@@ -2402,7 +2402,7 @@ static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
     mp_decoder_wrapper_get_video_dec_params(vo_c->track->dec, &p);
     if (!p.imgfmt)
         return M_PROPERTY_UNAVAILABLE;
-    return property_imgparams(p, action, arg);
+    return property_imgparams(&p, action, arg);
 }
 
 static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
@@ -2416,7 +2416,7 @@ static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
     struct mp_codec_params *c =
         track && track->stream ? track->stream->codec : NULL;
     if (vo_c->filter->input_params.imgfmt) {
-        return property_imgparams(vo_c->filter->input_params, action, arg);
+        return property_imgparams(&vo_c->filter->input_params, action, arg);
     } else if (c && c->disp_w && c->disp_h) {
         // Simplistic fallback for stupid scripts querying "width"/"height"
         // before the first frame is decoded.
