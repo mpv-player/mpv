@@ -21,6 +21,7 @@
 #include <wchar.h>
 #include <windows.h>
 #include <errors.h>
+#include <mmsystem.h>
 #include <ksguid.h>
 #include <ksmedia.h>
 #include <avrt.h>

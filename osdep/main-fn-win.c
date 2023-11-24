@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <shellapi.h>
 
 #ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
 #define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE (0x0001)
