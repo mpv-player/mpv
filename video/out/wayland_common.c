@@ -1410,28 +1410,23 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
         return;
 
     if (fdp.revents & POLLIN) {
-        ptrdiff_t offset = 0;
         size_t data_read = 0;
         const size_t chunk_size = 1;
-        uint8_t *buffer = ta_zalloc_size(wl, chunk_size);
-        if (!buffer)
-            goto end;
+        bstr file_list = {
+            .start = talloc_zero_size(NULL, chunk_size),
+        };
 
-        while ((data_read = read(wl->dnd_fd, buffer + offset, chunk_size)) > 0) {
-            offset += data_read;
-            buffer = ta_realloc_size(wl, buffer, offset + chunk_size);
-            memset(buffer + offset, 0, chunk_size);
-            if (!buffer)
-                goto end;
+        while ((data_read = read(wl->dnd_fd, file_list.start + file_list.len, chunk_size)) > 0) {
+            file_list.len += data_read;
+            file_list.start = talloc_realloc_size(NULL, file_list.start, file_list.len + chunk_size);
+            memset(file_list.start + file_list.len, 0, chunk_size);
         }
 
-        MP_VERBOSE(wl, "Read %td bytes from the DND fd\n", offset);
+        MP_VERBOSE(wl, "Read %zu bytes from the DND fd\n", file_list.len);
 
-        struct bstr file_list = bstr0(buffer);
         mp_event_drop_mime_data(wl->vo->input_ctx, wl->dnd_mime_type,
                                 file_list, wl->dnd_action);
-        talloc_free(buffer);
-end:
+        talloc_free(file_list.start);
         if (wl->dnd_mime_type)
             talloc_free(wl->dnd_mime_type);
 
