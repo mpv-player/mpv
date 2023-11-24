@@ -260,7 +260,7 @@ sources = files(
 # compiler stuff
 cc = meson.get_compiler('c')
 
-flags = ['-D_GNU_SOURCE', '-D_FILE_OFFSET_BITS=64']
+flags = ['-D_FILE_OFFSET_BITS=64']
 link_flags = []
 
 test_flags = ['-Werror=implicit-function-declaration',
@@ -304,8 +304,9 @@ features += {'darwin': darwin}
 features += {'posix': posix}
 features += {'dos-paths': win32, 'win32': win32}
 
-mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DUNICODE', '-DCOBJMACROS',
-               '-DINITGUID', '-U__STRICT_ANSI__']
+mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DWINVER=0x0602', '-DUNICODE',
+               '-DCOBJMACROS', '-DINITGUID', '-U__STRICT_ANSI__', '-DNOMINMAX',
+               '-D_USE_MATH_DEFINES', '-DWIN32_LEAN_AND_MEAN']
 
 if host_machine.system() == 'windows'
     flags += [mswin_flags]
@@ -313,6 +314,10 @@ endif
 
 if host_machine.system() == 'cygwin'
     flags += [mswin_flags, '-mwin32']
+endif
+
+if posix
+    flags += ['-D_GNU_SOURCE']
 endif
 
 noexecstack = false

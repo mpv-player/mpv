@@ -18,6 +18,7 @@
 
 #include <windows.h>
 #include <ole2.h>
+#include <shellapi.h>
 #include <shobjidl.h>
 
 #include "common/msg.h"
