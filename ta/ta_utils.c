@@ -265,27 +265,6 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap)
     return ta_vasprintf_append_at(str, size, fmt, ap);
 }
 
-
-void *ta_oom_p(void *p)
-{
-    if (!p)
-        abort();
-    return p;
-}
-
-void ta_oom_b(bool b)
-{
-    if (!b)
-        abort();
-}
-
-char *ta_oom_s(char *s)
-{
-    if (!s)
-        abort();
-    return s;
-}
-
 void *ta_xmemdup(void *ta_parent, void *ptr, size_t size)
 {
     void *new = ta_memdup(ta_parent, ptr, size);
