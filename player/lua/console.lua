@@ -72,6 +72,7 @@ local styles = {
     error = '{\\1c&H7a77f2&}',
     fatal = '{\\1c&H5791f9&\\b1}',
     suggestion = '{\\1c&Hcc99cc&}',
+    selected_suggestion = '{\\1c&H2fbdfa&\\b1}',
 }
 
 local repl_active = false
@@ -82,10 +83,13 @@ local cursor = 1
 local history = {}
 local history_pos = 1
 local log_buffer = {}
-local suggestion_buffer = {}
 local key_bindings = {}
 local global_margins = { t = 0, b = 0 }
 
+local suggestion_buffer = {}
+local selected_suggestion_index
+local completion_start_position
+local completion_append
 local file_commands = {}
 local path_separator = platform == 'windows' and '\\' or '/'
 
@@ -281,7 +285,9 @@ function format_table(list, width_max, rows_max)
 
     local spaces = math.floor((width_max - width_total) / (column_count - 1))
     spaces = math.max(spaces_min, math.min(spaces_max, spaces))
-    local spacing = column_count > 1 and string.format('%' .. spaces .. 's', ' ') or ''
+    local spacing = column_count > 1
+                    and ass_escape(string.format('%' .. spaces .. 's', ' '))
+                    or ''
 
     local rows = {}
     for row = 1, row_count do
@@ -292,12 +298,17 @@ function format_table(list, width_max, rows_max)
             -- more then 99 leads to 'invalid format (width or precision too long)'
             local format_string = column == column_count and '%s'
                                   or '%-' .. math.min(column_widths[column], 99) .. 's'
-            columns[column] = string.format(format_string, list[i])
+            columns[column] = ass_escape(string.format(format_string, list[i]))
+
+            if i == selected_suggestion_index then
+                columns[column] = styles.selected_suggestion .. columns[column]
+                                  .. '{\\b0}'.. styles.suggestion
+            end
         end
         -- first row is at the bottom
         rows[row_count - row + 1] = table.concat(columns, spacing)
     end
-    return table.concat(rows, '\n'), row_count
+    return table.concat(rows, ass_escape('\n')), row_count
 end
 
 local function print_to_terminal()
@@ -390,7 +401,7 @@ function update()
     local width_max = math.ceil(screenx / opts.font_size * get_font_hw_ratio())
 
     local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
-    local suggestion_ass = style .. styles.suggestion .. ass_escape(suggestions)
+    local suggestion_ass = style .. styles.suggestion .. suggestions
 
     local log_ass = ''
     local log_messages = #log_buffer
@@ -943,8 +954,29 @@ function max_overlap_length(s1, s2)
     return 0
 end
 
+local function cycle_through_suggestions(backwards)
+    selected_suggestion_index = selected_suggestion_index + (backwards and -1 or 1)
+
+    if selected_suggestion_index > #suggestion_buffer then
+        selected_suggestion_index = 1
+    elseif selected_suggestion_index < 1 then
+        selected_suggestion_index = #suggestion_buffer
+    end
+
+    local before_cur = line:sub(1, completion_start_position - 1) ..
+                       suggestion_buffer[selected_suggestion_index] .. completion_append
+    line = before_cur .. line:sub(cursor)
+    cursor = before_cur:len() + 1
+    update()
+end
+
 -- Complete the option or property at the cursor (TAB)
-function complete()
+function complete(backwards)
+    if #suggestion_buffer > 0 then
+        cycle_through_suggestions(backwards)
+        return
+    end
+
     local before_cur = line:sub(1, cursor - 1)
     local after_cur = line:sub(cursor)
 
@@ -952,45 +984,49 @@ function complete()
     for _, completer in ipairs(build_completers()) do
         -- Completer patterns should return the start of the word to be
         -- completed as the first capture.
-        local s, s2 = before_cur:match(completer.pattern)
-        if not s then
+        local s2
+        completion_start_position, s2 = before_cur:match(completer.pattern)
+        if not completion_start_position then
             -- Multiple input commands can be separated by semicolons, so all
             -- completions that are anchored at the start of the string with
             -- '^' can start from a semicolon as well. Replace ^ with ; and try
             -- to match again.
-            s, s2 = before_cur:match(completer.pattern:gsub('^^', ';'))
+            completion_start_position, s2 =
+                before_cur:match(completer.pattern:gsub('^^', ';'))
         end
-        if s then
+        if completion_start_position then
             local hint
             if s2 then
-                hint = s
-                s = s2
+                hint = completion_start_position
+                completion_start_position = s2
             end
 
             -- If the completer's pattern found a word, check the completer's
             -- list for possible completions
-            local part = before_cur:sub(s)
+            local part = before_cur:sub(completion_start_position)
             local completions, prefix = complete_match(part, completer.list(hint))
             if #completions > 0 then
                 -- If there was only one full match from the list, add
                 -- completer.append to the final string. This is normally a
                 -- space or a quotation mark followed by a space.
                 local after_cur_index = 1
+                completion_append = completer.append or ''
                 if #completions == 1 then
-                    local append = completer.append or ''
-                    prefix = prefix .. append
+                    prefix = prefix .. completion_append
 
                     -- calculate offset into after_cur
-                    local prefix_len = common_prefix_length(append, after_cur)
-                    local overlap_size = max_overlap_length(append, after_cur)
+                    local prefix_len = common_prefix_length(completion_append, after_cur)
+                    local overlap_size = max_overlap_length(completion_append, after_cur)
                     after_cur_index = math.max(prefix_len, overlap_size) + 1
                 else
                     table.sort(completions)
                     suggestion_buffer = completions
+                    selected_suggestion_index = 0
                 end
 
                 -- Insert the completion and update
-                before_cur = before_cur:sub(1, s - 1) .. prefix
+                before_cur = before_cur:sub(1, completion_start_position - 1) ..
+                             prefix
                 cursor = before_cur:len() + 1
                 line = before_cur .. after_cur:sub(after_cur_index)
                 update()
@@ -1157,6 +1193,7 @@ function get_bindings()
         { 'alt+f',       next_word                              },
         { 'tab',         complete                               },
         { 'ctrl+i',      complete                               },
+        { 'shift+tab',   function() complete(true) end          },
         { 'ctrl+a',      go_home                                },
         { 'home',        go_home                                },
         { 'ctrl+e',      go_end                                 },
