@@ -29,6 +29,8 @@
 #include <fcntl.h>
 #include <locale.h>
 
+#include "compiler.h"
+
 #if HAVE_GLOB_POSIX
 #include <glob.h>
 #endif
@@ -94,8 +96,8 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #include <sys/stat.h>
 #include <fcntl.h>
 
-int mp_printf(const char *format, ...);
-int mp_fprintf(FILE *stream, const char *format, ...);
+int mp_printf(const char *format, ...) PRINTF_ATTRIBUTE(1, 2);
+int mp_fprintf(FILE *stream, const char *format, ...) PRINTF_ATTRIBUTE(2, 3);
 int mp_open(const char *filename, int oflag, ...);
 int mp_creat(const char *filename, int mode);
 int mp_rename(const char *oldpath, const char *newpath);
