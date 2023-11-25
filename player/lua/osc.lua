@@ -436,7 +436,7 @@ end
 function window_controls_enabled()
     val = user_opts.windowcontrols
     if val == "auto" then
-        return not state.border
+        return not (state.border and state.title_bar)
     else
         return val ~= "no"
     end
@@ -2757,6 +2757,12 @@ mp.observe_property("fullscreen", "bool",
 mp.observe_property("border", "bool",
     function(name, val)
         state.border = val
+        request_init_resize()
+    end
+)
+mp.observe_property("title-bar", "bool",
+    function(name, val)
+        state.title_bar = val
         request_init_resize()
     end
 )
