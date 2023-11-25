@@ -86,7 +86,11 @@ Shift+INSERT
     Paste text (uses the primary selection on X11 and Wayland).
 
 TAB and Ctrl+i
-    Complete the command or property name at the cursor.
+    Complete the text at the cursor. The first press inserts the longest common
+    prefix of the completions, and subsequent presses cycle through them.
+
+Shift+TAB
+    Cycle through the completions backwards.
 
 Ctrl+l
     Clear all log messages from the console.
