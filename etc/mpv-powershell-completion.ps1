@@ -1,6 +1,4 @@
-#!/bin/pwsh
-
-# PowerShell command line completion for the mpv/mpv.net media player.
+# PowerShell command line completion for the mpv media player.
 
 # It can be installed by dot sourcing it in the PowerShell profile.
 
@@ -40,42 +38,42 @@ Function SetOptions
     {
         $line = $line.Trim()
 
-        if (-not $line.StartsWith("--"))
+        if (-not $line.StartsWith('--'))
         {
             continue
         }
 
-        $table = @{ value = ""; type = ""; choices = $null }
+        $table = @{ value = ''; type = ''; choices = $null }
 
-        if ($line.Contains(" "))
+        if ($line.Contains(' '))
         {
-            $table["name"] = $line.Substring(2, $line.IndexOf(" ") - 2)
-            $value = $line.Substring($line.IndexOf(" ") + 1).Trim()
+            $table['name'] = $line.Substring(2, $line.IndexOf(' ') - 2)
+            $value = $line.Substring($line.IndexOf(' ') + 1).Trim()
 
-            if ($value.Contains("("))
+            if ($value.Contains('('))
             {
-                $value = $value.Substring(0, $value.IndexOf("(")).TrimEnd()
+                $value = $value.Substring(0, $value.IndexOf('(')).TrimEnd()
             }
 
-            $table["value"] = $value
+            $table['value'] = $value
         }
         else
         {
-            $table["name"] = $line.Substring(2)
+            $table['name'] = $line.Substring(2)
         }
 
-        if ($value.StartsWith("Choices:"))
+        if ($table['value'].StartsWith('Choices:'))
         {
-            $table["type"] = "choice"
-            $table["choices"] = $value.Substring(8).TrimStart() -split " "
+            $table['type'] = 'choice'
+            $table['choices'] = $table['value'].Substring(8).TrimStart() -split ' '
         }
 
-        if ($value.StartsWith('Flag'))
+        if ($table['value'].StartsWith('Flag'))
         {
             $table['type'] = 'flag'
         }
 
-        if ($value.Contains('[file]') -or $table["name"].Contains('-file'))
+        if ($table['value'].Contains('[file]') -or $table['name'].Contains('-file'))
         {
             $table['type'] = 'file'
         }
