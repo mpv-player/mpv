@@ -1,4 +1,4 @@
-# PowerShell command line completion for the mpv/mpv.net media player.
+# PowerShell command line completion for the mpv media player.
 
 # It can be installed by dot sourcing it in the PowerShell profile.
 
@@ -20,8 +20,22 @@
 #
 
 $Options = New-Object Collections.Generic.List[Object]
-$UpdateOptions = @('vo', 'ao', 'profile', 'hwdec', 'audio-device', 'scale', 'tscale',
-                   'error-diffusion', 'vulkan-device')
+
+$DynamicOptions = @(
+    @{ name = 'vaapi-device'; pattern = '^\s*([-\w]+)' },
+    @{ name = 'd3d11-adapter'; pattern = 'description: (.+)' },
+    @{ name = 'vulkan-device'; pattern = "^\s*('.+?')" },
+    @{ name = 'audio-device'; pattern = "^\s*('\S+')" },
+    @{ name = 'hwdec'; pattern = '^\s*([-\w]+)' },
+    @{ name = 'error-diffusion'; pattern = '^\s*([-\w]+)' },
+    @{ name = 'scale'; pattern = '^\s*([-\w]+)' },
+    @{ name = 'cscale'; pattern = '^\s*([-\w]+)' },
+    @{ name = 'dscale'; pattern = '^\s*([-\w]+)' },
+    @{ name = 'tscale'; pattern = '^\s*([-\w]+)' },
+    @{ name = 'profile'; pattern = '^\s*([-\w]+)' },
+    @{ name = 'ao'; pattern = '^\s*([-\w]+)' },
+    @{ name = 'vo'; pattern = '^\s*([-\w]+)' }
+)
 
 Function SetOptions
 {
@@ -115,19 +129,7 @@ Function Update-Option($name)
         return
     }
 
-    $dynamicOptions = @(
-        @{ name = 'vulkan-device'; pattern = "^\s*('.+?')" },
-        @{ name = 'audio-device'; pattern = "^\s*('\S+')" },
-        @{ name = 'hwdec'; pattern = '^\s*([-\w]+)' },
-        @{ name = 'error-diffusion'; pattern = '^\s*([-\w]+)' },
-        @{ name = 'tscale'; pattern = '^\s*([-\w]+)' },
-        @{ name = 'scale'; pattern = '^\s*([-\w]+)' },
-        @{ name = 'profile'; pattern = '^\s*([-\w]+)' },
-        @{ name = 'ao'; pattern = '^\s*([-\w]+)' },
-        @{ name = 'vo'; pattern = '^\s*([-\w]+)' }
-     )
-
-    foreach ($opt in $dynamicOptions)
+    foreach ($opt in $DynamicOptions)
     {
         if ($name -eq $opt.name)
         {
@@ -137,6 +139,8 @@ Function Update-Option($name)
                  Select-Object -Unique | Sort-Object
 
             $output = $output | foreach { if ($_ -match "'\w+'") { $_ -replace "'", '' } else { $_ } }
+            $output = $output | foreach { if ($_ -match "^'.+'$") { $_ -replace "'", '' } else { $_ } }
+            $output = $output | foreach { if ($_.Contains(' ') -or $_.Contains('{')) { '"' + $_ + '"' } else { $_ } }
 
             if ($output -is [string])
             {
@@ -187,11 +191,11 @@ Function Get-Completion($cursorPosition, $wordToComplete, $commandName)
             $argName = $commandName.Substring($commandName.IndexOf('=') + 1)
         }
 
-        foreach ($it in $UpdateOptions)
+        foreach ($it in $DynamicOptions)
         {
-            if ($shortCommandName -eq $it)
+            if ($shortCommandName -eq $it.name)
             {
-                Update-Option $it
+                Update-Option $it.name
                 break
             }
         }
