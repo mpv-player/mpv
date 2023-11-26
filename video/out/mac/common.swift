@@ -107,10 +107,11 @@ class Common: NSObject {
 
         titleBar = TitleBar(frame: wr, window: window, common: self)
 
+        let maximized = Bool(mpv.opts.window_maximized)
         let minimized = Bool(mpv.opts.window_minimized)
         window.isRestorable = false
         window.isReleasedWhenClosed = false
-        window.setMaximized(minimized ? false : Bool(mpv.opts.window_maximized))
+        window.setMaximized((minimized || !maximized) ? window.isZoomed : maximized)
         window.setMinimized(minimized)
         window.makeMain()
         window.makeKey()
