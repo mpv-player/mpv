@@ -1,4 +1,4 @@
-# PowerShell command line completion for the mpv media player.
+# PowerShell command line completion for the mpv/mpv.net media player.
 
 # It can be installed by dot sourcing it in the PowerShell profile.
 
@@ -43,11 +43,11 @@ Function SetOptions
             continue
         }
 
-        $table = @{ value = ''; type = ''; choices = $null }
+        $name = ''; $value = ''; $type = ''; $choices = $null;
 
         if ($line.Contains(' '))
         {
-            $table['name'] = $line.Substring(2, $line.IndexOf(' ') - 2)
+            $name = $line.Substring(2, $line.IndexOf(' ') - 2)
             $value = $line.Substring($line.IndexOf(' ') + 1).Trim()
 
             if ($value.Contains('('))
@@ -55,36 +55,34 @@ Function SetOptions
                 $value = $value.Substring(0, $value.IndexOf('(')).TrimEnd()
             }
 
-            $table['value'] = $value
+            $value = $value
         }
         else
         {
-            $table['name'] = $line.Substring(2)
+            $name = $line.Substring(2)
         }
 
-        if ($table['value'].StartsWith('Choices:'))
+        if ($value.StartsWith('Choices:'))
         {
-            $table['type'] = 'choice'
-            $table['choices'] = $table['value'].Substring(8).TrimStart() -split ' '
+            $type = 'choice'
+            $choices = $value.Substring(8).TrimStart() -split ' '
         }
 
-        if ($table['value'].StartsWith('Flag'))
+        if ($value.StartsWith('Flag'))
         {
-            $table['type'] = 'flag'
+            $type = 'flag'
         }
 
-        if ($table['value'].Contains('[file]') -or $table['name'].Contains('-file'))
+        if ($value.Contains('[file]') -or $name.Contains('-file'))
         {
-            $table['type'] = 'file'
+            $type = 'file'
         }
 
-        if ($table['type'] -eq 'flag')
+        $table = @{ name = $name; value = $value; type = $type; choices = $choices }
+
+        if ($type -eq 'flag')
         {
-            $noTable = @{ name = 'no-' + $table['name'];
-                          value = $table['value'];
-                          type = '';
-                          choices = $null
-                        }
+            $noTable = @{ name = 'no-' + $name; value = $value; type = ''; choices = $null }
             $Options.Add($table)
             $Options.Add($noTable)
         }
