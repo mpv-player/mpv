@@ -288,9 +288,6 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         close_file_descriptors(desc);
         goto err;
     }
-    vaSyncSurface(display, va_surface_id(mapper->src));
-    // No need to error out if sync fails, but good to know if it did.
-    CHECK_VA_STATUS(mapper, "vaSyncSurface()");
     p->surface_acquired = true;
 
     // We use AVDRMFrameDescriptor to store the dmabuf so we need to copy the
