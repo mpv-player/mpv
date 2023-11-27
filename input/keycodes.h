@@ -82,10 +82,11 @@
 #define MP_KEY_CHANNEL_DOWN     (MP_KEY_MM_BASE+22)
 #define MP_KEY_PLAYONLY         (MP_KEY_MM_BASE+23)
 #define MP_KEY_PAUSEONLY        (MP_KEY_MM_BASE+24)
-#define MP_KEY_BACK             (MP_KEY_MM_BASE+25)
-#define MP_KEY_TOOLS            (MP_KEY_MM_BASE+26)
-#define MP_KEY_ZOOMIN           (MP_KEY_MM_BASE+27)
-#define MP_KEY_ZOOMOUT          (MP_KEY_MM_BASE+28)
+#define MP_KEY_GO_BACK          (MP_KEY_MM_BASE+25)
+#define MP_KEY_GO_FORWARD       (MP_KEY_MM_BASE+26)
+#define MP_KEY_TOOLS            (MP_KEY_MM_BASE+27)
+#define MP_KEY_ZOOMIN           (MP_KEY_MM_BASE+28)
+#define MP_KEY_ZOOMOUT          (MP_KEY_MM_BASE+29)
 
 /*  Function keys  */
 #define MP_KEY_F (MP_KEY_BASE+0x40)

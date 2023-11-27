@@ -754,7 +754,8 @@ static const struct mp_keymap keymap[] = {
     {XF86XK_HomePage, MP_KEY_HOMEPAGE}, {XF86XK_WWW, MP_KEY_WWW},
     {XF86XK_Mail, MP_KEY_MAIL}, {XF86XK_Favorites, MP_KEY_FAVORITES},
     {XF86XK_Search, MP_KEY_SEARCH}, {XF86XK_Sleep, MP_KEY_SLEEP},
-    {XF86XK_Back, MP_KEY_BACK}, {XF86XK_Tools, MP_KEY_TOOLS},
+    {XF86XK_Back, MP_KEY_GO_BACK}, {XF86XK_Forward, MP_KEY_GO_FORWARD},
+    {XF86XK_Tools, MP_KEY_TOOLS},
     {XF86XK_ZoomIn, MP_KEY_ZOOMIN}, {XF86XK_ZoomOut, MP_KEY_ZOOMOUT},
 
     {0, 0}
