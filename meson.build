@@ -1686,13 +1686,6 @@ features += {'libmpv-' + get_option('default_library'): get_option('libmpv')}
 
 # build targets
 if win32
-    # Older meson versions generate this in the player subdirectory.
-    if get_option('cplayer') and meson.version().version_compare('>= 1.3.0')
-        wrapper_sources= 'osdep/win32-console-wrapper.c'
-        executable('mpv', wrapper_sources, c_args: '-municode', link_args: '-municode',
-                   name_suffix: 'com', install: true)
-    endif
-
     windows = import('windows')
     res_flags = ['--codepage=65001']
 
@@ -1768,6 +1761,13 @@ if get_option('cplayer')
 
     mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
                      win_subsystem: 'windows,6.0', install: true)
+
+    # Older meson versions generate this in the player subdirectory.
+    if win32 and meson.version().version_compare('>= 1.3.0')
+        wrapper_sources= 'osdep/win32-console-wrapper.c'
+        executable('mpv', wrapper_sources, c_args: '-municode', link_args: '-municode',
+                   name_suffix: 'com', install: true)
+    endif
 endif
 
 if get_option('tests')
