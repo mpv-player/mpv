@@ -2426,6 +2426,12 @@ Subtitles
         ``--sub-speed=25/23.976`` plays frame based subtitles which have been
         loaded assuming a framerate of 23.976 at 25 FPS.
 
+``--sub-detect-rtl=<yes|no>``
+    Default: no. Set the ``Encoding`` flag to ``-1`` to enable Fribidi's base
+    direction auto detection through libass to render Right to Left (RTL)
+    subtitles correctly. By default, all text is assumed to be Left to Right
+    (LTR) for VSFilter compatibility.
+
 ``--sub-ass-style-overrides=<[Style.]Param=Value[,...]>``
     Override some style or script info parameters.
 

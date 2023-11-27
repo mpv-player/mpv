@@ -298,6 +298,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-gray", OPT_BOOL(sub_gray)},
         {"sub-ass", OPT_BOOL(ass_enabled), .flags = UPDATE_SUB_HARD},
         {"sub-scale", OPT_FLOAT(sub_scale), M_RANGE(0, 100)},
+        {"sub-detect-rtl", OPT_BOOL(sub_rtl)},
         {"sub-ass-line-spacing", OPT_FLOAT(ass_line_spacing),
             M_RANGE(-1000, 1000)},
         {"sub-use-margins", OPT_BOOL(sub_use_margins)},

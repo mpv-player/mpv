@@ -435,6 +435,8 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     if ((converted || opts->ass_style_override) && opts->ass_justify)
         set_force_flags |= ASS_OVERRIDE_BIT_JUSTIFY;
 #endif
+    if (converted && opts->sub_rtl)
+        track->styles->Encoding = -1;
     ass_set_selective_style_override_enabled(priv, set_force_flags);
     ASS_Style style = {0};
     mp_ass_set_style(&style, MP_ASS_FONT_PLAYRESY, opts->sub_style);
