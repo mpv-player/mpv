@@ -34,9 +34,9 @@ differs from your own.
 
 ### Log file
 
-Make a log file made with -v -v or --log-file=output.txt, paste it to
-https://0x0.st/ or attach it to the github issue, and replace this text with a
-link to it.
+Make a log file made with --gpu-debug and -v -v or --log-file=output.txt,
+paste it to https://0x0.st/ or attach it to the github issue, and replace this
+text with a link to it.
 
 The issue will be closed for ignoring the issue template.
 
