@@ -5799,8 +5799,8 @@ them.
 
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
-    (currently) only relevant for ``--gpu-api=vulkan`` and `--gpu-api=d3d11`.
-    The possible choices are currently only:
+    only relevant for ``--gpu-api=d3d11`` with ``--vo=gpu``.
+    The possible choices are currently:
 
     auto
         Use the first available compiler. (Default)
@@ -5810,7 +5810,7 @@ them.
 
     .. note::
 
-        This option is deprecated, since there is only one reasonable value.
+        This option is deprecated, since there is only one usable value.
         It may be removed in the future.
 
 ``--glsl-shader=<file>``, ``--glsl-shaders=<file-list>``
