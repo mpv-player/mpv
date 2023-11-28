@@ -599,11 +599,12 @@ if features['cdda']
     sources += files('stream/stream_cdda.c')
 endif
 
-dvbin = get_option('dvbin').require(
+dvbin_opt = get_option('dvbin').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
 )
-features += {'dvbin': dvbin.allowed()}
+dvbin = cc.has_header('linux/dvb/frontend.h', required: dvbin_opt)
+features += {'dvbin': dvbin}
 if features['dvbin']
     sources += files('stream/dvb_tune.c',
                      'stream/stream_dvb.c')
