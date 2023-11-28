@@ -4330,7 +4330,7 @@ OSD
     Size of the border of the OSD bar in scaled pixels (see ``--sub-font-size``
     for details).
 
-    Default: 1.2.
+    Default: 0.5.
 
 ``--osd-back-color=<color>``
     See ``--sub-color``. Color used for OSD text background.
