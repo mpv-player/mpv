@@ -12,7 +12,6 @@ meson setup build \
   -Dlibmpv=true           \
   -Dmanpage-build=enabled \
   -Dpipewire=enabled      \
-  -Dshaderc=enabled       \
   -Dtests=true            \
   -Dvulkan=enabled
 meson compile -C build
