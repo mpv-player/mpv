@@ -267,7 +267,7 @@ static void update_osd(struct vo *vo)
         .flip = true,
     };
     gl_video_set_osd_pts(p->gl_video, p->osd_pts);
-    gl_video_render_frame(p->gl_video, &frame, target, RENDER_FRAME_DEF);
+    gl_video_render_frame(p->gl_video, &frame, &target, RENDER_FRAME_DEF);
     ra_tex_free(p->egl.ra, &target.tex);
 
     MP_STATS(vo, "stop rpi_osd");

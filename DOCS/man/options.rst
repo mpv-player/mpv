@@ -2312,7 +2312,10 @@ Subtitles
     printed by ``--sub-demuxer=help``.
 
 ``--sub-delay=<sec>``
-    Delays subtitles by ``<sec>`` seconds. Can be negative.
+    Delays primary subtitles by ``<sec>`` seconds. Can be negative.
+
+``--secondary-sub-delay=<sec>``
+    Delays secondary subtitles by ``<sec>`` seconds. Can be negative.
 
 ``--sub-files=<file-list>``, ``--sub-file=<filename>``
     Add a subtitle file to the list of external subtitles.
@@ -4142,7 +4145,7 @@ Input
     implementation-defined.
 
 ``--input-right-alt-gr``, ``--no-input-right-alt-gr``
-    (Cocoa and Windows only)
+    (macOS and Windows only)
     Use the right Alt key as Alt Gr to produce special characters. If disabled,
     count the right Alt as an Alt modifier key. Enabled by default.
 
@@ -4261,6 +4264,12 @@ OSD
 
 ``--osd-bar-h=<0.1-50>``
     Height of the OSD bar, in percentage of the screen height (default: 3.125).
+
+``--osd-bar-border-size=<size>``
+    Size of the border of the OSD bar in scaled pixels (see ``--sub-font-size``
+    for details).
+
+    Default: 1.2.
 
 ``--osd-back-color=<color>``
     See ``--sub-color``. Color used for OSD text background.
@@ -5790,8 +5799,8 @@ them.
 
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
-    (currently) only relevant for ``--gpu-api=vulkan`` and `--gpu-api=d3d11`.
-    The possible choices are currently only:
+    only relevant for ``--gpu-api=d3d11`` with ``--vo=gpu``.
+    The possible choices are currently:
 
     auto
         Use the first available compiler. (Default)
@@ -5801,7 +5810,7 @@ them.
 
     .. note::
 
-        This option is deprecated, since there is only one reasonable value.
+        This option is deprecated, since there is only one usable value.
         It may be removed in the future.
 
 ``--glsl-shader=<file>``, ``--glsl-shaders=<file-list>``
@@ -6195,21 +6204,21 @@ them.
     software renderer, and ``auto`` only falls back to the software renderer
     when the usual pixel format couldn't be created.
 
-    macOS only.
+    macOS and cocoa-cb only.
 
 ``--cocoa-cb-10bit-context=<yes|no>``
     Creates a 10bit capable pixel format for the context creation (default: yes).
     Instead of 8bit integer framebuffer a 16bit half-float framebuffer is
     requested.
 
-    macOS only.
+    macOS and cocoa-cb only.
 
 ``--macos-title-bar-appearance=<appearance>``
     Sets the appearance of the title bar (default: auto). Not all combinations
     of appearances and ``--macos-title-bar-material`` materials make sense or
     are unique. Appearances that are not supported by you current macOS version
     fall back to the default value.
-    macOS and cocoa-cb only
+    macOS only
 
     ``<appearance>`` can be one of the following:
 
@@ -6234,7 +6243,7 @@ them.
     ``--macos-title-bar-appearance`` appearances make sense or are unique.
     Materials that are not supported by you current macOS version fall back to
     the default value.
-    macOS and cocoa-cb only
+    macOS only
 
     ``<material>`` can be one of the following:
 
@@ -6283,7 +6292,7 @@ them.
     1000ms since it's possible that Apple or the user changes the system
     defaults. Anything higher than 1000ms though seems too long and shouldn't be
     set anyway.
-    (macOS and cocoa-cb only)
+    (macOS)
 
 
 ``--macos-app-activation-policy=<regular|accessory|prohibited>``
@@ -6331,8 +6340,6 @@ them.
 
     auto
         auto-select (default)
-    cocoa
-        Cocoa/macOS (deprecated, use --vo=libmpv instead)
     win
         Win32/WGL
     winvk

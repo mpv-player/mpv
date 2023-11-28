@@ -144,9 +144,26 @@ void *ta_xrealloc_size(void *ta_parent, void *ptr, size_t size);
 #define ta_xrealloc_size(...)   ta_dbg_set_loc(ta_xrealloc_size(__VA_ARGS__), TA_LOC)
 #endif
 
-void ta_oom_b(bool b);
-char *ta_oom_s(char *s);
-void *ta_oom_p(void *p);
+static inline void *ta_oom_p(void *p)
+{
+    if (!p)
+        abort();
+    return p;
+}
+
+static inline void ta_oom_b(bool b)
+{
+    if (!b)
+        abort();
+}
+
+static inline char *ta_oom_s(char *s)
+{
+    if (!s)
+        abort();
+    return s;
+}
+
 // Generic pointer
 #define ta_oom_g(ptr) (TA_TYPEOF(ptr))ta_oom_p(ptr)
 

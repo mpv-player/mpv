@@ -63,7 +63,7 @@ static inline bool gl_transform_eq(struct gl_transform a, struct gl_transform b)
 
 void gl_transform_trans(struct gl_transform t, struct gl_transform *x);
 
-void gl_transform_ortho_fbo(struct gl_transform *t, struct ra_fbo fbo);
+void gl_transform_ortho_fbo(struct gl_transform *t, const struct ra_fbo *fbo);
 
 float gl_video_scale_ambient_lux(float lmin, float lmax,
                                  float rmin, float rmax, float lux);

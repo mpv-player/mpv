@@ -260,7 +260,7 @@ sources = files(
 # compiler stuff
 cc = meson.get_compiler('c')
 
-flags = ['-D_GNU_SOURCE', '-D_FILE_OFFSET_BITS=64']
+flags = ['-D_FILE_OFFSET_BITS=64']
 link_flags = []
 
 test_flags = ['-Werror=implicit-function-declaration',
@@ -304,15 +304,20 @@ features += {'darwin': darwin}
 features += {'posix': posix}
 features += {'dos-paths': win32, 'win32': win32}
 
-mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DUNICODE', '-DCOBJMACROS',
-               '-DINITGUID', '-U__STRICT_ANSI__']
+mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DWINVER=0x0602', '-DUNICODE',
+               '-DCOBJMACROS', '-DINITGUID', '-U__STRICT_ANSI__', '-DNOMINMAX',
+               '-D_USE_MATH_DEFINES', '-DWIN32_LEAN_AND_MEAN']
 
 if host_machine.system() == 'windows'
-    flags += [mswin_flags, '-D__USE_MINGW_ANSI_STDIO=1']
+    flags += [mswin_flags]
 endif
 
 if host_machine.system() == 'cygwin'
     flags += [mswin_flags, '-mwin32']
+endif
+
+if posix
+    flags += ['-D_GNU_SOURCE']
 endif
 
 noexecstack = false
@@ -362,6 +367,7 @@ if not features['win32-threads']
     features += {'pthread-condattr-setclock':
                     cc.has_header_symbol('pthread.h',
                                          'pthread_condattr_setclock',
+                                         args: '-D_GNU_SOURCE',
                                          dependencies: pthreads)}
     dependencies += pthreads
 endif
@@ -1755,6 +1761,13 @@ if get_option('cplayer')
 
     mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
                      win_subsystem: 'windows,6.0', install: true)
+
+    # Older meson versions generate this in the player subdirectory.
+    if win32 and meson.version().version_compare('>= 1.3.0')
+        wrapper_sources= 'osdep/win32-console-wrapper.c'
+        executable('mpv', wrapper_sources, c_args: '-municode', link_args: '-municode',
+                   name_suffix: 'com', install: true)
+    endif
 endif
 
 if get_option('tests')

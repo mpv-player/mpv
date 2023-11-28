@@ -269,7 +269,6 @@ rm -rf $build
 
 meson setup $build --cross-file "$prefix_dir/crossfile" \
     --werror                   \
-    -Dlibplacebo:werror=false  \
     -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
     --buildtype debugoptimized \
     -Dlibmpv=true -Dlua=luajit \
@@ -280,7 +279,7 @@ meson compile -C $build
 if [ "$2" = pack ]; then
     mkdir -p artifact/tmp
     echo "Copying:"
-    cp -pv $build/player/mpv.com $build/mpv.exe artifact/
+    cp -pv $build/mpv.com $build/mpv.exe artifact/
     # copy everything we can get our hands on
     cp -p "$prefix_dir/bin/"*.dll artifact/tmp/
     shopt -s nullglob

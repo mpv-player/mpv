@@ -470,11 +470,9 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
 
     ca_print_asbd(ao, "setting stream physical format:", &change_format);
 
-    sem_t wakeup;
-    if (mp_sem_init(&wakeup, 0, 0)) {
-        MP_WARN(ao, "OOM\n");
-        return false;
-    }
+    mp_sem_t wakeup;
+    if (mp_sem_init(&wakeup, 0, 0))
+        MP_HANDLE_OOM(0);
 
     AudioStreamBasicDescription prev_format;
     err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &prev_format);

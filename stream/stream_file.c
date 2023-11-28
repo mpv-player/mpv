@@ -50,6 +50,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <winioctl.h>
 #include <winternl.h>
 #include <io.h>
 

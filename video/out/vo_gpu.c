@@ -80,7 +80,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!sw->fns->start_frame(sw, &fbo))
         return;
 
-    gl_video_render_frame(p->renderer, frame, fbo, RENDER_FRAME_DEF);
+    gl_video_render_frame(p->renderer, frame, &fbo, RENDER_FRAME_DEF);
     if (!sw->fns->submit_frame(sw, frame)) {
         MP_ERR(vo, "Failed presenting frame!\n");
         return;

@@ -340,8 +340,9 @@ static int preinit(struct vo *vo)
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
 
 #if HAVE_POSIX
-    struct sigaction sa;
-    sa.sa_handler = handle_winch;
+    struct sigaction sa = {
+        .sa_handler = handle_winch,
+    };
     sigaction(SIGWINCH, &sa, &saved_sigaction);
 #endif
 

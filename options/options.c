@@ -281,7 +281,8 @@ const struct m_sub_options mp_sub_filter_opts = {
 
 const struct m_sub_options mp_subtitle_sub_opts = {
     .opts = (const struct m_option[]){
-        {"sub-delay", OPT_FLOAT(sub_delay)},
+        {"sub-delay", OPT_FLOAT(sub_delay[0])},
+        {"secondary-sub-delay", OPT_FLOAT(sub_delay[1])},
         {"sub-fps", OPT_FLOAT(sub_fps)},
         {"sub-speed", OPT_FLOAT(sub_speed)},
         {"sub-visibility", OPT_BOOL(sub_visibility)},
@@ -359,6 +360,7 @@ const struct m_sub_options mp_osd_render_sub_opts = {
         {"osd-bar-align-y", OPT_FLOAT(osd_bar_align_y), M_RANGE(-1.0, +1.0)},
         {"osd-bar-w", OPT_FLOAT(osd_bar_w), M_RANGE(1, 100)},
         {"osd-bar-h", OPT_FLOAT(osd_bar_h), M_RANGE(0.1, 50)},
+        {"osd-bar-border-size", OPT_FLOAT(osd_bar_border_size), M_RANGE(0, 1000.0)},
         {"osd", OPT_SUBSTRUCT(osd_style, osd_style_conf)},
         {"osd-scale", OPT_FLOAT(osd_scale), M_RANGE(0, 100)},
         {"osd-scale-by-window", OPT_BOOL(osd_scale_by_window)},
@@ -370,6 +372,7 @@ const struct m_sub_options mp_osd_render_sub_opts = {
         .osd_bar_align_y = 0.5,
         .osd_bar_w = 75.0,
         .osd_bar_h = 3.125,
+        .osd_bar_border_size = 1.2,
         .osd_scale = 1,
         .osd_scale_by_window = true,
     },

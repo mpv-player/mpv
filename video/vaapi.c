@@ -92,7 +92,7 @@ static void va_error_callback(void *context, const char *msg)
 
 static void va_info_callback(void *context, const char *msg)
 {
-    va_message_callback(context, msg, MSGL_DEBUG);
+    va_message_callback(context, msg, MSGL_V);
 }
 
 static void free_device_ref(struct AVHWDeviceContext *hwctx)
@@ -316,7 +316,8 @@ static struct AVBufferRef *va_create_standalone(struct mpv_global *global,
                 va_initialize(display, log, params->probing);
             if (!ctx) {
                 vaTerminate(display);
-                native_displays[n]->destroy(native_ctx);
+                if (native_displays[n]->destroy)
+                    native_displays[n]->destroy(native_ctx);
                 goto end;
             }
             ctx->native_ctx = native_ctx;

@@ -650,10 +650,9 @@ class Common: NSObject {
             focus.pointee = NSApp.isActive
             return VO_TRUE
         case VOCTRL_UPDATE_WINDOW_TITLE:
-            let titleData = data!.assumingMemoryBound(to: Int8.self)
+            let title = String(cString: data!.assumingMemoryBound(to: CChar.self))
             DispatchQueue.main.async {
-                let title = NSString(utf8String: titleData) as String?
-                self.title = title ?? "Unknown Title"
+                self.title = title
             }
             return VO_TRUE
         default:

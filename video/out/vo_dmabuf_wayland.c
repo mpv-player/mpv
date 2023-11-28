@@ -137,10 +137,10 @@ static const struct wl_buffer_listener osd_buffer_listener = {
 };
 
 #if HAVE_VAAPI
-static void close_file_descriptors(VADRMPRIMESurfaceDescriptor desc)
+static void close_file_descriptors(const VADRMPRIMESurfaceDescriptor *desc)
 {
-    for (int i = 0; i < desc.num_objects; i++)
-        close(desc.objects[i].fd);
+    for (int i = 0; i < desc->num_objects; i++)
+        close(desc->objects[i].fd);
 }
 #endif
 
@@ -175,7 +175,7 @@ static bool vaapi_drm_format(struct vo *vo, struct mp_image *src)
     p->drm_modifier = desc.objects[0].drm_format_modifier;
     format = true;
 done:
-    close_file_descriptors(desc);
+    close_file_descriptors(&desc);
 #endif
     return format;
 }
@@ -216,7 +216,7 @@ static void vaapi_dmabuf_importer(struct buffer *buf, struct mp_image *src,
     }
 
 done:
-    close_file_descriptors(desc);
+    close_file_descriptors(&desc);
 #endif
 }
 

@@ -33,7 +33,6 @@ enum {
 };
 
 struct macos_opts {
-    int macos_title_bar_style;
     int macos_title_bar_appearance;
     int macos_title_bar_material;
     struct m_color macos_title_bar_color;

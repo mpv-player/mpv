@@ -92,9 +92,10 @@ static void update_subtitle_speed(struct dec_sub *sub)
 static double pts_to_subtitle(struct dec_sub *sub, double pts)
 {
     struct mp_subtitle_opts *opts = sub->opts;
+    float delay = sub->order < 0 ? 0.0f : opts->sub_delay[sub->order];
 
     if (pts != MP_NOPTS_VALUE)
-        pts = (pts * sub->play_dir - opts->sub_delay) / sub->sub_speed;
+        pts = (pts * sub->play_dir - delay) / sub->sub_speed;
 
     return pts;
 }
@@ -102,9 +103,10 @@ static double pts_to_subtitle(struct dec_sub *sub, double pts)
 static double pts_from_subtitle(struct dec_sub *sub, double pts)
 {
     struct mp_subtitle_opts *opts = sub->opts;
+    float delay = sub->order < 0 ? 0.0f : opts->sub_delay[sub->order];
 
     if (pts != MP_NOPTS_VALUE)
-        pts = (pts * sub->sub_speed + opts->sub_delay) * sub->play_dir;
+        pts = (pts * sub->sub_speed + delay) * sub->play_dir;
 
     return pts;
 }
@@ -291,7 +293,8 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
             break;
 
         // (Use this mechanism only if sub_delay matters to avoid corner cases.)
-        double min_pts = sub->opts->sub_delay < 0 || force ? video_pts : MP_NOPTS_VALUE;
+        float delay = sub->order < 0 ? 0.0f : sub->opts->sub_delay[sub->order];
+        double min_pts = delay < 0 || force ? video_pts : MP_NOPTS_VALUE;
 
         struct demux_packet *pkt;
         int st = demux_read_packet_async_until(sub->sh, min_pts, &pkt);
