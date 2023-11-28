@@ -11,7 +11,7 @@ option('ta-leak-report', type: 'boolean', value: false, description: 'enable ta 
 # misc features
 option('cdda', type: 'feature', value: 'disabled', description: 'cdda support (libcdio)')
 option('cplugins', type: 'feature', value: 'auto', description: 'C plugins')
-option('dvbin', type: 'feature', value: 'disabled', description: 'DVB input module')
+option('dvbin', type: 'feature', value: 'auto', description: 'DVB input module')
 option('dvdnav', type: 'feature', value: 'disabled', description: 'dvdnav support')
 option('iconv', type: 'feature', value: 'auto', description: 'iconv')
 option('javascript', type: 'feature', value: 'auto', description: 'Javascript (MuJS backend)')
