@@ -573,7 +573,8 @@ sources += [ebml_defs, ebml_types]
 
 subdir('common')
 subdir('etc')
-subdir('player')
+subdir('player/javascript')
+subdir('player/lua')
 subdir('sub')
 
 if darwin
@@ -1703,6 +1704,11 @@ if win32
 
     sources += windows.compile_resources('osdep/mpv.rc', args: res_flags, depend_files: resources,
                                          depends: version_h, include_directories: res_includes)
+
+    if get_option('cplayer')
+        wrapper_sources = windows.compile_resources('osdep/mpv_wrapper.rc', args: res_flags, depend_files: resources,
+                                                    depends: version_h, include_directories: res_includes)
+    endif
 endif
 
 
@@ -1760,14 +1766,21 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
-                     win_subsystem: 'windows,6.0', install: true)
+    if win32
+        mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true),
+                         dependencies: dependencies, name_suffix: 'com', install: true)
 
-    # Older meson versions generate this in the player subdirectory.
-    if win32 and meson.version().version_compare('>= 1.3.0')
-        wrapper_sources= 'osdep/win32-console-wrapper.c'
-        executable('mpv', wrapper_sources, c_args: '-municode', link_args: '-municode',
-                   name_suffix: 'com', install: true)
+        if meson.version().version_compare('>= 1.3.0')
+            wrapper_sources += 'osdep/win32-gui-wrapper.c'
+            executable('mpv', wrapper_sources, c_args: '-municode', link_args: '-municode',
+                       win_subsystem: 'windows,6.0', install: true)
+        else
+            # Older meson versions generate this in the player subdirectory.
+            subdir('player')
+        endif
+    else
+        mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true),
+                         dependencies: dependencies, install: true)
     endif
 endif
 

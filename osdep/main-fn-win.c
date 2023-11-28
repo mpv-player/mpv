@@ -22,19 +22,6 @@ struct HEAP_OPTIMIZE_RESOURCES_INFORMATION {
 
 #endif
 
-static bool is_valid_handle(HANDLE h)
-{
-    return h != INVALID_HANDLE_VALUE && h != NULL &&
-           GetFileType(h) != FILE_TYPE_UNKNOWN;
-}
-
-static bool has_redirected_stdio(void)
-{
-    return is_valid_handle(GetStdHandle(STD_INPUT_HANDLE)) ||
-           is_valid_handle(GetStdHandle(STD_OUTPUT_HANDLE)) ||
-           is_valid_handle(GetStdHandle(STD_ERROR_HANDLE));
-}
-
 static void microsoft_nonsense(void)
 {
     // stop Windows from showing all kinds of annoying error dialogs
@@ -61,14 +48,17 @@ int main(int argc_, char **argv_)
 {
     microsoft_nonsense();
 
-    // If started from the console wrapper (see osdep/win32-console-wrapper.c),
-    // attach to the console and set up the standard IO handles
-    bool has_console = terminal_try_attach();
+    DWORD cproc_count = GetConsoleProcessList(&(DWORD){0}, 1);
+    STARTUPINFOW si = { sizeof(si) };
 
-    // If mpv is started from Explorer, the Run dialog or the Start Menu, it
-    // will have no console and no standard IO handles. In this case, the user
-    // is expecting mpv to show some UI, so enable the pseudo-GUI profile.
-    bool gui = !has_console && !has_redirected_stdio();
+    GetStartupInfoW(&si);
+    bool use_stdhandles = si.dwFlags & STARTF_USESTDHANDLES;
+
+    // Unless the standard IO handles have been inherited (MSYS2 console for
+    // example), provide a UI when not attached to a console (see
+    // osdep/win32-gui-wrapper.c), or when is the only process attached to the
+    // console (e.g., started from Explorer or the Run dialog).
+    bool gui = !use_stdhandles && cproc_count < 2;
 
     int argc = 0;
     wchar_t **argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -80,8 +70,10 @@ int main(int argc_, char **argv_)
     if (argc > 0 && argv[0])
         MP_TARRAY_APPEND(NULL, argv_u8, argv_len, mp_to_utf8(argv_u8, argv[0]));
     if (gui) {
-        MP_TARRAY_APPEND(NULL, argv_u8, argv_len,
-                         "--player-operation-mode=pseudo-gui");
+        MP_TARRAY_APPEND(NULL, argv_u8, argv_len, "--player-operation-mode=pseudo-gui");
+        // Enable terminal output if attached to a console
+        if (cproc_count)
+            MP_TARRAY_APPEND(NULL, argv_u8, argv_len, "--terminal=yes");
     }
     for (int i = 1; i < argc; i++)
         MP_TARRAY_APPEND(NULL, argv_u8, argv_len, mp_to_utf8(argv_u8, argv[i]));
