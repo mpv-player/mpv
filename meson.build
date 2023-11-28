@@ -939,7 +939,7 @@ if features['sdl2-video']
     sources += files('video/out/vo_sdl.c')
 endif
 
-shaderc = dependency('shaderc', required: get_option('shaderc'))
+shaderc = dependency('shaderc', required: get_option('shaderc').require(features['win32-desktop']))
 features += {'shaderc': shaderc.found()}
 if features['shaderc']
     dependencies += shaderc
@@ -958,7 +958,7 @@ if features['posix']
     features += {'posix-shm': cc.has_function('shm_open', prefix: '#include <sys/mman.h>')}
 endif
 
-spirv_cross = dependency('spirv-cross-c-shared', required: get_option('spirv-cross'))
+spirv_cross = dependency('spirv-cross-c-shared', required: get_option('spirv-cross').require(features['win32-desktop']))
 features += {'spirv-cross': spirv_cross.found()}
 if features['spirv-cross']
     dependencies += spirv_cross
