@@ -5,6 +5,8 @@ export CFLAGS="$CFLAGS -isystem/usr/local/include"
 export CXXFLAGS="$CXXFLAGS -isystem/usr/local/include"
 export LDFLAGS="$LDFLAGS -L/usr/local/lib"
 
+# TODO: readd -Ddvbin=enabled
+
 meson setup build \
     --werror      \
     -Dlibplacebo:werror=false \
@@ -19,7 +21,6 @@ meson setup build \
     -Dvdpau=enabled \
     -Dvulkan=enabled \
     -Doss-audio=enabled \
-    $(pkg info -q v4l_compat && echo -Ddvbin=enabled) \
     $(pkg info -q libdvdnav && echo -Ddvdnav=enabled) \
     $(pkg info -q libcdio-paranoia && echo -Dcdda=enabled) \
     $(pkg info -q pipewire && echo -Dpipewire=enabled) \
