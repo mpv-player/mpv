@@ -740,6 +740,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
             now - ictx->last_doubleclick_time < opts->doubleclick_time / 1000.0)
         {
             if (code >= MP_MBTN_LEFT && code <= MP_MBTN_RIGHT) {
+                now = 0;
                 interpret_key(ictx, code - MP_MBTN_BASE + MP_MBTN_DBL_BASE,
                               1, 1);
             }
