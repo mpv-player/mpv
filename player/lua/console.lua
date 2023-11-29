@@ -27,6 +27,7 @@ local opts = {
     -- multiplied by "scale".
     font_size = 16,
     border_size = 1,
+    case_sensitive = true,
     -- Remove duplicate entries in history as to only keep the latest one.
     history_dedup = true,
     -- The ratio of font height to font width.
@@ -49,6 +50,7 @@ end
 local platform = detect_platform()
 if platform == 'windows' then
     opts.font = 'Consolas'
+    opts.case_sensitive = false
 elseif platform == 'darwin' then
     opts.font = 'Menlo'
 else
@@ -901,30 +903,70 @@ function build_completers()
     return completers
 end
 
--- Use 'list' to find possible tab-completions for 'part.'
--- Returns a list of all potential completions and the longest
--- common prefix of all the matching list items.
-function complete_match(part, list)
-    local completions = {}
+-- Find the longest common case-sensitive prefix of the entries in "list".
+local function find_common_prefix(part, list)
     local prefix = nil
 
     for _, candidate in ipairs(list) do
-        if candidate:sub(1, part:len()) == part then
-            if prefix and prefix ~= candidate then
-                local prefix_len = part:len()
-                while prefix:sub(1, prefix_len + 1)
-                       == candidate:sub(1, prefix_len + 1) do
-                    prefix_len = prefix_len + 1
-                end
-                prefix = candidate:sub(1, prefix_len)
-            else
-                prefix = candidate
+        if prefix and prefix ~= candidate then
+            local prefix_len = part:len()
+            while prefix:sub(1, prefix_len + 1) == candidate:sub(1, prefix_len + 1) do
+                prefix_len = prefix_len + 1
             end
+            prefix = candidate:sub(1, prefix_len)
+        else
+            prefix = candidate
+        end
+    end
+
+    return prefix
+end
+
+-- Return the entries of "list" beginning with "part" and the longest common
+-- prefix of the matches.
+local function complete_match(part, list)
+    local completions = {}
+
+    for _, candidate in pairs(list) do
+        if candidate:sub(1, part:len()) == part then
             completions[#completions + 1] = candidate
         end
     end
 
-    return completions, prefix
+    local prefix = find_common_prefix(part, completions)
+
+    if opts.case_sensitive then
+        return completions, prefix
+    end
+
+    completions = {}
+    local lower_case_completions = {}
+    local lower_case_part = part:lower()
+
+    for _, candidate in pairs(list) do
+        if candidate:sub(1, part:len()):lower() == lower_case_part then
+            completions[#completions + 1] = candidate
+            lower_case_completions[#lower_case_completions + 1] = candidate:lower()
+        end
+    end
+
+    local lower_case_prefix = find_common_prefix(lower_case_part,
+                                                 lower_case_completions)
+
+    -- Behave like GNU readline with completion-ignore-case On.
+    -- part = 'fooBA', completions = {'foobarbaz', 'fooBARqux'} =>
+    -- prefix = 'fooBARqux', lower_case_prefix = 'foobar', return 'fooBAR'
+    if prefix then
+        return completions, prefix:sub(1, lower_case_prefix:len())
+    end
+
+    -- part = 'fooba', completions = {'fooBARbaz', 'fooBarqux'} =>
+    -- prefix = nil, lower_case_prefix ='foobar', return 'fooBAR'
+    if lower_case_prefix then
+        return completions, completions[1]:sub(1, lower_case_prefix:len())
+    end
+
+    return {}, part
 end
 
 function common_prefix_length(s1, s2)
