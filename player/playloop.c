@@ -1030,8 +1030,12 @@ int handle_force_window(struct MPContext *mpctx, bool force)
                 break;
             }
         }
+
+        // Use a 16:9 aspect ratio so that fullscreen on a 16:9 screen will not
+        // have vertical margins, which can lead to a different size or position
+        // of subtitles than with 16:9 videos.
         int w = 960;
-        int h = 480;
+        int h = 540;
         struct mp_image_params p = {
             .imgfmt = config_format,
             .w = w,   .h = h,
