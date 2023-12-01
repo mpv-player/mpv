@@ -29,7 +29,7 @@ differs from your own.
 
 ### Log file
 
-Upload meson-logs/meson-log.txt or meson setup build output to https://0x0.st/ or attach
-it to the github issue, and replace this text with a link to it.
+Attach meson-logs/meson-log.txt or meson setup build output to the issue,
+and replace this text with a link to it.
 
 Without the log file, this issue will be closed for ignoring the issue template.

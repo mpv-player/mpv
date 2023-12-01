@@ -35,9 +35,8 @@ differs from your own.
 
 ### Log file
 
-Make a log file made with -v -v or --log-file=output.txt, paste it to
-https://0x0.st/ or attach it to the github issue, and replace this text with a
-link to it.
+Make a log file made with -v -v or --log-file=output.txt, attach it to
+the issue, and replace this text with a link to it.
 
 Without the log file, this issue will be closed for ignoring the issue template.
 
@@ -45,6 +44,7 @@ In the case of a crash, please provide a backtrace.
 
 ### Sample files
 
-Sample files needed to reproduce this issue can be uploaded to https://0x0.st/
-or similar sites. (Only needed if the issue cannot be reproduced without it.)
+Sample files needed to reproduce this issue can be attached to the issue
+(preferred), or be uploaded to https://0x0.st/ or similar sites.
+(Only needed if the issue cannot be reproduced without it.)
 Do not use garbage like "cloud storage", especially not Google Drive.
