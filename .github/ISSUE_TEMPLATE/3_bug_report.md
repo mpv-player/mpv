@@ -13,6 +13,9 @@ Provide following Information:
 - mpv version
 - Platform and Version
 - Source of the mpv binary
+- If known which version of mpv introduced the problem
+- GPU model, driver and version
+- Possible screenshot or video of visual glitches
 
 If you're not using git master or the latest release, update.
 Releases are listed here: https://github.com/mpv-player/mpv/releases
@@ -35,6 +38,10 @@ differs from your own.
 Make a log file made with -v -v or --log-file=output.txt, paste it to
 https://0x0.st/ or attach it to the github issue, and replace this text with a
 link to it.
+
+Without the log file, this issue will be closed for ignoring the issue template.
+
+In the case of a crash, please provide a backtrace.
 
 ### Sample files
 
