@@ -7,7 +7,12 @@ assignees: ''
 
 ---
 
-### mpv version and platform versions
+### Important Information
+
+Provide following Information:
+- mpv version
+- Platform and Version
+- meson version
 
 If you're not using git master or the latest release, update.
 Releases are listed here: https://github.com/mpv-player/mpv/releases
@@ -27,4 +32,4 @@ differs from your own.
 Upload meson-logs/meson-log.txt or meson setup build output to https://0x0.st/ or attach
 it to the github issue, and replace this text with a link to it.
 
-The issue will be closed for ignoring the issue template.
+Without the log file, this issue will be closed for ignoring the issue template.
