@@ -20,6 +20,5 @@ https://github.com/mpv-player/mpv/labels/meta%3Aquestion
 ### Log file
 
 Even if you think it's not necessary at first, it might help us later to find
-possible issues. Make a log file made with -v -v or --log-file=output.txt, paste
-it to https://0x0.st/ or attach it to the github issue, and replace this text
-with a link to it.
+possible issues. Make a log file made with -v -v or --log-file=output.txt,
+attach it to the issue, and replace this text with a link to it.
