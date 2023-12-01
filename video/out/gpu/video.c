@@ -3365,8 +3365,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
 
                 // For the non-interpolation case, we draw to a single "cache"
                 // texture to speed up subsequent re-draws (if any exist)
-                const struct ra_fbo *dest_fbo = fbo;
                 bool repeats = frame->num_vsyncs > 1 && frame->display_synced;
+                bool r = false;
                 if ((repeats || frame->still) && !p->dumb_mode &&
                     (p->ra->caps & RA_CAP_BLIT) && fbo->tex->params.blit_dst)
                 {
@@ -3376,15 +3376,12 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                     const struct ra_format *fmt = fbo->tex->params.format;
                     if (fmt->dummy_format)
                         fmt = p->fbo_format;
-
-                    bool r = ra_tex_resize(p->ra, p->log, &p->output_tex,
-                                           fbo->tex->params.w, fbo->tex->params.h,
-                                           fmt);
-                    if (r) {
-                        dest_fbo = &(struct ra_fbo) { p->output_tex };
-                        p->output_tex_valid = true;
-                    }
+                    r = ra_tex_resize(p->ra, p->log, &p->output_tex,
+                                      fbo->tex->params.w, fbo->tex->params.h,
+                                      fmt);
                 }
+                const struct ra_fbo *dest_fbo = r ? &(struct ra_fbo) { p->output_tex } : fbo;
+                p->output_tex_valid = r;
                 pass_draw_to_screen(p, dest_fbo, flags);
             }
 

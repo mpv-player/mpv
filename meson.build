@@ -599,11 +599,12 @@ if features['cdda']
     sources += files('stream/stream_cdda.c')
 endif
 
-dvbin = get_option('dvbin').require(
+dvbin_opt = get_option('dvbin').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
 )
-features += {'dvbin': dvbin.allowed()}
+dvbin = cc.has_header('linux/dvb/frontend.h', required: dvbin_opt)
+features += {'dvbin': dvbin}
 if features['dvbin']
     sources += files('stream/dvb_tune.c',
                      'stream/stream_dvb.c')
@@ -939,7 +940,7 @@ if features['sdl2-video']
     sources += files('video/out/vo_sdl.c')
 endif
 
-shaderc = dependency('shaderc', required: get_option('shaderc'))
+shaderc = dependency('shaderc', required: get_option('shaderc').require(features['win32-desktop']))
 features += {'shaderc': shaderc.found()}
 if features['shaderc']
     dependencies += shaderc
@@ -958,7 +959,7 @@ if features['posix']
     features += {'posix-shm': cc.has_function('shm_open', prefix: '#include <sys/mman.h>')}
 endif
 
-spirv_cross = dependency('spirv-cross-c-shared', required: get_option('spirv-cross'))
+spirv_cross = dependency('spirv-cross-c-shared', required: get_option('spirv-cross').require(features['win32-desktop']))
 features += {'spirv-cross': spirv_cross.found()}
 if features['spirv-cross']
     dependencies += spirv_cross
