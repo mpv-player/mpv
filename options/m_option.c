@@ -1517,6 +1517,7 @@ static char *print_str_list(const m_option_t *opt, const void *src)
 {
     char **lst = NULL;
     char *ret = NULL;
+    const char sep = opt->priv ? *(char *)opt->priv : OPTION_LIST_SEPARATOR;
 
     if (!(src && VAL(src)))
         return talloc_strdup(NULL, "");
@@ -1524,7 +1525,7 @@ static char *print_str_list(const m_option_t *opt, const void *src)
 
     for (int i = 0; lst[i]; i++) {
         if (ret)
-            ret = talloc_strdup_append_buffer(ret, ",");
+            ret = talloc_strndup_append_buffer(ret, &sep, 1);
         ret = talloc_strdup_append_buffer(ret, lst[i]);
     }
     return ret;
