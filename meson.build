@@ -399,7 +399,11 @@ endif
 
 if posix
     path_source = files('osdep/path-unix.c')
-    subprocess_source = files('osdep/subprocess-posix.c')
+    if cc.has_function('fork', prefix : '#include <unistd.h>')
+        subprocess_source = files('osdep/subprocess-posix.c')
+    else
+        subprocess_source = files('osdep/subprocess-dummy.c')
+    endif
     sources += files('input/ipc-unix.c',
                      'osdep/poll_wrapper.c',
                      'osdep/terminal-unix.c',
