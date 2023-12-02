@@ -18,13 +18,15 @@
  */
 
 #include <math.h>
-#include <wchar.h>
+
 #include <windows.h>
-#include <errors.h>
 #include <mmsystem.h>
+#include <mmreg.h>
 #include <ksguid.h>
 #include <ksmedia.h>
 #include <avrt.h>
+#include <propsys.h>
+#include <functiondiscoverykeys_devpkey.h>
 
 #include "audio/format.h"
 #include "osdep/timer.h"
@@ -32,36 +34,47 @@
 #include "osdep/strnlen.h"
 #include "ao_wasapi.h"
 
-DEFINE_PROPERTYKEY(mp_PKEY_Device_FriendlyName,
-                   0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
-                   0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14);
-DEFINE_PROPERTYKEY(mp_PKEY_Device_DeviceDesc,
-                   0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
-                   0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 2);
-// CEA 861 subformats
-// should work on vista
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DTS,
-            0x00000008, 0x0000, 0x0010, 0x80, 0x00,
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DTS
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DTS,
+            WAVE_FORMAT_DTS, 0x0000, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL,
-            0x00000092, 0x0000, 0x0010, 0x80, 0x00,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL,
+            WAVE_FORMAT_DOLBY_AC3_SPDIF, 0x0000, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-// might require 7+
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_AAC,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_AAC
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_AAC,
             0x00000006, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3,
             0x00000005, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS,
             0x0000000a, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD,
             0x0000000b, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP,
             0x0000000c, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+#endif
 
 struct wasapi_sample_fmt {
     int mp_format;  // AF_FORMAT_*
@@ -83,13 +96,13 @@ static const struct wasapi_sample_fmt wasapi_formats[] = {
     // aka S24 (with conversion on output)
     {AF_FORMAT_S32,     24, 24, &KSDATAFORMAT_SUBTYPE_PCM},
     {AF_FORMAT_FLOAT,   32, 32, &KSDATAFORMAT_SUBTYPE_IEEE_FLOAT},
-    {AF_FORMAT_S_AC3,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL},
-    {AF_FORMAT_S_DTS,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DTS},
-    {AF_FORMAT_S_AAC,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_AAC},
-    {AF_FORMAT_S_MP3,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3},
-    {AF_FORMAT_S_TRUEHD, 16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP},
-    {AF_FORMAT_S_EAC3,  16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS},
-    {AF_FORMAT_S_DTSHD, 16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD},
+    {AF_FORMAT_S_AC3,   16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL},
+    {AF_FORMAT_S_DTS,   16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DTS},
+    {AF_FORMAT_S_AAC,   16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_AAC},
+    {AF_FORMAT_S_MP3,   16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3},
+    {AF_FORMAT_S_TRUEHD, 16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP},
+    {AF_FORMAT_S_EAC3,  16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS},
+    {AF_FORMAT_S_DTSHD, 16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD},
     {0},
 };
 
@@ -719,7 +732,7 @@ static char* get_device_name(struct mp_log *l, void *talloc_ctx, IMMDevice *pDev
     HRESULT hr = IMMDevice_OpenPropertyStore(pDevice, STGM_READ, &pProps);
     EXIT_ON_ERROR(hr);
 
-    hr = IPropertyStore_GetValue(pProps, &mp_PKEY_Device_FriendlyName,
+    hr = IPropertyStore_GetValue(pProps, &PKEY_Device_FriendlyName,
                                  &devname);
     EXIT_ON_ERROR(hr);
 
