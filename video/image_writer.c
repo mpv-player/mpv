@@ -59,7 +59,6 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .jxl_distance = 1.0,
     .jxl_effort = 4,
     .avif_encoder = "libaom-av1",
-    .avif_pixfmt = "yuv420p",
     .avif_opts = (char*[]){
         "usage",    "allintra",
         "crf",      "32",
@@ -717,7 +716,8 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
 #if HAVE_AVIF_MUXER
     if (opts->format == AV_CODEC_ID_AV1) {
         write = write_avif;
-        destfmt = mp_imgfmt_from_name(bstr0(opts->avif_pixfmt));
+        if (opts->avif_pixfmt && opts->avif_pixfmt[0])
+            destfmt = mp_imgfmt_from_name(bstr0(opts->avif_pixfmt));
     }
 #endif
     if (opts->format == AV_CODEC_ID_WEBP && !opts->webp_lossless) {
