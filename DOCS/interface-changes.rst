@@ -31,6 +31,7 @@ Interface changes
     - add `--secondary-sub-delay`, decouple secondary subtitles from
       `--sub-delay`
     - add the `--osd-bar-border-size` option
+    - `--screenshot-avif-pixfmt` no longer defaults to yuv420p
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.
