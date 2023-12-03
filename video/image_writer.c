@@ -61,9 +61,8 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .avif_encoder = "libaom-av1",
     .avif_opts = (char*[]){
         "usage",    "allintra",
-        "crf",      "32",
+        "crf",      "0",
         "cpu-used", "8",
-        "tune",     "ssim",
         NULL
     },
     .tag_csp = true,
