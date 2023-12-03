@@ -4566,7 +4566,7 @@ Screenshot
     Specifies libavcodec options for selected encoder. For more information,
     consult the FFmpeg documentation.
 
-    Default: ``usage=allintra,crf=32,cpu-used=8,tune=ssim``
+    Default: ``usage=allintra,crf=0,cpu-used=8``
 
     Note: the default is only guaranteed to work with the libaom-av1 encoder.
     Above options may not be valid and or optimal for other encoders.
@@ -4575,8 +4575,8 @@ Screenshot
 
     .. admonition:: Example
 
-        "``--screenshot-avif-opts=crf=32,aq-mode=complexity``"
-            sets the crf to 32 and quantization (aq-mode) to complexity based.
+        "``--screenshot-avif-opts=crf=23,aq-mode=complexity``"
+            sets the crf to 23 and quantization (aq-mode) to complexity based.
 
 ``--screenshot-sw=<yes|no>``
     Whether to use software rendering for screenshots (default: no).
