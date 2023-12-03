@@ -630,6 +630,8 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
         .p_w = 1,
         .p_h = 1,
         .color = image->params.color,
+        .chroma_location = image->params.chroma_location,
+        .crop = {0, 0, d_w, d_h},
     };
     mp_image_params_guess_csp(&p);
 
