@@ -253,6 +253,12 @@ static bool check_locale(void)
     return !name || strcmp(name, "C") == 0 || strcmp(name, "C.UTF-8") == 0;
 }
 
+static bool ta_report_enabled(void)
+{
+    char *enable_talloc = getenv("MPV_LEAK_REPORT");
+    return enable_talloc && strcmp(enable_talloc, "1") == 0;
+}
+
 struct MPContext *mp_create(void)
 {
     if (!check_locale()) {
@@ -263,8 +269,7 @@ struct MPContext *mp_create(void)
         return NULL;
     }
 
-    char *enable_talloc = getenv("MPV_LEAK_REPORT");
-    if (enable_talloc && strcmp(enable_talloc, "1") == 0)
+    if (ta_report_enabled())
         talloc_enable_leak_report();
 
     mp_time_init();
@@ -286,7 +291,7 @@ struct MPContext *mp_create(void)
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
 
-    demux_packet_pool_init(mpctx->global);
+    demux_packet_pool_init(mpctx->global, mpctx);
     stats_global_init(mpctx->global);
 
     // Nothing must call mp_msg*() and related before this
@@ -453,6 +458,10 @@ int mpv_main(int argc, char *argv[])
 
     char **options = argv && argv[0] ? argv + 1 : NULL; // skips program name
     int r = mp_initialize(mpctx, options);
+#if !defined(__SANITIZE_ADDRESS__)
+    // allow fast exit on standalone player, unless leak detection is enabled
+    mpctx->quit_fast = !ta_report_enabled();
+#endif
     if (r == 0)
         mp_play_files(mpctx);
 
