@@ -20,13 +20,15 @@
 #include "osdep/threads.h"
 
 struct demux_packet;
+struct MPContext;
 
 struct demux_packet_pool {
     mp_mutex lock;
     struct demux_packet *packets;
+    struct MPContext *parent;
 };
 
-void demux_packet_pool_init(struct demux_packet_pool *pool);
+void demux_packet_pool_init(struct demux_packet_pool *pool, struct MPContext *parent);
 void demux_packet_pool_uninit(void *p);
 void demux_packet_pool_clear(struct demux_packet_pool *pool);
 void demux_packet_pool_push(struct demux_packet_pool *pool,
