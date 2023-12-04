@@ -18,18 +18,21 @@
 #include "packet_pool.h"
 
 #include "osdep/threads.h"
+#include "player/core.h"
 #include "packet.h"
 
-void demux_packet_pool_init(struct demux_packet_pool *pool)
+void demux_packet_pool_init(struct demux_packet_pool *pool, struct MPContext *parent)
 {
     mp_mutex_init(&pool->lock);
     pool->packets = NULL;
+    pool->parent = parent;
 }
 
 void demux_packet_pool_uninit(void *p)
 {
     struct demux_packet_pool *pool = p;
-    demux_packet_pool_clear(pool);
+    if (!pool->parent->quit_fast)
+        demux_packet_pool_clear(pool);
     mp_mutex_destroy(&pool->lock);
 }
 
