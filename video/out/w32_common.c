@@ -182,6 +182,7 @@ struct vo_w32_state {
 
     bool cleared;
     bool dragging;
+    BOOL win_arranging;
 };
 
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
@@ -485,9 +486,12 @@ static bool handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
         // needs to be kept resonsive.
         // Workaround this by intercepting the loop in the WM_MOVING message,
         // where the up-to-date value is available.
+        SystemParametersInfoW(SPI_GETWINARRANGING, 0, &w32->win_arranging, 0);
         w32->dragging = true;
         SendMessage(w32->window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
         w32->dragging = false;
+        SystemParametersInfoW(SPI_SETWINARRANGING, w32->win_arranging, 0, 0);
+
         mp_input_put_key(w32->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
 
         // Indicate the message was handled, so DefWindowProc won't be called
@@ -1252,6 +1256,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         // Prevent the window from being moved if the window dragging hack
         // is active, and the window is currently in fullscreen.
         if (w32->dragging && w32->current_fs) {
+            // Temporarily disable window arrangement to prevent aero shake
+            // from being activated. The original system setting will be restored
+            // after the dragging hack ends.
+            if (w32->win_arranging) {
+                SystemParametersInfoW(SPI_SETWINARRANGING, FALSE, 0, 0);
+            }
             *rc = w32->windowrc;
             return TRUE;
         }
