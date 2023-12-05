@@ -742,19 +742,21 @@ local function command_list_and_help()
 end
 
 local function property_list()
-    local option_info = {
-        'name', 'type', 'set-from-commandline', 'set-locally', 'default-value',
-        'min', 'max', 'choices',
-    }
-
     local properties = mp.get_property_native('property-list')
+
+    for _, sub_property in pairs({'video', 'audio', 'sub', 'sub2'}) do
+        properties[#properties + 1] = 'current-tracks/' .. sub_property
+    end
 
     for _, option in ipairs(mp.get_property_native('options')) do
         properties[#properties + 1] = 'options/' .. option
         properties[#properties + 1] = 'file-local-options/' .. option
         properties[#properties + 1] = 'option-info/' .. option
 
-        for _, sub_property in ipairs(option_info) do
+        for _, sub_property in pairs({
+            'name', 'type', 'set-from-commandline', 'set-locally',
+            'default-value', 'min', 'max', 'choices',
+        }) do
             properties[#properties + 1] = 'option-info/' .. option .. '/' ..
                                           sub_property
         end
