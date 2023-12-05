@@ -379,6 +379,8 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             }
             break;
         case SUBBITMAP_LIBASS:
+            if (src && item->video_color_space)
+                ol->color = src->params.color;
             ol->mode = PL_OVERLAY_MONOCHROME;
             ol->repr.alpha = PL_ALPHA_INDEPENDENT;
             break;
