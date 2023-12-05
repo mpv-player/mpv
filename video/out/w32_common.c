@@ -132,7 +132,7 @@ struct vo_w32_state {
     atomic_uint event_flags;
 
     BOOL tracking;
-    TRACKMOUSEEVENT trackEvent;
+    TRACKMOUSEEVENT track_event;
 
     int mouse_x;
     int mouse_y;
@@ -156,8 +156,8 @@ struct vo_w32_state {
 
     ITaskbarList2 *taskbar_list;
     ITaskbarList3 *taskbar_list3;
-    UINT tbtnCreatedMsg;
-    bool tbtnCreated;
+    UINT tbtn_created_msg;
+    bool tbtn_created;
 
     struct voctrl_playback_state current_pstate;
 
@@ -672,7 +672,7 @@ static void update_playback_state(struct vo_w32_state *w32)
 {
     struct voctrl_playback_state *pstate = &w32->current_pstate;
 
-    if (!w32->taskbar_list3 || !w32->tbtnCreated)
+    if (!w32->taskbar_list3 || !w32->tbtn_created)
         return;
 
     if (!pstate->playing || !pstate->taskbar_progress) {
@@ -1455,7 +1455,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_MOUSEMOVE: {
         if (!w32->tracking) {
-            w32->tracking = TrackMouseEvent(&w32->trackEvent);
+            w32->tracking = TrackMouseEvent(&w32->track_event);
             mp_input_put_key(w32->input_ctx, MP_KEY_MOUSE_ENTER);
         }
         // Windows can send spurious mouse events, which would make the mpv
@@ -1528,8 +1528,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
 
-    if (message == w32->tbtnCreatedMsg) {
-        w32->tbtnCreated = true;
+    if (message == w32->tbtn_created_msg) {
+        w32->tbtn_created = true;
         update_playback_state(w32);
         return 0;
     }
@@ -1829,7 +1829,7 @@ static MP_THREAD_VOID gui_thread(void *ptr)
                 ITaskbarList3_Release(w32->taskbar_list3);
                 w32->taskbar_list3 = NULL;
             } else {
-                w32->tbtnCreatedMsg = RegisterWindowMessage(L"TaskbarButtonCreated");
+                w32->tbtn_created_msg = RegisterWindowMessage(L"TaskbarButtonCreated");
             }
         }
     } else {
@@ -1837,7 +1837,7 @@ static MP_THREAD_VOID gui_thread(void *ptr)
     }
 
     w32->tracking   = FALSE;
-    w32->trackEvent = (TRACKMOUSEEVENT){
+    w32->track_event = (TRACKMOUSEEVENT){
         .cbSize    = sizeof(TRACKMOUSEEVENT),
         .dwFlags   = TME_LEAVE,
         .hwndTrack = w32->window,
