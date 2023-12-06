@@ -59,12 +59,10 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .jxl_distance = 1.0,
     .jxl_effort = 4,
     .avif_encoder = "libaom-av1",
-    .avif_pixfmt = "yuv420p",
     .avif_opts = (char*[]){
         "usage",    "allintra",
-        "crf",      "32",
+        "crf",      "0",
         "cpu-used", "8",
-        "tune",     "ssim",
         NULL
     },
     .tag_csp = true,
@@ -631,6 +629,8 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
         .p_w = 1,
         .p_h = 1,
         .color = image->params.color,
+        .chroma_location = image->params.chroma_location,
+        .crop = {0, 0, d_w, d_h},
     };
     mp_image_params_guess_csp(&p);
 
@@ -651,7 +651,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
     if (mp_image_params_equal(&p, &image->params))
         return mp_image_new_ref(image);
 
-    mp_dbg(log, "will convert image to %s\n", mp_imgfmt_to_name(p.imgfmt));
+    mp_verbose(log, "will convert image to %s\n", mp_imgfmt_to_name(p.imgfmt));
 
     struct mp_image *src = image;
     if (mp_image_crop_valid(&src->params) &&
@@ -702,7 +702,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     if (!opts)
         opts = &defs;
 
-    mp_dbg(log, "input: %s\n", mp_image_params_to_str(&image->params));
+    mp_verbose(log, "input: %s\n", mp_image_params_to_str(&image->params));
 
     struct image_writer_ctx ctx = { log, opts, image->fmt };
     bool (*write)(struct image_writer_ctx *, mp_image_t *, const char *) = write_lavc;
@@ -717,7 +717,8 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
 #if HAVE_AVIF_MUXER
     if (opts->format == AV_CODEC_ID_AV1) {
         write = write_avif;
-        destfmt = mp_imgfmt_from_name(bstr0(opts->avif_pixfmt));
+        if (opts->avif_pixfmt && opts->avif_pixfmt[0])
+            destfmt = mp_imgfmt_from_name(bstr0(opts->avif_pixfmt));
     }
 #endif
     if (opts->format == AV_CODEC_ID_WEBP && !opts->webp_lossless) {

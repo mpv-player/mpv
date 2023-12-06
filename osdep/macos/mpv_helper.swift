@@ -67,8 +67,8 @@ class MPVHelper {
         mp_input_set_mouse_pos(input, Int32(pos.x), Int32(pos.y))
     }
 
-    func putAxis(_ mpkey: Int32, delta: Double) {
-        mp_input_put_wheel(input, mpkey, delta)
+    func putAxis(_ mpkey: Int32, modifiers: NSEvent.ModifierFlags, delta: Double) {
+        mp_input_put_wheel(input, mpkey | mapModifier(modifiers), delta)
     }
 
     func nextChangedOption(property: inout UnsafeMutableRawPointer?) -> Bool {
@@ -109,6 +109,27 @@ class MPVHelper {
         let mpvCmd = mp_input_parse_cmd(input, bstr0(cCmd), "")
         mp_input_queue_cmd(input, mpvCmd)
         free(UnsafeMutablePointer(mutating: cCmd))
+    }
+
+    func mapModifier(_ modifiers: NSEvent.ModifierFlags) -> Int32 {
+        var mask: UInt32 = 0;
+
+        if modifiers.contains(.shift) {
+            mask |= MP_KEY_MODIFIER_SHIFT
+        }
+        if modifiers.contains(.control) {
+            mask |= MP_KEY_MODIFIER_CTRL
+        }
+        if modifiers.contains(.command) {
+            mask |= MP_KEY_MODIFIER_META
+        }
+        if modifiers.rawValue & UInt(NX_DEVICELALTKEYMASK) != 0 ||
+           modifiers.rawValue & UInt(NX_DEVICERALTKEYMASK) != 0 && !mp_input_use_alt_gr(input)
+        {
+            mask |= MP_KEY_MODIFIER_ALT
+        }
+
+        return Int32(mask)
     }
 
     // (__bridge void*)

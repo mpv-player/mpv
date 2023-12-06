@@ -1480,11 +1480,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         handle_mouse_down(w32,
             HIWORD(wParam) == 1 ? MP_MBTN_BACK : MP_MBTN_FORWARD,
             GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        break;
+        return TRUE;
     case WM_XBUTTONUP:
         handle_mouse_up(w32,
             HIWORD(wParam) == 1 ? MP_MBTN_BACK : MP_MBTN_FORWARD);
-        break;
+        return TRUE;
     case WM_DISPLAYCHANGE:
         force_update_display_info(w32);
         break;

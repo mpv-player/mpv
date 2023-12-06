@@ -270,7 +270,6 @@ jobs:
             uchardet:p
             vapoursynth:p
             vulkan:p
-            xxhash:p
 
       - name: Build with meson
         id: build

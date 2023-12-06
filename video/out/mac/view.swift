@@ -227,7 +227,7 @@ class View: NSView {
             cmd = delta > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
         }
 
-        mpv?.putAxis(cmd, delta: abs(delta))
+        mpv?.putAxis(cmd, modifiers: event.modifierFlags, delta: abs(delta))
     }
 
     override func scrollWheel(with event: NSEvent) {
