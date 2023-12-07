@@ -241,9 +241,12 @@ static int get_title_bar_height(struct vo_w32_state *w32)
 {
     assert(!w32->opts->title_bar && w32->opts->border);
     UINT visible_border = 0;
-    // Only available on Windows 11
-    DwmGetWindowAttribute(w32->window, DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
-                          &visible_border, sizeof(visible_border));
+    // Only available on Windows 11, check in case it's backported and breaks
+    // WM_NCCALCSIZE exception for Windows 10.
+    if (check_windows10_build(22000)) {
+        DwmGetWindowAttribute(w32->window, DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
+                              &visible_border, sizeof(visible_border));
+    }
     int top_bar = IsMaximized(w32->window)
                       ? get_system_metrics(w32, SM_CYFRAME) +
                         get_system_metrics(w32, SM_CXPADDEDBORDER)
@@ -271,6 +274,8 @@ static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
     if (w32->opts->border && !w32->opts->title_bar && !w32->current_fs &&
        (GetWindowLongPtrW(w32->window, GWL_STYLE) & WS_CAPTION))
     {
+        if (!check_windows10_build(22000) && !IsMaximized(w32->window))
+            *rc = win;
         rc->top = win.top - get_title_bar_height(w32);
     }
 }
@@ -1650,6 +1655,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             !w32->current_fs && !w32->parent &&
             (GetWindowLongPtrW(w32->window, GWL_STYLE) & WS_CAPTION))
         {
+            // Remove all NC area on Windows 10 due to inability to control the
+            // top bar height before Windows 11.
+            if (!check_windows10_build(22000) && !IsMaximized(w32->window))
+                return 0;
             RECT r = {0};
             adjust_window_rect(w32, w32->window, &r);
             NCCALCSIZE_PARAMS *p = (LPNCCALCSIZE_PARAMS)lParam;
