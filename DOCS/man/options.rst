@@ -3155,7 +3155,6 @@ Window
     (Windows only) Snap the player window to screen edges.
 
 ``--drag-and-drop=<no|auto|replace|append>``
-    (X11, Wayland and Windows only)
     Controls the default behavior of drag and drop on platforms that support this.
     ``auto`` will obey what the underlying os/platform gives mpv. Typically, holding
     shift during the drag and drop will append the item to the playlist. Otherwise,

@@ -75,6 +75,20 @@ class MPVHelper {
         return m_config_cache_get_next_changed(optsCachePtr, &property)
     }
 
+    func open(files: [String]) {
+        if opts.drag_and_drop == -2 { return }
+
+        var action = NSEvent.modifierFlags.contains(.shift) ? DND_APPEND : DND_REPLACE
+        if opts.drag_and_drop >= 0  {
+            action = mp_dnd_action(UInt32(opts.drag_and_drop))
+        }
+
+        let filesClean = files.map{ $0.hasPrefix("file:///.file/id=") ? (URL(string: $0)?.path ?? $0) : $0 }
+        var filesPtr = filesClean.map { UnsafeMutablePointer<CChar>(strdup($0)) }
+        mp_event_drop_files(input, Int32(files.count), &filesPtr, action)
+        for charPtr in filesPtr { free(UnsafeMutablePointer(mutating: charPtr)) }
+    }
+
     func setOption(fullscreen: Bool) {
         optsPtr.pointee.fullscreen = fullscreen
         _ = withUnsafeMutableBytes(of: &optsPtr.pointee.fullscreen) { (ptr: UnsafeMutableRawBufferPointer) in
