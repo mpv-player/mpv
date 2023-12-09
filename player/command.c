@@ -6728,8 +6728,8 @@ const struct mp_cmd_def mp_cmds[] = {
                                         {"w", OPT_INT(v.i)},
                                         {"h", OPT_INT(v.i)},
                                         {"stride", OPT_INT(v.i)},
-                                        {"dw", OPT_INT(v.i)},
-                                        {"dh", OPT_INT(v.i)}, }},
+                                        {"dw", OPT_INT(v.i), OPTDEF_INT(0)},
+                                        {"dh", OPT_INT(v.i), OPTDEF_INT(0)}, }},
     { "overlay-remove", cmd_overlay_remove, { {"id", OPT_INT(v.i)} } },
 
     { "osd-overlay", cmd_osd_overlay,

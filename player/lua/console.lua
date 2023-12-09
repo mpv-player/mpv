@@ -31,7 +31,8 @@ local opts = {
     history_dedup = true,
     -- The ratio of font height to font width.
     -- Adjusts table width of completion suggestions.
-    font_hw_ratio = 2.0,
+    -- Values in the range 1.8..2.5 make sense for common monospace fonts.
+    font_hw_ratio = 'auto',
 }
 
 function detect_platform()
@@ -71,6 +72,7 @@ local styles = {
     error = '{\\1c&H7a77f2&}',
     fatal = '{\\1c&H5791f9&\\b1}',
     suggestion = '{\\1c&Hcc99cc&}',
+    selected_suggestion = '{\\1c&H2fbdfa&\\b1}',
 }
 
 local repl_active = false
@@ -81,10 +83,13 @@ local cursor = 1
 local history = {}
 local history_pos = 1
 local log_buffer = {}
-local suggestion_buffer = {}
 local key_bindings = {}
 local global_margins = { t = 0, b = 0 }
 
+local suggestion_buffer = {}
+local selected_suggestion_index
+local completion_start_position
+local completion_append
 local file_commands = {}
 local path_separator = platform == 'windows' and '\\' or '/'
 
@@ -106,6 +111,80 @@ mp.observe_property("user-data/osc/margins", "native", function(_, val)
     end
     update()
 end)
+
+do
+    local width_length_ratio = 0.5
+    local osd_width, osd_height = 100, 100
+
+    ---Update osd resolution if valid
+    local function update_osd_resolution()
+        local dim = mp.get_property_native('osd-dimensions')
+        if not dim or dim.w == 0 or dim.h == 0 then
+            return
+        end
+        osd_width = dim.w
+        osd_height = dim.h
+    end
+
+    local text_osd = mp.create_osd_overlay('ass-events')
+    text_osd.compute_bounds, text_osd.hidden = true, true
+
+    local function measure_bounds(ass_text)
+        update_osd_resolution()
+        text_osd.res_x, text_osd.res_y = osd_width, osd_height
+        text_osd.data = ass_text
+        local res = text_osd:update()
+        return res.x0, res.y0, res.x1, res.y1
+    end
+
+    ---Measure text width and normalize to a font size of 1
+    ---text has to be ass safe
+    local function normalized_text_width(text, size, horizontal)
+        local align, rotation = horizontal and 7 or 1, horizontal and 0 or -90
+        local template = '{\\pos(0,0)\\rDefault\\blur0\\bord0\\shad0\\q2\\an%s\\fs%s\\fn%s\\frz%s}%s'
+        local x1, y1 = nil, nil
+        size = size / 0.8
+        -- prevent endless loop
+        local repetitions_left = 5
+        repeat
+            size = size * 0.8
+            local ass = assdraw.ass_new()
+            ass.text = template:format(align, size, opts.font, rotation, text)
+            _, _, x1, y1 = measure_bounds(ass.text)
+            repetitions_left = repetitions_left - 1
+            -- make sure nothing got clipped
+        until (x1 and x1 < osd_width and y1 < osd_height) or repetitions_left == 0
+        local width = (repetitions_left == 0 and not x1) and 0 or (horizontal and x1 or y1)
+        return width / size, horizontal and osd_width or osd_height
+    end
+
+    local function fit_on_osd(text)
+        local estimated_width = #text * width_length_ratio
+        if osd_width >= osd_height then
+            -- Fill the osd as much as possible, bigger is more accurate.
+            return math.min(osd_width / estimated_width, osd_height), true
+        else
+            return math.min(osd_height / estimated_width, osd_width), false
+        end
+    end
+
+    local measured_font_hw_ratio = nil
+    function get_font_hw_ratio()
+        local font_hw_ratio = tonumber(opts.font_hw_ratio)
+        if font_hw_ratio then
+            return font_hw_ratio
+        end
+        if not measured_font_hw_ratio then
+            local alphabet = 'abcdefghijklmnopqrstuvwxyz'
+            local text = alphabet:rep(3)
+            update_osd_resolution()
+            local size, horizontal = fit_on_osd(text)
+            local normalized_width = normalized_text_width(text, size * 0.9, horizontal)
+            measured_font_hw_ratio = #text / normalized_width * 0.95
+        end
+        return measured_font_hw_ratio
+    end
+end
 
 -- Add a line to the log buffer (which is limited to 100 lines)
 function log_add(style, text)
@@ -206,7 +285,9 @@ function format_table(list, width_max, rows_max)
 
     local spaces = math.floor((width_max - width_total) / (column_count - 1))
     spaces = math.max(spaces_min, math.min(spaces_max, spaces))
-    local spacing = column_count > 1 and string.format('%' .. spaces .. 's', ' ') or ''
+    local spacing = column_count > 1
+                    and ass_escape(string.format('%' .. spaces .. 's', ' '))
+                    or ''
 
     local rows = {}
     for row = 1, row_count do
@@ -217,12 +298,17 @@ function format_table(list, width_max, rows_max)
             -- more then 99 leads to 'invalid format (width or precision too long)'
             local format_string = column == column_count and '%s'
                                   or '%-' .. math.min(column_widths[column], 99) .. 's'
-            columns[column] = string.format(format_string, list[i])
+            columns[column] = ass_escape(string.format(format_string, list[i]))
+
+            if i == selected_suggestion_index then
+                columns[column] = styles.selected_suggestion .. columns[column]
+                                  .. '{\\b0}'.. styles.suggestion
+            end
         end
         -- first row is at the bottom
         rows[row_count - row + 1] = table.concat(columns, spacing)
     end
-    return table.concat(rows, '\n'), row_count
+    return table.concat(rows, ass_escape('\n')), row_count
 end
 
 local function print_to_terminal()
@@ -312,10 +398,10 @@ function update()
     local screeny_factor = (1 - global_margins.t - global_margins.b)
     local lines_max = math.ceil(screeny * screeny_factor / opts.font_size - 1.5)
     -- Estimate how many characters fit in one line
-    local width_max = math.ceil(screenx / opts.font_size * opts.font_hw_ratio)
+    local width_max = math.ceil(screenx / opts.font_size * get_font_hw_ratio())
 
     local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
-    local suggestion_ass = style .. styles.suggestion .. ass_escape(suggestions)
+    local suggestion_ass = style .. styles.suggestion .. suggestions
 
     local log_ass = ''
     local log_messages = #log_buffer
@@ -868,8 +954,29 @@ function max_overlap_length(s1, s2)
     return 0
 end
 
+local function cycle_through_suggestions(backwards)
+    selected_suggestion_index = selected_suggestion_index + (backwards and -1 or 1)
+
+    if selected_suggestion_index > #suggestion_buffer then
+        selected_suggestion_index = 1
+    elseif selected_suggestion_index < 1 then
+        selected_suggestion_index = #suggestion_buffer
+    end
+
+    local before_cur = line:sub(1, completion_start_position - 1) ..
+                       suggestion_buffer[selected_suggestion_index] .. completion_append
+    line = before_cur .. line:sub(cursor)
+    cursor = before_cur:len() + 1
+    update()
+end
+
 -- Complete the option or property at the cursor (TAB)
-function complete()
+function complete(backwards)
+    if #suggestion_buffer > 0 then
+        cycle_through_suggestions(backwards)
+        return
+    end
+
     local before_cur = line:sub(1, cursor - 1)
     local after_cur = line:sub(cursor)
 
@@ -877,45 +984,49 @@ function complete()
     for _, completer in ipairs(build_completers()) do
         -- Completer patterns should return the start of the word to be
         -- completed as the first capture.
-        local s, s2 = before_cur:match(completer.pattern)
-        if not s then
+        local s2
+        completion_start_position, s2 = before_cur:match(completer.pattern)
+        if not completion_start_position then
             -- Multiple input commands can be separated by semicolons, so all
             -- completions that are anchored at the start of the string with
             -- '^' can start from a semicolon as well. Replace ^ with ; and try
             -- to match again.
-            s, s2 = before_cur:match(completer.pattern:gsub('^^', ';'))
+            completion_start_position, s2 =
+                before_cur:match(completer.pattern:gsub('^^', ';'))
         end
-        if s then
+        if completion_start_position then
             local hint
             if s2 then
-                hint = s
-                s = s2
+                hint = completion_start_position
+                completion_start_position = s2
             end
 
             -- If the completer's pattern found a word, check the completer's
             -- list for possible completions
-            local part = before_cur:sub(s)
+            local part = before_cur:sub(completion_start_position)
             local completions, prefix = complete_match(part, completer.list(hint))
             if #completions > 0 then
                 -- If there was only one full match from the list, add
                 -- completer.append to the final string. This is normally a
                 -- space or a quotation mark followed by a space.
                 local after_cur_index = 1
+                completion_append = completer.append or ''
                 if #completions == 1 then
-                    local append = completer.append or ''
-                    prefix = prefix .. append
+                    prefix = prefix .. completion_append
 
                     -- calculate offset into after_cur
-                    local prefix_len = common_prefix_length(append, after_cur)
-                    local overlap_size = max_overlap_length(append, after_cur)
+                    local prefix_len = common_prefix_length(completion_append, after_cur)
+                    local overlap_size = max_overlap_length(completion_append, after_cur)
                     after_cur_index = math.max(prefix_len, overlap_size) + 1
                 else
                     table.sort(completions)
                     suggestion_buffer = completions
+                    selected_suggestion_index = 0
                 end
 
                 -- Insert the completion and update
-                before_cur = before_cur:sub(1, s - 1) .. prefix
+                before_cur = before_cur:sub(1, completion_start_position - 1) ..
+                             prefix
                 cursor = before_cur:len() + 1
                 line = before_cur .. after_cur:sub(after_cur_index)
                 update()
@@ -1082,6 +1193,7 @@ function get_bindings()
         { 'alt+f',       next_word                              },
         { 'tab',         complete                               },
         { 'ctrl+i',      complete                               },
+        { 'shift+tab',   function() complete(true) end          },
         { 'ctrl+a',      go_home                                },
         { 'home',        go_home                                },
         { 'ctrl+e',      go_end                                 },
