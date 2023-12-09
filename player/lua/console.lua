@@ -548,12 +548,14 @@ end
 -- Move the cursor to the next character (Right)
 function next_char(amount)
     cursor = next_utf8(line, cursor)
+    suggestion_buffer = {}
     update()
 end
 
 -- Move the cursor to the previous character (Left)
 function prev_char(amount)
     cursor = prev_utf8(line, cursor)
+    suggestion_buffer = {}
     update()
 end
 
@@ -688,6 +690,7 @@ function go_history(new_pos)
     end
     cursor = line:len() + 1
     insert_mode = false
+    suggestion_buffer = {}
     update()
 end
 
@@ -713,6 +716,7 @@ function prev_word()
     -- string in order to do a "backwards" find. This wouldn't be as annoying
     -- to do if Lua didn't insist on 1-based indexing.
     cursor = line:len() - select(2, line:reverse():find('%s*[^%s]*', line:len() - cursor + 2)) + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -720,6 +724,7 @@ end
 -- the next word. (Ctrl+Right)
 function next_word()
     cursor = select(2, line:find('%s*[^%s]*', cursor)) + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -1039,12 +1044,14 @@ end
 -- Move the cursor to the beginning of the line (HOME)
 function go_home()
     cursor = 1
+    suggestion_buffer = {}
     update()
 end
 
 -- Move the cursor to the end of the line (END)
 function go_end()
     cursor = line:len() + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -1056,6 +1063,7 @@ function del_word()
     before_cur = before_cur:gsub('[^%s]+%s*$', '', 1)
     line = before_cur .. after_cur
     cursor = before_cur:len() + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -1068,12 +1076,14 @@ function del_next_word()
 
     after_cur = after_cur:gsub('^%s*[^%s]+', '', 1)
     line = before_cur .. after_cur
+    suggestion_buffer = {}
     update()
 end
 
 -- Delete from the cursor to the end of the line (Ctrl+K)
 function del_to_eol()
     line = line:sub(1, cursor - 1)
+    suggestion_buffer = {}
     update()
 end
 
@@ -1081,6 +1091,7 @@ end
 function del_to_start()
     line = line:sub(cursor)
     cursor = 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -1153,6 +1164,7 @@ function paste(clip)
     local after_cur = line:sub(cursor)
     line = before_cur .. text .. after_cur
     cursor = cursor + text:len()
+    suggestion_buffer = {}
     update()
 end
 
