@@ -23,6 +23,7 @@
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_drm.h>
+#include <libavutil/pixdesc.h>
 #include <xf86drm.h>
 
 #include "config.h"
@@ -62,6 +63,18 @@ const static dmabuf_interop_init interop_inits[] = {
     dmabuf_interop_wl_init,
 #endif
     NULL
+};
+
+/**
+ * Due to the fact that Raspberry Pi support only exists in forked ffmpegs and
+ * also requires custom pixel formats, we need some way to work with those formats
+ * without introducing any build time dependencies. We do this by looking up the
+ * pixel formats by name. As rpi is an important target platform for this hwdec
+ * we don't really have the luxury of ignoring these forks.
+ */
+const static char *forked_pix_fmt_names[] = {
+    "rpi4_8",
+    "rpi4_10",
 };
 
 static int init(struct ra_hwdec *hw)
@@ -119,6 +132,14 @@ static int init(struct ra_hwdec *hw)
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_NV12);
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_420P);
     MP_TARRAY_APPEND(p, p->formats, num_formats, pixfmt2imgfmt(AV_PIX_FMT_NV16));
+
+    for (int i = 0; i < MP_ARRAY_SIZE(forked_pix_fmt_names); i++) {
+        enum AVPixelFormat fmt = av_get_pix_fmt(forked_pix_fmt_names[i]);
+        if (fmt != AV_PIX_FMT_NONE) {
+            MP_TARRAY_APPEND(p, p->formats, num_formats, pixfmt2imgfmt(fmt));
+        }
+    }
+
     MP_TARRAY_APPEND(p, p->formats, num_formats, 0); // terminate it
 
     p->hwctx.hw_imgfmt = IMGFMT_DRMPRIME;
