@@ -1177,6 +1177,8 @@ void vo_x11_check_events(struct vo *vo)
 
     while (XPending(display)) {
         XNextEvent(display, &Event);
+        if (XFilterEvent(&Event, x11->window))
+            continue;
         MP_TRACE(x11, "XEvent: %d\n", Event.type);
         switch (Event.type) {
         case Expose:
@@ -1579,7 +1581,7 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
 
     if (x11->xim) {
         x11->xic = XCreateIC(x11->xim,
-                             XNInputStyle, XIMPreeditNone | XIMStatusNone,
+                             XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
                              XNClientWindow, x11->window,
                              XNFocusWindow, x11->window,
                              NULL);
