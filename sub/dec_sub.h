@@ -17,7 +17,6 @@ struct sd;
 enum sd_ctrl {
     SD_CTRL_SUB_STEP,
     SD_CTRL_SET_VIDEO_PARAMS,
-    SD_CTRL_SET_TOP,
     SD_CTRL_SET_VIDEO_DEF_FPS,
     SD_CTRL_UPDATE_OPTS,
 };

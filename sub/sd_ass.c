@@ -379,7 +379,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 }
 
 static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
-                          bool converted, ASS_Track *track)
+                          bool converted, ASS_Track *track, int order)
 {
     struct mp_subtitle_opts *opts = sd->opts;
     struct sd_ass_priv *ctx = sd->priv;
@@ -407,7 +407,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_use_margins = opts->ass_use_margins;
     }
     if (converted || opts->ass_style_override) {
-        set_sub_pos = 100.0f - opts->sub_pos;
+        set_sub_pos = 100.0f - (order == 1 ? opts->sec_sub_pos : opts->sub_pos);
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
         set_font_scale = opts->sub_scale;
@@ -557,12 +557,12 @@ static long long find_timestamp(struct sd *sd, double pts)
 #undef END
 
 static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
-                                       int format, double pts)
+                                       int format, double pts, int order)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
     bool no_ass = !opts->ass_enabled || ctx->on_top ||
-                  opts->ass_style_override == 5;
+                  opts->ass_style_override == 5 || order == 1;
     bool converted = ctx->is_converted || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
     ASS_Renderer *renderer = ctx->ass_renderer;
@@ -591,7 +591,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
             scale *= par;
     }
     if (!ctx->ass_configured || !osd_res_equals(old_osd, ctx->osd)) {
-        configure_ass(sd, &dim, converted, track);
+        configure_ass(sd, &dim, converted, track, order);
         ctx->ass_configured = true;
     }
     ass_set_pixel_aspect(renderer, scale);
@@ -851,9 +851,6 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     }
     case SD_CTRL_SET_VIDEO_PARAMS:
         ctx->video_params = *(struct mp_image_params *)arg;
-        return CONTROL_OK;
-    case SD_CTRL_SET_TOP:
-        ctx->on_top = *(bool *)arg;
         return CONTROL_OK;
     case SD_CTRL_UPDATE_OPTS: {
         int flags = (uintptr_t)arg;
