@@ -213,7 +213,6 @@ static void update_segment(struct dec_sub *sub)
             talloc_free(sub->sd);
             sub->sd = new;
             update_subtitle_speed(sub);
-            sub_control(sub, SD_CTRL_SET_TOP, &sub->order);
         } else {
             // We'll just keep the current decoder, and feed it possibly
             // invalid data (not our fault if it crashes or something).
@@ -364,7 +363,7 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
 
     if (!(sub->end != MP_NOPTS_VALUE && pts >= sub->end) &&
         sub->sd->driver->get_bitmaps)
-        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts);
+        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts, sub->order);
 
     mp_mutex_unlock(&sub->lock);
     return res;
