@@ -391,6 +391,7 @@ struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
     struct playlist *ret = NULL;
     if (d && d->playlist) {
         ret = talloc_zero(NULL, struct playlist);
+        playlist_populate_playlist_path(d->playlist, file);
         playlist_transfer_entries(ret, d->playlist);
         if (d->filetype && strcmp(d->filetype, "hls") == 0) {
             mp_warn(log, "This might be a HLS stream. For correct operation, "
