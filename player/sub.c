@@ -204,7 +204,8 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
     // When paused we have to wait for packets to be available.
     // So just retry until we get a packet in this case.
     if (mpctx->playback_initialized)
-        while (!update_subtitles(mpctx, mpctx->playback_pts) && mpctx->paused);
+        while (!update_subtitles(mpctx, mpctx->playback_pts) &&
+               mpctx->paused && !mpctx->paused_for_cache);
 }
 
 void reinit_sub_all(struct MPContext *mpctx)
