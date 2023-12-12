@@ -201,7 +201,6 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                     goto err_out;
                 }
                 playlist_transfer_entries(files, pl);
-                playlist_populate_playlist_path(files, param0);
                 talloc_free(param0);
                 talloc_free(pl);
                 continue;
