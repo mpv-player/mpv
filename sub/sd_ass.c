@@ -49,7 +49,6 @@ struct sd_ass_priv {
     struct sd_filter **filters;
     int num_filters;
     bool clear_once;
-    bool on_top;
     struct mp_ass_packer *packer;
     struct sub_bitmap_copy_cache *copy_cache;
     char last_text[500];
@@ -562,8 +561,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
-    bool no_ass = !opts->ass_enabled || ctx->on_top ||
-                  opts->ass_style_override == 5 || order == 1;
+    bool no_ass = !opts->ass_enabled || opts->ass_style_override == 5 || order == 1;
     bool converted = ctx->is_converted || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
     ASS_Renderer *renderer = ctx->ass_renderer;
@@ -785,9 +783,6 @@ static void fill_plaintext(struct sd *sd, double pts)
         return;
 
     bstr dst = {0};
-
-    if (ctx->on_top)
-        bstr_xappend(NULL, &dst, bstr0("{\\a6}"));
 
     while (*text) {
         if (*text == '{')
