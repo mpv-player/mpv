@@ -393,11 +393,6 @@ Configurable Options
     Supports ``left`` and ``right`` which will place the controls on those
     respective sides.
 
-``greenandgrumpy``
-    Default: no
-
-    Set to ``yes`` to reduce festivity (i.e. disable santa hat in December.)
-
 ``livemarkers``
     Default: yes
 
