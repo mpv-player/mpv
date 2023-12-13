@@ -803,7 +803,7 @@ int stream_skip_bom(struct stream *s)
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size)
 {
-    if (max_size > 1000000000)
+    if (max_size <= 0 || max_size > STREAM_MAX_READ_SIZE)
         abort();
 
     int bufsize;
