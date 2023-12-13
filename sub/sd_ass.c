@@ -382,6 +382,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
                           bool converted, ASS_Track *track, int order)
 {
     struct mp_subtitle_opts *opts = sd->opts;
+    struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Renderer *priv = ctx->ass_renderer;
 
@@ -407,7 +408,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_use_margins = opts->ass_use_margins;
     }
     if (converted || opts->ass_style_override) {
-        set_sub_pos = 100.0f - (order == 1 ? opts->sec_sub_pos : opts->sub_pos);
+        set_sub_pos = 100.0f - shared_opts->sub_pos[order];
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
         set_font_scale = opts->sub_scale;

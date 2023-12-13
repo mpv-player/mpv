@@ -16,6 +16,7 @@ struct sd {
     struct mpv_global *global;
     struct mp_log *log;
     struct mp_subtitle_opts *opts;
+    struct mp_subtitle_shared_opts *shared_opts;
 
     const struct sd_functions *driver;
     void *priv;

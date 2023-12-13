@@ -112,7 +112,7 @@ static void term_osd_update_title(struct MPContext *mpctx)
 
 void term_osd_set_subs(struct MPContext *mpctx, const char *text)
 {
-    if (mpctx->video_out || !text || !mpctx->opts->subs_rend->sub_visibility)
+    if (mpctx->video_out || !text || !mpctx->opts->subs_shared->sub_visibility[0])
         text = ""; // disable
     if (strcmp(mpctx->term_osd_subs ? mpctx->term_osd_subs : "", text) == 0)
         return;
