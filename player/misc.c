@@ -150,7 +150,7 @@ double get_track_seek_offset(struct MPContext *mpctx, struct track *track)
         {
             for (int n = 0; n < num_ptracks[STREAM_SUB]; n++) {
                 if (mpctx->current_track[n][STREAM_SUB] == track)
-                    return -opts->subs_rend->sub_delay[n];
+                    return -opts->subs_shared->sub_delay[n];
             }
         }
     }
