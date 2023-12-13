@@ -132,7 +132,7 @@ struct vo_w32_state {
     atomic_uint event_flags;
 
     BOOL tracking;
-    TRACKMOUSEEVENT trackEvent;
+    TRACKMOUSEEVENT track_event;
 
     int mouse_x;
     int mouse_y;
@@ -156,8 +156,8 @@ struct vo_w32_state {
 
     ITaskbarList2 *taskbar_list;
     ITaskbarList3 *taskbar_list3;
-    UINT tbtnCreatedMsg;
-    bool tbtnCreated;
+    UINT tbtn_created_msg;
+    bool tbtn_created;
 
     struct voctrl_playback_state current_pstate;
 
@@ -181,6 +181,8 @@ struct vo_w32_state {
     HANDLE avrt_handle;
 
     bool cleared;
+    bool dragging;
+    BOOL win_arranging;
 };
 
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
@@ -474,12 +476,22 @@ static bool handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
     btn |= mod_state(w32);
     mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_DOWN);
 
-    if (btn == MP_MBTN_LEFT && !w32->current_fs &&
-        !mp_input_test_dragging(w32->input_ctx, x, y))
-    {
+    if (btn == MP_MBTN_LEFT && !mp_input_test_dragging(w32->input_ctx, x, y)) {
         // Window dragging hack
         ReleaseCapture();
+        // The dragging model loop is entered at SendMessage() here.
+        // Unfortunately, the w32->current_fs value is stale because the
+        // input is handled in a different thread, and we cannot wait for
+        // an up-to-date value before entering the model loop if dragging
+        // needs to be kept resonsive.
+        // Workaround this by intercepting the loop in the WM_MOVING message,
+        // where the up-to-date value is available.
+        SystemParametersInfoW(SPI_GETWINARRANGING, 0, &w32->win_arranging, 0);
+        w32->dragging = true;
         SendMessage(w32->window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+        w32->dragging = false;
+        SystemParametersInfoW(SPI_SETWINARRANGING, w32->win_arranging, 0, 0);
+
         mp_input_put_key(w32->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
 
         // Indicate the message was handled, so DefWindowProc won't be called
@@ -660,7 +672,7 @@ static void update_playback_state(struct vo_w32_state *w32)
 {
     struct voctrl_playback_state *pstate = &w32->current_pstate;
 
-    if (!w32->taskbar_list3 || !w32->tbtnCreated)
+    if (!w32->taskbar_list3 || !w32->tbtn_created)
         return;
 
     if (!pstate->playing || !pstate->taskbar_progress) {
@@ -1241,6 +1253,18 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_MOVING: {
         w32->moving = true;
         RECT *rc = (RECT*)lParam;
+        // Prevent the window from being moved if the window dragging hack
+        // is active, and the window is currently in fullscreen.
+        if (w32->dragging && w32->current_fs) {
+            // Temporarily disable window arrangement to prevent aero shake
+            // from being activated. The original system setting will be restored
+            // after the dragging hack ends.
+            if (w32->win_arranging) {
+                SystemParametersInfoW(SPI_SETWINARRANGING, FALSE, 0, 0);
+            }
+            *rc = w32->windowrc;
+            return TRUE;
+        }
         if (snap_to_screen_edges(w32, rc))
             return TRUE;
         break;
@@ -1431,7 +1455,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_MOUSEMOVE: {
         if (!w32->tracking) {
-            w32->tracking = TrackMouseEvent(&w32->trackEvent);
+            w32->tracking = TrackMouseEvent(&w32->track_event);
             mp_input_put_key(w32->input_ctx, MP_KEY_MOUSE_ENTER);
         }
         // Windows can send spurious mouse events, which would make the mpv
@@ -1504,8 +1528,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
 
-    if (message == w32->tbtnCreatedMsg) {
-        w32->tbtnCreated = true;
+    if (message == w32->tbtn_created_msg) {
+        w32->tbtn_created = true;
         update_playback_state(w32);
         return 0;
     }
@@ -1805,7 +1829,7 @@ static MP_THREAD_VOID gui_thread(void *ptr)
                 ITaskbarList3_Release(w32->taskbar_list3);
                 w32->taskbar_list3 = NULL;
             } else {
-                w32->tbtnCreatedMsg = RegisterWindowMessage(L"TaskbarButtonCreated");
+                w32->tbtn_created_msg = RegisterWindowMessage(L"TaskbarButtonCreated");
             }
         }
     } else {
@@ -1813,7 +1837,7 @@ static MP_THREAD_VOID gui_thread(void *ptr)
     }
 
     w32->tracking   = FALSE;
-    w32->trackEvent = (TRACKMOUSEEVENT){
+    w32->track_event = (TRACKMOUSEEVENT){
         .cbSize    = sizeof(TRACKMOUSEEVENT),
         .dwFlags   = TME_LEAVE,
         .hwndTrack = w32->window,
