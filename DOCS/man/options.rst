@@ -2338,8 +2338,8 @@ Subtitles
 ``--secondary-sid=<ID|auto|no>``
     Select a secondary subtitle stream. This is similar to ``--sid``. If a
     secondary subtitle is selected, it will be rendered as toptitle (i.e. on
-    the top of the screen) alongside the normal subtitle, and provides a way
-    to render two subtitles at once.
+    the top of the screen) alongside the normal subtitle by default, and
+    provides a way to render two subtitles at once.
 
     There are some caveats associated with this feature. For example, bitmap
     subtitles will always be rendered in their usual position, so selecting a
@@ -2415,6 +2415,10 @@ Subtitles
         rendering in addition to the problem above.
 
         Using ``--sub-margin-y`` can achieve this in a better way.
+
+``--secondary-sub-pos=<0-150>``
+    Specify the position of secondary subtitles on the screen. This is similar
+    to ``--sub-pos`` but for secondary subtitles.
 
 ``--sub-speed=<0.1-10.0>``
     Multiply the subtitle event timestamps with the given value. Can be used
@@ -3168,7 +3172,6 @@ Window
     (Windows only) Snap the player window to screen edges.
 
 ``--drag-and-drop=<no|auto|replace|append>``
-    (X11, Wayland and Windows only)
     Controls the default behavior of drag and drop on platforms that support this.
     ``auto`` will obey what the underlying os/platform gives mpv. Typically, holding
     shift during the drag and drop will append the item to the playlist. Otherwise,

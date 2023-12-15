@@ -27,6 +27,7 @@ local opts = {
     -- multiplied by "scale".
     font_size = 16,
     border_size = 1,
+    case_sensitive = true,
     -- Remove duplicate entries in history as to only keep the latest one.
     history_dedup = true,
     -- The ratio of font height to font width.
@@ -49,6 +50,7 @@ end
 local platform = detect_platform()
 if platform == 'windows' then
     opts.font = 'Consolas'
+    opts.case_sensitive = false
 elseif platform == 'darwin' then
     opts.font = 'Menlo'
 else
@@ -548,12 +550,14 @@ end
 -- Move the cursor to the next character (Right)
 function next_char(amount)
     cursor = next_utf8(line, cursor)
+    suggestion_buffer = {}
     update()
 end
 
 -- Move the cursor to the previous character (Left)
 function prev_char(amount)
     cursor = prev_utf8(line, cursor)
+    suggestion_buffer = {}
     update()
 end
 
@@ -688,6 +692,7 @@ function go_history(new_pos)
     end
     cursor = line:len() + 1
     insert_mode = false
+    suggestion_buffer = {}
     update()
 end
 
@@ -713,6 +718,7 @@ function prev_word()
     -- string in order to do a "backwards" find. This wouldn't be as annoying
     -- to do if Lua didn't insist on 1-based indexing.
     cursor = line:len() - select(2, line:reverse():find('%s*[^%s]*', line:len() - cursor + 2)) + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -720,6 +726,7 @@ end
 -- the next word. (Ctrl+Right)
 function next_word()
     cursor = select(2, line:find('%s*[^%s]*', cursor)) + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -740,19 +747,21 @@ local function command_list_and_help()
 end
 
 local function property_list()
-    local option_info = {
-        'name', 'type', 'set-from-commandline', 'set-locally', 'default-value',
-        'min', 'max', 'choices',
-    }
-
     local properties = mp.get_property_native('property-list')
+
+    for _, sub_property in pairs({'video', 'audio', 'sub', 'sub2'}) do
+        properties[#properties + 1] = 'current-tracks/' .. sub_property
+    end
 
     for _, option in ipairs(mp.get_property_native('options')) do
         properties[#properties + 1] = 'options/' .. option
         properties[#properties + 1] = 'file-local-options/' .. option
         properties[#properties + 1] = 'option-info/' .. option
 
-        for _, sub_property in ipairs(option_info) do
+        for _, sub_property in pairs({
+            'name', 'type', 'set-from-commandline', 'set-locally',
+            'default-value', 'min', 'max', 'choices',
+        }) do
             properties[#properties + 1] = 'option-info/' .. option .. '/' ..
                                           sub_property
         end
@@ -901,30 +910,70 @@ function build_completers()
     return completers
 end
 
--- Use 'list' to find possible tab-completions for 'part.'
--- Returns a list of all potential completions and the longest
--- common prefix of all the matching list items.
-function complete_match(part, list)
-    local completions = {}
+-- Find the longest common case-sensitive prefix of the entries in "list".
+local function find_common_prefix(part, list)
     local prefix = nil
 
     for _, candidate in ipairs(list) do
-        if candidate:sub(1, part:len()) == part then
-            if prefix and prefix ~= candidate then
-                local prefix_len = part:len()
-                while prefix:sub(1, prefix_len + 1)
-                       == candidate:sub(1, prefix_len + 1) do
-                    prefix_len = prefix_len + 1
-                end
-                prefix = candidate:sub(1, prefix_len)
-            else
-                prefix = candidate
+        if prefix and prefix ~= candidate then
+            local prefix_len = part:len()
+            while prefix:sub(1, prefix_len + 1) == candidate:sub(1, prefix_len + 1) do
+                prefix_len = prefix_len + 1
             end
+            prefix = candidate:sub(1, prefix_len)
+        else
+            prefix = candidate
+        end
+    end
+
+    return prefix
+end
+
+-- Return the entries of "list" beginning with "part" and the longest common
+-- prefix of the matches.
+local function complete_match(part, list)
+    local completions = {}
+
+    for _, candidate in pairs(list) do
+        if candidate:sub(1, part:len()) == part then
             completions[#completions + 1] = candidate
         end
     end
 
-    return completions, prefix
+    local prefix = find_common_prefix(part, completions)
+
+    if opts.case_sensitive then
+        return completions, prefix
+    end
+
+    completions = {}
+    local lower_case_completions = {}
+    local lower_case_part = part:lower()
+
+    for _, candidate in pairs(list) do
+        if candidate:sub(1, part:len()):lower() == lower_case_part then
+            completions[#completions + 1] = candidate
+            lower_case_completions[#lower_case_completions + 1] = candidate:lower()
+        end
+    end
+
+    local lower_case_prefix = find_common_prefix(lower_case_part,
+                                                 lower_case_completions)
+
+    -- Behave like GNU readline with completion-ignore-case On.
+    -- part = 'fooBA', completions = {'foobarbaz', 'fooBARqux'} =>
+    -- prefix = 'fooBARqux', lower_case_prefix = 'foobar', return 'fooBAR'
+    if prefix then
+        return completions, prefix:sub(1, lower_case_prefix:len())
+    end
+
+    -- part = 'fooba', completions = {'fooBARbaz', 'fooBarqux'} =>
+    -- prefix = nil, lower_case_prefix ='foobar', return 'fooBAR'
+    if lower_case_prefix then
+        return completions, completions[1]:sub(1, lower_case_prefix:len())
+    end
+
+    return {}, part
 end
 
 function common_prefix_length(s1, s2)
@@ -1039,12 +1088,14 @@ end
 -- Move the cursor to the beginning of the line (HOME)
 function go_home()
     cursor = 1
+    suggestion_buffer = {}
     update()
 end
 
 -- Move the cursor to the end of the line (END)
 function go_end()
     cursor = line:len() + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -1056,6 +1107,7 @@ function del_word()
     before_cur = before_cur:gsub('[^%s]+%s*$', '', 1)
     line = before_cur .. after_cur
     cursor = before_cur:len() + 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -1068,12 +1120,14 @@ function del_next_word()
 
     after_cur = after_cur:gsub('^%s*[^%s]+', '', 1)
     line = before_cur .. after_cur
+    suggestion_buffer = {}
     update()
 end
 
 -- Delete from the cursor to the end of the line (Ctrl+K)
 function del_to_eol()
     line = line:sub(1, cursor - 1)
+    suggestion_buffer = {}
     update()
 end
 
@@ -1081,6 +1135,7 @@ end
 function del_to_start()
     line = line:sub(cursor)
     cursor = 1
+    suggestion_buffer = {}
     update()
 end
 
@@ -1153,6 +1208,7 @@ function paste(clip)
     local after_cur = line:sub(cursor)
     line = before_cur .. text .. after_cur
     cursor = cursor + text:len()
+    suggestion_buffer = {}
     update()
 end
 

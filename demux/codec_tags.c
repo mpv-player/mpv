@@ -230,6 +230,7 @@ static const char *const type_to_codec[][2] = {
     { "xface",          "xface" },
     { "xwd",            "xwd" },
     { "svg",            "svg" },
+    { "jxl",            "jpegxl" },
     {0}
 };
 

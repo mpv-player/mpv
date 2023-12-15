@@ -27,6 +27,7 @@
 #include "options/m_config.h"
 #include "player/core.h"
 #include "input/input.h"
+#include "input/event.h"
 #include "video/out/win_state.h"
 
 #include "osdep/macosx_application_objc.h"

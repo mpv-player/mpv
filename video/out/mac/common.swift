@@ -562,6 +562,13 @@ class Common: NSObject {
             let fps = data!.assumingMemoryBound(to: CDouble.self)
             fps.pointee = currentFps()
             return VO_TRUE
+        case VOCTRL_GET_WINDOW_ID:
+            guard let window = window else {
+                return VO_NOTAVAIL
+            }
+            let wid = data!.assumingMemoryBound(to: Int64.self)
+            wid.pointee = unsafeBitCast(window, to: Int64.self)
+            return VO_TRUE
         case VOCTRL_GET_HIDPI_SCALE:
             let scaleFactor = data!.assumingMemoryBound(to: CDouble.self)
             let screen = getCurrentScreen()

@@ -81,7 +81,7 @@ class View: NSView {
         if types.contains(.fileURL) || types.contains(.URL) {
             if let urls = pb.readObjects(forClasses: [NSURL.self]) as? [URL] {
                 let files = urls.map { $0.absoluteString }
-                EventsResponder.sharedInstance().handleFilesArray(files)
+                mpv?.open(files: files)
                 return true
             }
         } else if types.contains(.string) {
@@ -97,7 +97,7 @@ class View: NSView {
                     filesArray.append(path)
                 }
             }
-            EventsResponder.sharedInstance().handleFilesArray(filesArray)
+            mpv?.open(files: filesArray)
             return true
         }
         return false

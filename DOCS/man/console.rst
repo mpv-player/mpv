@@ -158,6 +158,11 @@ Configurable Options
 
     Set the font border size used for the REPL and the console.
 
+``case_sensitive``
+    Default: no on Windows, yes on other platforms.
+
+    Whether Tab completion is case sensitive. Only works with ASCII characters.
+
 ``history_dedup``
     Default: true
 

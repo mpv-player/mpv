@@ -2910,6 +2910,18 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+static int mp_property_secondary_sub_pos(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct MPOpts *opts = mpctx->opts;
+    if (action == M_PROPERTY_PRINT) {
+        *(char **)arg = talloc_asprintf(NULL, "%4.2f%%/100", opts->subs_rend->sec_sub_pos);
+        return M_PROPERTY_OK;
+    }
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
 static int mp_property_sub_ass_extradata(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3936,6 +3948,7 @@ static const struct m_property mp_properties_base[] = {
         .priv = (void *)&(const int){1}},
     {"sub-speed", mp_property_sub_speed},
     {"sub-pos", mp_property_sub_pos},
+    {"secondary-sub-pos", mp_property_secondary_sub_pos},
     {"sub-ass-extradata", mp_property_sub_ass_extradata},
     {"sub-text", mp_property_sub_text,
         .priv = (void *)&(const int){SD_TEXT_TYPE_PLAIN}},
@@ -4249,6 +4262,7 @@ static const struct property_osd_display {
     {"sub", "Subtitles"},
     {"secondary-sid", "Secondary subtitles"},
     {"sub-pos", "Sub position"},
+    {"secondary-sub-pos", "Secondary sub position"},
     {"sub-delay", "Sub delay"},
     {"secondary-sub-delay", "Secondary sub delay"},
     {"sub-speed", "Sub speed"},
