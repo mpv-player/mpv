@@ -249,25 +249,29 @@ static void prepare_prefix(struct mp_log_root *root, bstr *out, int lev, int ter
 
 void mp_msg_flush_status_line(struct mp_log *log, bool clear)
 {
-    if (log->root) {
-        mp_mutex_lock(&log->root->lock);
-        if (log->root->status_lines) {
-            if (!clear) {
-                fprintf(stderr, TERM_ESC_RESTORE_CURSOR "\n");
-                log->root->blank_lines = 0;
-                log->root->status_lines = 0;
-                goto done;
-            }
-            bstr term_msg = (bstr){0};
-            prepare_prefix(log->root, &term_msg, MSGL_STATUS, 0);
-            if (term_msg.len) {
-                fprintf(stderr, "%.*s", BSTR_P(term_msg));
-                talloc_free(term_msg.start);
-            }
-        }
-done:
-        mp_mutex_unlock(&log->root->lock);
+    if (!log->root)
+        return;
+
+    mp_mutex_lock(&log->root->lock);
+    if (!log->root->status_lines)
+        goto done;
+
+    if (!clear) {
+        fprintf(stderr, TERM_ESC_RESTORE_CURSOR "\n");
+        log->root->blank_lines = 0;
+        log->root->status_lines = 0;
+        goto done;
     }
+
+    bstr term_msg = {0};
+    prepare_prefix(log->root, &term_msg, MSGL_STATUS, 0);
+    if (term_msg.len) {
+        fprintf(stderr, "%.*s", BSTR_P(term_msg));
+        talloc_free(term_msg.start);
+    }
+
+done:
+    mp_mutex_unlock(&log->root->lock);
 }
 
 void mp_msg_set_term_title(struct mp_log *log, const char *title)
