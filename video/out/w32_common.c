@@ -1551,6 +1551,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             ((LPNCCALCSIZE_PARAMS) lParam)->rgrc[0].top -= get_title_bar_height(w32);
         }
         break;
+    case WM_IME_STARTCOMPOSITION: {
+        HIMC imc = ImmGetContext(w32->window);
+        if (imc) {
+            COMPOSITIONFORM cf = {.dwStyle = CFS_POINT, .ptCurrentPos = {0, 0}};
+            ImmSetCompositionWindow(imc, &cf);
+            ImmReleaseContext(w32->window, imc);
+        }
+        break;
+    }
     }
 
     if (message == w32->tbtn_created_msg) {
