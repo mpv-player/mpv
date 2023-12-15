@@ -5788,7 +5788,7 @@ static void cmd_run(void *p)
     char **args = talloc_zero_array(NULL, char *, cmd->num_args + 1);
     for (int n = 0; n < cmd->num_args; n++)
         args[n] = cmd->args[n].v.s;
-    mp_msg_flush_status_line(mpctx->log);
+    mp_msg_flush_status_line(mpctx->log, true);
     struct mp_subprocess_opts opts = {
         .exe = args[0],
         .args = args,
@@ -6893,6 +6893,9 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
 
     if (event == MPV_EVENT_PLAYBACK_RESTART)
         ctx->last_seek_time = mp_time_sec();
+
+    if (event == MPV_EVENT_END_FILE)
+        mp_msg_flush_status_line(mpctx->log, false);
 
     if (event == MPV_EVENT_END_FILE || event == MPV_EVENT_FILE_LOADED) {
         // Update chapters - does nothing if something else is visible.

@@ -247,11 +247,17 @@ static void prepare_prefix(struct mp_log_root *root, bstr *out, int lev, int ter
     root->blank_lines += root->status_lines;
 }
 
-void mp_msg_flush_status_line(struct mp_log *log)
+void mp_msg_flush_status_line(struct mp_log *log, bool clear)
 {
     if (log->root) {
         mp_mutex_lock(&log->root->lock);
         if (log->root->status_lines) {
+            if (!clear) {
+                fprintf(stderr, TERM_ESC_RESTORE_CURSOR "\n");
+                log->root->blank_lines = 0;
+                log->root->status_lines = 0;
+                goto done;
+            }
             bstr term_msg = (bstr){0};
             prepare_prefix(log->root, &term_msg, MSGL_STATUS, 0);
             if (term_msg.len) {
@@ -259,6 +265,7 @@ void mp_msg_flush_status_line(struct mp_log *log)
                 talloc_free(term_msg.start);
             }
         }
+done:
         mp_mutex_unlock(&log->root->lock);
     }
 }
@@ -836,7 +843,7 @@ bool mp_msg_has_log_file(struct mpv_global *global)
 void mp_msg_uninit(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;
-    mp_msg_flush_status_line(global->log);
+    mp_msg_flush_status_line(global->log, true);
     terminate_log_file_thread(root);
     mp_msg_log_buffer_destroy(root->early_buffer);
     mp_msg_log_buffer_destroy(root->early_filebuffer);
