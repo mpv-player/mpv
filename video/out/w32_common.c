@@ -77,7 +77,6 @@ typedef enum MONITOR_DPI_TYPE {
 
 struct w32_api {
     HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
-    BOOL (WINAPI *pImmDisableIME)(DWORD);
     BOOL (WINAPI *pAdjustWindowRectExForDpi)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
     BOOLEAN (WINAPI *pShouldAppsUseDarkMode)(void);
     DWORD (WINAPI *pSetPreferredAppMode)(DWORD mode);
@@ -1652,13 +1651,23 @@ static void remove_parent_hook(struct vo_w32_state *w32)
         UnhookWinEvent(w32->parent_evt_hook);
 }
 
+static bool is_key_message(UINT msg)
+{
+    return msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN ||
+           msg == WM_KEYUP || msg == WM_SYSKEYUP;
+}
+
 // Dispatch incoming window events and handle them.
 // This returns only when the thread is asked to terminate.
 static void run_message_loop(struct vo_w32_state *w32)
 {
     MSG msg;
-    while (GetMessageW(&msg, 0, 0, 0) > 0)
+    while (GetMessageW(&msg, 0, 0, 0) > 0) {
+        // Only send IME messages to TranslateMessage
+        if (is_key_message(msg.message) && msg.wParam == VK_PROCESSKEY)
+            TranslateMessage(&msg);
         DispatchMessageW(&msg);
+    }
 
     // Even if the message loop somehow exits, we still have to respond to
     // external requests until termination is requested.
@@ -1748,12 +1757,6 @@ static void w32_api_load(struct vo_w32_state *w32)
     w32->api.pAdjustWindowRectExForDpi = !user32_dll ? NULL :
                 (void *)GetProcAddress(user32_dll, "AdjustWindowRectExForDpi");
 
-    // imm32.dll must be loaded dynamically
-    // to account for machines without East Asian language support
-    HMODULE imm32_dll = LoadLibraryW(L"imm32.dll");
-    w32->api.pImmDisableIME = !imm32_dll ? NULL :
-                (void *)GetProcAddress(imm32_dll, "ImmDisableIME");
-
     // Dark mode related functions, available since the 1809 Windows 10 update
     // Check the Windows build version as on previous versions used ordinals
     // may point to unexpected code/data. Alternatively could check uxtheme.dll
@@ -1783,10 +1786,6 @@ static MP_THREAD_VOID gui_thread(void *ptr)
     mp_thread_set_name("window");
 
     w32_api_load(w32);
-
-    // Disables the IME for windows on this thread
-    if (w32->api.pImmDisableIME)
-        w32->api.pImmDisableIME(0);
 
     if (w32->opts->WinID >= 0)
         w32->parent = (HWND)(intptr_t)(w32->opts->WinID);
