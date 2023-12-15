@@ -1962,7 +1962,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     sh->codec->extradata = track->private_data;
     sh->codec->extradata_size = track->private_size;
 
-    if (!strcmp(sh->codec->codec, "arib_caption") && track->private_size >= 3) {
+    if (subtitle_type && !strcmp(sh->codec->codec, "arib_caption") && track->private_size >= 3) {
         struct AVCodecParameters **lavp = talloc_ptrtype(track, lavp);
 
         talloc_set_destructor(lavp, avcodec_par_destructor);
