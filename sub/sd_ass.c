@@ -527,8 +527,16 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     ass_set_hinting(priv, set_hinting);
     ass_set_line_spacing(priv, set_line_spacing);
 #if LIBASS_VERSION >= 0x01600010
-    if (converted)
+    if (converted) {
         ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
+        if (!opts->sub_vsfilter_bidi_compat) {
+            for (int n = 0; n < track->n_styles; n++) {
+                track->styles[n].Encoding = -1;
+            }
+            ass_track_set_feature(track, ASS_FEATURE_BIDI_BRACKETS, 1);
+            ass_track_set_feature(track, ASS_FEATURE_WHOLE_TEXT_LAYOUT, 1);
+        }
+    }
 #endif
     if (converted) {
         bool override_playres = true;

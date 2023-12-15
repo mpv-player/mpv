@@ -2560,6 +2560,15 @@ Subtitles
     offset scale factor, not what the video filter chain or the video output
     use.
 
+``--sub-vsfilter-bidi-compat=<yes|no>``
+    Set implicit bidi detection to ``ltr`` instead of ``auto`` to match ASS'
+    default. This also disables libass' incompatible extensions. This currently
+    includes bracket pair matching according to the revised Unicode
+    Bidirectional Algorithm introduced in Unicode 6.3, and also affects how BiDi
+    runs are split and processed, as well as soft linewrapping of unicode text.
+
+    This affects plaintext (non-ASS) subtitles only. Default: no.
+
 ``--sub-ass-vsfilter-color-compat=<basic|full|force-601|no>``
     Mangle colors like (xy-)vsfilter do (default: basic). Historically, VSFilter
     was not color space aware. This was no problem as long as the color space
