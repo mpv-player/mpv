@@ -457,9 +457,9 @@ static void handle_key_up(struct vo_w32_state *w32, UINT vkey, UINT scancode)
     }
 }
 
-static bool handle_char(struct vo_w32_state *w32, wchar_t wc)
+static bool handle_char(struct vo_w32_state *w32, WPARAM wc, bool decode)
 {
-    int c = decode_utf16(w32, wc);
+    int c = decode ? decode_utf16(w32, wc) : wc;
 
     if (c == 0)
         return true;
@@ -1446,8 +1446,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_CHAR:
     case WM_SYSCHAR:
-        if (handle_char(w32, wParam))
+        if (handle_char(w32, wParam, true))
             return 0;
+        break;
+    case WM_UNICHAR:
+        if (wParam == UNICODE_NOCHAR) {
+            return TRUE;
+        } else if (handle_char(w32, wParam, false)) {
+            return 0;
+        }
         break;
     case WM_KILLFOCUS:
         mp_input_put_key(w32->input_ctx, MP_INPUT_RELEASE_ALL);
