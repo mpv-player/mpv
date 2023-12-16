@@ -2011,8 +2011,8 @@ Audio
     (default: 0).
 
 ``--replaygain-clip=<yes|no>``
-    Prevent clipping caused by replaygain by automatically lowering the
-    gain (default). Use ``--replaygain-clip=no`` to disable this.
+    Allow the volume gain to clip (default: no). If this option is not
+    enabled, mpv automatically will prevent clipping by lowering the gain.
 
 ``--replaygain-fallback=<db>``
     Gain in dB to apply if the file has no replay gain tags. This option
