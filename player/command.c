@@ -6197,7 +6197,8 @@ static void cmd_key(void *p)
             cmd->success = false;
             return;
         }
-        mp_input_put_key_artificial(mpctx->input, code | action, 1);
+        double scale = action == 0 ? cmd->args[1].v.d : 1;
+        mp_input_put_key_artificial(mpctx->input, code | action, scale);
     }
 }
 
@@ -6753,7 +6754,8 @@ const struct mp_cmd_def mp_cmds[] = {
                                 .flags = MP_CMD_OPT_ARG}}},
     { "keybind", cmd_key_bind, { {"name", OPT_STRING(v.s)},
                                  {"cmd", OPT_STRING(v.s)} }},
-    { "keypress", cmd_key, { {"name", OPT_STRING(v.s)} },
+    { "keypress", cmd_key, { {"name", OPT_STRING(v.s)},
+                             {"scale", OPT_DOUBLE(v.d), OPTDEF_DOUBLE(1)} },
         .priv = &(const int){0}},
     { "keydown", cmd_key, { {"name", OPT_STRING(v.s)} },
         .priv = &(const int){MP_KEY_STATE_DOWN}},
