@@ -1220,6 +1220,20 @@ static void update_cursor_passthrough(const struct vo_w32_state *w32)
     }
 }
 
+static void set_ime_conversion_mode(const struct vo_w32_state *w32, DWORD mode)
+{
+    if (w32->parent)
+        return;
+
+    HIMC imc = ImmGetContext(w32->window);
+    if (imc) {
+        DWORD sentence_mode;
+        if (ImmGetConversionStatus(imc, NULL, &sentence_mode))
+            ImmSetConversionStatus(imc, mode, sentence_mode);
+        ImmReleaseContext(w32->window, imc);
+    }
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -1560,6 +1574,22 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         }
         break;
     }
+    case WM_CREATE:
+        // The IME can only be changed to alphanumeric input after it's initialized.
+        // Unfortunately, there is no way to know when this happens, as
+        // none of the WM_CREATE, WM_INPUTLANGCHANGE, or WM_IME_* messages work.
+        // This works if the IME is initialized within a short time after
+        // the window is created. Otherwise, fallback to setting alphanumeric mode on
+        // the first keypress.
+        SetTimer(w32->window, (UINT_PTR)WM_CREATE, 250, NULL);
+        break;
+    case WM_TIMER:
+        if (wParam == WM_CREATE) {
+            // Default to alphanumeric input when the IME is first initialized.
+            set_ime_conversion_mode(w32, IME_CMODE_ALPHANUMERIC);
+            return 0;
+        }
+        break;
     }
 
     if (message == w32->tbtn_created_msg) {
