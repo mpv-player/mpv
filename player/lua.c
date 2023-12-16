@@ -1184,11 +1184,11 @@ static int script_format_json(lua_State *L, void *tmp)
     char *dst = talloc_strdup(tmp, "");
     if (json_write(&dst, &node) >= 0) {
         lua_pushstring(L, dst);
-        lua_pushnil(L);
-    } else {
-        lua_pushnil(L);
-        lua_pushstring(L, "error");
+        return 1;
     }
+
+    lua_pushnil(L);
+    lua_pushstring(L, "error");
     return 2;
 }
 
