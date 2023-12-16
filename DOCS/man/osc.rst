@@ -211,6 +211,13 @@ Configurable Options
 
     Alpha of the seekable ranges, 0 (opaque) to 255 (fully transparent).
 
+``scrollcontrols``
+    Default: yes
+
+    By default, going up or down with the mouse wheel can trigger certain
+    actions (such as seeking) if the mouse is hovering an OSC element.
+    Set to ``no`` to disable any special mouse wheel behavior.
+
 ``deadzonesize``
     Default: 0.5
 
