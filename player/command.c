@@ -6158,7 +6158,7 @@ static void cmd_mouse(void *p)
 
     if (button == -1) {// no button
         if (pre_key)
-            mp_input_put_key_artificial(mpctx->input, pre_key);
+            mp_input_put_key_artificial(mpctx->input, pre_key, 1);
         mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
         return;
     }
@@ -6176,9 +6176,9 @@ static void cmd_mouse(void *p)
     }
     button += dbc ? MP_MBTN_DBL_BASE : MP_MBTN_BASE;
     if (pre_key)
-        mp_input_put_key_artificial(mpctx->input, pre_key);
+        mp_input_put_key_artificial(mpctx->input, pre_key, 1);
     mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
-    mp_input_put_key_artificial(mpctx->input, button);
+    mp_input_put_key_artificial(mpctx->input, button, 1);
 }
 
 static void cmd_key(void *p)
@@ -6189,7 +6189,7 @@ static void cmd_key(void *p)
 
     const char *key_name = cmd->args[0].v.s;
     if (key_name[0] == '\0' && action == MP_KEY_STATE_UP) {
-        mp_input_put_key_artificial(mpctx->input, MP_INPUT_RELEASE_ALL);
+        mp_input_put_key_artificial(mpctx->input, MP_INPUT_RELEASE_ALL, 1);
     } else {
         int code = mp_input_get_key_from_name(key_name);
         if (code < 0) {
@@ -6197,7 +6197,7 @@ static void cmd_key(void *p)
             cmd->success = false;
             return;
         }
-        mp_input_put_key_artificial(mpctx->input, code | action);
+        mp_input_put_key_artificial(mpctx->input, code | action, 1);
     }
 }
 
