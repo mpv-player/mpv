@@ -186,6 +186,9 @@ typedef struct MPOpts {
     float rgain_fallback;
     int softvol_mute;
     float softvol_max;
+    float softvol_gain;
+    float softvol_gain_min;
+    float softvol_gain_max;
     int gapless_audio;
 
     mp_vo_opts *vo;
