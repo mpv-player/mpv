@@ -187,6 +187,8 @@ mp.create_osd_overlay = function create_osd_overlay(format) {
         res_x: 0,
         res_y: 720,
         z: 0,
+        hidden: false,
+        compute_bounds: false,
 
         update: function ass_update() {
             var cmd = {};  // shallow clone of `this', excluding methods

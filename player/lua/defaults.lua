@@ -659,6 +659,8 @@ function mp.create_osd_overlay(format)
         data = "",
         res_x = 0,
         res_y = 720,
+        hidden = false,
+        compute_bounds = false,
     }
     setmetatable(overlay, overlay_mt)
     return overlay
