@@ -4257,6 +4257,7 @@ static const struct property_osd_display {
     {"sub-scale", "Sub Scale"},
     {"sub-ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
     {"sub-ass-override", "ASS subtitle style override"},
+    {"secondary-sub-ass-override", "Secondary sub ASS subtitle style override"},
     {"vf", "Video filters", .msg = "Video filters:\n${vf}"},
     {"af", "Audio filters", .msg = "Audio filters:\n${af}"},
     {"ab-loop-a", "A-B loop start"},

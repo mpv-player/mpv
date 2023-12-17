@@ -144,6 +144,7 @@ static struct sd *init_decoder(struct dec_sub *sub)
             .opts = sub->opts,
             .shared_opts = sub->shared_opts,
             .driver = driver,
+            .order = sub->order,
             .attachments = sub->attachments,
             .codec = sub->codec,
             .preload_ok = true,
@@ -368,7 +369,7 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
 
     if (!(sub->end != MP_NOPTS_VALUE && pts >= sub->end) &&
         sub->sd->driver->get_bitmaps)
-        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts, sub->order);
+        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts);
 
     mp_mutex_unlock(&sub->lock);
     return res;
