@@ -342,21 +342,19 @@ class Window: NSWindow, NSWindowDelegate {
 
     func updateFrame(_ rect: NSRect) {
         if rect != frame {
-            let cRect = frameRect(forContentRect: rect)
             unfsContentFrame = rect
-            setFrame(cRect, display: true)
-            common.windowDidUpdateFrame()
+            if !isInFullscreen {
+                let cRect = frameRect(forContentRect: rect)
+                setFrame(cRect, display: true)
+                common.windowDidUpdateFrame()
+            }
         }
     }
 
     func updateSize(_ size: NSSize) {
         if let currentSize = contentView?.frame.size, size != currentSize {
             let newContentFrame = centeredContentSize(for: frame, size: size)
-            if !isInFullscreen {
-                updateFrame(newContentFrame)
-            } else {
-                unfsContentFrame = newContentFrame
-            }
+            updateFrame(newContentFrame)
         }
     }
 
