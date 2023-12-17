@@ -20,6 +20,7 @@ struct sd {
 
     const struct sd_functions *driver;
     void *priv;
+    int order;
 
     struct attachment_list *attachments;
     struct mp_codec_params *codec;
@@ -42,7 +43,7 @@ struct sd_functions {
     int (*control)(struct sd *sd, enum sd_ctrl cmd, void *arg);
 
     struct sub_bitmaps *(*get_bitmaps)(struct sd *sd, struct mp_osd_res dim,
-                                       int format, double pts, int order);
+                                       int format, double pts);
     char *(*get_text)(struct sd *sd, double pts, enum sd_text_type type);
     struct sd_times (*get_times)(struct sd *sd, double pts);
 };

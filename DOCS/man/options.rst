@@ -2499,6 +2499,12 @@ Subtitles
     This also controls some bitmap subtitle overrides, as well as HTML tags in
     formats like SRT, despite the name of the option.
 
+``--secondary-sub-ass-override=<yes|no|force|scale|strip>``
+    Control whether user secondary substyle overrides should be applied. This
+    works exactly like ``--sub-ass-override``.
+
+    Default: strip.
+
 ``--sub-ass-force-margins``
     Enables placing toptitles and subtitles in black borders when they are
     available, if the subtitles are in the ASS format.

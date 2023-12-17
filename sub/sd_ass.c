@@ -77,9 +77,10 @@ static const struct sd_filter_functions *const filters[] = {
 
 // Add default styles, if the track does not have any styles yet.
 // Apply style overrides if the user provides any.
-static void mp_ass_add_default_styles(ASS_Track *track, struct mp_subtitle_opts *opts)
+static void mp_ass_add_default_styles(ASS_Track *track, struct mp_subtitle_opts *opts,
+                                      struct mp_subtitle_shared_opts *shared_opts, int order)
 {
-    if (opts->ass_styles_file && opts->ass_style_override)
+    if (opts->ass_styles_file && shared_opts->ass_style_override[order])
         ass_read_styles(track, opts->ass_styles_file, NULL);
 
     if (track->n_styles == 0) {
@@ -95,7 +96,7 @@ static void mp_ass_add_default_styles(ASS_Track *track, struct mp_subtitle_opts 
         mp_ass_set_style(style, track->PlayResY, opts->sub_style);
     }
 
-    if (opts->ass_style_override)
+    if (shared_opts->ass_style_override[order])
         ass_process_force_style(track);
 }
 
@@ -206,13 +207,14 @@ static void assobjects_init(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
+    struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
 
     ctx->ass_library = mp_ass_init(sd->global, sd->opts->sub_style, sd->log);
     ass_set_extract_fonts(ctx->ass_library, opts->use_embedded_fonts);
 
     add_subtitle_fonts(sd);
 
-    if (opts->ass_style_override)
+    if (shared_opts->ass_style_override[sd->order])
         ass_set_style_overrides(ctx->ass_library, opts->ass_style_override_list);
 
     ctx->ass_track = ass_new_track(ctx->ass_library);
@@ -221,7 +223,7 @@ static void assobjects_init(struct sd *sd)
     ctx->shadow_track = ass_new_track(ctx->ass_library);
     ctx->shadow_track->PlayResX = MP_ASS_FONT_PLAYRESX;
     ctx->shadow_track->PlayResY = MP_ASS_FONT_PLAYRESY;
-    mp_ass_add_default_styles(ctx->shadow_track, opts);
+    mp_ass_add_default_styles(ctx->shadow_track, opts, shared_opts, sd->order);
 
     char *extradata = sd->codec->extradata;
     int extradata_size = sd->codec->extradata_size;
@@ -232,7 +234,7 @@ static void assobjects_init(struct sd *sd)
     if (extradata)
         ass_process_codec_private(ctx->ass_track, extradata, extradata_size);
 
-    mp_ass_add_default_styles(ctx->ass_track, opts);
+    mp_ass_add_default_styles(ctx->ass_track, opts, shared_opts, sd->order);
 
 #if LIBASS_VERSION >= 0x01302000
     ass_set_check_readorder(ctx->ass_track, sd->opts->sub_clear_on_seek ? 0 : 1);
@@ -378,7 +380,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 }
 
 static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
-                          bool converted, ASS_Track *track, int order)
+                          bool converted, ASS_Track *track)
 {
     struct mp_subtitle_opts *opts = sd->opts;
     struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
@@ -397,7 +399,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     bool set_scale_by_window = true;
     bool total_override = false;
     // With forced overrides, apply the --sub-* specific options
-    if (converted || opts->ass_style_override == 3) { // 'force'
+    if (converted || shared_opts->ass_style_override[sd->order] == 3) { // 'force'
         set_scale_with_window = opts->sub_scale_with_window;
         set_use_margins = opts->sub_use_margins;
         set_scale_by_window = opts->sub_scale_by_window;
@@ -406,8 +408,8 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_scale_with_window = opts->ass_scale_with_window;
         set_use_margins = opts->ass_use_margins;
     }
-    if (converted || opts->ass_style_override) {
-        set_sub_pos = 100.0f - shared_opts->sub_pos[order];
+    if (converted || shared_opts->ass_style_override[sd->order]) {
+        set_sub_pos = 100.0f - shared_opts->sub_pos[sd->order];
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
         set_font_scale = opts->sub_scale;
@@ -427,12 +429,12 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     int set_force_flags = 0;
     if (total_override)
         set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
-    if (opts->ass_style_override == 4) // 'scale'
+    if (shared_opts->ass_style_override[sd->order] == 4) // 'scale'
         set_force_flags |= ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
     if (converted)
         set_force_flags |= ASS_OVERRIDE_BIT_ALIGNMENT;
 #ifdef ASS_JUSTIFY_AUTO
-    if ((converted || opts->ass_style_override) && opts->ass_justify)
+    if ((converted || shared_opts->ass_style_override[sd->order]) && opts->ass_justify)
         set_force_flags |= ASS_OVERRIDE_BIT_JUSTIFY;
 #endif
     ass_set_selective_style_override_enabled(priv, set_force_flags);
@@ -499,7 +501,7 @@ static long long find_timestamp(struct sd *sd, double pts)
 
     long long ts = llrint(pts * 1000);
 
-    if (!sd->opts->sub_fix_timing || sd->opts->ass_style_override == 0)
+    if (!sd->opts->sub_fix_timing || sd->shared_opts->ass_style_override[sd->order] == 0)
         return ts;
 
     // Try to fix small gaps and overlaps.
@@ -557,11 +559,12 @@ static long long find_timestamp(struct sd *sd, double pts)
 #undef END
 
 static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
-                                       int format, double pts, int order)
+                                       int format, double pts)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
-    bool no_ass = !opts->ass_enabled || opts->ass_style_override == 5 || order == 1;
+    struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
+    bool no_ass = !opts->ass_enabled || shared_opts->ass_style_override[sd->order] == 5;
     bool converted = ctx->is_converted || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
     ASS_Renderer *renderer = ctx->ass_renderer;
@@ -581,7 +584,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
         goto done;
 
     double scale = dim.display_par;
-    if (!converted && (!opts->ass_style_override ||
+    if (!converted && (!shared_opts->ass_style_override[sd->order] ||
                        opts->ass_vsfilter_aspect_compat))
     {
         // Let's use the original video PAR for vsfilter compatibility:
@@ -590,11 +593,11 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
             scale *= par;
     }
     if (!ctx->ass_configured || !osd_res_equals(old_osd, ctx->osd)) {
-        configure_ass(sd, &dim, converted, track, order);
+        configure_ass(sd, &dim, converted, track);
         ctx->ass_configured = true;
     }
     ass_set_pixel_aspect(renderer, scale);
-    if (!converted && (!opts->ass_style_override ||
+    if (!converted && (!shared_opts->ass_style_override[sd->order] ||
                        opts->ass_vsfilter_blur_compat))
     {
         ass_set_storage_size(renderer, ctx->video_params.w, ctx->video_params.h);

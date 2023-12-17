@@ -107,7 +107,6 @@ struct mp_subtitle_opts {
     bool use_embedded_fonts;
     char **ass_style_override_list;
     char *ass_styles_file;
-    int ass_style_override;
     int ass_hinting;
     int ass_shaper;
     bool ass_justify;
@@ -121,6 +120,7 @@ struct mp_subtitle_shared_opts {
     float sub_delay[2];
     float sub_pos[2];
     bool sub_visibility[2];
+    int ass_style_override[2];
 };
 
 struct mp_sub_filter_opts {
