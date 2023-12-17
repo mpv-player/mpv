@@ -2000,6 +2000,13 @@ Audio
 
     Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
+``--volume-gain=<db>``
+    Set the volume gain in dB. This is applied on top of other volume and gain
+    settings.
+
+``--volume-gain-max=<0.0-150.0>``, ``--volume-gain-min=<-150.0-0.0>``
+    Set the volume gain range in dB (default: -96 dB min, 12 dB max).
+
 ``--replaygain=<no|track|album>``
     Adjust volume gain according to replaygain values stored in the file
     metadata. With ``--replaygain=no`` (the default), perform no adjustment.
