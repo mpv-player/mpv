@@ -182,6 +182,8 @@ struct vo_w32_state {
     bool cleared;
     bool dragging;
     BOOL win_arranging;
+
+    bool conversion_mode_init;
 };
 
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
@@ -1709,6 +1711,14 @@ static void run_message_loop(struct vo_w32_state *w32)
 {
     MSG msg;
     while (GetMessageW(&msg, 0, 0, 0) > 0) {
+        // Change the conversion mode on the first keypress, in case the timer
+        // solution fails. Note that this leaves the mode indicator in the language
+        // bar showing the original mode until a key is pressed.
+        if (is_key_message(msg.message) && !w32->conversion_mode_init) {
+            set_ime_conversion_mode(w32, IME_CMODE_ALPHANUMERIC);
+            w32->conversion_mode_init = true;
+            KillTimer(w32->window, (UINT_PTR)WM_CREATE);
+        }
         // Only send IME messages to TranslateMessage
         if (is_key_message(msg.message) && msg.wParam == VK_PROCESSKEY)
             TranslateMessage(&msg);
