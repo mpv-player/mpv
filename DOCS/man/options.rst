@@ -2002,6 +2002,10 @@ Audio
 
     Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
+``--volume-max=<100.0-1000.0>``
+    Set the maximum amplification level in percent (default: 130). A value of
+    130 will allow you to adjust the volume up to about double the normal level.
+
 ``--volume-gain=<db>``
     Set the volume gain in dB. This is applied on top of other volume and gain
     settings.
@@ -2237,10 +2241,6 @@ Audio
     mpv versions did: video and audio are both started immediately even if
     their start timestamps differ, and then video timing is gradually adjusted
     if necessary to reach correct synchronization later.
-
-``--volume-max=<100.0-1000.0>``
-    Set the maximum amplification level in percent (default: 130). A value of
-    130 will allow you to adjust the volume up to about double the normal level.
 
 ``--audio-file-auto=<no|exact|fuzzy|all>``, ``--no-audio-file-auto``
     Load additional audio files matching the video filename. The parameter
