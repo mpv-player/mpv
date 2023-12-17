@@ -1625,6 +1625,28 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+static int mp_property_volume_gain(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct MPOpts *opts = mpctx->opts;
+
+    switch (action) {
+    case M_PROPERTY_GET_CONSTRICTED_TYPE:
+        *(struct m_option *)arg = (struct m_option){
+            .type = CONF_TYPE_FLOAT,
+            .min = opts->softvol_gain_min,
+            .max = opts->softvol_gain_max,
+        };
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT:
+        *(char **)arg = talloc_asprintf(NULL, "%.1f", opts->softvol_gain);
+        return M_PROPERTY_OK;
+    }
+
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
 static int mp_property_ao_volume(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
@@ -3872,6 +3894,7 @@ static const struct m_property mp_properties_base[] = {
     // Audio
     {"mixer-active", mp_property_mixer_active},
     {"volume", mp_property_volume},
+    {"volume-gain", mp_property_volume_gain},
     {"ao-volume", mp_property_ao_volume},
     {"ao-mute", mp_property_ao_mute},
     {"audio-delay", mp_property_audio_delay},
@@ -4033,9 +4056,9 @@ static const char *const *const mp_event_property_change[] = {
       "video-dec-params", "osd-dimensions",
       "hwdec", "hwdec-current", "hwdec-interop"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
-      "samplerate", "channels", "audio", "volume", "mute",
+      "samplerate", "channels", "audio", "volume", "volume-gain", "mute",
       "current-ao", "audio-codec-name", "audio-params",
-      "audio-out-params", "volume-max", "mixer-active"),
+      "audio-out-params", "volume-max", "volume-gain-min", "volume-gain-max", "mixer-active"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle", "eof-reached"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle", "eof-reached"),
     E(MP_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),
