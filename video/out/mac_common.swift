@@ -58,7 +58,9 @@ class MacCommon: Common {
                 initWindowState()
             }
 
-            if !NSEqualSizes(window?.unfsContentFramePixel.size ?? NSZeroSize, wr.size) {
+            if !NSEqualSizes(window?.unfsContentFramePixel.size ?? NSZeroSize, wr.size) &&
+               mpv?.opts.auto_window_resize ?? true
+            {
                 window?.updateSize(wr.size)
             }
 

@@ -3400,7 +3400,6 @@ Window
     be the default behavior. Currently only affects X11 and SDL VOs.
 
 ``--auto-window-resize=<yes|no>``
-    (Wayland, Win32, and X11)
     By default, mpv will automatically resize itself if the video's size changes
     (i.e. advancing forward in a playlist). Setting this to ``no`` disables this
     behavior so the window size never changes automatically. This option does
