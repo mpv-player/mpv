@@ -64,7 +64,7 @@ class CocoaCB: Common {
         mpv?.vo = vo
         if backendState == .needsInit {
             DispatchQueue.main.sync { self.initBackend(vo) }
-        } else {
+        } else if mpv?.opts.auto_window_resize ?? true {
             DispatchQueue.main.async {
                 self.updateWindowSize(vo)
                 self.layer?.update(force: true)
