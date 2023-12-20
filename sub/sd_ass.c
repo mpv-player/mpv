@@ -642,7 +642,7 @@ static void append(struct buf *b, char c)
     }
 }
 
-static void ass_to_plaintext(struct buf *b, const char *in)
+static void ass_to_plaintext(struct buf *b, const char *in, bool newline_to_space)
 {
     bool in_tag = false;
     const char *open_tag_pos = NULL;
@@ -668,7 +668,7 @@ static void ass_to_plaintext(struct buf *b, const char *in)
         } else {
             if (in[0] == '\\' && (in[1] == 'N' || in[1] == 'n')) {
                 in += 2;
-                append(b, '\n');
+                append(b, newline_to_space ? ' ' : '\n');
             } else if (in[0] == '\\' && in[1] == 'h') {
                 in += 2;
                 append(b, ' ');
@@ -703,6 +703,7 @@ static bool is_whitespace_only(char *s, int len)
 static char *get_text_buf(struct sd *sd, double pts, enum sd_text_type type)
 {
     struct sd_ass_priv *ctx = sd->priv;
+    struct mp_subtitle_opts *opts = sd->opts;
     ASS_Track *track = ctx->ass_track;
 
     if (pts == MP_NOPTS_VALUE)
@@ -717,7 +718,7 @@ static char *get_text_buf(struct sd *sd, double pts, enum sd_text_type type)
             if (event->Text) {
                 int start = b.len;
                 if (type == SD_TEXT_TYPE_PLAIN) {
-                    ass_to_plaintext(&b, event->Text);
+                    ass_to_plaintext(&b, event->Text, opts->sub_newline_to_space);
                 } else {
                     char *t = event->Text;
                     while (*t)
@@ -1024,7 +1025,7 @@ bstr sd_ass_pkt_text(struct sd_filter *ft, struct demux_packet *pkt, int offset)
 bstr sd_ass_to_plaintext(char *out, size_t out_siz, const char *in)
 {
     struct buf b = {out, out_siz, 0};
-    ass_to_plaintext(&b, in);
+    ass_to_plaintext(&b, in, false);
     if (b.len < out_siz)
         out[b.len] = 0;
     return (bstr){out, b.len};
