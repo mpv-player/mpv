@@ -28,6 +28,7 @@ Interface changes
 
  --- mpv 0.38.0 ---
     - add `--volume-gain`, `--volume-gain-min`, and `--volume-gain-max` options
+    - add `current-gpu-context` property
     - add `--secondary-sub-ass-override` option
     - remove shared-script-properties (user-data is a replacement)
     - add `--secondary-sub-delay`, decouple secondary subtitles from

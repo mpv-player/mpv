@@ -208,6 +208,7 @@ struct ra_ctx *ra_ctx_create(struct vo *vo, struct ra_ctx_opts opts)
         MP_VERBOSE(ctx, "Initializing GPU context '%s'\n", ctx->fns->name);
         if (contexts[i]->init(ctx)) {
             vo->probing = old_probing;
+            vo->context_name = ctx->fns->name;
             return ctx;
         }
 
