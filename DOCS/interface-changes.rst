@@ -27,6 +27,7 @@ Interface changes
 ::
 
  --- mpv 0.38.0 ---
+    - add `--secondary-sub-ass-override` option
     - remove shared-script-properties (user-data is a replacement)
     - add `--secondary-sub-delay`, decouple secondary subtitles from
       `--sub-delay`
