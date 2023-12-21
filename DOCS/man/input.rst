@@ -3332,6 +3332,10 @@ Property list
 ``current-vo``
     Current video output driver (name as used with ``--vo``).
 
+``current-gpu-context``
+    Current GPU context of video output driver (name as used with ``--gpu-context``).
+    Valid for ``--vo=gpu`` and ``--vo=gpu-next``.
+
 ``current-ao``
     Current audio output driver (name as used with ``--ao``).
 
