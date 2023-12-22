@@ -1921,6 +1921,7 @@ static const char *const mkv_sub_tag[][2] = {
     { "S_TEXT/ASCII",       "subrip"},
     { "S_TEXT/UTF8",        "subrip"},
     { "S_HDMV/PGS",         "hdmv_pgs_subtitle"},
+    { "S_HDMV/TEXTST",      "hdmv_text_subtitle"},
     { "D_WEBVTT/SUBTITLES", "webvtt-webm"},
     { "D_WEBVTT/CAPTIONS",  "webvtt-webm"},
     { "S_TEXT/WEBVTT",      "webvtt"},
@@ -1962,7 +1963,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     sh->codec->extradata = track->private_data;
     sh->codec->extradata_size = track->private_size;
 
-    if (!strcmp(sh->codec->codec, "arib_caption") && track->private_size >= 3) {
+    if (subtitle_type && !strcmp(sh->codec->codec, "arib_caption") && track->private_size >= 3) {
         struct AVCodecParameters **lavp = talloc_ptrtype(track, lavp);
 
         talloc_set_destructor(lavp, avcodec_par_destructor);

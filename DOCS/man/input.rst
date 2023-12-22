@@ -827,11 +827,13 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     <double>
         The mouse event represents double-click.
 
-``keypress <name>``
+``keypress <name> [<scale>]``
     Send a key event through mpv's input handler, triggering whatever
     behavior is configured to that key. ``name`` uses the ``input.conf``
-    naming scheme for keys and modifiers. Useful for the client API: key events
-    can be sent to libmpv to handle internally.
+    naming scheme for keys and modifiers. ``scale`` is used to scale numerical
+    change effected by the bound command (same mechanism as precise scrolling).
+    Useful for the client API: key events can be sent to libmpv to handle
+    internally.
 
 ``keydown <name>``
     Similar to ``keypress``, but sets the ``KEYDOWN`` flag so that if the key is

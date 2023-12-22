@@ -47,7 +47,9 @@ struct dec_sub {
     struct mp_log *log;
     struct mpv_global *global;
     struct mp_subtitle_opts *opts;
+    struct mp_subtitle_shared_opts *shared_opts;
     struct m_config_cache *opts_cache;
+    struct m_config_cache *shared_opts_cache;
 
     struct mp_recorder_sink *recorder_sink;
 
@@ -91,7 +93,7 @@ static void update_subtitle_speed(struct dec_sub *sub)
 // Return the subtitle PTS used for a given video PTS.
 static double pts_to_subtitle(struct dec_sub *sub, double pts)
 {
-    struct mp_subtitle_opts *opts = sub->opts;
+    struct mp_subtitle_shared_opts *opts = sub->shared_opts;
     float delay = sub->order < 0 ? 0.0f : opts->sub_delay[sub->order];
 
     if (pts != MP_NOPTS_VALUE)
@@ -102,7 +104,7 @@ static double pts_to_subtitle(struct dec_sub *sub, double pts)
 
 static double pts_from_subtitle(struct dec_sub *sub, double pts)
 {
-    struct mp_subtitle_opts *opts = sub->opts;
+    struct mp_subtitle_shared_opts *opts = sub->shared_opts;
     float delay = sub->order < 0 ? 0.0f : opts->sub_delay[sub->order];
 
     if (pts != MP_NOPTS_VALUE)
@@ -140,7 +142,9 @@ static struct sd *init_decoder(struct dec_sub *sub)
             .global = sub->global,
             .log = mp_log_new(sd, sub->log, driver->name),
             .opts = sub->opts,
+            .shared_opts = sub->shared_opts,
             .driver = driver,
+            .order = sub->order,
             .attachments = sub->attachments,
             .codec = sub->codec,
             .preload_ok = true,
@@ -172,6 +176,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
         .log = mp_log_new(sub, global->log, "sub"),
         .global = global,
         .opts_cache = m_config_cache_alloc(sub, global, &mp_subtitle_sub_opts),
+        .shared_opts_cache = m_config_cache_alloc(sub, global, &mp_subtitle_shared_sub_opts),
         .sh = track->stream,
         .codec = track->stream->codec,
         .attachments = talloc_steal(sub, attachments),
@@ -183,6 +188,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
         .end = MP_NOPTS_VALUE,
     };
     sub->opts = sub->opts_cache->opts;
+    sub->shared_opts = sub->shared_opts_cache->opts;
     mp_mutex_init_type(&sub->lock, MP_MUTEX_RECURSIVE);
 
     sub->sd = init_decoder(sub);
@@ -292,7 +298,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
             break;
 
         // (Use this mechanism only if sub_delay matters to avoid corner cases.)
-        float delay = sub->order < 0 ? 0.0f : sub->opts->sub_delay[sub->order];
+        float delay = sub->order < 0 ? 0.0f : sub->shared_opts->sub_delay[sub->order];
         double min_pts = delay < 0 || force ? video_pts : MP_NOPTS_VALUE;
 
         struct demux_packet *pkt;
@@ -363,7 +369,7 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
 
     if (!(sub->end != MP_NOPTS_VALUE && pts >= sub->end) &&
         sub->sd->driver->get_bitmaps)
-        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts, sub->order);
+        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts);
 
     mp_mutex_unlock(&sub->lock);
     return res;
@@ -457,6 +463,7 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
         int flags = (uintptr_t)arg;
         if (m_config_cache_update(sub->opts_cache))
             update_subtitle_speed(sub);
+        m_config_cache_update(sub->shared_opts_cache);
         propagate = true;
         if (flags & UPDATE_SUB_HARD) {
             // forget about the previous preload because
@@ -491,10 +498,10 @@ void sub_set_play_dir(struct dec_sub *sub, int dir)
 
 bool sub_is_primary_visible(struct dec_sub *sub)
 {
-    return !!sub->opts->sub_visibility;
+    return sub->shared_opts->sub_visibility[0];
 }
 
 bool sub_is_secondary_visible(struct dec_sub *sub)
 {
-    return !!sub->opts->sec_sub_visibility;
+    return sub->shared_opts->sub_visibility[1];
 }

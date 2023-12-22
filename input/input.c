@@ -757,10 +757,12 @@ void mp_input_put_key(struct input_ctx *ictx, int code)
     input_unlock(ictx);
 }
 
-void mp_input_put_key_artificial(struct input_ctx *ictx, int code)
+void mp_input_put_key_artificial(struct input_ctx *ictx, int code, double value)
 {
+    if (value == 0.0)
+        return;
     input_lock(ictx);
-    mp_input_feed_key(ictx, code, 1, true);
+    mp_input_feed_key(ictx, code, value, true);
     input_unlock(ictx);
 }
 

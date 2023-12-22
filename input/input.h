@@ -83,7 +83,8 @@ void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
 void mp_input_put_key(struct input_ctx *ictx, int code);
 
 // Like mp_input_put_key(), but ignore mouse disable option for mouse buttons.
-void mp_input_put_key_artificial(struct input_ctx *ictx, int code);
+// value can be used like with mp_input_put_wheel(), use 1 if not applicable.
+void mp_input_put_key_artificial(struct input_ctx *ictx, int code, double value);
 
 // Like mp_input_put_key(), but process all UTF-8 characters in the given
 // string as key events.

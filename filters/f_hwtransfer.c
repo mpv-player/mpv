@@ -94,10 +94,12 @@ static bool select_format(struct priv *p, int input_fmt,
     if (!input_fmt)
         return false;
 
-    // If the input format is a hw format, then we shouldn't be doing this
-    // format selection here at all.
+    // If the input format is a hw format, then we won't be doing any sort of
+    // conversion. Just assume that it will pass-through successfully.
     if (IMGFMT_IS_HWACCEL(input_fmt)) {
-        return false;
+        *out_hw_input_fmt = input_fmt;
+        *out_hw_output_fmt = input_fmt;
+        return true;
     }
 
     // If there is no capability to do uploads or conversions during uploads,

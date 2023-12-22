@@ -283,20 +283,14 @@ const struct m_sub_options mp_sub_filter_opts = {
 
 const struct m_sub_options mp_subtitle_sub_opts = {
     .opts = (const struct m_option[]){
-        {"sub-delay", OPT_FLOAT(sub_delay[0])},
-        {"secondary-sub-delay", OPT_FLOAT(sub_delay[1])},
         {"sub-fps", OPT_FLOAT(sub_fps)},
         {"sub-speed", OPT_FLOAT(sub_speed)},
-        {"sub-visibility", OPT_BOOL(sub_visibility)},
-        {"secondary-sub-visibility", OPT_BOOL(sec_sub_visibility)},
         {"sub-forced-events-only", OPT_BOOL(sub_forced_events_only)},
         {"stretch-dvd-subs", OPT_BOOL(stretch_dvd_subs)},
         {"stretch-image-subs-to-screen", OPT_BOOL(stretch_image_subs)},
         {"image-subs-video-resolution", OPT_BOOL(image_subs_video_res)},
         {"sub-fix-timing", OPT_BOOL(sub_fix_timing)},
         {"sub-stretch-durations", OPT_BOOL(sub_stretch_durations)},
-        {"sub-pos", OPT_FLOAT(sub_pos), M_RANGE(0.0, 150.0)},
-        {"secondary-sub-pos", OPT_FLOAT(sec_sub_pos), M_RANGE(0.0, 150.0)},
         {"sub-gauss", OPT_FLOAT(sub_gauss), M_RANGE(0.0, 3.0)},
         {"sub-gray", OPT_BOOL(sub_gray)},
         {"sub-ass", OPT_BOOL(ass_enabled), .flags = UPDATE_SUB_HARD},
@@ -319,9 +313,6 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-ass-shaper", OPT_CHOICE(ass_shaper,
             {"simple", 0}, {"complex", 1})},
         {"sub-ass-justify", OPT_BOOL(ass_justify)},
-        {"sub-ass-override", OPT_CHOICE(ass_style_override,
-            {"no", 0}, {"yes", 1}, {"force", 3}, {"scale", 4}, {"strip", 5}),
-            .flags = UPDATE_SUB_HARD},
         {"sub-scale-by-window", OPT_BOOL(sub_scale_by_window)},
         {"sub-scale-with-window", OPT_BOOL(sub_scale_with_window)},
         {"sub-ass-scale-with-window", OPT_BOOL(ass_scale_with_window)},
@@ -334,10 +325,6 @@ const struct m_sub_options mp_subtitle_sub_opts = {
     },
     .size = sizeof(OPT_BASE_STRUCT),
     .defaults = &(OPT_BASE_STRUCT){
-        .sub_visibility = true,
-        .sec_sub_visibility = true,
-        .sub_pos = 100,
-        .sec_sub_pos = 0,
         .sub_speed = 1.0,
         .ass_enabled = true,
         .sub_scale_by_window = true,
@@ -348,9 +335,38 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         .ass_vsfilter_aspect_compat = true,
         .ass_vsfilter_color_compat = 1,
         .ass_vsfilter_blur_compat = true,
-        .ass_style_override = 1,
         .ass_shaper = 1,
         .use_embedded_fonts = true,
+    },
+    .change_flags = UPDATE_OSD,
+};
+
+#undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct mp_subtitle_shared_opts
+
+const struct m_sub_options mp_subtitle_shared_sub_opts = {
+    .opts = (const struct m_option[]){
+        {"sub-delay", OPT_FLOAT(sub_delay[0])},
+        {"secondary-sub-delay", OPT_FLOAT(sub_delay[1])},
+        {"sub-pos", OPT_FLOAT(sub_pos[0]), M_RANGE(0.0, 150.0)},
+        {"secondary-sub-pos", OPT_FLOAT(sub_pos[1]), M_RANGE(0.0, 150.0)},
+        {"sub-visibility", OPT_BOOL(sub_visibility[0])},
+        {"secondary-sub-visibility", OPT_BOOL(sub_visibility[1])},
+        {"sub-ass-override", OPT_CHOICE(ass_style_override[0],
+            {"no", 0}, {"yes", 1}, {"force", 3}, {"scale", 4}, {"strip", 5}),
+            .flags = UPDATE_SUB_HARD},
+        {"secondary-sub-ass-override", OPT_CHOICE(ass_style_override[1],
+            {"no", 0}, {"yes", 1}, {"force", 3}, {"scale", 4}, {"strip", 5}),
+            .flags = UPDATE_SUB_HARD},
+        {0}
+    },
+    .size = sizeof(OPT_BASE_STRUCT),
+    .defaults = &(OPT_BASE_STRUCT){
+        .sub_visibility[0] = true,
+        .sub_visibility[1] = true,
+        .sub_pos[0] = 100,
+        .ass_style_override[0] = 1,
+        .ass_style_override[1] = 5,
     },
     .change_flags = UPDATE_OSD,
 };
@@ -669,6 +685,7 @@ static const m_option_t mp_opts[] = {
     {"cover-art-whitelist", OPT_BOOL(coverart_whitelist)},
 
     {"", OPT_SUBSTRUCT(subs_rend, mp_subtitle_sub_opts)},
+    {"", OPT_SUBSTRUCT(subs_shared, mp_subtitle_shared_sub_opts)},
     {"", OPT_SUBSTRUCT(subs_filt, mp_sub_filter_opts)},
     {"", OPT_SUBSTRUCT(osd_rend, mp_osd_render_sub_opts)},
 
@@ -1077,6 +1094,7 @@ static const struct MPOpts mp_default_opts = {
         "sub-ass-force-margins",
         "sub-ass-vsfilter-aspect-compat",
         "sub-ass-override",
+        "secondary-sub-ass-override",
         "secondary-sub-visibility",
         "ab-loop-a",
         "ab-loop-b",

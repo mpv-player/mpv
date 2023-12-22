@@ -2011,8 +2011,8 @@ Audio
     (default: 0).
 
 ``--replaygain-clip=<yes|no>``
-    Prevent clipping caused by replaygain by automatically lowering the
-    gain (default). Use ``--replaygain-clip=no`` to disable this.
+    Allow the volume gain to clip (default: no). If this option is not
+    enabled, mpv automatically will prevent clipping by lowering the gain.
 
 ``--replaygain-fallback=<db>``
     Gain in dB to apply if the file has no replay gain tags. This option
@@ -2498,6 +2498,12 @@ Subtitles
 
     This also controls some bitmap subtitle overrides, as well as HTML tags in
     formats like SRT, despite the name of the option.
+
+``--secondary-sub-ass-override=<yes|no|force|scale|strip>``
+    Control whether user secondary substyle overrides should be applied. This
+    works exactly like ``--sub-ass-override``.
+
+    Default: strip.
 
 ``--sub-ass-force-margins``
     Enables placing toptitles and subtitles in black borders when they are

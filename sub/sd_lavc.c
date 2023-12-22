@@ -399,10 +399,11 @@ static struct sub *get_current(struct sd_lavc_priv *priv, double pts)
 }
 
 static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
-                                       int format, double pts, int order)
+                                       int format, double pts)
 {
     struct sd_lavc_priv *priv = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
+    struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
 
     priv->current_pts = pts;
 
@@ -450,8 +451,8 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
         h = MPMAX(priv->video_params.h, current->src_h);
     }
 
-    if (opts->sub_pos != 100.0f && opts->ass_style_override) {
-        float offset = (100.0f - opts->sub_pos) / 100.0f * h;
+    if (shared_opts->sub_pos[0] != 100.0f && shared_opts->ass_style_override[0]) {
+        float offset = (100.0f - shared_opts->sub_pos[0]) / 100.0f * h;
 
         for (int n = 0; n < res->num_parts; n++) {
             struct sub_bitmap *sub = &res->parts[n];
@@ -469,7 +470,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
 
     osd_rescale_bitmaps(res, w, h, d, video_par);
 
-    if (opts->sub_scale != 1.0 && opts->ass_style_override) {
+    if (opts->sub_scale != 1.0 && shared_opts->ass_style_override[0]) {
         for (int n = 0; n < res->num_parts; n++) {
             struct sub_bitmap *sub = &res->parts[n];
 
