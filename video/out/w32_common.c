@@ -578,18 +578,20 @@ static double get_refresh_rate_from_gdi(const wchar_t *device)
 static char *get_color_profile(void *ctx, const wchar_t *device)
 {
     char *name = NULL;
+    wchar_t *wname = NULL;
 
     HDC ic = CreateICW(device, NULL, NULL, NULL);
     if (!ic)
         goto done;
-    wchar_t wname[MAX_PATH + 1];
-    if (!GetICMProfileW(ic, &(DWORD){ MAX_PATH }, wname))
+    wname = talloc_array(NULL, wchar_t, MP_PATH_MAX);
+    if (!GetICMProfileW(ic, &(DWORD){ MP_PATH_MAX - 1 }, wname))
         goto done;
 
     name = mp_to_utf8(ctx, wname);
 done:
     if (ic)
         DeleteDC(ic);
+    talloc_free(wname);
     return name;
 }
 

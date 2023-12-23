@@ -576,9 +576,10 @@ static void init_session_display(struct wasapi_state *state, const char *name) {
                                          (void **)&state->pSessionControl);
     EXIT_ON_ERROR(hr);
 
-    wchar_t path[MAX_PATH] = {0};
-    GetModuleFileNameW(NULL, path, MAX_PATH);
+    wchar_t *path = talloc_array(NULL, wchar_t, MP_PATH_MAX);
+    GetModuleFileNameW(NULL, path, MP_PATH_MAX);
     hr = IAudioSessionControl_SetIconPath(state->pSessionControl, path, NULL);
+    talloc_free(path);
     if (FAILED(hr)) {
         // don't goto exit_label here since SetDisplayName might still work
         MP_WARN(state, "Error setting audio session icon: %s\n",
