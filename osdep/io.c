@@ -558,7 +558,9 @@ FILE *mp_fopen(const char *filename, const char *mode)
 // Thus we need MP_PATH_MAX as the UTF-8/char version of PATH_MAX.
 // Also make sure there's free space for the terminating \0.
 // (For codepoints encoded as UTF-16 surrogate pairs, UTF-8 has the same length.)
-#define MP_PATH_MAX (FILENAME_MAX * 3 + 1)
+// Lastly, note that neither _wdirent nor WIN32_FIND_DATA can store filenames
+// longer than this, so long-path support for readdir() is impossible.
+#define MP_FILENAME_MAX (FILENAME_MAX * 3 + 1)
 
 struct mp_dir {
     DIR crap;   // must be first member
@@ -568,9 +570,9 @@ struct mp_dir {
         // dirent has space only for FILENAME_MAX bytes. _wdirent has space for
         // FILENAME_MAX wchar_t, which might end up bigger as UTF-8 in some
         // cases. Guarantee we can always hold _wdirent.d_name converted to
-        // UTF-8 (see MP_PATH_MAX).
+        // UTF-8 (see above).
         // This works because dirent.d_name is the last member of dirent.
-        char space[MP_PATH_MAX];
+        char space[MP_FILENAME_MAX];
     };
 };
 
