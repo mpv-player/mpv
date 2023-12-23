@@ -80,9 +80,19 @@ int mp_make_wakeup_pipe(int pipes[2]);
 void mp_flush_wakeup_pipe(int pipe_end);
 
 #ifdef _WIN32
+
 #include <wchar.h>
 wchar_t *mp_from_utf8(void *talloc_ctx, const char *s);
 char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
+
+// Use this in win32-specific code rather than PATH_MAX or MAX_PATH.
+// This is necessary because we declare long-path aware support which raises
+// the effective limit without affecting any defines.
+// The actual limit is 32767 but there's a few edge cases that reduce
+// it. So pick this nice round number.
+// Note that this is wchars, not chars.
+#define MP_PATH_MAX (32000)
+
 #endif
 
 #ifdef __CYGWIN__

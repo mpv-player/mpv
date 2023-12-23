@@ -19,6 +19,9 @@
 #include <stdio.h>
 #include <windows.h>
 
+// copied from osdep/io.h since this file is standalone
+#define MP_PATH_MAX (32000)
+
 int wmain(int argc, wchar_t **argv, wchar_t **envp);
 
 static void cr_perror(const wchar_t *prefix)
@@ -75,10 +78,11 @@ static int cr_runproc(wchar_t *name, wchar_t *cmdline)
 int wmain(int argc, wchar_t **argv, wchar_t **envp)
 {
     wchar_t *cmd;
-    wchar_t exe[MAX_PATH];
+    wchar_t *exe;
 
     cmd = GetCommandLineW();
-    GetModuleFileNameW(NULL, exe, MAX_PATH);
+    exe = LocalAlloc(LPTR, MP_PATH_MAX * sizeof(wchar_t));
+    GetModuleFileNameW(NULL, exe, MP_PATH_MAX);
     wcscpy(wcsrchr(exe, '.') + 1, L"exe");
 
     // Set an environment variable so the child process can tell whether it
