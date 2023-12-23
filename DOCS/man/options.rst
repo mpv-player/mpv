@@ -5767,6 +5767,11 @@ them.
         from Windows 10. Thus on older systems it will only automatically
         utilize the rgba8 output format.
 
+    .. note::
+
+        For ``--vo=gpu-next``, this is used as a best-effort hint and
+        libplacebo has the last say on which format is utilized.
+
 ``--d3d11-output-csp=<auto|srgb|linear|pq|bt.2020>``
     Select a specific D3D11 output color space to utilize for D3D11 rendering.
     "auto" is the default, which will select the color space of the desktop
