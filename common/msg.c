@@ -325,31 +325,30 @@ static bool test_terminal_level(struct mp_log *log, int lev)
 }
 
 // This is very basic way to infer needed width for a string.
-static int term_disp_width(bstr str, size_t start, size_t end)
+static int term_disp_width(bstr str)
 {
     int width = 0;
-    bool escape = false;
 
-    const char *line = str.start;
-    for (size_t i = start; i < end && i < str.len; ++i) {
-        if (escape) {
-            escape = !(line[i] >= '@' && line[i] <= '~');
+    while (str.len) {
+        if (bstr_eatstart0(&str, "\033[")) {
+            while (str.len && !((*str.start >= '@' && *str.start <= '~') || *str.start == 'm'))
+                str = bstr_cut(str, 1);
+            str = bstr_cut(str, 1);
             continue;
         }
 
-        if (line[i] == '\033' && line[i + 1] == '[') {
-            escape = true;
-            ++i;
-            continue;
-        }
-
-        if (line[i] == '\n')
+        bstr code = bstr_split_utf8(str, &str);
+        if (code.len == 0)
             continue;
 
+        if (code.len == 1 && *code.start == '\n')
+            continue;
+
+        // Only single-width characters are supported
         width++;
 
         // Assume that everything before \r should be discarded for simplicity
-        if (line[i] == '\r')
+        if (code.len == 1 && *code.start == '\r')
             width = 0;
     }
 
@@ -378,7 +377,7 @@ static void append_terminal_line(struct mp_log *log, int lev,
 
     bstr_xappend(root, term_msg, text);
     *line_w = root->isatty[term_msg_fileno(root, lev)]
-                ? term_disp_width(*term_msg, start, term_msg->len) : 0;
+                ? term_disp_width(bstr_splice(*term_msg, start, term_msg->len)) : 0;
 }
 
 static struct mp_log_buffer_entry *log_buffer_read(struct mp_log_buffer *buffer)
