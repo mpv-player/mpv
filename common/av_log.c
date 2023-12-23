@@ -108,6 +108,11 @@ static struct mp_log *get_av_log(void *ptr)
     return log_root;
 }
 
+static const char *avclass_item_name(void *obj, const AVClass *avc)
+{
+    return (avc->item_name ? avc->item_name : av_default_item_name)(obj);
+}
+
 static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
                                    va_list vl)
 {
@@ -131,7 +136,7 @@ static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
         bstr_xappend_vasprintf(log_root, &log_buffer, fmt, vl);
         if (!log_buffer.len)
             goto done;
-        const char *prefix = avc ? avc->item_name(ptr) : NULL;
+        const char *prefix = avc ? avclass_item_name(ptr, avc) : NULL;
         if (log_print_prefix && prefix) {
             mp_msg(log, mp_level, "%s: %.*s", prefix, BSTR_P(log_buffer));
         } else {
