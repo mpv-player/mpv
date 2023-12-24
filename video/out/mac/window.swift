@@ -91,6 +91,7 @@ class Window: NSWindow, NSWindowDelegate {
         title = com.title
         minSize = NSMakeSize(160, 90)
         collectionBehavior = .fullScreenPrimary
+        ignoresMouseEvents = mpv?.opts.cursor_passthrough ?? false
         delegate = self
 
         if let cView = contentView {
