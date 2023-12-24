@@ -2173,7 +2173,7 @@ Property list
 ``core-idle``
     Whether the playback core is paused. This can differ from ``pause`` in
     special situations, such as when the player pauses itself due to low
-    network cache.
+    network cache or when displaying an image without advancing automatically.
 
     This also returns ``yes``/true if playback is restarting or if nothing is
     playing at all. In other words, it's only ``no``/false if there's actually
