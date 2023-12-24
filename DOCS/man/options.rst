@@ -3145,12 +3145,12 @@ Window
     This option does not affect the framerate used for ``mf://`` or
     ``--merge-files``. For that, use ``--mf-fps`` instead.
 
-    Setting ``--image-display-duration`` hides the OSC and does not track
-    playback time on the command-line output, and also does not duplicate
-    the image frame when encoding. To force the player into "dumb mode"
-    and actually count out seconds, or to duplicate the image when
-    encoding, you need to use ``--demuxer=lavf --demuxer-lavf-o=loop=1``,
-    and use ``--length`` or ``--frames`` to stop after a particular time.
+    When viewing images, the playback time is not tracked on the command line
+    output, and the image frame is not duplicated when encoding. To force the
+    player into "dumb mode" and actually count out seconds, or to duplicate the
+    image when encoding, you need to use ``--demuxer=lavf
+    --demuxer-lavf-o=loop=1``, and use ``--length`` or ``--frames`` to stop
+    after a particular time.
 
 ``--force-window=<yes|no|immediate>``
     Create a video output window even if there is no video. This can be useful
