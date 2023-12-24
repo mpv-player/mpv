@@ -553,6 +553,14 @@ class Common: NSObject {
                     DispatchQueue.main.async {
                         self.window?.setMaximized(Bool(mpv.opts.window_maximized))
                     }
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.geometry): fallthrough
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit): fallthrough
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit_smaller): fallthrough
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit_larger):
+                    DispatchQueue.main.async {
+                        let (_, _, wr) = self.getInitProperties(vo)
+                        self.window?.updateFrame(wr)
+                    }
                 default:
                     break
                 }
