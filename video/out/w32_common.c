@@ -1204,6 +1204,23 @@ static void update_backdrop(const struct vo_w32_state *w32)
                           &backdropType, sizeof(backdropType));
 }
 
+static void update_cursor_passthrough(const struct vo_w32_state *w32)
+{
+    if (w32->parent)
+        return;
+
+    LONG_PTR exstyle = GetWindowLongPtrW(w32->window, GWL_EXSTYLE);
+    if (exstyle) {
+        if (w32->opts->cursor_passthrough) {
+            SetWindowLongPtrW(w32->window, GWL_EXSTYLE, exstyle | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+            // This is required, otherwise the titlebar disappears.
+            SetLayeredWindowAttributes(w32->window, 0, 255, LWA_ALPHA);
+        } else {
+            SetWindowLongPtrW(w32->window, GWL_EXSTYLE, exstyle & ~(WS_EX_LAYERED | WS_EX_TRANSPARENT));
+        }
+    }
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -1802,6 +1819,8 @@ static MP_THREAD_VOID gui_thread(void *ptr)
         update_affinity(w32);
     if (w32->opts->backdrop_type)
         update_backdrop(w32);
+    if (w32->opts->cursor_passthrough)
+        update_cursor_passthrough(w32);
 
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
@@ -1982,6 +2001,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                 update_window_state(w32);
             } else if (changed_option == &vo_opts->backdrop_type) {
                 update_backdrop(w32);
+            } else if (changed_option == &vo_opts->cursor_passthrough) {
+                update_cursor_passthrough(w32);
             } else if (changed_option == &vo_opts->border ||
                        changed_option == &vo_opts->title_bar)
             {

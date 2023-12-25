@@ -4149,7 +4149,6 @@ Input
     Support depends on the VO in use.
 
 ``--input-cursor-passthrough``, ``--no-input-cursor-passthrough``
-    (X11, Wayland and macOS only)
     Tell the backend windowing system to allow pointer events to passthrough
     the mpv window. This allows windows under mpv to instead receive pointer
     events as if the mpv window was never there.
