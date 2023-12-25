@@ -1049,6 +1049,16 @@ function complete(backwards)
                 completion_start_position = s2
             end
 
+            -- Expand ~ in file completion.
+            if completer.list == file_list and hint:find('^~' .. path_separator) then
+                local home = mp.command_native({'expand-path', '~/'})
+                before_cur = before_cur:sub(1, completion_start_position - #hint - 1) ..
+                             home ..
+                             before_cur:sub(completion_start_position - #hint + 1)
+                hint = home .. hint:sub(2)
+                completion_start_position = completion_start_position + #home - 1
+            end
+
             -- If the completer's pattern found a word, check the completer's
             -- list for possible completions
             local part = before_cur:sub(completion_start_position)
