@@ -5770,7 +5770,6 @@ static void cmd_run(void *p)
     char **args = talloc_zero_array(NULL, char *, cmd->num_args + 1);
     for (int n = 0; n < cmd->num_args; n++)
         args[n] = cmd->args[n].v.s;
-    mp_msg_flush_status_line(mpctx->log);
     struct mp_subprocess_opts opts = {
         .exe = args[0],
         .args = args,
