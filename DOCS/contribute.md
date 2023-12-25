@@ -5,13 +5,13 @@ General
 -------
 
 The main contact for mpv development is IRC, specifically #mpv
-and #mpv-devel on Libera.chat. Github is used for code review and
+and #mpv-devel on Libera.chat. GitHub is used for code review and
 long term discussions.
 
 Sending patches
 ---------------
 
-- Make a github pull request, or send a link to a plaintext patch created with
+- Make a GitHub pull request, or send a link to a plaintext patch created with
   ``git format-patch``.
 - Plain diffs posted as pastebins are not acceptable! (Especially if the http
   link returns HTML.) They only cause extra work for everyone, because they lack
@@ -111,13 +111,13 @@ Always squash fixup commits when making changes to pull requests
 - If you make fixup commits to your pull request, you should generally squash
   them with "git rebase -i". We prefer to have pull requests in a merge
   ready state.
-- We don't squash-merge (nor do we use github's feature that does this) because
+- We don't squash-merge (nor do we use GitHub's feature that does this) because
   pull requests with multiple commits are perfectly legitimate, and the only
   thing that makes sense in non-trivial cases.
 - With complex pull requests, it *may* make sense to keep them separate, but
   they should be clearly marked as such. Reviewing commits is generally easier
   with fixups squashed.
-- Reviewers are encouraged to look at individual commits instead of github's
+- Reviewers are encouraged to look at individual commits instead of GitHub's
   "changes from all commits" view (which just encourages bad git and review
   practices).
 
