@@ -510,7 +510,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_force_flags |= ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
     if (converted)
         set_force_flags |= ASS_OVERRIDE_BIT_ALIGNMENT;
-#ifdef ASS_JUSTIFY_AUTO
+#if LIBASS_VERSION >= 0x01306000
     if ((converted || shared_opts->ass_style_override[sd->order]) && opts->ass_justify)
         set_force_flags |= ASS_OVERRIDE_BIT_JUSTIFY;
 #endif
