@@ -190,7 +190,7 @@ see the [FAQ][FAQ].
 ## Contact
 
 
-Most activity happens on the IRC channel and the github issue tracker.
+Most activity happens on the IRC channel and the GitHub issue tracker.
 
 - **GitHub issue tracker**: [issue tracker][issue-tracker] (report bugs here)
 - **User IRC Channel**: `#mpv` on `irc.libera.chat`
