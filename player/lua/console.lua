@@ -1003,6 +1003,13 @@ function max_overlap_length(s1, s2)
     return 0
 end
 
+-- If str starts with the first or last characters of prefix, strip them.
+local function strip_common_characters(str, prefix)
+    return str:sub(1 + math.max(
+        common_prefix_length(prefix, str),
+        max_overlap_length(prefix, str)))
+end
+
 local function cycle_through_suggestions(backwards)
     selected_suggestion_index = selected_suggestion_index + (backwards and -1 or 1)
 
@@ -1014,7 +1021,7 @@ local function cycle_through_suggestions(backwards)
 
     local before_cur = line:sub(1, completion_start_position - 1) ..
                        suggestion_buffer[selected_suggestion_index] .. completion_append
-    line = before_cur .. line:sub(cursor)
+    line = before_cur .. strip_common_characters(line:sub(cursor), completion_append)
     cursor = before_cur:len() + 1
     update()
 end
@@ -1058,15 +1065,10 @@ function complete(backwards)
                 -- If there was only one full match from the list, add
                 -- completer.append to the final string. This is normally a
                 -- space or a quotation mark followed by a space.
-                local after_cur_index = 1
                 completion_append = completer.append or ''
                 if #completions == 1 then
                     prefix = prefix .. completion_append
-
-                    -- calculate offset into after_cur
-                    local prefix_len = common_prefix_length(completion_append, after_cur)
-                    local overlap_size = max_overlap_length(completion_append, after_cur)
-                    after_cur_index = math.max(prefix_len, overlap_size) + 1
+                    after_cur = strip_common_characters(after_cur, completion_append)
                 else
                     table.sort(completions)
                     suggestion_buffer = completions
@@ -1077,7 +1079,7 @@ function complete(backwards)
                 before_cur = before_cur:sub(1, completion_start_position - 1) ..
                              prefix
                 cursor = before_cur:len() + 1
-                line = before_cur .. after_cur:sub(after_cur_index)
+                line = before_cur .. after_cur
                 update()
                 return
             end
