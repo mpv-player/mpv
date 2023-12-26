@@ -655,7 +655,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
               wasn't started in detached mode, even if ``playback_only`` is
               false.
 
-    .. admonition:: Warning
+    .. warning::
 
         Don't forget to set the ``playback_only`` field to false if you want
         the command to run while the player is in idle mode, or if you don't
