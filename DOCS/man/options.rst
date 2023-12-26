@@ -1961,7 +1961,7 @@ Audio
     In earlier mpv versions you could use ``--ad`` to force the spdif wrapper.
     This does not work anymore.
 
-    .. admonition:: Warning
+    .. warning::
 
         There is not much reason to use this. HDMI supports uncompressed
         multichannel PCM, and mpv supports lossless DTS-HD decoding via
@@ -1988,7 +1988,7 @@ Audio
         ``--ad=help``
             List all available decoders.
 
-    .. admonition:: Warning
+    .. warning::
 
         Enabling compressed audio passthrough (AC3 and DTS via SPDIF/HDMI) with
         this option is not possible. Use ``--audio-spdif`` instead.
@@ -2080,7 +2080,7 @@ Audio
 ``--ad-spdif-dtshd=<yes|no>``, ``--dtshd``, ``--no-dtshd``
     If DTS is passed through, use DTS-HD.
 
-    .. admonition:: Warning
+    .. warning::
 
         This and enabling passthrough via ``--ad`` are deprecated in favor of
         using ``--audio-spdif=dts-hd``.
@@ -2138,7 +2138,7 @@ Audio
     work-around for this on some AOs is to use ``--audio-exclusive=yes`` to
     circumvent the system mixer entirely.
 
-    .. admonition:: Warning
+    .. warning::
 
         Using ``auto`` can cause issues when using audio over HDMI. The OS will
         typically report all channel layouts that _can_ go over HDMI, even if
@@ -2284,7 +2284,7 @@ Audio
 
     Not all AOs support this.
 
-    .. admonition:: Warning
+    .. warning::
 
         This modifies certain subtle player behavior, like A/V-sync and underrun
         handling. Enabling this option is strongly discouraged.
@@ -2406,7 +2406,7 @@ Subtitles
     some margin between the bottom and the subtitle. Values above 100 move the
     subtitle further down.
 
-    .. admonition:: Warning
+    .. warning::
 
         Text subtitles (as opposed to image subtitles) may be cut off if the
         value of the option is above 100. This is a libass restriction.
@@ -2452,7 +2452,7 @@ Subtitles
     :normal:     FreeType autohinter, normal mode
     :native:     font native hinter
 
-    .. admonition:: Warning
+    .. warning::
 
         Enabling hinting can lead to mispositioned text (in situations it's
         supposed to match up video background), or reduce the smoothness
@@ -5842,7 +5842,7 @@ them.
     and overwrites the internal list with it. The latter is a path list option
     (see `List Options`_ for details).
 
-    .. admonition:: Warning
+    .. warning::
 
         The syntax is not stable yet and may change any time.
 
