@@ -911,19 +911,11 @@ function build_completers()
 end
 
 -- Find the longest common case-sensitive prefix of the entries in "list".
-local function find_common_prefix(part, list)
-    local prefix = nil
+local function find_common_prefix(list)
+    local prefix = list[1]
 
-    for _, candidate in ipairs(list) do
-        if prefix and prefix ~= candidate then
-            local prefix_len = part:len()
-            while prefix:sub(1, prefix_len + 1) == candidate:sub(1, prefix_len + 1) do
-                prefix_len = prefix_len + 1
-            end
-            prefix = candidate:sub(1, prefix_len)
-        else
-            prefix = candidate
-        end
+    for i = 2, #list do
+        prefix = prefix:sub(1, common_prefix_length(prefix, list[i]))
     end
 
     return prefix
@@ -940,7 +932,7 @@ local function complete_match(part, list)
         end
     end
 
-    local prefix = find_common_prefix(part, completions)
+    local prefix = find_common_prefix(completions)
 
     if opts.case_sensitive then
         return completions, prefix
@@ -957,8 +949,7 @@ local function complete_match(part, list)
         end
     end
 
-    local lower_case_prefix = find_common_prefix(lower_case_part,
-                                                 lower_case_completions)
+    local lower_case_prefix = find_common_prefix(lower_case_completions)
 
     -- Behave like GNU readline with completion-ignore-case On.
     -- part = 'fooBA', completions = {'foobarbaz', 'fooBARqux'} =>
