@@ -205,6 +205,9 @@ Shift+PGUP and Shift+PGDWN
     Seek backward or forward by 10 minutes. (This used to be mapped to
     PGUP/PGDWN without Shift.)
 
+b
+    Activate/deactivate debanding.
+
 d
     Cycle the deinterlacing filter.
 
