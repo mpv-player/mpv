@@ -3155,7 +3155,7 @@ Window
 ``--force-window=<yes|no|immediate>``
     Create a video output window even if there is no video. This can be useful
     when pretending that mpv is a GUI application. Currently, the window
-    always has the size 640x480, and is subject to ``--geometry``,
+    always has the size 960x540, and is subject to ``--geometry``,
     ``--autofit``, and similar options.
 
     .. warning::
