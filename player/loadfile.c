@@ -673,9 +673,12 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     if (pick && !forced_pick && sub && (!match_lang(langs, pick->lang) || os_langs) && !sub_fallback)
         pick = NULL;
     // Handle this after matching langs and selecting a fallback.
-    if (pick && sub && (!opts->subs_with_matching_audio && audio_matches))
+    if (pick && sub && ((!opts->subs_with_matching_audio && audio_matches) ||
+        (opts->subs_with_matching_audio == 1 && audio_matches && !forced_pick)))
+    {
         pick = NULL;
-    // Handle edge cases if we picked a track that doesn't match the --subs-fallback-force value
+    }
+    // Handle edge cases if we picked a track that doesn't match the --subs-fallback-forced value
     if (pick && sub && ((!pick->forced_track && opts->subs_fallback_forced == 2) ||
         (pick->forced_track && !opts->subs_fallback_forced)))
     {
