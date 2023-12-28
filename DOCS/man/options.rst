@@ -135,11 +135,13 @@ Track Selection
     Note that if ``--lavfi-complex`` is set before playback is started, the
     referenced tracks are always selected.
 
-``--subs-with-matching-audio=<yes|no>``
-    When autoselecting a subtitle track, select a full/non-forced one even if the selected
-    audio stream matches your preferred subtitle language (default: yes). If this option is
-    set to ``no``, a non-forced subtitle track that matches the audio language will never be
-    autoselected by mpv regardless of the value of ``--slang`` or ``--subs-fallback``.
+``--subs-with-matching-audio=<yes|forced|no>``
+    When autoselecting a subtitle track, select it even if the selected audio
+    stream matches you preferred subtitle language (default: yes). If this
+    option is set to ``no``, then no subtitle track that matches the audio
+    language will ever be autoselected by mpv regardless of ``--slang`` or
+    ``subs-fallback``. If set to ``forced``, then only forced subtitles
+    will be selected.
 
 ``--subs-match-os-language=<yes|no>``
     When autoselecting a subtitle track, select the track that matches the language of your OS
