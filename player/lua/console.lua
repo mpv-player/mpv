@@ -384,7 +384,8 @@ function update()
     -- horizontal borders.
     local cheight = opts.font_size * 8
     local cglyph = '{\\r' ..
-                   '\\1a&H44&\\3a&H44&\\4a&H99&' ..
+                   (mp.get_property_native('focused') == false
+                    and '\\alpha&HFF&' or '\\1a&H44&\\3a&H44&\\4a&H99&') ..
                    '\\1c&Heeeeee&\\3c&Heeeeee&\\4c&H000000&' ..
                    '\\xbord0.5\\ybord0\\xshad0\\yshad1\\p4\\pbo24}' ..
                    'm 0 0 l 1 0 l 1 ' .. cheight .. ' l 0 ' .. cheight ..
@@ -1315,6 +1316,7 @@ end)
 mp.observe_property('osd-width', 'native', update)
 mp.observe_property('osd-height', 'native', update)
 mp.observe_property('display-hidpi-scale', 'native', update)
+mp.observe_property('focused', nil, update)
 
 -- Enable log messages. In silent mode, mpv will queue log messages in a buffer
 -- until enable_messages is called again without the silent: prefix.
