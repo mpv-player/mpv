@@ -3450,10 +3450,12 @@ Window
     the screensaver will re-enable when playback is not active. ``always`` will
     always disable the screensaver. Note that stopping the screensaver is only
     possible if a video output is available (i.e. there is an open mpv window).
+    This is not supported on all video outputs, platforms, or desktop environments.
 
-    This is not supported on all video outputs or platforms. Sometimes it is
-    implemented, but does not work (especially with Linux "desktops"). Read the
-    `Disabling Screensaver`_ section very carefully.
+    Before mpv 0.33.0, the X11 backend ran ``xdg-screensaver reset`` in 10 second
+    intervals when not paused in order to support screensaver inhibition in some
+    environments. This functionality was removed in 0.33.0, but it is possible to
+    call the ``xdg-screensaver`` command line program from a user script instead.
 
 ``--wid=<ID>``
     This tells mpv to attach to an existing window. If a VO is selected that

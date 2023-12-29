@@ -1358,27 +1358,6 @@ works like in older mpv releases:
     change, and not apply your additional settings, and/or use a different
     profile name.
 
-Linux desktop issues
-====================
-
-This subsection describes common problems on the Linux desktop. None of these
-problems exist on systems like Windows or macOS.
-
-Disabling Screensaver
----------------------
-
-By default, mpv tries to disable the OS screensaver during playback (only if
-a VO using the OS GUI API is active). ``--stop-screensaver=no`` disables this.
-
-A common problem is that Linux desktop environments ignore the standard
-screensaver APIs on which mpv relies. In particular, mpv uses the Screen Saver
-extension (XSS) on X11, and the idle-inhibit protocol on Wayland.
-
-Before mpv 0.33.0, the X11 backend ran ``xdg-screensaver reset`` in 10 second
-intervals when not paused in order to support screensaver inhibition in these
-environments. This functionality was removed in 0.33.0, but it is possible to
-call the ``xdg-screensaver`` command line program from a user script instead.
-
 
 .. include:: options.rst
 
