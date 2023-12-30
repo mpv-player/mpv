@@ -547,6 +547,10 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
             case SDL_WINDOWEVENT_LEAVE:
                 mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
                 break;
+            case SDL_WINDOWEVENT_FOCUS_LOST:
+            case SDL_WINDOWEVENT_FOCUS_GAINED:
+                vo_event(vo, VO_EVENT_FOCUS);
+                break;
             }
             break;
         case SDL_QUIT:
@@ -959,6 +963,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         SDL_SetWindowTitle(vc->window, (char *)data);
         return true;
+    case VOCTRL_GET_FOCUSED:
+        *(bool *)data = SDL_GetWindowFlags(vc->window) & SDL_WINDOW_INPUT_FOCUS;
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }

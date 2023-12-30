@@ -24,17 +24,15 @@
 #include "osdep/path.h"
 #include "osdep/threads.h"
 
-// Warning: do not use PATH_MAX. Cygwin messed it up.
-
 static mp_once path_init_once = MP_STATIC_ONCE_INITIALIZER;
 
 static char *portable_path;
 
 static char *mp_get_win_exe_dir(void *talloc_ctx)
 {
-    wchar_t w_exedir[MAX_PATH + 1] = {0};
+    wchar_t *w_exedir = talloc_array(NULL, wchar_t, MP_PATH_MAX);
 
-    int len = (int)GetModuleFileNameW(NULL, w_exedir, MAX_PATH);
+    int len = (int)GetModuleFileNameW(NULL, w_exedir, MP_PATH_MAX);
     int imax = 0;
     for (int i = 0; i < len; i++) {
         if (w_exedir[i] == '\\') {
@@ -42,10 +40,11 @@ static char *mp_get_win_exe_dir(void *talloc_ctx)
             imax = i;
         }
     }
-
     w_exedir[imax] = '\0';
 
-    return mp_to_utf8(talloc_ctx, w_exedir);
+    char *ret = mp_to_utf8(talloc_ctx, w_exedir);
+    talloc_free(w_exedir);
+    return ret;
 }
 
 static char *mp_get_win_exe_subdir(void *ta_ctx, const char *name)

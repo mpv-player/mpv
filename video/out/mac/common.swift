@@ -553,6 +553,10 @@ class Common: NSObject {
                     DispatchQueue.main.async {
                         self.window?.setMaximized(Bool(mpv.opts.window_maximized))
                     }
+                case MPVHelper.getPointer(&mpv.optsPtr.pointee.cursor_passthrough):
+                    DispatchQueue.main.async {
+                        self.window?.ignoresMouseEvents = mpv.opts.cursor_passthrough
+                    }
                 case MPVHelper.getPointer(&mpv.optsPtr.pointee.geometry): fallthrough
                 case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit): fallthrough
                 case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit_smaller): fallthrough

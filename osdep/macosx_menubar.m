@@ -578,7 +578,7 @@
                         @"url"        : @"https://mpv.io"
                     }],
                     [NSMutableDictionary dictionaryWithDictionary:@{
-                        @"name"       : @"mpv on github…",
+                        @"name"       : @"mpv on GitHub…",
                         @"action"     : @"url:",
                         @"key"        : @"",
                         @"target"     : self,

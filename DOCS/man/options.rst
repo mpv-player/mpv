@@ -1961,7 +1961,7 @@ Audio
     In earlier mpv versions you could use ``--ad`` to force the spdif wrapper.
     This does not work anymore.
 
-    .. admonition:: Warning
+    .. warning::
 
         There is not much reason to use this. HDMI supports uncompressed
         multichannel PCM, and mpv supports lossless DTS-HD decoding via
@@ -1988,7 +1988,7 @@ Audio
         ``--ad=help``
             List all available decoders.
 
-    .. admonition:: Warning
+    .. warning::
 
         Enabling compressed audio passthrough (AC3 and DTS via SPDIF/HDMI) with
         this option is not possible. Use ``--audio-spdif`` instead.
@@ -2080,7 +2080,7 @@ Audio
 ``--ad-spdif-dtshd=<yes|no>``, ``--dtshd``, ``--no-dtshd``
     If DTS is passed through, use DTS-HD.
 
-    .. admonition:: Warning
+    .. warning::
 
         This and enabling passthrough via ``--ad`` are deprecated in favor of
         using ``--audio-spdif=dts-hd``.
@@ -2138,7 +2138,7 @@ Audio
     work-around for this on some AOs is to use ``--audio-exclusive=yes`` to
     circumvent the system mixer entirely.
 
-    .. admonition:: Warning
+    .. warning::
 
         Using ``auto`` can cause issues when using audio over HDMI. The OS will
         typically report all channel layouts that _can_ go over HDMI, even if
@@ -2284,7 +2284,7 @@ Audio
 
     Not all AOs support this.
 
-    .. admonition:: Warning
+    .. warning::
 
         This modifies certain subtle player behavior, like A/V-sync and underrun
         handling. Enabling this option is strongly discouraged.
@@ -2406,7 +2406,7 @@ Subtitles
     some margin between the bottom and the subtitle. Values above 100 move the
     subtitle further down.
 
-    .. admonition:: Warning
+    .. warning::
 
         Text subtitles (as opposed to image subtitles) may be cut off if the
         value of the option is above 100. This is a libass restriction.
@@ -2452,7 +2452,7 @@ Subtitles
     :normal:     FreeType autohinter, normal mode
     :native:     font native hinter
 
-    .. admonition:: Warning
+    .. warning::
 
         Enabling hinting can lead to mispositioned text (in situations it's
         supposed to match up video background), or reduce the smoothness
@@ -3145,17 +3145,17 @@ Window
     This option does not affect the framerate used for ``mf://`` or
     ``--merge-files``. For that, use ``--mf-fps`` instead.
 
-    Setting ``--image-display-duration`` hides the OSC and does not track
-    playback time on the command-line output, and also does not duplicate
-    the image frame when encoding. To force the player into "dumb mode"
-    and actually count out seconds, or to duplicate the image when
-    encoding, you need to use ``--demuxer=lavf --demuxer-lavf-o=loop=1``,
-    and use ``--length`` or ``--frames`` to stop after a particular time.
+    When viewing images, the playback time is not tracked on the command line
+    output, and the image frame is not duplicated when encoding. To force the
+    player into "dumb mode" and actually count out seconds, or to duplicate the
+    image when encoding, you need to use ``--demuxer=lavf
+    --demuxer-lavf-o=loop=1``, and use ``--length`` or ``--frames`` to stop
+    after a particular time.
 
 ``--force-window=<yes|no|immediate>``
     Create a video output window even if there is no video. This can be useful
     when pretending that mpv is a GUI application. Currently, the window
-    always has the size 640x480, and is subject to ``--geometry``,
+    always has the size 960x540, and is subject to ``--geometry``,
     ``--autofit``, and similar options.
 
     .. warning::
@@ -3450,10 +3450,12 @@ Window
     the screensaver will re-enable when playback is not active. ``always`` will
     always disable the screensaver. Note that stopping the screensaver is only
     possible if a video output is available (i.e. there is an open mpv window).
+    This is not supported on all video outputs, platforms, or desktop environments.
 
-    This is not supported on all video outputs or platforms. Sometimes it is
-    implemented, but does not work (especially with Linux "desktops"). Read the
-    `Disabling Screensaver`_ section very carefully.
+    Before mpv 0.33.0, the X11 backend ran ``xdg-screensaver reset`` in 10 second
+    intervals when not paused in order to support screensaver inhibition in some
+    environments. This functionality was removed in 0.33.0, but it is possible to
+    call the ``xdg-screensaver`` command line program from a user script instead.
 
 ``--wid=<ID>``
     This tells mpv to attach to an existing window. If a VO is selected that
@@ -4149,7 +4151,6 @@ Input
     Support depends on the VO in use.
 
 ``--input-cursor-passthrough``, ``--no-input-cursor-passthrough``
-    (X11 and Wayland only)
     Tell the backend windowing system to allow pointer events to passthrough
     the mpv window. This allows windows under mpv to instead receive pointer
     events as if the mpv window was never there.
@@ -5843,7 +5844,7 @@ them.
     and overwrites the internal list with it. The latter is a path list option
     (see `List Options`_ for details).
 
-    .. admonition:: Warning
+    .. warning::
 
         The syntax is not stable yet and may change any time.
 
