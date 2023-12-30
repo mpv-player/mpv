@@ -123,10 +123,24 @@ static const int map_ass_level[] = {
 
 static void message_callback(int level, const char *format, va_list va, void *ctx)
 {
+    static bool missing_glyph_warned;
     struct mp_log *log = ctx;
     if (!log)
         return;
     level = map_ass_level[level];
+    // "fontselect" missing glyph messages are treated as "warnings" by libass.
+    // However, they're highly disruptive as these messages can be genereated
+    // repeatedly every time the sub is rendered, creating log spam.
+    // Unfortunately, libass also has some other useful messages at the same
+    // loglevel, so use strncmp to check the presence of fontselect messages.
+    // Reduce the log spam by changing the log level after the first warning.
+    if (level == MSGL_INFO && strncmp(format, "fontselect: failed to find", 26) == 0) {
+        if (!missing_glyph_warned) {
+            missing_glyph_warned = true;
+        } else {
+            level = MSGL_V;
+        }
+    }
     mp_msg_va(log, level, format, va);
     // libass messages lack trailing \n
     mp_msg(log, level, "\n");
