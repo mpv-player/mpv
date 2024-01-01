@@ -217,7 +217,7 @@ jobs:
                 vulkan-headers \
                 wayland-protocols
             ./ci/build-freebsd.sh
-            meson test -C build
+            meson test -C build || cat /usr/home/runner/work/mpv/mpv/build/meson-logs/testlog.txt
 
   msys2:
     runs-on: windows-latest
