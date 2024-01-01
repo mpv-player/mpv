@@ -9,7 +9,7 @@ export LDFLAGS="$LDFLAGS -L/usr/local/lib"
 
 meson setup build \
     --werror      \
-    -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
+    -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations -march=native" \
     -Diconv=disabled \
     -Dlibmpv=true \
     -Dlua=enabled \
