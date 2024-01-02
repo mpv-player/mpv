@@ -283,6 +283,7 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image,
 
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
+    volatile bool cinfo_created = false;
 
     cinfo.err = jpeg_std_error(&jerr);
     jerr.error_exit = write_jpeg_error_exit;
@@ -290,12 +291,14 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image,
     jmp_buf error_return_jmpbuf;
     cinfo.client_data = &error_return_jmpbuf;
     if (setjmp(cinfo.client_data)) {
-        jpeg_destroy_compress(&cinfo);
+        if (cinfo_created)
+            jpeg_destroy_compress(&cinfo);
         fclose(fp);
         return false;
     }
 
     jpeg_create_compress(&cinfo);
+    cinfo_created = true;
     jpeg_stdio_dest(&cinfo, fp);
 
     cinfo.image_width = image->w;
