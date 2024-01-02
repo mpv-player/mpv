@@ -96,6 +96,8 @@ static bool create_dc(struct ra_ctx *ctx)
 
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 24;
+    if (ctx->opts.want_alpha)
+        pfd.cAlphaBits = 8;
     pfd.iLayerType = PFD_MAIN_PLANE;
     int pf = ChoosePixelFormat(hdc, &pfd);
 
@@ -292,6 +294,9 @@ static bool wgl_init(struct ra_ctx *ctx)
 
     if (!vo_w32_init(ctx->vo))
         goto fail;
+
+    if (ctx->opts.want_alpha)
+        vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
 
     vo_w32_run_on_thread(ctx->vo, create_ctx, ctx);
     if (!p->context)
