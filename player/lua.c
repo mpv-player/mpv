@@ -61,6 +61,9 @@ static const char * const builtin_lua_scripts[][2] = {
     {"mp.assdraw",
 #   include "player/lua/assdraw.lua.inc"
     },
+    {"mp.input",
+#   include "player/lua/input.lua.inc"
+    },
     {"mp.options",
 #   include "player/lua/options.lua.inc"
     },

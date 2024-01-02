@@ -862,6 +862,88 @@ strictly part of the guaranteed API.
     Turn the given value into a string. Formats tables and their contents. This
     doesn't do anything special; it is only needed because Lua is terrible.
 
+mp.input functions
+--------------------
+
+This module lets scripts get textual input from the user using the console
+REPL.
+
+``input.get(table)``
+    Show the console to let the user enter text.
+
+    The following entries of ``table`` are read:
+
+    ``prompt``
+        The string to be displayed before the input field.
+
+    ``submit``
+        A callback invoked when the user presses Enter. The first argument is
+        the text in the console. You can close the console from within the
+        callback by calling ``input.terminate()``. If you don't, the console
+        stays open and the user can input more text.
+
+    ``opened``
+        A callback invoked when the console is shown. This can be used to
+        present a list of options with ``input.set_log()``.
+
+    ``edited``
+        A callback invoked when the text changes. This can be used to filter a
+        list of options based on what the user typed with ``input.set_log()``,
+        like dmenu does. The first argument is the text in the console.
+
+    ``complete``
+        A callback invoked when the user presses TAB. The first argument is the
+        text before the cursor. The callback should return a table of the string
+        candidate completion values and the 1-based cursor position from which
+        the completion starts. console.lua will filter the suggestions beginning
+        with the the text between this position and the cursor, sort them
+        alphabetically, insert their longest common prefix, and show them when
+        there are multiple ones.
+
+    ``closed``
+        A callback invoked when the console is hidden, either because
+        ``input.terminate()`` was invoked from the other callbacks, or because
+        the user closed it with a key binding. The first argument is the text in
+        the console, and the second argument is the cursor position.
+
+    ``default_text``
+        A string to pre-fill the input field with.
+
+    ``cursor_position``
+        The initial cursor position, starting from 1.
+
+    ``id``
+        An identifier that determines which input history and log buffer to use
+        among the ones stored for ``input.get()`` calls. The input histories
+        and logs are stored in memory and do not persist across different mpv
+        invocations. Defaults to the calling script name with ``prompt``
+        appended.
+
+``input.terminate()``
+    Close the console.
+
+``input.log(message, style)``
+    Add a line to the log buffer. ``style`` can contain additional ASS tags to
+    apply to ``message``.
+
+``input.log_error(message)``
+    Helper to add a line to the log buffer with the same color as the one the
+    console uses for errors. Useful when the user submits invalid input.
+
+``input.set_log(log)``
+    Replace the entire log buffer.
+
+    ``log`` is a table of strings, or tables with ``text`` and ``style`` keys.
+
+    Example:
+
+    ::
+
+        input.set_log({
+            "regular text",
+            { style = "{\\c&H7a77f2&}", text = "error text" }
+        })
+
 Events
 ------
 

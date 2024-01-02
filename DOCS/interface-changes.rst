@@ -36,6 +36,7 @@ Interface changes
     - `--screenshot-avif-opts` defaults to lossless screenshot
     - rename key `MP_KEY_BACK` to `MP_KEY_GO_BACK`
     - add `--sub-filter-sdh-enclosures` option
+    - added the `mp.input` scripting API to query the user for textual input
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.
