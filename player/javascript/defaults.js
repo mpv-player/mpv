@@ -643,6 +643,53 @@ function read_options(opts, id, on_update, conf_override) {
 mp.options = { read_options: read_options };
 
 /**********************************************************************
+*  input
+*********************************************************************/
+mp.input = {
+    get: function(t) {
+        mp.commandv("script-message-to", "console", "get-input", mp.script_name,
+                    JSON.stringify({
+                        prompt: t.prompt,
+                        default_text: t.default_text,
+                        cursor_position: t.cursor_position,
+                        id: t.id,
+                    }));
+
+        mp.register_script_message("input-event", function (type, text, cursor_position) {
+            if (t[type]) {
+                var result = t[type](text, cursor_position);
+
+                if (type == "complete" && result) {
+                    mp.commandv("script-message-to", "console", "complete",
+                                JSON.stringify(result[0]), result[1]);
+                }
+            }
+
+            if (type == "closed") {
+                mp.unregister_script_message("input-event");
+            }
+        })
+
+        return true;
+    },
+    terminate: function () {
+        mp.commandv("script-message-to", "console", "disable");
+    },
+    log: function (message, style) {
+        mp.commandv("script-message-to", "console", "log",
+                    JSON.stringify({ text: message, style: style }));
+    },
+    log_error: function (message) {
+        mp.commandv("script-message-to", "console", "log",
+                    JSON.stringify({ text: message, error: true }));
+    },
+    set_log: function (log) {
+        mp.commandv("script-message-to", "console", "set-log",
+                    JSON.stringify(log));
+    }
+}
+
+/**********************************************************************
  *  various
  *********************************************************************/
 g.print = mp.msg.info;  // convenient alias
