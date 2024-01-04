@@ -424,8 +424,10 @@ static MP_THREAD_VOID terminal_thread(void *ptr)
             (void)read(stop_cont_pipe[0], &c, 1);
             if (c == PIPE_STOP) {
                 do_deactivate_getch2();
-                (void)write(STDERR_FILENO, TERM_ESC_RESTORE_CURSOR,
-                            sizeof(TERM_ESC_RESTORE_CURSOR) - 1);
+                if (isatty(STDERR_FILENO)) {
+                    (void)write(STDERR_FILENO, TERM_ESC_RESTORE_CURSOR,
+                                sizeof(TERM_ESC_RESTORE_CURSOR) - 1);
+                }
                 // trying to reset SIGTSTP handler to default and raise it will
                 // result in a race and there's no other way to invoke the
                 // default handler. so just invoke SIGSTOP since it's

@@ -257,7 +257,9 @@ void mp_msg_flush_status_line(struct mp_log *log, bool clear)
         goto done;
 
     if (!clear) {
-        fprintf(stderr, TERM_ESC_RESTORE_CURSOR "\n");
+        if (log->root->isatty[STDERR_FILENO])
+            fprintf(stderr, TERM_ESC_RESTORE_CURSOR);
+        fprintf(stderr, "\n");
         log->root->blank_lines = 0;
         log->root->status_lines = 0;
         goto done;
