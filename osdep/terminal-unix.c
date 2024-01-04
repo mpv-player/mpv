@@ -358,8 +358,10 @@ static void stop_sighandler(int signum)
 {
     int saved_errno = errno;
     (void)write(stop_cont_pipe[1], &(char){PIPE_STOP}, 1);
-    (void)write(STDERR_FILENO, TERM_ESC_RESTORE_CURSOR,
-                sizeof(TERM_ESC_RESTORE_CURSOR) - 1);
+    if (isatty(STDERR_FILENO)) {
+        (void)write(STDERR_FILENO, TERM_ESC_RESTORE_CURSOR,
+                    sizeof(TERM_ESC_RESTORE_CURSOR) - 1);
+    }
     errno = saved_errno;
 
     // note: for this signal, we use SA_RESETHAND but do NOT mask signals
