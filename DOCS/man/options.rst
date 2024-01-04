@@ -3262,6 +3262,11 @@ Window
 
         This option does not work properly with all window managers.
 
+    .. admonition:: Note (Wayland)
+
+        Wayland does not allow a client to position itself so this option will
+        only affect the window size.
+
     .. admonition:: Examples
 
         ``50:40``
