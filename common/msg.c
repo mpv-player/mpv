@@ -350,7 +350,7 @@ static int term_disp_width(bstr str)
 
         bstr code = bstr_split_utf8(str, &str);
         if (code.len == 0)
-            continue;
+            return 0;
 
         if (code.len == 1 && *code.start == '\n')
             continue;
