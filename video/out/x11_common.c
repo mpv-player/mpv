@@ -29,6 +29,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/Xresource.h>
 #include <X11/keysym.h>
 #include <X11/XKBlib.h>
 #include <X11/XF86keysym.h>
@@ -626,6 +627,44 @@ static void vo_x11_get_x11_screen_dpi_scale(struct vo_x11_state *x11)
     }
 }
 
+// Get the dpi scale from the Xft.dpi resource. In practice, this value is much more
+// commonly used by GUI programs for scaling compared to the x11 screen dpi.
+// This is always a preference value so it's also more consistent.
+static bool vo_x11_get_xft_dpi_scale(struct vo_x11_state *x11)
+{
+    XrmInitialize();
+    char *resman = XResourceManagerString(x11->display);
+    if (!resman)
+        return false;
+
+    XrmDatabase db = XrmGetStringDatabase(resman);
+    if (!db)
+        return false;
+
+    XrmValue ret;
+    char *type;
+    double base_dpi = 96;
+    bool success = false;
+    if (XrmGetResource(db, "Xft.dpi", "String", &type, &ret) == True &&
+        ret.addr && !strcmp("String", type))
+    {
+        char *end;
+        long value = strtol(ret.addr, &end, 10);
+        if (*ret.addr && *end == '\0') {
+            int s = lrint(MPCLAMP(2 * value / base_dpi, 0, 20));
+            if (s > 2 && s < 20) {
+                x11->dpi_scale = s / 2.0;
+                MP_VERBOSE(x11, "Using Xft.dpi scale %g for prescaling. This can "
+                           "be disabled with --hidpi-window-scale=no.\n",
+                           x11->dpi_scale);
+                success = true;
+            }
+        }
+    }
+    XrmDestroyDatabase(db);
+    return success;
+}
+
 bool vo_x11_init(struct vo *vo)
 {
     char *dispName;
@@ -690,7 +729,8 @@ bool vo_x11_init(struct vo *vo)
            x11->ws_width, x11->ws_height, dispName,
            x11->display_is_local ? "local" : "remote");
 
-    vo_x11_get_x11_screen_dpi_scale(x11);
+    if (!vo_x11_get_xft_dpi_scale(x11))
+        vo_x11_get_x11_screen_dpi_scale(x11);
 
     x11->wm_type = vo_wm_detect(vo);
 
