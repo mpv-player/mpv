@@ -603,6 +603,29 @@ static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
     }
 }
 
+// Get the dpi scale of the x11 screen. Almost no GUI programs use this value
+// nowadays, and it has inconsistent behavior for different drivers.
+// (it returns the physical display DPI for proprietary NVIDIA driver only,
+// but essentially a user-set prefrence value everywhere else)
+static void vo_x11_get_x11_screen_dpi_scale(struct vo_x11_state *x11)
+{
+    int w_mm = DisplayWidthMM(x11->display, x11->screen);
+    int h_mm = DisplayHeightMM(x11->display, x11->screen);
+    double dpi_x = x11->ws_width * 25.4 / w_mm;
+    double dpi_y = x11->ws_height * 25.4 / h_mm;
+    double base_dpi = 96;
+    if (isfinite(dpi_x) && isfinite(dpi_y) && x11->opts->hidpi_window_scale) {
+        int s_x = lrint(MPCLAMP(2 * dpi_x / base_dpi, 0, 20));
+        int s_y = lrint(MPCLAMP(2 * dpi_y / base_dpi, 0, 20));
+        if (s_x == s_y && s_x > 2 && s_x < 20) {
+            x11->dpi_scale = s_x / 2.0;
+            MP_VERBOSE(x11, "Using X11 screen DPI scale %g for prescaling. This can "
+                       "be disabled with --hidpi-window-scale=no.\n",
+                       x11->dpi_scale);
+        }
+    }
+}
+
 bool vo_x11_init(struct vo *vo)
 {
     char *dispName;
@@ -667,21 +690,7 @@ bool vo_x11_init(struct vo *vo)
            x11->ws_width, x11->ws_height, dispName,
            x11->display_is_local ? "local" : "remote");
 
-    int w_mm = DisplayWidthMM(x11->display, x11->screen);
-    int h_mm = DisplayHeightMM(x11->display, x11->screen);
-    double dpi_x = x11->ws_width * 25.4 / w_mm;
-    double dpi_y = x11->ws_height * 25.4 / h_mm;
-    double base_dpi = 96;
-    if (isfinite(dpi_x) && isfinite(dpi_y) && x11->opts->hidpi_window_scale) {
-        int s_x = lrint(MPCLAMP(dpi_x / base_dpi, 0, 10));
-        int s_y = lrint(MPCLAMP(dpi_y / base_dpi, 0, 10));
-        if (s_x == s_y && s_x > 1 && s_x < 10) {
-            x11->dpi_scale = s_x;
-            MP_VERBOSE(x11, "Assuming DPI scale %d for prescaling. This can "
-                       "be disabled with --hidpi-window-scale=no.\n",
-                       x11->dpi_scale);
-        }
-    }
+    vo_x11_get_x11_screen_dpi_scale(x11);
 
     x11->wm_type = vo_wm_detect(vo);
 
