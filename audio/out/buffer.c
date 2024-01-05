@@ -656,10 +656,14 @@ static bool ao_play_data(struct ao *ao)
         MP_STATS(ao, "end ao fill");
 
         if (!p->streaming) {
-            MP_VERBOSE(ao, "starting AO\n");
-            ao->driver->start(ao);
-            p->streaming = true;
-            state.playing = true;
+            if (got_eof) {
+                MP_WARN(ao, "Error starting AO with EOF data.\n");
+            } else {
+                MP_VERBOSE(ao, "starting AO\n");
+                ao->driver->start(ao);
+                p->streaming = true;
+                state.playing = true;
+            }
         }
     }
 
