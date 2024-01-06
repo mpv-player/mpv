@@ -465,10 +465,6 @@ void terminal_setup_getch(struct input_ctx *ictx)
 
     if (mp_make_wakeup_pipe(death_pipe) < 0)
         return;
-    if (mp_make_wakeup_pipe(stop_cont_pipe) < 0) {
-        close_sig_pipes();
-        return;
-    }
 
     // Disable reading from the terminal even if stdout is not a tty, to make
     //   mpv ... | less
@@ -549,6 +545,11 @@ void terminal_init(void)
 {
     assert(!getch2_enabled);
     getch2_enabled = 1;
+
+    if (mp_make_wakeup_pipe(stop_cont_pipe) < 0) {
+        getch2_enabled = 0;
+        return;
+    }
 
     tty_in = tty_out = open("/dev/tty", O_RDWR | O_CLOEXEC);
     if (tty_in < 0) {
