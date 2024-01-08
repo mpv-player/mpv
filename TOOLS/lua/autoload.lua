@@ -10,6 +10,8 @@
 To configure this script use file autoload.conf in directory script-opts (the "script-opts"
 directory must be in the mpv configuration directory, typically ~/.config/mpv/).
 
+See details of ignore_pattern format at lua.org/pil/20.2.html.
+
 Example configuration would be:
 
 disabled=no
@@ -22,11 +24,13 @@ additional_audio_exts=list,of,ext
 ignore_hidden=yes
 same_type=yes
 directory_mode=recursive
+ignore_pattern=%.bak%.mp4$
 
 --]]
 
 MAXENTRIES = 5000
 MAXDIRSTACK = 20
+NEVERMATCHPATTERN = "$^"
 
 local msg = require 'mp.msg'
 local options = require 'mp.options'
@@ -42,7 +46,8 @@ o = {
     additional_audio_exts = "",
     ignore_hidden = true,
     same_type = false,
-    directory_mode = "auto"
+    directory_mode = "auto",
+    ignore_pattern = NEVERMATCHPATTERN
 }
 options.read_options(o, nil, function(list)
     split_option_exts(list.additional_video_exts, list.additional_audio_exts, list.additional_image_exts)
@@ -177,9 +182,14 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
     table.filter(files, function (v)
         -- The current file could be a hidden file, ignoring it doesn't load other
         -- files from the current directory.
-        if (o.ignore_hidden and not (prefix .. v == current_file) and string.match(v, "^%.")) then
+        local current = prefix .. v == current_file
+        if (o.ignore_hidden and not current and string.match(v, "^%.")) then
             return false
         end
+        if (not current and string.match(v, o.ignore_pattern)) then
+            return false;
+        end
+
         local ext = get_extension(v)
         if ext == nil then
             return false
