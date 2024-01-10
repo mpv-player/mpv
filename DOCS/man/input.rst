@@ -1336,6 +1336,11 @@ Input Commands that are Possibly Subject to Change
         relevant mode. Prints a warning if nothing could be done. See
         `Runtime profiles`_ for details.
 
+``load-config-file <filename>``
+    Load a configuration file, similar to the ``--include`` option. If the file
+    was already included, its previous options are not reset before it is
+    reparsed.
+
 ``load-script <filename>``
     Load a script, similar to the ``--script`` option. Whether this waits for
     the script to finish initialization or not changed multiple times, and the

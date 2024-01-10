@@ -164,8 +164,8 @@ local function compile_cond(name, s)
     return chunk
 end
 
-local function load_profiles()
-    for i, v in ipairs(mp.get_property_native("profile-list")) do
+local function load_profiles(profiles_property)
+    for _, v in ipairs(profiles_property) do
         local cond = v["profile-cond"]
         if cond and #cond > 0 then
             local profile = {
@@ -182,17 +182,25 @@ local function load_profiles()
     end
 end
 
-load_profiles()
+mp.observe_property("profile-list", "native", function (_, profiles_property)
+    profiles = {}
+    watched_properties = {}
+    cached_properties = {}
+    properties_to_profiles = {}
+    mp.unobserve_property(on_property_change)
 
-if #profiles < 1 and mp.get_property("load-auto-profiles") == "auto" then
-    -- make it exit immediately
-    _G.mp_event_loop = function() end
-    return
-end
+    load_profiles(profiles_property)
+
+    if #profiles < 1 and mp.get_property("load-auto-profiles") == "auto" then
+        -- make it exit immediately
+        _G.mp_event_loop = function() end
+        return
+    end
+
+    on_idle() -- re-evaluate all profiles immediately
+end)
 
 mp.register_idle(on_idle)
 for _, name in ipairs({"on_load", "on_preloaded", "on_before_start_file"}) do
     mp.add_hook(name, 50, on_hook)
 end
-
-on_idle() -- re-evaluate all profiles immediately

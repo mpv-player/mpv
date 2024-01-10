@@ -55,6 +55,7 @@
 #include "options/m_option.h"
 #include "options/m_property.h"
 #include "options/m_config_frontend.h"
+#include "options/parse_configfile.h"
 #include "osdep/getpid.h"
 #include "video/out/gpu/context.h"
 #include "video/out/vo.h"
@@ -6270,6 +6271,23 @@ static void cmd_apply_profile(void *p)
     }
 }
 
+static void cmd_load_config_file(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    char *config_file = cmd->args[0].v.s;
+    int r = m_config_parse_config_file(mpctx->mconfig, mpctx->global,
+                                       config_file, NULL, 0);
+
+    if (r < 1) {
+        cmd->success = false;
+        return;
+    }
+
+    mp_notify_property(mpctx, "profile-list");
+}
+
 static void cmd_load_script(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -6806,6 +6824,8 @@ const struct mp_cmd_def mp_cmds[] = {
         {"mode", OPT_CHOICE(v.i, {"apply", 0}, {"restore", 1}),
             .flags = MP_CMD_OPT_ARG}, }
     },
+
+    { "load-config-file", cmd_load_config_file, {{"filename", OPT_STRING(v.s)}} },
 
     { "load-script", cmd_load_script, {{"filename", OPT_STRING(v.s)}} },
 
