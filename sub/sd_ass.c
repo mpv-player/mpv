@@ -603,11 +603,6 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
         ass_set_storage_size(renderer, 0, 0);
     }
     long long ts = find_timestamp(sd, pts);
-    if (ctx->duration_unknown && pts != MP_NOPTS_VALUE) {
-        mp_ass_flush_old_events(track, ts);
-        ctx->num_seen_packets = 0;
-        sd->preload_ok = false;
-    }
 
     if (no_ass)
         fill_plaintext(sd, pts);
@@ -814,7 +809,7 @@ static void fill_plaintext(struct sd *sd, double pts)
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (sd->opts->sub_clear_on_seek || ctx->duration_unknown || ctx->clear_once) {
+    if (sd->opts->sub_clear_on_seek || ctx->clear_once) {
         ass_flush_events(ctx->ass_track);
         ctx->num_seen_packets = 0;
         sd->preload_ok = false;
