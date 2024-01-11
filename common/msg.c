@@ -748,6 +748,10 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
     root->module = opts->msg_module;
     root->use_terminal = opts->use_terminal;
     root->show_time = opts->msg_time;
+
+    if (root->really_quiet)
+        root->status_lines = 0;
+
     for (int i = STDOUT_FILENO; i <= STDERR_FILENO && root->use_terminal; ++i) {
         root->isatty[i] = isatty(i);
         root->color[i] = opts->msg_color && root->isatty[i];
@@ -847,6 +851,8 @@ void mp_msg_uninit(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;
     mp_msg_flush_status_line(global->log, true);
+    if (root->really_quiet && root->isatty[STDERR_FILENO])
+        fprintf(stderr, TERM_ESC_RESTORE_CURSOR);
     terminate_log_file_thread(root);
     mp_msg_log_buffer_destroy(root->early_buffer);
     mp_msg_log_buffer_destroy(root->early_filebuffer);
