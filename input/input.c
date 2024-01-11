@@ -1276,9 +1276,9 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
     return n_binds;
 }
 
-static int parse_config_file(struct input_ctx *ictx, char *file)
+static bool parse_config_file(struct input_ctx *ictx, char *file)
 {
-    int r = 0;
+    bool r = false;
     void *tmp = talloc_new(NULL);
     stream_t *s = NULL;
 
@@ -1295,7 +1295,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file)
         MP_VERBOSE(ictx, "Parsing input config file %s\n", file);
         int num = parse_config(ictx, false, data, file, NULL);
         MP_VERBOSE(ictx, "Input config file %s parsed: %d binds\n", file, num);
-        r = 1;
+        r = true;
     } else {
         MP_ERR(ictx, "Error reading input config file %s\n", file);
     }
