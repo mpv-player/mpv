@@ -7,8 +7,6 @@ meson setup build            \
   -D d3d-hwaccel=enabled     \
   -D d3d11=enabled           \
   -D dvdnav=enabled          \
-  -D egl-angle-lib=enabled   \
-  -D egl-angle-win32=enabled \
   -D jpeg=enabled            \
   -D lcms2=enabled           \
   -D libarchive=enabled      \
