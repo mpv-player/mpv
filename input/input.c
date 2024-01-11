@@ -1276,7 +1276,7 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
     return n_binds;
 }
 
-static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
+static int parse_config_file(struct input_ctx *ictx, char *file)
 {
     int r = 0;
     void *tmp = talloc_new(NULL);
@@ -1376,13 +1376,13 @@ void mp_input_load_config(struct input_ctx *ictx)
 
     bool config_ok = false;
     if (ictx->opts->config_file && ictx->opts->config_file[0])
-        config_ok = parse_config_file(ictx, ictx->opts->config_file, true);
+        config_ok = parse_config_file(ictx, ictx->opts->config_file);
     if (!config_ok) {
         // Try global conf dir
         void *tmp = talloc_new(NULL);
         char **files = mp_find_all_config_files(tmp, ictx->global, "input.conf");
         for (int n = 0; files && files[n]; n++)
-            parse_config_file(ictx, files[n], false);
+            parse_config_file(ictx, files[n]);
         talloc_free(tmp);
     }
 
