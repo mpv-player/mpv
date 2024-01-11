@@ -492,6 +492,10 @@ static bool init_pads(struct lavfi *c)
             params->sample_aspect_ratio.den = fmt->params.p_h;
             params->hw_frames_ctx = fmt->hwctx;
             params->frame_rate = av_d2q(fmt->nominal_fps, 1000000);
+#if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(9, 16, 100)
+            params->color_space = mp_csp_to_avcol_spc(fmt->params.color.space);
+            params->color_range = mp_csp_levels_to_avcol_range(fmt->params.color.levels);
+#endif
             filter_name = "buffer";
         } else {
             MP_ASSERT_UNREACHABLE();
