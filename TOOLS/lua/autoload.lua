@@ -10,7 +10,11 @@
 To configure this script use file autoload.conf in directory script-opts (the "script-opts"
 directory must be in the mpv configuration directory, typically ~/.config/mpv/).
 
-See details of ignore_pattern format at lua.org/pil/20.2.html.
+Option `ignore_patterns` is a comma-separated list of patterns (see lua.org/pil/20.2.html).
+Additionally to the standard lua patterns, you can also escape commas with `%`,
+for example, the option `bak%,x%,,another` will be resolved as patterns `bak,x,` and `another`.
+But it does not mean you need to escape all lua patterns twice,
+so the option `bak%%,%.mp4,` will be resolved as two patterns `bak%%` and `%.mp4`.
 
 Example configuration would be:
 
@@ -24,13 +28,12 @@ additional_audio_exts=list,of,ext
 ignore_hidden=yes
 same_type=yes
 directory_mode=recursive
-ignore_pattern=%.bak%.mp4$
+ignore_patterns=^~,^bak-,%.bak%.mp4$
 
 --]]
 
 MAXENTRIES = 5000
 MAXDIRSTACK = 20
-NEVERMATCHPATTERN = "$^"
 
 local msg = require 'mp.msg'
 local options = require 'mp.options'
@@ -47,7 +50,7 @@ o = {
     ignore_hidden = true,
     same_type = false,
     directory_mode = "auto",
-    ignore_pattern = NEVERMATCHPATTERN
+    ignore_patterns = ""
 }
 options.read_options(o, nil, function(list)
     split_option_exts(list.additional_video_exts, list.additional_audio_exts, list.additional_image_exts)
@@ -72,9 +75,45 @@ function SetUnion (a,b)
     return a
 end
 
-function Split (s)
+-- Returns first and last positions in string or past-to-end indices
+function FindOrPastTheEnd (string, pattern, start_at)
+    local pos1, pos2 = string.find(string, pattern, start_at)
+    return pos1 or #string + 1,
+           pos2 or #string + 1
+end
+
+function Split (list)
     local set = {}
-    for v in string.gmatch(s, '([^,]+)') do set[v] = true end
+
+    local item_pos = 1
+    local item = ""
+
+    while item_pos <= #list do
+        local pos1, pos2 = FindOrPastTheEnd(list, "%%*,", item_pos)
+
+        local pattern_length = pos2 - pos1
+        local is_comma_escaped = pattern_length % 2
+
+        local pos_before_escape = pos1 - 1
+        local item_escape_count = pattern_length - is_comma_escaped
+
+        item = item .. string.sub(list, item_pos, pos_before_escape + item_escape_count)
+
+        if is_comma_escaped == 1 then
+            item = item .. ","
+        else
+            set[item] = true
+            item = ""
+        end
+
+        item_pos = pos2 + 1
+    end
+
+    set[item] = true
+
+    -- exclude empty items
+    set[""] = nil
+
     return set
 end
 
@@ -99,6 +138,11 @@ function split_option_exts(video, audio, image)
     if image then o.additional_image_exts = Split(o.additional_image_exts) end
 end
 split_option_exts(true, true, true)
+
+function split_patterns()
+    o.ignore_patterns = Split(o.ignore_patterns)
+end
+split_patterns()
 
 function create_extensions()
     EXTENSIONS = {}
@@ -130,6 +174,16 @@ function get_extension(path)
     else
         return match
     end
+end
+
+function is_ignored(file)
+    for pattern, _ in pairs(o.ignore_patterns) do
+        if string.match(file, pattern) then
+            return true
+        end
+    end
+
+    return false
 end
 
 table.filter = function(t, iter)
@@ -183,11 +237,11 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
         -- The current file could be a hidden file, ignoring it doesn't load other
         -- files from the current directory.
         local current = prefix .. v == current_file
-        if (o.ignore_hidden and not current and string.match(v, "^%.")) then
+        if o.ignore_hidden and not current and string.match(v, "^%.") then
             return false
         end
-        if (not current and string.match(v, o.ignore_pattern)) then
-            return false;
+        if not current and is_ignored(v) then
+            return false
         end
 
         local ext = get_extension(v)
