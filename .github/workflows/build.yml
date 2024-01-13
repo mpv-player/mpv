@@ -244,6 +244,7 @@ jobs:
           update: true
           install: git
           pacboy: >-
+            angleproject:p
             ca-certificates:p
             cc:p
             diffutils:p
