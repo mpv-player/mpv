@@ -69,12 +69,20 @@ local styles = {
     -- cccc66 cc9966 cc99cc 537bd2
 
     debug = '{\\1c&Ha09f93&}',
-    verbose = '{\\1c&H99cc99&}',
+    v = '{\\1c&H99cc99&}',
     warn = '{\\1c&H66ccff&}',
     error = '{\\1c&H7a77f2&}',
     fatal = '{\\1c&H5791f9&\\b1}',
     suggestion = '{\\1c&Hcc99cc&}',
     selected_suggestion = '{\\1c&H2fbdfa&\\b1}',
+}
+
+local terminal_styles = {
+    debug = '\027[1;30m',
+    v = '\027[32m',
+    warn = '\027[33m',
+    error = '\027[31m',
+    fatal = '\027[1;31m',
 }
 
 local repl_active = false
@@ -197,9 +205,13 @@ do
 end
 
 -- Add a line to the log buffer (which is limited to 100 lines)
-function log_add(style, text)
+function log_add(text, style, terminal_style)
     local log_buffer = log_buffers[id]
-    log_buffer[#log_buffer + 1] = { style = style, text = text }
+    log_buffer[#log_buffer + 1] = {
+        text = text,
+        style = style or '',
+        terminal_style = terminal_style or '',
+    }
     if #log_buffer > 100 then
         table.remove(log_buffer, 1)
     end
@@ -331,7 +343,7 @@ local function print_to_terminal()
 
     local log = ''
     for _, log_line in ipairs(log_buffers[id]) do
-        log = log .. log_line.text
+        log = log .. log_line.terminal_style .. log_line.text .. '\027[0m'
     end
 
     local suggestions = table.concat(suggestion_buffer, '\t')
@@ -640,7 +652,8 @@ function help_command(param)
             end
         end
         if not cmd then
-            log_add(styles.error, 'No command matches "' .. param .. '"!')
+            log_add('No command matches "' .. param .. '"!\n', styles.error,
+                    terminal_styles.error)
             return
         end
         output = output .. 'Command "' .. cmd.name .. '"\n'
@@ -655,7 +668,7 @@ function help_command(param)
             output = output .. 'This command supports variable arguments.\n'
         end
     end
-    log_add('', output)
+    log_add(output)
 end
 
 -- Add a line to the history and deduplicate
@@ -1399,8 +1412,9 @@ mp.register_script_message('log', function (message)
 
     message = utils.parse_json(message)
 
-    log_add(message.error and styles.error or message.style or '',
-            message.text .. '\n')
+    log_add(message.text .. '\n',
+            message.error and styles.error or message.style,
+            message.error and terminal_styles.error or message.terminal_style)
 end)
 
 mp.register_script_message('set-log', function (log)
@@ -1414,11 +1428,14 @@ mp.register_script_message('set-log', function (log)
     for i = 1, #log do
         if type(log[i]) == 'table' then
             log[i].text = log[i].text .. '\n'
+            log[i].style = log[i].style or ''
+            log[i].terminal_style = log[i].terminal_style or ''
             log_buffers[id][i] = log[i]
         else
             log_buffers[id][i] = {
-                style = '',
                 text = log[i] .. '\n',
+                style = '',
+                terminal_style = '',
             }
         end
     end
@@ -1478,20 +1495,8 @@ mp.register_event('log-message', function(e)
     if e.level == 'trace' then return end
 
     -- Use color for debug/v/warn/error/fatal messages.
-    local style = ''
-    if e.level == 'debug' then
-        style = styles.debug
-    elseif e.level == 'v' then
-        style = styles.verbose
-    elseif e.level == 'warn' then
-        style = styles.warn
-    elseif e.level == 'error' then
-        style = styles.error
-    elseif e.level == 'fatal' then
-        style = styles.fatal
-    end
-
-    log_add(style, '[' .. e.prefix .. '] ' .. e.text)
+    log_add('[' .. e.prefix .. '] ' .. e.text, styles[e.level],
+            terminal_styles[e.level])
 end)
 
 collectgarbage()

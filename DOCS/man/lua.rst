@@ -922,9 +922,10 @@ REPL.
 ``input.terminate()``
     Close the console.
 
-``input.log(message, style)``
+``input.log(message, style, terminal_style)``
     Add a line to the log buffer. ``style`` can contain additional ASS tags to
-    apply to ``message``.
+    apply to ``message``, and ``terminal_style`` can contain escape sequences
+    that are used when the console is displayed in the terminal.
 
 ``input.log_error(message)``
     Helper to add a line to the log buffer with the same color as the one the
@@ -933,7 +934,8 @@ REPL.
 ``input.set_log(log)``
     Replace the entire log buffer.
 
-    ``log`` is a table of strings, or tables with ``text`` and ``style`` keys.
+    ``log`` is a table of strings, or tables with ``text``, ``style`` and
+    ``terminal_style`` keys.
 
     Example:
 
@@ -941,7 +943,11 @@ REPL.
 
         input.set_log({
             "regular text",
-            { style = "{\\c&H7a77f2&}", text = "error text" }
+            {
+                text = "error text",
+                style = "{\\c&H7a77f2&}",
+                terminal_style = "\027[31m",
+            }
         })
 
 Events
