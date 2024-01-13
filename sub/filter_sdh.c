@@ -389,7 +389,7 @@ static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t 
                 int bytes = get_char_bytes(rp);
                 for (int i = 0; i < bytes; i++)
                     left[i] = rp[i];
-                left[bytes + 1] = '\0';
+                left[bytes] = '\0';
                 right = get_right_enclosure(left);
             }
             if (left[0] && right && right[0]) {
