@@ -49,9 +49,12 @@ function input.terminate()
     mp.commandv("script-message-to", "console", "disable")
 end
 
-function input.log(message, style)
-    mp.commandv("script-message-to", "console", "log",
-                utils.format_json({ text = message, style = style }))
+function input.log(message, style, terminal_style)
+    mp.commandv("script-message-to", "console", "log", utils.format_json({
+                   text = message,
+                   style = style,
+                   terminal_style = terminal_style,
+               }))
 end
 
 function input.log_error(message)

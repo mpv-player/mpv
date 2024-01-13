@@ -675,9 +675,12 @@ mp.input = {
     terminate: function () {
         mp.commandv("script-message-to", "console", "disable");
     },
-    log: function (message, style) {
-        mp.commandv("script-message-to", "console", "log",
-                    JSON.stringify({ text: message, style: style }));
+    log: function (message, style, terminal_style) {
+        mp.commandv("script-message-to", "console", "log", JSON.stringify({
+                        text: message,
+                        style: style,
+                        terminal_style: terminal_style,
+                   }));
     },
     log_error: function (message) {
         mp.commandv("script-message-to", "console", "log",
