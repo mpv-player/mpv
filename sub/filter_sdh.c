@@ -67,18 +67,18 @@ static inline int append(struct sd_filter *sd, struct buffer *buf, char c)
 
 static int get_char_bytes(char *str)
 {
-    // In case the final character is non-ASCII.
+    // In case the first character is non-ASCII.
     // Will only work with UTF-8 but you shouldn't be
     // using anything else anyway.
     if (str && str[0]) {
         if (!(str[0] >> 7 & 1)) {
-            return MPMIN(strlen(str), 1);
+            return strnlen(str, 1);
         } else if (!(str[0] >> 5 & 1)) {
-            return MPMIN(strlen(str), 2);
+            return strnlen(str, 2);
         } else if (!(str[0] >> 4 & 1)) {
-            return MPMIN(strlen(str), 3);
+            return strnlen(str, 3);
         } else if (!(str[0] >> 3 & 1)) {
-            return MPMIN(strlen(str), 4);
+            return strnlen(str, 4);
         }
     }
     return 0;
