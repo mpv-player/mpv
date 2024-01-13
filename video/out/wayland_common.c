@@ -1584,7 +1584,7 @@ static int get_mods(struct vo_wayland_state *wl)
         xkb_mod_index_t index = xkb_keymap_mod_get_index(wl->xkb_keymap, mod_names[n]);
         if (index != XKB_MOD_INVALID
             && xkb_state_mod_index_is_active(wl->xkb_state, index,
-                                             XKB_STATE_MODS_DEPRESSED))
+                                             XKB_STATE_MODS_EFFECTIVE))
             modifiers |= mods[n];
     }
     return modifiers;
