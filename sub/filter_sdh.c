@@ -72,13 +72,13 @@ static int get_char_bytes(char *str)
     // using anything else anyway.
     if (str && str[0]) {
         if (!(str[0] >> 7 & 1)) {
-            return 1;
+            return MPMIN(strlen(str), 1);
         } else if (!(str[0] >> 5 & 1)) {
-            return 2;
+            return MPMIN(strlen(str), 2);
         } else if (!(str[0] >> 4 & 1)) {
-            return 3;
+            return MPMIN(strlen(str), 3);
         } else if (!(str[0] >> 3 & 1)) {
-            return 4;
+            return MPMIN(strlen(str), 4);
         }
     }
     return 0;
