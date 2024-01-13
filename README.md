@@ -36,14 +36,16 @@ Releases can be found on the [release list][releases].
 
 ## System requirements
 
-- A not too ancient Linux, Windows 10 or later, or macOS 10.15 or later.
+- A not too ancient Linux (usually, only the latest releases of distributions
+  are actively supported), Windows 10 or later, or macOS 10.15 or later.
 - A somewhat capable CPU. Hardware decoding might help if the CPU is too slow to
   decode video in realtime, but must be explicitly enabled with the `--hwdec`
   option.
 - A not too crappy GPU. mpv's focus is not on power-efficient playback on
   embedded or integrated GPUs (for example, hardware decoding is not even
   enabled by default). Low power GPUs may cause issues like tearing, stutter,
-  etc. The main video output uses shaders for video rendering and scaling,
+  etc. On such GPUs, it's recommended to use `--profile=fast` for smooth playback.
+  The main video output uses shaders for video rendering and scaling,
   rather than GPU fixed function hardware. On Windows, you might want to make
   sure the graphics drivers are current. In some cases, ancient fallback video
   output methods can help (such as `--vo=xv` on Linux), but this use is not

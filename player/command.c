@@ -56,6 +56,7 @@
 #include "options/m_property.h"
 #include "options/m_config_frontend.h"
 #include "osdep/getpid.h"
+#include "video/out/gpu/context.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
 #include "video/hwdec.h"
@@ -7006,7 +7007,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
     }
 
-    if (opt_ptr == &opts->vo->video_driver_list) {
+    if (opt_ptr == &opts->vo->video_driver_list ||
+        opt_ptr == &opts->ra_ctx_opts->context_name ||
+        opt_ptr == &opts->ra_ctx_opts->context_type) {
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
         uninit_video_out(mpctx);
         handle_force_window(mpctx, true);

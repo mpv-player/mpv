@@ -12,9 +12,8 @@ in the list.
 
 .. note::
 
-    See ``--ao=help`` for a list of compiled-in audio output drivers. The
-    driver ``--ao=alsa`` is preferred. ``--ao=pulse`` is preferred on systems
-    where PulseAudio is used. On BSD systems, ``--ao=oss`` is preferred.
+    See ``--ao=help`` for a list of compiled-in audio output drivers sorted by
+    autoprobe order.
 
 Available audio output drivers are:
 

@@ -82,11 +82,17 @@ local insert_mode = false
 local pending_update = false
 local line = ''
 local cursor = 1
-local history = {}
+local default_prompt = '>'
+local prompt = default_prompt
+local default_id = 'default'
+local id = default_id
+local histories = {[id] = {}}
+local history = histories[id]
 local history_pos = 1
-local log_buffer = {}
+local log_buffers = {[id] = {}}
 local key_bindings = {}
 local global_margins = { t = 0, b = 0 }
+local input_caller
 
 local suggestion_buffer = {}
 local selected_suggestion_index
@@ -94,6 +100,8 @@ local completion_start_position
 local completion_append
 local file_commands = {}
 local path_separator = platform == 'windows' and '\\' or '/'
+local completion_old_line
+local completion_old_cursor
 
 local update_timer = nil
 update_timer = mp.add_periodic_timer(0.05, function()
@@ -190,6 +198,7 @@ end
 
 -- Add a line to the log buffer (which is limited to 100 lines)
 function log_add(style, text)
+    local log_buffer = log_buffers[id]
     log_buffer[#log_buffer + 1] = { style = style, text = text }
     if #log_buffer > 100 then
         table.remove(log_buffer, 1)
@@ -321,7 +330,7 @@ local function print_to_terminal()
     end
 
     local log = ''
-    for _, log_line in ipairs(log_buffer) do
+    for _, log_line in ipairs(log_buffers[id]) do
         log = log .. log_line.text
     end
 
@@ -337,8 +346,9 @@ local function print_to_terminal()
         after_cur = ' '
     end
 
-    mp.osd_message(log .. suggestions .. '> ' .. before_cur .. '\027[7m' ..
-                   after_cur:sub(1, 1) .. '\027[0m' .. after_cur:sub(2), 999)
+    mp.osd_message(log .. suggestions .. prompt .. ' ' .. before_cur ..
+                  '\027[7m' .. after_cur:sub(1, 1) .. '\027[0m' ..
+                   after_cur:sub(2), 999)
 end
 
 -- Render the REPL and console as an ASS OSD
@@ -384,7 +394,8 @@ function update()
     -- horizontal borders.
     local cheight = opts.font_size * 8
     local cglyph = '{\\r' ..
-                   '\\1a&H44&\\3a&H44&\\4a&H99&' ..
+                   (mp.get_property_native('focused') == false
+                    and '\\alpha&HFF&' or '\\1a&H44&\\3a&H44&\\4a&H99&') ..
                    '\\1c&Heeeeee&\\3c&Heeeeee&\\4c&H000000&' ..
                    '\\xbord0.5\\ybord0\\xshad0\\yshad1\\p4\\pbo24}' ..
                    'm 0 0 l 1 0 l 1 ' .. cheight .. ' l 0 ' .. cheight ..
@@ -406,6 +417,7 @@ function update()
     local suggestion_ass = style .. styles.suggestion .. suggestions
 
     local log_ass = ''
+    local log_buffer = log_buffers[id]
     local log_messages = #log_buffer
     local log_max_lines = math.max(0, lines_max - rows)
     if log_max_lines < log_messages then
@@ -422,7 +434,7 @@ function update()
     if #suggestions > 0 then
         ass:append(suggestion_ass .. '\\N')
     end
-    ass:append(style .. '> ' .. before_cur)
+    ass:append(style .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. after_cur)
 
@@ -431,7 +443,7 @@ function update()
     ass:new_event()
     ass:an(1)
     ass:pos(2, screeny - 2 - global_margins.b * screeny)
-    ass:append(style .. '{\\alpha&HFF&}> ' .. before_cur)
+    ass:append(style .. '{\\alpha&HFF&}' .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
 
@@ -445,12 +457,28 @@ function set_active(active)
         repl_active = true
         insert_mode = false
         mp.enable_key_bindings('console-input', 'allow-hide-cursor+allow-vo-dragging')
-        mp.enable_messages('terminal-default')
         define_key_bindings()
+
+        if not input_caller then
+            prompt = default_prompt
+            id = default_id
+            history = histories[id]
+            history_pos = #history + 1
+            mp.enable_messages('terminal-default')
+        end
     else
         repl_active = false
+        suggestion_buffer = {}
         undefine_key_bindings()
         mp.enable_messages('silent:terminal-default')
+
+        if input_caller then
+            mp.commandv('script-message-to', input_caller, 'input-event',
+                        'closed', line, cursor)
+            input_caller = nil
+            line = ''
+            cursor = 1
+        end
         collectgarbage()
     end
     update()
@@ -512,6 +540,16 @@ function len_utf8(str)
     return len
 end
 
+local function handle_edit()
+    suggestion_buffer = {}
+    update()
+
+    if input_caller then
+        mp.commandv('script-message-to', input_caller, 'input-event', 'edited',
+                    line)
+    end
+end
+
 -- Insert a character at the current cursor position (any_unicode)
 function handle_char_input(c)
     if insert_mode then
@@ -520,8 +558,7 @@ function handle_char_input(c)
         line = line:sub(1, cursor - 1) .. c .. line:sub(cursor)
     end
     cursor = cursor + #c
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- Remove the character behind the cursor (Backspace)
@@ -530,16 +567,14 @@ function handle_backspace()
     local prev = prev_utf8(line, cursor)
     line = line:sub(1, prev - 1) .. line:sub(cursor)
     cursor = prev
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- Remove the character in front of the cursor (Del)
 function handle_del()
     if cursor > line:len() then return end
     line = line:sub(1, cursor - 1) .. line:sub(next_utf8(line, cursor))
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- Toggle insert mode (Ins)
@@ -567,8 +602,7 @@ function clear()
     cursor = 1
     insert_mode = false
     history_pos = #history + 1
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- Close the REPL if the current line is empty, otherwise delete the next
@@ -641,20 +675,25 @@ end
 
 -- Run the current command and clear the line (Enter)
 function handle_enter()
-    if line == '' then
+    if line == '' and input_caller == nil then
         return
     end
-    if history[#history] ~= line then
+    if history[#history] ~= line and line ~= '' then
         history_add(line)
     end
 
-    -- match "help [<text>]", return <text> or "", strip all whitespace
-    local help = line:match('^%s*help%s+(.-)%s*$') or
-                 (line:match('^%s*help$') and '')
-    if help then
-        help_command(help)
+    if input_caller then
+        mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
+                    line)
     else
-        mp.command(line)
+        -- match "help [<text>]", return <text> or "", strip all whitespace
+        local help = line:match('^%s*help%s+(.-)%s*$') or
+                     (line:match('^%s*help$') and '')
+        if help then
+            help_command(help)
+        else
+            mp.command(line)
+        end
     end
 
     clear()
@@ -994,6 +1033,13 @@ function max_overlap_length(s1, s2)
     return 0
 end
 
+-- If str starts with the first or last characters of prefix, strip them.
+local function strip_common_characters(str, prefix)
+    return str:sub(1 + math.max(
+        common_prefix_length(prefix, str),
+        max_overlap_length(prefix, str)))
+end
+
 local function cycle_through_suggestions(backwards)
     selected_suggestion_index = selected_suggestion_index + (backwards and -1 or 1)
 
@@ -1005,7 +1051,7 @@ local function cycle_through_suggestions(backwards)
 
     local before_cur = line:sub(1, completion_start_position - 1) ..
                        suggestion_buffer[selected_suggestion_index] .. completion_append
-    line = before_cur .. line:sub(cursor)
+    line = before_cur .. strip_common_characters(line:sub(cursor), completion_append)
     cursor = before_cur:len() + 1
     update()
 end
@@ -1014,6 +1060,14 @@ end
 function complete(backwards)
     if #suggestion_buffer > 0 then
         cycle_through_suggestions(backwards)
+        return
+    end
+
+    if input_caller then
+        completion_old_line = line
+        completion_old_cursor = cursor
+        mp.commandv('script-message-to', input_caller, 'input-event',
+                    'complete', line:sub(1, cursor - 1))
         return
     end
 
@@ -1041,6 +1095,16 @@ function complete(backwards)
                 completion_start_position = s2
             end
 
+            -- Expand ~ in file completion.
+            if completer.list == file_list and hint:find('^~' .. path_separator) then
+                local home = mp.command_native({'expand-path', '~/'})
+                before_cur = before_cur:sub(1, completion_start_position - #hint - 1) ..
+                             home ..
+                             before_cur:sub(completion_start_position - #hint + 1)
+                hint = home .. hint:sub(2)
+                completion_start_position = completion_start_position + #home - 1
+            end
+
             -- If the completer's pattern found a word, check the completer's
             -- list for possible completions
             local part = before_cur:sub(completion_start_position)
@@ -1049,15 +1113,10 @@ function complete(backwards)
                 -- If there was only one full match from the list, add
                 -- completer.append to the final string. This is normally a
                 -- space or a quotation mark followed by a space.
-                local after_cur_index = 1
                 completion_append = completer.append or ''
                 if #completions == 1 then
                     prefix = prefix .. completion_append
-
-                    -- calculate offset into after_cur
-                    local prefix_len = common_prefix_length(completion_append, after_cur)
-                    local overlap_size = max_overlap_length(completion_append, after_cur)
-                    after_cur_index = math.max(prefix_len, overlap_size) + 1
+                    after_cur = strip_common_characters(after_cur, completion_append)
                 else
                     table.sort(completions)
                     suggestion_buffer = completions
@@ -1068,7 +1127,7 @@ function complete(backwards)
                 before_cur = before_cur:sub(1, completion_start_position - 1) ..
                              prefix
                 cursor = before_cur:len() + 1
-                line = before_cur .. after_cur:sub(after_cur_index)
+                line = before_cur .. after_cur
                 update()
                 return
             end
@@ -1098,8 +1157,7 @@ function del_word()
     before_cur = before_cur:gsub('[^%s]+%s*$', '', 1)
     line = before_cur .. after_cur
     cursor = before_cur:len() + 1
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- Delete from the cursor to the end of the word (Ctrl+Del)
@@ -1111,28 +1169,25 @@ function del_next_word()
 
     after_cur = after_cur:gsub('^%s*[^%s]+', '', 1)
     line = before_cur .. after_cur
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- Delete from the cursor to the end of the line (Ctrl+K)
 function del_to_eol()
     line = line:sub(1, cursor - 1)
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- Delete from the cursor back to the start of the line (Ctrl+U)
 function del_to_start()
     line = line:sub(cursor)
     cursor = 1
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- Empty the log buffer of all messages (Ctrl+L)
 function clear_log_buffer()
-    log_buffer = {}
+    log_buffers[id] = {}
     update()
 end
 
@@ -1199,8 +1254,7 @@ function paste(clip)
     local after_cur = line:sub(cursor)
     line = before_cur .. text .. after_cur
     cursor = cursor + text:len()
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- List of input bindings. This is a weird mashup between common GUI text-input
@@ -1305,9 +1359,93 @@ mp.add_key_binding(nil, 'enable', function()
     set_active(true)
 end)
 
+mp.register_script_message('disable', function()
+    set_active(false)
+end)
+
 -- Add a script-message to show the REPL and fill it with the provided text
 mp.register_script_message('type', function(text, cursor_pos)
     show_and_type(text, cursor_pos)
+end)
+
+mp.register_script_message('get-input', function (script_name, args)
+    if repl_active then
+        return
+    end
+
+    input_caller = script_name
+    args = utils.parse_json(args)
+    prompt = args.prompt or default_prompt
+    line = args.default_text or ''
+    cursor = tonumber(args.cursor_position) or line:len() + 1
+    id = args.id or script_name .. prompt
+    if histories[id] == nil then
+        histories[id] = {}
+        log_buffers[id] = {}
+    end
+    history = histories[id]
+    history_pos = #history + 1
+
+    set_active(true)
+    mp.commandv('script-message-to', input_caller, 'input-event', 'opened')
+end)
+
+mp.register_script_message('log', function (message)
+    -- input.get's edited handler is invoked after submit, so avoid modifying
+    -- the default log.
+    if input_caller == nil then
+        return
+    end
+
+    message = utils.parse_json(message)
+
+    log_add(message.error and styles.error or message.style or '',
+            message.text .. '\n')
+end)
+
+mp.register_script_message('set-log', function (log)
+    if input_caller == nil then
+        return
+    end
+
+    log = utils.parse_json(log)
+    log_buffers[id] = {}
+
+    for i = 1, #log do
+        if type(log[i]) == 'table' then
+            log[i].text = log[i].text .. '\n'
+            log_buffers[id][i] = log[i]
+        else
+            log_buffers[id][i] = {
+                style = '',
+                text = log[i] .. '\n',
+            }
+        end
+    end
+
+    update()
+end)
+
+mp.register_script_message('complete', function(list, start_pos)
+    if line ~= completion_old_line or cursor ~= completion_old_cursor then
+        return
+    end
+
+    local completions, prefix = complete_match(line:sub(start_pos, cursor),
+                                               utils.parse_json(list))
+    local before_cur = line:sub(1, start_pos - 1) .. prefix
+    local after_cur = line:sub(cursor)
+    cursor = before_cur:len() + 1
+    line = before_cur .. after_cur
+
+    if #completions > 1 then
+        suggestion_buffer = completions
+        selected_suggestion_index = 0
+        completion_start_position = start_pos
+        completion_append = ''
+    end
+
+    update()
 end)
 
 -- Redraw the REPL when the OSD size changes. This is needed because the
@@ -1315,6 +1453,7 @@ end)
 mp.observe_property('osd-width', 'native', update)
 mp.observe_property('osd-height', 'native', update)
 mp.observe_property('display-hidpi-scale', 'native', update)
+mp.observe_property('focused', nil, update)
 
 -- Enable log messages. In silent mode, mpv will queue log messages in a buffer
 -- until enable_messages is called again without the silent: prefix.

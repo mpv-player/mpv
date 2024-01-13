@@ -146,7 +146,6 @@ struct format_hack {
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
     bool linearize_audio_ts : 1;// compensate timestamp resets (audio only)
-    bool fix_editlists : 1;
     bool is_network : 1;
     bool no_seek : 1;
     bool no_pcm_seek : 1;
@@ -175,8 +174,7 @@ static const struct format_hack format_hacks[] = {
     {"mxf", .use_stream_ids = true},
     {"avi", .use_stream_ids = true},
     {"asf", .use_stream_ids = true},
-    {"mp4", .skipinfo = true, .fix_editlists = true, .no_pcm_seek = true,
-            .use_stream_ids = true},
+    {"mp4", .skipinfo = true, .no_pcm_seek = true, .use_stream_ids = true},
     {"matroska", .skipinfo = true, .no_pcm_seek = true, .use_stream_ids = true},
 
     {"v4l2", .no_seek = true},
@@ -1065,9 +1063,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     guess_and_set_vobsub_name(demuxer, &dopts);
 
-    if (priv->format_hack.fix_editlists)
-        av_dict_set(&dopts, "advanced_editlist", "0", 0);
-
     avfc->interrupt_callback = (AVIOInterruptCB){
         .callback = interrupt_cb,
         .opaque = demuxer,
@@ -1267,8 +1262,6 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     dp->duration = pkt->duration * av_q2d(st->time_base);
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
-    if (pkt->flags & AV_PKT_FLAG_DISCARD)
-        MP_ERR(demux, "Edit lists are not correctly supported (FFmpeg issue).\n");
     av_packet_unref(pkt);
 
     if (priv->format_hack.clear_filepos)

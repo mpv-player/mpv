@@ -521,6 +521,16 @@ IDXGISwapChain *ra_d3d11_ctx_get_swapchain(struct ra_ctx *ra)
     return p->swapchain;
 }
 
+bool ra_d3d11_ctx_prefer_8bit_output_format(struct ra_ctx *ra)
+{
+    if (ra->swapchain->fns != &d3d11_swapchain)
+        return false;
+
+    struct priv *p = ra->priv;
+
+    return p->opts->output_format == DXGI_FORMAT_R8G8B8A8_UNORM;
+}
+
 const struct ra_ctx_fns ra_ctx_d3d11 = {
     .type     = "d3d11",
     .name     = "d3d11",

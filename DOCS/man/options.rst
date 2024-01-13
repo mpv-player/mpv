@@ -135,11 +135,13 @@ Track Selection
     Note that if ``--lavfi-complex`` is set before playback is started, the
     referenced tracks are always selected.
 
-``--subs-with-matching-audio=<yes|no>``
-    When autoselecting a subtitle track, select a full/non-forced one even if the selected
-    audio stream matches your preferred subtitle language (default: yes). If this option is
-    set to ``no``, a non-forced subtitle track that matches the audio language will never be
-    autoselected by mpv regardless of the value of ``--slang`` or ``--subs-fallback``.
+``--subs-with-matching-audio=<yes|forced|no>``
+    When autoselecting a subtitle track, select it even if the selected audio
+    stream matches you preferred subtitle language (default: yes). If this
+    option is set to ``no``, then no subtitle track that matches the audio
+    language will ever be autoselected by mpv regardless of ``--slang`` or
+    ``subs-fallback``. If set to ``forced``, then only forced subtitles
+    will be selected.
 
 ``--subs-match-os-language=<yes|no>``
     When autoselecting a subtitle track, select the track that matches the language of your OS
@@ -3262,6 +3264,11 @@ Window
 
         This option does not work properly with all window managers.
 
+    .. admonition:: Note (Wayland)
+
+        Wayland does not allow a client to position itself so this option will
+        only affect the window size.
+
     .. admonition:: Examples
 
         ``50:40``
@@ -5761,6 +5768,11 @@ them.
         Desktop bit depth querying is only available from an API available
         from Windows 10. Thus on older systems it will only automatically
         utilize the rgba8 output format.
+
+    .. note::
+
+        For ``--vo=gpu-next``, this is used as a best-effort hint and
+        libplacebo has the last say on which format is utilized.
 
 ``--d3d11-output-csp=<auto|srgb|linear|pq|bt.2020>``
     Select a specific D3D11 output color space to utilize for D3D11 rendering.
