@@ -225,9 +225,7 @@ jobs:
       fail-fast: false
       matrix:
         sys:
-          - clang32
           - clang64
-          - mingw32
           - mingw64
           - ucrt64
     defaults:
