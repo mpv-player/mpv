@@ -126,6 +126,7 @@ local state = {
     input_enabled = true,
     showhide_enabled = false,
     windowcontrols_buttons = false,
+    windowcontrols_title = false,
     dmx_cache = 0,
     using_video_margins = false,
     border = true,
@@ -2451,6 +2452,18 @@ function render()
 
     if osc_param.areas["window-controls-title"] then
         for _,cords in ipairs(osc_param.areas["window-controls-title"]) do
+            if state.osc_visible then -- activate only when OSC is actually visible
+                set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "window-controls-title")
+            end
+            if state.osc_visible ~= state.windowcontrols_title then
+                if state.osc_visible then
+                    mp.enable_key_bindings("window-controls-title", "allow-vo-dragging")
+                else
+                    mp.disable_key_bindings("window-controls-title", "allow-vo-dragging")
+                end
+                state.windowcontrols_title = state.osc_visible
+            end
+
             if mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2) then
                 mouse_over_osc = true
             end
@@ -2927,3 +2940,4 @@ mp.register_script_message("osc-idlescreen", idlescreen_visibility)
 
 set_virt_mouse_area(0, 0, 0, 0, "input")
 set_virt_mouse_area(0, 0, 0, 0, "window-controls")
+set_virt_mouse_area(0, 0, 0, 0, "window-controls-title")
