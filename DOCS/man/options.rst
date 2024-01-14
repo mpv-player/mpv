@@ -2320,6 +2320,13 @@ Subtitles
     Force subtitle demuxer type for ``--sub-file``. Give the demuxer name as
     printed by ``--sub-demuxer=help``.
 
+``--sub-lavc-o=<key>=<value>[,<key>=<value>[,...]]``
+    Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
+    unneeded and pass all unknown options through the AVOption system is
+    welcome. A full list of AVOptions can be found in the FFmpeg manual.
+
+    This is a key/value list option. See `List Options`_ for details.
+
 ``--sub-delay=<sec>``
     Delays primary subtitles by ``<sec>`` seconds. Can be negative.
 

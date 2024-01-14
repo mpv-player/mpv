@@ -321,6 +321,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"teletext-page", OPT_INT(teletext_page), M_RANGE(1, 999)},
         {"sub-past-video-end", OPT_BOOL(sub_past_video_end)},
         {"sub-ass-force-style", OPT_REPLACED("sub-ass-style-overrides")},
+        {"sub-lavc-o", OPT_KEYVALUELIST(sub_avopts)},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),

@@ -96,6 +96,9 @@ static int init(struct sd *sd)
     ctx = avcodec_alloc_context3(sub_codec);
     if (!ctx)
         goto error;
+
+    mp_set_avopts(sd->log, ctx, sd->opts->sub_avopts);
+
     priv->avpkt = av_packet_alloc();
     if (!priv->avpkt)
         goto error;
