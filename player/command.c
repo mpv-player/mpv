@@ -6288,6 +6288,15 @@ static void cmd_load_config_file(void *p)
     mp_notify_property(mpctx, "profile-list");
 }
 
+static void cmd_load_input_conf(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    char *config_file = cmd->args[0].v.s;
+    cmd->success = mp_input_load_config_file(mpctx->input, config_file);
+}
+
 static void cmd_load_script(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -6826,6 +6835,8 @@ const struct mp_cmd_def mp_cmds[] = {
     },
 
     { "load-config-file", cmd_load_config_file, {{"filename", OPT_STRING(v.s)}} },
+
+    { "load-input-conf", cmd_load_input_conf, {{"filename", OPT_STRING(v.s)}} },
 
     { "load-script", cmd_load_script, {{"filename", OPT_STRING(v.s)}} },
 
