@@ -1453,7 +1453,7 @@ end)
 mp.observe_property('osd-width', 'native', update)
 mp.observe_property('osd-height', 'native', update)
 mp.observe_property('display-hidpi-scale', 'native', update)
-mp.observe_property('focused', nil, update)
+mp.observe_property('focused', 'native', update)
 
 -- Enable log messages. In silent mode, mpv will queue log messages in a buffer
 -- until enable_messages is called again without the silent: prefix.

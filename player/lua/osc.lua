@@ -2721,7 +2721,7 @@ function update_duration_watch()
 
     if want_watch ~= duration_watched then
         if want_watch then
-            mp.observe_property("duration", nil, on_duration)
+            mp.observe_property("duration", "native", on_duration)
         else
             mp.unobserve_property(on_duration)
         end
@@ -2734,8 +2734,8 @@ update_duration_watch()
 
 mp.register_event("shutdown", shutdown)
 mp.register_event("start-file", request_init)
-mp.observe_property("track-list", nil, request_init)
-mp.observe_property("playlist", nil, request_init)
+mp.observe_property("track-list", "native", request_init)
+mp.observe_property("playlist", "native", request_init)
 mp.observe_property("chapter-list", "native", function(_, list)
     list = list or {}  -- safety, shouldn't return nil
     table.sort(list, function(a, b) return a.time < b.time end)
