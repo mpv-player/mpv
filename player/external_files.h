@@ -34,5 +34,6 @@ struct subfn *find_external_files(struct mpv_global *global, const char *fname,
 
 bool mp_might_be_subtitle_file(const char *filename);
 void mp_update_subtitle_exts(struct MPOpts *opts);
+char *mp_guess_lang_from_filename(void *talloc_ctx, const char *filename);
 
 #endif /* MPLAYER_FINDFILES_H */

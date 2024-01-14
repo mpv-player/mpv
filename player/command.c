@@ -5769,6 +5769,10 @@ static void cmd_track_reload(void *p)
     }
 
     struct track *nt = mpctx->tracks[nt_num];
+
+    if (!nt->lang)
+        nt->lang = mp_guess_lang_from_filename(nt, nt->external_filename);
+
     mp_switch_track(mpctx, nt->type, nt, 0);
     print_track_list(mpctx, "Reloaded:");
 }
