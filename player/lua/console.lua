@@ -83,6 +83,7 @@ local terminal_styles = {
     warn = '\027[33m',
     error = '\027[31m',
     fatal = '\027[1;31m',
+    selected_suggestion = '\027[7m',
 }
 
 local repl_active = false
@@ -346,9 +347,15 @@ local function print_to_terminal()
         log = log .. log_line.terminal_style .. log_line.text .. '\027[0m'
     end
 
-    local suggestions = table.concat(suggestion_buffer, '\t')
-    if suggestions ~= '' then
-        suggestions = suggestions .. '\n'
+    local suggestions = ''
+    for i, suggestion in ipairs(suggestion_buffer) do
+        if i == selected_suggestion_index then
+            suggestions = suggestions .. terminal_styles.selected_suggestion ..
+                          suggestion .. '\027[0m'
+        else
+            suggestions = suggestions .. suggestion
+        end
+        suggestions = suggestions .. (i < #suggestion_buffer and '\t' or '\n')
     end
 
     local before_cur = line:sub(1, cursor - 1)
