@@ -1395,6 +1395,14 @@ void mp_input_load_config(struct input_ctx *ictx)
     input_unlock(ictx);
 }
 
+bool mp_input_load_config_file(struct input_ctx *ictx, char *file)
+{
+    input_lock(ictx);
+    bool result = parse_config_file(ictx, file);
+    input_unlock(ictx);
+    return result;
+}
+
 static void clear_queue(struct cmd_queue *queue)
 {
     while (queue->first) {
