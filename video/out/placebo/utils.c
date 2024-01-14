@@ -44,6 +44,12 @@ static void log_cb(void *priv, enum pl_log_level level, const char *msg)
     mp_msg(log, pl_log_to_msg_lev[level], "%s\n", msg);
 }
 
+static int determine_pl_log_level(struct mp_log *log)
+{
+    int log_level = mp_msg_level(log);
+    return log_level == -1 ? PL_LOG_NONE : msg_lev_to_pl_log[log_level];
+}
+
 static void log_cb_probing(void *priv, enum pl_log_level level, const char *msg)
 {
     struct mp_log *log = priv;
@@ -54,7 +60,7 @@ pl_log mppl_log_create(void *tactx, struct mp_log *log)
 {
     return pl_log_create(PL_API_VER, &(struct pl_log_params) {
         .log_cb     = log_cb,
-        .log_level  = msg_lev_to_pl_log[mp_msg_level(log)],
+        .log_level  = determine_pl_log_level(log),
         .log_priv   = mp_log_new(tactx, log, "libplacebo"),
     });
 }
