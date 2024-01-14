@@ -232,7 +232,7 @@ local function read_frames()
     end
 end
 
-mp.observe_property(meta_property, "none", function()
+mp.observe_property(meta_property, "native", function()
     -- Ignore frames that are decoded/filtered during seeking.
     if seeking then
         return
