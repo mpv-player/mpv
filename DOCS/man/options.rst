@@ -2764,9 +2764,18 @@ Subtitles
     packets with the same ReadOrder as earlier packets.
 
 ``--teletext-page=<-1-999>``
+    Select a teletext page number to decode.
+
     This works for ``dvb_teletext`` subtitle streams, and if FFmpeg has been
-    compiled with support for it. `-1` matches all pages. `0` (default) matches
-    all subtitle pages.
+    compiled with support for it.
+
+    Values ``1-999`` are for individual pages. Special value ``0`` (default)
+    matches all subtitle pages. Special value ``-1`` matches all pages.
+
+    Note that page ``100`` is the default start page of actual teletext. It is
+    also the former default value of this option.
+
+    See the ``libzvbi-teletext`` section in FFmpeg documentation for details.
 
     Default: 0
 
