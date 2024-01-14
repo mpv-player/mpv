@@ -311,9 +311,15 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     mp_set_av_packet(priv->avpkt, packet, &priv->pkt_timebase);
 
     if (ctx->codec_id == AV_CODEC_ID_DVB_TELETEXT) {
-        char page[4];
-        snprintf(page, sizeof(page), "%d", opts->teletext_page);
-        av_opt_set(ctx, "txt_page", page, AV_OPT_SEARCH_CHILDREN);
+        if (!opts->teletext_page) {
+            av_opt_set(ctx, "txt_page", "subtitle", AV_OPT_SEARCH_CHILDREN);
+        } else if (opts->teletext_page == -1) {
+            av_opt_set(ctx, "txt_page", "*", AV_OPT_SEARCH_CHILDREN);
+        } else {
+            char page[4];
+            snprintf(page, sizeof(page), "%d", opts->teletext_page);
+            av_opt_set(ctx, "txt_page", page, AV_OPT_SEARCH_CHILDREN);
+        }
     }
 
     int got_sub;
