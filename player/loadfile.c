@@ -650,7 +650,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         // 1. Matches the audio language or --subs-fallback-forced=always.
         // 2. Matches the users list of preferred languages or none were specified (i.e. slang was not set).
         // 3. A track *wasn't* already selected by slang previously or the track->lang matches pick->lang and isn't forced.
-        bool valid_forced_slang = (os_langs || (mp_match_lang_single(pick->lang, track->lang) && !pick->forced_track) ||
+        bool valid_forced_slang = (os_langs || (mp_match_lang_single(pick->lang, track->lang)) ||
                                    (match_lang(langs, track->lang) && !match_lang(langs, pick->lang)));
         bool audio_lang_match = mp_match_lang_single(audio_lang, track->lang);
         if (fallback_forced && track->forced_track && valid_forced_slang && audio_lang_match &&
