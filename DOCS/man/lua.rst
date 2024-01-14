@@ -726,7 +726,7 @@ strictly part of the guaranteed API.
 
 ``utils.getcwd()``
     Returns the directory that mpv was launched from. On error, ``nil, error``
-    is returned.
+    is returned. This merely retrieves the ``working-directory`` property.
 
 ``utils.readdir(path [, filter])``
     Enumerate all entries at the given path on the filesystem, and return them
@@ -830,7 +830,8 @@ strictly part of the guaranteed API.
 
 ``utils.getpid()``
     Returns the process ID of the running mpv process. This can be used to identify
-    the calling mpv when launching (detached) subprocesses.
+    the calling mpv when launching (detached) subprocesses. This merely retrieves
+    the ``pid`` property.
 
 ``utils.get_env_list()``
     Returns the C environment as a list of strings. (Do not confuse this with
