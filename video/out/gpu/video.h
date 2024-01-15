@@ -52,6 +52,7 @@ struct scaler {
     struct ra_tex *lut;
     struct ra_tex *sep_fbo;
     bool insufficient;
+    int lut_size;
 
     // kernel points here
     struct filter_kernel kernel_storage;
@@ -132,6 +133,7 @@ struct gl_tone_map_opts {
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
+    int scaler_lut_size;
     float gamma;
     bool gamma_auto;
     int target_prim;
