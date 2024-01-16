@@ -874,7 +874,7 @@ static void handle_loop_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    if (mpctx->stop_play != AT_END_OF_FILE)
+    if (mpctx->video_status != STATUS_DRAINING && mpctx->video_status != STATUS_EOF)
         return;
 
     double target = MP_NOPTS_VALUE;

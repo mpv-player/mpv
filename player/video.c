@@ -1235,29 +1235,35 @@ void write_video(struct MPContext *mpctx)
     };
     calculate_frame_duration(mpctx);
 
-    int req = vo_get_num_req_frames(mpctx->video_out);
-    assert(req >= 1 && req <= VO_MAX_REQ_FRAMES);
-    struct vo_frame dummy = {
-        .pts = pts,
-        .duration = -1,
-        .still = mpctx->step_frames > 0,
-        .can_drop = opts->frame_dropping & 1,
-        .num_frames = MPMIN(mpctx->num_next_frames, req),
-        .num_vsyncs = 1,
-    };
-    for (int n = 0; n < dummy.num_frames; n++)
-        dummy.frames[n] = mpctx->next_frames[n];
-    struct vo_frame *frame = vo_frame_ref(&dummy);
+    // Output the frame, unless we're looping and reached EOF
+    // This avoids a black frame between file loop iterations
+    struct vo_frame *frame = NULL;
+    if (!mpctx->opts->loop_file || !logical_eof || mpctx->video_status == STATUS_DRAINING) {
+        int req = vo_get_num_req_frames(mpctx->video_out);
+        assert(req >= 1 && req <= VO_MAX_REQ_FRAMES);
+        struct vo_frame dummy = {
+            .pts = pts,
+            .duration = -1,
+            .still = mpctx->step_frames > 0,
+            .can_drop = opts->frame_dropping & 1,
+            .num_frames = MPMIN(mpctx->num_next_frames, req),
+            .num_vsyncs = 1,
+        };
+        for (int n = 0; n < dummy.num_frames; n++)
+            dummy.frames[n] = mpctx->next_frames[n];
 
-    double diff = mpctx->past_frames[0].approx_duration;
-    if (opts->untimed || vo->driver->untimed)
-        diff = -1; // disable frame dropping and aspects of frame timing
-    if (diff >= 0) {
-        // expected A/V sync correction is ignored
-        diff /= mpctx->video_speed;
-        if (mpctx->time_frame < 0)
-            diff += mpctx->time_frame;
-        frame->duration = MPCLAMP(diff, 0, 10) * 1e9;
+        frame = vo_frame_ref(&dummy);
+
+        double diff = mpctx->past_frames[0].approx_duration;
+        if (opts->untimed || vo->driver->untimed)
+            diff = -1; // disable frame dropping and aspects of frame timing
+        if (diff >= 0) {
+            // expected A/V sync correction is ignored
+            diff /= mpctx->video_speed;
+            if (mpctx->time_frame < 0)
+                diff += mpctx->time_frame;
+            frame->duration = MPCLAMP(diff, 0, 10) * 1e9;
+        }
     }
 
     mpctx->video_pts = mpctx->next_frames[0]->pts;
@@ -1266,12 +1272,14 @@ void write_video(struct MPContext *mpctx)
 
     shift_frames(mpctx);
 
-    schedule_frame(mpctx, frame);
+    if (frame)
+        schedule_frame(mpctx, frame);
 
     mpctx->osd_force_update = true;
     update_osd_msg(mpctx);
 
-    vo_queue_frame(vo, frame);
+    if (frame)
+        vo_queue_frame(vo, frame);
 
     check_framedrop(mpctx, vo_c);
 
