@@ -828,7 +828,7 @@ local function append_fps(s, prop, eprop)
     local unit = prop == "display-fps" and " Hz" or " fps"
     local suffix = single and "" or " (specified)"
     local esuffix = single and "" or " (estimated)"
-    local prefix = prop == "display-fps" and "Refresh Rate:" or "Frame rate:"
+    local prefix = prop == "display-fps" and "Refresh Rate:" or "Frame Rate:"
     local nl = o.nl
     local indent = o.indent
 
@@ -1076,7 +1076,7 @@ local function cache_stats()
 
     eval_ass_formatting()
     add_header(stats)
-    append(stats, "", {prefix="Cache info:", nl="", indent=""})
+    append(stats, "", {prefix="Cache Info:", nl="", indent=""})
 
     local info = mp.get_property_native("demuxer-cache-state")
     if info == nil then
@@ -1087,7 +1087,7 @@ local function cache_stats()
     local a = info["reader-pts"]
     local b = info["cache-end"]
 
-    append(stats, opt_time(a) .. " - " .. opt_time(b), {prefix = "Packet queue:"})
+    append(stats, opt_time(a) .. " - " .. opt_time(b), {prefix = "Packet Queue:"})
 
     local r = nil
     if a ~= nil and b ~= nil then
@@ -1101,7 +1101,7 @@ local function cache_stats()
                                  nil, 0.8, 1)
         r_graph = o.prefix_sep .. r_graph
     end
-    append(stats, opt_time(r), {prefix = "Read-ahead:", suffix = r_graph})
+    append(stats, opt_time(r), {prefix = "Readahead:", suffix = r_graph})
 
     -- These states are not necessarily exclusive. They're about potentially
     -- separate mechanisms, whose states may be decoupled.
@@ -1140,17 +1140,17 @@ local function cache_stats()
     else
         fc = "(disabled)"
     end
-    append(stats, fc, {prefix = "Disk cache:"})
+    append(stats, fc, {prefix = "Disk Cache:"})
 
-    append(stats, info["debug-low-level-seeks"], {prefix = "Media seeks:"})
-    append(stats, info["debug-byte-level-seeks"], {prefix = "Stream seeks:"})
+    append(stats, info["debug-low-level-seeks"], {prefix = "Media Seeks:"})
+    append(stats, info["debug-byte-level-seeks"], {prefix = "Stream Seeks:"})
 
     append(stats, "", {prefix=o.nl .. o.nl .. "Ranges:", nl="", indent=""})
 
     append(stats, info["bof-cached"] and "yes" or "no",
-           {prefix = "Start cached:"})
+           {prefix = "Start Cached:"})
     append(stats, info["eof-cached"] and "yes" or "no",
-           {prefix = "End cached:"})
+           {prefix = "End Cached:"})
 
     local ranges = info["seekable-ranges"] or {}
     for n, r in ipairs(ranges) do
@@ -1188,8 +1188,8 @@ pages = {
     [o.key_page_1] = { f = default_stats, desc = "Default" },
     [o.key_page_2] = { f = vo_stats, desc = "Extended Frame Timings", scroll = true },
     [o.key_page_3] = { f = cache_stats, desc = "Cache Statistics" },
-    [o.key_page_4] = { f = keybinding_info, desc = "Active key bindings", scroll = true },
-    [o.key_page_0] = { f = perf_stats, desc = "Internal performance info", scroll = true },
+    [o.key_page_4] = { f = keybinding_info, desc = "Active Key Bindings", scroll = true },
+    [o.key_page_0] = { f = perf_stats, desc = "Internal Performance Info", scroll = true },
 }
 
 
