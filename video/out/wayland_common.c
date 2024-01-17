@@ -890,6 +890,11 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     struct mp_vo_opts *vo_opts = wl->vo_opts;
     struct mp_rect old_geometry = wl->geometry;
 
+    if (width < 0 || height < 0) {
+        MP_WARN(wl, "Compositor sent negative width/height values. Treating them as zero.\n");
+        width = height = 0;
+    }
+
     int old_toplevel_width = wl->toplevel_width;
     int old_toplevel_height = wl->toplevel_height;
     wl->toplevel_width = width;
