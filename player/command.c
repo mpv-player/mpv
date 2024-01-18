@@ -3233,7 +3233,7 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
         if (rate < 1000) {
             *(char **)arg = talloc_asprintf(NULL, "%d kbps", (int)rate);
         } else {
-            *(char **)arg = talloc_asprintf(NULL, "%.3f mbps", rate / 1000.0);
+            *(char **)arg = talloc_asprintf(NULL, "%.3f Mbps", rate / 1000.0);
         }
         return M_PROPERTY_OK;
     }
