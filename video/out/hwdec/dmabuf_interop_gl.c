@@ -186,6 +186,7 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
                 format[2] = DRM_FORMAT_R8;
                 break;
             case DRM_FORMAT_P010:
+            case DRM_FORMAT_P210:
 #ifdef DRM_FORMAT_P030 /* Format added in a newer libdrm version than minimum */
             case DRM_FORMAT_P030:
 #endif
