@@ -1153,8 +1153,8 @@ PROTOCOLS
     either aliases to documented protocols, or are just redirections to
     protocols implemented and documented in FFmpeg.
 
-    ``data:`` is supported in FFmpeg (not in Libav), but needs to be in the
-    format ``data://``. This is done to avoid ambiguity with filenames. You
+    ``data:`` is supported, but needs to be in the format ``data://``.
+    This is done to avoid ambiguity with filenames. You
     can also prefix it with ``lavf://`` or ``ffmpeg://``.
 
 ``ytdl://...``
@@ -1210,7 +1210,7 @@ PROTOCOLS
 
 ``lavf://...``
 
-    Access any FFmpeg/Libav libavformat protocol. Basically, this passed the
+    Access any FFmpeg libavformat protocol. Basically, this passed the
     string after the ``//`` directly to libavformat.
 
 ``av://type:options``
@@ -1425,7 +1425,7 @@ behavior of mpv.
 ``DISPLAY``
     Standard X11 display name to use.
 
-FFmpeg/Libav:
+FFmpeg:
     This library accesses various environment variables. However, they are not
     centrally documented, and documenting them is not our job. Therefore, this
     list is incomplete.

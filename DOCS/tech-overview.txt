@@ -257,10 +257,7 @@ sub/:
     in turn asks dec_sub.c for subtitle overlay bitmaps, which relays the
     request to one of the sd_*.c subtitle decoders/renderers.
 
-    Subtitle loading is in demux/. The MPlayer subreader.c is mostly gone - parts
-    of it survive in demux_subreader.c. It's used as last fallback, or to handle
-    some text subtitle types on Libav. It should go away eventually. Normally,
-    subtitles are loaded via demux_lavf.c.
+    Subtitle loading is in demux/. Normally, subtitles are loaded via demux_lavf.c.
 
     The subtitles are passed to dec_sub.c and the subtitle decoders in sd_*.c
     as they are demuxed. All text subtitles are rendered by sd_ass.c. If text

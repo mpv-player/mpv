@@ -1721,7 +1721,7 @@ Video
 
     By default, this is set to ``h264,vc1,hevc,vp8,vp9,av1``. Note that
     the hardware acceleration special codecs like ``h264_vdpau`` are not
-    relevant anymore, and in fact have been removed from Libav in this form.
+    relevant anymore, and in fact have been removed from FFmpeg in this form.
 
     This is usually only needed with broken GPUs, where a codec is reported
     as supported, but decoding causes more problems than it solves.
@@ -1984,7 +1984,7 @@ Audio
     .. admonition:: Examples
 
         ``--ad=mp3float``
-            Prefer the FFmpeg/Libav ``mp3float`` decoder over all other MP3
+            Prefer the FFmpeg ``mp3float`` decoder over all other MP3
             decoders.
 
         ``--ad=help``
@@ -4776,7 +4776,7 @@ It also sets the defaults for the ``lavrresample`` audio filter.
 
 ``--audio-swresample-o=<string>``
     Set AVOptions on the SwrContext or AVAudioResampleContext. These should
-    be documented by FFmpeg or Libav.
+    be documented by FFmpeg.
 
     This is a key/value list option. See `List Options`_ for details.
 
@@ -5133,11 +5133,11 @@ Network
 
 ``--tls-ca-file=<filename>``
     Certificate authority database file for use with TLS. (Silently fails with
-    older FFmpeg or Libav versions.)
+    older FFmpeg versions.)
 
 ``--tls-verify``
     Verify peer certificates when using TLS (e.g. with ``https://...``).
-    (Silently fails with older FFmpeg or Libav versions.)
+    (Silently fails with older FFmpeg versions.)
 
 ``--tls-cert-file``
     A file containing a certificate to use in the handshake with the
@@ -5151,7 +5151,7 @@ Network
 
 ``--network-timeout=<seconds>``
     Specify the network timeout in seconds (default: 60 seconds). This affects
-    at least HTTP. The special value 0 uses the FFmpeg/Libav defaults. If a
+    at least HTTP. The special value 0 uses the FFmpeg defaults. If a
     protocol is used which does not support timeouts, this option is silently
     ignored.
 
