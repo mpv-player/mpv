@@ -177,7 +177,7 @@ Internal changes
 * General code cleanups (including refactoring or rewrites of many parts).
 * New build system.
 * Many bug fixes and removal of long-standing issues.
-* Generally preferring FFmpeg/Libav over internal demuxers, decoders, and
+* Generally preferring FFmpeg over internal demuxers, decoders, and
   filters.
 
 Detailed Listing of User-visible Changes
