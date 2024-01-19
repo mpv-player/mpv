@@ -239,8 +239,8 @@ void mp_chmap_set_unknown(struct mp_chmap *dst, int num_channels)
     }
 }
 
-// Return the ffmpeg/libav channel layout as in <libavutil/channel_layout.h>.
-// Speakers not representable by ffmpeg/libav are dropped.
+// Return the ffmpeg channel layout as in <libavutil/channel_layout.h>.
+// Speakers not representable by ffmpeg are dropped.
 // Warning: this ignores the order of the channels, and will return a channel
 //          mask even if the order is different from libavcodec's.
 //          Also, "unknown" channel maps are translated to non-sense channel
@@ -263,7 +263,7 @@ uint64_t mp_chmap_to_lavc_unchecked(const struct mp_chmap *src)
     return mask;
 }
 
-// Return the ffmpeg/libav channel layout as in <libavutil/channel_layout.h>.
+// Return the ffmpeg channel layout as in <libavutil/channel_layout.h>.
 // Returns 0 if the channel order doesn't match lavc's or if it's invalid.
 uint64_t mp_chmap_to_lavc(const struct mp_chmap *src)
 {
@@ -272,7 +272,7 @@ uint64_t mp_chmap_to_lavc(const struct mp_chmap *src)
     return mp_chmap_to_lavc_unchecked(src);
 }
 
-// Set channel map from the ffmpeg/libav channel layout as in
+// Set channel map from the ffmpeg channel layout as in
 // <libavutil/channel_layout.h>.
 // If the number of channels exceed MP_NUM_CHANNELS, set dst to empty.
 void mp_chmap_from_lavc(struct mp_chmap *dst, uint64_t src)

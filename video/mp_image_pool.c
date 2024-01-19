@@ -337,7 +337,7 @@ bool mp_image_hw_upload(struct mp_image *hw_img, struct mp_image *src)
     AVFrame *srcav = NULL;
 
     // This means the destination image will not be "writable", which would be
-    // a pain if Libav enforced this - fortunately it doesn't care. We can
+    // a pain if FFmpeg enforced this - fortunately it doesn't care. We can
     // transfer data to it even if there are multiple refs.
     dstav = mp_image_to_av_frame(hw_img);
     if (!dstav)
