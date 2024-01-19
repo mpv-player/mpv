@@ -483,9 +483,10 @@ static int match_lang(char **langs, const char *lang)
  * Forced tracks are preferred when the user prefers not to display subtitles
  */
 // Return whether t1 is preferred over t2
-static bool compare_track(struct track *t1, struct track *t2, char **langs,
-                          bool os_langs, struct MPOpts *opts, int preferred_program)
+static bool compare_track(struct track *t1, struct track *t2, char **langs, bool os_langs,
+                          bool forced, struct MPOpts *opts, int preferred_program)
 {
+    bool sub = t2->type == STREAM_SUB;
     if (!opts->autoload_files && t1->is_external != t2->is_external)
         return !t1->is_external;
     bool ext1 = t1->is_external && !t1->no_default;
@@ -503,16 +504,18 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
             (t2->program_id == preferred_program))
             return t1->program_id == preferred_program;
     }
-    int forced = t1->type == STREAM_SUB ? opts->subs_fallback_forced : 1;
-    bool force_match = forced == 1 || (t1->forced_track && forced == 2) ||
-                       (!t1->forced_track && !forced);
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
+    t1->forced_select = sub && forced && t1->forced_track;
     if (!os_langs && l1 != l2)
-        return l1 > l2 && force_match;
-    if (t1->default_track != t2->default_track)
-        return t1->default_track && force_match;
+        return l1 > l2;
+    if (forced)
+        return t1->forced_track;
+    if (sub && !t2->forced_select && t2->forced_track)
+        return !t1->forced_track;
+    if (t1->default_track != t2->default_track && !t2->forced_select)
+        return t1->default_track;
     if (os_langs && l1 != l2)
-        return l1 > l2 && force_match;
+        return l1 > l2;
     if (t1->attached_picture != t2->attached_picture)
         return !t1->attached_picture;
     if (t1->stream && t2->stream && opts->hls_bitrate >= 0 &&
@@ -624,11 +627,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     }
     const char *audio_lang = get_audio_lang(mpctx);
     bool sub = type == STREAM_SUB;
-    bool fallback_forced = sub && opts->subs_fallback_forced;
-    bool audio_matches = false;
-    bool sub_fallback = false;
     struct track *pick = NULL;
-    struct track *forced_pick = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
         if (track->type != type)
@@ -643,46 +642,24 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (duplicate_track(mpctx, order, type, track))
             continue;
-        if (!pick || compare_track(track, pick, langs, os_langs, mpctx->opts, preferred_program))
+        if (sub) {
+            // Subtitle specific auto-selecting crap.
+            bool audio_matches = mp_match_lang_single(audio_lang, track->lang);
+            bool forced = track->forced_track && (opts->subs_fallback_forced == 2 ||
+                          (audio_matches && opts->subs_fallback_forced == 1));
+            bool lang_match = !os_langs && match_lang(langs, track->lang) > 0;
+            bool subs_fallback = (track->is_external && !track->no_default) || opts->subs_fallback == 2 ||
+                                 (opts->subs_fallback == 1 && track->default_track);
+            bool subs_matching_audio = (!match_lang(langs, audio_lang) || opts->subs_with_matching_audio == 2 ||
+                                        (opts->subs_with_matching_audio == 1 && track->forced_track));
+            if (subs_matching_audio && ((!pick && (forced || lang_match || subs_fallback)) ||
+                (pick && compare_track(track, pick, langs, os_langs, forced, mpctx->opts, preferred_program))))
+            {
+                pick = track;
+            }
+        } else if (!pick || compare_track(track, pick, langs, os_langs, false, mpctx->opts, preferred_program)) {
             pick = track;
-
-        // Autoselecting forced sub tracks requires the following:
-        // 1. Matches the audio language or --subs-fallback-forced=always.
-        // 2. Matches the users list of preferred languages or none were specified (i.e. slang was not set).
-        // 3. A track *wasn't* already selected by slang previously or the track->lang matches pick->lang and isn't forced.
-        bool valid_forced_slang = (os_langs || (mp_match_lang_single(pick->lang, track->lang) && !pick->forced_track) ||
-                                   (match_lang(langs, track->lang) && !match_lang(langs, pick->lang)));
-        bool audio_lang_match = mp_match_lang_single(audio_lang, track->lang);
-        if (fallback_forced && track->forced_track && valid_forced_slang && audio_lang_match &&
-            (!forced_pick || compare_track(track, forced_pick, langs, os_langs, mpctx->opts, preferred_program)))
-        {
-            forced_pick = track;
         }
-    }
-
-    // If we found a forced track, use that.
-    if (forced_pick)
-        pick = forced_pick;
-
-    // Clear out any picks for these special cases for subtitles
-    if (pick) {
-        audio_matches = mp_match_lang_single(pick->lang, audio_lang);
-        sub_fallback = (pick->is_external && !pick->no_default) || opts->subs_fallback == 2 ||
-                        (opts->subs_fallback == 1 && pick->default_track);
-    }
-    if (pick && !forced_pick && sub && (!match_lang(langs, pick->lang) || os_langs) && !sub_fallback)
-        pick = NULL;
-    // Handle this after matching langs and selecting a fallback.
-    if (pick && sub && ((!opts->subs_with_matching_audio && audio_matches) ||
-        (opts->subs_with_matching_audio == 1 && audio_matches && !forced_pick)))
-    {
-        pick = NULL;
-    }
-    // Handle edge cases if we picked a track that doesn't match the --subs-fallback-forced value
-    if (pick && sub && ((!pick->forced_track && opts->subs_fallback_forced == 2) ||
-        (pick->forced_track && !opts->subs_fallback_forced)))
-    {
-        pick = NULL;
     }
 
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
