@@ -823,7 +823,6 @@ static const m_option_t mp_opts[] = {
 
     {"term-osd-bar", OPT_BOOL(term_osd_bar), .flags = UPDATE_OSD},
     {"term-osd-bar-chars", OPT_STRING(term_osd_bar_chars), .flags = UPDATE_OSD},
-    {"term-remaining-playtime", OPT_BOOL(term_remaining_playtime), .flags = UPDATE_OSD},
     {"term-title", OPT_STRING(term_title), .flags = UPDATE_OSD},
 
     {"term-playing-msg", OPT_STRING(playing_msg)},
@@ -978,7 +977,6 @@ static const struct MPOpts mp_default_opts = {
     .frame_dropping = 1,
     .term_osd = 2,
     .term_osd_bar_chars = "[-+-]",
-    .term_remaining_playtime = true,
     .consolecontrols = true,
     .playlist_pos = -1,
     .play_frames = -1,

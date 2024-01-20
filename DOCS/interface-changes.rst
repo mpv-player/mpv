@@ -40,6 +40,7 @@ Interface changes
     - add `--sub-filter-sdh-enclosures` option
     - added the `mp.input` scripting API to query the user for textual input
     - add `forced` choice to `subs-with-matching-audio`
+    - remove `--term-remaining-playtime` option
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.
