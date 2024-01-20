@@ -1781,8 +1781,7 @@ static int mp_property_audio_devices(void *ctx, struct m_property *prop,
 static int mp_property_ao(void *ctx, struct m_property *p, int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_strdup_ro(action, arg,
-                                    mpctx->ao ? ao_get_name(mpctx->ao) : NULL);
+    return m_property_strdup_ro(action, arg, mpctx->ao ? ao_get_name(mpctx->ao) : NULL);
 }
 
 /// Audio delay (RW)
@@ -2762,15 +2761,15 @@ static int mp_property_perf_info(void *ctx, struct m_property *p, int action,
 static int mp_property_vo(void *ctx, struct m_property *p, int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_strdup_ro(action, arg,
-                    mpctx->video_out ? mpctx->video_out->driver->name : NULL);
+    return m_property_strdup_ro(action, arg, mpctx->video_out ?
+                                mpctx->video_out->driver->name : NULL);
 }
 
 static int mp_property_gpu_context(void *ctx, struct m_property *p, int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_strdup_ro(action, arg,
-                    mpctx->video_out ? mpctx->video_out->context_name : NULL);
+    return m_property_strdup_ro(action, arg, mpctx->video_out ?
+                                mpctx->video_out->context_name : NULL);
 }
 
 static int mp_property_osd_dim(void *ctx, struct m_property *prop,
