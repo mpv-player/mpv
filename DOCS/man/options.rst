@@ -4887,10 +4887,6 @@ Terminal
 
     See `Property Expansion`_.
 
-``--term-remaining-playtime``, ``--no-term-remaining-playtime``
-    When printing out the time on the terminal, show the remaining time adjusted by
-    playback speed. Default: ``yes``
-
 ``--term-status-msg=<string>``
     Print out a custom string during playback instead of the standard status
     line. Expands properties. See `Property Expansion`_.
