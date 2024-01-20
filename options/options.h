@@ -113,6 +113,7 @@ struct mp_subtitle_opts {
     bool sub_clear_on_seek;
     int teletext_page;
     bool sub_past_video_end;
+    bool sub_newline_to_space;
 };
 
 // Options for both primary and secondary subs.

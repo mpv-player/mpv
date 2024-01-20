@@ -2527,6 +2527,14 @@ Subtitles
 
     Default: yes.
 
+``--sub-newline-to-space``
+    Enables replace newline with space in subtitles when they are available,
+    if the subtitles are in a plain text format (or ASS if
+    ``--sub-ass-override``, ``--secondary-sub-ass-override`` is set to strip).
+    Useful when secondary sub postion is adjacent to main subtitle.
+
+    Default: no.
+
 ``--sub-ass-vsfilter-aspect-compat=<yes|no>``
     Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
     with traditional VSFilter behavior. This switch has no effect when the

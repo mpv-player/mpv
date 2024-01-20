@@ -321,6 +321,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"teletext-page", OPT_INT(teletext_page), M_RANGE(1, 999)},
         {"sub-past-video-end", OPT_BOOL(sub_past_video_end)},
         {"sub-ass-force-style", OPT_REPLACED("sub-ass-style-overrides")},
+        {"sub-newline-to-space", OPT_BOOL(sub_newline_to_space)},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
@@ -337,6 +338,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         .ass_vsfilter_blur_compat = true,
         .ass_shaper = 1,
         .use_embedded_fonts = true,
+        .sub_newline_to_space = false,
     },
     .change_flags = UPDATE_OSD,
 };
@@ -1099,6 +1101,7 @@ static const struct MPOpts mp_default_opts = {
         "sub-visibility",
         "sub-scale",
         "sub-use-margins",
+        "sub-newline-to-space",
         "sub-ass-force-margins",
         "sub-ass-vsfilter-aspect-compat",
         "sub-ass-override",
