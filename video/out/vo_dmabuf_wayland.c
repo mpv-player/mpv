@@ -781,12 +781,6 @@ static int preinit(struct vo *vo)
         goto err;
     }
 
-    if (!vo->wl->viewport) {
-        MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
-                 wp_viewporter_interface.name);
-        goto err;
-    }
-
     if (vo->wl->single_pixel_manager) {
 #if HAVE_WAYLAND_PROTOCOLS_1_27
         p->solid_buffer = wp_single_pixel_buffer_manager_v1_create_u32_rgba_buffer(
