@@ -112,7 +112,6 @@ struct vo_wayland_state {
     struct zwp_linux_dmabuf_feedback_v1 *dmabuf_feedback;
     wayland_format *format_map;
     uint32_t format_size;
-    bool using_dmabuf_wayland;
 
     /* presentation-time */
     struct wp_presentation  *presentation;

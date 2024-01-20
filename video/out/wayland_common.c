@@ -836,8 +836,7 @@ static void surface_handle_preferred_buffer_scale(void *data,
     if (wl->fractional_scale_manager)
         return;
 
-    // dmabuf_wayland is always wl->scaling = 1
-    wl->scaling = !wl->using_dmabuf_wayland ? scale : 1;
+    wl->scaling = scale;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -1070,8 +1069,7 @@ static void preferred_scale(void *data,
     struct vo_wayland_state *wl = data;
     double old_scale = wl->scaling;
 
-    // dmabuf_wayland is always wl->scaling = 1
-    wl->scaling = !wl->using_dmabuf_wayland ? (double)scale / 120 : 1;
+    wl->scaling = (double)scale / 120;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -1845,9 +1843,8 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
     if (wl->fractional_scale_manager)
         return;
 
-    // dmabuf_wayland is always wl->scaling = 1
     double old_scale = wl->scaling;
-    wl->scaling = !wl->using_dmabuf_wayland ? wl->current_output->scale : 1;
+    wl->scaling = wl->current_output->scale;
     rescale_geometry(wl, old_scale);
 }
 
@@ -2208,7 +2205,7 @@ bool vo_wayland_init(struct vo *vo)
         .vo_opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
     wl->vo_opts = wl->vo_opts_cache->opts;
-    wl->using_dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
+    bool using_dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
 
     wl_list_init(&wl->output_list);
 
@@ -2330,7 +2327,7 @@ bool vo_wayland_init(struct vo *vo)
     update_app_id(wl);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
 
-    wl->callback_surface = wl->using_dmabuf_wayland ? wl->video_surface : wl->surface;
+    wl->callback_surface = using_dmabuf_wayland ? wl->video_surface : wl->surface;
     wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     wl_surface_commit(wl->surface);
