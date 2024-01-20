@@ -1710,7 +1710,7 @@ static bool is_key_message(UINT msg)
 static void run_message_loop(struct vo_w32_state *w32)
 {
     MSG msg;
-    while (GetMessageW(&msg, 0, 0, 0) > 0) {
+    while (!w32->destroyed && GetMessageW(&msg, 0, 0, 0) > 0) {
         // Change the conversion mode on the first keypress, in case the timer
         // solution fails. Note that this leaves the mode indicator in the language
         // bar showing the original mode until a key is pressed.
