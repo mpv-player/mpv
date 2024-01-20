@@ -1735,6 +1735,21 @@ static void remove_output(struct vo_wayland_output *out)
     return;
 }
 
+// If we aren't using fractional scale protocol, then we have to make sure that
+// the window coordinates are an integer multiple of the scale otherwise the
+// compositor may raise a protocol error.
+static void sanitize_window_size(struct vo_wayland_state *wl)
+{
+    if (wl->fractional_scale_manager)
+        return;
+    int width_remainder = wl->window_size.x1 % (int)wl->scaling;
+    if (width_remainder)
+        wl->window_size.x1 += wl->scaling - width_remainder;
+    int height_remainder = wl->window_size.y1 % (int)wl->scaling;
+    if (height_remainder)
+        wl->window_size.y1 += wl->scaling - height_remainder;
+}
+
 static void set_content_type(struct vo_wayland_state *wl)
 {
     if (!wl->content_type_manager)
@@ -1801,6 +1816,7 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
 
     if (!wl->initial_size_hint)
         wl->window_size = (struct mp_rect){0, 0, vo->dwidth, vo->dheight};
+    sanitize_window_size(wl);
     wl->initial_size_hint = false;
 
     if (resize) {
@@ -2123,6 +2139,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         wl->window_size.y0 = 0;
         wl->window_size.x1 = s[0];
         wl->window_size.y1 = s[1];
+        sanitize_window_size(wl);
         if (!wl->vo_opts->fullscreen && !wl->tiled) {
             if (wl->vo_opts->window_maximized) {
                 xdg_toplevel_unset_maximized(wl->xdg_toplevel);
