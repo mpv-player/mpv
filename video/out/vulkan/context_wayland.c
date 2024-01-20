@@ -118,7 +118,7 @@ static bool resize(struct ra_ctx *ctx)
     const int32_t height = mp_rect_h(wl->geometry);
 
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
-    vo_wayland_handle_fractional_scale(wl);
+    vo_wayland_handle_scale(wl);
     return ra_vk_ctx_resize(ctx, width, height);
 }
 
