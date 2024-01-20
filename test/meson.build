@@ -50,6 +50,7 @@ if not features['win32-threads']
 endif
 
 if features['win32-desktop']
+    test_utils_deps += cc.find_library('imm32')
     test_utils_deps += cc.find_library('winmm')
 endif
 test_utils_objects = libmpv.extract_objects(test_utils_files)

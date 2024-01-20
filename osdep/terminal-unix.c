@@ -324,7 +324,7 @@ static int setsigaction(int signo, void (*handler) (int),
     struct sigaction sa;
     sa.sa_handler = handler;
 
-    if(do_mask)
+    if (do_mask)
         sigfillset(&sa.sa_mask);
     else
         sigemptyset(&sa.sa_mask);
@@ -354,26 +354,11 @@ static int death_pipe[2] = {-1, -1};
 enum { PIPE_STOP, PIPE_CONT };
 static int stop_cont_pipe[2] = {-1, -1};
 
-static void stop_sighandler(int signum)
+static void stop_cont_sighandler(int signum)
 {
     int saved_errno = errno;
-    (void)write(stop_cont_pipe[1], &(char){PIPE_STOP}, 1);
-    (void)write(STDERR_FILENO, TERM_ESC_RESTORE_CURSOR,
-                sizeof(TERM_ESC_RESTORE_CURSOR) - 1);
-    errno = saved_errno;
-
-    // note: for this signal, we use SA_RESETHAND but do NOT mask signals
-    // so this will invoke the default handler
-    raise(SIGTSTP);
-}
-
-static void continue_sighandler(int signum)
-{
-    int saved_errno = errno;
-    // SA_RESETHAND has reset SIGTSTP, so we need to restore it here
-    setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
-
-    (void)write(stop_cont_pipe[1], &(char){PIPE_CONT}, 1);
+    char sig = signum == SIGCONT ? PIPE_CONT : PIPE_STOP;
+    (void)write(stop_cont_pipe[1], &sig, 1);
     errno = saved_errno;
 }
 
@@ -437,10 +422,20 @@ static MP_THREAD_VOID terminal_thread(void *ptr)
         if (fds[1].revents & POLLIN) {
             int8_t c = -1;
             (void)read(stop_cont_pipe[0], &c, 1);
-            if (c == PIPE_STOP)
+            if (c == PIPE_STOP) {
                 do_deactivate_getch2();
-            else if (c == PIPE_CONT)
+                if (isatty(STDERR_FILENO)) {
+                    (void)write(STDERR_FILENO, TERM_ESC_RESTORE_CURSOR,
+                                sizeof(TERM_ESC_RESTORE_CURSOR) - 1);
+                }
+                // trying to reset SIGTSTP handler to default and raise it will
+                // result in a race and there's no other way to invoke the
+                // default handler. so just invoke SIGSTOP since it's
+                // effectively the same thing.
+                raise(SIGSTOP);
+            } else if (c == PIPE_CONT) {
                 getch2_poll();
+            }
         }
         if (fds[2].revents) {
             int retval = read(tty_in, &buf.b[buf.len], BUF_LEN - buf.len);
@@ -472,10 +467,6 @@ void terminal_setup_getch(struct input_ctx *ictx)
 
     if (mp_make_wakeup_pipe(death_pipe) < 0)
         return;
-    if (mp_make_wakeup_pipe(stop_cont_pipe) < 0) {
-        close_sig_pipes();
-        return;
-    }
 
     // Disable reading from the terminal even if stdout is not a tty, to make
     //   mpv ... | less
@@ -492,8 +483,8 @@ void terminal_setup_getch(struct input_ctx *ictx)
     }
 
     setsigaction(SIGINT,  quit_request_sighandler, SA_RESETHAND, false);
-    setsigaction(SIGQUIT, quit_request_sighandler, SA_RESETHAND, false);
-    setsigaction(SIGTERM, quit_request_sighandler, SA_RESETHAND, false);
+    setsigaction(SIGQUIT, quit_request_sighandler, 0, true);
+    setsigaction(SIGTERM, quit_request_sighandler, 0, true);
 }
 
 void terminal_uninit(void)
@@ -557,6 +548,11 @@ void terminal_init(void)
     assert(!getch2_enabled);
     getch2_enabled = 1;
 
+    if (mp_make_wakeup_pipe(stop_cont_pipe) < 0) {
+        getch2_enabled = 0;
+        return;
+    }
+
     tty_in = tty_out = open("/dev/tty", O_RDWR | O_CLOEXEC);
     if (tty_in < 0) {
         tty_in = STDIN_FILENO;
@@ -566,8 +562,8 @@ void terminal_init(void)
     tcgetattr(tty_in, &tio_orig);
 
     // handlers to fix terminal settings
-    setsigaction(SIGCONT, continue_sighandler, 0, true);
-    setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
+    setsigaction(SIGCONT, stop_cont_sighandler, 0, true);
+    setsigaction(SIGTSTP, stop_cont_sighandler, 0, true);
     setsigaction(SIGTTIN, SIG_IGN, 0, true);
     setsigaction(SIGTTOU, SIG_IGN, 0, true);
 

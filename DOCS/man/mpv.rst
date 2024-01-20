@@ -1122,10 +1122,10 @@ commands ``quit-watch-later`` (bound to Shift+Q by default) and
 
 The difference between always quitting with a key bound to ``quit-watch-later``
 and using ``--save-position-on-quit`` is that the latter will save the playback
-position even when mpv is closed with a method other than a keybinding, for
-example if you shutdown your system without closing mpv beforehand, unless of
-course mpv is terminated abruptly and doesn't have the time to save (e.g. with
-the KILL Unix signal).
+position even when mpv is closed with a method other than a keybinding, such as
+clicking the close button in the window title bar. However if mpv is terminated
+abruptly and doesn't have the time to save, then the position will not be saved.
+For example, if you shutdown your system without closing mpv beforehand.
 
 mpv also stores options other than the playback position when they have been
 modified after playback began, for example the volume and selected audio/subtitles,

@@ -77,7 +77,6 @@ typedef enum MONITOR_DPI_TYPE {
 
 struct w32_api {
     HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
-    BOOL (WINAPI *pImmDisableIME)(DWORD);
     BOOL (WINAPI *pAdjustWindowRectExForDpi)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
     BOOLEAN (WINAPI *pShouldAppsUseDarkMode)(void);
     DWORD (WINAPI *pSetPreferredAppMode)(DWORD mode);
@@ -183,6 +182,8 @@ struct vo_w32_state {
     bool cleared;
     bool dragging;
     BOOL win_arranging;
+
+    bool conversion_mode_init;
 };
 
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
@@ -458,9 +459,9 @@ static void handle_key_up(struct vo_w32_state *w32, UINT vkey, UINT scancode)
     }
 }
 
-static bool handle_char(struct vo_w32_state *w32, wchar_t wc)
+static bool handle_char(struct vo_w32_state *w32, WPARAM wc, bool decode)
 {
-    int c = decode_utf16(w32, wc);
+    int c = decode ? decode_utf16(w32, wc) : wc;
 
     if (c == 0)
         return true;
@@ -1221,6 +1222,20 @@ static void update_cursor_passthrough(const struct vo_w32_state *w32)
     }
 }
 
+static void set_ime_conversion_mode(const struct vo_w32_state *w32, DWORD mode)
+{
+    if (w32->parent)
+        return;
+
+    HIMC imc = ImmGetContext(w32->window);
+    if (imc) {
+        DWORD sentence_mode;
+        if (ImmGetConversionStatus(imc, NULL, &sentence_mode))
+            ImmSetConversionStatus(imc, mode, sentence_mode);
+        ImmReleaseContext(w32->window, imc);
+    }
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -1447,8 +1462,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_CHAR:
     case WM_SYSCHAR:
-        if (handle_char(w32, wParam))
+        if (handle_char(w32, wParam, true))
             return 0;
+        break;
+    case WM_UNICHAR:
+        if (wParam == UNICODE_NOCHAR) {
+            return TRUE;
+        } else if (handle_char(w32, wParam, false)) {
+            return 0;
+        }
         break;
     case WM_KILLFOCUS:
         mp_input_put_key(w32->input_ctx, MP_INPUT_RELEASE_ALL);
@@ -1543,6 +1565,31 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             !w32->current_fs && !w32->parent)
         {
             ((LPNCCALCSIZE_PARAMS) lParam)->rgrc[0].top -= get_title_bar_height(w32);
+        }
+        break;
+    case WM_IME_STARTCOMPOSITION: {
+        HIMC imc = ImmGetContext(w32->window);
+        if (imc) {
+            COMPOSITIONFORM cf = {.dwStyle = CFS_POINT, .ptCurrentPos = {0, 0}};
+            ImmSetCompositionWindow(imc, &cf);
+            ImmReleaseContext(w32->window, imc);
+        }
+        break;
+    }
+    case WM_CREATE:
+        // The IME can only be changed to alphanumeric input after it's initialized.
+        // Unfortunately, there is no way to know when this happens, as
+        // none of the WM_CREATE, WM_INPUTLANGCHANGE, or WM_IME_* messages work.
+        // This works if the IME is initialized within a short time after
+        // the window is created. Otherwise, fallback to setting alphanumeric mode on
+        // the first keypress.
+        SetTimer(w32->window, (UINT_PTR)WM_CREATE, 250, NULL);
+        break;
+    case WM_TIMER:
+        if (wParam == WM_CREATE) {
+            // Default to alphanumeric input when the IME is first initialized.
+            set_ime_conversion_mode(w32, IME_CMODE_ALPHANUMERIC);
+            return 0;
         }
         break;
     }
@@ -1652,13 +1699,31 @@ static void remove_parent_hook(struct vo_w32_state *w32)
         UnhookWinEvent(w32->parent_evt_hook);
 }
 
+static bool is_key_message(UINT msg)
+{
+    return msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN ||
+           msg == WM_KEYUP || msg == WM_SYSKEYUP;
+}
+
 // Dispatch incoming window events and handle them.
 // This returns only when the thread is asked to terminate.
 static void run_message_loop(struct vo_w32_state *w32)
 {
     MSG msg;
-    while (GetMessageW(&msg, 0, 0, 0) > 0)
+    while (GetMessageW(&msg, 0, 0, 0) > 0) {
+        // Change the conversion mode on the first keypress, in case the timer
+        // solution fails. Note that this leaves the mode indicator in the language
+        // bar showing the original mode until a key is pressed.
+        if (is_key_message(msg.message) && !w32->conversion_mode_init) {
+            set_ime_conversion_mode(w32, IME_CMODE_ALPHANUMERIC);
+            w32->conversion_mode_init = true;
+            KillTimer(w32->window, (UINT_PTR)WM_CREATE);
+        }
+        // Only send IME messages to TranslateMessage
+        if (is_key_message(msg.message) && msg.wParam == VK_PROCESSKEY)
+            TranslateMessage(&msg);
         DispatchMessageW(&msg);
+    }
 
     // Even if the message loop somehow exits, we still have to respond to
     // external requests until termination is requested.
@@ -1748,12 +1813,6 @@ static void w32_api_load(struct vo_w32_state *w32)
     w32->api.pAdjustWindowRectExForDpi = !user32_dll ? NULL :
                 (void *)GetProcAddress(user32_dll, "AdjustWindowRectExForDpi");
 
-    // imm32.dll must be loaded dynamically
-    // to account for machines without East Asian language support
-    HMODULE imm32_dll = LoadLibraryW(L"imm32.dll");
-    w32->api.pImmDisableIME = !imm32_dll ? NULL :
-                (void *)GetProcAddress(imm32_dll, "ImmDisableIME");
-
     // Dark mode related functions, available since the 1809 Windows 10 update
     // Check the Windows build version as on previous versions used ordinals
     // may point to unexpected code/data. Alternatively could check uxtheme.dll
@@ -1783,10 +1842,6 @@ static MP_THREAD_VOID gui_thread(void *ptr)
     mp_thread_set_name("window");
 
     w32_api_load(w32);
-
-    // Disables the IME for windows on this thread
-    if (w32->api.pImmDisableIME)
-        w32->api.pImmDisableIME(0);
 
     if (w32->opts->WinID >= 0)
         w32->parent = (HWND)(intptr_t)(w32->opts->WinID);

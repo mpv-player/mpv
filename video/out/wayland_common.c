@@ -890,6 +890,11 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     struct mp_vo_opts *vo_opts = wl->vo_opts;
     struct mp_rect old_geometry = wl->geometry;
 
+    if (width < 0 || height < 0) {
+        MP_WARN(wl, "Compositor sent negative width/height values. Treating them as zero.\n");
+        width = height = 0;
+    }
+
     int old_toplevel_width = wl->toplevel_width;
     int old_toplevel_height = wl->toplevel_height;
     wl->toplevel_width = width;
@@ -1582,9 +1587,9 @@ static int get_mods(struct vo_wayland_state *wl)
 
     for (int n = 0; n < MP_ARRAY_SIZE(mods); n++) {
         xkb_mod_index_t index = xkb_keymap_mod_get_index(wl->xkb_keymap, mod_names[n]);
-        if (!xkb_state_mod_index_is_consumed(wl->xkb_state, wl->keyboard_code, index)
+        if (index != XKB_MOD_INVALID
             && xkb_state_mod_index_is_active(wl->xkb_state, index,
-                                             XKB_STATE_MODS_DEPRESSED))
+                                             XKB_STATE_MODS_EFFECTIVE))
             modifiers |= mods[n];
     }
     return modifiers;
