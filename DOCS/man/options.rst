@@ -1667,7 +1667,7 @@ Video
 ``--deinterlace=<yes|no>``
     Enable or disable interlacing (default: no).
     Interlaced video shows ugly comb-like artifacts, which are visible on
-    fast movement. Enabling this typically inserts the yadif video filter in
+    fast movement. Enabling this typically inserts the bwdif video filter in
     order to deinterlace the video, or lets the video output apply deinterlacing
     if supported.
 
