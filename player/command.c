@@ -7054,7 +7054,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         handle_force_window(mpctx, true);
         reinit_video_chain(mpctx);
         if (track)
-            reselect_demux_stream(mpctx, track, true);
+            queue_seek(mpctx, MPSEEK_RELATIVE, 0.0, MPSEEK_EXACT, 0);
 
         mp_wakeup_core(mpctx);
     }
