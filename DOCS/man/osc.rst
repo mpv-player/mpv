@@ -400,6 +400,13 @@ Configurable Options
     Supports ``left`` and ``right`` which will place the controls on those
     respective sides.
 
+``windowcontrols_title``
+    Default: ${media-title}
+
+    String that supports property expansion that will be displayed as the
+    windowcontrols title.
+    ASS tags are escaped, and newlines and trailing slashes are stripped.
+
 ``greenandgrumpy``
     Default: no
 
