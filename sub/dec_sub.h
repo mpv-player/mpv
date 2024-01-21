@@ -43,7 +43,8 @@ void sub_destroy(struct dec_sub *sub);
 bool sub_can_preload(struct dec_sub *sub);
 void sub_preload(struct dec_sub *sub);
 void sub_redecode_cached_packets(struct dec_sub *sub);
-bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force);
+void sub_read_packets(struct dec_sub *sub, double video_pts, bool force,
+                      bool *packets_read, bool *sub_updated);
 struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
                                     int format, double pts);
 char *sub_get_text(struct dec_sub *sub, double pts, enum sd_text_type type);
