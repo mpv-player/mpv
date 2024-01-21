@@ -17,12 +17,17 @@
 # License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# Cache all the mpv options
-_mpv_options=$(mpv --no-config --list-options)
+_mpv_options()
+{
+  if [ -z ${_mpv_options_cache+x} ]; then
+    _mpv_options_cache=$(mpv --no-config --list-options)
+  fi
+  echo "$_mpv_options_cache"
+}
 
 _mpv_get_args()
 {
-  local doc=$(echo "$_mpv_options" | grep -E "^\\s*$1\\s")
+  local doc=$(_mpv_options | grep -E "^\\s*$1\\s")
   local partial="$2"
   local type=$(echo "$doc" | awk '{print $2;}')
 
@@ -81,10 +86,26 @@ _mpv_get_args()
 # This regex detects special options where we don't want an '=' appended
 _mpv_special_regex='\s(Flag.*\[not in config files\]|Print)'
 _mpv_skip_regex='\sremoved \[deprecated\]'
-_mpv_regular_options=($(echo "$_mpv_options" | grep -vE "$_mpv_skip_regex" | \
-  grep -vE "$_mpv_special_regex" | awk '{print "\\"$1;}' | grep '\--'))
-_mpv_special_options=($(echo "$_mpv_options" | grep -vE "$_mpv_skip_regex" | \
-  grep -E "$_mpv_special_regex" | awk '{print "\\"$1;}' | grep '\--'))
+
+_mpv_regular_options()
+{
+  if [ -z ${_mpv_regular_options_cache+x} ]; then
+    _mpv_regular_options_cache=($(_mpv_options | grep -vE "$_mpv_skip_regex" | \
+      grep -vE "$_mpv_special_regex" | awk '{print "\\"$1;}' | grep '\--'))
+    _mpv_regular_options_cache="${_mpv_regular_options_cache[*]}"
+  fi
+  echo "$_mpv_regular_options_cache"
+}
+
+_mpv_special_options()
+{
+  if [ -z ${_mpv_special_options_cache+x} ]; then
+    _mpv_special_options_cache=($(_mpv_options | grep -vE "$_mpv_skip_regex" | \
+      grep -E "$_mpv_special_regex" | awk '{print "\\"$1;}' | grep '\--'))
+    _mpv_special_options_cache="${_mpv_special_options_cache[*]}"
+  fi
+  echo "$_mpv_special_options_cache"
+}
 
 _mpv()
 {
@@ -106,9 +127,9 @@ _mpv()
   else
     case $cur in
       -*)
-        COMPREPLY=($(compgen -W "${_mpv_regular_options[*]}" -S '=' -- "${cur}"))
+        COMPREPLY=($(compgen -W "$(_mpv_regular_options)" -S '=' -- "${cur}"))
         local normal_count=${#COMPREPLY[@]}
-        COMPREPLY+=($(compgen -W "${_mpv_special_options[*]}" -- "${cur}"))
+        COMPREPLY+=($(compgen -W "$(_mpv_special_options)" -- "${cur}"))
         if [ $normal_count -gt 0 -o ${#COMPREPLY[@]} -gt 1 ]; then
           compopt -o nospace mpv
         fi
