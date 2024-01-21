@@ -327,6 +327,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     if (res < 0 || !got_sub)
         return;
 
+    packet->sub_duration = sub.end_display_time;
+
     if (sub.pts != AV_NOPTS_VALUE)
         pts = sub.pts / (double)AV_TIME_BASE;
 

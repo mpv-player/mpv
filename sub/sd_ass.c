@@ -332,6 +332,9 @@ static bool check_packet_seen(struct sd *sd, int64_t pos)
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *ctx = sd->priv;
+
+    packet->sub_duration = packet->duration;
+
     ASS_Track *track = ctx->ass_track;
     if (ctx->converter) {
         if (!sd->opts->sub_clear_on_seek && packet->pos >= 0 &&

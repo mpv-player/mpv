@@ -402,6 +402,9 @@ typedef struct MPContext {
     int last_chapter_seek;
     bool last_chapter_flag;
 
+    /* Heuristic for potentially redrawing subs. */
+    bool redraw_subs;
+
     bool paused;            // internal pause state
     bool playback_active;   // not paused, restarting, loading, unloading
     bool in_playloop;
@@ -621,6 +624,7 @@ void mp_load_builtin_scripts(struct MPContext *mpctx);
 int64_t mp_load_user_script(struct MPContext *mpctx, const char *fname);
 
 // sub.c
+void redraw_subs(struct MPContext *mpctx);
 void reset_subtitle_state(struct MPContext *mpctx);
 void reinit_sub(struct MPContext *mpctx, struct track *track);
 void reinit_sub_all(struct MPContext *mpctx);
