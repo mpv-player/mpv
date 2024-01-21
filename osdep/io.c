@@ -738,9 +738,23 @@ static void mp_dl_init(void)
 
 void *mp_dlopen(const char *filename, int flag)
 {
-    wchar_t *wfilename = mp_from_utf8(NULL, filename);
-    HMODULE lib = LoadLibraryW(wfilename);
-    talloc_free(wfilename);
+    HMODULE lib = NULL;
+    void *ta_ctx = talloc_new(NULL);
+    wchar_t *wfilename = mp_from_utf8(ta_ctx, filename);
+
+    DWORD len = GetFullPathNameW(wfilename, 0, NULL, NULL);
+    if (!len)
+        goto err;
+
+    wchar_t *path = talloc_array(ta_ctx, wchar_t, len);
+    len = GetFullPathNameW(wfilename, len, path, NULL);
+    if (!len)
+        goto err;
+
+    lib = LoadLibraryW(path);
+
+err:
+    talloc_free(ta_ctx);
     mp_dl_result.errcode = GetLastError();
     return (void *)lib;
 }
