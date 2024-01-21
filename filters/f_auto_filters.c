@@ -81,7 +81,7 @@ static void deint_process(struct mp_filter *f)
     } else if (img->imgfmt == IMGFMT_CUDA) {
         char *args[] = {"mode", "send_field", NULL};
         p->sub.filter =
-            mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "yadif_cuda", args);
+            mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "bwdif_cuda", args);
 #if HAVE_VULKAN_INTEROP
     } else if (img->imgfmt == IMGFMT_VULKAN) {
         char *args[] = {"mode", "send_field", NULL};
