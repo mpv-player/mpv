@@ -168,6 +168,12 @@ static const struct mp_filter_info deint_filter = {
     .destroy = deint_destroy,
 };
 
+bool mp_deint_active(struct mp_filter *f)
+{
+    struct deint_priv *p = f->priv;
+    return p->deinterlace_active;
+}
+
 struct mp_filter *mp_deint_create(struct mp_filter *parent)
 {
     struct mp_filter *f = mp_filter_create(parent, &deint_filter);

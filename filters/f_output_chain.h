@@ -85,3 +85,6 @@ void mp_output_chain_set_audio_speed(struct mp_output_chain *p,
 // due to the change.
 // Makes sense for audio only.
 double mp_output_get_measured_total_delay(struct mp_output_chain *p);
+
+// Check if deinterlace user filter is inserted
+bool mp_output_chain_deinterlace_active(struct mp_output_chain *p);

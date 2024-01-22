@@ -1357,6 +1357,18 @@ static int mp_property_core_idle(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, !mpctx->playback_active);
 }
 
+static int mp_property_deinterlace(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    if (!vo_c)
+        return M_PROPERTY_UNAVAILABLE;
+
+    bool deinterlace_active = mp_output_chain_deinterlace_active(vo_c->filter);
+    return m_property_bool_ro(action, arg, deinterlace_active);
+}
+
 static int mp_property_idle(void *ctx, struct m_property *prop,
                             int action, void *arg)
 {
@@ -3882,6 +3894,7 @@ static const struct m_property mp_properties_base[] = {
     {"clock", mp_property_clock},
     {"seekable", mp_property_seekable},
     {"partially-seekable", mp_property_partially_seekable},
+    {"deinterlace-active", mp_property_deinterlace},
     {"idle-active", mp_property_idle},
     {"window-id", mp_property_window_id},
 
@@ -4056,7 +4069,8 @@ static const char *const *const mp_event_property_change[] = {
       "secondary-sub-text", "audio-bitrate", "video-bitrate", "sub-bitrate",
       "decoder-frame-drop-count", "frame-drop-count", "video-frame-info",
       "vf-metadata", "af-metadata", "sub-start", "sub-end", "secondary-sub-start",
-      "secondary-sub-end", "video-out-params", "video-dec-params", "video-params"),
+      "secondary-sub-end", "video-out-params", "video-dec-params", "video-params",
+      "deinterlace-active"),
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
