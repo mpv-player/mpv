@@ -45,6 +45,7 @@ Interface changes
     - add the command `load-config-file`
     - add the command `load-input-conf`
     - remove `--vo=rpi`, `--gpu-context=rpi`, and `--hwdec=mmal`
+    - add `auto` choice to `--deinterlace`
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.
