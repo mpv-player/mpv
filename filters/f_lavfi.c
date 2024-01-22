@@ -32,6 +32,7 @@
 #include <libavfilter/avfilter.h>
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
+#include <libplacebo/utils/libav.h>
 
 #include "config.h"
 
@@ -493,8 +494,8 @@ static bool init_pads(struct lavfi *c)
             params->hw_frames_ctx = fmt->hwctx;
             params->frame_rate = av_d2q(fmt->nominal_fps, 1000000);
 #if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(9, 16, 100)
-            params->color_space = mp_csp_to_avcol_spc(fmt->params.color.space);
-            params->color_range = mp_csp_levels_to_avcol_range(fmt->params.color.levels);
+            params->color_space = pl_system_to_av(fmt->params.repr.sys);
+            params->color_range = pl_levels_to_av(fmt->params.repr.levels);
 #endif
             filter_name = "buffer";
         } else {
