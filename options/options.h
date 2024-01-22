@@ -397,7 +397,7 @@ struct dvd_opts {
 };
 
 struct filter_opts {
-    bool deinterlace;
+    int deinterlace;
 };
 
 extern const struct m_sub_options vo_sub_opts;

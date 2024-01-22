@@ -206,7 +206,7 @@ Shift+PGUP and Shift+PGDWN
     PGUP/PGDWN without Shift.)
 
 d
-    Activate/deactivate deinterlacer.
+    Cycle the deinterlacing filter.
 
 A
     Cycle aspect ratio override.
