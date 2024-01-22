@@ -70,7 +70,8 @@ struct dec_sub {
     struct sd *sd;
 
     struct demux_packet *new_segment;
-    struct demux_packet *cached_pkts[2];
+    struct demux_packet **cached_pkts;
+    int num_cached_pkts;
 };
 
 static void update_subtitle_speed(struct dec_sub *sub)
@@ -117,6 +118,16 @@ static void wakeup_demux(void *ctx)
 {
     struct mp_dispatch_queue *q = ctx;
     mp_dispatch_interrupt(q);
+}
+
+static void sub_destroy_cached_pkts(struct dec_sub *sub)
+{
+    int index = 0;
+    while (index < sub->num_cached_pkts) {
+        TA_FREEP(&sub->cached_pkts[index]);
+        ++index;
+    }
+    sub->num_cached_pkts = 0;
 }
 
 void sub_destroy(struct dec_sub *sub)
@@ -258,7 +269,7 @@ void sub_preload(struct dec_sub *sub)
         if (!pkt)
             break;
         sub->sd->driver->decode(sub->sd, pkt);
-        talloc_free(pkt);
+        MP_TARRAY_APPEND(sub, sub->cached_pkts, sub->num_cached_pkts, pkt);
     }
 
     demux_set_stream_wakeup_cb(sub->sh, NULL, NULL);
@@ -317,16 +328,8 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
         if (sub->recorder_sink)
             mp_recorder_feed_packet(sub->recorder_sink, pkt);
 
-
-        // Update cached packets
-        if (sub->cached_pkts[0]) {
-            if (sub->cached_pkts[1])
-                talloc_free(sub->cached_pkts[1]);
-            sub->cached_pkts[1] = sub->cached_pkts[0];
-        }
-        sub->cached_pkts[0] = pkt;
-
         sub->last_pkt_pts = pkt->pts;
+        MP_TARRAY_APPEND(sub, sub->cached_pkts, sub->num_cached_pkts, pkt);
 
         if (is_new_segment(sub, pkt)) {
             sub->new_segment = demux_copy_packet(pkt);
@@ -342,15 +345,16 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
     return r;
 }
 
-// Redecode both cached packets if needed.
+// Redecode all cached packets if needed.
 // Used with UPDATE_SUB_HARD and UPDATE_SUB_FILT.
 void sub_redecode_cached_packets(struct dec_sub *sub)
 {
     mp_mutex_lock(&sub->lock);
-    if (sub->cached_pkts[0])
-        sub->sd->driver->decode(sub->sd, sub->cached_pkts[0]);
-    if (sub->cached_pkts[1])
-        sub->sd->driver->decode(sub->sd, sub->cached_pkts[1]);
+    int index = 0;
+    while (index < sub->num_cached_pkts) {
+        sub->sd->driver->decode(sub->sd, sub->cached_pkts[index]);
+        ++index;
+    }
     mp_mutex_unlock(&sub->lock);
 }
 
@@ -425,8 +429,7 @@ void sub_reset(struct dec_sub *sub)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
-    TA_FREEP(&sub->cached_pkts[0]);
-    TA_FREEP(&sub->cached_pkts[1]);
+    sub_destroy_cached_pkts(sub);
     TA_FREEP(&sub->new_segment);
     mp_mutex_unlock(&sub->lock);
 }
