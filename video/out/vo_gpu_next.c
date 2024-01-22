@@ -1025,7 +1025,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             struct frame_priv *fp = mpi->priv;
             apply_crop(image, p->src, vo->params->w, vo->params->h);
             if (opts->blend_subs) {
-                if (frame->redraw || fp->osd_sync < p->osd_sync) {
+                if (frame->redraw)
+                    p->osd_sync++;
+                if (fp->osd_sync < p->osd_sync) {
                     float rx = pl_rect_w(p->dst) / pl_rect_w(image->crop);
                     float ry = pl_rect_h(p->dst) / pl_rect_h(image->crop);
                     struct mp_osd_res res = {
@@ -1037,9 +1039,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                         .mb = (image->crop.y1 - vo->params->h) * ry,
                         .display_par = 1.0,
                     };
-                    // TODO: fix this doing pointless updates
-                    if (frame->redraw)
-                        p->osd_sync++;
                     update_overlays(vo, res, OSD_DRAW_SUB_ONLY,
                                     PL_OVERLAY_COORDS_DST_CROP,
                                     &fp->subs, image, mpi);
