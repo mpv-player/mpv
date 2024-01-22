@@ -866,7 +866,7 @@ local function add_video_out(s)
     append_display_sync(s)
     append_perfdata(s, false, o.print_perfdata_passes)
 
-    if mp.get_property_native("deinterlace") then
+    if mp.get_property_native("deinterlace-active") then
         append_property(s, "deinterlace", {prefix="Deinterlacing:"})
     end
 
