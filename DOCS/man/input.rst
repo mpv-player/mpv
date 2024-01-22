@@ -2174,6 +2174,11 @@ Property list
 ``af-metadata/<filter-label>``
     Equivalent to ``vf-metadata/<filter-label>``, but for audio filters.
 
+``deinterlace-active``
+    Returns ``yes``/true if mpv's deinterlacing filter is active. Note that it
+    will not detect any manually inserted deinterlacing filters done via
+    ``--vf``.
+
 ``idle-active``
     Returns ``yes``/true if no file is loaded, but the player is staying around
     because of the ``--idle`` option.
