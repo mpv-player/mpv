@@ -7015,10 +7015,11 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             if (sub) {
                 int ret = sub_control(sub, SD_CTRL_UPDATE_OPTS,
                                       (void *)(uintptr_t)flags);
-                if (ret == CONTROL_OK && flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD))
+                if (ret == CONTROL_OK && flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD)) {
                     sub_redecode_cached_packets(sub);
-                if (track->selected)
-                    reselect_demux_stream(mpctx, track, true);
+                    if (track->selected)
+                        reselect_demux_stream(mpctx, track, true);
+                }
             }
         }
         osd_changed(mpctx->osd);
