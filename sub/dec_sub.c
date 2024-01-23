@@ -312,11 +312,15 @@ static bool update_pkt_cache(struct dec_sub *sub, double video_pts)
     if (next_pts < pts || end_pts < pts) {
         if (sub->cached_pkt_pos + 1 < sub->num_cached_pkts) {
             TA_FREEP(&sub->cached_pkts[sub->cached_pkt_pos]);
+            pkt = NULL;
             sub->cached_pkt_pos++;
         }
         if (next_pts < pts)
             return true;
     }
+
+    if (pkt && pkt->animated)
+        return true;
 
     return false;
 }
