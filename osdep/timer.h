@@ -23,7 +23,7 @@
 // Initialize timer, must be called at least once at start.
 void mp_time_init(void);
 
-// Return time in nanoseconds. Never wraps. Never returns 0 or negative values.
+// Return time in nanoseconds. Never wraps. Never returns negative values.
 int64_t mp_time_ns(void);
 
 // Return time in seconds. Can have down to 1 nanosecond resolution, but will
