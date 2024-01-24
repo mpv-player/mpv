@@ -34,6 +34,25 @@ cpu = 'x86_64'
 endian = 'little'
 ```
 
+An alternative example for cross compiling for ARM64 platforms (on an MSYS2 ARM64 host) is also included:
+
+```ini
+[binaries]
+c = 'clang'
+cpp = 'clang'
+ld = 'llvm-ld'
+ar = 'llvm-lib'
+strip = 'llvm-strip'
+cmake = 'cmake'
+pkgconfig = 'pkgconf'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'aarch64'
+cpu = 'aarch64'
+endian = 'little'
+```
+
 See [meson's documentation](https://mesonbuild.com/Cross-compilation.html) for
 more information.
 
@@ -123,12 +142,16 @@ Installing MSYS2
    close that shell and open a new one.
 
    For a 32-bit build, use ``mingw32.exe``.
+   
+   For a build on an ARM64 machine, use `clangarm64.exe`
 
 Updating MSYS2
 --------------
 
 To prevent errors during post-install, the MSYS2 core runtime must be updated
 separately.
+
+**NOTE:** On ARM64 platforms it is required to enable the ``[clangarm64]`` section in ``/etc/pacman.conf`` before performing these pacman commands.
 
 ```bash
 # Check for core updates. If instructed, close the shell window and reopen it
@@ -142,6 +165,7 @@ pacman -Su
 Installing mpv dependencies
 ---------------------------
 
+x86 or x86_64:
 ```bash
 # Install MSYS2 build dependencies and a MinGW-w64 compiler
 pacman -S git $MINGW_PACKAGE_PREFIX-{python,pkgconf,gcc,meson}
@@ -151,11 +175,26 @@ pacman -S git $MINGW_PACKAGE_PREFIX-{python,pkgconf,gcc,meson}
 pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,luajit}
 ```
 
+ARM64:
+```bash
+# Install MSYS2 build dependencies and clang
+pacman -S git $MINGW_PACKAGE_PREFIX-{python,pkgconf,clang,meson,cmake}
+
+# Install the most important MinGW-w64 dependencies. libass and lcms2 are also
+# pulled in as dependencies of ffmpeg.
+pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,spirv-cross,shaderc}
+```
+
+**NOTE:** ARM64 does not support LuaJIT currently, and requires the use of D3D instead of GL, hence the variation in packages.
+
+
 Building mpv
 ------------
 
 Finally, compile and install mpv. Binaries will be installed to
-``/mingw64/bin`` or ``/mingw32/bin``.
+``/mingw64/bin``, ``/mingw32/bin``, or ``/clangarm64/bin``.
+
+**NOTE:** For ARM64 platforms, in the setup lines, ``-Dgl=disabled`` must be appended.
 
 ```bash
 meson setup build --prefix=$MSYSTEM_PREFIX
