@@ -27,13 +27,13 @@ jobs:
       matrix:
         target: [i686-w64-mingw32, x86_64-w64-mingw32]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Get time
         id: get_time
         run: echo "timestamp=`date +%s%N`" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
@@ -88,7 +88,7 @@ jobs:
           - "macos-12"
           - "macos-13"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Remove stray upstream python binary symlinks under /usr/local
         run: |
@@ -143,7 +143,7 @@ jobs:
             cxx: "clang++",
           }
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -174,7 +174,7 @@ jobs:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 30 # avoid any weirdness with the VM
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Test in FreeBSD VM
       uses: cross-platform-actions/action@v0.19.1
       with:
@@ -237,7 +237,7 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.sys }}
