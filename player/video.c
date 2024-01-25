@@ -343,7 +343,7 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
 {
     struct MPOpts *opts = mpctx->opts;
 
-    if (mpctx->audio_status != STATUS_PLAYING)
+    if (mpctx->audio_status == STATUS_EOF)
         return;
 
     mpctx->delay -= frame_time;
