@@ -300,6 +300,21 @@ darwin = host_machine.system() == 'darwin'
 win32 = host_machine.system() == 'cygwin' or host_machine.system() == 'windows'
 posix = not win32
 
+# Narrow down the darwin systems to iOS, tvOS or macOS
+if host_machine.system() == 'darwin'
+    is_ios = cc.get_define('TARGET_OS_IPHONE',
+        prefix: '#include <TargetConditionals.h>') == '1'
+    is_tvos = cc.get_define('TARGET_OS_TV',
+        prefix: '#include <TargetConditionals.h>') == '1'
+
+    # Assume it's macOS if it's neither iOS or tvOS
+    is_macos = not is_ios and not is_tvos
+else
+    is_ios = false
+    is_tvos = false
+    is_macos = false
+endif
+
 features += {'darwin': darwin}
 features += {'posix': posix}
 features += {'dos-paths': win32, 'win32': win32}
@@ -398,6 +413,10 @@ if posix
                      'osdep/poll_wrapper.c',
                      'osdep/terminal-unix.c',
                      'sub/filter_regex.c')
+endif
+
+if is_ios or is_tvos
+    subprocess_source = files('osdep/subprocess-dummy.c')
 endif
 
 if posix and not features['cocoa']
