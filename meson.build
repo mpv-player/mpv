@@ -1471,7 +1471,7 @@ features += {'videotoolbox-pl': videotoolbox_pl.allowed()}
 if features['videotoolbox-gl'] or features['videotoolbox-pl']
     sources += files('video/out/hwdec/hwdec_vt.c')
 endif
-if features['videotoolbox-gl']
+if features['videotoolbox-gl'] and is_macos
     sources += files('video/out/hwdec/hwdec_mac_gl.c')
 endif
 if features['videotoolbox-pl']
