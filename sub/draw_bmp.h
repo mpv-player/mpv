@@ -15,7 +15,7 @@ struct mp_draw_sub_cache *mp_draw_sub_alloc_test(struct mp_image *dst);
 
 // Render the sub-bitmaps in sbs_list to dst. sbs_list must have been rendered
 // for an OSD resolution equivalent to dst's size (UB if not).
-// Warning: if dst is a format with alpha, and dst is not set to MP_ALPHA_PREMUL
+// Warning: if dst is a format with alpha, and dst is not set to PL_ALPHA_PREMULTIPLIED
 //          (not done by default), this will be extremely slow.
 // Warning: the caller is responsible for ensuring that dst is writable.
 //  cache: allocated instance; caches non-changing OSD parts etc.

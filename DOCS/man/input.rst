@@ -3332,6 +3332,10 @@ Property list
 ``current-vo``
     Current video output driver (name as used with ``--vo``).
 
+``current-gpu-context``
+    Current GPU context of video output driver (name as used with ``--gpu-context``).
+    Valid for ``--vo=gpu`` and ``--vo=gpu-next``.
+
 ``current-ao``
     Current audio output driver (name as used with ``--ao``).
 
@@ -3413,9 +3417,8 @@ Property list
 ``ffmpeg-version``
     The contents of the ``av_version_info()`` API call. This is a string which
     identifies the build in some way, either through a release version number,
-    or a git hash. This applies to Libav as well (the property is still named
-    the same.) This property is unavailable if mpv is linked against older
-    FFmpeg and Libav versions.
+    or a git hash. This property is unavailable if mpv is linked against older
+    FFmpeg versions.
 
 ``libass-version``
     The value of ``ass_library_version()``. This is an integer, encoded in a

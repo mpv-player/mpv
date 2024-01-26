@@ -81,7 +81,7 @@ static void deint_process(struct mp_filter *f)
     } else if (img->imgfmt == IMGFMT_CUDA) {
         char *args[] = {"mode", "send_field", NULL};
         p->sub.filter =
-            mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "yadif_cuda", args);
+            mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "bwdif_cuda", args);
 #if HAVE_VULKAN_INTEROP
     } else if (img->imgfmt == IMGFMT_VULKAN) {
         char *args[] = {"mode", "send_field", NULL};
@@ -107,7 +107,7 @@ static void deint_process(struct mp_filter *f)
         struct mp_autoconvert *ac = mp_autoconvert_create(subf);
         if (ac) {
             filters[0] = ac->f;
-            // We know vf_yadif does not support hw inputs.
+            // We know vf_bwdif does not support hw inputs.
             mp_autoconvert_add_all_sw_imgfmts(ac);
 
             if (!mp_autoconvert_probe_input_video(ac, img)) {
@@ -121,7 +121,7 @@ static void deint_process(struct mp_filter *f)
 
         char *args[] = {"mode", "send_field", NULL};
         filters[1] =
-            mp_create_user_filter(subf, MP_OUTPUT_CHAIN_VIDEO, "yadif", args);
+            mp_create_user_filter(subf, MP_OUTPUT_CHAIN_VIDEO, "bwdif", args);
 
         mp_chain_filters(subf->ppins[0], subf->ppins[1], filters, 2);
         p->sub.filter = subf;

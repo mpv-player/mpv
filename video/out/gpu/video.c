@@ -368,13 +368,13 @@ const struct m_sub_options gl_video_conf = {
             .deprecation_message = "no replacement"},
         {"gamma-auto", OPT_BOOL(gamma_auto),
             .deprecation_message = "no replacement"},
-        {"target-prim", OPT_CHOICE_C(target_prim, mp_csp_prim_names)},
-        {"target-trc", OPT_CHOICE_C(target_trc, mp_csp_trc_names)},
+        {"target-prim", OPT_CHOICE_C(target_prim, pl_csp_prim_names)},
+        {"target-trc", OPT_CHOICE_C(target_trc, pl_csp_trc_names)},
         {"target-peak", OPT_CHOICE(target_peak, {"auto", 0}),
             M_RANGE(10, 10000)},
         {"target-contrast", OPT_CHOICE(target_contrast, {"auto", 0}, {"inf", -1}),
             M_RANGE(10, 1000000)},
-        {"target-gamut", OPT_CHOICE_C(target_gamut, mp_csp_prim_names)},
+        {"target-gamut", OPT_CHOICE_C(target_gamut, pl_csp_prim_names)},
         {"tone-mapping", OPT_CHOICE(tone_map.curve,
             {"auto",     TONE_MAPPING_AUTO},
             {"clip",     TONE_MAPPING_CLIP},
@@ -605,15 +605,6 @@ bool gl_video_gamma_auto_enabled(struct gl_video *p)
     return p->opts.gamma_auto;
 }
 
-struct mp_colorspace gl_video_get_output_colorspace(struct gl_video *p)
-{
-    return (struct mp_colorspace) {
-        .primaries = p->opts.target_prim,
-        .gamma = p->opts.target_trc,
-        .hdr.max_luma = p->opts.target_peak,
-    };
-}
-
 // Warning: profile.start must point to a ta allocation, and the function
 //          takes over ownership.
 void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data)
@@ -627,8 +618,8 @@ bool gl_video_icc_auto_enabled(struct gl_video *p)
     return p->opts.icc_opts ? p->opts.icc_opts->profile_auto : false;
 }
 
-static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
-                               enum mp_csp_trc trc)
+static bool gl_video_get_lut3d(struct gl_video *p, enum pl_color_primaries prim,
+                               enum pl_color_transfer trc)
 {
     if (!p->use_lut_3d)
         return false;
@@ -771,16 +762,16 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
 
     struct gl_transform chroma = {{{ls_w, 0.0}, {0.0, ls_h}}};
 
-    if (p->image_params.chroma_location != MP_CHROMA_CENTER) {
-        int cx, cy;
-        mp_get_chroma_location(p->image_params.chroma_location, &cx, &cy);
+    if (p->image_params.chroma_location != PL_CHROMA_CENTER) {
+        float cx, cy;
+        pl_chroma_location_offset(p->image_params.chroma_location, &cx, &cy);
         // By default texture coordinates are such that chroma is centered with
         // any chroma subsampling. If a specific direction is given, make it
         // so that the luma and chroma sample line up exactly.
         // For 4:4:4, setting chroma location should have no effect at all.
         // luma sample size (in chroma coord. space)
-        chroma.t[0] = ls_w < 1 ? ls_w * -cx / 2 : 0;
-        chroma.t[1] = ls_h < 1 ? ls_h * -cy / 2 : 0;
+        chroma.t[0] = ls_w < 1 ? ls_w * -cx : 0;
+        chroma.t[1] = ls_h < 1 ? ls_h * -cy : 0;
     }
 
     memset(img, 0, 4 * sizeof(img[0]));
@@ -796,9 +787,9 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
                 ctype = PLANE_NONE;
             } else if (c == 4) {
                 ctype = PLANE_ALPHA;
-            } else if (p->image_params.color.space == MP_CSP_RGB) {
+            } else if (p->image_params.repr.sys == PL_COLOR_SYSTEM_RGB) {
                 ctype = PLANE_RGB;
-            } else if (p->image_params.color.space == MP_CSP_XYZ) {
+            } else if (p->image_params.repr.sys == PL_COLOR_SYSTEM_XYZ) {
                 ctype = PLANE_XYZ;
             } else {
                 ctype = c == 1 ? PLANE_LUMA : PLANE_CHROMA;
@@ -810,7 +801,7 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
 
         int msb_valid_bits =
             p->ra_format.component_bits + MPMIN(p->ra_format.component_pad, 0);
-        int csp = type == PLANE_ALPHA ? MP_CSP_RGB : p->image_params.color.space;
+        int csp = type == PLANE_ALPHA ? PL_COLOR_SYSTEM_RGB : p->image_params.repr.sys;
         float tex_mul =
             1.0 / mp_get_csp_mul(csp, msb_valid_bits, p->ra_format.component_bits);
         if (p->ra_format.component_type == RA_CTYPE_FLOAT)
@@ -1957,7 +1948,7 @@ static void deband_hook(struct gl_video *p, struct image img,
 {
     pass_describe(p, "debanding (%s)", plane_names[img.type]);
     pass_sample_deband(p->sc, p->opts.deband_opts, &p->lfg,
-                       p->image_params.color.gamma);
+                       p->image_params.color.transfer);
 }
 
 static void unsharp_hook(struct gl_video *p, struct image img,
@@ -2345,29 +2336,29 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSLF("color = color.%s;\n", p->color_swizzle);
 
     // Pre-colormatrix input gamma correction
-    if (cparams.color.space == MP_CSP_XYZ)
-        pass_linearize(p->sc, p->image_params.color.gamma);
+    if (cparams.repr.sys == PL_COLOR_SYSTEM_XYZ)
+        pass_linearize(p->sc, p->image_params.color.transfer);
 
     // We always explicitly normalize the range in pass_read_video
     cparams.input_bits = cparams.texture_bits = 0;
 
     // Conversion to RGB. For RGB itself, this still applies e.g. brightness
     // and contrast controls, or expansion of e.g. LSB-packed 10 bit data.
-    struct mp_cmat m = {{{0}}};
+    struct pl_transform3x3 m = {0};
     mp_get_csp_matrix(&cparams, &m);
-    gl_sc_uniform_mat3(sc, "colormatrix", true, &m.m[0][0]);
+    gl_sc_uniform_mat3(sc, "colormatrix", true, &m.mat.m[0][0]);
     gl_sc_uniform_vec3(sc, "colormatrix_c", m.c);
 
     GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
 
-    if (cparams.color.space == MP_CSP_XYZ) {
-        pass_delinearize(p->sc, p->image_params.color.gamma);
+    if (cparams.repr.sys == PL_COLOR_SYSTEM_XYZ) {
+        pass_delinearize(p->sc, p->image_params.color.transfer);
         // mp_get_csp_matrix implicitly converts XYZ to DCI-P3
-        p->image_params.color.space = MP_CSP_RGB;
-        p->image_params.color.primaries = MP_CSP_PRIM_DCI_P3;
+        p->image_params.repr.sys = PL_COLOR_SYSTEM_RGB;
+        p->image_params.color.primaries = PL_COLOR_PRIM_DCI_P3;
     }
 
-    if (p->image_params.color.space == MP_CSP_BT_2020_C) {
+    if (p->image_params.repr.sys == PL_COLOR_SYSTEM_BT_2020_C) {
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
         // C'bc = (B'-Y'c) / 1.9404  | C'bc <= 0
         //      = (B'-Y'c) / 1.5816  | C'bc >  0
@@ -2406,7 +2397,7 @@ static void pass_convert_yuv(struct gl_video *p)
     p->components = 3;
     if (!p->has_alpha || p->opts.alpha_mode == ALPHA_NO) {
         GLSL(color.a = 1.0;)
-    } else if (p->image_params.alpha == MP_ALPHA_PREMUL) {
+    } else if (p->image_params.repr.alpha == PL_ALPHA_PREMULTIPLIED) {
         p->components = 4;
     } else {
         p->components = 4;
@@ -2491,7 +2482,7 @@ static void pass_scale_main(struct gl_video *p)
         // Linear light downscaling results in nasty artifacts for HDR curves
         // due to the potentially extreme brightness differences severely
         // compounding any ringing. So just scale in gamma light instead.
-        if (mp_trc_is_hdr(p->image_params.color.gamma))
+        if (pl_color_space_is_hdr(&p->image_params.color))
             use_linear = false;
     } else if (upscaling) {
         use_linear = p->opts.linear_upscaling || p->opts.sigmoid_upscaling;
@@ -2499,7 +2490,7 @@ static void pass_scale_main(struct gl_video *p)
 
     if (use_linear) {
         p->use_linear = true;
-        pass_linearize(p->sc, p->image_params.color.gamma);
+        pass_linearize(p->sc, p->image_params.color.transfer);
         pass_opt_hook_point(p, "LINEAR", NULL);
     }
 
@@ -2552,8 +2543,9 @@ static void pass_scale_main(struct gl_video *p)
 // rendering)
 // If OSD is true, ignore any changes that may have been made to the video
 // by previous passes (i.e. linear scaling)
-static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
-                             struct mp_colorspace fbo_csp, int flags, bool osd)
+static void pass_colormanage(struct gl_video *p, struct pl_color_space src,
+                             enum mp_csp_light src_light,
+                             struct pl_color_space fbo_csp, int flags, bool osd)
 {
     struct ra *ra = p->ra;
 
@@ -2561,18 +2553,17 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     // unless specific transfer function, primaries or target peak
     // is set. If values are set to _AUTO, the most likely intended
     // values are guesstimated later in this function.
-    struct mp_colorspace dst = {
-        .gamma = p->opts.target_trc == MP_CSP_TRC_AUTO ?
-                 fbo_csp.gamma : p->opts.target_trc,
-        .primaries = p->opts.target_prim == MP_CSP_PRIM_AUTO ?
+    struct pl_color_space dst = {
+        .transfer = p->opts.target_trc == PL_COLOR_TRC_UNKNOWN ?
+                        fbo_csp.transfer : p->opts.target_trc,
+        .primaries = p->opts.target_prim == PL_COLOR_PRIM_UNKNOWN ?
                      fbo_csp.primaries : p->opts.target_prim,
-        .light = MP_CSP_LIGHT_DISPLAY,
         .hdr.max_luma = !p->opts.target_peak ?
                         fbo_csp.hdr.max_luma : p->opts.target_peak,
     };
 
     if (!p->colorspace_override_warned &&
-        ((fbo_csp.gamma && dst.gamma != fbo_csp.gamma) ||
+        ((fbo_csp.transfer && dst.transfer != fbo_csp.transfer) ||
          (fbo_csp.primaries && dst.primaries != fbo_csp.primaries)))
     {
         MP_WARN(p, "One or more colorspace value is being overridden "
@@ -2580,44 +2571,44 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
                    "transfer function: (dst: %s, fbo: %s), "
                    "primaries: (dst: %s, fbo: %s). "
                    "Rendering can lead to incorrect results!\n",
-                m_opt_choice_str(mp_csp_trc_names,  dst.gamma),
-                m_opt_choice_str(mp_csp_trc_names,  fbo_csp.gamma),
-                m_opt_choice_str(mp_csp_prim_names, dst.primaries),
-                m_opt_choice_str(mp_csp_prim_names, fbo_csp.primaries));
+                m_opt_choice_str(pl_csp_trc_names,  dst.transfer),
+                m_opt_choice_str(pl_csp_trc_names,  fbo_csp.transfer),
+                m_opt_choice_str(pl_csp_prim_names, dst.primaries),
+                m_opt_choice_str(pl_csp_prim_names, fbo_csp.primaries));
         p->colorspace_override_warned = true;
     }
 
-    if (dst.gamma == MP_CSP_TRC_HLG)
-        dst.light = MP_CSP_LIGHT_SCENE_HLG;
+    enum mp_csp_light dst_light = dst.transfer == PL_COLOR_TRC_HLG ?
+                                    MP_CSP_LIGHT_SCENE_HLG : MP_CSP_LIGHT_DISPLAY;
 
     if (p->use_lut_3d && (flags & RENDER_SCREEN_COLOR)) {
         // The 3DLUT is always generated against the video's original source
         // space, *not* the reference space. (To avoid having to regenerate
         // the 3DLUT for the OSD on every frame)
-        enum mp_csp_prim prim_orig = p->image_params.color.primaries;
-        enum mp_csp_trc trc_orig = p->image_params.color.gamma;
+        enum pl_color_primaries prim_orig = p->image_params.color.primaries;
+        enum pl_color_transfer trc_orig = p->image_params.color.transfer;
 
         // One exception: HDR is not implemented by LittleCMS for technical
         // limitation reasons, so we use a gamma 2.2 input curve here instead.
         // We could pick any value we want here, the difference is just coding
         // efficiency.
-        if (mp_trc_is_hdr(trc_orig))
-            trc_orig = MP_CSP_TRC_GAMMA22;
+        if (pl_color_space_is_hdr(&p->image_params.color))
+            trc_orig = PL_COLOR_TRC_GAMMA22;
 
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
             dst.primaries = prim_orig;
-            dst.gamma = trc_orig;
-            assert(dst.primaries && dst.gamma);
+            dst.transfer = trc_orig;
+            assert(dst.primaries && dst.transfer);
         }
     }
 
-    if (dst.primaries == MP_CSP_PRIM_AUTO) {
+    if (dst.primaries == PL_COLOR_PRIM_UNKNOWN) {
         // The vast majority of people are on sRGB or BT.709 displays, so pick
         // this as the default output color space.
-        dst.primaries = MP_CSP_PRIM_BT_709;
+        dst.primaries = PL_COLOR_PRIM_BT_709;
 
-        if (src.primaries == MP_CSP_PRIM_BT_601_525 ||
-            src.primaries == MP_CSP_PRIM_BT_601_625)
+        if (src.primaries == PL_COLOR_PRIM_BT_601_525 ||
+            src.primaries == PL_COLOR_PRIM_BT_601_625)
         {
             // Since we auto-pick BT.601 and BT.709 based on the dimensions,
             // combined with the fact that they're very similar to begin with,
@@ -2627,28 +2618,28 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
         }
     }
 
-    if (dst.gamma == MP_CSP_TRC_AUTO) {
+    if (dst.transfer == PL_COLOR_TRC_UNKNOWN) {
         // Most people seem to complain when the image is darker or brighter
         // than what they're "used to", so just avoid changing the gamma
         // altogether by default. The only exceptions to this rule apply to
         // very unusual TRCs, which even hardcode technoluddites would probably
         // not enjoy viewing unaltered.
-        dst.gamma = src.gamma;
+        dst.transfer = src.transfer;
 
         // Avoid outputting linear light or HDR content "by default". For these
         // just pick gamma 2.2 as a default, since it's a good estimate for
         // the response of typical displays
-        if (dst.gamma == MP_CSP_TRC_LINEAR || mp_trc_is_hdr(dst.gamma))
-            dst.gamma = MP_CSP_TRC_GAMMA22;
+        if (dst.transfer == PL_COLOR_TRC_LINEAR || pl_color_space_is_hdr(&dst))
+            dst.transfer = PL_COLOR_TRC_GAMMA22;
     }
 
     // If there's no specific signal peak known for the output display, infer
     // it from the chosen transfer function. Also normalize the src peak, in
     // case it was unknown
     if (!dst.hdr.max_luma)
-        dst.hdr.max_luma = mp_trc_nom_peak(dst.gamma) * MP_REF_WHITE;
+        dst.hdr.max_luma = pl_color_transfer_nominal_peak(dst.transfer) * MP_REF_WHITE;
     if (!src.hdr.max_luma)
-        src.hdr.max_luma = mp_trc_nom_peak(src.gamma) * MP_REF_WHITE;
+        src.hdr.max_luma = pl_color_transfer_nominal_peak(src.transfer) * MP_REF_WHITE;
 
     // Whitelist supported modes
     switch (p->opts.tone_map.curve) {
@@ -2680,7 +2671,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     }
 
     struct gl_tone_map_opts tone_map = p->opts.tone_map;
-    bool detect_peak = tone_map.compute_peak >= 0 && mp_trc_is_hdr(src.gamma)
+    bool detect_peak = tone_map.compute_peak >= 0 && pl_color_space_is_hdr(&src)
                        && src.hdr.max_luma > dst.hdr.max_luma;
 
     if (detect_peak && !p->hdr_peak_ssbo) {
@@ -2719,7 +2710,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src,
     }
 
     // Adapt from src to dst as necessary
-    pass_color_map(p->sc, p->use_linear && !osd, src, dst, &tone_map);
+    pass_color_map(p->sc, p->use_linear && !osd, src, dst, src_light, dst_light, &tone_map);
 
     if (p->use_lut_3d && (flags & RENDER_SCREEN_COLOR)) {
         gl_sc_uniform_texture(p->sc, "lut_3d", p->lut_3d_texture);
@@ -2910,13 +2901,13 @@ static void pass_draw_osd(struct gl_video *p, int osd_flags, int frame_flags,
         // When subtitles need to be color managed, assume they're in sRGB
         // (for lack of anything saner to do)
         if (cms) {
-            static const struct mp_colorspace csp_srgb = {
-                .primaries = MP_CSP_PRIM_BT_709,
-                .gamma = MP_CSP_TRC_SRGB,
-                .light = MP_CSP_LIGHT_DISPLAY,
+            static const struct pl_color_space csp_srgb = {
+                .primaries = PL_COLOR_PRIM_BT_709,
+                .transfer = PL_COLOR_TRC_SRGB,
             };
 
-            pass_colormanage(p, csp_srgb, fbo->color_space, frame_flags, true);
+            pass_colormanage(p, csp_srgb, MP_CSP_LIGHT_DISPLAY, fbo->color_space,
+                             frame_flags, true);
         }
         mpgl_osd_draw_finish(p->osd, n, p->sc, fbo);
     }
@@ -3041,7 +3032,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
         rect.mt *= scale[1]; rect.mb *= scale[1];
         // We should always blend subtitles in non-linear light
         if (p->use_linear) {
-            pass_delinearize(p->sc, p->image_params.color.gamma);
+            pass_delinearize(p->sc, p->image_params.color.transfer);
             p->use_linear = false;
         }
         finish_pass_tex(p, &p->blend_subs_tex, p->texture_w, p->texture_h);
@@ -3068,7 +3059,8 @@ static void pass_draw_to_screen(struct gl_video *p, const struct ra_fbo *fbo, in
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
-    pass_colormanage(p, p->image_params.color, fbo->color_space, flags, false);
+    pass_colormanage(p, p->image_params.color, p->image_params.light,
+                     fbo->color_space, flags, false);
 
     // Since finish_pass_fbo doesn't work with compute shaders, and neither
     // does the checkerboard/dither code, we may need an indirection via
@@ -3123,7 +3115,7 @@ static bool update_surface(struct gl_video *p, struct mp_image *mpi,
     // because mixing in compressed light artificially darkens the results
     if (!p->use_linear) {
         p->use_linear = true;
-        pass_linearize(p->sc, p->image_params.color.gamma);
+        pass_linearize(p->sc, p->image_params.color.transfer);
     }
 
     finish_pass_tex(p, &surf->tex, vp_w, vp_h);
@@ -3914,8 +3906,8 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
-    int use_cms = p->opts.target_prim != MP_CSP_PRIM_AUTO ||
-                  p->opts.target_trc != MP_CSP_TRC_AUTO || p->use_lut_3d;
+    int use_cms = p->opts.target_prim != PL_COLOR_PRIM_UNKNOWN ||
+                  p->opts.target_trc != PL_COLOR_TRC_UNKNOWN || p->use_lut_3d;
 
     // mix() is needed for some gamma functions
     if (!have_mglsl && (p->opts.linear_downscaling ||
@@ -3927,8 +3919,8 @@ static void check_gl_features(struct gl_video *p)
         MP_WARN(p, "Disabling linear/sigmoid scaling (GLSL version too old).\n");
     }
     if (!have_mglsl && use_cms) {
-        p->opts.target_prim = MP_CSP_PRIM_AUTO;
-        p->opts.target_trc = MP_CSP_TRC_AUTO;
+        p->opts.target_prim = PL_COLOR_PRIM_UNKNOWN;
+        p->opts.target_trc = PL_COLOR_TRC_UNKNOWN;
         p->use_lut_3d = false;
         MP_WARN(p, "Disabling color management (GLSL version too old).\n");
     }

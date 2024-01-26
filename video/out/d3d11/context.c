@@ -96,7 +96,7 @@ struct priv {
     struct ra_tex *backbuffer;
     ID3D11Device *device;
     IDXGISwapChain *swapchain;
-    struct mp_colorspace swapchain_csp;
+    struct pl_color_space swapchain_csp;
 
     int64_t perf_freq;
     unsigned sync_refresh_count;

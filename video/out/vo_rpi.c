@@ -587,12 +587,12 @@ static int query_format(struct vo *vo, int format)
     return format == IMGFMT_MMAL || format == IMGFMT_420P;
 }
 
-static MMAL_FOURCC_T map_csp(enum mp_csp csp)
+static MMAL_FOURCC_T map_csp(enum pl_color_system csp)
 {
     switch (csp) {
-    case MP_CSP_BT_601:     return MMAL_COLOR_SPACE_ITUR_BT601;
-    case MP_CSP_BT_709:     return MMAL_COLOR_SPACE_ITUR_BT709;
-    case MP_CSP_SMPTE_240M: return MMAL_COLOR_SPACE_SMPTE240M;
+    case PL_COLOR_SYSTEM_BT_601:     return MMAL_COLOR_SPACE_ITUR_BT601;
+    case PL_COLOR_SYSTEM_BT_709:     return MMAL_COLOR_SPACE_ITUR_BT709;
+    case PL_COLOR_SYSTEM_SMPTE_240M: return MMAL_COLOR_SPACE_SMPTE240M;
     default:                return MMAL_COLOR_SPACE_UNKNOWN;
     }
 }
@@ -642,7 +642,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     input->format->es->video.height = MP_ALIGN_UP(params->h, ALIGN_H);
     input->format->es->video.crop = (MMAL_RECT_T){0, 0, params->w, params->h};
     input->format->es->video.par = (MMAL_RATIONAL_T){params->p_w, params->p_h};
-    input->format->es->video.color_space = map_csp(params->color.space);
+    input->format->es->video.color_space = map_csp(params->repr.sys);
 
     if (mmal_port_format_commit(input))
         return -1;

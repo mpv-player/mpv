@@ -135,7 +135,7 @@ struct priv {
     struct mp_csp_equalizer_state *video_eq;
     struct scaler_params scalers[SCALER_COUNT];
     const struct pl_hook **hooks; // storage for `params.hooks`
-    enum mp_csp_levels output_levels;
+    enum pl_color_levels output_levels;
     char **raw_opts;
 
     struct pl_icc_params icc_params;
@@ -238,8 +238,6 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     return mpi;
 }
 
-static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi);
-
 static void update_overlays(struct vo *vo, struct mp_osd_res res,
                             int flags, enum pl_overlay_coords coords,
                             struct osd_state *state, struct pl_frame *frame,
@@ -322,7 +320,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             ol->repr.alpha = PL_ALPHA_PREMULTIPLIED;
             // Infer bitmap colorspace from source
             if (src) {
-                ol->color = get_mpi_csp(vo, src);
+                ol->color = src->params.color;
                 // Seems like HDR subtitles are targeting SDR white
                 if (pl_color_transfer_is_hdr(ol->color.transfer)) {
                     ol->color.hdr = (struct pl_hdr_metadata) {
@@ -439,16 +437,6 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
         return 0; // can't handle padded components without `pl_bit_encoding`
 
     return desc.num_planes;
-}
-
-static struct pl_color_space get_mpi_csp(struct vo *vo, struct mp_image *mpi)
-{
-    struct pl_color_space csp = {
-        .primaries = mp_prim_to_pl(mpi->params.color.primaries),
-        .transfer = mp_trc_to_pl(mpi->params.color.gamma),
-        .hdr = mpi->params.color.hdr,
-    };
-    return csp;
 }
 
 static bool hwdec_reconfig(struct priv *p, struct ra_hwdec *hwdec,
@@ -571,12 +559,8 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     }
 
     *frame = (struct pl_frame) {
-        .color = get_mpi_csp(vo, mpi),
-        .repr = {
-            .sys = mp_csp_to_pl(par->color.space),
-            .levels = mp_levels_to_pl(par->color.levels),
-            .alpha = mp_alpha_to_pl(par->alpha),
-        },
+        .color = par->color,
+        .repr = par->repr,
         .profile = {
             .data = mpi->icc_profile ? mpi->icc_profile->data : NULL,
             .len = mpi->icc_profile ? mpi->icc_profile->size : 0,
@@ -588,14 +572,14 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     // mp_image, like AVFrame, likes communicating RGB/XYZ/YCbCr status
     // implicitly via the image format, rather than the actual tagging.
     switch (mp_imgfmt_get_forced_csp(par->imgfmt)) {
-    case MP_CSP_RGB:
+    case PL_COLOR_SYSTEM_RGB:
         frame->repr.sys = PL_COLOR_SYSTEM_RGB;
         frame->repr.levels = PL_COLOR_LEVELS_FULL;
         break;
-    case MP_CSP_XYZ:
+    case PL_COLOR_SYSTEM_XYZ:
         frame->repr.sys = PL_COLOR_SYSTEM_XYZ;
         break;
-    case MP_CSP_AUTO:
+    case PL_COLOR_SYSTEM_UNKNOWN:
         if (!frame->repr.sys)
             frame->repr.sys = pl_color_system_guess_ycbcr(par->w, par->h);
         break;
@@ -664,7 +648,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     }
 
     // Update chroma location, must be done after initializing planes
-    pl_frame_set_chroma_location(frame, mp_chroma_to_pl(par->chroma_location));
+    pl_frame_set_chroma_location(frame, par->chroma_location);
 
     // Set the frame DOVI metadata
     mp_map_dovi_metadata_to_pl(mpi, frame);
@@ -783,11 +767,11 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
     // Colorspace overrides
     const struct gl_video_opts *opts = p->opts_cache->opts;
     if (p->output_levels)
-        target->repr.levels = mp_levels_to_pl(p->output_levels);
+        target->repr.levels = p->output_levels;
     if (opts->target_prim)
-        target->color.primaries = mp_prim_to_pl(opts->target_prim);
+        target->color.primaries = opts->target_prim;
     if (opts->target_trc)
-        target->color.transfer = mp_trc_to_pl(opts->target_trc);
+        target->color.transfer = opts->target_trc;
     // If swapchain returned a value use this, override is used in hint
     if (opts->target_peak && !target->color.hdr.max_luma)
         target->color.hdr.max_luma = opts->target_peak;
@@ -796,7 +780,7 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
     if (opts->target_gamut) {
         // Ensure resulting gamut still fits inside container
         const struct pl_raw_primaries *gamut, *container;
-        gamut = pl_raw_primaries_get(mp_prim_to_pl(opts->target_gamut));
+        gamut = pl_raw_primaries_get(opts->target_gamut);
         container = pl_raw_primaries_get(target->color.primaries);
         target->color.hdr.prim = pl_primaries_clip(gamut, container);
     }
@@ -940,11 +924,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     }
 
     if (p->target_hint && frame->current) {
-        struct pl_color_space hint = get_mpi_csp(vo, frame->current);
+        struct pl_color_space hint = frame->current->params.color;
         if (opts->target_prim)
-            hint.primaries = mp_prim_to_pl(opts->target_prim);
+            hint.primaries = opts->target_prim;
         if (opts->target_trc)
-            hint.transfer = mp_trc_to_pl(opts->target_trc);
+            hint.transfer = opts->target_trc;
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
         apply_target_contrast(p, &hint);
@@ -1381,9 +1365,9 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     if (!args->res)
         goto done;
 
-    args->res->params.color.primaries = mp_prim_from_pl(target.color.primaries);
-    args->res->params.color.gamma = mp_trc_from_pl(target.color.transfer);
-    args->res->params.color.levels = mp_levels_from_pl(target.repr.levels);
+    args->res->params.color.primaries = target.color.primaries;
+    args->res->params.color.transfer = target.color.transfer;
+    args->res->params.repr.levels = target.repr.levels;
     args->res->params.color.hdr = target.color.hdr;
     if (args->scaled)
         args->res->params.p_w = args->res->params.p_h = 1;

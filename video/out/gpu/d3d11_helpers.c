@@ -228,9 +228,9 @@ static const char *d3d11_get_csp_name(DXGI_COLOR_SPACE_TYPE csp)
 }
 
 static bool d3d11_get_mp_csp(DXGI_COLOR_SPACE_TYPE csp,
-                             struct mp_colorspace *mp_csp)
+                             struct pl_color_space *pl_color_system)
 {
-    if (!mp_csp)
+    if (!pl_color_system)
         return false;
 
     // Colorspaces utilizing gamma 2.2 (G22) are set to
@@ -243,27 +243,27 @@ static bool d3d11_get_mp_csp(DXGI_COLOR_SPACE_TYPE csp,
     // regarding not doing conversion from BT.601 to BT.709.
     switch (csp) {
     case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709:
-        *mp_csp = (struct mp_colorspace){
-            .gamma     = MP_CSP_TRC_AUTO,
-            .primaries = MP_CSP_PRIM_AUTO,
+        *pl_color_system = (struct pl_color_space){
+            .transfer  = PL_COLOR_TRC_UNKNOWN,
+            .primaries = PL_COLOR_PRIM_UNKNOWN,
         };
         break;
     case DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709:
-        *mp_csp = (struct mp_colorspace) {
-            .gamma     = MP_CSP_TRC_LINEAR,
-            .primaries = MP_CSP_PRIM_AUTO,
+        *pl_color_system = (struct pl_color_space) {
+            .transfer  = PL_COLOR_TRC_LINEAR,
+            .primaries = PL_COLOR_PRIM_UNKNOWN,
         };
         break;
     case DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020:
-        *mp_csp = (struct mp_colorspace) {
-            .gamma     = MP_CSP_TRC_PQ,
-            .primaries = MP_CSP_PRIM_BT_2020,
+        *pl_color_system = (struct pl_color_space) {
+            .transfer  = PL_COLOR_TRC_PQ,
+            .primaries = PL_COLOR_PRIM_BT_2020,
         };
         break;
     case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P2020:
-        *mp_csp = (struct mp_colorspace) {
-            .gamma     = MP_CSP_TRC_AUTO,
-            .primaries = MP_CSP_PRIM_BT_2020,
+        *pl_color_system = (struct pl_color_space) {
+            .transfer  = PL_COLOR_TRC_UNKNOWN,
+            .primaries = PL_COLOR_PRIM_BT_2020,
         };
         break;
     default:
@@ -824,7 +824,7 @@ static bool configure_created_swapchain(struct mp_log *log,
                                         IDXGISwapChain *swapchain,
                                         DXGI_FORMAT requested_format,
                                         DXGI_COLOR_SPACE_TYPE requested_csp,
-                                        struct mp_colorspace *configured_csp)
+                                        struct pl_color_space *configured_csp)
 {
     DXGI_FORMAT probed_format = DXGI_FORMAT_UNKNOWN;
     DXGI_FORMAT selected_format = DXGI_FORMAT_UNKNOWN;
@@ -832,7 +832,7 @@ static bool configure_created_swapchain(struct mp_log *log,
     DXGI_COLOR_SPACE_TYPE selected_colorspace;
     const char *format_name = NULL;
     const char *csp_name = NULL;
-    struct mp_colorspace mp_csp = { 0 };
+    struct pl_color_space pl_color_system = { 0 };
     bool mp_csp_mapped = false;
 
     query_output_format_and_colorspace(log, swapchain,
@@ -848,7 +848,7 @@ static bool configure_created_swapchain(struct mp_log *log,
                           requested_csp : probed_colorspace;
     format_name   = d3d11_get_format_name(selected_format);
     csp_name      = d3d11_get_csp_name(selected_colorspace);
-    mp_csp_mapped = d3d11_get_mp_csp(selected_colorspace, &mp_csp);
+    mp_csp_mapped = d3d11_get_mp_csp(selected_colorspace, &pl_color_system);
 
     mp_verbose(log, "Selected swapchain format %s (%d), attempting "
                     "to utilize it.\n",
@@ -879,7 +879,7 @@ static bool configure_created_swapchain(struct mp_log *log,
                      "mapping! Overriding to standard sRGB!\n",
                 csp_name, selected_colorspace);
         selected_colorspace = DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
-        d3d11_get_mp_csp(selected_colorspace, &mp_csp);
+        d3d11_get_mp_csp(selected_colorspace, &pl_color_system);
     }
 
     mp_verbose(log, "Selected swapchain color space %s (%d), attempting to "
@@ -891,7 +891,7 @@ static bool configure_created_swapchain(struct mp_log *log,
     }
 
     if (configured_csp) {
-        *configured_csp = mp_csp;
+        *configured_csp = pl_color_system;
     }
 
     return true;

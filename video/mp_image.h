@@ -47,12 +47,13 @@ struct mp_image_params {
     int w, h;                   // image dimensions
     int p_w, p_h;               // define pixel aspect ratio (undefined: 0/0)
     bool force_window;          // fake image created by handle_force_window
-    struct mp_colorspace color;
-    enum mp_chroma_location chroma_location;
+    struct pl_color_space color;
+    struct pl_color_repr repr;
+    enum mp_csp_light light;
+    enum pl_chroma_location chroma_location;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;
     enum mp_stereo3d_mode stereo3d; // image is encoded with this mode
-    enum mp_alpha_type alpha;   // usually auto; only set if explicitly known
     struct mp_rect crop;        // crop applied on image
 };
 

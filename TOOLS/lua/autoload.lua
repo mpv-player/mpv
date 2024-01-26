@@ -211,6 +211,12 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
 end
 
 function find_and_add_entries()
+    local aborted = mp.get_property_native("playback-abort")
+    if aborted then
+        msg.debug("stopping: playback aborted")
+        return
+    end
+
     local path = mp.get_property("path", "")
     local dir, filename = utils.split_path(path)
     msg.trace(("dir: %s, filename: %s"):format(dir, filename))

@@ -65,26 +65,26 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
                        bool set_size)
 {
     if (p->colormatrix)
-        out->color.space = p->colormatrix;
+        out->repr.sys = p->colormatrix;
     if (p->colorlevels)
-        out->color.levels = p->colorlevels;
+        out->repr.levels = p->colorlevels;
     if (p->primaries)
         out->color.primaries = p->primaries;
     if (p->gamma) {
-        enum mp_csp_trc in_gamma = p->gamma;
-        out->color.gamma = p->gamma;
-        if (in_gamma != out->color.gamma) {
+        enum pl_color_transfer in_gamma = p->gamma;
+        out->color.transfer = p->gamma;
+        if (in_gamma != out->color.transfer) {
             // When changing the gamma function explicitly, also reset stuff
             // related to the gamma function since that information will almost
             // surely be false now and have to be re-inferred
             out->color.hdr = (struct pl_hdr_metadata){0};
-            out->color.light = MP_CSP_LIGHT_AUTO;
+            out->light = MP_CSP_LIGHT_AUTO;
         }
     }
     if (p->sig_peak)
         out->color.hdr = (struct pl_hdr_metadata){ .max_luma = p->sig_peak * MP_REF_WHITE };
     if (p->light)
-        out->color.light = p->light;
+        out->light = p->light;
     if (p->chroma_location)
         out->chroma_location = p->chroma_location;
     if (p->stereo_in)
@@ -92,7 +92,7 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
     if (p->rotate >= 0)
         out->rotate = p->rotate;
     if (p->alpha)
-        out->alpha = p->alpha;
+        out->repr.alpha = p->alpha;
 
     if (p->w > 0 && set_size)
         out->w = p->w;
@@ -122,10 +122,10 @@ static void vf_format_process(struct mp_filter *f)
             int outfmt = priv->opts->fmt;
 
             // If we convert from RGB to YUV, default to limited range.
-            if (mp_imgfmt_get_forced_csp(img->imgfmt) == MP_CSP_RGB &&
-                outfmt && mp_imgfmt_get_forced_csp(outfmt) == MP_CSP_AUTO)
+            if (mp_imgfmt_get_forced_csp(img->imgfmt) == PL_COLOR_SYSTEM_RGB &&
+                outfmt && mp_imgfmt_get_forced_csp(outfmt) == PL_COLOR_SYSTEM_UNKNOWN)
             {
-                par.color.levels = MP_CSP_LEVELS_TV;
+                par.repr.levels = PL_COLOR_LEVELS_LIMITED;
             }
 
             set_params(priv->opts, &par, true);
@@ -204,16 +204,16 @@ static struct mp_filter *vf_format_create(struct mp_filter *parent, void *option
 #define OPT_BASE_STRUCT struct vf_format_opts
 static const m_option_t vf_opts_fields[] = {
     {"fmt", OPT_IMAGEFORMAT(fmt)},
-    {"colormatrix", OPT_CHOICE_C(colormatrix, mp_csp_names)},
-    {"colorlevels", OPT_CHOICE_C(colorlevels, mp_csp_levels_names)},
-    {"primaries", OPT_CHOICE_C(primaries, mp_csp_prim_names)},
-    {"gamma", OPT_CHOICE_C(gamma, mp_csp_trc_names)},
+    {"colormatrix", OPT_CHOICE_C(colormatrix, pl_csp_names)},
+    {"colorlevels", OPT_CHOICE_C(colorlevels, pl_csp_levels_names)},
+    {"primaries", OPT_CHOICE_C(primaries, pl_csp_prim_names)},
+    {"gamma", OPT_CHOICE_C(gamma, pl_csp_trc_names)},
     {"sig-peak", OPT_FLOAT(sig_peak)},
     {"light", OPT_CHOICE_C(light, mp_csp_light_names)},
-    {"chroma-location", OPT_CHOICE_C(chroma_location, mp_chroma_names)},
+    {"chroma-location", OPT_CHOICE_C(chroma_location, pl_chroma_names)},
     {"stereo-in", OPT_CHOICE_C(stereo_in, mp_stereo3d_names)},
     {"rotate", OPT_INT(rotate), M_RANGE(-1, 359)},
-    {"alpha", OPT_CHOICE_C(alpha, mp_alpha_names)},
+    {"alpha", OPT_CHOICE_C(alpha, pl_alpha_names)},
     {"w", OPT_INT(w)},
     {"h", OPT_INT(h)},
     {"dw", OPT_INT(dw)},

@@ -76,8 +76,8 @@ struct mp_repack {
     int f32_comp_size;
     float f32_m[4], f32_o[4];
     uint32_t f32_pmax[4];
-    enum mp_csp f32_csp_space;
-    enum mp_csp_levels f32_csp_levels;
+    enum pl_color_system f32_csp_space;
+    enum pl_color_levels f32_csp_levels;
 
     // REPACK_STEP_REPACK: if true, need to copy this plane
     bool copy_buf[4];
@@ -95,7 +95,7 @@ static int find_gbrp_format(int depth, int num_planes)
         return 0;
     struct mp_regular_imgfmt desc = {
         .component_type = MP_COMPONENT_TYPE_UINT,
-        .forced_csp = MP_CSP_RGB,
+        .forced_csp = PL_COLOR_SYSTEM_RGB,
         .component_size = depth > 8 ? 2 : 1,
         .component_pad = depth - (depth > 8 ? 16 : 8),
         .num_planes = num_planes,
@@ -467,7 +467,7 @@ static void setup_fringe_rgb_packer(struct mp_repack *rp)
         return;
 
     if (desc.bpp[0] > 16 || (desc.bpp[0] % 8u) ||
-        mp_imgfmt_get_forced_csp(rp->imgfmt_a) != MP_CSP_RGB ||
+        mp_imgfmt_get_forced_csp(rp->imgfmt_a) != PL_COLOR_SYSTEM_RGB ||
         desc.num_planes != 1 || desc.comps[3].size)
         return;
 
@@ -845,8 +845,8 @@ static void update_repack_float(struct mp_repack *rp)
     // Image in input format.
     struct mp_image *ui =  rp->pack ? rp->steps[rp->num_steps - 1].buf[1]
                                     : rp->steps[0].buf[0];
-    enum mp_csp csp = ui->params.color.space;
-    enum mp_csp_levels levels = ui->params.color.levels;
+    enum pl_color_system csp = ui->params.repr.sys;
+    enum pl_color_levels levels = ui->params.repr.levels;
     if (rp->f32_csp_space == csp && rp->f32_csp_levels == levels)
         return;
 
@@ -989,8 +989,8 @@ static bool setup_format_ne(struct mp_repack *rp)
                 (desc.component_size != 1 && desc.component_size != 2))
                 return false;
             rp->f32_comp_size = desc.component_size;
-            rp->f32_csp_space = MP_CSP_COUNT;
-            rp->f32_csp_levels = MP_CSP_LEVELS_COUNT;
+            rp->f32_csp_space = PL_COLOR_SYSTEM_COUNT;
+            rp->f32_csp_levels = PL_COLOR_LEVELS_COUNT;
             rp->steps[rp->num_steps++] = (struct repack_step) {
                 .type = REPACK_STEP_FLOAT,
                 .fmt = {

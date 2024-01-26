@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
         int fcsp = mp_imgfmt_get_forced_csp(mpfmt);
         if (fcsp)
-            fprintf(f, "fcsp=%s ", m_opt_choice_str(mp_csp_names, fcsp));
+            fprintf(f, "fcsp=%s ", m_opt_choice_str(pl_csp_names, fcsp));
         fprintf(f, "ctype=%s\n", comp_type(mp_imgfmt_get_component_type(mpfmt)));
 
         struct mp_imgfmt_desc d = mp_imgfmt_get_desc(mpfmt);

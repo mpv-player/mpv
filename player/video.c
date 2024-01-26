@@ -343,7 +343,7 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
 {
     struct MPOpts *opts = mpctx->opts;
 
-    if (mpctx->audio_status == STATUS_EOF)
+    if (mpctx->audio_status != STATUS_PLAYING)
         return;
 
     mpctx->delay -= frame_time;
@@ -388,7 +388,7 @@ static void handle_new_frame(struct MPContext *mpctx)
         }
     }
     mpctx->time_frame += frame_time / mpctx->video_speed;
-    if (frame_time)
+    if (mpctx->video_status >= STATUS_PLAYING)
         adjust_sync(mpctx, pts, frame_time);
     MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 }
@@ -1041,17 +1041,12 @@ static void apply_video_crop(struct MPContext *mpctx, struct vo *vo)
     }
 }
 
-static bool video_reconfig_needed(const struct mp_image_params *p1,
-                                  const struct mp_image_params *p2)
+static bool video_reconfig_needed(struct mp_image_params a,
+                                  struct mp_image_params b)
 {
-    return p1->imgfmt != p2->imgfmt ||
-           p1->hw_subfmt != p2->hw_subfmt ||
-           p1->w != p2->w || p1->h != p2->h ||
-           p1->p_w != p2->p_w || p1->p_h != p2->p_h ||
-           p1->force_window != p2->force_window ||
-           p1->rotate != p2->rotate ||
-           p1->stereo3d != p2->stereo3d ||
-           !mp_rect_equals(&p1->crop, &p2->crop);
+    a.color.hdr = (struct pl_hdr_metadata){0};
+    b.color.hdr = (struct pl_hdr_metadata){0};
+    return !mp_image_params_equal(&a, &b);
 }
 
 void write_video(struct MPContext *mpctx)
@@ -1176,7 +1171,7 @@ void write_video(struct MPContext *mpctx)
 
     // Filter output is different from VO input?
     struct mp_image_params *p = &mpctx->next_frames[0]->params;
-    if (!vo->params || video_reconfig_needed(p, vo->params)) {
+    if (!vo->params || video_reconfig_needed(*p, *vo->params)) {
         // Changing config deletes the current frame; wait until it's finished.
         if (vo_still_displaying(vo))
             return;

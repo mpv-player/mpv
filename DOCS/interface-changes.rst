@@ -27,6 +27,8 @@ Interface changes
 ::
 
  --- mpv 0.38.0 ---
+    - add `--volume-gain`, `--volume-gain-min`, and `--volume-gain-max` options
+    - add `current-gpu-context` property
     - add `--secondary-sub-ass-override` option
     - remove shared-script-properties (user-data is a replacement)
     - add `--secondary-sub-delay`, decouple secondary subtitles from
@@ -38,6 +40,8 @@ Interface changes
     - add `--sub-filter-sdh-enclosures` option
     - added the `mp.input` scripting API to query the user for textual input
     - add `forced` choice to `subs-with-matching-audio`
+    - remove `--term-remaining-playtime` option
+    - change fallback deinterlace to bwdif
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

@@ -8,7 +8,7 @@
 -- telecined and the interlacing field dominance.
 --
 -- Based on this information, it may set mpv's ``deinterlace`` property (which
--- usually inserts the yadif filter), or insert the ``pullup`` filter if the
+-- usually inserts the bwdif filter), or insert the ``pullup`` filter if the
 -- content is telecined.  It also sets field dominance with lavfi setfield.
 --
 -- OPTIONS:

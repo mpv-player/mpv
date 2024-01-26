@@ -82,7 +82,7 @@ static struct mp_log *get_av_log(void *ptr)
     if (!avc) {
         mp_warn(log_root,
                "av_log callback called with bad parameters (NULL AVClass).\n"
-               "This is a bug in one of Libav/FFmpeg libraries used.\n");
+               "This is a bug in one of FFmpeg libraries used.\n");
         return log_root;
     }
 

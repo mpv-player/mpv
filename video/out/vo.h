@@ -494,6 +494,9 @@ struct vo {
     int dwidth;
     int dheight;
     float monitor_par;
+
+    // current GPU context (--vo=gpu and --vo=gpu-next only)
+    const char *context_name;
 };
 
 struct mpv_global;

@@ -324,7 +324,7 @@ static int open_f(stream_t *stream)
     if (err < 0) {
         if (err == AVERROR_PROTOCOL_NOT_FOUND)
             MP_ERR(stream, "Protocol not found. Make sure"
-                   " ffmpeg/Libav is compiled with networking support.\n");
+                   " FFmpeg is compiled with networking support.\n");
         goto out;
     }
 

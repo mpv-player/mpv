@@ -61,6 +61,11 @@ const char m_option_path_separator = OPTION_PATH_SEPARATOR;
 #define OPT_INT_MAX(opt, T, Tm) ((opt)->min < (opt)->max \
     ? ((opt)->max >= (double)(Tm) ? (Tm) : (T)((opt)->max)) : (Tm))
 
+#if defined(__clang__)
+// Last argument of validate functions is always a pointer, but not always void*
+// which triggers UBSAN warning.
+__attribute__((no_sanitize("function")))
+#endif
 int m_option_parse(struct mp_log *log, const m_option_t *opt,
                    struct bstr name, struct bstr param, void *dst)
 {

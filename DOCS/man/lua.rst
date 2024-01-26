@@ -426,9 +426,9 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     This depends on the property, and it's a valid feature request to ask for
     better update handling of a specific property.
 
-    If the ``type`` is ``none`` or ``nil``, sporadic property change events are
-    possible. This means the change function ``fn`` can be called even if the
-    property doesn't actually change.
+    If the ``type`` is ``none`` or ``nil``, the change function ``fn`` will be
+    called sporadically even if the property doesn't actually change. You should
+    therefore avoid using these types.
 
     You always get an initial change notification. This is meant to initialize
     the user's state to the current value of the property.

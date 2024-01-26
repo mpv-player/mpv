@@ -190,10 +190,9 @@ static char *get_term_status_msg(struct MPContext *mpctx)
     saddf(&line, ": ");
 
     // Playback position
-    double speed = opts->term_remaining_playtime ? mpctx->video_speed : 1;
     sadd_hhmmssff(&line, get_playback_time(mpctx), opts->osd_fractions);
     saddf(&line, " / ");
-    sadd_hhmmssff(&line, get_time_length(mpctx) / speed, opts->osd_fractions);
+    sadd_hhmmssff(&line, get_time_length(mpctx), opts->osd_fractions);
 
     sadd_percentage(&line, get_percent_pos(mpctx));
 

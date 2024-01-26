@@ -27,6 +27,7 @@
 
 #include <libavutil/rational.h>
 #include <libavutil/cpu.h>
+#include <libplacebo/utils/libav.h>
 
 #include "common/msg.h"
 #include "filters/f_autoconvert.h"
@@ -184,16 +185,16 @@ static void copy_mp_to_vs_frame_props_map(struct priv *p, VSMap *map,
     struct mp_image_params *params = &img->params;
     p->vsapi->propSetInt(map, "_SARNum", params->p_w, 0);
     p->vsapi->propSetInt(map, "_SARDen", params->p_h, 0);
-    if (params->color.levels) {
+    if (params->repr.levels) {
         p->vsapi->propSetInt(map, "_ColorRange",
-                params->color.levels == MP_CSP_LEVELS_TV, 0);
+                params->repr.levels == PL_COLOR_LEVELS_LIMITED, 0);
     }
     // The docs explicitly say it uses libavcodec values.
     p->vsapi->propSetInt(map, "_ColorSpace",
-            mp_csp_to_avcol_spc(params->color.space), 0);
+            pl_system_to_av(params->repr.sys), 0);
     if (params->chroma_location) {
         p->vsapi->propSetInt(map, "_ChromaLocation",
-                params->chroma_location == MP_CHROMA_CENTER, 0);
+                params->chroma_location == PL_CHROMA_CENTER, 0);
     }
     char pict_type = 0;
     switch (img->pict_type) {

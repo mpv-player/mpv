@@ -155,9 +155,9 @@ int mp_imgfmt_desc_get_num_comps(struct mp_imgfmt_desc *desc);
 // luma pixel. luma_offsets[0] == mp_imgfmt_desc.comps[0].offset.
 bool mp_imgfmt_get_packed_yuv_locations(int imgfmt, uint8_t *luma_offsets);
 
-// MP_CSP_AUTO for YUV, MP_CSP_RGB or MP_CSP_XYZ otherwise.
+// PL_COLOR_SYSTEM_UNKNOWN for YUV, PL_COLOR_SYSTEM_RGB or PL_COLOR_SYSTEM_XYZ otherwise.
 // (Because IMGFMT/AV_PIX_FMT conflate format and csp for RGB and XYZ.)
-enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt);
+enum pl_color_system mp_imgfmt_get_forced_csp(int imgfmt);
 
 enum mp_component_type {
     MP_COMPONENT_TYPE_UNKNOWN = 0,
@@ -184,7 +184,7 @@ struct mp_regular_imgfmt {
     // See mp_imgfmt_get_forced_csp(). Normally code should use
     // mp_image_params.colors. This field is only needed to map the format
     // unambiguously to FFmpeg formats.
-    enum mp_csp forced_csp;
+    enum pl_color_system forced_csp;
 
     // Size of each component in bytes.
     uint8_t component_size;

@@ -177,7 +177,7 @@ function detect_end()
     else
         mp.msg.error("No crop data.")
         mp.msg.info("Was the cropdetect filter successfully inserted?")
-        mp.msg.info("Does your version of ffmpeg/libav support AVFrame metadata?")
+        mp.msg.info("Does your version of FFmpeg support AVFrame metadata?")
         return
     end
 

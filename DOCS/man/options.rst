@@ -1667,7 +1667,7 @@ Video
 ``--deinterlace=<yes|no>``
     Enable or disable interlacing (default: no).
     Interlaced video shows ugly comb-like artifacts, which are visible on
-    fast movement. Enabling this typically inserts the yadif video filter in
+    fast movement. Enabling this typically inserts the bwdif video filter in
     order to deinterlace the video, or lets the video output apply deinterlacing
     if supported.
 
@@ -1721,7 +1721,7 @@ Video
 
     By default, this is set to ``h264,vc1,hevc,vp8,vp9,av1``. Note that
     the hardware acceleration special codecs like ``h264_vdpau`` are not
-    relevant anymore, and in fact have been removed from Libav in this form.
+    relevant anymore, and in fact have been removed from FFmpeg in this form.
 
     This is usually only needed with broken GPUs, where a codec is reported
     as supported, but decoding causes more problems than it solves.
@@ -1984,7 +1984,7 @@ Audio
     .. admonition:: Examples
 
         ``--ad=mp3float``
-            Prefer the FFmpeg/Libav ``mp3float`` decoder over all other MP3
+            Prefer the FFmpeg ``mp3float`` decoder over all other MP3
             decoders.
 
         ``--ad=help``
@@ -2001,6 +2001,17 @@ Audio
     treated as 0.
 
     Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
+
+``--volume-max=<100.0-1000.0>``
+    Set the maximum amplification level in percent (default: 130). A value of
+    130 will allow you to adjust the volume up to about double the normal level.
+
+``--volume-gain=<db>``
+    Set the volume gain in dB. This is applied on top of other volume and gain
+    settings.
+
+``--volume-gain-max=<0.0-150.0>``, ``--volume-gain-min=<-150.0-0.0>``
+    Set the volume gain range in dB (default: -96 dB min, 12 dB max).
 
 ``--replaygain=<no|track|album>``
     Adjust volume gain according to replaygain values stored in the file
@@ -2231,10 +2242,6 @@ Audio
     their start timestamps differ, and then video timing is gradually adjusted
     if necessary to reach correct synchronization later.
 
-``--volume-max=<100.0-1000.0>``
-    Set the maximum amplification level in percent (default: 130). A value of
-    130 will allow you to adjust the volume up to about double the normal level.
-
 ``--audio-file-auto=<no|exact|fuzzy|all>``, ``--no-audio-file-auto``
     Load additional audio files matching the video filename. The parameter
     specifies how external audio files are matched.
@@ -2312,6 +2319,13 @@ Subtitles
 ``--sub-demuxer=<[+]name>``
     Force subtitle demuxer type for ``--sub-file``. Give the demuxer name as
     printed by ``--sub-demuxer=help``.
+
+``--sub-lavc-o=<key>=<value>[,<key>=<value>[,...]]``
+    Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
+    unneeded and pass all unknown options through the AVOption system is
+    welcome. A full list of AVOptions can be found in the FFmpeg manual.
+
+    This is a key/value list option. See `List Options`_ for details.
 
 ``--sub-delay=<sec>``
     Delays primary subtitles by ``<sec>`` seconds. Can be negative.
@@ -4776,7 +4790,7 @@ It also sets the defaults for the ``lavrresample`` audio filter.
 
 ``--audio-swresample-o=<string>``
     Set AVOptions on the SwrContext or AVAudioResampleContext. These should
-    be documented by FFmpeg or Libav.
+    be documented by FFmpeg.
 
     This is a key/value list option. See `List Options`_ for details.
 
@@ -4879,10 +4893,6 @@ Terminal
     ``file:`` followed by a space and the currently played filename.
 
     See `Property Expansion`_.
-
-``--term-remaining-playtime``, ``--no-term-remaining-playtime``
-    When printing out the time on the terminal, show the remaining time adjusted by
-    playback speed. Default: ``yes``
 
 ``--term-status-msg=<string>``
     Print out a custom string during playback instead of the standard status
@@ -5133,11 +5143,11 @@ Network
 
 ``--tls-ca-file=<filename>``
     Certificate authority database file for use with TLS. (Silently fails with
-    older FFmpeg or Libav versions.)
+    older FFmpeg versions.)
 
 ``--tls-verify``
     Verify peer certificates when using TLS (e.g. with ``https://...``).
-    (Silently fails with older FFmpeg or Libav versions.)
+    (Silently fails with older FFmpeg versions.)
 
 ``--tls-cert-file``
     A file containing a certificate to use in the handshake with the
@@ -5151,7 +5161,7 @@ Network
 
 ``--network-timeout=<seconds>``
     Specify the network timeout in seconds (default: 60 seconds). This affects
-    at least HTTP. The special value 0 uses the FFmpeg/Libav defaults. If a
+    at least HTTP. The special value 0 uses the FFmpeg defaults. If a
     protocol is used which does not support timeouts, this option is silently
     ignored.
 

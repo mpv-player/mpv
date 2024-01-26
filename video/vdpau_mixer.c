@@ -193,7 +193,7 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer,
     if (!opts->chroma_deint)
         SET_VIDEO_ATTR(SKIP_CHROMA_DEINTERLACE, uint8_t, 1);
 
-    struct mp_cmat yuv2rgb;
+    struct pl_transform3x3 yuv2rgb;
     VdpCSCMatrix matrix;
 
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
@@ -204,7 +204,7 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer,
 
     for (int r = 0; r < 3; r++) {
         for (int c = 0; c < 3; c++)
-            matrix[r][c] = yuv2rgb.m[r][c];
+            matrix[r][c] = yuv2rgb.mat.m[r][c];
         matrix[r][3] = yuv2rgb.c[r];
     }
 

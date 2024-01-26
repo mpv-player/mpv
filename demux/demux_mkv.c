@@ -36,6 +36,8 @@
 #include <libavcodec/avcodec.h>
 #include <libavcodec/version.h>
 
+#include <libplacebo/utils/libav.h>
+
 #include "config.h"
 
 #if HAVE_ZLIB
@@ -108,7 +110,8 @@ typedef struct mkv_track {
     double v_frate;
     uint32_t colorspace;
     int stereo_mode;
-    struct mp_colorspace color;
+    struct pl_color_repr repr;
+    struct pl_color_space color;
     uint32_t v_crop_top, v_crop_left, v_crop_right, v_crop_bottom;
     float v_projection_pose_roll;
     bool v_projection_pose_roll_set;
@@ -573,24 +576,24 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
     // 23001-8:2013/DCOR1, which is the same order used by libavutil/pixfmt.h,
     // so we can just re-use our avcol_ conversion functions.
     if (colour->n_matrix_coefficients) {
-        track->color.space = avcol_spc_to_mp_csp(colour->matrix_coefficients);
+        track->repr.sys = pl_system_from_av(colour->matrix_coefficients);
         MP_DBG(demuxer, "|    + Matrix: %s\n",
-                   m_opt_choice_str(mp_csp_names, track->color.space));
+                   m_opt_choice_str(pl_csp_names, track->repr.sys));
     }
     if (colour->n_primaries) {
-        track->color.primaries = avcol_pri_to_mp_csp_prim(colour->primaries);
+        track->color.primaries = pl_primaries_from_av(colour->primaries);
         MP_DBG(demuxer, "|    + Primaries: %s\n",
-                   m_opt_choice_str(mp_csp_prim_names, track->color.primaries));
+                   m_opt_choice_str(pl_csp_prim_names, track->color.primaries));
     }
     if (colour->n_transfer_characteristics) {
-        track->color.gamma = avcol_trc_to_mp_csp_trc(colour->transfer_characteristics);
+        track->color.transfer = pl_transfer_from_av(colour->transfer_characteristics);
         MP_DBG(demuxer, "|    + Gamma: %s\n",
-                   m_opt_choice_str(mp_csp_trc_names, track->color.gamma));
+                   m_opt_choice_str(pl_csp_trc_names, track->color.transfer));
     }
     if (colour->n_range) {
-        track->color.levels = avcol_range_to_mp_csp_levels(colour->range);
+        track->repr.levels = pl_levels_from_av(colour->range);
         MP_DBG(demuxer, "|    + Levels: %s\n",
-                   m_opt_choice_str(mp_csp_levels_names, track->color.levels));
+                   m_opt_choice_str(pl_csp_levels_names, track->repr.levels));
     }
     if (colour->n_max_cll) {
         track->color.hdr.max_cll = colour->max_cll;

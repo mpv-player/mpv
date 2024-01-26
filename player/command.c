@@ -1625,6 +1625,28 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+static int mp_property_volume_gain(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct MPOpts *opts = mpctx->opts;
+
+    switch (action) {
+    case M_PROPERTY_GET_CONSTRICTED_TYPE:
+        *(struct m_option *)arg = (struct m_option){
+            .type = CONF_TYPE_FLOAT,
+            .min = opts->softvol_gain_min,
+            .max = opts->softvol_gain_max,
+        };
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT:
+        *(char **)arg = talloc_asprintf(NULL, "%.1f", opts->softvol_gain);
+        return M_PROPERTY_OK;
+    }
+
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
 static int mp_property_ao_volume(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
@@ -1759,8 +1781,7 @@ static int mp_property_audio_devices(void *ctx, struct m_property *prop,
 static int mp_property_ao(void *ctx, struct m_property *p, int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_strdup_ro(action, arg,
-                                    mpctx->ao ? ao_get_name(mpctx->ao) : NULL);
+    return m_property_strdup_ro(action, arg, mpctx->ao ? ao_get_name(mpctx->ao) : NULL);
 }
 
 /// Audio delay (RW)
@@ -2286,11 +2307,11 @@ static int property_imgparams(const struct mp_image_params *p, int action, void 
     for (int i = 0; i < desc.num_planes; i++)
         bpp += desc.bpp[i] >> (desc.xs[i] + desc.ys[i]);
 
-    enum mp_alpha_type alpha = p->alpha;
-    // Alpha type is not supported by FFmpeg, so MP_ALPHA_AUTO may mean alpha
+    enum pl_alpha_mode alpha = p->repr.alpha;
+    // Alpha type is not supported by FFmpeg, so PL_ALPHA_UNKNOWN may mean alpha
     // is of an unknown type, or simply not present. Normalize to AUTO=no alpha.
-    if (!!(desc.flags & MP_IMGFLAG_ALPHA) != (alpha != MP_ALPHA_AUTO))
-        alpha = (desc.flags & MP_IMGFLAG_ALPHA) ? MP_ALPHA_STRAIGHT : MP_ALPHA_AUTO;
+    if (!!(desc.flags & MP_IMGFLAG_ALPHA) != (alpha != PL_ALPHA_UNKNOWN))
+        alpha = (desc.flags & MP_IMGFLAG_ALPHA) ? PL_ALPHA_INDEPENDENT : PL_ALPHA_UNKNOWN;
 
     const struct pl_hdr_metadata *hdr = &p->color.hdr;
     bool has_cie_y     = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_CIE_Y);
@@ -2320,25 +2341,25 @@ static int property_imgparams(const struct mp_image_params *p, int action, void 
         {"sar",             SUB_PROP_FLOAT(p->w / (double)p->h)},
         {"sar-name",        SUB_PROP_STR(sar_name), .unavailable = !sar_name},
         {"colormatrix",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p->color.space))},
+            SUB_PROP_STR(m_opt_choice_str(pl_csp_names, p->repr.sys))},
         {"colorlevels",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p->color.levels))},
+            SUB_PROP_STR(m_opt_choice_str(pl_csp_levels_names, p->repr.levels))},
         {"primaries",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p->color.primaries))},
+            SUB_PROP_STR(m_opt_choice_str(pl_csp_prim_names, p->color.primaries))},
         {"gamma",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p->color.gamma))},
+            SUB_PROP_STR(m_opt_choice_str(pl_csp_trc_names, p->color.transfer))},
         {"sig-peak", SUB_PROP_FLOAT(p->color.hdr.max_luma / MP_REF_WHITE)},
         {"light",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_light_names, p->color.light))},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_light_names, p->light))},
         {"chroma-location",
-            SUB_PROP_STR(m_opt_choice_str(mp_chroma_names, p->chroma_location))},
+            SUB_PROP_STR(m_opt_choice_str(pl_chroma_names, p->chroma_location))},
         {"stereo-in",
             SUB_PROP_STR(m_opt_choice_str(mp_stereo3d_names, p->stereo3d))},
         {"rotate",          SUB_PROP_INT(p->rotate)},
         {"alpha",
-            SUB_PROP_STR(m_opt_choice_str(mp_alpha_names, alpha)),
+            SUB_PROP_STR(m_opt_choice_str(pl_alpha_names, alpha)),
             // avoid using "auto" for "no", so just make it unavailable
-            .unavailable = alpha == MP_ALPHA_AUTO},
+            .unavailable = alpha == PL_ALPHA_UNKNOWN},
         {"min-luma",    SUB_PROP_FLOAT(hdr->min_luma),     .unavailable = !has_hdr10},
         {"max-luma",    SUB_PROP_FLOAT(hdr->max_luma),     .unavailable = !has_hdr10},
         {"max-cll",     SUB_PROP_FLOAT(hdr->max_cll),      .unavailable = !has_hdr10},
@@ -2740,8 +2761,15 @@ static int mp_property_perf_info(void *ctx, struct m_property *p, int action,
 static int mp_property_vo(void *ctx, struct m_property *p, int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_strdup_ro(action, arg,
-                    mpctx->video_out ? mpctx->video_out->driver->name : NULL);
+    return m_property_strdup_ro(action, arg, mpctx->video_out ?
+                                mpctx->video_out->driver->name : NULL);
+}
+
+static int mp_property_gpu_context(void *ctx, struct m_property *p, int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_strdup_ro(action, arg, mpctx->video_out ?
+                                mpctx->video_out->context_name : NULL);
 }
 
 static int mp_property_osd_dim(void *ctx, struct m_property *prop,
@@ -3872,6 +3900,7 @@ static const struct m_property mp_properties_base[] = {
     // Audio
     {"mixer-active", mp_property_mixer_active},
     {"volume", mp_property_volume},
+    {"volume-gain", mp_property_volume_gain},
     {"ao-volume", mp_property_ao_volume},
     {"ao-mute", mp_property_ao_mute},
     {"audio-delay", mp_property_audio_delay},
@@ -3900,6 +3929,7 @@ static const struct m_property mp_properties_base[] = {
     {"vo-passes", mp_property_vo_passes},
     {"perf-info", mp_property_perf_info},
     {"current-vo", mp_property_vo},
+    {"current-gpu-context", mp_property_gpu_context},
     {"container-fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
     {"video-aspect-override", mp_property_video_aspect_override},
@@ -4033,9 +4063,9 @@ static const char *const *const mp_event_property_change[] = {
       "video-dec-params", "osd-dimensions",
       "hwdec", "hwdec-current", "hwdec-interop"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
-      "samplerate", "channels", "audio", "volume", "mute",
+      "samplerate", "channels", "audio", "volume", "volume-gain", "mute",
       "current-ao", "audio-codec-name", "audio-params",
-      "audio-out-params", "volume-max", "mixer-active"),
+      "audio-out-params", "volume-max", "volume-gain-min", "volume-gain-max", "mixer-active"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle", "eof-reached"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle", "eof-reached"),
     E(MP_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),
@@ -4218,6 +4248,9 @@ static const struct property_osd_display {
     {"volume", "Volume",
      .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
      .osd_progbar = OSD_VOLUME, .marker = 100},
+    {"volume-gain", "Volume gain",
+     .msg = "Volume gain: ${?volume-gain:${volume-gain} dB ${?mute==yes:(Muted)}}${!volume-gain:${volume-gain}}",
+     .osd_progbar = OSD_VOLUME, .marker = 0},
     {"ao-volume", "AO Volume",
      .msg = "AO Volume: ${?ao-volume:${ao-volume}% ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
      .osd_progbar = OSD_VOLUME, .marker = 100},
@@ -5736,6 +5769,10 @@ static void cmd_track_reload(void *p)
     }
 
     struct track *nt = mpctx->tracks[nt_num];
+
+    if (!nt->lang)
+        nt->lang = mp_guess_lang_from_filename(nt, nt->external_filename);
+
     mp_switch_track(mpctx, nt->type, nt, 0);
     print_track_list(mpctx, "Reloaded:");
 }
@@ -6978,8 +7015,11 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             if (sub) {
                 int ret = sub_control(sub, SD_CTRL_UPDATE_OPTS,
                                       (void *)(uintptr_t)flags);
-                if (ret == CONTROL_OK && flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD))
+                if (ret == CONTROL_OK && flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD)) {
                     sub_redecode_cached_packets(sub);
+                    if (track->selected)
+                        reselect_demux_stream(mpctx, track, true);
+                }
             }
         }
         osd_changed(mpctx->osd);
@@ -7015,7 +7055,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         handle_force_window(mpctx, true);
         reinit_video_chain(mpctx);
         if (track)
-            reselect_demux_stream(mpctx, track, true);
+            queue_seek(mpctx, MPSEEK_RELATIVE, 0.0, MPSEEK_EXACT, 0);
 
         mp_wakeup_core(mpctx);
     }

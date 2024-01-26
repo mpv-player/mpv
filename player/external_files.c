@@ -142,6 +142,14 @@ static struct bstr guess_lang_from_filename(struct bstr name, int *fn_start)
     return (struct bstr){name.start + i + 1, n};
 }
 
+char *mp_guess_lang_from_filename(void* ctx, const char *filename)
+{
+    bstr filename_no_ext = bstr_strip_ext(bstr0(filename));
+    int start = 0; // only used in append_dir_subtitles()
+    char *lang = bstrto0(ctx, guess_lang_from_filename(filename_no_ext, &start));
+    return lang;
+}
+
 static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
                                  struct subfn **slist, int *nsub,
                                  struct bstr path, const char *fname,

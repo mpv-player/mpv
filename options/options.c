@@ -321,6 +321,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"teletext-page", OPT_INT(teletext_page), M_RANGE(1, 999)},
         {"sub-past-video-end", OPT_BOOL(sub_past_video_end)},
         {"sub-ass-force-style", OPT_REPLACED("sub-ass-style-overrides")},
+        {"sub-lavc-o", OPT_KEYVALUELIST(sub_avopts)},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
@@ -705,6 +706,10 @@ static const m_option_t mp_opts[] = {
     // values <0 for volume and mute are legacy and ignored
     {"volume", OPT_FLOAT(softvol_volume), .flags = UPDATE_VOL,
         M_RANGE(-1, 1000)},
+    {"volume-gain-max", OPT_FLOAT(softvol_gain_max), M_RANGE(0, 150)},
+    {"volume-gain-min", OPT_FLOAT(softvol_gain_min), M_RANGE(-150, 0)},
+    {"volume-gain", OPT_FLOAT(softvol_gain), .flags = UPDATE_VOL,
+        M_RANGE(-150, 150)},
     {"mute", OPT_CHOICE(softvol_mute,
         {"no", 0},
         {"auto", 0},
@@ -819,7 +824,6 @@ static const m_option_t mp_opts[] = {
 
     {"term-osd-bar", OPT_BOOL(term_osd_bar), .flags = UPDATE_OSD},
     {"term-osd-bar-chars", OPT_STRING(term_osd_bar_chars), .flags = UPDATE_OSD},
-    {"term-remaining-playtime", OPT_BOOL(term_remaining_playtime), .flags = UPDATE_OSD},
     {"term-title", OPT_STRING(term_title), .flags = UPDATE_OSD},
 
     {"term-playing-msg", OPT_STRING(playing_msg)},
@@ -928,6 +932,9 @@ static const struct MPOpts mp_default_opts = {
     .msg_color = true,
     .softvol_max = 130,
     .softvol_volume = 100,
+    .softvol_gain_max = 12,
+    .softvol_gain_min = -96,
+    .softvol_gain = 0,
     .gapless_audio = -1,
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",
     .stop_screensaver = 1,
@@ -971,7 +978,6 @@ static const struct MPOpts mp_default_opts = {
     .frame_dropping = 1,
     .term_osd = 2,
     .term_osd_bar_chars = "[-+-]",
-    .term_remaining_playtime = true,
     .consolecontrols = true,
     .playlist_pos = -1,
     .play_frames = -1,

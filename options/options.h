@@ -113,6 +113,7 @@ struct mp_subtitle_opts {
     bool sub_clear_on_seek;
     int teletext_page;
     bool sub_past_video_end;
+    char **sub_avopts;
 };
 
 // Options for both primary and secondary subs.
@@ -186,6 +187,9 @@ typedef struct MPOpts {
     float rgain_fallback;
     int softvol_mute;
     float softvol_max;
+    float softvol_gain;
+    float softvol_gain_min;
+    float softvol_gain_max;
     int gapless_audio;
 
     mp_vo_opts *vo;
@@ -244,7 +248,6 @@ typedef struct MPOpts {
     int term_osd;
     bool term_osd_bar;
     char *term_osd_bar_chars;
-    bool term_remaining_playtime;
     char *term_title;
     char *playing_msg;
     char *osd_playing_msg;

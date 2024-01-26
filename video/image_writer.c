@@ -25,6 +25,7 @@
 #include <libavutil/mem.h>
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
+#include <libplacebo/utils/libav.h>
 
 #include "common/msg.h"
 #include "config.h"
@@ -135,18 +136,18 @@ static void prepare_avframe(AVFrame *pic, AVCodecContext *avctx,
     pic->width = avctx->width;
     pic->height = avctx->height;
     avctx->color_range = pic->color_range =
-        mp_csp_levels_to_avcol_range(image->params.color.levels);
+        pl_levels_to_av(image->params.repr.levels);
 
     if (!tag_csp)
         return;
     avctx->color_primaries = pic->color_primaries =
-        mp_csp_prim_to_avcol_pri(image->params.color.primaries);
+        pl_primaries_to_av(image->params.color.primaries);
     avctx->color_trc = pic->color_trc =
-        mp_csp_trc_to_avcol_trc(image->params.color.gamma);
+        pl_transfer_to_av(image->params.color.transfer);
     avctx->colorspace = pic->colorspace =
-        mp_csp_to_avcol_spc(image->params.color.space);
+        pl_system_to_av(image->params.repr.sys);
     avctx->chroma_sample_location = pic->chroma_location =
-        mp_chroma_location_to_av(image->params.chroma_location);
+        pl_chroma_to_av(image->params.chroma_location);
     mp_dbg(log, "mapped color params:\n"
         "  trc = %s\n"
         "  primaries = %s\n"
@@ -193,7 +194,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, const ch
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
     if (codec->id == AV_CODEC_ID_MJPEG) {
         // Annoying deprecated garbage for the jpg encoder.
-        if (image->params.color.levels == MP_CSP_LEVELS_PC)
+        if (image->params.repr.levels == PL_COLOR_LEVELS_FULL)
             avctx->pix_fmt = replace_j_format(avctx->pix_fmt);
     }
     if (avctx->pix_fmt == AV_PIX_FMT_NONE) {
@@ -614,7 +615,7 @@ int image_writer_format_from_ext(const char *ext)
 }
 
 static struct mp_image *convert_image(struct mp_image *image, int destfmt,
-                                      enum mp_csp_levels yuv_levels,
+                                      enum pl_color_levels yuv_levels,
                                       const struct image_writer_opts *opts,
                                       struct mpv_global *global,
                                       struct mp_log *log)
@@ -629,6 +630,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
         .p_w = 1,
         .p_h = 1,
         .color = image->params.color,
+        .repr = image->params.repr,
         .chroma_location = image->params.chroma_location,
         .crop = {0, 0, d_w, d_h},
     };
@@ -636,14 +638,14 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
 
     if (!image_writer_flexible_csp(opts)) {
         // If our format can't tag csps, set something sane
-        p.color.primaries = MP_CSP_PRIM_BT_709;
-        p.color.gamma = MP_CSP_TRC_AUTO;
-        p.color.light = MP_CSP_LIGHT_DISPLAY;
+        p.color.primaries = PL_COLOR_PRIM_BT_709;
+        p.color.transfer = PL_COLOR_TRC_UNKNOWN;
+        p.light = MP_CSP_LIGHT_DISPLAY;
         p.color.hdr = (struct pl_hdr_metadata){0};
-        if (p.color.space != MP_CSP_RGB) {
-            p.color.levels = yuv_levels;
-            p.color.space = MP_CSP_BT_601;
-            p.chroma_location = MP_CHROMA_CENTER;
+        if (p.repr.sys != PL_COLOR_SYSTEM_RGB) {
+            p.repr.levels = yuv_levels;
+            p.repr.sys = PL_COLOR_SYSTEM_BT_601;
+            p.chroma_location = PL_CHROMA_CENTER;
         }
         mp_image_params_guess_csp(&p);
     }
@@ -731,11 +733,11 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     if (!destfmt)
         destfmt = get_target_format(&ctx);
 
-    enum mp_csp_levels levels; // Ignored if destfmt is a RGB format
+    enum pl_color_levels levels; // Ignored if destfmt is a RGB format
     if (opts->format == AV_CODEC_ID_WEBP) {
-        levels = MP_CSP_LEVELS_TV;
+        levels = PL_COLOR_LEVELS_LIMITED;
     } else {
-        levels = MP_CSP_LEVELS_PC;
+        levels = PL_COLOR_LEVELS_FULL;
     }
 
     struct mp_image *dst = convert_image(image, destfmt, levels, opts, global, log);

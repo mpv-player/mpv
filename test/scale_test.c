@@ -10,7 +10,7 @@ static struct mp_image *gen_repack_test_img(int w, int h, int bytes, bool rgb,
     struct mp_regular_imgfmt planar_desc = {
         .component_type = MP_COMPONENT_TYPE_UINT,
         .component_size = bytes,
-        .forced_csp = rgb ? MP_CSP_RGB : 0,
+        .forced_csp = rgb ? PL_COLOR_SYSTEM_RGB : 0,
         .num_planes = alpha ? 4 : 3,
         .planes = {
             {1, {rgb ? 2 : 1}},
@@ -129,7 +129,7 @@ void repack_test_run(struct scale_test *stest)
             if (!mp_get_regular_imgfmt(&rdesc, ofmt))
                 continue;
         }
-        if (rdesc.num_planes > 1 || rdesc.forced_csp != MP_CSP_RGB)
+        if (rdesc.num_planes > 1 || rdesc.forced_csp != PL_COLOR_SYSTEM_RGB)
             continue;
 
         struct mp_image *test_img = NULL;

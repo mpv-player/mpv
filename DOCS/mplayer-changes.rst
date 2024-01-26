@@ -135,7 +135,7 @@ Miscellaneous
 * Support for precise scrolling which scales the parameter of commands. If the
   input doesn't support precise scrolling the scale factor stays 1.
 * Allow changing/adjusting video filters at runtime. (This is also used to make
-  the ``D`` key insert vf_yadif if deinterlacing is not supported otherwise).
+  the ``D`` key insert vf_bwdif if deinterlacing is not supported otherwise).
 * Improved support for .cue files.
 
 Mac OS X
@@ -177,7 +177,7 @@ Internal changes
 * General code cleanups (including refactoring or rewrites of many parts).
 * New build system.
 * Many bug fixes and removal of long-standing issues.
-* Generally preferring FFmpeg/Libav over internal demuxers, decoders, and
+* Generally preferring FFmpeg over internal demuxers, decoders, and
   filters.
 
 Detailed Listing of User-visible Changes
