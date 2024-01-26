@@ -973,6 +973,7 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
 
     // Proper conversion to RGB
     struct mp_csp_params rgb_params = MP_CSP_PARAMS_DEFAULTS;
+    rgb_params.repr = params.repr;
     rgb_params.color = params.color;
     struct pl_transform3x3 vs2rgb;
     mp_get_csp_matrix(&rgb_params, &vs2rgb);

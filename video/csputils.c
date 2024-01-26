@@ -436,6 +436,7 @@ void mp_csp_set_image_params(struct mp_csp_params *params,
 {
     struct mp_image_params p = *imgparams;
     mp_image_params_guess_csp(&p); // ensure consistency
+    params->repr = p.repr;
     params->color = p.color;
 }
 

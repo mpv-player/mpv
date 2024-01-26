@@ -662,7 +662,9 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
     mp_image_params_guess_csp(&p->rgba_overlay->params);
     p->rgba_overlay->params.repr.alpha = PL_ALPHA_PREMULTIPLIED;
 
+    p->overlay_tmp->params.repr = params->repr;
     p->overlay_tmp->params.color = params->color;
+    p->video_tmp->params.repr = params->repr;
     p->video_tmp->params.color = params->color;
 
     if (p->rgba_overlay->imgfmt == overlay_fmt) {
@@ -675,6 +677,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
         if (!p->video_overlay)
             return false;
 
+        p->video_overlay->params.repr = params->repr;
         p->video_overlay->params.color = params->color;
         p->video_overlay->params.chroma_location = params->chroma_location;
         p->video_overlay->params.repr.alpha = PL_ALPHA_PREMULTIPLIED;
@@ -731,6 +734,7 @@ static bool reinit_to_video(struct mp_draw_sub_cache *p)
                 talloc_steal(p, mp_image_alloc(calpha_fmt, w >> xs, h >> ys));
             if (!p->calpha_overlay)
                 return false;
+            p->calpha_overlay->params.repr = p->alpha_overlay->params.repr;
             p->calpha_overlay->params.color = p->alpha_overlay->params.color;
 
             p->calpha_to_f32 = mp_repack_create_planar(calpha_fmt, false, rflags);
