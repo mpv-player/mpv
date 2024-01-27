@@ -138,6 +138,10 @@ static int init(struct ra_hwdec *hw)
     if (!gl_check_extension(exts, "EGL_ANDROID_image_native_buffer"))
         return -1;
 
+    JNIEnv *env = MP_JNI_GET_ENV(hw);
+    if (!env)
+        return -1;
+
     if (!load_lib_functions(p, hw->log))
         return -1;
 
@@ -167,8 +171,6 @@ static int init(struct ra_hwdec *hw)
     }
     assert(window);
 
-    JNIEnv *env = MP_JNI_GET_ENV(hw);
-    assert(env);
     jobject surface = p->ANativeWindow_toSurface(env, window);
     p->surface = (*env)->NewGlobalRef(env, surface);
     (*env)->DeleteLocalRef(env, surface);
@@ -192,10 +194,10 @@ static int init(struct ra_hwdec *hw)
 static void uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
-    JNIEnv *env = MP_JNI_GET_ENV(hw);
-    assert(env);
 
     if (p->surface) {
+        JNIEnv *env = MP_JNI_GET_ENV(hw);
+        assert(env);
         (*env)->DeleteGlobalRef(env, p->surface);
         p->surface = NULL;
     }
