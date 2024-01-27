@@ -2979,20 +2979,22 @@ static int read_next_block_into_queue(demuxer_t *demuxer)
                 if (end > mkv_d->cluster_end)
                     goto find_next_cluster;
                 int res = read_block_group(demuxer, end, &block);
-                if (res < 0)
-                    goto find_next_cluster;
                 if (res > 0)
                     goto add_block;
+                free_block(&block);
+                if (res < 0)
+                    goto find_next_cluster;
                 break;
             }
 
             case MATROSKA_ID_SIMPLEBLOCK: {
                 block = (struct block_info){ .simple = true };
                 int res = read_block(demuxer, mkv_d->cluster_end, &block);
-                if (res < 0)
-                    goto find_next_cluster;
                 if (res > 0)
                     goto add_block;
+                free_block(&block);
+                if (res < 0)
+                    goto find_next_cluster;
                 break;
             }
 
