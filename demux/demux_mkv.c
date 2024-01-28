@@ -390,6 +390,10 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
             }
             size = dstlen - out_avail;
         } else if (enc->comp_algo == 3) {
+            if (enc->comp_settings_len == 0 || !enc->comp_settings) {
+                mp_warn(log, "missing comp_settings, unable to reconstruct the data.\n");
+                goto error;
+            }
             dest = talloc_size(track->parser_tmp, size + enc->comp_settings_len);
             memcpy(dest, enc->comp_settings, enc->comp_settings_len);
             memcpy(dest + enc->comp_settings_len, src, size);
