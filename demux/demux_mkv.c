@@ -406,6 +406,8 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
         talloc_free(src);
     if (!size)
         dest = NULL;
+    if (!dest)
+        size = 0;
     return (bstr){dest, size};
 }
 
@@ -2072,6 +2074,8 @@ static void probe_x264_garbage(demuxer_t *demuxer)
 
         bstr sblock = {block->laces[0]->data, block->laces[0]->size};
         bstr nblock = demux_mkv_decode(demuxer->log, track, sblock, 1);
+        if (!nblock.len)
+            continue;
 
         sh->codec->first_packet = new_demux_packet_from(nblock.start, nblock.len);
         talloc_steal(mkv_d, sh->codec->first_packet);
@@ -2834,6 +2838,8 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 
             bstr block = {data->data, data->size};
             bstr nblock = demux_mkv_decode(demuxer->log, track, block, 1);
+            if (!nblock.len)
+                break;
 
             if (block.start != nblock.start || block.len != nblock.len) {
                 // (avoidable copy of the entire data)
