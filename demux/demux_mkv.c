@@ -2002,6 +2002,41 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     return 0;
 }
 
+// Workaround for broken files that don't set attached_picture
+static void probe_if_image(demuxer_t *demuxer)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+
+    for (int n = 0; n < mkv_d->num_tracks; n++) {
+        int video_blocks = 0;
+        mkv_track_t *track = mkv_d->tracks[n];
+        struct sh_stream *sh = track->stream;
+
+        if (!sh || sh->type != STREAM_VIDEO)
+            continue;
+
+        int64_t timecode = -1;
+        // Arbitrary restriction on packet reading.
+        for (int i = 0; i < 100; i++) {
+            int ret = read_next_block_into_queue(demuxer);
+            if (ret == 1 && mkv_d->blocks[i].track == track) {
+                if (timecode != mkv_d->blocks[i].timecode)
+                    ++video_blocks;
+                timecode = mkv_d->blocks[i].timecode;
+            }
+            // No need to read more
+            if (video_blocks > 1)
+                break;
+        }
+
+        // Assume still image
+        if (video_blocks == 1) {
+            sh->still_image = true;
+            sh->image = true;
+        }
+    }
+}
+
 static void probe_x264_garbage(demuxer_t *demuxer)
 {
     mkv_demuxer_t *mkv_d = demuxer->priv;
@@ -2254,6 +2289,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     if (mkv_d->opts->probe_duration)
         probe_last_timestamp(demuxer, start_pos);
     probe_x264_garbage(demuxer);
+    probe_if_image(demuxer);
 
     return 0;
 }
