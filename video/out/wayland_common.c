@@ -1893,9 +1893,12 @@ static int spawn_cursor(struct vo_wayland_state *wl)
         return 1;
     }
 
-    wl->default_cursor = wl_cursor_theme_get_cursor(wl->cursor_theme, "left_ptr");
+    wl->default_cursor = wl_cursor_theme_get_cursor(wl->cursor_theme, "default");
+    if (!wl->default_cursor)
+        wl->default_cursor = wl_cursor_theme_get_cursor(wl->cursor_theme, "left_ptr");
+
     if (!wl->default_cursor) {
-        MP_ERR(wl, "Unable to load cursor theme!\n");
+        MP_ERR(wl, "Unable to get default and left_ptr XCursor from theme!\n");
         return 1;
     }
 
