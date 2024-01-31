@@ -32,6 +32,9 @@
 // it's guaranteed that you can seek back by <= of this size again.
 #define STREAM_BUFFER_SIZE 2048
 
+// Maximum size of a complete read.
+#define STREAM_MAX_READ_SIZE (INT_MAX - 1)
+
 // flags for stream_open_ext (this includes STREAM_READ and STREAM_WRITE)
 
 // stream->mode

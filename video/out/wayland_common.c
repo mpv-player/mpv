@@ -836,8 +836,7 @@ static void surface_handle_preferred_buffer_scale(void *data,
     if (wl->fractional_scale_manager)
         return;
 
-    // dmabuf_wayland is always wl->scaling = 1
-    wl->scaling = !wl->using_dmabuf_wayland ? scale : 1;
+    wl->scaling = scale;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -1012,13 +1011,13 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
         wl->window_size.x0 = 0;
         wl->window_size.y0 = 0;
-        wl->window_size.x1 = round(width * wl->scaling);
-        wl->window_size.y1 = round(height * wl->scaling);
+        wl->window_size.x1 = lround(width * wl->scaling);
+        wl->window_size.y1 = lround(height * wl->scaling);
     }
     wl->geometry.x0 = 0;
     wl->geometry.y0 = 0;
-    wl->geometry.x1 = round(width * wl->scaling);
-    wl->geometry.y1 = round(height * wl->scaling);
+    wl->geometry.x1 = lround(width * wl->scaling);
+    wl->geometry.y1 = lround(height * wl->scaling);
 
     if (mp_rect_equals(&old_geometry, &wl->geometry))
         return;
@@ -1070,8 +1069,7 @@ static void preferred_scale(void *data,
     struct vo_wayland_state *wl = data;
     double old_scale = wl->scaling;
 
-    // dmabuf_wayland is always wl->scaling = 1
-    wl->scaling = !wl->using_dmabuf_wayland ? (double)scale / 120 : 1;
+    wl->scaling = (double)scale / 120;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -1500,13 +1498,11 @@ static bool create_input(struct vo_wayland_state *wl)
 
 static int create_viewports(struct vo_wayland_state *wl)
 {
-    if (wl->viewporter) {
-        wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
-        wl->osd_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->osd_surface);
-        wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
-    }
+    wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
+    wl->osd_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->osd_surface);
+    wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
 
-    if (wl->viewporter && (!wl->viewport || !wl->osd_viewport || !wl->video_viewport)) {
+    if (!wl->viewport || !wl->osd_viewport || !wl->video_viewport) {
         MP_ERR(wl, "failed to create viewport interfaces!\n");
         return 1;
     }
@@ -1691,6 +1687,9 @@ static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode)
 
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale)
 {
+    if (!wl->vo_opts->hidpi_window_scale)
+        return;
+
     double factor = old_scale / wl->scaling;
     wl->window_size.x1 /= factor;
     wl->window_size.y1 /= factor;
@@ -1844,12 +1843,9 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
     if (wl->fractional_scale_manager)
         return;
 
-    // dmabuf_wayland is always wl->scaling = 1
     double old_scale = wl->scaling;
-    wl->scaling = !wl->using_dmabuf_wayland ? wl->current_output->scale : 1;
-
+    wl->scaling = wl->current_output->scale;
     rescale_geometry(wl, old_scale);
-    wl_surface_set_buffer_scale(wl->surface, wl->scaling);
 }
 
 static void set_window_bounds(struct vo_wayland_state *wl)
@@ -2182,12 +2178,11 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-void vo_wayland_handle_fractional_scale(struct vo_wayland_state *wl)
+void vo_wayland_handle_scale(struct vo_wayland_state *wl)
 {
-    if (wl->fractional_scale_manager && wl->viewport)
-        wp_viewport_set_destination(wl->viewport,
-                                    round(mp_rect_w(wl->geometry) / wl->scaling),
-                                    round(mp_rect_h(wl->geometry) / wl->scaling));
+    wp_viewport_set_destination(wl->viewport,
+                                lround(mp_rect_w(wl->geometry) / wl->scaling),
+                                lround(mp_rect_h(wl->geometry) / wl->scaling));
 }
 
 bool vo_wayland_init(struct vo *vo)
@@ -2210,7 +2205,7 @@ bool vo_wayland_init(struct vo *vo)
         .vo_opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
     wl->vo_opts = wl->vo_opts_cache->opts;
-    wl->using_dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
+    bool using_dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
 
     wl_list_init(&wl->output_list);
 
@@ -2241,6 +2236,12 @@ bool vo_wayland_init(struct vo *vo)
     if (!wl_list_length(&wl->output_list)) {
         MP_FATAL(wl, "No outputs found or compositor doesn't support %s (ver. 2)\n",
                  wl_output_interface.name);
+        goto err;
+    }
+
+    if (!wl->viewporter) {
+        MP_FATAL(wl, "Compositor doesn't support the required %s protocol!\n",
+                 wp_viewporter_interface.name);
         goto err;
     }
 
@@ -2326,7 +2327,7 @@ bool vo_wayland_init(struct vo *vo)
     update_app_id(wl);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
 
-    wl->callback_surface = wl->using_dmabuf_wayland ? wl->video_surface : wl->surface;
+    wl->callback_surface = using_dmabuf_wayland ? wl->video_surface : wl->surface;
     wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     wl_surface_commit(wl->surface);

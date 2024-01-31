@@ -211,7 +211,7 @@ struct vo_frame {
     // If 0, present immediately.
     int64_t pts;
     // Approximate frame duration, in ns.
-    int duration;
+    double duration;
     // Realtime of estimated distance between 2 vsync events.
     double vsync_interval;
     // "ideal" display time within the vsync

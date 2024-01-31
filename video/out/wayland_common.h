@@ -112,7 +112,6 @@ struct vo_wayland_state {
     struct zwp_linux_dmabuf_feedback_v1 *dmabuf_feedback;
     wayland_format *format_map;
     uint32_t format_size;
-    bool using_dmabuf_wayland;
 
     /* presentation-time */
     struct wp_presentation  *presentation;
@@ -178,7 +177,7 @@ bool vo_wayland_reconfig(struct vo *vo);
 int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 
-void vo_wayland_handle_fractional_scale(struct vo_wayland_state *wl);
+void vo_wayland_handle_scale(struct vo_wayland_state *wl);
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha);
 void vo_wayland_sync_swap(struct vo_wayland_state *wl);
 void vo_wayland_uninit(struct vo *vo);

@@ -1003,7 +1003,7 @@ static bool render_frame(struct vo *vo)
     wakeup_core(vo);
 
 done:
-    if (!vo->driver->frame_owner)
+    if (!vo->driver->frame_owner || in->dropped_frame)
         talloc_free(frame);
     mp_mutex_unlock(&in->lock);
 

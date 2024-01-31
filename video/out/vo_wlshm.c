@@ -209,7 +209,7 @@ static int resize(struct vo *vo)
         talloc_free(buf);
     }
 
-    vo_wayland_handle_fractional_scale(wl);
+    vo_wayland_handle_scale(wl);
 
     return mp_sws_reinit(p->sws);
 }

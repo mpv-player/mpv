@@ -42,9 +42,11 @@
 #include "msg.h"
 #include "msg_control.h"
 
-// log buffer size (lines) for terminal level and logfile level
-#define TERM_BUF 100
+// log buffer size (lines) logfile level
 #define FILE_BUF 100
+
+// lines to accumulate before any client requests the terminal loglevel
+#define EARLY_TERM_BUF 100
 
 // logfile lines to accumulate during init before we know the log file name.
 // thousands of logfile lines during init can happen (especially with many
@@ -921,7 +923,7 @@ void mp_msg_set_early_logging(struct mpv_global *global, bool enable)
     struct mp_log_root *root = global->log->root;
 
     mp_msg_set_early_logging_raw(global, enable, &root->early_buffer,
-                                 TERM_BUF, MP_LOG_BUFFER_MSGL_TERM);
+                                 EARLY_TERM_BUF, MP_LOG_BUFFER_MSGL_TERM);
 
     // normally MSGL_LOGFILE buffer gets a write thread, but not the early buf
     mp_msg_set_early_logging_raw(global, enable, &root->early_filebuffer,
@@ -938,8 +940,6 @@ struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
     mp_mutex_lock(&root->lock);
 
     if (level == MP_LOG_BUFFER_MSGL_TERM) {
-        size = TERM_BUF;
-
         // The first thing which creates a terminal-level log buffer gets the
         // early log buffer, if it exists. This is supposed to enable a script
         // to grab log messages from before it was initialized. It's OK that
@@ -947,6 +947,7 @@ struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
         if (root->early_buffer) {
             struct mp_log_buffer *buffer = root->early_buffer;
             root->early_buffer = NULL;
+            mp_msg_log_buffer_resize(buffer, size);
             buffer->wakeup_cb = wakeup_cb;
             buffer->wakeup_cb_ctx = wakeup_cb_ctx;
             mp_mutex_unlock(&root->lock);
@@ -974,6 +975,40 @@ struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
     mp_mutex_unlock(&root->lock);
 
     return buffer;
+}
+
+void mp_msg_log_buffer_resize(struct mp_log_buffer *buffer, int size)
+{
+    mp_mutex_lock(&buffer->lock);
+
+    assert(size > 0);
+    if (buffer->capacity < size &&
+        buffer->entry0 + buffer->num_entries <= buffer->capacity) {
+        // shortcut if buffer doesn't wrap
+        buffer->entries = talloc_realloc(buffer, buffer->entries,
+                                         struct mp_log_buffer_entry *, size);
+    } else if (buffer->capacity != size) {
+        struct mp_log_buffer_entry **entries =
+            talloc_array(buffer, struct mp_log_buffer_entry *, size);
+        int num_entries = 0;
+        for (int i = buffer->num_entries - 1; i >= 0; i--) {
+            int entry = (buffer->entry0 + i) % buffer->num_entries;
+            struct mp_log_buffer_entry *res = buffer->entries[entry];
+            if (num_entries < size) {
+                entries[num_entries++] = res;
+            } else {
+                talloc_free(res);
+                buffer->dropped += 1;
+            }
+        }
+        talloc_free(buffer->entries);
+        buffer->entries = entries;
+        buffer->entry0 = 0;
+        buffer->num_entries = num_entries;
+    }
+    buffer->capacity = size;
+
+    mp_mutex_unlock(&buffer->lock);
 }
 
 void mp_msg_log_buffer_set_silent(struct mp_log_buffer *buffer, bool silent)

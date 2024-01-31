@@ -853,8 +853,10 @@ void mp_image_set_attributes(struct mp_image *image,
     nparams.imgfmt = image->imgfmt;
     nparams.w = image->w;
     nparams.h = image->h;
-    if (nparams.imgfmt != params->imgfmt)
+    if (nparams.imgfmt != params->imgfmt) {
+        nparams.repr = (struct pl_color_repr){0};
         nparams.color = (struct pl_color_space){0};
+    }
     mp_image_set_params(image, &nparams);
 }
 

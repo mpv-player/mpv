@@ -493,7 +493,7 @@ static void set_viewport_source(struct vo *vo, struct mp_rect src)
     if (p->force_window)
         return;
 
-    if (wl->video_viewport && !mp_rect_equals(&p->src, &src)) {
+    if (!mp_rect_equals(&p->src, &src)) {
         wp_viewport_set_source(wl->video_viewport, src.x0 << 8,
                                src.y0 << 8, mp_rect_w(src) << 8,
                                mp_rect_h(src) << 8);
@@ -528,15 +528,18 @@ static void resize(struct vo *vo)
     vo_get_src_dst_rects(vo, &src, &dst, &p->screen_osd_res);
     int window_w = p->screen_osd_res.ml + p->screen_osd_res.mr + mp_rect_w(dst);
     int window_h = p->screen_osd_res.mt + p->screen_osd_res.mb + mp_rect_h(dst);
-    wp_viewport_set_destination(wl->viewport, window_w, window_h);
+    wp_viewport_set_destination(wl->viewport, lround(window_w / wl->scaling),
+                                lround(window_h / wl->scaling));
 
     //now we restore pan for video viewport calculation
     vo->opts->pan_x = vo_opts->pan_x;
     vo->opts->pan_y = vo_opts->pan_y;
     vo_get_src_dst_rects(vo, &src, &dst, &p->screen_osd_res);
-    wp_viewport_set_destination(wl->video_viewport, mp_rect_w(dst), mp_rect_h(dst));
+    wp_viewport_set_destination(wl->video_viewport, lround(mp_rect_w(dst) / wl->scaling),
+                                                    lround(mp_rect_h(dst) / wl->scaling));
     wl_subsurface_set_position(wl->video_subsurface, dst.x0, dst.y0);
-    wp_viewport_set_destination(wl->osd_viewport, vo->dwidth, vo->dheight);
+    wp_viewport_set_destination(wl->osd_viewport, lround(vo->dwidth / wl->scaling),
+                                                  lround(vo->dheight / wl->scaling));
     wl_subsurface_set_position(wl->osd_subsurface, 0 - dst.x0, 0 - dst.y0);
     set_viewport_source(vo, src);
 }
@@ -778,12 +781,6 @@ static int preinit(struct vo *vo)
     if (!vo->wl->video_subsurface) {
         MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
                  wl_subcompositor_interface.name);
-        goto err;
-    }
-
-    if (!vo->wl->viewport) {
-        MP_FATAL(vo->wl, "Compositor doesn't support the %s protocol!\n",
-                 wp_viewporter_interface.name);
         goto err;
     }
 
