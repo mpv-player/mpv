@@ -28,7 +28,6 @@ void mp_set_codec_from_tag(struct mp_codec_params *c);
 void mp_set_pcm_codec(struct mp_codec_params *c, bool sign, bool is_float,
                       int bits, bool is_be);
 
-bool mp_codec_is_image(const char *codec);
 const char *mp_map_type_to_image_codec(const char *type);
 const char *mp_map_mimetype_to_video_codec(const char *mimetype);
 
