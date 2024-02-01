@@ -1200,9 +1200,20 @@ PROTOCOLS
 
     Digital TV via DVB. (Linux only.)
 
-``mf://[filemask|@listfile]`` ``--mf-...``
+``mf://[@listfile|filemask|glob|printf-format]`` ``--mf-...``
 
     Play a series of images as video.
+
+    If the URL path begins with ``@``, it is interpreted as the path to a file
+    containing a list of image paths separated by newlines. If the URL path
+    contains ``,``, it is interpreted as a list of image paths separated by
+    ``,``. If the URL path does not contain ``%`` and if on POSIX platforms, is
+    interpreted as a glob, and ``*`` is automatically appended if it was not
+    specified. Otherwise, the printf sequences ``%[.][NUM]d``, where ``NUM`` is
+    one, two, or three decimal digits, and ``%%`` and are interpreted. For
+    example, ``mf://image-%d.jpg`` plays files like ``image-1.jpg``,
+    ``image-2.jpg`` and ``image-10.jpg``, provided that there are no big gaps
+    between the files.
 
 ``cdda://[device]`` ``--cdrom-device=PATH`` ``--cdda-...``
 
