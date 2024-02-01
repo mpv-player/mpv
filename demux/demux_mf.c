@@ -186,7 +186,9 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
 
     // nspec==0 (zero specifiers) is rejected because fname wouldn't advance.
     if (bad_spec || nspec != 1) {
-        mp_err(log, "unsupported expr format: '%s'\n", filename);
+        mp_err(log,
+               "unsupported expr format: '%s' - exactly one format specifier of the form %%[.][NUM]d is expected\n",
+               filename);
         goto exit_mf;
     }
 
