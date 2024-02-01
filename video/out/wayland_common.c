@@ -295,7 +295,12 @@ static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
 {
     struct vo_wayland_state *wl = data;
 
-    double val = wl_fixed_to_double(value) < 0 ? -1 : 1;
+    // The axis value is specified in logical coordinates, but the exact value emitted
+    // by one mouse wheel click is unspecified. In practice, most compositors use either
+    // 10 (GNOME, Weston) or 15 (wlroots, same as libinput) as the value.
+    // Divide the value by 10 and clamp it between -1 and 1 so that mouse wheel clicks
+    // work as intended on all compositors while still allowing high resolution trackpads.
+    double val = MPCLAMP(wl_fixed_to_double(value) / 10.0, -1, 1);
     switch (axis) {
     case WL_POINTER_AXIS_VERTICAL_SCROLL:
         if (value > 0)
