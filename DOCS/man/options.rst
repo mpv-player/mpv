@@ -3236,7 +3236,7 @@ Window
     default, use ``--no-border`` to disable the standard window decorations.
 
 ``--title-bar``, ``--no-title-bar``
-    (Windows only)
+    (Windows and X11 only)
     Play video with the window title bar. Since this is on by default,
     use --no-title-bar to hide the title bar. The --no-border option takes
     precedence.
