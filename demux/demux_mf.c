@@ -95,7 +95,6 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
             }
             free_stream(s);
 
-            mp_info(log, "number of files: %d\n", mf->nr_of_files);
             goto exit_mf;
         }
         mp_info(log, "%s is not indirect filelist\n", filename + 1);
@@ -117,7 +116,6 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
             }
             talloc_free(fname2);
         }
-        mp_info(log, "number of files: %d\n", mf->nr_of_files);
 
         goto exit_mf;
     }
@@ -143,7 +141,6 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
                 continue;
             mf_add(mf, gg.gl_pathv[i]);
         }
-        mp_info(log, "number of files: %d\n", mf->nr_of_files);
         globfree(&gg);
         goto exit_mf;
     }
@@ -208,9 +205,8 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
         }
     }
 
-    mp_info(log, "number of files: %d\n", mf->nr_of_files);
-
 exit_mf:
+    mp_info(log, "number of files: %d\n", mf->nr_of_files);
     return mf;
 }
 
