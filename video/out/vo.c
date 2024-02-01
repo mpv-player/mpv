@@ -1171,6 +1171,16 @@ void vo_redraw(struct vo *vo)
     mp_mutex_unlock(&in->lock);
 }
 
+// Same as vo_redraw but the redraw is delayed until it
+// is detected in the playloop.
+void vo_set_want_redraw(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&in->lock);
+    in->want_redraw = true;
+    mp_mutex_unlock(&in->lock);
+}
+
 bool vo_want_redraw(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
