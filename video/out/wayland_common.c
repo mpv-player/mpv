@@ -1420,6 +1420,9 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, wl_seat_interface.name) && found++) {
+        if (ver < 5)
+            MP_WARN(wl, "Scrolling won't work because the compositor doesn't "
+                        "support version 5 of wl_seat protocol!\n");
 #ifdef HAVE_WAYLAND_1_21
         ver = MPMIN(ver, 8); /* Cap at 8 in case new events are added later. */
 #else
