@@ -436,12 +436,24 @@ static void touch_handle_cancel(void *data, struct wl_touch *wl_touch)
 {
 }
 
+static void touch_handle_shape(void *data, struct wl_touch *wl_touch,
+                               int32_t id, wl_fixed_t major, wl_fixed_t minor)
+{
+}
+
+static void touch_handle_orientation(void *data, struct wl_touch *wl_touch,
+                                     int32_t id, wl_fixed_t orientation)
+{
+}
+
 static const struct wl_touch_listener touch_listener = {
     touch_handle_down,
     touch_handle_up,
     touch_handle_motion,
     touch_handle_frame,
     touch_handle_cancel,
+    touch_handle_shape,
+    touch_handle_orientation,
 };
 
 static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
