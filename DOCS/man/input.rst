@@ -469,6 +469,12 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Append the file, and if nothing is currently playing, start playback.
         (Always starts with the added file, even if the playlist was not empty
         before running this command.)
+    <insert-next>
+        Insert the file into the playlist, directly after the current entry.
+    <insert-next-play>
+        Insert the file next, and if nothing is currently playing, start playback.
+        (Always starts with the added file, even if the playlist was not empty
+        before running this command.)
 
     The third argument is a list of options and values which should be set
     while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.

@@ -5527,9 +5527,13 @@ static void cmd_loadfile(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
-    int append = cmd->args[1].v.i;
+    int action = cmd->args[1].v.i;
 
-    if (!append)
+    bool replace = (action == 0);
+    bool insert_next = (action == 3 || action == 4);
+    bool play = (action == 2 || action == 4);
+
+    if (replace)
         playlist_clear(mpctx->playlist);
 
     struct playlist_entry *entry = playlist_entry_new(filename);
@@ -5538,13 +5542,18 @@ static void cmd_loadfile(void *p)
         for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
             playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
     }
-    playlist_add(mpctx->playlist, entry);
+
+    if (insert_next) {
+        playlist_insert_next(mpctx->playlist, entry, mpctx->playlist->current);
+    } else {
+        playlist_add(mpctx->playlist, entry);
+    }
 
     struct mpv_node *res = &cmd->result;
     node_init(res, MPV_FORMAT_NODE_MAP, NULL);
     node_map_add_int64(res, "playlist_entry_id", entry->id);
 
-    if (!append || (append == 2 && !mpctx->playlist->current)) {
+    if (replace || (play && !mpctx->playlist->current)) {
         if (mpctx->opts->position_save_on_quit) // requested in issue #1148
             mp_write_watch_later_conf(mpctx);
         mp_set_playlist_entry(mpctx, entry);
@@ -6681,7 +6690,9 @@ const struct mp_cmd_def mp_cmds[] = {
             {"flags", OPT_CHOICE(v.i,
                 {"replace", 0},
                 {"append", 1},
-                {"append-play", 2}),
+                {"append-play", 2},
+                {"insert-next", 3},
+                {"insert-next-play", 4}),
                 .flags = MP_CMD_OPT_ARG},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
         },
