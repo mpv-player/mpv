@@ -70,6 +70,25 @@ void playlist_add(struct playlist *pl, struct playlist_entry *add)
     talloc_steal(pl, add);
 }
 
+// Inserts the entry so that it comes directly after "at" (or move to end, if at==NULL).
+void playlist_insert_next(struct playlist *pl, struct playlist_entry *add,
+                          struct playlist_entry *at)
+{
+    assert(add->filename);
+    assert(!at || at->pl == pl);
+
+    int index = at ? at->pl_index + 1 : pl->num_entries;
+    MP_TARRAY_INSERT_AT(pl, pl->entries, pl->num_entries, index, add);
+
+    add->pl = pl;
+    add->pl_index = index;
+    add->id = ++pl->id_alloc;
+
+    playlist_update_indexes(pl, index, pl->num_entries);
+
+    talloc_steal(pl, add);
+}
+
 void playlist_entry_unref(struct playlist_entry *e)
 {
     e->reserved--;
