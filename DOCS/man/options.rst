@@ -5299,8 +5299,8 @@ them.
         (This filter is an alias for ``jinc``-windowed ``jinc``)
 
     ``ewa_lanczossharp``
-        A slightly sharpened version of ewa_lanczos. This is the default when
-        using the ``high-quality`` profile.
+        A slightly sharpened version of ``ewa_lanczos``. This is the default
+        when using the ``high-quality`` profile.
 
     ``ewa_lanczos4sharpest``
         Very sharp scaler, but also slightly slower than ``ewa_lanczossharp``.
@@ -5309,8 +5309,10 @@ them.
         built-in anti-ringing, so no extra action needs to be taken.
 
     ``mitchell``
-        Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
-        ``--scale-param1`` and ``--scale-param2``.
+        Mitchell-Netravali. Piecewise cubic filter with a support of radius 2.0.
+        Provides a balanced compromise of all scaling artifacts. This filter has
+        both ``B`` and ``C`` set to ``1/3``. The ``B`` and ``C`` parameters can
+        be controlled with ``--scale-param1`` and ``--scale-param2``.
 
     ``hermite``
         Hermite spline. Similar to ``bicubic`` but with ``B`` set to ``0.0``.
@@ -5319,10 +5321,9 @@ them.
         default for ``--dscale``.
 
     ``catmull_rom``
-        Catmull-Rom. A Cubic filter in the same vein as ``mitchell``, where
-        the ``B`` and ``C`` parameters are ``0.0`` and ``0.5`` respectively.
-        This filter is sharper than ``mitchell``, but it results in more
-        ringing.
+        Catmull-Rom spline. Similar to ``mitchell``, but with ``B`` and ``C``
+        set to ``0.0`` and ``0.5`` respectively. This filter is sharper than
+        ``mitchell``, but prone to ringing.
 
     ``oversample``
         A version of nearest neighbour that (naively) oversamples pixels, so
