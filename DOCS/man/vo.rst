@@ -567,30 +567,6 @@ Available video output drivers are:
     This also supports many of the options the ``gpu`` VO has, depending on the
     backend.
 
-``rpi`` (Raspberry Pi)
-    Native video output on the Raspberry Pi using the MMAL API.
-
-    The following global options are supported by this video output:
-
-    ``--rpi-display=<number>``
-        Select the display number on which the video overlay should be shown
-        (default: 0).
-
-    ``--rpi-layer=<number>``
-        Select the dispmanx layer on which the video overlay should be shown
-        (default: -10). Note that mpv will also use the 2 layers above the
-        selected layer, to handle the window background and OSD. Actual video
-        rendering will happen on the layer above the selected layer.
-
-    ``--rpi-background=<yes|no>``
-        Whether to render a black background behind the video (default: no).
-        Normally it's better to kill the console framebuffer instead, which
-        gives better performance.
-
-    ``--rpi-osd=<yes|no>``
-        Enabled by default. If disabled with ``no``, no OSD layer is created.
-        This also means there will be no subtitles rendered.
-
 ``drm`` (Direct Rendering Manager)
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.
     Should be used when one doesn't want to install full-blown graphical

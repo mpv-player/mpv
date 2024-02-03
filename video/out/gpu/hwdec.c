@@ -34,7 +34,6 @@ extern const struct ra_hwdec_driver ra_hwdec_dxva2gldx;
 extern const struct ra_hwdec_driver ra_hwdec_d3d11va;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2dxgi;
 extern const struct ra_hwdec_driver ra_hwdec_cuda;
-extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_aimagereader;
@@ -69,9 +68,6 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #endif
 #if HAVE_VDPAU_GL_X11
     &ra_hwdec_vdpau,
-#endif
-#if HAVE_RPI_MMAL
-    &ra_hwdec_rpi_overlay,
 #endif
 #if HAVE_DRM
     &ra_hwdec_drmprime,
