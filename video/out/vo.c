@@ -63,7 +63,6 @@ extern const struct vo_driver video_out_sdl;
 extern const struct vo_driver video_out_vaapi;
 extern const struct vo_driver video_out_dmabuf_wayland;
 extern const struct vo_driver video_out_wlshm;
-extern const struct vo_driver video_out_rpi;
 extern const struct vo_driver video_out_tct;
 extern const struct vo_driver video_out_sixel;
 extern const struct vo_driver video_out_kitty;
@@ -109,9 +108,6 @@ static const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_DRM
     &video_out_drm,
-#endif
-#if HAVE_RPI_MMAL
-    &video_out_rpi,
 #endif
 #if HAVE_SIXEL
     &video_out_sixel,

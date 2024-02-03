@@ -1315,8 +1315,6 @@ Video
     :mediacodec: requires ``--vo=gpu --gpu-context=android``
                  or ``--vo=mediacodec_embed`` (Android only)
     :mediacodec-copy: copies video back to system RAM (Android only)
-    :mmal:      requires ``--vo=gpu`` (Raspberry Pi only - default if available)
-    :mmal-copy: copies video back to system RAM (Raspberry Pi only)
     :cuda:      requires ``--vo=gpu`` (Any platform CUDA is available)
     :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
     :crystalhd: copies video back to system RAM (Any platform supported by hardware)
@@ -1410,9 +1408,6 @@ Video
         In addition to driver-specific behavior, global system settings might
         affect this additionally. This can give incorrect results even with
         completely ordinary video sources.
-
-        ``rpi`` always uses the hardware overlay renderer, even with
-        ``--vo=gpu``.
 
         ``mediacodec`` is not safe. It forces RGB conversion (not with ``-copy``)
         and how well it handles non-standard colorspaces is not known.

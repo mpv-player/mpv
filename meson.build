@@ -1219,16 +1219,7 @@ if plain_gl.allowed()
     features += {'gl': true}
 endif
 
-rpi = dependency('/opt/vc/lib/pkgconfig/brcmegl.pc', 'brcmegl', required: get_option('rpi'))
-features += {'rpi': gl_allowed and rpi.found()}
-if features['rpi']
-    dependencies += rpi
-    features += {'gl': true}
-    sources += files('video/out/opengl/context_rpi.c')
-endif
-
-features += {'egl-helpers': features['egl'] or egl_android.found() or
-             egl_angle_win32.allowed() or features['rpi']}
+features += {'egl-helpers': features['egl'] or egl_android.found() or egl_angle_win32.allowed()}
 if features['egl-helpers']
     sources += files('video/out/opengl/egl_helpers.c')
 endif
@@ -1375,18 +1366,6 @@ ios_gl = cc.has_header_symbol('OpenGLES/ES3/glext.h', 'GL_RGB32F', required: get
 features += {'ios-gl': ios_gl}
 if features['ios-gl']
     sources += files('video/out/hwdec/hwdec_ios_gl.m')
-endif
-
-rpi_mmal_opt = get_option('rpi-mmal').require(
-    features['rpi'],
-    error_message: 'rpi was not found!',
-)
-rpi_mmal = dependency('/opt/vc/lib/pkgconfig/mmal.pc', 'mmal', required: rpi_mmal_opt)
-features += {'rpi-mmal': rpi_mmal.found()}
-if features['rpi-mmal']
-    dependencies += rpi_mmal
-    sources += files('video/out/opengl/hwdec_rpi.c',
-                     'video/out/vo_rpi.c')
 endif
 
 libva = dependency('libva', version: '>= 1.1.0', required: get_option('vaapi'))
