@@ -379,6 +379,15 @@ pthread_debug = get_option('pthread-debug').require(
 )
 features += {'pthread-debug': pthread_debug.allowed()}
 
+if get_option('fuzzers')
+    if get_option('cplayer') or not get_option('libmpv')
+        error('fuzzers require !cplayer and libmpv')
+    endif
+    # Adding flags manually until https://github.com/mesonbuild/meson/pull/9825
+    flags += ['-fsanitize=address,undefined,fuzzer', '-fno-omit-frame-pointer']
+    link_flags += ['-fsanitize=address,undefined,fuzzer', '-fno-omit-frame-pointer']
+endif
+
 add_project_arguments(flags, language: 'c')
 add_project_arguments(['-Wno-unused-parameter'], language: 'objc')
 add_project_link_arguments(link_flags, language: ['c', 'objc'])
@@ -1801,6 +1810,10 @@ endif
 
 if get_option('tests')
     subdir('test')
+endif
+
+if get_option('fuzzers')
+    subdir('fuzzers')
 endif
 
 summary({'d3d11': features['d3d11'],
