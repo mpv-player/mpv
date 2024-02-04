@@ -5573,24 +5573,32 @@ static void cmd_loadlist(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
-    int append = cmd->args[1].v.i;
+    int flag = cmd->args[1].v.i;
+
+    bool replace = (flag == 0);
+    bool insert_next = (flag == 3 || flag == 4);
+    bool play = (flag == 2 || flag == 4);
 
     struct playlist *pl = playlist_parse_file(filename, cmd->abort->cancel,
                                               mpctx->global);
     if (pl) {
         prepare_playlist(mpctx, pl);
         struct playlist_entry *new = pl->current;
-        if (!append)
+        if (replace)
             playlist_clear(mpctx->playlist);
         struct playlist_entry *first = playlist_entry_from_index(pl, 0);
         int num_entries = pl->num_entries;
-        playlist_append_entries(mpctx->playlist, pl);
+        if (insert_next) {
+            playlist_transfer_entries(mpctx->playlist, pl);
+        } else {
+            playlist_append_entries(mpctx->playlist, pl);
+        }
         talloc_free(pl);
 
         if (!new)
             new = playlist_get_first(mpctx->playlist);
 
-        if ((!append || (append == 2 && !mpctx->playlist->current)) && new)
+        if ((replace || (play && !mpctx->playlist->current)) && new)
             mp_set_playlist_entry(mpctx, new);
 
         struct mpv_node *res = &cmd->result;
@@ -6709,7 +6717,9 @@ const struct mp_cmd_def mp_cmds[] = {
             {"flags", OPT_CHOICE(v.i,
                 {"replace", 0},
                 {"append", 1},
-                {"append-play", 2}),
+                {"append-play", 2},
+                {"insert-next", 3},
+                {"insert-next-play", 4}),
                 .flags = MP_CMD_OPT_ARG},
         },
         .spawn_thread = true,

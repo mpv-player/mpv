@@ -496,6 +496,13 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Append the new playlist, and if nothing is currently playing, start
         playback. (Always starts with the new playlist, even if the internal
         playlist was not empty before running this command.)
+    <insert-next>
+        Insert the new playlist into the current internal playlist, directly
+        after the current entry.
+    <insert-next-play>
+        Insert the new playlist, and if nothing is currently playing, start
+        playback. (Always starts with the new playlist, even if the internal
+        playlist was not empty before running this command.)
 
 ``playlist-clear``
     Clear the playlist, except the currently played file.
