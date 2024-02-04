@@ -134,6 +134,7 @@ struct vo_internal {
     bool want_redraw;               // redraw request from VO to player
     bool send_reset;                // send VOCTRL_RESET
     bool paused;
+    bool wakeup_on_done;
     int queued_events;              // event mask for the user
     int internal_events;            // event mask for us
 
@@ -767,6 +768,41 @@ void vo_wakeup(struct vo *vo)
     mp_mutex_unlock(&in->lock);
 }
 
+static bool still_displaying(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    int64_t now = mp_time_ns();
+    int64_t frame_end = 0;
+    if (in->current_frame) {
+        frame_end = in->current_frame->pts + MPMAX(in->current_frame->duration, 0);
+        if (in->current_frame->display_synced)
+            frame_end = in->current_frame->num_vsyncs > 0 ? INT64_MAX : 0;
+    }
+    return (now < frame_end || in->rendering || in->frame_queued) && in->hasframe;
+}
+
+// Return true if there is still a frame being displayed (or queued).
+bool vo_still_displaying(struct vo *vo)
+{
+    mp_mutex_lock(&vo->in->lock);
+    bool res = still_displaying(vo);
+    mp_mutex_unlock(&vo->in->lock);
+    return res;
+}
+
+// Make vo issue a wakeup once vo_still_displaying() becomes true.
+void vo_request_wakeup_on_done(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&vo->in->lock);
+    if (still_displaying(vo)) {
+        in->wakeup_on_done = true;
+    } else {
+        wakeup_core(vo);
+    }
+    mp_mutex_unlock(&vo->in->lock);
+}
+
 // Whether vo_queue_frame() can be called. If the VO is not ready yet, the
 // function will return false, and the VO will call the wakeup callback once
 // it's ready.
@@ -925,6 +961,7 @@ static bool render_frame(struct vo *vo)
 
     if (in->dropped_frame) {
         in->drop_count += 1;
+        wakeup_core(vo);
     } else {
         in->rendering = true;
         in->hasframe_rendered = true;
@@ -996,11 +1033,14 @@ static bool render_frame(struct vo *vo)
         more_frames = true;
 
     mp_cond_broadcast(&in->wakeup); // for vo_wait_frame()
-    wakeup_core(vo);
 
 done:
     if (!vo->driver->frame_owner || in->dropped_frame)
         talloc_free(frame);
+    if (in->wakeup_on_done && !still_displaying(vo)) {
+        in->wakeup_on_done = false;
+        wakeup_core(vo);
+    }
     mp_mutex_unlock(&in->lock);
 
     return more_frames;
@@ -1195,24 +1235,6 @@ void vo_seek_reset(struct vo *vo)
     in->send_reset = true;
     wakeup_locked(vo);
     mp_mutex_unlock(&in->lock);
-}
-
-// Return true if there is still a frame being displayed (or queued).
-// If this returns true, a wakeup some time in the future is guaranteed.
-bool vo_still_displaying(struct vo *vo)
-{
-    struct vo_internal *in = vo->in;
-    mp_mutex_lock(&vo->in->lock);
-    int64_t now = mp_time_ns();
-    int64_t frame_end = 0;
-    if (in->current_frame) {
-        frame_end = in->current_frame->pts + MPMAX(in->current_frame->duration, 0);
-        if (in->current_frame->display_synced)
-            frame_end = in->current_frame->num_vsyncs > 0 ? INT64_MAX : 0;
-    }
-    bool working = now < frame_end || in->rendering || in->frame_queued;
-    mp_mutex_unlock(&vo->in->lock);
-    return working && in->hasframe;
 }
 
 // Whether at least 1 frame was queued or rendered since last seek or reconfig.
