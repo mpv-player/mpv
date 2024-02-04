@@ -37,6 +37,21 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
             };
             mp_input_run_cmd(ictx, cmd);
         }
+    } else if (action == DND_INSERT_NEXT) {
+        /* To insert the entries in the correct order, we iterate over them
+           backwards */
+        for (int i = num_files - 1; i >= 0; i--) {
+            const char *cmd[] = {
+                "osd-auto",
+                "loadfile",
+                files[i],
+                /* Since we're inserting in reverse, wait til the final item
+                   is added to start playing */
+                (i > 0) ? "insert-next" : "insert-next-play",
+                NULL
+            };
+            mp_input_run_cmd(ictx, cmd);
+        }
     } else {
         for (int i = 0; i < num_files; i++) {
             const char *cmd[] = {

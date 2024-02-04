@@ -24,16 +24,17 @@ struct input_ctx;
 enum mp_dnd_action {
     DND_REPLACE,
     DND_APPEND,
+    DND_INSERT_NEXT,
 };
 
 // Enqueue files for playback after drag and drop
 void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
-                         enum mp_dnd_action append);
+                         enum mp_dnd_action action);
 
 // Drop data in a specific format (identified by the mimetype).
 // Returns <0 on error, ==0 if data was ok but empty, >0 on success.
 int mp_event_drop_mime_data(struct input_ctx *ictx, const char *mime_type,
-                            bstr data, enum mp_dnd_action append);
+                            bstr data, enum mp_dnd_action action);
 
 // Many drag & drop APIs support multiple mime types, and this function returns
 // whether a type is preferred (higher integer score), or supported (scores
