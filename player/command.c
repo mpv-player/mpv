@@ -5549,11 +5549,10 @@ static void cmd_loadfile(void *p)
             playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
     }
 
-    if (insert_next) {
-        playlist_insert_next(mpctx->playlist, entry, mpctx->playlist->current);
-    } else {
-        playlist_add(mpctx->playlist, entry);
-    }
+    struct playlist_entry *at = insert_next ?
+        playlist_get_next(mpctx->playlist, +1) : NULL;
+
+    playlist_insert_at(mpctx->playlist, entry, at);
 
     struct mpv_node *res = &cmd->result;
     node_init(res, MPV_FORMAT_NODE_MAP, NULL);
