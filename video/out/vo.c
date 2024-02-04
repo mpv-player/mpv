@@ -768,17 +768,28 @@ void vo_wakeup(struct vo *vo)
     mp_mutex_unlock(&in->lock);
 }
 
+static int64_t get_current_frame_end(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    if (!in->current_frame)
+        return -1;
+    return in->current_frame->pts + MPMAX(in->current_frame->duration, 0);
+}
+
 static bool still_displaying(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
-    int64_t now = mp_time_ns();
-    int64_t frame_end = 0;
-    if (in->current_frame) {
-        frame_end = in->current_frame->pts + MPMAX(in->current_frame->duration, 0);
-        if (in->current_frame->display_synced)
-            frame_end = in->current_frame->num_vsyncs > 0 ? INT64_MAX : 0;
-    }
-    return (now < frame_end || in->rendering || in->frame_queued) && in->hasframe;
+    bool working = in->rendering || in->frame_queued;
+    if (working)
+        goto done;
+
+    int64_t frame_end = get_current_frame_end(vo);
+    if (frame_end < 0)
+        goto done;
+    working = mp_time_ns() < frame_end;
+
+done:
+    return working && in->hasframe;
 }
 
 // Return true if there is still a frame being displayed (or queued).
@@ -790,7 +801,7 @@ bool vo_still_displaying(struct vo *vo)
     return res;
 }
 
-// Make vo issue a wakeup once vo_still_displaying() becomes true.
+// Make vo issue a wakeup once vo_still_displaying() becomes false.
 void vo_request_wakeup_on_done(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
@@ -1037,10 +1048,6 @@ static bool render_frame(struct vo *vo)
 done:
     if (!vo->driver->frame_owner || in->dropped_frame)
         talloc_free(frame);
-    if (in->wakeup_on_done && !still_displaying(vo)) {
-        in->wakeup_on_done = false;
-        wakeup_core(vo);
-    }
     mp_mutex_unlock(&in->lock);
 
     return more_frames;
@@ -1116,6 +1123,8 @@ static MP_THREAD_VOID vo_thread(void *ptr)
         bool working = render_frame(vo);
         int64_t now = mp_time_ns();
         int64_t wait_until = now + MP_TIME_S_TO_NS(working ? 0 : 1000);
+        bool wakeup_on_done = false;
+        int64_t wakeup_core_after = 0;
 
         mp_mutex_lock(&in->lock);
         if (in->wakeup_pts) {
@@ -1129,6 +1138,14 @@ static MP_THREAD_VOID vo_thread(void *ptr)
         if (vo->want_redraw && !in->want_redraw) {
             in->want_redraw = true;
             wakeup_core(vo);
+        }
+        if ((!working && !in->rendering && !in->frame_queued) && in->wakeup_on_done) {
+            // At this point we know VO is going to sleep
+            int64_t frame_end = get_current_frame_end(vo);
+            if (frame_end >= 0)
+                wakeup_core_after = frame_end;
+            wakeup_on_done = true;
+            in->wakeup_on_done = false;
         }
         vo->want_redraw = false;
         bool redraw = in->request_redraw;
@@ -1151,6 +1168,17 @@ static MP_THREAD_VOID vo_thread(void *ptr)
 
         if (wait_until <= now)
             continue;
+
+        if (wakeup_on_done) {
+            // At this point wait_until should be longer than frame duration
+            if (wakeup_core_after >= 0 && wait_until >= wakeup_core_after) {
+                wait_vo(vo, wakeup_core_after);
+                mp_mutex_lock(&in->lock);
+                in->need_wakeup = true;
+                mp_mutex_unlock(&in->lock);
+            }
+            wakeup_core(vo);
+        }
 
         wait_vo(vo, wait_until);
     }
