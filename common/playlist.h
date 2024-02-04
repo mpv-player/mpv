@@ -81,10 +81,8 @@ void playlist_entry_add_params(struct playlist_entry *e,
 
 struct playlist_entry *playlist_entry_new(const char *filename);
 
-void playlist_add(struct playlist *pl, struct playlist_entry *add);
-
-void playlist_insert_next(struct playlist *pl, struct playlist_entry *entry,
-                          struct playlist_entry *at);
+void playlist_insert_at(struct playlist *pl, struct playlist_entry *entry,
+                        struct playlist_entry *at);
 
 void playlist_remove(struct playlist *pl, struct playlist_entry *entry);
 void playlist_clear(struct playlist *pl);
@@ -93,7 +91,7 @@ void playlist_clear_except_current(struct playlist *pl);
 void playlist_move(struct playlist *pl, struct playlist_entry *entry,
                    struct playlist_entry *at);
 
-void playlist_add_file(struct playlist *pl, const char *filename);
+void playlist_append_file(struct playlist *pl, const char *filename);
 void playlist_populate_playlist_path(struct playlist *pl, const char *path);
 void playlist_shuffle(struct playlist *pl);
 void playlist_unshuffle(struct playlist *pl);

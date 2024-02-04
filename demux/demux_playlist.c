@@ -202,7 +202,7 @@ static void pl_free_line(struct pl_parser *p, bstr line)
 static void pl_add(struct pl_parser *p, bstr entry)
 {
     char *s = bstrto0(NULL, entry);
-    playlist_add_file(p->pl, s);
+    playlist_append_file(p->pl, s);
     talloc_free(s);
 }
 
@@ -266,7 +266,7 @@ ok:
             talloc_free(fn);
             e->title = talloc_steal(e, title);
             title = NULL;
-            playlist_add(p->pl, e);
+            playlist_insert_at(p->pl, e, NULL);
         }
         pl_free_line(p, line);
         line = pl_get_line(p);
@@ -296,7 +296,7 @@ static int parse_ref_init(struct pl_parser *p)
     bstr burl = bstr0(p->s->url);
     if (bstr_eatstart0(&burl, "http://") && check_mimetype(p->s, mmsh_types)) {
         MP_INFO(p, "Redirecting to mmsh://\n");
-        playlist_add_file(p->pl, talloc_asprintf(p, "mmsh://%.*s", BSTR_P(burl)));
+        playlist_append_file(p->pl, talloc_asprintf(p, "mmsh://%.*s", BSTR_P(burl)));
         return 0;
     }
 
@@ -456,7 +456,7 @@ static bool scan_dir(struct pl_parser *p, char *path,
             scan_dir(p, file, dir_stack, num_dir_stack + 1);
         }
         else {
-            playlist_add_file(p->pl, dir_entries[n].path);
+            playlist_append_file(p->pl, dir_entries[n].path);
         }
     }
 
