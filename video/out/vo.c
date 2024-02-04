@@ -1202,9 +1202,16 @@ void vo_seek_reset(struct vo *vo)
 bool vo_still_displaying(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
-    mp_mutex_lock(&in->lock);
-    bool working = in->rendering || in->frame_queued;
-    mp_mutex_unlock(&in->lock);
+    mp_mutex_lock(&vo->in->lock);
+    int64_t now = mp_time_ns();
+    int64_t frame_end = 0;
+    if (in->current_frame) {
+        frame_end = in->current_frame->pts + MPMAX(in->current_frame->duration, 0);
+        if (in->current_frame->display_synced)
+            frame_end = in->current_frame->num_vsyncs > 0 ? INT64_MAX : 0;
+    }
+    bool working = now < frame_end || in->rendering || in->frame_queued;
+    mp_mutex_unlock(&vo->in->lock);
     return working && in->hasframe;
 }
 
