@@ -136,19 +136,18 @@ static void prepare_avframe(AVFrame *pic, AVCodecContext *avctx,
     pic->format = avctx->pix_fmt;
     pic->width = avctx->width;
     pic->height = avctx->height;
-    avctx->color_range = pic->color_range =
-        pl_levels_to_av(image->params.repr.levels);
+    pl_avframe_set_repr(pic, image->params.repr);
+    avctx->colorspace = pic->colorspace;
+    avctx->color_range = pic->color_range;
 
     if (!tag_csp)
         return;
-    avctx->color_primaries = pic->color_primaries =
-        pl_primaries_to_av(image->params.color.primaries);
-    avctx->color_trc = pic->color_trc =
-        pl_transfer_to_av(image->params.color.transfer);
-    avctx->colorspace = pic->colorspace =
-        pl_system_to_av(image->params.repr.sys);
+    pl_avframe_set_color(pic, image->params.color);
+    avctx->color_primaries = pic->color_primaries;
+    avctx->color_trc = pic->color_trc;
     avctx->chroma_sample_location = pic->chroma_location =
         pl_chroma_to_av(image->params.chroma_location);
+
     mp_dbg(log, "mapped color params:\n"
         "  trc = %s\n"
         "  primaries = %s\n"
