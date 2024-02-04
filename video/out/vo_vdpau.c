@@ -80,7 +80,7 @@ struct vdpctx {
 
     struct mp_image                   *current_image;
     int64_t                            current_pts;
-    int                                current_duration;
+    int64_t                            current_duration;
 
     int                                output_surface_w, output_surface_h;
     int                                rotation;
@@ -754,8 +754,8 @@ static void flip_page(struct vo *vo)
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
-    int64_t pts_us = vc->current_pts;
-    int duration = vc->current_duration;
+    int64_t pts_ns = vc->current_pts;
+    int64_t duration = vc->current_duration;
 
     vc->dropped_frame = true; // changed at end if false
 
@@ -770,10 +770,8 @@ static void flip_page(struct vo *vo)
     }
     vc->vsync_interval = MPMAX(vc->vsync_interval, 1);
 
-    if (duration > INT_MAX / 1000)
+    if (duration > INT_MAX)
         duration = -1;
-    else
-        duration *= 1000;
 
     if (vc->vsync_interval == 1)
         duration = -1;  // Make sure drop logic is disabled
@@ -782,8 +780,8 @@ static void flip_page(struct vo *vo)
     vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
     CHECK_VDP_WARNING(vo, "Error when calling vdp_presentation_queue_get_time");
 
-    int64_t rel_pts_ns = (pts_us * 1000) - mp_time_ns();
-    if (!pts_us || rel_pts_ns < 0)
+    int64_t rel_pts_ns = pts_ns - mp_time_ns();
+    if (!pts_ns || rel_pts_ns < 0)
         rel_pts_ns = 0;
 
     uint64_t now = vdp_time;
