@@ -336,6 +336,7 @@ static const struct {
     { "xface",          "xface" },
     { "xwd",            "xwd" },
     { "svg",            "svg" },
+    { "webp",           "webp" },
     { "jxl",            "jpegxl" },
     {0}
 };
