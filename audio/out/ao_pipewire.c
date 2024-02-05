@@ -86,7 +86,7 @@ struct id_list {
     struct spa_list node;
 };
 
-static enum spa_audio_format af_fmt_to_pw(struct ao *ao, enum af_format format)
+static enum spa_audio_format af_fmt_to_pw(enum af_format format)
 {
     switch (format) {
     case AF_FORMAT_U8:          return SPA_AUDIO_FORMAT_U8;
@@ -99,9 +99,7 @@ static enum spa_audio_format af_fmt_to_pw(struct ao *ao, enum af_format format)
     case AF_FORMAT_S32P:        return SPA_AUDIO_FORMAT_S32P;
     case AF_FORMAT_FLOATP:      return SPA_AUDIO_FORMAT_F32P;
     case AF_FORMAT_DOUBLEP:     return SPA_AUDIO_FORMAT_F64P;
-    default:
-                                MP_WARN(ao, "Unhandled format %d\n", format);
-                                return SPA_AUDIO_FORMAT_UNKNOWN;
+    default:                    return SPA_AUDIO_FORMAT_UNKNOWN;
     }
 }
 
@@ -580,10 +578,10 @@ static int init(struct ao *ao)
 
     pw_properties_setf(props, PW_KEY_NODE_RATE, "1/%d", ao->samplerate);
 
-    enum spa_audio_format spa_format = af_fmt_to_pw(ao, ao->format);
+    enum spa_audio_format spa_format = af_fmt_to_pw(ao->format);
     if (spa_format == SPA_AUDIO_FORMAT_UNKNOWN) {
-        ao->format = AF_FORMAT_FLOATP;
-        spa_format = SPA_AUDIO_FORMAT_F32P;
+        MP_ERR(ao, "Unhandled format %d\n", ao->format);
+        goto error_props;
     }
 
     struct spa_audio_info_raw audio_info = {
