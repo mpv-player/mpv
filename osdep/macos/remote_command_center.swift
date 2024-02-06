@@ -17,7 +17,7 @@
 
 import MediaPlayer
 
-class RemoteCommandCenter: NSObject {
+extension RemoteCommandCenter {
     enum KeyType {
         case normal
         case repeatable
@@ -33,7 +33,9 @@ class RemoteCommandCenter: NSObject {
             self.type = type
         }
     }
+}
 
+class RemoteCommandCenter: NSObject {
     var configs: [MPRemoteCommand:Config] = [
         MPRemoteCommandCenter.shared().pauseCommand: Config(key: MP_KEY_PAUSEONLY),
         MPRemoteCommandCenter.shared().playCommand: Config(key: MP_KEY_PLAYONLY),
