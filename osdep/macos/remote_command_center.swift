@@ -141,12 +141,8 @@ class RemoteCommandCenter: NSObject {
 
         var state = config.state
         if config.type == .repeatable {
-            state = MP_KEY_STATE_DOWN
-            configs[event.command]?.state = MP_KEY_STATE_DOWN
-            if config.state == MP_KEY_STATE_DOWN {
-                state = MP_KEY_STATE_UP
-                configs[event.command]?.state = MP_KEY_STATE_UP
-            }
+            state = config.state == MP_KEY_STATE_DOWN ? MP_KEY_STATE_UP : MP_KEY_STATE_DOWN
+            self.configs[event.command]?.state = state
         }
 
         EventsResponder.sharedInstance().handleMPKey(config.key, withMask: Int32(state))
