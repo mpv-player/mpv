@@ -23,41 +23,28 @@ class RemoteCommandCenter: NSObject {
         case repeatable
     }
 
-    var config: [MPRemoteCommand:[String:Any]] = [
-        MPRemoteCommandCenter.shared().pauseCommand: [
-            "mpKey": MP_KEY_PAUSEONLY,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().playCommand: [
-            "mpKey": MP_KEY_PLAYONLY,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().stopCommand: [
-            "mpKey": MP_KEY_STOP,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().nextTrackCommand: [
-            "mpKey": MP_KEY_NEXT,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().previousTrackCommand: [
-            "mpKey": MP_KEY_PREV,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().togglePlayPauseCommand: [
-            "mpKey": MP_KEY_PLAY,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().seekForwardCommand: [
-            "mpKey": MP_KEY_FORWARD,
-            "keyType": KeyType.repeatable,
-            "state": MP_KEY_STATE_UP
-        ],
-        MPRemoteCommandCenter.shared().seekBackwardCommand: [
-            "mpKey": MP_KEY_REWIND,
-            "keyType": KeyType.repeatable,
-            "state": MP_KEY_STATE_UP
-        ],
+    struct Config {
+        let key: Int32
+        let type: KeyType
+        var state: UInt32 = 0
+
+        init(key: Int32, type: KeyType = .normal) {
+            self.key = key
+            self.type = type
+        }
+    }
+
+    var configs: [MPRemoteCommand:Config] = [
+        MPRemoteCommandCenter.shared().pauseCommand: Config(key: MP_KEY_PAUSEONLY),
+        MPRemoteCommandCenter.shared().playCommand: Config(key: MP_KEY_PLAYONLY),
+        MPRemoteCommandCenter.shared().stopCommand: Config(key: MP_KEY_STOP),
+        MPRemoteCommandCenter.shared().nextTrackCommand: Config(key: MP_KEY_NEXT),
+        MPRemoteCommandCenter.shared().previousTrackCommand: Config(key: MP_KEY_PREV),
+        MPRemoteCommandCenter.shared().togglePlayPauseCommand: Config(key: MP_KEY_PLAY),
+        MPRemoteCommandCenter.shared().seekForwardCommand:
+            Config(key: MP_KEY_FORWARD, type: .repeatable),
+        MPRemoteCommandCenter.shared().seekBackwardCommand:
+            Config(key: MP_KEY_REWIND, type: .repeatable)
     ]
 
     var nowPlayingInfo: [String: Any] = [
@@ -97,7 +84,7 @@ class RemoteCommandCenter: NSObject {
     }
 
     @objc func start() {
-        for (cmd, _) in config {
+        for (cmd, _) in configs {
             cmd.isEnabled = true
             cmd.addTarget { [unowned self] event in
                 return self.cmdHandler(event)
@@ -123,7 +110,7 @@ class RemoteCommandCenter: NSObject {
     }
 
     @objc func stop() {
-        for (cmd, _) in config {
+        for (cmd, _) in configs {
             cmd.isEnabled = false
             cmd.removeTarget(nil)
         }
@@ -143,25 +130,21 @@ class RemoteCommandCenter: NSObject {
     }
 
     func cmdHandler(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        guard let cmdConfig = config[event.command],
-              let mpKey = cmdConfig["mpKey"] as? Int32,
-              let keyType = cmdConfig["keyType"] as? KeyType else
-        {
+        guard let config = configs[event.command] else {
             return .commandFailed
         }
 
-        var state = cmdConfig["state"] as? UInt32 ?? 0
-
-        if let currentState = cmdConfig["state"] as? UInt32, keyType == .repeatable {
+        var state = config.state
+        if config.type == .repeatable {
             state = MP_KEY_STATE_DOWN
-            config[event.command]?["state"] = MP_KEY_STATE_DOWN
-            if currentState == MP_KEY_STATE_DOWN {
+            configs[event.command]?.state = MP_KEY_STATE_DOWN
+            if config.state == MP_KEY_STATE_DOWN {
                 state = MP_KEY_STATE_UP
-                config[event.command]?["state"] = MP_KEY_STATE_UP
+                configs[event.command]?.state = MP_KEY_STATE_UP
             }
         }
 
-        EventsResponder.sharedInstance().handleMPKey(mpKey, withMask: Int32(state))
+        EventsResponder.sharedInstance().handleMPKey(config.key, withMask: Int32(state))
 
         return .success
     }
