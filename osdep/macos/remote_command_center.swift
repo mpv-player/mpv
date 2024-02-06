@@ -36,49 +36,59 @@ extension RemoteCommandCenter {
 }
 
 class RemoteCommandCenter: NSObject {
-    var configs: [MPRemoteCommand:Config] = [
-        MPRemoteCommandCenter.shared().pauseCommand: Config(key: MP_KEY_PAUSEONLY),
-        MPRemoteCommandCenter.shared().playCommand: Config(key: MP_KEY_PLAYONLY),
-        MPRemoteCommandCenter.shared().stopCommand: Config(key: MP_KEY_STOP),
-        MPRemoteCommandCenter.shared().nextTrackCommand: Config(key: MP_KEY_NEXT),
-        MPRemoteCommandCenter.shared().previousTrackCommand: Config(key: MP_KEY_PREV),
-        MPRemoteCommandCenter.shared().togglePlayPauseCommand: Config(key: MP_KEY_PLAY),
-        MPRemoteCommandCenter.shared().seekForwardCommand:
-            Config(key: MP_KEY_FORWARD, type: .repeatable),
-        MPRemoteCommandCenter.shared().seekBackwardCommand:
-            Config(key: MP_KEY_REWIND, type: .repeatable)
-    ]
-
-    var nowPlayingInfo: [String: Any] = [
-        MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
-        MPNowPlayingInfoPropertyDefaultPlaybackRate: NSNumber(value: 1),
-        MPNowPlayingInfoPropertyPlaybackProgress: NSNumber(value: 0.0),
-        MPMediaItemPropertyPlaybackDuration: NSNumber(value: 0),
-        MPMediaItemPropertyTitle: "mpv",
-        MPMediaItemPropertyAlbumTitle: "mpv",
-        MPMediaItemPropertyArtist: "mpv",
-    ]
-
-    let disabledCommands: [MPRemoteCommand] = [
-        MPRemoteCommandCenter.shared().changePlaybackRateCommand,
-        MPRemoteCommandCenter.shared().changeRepeatModeCommand,
-        MPRemoteCommandCenter.shared().changeShuffleModeCommand,
-        MPRemoteCommandCenter.shared().skipForwardCommand,
-        MPRemoteCommandCenter.shared().skipBackwardCommand,
-        MPRemoteCommandCenter.shared().changePlaybackPositionCommand,
-        MPRemoteCommandCenter.shared().enableLanguageOptionCommand,
-        MPRemoteCommandCenter.shared().disableLanguageOptionCommand,
-        MPRemoteCommandCenter.shared().ratingCommand,
-        MPRemoteCommandCenter.shared().likeCommand,
-        MPRemoteCommandCenter.shared().dislikeCommand,
-        MPRemoteCommandCenter.shared().bookmarkCommand,
-    ]
-
-    var mpInfoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
+    var nowPlayingInfo: [String:Any] = [:]
+    var configs: [MPRemoteCommand:Config] = [:]
+    var disabledCommands: [MPRemoteCommand] = []
     var isPaused: Bool = false { didSet { updatePlaybackState() } }
+
+    var infoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
+    var commandCenter: MPRemoteCommandCenter { get { return MPRemoteCommandCenter.shared() } }
 
     @objc override init() {
         super.init()
+
+        nowPlayingInfo = [
+            MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
+            MPNowPlayingInfoPropertyDefaultPlaybackRate: NSNumber(value: 1),
+            MPNowPlayingInfoPropertyPlaybackProgress: NSNumber(value: 0.0),
+            MPMediaItemPropertyPlaybackDuration: NSNumber(value: 0),
+            MPMediaItemPropertyTitle: "mpv",
+            MPMediaItemPropertyAlbumTitle: "mpv",
+            MPMediaItemPropertyArtist: "mpv",
+        ]
+
+        configs = [
+            commandCenter.pauseCommand: Config(key: MP_KEY_PAUSEONLY),
+            commandCenter.playCommand: Config(key: MP_KEY_PLAYONLY),
+            commandCenter.stopCommand: Config(key: MP_KEY_STOP),
+            commandCenter.nextTrackCommand: Config(key: MP_KEY_NEXT),
+            commandCenter.previousTrackCommand: Config(key: MP_KEY_PREV),
+            commandCenter.togglePlayPauseCommand: Config(key: MP_KEY_PLAY),
+            commandCenter.seekForwardCommand: Config(key: MP_KEY_FORWARD, type: .repeatable),
+            commandCenter.seekBackwardCommand: Config(key: MP_KEY_REWIND, type: .repeatable)
+        ]
+
+        disabledCommands = [
+            commandCenter.changePlaybackRateCommand,
+            commandCenter.changeRepeatModeCommand,
+            commandCenter.changeShuffleModeCommand,
+            commandCenter.skipForwardCommand,
+            commandCenter.skipBackwardCommand,
+            commandCenter.changePlaybackPositionCommand,
+            commandCenter.enableLanguageOptionCommand,
+            commandCenter.disableLanguageOptionCommand,
+            commandCenter.ratingCommand,
+            commandCenter.likeCommand,
+            commandCenter.dislikeCommand,
+            commandCenter.bookmarkCommand,
+        ]
+
+        if let app = NSApp as? Application, let icon = app.getMPVIcon() {
+            let albumArt = MPMediaItemArtwork(boundsSize: icon.size) { _ in
+                return icon
+            }
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = albumArt
+        }
 
         for cmd in disabledCommands {
             cmd.isEnabled = false
@@ -93,15 +103,8 @@ class RemoteCommandCenter: NSObject {
             }
         }
 
-        if let app = NSApp as? Application, let icon = app.getMPVIcon() {
-            let albumArt = MPMediaItemArtwork(boundsSize: icon.size) { _ in
-                return icon
-            }
-            nowPlayingInfo[MPMediaItemPropertyArtwork] = albumArt
-        }
-
-        mpInfoCenter.nowPlayingInfo = nowPlayingInfo
-        mpInfoCenter.playbackState = .playing
+        infoCenter.nowPlayingInfo = nowPlayingInfo
+        infoCenter.playbackState = .playing
 
         NotificationCenter.default.addObserver(
             self,
@@ -117,18 +120,18 @@ class RemoteCommandCenter: NSObject {
             cmd.removeTarget(nil)
         }
 
-        mpInfoCenter.nowPlayingInfo = nil
-        mpInfoCenter.playbackState = .unknown
+        infoCenter.nowPlayingInfo = nil
+        infoCenter.playbackState = .unknown
     }
 
     @objc func makeCurrent(notification: NSNotification) {
-        mpInfoCenter.playbackState = .paused
-        mpInfoCenter.playbackState = .playing
+        infoCenter.playbackState = .paused
+        infoCenter.playbackState = .playing
         updatePlaybackState()
     }
 
     func updatePlaybackState() {
-        mpInfoCenter.playbackState = isPaused ? .paused : .playing
+        infoCenter.playbackState = isPaused ? .paused : .playing
     }
 
     func cmdHandler(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
