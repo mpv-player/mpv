@@ -18,6 +18,8 @@
 import MediaPlayer
 
 extension RemoteCommandCenter {
+    typealias ConfigHandler = (MPRemoteCommandEvent) -> (MPRemoteCommandHandlerStatus)
+
     enum KeyType {
         case normal
         case repeatable
@@ -27,10 +29,12 @@ extension RemoteCommandCenter {
         let key: Int32
         let type: KeyType
         var state: UInt32 = 0
+        let handler: ConfigHandler
 
-        init(key: Int32, type: KeyType = .normal) {
+        init(key: Int32, type: KeyType = .normal, handler: @escaping ConfigHandler = { event in return .commandFailed }) {
             self.key = key
             self.type = type
+            self.handler = handler
         }
     }
 }
@@ -58,14 +62,14 @@ class RemoteCommandCenter: NSObject {
         ]
 
         configs = [
-            commandCenter.pauseCommand: Config(key: MP_KEY_PAUSEONLY),
-            commandCenter.playCommand: Config(key: MP_KEY_PLAYONLY),
-            commandCenter.stopCommand: Config(key: MP_KEY_STOP),
-            commandCenter.nextTrackCommand: Config(key: MP_KEY_NEXT),
-            commandCenter.previousTrackCommand: Config(key: MP_KEY_PREV),
-            commandCenter.togglePlayPauseCommand: Config(key: MP_KEY_PLAY),
-            commandCenter.seekForwardCommand: Config(key: MP_KEY_FORWARD, type: .repeatable),
-            commandCenter.seekBackwardCommand: Config(key: MP_KEY_REWIND, type: .repeatable)
+            commandCenter.pauseCommand: Config(key: MP_KEY_PAUSEONLY, handler: keyHandler),
+            commandCenter.playCommand: Config(key: MP_KEY_PLAYONLY, handler: keyHandler),
+            commandCenter.stopCommand: Config(key: MP_KEY_STOP, handler: keyHandler),
+            commandCenter.nextTrackCommand: Config(key: MP_KEY_NEXT, handler: keyHandler),
+            commandCenter.previousTrackCommand: Config(key: MP_KEY_PREV, handler: keyHandler),
+            commandCenter.togglePlayPauseCommand: Config(key: MP_KEY_PLAY, handler: keyHandler),
+            commandCenter.seekForwardCommand: Config(key: MP_KEY_FORWARD, type: .repeatable, handler: keyHandler),
+            commandCenter.seekBackwardCommand: Config(key: MP_KEY_REWIND, type: .repeatable, handler: keyHandler)
         ]
 
         disabledCommands = [
@@ -96,11 +100,9 @@ class RemoteCommandCenter: NSObject {
     }
 
     @objc func start() {
-        for (cmd, _) in configs {
+        for (cmd, config) in configs {
             cmd.isEnabled = true
-            cmd.addTarget { [unowned self] event in
-                return self.cmdHandler(event)
-            }
+            cmd.addTarget(handler: config.handler)
         }
 
         infoCenter.nowPlayingInfo = nowPlayingInfo
@@ -134,8 +136,8 @@ class RemoteCommandCenter: NSObject {
         infoCenter.playbackState = isPaused ? .paused : .playing
     }
 
-    func cmdHandler(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        guard let config = configs[event.command] else {
+    lazy var keyHandler: ConfigHandler = { event in
+        guard let config = self.configs[event.command] else {
             return .commandFailed
         }
 
