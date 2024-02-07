@@ -245,4 +245,9 @@ class LibmpvHelper {
     class func mpvFlagToBool(_ obj: UnsafeMutableRawPointer) -> Bool? {
         return UnsafePointer<Bool>(OpaquePointer(obj))?.pointee
     }
+
+    // MPV_FORMAT_DOUBLE
+    class func mpvDoubleToDouble(_ obj: UnsafeMutableRawPointer) -> Double? {
+        return UnsafePointer<Double>(OpaquePointer(obj))?.pointee
+    }
 }
