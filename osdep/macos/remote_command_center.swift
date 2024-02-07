@@ -124,6 +124,12 @@ class RemoteCommandCenter: NSObject {
 
         infoCenter.nowPlayingInfo = nil
         infoCenter.playbackState = .unknown
+
+        NotificationCenter.default.removeObserver(
+            self,
+            name: NSApplication.willBecomeActiveNotification,
+            object: nil
+        )
     }
 
     @objc func makeCurrent(notification: NSNotification) {
