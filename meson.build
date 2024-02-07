@@ -1285,6 +1285,17 @@ if features['vulkan'] and features['x11']
      sources += files('video/out/vulkan/context_xlib.c')
 endif
 
+if host_machine.system() == 'darwin'
+    moltenvk = get_option('moltenvk').require(
+        features['vulkan'],
+        error_message: 'vulkan or moltenvk header could not be found!',
+    )
+    features += {'moltenvk': moltenvk.allowed()}
+    if features['vulkan'] and features['moltenvk']
+        sources += files('video/out/vulkan/context_moltenvk.m')
+    endif
+endif
+
 features += {'vk-khr-display': cc.has_function('vkCreateDisplayPlaneSurfaceKHR', prefix: '#include <vulkan/vulkan_core.h>',
                                                dependencies: [vulkan])}
 if features['vk-khr-display']

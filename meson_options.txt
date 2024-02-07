@@ -103,6 +103,7 @@ option('rpi-mmal', type: 'feature', value: 'auto', description: 'Raspberry Pi MM
 option('videotoolbox-gl', type: 'feature', value: 'auto', description: 'Videotoolbox with OpenGL')
 option('videotoolbox-pl', type: 'feature', value: 'auto', description: 'Videotoolbox with libplacebo')
 option('vulkan-interop', type: 'feature', value: 'auto', description: 'Vulkan graphics interop')
+option('moltenvk', type: 'feature', value: 'auto', description: 'MoltenVK context')
 
 # macOS features
 option('macos-cocoa-cb', type: 'feature', value: 'auto', description: 'macOS libmpv backend')
