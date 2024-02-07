@@ -43,7 +43,9 @@ class RemoteCommandCenter: NSObject {
     var nowPlayingInfo: [String:Any] = [:]
     var configs: [MPRemoteCommand:Config] = [:]
     var disabledCommands: [MPRemoteCommand] = []
-    var isPaused: Bool = false { didSet { updatePlaybackState() } }
+    var isPaused: Bool = false { didSet { updateInfoCenter() } }
+    var duration: Double = 0 { didSet { updateInfoCenter() } }
+    var position: Double = 0 { didSet { updateInfoCenter() } }
 
     var infoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
     var commandCenter: MPRemoteCommandCenter { get { return MPRemoteCommandCenter.shared() } }
@@ -53,9 +55,7 @@ class RemoteCommandCenter: NSObject {
 
         nowPlayingInfo = [
             MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
-            MPNowPlayingInfoPropertyDefaultPlaybackRate: NSNumber(value: 1),
             MPNowPlayingInfoPropertyPlaybackProgress: NSNumber(value: 0.0),
-            MPMediaItemPropertyPlaybackDuration: NSNumber(value: 0),
             MPMediaItemPropertyTitle: "mpv",
             MPMediaItemPropertyAlbumTitle: "mpv",
             MPMediaItemPropertyArtist: "mpv",
@@ -69,7 +69,7 @@ class RemoteCommandCenter: NSObject {
             commandCenter.previousTrackCommand: Config(key: MP_KEY_PREV, handler: keyHandler),
             commandCenter.togglePlayPauseCommand: Config(key: MP_KEY_PLAY, handler: keyHandler),
             commandCenter.seekForwardCommand: Config(key: MP_KEY_FORWARD, type: .repeatable, handler: keyHandler),
-            commandCenter.seekBackwardCommand: Config(key: MP_KEY_REWIND, type: .repeatable, handler: keyHandler)
+            commandCenter.seekBackwardCommand: Config(key: MP_KEY_REWIND, type: .repeatable, handler: keyHandler),
         ]
 
         disabledCommands = [
@@ -105,8 +105,7 @@ class RemoteCommandCenter: NSObject {
             cmd.addTarget(handler: config.handler)
         }
 
-        infoCenter.nowPlayingInfo = nowPlayingInfo
-        infoCenter.playbackState = .playing
+        updateInfoCenter()
 
         NotificationCenter.default.addObserver(
             self,
@@ -135,10 +134,17 @@ class RemoteCommandCenter: NSObject {
     @objc func makeCurrent(notification: NSNotification) {
         infoCenter.playbackState = .paused
         infoCenter.playbackState = .playing
-        updatePlaybackState()
+        updateInfoCenter()
     }
 
-    func updatePlaybackState() {
+    func updateInfoCenter() {
+        nowPlayingInfo.merge([
+            MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: !isPaused),
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(value: position),
+            MPMediaItemPropertyPlaybackDuration: NSNumber(value: duration),
+        ]) { (_, new) in new }
+
+        infoCenter.nowPlayingInfo = nowPlayingInfo
         infoCenter.playbackState = isPaused ? .paused : .playing
     }
 
@@ -176,6 +182,13 @@ class RemoteCommandCenter: NSObject {
         switch String(cString: property.name) {
         case "pause" where property.format == MPV_FORMAT_FLAG:
             isPaused = LibmpvHelper.mpvFlagToBool(property.data) ?? false
+        case "time-pos" where property.format == MPV_FORMAT_DOUBLE:
+            let newPosition = max(LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0, 0)
+            if Int(floor(newPosition) - floor(position)) != 0 {
+                position = newPosition
+            }
+        case "duration" where property.format == MPV_FORMAT_DOUBLE:
+            duration = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0
         default:
             break
         }
