@@ -80,7 +80,7 @@ struct vdpctx {
 
     struct mp_image                   *current_image;
     int64_t                            current_pts;
-    int                                current_duration;
+    int64_t                            current_duration;
 
     int                                output_surface_w, output_surface_h;
     int                                rotation;
@@ -104,9 +104,9 @@ struct vdpctx {
     int                                surface_num; // indexes output_surfaces
     int                                query_surface_num;
     VdpTime                            recent_vsync_time;
-    float                              user_fps;
+    double                             user_fps;
     bool                               composite_detect;
-    int                                vsync_interval;
+    int64_t                            vsync_interval;
     uint64_t                           last_queue_time;
     uint64_t                           queue_time[MAX_OUTPUT_SURFACES];
     uint64_t                           last_ideal_time;
@@ -721,12 +721,12 @@ static int update_presentation_queue_status(struct vo *vo)
             break;
         if (vc->vsync_interval > 1) {
             uint64_t qtime = vc->queue_time[vc->query_surface_num];
-            int diff = ((int64_t)vtime - (int64_t)qtime) / 1e6;
-            MP_TRACE(vo, "Queue time difference: %d ms\n", diff);
+            double diff = MP_TIME_NS_TO_MS((int64_t)vtime - (int64_t)qtime);
+            MP_TRACE(vo, "Queue time difference: %.4f ms\n", diff);
             if (vtime < qtime + vc->vsync_interval / 2)
-                MP_VERBOSE(vo, "Frame shown too early (%d ms)\n", diff);
+                MP_VERBOSE(vo, "Frame shown too early (%.4f ms)\n", diff);
             if (vtime > qtime + vc->vsync_interval)
-                MP_VERBOSE(vo, "Frame shown late (%d ms)\n", diff);
+                MP_VERBOSE(vo, "Frame shown late (%.4f ms)\n", diff);
         }
         vc->query_surface_num = WRAP_ADD(vc->query_surface_num, 1,
                                          vc->num_output_surfaces);
@@ -754,8 +754,8 @@ static void flip_page(struct vo *vo)
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
-    int64_t pts_us = vc->current_pts;
-    int duration = vc->current_duration;
+    int64_t pts_ns = vc->current_pts;
+    int64_t duration = vc->current_duration;
 
     vc->dropped_frame = true; // changed at end if false
 
@@ -770,11 +770,6 @@ static void flip_page(struct vo *vo)
     }
     vc->vsync_interval = MPMAX(vc->vsync_interval, 1);
 
-    if (duration > INT_MAX / 1000)
-        duration = -1;
-    else
-        duration *= 1000;
-
     if (vc->vsync_interval == 1)
         duration = -1;  // Make sure drop logic is disabled
 
@@ -782,8 +777,8 @@ static void flip_page(struct vo *vo)
     vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
     CHECK_VDP_WARNING(vo, "Error when calling vdp_presentation_queue_get_time");
 
-    int64_t rel_pts_ns = (pts_us * 1000) - mp_time_ns();
-    if (!pts_us || rel_pts_ns < 0)
+    int64_t rel_pts_ns = pts_ns - mp_time_ns();
+    if (!pts_ns || rel_pts_ns < 0)
         rel_pts_ns = 0;
 
     uint64_t now = vdp_time;
@@ -1124,7 +1119,7 @@ const struct vo_driver video_out_vdpau = {
         {"denoise", OPT_FLOAT(denoise), M_RANGE(0, 1)},
         {"sharpen", OPT_FLOAT(sharpen), M_RANGE(-1, 1)},
         {"hqscaling", OPT_INT(hqscaling), M_RANGE(0, 9)},
-        {"fps", OPT_FLOAT(user_fps)},
+        {"fps", OPT_DOUBLE(user_fps)},
         {"composite-detect", OPT_BOOL(composite_detect), OPTDEF_INT(1)},
         {"queuetime-windowed", OPT_INT(flip_offset_window), OPTDEF_INT(50)},
         {"queuetime-fs", OPT_INT(flip_offset_fs), OPTDEF_INT(50)},

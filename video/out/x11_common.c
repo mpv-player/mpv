@@ -99,7 +99,9 @@
 #define MWM_FUNC_MAXIMIZE       (1L << 4)
 #define MWM_FUNC_CLOSE          (1L << 5)
 
-#define MWM_DECOR_ALL           (1L << 0)
+// Equals to all MWM_DECOR_* OR'd together.
+#define MWM_DECOR_ALL           126
+#define MWM_DECOR_TITLE         (1L << 3)
 
 typedef struct
 {
@@ -833,7 +835,7 @@ static int vo_x11_lookupkey(int key)
     return mpkey;
 }
 
-static void vo_x11_decoration(struct vo *vo, bool d)
+static void vo_x11_decoration(struct vo *vo, bool decorations, bool title_bar)
 {
     struct vo_x11_state *x11 = vo->x11;
 
@@ -844,8 +846,9 @@ static void vo_x11_decoration(struct vo *vo, bool d)
     MotifWmHints mhints = {0};
     bool got = x11_get_property_copy(x11, x11->window, motif_hints,
                                      motif_hints, 32, &mhints, sizeof(mhints));
-    // hints weren't set, and decorations requested -> assume WM displays them
-    if (!got && d)
+    // If hints weren't set, and decorations and title bar requested,
+    // assume WM displays them.
+    if (!got && decorations && title_bar)
         return;
     if (!got) {
         mhints.flags = MWM_HINTS_FUNCTIONS;
@@ -853,7 +856,8 @@ static void vo_x11_decoration(struct vo *vo, bool d)
                            MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE;
     }
     mhints.flags |= MWM_HINTS_DECORATIONS;
-    mhints.decorations = d ? MWM_DECOR_ALL : 0;
+    mhints.decorations = decorations ? MWM_DECOR_ALL : 0;
+    mhints.decorations &= ~(!title_bar ? MWM_DECOR_TITLE : 0);
     XChangeProperty(x11->display, x11->window, motif_hints, motif_hints, 32,
                     PropModeReplace, (unsigned char *) &mhints, 5);
 }
@@ -1652,7 +1656,7 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     struct vo_x11_state *x11 = vo->x11;
 
     vo_x11_move_resize(vo, true, true, rc);
-    vo_x11_decoration(vo, x11->opts->border);
+    vo_x11_decoration(vo, x11->opts->border, x11->opts->title_bar);
 
     if (x11->opts->fullscreen && (x11->wm_type & vo_wm_FULLSCREEN)) {
         Atom state = XA(x11, _NET_WM_STATE_FULLSCREEN);
@@ -1973,7 +1977,7 @@ static void vo_x11_fullscreen(struct vo *vo)
             rc = x11->screenrc;
         }
 
-        vo_x11_decoration(vo, opts->border && !x11->fs);
+        vo_x11_decoration(vo, opts->border && !x11->fs, opts->title_bar);
         vo_x11_sizehint(vo, rc, true);
 
         XMoveResizeWindow(x11->display, x11->window, rc.x0, rc.y0,
@@ -2071,8 +2075,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 vo_x11_fullscreen(vo);
             if (opt == &opts->ontop)
                 vo_x11_setlayer(vo, opts->ontop);
-            if (opt == &opts->border)
-                vo_x11_decoration(vo, opts->border);
+            if (opt == &opts->border || opt == &opts->title_bar)
+                vo_x11_decoration(vo, opts->border, opts->title_bar);
             if (opt == &opts->all_workspaces)
                 vo_x11_sticky(vo, opts->all_workspaces);
             if (opt == &opts->window_minimized)

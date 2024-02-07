@@ -56,6 +56,10 @@
 #include "cursor-shape-v1.h"
 #endif
 
+#if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 21
+#define HAVE_WAYLAND_1_21
+#endif
+
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
 #define HAVE_WAYLAND_1_22
 #endif
@@ -294,23 +298,81 @@ static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
                                 uint32_t time, uint32_t axis, wl_fixed_t value)
 {
     struct vo_wayland_state *wl = data;
-
-    double val = wl_fixed_to_double(value) < 0 ? -1 : 1;
     switch (axis) {
     case WL_POINTER_AXIS_VERTICAL_SCROLL:
-        if (value > 0)
-            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_DOWN | wl->mpmod, +val);
-        if (value < 0)
-            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_UP | wl->mpmod, -val);
+        wl->axis_value_vertical += wl_fixed_to_double(value);
         break;
     case WL_POINTER_AXIS_HORIZONTAL_SCROLL:
-        if (value > 0)
-            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_RIGHT | wl->mpmod, +val);
-        if (value < 0)
-            mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT | wl->mpmod, -val);
+        wl->axis_value_horizontal += wl_fixed_to_double(value);
         break;
     }
 }
+
+static void pointer_handle_frame(void *data, struct wl_pointer *wl_pointer)
+{
+    struct vo_wayland_state *wl = data;
+    double value_vertical, value_horizontal;
+    if (wl->axis_value120_scroll) {
+        // Prefer axis_value120 if supported and the axis event is from mouse wheel.
+        value_vertical = wl->axis_value120_vertical / 120.0;
+        value_horizontal = wl->axis_value120_horizontal / 120.0;
+    } else {
+        // The axis value is specified in logical coordinates, but the exact value emitted
+        // by one mouse wheel click is unspecified. In practice, most compositors use either
+        // 10 (GNOME, Weston) or 15 (wlroots, same as libinput) as the value.
+        // Divide the value by 10 and clamp it between -1 and 1 so that mouse wheel clicks
+        // work as intended on all compositors while still allowing high resolution trackpads.
+        value_vertical = MPCLAMP(wl->axis_value_vertical / 10.0, -1, 1);
+        value_horizontal = MPCLAMP(wl->axis_value_horizontal / 10.0, -1, 1);
+    }
+
+    if (value_vertical > 0)
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_DOWN | wl->mpmod, +value_vertical);
+    if (value_vertical < 0)
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_UP | wl->mpmod, -value_vertical);
+    if (value_horizontal > 0)
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_RIGHT | wl->mpmod, +value_horizontal);
+    if (value_horizontal < 0)
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT | wl->mpmod, -value_horizontal);
+
+    wl->axis_value120_scroll = false;
+    wl->axis_value_vertical = 0;
+    wl->axis_value_horizontal = 0;
+    wl->axis_value120_vertical = 0;
+    wl->axis_value120_horizontal = 0;
+}
+
+static void pointer_handle_axis_source(void *data, struct wl_pointer *wl_pointer,
+                                       uint32_t axis_source)
+{
+}
+
+static void pointer_handle_axis_stop(void *data, struct wl_pointer *wl_pointer,
+                                     uint32_t time, uint32_t axis)
+{
+}
+
+static void pointer_handle_axis_discrete(void *data, struct wl_pointer *wl_pointer,
+                                         uint32_t axis, int32_t discrete)
+{
+}
+
+#ifdef HAVE_WAYLAND_1_21
+static void pointer_handle_axis_value120(void *data, struct wl_pointer *wl_pointer,
+                                         uint32_t axis, int32_t value120)
+{
+    struct vo_wayland_state *wl = data;
+    wl->axis_value120_scroll = true;
+    switch (axis) {
+    case WL_POINTER_AXIS_VERTICAL_SCROLL:
+        wl->axis_value120_vertical += value120;
+        break;
+    case WL_POINTER_AXIS_HORIZONTAL_SCROLL:
+        wl->axis_value120_horizontal += value120;
+        break;
+    }
+}
+#endif
 
 static const struct wl_pointer_listener pointer_listener = {
     pointer_handle_enter,
@@ -318,6 +380,13 @@ static const struct wl_pointer_listener pointer_listener = {
     pointer_handle_motion,
     pointer_handle_button,
     pointer_handle_axis,
+    pointer_handle_frame,
+    pointer_handle_axis_source,
+    pointer_handle_axis_stop,
+    pointer_handle_axis_discrete,
+#ifdef HAVE_WAYLAND_1_21
+    pointer_handle_axis_value120,
+#endif
 };
 
 static void touch_handle_down(void *data, struct wl_touch *wl_touch,
@@ -367,12 +436,24 @@ static void touch_handle_cancel(void *data, struct wl_touch *wl_touch)
 {
 }
 
+static void touch_handle_shape(void *data, struct wl_touch *wl_touch,
+                               int32_t id, wl_fixed_t major, wl_fixed_t minor)
+{
+}
+
+static void touch_handle_orientation(void *data, struct wl_touch *wl_touch,
+                                     int32_t id, wl_fixed_t orientation)
+{
+}
+
 static const struct wl_touch_listener touch_listener = {
     touch_handle_down,
     touch_handle_up,
     touch_handle_motion,
     touch_handle_frame,
     touch_handle_cancel,
+    touch_handle_shape,
+    touch_handle_orientation,
 };
 
 static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
@@ -529,8 +610,14 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
     }
 }
 
+static void seat_handle_name(void *data, struct wl_seat *seat,
+                             const char *name)
+{
+}
+
 static const struct wl_seat_listener seat_listener = {
     seat_handle_caps,
+    seat_handle_name,
 };
 
 static void data_offer_handle_offer(void *data, struct wl_data_offer *offer,
@@ -1333,7 +1420,15 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, wl_seat_interface.name) && found++) {
-        wl->seat = wl_registry_bind(reg, id, &wl_seat_interface, 1);
+        if (ver < 5)
+            MP_WARN(wl, "Scrolling won't work because the compositor doesn't "
+                        "support version 5 of wl_seat protocol!\n");
+#ifdef HAVE_WAYLAND_1_21
+        ver = MPMIN(ver, 8); /* Cap at 8 in case new events are added later. */
+#else
+        ver = MPMIN(ver, 7);
+#endif
+        wl->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
         wl_seat_add_listener(wl->seat, &seat_listener, wl);
     }
 
@@ -1893,9 +1988,12 @@ static int spawn_cursor(struct vo_wayland_state *wl)
         return 1;
     }
 
-    wl->default_cursor = wl_cursor_theme_get_cursor(wl->cursor_theme, "left_ptr");
+    wl->default_cursor = wl_cursor_theme_get_cursor(wl->cursor_theme, "default");
+    if (!wl->default_cursor)
+        wl->default_cursor = wl_cursor_theme_get_cursor(wl->cursor_theme, "left_ptr");
+
     if (!wl->default_cursor) {
-        MP_ERR(wl, "Unable to load cursor theme!\n");
+        MP_ERR(wl, "Unable to get default and left_ptr XCursor from theme!\n");
         return 1;
     }
 

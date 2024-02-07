@@ -55,6 +55,7 @@
 #include "options/m_option.h"
 #include "options/m_property.h"
 #include "options/m_config_frontend.h"
+#include "options/parse_configfile.h"
 #include "osdep/getpid.h"
 #include "video/out/gpu/context.h"
 #include "video/out/vo.h"
@@ -1354,6 +1355,18 @@ static int mp_property_core_idle(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     return m_property_bool_ro(action, arg, !mpctx->playback_active);
+}
+
+static int mp_property_deinterlace(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    if (!vo_c)
+        return M_PROPERTY_UNAVAILABLE;
+
+    bool deinterlace_active = mp_output_chain_deinterlace_active(vo_c->filter);
+    return m_property_bool_ro(action, arg, deinterlace_active);
 }
 
 static int mp_property_idle(void *ctx, struct m_property *prop,
@@ -3881,6 +3894,7 @@ static const struct m_property mp_properties_base[] = {
     {"clock", mp_property_clock},
     {"seekable", mp_property_seekable},
     {"partially-seekable", mp_property_partially_seekable},
+    {"deinterlace-active", mp_property_deinterlace},
     {"idle-active", mp_property_idle},
     {"window-id", mp_property_window_id},
 
@@ -4055,7 +4069,8 @@ static const char *const *const mp_event_property_change[] = {
       "secondary-sub-text", "audio-bitrate", "video-bitrate", "sub-bitrate",
       "decoder-frame-drop-count", "frame-drop-count", "video-frame-info",
       "vf-metadata", "af-metadata", "sub-start", "sub-end", "secondary-sub-start",
-      "secondary-sub-end", "video-out-params", "video-dec-params", "video-params"),
+      "secondary-sub-end", "video-out-params", "video-dec-params", "video-params",
+      "deinterlace-active"),
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
@@ -6270,6 +6285,32 @@ static void cmd_apply_profile(void *p)
     }
 }
 
+static void cmd_load_config_file(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    char *config_file = cmd->args[0].v.s;
+    int r = m_config_parse_config_file(mpctx->mconfig, mpctx->global,
+                                       config_file, NULL, 0);
+
+    if (r < 1) {
+        cmd->success = false;
+        return;
+    }
+
+    mp_notify_property(mpctx, "profile-list");
+}
+
+static void cmd_load_input_conf(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    char *config_file = cmd->args[0].v.s;
+    cmd->success = mp_input_load_config_file(mpctx->input, config_file);
+}
+
 static void cmd_load_script(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -6807,6 +6848,10 @@ const struct mp_cmd_def mp_cmds[] = {
             .flags = MP_CMD_OPT_ARG}, }
     },
 
+    { "load-config-file", cmd_load_config_file, {{"filename", OPT_STRING(v.s)}} },
+
+    { "load-input-conf", cmd_load_input_conf, {{"filename", OPT_STRING(v.s)}} },
+
     { "load-script", cmd_load_script, {{"filename", OPT_STRING(v.s)}} },
 
     { "dump-cache", cmd_dump_cache, { {"start", OPT_TIME(v.d),
@@ -7074,6 +7119,13 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (flags & UPDATE_LAVFI_COMPLEX)
         update_lavfi_complex(mpctx);
+
+    if (flags & UPDATE_VIDEO) {
+        if (mpctx->video_out) {
+            vo_set_want_redraw(mpctx->video_out);
+            mp_wakeup_core(mpctx);
+        }
+    }
 
     if (opt_ptr == &opts->vo->android_surface_size) {
         if (mpctx->video_out)

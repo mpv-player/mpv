@@ -1276,9 +1276,9 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
     return n_binds;
 }
 
-static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
+static bool parse_config_file(struct input_ctx *ictx, char *file)
 {
-    int r = 0;
+    bool r = false;
     void *tmp = talloc_new(NULL);
     stream_t *s = NULL;
 
@@ -1295,7 +1295,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
         MP_VERBOSE(ictx, "Parsing input config file %s\n", file);
         int num = parse_config(ictx, false, data, file, NULL);
         MP_VERBOSE(ictx, "Input config file %s parsed: %d binds\n", file, num);
-        r = 1;
+        r = true;
     } else {
         MP_ERR(ictx, "Error reading input config file %s\n", file);
     }
@@ -1376,13 +1376,13 @@ void mp_input_load_config(struct input_ctx *ictx)
 
     bool config_ok = false;
     if (ictx->opts->config_file && ictx->opts->config_file[0])
-        config_ok = parse_config_file(ictx, ictx->opts->config_file, true);
+        config_ok = parse_config_file(ictx, ictx->opts->config_file);
     if (!config_ok) {
         // Try global conf dir
         void *tmp = talloc_new(NULL);
         char **files = mp_find_all_config_files(tmp, ictx->global, "input.conf");
         for (int n = 0; files && files[n]; n++)
-            parse_config_file(ictx, files[n], false);
+            parse_config_file(ictx, files[n]);
         talloc_free(tmp);
     }
 
@@ -1393,6 +1393,14 @@ void mp_input_load_config(struct input_ctx *ictx)
 #endif
 
     input_unlock(ictx);
+}
+
+bool mp_input_load_config_file(struct input_ctx *ictx, char *file)
+{
+    input_lock(ictx);
+    bool result = parse_config_file(ictx, file);
+    input_unlock(ictx);
+    return result;
 }
 
 static void clear_queue(struct cmd_queue *queue)

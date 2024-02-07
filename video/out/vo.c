@@ -63,7 +63,6 @@ extern const struct vo_driver video_out_sdl;
 extern const struct vo_driver video_out_vaapi;
 extern const struct vo_driver video_out_dmabuf_wayland;
 extern const struct vo_driver video_out_wlshm;
-extern const struct vo_driver video_out_rpi;
 extern const struct vo_driver video_out_tct;
 extern const struct vo_driver video_out_sixel;
 extern const struct vo_driver video_out_kitty;
@@ -109,9 +108,6 @@ static const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_DRM
     &video_out_drm,
-#endif
-#if HAVE_RPI_MMAL
-    &video_out_rpi,
 #endif
 #if HAVE_SIXEL
     &video_out_sixel,
@@ -1168,6 +1164,16 @@ void vo_redraw(struct vo *vo)
         in->want_redraw = false;
         wakeup_locked(vo);
     }
+    mp_mutex_unlock(&in->lock);
+}
+
+// Same as vo_redraw but the redraw is delayed until it
+// is detected in the playloop.
+void vo_set_want_redraw(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&in->lock);
+    in->want_redraw = true;
     mp_mutex_unlock(&in->lock);
 }
 

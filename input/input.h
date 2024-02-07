@@ -178,7 +178,11 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
                                 void (*wakeup_cb)(void *ctx),
                                 void *wakeup_ctx);
 
+// Load the configured input.conf files.
 void mp_input_load_config(struct input_ctx *ictx);
+
+// Load a specific input.conf file.
+bool mp_input_load_config_file(struct input_ctx *ictx, char *file);
 
 void mp_input_update_opts(struct input_ctx *ictx);
 

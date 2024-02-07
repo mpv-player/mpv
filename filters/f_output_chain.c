@@ -518,6 +518,17 @@ double mp_output_get_measured_total_delay(struct mp_output_chain *c)
     return delay;
 }
 
+bool mp_output_chain_deinterlace_active(struct mp_output_chain *c)
+{
+    struct chain *p = c->f->priv;
+    for (int n = 0; n < p->num_all_filters; n++) {
+        struct mp_user_filter *u = p->all_filters[n];
+        if (strcmp(u->name, "userdeint") == 0)
+            return mp_deint_active(u->f);
+    }
+    return false;
+}
+
 bool mp_output_chain_update_filters(struct mp_output_chain *c,
                                     struct m_obj_settings *list)
 {

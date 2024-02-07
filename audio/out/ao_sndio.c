@@ -22,6 +22,8 @@
 #include <errno.h>
 #include <sndio.h>
 
+#include "config.h"
+
 #include "options/m_option.h"
 #include "common/msg.h"
 

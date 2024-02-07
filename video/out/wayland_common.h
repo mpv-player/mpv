@@ -151,6 +151,11 @@ struct vo_wayland_state {
     uint32_t keyboard_code;
     int mpkey;
     int mpmod;
+    double axis_value_vertical;
+    int32_t axis_value120_vertical;
+    double axis_value_horizontal;
+    int32_t axis_value120_horizontal;
+    bool axis_value120_scroll;
 
     /* DND */
     struct wl_data_device *dnd_ddev;

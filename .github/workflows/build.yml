@@ -9,11 +9,21 @@ on:
     paths-ignore:
       - 'DOCS/**'
       - 'TOOLS/lua/**'
+      - '.editorconfig'
+      - '.gitignore'
+      - 'Copyright'
+      - 'README.md'
+      - 'RELEASE_NOTES'
   pull_request:
     branches: [master]
     paths-ignore:
       - 'DOCS/**'
       - 'TOOLS/lua/**'
+      - '.editorconfig'
+      - '.gitignore'
+      - 'Copyright'
+      - 'README.md'
+      - 'RELEASE_NOTES'
 
 jobs:
   mingw:

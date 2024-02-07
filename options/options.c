@@ -436,7 +436,8 @@ const struct m_sub_options dvd_conf = {
 
 const struct m_sub_options filter_conf = {
     .opts = (const struct m_option[]){
-        {"deinterlace", OPT_BOOL(deinterlace)},
+        {"deinterlace", OPT_CHOICE(deinterlace,
+            {"no", 0}, {"yes", 1}, {"auto", -1})},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),

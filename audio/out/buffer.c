@@ -173,8 +173,8 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
     return pos;
 }
 
-static int ao_read_data_unlocked(struct ao *ao, void **data, int samples,
-                                 int64_t out_time_ns, bool pad_silence)
+static int ao_read_data_locked(struct ao *ao, void **data, int samples,
+                               int64_t out_time_ns, bool pad_silence)
 {
     struct buffer_state *p = ao->buffer_state;
     assert(!ao->driver->write);
@@ -208,7 +208,7 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns)
 
     mp_mutex_lock(&p->lock);
 
-    int pos = ao_read_data_unlocked(ao, data, samples, out_time_ns, true);
+    int pos = ao_read_data_locked(ao, data, samples, out_time_ns, true);
 
     mp_mutex_unlock(&p->lock);
 
@@ -224,7 +224,7 @@ int ao_read_data_nonblocking(struct ao *ao, void **data, int samples, int64_t ou
     if (mp_mutex_trylock(&p->lock))
             return 0;
 
-    int pos = ao_read_data_unlocked(ao, data, samples, out_time_ns, false);
+    int pos = ao_read_data_locked(ao, data, samples, out_time_ns, false);
 
     mp_mutex_unlock(&p->lock);
 

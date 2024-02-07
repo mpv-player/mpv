@@ -1315,8 +1315,6 @@ Video
     :mediacodec: requires ``--vo=gpu --gpu-context=android``
                  or ``--vo=mediacodec_embed`` (Android only)
     :mediacodec-copy: copies video back to system RAM (Android only)
-    :mmal:      requires ``--vo=gpu`` (Raspberry Pi only - default if available)
-    :mmal-copy: copies video back to system RAM (Raspberry Pi only)
     :cuda:      requires ``--vo=gpu`` (Any platform CUDA is available)
     :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
     :crystalhd: copies video back to system RAM (Any platform supported by hardware)
@@ -1410,9 +1408,6 @@ Video
         In addition to driver-specific behavior, global system settings might
         affect this additionally. This can give incorrect results even with
         completely ordinary video sources.
-
-        ``rpi`` always uses the hardware overlay renderer, even with
-        ``--vo=gpu``.
 
         ``mediacodec`` is not safe. It forces RGB conversion (not with ``-copy``)
         and how well it handles non-standard colorspaces is not known.
@@ -1664,23 +1659,22 @@ Video
 
         Works in ``--no-correct-pts`` mode only.
 
-``--deinterlace=<yes|no>``
+``--deinterlace=<yes|no|auto>``
     Enable or disable interlacing (default: no).
     Interlaced video shows ugly comb-like artifacts, which are visible on
     fast movement. Enabling this typically inserts the bwdif video filter in
     order to deinterlace the video, or lets the video output apply deinterlacing
     if supported.
 
-    This behaves exactly like the ``deinterlace`` input property (usually
-    mapped to ``d``).
+    When using ``auto``, mpv will insert a deinterlacing filter if ffmpeg
+    detects that the video frame is interlaced. Be aware that there can be false
+    positives in certain cases, such as when files are encoded as interlaced
+    despite the video not actually being so. This is why ``auto`` is not the
+    default value.
 
-    Keep in mind that this **will** conflict with manually inserted
-    deinterlacing filters, unless you take care. (Since mpv 0.27.0, even the
-    hardware deinterlace filters will conflict. Also since that version,
-    ``--deinterlace=auto`` was removed, which used to mean that the default
-    interlacing option of possibly inserted video filters was used.)
-
-    Note that this will make video look worse if it's not actually interlaced.
+    Keep in mind that using this filter **will** conflict with any manually
+    inserted deinterlacing filters, and that this will make video look worse if
+    it's not actually interlaced.
 
 ``--frames=<number>``
     Play/convert only first ``<number>`` video frames, then quit.
@@ -3236,7 +3230,7 @@ Window
     default, use ``--no-border`` to disable the standard window decorations.
 
 ``--title-bar``, ``--no-title-bar``
-    (Windows only)
+    (Windows and X11 only)
     Play video with the window title bar. Since this is on by default,
     use --no-title-bar to hide the title bar. The --no-border option takes
     precedence.
