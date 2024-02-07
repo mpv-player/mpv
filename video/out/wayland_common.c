@@ -904,12 +904,12 @@ static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
 
     struct vo_wayland_output *o;
     wl_list_for_each(o, &wl->output_list, link) {
-        if (o->output == output) {
+        if (o->output == output)
             o->has_surface = false;
-            wl->pending_vo_events |= VO_EVENT_WIN_STATE;
-            return;
-        }
+        if (o->output != output && o->has_surface)
+            wl->current_output = o;
     }
+    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
 #ifdef HAVE_WAYLAND_1_22
