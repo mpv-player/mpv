@@ -2017,7 +2017,7 @@ static void probe_if_image(demuxer_t *demuxer)
 
         int64_t timecode = -1;
         // Arbitrary restriction on packet reading.
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             int ret = read_next_block_into_queue(demuxer);
             if (ret == 1 && mkv_d->blocks[i].track == track) {
                 if (timecode != mkv_d->blocks[i].timecode)
