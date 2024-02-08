@@ -2012,7 +2012,7 @@ static void probe_if_image(demuxer_t *demuxer)
         mkv_track_t *track = mkv_d->tracks[n];
         struct sh_stream *sh = track->stream;
 
-        if (!sh || sh->type != STREAM_VIDEO)
+        if (!sh || sh->type != STREAM_VIDEO || sh->image)
             continue;
 
         int64_t timecode = -1;
@@ -2030,10 +2030,8 @@ static void probe_if_image(demuxer_t *demuxer)
         }
 
         // Assume still image
-        if (video_blocks == 1) {
-            sh->still_image = true;
+        if (video_blocks == 1)
             sh->image = true;
-        }
     }
 }
 
