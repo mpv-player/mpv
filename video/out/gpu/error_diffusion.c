@@ -227,7 +227,8 @@ void pass_error_diffusion(struct gl_shader_cache *sc,
 }
 
 // Different kernels for error diffusion.
-// Patterns are from http://www.efg2.com/Lab/Library/ImageProcessing/DHALF.TXT
+// Patterns are from <https://web.archive.org/web/20181031005427/
+// http://www.efg2.com/Lab/Library/ImageProcessing/DHALF.TXT>
 const struct error_diffusion_kernel mp_error_diffusion_kernels[] = {
     {
         .name = "simple",

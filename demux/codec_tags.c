@@ -48,8 +48,8 @@ static const char *lookup_tag(int type, uint32_t tag)
 /*
  * As seen in the following page:
  *
- * https://web.archive.org/web/20220406060153/
- * http://dream.cs.bath.ac.uk/researchdev/wave-ex/bformat.html
+ * <https://web.archive.org/web/20220406060153/
+ * http://dream.cs.bath.ac.uk/researchdev/wave-ex/bformat.html>
  *
  * Note that the GUID struct in the above citation has its
  * integers encoded in little-endian format, which means that

@@ -347,8 +347,8 @@ static void clear_keyboard_buffer(void)
 
     // Use the method suggested by Michael Kaplan to clear any pending dead
     // keys from the current keyboard layout. See:
-    // https://web.archive.org/web/20101004154432/http://blogs.msdn.com/b/michkap/archive/2006/04/06/569632.aspx
-    // https://web.archive.org/web/20100820152419/http://blogs.msdn.com/b/michkap/archive/2007/10/27/5717859.aspx
+    // <https://web.archive.org/web/20101004154432/http://blogs.msdn.com/b/michkap/archive/2006/04/06/569632.aspx>
+    // <https://web.archive.org/web/20100820152419/http://blogs.msdn.com/b/michkap/archive/2007/10/27/5717859.aspx>
     do {
         ret = ToUnicode(vkey, scancode, keys, buf, MP_ARRAY_SIZE(buf), 0);
     } while (ret < 0);
@@ -359,7 +359,7 @@ static int to_unicode(UINT vkey, UINT scancode, const BYTE keys[256])
     // This wraps ToUnicode to be stateless and to return only one character
 
     // Make the buffer 10 code units long to be safe, same as here:
-    // https://web.archive.org/web/20101013215215/http://blogs.msdn.com/b/michkap/archive/2006/03/24/559169.aspx
+    // <https://web.archive.org/web/20101013215215/http://blogs.msdn.com/b/michkap/archive/2006/03/24/559169.aspx>
     wchar_t buf[10] = { 0 };
 
     // Dead keys aren't useful for key shortcuts, so clear the keyboard state
@@ -1501,7 +1501,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         }
         // Windows can send spurious mouse events, which would make the mpv
         // core unhide the mouse cursor on completely unrelated events. See:
-        //  https://blogs.msdn.com/b/oldnewthing/archive/2003/10/01/55108.aspx
+        // <https://web.archive.org/web/20100821161603/
+        // https://blogs.msdn.com/b/oldnewthing/archive/2003/10/01/55108.aspx>
         int x = GET_X_LPARAM(lParam);
         int y = GET_Y_LPARAM(lParam);
         if (x != w32->mouse_x || y != w32->mouse_y) {
