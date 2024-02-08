@@ -84,38 +84,37 @@ exit_label:
     return hr;
 }
 
-static bool thread_feed(struct ao *ao)
+static void thread_feed(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
     HRESULT hr;
 
     UINT32 frame_count = state->bufferFrameCount;
-    UINT32 padding;
-    hr = IAudioClient_GetCurrentPadding(state->pAudioClient, &padding);
-    EXIT_ON_ERROR(hr);
-    bool refill = false;
+
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
+        // GetCurrentPadding is only meaningful for shared mode streams since
+        // we are using event-driven mode. MS didn't provide precise definition
+        // of its return value for an exclusive, event-driven stream. In practice
+        // it seems to be fixed to the size of a buffer (there should be two such
+        // buffers in this mode), even if NO audio data has ever been written.
+        // See https://learn.microsoft.com/en-us/windows/win32/api/audioclient/nf-audioclient-iaudioclient-getcurrentpadding
+        UINT32 padding;
+        hr = IAudioClient_GetCurrentPadding(state->pAudioClient, &padding);
+        EXIT_ON_ERROR(hr);
+
+        MP_TRACE(ao, "Padding: %"PRIu32"\n", padding);
+
         // Return if there's nothing to do.
         if (frame_count <= padding)
-            return false;
+            return;
+
         // In shared mode, there is only one buffer of size bufferFrameCount.
         // We must therefore take care not to overwrite the samples that have
         // yet to play.
         frame_count -= padding;
-    } else if (padding >= 2 * frame_count) {
-        // In exclusive mode, we exchange entire buffers of size
-        // bufferFrameCount with the device. If there are already two such
-        // full buffers waiting to play, there is no work to do.
-        return false;
-    } else if (padding < frame_count) {
-        // If there is not at least one full buffer of audio queued to play in
-        // exclusive mode, call this function again immediately to try and catch
-        // up and avoid a cascade of under-runs. WASAPI doesn't seem to be smart
-        // enough to send more feed events when it gets behind.
-        refill = true;
     }
-    MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n",
-             frame_count, padding);
+
+    MP_TRACE(ao, "Frame to fill: %"PRIu32"\n", frame_count);
 
     double delay_ns;
     hr = get_device_delay(state, &delay_ns);
@@ -142,12 +141,12 @@ static bool thread_feed(struct ao *ao)
 
     atomic_fetch_add(&state->sample_count, frame_count);
 
-    return refill;
+    return;
+
 exit_label:
     MP_ERR(state, "Error feeding audio: %s\n", mp_HRESULT_to_str(hr));
     MP_VERBOSE(ao, "Requesting ao reload\n");
     ao_request_reload(ao);
-    return false;
 }
 
 static void thread_reset(struct ao *ao)
@@ -180,19 +179,25 @@ static void thread_resume(struct ao *ao)
     }
 }
 
-static void thread_wakeup(void *ptr)
-{
-    struct ao *ao = ptr;
-    struct wasapi_state *state = ao->priv;
-    SetEvent(state->hWake);
-}
-
 static void set_thread_state(struct ao *ao,
                              enum wasapi_thread_state thread_state)
 {
     struct wasapi_state *state = ao->priv;
+
     atomic_store(&state->thread_state, thread_state);
-    thread_wakeup(ao);
+
+    // Let the OS signal buffer fills in exclusive mode because
+    // we can't tell if there is space available for writing (see
+    // comments in thread_feed). This shouldn't happen on external
+    // wakeups, but just in case.
+    if (state->share_mode == AUDCLNT_SHAREMODE_SHARED ||
+            thread_state != WASAPI_THREAD_FEED)
+        SetEvent(state->hWake);
+}
+
+static void thread_process_dispatch(void *ptr)
+{
+    set_thread_state(ptr, WASAPI_THREAD_DISPATCH);
 }
 
 static DWORD __stdcall AudioThread(void *lpParameter)
@@ -212,14 +217,13 @@ static DWORD __stdcall AudioThread(void *lpParameter)
         if (WaitForSingleObject(state->hWake, INFINITE) != WAIT_OBJECT_0)
             MP_ERR(ao, "Unexpected return value from WaitForSingleObject\n");
 
-        mp_dispatch_queue_process(state->dispatch, 0);
-
         int thread_state = atomic_load(&state->thread_state);
         switch (thread_state) {
         case WASAPI_THREAD_FEED:
-            // fill twice on under-full buffer (see comment in thread_feed)
-            if (thread_feed(ao) && thread_feed(ao))
-                MP_ERR(ao, "Unable to fill buffer fast enough\n");
+            thread_feed(ao);
+            break;
+        case WASAPI_THREAD_DISPATCH:
+            mp_dispatch_queue_process(state->dispatch, 0);
             break;
         case WASAPI_THREAD_RESET:
             thread_reset(ao);
@@ -301,7 +305,7 @@ static int init(struct ao *ao)
     }
 
     state->dispatch = mp_dispatch_create(state);
-    mp_dispatch_set_wakeup_fn(state->dispatch, thread_wakeup, ao);
+    mp_dispatch_set_wakeup_fn(state->dispatch, thread_process_dispatch, ao);
 
     state->init_ok = false;
     state->hAudioThread = CreateThread(NULL, 0, &AudioThread, ao, 0, NULL);
