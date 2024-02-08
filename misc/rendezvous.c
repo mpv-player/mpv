@@ -28,7 +28,7 @@ struct waiter {
  * of _all_ waiters in the process, and temporarily wakes up _all_ waiters on
  * each second call).
  *
- * This is inspired by: http://9atom.org/magic/man2html/2/rendezvous */
+ * This is inspired by: https://man.cat-v.org/plan_9/2/rendezvous */
 intptr_t mp_rendezvous(void *tag, intptr_t value)
 {
     struct waiter wait = { .tag = tag, .value = &value };

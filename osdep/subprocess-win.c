@@ -377,7 +377,8 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     // Get pointers to the arrays in lpReserved2. This is an undocumented data
     // structure used by MSVCRT (and other frameworks and runtimes) to emulate
     // FD inheritance. The format is unofficially documented here:
-    // https://www.catch22.net/tuts/undocumented-createprocess
+    // <https://web.archive.org/web/20221014190010/
+    // https://www.catch22.net/tuts/undocumented-createprocess>
     si.StartupInfo.cbReserved2 = sizeof(int) + crt_fd_count * (1 + sizeof(intptr_t));
     si.StartupInfo.lpReserved2 = talloc_size(tmp, si.StartupInfo.cbReserved2);
     char *crt_buf_flags = si.StartupInfo.lpReserved2 + sizeof(int);
@@ -402,7 +403,8 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     // Specify which handles are inherited by the subprocess. If this isn't
     // specified, the subprocess inherits all inheritable handles, which could
     // include handles created by other threads. See:
-    // http://blogs.msdn.com/b/oldnewthing/archive/2011/12/16/10248328.aspx
+    // <https://web.archive.org/web/20121127222200/
+    // http://blogs.msdn.com/b/oldnewthing/archive/2011/12/16/10248328.aspx>
     si.lpAttributeList = create_handle_list(tmp, share_hndls, share_hndl_count);
 
     // If we have a console, the subprocess will automatically attach to it so
