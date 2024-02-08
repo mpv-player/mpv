@@ -46,6 +46,7 @@ class RemoteCommandCenter: NSObject {
     var isPaused: Bool = false { didSet { updateInfoCenter() } }
     var duration: Double = 0 { didSet { updateInfoCenter() } }
     var position: Double = 0 { didSet { updateInfoCenter() } }
+    var rate: Double = 0 { didSet { updateInfoCenter() } }
 
     var infoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
     var commandCenter: MPRemoteCommandCenter { get { return MPRemoteCommandCenter.shared() } }
@@ -139,7 +140,7 @@ class RemoteCommandCenter: NSObject {
 
     func updateInfoCenter() {
         nowPlayingInfo.merge([
-            MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: !isPaused),
+            MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: isPaused ? 0 : rate),
             MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(value: position),
             MPMediaItemPropertyPlaybackDuration: NSNumber(value: duration),
         ]) { (_, new) in new }
@@ -184,11 +185,13 @@ class RemoteCommandCenter: NSObject {
             isPaused = LibmpvHelper.mpvFlagToBool(property.data) ?? false
         case "time-pos" where property.format == MPV_FORMAT_DOUBLE:
             let newPosition = max(LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0, 0)
-            if Int(floor(newPosition) - floor(position)) != 0 {
+            if Int((floor(newPosition) - floor(position)) / rate) != 0 {
                 position = newPosition
             }
         case "duration" where property.format == MPV_FORMAT_DOUBLE:
             duration = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0
+        case "speed" where property.format == MPV_FORMAT_DOUBLE:
+            rate = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 1
         default:
             break
         }
