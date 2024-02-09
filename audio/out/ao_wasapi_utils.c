@@ -647,10 +647,6 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
                (double) devicePeriod / 10000.0 );
 
     REFERENCE_TIME bufferDuration = devicePeriod;
-    if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
-        // for shared mode, use integer multiple of device period close to 50ms
-        bufferDuration = devicePeriod * ceil(50.0 * 10000.0 / devicePeriod);
-    }
 
     // handle unsupported buffer size if AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED was
     // returned in a previous attempt. hopefully this shouldn't happen because
@@ -662,15 +658,17 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
              * state->bufferFrameCount));
     }
 
-    REFERENCE_TIME bufferPeriod =
-        state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ? bufferDuration : 0;
-
+    // MSDN states that when using event-driven buffering:
+    //   hnsBufferDuration = hnsPeriodicity = 0 for shared streams
+    //   hnsBufferDuration = hnsPeriodicity != 0 for exclusive streams
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx
     MP_DBG(state, "IAudioClient::Initialize\n");
+    bool is_shared = state->share_mode == AUDCLNT_SHAREMODE_SHARED;
     hr = IAudioClient_Initialize(state->pAudioClient,
                                  state->share_mode,
                                  AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                                 bufferDuration,
-                                 bufferPeriod,
+                                 is_shared ? 0 : bufferDuration,
+                                 is_shared ? 0 : bufferDuration,
                                  &(state->format.Format),
                                  NULL);
     EXIT_ON_ERROR(hr);
