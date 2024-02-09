@@ -31,7 +31,7 @@ extension RemoteCommandCenter {
         var state: UInt32 = 0
         let handler: ConfigHandler
 
-        init(key: Int32, type: KeyType = .normal, handler: @escaping ConfigHandler = { event in return .commandFailed }) {
+        init(key: Int32 = 0, type: KeyType = .normal, handler: @escaping ConfigHandler = { event in return .commandFailed }) {
             self.key = key
             self.type = type
             self.handler = handler
@@ -70,6 +70,7 @@ class RemoteCommandCenter: NSObject {
             commandCenter.togglePlayPauseCommand: Config(key: MP_KEY_PLAY, handler: keyHandler),
             commandCenter.seekForwardCommand: Config(key: MP_KEY_FORWARD, type: .repeatable, handler: keyHandler),
             commandCenter.seekBackwardCommand: Config(key: MP_KEY_REWIND, type: .repeatable, handler: keyHandler),
+            commandCenter.changePlaybackPositionCommand: Config(handler: seekHandler),
         ]
 
         disabledCommands = [
@@ -78,7 +79,6 @@ class RemoteCommandCenter: NSObject {
             commandCenter.changeShuffleModeCommand,
             commandCenter.skipForwardCommand,
             commandCenter.skipBackwardCommand,
-            commandCenter.changePlaybackPositionCommand,
             commandCenter.enableLanguageOptionCommand,
             commandCenter.disableLanguageOptionCommand,
             commandCenter.ratingCommand,
@@ -164,6 +164,18 @@ class RemoteCommandCenter: NSObject {
         EventsResponder.sharedInstance().handleMPKey(config.key, withMask: Int32(state))
 
         return .success
+    }
+
+    lazy var seekHandler: ConfigHandler = { event in
+        guard let posEvent = event as? MPChangePlaybackPositionCommandEvent else {
+            return .commandFailed
+        }
+
+        let success = String(format: "seek %.02f absolute", posEvent.positionTime).withCString {
+            EventsResponder.sharedInstance().queueCommand(UnsafeMutablePointer<Int8>(mutating: $0))
+        }
+
+        return success ? .success : .commandFailed
     }
 
     @objc func processEvent(_ event: UnsafeMutablePointer<mpv_event>) {
