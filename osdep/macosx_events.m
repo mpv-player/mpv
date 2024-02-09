@@ -159,6 +159,7 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
         mpv_observe_property(ctx, 0, "speed", MPV_FORMAT_DOUBLE);
         mpv_observe_property(ctx, 0, "pause", MPV_FORMAT_FLAG);
         mpv_observe_property(ctx, 0, "media-title", MPV_FORMAT_STRING);
+        mpv_observe_property(ctx, 0, "chapter-metadata/title", MPV_FORMAT_STRING);
         mpv_set_wakeup_callback(ctx, wakeup, NULL);
     }
 }

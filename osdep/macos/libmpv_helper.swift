@@ -236,8 +236,9 @@ class LibmpvHelper {
     }
 
     // *(char **) MPV_FORMAT_STRING on mpv_event_property
-    class func mpvStringArrayToString(_ obj: UnsafeMutableRawPointer) -> String? {
-        let cstr = UnsafeMutablePointer<UnsafeMutablePointer<Int8>>(OpaquePointer(obj))
+    class func mpvStringArrayToString(_ obj: UnsafeMutableRawPointer?) -> String? {
+        guard let str = obj else { return nil }
+        let cstr = UnsafeMutablePointer<UnsafeMutablePointer<Int8>>(OpaquePointer(str))
         return String(cString: cstr[0])
     }
 
