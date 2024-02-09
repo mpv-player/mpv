@@ -246,10 +246,10 @@ mp.get_osd_margins = function get_osd_margins() {
 // {cb: fn, forced: bool, maybe input: str, repeatable: bool, complex: bool}
 var binds = new_cache();
 
-function dispatch_key_binding(name, state, key_name) {
+function dispatch_key_binding(name, state, key_name, key_text) {
     var cb = binds[name] ? binds[name].cb : false;
     if (cb)  // "script-binding [<script_name>/]<name>" command was invoked
-        cb(state, key_name);
+        cb(state, key_name, key_text);
 }
 
 var binds_tid = 0;  // flush timer id. actual id's are always true-thy
@@ -307,11 +307,12 @@ function add_binding(forced, key, name, fn, opts) {
             fn({event: "press", is_mouse: false});
         });
         var KEY_STATES = { u: "up", d: "down", r: "repeat", p: "press" };
-        key_data.cb = function key_cb(state, key_name) {
+        key_data.cb = function key_cb(state, key_name, key_text) {
             fn({
                 event: KEY_STATES[state[0]] || "unknown",
                 is_mouse: state[1] == "m",
-                key_name: key_name || undefined
+                key_name: key_name || undefined,
+                key_text: key_text || undefined
             });
         }
     } else {

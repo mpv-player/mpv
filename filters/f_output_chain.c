@@ -627,7 +627,7 @@ bool mp_output_chain_update_filters(struct mp_output_chain *c,
 
 error:
     for (int n = 0; n < num_add; n++)
-        talloc_free(add[n]);
+        talloc_free(add[n]->wrapper);
     talloc_free(add);
     talloc_free(used);
     return false;

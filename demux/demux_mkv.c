@@ -2012,12 +2012,12 @@ static void probe_if_image(demuxer_t *demuxer)
         mkv_track_t *track = mkv_d->tracks[n];
         struct sh_stream *sh = track->stream;
 
-        if (!sh || sh->type != STREAM_VIDEO)
+        if (!sh || sh->type != STREAM_VIDEO || sh->image)
             continue;
 
         int64_t timecode = -1;
         // Arbitrary restriction on packet reading.
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             int ret = read_next_block_into_queue(demuxer);
             if (ret == 1 && mkv_d->blocks[i].track == track) {
                 if (timecode != mkv_d->blocks[i].timecode)
@@ -2030,10 +2030,8 @@ static void probe_if_image(demuxer_t *demuxer)
         }
 
         // Assume still image
-        if (video_blocks == 1) {
-            sh->still_image = true;
+        if (video_blocks == 1)
             sh->image = true;
-        }
     }
 }
 

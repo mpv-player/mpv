@@ -969,6 +969,40 @@ function build_completers()
     return completers
 end
 
+function common_prefix_length(s1, s2)
+    local common_count = 0
+    for i = 1, #s1 do
+        if s1:byte(i) ~= s2:byte(i) then
+            break
+        end
+        common_count = common_count + 1
+    end
+    return common_count
+end
+
+function max_overlap_length(s1, s2)
+    for s1_offset = 0, #s1 - 1 do
+        local match = true
+        for i = 1, #s1 - s1_offset do
+            if s1:byte(s1_offset + i) ~= s2:byte(i) then
+                match = false
+                break
+            end
+        end
+        if match then
+            return #s1 - s1_offset
+        end
+    end
+    return 0
+end
+
+-- If str starts with the first or last characters of prefix, strip them.
+local function strip_common_characters(str, prefix)
+    return str:sub(1 + math.max(
+    common_prefix_length(prefix, str),
+    max_overlap_length(prefix, str)))
+end
+
 -- Find the longest common case-sensitive prefix of the entries in "list".
 local function find_common_prefix(list)
     local prefix = list[1]
@@ -1024,40 +1058,6 @@ local function complete_match(part, list)
     end
 
     return {}, part
-end
-
-function common_prefix_length(s1, s2)
-    local common_count = 0
-    for i = 1, #s1 do
-        if s1:byte(i) ~= s2:byte(i) then
-            break
-        end
-        common_count = common_count + 1
-    end
-    return common_count
-end
-
-function max_overlap_length(s1, s2)
-    for s1_offset = 0, #s1 - 1 do
-        local match = true
-        for i = 1, #s1 - s1_offset do
-            if s1:byte(s1_offset + i) ~= s2:byte(i) then
-                match = false
-                break
-            end
-        end
-        if match then
-            return #s1 - s1_offset
-        end
-    end
-    return 0
-end
-
--- If str starts with the first or last characters of prefix, strip them.
-local function strip_common_characters(str, prefix)
-    return str:sub(1 + math.max(
-        common_prefix_length(prefix, str),
-        max_overlap_length(prefix, str)))
 end
 
 local function cycle_through_suggestions(backwards)
