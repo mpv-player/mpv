@@ -48,6 +48,7 @@ class RemoteCommandCenter: NSObject {
     var position: Double = 0 { didSet { updateInfoCenter() } }
     var rate: Double = 0 { didSet { updateInfoCenter() } }
     var title: String = "" { didSet { updateInfoCenter() } }
+    var chapter: String = "" { didSet { updateInfoCenter() } }
 
     var infoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
     var commandCenter: MPRemoteCommandCenter { get { return MPRemoteCommandCenter.shared() } }
@@ -58,8 +59,6 @@ class RemoteCommandCenter: NSObject {
         nowPlayingInfo = [
             MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
             MPNowPlayingInfoPropertyPlaybackProgress: NSNumber(value: 0.0),
-            MPMediaItemPropertyAlbumTitle: "",
-            MPMediaItemPropertyArtist: "",
         ]
 
         configs = [
@@ -144,6 +143,7 @@ class RemoteCommandCenter: NSObject {
             MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(value: position),
             MPMediaItemPropertyPlaybackDuration: NSNumber(value: duration),
             MPMediaItemPropertyTitle: title,
+            MPMediaItemPropertyArtist: chapter,
         ]) { (_, new) in new }
 
         infoCenter.nowPlayingInfo = nowPlayingInfo
@@ -195,6 +195,8 @@ class RemoteCommandCenter: NSObject {
             rate = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 1
         case "media-title" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
             title = LibmpvHelper.mpvStringArrayToString(property.data) ?? ""
+        case "chapter-metadata/title" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
+            chapter = LibmpvHelper.mpvStringArrayToString(property.data) ?? ""
         default:
             break
         }
