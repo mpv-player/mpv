@@ -367,7 +367,7 @@ struct demux_stream {
     bool eager;             // try to keep at least 1 packet queued
                             // if false, this stream is disabled, or passively
                             // read (like subtitles)
-    bool still_image;       // stream has still video images
+    bool still_image;       // stream consists of multiple sparse still images
     bool refreshing;        // finding old position after track switches
     bool eof;               // end of demuxed stream? (true if no more packets)
 
