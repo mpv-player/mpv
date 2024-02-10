@@ -37,6 +37,9 @@ const struct m_opt_choice_alternatives pl_csp_names[] = {
     {"smpte-240m",  PL_COLOR_SYSTEM_SMPTE_240M},
     {"bt.2020-ncl", PL_COLOR_SYSTEM_BT_2020_NC},
     {"bt.2020-cl",  PL_COLOR_SYSTEM_BT_2020_C},
+    {"bt.2100-pq",  PL_COLOR_SYSTEM_BT_2100_PQ},
+    {"bt.2100-hlg", PL_COLOR_SYSTEM_BT_2100_HLG},
+    {"dolbyvision", PL_COLOR_SYSTEM_DOLBYVISION},
     {"rgb",         PL_COLOR_SYSTEM_RGB},
     {"xyz",         PL_COLOR_SYSTEM_XYZ},
     {"ycgco",       PL_COLOR_SYSTEM_YCGCO},
@@ -315,6 +318,12 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct pl_transform3x3 *m)
     enum pl_color_system colorspace = params->repr.sys;
     if (colorspace <= PL_COLOR_SYSTEM_UNKNOWN || colorspace >= PL_COLOR_SYSTEM_COUNT)
         colorspace = PL_COLOR_SYSTEM_BT_601;
+    // Not supported. TODO: replace with pl_color_repr_decode
+    if (colorspace == PL_COLOR_SYSTEM_BT_2100_PQ ||
+        colorspace == PL_COLOR_SYSTEM_BT_2100_HLG ||
+        colorspace == PL_COLOR_SYSTEM_DOLBYVISION) {
+        colorspace = PL_COLOR_SYSTEM_BT_2020_NC;
+    }
     enum pl_color_levels levels_in = params->repr.levels;
     if (levels_in <= PL_COLOR_LEVELS_UNKNOWN || levels_in >= PL_COLOR_LEVELS_COUNT)
         levels_in = PL_COLOR_LEVELS_LIMITED;

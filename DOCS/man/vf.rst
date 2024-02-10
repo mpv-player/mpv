@@ -204,10 +204,13 @@ Available mpv-only filters are:
         Available color spaces are:
 
         :auto:          automatic selection (default)
-        :bt.601:        ITU-R BT.601 (SD)
-        :bt.709:        ITU-R BT.709 (HD)
-        :bt.2020-ncl:   ITU-R BT.2020 non-constant luminance system
-        :bt.2020-cl:    ITU-R BT.2020 constant luminance system
+        :bt.601:        ITU-R Rec. BT.601 (SD)
+        :bt.709:        ITU-R Rec. BT.709 (HD)
+        :bt.2020-ncl:   ITU-R Rec. BT.2020 (non-constant luminance)
+        :bt.2020-cl:    ITU-R Rec. BT.2020 (constant luminance)
+        :bt.2100-pq:    ITU-R Rec. BT.2100 ICtCp PQ variant
+        :bt.2100-hlg:   ITU-R Rec. BT.2100 ICtCp HLG variant
+        :dolbyvision:   Dolby Vision
         :smpte-240m:    SMPTE-240M
 
     ``<colorlevels>``
