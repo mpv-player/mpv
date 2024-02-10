@@ -137,9 +137,6 @@ struct vo_x11_state {
     Atom dnd_requested_action;
     Window dnd_src_window;
 
-    /* dragging the window */
-    bool win_drag_button1_down;
-
     Atom icc_profile_property;
 };
 

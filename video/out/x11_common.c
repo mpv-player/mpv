@@ -1217,7 +1217,6 @@ static void release_all_keys(struct vo *vo)
 
     if (x11->no_autorepeat)
         mp_input_put_key(x11->input_ctx, MP_INPUT_RELEASE_ALL);
-    x11->win_drag_button1_down = false;
 }
 
 void vo_x11_check_events(struct vo *vo)
@@ -1288,7 +1287,28 @@ void vo_x11_check_events(struct vo *vo)
             release_all_keys(vo);
             break;
         case MotionNotify:
-            if (x11->win_drag_button1_down && !x11->fs &&
+            mp_input_set_mouse_pos(x11->input_ctx, Event.xmotion.x,
+                                                   Event.xmotion.y);
+            break;
+        case LeaveNotify:
+            if (Event.xcrossing.mode != NotifyNormal)
+                break;
+            mp_input_put_key(x11->input_ctx, MP_KEY_MOUSE_LEAVE);
+            break;
+        case EnterNotify:
+            if (Event.xcrossing.mode != NotifyNormal)
+                break;
+            mp_input_put_key(x11->input_ctx, MP_KEY_MOUSE_ENTER);
+            break;
+        case ButtonPress:
+            if (Event.xbutton.button - 1 >= MP_KEY_MOUSE_BTN_COUNT)
+                break;
+            mp_input_put_key(x11->input_ctx,
+                             (MP_MBTN_BASE + Event.xbutton.button - 1) |
+                             get_mods(Event.xbutton.state) | MP_KEY_STATE_DOWN);
+            long msg[4] = {XEMBED_REQUEST_FOCUS};
+            vo_x11_xembed_send_message(x11, msg);
+            if (Event.xbutton.button == 1 && !x11->fs &&
                 !mp_input_test_dragging(x11->input_ctx, Event.xmotion.x,
                                                         Event.xmotion.y))
             {
@@ -1302,39 +1322,11 @@ void vo_x11_check_events(struct vo *vo)
                     1, // source indication: normal
                 };
                 x11_send_ewmh_msg(x11, "_NET_WM_MOVERESIZE", params);
-            } else {
-                mp_input_set_mouse_pos(x11->input_ctx, Event.xmotion.x,
-                                                       Event.xmotion.y);
             }
-            x11->win_drag_button1_down = false;
-            break;
-        case LeaveNotify:
-            if (Event.xcrossing.mode != NotifyNormal)
-                break;
-            x11->win_drag_button1_down = false;
-            mp_input_put_key(x11->input_ctx, MP_KEY_MOUSE_LEAVE);
-            break;
-        case EnterNotify:
-            if (Event.xcrossing.mode != NotifyNormal)
-                break;
-            mp_input_put_key(x11->input_ctx, MP_KEY_MOUSE_ENTER);
-            break;
-        case ButtonPress:
-            if (Event.xbutton.button - 1 >= MP_KEY_MOUSE_BTN_COUNT)
-                break;
-            if (Event.xbutton.button == 1)
-                x11->win_drag_button1_down = true;
-            mp_input_put_key(x11->input_ctx,
-                             (MP_MBTN_BASE + Event.xbutton.button - 1) |
-                             get_mods(Event.xbutton.state) | MP_KEY_STATE_DOWN);
-            long msg[4] = {XEMBED_REQUEST_FOCUS};
-            vo_x11_xembed_send_message(x11, msg);
             break;
         case ButtonRelease:
             if (Event.xbutton.button - 1 >= MP_KEY_MOUSE_BTN_COUNT)
                 break;
-            if (Event.xbutton.button == 1)
-                x11->win_drag_button1_down = false;
             mp_input_put_key(x11->input_ctx,
                              (MP_MBTN_BASE + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_UP);
