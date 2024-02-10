@@ -536,6 +536,12 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
             mp_input_put_key_utf8(wl->vo->input_ctx, state | wl->mpmod, bstr0(s));
         } else {
             // Assume a modifier was pressed and handle it in the mod event instead.
+            // If a modifier is released before a regular key, also release that
+            // key to not activate it again by accident.
+            if (state == MP_KEY_STATE_UP) {
+                wl->mpkey = 0;
+                mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
+            }
             return;
         }
     }
