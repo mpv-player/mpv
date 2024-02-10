@@ -316,6 +316,10 @@ Available mpv-only filters are:
         Whether or not to include Dolby Vision metadata (default: yes). If
         disabled, any Dolby Vision metadata will be stripped from frames.
 
+    ``<hdr10plus=yes|no>``
+        Whether or not to include HDR10+ metadata (default: yes). If
+        disabled, any HDR10+ metadata will be stripped from frames.
+
     ``<film-grain=yes|no>``
         Whether or not to include film grain metadata (default: yes). If
         disabled, any film grain metadata will be stripped from frames.
