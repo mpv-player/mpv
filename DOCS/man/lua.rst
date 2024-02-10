@@ -308,16 +308,17 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
         ``repeatable``
             If set to ``true``, enables key repeat for this specific binding.
+            This option only makes sense when ``complex`` is not set to ``true``.
 
         ``complex``
-            If set to ``true``, then ``fn`` is called on both key up and down
-            events (as well as key repeat, if enabled), with the first
-            argument being a table. This table has the following entries (and
-            may contain undocumented ones):
+            If set to ``true``, then ``fn`` is called on key down, repeat and up
+            events, with the first argument being a table. This table has the
+            following entries (and may contain undocumented ones):
 
                 ``event``
                     Set to one of the strings ``down``, ``repeat``, ``up`` or
-                    ``press`` (the latter if key up/down can't be tracked).
+                    ``press`` (the latter if key up/down/repeat can't be
+                    tracked).
 
                 ``is_mouse``
                     Boolean Whether the event was caused by a mouse button.
