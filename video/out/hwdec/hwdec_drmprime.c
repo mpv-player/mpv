@@ -133,7 +133,9 @@ static int init(struct ra_hwdec *hw)
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_420P);
     MP_TARRAY_APPEND(p, p->formats, num_formats, pixfmt2imgfmt(AV_PIX_FMT_NV16));
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_P010);
+#ifdef AV_PIX_FMT_P210
     MP_TARRAY_APPEND(p, p->formats, num_formats, pixfmt2imgfmt(AV_PIX_FMT_P210));
+#endif
 
     for (int i = 0; i < MP_ARRAY_SIZE(forked_pix_fmt_names); i++) {
         enum AVPixelFormat fmt = av_get_pix_fmt(forked_pix_fmt_names[i]);
