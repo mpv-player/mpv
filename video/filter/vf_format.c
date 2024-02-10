@@ -60,6 +60,7 @@ struct vf_format_opts {
     bool convert;
     int force_scaler;
     bool dovi;
+    bool hdr10plus;
     bool film_grain;
 };
 
@@ -178,6 +179,13 @@ static void vf_format_process(struct mp_filter *f)
             });
         }
 
+        if (!priv->opts->hdr10plus) {
+            memset(img->params.color.hdr.scene_max, 0,
+                   sizeof(img->params.color.hdr.scene_max));
+            img->params.color.hdr.scene_avg = 0;
+            img->params.color.hdr.ootf = (struct pl_hdr_bezier){0};
+        }
+
         if (!priv->opts->film_grain)
             av_buffer_unref(&img->film_grain);
 
@@ -240,6 +248,7 @@ static const m_option_t vf_opts_fields[] = {
     {"dar", OPT_DOUBLE(dar)},
     {"convert", OPT_BOOL(convert)},
     {"dolbyvision", OPT_BOOL(dovi)},
+    {"hdr10plus", OPT_BOOL(hdr10plus)},
     {"film-grain", OPT_BOOL(film_grain)},
     {"force-scaler", OPT_CHOICE(force_scaler,
                                 {"auto", MP_SWS_AUTO},
@@ -256,6 +265,7 @@ const struct mp_user_filter_entry vf_format = {
         .priv_defaults = &(const OPT_BASE_STRUCT){
             .rotate = -1,
             .dovi = true,
+            .hdr10plus = true,
             .film_grain = true,
         },
         .options = vf_opts_fields,

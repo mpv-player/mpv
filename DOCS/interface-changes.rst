@@ -62,6 +62,7 @@ Interface changes
       over blending alpha components into specific background types
     - add `--border-background` option
     - add `video-target-params` property
+    - add `hdr10plus` sub-parameter to `format` video filter
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.
