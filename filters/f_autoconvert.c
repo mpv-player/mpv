@@ -157,7 +157,7 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
          */
         if (samefmt && samesubffmt) {
             if (p->imgparams_set) {
-                if (!mp_image_params_equal(&p->imgparams, &img->params))
+                if (!mp_image_params_static_equal(&p->imgparams, &img->params))
                     break;
             }
             return true;

@@ -3193,7 +3193,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         struct mp_image *f = t->frames[i];
         uint64_t f_id = t->frame_id + i;
-        if (!mp_image_params_equal(&f->params, &p->real_image_params))
+        if (!mp_image_params_static_equal(&f->params, &p->real_image_params))
             continue;
 
         if (f_id > p->surfaces[p->surface_idx].id) {
@@ -4016,7 +4016,7 @@ void gl_video_config(struct gl_video *p, struct mp_image_params *params)
     unmap_overlay(p);
     unref_current_image(p);
 
-    if (!mp_image_params_equal(&p->real_image_params, params)) {
+    if (!mp_image_params_static_equal(&p->real_image_params, params)) {
         uninit_video(p);
         p->real_image_params = *params;
         p->image_params = *params;

@@ -494,7 +494,11 @@ static bool hwdec_reconfig(struct priv *p, struct ra_hwdec *hwdec,
                            const struct mp_image_params *par)
 {
     if (p->hwdec_mapper) {
-        if (mp_image_params_equal(par, &p->hwdec_mapper->src_params)) {
+        if (mp_image_params_static_equal(par, &p->hwdec_mapper->src_params)) {
+            p->hwdec_mapper->src_params.repr.dovi = par->repr.dovi;
+            p->hwdec_mapper->dst_params.repr.dovi = par->repr.dovi;
+            p->hwdec_mapper->src_params.color.hdr = par->color.hdr;
+            p->hwdec_mapper->dst_params.color.hdr = par->color.hdr;
             return p->hwdec_mapper;
         } else {
             ra_hwdec_mapper_free(&p->hwdec_mapper);
