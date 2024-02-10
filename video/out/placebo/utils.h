@@ -26,6 +26,3 @@ static inline struct pl_rect2d mp_rect2d_to_pl(struct mp_rect rc)
         .y1 = rc.y1,
     };
 }
-
-void mp_map_dovi_metadata_to_pl(struct mp_image *mpi,
-                                struct pl_frame *frame);

@@ -23,6 +23,8 @@
 
 #include <libavutil/rational.h>
 #include <libavutil/buffer.h>
+#include <libavutil/frame.h>
+#include <libplacebo/utils/libav.h>
 
 #include "common/msg.h"
 #include "common/common.h"
@@ -109,6 +111,16 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
     mp_image_params_set_dsize(out, dsize.num, dsize.den);
 }
 
+static inline void *get_side_data(const struct mp_image *mpi,
+                                  enum AVFrameSideDataType type)
+{
+    for (int i = 0; i < mpi->num_ff_side_data; i++) {
+        if (mpi->ff_side_data[i].type == type)
+            return (void *)mpi->ff_side_data[i].buf->data;
+    }
+    return NULL;
+}
+
 static void vf_format_process(struct mp_filter *f)
 {
     struct priv *priv = f->priv;
@@ -155,8 +167,15 @@ static void vf_format_process(struct mp_filter *f)
         }
 
         if (!priv->opts->dovi) {
-            av_buffer_unref(&img->dovi);
-            av_buffer_unref(&img->dovi_buf);
+            if (img->params.repr.sys == PL_COLOR_SYSTEM_DOLBYVISION)
+                img->params.repr.sys = PL_COLOR_SYSTEM_BT_2020_NC;
+            // Map again to strip any DV metadata set to common fields.
+            img->params.color.hdr = (struct pl_hdr_metadata){0};
+            pl_map_hdr_metadata(&img->params.color.hdr, &(struct pl_av_hdr_metadata) {
+                .mdm = get_side_data(img, AV_FRAME_DATA_MASTERING_DISPLAY_METADATA),
+                .clm = get_side_data(img, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
+                .dhp = get_side_data(img, AV_FRAME_DATA_DYNAMIC_HDR_PLUS),
+            });
         }
 
         if (!priv->opts->film_grain)
