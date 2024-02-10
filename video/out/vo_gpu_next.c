@@ -705,9 +705,6 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     // Update chroma location, must be done after initializing planes
     pl_frame_set_chroma_location(frame, par->chroma_location);
 
-    // Set the frame DOVI metadata
-    mp_map_dovi_metadata_to_pl(mpi, frame);
-
     if (mpi->film_grain)
         pl_film_grain_from_av(&frame->film_grain, (AVFilmGrainParams *) mpi->film_grain->data);
 
