@@ -333,7 +333,7 @@ bool mp_refqueue_can_output(struct mp_refqueue *q)
 
     if (!q->in_format || !!q->in_format->hwctx != !!img->hwctx ||
         (img->hwctx && img->hwctx->data != q->in_format->hwctx->data) ||
-        !mp_image_params_equal(&q->in_format->params, &img->params))
+        !mp_image_params_static_equal(&q->in_format->params, &img->params))
     {
         q->next = img;
         q->eof = true;

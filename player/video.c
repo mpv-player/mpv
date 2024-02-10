@@ -1043,14 +1043,6 @@ static void apply_video_crop(struct MPContext *mpctx, struct vo *vo)
     }
 }
 
-static bool video_reconfig_needed(struct mp_image_params a,
-                                  struct mp_image_params b)
-{
-    a.color.hdr = (struct pl_hdr_metadata){0};
-    b.color.hdr = (struct pl_hdr_metadata){0};
-    return !mp_image_params_equal(&a, &b);
-}
-
 void write_video(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -1173,7 +1165,7 @@ void write_video(struct MPContext *mpctx)
 
     // Filter output is different from VO input?
     struct mp_image_params *p = &mpctx->next_frames[0]->params;
-    if (!vo->params || video_reconfig_needed(*p, *vo->params)) {
+    if (!vo->params || !mp_image_params_static_equal(p, vo->params)) {
         // Changing config deletes the current frame; wait until it's finished.
         if (vo_still_displaying(vo)) {
             vo_request_wakeup_on_done(vo);

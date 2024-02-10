@@ -100,27 +100,29 @@ static void check_in_format_change(struct mp_user_filter *u,
         struct mp_image *img = frame.data;
 
         if (!mp_image_params_equal(&img->params, &u->last_in_vformat)) {
-            MP_VERBOSE(p, "[%s] %s\n", u->name,
-                       mp_image_params_to_str(&img->params));
-            u->last_in_vformat = img->params;
-
             if (u == p->input) {
                 p->public.input_params = img->params;
             } else if (u == p->output) {
                 p->public.output_params = img->params;
             }
 
-            // Unfortunately there's no good place to update these.
-            // But a common case is enabling HW decoding, which
-            // might init some support of them in the VO, and update
-            // the VO's format list.
-            //
-            // But as this is only relevant to the "convert" filter, don't
-            // do this for the other filters as it is wasted work.
-            if (strcmp(u->name, "convert") == 0)
-                update_output_caps(p);
+            if (!mp_image_params_static_equal(&img->params, &u->last_in_vformat)) {
+                MP_VERBOSE(p, "[%s] %s\n", u->name,
+                           mp_image_params_to_str(&img->params));
 
-            p->public.reconfig_happened = true;
+                // Unfortunately there's no good place to update these.
+                // But a common case is enabling HW decoding, which
+                // might init some support of them in the VO, and update
+                // the VO's format list.
+                //
+                // But as this is only relevant to the "convert" filter, don't
+                // do this for the other filters as it is wasted work.
+                if (strcmp(u->name, "convert") == 0)
+                    update_output_caps(p);
+
+                p->public.reconfig_happened = true;
+            }
+            u->last_in_vformat = img->params;
         }
     }
 

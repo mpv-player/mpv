@@ -844,6 +844,17 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            mp_rect_equals(&p1->crop, &p2->crop);
 }
 
+bool mp_image_params_static_equal(const struct mp_image_params *p1,
+                                  const struct mp_image_params *p2)
+{
+    // Compare only static video parameters, excluding dynamic metadata.
+    struct mp_image_params a = *p1;
+    struct mp_image_params b = *p2;
+    a.repr.dovi = b.repr.dovi = NULL;
+    a.color.hdr = b.color.hdr = (struct pl_hdr_metadata){0};
+    return mp_image_params_equal(&a, &b);
+}
+
 // Set most image parameters, but not image format or size.
 // Display size is used to set the PAR.
 void mp_image_set_attributes(struct mp_image *image,

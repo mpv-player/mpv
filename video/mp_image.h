@@ -177,6 +177,8 @@ bool mp_image_crop_valid(const struct mp_image_params *p);
 bool mp_image_params_valid(const struct mp_image_params *p);
 bool mp_image_params_equal(const struct mp_image_params *p1,
                            const struct mp_image_params *p2);
+bool mp_image_params_static_equal(const struct mp_image_params *p1,
+                                  const struct mp_image_params *p2);
 
 void mp_image_params_get_dsize(const struct mp_image_params *p,
                                int *d_w, int *d_h);

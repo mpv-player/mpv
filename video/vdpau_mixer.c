@@ -277,7 +277,7 @@ int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
     CHECK_VDP_ERROR(mixer, "Error when calling vdp_video_surface_get_parameters");
 
     if (!mixer->initialized || !opts_equal(opts, &mixer->opts) ||
-        !mp_image_params_equal(&video->params, &mixer->image_params) ||
+        !mp_image_params_static_equal(&video->params, &mixer->image_params) ||
         mixer->current_w != s_w || mixer->current_h != s_h ||
         mixer->current_chroma_type != s_chroma_type)
     {

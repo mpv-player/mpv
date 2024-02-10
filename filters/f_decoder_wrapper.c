@@ -551,31 +551,36 @@ void mp_decoder_wrapper_set_play_dir(struct mp_decoder_wrapper *d, int dir)
 }
 
 static void fix_image_params(struct priv *p,
-                             struct mp_image_params *params)
+                             struct mp_image_params *params,
+                             bool quiet)
 {
     struct mp_image_params m = *params;
     struct mp_codec_params *c = p->codec;
     struct dec_wrapper_opts *opts = p->opts;
 
-    MP_VERBOSE(p, "Decoder format: %s\n", mp_image_params_to_str(params));
+    if (!quiet)
+        MP_VERBOSE(p, "Decoder format: %s\n", mp_image_params_to_str(params));
     p->dec_format = *params;
 
     // While mp_image_params normally always have to have d_w/d_h set, the
     // decoder signals unknown bitstream aspect ratio with both set to 0.
     bool use_container = true;
     if (opts->aspect_method == 1 && m.p_w > 0 && m.p_h > 0) {
-        MP_VERBOSE(p, "Using bitstream aspect ratio.\n");
+        if (!quiet)
+            MP_VERBOSE(p, "Using bitstream aspect ratio.\n");
         use_container = false;
     }
 
     if (use_container && c->par_w > 0 && c->par_h) {
-        MP_VERBOSE(p, "Using container aspect ratio.\n");
+        if (!quiet)
+            MP_VERBOSE(p, "Using container aspect ratio.\n");
         m.p_w = c->par_w;
         m.p_h = c->par_h;
     }
 
     if (opts->movie_aspect >= 0) {
-        MP_VERBOSE(p, "Forcing user-set aspect ratio.\n");
+        if (!quiet)
+            MP_VERBOSE(p, "Forcing user-set aspect ratio.\n");
         if (opts->movie_aspect == 0) {
             m.p_w = m.p_h = 1;
         } else {
@@ -819,8 +824,10 @@ static void process_output_frame(struct priv *p, struct mp_frame frame)
 
         correct_video_pts(p, mpi);
 
-        if (!mp_image_params_equal(&p->last_format, &mpi->params))
-            fix_image_params(p, &mpi->params);
+        if (!mp_image_params_equal(&p->last_format, &mpi->params)) {
+            fix_image_params(p, &mpi->params,
+                mp_image_params_static_equal(&p->last_format, &mpi->params));
+        }
 
         mpi->params = p->fixed_format;
         mpi->nominal_fps = p->fps;
