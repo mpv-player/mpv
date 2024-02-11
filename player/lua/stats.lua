@@ -806,6 +806,7 @@ local function append_img_params(s, r, ro)
     end
 
     local indent = o.prefix_sep .. o.prefix_sep
+    r = ro or r
 
     local pixel_format = r["hw-pixelformat"] or r["pixelformat"]
     append(s, pixel_format, {prefix="Format:"})
