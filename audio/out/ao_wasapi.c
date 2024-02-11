@@ -162,6 +162,7 @@ static void thread_reset(struct ao *ao)
     if (FAILED(hr))
         MP_ERR(state, "IAudioClient_Reset returned: %s\n", mp_HRESULT_to_str(hr));
 
+    state->client_started = false;
     atomic_store(&state->sample_count, 0);
 }
 
@@ -169,7 +170,10 @@ static void thread_resume(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
     MP_DBG(state, "Thread Resume\n");
-    thread_reset(ao);
+
+    if (state->client_started)
+        thread_reset(ao);
+
     thread_feed(ao);
 
     HRESULT hr = IAudioClient_Start(state->pAudioClient);
@@ -177,6 +181,8 @@ static void thread_resume(struct ao *ao)
         MP_ERR(state, "IAudioClient_Start returned %s\n",
                mp_HRESULT_to_str(hr));
     }
+
+    state->client_started = true;
 }
 
 static void set_thread_state(struct ao *ao,
@@ -211,6 +217,7 @@ static DWORD __stdcall AudioThread(void *lpParameter)
     SetEvent(state->hInitDone);
     if (!state->init_ok)
         goto exit_label;
+    state->client_started = false;
 
     MP_DBG(ao, "Entering dispatch loop\n");
     while (true) {
@@ -243,6 +250,7 @@ static DWORD __stdcall AudioThread(void *lpParameter)
     }
 exit_label:
     wasapi_thread_uninit(ao);
+    state->client_started = false;
 
     CoUninitialize();
     MP_DBG(ao, "Thread return\n");

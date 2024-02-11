@@ -74,6 +74,7 @@ typedef struct wasapi_state {
     IMMDevice *pDevice;
     IAudioClient *pAudioClient;
     IAudioRenderClient *pRenderClient;
+    bool client_started;
 
     // WASAPI internal clock information, for estimating delay
     IAudioClock *pAudioClock;
