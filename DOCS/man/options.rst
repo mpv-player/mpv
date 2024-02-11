@@ -2761,7 +2761,9 @@ Subtitles
     Matroska-style ASS subtitle packets. It should be unique, and libass
     uses it for fast elimination of duplicates. This option disables caching
     of subtitles across seeks, so after a seek libass can't eliminate subtitle
-    packets with the same ReadOrder as earlier packets.
+    packets with the same ReadOrder as earlier packets. Note that enabling this
+    option can result in broken subtitle behavior if you are not actually
+    playing one of the aforementioned broken mkv files.
 
 ``--teletext-page=<-1-999>``
     Select a teletext page number to decode.
