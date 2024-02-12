@@ -669,10 +669,8 @@ static bool vo_x11_get_xft_dpi_scale(struct vo_x11_state *x11)
 
 static void vo_x11_get_dpi_scale(struct vo_x11_state *x11)
 {
-    if (x11->opts->hidpi_window_scale) {
-        if (!vo_x11_get_xft_dpi_scale(x11))
-            vo_x11_get_x11_screen_dpi_scale(x11);
-    }
+    if (!vo_x11_get_xft_dpi_scale(x11))
+        vo_x11_get_x11_screen_dpi_scale(x11);
     x11->pending_vo_events |= VO_EVENT_DPI;
 }
 
@@ -2109,16 +2107,16 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         int *s = arg;
         if (!x11->window || x11->parent)
             return VO_FALSE;
-        s[0] = (x11->fs ? RC_W(x11->nofsrc) : RC_W(x11->winrc)) / x11->dpi_scale;
-        s[1] = (x11->fs ? RC_H(x11->nofsrc) : RC_H(x11->winrc)) / x11->dpi_scale;
+        s[0] = x11->fs ? RC_W(x11->nofsrc) : RC_W(x11->winrc);
+        s[1] = x11->fs ? RC_H(x11->nofsrc) : RC_H(x11->winrc);
         return VO_TRUE;
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (!x11->window || x11->parent)
             return VO_FALSE;
-        int w = s[0] * x11->dpi_scale;
-        int h = s[1] * x11->dpi_scale;
+        int w = s[0];
+        int h = s[1];
         struct mp_rect rc = x11->winrc;
         rc.x1 = rc.x0 + w;
         rc.y1 = rc.y0 + h;
