@@ -141,10 +141,7 @@ struct vo_wayland_state {
     struct wp_viewport   *video_viewport;
 
     /* Input */
-    struct wl_keyboard *keyboard;
-    struct wl_pointer  *pointer;
-    struct wl_seat     *seat;
-    struct wl_touch    *touch;
+    struct wl_list seat_list;
     struct xkb_context *xkb_context;
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
@@ -158,7 +155,6 @@ struct vo_wayland_state {
     bool axis_value120_scroll;
 
     /* DND */
-    struct wl_data_device *dnd_ddev;
     struct wl_data_device_manager *dnd_devman;
     struct wl_data_offer *dnd_offer;
     enum mp_dnd_action dnd_action;
@@ -172,6 +168,7 @@ struct vo_wayland_state {
     struct wl_surface      *cursor_surface;
     bool                    cursor_visible;
     int                     allocated_cursor_scale;
+    struct wl_pointer      *pointer;
     uint32_t                pointer_id;
 };
 
