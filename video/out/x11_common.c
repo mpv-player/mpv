@@ -1405,6 +1405,7 @@ void vo_x11_check_events(struct vo *vo)
             }
             if (Event.type == x11->xrandr_event) {
                 xrandr_read(x11);
+                vo_x11_get_dpi_scale(x11);
                 vo_x11_update_geometry(vo);
             }
             break;
