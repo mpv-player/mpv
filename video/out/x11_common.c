@@ -667,6 +667,15 @@ static bool vo_x11_get_xft_dpi_scale(struct vo_x11_state *x11)
     return success;
 }
 
+static void vo_x11_get_dpi_scale(struct vo_x11_state *x11)
+{
+    if (x11->opts->hidpi_window_scale) {
+        if (!vo_x11_get_xft_dpi_scale(x11))
+            vo_x11_get_x11_screen_dpi_scale(x11);
+    }
+    x11->pending_vo_events |= VO_EVENT_DPI;
+}
+
 bool vo_x11_init(struct vo *vo)
 {
     char *dispName;
@@ -731,10 +740,7 @@ bool vo_x11_init(struct vo *vo)
            x11->ws_width, x11->ws_height, dispName,
            x11->display_is_local ? "local" : "remote");
 
-    if (x11->opts->hidpi_window_scale) {
-        if (!vo_x11_get_xft_dpi_scale(x11))
-            vo_x11_get_x11_screen_dpi_scale(x11);
-    }
+    vo_x11_get_dpi_scale(x11);
 
     x11->wm_type = vo_wm_detect(vo);
 
@@ -2077,6 +2083,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 vo_x11_fullscreen(vo);
             if (opt == &opts->ontop)
                 vo_x11_setlayer(vo, opts->ontop);
+            if (opt == &opts->hidpi_window_scale)
+                vo_x11_set_geometry(vo);
             if (opt == &opts->border || opt == &opts->title_bar)
                 vo_x11_decoration(vo, opts->border, opts->title_bar);
             if (opt == &opts->all_workspaces)
