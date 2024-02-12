@@ -1404,7 +1404,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp (interface, wp_viewporter_interface.name) && (ver >= 1) && found++) {
-       wl->viewporter = wl_registry_bind (reg, id, &wp_viewporter_interface, 1);
+        wl->viewporter = wl_registry_bind (reg, id, &wp_viewporter_interface, 1);
     }
 
     if (!strcmp(interface, wl_data_device_manager_interface.name) && (ver >= 3) && found++) {
