@@ -2626,6 +2626,26 @@ static int mp_property_hidpi_scale(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, cmd->cached_window_scale);
 }
 
+static void update_hidpi_window_scale(struct MPContext *mpctx, bool hidpi_scale)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo || cmd->cached_window_scale <= 0)
+        return;
+
+    double scale = hidpi_scale ? cmd->cached_window_scale : 1 / cmd->cached_window_scale;
+
+    int s[2];
+    if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 || s[0] < 1 || s[1] < 1)
+        return;
+
+    s[0] *= scale;
+    s[1] *= scale;
+    if (s[0] <= 0 || s[1] <= 0)
+        return;
+    vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
+}
+
 static int mp_property_focused(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -7187,6 +7207,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (opt_ptr == &opts->vo->window_scale)
         update_window_scale(mpctx);
+
+    if (opt_ptr == &opts->vo->hidpi_window_scale)
+        update_hidpi_window_scale(mpctx, opts->vo->hidpi_window_scale);
 
     if (opt_ptr == &opts->cursor_autohide_delay)
         mpctx->mouse_timer = 0;
