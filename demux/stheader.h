@@ -49,7 +49,7 @@ struct sh_stream {
     bool visual_impaired_track; // container flag
     bool hearing_impaired_track;// container flag
     bool image;                 // video stream is an image
-    bool still_image;           // video stream contains still images
+    bool still_image;           // video consists of multiple sparse still images
     int hls_bitrate;
     int program_id;
 

@@ -281,7 +281,7 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
                     if (pid)
                         kill(pid, SIGKILL);
                     killed_by_us = true;
-                    break;
+                    goto break_poll;
                 }
                 struct mp_subprocess_fd *fd = &opts->fds[n];
                 if (fd->on_read) {
@@ -315,6 +315,8 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
             }
         }
     }
+
+break_poll:
 
     // Note: it can happen that a child process closes the pipe, but does not
     //       terminate yet. In this case, we would have to run waitpid() in

@@ -5,10 +5,10 @@
  * (https://github.com/glumpy/glumpy/blob/master/glumpy/library/build-spatial-filters.py)
  *
  * Also see:
- * - http://vector-agg.cvs.sourceforge.net/viewvc/vector-agg/agg-2.5/include/agg_image_filters.h
+ * - https://sourceforge.net/p/agg/svn/HEAD/tree/agg-2.4/include/agg_image_filters.h
  * - Vapoursynth plugin fmtconv (WTFPL Licensed), which is based on
  *   dither plugin for avisynth from the same author:
- *   https://github.com/vapoursynth/fmtconv/tree/master/src/fmtc
+ *   https://gitlab.com/EleonoreMizo/fmtconv/-/tree/master/src/fmtc
  * - Paul Heckbert's "zoom"
  * - XBMC: ConvolutionKernels.cpp etc.
  *

@@ -617,7 +617,7 @@ static void vo_x11_get_x11_screen_dpi_scale(struct vo_x11_state *x11)
     double dpi_x = x11->ws_width * 25.4 / w_mm;
     double dpi_y = x11->ws_height * 25.4 / h_mm;
     double base_dpi = 96;
-    if (isfinite(dpi_x) && isfinite(dpi_y) && x11->opts->hidpi_window_scale) {
+    if (isfinite(dpi_x) && isfinite(dpi_y)) {
         int s_x = lrint(MPCLAMP(2 * dpi_x / base_dpi, 0, 20));
         int s_y = lrint(MPCLAMP(2 * dpi_y / base_dpi, 0, 20));
         if (s_x == s_y && s_x > 2 && s_x < 20) {
@@ -731,8 +731,10 @@ bool vo_x11_init(struct vo *vo)
            x11->ws_width, x11->ws_height, dispName,
            x11->display_is_local ? "local" : "remote");
 
-    if (!vo_x11_get_xft_dpi_scale(x11))
-        vo_x11_get_x11_screen_dpi_scale(x11);
+    if (x11->opts->hidpi_window_scale) {
+        if (!vo_x11_get_xft_dpi_scale(x11))
+            vo_x11_get_x11_screen_dpi_scale(x11);
+    }
 
     x11->wm_type = vo_wm_detect(vo);
 

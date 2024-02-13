@@ -94,6 +94,13 @@ Example:
     meson compile -C build
     meson install -C build
 
+For libplacebo, meson can use a git check out as a subproject for a convenient
+way to compile mpv if a sufficient libplacebo version is not easily available
+in the build environment. It will be statically linked with mpv. Example:
+
+    mkdir -p subprojects
+    git clone https://code.videolan.org/videolan/libplacebo.git --depth=1 --recursive subprojects/libplacebo
+
 Essential dependencies (incomplete list):
 
 - gcc or clang

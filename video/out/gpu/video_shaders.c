@@ -254,7 +254,7 @@ void pass_compute_polar(struct gl_shader_cache *sc, struct scaler *scaler,
 static void bicubic_calcweights(struct gl_shader_cache *sc, const char *t, const char *s)
 {
     // Explanation of how bicubic scaling with only 4 texel fetches is done:
-    //   http://www.mate.tue.nl/mate/pdfs/10318.pdf
+    //   <https://web.archive.org/web/20180720154854/http://www.mate.tue.nl/mate/pdfs/10318.pdf>
     //   'Efficient GPU-Based Texture Interpolation using Uniform B-Splines'
     // Explanation why this algorithm normally always blurs, even with unit
     // scaling:
