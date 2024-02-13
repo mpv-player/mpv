@@ -3458,7 +3458,7 @@ Window
 
 ``--hidpi-window-scale``, ``--no-hidpi-window-scale``
     Scale the window size according to the backing DPI scale factor from the OS
-    (default: yes). For example, if the OS DPI scaling is set to 200%, mpv's window
+    (default: no). For example, if the OS DPI scaling is set to 200%, mpv's window
     size will be multiplied by 2.
 
 ``--native-fs``, ``--no-native-fs``
