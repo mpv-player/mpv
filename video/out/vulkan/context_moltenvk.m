@@ -23,14 +23,40 @@
 #include "context.h"
 #include "utils.h"
 
+static bool moltenvk_reconfig(struct ra_ctx *ctx);
+
+@interface MetalLayerDelegate : NSObject<CALayerDelegate>
+@property (nonatomic) struct ra_ctx *ra_ctx;
+- (id) initWithContext: (struct ra_ctx*) cxt;
+@end
+
+@implementation MetalLayerDelegate : NSObject
+
+- (id)initWithContext: (struct ra_ctx*) ctx
+{
+    _ra_ctx = ctx;
+    return self;
+}
+
+- (void)layoutSublayers: (CALayer*) layer
+{
+    moltenvk_reconfig(_ra_ctx);
+}
+
+@end
+
 struct priv {
     struct mpvk_ctx vk;
     CAMetalLayer *layer;
+    MetalLayerDelegate *delegate;
 };
 
 static void moltenvk_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
+    p->layer.delegate = nil;
+    p->delegate.ra_ctx = nil;
+    p->delegate = nil;
     ra_vk_ctx_uninit(ctx);
     mpvk_uninit(&p->vk);
 }
@@ -66,6 +92,9 @@ static bool moltenvk_init(struct ra_ctx *ctx)
 
     if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
         goto fail;
+
+    p->delegate = [[MetalLayerDelegate alloc] initWithContext: ctx];
+    p->layer.delegate = p->delegate;
 
     return true;
 fail:
