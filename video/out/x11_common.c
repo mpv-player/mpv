@@ -622,9 +622,7 @@ static void vo_x11_get_x11_screen_dpi_scale(struct vo_x11_state *x11)
         int s_y = lrint(MPCLAMP(2 * dpi_y / base_dpi, 0, 20));
         if (s_x == s_y && s_x > 2 && s_x < 20) {
             x11->dpi_scale = s_x / 2.0;
-            MP_VERBOSE(x11, "Using X11 screen DPI scale %g for prescaling. This can "
-                       "be disabled with --hidpi-window-scale=no.\n",
-                       x11->dpi_scale);
+            MP_VERBOSE(x11, "Using X11 screen DPI scale: %g", x11->dpi_scale);
         }
     }
 }
@@ -656,15 +654,20 @@ static bool vo_x11_get_xft_dpi_scale(struct vo_x11_state *x11)
             int s = lrint(MPCLAMP(2 * value / base_dpi, 0, 20));
             if (s > 2 && s < 20) {
                 x11->dpi_scale = s / 2.0;
-                MP_VERBOSE(x11, "Using Xft.dpi scale %g for prescaling. This can "
-                           "be disabled with --hidpi-window-scale=no.\n",
-                           x11->dpi_scale);
+                MP_VERBOSE(x11, "Using Xft.dpi scale: %g", x11->dpi_scale);
                 success = true;
             }
         }
     }
     XrmDestroyDatabase(db);
     return success;
+}
+
+static void vo_x11_get_dpi_scale(struct vo_x11_state *x11)
+{
+    if (!vo_x11_get_xft_dpi_scale(x11))
+        vo_x11_get_x11_screen_dpi_scale(x11);
+    x11->pending_vo_events |= VO_EVENT_DPI;
 }
 
 bool vo_x11_init(struct vo *vo)
@@ -731,10 +734,7 @@ bool vo_x11_init(struct vo *vo)
            x11->ws_width, x11->ws_height, dispName,
            x11->display_is_local ? "local" : "remote");
 
-    if (x11->opts->hidpi_window_scale) {
-        if (!vo_x11_get_xft_dpi_scale(x11))
-            vo_x11_get_x11_screen_dpi_scale(x11);
-    }
+    vo_x11_get_dpi_scale(x11);
 
     x11->wm_type = vo_wm_detect(vo);
 
@@ -1401,6 +1401,7 @@ void vo_x11_check_events(struct vo *vo)
             }
             if (Event.type == x11->xrandr_event) {
                 xrandr_read(x11);
+                vo_x11_get_dpi_scale(x11);
                 vo_x11_update_geometry(vo);
             }
             break;
@@ -2101,16 +2102,16 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         int *s = arg;
         if (!x11->window || x11->parent)
             return VO_FALSE;
-        s[0] = (x11->fs ? RC_W(x11->nofsrc) : RC_W(x11->winrc)) / x11->dpi_scale;
-        s[1] = (x11->fs ? RC_H(x11->nofsrc) : RC_H(x11->winrc)) / x11->dpi_scale;
+        s[0] = x11->fs ? RC_W(x11->nofsrc) : RC_W(x11->winrc);
+        s[1] = x11->fs ? RC_H(x11->nofsrc) : RC_H(x11->winrc);
         return VO_TRUE;
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (!x11->window || x11->parent)
             return VO_FALSE;
-        int w = s[0] * x11->dpi_scale;
-        int h = s[1] * x11->dpi_scale;
+        int w = s[0];
+        int h = s[1];
         struct mp_rect rc = x11->winrc;
         rc.x1 = rc.x0 + w;
         rc.y1 = rc.y0 + h;
