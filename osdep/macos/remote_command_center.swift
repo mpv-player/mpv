@@ -84,9 +84,7 @@ class RemoteCommandCenter: NSObject {
             commandCenter.bookmarkCommand,
         ]
 
-        if let app = NSApp as? Application, let icon = app.getMPVIcon() {
-            cover = icon
-        }
+        cover = (NSApp as? Application)?.getMPVIcon() ?? cover
 
         for cmd in disabledCommands {
             cmd.isEnabled = false
