@@ -1966,6 +1966,27 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
     return VO_TRUE;
 }
 
+static int set_cursor_visibility_all_seats(struct vo_wayland_state *wl, bool on)
+{
+    bool unavailable = true;
+    bool failed = false;
+    struct vo_wayland_seat *seat;
+    wl_list_for_each(seat, &wl->seat_list, link) {
+        if (seat->pointer) {
+            unavailable = false;
+            if (set_cursor_visibility(seat, on) == VO_FALSE)
+                failed = true;
+        }
+    }
+
+    if (unavailable)
+        return VO_NOTAVAIL;
+    if (failed)
+        return VO_FALSE;
+
+    return VO_TRUE;
+}
+
 static void set_geometry(struct vo_wayland_state *wl, bool resize)
 {
     struct vo *vo = wl->vo;
@@ -2339,9 +2360,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         return update_window_title(wl, (const char *)arg);
     case VOCTRL_SET_CURSOR_VISIBILITY:
-        if (wl->cursor_seat && !wl->cursor_seat->pointer)
-            return VO_NOTAVAIL;
-        return set_cursor_visibility(wl->cursor_seat, *(bool *)arg);
+        return set_cursor_visibility_all_seats(wl, *(bool *)arg);
     case VOCTRL_KILL_SCREENSAVER:
         return set_screensaver_inhibitor(wl, true);
     case VOCTRL_RESTORE_SCREENSAVER:
