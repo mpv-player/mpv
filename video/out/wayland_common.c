@@ -2284,8 +2284,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                 set_input_region(wl, opts->cursor_passthrough);
             if (opt == &opts->fullscreen)
                 toggle_fullscreen(wl);
-            if (opt == &opts->hidpi_window_scale)
-                set_geometry(wl, true);
             if (opt == &opts->window_maximized)
                 toggle_maximized(wl);
             if (opt == &opts->window_minimized)
