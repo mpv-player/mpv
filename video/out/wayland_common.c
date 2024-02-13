@@ -242,7 +242,6 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
 
-    wl->cursor_seat = s;
     set_cursor_visibility(s, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
 }
@@ -1557,8 +1556,6 @@ static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t
     wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link) {
         if (seat->id == id) {
             remove_seat(seat);
-            if (seat == wl->cursor_seat)
-                wl->cursor_seat = NULL;
             return;
         }
     }
@@ -2093,12 +2090,9 @@ static void set_window_bounds(struct vo_wayland_state *wl)
 
 static int spawn_cursor(struct vo_wayland_state *wl)
 {
-    struct vo_wayland_seat *s = wl->cursor_seat;
-    /* Don't use this if we have cursor-shape. */
-    if (s && s->cursor_shape_device)
+    if (wl->cursor_shape_manager)
         return 0;
-    /* Reuse if size is identical */
-    if ((s && !s->pointer) || wl->allocated_cursor_scale == wl->scaling)
+    if (wl->allocated_cursor_scale == wl->scaling)
         return 0;
     else if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
@@ -2739,7 +2733,6 @@ void vo_wayland_uninit(struct vo *vo)
     wl_list_for_each_safe(output, output_tmp, &wl->output_list, link)
         remove_output(output);
 
-    wl->cursor_seat = NULL;
     struct vo_wayland_seat *seat, *seat_tmp;
     wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link)
         remove_seat(seat);
