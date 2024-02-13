@@ -1,0 +1,15 @@
+StartChar: uniE00D
+Encoding: 57357 57357 34
+Width: 880
+Flags: HWO
+HStem: 780 20G<200 200>
+VStem: 200 375<400 400 400 800>
+LayerCount: 2
+Fore
+SplineSet
+200 400 m 1
+ 575 800 l 1
+ 575 0 l 1
+ 200 400 l 1
+EndSplineSet
+EndChar

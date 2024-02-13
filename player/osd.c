@@ -412,6 +412,8 @@ void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size)
             sym = OSD_CLOCK;
         } else if (mpctx->paused || mpctx->step_frames) {
             sym = OSD_PAUSE;
+        } else if (mpctx->play_dir < 0 ) {
+            sym = OSD_REV;
         } else {
             sym = OSD_PLAY;
         }
