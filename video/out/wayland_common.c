@@ -2693,6 +2693,7 @@ void vo_wayland_uninit(struct vo *vo)
     wl_list_for_each_safe(output, output_tmp, &wl->output_list, link)
         remove_output(output);
 
+    wl->cursor_seat = NULL;
     struct vo_wayland_seat *seat, *seat_tmp;
     wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link)
         remove_seat(seat);
