@@ -237,7 +237,6 @@ const struct m_sub_options vo_sub_opts = {
         .auto_window_resize = true,
         .keepaspect = true,
         .keepaspect_window = true,
-        .hidpi_window_scale = true,
         .native_fs = true,
         .taskbar_progress = true,
         .border = true,
