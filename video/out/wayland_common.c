@@ -195,6 +195,9 @@ struct vo_wayland_seat {
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
     struct wl_data_device *dnd_ddev;
+    /* TODO: unvoid this if required wayland protocols is bumped to 1.32+ */
+    void *cursor_shape_device;
+    uint32_t pointer_serial;
     struct wl_list link;
 };
 
@@ -202,7 +205,7 @@ static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
                             enum xdg_toplevel_resize_edge *edge);
 static int get_mods(struct vo_wayland_state *wl);
 static int lookupkey(int key);
-static int set_cursor_visibility(struct vo_wayland_state *wl, bool on);
+static int set_cursor_visibility(struct vo_wayland_seat *s, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
 
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
@@ -227,10 +230,8 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
 
-    wl->pointer    = pointer;
-    wl->pointer_id = serial;
-
-    set_cursor_visibility(wl, wl->cursor_visible);
+    wl->cursor_seat = s;
+    set_cursor_visibility(s, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
 }
 
@@ -1737,9 +1738,9 @@ static int get_mods(struct vo_wayland_state *wl)
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    if (!wl->cursor_shape_device && wl->cursor_shape_manager) {
-        wl->cursor_shape_device = wp_cursor_shape_manager_v1_get_pointer(wl->cursor_shape_manager,
-                                                                         s->pointer);
+    if (!s->cursor_shape_device && wl->cursor_shape_manager) {
+        s->cursor_shape_device = wp_cursor_shape_manager_v1_get_pointer(wl->cursor_shape_manager,
+                                                                        s->pointer);
     }
 #endif
 }
@@ -1892,6 +1893,10 @@ static void remove_seat(struct vo_wayland_seat *seat)
         wl_touch_destroy(seat->touch);
     if (seat->dnd_ddev)
         wl_data_device_destroy(seat->dnd_ddev);
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (seat->cursor_shape_device)
+        wp_cursor_shape_device_v1_destroy(seat->cursor_shape_device);
+#endif
 
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
@@ -1912,20 +1917,23 @@ static void set_content_type(struct vo_wayland_state *wl)
 #endif
 }
 
-static void set_cursor_shape(struct vo_wayland_state *wl)
+static void set_cursor_shape(struct vo_wayland_seat *s)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    wp_cursor_shape_device_v1_set_shape(wl->cursor_shape_device, wl->pointer_id,
+    wp_cursor_shape_device_v1_set_shape(s->cursor_shape_device, s->pointer_serial,
                                         WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
 #endif
 }
 
-static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
+static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
 {
+    if (!s)
+        return VO_FALSE;
+    struct vo_wayland_state *wl = s->wl;
     wl->cursor_visible = on;
     if (on) {
-        if (wl->cursor_shape_device) {
-            set_cursor_shape(wl);
+        if (s->cursor_shape_device) {
+            set_cursor_shape(s);
         } else {
             if (spawn_cursor(wl))
                 return VO_FALSE;
@@ -1934,7 +1942,7 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
             if (!buffer)
                 return VO_FALSE;
             int scale = MPMAX(wl->scaling, 1);
-            wl_pointer_set_cursor(wl->pointer, wl->pointer_id, wl->cursor_surface,
+            wl_pointer_set_cursor(s->pointer, s->pointer_serial, wl->cursor_surface,
                                   img->hotspot_x / scale, img->hotspot_y / scale);
             wl_surface_set_buffer_scale(wl->cursor_surface, scale);
             wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
@@ -1942,7 +1950,7 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
         }
         wl_surface_commit(wl->cursor_surface);
     } else {
-        wl_pointer_set_cursor(wl->pointer, wl->pointer_id, NULL, 0, 0);
+        wl_pointer_set_cursor(s->pointer, s->pointer_serial, NULL, 0, 0);
     }
     return VO_TRUE;
 }
@@ -2031,11 +2039,12 @@ static void set_window_bounds(struct vo_wayland_state *wl)
 
 static int spawn_cursor(struct vo_wayland_state *wl)
 {
+    struct vo_wayland_seat *s = wl->cursor_seat;
     /* Don't use this if we have cursor-shape. */
-    if (wl->cursor_shape_device)
+    if (s && s->cursor_shape_device)
         return 0;
     /* Reuse if size is identical */
-    if (!wl->pointer || wl->allocated_cursor_scale == wl->scaling)
+    if ((s && !s->pointer) || wl->allocated_cursor_scale == wl->scaling)
         return 0;
     else if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
@@ -2319,9 +2328,9 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         return update_window_title(wl, (const char *)arg);
     case VOCTRL_SET_CURSOR_VISIBILITY:
-        if (!wl->pointer)
+        if (wl->cursor_seat && !wl->cursor_seat->pointer)
             return VO_NOTAVAIL;
-        return set_cursor_visibility(wl, *(bool *)arg);
+        return set_cursor_visibility(wl->cursor_seat, *(bool *)arg);
     case VOCTRL_KILL_SCREENSAVER:
         return set_screensaver_inhibitor(wl, true);
     case VOCTRL_RESTORE_SCREENSAVER:
@@ -2565,9 +2574,6 @@ void vo_wayland_uninit(struct vo *vo)
         wl_subcompositor_destroy(wl->subcompositor);
 
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    if (wl->cursor_shape_device)
-        wp_cursor_shape_device_v1_destroy(wl->cursor_shape_device);
-
     if (wl->cursor_shape_manager)
         wp_cursor_shape_manager_v1_destroy(wl->cursor_shape_manager);
 #endif
@@ -2611,10 +2617,6 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->idle_inhibit_manager)
         zwp_idle_inhibit_manager_v1_destroy(wl->idle_inhibit_manager);
-
-    // destroyed in remove_seat
-    if (wl->pointer)
-        wl->pointer = NULL;
 
     if (wl->presentation)
         wp_presentation_destroy(wl->presentation);
