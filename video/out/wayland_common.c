@@ -198,12 +198,17 @@ struct vo_wayland_seat {
     /* TODO: unvoid this if required wayland protocols is bumped to 1.32+ */
     void *cursor_shape_device;
     uint32_t pointer_serial;
+    struct xkb_keymap  *xkb_keymap;
+    struct xkb_state   *xkb_state;
+    uint32_t keyboard_code;
+    int mpkey;
+    int mpmod;
     struct wl_list link;
 };
 
 static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
                             enum xdg_toplevel_resize_edge *edge);
-static int get_mods(struct vo_wayland_state *wl);
+static int get_mods(struct vo_wayland_seat *seat);
 static int lookupkey(int key);
 static int set_cursor_visibility(struct vo_wayland_seat *s, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
@@ -293,7 +298,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     }
 
     if (button)
-        mp_input_put_key(wl->vo->input_ctx, button | state | wl->mpmod);
+        mp_input_put_key(wl->vo->input_ctx, button | state | s->mpmod);
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         !wl->locked_size && (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN))
@@ -345,13 +350,13 @@ static void pointer_handle_frame(void *data, struct wl_pointer *wl_pointer)
     }
 
     if (value_vertical > 0)
-        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_DOWN | wl->mpmod, +value_vertical);
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_DOWN | s->mpmod, +value_vertical);
     if (value_vertical < 0)
-        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_UP | wl->mpmod, -value_vertical);
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_UP | s->mpmod, -value_vertical);
     if (value_horizontal > 0)
-        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_RIGHT | wl->mpmod, +value_horizontal);
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_RIGHT | s->mpmod, +value_horizontal);
     if (value_horizontal < 0)
-        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT | wl->mpmod, -value_horizontal);
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT | s->mpmod, -value_horizontal);
 
     wl->axis_value120_scroll = false;
     wl->axis_value_vertical = 0;
@@ -496,25 +501,25 @@ static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
         return;
     }
 
-    if (!wl->xkb_keymap)
-        wl->xkb_keymap = xkb_keymap_new_from_buffer(wl->xkb_context, map_str,
-                                                    strnlen(map_str, size),
-                                                    XKB_KEYMAP_FORMAT_TEXT_V1, 0);
+    if (!s->xkb_keymap)
+        s->xkb_keymap = xkb_keymap_new_from_buffer(wl->xkb_context, map_str,
+                                                   strnlen(map_str, size),
+                                                   XKB_KEYMAP_FORMAT_TEXT_V1, 0);
 
     munmap(map_str, size);
     close(fd);
 
-    if (!wl->xkb_keymap) {
+    if (!s->xkb_keymap) {
         MP_ERR(wl, "failed to compile keymap\n");
         return;
     }
 
-    if (!wl->xkb_state)
-        wl->xkb_state = xkb_state_new(wl->xkb_keymap);
-    if (!wl->xkb_state) {
+    if (!s->xkb_state)
+        s->xkb_state = xkb_state_new(s->xkb_keymap);
+    if (!s->xkb_state) {
         MP_ERR(wl, "failed to create XKB state\n");
-        xkb_keymap_unref(wl->xkb_keymap);
-        wl->xkb_keymap = NULL;
+        xkb_keymap_unref(s->xkb_keymap);
+        s->xkb_keymap = NULL;
         return;
     }
 }
@@ -535,9 +540,9 @@ static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     wl->has_keyboard_input = false;
-    wl->keyboard_code = 0;
-    wl->mpkey = 0;
-    wl->mpmod = 0;
+    s->keyboard_code = 0;
+    s->mpkey = 0;
+    s->mpmod = 0;
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
     guess_focus(wl);
 }
@@ -549,34 +554,34 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
 
-    wl->keyboard_code = key + 8;
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(wl->xkb_state, wl->keyboard_code);
+    s->keyboard_code = key + 8;
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(s->xkb_state, s->keyboard_code);
     int mpkey = lookupkey(sym);
 
     state = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                    : MP_KEY_STATE_UP;
 
     if (mpkey) {
-        mp_input_put_key(wl->vo->input_ctx, mpkey | state | wl->mpmod);
+        mp_input_put_key(wl->vo->input_ctx, mpkey | state | s->mpmod);
     } else {
         char str[128];
         if (xkb_keysym_to_utf8(sym, str, sizeof(str)) > 0) {
-            mp_input_put_key_utf8(wl->vo->input_ctx, state | wl->mpmod, bstr0(str));
+            mp_input_put_key_utf8(wl->vo->input_ctx, state | s->mpmod, bstr0(str));
         } else {
             // Assume a modifier was pressed and handle it in the mod event instead.
             // If a modifier is released before a regular key, also release that
             // key to not activate it again by accident.
             if (state == MP_KEY_STATE_UP) {
-                wl->mpkey = 0;
+                s->mpkey = 0;
                 mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
             }
             return;
         }
     }
     if (state == MP_KEY_STATE_DOWN)
-        wl->mpkey = mpkey;
+        s->mpkey = mpkey;
     if (mpkey && state == MP_KEY_STATE_UP)
-        wl->mpkey = 0;
+        s->mpkey = 0;
 }
 
 static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboard,
@@ -587,12 +592,12 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboar
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
 
-    if (wl->xkb_state) {
-        xkb_state_update_mask(wl->xkb_state, mods_depressed, mods_latched,
+    if (s->xkb_state) {
+        xkb_state_update_mask(s->xkb_state, mods_depressed, mods_latched,
                               mods_locked, 0, 0, group);
-        wl->mpmod = get_mods(wl);
-        if (wl->mpkey)
-            mp_input_put_key(wl->vo->input_ctx, wl->mpkey | MP_KEY_STATE_DOWN | wl->mpmod);
+        s->mpmod = get_mods(s);
+        if (s->mpkey)
+            mp_input_put_key(wl->vo->input_ctx, s->mpkey | MP_KEY_STATE_DOWN | s->mpmod);
     }
 }
 
@@ -1718,7 +1723,7 @@ static char **get_displays_spanned(struct vo_wayland_state *wl)
     return names;
 }
 
-static int get_mods(struct vo_wayland_state *wl)
+static int get_mods(struct vo_wayland_seat *s)
 {
     static char* const mod_names[] = {
         XKB_MOD_NAME_SHIFT,
@@ -1737,9 +1742,9 @@ static int get_mods(struct vo_wayland_state *wl)
     int modifiers = 0;
 
     for (int n = 0; n < MP_ARRAY_SIZE(mods); n++) {
-        xkb_mod_index_t index = xkb_keymap_mod_get_index(wl->xkb_keymap, mod_names[n]);
+        xkb_mod_index_t index = xkb_keymap_mod_get_index(s->xkb_keymap, mod_names[n]);
         if (index != XKB_MOD_INVALID
-            && xkb_state_mod_index_is_active(wl->xkb_state, index,
+            && xkb_state_mod_index_is_active(s->xkb_state, index,
                                              XKB_STATE_MODS_EFFECTIVE))
             modifiers |= mods[n];
     }
@@ -1908,6 +1913,10 @@ static void remove_seat(struct vo_wayland_seat *seat)
     if (seat->cursor_shape_device)
         wp_cursor_shape_device_v1_destroy(seat->cursor_shape_device);
 #endif
+    if (seat->xkb_keymap)
+        xkb_keymap_unref(seat->xkb_keymap);
+    if (seat->xkb_state)
+        xkb_state_unref(seat->xkb_state);
 
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
@@ -2712,12 +2721,6 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->xkb_context)
         xkb_context_unref(wl->xkb_context);
-
-    if (wl->xkb_keymap)
-        xkb_keymap_unref(wl->xkb_keymap);
-
-    if (wl->xkb_state)
-        xkb_state_unref(wl->xkb_state);
 
     struct vo_wayland_output *output, *output_tmp;
     wl_list_for_each_safe(output, output_tmp, &wl->output_list, link)
