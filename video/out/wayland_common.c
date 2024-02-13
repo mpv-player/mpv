@@ -300,7 +300,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         // Implement an edge resize zone if there are no decorations
         if (!wl->vo_opts->border && check_for_resize(wl, wl->opts->edge_pixels_pointer, &edges)) {
             xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edges);
-        } else if (wl->xdg_toplevel) {
+        } else {
             xdg_toplevel_move(wl->xdg_toplevel, s->seat, serial);
         }
         // Explicitly send an UP event after the client finishes a move/resize
@@ -1686,8 +1686,6 @@ static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
 
 static void do_minimize(struct vo_wayland_state *wl)
 {
-    if (!wl->xdg_toplevel)
-        return;
     if (wl->vo_opts->window_minimized)
         xdg_toplevel_set_minimized(wl->xdg_toplevel);
 }
@@ -2075,8 +2073,6 @@ static int spawn_cursor(struct vo_wayland_state *wl)
 
 static void toggle_fullscreen(struct vo_wayland_state *wl)
 {
-    if (!wl->xdg_toplevel)
-        return;
     wl->state_change = true;
     bool specific_screen = wl->vo_opts->fsscreen_id >= 0 || wl->vo_opts->fsscreen_name;
     if (wl->vo_opts->fullscreen && !specific_screen) {
@@ -2091,8 +2087,6 @@ static void toggle_fullscreen(struct vo_wayland_state *wl)
 
 static void toggle_maximized(struct vo_wayland_state *wl)
 {
-    if (!wl->xdg_toplevel)
-        return;
     wl->state_change = true;
     if (wl->vo_opts->window_maximized) {
         xdg_toplevel_set_maximized(wl->xdg_toplevel);
@@ -2103,15 +2097,11 @@ static void toggle_maximized(struct vo_wayland_state *wl)
 
 static void update_app_id(struct vo_wayland_state *wl)
 {
-    if (!wl->xdg_toplevel)
-        return;
     xdg_toplevel_set_app_id(wl->xdg_toplevel, wl->vo_opts->appid);
 }
 
 static int update_window_title(struct vo_wayland_state *wl, const char *title)
 {
-    if (!wl->xdg_toplevel)
-        return VO_NOTAVAIL;
     /* The xdg-shell protocol requires that the title is UTF-8. */
     void *tmp = talloc_new(NULL);
     struct bstr b_title = bstr_sanitize_utf8_latin1(tmp, bstr0(title));
