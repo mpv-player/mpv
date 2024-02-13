@@ -208,6 +208,7 @@ struct vo_wayland_seat {
     double axis_value_horizontal;
     int32_t axis_value120_horizontal;
     bool axis_value120_scroll;
+    bool has_keyboard_input;
     struct wl_list link;
 };
 
@@ -533,7 +534,7 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
-    wl->has_keyboard_input = true;
+    s->has_keyboard_input = true;
     guess_focus(wl);
 }
 
@@ -542,7 +543,7 @@ static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
-    wl->has_keyboard_input = false;
+    s->has_keyboard_input = false;
     s->keyboard_code = 0;
     s->mpkey = 0;
     s->mpmod = 0;
@@ -1776,8 +1777,17 @@ static void guess_focus(struct vo_wayland_state *wl)
 {
     // We can't actually know if the window is focused or not in wayland,
     // so just guess it with some common sense. Obviously won't work if
-    // the user has no keyboard.
-    if ((!wl->focused && wl->activated && wl->has_keyboard_input) ||
+    // the user has no keyboard. We flag has_keyboard_input if
+    // at least one seat has it.
+    bool has_keyboard_input = false;
+    struct vo_wayland_seat *seat;
+    wl_list_for_each(seat, &wl->seat_list, link) {
+        if (seat->has_keyboard_input) {
+            has_keyboard_input = true;
+        }
+    }
+
+    if ((!wl->focused && wl->activated && has_keyboard_input) ||
         (wl->focused && !wl->activated))
      {
          wl->focused = !wl->focused;
