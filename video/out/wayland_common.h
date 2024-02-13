@@ -144,11 +144,6 @@ struct vo_wayland_state {
     /* Input */
     struct wl_list seat_list;
     struct xkb_context *xkb_context;
-    struct xkb_keymap  *xkb_keymap;
-    struct xkb_state   *xkb_state;
-    uint32_t keyboard_code;
-    int mpkey;
-    int mpmod;
     double axis_value_vertical;
     int32_t axis_value120_vertical;
     double axis_value_horizontal;
