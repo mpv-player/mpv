@@ -40,7 +40,6 @@ extension RemoteCommandCenter {
 }
 
 class RemoteCommandCenter: NSObject {
-    var nowPlayingInfo: [String:Any] = [:]
     var configs: [MPRemoteCommand:Config] = [:]
     var disabledCommands: [MPRemoteCommand] = []
     var isPaused: Bool = false { didSet { updateInfoCenter() } }
@@ -51,17 +50,13 @@ class RemoteCommandCenter: NSObject {
     var chapter: String? { didSet { updateInfoCenter() } }
     var album: String? { didSet { updateInfoCenter() } }
     var artist: String? { didSet { updateInfoCenter() } }
+    var cover: NSImage = NSImage(size: NSSize(width: 256, height: 256))
 
     var infoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
     var commandCenter: MPRemoteCommandCenter { get { return MPRemoteCommandCenter.shared() } }
 
     @objc override init() {
         super.init()
-
-        nowPlayingInfo = [
-            MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
-            MPNowPlayingInfoPropertyPlaybackProgress: NSNumber(value: 0.0),
-        ]
 
         configs = [
             commandCenter.pauseCommand: Config(key: MP_KEY_PAUSEONLY, handler: keyHandler),
@@ -90,10 +85,7 @@ class RemoteCommandCenter: NSObject {
         ]
 
         if let app = NSApp as? Application, let icon = app.getMPVIcon() {
-            let albumArt = MPMediaItemArtwork(boundsSize: icon.size) { _ in
-                return icon
-            }
-            nowPlayingInfo[MPMediaItemPropertyArtwork] = albumArt
+            cover = icon
         }
 
         for cmd in disabledCommands {
@@ -140,17 +132,18 @@ class RemoteCommandCenter: NSObject {
     }
 
     func updateInfoCenter() {
-        nowPlayingInfo.merge([
+        infoCenter.playbackState = isPaused ? .paused : .playing
+        infoCenter.nowPlayingInfo = (infoCenter.nowPlayingInfo ?? [:]).merging([
+            MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
+            MPNowPlayingInfoPropertyPlaybackProgress: NSNumber(value: 0.0),
             MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: isPaused ? 0 : rate),
             MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(value: position),
             MPMediaItemPropertyPlaybackDuration: NSNumber(value: duration),
             MPMediaItemPropertyTitle: title,
             MPMediaItemPropertyArtist: artist ?? chapter ?? "",
             MPMediaItemPropertyAlbumTitle: album ?? "",
+            MPMediaItemPropertyArtwork: MPMediaItemArtwork(boundsSize: cover.size) { _ in return self.cover }
         ]) { (_, new) in new }
-
-        infoCenter.nowPlayingInfo = nowPlayingInfo
-        infoCenter.playbackState = isPaused ? .paused : .playing
     }
 
     lazy var keyHandler: ConfigHandler = { event in
