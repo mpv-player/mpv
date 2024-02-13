@@ -203,6 +203,11 @@ struct vo_wayland_seat {
     uint32_t keyboard_code;
     int mpkey;
     int mpmod;
+    double axis_value_vertical;
+    int32_t axis_value120_vertical;
+    double axis_value_horizontal;
+    int32_t axis_value120_horizontal;
+    bool axis_value120_scroll;
     struct wl_list link;
 };
 
@@ -319,13 +324,12 @@ static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
                                 uint32_t time, uint32_t axis, wl_fixed_t value)
 {
     struct vo_wayland_seat *s = data;
-    struct vo_wayland_state *wl = s->wl;
     switch (axis) {
     case WL_POINTER_AXIS_VERTICAL_SCROLL:
-        wl->axis_value_vertical += wl_fixed_to_double(value);
+        s->axis_value_vertical += wl_fixed_to_double(value);
         break;
     case WL_POINTER_AXIS_HORIZONTAL_SCROLL:
-        wl->axis_value_horizontal += wl_fixed_to_double(value);
+        s->axis_value_horizontal += wl_fixed_to_double(value);
         break;
     }
 }
@@ -335,18 +339,18 @@ static void pointer_handle_frame(void *data, struct wl_pointer *wl_pointer)
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     double value_vertical, value_horizontal;
-    if (wl->axis_value120_scroll) {
+    if (s->axis_value120_scroll) {
         // Prefer axis_value120 if supported and the axis event is from mouse wheel.
-        value_vertical = wl->axis_value120_vertical / 120.0;
-        value_horizontal = wl->axis_value120_horizontal / 120.0;
+        value_vertical = s->axis_value120_vertical / 120.0;
+        value_horizontal = s->axis_value120_horizontal / 120.0;
     } else {
         // The axis value is specified in logical coordinates, but the exact value emitted
         // by one mouse wheel click is unspecified. In practice, most compositors use either
         // 10 (GNOME, Weston) or 15 (wlroots, same as libinput) as the value.
         // Divide the value by 10 and clamp it between -1 and 1 so that mouse wheel clicks
         // work as intended on all compositors while still allowing high resolution trackpads.
-        value_vertical = MPCLAMP(wl->axis_value_vertical / 10.0, -1, 1);
-        value_horizontal = MPCLAMP(wl->axis_value_horizontal / 10.0, -1, 1);
+        value_vertical = MPCLAMP(s->axis_value_vertical / 10.0, -1, 1);
+        value_horizontal = MPCLAMP(s->axis_value_horizontal / 10.0, -1, 1);
     }
 
     if (value_vertical > 0)
@@ -358,11 +362,11 @@ static void pointer_handle_frame(void *data, struct wl_pointer *wl_pointer)
     if (value_horizontal < 0)
         mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT | s->mpmod, -value_horizontal);
 
-    wl->axis_value120_scroll = false;
-    wl->axis_value_vertical = 0;
-    wl->axis_value_horizontal = 0;
-    wl->axis_value120_vertical = 0;
-    wl->axis_value120_horizontal = 0;
+    s->axis_value120_scroll = false;
+    s->axis_value_vertical = 0;
+    s->axis_value_horizontal = 0;
+    s->axis_value120_vertical = 0;
+    s->axis_value120_horizontal = 0;
 }
 
 static void pointer_handle_axis_source(void *data, struct wl_pointer *wl_pointer,
@@ -385,14 +389,13 @@ static void pointer_handle_axis_value120(void *data, struct wl_pointer *wl_point
                                          uint32_t axis, int32_t value120)
 {
     struct vo_wayland_seat *s = data;
-    struct vo_wayland_state *wl = s->wl;
-    wl->axis_value120_scroll = true;
+    s->axis_value120_scroll = true;
     switch (axis) {
     case WL_POINTER_AXIS_VERTICAL_SCROLL:
-        wl->axis_value120_vertical += value120;
+        s->axis_value120_vertical += value120;
         break;
     case WL_POINTER_AXIS_HORIZONTAL_SCROLL:
-        wl->axis_value120_horizontal += value120;
+        s->axis_value120_horizontal += value120;
         break;
     }
 }

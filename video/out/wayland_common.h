@@ -144,11 +144,6 @@ struct vo_wayland_state {
     /* Input */
     struct wl_list seat_list;
     struct xkb_context *xkb_context;
-    double axis_value_vertical;
-    int32_t axis_value120_vertical;
-    double axis_value_horizontal;
-    int32_t axis_value120_horizontal;
-    bool axis_value120_scroll;
 
     /* DND */
     struct wl_data_device_manager *dnd_devman;
