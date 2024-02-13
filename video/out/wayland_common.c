@@ -217,6 +217,7 @@ static void prepare_resize(struct vo_wayland_state *wl, int width, int height);
 static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
+static void remove_seat(struct vo_wayland_seat *seat);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale);
 static void set_geometry(struct vo_wayland_state *wl, bool resize);
@@ -1535,10 +1536,20 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t id)
 {
     struct vo_wayland_state *wl = data;
-    struct vo_wayland_output *output, *tmp;
-    wl_list_for_each_safe(output, tmp, &wl->output_list, link) {
+    struct vo_wayland_output *output, *output_tmp;
+    wl_list_for_each_safe(output, output_tmp, &wl->output_list, link) {
         if (output->id == id) {
             remove_output(output);
+            return;
+        }
+    }
+
+    struct vo_wayland_seat *seat, *seat_tmp;
+    wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link) {
+        if (seat->id == id) {
+            remove_seat(seat);
+            if (seat == wl->cursor_seat)
+                wl->cursor_seat = NULL;
             return;
         }
     }
