@@ -139,6 +139,18 @@ struct hook_handler {
     bool active;    // hook is currently in progress (only 1 at a time for now)
 };
 
+enum load_action_type {
+    LOAD_TYPE_REPLACE,
+    LOAD_TYPE_INSERT_AT,
+    LOAD_TYPE_INSERT_NEXT,
+    LOAD_TYPE_APPEND,
+};
+
+struct load_action {
+    enum load_action_type type;
+    bool play;
+};
+
 // U+279C HEAVY ROUND-TIPPED RIGHTWARDS ARROW
 // U+00A0 NO-BREAK SPACE
 #define ARROW_SP "\342\236\234\302\240"
@@ -5522,37 +5534,71 @@ static void cmd_expand_path(void *p)
     };
 }
 
+static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
+{
+    switch (action_flag) {
+    case 0: // replace
+        return (struct load_action){LOAD_TYPE_REPLACE, .play = true};
+    case 1: // append
+        return (struct load_action){LOAD_TYPE_APPEND, .play = false};
+    case 2: // append-play
+        return (struct load_action){LOAD_TYPE_APPEND, .play = true};
+    case 3: // insert-next
+        return (struct load_action){LOAD_TYPE_INSERT_NEXT, .play = false};
+    case 4: // insert-next-play
+        return (struct load_action){LOAD_TYPE_INSERT_NEXT, .play = true};
+    case 5: // insert-at
+        return (struct load_action){LOAD_TYPE_INSERT_AT, .play = false};
+    case 6: // insert-at-play
+        return (struct load_action){LOAD_TYPE_INSERT_AT, .play = true};
+    default: // default: replace
+        return (struct load_action){LOAD_TYPE_REPLACE, .play = true};
+    }
+}
+
+static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct load_action *action,
+                                               int insert_at_idx)
+{
+    switch (action->type) {
+    case LOAD_TYPE_INSERT_NEXT:
+        return playlist_get_next(mpctx->playlist, +1);
+    case LOAD_TYPE_INSERT_AT:
+        return playlist_entry_from_index(mpctx->playlist, insert_at_idx);
+    case LOAD_TYPE_REPLACE:
+    case LOAD_TYPE_APPEND:
+    default:
+        return NULL;
+    }
+}
+
 static void cmd_loadfile(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
-    int action = cmd->args[1].v.i;
+    int action_flag = cmd->args[1].v.i;
+    int insert_at_idx = cmd->args[2].v.i;
 
-    bool replace = (action == 0);
-    bool insert_next = (action == 3 || action == 4);
-    bool play = (action == 2 || action == 4);
+    struct load_action action = get_load_action(mpctx, action_flag);
 
-    if (replace)
+    if (action.type == LOAD_TYPE_REPLACE)
         playlist_clear(mpctx->playlist);
 
     struct playlist_entry *entry = playlist_entry_new(filename);
-    if (cmd->args[2].v.str_list) {
-        char **pairs = cmd->args[2].v.str_list;
+    if (cmd->args[3].v.str_list) {
+        char **pairs = cmd->args[3].v.str_list;
         for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
             playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
     }
 
-    struct playlist_entry *at = insert_next ?
-        playlist_get_next(mpctx->playlist, +1) : NULL;
-
+    struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
     playlist_insert_at(mpctx->playlist, entry, at);
 
     struct mpv_node *res = &cmd->result;
     node_init(res, MPV_FORMAT_NODE_MAP, NULL);
     node_map_add_int64(res, "playlist_entry_id", entry->id);
 
-    if (replace || (play && !mpctx->playlist->current)) {
+    if (action.type == LOAD_TYPE_REPLACE || (action.play && !mpctx->playlist->current)) {
         if (mpctx->opts->position_save_on_quit) // requested in issue #1148
             mp_write_watch_later_conf(mpctx);
         mp_set_playlist_entry(mpctx, entry);
@@ -5566,33 +5612,37 @@ static void cmd_loadlist(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
-    int flag = cmd->args[1].v.i;
+    int action_flag = cmd->args[1].v.i;
+    int insert_at_idx = cmd->args[2].v.i;
 
-    bool replace = (flag == 0);
-    bool insert_next = (flag == 3 || flag == 4);
-    bool play = (flag == 2 || flag == 4);
+    struct load_action action = get_load_action(mpctx, action_flag);
 
     struct playlist *pl = playlist_parse_file(filename, cmd->abort->cancel,
                                               mpctx->global);
     if (pl) {
         prepare_playlist(mpctx, pl);
         struct playlist_entry *new = pl->current;
-        if (replace)
+        if (action.type == LOAD_TYPE_REPLACE)
             playlist_clear(mpctx->playlist);
         struct playlist_entry *first = playlist_entry_from_index(pl, 0);
         int num_entries = pl->num_entries;
-        if (insert_next) {
-            playlist_transfer_entries(mpctx->playlist, pl);
-        } else {
+
+        struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
+        if (at == NULL) {
             playlist_append_entries(mpctx->playlist, pl);
+        } else {
+            int at_index = playlist_entry_to_index(mpctx->playlist, at);
+            playlist_transfer_entries_to(mpctx->playlist, at_index, pl);
         }
         talloc_free(pl);
 
         if (!new)
             new = playlist_get_first(mpctx->playlist);
 
-        if ((replace || (play && !mpctx->playlist->current)) && new)
+        if ((action.type == LOAD_TYPE_REPLACE ||
+            (action.play && !mpctx->playlist->current)) && new) {
             mp_set_playlist_entry(mpctx, new);
+        }
 
         struct mpv_node *res = &cmd->result;
         node_init(res, MPV_FORMAT_NODE_MAP, NULL);
@@ -6699,8 +6749,11 @@ const struct mp_cmd_def mp_cmds[] = {
                 {"append", 1},
                 {"append-play", 2},
                 {"insert-next", 3},
-                {"insert-next-play", 4}),
+                {"insert-next-play", 4},
+                {"insert-at", 5},
+                {"insert-at-play", 6}),
                 .flags = MP_CMD_OPT_ARG},
+            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
         },
     },
@@ -6712,8 +6765,11 @@ const struct mp_cmd_def mp_cmds[] = {
                 {"append", 1},
                 {"append-play", 2},
                 {"insert-next", 3},
-                {"insert-next-play", 4}),
+                {"insert-next-play", 4},
+                {"insert-at", 5},
+                {"insert-at-play", 6}),
                 .flags = MP_CMD_OPT_ARG},
+            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
         },
         .spawn_thread = true,
         .can_abort = true,
