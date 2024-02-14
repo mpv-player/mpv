@@ -1425,7 +1425,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         resize(vo);
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER:
     case VOCTRL_PAUSE:
         if (p->is_interpolated)
             vo->want_redraw = true;

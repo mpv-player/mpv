@@ -7122,7 +7122,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (flags & UPDATE_VIDEO) {
         if (mpctx->video_out) {
-            vo_set_want_redraw(mpctx->video_out);
+            vo_control(mpctx->video_out, VOCTRL_UPDATE_RENDER_OPTS, NULL);
             mp_wakeup_core(mpctx);
         }
     }

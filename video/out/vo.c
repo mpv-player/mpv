@@ -236,25 +236,12 @@ static void update_opts(void *p)
 
     if (m_config_cache_update(vo->opts_cache)) {
         read_opts(vo);
-
         if (vo->driver->control) {
             vo->driver->control(vo, VOCTRL_VO_OPTS_CHANGED, NULL);
             // "Legacy" update of video position related options.
             // Unlike VOCTRL_VO_OPTS_CHANGED, often not propagated to backends.
             vo->driver->control(vo, VOCTRL_SET_PANSCAN, NULL);
         }
-    }
-
-    if (vo->gl_opts_cache && m_config_cache_update(vo->gl_opts_cache)) {
-        // "Legacy" update of video GL renderer related options.
-        if (vo->driver->control)
-            vo->driver->control(vo, VOCTRL_UPDATE_RENDER_OPTS, NULL);
-    }
-
-    if (m_config_cache_update(vo->eq_opts_cache)) {
-        // "Legacy" update of video equalizer related options.
-        if (vo->driver->control)
-            vo->driver->control(vo, VOCTRL_SET_EQUALIZER, NULL);
     }
 }
 
@@ -318,12 +305,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
                                           update_opts, vo);
 
     vo->gl_opts_cache = m_config_cache_alloc(NULL, global, &gl_video_conf);
-    m_config_cache_set_dispatch_change_cb(vo->gl_opts_cache, vo->in->dispatch,
-                                          update_opts, vo);
-
     vo->eq_opts_cache = m_config_cache_alloc(NULL, global, &mp_csp_equalizer_conf);
-    m_config_cache_set_dispatch_change_cb(vo->eq_opts_cache, vo->in->dispatch,
-                                          update_opts, vo);
 
     mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
@@ -1232,16 +1214,6 @@ void vo_redraw(struct vo *vo)
         in->want_redraw = false;
         wakeup_locked(vo);
     }
-    mp_mutex_unlock(&in->lock);
-}
-
-// Same as vo_redraw but the redraw is delayed until it
-// is detected in the playloop.
-void vo_set_want_redraw(struct vo *vo)
-{
-    struct vo_internal *in = vo->in;
-    mp_mutex_lock(&in->lock);
-    in->want_redraw = true;
     mp_mutex_unlock(&in->lock);
 }
 
