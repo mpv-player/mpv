@@ -80,13 +80,6 @@ struct user_hook {
     const struct pl_hook *hook;
 };
 
-struct user_lut {
-    char *opt;
-    char *path;
-    int type;
-    struct pl_custom_lut *lut;
-};
-
 struct frame_info {
     int count;
     struct pl_dispatch_info info[VO_PASS_PERF_MAX];
@@ -142,15 +135,10 @@ struct priv {
     struct scaler_params scalers[SCALER_COUNT];
     const struct pl_hook **hooks; // storage for `params.hooks`
     enum pl_color_levels output_levels;
-    char **raw_opts;
 
     struct pl_icc_params icc_params;
     char *icc_path;
     pl_icc_object icc_profile;
-
-    struct user_lut image_lut;
-    struct user_lut target_lut;
-    struct user_lut lut;
 
     // Cached shaders, preserved across options updates
     struct user_hook *user_hooks;
@@ -160,11 +148,6 @@ struct priv {
     struct frame_info perf_fresh;
     struct frame_info perf_redraw;
 
-    bool delayed_peak;
-    bool inter_preserve;
-    bool target_hint;
-
-    float corner_rounding;
 };
 
 static void update_render_options(struct vo *vo);
@@ -549,6 +532,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     struct frame_priv *fp = mpi->priv;
     struct vo *vo = fp->vo;
     struct priv *p = vo->priv;
+    struct gl_video_opts *opts = p->opts_cache->opts;
 
     fp->hwdec = ra_hwdec_get(&p->hwdec_ctx, mpi->imgfmt);
     if (fp->hwdec) {
@@ -669,9 +653,9 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     pl_icc_profile_compute_signature(&frame->profile);
 
     // Update LUT attached to this frame
-    update_lut(p, &p->image_lut);
-    frame->lut = p->image_lut.lut;
-    frame->lut_type = p->image_lut.type;
+    update_lut(p, &opts->image_lut);
+    frame->lut = opts->image_lut.lut;
+    frame->lut_type = opts->image_lut.type;
     return true;
 }
 
@@ -716,13 +700,14 @@ static void info_callback(void *priv, const struct pl_render_info *info)
 static void update_options(struct vo *vo)
 {
     struct priv *p = vo->priv;
+    struct gl_video_opts *opts = p->opts_cache->opts;
     pl_options pars = p->pars;
     if (m_config_cache_update(p->opts_cache))
         update_render_options(vo);
 
-    update_lut(p, &p->lut);
-    pars->params.lut = p->lut.lut;
-    pars->params.lut_type = p->lut.type;
+    update_lut(p, &opts->lut);
+    pars->params.lut = opts->lut.lut;
+    pars->params.lut_type = opts->lut.type;
 
     // Update equalizer state
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
@@ -734,7 +719,7 @@ static void update_options(struct vo *vo)
     pars->color_adjustment.gamma = cparams.gamma;
     p->output_levels = cparams.levels_out;
 
-    for (char **kv = p->raw_opts; kv && kv[0]; kv += 2)
+    for (char **kv = opts->placebo_raw_opts; kv && kv[0]; kv += 2)
         pl_options_set_str(pars, kv[0], kv[1]);
 }
 
@@ -766,12 +751,13 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
 
 static void apply_target_options(struct priv *p, struct pl_frame *target)
 {
-    update_lut(p, &p->target_lut);
-    target->lut = p->target_lut.lut;
-    target->lut_type = p->target_lut.type;
+    struct gl_video_opts *opts = p->opts_cache->opts;
+
+    update_lut(p, &opts->target_lut);
+    target->lut = opts->target_lut.lut;
+    target->lut_type = opts->target_lut.type;
 
     // Colorspace overrides
-    const struct gl_video_opts *opts = p->opts_cache->opts;
     if (p->output_levels)
         target->repr.levels = p->output_levels;
     if (opts->target_prim)
@@ -872,7 +858,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     params.info_callback = info_callback;
     params.info_priv = vo;
     params.skip_caching_single_frame = !cache_frame;
-    params.preserve_mixing_cache = p->inter_preserve && !frame->still;
+    params.preserve_mixing_cache = opts->inter_preserve && !frame->still;
     if (frame->still)
         params.frame_mixer = NULL;
 
@@ -929,7 +915,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         p->last_id = id;
     }
 
-    if (p->target_hint && frame->current) {
+    if (opts->target_hint && frame->current) {
         struct pl_color_space hint = frame->current->params.color;
         if (opts->target_prim)
             hint.primaries = opts->target_prim;
@@ -939,7 +925,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.hdr.max_luma = opts->target_peak;
         apply_target_contrast(p, &hint);
         pl_swapchain_colorspace_hint(p->sw, &hint);
-    } else if (!p->target_hint) {
+    } else if (!opts->target_hint) {
         pl_swapchain_colorspace_hint(p->sw, NULL);
     }
 
@@ -2040,7 +2026,7 @@ static void update_render_options(struct vo *vo)
     pars->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     pars->params.disable_fbos = opts->dumb_mode == 1;
     pars->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
-    pars->params.corner_rounding = p->corner_rounding;
+    pars->params.corner_rounding = opts->corner_rounding;
     pars->params.correct_subpixel_offsets = !opts->scaler_resizes_only;
 
     // Map scaler options as best we can
@@ -2074,7 +2060,7 @@ static void update_render_options(struct vo *vo)
     pars->peak_detect_params.scene_threshold_low = opts->tone_map.scene_threshold_low;
     pars->peak_detect_params.scene_threshold_high = opts->tone_map.scene_threshold_high;
     pars->peak_detect_params.percentile = opts->tone_map.peak_percentile;
-    pars->peak_detect_params.allow_delayed = p->delayed_peak;
+    pars->peak_detect_params.allow_delayed = opts->delayed_peak;
 
     const struct pl_tone_map_function * const tone_map_funs[] = {
         [TONE_MAPPING_AUTO]     = &pl_tone_map_auto,
@@ -2153,16 +2139,6 @@ static void update_render_options(struct vo *vo)
     pars->params.hooks = p->hooks;
 }
 
-#define OPT_BASE_STRUCT struct priv
-
-const struct m_opt_choice_alternatives lut_types[] = {
-    {"auto",        PL_LUT_UNKNOWN},
-    {"native",      PL_LUT_NATIVE},
-    {"normalized",  PL_LUT_NORMALIZED},
-    {"conversion",  PL_LUT_CONVERSION},
-    {0}
-};
-
 const struct vo_driver video_out_gpu_next = {
     .description = "Video output based on libplacebo",
     .name = "gpu-next",
@@ -2181,22 +2157,4 @@ const struct vo_driver video_out_gpu_next = {
     .wakeup = wakeup,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
-    .priv_defaults = &(const struct priv) {
-        .inter_preserve = true,
-    },
-
-    .options = (const struct m_option[]) {
-        {"allow-delayed-peak-detect", OPT_BOOL(delayed_peak)},
-        {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
-        {"interpolation-preserve", OPT_BOOL(inter_preserve)},
-        {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
-        {"lut-type", OPT_CHOICE_C(lut.type, lut_types)},
-        {"image-lut", OPT_STRING(image_lut.opt), .flags = M_OPT_FILE},
-        {"image-lut-type", OPT_CHOICE_C(image_lut.type, lut_types)},
-        {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
-        {"target-colorspace-hint", OPT_BOOL(target_hint)},
-        // No `target-lut-type` because we don't support non-RGB targets
-        {"libplacebo-opts", OPT_KEYVALUELIST(raw_opts)},
-        {0}
-    },
 };

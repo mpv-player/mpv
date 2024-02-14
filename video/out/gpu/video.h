@@ -57,6 +57,13 @@ struct scaler {
     struct filter_kernel kernel_storage;
 };
 
+struct user_lut {
+    char *opt;
+    char *path;
+    int type;
+    struct pl_custom_lut *lut;
+};
+
 enum scaler_unit {
     SCALER_SCALE,  // luma/video
     SCALER_DSCALE, // luma-video downscaling
@@ -172,6 +179,18 @@ struct gl_video_opts {
     int early_flush;
     char *shader_cache_dir;
     char *hwdec_interop;
+
+    char **placebo_raw_opts;
+
+    struct user_lut image_lut;
+    struct user_lut target_lut;
+    struct user_lut lut;
+
+    bool delayed_peak;
+    bool inter_preserve;
+    bool target_hint;
+
+    float corner_rounding;
 };
 
 extern const struct m_sub_options gl_video_conf;

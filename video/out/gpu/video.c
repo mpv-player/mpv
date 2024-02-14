@@ -44,6 +44,7 @@
 #include "video/out/aspect.h"
 #include "video/out/dither.h"
 #include "video/out/vo.h"
+#include <libplacebo/renderer.h>
 
 // scale/cscale arguments that map directly to shader filter routines.
 // Note that the convolution filters are not included in this list.
@@ -327,6 +328,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .early_flush = -1,
     .shader_cache = true,
     .hwdec_interop = "auto",
+    .inter_preserve = true,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -339,6 +341,14 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
                                         struct bstr name, const char **value);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
+
+const struct m_opt_choice_alternatives lut_types[] = {
+    {"auto",        PL_LUT_UNKNOWN},
+    {"native",      PL_LUT_NATIVE},
+    {"normalized",  PL_LUT_NORMALIZED},
+    {"conversion",  PL_LUT_CONVERSION},
+    {0}
+};
 
 // Use for options which use NAN for defaults.
 #define OPT_FLOATDEF(field) \
@@ -473,6 +483,17 @@ const struct m_sub_options gl_video_conf = {
         {"gpu-shader-cache-dir", OPT_STRING(shader_cache_dir), .flags = M_OPT_FILE},
         {"gpu-hwdec-interop",
             OPT_STRING_VALIDATE(hwdec_interop, ra_hwdec_validate_opt)},
+        {"allow-delayed-peak-detect", OPT_BOOL(delayed_peak)},
+        {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
+        {"interpolation-preserve", OPT_BOOL(inter_preserve)},
+        {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
+        {"lut-type", OPT_CHOICE_C(lut.type, lut_types)},
+        {"image-lut", OPT_STRING(image_lut.opt), .flags = M_OPT_FILE},
+        {"image-lut-type", OPT_CHOICE_C(image_lut.type, lut_types)},
+        {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
+        {"target-colorspace-hint", OPT_BOOL(target_hint)},
+        // No `target-lut-type` because we don't support non-RGB targets
+        {"libplacebo-opts", OPT_KEYVALUELIST(placebo_raw_opts)},
         {"gamut-warning", OPT_REMOVED("Replaced by --gamut-mapping-mode=warn")},
         {"gamut-clipping", OPT_REMOVED("Replaced by --gamut-mapping-mode=desaturate")},
         {"tone-mapping-desaturate", OPT_REMOVED("Replaced by --tone-mapping-mode")},
