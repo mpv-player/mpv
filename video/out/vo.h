@@ -67,7 +67,6 @@ enum mp_voctrl {
     VOCTRL_RESUME,
 
     VOCTRL_SET_PANSCAN,
-    VOCTRL_SET_EQUALIZER,
 
     // Triggered by any change to mp_vo_opts. This is for convenience. In theory,
     // you could install your own listener.
@@ -513,7 +512,6 @@ bool vo_still_displaying(struct vo *vo);
 void vo_request_wakeup_on_done(struct vo *vo);
 bool vo_has_frame(struct vo *vo);
 void vo_redraw(struct vo *vo);
-void vo_set_want_redraw(struct vo *vo);
 bool vo_want_redraw(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
