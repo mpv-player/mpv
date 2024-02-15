@@ -90,7 +90,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 
     for (int n = 0; n < p->desc.num_planes; n++) {
         p->desc.planes[n] = find_la_variant(mapper->ra, p->desc.planes[n]);
-        if (!p->desc.planes[n] || p->desc.planes[n]->ctype != RA_CTYPE_UNORM) {
+        if (!p->desc.planes[n]) {
             MP_ERR(mapper, "Format unsupported.\n");
             return -1;
         }
