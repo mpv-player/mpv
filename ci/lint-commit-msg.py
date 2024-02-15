@@ -56,7 +56,7 @@ def do_lint(commit_range: str) -> bool:
 
 ################################################################################
 
-NO_PREFIX_WHITELIST = r"^Revert \"(.*)\"|^Release [0-9]|^Update VERSION$"
+NO_PREFIX_WHITELIST = r"^Revert \"(.*)\"|^Reapply \"(.*)\"|^Release [0-9]|^Update VERSION$"
 
 @lint_rule("Subject line must contain a prefix identifying the sub system")
 def subsystem_prefix(body):
@@ -98,7 +98,7 @@ def no_merge(body):
 
 @lint_rule("Subject line should be shorter than 72 characters")
 def line_too_long(body):
-	revert = re.search(r"^Revert \"(.*)\"", body[0])
+	revert = re.search(r"^Revert \"(.*)\"|^Reapply \"(.*)\"", body[0])
 	return True if revert else len(body[0]) <= 72
 
 @lint_rule("Prefix should not include C file extensions (use `vo_gpu: ...` not `vo_gpu.c: ...`)")
