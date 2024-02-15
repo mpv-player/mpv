@@ -1023,14 +1023,13 @@ static void update_minimized_state(struct vo_w32_state *w32)
     }
 }
 
-static void update_maximized_state(struct vo_w32_state *w32)
+static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullscreen)
 {
     if (w32->parent)
         return;
 
-    // Don't change the maximized state in fullscreen for now. In future, this
-    // should be made to apply the maximized state on leaving fullscreen.
-    if (w32->current_fs)
+    // Apply the maximized state on leaving fullscreen.
+    if (w32->current_fs && !leaving_fullscreen)
         return;
 
     WINDOWPLACEMENT wp = { .length = sizeof wp };
@@ -1099,7 +1098,7 @@ static void update_window_state(struct vo_w32_state *w32)
     if (!is_visible(w32->window)) {
         if (w32->opts->window_minimized) {
             ShowWindow(w32->window, SW_SHOWMINNOACTIVE);
-            update_maximized_state(w32); // Set the WPF_RESTORETOMAXIMIZED flag
+            update_maximized_state(w32, false); // Set the WPF_RESTORETOMAXIMIZED flag
         } else if (w32->opts->window_maximized) {
             ShowWindow(w32->window, SW_SHOWMAXIMIZED);
         } else {
@@ -2075,6 +2074,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             struct mp_vo_opts *vo_opts = w32->opts_cache->opts;
 
             if (changed_option == &vo_opts->fullscreen) {
+                if (!vo_opts->fullscreen)
+                    update_maximized_state(w32, true);
                 reinit_window_state(w32);
             } else if (changed_option == &vo_opts->window_affinity) {
                 update_affinity(w32);
@@ -2092,7 +2093,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             } else if (changed_option == &vo_opts->window_minimized) {
                 update_minimized_state(w32);
             } else if (changed_option == &vo_opts->window_maximized) {
-                update_maximized_state(w32);
+                update_maximized_state(w32, false);
             } else if (changed_option == &vo_opts->window_corners) {
                 update_corners_pref(w32);
             } else if (changed_option == &vo_opts->geometry || changed_option == &vo_opts->autofit ||
