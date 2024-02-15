@@ -24,6 +24,7 @@
 #include <libavutil/common.h>
 
 #include "common/av_common.h"
+#include "common/global.h"
 
 #include "options/m_config.h"
 #include "options/m_option.h"
@@ -273,7 +274,8 @@ static bool raw_read_packet(struct demuxer *demuxer, struct demux_packet **pkt)
     if (demuxer->stream->eof)
         return false;
 
-    struct demux_packet *dp = new_demux_packet(p->frame_size * p->read_frames);
+    struct demux_packet *dp = new_demux_packet(demuxer->global->packet_pool,
+                                               p->frame_size * p->read_frames);
     if (!dp) {
         MP_ERR(demuxer, "Can't read packet.\n");
         return true;
