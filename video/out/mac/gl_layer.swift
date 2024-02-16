@@ -199,6 +199,14 @@ class GLLayer: CAOpenGLLayer {
         }
     }
 
+    func lockCglContext() {
+        CGLLockContext(cglContext)
+    }
+
+    func unlockCglContext() {
+        CGLUnlockContext(cglContext)
+    }
+
     override func copyCGLPixelFormat(forDisplayMask mask: UInt32) -> CGLPixelFormatObj {
         return cglPixelFormat
     }
@@ -219,10 +227,12 @@ class GLLayer: CAOpenGLLayer {
         super.display()
         CATransaction.flush()
         if isUpdate && needsFlip {
+            lockCglContext()
             CGLSetCurrentContext(cglContext)
             if libmpv.isRenderUpdateFrame() {
                 libmpv.drawRender(NSZeroSize, bufferDepth, cglContext, skip: true)
             }
+            unlockCglContext()
         }
         displayLock.unlock()
     }
