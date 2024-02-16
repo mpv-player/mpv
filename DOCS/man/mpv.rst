@@ -711,22 +711,24 @@ or at runtime with the ``apply-profile <name>`` command.
         # a profile that can be enabled with --profile=big-cache
         [big-cache]
         cache=yes
-        demuxer-max-bytes=123400KiB
+        demuxer-max-bytes=512MiB
         demuxer-readahead-secs=20
 
-        [slow]
-        profile-desc="some profile name"
-        # reference a builtin profile
-        profile=high-quality
-
-        [fast]
-        vo=vdpau
-
-        # using a profile again extends it
-        [slow]
-        framedrop=no
+        [network]
+        profile-desc="profile for content over network"
+        force-window=immediate
         # you can also include other profiles
         profile=big-cache
+
+        [reduce-judder]
+        video-sync=display-resample
+        interpolation=yes
+
+        # using a profile again extends it
+        [network]
+        demuxer-max-back-bytes=512MiB
+        # reference a builtin profile
+        profile=fast
 
 Runtime profiles
 ----------------
