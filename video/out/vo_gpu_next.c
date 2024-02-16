@@ -1458,7 +1458,9 @@ static void update_ra_ctx_options(struct vo *vo)
 {
     struct priv *p = vo->priv;
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
-    p->ra_ctx->opts.want_alpha = gl_opts->alpha_mode == ALPHA_YES;
+    p->ra_ctx->opts.want_alpha = (gl_opts->background == BACKGROUND_COLOR &&
+                                  gl_opts->background_color.a != 255) ||
+                                  gl_opts->background == BACKGROUND_NONE;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -2090,7 +2092,7 @@ static void update_render_options(struct vo *vo)
     pars->params.skip_anti_aliasing = !opts->correct_downscaling;
     pars->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     pars->params.disable_fbos = opts->dumb_mode == 1;
-    pars->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
+    pars->params.blend_against_tiles = opts->background == BACKGROUND_TILES;
     pars->params.corner_rounding = p->next_opts->corner_rounding;
     pars->params.correct_subpixel_offsets = !opts->scaler_resizes_only;
 

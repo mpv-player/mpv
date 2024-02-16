@@ -312,7 +312,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .linear_downscaling = true,
     .sigmoid_upscaling = true,
     .interpolation_threshold = 0.01,
-    .alpha_mode = ALPHA_BLEND_TILES,
+    .background = BACKGROUND_TILES,
     .background_color = {0, 0, 0, 255},
     .gamma = 1.0f,
     .tone_map = {
@@ -447,11 +447,10 @@ const struct m_sub_options gl_video_conf = {
             M_RANGE(1, 128)},
         {"error-diffusion",
             OPT_STRING_VALIDATE(error_diffusion, validate_error_diffusion_opt)},
-        {"alpha", OPT_CHOICE(alpha_mode,
-            {"no", ALPHA_NO},
-            {"yes", ALPHA_YES},
-            {"blend", ALPHA_BLEND},
-            {"blend-tiles", ALPHA_BLEND_TILES})},
+        {"background", OPT_CHOICE(background,
+            {"none", BACKGROUND_NONE},
+            {"color", BACKGROUND_COLOR},
+            {"tiles", BACKGROUND_TILES})},
         {"opengl-rectangle-textures", OPT_BOOL(use_rectangle)},
         {"background-color", OPT_COLOR(background_color)},
         {"interpolation", OPT_BOOL(interpolation)},
@@ -2396,7 +2395,7 @@ static void pass_convert_yuv(struct gl_video *p)
     }
 
     p->components = 3;
-    if (!p->has_alpha || p->opts.alpha_mode == ALPHA_NO) {
+    if (!p->has_alpha) {
         GLSL(color.a = 1.0;)
     } else if (p->image_params.repr.alpha == PL_ALPHA_PREMULTIPLIED) {
         p->components = 4;
@@ -3076,8 +3075,8 @@ static void pass_draw_to_screen(struct gl_video *p, const struct ra_fbo *fbo, in
         copy_image(p, &(int){0}, tmp);
     }
 
-    if (p->has_alpha){
-        if (p->opts.alpha_mode == ALPHA_BLEND_TILES) {
+    if (p->has_alpha) {
+        if (p->opts.background == BACKGROUND_TILES) {
             // Draw checkerboard pattern to indicate transparency
             GLSLF("// transparency checkerboard\n");
             GLSLF("vec2 tile_coord = vec2(gl_FragCoord.x, %d.0 + %f * gl_FragCoord.y);",
@@ -3086,13 +3085,12 @@ static void pass_draw_to_screen(struct gl_video *p, const struct ra_fbo *fbo, in
             GLSL(vec3 background = vec3(tile.x == tile.y ? 0.93 : 0.87);)
             GLSL(color.rgb += background.rgb * (1.0 - color.a);)
             GLSL(color.a = 1.0;)
-        } else if (p->opts.alpha_mode == ALPHA_BLEND) {
+        } else if (p->opts.background == BACKGROUND_COLOR) {
             // Blend into background color (usually black)
             struct m_color c = p->opts.background_color;
             GLSLF("vec4 background = vec4(%f, %f, %f, %f);\n",
                   c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
-            GLSL(color.rgb += background.rgb * (1.0 - color.a);)
-            GLSL(color.a = background.a;)
+            GLSL(color += background * (1.0 - color.a);)
         }
     }
 
@@ -3804,9 +3802,8 @@ static void check_gl_features(struct gl_video *p)
         p->opts.dither_algo = DITHER_NONE;
         MP_WARN(p, "Disabling dithering (no gl_FragCoord).\n");
     }
-    if (!have_fragcoord && p->opts.alpha_mode == ALPHA_BLEND_TILES) {
-        p->opts.alpha_mode = ALPHA_BLEND;
-        // Verbose, since this is the default setting
+    if (!have_fragcoord && p->opts.background == BACKGROUND_TILES) {
+        p->opts.background = BACKGROUND_COLOR;
         MP_VERBOSE(p, "Disabling alpha checkerboard (no gl_FragCoord).\n");
     }
     if (!have_fbo && have_compute) {
@@ -3862,7 +3859,7 @@ static void check_gl_features(struct gl_video *p)
             .gamma_auto = p->opts.gamma_auto,
             .pbo = p->opts.pbo,
             .fbo_format = p->opts.fbo_format,
-            .alpha_mode = p->opts.alpha_mode,
+            .background = p->opts.background,
             .use_rectangle = p->opts.use_rectangle,
             .background_color = p->opts.background_color,
             .dither_algo = p->opts.dither_algo,

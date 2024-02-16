@@ -6921,34 +6921,30 @@ them.
                  softsubbed ASS signs to match the video colors, but may cause
                  SRT subtitles or similar to look slightly off.
 
-``--alpha=<blend-tiles|blend|yes|no>``
-    Decides what to do if the input has an alpha component.
+``--background=<none|color|tiles>``
+    If the frame has an alpha component, decide what kind of background, if any,
+    to blend it with. This does nothing if there is no alpha component.
 
-    blend-tiles
+    color
+        Blend the frame against the background color (``--background-color``,
+        normally black).
+    tiles
         Blend the frame against a 16x16 gray/white tiles background (default).
-    blend
-        Blend the frame against the background color (``--background``, normally
-        black).
-    yes
-        Try to create a framebuffer with alpha component. This only makes sense
-        if the video contains alpha information (which is extremely rare) or if
-        you make the background color transparent. May not be supported on all
-        platforms. If alpha framebuffers are unavailable, it silently falls
-        back on a normal framebuffer. Note that if you set the ``--fbo-format``
-        option to a non-default value, a format with alpha must be specified,
-        or this won't work. Whether this really works depends on the windowing
-        system and desktop environment.
-    no
-        Ignore alpha component.
+    none
+        Do not blend the frame and leave the alpha as is.
+
+    Before mpv 0.38.0, this option used to accept a color value specifying the
+    background color. This is now done by the ``--background-color`` option.
+    Use that instead.
+
+``--background-color=<color>``
+    Color used to draw parts of the mpv window not covered by video. See the
+    ``--sub-color`` option for how colors are defined.
 
 ``--opengl-rectangle-textures``
     Force use of rectangle textures (default: no). Normally this shouldn't have
     any advantages over normal textures. Note that hardware decoding overrides
     this flag. Could be removed any time.
-
-``--background-color=<color>``
-    Color used to draw parts of the mpv window not covered by video. See the
-    ``--sub-color`` option for how colors are defined.
 
 ``--gpu-tex-pad-x``, ``--gpu-tex-pad-y``
     Enlarge the video source textures by this many pixels. For debugging only

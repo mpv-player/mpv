@@ -173,7 +173,9 @@ static void update_ra_ctx_options(struct vo *vo)
 {
     struct gpu_priv *p = vo->priv;
     struct gl_video_opts *gl_opts = mp_get_config_group(p->ctx, vo->global, &gl_video_conf);
-    p->ctx->opts.want_alpha = gl_opts->alpha_mode == 1;
+    p->ctx->opts.want_alpha = (gl_opts->background == BACKGROUND_COLOR &&
+                               gl_opts->background_color.a != 255) ||
+                               gl_opts->background == BACKGROUND_NONE;
     talloc_free(gl_opts);
 }
 
