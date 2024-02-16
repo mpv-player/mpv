@@ -2092,7 +2092,18 @@ static void update_render_options(struct vo *vo)
     pars->params.skip_anti_aliasing = !opts->correct_downscaling;
     pars->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     pars->params.disable_fbos = opts->dumb_mode == 1;
+
+#if PL_API_VER >= 346
+    enum pl_clear_mode map_background_types[3][2] = {
+        { BACKGROUND_NONE,  PL_CLEAR_SKIP  },
+        { BACKGROUND_COLOR, PL_CLEAR_COLOR },
+        { BACKGROUND_TILES, PL_CLEAR_TILES },
+    };
+    pars->params.background = map_background_types[opts->background][1];
+#else
     pars->params.blend_against_tiles = opts->background == BACKGROUND_TILES;
+#endif
+
     pars->params.corner_rounding = p->next_opts->corner_rounding;
     pars->params.correct_subpixel_offsets = !opts->scaler_resizes_only;
 
