@@ -43,6 +43,11 @@
 #include "xdg-shell.h"
 #include "viewporter.h"
 
+#if HAVE_DRM
+#include <xf86drm.h>
+#include <xf86drmMode.h>
+#endif
+
 #if HAVE_WAYLAND_PROTOCOLS_1_27
 #include "content-type-v1.h"
 #include "single-pixel-buffer-v1.h"
@@ -221,6 +226,7 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
+static void get_gpu_drm_formats(struct vo_wayland_state *wl);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static int greatest_common_divisor(int a, int b);
 static void guess_focus(struct vo_wayland_state *wl);
@@ -1378,6 +1384,16 @@ static void main_device(void *data,
                         struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
                         struct wl_array *device)
 {
+    struct vo_wayland_state *wl = data;
+
+    // Despite being an array, the protocol specifically states there can only be
+    // one main device so break as soon as we get one.
+    dev_t *id;
+    wl_array_for_each(id, device) {
+        memcpy(&wl->main_device_id, id, sizeof(dev_t));
+        break;
+    }
+    get_gpu_drm_formats(wl);
 }
 
 static void tranche_done(void *data,
@@ -1723,6 +1739,107 @@ static char **get_displays_spanned(struct vo_wayland_state *wl)
     }
     MP_TARRAY_APPEND(NULL, names, displays_spanned, NULL);
     return names;
+}
+
+static void get_gpu_drm_formats(struct vo_wayland_state *wl)
+{
+#if HAVE_DRM
+    drmDevice *device = NULL;
+    drmModePlaneRes *res = NULL;
+    drmModePlane *plane = NULL;
+
+    if (drmGetDeviceFromDevId(wl->main_device_id, 0, &device) != 0) {
+        MP_WARN(wl, "Unable to get drm device from main device id: %s\n", mp_strerror(errno));
+        goto done;
+    }
+
+    // Pick the first path we get and hope for the best.
+    char *path = NULL;
+    for (int i = 0; i < device->available_nodes; ++i) {
+        if (device->nodes[0]) {
+            path = device->nodes[0];
+            break;
+        }
+    }
+
+    if (!path || !path[0]) {
+        MP_WARN(wl, "Unable to find a valid drm device node.\n");
+        goto done;
+    }
+
+    int fd = open(path, O_RDWR | O_CLOEXEC);
+    if (fd < 0) {
+        MP_WARN(wl, "Unable to open DRM node path '%s': %s\n", path, mp_strerror(errno));
+        goto done;
+    }
+
+    // Need to set this in order to access plane information.
+    if (drmSetClientCap(fd, DRM_CLIENT_CAP_ATOMIC, 1)) {
+        MP_WARN(wl, "Unable to set DRM atomic cap: %s\n", mp_strerror(errno));
+        goto done;
+    }
+
+    res = drmModeGetPlaneResources(fd);
+    if (!res) {
+        MP_WARN(wl, "Unable to get DRM plane resources: %s\n", mp_strerror(errno));
+        goto done;
+    }
+
+    if (!res->count_planes) {
+        MP_WARN(wl, "No DRM planes were found.\n");
+        goto done;
+    }
+
+    // Only check the formats on the first primary plane we find as a crude guess.
+    int index = -1;
+    for (int i = 0; i < res->count_planes; ++i) {
+	    drmModeObjectProperties *props = NULL;
+		props = drmModeObjectGetProperties(fd, res->planes[i], DRM_MODE_OBJECT_PLANE);
+        if (!props) {
+            MP_VERBOSE(wl, "Unable to get DRM plane properties: %s\n", mp_strerror(errno));
+            continue;
+        }
+        for (int j = 0; j < props->count_props; ++j) {
+		    drmModePropertyRes *prop = drmModeGetProperty(fd, props->props[j]);
+            if (!prop) {
+                MP_VERBOSE(wl, "Unable to get DRM plane property: %s\n", mp_strerror(errno));
+                continue;
+            }
+            if (strcmp(prop->name, "type") == 0) {
+                for (int k = 0; k < prop->count_values; ++k) {
+                    if (prop->values[k] == DRM_PLANE_TYPE_PRIMARY)
+                        index = i;
+                }
+            }
+		    drmModeFreeProperty(prop);
+            if (index > -1)
+                break;
+        }
+        drmModeFreeObjectProperties(props);
+        if (index > -1)
+            break;
+    }
+
+    if (index == -1) {
+        MP_WARN(wl, "Unable to get DRM plane: %s\n", mp_strerror(errno));
+        goto done;
+    }
+
+    plane = drmModeGetPlane(fd, res->planes[index]);
+    wl->gpu_format_count = plane->count_formats;
+
+    if (wl->gpu_formats)
+        talloc_free(wl->gpu_formats);
+
+    wl->gpu_formats = talloc_zero_array(wl, uint32_t, wl->gpu_format_count);
+    for (int i = 0; i < wl->gpu_format_count; ++i)
+        wl->gpu_formats[i] = plane->formats[i];
+
+done:
+    drmModeFreePlane(plane);
+    drmModeFreePlaneResources(res);
+    drmFreeDevice(&device);
+#endif
 }
 
 static int get_mods(struct vo_wayland_seat *s)
