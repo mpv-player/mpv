@@ -108,7 +108,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 lua@5.1 libass ffmpeg meson libplacebo
+          brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 luajit libass ffmpeg meson libplacebo
 
       - name: Build with meson
         id: build
