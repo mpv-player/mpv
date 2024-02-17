@@ -1750,6 +1750,10 @@ static void uninit(struct vo *vo)
     cache_uninit(p, &p->shader_cache);
     cache_uninit(p, &p->icc_cache);
 
+    pl_lut_free(&p->next_opts->image_lut.lut);
+    pl_lut_free(&p->next_opts->lut.lut);
+    pl_lut_free(&p->next_opts->target_lut.lut);
+
     pl_icc_close(&p->icc_profile);
     pl_renderer_destroy(&p->rr);
 
@@ -1991,6 +1995,7 @@ static void update_lut(struct priv *p, struct user_lut *lut)
     MP_VERBOSE(p, "Loading custom LUT '%s'\n", fname);
     struct bstr lutdata = stream_read_file(fname, p, p->global, 100000000); // 100 MB
     lut->lut = pl_lut_parse_cube(p->pllog, lutdata.start, lutdata.len);
+    talloc_free(fname);
     talloc_free(lutdata.start);
 }
 
