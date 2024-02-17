@@ -42,17 +42,14 @@ def sign_bundle(binary_name):
     sh('codesign --force --deep -s - ' + bundle_path(binary_name))
 
 def bundle_version():
+    version = 'UNKNOWN'
     if os.path.exists('VERSION'):
         x = open('VERSION')
         version = x.read()
         x.close()
-    else:
-        version = sh("./version.sh").strip()
     return version
 
 def main():
-    version = bundle_version().rstrip()
-
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
     parser.add_option("-s", "--skip-deps", action="store_false", dest="deps",
@@ -65,6 +62,8 @@ def main():
         parser.error("incorrect number of arguments")
     else:
         binary_name = args[0]
+
+    version = bundle_version().rstrip()
 
     print("Creating Mac OS X application bundle (version: %s)..." % version)
     print("> copying bundle skeleton")
