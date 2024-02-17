@@ -26,7 +26,7 @@ typedef struct {
     uint32_t format;
     uint32_t padding;
     uint64_t modifier;
-} wayland_format;
+} compositor_format;
 
 struct wayland_opts {
     int configure_bounds;
@@ -111,8 +111,8 @@ struct vo_wayland_state {
     struct zwp_linux_dmabuf_feedback_v1 *dmabuf_feedback;
     uint32_t *gpu_formats;
     uint32_t gpu_format_count;
-    wayland_format *format_map;
-    uint32_t format_size;
+    compositor_format *compositor_format_map;
+    uint32_t compositor_format_size;
 
     /* presentation-time */
     struct wp_presentation  *presentation;

@@ -1375,8 +1375,8 @@ static void format_table(void *data,
     close(fd);
 
     if (map != MAP_FAILED) {
-        wl->format_map = map;
-        wl->format_size = size;
+        wl->compositor_format_map = map;
+        wl->compositor_format_size = size;
     }
 }
 
@@ -2858,7 +2858,7 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->display)
         wl_display_disconnect(wl->display);
 
-    munmap(wl->format_map, wl->format_size);
+    munmap(wl->compositor_format_map, wl->compositor_format_size);
 
     for (int n = 0; n < 2; n++)
         close(wl->wakeup_pipe[n]);

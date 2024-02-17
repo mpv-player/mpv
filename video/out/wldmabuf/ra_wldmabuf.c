@@ -32,7 +32,7 @@ bool ra_compatible_format(struct ra* ra, uint32_t drm_format, uint64_t modifier)
 {
     struct priv* p = ra->priv;
     struct vo_wayland_state *wl = p->vo->wl;
-    const wayland_format *formats = wl->format_map;
+    const compositor_format *formats = wl->compositor_format_map;
 
     // First check if the gpu/drivers support the format.
     bool supported_gpu_format = false;
@@ -47,7 +47,7 @@ bool ra_compatible_format(struct ra* ra, uint32_t drm_format, uint64_t modifier)
         return false;
 
     // Now check if the compositor supports the format.
-    for (int i = 0; i < wl->format_size / sizeof(wayland_format); i++) {
+    for (int i = 0; i < wl->compositor_format_size / sizeof(compositor_format); i++) {
         if (drm_format == formats[i].format && modifier == formats[i].modifier)
             return true;
     }
