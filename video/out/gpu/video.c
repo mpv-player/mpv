@@ -3091,6 +3091,7 @@ static void pass_draw_to_screen(struct gl_video *p, const struct ra_fbo *fbo, in
             GLSLF("vec4 background = vec4(%f, %f, %f, %f);\n",
                   c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
             GLSL(color += background * (1.0 - color.a);)
+            GLSL(color.rgb *= vec3(color.a););
         }
     }
 
@@ -3314,6 +3315,9 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
 
     struct m_color c = p->clear_color;
     float clear_color[4] = {c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0};
+    clear_color[0] *= clear_color[3];
+    clear_color[1] *= clear_color[3];
+    clear_color[2] *= clear_color[3];
     p->ra->fns->clear(p->ra, fbo->tex, clear_color, &target_rc);
 
     if (p->hwdec_overlay) {
