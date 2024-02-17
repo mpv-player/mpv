@@ -5,6 +5,8 @@ import os
 import sys
 import shutil
 import subprocess
+import json
+from distutils.dir_util import copy_tree
 from functools import partial
 
 sys_re = re.compile("^/System")
@@ -82,6 +84,13 @@ def resolve_lib_path(objfile, lib, rapths):
 
     raise Exception('Could not resolve library: ' + lib)
 
+def check_vulkan_max_version(version):
+    try:
+        result = subprocess.check_output("pkg-config vulkan --max-version=" + version, shell = True)
+        return True
+    except:
+        return False
+
 def install_name_tool_change(old, new, objfile):
     subprocess.call(["install_name_tool", "-change", old, new, objfile], stderr=subprocess.DEVNULL)
 
@@ -108,6 +117,9 @@ def libraries(objfile, result = dict(), result_relative = set(), rapths = []):
 
 def lib_path(binary):
     return os.path.join(os.path.dirname(binary), 'lib')
+
+def resources_path(binary):
+    return os.path.join(os.path.dirname(binary), '../Resources')
 
 def lib_name(lib):
     return os.path.join("@executable_path", "lib", os.path.basename(lib))
@@ -157,6 +169,61 @@ def process_swift_libraries(binary):
     print(">> setting additional rpath for swift libraries")
     install_name_tool_add_rpath("@executable_path/lib", binary)
 
+def process_vulkan_loader(binary, loaderName, loaderRelativeFolder, libraryNode):
+    # https://github.com/KhronosGroup/Vulkan-Loader/blob/main/docs/LoaderDriverInterface.md#example-macos-driver-search-path
+    # https://github.com/KhronosGroup/Vulkan-Loader/blob/main/docs/LoaderLayerInterface.md#macos-layer-discovery
+    loaderSystemSearchFolders = [
+        os.path.join(os.path.expanduser("~"), ".config", loaderRelativeFolder),
+        os.path.join("/etc/xdg", loaderRelativeFolder),
+        os.path.join("/usr/local/etc", loaderRelativeFolder),
+        os.path.join("/etc", loaderRelativeFolder),
+        os.path.join(os.path.expanduser("~"), ".local/share", loaderRelativeFolder),
+        os.path.join("/usr/local/share", loaderRelativeFolder),
+        os.path.join("/usr/share/vulkan", loaderRelativeFolder),
+    ]
+
+    loaderSystemFolder = ""
+    for loaderSystemSearchFolder in loaderSystemSearchFolders:
+        if os.path.exists(loaderSystemSearchFolder):
+            loaderSystemFolder = loaderSystemSearchFolder
+            break
+
+    if not loaderSystemFolder:
+        print(">>> could not find loader folder " + loaderRelativeFolder)
+        return
+
+    loaderBundleFolder = os.path.join(resources_path(binary), loaderRelativeFolder)
+    loaderSystemPath = os.path.join(loaderSystemFolder, loaderName)
+    loaderBundlePath = os.path.join(loaderBundleFolder, loaderName)
+    libraryRelativeFolder = "../../../Frameworks/"
+
+    if not os.path.exists(loaderSystemPath):
+        print(">>> could not find loader " + loaderName)
+        return
+
+    if not os.path.exists(loaderBundleFolder):
+        os.makedirs(loaderBundleFolder)
+
+    loaderSystemFile = open(loaderSystemPath, 'r')
+    loaderJsonData = json.load(loaderSystemFile)
+    librarySystemPath = os.path.join(loaderSystemFolder, loaderJsonData[libraryNode]["library_path"])
+
+    if not os.path.exists(librarySystemPath):
+        print(">>> could not find loader library " + librarySystemPath)
+        return
+
+    print(">>> modifiying and writing loader json " + loaderName)
+    loaderBundleFile = open(loaderBundlePath, 'w')
+    loaderLibraryName = os.path.basename(librarySystemPath)
+    loaderJsonData[libraryNode]["library_path"] = os.path.join(libraryRelativeFolder, loaderLibraryName)
+    json.dump(loaderJsonData, loaderBundleFile, indent=4)
+
+    print(">>> copying loader library " + loaderLibraryName)
+    frameworkBundleFolder = os.path.join(loaderBundleFolder, libraryRelativeFolder)
+    if not os.path.exists(frameworkBundleFolder):
+        os.makedirs(frameworkBundleFolder)
+    shutil.copy(librarySystemPath, os.path.join(frameworkBundleFolder, loaderLibraryName))
+
 def remove_dev_tools_rapths(binary):
     for path in get_rpaths_dev_tools(binary):
         install_name_tool_delete_rpath(path, binary)
@@ -176,6 +243,11 @@ def main():
 
     print(">> copying and processing swift libraries")
     process_swift_libraries(binary)
+
+    print(">> copying and processing vulkan loader")
+    process_vulkan_loader(binary, "MoltenVK_icd.json", "vulkan/icd.d", "ICD")
+    if check_vulkan_max_version("1.3.261.1"):
+        process_vulkan_loader(binary, "VkLayer_khronos_synchronization2.json", "vulkan/explicit_layer.d", "layer")
 
 if __name__ == "__main__":
     main()
