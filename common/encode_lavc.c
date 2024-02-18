@@ -906,7 +906,7 @@ bool encoder_init_codec_and_muxer(struct encoder_context *p,
     return true;
 
 fail:
-    avcodec_close(p->encoder);
+    avcodec_free_context(&p->encoder);
     return false;
 }
 
