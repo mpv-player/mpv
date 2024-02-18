@@ -69,7 +69,6 @@ extern const struct vo_driver video_out_kitty;
 
 static const struct vo_driver *const video_out_drivers[] =
 {
-    &video_out_libmpv,
 #if HAVE_ANDROID
     &video_out_mediacodec_embed,
 #endif
@@ -99,6 +98,7 @@ static const struct vo_driver *const video_out_drivers[] =
 #if HAVE_X11
     &video_out_x11,
 #endif
+    &video_out_libmpv,
     &video_out_null,
     // should not be auto-selected
     &video_out_image,
