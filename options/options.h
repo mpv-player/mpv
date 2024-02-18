@@ -366,6 +366,7 @@ typedef struct MPOpts {
 
     struct ra_ctx_opts *ra_ctx_opts;
     struct gl_video_opts *gl_video_opts;
+    struct gl_next_opts *gl_next_opts;
     struct angle_opts *angle_opts;
     struct opengl_opts *opengl_opts;
     struct vulkan_opts *vulkan_opts;

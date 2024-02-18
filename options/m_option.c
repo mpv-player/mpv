@@ -3404,15 +3404,21 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
         if (r == 0) {
             r = parse_obj_settings(log, name, op, &param, ol, dst ? &res : NULL);
         }
-        if (r < 0)
+        if (r < 0) {
+            free_obj_settings_list(&res);
             return r;
+        }
         if (param.len > 0) {
             const char sep[2] = {OPTION_LIST_SEPARATOR, 0};
-            if (!bstr_eatstart0(&param, sep))
+            if (!bstr_eatstart0(&param, sep)) {
+                free_obj_settings_list(&res);
                 return M_OPT_INVALID;
+            }
             if (param.len == 0) {
-                if (!ol->allow_trailer)
+                if (!ol->allow_trailer) {
+                    free_obj_settings_list(&res);
                     return M_OPT_INVALID;
+                }
                 if (dst) {
                     m_obj_settings_t item = {
                         .name = talloc_strdup(NULL, ""),
@@ -3427,6 +3433,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
         if (op == OP_APPEND) {
             mp_err(log, "Option %.*s: -append takes only 1 filter (no ',').\n",
                    BSTR_P(name));
+            free_obj_settings_list(&res);
             return M_OPT_INVALID;
         }
         mp_warn(log, "Passing more than 1 argument to %.*s is deprecated!\n",

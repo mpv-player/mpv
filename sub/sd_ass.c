@@ -57,6 +57,8 @@ struct sd_ass_priv {
     struct mp_osd_res osd;
     int64_t *seen_packets;
     int num_seen_packets;
+    bool *packets_animated;
+    int num_packets_animated;
     bool duration_unknown;
 };
 
@@ -280,11 +282,55 @@ static int init(struct sd *sd)
     return 0;
 }
 
+// Check if subtitle has events that would cause it to be animated inside {}
+static bool is_animated(char *s)
+{
+    bool in_tag = false;
+    bool valid_event = false;
+    bool valid_tag = false;
+    while (*s) {
+        if (!in_tag && s[0] == '{')
+            in_tag = true;
+        if (s[0] == '\\') {
+            s++;
+            if (!s[0])
+                break;
+            if (s[0] == 'k' || s[0] == 'K' || s[0] == 't') {
+                valid_event = true;
+                continue;
+            // just bruteforce the multi-letter ones
+            } else if (s[0] == 'f') {
+                if (!strncmp(s, "fad", 3)) {
+                    valid_event = true;
+                    continue;
+                }
+            } else if (s[0] == 'm') {
+                if (!strncmp(s, "move", 4)) {
+                    valid_event = true;
+                    continue;
+                }
+            }
+        }
+        if (in_tag && valid_event && s[0] == '}') {
+            valid_tag = true;
+            break;
+        } else if (s[0] == '}') {
+            in_tag = false;
+            valid_event = false;
+            valid_tag = false;
+        }
+        s++;
+    }
+    return valid_tag;
+}
+
 // Note: pkt is not necessarily a fully valid refcounted packet.
 static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct demux_packet *orig_pkt = pkt;
+    ASS_Track *track = ctx->ass_track;
+    int old_n_events = track->n_events;
 
     for (int n = 0; n < ctx->num_filters; n++) {
         struct sd_filter *ft = ctx->filters[n];
@@ -300,6 +346,22 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
                       llrint(pkt->pts * 1000),
                       llrint(pkt->duration * 1000));
 
+    // This bookkeeping is only ever needed for ASS subs
+    if (!ctx->is_converted) {
+        if (!pkt->seen) {
+            for (int n = track->n_events - 1; n >= 0; n--) {
+                if (n + 1 == old_n_events || pkt->animated)
+                    break;
+                ASS_Event *event = &track->events[n];
+                pkt->animated = (event->Effect && event->Effect[0]) ||
+                                 is_animated(event->Text);
+            }
+            MP_TARRAY_APPEND(ctx, ctx->packets_animated, ctx->num_packets_animated, pkt->animated);
+        } else {
+            pkt->animated = ctx->packets_animated[pkt->seen_pos];
+        }
+    }
+
     if (pkt != orig_pkt)
         talloc_free(pkt);
 }
@@ -307,7 +369,7 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
 // Test if the packet with the given file position (used as unique ID) was
 // already consumed. Return false if the packet is new (and add it to the
 // internal list), and return true if it was already seen.
-static bool check_packet_seen(struct sd *sd, int64_t pos)
+static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *priv = sd->priv;
     int a = 0;
@@ -315,15 +377,18 @@ static bool check_packet_seen(struct sd *sd, int64_t pos)
     while (a < b) {
         int mid = a + (b - a) / 2;
         int64_t val = priv->seen_packets[mid];
-        if (pos == val)
+        if (packet->pos == val) {
+            packet->seen_pos = mid;
             return true;
-        if (pos > val) {
+        }
+        if (packet->pos > val) {
             a = mid + 1;
         } else {
             b = mid;
         }
     }
-    MP_TARRAY_INSERT_AT(priv, priv->seen_packets, priv->num_seen_packets, a, pos);
+    packet->seen_pos = a;
+    MP_TARRAY_INSERT_AT(priv, priv->seen_packets, priv->num_seen_packets, a, packet->pos);
     return false;
 }
 
@@ -333,9 +398,12 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
+
+    packet->sub_duration = packet->duration;
+
     if (ctx->converter) {
         if (!sd->opts->sub_clear_on_seek && packet->pos >= 0 &&
-            check_packet_seen(sd, packet->pos))
+            check_packet_seen(sd, packet))
             return;
 
         double sub_pts = 0;
@@ -374,7 +442,9 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         }
     } else {
         // Note that for this packet format, libass has an internal mechanism
-        // for discarding duplicate (already seen) packets.
+        // for discarding duplicate (already seen) packets but we check this
+        // anyways for our purposes for ASS subtitles.
+        packet->seen = check_packet_seen(sd, packet);
         filter_and_add(sd, packet);
     }
 }

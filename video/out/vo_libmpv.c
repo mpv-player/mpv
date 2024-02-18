@@ -608,9 +608,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_PAUSE:
         vo->want_redraw = true;
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER:
-        vo->want_redraw = true;
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         mp_mutex_lock(&ctx->lock);
         ctx->need_resize = true;

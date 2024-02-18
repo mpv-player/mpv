@@ -75,6 +75,7 @@ extern const struct m_sub_options input_config;
 extern const struct m_sub_options encode_config;
 extern const struct m_sub_options ra_ctx_conf;
 extern const struct m_sub_options gl_video_conf;
+extern const struct m_sub_options gl_next_conf;
 extern const struct m_sub_options ao_alsa_conf;
 
 extern const struct m_sub_options demux_conf;
@@ -318,7 +319,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-ass-scale-with-window", OPT_BOOL(ass_scale_with_window)},
         {"sub", OPT_SUBSTRUCT(sub_style, sub_style_conf)},
         {"sub-clear-on-seek", OPT_BOOL(sub_clear_on_seek)},
-        {"teletext-page", OPT_INT(teletext_page), M_RANGE(1, 999)},
+        {"teletext-page", OPT_INT(teletext_page), M_RANGE(-1, 999)},
         {"sub-past-video-end", OPT_BOOL(sub_past_video_end)},
         {"sub-ass-force-style", OPT_REPLACED("sub-ass-style-overrides")},
         {"sub-lavc-o", OPT_KEYVALUELIST(sub_avopts)},
@@ -331,7 +332,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         .sub_scale_by_window = true,
         .sub_use_margins = true,
         .sub_scale_with_window = true,
-        .teletext_page = 100,
+        .teletext_page = 0,
         .sub_scale = 1,
         .ass_vsfilter_aspect_compat = true,
         .ass_vsfilter_color_compat = 1,
@@ -867,6 +868,7 @@ static const m_option_t mp_opts[] = {
 
     {"", OPT_SUBSTRUCT(ra_ctx_opts, ra_ctx_conf)},
     {"", OPT_SUBSTRUCT(gl_video_opts, gl_video_conf)},
+    {"", OPT_SUBSTRUCT(gl_next_opts, gl_next_conf)},
     {"", OPT_SUBSTRUCT(spirv_opts, spirv_conf)},
 
 #if HAVE_GL

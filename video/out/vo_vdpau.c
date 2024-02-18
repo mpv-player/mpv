@@ -1071,9 +1071,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         checked_resize(vo);
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER:
-        vo->want_redraw = true;
-        return true;
     case VOCTRL_RESET:
         forget_frames(vo, true);
         return true;

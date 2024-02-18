@@ -58,6 +58,12 @@ typedef struct demux_packet {
     struct mp_codec_params *codec;  // set to non-NULL iff segmented is set
     double start, end;              // set to non-NOPTS iff segmented is set
 
+    // subtitles only
+    bool animated;
+    bool seen;
+    int seen_pos;
+    double sub_duration;
+
     // private
     struct demux_packet *next;
     struct AVPacket *avpacket;   // keep the buffer allocation and sidedata

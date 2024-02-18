@@ -1173,8 +1173,10 @@ void write_video(struct MPContext *mpctx)
     struct mp_image_params *p = &mpctx->next_frames[0]->params;
     if (!vo->params || video_reconfig_needed(*p, *vo->params)) {
         // Changing config deletes the current frame; wait until it's finished.
-        if (vo_still_displaying(vo))
+        if (vo_still_displaying(vo)) {
+            vo_request_wakeup_on_done(vo);
             return;
+        }
 
         const struct vo_driver *info = mpctx->video_out->driver;
         char extra[20] = {0};

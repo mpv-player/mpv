@@ -23,6 +23,11 @@
 
 #include "common/common.h"
 #include "config.h"
+// We make use of NON-POSIX pthreads functions and certain systems 
+// require this header to build without issues. (ex: OpenBSD)
+#if HAVE_BSD_THREAD_NAME
+#include <pthread_np.h>
+#endif
 #include "osdep/compiler.h"
 #include "timer.h"
 

@@ -30,6 +30,7 @@ Interface changes
     - add `--volume-gain`, `--volume-gain-min`, and `--volume-gain-max` options
     - add `current-gpu-context` property
     - add `--secondary-sub-ass-override` option
+    - add `--input-preprocess-wheel` option
     - remove shared-script-properties (user-data is a replacement)
     - add `--secondary-sub-delay`, decouple secondary subtitles from
       `--sub-delay`
@@ -46,6 +47,7 @@ Interface changes
     - add the command `load-input-conf`
     - remove `--vo=rpi`, `--gpu-context=rpi`, and `--hwdec=mmal`
     - add `auto` choice to `--deinterlace`
+    - change `--teletext-page` default from 100 to 0 ("subtitle" in lavc)
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

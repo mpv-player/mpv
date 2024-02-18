@@ -86,7 +86,7 @@ struct id_list {
     struct spa_list node;
 };
 
-static enum spa_audio_format af_fmt_to_pw(struct ao *ao, enum af_format format)
+static enum spa_audio_format af_fmt_to_pw(enum af_format format)
 {
     switch (format) {
     case AF_FORMAT_U8:          return SPA_AUDIO_FORMAT_U8;
@@ -99,9 +99,21 @@ static enum spa_audio_format af_fmt_to_pw(struct ao *ao, enum af_format format)
     case AF_FORMAT_S32P:        return SPA_AUDIO_FORMAT_S32P;
     case AF_FORMAT_FLOATP:      return SPA_AUDIO_FORMAT_F32P;
     case AF_FORMAT_DOUBLEP:     return SPA_AUDIO_FORMAT_F64P;
-    default:
-                                MP_WARN(ao, "Unhandled format %d\n", format);
-                                return SPA_AUDIO_FORMAT_UNKNOWN;
+    default:                    return SPA_AUDIO_FORMAT_UNKNOWN;
+    }
+}
+
+static enum spa_audio_iec958_codec af_fmt_to_codec(enum af_format format)
+{
+    switch (format) {
+    case AF_FORMAT_S_AAC:    return SPA_AUDIO_IEC958_CODEC_MPEG2_AAC;
+    case AF_FORMAT_S_AC3:    return SPA_AUDIO_IEC958_CODEC_AC3;
+    case AF_FORMAT_S_DTS:    return SPA_AUDIO_IEC958_CODEC_DTS;
+    case AF_FORMAT_S_DTSHD:  return SPA_AUDIO_IEC958_CODEC_DTSHD;
+    case AF_FORMAT_S_EAC3:   return SPA_AUDIO_IEC958_CODEC_EAC3;
+    case AF_FORMAT_S_MP3:    return SPA_AUDIO_IEC958_CODEC_MPEG;
+    case AF_FORMAT_S_TRUEHD: return SPA_AUDIO_IEC958_CODEC_TRUEHD;
+    default:                 return SPA_AUDIO_IEC958_CODEC_UNKNOWN;
     }
 }
 
@@ -580,24 +592,41 @@ static int init(struct ao *ao)
 
     pw_properties_setf(props, PW_KEY_NODE_RATE, "1/%d", ao->samplerate);
 
-    enum spa_audio_format spa_format = af_fmt_to_pw(ao, ao->format);
-    if (spa_format == SPA_AUDIO_FORMAT_UNKNOWN) {
-        ao->format = AF_FORMAT_FLOATP;
-        spa_format = SPA_AUDIO_FORMAT_F32P;
+    if (af_fmt_is_spdif(ao->format)) {
+        enum spa_audio_iec958_codec spa_codec = af_fmt_to_codec(ao->format);
+        if (spa_codec == SPA_AUDIO_IEC958_CODEC_UNKNOWN) {
+            MP_ERR(ao, "Unhandled codec %d\n", ao->format);
+            goto error_props;
+        }
+
+        struct spa_audio_info_iec958 audio_info = {
+            .codec = spa_codec,
+            .rate = ao->samplerate,
+        };
+
+        params[0] = spa_format_audio_iec958_build(&b, SPA_PARAM_EnumFormat, &audio_info);
+        if (!params[0])
+            goto error_props;
+    } else {
+        enum spa_audio_format spa_format = af_fmt_to_pw(ao->format);
+        if (spa_format == SPA_AUDIO_FORMAT_UNKNOWN) {
+            MP_ERR(ao, "Unhandled format %d\n", ao->format);
+            goto error_props;
+        }
+
+        struct spa_audio_info_raw audio_info = {
+            .format = spa_format,
+            .rate = ao->samplerate,
+            .channels = ao->channels.num,
+        };
+
+        for (int i = 0; i < ao->channels.num; i++)
+            audio_info.position[i] = mp_speaker_id_to_spa(ao, ao->channels.speaker[i]);
+
+        params[0] = spa_format_audio_raw_build(&b, SPA_PARAM_EnumFormat, &audio_info);
+        if (!params[0])
+            goto error_props;
     }
-
-    struct spa_audio_info_raw audio_info = {
-        .format = spa_format,
-        .rate = ao->samplerate,
-        .channels = ao->channels.num,
-    };
-
-    for (int i = 0; i < ao->channels.num; i++)
-        audio_info.position[i] = mp_speaker_id_to_spa(ao, ao->channels.speaker[i]);
-
-    params[0] = spa_format_audio_raw_build(&b, SPA_PARAM_EnumFormat, &audio_info);
-    if (!params[0])
-        goto error_props;
 
     if (af_fmt_is_planar(ao->format)) {
         ao->num_planes = ao->channels.num;

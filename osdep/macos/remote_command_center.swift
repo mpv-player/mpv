@@ -17,79 +17,74 @@
 
 import MediaPlayer
 
-class RemoteCommandCenter: NSObject {
+extension RemoteCommandCenter {
+    typealias ConfigHandler = (MPRemoteCommandEvent) -> (MPRemoteCommandHandlerStatus)
+
     enum KeyType {
         case normal
         case repeatable
     }
 
-    var config: [MPRemoteCommand:[String:Any]] = [
-        MPRemoteCommandCenter.shared().pauseCommand: [
-            "mpKey": MP_KEY_PAUSEONLY,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().playCommand: [
-            "mpKey": MP_KEY_PLAYONLY,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().stopCommand: [
-            "mpKey": MP_KEY_STOP,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().nextTrackCommand: [
-            "mpKey": MP_KEY_NEXT,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().previousTrackCommand: [
-            "mpKey": MP_KEY_PREV,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().togglePlayPauseCommand: [
-            "mpKey": MP_KEY_PLAY,
-            "keyType": KeyType.normal
-        ],
-        MPRemoteCommandCenter.shared().seekForwardCommand: [
-            "mpKey": MP_KEY_FORWARD,
-            "keyType": KeyType.repeatable,
-            "state": MP_KEY_STATE_UP
-        ],
-        MPRemoteCommandCenter.shared().seekBackwardCommand: [
-            "mpKey": MP_KEY_REWIND,
-            "keyType": KeyType.repeatable,
-            "state": MP_KEY_STATE_UP
-        ],
-    ]
+    struct Config {
+        let key: Int32
+        let type: KeyType
+        var state: UInt32 = 0
+        let handler: ConfigHandler
 
-    var nowPlayingInfo: [String: Any] = [
-        MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
-        MPNowPlayingInfoPropertyDefaultPlaybackRate: NSNumber(value: 1),
-        MPNowPlayingInfoPropertyPlaybackProgress: NSNumber(value: 0.0),
-        MPMediaItemPropertyPlaybackDuration: NSNumber(value: 0),
-        MPMediaItemPropertyTitle: "mpv",
-        MPMediaItemPropertyAlbumTitle: "mpv",
-        MPMediaItemPropertyArtist: "mpv",
-    ]
+        init(key: Int32 = 0, type: KeyType = .normal, handler: @escaping ConfigHandler = { event in return .commandFailed }) {
+            self.key = key
+            self.type = type
+            self.handler = handler
+        }
+    }
+}
 
-    let disabledCommands: [MPRemoteCommand] = [
-        MPRemoteCommandCenter.shared().changePlaybackRateCommand,
-        MPRemoteCommandCenter.shared().changeRepeatModeCommand,
-        MPRemoteCommandCenter.shared().changeShuffleModeCommand,
-        MPRemoteCommandCenter.shared().skipForwardCommand,
-        MPRemoteCommandCenter.shared().skipBackwardCommand,
-        MPRemoteCommandCenter.shared().changePlaybackPositionCommand,
-        MPRemoteCommandCenter.shared().enableLanguageOptionCommand,
-        MPRemoteCommandCenter.shared().disableLanguageOptionCommand,
-        MPRemoteCommandCenter.shared().ratingCommand,
-        MPRemoteCommandCenter.shared().likeCommand,
-        MPRemoteCommandCenter.shared().dislikeCommand,
-        MPRemoteCommandCenter.shared().bookmarkCommand,
-    ]
+class RemoteCommandCenter: NSObject {
+    var configs: [MPRemoteCommand:Config] = [:]
+    var disabledCommands: [MPRemoteCommand] = []
+    var isPaused: Bool = false { didSet { updateInfoCenter() } }
+    var duration: Double = 0 { didSet { updateInfoCenter() } }
+    var position: Double = 0 { didSet { updateInfoCenter() } }
+    var rate: Double = 0 { didSet { updateInfoCenter() } }
+    var title: String = "" { didSet { updateInfoCenter() } }
+    var chapter: String? { didSet { updateInfoCenter() } }
+    var album: String? { didSet { updateInfoCenter() } }
+    var artist: String? { didSet { updateInfoCenter() } }
+    var cover: NSImage = NSImage(size: NSSize(width: 256, height: 256))
 
-    var mpInfoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
-    var isPaused: Bool = false { didSet { updatePlaybackState() } }
+    var infoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
+    var commandCenter: MPRemoteCommandCenter { get { return MPRemoteCommandCenter.shared() } }
 
     @objc override init() {
         super.init()
+
+        configs = [
+            commandCenter.pauseCommand: Config(key: MP_KEY_PAUSEONLY, handler: keyHandler),
+            commandCenter.playCommand: Config(key: MP_KEY_PLAYONLY, handler: keyHandler),
+            commandCenter.stopCommand: Config(key: MP_KEY_STOP, handler: keyHandler),
+            commandCenter.nextTrackCommand: Config(key: MP_KEY_NEXT, handler: keyHandler),
+            commandCenter.previousTrackCommand: Config(key: MP_KEY_PREV, handler: keyHandler),
+            commandCenter.togglePlayPauseCommand: Config(key: MP_KEY_PLAY, handler: keyHandler),
+            commandCenter.seekForwardCommand: Config(key: MP_KEY_FORWARD, type: .repeatable, handler: keyHandler),
+            commandCenter.seekBackwardCommand: Config(key: MP_KEY_REWIND, type: .repeatable, handler: keyHandler),
+            commandCenter.changePlaybackPositionCommand: Config(handler: seekHandler),
+        ]
+
+        disabledCommands = [
+            commandCenter.changePlaybackRateCommand,
+            commandCenter.changeRepeatModeCommand,
+            commandCenter.changeShuffleModeCommand,
+            commandCenter.skipForwardCommand,
+            commandCenter.skipBackwardCommand,
+            commandCenter.enableLanguageOptionCommand,
+            commandCenter.disableLanguageOptionCommand,
+            commandCenter.ratingCommand,
+            commandCenter.likeCommand,
+            commandCenter.dislikeCommand,
+            commandCenter.bookmarkCommand,
+        ]
+
+        cover = (NSApp as? Application)?.getMPVIcon() ?? cover
 
         for cmd in disabledCommands {
             cmd.isEnabled = false
@@ -97,22 +92,12 @@ class RemoteCommandCenter: NSObject {
     }
 
     @objc func start() {
-        for (cmd, _) in config {
+        for (cmd, config) in configs {
             cmd.isEnabled = true
-            cmd.addTarget { [unowned self] event in
-                return self.cmdHandler(event)
-            }
+            cmd.addTarget(handler: config.handler)
         }
 
-        if let app = NSApp as? Application, let icon = app.getMPVIcon() {
-            let albumArt = MPMediaItemArtwork(boundsSize: icon.size) { _ in
-                return icon
-            }
-            nowPlayingInfo[MPMediaItemPropertyArtwork] = albumArt
-        }
-
-        mpInfoCenter.nowPlayingInfo = nowPlayingInfo
-        mpInfoCenter.playbackState = .playing
+        updateInfoCenter()
 
         NotificationCenter.default.addObserver(
             self,
@@ -123,47 +108,68 @@ class RemoteCommandCenter: NSObject {
     }
 
     @objc func stop() {
-        for (cmd, _) in config {
+        for (cmd, _) in configs {
             cmd.isEnabled = false
             cmd.removeTarget(nil)
         }
 
-        mpInfoCenter.nowPlayingInfo = nil
-        mpInfoCenter.playbackState = .unknown
+        infoCenter.nowPlayingInfo = nil
+        infoCenter.playbackState = .unknown
+
+        NotificationCenter.default.removeObserver(
+            self,
+            name: NSApplication.willBecomeActiveNotification,
+            object: nil
+        )
     }
 
     @objc func makeCurrent(notification: NSNotification) {
-        mpInfoCenter.playbackState = .paused
-        mpInfoCenter.playbackState = .playing
-        updatePlaybackState()
+        infoCenter.playbackState = .paused
+        infoCenter.playbackState = .playing
+        updateInfoCenter()
     }
 
-    func updatePlaybackState() {
-        mpInfoCenter.playbackState = isPaused ? .paused : .playing
+    func updateInfoCenter() {
+        infoCenter.playbackState = isPaused ? .paused : .playing
+        infoCenter.nowPlayingInfo = (infoCenter.nowPlayingInfo ?? [:]).merging([
+            MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
+            MPNowPlayingInfoPropertyPlaybackProgress: NSNumber(value: 0.0),
+            MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: isPaused ? 0 : rate),
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(value: position),
+            MPMediaItemPropertyPlaybackDuration: NSNumber(value: duration),
+            MPMediaItemPropertyTitle: title,
+            MPMediaItemPropertyArtist: artist ?? chapter ?? "",
+            MPMediaItemPropertyAlbumTitle: album ?? "",
+            MPMediaItemPropertyArtwork: MPMediaItemArtwork(boundsSize: cover.size) { _ in return self.cover }
+        ]) { (_, new) in new }
     }
 
-    func cmdHandler(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        guard let cmdConfig = config[event.command],
-              let mpKey = cmdConfig["mpKey"] as? Int32,
-              let keyType = cmdConfig["keyType"] as? KeyType else
-        {
+    lazy var keyHandler: ConfigHandler = { event in
+        guard let config = self.configs[event.command] else {
             return .commandFailed
         }
 
-        var state = cmdConfig["state"] as? UInt32 ?? 0
-
-        if let currentState = cmdConfig["state"] as? UInt32, keyType == .repeatable {
-            state = MP_KEY_STATE_DOWN
-            config[event.command]?["state"] = MP_KEY_STATE_DOWN
-            if currentState == MP_KEY_STATE_DOWN {
-                state = MP_KEY_STATE_UP
-                config[event.command]?["state"] = MP_KEY_STATE_UP
-            }
+        var state = config.state
+        if config.type == .repeatable {
+            state = config.state == MP_KEY_STATE_DOWN ? MP_KEY_STATE_UP : MP_KEY_STATE_DOWN
+            self.configs[event.command]?.state = state
         }
 
-        EventsResponder.sharedInstance().handleMPKey(mpKey, withMask: Int32(state))
+        EventsResponder.sharedInstance().handleMPKey(config.key, withMask: Int32(state))
 
         return .success
+    }
+
+    lazy var seekHandler: ConfigHandler = { event in
+        guard let posEvent = event as? MPChangePlaybackPositionCommandEvent else {
+            return .commandFailed
+        }
+
+        let success = String(format: "seek %.02f absolute", posEvent.positionTime).withCString {
+            EventsResponder.sharedInstance().queueCommand(UnsafeMutablePointer<Int8>(mutating: $0))
+        }
+
+        return success ? .success : .commandFailed
     }
 
     @objc func processEvent(_ event: UnsafeMutablePointer<mpv_event>) {
@@ -184,6 +190,23 @@ class RemoteCommandCenter: NSObject {
         switch String(cString: property.name) {
         case "pause" where property.format == MPV_FORMAT_FLAG:
             isPaused = LibmpvHelper.mpvFlagToBool(property.data) ?? false
+        case "time-pos" where property.format == MPV_FORMAT_DOUBLE:
+            let newPosition = max(LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0, 0)
+            if Int((floor(newPosition) - floor(position)) / rate) != 0 {
+                position = newPosition
+            }
+        case "duration" where property.format == MPV_FORMAT_DOUBLE:
+            duration = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0
+        case "speed" where property.format == MPV_FORMAT_DOUBLE:
+            rate = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 1
+        case "media-title" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
+            title = LibmpvHelper.mpvStringArrayToString(property.data) ?? ""
+        case "chapter-metadata/title" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
+            chapter = LibmpvHelper.mpvStringArrayToString(property.data)
+        case "metadata/by-key/album" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
+            album = LibmpvHelper.mpvStringArrayToString(property.data)
+        case "metadata/by-key/artist" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
+            artist = LibmpvHelper.mpvStringArrayToString(property.data)
         default:
             break
         }

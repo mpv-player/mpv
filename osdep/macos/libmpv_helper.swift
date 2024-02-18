@@ -236,13 +236,19 @@ class LibmpvHelper {
     }
 
     // *(char **) MPV_FORMAT_STRING on mpv_event_property
-    class func mpvStringArrayToString(_ obj: UnsafeMutableRawPointer) -> String? {
-        let cstr = UnsafeMutablePointer<UnsafeMutablePointer<Int8>>(OpaquePointer(obj))
+    class func mpvStringArrayToString(_ obj: UnsafeMutableRawPointer?) -> String? {
+        guard let str = obj else { return nil }
+        let cstr = UnsafeMutablePointer<UnsafeMutablePointer<Int8>>(OpaquePointer(str))
         return String(cString: cstr[0])
     }
 
     // MPV_FORMAT_FLAG
     class func mpvFlagToBool(_ obj: UnsafeMutableRawPointer) -> Bool? {
         return UnsafePointer<Bool>(OpaquePointer(obj))?.pointee
+    }
+
+    // MPV_FORMAT_DOUBLE
+    class func mpvDoubleToDouble(_ obj: UnsafeMutableRawPointer) -> Double? {
+        return UnsafePointer<Double>(OpaquePointer(obj))?.pointee
     }
 }

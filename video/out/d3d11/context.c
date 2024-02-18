@@ -479,6 +479,9 @@ static bool d3d11_init(struct ra_ctx *ctx)
     if (!vo_w32_init(ctx->vo))
         goto error;
 
+    if (ctx->opts.want_alpha)
+        vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
+
     UINT usage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
     if (ID3D11Device_GetFeatureLevel(p->device) >= D3D_FEATURE_LEVEL_11_0 &&
         p->opts->output_format != DXGI_FORMAT_B8G8R8A8_UNORM)
@@ -509,6 +512,11 @@ error:
     return false;
 }
 
+static void d3d11_update_render_opts(struct ra_ctx *ctx)
+{
+    vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
+}
+
 IDXGISwapChain *ra_d3d11_ctx_get_swapchain(struct ra_ctx *ra)
 {
     if (ra->swapchain->fns != &d3d11_swapchain)
@@ -532,10 +540,11 @@ bool ra_d3d11_ctx_prefer_8bit_output_format(struct ra_ctx *ra)
 }
 
 const struct ra_ctx_fns ra_ctx_d3d11 = {
-    .type     = "d3d11",
-    .name     = "d3d11",
-    .reconfig = d3d11_reconfig,
-    .control  = d3d11_control,
-    .init     = d3d11_init,
-    .uninit   = d3d11_uninit,
+    .type               = "d3d11",
+    .name               = "d3d11",
+    .reconfig           = d3d11_reconfig,
+    .control            = d3d11_control,
+    .update_render_opts = d3d11_update_render_opts,
+    .init               = d3d11_init,
+    .uninit             = d3d11_uninit,
 };

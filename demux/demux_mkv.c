@@ -390,6 +390,10 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
             }
             size = dstlen - out_avail;
         } else if (enc->comp_algo == 3) {
+            if (enc->comp_settings_len == 0 || !enc->comp_settings) {
+                mp_warn(log, "missing comp_settings, unable to reconstruct the data.\n");
+                goto error;
+            }
             dest = talloc_size(track->parser_tmp, size + enc->comp_settings_len);
             memcpy(dest, enc->comp_settings, enc->comp_settings_len);
             memcpy(dest + enc->comp_settings_len, src, size);
@@ -402,6 +406,8 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
         talloc_free(src);
     if (!size)
         dest = NULL;
+    if (!dest)
+        size = 0;
     return (bstr){dest, size};
 }
 
@@ -2068,6 +2074,8 @@ static void probe_x264_garbage(demuxer_t *demuxer)
 
         bstr sblock = {block->laces[0]->data, block->laces[0]->size};
         bstr nblock = demux_mkv_decode(demuxer->log, track, sblock, 1);
+        if (!nblock.len)
+            continue;
 
         sh->codec->first_packet = new_demux_packet_from(nblock.start, nblock.len);
         talloc_steal(mkv_d, sh->codec->first_packet);
@@ -2830,6 +2838,8 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 
             bstr block = {data->data, data->size};
             bstr nblock = demux_mkv_decode(demuxer->log, track, block, 1);
+            if (!nblock.len)
+                break;
 
             if (block.start != nblock.start || block.len != nblock.len) {
                 // (avoidable copy of the entire data)
@@ -2979,20 +2989,22 @@ static int read_next_block_into_queue(demuxer_t *demuxer)
                 if (end > mkv_d->cluster_end)
                     goto find_next_cluster;
                 int res = read_block_group(demuxer, end, &block);
-                if (res < 0)
-                    goto find_next_cluster;
                 if (res > 0)
                     goto add_block;
+                free_block(&block);
+                if (res < 0)
+                    goto find_next_cluster;
                 break;
             }
 
             case MATROSKA_ID_SIMPLEBLOCK: {
                 block = (struct block_info){ .simple = true };
                 int res = read_block(demuxer, mkv_d->cluster_end, &block);
-                if (res < 0)
-                    goto find_next_cluster;
                 if (res > 0)
                     goto add_block;
+                free_block(&block);
+                if (res < 0)
+                    goto find_next_cluster;
                 break;
             }
 

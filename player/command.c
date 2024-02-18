@@ -4075,8 +4075,8 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "container-fps", "aspect", "aspect-name", "vo-configured", "current-vo",
-      "video-dec-params", "osd-dimensions",
-      "hwdec", "hwdec-current", "hwdec-interop"),
+      "video-dec-params", "osd-dimensions", "hwdec", "hwdec-current", "hwdec-interop",
+      "window-id"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "volume-gain", "mute",
       "current-ao", "audio-codec-name", "audio-params",
@@ -7122,7 +7122,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (flags & UPDATE_VIDEO) {
         if (mpctx->video_out) {
-            vo_set_want_redraw(mpctx->video_out);
+            vo_control(mpctx->video_out, VOCTRL_UPDATE_RENDER_OPTS, NULL);
             mp_wakeup_core(mpctx);
         }
     }

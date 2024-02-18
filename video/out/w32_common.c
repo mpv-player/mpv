@@ -2245,3 +2245,24 @@ void vo_w32_run_on_thread(struct vo *vo, void (*cb)(void *ctx), void *ctx)
     struct vo_w32_state *w32 = vo->w32;
     mp_dispatch_run(w32->dispatch, cb, ctx);
 }
+
+void vo_w32_set_transparency(struct vo *vo, bool enable)
+{
+    struct vo_w32_state *w32 = vo->w32;
+    if (w32->parent)
+        return;
+
+    DWM_BLURBEHIND dbb = {0};
+    if (enable) {
+        HRGN rgn = CreateRectRgn(0, 0, -1, -1);
+        dbb.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
+        dbb.hRgnBlur = rgn;
+        dbb.fEnable = TRUE;
+        DwmEnableBlurBehindWindow(w32->window, &dbb);
+        DeleteObject(rgn);
+    } else {
+        dbb.dwFlags = DWM_BB_ENABLE;
+        dbb.fEnable = FALSE;
+        DwmEnableBlurBehindWindow(w32->window, &dbb);
+    }
+}

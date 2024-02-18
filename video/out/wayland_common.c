@@ -187,53 +187,78 @@ struct vo_wayland_output {
     struct wl_list link;
 };
 
+struct vo_wayland_seat {
+    struct vo_wayland_state *wl;
+    struct wl_seat *seat;
+    uint32_t id;
+    struct wl_keyboard *keyboard;
+    struct wl_pointer  *pointer;
+    struct wl_touch    *touch;
+    struct wl_data_device *dnd_ddev;
+    /* TODO: unvoid this if required wayland protocols is bumped to 1.32+ */
+    void *cursor_shape_device;
+    uint32_t pointer_serial;
+    struct xkb_keymap  *xkb_keymap;
+    struct xkb_state   *xkb_state;
+    uint32_t keyboard_code;
+    int mpkey;
+    int mpmod;
+    double axis_value_vertical;
+    int32_t axis_value120_vertical;
+    double axis_value_horizontal;
+    int32_t axis_value120_horizontal;
+    bool axis_value120_scroll;
+    bool has_keyboard_input;
+    struct wl_list link;
+};
+
 static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
                             enum xdg_toplevel_resize_edge *edge);
-static int get_mods(struct vo_wayland_state *wl);
+static int get_mods(struct vo_wayland_seat *seat);
 static int lookupkey(int key);
-static int set_cursor_visibility(struct vo_wayland_state *wl, bool on);
+static int set_cursor_visibility(struct vo_wayland_seat *s, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
 
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
-static void get_shape_device(struct vo_wayland_state *wl);
+static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static int greatest_common_divisor(int a, int b);
 static void guess_focus(struct vo_wayland_state *wl);
 static void prepare_resize(struct vo_wayland_state *wl, int width, int height);
 static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
+static void remove_seat(struct vo_wayland_seat *seat);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale);
 static void set_geometry(struct vo_wayland_state *wl, bool resize);
 static void set_surface_scaling(struct vo_wayland_state *wl);
-static void window_move(struct vo_wayland_state *wl, uint32_t serial);
 
 /* Wayland listener boilerplate */
 static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
                                  uint32_t serial, struct wl_surface *surface,
                                  wl_fixed_t sx, wl_fixed_t sy)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
 
-    wl->pointer    = pointer;
-    wl->pointer_id = serial;
-
-    set_cursor_visibility(wl, wl->cursor_visible);
+    set_cursor_visibility(s, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
 }
 
 static void pointer_handle_leave(void *data, struct wl_pointer *pointer,
                                  uint32_t serial, struct wl_surface *surface)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_LEAVE);
 }
 
 static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
                                   uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
 
     wl->mouse_x = wl_fixed_to_int(sx) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(sy) * wl->scaling;
@@ -247,7 +272,8 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
                                   uint32_t serial, uint32_t time, uint32_t button,
                                   uint32_t state)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     state = state == WL_POINTER_BUTTON_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                      : MP_KEY_STATE_UP;
 
@@ -277,7 +303,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     }
 
     if (button)
-        mp_input_put_key(wl->vo->input_ctx, button | state | wl->mpmod);
+        mp_input_put_key(wl->vo->input_ctx, button | state | s->mpmod);
 
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         !wl->locked_size && (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN))
@@ -285,9 +311,9 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         uint32_t edges;
         // Implement an edge resize zone if there are no decorations
         if (!wl->vo_opts->border && check_for_resize(wl, wl->opts->edge_pixels_pointer, &edges)) {
-            xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edges);
+            xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edges);
         } else {
-            window_move(wl, serial);
+            xdg_toplevel_move(wl->xdg_toplevel, s->seat, serial);
         }
         // Explicitly send an UP event after the client finishes a move/resize
         mp_input_put_key(wl->vo->input_ctx, button | MP_KEY_STATE_UP);
@@ -297,49 +323,50 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
 static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
                                 uint32_t time, uint32_t axis, wl_fixed_t value)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
     switch (axis) {
     case WL_POINTER_AXIS_VERTICAL_SCROLL:
-        wl->axis_value_vertical += wl_fixed_to_double(value);
+        s->axis_value_vertical += wl_fixed_to_double(value);
         break;
     case WL_POINTER_AXIS_HORIZONTAL_SCROLL:
-        wl->axis_value_horizontal += wl_fixed_to_double(value);
+        s->axis_value_horizontal += wl_fixed_to_double(value);
         break;
     }
 }
 
 static void pointer_handle_frame(void *data, struct wl_pointer *wl_pointer)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     double value_vertical, value_horizontal;
-    if (wl->axis_value120_scroll) {
+    if (s->axis_value120_scroll) {
         // Prefer axis_value120 if supported and the axis event is from mouse wheel.
-        value_vertical = wl->axis_value120_vertical / 120.0;
-        value_horizontal = wl->axis_value120_horizontal / 120.0;
+        value_vertical = s->axis_value120_vertical / 120.0;
+        value_horizontal = s->axis_value120_horizontal / 120.0;
     } else {
         // The axis value is specified in logical coordinates, but the exact value emitted
         // by one mouse wheel click is unspecified. In practice, most compositors use either
         // 10 (GNOME, Weston) or 15 (wlroots, same as libinput) as the value.
         // Divide the value by 10 and clamp it between -1 and 1 so that mouse wheel clicks
         // work as intended on all compositors while still allowing high resolution trackpads.
-        value_vertical = MPCLAMP(wl->axis_value_vertical / 10.0, -1, 1);
-        value_horizontal = MPCLAMP(wl->axis_value_horizontal / 10.0, -1, 1);
+        value_vertical = MPCLAMP(s->axis_value_vertical / 10.0, -1, 1);
+        value_horizontal = MPCLAMP(s->axis_value_horizontal / 10.0, -1, 1);
     }
 
     if (value_vertical > 0)
-        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_DOWN | wl->mpmod, +value_vertical);
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_DOWN | s->mpmod, +value_vertical);
     if (value_vertical < 0)
-        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_UP | wl->mpmod, -value_vertical);
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_UP | s->mpmod, -value_vertical);
     if (value_horizontal > 0)
-        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_RIGHT | wl->mpmod, +value_horizontal);
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_RIGHT | s->mpmod, +value_horizontal);
     if (value_horizontal < 0)
-        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT | wl->mpmod, -value_horizontal);
+        mp_input_put_wheel(wl->vo->input_ctx, MP_WHEEL_LEFT | s->mpmod, -value_horizontal);
 
-    wl->axis_value120_scroll = false;
-    wl->axis_value_vertical = 0;
-    wl->axis_value_horizontal = 0;
-    wl->axis_value120_vertical = 0;
-    wl->axis_value120_horizontal = 0;
+    s->axis_value120_scroll = false;
+    s->axis_value_vertical = 0;
+    s->axis_value_horizontal = 0;
+    s->axis_value120_vertical = 0;
+    s->axis_value120_horizontal = 0;
 }
 
 static void pointer_handle_axis_source(void *data, struct wl_pointer *wl_pointer,
@@ -361,14 +388,14 @@ static void pointer_handle_axis_discrete(void *data, struct wl_pointer *wl_point
 static void pointer_handle_axis_value120(void *data, struct wl_pointer *wl_pointer,
                                          uint32_t axis, int32_t value120)
 {
-    struct vo_wayland_state *wl = data;
-    wl->axis_value120_scroll = true;
+    struct vo_wayland_seat *s = data;
+    s->axis_value120_scroll = true;
     switch (axis) {
     case WL_POINTER_AXIS_VERTICAL_SCROLL:
-        wl->axis_value120_vertical += value120;
+        s->axis_value120_vertical += value120;
         break;
     case WL_POINTER_AXIS_HORIZONTAL_SCROLL:
-        wl->axis_value120_horizontal += value120;
+        s->axis_value120_horizontal += value120;
         break;
     }
 }
@@ -393,16 +420,17 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
                               uint32_t serial, uint32_t time, struct wl_surface *surface,
                               int32_t id, wl_fixed_t x_w, wl_fixed_t y_w)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
 
     enum xdg_toplevel_resize_edge edge;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y)) {
         if (check_for_resize(wl, wl->opts->edge_pixels_touch, &edge)) {
-            xdg_toplevel_resize(wl->xdg_toplevel, wl->seat, serial, edge);
+            xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edge);
         } else  {
-            xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
+            xdg_toplevel_move(wl->xdg_toplevel, s->seat, serial);
         }
     }
 
@@ -413,14 +441,16 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
 static void touch_handle_up(void *data, struct wl_touch *wl_touch,
                             uint32_t serial, uint32_t time, int32_t id)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
 }
 
 static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
                                 uint32_t time, int32_t id, wl_fixed_t x_w, wl_fixed_t y_w)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
 
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
@@ -459,7 +489,8 @@ static const struct wl_touch_listener touch_listener = {
 static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
                                    uint32_t format, int32_t fd, uint32_t size)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     char *map_str;
 
     if (format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
@@ -473,23 +504,25 @@ static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
         return;
     }
 
-    wl->xkb_keymap = xkb_keymap_new_from_buffer(wl->xkb_context, map_str,
-                                                strnlen(map_str, size),
-                                                XKB_KEYMAP_FORMAT_TEXT_V1, 0);
+    if (!s->xkb_keymap)
+        s->xkb_keymap = xkb_keymap_new_from_buffer(wl->xkb_context, map_str,
+                                                   strnlen(map_str, size),
+                                                   XKB_KEYMAP_FORMAT_TEXT_V1, 0);
 
     munmap(map_str, size);
     close(fd);
 
-    if (!wl->xkb_keymap) {
+    if (!s->xkb_keymap) {
         MP_ERR(wl, "failed to compile keymap\n");
         return;
     }
 
-    wl->xkb_state = xkb_state_new(wl->xkb_keymap);
-    if (!wl->xkb_state) {
+    if (!s->xkb_state)
+        s->xkb_state = xkb_state_new(s->xkb_keymap);
+    if (!s->xkb_state) {
         MP_ERR(wl, "failed to create XKB state\n");
-        xkb_keymap_unref(wl->xkb_keymap);
-        wl->xkb_keymap = NULL;
+        xkb_keymap_unref(s->xkb_keymap);
+        s->xkb_keymap = NULL;
         return;
     }
 }
@@ -498,19 +531,21 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
                                   uint32_t serial, struct wl_surface *surface,
                                   struct wl_array *keys)
 {
-    struct vo_wayland_state *wl = data;
-    wl->has_keyboard_input = true;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
+    s->has_keyboard_input = true;
     guess_focus(wl);
 }
 
 static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
                                   uint32_t serial, struct wl_surface *surface)
 {
-    struct vo_wayland_state *wl = data;
-    wl->has_keyboard_input = false;
-    wl->keyboard_code = 0;
-    wl->mpkey = 0;
-    wl->mpmod = 0;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
+    s->has_keyboard_input = false;
+    s->keyboard_code = 0;
+    s->mpkey = 0;
+    s->mpmod = 0;
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
     guess_focus(wl);
 }
@@ -519,36 +554,37 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
                                 uint32_t serial, uint32_t time, uint32_t key,
                                 uint32_t state)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
 
-    wl->keyboard_code = key + 8;
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(wl->xkb_state, wl->keyboard_code);
+    s->keyboard_code = key + 8;
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(s->xkb_state, s->keyboard_code);
     int mpkey = lookupkey(sym);
 
     state = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                    : MP_KEY_STATE_UP;
 
     if (mpkey) {
-        mp_input_put_key(wl->vo->input_ctx, mpkey | state | wl->mpmod);
+        mp_input_put_key(wl->vo->input_ctx, mpkey | state | s->mpmod);
     } else {
-        char s[128];
-        if (xkb_keysym_to_utf8(sym, s, sizeof(s)) > 0) {
-            mp_input_put_key_utf8(wl->vo->input_ctx, state | wl->mpmod, bstr0(s));
+        char str[128];
+        if (xkb_keysym_to_utf8(sym, str, sizeof(str)) > 0) {
+            mp_input_put_key_utf8(wl->vo->input_ctx, state | s->mpmod, bstr0(str));
         } else {
             // Assume a modifier was pressed and handle it in the mod event instead.
             // If a modifier is released before a regular key, also release that
             // key to not activate it again by accident.
             if (state == MP_KEY_STATE_UP) {
-                wl->mpkey = 0;
+                s->mpkey = 0;
                 mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
             }
             return;
         }
     }
     if (state == MP_KEY_STATE_DOWN)
-        wl->mpkey = mpkey;
+        s->mpkey = mpkey;
     if (mpkey && state == MP_KEY_STATE_UP)
-        wl->mpkey = 0;
+        s->mpkey = 0;
 }
 
 static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboard,
@@ -556,21 +592,23 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboar
                                       uint32_t mods_latched, uint32_t mods_locked,
                                       uint32_t group)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
 
-    if (wl->xkb_state) {
-        xkb_state_update_mask(wl->xkb_state, mods_depressed, mods_latched,
+    if (s->xkb_state) {
+        xkb_state_update_mask(s->xkb_state, mods_depressed, mods_latched,
                               mods_locked, 0, 0, group);
-        wl->mpmod = get_mods(wl);
-        if (wl->mpkey)
-            mp_input_put_key(wl->vo->input_ctx, wl->mpkey | MP_KEY_STATE_DOWN | wl->mpmod);
+        s->mpmod = get_mods(s);
+        if (s->mpkey)
+            mp_input_put_key(wl->vo->input_ctx, s->mpkey | MP_KEY_STATE_DOWN | s->mpmod);
     }
 }
 
 static void keyboard_handle_repeat_info(void *data, struct wl_keyboard *wl_keyboard,
                                         int32_t rate, int32_t delay)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     if (wl->vo_opts->native_keyrepeat)
         mp_input_set_repeat_info(wl->vo->input_ctx, rate, delay);
 }
@@ -587,32 +625,32 @@ static const struct wl_keyboard_listener keyboard_listener = {
 static void seat_handle_caps(void *data, struct wl_seat *seat,
                              enum wl_seat_capability caps)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
 
-    if ((caps & WL_SEAT_CAPABILITY_POINTER) && !wl->pointer) {
-        wl->pointer = wl_seat_get_pointer(seat);
-        get_shape_device(wl);
-        wl_pointer_add_listener(wl->pointer, &pointer_listener, wl);
-    } else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && wl->pointer) {
-        wl_pointer_destroy(wl->pointer);
-        wl->pointer = NULL;
+    if ((caps & WL_SEAT_CAPABILITY_POINTER) && !s->pointer) {
+        s->pointer = wl_seat_get_pointer(seat);
+        get_shape_device(s->wl, s);
+        wl_pointer_add_listener(s->pointer, &pointer_listener, s);
+    } else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && s->pointer) {
+        wl_pointer_destroy(s->pointer);
+        s->pointer = NULL;
     }
 
-    if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !wl->keyboard) {
-        wl->keyboard = wl_seat_get_keyboard(seat);
-        wl_keyboard_add_listener(wl->keyboard, &keyboard_listener, wl);
-    } else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && wl->keyboard) {
-        wl_keyboard_destroy(wl->keyboard);
-        wl->keyboard = NULL;
+    if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !s->keyboard) {
+        s->keyboard = wl_seat_get_keyboard(seat);
+        wl_keyboard_add_listener(s->keyboard, &keyboard_listener, s);
+    } else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && s->keyboard) {
+        wl_keyboard_destroy(s->keyboard);
+        s->keyboard = NULL;
     }
 
-    if ((caps & WL_SEAT_CAPABILITY_TOUCH) && !wl->touch) {
-        wl->touch = wl_seat_get_touch(seat);
-        wl_touch_set_user_data(wl->touch, wl);
-        wl_touch_add_listener(wl->touch, &touch_listener, wl);
-    } else if (!(caps & WL_SEAT_CAPABILITY_TOUCH) && wl->touch) {
-        wl_touch_destroy(wl->touch);
-        wl->touch = NULL;
+    if ((caps & WL_SEAT_CAPABILITY_TOUCH) && !s->touch) {
+        s->touch = wl_seat_get_touch(seat);
+        wl_touch_set_user_data(s->touch, s);
+        wl_touch_add_listener(s->touch, &touch_listener, s);
+    } else if (!(caps & WL_SEAT_CAPABILITY_TOUCH) && s->touch) {
+        wl_touch_destroy(s->touch);
+        s->touch = NULL;
     }
 }
 
@@ -629,7 +667,8 @@ static const struct wl_seat_listener seat_listener = {
 static void data_offer_handle_offer(void *data, struct wl_data_offer *offer,
                                     const char *mime_type)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     int score = mp_event_get_mime_type_score(wl->vo->input_ctx, mime_type);
     if (score > wl->dnd_mime_score && wl->vo_opts->drag_and_drop != -2) {
         wl->dnd_mime_score = score;
@@ -646,7 +685,8 @@ static void data_offer_source_actions(void *data, struct wl_data_offer *offer, u
 
 static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, uint32_t dnd_action)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     if (dnd_action && wl->vo_opts->drag_and_drop != -2) {
         if (wl->vo_opts->drag_and_drop >= 0) {
             wl->dnd_action = wl->vo_opts->drag_and_drop;
@@ -668,12 +708,13 @@ static const struct wl_data_offer_listener data_offer_listener = {
 static void data_device_handle_data_offer(void *data, struct wl_data_device *wl_ddev,
                                           struct wl_data_offer *id)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     if (wl->dnd_offer)
         wl_data_offer_destroy(wl->dnd_offer);
 
     wl->dnd_offer = id;
-    wl_data_offer_add_listener(id, &data_offer_listener, wl);
+    wl_data_offer_add_listener(id, &data_offer_listener, s);
 }
 
 static void data_device_handle_enter(void *data, struct wl_data_device *wl_ddev,
@@ -681,7 +722,8 @@ static void data_device_handle_enter(void *data, struct wl_data_device *wl_ddev,
                                      wl_fixed_t x, wl_fixed_t y,
                                      struct wl_data_offer *id)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     if (wl->dnd_offer != id) {
         MP_FATAL(wl, "DND offer ID mismatch!\n");
         return;
@@ -699,7 +741,8 @@ static void data_device_handle_enter(void *data, struct wl_data_device *wl_ddev,
 
 static void data_device_handle_leave(void *data, struct wl_data_device *wl_ddev)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
 
     if (wl->dnd_offer) {
         if (wl->dnd_fd != -1)
@@ -719,13 +762,15 @@ static void data_device_handle_leave(void *data, struct wl_data_device *wl_ddev)
 static void data_device_handle_motion(void *data, struct wl_data_device *wl_ddev,
                                       uint32_t time, wl_fixed_t x, wl_fixed_t y)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
     wl_data_offer_accept(wl->dnd_offer, time, wl->dnd_mime_type);
 }
 
 static void data_device_handle_drop(void *data, struct wl_data_device *wl_ddev)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
 
     int pipefd[2];
 
@@ -746,7 +791,8 @@ static void data_device_handle_drop(void *data, struct wl_data_device *wl_ddev)
 static void data_device_handle_selection(void *data, struct wl_data_device *wl_ddev,
                                          struct wl_data_offer *id)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
 
     if (wl->dnd_offer) {
         wl_data_offer_destroy(wl->dnd_offer);
@@ -1404,7 +1450,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp (interface, wp_viewporter_interface.name) && (ver >= 1) && found++) {
-       wl->viewporter = wl_registry_bind (reg, id, &wp_viewporter_interface, 1);
+        wl->viewporter = wl_registry_bind (reg, id, &wp_viewporter_interface, 1);
     }
 
     if (!strcmp(interface, wl_data_device_manager_interface.name) && (ver >= 3) && found++) {
@@ -1434,8 +1480,16 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 #else
         ver = MPMIN(ver, 7);
 #endif
-        wl->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
-        wl_seat_add_listener(wl->seat, &seat_listener, wl);
+        struct vo_wayland_seat *seat = talloc_zero(wl, struct vo_wayland_seat);
+        seat->wl   = wl;
+        seat->id   = id;
+        seat->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
+        wl_seat_add_listener(seat->seat, &seat_listener, seat);
+        if (wl->dnd_devman) {
+            seat->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, seat->seat);
+            wl_data_device_add_listener(seat->dnd_ddev, &data_device_listener, seat);
+        }
+        wl_list_insert(&wl->seat_list, &seat->link);
     }
 
     if (!strcmp(interface, wl_shm_interface.name) && found++) {
@@ -1490,10 +1544,18 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t id)
 {
     struct vo_wayland_state *wl = data;
-    struct vo_wayland_output *output, *tmp;
-    wl_list_for_each_safe(output, tmp, &wl->output_list, link) {
+    struct vo_wayland_output *output, *output_tmp;
+    wl_list_for_each_safe(output, output_tmp, &wl->output_list, link) {
         if (output->id == id) {
             remove_output(output);
+            return;
+        }
+    }
+
+    struct vo_wayland_seat *seat, *seat_tmp;
+    wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link) {
+        if (seat->id == id) {
+            remove_seat(seat);
             return;
         }
     }
@@ -1642,8 +1704,6 @@ static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
 
 static void do_minimize(struct vo_wayland_state *wl)
 {
-    if (!wl->xdg_toplevel)
-        return;
     if (wl->vo_opts->window_minimized)
         xdg_toplevel_set_minimized(wl->xdg_toplevel);
 }
@@ -1664,7 +1724,7 @@ static char **get_displays_spanned(struct vo_wayland_state *wl)
     return names;
 }
 
-static int get_mods(struct vo_wayland_state *wl)
+static int get_mods(struct vo_wayland_seat *s)
 {
     static char* const mod_names[] = {
         XKB_MOD_NAME_SHIFT,
@@ -1683,21 +1743,21 @@ static int get_mods(struct vo_wayland_state *wl)
     int modifiers = 0;
 
     for (int n = 0; n < MP_ARRAY_SIZE(mods); n++) {
-        xkb_mod_index_t index = xkb_keymap_mod_get_index(wl->xkb_keymap, mod_names[n]);
+        xkb_mod_index_t index = xkb_keymap_mod_get_index(s->xkb_keymap, mod_names[n]);
         if (index != XKB_MOD_INVALID
-            && xkb_state_mod_index_is_active(wl->xkb_state, index,
+            && xkb_state_mod_index_is_active(s->xkb_state, index,
                                              XKB_STATE_MODS_EFFECTIVE))
             modifiers |= mods[n];
     }
     return modifiers;
 }
 
-static void get_shape_device(struct vo_wayland_state *wl)
+static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    if (!wl->cursor_shape_device && wl->cursor_shape_manager) {
-        wl->cursor_shape_device = wp_cursor_shape_manager_v1_get_pointer(wl->cursor_shape_manager,
-                                                                         wl->pointer);
+    if (!s->cursor_shape_device && wl->cursor_shape_manager) {
+        s->cursor_shape_device = wp_cursor_shape_manager_v1_get_pointer(wl->cursor_shape_manager,
+                                                                        s->pointer);
     }
 #endif
 }
@@ -1714,8 +1774,17 @@ static void guess_focus(struct vo_wayland_state *wl)
 {
     // We can't actually know if the window is focused or not in wayland,
     // so just guess it with some common sense. Obviously won't work if
-    // the user has no keyboard.
-    if ((!wl->focused && wl->activated && wl->has_keyboard_input) ||
+    // the user has no keyboard. We flag has_keyboard_input if
+    // at least one seat has it.
+    bool has_keyboard_input = false;
+    struct vo_wayland_seat *seat;
+    wl_list_for_each(seat, &wl->seat_list, link) {
+        if (seat->has_keyboard_input) {
+            has_keyboard_input = true;
+        }
+    }
+
+    if ((!wl->focused && wl->activated && has_keyboard_input) ||
         (wl->focused && !wl->activated))
      {
          wl->focused = !wl->focused;
@@ -1835,6 +1904,35 @@ static void remove_output(struct vo_wayland_output *out)
     return;
 }
 
+static void remove_seat(struct vo_wayland_seat *seat)
+{
+    if (!seat)
+        return;
+
+    MP_VERBOSE(seat->wl, "Deregistering seat 0x%x\n", seat->id);
+    wl_list_remove(&seat->link);
+    if (seat->keyboard)
+        wl_keyboard_destroy(seat->keyboard);
+    if (seat->pointer)
+        wl_pointer_destroy(seat->pointer);
+    if (seat->touch)
+        wl_touch_destroy(seat->touch);
+    if (seat->dnd_ddev)
+        wl_data_device_destroy(seat->dnd_ddev);
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (seat->cursor_shape_device)
+        wp_cursor_shape_device_v1_destroy(seat->cursor_shape_device);
+#endif
+    if (seat->xkb_keymap)
+        xkb_keymap_unref(seat->xkb_keymap);
+    if (seat->xkb_state)
+        xkb_state_unref(seat->xkb_state);
+
+    wl_seat_destroy(seat->seat);
+    talloc_free(seat);
+    return;
+}
+
 static void set_content_type(struct vo_wayland_state *wl)
 {
     if (!wl->content_type_manager)
@@ -1849,20 +1947,23 @@ static void set_content_type(struct vo_wayland_state *wl)
 #endif
 }
 
-static void set_cursor_shape(struct vo_wayland_state *wl)
+static void set_cursor_shape(struct vo_wayland_seat *s)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    wp_cursor_shape_device_v1_set_shape(wl->cursor_shape_device, wl->pointer_id,
+    wp_cursor_shape_device_v1_set_shape(s->cursor_shape_device, s->pointer_serial,
                                         WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
 #endif
 }
 
-static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
+static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
 {
+    if (!s)
+        return VO_FALSE;
+    struct vo_wayland_state *wl = s->wl;
     wl->cursor_visible = on;
     if (on) {
-        if (wl->cursor_shape_device) {
-            set_cursor_shape(wl);
+        if (s->cursor_shape_device) {
+            set_cursor_shape(s);
         } else {
             if (spawn_cursor(wl))
                 return VO_FALSE;
@@ -1871,7 +1972,7 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
             if (!buffer)
                 return VO_FALSE;
             int scale = MPMAX(wl->scaling, 1);
-            wl_pointer_set_cursor(wl->pointer, wl->pointer_id, wl->cursor_surface,
+            wl_pointer_set_cursor(s->pointer, s->pointer_serial, wl->cursor_surface,
                                   img->hotspot_x / scale, img->hotspot_y / scale);
             wl_surface_set_buffer_scale(wl->cursor_surface, scale);
             wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
@@ -1879,8 +1980,29 @@ static int set_cursor_visibility(struct vo_wayland_state *wl, bool on)
         }
         wl_surface_commit(wl->cursor_surface);
     } else {
-        wl_pointer_set_cursor(wl->pointer, wl->pointer_id, NULL, 0, 0);
+        wl_pointer_set_cursor(s->pointer, s->pointer_serial, NULL, 0, 0);
     }
+    return VO_TRUE;
+}
+
+static int set_cursor_visibility_all_seats(struct vo_wayland_state *wl, bool on)
+{
+    bool unavailable = true;
+    bool failed = false;
+    struct vo_wayland_seat *seat;
+    wl_list_for_each(seat, &wl->seat_list, link) {
+        if (seat->pointer) {
+            unavailable = false;
+            if (set_cursor_visibility(seat, on) == VO_FALSE)
+                failed = true;
+        }
+    }
+
+    if (unavailable)
+        return VO_NOTAVAIL;
+    if (failed)
+        return VO_FALSE;
+
     return VO_TRUE;
 }
 
@@ -1968,11 +2090,9 @@ static void set_window_bounds(struct vo_wayland_state *wl)
 
 static int spawn_cursor(struct vo_wayland_state *wl)
 {
-    /* Don't use this if we have cursor-shape. */
-    if (wl->cursor_shape_device)
+    if (wl->cursor_shape_manager)
         return 0;
-    /* Reuse if size is identical */
-    if (!wl->pointer || wl->allocated_cursor_scale == wl->scaling)
+    if (wl->allocated_cursor_scale == wl->scaling)
         return 0;
     else if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
@@ -2010,8 +2130,6 @@ static int spawn_cursor(struct vo_wayland_state *wl)
 
 static void toggle_fullscreen(struct vo_wayland_state *wl)
 {
-    if (!wl->xdg_toplevel)
-        return;
     wl->state_change = true;
     bool specific_screen = wl->vo_opts->fsscreen_id >= 0 || wl->vo_opts->fsscreen_name;
     if (wl->vo_opts->fullscreen && !specific_screen) {
@@ -2026,8 +2144,6 @@ static void toggle_fullscreen(struct vo_wayland_state *wl)
 
 static void toggle_maximized(struct vo_wayland_state *wl)
 {
-    if (!wl->xdg_toplevel)
-        return;
     wl->state_change = true;
     if (wl->vo_opts->window_maximized) {
         xdg_toplevel_set_maximized(wl->xdg_toplevel);
@@ -2038,27 +2154,17 @@ static void toggle_maximized(struct vo_wayland_state *wl)
 
 static void update_app_id(struct vo_wayland_state *wl)
 {
-    if (!wl->xdg_toplevel)
-        return;
     xdg_toplevel_set_app_id(wl->xdg_toplevel, wl->vo_opts->appid);
 }
 
 static int update_window_title(struct vo_wayland_state *wl, const char *title)
 {
-    if (!wl->xdg_toplevel)
-        return VO_NOTAVAIL;
     /* The xdg-shell protocol requires that the title is UTF-8. */
     void *tmp = talloc_new(NULL);
     struct bstr b_title = bstr_sanitize_utf8_latin1(tmp, bstr0(title));
     xdg_toplevel_set_title(wl->xdg_toplevel, bstrto0(tmp, b_title));
     talloc_free(tmp);
     return VO_TRUE;
-}
-
-static void window_move(struct vo_wayland_state *wl, uint32_t serial)
-{
-    if (wl->xdg_toplevel)
-        xdg_toplevel_move(wl->xdg_toplevel, wl->seat, serial);
 }
 
 static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int64_t timeout_ns)
@@ -2270,9 +2376,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         return update_window_title(wl, (const char *)arg);
     case VOCTRL_SET_CURSOR_VISIBILITY:
-        if (!wl->pointer)
-            return VO_NOTAVAIL;
-        return set_cursor_visibility(wl, *(bool *)arg);
+        return set_cursor_visibility_all_seats(wl, *(bool *)arg);
     case VOCTRL_KILL_SCREENSAVER:
         return set_screensaver_inhibitor(wl, true);
     case VOCTRL_RESTORE_SCREENSAVER:
@@ -2312,6 +2416,7 @@ bool vo_wayland_init(struct vo *vo)
     bool using_dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
 
     wl_list_init(&wl->output_list);
+    wl_list_init(&wl->seat_list);
 
     if (!wl->display)
         goto err;
@@ -2385,10 +2490,7 @@ bool vo_wayland_init(struct vo *vo)
     }
 #endif
 
-    if (wl->dnd_devman && wl->seat) {
-        wl->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, wl->seat);
-        wl_data_device_add_listener(wl->dnd_ddev, &data_device_listener, wl);
-    } else if (!wl->dnd_devman) {
+    if (!wl->dnd_devman) {
         MP_VERBOSE(wl, "Compositor doesn't support the %s (ver. 3) protocol!\n",
                    wl_data_device_manager_interface.name);
     }
@@ -2518,9 +2620,6 @@ void vo_wayland_uninit(struct vo *vo)
         wl_subcompositor_destroy(wl->subcompositor);
 
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    if (wl->cursor_shape_device)
-        wp_cursor_shape_device_v1_destroy(wl->cursor_shape_device);
-
     if (wl->cursor_shape_manager)
         wp_cursor_shape_manager_v1_destroy(wl->cursor_shape_manager);
 #endif
@@ -2538,9 +2637,6 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->content_type_manager)
         wp_content_type_manager_v1_destroy(wl->content_type_manager);
 #endif
-
-    if (wl->dnd_ddev)
-        wl_data_device_destroy(wl->dnd_ddev);
 
     if (wl->dnd_devman)
         wl_data_device_manager_destroy(wl->dnd_devman);
@@ -2568,12 +2664,6 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->idle_inhibit_manager)
         zwp_idle_inhibit_manager_v1_destroy(wl->idle_inhibit_manager);
 
-    if (wl->keyboard)
-        wl_keyboard_destroy(wl->keyboard);
-
-    if (wl->pointer)
-        wl_pointer_destroy(wl->pointer);
-
     if (wl->presentation)
         wp_presentation_destroy(wl->presentation);
 
@@ -2597,9 +2687,6 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->dmabuf_feedback)
         zwp_linux_dmabuf_feedback_v1_destroy(wl->dmabuf_feedback);
-
-    if (wl->seat)
-        wl_seat_destroy(wl->seat);
 
     if (wl->shm)
         wl_shm_destroy(wl->shm);
@@ -2642,15 +2729,13 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->xkb_context)
         xkb_context_unref(wl->xkb_context);
 
-    if (wl->xkb_keymap)
-        xkb_keymap_unref(wl->xkb_keymap);
-
-    if (wl->xkb_state)
-        xkb_state_unref(wl->xkb_state);
-
-    struct vo_wayland_output *output, *tmp;
-    wl_list_for_each_safe(output, tmp, &wl->output_list, link)
+    struct vo_wayland_output *output, *output_tmp;
+    wl_list_for_each_safe(output, output_tmp, &wl->output_list, link)
         remove_output(output);
+
+    struct vo_wayland_seat *seat, *seat_tmp;
+    wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link)
+        remove_seat(seat);
 
     if (wl->display)
         wl_display_disconnect(wl->display);

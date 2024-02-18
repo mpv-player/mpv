@@ -419,6 +419,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     update_ab_loop_clip(mpctx);
 
     mpctx->current_seek = seek;
+    redraw_subs(mpctx);
 }
 
 // This combines consecutive seek requests.
@@ -665,6 +666,9 @@ static void handle_osd_redraw(struct MPContext *mpctx)
     if (!want_redraw)
         return;
     vo_redraw(mpctx->video_out);
+    // Even though we just redrew, it may need to be done again for certain
+    // cases of subtitles on an image.
+    redraw_subs(mpctx);
 }
 
 static void clear_underruns(struct MPContext *mpctx)

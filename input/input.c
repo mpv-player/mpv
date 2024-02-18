@@ -179,6 +179,7 @@ struct input_opts {
     bool vo_key_input;
     bool test;
     bool allow_win_drag;
+    bool preprocess_wheel;
 };
 
 const struct m_sub_options input_config = {
@@ -198,6 +199,7 @@ const struct m_sub_options input_config = {
         {"input-cursor", OPT_BOOL(enable_mouse_movements)},
         {"input-vo-keyboard", OPT_BOOL(vo_key_input)},
         {"input-media-keys", OPT_BOOL(use_media_keys)},
+        {"input-preprocess-wheel", OPT_BOOL(preprocess_wheel)},
 #if HAVE_SDL2_GAMEPAD
         {"input-gamepad", OPT_BOOL(use_gamepad)},
 #endif
@@ -217,6 +219,7 @@ const struct m_sub_options input_config = {
         .builtin_bindings = true,
         .vo_key_input = true,
         .allow_win_drag = true,
+        .preprocess_wheel = true,
     },
     .change_flags = UPDATE_INPUT,
 };
@@ -731,7 +734,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     if (!force_mouse && opts->doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
         return;
     int units = 1;
-    if (MP_KEY_IS_WHEEL(unmod) && !process_wheel(ictx, unmod, &scale, &units))
+    if (MP_KEY_IS_WHEEL(unmod) && opts->preprocess_wheel && !process_wheel(ictx, unmod, &scale, &units))
         return;
     interpret_key(ictx, code, scale, units);
     if (code & MP_KEY_STATE_DOWN) {

@@ -20,6 +20,7 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <limits.h>
 
 #include "demux/demux.h"
 #include "sd.h"
@@ -62,6 +63,7 @@ struct dec_sub {
     bool preload_attempted;
     double video_fps;
     double sub_speed;
+    bool sub_visible;
 
     struct mp_codec_params *codec;
     double start, end;
@@ -70,7 +72,9 @@ struct dec_sub {
     struct sd *sd;
 
     struct demux_packet *new_segment;
-    struct demux_packet *cached_pkts[2];
+    struct demux_packet **cached_pkts;
+    int cached_pkt_pos;
+    int num_cached_pkts;
 };
 
 static void update_subtitle_speed(struct dec_sub *sub)
@@ -117,6 +121,17 @@ static void wakeup_demux(void *ctx)
 {
     struct mp_dispatch_queue *q = ctx;
     mp_dispatch_interrupt(q);
+}
+
+static void sub_destroy_cached_pkts(struct dec_sub *sub)
+{
+    int index = 0;
+    while (index < sub->num_cached_pkts) {
+        TA_FREEP(&sub->cached_pkts[index]);
+        ++index;
+    }
+    sub->cached_pkt_pos = 0;
+    sub->num_cached_pkts = 0;
 }
 
 void sub_destroy(struct dec_sub *sub)
@@ -258,7 +273,7 @@ void sub_preload(struct dec_sub *sub)
         if (!pkt)
             break;
         sub->sd->driver->decode(sub->sd, pkt);
-        talloc_free(pkt);
+        MP_TARRAY_APPEND(sub, sub->cached_pkts, sub->num_cached_pkts, pkt);
     }
 
     demux_set_stream_wakeup_cb(sub->sh, NULL, NULL);
@@ -273,12 +288,51 @@ static bool is_new_segment(struct dec_sub *sub, struct demux_packet *p)
         (p->start != sub->start || p->end != sub->end || p->codec != sub->codec);
 }
 
-// Read packets from the demuxer stream passed to sub_create(). Return true if
-// enough packets were read, false if the player should wait until the demuxer
-// signals new packets available (and then should retry).
-bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
+static bool is_packet_visible(struct demux_packet *p, double video_pts)
 {
-    bool r = true;
+    return p && p->pts <= video_pts && (video_pts <= p->pts + p->sub_duration ||
+           p->sub_duration < 0);
+}
+
+static bool update_pkt_cache(struct dec_sub *sub, double video_pts)
+{
+    if (!sub->cached_pkts[sub->cached_pkt_pos])
+        return false;
+
+    struct demux_packet *pkt = sub->cached_pkts[sub->cached_pkt_pos];
+    struct demux_packet *next_pkt = sub->cached_pkt_pos + 1 < sub->num_cached_pkts ?
+                                    sub->cached_pkts[sub->cached_pkt_pos + 1] : NULL;
+    if (!pkt)
+        return false;
+
+    double pts = video_pts + sub->shared_opts->sub_delay[sub->order];
+    double next_pts = next_pkt ? next_pkt->pts : INT_MAX;
+    double end_pts = pkt->sub_duration >= 0 ? pkt->pts + pkt->sub_duration : INT_MAX;
+
+    if (next_pts < pts || end_pts < pts) {
+        if (sub->cached_pkt_pos + 1 < sub->num_cached_pkts) {
+            TA_FREEP(&sub->cached_pkts[sub->cached_pkt_pos]);
+            pkt = NULL;
+            sub->cached_pkt_pos++;
+        }
+        if (next_pts < pts)
+            return true;
+    }
+
+    if (pkt && pkt->animated)
+        return true;
+
+    return false;
+}
+
+// Read packets from the demuxer stream passed to sub_create(). Signals if
+// enough packets were read and if the subtitle state updated in anyway. If
+// packets_read is false, the player should wait until the demuxer signals new
+// packets and retry.
+void sub_read_packets(struct dec_sub *sub, double video_pts, bool force,
+                      bool *packets_read, bool *sub_updated)
+{
+    *packets_read = true;
     mp_mutex_lock(&sub->lock);
     video_pts = pts_to_subtitle(sub, video_pts);
     while (1) {
@@ -309,24 +363,16 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
         // happen for interleaved subtitle streams, which never return "wait"
         // when reading, unless min_pts is set.
         if (st <= 0) {
-            r = st < 0 || (sub->last_pkt_pts != MP_NOPTS_VALUE &&
-                           sub->last_pkt_pts > video_pts);
+            *packets_read = st < 0 || (sub->last_pkt_pts != MP_NOPTS_VALUE &&
+                                       sub->last_pkt_pts > video_pts);
             break;
         }
 
         if (sub->recorder_sink)
             mp_recorder_feed_packet(sub->recorder_sink, pkt);
 
-
-        // Update cached packets
-        if (sub->cached_pkts[0]) {
-            if (sub->cached_pkts[1])
-                talloc_free(sub->cached_pkts[1]);
-            sub->cached_pkts[1] = sub->cached_pkts[0];
-        }
-        sub->cached_pkts[0] = pkt;
-
         sub->last_pkt_pts = pkt->pts;
+        MP_TARRAY_APPEND(sub, sub->cached_pkts, sub->num_cached_pkts, pkt);
 
         if (is_new_segment(sub, pkt)) {
             sub->new_segment = demux_copy_packet(pkt);
@@ -338,19 +384,24 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force)
         if (!(sub->preload_attempted && sub->sd->preload_ok))
             sub->sd->driver->decode(sub->sd, pkt);
     }
+    if (sub->cached_pkts && sub->num_cached_pkts) {
+        bool visible = is_packet_visible(sub->cached_pkts[sub->cached_pkt_pos], video_pts);
+        *sub_updated = update_pkt_cache(sub, video_pts) || sub->sub_visible != visible;
+        sub->sub_visible = visible;
+    }
     mp_mutex_unlock(&sub->lock);
-    return r;
 }
 
-// Redecode both cached packets if needed.
+// Redecode all cached packets if needed.
 // Used with UPDATE_SUB_HARD and UPDATE_SUB_FILT.
 void sub_redecode_cached_packets(struct dec_sub *sub)
 {
     mp_mutex_lock(&sub->lock);
-    if (sub->cached_pkts[0])
-        sub->sd->driver->decode(sub->sd, sub->cached_pkts[0]);
-    if (sub->cached_pkts[1])
-        sub->sd->driver->decode(sub->sd, sub->cached_pkts[1]);
+    int index = sub->cached_pkt_pos;
+    while (index < sub->num_cached_pkts) {
+        sub->sd->driver->decode(sub->sd, sub->cached_pkts[index]);
+        ++index;
+    }
     mp_mutex_unlock(&sub->lock);
 }
 
@@ -425,8 +476,7 @@ void sub_reset(struct dec_sub *sub)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
-    TA_FREEP(&sub->cached_pkts[0]);
-    TA_FREEP(&sub->cached_pkts[1]);
+    sub_destroy_cached_pkts(sub);
     TA_FREEP(&sub->new_segment);
     mp_mutex_unlock(&sub->lock);
 }

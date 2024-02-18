@@ -209,7 +209,9 @@ class CocoaCB: Common {
         uninit()
         uninitCommon()
 
+        layer?.lockCglContext()
         libmpv.deinitRender()
+        layer?.unlockCglContext()
         libmpv.deinitMPV(destroy)
     }
 
