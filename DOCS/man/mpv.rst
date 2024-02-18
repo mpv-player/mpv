@@ -218,7 +218,7 @@ Alt+LEFT, Alt+RIGHT, Alt+UP, Alt+DOWN
     Move the video rectangle (panning).
 
 Alt++ and Alt+-
-    Combining ``Alt`` with the ``+`` or ``-`` keys changes video zoom.
+    Change video zoom.
 
 Alt+BACKSPACE
     Reset the pan/zoom settings.
@@ -281,7 +281,7 @@ PREVIOUS and NEXT
     Seek backward/forward 1 minute.
 
 ZOOMIN and ZOOMOUT
-    Changes video zoom.
+    Change video zoom.
 
 If you miss some older key bindings, look at ``etc/restore-old-bindings.conf``
 in the mpv git repository.
@@ -304,6 +304,8 @@ Wheel up/down
 Wheel left/right
     Seek forward/backward 10 seconds.
 
+Ctrl+Wheel up/down
+    Change video zoom.
 
 USAGE
 =====
