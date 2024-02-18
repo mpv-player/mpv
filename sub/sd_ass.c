@@ -55,11 +55,16 @@ struct sd_ass_priv {
     struct mp_image_params video_params;
     struct mp_image_params last_params;
     struct mp_osd_res osd;
-    int64_t *seen_packets;
+    struct seen_packet *seen_packets;
     int num_seen_packets;
     bool *packets_animated;
     int num_packets_animated;
     bool duration_unknown;
+};
+
+struct seen_packet {
+    int64_t pos;
+    double pts;
 };
 
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
@@ -366,9 +371,9 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
         talloc_free(pkt);
 }
 
-// Test if the packet with the given file position (used as unique ID) was
-// already consumed. Return false if the packet is new (and add it to the
-// internal list), and return true if it was already seen.
+// Test if the packet with the given file position and pts was already consumed.
+// Return false if the packet is new (and add it to the internal list), and
+// return true if it was already seen.
 static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *priv = sd->priv;
@@ -376,19 +381,21 @@ static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
     int b = priv->num_seen_packets;
     while (a < b) {
         int mid = a + (b - a) / 2;
-        int64_t val = priv->seen_packets[mid];
-        if (packet->pos == val) {
+        struct seen_packet *seen_packet = &priv->seen_packets[mid];
+        if (packet->pos == seen_packet->pos && packet->pts == seen_packet->pts) {
             packet->seen_pos = mid;
             return true;
         }
-        if (packet->pos > val) {
+        if (packet->pos > seen_packet->pos ||
+            (packet->pos == seen_packet->pos && packet->pts > seen_packet->pts)) {
             a = mid + 1;
         } else {
             b = mid;
         }
     }
     packet->seen_pos = a;
-    MP_TARRAY_INSERT_AT(priv, priv->seen_packets, priv->num_seen_packets, a, packet->pos);
+    MP_TARRAY_INSERT_AT(priv, priv->seen_packets, priv->num_seen_packets, a,
+                        (struct seen_packet){packet->pos, packet->pts});
     return false;
 }
 
