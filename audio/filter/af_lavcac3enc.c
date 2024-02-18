@@ -103,7 +103,15 @@ static bool reinit(struct mp_filter *f)
     if (!bit_rate && chmap.num < AC3_MAX_CHANNELS + 1)
         bit_rate = default_bit_rate[chmap.num];
 
-    avcodec_close(s->lavc_actx);
+    avcodec_free_context(&s->lavc_actx);
+    s->lavc_actx = avcodec_alloc_context3(s->lavc_acodec);
+    if (!s->lavc_actx) {
+        MP_ERR(f, "Audio LAVC, couldn't reallocate context!\n");
+        return false;
+    }
+
+    if (mp_set_avopts(f->log, s->lavc_actx, s->opts->avopts) < 0)
+        return false;
 
     // Put sample parameters
     s->lavc_actx->sample_fmt = af_to_avformat(format);
