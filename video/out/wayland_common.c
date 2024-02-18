@@ -242,6 +242,7 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
 
+    s->pointer_serial = serial;
     set_cursor_visibility(s, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
 }
