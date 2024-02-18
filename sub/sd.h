@@ -11,6 +11,7 @@
 #define SUB_GAP_KEEP 0.4
 // slight offset when sub seeking or sub stepping
 #define SUB_SEEK_OFFSET 0.01
+#define SUB_SEEK_WITHOUT_VIDEO_OFFSET 0.1
 
 struct sd {
     struct mpv_global *global;
