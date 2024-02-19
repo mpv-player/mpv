@@ -139,6 +139,7 @@ sources = files(
     'misc/language.c',
     'misc/natural_sort.c',
     'misc/node.c',
+    'misc/path_utils.c',
     'misc/random.c',
     'misc/rendezvous.c',
     'misc/thread_pool.c',

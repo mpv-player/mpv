@@ -17,6 +17,7 @@ test_utils_files = [
     'misc/dispatch.c',
     'misc/json.c',
     'misc/node.c',
+    'misc/path_utils.c',
     'misc/random.c',
     'misc/thread_tools.c',
     'options/m_config_core.c',
