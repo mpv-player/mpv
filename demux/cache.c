@@ -26,6 +26,7 @@
 #include "common/msg.h"
 #include "common/av_common.h"
 #include "demux.h"
+#include "misc/io_utils.h"
 #include "options/path.h"
 #include "options/m_config.h"
 #include "options/m_option.h"

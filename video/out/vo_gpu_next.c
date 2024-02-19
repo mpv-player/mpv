@@ -32,9 +32,9 @@
 
 #include "config.h"
 #include "common/common.h"
+#include "misc/io_utils.h"
 #include "options/m_config.h"
 #include "options/path.h"
-#include "osdep/io.h"
 #include "osdep/threads.h"
 #include "stream/stream.h"
 #include "video/fmt-conversion.h"
