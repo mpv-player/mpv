@@ -7,7 +7,7 @@
 // The following type values are defined:
 //  "home"          the native mpv-specific user config dir
 //  "old_home"      same as "home", but lesser priority (compatibility)
-//  "osxbundle"     OSX bundle resource path
+//  "osxbundle"     macOS bundle resource path
 //  "global"        the least priority, global config file location
 //  "desktop"       path to desktop contents
 //

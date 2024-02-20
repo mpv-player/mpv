@@ -4,7 +4,7 @@
 #include <sys/types.h>
 #include <semaphore.h>
 
-// OSX provides non-working empty stubs, so we emulate them.
+// macOS provides non-working empty stubs, so we emulate them.
 // This should be AS-safe, but cancellation issues were ignored.
 // sem_getvalue() is not provided.
 // sem_post() won't always correctly return an error on overflow.
