@@ -277,7 +277,7 @@ API changes
         - extend the "--start" option; a leading "+", which was previously
           insignificant is now significant
         - add "cache-free" and "cache-used" properties
-        - OSX: the "coreaudio" AO spdif code is split into a separate AO
+        - macOS: the "coreaudio" AO spdif code is split into a separate AO
  --- mpv 0.4.0 ---
  1.0    - the API is declared stable
 
