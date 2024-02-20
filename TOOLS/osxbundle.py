@@ -67,7 +67,7 @@ def main():
 
     version = bundle_version(src_path).rstrip()
 
-    print("Creating Mac OS X application bundle (version: %s)..." % version)
+    print("Creating macOS application bundle (version: %s)..." % version)
     print("> copying bundle skeleton")
     copy_bundle(binary_name, src_path)
     print("> copying binary")
