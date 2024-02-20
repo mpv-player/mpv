@@ -138,7 +138,7 @@ Miscellaneous
   the ``D`` key insert vf_bwdif if deinterlacing is not supported otherwise).
 * Improved support for .cue files.
 
-Mac OS X
+macOS
 ~~~~~~~~
 
 * Native OpenGL backend.
