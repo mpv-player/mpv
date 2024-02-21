@@ -2083,10 +2083,10 @@ static void update_render_options(struct vo *vo)
     pl_options pars = p->pars;
     const struct gl_video_opts *opts = p->opts_cache->opts;
     pars->params.antiringing_strength = opts->scaler[0].antiring;
-    pars->params.background_color[0] = opts->background.r / 255.0;
-    pars->params.background_color[1] = opts->background.g / 255.0;
-    pars->params.background_color[2] = opts->background.b / 255.0;
-    pars->params.background_transparency = 1.0 - opts->background.a / 255.0;
+    pars->params.background_color[0] = opts->background_color.r / 255.0;
+    pars->params.background_color[1] = opts->background_color.g / 255.0;
+    pars->params.background_color[2] = opts->background_color.b / 255.0;
+    pars->params.background_transparency = 1 - opts->background_color.a / 255.0;
     pars->params.skip_anti_aliasing = !opts->correct_downscaling;
     pars->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     pars->params.disable_fbos = opts->dumb_mode == 1;

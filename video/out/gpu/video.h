@@ -157,7 +157,7 @@ struct gl_video_opts {
     char *fbo_format;
     int alpha_mode;
     bool use_rectangle;
-    struct m_color background;
+    struct m_color background_color;
     bool interpolation;
     float interpolation_threshold;
     int blend_subs;
