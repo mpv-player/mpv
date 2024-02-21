@@ -165,6 +165,7 @@ static void update_lut(struct priv *p, struct user_lut *lut);
 
 struct gl_next_opts {
     bool delayed_peak;
+    int border_background;
     float corner_rounding;
     bool inter_preserve;
     struct user_lut lut;
@@ -186,6 +187,10 @@ const struct m_opt_choice_alternatives lut_types[] = {
 const struct m_sub_options gl_next_conf = {
     .opts = (const struct m_option[]) {
         {"allow-delayed-peak-detect", OPT_BOOL(delayed_peak)},
+        {"border-background", OPT_CHOICE(border_background,
+            {"none",  BACKGROUND_NONE},
+            {"color", BACKGROUND_COLOR},
+            {"tiles", BACKGROUND_TILES})},
         {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
         {"interpolation-preserve", OPT_BOOL(inter_preserve)},
         {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
@@ -199,6 +204,7 @@ const struct m_sub_options gl_next_conf = {
         {0},
     },
     .defaults = &(struct gl_next_opts) {
+        .border_background = BACKGROUND_COLOR,
         .inter_preserve = true,
     },
     .size = sizeof(struct gl_next_opts),
@@ -1458,9 +1464,13 @@ static void update_ra_ctx_options(struct vo *vo)
 {
     struct priv *p = vo->priv;
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
+    bool border_alpha = (p->next_opts->border_background == BACKGROUND_COLOR &&
+                         gl_opts->background_color.a != 255) ||
+                         p->next_opts->border_background == BACKGROUND_NONE;
     p->ra_ctx->opts.want_alpha = (gl_opts->background == BACKGROUND_COLOR &&
                                   gl_opts->background_color.a != 255) ||
-                                  gl_opts->background == BACKGROUND_NONE;
+                                  gl_opts->background == BACKGROUND_NONE ||
+                                  border_alpha;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -2100,6 +2110,7 @@ static void update_render_options(struct vo *vo)
         { BACKGROUND_TILES, PL_CLEAR_TILES },
     };
     pars->params.background = map_background_types[opts->background][1];
+    pars->params.border = map_background_types[p->next_opts->border_background][1];
 #else
     pars->params.blend_against_tiles = opts->background == BACKGROUND_TILES;
 #endif

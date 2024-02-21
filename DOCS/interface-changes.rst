@@ -60,6 +60,7 @@ Interface changes
     - rename `--background` to `--background-color`
     - remove `--alpha` and reintroduce `--background` option for better control
       over blending alpha components into specific background types
+    - add `--border-background` option
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.
