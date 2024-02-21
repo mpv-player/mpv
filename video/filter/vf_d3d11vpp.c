@@ -46,6 +46,7 @@ struct opts {
     bool deint_enabled;
     bool interlaced_only;
     int mode;
+    int field_parity;
 };
 
 struct priv {
@@ -469,6 +470,7 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
         (p->opts->deint_enabled ? MP_MODE_DEINT : 0) |
         MP_MODE_OUTPUT_FIELDS |
         (p->opts->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
+    mp_refqueue_set_parity(p->queue, p->opts->field_parity);
 
     return f;
 
@@ -488,6 +490,10 @@ static const m_option_t vf_opts_fields[] = {
         {"mocomp", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_MOTION_COMPENSATION},
         {"ivctc", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE},
         {"none", 0})},
+    {"parity", OPT_CHOICE(field_parity,
+        {"tff", MP_FIELD_PARITY_TFF},
+        {"bff", MP_FIELD_PARITY_BFF},
+        {"auto", MP_FIELD_PARITY_AUTO})},
     {0}
 };
 
@@ -499,6 +505,7 @@ const struct mp_user_filter_entry vf_d3d11vpp = {
         .priv_defaults = &(const OPT_BASE_STRUCT) {
             .deint_enabled = true,
             .mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB,
+            .field_parity = MP_FIELD_PARITY_AUTO,
         },
         .options = vf_opts_fields,
     },
