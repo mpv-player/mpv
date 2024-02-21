@@ -57,6 +57,7 @@ Interface changes
     - move the `options` argument of the `loadfile` command from the third
       parameter to the fourth (after `index`)
     - add `--drag-and-drop=insert-next` option
+    - rename `--background` to `--background-color`
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

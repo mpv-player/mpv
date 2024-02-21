@@ -313,7 +313,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .sigmoid_upscaling = true,
     .interpolation_threshold = 0.01,
     .alpha_mode = ALPHA_BLEND_TILES,
-    .background = {0, 0, 0, 255},
+    .background_color = {0, 0, 0, 255},
     .gamma = 1.0f,
     .tone_map = {
         .curve = TONE_MAPPING_AUTO,
@@ -453,7 +453,7 @@ const struct m_sub_options gl_video_conf = {
             {"blend", ALPHA_BLEND},
             {"blend-tiles", ALPHA_BLEND_TILES})},
         {"opengl-rectangle-textures", OPT_BOOL(use_rectangle)},
-        {"background", OPT_COLOR(background)},
+        {"background-color", OPT_COLOR(background_color)},
         {"interpolation", OPT_BOOL(interpolation)},
         {"interpolation-threshold", OPT_FLOAT(interpolation_threshold)},
         {"blend-subtitles", OPT_CHOICE(blend_subs,
@@ -3088,7 +3088,7 @@ static void pass_draw_to_screen(struct gl_video *p, const struct ra_fbo *fbo, in
             GLSL(color.a = 1.0;)
         } else if (p->opts.alpha_mode == ALPHA_BLEND) {
             // Blend into background color (usually black)
-            struct m_color c = p->opts.background;
+            struct m_color c = p->opts.background_color;
             GLSLF("vec4 background = vec4(%f, %f, %f, %f);\n",
                   c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
             GLSL(color.rgb += background.rgb * (1.0 - color.a);)
@@ -3864,7 +3864,7 @@ static void check_gl_features(struct gl_video *p)
             .fbo_format = p->opts.fbo_format,
             .alpha_mode = p->opts.alpha_mode,
             .use_rectangle = p->opts.use_rectangle,
-            .background = p->opts.background,
+            .background_color = p->opts.background_color,
             .dither_algo = p->opts.dither_algo,
             .dither_depth = p->opts.dither_depth,
             .dither_size = p->opts.dither_size,
@@ -4115,7 +4115,7 @@ static void reinit_from_options(struct gl_video *p)
     p->opts = *(struct gl_video_opts *)p->opts_cache->opts;
 
     if (!p->force_clear_color)
-        p->clear_color = p->opts.background;
+        p->clear_color = p->opts.background_color;
 
     check_gl_features(p);
     uninit_rendering(p);

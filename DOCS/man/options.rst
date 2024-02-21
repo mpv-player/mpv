@@ -6946,7 +6946,7 @@ them.
     any advantages over normal textures. Note that hardware decoding overrides
     this flag. Could be removed any time.
 
-``--background=<color>``
+``--background-color=<color>``
     Color used to draw parts of the mpv window not covered by video. See the
     ``--sub-color`` option for how colors are defined.
 
