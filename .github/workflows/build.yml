@@ -97,6 +97,11 @@ jobs:
         os:
           - "macos-12"
           - "macos-13"
+        include:
+          - os: "macos-12"
+            arch: "intel"
+          - os: "macos-13"
+            arch: "intel"
     steps:
       - uses: actions/checkout@v4
 
@@ -119,6 +124,11 @@ jobs:
           CXX: "${{ matrix.cxx }}"
           TRAVIS_OS_NAME: "${{ matrix.os }}"
 
+      - name: Create App Bundle
+        run: |
+          meson compile -C build macos-bundle
+          tar -czvf mpv.tar.gz -C build mpv.app
+
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
         run: |
@@ -133,6 +143,11 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mpv-${{ matrix.os }}-${{ matrix.arch }}
+          path: mpv.tar.gz
 
   linux:
     runs-on: "ubuntu-22.04"
