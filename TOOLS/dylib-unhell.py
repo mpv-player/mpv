@@ -43,7 +43,7 @@ def otool(objfile, rapths):
 def get_rapths(objfile):
     rpaths = []
     command = "otool -l '%s' | grep -A2 LC_RPATH | grep path" % objfile
-    pathRe = re.compile("^\s*path (.*) \(offset \d*\)$")
+    pathRe = re.compile(r"^\s*path (.*) \(offset \d*\)$")
 
     try:
         result = subprocess.check_output(command, shell = True, universal_newlines=True)
@@ -56,9 +56,9 @@ def get_rapths(objfile):
     return rpaths
 
 def get_rpaths_dev_tools(binary):
-    command = "otool -l '%s' | grep -A2 LC_RPATH | grep path | grep \"Xcode\|CommandLineTools\"" % binary
+    command = "otool -l '%s' | grep -A2 LC_RPATH | grep path | grep \"Xcode\\|CommandLineTools\"" % binary
     result  = subprocess.check_output(command, shell = True, universal_newlines=True)
-    pathRe = re.compile("^\s*path (.*) \(offset \d*\)$")
+    pathRe = re.compile(r"^\s*path (.*) \(offset \d*\)$")
     output = []
 
     for line in result.splitlines():
