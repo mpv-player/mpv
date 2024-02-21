@@ -6,7 +6,6 @@ import sys
 import shutil
 import subprocess
 import json
-from distutils.dir_util import copy_tree
 from functools import partial
 
 sys_re = re.compile("^/System")
