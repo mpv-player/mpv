@@ -24,11 +24,11 @@ def target_binary(binary_name):
     return os.path.join(target_directory(binary_name),
                         os.path.basename(binary_name))
 
-def copy_bundle(binary_name):
+def copy_bundle(binary_name, src_path):
     if os.path.isdir(bundle_path(binary_name)):
         shutil.rmtree(bundle_path(binary_name))
     shutil.copytree(
-        os.path.join('TOOLS', 'osxbundle', bundle_name(binary_name)),
+        os.path.join(src_path, 'TOOLS', 'osxbundle', bundle_name(binary_name)),
         bundle_path(binary_name))
 
 def copy_binary(binary_name):
@@ -41,18 +41,16 @@ def apply_plist_template(plist_file, version):
 def sign_bundle(binary_name):
     sh('codesign --force --deep -s - ' + bundle_path(binary_name))
 
-def bundle_version():
-    if os.path.exists('VERSION'):
-        x = open('VERSION')
+def bundle_version(src_path):
+    version = 'UNKNOWN'
+    version_path = os.path.join(src_path, 'VERSION')
+    if os.path.exists(version_path):
+        x = open(version_path)
         version = x.read()
         x.close()
-    else:
-        version = sh("./version.sh").strip()
     return version
 
 def main():
-    version = bundle_version().rstrip()
-
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
     parser.add_option("-s", "--skip-deps", action="store_false", dest="deps",
@@ -61,14 +59,17 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    if len(args) != 1:
+    if len(args) < 1 or len(args) > 2:
         parser.error("incorrect number of arguments")
     else:
         binary_name = args[0]
+        src_path = args[1] if len(args) > 1 else "."
+
+    version = bundle_version(src_path).rstrip()
 
     print("Creating Mac OS X application bundle (version: %s)..." % version)
     print("> copying bundle skeleton")
-    copy_bundle(binary_name)
+    copy_bundle(binary_name, src_path)
     print("> copying binary")
     copy_binary(binary_name)
     print("> generating Info.plist")
@@ -76,7 +77,7 @@ def main():
 
     if options.deps:
         print("> bundling dependencies")
-        print(sh(" ".join(["TOOLS/dylib-unhell.py", target_binary(binary_name)])))
+        print(sh(" ".join([os.path.join(src_path, "TOOLS/dylib-unhell.py"), target_binary(binary_name)])))
 
     print("> signing bundle with ad-hoc pseudo identity")
     sign_bundle(binary_name)

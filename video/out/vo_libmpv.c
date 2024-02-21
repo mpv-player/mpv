@@ -705,6 +705,11 @@ static void uninit(struct vo *vo)
 
 static int preinit(struct vo *vo)
 {
+#if !HAVE_MACOS_COCOA_CB
+    if (vo->probing)
+        return -1;
+#endif
+
     struct vo_priv *p = vo->priv;
 
     struct mpv_render_context *ctx =
