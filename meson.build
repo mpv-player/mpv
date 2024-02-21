@@ -1754,6 +1754,14 @@ if get_option('cplayer')
         executable('mpv', wrapper_sources, c_args: '-municode', link_args: '-municode',
                    name_suffix: 'com', install: true)
     endif
+
+    if darwin
+        osxbundle = find_program(join_paths(tools_directory, 'osxbundle.py'), required: true)
+        custom_target('macos-bundle',
+            output: 'mpv.app',
+            command: [osxbundle, mpv.full_path(), '@SOURCE_ROOT@'],
+        )
+    endif
 endif
 
 if get_option('tests')
