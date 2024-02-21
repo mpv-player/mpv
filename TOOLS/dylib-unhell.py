@@ -50,7 +50,12 @@ def get_rapths(objfile):
         return rpaths
 
     for line in result.splitlines():
-        rpaths.append(pathRe.search(line).group(1).strip())
+        line_clean = pathRe.search(line).group(1).strip()
+        # resolve @loader_path
+        if line_clean.startswith('@loader_path/'):
+            line_clean = line_clean[len('@loader_path/'):]
+            line_clean = os.path.normpath(os.path.join(os.path.dirname(objfile), line_clean))
+        rpaths.append(line_clean)
 
     return rpaths
 
