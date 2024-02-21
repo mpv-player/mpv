@@ -83,7 +83,11 @@ void mp_map_dovi_metadata_to_pl(struct mp_image *mpi,
         if (header->disable_residual_flag) {
             // Only automatically map DoVi RPUs that don't require an EL
             struct pl_dovi_metadata *dovi = talloc_ptrtype(mpi, dovi);
+#if PL_API_VER >= 343
+            pl_map_avdovi_metadata(&frame->color, &frame->repr, dovi, metadata);
+#else
             pl_frame_map_avdovi_metadata(frame, dovi, metadata);
+#endif
         }
     }
 
