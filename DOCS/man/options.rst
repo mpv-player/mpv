@@ -6941,6 +6941,10 @@ them.
     Color used to draw parts of the mpv window not covered by video. See the
     ``--sub-color`` option for how colors are defined.
 
+``--border-background=<none|color|tiles>``
+    Same as ``--background`` but only applies to the black bar/border area of
+    the window. ``vo=gpu-next`` only. Defaults to ``color``.
+
 ``--opengl-rectangle-textures``
     Force use of rectangle textures (default: no). Normally this shouldn't have
     any advantages over normal textures. Note that hardware decoding overrides
