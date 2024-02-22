@@ -1669,12 +1669,6 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
         return M_PROPERTY_NOT_IMPLEMENTED;
 
     switch (action) {
-    case M_PROPERTY_SET: {
-        float vol = *(float *)arg;
-        if (ao_control(ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
-            return M_PROPERTY_UNAVAILABLE;
-        return M_PROPERTY_OK;
-    }
     case M_PROPERTY_GET: {
         if (ao_control(ao, AOCONTROL_GET_VOLUME, arg) != CONTROL_OK)
             return M_PROPERTY_UNAVAILABLE;
@@ -3915,7 +3909,7 @@ static const struct m_property mp_properties_base[] = {
     {"mixer-active", mp_property_mixer_active},
     {"volume", mp_property_volume},
     {"volume-gain", mp_property_volume_gain},
-    {"ao-volume", mp_property_ao_volume},
+    {"current-ao-volume", mp_property_ao_volume},
     {"ao-mute", mp_property_ao_mute},
     {"audio-delay", mp_property_audio_delay},
     {"audio-codec-name", mp_property_audio_codec_name},
@@ -4266,8 +4260,8 @@ static const struct property_osd_display {
     {"volume-gain", "Volume gain",
      .msg = "Volume gain: ${?volume-gain:${volume-gain} dB ${?mute==yes:(Muted)}}${!volume-gain:${volume-gain}}",
      .osd_progbar = OSD_VOLUME, .marker = 0},
-    {"ao-volume", "AO Volume",
-     .msg = "AO Volume: ${?ao-volume:${ao-volume}% ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
+    {"current-ao-volume", "AO Volume",
+     .msg = "AO Volume: ${?current-ao-volume:${current-ao-volume}% ${?ao-mute==yes:(Muted)}}${!current-ao-volume:${currene-ao-volume}}",
      .osd_progbar = OSD_VOLUME, .marker = 100},
     {"mute", "Mute"},
     {"ao-mute", "AO Mute"},
@@ -7173,6 +7167,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         }
         mp_wakeup_core(mpctx);
     }
+
+    if (opt_ptr == &opts->ao_volume)
+        audio_update_ao_volume(mpctx);
 
     if (flags & UPDATE_HWDEC) {
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
