@@ -236,8 +236,8 @@ def remove_dev_tools_rapths(binary):
     for path in get_rpaths_dev_tools(binary):
         install_name_tool_delete_rpath(path, binary)
 
-def main():
-    binary = os.path.abspath(sys.argv[1])
+def process(binary):
+    binary = os.path.abspath(binary)
     if not os.path.exists(lib_path(binary)):
         os.makedirs(lib_path(binary))
     print(">> gathering all linked libraries")
@@ -258,4 +258,4 @@ def main():
         process_vulkan_loader(binary, "VkLayer_khronos_synchronization2.json", "vulkan/explicit_layer.d", "layer")
 
 if __name__ == "__main__":
-    main()
+    process(sys.argv[1])
