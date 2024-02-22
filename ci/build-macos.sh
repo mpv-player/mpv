@@ -17,7 +17,8 @@ meson setup build \
     -D{c_args,objc_args}="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
     -D{libmpv,tests}=true \
     -D{gl,iconv,lcms2,lua,jpeg,plain-gl,zlib}=enabled \
-    -D{cocoa,coreaudio,gl-cocoa,macos-cocoa-cb,macos-touchbar,videotoolbox-gl}=enabled
+    -D{cocoa,coreaudio,gl-cocoa,videotoolbox-gl,videotoolbox-pl}=enabled \
+    -D{swift-build,macos-cocoa-cb,macos-media-player,macos-touchbar,vulkan}=enabled
 
 meson compile -C build -j4
 meson install -C build
