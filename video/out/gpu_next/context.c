@@ -113,7 +113,6 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
     ctx->log = vo->log;
 
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(ctx, vo->global, &ra_ctx_conf);
-    ctx_opts->want_alpha = gl_opts->alpha_mode == ALPHA_YES;
     ctx->ra_ctx = ra_ctx_create(vo, *ctx_opts);
     if (!ctx->ra_ctx)
         goto err_out;

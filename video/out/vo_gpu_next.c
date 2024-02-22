@@ -1454,6 +1454,13 @@ static inline void copy_frame_info_to_mp(struct frame_info *pl,
     }
 }
 
+static void update_ra_ctx_options(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct gl_video_opts *gl_opts = p->opts_cache->opts;
+    p->ra_ctx->opts.want_alpha = gl_opts->alpha_mode == ALPHA_YES;
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -1469,8 +1476,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
         m_config_cache_update(p->opts_cache);
-        const struct gl_video_opts *opts = p->opts_cache->opts;
-        p->ra_ctx->opts.want_alpha = opts->alpha_mode == ALPHA_YES;
+        update_ra_ctx_options(vo);
         if (p->ra_ctx->fns->update_render_opts)
             p->ra_ctx->fns->update_render_opts(p->ra_ctx);
         update_render_options(vo);
@@ -1803,6 +1809,7 @@ static int preinit(struct vo *vo)
         .global = p->global,
         .ra_ctx = p->ra_ctx,
     };
+    update_ra_ctx_options(vo);
 
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
