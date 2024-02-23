@@ -74,7 +74,7 @@ endif
 
 img_utils_objects = libmpv.extract_objects(img_utils_files)
 img_utils = static_library('img-utils', 'img_utils.c', include_directories: incdir,
-                           dependencies: [libavcodec], objects: img_utils_objects)
+                           dependencies: [libavcodec, libplacebo], objects: img_utils_objects)
 
 # The actual tests.
 chmap_files = [
@@ -92,7 +92,7 @@ test('chmap', chmap)
 gl_video_objects = libmpv.extract_objects('video/out/gpu/ra.c',
                                           'video/out/gpu/utils.c')
 gl_video = executable('gl-video', 'gl_video.c', objects: gl_video_objects,
-                      dependencies: [libavutil], include_directories: incdir,
+                      dependencies: [libavutil, libplacebo], include_directories: incdir,
                       link_with: [img_utils, test_utils])
 test('gl-video', gl_video)
 
