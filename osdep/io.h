@@ -116,6 +116,7 @@ DIR *mp_opendir(const char *path);
 struct dirent *mp_readdir(DIR *dir);
 int mp_closedir(DIR *dir);
 int mp_mkdir(const char *path, int mode);
+int mp_unlink(const char *path);
 char *mp_win32_getcwd(char *buf, size_t size);
 char *mp_getenv(const char *name);
 
@@ -183,6 +184,7 @@ void mp_globfree(mp_glob_t *pglob);
 #define readdir(...) mp_readdir(__VA_ARGS__)
 #define closedir(...) mp_closedir(__VA_ARGS__)
 #define mkdir(...) mp_mkdir(__VA_ARGS__)
+#define unlink(...) mp_unlink(__VA_ARGS__)
 #define getcwd(...) mp_win32_getcwd(__VA_ARGS__)
 #define getenv(...) mp_getenv(__VA_ARGS__)
 
