@@ -95,6 +95,9 @@ def check_vulkan_max_version(version):
     except:
         return False
 
+def get_homebrew_prefix():
+    return subprocess.check_output("brew --prefix", universal_newlines=True, shell=True).strip()
+
 def install_name_tool_change(old, new, objfile):
     subprocess.call(["install_name_tool", "-change", old, new, objfile], stderr=subprocess.DEVNULL)
 
@@ -184,6 +187,7 @@ def process_vulkan_loader(binary, loaderName, loaderRelativeFolder, libraryNode)
         os.path.join(os.path.expanduser("~"), ".local/share", loaderRelativeFolder),
         os.path.join("/usr/local/share", loaderRelativeFolder),
         os.path.join("/usr/share/vulkan", loaderRelativeFolder),
+        os.path.join(get_homebrew_prefix(), 'share', loaderRelativeFolder),
     ]
 
     loaderSystemFolder = ""
