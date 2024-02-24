@@ -122,6 +122,10 @@ struct vo_wayland_state {
     /* TODO: unvoid this if required wayland-protocols is bumped to 1.27+ */
     void *single_pixel_manager;
 
+    /* surface-invalidation */
+    struct wp_surface_invalidation_manager_v1 *surface_invalidation_manager;
+    struct wp_surface_invalidation_v1 *surface_invalidation;
+
     /* xdg-decoration */
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
     struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration;

@@ -489,6 +489,8 @@ struct vo {
 
     bool want_redraw;   // redraw as soon as possible
 
+    bool wants_reinit;  // VO wants to be reinitialized
+
     // current window state
     int dwidth;
     int dheight;

@@ -42,6 +42,7 @@
 #include "xdg-decoration-unstable-v1.h"
 #include "xdg-shell.h"
 #include "viewporter.h"
+#include "surface-invalidation-v1.h"
 
 #if HAVE_WAYLAND_PROTOCOLS_1_27
 #include "content-type-v1.h"
@@ -905,6 +906,21 @@ static const struct wl_output_listener output_listener = {
     output_handle_description,
 };
 
+static void surface_invalidation_handle_invalidated(void *data,
+                                                    struct wp_surface_invalidation_v1 *wp_surface_invalidation_v1,
+                                                    uint32_t serial)
+{
+	struct vo_wayland_state *wl = data;
+
+	wp_surface_invalidation_v1_ack(wp_surface_invalidation_v1, serial);
+    MP_WARN(wl, "Surface invalidated, attempting to reinitialize\n");
+    wl->vo->wants_reinit = true;
+}
+
+static struct wp_surface_invalidation_v1_listener surface_invalidation_listener = {
+	.invalidated = surface_invalidation_handle_invalidated,
+};
+
 static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
@@ -1496,6 +1512,12 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     if (!strcmp(interface, wl_shm_interface.name) && found++) {
         wl->shm = wl_registry_bind(reg, id, &wl_shm_interface, 1);
     }
+
+    if (!strcmp(interface, wp_surface_invalidation_manager_v1_interface.name) && found++) {
+        wl->surface_invalidation_manager = wl_registry_bind(reg, id, &wp_surface_invalidation_manager_v1_interface, 1);
+        wl->surface_invalidation = wp_surface_invalidation_manager_v1_get_surface_invalidation(wl->surface_invalidation_manager, wl->surface);
+        wp_surface_invalidation_v1_add_listener(wl->surface_invalidation, &surface_invalidation_listener, wl);
+	}
 
 #if HAVE_WAYLAND_PROTOCOLS_1_27
     if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++) {
@@ -2664,6 +2686,12 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->idle_inhibit_manager)
         zwp_idle_inhibit_manager_v1_destroy(wl->idle_inhibit_manager);
+
+    if (wl->surface_invalidation)
+        wp_surface_invalidation_v1_destroy(wl->surface_invalidation);
+
+    if (wl->surface_invalidation_manager)
+        wp_surface_invalidation_manager_v1_destroy(wl->surface_invalidation_manager);
 
     if (wl->presentation)
         wp_presentation_destroy(wl->presentation);
