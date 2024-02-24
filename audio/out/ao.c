@@ -612,7 +612,7 @@ void ao_set_gain(struct ao *ao, float gain)
 
 #define MUL_GAIN_f(d, num_samples, gain)                                        \
     for (int n = 0; n < (num_samples); n++)                                     \
-        (d)[n] = MPCLAMP(((d)[n]) * (gain), -1.0, 1.0)
+        (d)[n] = (d)[n] * (gain)
 
 static void process_plane(struct ao *ao, void *data, int num_samples)
 {
