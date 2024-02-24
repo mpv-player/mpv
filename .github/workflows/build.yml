@@ -186,10 +186,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Test in FreeBSD VM
-      uses: cross-platform-actions/action@v0.19.1
+      uses: cross-platform-actions/action@v0.23.0
       with:
         operating_system: freebsd
-        version: '13.2'
+        version: '14.0'
         run: |
             sudo pkg update
             sudo pkg install -y \

@@ -261,7 +261,7 @@ Interface changes
     - names starting with "." in ~/.mpv/scripts/ (or equivalent) are now ignored
     - js modules: ~~/scripts/modules.js/ is no longer used, global paths can be
       set with custom init (see docs), dir-scripts first look at <dir>/modules/
-    - the OSX bundle now logs to "~/Library/Logs/mpv.log" by default
+    - the macOS bundle now logs to "~/Library/Logs/mpv.log" by default
     - deprecate the --cache-secs option (once removed, the cache cannot be
       limited by time anymore)
     - remove deprecated legacy hook API ("hook-add", "hook-ack"). Use either the

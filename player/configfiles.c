@@ -251,6 +251,9 @@ static bool needs_config_quoting(const char *s)
 
 static void write_filename(struct MPContext *mpctx, FILE *file, char *filename)
 {
+    if (mpctx->opts->ignore_path_in_watch_later_config && !mp_is_url(bstr0(filename)))
+        filename = mp_basename(filename);
+
     if (mpctx->opts->write_filename_in_watch_later_config) {
         char write_name[1024] = {0};
         for (int n = 0; filename[n] && n < sizeof(write_name) - 1; n++)
@@ -280,7 +283,7 @@ static void write_redirect(struct MPContext *mpctx, char *path)
 
 static void write_redirects_for_parent_dirs(struct MPContext *mpctx, char *path)
 {
-    if (mp_is_url(bstr0(path)))
+    if (mp_is_url(bstr0(path)) || mpctx->opts->ignore_path_in_watch_later_config)
         return;
 
     // Write redirect entries for the file's parent directories to allow
@@ -403,7 +406,7 @@ void mp_delete_watch_later_conf(struct MPContext *mpctx, const char *file)
         talloc_free(fname);
     }
 
-    if (mp_is_url(bstr0(file)))
+    if (mp_is_url(bstr0(file)) || mpctx->opts->ignore_path_in_watch_later_config)
         return;
 
     void *ctx = talloc_new(NULL);

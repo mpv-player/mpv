@@ -5446,9 +5446,13 @@ static void cmd_sub_step_seek(void *p)
                     cmd->on_osd);
             } else {
                 // We can easily seek/step to the wrong subtitle line (because
-                // video frame PTS and sub PTS rarely match exactly). Add an
-                // arbitrary forward offset as a workaround.
-                a[0] += SUB_SEEK_OFFSET;
+                // video frame PTS and sub PTS rarely match exactly).
+                // sub/sd_ass.c adds SUB_SEEK_OFFSET as a workaround, and we
+                // need an even bigger offset without a video.
+                if (!mpctx->current_track[0][STREAM_VIDEO] ||
+                    mpctx->current_track[0][STREAM_VIDEO]->image) {
+                    a[0] += SUB_SEEK_WITHOUT_VIDEO_OFFSET - SUB_SEEK_OFFSET;
+                }
                 mark_seek(mpctx);
                 queue_seek(mpctx, MPSEEK_ABSOLUTE, a[0], MPSEEK_EXACT,
                            MPSEEK_FLAG_DELAY);
