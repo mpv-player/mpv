@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -259,7 +260,10 @@ error_exit:
     avcodec_free_context(&avctx);
     av_frame_free(&pic);
     av_packet_free(&pkt);
-    return !fclose(fp) && success;
+    success = success && !fclose(fp);
+    if (!success)
+        unlink(filename);
+    return success;
 }
 
 #if HAVE_JPEG
@@ -293,6 +297,7 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image,
     if (setjmp(cinfo.client_data)) {
         jpeg_destroy_compress(&cinfo);
         fclose(fp);
+        unlink(filename);
         return false;
     }
 
@@ -329,7 +334,10 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image,
 
     jpeg_destroy_compress(&cinfo);
 
-    return !fclose(fp);
+    if (!fclose(fp))
+        return true;
+    unlink(filename);
+    return false;
 }
 
 #endif
