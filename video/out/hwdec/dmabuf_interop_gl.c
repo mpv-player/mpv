@@ -55,12 +55,64 @@ struct vaapi_gl_mapper_priv {
     GLuint gl_textures[4];
     EGLImageKHR images[4];
 
+    const struct ra_format *planes[4];
+
     EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(EGLDisplay, EGLContext,
                                               EGLenum, EGLClientBuffer,
                                               const EGLint *);
     EGLBoolean (EGLAPIENTRY *DestroyImageKHR)(EGLDisplay, EGLImageKHR);
     void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
 };
+
+static bool gl_create_textures(struct ra_hwdec_mapper *mapper)
+{
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
+    struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
+
+    GL *gl = ra_gl_get(mapper->ra);
+    gl->GenTextures(4, p->gl_textures);
+    for (int n = 0; n < p_mapper->num_planes; n++) {
+        gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
+        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        gl->BindTexture(GL_TEXTURE_2D, 0);
+
+        struct ra_tex_params params = {
+            .dimensions = 2,
+            .w = mp_image_plane_w(&p_mapper->layout, n),
+            .h = mp_image_plane_h(&p_mapper->layout, n),
+            .d = 1,
+            .format = p->planes[n],
+            .render_src = true,
+            .src_linear = true,
+        };
+
+        if (params.format->ctype != RA_CTYPE_UNORM)
+            return false;
+
+        p_mapper->tex[n] = ra_create_wrapped_tex(mapper->ra, &params,
+                                                 p->gl_textures[n]);
+        if (!p_mapper->tex[n])
+            return false;
+    }
+
+    return true;
+}
+
+static void gl_delete_textures(const struct ra_hwdec_mapper *mapper)
+{
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
+    struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
+
+    GL *gl = ra_gl_get(mapper->ra);
+    gl->DeleteTextures(4, p->gl_textures);
+    for (int n = 0; n < 4; n++) {
+        p->gl_textures[n] = 0;
+        ra_tex_free(mapper->ra, &p_mapper->tex[n]);
+    }
+}
 
 static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
                                  const struct ra_imgfmt_desc *desc)
@@ -82,34 +134,12 @@ static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
         !p->EGLImageTargetTexture2DOES)
         return false;
 
-    GL *gl = ra_gl_get(mapper->ra);
-    gl->GenTextures(4, p->gl_textures);
+    // remember format to allow texture recreation
     for (int n = 0; n < desc->num_planes; n++) {
-        gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
-
-        struct ra_tex_params params = {
-            .dimensions = 2,
-            .w = mp_image_plane_w(&p_mapper->layout, n),
-            .h = mp_image_plane_h(&p_mapper->layout, n),
-            .d = 1,
-            .format = desc->planes[n],
-            .render_src = true,
-            .src_linear = true,
-        };
-
-        if (params.format->ctype != RA_CTYPE_UNORM)
-            return false;
-
-        p_mapper->tex[n] = ra_create_wrapped_tex(mapper->ra, &params,
-                                                 p->gl_textures[n]);
-        if (!p_mapper->tex[n])
-            return false;
+        p->planes[n] = desc->planes[n];
     }
+    if (!gl_create_textures(mapper))
+        return false;
 
     return true;
 }
@@ -120,12 +150,7 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     if (p) {
-        GL *gl = ra_gl_get(mapper->ra);
-        gl->DeleteTextures(4, p->gl_textures);
-        for (int n = 0; n < 4; n++) {
-            p->gl_textures[n] = 0;
-            ra_tex_free(mapper->ra, &p_mapper->tex[n]);
-        }
+        gl_delete_textures(mapper);
         talloc_free(p);
         p_mapper->interop_mapper_priv = NULL;
     }
