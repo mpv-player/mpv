@@ -56,12 +56,10 @@ struct hwmap_pairs {
 // We cannot discover which pairs of hardware formats need to use hwmap to
 // convert between the formats, so we need a lookup table.
 static const struct hwmap_pairs hwmap_pairs[] = {
-#if HAVE_VULKAN_INTEROP
     {
         .first_fmt = IMGFMT_VAAPI,
         .second_fmt = IMGFMT_VULKAN,
     },
-#endif
     {
         .first_fmt = IMGFMT_DRMPRIME,
         .second_fmt = IMGFMT_VAAPI,
