@@ -634,7 +634,7 @@ double playing_audio_pts(struct MPContext *mpctx)
     double pts = written_audio_pts(mpctx);
     if (pts == MP_NOPTS_VALUE || !mpctx->ao)
         return pts;
-    return pts - mpctx->audio_speed * ao_get_delay(mpctx->ao);
+    return pts - ao_get_delay(mpctx->ao);
 }
 
 // This garbage is needed for untimed AOs. These consume audio infinitely fast,
