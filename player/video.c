@@ -293,6 +293,18 @@ err_out:
     handle_force_window(mpctx, true);
 }
 
+void mp_force_video_reinit(struct MPContext *mpctx)
+{
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    uninit_video_out(mpctx);
+    handle_force_window(mpctx, true);
+    reinit_video_chain(mpctx);
+    if (track)
+        queue_seek(mpctx, MPSEEK_RELATIVE, 0.0, MPSEEK_EXACT, 0);
+
+    mp_wakeup_core(mpctx);
+}
+
 // Try to refresh the video by doing a precise seek to the currently displayed
 // frame. This can go wrong in all sorts of ways, so use sparingly.
 void mp_force_video_refresh(struct MPContext *mpctx)

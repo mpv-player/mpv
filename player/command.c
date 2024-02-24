@@ -7099,14 +7099,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (opt_ptr == &opts->vo->video_driver_list ||
         opt_ptr == &opts->ra_ctx_opts->context_name ||
         opt_ptr == &opts->ra_ctx_opts->context_type) {
-        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-        uninit_video_out(mpctx);
-        handle_force_window(mpctx, true);
-        reinit_video_chain(mpctx);
-        if (track)
-            queue_seek(mpctx, MPSEEK_RELATIVE, 0.0, MPSEEK_EXACT, 0);
-
-        mp_wakeup_core(mpctx);
+        mp_force_video_reinit(mpctx);
     }
 
     if (flags & UPDATE_AUDIO)
