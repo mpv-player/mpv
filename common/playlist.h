@@ -79,6 +79,8 @@ void playlist_entry_add_params(struct playlist_entry *e,
                                struct playlist_param *params,
                                int params_count);
 
+struct playlist_entry *playlist_entry_new_uninitialized(void);
+struct playlist_entry *playlist_entry_init_filename(struct playlist_entry *e, const char *filename);
 struct playlist_entry *playlist_entry_new(const char *filename);
 
 void playlist_add(struct playlist *pl, struct playlist_entry *add);
