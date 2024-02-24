@@ -97,11 +97,15 @@ jobs:
         os:
           - "macos-12"
           - "macos-13"
+          - "macos-14"
         include:
           - os: "macos-12"
             arch: "intel"
           - os: "macos-13"
             arch: "intel"
+          - os: "macos-14"
+            arch: "arm"
+            xcode: "Xcode_15.2"
     steps:
       - uses: actions/checkout@v4
 
@@ -109,6 +113,11 @@ jobs:
         run: |
           find /usr/local/bin -lname '*/Library/Frameworks/Python.framework/*' -delete -print
           brew unlink python && brew link --overwrite python
+
+      - name: Change Xcode version
+        if: ${{ matrix.xcode != '' }}
+        run: |
+          sudo xcode-select -s /Applications/${{ matrix.xcode }}.app
 
       - name: Install dependencies
         run: |
