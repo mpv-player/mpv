@@ -62,6 +62,8 @@ struct vaapi_gl_mapper_priv {
                                               const EGLint *);
     EGLBoolean (EGLAPIENTRY *DestroyImageKHR)(EGLDisplay, EGLImageKHR);
     void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
+    void (EGLAPIENTRY *EGLImageTargetTexStorageEXT)(GLenum, GLeglImageOES,
+                                                    const GLint *);
 };
 
 static bool gl_create_textures(struct ra_hwdec_mapper *mapper)
@@ -125,21 +127,31 @@ static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
         // EGL_KHR_image_base
         .CreateImageKHR = (void *)eglGetProcAddress("eglCreateImageKHR"),
         .DestroyImageKHR = (void *)eglGetProcAddress("eglDestroyImageKHR"),
-        // GL_OES_EGL_image
-        .EGLImageTargetTexture2DOES =
-            (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES"),
     };
+    if (ra_gl_get(mapper->ra)->es) {
+        // GL_OES_EGL_image
+        p->EGLImageTargetTexture2DOES =
+            (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES");
+    } else {
+        // GL_EXT_EGL_image_storage
+        p->EGLImageTargetTexStorageEXT =
+            (void *)eglGetProcAddress("glEGLImageTargetTexStorageEXT");
+    }
 
     if (!p->CreateImageKHR || !p->DestroyImageKHR ||
-        !p->EGLImageTargetTexture2DOES)
+        (!p->EGLImageTargetTexture2DOES && !p->EGLImageTargetTexStorageEXT)) {
         return false;
+    }
 
     // remember format to allow texture recreation
     for (int n = 0; n < desc->num_planes; n++) {
         p->planes[n] = desc->planes[n];
     }
-    if (!gl_create_textures(mapper))
-        return false;
+    if (p->EGLImageTargetTexture2DOES) {
+        // created only once
+        if (!gl_create_textures(mapper))
+            return false;
+    }
 
     return true;
 }
@@ -190,6 +202,11 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     GL *gl = ra_gl_get(mapper->ra);
+
+    if (p->EGLImageTargetTexStorageEXT) {
+        if (!gl_create_textures(mapper))
+            return false;
+    }
 
     for (int i = 0, n = 0; i < p_mapper->desc.nb_layers; i++) {
         /*
@@ -281,7 +298,11 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
             }
 
             gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-            p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+            if (p->EGLImageTargetTexStorageEXT) {
+                p->EGLImageTargetTexStorageEXT(GL_TEXTURE_2D, p->images[n], NULL);
+            } else {
+                p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+            }
 
             mapper->tex[n] = p_mapper->tex[n];
         }
@@ -296,12 +317,18 @@ static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
     struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
-    if (p) {
-        for (int n = 0; n < 4; n++) {
-            if (p->images[n])
-                p->DestroyImageKHR(eglGetCurrentDisplay(), p->images[n]);
-            p->images[n] = 0;
-        }
+    if (!p)
+        return;
+
+    if (p->EGLImageTargetTexStorageEXT) {
+        // textures are immutable, can't reuse
+        gl_delete_textures(mapper);
+    }
+
+    for (int n = 0; n < 4; n++) {
+        if (p->images[n])
+            p->DestroyImageKHR(eglGetCurrentDisplay(), p->images[n]);
+        p->images[n] = 0;
     }
 }
 
@@ -321,16 +348,18 @@ bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
         return false;
 
     GL *gl = ra_gl_get(hw->ra_ctx->ra);
+    const char *imageext = gl->es ? "GL_OES_EGL_image" : "GL_EXT_EGL_image_storage";
     if (!gl_check_extension(exts, "EGL_EXT_image_dma_buf_import") ||
         !gl_check_extension(exts, "EGL_KHR_image_base") ||
-        !gl_check_extension(gl->extensions, "GL_OES_EGL_image") ||
-        !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
+        !gl_check_extension(gl->extensions, imageext) ||
+        !(gl->mpgl_caps & MPGL_CAP_TEX_RG)) {
         return false;
+    }
 
     dmabuf_interop->use_modifiers =
         gl_check_extension(exts, "EGL_EXT_image_dma_buf_import_modifiers");
 
-    MP_VERBOSE(hw, "using EGL dmabuf interop\n");
+    MP_VERBOSE(hw, "Using EGL dmabuf interop via %s\n", imageext);
 
     dmabuf_interop->interop_init = vaapi_gl_mapper_init;
     dmabuf_interop->interop_uninit = vaapi_gl_mapper_uninit;
