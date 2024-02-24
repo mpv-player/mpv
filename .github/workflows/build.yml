@@ -205,6 +205,47 @@ jobs:
         run: |
           cat ./build/meson-logs/testlog.txt
 
+  openbsd:
+    runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
+    timeout-minutes: 30 # avoid any weirdness with the VM
+    steps:
+    - uses: actions/checkout@v4
+    - name: Test in OpenBSD VM
+      uses: cross-platform-actions/action@v0.23.0
+      with:
+        operating_system: openbsd
+        version: '7.4'
+        run: |
+            sudo pkg_add -U \
+                cmake \
+                ffmpeg \
+                git \
+                libarchive \
+                libbluray \
+                libcaca \
+                libcdio-paranoia \
+                libdvdnav \
+                libiconv \
+                libv4l \
+                libxkbcommon \
+                luajit \
+                meson \
+                openal \
+                pkgconf \
+                pulseaudio \
+                python3 \
+                rubberband \
+                sdl2 \
+                shaderc \
+                spirv-cross \
+                spirv-headers \
+                uchardet \
+                vulkan-loader \
+                vulkan-headers \
+                zimg
+            ./ci/build-openbsd.sh
+            meson test -C build
+
   freebsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 30 # avoid any weirdness with the VM
