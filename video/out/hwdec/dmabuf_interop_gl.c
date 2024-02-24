@@ -131,27 +131,31 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
     }
 }
 
-#define ADD_ATTRIB(name, value)                         \
-    do {                                                \
-    assert(num_attribs + 3 < MP_ARRAY_SIZE(attribs));   \
-    attribs[num_attribs++] = (name);                    \
-    attribs[num_attribs++] = (value);                   \
-    attribs[num_attribs] = EGL_NONE;                    \
+#define ADD_ATTRIB(name, value) \
+    do { \
+    assert(num_attribs + 3 < MP_ARRAY_SIZE(attribs)); \
+    attribs[num_attribs++] = (name); \
+    attribs[num_attribs++] = (value); \
+    attribs[num_attribs] = EGL_NONE; \
     } while(0)
 
-#define ADD_PLANE_ATTRIBS(plane) do { \
-            uint64_t drm_format_modifier = p_mapper->desc.objects[p_mapper->desc.layers[i].planes[j].object_index].format_modifier; \
-            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _FD_EXT, \
-                        p_mapper->desc.objects[p_mapper->desc.layers[i].planes[j].object_index].fd); \
-            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _OFFSET_EXT, \
-                        p_mapper->desc.layers[i].planes[j].offset); \
-            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
-                        p_mapper->desc.layers[i].planes[j].pitch); \
-            if (dmabuf_interop->use_modifiers && drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
-                ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_LO_EXT, drm_format_modifier & 0xfffffffful); \
-                ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_HI_EXT, drm_format_modifier >> 32); \
-            }                               \
-        } while (0)
+#define ADD_PLANE_ATTRIBS(nplane) \
+    do { \
+    const AVDRMPlaneDescriptor *plane = &p_mapper->desc.layers[i].planes[j]; \
+    const AVDRMObjectDescriptor *object = \
+        &p_mapper->desc.objects[plane->object_index]; \
+    ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _FD_EXT, object->fd); \
+    ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _OFFSET_EXT, plane->offset); \
+    ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _PITCH_EXT, plane->pitch); \
+    uint64_t drm_format_modifier = object->format_modifier; \
+    if (dmabuf_interop->use_modifiers && \
+        drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
+        ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _MODIFIER_LO_EXT, \
+            drm_format_modifier & 0xfffffffful); \
+        ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _MODIFIER_HI_EXT, \
+            drm_format_modifier >> 32); \
+    } \
+    } while (0)
 
 static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
                          struct dmabuf_interop *dmabuf_interop,
