@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import os, sys, json, subprocess, re
+from typing import Dict, Tuple, Callable, Optional
 
 def call(cmd) -> str:
 	sys.stdout.flush()
 	ret = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, text=True)
 	return ret.stdout
 
-lint_rules = {}
+lint_rules: Dict[str, Tuple[Callable, str]] = {}
 
 def lint_rule(description: str):
 	def f(func):
@@ -14,7 +15,7 @@ def lint_rule(description: str):
 		lint_rules[func.__name__] = (func, description)
 	return f
 
-def get_commit_range() -> str:
+def get_commit_range() -> Optional[str]:
 	if len(sys.argv) > 1:
 		return sys.argv[1]
 	# https://github.com/actions/runner/issues/342#issuecomment-590670059
@@ -28,6 +29,7 @@ def get_commit_range() -> str:
 		return event["before"] + "..." + event["after"]
 	elif event_name == "pull_request":
 		return event["pull_request"]["base"]["sha"] + ".." + event["pull_request"]["head"]["sha"]
+	return None
 
 def do_lint(commit_range: str) -> bool:
 	commits = call(["git", "log", "--pretty=format:%h %s", commit_range]).splitlines()
