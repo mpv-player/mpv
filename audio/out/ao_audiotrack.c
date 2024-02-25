@@ -57,9 +57,6 @@ struct priv {
     bool cfg_pcm_float;
     int cfg_session_id;
 
-    bool needs_timestamp_offset;
-    int64_t timestamp_offset;
-
     bool thread_terminate;
     bool thread_created;
     mp_thread thread;
@@ -407,11 +404,6 @@ static uint32_t AudioTrack_getPlaybackHeadPosition(struct ao *ao)
         int64_t time = MP_JNI_GET_LONG(p->timestamp, AudioTimestamp.nanoTime);
         if (time == 0)
             fpos = pos = 0;
-        if (p->needs_timestamp_offset) {
-            if (time != 0 && !p->timestamp_offset)
-                p->timestamp_offset = now - time;
-            time += p->timestamp_offset;
-        }
         if (fpos != 0 && time != 0 && state == AudioTrack.PLAYSTATE_PLAYING) {
             double diff = (double)(now - time) / 1e9;
             pos += diff * ao->samplerate;
@@ -816,7 +808,6 @@ static void stop(struct ao *ao)
     p->written_frames = 0;
     p->timestamp_fetched = 0;
     p->timestamp_set = false;
-    p->timestamp_offset = 0;
 }
 
 static void start(struct ao *ao)
