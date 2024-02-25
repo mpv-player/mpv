@@ -2861,7 +2861,7 @@ static void pass_dither(struct gl_video *p, const struct ra_fbo *fbo)
     gl_sc_uniform_texture(p->sc, "dither", p->dither_texture);
 
     GLSLF("vec2 dither_coord = vec2(gl_FragCoord.x, %d.0 + %f * gl_FragCoord.y);",
-          fbo->flip ? p->dst_rect.y1 : 0, fbo->flip ? -1.0 : 1.0);
+          fbo->flip ? fbo->tex->params.h : 0, fbo->flip ? -1.0 : 1.0);
     GLSLF("vec2 dither_pos = dither_coord * 1.0/%d.0;\n", dither_size);
 
     if (p->opts.temporal_dither) {
@@ -3081,7 +3081,7 @@ static void pass_draw_to_screen(struct gl_video *p, const struct ra_fbo *fbo, in
             // Draw checkerboard pattern to indicate transparency
             GLSLF("// transparency checkerboard\n");
             GLSLF("vec2 tile_coord = vec2(gl_FragCoord.x, %d.0 + %f * gl_FragCoord.y);",
-                  fbo->flip ? p->dst_rect.y1 : 0, fbo->flip ? -1.0 : 1.0);
+                  fbo->flip ? fbo->tex->params.h : 0, fbo->flip ? -1.0 : 1.0);
             GLSL(bvec2 tile = lessThan(fract(tile_coord * 1.0 / 32.0), vec2(0.5));)
             GLSL(vec3 background = vec3(tile.x == tile.y ? 0.93 : 0.87);)
             GLSL(color.rgb += background.rgb * (1.0 - color.a);)

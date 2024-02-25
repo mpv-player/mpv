@@ -3459,10 +3459,9 @@ Window
         - ``--monitoraspect=16:9`` or ``--monitoraspect=1.7777``
 
 ``--hidpi-window-scale``, ``--no-hidpi-window-scale``
-    (macOS, Windows, X11, and Wayland only)
-    Scale the window size according to the backing scale factor (default: yes).
-    On regular HiDPI resolutions the window opens with double the size but appears
-    as having the same size as on non-HiDPI resolutions.
+    Scale the window size according to the backing DPI scale factor from the OS
+    (default: no). For example, if the OS DPI scaling is set to 200%, mpv's window
+    size will be multiplied by 2.
 
 ``--native-fs``, ``--no-native-fs``
     (macOS only)

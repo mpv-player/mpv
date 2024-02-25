@@ -3,6 +3,7 @@ import os
 import shutil
 import sys
 import fileinput
+import dylib_unhell
 from optparse import OptionParser
 
 def sh(command):
@@ -77,7 +78,7 @@ def main():
 
     if options.deps:
         print("> bundling dependencies")
-        print(sh(" ".join([os.path.join(src_path, "TOOLS/dylib-unhell.py"), target_binary(binary_name)])))
+        dylib_unhell.process(target_binary(binary_name))
 
     print("> signing bundle with ad-hoc pseudo identity")
     sign_bundle(binary_name)

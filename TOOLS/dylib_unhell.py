@@ -6,7 +6,6 @@ import sys
 import shutil
 import subprocess
 import json
-from distutils.dir_util import copy_tree
 from functools import partial
 
 sys_re = re.compile("^/System")
@@ -43,7 +42,7 @@ def otool(objfile, rapths):
 def get_rapths(objfile):
     rpaths = []
     command = "otool -l '%s' | grep -A2 LC_RPATH | grep path" % objfile
-    pathRe = re.compile("^\s*path (.*) \(offset \d*\)$")
+    pathRe = re.compile(r"^\s*path (.*) \(offset \d*\)$")
 
     try:
         result = subprocess.check_output(command, shell = True, universal_newlines=True)
@@ -51,14 +50,19 @@ def get_rapths(objfile):
         return rpaths
 
     for line in result.splitlines():
-        rpaths.append(pathRe.search(line).group(1).strip())
+        line_clean = pathRe.search(line).group(1).strip()
+        # resolve @loader_path
+        if line_clean.startswith('@loader_path/'):
+            line_clean = line_clean[len('@loader_path/'):]
+            line_clean = os.path.normpath(os.path.join(os.path.dirname(objfile), line_clean))
+        rpaths.append(line_clean)
 
     return rpaths
 
 def get_rpaths_dev_tools(binary):
-    command = "otool -l '%s' | grep -A2 LC_RPATH | grep path | grep \"Xcode\|CommandLineTools\"" % binary
+    command = "otool -l '%s' | grep -A2 LC_RPATH | grep path | grep \"Xcode\\|CommandLineTools\"" % binary
     result  = subprocess.check_output(command, shell = True, universal_newlines=True)
-    pathRe = re.compile("^\s*path (.*) \(offset \d*\)$")
+    pathRe = re.compile(r"^\s*path (.*) \(offset \d*\)$")
     output = []
 
     for line in result.splitlines():
@@ -90,6 +94,9 @@ def check_vulkan_max_version(version):
         return True
     except:
         return False
+
+def get_homebrew_prefix():
+    return subprocess.check_output("brew --prefix", universal_newlines=True, shell=True).strip()
 
 def install_name_tool_change(old, new, objfile):
     subprocess.call(["install_name_tool", "-change", old, new, objfile], stderr=subprocess.DEVNULL)
@@ -180,6 +187,7 @@ def process_vulkan_loader(binary, loaderName, loaderRelativeFolder, libraryNode)
         os.path.join(os.path.expanduser("~"), ".local/share", loaderRelativeFolder),
         os.path.join("/usr/local/share", loaderRelativeFolder),
         os.path.join("/usr/share/vulkan", loaderRelativeFolder),
+        os.path.join(get_homebrew_prefix(), 'share', loaderRelativeFolder),
     ]
 
     loaderSystemFolder = ""
@@ -228,8 +236,8 @@ def remove_dev_tools_rapths(binary):
     for path in get_rpaths_dev_tools(binary):
         install_name_tool_delete_rpath(path, binary)
 
-def main():
-    binary = os.path.abspath(sys.argv[1])
+def process(binary):
+    binary = os.path.abspath(binary)
     if not os.path.exists(lib_path(binary)):
         os.makedirs(lib_path(binary))
     print(">> gathering all linked libraries")
@@ -250,4 +258,4 @@ def main():
         process_vulkan_loader(binary, "VkLayer_khronos_synchronization2.json", "vulkan/explicit_layer.d", "layer")
 
 if __name__ == "__main__":
-    main()
+    process(sys.argv[1])

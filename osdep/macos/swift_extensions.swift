@@ -22,7 +22,6 @@ extension NSDeviceDescriptionKey {
 }
 
 extension NSScreen {
-
     public var displayID: CGDirectDisplayID {
         get {
             return deviceDescription[.screenNumber] as? CGDirectDisplayID ?? 0
@@ -31,7 +30,6 @@ extension NSScreen {
 }
 
 extension NSColor {
-
     convenience init(hex: String) {
         let int = Int(hex.dropFirst(), radix: 16) ?? 0
         let alpha = CGFloat((int >> 24) & 0x000000FF)/255
@@ -44,14 +42,12 @@ extension NSColor {
 }
 
 extension Bool {
-
     init(_ int32: Int32) {
         self.init(int32 != 0)
     }
 }
 
 extension Int32 {
-
     init(_ bool: Bool) {
         self.init(bool ? 1 : 0)
     }

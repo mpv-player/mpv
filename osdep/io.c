@@ -621,6 +621,14 @@ int mp_mkdir(const char *path, int mode)
     return res;
 }
 
+int mp_unlink(const char *path)
+{
+    wchar_t *wpath = mp_from_utf8(NULL, path);
+    int res = _wunlink(wpath);
+    talloc_free(wpath);
+    return res;
+}
+
 char *mp_win32_getcwd(char *buf, size_t size)
 {
     if (size >= SIZE_MAX / 3 - 1) {

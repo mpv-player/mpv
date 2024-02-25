@@ -97,6 +97,15 @@ jobs:
         os:
           - "macos-12"
           - "macos-13"
+          - "macos-14"
+        include:
+          - os: "macos-12"
+            arch: "intel"
+          - os: "macos-13"
+            arch: "intel"
+          - os: "macos-14"
+            arch: "arm"
+            xcode: "Xcode_15.2"
     steps:
       - uses: actions/checkout@v4
 
@@ -105,10 +114,16 @@ jobs:
           find /usr/local/bin -lname '*/Library/Frameworks/Python.framework/*' -delete -print
           brew unlink python && brew link --overwrite python
 
+      - name: Change Xcode version
+        if: ${{ matrix.xcode != '' }}
+        run: |
+          sudo xcode-select -s /Applications/${{ matrix.xcode }}.app
+
       - name: Install dependencies
         run: |
           brew update
-          brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 luajit libass ffmpeg meson libplacebo
+          brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 \
+            luajit libass ffmpeg meson uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
 
       - name: Build with meson
         id: build
@@ -118,6 +133,11 @@ jobs:
           CC: "${{ matrix.cc }}"
           CXX: "${{ matrix.cxx }}"
           TRAVIS_OS_NAME: "${{ matrix.os }}"
+
+      - name: Create App Bundle
+        run: |
+          meson compile -C build macos-bundle
+          tar -czvf mpv.tar.gz -C build mpv.app
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -133,6 +153,11 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mpv-${{ matrix.os }}-${{ matrix.arch }}
+          path: mpv.tar.gz
 
   linux:
     runs-on: "ubuntu-22.04"
@@ -179,6 +204,47 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
+
+  openbsd:
+    runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
+    timeout-minutes: 30 # avoid any weirdness with the VM
+    steps:
+    - uses: actions/checkout@v4
+    - name: Test in OpenBSD VM
+      uses: cross-platform-actions/action@v0.23.0
+      with:
+        operating_system: openbsd
+        version: '7.4'
+        run: |
+            sudo pkg_add -U \
+                cmake \
+                ffmpeg \
+                git \
+                libarchive \
+                libbluray \
+                libcaca \
+                libcdio-paranoia \
+                libdvdnav \
+                libiconv \
+                libv4l \
+                libxkbcommon \
+                luajit \
+                meson \
+                openal \
+                pkgconf \
+                pulseaudio \
+                python3 \
+                rubberband \
+                sdl2 \
+                shaderc \
+                spirv-cross \
+                spirv-headers \
+                uchardet \
+                vulkan-loader \
+                vulkan-headers \
+                zimg
+            ./ci/build-openbsd.sh
+            meson test -C build
 
   freebsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
