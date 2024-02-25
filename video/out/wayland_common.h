@@ -67,9 +67,9 @@ struct vo_wayland_state {
 
     /* State */
     bool activated;
-    bool configured;
     bool focused;
     bool frame_wait;
+    bool geometry_configured;
     bool hidden;
     bool initial_size_hint;
     bool locked_size;
