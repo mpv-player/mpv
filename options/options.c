@@ -128,7 +128,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"autofit-larger", OPT_SIZE_BOX(autofit_larger)},
     {"autofit-smaller", OPT_SIZE_BOX(autofit_smaller)},
     {"auto-window-resize", OPT_BOOL(auto_window_resize)},
-    {"window-scale", OPT_DOUBLE(window_scale), M_RANGE(0.001, 100)},
+    {"window-scale", OPT_DOUBLE(window_scale), M_RANGE(0.001, 100), .force_update = true},
     {"window-minimized", OPT_BOOL(window_minimized)},
     {"window-maximized", OPT_BOOL(window_maximized)},
     {"focus-on-open", OPT_REMOVED("Replaced by --focus-on")},
