@@ -658,6 +658,10 @@ static int init(struct ao *ao)
 
     if (af_fmt_is_spdif(ao->format)) {
         p->format = AudioFormat.ENCODING_IEC61937;
+        if (!p->format || !AudioTrack.writeShortV23) {
+            MP_ERR(ao, "spdif passthrough not supported by API\n");
+            return -1;
+        }
     } else if (ao->format == AF_FORMAT_U8) {
         p->format = AudioFormat.ENCODING_PCM_8BIT;
     } else if (p->cfg_pcm_float && af_fmt_is_float(ao->format)) {
