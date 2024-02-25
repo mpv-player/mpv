@@ -81,7 +81,7 @@ jobs:
         env:
           WINEDEBUG: '+loaddll'
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: mpv-${{ matrix.target }}
           path: mpv-git-*.zip
