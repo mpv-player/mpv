@@ -30,7 +30,7 @@ struct mpv_handle;
 - (void)queueCommand:(char *)cmd;
 - (void)stopMPV:(char *)cmd;
 - (void)openFiles:(NSArray *)filenames;
-- (void)setMpvHandle:(struct mpv_handle *)ctx;
+- (void)initCocoaCb:(struct mpv_handle *)ctx;
 + (const struct m_sub_options *)getMacOSConf;
 + (const struct m_sub_options *)getVoSubConf;
 

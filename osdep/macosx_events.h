@@ -32,5 +32,6 @@ void cocoa_uninit_media_keys(void);
 
 void cocoa_set_input_context(struct input_ctx *input_context);
 void cocoa_set_mpv_handle(struct mpv_handle *ctx);
+void cocoa_init_cocoa_cb(void);
 
 #endif

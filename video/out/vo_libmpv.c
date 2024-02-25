@@ -27,6 +27,10 @@
 
 #include "libmpv.h"
 
+#if HAVE_MACOS_COCOA_CB
+#include "osdep/macosx_events.h"
+#endif
+
 /*
  * mpv_render_context is managed by the host application - the host application
  * can access it any time, even if the VO is destroyed (or not created yet).
@@ -705,7 +709,9 @@ static void uninit(struct vo *vo)
 
 static int preinit(struct vo *vo)
 {
-#if !HAVE_MACOS_COCOA_CB
+#if HAVE_MACOS_COCOA_CB
+    cocoa_init_cocoa_cb();
+#else
     if (vo->probing)
         return -1;
 #endif
