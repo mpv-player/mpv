@@ -1,0 +1,1 @@
+deprecate writing to `current-window-scale` (use `window-scale` instead)
