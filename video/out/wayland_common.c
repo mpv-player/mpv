@@ -1036,7 +1036,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         width = height = 0;
     }
 
-    if (!wl->configured) {
+    if (!wl->geometry_configured) {
         /* Save initial window size if the compositor gives us a hint here. */
         bool autofit_or_geometry = vo_opts->geometry.wh_valid || vo_opts->autofit.wh_valid ||
                                    vo_opts->autofit_larger.wh_valid || vo_opts->autofit_smaller.wh_valid;
@@ -2556,15 +2556,15 @@ bool vo_wayland_reconfig(struct vo *vo)
         wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
-    if (wl->vo_opts->auto_window_resize || !wl->configured)
+    if (wl->vo_opts->auto_window_resize || !wl->geometry_configured)
         set_geometry(wl, false);
 
     if (wl->opts->configure_bounds)
         set_window_bounds(wl);
 
-    if (!wl->configured || !wl->locked_size) {
+    if (!wl->geometry_configured || !wl->locked_size) {
         wl->geometry = wl->window_size;
-        wl->configured = true;
+        wl->geometry_configured = true;
     }
 
     if (wl->vo_opts->cursor_passthrough)
