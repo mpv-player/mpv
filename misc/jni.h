@@ -22,6 +22,7 @@
 #ifndef MP_JNI_H
 #define MP_JNI_H
 
+#include <stdbool.h>
 #include <jni.h>
 #include "common/msg.h"
 
@@ -128,11 +129,10 @@ enum MPJniFieldType {
 struct MPJniField {
 
     const char *name;
-    const char *method;
     const char *signature;
     enum MPJniFieldType type;
     int offset;
-    int mandatory;
+    bool mandatory;
 
 };
 
