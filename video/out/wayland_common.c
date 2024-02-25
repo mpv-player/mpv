@@ -870,7 +870,6 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
      * geometry and scaling should be recalculated. */
     if (wl->current_output && wl->current_output->output == wl_output) {
         set_surface_scaling(wl);
-        spawn_cursor(wl);
         set_geometry(wl, false);
         prepare_resize(wl, 0, 0);
     }
@@ -934,7 +933,6 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
 
     if (wl->scaling != wl->current_output->scale) {
         set_surface_scaling(wl);
-        spawn_cursor(wl);
         force_resize = true;
     }
 
@@ -1656,6 +1654,7 @@ static bool create_input(struct vo_wayland_state *wl)
 static int create_viewports(struct vo_wayland_state *wl)
 {
     wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
+    wl->cursor_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->cursor_surface);
     wl->osd_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->osd_surface);
     wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
 
@@ -1968,7 +1967,8 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
             int scale = MPMAX(wl->scaling, 1);
             wl_pointer_set_cursor(s->pointer, s->pointer_serial, wl->cursor_surface,
                                   img->hotspot_x / scale, img->hotspot_y / scale);
-            wl_surface_set_buffer_scale(wl->cursor_surface, scale);
+            wp_viewport_set_destination(wl->cursor_viewport, lround(img->width / scale),
+                                        img->height / scale);
             wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
             wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
         }
@@ -2085,12 +2085,11 @@ static void set_window_bounds(struct vo_wayland_state *wl)
 
 static int spawn_cursor(struct vo_wayland_state *wl)
 {
-    if (wl->cursor_shape_manager)
+    if (wl->allocated_cursor_scale == wl->scaling) {
         return 0;
-    if (wl->allocated_cursor_scale == wl->scaling)
-        return 0;
-    else if (wl->cursor_theme)
+    } else if (wl->cursor_theme) {
         wl_cursor_theme_destroy(wl->cursor_theme);
+    }
 
     const char *xcursor_theme = getenv("XCURSOR_THEME");
     const char *size_str = getenv("XCURSOR_SIZE");
@@ -2668,6 +2667,9 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->viewport)
         wp_viewport_destroy(wl->viewport);
+
+    if (wl->cursor_viewport)
+        wp_viewport_destroy(wl->cursor_viewport);
 
     if (wl->osd_viewport)
         wp_viewport_destroy(wl->osd_viewport);

@@ -133,6 +133,7 @@ struct vo_wayland_state {
     /* viewporter */
     struct wp_viewporter *viewporter;
     struct wp_viewport   *viewport;
+    struct wp_viewport   *cursor_viewport;
     struct wp_viewport   *osd_viewport;
     struct wp_viewport   *video_viewport;
 
