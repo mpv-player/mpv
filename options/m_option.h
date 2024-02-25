@@ -384,6 +384,9 @@ struct m_option {
     // See \ref OptionFlags.
     unsigned int flags;
 
+    // Always force an option update even if the written value does not change.
+    bool force_update;
+
     int offset;
 
     // Most numeric types restrict the range to [min, max] if min<max (this
