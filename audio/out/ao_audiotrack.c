@@ -276,8 +276,6 @@ const static struct {
 };
 #undef ENTRY
 
-#define MP_JNI_DELETELOCAL(o) (*env)->DeleteLocalRef(env, o)
-
 static int AudioTrack_New(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -291,24 +289,24 @@ static int AudioTrack_New(struct ao *ao)
         jobject format_builder = MP_JNI_NEW(AudioFormatBuilder.clazz, AudioFormatBuilder.ctor);
         MP_JNI_EXCEPTION_LOG(ao);
         tmp = MP_JNI_CALL_OBJECT(format_builder, AudioFormatBuilder.setEncoding, p->format);
-        MP_JNI_DELETELOCAL(tmp);
+        MP_JNI_LOCAL_FREEP(&tmp);
         tmp = MP_JNI_CALL_OBJECT(format_builder, AudioFormatBuilder.setSampleRate, p->samplerate);
-        MP_JNI_DELETELOCAL(tmp);
+        MP_JNI_LOCAL_FREEP(&tmp);
         tmp = MP_JNI_CALL_OBJECT(format_builder, AudioFormatBuilder.setChannelMask, p->channel_config);
-        MP_JNI_DELETELOCAL(tmp);
+        MP_JNI_LOCAL_FREEP(&tmp);
         jobject format = MP_JNI_CALL_OBJECT(format_builder, AudioFormatBuilder.build);
-        MP_JNI_DELETELOCAL(format_builder);
+        MP_JNI_LOCAL_FREEP(&format_builder);
 
         jobject attr_builder = MP_JNI_NEW(AudioAttributesBuilder.clazz, AudioAttributesBuilder.ctor);
         MP_JNI_EXCEPTION_LOG(ao);
         tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setUsage, AudioAttributes.USAGE_MEDIA);
-        MP_JNI_DELETELOCAL(tmp);
+        MP_JNI_LOCAL_FREEP(&tmp);
         jint content_type = (ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC) ?
             AudioAttributes.CONTENT_TYPE_MUSIC : AudioAttributes.CONTENT_TYPE_MOVIE;
         tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setContentType, content_type);
-        MP_JNI_DELETELOCAL(tmp);
+        MP_JNI_LOCAL_FREEP(&tmp);
         jobject attr = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.build);
-        MP_JNI_DELETELOCAL(attr_builder);
+        MP_JNI_LOCAL_FREEP(&attr_builder);
 
         audiotrack = MP_JNI_NEW(
             AudioTrack.clazz,
@@ -320,8 +318,8 @@ static int AudioTrack_New(struct ao *ao)
             p->cfg_session_id
         );
 
-        MP_JNI_DELETELOCAL(format);
-        MP_JNI_DELETELOCAL(attr);
+        MP_JNI_LOCAL_FREEP(&format);
+        MP_JNI_LOCAL_FREEP(&attr);
     } else {
         MP_VERBOSE(ao, "Using legacy initializer\n");
         audiotrack = MP_JNI_NEW(
@@ -344,7 +342,7 @@ static int AudioTrack_New(struct ao *ao)
     if (MP_JNI_CALL_INT(audiotrack, AudioTrack.getState) != AudioTrack.STATE_INITIALIZED) {
         MP_JNI_CALL_VOID(audiotrack, AudioTrack.release);
         MP_JNI_EXCEPTION_LOG(ao);
-        (*env)->DeleteLocalRef(env, audiotrack);
+        MP_JNI_LOCAL_FREEP(&audiotrack);
         MP_ERR(ao, "AudioTrack.getState failed\n");
         return -1;
     }
@@ -358,7 +356,7 @@ static int AudioTrack_New(struct ao *ao)
     }
 
     p->audiotrack = (*env)->NewGlobalRef(env, audiotrack);
-    (*env)->DeleteLocalRef(env, audiotrack);
+    MP_JNI_LOCAL_FREEP(&audiotrack);
     if (!p->audiotrack)
         return -1;
 
@@ -372,8 +370,7 @@ static int AudioTrack_Recreate(struct ao *ao)
 
     MP_JNI_CALL_VOID(p->audiotrack, AudioTrack.release);
     MP_JNI_EXCEPTION_LOG(ao);
-    (*env)->DeleteGlobalRef(env, p->audiotrack);
-    p->audiotrack = NULL;
+    MP_JNI_GLOBAL_FREEP(&p->audiotrack);
     return AudioTrack_New(ao);
 }
 
@@ -504,7 +501,7 @@ static int AudioTrack_write(struct ao *ao, int len)
         // reset positions for reading
         jobject bbuf = MP_JNI_CALL_OBJECT(p->bbuf, ByteBuffer.clear);
         if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
-        (*env)->DeleteLocalRef(env, bbuf);
+        MP_JNI_LOCAL_FREEP(&bbuf);
         ret = MP_JNI_CALL_INT(p->audiotrack, AudioTrack.writeBufferV21, p->bbuf, len, AudioTrack.WRITE_BLOCKING);
         if (MP_JNI_EXCEPTION_LOG(ao) < 0) return -1;
 
@@ -609,34 +606,18 @@ static void uninit(struct ao *ao)
     if (p->audiotrack) {
         MP_JNI_CALL_VOID(p->audiotrack, AudioTrack.release);
         MP_JNI_EXCEPTION_LOG(ao);
-        (*env)->DeleteGlobalRef(env, p->audiotrack);
-        p->audiotrack = NULL;
+        MP_JNI_GLOBAL_FREEP(&p->audiotrack);
     }
 
-    if (p->bytearray) {
-        (*env)->DeleteGlobalRef(env, p->bytearray);
-        p->bytearray = NULL;
-    }
+    MP_JNI_GLOBAL_FREEP(&p->bytearray);
 
-    if (p->shortarray) {
-        (*env)->DeleteGlobalRef(env, p->shortarray);
-        p->shortarray = NULL;
-    }
+    MP_JNI_GLOBAL_FREEP(&p->shortarray);
 
-    if (p->floatarray) {
-        (*env)->DeleteGlobalRef(env, p->floatarray);
-        p->floatarray = NULL;
-    }
+    MP_JNI_GLOBAL_FREEP(&p->floatarray);
 
-    if (p->bbuf) {
-        (*env)->DeleteGlobalRef(env, p->bbuf);
-        p->bbuf = NULL;
-    }
+    MP_JNI_GLOBAL_FREEP(&p->bbuf);
 
-    if (p->timestamp) {
-        (*env)->DeleteGlobalRef(env, p->timestamp);
-        p->timestamp = NULL;
-    }
+    MP_JNI_GLOBAL_FREEP(&p->timestamp);
 
     mp_cond_destroy(&p->wakeup);
     mp_mutex_destroy(&p->lock);
@@ -757,26 +738,26 @@ static int init(struct ao *ao)
         return -1;
     }
     p->timestamp = (*env)->NewGlobalRef(env, timestamp);
-    (*env)->DeleteLocalRef(env, timestamp);
+    MP_JNI_LOCAL_FREEP(&timestamp);
 
     // decide and create buffer of right type
     if (p->format == AudioFormat.ENCODING_IEC61937) {
         jshortArray shortarray = (*env)->NewShortArray(env, p->chunksize / 2);
         p->shortarray = (*env)->NewGlobalRef(env, shortarray);
-        (*env)->DeleteLocalRef(env, shortarray);
+        MP_JNI_LOCAL_FREEP(&shortarray);
     } else if (AudioTrack.writeBufferV21) {
         MP_VERBOSE(ao, "Using NIO ByteBuffer\n");
         jobject bbuf = (*env)->NewDirectByteBuffer(env, p->chunk, p->chunksize);
         p->bbuf = (*env)->NewGlobalRef(env, bbuf);
-        (*env)->DeleteLocalRef(env, bbuf);
+        MP_JNI_LOCAL_FREEP(&bbuf);
     } else if (p->format == AudioFormat.ENCODING_PCM_FLOAT) {
         jfloatArray floatarray = (*env)->NewFloatArray(env, p->chunksize / sizeof(float));
         p->floatarray = (*env)->NewGlobalRef(env, floatarray);
-        (*env)->DeleteLocalRef(env, floatarray);
+        MP_JNI_LOCAL_FREEP(&floatarray);
     } else {
         jbyteArray bytearray = (*env)->NewByteArray(env, p->chunksize);
         p->bytearray = (*env)->NewGlobalRef(env, bytearray);
-        (*env)->DeleteLocalRef(env, bytearray);
+        MP_JNI_LOCAL_FREEP(&bytearray);
     }
 
     /* create AudioTrack object */
