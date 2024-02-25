@@ -52,10 +52,10 @@ typedef void *EGLImageKHR;
 #define EGL_DMA_BUF_PLANE3_MODIFIER_HI_EXT 0x344A
 
 struct vaapi_gl_mapper_priv {
-    GLuint gl_textures[4];
-    EGLImageKHR images[4];
+    GLuint gl_textures[AV_DRM_MAX_PLANES];
+    EGLImageKHR images[AV_DRM_MAX_PLANES];
 
-    const struct ra_format *planes[4];
+    const struct ra_format *planes[AV_DRM_MAX_PLANES];
 
     EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(EGLDisplay, EGLContext,
                                               EGLenum, EGLClientBuffer,
@@ -72,7 +72,7 @@ static bool gl_create_textures(struct ra_hwdec_mapper *mapper)
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     GL *gl = ra_gl_get(mapper->ra);
-    gl->GenTextures(4, p->gl_textures);
+    gl->GenTextures(AV_DRM_MAX_PLANES, p->gl_textures);
     for (int n = 0; n < p_mapper->num_planes; n++) {
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -109,8 +109,8 @@ static void gl_delete_textures(const struct ra_hwdec_mapper *mapper)
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     GL *gl = ra_gl_get(mapper->ra);
-    gl->DeleteTextures(4, p->gl_textures);
-    for (int n = 0; n < 4; n++) {
+    gl->DeleteTextures(AV_DRM_MAX_PLANES, p->gl_textures);
+    for (int n = 0; n < AV_DRM_MAX_PLANES; n++) {
         p->gl_textures[n] = 0;
         ra_tex_free(mapper->ra, &p_mapper->tex[n]);
     }
@@ -142,6 +142,9 @@ static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
         (!p->EGLImageTargetTexture2DOES && !p->EGLImageTargetTexStorageEXT)) {
         return false;
     }
+
+    static_assert(MP_ARRAY_SIZE(desc->planes) == AV_DRM_MAX_PLANES, "");
+    static_assert(MP_ARRAY_SIZE(mapper->tex) == AV_DRM_MAX_PLANES, "");
 
     // remember format to allow texture recreation
     for (int n = 0; n < desc->num_planes; n++) {
@@ -325,7 +328,7 @@ static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
         gl_delete_textures(mapper);
     }
 
-    for (int n = 0; n < 4; n++) {
+    for (int n = 0; n < AV_DRM_MAX_PLANES; n++) {
         if (p->images[n])
             p->DestroyImageKHR(eglGetCurrentDisplay(), p->images[n]);
         p->images[n] = 0;
