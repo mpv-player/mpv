@@ -6611,7 +6611,7 @@ static void cmd_context_menu(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     struct vo *vo = mpctx->video_out;
-    
+
     if (vo)
         vo_control(vo, VOCTRL_SHOW_MENU, NULL);
 }

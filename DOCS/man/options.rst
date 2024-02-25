@@ -3388,7 +3388,10 @@ Window
 ``--window-scale=<factor>``
     Resize the video window to a multiple (or fraction) of the video size. This
     option is applied before ``--autofit`` and other options are applied (so
-    they override this option).
+    they override this option). Changing this option while the window is
+    maximized can unmaximize the window depending on the OS and window manager.
+    If the window does not unmaximize, the multiplier will be applied if the user
+    unmaximizes the window later.
 
     For example, ``--window-scale=0.5`` would show the window at half the
     video size.
