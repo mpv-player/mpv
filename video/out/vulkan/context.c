@@ -50,6 +50,11 @@ static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
         .pApplicationInfo = &(VkApplicationInfo) {
             .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
             .apiVersion = VK_API_VERSION_1_1,
+        },
+        .flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR,
+        .enabledExtensionCount = 1,
+        .ppEnabledExtensionNames = (const char*[]) {
+            VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME,
         }
     };
 
