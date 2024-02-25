@@ -52,6 +52,28 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
         }
     };
 
+#ifdef VK_KHR_portability_enumeration
+    uint32_t exts_count = 0;
+    vkEnumerateInstanceExtensionProperties(NULL, &exts_count, NULL);
+    VkExtensionProperties *exts = talloc_array_ptrtype(NULL, exts, exts_count);
+    res = vkEnumerateInstanceExtensionProperties(NULL, &exts_count, exts);
+
+    if (res == VK_SUCCESS) {
+        for (int n = 0; n < exts_count; n++) {
+            if (strcmp(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME, exts[n].extensionName) == 0) {
+                info.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+                info.enabledExtensionCount = 1;
+                info.ppEnabledExtensionNames = (const char*[]) {
+                    VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME,
+                };
+                break;
+            }
+        }
+    }
+
+    talloc_free(exts);
+#endif
+
     VkInstance inst;
     VkPhysicalDevice *devices = NULL;
     uint32_t num = 0;
