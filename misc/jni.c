@@ -280,7 +280,7 @@ int mp_jni_init_jfields(JNIEnv *env, void *jfields,
         switch (type) {
         case MP_JNI_FIELD: {
             jfieldID field_id = (*env)->GetFieldID(env, last_clazz,
-                jfields_mapping[i].method, jfields_mapping[i].signature);
+                jfields_mapping[i].name, jfields_mapping[i].signature);
             CHECK_EXC_MANDATORY();
 
             *(jfieldID*)jfield = field_id;
@@ -289,7 +289,7 @@ int mp_jni_init_jfields(JNIEnv *env, void *jfields,
         case MP_JNI_STATIC_FIELD_AS_INT:
         case MP_JNI_STATIC_FIELD: {
             jfieldID field_id = (*env)->GetStaticFieldID(env, last_clazz,
-                jfields_mapping[i].method, jfields_mapping[i].signature);
+                jfields_mapping[i].name, jfields_mapping[i].signature);
             CHECK_EXC_MANDATORY();
 
             if (type == MP_JNI_STATIC_FIELD_AS_INT) {
@@ -305,7 +305,7 @@ int mp_jni_init_jfields(JNIEnv *env, void *jfields,
         }
         case MP_JNI_METHOD: {
             jmethodID method_id = (*env)->GetMethodID(env, last_clazz,
-                jfields_mapping[i].method, jfields_mapping[i].signature);
+                jfields_mapping[i].name, jfields_mapping[i].signature);
             CHECK_EXC_MANDATORY();
 
             *(jmethodID*)jfield = method_id;
@@ -313,7 +313,7 @@ int mp_jni_init_jfields(JNIEnv *env, void *jfields,
         }
         case MP_JNI_STATIC_METHOD: {
             jmethodID method_id = (*env)->GetStaticMethodID(env, last_clazz,
-                jfields_mapping[i].method, jfields_mapping[i].signature);
+                jfields_mapping[i].name, jfields_mapping[i].signature);
             CHECK_EXC_MANDATORY();
 
             *(jmethodID*)jfield = method_id;

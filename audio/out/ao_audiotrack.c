@@ -70,8 +70,8 @@ static struct JNIByteBuffer {
 } ByteBuffer;
 #define OFFSET(member) offsetof(struct JNIByteBuffer, member)
 const static struct MPJniField ByteBuffer_mapping[] = {
-    {"java/nio/ByteBuffer", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
-    {"java/nio/ByteBuffer", "clear", "()Ljava/nio/Buffer;", MP_JNI_METHOD, OFFSET(clear), 1},
+    {"java/nio/ByteBuffer", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
+    {"clear", "()Ljava/nio/Buffer;", MP_JNI_METHOD, OFFSET(clear), 1},
     {0},
 };
 #undef OFFSET
@@ -110,36 +110,36 @@ static struct JNIAudioTrack {
 } AudioTrack;
 #define OFFSET(member) offsetof(struct JNIAudioTrack, member)
 const static struct MPJniField AudioTrack_mapping[] = {
-    {"android/media/AudioTrack", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
-    {"android/media/AudioTrack", "<init>", "(IIIIIII)V", MP_JNI_METHOD, OFFSET(ctor), 1},
-    {"android/media/AudioTrack", "<init>", "(Landroid/media/AudioAttributes;Landroid/media/AudioFormat;III)V", MP_JNI_METHOD, OFFSET(ctorV21), 0},
-    {"android/media/AudioTrack", "release", "()V", MP_JNI_METHOD, OFFSET(release), 1},
-    {"android/media/AudioTrack", "getState", "()I", MP_JNI_METHOD, OFFSET(getState), 1},
-    {"android/media/AudioTrack", "getPlayState", "()I", MP_JNI_METHOD, OFFSET(getPlayState), 1},
-    {"android/media/AudioTrack", "play", "()V", MP_JNI_METHOD, OFFSET(play), 1},
-    {"android/media/AudioTrack", "stop", "()V", MP_JNI_METHOD, OFFSET(stop), 1},
-    {"android/media/AudioTrack", "flush", "()V", MP_JNI_METHOD, OFFSET(flush), 1},
-    {"android/media/AudioTrack", "pause", "()V", MP_JNI_METHOD, OFFSET(pause), 1},
-    {"android/media/AudioTrack", "write", "([BII)I", MP_JNI_METHOD, OFFSET(write), 1},
-    {"android/media/AudioTrack", "write", "([FIII)I", MP_JNI_METHOD, OFFSET(writeFloat), 1},
-    {"android/media/AudioTrack", "write", "([SIII)I", MP_JNI_METHOD, OFFSET(writeShortV23), 0},
-    {"android/media/AudioTrack", "write", "(Ljava/nio/ByteBuffer;II)I", MP_JNI_METHOD, OFFSET(writeBufferV21), 1},
-    {"android/media/AudioTrack", "getBufferSizeInFrames", "()I", MP_JNI_METHOD, OFFSET(getBufferSizeInFramesV23), 0},
-    {"android/media/AudioTrack", "getTimestamp", "(Landroid/media/AudioTimestamp;)Z", MP_JNI_METHOD, OFFSET(getTimestamp), 1},
-    {"android/media/AudioTrack", "getPlaybackHeadPosition", "()I", MP_JNI_METHOD, OFFSET(getPlaybackHeadPosition), 1},
-    {"android/media/AudioTrack", "getLatency", "()I", MP_JNI_METHOD, OFFSET(getLatency), 1},
-    {"android/media/AudioTrack", "getMinBufferSize", "(III)I", MP_JNI_STATIC_METHOD, OFFSET(getMinBufferSize), 1},
-    {"android/media/AudioTrack", "getNativeOutputSampleRate", "(I)I", MP_JNI_STATIC_METHOD, OFFSET(getNativeOutputSampleRate), 1},
-    {"android/media/AudioTrack", "WRITE_BLOCKING", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(WRITE_BLOCKING), 0},
-    {"android/media/AudioTrack", "WRITE_NON_BLOCKING", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(WRITE_NON_BLOCKING), 0},
-    {"android/media/AudioTrack", "STATE_INITIALIZED", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(STATE_INITIALIZED), 1},
-    {"android/media/AudioTrack", "PLAYSTATE_STOPPED", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(PLAYSTATE_STOPPED), 1},
-    {"android/media/AudioTrack", "PLAYSTATE_PAUSED", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(PLAYSTATE_PAUSED), 1},
-    {"android/media/AudioTrack", "PLAYSTATE_PLAYING", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(PLAYSTATE_PLAYING), 1},
-    {"android/media/AudioTrack", "MODE_STREAM", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(MODE_STREAM), 1},
-    {"android/media/AudioTrack", "ERROR", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ERROR), 1},
-    {"android/media/AudioTrack", "ERROR_BAD_VALUE", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ERROR_BAD_VALUE), 1},
-    {"android/media/AudioTrack", "ERROR_INVALID_OPERATION", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ERROR_INVALID_OPERATION), 1},
+    {"android/media/AudioTrack", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
+    {"<init>", "(IIIIIII)V", MP_JNI_METHOD, OFFSET(ctor), 1},
+    {"<init>", "(Landroid/media/AudioAttributes;Landroid/media/AudioFormat;III)V", MP_JNI_METHOD, OFFSET(ctorV21), 0},
+    {"release", "()V", MP_JNI_METHOD, OFFSET(release), 1},
+    {"getState", "()I", MP_JNI_METHOD, OFFSET(getState), 1},
+    {"getPlayState", "()I", MP_JNI_METHOD, OFFSET(getPlayState), 1},
+    {"play", "()V", MP_JNI_METHOD, OFFSET(play), 1},
+    {"stop", "()V", MP_JNI_METHOD, OFFSET(stop), 1},
+    {"flush", "()V", MP_JNI_METHOD, OFFSET(flush), 1},
+    {"pause", "()V", MP_JNI_METHOD, OFFSET(pause), 1},
+    {"write", "([BII)I", MP_JNI_METHOD, OFFSET(write), 1},
+    {"write", "([FIII)I", MP_JNI_METHOD, OFFSET(writeFloat), 1},
+    {"write", "([SIII)I", MP_JNI_METHOD, OFFSET(writeShortV23), 0},
+    {"write", "(Ljava/nio/ByteBuffer;II)I", MP_JNI_METHOD, OFFSET(writeBufferV21), 1},
+    {"getBufferSizeInFrames", "()I", MP_JNI_METHOD, OFFSET(getBufferSizeInFramesV23), 0},
+    {"getTimestamp", "(Landroid/media/AudioTimestamp;)Z", MP_JNI_METHOD, OFFSET(getTimestamp), 1},
+    {"getPlaybackHeadPosition", "()I", MP_JNI_METHOD, OFFSET(getPlaybackHeadPosition), 1},
+    {"getLatency", "()I", MP_JNI_METHOD, OFFSET(getLatency), 1},
+    {"getMinBufferSize", "(III)I", MP_JNI_STATIC_METHOD, OFFSET(getMinBufferSize), 1},
+    {"getNativeOutputSampleRate", "(I)I", MP_JNI_STATIC_METHOD, OFFSET(getNativeOutputSampleRate), 1},
+    {"WRITE_BLOCKING", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(WRITE_BLOCKING), 0},
+    {"WRITE_NON_BLOCKING", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(WRITE_NON_BLOCKING), 0},
+    {"STATE_INITIALIZED", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(STATE_INITIALIZED), 1},
+    {"PLAYSTATE_STOPPED", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(PLAYSTATE_STOPPED), 1},
+    {"PLAYSTATE_PAUSED", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(PLAYSTATE_PAUSED), 1},
+    {"PLAYSTATE_PLAYING", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(PLAYSTATE_PLAYING), 1},
+    {"MODE_STREAM", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(MODE_STREAM), 1},
+    {"ERROR", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ERROR), 1},
+    {"ERROR_BAD_VALUE", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ERROR_BAD_VALUE), 1},
+    {"ERROR_INVALID_OPERATION", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ERROR_INVALID_OPERATION), 1},
     {0}
 };
 #undef OFFSET
@@ -152,10 +152,10 @@ static struct JNIAudioAttributes {
 } AudioAttributes;
 #define OFFSET(member) offsetof(struct JNIAudioAttributes, member)
 const static struct MPJniField AudioAttributes_mapping[] = {
-    {"android/media/AudioAttributes", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
-    {"android/media/AudioAttributes", "CONTENT_TYPE_MOVIE", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MOVIE), 0},
-    {"android/media/AudioAttributes", "CONTENT_TYPE_MUSIC", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MUSIC), 0},
-    {"android/media/AudioAttributes", "USAGE_MEDIA", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(USAGE_MEDIA), 0},
+    {"android/media/AudioAttributes", NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
+    {"CONTENT_TYPE_MOVIE", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MOVIE), 0},
+    {"CONTENT_TYPE_MUSIC", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MUSIC), 0},
+    {"USAGE_MEDIA", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(USAGE_MEDIA), 0},
     {0}
 };
 #undef OFFSET
@@ -169,11 +169,11 @@ static struct JNIAudioAttributesBuilder {
 } AudioAttributesBuilder;
 #define OFFSET(member) offsetof(struct JNIAudioAttributesBuilder, member)
 const static struct MPJniField AudioAttributesBuilder_mapping[] = {
-    {"android/media/AudioAttributes$Builder", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
-    {"android/media/AudioAttributes$Builder", "<init>", "()V", MP_JNI_METHOD, OFFSET(ctor), 0},
-    {"android/media/AudioAttributes$Builder", "setUsage", "(I)Landroid/media/AudioAttributes$Builder;", MP_JNI_METHOD, OFFSET(setUsage), 0},
-    {"android/media/AudioAttributes$Builder", "setContentType", "(I)Landroid/media/AudioAttributes$Builder;", MP_JNI_METHOD, OFFSET(setContentType), 0},
-    {"android/media/AudioAttributes$Builder", "build", "()Landroid/media/AudioAttributes;", MP_JNI_METHOD, OFFSET(build), 0},
+    {"android/media/AudioAttributes$Builder", NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
+    {"<init>", "()V", MP_JNI_METHOD, OFFSET(ctor), 0},
+    {"setUsage", "(I)Landroid/media/AudioAttributes$Builder;", MP_JNI_METHOD, OFFSET(setUsage), 0},
+    {"setContentType", "(I)Landroid/media/AudioAttributes$Builder;", MP_JNI_METHOD, OFFSET(setContentType), 0},
+    {"build", "()Landroid/media/AudioAttributes;", MP_JNI_METHOD, OFFSET(build), 0},
     {0}
 };
 #undef OFFSET
@@ -194,18 +194,18 @@ static struct JNIAudioFormat {
 } AudioFormat;
 #define OFFSET(member) offsetof(struct JNIAudioFormat, member)
 const static struct MPJniField AudioFormat_mapping[] = {
-    {"android/media/AudioFormat", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
-    {"android/media/AudioFormat", "ENCODING_PCM_8BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_8BIT), 1},
-    {"android/media/AudioFormat", "ENCODING_PCM_16BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_16BIT), 1},
-    {"android/media/AudioFormat", "ENCODING_PCM_FLOAT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_FLOAT), 1},
-    {"android/media/AudioFormat", "ENCODING_IEC61937", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_IEC61937), 0},
-    {"android/media/AudioFormat", "CHANNEL_OUT_MONO", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_MONO), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_STEREO", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_STEREO), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_FRONT_CENTER", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_FRONT_CENTER), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_QUAD", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_QUAD), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_5POINT1", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_5POINT1), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_BACK_CENTER", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_BACK_CENTER), 1},
-    {"android/media/AudioFormat", "CHANNEL_OUT_7POINT1_SURROUND", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_7POINT1_SURROUND), 0},
+    {"android/media/AudioFormat", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
+    {"ENCODING_PCM_8BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_8BIT), 1},
+    {"ENCODING_PCM_16BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_16BIT), 1},
+    {"ENCODING_PCM_FLOAT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_FLOAT), 1},
+    {"ENCODING_IEC61937", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_IEC61937), 0},
+    {"CHANNEL_OUT_MONO", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_MONO), 1},
+    {"CHANNEL_OUT_STEREO", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_STEREO), 1},
+    {"CHANNEL_OUT_FRONT_CENTER", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_FRONT_CENTER), 1},
+    {"CHANNEL_OUT_QUAD", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_QUAD), 1},
+    {"CHANNEL_OUT_5POINT1", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_5POINT1), 1},
+    {"CHANNEL_OUT_BACK_CENTER", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_BACK_CENTER), 1},
+    {"CHANNEL_OUT_7POINT1_SURROUND", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CHANNEL_OUT_7POINT1_SURROUND), 0},
     {0}
 };
 #undef OFFSET
@@ -220,12 +220,12 @@ static struct JNIAudioFormatBuilder {
 } AudioFormatBuilder;
 #define OFFSET(member) offsetof(struct JNIAudioFormatBuilder, member)
 const static struct MPJniField AudioFormatBuilder_mapping[] = {
-    {"android/media/AudioFormat$Builder", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
-    {"android/media/AudioFormat$Builder", "<init>", "()V", MP_JNI_METHOD, OFFSET(ctor), 0},
-    {"android/media/AudioFormat$Builder", "setEncoding", "(I)Landroid/media/AudioFormat$Builder;", MP_JNI_METHOD, OFFSET(setEncoding), 0},
-    {"android/media/AudioFormat$Builder", "setSampleRate", "(I)Landroid/media/AudioFormat$Builder;", MP_JNI_METHOD, OFFSET(setSampleRate), 0},
-    {"android/media/AudioFormat$Builder", "setChannelMask", "(I)Landroid/media/AudioFormat$Builder;", MP_JNI_METHOD, OFFSET(setChannelMask), 0},
-    {"android/media/AudioFormat$Builder", "build", "()Landroid/media/AudioFormat;", MP_JNI_METHOD, OFFSET(build), 0},
+    {"android/media/AudioFormat$Builder", NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
+    {"<init>", "()V", MP_JNI_METHOD, OFFSET(ctor), 0},
+    {"setEncoding", "(I)Landroid/media/AudioFormat$Builder;", MP_JNI_METHOD, OFFSET(setEncoding), 0},
+    {"setSampleRate", "(I)Landroid/media/AudioFormat$Builder;", MP_JNI_METHOD, OFFSET(setSampleRate), 0},
+    {"setChannelMask", "(I)Landroid/media/AudioFormat$Builder;", MP_JNI_METHOD, OFFSET(setChannelMask), 0},
+    {"build", "()Landroid/media/AudioFormat;", MP_JNI_METHOD, OFFSET(build), 0},
     {0}
 };
 #undef OFFSET
@@ -237,9 +237,9 @@ static struct JNIAudioManager {
 } AudioManager;
 #define OFFSET(member) offsetof(struct JNIAudioManager, member)
 const static struct MPJniField AudioManager_mapping[] = {
-    {"android/media/AudioManager", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
-    {"android/media/AudioManager", "STREAM_MUSIC", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(STREAM_MUSIC), 1},
-    {"android/media/AudioManager", "ERROR_DEAD_OBJECT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ERROR_DEAD_OBJECT), 0},
+    {"android/media/AudioManager", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
+    {"STREAM_MUSIC", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(STREAM_MUSIC), 1},
+    {"ERROR_DEAD_OBJECT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ERROR_DEAD_OBJECT), 0},
     {0}
 };
 #undef OFFSET
@@ -252,10 +252,10 @@ static struct JNIAudioTimestamp {
 } AudioTimestamp;
 #define OFFSET(member) offsetof(struct JNIAudioTimestamp, member)
 const static struct MPJniField AudioTimestamp_mapping[] = {
-    {"android/media/AudioTimestamp", NULL, NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
-    {"android/media/AudioTimestamp", "<init>", "()V", MP_JNI_METHOD, OFFSET(ctor), 1},
-    {"android/media/AudioTimestamp", "framePosition", "J", MP_JNI_FIELD, OFFSET(framePosition), 1},
-    {"android/media/AudioTimestamp", "nanoTime", "J", MP_JNI_FIELD, OFFSET(nanoTime), 1},
+    {"android/media/AudioTimestamp", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
+    {"<init>", "()V", MP_JNI_METHOD, OFFSET(ctor), 1},
+    {"framePosition", "J", MP_JNI_FIELD, OFFSET(framePosition), 1},
+    {"nanoTime", "J", MP_JNI_FIELD, OFFSET(nanoTime), 1},
     {0}
 };
 #undef OFFSET
