@@ -873,7 +873,6 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
         spawn_cursor(wl);
         set_geometry(wl, false);
         prepare_resize(wl, 0, 0);
-        wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
@@ -933,13 +932,10 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     wl->current_output->has_surface = true;
     bool force_resize = false;
 
-    if (!wl->fractional_scale_manager && wl_surface_get_version(wl_surface) < 6 &&
-        wl->scaling != wl->current_output->scale)
-    {
+    if (wl->scaling != wl->current_output->scale) {
         set_surface_scaling(wl);
         spawn_cursor(wl);
         force_resize = true;
-        wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
     if (!mp_rect_equals(&old_output_geometry, &wl->current_output->geometry)) {
@@ -2061,12 +2057,13 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
 
 static void set_surface_scaling(struct vo_wayland_state *wl)
 {
-    if (wl->fractional_scale_manager)
+    if (wl->fractional_scale_manager || wl_surface_get_version(wl->surface) >= 6)
         return;
 
     double old_scale = wl->scaling;
     wl->scaling = wl->current_output->scale;
     rescale_geometry(wl, old_scale);
+    wl->pending_vo_events |= VO_EVENT_DPI;
 }
 
 static void set_window_bounds(struct vo_wayland_state *wl)
