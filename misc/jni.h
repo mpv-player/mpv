@@ -29,7 +29,7 @@
 #define MP_JNI_GET_ENV(obj) mp_jni_get_env((obj)->log)
 #define MP_JNI_EXCEPTION_CHECK() mp_jni_exception_check(env, 0, NULL)
 #define MP_JNI_EXCEPTION_LOG(obj) mp_jni_exception_check(env, 1, (obj)->log)
-#define MP_JNI_DO(what, obj, method, ...) (*env)->what(env, obj, method, ##__VA_ARGS__)
+#define MP_JNI_DO(what, obj, ...) (*env)->what(env, obj, ##__VA_ARGS__)
 #define MP_JNI_NEW(clazz, method, ...) MP_JNI_DO(NewObject, clazz, method, ##__VA_ARGS__)
 #define MP_JNI_CALL_INT(obj, method, ...) MP_JNI_DO(CallIntMethod, obj, method, ##__VA_ARGS__)
 #define MP_JNI_CALL_BOOL(obj, method, ...) MP_JNI_DO(CallBooleanMethod, obj, method, ##__VA_ARGS__)
@@ -39,6 +39,16 @@
 #define MP_JNI_GET_INT(obj, field) MP_JNI_DO(GetIntField, obj, field)
 #define MP_JNI_GET_LONG(obj, field) MP_JNI_DO(GetLongField, obj, field)
 #define MP_JNI_GET_BOOL(obj, field) MP_JNI_DO(GetBoolField, obj, field)
+#define MP_JNI_LOCAL_FREEP(objp) do { \
+        if (*(objp)) \
+            MP_JNI_DO(DeleteLocalRef, *(objp)); \
+        *(objp) = NULL; \
+    } while (0)
+#define MP_JNI_GLOBAL_FREEP(objp) do { \
+        if (*(objp)) \
+            MP_JNI_DO(DeleteGlobalRef, *(objp)); \
+        *(objp) = NULL; \
+    } while (0)
 
 /*
  * Attach permanently a JNI environment to the current thread and retrieve it.

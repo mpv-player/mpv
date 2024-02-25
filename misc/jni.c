@@ -166,8 +166,7 @@ int mp_jni_exception_get_summary(JNIEnv *env, jthrowable exception,
 
     if (string) {
         name = mp_jni_jstring_to_utf_chars(env, string, log);
-        (*env)->DeleteLocalRef(env, string);
-        string = NULL;
+        MP_JNI_LOCAL_FREEP(&string);
     }
 
     jmethodID get_message_id = (*env)->GetMethodID(env, exception_class, "getMessage", "()Ljava/lang/String;");
@@ -188,8 +187,7 @@ int mp_jni_exception_get_summary(JNIEnv *env, jthrowable exception,
 
     if (string) {
         message = mp_jni_jstring_to_utf_chars(env, string, log);
-        (*env)->DeleteLocalRef(env, string);
-        string = NULL;
+        MP_JNI_LOCAL_FREEP(&string);
     }
 
     if (name && message) {
@@ -208,17 +206,9 @@ done:
     talloc_free(name);
     talloc_free(message);
 
-    if (class_class) {
-        (*env)->DeleteLocalRef(env, class_class);
-    }
-
-    if (exception_class) {
-        (*env)->DeleteLocalRef(env, exception_class);
-    }
-
-    if (string) {
-        (*env)->DeleteLocalRef(env, string);
-    }
+    MP_JNI_LOCAL_FREEP(&class_class);
+    MP_JNI_LOCAL_FREEP(&exception_class);
+    MP_JNI_LOCAL_FREEP(&string);
 
     return ret;
 }
@@ -238,7 +228,7 @@ int mp_jni_exception_check(JNIEnv *env, int logging, struct mp_log *log)
 
     char *message = NULL;
     int ret = mp_jni_exception_get_summary(env, exception, &message, log);
-    (*env)->DeleteLocalRef(env, exception);
+    MP_JNI_LOCAL_FREEP(&exception);
     if (ret < 0)
         return ret;
 
@@ -277,7 +267,7 @@ int mp_jni_init_jfields(JNIEnv *env, void *jfields,
                     global ? (*env)->NewGlobalRef(env, clazz) : clazz;
 
             if (global)
-                (*env)->DeleteLocalRef(env, clazz);
+                MP_JNI_LOCAL_FREEP(&clazz);
 
             continue;
         }
@@ -365,9 +355,9 @@ int mp_jni_reset_jfields(JNIEnv *env, void *jfields,
                 continue;
 
             if (global) {
-                (*env)->DeleteGlobalRef(env, clazz);
+                MP_JNI_GLOBAL_FREEP(&clazz);
             } else {
-                (*env)->DeleteLocalRef(env, clazz);
+                MP_JNI_LOCAL_FREEP(&clazz);
             }
 
             *(jclass*)jfield = NULL;
