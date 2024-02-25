@@ -205,6 +205,58 @@ jobs:
         run: |
           cat ./build/meson-logs/testlog.txt
 
+  linux-ffmpeg-4-4:
+    runs-on: ubuntu-22.04
+    container:
+      # We want to test ffmpeg 4.4 which alpine 3.15 has exactly.
+      # Furthermore, this is a very minimal build of mpv without commonly
+      # used features to test build compatibility. Musl is a nice bonus as well
+      image: alpine:3.15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          apk update
+          apk add \
+              binutils \
+              ffmpeg-dev \
+              gcc \
+              git \
+              g++ \
+              libass-dev \
+              lua5.2-dev \
+              pulseaudio-dev \
+              libx11-dev \
+              libxfixes-dev \
+              libxkbcommon-dev \
+              libxrandr-dev \
+              libxpresent-dev \
+              libxscrnsaver-dev \
+              musl-dev \
+              py3-pip \
+              samurai
+              pip install meson
+
+      - name: Build with meson
+        id: build
+        run: |
+              ./ci/build-linux-old.sh
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/testlog.txt
+
   openbsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 30 # avoid any weirdness with the VM
