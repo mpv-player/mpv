@@ -222,7 +222,7 @@ local function generate_graph(values, i, len, v_max, v_avg, scale, x_tics)
 
     local bg_box = format("{\\bord0.5}{\\3c&H%s&}{\\1c&H%s&}m 0 %f l %f %f %f 0 0 0",
                           o.plot_bg_border_color, o.plot_bg_color, y_max, x_max, y_max, x_max)
-    return format("%s{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}%s",
+    return format("%s{\\r}{\\rDefault}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}%s",
                   o.prefix_sep, y_offset, bg_box, o.plot_color, table.concat(s), text_style())
 end
 
