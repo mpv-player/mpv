@@ -182,6 +182,19 @@ void audio_update_volume(struct MPContext *mpctx)
     ao_set_gain(ao_c->ao, gain);
 }
 
+// Called when opts->ao_volume were changed.
+void audio_update_ao_volume(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct ao *ao = mpctx->ao;
+    float vol = opts->ao_volume;
+    if (!ao || vol < 0)
+        return;
+
+    ao_control(ao, AOCONTROL_SET_VOLUME, &vol);
+}
+
+
 // Call this if opts->playback_speed or mpctx->speed_factor_* change.
 void update_playback_speed(struct MPContext *mpctx)
 {
@@ -335,6 +348,7 @@ static void ao_chain_set_ao(struct ao_chain *ao_c, struct ao *ao)
         // Make sure filtering never stops with frames stuck in access filter.
         mp_filter_set_high_priority(ao_c->queue_filter, true);
         audio_update_volume(ao_c->mpctx);
+        audio_update_ao_volume(ao_c->mpctx);
     }
 
     if (ao_c->filter->ao_needs_update)
@@ -593,8 +607,10 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
     if (recreate_audio_filters(mpctx) < 0)
         goto init_error;
 
-    if (mpctx->ao)
+    if (mpctx->ao) {
         audio_update_volume(mpctx);
+        audio_update_ao_volume(mpctx);
+    }
 
     mp_wakeup_core(mpctx);
     return;
@@ -618,7 +634,7 @@ double playing_audio_pts(struct MPContext *mpctx)
     double pts = written_audio_pts(mpctx);
     if (pts == MP_NOPTS_VALUE || !mpctx->ao)
         return pts;
-    return pts - mpctx->audio_speed * ao_get_delay(mpctx->ao);
+    return pts - ao_get_delay(mpctx->ao);
 }
 
 // This garbage is needed for untimed AOs. These consume audio infinitely fast,
@@ -829,7 +845,7 @@ void audio_start_ao(struct MPContext *mpctx)
     double pts = MP_NOPTS_VALUE;
     if (!get_sync_pts(mpctx, &pts))
         return;
-    double apts = playing_audio_pts(mpctx); // (basically including mpctx->delay)
+    double apts = playing_audio_pts(mpctx);
     if (pts != MP_NOPTS_VALUE && apts != MP_NOPTS_VALUE && pts < apts &&
         mpctx->video_status != STATUS_EOF)
     {

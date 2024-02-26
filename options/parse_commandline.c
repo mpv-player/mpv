@@ -103,10 +103,10 @@ static void process_non_option(struct playlist *files, const char *arg)
 
     // Glob filenames on Windows (cmd.exe doesn't do this automatically)
     if (glob(arg, 0, NULL, &gg)) {
-        playlist_add_file(files, arg);
+        playlist_append_file(files, arg);
     } else {
         for (int i = 0; i < gg.gl_pathc; i++)
-            playlist_add_file(files, gg.gl_pathv[i]);
+            playlist_append_file(files, gg.gl_pathv[i]);
 
         globfree(&gg);
     }
@@ -114,7 +114,7 @@ static void process_non_option(struct playlist *files, const char *arg)
 #else
 static void process_non_option(struct playlist *files, const char *arg)
 {
-    playlist_add_file(files, arg);
+    playlist_append_file(files, arg);
 }
 #endif
 

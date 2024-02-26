@@ -91,7 +91,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
         qsort(files, num_files, sizeof(files[0]), cmp_filename);
 
     for (int n = 0; n < num_files; n++)
-        playlist_add_file(pl, files[n]);
+        playlist_append_file(pl, files[n]);
 
     playlist_set_stream_flags(pl, demuxer->stream_origin);
 

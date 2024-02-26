@@ -36,6 +36,7 @@
 #include "options/m_config.h"
 #include "options/options.h"
 #include "options/path.h"
+#include "osdep/io.h"
 #include "osdep/threads.h"
 #include "stream/stream.h"
 #include "video/fmt-conversion.h"
@@ -164,6 +165,7 @@ static void update_lut(struct priv *p, struct user_lut *lut);
 
 struct gl_next_opts {
     bool delayed_peak;
+    int border_background;
     float corner_rounding;
     bool inter_preserve;
     struct user_lut lut;
@@ -185,6 +187,10 @@ const struct m_opt_choice_alternatives lut_types[] = {
 const struct m_sub_options gl_next_conf = {
     .opts = (const struct m_option[]) {
         {"allow-delayed-peak-detect", OPT_BOOL(delayed_peak)},
+        {"border-background", OPT_CHOICE(border_background,
+            {"none",  BACKGROUND_NONE},
+            {"color", BACKGROUND_COLOR},
+            {"tiles", BACKGROUND_TILES})},
         {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
         {"interpolation-preserve", OPT_BOOL(inter_preserve)},
         {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
@@ -198,6 +204,7 @@ const struct m_sub_options gl_next_conf = {
         {0},
     },
     .defaults = &(struct gl_next_opts) {
+        .border_background = BACKGROUND_COLOR,
         .inter_preserve = true,
     },
     .size = sizeof(struct gl_next_opts),
@@ -1453,6 +1460,19 @@ static inline void copy_frame_info_to_mp(struct frame_info *pl,
     }
 }
 
+static void update_ra_ctx_options(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct gl_video_opts *gl_opts = p->opts_cache->opts;
+    bool border_alpha = (p->next_opts->border_background == BACKGROUND_COLOR &&
+                         gl_opts->background_color.a != 255) ||
+                         p->next_opts->border_background == BACKGROUND_NONE;
+    p->ra_ctx->opts.want_alpha = (gl_opts->background == BACKGROUND_COLOR &&
+                                  gl_opts->background_color.a != 255) ||
+                                  gl_opts->background == BACKGROUND_NONE ||
+                                  border_alpha;
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -1468,8 +1488,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
         m_config_cache_update(p->opts_cache);
-        const struct gl_video_opts *opts = p->opts_cache->opts;
-        p->ra_ctx->opts.want_alpha = opts->alpha_mode == ALPHA_YES;
+        update_ra_ctx_options(vo);
         if (p->ra_ctx->fns->update_render_opts)
             p->ra_ctx->fns->update_render_opts(p->ra_ctx);
         update_render_options(vo);
@@ -1802,6 +1821,7 @@ static int preinit(struct vo *vo)
         .global = p->global,
         .ra_ctx = p->ra_ctx,
     };
+    update_ra_ctx_options(vo);
 
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
@@ -2075,14 +2095,26 @@ static void update_render_options(struct vo *vo)
     pl_options pars = p->pars;
     const struct gl_video_opts *opts = p->opts_cache->opts;
     pars->params.antiringing_strength = opts->scaler[0].antiring;
-    pars->params.background_color[0] = opts->background.r / 255.0;
-    pars->params.background_color[1] = opts->background.g / 255.0;
-    pars->params.background_color[2] = opts->background.b / 255.0;
-    pars->params.background_transparency = 1.0 - opts->background.a / 255.0;
+    pars->params.background_color[0] = opts->background_color.r / 255.0;
+    pars->params.background_color[1] = opts->background_color.g / 255.0;
+    pars->params.background_color[2] = opts->background_color.b / 255.0;
+    pars->params.background_transparency = 1 - opts->background_color.a / 255.0;
     pars->params.skip_anti_aliasing = !opts->correct_downscaling;
     pars->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     pars->params.disable_fbos = opts->dumb_mode == 1;
-    pars->params.blend_against_tiles = opts->alpha_mode == ALPHA_BLEND_TILES;
+
+#if PL_API_VER >= 346
+    enum pl_clear_mode map_background_types[3][2] = {
+        { BACKGROUND_NONE,  PL_CLEAR_SKIP  },
+        { BACKGROUND_COLOR, PL_CLEAR_COLOR },
+        { BACKGROUND_TILES, PL_CLEAR_TILES },
+    };
+    pars->params.background = map_background_types[opts->background][1];
+    pars->params.border = map_background_types[p->next_opts->border_background][1];
+#else
+    pars->params.blend_against_tiles = opts->background == BACKGROUND_TILES;
+#endif
+
     pars->params.corner_rounding = p->next_opts->corner_rounding;
     pars->params.correct_subpixel_offsets = !opts->scaler_resizes_only;
 

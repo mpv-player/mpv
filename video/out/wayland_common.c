@@ -695,8 +695,14 @@ static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, u
             wl->dnd_action = dnd_action & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY ?
                              DND_REPLACE : DND_APPEND;
         }
-        MP_VERBOSE(wl, "DND action is %s\n",
-                   wl->dnd_action == DND_REPLACE ? "DND_REPLACE" : "DND_APPEND");
+
+        static const char * const dnd_action_names[] = {
+            [DND_REPLACE] = "DND_REPLACE",
+            [DND_APPEND] = "DND_APPEND",
+            [DND_INSERT_NEXT] = "DND_INSERT_NEXT",
+        };
+
+        MP_VERBOSE(wl, "DND action is %s\n", dnd_action_names[wl->dnd_action]);
     }
 }
 
@@ -1034,11 +1040,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         width = height = 0;
     }
 
-    int old_toplevel_width = wl->toplevel_width;
-    int old_toplevel_height = wl->toplevel_height;
-    wl->toplevel_width = width;
-    wl->toplevel_height = height;
-
     if (!wl->configured) {
         /* Save initial window size if the compositor gives us a hint here. */
         bool autofit_or_geometry = vo_opts->geometry.wh_valid || vo_opts->autofit.wh_valid ||
@@ -1137,10 +1138,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
         goto resize;
     }
-
-    if (old_toplevel_width == wl->toplevel_width &&
-        old_toplevel_height == wl->toplevel_height)
-        return;
 
     if (!wl->locked_size) {
         if (vo_opts->keepaspect) {

@@ -27,6 +27,8 @@ Interface changes
 ::
 
  --- mpv 0.38.0 ---
+    - add `--ao-volume` option
+    - change `ao-volume` property to read only property `current-ao-volume`
     - add `--volume-gain`, `--volume-gain-min`, and `--volume-gain-max` options
     - add `current-gpu-context` property
     - add `--secondary-sub-ass-override` option
@@ -49,6 +51,16 @@ Interface changes
     - add `auto` choice to `--deinterlace`
     - change `--teletext-page` default from 100 to 0 ("subtitle" in lavc)
     - change `--hidpi-window-scale` default to `no`
+    - add `insert-next`, `insert-next-play`, `insert-at`, and `insert-at-play`
+      actions to `loadfile` and `loadlist` commands
+    - add `index` argument to `loadfile` and `loadlist` commands
+    - move the `options` argument of the `loadfile` command from the third
+      parameter to the fourth (after `index`)
+    - add `--drag-and-drop=insert-next` option
+    - rename `--background` to `--background-color`
+    - remove `--alpha` and reintroduce `--background` option for better control
+      over blending alpha components into specific background types
+    - add `--border-background` option
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

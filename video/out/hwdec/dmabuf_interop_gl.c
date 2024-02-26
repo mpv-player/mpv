@@ -52,39 +52,28 @@ typedef void *EGLImageKHR;
 #define EGL_DMA_BUF_PLANE3_MODIFIER_HI_EXT 0x344A
 
 struct vaapi_gl_mapper_priv {
-    GLuint gl_textures[4];
-    EGLImageKHR images[4];
+    GLuint gl_textures[AV_DRM_MAX_PLANES];
+    EGLImageKHR images[AV_DRM_MAX_PLANES];
+
+    const struct ra_format *planes[AV_DRM_MAX_PLANES];
 
     EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(EGLDisplay, EGLContext,
                                               EGLenum, EGLClientBuffer,
                                               const EGLint *);
     EGLBoolean (EGLAPIENTRY *DestroyImageKHR)(EGLDisplay, EGLImageKHR);
     void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
+    void (EGLAPIENTRY *EGLImageTargetTexStorageEXT)(GLenum, GLeglImageOES,
+                                                    const GLint *);
 };
 
-static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
-                                 const struct ra_imgfmt_desc *desc)
+static bool gl_create_textures(struct ra_hwdec_mapper *mapper)
 {
     struct dmabuf_interop_priv *p_mapper = mapper->priv;
-    struct vaapi_gl_mapper_priv *p = talloc_ptrtype(NULL, p);
-    p_mapper->interop_mapper_priv = p;
-
-    *p = (struct vaapi_gl_mapper_priv) {
-        // EGL_KHR_image_base
-        .CreateImageKHR = (void *)eglGetProcAddress("eglCreateImageKHR"),
-        .DestroyImageKHR = (void *)eglGetProcAddress("eglDestroyImageKHR"),
-        // GL_OES_EGL_image
-        .EGLImageTargetTexture2DOES =
-            (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES"),
-    };
-
-    if (!p->CreateImageKHR || !p->DestroyImageKHR ||
-        !p->EGLImageTargetTexture2DOES)
-        return false;
+    struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     GL *gl = ra_gl_get(mapper->ra);
-    gl->GenTextures(4, p->gl_textures);
-    for (int n = 0; n < desc->num_planes; n++) {
+    gl->GenTextures(AV_DRM_MAX_PLANES, p->gl_textures);
+    for (int n = 0; n < p_mapper->num_planes; n++) {
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -97,7 +86,7 @@ static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
             .w = mp_image_plane_w(&p_mapper->layout, n),
             .h = mp_image_plane_h(&p_mapper->layout, n),
             .d = 1,
-            .format = desc->planes[n],
+            .format = p->planes[n],
             .render_src = true,
             .src_linear = true,
         };
@@ -114,44 +103,99 @@ static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
     return true;
 }
 
+static void gl_delete_textures(const struct ra_hwdec_mapper *mapper)
+{
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
+    struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
+
+    GL *gl = ra_gl_get(mapper->ra);
+    gl->DeleteTextures(AV_DRM_MAX_PLANES, p->gl_textures);
+    for (int n = 0; n < AV_DRM_MAX_PLANES; n++) {
+        p->gl_textures[n] = 0;
+        ra_tex_free(mapper->ra, &p_mapper->tex[n]);
+    }
+}
+
+static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
+                                 const struct ra_imgfmt_desc *desc)
+{
+    struct dmabuf_interop_priv *p_mapper = mapper->priv;
+    struct vaapi_gl_mapper_priv *p = talloc_ptrtype(NULL, p);
+    p_mapper->interop_mapper_priv = p;
+
+    *p = (struct vaapi_gl_mapper_priv) {
+        // EGL_KHR_image_base
+        .CreateImageKHR = (void *)eglGetProcAddress("eglCreateImageKHR"),
+        .DestroyImageKHR = (void *)eglGetProcAddress("eglDestroyImageKHR"),
+    };
+    if (ra_gl_get(mapper->ra)->es) {
+        // GL_OES_EGL_image
+        p->EGLImageTargetTexture2DOES =
+            (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES");
+    } else {
+        // GL_EXT_EGL_image_storage
+        p->EGLImageTargetTexStorageEXT =
+            (void *)eglGetProcAddress("glEGLImageTargetTexStorageEXT");
+    }
+
+    if (!p->CreateImageKHR || !p->DestroyImageKHR ||
+        (!p->EGLImageTargetTexture2DOES && !p->EGLImageTargetTexStorageEXT)) {
+        return false;
+    }
+
+    static_assert(MP_ARRAY_SIZE(desc->planes) == AV_DRM_MAX_PLANES, "");
+    static_assert(MP_ARRAY_SIZE(mapper->tex) == AV_DRM_MAX_PLANES, "");
+
+    // remember format to allow texture recreation
+    for (int n = 0; n < desc->num_planes; n++) {
+        p->planes[n] = desc->planes[n];
+    }
+    if (p->EGLImageTargetTexture2DOES) {
+        // created only once
+        if (!gl_create_textures(mapper))
+            return false;
+    }
+
+    return true;
+}
+
 static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
 {
     struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     if (p) {
-        GL *gl = ra_gl_get(mapper->ra);
-        gl->DeleteTextures(4, p->gl_textures);
-        for (int n = 0; n < 4; n++) {
-            p->gl_textures[n] = 0;
-            ra_tex_free(mapper->ra, &p_mapper->tex[n]);
-        }
+        gl_delete_textures(mapper);
         talloc_free(p);
         p_mapper->interop_mapper_priv = NULL;
     }
 }
 
-#define ADD_ATTRIB(name, value)                         \
-    do {                                                \
-    assert(num_attribs + 3 < MP_ARRAY_SIZE(attribs));   \
-    attribs[num_attribs++] = (name);                    \
-    attribs[num_attribs++] = (value);                   \
-    attribs[num_attribs] = EGL_NONE;                    \
+#define ADD_ATTRIB(name, value) \
+    do { \
+    assert(num_attribs + 3 < MP_ARRAY_SIZE(attribs)); \
+    attribs[num_attribs++] = (name); \
+    attribs[num_attribs++] = (value); \
+    attribs[num_attribs] = EGL_NONE; \
     } while(0)
 
-#define ADD_PLANE_ATTRIBS(plane) do { \
-            uint64_t drm_format_modifier = p_mapper->desc.objects[p_mapper->desc.layers[i].planes[j].object_index].format_modifier; \
-            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _FD_EXT, \
-                        p_mapper->desc.objects[p_mapper->desc.layers[i].planes[j].object_index].fd); \
-            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _OFFSET_EXT, \
-                        p_mapper->desc.layers[i].planes[j].offset); \
-            ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _PITCH_EXT, \
-                        p_mapper->desc.layers[i].planes[j].pitch); \
-            if (dmabuf_interop->use_modifiers && drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
-                ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_LO_EXT, drm_format_modifier & 0xfffffffful); \
-                ADD_ATTRIB(EGL_DMA_BUF_PLANE ## plane ## _MODIFIER_HI_EXT, drm_format_modifier >> 32); \
-            }                               \
-        } while (0)
+#define ADD_PLANE_ATTRIBS(nplane) \
+    do { \
+    const AVDRMPlaneDescriptor *plane = &p_mapper->desc.layers[i].planes[j]; \
+    const AVDRMObjectDescriptor *object = \
+        &p_mapper->desc.objects[plane->object_index]; \
+    ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _FD_EXT, object->fd); \
+    ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _OFFSET_EXT, plane->offset); \
+    ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _PITCH_EXT, plane->pitch); \
+    uint64_t drm_format_modifier = object->format_modifier; \
+    if (dmabuf_interop->use_modifiers && \
+        drm_format_modifier != DRM_FORMAT_MOD_INVALID) { \
+        ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _MODIFIER_LO_EXT, \
+            drm_format_modifier & 0xfffffffful); \
+        ADD_ATTRIB(EGL_DMA_BUF_PLANE ## nplane ## _MODIFIER_HI_EXT, \
+            drm_format_modifier >> 32); \
+    } \
+    } while (0)
 
 static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
                          struct dmabuf_interop *dmabuf_interop,
@@ -161,6 +205,11 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
     GL *gl = ra_gl_get(mapper->ra);
+
+    if (p->EGLImageTargetTexStorageEXT) {
+        if (!gl_create_textures(mapper))
+            return false;
+    }
 
     for (int i = 0, n = 0; i < p_mapper->desc.nb_layers; i++) {
         /*
@@ -252,7 +301,11 @@ static bool vaapi_gl_map(struct ra_hwdec_mapper *mapper,
             }
 
             gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-            p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+            if (p->EGLImageTargetTexStorageEXT) {
+                p->EGLImageTargetTexStorageEXT(GL_TEXTURE_2D, p->images[n], NULL);
+            } else {
+                p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+            }
 
             mapper->tex[n] = p_mapper->tex[n];
         }
@@ -267,12 +320,18 @@ static void vaapi_gl_unmap(struct ra_hwdec_mapper *mapper)
     struct dmabuf_interop_priv *p_mapper = mapper->priv;
     struct vaapi_gl_mapper_priv *p = p_mapper->interop_mapper_priv;
 
-    if (p) {
-        for (int n = 0; n < 4; n++) {
-            if (p->images[n])
-                p->DestroyImageKHR(eglGetCurrentDisplay(), p->images[n]);
-            p->images[n] = 0;
-        }
+    if (!p)
+        return;
+
+    if (p->EGLImageTargetTexStorageEXT) {
+        // textures are immutable, can't reuse
+        gl_delete_textures(mapper);
+    }
+
+    for (int n = 0; n < AV_DRM_MAX_PLANES; n++) {
+        if (p->images[n])
+            p->DestroyImageKHR(eglGetCurrentDisplay(), p->images[n]);
+        p->images[n] = 0;
     }
 }
 
@@ -292,16 +351,18 @@ bool dmabuf_interop_gl_init(const struct ra_hwdec *hw,
         return false;
 
     GL *gl = ra_gl_get(hw->ra_ctx->ra);
+    const char *imageext = gl->es ? "GL_OES_EGL_image" : "GL_EXT_EGL_image_storage";
     if (!gl_check_extension(exts, "EGL_EXT_image_dma_buf_import") ||
         !gl_check_extension(exts, "EGL_KHR_image_base") ||
-        !gl_check_extension(gl->extensions, "GL_OES_EGL_image") ||
-        !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
+        !gl_check_extension(gl->extensions, imageext) ||
+        !(gl->mpgl_caps & MPGL_CAP_TEX_RG)) {
         return false;
+    }
 
     dmabuf_interop->use_modifiers =
         gl_check_extension(exts, "EGL_EXT_image_dma_buf_import_modifiers");
 
-    MP_VERBOSE(hw, "using EGL dmabuf interop\n");
+    MP_VERBOSE(hw, "Using EGL dmabuf interop via %s\n", imageext);
 
     dmabuf_interop->interop_init = vaapi_gl_mapper_init;
     dmabuf_interop->interop_uninit = vaapi_gl_mapper_uninit;

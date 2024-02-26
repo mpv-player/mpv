@@ -322,7 +322,7 @@ void merge_playlist_files(struct playlist *pl)
         edl = talloc_strdup_append_buffer(edl, e->filename);
     }
     playlist_clear(pl);
-    playlist_add_file(pl, edl);
+    playlist_append_file(pl, edl);
     talloc_free(edl);
 }
 

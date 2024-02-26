@@ -60,13 +60,23 @@ static void playlist_update_indexes(struct playlist *pl, int start, int end)
         pl->entries[n]->pl_index = n;
 }
 
-void playlist_add(struct playlist *pl, struct playlist_entry *add)
+// Inserts the entry so that it takes "at"'s place, shifting "at" and all
+// further entires to the right (or append to end, if at==NULL).
+void playlist_insert_at(struct playlist *pl, struct playlist_entry *add,
+                        struct playlist_entry *at)
 {
     assert(add->filename);
-    MP_TARRAY_APPEND(pl, pl->entries, pl->num_entries, add);
+    assert(!at || at->pl == pl);
+
+    int index = at ? at->pl_index : pl->num_entries;
+    MP_TARRAY_INSERT_AT(pl, pl->entries, pl->num_entries, index, add);
+
     add->pl = pl;
-    add->pl_index = pl->num_entries - 1;
+    add->pl_index = index;
     add->id = ++pl->id_alloc;
+
+    playlist_update_indexes(pl, index, pl->num_entries);
+
     talloc_steal(pl, add);
 }
 
@@ -137,9 +147,9 @@ void playlist_move(struct playlist *pl, struct playlist_entry *entry,
                                 MPMAX(index + 1, old_index + 1));
 }
 
-void playlist_add_file(struct playlist *pl, const char *filename)
+void playlist_append_file(struct playlist *pl, const char *filename)
 {
-    playlist_add(pl, playlist_entry_new(filename));
+    playlist_insert_at(pl, playlist_entry_new(filename), NULL);
 }
 
 void playlist_populate_playlist_path(struct playlist *pl, const char *path)
@@ -302,8 +312,8 @@ void playlist_set_stream_flags(struct playlist *pl, int flags)
         pl->entries[n]->stream_flags = flags;
 }
 
-static int64_t playlist_transfer_entries_to(struct playlist *pl, int dst_index,
-                                            struct playlist *source_pl)
+int64_t playlist_transfer_entries_to(struct playlist *pl, int dst_index,
+                                     struct playlist *source_pl)
 {
     assert(pl != source_pl);
     struct playlist_entry *first = playlist_get_first(source_pl);

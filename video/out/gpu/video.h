@@ -72,11 +72,10 @@ enum dither_algo {
     DITHER_ERROR_DIFFUSION,
 };
 
-enum alpha_mode {
-    ALPHA_NO = 0,
-    ALPHA_YES,
-    ALPHA_BLEND,
-    ALPHA_BLEND_TILES,
+enum background_type {
+    BACKGROUND_NONE = 0,
+    BACKGROUND_COLOR,
+    BACKGROUND_TILES,
 };
 
 enum blend_subs_mode {
@@ -155,9 +154,9 @@ struct gl_video_opts {
     int temporal_dither_period;
     char *error_diffusion;
     char *fbo_format;
-    int alpha_mode;
+    int background;
     bool use_rectangle;
-    struct m_color background;
+    struct m_color background_color;
     bool interpolation;
     float interpolation_threshold;
     int blend_subs;

@@ -17,10 +17,54 @@ in the list.
 
 Available audio output drivers are:
 
-``alsa`` (Linux only)
-    ALSA audio output driver
+``alsa``
+    ALSA audio output driver.
 
-    See `ALSA audio output options`_ for options specific to this AO.
+    The following global options are supported by this audio output:
+
+    ``--alsa-resample=yes``
+        Enable ALSA resampling plugin. (This is disabled by default, because
+        some drivers report incorrect audio delay in some cases.)
+
+    ``--alsa-mixer-device=<device>``
+        Set the mixer device used with ``ao-volume`` (default: ``default``).
+
+    ``--alsa-mixer-name=<name>``
+        Set the name of the mixer element (default: ``Master``). This is for
+        example ``PCM`` or ``Master``.
+
+    ``--alsa-mixer-index=<number>``
+        Set the index of the mixer channel (default: 0). Consider the output of
+        "``amixer scontrols``", then the index is the number that follows the
+        name of the element.
+
+    ``--alsa-non-interleaved``
+        Allow output of non-interleaved formats (if the audio decoder uses
+        this format). Currently disabled by default, because some popular
+        ALSA plugins are utterly broken with non-interleaved formats.
+
+    ``--alsa-ignore-chmap``
+        Don't read or set the channel map of the ALSA device - only request the
+        required number of channels, and then pass the audio as-is to it. This
+        option most likely should not be used. It can be useful for debugging,
+        or for static setups with a specially engineered ALSA configuration (in
+        this case you should always force the same layout with ``--audio-channels``,
+        or it will work only for files which use the layout implicit to your
+        ALSA device).
+
+    ``--alsa-buffer-time=<microseconds>``
+        Set the requested buffer time in microseconds. A value of 0 skips requesting
+        anything from the ALSA API. This and the ``--alsa-periods`` option uses the
+        ALSA ``near`` functions to set the requested parameters. If doing so results
+        in an empty configuration set, setting these parameters is skipped.
+
+        Both options control the buffer size. A low buffer size can lead to higher
+        CPU usage and audio dropouts, while a high buffer size can lead to higher
+        latency in volume changes and other filtering.
+
+    ``--alsa-periods=<number>``
+        Number of periods requested from the ALSA API. See ``--alsa-buffer-time``
+        for further remarks.
 
     .. warning::
 
@@ -166,8 +210,8 @@ Available audio output drivers are:
         By default the channel volumes are used.
 
 ``sdl``
-    SDL 1.2+ audio output driver. Should work on any platform supported by SDL
-    1.2, but may require the ``SDL_AUDIODRIVER`` environment variable to be set
+    SDL 2.0+ audio output driver. Should work on any platform supported by SDL
+    2.0, but may require the ``SDL_AUDIODRIVER`` environment variable to be set
     appropriately for your system.
 
     .. note:: This driver is for compatibility with extremely foreign
