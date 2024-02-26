@@ -33,7 +33,7 @@
 #if HAVE_MACOS_TOUCHBAR
 #import "osdep/macosx_touchbar.h"
 #endif
-#if HAVE_MACOS_COCOA_CB
+#if HAVE_SWIFT
 #include "osdep/macOS_swift.h"
 #endif
 
