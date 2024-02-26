@@ -116,6 +116,8 @@ class Common: NSObject {
         window.makeMain()
         window.makeKey()
 
+        view.layer?.contentsScale = window.backingScaleFactor
+
         if !minimized {
             window.orderFront(nil)
         }
