@@ -329,14 +329,9 @@ static const struct gl_video_opts gl_video_opts_def = {
     .hwdec_interop = "auto",
 };
 
-static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, const char **value);
-
-static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, const char **value);
-
-static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *opt,
-                                        struct bstr name, const char **value);
+static OPT_STRING_VALIDATE_FUNC(validate_scaler_opt);
+static OPT_STRING_VALIDATE_FUNC(validate_window_opt);
+static OPT_STRING_VALIDATE_FUNC(validate_error_diffusion_opt);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 

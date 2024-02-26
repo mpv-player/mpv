@@ -37,8 +37,7 @@ struct vulkan_opts {
     bool async_compute;
 };
 
-static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
-                           struct bstr name, const char **value)
+static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
 {
     struct bstr param = bstr0(*value);
     int ret = M_OPT_INVALID;
