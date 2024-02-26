@@ -2815,7 +2815,8 @@ Subtitles
     ``--sub-shadow-offset`` to change its size relative to the text.
 
 ``--sub-blur=<0..20.0>``
-    Gaussian blur factor. 0 means no blur applied (default).
+    Gaussian blur factor applied to the sub font border.
+    0 means no blur applied (default).
 
 ``--sub-bold=<yes|no>``
     Format text on bold.
@@ -4336,7 +4337,8 @@ OSD
     See ``--sub-color``. Color used for OSD text background.
 
 ``--osd-blur=<0..20.0>``
-    Gaussian blur factor. 0 means no blur applied (default).
+    Gaussian blur factor applied to the OSD font border.
+    0 means no blur applied (default).
 
 ``--osd-bold=<yes|no>``
     Format text on bold.
