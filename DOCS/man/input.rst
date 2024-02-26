@@ -1478,6 +1478,13 @@ Input Commands that are Possibly Subject to Change
     This command has an even more uncertain future than ``ab-loop-dump-cache``
     and might disappear without replacement if the author decides it's useless.
 
+``begin-vo-dragging``
+    Begin window dragging if supported by the current VO. This command should
+    only be called while a mouse button is being pressed, otherwise it will
+    be ignored. The exact effect of this command depends on the VO implementation
+    of window dragging. For example, on Windows only the left mouse button can
+    begin window dragging, while X11 and Wayland allow other mouse buttons.
+
 Undocumented commands: ``ao-reload`` (experimental/internal).
 
 List of events
