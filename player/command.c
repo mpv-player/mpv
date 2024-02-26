@@ -6502,6 +6502,16 @@ static void cmd_dump_cache_ab(void *p)
                  cmd->args[0].v.s);
 }
 
+static void cmd_begin_vo_dragging(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    struct vo *vo = mpctx->video_out;
+
+    if (vo)
+        vo_control(vo, VOCTRL_BEGIN_DRAGGING, NULL);
+}
+
 /* This array defines all known commands.
  * The first field the command name used in libmpv and input.conf.
  * The second field is the handler function (see mp_cmd_def.handler and
@@ -6969,6 +6979,8 @@ const struct mp_cmd_def mp_cmds[] = {
     },
 
     { "ab-loop-align-cache", cmd_align_cache_ab },
+
+    { "begin-vo-dragging", cmd_begin_vo_dragging },
 
     {0}
 };
