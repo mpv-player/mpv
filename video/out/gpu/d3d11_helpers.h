@@ -69,9 +69,7 @@ IDXGIAdapter1 *mp_get_dxgi_adapter(struct mp_log *log,
                                    bstr requested_adapter_name,
                                    bstr *listing);
 
-int mp_dxgi_validate_adapter(struct mp_log *log,
-                             const struct m_option *opt,
-                             struct bstr name, const char **value);
+OPT_STRING_VALIDATE_FUNC(mp_dxgi_validate_adapter);
 
 bool mp_dxgi_list_or_verify_adapters(struct mp_log *log,
                                      bstr adapter_name,

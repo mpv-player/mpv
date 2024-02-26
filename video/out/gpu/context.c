@@ -129,8 +129,7 @@ static int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
     return M_OPT_EXIT;
 }
 
-static int ra_ctx_validate_api(struct mp_log *log, const struct m_option *opt,
-                               struct bstr name, const char **value)
+static inline OPT_STRING_VALIDATE_FUNC(ra_ctx_validate_api)
 {
     struct bstr param = bstr0(*value);
     if (bstr_equals0(param, "auto"))
@@ -154,8 +153,7 @@ static int ra_ctx_context_help(struct mp_log *log, const struct m_option *opt,
     return M_OPT_EXIT;
 }
 
-static int ra_ctx_validate_context(struct mp_log *log, const struct m_option *opt,
-                                   struct bstr name, const char **value)
+static inline OPT_STRING_VALIDATE_FUNC(ra_ctx_validate_context)
 {
     struct bstr param = bstr0(*value);
     if (bstr_equals0(param, "auto"))

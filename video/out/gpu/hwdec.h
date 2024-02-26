@@ -18,12 +18,8 @@ struct ra_hwdec_ctx {
     int num_hwdecs;
 };
 
-int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                          struct bstr name, const char **value);
-
-int ra_hwdec_validate_drivers_only_opt(struct mp_log *log,
-                                       const m_option_t *opt,
-                                       struct bstr name, const char **value);
+OPT_STRING_VALIDATE_FUNC(ra_hwdec_validate_opt);
+OPT_STRING_VALIDATE_FUNC(ra_hwdec_validate_drivers_only_opt);
 
 void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
                        const char *opt, bool load_all_by_default);

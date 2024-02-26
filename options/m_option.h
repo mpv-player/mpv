@@ -189,15 +189,20 @@ struct m_opt_choice_alternatives {
 const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
                              int value);
 
-// Validator function signatures. Required to properly type the param value.
 typedef int (*m_opt_generic_validate_fn)(struct mp_log *log, const m_option_t *opt,
                                          struct bstr name, void *value);
 
-typedef int (*m_opt_string_validate_fn)(struct mp_log *log, const m_option_t *opt,
-                                        struct bstr name, const char **value);
-typedef int (*m_opt_int_validate_fn)(struct mp_log *log, const m_option_t *opt,
-                                     struct bstr name, const int *value);
-
+#define OPT_FUNC(name) name
+#define OPT_FUNC_IN(name, suffix) name ## _ ## suffix
+#define OPT_VALIDATE_FUNC(func, value_type, suffix) \
+int OPT_FUNC(func)(struct mp_log *log, const m_option_t *opt, \
+                   struct bstr name, value_type value); \
+static inline int OPT_FUNC_IN(func, suffix)(struct mp_log *log, const m_option_t *opt, \
+                                            struct bstr name, void *value) { \
+    return OPT_FUNC(func)(log, opt, name, value); \
+} \
+int OPT_FUNC(func)(struct mp_log *log, const m_option_t *opt, \
+                   struct bstr name, value_type value)
 
 // m_option.priv points to this if OPT_SUBSTRUCT is used
 struct m_sub_options {
@@ -685,15 +690,17 @@ extern const char m_option_path_separator;
 #define OPT_CHANNELS(field) \
     OPT_TYPED_FIELD(m_option_type_channels, struct m_channels, field)
 
+#define OPT_INT_VALIDATE_FUNC(func) OPT_VALIDATE_FUNC(func, const int *, int)
+
 #define OPT_INT_VALIDATE(field, validate_fn) \
     OPT_TYPED_FIELD(m_option_type_int, int, field), \
-    .validate = (m_opt_generic_validate_fn) \
-        MP_EXPECT_TYPE(m_opt_int_validate_fn, validate_fn)
+    .validate = OPT_FUNC_IN(validate_fn, int)
+
+#define OPT_STRING_VALIDATE_FUNC(func) OPT_VALIDATE_FUNC(func, const char **, str)
 
 #define OPT_STRING_VALIDATE(field, validate_fn) \
     OPT_TYPED_FIELD(m_option_type_string, char*, field), \
-    .validate = (m_opt_generic_validate_fn) \
-        MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn)
+    .validate = OPT_FUNC_IN(validate_fn, str)
 
 #define M_CHOICES(...) \
     .priv = (void *)&(const struct m_opt_choice_alternatives[]){ __VA_ARGS__, {0}}
