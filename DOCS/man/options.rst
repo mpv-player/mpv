@@ -2185,8 +2185,8 @@ Audio
 ``--audio-samplerate=<Hz>``
     Select the output sample rate to be used (of course sound cards have
     limits on this). If the sample frequency selected is different from that
-    of the current media, the lavrresample audio filter will be inserted into
-    the audio filter layer to compensate for the difference.
+    of the current media, the internal swresample audio filter will be inserted
+    into the audio filter layer to compensate for the difference.
 
 ``--gapless-audio=<no|yes|weak>``
     Try to play consecutive audio files with no silence or disruption at the
@@ -4768,8 +4768,6 @@ Audio Resampler
 This controls the default options of any resampling done by mpv (but not within
 libavfilter, within the system audio API resampler, or any other places).
 
-It also sets the defaults for the ``lavrresample`` audio filter.
-
 ``--audio-resample-filter-size=<length>``
     Length of the filter with respect to the lower sampling rate. (default:
     16)
@@ -4789,9 +4787,6 @@ It also sets the defaults for the ``lavrresample`` audio filter.
     Enable/disable normalization if surround audio is downmixed to stereo
     (default: no). If this is disabled, downmix can cause clipping. If it's
     enabled, the output might be too quiet. It depends on the source audio.
-
-    Technically, this changes the ``normalize`` suboption of the
-    ``lavrresample`` audio filter, which performs the downmixing.
 
     If downmix happens outside of mpv for some reason, or in the decoder
     (decoder downmixing), or in the audio output (system mixer), this has no
