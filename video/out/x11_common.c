@@ -1221,6 +1221,28 @@ static void release_all_keys(struct vo *vo)
         mp_input_put_key(x11->input_ctx, MP_INPUT_RELEASE_ALL);
 }
 
+static void vo_x11_begin_dragging(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    XEvent Event = x11->last_button_event;
+    if (Event.type == ButtonPress && !x11->fs &&
+        !mp_input_test_dragging(x11->input_ctx, Event.xmotion.x,
+                                                Event.xmotion.y))
+    {
+        mp_input_put_key(x11->input_ctx, MP_INPUT_RELEASE_ALL);
+        XUngrabPointer(x11->display, CurrentTime);
+
+        long params[5] = {
+            Event.xmotion.x_root, Event.xmotion.y_root,
+            8, // _NET_WM_MOVERESIZE_MOVE
+            Event.xbutton.button,
+            1, // source indication: normal
+        };
+        x11_send_ewmh_msg(x11, "_NET_WM_MOVERESIZE", params);
+        x11->last_button_event = (XEvent){0};
+    }
+}
+
 void vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1310,21 +1332,9 @@ void vo_x11_check_events(struct vo *vo)
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_DOWN);
             long msg[4] = {XEMBED_REQUEST_FOCUS};
             vo_x11_xembed_send_message(x11, msg);
-            if (Event.xbutton.button == 1 && !x11->fs &&
-                !mp_input_test_dragging(x11->input_ctx, Event.xmotion.x,
-                                                        Event.xmotion.y))
-            {
-                mp_input_put_key(x11->input_ctx, MP_INPUT_RELEASE_ALL);
-                XUngrabPointer(x11->display, CurrentTime);
-
-                long params[5] = {
-                    Event.xmotion.x_root, Event.xmotion.y_root,
-                    8, // _NET_WM_MOVERESIZE_MOVE
-                    1, // button 1
-                    1, // source indication: normal
-                };
-                x11_send_ewmh_msg(x11, "_NET_WM_MOVERESIZE", params);
-            }
+            x11->last_button_event = Event;
+            if (Event.xbutton.button == 1)
+                vo_x11_begin_dragging(vo);
             break;
         case ButtonRelease:
             if (Event.xbutton.button - 1 >= MP_KEY_MOUSE_BTN_COUNT)
@@ -1332,6 +1342,7 @@ void vo_x11_check_events(struct vo *vo)
             mp_input_put_key(x11->input_ctx,
                              (MP_MBTN_BASE + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_UP);
+            x11->last_button_event = Event;
             break;
         case MapNotify:
             x11->window_hidden = false;
@@ -2200,6 +2211,9 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_GET_HIDPI_SCALE:
         *(double *)arg = x11->dpi_scale;
+        return VO_TRUE;
+    case VOCTRL_BEGIN_DRAGGING:
+        vo_x11_begin_dragging(vo);
         return VO_TRUE;
     }
     return VO_NOTIMPL;
