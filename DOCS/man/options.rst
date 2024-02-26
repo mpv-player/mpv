@@ -1994,7 +1994,8 @@ Audio
     amplification. Negative values can be passed for compatibility, but are
     treated as 0.
 
-    Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
+    Since mpv 0.18.1, this always controls the internal mixer (aka software
+    volume).
 
 ``--ao-volume=<value>``
     Set the startup system volume. This option works only if mpv audio
@@ -2043,18 +2044,6 @@ Audio
     ``auto`` is a deprecated possible value that is equivalent to ``no``.
 
     See also: ``--volume``.
-
-``--softvol=<no|yes|auto>``
-    Deprecated/unfunctional. Before mpv 0.18.1, this used to control whether
-    to use the volume controls of the audio output driver or the internal mpv
-    volume filter.
-
-    The current behavior is that softvol is always enabled, i.e. as if this
-    option is set to ``yes``. The other behaviors are not available anymore,
-    although ``auto`` almost matches current behavior in most cases.
-
-    The ``no`` behavior is still partially available through the ``ao-volume``
-    and ``ao-mute`` properties. But there are no options to reset these.
 
 ``--audio-demuxer=<[+]name>``
     Use this audio demuxer type when using ``--audio-file``. Use a '+' before
