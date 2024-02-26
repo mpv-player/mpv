@@ -27,8 +27,6 @@ Interface changes
 ::
 
  --- mpv 0.38.0 ---
-    - add `--ao-volume` option
-    - change `ao-volume` property to read only property `current-ao-volume`
     - add `--volume-gain`, `--volume-gain-min`, and `--volume-gain-max` options
     - add `current-gpu-context` property
     - add `--secondary-sub-ass-override` option
@@ -63,6 +61,10 @@ Interface changes
     - add `--border-background` option
     - remove `auto` choice from `--mute` (same as setting `no`)
     - `--volume` no longer accepts negative values (same as setting `0`)
+    - add `--ao-volume` option
+    - change `ao-volume` property to read only property `current-ao-volume`
+    - add `--ao-mute` option
+    - change `ao-mute` property to read only property `current-ao-mute`
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

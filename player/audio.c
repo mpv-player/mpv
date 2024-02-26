@@ -164,7 +164,7 @@ static float compute_replaygain(struct MPContext *mpctx)
     return rgain;
 }
 
-// Called when opts->softvol_volume or opts->softvol_mute were changed.
+// Called when opts->softvol_volume or opts->softvol_mute was changed.
 void audio_update_volume(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -182,7 +182,17 @@ void audio_update_volume(struct MPContext *mpctx)
     ao_set_gain(ao_c->ao, gain);
 }
 
-// Called when opts->ao_volume were changed.
+void audio_update_ao_mute(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct ao *ao = mpctx->ao;
+    bool mute = opts->ao_mute;
+    if (!ao)
+        return;
+
+    ao_control(ao, AOCONTROL_SET_MUTE, &mute);
+}
+
 void audio_update_ao_volume(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -193,7 +203,6 @@ void audio_update_ao_volume(struct MPContext *mpctx)
 
     ao_control(ao, AOCONTROL_SET_VOLUME, &vol);
 }
-
 
 // Call this if opts->playback_speed or mpctx->speed_factor_* change.
 void update_playback_speed(struct MPContext *mpctx)
@@ -349,6 +358,7 @@ static void ao_chain_set_ao(struct ao_chain *ao_c, struct ao *ao)
         mp_filter_set_high_priority(ao_c->queue_filter, true);
         audio_update_volume(ao_c->mpctx);
         audio_update_ao_volume(ao_c->mpctx);
+        audio_update_ao_mute(ao_c->mpctx);
     }
 
     if (ao_c->filter->ao_needs_update)
@@ -610,6 +620,7 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
     if (mpctx->ao) {
         audio_update_volume(mpctx);
         audio_update_ao_volume(mpctx);
+        audio_update_ao_mute(mpctx);
     }
 
     mp_wakeup_core(mpctx);

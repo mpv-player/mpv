@@ -2374,8 +2374,8 @@ Property list
     control. What this option shows depends on the API. For example, on ALSA
     this usually shows system-wide audio, while on PulseAudio per-application volume.
 
-``ao-mute`` (RW)
-    Similar to ``current-ao-volume``, but controls the mute state. May be unimplemented
+``current-ao-mute``
+    Similar to ``current-ao-volume``, but shows the mute state. May be unimplemented
     even if ``current-ao-volume`` works.
 
 ``audio-codec``

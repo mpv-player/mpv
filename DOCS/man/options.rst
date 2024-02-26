@@ -2042,6 +2042,12 @@ Audio
 
     See also: ``--volume``.
 
+``--ao-mute=<yes|no>``
+    Set the startup system audio mute status (default: no). May be unimplemented
+    even if ``ao-volume`` works.
+
+    See also: ``--ao-volume``.
+
 ``--audio-demuxer=<[+]name>``
     Use this audio demuxer type when using ``--audio-file``. Use a '+' before
     the name to force it; this will skip some checks. Give the demuxer name as

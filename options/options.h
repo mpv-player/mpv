@@ -187,6 +187,7 @@ typedef struct MPOpts {
     bool rgain_clip;             // Enable/disable clipping prevention
     float rgain_fallback;
     bool softvol_mute;
+    bool ao_mute;
     float softvol_max;
     float softvol_gain;
     float softvol_gain_min;

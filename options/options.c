@@ -714,6 +714,7 @@ static const m_option_t mp_opts[] = {
     {"volume-gain", OPT_FLOAT(softvol_gain), .flags = UPDATE_VOL,
         M_RANGE(-150, 150)},
     {"mute", OPT_BOOL(softvol_mute), .flags = UPDATE_VOL},
+    {"ao-mute", OPT_BOOL(ao_mute)},
     {"replaygain", OPT_CHOICE(rgain_mode,
         {"no", 0},
         {"track", 1},
