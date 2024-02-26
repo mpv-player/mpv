@@ -2262,7 +2262,7 @@ Audio
     a larger buffer if it pleases. If the device creates a smaller buffer,
     additional audio is buffered in an additional software buffer.
 
-    Making this larger will make soft-volume and other filters react slower,
+    Making this larger may make soft-volume and other filters react slower,
     introduce additional issues on playback speed change, and block the
     player on audio format changes. A smaller buffer might lead to audio
     dropouts.
