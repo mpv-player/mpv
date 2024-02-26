@@ -6,7 +6,7 @@ ln -snf . "$prefix_dir/usr"
 ln -snf . "$prefix_dir/local"
 
 wget="wget -nc --progress=bar:force"
-gitclone="git clone --depth=1 --recursive"
+gitclone="git clone --depth=1 --recursive --shallow-submodules"
 
 # -posix is Ubuntu's variant with pthreads support
 export CC=$TARGET-gcc-posix

@@ -5,7 +5,8 @@ set -e
 rm -rf subprojects
 mkdir -p subprojects
 git clone https://code.videolan.org/videolan/libplacebo.git \
-    --depth 1 --branch v6.338 --recurse-submodules subprojects/libplacebo
+    --recurse-submodules --shallow-submodules \
+    --depth=1 --branch v6.338 subprojects/libplacebo \
 
 meson setup build \
     -Dlibplacebo:vulkan=disabled \
