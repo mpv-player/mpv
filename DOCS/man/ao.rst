@@ -166,8 +166,8 @@ Available audio output drivers are:
         By default the channel volumes are used.
 
 ``sdl``
-    SDL 1.2+ audio output driver. Should work on any platform supported by SDL
-    1.2, but may require the ``SDL_AUDIODRIVER`` environment variable to be set
+    SDL 2.0+ audio output driver. Should work on any platform supported by SDL
+    2.0, but may require the ``SDL_AUDIODRIVER`` environment variable to be set
     appropriately for your system.
 
     .. note:: This driver is for compatibility with extremely foreign
