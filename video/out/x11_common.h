@@ -138,6 +138,8 @@ struct vo_x11_state {
     Window dnd_src_window;
 
     Atom icc_profile_property;
+
+    XEvent last_button_event;
 };
 
 bool vo_x11_init(struct vo *vo);
