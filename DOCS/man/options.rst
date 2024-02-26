@@ -5277,9 +5277,6 @@ ALSA audio output options
 -------------------------
 
 
-``--alsa-device=<device>``
-    Deprecated, use ``--audio-device`` (requires ``alsa/`` prefix).
-
 ``--alsa-resample=yes``
     Enable ALSA resampling plugin. (This is disabled by default, because
     some drivers report incorrect audio delay in some cases.)
