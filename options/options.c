@@ -706,9 +706,8 @@ static const m_option_t mp_opts[] = {
         {"no", 0}, {"yes", 1}, {"immediate", 2})},
 
     {"volume-max", OPT_FLOAT(softvol_max), M_RANGE(100, 1000)},
-    // values <0 for volume and mute are legacy and ignored
     {"volume", OPT_FLOAT(softvol_volume), .flags = UPDATE_VOL,
-        M_RANGE(-1, 1000)},
+        M_RANGE(0, 1000)},
     {"ao-volume", OPT_FLOAT(ao_volume), M_RANGE(-1, 100)},
     {"volume-gain-max", OPT_FLOAT(softvol_gain_max), M_RANGE(0, 150)},
     {"volume-gain-min", OPT_FLOAT(softvol_gain_min), M_RANGE(-150, 0)},

@@ -62,6 +62,7 @@ Interface changes
       over blending alpha components into specific background types
     - add `--border-background` option
     - remove `auto` choice from `--mute` (same as setting `no`)
+    - `--volume` no longer accepts negative values (same as setting `0`)
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

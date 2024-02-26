@@ -1991,8 +1991,7 @@ Audio
 
 ``--volume=<value>``
     Set the startup volume. 0 means silence, 100 means no volume reduction or
-    amplification. Negative values can be passed for compatibility, but are
-    treated as 0.
+    amplification.
 
     Since mpv 0.18.1, this always controls the internal mixer (aka software
     volume).
