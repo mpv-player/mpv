@@ -2038,10 +2038,8 @@ Audio
     Audio delay in seconds (positive or negative float value). Positive values
     delay the audio, and negative values delay the video.
 
-``--mute=<yes|no|auto>``
+``--mute=<yes|no>``
     Set startup audio mute status (default: no).
-
-    ``auto`` is a deprecated possible value that is equivalent to ``no``.
 
     See also: ``--volume``.
 
