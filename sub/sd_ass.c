@@ -724,7 +724,7 @@ static void ass_to_plaintext(struct buf *b, const char *in)
             if (in[0] == '}') {
                 in += 1;
                 in_tag = false;
-            } else if (in[0] == '\\' && in[1] == 'p') {
+            } else if (in[0] == '\\' && in[1] == 'p' && in[2] != 'o') {
                 in += 2;
                 // Skip text between \pN and \p0 tags. A \p without a number
                 // is the same as \p0, and leading 0s are also allowed.
