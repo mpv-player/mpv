@@ -15,10 +15,10 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MPV_MACOSX_APPLICATION
-#define MPV_MACOSX_APPLICATION
+#ifndef MAC_APPLICATION
+#define MAC_APPLICATION
 
-#include "osdep/macosx_menubar.h"
+#include "osdep/mac/menubar.h"
 #include "options/m_option.h"
 
 enum {
@@ -51,4 +51,4 @@ void cocoa_register_menu_item_action(MPMenuKey key, void* action);
 
 extern const struct m_sub_options macos_conf;
 
-#endif /* MPV_MACOSX_APPLICATION */
+#endif /* MAC_APPLICATION */

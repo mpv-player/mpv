@@ -27,7 +27,7 @@
 #include "common/msg.h"
 #include "audio/out/ao.h"
 #include "internal.h"
-#include "osdep/apple_utils.h"
+#include "osdep/utils-mac.h"
 
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
 

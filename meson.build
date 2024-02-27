@@ -249,7 +249,7 @@ sources = files(
 
     ## osdep
     'osdep/io.c',
-    'osdep/semaphore_osx.c',
+    'osdep/semaphore-mac.c',
     'osdep/subprocess.c',
     'osdep/timer.c',
 
@@ -391,13 +391,13 @@ cocoa = dependency('appleframeworks', modules: ['Cocoa', 'IOKit', 'QuartzCore'],
 features += {'cocoa': cocoa.found()}
 if features['cocoa']
     dependencies += cocoa
-    sources += files('osdep/apple_utils.c',
-                     'osdep/language-apple.c',
-                     'osdep/macosx_application.m',
-                     'osdep/macosx_events.m',
-                     'osdep/macosx_menubar.m',
-                     'osdep/main-fn-cocoa.c',
-                     'osdep/path-macosx.m')
+    sources += files('osdep/language-mac.c',
+                     'osdep/main-fn-mac.c',
+                     'osdep/path-mac.m',
+                     'osdep/utils-mac.c',
+                     'osdep/mac/application.m',
+                     'osdep/mac/events.m',
+                     'osdep/mac/menubar.m')
 endif
 
 if posix
@@ -530,16 +530,16 @@ features += {'vt.h': cc.has_header_symbol('sys/vt.h', 'VT_GETMODE')}
 features += {'consio.h': not features['vt.h'] and cc.has_header_symbol('sys/consio.h', 'VT_GETMODE')}
 
 # macOS's pthread_setname_np is a special snowflake and differs from literally every other platform.
-features += {'osx-thread-name': darwin}
+features += {'mac-thread-name': darwin}
 
 features += {'glibc-thread-name': false}
-if not features['osx-thread-name']
+if not features['mac-thread-name']
     features += {'glibc-thread-name': posix and cc.has_function('pthread_setname_np', args: '-D_GNU_SOURCE',
                                                                 dependencies: pthreads, prefix: '#include <pthread.h>')}
 endif
 
 features += {'bsd-thread-name': false}
-if not features['osx-thread-name'] and not features['glibc-thread-name']
+if not features['mac-thread-name'] and not features['glibc-thread-name']
     features += {'bsd-thread-name': posix and cc.has_function('pthread_set_name_np', dependencies: pthreads,
                                                               prefix: '#include <pthread.h>\n#include <pthread_np.h>')}
 endif
@@ -1513,12 +1513,12 @@ features += {'swift': swift.allowed()}
 
 swift_sources = []
 if features['cocoa'] and features['swift']
-    swift_sources += files('osdep/macos/libmpv_helper.swift',
-                           'osdep/macos/log_helper.swift',
-                           'osdep/macos/mpv_helper.swift',
-                           'osdep/macos/precise_timer.swift',
-                           'osdep/macos/swift_compat.swift',
-                           'osdep/macos/swift_extensions.swift',
+    swift_sources += files('osdep/mac/libmpv_helper.swift',
+                           'osdep/mac/log_helper.swift',
+                           'osdep/mac/mpv_helper.swift',
+                           'osdep/mac/precise_timer.swift',
+                           'osdep/mac/swift_compat.swift',
+                           'osdep/mac/swift_extensions.swift',
                            'video/out/mac/common.swift',
                            'video/out/mac/title_bar.swift',
                            'video/out/mac/view.swift',
@@ -1546,11 +1546,11 @@ macos_media_player = get_option('macos-media-player').require(
 )
 features += {'macos-media-player': macos_media_player.allowed()}
 if features['macos-media-player']
-    swift_sources += files('osdep/macos/remote_command_center.swift')
+    swift_sources += files('osdep/mac/remote_command_center.swift')
 endif
 
 if features['swift'] and swift_sources.length() > 0
-    subdir('osdep')
+    subdir('osdep/mac')
 endif
 
 macos_touchbar = get_option('macos-touchbar').require(
@@ -1559,7 +1559,7 @@ macos_touchbar = get_option('macos-touchbar').require(
 )
 features += {'macos-touchbar': macos_touchbar.allowed()}
 if features['macos-touchbar']
-    sources += files('osdep/macosx_touchbar.m')
+    sources += files('osdep/mac/touchbar.m')
 endif
 
 

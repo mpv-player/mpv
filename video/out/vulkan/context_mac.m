@@ -16,7 +16,7 @@
  */
 
 #include "video/out/gpu/context.h"
-#include "osdep/macOS_swift.h"
+#include "osdep/mac/swift.h"
 
 #include "common.h"
 #include "context.h"

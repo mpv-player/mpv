@@ -1,6 +1,4 @@
 /*
- * Cocoa Application Event Handling
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -17,21 +15,11 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MACOSX_EVENTS_H
-#define MACOSX_EVENTS_H
-#include "input/keycodes.h"
+#import <Cocoa/Cocoa.h>
+#include "osdep/mac/menubar.h"
 
-struct input_ctx;
-struct mpv_handle;
+@interface MenuBar : NSObject
 
-void cocoa_put_key(int keycode);
-void cocoa_put_key_with_modifiers(int keycode, int modifiers);
+- (void)registerSelector:(SEL)action forKey:(MPMenuKey)key;
 
-void cocoa_init_media_keys(void);
-void cocoa_uninit_media_keys(void);
-
-void cocoa_set_input_context(struct input_ctx *input_context);
-void cocoa_set_mpv_handle(struct mpv_handle *ctx);
-void cocoa_init_cocoa_cb(void);
-
-#endif
+@end

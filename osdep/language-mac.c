@@ -1,4 +1,6 @@
 /*
+ * User language lookup for Apple platforms
+ *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -15,16 +17,29 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MPV_MACOSX_MENU
-#define MPV_MACOSX_MENU
+#include "misc/language.h"
 
-// Menu Keys identifying menu items
-typedef enum {
-    MPM_H_SIZE,
-    MPM_N_SIZE,
-    MPM_D_SIZE,
-    MPM_MINIMIZE,
-    MPM_ZOOM,
-} MPMenuKey;
+#include "utils-mac.h"
+#include "mpv_talloc.h"
 
-#endif /* MPV_MACOSX_MENU */
+char **mp_get_user_langs(void)
+{
+    CFArrayRef arr = CFLocaleCopyPreferredLanguages();
+    if (!arr)
+        return NULL;
+    CFIndex count = CFArrayGetCount(arr);
+    if (!count)
+        return NULL;
+
+    char **ret = talloc_array_ptrtype(NULL, ret, count + 1);
+
+    for (CFIndex i = 0; i < count; i++) {
+        CFStringRef cfstr = CFArrayGetValueAtIndex(arr, i);
+        ret[i] = talloc_steal(ret, cfstr_get_cstr(cfstr));
+    }
+
+    ret[count] = NULL;
+
+    CFRelease(arr);
+    return ret;
+}

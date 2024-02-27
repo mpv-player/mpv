@@ -1,8 +1,8 @@
 # custom swift targets
-bridge = join_paths(source_root, 'osdep/macOS_swift_bridge.h')
-header = join_paths(build_root, 'osdep/macOS_swift.h')
-module = join_paths(build_root, 'osdep/macOS_swift.swiftmodule')
-target = join_paths(build_root, 'osdep/macOS_swift.o')
+bridge = join_paths(source_root, 'osdep/mac/swift_bridge.h')
+header = join_paths(build_root, 'osdep/mac/swift.h')
+module = join_paths(build_root, 'osdep/mac/swift.swiftmodule')
+target = join_paths(build_root, 'osdep/mac/swift.o')
 
 swift_flags = ['-frontend', '-c', '-sdk', macos_sdk_path,
                '-enable-objc-interop', '-emit-objc-header', '-parse-as-library']
@@ -22,7 +22,7 @@ endif
 extra_flags = get_option('swift-flags').split()
 swift_flags += extra_flags
 
-swift_compile = [swift_prog, swift_flags, '-module-name', 'macOS_swift',
+swift_compile = [swift_prog, swift_flags, '-module-name', 'swift',
                  '-emit-module-path', '@OUTPUT0@', '-import-objc-header', bridge,
                  '-emit-objc-header-path', '@OUTPUT1@', '-o', '@OUTPUT2@',
                  '@INPUT@', '-I.', '-I' + source_root,
@@ -31,7 +31,7 @@ swift_compile = [swift_prog, swift_flags, '-module-name', 'macOS_swift',
 
 swift_targets = custom_target('swift_targets',
     input: swift_sources,
-    output: ['macOS_swift.swiftmodule', 'macOS_swift.h', 'macOS_swift.o'],
+    output: ['swift.swiftmodule', 'swift.h', 'swift.o'],
     command: swift_compile,
 )
 sources += swift_targets

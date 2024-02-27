@@ -15,20 +15,16 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#import <Foundation/Foundation.h>
-#include "options/path.h"
-#include "osdep/path.h"
+#ifndef MAC_MENUBAR
+#define MAC_MENUBAR
 
-const char *mp_get_platform_path_osx(void *talloc_ctx, const char *type)
-{
-    if (strcmp(type, "osxbundle") == 0 && getenv("MPVBUNDLE")) {
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        NSString *path = [[NSBundle mainBundle] resourcePath];
-        char *res = talloc_strdup(talloc_ctx, [path UTF8String]);
-        [pool release];
-        return res;
-    }
-    if (strcmp(type, "desktop") == 0 && getenv("HOME"))
-        return mp_path_join(talloc_ctx, getenv("HOME"), "Desktop");
-    return NULL;
-}
+// Menu Keys identifying menu items
+typedef enum {
+    MPM_H_SIZE,
+    MPM_N_SIZE,
+    MPM_D_SIZE,
+    MPM_MINIMIZE,
+    MPM_ZOOM,
+} MPMenuKey;
+
+#endif /* MAC_MENUBAR */

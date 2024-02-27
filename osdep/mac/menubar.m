@@ -18,8 +18,8 @@
 #include "config.h"
 #include "common/common.h"
 
-#import "macosx_menubar_objc.h"
-#import "osdep/macosx_application_objc.h"
+#import "osdep/mac/menubar_objc.h"
+#import "osdep/mac/application_objc.h"
 
 @implementation MenuBar
 {
