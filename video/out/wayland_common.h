@@ -22,6 +22,8 @@
 #include "input/event.h"
 #include "vo.h"
 
+struct vo_wayland_seat;
+
 typedef struct {
     uint32_t format;
     uint32_t padding;
@@ -155,6 +157,7 @@ struct vo_wayland_state {
     struct wl_surface      *cursor_surface;
     bool                    cursor_visible;
     int                     allocated_cursor_scale;
+    struct vo_wayland_seat *last_button_seat;
 };
 
 bool vo_wayland_check_visible(struct vo *vo);
