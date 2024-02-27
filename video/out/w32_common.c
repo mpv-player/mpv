@@ -474,7 +474,8 @@ static bool handle_char(struct vo_w32_state *w32, WPARAM wc, bool decode)
 
 static void begin_dragging(struct vo_w32_state *w32)
 {
-    if (mp_input_test_dragging(w32->input_ctx, w32->mouse_x, w32->mouse_y))
+    if (w32->current_fs ||
+        mp_input_test_dragging(w32->input_ctx, w32->mouse_x, w32->mouse_y))
         return;
     // Window dragging hack
     ReleaseCapture();
