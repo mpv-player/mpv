@@ -237,6 +237,14 @@ Playback Control
     speed higher than normal automatically inserts the ``scaletempo2`` audio
     filter.
 
+``--speed-change-threshold=<0.01-100>``
+    When changing speed, mpv will clear out the previous A/V sync state if the
+    difference in the changed speed goes over this threshold. Generally,
+    resetting the A/V sync is desirable to avoid unwanted drifting and glitches
+    in the frame timing after the speed change. However if many small speed
+    changes are done rapidly in succession, this can lead to visual jitter due
+    to the A/V sync constantly being reset. (Default: ``0.1``).
+
 ``--pause``
     Start the player in paused state.
 

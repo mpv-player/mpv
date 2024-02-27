@@ -312,6 +312,7 @@ typedef struct MPOpts {
     int audio_output_format;
     int force_srate;
     double playback_speed;
+    double speed_change_threshold;
     bool pitch_correction;
     struct m_obj_settings *vf_settings;
     struct m_obj_settings *af_settings;

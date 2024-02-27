@@ -7227,8 +7227,11 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     }
 
     if (opt_ptr == &opts->playback_speed) {
+        double diff = fabs(mpctx->video_speed - opts->playback_speed);
+        bool want_reset = diff > opts->speed_change_threshold;
         update_playback_speed(mpctx);
-        reset_av_state(mpctx);
+        if (want_reset)
+            reset_av_state(mpctx);
         mp_wakeup_core(mpctx);
     }
 

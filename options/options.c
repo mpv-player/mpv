@@ -638,6 +638,7 @@ static const m_option_t mp_opts[] = {
     {"audio-channels", OPT_CHANNELS(audio_output_channels), .flags = UPDATE_AUDIO},
     {"audio-format", OPT_AUDIOFORMAT(audio_output_format), .flags = UPDATE_AUDIO},
     {"speed", OPT_DOUBLE(playback_speed), M_RANGE(0.01, 100.0)},
+    {"speed-change-threshold", OPT_DOUBLE(speed_change_threshold), M_RANGE(0.01, 100.0)},
 
     {"audio-pitch-correction", OPT_BOOL(pitch_correction)},
 
@@ -1003,7 +1004,8 @@ static const struct MPOpts mp_default_opts = {
     .subs_fallback_forced = 1,
     .audio_display = 1,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
-    .playback_speed = 1.,
+    .playback_speed = 1.0,
+    .speed_change_threshold = 0.1,
     .pitch_correction = true,
     .audiofile_auto = -1,
     .coverart_whitelist = true,
