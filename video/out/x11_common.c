@@ -1333,8 +1333,6 @@ void vo_x11_check_events(struct vo *vo)
             long msg[4] = {XEMBED_REQUEST_FOCUS};
             vo_x11_xembed_send_message(x11, msg);
             x11->last_button_event = Event;
-            if (Event.xbutton.button == 1)
-                vo_x11_begin_dragging(vo);
             break;
         case ButtonRelease:
             if (Event.xbutton.button - 1 >= MP_KEY_MOUSE_BTN_COUNT)
