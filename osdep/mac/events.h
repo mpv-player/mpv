@@ -1,5 +1,5 @@
 /*
- * Apple-specific utility functions
+ * Cocoa Application Event Handling
  *
  * This file is part of mpv.
  *
@@ -17,23 +17,21 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "apple_utils.h"
+#ifndef MAC_EVENTS
+#define MAC_EVENTS
+#include "input/keycodes.h"
 
-#include "mpv_talloc.h"
+struct input_ctx;
+struct mpv_handle;
 
-CFStringRef cfstr_from_cstr(const char *str)
-{
-    return CFStringCreateWithCString(NULL, str, kCFStringEncodingUTF8);
-}
+void cocoa_put_key(int keycode);
+void cocoa_put_key_with_modifiers(int keycode, int modifiers);
 
-char *cfstr_get_cstr(const CFStringRef cfstr)
-{
-    if (!cfstr)
-        return NULL;
-    CFIndex size =
-        CFStringGetMaximumSizeForEncoding(
-            CFStringGetLength(cfstr), kCFStringEncodingUTF8) + 1;
-    char *buffer = talloc_zero_size(NULL, size);
-    CFStringGetCString(cfstr, buffer, size, kCFStringEncodingUTF8);
-    return buffer;
-}
+void cocoa_init_media_keys(void);
+void cocoa_uninit_media_keys(void);
+
+void cocoa_set_input_context(struct input_ctx *input_context);
+void cocoa_set_mpv_handle(struct mpv_handle *ctx);
+void cocoa_init_cocoa_cb(void);
+
+#endif

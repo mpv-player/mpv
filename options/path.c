@@ -43,7 +43,7 @@
 // In order of decreasing priority: the first has highest priority.
 static const mp_get_platform_path_cb path_resolvers[] = {
 #if HAVE_COCOA
-    mp_get_platform_path_osx,
+    mp_get_platform_path_mac,
 #endif
 #if HAVE_DARWIN
     mp_get_platform_path_darwin,

@@ -25,16 +25,16 @@
 #include "options/m_config.h"
 #include "options/options.h"
 
-#import "osdep/macosx_application_objc.h"
-#import "osdep/macosx_events_objc.h"
+#import "osdep/mac/application_objc.h"
+#import "osdep/mac/events_objc.h"
 #include "osdep/threads.h"
 #include "osdep/main-fn.h"
 
 #if HAVE_MACOS_TOUCHBAR
-#import "osdep/macosx_touchbar.h"
+#import "osdep/mac/touchbar.h"
 #endif
 #if HAVE_SWIFT
-#include "osdep/macOS_swift.h"
+#include "osdep/mac/swift.h"
 #endif
 
 #define MPV_PROTOCOL @"mpv://"
@@ -145,15 +145,15 @@ static void terminate_cocoa_application(void)
     [super dealloc];
 }
 
-static const char macosx_icon[] =
+static const char mac_icon[] =
 #include "TOOLS/osxbundle/icon.icns.inc"
 ;
 
 - (NSImage *)getMPVIcon
 {
     // The C string contains a trailing null, so we strip it away
-    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
-                                             length:sizeof(macosx_icon) - 1
+    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)mac_icon
+                                             length:sizeof(mac_icon) - 1
                                        freeWhenDone:NO];
     return [[NSImage alloc] initWithData:icon_data];
 }

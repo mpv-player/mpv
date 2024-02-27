@@ -28,7 +28,7 @@
 #include "libmpv.h"
 
 #if HAVE_MACOS_COCOA_CB
-#include "osdep/macosx_events.h"
+#include "osdep/mac/events.h"
 #endif
 
 /*

@@ -33,13 +33,13 @@
 // doesn't make much sense, but needed to access keymap functionality
 #include "video/out/vo.h"
 
-#import "osdep/macosx_events_objc.h"
-#import "osdep/macosx_application_objc.h"
+#import "osdep/mac/events_objc.h"
+#import "osdep/mac/application_objc.h"
 
 #include "config.h"
 
 #if HAVE_SWIFT
-#include "osdep/macOS_swift.h"
+#include "osdep/mac/swift.h"
 #endif
 
 @interface EventsResponder ()
