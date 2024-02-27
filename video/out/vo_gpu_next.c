@@ -2104,13 +2104,13 @@ static void update_render_options(struct vo *vo)
     pars->params.disable_fbos = opts->dumb_mode == 1;
 
 #if PL_API_VER >= 346
-    enum pl_clear_mode map_background_types[3][2] = {
-        { BACKGROUND_NONE,  PL_CLEAR_SKIP  },
-        { BACKGROUND_COLOR, PL_CLEAR_COLOR },
-        { BACKGROUND_TILES, PL_CLEAR_TILES },
+    int map_background_types[3] = {
+        PL_CLEAR_SKIP,  // BACKGROUND_NONE
+        PL_CLEAR_COLOR, // BACKGROUND_COLOR
+        PL_CLEAR_TILES, // BACKGROUND_TILES
     };
-    pars->params.background = map_background_types[opts->background][1];
-    pars->params.border = map_background_types[p->next_opts->border_background][1];
+    pars->params.background = map_background_types[opts->background];
+    pars->params.border = map_background_types[p->next_opts->border_background];
 #else
     pars->params.blend_against_tiles = opts->background == BACKGROUND_TILES;
 #endif
