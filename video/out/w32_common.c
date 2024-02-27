@@ -498,13 +498,6 @@ static bool handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
 {
     btn |= mod_state(w32);
     mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_DOWN);
-
-    if (btn == MP_MBTN_LEFT) {
-        begin_dragging(w32);
-        // Indicate the message was handled, so DefWindowProc won't be called
-        return true;
-    }
-
     SetCapture(w32->window);
     return false;
 }
