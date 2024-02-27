@@ -341,7 +341,7 @@ static bool pack_rgba(struct mp_ass_packer *p, struct sub_bitmaps *res)
 // repacks all images). preferred_osd_format can be set to a desired
 // sub_bitmap_format. Currently, only SUBBITMAP_LIBASS is supported.
 void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
-                        int num_image_lists, bool image_lists_changed,
+                        int num_image_lists, bool image_lists_changed, bool video_color_space,
                         int preferred_osd_format, struct sub_bitmaps *out)
 {
     int format = preferred_osd_format == SUBBITMAP_BGRA ? SUBBITMAP_BGRA
@@ -361,6 +361,7 @@ void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
         .change_id = image_lists_changed,
         .format = SUBBITMAP_LIBASS,
         .parts = p->cached_parts,
+        .video_color_space = video_color_space,
     };
 
     for (int n = 0; n < num_image_lists; n++) {

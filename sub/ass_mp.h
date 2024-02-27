@@ -57,7 +57,7 @@ struct sub_bitmaps;
 struct mp_ass_packer;
 struct mp_ass_packer *mp_ass_packer_alloc(void *ta_parent);
 void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
-                        int num_image_lists, bool changed,
+                        int num_image_lists, bool changed, bool video_color_space,
                         int preferred_osd_format, struct sub_bitmaps *out);
 void mp_ass_get_bb(ASS_Image *image_list, ASS_Track *track,
                    struct mp_osd_res *res, double *out_rc);
