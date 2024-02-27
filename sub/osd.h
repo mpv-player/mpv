@@ -74,6 +74,8 @@ struct sub_bitmaps {
     int packed_w, packed_h;
 
     int change_id;  // Incremented on each change (0 is never used)
+
+    bool video_color_space; // True if the bitmap is in video color space
 };
 
 struct sub_bitmap_list {
