@@ -215,6 +215,11 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
     case PL_COLOR_TRC_GAMMA26: tonecurve[0] = cmsBuildGamma(cms, 2.6); break;
     case PL_COLOR_TRC_GAMMA28: tonecurve[0] = cmsBuildGamma(cms, 2.8); break;
 
+    case PL_COLOR_TRC_ST428:
+        tonecurve[0] = cmsBuildParametricToneCurve(cms, 2,
+                (double[3]){2.6, pow(52.37/48.0, 1/2.6), 0.0});
+        break;
+
     case PL_COLOR_TRC_SRGB:
         // Values copied from Little-CMS
         tonecurve[0] = cmsBuildParametricToneCurve(cms, 4,
