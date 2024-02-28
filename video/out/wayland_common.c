@@ -306,7 +306,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     if (button)
         mp_input_put_key(wl->vo->input_ctx, button | state | s->mpmod);
 
-    uint32_t edges;
+    enum xdg_toplevel_resize_edge edges;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         !wl->locked_size && (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN) &&
         !wl->vo_opts->border && check_for_resize(wl, wl->opts->edge_pixels_pointer, &edges))
@@ -429,19 +429,21 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
 
+    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
+    mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN);
+
     enum xdg_toplevel_resize_edge edge;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
-        check_for_resize(wl, wl->opts->edge_pixels_touch, &edge))
+        !wl->locked_size && check_for_resize(wl, wl->opts->edge_pixels_touch, &edge))
     {
         xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edge);
+        // Explicitly send an UP event after the client finishes a resize
+        mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
     } else {
         // Save the serial and seat for voctrl-initialized dragging requests.
         s->pointer_serial = serial;
         wl->last_button_seat = s;
     }
-
-    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
-    mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN);
 }
 
 static void touch_handle_up(void *data, struct wl_touch *wl_touch,
