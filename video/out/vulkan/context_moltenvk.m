@@ -30,7 +30,7 @@ static bool moltenvk_reconfig(struct ra_ctx *ctx);
 - (id) initWithContext: (struct ra_ctx*) cxt;
 @end
 
-@implementation MetalLayerDelegate : NSObject
+@implementation MetalLayerDelegate
 
 - (id)initWithContext: (struct ra_ctx*) ctx
 {
@@ -38,7 +38,7 @@ static bool moltenvk_reconfig(struct ra_ctx *ctx);
     return self;
 }
 
-- (void)layoutSublayers: (CALayer*) layer
+- (void)layoutSublayersOfLayer:(CALayer *)layer 
 {
     moltenvk_reconfig(_ra_ctx);
 }
