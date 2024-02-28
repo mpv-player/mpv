@@ -144,7 +144,7 @@ struct vo_wayland_state {
     /* DND */
     struct wl_data_device_manager *dnd_devman;
     struct wl_data_offer *dnd_offer;
-    enum mp_dnd_action dnd_action;
+    int dnd_action; // actually enum mp_dnd_action
     char *dnd_mime_type;
     int dnd_fd;
     int dnd_mime_score;
