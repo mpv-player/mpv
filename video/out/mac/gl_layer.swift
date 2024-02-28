@@ -82,8 +82,6 @@ class GLLayer: CAOpenGLLayer {
     enum Draw: Int { case normal = 1, atomic, atomicEnd }
     var draw: Draw = .normal
 
-    let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue.draw")
-
     var needsICCUpdate: Bool = false {
         didSet {
             if needsICCUpdate == true {
@@ -239,7 +237,7 @@ class GLLayer: CAOpenGLLayer {
 
     func update(force: Bool = false) {
         if force { forceDraw = true }
-        queue.async {
+        DispatchQueue.main.async {
             if self.forceDraw || !self.inLiveResize {
                 self.needsFlip = true
                 self.display()
