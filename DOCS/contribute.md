@@ -131,11 +131,23 @@ Touching user-visible parts may require updating the mpv docs
 - Changes to command line options (addition/modification/removal) must be
   documented in options.rst.
 - Changes to input properties or input commands must be documented in input.rst.
-- All incompatible changes to the user interface (options, properties, commands)
-  must be documented with a small note in interface-changes.rst. (Additions may
-  be documented there as well, but this isn't required.)
 - Changes to the libmpv API must be reflected in the libmpv's headers doxygen,
   and in client-api-changes.rst.
+
+Interface change policy
+-----------------------
+
+- All incompatible changes to the user interface (options, properties, commands)
+  must be documented by making a new text file with a txt extension containing a
+  small note in the DOCS/interface-changes directory.
+- The name of the file should be brief and related to the commit that makes the
+  change.
+- Grouping multiple related changes in the same file is also OK. Just be sure to
+  put each separate change on a different line.
+- Documenting additions in DOCS/interface-changes is optional but encouraged.
+- interface-changes.rst is never directly updated except when making new major
+  releases.
+- See DOCS/interface-changes/example.txt for an example.
 
 Code formatting
 ---------------

@@ -17,9 +17,12 @@ a large part of the user interface and APIs.
 
 Also see compatibility.rst.
 
-This document lists changes to them. New changes are added to the top. Usually,
-only incompatible or important changes are mentioned. New options/commands/etc.
-are not always listed.
+This document lists changes to them. New options/commands/etc. are not always
+listed.
+
+**Never** write to this file directly except when making releases. New changes
+are added in the interface-changes directory instead. See contribute.md for more
+details.
 
 Interface changes
 =================

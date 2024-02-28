@@ -26,8 +26,13 @@ While on master:
 
 - Update the `VERSION` file.
 
-- Update `DOCS/client-api-changes.rst` and `DOCS/interface-changes.rst`
-  (in particular, update the last version numbers if necessary)
+- Update `DOCS/client-api-changes.rst` (in particular, update the last version
+  number if necessary)
+
+- Run `TOOLS/gen-interface-changes.py` to refresh `DOCS/interface-changes.rst`,
+  edit manually as necessary.
+
+- Delete all `.txt` files in the `DOCS/interface-changes` directory except for `example.txt`.
 
 - Create signed commit with changes.
 
