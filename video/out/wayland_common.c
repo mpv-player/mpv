@@ -1569,7 +1569,7 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
 
     if (fdp.revents & POLLIN) {
         size_t data_read = 0;
-        const size_t chunk_size = 1;
+        const size_t chunk_size = 256;
         bstr file_list = {
             .start = talloc_zero_size(NULL, chunk_size),
         };
