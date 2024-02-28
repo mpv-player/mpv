@@ -1568,25 +1568,35 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
         return;
 
     if (fdp.revents & POLLIN) {
-        size_t data_read = 0;
+        ssize_t data_read = 0;
         const size_t chunk_size = 256;
         bstr file_list = {
             .start = talloc_zero_size(NULL, chunk_size),
         };
 
-        while ((data_read = read(wl->dnd_fd, file_list.start + file_list.len, chunk_size)) > 0) {
+        while (1) {
+            data_read = read(wl->dnd_fd, file_list.start + file_list.len, chunk_size);
+            if (data_read == -1 && errno == EINTR)
+                continue;
+            else if (data_read <= 0)
+                break;
             file_list.len += data_read;
             file_list.start = talloc_realloc_size(NULL, file_list.start, file_list.len + chunk_size);
             memset(file_list.start + file_list.len, 0, chunk_size);
         }
 
-        MP_VERBOSE(wl, "Read %zu bytes from the DND fd\n", file_list.len);
+        if (data_read == -1) {
+            MP_VERBOSE(wl, "DND aborted (read error)\n");
+        } else {
+            MP_VERBOSE(wl, "Read %zu bytes from the DND fd\n", file_list.len);
 
-        if (wl->dnd_offer)
-            wl_data_offer_finish(wl->dnd_offer);
+            if (wl->dnd_offer)
+                wl_data_offer_finish(wl->dnd_offer);
 
-        mp_event_drop_mime_data(wl->vo->input_ctx, wl->dnd_mime_type,
-                                file_list, wl->dnd_action);
+            assert(wl->dnd_action >= 0);
+            mp_event_drop_mime_data(wl->vo->input_ctx, wl->dnd_mime_type,
+                                    file_list, wl->dnd_action);
+        }
 
         talloc_free(file_list.start);
         free_dnd_data(wl);
