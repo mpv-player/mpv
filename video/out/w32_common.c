@@ -181,6 +181,7 @@ struct vo_w32_state {
 
     bool cleared;
     bool dragging;
+    bool start_dragging;
     BOOL win_arranging;
 
     bool conversion_mode_init;
@@ -1262,6 +1263,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         mp_dispatch_queue_process(w32->dispatch, 0);
         w32->in_dispatch = false;
     }
+    // Start window dragging if the flag is set by the voctrl.
+    // This is processed here to avoid blocking the dispatch queue.
+    if (w32->start_dragging) {
+        w32->start_dragging = false;
+        begin_dragging(w32);
+    }
 
     switch (message) {
     case WM_ERASEBKGND:
@@ -2165,7 +2172,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         *(bool *)arg = w32->focused;
         return VO_TRUE;
     case VOCTRL_BEGIN_DRAGGING:
-        begin_dragging(w32);
+        w32->start_dragging = true;
         return VO_TRUE;
     }
     return VO_NOTIMPL;
