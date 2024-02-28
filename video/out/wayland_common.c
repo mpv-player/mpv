@@ -1549,6 +1549,15 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 /* Static functions */
+static void free_dnd_data(struct vo_wayland_state *wl)
+{
+    // caller should close wl->dnd_fd if appropriate
+
+    wl->dnd_action = -1;
+    TA_FREEP(&wl->dnd_mime_type);
+    wl->dnd_mime_score = 0;
+}
+
 static void check_dnd_fd(struct vo_wayland_state *wl)
 {
     if (wl->dnd_fd == -1)
@@ -1573,21 +1582,18 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
 
         MP_VERBOSE(wl, "Read %zu bytes from the DND fd\n", file_list.len);
 
-        mp_event_drop_mime_data(wl->vo->input_ctx, wl->dnd_mime_type,
-                                file_list, wl->dnd_action);
-        talloc_free(file_list.start);
-        if (wl->dnd_mime_type)
-            talloc_free(wl->dnd_mime_type);
-
-        if (wl->dnd_action >= 0 && wl->dnd_offer)
+        if (wl->dnd_offer)
             wl_data_offer_finish(wl->dnd_offer);
 
-        wl->dnd_action = -1;
-        wl->dnd_mime_type = NULL;
-        wl->dnd_mime_score = 0;
+        mp_event_drop_mime_data(wl->vo->input_ctx, wl->dnd_mime_type,
+                                file_list, wl->dnd_action);
+
+        talloc_free(file_list.start);
+        free_dnd_data(wl);
     }
 
     if (fdp.revents & (POLLIN | POLLERR | POLLHUP)) {
+        free_dnd_data(wl);
         close(wl->dnd_fd);
         wl->dnd_fd = -1;
     }
@@ -2592,6 +2598,10 @@ void vo_wayland_uninit(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     if (!wl)
         return;
+
+    if (wl->dnd_fd != -1)
+        close(wl->dnd_fd);
+    free_dnd_data(wl);
 
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
