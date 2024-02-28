@@ -1593,6 +1593,8 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
     }
 
     if (fdp.revents & (POLLIN | POLLERR | POLLHUP)) {
+        if (wl->dnd_action >= 0)
+            MP_VERBOSE(wl, "DND aborted (hang up or error)\n");
         free_dnd_data(wl);
         close(wl->dnd_fd);
         wl->dnd_fd = -1;
