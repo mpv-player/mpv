@@ -870,10 +870,8 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
      * geometry and scaling should be recalculated. */
     if (wl->current_output && wl->current_output->output == wl_output) {
         set_surface_scaling(wl);
-        spawn_cursor(wl);
         set_geometry(wl, false);
         prepare_resize(wl, 0, 0);
-        wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
@@ -933,13 +931,9 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     wl->current_output->has_surface = true;
     bool force_resize = false;
 
-    if (!wl->fractional_scale_manager && wl_surface_get_version(wl_surface) < 6 &&
-        wl->scaling != wl->current_output->scale)
-    {
+    if (wl->scaling != wl->current_output->scale) {
         set_surface_scaling(wl);
-        spawn_cursor(wl);
         force_resize = true;
-        wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
     if (!mp_rect_equals(&old_output_geometry, &wl->current_output->geometry)) {
@@ -1040,7 +1034,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         width = height = 0;
     }
 
-    if (!wl->configured) {
+    if (!wl->geometry_configured) {
         /* Save initial window size if the compositor gives us a hint here. */
         bool autofit_or_geometry = vo_opts->geometry.wh_valid || vo_opts->autofit.wh_valid ||
                                    vo_opts->autofit_larger.wh_valid || vo_opts->autofit_smaller.wh_valid;
@@ -1437,9 +1431,8 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
     }
 
-    if (!strcmp(interface, wl_subcompositor_interface.name) && (ver >= 1) && found++) {
+    if (!strcmp(interface, wl_subcompositor_interface.name) && (ver >= 1) && found++)
         wl->subcompositor = wl_registry_bind(reg, id, &wl_subcompositor_interface, 1);
-    }
 
     if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 4) && found++) {
         wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 4);
@@ -1447,13 +1440,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         zwp_linux_dmabuf_feedback_v1_add_listener(wl->dmabuf_feedback, &dmabuf_feedback_listener, wl);
     }
 
-    if (!strcmp (interface, wp_viewporter_interface.name) && (ver >= 1) && found++) {
+    if (!strcmp (interface, wp_viewporter_interface.name) && (ver >= 1) && found++)
         wl->viewporter = wl_registry_bind (reg, id, &wp_viewporter_interface, 1);
-    }
 
-    if (!strcmp(interface, wl_data_device_manager_interface.name) && (ver >= 3) && found++) {
+    if (!strcmp(interface, wl_data_device_manager_interface.name) && (ver >= 3) && found++)
         wl->dnd_devman = wl_registry_bind(reg, id, &wl_data_device_manager_interface, 3);
-    }
 
     if (!strcmp(interface, wl_output_interface.name) && (ver >= 2) && found++) {
         struct vo_wayland_output *output = talloc_zero(wl, struct vo_wayland_output);
@@ -1490,30 +1481,25 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl_list_insert(&wl->seat_list, &seat->link);
     }
 
-    if (!strcmp(interface, wl_shm_interface.name) && found++) {
+    if (!strcmp(interface, wl_shm_interface.name) && found++)
         wl->shm = wl_registry_bind(reg, id, &wl_shm_interface, 1);
-    }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_27
-    if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++) {
+    if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++)
         wl->content_type_manager = wl_registry_bind(reg, id, &wp_content_type_manager_v1_interface, 1);
-    }
 
-    if (!strcmp(interface, wp_single_pixel_buffer_manager_v1_interface.name) && found++) {
+    if (!strcmp(interface, wp_single_pixel_buffer_manager_v1_interface.name) && found++)
         wl->single_pixel_manager = wl_registry_bind(reg, id, &wp_single_pixel_buffer_manager_v1_interface, 1);
-    }
 #endif
 
 #if HAVE_WAYLAND_PROTOCOLS_1_31
-    if (!strcmp(interface, wp_fractional_scale_manager_v1_interface.name) && found++) {
+    if (!strcmp(interface, wp_fractional_scale_manager_v1_interface.name) && found++)
         wl->fractional_scale_manager = wl_registry_bind(reg, id, &wp_fractional_scale_manager_v1_interface, 1);
-    }
 #endif
 
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    if (!strcmp(interface, wp_cursor_shape_manager_v1_interface.name) && found++) {
+    if (!strcmp(interface, wp_cursor_shape_manager_v1_interface.name) && found++)
         wl->cursor_shape_manager = wl_registry_bind(reg, id, &wp_cursor_shape_manager_v1_interface, 1);
-    }
 #endif
 
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
@@ -1527,13 +1513,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
     }
 
-    if (!strcmp(interface, zxdg_decoration_manager_v1_interface.name) && found++) {
+    if (!strcmp(interface, zxdg_decoration_manager_v1_interface.name) && found++)
         wl->xdg_decoration_manager = wl_registry_bind(reg, id, &zxdg_decoration_manager_v1_interface, 1);
-    }
 
-    if (!strcmp(interface, zwp_idle_inhibit_manager_v1_interface.name) && found++) {
+    if (!strcmp(interface, zwp_idle_inhibit_manager_v1_interface.name) && found++)
         wl->idle_inhibit_manager = wl_registry_bind(reg, id, &zwp_idle_inhibit_manager_v1_interface, 1);
-    }
 
     if (found > 1)
         MP_VERBOSE(wl, "Registered for protocol %s\n", interface);
@@ -1660,6 +1644,7 @@ static bool create_input(struct vo_wayland_state *wl)
 static int create_viewports(struct vo_wayland_state *wl)
 {
     wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
+    wl->cursor_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->cursor_surface);
     wl->osd_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->osd_surface);
     wl->video_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->video_surface);
 
@@ -1972,7 +1957,8 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
             int scale = MPMAX(wl->scaling, 1);
             wl_pointer_set_cursor(s->pointer, s->pointer_serial, wl->cursor_surface,
                                   img->hotspot_x / scale, img->hotspot_y / scale);
-            wl_surface_set_buffer_scale(wl->cursor_surface, scale);
+            wp_viewport_set_destination(wl->cursor_viewport, lround(img->width / scale),
+                                        img->height / scale);
             wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
             wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
         }
@@ -2061,12 +2047,13 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
 
 static void set_surface_scaling(struct vo_wayland_state *wl)
 {
-    if (wl->fractional_scale_manager)
+    if (wl->fractional_scale_manager || wl_surface_get_version(wl->surface) >= 6)
         return;
 
     double old_scale = wl->scaling;
     wl->scaling = wl->current_output->scale;
     rescale_geometry(wl, old_scale);
+    wl->pending_vo_events |= VO_EVENT_DPI;
 }
 
 static void set_window_bounds(struct vo_wayland_state *wl)
@@ -2088,12 +2075,11 @@ static void set_window_bounds(struct vo_wayland_state *wl)
 
 static int spawn_cursor(struct vo_wayland_state *wl)
 {
-    if (wl->cursor_shape_manager)
+    if (wl->allocated_cursor_scale == wl->scaling) {
         return 0;
-    if (wl->allocated_cursor_scale == wl->scaling)
-        return 0;
-    else if (wl->cursor_theme)
+    } else if (wl->cursor_theme) {
         wl_cursor_theme_destroy(wl->cursor_theme);
+    }
 
     const char *xcursor_theme = getenv("XCURSOR_THEME");
     const char *size_str = getenv("XCURSOR_SIZE");
@@ -2559,15 +2545,15 @@ bool vo_wayland_reconfig(struct vo *vo)
         wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
-    if (wl->vo_opts->auto_window_resize || !wl->configured)
+    if (wl->vo_opts->auto_window_resize || !wl->geometry_configured)
         set_geometry(wl, false);
 
     if (wl->opts->configure_bounds)
         set_window_bounds(wl);
 
-    if (!wl->configured || !wl->locked_size) {
+    if (!wl->geometry_configured || !wl->locked_size) {
         wl->geometry = wl->window_size;
-        wl->configured = true;
+        wl->geometry_configured = true;
     }
 
     if (wl->vo_opts->cursor_passthrough)
@@ -2671,6 +2657,9 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->viewport)
         wp_viewport_destroy(wl->viewport);
+
+    if (wl->cursor_viewport)
+        wp_viewport_destroy(wl->cursor_viewport);
 
     if (wl->osd_viewport)
         wp_viewport_destroy(wl->osd_viewport);

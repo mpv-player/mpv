@@ -38,7 +38,7 @@
 
 #include "config.h"
 
-#if HAVE_MACOS_COCOA_CB
+#if HAVE_SWIFT
 #include "osdep/macOS_swift.h"
 #endif
 
@@ -52,6 +52,7 @@
 
 - (NSEvent *)handleKey:(NSEvent *)event;
 - (BOOL)setMpvHandle:(struct mpv_handle *)ctx;
+- (void)initCocoaCb;
 - (void)readEvents;
 - (void)startMediaKeys;
 - (void)stopMediaKeys;
@@ -166,6 +167,11 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
     }
 }
 
+void cocoa_init_cocoa_cb(void)
+{
+    [[EventsResponder sharedInstance] initCocoaCb];
+}
+
 @implementation EventsResponder
 
 @synthesize remoteCommandCenter = _remoteCommandCenter;
@@ -252,14 +258,20 @@ void cocoa_set_mpv_handle(struct mpv_handle *ctx)
 - (BOOL)setMpvHandle:(struct mpv_handle *)ctx
 {
     if (_is_application) {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            _ctx = ctx;
-            [NSApp setMpvHandle:ctx];
-        });
+        _ctx = ctx;
         return YES;
-    } else {
-        mpv_destroy(ctx);
-        return NO;
+    }
+
+    mpv_destroy(ctx);
+    return NO;
+}
+
+- (void)initCocoaCb
+{
+    if (_is_application) {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [NSApp initCocoaCb:_ctx];
+        });
     }
 }
 

@@ -24,8 +24,6 @@ class MacCommon: Common {
     var swapTime: UInt64 = 0
     let swapLock: NSCondition = NSCondition()
 
-    var needsICCUpdate: Bool = false
-
     @objc init(_ vo: UnsafeMutablePointer<vo>) {
         let newlog = mp_log_new(vo, vo.pointee.log, "mac")
         super.init(newlog)
@@ -65,7 +63,7 @@ class MacCommon: Common {
             }
 
             windowDidResize()
-            needsICCUpdate = true
+            updateICCProfile()
         }
 
         return true
@@ -92,11 +90,6 @@ class MacCommon: Common {
             }
             swapTime = 0
             swapLock.unlock()
-        }
-
-        if needsICCUpdate {
-            needsICCUpdate = false
-            updateICCProfile()
         }
     }
 
@@ -146,13 +139,7 @@ class MacCommon: Common {
         flagEvents(VO_EVENT_AMBIENT_LIGHTING_CHANGED)
     }
 
-    @objc override func updateICCProfile() {
-        guard let colorSpace = window?.screen?.colorSpace else {
-            log.sendWarning("Couldn't update ICC Profile, no color space available")
-            return
-        }
-
-        layer?.colorspace = colorSpace.cgColorSpace
+    override func updateICCProfile() {
         flagEvents(VO_EVENT_ICC_PROFILE_CHANGED)
     }
 
@@ -166,7 +153,7 @@ class MacCommon: Common {
     }
 
     override func windowDidChangeScreenProfile() {
-        needsICCUpdate = true
+        updateICCProfile()
     }
 
     override func windowDidChangeBackingProperties() {

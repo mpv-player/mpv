@@ -412,7 +412,7 @@ function update()
     -- thin as possible and make it appear to be 1px wide by giving it 0.5px
     -- horizontal borders.
     local cheight = opts.font_size * 8
-    local cglyph = '{\\r' ..
+    local cglyph = '{\\rDefault' ..
                    (mp.get_property_native('focused') == false
                     and '\\alpha&HFF&' or '\\1a&H44&\\3a&H44&\\4a&H99&') ..
                    '\\1c&Heeeeee&\\3c&Heeeeee&\\4c&H000000&' ..

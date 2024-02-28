@@ -33,7 +33,7 @@
 #if HAVE_MACOS_TOUCHBAR
 #import "osdep/macosx_touchbar.h"
 #endif
-#if HAVE_MACOS_COCOA_CB
+#if HAVE_SWIFT
 #include "osdep/macOS_swift.h"
 #endif
 
@@ -183,10 +183,12 @@ static const char macosx_icon[] =
     }
 }
 
-- (void)setMpvHandle:(struct mpv_handle *)ctx
+- (void)initCocoaCb:(struct mpv_handle *)ctx
 {
 #if HAVE_MACOS_COCOA_CB
-    [NSApp setCocoaCB:[[CocoaCB alloc] init:ctx]];
+    if (!_cocoa_cb) {
+        [NSApp setCocoaCB:[[CocoaCB alloc] init:ctx]];
+    }
 #endif
 }
 
