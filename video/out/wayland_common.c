@@ -1474,10 +1474,6 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         seat->id   = id;
         seat->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
         wl_seat_add_listener(seat->seat, &seat_listener, seat);
-        if (wl->dnd_devman) {
-            seat->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, seat->seat);
-            wl_data_device_add_listener(seat->dnd_ddev, &data_device_listener, seat);
-        }
         wl_list_insert(&wl->seat_list, &seat->link);
     }
 
@@ -2490,7 +2486,13 @@ bool vo_wayland_init(struct vo *vo)
     }
 #endif
 
-    if (!wl->dnd_devman) {
+    if (wl->dnd_devman) {
+        struct vo_wayland_seat *seat;
+        wl_list_for_each(seat, &wl->seat_list, link) {
+            seat->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, seat->seat);
+            wl_data_device_add_listener(seat->dnd_ddev, &data_device_listener, seat);
+        }
+    } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s (ver. 3) protocol!\n",
                    wl_data_device_manager_interface.name);
     }
