@@ -23,7 +23,6 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 #if HAVE_COCOA
-#define VK_USE_PLATFORM_MACOS_MVK
 #define VK_USE_PLATFORM_METAL_EXT
 #endif
 
