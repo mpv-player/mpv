@@ -184,7 +184,7 @@ static void filters_init(struct sd *sd)
             .opts = mp_get_config_group(ft, sd->global, &mp_sub_filter_opts),
             .driver = filters[n],
             .codec = "ass",
-            .event_format = ctx->ass_track->event_format,
+            .event_format = talloc_strdup(ft, ctx->ass_track->event_format),
         };
         if (ft->driver->init(ft)) {
             MP_TARRAY_APPEND(ctx, ctx->filters, ctx->num_filters, ft);
