@@ -188,8 +188,13 @@ void audio_update_ao_volume(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     struct ao *ao = mpctx->ao;
     float vol = opts->ao_volume;
-    if (!ao || vol < 0)
+    if (!ao)
         return;
+    if (vol < 0) {
+        ao_control(ao, AOCONTROL_GET_VOLUME, &vol);
+        opts->ao_volume = (int) vol;
+        return;
+    }
 
     ao_control(ao, AOCONTROL_SET_VOLUME, &vol);
 }
