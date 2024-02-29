@@ -142,6 +142,7 @@ class Common: NSObject {
         view.layer = layer
         view.wantsLayer = true
         view.layerContentsPlacement = .scaleProportionallyToFit
+        layer.delegate = view
     }
 
     func initWindowState() {
