@@ -56,7 +56,7 @@ static bool mac_vk_init(struct ra_ctx *ctx)
         goto error;
 
     VkMetalSurfaceCreateInfoEXT mac_info = {
-        .sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK,
+        .sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT,
         .pNext = NULL,
         .flags = 0,
         .pLayer = p->vo_mac.layer,
