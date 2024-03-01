@@ -1997,13 +1997,6 @@ Audio
     Since mpv 0.18.1, this always controls the internal mixer (aka software
     volume).
 
-``--ao-volume=<value>``
-    Set the startup system volume. This option works only if mpv audio
-    output is currently active, and the underlying implementation supports
-    volume control. What this option does depends on the API. For example, on
-    ALSA this usually changes system-wide audio, while with PulseAudio this
-    controls per-application volume. Negative values will be ignored.
-
 ``--volume-max=<100.0-1000.0>``
     Set the maximum amplification level in percent (default: 130). A value of
     130 will allow you to adjust the volume up to about double the normal level.
