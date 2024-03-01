@@ -94,6 +94,8 @@ struct command_ctx {
     char **warned_deprecated;
     int num_warned_deprecated;
 
+    bool command_opts_processed;
+
     struct overlay *overlays;
     int num_overlays;
     // One of these is in use by the OSD; the other one exists so that the
@@ -7161,6 +7163,27 @@ void handle_command_updates(struct MPContext *mpctx)
 
     // Depends on polling demuxer wakeup callback notifications.
     cache_dump_poll(mpctx);
+
+    // Potentially run the commands now (idle) instead of waiting for a file to load.
+    if (mpctx->stop_play == PT_STOP)
+        run_command_opts(mpctx);
+}
+
+void run_command_opts(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct command_ctx *ctx = mpctx->command_ctx;
+
+    if (!opts->input_commands || ctx->command_opts_processed)
+        return;
+
+    // Take easy way out and add these to the input queue.
+    for (int i = 0; opts->input_commands[i]; i++) {
+        struct mp_cmd *cmd = mp_input_parse_cmd(mpctx->input, bstr0(opts->input_commands[i]),
+                                                "the command line");
+        mp_input_queue_cmd(mpctx->input, cmd);
+    }
+    ctx->command_opts_processed = true;
 }
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg)
@@ -7297,6 +7320,11 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (opt_ptr == &opts->vo->android_surface_size) {
         if (mpctx->video_out)
             vo_control(mpctx->video_out, VOCTRL_EXTERNAL_RESIZE, NULL);
+    }
+
+    if (opt_ptr == &opts->input_commands) {
+        mpctx->command_ctx->command_opts_processed = false;
+        run_command_opts(mpctx);
     }
 
     if (opt_ptr == &opts->playback_speed) {

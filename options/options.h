@@ -256,6 +256,7 @@ typedef struct MPOpts {
     char *osd_status_msg;
     char *osd_msg[3];
     int player_idle_mode;
+    char **input_commands;
     bool consolecontrols;
     int playlist_pos;
     struct m_rel_time play_start;

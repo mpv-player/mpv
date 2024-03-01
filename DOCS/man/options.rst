@@ -4101,6 +4101,21 @@ Input
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
 
+``--input-commands=<cmd1,cmd2,...>``
+    Define a list of commands for mpv to run. The syntax is the same as format
+    as ``input.conf`` but without the key binding argument at the beginning.
+    When this option is set at startup, the commands will run after audio and
+    video playback are about to begin if applicable (in idle mode with no file,
+    it will run immediately). When changing values at runtime, the commands will
+    also run as soon as possible.
+
+    This is a string list option. See `List Options`_ for details.
+
+    .. admonition:: Example
+
+        ``--input-commands="playlist-play-index 1,set ao-volume 40"``
+            sets the playlist index to 1 and the ao-volume to 40
+
 ``--input-doubleclick-time=<milliseconds>``
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
