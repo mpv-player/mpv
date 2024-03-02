@@ -45,8 +45,6 @@
 #include "command.h"
 #include "screenshot.h"
 
-#define MIN_PAST_FRAMES 10
-
 enum {
     // update_video() - code also uses: <0 error, 0 eof, >0 progress
     VD_ERROR = -1,
@@ -95,17 +93,6 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
     vo_seek_reset(vo_c->vo);
     vo_c->underrun = false;
     vo_c->underrun_signaled = false;
-}
-
-void reset_av_state(struct MPContext *mpctx)
-{
-    mpctx->delay = 0;
-    mpctx->display_sync_drift_dir = 0;
-    mpctx->display_sync_error = 0;
-    mpctx->last_av_difference = 0;
-    mpctx->logged_async_diff = -1;
-    mpctx->num_past_frames = 0;
-    mpctx->total_avsync_change = 0;
 }
 
 void reset_video_state(struct MPContext *mpctx)
@@ -606,9 +593,7 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
 
     if (mpctx->video_status < STATUS_READY) {
         mpctx->time_frame = 0;
-    } else if (mpctx->display_sync_active || vo->opts->video_sync == VS_NONE ||
-               mpctx->num_past_frames <= MIN_PAST_FRAMES)
-    {
+    } else if (mpctx->display_sync_active || vo->opts->video_sync == VS_NONE) {
         // don't touch the timing
     } else if (mpctx->audio_status == STATUS_PLAYING &&
                mpctx->video_status == STATUS_PLAYING &&
@@ -742,7 +727,7 @@ static double compute_audio_drift(struct MPContext *mpctx, double vsync)
     // audio desync for y. Assume speed didn't change for the frames we're
     // looking at for simplicity. This also should actually use the realtime
     // (minus paused time) for x, but use vsync scheduling points instead.
-    if (mpctx->num_past_frames <= MIN_PAST_FRAMES)
+    if (mpctx->num_past_frames <= 10)
         return NAN;
     int num = mpctx->num_past_frames - 1;
     double sum_x = 0, sum_y = 0, sum_xy = 0, sum_xx = 0;
@@ -845,9 +830,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     drop &= frame->can_drop;
 
     if (resample && using_spdif_passthrough(mpctx))
-        return;
-
-    if (mpctx->num_past_frames <= MIN_PAST_FRAMES)
         return;
 
     double vsync = vo_get_vsync_interval(vo) / 1e9;

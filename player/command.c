@@ -7246,7 +7246,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (opt_ptr == &opts->playback_speed) {
         update_playback_speed(mpctx);
-        reset_av_state(mpctx);
         mp_wakeup_core(mpctx);
     }
 
