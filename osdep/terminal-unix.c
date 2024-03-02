@@ -240,6 +240,13 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
             int mods = 0;
             if (buf.b[0] == '\033') {
                 if (buf.len > 1 && buf.b[1] == '[') {
+                    // Throw away unrecognized mouse CSI sequences.
+                    // Cannot be handled by the loop below since the bytes
+                    // afterwards can be out of that range.
+                    if (buf.len > 2 && buf.b[2] == 'M') {
+                        skip_buf(&buf, buf.len);
+                        continue;
+                    }
                     // unknown CSI sequence. wait till it completes
                     for (int i = 2; i < buf.len; i++) {
                         if (buf.b[i] >= 0x40 && buf.b[i] <= 0x7E)  {
