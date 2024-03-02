@@ -71,7 +71,12 @@ int m_option_parse(struct mp_log *log, const m_option_t *opt,
             return r;
     }
 
+    // Silence log on skippable options
+    int old_log_level = mp_msg_level(log);
+    mp_msg_set_max_level(log, -1);
     r = opt->type->parse(log, opt, name, param, dst);
+    mp_msg_set_max_level(log, old_log_level);
+
     if (r < 0)
         return r;
 

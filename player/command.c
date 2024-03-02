@@ -5583,7 +5583,15 @@ static void cmd_loadfile(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
     int action_flag = cmd->args[1].v.i;
-    int insert_at_idx = cmd->args[2].v.i;
+    int insert_at_idx = -1;
+    char **pairs;
+
+    if (cmd->args[2].skipped) {
+        pairs = cmd->args[2].v.str_list;
+    } else {
+        insert_at_idx = cmd->args[2].v.i;
+        pairs = cmd->args[3].v.str_list;
+    }
 
     struct load_action action = get_load_action(mpctx, action_flag);
 
@@ -5591,8 +5599,7 @@ static void cmd_loadfile(void *p)
         playlist_clear(mpctx->playlist);
 
     struct playlist_entry *entry = playlist_entry_new(filename);
-    if (cmd->args[3].v.str_list) {
-        char **pairs = cmd->args[3].v.str_list;
+    if (pairs) {
         for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
             playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
     }
@@ -6769,7 +6776,7 @@ const struct mp_cmd_def mp_cmds[] = {
                 {"insert-at", 5},
                 {"insert-at-play", 6}),
                 .flags = MP_CMD_OPT_ARG},
-            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
+            {"index", OPT_INT(v.i), .flags = MP_CMD_OPT_ARG, .skippable = true},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
         },
     },

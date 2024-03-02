@@ -384,6 +384,9 @@ struct m_option {
     // See \ref OptionFlags.
     unsigned int flags;
 
+    // Only for use with commands
+    bool skippable;
+
     int offset;
 
     // Most numeric types restrict the range to [min, max] if min<max (this

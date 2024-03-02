@@ -416,6 +416,19 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
 
         struct mp_cmd_arg arg = {.type = opt};
         r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &arg.v);
+
+        // Try to read the next cmd arg instead.
+        while (r < 0 && opt->skippable) {
+            assert(i + 1 < MP_CMD_MAX_ARGS);
+            ++i;
+            arg.skipped = true;
+            opt = get_arg_type(cmd->def, i);
+            if (!opt)
+                break;
+            arg.type = opt;
+            r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &arg.v);
+        }
+
         if (r < 0) {
             MP_ERR(ctx, "Command %s: argument %d can't be parsed: %s.\n",
                    cmd->name, i + 1, m_option_strerror(r));

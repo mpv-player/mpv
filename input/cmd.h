@@ -94,6 +94,7 @@ struct mp_cmd_arg {
         char **str_list;
         void *p;
     } v;
+    bool skipped;
 };
 
 typedef struct mp_cmd {
