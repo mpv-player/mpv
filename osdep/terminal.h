@@ -35,6 +35,9 @@
 #define TERM_ESC_ALT_SCREEN         "\033[?1049h"
 #define TERM_ESC_NORMAL_SCREEN      "\033[?1049l"
 
+#define TERM_ESC_ENABLE_MOUSE       "\033[?1003h"
+#define TERM_ESC_DISABLE_MOUSE      "\033[?1003l"
+
 struct input_ctx;
 
 /* Global initialization for terminal output. */
