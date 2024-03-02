@@ -161,6 +161,14 @@ _spirv_cross () {
 }
 _spirv_cross_mark=lib/libspirv-cross-c-shared.dll.a
 
+_nv_headers () {
+    [ -d nv-codec-headers ] || $gitclone https://github.com/FFmpeg/nv-codec-headers
+    pushd nv-codec-headers
+    makeplusinstall
+    popd
+}
+_nv_headers_mark=include/ffnvcodec/dynlink_loader.h
+
 _vulkan_headers () {
     [ -d Vulkan-Headers ] || $gitclone https://github.com/KhronosGroup/Vulkan-Headers
     builddir Vulkan-Headers
@@ -246,7 +254,7 @@ _luajit () {
 }
 _luajit_mark=lib/libluajit-5.1.a
 
-for x in iconv zlib shaderc spirv-cross; do
+for x in iconv zlib shaderc spirv-cross nv-headers; do
     build_if_missing $x
 done
 if [[ "$TARGET" != "i686-"* ]]; then
