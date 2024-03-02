@@ -362,6 +362,7 @@ static int preinit(struct vo *vo)
 #endif
 
     write_str(TERM_ESC_HIDE_CURSOR);
+    write_str(TERM_ESC_ENABLE_MOUSE);
     if (p->opts.alt_screen)
         write_str(TERM_ESC_ALT_SCREEN);
 
@@ -389,6 +390,7 @@ static void uninit(struct vo *vo)
 #endif
 
     write_str(TERM_ESC_RESTORE_CURSOR);
+    write_str(TERM_ESC_DISABLE_MOUSE);
 
     if (p->opts.alt_screen) {
         write_str(TERM_ESC_NORMAL_SCREEN);
