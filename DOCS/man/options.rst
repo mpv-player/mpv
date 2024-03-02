@@ -6366,7 +6366,7 @@ them.
     drm
         DRM/EGL
     displayvk
-        VK_KHR_display. This backend is roughly the Vukan equivalent of
+        VK_KHR_display. This backend is roughly the Vulkan equivalent of
         DRM/EGL, allowing for direct rendering via Vulkan without a display
         manager.
     x11egl
