@@ -110,7 +110,7 @@ _iconv () {
 _iconv_mark=lib/libiconv.dll.a
 
 _zlib () {
-    local ver=1.3
+    local ver=1.3.1
     gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
     make -fwin32/Makefile.gcc clean
@@ -209,7 +209,7 @@ _libplacebo () {
 _libplacebo_mark=lib/libplacebo.dll.a
 
 _freetype () {
-    local ver=2.13.1
+    local ver=2.13.2
     gettar "https://mirror.netcologne.de/savannah/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile"
@@ -230,7 +230,7 @@ _fribidi () {
 _fribidi_mark=lib/libfribidi.dll.a
 
 _harfbuzz () {
-    local ver=8.1.1
+    local ver=8.3.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile" \
