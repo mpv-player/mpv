@@ -846,6 +846,7 @@ void audio_start_ao(struct MPContext *mpctx)
     }
 
     MP_VERBOSE(mpctx, "starting audio playback\n");
+    ao_c->audio_started = true;
     ao_start(ao_c->ao);
     mpctx->audio_status = STATUS_PLAYING;
     if (ao_c->out_eof) {
