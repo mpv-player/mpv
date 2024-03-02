@@ -353,6 +353,9 @@ typedef struct MPContext {
     double delay;
     // AV sync: time in seconds until next frame should be shown
     double time_frame;
+    // AV sync: buffer used for time_frame on sudden, large timing changes (i.e.
+    // speed changes)
+    double time_frame_buffer;
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
@@ -407,6 +410,9 @@ typedef struct MPContext {
 
     /* Heuristic for potentially redrawing subs. */
     bool redraw_subs;
+
+    bool speed_changed;
+    bool speed_changed_display_sync;
 
     bool paused;            // internal pause state
     bool playback_active;   // not paused, restarting, loading, unloading
