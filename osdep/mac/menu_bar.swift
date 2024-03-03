@@ -257,12 +257,6 @@ class MenuBar: NSObject {
             menuConfigs[menuConfigIndex].menuItem = item
 
             for (subConfigIndex, subConfig) in (menuConfig.configs ?? []).enumerated() {
-#if HAVE_MACOS_TOUCHBAR
-                if subConfig.action == "toggleTouchBarCustomizationPalette:" {
-                    continue
-                }
-#endif
-
                 if subConfig.name == "Show log File…" && ProcessInfo.processInfo.environment["MPVBUNDLE"] != "true" {
                     continue
                 }
