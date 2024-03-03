@@ -338,7 +338,7 @@ class MenuBar: NSObject {
 
         if panel.runModal() == .OK {
             "loadlist \"\(panel.urls[0].path)\"".withCString {
-                (NSApp as? Application)?.queueCommand(UnsafeMutablePointer<CChar>(mutating: $0))
+                EventsResponder.sharedInstance().queueCommand(UnsafeMutablePointer<CChar>(mutating: $0))
             }
         }
     }
@@ -366,7 +366,7 @@ class MenuBar: NSObject {
     @objc func command(_ menuItem: NSMenuItem) {
         guard let menuConfig = getConfigFromMenu(menuItem: menuItem) else { return }
         menuConfig.command.withCString {
-            (NSApp as? Application)?.queueCommand(UnsafeMutablePointer<CChar>(mutating: $0))
+            EventsResponder.sharedInstance().queueCommand(UnsafeMutablePointer<CChar>(mutating: $0))
         }
     }
 
