@@ -106,8 +106,6 @@ struct playlist_entry *playlist_get_first_in_same_playlist(struct playlist_entry
                                                            char *current_playlist_path);
 void playlist_add_base_path(struct playlist *pl, bstr base_path);
 void playlist_set_stream_flags(struct playlist *pl, int flags);
-int64_t playlist_transfer_entries_to(struct playlist *pl, int dst_index,
-                                     struct playlist *source_pl);
 int64_t playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl);
 int64_t playlist_append_entries(struct playlist *pl, struct playlist *source_pl);
 
