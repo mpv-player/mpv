@@ -105,6 +105,7 @@ const char *mp_help_text;
 void mp_msg(struct mp_log *log, int lev, const char *format, ...) {};
 int mp_msg_find_level(const char *s) {return 0;};
 int mp_msg_level(struct mp_log *log) {return 0;};
+void mp_msg_set_max_level(struct mp_log *log, int lev) {};
 void mp_write_console_ansi(void) {};
 void mp_set_avdict(AVDictionary **dict, char **kv) {};
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
