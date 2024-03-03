@@ -82,15 +82,15 @@ class MenuBar: NSObject {
             Config(name: "About mpv", action: #selector(about), target: self),
             Config(name: "separator"),
             Config(
-                name: "Preferences…",
+                name: "Settings…",
                 key: ",",
-                action: #selector(preferences(_:)),
+                action: #selector(settings(_:)),
                 target: self,
                 file: "mpv.conf"
             ),
             Config(
                 name: "Keyboard Shortcuts Config…",
-                action: #selector(preferences(_:)),
+                action: #selector(settings(_:)),
                 target: self,
                 file: "input.conf"
             ),
@@ -295,7 +295,7 @@ class MenuBar: NSObject {
         ])
     }
 
-    @objc func preferences(_ menuItem: NSMenuItem) {
+    @objc func settings(_ menuItem: NSMenuItem) {
         guard let menuConfig = getConfigFromMenu(menuItem: menuItem),
               let fileName = menuConfig.file else { return }
         let configPaths: [URL] = [
