@@ -208,7 +208,7 @@ class MenuBar: NSObject {
 
         let windowMenuConfigs = [
             Config(name: "Minimize", key: "m", commandSpecial: .minimize),
-            Config(name: "Zoom", key: "z", commandSpecial: .zoom),
+            Config(name: "Zoom", commandSpecial: .zoom),
         ]
 
         let helpMenuConfigs = [
