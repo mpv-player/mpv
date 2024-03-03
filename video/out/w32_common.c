@@ -1739,9 +1739,8 @@ static void run_message_loop(struct vo_w32_state *w32)
         mp_dispatch_queue_process(w32->dispatch, 1000);
 }
 
-static void gui_thread_reconfig(void *ptr)
+static void window_reconfig(struct vo_w32_state *w32, bool force)
 {
-    struct vo_w32_state *w32 = ptr;
     struct vo *vo = w32->vo;
 
     RECT r = get_working_area(w32);
@@ -1764,14 +1763,14 @@ static void gui_thread_reconfig(void *ptr)
     vo_calc_window_geometry3(vo, &screen, &mon, w32->dpi_scale, &geo);
     vo_apply_window_geometry(vo, &geo);
 
-    bool reset_size = (w32->o_dwidth != vo->dwidth ||
+    bool reset_size = ((w32->o_dwidth != vo->dwidth ||
                        w32->o_dheight != vo->dheight) &&
-                       w32->opts->auto_window_resize;
+                       w32->opts->auto_window_resize) || force;
 
     w32->o_dwidth = vo->dwidth;
     w32->o_dheight = vo->dheight;
 
-    if (!w32->parent && !w32->window_bounds_initialized) {
+    if (!w32->parent && (!w32->window_bounds_initialized || force)) {
         SetRect(&w32->windowrc, geo.win.x0, geo.win.y0,
                 geo.win.x0 + vo->dwidth, geo.win.y0 + vo->dheight);
         w32->prev_windowrc = w32->windowrc;
@@ -1800,6 +1799,11 @@ static void gui_thread_reconfig(void *ptr)
 
 finish:
     reinit_window_state(w32);
+}
+
+static void gui_thread_reconfig(void *ptr)
+{
+    window_reconfig(ptr, false);
 }
 
 // Resize the window. On the first call, it's also made visible.
@@ -2077,6 +2081,10 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                 update_maximized_state(w32);
             } else if (changed_option == &vo_opts->window_corners) {
                 update_corners_pref(w32);
+            } else if (changed_option == &vo_opts->geometry || changed_option == &vo_opts->autofit ||
+                changed_option == &vo_opts->autofit_smaller || changed_option == &vo_opts->autofit_larger)
+            {
+                window_reconfig(w32, true);
             }
         }
 
