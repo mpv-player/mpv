@@ -210,7 +210,7 @@ class MenuBar: NSObject {
             Config(name: "Zoom", commandSpecial: .zoom),
         ]
 
-        let helpMenuConfigs = [
+        var helpMenuConfigs = [
             Config(name: "mpv Website…", action: #selector(url(_:)), target: self, url: "https://mpv.io"),
             Config(name: "mpv on GitHub…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv"),
             Config(name: "separator"),
@@ -220,13 +220,12 @@ class MenuBar: NSObject {
             Config(name: "Keyboard Shortcuts…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/blob/master/etc/input.conf"),
             Config(name: "separator"),
             Config(name: "Report Issue…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/issues/new/choose"),
-            Config(
-                name: "Show log File…",
-                action: #selector(showFile(_:)),
-                target: self,
-                url: NSHomeDirectory() + "/Library/Logs/mpv.log"
-            ),
         ]
+        if ProcessInfo.processInfo.environment["MPVBUNDLE"] == "true" {
+            helpMenuConfigs += [
+                Config(name: "Show log File…", action: #selector(showFile(_:)), target: self, url: NSHomeDirectory() + "/Library/Logs/mpv.log")
+            ]
+        }
 
         menuConfigs = [
             Config(name: "Apple", configs: appMenuConfigs),
@@ -256,10 +255,6 @@ class MenuBar: NSObject {
             mainMenu.setSubmenu(menu, for: item)
 
             for subConfig in menuConfig.configs ?? [] {
-                if subConfig.name == "Show log File…" && ProcessInfo.processInfo.environment["MPVBUNDLE"] != "true" {
-                    continue
-                }
-
                 if subConfig.name == "separator" {
                     menu.addItem(MenuItem.separator())
                 } else {
