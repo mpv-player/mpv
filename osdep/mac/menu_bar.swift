@@ -37,7 +37,6 @@ extension MenuBar {
         let command: String
         let url: String
         let commandSpecial: MenuKey?
-        var menuItem: MenuItem?
         var configs: [Config]?
 
         init(
@@ -49,7 +48,6 @@ extension MenuBar {
             command: String = "",
             url: String = "",
             commandSpecial: MenuKey? = nil,
-            menuItem: MenuItem? = nil,
             configs: [Config]? = nil
         ) {
             self.name = name
@@ -60,7 +58,6 @@ extension MenuBar {
             self.command = command
             self.url = url
             self.commandSpecial = commandSpecial
-            self.menuItem = menuItem
             self.configs = configs
         }
     }
@@ -68,6 +65,7 @@ extension MenuBar {
 
 class MenuBar: NSObject {
     var menuConfigs: [Config] = []
+    var dynamicMenuItems: [MenuKey:[MenuItem]] = [:]
     let appIcon: NSImage
 
     @objc override init() {
@@ -250,15 +248,14 @@ class MenuBar: NSObject {
         let mainMenu = NSMenu(title: "MainMenu")
         NSApp.servicesMenu = NSMenu()
 
-        for (menuConfigIndex, menuConfig) in menuConfigs.enumerated() {
+        for menuConfig in menuConfigs {
             let menu = NSMenu(title: menuConfig.name)
             let item = MenuItem(title: menuConfig.name, action: nil, keyEquivalent: menuConfig.key)
             item.config = menuConfig
             mainMenu.addItem(item)
             mainMenu.setSubmenu(menu, for: item)
-            menuConfigs[menuConfigIndex].menuItem = item
 
-            for (subConfigIndex, subConfig) in (menuConfig.configs ?? []).enumerated() {
+            for subConfig in menuConfig.configs ?? [] {
                 if subConfig.name == "Show log File…" && ProcessInfo.processInfo.environment["MPVBUNDLE"] != "true" {
                     continue
                 }
@@ -271,10 +268,12 @@ class MenuBar: NSObject {
                     subItem.keyEquivalentModifierMask = subConfig.modifiers
                     subItem.config = subConfig
                     menu.addItem(subItem)
-                    menuConfigs[menuConfigIndex].configs?[subConfigIndex].menuItem = subItem
 
                     if subConfig.name == "Services" {
                         subItem.submenu = NSApp.servicesMenu
+                    }
+                    if let cmd = subConfig.commandSpecial {
+                        dynamicMenuItems[cmd] = (dynamicMenuItems[cmd] ?? []) + [subItem]
                     }
                 }
             }
@@ -399,13 +398,8 @@ class MenuBar: NSObject {
     }
 
     func register(_ selector: Selector, key: MenuKey) {
-        for menuConfig in menuConfigs {
-            for subConfig in menuConfig.configs ?? [] {
-                if subConfig.commandSpecial == key {
-                    subConfig.menuItem?.action = selector
-                    return
-                }
-            }
+        for menuItem in dynamicMenuItems[key] ?? [] {
+            menuItem.action = selector
         }
     }
 }
