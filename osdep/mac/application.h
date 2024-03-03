@@ -18,7 +18,6 @@
 #ifndef MAC_APPLICATION
 #define MAC_APPLICATION
 
-#include "osdep/mac/menubar.h"
 #include "options/m_option.h"
 
 enum {
