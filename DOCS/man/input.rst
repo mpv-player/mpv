@@ -1478,6 +1478,13 @@ Input Commands that are Possibly Subject to Change
     This command has an even more uncertain future than ``ab-loop-dump-cache``
     and might disappear without replacement if the author decides it's useless.
 
+``begin-vo-dragging``
+    Begin window dragging if supported by the current VO. This command should
+    only be called while a mouse button is being pressed, otherwise it will
+    be ignored. The exact effect of this command depends on the VO implementation
+    of window dragging. For example, on Windows only the left mouse button can
+    begin window dragging, while X11 and Wayland allow other mouse buttons.
+
 Undocumented commands: ``ao-reload`` (experimental/internal).
 
 List of events
@@ -2368,15 +2375,16 @@ Property list
     This option is relatively useless. Before mpv 0.18.1, it could be used to
     infer behavior of the ``volume`` property.
 
-``current-ao-volume``
+``ao-volume`` (RW)
     System volume. This property is available only if mpv audio output is
     currently active, and only if the underlying implementation supports volume
-    control. What this option shows depends on the API. For example, on ALSA
-    this usually shows system-wide audio, while on PulseAudio per-application volume.
+    control. What this option does depends on the API. For example, on ALSA
+    this usually changes system-wide audio, while with PulseAudio this controls
+    per-application volume.
 
 ``ao-mute`` (RW)
-    Similar to ``current-ao-volume``, but controls the mute state. May be unimplemented
-    even if ``current-ao-volume`` works.
+    Similar to ``ao-volume``, but controls the mute state. May be unimplemented
+    even if ``ao-volume`` works.
 
 ``audio-codec``
     Audio codec selected for decoding.

@@ -96,7 +96,14 @@ def check_vulkan_max_version(version):
         return False
 
 def get_homebrew_prefix():
-    return subprocess.check_output("brew --prefix", universal_newlines=True, shell=True).strip()
+    # set default to standard ARM path, intel path is already in the vulkan loader search array
+    result = "/opt/homebrew"
+    try:
+        result = subprocess.check_output("brew --prefix", universal_newlines=True, shell=True, stderr=subprocess.DEVNULL).strip()
+    except:
+        pass
+
+    return result
 
 def install_name_tool_change(old, new, objfile):
     subprocess.call(["install_name_tool", "-change", old, new, objfile], stderr=subprocess.DEVNULL)

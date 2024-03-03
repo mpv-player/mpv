@@ -306,18 +306,21 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     if (button)
         mp_input_put_key(wl->vo->input_ctx, button | state | s->mpmod);
 
+    enum xdg_toplevel_resize_edge edges;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
-        !wl->locked_size && (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN))
+        !wl->locked_size && (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN) &&
+        !wl->vo_opts->border && check_for_resize(wl, wl->opts->edge_pixels_pointer, &edges))
     {
-        uint32_t edges;
         // Implement an edge resize zone if there are no decorations
-        if (!wl->vo_opts->border && check_for_resize(wl, wl->opts->edge_pixels_pointer, &edges)) {
-            xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edges);
-        } else {
-            xdg_toplevel_move(wl->xdg_toplevel, s->seat, serial);
-        }
-        // Explicitly send an UP event after the client finishes a move/resize
+        xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edges);
+        // Explicitly send an UP event after the client finishes a resize
         mp_input_put_key(wl->vo->input_ctx, button | MP_KEY_STATE_UP);
+    } else if (state == MP_KEY_STATE_DOWN) {
+        // Save the serial and seat for voctrl-initialized dragging requests.
+        s->pointer_serial = serial;
+        wl->last_button_seat = s;
+    } else {
+        wl->last_button_seat = NULL;
     }
 }
 
@@ -426,17 +429,21 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
 
-    enum xdg_toplevel_resize_edge edge;
-    if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y)) {
-        if (check_for_resize(wl, wl->opts->edge_pixels_touch, &edge)) {
-            xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edge);
-        } else  {
-            xdg_toplevel_move(wl->xdg_toplevel, s->seat, serial);
-        }
-    }
-
     mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
     mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN);
+
+    enum xdg_toplevel_resize_edge edge;
+    if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
+        !wl->locked_size && check_for_resize(wl, wl->opts->edge_pixels_touch, &edge))
+    {
+        xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edge);
+        // Explicitly send an UP event after the client finishes a resize
+        mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
+    } else {
+        // Save the serial and seat for voctrl-initialized dragging requests.
+        s->pointer_serial = serial;
+        wl->last_button_seat = s;
+    }
 }
 
 static void touch_handle_up(void *data, struct wl_touch *wl_touch,
@@ -445,6 +452,7 @@ static void touch_handle_up(void *data, struct wl_touch *wl_touch,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
+    wl->last_button_seat = NULL;
 }
 
 static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
@@ -1474,10 +1482,6 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         seat->id   = id;
         seat->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
         wl_seat_add_listener(seat->seat, &seat_listener, seat);
-        if (wl->dnd_devman) {
-            seat->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, seat->seat);
-            wl_data_device_add_listener(seat->dnd_ddev, &data_device_listener, seat);
-        }
         wl_list_insert(&wl->seat_list, &seat->link);
     }
 
@@ -1549,6 +1553,15 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 /* Static functions */
+static void free_dnd_data(struct vo_wayland_state *wl)
+{
+    // caller should close wl->dnd_fd if appropriate
+
+    wl->dnd_action = -1;
+    TA_FREEP(&wl->dnd_mime_type);
+    wl->dnd_mime_score = 0;
+}
+
 static void check_dnd_fd(struct vo_wayland_state *wl)
 {
     if (wl->dnd_fd == -1)
@@ -1559,35 +1572,44 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
         return;
 
     if (fdp.revents & POLLIN) {
-        size_t data_read = 0;
-        const size_t chunk_size = 1;
+        ssize_t data_read = 0;
+        const size_t chunk_size = 256;
         bstr file_list = {
             .start = talloc_zero_size(NULL, chunk_size),
         };
 
-        while ((data_read = read(wl->dnd_fd, file_list.start + file_list.len, chunk_size)) > 0) {
+        while (1) {
+            data_read = read(wl->dnd_fd, file_list.start + file_list.len, chunk_size);
+            if (data_read == -1 && errno == EINTR)
+                continue;
+            else if (data_read <= 0)
+                break;
             file_list.len += data_read;
             file_list.start = talloc_realloc_size(NULL, file_list.start, file_list.len + chunk_size);
             memset(file_list.start + file_list.len, 0, chunk_size);
         }
 
-        MP_VERBOSE(wl, "Read %zu bytes from the DND fd\n", file_list.len);
+        if (data_read == -1) {
+            MP_VERBOSE(wl, "DND aborted (read error)\n");
+        } else {
+            MP_VERBOSE(wl, "Read %zu bytes from the DND fd\n", file_list.len);
 
-        mp_event_drop_mime_data(wl->vo->input_ctx, wl->dnd_mime_type,
-                                file_list, wl->dnd_action);
+            if (wl->dnd_offer)
+                wl_data_offer_finish(wl->dnd_offer);
+
+            assert(wl->dnd_action >= 0);
+            mp_event_drop_mime_data(wl->vo->input_ctx, wl->dnd_mime_type,
+                                    file_list, wl->dnd_action);
+        }
+
         talloc_free(file_list.start);
-        if (wl->dnd_mime_type)
-            talloc_free(wl->dnd_mime_type);
-
-        if (wl->dnd_action >= 0 && wl->dnd_offer)
-            wl_data_offer_finish(wl->dnd_offer);
-
-        wl->dnd_action = -1;
-        wl->dnd_mime_type = NULL;
-        wl->dnd_mime_score = 0;
+        free_dnd_data(wl);
     }
 
     if (fdp.revents & (POLLIN | POLLERR | POLLHUP)) {
+        if (wl->dnd_action >= 0)
+            MP_VERBOSE(wl, "DND aborted (hang up or error)\n");
+        free_dnd_data(wl);
         close(wl->dnd_fd);
         wl->dnd_fd = -1;
     }
@@ -1894,6 +1916,8 @@ static void remove_seat(struct vo_wayland_seat *seat)
 
     MP_VERBOSE(seat->wl, "Deregistering seat 0x%x\n", seat->id);
     wl_list_remove(&seat->link);
+    if (seat == seat->wl->last_button_seat)
+        seat->wl->last_button_seat = NULL;
     if (seat->keyboard)
         wl_keyboard_destroy(seat->keyboard);
     if (seat->pointer)
@@ -2185,6 +2209,18 @@ static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int64
     wl_display_dispatch_pending(wl->display);
 }
 
+static void begin_dragging(struct vo_wayland_state *wl)
+{
+    struct vo_wayland_seat *s = wl->last_button_seat;
+    if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
+        !wl->locked_size && s)
+    {
+        xdg_toplevel_move(wl->xdg_toplevel, s->seat, s->pointer_serial);
+        wl->last_button_seat = NULL;
+        mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
+    }
+}
+
 /* Non-static */
 int vo_wayland_allocate_memfd(struct vo *vo, size_t size)
 {
@@ -2355,6 +2391,9 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         *(double *)arg = wl->scaling;
         return VO_TRUE;
     }
+    case VOCTRL_BEGIN_DRAGGING:
+        begin_dragging(wl);
+        return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
         return update_window_title(wl, (const char *)arg);
     case VOCTRL_SET_CURSOR_VISIBILITY:
@@ -2472,7 +2511,13 @@ bool vo_wayland_init(struct vo *vo)
     }
 #endif
 
-    if (!wl->dnd_devman) {
+    if (wl->dnd_devman) {
+        struct vo_wayland_seat *seat;
+        wl_list_for_each(seat, &wl->seat_list, link) {
+            seat->dnd_ddev = wl_data_device_manager_get_data_device(wl->dnd_devman, seat->seat);
+            wl_data_device_add_listener(seat->dnd_ddev, &data_device_listener, seat);
+        }
+    } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s (ver. 3) protocol!\n",
                    wl_data_device_manager_interface.name);
     }
@@ -2592,6 +2637,10 @@ void vo_wayland_uninit(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     if (!wl)
         return;
+
+    if (wl->dnd_fd != -1)
+        close(wl->dnd_fd);
+    free_dnd_data(wl);
 
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
 

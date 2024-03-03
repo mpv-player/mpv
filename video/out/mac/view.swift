@@ -17,7 +17,7 @@
 
 import Cocoa
 
-class View: NSView {
+class View: NSView, CALayerDelegate {
     unowned var common: Common
     var mpv: MPVHelper? { get { return common.mpv } }
 

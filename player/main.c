@@ -71,7 +71,7 @@ static const char def_config[] =
 ;
 
 #if HAVE_COCOA
-#include "osdep/macosx_events.h"
+#include "osdep/mac/events.h"
 #endif
 
 #ifndef FULLCONFIG
@@ -389,7 +389,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     MP_STATS(mpctx, "start init");
 
 #if HAVE_COCOA
-    mpv_handle *ctx = mp_new_client(mpctx->clients, "osx");
+    mpv_handle *ctx = mp_new_client(mpctx->clients, "mac");
     cocoa_set_mpv_handle(ctx);
 #endif
 

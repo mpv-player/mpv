@@ -50,7 +50,7 @@
 #include "common/common.h"
 
 #if HAVE_COCOA
-#include "osdep/macosx_events.h"
+#include "osdep/mac/events.h"
 #endif
 
 #define input_lock(ictx)    mp_mutex_lock(&ictx->mutex)
@@ -740,13 +740,17 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     if (code & MP_KEY_STATE_DOWN) {
         code &= ~MP_KEY_STATE_DOWN;
         if (ictx->last_doubleclick_key_down == code &&
-            now - ictx->last_doubleclick_time < opts->doubleclick_time / 1000.0)
+            now - ictx->last_doubleclick_time < opts->doubleclick_time / 1000.0 &&
+            code >= MP_MBTN_LEFT && code <= MP_MBTN_RIGHT)
         {
-            if (code >= MP_MBTN_LEFT && code <= MP_MBTN_RIGHT) {
-                now = 0;
-                interpret_key(ictx, code - MP_MBTN_BASE + MP_MBTN_DBL_BASE,
-                              1, 1);
-            }
+            now = 0;
+            interpret_key(ictx, code - MP_MBTN_BASE + MP_MBTN_DBL_BASE,
+                          1, 1);
+        } else if (code == MP_MBTN_LEFT) {
+            // This is a mouse left botton down event which isn't part of a doubleclick.
+            // Initialize vo dragging in this case.
+            mp_cmd_t *cmd = mp_input_parse_cmd(ictx, bstr0("begin-vo-dragging"), "<internal>");
+            mp_input_queue_cmd(ictx, cmd);
         }
         ictx->last_doubleclick_key_down = code;
         ictx->last_doubleclick_time = now;

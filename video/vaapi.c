@@ -45,9 +45,7 @@
 #define DEV_PATH_DEFAULT "/dev/dri/renderD128"
 #define DEV_PATH_VALIDATE validate_path
 
-static int validate_path(struct mp_log *log,
-                         const struct m_option *opt,
-                         struct bstr name, const char **value)
+static inline OPT_STRING_VALIDATE_FUNC(validate_path)
 {
     return (*value && **value) ? 0 : M_OPT_INVALID;
 }

@@ -122,6 +122,9 @@ enum mp_voctrl {
 
     /* private to vo_gpu and vo_gpu_next */
     VOCTRL_EXTERNAL_RESIZE,
+
+    // Begin VO dragging.
+    VOCTRL_BEGIN_DRAGGING,
 };
 
 // Helper to expose what kind of content is currently playing to the VO.

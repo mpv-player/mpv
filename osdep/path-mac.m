@@ -15,11 +15,20 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#import <Cocoa/Cocoa.h>
-#include "osdep/macosx_menubar.h"
+#import <Foundation/Foundation.h>
+#include "options/path.h"
+#include "osdep/path.h"
 
-@interface MenuBar : NSObject
-
-- (void)registerSelector:(SEL)action forKey:(MPMenuKey)key;
-
-@end
+const char *mp_get_platform_path_mac(void *talloc_ctx, const char *type)
+{
+    if (strcmp(type, "osxbundle") == 0 && getenv("MPVBUNDLE")) {
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        NSString *path = [[NSBundle mainBundle] resourcePath];
+        char *res = talloc_strdup(talloc_ctx, [path UTF8String]);
+        [pool release];
+        return res;
+    }
+    if (strcmp(type, "desktop") == 0 && getenv("HOME"))
+        return mp_path_join(talloc_ctx, getenv("HOME"), "Desktop");
+    return NULL;
+}

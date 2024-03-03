@@ -16,7 +16,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "osdep/macosx_application_objc.h"
+#import "osdep/mac/application_objc.h"
 
 #define BASE_ID @"io.mpv.touchbar"
 static NSTouchBarCustomizationIdentifier customID = BASE_ID;

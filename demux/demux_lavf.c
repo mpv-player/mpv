@@ -510,6 +510,10 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
                 break;
             }
 
+            // AVIF always needs to find stream info
+            if (bstrcasecmp0(ext, "avif") == 0)
+                priv->format_hack.skipinfo = false;
+
             if (score >= lavfdopts->probescore)
                 break;
 

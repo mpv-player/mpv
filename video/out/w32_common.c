@@ -181,6 +181,7 @@ struct vo_w32_state {
 
     bool cleared;
     bool dragging;
+    bool start_dragging;
     BOOL win_arranging;
 
     bool conversion_mode_init;
@@ -472,33 +473,33 @@ static bool handle_char(struct vo_w32_state *w32, WPARAM wc, bool decode)
     return true;
 }
 
+static void begin_dragging(struct vo_w32_state *w32)
+{
+    if (w32->current_fs ||
+        mp_input_test_dragging(w32->input_ctx, w32->mouse_x, w32->mouse_y))
+        return;
+    // Window dragging hack
+    ReleaseCapture();
+    // The dragging model loop is entered at SendMessage() here.
+    // Unfortunately, the w32->current_fs value is stale because the
+    // input is handled in a different thread, and we cannot wait for
+    // an up-to-date value before entering the model loop if dragging
+    // needs to be kept resonsive.
+    // Workaround this by intercepting the loop in the WM_MOVING message,
+    // where the up-to-date value is available.
+    SystemParametersInfoW(SPI_GETWINARRANGING, 0, &w32->win_arranging, 0);
+    w32->dragging = true;
+    SendMessage(w32->window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+    w32->dragging = false;
+    SystemParametersInfoW(SPI_SETWINARRANGING, w32->win_arranging, 0, 0);
+
+    mp_input_put_key(w32->input_ctx, MP_INPUT_RELEASE_ALL);
+}
+
 static bool handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
 {
     btn |= mod_state(w32);
     mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_DOWN);
-
-    if (btn == MP_MBTN_LEFT && !mp_input_test_dragging(w32->input_ctx, x, y)) {
-        // Window dragging hack
-        ReleaseCapture();
-        // The dragging model loop is entered at SendMessage() here.
-        // Unfortunately, the w32->current_fs value is stale because the
-        // input is handled in a different thread, and we cannot wait for
-        // an up-to-date value before entering the model loop if dragging
-        // needs to be kept resonsive.
-        // Workaround this by intercepting the loop in the WM_MOVING message,
-        // where the up-to-date value is available.
-        SystemParametersInfoW(SPI_GETWINARRANGING, 0, &w32->win_arranging, 0);
-        w32->dragging = true;
-        SendMessage(w32->window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-        w32->dragging = false;
-        SystemParametersInfoW(SPI_SETWINARRANGING, w32->win_arranging, 0, 0);
-
-        mp_input_put_key(w32->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
-
-        // Indicate the message was handled, so DefWindowProc won't be called
-        return true;
-    }
-
     SetCapture(w32->window);
     return false;
 }
@@ -1261,6 +1262,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         w32->in_dispatch = true;
         mp_dispatch_queue_process(w32->dispatch, 0);
         w32->in_dispatch = false;
+    }
+    // Start window dragging if the flag is set by the voctrl.
+    // This is processed here to avoid blocking the dispatch queue.
+    if (w32->start_dragging) {
+        w32->start_dragging = false;
+        begin_dragging(w32);
     }
 
     switch (message) {
@@ -2163,6 +2170,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         return VO_FALSE;
     case VOCTRL_GET_FOCUSED:
         *(bool *)arg = w32->focused;
+        return VO_TRUE;
+    case VOCTRL_BEGIN_DRAGGING:
+        w32->start_dragging = true;
         return VO_TRUE;
     }
     return VO_NOTIMPL;

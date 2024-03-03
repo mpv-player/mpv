@@ -27,8 +27,7 @@ Interface changes
 ::
 
  --- mpv 0.38.0 ---
-    - add `--ao-volume` option
-    - change `ao-volume` property to read only property `current-ao-volume`
+    - add `begin-vo-dragging` command
     - add `--volume-gain`, `--volume-gain-min`, and `--volume-gain-max` options
     - add `current-gpu-context` property
     - add `--secondary-sub-ass-override` option

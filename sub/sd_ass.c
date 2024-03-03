@@ -184,7 +184,7 @@ static void filters_init(struct sd *sd)
             .opts = mp_get_config_group(ft, sd->global, &mp_sub_filter_opts),
             .driver = filters[n],
             .codec = "ass",
-            .event_format = ctx->ass_track->event_format,
+            .event_format = talloc_strdup(ft, ctx->ass_track->event_format),
         };
         if (ft->driver->init(ft)) {
             MP_TARRAY_APPEND(ctx, ctx->filters, ctx->num_filters, ft);
@@ -688,7 +688,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
 
     int changed;
     ASS_Image *imgs = ass_render_frame(renderer, track, ts, &changed);
-    mp_ass_packer_pack(ctx->packer, &imgs, 1, changed, format, res);
+    mp_ass_packer_pack(ctx->packer, &imgs, 1, changed, !converted, format, res);
 
 done:
     // mangle_colors() modifies the color field, so copy the thing _before_.

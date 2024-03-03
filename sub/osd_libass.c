@@ -678,7 +678,7 @@ struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
 
     struct sub_bitmaps out_imgs = {0};
     mp_ass_packer_pack(obj->ass_packer, obj->ass_imgs, obj->num_externals + 1,
-                       obj->changed, format, &out_imgs);
+                       obj->changed, false, format, &out_imgs);
 
     obj->changed = false;
 

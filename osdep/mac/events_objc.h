@@ -1,5 +1,5 @@
 /*
- * Apple-specific utility functions
+ * Cocoa Application Event Handling
  *
  * This file is part of mpv.
  *
@@ -17,12 +17,29 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MPV_APPLE_UTILS
-#define MPV_APPLE_UTILS
+#import <Cocoa/Cocoa.h>
+#include "osdep/mac/events.h"
 
-#include <CoreFoundation/CoreFoundation.h>
+@class RemoteCommandCenter;
+struct input_ctx;
 
-CFStringRef cfstr_from_cstr(const char *str);
-char *cfstr_get_cstr(const CFStringRef cfstr);
+@interface EventsResponder : NSObject
 
-#endif /* MPV_APPLE_UTILS */
++ (EventsResponder *)sharedInstance;
+- (void)setInputContext:(struct input_ctx *)ctx;
+- (void)setIsApplication:(BOOL)isApplication;
+
+/// Blocks until inputContext is present.
+- (void)waitForInputContext;
+- (void)wakeup;
+- (void)putKey:(int)keycode;
+- (void)handleFilesArray:(NSArray *)files;
+
+- (bool)queueCommand:(char *)cmd;
+- (bool)processKeyEvent:(NSEvent *)event;
+
+- (BOOL)handleMPKey:(int)key withMask:(int)mask;
+
+@property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
+
+@end

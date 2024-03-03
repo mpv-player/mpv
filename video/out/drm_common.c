@@ -65,8 +65,7 @@ static int drm_connector_opt_help(struct mp_log *log, const struct m_option *opt
 static int drm_mode_opt_help(struct mp_log *log, const struct m_option *opt,
                              struct bstr name);
 
-static int drm_validate_mode_opt(struct mp_log *log, const struct m_option *opt,
-                                 struct bstr name, const char **value);
+static OPT_STRING_VALIDATE_FUNC(drm_validate_mode_opt);
 
 static void drm_show_available_modes(struct mp_log *log, const drmModeConnector *connector);
 

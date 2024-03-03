@@ -1,5 +1,5 @@
 /*
- * Cocoa Application Event Handling
+ * Apple-specific utility functions
  *
  * This file is part of mpv.
  *
@@ -17,29 +17,23 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#import <Cocoa/Cocoa.h>
-#include "osdep/macosx_events.h"
+#include "utils-mac.h"
 
-@class RemoteCommandCenter;
-struct input_ctx;
+#include "mpv_talloc.h"
 
-@interface EventsResponder : NSObject
+CFStringRef cfstr_from_cstr(const char *str)
+{
+    return CFStringCreateWithCString(NULL, str, kCFStringEncodingUTF8);
+}
 
-+ (EventsResponder *)sharedInstance;
-- (void)setInputContext:(struct input_ctx *)ctx;
-- (void)setIsApplication:(BOOL)isApplication;
-
-/// Blocks until inputContext is present.
-- (void)waitForInputContext;
-- (void)wakeup;
-- (void)putKey:(int)keycode;
-- (void)handleFilesArray:(NSArray *)files;
-
-- (bool)queueCommand:(char *)cmd;
-- (bool)processKeyEvent:(NSEvent *)event;
-
-- (BOOL)handleMPKey:(int)key withMask:(int)mask;
-
-@property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
-
-@end
+char *cfstr_get_cstr(const CFStringRef cfstr)
+{
+    if (!cfstr)
+        return NULL;
+    CFIndex size =
+        CFStringGetMaximumSizeForEncoding(
+            CFStringGetLength(cfstr), kCFStringEncodingUTF8) + 1;
+    char *buffer = talloc_zero_size(NULL, size);
+    CFStringGetCString(cfstr, buffer, size, kCFStringEncodingUTF8);
+    return buffer;
+}
