@@ -33,12 +33,6 @@ extension MenuBar {
         let command: String
         let url: String?
         let file: String?
-        let alertTitle1: String?
-        let alertText1: String?
-        let alertTitle2: String?
-        let alertText2: String?
-        let alertTitle3: String?
-        let alertText3: String?
         let commandSpecial: MenuKey?
         var menuItem: NSMenuItem?
         var configs: [Config]?
@@ -52,12 +46,6 @@ extension MenuBar {
             command: String = "",
             url: String? = nil,
             file: String? = nil,
-            alertTitle1: String? = nil,
-            alertText1: String? = nil,
-            alertTitle2: String? = nil,
-            alertText2: String? = nil,
-            alertTitle3: String? = nil,
-            alertText3: String? = nil,
             commandSpecial: MenuKey? = nil,
             menuItem: NSMenuItem? = nil,
             configs: [Config]? = nil
@@ -70,12 +58,6 @@ extension MenuBar {
             self.command = command
             self.url = url
             self.file = file
-            self.alertTitle1 = alertTitle1
-            self.alertText1 = alertText1
-            self.alertTitle2 = alertTitle2
-            self.alertText2 = alertText2
-            self.alertTitle3 = alertTitle3
-            self.alertText3 = alertText3
             self.commandSpecial = commandSpecial
             self.menuItem = menuItem
             self.configs = configs
@@ -104,25 +86,13 @@ class MenuBar: NSObject {
                 key: ",",
                 action: #selector(preferences(_:)),
                 target: self,
-                file: "mpv.conf",
-                alertTitle1: "No Application found to open your config file.",
-                alertText1: "Please open the mpv.conf file with your preferred text editor in the now open folder to edit your config.",
-                alertTitle2: "No config file found.",
-                alertText2: "Please create a mpv.conf file with your preferred text editor in the now open folder.",
-                alertTitle3: "No config path or file found.",
-                alertText3: "Please create the following path ~/.config/mpv/ and a mpv.conf file within with your preferred text editor."
+                file: "mpv.conf"
             ),
             Config(
                 name: "Keyboard Shortcuts Config…",
                 action: #selector(preferences(_:)),
                 target: self,
-                file: "input.conf",
-                alertTitle1: "No Application found to open your config file.",
-                alertText1: "Please open the input.conf file with your preferred text editor in the now open folder to edit your config.",
-                alertTitle2: "No config file found.",
-                alertText2: "Please create a input.conf file with your preferred text editor in the now open folder.",
-                alertTitle3: "No config path or file found.",
-                alertText3: "Please create the following path ~/.config/mpv/ and a input.conf file within with your preferred text editor."
+                file: "input.conf"
             ),
             Config(name: "separator"),
             Config(name: "Services"),
@@ -255,9 +225,7 @@ class MenuBar: NSObject {
                 name: "Show log File…",
                 action: #selector(showFile(_:)),
                 target: self,
-                file: NSHomeDirectory() + "/Library/Logs/mpv.log",
-                alertTitle1: "No log File found.",
-                alertText1: "You deactivated logging for the Bundle."
+                file: NSHomeDirectory() + "/Library/Logs/mpv.log"
             ),
         ]
 
@@ -328,31 +296,30 @@ class MenuBar: NSObject {
     }
 
     @objc func preferences(_ menuItem: NSMenuItem) {
-        guard let menuConfig = getConfigFromMenu(menuItem: menuItem) else { return }
+        guard let menuConfig = getConfigFromMenu(menuItem: menuItem),
+              let fileName = menuConfig.file else { return }
         let configPaths: [String] = [
-            NSHomeDirectory() + "/.mpv/",
             NSHomeDirectory() + "/.config/mpv/",
+            NSHomeDirectory() + "/.mpv/",
         ]
 
         for path in configPaths {
-            let configFile = path + (menuConfig.file ?? "")
+            let configFile = path + fileName
 
             if FileManager.default.fileExists(atPath: configFile) {
                 if NSWorkspace.shared.openFile(configFile) {
                     return
                 }
                 NSWorkspace.shared.openFile(path)
-                alert(title: menuConfig.alertTitle1 ?? "", text: menuConfig.alertText1 ?? "")
+                alert(title: "No Application found to open your config file.", text: "Please open the \(fileName) file with your preferred text editor in the now open folder to edit your config.")
                 return
             }
 
             if NSWorkspace.shared.openFile(path) {
-                alert(title: menuConfig.alertTitle2 ?? "", text: menuConfig.alertText2 ?? "")
+                alert(title: "No config file found.", text: "Please create a \(fileName) file with your preferred text editor in the now open folder.")
                 return
             }
         }
-
-        alert(title: menuConfig.alertTitle3 ?? "", text: menuConfig.alertText3 ?? "")
     }
 
     @objc func quit(_ menuItem: NSMenuItem) {
@@ -427,7 +394,7 @@ class MenuBar: NSObject {
             return
         }
 
-        alert(title: menuConfig.alertTitle1 ?? "", text: menuConfig.alertText1 ?? "")
+        alert(title: "No log File found.", text: "You deactivated logging for the Bundle.")
     }
 
     func alert(title: String, text: String) {
