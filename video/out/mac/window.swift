@@ -105,11 +105,11 @@ class Window: NSWindow, NSWindowDelegate {
         unfScreen = screen
 
         if let app = NSApp as? Application {
-            app.menuBar.register(#selector(setHalfWindowSize), for: MPM_H_SIZE)
-            app.menuBar.register(#selector(setNormalWindowSize), for: MPM_N_SIZE)
-            app.menuBar.register(#selector(setDoubleWindowSize), for: MPM_D_SIZE)
-            app.menuBar.register(#selector(performMiniaturize(_:)), for: MPM_MINIMIZE)
-            app.menuBar.register(#selector(performZoom(_:)), for: MPM_ZOOM)
+            app.menuBar.register(#selector(setHalfWindowSize), key: .halfSize)
+            app.menuBar.register(#selector(setNormalWindowSize), key: .normalSize)
+            app.menuBar.register(#selector(setDoubleWindowSize), key: .doubleSize)
+            app.menuBar.register(#selector(performMiniaturize(_:)), key: .minimize)
+            app.menuBar.register(#selector(performZoom(_:)), key: .zoom)
         }
     }
 

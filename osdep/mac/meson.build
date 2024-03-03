@@ -19,6 +19,10 @@ if get_option('optimization') != '0'
     swift_flags += '-O'
 endif
 
+if macos_touchbar.allowed()
+    swift_flags += ['-D', 'HAVE_MACOS_TOUCHBAR']
+endif
+
 extra_flags = get_option('swift-flags').split()
 swift_flags += extra_flags
 

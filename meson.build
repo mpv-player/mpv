@@ -396,8 +396,7 @@ if features['cocoa']
                      'osdep/path-mac.m',
                      'osdep/utils-mac.c',
                      'osdep/mac/application.m',
-                     'osdep/mac/events.m',
-                     'osdep/mac/menubar.m')
+                     'osdep/mac/events.m')
 endif
 
 if posix
@@ -1516,6 +1515,7 @@ if features['cocoa'] and features['swift']
     swift_sources += files('osdep/mac/libmpv_helper.swift',
                            'osdep/mac/log_helper.swift',
                            'osdep/mac/mpv_helper.swift',
+                           'osdep/mac/menu_bar.swift',
                            'osdep/mac/precise_timer.swift',
                            'osdep/mac/swift_compat.swift',
                            'osdep/mac/swift_extensions.swift',
@@ -1549,10 +1549,6 @@ if features['macos-media-player']
     swift_sources += files('osdep/mac/remote_command_center.swift')
 endif
 
-if features['swift'] and swift_sources.length() > 0
-    subdir('osdep/mac')
-endif
-
 macos_touchbar = get_option('macos-touchbar').require(
     features['cocoa'] and cc.has_header('AppKit/NSTouchBar.h'),
     error_message: 'Either cocoa could not be found or AppKit/NSTouchBar.h could not be found!',
@@ -1560,6 +1556,10 @@ macos_touchbar = get_option('macos-touchbar').require(
 features += {'macos-touchbar': macos_touchbar.allowed()}
 if features['macos-touchbar']
     sources += files('osdep/mac/touchbar.m')
+endif
+
+if features['swift'] and swift_sources.length() > 0
+    subdir('osdep/mac')
 endif
 
 
