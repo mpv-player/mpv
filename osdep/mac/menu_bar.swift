@@ -106,7 +106,7 @@ class MenuBar: NSObject {
         ]
 
         let fileMenuConfigs = [
-            Config(name: "Open File…", key: "o", action: #selector(openFile), target: self),
+            Config(name: "Open File…", key: "o", action: #selector(openFiles), target: self),
             Config(name: "Open URL…", key: "O", action: #selector(openUrl), target: self),
             Config(name: "Open Playlist…", action: #selector(openPlaylist), target: self),
             Config(name: "separator"),
@@ -329,17 +329,13 @@ class MenuBar: NSObject {
         }
     }
 
-    @objc func openFile() {
+    @objc func openFiles() {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = true
 
         if panel.runModal() == .OK {
-            var files: [String] = []
-            for url in panel.urls {
-                files += [url.path]
-            }
-            (NSApp as? Application)?.openFiles(files)
+            (NSApp as? Application)?.openFiles(panel.urls.map { $0.path })
         }
     }
 
