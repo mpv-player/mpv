@@ -298,24 +298,24 @@ class MenuBar: NSObject {
     @objc func preferences(_ menuItem: NSMenuItem) {
         guard let menuConfig = getConfigFromMenu(menuItem: menuItem),
               let fileName = menuConfig.file else { return }
-        let configPaths: [String] = [
-            NSHomeDirectory() + "/.config/mpv/",
-            NSHomeDirectory() + "/.mpv/",
+        let configPaths: [URL] = [
+            URL(fileURLWithPath: NSHomeDirectory() + "/.config/mpv/", isDirectory: true),
+            URL(fileURLWithPath: NSHomeDirectory() + "/.mpv/", isDirectory: true),
         ]
 
         for path in configPaths {
-            let configFile = path + fileName
+            let configFile = path.appendingPathComponent(fileName, isDirectory: false)
 
-            if FileManager.default.fileExists(atPath: configFile) {
-                if NSWorkspace.shared.openFile(configFile) {
+            if FileManager.default.fileExists(atPath: configFile.path) {
+                if NSWorkspace.shared.open(configFile) {
                     return
                 }
-                NSWorkspace.shared.openFile(path)
+                NSWorkspace.shared.open(path)
                 alert(title: "No Application found to open your config file.", text: "Please open the \(fileName) file with your preferred text editor in the now open folder to edit your config.")
                 return
             }
 
-            if NSWorkspace.shared.openFile(path) {
+            if NSWorkspace.shared.open(path) {
                 alert(title: "No config file found.", text: "Please create a \(fileName) file with your preferred text editor in the now open folder.")
                 return
             }
