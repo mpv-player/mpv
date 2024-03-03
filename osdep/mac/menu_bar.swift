@@ -35,8 +35,7 @@ extension MenuBar {
         let action: Selector?
         let target: AnyObject?
         let command: String
-        let url: String?
-        let file: String?
+        let url: String
         let commandSpecial: MenuKey?
         var menuItem: MenuItem?
         var configs: [Config]?
@@ -48,8 +47,7 @@ extension MenuBar {
             action: Selector? = nil,
             target: AnyObject? = nil,
             command: String = "",
-            url: String? = nil,
-            file: String? = nil,
+            url: String = "",
             commandSpecial: MenuKey? = nil,
             menuItem: MenuItem? = nil,
             configs: [Config]? = nil
@@ -61,7 +59,6 @@ extension MenuBar {
             self.target = target
             self.command = command
             self.url = url
-            self.file = file
             self.commandSpecial = commandSpecial
             self.menuItem = menuItem
             self.configs = configs
@@ -90,13 +87,13 @@ class MenuBar: NSObject {
                 key: ",",
                 action: #selector(settings(_:)),
                 target: self,
-                file: "mpv.conf"
+                url: "mpv.conf"
             ),
             Config(
                 name: "Keyboard Shortcuts Config…",
                 action: #selector(settings(_:)),
                 target: self,
-                file: "input.conf"
+                url: "input.conf"
             ),
             Config(name: "separator"),
             Config(name: "Services"),
@@ -229,7 +226,7 @@ class MenuBar: NSObject {
                 name: "Show log File…",
                 action: #selector(showFile(_:)),
                 target: self,
-                file: NSHomeDirectory() + "/Library/Logs/mpv.log"
+                url: NSHomeDirectory() + "/Library/Logs/mpv.log"
             ),
         ]
 
@@ -296,27 +293,26 @@ class MenuBar: NSObject {
     }
 
     @objc func settings(_ menuItem: MenuItem) {
-        guard let menuConfig = menuItem.config,
-              let fileName = menuConfig.file else { return }
+        guard let menuConfig = menuItem.config else { return }
         let configPaths: [URL] = [
             URL(fileURLWithPath: NSHomeDirectory() + "/.config/mpv/", isDirectory: true),
             URL(fileURLWithPath: NSHomeDirectory() + "/.mpv/", isDirectory: true),
         ]
 
         for path in configPaths {
-            let configFile = path.appendingPathComponent(fileName, isDirectory: false)
+            let configFile = path.appendingPathComponent(menuConfig.url, isDirectory: false)
 
             if FileManager.default.fileExists(atPath: configFile.path) {
                 if NSWorkspace.shared.open(configFile) {
                     return
                 }
                 NSWorkspace.shared.open(path)
-                alert(title: "No Application found to open your config file.", text: "Please open the \(fileName) file with your preferred text editor in the now open folder to edit your config.")
+                alert(title: "No Application found to open your config file.", text: "Please open the \(menuConfig.url) file with your preferred text editor in the now open folder to edit your config.")
                 return
             }
 
             if NSWorkspace.shared.open(path) {
-                alert(title: "No config file found.", text: "Please create a \(fileName) file with your preferred text editor in the now open folder.")
+                alert(title: "No config file found.", text: "Please create a \(menuConfig.url) file with your preferred text editor in the now open folder.")
                 return
             }
         }
@@ -378,13 +374,13 @@ class MenuBar: NSObject {
 
     @objc func url(_ menuItem: MenuItem) {
         guard let menuConfig = menuItem.config,
-              let url = URL(string: menuConfig.url ?? "") else { return }
+              let url = URL(string: menuConfig.url) else { return }
         NSWorkspace.shared.open(url)
     }
 
     @objc func showFile(_ menuItem: MenuItem) {
         guard let menuConfig = menuItem.config else { return }
-        let url = URL(fileURLWithPath: menuConfig.file ?? "")
+        let url = URL(fileURLWithPath: menuConfig.url)
         if FileManager.default.fileExists(atPath: url.path) {
             NSWorkspace.shared.activateFileViewerSelecting([url])
             return
