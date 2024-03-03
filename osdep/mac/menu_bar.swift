@@ -16,6 +16,10 @@
  */
 
 extension MenuBar {
+    class MenuItem: NSMenuItem {
+        var config: Config?
+    }
+
     enum MenuKey {
         case normalSize
         case halfSize
@@ -34,7 +38,7 @@ extension MenuBar {
         let url: String?
         let file: String?
         let commandSpecial: MenuKey?
-        var menuItem: NSMenuItem?
+        var menuItem: MenuItem?
         var configs: [Config]?
 
         init(
@@ -47,7 +51,7 @@ extension MenuBar {
             url: String? = nil,
             file: String? = nil,
             commandSpecial: MenuKey? = nil,
-            menuItem: NSMenuItem? = nil,
+            menuItem: MenuItem? = nil,
             configs: [Config]? = nil
         ) {
             self.name = name
@@ -251,7 +255,8 @@ class MenuBar: NSObject {
 
         for (menuConfigIndex, menuConfig) in menuConfigs.enumerated() {
             let menu = NSMenu(title: menuConfig.name)
-            let item = NSMenuItem(title: menuConfig.name, action: nil, keyEquivalent: menuConfig.key)
+            let item = MenuItem(title: menuConfig.name, action: nil, keyEquivalent: menuConfig.key)
+            item.config = menuConfig
             mainMenu.addItem(item)
             mainMenu.setSubmenu(menu, for: item)
             menuConfigs[menuConfigIndex].menuItem = item
@@ -262,11 +267,12 @@ class MenuBar: NSObject {
                 }
 
                 if subConfig.name == "separator" {
-                    menu.addItem(NSMenuItem.separator())
+                    menu.addItem(MenuItem.separator())
                 } else {
-                    let subItem = NSMenuItem(title: subConfig.name, action: subConfig.action, keyEquivalent: subConfig.key)
+                    let subItem = MenuItem(title: subConfig.name, action: subConfig.action, keyEquivalent: subConfig.key)
                     subItem.target = subConfig.target
                     subItem.keyEquivalentModifierMask = subConfig.modifiers
+                    subItem.config = subConfig
                     menu.addItem(subItem)
                     menuConfigs[menuConfigIndex].configs?[subConfigIndex].menuItem = subItem
 
@@ -289,8 +295,8 @@ class MenuBar: NSObject {
         ])
     }
 
-    @objc func settings(_ menuItem: NSMenuItem) {
-        guard let menuConfig = getConfigFromMenu(menuItem: menuItem),
+    @objc func settings(_ menuItem: MenuItem) {
+        guard let menuConfig = menuItem.config,
               let fileName = menuConfig.file else { return }
         let configPaths: [URL] = [
             URL(fileURLWithPath: NSHomeDirectory() + "/.config/mpv/", isDirectory: true),
@@ -316,8 +322,8 @@ class MenuBar: NSObject {
         }
     }
 
-    @objc func quit(_ menuItem: NSMenuItem) {
-        guard let menuConfig = getConfigFromMenu(menuItem: menuItem) else { return }
+    @objc func quit(_ menuItem: MenuItem) {
+        guard let menuConfig = menuItem.config else { return }
         menuConfig.command.withCString {
             (NSApp as? Application)?.stopMPV(UnsafeMutablePointer<CChar>(mutating: $0))
         }
@@ -363,21 +369,21 @@ class MenuBar: NSObject {
         }
     }
 
-    @objc func command(_ menuItem: NSMenuItem) {
-        guard let menuConfig = getConfigFromMenu(menuItem: menuItem) else { return }
+    @objc func command(_ menuItem: MenuItem) {
+        guard let menuConfig = menuItem.config else { return }
         menuConfig.command.withCString {
             EventsResponder.sharedInstance().queueCommand(UnsafeMutablePointer<CChar>(mutating: $0))
         }
     }
 
-    @objc func url(_ menuItem: NSMenuItem) {
-        guard let menuConfig = getConfigFromMenu(menuItem: menuItem),
+    @objc func url(_ menuItem: MenuItem) {
+        guard let menuConfig = menuItem.config,
               let url = URL(string: menuConfig.url ?? "") else { return }
         NSWorkspace.shared.open(url)
     }
 
-    @objc func showFile(_ menuItem: NSMenuItem) {
-        guard let menuConfig = getConfigFromMenu(menuItem: menuItem) else { return }
+    @objc func showFile(_ menuItem: MenuItem) {
+        guard let menuConfig = menuItem.config else { return }
         let url = URL(fileURLWithPath: menuConfig.file ?? "")
         if FileManager.default.fileExists(atPath: url.path) {
             NSWorkspace.shared.activateFileViewerSelecting([url])
@@ -394,18 +400,6 @@ class MenuBar: NSObject {
         alert.icon = appIcon
         alert.addButton(withTitle: "Ok")
         alert.runModal()
-    }
-
-    func getConfigFromMenu(menuItem: NSMenuItem) -> Config? {
-        for menuConfig in menuConfigs {
-            for subConfig in menuConfig.configs ?? [] {
-                if subConfig.menuItem == menuItem {
-                    return subConfig
-                }
-            }
-        }
-
-        return nil
     }
 
     func register(_ selector: Selector, key: MenuKey) {
