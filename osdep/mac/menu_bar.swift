@@ -342,8 +342,8 @@ class MenuBar: NSObject {
     @objc func openPlaylist() {
         let panel = NSOpenPanel()
 
-        if panel.runModal() == .OK {
-            "loadlist \"\(panel.urls[0].path)\"".withCString {
+        if panel.runModal() == .OK, let url = panel.urls.first {
+            "loadlist \"\(url.path)\"".withCString {
                 EventsResponder.sharedInstance().queueCommand(UnsafeMutablePointer<CChar>(mutating: $0))
             }
         }
