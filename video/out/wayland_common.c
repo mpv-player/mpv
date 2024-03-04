@@ -1984,7 +1984,7 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
             wl_pointer_set_cursor(s->pointer, s->pointer_serial, wl->cursor_surface,
                                   img->hotspot_x / scale, img->hotspot_y / scale);
             wp_viewport_set_destination(wl->cursor_viewport, lround(img->width / scale),
-                                        img->height / scale);
+                                        lround(img->height / scale));
             wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
             wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
         }
