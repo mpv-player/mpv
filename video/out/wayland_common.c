@@ -985,6 +985,7 @@ static void surface_handle_preferred_buffer_scale(void *data,
         return;
 
     wl->scaling = scale;
+    wl->scale_configured = true;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -1209,6 +1210,7 @@ static void preferred_scale(void *data,
     double old_scale = wl->scaling;
 
     wl->scaling = (double)scale / 120;
+    wl->scale_configured = true;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -2071,8 +2073,11 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
 
 static void set_surface_scaling(struct vo_wayland_state *wl)
 {
-    if (wl->fractional_scale_manager || wl_surface_get_version(wl->surface) >= 6)
+    if (wl->scale_configured && (wl->fractional_scale_manager ||
+        wl_surface_get_version(wl->surface) >= 6))
+    {
         return;
+    }
 
     double old_scale = wl->scaling;
     wl->scaling = wl->current_output->scale;
@@ -2587,6 +2592,7 @@ bool vo_wayland_reconfig(struct vo *vo)
         if (!wl->current_output)
             return false;
         set_surface_scaling(wl);
+        wl->scale_configured = true;
         wl->pending_vo_events |= VO_EVENT_DPI;
     }
 
