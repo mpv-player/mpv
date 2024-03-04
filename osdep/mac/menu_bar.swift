@@ -64,6 +64,8 @@ extension MenuBar {
 }
 
 class MenuBar: NSObject {
+    let mainMenu = NSMenu(title: "Main")
+    let servicesMenu = NSMenu(title: "Services")
     var menuConfigs: [Config] = []
     var dynamicMenuItems: [MenuKey:[MenuItem]] = [:]
     let appIcon: NSImage
@@ -94,7 +96,7 @@ class MenuBar: NSObject {
                 url: "input.conf"
             ),
             Config(name: "separator"),
-            Config(name: "Services"),
+            Config(name: "Services", configs: []),
             Config(name: "separator"),
             Config(name: "Hide mpv", key: "h", action: #selector(NSApp.hide(_:))),
             Config(name: "Hide Others", key: "h", modifiers: [.command, .option], action: #selector(NSApp.hideOtherApplications(_:))),
@@ -240,41 +242,39 @@ class MenuBar: NSObject {
             Config(name: "Help", configs: helpMenuConfigs),
         ]
 
-        NSApp.mainMenu = generateMainMenu()
+        createMenu(parentMenu: mainMenu, configs: menuConfigs)
+        NSApp.mainMenu = mainMenu
+        NSApp.servicesMenu = servicesMenu
     }
 
-    func generateMainMenu() -> NSMenu {
-        let mainMenu = NSMenu(title: "MainMenu")
-        NSApp.servicesMenu = NSMenu()
+    func createMenu(parentMenu: NSMenu, configs: [Config]) {
+        for config in configs {
+            let item = createMenuItem(parentMenu: parentMenu, config: config)
 
-        for menuConfig in menuConfigs {
-            let menu = NSMenu(title: menuConfig.name)
-            let item = MenuItem(title: menuConfig.name, action: nil, keyEquivalent: menuConfig.key)
-            item.config = menuConfig
-            mainMenu.addItem(item)
-            mainMenu.setSubmenu(menu, for: item)
+            if config.configs != nil {
+                let menu = config.name == "Services" ? servicesMenu : NSMenu(title: config.name)
+                item.submenu = menu
+                createMenu(parentMenu: menu, configs: config.configs ?? [])
+            }
 
-            for subConfig in menuConfig.configs ?? [] {
-                if subConfig.name == "separator" {
-                    menu.addItem(MenuItem.separator())
-                } else {
-                    let subItem = MenuItem(title: subConfig.name, action: subConfig.action, keyEquivalent: subConfig.key)
-                    subItem.target = subConfig.target
-                    subItem.keyEquivalentModifierMask = subConfig.modifiers
-                    subItem.config = subConfig
-                    menu.addItem(subItem)
-
-                    if subConfig.name == "Services" {
-                        subItem.submenu = NSApp.servicesMenu
-                    }
-                    if let cmd = subConfig.commandSpecial {
-                        dynamicMenuItems[cmd] = (dynamicMenuItems[cmd] ?? []) + [subItem]
-                    }
-                }
+            if let cmd = config.commandSpecial {
+                dynamicMenuItems[cmd] = (dynamicMenuItems[cmd] ?? []) + [item]
             }
         }
+    }
 
-        return mainMenu
+    func createMenuItem(parentMenu: NSMenu, config: Config) -> MenuItem {
+        var item = MenuItem(title: config.name, action: config.action, keyEquivalent: config.key)
+        item.config = config
+        item.target = config.target
+        item.keyEquivalentModifierMask = config.modifiers
+
+        if config.name == "separator" {
+            item = MenuItem.separator() as? MenuItem ?? item
+        }
+        parentMenu.addItem(item)
+
+        return item
     }
 
     @objc func about() {
