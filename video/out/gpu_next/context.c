@@ -88,6 +88,7 @@ static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx,
     ctx->swapchain = pl_d3d11_create_swapchain(d3d11,
         pl_d3d11_swapchain_params(
             .swapchain = swapchain,
+            .disable_10bit_sdr = true,
         )
     );
     if (!ctx->swapchain) {

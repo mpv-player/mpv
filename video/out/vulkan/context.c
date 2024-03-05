@@ -268,6 +268,7 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         // mpv already handles resize events, so gracefully allow suboptimal
         // swapchains to exist in order to make resizing even smoother
         .allow_suboptimal = true,
+        .disable_10bit_sdr = true,
     };
 
     if (p->opts->swap_mode >= 0) // user override
