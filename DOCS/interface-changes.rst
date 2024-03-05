@@ -28,6 +28,7 @@ Interface changes
 
  --- mpv 0.38.0 ---
     - add `begin-vo-dragging` command
+    - add `--deinterlace-field-parity` option
     - add `--volume-gain`, `--volume-gain-min`, and `--volume-gain-max` options
     - add `current-gpu-context` property
     - add `--secondary-sub-ass-override` option
