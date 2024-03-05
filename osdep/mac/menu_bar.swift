@@ -20,44 +20,48 @@ extension MenuBar {
         var config: Config?
     }
 
-    enum MenuKey {
-        case normalSize
-        case halfSize
-        case doubleSize
-        case minimize
-        case zoom
+    enum `Type`: Comparable {
+        case menu
+        case menuServices
+        case separator
+        case item
+        case itemNormalSize
+        case itemHalfSize
+        case itemDoubleSize
+        case itemMinimize
+        case itemZoom
     }
 
     struct Config {
         let name: String
         let key: String
         let modifiers: NSEvent.ModifierFlags
+        let type: Type
         let action: Selector?
         let target: AnyObject?
         let command: String
         let url: String
-        let commandSpecial: MenuKey?
-        var configs: [Config]?
+        var configs: [Config]
 
         init(
             name: String = "",
             key: String = "",
             modifiers: NSEvent.ModifierFlags = .command,
+            type: Type = .item,
             action: Selector? = nil,
             target: AnyObject? = nil,
             command: String = "",
             url: String = "",
-            commandSpecial: MenuKey? = nil,
-            configs: [Config]? = nil
+            configs: [Config] = []
         ) {
             self.name = name
             self.key = key
             self.modifiers = modifiers
+            self.type = configs.isEmpty ? type : .menu
             self.action = action
             self.target = target
             self.command = command
             self.url = url
-            self.commandSpecial = commandSpecial
             self.configs = configs
         }
     }
@@ -67,7 +71,7 @@ class MenuBar: NSObject {
     let mainMenu = NSMenu(title: "Main")
     let servicesMenu = NSMenu(title: "Services")
     var menuConfigs: [Config] = []
-    var dynamicMenuItems: [MenuKey:[MenuItem]] = [:]
+    var dynamicMenuItems: [Type:[MenuItem]] = [:]
     let appIcon: NSImage
 
     @objc override init() {
@@ -81,7 +85,7 @@ class MenuBar: NSObject {
 
         let appMenuConfigs = [
             Config(name: "About mpv", action: #selector(about), target: self),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(
                 name: "Settings…",
                 key: ",",
@@ -95,13 +99,13 @@ class MenuBar: NSObject {
                 target: self,
                 url: "input.conf"
             ),
-            Config(name: "separator"),
-            Config(name: "Services", configs: []),
-            Config(name: "separator"),
+            Config(type: .separator),
+            Config(name: "Services", type: .menuServices),
+            Config(type: .separator),
             Config(name: "Hide mpv", key: "h", action: #selector(NSApp.hide(_:))),
             Config(name: "Hide Others", key: "h", modifiers: [.command, .option], action: #selector(NSApp.hideOtherApplications(_:))),
             Config(name: "Show All", action: #selector(NSApp.unhideAllApplications(_:))),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Quit and Remember Position", action: #selector(quit(_:)), target: self, command: "quit-watch-later"),
             Config(name: "Quit mpv", key: "q", action: #selector(quit(_:)), target: self, command: "quit"),
         ]
@@ -110,7 +114,7 @@ class MenuBar: NSObject {
             Config(name: "Open File…", key: "o", action: #selector(openFiles), target: self),
             Config(name: "Open URL…", key: "O", action: #selector(openUrl), target: self),
             Config(name: "Open Playlist…", action: #selector(openPlaylist), target: self),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Close", key: "w", action: #selector(NSWindow.performClose(_:))),
             Config(name: "Save Screenshot", action: #selector(command(_:)), target: self, command: "async screenshot"),
         ]
@@ -118,7 +122,7 @@ class MenuBar: NSObject {
         let editMenuConfigs = [
             Config(name: "Undo", key: "z", action: Selector(("undo:"))),
             Config(name: "Redo", key: "Z", action: Selector(("redo:"))),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Cut", key: "x", action: #selector(NSText.cut(_:))),
             Config(name: "Copy", key: "c", action: #selector(NSText.copy(_:))),
             Config(name: "Paste", key: "v", action: #selector(NSText.paste(_:))),
@@ -137,7 +141,7 @@ class MenuBar: NSObject {
         ]
 #if HAVE_MACOS_TOUCHBAR
         viewMenuConfigs += [
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Customize Touch Bar…", action: #selector(NSApp.toggleTouchBarCustomizationPalette(_:))),
         ]
 #endif
@@ -146,28 +150,28 @@ class MenuBar: NSObject {
             Config(name: "Zoom Out", action: #selector(command(_:)), target: self, command: "add panscan -0.1"),
             Config(name: "Zoom In", action: #selector(command(_:)), target: self, command: "add panscan 0.1"),
             Config(name: "Reset Zoom", action: #selector(command(_:)), target: self, command: "set panscan 0"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Aspect Ratio 4:3", action: #selector(command(_:)), target: self, command: "set video-aspect-override \"4:3\""),
             Config(name: "Aspect Ratio 16:9", action: #selector(command(_:)), target: self, command: "set video-aspect-override \"16:9\""),
             Config(name: "Aspect Ratio 1.85:1", action: #selector(command(_:)), target: self, command: "set video-aspect-override \"1.85:1\""),
             Config(name: "Aspect Ratio 2.35:1", action: #selector(command(_:)), target: self, command: "set video-aspect-override \"2.35:1\""),
             Config(name: "Reset Aspect Ratio", action: #selector(command(_:)), target: self, command: "set video-aspect-override \"-1\""),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Rotate Left", action: #selector(command(_:)), target: self, command: "cycle-values video-rotate 0 270 180 90"),
             Config(name: "Rotate Right", action: #selector(command(_:)), target: self, command: "cycle-values video-rotate 90 180 270 0"),
             Config(name: "Reset Rotation", action: #selector(command(_:)), target: self, command: "set video-rotate 0"),
-            Config(name: "separator"),
-            Config(name: "Half Size", key: "0", commandSpecial: .halfSize),
-            Config(name: "Normal Size", key: "1", commandSpecial: .normalSize),
-            Config(name: "Double Size", key: "2", commandSpecial: .doubleSize),
+            Config(type: .separator),
+            Config(name: "Half Size", key: "0", type: .itemHalfSize),
+            Config(name: "Normal Size", key: "1", type: .itemNormalSize),
+            Config(name: "Double Size", key: "2", type: .itemDoubleSize),
         ]
 
         let audioMenuConfigs = [
             Config(name: "Next Audio Track", action: #selector(command(_:)), target: self, command: "cycle audio"),
             Config(name: "Previous Audio Track", action: #selector(command(_:)), target: self, command: "cycle audio down"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Toggle Mute", action: #selector(command(_:)), target: self, command: "cycle mute"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Play Audio Later", action: #selector(command(_:)), target: self, command: "add audio-delay 0.1"),
             Config(name: "Play Audio Earlier", action: #selector(command(_:)), target: self, command: "add audio-delay -0.1"),
             Config(name: "Reset Audio Delay", action: #selector(command(_:)), target: self, command: "set audio-delay 0.0"),
@@ -176,9 +180,9 @@ class MenuBar: NSObject {
         let subtitleMenuConfigs = [
             Config(name: "Next Subtitle Track", action: #selector(command(_:)), target: self, command: "cycle sub"),
             Config(name: "Previous Subtitle Track", action: #selector(command(_:)), target: self, command: "cycle sub down"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Toggle Force Style", action: #selector(command(_:)), target: self, command: "cycle-values sub-ass-override \"force\" \"no\""),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Display Subtitles Later", action: #selector(command(_:)), target: self, command: "add sub-delay 0.1"),
             Config(name: "Display Subtitles Earlier", action: #selector(command(_:)), target: self, command: "add sub-delay -0.1"),
             Config(name: "Reset Subtitle Delay", action: #selector(command(_:)), target: self, command: "set sub-delay 0.0"),
@@ -189,38 +193,38 @@ class MenuBar: NSObject {
             Config(name: "Increase Speed", action: #selector(command(_:)), target: self, command: "add speed 0.1"),
             Config(name: "Decrease Speed", action: #selector(command(_:)), target: self, command: "add speed -0.1"),
             Config(name: "Reset Speed", action: #selector(command(_:)), target: self, command: "set speed 1.0"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Show Playlist", action: #selector(command(_:)), target: self, command: "script-message osc-playlist"),
             Config(name: "Show Chapters", action: #selector(command(_:)), target: self, command: "script-message osc-chapterlist"),
             Config(name: "Show Tracks", action: #selector(command(_:)), target: self, command: "script-message osc-tracklist"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Next File", action: #selector(command(_:)), target: self, command: "playlist-next"),
             Config(name: "Previous File", action: #selector(command(_:)), target: self, command: "playlist-prev"),
             Config(name: "Toggle Loop File", action: #selector(command(_:)), target: self, command: "cycle-values loop-file \"inf\" \"no\""),
             Config(name: "Toggle Loop Playlist", action: #selector(command(_:)), target: self, command: "cycle-values loop-playlist \"inf\" \"no\""),
             Config(name: "Shuffle", action: #selector(command(_:)), target: self, command: "playlist-shuffle"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Next Chapter", action: #selector(command(_:)), target: self, command: "add chapter 1"),
             Config(name: "Previous Chapter", action: #selector(command(_:)), target: self, command: "add chapter -1"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Step Forward", action: #selector(command(_:)), target: self, command: "frame-step"),
             Config(name: "Step Backward", action: #selector(command(_:)), target: self, command: "frame-back-step"),
         ]
 
         let windowMenuConfigs = [
-            Config(name: "Minimize", key: "m", commandSpecial: .minimize),
-            Config(name: "Zoom", commandSpecial: .zoom),
+            Config(name: "Minimize", key: "m", type: .itemMinimize),
+            Config(name: "Zoom", type: .itemZoom),
         ]
 
         var helpMenuConfigs = [
             Config(name: "mpv Website…", action: #selector(url(_:)), target: self, url: "https://mpv.io"),
             Config(name: "mpv on GitHub…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Online Manual…", action: #selector(url(_:)), target: self, url: "https://mpv.io/manual/master/"),
             Config(name: "Online Wiki…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/wiki"),
             Config(name: "Release Notes…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/blob/master/RELEASE_NOTES"),
             Config(name: "Keyboard Shortcuts…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/blob/master/etc/input.conf"),
-            Config(name: "separator"),
+            Config(type: .separator),
             Config(name: "Report Issue…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/issues/new/choose"),
         ]
         if ProcessInfo.processInfo.environment["MPVBUNDLE"] == "true" {
@@ -251,14 +255,14 @@ class MenuBar: NSObject {
         for config in configs {
             let item = createMenuItem(parentMenu: parentMenu, config: config)
 
-            if config.configs != nil {
-                let menu = config.name == "Services" ? servicesMenu : NSMenu(title: config.name)
+            if config.type <= .menuServices {
+                let menu = config.type == .menuServices ? servicesMenu : NSMenu(title: config.name)
                 item.submenu = menu
-                createMenu(parentMenu: menu, configs: config.configs ?? [])
+                createMenu(parentMenu: menu, configs: config.configs)
             }
 
-            if let cmd = config.commandSpecial {
-                dynamicMenuItems[cmd] = (dynamicMenuItems[cmd] ?? []) + [item]
+            if config.type > Type.item {
+                dynamicMenuItems[config.type] = (dynamicMenuItems[config.type] ?? []) + [item]
             }
         }
     }
@@ -269,7 +273,7 @@ class MenuBar: NSObject {
         item.target = config.target
         item.keyEquivalentModifierMask = config.modifiers
 
-        if config.name == "separator" {
+        if config.type == .separator {
             item = MenuItem.separator() as? MenuItem ?? item
         }
         parentMenu.addItem(item)
@@ -392,7 +396,7 @@ class MenuBar: NSObject {
         alert.runModal()
     }
 
-    func register(_ selector: Selector, key: MenuKey) {
+    func register(_ selector: Selector, key: Type) {
         for menuItem in dynamicMenuItems[key] ?? [] {
             menuItem.action = selector
         }
