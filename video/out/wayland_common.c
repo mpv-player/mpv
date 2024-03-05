@@ -1865,7 +1865,7 @@ static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode)
 
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale)
 {
-    if (!wl->vo_opts->hidpi_window_scale)
+    if (!wl->vo_opts->hidpi_window_scale && !wl->locked_size)
         return;
 
     double factor = old_scale / wl->scaling;
