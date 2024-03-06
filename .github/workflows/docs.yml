@@ -20,5 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Docs
         run: |
-          sudo apt-get install python3-docutils
-          rst2man --strip-elements-with-class=contents --halt=2 ./DOCS/man/mpv.rst mpv.1
+          sudo apt-get install python3-docutils rst2pdf
+          ./TOOLS/docutils-wrapper.py rst2man --strip-elements-with-class=contents --halt=2 ./DOCS/man/mpv.rst mpv.1
+          ./TOOLS/docutils-wrapper.py rst2html --halt=2 ./DOCS/man/mpv.rst mpv.html
+          ./TOOLS/docutils-wrapper.py rst2pdf -c -b 1 --repeat-table-rows ./DOCS/man/mpv.rst -o mpv.pdf
