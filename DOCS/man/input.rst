@@ -483,11 +483,11 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         is currently playing, start playback. (Always starts with the added
         file, even if the playlist was not empty before running this command.)
 
-    The third argument is an insertion index, used only by the `insert-at` and
-    `insert-at-play` actions. When used with those actions, the new item will be
-    insert at the <index> position in the playlist, or appended to the end if
-    <index> is less than 0 or greater than the size of the playlist. This
-    argument will be ignored for all other actions.
+    The third argument is an insertion index, used only by the ``insert-at`` and
+    ``insert-at-play`` actions. When used with those actions, the new item will
+    be inserted at the index position in the playlist, or appended to the end if
+    index is less than 0 or greater than the size of the playlist. This argument
+    will be ignored for all other actions.
 
     The fourth argument is a list of options and values which should be set
     while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
@@ -524,11 +524,11 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         new playlist, even if the internal playlist was not empty before running
         this command.)
 
-    The third argument is an insertion index, used only by the `insert-at` and
-    `insert-at-play` actions. When used with those actions, the new playlist
-    will be insert at the <index> position in the internal playlist, or appended
-    to the end if <index> is less than 0 or greater than the size of the
-    internal playlist. This argument will be ignored for all other actions.
+    The third argument is an insertion index, used only by the ``insert-at`` and
+    ``insert-at-play`` actions. When used with those actions, the new playlist
+    will be inserted at the index position in the internal playlist, or appended
+    to the end if index is less than 0 or greater than the size of the internal
+    playlist. This argument will be ignored for all other actions.
 
 ``playlist-clear``
     Clear the playlist, except the currently played file.
