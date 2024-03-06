@@ -35,7 +35,7 @@ class Window: NSWindow, NSWindowDelegate {
     let animationLock: NSCondition = NSCondition()
 
     var unfsContentFramePixel: NSRect { get { return convertToBacking(unfsContentFrame ?? NSRect(x: 0, y: 0, width: 160, height: 90)) } }
-    var framePixel: NSRect { get { return convertToBacking(frame) } }
+    @objc var framePixel: NSRect { get { return convertToBacking(frame) } }
 
     var keepAspect: Bool = true {
         didSet {
