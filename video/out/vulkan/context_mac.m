@@ -85,7 +85,14 @@ error:
 
 static bool resize(struct ra_ctx *ctx)
 {
-    return ra_vk_ctx_resize(ctx, ctx->vo->dwidth, ctx->vo->dheight);
+    struct priv *p = ctx->priv;
+
+    if (!p->vo_mac.window) {
+        return false;
+    }
+    CGSize size = p->vo_mac.window.framePixel.size;
+
+    return ra_vk_ctx_resize(ctx, (int)size.width, (int)size.height);
 }
 
 static bool mac_vk_reconfig(struct ra_ctx *ctx)

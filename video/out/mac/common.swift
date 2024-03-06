@@ -23,7 +23,7 @@ class Common: NSObject {
     var log: LogHelper
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue")
 
-    var window: Window?
+    @objc var window: Window?
     var view: View?
     var titleBar: TitleBar?
 
