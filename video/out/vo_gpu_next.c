@@ -841,7 +841,11 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
     int dither_depth = opts->dither_depth;
     if (dither_depth == 0) {
         struct ra_swapchain *sw = p->ra_ctx->swapchain;
-        dither_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
+        if (sw->fns->color_depth) {
+            dither_depth = sw->fns->color_depth(sw);
+        } else if (!pl_color_transfer_is_hdr(target->color.transfer)) {
+            dither_depth = 8;
+        }
     }
     if (dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
