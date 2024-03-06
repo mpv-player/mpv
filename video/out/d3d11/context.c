@@ -154,6 +154,11 @@ static bool d3d11_reconfig(struct ra_ctx *ctx)
 static int d3d11_color_depth(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
+
+    DXGI_OUTPUT_DESC1 desc1;
+    if (mp_get_dxgi_output_desc(p->swapchain, &desc1))
+        return desc1.BitsPerColor;
+
     DXGI_SWAP_CHAIN_DESC desc;
 
     HRESULT hr = IDXGISwapChain_GetDesc(p->swapchain, &desc);
