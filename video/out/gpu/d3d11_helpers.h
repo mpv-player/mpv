@@ -22,6 +22,7 @@
 #include <windows.h>
 #include <d3d11.h>
 #include <dxgi1_2.h>
+#include <dxgi1_6.h>
 
 #include "video/mp_image.h"
 
@@ -68,6 +69,8 @@ struct d3d11_device_opts {
 IDXGIAdapter1 *mp_get_dxgi_adapter(struct mp_log *log,
                                    bstr requested_adapter_name,
                                    bstr *listing);
+
+bool mp_get_dxgi_output_desc(IDXGISwapChain *swapchain, DXGI_OUTPUT_DESC1 *desc);
 
 OPT_STRING_VALIDATE_FUNC(mp_dxgi_validate_adapter);
 

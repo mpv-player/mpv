@@ -287,28 +287,8 @@ static bool query_output_format_and_colorspace(struct mp_log *log,
     if (!out_fmt || !out_cspace)
         return false;
 
-    HRESULT hr = IDXGISwapChain_GetContainingOutput(swapchain, &output);
-    if (FAILED(hr)) {
-        mp_err(log, "Failed to get swap chain's containing output: %s!\n",
-               mp_HRESULT_to_str(hr));
-        goto done;
-    }
-
-    hr = IDXGIOutput_QueryInterface(output, &IID_IDXGIOutput6,
-                                    (void**)&output6);
-    if (FAILED(hr)) {
-        // point where systems older than Windows 10 would fail,
-        // thus utilizing error log level only with windows 10+
-        mp_msg(log, IsWindows10OrGreater() ? MSGL_ERR : MSGL_V,
-               "Failed to create a DXGI 1.6 output interface: %s\n",
-               mp_HRESULT_to_str(hr));
-        goto done;
-    }
-
-    hr = IDXGIOutput6_GetDesc1(output6, &desc);
-    if (FAILED(hr)) {
-        mp_err(log, "Failed to query swap chain's output information: %s\n",
-               mp_HRESULT_to_str(hr));
+    if (!mp_get_dxgi_output_desc(swapchain, &desc)) {
+        mp_err(log, "Failed to query swap chain's output information\n");
         goto done;
     }
 
@@ -994,4 +974,24 @@ done:
     SAFE_RELEASE(adapter);
     SAFE_RELEASE(dxgi_dev);
     return success;
+}
+
+bool mp_get_dxgi_output_desc(IDXGISwapChain *swapchain, DXGI_OUTPUT_DESC1 *desc)
+{
+    bool ret = false;
+    IDXGIOutput *output = NULL;
+    IDXGIOutput6 *output6 = NULL;
+
+    if (FAILED(IDXGISwapChain_GetContainingOutput(swapchain, &output)))
+        goto done;
+
+    if (FAILED(IDXGIOutput_QueryInterface(output, &IID_IDXGIOutput6, (void**)&output6)))
+        goto done;
+
+    ret = SUCCEEDED(IDXGIOutput6_GetDesc1(output6, desc));
+
+done:
+    SAFE_RELEASE(output);
+    SAFE_RELEASE(output6);
+    return ret;
 }
