@@ -5554,8 +5554,10 @@ them.
     no
         Disable any dithering done by mpv.
     auto
-        Automatic selection. If output bit depth cannot be detected, 8 bits per
-        component are assumed.
+        Automatic selection.
+        On ``vo=gpu``: if output bit depth cannot be detected, 8 bpc is assumed.
+        On ``vo=gpu-next``: with ``gpu-api=d3d11``, real on-the-wire bpc is used.
+        For other ``gpu-api``, 8 bpc is used for SDR content.
     8
         Dither to 8 bit output.
 
