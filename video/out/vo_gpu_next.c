@@ -837,10 +837,15 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
         container = pl_raw_primaries_get(target->color.primaries);
         target->color.hdr.prim = pl_primaries_clip(gamut, container);
     }
-    if (opts->dither_depth > 0) {
+    int dither_depth = opts->dither_depth;
+    if (dither_depth == 0) {
+        struct ra_swapchain *sw = p->ra_ctx->swapchain;
+        dither_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
+    }
+    if (dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
-        tbits->color_depth += opts->dither_depth - tbits->sample_depth;
-        tbits->sample_depth = opts->dither_depth;
+        tbits->color_depth += dither_depth - tbits->sample_depth;
+        tbits->sample_depth = dither_depth;
     }
 
     if (opts->icc_opts->icc_use_luma) {
