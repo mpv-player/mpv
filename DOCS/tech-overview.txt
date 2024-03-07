@@ -242,9 +242,9 @@ audio/out/:
     Unlike VOs, AOs can't be reconfigured on a format change. On audio format
     changes, the AO will simply be closed and re-opened.
 
-    There are wrappers to support for two types of audio APIs: push.c and
-    pull.c. ao.c calls into one of these. They contain generic code to deal
-    with the data flow these APIs impose.
+    buffer.c is the wrapper to support for two types of audio APIs: push and
+    pull. ao.c calls into that. It contains generic code to deal with the data
+    flow these APIs impose.
 
     Note that mpv synchronizes the video to the audio. That's the reason
     why buggy audio drivers can have a bad influence on playback quality.
