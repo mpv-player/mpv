@@ -11,7 +11,7 @@ player/*.c:
     * main():
         * basic initializations (e.g. init_libav() and more)
         * pre-parse command line (verbosity level, config file locations)
-        * load config files (parse_cfgfiles())
+        * load config files (mp_parse_cfgfiles())
         * parse command line, add files from the command line to playlist
           (m_config_parse_mp_command_line())
         * check help options etc. (call handle_help_options()), possibly exit
@@ -45,7 +45,7 @@ player/*.c:
     Things worth saying about the playback core:
     - most state is in MPContext (core.h), which is not available to the
       subsystems (and should not be made available)
-    - the currently played tracks are in mpctx->current_tracks, and decoder
+    - the currently played tracks are in mpctx->current_track, and decoder
       state in track.dec/d_sub
     - the other subsystems rarely call back into the frontend, and the frontend
       polls them instead (probably a good thing)
@@ -174,7 +174,7 @@ stream/*:
 
 demux/:
     Demuxers split data streams into audio/video/sub streams, which in turn
-    are split in packets. Packets (see demux_packet.h) are mostly byte chunks
+    are split in packets. Packets (see packet.h) are mostly byte chunks
     tagged with a playback time (PTS). These packets are passed to the decoders.
 
     Most demuxers have been removed from this fork, and the only important and
