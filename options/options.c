@@ -442,9 +442,9 @@ const struct m_sub_options filter_conf = {
     .opts = (const struct m_option[]){
         {"deinterlace", OPT_CHOICE(deinterlace,
             {"no", 0}, {"yes", 1}, {"auto", -1})},
-        {"deinterlace-field-parity", OPT_CHOICE(field_parity, 
-            {"tff", MP_FIELD_PARITY_TFF}, 
-            {"bff", MP_FIELD_PARITY_BFF}, 
+        {"deinterlace-field-parity", OPT_CHOICE(field_parity,
+            {"tff", MP_FIELD_PARITY_TFF},
+            {"bff", MP_FIELD_PARITY_BFF},
             {"auto", MP_FIELD_PARITY_AUTO})},
         {0}
     },
