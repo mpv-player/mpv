@@ -59,7 +59,11 @@ struct spdifContext {
     struct mp_decoder public;
 };
 
+#if LIBAVCODEC_VERSION_MAJOR < 61
 static int write_packet(void *p, uint8_t *buf, int buf_size)
+#else
+static int write_packet(void *p, const uint8_t *buf, int buf_size)
+#endif
 {
     struct spdifContext *ctx = p;
 
