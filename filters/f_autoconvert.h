@@ -39,7 +39,9 @@ void mp_autoconvert_set_target_image_params(struct mp_autoconvert *c,
 // formats are allowed (even non-video).
 // subfmt can be used to specify underlying surface formats for hardware formats,
 // otherwise must be 0. (Mismatches lead to conversion errors.)
-void mp_autoconvert_add_imgfmt(struct mp_autoconvert *c, int imgfmt, int subfmt);
+// priority: higher is better
+void mp_autoconvert_add_imgfmt(struct mp_autoconvert *c, int imgfmt,
+                               int subfmt, uint8_t priority);
 
 // Add all sw image formats. The effect is that hardware video image formats are
 // disallowed. The semantics are the same as calling mp_autoconvert_add_imgfmt()

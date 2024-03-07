@@ -84,9 +84,14 @@ static void update_output_caps(struct chain *p)
         uint8_t allowed_output_formats[IMGFMT_END - IMGFMT_START] = {0};
         vo_query_formats(p->vo, allowed_output_formats);
 
+        MP_TRACE(p, "VO reports supported formats:\n");
         for (int n = 0; n < MP_ARRAY_SIZE(allowed_output_formats); n++) {
-            if (allowed_output_formats[n])
-                mp_autoconvert_add_imgfmt(p->convert, IMGFMT_START + n, 0);
+            const uint8_t prio = allowed_output_formats[n];
+            if (prio) {
+                const int imgfmt = IMGFMT_START + n;
+                mp_autoconvert_add_imgfmt(p->convert, imgfmt, 0, prio);
+                MP_TRACE(p, "  %-14s (%d)\n", mp_imgfmt_to_name(imgfmt), (int) prio);
+            }
         }
     }
 }

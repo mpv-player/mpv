@@ -24,6 +24,7 @@ struct priv {
 
     int *imgfmts;
     int *subfmts;
+    uint8_t *priorities;
     int num_imgfmts;
     struct mp_image_params imgparams;
     bool imgparams_set;
@@ -69,15 +70,20 @@ void mp_autoconvert_clear(struct mp_autoconvert *c)
     p->force_update = true;
 }
 
-void mp_autoconvert_add_imgfmt(struct mp_autoconvert *c, int imgfmt, int subfmt)
+void mp_autoconvert_add_imgfmt(struct mp_autoconvert *c, int imgfmt,
+                               int subfmt, uint8_t priority)
 {
     struct priv *p = c->f->priv;
 
-    MP_TARRAY_GROW(p, p->imgfmts, p->num_imgfmts);
-    MP_TARRAY_GROW(p, p->subfmts, p->num_imgfmts);
+    const int i = p->num_imgfmts;
 
-    p->imgfmts[p->num_imgfmts] = imgfmt;
-    p->subfmts[p->num_imgfmts] = subfmt;
+    MP_TARRAY_GROW(p, p->imgfmts, i);
+    MP_TARRAY_GROW(p, p->subfmts, i);
+    MP_TARRAY_GROW(p, p->priorities, i);
+
+    p->imgfmts[i] = imgfmt;
+    p->subfmts[i] = subfmt;
+    p->priorities[i] = priority;
 
     p->num_imgfmts += 1;
     p->force_update = true;
@@ -97,14 +103,14 @@ void mp_autoconvert_set_target_image_params(struct mp_autoconvert *c,
     p->imgparams_set = true;
 
     p->num_imgfmts = 0;
-    mp_autoconvert_add_imgfmt(c, par->imgfmt, par->hw_subfmt);
+    mp_autoconvert_add_imgfmt(c, par->imgfmt, par->hw_subfmt, 1);
 }
 
 void mp_autoconvert_add_all_sw_imgfmts(struct mp_autoconvert *c)
 {
     for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
         if (!IMGFMT_IS_HWACCEL(n))
-            mp_autoconvert_add_imgfmt(c, n, 0);
+            mp_autoconvert_add_imgfmt(c, n, 0, 1);
     }
 }
 
@@ -307,7 +313,8 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
 
         sws->force_scaler = c->force_scaler;
 
-        int out = mp_sws_find_best_out_format(sws, src_fmt, fmts, num_fmts);
+        int out = mp_sws_find_best_out_format(sws, src_fmt, fmts,
+                                              p->priorities, num_fmts);
         if (!out) {
             mp_err(log, "can't find video conversion for %s\n",
                    mp_imgfmt_to_name(src_fmt));

@@ -223,7 +223,7 @@ static struct mp_filter *vf_format_create(struct mp_filter *parent, void *option
     priv->conv->force_scaler = priv->opts->force_scaler;
 
     if (priv->opts->fmt)
-        mp_autoconvert_add_imgfmt(priv->conv, priv->opts->fmt, 0);
+        mp_autoconvert_add_imgfmt(priv->conv, priv->opts->fmt, 0, 1);
 
     return f;
 }

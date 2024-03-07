@@ -788,7 +788,7 @@ static struct mp_filter *vf_vapoursynth_create(struct mp_filter *parent,
     for (int n = 0; mpvs_fmt_table[n].bits; n++) {
         int imgfmt = mp_from_vs(mpvs_fmt_table[n].vs);
         if (imgfmt)
-            mp_autoconvert_add_imgfmt(conv, imgfmt, 0);
+            mp_autoconvert_add_imgfmt(conv, imgfmt, 0, 1);
     }
 
     struct mp_filter *dur = mp_compute_frame_duration_create(f);
