@@ -166,9 +166,8 @@ stream/*:
     E.g. if mpv sees "http://something" on the command line, it will pick
     stream_lavf.c based on the prefix, and pass the rest of the filename to it.
 
-    Some stream inputs are quite special: stream_dvd.c turns DVDs into mpeg
+    Some stream inputs are quite special: stream_dvdnav.c turns DVDs into mpeg
     streams (DVDs are actually a bunch of vob files etc. on a filesystem),
-    stream_tv.c provides TV input including channel switching.
 
     Some stream inputs are just there to invoke special demuxers, like
     stream_mf.c. (Basically to make the prefix "mf://" do something special.)
