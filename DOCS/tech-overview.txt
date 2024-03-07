@@ -126,15 +126,16 @@ options/options.h, options/options.c
 
     ... to get a copy of its options.
 
-    See m_config.h (below) how to access options.
+    See m_config_core.h (below) how to access options.
 
-    The actual option parser is spread over m_option.c, m_config.c, and
-    parse_commandline.c, and uses the option table in options.c.
+    The actual option parser is spread over m_option.c, m_config_frontend.c,
+    and parse_commandline.c, and uses the option table in options.c.
 
-options/m_config.h & m_config.c:
-    Code for querying and managing options. This (unfortunately) contains both
-    declarations for the "legacy-ish" global m_config struct, and ways to access
-    options in a threads-safe way anywhere, like m_config_cache_alloc().
+options/m_config_*.h & m_config_*.c:
+    Code for querying and managing options. m_config_frontend.h contains
+    declarations for the "legacy-ish" global m_config struct, while
+    m_config_core.h provides ways to access options in a threads-safe way
+    anywhere, like m_config_cache_alloc().
 
     m_config_cache_alloc() lets anyone read, observe, and write options in any
     thread. The only state it needs is struct mpv_global, which is an opaque
