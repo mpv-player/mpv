@@ -189,6 +189,14 @@ demux/:
     cache, which is implemented as a list of packets. The cache is complex
     because it support seeking, multiple ranges, prefetching, and so on.
 
+filters/:
+    Filter related code. filter.c contains the generic filtering framework
+    which converts input frames to output frames (audio, video, or demux
+    packet data). f_decoder_wrapper.c is a source filter which connects the
+    frontend with the actual audio and video decoders. f_output_chain.c handles
+    VO/AO output conversions. f_autoconvert.c automatically inserts the
+    appropriate conversion filters if format conversion is needed.
+
 video/:
     This contains several things related to audio/video decoding, as well as
     video filters.
@@ -197,15 +205,11 @@ video/:
     internally.
 
 video/decode/:
-    vd_*.c are video decoders. (There's only vd_lavc.c left.) dec_video.c
-    handles most of connecting the frontend with the actual decoder.
+    vd_*.c are video decoders. (There's only vd_lavc.c left.)
 
 video/filter/:
-    vf_*.c and vf.c form the video filter chain. They are fed by the video
-    decoder, and output the filtered images to the VOs though vf_vo.c. By
-    default, no video filters (except vf_vo) are used. vf_scale is automatically
-    inserted if the video output can't handle the video format used by the
-    decoder.
+    vf_*.c are video filters. They are fed by the video decoder, and output the
+    filtered images to the VOs. By default, no video filters are used.
 
 video/out/:
     Video output. They also create GUI windows and handle user input. In most
@@ -224,13 +228,13 @@ audio/:
     compressed formats used for spdif.)
 
 audio/decode/:
-    ad_*.c and dec_audio.c handle audio decoding. ad_lavc.c is the
-    decoder using ffmpeg. ad_spdif.c is not really a decoder, but is used for
-    compressed audio passthrough.
+    ad_*.c handle audio decoding. ad_lavc.c is the decoder using ffmpeg.
+    ad_spdif.c is not really a decoder, but is used for compressed audio
+    passthrough.
 
 audio/filter/:
-    Audio filter chain. af_lavrresample is inserted if any form of conversion
-    between audio formats is needed.
+    Audio filters. af_scaletempo2 is inserted by default if playback is different
+    from normal speed.
 
 audio/out/:
     Audio outputs.
