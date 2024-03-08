@@ -69,7 +69,7 @@ static struct JNIByteBuffer {
     jmethodID clear;
 } ByteBuffer;
 #define OFFSET(member) offsetof(struct JNIByteBuffer, member)
-const static struct MPJniField ByteBuffer_mapping[] = {
+static const struct MPJniField ByteBuffer_mapping[] = {
     {"java/nio/ByteBuffer", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
     {"clear", "()Ljava/nio/Buffer;", MP_JNI_METHOD, OFFSET(clear), 1},
     {0},
@@ -109,7 +109,7 @@ static struct JNIAudioTrack {
     jint WRITE_NON_BLOCKING;
 } AudioTrack;
 #define OFFSET(member) offsetof(struct JNIAudioTrack, member)
-const static struct MPJniField AudioTrack_mapping[] = {
+static const struct MPJniField AudioTrack_mapping[] = {
     {"android/media/AudioTrack", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
     {"<init>", "(IIIIIII)V", MP_JNI_METHOD, OFFSET(ctor), 1},
     {"<init>", "(Landroid/media/AudioAttributes;Landroid/media/AudioFormat;III)V", MP_JNI_METHOD, OFFSET(ctorV21), 0},
@@ -151,7 +151,7 @@ static struct JNIAudioAttributes {
     jint USAGE_MEDIA;
 } AudioAttributes;
 #define OFFSET(member) offsetof(struct JNIAudioAttributes, member)
-const static struct MPJniField AudioAttributes_mapping[] = {
+static const struct MPJniField AudioAttributes_mapping[] = {
     {"android/media/AudioAttributes", NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
     {"CONTENT_TYPE_MOVIE", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MOVIE), 0},
     {"CONTENT_TYPE_MUSIC", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(CONTENT_TYPE_MUSIC), 0},
@@ -168,7 +168,7 @@ static struct JNIAudioAttributesBuilder {
     jmethodID build;
 } AudioAttributesBuilder;
 #define OFFSET(member) offsetof(struct JNIAudioAttributesBuilder, member)
-const static struct MPJniField AudioAttributesBuilder_mapping[] = {
+static const struct MPJniField AudioAttributesBuilder_mapping[] = {
     {"android/media/AudioAttributes$Builder", NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
     {"<init>", "()V", MP_JNI_METHOD, OFFSET(ctor), 0},
     {"setUsage", "(I)Landroid/media/AudioAttributes$Builder;", MP_JNI_METHOD, OFFSET(setUsage), 0},
@@ -193,7 +193,7 @@ static struct JNIAudioFormat {
     jint CHANNEL_OUT_7POINT1_SURROUND;
 } AudioFormat;
 #define OFFSET(member) offsetof(struct JNIAudioFormat, member)
-const static struct MPJniField AudioFormat_mapping[] = {
+static const struct MPJniField AudioFormat_mapping[] = {
     {"android/media/AudioFormat", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
     {"ENCODING_PCM_8BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_8BIT), 1},
     {"ENCODING_PCM_16BIT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ENCODING_PCM_16BIT), 1},
@@ -219,7 +219,7 @@ static struct JNIAudioFormatBuilder {
     jmethodID build;
 } AudioFormatBuilder;
 #define OFFSET(member) offsetof(struct JNIAudioFormatBuilder, member)
-const static struct MPJniField AudioFormatBuilder_mapping[] = {
+static const struct MPJniField AudioFormatBuilder_mapping[] = {
     {"android/media/AudioFormat$Builder", NULL, MP_JNI_CLASS, OFFSET(clazz), 0},
     {"<init>", "()V", MP_JNI_METHOD, OFFSET(ctor), 0},
     {"setEncoding", "(I)Landroid/media/AudioFormat$Builder;", MP_JNI_METHOD, OFFSET(setEncoding), 0},
@@ -236,7 +236,7 @@ static struct JNIAudioManager {
     jint STREAM_MUSIC;
 } AudioManager;
 #define OFFSET(member) offsetof(struct JNIAudioManager, member)
-const static struct MPJniField AudioManager_mapping[] = {
+static const struct MPJniField AudioManager_mapping[] = {
     {"android/media/AudioManager", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
     {"STREAM_MUSIC", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(STREAM_MUSIC), 1},
     {"ERROR_DEAD_OBJECT", "I", MP_JNI_STATIC_FIELD_AS_INT, OFFSET(ERROR_DEAD_OBJECT), 0},
@@ -251,7 +251,7 @@ static struct JNIAudioTimestamp {
     jfieldID nanoTime;
 } AudioTimestamp;
 #define OFFSET(member) offsetof(struct JNIAudioTimestamp, member)
-const static struct MPJniField AudioTimestamp_mapping[] = {
+static const struct MPJniField AudioTimestamp_mapping[] = {
     {"android/media/AudioTimestamp", NULL, MP_JNI_CLASS, OFFSET(clazz), 1},
     {"<init>", "()V", MP_JNI_METHOD, OFFSET(ctor), 1},
     {"framePosition", "J", MP_JNI_FIELD, OFFSET(framePosition), 1},
@@ -261,7 +261,7 @@ const static struct MPJniField AudioTimestamp_mapping[] = {
 #undef OFFSET
 
 #define ENTRY(name) { &name, name ## _mapping }
-const static struct {
+static const struct {
     void *fields;
     const struct MPJniField *mapping;
 } jclass_list[] = {

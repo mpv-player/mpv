@@ -844,7 +844,7 @@ int mp_client_send_event_dup(struct MPContext *mpctx, const char *client_name,
     return mp_client_send_event(mpctx, client_name, 0, event, event_data.data);
 }
 
-const static bool deprecated_events[] = {
+static const bool deprecated_events[] = {
     [MPV_EVENT_IDLE] = true,
     [MPV_EVENT_TICK] = true,
 };

@@ -36,7 +36,7 @@ static void uninit(struct ra_hwdec *hw)
     av_buffer_unref(&p->hwctx.av_device_ref);
 }
 
-const static vt_interop_init interop_inits[] = {
+static const vt_interop_init interop_inits[] = {
 #if HAVE_VIDEOTOOLBOX_GL || HAVE_IOS_GL
     vt_gl_init,
 #endif
