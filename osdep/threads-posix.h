@@ -102,7 +102,7 @@ typedef pthread_once_t  mp_once;
 typedef pthread_t       mp_thread_id;
 typedef pthread_t       mp_thread;
 
-#define MP_STATIC_COND_INITIALIZER (mp_cond){ .cond = PTHREAD_COND_INITIALIZER, .clk_id = CLOCK_REALTIME }
+#define MP_STATIC_COND_INITIALIZER { .cond = PTHREAD_COND_INITIALIZER, .clk_id = CLOCK_REALTIME }
 #define MP_STATIC_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 #define MP_STATIC_ONCE_INITIALIZER PTHREAD_ONCE_INIT
 
