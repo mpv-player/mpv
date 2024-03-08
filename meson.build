@@ -7,7 +7,7 @@ project('mpv',
             'buildtype=debugoptimized',
             'b_lundef=false',
             'c_std=c11',
-            'warning_level=1',
+            'warning_level=2',
         ]
 )
 
@@ -267,6 +267,10 @@ flags = ['-D_FILE_OFFSET_BITS=64']
 link_flags = []
 
 test_flags = ['-Werror=implicit-function-declaration',
+              '-Wno-missing-field-initializers',
+              '-Wno-sign-compare',
+              '-Wno-unused-parameter',
+              '-Wno-cast-function-type',
               '-Wempty-body',
               '-Wdisabled-optimization',
               '-Wstrict-prototypes',
@@ -382,6 +386,7 @@ pthread_debug = get_option('pthread-debug').require(
 features += {'pthread-debug': pthread_debug.allowed()}
 
 add_project_arguments(flags, language: 'c')
+add_project_arguments(['-Wno-unused-parameter'], language: 'objc')
 add_project_link_arguments(link_flags, language: ['c', 'objc'])
 
 
