@@ -145,18 +145,17 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
 #if HAVE_GL && defined(PL_HAVE_OPENGL)
     if (ra_is_gl(ctx->ra_ctx->ra)) {
         struct GL *gl = ra_gl_get(ctx->ra_ctx->ra);
-        pl_opengl opengl = pl_opengl_create(ctx->pllog,
-            pl_opengl_params(
-                .debug = ctx_opts->debug,
-                .allow_software = ctx_opts->allow_sw,
-                .get_proc_addr_ex = (void *) gl->get_fn,
-                .proc_ctx = gl->fn_ctx,
-# if HAVE_EGL
-                .egl_display = eglGetCurrentDisplay(),
-                .egl_context = eglGetCurrentContext(),
-# endif
-            )
+        struct pl_opengl_params params = *pl_opengl_params(
+            .debug = ctx_opts->debug,
+            .allow_software = ctx_opts->allow_sw,
+            .get_proc_addr_ex = (void *) gl->get_fn,
+            .proc_ctx = gl->fn_ctx,
         );
+# if HAVE_EGL
+        params.egl_display = eglGetCurrentDisplay();
+        params.egl_context = eglGetCurrentContext();
+# endif
+        pl_opengl opengl = pl_opengl_create(ctx->pllog, &params);
         if (!opengl)
             goto err_out;
         ctx->gpu = opengl->gpu;
