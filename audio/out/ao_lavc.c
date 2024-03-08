@@ -26,6 +26,7 @@
 #include <limits.h>
 
 #include <libavutil/common.h>
+#include <libavutil/samplefmt.h>
 
 #include "config.h"
 #include "options/options.h"
