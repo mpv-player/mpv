@@ -1035,9 +1035,9 @@ static const char *get_avopt_type_name(enum AVOptionType type)
     case AV_OPT_TYPE_DURATION:          return "duration";
     case AV_OPT_TYPE_COLOR:             return "color";
 #if LIBAVUTIL_VERSION_MAJOR < 59
-    case AV_OPT_TYPE_CHANNEL_LAYOUT:    return "channellayout";
+    case AV_OPT_TYPE_CHANNEL_LAYOUT:    return "ch_layout";
 #else
-    case AV_OPT_TYPE_CHLAYOUT:          return "channellayout";
+    case AV_OPT_TYPE_CHLAYOUT:          return "ch_layout";
 #endif
     case AV_OPT_TYPE_BOOL:              return "bool";
     case AV_OPT_TYPE_CONST: // fallthrough
