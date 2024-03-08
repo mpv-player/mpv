@@ -75,7 +75,7 @@ struct priv {
     void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
 };
 
-const static struct { const char *symbol; int offset; } lib_functions[] = {
+static const struct { const char *symbol; int offset; } lib_functions[] = {
     { "AImageReader_newWithUsage", offsetof(struct priv_owner, AImageReader_newWithUsage) },
     { "AImageReader_getWindow", offsetof(struct priv_owner, AImageReader_getWindow) },
     { "AImageReader_setImageListener", offsetof(struct priv_owner, AImageReader_setImageListener) },

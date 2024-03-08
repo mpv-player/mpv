@@ -52,7 +52,7 @@ static void uninit(struct ra_hwdec *hw)
     av_buffer_unref(&p->hwctx.av_device_ref);
 }
 
-const static dmabuf_interop_init interop_inits[] = {
+static const dmabuf_interop_init interop_inits[] = {
 #if HAVE_DMABUF_INTEROP_GL
     dmabuf_interop_gl_init,
 #endif
@@ -72,7 +72,7 @@ const static dmabuf_interop_init interop_inits[] = {
  * pixel formats by name. As rpi is an important target platform for this hwdec
  * we don't really have the luxury of ignoring these forks.
  */
-const static char *forked_pix_fmt_names[] = {
+static const char *forked_pix_fmt_names[] = {
     "rpi4_8",
     "rpi4_10",
 };

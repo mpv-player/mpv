@@ -114,7 +114,7 @@ static fe_code_rate_t parse_fec(const char *cr)
 
 static fe_modulation_t parse_vdr_modulation(const char** modstring)
 {
-    const static struct { const char *s; fe_modulation_t v; } table[] = {
+    static const struct { const char *s; fe_modulation_t v; } table[] = {
         { "16",  QAM_16 },
         { "32",  QAM_32 },
         { "64",  QAM_64 },
