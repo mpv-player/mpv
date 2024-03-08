@@ -299,15 +299,18 @@ bool mp_msg_has_status_line(struct mpv_global *global)
 
 static void set_term_color(void *talloc_ctx, bstr *text, int c)
 {
-    return c == -1 ? bstr_xappend(talloc_ctx, text, bstr0("\033[0m"))
-                   : bstr_xappend_asprintf(talloc_ctx, text,
-                                           "\033[%d;3%dm", c >> 3, c & 7);
+    if (c == -1) {
+        bstr_xappend(talloc_ctx, text, bstr0("\033[0m"));
+        return;
+    }
+
+    bstr_xappend_asprintf(talloc_ctx, text, "\033[%d;3%dm", c >> 3, c & 7);
 }
 
 static void set_msg_color(void *talloc_ctx, bstr *text, int lev)
 {
     static const int v_colors[] = {9, 1, 3, -1, -1, 2, 8, 8, 8, -1};
-    return set_term_color(talloc_ctx, text, v_colors[lev]);
+    set_term_color(talloc_ctx, text, v_colors[lev]);
 }
 
 static void pretty_print_module(struct mp_log_root *root, bstr *text,
