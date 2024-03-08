@@ -39,7 +39,7 @@ typedef HANDLE             mp_thread;
 typedef DWORD              mp_thread_id;
 
 #define MP_STATIC_COND_INITIALIZER CONDITION_VARIABLE_INIT
-#define MP_STATIC_MUTEX_INITIALIZER (mp_mutex){ .srw = SRWLOCK_INIT }
+#define MP_STATIC_MUTEX_INITIALIZER { .srw = SRWLOCK_INIT }
 #define MP_STATIC_ONCE_INITIALIZER INIT_ONCE_STATIC_INIT
 
 static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_type mtype)
