@@ -283,7 +283,7 @@ void mp_msg_set_term_title(struct mp_log *log, const char *title)
     if (log->root && title) {
         // Lock because printf to terminal is not necessarily atomic.
         mp_mutex_lock(&log->root->lock);
-        fprintf(stderr, "\e]0;%s\007", title);
+        fprintf(stderr, "\033]0;%s\007", title);
         mp_mutex_unlock(&log->root->lock);
     }
 }
