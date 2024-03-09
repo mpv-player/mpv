@@ -636,8 +636,6 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             pick = track;
             goto cleanup;
         }
-        if (tid >= 0)
-            continue;
         if (track->no_auto_select)
             continue;
         if (duplicate_track(mpctx, order, type, track))
@@ -669,47 +667,6 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
 cleanup:
     talloc_free(langs);
     return pick;
-}
-
-static char *track_layout_hash(struct MPContext *mpctx)
-{
-    char *h = talloc_strdup(NULL, "");
-    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-        for (int n = 0; n < mpctx->num_tracks; n++) {
-            struct track *track = mpctx->tracks[n];
-            if (track->type != type)
-                continue;
-            h = talloc_asprintf_append_buffer(h, "%d-%d-%d-%d-%s\n", type,
-                    track->user_tid, track->default_track, track->is_external,
-                    track->lang ? track->lang : "");
-        }
-    }
-    return h;
-}
-
-// Normally, video/audio/sub track selection is persistent across files. This
-// code resets track selection if the new file has a different track layout.
-static void check_previous_track_selection(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-
-    if (!mpctx->track_layout_hash)
-        return;
-
-    char *h = track_layout_hash(mpctx);
-    if (strcmp(h, mpctx->track_layout_hash) != 0) {
-        // Reset selection, but only if they're not "auto" or "off". The
-        // defaults are -1 (default selection), or -2 (off) for secondary tracks.
-        for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
-            for (int i = 0; i < num_ptracks[t]; i++) {
-                if (opts->stream_id[i][t] >= 0)
-                    mark_track_selection(mpctx, i, t, i == 0 ? -1 : -2);
-            }
-        }
-        talloc_free(mpctx->track_layout_hash);
-        mpctx->track_layout_hash = NULL;
-    }
-    talloc_free(h);
 }
 
 // Update the matching track selection user option to the given value.
@@ -796,9 +753,6 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
 
     mp_notify(mpctx, MP_EVENT_TRACK_SWITCHED, NULL);
     mp_wakeup_core(mpctx);
-
-    talloc_free(mpctx->track_layout_hash);
-    mpctx->track_layout_hash = talloc_steal(mpctx, track_layout_hash(mpctx));
 
     return;
 error:
@@ -1680,8 +1634,6 @@ static void play_current_file(struct MPContext *mpctx)
     load_external_opts(mpctx);
     if (mpctx->stop_play)
         goto terminate_playback;
-
-    check_previous_track_selection(mpctx);
 
     process_hooks(mpctx, "on_preloaded");
     if (mpctx->stop_play)

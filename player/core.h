@@ -301,8 +301,6 @@ typedef struct MPContext {
     struct track **tracks;
     int num_tracks;
 
-    char *track_layout_hash;
-
     // Selected tracks. NULL if no track selected.
     // There can be num_ptracks[type] of the same STREAM_TYPE selected at once.
     // Currently, this is used for the secondary subtitle track only.
