@@ -175,6 +175,7 @@ void cocoa_init_cocoa_cb(void)
 @implementation EventsResponder
 
 @synthesize remoteCommandCenter = _remoteCommandCenter;
+@synthesize inputHelper = _inputHelper;
 
 + (EventsResponder *)sharedInstance
 {
@@ -182,6 +183,7 @@ void cocoa_init_cocoa_cb(void)
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         responder = [EventsResponder new];
+        responder.inputHelper = [[InputHelper alloc] init: nil];
     });
     return responder;
 }
@@ -197,57 +199,32 @@ void cocoa_init_cocoa_cb(void)
 
 - (void)waitForInputContext
 {
-    [_input_lock lock];
-    while (!_inputContext)
-        [_input_lock wait];
-    [_input_lock unlock];
+    [_inputHelper wait];
 }
 
 - (void)setInputContext:(struct input_ctx *)ctx
 {
-    [_input_lock lock];
-    _inputContext = ctx;
-    [_input_lock signal];
-    [_input_lock unlock];
+    [_inputHelper signalWithInput:ctx];
 }
 
 - (void)wakeup
 {
-    [_input_lock lock];
-    if (_inputContext)
-        mp_input_wakeup(_inputContext);
-    [_input_lock unlock];
+    [_inputHelper wakeup];
 }
 
 - (bool)queueCommand:(char *)cmd
 {
-    bool r = false;
-    [_input_lock lock];
-    if (_inputContext) {
-        mp_cmd_t *cmdt = mp_input_parse_cmd(_inputContext, bstr0(cmd), "");
-        mp_input_queue_cmd(_inputContext, cmdt);
-        r = true;
-    }
-    [_input_lock unlock];
-    return r;
+    return [_inputHelper command:[NSString stringWithUTF8String:cmd]];
 }
 
 - (void)putKey:(int)keycode
 {
-    [_input_lock lock];
-    if (_inputContext)
-        mp_input_put_key(_inputContext, keycode);
-    [_input_lock unlock];
+    [_inputHelper putKey:keycode];
 }
 
 - (BOOL)useAltGr
 {
-    BOOL r = YES;
-    [_input_lock lock];
-    if (_inputContext)
-        r = mp_input_use_alt_gr(_inputContext);
-    [_input_lock unlock];
-    return r;
+    return [_inputHelper useAltGr];
 }
 
 - (void)setIsApplication:(BOOL)isApplication
