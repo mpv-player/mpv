@@ -53,7 +53,7 @@ class View: NSView, CALayerDelegate {
         addTrackingArea(tracker!)
 
         if containsMouseLocation() {
-            cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
+            input?.putKey(SWIFT_KEY_MOUSE_LEAVE)
         }
     }
 
@@ -118,14 +118,14 @@ class View: NSView, CALayerDelegate {
 
     override func mouseEntered(with event: NSEvent) {
         if input?.mouseEnabled() ?? true {
-            cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_ENTER, 0)
+            input?.putKey(SWIFT_KEY_MOUSE_ENTER)
         }
         common.updateCursorVisibility()
     }
 
     override func mouseExited(with event: NSEvent) {
         if input?.mouseEnabled() ?? true {
-            cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
+            input?.putKey(SWIFT_KEY_MOUSE_LEAVE)
         }
         common.titleBar?.hide()
         common.setCursorVisibility(true)
@@ -202,7 +202,7 @@ class View: NSView, CALayerDelegate {
     func signalMouseEvent(_ event: NSEvent, _ state: UInt32) {
         hasMouseDown = state == MP_KEY_STATE_DOWN
         let mpkey = getMpvButton(event)
-        cocoa_put_key_with_modifiers((mpkey | Int32(state)), Int32(event.modifierFlags.rawValue))
+        input?.putKey((mpkey | Int32(state)), modifiers: event.modifierFlags)
     }
 
     func signalMouseMovement(_ event: NSEvent) {
@@ -250,7 +250,7 @@ class View: NSView, CALayerDelegate {
                 mpkey = deltaX > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
             }
 
-            cocoa_put_key_with_modifiers(mpkey, Int32(modifiers.rawValue))
+            input?.putKey(mpkey, modifiers: modifiers)
         }
     }
 

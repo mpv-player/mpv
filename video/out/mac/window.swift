@@ -556,7 +556,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        cocoa_put_key(MP_KEY_CLOSE_WIN)
+        input?.putKey(MP_KEY_CLOSE_WIN)
         return false
     }
 

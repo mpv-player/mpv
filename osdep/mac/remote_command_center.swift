@@ -165,11 +165,8 @@ class RemoteCommandCenter: NSObject {
             return .commandFailed
         }
 
-        let success = String(format: "seek %.02f absolute", posEvent.positionTime).withCString {
-            EventsResponder.sharedInstance().queueCommand(UnsafeMutablePointer<Int8>(mutating: $0))
-        }
-
-        return success ? .success : .commandFailed
+        let cmd = String(format: "seek %.02f absolute", posEvent.positionTime)
+        return EventsResponder.sharedInstance().inputHelper.command(cmd) ? .success : .commandFailed
     }
 
     @objc func processEvent(_ event: UnsafeMutablePointer<mpv_event>) {

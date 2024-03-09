@@ -16,7 +16,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "osdep/mac/application_objc.h"
 
 #define BASE_ID @"io.mpv.touchbar"
 static NSTouchBarCustomizationIdentifier customID = BASE_ID;
@@ -37,7 +36,6 @@ struct mpv_event;
 
 -(void)processEvent:(struct mpv_event *)event;
 
-@property(nonatomic, retain) Application *app;
 @property(nonatomic, retain) NSDictionary *touchbarItems;
 @property(nonatomic, assign) double duration;
 @property(nonatomic, assign) double position;
