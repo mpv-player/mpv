@@ -39,6 +39,7 @@ struct mp_refqueue {
     int needed_past_frames;
     int needed_future_frames;
     int flags;
+    int field_parity;
 
     bool second_field; // current frame has to output a second field yet
     bool eof;
@@ -97,6 +98,11 @@ void mp_refqueue_set_mode(struct mp_refqueue *q, int flags)
     q->flags = flags;
 }
 
+void mp_refqueue_set_parity(struct mp_refqueue *q, int parity)
+{
+    q->field_parity = parity;
+}
+
 // Whether the current frame should be deinterlaced.
 bool mp_refqueue_should_deint(struct mp_refqueue *q)
 {
@@ -113,8 +119,14 @@ bool mp_refqueue_is_top_field(struct mp_refqueue *q)
 {
     if (!mp_refqueue_has_output(q))
         return false;
-
-    return !!(q->queue[q->pos]->fields & MP_IMGFIELD_TOP_FIRST) ^ q->second_field;
+    
+    bool tff = q->field_parity == MP_FIELD_PARITY_TFF;
+    bool bff = q->field_parity == MP_FIELD_PARITY_BFF;
+    bool ret = (!!(q->queue[q->pos]->fields & MP_IMGFIELD_TOP_FIRST) ^ q->second_field 
+                && !tff && !bff); // Default parity
+    ret = ret || (tff && !q->second_field); // Check if top field is forced
+    ret = ret || (bff && q->second_field); // Check if bottom field is forced
+    return ret;
 }
 
 // Whether top-field-first mode is enabled.
@@ -123,7 +135,9 @@ bool mp_refqueue_top_field_first(struct mp_refqueue *q)
     if (!mp_refqueue_has_output(q))
         return false;
 
-    return q->queue[q->pos]->fields & MP_IMGFIELD_TOP_FIRST;
+    bool tff = q->field_parity == MP_FIELD_PARITY_TFF;
+    bool bff = q->field_parity == MP_FIELD_PARITY_BFF;
+    return ((q->queue[q->pos]->fields & MP_IMGFIELD_TOP_FIRST) || tff) && !bff;
 }
 
 // Discard all state.
@@ -319,7 +333,7 @@ bool mp_refqueue_can_output(struct mp_refqueue *q)
 
     if (!q->in_format || !!q->in_format->hwctx != !!img->hwctx ||
         (img->hwctx && img->hwctx->data != q->in_format->hwctx->data) ||
-        !mp_image_params_equal(&q->in_format->params, &img->params))
+        !mp_image_params_static_equal(&q->in_format->params, &img->params))
     {
         q->next = img;
         q->eof = true;

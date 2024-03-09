@@ -51,6 +51,7 @@ struct pipeline {
 
 struct opts {
     int deint_type;
+    int field_parity;
     bool interlaced_only;
     bool reversal_bug;
 };
@@ -143,11 +144,13 @@ static void update_pipeline(struct mp_filter *vf)
         (p->do_deint ? MP_MODE_DEINT : 0) |
         (p->opts->deint_type >= 2 ? MP_MODE_OUTPUT_FIELDS : 0) |
         (p->opts->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
+    mp_refqueue_set_parity(p->queue, p->opts->field_parity);
     return;
 
 nodeint:
     mp_refqueue_set_refs(p->queue, 0, 0);
     mp_refqueue_set_mode(p->queue, 0);
+    mp_refqueue_set_parity(p->queue, p->opts->field_parity);
 }
 
 static struct mp_image *alloc_out(struct mp_filter *vf)
@@ -485,6 +488,10 @@ static const m_option_t vf_opts_fields[] = {
         {"motion-compensated", 5})},
     {"interlaced-only", OPT_BOOL(interlaced_only)},
     {"reversal-bug", OPT_BOOL(reversal_bug)},
+    {"parity", OPT_CHOICE(field_parity,
+        {"tff", MP_FIELD_PARITY_TFF},
+        {"bff", MP_FIELD_PARITY_BFF},
+        {"auto", MP_FIELD_PARITY_AUTO})},
     {0}
 };
 
@@ -496,6 +503,7 @@ const struct mp_user_filter_entry vf_vavpp = {
         .priv_defaults = &(const OPT_BASE_STRUCT){
             .deint_type = -1,
             .reversal_bug = true,
+            .field_parity = MP_FIELD_PARITY_AUTO,
         },
         .options = vf_opts_fields,
     },

@@ -452,9 +452,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     restarted if for example the new playlist entry is the same as the previous
     one.
 
-``loadfile <url> [<flags> [<options>]]``
+``loadfile <url> [<flags> [<index> [<options>]]]``
     Load the given file or URL and play it. Technically, this is just a playlist
-    manipulation command (which either replaces the playlist or appends an entry
+    manipulation command (which either replaces the playlist or adds an entry
     to it). Actual file loading happens independently. For example, a
     ``loadfile`` command that replaces the current file with a new one returns
     before the current file is stopped, and the new file even begins loading.
@@ -475,15 +475,28 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Insert the file next, and if nothing is currently playing, start playback.
         (Always starts with the added file, even if the playlist was not empty
         before running this command.)
+    <insert-at>
+        Insert the file into the playlist, at the index given in the third
+        argument.
+    <insert-at-play>
+        Insert the file at the index given in the third argument, and if nothing
+        is currently playing, start playback. (Always starts with the added
+        file, even if the playlist was not empty before running this command.)
 
-    The third argument is a list of options and values which should be set
+    The third argument is an insertion index, used only by the ``insert-at`` and
+    ``insert-at-play`` actions. When used with those actions, the new item will
+    be inserted at the index position in the playlist, or appended to the end if
+    index is less than 0 or greater than the size of the playlist. This argument
+    will be ignored for all other actions.
+
+    The fourth argument is a list of options and values which should be set
     while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
     When using the client API, this can be a ``MPV_FORMAT_NODE_MAP`` (or a Lua
     table), however the values themselves must be strings currently. These
     options are set during playback, and restored to the previous value at end
     of playback (see `Per-File Options`_).
 
-``loadlist <url> [<flags>]``
+``loadlist <url> [<flags> [<index>]]``
     Load the given playlist file or URL (like ``--playlist``).
 
     Second argument:
@@ -503,6 +516,19 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Insert the new playlist, and if nothing is currently playing, start
         playback. (Always starts with the new playlist, even if the internal
         playlist was not empty before running this command.)
+    <insert-at>
+        Insert the new playlist at the index given in the third argument.
+    <insert-at-play>
+        Insert the new playlist at the index given in the third argument, and if
+        nothing is currently playing, start playback. (Always starts with the
+        new playlist, even if the internal playlist was not empty before running
+        this command.)
+
+    The third argument is an insertion index, used only by the ``insert-at`` and
+    ``insert-at-play`` actions. When used with those actions, the new playlist
+    will be inserted at the index position in the internal playlist, or appended
+    to the end if index is less than 0 or greater than the size of the internal
+    playlist. This argument will be ignored for all other actions.
 
 ``playlist-clear``
     Clear the playlist, except the currently played file.
@@ -2618,6 +2644,11 @@ Property list
     ``video-params``. Note that this is still not necessarily what the video
     window uses, since the user can change the window size, and all real VOs
     do their own scaling independently from the filter chain.
+
+    Has the same sub-properties as ``video-params``.
+
+``video-target-params``
+    Same as ``video-params``, but with the target properties that VO outputs to.
 
     Has the same sub-properties as ``video-params``.
 

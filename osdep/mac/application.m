@@ -284,12 +284,6 @@ static MP_THREAD_VOID playback_thread(void *ctx_obj)
     }
 }
 
-void cocoa_register_menu_item_action(MPMenuKey key, void* action)
-{
-    if (application_instantiated)
-        [[NSApp menuBar] registerSelector:(SEL)action forKey:key];
-}
-
 static void init_cocoa_application(bool regular)
 {
     NSApp = mpv_shared_app();

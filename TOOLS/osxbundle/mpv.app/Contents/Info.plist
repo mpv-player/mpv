@@ -188,6 +188,8 @@
     <string>${VERSION}</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.games</string>
     <key>LSEnvironment</key>
     <dict>
       <key>MallocNanoZone</key>

@@ -1676,6 +1676,17 @@ Video
     inserted deinterlacing filters, and that this will make video look worse if
     it's not actually interlaced.
 
+``--deinterlace-field-parity=<tff|bff|auto>``
+    Specify the field parity/order when deinterlacing(default: auto)
+    Each frame of an interlaced video is divided into two fields, which are
+    then separately transmitted. Top field represents even lines while bottom
+    field represents odd lines. When deinterlacing the deinterlacer needs to
+    know the correct temporal order of the fields else the video will appear
+    jittery.
+
+    ``auto`` will automatically try to detect the field order of the video,
+    ``tff`` forces top field first while ``bff`` forces bottom field first.
+
 ``--frames=<number>``
     Play/convert only first ``<number>`` video frames, then quit.
 

@@ -494,7 +494,11 @@ static bool hwdec_reconfig(struct priv *p, struct ra_hwdec *hwdec,
                            const struct mp_image_params *par)
 {
     if (p->hwdec_mapper) {
-        if (mp_image_params_equal(par, &p->hwdec_mapper->src_params)) {
+        if (mp_image_params_static_equal(par, &p->hwdec_mapper->src_params)) {
+            p->hwdec_mapper->src_params.repr.dovi = par->repr.dovi;
+            p->hwdec_mapper->dst_params.repr.dovi = par->repr.dovi;
+            p->hwdec_mapper->src_params.color.hdr = par->color.hdr;
+            p->hwdec_mapper->dst_params.color.hdr = par->color.hdr;
             return p->hwdec_mapper;
         } else {
             ra_hwdec_mapper_free(&p->hwdec_mapper);
@@ -700,9 +704,6 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
 
     // Update chroma location, must be done after initializing planes
     pl_frame_set_chroma_location(frame, par->chroma_location);
-
-    // Set the frame DOVI metadata
-    mp_map_dovi_metadata_to_pl(mpi, frame);
 
     if (mpi->film_grain)
         pl_film_grain_from_av(&frame->film_grain, (AVFilmGrainParams *) mpi->film_grain->data);
@@ -1114,10 +1115,24 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         goto done;
     }
 
-    const struct pl_frame *cur_frame = pl_frame_mix_nearest(&mix);
+    struct pl_frame ref_frame;
+    pl_frames_infer_mix(p->rr, &mix, &target, &ref_frame);
+
     mp_mutex_lock(&vo->params_mutex);
-    if (cur_frame && vo->params) {
-        vo->params->color.hdr = cur_frame->color.hdr;
+    if (!vo->target_params)
+        vo->target_params = talloc(vo, struct mp_image_params);
+    *vo->target_params = (struct mp_image_params){
+        .imgfmt_name = swframe.fbo->params.format
+                        ? swframe.fbo->params.format->name : NULL,
+        .w = swframe.fbo->params.w,
+        .h = swframe.fbo->params.h,
+        .color = target.color,
+        .repr = target.repr,
+        .rotate = target.rotation,
+    };
+
+    if (vo->params) {
+        vo->params->color.hdr = ref_frame.color.hdr;
         // Augment metadata with peak detection max_pq_y / avg_pq_y
         pl_renderer_get_hdr_metadata(p->rr, &vo->params->color.hdr);
     }

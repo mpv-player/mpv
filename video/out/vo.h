@@ -481,6 +481,7 @@ struct vo {
     //     generic getter is protected by params_mutex.
     mp_mutex params_mutex;
     struct mp_image_params *params; // Configured parameters (changed in vo_reconfig)
+    struct mp_image_params *target_params; // Target display parameters
 
     // --- The following fields can be accessed only by the VO thread, or from
     //     anywhere _if_ the VO thread is suspended (use vo->dispatch).
@@ -554,5 +555,6 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
 struct vo_frame *vo_frame_ref(struct vo_frame *frame);
 
 struct mp_image_params vo_get_current_params(struct vo *vo);
+struct mp_image_params vo_get_target_params(struct vo *vo);
 
 #endif /* MPLAYER_VIDEO_OUT_H */

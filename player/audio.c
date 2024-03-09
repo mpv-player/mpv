@@ -829,7 +829,8 @@ void audio_start_ao(struct MPContext *mpctx)
     double pts = MP_NOPTS_VALUE;
     if (!get_sync_pts(mpctx, &pts))
         return;
-    double apts = playing_audio_pts(mpctx);
+    double apts = written_audio_pts(mpctx);
+    apts -= apts != MP_NOPTS_VALUE ? mpctx->audio_speed * ao_get_delay(mpctx->ao) : 0;
     if (pts != MP_NOPTS_VALUE && apts != MP_NOPTS_VALUE && pts < apts &&
         mpctx->video_status != STATUS_EOF)
     {
@@ -845,6 +846,7 @@ void audio_start_ao(struct MPContext *mpctx)
     }
 
     MP_VERBOSE(mpctx, "starting audio playback\n");
+    ao_c->audio_started = true;
     ao_start(ao_c->ao);
     mpctx->audio_status = STATUS_PLAYING;
     if (ao_c->out_eof) {

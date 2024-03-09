@@ -93,12 +93,6 @@ class MacCommon: Common {
         }
     }
 
-    func updateRenderSize(_ size: NSSize) {
-        mpv?.vo.pointee.dwidth = Int32(size.width)
-        mpv?.vo.pointee.dheight = Int32(size.height)
-        flagEvents(VO_EVENT_RESIZE | VO_EVENT_EXPOSE)
-    }
-
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
                                             _ inNow: UnsafePointer<CVTimeStamp>,
                                      _ inOutputTime: UnsafePointer<CVTimeStamp>,
@@ -144,12 +138,7 @@ class MacCommon: Common {
     }
 
     override func windowDidResize() {
-        guard let window = window else {
-            log.sendWarning("No window available on window resize event")
-            return
-        }
-
-        updateRenderSize(window.framePixel.size)
+        flagEvents(VO_EVENT_RESIZE | VO_EVENT_EXPOSE)
     }
 
     override func windowDidChangeScreenProfile() {

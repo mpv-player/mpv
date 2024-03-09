@@ -18,7 +18,6 @@
 #ifndef MAC_APPLICATION
 #define MAC_APPLICATION
 
-#include "osdep/mac/menubar.h"
 #include "options/m_option.h"
 
 enum {
@@ -47,7 +46,6 @@ struct macos_opts {
 
 // multithreaded wrapper for mpv_main
 int cocoa_main(int argc, char *argv[]);
-void cocoa_register_menu_item_action(MPMenuKey key, void* action);
 
 extern const struct m_sub_options macos_conf;
 

@@ -197,7 +197,8 @@ struct vo_wayland_seat {
     struct wl_data_device *dnd_ddev;
     /* TODO: unvoid this if required wayland protocols is bumped to 1.32+ */
     void *cursor_shape_device;
-    uint32_t pointer_serial;
+    uint32_t pointer_enter_serial;
+    uint32_t pointer_button_serial;
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
     uint32_t keyboard_code;
@@ -242,7 +243,7 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
 
-    s->pointer_serial = serial;
+    s->pointer_enter_serial = serial;
     set_cursor_visibility(s, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
 }
@@ -317,7 +318,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         mp_input_put_key(wl->vo->input_ctx, button | MP_KEY_STATE_UP);
     } else if (state == MP_KEY_STATE_DOWN) {
         // Save the serial and seat for voctrl-initialized dragging requests.
-        s->pointer_serial = serial;
+        s->pointer_button_serial = serial;
         wl->last_button_seat = s;
     } else {
         wl->last_button_seat = NULL;
@@ -441,7 +442,7 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
         mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
     } else {
         // Save the serial and seat for voctrl-initialized dragging requests.
-        s->pointer_serial = serial;
+        s->pointer_button_serial = serial;
         wl->last_button_seat = s;
     }
 }
@@ -985,6 +986,7 @@ static void surface_handle_preferred_buffer_scale(void *data,
         return;
 
     wl->scaling = scale;
+    wl->scale_configured = true;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -1209,6 +1211,7 @@ static void preferred_scale(void *data,
     double old_scale = wl->scaling;
 
     wl->scaling = (double)scale / 120;
+    wl->scale_configured = true;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->scaling);
     wl->pending_vo_events |= VO_EVENT_DPI;
@@ -1862,7 +1865,7 @@ static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode)
 
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale)
 {
-    if (!wl->vo_opts->hidpi_window_scale)
+    if (!wl->vo_opts->hidpi_window_scale && !wl->locked_size)
         return;
 
     double factor = old_scale / wl->scaling;
@@ -1957,7 +1960,7 @@ static void set_content_type(struct vo_wayland_state *wl)
 static void set_cursor_shape(struct vo_wayland_seat *s)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    wp_cursor_shape_device_v1_set_shape(s->cursor_shape_device, s->pointer_serial,
+    wp_cursor_shape_device_v1_set_shape(s->cursor_shape_device, s->pointer_enter_serial,
                                         WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
 #endif
 }
@@ -1979,16 +1982,16 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
             if (!buffer)
                 return VO_FALSE;
             int scale = MPMAX(wl->scaling, 1);
-            wl_pointer_set_cursor(s->pointer, s->pointer_serial, wl->cursor_surface,
+            wl_pointer_set_cursor(s->pointer, s->pointer_enter_serial, wl->cursor_surface,
                                   img->hotspot_x / scale, img->hotspot_y / scale);
             wp_viewport_set_destination(wl->cursor_viewport, lround(img->width / scale),
-                                        img->height / scale);
+                                        lround(img->height / scale));
             wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
             wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
         }
         wl_surface_commit(wl->cursor_surface);
     } else {
-        wl_pointer_set_cursor(s->pointer, s->pointer_serial, NULL, 0, 0);
+        wl_pointer_set_cursor(s->pointer, s->pointer_enter_serial, NULL, 0, 0);
     }
     return VO_TRUE;
 }
@@ -2071,8 +2074,11 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
 
 static void set_surface_scaling(struct vo_wayland_state *wl)
 {
-    if (wl->fractional_scale_manager || wl_surface_get_version(wl->surface) >= 6)
+    if (wl->scale_configured && (wl->fractional_scale_manager ||
+        wl_surface_get_version(wl->surface) >= 6))
+    {
         return;
+    }
 
     double old_scale = wl->scaling;
     wl->scaling = wl->current_output->scale;
@@ -2215,7 +2221,7 @@ static void begin_dragging(struct vo_wayland_state *wl)
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         !wl->locked_size && s)
     {
-        xdg_toplevel_move(wl->xdg_toplevel, s->seat, s->pointer_serial);
+        xdg_toplevel_move(wl->xdg_toplevel, s->seat, s->pointer_button_serial);
         wl->last_button_seat = NULL;
         mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
     }
@@ -2587,6 +2593,7 @@ bool vo_wayland_reconfig(struct vo *vo)
         if (!wl->current_output)
             return false;
         set_surface_scaling(wl);
+        wl->scale_configured = true;
         wl->pending_vo_events |= VO_EVENT_DPI;
     }
 

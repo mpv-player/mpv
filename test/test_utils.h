@@ -51,6 +51,7 @@ void mp_msg(struct mp_log *log, int lev, const char *format, ...)
     PRINTF_ATTRIBUTE(3, 4);
 int mp_msg_find_level(const char *s);
 int mp_msg_level(struct mp_log *log);
+void mp_msg_set_max_level(struct mp_log *log, int lev);
 void mp_write_console_ansi(void);
 typedef struct AVDictionary AVDictionary;
 void mp_set_avdict(AVDictionary **dict, char **kv);

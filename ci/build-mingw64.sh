@@ -110,7 +110,7 @@ _iconv () {
 _iconv_mark=lib/libiconv.dll.a
 
 _zlib () {
-    local ver=1.3
+    local ver=1.3.1
     gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
     pushd zlib-${ver}
     make -fwin32/Makefile.gcc clean
@@ -121,6 +121,16 @@ _zlib () {
 }
 _zlib_mark=lib/libz.dll.a
 
+_dav1d () {
+    [ -d dav1d ] || $gitclone https://code.videolan.org/videolan/dav1d.git
+    builddir dav1d
+    meson setup .. --cross-file "$prefix_dir/crossfile" \
+        -Denable_{tools,tests}=false
+    makeplusinstall
+    popd
+}
+_dav1d_mark=lib/libdav1d.dll.a
+
 _ffmpeg () {
     [ -d ffmpeg ] || $gitclone https://github.com/FFmpeg/FFmpeg.git ffmpeg
     builddir ffmpeg
@@ -129,7 +139,7 @@ _ffmpeg () {
         --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*}
         --cc="$CC" --cxx="$CXX" $commonflags
         --disable-{doc,programs,muxers,encoders}
-        --enable-encoder=mjpeg,png
+        --enable-encoder=mjpeg,png --enable-libdav1d
     )
     pkg-config vulkan && args+=(--enable-vulkan --enable-libshaderc)
     ../configure "${args[@]}"
@@ -161,6 +171,14 @@ _spirv_cross () {
 }
 _spirv_cross_mark=lib/libspirv-cross-c-shared.dll.a
 
+_nv_headers () {
+    [ -d nv-codec-headers ] || $gitclone https://github.com/FFmpeg/nv-codec-headers
+    pushd nv-codec-headers
+    makeplusinstall
+    popd
+}
+_nv_headers_mark=include/ffnvcodec/dynlink_loader.h
+
 _vulkan_headers () {
     [ -d Vulkan-Headers ] || $gitclone https://github.com/KhronosGroup/Vulkan-Headers
     builddir Vulkan-Headers
@@ -191,7 +209,7 @@ _libplacebo () {
 _libplacebo_mark=lib/libplacebo.dll.a
 
 _freetype () {
-    local ver=2.13.1
+    local ver=2.13.2
     gettar "https://mirror.netcologne.de/savannah/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile"
@@ -212,7 +230,7 @@ _fribidi () {
 _fribidi_mark=lib/libfribidi.dll.a
 
 _harfbuzz () {
-    local ver=8.1.1
+    local ver=8.3.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile" \
@@ -246,7 +264,7 @@ _luajit () {
 }
 _luajit_mark=lib/libluajit-5.1.a
 
-for x in iconv zlib shaderc spirv-cross; do
+for x in iconv zlib shaderc spirv-cross nv-headers dav1d; do
     build_if_missing $x
 done
 if [[ "$TARGET" != "i686-"* ]]; then
@@ -291,7 +309,7 @@ if [ "$2" = pack ]; then
     dlls=(
         libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll # compiler runtime
         av*.dll sw*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
-        lib{shaderc_shared,spirv-cross-c-shared}.dll zlib1.dll
+        lib{shaderc_shared,spirv-cross-c-shared,dav1d}.dll zlib1.dll
         # note: vulkan-1.dll is not here since drivers provide it
     )
     mv -v "${dlls[@]}" ..

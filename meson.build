@@ -392,12 +392,11 @@ features += {'cocoa': cocoa.found()}
 if features['cocoa']
     dependencies += cocoa
     sources += files('osdep/language-mac.c',
-                     'osdep/main-fn-mac.c',
                      'osdep/path-mac.m',
                      'osdep/utils-mac.c',
                      'osdep/mac/application.m',
-                     'osdep/mac/events.m',
-                     'osdep/mac/menubar.m')
+                     'osdep/mac/events.m')
+    main_fn_source = files('osdep/main-fn-mac.c')
 endif
 
 if posix
@@ -414,8 +413,8 @@ if posix
 endif
 
 if posix and not features['cocoa']
-    sources += files('osdep/main-fn-unix.c',
-                     'osdep/language-posix.c')
+    sources += files('osdep/language-posix.c')
+    main_fn_source = files('osdep/main-fn-unix.c')
 endif
 
 if darwin
@@ -503,11 +502,11 @@ if features['win32-desktop']
     subprocess_source = files('osdep/subprocess-win.c')
     sources += files('input/ipc-win.c',
                      'osdep/language-win.c',
-                     'osdep/main-fn-win.c',
                      'osdep/terminal-win.c',
                      'video/out/w32_common.c',
                      'video/out/win32/displayconfig.c',
                      'video/out/win32/droptarget.c')
+    main_fn_source = files('osdep/main-fn-win.c')
 endif
 
 if not posix and not features['win32-desktop']
@@ -1516,6 +1515,7 @@ if features['cocoa'] and features['swift']
     swift_sources += files('osdep/mac/libmpv_helper.swift',
                            'osdep/mac/log_helper.swift',
                            'osdep/mac/mpv_helper.swift',
+                           'osdep/mac/menu_bar.swift',
                            'osdep/mac/precise_timer.swift',
                            'osdep/mac/swift_compat.swift',
                            'osdep/mac/swift_extensions.swift',
@@ -1549,10 +1549,6 @@ if features['macos-media-player']
     swift_sources += files('osdep/mac/remote_command_center.swift')
 endif
 
-if features['swift'] and swift_sources.length() > 0
-    subdir('osdep/mac')
-endif
-
 macos_touchbar = get_option('macos-touchbar').require(
     features['cocoa'] and cc.has_header('AppKit/NSTouchBar.h'),
     error_message: 'Either cocoa could not be found or AppKit/NSTouchBar.h could not be found!',
@@ -1560,6 +1556,10 @@ macos_touchbar = get_option('macos-touchbar').require(
 features += {'macos-touchbar': macos_touchbar.allowed()}
 if features['macos-touchbar']
     sources += files('osdep/mac/touchbar.m')
+endif
+
+if features['swift'] and swift_sources.length() > 0
+    subdir('osdep/mac')
 endif
 
 
@@ -1747,7 +1747,7 @@ if get_option('cplayer')
                  rename: 'mpv.svg')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
-    mpv = executable('mpv', objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
+    mpv = executable('mpv', main_fn_source, objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
                      win_subsystem: 'windows,6.0', install: true)
 
     # Older meson versions generate this in the player subdirectory.

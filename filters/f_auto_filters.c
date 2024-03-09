@@ -6,6 +6,7 @@
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "options/options.h"
+#include "video/filter/refqueue.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 
@@ -73,25 +74,42 @@ static void deint_process(struct mp_filter *f)
         return;
     }
 
+    char *field_parity;
+    switch (opts->field_parity) {
+    case MP_FIELD_PARITY_TFF:
+        field_parity = "tff"; 
+        break;
+    case MP_FIELD_PARITY_BFF:
+        field_parity = "bff";
+        break;
+    default:
+        field_parity = "auto";
+    }
+
     bool has_filter = true;
     if (img->imgfmt == IMGFMT_VDPAU) {
-        char *args[] = {"deint", "yes", NULL};
+        char *args[] = {"deint", "yes", 
+                        "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "vdpaupp", args);
     } else if (img->imgfmt == IMGFMT_D3D11) {
+        char *args[] = {"parity", field_parity, NULL};
         p->sub.filter =
-            mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "d3d11vpp", NULL);
+            mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "d3d11vpp", args);
     } else if (img->imgfmt == IMGFMT_CUDA) {
-        char *args[] = {"mode", "send_field", NULL};
+        char *args[] = {"mode", "send_field",
+                        "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "bwdif_cuda", args);
     } else if (img->imgfmt == IMGFMT_VULKAN) {
-        char *args[] = {"mode", "send_field", NULL};
+        char *args[] = {"mode", "send_field",
+                        "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "bwdif_vulkan", args);
     } else if (img->imgfmt == IMGFMT_VAAPI) {
         char *args[] = {"deint", "motion-adaptive",
-                        "interlaced-only", "yes", NULL};
+                        "interlaced-only", "yes", 
+                        "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "vavpp", args);
     } else {
@@ -120,7 +138,8 @@ static void deint_process(struct mp_filter *f)
             }
         }
 
-        char *args[] = {"mode", "send_field", NULL};
+        char *args[] = {"mode", "send_field",
+                        "parity", field_parity, NULL};
         filters[1] =
             mp_create_user_filter(subf, MP_OUTPUT_CHAIN_VIDEO, "bwdif", args);
 

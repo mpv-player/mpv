@@ -166,11 +166,13 @@ static struct mp_image *gpu_render_frame(struct mp_filter *f, struct mp_image *i
 
     bool need_reconfig = m_config_cache_update(priv->vo_opts_cache);
 
-    if (!mp_image_params_equal(&priv->img_params, &in->params)) {
-        priv->img_params = in->params;
+    if (!mp_image_params_static_equal(&priv->img_params, &in->params)) {
         gl_video_config(priv->renderer, &in->params);
         need_reconfig = true;
     }
+
+    if (!mp_image_params_equal(&priv->img_params, &in->params))
+        priv->img_params = in->params;
 
     if (need_reconfig) {
         struct mp_rect src, dst;

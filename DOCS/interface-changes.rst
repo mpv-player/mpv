@@ -28,6 +28,7 @@ Interface changes
 
  --- mpv 0.38.0 ---
     - add `begin-vo-dragging` command
+    - add `--deinterlace-field-parity` option
     - add `--volume-gain`, `--volume-gain-min`, and `--volume-gain-max` options
     - add `current-gpu-context` property
     - add `--secondary-sub-ass-override` option
@@ -60,6 +61,8 @@ Interface changes
     - remove `--alpha` and reintroduce `--background` option for better control
       over blending alpha components into specific background types
     - add `--border-background` option
+    - add `video-target-params` property
+    - add `hdr10plus` sub-parameter to `format` video filter
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

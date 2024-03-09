@@ -43,6 +43,7 @@
 // usually copy the whole struct, so that fields added later will be preserved.
 struct mp_image_params {
     enum mp_imgfmt imgfmt;      // pixel format
+    const char *imgfmt_name;    // pixel format name
     enum mp_imgfmt hw_subfmt;   // underlying format for some hwaccel pixfmts
     int w, h;                   // image dimensions
     int p_w, p_h;               // define pixel aspect ratio (undefined: 0/0)
@@ -115,8 +116,6 @@ typedef struct mp_image {
     struct AVBufferRef *dovi;
     // Film grain data, if any
     struct AVBufferRef *film_grain;
-    // Dolby Vision RPU buffer, if any
-    struct AVBufferRef *dovi_buf;
     // Other side data we don't care about.
     struct mp_ff_side_data *ff_side_data;
     int num_ff_side_data;
@@ -176,6 +175,8 @@ bool mp_image_crop_valid(const struct mp_image_params *p);
 bool mp_image_params_valid(const struct mp_image_params *p);
 bool mp_image_params_equal(const struct mp_image_params *p1,
                            const struct mp_image_params *p2);
+bool mp_image_params_static_equal(const struct mp_image_params *p1,
+                                  const struct mp_image_params *p2);
 
 void mp_image_params_get_dsize(const struct mp_image_params *p,
                                int *d_w, int *d_h);

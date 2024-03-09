@@ -209,7 +209,6 @@ static void mp_image_destructor(void *ptr)
     av_buffer_unref(&mpi->a53_cc);
     av_buffer_unref(&mpi->dovi);
     av_buffer_unref(&mpi->film_grain);
-    av_buffer_unref(&mpi->dovi_buf);
     for (int n = 0; n < mpi->num_ff_side_data; n++)
         av_buffer_unref(&mpi->ff_side_data[n].buf);
     talloc_free(mpi->ff_side_data);
@@ -344,7 +343,6 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
     ref_buffer(&new->a53_cc);
     ref_buffer(&new->dovi);
     ref_buffer(&new->film_grain);
-    ref_buffer(&new->dovi_buf);
 
     new->ff_side_data = talloc_memdup(NULL, new->ff_side_data,
                         new->num_ff_side_data * sizeof(new->ff_side_data[0]));
@@ -382,7 +380,6 @@ struct mp_image *mp_image_new_dummy_ref(struct mp_image *img)
     new->a53_cc = NULL;
     new->dovi = NULL;
     new->film_grain = NULL;
-    new->dovi_buf = NULL;
     new->num_ff_side_data = 0;
     new->ff_side_data = NULL;
     return new;
@@ -542,7 +539,6 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     }
     assign_bufref(&dst->icc_profile, src->icc_profile);
     assign_bufref(&dst->dovi, src->dovi);
-    assign_bufref(&dst->dovi_buf, src->dovi_buf);
     assign_bufref(&dst->film_grain, src->film_grain);
     assign_bufref(&dst->a53_cc, src->a53_cc);
 
@@ -844,6 +840,17 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            mp_rect_equals(&p1->crop, &p2->crop);
 }
 
+bool mp_image_params_static_equal(const struct mp_image_params *p1,
+                                  const struct mp_image_params *p2)
+{
+    // Compare only static video parameters, excluding dynamic metadata.
+    struct mp_image_params a = *p1;
+    struct mp_image_params b = *p2;
+    a.repr.dovi = b.repr.dovi = NULL;
+    a.color.hdr = b.color.hdr = (struct pl_hdr_metadata){0};
+    return mp_image_params_equal(&a, &b);
+}
+
 // Set most image parameters, but not image format or size.
 // Display size is used to set the PAR.
 void mp_image_set_attributes(struct mp_image *image,
@@ -899,6 +906,9 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
             params->repr.sys != PL_COLOR_SYSTEM_BT_709 &&
             params->repr.sys != PL_COLOR_SYSTEM_BT_2020_NC &&
             params->repr.sys != PL_COLOR_SYSTEM_BT_2020_C &&
+            params->repr.sys != PL_COLOR_SYSTEM_BT_2100_PQ &&
+            params->repr.sys != PL_COLOR_SYSTEM_BT_2100_HLG &&
+            params->repr.sys != PL_COLOR_SYSTEM_DOLBYVISION &&
             params->repr.sys != PL_COLOR_SYSTEM_SMPTE_240M &&
             params->repr.sys != PL_COLOR_SYSTEM_YCGCO)
         {
@@ -1079,14 +1089,38 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     if (sd)
         dst->a53_cc = sd->buf;
 
+    AVBufferRef *dovi = NULL;
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 16, 100)
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_DOVI_METADATA);
-    if (sd)
-        dst->dovi = sd->buf;
+    if (sd) {
+#ifdef PL_HAVE_LAV_DOLBY_VISION
+        const AVDOVIMetadata *metadata = (const AVDOVIMetadata *)sd->buf->data;
+        const AVDOVIRpuDataHeader *header = av_dovi_get_header(metadata);
+        if (header->disable_residual_flag) {
+            dst->dovi = dovi = av_buffer_alloc(sizeof(struct pl_dovi_metadata));
+            MP_HANDLE_OOM(dovi);
+#if PL_API_VER >= 343
+            pl_map_avdovi_metadata(&dst->params.color, &dst->params.repr,
+                                   (void *)dst->dovi->data, metadata);
+#else
+            struct pl_frame frame;
+            frame.repr = dst->params.repr;
+            frame.color = dst->params.color;
+            pl_frame_map_avdovi_metadata(&frame, (void *)dst->dovi->data, metadata);
+            dst->params.repr = frame.repr;
+            dst->params.color = frame.color;
+#endif
+        }
+#endif
+    }
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_DOVI_RPU_BUFFER);
-    if (sd)
-        dst->dovi_buf = sd->buf;
+    if (sd) {
+#ifdef PL_HAVE_LIBDOVI
+        pl_hdr_metadata_from_dovi_rpu(&dst->params.color.hdr, sd->buf->data,
+                                      sd->buf->size);
+#endif
+    }
 #endif
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_FILM_GRAIN_PARAMS);
@@ -1111,6 +1145,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 
     // Allocated, but non-refcounted data.
     talloc_free(dst->ff_side_data);
+    av_buffer_unref(&dovi);
 
     return res;
 }

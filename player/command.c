@@ -2309,22 +2309,25 @@ static const char *get_aspect_ratio_name(double ratio)
 
 static int property_imgparams(const struct mp_image_params *p, int action, void *arg)
 {
-    if (!p->imgfmt)
+    if (!p->imgfmt && !p->imgfmt_name)
         return M_PROPERTY_UNAVAILABLE;
 
     int d_w, d_h;
     mp_image_params_get_dsize(p, &d_w, &d_h);
 
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->imgfmt);
     int bpp = 0;
-    for (int i = 0; i < desc.num_planes; i++)
-        bpp += desc.bpp[i] >> (desc.xs[i] + desc.ys[i]);
-
     enum pl_alpha_mode alpha = p->repr.alpha;
-    // Alpha type is not supported by FFmpeg, so PL_ALPHA_UNKNOWN may mean alpha
-    // is of an unknown type, or simply not present. Normalize to AUTO=no alpha.
-    if (!!(desc.flags & MP_IMGFLAG_ALPHA) != (alpha != PL_ALPHA_UNKNOWN))
-        alpha = (desc.flags & MP_IMGFLAG_ALPHA) ? PL_ALPHA_INDEPENDENT : PL_ALPHA_UNKNOWN;
+    int fmt = p->hw_subfmt ? p->hw_subfmt : p->imgfmt;
+    if (fmt) {
+        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+        for (int i = 0; i < desc.num_planes; i++)
+            bpp += desc.bpp[i] >> (desc.xs[i] + desc.ys[i]);
+
+        // Alpha type is not supported by FFmpeg, so PL_ALPHA_UNKNOWN may mean alpha
+        // is of an unknown type, or simply not present. Normalize to AUTO=no alpha.
+        if (!!(desc.flags & MP_IMGFLAG_ALPHA) != (alpha != PL_ALPHA_UNKNOWN))
+            alpha = (desc.flags & MP_IMGFLAG_ALPHA) ? PL_ALPHA_INDEPENDENT : PL_ALPHA_UNKNOWN;
+    }
 
     const struct pl_hdr_metadata *hdr = &p->color.hdr;
     bool has_cie_y     = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_CIE_Y);
@@ -2334,8 +2337,10 @@ static int property_imgparams(const struct mp_image_params *p, int action, void 
     bool has_crop = mp_rect_w(p->crop) > 0 && mp_rect_h(p->crop) > 0;
     const char *aspect_name = get_aspect_ratio_name(d_w / (double)d_h);
     const char *sar_name = get_aspect_ratio_name(p->w / (double)p->h);
+    const char *pixelformat_name = p->imgfmt_name ? p->imgfmt_name :
+                                                   mp_imgfmt_to_name(p->imgfmt);
     struct m_sub_property props[] = {
-        {"pixelformat",     SUB_PROP_STR(mp_imgfmt_to_name(p->imgfmt))},
+        {"pixelformat",     SUB_PROP_STR(pixelformat_name)},
         {"hw-pixelformat",  SUB_PROP_STR(mp_imgfmt_to_name(p->hw_subfmt)),
                             .unavailable = !p->hw_subfmt},
         {"average-bpp",     SUB_PROP_INT(bpp),
@@ -2419,6 +2424,22 @@ static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
         return valid;
 
     struct mp_image_params p = vo_get_current_params(vo);
+    return property_imgparams(&p, action, arg);
+}
+
+static int mp_property_tgt_imgparams(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!mpctx->video_out)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int valid = m_property_read_sub_validate(ctx, prop, action, arg);
+    if (valid != M_PROPERTY_VALID)
+        return valid;
+
+    struct mp_image_params p = vo_get_target_params(vo);
     return property_imgparams(&p, action, arg);
 }
 
@@ -3948,6 +3969,7 @@ static const struct m_property mp_properties_base[] = {
     {"current-ao", mp_property_ao},
 
     // Video
+    {"video-target-params", mp_property_tgt_imgparams},
     {"video-out-params", mp_property_vo_imgparams},
     {"video-dec-params", mp_property_dec_imgparams},
     {"video-params", mp_property_vd_imgparams},
@@ -4090,7 +4112,7 @@ static const char *const *const mp_event_property_change[] = {
       "decoder-frame-drop-count", "frame-drop-count", "video-frame-info",
       "vf-metadata", "af-metadata", "sub-start", "sub-end", "secondary-sub-start",
       "secondary-sub-end", "video-out-params", "video-dec-params", "video-params",
-      "deinterlace-active"),
+      "deinterlace-active", "video-target-params"),
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
@@ -7190,7 +7212,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (opt_ptr == &opts->playback_speed) {
         update_playback_speed(mpctx);
-        reset_av_state(mpctx);
         mp_wakeup_core(mpctx);
     }
 
