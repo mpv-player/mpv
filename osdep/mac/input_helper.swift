@@ -26,10 +26,10 @@ class InputHelper: NSObject {
         self.mpv = mpv
     }
 
-    @objc func putKey(_ key: Int32) {
+    @objc func putKey(_ key: Int32, modifiers: NSEvent.ModifierFlags = .init(rawValue: 0)) {
         lock.withLock {
             guard let input = input else { return }
-            mp_input_put_key(input, key)
+            mp_input_put_key(input, key | mapModifier(modifiers))
         }
     }
 

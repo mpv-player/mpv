@@ -129,20 +129,9 @@ void cocoa_uninit_media_keys(void)
     [[EventsResponder sharedInstance] stopMediaKeys];
 }
 
-void cocoa_put_key(int keycode)
-{
-    [[EventsResponder sharedInstance] putKey:keycode];
-}
-
-void cocoa_put_key_with_modifiers(int keycode, int modifiers)
-{
-    keycode |= [[EventsResponder sharedInstance] mapKeyModifiers:modifiers];
-    cocoa_put_key(keycode);
-}
-
 void cocoa_set_input_context(struct input_ctx *input_context)
 {
-    [[EventsResponder sharedInstance] setInputContext:input_context];
+    [[EventsResponder sharedInstance].inputHelper signalWithInput:input_context];
 }
 
 static void wakeup(void *context)
@@ -184,36 +173,6 @@ void cocoa_init_cocoa_cb(void)
         responder.inputHelper = [[InputHelper alloc] init: nil :nil];
     });
     return responder;
-}
-
-- (void)waitForInputContext
-{
-    [_inputHelper wait];
-}
-
-- (void)setInputContext:(struct input_ctx *)ctx
-{
-    [_inputHelper signalWithInput:ctx];
-}
-
-- (void)wakeup
-{
-    [_inputHelper wakeup];
-}
-
-- (bool)queueCommand:(char *)cmd
-{
-    return [_inputHelper command:[NSString stringWithUTF8String:cmd]];
-}
-
-- (void)putKey:(int)keycode
-{
-    [_inputHelper putKey:keycode];
-}
-
-- (BOOL)useAltGr
-{
-    return [_inputHelper useAltGr];
 }
 
 - (void)setIsApplication:(BOOL)isApplication
@@ -304,7 +263,7 @@ void cocoa_init_cocoa_cb(void)
     if (cocoaModifiers & NSEventModifierFlagControl)
         mask |= MP_KEY_MODIFIER_CTRL;
     if (LeftAltPressed(cocoaModifiers) ||
-        (RightAltPressed(cocoaModifiers) && ![self useAltGr]))
+        (RightAltPressed(cocoaModifiers) && ![_inputHelper useAltGr]))
         mask |= MP_KEY_MODIFIER_ALT;
     if (cocoaModifiers & NSEventModifierFlagCommand)
         mask |= MP_KEY_MODIFIER_META;
@@ -329,9 +288,9 @@ void cocoa_init_cocoa_cb(void)
 -(BOOL)handleMPKey:(int)key withMask:(int)mask
 {
     if (key > 0) {
-        cocoa_put_key(key | mask);
+        [_inputHelper putKey:key | mask modifiers:0];
         if (mask & MP_KEY_STATE_UP)
-            cocoa_put_key(MP_INPUT_RELEASE_ALL);
+            [_inputHelper putKey:MP_INPUT_RELEASE_ALL modifiers:0];
         return YES;
     } else {
         return NO;
@@ -344,7 +303,7 @@ void cocoa_init_cocoa_cb(void)
 
     NSString *chars;
 
-    if ([self useAltGr] && RightAltPressed([event modifierFlags])) {
+    if ([_inputHelper useAltGr] && RightAltPressed([event modifierFlags])) {
         chars = [event characters];
     } else {
         chars = [event charactersIgnoringModifiers];
@@ -367,11 +326,6 @@ void cocoa_init_cocoa_cb(void)
         return true;
     }
     return false;
-}
-
-- (void)handleFilesArray:(NSArray *)files
-{
-    [_inputHelper openWithFiles:files];
 }
 
 @end

@@ -318,9 +318,7 @@ class MenuBar: NSObject {
 
     @objc func quit(_ menuItem: MenuItem) {
         guard let menuConfig = menuItem.config else { return }
-        menuConfig.command.withCString {
-            (NSApp as? Application)?.stopMPV(UnsafeMutablePointer<CChar>(mutating: $0))
-        }
+        EventsResponder.sharedInstance().inputHelper.command(menuConfig.command)
     }
 
     @objc func openFiles() {
@@ -329,7 +327,7 @@ class MenuBar: NSObject {
         panel.canChooseDirectories = true
 
         if panel.runModal() == .OK {
-            (NSApp as? Application)?.openFiles(panel.urls.map { $0.path })
+            EventsResponder.sharedInstance().inputHelper.open(files: panel.urls.map { $0.path })
         }
     }
 
@@ -337,9 +335,7 @@ class MenuBar: NSObject {
         let panel = NSOpenPanel()
 
         if panel.runModal() == .OK, let url = panel.urls.first {
-            "loadlist \"\(url.path)\"".withCString {
-                EventsResponder.sharedInstance().queueCommand(UnsafeMutablePointer<CChar>(mutating: $0))
-            }
+            EventsResponder.sharedInstance().inputHelper.command("loadlist \"\(url.path)\"")
         }
     }
 
@@ -359,15 +355,13 @@ class MenuBar: NSObject {
         }
 
         if alert.runModal() == .alertFirstButtonReturn && input.stringValue.count > 0 {
-            (NSApp as? Application)?.openFiles([input.stringValue])
+            EventsResponder.sharedInstance().inputHelper.open(files: [input.stringValue])
         }
     }
 
     @objc func command(_ menuItem: MenuItem) {
         guard let menuConfig = menuItem.config else { return }
-        menuConfig.command.withCString {
-            EventsResponder.sharedInstance().queueCommand(UnsafeMutablePointer<CChar>(mutating: $0))
-        }
+        EventsResponder.sharedInstance().inputHelper.command(menuConfig.command)
     }
 
     @objc func url(_ menuItem: MenuItem) {
