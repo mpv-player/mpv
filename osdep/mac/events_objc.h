@@ -21,6 +21,7 @@
 #include "osdep/mac/events.h"
 
 @class RemoteCommandCenter;
+@class InputHelper;
 struct input_ctx;
 
 @interface EventsResponder : NSObject
@@ -41,5 +42,6 @@ struct input_ctx;
 - (BOOL)handleMPKey:(int)key withMask:(int)mask;
 
 @property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
+@property(nonatomic, retain) InputHelper *inputHelper;
 
 @end
