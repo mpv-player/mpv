@@ -20,6 +20,7 @@ import Cocoa
 class View: NSView, CALayerDelegate {
     unowned var common: Common
     var mpv: MPVHelper? { get { return common.mpv } }
+    var input: InputHelper? { get { return common.input } }
 
     var tracker: NSTrackingArea?
     var hasMouseDown: Bool = false
@@ -81,7 +82,7 @@ class View: NSView, CALayerDelegate {
         if types.contains(.fileURL) || types.contains(.URL) {
             if let urls = pb.readObjects(forClasses: [NSURL.self]) as? [URL] {
                 let files = urls.map { $0.absoluteString }
-                mpv?.open(files: files)
+                input?.open(files: files)
                 return true
             }
         } else if types.contains(.string) {
@@ -97,7 +98,7 @@ class View: NSView, CALayerDelegate {
                     filesArray.append(path)
                 }
             }
-            mpv?.open(files: filesArray)
+            input?.open(files: filesArray)
             return true
         }
         return false
@@ -116,14 +117,14 @@ class View: NSView, CALayerDelegate {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_ENTER, 0)
         }
         common.updateCursorVisibility()
     }
 
     override func mouseExited(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
         common.titleBar?.hide()
@@ -131,51 +132,51 @@ class View: NSView, CALayerDelegate {
     }
 
     override func mouseMoved(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             signalMouseMovement(event)
         }
         common.titleBar?.show()
     }
 
     override func mouseDragged(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             signalMouseMovement(event)
         }
     }
 
     override func mouseDown(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             signalMouseDown(event)
         }
     }
 
     override func mouseUp(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             signalMouseUp(event)
         }
         common.window?.isMoving = false
     }
 
     override func rightMouseDown(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             signalMouseDown(event)
         }
     }
 
     override func rightMouseUp(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             signalMouseUp(event)
         }
     }
 
     override func otherMouseDown(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             signalMouseDown(event)
         }
     }
 
     override func otherMouseUp(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
+        if input?.mouseEnabled() ?? true {
             signalMouseUp(event)
         }
     }
@@ -211,7 +212,7 @@ class View: NSView, CALayerDelegate {
 
         common.window?.updateMovableBackground(point)
         if !(common.window?.isMoving ?? false) {
-            mpv?.setMousePosition(point)
+            input?.setMouse(position: point)
         }
     }
 
@@ -227,11 +228,11 @@ class View: NSView, CALayerDelegate {
             cmd = delta > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
         }
 
-        mpv?.putAxis(cmd, modifiers: event.modifierFlags, delta: abs(delta))
+        input?.putAxis(cmd, modifiers: event.modifierFlags, delta: abs(delta))
     }
 
     override func scrollWheel(with event: NSEvent) {
-        if !(mpv?.mouseEnabled() ?? true) {
+        if !(input?.mouseEnabled() ?? true) {
             return
         }
 

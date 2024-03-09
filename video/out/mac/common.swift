@@ -20,6 +20,7 @@ import IOKit.pwr_mgt
 
 class Common: NSObject {
     var mpv: MPVHelper?
+    var input: InputHelper?
     var log: LogHelper
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue")
 

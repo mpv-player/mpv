@@ -44,10 +44,8 @@
 
 @interface EventsResponder ()
 {
-    struct input_ctx *_inputContext;
     struct mpv_handle *_ctx;
     BOOL _is_application;
-    NSCondition *_input_lock;
 }
 
 - (NSEvent *)handleKey:(NSEvent *)event;
@@ -183,18 +181,9 @@ void cocoa_init_cocoa_cb(void)
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         responder = [EventsResponder new];
-        responder.inputHelper = [[InputHelper alloc] init: nil];
+        responder.inputHelper = [[InputHelper alloc] init: nil :nil];
     });
     return responder;
-}
-
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        _input_lock = [NSCondition new];
-    }
-    return self;
 }
 
 - (void)waitForInputContext
@@ -382,23 +371,7 @@ void cocoa_init_cocoa_cb(void)
 
 - (void)handleFilesArray:(NSArray *)files
 {
-    enum mp_dnd_action action = [NSEvent modifierFlags] &
-                                NSEventModifierFlagShift ? DND_APPEND : DND_REPLACE;
-
-    size_t num_files  = [files count];
-    char **files_utf8 = talloc_array(NULL, char*, num_files);
-    [files enumerateObjectsUsingBlock:^(NSString *p, NSUInteger i, BOOL *_){
-        if ([p hasPrefix:@"file:///.file/id="])
-            p = [[NSURL URLWithString:p] path];
-        char *filename = (char *)[p UTF8String];
-        size_t bytes   = [p lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
-        files_utf8[i]  = talloc_memdup(files_utf8, filename, bytes + 1);
-    }];
-    [_input_lock lock];
-    if (_inputContext)
-        mp_event_drop_files(_inputContext, num_files, files_utf8, action);
-    [_input_lock unlock];
-    talloc_free(files_utf8);
+    [_inputHelper openWithFiles:files];
 }
 
 @end

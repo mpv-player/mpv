@@ -19,7 +19,7 @@ import Cocoa
 
 typealias swift_wakeup_cb_fn = (@convention(c) (UnsafeMutableRawPointer?) -> Void)?
 
-class MPVHelper {
+class MPVHelper: NSObject {
     var log: LogHelper
     var vo: UnsafeMutablePointer<vo>
     var optsCachePtr: UnsafeMutablePointer<m_config_cache>
@@ -35,8 +35,6 @@ class MPVHelper {
     var opts: mp_vo_opts { get { return optsPtr.pointee } }
     var macOptsCache: m_config_cache { get { return macOptsCachePtr.pointee } }
     var macOpts: macos_opts { get { return macOptsPtr.pointee } }
-
-    var input: OpaquePointer { get { return vout.input_ctx } }
 
     init(_ vo: UnsafeMutablePointer<vo>, _ log: LogHelper) {
         self.vo = vo
@@ -54,39 +52,8 @@ class MPVHelper {
         macOptsPtr = UnsafeMutablePointer<macos_opts>(OpaquePointer(macCache.pointee.opts))
     }
 
-    func canBeDraggedAt(_ pos: NSPoint) -> Bool {
-        let canDrag = !mp_input_test_dragging(input, Int32(pos.x), Int32(pos.y))
-        return canDrag
-    }
-
-    func mouseEnabled() -> Bool {
-        return mp_input_mouse_enabled(input)
-    }
-
-    func setMousePosition(_ pos: NSPoint) {
-        mp_input_set_mouse_pos(input, Int32(pos.x), Int32(pos.y))
-    }
-
-    func putAxis(_ mpkey: Int32, modifiers: NSEvent.ModifierFlags, delta: Double) {
-        mp_input_put_wheel(input, mpkey | mapModifier(modifiers), delta)
-    }
-
     func nextChangedOption(property: inout UnsafeMutableRawPointer?) -> Bool {
         return m_config_cache_get_next_changed(optsCachePtr, &property)
-    }
-
-    func open(files: [String]) {
-        if opts.drag_and_drop == -2 { return }
-
-        var action = NSEvent.modifierFlags.contains(.shift) ? DND_APPEND : DND_REPLACE
-        if opts.drag_and_drop >= 0  {
-            action = mp_dnd_action(UInt32(opts.drag_and_drop))
-        }
-
-        let filesClean = files.map{ $0.hasPrefix("file:///.file/id=") ? (URL(string: $0)?.path ?? $0) : $0 }
-        var filesPtr = filesClean.map { UnsafeMutablePointer<CChar>(strdup($0)) }
-        mp_event_drop_files(input, Int32(files.count), &filesPtr, action)
-        for charPtr in filesPtr { free(UnsafeMutablePointer(mutating: charPtr)) }
     }
 
     func setOption(fullscreen: Bool) {
@@ -116,34 +83,6 @@ class MPVHelper {
 
     func nextChangedMacOption(property: inout UnsafeMutableRawPointer?) -> Bool {
         return m_config_cache_get_next_changed(macOptsCachePtr, &property)
-    }
-
-    func command(_ cmd: String) {
-        let cCmd = UnsafePointer<Int8>(strdup(cmd))
-        let mpvCmd = mp_input_parse_cmd(input, bstr0(cCmd), "")
-        mp_input_queue_cmd(input, mpvCmd)
-        free(UnsafeMutablePointer(mutating: cCmd))
-    }
-
-    func mapModifier(_ modifiers: NSEvent.ModifierFlags) -> Int32 {
-        var mask: UInt32 = 0;
-
-        if modifiers.contains(.shift) {
-            mask |= MP_KEY_MODIFIER_SHIFT
-        }
-        if modifiers.contains(.control) {
-            mask |= MP_KEY_MODIFIER_CTRL
-        }
-        if modifiers.contains(.command) {
-            mask |= MP_KEY_MODIFIER_META
-        }
-        if modifiers.rawValue & UInt(NX_DEVICELALTKEYMASK) != 0 ||
-           modifiers.rawValue & UInt(NX_DEVICERALTKEYMASK) != 0 && !mp_input_use_alt_gr(input)
-        {
-            mask |= MP_KEY_MODIFIER_ALT
-        }
-
-        return Int32(mask)
     }
 
     // (__bridge void*)

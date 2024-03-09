@@ -40,6 +40,7 @@ class CocoaCB: Common {
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
         mpv = MPVHelper(vo, log)
+        input = InputHelper(vo.pointee.input_ctx, mpv)
 
         if backendState == .uninitialized {
             backendState = .needsInit
