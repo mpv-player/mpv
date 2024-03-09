@@ -2528,6 +2528,21 @@ Subtitles
 
     Default: yes.
 
+``--sub-ass-colorspace=<auto|video|sdr>``
+    Specify the RGB primaries and transfer function to use when rendering
+    ASS subtitles.
+
+    :auto:  Follow the ASS specification. This is currently equivalent to
+            ``video``. This behavior may change in the future. (default)
+    :video: Assume that ASS subtitles are in the video's colorspace. Match the
+            color primaries and transfer function of the ASS subtitles to those
+            of the associated video.
+    :sdr:   Assume that ASS subtitles are SDR. Match them to the video's
+            colorspace in SDR mode. If the video is HDR, fall back to sRGB.
+
+    This option affects ``--vo=gpu-next``, ``--vo=gpu`` always assume sRGB
+    colorspace for subtitles.
+
 ``--sub-ass-vsfilter-aspect-compat=<yes|no>``
     Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
     with traditional VSFilter behavior. This switch has no effect when the

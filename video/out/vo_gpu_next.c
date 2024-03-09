@@ -141,6 +141,8 @@ struct priv {
     struct m_config_cache *opts_cache;
     struct m_config_cache *next_opts_cache;
     struct gl_next_opts *next_opts;
+    struct m_config_cache *subtitle_opts_cache;
+    struct mp_subtitle_opts *subtitle_opts;
     struct cache shader_cache, icc_cache;
     struct mp_csp_equalizer_state *video_eq;
     struct scaler_params scalers[SCALER_COUNT];
@@ -378,8 +380,14 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
                 }
             }
             break;
-        case SUBBITMAP_LIBASS:
-            if (src && item->video_color_space)
+        case SUBBITMAP_LIBASS:;
+            bool video_color_space = item->video_color_space;
+            if (p->subtitle_opts->ass_colorspace == 2 && src &&
+                pl_color_space_is_hdr(&src->params.color))
+            {
+                video_color_space = false;
+            }
+            if (src && video_color_space)
                 ol->color = src->params.color;
             ol->mode = PL_OVERLAY_MONOCHROME;
             ol->repr.alpha = PL_ALPHA_INDEPENDENT;
@@ -767,6 +775,8 @@ static void update_options(struct vo *vo)
     changed = m_config_cache_update(p->next_opts_cache) || changed;
     if (changed)
         update_render_options(vo);
+
+    m_config_cache_update(p->subtitle_opts_cache);
 
     update_lut(p, &p->next_opts->lut);
     pars->params.lut = p->next_opts->lut.lut;
@@ -1820,6 +1830,8 @@ static int preinit(struct vo *vo)
     p->opts_cache = m_config_cache_alloc(p, vo->global, &gl_video_conf);
     p->next_opts_cache = m_config_cache_alloc(p, vo->global, &gl_next_conf);
     p->next_opts = p->next_opts_cache->opts;
+    p->subtitle_opts_cache = m_config_cache_alloc(p, vo->global, &mp_subtitle_sub_opts);
+    p->subtitle_opts = p->subtitle_opts_cache->opts;
     p->video_eq = mp_csp_equalizer_create(p, vo->global);
     p->global = vo->global;
     p->log = vo->log;
