@@ -226,7 +226,7 @@ static int init_filter(struct mp_filter *da)
         // for DTS-HD MA, and stereo (2 channels) for DTS-HD HRA. The bit
         // streaming rate as well as the signaled channel count are defined
         // based on this value.
-        int dts_hd_spdif_channel_count = profile == FF_PROFILE_DTS_HD_HRA ?
+        int dts_hd_spdif_channel_count = profile == AV_PROFILE_DTS_HD_HRA ?
                                          2 : 8;
         if (spdif_ctx->use_dts_hd && is_hd) {
             av_dict_set_int(&format_opts, "dtshd_rate",
