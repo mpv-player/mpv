@@ -38,8 +38,11 @@
 #include "vo.h"
 
 #define IMGFMT_XRGB8888 IMGFMT_BGR0
+#define IMGFMT_XBGR8888 IMGFMT_RGB0
 #define IMGFMT_XRGB2101010 \
     pixfmt2imgfmt(MP_SELECT_LE_BE(AV_PIX_FMT_X2RGB10LE, AV_PIX_FMT_X2RGB10BE))
+#define IMGFMT_XBGR2101010 \
+    pixfmt2imgfmt(MP_SELECT_LE_BE(AV_PIX_FMT_X2BGR10LE, AV_PIX_FMT_X2BGR10BE))
 
 #define BYTES_PER_PIXEL 4
 #define BITS_PER_PIXEL 32
@@ -115,12 +118,27 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
     fb->handle = creq.handle;
 
     // select format
-    if (drm->opts->drm_format == DRM_OPTS_FORMAT_XRGB2101010) {
+    switch (drm->opts->drm_format) {
+    case DRM_OPTS_FORMAT_XRGB2101010:
         p->drm_format = DRM_FORMAT_XRGB2101010;
         p->imgfmt = IMGFMT_XRGB2101010;
-    } else {
-        p->drm_format = DRM_FORMAT_XRGB8888;;
+        break;
+    case DRM_OPTS_FORMAT_XBGR2101010:
+        p->drm_format = DRM_FORMAT_XRGB2101010;
+        p->imgfmt = IMGFMT_XRGB2101010;
+        break;
+    case DRM_OPTS_FORMAT_XBGR8888:
+        p->drm_format = DRM_FORMAT_XBGR8888;
+        p->imgfmt = IMGFMT_XBGR8888;
+        break;
+    default:
+        if (drm->opts->drm_format != DRM_OPTS_FORMAT_XRGB8888) {
+            MP_VERBOSE(vo, "Requested format not supported by VO, "
+                       "falling back to xrgb8888\n");
+        }
+        p->drm_format = DRM_FORMAT_XRGB8888;
         p->imgfmt = IMGFMT_XRGB8888;
+        break;
     }
 
     // create framebuffer object for the dumb-buffer
