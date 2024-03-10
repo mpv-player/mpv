@@ -68,6 +68,9 @@ class CocoaCB: Common {
             DispatchQueue.main.async {
                 self.updateWindowSize(vo)
                 self.layer?.update(force: true)
+                if self.mpv?.opts.focus_on ?? 1 == 2 {
+                    NSApp.activate(ignoringOtherApps: true)
+                }
             }
         }
     }

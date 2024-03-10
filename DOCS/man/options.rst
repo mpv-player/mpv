@@ -3227,10 +3227,13 @@ Window
     :desktop: On top of the Desktop behind windows and Desktop icons.
     :level:   A level as integer.
 
-``--focus-on-open``, ``--no-focus-on-open``
+``--focus-on=<never|open|all>``,
     (macOS only)
-    Focus the video window on creation and makes it the front most window. This
-    is on by default.
+    Focus the video window and make it the front most window on specific events (default: open).
+
+    :never: Never focus the window on open or new file load events.
+    :open:  Focus the window on creation, eg when a vo is initialised.
+    :all:   Focus the window on open and new file load event.
 
 ``--window-corners=<default|donotround|round|roundsmall>``
     (Windows only)
