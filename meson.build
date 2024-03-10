@@ -1449,7 +1449,7 @@ videotoolbox_pl = get_option('videotoolbox-pl').require(
     error_message: 'vulkan or CV metal support could be found!',
 )
 features += {'videotoolbox-pl': videotoolbox_pl.allowed()}
-if features['videotoolbox-gl'] or features['videotoolbox-pl']
+if features['videotoolbox-gl'] or features['videotoolbox-pl'] or features['ios-gl']
     sources += files('video/out/hwdec/hwdec_vt.c')
 endif
 if features['videotoolbox-gl']
