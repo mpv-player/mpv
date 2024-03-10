@@ -16,6 +16,7 @@
  */
 
 import Cocoa
+import IOKit.hidsystem
 
 extension NSDeviceDescriptionKey {
     static let screenNumber = NSDeviceDescriptionKey("NSScreenNumber")
@@ -39,6 +40,11 @@ extension NSColor {
 
         self.init(calibratedRed: red, green: green, blue: blue, alpha: alpha)
     }
+}
+
+extension NSEvent.ModifierFlags {
+    public static var optionLeft: NSEvent.ModifierFlags = .init(rawValue: UInt(NX_DEVICELALTKEYMASK))
+    public static var optionRight: NSEvent.ModifierFlags = .init(rawValue: UInt(NX_DEVICERALTKEYMASK))
 }
 
 extension Bool {

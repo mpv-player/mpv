@@ -85,8 +85,8 @@ class InputHelper: NSObject {
         if modifiers.contains(.command) {
             mask |= MP_KEY_MODIFIER_META
         }
-        if modifiers.rawValue & UInt(NX_DEVICELALTKEYMASK) != 0 ||
-           modifiers.rawValue & UInt(NX_DEVICERALTKEYMASK) != 0 && !mp_input_use_alt_gr(input)
+        if modifiers.contains(.optionLeft) ||
+           modifiers.contains(.optionRight) && !mp_input_use_alt_gr(input)
         {
             mask |= MP_KEY_MODIFIER_ALT
         }
