@@ -1176,20 +1176,23 @@ static int query_format(struct vo *vo, int format)
 {
     struct priv *p = vo->priv;
     if (ra_hwdec_get(&p->hwdec_ctx, format))
-        return true;
+        return 2;
 
     struct pl_bit_encoding bits;
     struct pl_plane_data data[4] = {0};
     int planes = plane_data_from_imgfmt(data, &bits, format);
     if (!planes)
-        return false;
+        return 0;
 
+    bool only_fallback = false;
     for (int i = 0; i < planes; i++) {
-        if (!pl_plane_find_fmt(p->gpu, NULL, &data[i]))
-            return false;
+        pl_fmt fmt = pl_plane_find_fmt(p->gpu, NULL, &data[i]);
+        if (!fmt)
+            return 0;
+        only_fallback |= fmt->emulated;
     }
 
-    return true;
+    return only_fallback ? 1 : 2;
 }
 
 static void resize(struct vo *vo)
