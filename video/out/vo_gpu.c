@@ -169,13 +169,13 @@ static void get_and_update_ambient_lighting(struct gpu_priv *p)
     }
 }
 
-static void update_ra_ctx_options(struct vo *vo)
+static void update_ra_ctx_options(struct vo *vo, struct ra_ctx_opts *ctx_opts)
 {
     struct gpu_priv *p = vo->priv;
     struct gl_video_opts *gl_opts = mp_get_config_group(p->ctx, vo->global, &gl_video_conf);
-    p->ctx->opts.want_alpha = (gl_opts->background == BACKGROUND_COLOR &&
-                               gl_opts->background_color.a != 255) ||
-                               gl_opts->background == BACKGROUND_NONE;
+    ctx_opts->want_alpha = (gl_opts->background == BACKGROUND_COLOR &&
+                            gl_opts->background_color.a != 255) ||
+                            gl_opts->background == BACKGROUND_NONE;
     talloc_free(gl_opts);
 }
 
@@ -198,12 +198,14 @@ static int control(struct vo *vo, uint32_t request, void *data)
         request_hwdec_api(vo, data);
         return true;
     case VOCTRL_UPDATE_RENDER_OPTS: {
-        update_ra_ctx_options(vo);
+        struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
+        update_ra_ctx_options(vo, ctx_opts);
         gl_video_configure_queue(p->renderer, vo);
         get_and_update_icc_profile(p);
         if (p->ctx->fns->update_render_opts)
             p->ctx->fns->update_render_opts(p->ctx);
         vo->want_redraw = true;
+        talloc_free(ctx_opts);
         return true;
     }
     case VOCTRL_RESET:
@@ -286,14 +288,13 @@ static int preinit(struct vo *vo)
     p->log = vo->log;
 
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
-    struct ra_ctx_opts opts = *ctx_opts;
-    p->ctx = ra_ctx_create(vo, opts);
+    update_ra_ctx_options(vo, ctx_opts);
+    p->ctx = ra_ctx_create(vo, *ctx_opts);
     talloc_free(ctx_opts);
     if (!p->ctx)
         goto err_out;
     assert(p->ctx->ra);
     assert(p->ctx->swapchain);
-    update_ra_ctx_options(vo);
 
     p->renderer = gl_video_init(p->ctx->ra, vo->log, vo->global);
     gl_video_set_osd_source(p->renderer, vo->osd);
