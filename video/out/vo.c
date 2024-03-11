@@ -614,10 +614,6 @@ static void run_reconfig(void *p)
         mp_mutex_unlock(&vo->params_mutex);
     }
 
-    mp_mutex_lock(&vo->params_mutex);
-    talloc_free(vo->target_params);
-    vo->target_params = NULL;
-    mp_mutex_unlock(&vo->params_mutex);
     mp_mutex_lock(&in->lock);
     talloc_free(in->current_frame);
     in->current_frame = NULL;
