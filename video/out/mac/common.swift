@@ -122,11 +122,11 @@ class Common: NSObject {
             window.orderFront(nil)
         }
 
-        NSApp.activate(ignoringOtherApps: mpv.opts.focus_on_open)
+        NSApp.activate(ignoringOtherApps: mpv.opts.focus_on >= 1)
 
         // workaround for macOS 10.15 to refocus the previous App
-        if (!mpv.opts.focus_on_open) {
-            previousActiveApp?.activate(options: .activateAllWindows)
+        if mpv.opts.focus_on == 0 {
+            previousActiveApp?.activate()
         }
     }
 

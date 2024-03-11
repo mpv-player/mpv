@@ -11,7 +11,7 @@ player/*.c:
     * main():
         * basic initializations (e.g. init_libav() and more)
         * pre-parse command line (verbosity level, config file locations)
-        * load config files (parse_cfgfiles())
+        * load config files (mp_parse_cfgfiles())
         * parse command line, add files from the command line to playlist
           (m_config_parse_mp_command_line())
         * check help options etc. (call handle_help_options()), possibly exit
@@ -45,7 +45,7 @@ player/*.c:
     Things worth saying about the playback core:
     - most state is in MPContext (core.h), which is not available to the
       subsystems (and should not be made available)
-    - the currently played tracks are in mpctx->current_tracks, and decoder
+    - the currently played tracks are in mpctx->current_track, and decoder
       state in track.dec/d_sub
     - the other subsystems rarely call back into the frontend, and the frontend
       polls them instead (probably a good thing)
@@ -126,15 +126,16 @@ options/options.h, options/options.c
 
     ... to get a copy of its options.
 
-    See m_config.h (below) how to access options.
+    See m_config_core.h (below) how to access options.
 
-    The actual option parser is spread over m_option.c, m_config.c, and
-    parse_commandline.c, and uses the option table in options.c.
+    The actual option parser is spread over m_option.c, m_config_frontend.c,
+    and parse_commandline.c, and uses the option table in options.c.
 
-options/m_config.h & m_config.c:
-    Code for querying and managing options. This (unfortunately) contains both
-    declarations for the "legacy-ish" global m_config struct, and ways to access
-    options in a threads-safe way anywhere, like m_config_cache_alloc().
+options/m_config_*.h & m_config_*.c:
+    Code for querying and managing options. m_config_frontend.h contains
+    declarations for the "legacy-ish" global m_config struct, while
+    m_config_core.h provides ways to access options in a threads-safe way
+    anywhere, like m_config_cache_alloc().
 
     m_config_cache_alloc() lets anyone read, observe, and write options in any
     thread. The only state it needs is struct mpv_global, which is an opaque
@@ -165,16 +166,15 @@ stream/*:
     E.g. if mpv sees "http://something" on the command line, it will pick
     stream_lavf.c based on the prefix, and pass the rest of the filename to it.
 
-    Some stream inputs are quite special: stream_dvd.c turns DVDs into mpeg
+    Some stream inputs are quite special: stream_dvdnav.c turns DVDs into mpeg
     streams (DVDs are actually a bunch of vob files etc. on a filesystem),
-    stream_tv.c provides TV input including channel switching.
 
     Some stream inputs are just there to invoke special demuxers, like
     stream_mf.c. (Basically to make the prefix "mf://" do something special.)
 
 demux/:
     Demuxers split data streams into audio/video/sub streams, which in turn
-    are split in packets. Packets (see demux_packet.h) are mostly byte chunks
+    are split in packets. Packets (see packet.h) are mostly byte chunks
     tagged with a playback time (PTS). These packets are passed to the decoders.
 
     Most demuxers have been removed from this fork, and the only important and
@@ -189,6 +189,14 @@ demux/:
     cache, which is implemented as a list of packets. The cache is complex
     because it support seeking, multiple ranges, prefetching, and so on.
 
+filters/:
+    Filter related code. filter.c contains the generic filtering framework
+    which converts input frames to output frames (audio, video, or demux
+    packet data). f_decoder_wrapper.c is a source filter which connects the
+    frontend with the actual audio and video decoders. f_output_chain.c handles
+    VO/AO output conversions. f_autoconvert.c automatically inserts the
+    appropriate conversion filters if format conversion is needed.
+
 video/:
     This contains several things related to audio/video decoding, as well as
     video filters.
@@ -197,22 +205,18 @@ video/:
     internally.
 
 video/decode/:
-    vd_*.c are video decoders. (There's only vd_lavc.c left.) dec_video.c
-    handles most of connecting the frontend with the actual decoder.
+    vd_*.c are video decoders. (There's only vd_lavc.c left.)
 
 video/filter/:
-    vf_*.c and vf.c form the video filter chain. They are fed by the video
-    decoder, and output the filtered images to the VOs though vf_vo.c. By
-    default, no video filters (except vf_vo) are used. vf_scale is automatically
-    inserted if the video output can't handle the video format used by the
-    decoder.
+    vf_*.c are video filters. They are fed by the video decoder, and output the
+    filtered images to the VOs. By default, no video filters are used.
 
 video/out/:
     Video output. They also create GUI windows and handle user input. In most
     cases, the windowing code is shared among VOs, like x11_common.c for X11 and
     w32_common.c for Windows. The VOs stand between frontend and windowing code.
-    vo_gpu can pick a windowing system at runtime, e.g. the same binary can
-    provide both X11 and Cocoa support on macOS.
+    vo_gpu and vo_gpu_next can pick a windowing system at runtime, e.g. the same
+    binary can provide both X11 and Cocoa support on macOS.
 
     VOs can be reconfigured at runtime. A vo_reconfig() call can change the video
     resolution and format, without destroying the window.
@@ -224,13 +228,13 @@ audio/:
     compressed formats used for spdif.)
 
 audio/decode/:
-    ad_*.c and dec_audio.c handle audio decoding. ad_lavc.c is the
-    decoder using ffmpeg. ad_spdif.c is not really a decoder, but is used for
-    compressed audio passthrough.
+    ad_*.c handle audio decoding. ad_lavc.c is the decoder using ffmpeg.
+    ad_spdif.c is not really a decoder, but is used for compressed audio
+    passthrough.
 
 audio/filter/:
-    Audio filter chain. af_lavrresample is inserted if any form of conversion
-    between audio formats is needed.
+    Audio filters. af_scaletempo2 is inserted by default if playback is different
+    from normal speed.
 
 audio/out/:
     Audio outputs.
@@ -238,9 +242,9 @@ audio/out/:
     Unlike VOs, AOs can't be reconfigured on a format change. On audio format
     changes, the AO will simply be closed and re-opened.
 
-    There are wrappers to support for two types of audio APIs: push.c and
-    pull.c. ao.c calls into one of these. They contain generic code to deal
-    with the data flow these APIs impose.
+    buffer.c is the wrapper to support for two types of audio APIs: push and
+    pull. ao.c calls into that. It contains generic code to deal with the data
+    flow these APIs impose.
 
     Note that mpv synchronizes the video to the audio. That's the reason
     why buggy audio drivers can have a bad influence on playback quality.
@@ -269,8 +273,8 @@ sub/:
     sd_ass.c's internal state.
 
 etc/:
-    The file input.conf is actually integrated into the mpv binary by the
-    build system. It contains the default keybindings.
+    The files input.conf and builtin.conf are actually integrated into the mpv
+    binary by the build system. They contain the default configs and keybindings.
 
 Best practices and Concepts within mpv
 ======================================

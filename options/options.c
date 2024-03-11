@@ -131,7 +131,8 @@ static const m_option_t mp_vo_opt_list[] = {
     {"window-scale", OPT_DOUBLE(window_scale), M_RANGE(0.001, 100)},
     {"window-minimized", OPT_BOOL(window_minimized)},
     {"window-maximized", OPT_BOOL(window_maximized)},
-    {"focus-on-open", OPT_BOOL(focus_on_open)},
+    {"focus-on-open", OPT_REMOVED("Replaced by --focus-on")},
+    {"focus-on", OPT_CHOICE(focus_on, {"never", 0}, {"open", 1}, {"all", 2})},
     {"force-render", OPT_BOOL(force_render)},
     {"force-window-position", OPT_BOOL(force_window_position)},
     {"x11-name", OPT_STRING(winname)},
@@ -254,7 +255,7 @@ const struct m_sub_options vo_sub_opts = {
         .ontop_level = -1,
         .timing_offset = 0.050,
         .swapchain_depth = 3,
-        .focus_on_open = true,
+        .focus_on = 1,
     },
 };
 
@@ -441,9 +442,9 @@ const struct m_sub_options filter_conf = {
     .opts = (const struct m_option[]){
         {"deinterlace", OPT_CHOICE(deinterlace,
             {"no", 0}, {"yes", 1}, {"auto", -1})},
-        {"deinterlace-field-parity", OPT_CHOICE(field_parity, 
-            {"tff", MP_FIELD_PARITY_TFF}, 
-            {"bff", MP_FIELD_PARITY_BFF}, 
+        {"deinterlace-field-parity", OPT_CHOICE(field_parity,
+            {"tff", MP_FIELD_PARITY_TFF},
+            {"bff", MP_FIELD_PARITY_BFF},
             {"auto", MP_FIELD_PARITY_AUTO})},
         {0}
     },

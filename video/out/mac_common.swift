@@ -62,6 +62,10 @@ class MacCommon: Common {
                 window?.updateSize(wr.size)
             }
 
+            if mpv?.opts.focus_on ?? 1 == 2 {
+                NSApp.activate(ignoringOtherApps: true)
+            }
+
             windowDidResize()
             updateICCProfile()
         }
