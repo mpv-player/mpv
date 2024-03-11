@@ -43,6 +43,7 @@
     pixfmt2imgfmt(MP_SELECT_LE_BE(AV_PIX_FMT_X2RGB10LE, AV_PIX_FMT_X2RGB10BE))
 #define IMGFMT_XBGR2101010 \
     pixfmt2imgfmt(MP_SELECT_LE_BE(AV_PIX_FMT_X2BGR10LE, AV_PIX_FMT_X2BGR10BE))
+#define IMGFMT_YUYV pixfmt2imgfmt(AV_PIX_FMT_YUYV422)
 
 #define BYTES_PER_PIXEL 4
 #define BITS_PER_PIXEL 32
@@ -131,6 +132,10 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
         p->drm_format = DRM_FORMAT_XBGR8888;
         p->imgfmt = IMGFMT_XBGR8888;
         break;
+    case DRM_OPTS_FORMAT_YUYV:
+        p->drm_format = DRM_FORMAT_YUYV;
+        p->imgfmt = IMGFMT_YUYV;
+        break;
     default:
         if (drm->opts->drm_format != DRM_OPTS_FORMAT_XRGB8888) {
             MP_VERBOSE(vo, "Requested format not supported by VO, "
@@ -187,14 +192,15 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     vo->dheight = drm->fb->height;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
 
-    int w = p->dst.x1 - p->dst.x0;
-    int h = p->dst.y1 - p->dst.y0;
+    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(p->imgfmt);
+    p->dst.x0 = MP_ALIGN_DOWN(p->dst.x0, fmt.align_x);
+    p->dst.y0 = MP_ALIGN_DOWN(p->dst.y0, fmt.align_y);
 
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = p->imgfmt,
-        .w = w,
-        .h = h,
+        .w = mp_rect_w(p->dst),
+        .h = mp_rect_h(p->dst),
         .p_w = 1,
         .p_h = 1,
     };

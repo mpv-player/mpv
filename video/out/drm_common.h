@@ -23,10 +23,13 @@
 #include <xf86drmMode.h>
 #include "vo.h"
 
-#define DRM_OPTS_FORMAT_XRGB8888    0
-#define DRM_OPTS_FORMAT_XRGB2101010 1
-#define DRM_OPTS_FORMAT_XBGR8888    2
-#define DRM_OPTS_FORMAT_XBGR2101010 3
+enum {
+    DRM_OPTS_FORMAT_XRGB8888,
+    DRM_OPTS_FORMAT_XRGB2101010,
+    DRM_OPTS_FORMAT_XBGR8888,
+    DRM_OPTS_FORMAT_XBGR2101010,
+    DRM_OPTS_FORMAT_YUYV,
+};
 
 struct framebuffer {
     int fd;
